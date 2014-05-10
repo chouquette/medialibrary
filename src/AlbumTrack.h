@@ -11,13 +11,15 @@ class Album;
 class AlbumTrack : public IAlbumTrack
 {
     public:
-        AlbumTrack();
+        AlbumTrack( sqlite3* dbConnection, sqlite3_stmt* stmt );
 
-        static bool createTable( sqlite3* dbConnection );
         virtual const std::string&genre();
         virtual const std::string&title();
         virtual unsigned int trackNumber();
         virtual IAlbum*album();
+
+        static bool createTable( sqlite3* dbConnection );
+        static AlbumTrack* fetch( sqlite3* dbConnection, unsigned int idTrack );
 
     private:
         sqlite3* m_dbConnection;

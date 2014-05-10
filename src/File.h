@@ -30,7 +30,8 @@ class File : public IFile
         virtual unsigned int duration();
         virtual IShowEpisode* showEpisode();
         virtual std::vector<ILabel*> labels();
-        
+        virtual int playCount();
+
         static bool CreateTable( sqlite3* connection );
 
     private:
@@ -41,6 +42,7 @@ class File : public IFile
         Type m_type;
         unsigned int m_duration;
         unsigned int m_albumTrackId;
+        unsigned int m_playCount;
 
         // Auto fetched related properties
         Album* m_album;

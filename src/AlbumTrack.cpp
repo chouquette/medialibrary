@@ -2,7 +2,7 @@
 #include "Album.h"
 #include "SqliteTools.h"
 
-AlbumTrack::AlbumTrak( sqlite3* dbConnection, sqlite3_stmt* stmt )
+AlbumTrack::AlbumTrack( sqlite3* dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
     , m_album( NULL )
 {
@@ -21,9 +21,24 @@ bool AlbumTrack::createTable(sqlite3* dbConnection)
                 "genre TEXT,"
                 "track_number UNSIGNED INTEGER,"
                 "album_id UNSIGNED INTEGER NOT NULL,"
-                "FOREIGN KEY (album_id) REFERENCES Album(id_album) ON DELETE CASCADE
+                "FOREIGN KEY (album_id) REFERENCES Album(id_album) ON DELETE CASCADE"
             ")";
     return SqliteTools::CreateTable( dbConnection, req );
+}
+
+AlbumTrack* AlbumTrack::fetch(sqlite3* dbConnection, unsigned int idTrack )
+{
+    const char* req = "SELECT * FROM AlbumTrack WHERE id_track = ?";
+    sqlite3_stmt *stmt;
+    int res = sqlite3_prepare_v2( dbConnection, req, -1, &stmt, NULL );
+    if ( res != SQLITE_OK )
+        return NULL;
+    sqlite3_bind_int( stmt, 1, idTrack );
+    if ( sqlite3_step( stmt ) != SQLITE_ROW )
+        return NULL;
+    AlbumTrack* albumTrack = new AlbumTrack( dbConnection, stmt );
+    sqlite3_finalize( stmt );
+    return albumTrack;
 }
 
 const std::string& AlbumTrack::genre()

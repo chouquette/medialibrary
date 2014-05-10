@@ -21,8 +21,6 @@ class IFile
         virtual IShowEpisode* showEpisode() = 0;
         virtual int playCount() = 0;
         
-
-        virtual std::vector<ITrackInformation*> tracks() = 0;
         virtual std::vector<ILabel*> labels() = 0;
 };
 

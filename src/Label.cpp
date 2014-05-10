@@ -1,5 +1,5 @@
 #include "Label.h"
-
+#include "File.h"
 #include "SqliteTools.h"
 
 Label::Label( sqlite3* dbConnection, sqlite3_stmt* stmt )
@@ -20,23 +20,10 @@ std::vector<IFile*> Label::files()
 {
     if ( m_files == NULL )
     {
-        m_files = new std::vector<IFile*>;
         const char* req = "SELECT * FROM Files f"
                 "LEFT JOIN LabelFileRelation lfr ON lfr.id_file = f.id_file "
                 "WHERE lfr.id_label = ?";
-        sqlite3_stmt* stmt;
-        int res = sqlite3_prepare_v2( m_dbConnection, req, -1, &stmt, NULL );
-        if ( res != SQLITE_OK )
-            return ;
-        sqlite3_bind_int( stmt, 1, m_id );
-        res = sqlite3_step( stmt );
-        while ( res == SQLITE_ROW )
-        {
-            IFile* f = new File( m_dbConnection, stmt );
-            m_files->push_back( f );
-            res = sqlite3_step( stmt );
-        }
-        sqlite3_finalize( stmt );
+        SqliteTools::fetchAll<File>( m_dbConnection, req, m_id, m_files );
     }
     return *m_files;
 }

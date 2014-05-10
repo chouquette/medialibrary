@@ -16,9 +16,10 @@ class Album : public IAlbum
         virtual const std::string& shortSummary();
         virtual const std::string& artworkUrl();
         virtual time_t lastSyncDate();
+        virtual const std::vector<ITrack*>& tracks();
 
         static bool CreateTable( sqlite3* dbConnection );
-        static Album* Fetch( sqlite3* dbConnection, unsigned int albumTrackId );
+        static Album* fetch( sqlite3* dbConnection, unsigned int albumTrackId );
 
     protected:
         sqlite3* m_dbConnection;
