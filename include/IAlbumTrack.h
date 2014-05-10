@@ -10,11 +10,9 @@ class IAlbumTrack
     public:
         virtual ~IAlbumTrack() {}
 
-        virtual const std::string& artist() = 0;
         virtual const std::string& genre() = 0;
         virtual const std::string& title() = 0;
         virtual unsigned int trackNumber() = 0;
-
         virtual IAlbum* album() = 0;
 };
 
