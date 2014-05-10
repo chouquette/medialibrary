@@ -16,11 +16,11 @@ class IFile
         virtual ~IFile() {}
 
         virtual IAlbumTrack* albumTrack() = 0;
-        virtual const std::string& artist() = 0;
         virtual const std::string& artworkUrl() = 0;
         virtual unsigned int duration() = 0;
         virtual IShowEpisode* showEpisode() = 0;
-
+        virtual int playCount() = 0;
+        
 
         virtual std::vector<ITrackInformation*> tracks() = 0;
         virtual std::vector<ILabel*> labels() = 0;
