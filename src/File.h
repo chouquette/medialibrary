@@ -5,21 +5,25 @@
 
 #include "IFile.h"
 
+class Album;
+class ShowEpisode;
+class AlbumTrack;
+
 class File : public IFile
 {
     public:
         enum Type
         {
-            Video, // Any video file, not being a tv show episode
-            Audio, // Any kind of audio file, not being an album track
-            ShowEpisode,
-            AlbumTrack,
+            VideoType, // Any video file, not being a tv show episode
+            AudioType, // Any kind of audio file, not being an album track
+            ShowEpisodeType,
+            AlbumTrackType,
         };
 
         File(sqlite3* dbConnection , sqlite3_stmt* stmt);
-        File( sqlite3* dbConnection );
+        File();
 
-        bool insert();
+        bool insert(sqlite3* dbConnection);
 
         virtual IAlbumTrack* albumTrack();
         virtual const std::string& artworkUrl();
@@ -36,8 +40,13 @@ class File : public IFile
         unsigned int m_id;
         Type m_type;
         unsigned int m_duration;
-        
-                
+        unsigned int m_albumTrackId;
+
+        // Auto fetched related properties
+        Album* m_album;
+        AlbumTrack* m_albumTrack;
+        ShowEpisode* m_showEpisode;
+        std::vector<ILabel*>* m_labels;
 };
 
 #endif // FILE_H

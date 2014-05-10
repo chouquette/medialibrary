@@ -18,6 +18,7 @@ class Album : public IAlbum
         virtual time_t lastSyncDate();
 
         static bool CreateTable( sqlite3* dbConnection );
+        static Album* Fetch( sqlite3* dbConnection, unsigned int albumTrackId)
 
     protected:
         sqlite3* m_dbConnection;

@@ -51,3 +51,18 @@ bool Album::CreateTable(sqlite3* dbConnection)
             "TEXT artwork_url, UNSIGNED INTEGER last_sync_date)";
     return SqliteTools::CreateTable( dbConnection, req );
 }
+
+Album* Album::Fetch(sqlite3* dbConnection, unsigned int albumTrackId)
+{
+    const char* req = "SELECT * FROM Album WHERE id_album = ?";
+    sqlite3_stmt *stmt;
+    int res = sqlite3_prepare_v2( dbConnection, req, -1, &stmt, NULL );
+    if ( res != SQLITE_OK )
+        return NULL;
+    sqlite3_bind_int( stmt, 1, albumTrackId );
+    if ( sqlite3_step( stmt ) != SQLITE_ROW )
+        return NULL;
+    Album* album = new Album( dbConnection, stmt );
+    sqlite3_finalize( stmt );
+    return album;
+}
