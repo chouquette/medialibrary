@@ -2,10 +2,10 @@
 
 #include "SqliteTools.h"
 
-bool SqliteTools::CreateTable( sqlite3 *db, const std::string& request )
+bool SqliteTools::CreateTable( sqlite3 *db, const char* request )
 {
     sqlite3_stmt* stmt;
-    int res = sqlite3_prepare_v2( db, request.c_str(), -1, &stmt, NULL );
+    int res = sqlite3_prepare_v2( db, request, -1, &stmt, NULL );
     if ( res != SQLITE_OK )
     {
         std::cerr << "Failed to execute request: " << request << std::endl;

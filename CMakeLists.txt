@@ -22,6 +22,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     src/File.cpp
     src/Album.cpp
     src/Show.cpp
+    src/Label.cpp
 )
 
 find_package(Sqlite3 REQUIRED)

@@ -7,6 +7,8 @@ MediaLibrary::MediaLibrary()
 bool MediaLibrary::initialize(const std::string& dbPath)
 {
     int res = sqlite3_open( dbPath.c_str(), &m_dbConnection );
+    //FIXME:
+    // PRAGMA foreign_keys = ON;
     return res == SQLITE_OK;
 }
 

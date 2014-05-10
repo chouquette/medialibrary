@@ -1,7 +1,9 @@
 #include <cassert>
 
 #include "File.h"
+#include "Label.h"
 #include "SqliteTools.h"
+#include "Album.h"
 
 File::File( sqlite3* dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
@@ -38,7 +40,7 @@ bool File::insert( sqlite3* dbConnection )
     return true;
 }
 
-IAlbumTrack*File::albumTrack()
+IAlbumTrack* File::albumTrack()
 {
     if ( m_albumTrack == NULL && m_albumTrackId != 0 )
     {
@@ -62,11 +64,32 @@ IShowEpisode*File::showEpisode()
 
 std::vector<ILabel*> File::labels()
 {
+    if ( m_labels == NULL )
+    {
+        m_labels = new std::vector<ILabel*>;
+        const char* req = "SELECT * FROM Labels l"
+                "LEFT JOIN LabelFileRelation lfr ON lfr.id_label = f.id_label "
+                "WHERE lfr.id_file = ?";
+        sqlite3_stmt* stmt;
+        int res = sqlite3_prepare_v2( m_dbConnection, req, -1, &stmt, NULL );
+        if ( res != SQLITE_OK )
+            return *m_labels;
+        sqlite3_bind_int( stmt, 1, m_id );
+        res = sqlite3_step( stmt );
+        while ( res == SQLITE_ROW )
+        {
+            ILabel* l = new Label( m_dbConnection, stmt );
+            m_labels->push_back( l );
+            res = sqlite3_step( stmt );
+        }
+        sqlite3_finalize( stmt );
+    }
+    return *m_labels;
 }
 
 bool File::CreateTable(sqlite3* connection)
 {
-    std::string req = "CREATE TABLE IF NOT EXISTS File("
+    const char* req = "CREATE TABLE IF NOT EXISTS File("
             "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
             "type INTEGER, duration UNSIGNED INTEGER,"
             "album_track_id UNSIGNED INTEGER)";

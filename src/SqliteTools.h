@@ -7,7 +7,7 @@
 class SqliteTools
 {
     public:
-        static bool CreateTable(sqlite3* db, const std::string& request );
+        static bool CreateTable(sqlite3* db, const char* request );
 };
 
 #endif // SQLITETOOLS_H
