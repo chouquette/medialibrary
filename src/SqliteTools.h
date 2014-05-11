@@ -18,7 +18,8 @@ class SqliteTools
             int res = sqlite3_prepare_v2( dbConnection, req, -1, &stmt, NULL );
             if ( res != SQLITE_OK )
                 return false;
-            sqlite3_bind_int( stmt, 1, foreignKey );
+            if ( foreignKey != 0 )
+                sqlite3_bind_int( stmt, 1, foreignKey );
             res = sqlite3_step( stmt );
             while ( res == SQLITE_ROW )
             {
