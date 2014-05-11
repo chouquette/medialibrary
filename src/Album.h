@@ -18,7 +18,7 @@ class Album : public IAlbum
         virtual time_t lastSyncDate();
         virtual const std::vector<IAlbumTrack*>& tracks();
 
-        static bool CreateTable( sqlite3* dbConnection );
+        static bool createTable( sqlite3* dbConnection );
         static Album* fetch( sqlite3* dbConnection, unsigned int albumTrackId );
 
     protected:

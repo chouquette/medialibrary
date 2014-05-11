@@ -30,7 +30,7 @@ class File : public IFile
         virtual std::vector<ILabel*> labels();
         virtual int playCount();
 
-        static bool CreateTable( sqlite3* connection );
+        static bool createTable( sqlite3* connection );
 
     private:
         sqlite3* m_dbConnection;

@@ -18,7 +18,7 @@ class Show : public IShow
         virtual time_t lastSyncDate();
         virtual const std::string& tvdbId();
 
-        static bool CreateTable( sqlite3* dbConnection );
+        static bool createTable( sqlite3* dbConnection );
 
     protected:
         sqlite3* m_dbConnection;

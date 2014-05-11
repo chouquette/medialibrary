@@ -50,7 +50,7 @@ const std::string& Show::tvdbId()
     return m_tvdbId;
 }
 
-bool Show::CreateTable(sqlite3* dbConnection)
+bool Show::createTable(sqlite3* dbConnection)
 {
     const char* req = "CREATE TABLE IF NOT EXISTS Show("
             "id_show INTEGER PRIMARY KEY AUTOINCREMENT,"

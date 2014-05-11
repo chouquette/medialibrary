@@ -80,7 +80,7 @@ int File::playCount()
     return m_playCount;
 }
 
-bool File::CreateTable(sqlite3* connection)
+bool File::createTable(sqlite3* connection)
 {
     const char* req = "CREATE TABLE IF NOT EXISTS File("
             "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"

@@ -54,7 +54,7 @@ const std::vector<IAlbumTrack*>&Album::tracks()
     return *m_tracks;
 }
 
-bool Album::CreateTable(sqlite3* dbConnection)
+bool Album::createTable(sqlite3* dbConnection)
 {
     const char* req = "CREATE TABLE IF NOT EXISTS Album("
             "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
