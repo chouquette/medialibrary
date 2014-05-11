@@ -21,12 +21,6 @@ File::File( sqlite3* dbConnection, sqlite3_stmt* stmt )
     m_showEpisodeId = sqlite3_column_int( stmt, 5 );
 }
 
-File::File()
-    : m_dbConnection( NULL )
-    , m_id( 0 )
-{
-}
-
 bool File::insert( sqlite3* dbConnection )
 {
     assert( m_dbConnection == NULL );

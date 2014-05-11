@@ -21,7 +21,6 @@ class File : public IFile
         };
 
         File(sqlite3* dbConnection , sqlite3_stmt* stmt);
-        File();
 
         bool insert(sqlite3* dbConnection);
 

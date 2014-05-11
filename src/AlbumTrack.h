@@ -19,7 +19,6 @@ class AlbumTrack : public IAlbumTrack
         virtual IAlbum*album();
 
         static bool createTable( sqlite3* dbConnection );
-        static AlbumTrack* fetch( sqlite3* dbConnection, unsigned int idTrack );
 
     private:
         sqlite3* m_dbConnection;

@@ -26,21 +26,6 @@ bool AlbumTrack::createTable(sqlite3* dbConnection)
     return SqliteTools::createTable( dbConnection, req );
 }
 
-AlbumTrack* AlbumTrack::fetch(sqlite3* dbConnection, unsigned int idTrack )
-{
-    const char* req = "SELECT * FROM AlbumTrack WHERE id_track = ?";
-    sqlite3_stmt *stmt;
-    int res = sqlite3_prepare_v2( dbConnection, req, -1, &stmt, NULL );
-    if ( res != SQLITE_OK )
-        return NULL;
-    sqlite3_bind_int( stmt, 1, idTrack );
-    if ( sqlite3_step( stmt ) != SQLITE_ROW )
-        return NULL;
-    AlbumTrack* albumTrack = new AlbumTrack( dbConnection, stmt );
-    sqlite3_finalize( stmt );
-    return albumTrack;
-}
-
 const std::string& AlbumTrack::genre()
 {
     return m_genre;
@@ -61,14 +46,7 @@ IAlbum* AlbumTrack::album()
     if ( m_album == NULL && m_albumId != 0 )
     {
         const char* req = "SELECT * FROM Album WHERE id_album = ?";
-        sqlite3_stmt *stmt;
-        int res = sqlite3_prepare_v2( m_dbConnection, req, -1, &stmt, NULL );
-        if ( res != SQLITE_OK )
-            return NULL;
-        sqlite3_bind_int( stmt, 1, m_albumId );
-        res = sqlite3_step( stmt );
-        m_album = new Album( m_dbConnection, stmt );
-        sqlite3_finalize( stmt );
+        m_album = SqliteTools::fetchOne<Album>( m_dbConnection, req, m_albumId );
     }
     return m_album;
 }
