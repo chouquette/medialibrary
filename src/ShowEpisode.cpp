@@ -5,15 +5,15 @@
 ShowEpisode::ShowEpisode( sqlite3* dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
 {
-    m_id = sqlite3_column_int( stmt, 1 );
-    m_artworkUrl = (const char*)sqlite3_column_text( stmt, 2 );
-    m_episodeNumber = sqlite3_column_int( stmt, 3 );
-    m_lastSyncDate = sqlite3_column_int( stmt, 4 );
-    m_name = (const char*)sqlite3_column_text( stmt, 5 );
-    m_seasonNumber = sqlite3_column_int( stmt, 6 );
-    m_shortSummary = (const char*)sqlite3_column_text( stmt, 7 );
-    m_tvdbId = (const char*)sqlite3_column_text( stmt, 8 );
-    m_showId = sqlite3_column_int( stmt, 9 );
+    m_id = sqlite3_column_int( stmt, 0 );
+    m_artworkUrl = (const char*)sqlite3_column_text( stmt, 1 );
+    m_episodeNumber = sqlite3_column_int( stmt, 2 );
+    m_lastSyncDate = sqlite3_column_int( stmt, 3 );
+    m_name = (const char*)sqlite3_column_text( stmt, 4 );
+    m_seasonNumber = sqlite3_column_int( stmt, 5 );
+    m_shortSummary = (const char*)sqlite3_column_text( stmt, 6 );
+    m_tvdbId = (const char*)sqlite3_column_text( stmt, 7 );
+    m_showId = sqlite3_column_int( stmt, 8 );
 }
 
 

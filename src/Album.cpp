@@ -6,12 +6,12 @@
 Album::Album(sqlite3* dbConnection, sqlite3_stmt* stmt)
     : m_dbConnection( dbConnection )
 {
-    m_id = sqlite3_column_int( stmt, 1 );
-    m_name = (const char*)sqlite3_column_text( stmt, 2 );
-    m_releaseYear = sqlite3_column_int( stmt, 3 );
-    m_shortSummary = (const char*)sqlite3_column_text( stmt, 4 );
-    m_artworkUrl = (const char*)sqlite3_column_text( stmt, 5 );
-    m_lastSyncDate = sqlite3_column_int( stmt, 6 );
+    m_id = sqlite3_column_int( stmt, 0 );
+    m_name = (const char*)sqlite3_column_text( stmt, 1 );
+    m_releaseYear = sqlite3_column_int( stmt, 2 );
+    m_shortSummary = (const char*)sqlite3_column_text( stmt, 3 );
+    m_artworkUrl = (const char*)sqlite3_column_text( stmt, 4 );
+    m_lastSyncDate = sqlite3_column_int( stmt, 5 );
 }
 
 const std::string& Album::name()

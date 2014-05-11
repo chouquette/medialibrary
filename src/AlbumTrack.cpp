@@ -6,11 +6,11 @@ AlbumTrack::AlbumTrack( sqlite3* dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
     , m_album( NULL )
 {
-    m_id = sqlite3_column_int( stmt, 1 );
-    m_title = (const char*)sqlite3_column_text( stmt, 2 );
-    m_genre = (const char*)sqlite3_column_text( stmt, 3 );
-    m_trackNumber = sqlite3_column_int( stmt, 4 );
-    m_albumId = sqlite3_column_int( stmt, 5 );
+    m_id = sqlite3_column_int( stmt, 0 );
+    m_title = (const char*)sqlite3_column_text( stmt, 1 );
+    m_genre = (const char*)sqlite3_column_text( stmt, 2 );
+    m_trackNumber = sqlite3_column_int( stmt, 3 );
+    m_albumId = sqlite3_column_int( stmt, 4 );
 }
 
 bool AlbumTrack::createTable(sqlite3* dbConnection)
