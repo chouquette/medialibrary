@@ -9,10 +9,16 @@
 class IMediaLibrary
 {
     public:
-        virtual ~IMediaLibrary(){}
-        virtual bool initialize( const std::string& dbPath );
+        virtual ~IMediaLibrary() {}
+        virtual bool initialize( const std::string& dbPath ) = 0;
 
         virtual const std::vector<IFile*>& files() = 0;
+};
+
+class MediaLibraryFactory
+{
+    public:
+        static IMediaLibrary* create();
 };
 
 #endif // IMEDIALIBRARY_H

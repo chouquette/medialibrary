@@ -25,6 +25,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     Label.cpp
     AlbumTrack.cpp
     ShowEpisode.cpp
+    Factory.cpp
 )
 
 find_package(Sqlite3 REQUIRED)
