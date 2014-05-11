@@ -9,6 +9,7 @@ bool SqliteTools::createTable( sqlite3 *db, const char* request )
     if ( res != SQLITE_OK )
     {
         std::cerr << "Failed to execute request: " << request << std::endl;
+        std::cerr << sqlite3_errmsg( db ) << std::endl;
         return false;
     }
     res = sqlite3_step( stmt );

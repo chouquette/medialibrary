@@ -64,8 +64,8 @@ IShow* ShowEpisode::show()
 
 bool ShowEpisode::createTable(sqlite3* dbConnection)
 {
-    const char* req = "CREATE TABLE IF NOT EXISTS ("
-                "id_episode INTEGER PRIMARY KEY AUTO INCREMENT,"
+    const char* req = "CREATE TABLE IF NOT EXISTS ShowEpisode("
+                "id_episode INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "artwork_url TEXT,"
                 "episode_number UNSIGNED INT,"
                 "last_sync_date UNSIGNED INT,"

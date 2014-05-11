@@ -4,6 +4,7 @@
 #include <sqlite3.h>
 #include <string>
 #include <vector>
+#include <iostream>
 
 class SqliteTools
 {
@@ -17,7 +18,11 @@ class SqliteTools
             sqlite3_stmt* stmt;
             int res = sqlite3_prepare_v2( dbConnection, req, -1, &stmt, NULL );
             if ( res != SQLITE_OK )
+            {
+                std::cerr << "Failed to execute request: " << req << std::endl;
+                std::cerr << sqlite3_errmsg( dbConnection ) << std::endl;
                 return false;
+            }
             if ( foreignKey != 0 )
                 sqlite3_bind_int( stmt, 1, foreignKey );
             res = sqlite3_step( stmt );
@@ -38,7 +43,11 @@ class SqliteTools
             sqlite3_stmt *stmt;
             int res = sqlite3_prepare_v2( dbConnection, req, -1, &stmt, NULL );
             if ( res != SQLITE_OK )
+            {
+                std::cerr << "Failed to execute request: " << req << std::endl;
+                std::cerr << sqlite3_errmsg( dbConnection ) << std::endl;
                 return result;
+            }
             sqlite3_bind_int( stmt, 1, primaryKey );
             if ( sqlite3_step( stmt ) != SQLITE_ROW )
                 return result;
