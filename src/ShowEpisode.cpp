@@ -17,7 +17,7 @@ ShowEpisode::ShowEpisode( sqlite3* dbConnection, sqlite3_stmt* stmt )
 }
 
 
-const std::string&ShowEpisode::artworkUrl()
+const std::string& ShowEpisode::artworkUrl()
 {
     return m_artworkUrl;
 }
@@ -76,5 +76,5 @@ bool ShowEpisode::createTable(sqlite3* dbConnection)
                 "show_id UNSIGNED INT,"
                 "FOREIGN KEY(show_id) REFERENCES Show(id_show)"
             ")";
-    SqliteTools::createTable( dbConnection, req );
+    return SqliteTools::createTable( dbConnection, req );
 }

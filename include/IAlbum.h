@@ -6,7 +6,7 @@
 
 #include "IDescription.h"
 
-class ITrack;
+class IAlbumTrack;
 
 class IAlbum
 {
@@ -16,7 +16,7 @@ class IAlbum
         virtual unsigned int releaseYear() = 0;
         virtual const std::string& shortSummary() = 0;
         virtual const std::string& artworkUrl() = 0;
-        virtual const std::vector<ITrack*>& tracks() = 0;
+        virtual const std::vector<IAlbumTrack*>& tracks() = 0;
 };
 
 #endif // IALBUM_H

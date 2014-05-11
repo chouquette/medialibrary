@@ -1,4 +1,5 @@
 #include "Album.h"
+#include "AlbumTrack.h"
 
 #include "SqliteTools.h"
 
@@ -43,9 +44,14 @@ time_t Album::lastSyncDate()
     return m_lastSyncDate;
 }
 
-const std::vector<ITrack*>&Album::tracks()
+const std::vector<IAlbumTrack*>&Album::tracks()
 {
-
+    if ( m_tracks == NULL )
+    {
+        const char* req = "SELECT * FROM AlbumTrack WHERE id_album = ?";
+        SqliteTools::fetchAll<AlbumTrack>( m_dbConnection, req, m_id, m_tracks );
+    }
+    return *m_tracks;
 }
 
 bool Album::CreateTable(sqlite3* dbConnection)
