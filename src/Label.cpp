@@ -34,7 +34,7 @@ bool Label::createTable(sqlite3* dbConnection)
                 "id_label INTEGER PRIMARY KEY AUTO INCREMENT, "
                 "name TEXT"
             ")";
-    if ( SqliteTools::CreateTable( dbConnection, req ) )
+    if ( SqliteTools::createTable( dbConnection, req ) )
         return false;
     req = "CREATE TABLE IF NOT EXISTS LabelFileRelation("
                 "id_label INTEGER,"
@@ -42,5 +42,5 @@ bool Label::createTable(sqlite3* dbConnection)
             "PRIMARY KEY (id_label, id_file)"
             "FOREIGN KEY(id_label) REFERENCES Label(id_label) ON DELETE CASCADE,"
             "FOREIGN KEY(id_file) REFERENCES File(id_file) ON DELETE CASCADE);";
-    return SqliteTools::CreateTable( dbConnection, req );
+    return SqliteTools::createTable( dbConnection, req );
 }

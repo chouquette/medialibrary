@@ -8,7 +8,7 @@
 class SqliteTools
 {
     public:
-        static bool CreateTable(sqlite3* db, const char* request );
+        static bool createTable(sqlite3* db, const char* request );
 
         template <typename T, typename U>
         static bool fetchAll( sqlite3* dbConnection, const char* req, unsigned int foreignKey, std::vector<U*>*& results)

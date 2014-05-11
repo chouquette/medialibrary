@@ -16,7 +16,6 @@ class IFile
         virtual ~IFile() {}
 
         virtual IAlbumTrack* albumTrack() = 0;
-        virtual const std::string& artworkUrl() = 0;
         virtual unsigned int duration() = 0;
         virtual IShowEpisode* showEpisode() = 0;
         virtual int playCount() = 0;

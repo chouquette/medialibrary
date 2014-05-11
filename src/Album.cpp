@@ -54,7 +54,7 @@ bool Album::CreateTable(sqlite3* dbConnection)
             "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
             "name TEXT, UNSIGNED INTEGER release_year, TEXT short_summary,"
             "TEXT artwork_url, UNSIGNED INTEGER last_sync_date)";
-    return SqliteTools::CreateTable( dbConnection, req );
+    return SqliteTools::createTable( dbConnection, req );
 }
 
 Album* Album::fetch(sqlite3* dbConnection, unsigned int albumTrackId)

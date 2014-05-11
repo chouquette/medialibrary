@@ -23,7 +23,7 @@ bool AlbumTrack::createTable(sqlite3* dbConnection)
                 "album_id UNSIGNED INTEGER NOT NULL,"
                 "FOREIGN KEY (album_id) REFERENCES Album(id_album) ON DELETE CASCADE"
             ")";
-    return SqliteTools::CreateTable( dbConnection, req );
+    return SqliteTools::createTable( dbConnection, req );
 }
 
 AlbumTrack* AlbumTrack::fetch(sqlite3* dbConnection, unsigned int idTrack )

@@ -2,7 +2,7 @@
 
 #include "SqliteTools.h"
 
-bool SqliteTools::CreateTable( sqlite3 *db, const char* request )
+bool SqliteTools::createTable( sqlite3 *db, const char* request )
 {
     sqlite3_stmt* stmt;
     int res = sqlite3_prepare_v2( db, request, -1, &stmt, NULL );

@@ -26,7 +26,6 @@ class File : public IFile
         bool insert(sqlite3* dbConnection);
 
         virtual IAlbumTrack* albumTrack();
-        virtual const std::string& artworkUrl();
         virtual unsigned int duration();
         virtual IShowEpisode* showEpisode();
         virtual std::vector<ILabel*> labels();
@@ -43,6 +42,7 @@ class File : public IFile
         unsigned int m_duration;
         unsigned int m_albumTrackId;
         unsigned int m_playCount;
+        unsigned int m_showEpisodeId;
 
         // Auto fetched related properties
         Album* m_album;

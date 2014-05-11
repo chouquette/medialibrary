@@ -1,10 +1,11 @@
 #include <cassert>
 
+#include "Album.h"
 #include "AlbumTrack.h"
 #include "File.h"
 #include "Label.h"
+#include "ShowEpisode.h"
 #include "SqliteTools.h"
-#include "Album.h"
 
 File::File( sqlite3* dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
@@ -17,6 +18,7 @@ File::File( sqlite3* dbConnection, sqlite3_stmt* stmt )
     m_duration = sqlite3_column_int( stmt, 2 );
     m_albumTrackId = sqlite3_column_int( stmt, 3 );
     m_playCount = sqlite3_column_int( stmt, 4 );
+    m_showEpisodeId = sqlite3_column_int( stmt, 5 );
 }
 
 File::File()
@@ -52,10 +54,6 @@ IAlbumTrack* File::albumTrack()
     return m_albumTrack;
 }
 
-const std::string&File::artworkUrl()
-{
-}
-
 unsigned int File::duration()
 {
     return m_duration;
@@ -63,6 +61,12 @@ unsigned int File::duration()
 
 IShowEpisode*File::showEpisode()
 {
+    if ( m_showEpisode == NULL && m_showEpisodeId != 0 )
+    {
+        const char* req = "SELECT * FROM ShowEpisode WHERE id_episode = ?";
+        m_showEpisode = SqliteTools::fetchOne<ShowEpisode>( m_dbConnection, req, m_showEpisodeId );
+    }
+    return m_showEpisode;
 }
 
 std::vector<ILabel*> File::labels()
@@ -79,7 +83,7 @@ std::vector<ILabel*> File::labels()
 
 int File::playCount()
 {
-
+    return m_playCount;
 }
 
 bool File::CreateTable(sqlite3* connection)
@@ -88,6 +92,8 @@ bool File::CreateTable(sqlite3* connection)
             "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
             "type INTEGER, duration UNSIGNED INTEGER,"
             "album_track_id UNSIGNED INTEGER,"
-            "play_count UNSIGNED INTEGER)";
-    return SqliteTools::CreateTable( connection, req );
+            "play_count UNSIGNED INTEGER"
+            "show_episode_id UNSIGNED INTEGER"
+            ")";
+    return SqliteTools::createTable( connection, req );
 }

@@ -3,6 +3,8 @@
 
 class IShow;
 
+#include <string>
+
 class IShowEpisode
 {
     public:
@@ -14,9 +16,7 @@ class IShowEpisode
         virtual const std::string& name() = 0;
         virtual unsigned int seasonNuber() = 0;
         virtual const std::string& shortSummary() = 0;
-        virtual bool shouldBeDisplayed() = 0;
         virtual const std::string& tvdbId() = 0;
-        virtual bool isUnread() = 0;
         virtual IShow* show() = 0;
 };
 

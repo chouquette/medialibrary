@@ -56,5 +56,5 @@ bool Show::CreateTable(sqlite3* dbConnection)
             "id_show INTEGER PRIMARY KEY AUTOINCREMENT,"
             "name TEXT, UNSIGNED INTEGER release_year, TEXT short_summary,"
             "TEXT artwork_url, UNSIGNED INTEGER last_sync_date, TEXT tvdb_id)";
-    return SqliteTools::CreateTable( dbConnection, req );
+    return SqliteTools::createTable( dbConnection, req );
 }
