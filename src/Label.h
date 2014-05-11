@@ -5,18 +5,21 @@
 #include <string>
 
 #include "ILabel.h"
+class File;
 
 class Label : public ILabel
 {
     public:
         Label(sqlite3* dbConnection, sqlite3_stmt* stmt);
+        Label( const std::string& name );
 
     public:
         virtual const std::string& name();
         virtual std::vector<IFile*> files();
+        bool insert( sqlite3* dbConnection );
 
         static bool createTable( sqlite3* dbConnection );
-
+        bool link( File* file );
     private:
         sqlite3* m_dbConnection;
         unsigned int m_id;

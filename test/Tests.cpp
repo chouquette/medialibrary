@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "IMediaLibrary.h"
+#include "ILabel.h"
 
 class MLTest : public testing::Test
 {
@@ -41,4 +42,25 @@ TEST_F( MLTest, InsertFile )
     std::vector<IFile*> files = ml->files();
     ASSERT_EQ( files.size(), 1u );
     ASSERT_EQ( files[0]->mrl(), f->mrl() );
+
+    delete f;
+}
+
+TEST_F( MLTest, AddLabel )
+{
+    IFile* f = ml->addFile( "/dev/null" );
+    ILabel* l1 = f->addLabel( "sea otter" );
+    ILabel* l2 = f->addLabel( "cony the cone" );
+
+    ASSERT_TRUE( l1 != NULL );
+    ASSERT_TRUE( l2 != NULL );
+
+    std::vector<ILabel*> labels = f->labels();
+    ASSERT_EQ( labels.size(), 2u );
+    ASSERT_EQ( labels[0]->name(), "sea otter" );
+    ASSERT_EQ( labels[1]->name(), "cony the cone" );
+
+    delete l1;
+    delete l2;
+    delete f;
 }

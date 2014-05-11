@@ -24,6 +24,7 @@ File::File( sqlite3* dbConnection, sqlite3_stmt* stmt )
 
 File::File( const std::string& mrl )
     : m_dbConnection( NULL )
+    , m_id( 0 )
     , m_type( UnknownType )
     , m_duration( 0 )
     , m_albumTrackId( 0 )
@@ -39,12 +40,12 @@ File::File( const std::string& mrl )
 bool File::insert( sqlite3* dbConnection )
 {
     assert( m_dbConnection == NULL );
-    m_dbConnection = dbConnection;
+    assert( m_id == 0 );
     sqlite3_stmt* stmt;
-    std::string req = "INSERT INTO File VALUES(NULL, ?, ?, ?, ?, ?, ?)";
-    if ( sqlite3_prepare_v2( m_dbConnection, req.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
+    const char* req = "INSERT INTO File VALUES(NULL, ?, ?, ?, ?, ?, ?)";
+    if ( sqlite3_prepare_v2( dbConnection, req, -1, &stmt, NULL ) != SQLITE_OK )
     {
-        std::cerr << "Failed to insert record: " << sqlite3_errmsg( m_dbConnection ) << std::endl;
+        std::cerr << "Failed to insert record: " << sqlite3_errmsg( dbConnection ) << std::endl;
         return false;
     }
     const char* tmpMrl = strdup( m_mrl.c_str() );
@@ -56,7 +57,8 @@ bool File::insert( sqlite3* dbConnection )
     sqlite3_bind_text( stmt, 6, tmpMrl, -1, &free );
     if ( sqlite3_step( stmt ) != SQLITE_DONE )
         return false;
-    m_id = sqlite3_last_insert_rowid( m_dbConnection );
+    m_id = sqlite3_last_insert_rowid( dbConnection );
+    m_dbConnection = dbConnection;
     return true;
 }
 
@@ -89,8 +91,8 @@ std::vector<ILabel*> File::labels()
 {
     if ( m_labels == NULL )
     {
-        const char* req = "SELECT * FROM Labels l"
-                "LEFT JOIN LabelFileRelation lfr ON lfr.id_label = f.id_label "
+        const char* req = "SELECT l.* FROM Label l "
+                "LEFT JOIN LabelFileRelation lfr ON lfr.id_label = l.id_label "
                 "WHERE lfr.id_file = ?";
         SqliteTools::fetchAll<Label>( m_dbConnection, req, m_id, m_labels );
     }
@@ -107,10 +109,27 @@ const std::string& File::mrl()
     return m_mrl;
 }
 
+ILabel* File::addLabel(const std::string& label)
+{
+    Label* l = new Label( label );
+    if ( l->insert( m_dbConnection ) == false )
+    {
+        delete l;
+        return NULL;
+    }
+    l->link( this );
+    return l;
+}
+
+unsigned int File::id() const
+{
+    return m_id;
+}
+
 bool File::createTable(sqlite3* connection)
 {
     const char* req = "CREATE TABLE IF NOT EXISTS File("
-            "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "id_file INTEGER PRIMARY KEY AUTOINCREMENT,"
             "type INTEGER,"
             "duration UNSIGNED INTEGER,"
             "album_track_id UNSIGNED INTEGER,"

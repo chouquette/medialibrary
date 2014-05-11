@@ -32,7 +32,9 @@ class File : public IFile
         virtual std::vector<ILabel*> labels();
         virtual int playCount();
         virtual const std::string& mrl();
+        virtual ILabel* addLabel( const std::string &label );
 
+        unsigned int id() const;
         static bool createTable( sqlite3* connection );
 
     private:
