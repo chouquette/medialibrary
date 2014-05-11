@@ -53,8 +53,11 @@ const std::string& Show::tvdbId()
 bool Show::createTable(sqlite3* dbConnection)
 {
     const char* req = "CREATE TABLE IF NOT EXISTS Show("
-            "id_show INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "name TEXT, UNSIGNED INTEGER release_year, TEXT short_summary,"
-            "TEXT artwork_url, UNSIGNED INTEGER last_sync_date, TEXT tvdb_id)";
+                        "id_show INTEGER PRIMARY KEY AUTOINCREMENT,"
+                        "name TEXT, UNSIGNED INTEGER release_year, TEXT short_summary,"
+                        "artwork_url TEXT,"
+                        "last_sync_date UNSIGNED INTEGER,"
+                        "tvdb_id TEXT"
+                    ")";
     return SqliteTools::createTable( dbConnection, req );
 }

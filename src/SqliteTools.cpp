@@ -15,5 +15,10 @@ bool SqliteTools::createTable( sqlite3 *db, const char* request )
     res = sqlite3_step( stmt );
     while ( res != SQLITE_DONE && res != SQLITE_ERROR )
         res = sqlite3_step( stmt );
+    if ( res == SQLITE_ERROR )
+    {
+        std::cerr << "Failed to execute request: " << request << std::endl;
+        std::cerr << sqlite3_errmsg( db ) << std::endl;
+    }
     return res == SQLITE_DONE;
 }

@@ -14,11 +14,6 @@ Album::Album(sqlite3* dbConnection, sqlite3_stmt* stmt)
     m_lastSyncDate = sqlite3_column_int( stmt, 6 );
 }
 
-Album::Album(sqlite3* dbConnection)
-{
-
-}
-
 const std::string& Album::name()
 {
     return m_name;
@@ -54,12 +49,16 @@ const std::vector<IAlbumTrack*>&Album::tracks()
     return *m_tracks;
 }
 
-bool Album::createTable(sqlite3* dbConnection)
+bool Album::createTable( sqlite3* dbConnection )
 {
     const char* req = "CREATE TABLE IF NOT EXISTS Album("
-            "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "name TEXT, UNSIGNED INTEGER release_year, TEXT short_summary,"
-            "TEXT artwork_url, UNSIGNED INTEGER last_sync_date)";
+                "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
+                "name TEXT,"
+                "release_year UNSIGNED INTEGER,"
+                "short_summary TEXT,"
+                "artwork_url TEXT,"
+                "UNSIGNED INTEGER last_sync_date"
+            ")";
     return SqliteTools::createTable( dbConnection, req );
 }
 

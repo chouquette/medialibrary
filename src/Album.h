@@ -9,7 +9,6 @@ class Album : public IAlbum
 {
     public:
         Album( sqlite3* dbConnection, sqlite3_stmt* stmt );
-        Album( sqlite3* dbConnection );
 
         virtual const std::string& name();
         virtual unsigned int releaseYear();

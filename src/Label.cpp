@@ -31,10 +31,10 @@ std::vector<IFile*> Label::files()
 bool Label::createTable(sqlite3* dbConnection)
 {
     const char* req = "CREATE TABLE IF NOT EXISTS Label("
-                "id_label INTEGER PRIMARY KEY AUTO INCREMENT, "
+                "id_label INTEGER PRIMARY KEY AUTOINCREMENT, "
                 "name TEXT"
             ")";
-    if ( SqliteTools::createTable( dbConnection, req ) )
+    if ( SqliteTools::createTable( dbConnection, req ) == false )
         return false;
     req = "CREATE TABLE IF NOT EXISTS LabelFileRelation("
                 "id_label INTEGER,"

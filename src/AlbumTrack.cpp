@@ -16,7 +16,7 @@ AlbumTrack::AlbumTrack( sqlite3* dbConnection, sqlite3_stmt* stmt )
 bool AlbumTrack::createTable(sqlite3* dbConnection)
 {
     const char* req = "CREATE TABLE IF NOT EXISTS AlbumTrack ("
-                "id_track INTEGER PRIMARY KEY AUTO INCREMENT,"
+                "id_track INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "title TEXT,"
                 "genre TEXT,"
                 "track_number UNSIGNED INTEGER,"
