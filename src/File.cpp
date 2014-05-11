@@ -19,6 +19,21 @@ File::File( sqlite3* dbConnection, sqlite3_stmt* stmt )
     m_albumTrackId = sqlite3_column_int( stmt, 3 );
     m_playCount = sqlite3_column_int( stmt, 4 );
     m_showEpisodeId = sqlite3_column_int( stmt, 5 );
+    m_mrl = (const char*)sqlite3_column_text( stmt, 6 );
+}
+
+File::File( const std::string& mrl )
+    : m_dbConnection( NULL )
+    , m_type( UnknownType )
+    , m_duration( 0 )
+    , m_albumTrackId( 0 )
+    , m_playCount( 0 )
+    , m_showEpisodeId( 0 )
+    , m_mrl( mrl )
+    , m_albumTrack( NULL )
+    , m_showEpisode( NULL )
+    , m_labels( NULL )
+{
 }
 
 bool File::insert( sqlite3* dbConnection )
@@ -26,12 +41,19 @@ bool File::insert( sqlite3* dbConnection )
     assert( m_dbConnection == NULL );
     m_dbConnection = dbConnection;
     sqlite3_stmt* stmt;
-    std::string req = "INSERT INTO File VALUES(NULL, ?, ?, ?)";
+    std::string req = "INSERT INTO File VALUES(NULL, ?, ?, ?, ?, ?, ?)";
     if ( sqlite3_prepare_v2( m_dbConnection, req.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
+    {
+        std::cerr << "Failed to insert record: " << sqlite3_errmsg( m_dbConnection ) << std::endl;
         return false;
+    }
+    const char* tmpMrl = strdup( m_mrl.c_str() );
     sqlite3_bind_int( stmt, 1, m_type );
     sqlite3_bind_int( stmt, 2, m_duration );
     sqlite3_bind_int( stmt, 3, m_albumTrackId );
+    sqlite3_bind_int( stmt, 4, m_playCount );
+    sqlite3_bind_int( stmt, 5, m_showEpisodeId );
+    sqlite3_bind_text( stmt, 6, tmpMrl, -1, &free );
     if ( sqlite3_step( stmt ) != SQLITE_DONE )
         return false;
     m_id = sqlite3_last_insert_rowid( m_dbConnection );
@@ -80,14 +102,21 @@ int File::playCount()
     return m_playCount;
 }
 
+const std::string& File::mrl()
+{
+    return m_mrl;
+}
+
 bool File::createTable(sqlite3* connection)
 {
     const char* req = "CREATE TABLE IF NOT EXISTS File("
             "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "type INTEGER, duration UNSIGNED INTEGER,"
+            "type INTEGER,"
+            "duration UNSIGNED INTEGER,"
             "album_track_id UNSIGNED INTEGER,"
-            "play_count UNSIGNED INTEGER"
-            "show_episode_id UNSIGNED INTEGER"
+            "play_count UNSIGNED INTEGER,"
+            "show_episode_id UNSIGNED INTEGER,"
+            "mrl TEXT"
             ")";
     return SqliteTools::createTable( connection, req );
 }

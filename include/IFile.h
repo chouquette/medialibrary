@@ -19,6 +19,7 @@ class IFile
         virtual unsigned int duration() = 0;
         virtual IShowEpisode* showEpisode() = 0;
         virtual int playCount() = 0;
+        virtual const std::string& mrl() = 0;
         
         virtual std::vector<ILabel*> labels() = 0;
 };

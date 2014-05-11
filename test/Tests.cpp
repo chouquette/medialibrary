@@ -34,6 +34,10 @@ TEST_F( MLTest, InsertFile )
     IFile* f = ml->addFile( "/dev/null" );
     ASSERT_TRUE( f != NULL );
 
+    ASSERT_EQ( f->playCount(), 0 );
+    ASSERT_TRUE( f->albumTrack() == NULL );
+    ASSERT_TRUE( f->showEpisode() == NULL );
+
     std::vector<IFile*> files = ml->files();
     ASSERT_EQ( files.size(), 1u );
     ASSERT_EQ( files[0]->mrl(), f->mrl() );

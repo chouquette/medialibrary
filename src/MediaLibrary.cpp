@@ -36,8 +36,19 @@ const std::vector<IFile*>& MediaLibrary::files()
 {
     if ( m_files == NULL )
     {
-        const char* req = "SELECT * FROM Files";
+        const char* req = "SELECT * FROM File";
         SqliteTools::fetchAll<File>( m_dbConnection, req, 0, m_files );
     }
     return *m_files;
+}
+
+IFile* MediaLibrary::addFile( const std::string& path )
+{
+    File* f = new File( path );
+    if ( f->insert( m_dbConnection ) == false )
+    {
+        delete f;
+        return NULL;
+    }
+    return f;
 }

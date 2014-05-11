@@ -18,9 +18,11 @@ class File : public IFile
             AudioType, // Any kind of audio file, not being an album track
             ShowEpisodeType,
             AlbumTrackType,
+            UnknownType,
         };
 
         File(sqlite3* dbConnection , sqlite3_stmt* stmt);
+        File( const std::string& mrl );
 
         bool insert(sqlite3* dbConnection);
 
@@ -29,6 +31,7 @@ class File : public IFile
         virtual IShowEpisode* showEpisode();
         virtual std::vector<ILabel*> labels();
         virtual int playCount();
+        virtual const std::string& mrl();
 
         static bool createTable( sqlite3* connection );
 
@@ -42,6 +45,7 @@ class File : public IFile
         unsigned int m_albumTrackId;
         unsigned int m_playCount;
         unsigned int m_showEpisodeId;
+        std::string m_mrl;
 
         // Auto fetched related properties
         Album* m_album;
