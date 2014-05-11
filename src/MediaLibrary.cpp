@@ -8,6 +8,8 @@
 #include "ShowEpisode.h"
 
 MediaLibrary::MediaLibrary()
+    : m_dbConnection( NULL )
+    , m_files( NULL )
 {
 }
 
@@ -30,7 +32,7 @@ bool MediaLibrary::initialize(const std::string& dbPath)
 }
 
 
-const std::vector<IFile*>&MediaLibrary::files()
+const std::vector<IFile*>& MediaLibrary::files()
 {
     if ( m_files == NULL )
     {
