@@ -64,3 +64,47 @@ TEST_F( MLTest, AddLabel )
     delete l2;
     delete f;
 }
+
+TEST_F( MLTest, RemoveLabel )
+{
+    IFile* f = ml->addFile( "/dev/null" );
+    ILabel* l1 = f->addLabel( "sea otter" );
+    ILabel* l2 = f->addLabel( "cony the cone" );
+
+    std::vector<ILabel*> labels = f->labels();
+    ASSERT_EQ( labels.size(), 2u );
+
+    bool res = f->removeLabel( l1 );
+    ASSERT_TRUE( res );
+
+    // Check for existing file first
+    labels = f->labels();
+    ASSERT_EQ( labels.size(), 1u );
+    ASSERT_EQ( labels[0]->name(), "cony the cone" );
+
+    // And now clean fetch another instance of the file & check again for DB replication
+    IFile* f2 = ml->file( f->mrl() );
+    labels = f2->labels();
+    ASSERT_EQ( labels.size(), 1u );
+    ASSERT_EQ( labels[0]->name(), "cony the cone" );
+
+    // Remove a non-linked label
+    res = f->removeLabel( l1 );
+    ASSERT_FALSE( res );
+
+    // Remove the last label
+    res = f->removeLabel( l2 );
+    ASSERT_TRUE( res );
+
+    labels = f->labels();
+    ASSERT_EQ( labels.size(), 0u );
+
+    // Check again for DB replication
+    f2 = ml->file( f->mrl() );
+    labels = f2->labels();
+    ASSERT_EQ( labels.size(), 0u );
+
+    delete l1;
+    delete l2;
+    delete f;
+}
