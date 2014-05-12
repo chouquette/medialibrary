@@ -1,8 +1,10 @@
+#include <cassert>
+#include <cstdlib>
+#include <cstring>
+
 #include "Label.h"
 #include "File.h"
 #include "SqliteTools.h"
-
-#include <cassert>
 
 Label::Label( sqlite3* dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )

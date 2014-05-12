@@ -1,4 +1,6 @@
 #include <cassert>
+#include <cstdlib>
+#include <cstring>
 
 #include "Album.h"
 #include "AlbumTrack.h"
