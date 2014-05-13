@@ -14,12 +14,14 @@ class Label : public ILabel
         Label( const std::string& name );
 
     public:
+        virtual unsigned int id() const;
         virtual const std::string& name();
         virtual std::vector<IFile*> files();
         bool insert( sqlite3* dbConnection );
 
         static bool createTable( sqlite3* dbConnection );
-        bool link( File* file );
+        bool link( IFile* file );
+        bool unlink( IFile* file ) const;
     private:
         sqlite3* m_dbConnection;
         unsigned int m_id;

@@ -26,6 +26,7 @@ class File : public IFile
 
         bool insert(sqlite3* dbConnection);
 
+        virtual unsigned int id() const;
         virtual IAlbumTrack* albumTrack();
         virtual unsigned int duration();
         virtual IShowEpisode* showEpisode();
@@ -33,8 +34,8 @@ class File : public IFile
         virtual int playCount();
         virtual const std::string& mrl();
         virtual ILabel* addLabel( const std::string &label );
+        virtual bool removeLabel( const ILabel* label );
 
-        unsigned int id() const;
         static bool createTable( sqlite3* connection );
 
     private:

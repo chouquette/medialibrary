@@ -15,12 +15,14 @@ class IFile
     public:
         virtual ~IFile() {}
 
+        virtual unsigned int id() const = 0;
         virtual IAlbumTrack* albumTrack() = 0;
         virtual unsigned int duration() = 0;
         virtual IShowEpisode* showEpisode() = 0;
         virtual int playCount() = 0;
         virtual const std::string& mrl() = 0;
         virtual ILabel* addLabel( const std::string& label ) = 0;
+        virtual bool removeLabel( const ILabel* label ) = 0;
         
         virtual std::vector<ILabel*> labels() = 0;
 };

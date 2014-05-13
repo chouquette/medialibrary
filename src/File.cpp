@@ -123,6 +123,25 @@ ILabel* File::addLabel(const std::string& label)
     return l;
 }
 
+bool File::removeLabel( const ILabel* label )
+{
+    if ( m_labels != NULL )
+    {
+        std::vector<ILabel*>::iterator it = m_labels->begin();
+        std::vector<ILabel*>::iterator ite = m_labels->end();
+        while ( it != ite )
+        {
+            if ( (*it)->id() == label->id() )
+                break;
+            ++it;
+        }
+        if ( it == ite )
+            return false;
+        m_labels->erase( it );
+    }
+    return label->unlink( this );
+}
+
 unsigned int File::id() const
 {
     return m_id;
