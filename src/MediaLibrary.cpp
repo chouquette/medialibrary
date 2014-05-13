@@ -42,6 +42,27 @@ const std::vector<IFile*>& MediaLibrary::files()
     return *m_files;
 }
 
+IFile*MediaLibrary::file( const std::string& path )
+{
+    if ( m_files == NULL )
+    {
+        // FIXME: This is probably ineficient.
+        // Consider loading the file itself from the DB & eventually store it in a tmp
+        // vector? Or implement caching globally for each class
+        files();
+    }
+
+    std::vector<IFile*>::iterator it = m_files->begin();
+    std::vector<IFile*>::iterator ite = m_files->end();
+    while ( it != ite )
+    {
+        if ( (*it)->mrl() == path )
+            return *it;
+        ++it;
+    }
+    return NULL;
+}
+
 IFile* MediaLibrary::addFile( const std::string& path )
 {
     File* f = new File( path );

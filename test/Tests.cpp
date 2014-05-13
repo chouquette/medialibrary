@@ -46,6 +46,13 @@ TEST_F( MLTest, InsertFile )
     delete f;
 }
 
+TEST_F( MLTest, FetchFile )
+{
+    IFile* f = ml->addFile( "/dev/null" );
+    IFile* f2 = ml->file( "/dev/null" );
+    ASSERT_EQ( f->mrl(), f2->mrl() );
+}
+
 TEST_F( MLTest, AddLabel )
 {
     IFile* f = ml->addFile( "/dev/null" );

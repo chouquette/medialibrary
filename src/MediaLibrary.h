@@ -11,6 +11,7 @@ class MediaLibrary : public IMediaLibrary
         MediaLibrary();
         virtual bool initialize( const std::string& dbPath );
         virtual const std::vector<IFile*>& files();
+        virtual IFile* file( const std::string& path );
         virtual IFile* addFile( const std::string& path );
 
     private:
