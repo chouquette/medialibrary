@@ -2,6 +2,7 @@ project(medialibrary)
 
 cmake_minimum_required(VERSION 2.8)
 include(ExternalProject)
+include(cpp11)
 
 # Fetch gtest
 ExternalProject_Add(
@@ -24,6 +25,7 @@ include_directories(${source_dir}/include)
 ExternalProject_Get_Property(gtest-dependency binary_dir)
 link_directories(${binary_dir})
 
+EnableCpp11()
 add_definitions("-g")
 add_definitions("-Wall -Wextra")
 include_directories(${CMAKE_SOURCE_DIR}/include)
