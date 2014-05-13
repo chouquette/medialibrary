@@ -13,6 +13,7 @@ list(APPEND HEADERS_LIST
     ${CMAKE_SOURCE_DIR}/include/IAlbumTrack.h
     ${CMAKE_SOURCE_DIR}/include/IFile.h
     ${CMAKE_SOURCE_DIR}/include/IMediaLibrary.h
+    ${CMAKE_SOURCE_DIR}/include/ILabel.h
 )
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
