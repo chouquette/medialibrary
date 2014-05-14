@@ -37,7 +37,7 @@ const std::vector<IFile*>& MediaLibrary::files()
     if ( m_files == NULL )
     {
         const char* req = "SELECT * FROM File";
-        SqliteTools::fetchAll<File>( m_dbConnection, req, 0, m_files );
+        SqliteTools::fetchAll<File>( m_dbConnection, req, m_files );
     }
     return *m_files;
 }
