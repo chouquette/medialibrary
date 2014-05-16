@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 EnableCpp11()
+add_definitions("-Wall -Wextra -pedantic -O0")
 
 list(APPEND HEADERS_LIST
     ${CMAKE_SOURCE_DIR}/include/IAudioTrackInformation.h
