@@ -91,13 +91,13 @@ class SqliteTools
             return sqlite3_changes( dbConnection ) > 0;
         }
 
-    private:
         template <typename... Args>
         static StmtPtr executeRequest( sqlite3* dbConnection, const char* req, const Args&... args )
         {
             return _executeRequest<1>( dbConnection, req, args... );
         }
 
+    private:
         template <unsigned int>
         static StmtPtr _executeRequest( sqlite3* dbConnection, const char* req )
         {

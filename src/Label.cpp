@@ -73,10 +73,19 @@ bool Label::createTable(sqlite3* dbConnection)
 {
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::LabelTable::Name + "("
                 "id_label INTEGER PRIMARY KEY AUTOINCREMENT, "
-                "name TEXT"
+                "name TEXT UNIQUE ON CONFLICT FAIL"
             ")";
     if ( SqliteTools::createTable( dbConnection, req.c_str() ) == false )
         return false;
+    //FIXME: Check for a better way when addressing transactions
+    req = "CREATE INDEX label_index ON " + policy::LabelTable::Name + " (name)";
+    {
+        auto stmt = SqliteTools::executeRequest( dbConnection, req.c_str() );
+        if ( stmt == nullptr )
+            return false;
+        if ( sqlite3_step( stmt.get() ) != SQLITE_DONE )
+            return false;
+    }
     req = "CREATE TABLE IF NOT EXISTS LabelFileRelation("
                 "id_label INTEGER,"
                 "id_file INTEGER,"

@@ -119,9 +119,13 @@ bool File::createTable(sqlite3* connection)
             "album_track_id UNSIGNED INTEGER,"
             "play_count UNSIGNED INTEGER,"
             "show_episode_id UNSIGNED INTEGER,"
-            "mrl TEXT"
+            "mrl TEXT UNIQUE ON CONFLICT FAIL"
             ")";
-    return SqliteTools::createTable( connection, req.c_str() );
+    if ( SqliteTools::createTable( connection, req.c_str() ) == false )
+        return false;
+    req = "CREATE INDEX file_index ON " + policy::FileTable::Name + " (mrl)";
+    auto stmt = SqliteTools::executeRequest( connection, req.c_str() );
+    return sqlite3_step( stmt.get() ) == SQLITE_DONE;
 }
 
 bool File::addLabel( LabelPtr label )
