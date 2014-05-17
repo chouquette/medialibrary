@@ -88,7 +88,7 @@ bool Label::createTable(sqlite3* dbConnection)
 
 
 
-const std::string&policy::LabelCachePolicy::key( const std::shared_ptr<Label> self )
+const std::string&policy::LabelCachePolicy::key( const std::shared_ptr<ILabel> self )
 {
     return self->name();
 }

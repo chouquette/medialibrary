@@ -82,6 +82,17 @@ class SqliteTools
         }
 
         template <typename... Args>
+        static bool destroy( sqlite3* dbConnection, const char* req, const Args&... args )
+        {
+            auto stmt = executeRequest( dbConnection, req, args... );
+            if ( stmt == nullptr )
+                return false;
+            sqlite3_step( stmt );
+            sqlite3_finalize( stmt );
+            return sqlite3_changes( dbConnection ) > 0;
+        }
+
+        template <typename... Args>
         static sqlite3_stmt* executeRequest( sqlite3* dbConnection, const char* req, const Args&... args )
         {
             return _executeRequest<1>( dbConnection, req, args... );

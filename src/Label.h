@@ -21,7 +21,7 @@ struct LabelTable
 struct LabelCachePolicy
 {
     typedef std::string KeyType;
-    static const std::string& key( const std::shared_ptr<Label> self );
+    static const std::string& key(const std::shared_ptr<ILabel> self );
     static std::string key( sqlite3_stmt* stmt );
 };
 

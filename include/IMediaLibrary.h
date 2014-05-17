@@ -19,6 +19,8 @@ class IMediaLibrary
         virtual FilePtr addFile( const std::string& path ) = 0;
         virtual FilePtr file( const std::string& path ) = 0;
         virtual LabelPtr createLabel( const std::string& label ) = 0;
+        virtual bool deleteLabel( const std::string& label ) = 0;
+        virtual bool deleteLabel( LabelPtr label ) = 0;
         virtual bool files( std::vector<FilePtr>& res ) = 0;
 };
 

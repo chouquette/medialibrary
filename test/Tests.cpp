@@ -147,3 +147,28 @@ TEST_F( MLTest, FilesWithLabel )
         ASSERT_TRUE( labelFile == f || labelFile == f3 );
     }
 }
+
+TEST_F( MLTest, DeleteLabel )
+{
+    auto f = ml->addFile( "/dev/null" );
+    auto l1 = ml->createLabel( "sea otter" );
+    auto l2 = ml->createLabel( "cony the cone" );
+
+    f->addLabel( l1 );
+    f->addLabel( l2 );
+
+    auto labels = f->labels();
+    ASSERT_EQ( labels.size(), 2u );
+
+    ml->deleteLabel( "sea otter" );
+    labels = f->labels();
+    ASSERT_EQ( labels.size(), 1u );
+
+    ml->deleteLabel( l2 );
+    labels = f->labels();
+    ASSERT_EQ( labels.size(), 0u );
+
+    // Nothing to delete anymore, this should fail gracefuly
+    bool res = ml->deleteLabel( l1 );
+    ASSERT_FALSE( res );
+}
