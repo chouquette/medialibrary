@@ -65,8 +65,7 @@ std::shared_ptr<IAlbumTrack> File::albumTrack()
 {
     if ( m_albumTrack == nullptr && m_albumTrackId != 0 )
     {
-        const char* req = "SELECT * FROM AlbumTrack WHERE id_track = ?";
-        m_albumTrack = SqliteTools::fetchOne<AlbumTrack>( m_dbConnection, req, m_albumTrackId );
+        m_albumTrack = AlbumTrack::fetch( m_dbConnection, m_albumTrackId );
     }
     return m_albumTrack;
 }
