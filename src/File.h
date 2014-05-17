@@ -56,11 +56,11 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         virtual std::shared_ptr<IAlbumTrack> albumTrack();
         virtual unsigned int duration();
         virtual std::shared_ptr<IShowEpisode> showEpisode();
-        virtual const std::vector<std::shared_ptr<ILabel>>& labels();
+        virtual bool addLabel( LabelPtr label );
+        virtual bool removeLabel( LabelPtr label );
+        virtual std::vector<std::shared_ptr<ILabel> > labels();
         virtual int playCount();
         virtual const std::string& mrl();
-        virtual std::shared_ptr<ILabel> addLabel( const std::string &label );
-        virtual bool removeLabel(const std::shared_ptr<ILabel>& label );
 
     private:
         sqlite3* m_dbConnection;
@@ -78,7 +78,6 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         Album* m_album;
         std::shared_ptr<AlbumTrack> m_albumTrack;
         std::shared_ptr<ShowEpisode> m_showEpisode;
-        std::vector<std::shared_ptr<ILabel>>* m_labels;
 
         friend class Cache<File, IFile, policy::FileTable, policy::FileCache>;
 };

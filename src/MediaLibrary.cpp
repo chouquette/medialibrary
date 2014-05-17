@@ -50,3 +50,13 @@ FilePtr MediaLibrary::addFile( const std::string& path )
     }
     return f;
 }
+
+LabelPtr MediaLibrary::createLabel( const std::string& label )
+{
+    auto l = Label::create( label );
+    if ( l->insert( m_dbConnection ) == false )
+    {
+        return nullptr;
+    }
+    return l;
+}

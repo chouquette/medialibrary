@@ -14,7 +14,6 @@ const std::string policy::FileTable::CacheColumn = "mrl";
 
 File::File( sqlite3* dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
-    , m_labels( nullptr )
 {
     m_id = sqlite3_column_int( stmt, 0 );
     m_type = (Type)sqlite3_column_int( stmt, 1 );
@@ -34,7 +33,6 @@ File::File( const std::string& mrl )
     , m_playCount( 0 )
     , m_showEpisodeId( 0 )
     , m_mrl( mrl )
-    , m_labels( nullptr )
 {
 }
 
@@ -87,17 +85,14 @@ std::shared_ptr<IShowEpisode> File::showEpisode()
     return m_showEpisode;
 }
 
-const std::vector<std::shared_ptr<ILabel>>& File::labels()
+std::vector<std::shared_ptr<ILabel> > File::labels()
 {
-    if ( m_labels == nullptr )
-    {
-        m_labels = new std::vector<std::shared_ptr<ILabel>>;
-        const char* req = "SELECT l.* FROM Label l "
-                "LEFT JOIN LabelFileRelation lfr ON lfr.id_label = l.id_label "
-                "WHERE lfr.id_file = ?";
-        SqliteTools::fetchAll<Label>( m_dbConnection, req, m_id, *m_labels );
-    }
-    return *m_labels;
+    std::vector<std::shared_ptr<ILabel> > labels;
+    const char* req = "SELECT l.* FROM Label l "
+            "LEFT JOIN LabelFileRelation lfr ON lfr.id_label = l.id_label "
+            "WHERE lfr.id_file = ?";
+    SqliteTools::fetchAll<Label>( m_dbConnection, req, m_id, labels );
+    return labels;
 }
 
 int File::playCount()
@@ -108,36 +103,6 @@ int File::playCount()
 const std::string& File::mrl()
 {
     return m_mrl;
-}
-
-std::shared_ptr<ILabel> File::addLabel(const std::string& label)
-{
-    auto l = Label::create( label );
-    if ( l->insert( m_dbConnection ) == false )
-    {
-        return nullptr;
-    }
-    l->link( this );
-    return l;
-}
-
-bool File::removeLabel( const std::shared_ptr<ILabel>& label )
-{
-    if ( m_labels != false )
-    {
-        auto it = m_labels->begin();
-        auto ite = m_labels->end();
-        while ( it != ite )
-        {
-            if ( (*it)->id() == label->id() )
-                break;
-            ++it;
-        }
-        if ( it == ite )
-            return false;
-        m_labels->erase( it );
-    }
-    return label->unlink( this );
 }
 
 unsigned int File::id() const
@@ -160,6 +125,47 @@ bool File::createTable(sqlite3* connection)
     return SqliteTools::createTable( connection, req );
 }
 
+bool File::addLabel( LabelPtr label )
+{
+    if ( m_dbConnection == nullptr || m_id == 0 || label->id() == 0)
+    {
+        std::cerr << "Both file & label need to be inserted in database before being linked together" << std::endl;
+        return false;
+    }
+    const char* req = "INSERT INTO LabelFileRelation VALUES(?, ?)";
+    sqlite3_stmt* stmt;
+    if ( sqlite3_prepare_v2( m_dbConnection, req, -1, &stmt, NULL ) != SQLITE_OK )
+    {
+        std::cerr << "Failed to insert record: " << sqlite3_errmsg( m_dbConnection ) << std::endl;
+        return false;
+    }
+    sqlite3_bind_int( stmt, 1, label->id() );
+    sqlite3_bind_int( stmt, 2, m_id );
+    bool res = sqlite3_step( stmt ) == SQLITE_DONE;
+    sqlite3_finalize( stmt );
+    return res;
+}
+
+bool File::removeLabel( LabelPtr label )
+{
+    if ( m_dbConnection == nullptr || m_id == 0 || label->id() == 0 )
+    {
+        std::cerr << "Can't unlink a label/file not inserted in database" << std::endl;
+        return false;
+    }
+    const char* req = "DELETE FROM LabelFileRelation WHERE id_label = ? AND id_file = ?";
+    sqlite3_stmt* stmt;
+    if ( sqlite3_prepare_v2( m_dbConnection, req, -1, &stmt, NULL ) != SQLITE_OK )
+    {
+        std::cerr << "Failed to remove record: " << sqlite3_errmsg( m_dbConnection ) << std::endl;
+        return false;
+    }
+    sqlite3_bind_int( stmt, 1, label->id() );
+    sqlite3_bind_int( stmt, 2, m_id );
+    sqlite3_step( stmt );
+    sqlite3_finalize( stmt );
+    return sqlite3_changes( m_dbConnection ) > 0;
+}
 
 const std::string& policy::FileCache::key(const std::shared_ptr<File> self )
 {

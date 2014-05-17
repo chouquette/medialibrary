@@ -59,13 +59,20 @@ TEST_F( MLTest, FetchFile )
 TEST_F( MLTest, AddLabel )
 {
     auto f = ml->addFile( "/dev/null" );
-    auto l1 = f->addLabel( "sea otter" );
-    auto l2 = f->addLabel( "cony the cone" );
+    auto l1 = ml->createLabel( "sea otter" );
+    auto l2 = ml->createLabel( "cony the cone" );
 
-    ASSERT_TRUE( l1 != NULL );
-    ASSERT_TRUE( l2 != NULL );
+    ASSERT_NE( l1, nullptr);
+    ASSERT_NE( l2, nullptr);
 
     auto labels = f->labels();
+    ASSERT_EQ( labels.size(), 0u );
+
+    f->addLabel( l1 );
+    f->addLabel( l2 );
+
+    labels = f->labels();
+
     ASSERT_EQ( labels.size(), 2u );
     ASSERT_EQ( labels[0]->name(), "sea otter" );
     ASSERT_EQ( labels[1]->name(), "cony the cone" );
@@ -74,8 +81,11 @@ TEST_F( MLTest, AddLabel )
 TEST_F( MLTest, RemoveLabel )
 {
     auto f = ml->addFile( "/dev/null" );
-    auto l1 = f->addLabel( "sea otter" );
-    auto l2 = f->addLabel( "cony the cone" );
+    auto l1 = ml->createLabel( "sea otter" );
+    auto l2 = ml->createLabel( "cony the cone" );
+
+    f->addLabel( l1 );
+    f->addLabel( l2 );
 
     auto labels = f->labels();
     ASSERT_EQ( labels.size(), 2u );
@@ -110,3 +120,5 @@ TEST_F( MLTest, RemoveLabel )
     labels = f2->labels();
     ASSERT_EQ( labels.size(), 0u );
 }
+
+

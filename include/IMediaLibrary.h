@@ -6,8 +6,10 @@
 #include <memory>
 
 class IFile;
+class ILabel;
 
 typedef std::shared_ptr<IFile> FilePtr;
+typedef std::shared_ptr<ILabel> LabelPtr;
 
 class IMediaLibrary
 {
@@ -16,6 +18,7 @@ class IMediaLibrary
         virtual bool initialize( const std::string& dbPath ) = 0;
         virtual FilePtr addFile( const std::string& path ) = 0;
         virtual FilePtr file( const std::string& path ) = 0;
+        virtual LabelPtr createLabel( const std::string& label ) = 0;
         virtual bool files( std::vector<FilePtr>& res ) = 0;
 };
 

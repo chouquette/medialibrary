@@ -3,10 +3,11 @@
 
 #include <vector>
 #include <memory>
+
+#include "IMediaLibrary.h"
 #include "ITrackInformation.h"
 
 class IAlbumTrack;
-class ILabel;
 class IShowEpisode;
 class ITrackInformation;
 
@@ -21,9 +22,9 @@ class IFile
         virtual std::shared_ptr<IShowEpisode> showEpisode() = 0;
         virtual int playCount() = 0;
         virtual const std::string& mrl() = 0;
-        virtual std::shared_ptr<ILabel> addLabel( const std::string& label ) = 0;
-        virtual bool removeLabel( const std::shared_ptr<ILabel>& label ) = 0;
-        virtual const std::vector<std::shared_ptr<ILabel>>& labels() = 0;
+        virtual bool addLabel( LabelPtr label ) = 0;
+        virtual bool removeLabel( LabelPtr label ) = 0;
+        virtual std::vector<std::shared_ptr<ILabel> > labels() = 0;
 };
 
 #endif // IFILE_H
