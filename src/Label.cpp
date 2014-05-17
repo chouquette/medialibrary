@@ -7,7 +7,7 @@
 #include "SqliteTools.h"
 
 const std::string policy::LabelTable::Name = "Label";
-const std::string policy::LabelTable::CacheColumn = "id_label";
+const std::string policy::LabelTable::CacheColumn = "name";
 
 Label::Label( sqlite3* dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
@@ -86,3 +86,14 @@ bool Label::createTable(sqlite3* dbConnection)
     return SqliteTools::createTable( dbConnection, req.c_str() );
 }
 
+
+
+const std::string&policy::LabelCachePolicy::key( const std::shared_ptr<Label> self )
+{
+    return self->name();
+}
+
+std::string policy::LabelCachePolicy::key(sqlite3_stmt* stmt)
+{
+    return Traits<KeyType>::Load( stmt, 1 );
+}

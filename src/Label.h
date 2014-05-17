@@ -5,6 +5,7 @@
 #include <string>
 
 class File;
+class Label;
 
 #include "ILabel.h"
 #include "Cache.h"
@@ -16,9 +17,17 @@ struct LabelTable
     static const std::string Name;
     static const std::string CacheColumn;
 };
+
+struct LabelCachePolicy
+{
+    typedef std::string KeyType;
+    static const std::string& key( const std::shared_ptr<Label> self );
+    static std::string key( sqlite3_stmt* stmt );
+};
+
 }
 
-class Label : public ILabel, public Cache<Label, ILabel, policy::LabelTable>
+class Label : public ILabel, public Cache<Label, ILabel, policy::LabelTable, policy::LabelCachePolicy>
 {
     public:
 
