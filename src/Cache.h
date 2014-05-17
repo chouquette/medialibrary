@@ -54,7 +54,7 @@ class Cache
             auto it = Store.find( key );
             if ( it != Store.end() )
                 return it->second;
-            std::string req = "SELECT * FROM" + TABLEPOLICY::Name +
+            static const std::string req = "SELECT * FROM" + TABLEPOLICY::Name +
                             " WHERE " + TABLEPOLICY::CacheColumn + " = ?";
             auto res = SqliteTools::fetchOne<IMPL>( dbConnection, req.c_str(), key );
             Store[key] = res;
@@ -69,7 +69,7 @@ class Cache
          */
         static bool fetchAll( sqlite3* dbConnection, std::vector<std::shared_ptr<INTF>>& res )
         {
-            std::string req = "SELECT * FROM " + TABLEPOLICY::Name;
+            static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name;
             return SqliteTools::fetchAll<IMPL, INTF>( dbConnection, req.c_str(), res );
         }
 
