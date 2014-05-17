@@ -8,12 +8,6 @@
 #include <vector>
 #include <iostream>
 
-template <typename T>
-struct TypeHelper
-{
-    static const T Default = {};
-};
-
 // Have a base case for integral type only
 // Use specialization to define other cases, and fail for the rest.
 template <typename T>
@@ -55,21 +49,14 @@ class SqliteTools
          * @param results   A reference to the result vector. All existing elements will
          *                  be discarded.
          */
-        template <typename IMPL, typename INTF, typename KEYTYPE>
-        static bool fetchAll( sqlite3* dbConnection, const char* req, const KEYTYPE& foreignKey, std::vector<std::shared_ptr<INTF> >& results)
+        template <typename IMPL, typename INTF, typename... Args>
+        static bool fetchAll( sqlite3* dbConnection, const char* req, std::vector<std::shared_ptr<INTF> >& results, const Args&... args )
         {
             results.clear();
-            sqlite3_stmt* stmt;
-            int res = sqlite3_prepare_v2( dbConnection, req, -1, &stmt, NULL );
-            if ( res != SQLITE_OK )
-            {
-                std::cerr << "Failed to execute request: " << req << std::endl;
-                std::cerr << sqlite3_errmsg( dbConnection ) << std::endl;
+            sqlite3_stmt* stmt = executeRequest( dbConnection, req, args...);
+            if ( stmt == nullptr )
                 return false;
-            }
-            if ( foreignKey != TypeHelper<KEYTYPE>::Default )
-                Traits<KEYTYPE>::Bind( stmt, 1, foreignKey );
-            res = sqlite3_step( stmt );
+            int res = sqlite3_step( stmt );
             while ( res == SQLITE_ROW )
             {
                 auto row = IMPL::load( dbConnection, stmt );
@@ -80,25 +67,13 @@ class SqliteTools
             return true;
         }
 
-        template <typename IMPL, typename INTF>
-        static bool fetchAll( sqlite3* dbConnection, const char* req, std::vector<std::shared_ptr<INTF> >& results)
-        {
-            return fetchAll<IMPL, INTF>( dbConnection, req, 0, results );
-        }
-
-        template <typename T, typename KEYTYPE>
-        static std::shared_ptr<T> fetchOne( sqlite3* dbConnection, const char* req, const KEYTYPE& toBind )
+        template <typename T, typename... Args>
+        static std::shared_ptr<T> fetchOne( sqlite3* dbConnection, const char* req, const Args&... args )
         {
             std::shared_ptr<T> result;
-            sqlite3_stmt *stmt;
-            int res = sqlite3_prepare_v2( dbConnection, req, -1, &stmt, NULL );
-            if ( res != SQLITE_OK )
-            {
-                std::cerr << "Failed to execute request: " << req << std::endl;
-                std::cerr << sqlite3_errmsg( dbConnection ) << std::endl;
-                return result;
-            }
-            Traits<KEYTYPE>::Bind( stmt, 1, toBind );
+            sqlite3_stmt *stmt = executeRequest( dbConnection, req, args... );
+            if ( stmt == nullptr )
+                return false;
             if ( sqlite3_step( stmt ) != SQLITE_ROW )
                 return result;
             result = T::load( dbConnection, stmt );
@@ -106,7 +81,33 @@ class SqliteTools
             return result;
         }
 
+        template <typename... Args>
+        static sqlite3_stmt* executeRequest( sqlite3* dbConnection, const char* req, const Args&... args )
+        {
+            return _executeRequest<1>( dbConnection, req, args... );
+        }
 
+    private:
+        template <unsigned int>
+        static sqlite3_stmt* _executeRequest( sqlite3* dbConnection, const char* req )
+        {
+            sqlite3_stmt* stmt = nullptr;
+            int res = sqlite3_prepare_v2( dbConnection, req, -1, &stmt, NULL );
+            if ( res != SQLITE_OK )
+            {
+                std::cerr << "Failed to execute request: " << req << std::endl;
+                std::cerr << sqlite3_errmsg( dbConnection ) << std::endl;
+            }
+            return stmt;
+        }
+
+        template <unsigned int COLIDX, typename T, typename... Args>
+        static sqlite3_stmt* _executeRequest( sqlite3* dbConnection, const char* req, const T& arg, const Args&... args )
+        {
+            sqlite3_stmt* stmt = _executeRequest<COLIDX + 1>( dbConnection, req, args... );
+            Traits<T>::Bind( stmt, COLIDX, arg );
+            return stmt;
+        }
 };
 
 #endif // SQLITETOOLS_H

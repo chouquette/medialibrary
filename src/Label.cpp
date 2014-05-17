@@ -44,7 +44,7 @@ std::vector<FilePtr>& Label::files()
         static const std::string req = "SELECT f.* FROM " + policy::FileTable::Name + " f "
                 "LEFT JOIN LabelFileRelation lfr ON lfr.id_file = f.id_file "
                 "WHERE lfr.id_label = ?";
-        SqliteTools::fetchAll<File>( m_dbConnection, req.c_str(), m_id, *m_files );
+        SqliteTools::fetchAll<File>( m_dbConnection, req.c_str(), *m_files, m_id );
     }
     return *m_files;
 }

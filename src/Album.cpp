@@ -48,7 +48,7 @@ const std::vector<std::shared_ptr<IAlbumTrack>>& Album::tracks()
     {
         m_tracks = new std::vector<std::shared_ptr<IAlbumTrack>>;
         const char* req = "SELECT * FROM AlbumTrack WHERE id_album = ?";
-        SqliteTools::fetchAll<AlbumTrack>( m_dbConnection, req, m_id, *m_tracks );
+        SqliteTools::fetchAll<AlbumTrack>( m_dbConnection, req, *m_tracks, m_id );
     }
     return *m_tracks;
 }

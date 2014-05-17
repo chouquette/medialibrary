@@ -91,7 +91,7 @@ std::vector<std::shared_ptr<ILabel> > File::labels()
     static const std::string req = "SELECT l.* FROM " + policy::LabelTable::Name + " l "
             "LEFT JOIN LabelFileRelation lfr ON lfr.id_label = l.id_label "
             "WHERE lfr.id_file = ?";
-    SqliteTools::fetchAll<Label>( m_dbConnection, req.c_str(), m_id, labels );
+    SqliteTools::fetchAll<Label>( m_dbConnection, req.c_str(), labels, m_id );
     return labels;
 }
 
