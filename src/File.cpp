@@ -41,8 +41,9 @@ bool File::insert( sqlite3* dbConnection )
     assert( m_dbConnection == NULL );
     assert( m_id == 0 );
     sqlite3_stmt* stmt;
-    const char* req = "INSERT INTO File VALUES(NULL, ?, ?, ?, ?, ?, ?)";
-    if ( sqlite3_prepare_v2( dbConnection, req, -1, &stmt, NULL ) != SQLITE_OK )
+    static const std::string req = "INSERT INTO " + policy::FileTable::Name +
+            " VALUES(NULL, ?, ?, ?, ?, ?, ?)";
+    if ( sqlite3_prepare_v2( dbConnection, req.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
     {
         std::cerr << "Failed to insert record: " << sqlite3_errmsg( dbConnection ) << std::endl;
         return false;
@@ -87,10 +88,10 @@ std::shared_ptr<IShowEpisode> File::showEpisode()
 std::vector<std::shared_ptr<ILabel> > File::labels()
 {
     std::vector<std::shared_ptr<ILabel> > labels;
-    const char* req = "SELECT l.* FROM Label l "
+    static const std::string req = "SELECT l.* FROM " + policy::LabelTable::Name + " l "
             "LEFT JOIN LabelFileRelation lfr ON lfr.id_label = l.id_label "
             "WHERE lfr.id_file = ?";
-    SqliteTools::fetchAll<Label>( m_dbConnection, req, m_id, labels );
+    SqliteTools::fetchAll<Label>( m_dbConnection, req.c_str(), m_id, labels );
     return labels;
 }
 
@@ -111,8 +112,7 @@ unsigned int File::id() const
 
 bool File::createTable(sqlite3* connection)
 {
-    //FIXME: File is hardcoded
-    const char* req = "CREATE TABLE IF NOT EXISTS File("
+    std::string req = "CREATE TABLE IF NOT EXISTS " + policy::FileTable::Name + "("
             "id_file INTEGER PRIMARY KEY AUTOINCREMENT,"
             "type INTEGER,"
             "duration UNSIGNED INTEGER,"
@@ -121,7 +121,7 @@ bool File::createTable(sqlite3* connection)
             "show_episode_id UNSIGNED INTEGER,"
             "mrl TEXT"
             ")";
-    return SqliteTools::createTable( connection, req );
+    return SqliteTools::createTable( connection, req.c_str() );
 }
 
 bool File::addLabel( LabelPtr label )

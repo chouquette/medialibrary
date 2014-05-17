@@ -41,10 +41,10 @@ std::vector<FilePtr>& Label::files()
     if ( m_files == nullptr )
     {
         m_files = new std::vector<std::shared_ptr<IFile>>;
-        const char* req = "SELECT f.* FROM Files f "
+        static const std::string req = "SELECT f.* FROM " + policy::FileTable::Name + " f "
                 "LEFT JOIN LabelFileRelation lfr ON lfr.id_file = f.id_file "
                 "WHERE lfr.id_label = ?";
-        SqliteTools::fetchAll<File>( m_dbConnection, req, m_id, *m_files );
+        SqliteTools::fetchAll<File>( m_dbConnection, req.c_str(), m_id, *m_files );
     }
     return *m_files;
 }
@@ -71,11 +71,11 @@ bool Label::insert( sqlite3* dbConnection )
 
 bool Label::createTable(sqlite3* dbConnection)
 {
-    const char* req = "CREATE TABLE IF NOT EXISTS Label("
+    std::string req = "CREATE TABLE IF NOT EXISTS " + policy::LabelTable::Name + "("
                 "id_label INTEGER PRIMARY KEY AUTOINCREMENT, "
                 "name TEXT"
             ")";
-    if ( SqliteTools::createTable( dbConnection, req ) == false )
+    if ( SqliteTools::createTable( dbConnection, req.c_str() ) == false )
         return false;
     req = "CREATE TABLE IF NOT EXISTS LabelFileRelation("
                 "id_label INTEGER,"
@@ -83,6 +83,6 @@ bool Label::createTable(sqlite3* dbConnection)
             "PRIMARY KEY (id_label, id_file)"
             "FOREIGN KEY(id_label) REFERENCES Label(id_label) ON DELETE CASCADE,"
             "FOREIGN KEY(id_file) REFERENCES File(id_file) ON DELETE CASCADE);";
-    return SqliteTools::createTable( dbConnection, req );
+    return SqliteTools::createTable( dbConnection, req.c_str() );
 }
 
