@@ -121,4 +121,29 @@ TEST_F( MLTest, RemoveLabel )
     ASSERT_EQ( labels.size(), 0u );
 }
 
+TEST_F( MLTest, FilesWithLabel )
+{
+    auto f = ml->addFile( "/dev/null" );
+    auto f2 = ml->addFile( "/dev/moulaf" );
+    auto f3 = ml->addFile( "/sea/otter" );
 
+    auto l1 = ml->createLabel( "label1" );
+    auto l2 = ml->createLabel( "label2" );
+
+    f->addLabel( l1 );
+    f2->addLabel( l2 );
+    f3->addLabel( l1 );
+
+    auto label1Files = l1->files();
+    auto label2Files = l2->files();
+
+    ASSERT_EQ( label1Files.size(), 2u );
+    ASSERT_EQ( label2Files.size(), 1u );
+
+    ASSERT_EQ( label2Files[0], f2 );
+
+    for (auto labelFile : label1Files )
+    {
+        ASSERT_TRUE( labelFile == f || labelFile == f3 );
+    }
+}
