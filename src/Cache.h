@@ -24,33 +24,25 @@ class PrimaryKeyCacheKeyPolicy
 
 /**
  * This utility class eases up the implementation of caching.
- * It has a few assumptions about class that will use it:
- * - The class is stored in database and has a dedicated type.
- * - The class has a static std::string member named TableName, that can be used to generate
- *   requests
- * - The class has a static std::string member named CacheColumn, that holds the name of
- *   the column that will act as a primary key in the cache.
- * - The class has a public method of signature "unsigned int id()" that can be used to
- *   fetch the primary key
- * - The class has 2 contructors:
- *      - One that takes a sqlite3* representing the active DB connection, and
- *        a sqlite3_stmt* that holds the row currently being fetched. This CTOR is used by
- *        the load method, when fetching an existing record which isn't cached yet.
- *      - One that can be used to instantiate a new record, without parameter restriction
  *
- * Template parameter:
+ * It is driven by 2 policy classes:
+ * - TABLEPOLICY describes the basics required to fetch a record. It has 2 static fields:
+ *      - Name: the table name
+ *      - CacheColumn: The column used to cache records.
+ * - CACHEPOLICY describes which column to use for caching by providing two "key" methods.
+ *   One that takes a sqlite3_stmt and one that takes an instance of the type being cached
+ *
+ * The default CACHEPOLICY implementation bases itself on an unsigned int column, assumed
+ * to be the primary key, at index 0 of a fetch statement.
+ *
+ * Other template parameter:
  * - IMPL: The actual implementation. Typically the type that inherits this class
  * - INTF: An interface that express the type. This is used when fetching containers, as they
  *         are not polymorphic.
- * - CACHECOLUMNTYPE: The type of the column representing a record in a unique way. Quite
- *                    likely the primary key type
- * - CACHECOLUMNINDEX: The index of the column used by the cache, to be able to fetch it
- *                     from a sqlite3_stmt containing a row of the stored entity type.
  *
  * How to use it:
- * - Inherit this class and specify the template parameter accordingly
+ * - Inherit this class and specify the template parameter & policies accordingly
  * - Make this class a friend class of the class you inherit from
- * - Implement the 2 static strings defined above.
  */
 template <typename IMPL, typename INTF, typename TABLEPOLICY, typename CACHEPOLICY = PrimaryKeyCacheKeyPolicy<IMPL>>
 class Cache
