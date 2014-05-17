@@ -44,7 +44,7 @@ class PrimaryKeyCacheKeyPolicy
  * - Inherit this class and specify the template parameter & policies accordingly
  * - Make this class a friend class of the class you inherit from
  */
-template <typename IMPL, typename INTF, typename TABLEPOLICY, typename CACHEPOLICY = PrimaryKeyCacheKeyPolicy<IMPL>>
+template <typename IMPL, typename INTF, typename TABLEPOLICY, typename CACHEPOLICY = PrimaryKeyCacheKeyPolicy<IMPL> >
 class Cache
 {
     public:
@@ -67,7 +67,7 @@ class Cache
          * @param res   A reference to the result vector. All existing elements will
          *              be discarded.
          */
-        static bool fetchAll( sqlite3* dbConnection, std::vector<std::shared_ptr<INTF>>& res )
+        static bool fetchAll( sqlite3* dbConnection, std::vector<std::shared_ptr<INTF> >& res )
         {
             static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name;
             return SqliteTools::fetchAll<IMPL, INTF>( dbConnection, req.c_str(), res );
@@ -103,12 +103,12 @@ class Cache
         }
 
     private:
-        static std::unordered_map<typename CACHEPOLICY::KeyType, std::shared_ptr<IMPL>> Store;
+        static std::unordered_map<typename CACHEPOLICY::KeyType, std::shared_ptr<IMPL> > Store;
         static std::mutex Mutex;
 };
 
 template <typename IMPL, typename INTF, typename TABLEPOLICY, typename CACHEPOLICY>
-std::unordered_map<typename CACHEPOLICY::KeyType, std::shared_ptr<IMPL>>
+std::unordered_map<typename CACHEPOLICY::KeyType, std::shared_ptr<IMPL> >
 Cache<IMPL, INTF, TABLEPOLICY, CACHEPOLICY>::Store;
 
 template <typename IMPL, typename INTF, typename TABLEPOLICY, typename CACHEPOLICY>

@@ -56,7 +56,7 @@ class SqliteTools
          *                  be discarded.
          */
         template <typename IMPL, typename INTF, typename KEYTYPE>
-        static bool fetchAll( sqlite3* dbConnection, const char* req, const KEYTYPE& foreignKey, std::vector<std::shared_ptr<INTF>>& results)
+        static bool fetchAll( sqlite3* dbConnection, const char* req, const KEYTYPE& foreignKey, std::vector<std::shared_ptr<INTF> >& results)
         {
             results.clear();
             sqlite3_stmt* stmt;
@@ -81,7 +81,7 @@ class SqliteTools
         }
 
         template <typename IMPL, typename INTF>
-        static bool fetchAll( sqlite3* dbConnection, const char* req, std::vector<std::shared_ptr<INTF>>& results)
+        static bool fetchAll( sqlite3* dbConnection, const char* req, std::vector<std::shared_ptr<INTF> >& results)
         {
             return fetchAll<IMPL, INTF>( dbConnection, req, 0, results );
         }
