@@ -23,7 +23,6 @@ include_directories("${CMAKE_SOURCE_DIR}/include")
 
 list(APPEND SRC_LIST ${HEADERS_LIST}
     MediaLibrary.cpp
-    SqliteTools.cpp
     File.cpp
     Album.cpp
     Show.cpp

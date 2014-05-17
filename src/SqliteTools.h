@@ -42,8 +42,6 @@ class SqliteTools
     private:
         typedef std::unique_ptr<sqlite3_stmt, int (*)(sqlite3_stmt*)> StmtPtr;
     public:
-        static bool createTable(sqlite3* db, const char* request );
-
         /**
          * Will fetch all records of type IMPL and return them as a shared_ptr to INTF
          * This WILL add all fetched records to the cache
@@ -55,7 +53,7 @@ class SqliteTools
         static bool fetchAll( sqlite3* dbConnection, const char* req, std::vector<std::shared_ptr<INTF> >& results, const Args&... args )
         {
             results.clear();
-            auto stmt = executeRequest( dbConnection, req, args...);
+            auto stmt = prepareRequest( dbConnection, req, args...);
             if ( stmt == nullptr )
                 return false;
             int res = sqlite3_step( stmt.get() );
@@ -72,7 +70,7 @@ class SqliteTools
         static std::shared_ptr<T> fetchOne( sqlite3* dbConnection, const char* req, const Args&... args )
         {
             std::shared_ptr<T> result;
-            auto stmt = executeRequest( dbConnection, req, args... );
+            auto stmt = prepareRequest( dbConnection, req, args... );
             if ( stmt == nullptr )
                 return nullptr;
             if ( sqlite3_step( stmt.get() ) != SQLITE_ROW )
@@ -82,24 +80,40 @@ class SqliteTools
         }
 
         template <typename... Args>
-        static bool destroy( sqlite3* dbConnection, const char* req, const Args&... args )
+        static bool executeDelete( sqlite3* dbConnection, const char* req, const Args&... args )
         {
-            auto stmt = executeRequest( dbConnection, req, args... );
-            if ( stmt == nullptr )
+            if ( executeRequest( dbConnection, req, args... ) == false )
                 return false;
-            sqlite3_step( stmt.get() );
             return sqlite3_changes( dbConnection ) > 0;
         }
 
+        /**
+         * This is meant to be used for "write only" requests, as the statement is not
+         * exposed to the caller.
+         */
         template <typename... Args>
-        static StmtPtr executeRequest( sqlite3* dbConnection, const char* req, const Args&... args )
+        static bool executeRequest( sqlite3* dbConnection, const char* req, const Args&... args )
         {
-            return _executeRequest<1>( dbConnection, req, args... );
+            auto stmt = prepareRequest( dbConnection, req, args... );
+            if ( stmt == nullptr )
+                return false;
+            int res;
+            do
+            {
+                res = sqlite3_step( stmt.get() );
+            } while ( res != SQLITE_DONE && res != SQLITE_ERROR );
+            return res == SQLITE_DONE;
         }
 
     private:
+        template <typename... Args>
+        static StmtPtr prepareRequest( sqlite3* dbConnection, const char* req, const Args&... args )
+        {
+            return _prepareRequest<1>( dbConnection, req, args... );
+        }
+
         template <unsigned int>
-        static StmtPtr _executeRequest( sqlite3* dbConnection, const char* req )
+        static StmtPtr _prepareRequest( sqlite3* dbConnection, const char* req )
         {
             sqlite3_stmt* stmt = nullptr;
             int res = sqlite3_prepare_v2( dbConnection, req, -1, &stmt, NULL );
@@ -112,9 +126,9 @@ class SqliteTools
         }
 
         template <unsigned int COLIDX, typename T, typename... Args>
-        static StmtPtr _executeRequest( sqlite3* dbConnection, const char* req, const T& arg, const Args&... args )
+        static StmtPtr _prepareRequest( sqlite3* dbConnection, const char* req, const T& arg, const Args&... args )
         {
-            auto stmt = _executeRequest<COLIDX + 1>( dbConnection, req, args... );
+            auto stmt = _prepareRequest<COLIDX + 1>( dbConnection, req, args... );
             Traits<T>::Bind( stmt.get(), COLIDX, arg );
             return stmt;
         }

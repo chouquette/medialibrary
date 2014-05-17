@@ -53,16 +53,8 @@ bool Label::insert( sqlite3* dbConnection )
 {
     assert( m_dbConnection == nullptr );
     assert( m_id == 0 );
-    sqlite3_stmt* stmt;
     const char* req = "INSERT INTO Label VALUES(NULL, ?)";
-    if ( sqlite3_prepare_v2( dbConnection, req, -1, &stmt, NULL ) != SQLITE_OK )
-    {
-        std::cerr << "Failed to insert record: " << sqlite3_errmsg( dbConnection ) << std::endl;
-        return false;
-    }
-    char* tmpName = strdup( m_name.c_str() );
-    sqlite3_bind_text( stmt, 1, tmpName, -1, &free );
-    if ( sqlite3_step( stmt ) != SQLITE_DONE )
+    if ( SqliteTools::executeRequest( dbConnection, req, m_name ) == false )
         return false;
     m_dbConnection = dbConnection;
     m_id = sqlite3_last_insert_rowid( dbConnection );
@@ -75,24 +67,19 @@ bool Label::createTable(sqlite3* dbConnection)
                 "id_label INTEGER PRIMARY KEY AUTOINCREMENT, "
                 "name TEXT UNIQUE ON CONFLICT FAIL"
             ")";
-    if ( SqliteTools::createTable( dbConnection, req.c_str() ) == false )
+    if ( SqliteTools::executeRequest( dbConnection, req.c_str() ) == false )
         return false;
     //FIXME: Check for a better way when addressing transactions
     req = "CREATE INDEX label_index ON " + policy::LabelTable::Name + " (name)";
-    {
-        auto stmt = SqliteTools::executeRequest( dbConnection, req.c_str() );
-        if ( stmt == nullptr )
-            return false;
-        if ( sqlite3_step( stmt.get() ) != SQLITE_DONE )
-            return false;
-    }
+    if ( SqliteTools::executeRequest( dbConnection, req.c_str() ) == false )
+        return false;
     req = "CREATE TABLE IF NOT EXISTS LabelFileRelation("
                 "id_label INTEGER,"
                 "id_file INTEGER,"
             "PRIMARY KEY (id_label, id_file)"
             "FOREIGN KEY(id_label) REFERENCES Label(id_label) ON DELETE CASCADE,"
             "FOREIGN KEY(id_file) REFERENCES File(id_file) ON DELETE CASCADE);";
-    return SqliteTools::createTable( dbConnection, req.c_str() );
+    return SqliteTools::executeRequest( dbConnection, req.c_str() );
 }
 
 

@@ -63,5 +63,5 @@ bool Album::createTable( sqlite3* dbConnection )
                 "artwork_url TEXT,"
                 "UNSIGNED INTEGER last_sync_date"
             ")";
-    return SqliteTools::createTable( dbConnection, req );
+    return SqliteTools::executeRequest( dbConnection, req );
 }

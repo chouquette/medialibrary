@@ -18,9 +18,7 @@ bool MediaLibrary::initialize(const std::string& dbPath)
     // PRAGMA foreign_keys = ON;
     if ( res != SQLITE_OK )
         return false;
-    sqlite3_stmt* stmt;
-    sqlite3_prepare_v2( m_dbConnection, "PRAGMA foreign_keys = ON", -1, &stmt, NULL );
-    if ( sqlite3_step( stmt ) != SQLITE_DONE )
+    if ( SqliteTools::executeRequest( m_dbConnection, "PRAGMA foreign_keys = ON" ) == false )
         return false;
     return ( File::createTable( m_dbConnection ) &&
         Label::createTable( m_dbConnection ) &&

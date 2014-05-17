@@ -112,7 +112,7 @@ class Cache
                 Store.erase( it );
             static const std::string req = "DELETE FROM " + TABLEPOLICY::Name + " WHERE " +
                     TABLEPOLICY::CacheColumn + " = ?";
-            return SqliteTools::destroy( dbConnection, req.c_str(), key );
+            return SqliteTools::executeDelete( dbConnection, req.c_str(), key );
         }
 
     private:

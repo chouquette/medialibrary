@@ -40,22 +40,10 @@ bool File::insert( sqlite3* dbConnection )
 {
     assert( m_dbConnection == NULL );
     assert( m_id == 0 );
-    sqlite3_stmt* stmt;
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
             " VALUES(NULL, ?, ?, ?, ?, ?, ?)";
-    if ( sqlite3_prepare_v2( dbConnection, req.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
-    {
-        std::cerr << "Failed to insert record: " << sqlite3_errmsg( dbConnection ) << std::endl;
-        return false;
-    }
-    const char* tmpMrl = strdup( m_mrl.c_str() );
-    sqlite3_bind_int( stmt, 1, m_type );
-    sqlite3_bind_int( stmt, 2, m_duration );
-    sqlite3_bind_int( stmt, 3, m_albumTrackId );
-    sqlite3_bind_int( stmt, 4, m_playCount );
-    sqlite3_bind_int( stmt, 5, m_showEpisodeId );
-    sqlite3_bind_text( stmt, 6, tmpMrl, -1, &free );
-    if ( sqlite3_step( stmt ) != SQLITE_DONE )
+    if ( SqliteTools::executeRequest( dbConnection, req.c_str(), (int)m_type, m_duration,
+        m_albumTrackId, m_playCount, m_showEpisodeId, m_mrl ) == false )
         return false;
     m_id = sqlite3_last_insert_rowid( dbConnection );
     m_dbConnection = dbConnection;
@@ -121,11 +109,10 @@ bool File::createTable(sqlite3* connection)
             "show_episode_id UNSIGNED INTEGER,"
             "mrl TEXT UNIQUE ON CONFLICT FAIL"
             ")";
-    if ( SqliteTools::createTable( connection, req.c_str() ) == false )
+    if ( SqliteTools::executeRequest( connection, req.c_str() ) == false )
         return false;
     req = "CREATE INDEX file_index ON " + policy::FileTable::Name + " (mrl)";
-    auto stmt = SqliteTools::executeRequest( connection, req.c_str() );
-    return sqlite3_step( stmt.get() ) == SQLITE_DONE;
+    return SqliteTools::executeRequest( connection, req.c_str() );
 }
 
 bool File::addLabel( LabelPtr label )
@@ -136,17 +123,7 @@ bool File::addLabel( LabelPtr label )
         return false;
     }
     const char* req = "INSERT INTO LabelFileRelation VALUES(?, ?)";
-    sqlite3_stmt* stmt;
-    if ( sqlite3_prepare_v2( m_dbConnection, req, -1, &stmt, NULL ) != SQLITE_OK )
-    {
-        std::cerr << "Failed to insert record: " << sqlite3_errmsg( m_dbConnection ) << std::endl;
-        return false;
-    }
-    sqlite3_bind_int( stmt, 1, label->id() );
-    sqlite3_bind_int( stmt, 2, m_id );
-    bool res = sqlite3_step( stmt ) == SQLITE_DONE;
-    sqlite3_finalize( stmt );
-    return res;
+    return SqliteTools::executeRequest( m_dbConnection, req, label->id(), m_id );
 }
 
 bool File::removeLabel( LabelPtr label )
@@ -157,17 +134,7 @@ bool File::removeLabel( LabelPtr label )
         return false;
     }
     const char* req = "DELETE FROM LabelFileRelation WHERE id_label = ? AND id_file = ?";
-    sqlite3_stmt* stmt;
-    if ( sqlite3_prepare_v2( m_dbConnection, req, -1, &stmt, NULL ) != SQLITE_OK )
-    {
-        std::cerr << "Failed to remove record: " << sqlite3_errmsg( m_dbConnection ) << std::endl;
-        return false;
-    }
-    sqlite3_bind_int( stmt, 1, label->id() );
-    sqlite3_bind_int( stmt, 2, m_id );
-    sqlite3_step( stmt );
-    sqlite3_finalize( stmt );
-    return sqlite3_changes( m_dbConnection ) > 0;
+    return SqliteTools::executeDelete( m_dbConnection, req, label->id(), m_id );
 }
 
 const std::string& policy::FileCache::key(const std::shared_ptr<File> self )

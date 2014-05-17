@@ -62,5 +62,5 @@ bool Show::createTable(sqlite3* dbConnection)
                         "last_sync_date UNSIGNED INTEGER,"
                         "tvdb_id TEXT"
                     ")";
-    return SqliteTools::createTable( dbConnection, req );
+    return SqliteTools::executeRequest( dbConnection, req );
 }

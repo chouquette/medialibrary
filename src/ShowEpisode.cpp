@@ -78,5 +78,5 @@ bool ShowEpisode::createTable(sqlite3* dbConnection)
                 "show_id UNSIGNED INT,"
                 "FOREIGN KEY(show_id) REFERENCES Show(id_show)"
             ")";
-    return SqliteTools::createTable( dbConnection, req );
+    return SqliteTools::executeRequest( dbConnection, req );
 }
