@@ -2,6 +2,9 @@
 #include "Album.h"
 #include "SqliteTools.h"
 
+const std::string policy::AlbumTrackTable::Name = "AlbumTrack";
+const std::string policy::AlbumTrackTable::CacheColumn = "id_track";
+
 AlbumTrack::AlbumTrack( sqlite3* dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
     , m_album( NULL )
@@ -41,12 +44,11 @@ unsigned int AlbumTrack::trackNumber()
     return m_trackNumber;
 }
 
-IAlbum* AlbumTrack::album()
+std::shared_ptr<IAlbum> AlbumTrack::album()
 {
-    if ( m_album == NULL && m_albumId != 0 )
+    if ( m_album == nullptr && m_albumId != 0 )
     {
-        const char* req = "SELECT * FROM Album WHERE id_album = ?";
-        m_album = SqliteTools::fetchOne<Album>( m_dbConnection, req, m_albumId );
+        m_album = Album::fetch( m_dbConnection, m_albumId );
     }
     return m_album;
 }

@@ -3,9 +3,19 @@
 
 #include <sqlite3.h>
 
+#include "Cache.h"
 #include "IShow.h"
 
-class Show : public IShow
+namespace policy
+{
+struct ShowTable
+{
+    static const std::string Name;
+    static const std::string CacheColumn;
+};
+}
+
+class Show : public IShow, public Cache<Show, IShow, policy::ShowTable>
 {
     public:
         Show( sqlite3* dbConnection, sqlite3_stmt* stmt );
@@ -29,6 +39,8 @@ class Show : public IShow
         std::string m_artworkUrl;
         time_t m_lastSyncDate;
         std::string m_tvdbId;
+
+        friend class Cache<Show, IShow, policy::ShowTable>;
 };
 
 #endif // SHOW_H

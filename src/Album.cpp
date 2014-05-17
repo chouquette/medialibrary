@@ -3,6 +3,9 @@
 
 #include "SqliteTools.h"
 
+const std::string policy::AlbumTable::Name = "Album";
+const std::string policy::AlbumTable::CacheColumn = "id_album";
+
 Album::Album(sqlite3* dbConnection, sqlite3_stmt* stmt)
     : m_dbConnection( dbConnection )
 {
@@ -39,12 +42,13 @@ time_t Album::lastSyncDate()
     return m_lastSyncDate;
 }
 
-const std::vector<IAlbumTrack*>&Album::tracks()
+const std::vector<std::shared_ptr<IAlbumTrack>>& Album::tracks()
 {
     if ( m_tracks == NULL )
     {
+        m_tracks = new std::vector<std::shared_ptr<IAlbumTrack>>;
         const char* req = "SELECT * FROM AlbumTrack WHERE id_album = ?";
-        SqliteTools::fetchAll<AlbumTrack>( m_dbConnection, req, m_id, m_tracks );
+        SqliteTools::fetchAll<AlbumTrack>( m_dbConnection, req, m_id, *m_tracks );
     }
     return *m_tracks;
 }
@@ -60,10 +64,4 @@ bool Album::createTable( sqlite3* dbConnection )
                 "UNSIGNED INTEGER last_sync_date"
             ")";
     return SqliteTools::createTable( dbConnection, req );
-}
-
-Album* Album::fetch(sqlite3* dbConnection, unsigned int albumTrackId)
-{
-    const char* req = "SELECT * FROM Album WHERE id_album = ?";
-    return SqliteTools::fetchOne<Album>( dbConnection, req, albumTrackId );
 }

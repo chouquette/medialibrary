@@ -1,17 +1,38 @@
 #ifndef FILE_H
 #define FILE_H
 
+
 #include <sqlite3.h>
 
 #include "IFile.h"
+#include "Cache.h"
 
 class Album;
 class ShowEpisode;
 class AlbumTrack;
 
-class File : public IFile
+class File;
+
+namespace policy
+{
+struct FileTable
+{
+    static const std::string Name;
+    static const std::string CacheColumn;
+};
+struct FileCache
+{
+    typedef std::string KeyType;
+    static const std::string& key(const std::shared_ptr<File> self);
+    static std::string key( sqlite3_stmt* stmt );
+};
+}
+
+class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::FileCache>
 {
     public:
+
+
         enum Type
         {
             VideoType, // Any video file, not being a tv show episode
@@ -21,26 +42,29 @@ class File : public IFile
             UnknownType,
         };
 
+        // Those should be private, however the standard states that the expression
+        // ::new (pv) T(std::forward(args)...)
+        // shall be well-formed, and private constructor would prevent that.
+        // There might be a way with a user-defined allocator, but we'll see that later...
         File(sqlite3* dbConnection , sqlite3_stmt* stmt);
         File( const std::string& mrl );
 
         bool insert(sqlite3* dbConnection);
+        static bool createTable(sqlite3* connection);
 
         virtual unsigned int id() const;
-        virtual IAlbumTrack* albumTrack();
+        virtual std::shared_ptr<IAlbumTrack> albumTrack();
         virtual unsigned int duration();
-        virtual IShowEpisode* showEpisode();
-        virtual std::vector<ILabel*> labels();
+        virtual std::shared_ptr<IShowEpisode> showEpisode();
+        virtual const std::vector<std::shared_ptr<ILabel>>& labels();
         virtual int playCount();
         virtual const std::string& mrl();
-        virtual ILabel* addLabel( const std::string &label );
-        virtual bool removeLabel( const ILabel* label );
-
-        static bool createTable( sqlite3* connection );
+        virtual std::shared_ptr<ILabel> addLabel( const std::string &label );
+        virtual bool removeLabel(const std::shared_ptr<ILabel>& label );
 
     private:
         sqlite3* m_dbConnection;
-    
+
         // DB fields:
         unsigned int m_id;
         Type m_type;
@@ -52,9 +76,11 @@ class File : public IFile
 
         // Auto fetched related properties
         Album* m_album;
-        AlbumTrack* m_albumTrack;
-        ShowEpisode* m_showEpisode;
-        std::vector<ILabel*>* m_labels;
+        std::shared_ptr<AlbumTrack> m_albumTrack;
+        std::shared_ptr<ShowEpisode> m_showEpisode;
+        std::vector<std::shared_ptr<ILabel>>* m_labels;
+
+        friend class Cache<File, IFile, policy::FileTable, policy::FileCache>;
 };
 
 #endif // FILE_H

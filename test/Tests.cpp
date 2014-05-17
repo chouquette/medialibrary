@@ -2,6 +2,7 @@
 
 #include "IMediaLibrary.h"
 #include "ILabel.h"
+#include "IFile.h"
 
 class MLTest : public testing::Test
 {
@@ -32,53 +33,51 @@ TEST_F( MLTest, Init )
 
 TEST_F( MLTest, InsertFile )
 {
-    IFile* f = ml->addFile( "/dev/null" );
+    auto f = ml->addFile( "/dev/null" );
     ASSERT_TRUE( f != NULL );
 
     ASSERT_EQ( f->playCount(), 0 );
     ASSERT_TRUE( f->albumTrack() == NULL );
     ASSERT_TRUE( f->showEpisode() == NULL );
 
-    std::vector<IFile*> files = ml->files();
+    std::vector<std::shared_ptr<IFile>> files;
+    bool success = ml->files( files );
+    ASSERT_TRUE( success );
     ASSERT_EQ( files.size(), 1u );
     ASSERT_EQ( files[0]->mrl(), f->mrl() );
-
-    delete f;
 }
 
 TEST_F( MLTest, FetchFile )
 {
-    IFile* f = ml->addFile( "/dev/null" );
-    IFile* f2 = ml->file( "/dev/null" );
+    auto f = ml->addFile( "/dev/null" );
+    auto f2 = ml->file( "/dev/null" );
     ASSERT_EQ( f->mrl(), f2->mrl() );
+    // Basic caching test:
+    ASSERT_EQ( f, f2 );
 }
 
 TEST_F( MLTest, AddLabel )
 {
-    IFile* f = ml->addFile( "/dev/null" );
-    ILabel* l1 = f->addLabel( "sea otter" );
-    ILabel* l2 = f->addLabel( "cony the cone" );
+    auto f = ml->addFile( "/dev/null" );
+    auto l1 = f->addLabel( "sea otter" );
+    auto l2 = f->addLabel( "cony the cone" );
 
     ASSERT_TRUE( l1 != NULL );
     ASSERT_TRUE( l2 != NULL );
 
-    std::vector<ILabel*> labels = f->labels();
+    auto labels = f->labels();
     ASSERT_EQ( labels.size(), 2u );
     ASSERT_EQ( labels[0]->name(), "sea otter" );
     ASSERT_EQ( labels[1]->name(), "cony the cone" );
-
-    delete l1;
-    delete l2;
-    delete f;
 }
 
 TEST_F( MLTest, RemoveLabel )
 {
-    IFile* f = ml->addFile( "/dev/null" );
-    ILabel* l1 = f->addLabel( "sea otter" );
-    ILabel* l2 = f->addLabel( "cony the cone" );
+    auto f = ml->addFile( "/dev/null" );
+    auto l1 = f->addLabel( "sea otter" );
+    auto l2 = f->addLabel( "cony the cone" );
 
-    std::vector<ILabel*> labels = f->labels();
+    auto labels = f->labels();
     ASSERT_EQ( labels.size(), 2u );
 
     bool res = f->removeLabel( l1 );
@@ -90,7 +89,7 @@ TEST_F( MLTest, RemoveLabel )
     ASSERT_EQ( labels[0]->name(), "cony the cone" );
 
     // And now clean fetch another instance of the file & check again for DB replication
-    IFile* f2 = ml->file( f->mrl() );
+    auto f2 = ml->file( f->mrl() );
     labels = f2->labels();
     ASSERT_EQ( labels.size(), 1u );
     ASSERT_EQ( labels[0]->name(), "cony the cone" );
@@ -110,8 +109,4 @@ TEST_F( MLTest, RemoveLabel )
     f2 = ml->file( f->mrl() );
     labels = f2->labels();
     ASSERT_EQ( labels.size(), 0u );
-
-    delete l1;
-    delete l2;
-    delete f;
 }

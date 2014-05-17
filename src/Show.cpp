@@ -1,6 +1,9 @@
 #include "Show.h"
 #include "SqliteTools.h"
 
+const std::string policy::ShowTable::Name = "Show";
+const std::string policy::ShowTable::CacheColumn = "id_show";
+
 Show::Show(sqlite3* dbConnection, sqlite3_stmt* stmt)
     : m_dbConnection( dbConnection )
 {

@@ -3,6 +3,7 @@
 
 class IShow;
 
+#include <memory>
 #include <string>
 
 class IShowEpisode
@@ -17,7 +18,7 @@ class IShowEpisode
         virtual unsigned int seasonNuber() = 0;
         virtual const std::string& shortSummary() = 0;
         virtual const std::string& tvdbId() = 0;
-        virtual IShow* show() = 0;
+        virtual std::shared_ptr<IShow> show() = 0;
 };
 
 #endif // ISHOWEPISODE_H

@@ -9,11 +9,12 @@
 #include "ShowEpisode.h"
 #include "SqliteTools.h"
 
+const std::string policy::FileTable::Name = "File";
+const std::string policy::FileTable::CacheColumn = "mrl";
+
 File::File( sqlite3* dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
-    , m_albumTrack( NULL )
-    , m_showEpisode( NULL )
-    , m_labels( NULL )
+    , m_labels( nullptr )
 {
     m_id = sqlite3_column_int( stmt, 0 );
     m_type = (Type)sqlite3_column_int( stmt, 1 );
@@ -33,9 +34,7 @@ File::File( const std::string& mrl )
     , m_playCount( 0 )
     , m_showEpisodeId( 0 )
     , m_mrl( mrl )
-    , m_albumTrack( NULL )
-    , m_showEpisode( NULL )
-    , m_labels( NULL )
+    , m_labels( nullptr )
 {
 }
 
@@ -64,9 +63,9 @@ bool File::insert( sqlite3* dbConnection )
     return true;
 }
 
-IAlbumTrack* File::albumTrack()
+std::shared_ptr<IAlbumTrack> File::albumTrack()
 {
-    if ( m_albumTrack == NULL && m_albumTrackId != 0 )
+    if ( m_albumTrack == nullptr && m_albumTrackId != 0 )
     {
         const char* req = "SELECT * FROM AlbumTrack WHERE id_track = ?";
         m_albumTrack = SqliteTools::fetchOne<AlbumTrack>( m_dbConnection, req, m_albumTrackId );
@@ -79,24 +78,24 @@ unsigned int File::duration()
     return m_duration;
 }
 
-IShowEpisode*File::showEpisode()
+std::shared_ptr<IShowEpisode> File::showEpisode()
 {
-    if ( m_showEpisode == NULL && m_showEpisodeId != 0 )
+    if ( m_showEpisode == nullptr && m_showEpisodeId != 0 )
     {
-        const char* req = "SELECT * FROM ShowEpisode WHERE id_episode = ?";
-        m_showEpisode = SqliteTools::fetchOne<ShowEpisode>( m_dbConnection, req, m_showEpisodeId );
+        m_showEpisode = ShowEpisode::fetch( m_dbConnection, m_showEpisodeId );
     }
     return m_showEpisode;
 }
 
-std::vector<ILabel*> File::labels()
+const std::vector<std::shared_ptr<ILabel>>& File::labels()
 {
-    if ( m_labels == NULL )
+    if ( m_labels == nullptr )
     {
+        m_labels = new std::vector<std::shared_ptr<ILabel>>;
         const char* req = "SELECT l.* FROM Label l "
                 "LEFT JOIN LabelFileRelation lfr ON lfr.id_label = l.id_label "
                 "WHERE lfr.id_file = ?";
-        SqliteTools::fetchAll<Label>( m_dbConnection, req, m_id, m_labels );
+        SqliteTools::fetchAll<Label>( m_dbConnection, req, m_id, *m_labels );
     }
     return *m_labels;
 }
@@ -111,24 +110,23 @@ const std::string& File::mrl()
     return m_mrl;
 }
 
-ILabel* File::addLabel(const std::string& label)
+std::shared_ptr<ILabel> File::addLabel(const std::string& label)
 {
-    Label* l = new Label( label );
+    auto l = Label::create( label );
     if ( l->insert( m_dbConnection ) == false )
     {
-        delete l;
-        return NULL;
+        return nullptr;
     }
     l->link( this );
     return l;
 }
 
-bool File::removeLabel( const ILabel* label )
+bool File::removeLabel( const std::shared_ptr<ILabel>& label )
 {
-    if ( m_labels != NULL )
+    if ( m_labels != false )
     {
-        std::vector<ILabel*>::iterator it = m_labels->begin();
-        std::vector<ILabel*>::iterator ite = m_labels->end();
+        auto it = m_labels->begin();
+        auto ite = m_labels->end();
         while ( it != ite )
         {
             if ( (*it)->id() == label->id() )
@@ -149,6 +147,7 @@ unsigned int File::id() const
 
 bool File::createTable(sqlite3* connection)
 {
+    //FIXME: File is hardcoded
     const char* req = "CREATE TABLE IF NOT EXISTS File("
             "id_file INTEGER PRIMARY KEY AUTOINCREMENT,"
             "type INTEGER,"
@@ -159,4 +158,15 @@ bool File::createTable(sqlite3* connection)
             "mrl TEXT"
             ")";
     return SqliteTools::createTable( connection, req );
+}
+
+
+const std::string& policy::FileCache::key(const std::shared_ptr<File> self )
+{
+    return self->mrl();
+}
+
+std::string policy::FileCache::key(sqlite3_stmt* stmt)
+{
+    return Traits<std::string>::Load( stmt, 6 );
 }

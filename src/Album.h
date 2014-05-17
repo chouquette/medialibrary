@@ -1,11 +1,22 @@
 #ifndef ALBUM_H
 #define ALBUM_H
 
+#include <memory>
 #include <sqlite3.h>
 
+#include "Cache.h"
 #include "IAlbum.h"
 
-class Album : public IAlbum
+namespace policy
+{
+struct AlbumTable
+{
+    static const std::string Name;
+    static const std::string CacheColumn;
+};
+}
+
+class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
 {
     public:
         Album( sqlite3* dbConnection, sqlite3_stmt* stmt );
@@ -15,10 +26,9 @@ class Album : public IAlbum
         virtual const std::string& shortSummary();
         virtual const std::string& artworkUrl();
         virtual time_t lastSyncDate();
-        virtual const std::vector<IAlbumTrack*>& tracks();
+        virtual const std::vector<std::shared_ptr<IAlbumTrack>>& tracks();
 
         static bool createTable( sqlite3* dbConnection );
-        static Album* fetch( sqlite3* dbConnection, unsigned int albumTrackId );
 
     protected:
         sqlite3* m_dbConnection;
@@ -29,7 +39,9 @@ class Album : public IAlbum
         std::string m_artworkUrl;
         time_t m_lastSyncDate;
 
-        std::vector<IAlbumTrack*>* m_tracks;
+        std::vector<std::shared_ptr<IAlbumTrack>>* m_tracks;
+
+        friend class Cache<Album, IAlbum, policy::AlbumTable>;
 };
 
 #endif // ALBUM_H

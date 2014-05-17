@@ -2,6 +2,9 @@
 #include "SqliteTools.h"
 #include "Show.h"
 
+const std::string policy::ShowEpisodeTable::Name = "Show";
+const std::string policy::ShowEpisodeTable::CacheColumn = "id_show";
+
 ShowEpisode::ShowEpisode( sqlite3* dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
 {
@@ -52,12 +55,11 @@ const std::string&ShowEpisode::tvdbId()
     return m_tvdbId;
 }
 
-IShow* ShowEpisode::show()
+std::shared_ptr<IShow> ShowEpisode::show()
 {
-    if ( m_show == NULL && m_showId != 0 )
+    if ( m_show == nullptr && m_showId != 0 )
     {
-        const char* req = "SELECT * FROM Show WHERE id_show = ?";
-        m_show = SqliteTools::fetchOne<Show>( m_dbConnection, req, m_showId );
+        m_show = Show::fetch( m_dbConnection, m_showId );
     }
     return m_show;
 }

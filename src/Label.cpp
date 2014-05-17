@@ -6,6 +6,9 @@
 #include "File.h"
 #include "SqliteTools.h"
 
+const std::string policy::LabelTable::Name = "Label";
+const std::string policy::LabelTable::CacheColumn = "id_label";
+
 Label::Label( sqlite3* dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
     , m_files( NULL )
@@ -33,21 +36,22 @@ const std::string& Label::name()
     return m_name;
 }
 
-std::vector<IFile*> Label::files()
+std::vector<std::shared_ptr<IFile>>& Label::files()
 {
-    if ( m_files == NULL )
+    if ( m_files == nullptr )
     {
+        m_files = new std::vector<std::shared_ptr<IFile>>;
         const char* req = "SELECT f.* FROM Files f "
                 "LEFT JOIN LabelFileRelation lfr ON lfr.id_file = f.id_file "
                 "WHERE lfr.id_label = ?";
-        SqliteTools::fetchAll<File>( m_dbConnection, req, m_id, m_files );
+        SqliteTools::fetchAll<File>( m_dbConnection, req, m_id, *m_files );
     }
     return *m_files;
 }
 
 bool Label::insert( sqlite3* dbConnection )
 {
-    assert( m_dbConnection == NULL );
+    assert( m_dbConnection == nullptr );
     assert( m_id == 0 );
     sqlite3_stmt* stmt;
     const char* req = "INSERT INTO Label VALUES(NULL, ?)";
@@ -84,7 +88,7 @@ bool Label::createTable(sqlite3* dbConnection)
 
 bool Label::link( IFile* file )
 {
-    if ( m_dbConnection == NULL || m_id == 0 )
+    if ( m_dbConnection == nullptr || m_id == 0 )
     {
         std::cerr << "A label needs to be inserted in database before being linked to a file" << std::endl;
         return false;
@@ -105,7 +109,7 @@ bool Label::link( IFile* file )
 
 bool Label::unlink( IFile* file ) const
 {
-    if ( m_dbConnection == NULL || m_id == 0 )
+    if ( m_dbConnection == nullptr || m_id == 0 )
     {
         std::cerr << "Can't unlink a label not inserted in database" << std::endl;
         return false;

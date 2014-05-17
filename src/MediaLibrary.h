@@ -10,14 +10,12 @@ class MediaLibrary : public IMediaLibrary
     public:
         MediaLibrary();
         virtual bool initialize( const std::string& dbPath );
-        virtual const std::vector<IFile*>& files();
-        virtual IFile* file( const std::string& path );
-        virtual IFile* addFile( const std::string& path );
+        virtual bool files( std::vector<FilePtr>& res );
+        virtual FilePtr file( const std::string& path );
+        virtual FilePtr addFile( const std::string& path );
 
     private:
         sqlite3* m_dbConnection;
-
-        std::vector<IFile*>* m_files;
 };
 
 #endif // MEDIALIBRARY_H

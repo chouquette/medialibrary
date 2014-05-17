@@ -7,8 +7,18 @@ class Show;
 #include <sqlite3.h>
 
 #include "IShowEpisode.h"
+#include "Cache.h"
 
-class ShowEpisode : public IShowEpisode
+namespace policy
+{
+struct ShowEpisodeTable
+{
+    static const std::string Name;
+    static const std::string CacheColumn;
+};
+}
+
+class ShowEpisode : public IShowEpisode, public Cache<ShowEpisode, IShowEpisode, policy::ShowEpisodeTable>
 {
     public:
         ShowEpisode(sqlite3* dbConnection, sqlite3_stmt* stmt);
@@ -20,7 +30,7 @@ class ShowEpisode : public IShowEpisode
         virtual unsigned int seasonNuber();
         virtual const std::string& shortSummary();
         virtual const std::string& tvdbId();
-        virtual IShow*show();
+        virtual std::shared_ptr<IShow> show();
 
         static bool createTable( sqlite3* dbConnection );
 
@@ -35,7 +45,9 @@ class ShowEpisode : public IShowEpisode
         std::string m_shortSummary;
         std::string m_tvdbId;
         unsigned int m_showId;
-        Show* m_show;
+        std::shared_ptr<Show> m_show;
+
+        friend class Cache<ShowEpisode, IShowEpisode, policy::ShowEpisodeTable>;
 };
 
 #endif // SHOWEPISODE_H

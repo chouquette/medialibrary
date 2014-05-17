@@ -9,7 +9,6 @@
 
 MediaLibrary::MediaLibrary()
     : m_dbConnection( NULL )
-    , m_files( NULL )
 {
 }
 
@@ -32,44 +31,22 @@ bool MediaLibrary::initialize(const std::string& dbPath)
 }
 
 
-const std::vector<IFile*>& MediaLibrary::files()
+bool MediaLibrary::files( std::vector<FilePtr>& res )
 {
-    if ( m_files == NULL )
-    {
-        const char* req = "SELECT * FROM File";
-        SqliteTools::fetchAll<File>( m_dbConnection, req, m_files );
-    }
-    return *m_files;
+    return File::fetchAll( m_dbConnection, res );
 }
 
-IFile*MediaLibrary::file( const std::string& path )
+FilePtr MediaLibrary::file( const std::string& path )
 {
-    if ( m_files == NULL )
-    {
-        // FIXME: This is probably ineficient.
-        // Consider loading the file itself from the DB & eventually store it in a tmp
-        // vector? Or implement caching globally for each class
-        files();
-    }
-
-    std::vector<IFile*>::iterator it = m_files->begin();
-    std::vector<IFile*>::iterator ite = m_files->end();
-    while ( it != ite )
-    {
-        if ( (*it)->mrl() == path )
-            return *it;
-        ++it;
-    }
-    return NULL;
+    return File::fetch( m_dbConnection, path );
 }
 
-IFile* MediaLibrary::addFile( const std::string& path )
+FilePtr MediaLibrary::addFile( const std::string& path )
 {
-    File* f = new File( path );
+    auto f = File::create( path );
     if ( f->insert( m_dbConnection ) == false )
     {
-        delete f;
-        return NULL;
+        return nullptr;
     }
     return f;
 }
