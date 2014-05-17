@@ -73,7 +73,7 @@ class SqliteTools
             std::shared_ptr<T> result;
             sqlite3_stmt *stmt = executeRequest( dbConnection, req, args... );
             if ( stmt == nullptr )
-                return false;
+                return nullptr;
             if ( sqlite3_step( stmt ) != SQLITE_ROW )
                 return result;
             result = T::load( dbConnection, stmt );
