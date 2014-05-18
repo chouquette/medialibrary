@@ -9,7 +9,6 @@ add_definitions("-Wall -Wextra -pedantic -O0")
 list(APPEND HEADERS_LIST
     ${CMAKE_SOURCE_DIR}/include/IAudioTrackInformation.h
     ${CMAKE_SOURCE_DIR}/include/ITrackInformation.h
-    ${CMAKE_SOURCE_DIR}/include/IDescription.h
     ${CMAKE_SOURCE_DIR}/include/IVideoTrackInformation.h
     ${CMAKE_SOURCE_DIR}/include/IShow.h
     ${CMAKE_SOURCE_DIR}/include/IShowEpisode.h

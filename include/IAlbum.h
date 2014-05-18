@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "IDescription.h"
-
 class IAlbumTrack;
 
 class IAlbum

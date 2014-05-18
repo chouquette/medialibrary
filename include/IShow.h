@@ -2,7 +2,6 @@
 #define ISHOW_H
 
 #include <string>
-#include "IDescription.h"
 
 class IShow
 {
