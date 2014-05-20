@@ -101,7 +101,7 @@ class SqliteTools
             do
             {
                 res = sqlite3_step( stmt.get() );
-            } while ( res != SQLITE_DONE && res != SQLITE_ERROR );
+            } while ( res == SQLITE_ROW );
             return res == SQLITE_DONE;
         }
 
