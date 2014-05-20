@@ -56,6 +56,18 @@ TEST_F( MLTest, FetchFile )
     ASSERT_EQ( f, f2 );
 }
 
+TEST_F( MLTest, DeleteFile )
+{
+    auto f = ml->addFile( "/dev/loutre" );
+    auto f2 = ml->file( "/dev/loutre" );
+
+    ASSERT_EQ( f, f2 );
+
+    ml->deleteFile( f );
+    f2 = ml->file( "/dev/loutre" );
+    ASSERT_EQ( f2, nullptr );
+}
+
 TEST_F( MLTest, AddLabel )
 {
     auto f = ml->addFile( "/dev/null" );

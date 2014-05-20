@@ -48,6 +48,16 @@ FilePtr MediaLibrary::addFile( const std::string& path )
     return f;
 }
 
+bool MediaLibrary::deleteFile( const std::string& mrl )
+{
+    return File::destroy( m_dbConnection, mrl );
+}
+
+bool MediaLibrary::deleteFile( FilePtr file )
+{
+    return File::destroy( m_dbConnection, std::static_pointer_cast<File>( file ) );
+}
+
 LabelPtr MediaLibrary::createLabel( const std::string& label )
 {
     auto l = Label::create( label );
