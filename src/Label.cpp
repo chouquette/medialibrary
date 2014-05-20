@@ -69,10 +69,6 @@ bool Label::createTable(sqlite3* dbConnection)
             ")";
     if ( SqliteTools::executeRequest( dbConnection, req.c_str() ) == false )
         return false;
-    //FIXME: Check for a better way when addressing transactions
-    req = "CREATE INDEX label_index ON " + policy::LabelTable::Name + " (name)";
-    if ( SqliteTools::executeRequest( dbConnection, req.c_str() ) == false )
-        return false;
     req = "CREATE TABLE IF NOT EXISTS LabelFileRelation("
                 "id_label INTEGER,"
                 "id_file INTEGER,"

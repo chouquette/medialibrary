@@ -31,8 +31,6 @@ struct FileCache
 class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::FileCache>
 {
     public:
-
-
         enum Type
         {
             VideoType, // Any video file, not being a tv show episode

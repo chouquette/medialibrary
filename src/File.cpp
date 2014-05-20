@@ -109,9 +109,6 @@ bool File::createTable(sqlite3* connection)
             "show_episode_id UNSIGNED INTEGER,"
             "mrl TEXT UNIQUE ON CONFLICT FAIL"
             ")";
-    if ( SqliteTools::executeRequest( connection, req.c_str() ) == false )
-        return false;
-    req = "CREATE INDEX file_index ON " + policy::FileTable::Name + " (mrl)";
     return SqliteTools::executeRequest( connection, req.c_str() );
 }
 
