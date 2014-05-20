@@ -78,8 +78,6 @@ bool Label::createTable(sqlite3* dbConnection)
     return SqliteTools::executeRequest( dbConnection, req.c_str() );
 }
 
-
-
 const std::string&policy::LabelCachePolicy::key( const std::shared_ptr<ILabel> self )
 {
     return self->name();

@@ -67,3 +67,15 @@ TEST_F( Files, Delete )
     f2 = ml->file( "/dev/loutre" );
     ASSERT_EQ( f2, nullptr );
 }
+
+TEST_F( Files, Duplicate )
+{
+    auto f = ml->addFile( "/dev/moulaf" );
+    auto f2 = ml->addFile( "/dev/moulaf" );
+
+    ASSERT_NE( f, nullptr );
+    ASSERT_EQ( f2, nullptr );
+
+    f2 = ml->file( "/dev/moulaf" );
+    ASSERT_EQ( f, f2 );
+}
