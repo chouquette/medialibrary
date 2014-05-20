@@ -54,7 +54,7 @@ class Cache
             auto it = Store.find( key );
             if ( it != Store.end() )
                 return it->second;
-            static const std::string req = "SELECT * FROM" + TABLEPOLICY::Name +
+            static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name +
                             " WHERE " + TABLEPOLICY::CacheColumn + " = ?";
             auto res = SqliteTools::fetchOne<IMPL>( dbConnection, req.c_str(), key );
             Store[key] = res;
