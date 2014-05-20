@@ -31,7 +31,8 @@ add_definitions("-Wall -Wextra")
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 list(APPEND TEST_SRCS
-    Tests.cpp
+    Files.cpp
+    Labels.cpp
 )
 
 add_executable(unittest ${TEST_SRCS})

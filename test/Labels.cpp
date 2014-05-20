@@ -1,10 +1,10 @@
 #include "gtest/gtest.h"
 
 #include "IMediaLibrary.h"
-#include "ILabel.h"
 #include "IFile.h"
+#include "ILabel.h"
 
-class MLTest : public testing::Test
+class Labels : public testing::Test
 {
     public:
         static IMediaLibrary* ml;
@@ -24,51 +24,9 @@ class MLTest : public testing::Test
         }
 };
 
-IMediaLibrary* MLTest::ml;
+IMediaLibrary* Labels::ml;
 
-TEST_F( MLTest, Init )
-{
-    // only test for correct test fixture behavior
-}
-
-TEST_F( MLTest, InsertFile )
-{
-    auto f = ml->addFile( "/dev/null" );
-    ASSERT_TRUE( f != NULL );
-
-    ASSERT_EQ( f->playCount(), 0 );
-    ASSERT_TRUE( f->albumTrack() == NULL );
-    ASSERT_TRUE( f->showEpisode() == NULL );
-
-    std::vector<std::shared_ptr<IFile>> files;
-    bool success = ml->files( files );
-    ASSERT_TRUE( success );
-    ASSERT_EQ( files.size(), 1u );
-    ASSERT_EQ( files[0]->mrl(), f->mrl() );
-}
-
-TEST_F( MLTest, FetchFile )
-{
-    auto f = ml->addFile( "/dev/null" );
-    auto f2 = ml->file( "/dev/null" );
-    ASSERT_EQ( f->mrl(), f2->mrl() );
-    // Basic caching test:
-    ASSERT_EQ( f, f2 );
-}
-
-TEST_F( MLTest, DeleteFile )
-{
-    auto f = ml->addFile( "/dev/loutre" );
-    auto f2 = ml->file( "/dev/loutre" );
-
-    ASSERT_EQ( f, f2 );
-
-    ml->deleteFile( f );
-    f2 = ml->file( "/dev/loutre" );
-    ASSERT_EQ( f2, nullptr );
-}
-
-TEST_F( MLTest, AddLabel )
+TEST_F( Labels, Add )
 {
     auto f = ml->addFile( "/dev/null" );
     auto l1 = ml->createLabel( "sea otter" );
@@ -90,7 +48,7 @@ TEST_F( MLTest, AddLabel )
     ASSERT_EQ( labels[1]->name(), "cony the cone" );
 }
 
-TEST_F( MLTest, RemoveLabel )
+TEST_F( Labels, Remove )
 {
     auto f = ml->addFile( "/dev/null" );
     auto l1 = ml->createLabel( "sea otter" );
@@ -133,7 +91,7 @@ TEST_F( MLTest, RemoveLabel )
     ASSERT_EQ( labels.size(), 0u );
 }
 
-TEST_F( MLTest, FilesWithLabel )
+TEST_F( Labels, Files )
 {
     auto f = ml->addFile( "/dev/null" );
     auto f2 = ml->addFile( "/dev/moulaf" );
@@ -160,7 +118,7 @@ TEST_F( MLTest, FilesWithLabel )
     }
 }
 
-TEST_F( MLTest, DeleteLabel )
+TEST_F( Labels, Delete )
 {
     auto f = ml->addFile( "/dev/null" );
     auto l1 = ml->createLabel( "sea otter" );
@@ -184,3 +142,4 @@ TEST_F( MLTest, DeleteLabel )
     bool res = ml->deleteLabel( l1 );
     ASSERT_FALSE( res );
 }
+
