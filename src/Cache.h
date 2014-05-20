@@ -119,6 +119,12 @@ class Cache
             return destroy( dbConnection, key );
         }
 
+        static void clear()
+        {
+            std::lock_guard<std::mutex> lock( Mutex );
+            Store.clear();
+        }
+
     private:
         static std::unordered_map<typename CACHEPOLICY::KeyType, std::shared_ptr<IMPL> > Store;
         static std::mutex Mutex;

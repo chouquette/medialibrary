@@ -9,6 +9,7 @@ class MediaLibrary : public IMediaLibrary
 {
     public:
         MediaLibrary();
+        ~MediaLibrary();
         virtual bool initialize( const std::string& dbPath );
         virtual bool files( std::vector<FilePtr>& res );
         virtual FilePtr file( const std::string& path );

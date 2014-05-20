@@ -12,6 +12,16 @@ MediaLibrary::MediaLibrary()
 {
 }
 
+MediaLibrary::~MediaLibrary()
+{
+    File::clear();
+    Label::clear();
+    Album::clear();
+    AlbumTrack::clear();
+    Show::clear();
+    ShowEpisode::clear();
+}
+
 bool MediaLibrary::initialize(const std::string& dbPath)
 {
     int res = sqlite3_open( dbPath.c_str(), &m_dbConnection );
