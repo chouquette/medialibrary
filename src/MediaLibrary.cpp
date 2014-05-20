@@ -60,8 +60,7 @@ LabelPtr MediaLibrary::createLabel( const std::string& label )
 
 bool MediaLibrary::deleteLabel( const std::string& text )
 {
-    auto label = Label::fetch( m_dbConnection, text );
-    return deleteLabel( label );
+    return Label::destroy( m_dbConnection, text );
 }
 
 bool MediaLibrary::deleteLabel( LabelPtr label )

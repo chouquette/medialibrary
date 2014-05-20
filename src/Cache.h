@@ -102,17 +102,21 @@ class Cache
             return res;
         }
 
-        static bool destroy( sqlite3* dbConnection, const std::shared_ptr<IMPL>& self )
+        static bool destroy( sqlite3* dbConnection, const typename CACHEPOLICY::KeyType& key )
         {
             std::lock_guard<std::mutex> lock( Mutex );
-
-            auto key = CACHEPOLICY::key( self );
             auto it = Store.find( key );
             if ( it != Store.end() )
                 Store.erase( it );
             static const std::string req = "DELETE FROM " + TABLEPOLICY::Name + " WHERE " +
                     TABLEPOLICY::CacheColumn + " = ?";
             return SqliteTools::executeDelete( dbConnection, req.c_str(), key );
+        }
+
+        static bool destroy( sqlite3* dbConnection, const std::shared_ptr<IMPL>& self )
+        {
+            const auto& key = CACHEPOLICY::key( self );
+            return destroy( dbConnection, key );
         }
 
     private:
