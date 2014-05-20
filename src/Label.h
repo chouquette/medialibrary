@@ -29,8 +29,9 @@ struct LabelCachePolicy
 
 class Label : public ILabel, public Cache<Label, ILabel, policy::LabelTable, policy::LabelCachePolicy>
 {
+    private:
+        typedef Cache<Label, ILabel, policy::LabelTable, policy::LabelCachePolicy> _Cache;
     public:
-
         Label(sqlite3* dbConnection, sqlite3_stmt* stmt);
         Label( const std::string& name );
 
@@ -38,8 +39,8 @@ class Label : public ILabel, public Cache<Label, ILabel, policy::LabelTable, pol
         virtual unsigned int id() const;
         virtual const std::string& name();
         virtual std::vector<FilePtr>& files();
-        bool insert( sqlite3* dbConnection );
 
+        static LabelPtr create(sqlite3* dbConnection, const std::string& name );
         static bool createTable( sqlite3* dbConnection );
     private:
         sqlite3* m_dbConnection;

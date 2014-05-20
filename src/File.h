@@ -30,6 +30,8 @@ struct FileCache
 
 class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::FileCache>
 {
+    private:
+        typedef Cache<File, IFile, policy::FileTable, policy::FileCache> _Cache;
     public:
         enum Type
         {
@@ -47,7 +49,7 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         File(sqlite3* dbConnection , sqlite3_stmt* stmt);
         File( const std::string& mrl );
 
-        bool insert(sqlite3* dbConnection);
+        static FilePtr create(sqlite3* dbConnection, const std::string& mrl );
         static bool createTable(sqlite3* connection);
 
         virtual unsigned int id() const;

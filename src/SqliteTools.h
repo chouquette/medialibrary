@@ -105,6 +105,18 @@ class SqliteTools
             return res == SQLITE_DONE;
         }
 
+        /**
+         * Inserts a record to the DB and return the newly created primary key.
+         * Returns 0 (which is an invalid sqlite primary key) when insertion fails.
+         */
+        template <typename... Args>
+        static unsigned int insert( sqlite3* dbConnection, const char* req, const Args&... args )
+        {
+            if ( executeRequest( dbConnection, req, args... ) == false )
+                return 0;
+            return sqlite3_last_insert_rowid( dbConnection );
+        }
+
     private:
         template <typename... Args>
         static StmtPtr prepareRequest( sqlite3* dbConnection, const char* req, const Args&... args )

@@ -1,6 +1,7 @@
 #ifndef CACHE_H
 #define CACHE_H
 
+#include <cassert>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
@@ -86,22 +87,6 @@ class Cache
             return inst;
         }
 
-        /*
-         * Create a new instance of the cache class.
-         * This doesn't check for the existence of a similar entity already cached.
-         */
-        template <typename... Args>
-        static std::shared_ptr<IMPL> create( Args&&... args )
-        {
-            auto res = std::make_shared<IMPL>( std::forward<Args>( args )... );
-
-            typename CACHEPOLICY::KeyType cacheKey = CACHEPOLICY::key( res );
-
-            std::lock_guard<std::mutex> lock( Mutex );
-            Store[cacheKey] = res;
-            return res;
-        }
-
         static bool destroy( sqlite3* dbConnection, const typename CACHEPOLICY::KeyType& key )
         {
             std::lock_guard<std::mutex> lock( Mutex );
@@ -123,6 +108,26 @@ class Cache
         {
             std::lock_guard<std::mutex> lock( Mutex );
             Store.clear();
+        }
+
+    protected:
+        /*
+         * Create a new instance of the cache class.
+         */
+        template <typename... Args>
+        static unsigned int insert( sqlite3* dbConnection, std::shared_ptr<IMPL> self, const char* req, const Args&... args )
+        {
+            unsigned int pKey = SqliteTools::insert( dbConnection, req, args... );
+            if ( pKey == 0 )
+                return 0;
+            auto cacheKey = CACHEPOLICY::key( self );
+
+            std::lock_guard<std::mutex> lock( Mutex );
+            // We expect the cache column to be PRIMARY KEY / UNIQUE, so an insertion with
+            // a duplicated key should have been rejected by sqlite. This indicates an invalid state
+            assert( Store.find( cacheKey ) == Store.end() );
+            Store[cacheKey] = self;
+            return pKey;
         }
 
     private:

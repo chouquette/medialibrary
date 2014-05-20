@@ -36,18 +36,18 @@ File::File( const std::string& mrl )
 {
 }
 
-bool File::insert( sqlite3* dbConnection )
+FilePtr File::create( sqlite3* dbConnection, const std::string& mrl )
 {
-    assert( m_dbConnection == NULL );
-    assert( m_id == 0 );
+    auto self = std::make_shared<File>( mrl );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
             " VALUES(NULL, ?, ?, ?, ?, ?, ?)";
-    if ( SqliteTools::executeRequest( dbConnection, req.c_str(), (int)m_type, m_duration,
-        m_albumTrackId, m_playCount, m_showEpisodeId, m_mrl ) == false )
-        return false;
-    m_id = sqlite3_last_insert_rowid( dbConnection );
-    m_dbConnection = dbConnection;
-    return true;
+    auto pKey = _Cache::insert( dbConnection, self, req.c_str(), (int)self->m_type, self->m_duration,
+        self->m_albumTrackId, self->m_playCount, self->m_showEpisodeId, self->m_mrl );
+    if ( pKey == 0 )
+        return nullptr;
+    self->m_id = pKey;
+    self->m_dbConnection = dbConnection;
+    return self;
 }
 
 std::shared_ptr<IAlbumTrack> File::albumTrack()

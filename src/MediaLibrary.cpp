@@ -50,12 +50,7 @@ FilePtr MediaLibrary::file( const std::string& path )
 
 FilePtr MediaLibrary::addFile( const std::string& path )
 {
-    auto f = File::create( path );
-    if ( f->insert( m_dbConnection ) == false )
-    {
-        return nullptr;
-    }
-    return f;
+    return File::create( m_dbConnection, path );
 }
 
 bool MediaLibrary::deleteFile( const std::string& mrl )
@@ -70,12 +65,7 @@ bool MediaLibrary::deleteFile( FilePtr file )
 
 LabelPtr MediaLibrary::createLabel( const std::string& label )
 {
-    auto l = Label::create( label );
-    if ( l->insert( m_dbConnection ) == false )
-    {
-        return nullptr;
-    }
-    return l;
+    return Label::create( m_dbConnection, label );
 }
 
 bool MediaLibrary::deleteLabel( const std::string& text )
