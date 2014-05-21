@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "IMediaLibrary.h"
-#include "IFile.h"
+#include "IAlbum.h"
 
 class Albums : public testing::Test
 {
@@ -35,3 +35,17 @@ TEST_F( Albums, Create )
     ASSERT_EQ( a, a2 );
 }
 
+TEST_F( Albums, Fetch )
+{
+    auto a = ml->createAlbum( "album" );
+
+    // Clear the cache
+    delete ml;
+    SetUp();
+
+    auto a2 = ml->album( "album" );
+    // The shared pointer are expected to point to a different instance
+    ASSERT_NE( a, a2 );
+
+    ASSERT_EQ( a->id(), a2->id() );
+}
