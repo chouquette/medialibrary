@@ -1,4 +1,8 @@
+#include <algorithm>
+#include <functional>
+
 #include "MediaLibrary.h"
+#include "IMetadataService.h"
 #include "SqliteTools.h"
 #include "File.h"
 #include "Label.h"
@@ -76,4 +80,16 @@ bool MediaLibrary::deleteLabel( const std::string& text )
 bool MediaLibrary::deleteLabel( LabelPtr label )
 {
     return Label::destroy( m_dbConnection, std::static_pointer_cast<Label>( label ) );
+}
+
+void MediaLibrary::addMetadataService(IMetadataService* service)
+{
+    typedef std::unique_ptr<IMetadataService> MdsPtr;
+    std::function<bool(const MdsPtr&, const MdsPtr&)> comp = []( const MdsPtr& a, const MdsPtr& b )
+    {
+        // We want higher priority first
+        return a->priority() > b->priority();
+    };
+    m_mdServices.push_back( MdsPtr( service ) );
+    std::push_heap( m_mdServices.begin(), m_mdServices.end(), comp );
 }

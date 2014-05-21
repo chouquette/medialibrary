@@ -19,7 +19,9 @@ class MediaLibrary : public IMediaLibrary
         virtual LabelPtr createLabel( const std::string& label );
         virtual bool deleteLabel(const std::string& text );
         virtual bool deleteLabel( LabelPtr label );
+        virtual void addMetadataService( IMetadataService* service );
     private:
         sqlite3* m_dbConnection;
+        std::vector<std::unique_ptr<IMetadataService>> m_mdServices;
 };
 #endif // MEDIALIBRARY_H

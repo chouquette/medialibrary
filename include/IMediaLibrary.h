@@ -7,6 +7,7 @@
 
 class IFile;
 class ILabel;
+class IMetadataService;
 
 typedef std::shared_ptr<IFile> FilePtr;
 typedef std::shared_ptr<ILabel> LabelPtr;
@@ -24,6 +25,7 @@ class IMediaLibrary
         virtual bool deleteLabel( const std::string& label ) = 0;
         virtual bool deleteLabel( LabelPtr label ) = 0;
         virtual bool files( std::vector<FilePtr>& res ) = 0;
+        virtual void addMetadataService( IMetadataService* service ) = 0;
 };
 
 class MediaLibraryFactory
