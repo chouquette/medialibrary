@@ -110,6 +110,16 @@ class Cache
             Store.clear();
         }
 
+        static bool discard( const typename CACHEPOLICY::KeyType& key )
+        {
+            std::lock_guard<std::mutex> lock( Mutex );
+            auto it = Store.find( key );
+            if ( it != Store.end() )
+                return false;
+            Store.erase( it );
+            return true;
+        }
+
     protected:
         /*
          * Create a new instance of the cache class.
