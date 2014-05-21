@@ -31,9 +31,12 @@ struct Traits<std::string>
         return sqlite3_bind_text( stmt, pos, tmp, -1, free );
     }
 
-    static const char* Load( sqlite3_stmt* stmt, int pos )
+    static std::string Load( sqlite3_stmt* stmt, int pos )
     {
-        return (const char*)sqlite3_column_text( stmt, pos );
+        auto tmp = (const char*)sqlite3_column_text( stmt, pos );
+        if ( tmp != nullptr )
+            return std::string( tmp );
+        return std::string();
     }
 };
 
