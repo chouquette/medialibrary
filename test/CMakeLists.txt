@@ -33,6 +33,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 list(APPEND TEST_SRCS
     Files.cpp
     Labels.cpp
+    Albums.cpp
 )
 
 add_executable(unittest ${TEST_SRCS})

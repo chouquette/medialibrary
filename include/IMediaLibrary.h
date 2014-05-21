@@ -5,12 +5,14 @@
 #include <string>
 #include <memory>
 
+class IAlbum;
 class IFile;
 class ILabel;
 class IMetadataService;
 
 typedef std::shared_ptr<IFile> FilePtr;
 typedef std::shared_ptr<ILabel> LabelPtr;
+typedef std::shared_ptr<IAlbum> AlbumPtr;
 
 class IMediaLibrary
 {
@@ -25,6 +27,9 @@ class IMediaLibrary
         virtual bool deleteLabel( const std::string& label ) = 0;
         virtual bool deleteLabel( LabelPtr label ) = 0;
         virtual bool files( std::vector<FilePtr>& res ) = 0;
+        virtual AlbumPtr album( const std::string& id3Tag ) = 0;
+        virtual AlbumPtr createAlbum( const std::string& id3Tag ) = 0;
+
         virtual void addMetadataService( IMetadataService* service ) = 0;
 };
 

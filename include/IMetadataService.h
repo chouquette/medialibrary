@@ -3,6 +3,12 @@
 
 #include "IMediaLibrary.h"
 
+class IMetadataServiceCb
+{
+    public:
+        virtual void updated( FilePtr file ) = 0;
+};
+
 class IMetadataService
 {
     public:
