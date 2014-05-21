@@ -4,6 +4,7 @@
 
 const std::string policy::ShowEpisodeTable::Name = "Show";
 const std::string policy::ShowEpisodeTable::CacheColumn = "id_show";
+unsigned int ShowEpisode::* const policy::ShowEpisodeTable::PrimaryKey = &ShowEpisode::m_id;
 
 ShowEpisode::ShowEpisode( sqlite3* dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )

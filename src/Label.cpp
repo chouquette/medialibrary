@@ -8,6 +8,7 @@
 
 const std::string policy::LabelTable::Name = "Label";
 const std::string policy::LabelTable::CacheColumn = "name";
+unsigned int Label::* const policy::LabelTable::PrimaryKey = &Label::m_id;
 
 Label::Label( sqlite3* dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
@@ -53,11 +54,9 @@ LabelPtr Label::create( sqlite3* dbConnection, const std::string& name )
 {
     auto self = std::make_shared<Label>( name );
     const char* req = "INSERT INTO Label VALUES(NULL, ?)";
-    auto pKey = _Cache::insert( dbConnection, self, req, self->m_name );
-    if ( pKey == 0 )
+    if ( _Cache::insert( dbConnection, self, req, self->m_name ) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;
-    self->m_id = pKey;
     return self;
 }
 

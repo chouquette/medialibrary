@@ -2,6 +2,7 @@
 #define SHOWEPISODE_H
 
 class Show;
+class ShowEpisode;
 
 #include <string>
 #include <sqlite3.h>
@@ -15,6 +16,7 @@ struct ShowEpisodeTable
 {
     static const std::string Name;
     static const std::string CacheColumn;
+    static unsigned int ShowEpisode::*const PrimaryKey;
 };
 }
 
@@ -48,6 +50,7 @@ class ShowEpisode : public IShowEpisode, public Cache<ShowEpisode, IShowEpisode,
         std::shared_ptr<Show> m_show;
 
         friend class Cache<ShowEpisode, IShowEpisode, policy::ShowEpisodeTable>;
+        friend class policy::ShowEpisodeTable;
 };
 
 #endif // SHOWEPISODE_H

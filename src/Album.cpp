@@ -5,6 +5,7 @@
 
 const std::string policy::AlbumTable::Name = "Album";
 const std::string policy::AlbumTable::CacheColumn = "id_album";
+unsigned int Album::* const policy::AlbumTable::PrimaryKey = &Album::m_id;
 
 Album::Album(sqlite3* dbConnection, sqlite3_stmt* stmt)
     : m_dbConnection( dbConnection )
@@ -87,10 +88,8 @@ AlbumPtr Album::create( sqlite3* dbConnection, const std::string& id3Tag )
     auto album = std::make_shared<Album>( id3Tag );
     static const std::string& req = "INSERT INTO " + policy::AlbumTable::Name +
             "(id_album, id3tag) VALUES(NULL, ?)";
-    auto pKey = _Cache::insert( dbConnection, album, req.c_str(), id3Tag );
-    if ( pKey == 0 )
+    if ( _Cache::insert( dbConnection, album, req.c_str(), id3Tag ) == false )
         return nullptr;
-    album->m_id = pKey;
     album->m_dbConnection = dbConnection;
     return album;
 }

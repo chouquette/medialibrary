@@ -9,12 +9,15 @@
 #include "Cache.h"
 #include "IAlbum.h"
 
+class Album;
+
 namespace policy
 {
 struct AlbumTable
 {
     static const std::string Name;
     static const std::string CacheColumn;
+    static unsigned int Album::*const PrimaryKey;
 };
 }
 
@@ -50,6 +53,7 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         std::vector<std::shared_ptr<IAlbumTrack>>* m_tracks;
 
         friend class Cache<Album, IAlbum, policy::AlbumTable>;
+        friend class policy::AlbumTable;
 };
 
 #endif // ALBUM_H

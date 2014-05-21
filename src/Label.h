@@ -16,6 +16,7 @@ struct LabelTable
 {
     static const std::string Name;
     static const std::string CacheColumn;
+    static unsigned int Label::*const PrimaryKey;
 };
 
 struct LabelCachePolicy
@@ -49,6 +50,7 @@ class Label : public ILabel, public Cache<Label, ILabel, policy::LabelTable, pol
         std::vector<std::shared_ptr<IFile>>* m_files;
 
         friend class Cache<Label, ILabel, policy::LabelTable>;
+        friend class policy::LabelTable;
 };
 
 #endif // LABEL_H

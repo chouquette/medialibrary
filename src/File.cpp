@@ -11,6 +11,7 @@
 
 const std::string policy::FileTable::Name = "File";
 const std::string policy::FileTable::CacheColumn = "mrl";
+unsigned int File::* const policy::FileTable::PrimaryKey = &File::m_id;
 
 File::File( sqlite3* dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
@@ -41,11 +42,10 @@ FilePtr File::create( sqlite3* dbConnection, const std::string& mrl )
     auto self = std::make_shared<File>( mrl );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
             " VALUES(NULL, ?, ?, ?, ?, ?, ?)";
-    auto pKey = _Cache::insert( dbConnection, self, req.c_str(), (int)self->m_type, self->m_duration,
+    bool pKey = _Cache::insert( dbConnection, self, req.c_str(), (int)self->m_type, self->m_duration,
         self->m_albumTrackId, self->m_playCount, self->m_showEpisodeId, self->m_mrl );
-    if ( pKey == 0 )
+    if ( pKey == false )
         return nullptr;
-    self->m_id = pKey;
     self->m_dbConnection = dbConnection;
     return self;
 }

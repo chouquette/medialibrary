@@ -6,12 +6,15 @@
 #include "Cache.h"
 #include "IShow.h"
 
+class Show;
+
 namespace policy
 {
 struct ShowTable
 {
     static const std::string Name;
     static const std::string CacheColumn;
+    static unsigned int Show::*const PrimaryKey;
 };
 }
 
@@ -41,6 +44,7 @@ class Show : public IShow, public Cache<Show, IShow, policy::ShowTable>
         std::string m_tvdbId;
 
         friend class Cache<Show, IShow, policy::ShowTable>;
+        friend class policy::ShowTable;
 };
 
 #endif // SHOW_H

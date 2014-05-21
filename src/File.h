@@ -19,6 +19,7 @@ struct FileTable
 {
     static const std::string Name;
     static const std::string CacheColumn;
+    static unsigned int File::*const PrimaryKey;
 };
 struct FileCache
 {
@@ -80,6 +81,7 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         std::shared_ptr<ShowEpisode> m_showEpisode;
 
         friend class Cache<File, IFile, policy::FileTable, policy::FileCache>;
+        friend class policy::FileTable;
 };
 
 #endif // FILE_H

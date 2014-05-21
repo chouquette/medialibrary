@@ -8,6 +8,7 @@
 #include "Cache.h"
 
 class Album;
+class AlbumTrack;
 
 namespace policy
 {
@@ -15,6 +16,7 @@ struct AlbumTrackTable
 {
     static const std::string Name;
     static const std::string CacheColumn;
+    static unsigned int AlbumTrack::*const PrimaryKey;
 };
 }
 
@@ -41,6 +43,7 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
         std::shared_ptr<Album> m_album;
 
         friend class Cache<AlbumTrack, IAlbumTrack, policy::AlbumTrackTable>;
+        friend class policy::AlbumTrackTable;
 };
 
 #endif // ALBUMTRACK_H

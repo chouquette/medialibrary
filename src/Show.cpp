@@ -3,6 +3,7 @@
 
 const std::string policy::ShowTable::Name = "Show";
 const std::string policy::ShowTable::CacheColumn = "id_show";
+unsigned int Show::* const policy::ShowTable::PrimaryKey = &Show::m_id;
 
 Show::Show(sqlite3* dbConnection, sqlite3_stmt* stmt)
     : m_dbConnection( dbConnection )
