@@ -34,11 +34,11 @@ TEST_F( Files, Init )
 TEST_F( Files, Create )
 {
     auto f = ml->addFile( "/dev/null" );
-    ASSERT_TRUE( f != NULL );
+    ASSERT_NE( f, nullptr );
 
     ASSERT_EQ( f->playCount(), 0 );
-    ASSERT_TRUE( f->albumTrack() == NULL );
-    ASSERT_TRUE( f->showEpisode() == NULL );
+    ASSERT_EQ( f->albumTrack(), nullptr );
+    ASSERT_EQ( f->showEpisode(), nullptr );
 
     std::vector<std::shared_ptr<IFile>> files;
     bool success = ml->files( files );

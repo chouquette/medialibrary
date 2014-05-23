@@ -18,7 +18,7 @@ Label::Label( sqlite3* dbConnection, sqlite3_stmt* stmt )
 }
 
 Label::Label( const std::string& name )
-    : m_dbConnection( NULL )
+    : m_dbConnection( nullptr )
     , m_id( 0 )
     , m_name( name )
 {

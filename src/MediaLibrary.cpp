@@ -12,7 +12,7 @@
 #include "ShowEpisode.h"
 
 MediaLibrary::MediaLibrary()
-    : m_dbConnection( NULL )
+    : m_dbConnection( nullptr )
 {
 }
 

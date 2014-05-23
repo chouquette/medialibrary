@@ -26,7 +26,7 @@ File::File( sqlite3* dbConnection, sqlite3_stmt* stmt )
 }
 
 File::File( const std::string& mrl )
-    : m_dbConnection( NULL )
+    : m_dbConnection( nullptr )
     , m_id( 0 )
     , m_type( UnknownType )
     , m_duration( 0 )
