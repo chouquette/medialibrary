@@ -34,14 +34,6 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
     private:
         typedef Cache<File, IFile, policy::FileTable, policy::FileCache> _Cache;
     public:
-        enum Type
-        {
-            VideoType, // Any video file, not being a tv show episode
-            AudioType, // Any kind of audio file, not being an album track
-            ShowEpisodeType,
-            AlbumTrackType,
-            UnknownType,
-        };
 
         // Those should be private, however the standard states that the expression
         // ::new (pv) T(std::forward(args)...)
@@ -55,13 +47,13 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
 
         virtual unsigned int id() const;
         virtual std::shared_ptr<IAlbumTrack> albumTrack();
-        virtual unsigned int duration();
+        virtual unsigned int duration() const;
         virtual std::shared_ptr<IShowEpisode> showEpisode();
         virtual bool addLabel( LabelPtr label );
         virtual bool removeLabel( LabelPtr label );
         virtual std::vector<std::shared_ptr<ILabel> > labels();
-        virtual int playCount();
-        virtual const std::string& mrl();
+        virtual int playCount() const;
+        virtual const std::string& mrl() const;
 
     private:
         sqlite3* m_dbConnection;

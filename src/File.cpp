@@ -59,7 +59,7 @@ std::shared_ptr<IAlbumTrack> File::albumTrack()
     return m_albumTrack;
 }
 
-unsigned int File::duration()
+unsigned int File::duration() const
 {
     return m_duration;
 }
@@ -83,12 +83,12 @@ std::vector<std::shared_ptr<ILabel> > File::labels()
     return labels;
 }
 
-int File::playCount()
+int File::playCount() const
 {
     return m_playCount;
 }
 
-const std::string& File::mrl()
+const std::string& File::mrl() const
 {
     return m_mrl;
 }
