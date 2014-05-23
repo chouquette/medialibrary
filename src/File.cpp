@@ -50,13 +50,24 @@ FilePtr File::create( sqlite3* dbConnection, const std::string& mrl )
     return self;
 }
 
-std::shared_ptr<IAlbumTrack> File::albumTrack()
+AlbumTrackPtr File::albumTrack()
 {
     if ( m_albumTrack == nullptr && m_albumTrackId != 0 )
     {
         m_albumTrack = AlbumTrack::fetch( m_dbConnection, m_albumTrackId );
     }
     return m_albumTrack;
+}
+
+bool File::setAlbumTrack( AlbumTrackPtr albumTrack )
+{
+    static const std::string req = "UPDATE " + policy::FileTable::Name + " SET album_track_id = ? "
+            "WHERE id_file = ?";
+    if ( SqliteTools::executeUpdate( m_dbConnection, req, albumTrack->id(), m_id ) == false )
+        return false;
+    m_albumTrackId = albumTrack->id();
+    m_albumTrack = albumTrack;
+    return true;
 }
 
 unsigned int File::duration() const

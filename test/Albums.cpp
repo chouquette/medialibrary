@@ -2,6 +2,7 @@
 
 #include "IAlbum.h"
 #include "IAlbumTrack.h"
+#include "IFile.h"
 #include "IMediaLibrary.h"
 
 class Albums : public testing::Test
@@ -69,4 +70,25 @@ TEST_F( Albums, AddTrack )
     a->tracks( tracks );
     ASSERT_EQ( tracks.size(), 1u );
     ASSERT_EQ( tracks[0]->title(), track->title() );
+}
+
+TEST_F( Albums, AssignTrack )
+{
+    auto f = ml->addFile( "file" );
+    auto a = ml->createAlbum( "album" );
+    auto t = a->addTrack( "track", 1 );
+
+    ASSERT_EQ( f->albumTrack(), nullptr );
+    bool res = f->setAlbumTrack( t );
+    ASSERT_TRUE( res );
+    ASSERT_NE( f->albumTrack(), nullptr );
+    ASSERT_EQ( f->albumTrack(), t );
+
+    delete ml;
+    SetUp();
+
+    f = ml->file( "file" );
+    t = f->albumTrack();
+    ASSERT_NE( t, nullptr );
+    ASSERT_EQ( t->title(), "track" );
 }

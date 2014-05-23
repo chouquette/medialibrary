@@ -29,7 +29,6 @@ unsigned int Label::id() const
     return m_id;
 }
 
-
 const std::string& Label::name()
 {
     return m_name;

@@ -46,7 +46,8 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         static bool createTable(sqlite3* connection);
 
         virtual unsigned int id() const;
-        virtual std::shared_ptr<IAlbumTrack> albumTrack();
+        virtual AlbumTrackPtr albumTrack();
+        virtual bool setAlbumTrack( AlbumTrackPtr albumTrack );
         virtual unsigned int duration() const;
         virtual std::shared_ptr<IShowEpisode> showEpisode();
         virtual bool addLabel( LabelPtr label );
@@ -69,7 +70,7 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
 
         // Auto fetched related properties
         Album* m_album;
-        std::shared_ptr<AlbumTrack> m_albumTrack;
+        AlbumTrackPtr m_albumTrack;
         std::shared_ptr<ShowEpisode> m_showEpisode;
 
         friend class Cache<File, IFile, policy::FileTable, policy::FileCache>;

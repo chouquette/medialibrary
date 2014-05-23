@@ -90,10 +90,13 @@ class SqliteTools
             return sqlite3_changes( dbConnection ) > 0;
         }
 
-        /**
-         * This is meant to be used for "write only" requests, as the statement is not
-         * exposed to the caller.
-         */
+        template <typename... Args>
+        static bool executeUpdate( sqlite3* dbConnection, const std::string& req, const Args&... args )
+        {
+            // The code would be exactly the same, do not freak out because it call delete :)
+            return executeDelete( dbConnection, req, args... );
+        }
+
         template <typename... Args>
         static bool executeRequest( sqlite3* dbConnection, const std::string& req, const Args&... args )
         {
