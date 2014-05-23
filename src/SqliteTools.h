@@ -53,7 +53,7 @@ class SqliteTools
          *                  be discarded.
          */
         template <typename IMPL, typename INTF, typename... Args>
-        static bool fetchAll( sqlite3* dbConnection, const char* req, std::vector<std::shared_ptr<INTF> >& results, const Args&... args )
+        static bool fetchAll( sqlite3* dbConnection, const std::string& req, std::vector<std::shared_ptr<INTF> >& results, const Args&... args )
         {
             results.clear();
             auto stmt = prepareRequest( dbConnection, req, args...);
@@ -70,7 +70,7 @@ class SqliteTools
         }
 
         template <typename T, typename... Args>
-        static std::shared_ptr<T> fetchOne( sqlite3* dbConnection, const char* req, const Args&... args )
+        static std::shared_ptr<T> fetchOne( sqlite3* dbConnection, const std::string& req, const Args&... args )
         {
             std::shared_ptr<T> result;
             auto stmt = prepareRequest( dbConnection, req, args... );
@@ -83,7 +83,7 @@ class SqliteTools
         }
 
         template <typename... Args>
-        static bool executeDelete( sqlite3* dbConnection, const char* req, const Args&... args )
+        static bool executeDelete( sqlite3* dbConnection, const std::string& req, const Args&... args )
         {
             if ( executeRequest( dbConnection, req, args... ) == false )
                 return false;
@@ -95,7 +95,7 @@ class SqliteTools
          * exposed to the caller.
          */
         template <typename... Args>
-        static bool executeRequest( sqlite3* dbConnection, const char* req, const Args&... args )
+        static bool executeRequest( sqlite3* dbConnection, const std::string& req, const Args&... args )
         {
             auto stmt = prepareRequest( dbConnection, req, args... );
             if ( stmt == nullptr )
@@ -119,7 +119,7 @@ class SqliteTools
          * Returns 0 (which is an invalid sqlite primary key) when insertion fails.
          */
         template <typename... Args>
-        static unsigned int insert( sqlite3* dbConnection, const char* req, const Args&... args )
+        static unsigned int insert( sqlite3* dbConnection, const std::string& req, const Args&... args )
         {
             if ( executeRequest( dbConnection, req, args... ) == false )
                 return 0;
@@ -128,16 +128,16 @@ class SqliteTools
 
     private:
         template <typename... Args>
-        static StmtPtr prepareRequest( sqlite3* dbConnection, const char* req, const Args&... args )
+        static StmtPtr prepareRequest( sqlite3* dbConnection, const std::string& req, const Args&... args )
         {
             return _prepareRequest<1>( dbConnection, req, args... );
         }
 
         template <unsigned int>
-        static StmtPtr _prepareRequest( sqlite3* dbConnection, const char* req )
+        static StmtPtr _prepareRequest( sqlite3* dbConnection, const std::string& req )
         {
             sqlite3_stmt* stmt = nullptr;
-            int res = sqlite3_prepare_v2( dbConnection, req, -1, &stmt, NULL );
+            int res = sqlite3_prepare_v2( dbConnection, req.c_str(), -1, &stmt, NULL );
             if ( res != SQLITE_OK )
             {
                 std::cerr << "Failed to execute request: " << req << std::endl;
@@ -147,7 +147,7 @@ class SqliteTools
         }
 
         template <unsigned int COLIDX, typename T, typename... Args>
-        static StmtPtr _prepareRequest( sqlite3* dbConnection, const char* req, const T& arg, const Args&... args )
+        static StmtPtr _prepareRequest( sqlite3* dbConnection, const std::string& req, const T& arg, const Args&... args )
         {
             auto stmt = _prepareRequest<COLIDX + 1>( dbConnection, req, args... );
             Traits<T>::Bind( stmt.get(), COLIDX, arg );

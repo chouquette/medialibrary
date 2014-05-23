@@ -40,7 +40,7 @@ bool Label::files( std::vector<FilePtr>& files )
     static const std::string req = "SELECT f.* FROM " + policy::FileTable::Name + " f "
             "LEFT JOIN LabelFileRelation lfr ON lfr.id_file = f.id_file "
             "WHERE lfr.id_label = ?";
-    return SqliteTools::fetchAll<File>( m_dbConnection, req.c_str(), files, m_id );
+    return SqliteTools::fetchAll<File>( m_dbConnection, req, files, m_id );
 }
 
 LabelPtr Label::create( sqlite3* dbConnection, const std::string& name )
@@ -59,7 +59,7 @@ bool Label::createTable(sqlite3* dbConnection)
                 "id_label INTEGER PRIMARY KEY AUTOINCREMENT, "
                 "name TEXT UNIQUE ON CONFLICT FAIL"
             ")";
-    if ( SqliteTools::executeRequest( dbConnection, req.c_str() ) == false )
+    if ( SqliteTools::executeRequest( dbConnection, req ) == false )
         return false;
     req = "CREATE TABLE IF NOT EXISTS LabelFileRelation("
                 "id_label INTEGER,"
@@ -67,7 +67,7 @@ bool Label::createTable(sqlite3* dbConnection)
             "PRIMARY KEY (id_label, id_file)"
             "FOREIGN KEY(id_label) REFERENCES Label(id_label) ON DELETE CASCADE,"
             "FOREIGN KEY(id_file) REFERENCES File(id_file) ON DELETE CASCADE);";
-    return SqliteTools::executeRequest( dbConnection, req.c_str() );
+    return SqliteTools::executeRequest( dbConnection, req );
 }
 
 const std::string&policy::LabelCachePolicy::key( const std::shared_ptr<ILabel> self )

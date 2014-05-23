@@ -87,7 +87,7 @@ AlbumPtr MediaLibrary::album( const std::string& id3Tag )
     // We can't use Cache helper, since albums are cached by primary keys
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
             " WHERE id3tag = ?";
-    return SqliteTools::fetchOne<Album>( m_dbConnection, req.c_str(), id3Tag );
+    return SqliteTools::fetchOne<Album>( m_dbConnection, req, id3Tag );
 }
 
 AlbumPtr MediaLibrary::createAlbum( const std::string& id3Tag )

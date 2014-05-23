@@ -88,7 +88,7 @@ AlbumPtr Album::create( sqlite3* dbConnection, const std::string& id3Tag )
     auto album = std::make_shared<Album>( id3Tag );
     static const std::string& req = "INSERT INTO " + policy::AlbumTable::Name +
             "(id_album, id3tag) VALUES(NULL, ?)";
-    if ( _Cache::insert( dbConnection, album, req.c_str(), id3Tag ) == false )
+    if ( _Cache::insert( dbConnection, album, req, id3Tag ) == false )
         return nullptr;
     album->m_dbConnection = dbConnection;
     return album;

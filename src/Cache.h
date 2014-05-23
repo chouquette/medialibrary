@@ -125,7 +125,7 @@ class Cache
          * Create a new instance of the cache class.
          */
         template <typename... Args>
-        static bool insert( sqlite3* dbConnection, std::shared_ptr<IMPL> self, const char* req, const Args&... args )
+        static bool insert( sqlite3* dbConnection, std::shared_ptr<IMPL> self, const std::string& req, const Args&... args )
         {
             unsigned int pKey = SqliteTools::insert( dbConnection, req, args... );
             if ( pKey == 0 )

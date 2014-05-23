@@ -42,7 +42,7 @@ FilePtr File::create( sqlite3* dbConnection, const std::string& mrl )
     auto self = std::make_shared<File>( mrl );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
             " VALUES(NULL, ?, ?, ?, ?, ?, ?)";
-    bool pKey = _Cache::insert( dbConnection, self, req.c_str(), (int)self->m_type, self->m_duration,
+    bool pKey = _Cache::insert( dbConnection, self, req, (int)self->m_type, self->m_duration,
         self->m_albumTrackId, self->m_playCount, self->m_showEpisodeId, self->m_mrl );
     if ( pKey == false )
         return nullptr;
@@ -79,7 +79,7 @@ std::vector<std::shared_ptr<ILabel> > File::labels()
     static const std::string req = "SELECT l.* FROM " + policy::LabelTable::Name + " l "
             "LEFT JOIN LabelFileRelation lfr ON lfr.id_label = l.id_label "
             "WHERE lfr.id_file = ?";
-    SqliteTools::fetchAll<Label>( m_dbConnection, req.c_str(), labels, m_id );
+    SqliteTools::fetchAll<Label>( m_dbConnection, req, labels, m_id );
     return labels;
 }
 
@@ -109,7 +109,7 @@ bool File::createTable(sqlite3* connection)
             "show_episode_id UNSIGNED INTEGER,"
             "mrl TEXT UNIQUE ON CONFLICT FAIL"
             ")";
-    return SqliteTools::executeRequest( connection, req.c_str() );
+    return SqliteTools::executeRequest( connection, req );
 }
 
 bool File::addLabel( LabelPtr label )

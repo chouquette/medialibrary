@@ -50,7 +50,7 @@ AlbumTrackPtr AlbumTrack::create(sqlite3* dbConnection, unsigned int albumId, co
     auto self = std::make_shared<AlbumTrack>( name, trackNb, albumId );
     static const std::string req = "INSERT INTO " + policy::AlbumTrackTable::Name
             + "(title, track_number, album_id) VALUES(?, ?, ?)";
-    if ( _Cache::insert( dbConnection, self, req.c_str(), name, trackNb, albumId ) == false )
+    if ( _Cache::insert( dbConnection, self, req, name, trackNb, albumId ) == false )
         return false;
     self->m_dbConnection = dbConnection;
     return self;
