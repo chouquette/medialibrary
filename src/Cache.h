@@ -51,7 +51,7 @@ class Cache
     public:
         static std::shared_ptr<IMPL> fetch( sqlite3* dbConnection, const typename CACHEPOLICY::KeyType& key )
         {
-            std::lock_guard<std::mutex> lock( Mutex );
+            Lock lock( Mutex );
             auto it = Store.find( key );
             if ( it != Store.end() )
                 return it->second;
@@ -78,7 +78,7 @@ class Cache
         {
             auto cacheKey = CACHEPOLICY::key( stmt );
 
-            std::lock_guard<std::mutex> lock( Mutex );
+            Lock lock( Mutex );
             auto it = Store.find( cacheKey );
             if ( it != Store.end() )
                 return it->second;
@@ -89,7 +89,7 @@ class Cache
 
         static bool destroy( sqlite3* dbConnection, const typename CACHEPOLICY::KeyType& key )
         {
-            std::lock_guard<std::mutex> lock( Mutex );
+            Lock lock( Mutex );
             auto it = Store.find( key );
             if ( it != Store.end() )
                 Store.erase( it );
@@ -106,7 +106,7 @@ class Cache
 
         static void clear()
         {
-            std::lock_guard<std::mutex> lock( Mutex );
+            Lock lock( Mutex );
             Store.clear();
         }
 
@@ -133,7 +133,7 @@ class Cache
             (self.get())->*TABLEPOLICY::PrimaryKey = pKey;
             auto cacheKey = CACHEPOLICY::key( self );
 
-            std::lock_guard<std::mutex> lock( Mutex );
+            Lock lock( Mutex );
             // We expect the cache column to be PRIMARY KEY / UNIQUE, so an insertion with
             // a duplicated key should have been rejected by sqlite. This indicates an invalid state
             assert( Store.find( cacheKey ) == Store.end() );
@@ -143,7 +143,8 @@ class Cache
 
     private:
         static std::unordered_map<typename CACHEPOLICY::KeyType, std::shared_ptr<IMPL> > Store;
-        static std::mutex Mutex;
+        static std::recursive_mutex Mutex;
+        typedef std::lock_guard<std::recursive_mutex> Lock;
 };
 
 template <typename IMPL, typename INTF, typename TABLEPOLICY, typename CACHEPOLICY>
@@ -151,6 +152,6 @@ std::unordered_map<typename CACHEPOLICY::KeyType, std::shared_ptr<IMPL> >
 Cache<IMPL, INTF, TABLEPOLICY, CACHEPOLICY>::Store;
 
 template <typename IMPL, typename INTF, typename TABLEPOLICY, typename CACHEPOLICY>
-std::mutex Cache<IMPL, INTF, TABLEPOLICY, CACHEPOLICY>::Mutex;
+std::recursive_mutex Cache<IMPL, INTF, TABLEPOLICY, CACHEPOLICY>::Mutex;
 
 #endif // CACHE_H
