@@ -34,6 +34,7 @@ list(APPEND TEST_SRCS
     Files.cpp
     Labels.cpp
     Albums.cpp
+    Tests.cpp
 )
 
 add_executable(unittest ${TEST_SRCS})
