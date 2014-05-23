@@ -5,6 +5,7 @@
 #include <string>
 
 #include "IAlbumTrack.h"
+#include "IMediaLibrary.h"
 #include "Cache.h"
 
 class Album;
@@ -22,15 +23,21 @@ struct AlbumTrackTable
 
 class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, policy::AlbumTrackTable>
 {
+    private:
+        typedef Cache<AlbumTrack, IAlbumTrack, policy::AlbumTrackTable> _Cache;
     public:
         AlbumTrack( sqlite3* dbConnection, sqlite3_stmt* stmt );
+        AlbumTrack( const std::string& title, unsigned int trackNumber, unsigned int albumId );
 
+        virtual unsigned int id() const;
         virtual const std::string& genre();
         virtual const std::string& title();
         virtual unsigned int trackNumber();
         virtual std::shared_ptr<IAlbum> album();
 
         static bool createTable( sqlite3* dbConnection );
+        static AlbumTrackPtr create(sqlite3* dbConnection, unsigned int albumId,
+                                     const std::string& name, unsigned int trackNb );
 
     private:
         sqlite3* m_dbConnection;

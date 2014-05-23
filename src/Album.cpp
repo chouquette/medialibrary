@@ -58,15 +58,15 @@ time_t Album::lastSyncDate()
     return m_lastSyncDate;
 }
 
-const std::vector<std::shared_ptr<IAlbumTrack> >& Album::tracks()
+bool Album::tracks( std::vector<std::shared_ptr<IAlbumTrack> >& tracks )
 {
-    if ( m_tracks == NULL )
-    {
-        m_tracks = new std::vector<std::shared_ptr<IAlbumTrack>>;
-        const char* req = "SELECT * FROM AlbumTrack WHERE id_album = ?";
-        SqliteTools::fetchAll<AlbumTrack>( m_dbConnection, req, *m_tracks, m_id );
-    }
-    return *m_tracks;
+    const char* req = "SELECT * FROM AlbumTrack WHERE album_id = ?";
+    return SqliteTools::fetchAll<AlbumTrack>( m_dbConnection, req, tracks, m_id );
+}
+
+AlbumTrackPtr Album::addTrack( const std::string& name, unsigned int trackNb )
+{
+    return AlbumTrack::create( m_dbConnection, m_id, name, trackNb );
 }
 
 bool Album::createTable( sqlite3* dbConnection )

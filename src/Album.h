@@ -35,7 +35,9 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         virtual const std::string& shortSummary();
         virtual const std::string& artworkUrl();
         virtual time_t lastSyncDate();
-        virtual const std::vector<std::shared_ptr<IAlbumTrack>>& tracks();
+        virtual bool tracks( std::vector<std::shared_ptr<IAlbumTrack>>& tracks );
+        virtual AlbumTrackPtr addTrack( const std::string& name, unsigned int trackNb );
+
 
         static bool createTable( sqlite3* dbConnection );
         static AlbumPtr create( sqlite3* dbConnection, const std::string& id3Tag );
@@ -49,8 +51,6 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         std::string m_artworkUrl;
         time_t m_lastSyncDate;
         std::string m_id3tag;
-
-        std::vector<std::shared_ptr<IAlbumTrack>>* m_tracks;
 
         friend class Cache<Album, IAlbum, policy::AlbumTable>;
         friend class policy::AlbumTable;

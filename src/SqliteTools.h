@@ -105,7 +105,13 @@ class SqliteTools
             {
                 res = sqlite3_step( stmt.get() );
             } while ( res == SQLITE_ROW );
-            return res == SQLITE_DONE;
+            if ( res != SQLITE_DONE )
+            {
+                std::cerr << "Invalid result: " << res << ": " <<
+                             sqlite3_errmsg( dbConnection ) << std::endl;
+                return false;
+            }
+            return true;
         }
 
         /**

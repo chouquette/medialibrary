@@ -6,6 +6,7 @@
 #include <memory>
 
 class IAlbum;
+class IAlbumTrack;
 class IFile;
 class ILabel;
 class IMetadataService;
@@ -13,6 +14,7 @@ class IMetadataService;
 typedef std::shared_ptr<IFile> FilePtr;
 typedef std::shared_ptr<ILabel> LabelPtr;
 typedef std::shared_ptr<IAlbum> AlbumPtr;
+typedef std::shared_ptr<IAlbumTrack> AlbumTrackPtr;
 
 class IMediaLibrary
 {

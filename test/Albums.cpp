@@ -1,7 +1,8 @@
 #include "gtest/gtest.h"
 
-#include "IMediaLibrary.h"
 #include "IAlbum.h"
+#include "IAlbumTrack.h"
+#include "IMediaLibrary.h"
 
 class Albums : public testing::Test
 {
@@ -48,4 +49,24 @@ TEST_F( Albums, Fetch )
     ASSERT_NE( a, a2 );
 
     ASSERT_EQ( a->id(), a2->id() );
+}
+
+TEST_F( Albums, AddTrack )
+{
+    auto a = ml->createAlbum( "albumtag" );
+    auto track = a->addTrack( "track", 10 );
+    ASSERT_NE( track, nullptr );
+
+    std::vector<AlbumTrackPtr> tracks;
+    bool res = a->tracks( tracks );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( tracks.size(), 1u );
+    ASSERT_EQ( tracks[0], track );
+
+    delete ml;
+    SetUp();
+
+    a->tracks( tracks );
+    ASSERT_EQ( tracks.size(), 1u );
+    ASSERT_EQ( tracks[0]->title(), track->title() );
 }
