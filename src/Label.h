@@ -39,7 +39,7 @@ class Label : public ILabel, public Cache<Label, ILabel, policy::LabelTable, pol
     public:
         virtual unsigned int id() const;
         virtual const std::string& name();
-        virtual std::vector<FilePtr>& files();
+        virtual bool files( std::vector<FilePtr>& files );
 
         static LabelPtr create(sqlite3* dbConnection, const std::string& name );
         static bool createTable( sqlite3* dbConnection );
@@ -47,7 +47,6 @@ class Label : public ILabel, public Cache<Label, ILabel, policy::LabelTable, pol
         sqlite3* m_dbConnection;
         unsigned int m_id;
         std::string m_name;
-        std::vector<std::shared_ptr<IFile>>* m_files;
 
         friend class Cache<Label, ILabel, policy::LabelTable>;
         friend class policy::LabelTable;

@@ -12,7 +12,6 @@ unsigned int Label::* const policy::LabelTable::PrimaryKey = &Label::m_id;
 
 Label::Label( sqlite3* dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
-    , m_files( NULL )
 {
     m_id = sqlite3_column_int( stmt, 0 );
     m_name = (const char*)sqlite3_column_text( stmt, 1 );
@@ -22,7 +21,6 @@ Label::Label( const std::string& name )
     : m_dbConnection( NULL )
     , m_id( 0 )
     , m_name( name )
-    , m_files( NULL )
 {
 }
 
@@ -37,17 +35,12 @@ const std::string& Label::name()
     return m_name;
 }
 
-std::vector<FilePtr>& Label::files()
+bool Label::files( std::vector<FilePtr>& files )
 {
-    if ( m_files == nullptr )
-    {
-        m_files = new std::vector<std::shared_ptr<IFile>>;
-        static const std::string req = "SELECT f.* FROM " + policy::FileTable::Name + " f "
-                "LEFT JOIN LabelFileRelation lfr ON lfr.id_file = f.id_file "
-                "WHERE lfr.id_label = ?";
-        SqliteTools::fetchAll<File>( m_dbConnection, req.c_str(), *m_files, m_id );
-    }
-    return *m_files;
+    static const std::string req = "SELECT f.* FROM " + policy::FileTable::Name + " f "
+            "LEFT JOIN LabelFileRelation lfr ON lfr.id_file = f.id_file "
+            "WHERE lfr.id_label = ?";
+    return SqliteTools::fetchAll<File>( m_dbConnection, req.c_str(), files, m_id );
 }
 
 LabelPtr Label::create( sqlite3* dbConnection, const std::string& name )

@@ -104,8 +104,13 @@ TEST_F( Labels, Files )
     f2->addLabel( l2 );
     f3->addLabel( l1 );
 
-    auto label1Files = l1->files();
-    auto label2Files = l2->files();
+    std::vector<FilePtr> label1Files;
+    std::vector<FilePtr> label2Files;
+
+    bool res = l1->files( label1Files );
+    ASSERT_TRUE( res );
+    res = l2->files( label2Files );
+    ASSERT_TRUE( res );
 
     ASSERT_EQ( label1Files.size(), 2u );
     ASSERT_EQ( label2Files.size(), 1u );
