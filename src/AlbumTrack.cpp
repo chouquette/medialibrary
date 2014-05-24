@@ -51,7 +51,7 @@ AlbumTrackPtr AlbumTrack::create(sqlite3* dbConnection, unsigned int albumId, co
     static const std::string req = "INSERT INTO " + policy::AlbumTrackTable::Name
             + "(title, track_number, album_id) VALUES(?, ?, ?)";
     if ( _Cache::insert( dbConnection, self, req, name, trackNb, albumId ) == false )
-        return false;
+        return nullptr;
     self->m_dbConnection = dbConnection;
     return self;
 }
