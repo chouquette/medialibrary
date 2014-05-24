@@ -101,11 +101,9 @@ bool AlbumTrack::destroy()
         std::cerr << "No files found for AlbumTrack " << m_id << std::endl;
     for ( auto& f : fs )
     {
-        if ( File::discard( std::static_pointer_cast<File>( f ) ) == false )
-        {
-            std::cerr << "Failed to discard a file from cache";
-            return false;
-        }
+        // Ignore failures to discard from cache, we might want to discard records from
+        // cache in a near future to avoid running out of memory on mobile devices
+        File::discard( std::static_pointer_cast<File>( f ) );
     }
     return _Cache::destroy( m_dbConnection, this );
 }

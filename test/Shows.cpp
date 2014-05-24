@@ -196,3 +196,45 @@ TEST_F( Shows, SetEpisodeTvdbId )
     show->episodes( episodes );
     ASSERT_EQ( episodes[0]->tvdbId(), e->tvdbId() );
 }
+
+////////////////////////////////////////////////////
+// Files links:
+////////////////////////////////////////////////////
+
+TEST_F( Shows, FileSetShowEpisode )
+{
+    auto show = ml->createShow( "show" );
+    auto e = show->addEpisode( "episode 1", 1 );
+    auto f = ml->addFile( "file" );
+
+    ASSERT_EQ( f->showEpisode(), nullptr );
+    f->setShowEpisode( e );
+    ASSERT_EQ( f->showEpisode(), e );
+
+    delete ml;
+    SetUp();
+
+    f = ml->file( "file" );
+    e = f->showEpisode();
+    ASSERT_NE( e, nullptr );
+    ASSERT_EQ( e->name(), "episode 1" );
+}
+
+TEST_F( Shows, DeleteShowEpisode )
+{
+    auto show = ml->createShow( "show" );
+    auto e = show->addEpisode( "episode 1", 1 );
+    auto f = ml->addFile( "file" );
+
+    f->setShowEpisode( e );
+    e->destroy();
+
+    f = ml->file( "file" );
+    ASSERT_EQ( f, nullptr );
+
+    delete ml;
+    SetUp();
+
+    f = ml->file( "file" );
+    ASSERT_EQ( f, nullptr );
+}

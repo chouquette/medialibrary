@@ -29,6 +29,7 @@ class IFile
         virtual bool setAlbumTrack(AlbumTrackPtr albumTrack ) = 0;
         virtual unsigned int duration() const = 0;
         virtual std::shared_ptr<IShowEpisode> showEpisode() = 0;
+        virtual bool setShowEpisode( ShowEpisodePtr showEpisode ) = 0;
         virtual int playCount() const = 0;
         virtual const std::string& mrl() const = 0;
         virtual bool addLabel( LabelPtr label ) = 0;

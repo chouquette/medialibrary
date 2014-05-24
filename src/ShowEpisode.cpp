@@ -1,9 +1,10 @@
 #include "ShowEpisode.h"
 #include "SqliteTools.h"
 #include "Show.h"
+#include "File.h"
 
 const std::string policy::ShowEpisodeTable::Name = "ShowEpisode";
-const std::string policy::ShowEpisodeTable::CacheColumn = "id_show";
+const std::string policy::ShowEpisodeTable::CacheColumn = "show_id";
 unsigned int ShowEpisode::* const policy::ShowEpisodeTable::PrimaryKey = &ShowEpisode::m_id;
 
 ShowEpisode::ShowEpisode( sqlite3* dbConnection, sqlite3_stmt* stmt )
@@ -117,6 +118,23 @@ std::shared_ptr<IShow> ShowEpisode::show()
         m_show = Show::fetch( m_dbConnection, m_showId );
     }
     return m_show;
+}
+
+bool ShowEpisode::files( std::vector<FilePtr>& files )
+{
+    static const std::string req = "SELECT * FROM " + policy::FileTable::Name
+            + " WHERE show_episode_id = ?";
+    return SqliteTools::fetchAll<File>( m_dbConnection, req, files, m_id );
+}
+
+bool ShowEpisode::destroy()
+{
+    std::vector<FilePtr> fs;
+    if ( files( fs ) == false )
+        return false;
+    for ( auto& f : fs )
+        File::discard( std::static_pointer_cast<File>( f ) );
+    return _Cache::destroy( m_dbConnection, this );
 }
 
 bool ShowEpisode::createTable(sqlite3* dbConnection)

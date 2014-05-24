@@ -83,6 +83,17 @@ std::shared_ptr<IShowEpisode> File::showEpisode()
     return m_showEpisode;
 }
 
+bool File::setShowEpisode(ShowEpisodePtr showEpisode)
+{
+    static const std::string req = "UPDATE " + policy::FileTable::Name
+            + " SET show_episode_id = ?  WHERE id_file = ?";
+    if ( SqliteTools::executeUpdate( m_dbConnection, req, showEpisode->id(), m_id ) == false )
+        return false;
+    m_showEpisodeId = showEpisode->id();
+    m_showEpisode = showEpisode;
+    return true;
+}
+
 std::vector<std::shared_ptr<ILabel> > File::labels()
 {
     std::vector<std::shared_ptr<ILabel> > labels;
@@ -119,7 +130,9 @@ bool File::createTable(sqlite3* connection)
             "show_episode_id UNSIGNED INTEGER,"
             "mrl TEXT UNIQUE ON CONFLICT FAIL,"
             "FOREIGN KEY (album_track_id) REFERENCES " + policy::AlbumTrackTable::Name
-            + "(id_track) ON DELETE CASCADE"
+            + "(id_track) ON DELETE CASCADE,"
+            "FOREIGN KEY (show_episode_id) REFERENCES " + policy::ShowEpisodeTable::Name
+            + "(id_episode) ON DELETE CASCADE"
             ")";
     return SqliteTools::executeRequest( connection, req );
 }

@@ -42,7 +42,6 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         virtual bool tracks( std::vector<std::shared_ptr<IAlbumTrack>>& tracks ) const;
         virtual AlbumTrackPtr addTrack( const std::string& name, unsigned int trackNb );
 
-
         static bool createTable( sqlite3* dbConnection );
         static AlbumPtr create( sqlite3* dbConnection, const std::string& id3Tag );
 

@@ -50,6 +50,7 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         virtual bool setAlbumTrack( AlbumTrackPtr albumTrack );
         virtual unsigned int duration() const;
         virtual std::shared_ptr<IShowEpisode> showEpisode();
+        virtual bool setShowEpisode( ShowEpisodePtr showEpisode );
         virtual bool addLabel( LabelPtr label );
         virtual bool removeLabel( LabelPtr label );
         virtual std::vector<std::shared_ptr<ILabel> > labels();
@@ -71,7 +72,7 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         // Auto fetched related properties
         Album* m_album;
         AlbumTrackPtr m_albumTrack;
-        std::shared_ptr<ShowEpisode> m_showEpisode;
+        ShowEpisodePtr m_showEpisode;
 
         friend class Cache<File, IFile, policy::FileTable, policy::FileCache>;
         friend struct policy::FileTable;
