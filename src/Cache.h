@@ -112,7 +112,7 @@ class Cache
 
         static bool discard( const typename CACHEPOLICY::KeyType& key )
         {
-            std::lock_guard<std::mutex> lock( Mutex );
+            Lock lock( Mutex );
             auto it = Store.find( key );
             if ( it != Store.end() )
                 return false;
