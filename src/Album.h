@@ -29,7 +29,7 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         Album( sqlite3* dbConnection, sqlite3_stmt* stmt );
         Album( const std::string& id3tag );
 
-        unsigned int id() const;
+        virtual unsigned int id() const;
         virtual const std::string& name() const;
         virtual bool setName( const std::string& name );
         virtual time_t releaseDate() const;

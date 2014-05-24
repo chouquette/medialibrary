@@ -10,11 +10,13 @@ class IAlbumTrack;
 class IFile;
 class ILabel;
 class IMetadataService;
+class IShow;
 
 typedef std::shared_ptr<IFile> FilePtr;
 typedef std::shared_ptr<ILabel> LabelPtr;
 typedef std::shared_ptr<IAlbum> AlbumPtr;
 typedef std::shared_ptr<IAlbumTrack> AlbumTrackPtr;
+typedef std::shared_ptr<IShow> ShowPtr;
 
 class IMediaLibrary
 {
@@ -31,6 +33,8 @@ class IMediaLibrary
         virtual bool files( std::vector<FilePtr>& res ) = 0;
         virtual AlbumPtr album( const std::string& id3Tag ) = 0;
         virtual AlbumPtr createAlbum( const std::string& id3Tag ) = 0;
+        virtual ShowPtr show( const std::string& name ) = 0;
+        virtual ShowPtr createShow( const std::string& name ) = 0;
 
         virtual void addMetadataService( IMetadataService* service ) = 0;
 };

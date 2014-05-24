@@ -95,6 +95,18 @@ AlbumPtr MediaLibrary::createAlbum( const std::string& id3Tag )
     return Album::create( m_dbConnection, id3Tag );
 }
 
+ShowPtr MediaLibrary::show(const std::string& name)
+{
+    static const std::string req = "SELECT * FROM " + policy::ShowTable::Name
+            + " WHERE name = ?";
+    return SqliteTools::fetchOne<Show>( m_dbConnection, req, name );
+}
+
+ShowPtr MediaLibrary::createShow(const std::string& name)
+{
+    return Show::create( m_dbConnection, name );
+}
+
 void MediaLibrary::addMetadataService(IMetadataService* service)
 {
     typedef std::unique_ptr<IMetadataService> MdsPtr;

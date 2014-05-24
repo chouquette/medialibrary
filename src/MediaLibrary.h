@@ -25,6 +25,9 @@ class MediaLibrary : public IMediaLibrary
         virtual AlbumPtr album( const std::string& id3Tag );
         virtual AlbumPtr createAlbum( const std::string& id3Tag );
 
+        virtual ShowPtr show( const std::string& name );
+        virtual ShowPtr createShow( const std::string& name );
+
         virtual void addMetadataService( IMetadataService* service );
     private:
         sqlite3* m_dbConnection;

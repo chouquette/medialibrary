@@ -4,6 +4,7 @@
 #include <sqlite3.h>
 
 #include "Cache.h"
+#include "IMediaLibrary.h"
 #include "IShow.h"
 
 class Show;
@@ -22,22 +23,28 @@ class Show : public IShow, public Cache<Show, IShow, policy::ShowTable>
 {
     public:
         Show( sqlite3* dbConnection, sqlite3_stmt* stmt );
-        Show( sqlite3* dbConnection );
+        Show( const std::string& name );
 
-        virtual const std::string& name();
-        virtual unsigned int releaseYear();
-        virtual const std::string& shortSummary();
-        virtual const std::string& artworkUrl();
-        virtual time_t lastSyncDate();
+        virtual unsigned int id() const;
+        virtual const std::string& name() const;
+        virtual time_t releaseDate() const;
+        virtual bool setReleaseDate( time_t date );
+        virtual const std::string& shortSummary() const;
+        virtual bool setShortSummary( const std::string& summary );
+        virtual const std::string& artworkUrl() const;
+        virtual bool setArtworkUrl( const std::string& artworkUrl );
+        virtual time_t lastSyncDate() const;
         virtual const std::string& tvdbId();
+        virtual bool setTvdbId( const std::string& summary );
 
         static bool createTable( sqlite3* dbConnection );
+        static ShowPtr create(sqlite3* dbConnection, const std::string& name );
 
     protected:
         sqlite3* m_dbConnection;
         unsigned int m_id;
         std::string m_name;
-        unsigned int m_releaseYear;
+        time_t m_releaseDate;
         std::string m_shortSummary;
         std::string m_artworkUrl;
         time_t m_lastSyncDate;
@@ -45,6 +52,7 @@ class Show : public IShow, public Cache<Show, IShow, policy::ShowTable>
 
         friend class Cache<Show, IShow, policy::ShowTable>;
         friend struct policy::ShowTable;
+        typedef Cache<Show, IShow, policy::ShowTable> _Cache;
 };
 
 #endif // SHOW_H
