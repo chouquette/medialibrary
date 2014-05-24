@@ -44,7 +44,7 @@ class Show : public IShow, public Cache<Show, IShow, policy::ShowTable>
         std::string m_tvdbId;
 
         friend class Cache<Show, IShow, policy::ShowTable>;
-        friend class policy::ShowTable;
+        friend struct policy::ShowTable;
 };
 
 #endif // SHOW_H

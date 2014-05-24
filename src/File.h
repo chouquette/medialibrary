@@ -74,7 +74,7 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         std::shared_ptr<ShowEpisode> m_showEpisode;
 
         friend class Cache<File, IFile, policy::FileTable, policy::FileCache>;
-        friend class policy::FileTable;
+        friend struct policy::FileTable;
 };
 
 #endif // FILE_H

@@ -49,7 +49,7 @@ class Label : public ILabel, public Cache<Label, ILabel, policy::LabelTable, pol
         std::string m_name;
 
         friend class Cache<Label, ILabel, policy::LabelTable>;
-        friend class policy::LabelTable;
+        friend struct policy::LabelTable;
 };
 
 #endif // LABEL_H

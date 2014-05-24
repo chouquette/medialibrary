@@ -50,7 +50,7 @@ class ShowEpisode : public IShowEpisode, public Cache<ShowEpisode, IShowEpisode,
         std::shared_ptr<Show> m_show;
 
         friend class Cache<ShowEpisode, IShowEpisode, policy::ShowEpisodeTable>;
-        friend class policy::ShowEpisodeTable;
+        friend struct policy::ShowEpisodeTable;
 };
 
 #endif // SHOWEPISODE_H

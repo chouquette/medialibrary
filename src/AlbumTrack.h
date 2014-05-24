@@ -50,7 +50,7 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
         std::shared_ptr<Album> m_album;
 
         friend class Cache<AlbumTrack, IAlbumTrack, policy::AlbumTrackTable>;
-        friend class policy::AlbumTrackTable;
+        friend struct policy::AlbumTrackTable;
 };
 
 #endif // ALBUMTRACK_H

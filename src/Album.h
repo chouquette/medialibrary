@@ -53,7 +53,7 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         std::string m_id3tag;
 
         friend class Cache<Album, IAlbum, policy::AlbumTable>;
-        friend class policy::AlbumTable;
+        friend struct policy::AlbumTable;
 };
 
 #endif // ALBUM_H
