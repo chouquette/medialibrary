@@ -1,7 +1,7 @@
 #ifndef ISHOW_H
 #define ISHOW_H
 
-#include <string>
+#include "IMediaLibrary.h"
 
 class IShow
 {
@@ -17,6 +17,8 @@ class IShow
         virtual bool setArtworkUrl( const std::string& artworkUrl ) = 0;
         virtual const std::string& tvdbId() = 0;
         virtual bool setTvdbId( const std::string& id ) = 0;
+        virtual ShowEpisodePtr addEpisode( const std::string& title, unsigned int episodeNumber ) = 0;
+        virtual bool episodes( std::vector<ShowEpisodePtr>& episodes ) = 0;
 };
 
 #endif // ISHOW_H

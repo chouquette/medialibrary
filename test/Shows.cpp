@@ -3,6 +3,7 @@
 #include "IFile.h"
 #include "IMediaLibrary.h"
 #include "IShow.h"
+#include "IShowEpisode.h"
 
 class Shows : public testing::Test
 {
@@ -91,4 +92,107 @@ TEST_F( Shows, SetArtworkUrl )
 
     auto s2 = ml->show( "show" );
     ASSERT_EQ( s->artworkUrl(), s2->artworkUrl() );
+}
+
+TEST_F( Shows, SetTvdbId )
+{
+    auto s = ml->createShow( "show" );
+
+    s->setTvdbId( "TVDBID" );
+    ASSERT_EQ( s->tvdbId(), "TVDBID" );
+
+    delete ml;
+    SetUp();
+
+    auto s2 = ml->show( "show" );
+    ASSERT_EQ( s->tvdbId(), s2->tvdbId() );
+}
+
+////////////////////////////////////////////////////
+// Episodes:
+////////////////////////////////////////////////////
+
+TEST_F( Shows, AddEpisode )
+{
+    auto show = ml->createShow( "show" );
+    auto e = show->addEpisode( "episode 1", 1 );
+    ASSERT_NE( e, nullptr );
+
+    ASSERT_EQ( e->episodeNumber(), 1u );
+    ASSERT_EQ( e->show(), show );
+    ASSERT_EQ( e->name(), "episode 1" );
+
+    std::vector<ShowEpisodePtr> episodes;
+    bool res = show->episodes( episodes );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( episodes.size(), 1u );
+    ASSERT_EQ( episodes[0], e );
+}
+
+TEST_F( Shows, SetEpisodeArtwork )
+{
+    auto show = ml->createShow( "show" );
+    auto e = show->addEpisode( "episode 1", 1 );
+    bool res = e->setArtworkUrl( "path-to-snapshot" );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( e->artworkUrl(), "path-to-snapshot" );
+
+    delete ml;
+    SetUp();
+
+    show = ml->show( "show" );
+    std::vector<ShowEpisodePtr> episodes;
+    show->episodes( episodes );
+    ASSERT_EQ( episodes[0]->artworkUrl(), e->artworkUrl() );
+}
+
+TEST_F( Shows, SetEpisodeSeasonNumber )
+{
+    auto show = ml->createShow( "show" );
+    auto e = show->addEpisode( "episode 1", 1 );
+    bool res = e->setSeasonNumber( 42 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( e->seasonNumber(), 42 );
+
+    delete ml;
+    SetUp();
+
+    show = ml->show( "show" );
+    std::vector<ShowEpisodePtr> episodes;
+    show->episodes( episodes );
+    ASSERT_EQ( episodes[0]->seasonNumber(), e->seasonNumber() );
+}
+
+TEST_F( Shows, SetEpisodeSummary )
+{
+    auto show = ml->createShow( "show" );
+    auto e = show->addEpisode( "episode 1", 1 );
+    bool res = e->setShortSummary( "Insert spoilers here" );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( e->shortSummary(), "Insert spoilers here" );
+
+    delete ml;
+    SetUp();
+
+    show = ml->show( "show" );
+    std::vector<ShowEpisodePtr> episodes;
+    show->episodes( episodes );
+    ASSERT_EQ( episodes[0]->shortSummary(), e->shortSummary() );
+}
+
+TEST_F( Shows, SetEpisodeTvdbId )
+{
+    auto show = ml->createShow( "show" );
+    auto e = show->addEpisode( "episode 1", 1 );
+    bool res = e->setTvdbId( "TVDBID" );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( e->tvdbId(), "TVDBID" );
+
+    delete ml;
+    SetUp();
+
+    show = ml->show( "show" );
+    std::vector<ShowEpisodePtr> episodes;
+    show->episodes( episodes );
+    ASSERT_EQ( episodes[0]->tvdbId(), e->tvdbId() );
 }

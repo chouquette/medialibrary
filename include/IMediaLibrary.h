@@ -11,12 +11,14 @@ class IFile;
 class ILabel;
 class IMetadataService;
 class IShow;
+class IShowEpisode;
 
 typedef std::shared_ptr<IFile> FilePtr;
 typedef std::shared_ptr<ILabel> LabelPtr;
 typedef std::shared_ptr<IAlbum> AlbumPtr;
 typedef std::shared_ptr<IAlbumTrack> AlbumTrackPtr;
 typedef std::shared_ptr<IShow> ShowPtr;
+typedef std::shared_ptr<IShowEpisode> ShowEpisodePtr;
 
 class IMediaLibrary
 {

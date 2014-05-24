@@ -7,6 +7,7 @@ class ShowEpisode;
 #include <string>
 #include <sqlite3.h>
 
+#include "IMediaLibrary.h"
 #include "IShowEpisode.h"
 #include "Cache.h"
 
@@ -24,17 +25,24 @@ class ShowEpisode : public IShowEpisode, public Cache<ShowEpisode, IShowEpisode,
 {
     public:
         ShowEpisode(sqlite3* dbConnection, sqlite3_stmt* stmt);
+        ShowEpisode(const std::string& name, unsigned int episodeNumber, unsigned int showId );
 
-        virtual const std::string& artworkUrl();
-        virtual unsigned int episodeNumber();
-        virtual time_t lastSyncDate();
-        virtual const std::string& name();
-        virtual unsigned int seasonNuber();
-        virtual const std::string& shortSummary();
-        virtual const std::string& tvdbId();
+        virtual unsigned int id() const;
+        virtual const std::string& artworkUrl() const;
+        virtual bool setArtworkUrl( const std::string& artworkUrl );
+        virtual unsigned int episodeNumber() const;
+        virtual time_t lastSyncDate() const;
+        virtual const std::string& name() const;
+        virtual unsigned int seasonNumber() const;
+        virtual bool setSeasonNumber(unsigned int seasonNumber);
+        virtual const std::string& shortSummary() const;
+        virtual bool setShortSummary( const std::string& summary );
+        virtual const std::string& tvdbId() const;
+        virtual bool setTvdbId( const std::string& tvdbId );
         virtual std::shared_ptr<IShow> show();
 
         static bool createTable( sqlite3* dbConnection );
+        static ShowEpisodePtr create(sqlite3* dbConnection, const std::string& title, unsigned int episodeNumber, unsigned int showId );
 
     private:
         sqlite3* m_dbConnection;
@@ -47,10 +55,11 @@ class ShowEpisode : public IShowEpisode, public Cache<ShowEpisode, IShowEpisode,
         std::string m_shortSummary;
         std::string m_tvdbId;
         unsigned int m_showId;
-        std::shared_ptr<Show> m_show;
+        ShowPtr m_show;
 
         friend class Cache<ShowEpisode, IShowEpisode, policy::ShowEpisodeTable>;
         friend struct policy::ShowEpisodeTable;
+        typedef Cache<ShowEpisode, IShowEpisode, policy::ShowEpisodeTable> _Cache;
 };
 
 #endif // SHOWEPISODE_H

@@ -2,58 +2,112 @@
 #include "SqliteTools.h"
 #include "Show.h"
 
-const std::string policy::ShowEpisodeTable::Name = "Show";
+const std::string policy::ShowEpisodeTable::Name = "ShowEpisode";
 const std::string policy::ShowEpisodeTable::CacheColumn = "id_show";
 unsigned int ShowEpisode::* const policy::ShowEpisodeTable::PrimaryKey = &ShowEpisode::m_id;
 
 ShowEpisode::ShowEpisode( sqlite3* dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
 {
-    m_id = sqlite3_column_int( stmt, 0 );
-    m_artworkUrl = (const char*)sqlite3_column_text( stmt, 1 );
-    m_episodeNumber = sqlite3_column_int( stmt, 2 );
-    m_lastSyncDate = sqlite3_column_int( stmt, 3 );
-    m_name = (const char*)sqlite3_column_text( stmt, 4 );
-    m_seasonNumber = sqlite3_column_int( stmt, 5 );
-    m_shortSummary = (const char*)sqlite3_column_text( stmt, 6 );
-    m_tvdbId = (const char*)sqlite3_column_text( stmt, 7 );
-    m_showId = sqlite3_column_int( stmt, 8 );
+    m_id = Traits<unsigned int>::Load( stmt, 0 );
+    m_artworkUrl = Traits<std::string>::Load( stmt, 1 );
+    m_episodeNumber = Traits<unsigned int>::Load( stmt, 2 );
+    m_lastSyncDate = Traits<time_t>::Load( stmt, 3 );
+    m_name = Traits<std::string>::Load( stmt, 4 );
+    m_seasonNumber = Traits<unsigned int>::Load( stmt, 5 );
+    m_shortSummary = Traits<std::string>::Load( stmt, 6 );
+    m_tvdbId = Traits<std::string>::Load( stmt, 7 );
+    m_showId = Traits<unsigned int>::Load( stmt, 8 );
 }
 
+ShowEpisode::ShowEpisode(const std::string& name, unsigned int episodeNumber, unsigned int showId )
+    : m_dbConnection( nullptr )
+    , m_id( 0 )
+    , m_episodeNumber( episodeNumber )
+    , m_name( name )
+    , m_seasonNumber( 0 )
+    , m_showId( showId )
+{
+}
 
-const std::string& ShowEpisode::artworkUrl()
+unsigned int ShowEpisode::id() const
+{
+    return m_id;
+}
+
+const std::string& ShowEpisode::artworkUrl() const
 {
     return m_artworkUrl;
 }
 
-unsigned int ShowEpisode::episodeNumber()
+bool ShowEpisode::setArtworkUrl( const std::string& artworkUrl )
+{
+    static const std::string req = "UPDATE " + policy::ShowEpisodeTable::Name
+            + " SET artwork_url = ? WHERE id_episode = ?";
+    if ( SqliteTools::executeUpdate( m_dbConnection, req, artworkUrl, m_id ) == false )
+        return false;
+    m_artworkUrl = artworkUrl;
+    return true;
+}
+
+unsigned int ShowEpisode::episodeNumber() const
 {
     return m_episodeNumber;
 }
 
-time_t ShowEpisode::lastSyncDate()
+time_t ShowEpisode::lastSyncDate() const
 {
     return m_lastSyncDate;
 }
 
-const std::string&ShowEpisode::name()
+const std::string& ShowEpisode::name() const
 {
     return m_name;
 }
 
-unsigned int ShowEpisode::seasonNuber()
+unsigned int ShowEpisode::seasonNumber() const
 {
     return m_seasonNumber;
 }
 
-const std::string&ShowEpisode::shortSummary()
+bool ShowEpisode::setSeasonNumber( unsigned int seasonNumber )
+{
+    static const std::string req = "UPDATE " + policy::ShowEpisodeTable::Name
+            + " SET season_number = ? WHERE id_episode = ?";
+    if ( SqliteTools::executeUpdate( m_dbConnection, req, seasonNumber, m_id ) == false )
+        return false;
+    m_seasonNumber = seasonNumber;
+    return true;
+}
+
+const std::string& ShowEpisode::shortSummary() const
 {
     return m_shortSummary;
 }
 
-const std::string&ShowEpisode::tvdbId()
+bool ShowEpisode::setShortSummary( const std::string& summary )
+{
+    static const std::string req = "UPDATE " + policy::ShowEpisodeTable::Name
+            + " SET episode_summary = ? WHERE id_episode = ?";
+    if ( SqliteTools::executeUpdate( m_dbConnection, req, summary, m_id ) == false )
+        return false;
+    m_shortSummary = summary;
+    return true;
+}
+
+const std::string& ShowEpisode::tvdbId() const
 {
     return m_tvdbId;
+}
+
+bool ShowEpisode::setTvdbId( const std::string& tvdbId )
+{
+    static const std::string req = "UPDATE " + policy::ShowEpisodeTable::Name
+            + " SET tvdb_id = ? WHERE id_episode = ?";
+    if ( SqliteTools::executeUpdate( m_dbConnection, req, tvdbId, m_id ) == false )
+        return false;
+    m_tvdbId = tvdbId;
+    return true;
 }
 
 std::shared_ptr<IShow> ShowEpisode::show()
@@ -67,17 +121,29 @@ std::shared_ptr<IShow> ShowEpisode::show()
 
 bool ShowEpisode::createTable(sqlite3* dbConnection)
 {
-    const char* req = "CREATE TABLE IF NOT EXISTS ShowEpisode("
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::ShowEpisodeTable::Name
+            + "("
                 "id_episode INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "artwork_url TEXT,"
                 "episode_number UNSIGNED INT,"
                 "last_sync_date UNSIGNED INT,"
-                "name TEXT,"
+                "title TEXT,"
                 "season_number UNSIGNED INT,"
                 "episode_summary TEXT,"
                 "tvdb_id TEXT,"
                 "show_id UNSIGNED INT,"
-                "FOREIGN KEY(show_id) REFERENCES Show(id_show)"
+                "FOREIGN KEY(show_id) REFERENCES " + policy::ShowTable::Name + "(id_show)"
             ")";
     return SqliteTools::executeRequest( dbConnection, req );
+}
+
+ShowEpisodePtr ShowEpisode::create( sqlite3* dbConnection, const std::string& title, unsigned int episodeNumber, unsigned int showId )
+{
+    auto episode = std::make_shared<ShowEpisode>( title, episodeNumber, showId );
+    static const std::string req = "INSERT INTO " + policy::ShowEpisodeTable::Name
+            + "(episode_number, title, show_id) VALUES(? , ?, ?)";
+    if ( _Cache::insert( dbConnection, episode, req, episodeNumber, title, showId ) == false )
+        return nullptr;
+    episode->m_dbConnection = dbConnection;
+    return episode;
 }

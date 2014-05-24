@@ -1,4 +1,5 @@
 #include "Show.h"
+#include "ShowEpisode.h"
 #include "SqliteTools.h"
 
 const std::string policy::ShowTable::Name = "Show";
@@ -98,6 +99,18 @@ bool Show::setTvdbId( const std::string& tvdbId )
         return false;
     m_tvdbId = tvdbId;
     return true;
+}
+
+ShowEpisodePtr Show::addEpisode(const std::string& title, unsigned int episodeNumber)
+{
+    return ShowEpisode::create( m_dbConnection, title, episodeNumber, m_id );
+}
+
+bool Show::episodes( std::vector<ShowEpisodePtr>& episodes )
+{
+    static const std::string req = "SELECT * FROM " + policy::ShowEpisodeTable::Name
+            + " WHERE show_id = ?";
+    return SqliteTools::fetchAll<ShowEpisode>( m_dbConnection, req, episodes, m_id );
 }
 
 bool Show::createTable(sqlite3* dbConnection)
