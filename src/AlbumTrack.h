@@ -31,6 +31,7 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
 
         virtual unsigned int id() const;
         virtual const std::string& genre();
+        virtual bool setGenre( const std::string& genre );
         virtual const std::string& title();
         virtual unsigned int trackNumber();
         virtual std::shared_ptr<IAlbum> album();

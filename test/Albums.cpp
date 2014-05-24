@@ -106,3 +106,20 @@ TEST_F( Albums, DeleteTrack )
     auto f2 = ml->file( "file" );
     ASSERT_EQ( f2, nullptr );
 }
+
+TEST_F( Albums, SetGenre )
+{
+    auto a = ml->createAlbum( "album" );
+    auto t = a->addTrack( "track", 1 );
+
+    t->setGenre( "happy underground post progressive death metal" );
+
+    delete ml;
+    SetUp();
+
+    std::vector<AlbumTrackPtr> tracks;
+    a->tracks( tracks );
+    auto t2 = tracks[0];
+    ASSERT_EQ( t->genre(), t2->genre() );
+}
+

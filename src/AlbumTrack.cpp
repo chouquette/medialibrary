@@ -62,6 +62,16 @@ const std::string& AlbumTrack::genre()
     return m_genre;
 }
 
+bool AlbumTrack::setGenre(const std::string& genre)
+{
+    static const std::string req = "UPDATE " + policy::AlbumTrackTable::Name
+            + " SET genre = ? WHERE id_track = ? ";
+    if ( SqliteTools::executeUpdate( m_dbConnection, req, genre, m_id ) == false )
+        return false;
+    m_genre = genre;
+    return true;
+}
+
 const std::string& AlbumTrack::title()
 {
     return m_title;

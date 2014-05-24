@@ -12,6 +12,7 @@ class IAlbumTrack
 
         virtual unsigned int id() const = 0;
         virtual const std::string& genre() = 0;
+        virtual bool setGenre( const std::string& genre ) = 0;
         virtual const std::string& title() = 0;
         virtual unsigned int trackNumber() = 0;
         virtual std::shared_ptr<IAlbum> album() = 0;
