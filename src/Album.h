@@ -30,12 +30,16 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         Album( const std::string& id3tag );
 
         unsigned int id() const;
-        virtual const std::string& name();
-        virtual unsigned int releaseYear();
-        virtual const std::string& shortSummary();
-        virtual const std::string& artworkUrl();
-        virtual time_t lastSyncDate();
-        virtual bool tracks( std::vector<std::shared_ptr<IAlbumTrack>>& tracks );
+        virtual const std::string& name() const;
+        virtual bool setName( const std::string& name );
+        virtual time_t releaseDate() const;
+        virtual bool setReleaseDate( time_t date );
+        virtual const std::string& shortSummary() const;
+        virtual bool setShortSummary( const std::string& summary );
+        virtual const std::string& artworkUrl() const;
+        virtual bool setArtworkUrl( const std::string& artworkUrl );
+        virtual time_t lastSyncDate() const;
+        virtual bool tracks( std::vector<std::shared_ptr<IAlbumTrack>>& tracks ) const;
         virtual AlbumTrackPtr addTrack( const std::string& name, unsigned int trackNb );
 
 
@@ -46,7 +50,7 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         sqlite3* m_dbConnection;
         unsigned int m_id;
         std::string m_name;
-        unsigned int m_releaseYear;
+        unsigned int m_releaseDate;
         std::string m_shortSummary;
         std::string m_artworkUrl;
         time_t m_lastSyncDate;

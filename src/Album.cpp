@@ -12,7 +12,7 @@ Album::Album(sqlite3* dbConnection, sqlite3_stmt* stmt)
 {
     m_id = sqlite3_column_int( stmt, 0 );
     m_name = Traits<std::string>::Load( stmt, 1 );
-    m_releaseYear = sqlite3_column_int( stmt, 2 );
+    m_releaseDate = sqlite3_column_int( stmt, 2 );
     m_shortSummary = Traits<std::string>::Load( stmt, 3 );
     m_artworkUrl = Traits<std::string>::Load( stmt, 4 );
     m_lastSyncDate = sqlite3_column_int( stmt, 5 );
@@ -22,7 +22,7 @@ Album::Album(sqlite3* dbConnection, sqlite3_stmt* stmt)
 Album::Album( const std::string& id3tag )
     : m_dbConnection( nullptr )
     , m_id( 0 )
-    , m_releaseYear( 0 )
+    , m_releaseDate( 0 )
     , m_lastSyncDate( 0 )
     , m_id3tag( id3tag )
 {
@@ -33,32 +33,72 @@ unsigned int Album::id() const
     return m_id;
 }
 
-const std::string& Album::name()
+const std::string& Album::name() const
 {
     return m_name;
 }
 
-unsigned int Album::releaseYear()
+bool Album::setName( const std::string& name )
 {
-    return m_releaseYear;
+    static const std::string& req = "UPDATE " + policy::AlbumTable::Name
+            + " SET name = ? WHERE id_album = ?";
+    if ( SqliteTools::executeUpdate( m_dbConnection, req, name, m_id ) == false )
+        return false;
+    m_name = name;
+    return true;
 }
 
-const std::string& Album::shortSummary()
+time_t Album::releaseDate() const
+{
+    return m_releaseDate;
+}
+
+bool Album::setReleaseDate( time_t date )
+{
+    static const std::string& req = "UPDATE " + policy::AlbumTable::Name
+            + " SET release_date = ? WHERE id_album = ?";
+    if ( SqliteTools::executeUpdate( m_dbConnection, req, date, m_id ) == false )
+        return false;
+    m_releaseDate = date;
+    return true;
+}
+
+const std::string& Album::shortSummary() const
 {
     return m_shortSummary;
 }
 
-const std::string& Album::artworkUrl()
+bool Album::setShortSummary( const std::string& summary )
+{
+    static const std::string& req = "UPDATE " + policy::AlbumTable::Name
+            + " SET short_summary = ? WHERE id_album = ?";
+    if ( SqliteTools::executeUpdate( m_dbConnection, req, summary, m_id ) == false )
+        return false;
+    m_shortSummary = summary;
+    return true;
+}
+
+const std::string& Album::artworkUrl() const
 {
     return m_artworkUrl;
 }
 
-time_t Album::lastSyncDate()
+bool Album::setArtworkUrl( const std::string& artworkUrl )
+{
+    static const std::string& req = "UPDATE " + policy::AlbumTable::Name
+            + " SET artwork_url = ? WHERE id_album = ?";
+    if ( SqliteTools::executeUpdate( m_dbConnection, req, artworkUrl, m_id ) == false )
+        return false;
+    m_artworkUrl = artworkUrl;
+    return true;
+}
+
+time_t Album::lastSyncDate() const
 {
     return m_lastSyncDate;
 }
 
-bool Album::tracks( std::vector<std::shared_ptr<IAlbumTrack> >& tracks )
+bool Album::tracks( std::vector<std::shared_ptr<IAlbumTrack> >& tracks ) const
 {
     const char* req = "SELECT * FROM AlbumTrack WHERE album_id = ?";
     return SqliteTools::fetchAll<AlbumTrack>( m_dbConnection, req, tracks, m_id );
@@ -74,7 +114,7 @@ bool Album::createTable( sqlite3* dbConnection )
     const char* req = "CREATE TABLE IF NOT EXISTS Album("
                 "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "name TEXT,"
-                "release_year UNSIGNED INTEGER,"
+                "release_date UNSIGNED INTEGER,"
                 "short_summary TEXT,"
                 "artwork_url TEXT,"
                 "UNSIGNED INTEGER last_sync_date,"

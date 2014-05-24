@@ -113,6 +113,7 @@ TEST_F( Albums, SetGenre )
     auto t = a->addTrack( "track", 1 );
 
     t->setGenre( "happy underground post progressive death metal" );
+    ASSERT_EQ( t->genre(), "happy underground post progressive death metal" );
 
     delete ml;
     SetUp();
@@ -123,3 +124,58 @@ TEST_F( Albums, SetGenre )
     ASSERT_EQ( t->genre(), t2->genre() );
 }
 
+TEST_F( Albums, SetName )
+{
+    auto a = ml->createAlbum( "album" );
+
+    a->setName( "albumname" );
+    ASSERT_EQ( a->name(), "albumname" );
+
+    delete ml;
+    SetUp();
+
+    auto a2 = ml->album( "album" );
+    ASSERT_EQ( a->name(), a2->name() );
+}
+
+TEST_F( Albums, SetReleaseDate )
+{
+    auto a = ml->createAlbum( "album" );
+
+    a->setReleaseDate( 1234 );
+    ASSERT_EQ( a->releaseDate(), 1234 );
+
+    delete ml;
+    SetUp();
+
+    auto a2 = ml->album( "album" );
+    ASSERT_EQ( a->releaseDate(), a2->releaseDate() );
+}
+
+TEST_F( Albums, SetShortSummary )
+{
+    auto a = ml->createAlbum( "album" );
+
+    a->setShortSummary( "summary" );
+    ASSERT_EQ( a->shortSummary(), "summary" );
+
+    delete ml;
+    SetUp();
+
+    auto a2 = ml->album( "album" );
+    ASSERT_EQ( a->shortSummary(), a2->shortSummary() );
+}
+
+TEST_F( Albums, SetArtworkUrl )
+{
+    auto a = ml->createAlbum( "album" );
+
+    a->setArtworkUrl( "artwork" );
+    ASSERT_EQ( a->artworkUrl(), "artwork" );
+
+    delete ml;
+    SetUp();
+
+    auto a2 = ml->album( "album" );
+    ASSERT_EQ( a->artworkUrl(), a2->artworkUrl() );
+}
