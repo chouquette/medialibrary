@@ -52,8 +52,14 @@ TEST_F( Files, Fetch )
     auto f = ml->addFile( "/dev/null" );
     auto f2 = ml->file( "/dev/null" );
     ASSERT_EQ( f->mrl(), f2->mrl() );
-    // Basic caching test:
     ASSERT_EQ( f, f2 );
+
+    // Flush cache and fetch from DB
+    delete ml;
+    SetUp();
+
+    f2 = ml->file( "/dev/null" );
+    ASSERT_EQ( f->mrl(), f2->mrl() );
 }
 
 TEST_F( Files, Delete )
