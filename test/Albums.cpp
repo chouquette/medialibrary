@@ -92,3 +92,17 @@ TEST_F( Albums, AssignTrack )
     ASSERT_NE( t, nullptr );
     ASSERT_EQ( t->title(), "track" );
 }
+
+TEST_F( Albums, DeleteTrack )
+{
+    auto f = ml->addFile( "file" );
+    auto a = ml->createAlbum( "album" );
+    auto t = a->addTrack( "track", 1 );
+    f->setAlbumTrack( t );
+
+    bool res = t->destroy();
+    ASSERT_TRUE( res );
+
+    auto f2 = ml->file( "file" );
+    ASSERT_EQ( f2, nullptr );
+}

@@ -1,8 +1,7 @@
 #ifndef IALBUMTRACK_H
 #define IALBUMTRACK_H
 
-#include <memory>
-#include <string>
+#include "IMediaLibrary.h"
 
 class IAlbum;
 
@@ -16,6 +15,11 @@ class IAlbumTrack
         virtual const std::string& title() = 0;
         virtual unsigned int trackNumber() = 0;
         virtual std::shared_ptr<IAlbum> album() = 0;
+        virtual bool files( std::vector<FilePtr>& files ) = 0;
+        /**
+         * @brief destroy Deletes the album track and the file(s) associated
+         */
+        virtual bool destroy() = 0;
 };
 
 #endif // IALBUMTRACK_H

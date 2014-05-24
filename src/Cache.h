@@ -17,6 +17,10 @@ class PrimaryKeyCacheKeyPolicy
         {
             return self->id();
         }
+        static unsigned int key( const TYPE* self )
+        {
+            return self->id();
+        }
         static unsigned int key( sqlite3_stmt* stmt )
         {
             return Traits<unsigned int>::Load( stmt, 0 );
@@ -104,17 +108,29 @@ class Cache
             return destroy( dbConnection, key );
         }
 
+        static bool destroy( sqlite3* dbConnection, const IMPL* self )
+        {
+            const auto& key = CACHEPOLICY::key( self );
+            return destroy( dbConnection, key );
+        }
+
         static void clear()
         {
             Lock lock( Mutex );
             Store.clear();
         }
 
-        static bool discard( const typename CACHEPOLICY::KeyType& key )
+        /**
+         * @brief discard Discard a record from the cache
+         * @param key The key used for cache
+         * @return
+         */
+        static bool discard( const std::shared_ptr<IMPL>& record )
         {
+            auto key = CACHEPOLICY::key( record );
             Lock lock( Mutex );
             auto it = Store.find( key );
-            if ( it != Store.end() )
+            if ( it == Store.end() )
                 return false;
             Store.erase( it );
             return true;

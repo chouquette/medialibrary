@@ -1,5 +1,6 @@
 #include "AlbumTrack.h"
 #include "Album.h"
+#include "File.h"
 #include "SqliteTools.h"
 
 const std::string policy::AlbumTrackTable::Name = "AlbumTrack";
@@ -78,4 +79,30 @@ std::shared_ptr<IAlbum> AlbumTrack::album()
         m_album = Album::fetch( m_dbConnection, m_albumId );
     }
     return m_album;
+}
+
+bool AlbumTrack::destroy()
+{
+    // Manually remove Files from cache, and let foreign key handling delete them from the DB
+    std::vector<FilePtr> fs;
+    if ( files( fs ) == false )
+        return false;
+    if ( fs.size() == 0 )
+        std::cerr << "No files found for AlbumTrack " << m_id << std::endl;
+    for ( auto& f : fs )
+    {
+        if ( File::discard( std::static_pointer_cast<File>( f ) ) == false )
+        {
+            std::cerr << "Failed to discard a file from cache";
+            return false;
+        }
+    }
+    return _Cache::destroy( m_dbConnection, this );
+}
+
+bool AlbumTrack::files(std::vector<FilePtr>& files)
+{
+    static const std::string req = "SELECT * FROM " + policy::FileTable::Name
+            + " WHERE album_track_id = ? ";
+    return SqliteTools::fetchAll<File>( m_dbConnection, req, files, m_id );
 }

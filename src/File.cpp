@@ -41,9 +41,8 @@ FilePtr File::create( sqlite3* dbConnection, const std::string& mrl )
 {
     auto self = std::make_shared<File>( mrl );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
-            " VALUES(NULL, ?, ?, ?, ?, ?, ?)";
-    bool pKey = _Cache::insert( dbConnection, self, req, (int)self->m_type, self->m_duration,
-        self->m_albumTrackId, self->m_playCount, self->m_showEpisodeId, self->m_mrl );
+            "(mrl) VALUES(?)";
+    bool pKey = _Cache::insert( dbConnection, self, req, mrl );
     if ( pKey == false )
         return nullptr;
     self->m_dbConnection = dbConnection;
@@ -118,7 +117,9 @@ bool File::createTable(sqlite3* connection)
             "album_track_id UNSIGNED INTEGER,"
             "play_count UNSIGNED INTEGER,"
             "show_episode_id UNSIGNED INTEGER,"
-            "mrl TEXT UNIQUE ON CONFLICT FAIL"
+            "mrl TEXT UNIQUE ON CONFLICT FAIL,"
+            "FOREIGN KEY (album_track_id) REFERENCES " + policy::AlbumTrackTable::Name
+            + "(id_track) ON DELETE CASCADE"
             ")";
     return SqliteTools::executeRequest( connection, req );
 }

@@ -110,7 +110,7 @@ class SqliteTools
             } while ( res == SQLITE_ROW );
             if ( res != SQLITE_DONE )
             {
-                std::cerr << "Invalid result: " << res << ": " <<
+                std::cerr << "Invalid result: " << sqlite3_errstr( res ) << ": " <<
                              sqlite3_errmsg( dbConnection ) << std::endl;
                 return false;
             }

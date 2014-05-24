@@ -34,6 +34,8 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
         virtual const std::string& title();
         virtual unsigned int trackNumber();
         virtual std::shared_ptr<IAlbum> album();
+        virtual bool destroy();
+        virtual bool files( std::vector<FilePtr>& files );
 
         static bool createTable( sqlite3* dbConnection );
         static AlbumTrackPtr create(sqlite3* dbConnection, unsigned int albumId,
