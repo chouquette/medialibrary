@@ -129,6 +129,27 @@ TEST_F( Shows, AddEpisode )
     ASSERT_EQ( episodes[0], e );
 }
 
+TEST_F( Shows, FetchShowFromEpisode )
+{
+    auto s = ml->createShow( "show" );
+    auto e = s->addEpisode( "episode 1", 1 );
+    auto f = ml->addFile( "file" );
+    f->setShowEpisode( e );
+
+    auto e2 = f->showEpisode();
+    auto s2 = e2->show();
+    ASSERT_NE( s2, nullptr );
+    ASSERT_EQ( s, s2 );
+
+    delete ml;
+    SetUp();
+
+    f = ml->file( "file" );
+    s2 = f->showEpisode()->show();
+    ASSERT_NE( s2, nullptr );
+    ASSERT_EQ( s->name(), s2->name() );
+}
+
 TEST_F( Shows, SetEpisodeArtwork )
 {
     auto show = ml->createShow( "show" );
