@@ -179,3 +179,22 @@ TEST_F( Albums, SetArtworkUrl )
     auto a2 = ml->album( "album" );
     ASSERT_EQ( a->artworkUrl(), a2->artworkUrl() );
 }
+
+TEST_F( Albums, FetchAlbumFromTrack )
+{
+    {
+        auto a = ml->createAlbum( "album" );
+        a->setName( "album" );
+        auto f = ml->addFile( "file" );
+        auto t = a->addTrack( "track 1", 1 );
+        f->setAlbumTrack( t );
+    }
+    delete ml;
+    SetUp();
+
+    auto f = ml->file( "file" );
+    auto t = f->albumTrack();
+    auto a = t->album();
+    ASSERT_NE( a, nullptr );
+    ASSERT_EQ( a->name(), "album" );
+}
