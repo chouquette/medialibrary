@@ -152,7 +152,7 @@ TEST_F( Shows, SetEpisodeSeasonNumber )
     auto e = show->addEpisode( "episode 1", 1 );
     bool res = e->setSeasonNumber( 42 );
     ASSERT_TRUE( res );
-    ASSERT_EQ( e->seasonNumber(), 42 );
+    ASSERT_EQ( e->seasonNumber(), 42u );
 
     delete ml;
     SetUp();
