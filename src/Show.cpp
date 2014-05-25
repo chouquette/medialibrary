@@ -113,6 +113,19 @@ bool Show::episodes( std::vector<ShowEpisodePtr>& episodes )
     return SqliteTools::fetchAll<ShowEpisode>( m_dbConnection, req, episodes, m_id );
 }
 
+bool Show::destroy()
+{
+    std::vector<ShowEpisodePtr> eps;
+    if ( episodes( eps ) == false )
+        return false;
+    //FIXME: This is suboptimal. Each episode::destroy() will fire a SQL request of its own
+    for ( auto& t : eps )
+    {
+        t->destroy();
+    }
+    return _Cache::destroy( m_dbConnection, this );
+}
+
 bool Show::createTable(sqlite3* dbConnection)
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::ShowTable::Name + "("

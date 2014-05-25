@@ -109,6 +109,19 @@ AlbumTrackPtr Album::addTrack( const std::string& name, unsigned int trackNb )
     return AlbumTrack::create( m_dbConnection, m_id, name, trackNb );
 }
 
+bool Album::destroy()
+{
+    std::vector<AlbumTrackPtr> ts;
+    if ( tracks( ts ) == false )
+        return false;
+    //FIXME: Have a single request to fetch all files at once, instead of having one per track
+    for ( auto& t : ts )
+    {
+        t->destroy();
+    }
+    return _Cache::destroy( m_dbConnection, this );
+}
+
 bool Album::createTable( sqlite3* dbConnection )
 {
     const char* req = "CREATE TABLE IF NOT EXISTS Album("

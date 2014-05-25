@@ -198,3 +198,18 @@ TEST_F( Albums, FetchAlbumFromTrack )
     ASSERT_NE( a, nullptr );
     ASSERT_EQ( a->name(), "album" );
 }
+
+TEST_F( Albums, DestroyAlbum )
+{
+    auto a = ml->createAlbum( "album" );
+    a->setName( "album" );
+    auto f = ml->addFile( "file" );
+    auto t = a->addTrack( "track 1", 1 );
+    f->setAlbumTrack( t );
+
+    bool res = a->destroy();
+    ASSERT_TRUE( res );
+
+    f = ml->file( "file" );
+    ASSERT_EQ( f, nullptr );
+}

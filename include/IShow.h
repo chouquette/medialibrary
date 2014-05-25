@@ -19,6 +19,7 @@ class IShow
         virtual bool setTvdbId( const std::string& id ) = 0;
         virtual ShowEpisodePtr addEpisode( const std::string& title, unsigned int episodeNumber ) = 0;
         virtual bool episodes( std::vector<ShowEpisodePtr>& episodes ) = 0;
+        virtual bool destroy() = 0;
 };
 
 #endif // ISHOW_H

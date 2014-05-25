@@ -238,3 +238,16 @@ TEST_F( Shows, DeleteShowEpisode )
     f = ml->file( "file" );
     ASSERT_EQ( f, nullptr );
 }
+
+TEST_F( Shows, DeleteShow )
+{
+    auto show = ml->createShow( "show" );
+    auto e = show->addEpisode( "episode 1", 1 );
+    auto f = ml->addFile( "file" );
+    f->setShowEpisode( e );
+
+    bool res = show->destroy();
+    ASSERT_TRUE( res );
+    f = ml->file( "file" );
+    ASSERT_EQ( f, nullptr );
+}

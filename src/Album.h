@@ -41,6 +41,7 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         virtual time_t lastSyncDate() const;
         virtual bool tracks( std::vector<std::shared_ptr<IAlbumTrack>>& tracks ) const;
         virtual AlbumTrackPtr addTrack( const std::string& name, unsigned int trackNb );
+        virtual bool destroy();
 
         static bool createTable( sqlite3* dbConnection );
         static AlbumPtr create( sqlite3* dbConnection, const std::string& id3Tag );

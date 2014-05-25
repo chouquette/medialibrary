@@ -38,6 +38,7 @@ class Show : public IShow, public Cache<Show, IShow, policy::ShowTable>
         virtual bool setTvdbId( const std::string& summary );
         virtual ShowEpisodePtr addEpisode( const std::string& title, unsigned int episodeNumber );
         virtual bool episodes( std::vector<ShowEpisodePtr>& episodes );
+        virtual bool destroy();
 
         static bool createTable( sqlite3* dbConnection );
         static ShowPtr create(sqlite3* dbConnection, const std::string& name );
