@@ -110,8 +110,13 @@ class SqliteTools
             } while ( res == SQLITE_ROW );
             if ( res != SQLITE_DONE )
             {
-                std::cerr << "Invalid result: " << sqlite3_errstr( res ) << ": " <<
-                             sqlite3_errmsg( dbConnection ) << std::endl;
+                std::cerr << "Invalid result: " <<
+#if SQLITE_VERSION_NUMBER >= 3007015
+                            sqlite3_errstr( res )
+#else
+                             res
+#endif
+                          << ": " << sqlite3_errmsg( dbConnection ) << std::endl;
                 return false;
             }
             return true;
