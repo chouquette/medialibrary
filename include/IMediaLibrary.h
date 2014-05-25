@@ -10,6 +10,7 @@ class IAlbumTrack;
 class IFile;
 class ILabel;
 class IMetadataService;
+class IMovie;
 class IShow;
 class IShowEpisode;
 
@@ -19,6 +20,7 @@ typedef std::shared_ptr<IAlbum> AlbumPtr;
 typedef std::shared_ptr<IAlbumTrack> AlbumTrackPtr;
 typedef std::shared_ptr<IShow> ShowPtr;
 typedef std::shared_ptr<IShowEpisode> ShowEpisodePtr;
+typedef std::shared_ptr<IMovie> MoviePtr;
 
 class IMediaLibrary
 {
@@ -37,6 +39,8 @@ class IMediaLibrary
         virtual AlbumPtr createAlbum( const std::string& id3Tag ) = 0;
         virtual ShowPtr show( const std::string& name ) = 0;
         virtual ShowPtr createShow( const std::string& name ) = 0;
+        virtual MoviePtr movie( const std::string& title ) = 0;
+        virtual MoviePtr createMovie( const std::string& title ) = 0;
 
         virtual void addMetadataService( IMetadataService* service ) = 0;
 };

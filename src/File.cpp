@@ -6,6 +6,7 @@
 #include "AlbumTrack.h"
 #include "File.h"
 #include "Label.h"
+#include "Movie.h"
 #include "ShowEpisode.h"
 #include "SqliteTools.h"
 
@@ -23,6 +24,7 @@ File::File( sqlite3* dbConnection, sqlite3_stmt* stmt )
     m_playCount = sqlite3_column_int( stmt, 4 );
     m_showEpisodeId = sqlite3_column_int( stmt, 5 );
     m_mrl = (const char*)sqlite3_column_text( stmt, 6 );
+    m_movieId = Traits<unsigned int>::Load( stmt, 7 );
 }
 
 File::File( const std::string& mrl )
@@ -34,6 +36,7 @@ File::File( const std::string& mrl )
     , m_playCount( 0 )
     , m_showEpisodeId( 0 )
     , m_mrl( mrl )
+    , m_movieId( 0 )
 {
 }
 
@@ -114,6 +117,26 @@ const std::string& File::mrl() const
     return m_mrl;
 }
 
+MoviePtr File::movie()
+{
+    if ( m_movie == nullptr && m_movieId != 0 )
+    {
+        m_movie = Movie::fetch( m_dbConnection, m_movieId );
+    }
+    return m_movie;
+}
+
+bool File::setMovie( MoviePtr movie )
+{
+    static const std::string req = "UPDATE " + policy::FileTable::Name
+            + " SET movie_id = ? WHERE id_file = ?";
+    if ( SqliteTools::executeUpdate( m_dbConnection, req, movie->id(), m_id ) == false )
+        return false;
+    m_movie = movie;
+    m_movieId = movie->id();
+    return true;
+}
+
 unsigned int File::id() const
 {
     return m_id;
@@ -129,10 +152,13 @@ bool File::createTable(sqlite3* connection)
             "play_count UNSIGNED INTEGER,"
             "show_episode_id UNSIGNED INTEGER,"
             "mrl TEXT UNIQUE ON CONFLICT FAIL,"
+            "movie_id UNSIGNED INTEGER,"
             "FOREIGN KEY (album_track_id) REFERENCES " + policy::AlbumTrackTable::Name
             + "(id_track) ON DELETE CASCADE,"
             "FOREIGN KEY (show_episode_id) REFERENCES " + policy::ShowEpisodeTable::Name
-            + "(id_episode) ON DELETE CASCADE"
+            + "(id_episode) ON DELETE CASCADE,"
+            "FOREIGN KEY (movie_id) REFERENCES " + policy::MovieTable::Name
+            + "(id_movie) ON DELETE CASCADE"
             ")";
     return SqliteTools::executeRequest( connection, req );
 }

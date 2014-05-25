@@ -36,6 +36,7 @@ list(APPEND TEST_SRCS
     Albums.cpp
     Tests.cpp
     Shows.cpp
+    Movies.cpp
 )
 
 add_executable(unittest ${TEST_SRCS})

@@ -34,6 +34,8 @@ class IFile
         virtual const std::string& mrl() const = 0;
         virtual bool addLabel( LabelPtr label ) = 0;
         virtual bool removeLabel( LabelPtr label ) = 0;
+        virtual MoviePtr movie() = 0;
+        virtual bool setMovie( MoviePtr movie ) = 0;
         virtual std::vector<std::shared_ptr<ILabel> > labels() = 0;
 };
 

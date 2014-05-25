@@ -28,6 +28,9 @@ class MediaLibrary : public IMediaLibrary
         virtual ShowPtr show( const std::string& name );
         virtual ShowPtr createShow( const std::string& name );
 
+        virtual MoviePtr movie( const std::string& title );
+        virtual MoviePtr createMovie( const std::string& title );
+
         virtual void addMetadataService( IMetadataService* service );
     private:
         sqlite3* m_dbConnection;

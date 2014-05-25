@@ -8,6 +8,7 @@
 #include "Label.h"
 #include "Album.h"
 #include "AlbumTrack.h"
+#include "Movie.h"
 #include "Show.h"
 #include "ShowEpisode.h"
 
@@ -24,6 +25,7 @@ MediaLibrary::~MediaLibrary()
     AlbumTrack::clear();
     Show::clear();
     ShowEpisode::clear();
+    Movie::clear();
 }
 
 bool MediaLibrary::initialize(const std::string& dbPath)
@@ -38,7 +40,8 @@ bool MediaLibrary::initialize(const std::string& dbPath)
         Album::createTable( m_dbConnection ) &&
         AlbumTrack::createTable( m_dbConnection ) &&
         Show::createTable( m_dbConnection ) &&
-        ShowEpisode::createTable( m_dbConnection ) );
+        ShowEpisode::createTable( m_dbConnection ) &&
+        Movie::createTable( m_dbConnection ) );
 }
 
 
@@ -105,6 +108,18 @@ ShowPtr MediaLibrary::show(const std::string& name)
 ShowPtr MediaLibrary::createShow(const std::string& name)
 {
     return Show::create( m_dbConnection, name );
+}
+
+MoviePtr MediaLibrary::movie( const std::string& title )
+{
+    static const std::string req = "SELECT * FROM " + policy::MovieTable::Name
+            + " WHERE title = ?";
+    return SqliteTools::fetchOne<Movie>( m_dbConnection, req, title );
+}
+
+MoviePtr MediaLibrary::createMovie( const std::string& title )
+{
+    return Movie::create( m_dbConnection, title );
 }
 
 void MediaLibrary::addMetadataService(IMetadataService* service)

@@ -56,6 +56,8 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         virtual std::vector<std::shared_ptr<ILabel> > labels();
         virtual int playCount() const;
         virtual const std::string& mrl() const;
+        virtual MoviePtr movie();
+        virtual bool setMovie( MoviePtr movie );
 
     private:
         sqlite3* m_dbConnection;
@@ -68,11 +70,13 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         unsigned int m_playCount;
         unsigned int m_showEpisodeId;
         std::string m_mrl;
+        unsigned int m_movieId;
 
         // Auto fetched related properties
         Album* m_album;
         AlbumTrackPtr m_albumTrack;
         ShowEpisodePtr m_showEpisode;
+        MoviePtr m_movie;
 
         friend class Cache<File, IFile, policy::FileTable, policy::FileCache>;
         friend struct policy::FileTable;
