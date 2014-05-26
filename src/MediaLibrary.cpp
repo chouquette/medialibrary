@@ -26,6 +26,7 @@ MediaLibrary::~MediaLibrary()
     Show::clear();
     ShowEpisode::clear();
     Movie::clear();
+    sqlite3_close( m_dbConnection );
 }
 
 bool MediaLibrary::initialize(const std::string& dbPath)
