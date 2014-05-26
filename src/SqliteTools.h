@@ -81,7 +81,7 @@ class SqliteTools
         {
             auto dbConnection = dbConnectionWeak.lock();
             if ( dbConnection == nullptr )
-                return false;
+                return nullptr;
 
             std::shared_ptr<T> result;
             auto stmt = prepareRequest( dbConnection, req, args... );

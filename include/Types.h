@@ -11,7 +11,7 @@ class IMetadataService;
 class IMovie;
 class IShow;
 class IShowEpisode;
-class sqlite3;
+struct sqlite3;
 
 typedef std::shared_ptr<IFile> FilePtr;
 typedef std::shared_ptr<ILabel> LabelPtr;
