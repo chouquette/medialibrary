@@ -39,11 +39,11 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         // ::new (pv) T(std::forward(args)...)
         // shall be well-formed, and private constructor would prevent that.
         // There might be a way with a user-defined allocator, but we'll see that later...
-        File(sqlite3* dbConnection , sqlite3_stmt* stmt);
+        File(DBConnection dbConnection , sqlite3_stmt* stmt);
         File( const std::string& mrl );
 
-        static FilePtr create(sqlite3* dbConnection, const std::string& mrl );
-        static bool createTable(sqlite3* connection);
+        static FilePtr create( DBConnection dbConnection, const std::string& mrl );
+        static bool createTable( DBConnection connection );
 
         virtual unsigned int id() const;
         virtual AlbumTrackPtr albumTrack();
@@ -60,7 +60,7 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         virtual bool setMovie( MoviePtr movie );
 
     private:
-        sqlite3* m_dbConnection;
+        DBConnection m_dbConnection;
 
         // DB fields:
         unsigned int m_id;

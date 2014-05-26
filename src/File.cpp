@@ -14,7 +14,7 @@ const std::string policy::FileTable::Name = "File";
 const std::string policy::FileTable::CacheColumn = "mrl";
 unsigned int File::* const policy::FileTable::PrimaryKey = &File::m_id;
 
-File::File( sqlite3* dbConnection, sqlite3_stmt* stmt )
+File::File( DBConnection dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
 {
     m_id = sqlite3_column_int( stmt, 0 );
@@ -28,8 +28,7 @@ File::File( sqlite3* dbConnection, sqlite3_stmt* stmt )
 }
 
 File::File( const std::string& mrl )
-    : m_dbConnection( nullptr )
-    , m_id( 0 )
+    : m_id( 0 )
     , m_type( UnknownType )
     , m_duration( 0 )
     , m_albumTrackId( 0 )
@@ -40,7 +39,7 @@ File::File( const std::string& mrl )
 {
 }
 
-FilePtr File::create( sqlite3* dbConnection, const std::string& mrl )
+FilePtr File::create( DBConnection dbConnection, const std::string& mrl )
 {
     auto self = std::make_shared<File>( mrl );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
@@ -142,7 +141,7 @@ unsigned int File::id() const
     return m_id;
 }
 
-bool File::createTable(sqlite3* connection)
+bool File::createTable( DBConnection connection )
 {
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::FileTable::Name + "("
             "id_file INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -165,7 +164,7 @@ bool File::createTable(sqlite3* connection)
 
 bool File::addLabel( LabelPtr label )
 {
-    if ( m_dbConnection == nullptr || m_id == 0 || label->id() == 0)
+    if ( m_id == 0 || label->id() == 0 )
     {
         std::cerr << "Both file & label need to be inserted in database before being linked together" << std::endl;
         return false;
@@ -176,7 +175,7 @@ bool File::addLabel( LabelPtr label )
 
 bool File::removeLabel( LabelPtr label )
 {
-    if ( m_dbConnection == nullptr || m_id == 0 || label->id() == 0 )
+    if ( m_id == 0 || label->id() == 0 )
     {
         std::cerr << "Can't unlink a label/file not inserted in database" << std::endl;
         return false;

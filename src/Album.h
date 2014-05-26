@@ -26,7 +26,7 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
     private:
         typedef Cache<Album, IAlbum, policy::AlbumTable> _Cache;
     public:
-        Album( sqlite3* dbConnection, sqlite3_stmt* stmt );
+        Album( DBConnection dbConnection, sqlite3_stmt* stmt );
         Album( const std::string& id3tag );
 
         virtual unsigned int id() const;
@@ -43,11 +43,11 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         virtual AlbumTrackPtr addTrack( const std::string& name, unsigned int trackNb );
         virtual bool destroy();
 
-        static bool createTable( sqlite3* dbConnection );
-        static AlbumPtr create( sqlite3* dbConnection, const std::string& id3Tag );
+        static bool createTable( DBConnection dbConnection );
+        static AlbumPtr create( DBConnection dbConnection, const std::string& id3Tag );
 
     protected:
-        sqlite3* m_dbConnection;
+        DBConnection m_dbConnection;
         unsigned int m_id;
         std::string m_name;
         unsigned int m_releaseDate;

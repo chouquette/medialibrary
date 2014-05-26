@@ -33,7 +33,7 @@ class MediaLibrary : public IMediaLibrary
 
         virtual void addMetadataService( IMetadataService* service );
     private:
-        sqlite3* m_dbConnection;
+        std::shared_ptr<sqlite3> m_dbConnection;
         std::vector<std::unique_ptr<IMetadataService>> m_mdServices;
 };
 #endif // MEDIALIBRARY_H

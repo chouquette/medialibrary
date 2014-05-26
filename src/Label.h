@@ -33,7 +33,7 @@ class Label : public ILabel, public Cache<Label, ILabel, policy::LabelTable, pol
     private:
         typedef Cache<Label, ILabel, policy::LabelTable, policy::LabelCachePolicy> _Cache;
     public:
-        Label(sqlite3* dbConnection, sqlite3_stmt* stmt);
+        Label( DBConnection dbConnection, sqlite3_stmt* stmt);
         Label( const std::string& name );
 
     public:
@@ -41,10 +41,10 @@ class Label : public ILabel, public Cache<Label, ILabel, policy::LabelTable, pol
         virtual const std::string& name();
         virtual bool files( std::vector<FilePtr>& files );
 
-        static LabelPtr create(sqlite3* dbConnection, const std::string& name );
-        static bool createTable( sqlite3* dbConnection );
+        static LabelPtr create( DBConnection dbConnection, const std::string& name );
+        static bool createTable( DBConnection dbConnection );
     private:
-        sqlite3* m_dbConnection;
+        DBConnection m_dbConnection;
         unsigned int m_id;
         std::string m_name;
 

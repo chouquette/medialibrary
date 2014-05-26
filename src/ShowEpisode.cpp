@@ -7,7 +7,7 @@ const std::string policy::ShowEpisodeTable::Name = "ShowEpisode";
 const std::string policy::ShowEpisodeTable::CacheColumn = "show_id";
 unsigned int ShowEpisode::* const policy::ShowEpisodeTable::PrimaryKey = &ShowEpisode::m_id;
 
-ShowEpisode::ShowEpisode( sqlite3* dbConnection, sqlite3_stmt* stmt )
+ShowEpisode::ShowEpisode( DBConnection dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
 {
     m_id = Traits<unsigned int>::Load( stmt, 0 );
@@ -21,9 +21,8 @@ ShowEpisode::ShowEpisode( sqlite3* dbConnection, sqlite3_stmt* stmt )
     m_showId = Traits<unsigned int>::Load( stmt, 8 );
 }
 
-ShowEpisode::ShowEpisode(const std::string& name, unsigned int episodeNumber, unsigned int showId )
-    : m_dbConnection( nullptr )
-    , m_id( 0 )
+ShowEpisode::ShowEpisode( const std::string& name, unsigned int episodeNumber, unsigned int showId )
+    : m_id( 0 )
     , m_episodeNumber( episodeNumber )
     , m_name( name )
     , m_seasonNumber( 0 )
@@ -137,7 +136,7 @@ bool ShowEpisode::destroy()
     return _Cache::destroy( m_dbConnection, this );
 }
 
-bool ShowEpisode::createTable(sqlite3* dbConnection)
+bool ShowEpisode::createTable( DBConnection dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::ShowEpisodeTable::Name
             + "("
@@ -155,7 +154,7 @@ bool ShowEpisode::createTable(sqlite3* dbConnection)
     return SqliteTools::executeRequest( dbConnection, req );
 }
 
-ShowEpisodePtr ShowEpisode::create( sqlite3* dbConnection, const std::string& title, unsigned int episodeNumber, unsigned int showId )
+ShowEpisodePtr ShowEpisode::create( DBConnection dbConnection, const std::string& title, unsigned int episodeNumber, unsigned int showId )
 {
     auto episode = std::make_shared<ShowEpisode>( title, episodeNumber, showId );
     static const std::string req = "INSERT INTO " + policy::ShowEpisodeTable::Name

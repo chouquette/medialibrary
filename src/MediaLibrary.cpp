@@ -13,7 +13,6 @@
 #include "ShowEpisode.h"
 
 MediaLibrary::MediaLibrary()
-    : m_dbConnection( nullptr )
 {
 }
 
@@ -26,15 +25,16 @@ MediaLibrary::~MediaLibrary()
     Show::clear();
     ShowEpisode::clear();
     Movie::clear();
-    sqlite3_close( m_dbConnection );
 }
 
 bool MediaLibrary::initialize(const std::string& dbPath)
 {
-    int res = sqlite3_open( dbPath.c_str(), &m_dbConnection );
+    sqlite3* dbConnection;
+    int res = sqlite3_open( dbPath.c_str(), &dbConnection );
     if ( res != SQLITE_OK )
         return false;
-    if ( SqliteTools::executeRequest( m_dbConnection, "PRAGMA foreign_keys = ON" ) == false )
+    m_dbConnection.reset( dbConnection, &sqlite3_close );
+    if ( SqliteTools::executeRequest( DBConnection(m_dbConnection), "PRAGMA foreign_keys = ON" ) == false )
         return false;
     return ( File::createTable( m_dbConnection ) &&
         Label::createTable( m_dbConnection ) &&
@@ -91,7 +91,7 @@ AlbumPtr MediaLibrary::album( const std::string& id3Tag )
     // We can't use Cache helper, since albums are cached by primary keys
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
             " WHERE id3tag = ?";
-    return SqliteTools::fetchOne<Album>( m_dbConnection, req, id3Tag );
+    return SqliteTools::fetchOne<Album>( DBConnection( m_dbConnection ), req, id3Tag );
 }
 
 AlbumPtr MediaLibrary::createAlbum( const std::string& id3Tag )

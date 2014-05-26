@@ -7,7 +7,7 @@ const std::string policy::AlbumTable::Name = "Album";
 const std::string policy::AlbumTable::CacheColumn = "id_album";
 unsigned int Album::* const policy::AlbumTable::PrimaryKey = &Album::m_id;
 
-Album::Album(sqlite3* dbConnection, sqlite3_stmt* stmt)
+Album::Album(DBConnection dbConnection, sqlite3_stmt* stmt)
     : m_dbConnection( dbConnection )
 {
     m_id = sqlite3_column_int( stmt, 0 );
@@ -20,8 +20,7 @@ Album::Album(sqlite3* dbConnection, sqlite3_stmt* stmt)
 }
 
 Album::Album( const std::string& id3tag )
-    : m_dbConnection( nullptr )
-    , m_id( 0 )
+    : m_id( 0 )
     , m_releaseDate( 0 )
     , m_lastSyncDate( 0 )
     , m_id3tag( id3tag )
@@ -123,7 +122,7 @@ bool Album::destroy()
     return _Cache::destroy( m_dbConnection, this );
 }
 
-bool Album::createTable( sqlite3* dbConnection )
+bool Album::createTable(DBConnection dbConnection )
 {
     static const std::string req = "CREATE TABLE IF NOT EXISTS " +
             policy::AlbumTable::Name +
@@ -139,7 +138,7 @@ bool Album::createTable( sqlite3* dbConnection )
    return SqliteTools::executeRequest( dbConnection, req );
 }
 
-AlbumPtr Album::create( sqlite3* dbConnection, const std::string& id3Tag )
+AlbumPtr Album::create(DBConnection dbConnection, const std::string& id3Tag )
 {
     auto album = std::make_shared<Album>( id3Tag );
     static const std::string& req = "INSERT INTO " + policy::AlbumTable::Name +

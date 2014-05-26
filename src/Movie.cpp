@@ -6,7 +6,7 @@ const std::string policy::MovieTable::Name = "Movie";
 const std::string policy::MovieTable::CacheColumn = "id_movie";
 unsigned int Movie::* const policy::MovieTable::PrimaryKey = &Movie::m_id;
 
-Movie::Movie( sqlite3* dbConnection, sqlite3_stmt* stmt )
+Movie::Movie( DBConnection dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
 {
     m_id = Traits<unsigned int>::Load( stmt, 0 );
@@ -18,8 +18,7 @@ Movie::Movie( sqlite3* dbConnection, sqlite3_stmt* stmt )
 }
 
 Movie::Movie( const std::string& title )
-    : m_dbConnection( nullptr )
-    , m_id( 0 )
+    : m_id( 0 )
     , m_title( title )
     , m_releaseDate( 0 )
 {
@@ -115,7 +114,7 @@ bool Movie::files( std::vector<FilePtr>& files )
     return SqliteTools::fetchAll<File>( m_dbConnection, req, files, m_id );
 }
 
-bool Movie::createTable( sqlite3* dbConnection )
+bool Movie::createTable( DBConnection dbConnection )
 {
     static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::MovieTable::Name
             + "("
@@ -129,7 +128,7 @@ bool Movie::createTable( sqlite3* dbConnection )
     return SqliteTools::executeRequest( dbConnection, req );
 }
 
-MoviePtr Movie::create( sqlite3* dbConnection, const std::string& title )
+MoviePtr Movie::create(DBConnection dbConnection, const std::string& title )
 {
     auto movie = std::make_shared<Movie>( title );
     static const std::string req = "INSERT INTO " + policy::MovieTable::Name

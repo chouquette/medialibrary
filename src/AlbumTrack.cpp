@@ -7,7 +7,7 @@ const std::string policy::AlbumTrackTable::Name = "AlbumTrack";
 const std::string policy::AlbumTrackTable::CacheColumn = "id_track";
 unsigned int AlbumTrack::* const policy::AlbumTrackTable::PrimaryKey = &AlbumTrack::m_id;
 
-AlbumTrack::AlbumTrack( sqlite3* dbConnection, sqlite3_stmt* stmt )
+AlbumTrack::AlbumTrack( DBConnection dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
     , m_album( nullptr )
 {
@@ -19,8 +19,7 @@ AlbumTrack::AlbumTrack( sqlite3* dbConnection, sqlite3_stmt* stmt )
 }
 
 AlbumTrack::AlbumTrack( const std::string& title, unsigned int trackNumber, unsigned int albumId )
-    : m_dbConnection( nullptr )
-    , m_id( 0 )
+    : m_id( 0 )
     , m_title( title )
     , m_trackNumber( trackNumber )
     , m_albumId( albumId )
@@ -33,7 +32,7 @@ unsigned int AlbumTrack::id() const
     return m_id;
 }
 
-bool AlbumTrack::createTable(sqlite3* dbConnection)
+bool AlbumTrack::createTable( DBConnection dbConnection )
 {
     const char* req = "CREATE TABLE IF NOT EXISTS AlbumTrack ("
                 "id_track INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -46,7 +45,7 @@ bool AlbumTrack::createTable(sqlite3* dbConnection)
     return SqliteTools::executeRequest( dbConnection, req );
 }
 
-AlbumTrackPtr AlbumTrack::create(sqlite3* dbConnection, unsigned int albumId, const std::string& name, unsigned int trackNb)
+AlbumTrackPtr AlbumTrack::create(DBConnection dbConnection, unsigned int albumId, const std::string& name, unsigned int trackNb)
 {
     auto self = std::make_shared<AlbumTrack>( name, trackNb, albumId );
     static const std::string req = "INSERT INTO " + policy::AlbumTrackTable::Name

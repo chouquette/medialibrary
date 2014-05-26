@@ -6,7 +6,7 @@ const std::string policy::ShowTable::Name = "Show";
 const std::string policy::ShowTable::CacheColumn = "id_show";
 unsigned int Show::* const policy::ShowTable::PrimaryKey = &Show::m_id;
 
-Show::Show(sqlite3* dbConnection, sqlite3_stmt* stmt)
+Show::Show(DBConnection dbConnection, sqlite3_stmt* stmt)
     : m_dbConnection( dbConnection )
 {
     m_id = Traits<unsigned int>::Load( stmt, 0 );
@@ -126,7 +126,7 @@ bool Show::destroy()
     return _Cache::destroy( m_dbConnection, this );
 }
 
-bool Show::createTable(sqlite3* dbConnection)
+bool Show::createTable(DBConnection dbConnection)
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::ShowTable::Name + "("
                         "id_show INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -140,7 +140,7 @@ bool Show::createTable(sqlite3* dbConnection)
     return SqliteTools::executeRequest( dbConnection, req );
 }
 
-ShowPtr Show::create( sqlite3* dbConnection, const std::string& name )
+ShowPtr Show::create(DBConnection dbConnection, const std::string& name )
 {
     auto show = std::make_shared<Show>( name );
     static const std::string req = "INSERT INTO " + policy::ShowTable::Name

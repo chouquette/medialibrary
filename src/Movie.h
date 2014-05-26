@@ -20,7 +20,7 @@ struct MovieTable
 class Movie : public IMovie, public Cache<Movie, IMovie, policy::MovieTable>
 {
     public:
-        Movie( sqlite3* dbConnection, sqlite3_stmt* stmt );
+        Movie( DBConnection dbConnection, sqlite3_stmt* stmt );
         Movie( const std::string& title );
 
         virtual unsigned int id() const;
@@ -36,11 +36,11 @@ class Movie : public IMovie, public Cache<Movie, IMovie, policy::MovieTable>
         virtual bool destroy();
         virtual bool files( std::vector<FilePtr>& files );
 
-        static bool createTable( sqlite3* dbConnection );
-        static MoviePtr create( sqlite3* dbConnection, const std::string& title );
+        static bool createTable( DBConnection dbConnection );
+        static MoviePtr create( DBConnection dbConnection, const std::string& title );
 
     private:
-        sqlite3* m_dbConnection;
+        DBConnection m_dbConnection;
         unsigned int m_id;
         std::string m_title;
         time_t m_releaseDate;

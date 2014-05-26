@@ -10,7 +10,7 @@ const std::string policy::LabelTable::Name = "Label";
 const std::string policy::LabelTable::CacheColumn = "name";
 unsigned int Label::* const policy::LabelTable::PrimaryKey = &Label::m_id;
 
-Label::Label( sqlite3* dbConnection, sqlite3_stmt* stmt )
+Label::Label( DBConnection dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
 {
     m_id = sqlite3_column_int( stmt, 0 );
@@ -18,8 +18,7 @@ Label::Label( sqlite3* dbConnection, sqlite3_stmt* stmt )
 }
 
 Label::Label( const std::string& name )
-    : m_dbConnection( nullptr )
-    , m_id( 0 )
+    : m_id( 0 )
     , m_name( name )
 {
 }
@@ -42,7 +41,7 @@ bool Label::files( std::vector<FilePtr>& files )
     return SqliteTools::fetchAll<File>( m_dbConnection, req, files, m_id );
 }
 
-LabelPtr Label::create( sqlite3* dbConnection, const std::string& name )
+LabelPtr Label::create(DBConnection dbConnection, const std::string& name )
 {
     auto self = std::make_shared<Label>( name );
     const char* req = "INSERT INTO Label VALUES(NULL, ?)";
@@ -52,7 +51,7 @@ LabelPtr Label::create( sqlite3* dbConnection, const std::string& name )
     return self;
 }
 
-bool Label::createTable(sqlite3* dbConnection)
+bool Label::createTable(DBConnection dbConnection)
 {
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::LabelTable::Name + "("
                 "id_label INTEGER PRIMARY KEY AUTOINCREMENT, "

@@ -24,7 +24,7 @@ struct ShowEpisodeTable
 class ShowEpisode : public IShowEpisode, public Cache<ShowEpisode, IShowEpisode, policy::ShowEpisodeTable>
 {
     public:
-        ShowEpisode(sqlite3* dbConnection, sqlite3_stmt* stmt);
+        ShowEpisode( DBConnection dbConnection, sqlite3_stmt* stmt );
         ShowEpisode(const std::string& name, unsigned int episodeNumber, unsigned int showId );
 
         virtual unsigned int id() const;
@@ -43,11 +43,11 @@ class ShowEpisode : public IShowEpisode, public Cache<ShowEpisode, IShowEpisode,
         virtual bool files( std::vector<FilePtr>& files );
         virtual bool destroy();
 
-        static bool createTable( sqlite3* dbConnection );
-        static ShowEpisodePtr create(sqlite3* dbConnection, const std::string& title, unsigned int episodeNumber, unsigned int showId );
+        static bool createTable( DBConnection dbConnection );
+        static ShowEpisodePtr create( DBConnection dbConnection, const std::string& title, unsigned int episodeNumber, unsigned int showId );
 
     private:
-        sqlite3* m_dbConnection;
+        DBConnection m_dbConnection;
         unsigned int m_id;
         std::string m_artworkUrl;
         unsigned int m_episodeNumber;

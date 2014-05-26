@@ -22,7 +22,7 @@ struct ShowTable
 class Show : public IShow, public Cache<Show, IShow, policy::ShowTable>
 {
     public:
-        Show( sqlite3* dbConnection, sqlite3_stmt* stmt );
+        Show( DBConnection dbConnection, sqlite3_stmt* stmt );
         Show( const std::string& name );
 
         virtual unsigned int id() const;
@@ -40,11 +40,11 @@ class Show : public IShow, public Cache<Show, IShow, policy::ShowTable>
         virtual bool episodes( std::vector<ShowEpisodePtr>& episodes );
         virtual bool destroy();
 
-        static bool createTable( sqlite3* dbConnection );
-        static ShowPtr create(sqlite3* dbConnection, const std::string& name );
+        static bool createTable( DBConnection dbConnection );
+        static ShowPtr create( DBConnection dbConnection, const std::string& name );
 
     protected:
-        sqlite3* m_dbConnection;
+        DBConnection m_dbConnection;
         unsigned int m_id;
         std::string m_name;
         time_t m_releaseDate;
