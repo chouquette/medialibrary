@@ -8,25 +8,24 @@
 class Albums : public testing::Test
 {
     public:
-        static IMediaLibrary* ml;
+        static std::unique_ptr<IMediaLibrary> ml;
 
     protected:
         virtual void SetUp()
         {
-            ml = MediaLibraryFactory::create();
+            ml.reset( MediaLibraryFactory::create() );
             bool res = ml->initialize( "test.db" );
             ASSERT_TRUE( res );
         }
 
         virtual void TearDown()
         {
-            delete ml;
-            ml = nullptr;
+            ml.reset();
             unlink("test.db");
         }
 };
 
-IMediaLibrary* Albums::ml;
+std::unique_ptr<IMediaLibrary> Albums::ml;
 
 TEST_F( Albums, Create )
 {
@@ -42,7 +41,6 @@ TEST_F( Albums, Fetch )
     auto a = ml->createAlbum( "album" );
 
     // Clear the cache
-    delete ml;
     SetUp();
 
     auto a2 = ml->album( "album" );
@@ -64,7 +62,6 @@ TEST_F( Albums, AddTrack )
     ASSERT_EQ( tracks.size(), 1u );
     ASSERT_EQ( tracks[0], track );
 
-    delete ml;
     SetUp();
 
     a->tracks( tracks );
@@ -84,7 +81,6 @@ TEST_F( Albums, AssignTrack )
     ASSERT_NE( f->albumTrack(), nullptr );
     ASSERT_EQ( f->albumTrack(), t );
 
-    delete ml;
     SetUp();
 
     f = ml->file( "file" );
@@ -115,7 +111,6 @@ TEST_F( Albums, SetGenre )
     t->setGenre( "happy underground post progressive death metal" );
     ASSERT_EQ( t->genre(), "happy underground post progressive death metal" );
 
-    delete ml;
     SetUp();
 
     std::vector<AlbumTrackPtr> tracks;
@@ -131,7 +126,6 @@ TEST_F( Albums, SetName )
     a->setName( "albumname" );
     ASSERT_EQ( a->name(), "albumname" );
 
-    delete ml;
     SetUp();
 
     auto a2 = ml->album( "album" );
@@ -145,7 +139,6 @@ TEST_F( Albums, SetReleaseDate )
     a->setReleaseDate( 1234 );
     ASSERT_EQ( a->releaseDate(), 1234 );
 
-    delete ml;
     SetUp();
 
     auto a2 = ml->album( "album" );
@@ -159,7 +152,6 @@ TEST_F( Albums, SetShortSummary )
     a->setShortSummary( "summary" );
     ASSERT_EQ( a->shortSummary(), "summary" );
 
-    delete ml;
     SetUp();
 
     auto a2 = ml->album( "album" );
@@ -173,7 +165,6 @@ TEST_F( Albums, SetArtworkUrl )
     a->setArtworkUrl( "artwork" );
     ASSERT_EQ( a->artworkUrl(), "artwork" );
 
-    delete ml;
     SetUp();
 
     auto a2 = ml->album( "album" );
@@ -189,7 +180,6 @@ TEST_F( Albums, FetchAlbumFromTrack )
         auto t = a->addTrack( "track 1", 1 );
         f->setAlbumTrack( t );
     }
-    delete ml;
     SetUp();
 
     auto f = ml->file( "file" );

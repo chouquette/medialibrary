@@ -8,25 +8,24 @@
 class Shows : public testing::Test
 {
     public:
-        static IMediaLibrary* ml;
+        static std::unique_ptr<IMediaLibrary> ml;
 
     protected:
         virtual void SetUp()
         {
-            ml = MediaLibraryFactory::create();
+            ml.reset( MediaLibraryFactory::create() );
             bool res = ml->initialize( "test.db" );
             ASSERT_TRUE( res );
         }
 
         virtual void TearDown()
         {
-            delete ml;
-            ml = nullptr;
+            ml.reset();
             unlink("test.db");
         }
 };
 
-IMediaLibrary* Shows::ml;
+std::unique_ptr<IMediaLibrary> Shows::ml;
 
 TEST_F( Shows, Create )
 {
@@ -42,7 +41,6 @@ TEST_F( Shows, Fetch )
     auto s = ml->createShow( "show" );
 
     // Clear the cache
-    delete ml;
     SetUp();
 
     auto s2 = ml->show( "show" );
@@ -59,7 +57,6 @@ TEST_F( Shows, SetReleaseDate )
     s->setReleaseDate( 1234 );
     ASSERT_EQ( s->releaseDate(), 1234 );
 
-    delete ml;
     SetUp();
 
     auto s2 = ml->show( "show" );
@@ -73,7 +70,7 @@ TEST_F( Shows, SetShortSummary )
     s->setShortSummary( "summary" );
     ASSERT_EQ( s->shortSummary(), "summary" );
 
-    delete ml;
+
     SetUp();
 
     auto s2 = ml->show( "show" );
@@ -87,7 +84,6 @@ TEST_F( Shows, SetArtworkUrl )
     s->setArtworkUrl( "artwork" );
     ASSERT_EQ( s->artworkUrl(), "artwork" );
 
-    delete ml;
     SetUp();
 
     auto s2 = ml->show( "show" );
@@ -101,7 +97,6 @@ TEST_F( Shows, SetTvdbId )
     s->setTvdbId( "TVDBID" );
     ASSERT_EQ( s->tvdbId(), "TVDBID" );
 
-    delete ml;
     SetUp();
 
     auto s2 = ml->show( "show" );
@@ -141,7 +136,6 @@ TEST_F( Shows, FetchShowFromEpisode )
     ASSERT_NE( s2, nullptr );
     ASSERT_EQ( s, s2 );
 
-    delete ml;
     SetUp();
 
     f = ml->file( "file" );
@@ -158,7 +152,6 @@ TEST_F( Shows, SetEpisodeArtwork )
     ASSERT_TRUE( res );
     ASSERT_EQ( e->artworkUrl(), "path-to-snapshot" );
 
-    delete ml;
     SetUp();
 
     show = ml->show( "show" );
@@ -175,7 +168,6 @@ TEST_F( Shows, SetEpisodeSeasonNumber )
     ASSERT_TRUE( res );
     ASSERT_EQ( e->seasonNumber(), 42u );
 
-    delete ml;
     SetUp();
 
     show = ml->show( "show" );
@@ -192,7 +184,6 @@ TEST_F( Shows, SetEpisodeSummary )
     ASSERT_TRUE( res );
     ASSERT_EQ( e->shortSummary(), "Insert spoilers here" );
 
-    delete ml;
     SetUp();
 
     show = ml->show( "show" );
@@ -209,7 +200,6 @@ TEST_F( Shows, SetEpisodeTvdbId )
     ASSERT_TRUE( res );
     ASSERT_EQ( e->tvdbId(), "TVDBID" );
 
-    delete ml;
     SetUp();
 
     show = ml->show( "show" );
@@ -232,7 +222,6 @@ TEST_F( Shows, FileSetShowEpisode )
     f->setShowEpisode( e );
     ASSERT_EQ( f->showEpisode(), e );
 
-    delete ml;
     SetUp();
 
     f = ml->file( "file" );
@@ -253,7 +242,6 @@ TEST_F( Shows, DeleteShowEpisode )
     f = ml->file( "file" );
     ASSERT_EQ( f, nullptr );
 
-    delete ml;
     SetUp();
 
     f = ml->file( "file" );

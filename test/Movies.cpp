@@ -7,25 +7,24 @@
 class Movies : public testing::Test
 {
     public:
-        static IMediaLibrary* ml;
+        static std::unique_ptr<IMediaLibrary> ml;
 
     protected:
         virtual void SetUp()
         {
-            ml = MediaLibraryFactory::create();
+            ml.reset( MediaLibraryFactory::create() );
             bool res = ml->initialize( "test.db" );
             ASSERT_TRUE( res );
         }
 
         virtual void TearDown()
         {
-            delete ml;
-            ml = nullptr;
+            ml.reset();
             unlink("test.db");
         }
 };
 
-IMediaLibrary* Movies::ml;
+std::unique_ptr<IMediaLibrary> Movies::ml;
 
 TEST_F( Movies, Create )
 {
@@ -41,7 +40,6 @@ TEST_F( Movies, Fetch )
 
     ASSERT_EQ( m, m2 );
 
-    delete ml;
     SetUp();
 
     m2 = ml->movie( "movie" );
@@ -56,7 +54,6 @@ TEST_F( Movies, SetReleaseDate )
     m->setReleaseDate( 1234 );
     ASSERT_EQ( m->releaseDate(), 1234u );
 
-    delete ml;
     SetUp();
 
     m = ml->movie( "movie" );
@@ -70,7 +67,6 @@ TEST_F( Movies, SetShortSummary )
     m->setShortSummary( "great movie" );
     ASSERT_EQ( m->shortSummary(), "great movie" );
 
-    delete ml;
     SetUp();
 
     m = ml->movie( "movie" );
@@ -84,7 +80,6 @@ TEST_F( Movies, SetArtworkUrl )
     m->setArtworkUrl( "artwork" );
     ASSERT_EQ( m->artworkUrl(), "artwork" );
 
-    delete ml;
     SetUp();
 
     m = ml->movie( "movie" );
@@ -98,7 +93,6 @@ TEST_F( Movies, SetImdbId )
     m->setImdbId( "id" );
     ASSERT_EQ( m->imdbId(), "id" );
 
-    delete ml;
     SetUp();
 
     m = ml->movie( "movie" );
@@ -114,7 +108,6 @@ TEST_F( Movies, AssignToFile )
     f->setMovie( m );
     ASSERT_EQ( f->movie(), m );
 
-    delete ml;
     SetUp();
 
     f = ml->file( "file" );
@@ -134,7 +127,6 @@ TEST_F( Movies, DestroyMovie )
     f = ml->file( "file" );
     ASSERT_EQ( f, nullptr );
 
-    delete ml;
     SetUp();
 
     f = ml->file( "file" );

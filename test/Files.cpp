@@ -6,25 +6,24 @@
 class Files : public testing::Test
 {
     public:
-        static IMediaLibrary* ml;
+        static std::unique_ptr<IMediaLibrary> ml;
 
     protected:
         virtual void SetUp()
         {
-            ml = MediaLibraryFactory::create();
+            ml.reset( MediaLibraryFactory::create() );
             bool res = ml->initialize( "test.db" );
             ASSERT_TRUE( res );
         }
 
         virtual void TearDown()
         {
-            delete ml;
-            ml = nullptr;
+            ml.reset();
             unlink("test.db");
         }
 };
 
-IMediaLibrary* Files::ml;
+std::unique_ptr<IMediaLibrary> Files::ml;
 
 TEST_F( Files, Init )
 {
@@ -55,7 +54,6 @@ TEST_F( Files, Fetch )
     ASSERT_EQ( f, f2 );
 
     // Flush cache and fetch from DB
-    delete ml;
     SetUp();
 
     f2 = ml->file( "/dev/null" );

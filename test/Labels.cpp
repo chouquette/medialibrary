@@ -7,24 +7,24 @@
 class Labels : public testing::Test
 {
     public:
-        static IMediaLibrary* ml;
+        static std::unique_ptr<IMediaLibrary> ml;
 
     protected:
         virtual void SetUp()
         {
-            ml = MediaLibraryFactory::create();
+            ml.reset( MediaLibraryFactory::create() );
             bool res = ml->initialize( "test.db" );
             ASSERT_TRUE( res );
         }
 
         virtual void TearDown()
         {
-            delete ml;
+            ml.reset();
             unlink("test.db");
         }
 };
 
-IMediaLibrary* Labels::ml;
+std::unique_ptr<IMediaLibrary> Labels::ml;
 
 TEST_F( Labels, Add )
 {
