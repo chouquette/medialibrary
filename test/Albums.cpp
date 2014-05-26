@@ -114,6 +114,7 @@ TEST_F( Albums, SetGenre )
     SetUp();
 
     std::vector<AlbumTrackPtr> tracks;
+    a = ml->album( "album" );
     a->tracks( tracks );
     auto t2 = tracks[0];
     ASSERT_EQ( t->genre(), t2->genre() );
