@@ -100,7 +100,8 @@ time_t Album::lastSyncDate() const
 
 bool Album::tracks( std::vector<std::shared_ptr<IAlbumTrack> >& tracks ) const
 {
-    const char* req = "SELECT * FROM AlbumTrack WHERE album_id = ?";
+    static const std::string req = "SELECT * FROM " + policy::AlbumTrackTable::Name
+            + " WHERE album_id = ?";
     return SqliteTools::fetchAll<AlbumTrack>( m_dbConnection, req, tracks, m_id );
 }
 
@@ -124,7 +125,9 @@ bool Album::destroy()
 
 bool Album::createTable( sqlite3* dbConnection )
 {
-    const char* req = "CREATE TABLE IF NOT EXISTS Album("
+    static const std::string req = "CREATE TABLE IF NOT EXISTS " +
+            policy::AlbumTable::Name +
+            "("
                 "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "name TEXT,"
                 "release_date UNSIGNED INTEGER,"
