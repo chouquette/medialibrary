@@ -20,7 +20,7 @@ class IFile
             AudioType, // Any kind of audio file, not being an album track
             ShowEpisodeType,
             AlbumTrackType,
-            UnknownType,
+            UnknownType
         };
         virtual ~IFile() {}
 
