@@ -62,7 +62,7 @@ bool Label::createTable(DBConnection dbConnection)
     req = "CREATE TABLE IF NOT EXISTS LabelFileRelation("
                 "id_label INTEGER,"
                 "id_file INTEGER,"
-            "PRIMARY KEY (id_label, id_file)"
+            "PRIMARY KEY (id_label, id_file),"
             "FOREIGN KEY(id_label) REFERENCES Label(id_label) ON DELETE CASCADE,"
             "FOREIGN KEY(id_file) REFERENCES File(id_file) ON DELETE CASCADE);";
     return SqliteTools::executeRequest( dbConnection, req );
