@@ -28,15 +28,15 @@ std::unique_ptr<IMediaLibrary> AudioTracks::ml;
 TEST_F( AudioTracks, AddTrack )
 {
     auto f = ml->addFile( "file" );
-    bool res = f->addAudioTrack( "PCM", 44100 );
+    bool res = f->addAudioTrack( "PCM", 44100, 128, 2 );
     ASSERT_TRUE( res );
 }
 
 TEST_F( AudioTracks, FetchTracks )
 {
     auto f = ml->addFile( "file" );
-    f->addAudioTrack( "PCM", 44100 );
-    f->addAudioTrack( "WMA", 48000 );
+    f->addAudioTrack( "PCM", 44100, 128, 2 );
+    f->addAudioTrack( "WMA", 48000, 128, 2 );
 
     std::vector<AudioTrackPtr> ts;
     bool res = f->audioTracks( ts );
@@ -47,10 +47,10 @@ TEST_F( AudioTracks, FetchTracks )
 TEST_F( AudioTracks, CheckUnique )
 {
     auto f = ml->addFile( "file" );
-    f->addAudioTrack( "PCM", 44100 );
+    f->addAudioTrack( "PCM", 44100, 128, 2 );
 
     auto f2 = ml->addFile( "file2" );
-    f2->addAudioTrack( "PCM", 44100 );
+    f2->addAudioTrack( "PCM", 44100, 128, 2 );
 
     std::vector<AudioTrackPtr> ts;
     f->audioTracks( ts );

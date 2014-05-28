@@ -61,7 +61,7 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         virtual bool addVideoTrack( const std::string& codec, unsigned int width,
                                     unsigned int height, float fps );
         virtual bool videoTracks( std::vector<VideoTrackPtr>& tracks );
-        virtual bool addAudioTrack( const std::string& codec, unsigned int bitrate );
+        virtual bool addAudioTrack(const std::string& codec, unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels);
         virtual bool audioTracks( std::vector<AudioTrackPtr>& tracks );
 
     private:

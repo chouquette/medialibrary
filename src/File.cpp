@@ -160,14 +160,15 @@ bool File::videoTracks(std::vector<VideoTrackPtr>& tracks)
     return SqliteTools::fetchAll<VideoTrack>( m_dbConnection, req, tracks, m_id );
 }
 
-bool File::addAudioTrack(const std::string& codec, unsigned int bitrate)
+bool File::addAudioTrack( const std::string& codec, unsigned int bitrate,
+                          unsigned int sampleRate, unsigned int nbChannels )
 {
     static const std::string req = "INSERT INTO AudioTrackFileRelation VALUES(?, ?)";
 
-    auto track = AudioTrack::fetch( m_dbConnection, codec, bitrate );
+    auto track = AudioTrack::fetch( m_dbConnection, codec, bitrate, sampleRate, nbChannels );
     if ( track == nullptr )
     {
-        track = AudioTrack::create( m_dbConnection, codec, bitrate );
+        track = AudioTrack::create( m_dbConnection, codec, bitrate, sampleRate, nbChannels );
         if ( track == nullptr )
             return false;
     }

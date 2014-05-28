@@ -9,13 +9,17 @@ AudioTrack::AudioTrack( DBConnection dbConnection, sqlite3_stmt* stmt )
     , m_id( Traits<unsigned int>::Load( stmt, 0 ) )
     , m_codec( Traits<std::string>::Load( stmt, 1 ) )
     , m_bitrate( Traits<unsigned int>::Load( stmt, 2 ) )
+    , m_sampleRate( Traits<unsigned int>::Load( stmt, 3 ) )
+    , m_nbChannels( Traits<unsigned int>::Load( stmt, 4 ) )
 {
 }
 
-AudioTrack::AudioTrack( const std::string& codec, unsigned int bitrate )
+AudioTrack::AudioTrack(const std::string& codec, unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels )
     : m_id( 0 )
     , m_codec( codec )
     , m_bitrate( bitrate )
+    , m_sampleRate( sampleRate )
+    , m_nbChannels( nbChannels )
 {
 }
 
@@ -34,6 +38,16 @@ unsigned int AudioTrack::bitrate() const
     return m_bitrate;
 }
 
+unsigned int AudioTrack::sampleRate() const
+{
+    return m_sampleRate;
+}
+
+unsigned int AudioTrack::nbChannels() const
+{
+    return m_nbChannels;
+}
+
 bool AudioTrack::createTable( DBConnection dbConnection )
 {
     static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AudioTrackTable::Name
@@ -41,24 +55,28 @@ bool AudioTrack::createTable( DBConnection dbConnection )
                 policy::AudioTrackTable::CacheColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "codec TEXT,"
                 "bitrate UNSIGNED INTEGER,"
+                "samplerate UNSIGNED INTEGER,"
+                "nb_channels UNSIGNED INTEGER,"
                 "UNIQUE ( codec, bitrate ) ON CONFLICT FAIL"
             ")";
     return SqliteTools::executeRequest( dbConnection, req );
 }
 
-AudioTrackPtr AudioTrack::fetch( DBConnection dbConnection, const std::string& codec, unsigned int bitrate )
+AudioTrackPtr AudioTrack::fetch(DBConnection dbConnection, const std::string& codec,
+                unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels )
 {
     static const std::string req = "SELECT * FROM " + policy::AudioTrackTable::Name
-            + " WHERE codec = ? AND bitrate = ?";
-    return SqliteTools::fetchOne<AudioTrack>( dbConnection, req, codec, bitrate );
+            + " WHERE codec = ? AND bitrate = ? AND samplerate = ? AND nb_channels = ?";
+    return SqliteTools::fetchOne<AudioTrack>( dbConnection, req, codec, bitrate, sampleRate, nbChannels );
 }
 
-AudioTrackPtr AudioTrack::create( DBConnection dbConnection, const std::string& codec, unsigned int bitrate )
+AudioTrackPtr AudioTrack::create( DBConnection dbConnection, const std::string& codec,
+                unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels )
 {
     static const std::string req = "INSERT INTO " + policy::AudioTrackTable::Name
-            + "(codec, bitrate) VALUES(?, ?)";
-    auto track = std::make_shared<AudioTrack>( codec, bitrate );
-    if ( _Cache::insert( dbConnection, track, req, codec, bitrate ) == false )
+            + "(codec, bitrate, samplerate, nb_channels) VALUES(?, ?, ?, ?)";
+    auto track = std::make_shared<AudioTrack>( codec, bitrate, sampleRate, nbChannels );
+    if ( _Cache::insert( dbConnection, track, req, codec, bitrate, sampleRate, nbChannels ) == false )
         return nullptr;
     track->m_dbConnection = dbConnection;
     return track;

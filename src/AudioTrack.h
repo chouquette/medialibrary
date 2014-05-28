@@ -21,21 +21,26 @@ class AudioTrack : public IAudioTrack, public Cache<AudioTrack, IAudioTrack, pol
 {
     public:
         AudioTrack( DBConnection dbConnection, sqlite3_stmt* stmt );
-        AudioTrack( const std::string& codec, unsigned int bitrate );
+        AudioTrack( const std::string& codec, unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels );
 
         virtual unsigned int id() const;
         virtual const std::string&codec() const;
         virtual unsigned int bitrate() const;
+        virtual unsigned int sampleRate() const;
+        virtual unsigned int nbChannels() const;
 
         static bool createTable( DBConnection dbConnection );
-        static AudioTrackPtr fetch( DBConnection dbConnection, const std::string& codec, unsigned int bitrate );
-        static AudioTrackPtr create( DBConnection dbConnection, const std::string& codec, unsigned int bitrate );
+        static AudioTrackPtr fetch( DBConnection dbConnection, const std::string& codec,
+                                    unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels );
+        static AudioTrackPtr create(DBConnection dbConnection, const std::string& codec, unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels);
 
     private:
         DBConnection m_dbConnection;
         unsigned int m_id;
         const std::string m_codec;
         const unsigned int m_bitrate;
+        const unsigned int m_sampleRate;
+        const unsigned int m_nbChannels;
 
 
     private:

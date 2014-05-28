@@ -39,7 +39,8 @@ class IFile
         virtual bool addVideoTrack( const std::string& codec, unsigned int width,
                                     unsigned int height, float fps ) = 0;
         virtual bool videoTracks( std::vector<VideoTrackPtr>& tracks ) = 0;
-        virtual bool addAudioTrack( const std::string& codec, unsigned int bitrate ) = 0;
+        virtual bool addAudioTrack( const std::string& codec, unsigned int bitrate,
+                                    unsigned int sampleRate, unsigned int nbChannels ) = 0;
         virtual bool audioTracks( std::vector<AudioTrackPtr>& tracks ) = 0;
 };
 

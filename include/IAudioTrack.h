@@ -10,6 +10,8 @@ class IAudioTrack
         virtual unsigned int id() const = 0;
         virtual const std::string& codec() const = 0;
         virtual unsigned int bitrate() const = 0;
+        virtual unsigned int sampleRate() const = 0;
+        virtual unsigned int nbChannels() const = 0;
 };
 
 #endif // IAUDIOTRACK_H
