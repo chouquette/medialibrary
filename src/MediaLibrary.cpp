@@ -1,16 +1,17 @@
 #include <algorithm>
 #include <functional>
 
-#include "MediaLibrary.h"
-#include "IMetadataService.h"
-#include "SqliteTools.h"
-#include "File.h"
-#include "Label.h"
 #include "Album.h"
 #include "AlbumTrack.h"
+#include "AudioTrack.h"
+#include "File.h"
+#include "MediaLibrary.h"
+#include "IMetadataService.h"
+#include "Label.h"
 #include "Movie.h"
 #include "Show.h"
 #include "ShowEpisode.h"
+#include "SqliteTools.h"
 #include "VideoTrack.h"
 
 MediaLibrary::MediaLibrary()
@@ -27,6 +28,7 @@ MediaLibrary::~MediaLibrary()
     ShowEpisode::clear();
     Movie::clear();
     VideoTrack::clear();
+    AudioTrack::clear();
 }
 
 bool MediaLibrary::initialize(const std::string& dbPath)
@@ -45,7 +47,8 @@ bool MediaLibrary::initialize(const std::string& dbPath)
         Show::createTable( m_dbConnection ) &&
         ShowEpisode::createTable( m_dbConnection ) &&
         Movie::createTable( m_dbConnection ) ) &&
-        VideoTrack::createTable( m_dbConnection );
+        VideoTrack::createTable( m_dbConnection ) &&
+        AudioTrack::createTable( m_dbConnection );
 }
 
 

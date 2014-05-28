@@ -4,6 +4,7 @@
 
 #include "Album.h"
 #include "AlbumTrack.h"
+#include "AudioTrack.h"
 #include "File.h"
 #include "Label.h"
 #include "Movie.h"
@@ -159,6 +160,28 @@ bool File::videoTracks(std::vector<VideoTrackPtr>& tracks)
     return SqliteTools::fetchAll<VideoTrack>( m_dbConnection, req, tracks, m_id );
 }
 
+bool File::addAudioTrack(const std::string& codec, unsigned int bitrate)
+{
+    static const std::string req = "INSERT INTO AudioTrackFileRelation VALUES(?, ?)";
+
+    auto track = AudioTrack::fetch( m_dbConnection, codec, bitrate );
+    if ( track == nullptr )
+    {
+        track = AudioTrack::create( m_dbConnection, codec, bitrate );
+        if ( track == nullptr )
+            return false;
+    }
+    return SqliteTools::executeRequest( m_dbConnection, req, track->id(), m_id );
+}
+
+bool File::audioTracks( std::vector<AudioTrackPtr>& tracks )
+{
+    static const std::string req = "SELECT t.* FROM " + policy::AudioTrackTable::Name +
+            " t LEFT JOIN AudioTrackFileRelation atfr ON atfr.id_track = t.id_track"
+            " WHERE atfr.id_file = ?";
+    return SqliteTools::fetchAll<AudioTrack>( m_dbConnection, req, tracks, m_id );
+}
+
 unsigned int File::id() const
 {
     return m_id;
@@ -189,6 +212,17 @@ bool File::createTable( DBConnection connection )
                 "id_file INTEGER,"
                 "PRIMARY KEY ( id_track, id_file ), "
                 "FOREIGN KEY ( id_track ) REFERENCES " + policy::VideoTrackTable::Name +
+                    "(id_track) ON DELETE CASCADE,"
+                "FOREIGN KEY ( id_file ) REFERENCES " + policy::FileTable::Name
+                + "(id_file) ON DELETE CASCADE"
+            ")";
+    if ( SqliteTools::executeRequest( connection, req ) == false )
+        return false;
+    req = "CREATE TABLE IF NOT EXISTS AudioTrackFileRelation("
+                "id_track INTEGER,"
+                "id_file INTEGER,"
+                "PRIMARY KEY ( id_track, id_file ), "
+                "FOREIGN KEY ( id_track ) REFERENCES " + policy::AudioTrackTable::Name +
                     "(id_track) ON DELETE CASCADE,"
                 "FOREIGN KEY ( id_file ) REFERENCES " + policy::FileTable::Name
                 + "(id_file) ON DELETE CASCADE"
