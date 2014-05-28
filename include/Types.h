@@ -11,6 +11,8 @@ class IMetadataService;
 class IMovie;
 class IShow;
 class IShowEpisode;
+class IVideoTrack;
+
 struct sqlite3;
 
 typedef std::shared_ptr<IFile> FilePtr;
@@ -20,6 +22,9 @@ typedef std::shared_ptr<IAlbumTrack> AlbumTrackPtr;
 typedef std::shared_ptr<IShow> ShowPtr;
 typedef std::shared_ptr<IShowEpisode> ShowEpisodePtr;
 typedef std::shared_ptr<IMovie> MoviePtr;
+typedef std::shared_ptr<IVideoTrack> VideoTrackPtr;
+
 typedef std::weak_ptr<sqlite3> DBConnection;
+
 
 #endif // TYPES_H

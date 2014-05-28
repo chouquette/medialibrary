@@ -37,6 +37,9 @@ class IFile
         virtual MoviePtr movie() = 0;
         virtual bool setMovie( MoviePtr movie ) = 0;
         virtual std::vector<std::shared_ptr<ILabel> > labels() = 0;
+        virtual bool addVideoTrack( const std::string& codec, unsigned int width,
+                                    unsigned int height, float fps ) = 0;
+        virtual bool videoTracks( std::vector<VideoTrackPtr>& tracks ) = 0;
 };
 
 #endif // IFILE_H

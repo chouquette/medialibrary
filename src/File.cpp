@@ -9,6 +9,7 @@
 #include "Movie.h"
 #include "ShowEpisode.h"
 #include "SqliteTools.h"
+#include "VideoTrack.h"
 
 const std::string policy::FileTable::Name = "File";
 const std::string policy::FileTable::CacheColumn = "mrl";
@@ -136,6 +137,28 @@ bool File::setMovie( MoviePtr movie )
     return true;
 }
 
+bool File::addVideoTrack(const std::string& codec, unsigned int width, unsigned int height, float fps)
+{
+    static const std::string req = "INSERT INTO VideoTrackFileRelation VALUES(?, ?)";
+
+    auto track = VideoTrack::fetch( m_dbConnection, codec, width, height, fps );
+    if ( track == nullptr )
+    {
+        track = VideoTrack::create( m_dbConnection, codec, width, height, fps );
+        if ( track == nullptr )
+            return false;
+    }
+    return SqliteTools::executeRequest( m_dbConnection, req, track->id(), m_id );
+}
+
+bool File::videoTracks(std::vector<VideoTrackPtr>& tracks)
+{
+    static const std::string req = "SELECT t.* FROM " + policy::VideoTrackTable::Name +
+            " t LEFT JOIN VideoTrackFileRelation vtfr ON vtfr.id_track = t.id_track"
+            " WHERE vtfr.id_file = ?";
+    return SqliteTools::fetchAll<VideoTrack>( m_dbConnection, req, tracks, m_id );
+}
+
 unsigned int File::id() const
 {
     return m_id;
@@ -158,6 +181,17 @@ bool File::createTable( DBConnection connection )
             + "(id_episode) ON DELETE CASCADE,"
             "FOREIGN KEY (movie_id) REFERENCES " + policy::MovieTable::Name
             + "(id_movie) ON DELETE CASCADE"
+            ")";
+    if ( SqliteTools::executeRequest( connection, req ) == false )
+        return false;
+    req = "CREATE TABLE IF NOT EXISTS VideoTrackFileRelation("
+                "id_track INTEGER,"
+                "id_file INTEGER,"
+                "PRIMARY KEY ( id_track, id_file ), "
+                "FOREIGN KEY ( id_track ) REFERENCES " + policy::VideoTrackTable::Name +
+                    "(id_track) ON DELETE CASCADE,"
+                "FOREIGN KEY ( id_file ) REFERENCES " + policy::FileTable::Name
+                + "(id_file) ON DELETE CASCADE"
             ")";
     return SqliteTools::executeRequest( connection, req );
 }

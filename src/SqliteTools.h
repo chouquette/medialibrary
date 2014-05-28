@@ -43,6 +43,16 @@ struct Traits<std::string>
     }
 };
 
+template <>
+struct Traits<float>
+{
+        static constexpr int
+        (*Bind)(sqlite3_stmt *, int, double) = &sqlite3_bind_double;
+
+        static constexpr double
+        (*Load)(sqlite3_stmt *, int) = &sqlite3_column_double;
+};
+
 class SqliteTools
 {
     private:

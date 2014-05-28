@@ -11,6 +11,7 @@
 #include "Movie.h"
 #include "Show.h"
 #include "ShowEpisode.h"
+#include "VideoTrack.h"
 
 MediaLibrary::MediaLibrary()
 {
@@ -25,6 +26,7 @@ MediaLibrary::~MediaLibrary()
     Show::clear();
     ShowEpisode::clear();
     Movie::clear();
+    VideoTrack::clear();
 }
 
 bool MediaLibrary::initialize(const std::string& dbPath)
@@ -42,7 +44,8 @@ bool MediaLibrary::initialize(const std::string& dbPath)
         AlbumTrack::createTable( m_dbConnection ) &&
         Show::createTable( m_dbConnection ) &&
         ShowEpisode::createTable( m_dbConnection ) &&
-        Movie::createTable( m_dbConnection ) );
+        Movie::createTable( m_dbConnection ) ) &&
+        VideoTrack::createTable( m_dbConnection );
 }
 
 

@@ -58,6 +58,9 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         virtual const std::string& mrl() const;
         virtual MoviePtr movie();
         virtual bool setMovie( MoviePtr movie );
+        virtual bool addVideoTrack( const std::string& codec, unsigned int width,
+                                    unsigned int height, float fps );
+        virtual bool videoTracks( std::vector<VideoTrackPtr>& tracks );
 
     private:
         DBConnection m_dbConnection;
