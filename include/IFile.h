@@ -5,7 +5,6 @@
 #include <memory>
 
 #include "IMediaLibrary.h"
-#include "ITrackInformation.h"
 
 class IAlbumTrack;
 class IShowEpisode;

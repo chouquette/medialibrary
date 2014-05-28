@@ -7,9 +7,6 @@ EnableCpp11()
 add_definitions("-Wall -Wextra -pedantic -O0")
 
 list(APPEND HEADERS_LIST
-    ${CMAKE_SOURCE_DIR}/include/IAudioTrackInformation.h
-    ${CMAKE_SOURCE_DIR}/include/ITrackInformation.h
-    ${CMAKE_SOURCE_DIR}/include/IVideoTrackInformation.h
     ${CMAKE_SOURCE_DIR}/include/IShow.h
     ${CMAKE_SOURCE_DIR}/include/IShowEpisode.h
     ${CMAKE_SOURCE_DIR}/include/IAlbum.h
@@ -17,6 +14,9 @@ list(APPEND HEADERS_LIST
     ${CMAKE_SOURCE_DIR}/include/IFile.h
     ${CMAKE_SOURCE_DIR}/include/IMediaLibrary.h
     ${CMAKE_SOURCE_DIR}/include/ILabel.h
+    ${CMAKE_SOURCE_DIR}/include/IAudioTrack.h
+    ${CMAKE_SOURCE_DIR}/include/IVideoTrack.h
+    ${CMAKE_SOURCE_DIR}/include/IMovie.h
 )
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
