@@ -7,6 +7,8 @@
 #include "IMetadataService.h"
 #include "IFile.h"
 #include "IAudioTrack.h"
+#include "IAlbum.h"
+#include "IAlbumTrack.h"
 #include "metadata_services/VLCMetadataService.h"
 
 class ServiceCb : public IMetadataServiceCb
@@ -81,4 +83,27 @@ TEST_F( VLCMetadataServices, ParseAudio )
     ASSERT_EQ( track->bitrate(), 128000 );
     ASSERT_EQ( track->sampleRate(), 44100 );
     ASSERT_EQ( track->nbChannels(), 2 );
+}
+
+TEST_F( VLCMetadataServices, ParseAlbum )
+{
+    std::unique_lock<std::mutex> lock( cb->mutex );
+    auto file = ml->addFile( "mr-zebra.mp3" );
+    bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 2 ),
+                           [&]{ return file->albumTrack() != nullptr; } );
+
+    ASSERT_TRUE( res );
+    SetUp();
+
+    file = ml->file( "mr-zebra.mp3" );
+    auto track = file->albumTrack();
+    ASSERT_NE( track, nullptr );
+    ASSERT_EQ( track->title(), "Mr. Zebra" );
+    ASSERT_EQ( track->genre(), "Rock" );
+    auto album = track->album();
+    ASSERT_NE( album, nullptr );
+    ASSERT_EQ( album->title(), "Boys for Pele" );
+
+    auto album2 = ml->album( "Boys for Pele" );
+    ASSERT_EQ( album, album2 );
 }
