@@ -29,6 +29,7 @@ EnableCpp11()
 add_definitions("-g")
 add_definitions("-Wall -Wextra")
 include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/src)
 
 list(APPEND TEST_SRCS
     Files.cpp
@@ -39,6 +40,7 @@ list(APPEND TEST_SRCS
     Movies.cpp
     VideoTracks.cpp
     AudioTracks.cpp
+    VLCMetadataServices.cpp
 )
 
 add_executable(unittest ${TEST_SRCS})

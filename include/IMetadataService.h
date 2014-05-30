@@ -7,21 +7,16 @@ class IMetadataServiceCb
 {
     public:
         virtual void updated( FilePtr file ) = 0;
+        virtual void error( FilePtr file, const std::string& error ) = 0;
 };
 
 class IMetadataService
 {
     public:
-        enum Result
-        {
-            Success,
-            Failure,
-            NotApplicable // If trying to fetch the tv show summary of an album, for instance
-        };
-
         virtual ~IMetadataService() {}
-        virtual unsigned int priority() = 0;
-        virtual Result run( FilePtr file ) = 0;
+        virtual bool initialize( IMetadataServiceCb* callback, IMediaLibrary* ml ) = 0;
+        virtual unsigned int priority() const = 0;
+        virtual bool run( FilePtr file ) = 0;
 };
 
 #endif // IMETADATASERVICE_H

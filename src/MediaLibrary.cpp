@@ -64,7 +64,12 @@ FilePtr MediaLibrary::file( const std::string& path )
 
 FilePtr MediaLibrary::addFile( const std::string& path )
 {
-    return File::create( m_dbConnection, path );
+    auto file = File::create( m_dbConnection, path );
+    if ( file == nullptr )
+        return nullptr;
+    for ( const auto& s : m_mdServices )
+        s->run( file );
+    return file;
 }
 
 bool MediaLibrary::deleteFile( const std::string& mrl )
