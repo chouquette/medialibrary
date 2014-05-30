@@ -27,11 +27,10 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         typedef Cache<Album, IAlbum, policy::AlbumTable> _Cache;
     public:
         Album( DBConnection dbConnection, sqlite3_stmt* stmt );
-        Album( const std::string& id3tag );
+        Album( const std::string& title );
 
         virtual unsigned int id() const;
-        virtual const std::string& name() const;
-        virtual bool setName( const std::string& name );
+        virtual const std::string& title() const;
         virtual time_t releaseDate() const;
         virtual bool setReleaseDate( time_t date );
         virtual const std::string& shortSummary() const;
@@ -40,21 +39,20 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         virtual bool setArtworkUrl( const std::string& artworkUrl );
         virtual time_t lastSyncDate() const;
         virtual bool tracks( std::vector<std::shared_ptr<IAlbumTrack>>& tracks ) const;
-        virtual AlbumTrackPtr addTrack( const std::string& name, unsigned int trackNb );
+        virtual AlbumTrackPtr addTrack( const std::string& title, unsigned int trackNb );
         virtual bool destroy();
 
         static bool createTable( DBConnection dbConnection );
-        static AlbumPtr create( DBConnection dbConnection, const std::string& id3Tag );
+        static AlbumPtr create(DBConnection dbConnection, const std::string& title );
 
     protected:
         DBConnection m_dbConnection;
         unsigned int m_id;
-        std::string m_name;
+        std::string m_title;
         unsigned int m_releaseDate;
         std::string m_shortSummary;
         std::string m_artworkUrl;
         time_t m_lastSyncDate;
-        std::string m_id3tag;
 
         friend class Cache<Album, IAlbum, policy::AlbumTable>;
         friend struct policy::AlbumTable;

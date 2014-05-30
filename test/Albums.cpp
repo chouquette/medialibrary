@@ -29,11 +29,12 @@ std::unique_ptr<IMediaLibrary> Albums::ml;
 
 TEST_F( Albums, Create )
 {
-    auto a = ml->createAlbum( "mytag" );
+    auto a = ml->createAlbum( "album" );
     ASSERT_NE( a, nullptr );
 
-    auto a2 = ml->album( "mytag" );
+    auto a2 = ml->album( "album" );
     ASSERT_EQ( a, a2 );
+    ASSERT_EQ( a2->title(), "album" );
 }
 
 TEST_F( Albums, Fetch )
@@ -120,19 +121,6 @@ TEST_F( Albums, SetGenre )
     ASSERT_EQ( t->genre(), t2->genre() );
 }
 
-TEST_F( Albums, SetName )
-{
-    auto a = ml->createAlbum( "album" );
-
-    a->setName( "albumname" );
-    ASSERT_EQ( a->name(), "albumname" );
-
-    SetUp();
-
-    auto a2 = ml->album( "album" );
-    ASSERT_EQ( a->name(), a2->name() );
-}
-
 TEST_F( Albums, SetReleaseDate )
 {
     auto a = ml->createAlbum( "album" );
@@ -176,7 +164,6 @@ TEST_F( Albums, FetchAlbumFromTrack )
 {
     {
         auto a = ml->createAlbum( "album" );
-        a->setName( "album" );
         auto f = ml->addFile( "file" );
         auto t = a->addTrack( "track 1", 1 );
         f->setAlbumTrack( t );
@@ -187,13 +174,12 @@ TEST_F( Albums, FetchAlbumFromTrack )
     auto t = f->albumTrack();
     auto a = t->album();
     ASSERT_NE( a, nullptr );
-    ASSERT_EQ( a->name(), "album" );
+    ASSERT_EQ( a->title(), "album" );
 }
 
 TEST_F( Albums, DestroyAlbum )
 {
     auto a = ml->createAlbum( "album" );
-    a->setName( "album" );
     auto f = ml->addFile( "file" );
     auto t = a->addTrack( "track 1", 1 );
     f->setAlbumTrack( t );

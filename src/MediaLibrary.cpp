@@ -92,17 +92,17 @@ bool MediaLibrary::deleteLabel( LabelPtr label )
     return Label::destroy( m_dbConnection, std::static_pointer_cast<Label>( label ) );
 }
 
-AlbumPtr MediaLibrary::album( const std::string& id3Tag )
+AlbumPtr MediaLibrary::album(const std::string& title )
 {
     // We can't use Cache helper, since albums are cached by primary keys
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
-            " WHERE id3tag = ?";
-    return SqliteTools::fetchOne<Album>( DBConnection( m_dbConnection ), req, id3Tag );
+            " WHERE title = ?";
+    return SqliteTools::fetchOne<Album>( DBConnection( m_dbConnection ), req, title );
 }
 
-AlbumPtr MediaLibrary::createAlbum( const std::string& id3Tag )
+AlbumPtr MediaLibrary::createAlbum(const std::string& title )
 {
-    return Album::create( m_dbConnection, id3Tag );
+    return Album::create( m_dbConnection, title );
 }
 
 ShowPtr MediaLibrary::show(const std::string& name)

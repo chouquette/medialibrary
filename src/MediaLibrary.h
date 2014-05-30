@@ -22,8 +22,8 @@ class MediaLibrary : public IMediaLibrary
         virtual bool deleteLabel(const std::string& text );
         virtual bool deleteLabel( LabelPtr label );
 
-        virtual AlbumPtr album( const std::string& id3Tag );
-        virtual AlbumPtr createAlbum( const std::string& id3Tag );
+        virtual AlbumPtr album( const std::string& title );
+        virtual AlbumPtr createAlbum( const std::string& title );
 
         virtual ShowPtr show( const std::string& name );
         virtual ShowPtr createShow( const std::string& name );

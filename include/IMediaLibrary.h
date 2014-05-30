@@ -19,8 +19,8 @@ class IMediaLibrary
         virtual bool deleteLabel( const std::string& label ) = 0;
         virtual bool deleteLabel( LabelPtr label ) = 0;
         virtual bool files( std::vector<FilePtr>& res ) = 0;
-        virtual AlbumPtr album( const std::string& id3Tag ) = 0;
-        virtual AlbumPtr createAlbum( const std::string& id3Tag ) = 0;
+        virtual AlbumPtr album( const std::string& title ) = 0;
+        virtual AlbumPtr createAlbum( const std::string& title ) = 0;
         virtual ShowPtr show( const std::string& name ) = 0;
         virtual ShowPtr createShow( const std::string& name ) = 0;
         virtual MoviePtr movie( const std::string& title ) = 0;

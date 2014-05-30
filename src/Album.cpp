@@ -11,19 +11,18 @@ Album::Album(DBConnection dbConnection, sqlite3_stmt* stmt)
     : m_dbConnection( dbConnection )
 {
     m_id = sqlite3_column_int( stmt, 0 );
-    m_name = Traits<std::string>::Load( stmt, 1 );
+    m_title = Traits<std::string>::Load( stmt, 1 );
     m_releaseDate = sqlite3_column_int( stmt, 2 );
     m_shortSummary = Traits<std::string>::Load( stmt, 3 );
     m_artworkUrl = Traits<std::string>::Load( stmt, 4 );
     m_lastSyncDate = sqlite3_column_int( stmt, 5 );
-    m_id3tag = Traits<std::string>::Load( stmt, 6 );
 }
 
-Album::Album( const std::string& id3tag )
+Album::Album(const std::string& title )
     : m_id( 0 )
+    , m_title( title )
     , m_releaseDate( 0 )
     , m_lastSyncDate( 0 )
-    , m_id3tag( id3tag )
 {
 }
 
@@ -32,19 +31,9 @@ unsigned int Album::id() const
     return m_id;
 }
 
-const std::string& Album::name() const
+const std::string& Album::title() const
 {
-    return m_name;
-}
-
-bool Album::setName( const std::string& name )
-{
-    static const std::string& req = "UPDATE " + policy::AlbumTable::Name
-            + " SET name = ? WHERE id_album = ?";
-    if ( SqliteTools::executeUpdate( m_dbConnection, req, name, m_id ) == false )
-        return false;
-    m_name = name;
-    return true;
+    return m_title;
 }
 
 time_t Album::releaseDate() const
@@ -104,9 +93,9 @@ bool Album::tracks( std::vector<std::shared_ptr<IAlbumTrack> >& tracks ) const
     return SqliteTools::fetchAll<AlbumTrack>( m_dbConnection, req, tracks, m_id );
 }
 
-AlbumTrackPtr Album::addTrack( const std::string& name, unsigned int trackNb )
+AlbumTrackPtr Album::addTrack( const std::string& title, unsigned int trackNb )
 {
-    return AlbumTrack::create( m_dbConnection, m_id, name, trackNb );
+    return AlbumTrack::create( m_dbConnection, m_id, title, trackNb );
 }
 
 bool Album::destroy()
@@ -128,22 +117,21 @@ bool Album::createTable(DBConnection dbConnection )
             policy::AlbumTable::Name +
             "("
                 "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
-                "name TEXT,"
+                "title TEXT UNIQUE ON CONFLICT FAIL,"
                 "release_date UNSIGNED INTEGER,"
                 "short_summary TEXT,"
                 "artwork_url TEXT,"
-                "UNSIGNED INTEGER last_sync_date,"
-                "id3tag TEXT UNIQUE ON CONFLICT FAIL"
+                "UNSIGNED INTEGER last_sync_date"
             ")";
    return SqliteTools::executeRequest( dbConnection, req );
 }
 
-AlbumPtr Album::create(DBConnection dbConnection, const std::string& id3Tag )
+AlbumPtr Album::create(DBConnection dbConnection, const std::string& title )
 {
-    auto album = std::make_shared<Album>( id3Tag );
+    auto album = std::make_shared<Album>( title );
     static const std::string& req = "INSERT INTO " + policy::AlbumTable::Name +
-            "(id_album, id3tag) VALUES(NULL, ?)";
-    if ( _Cache::insert( dbConnection, album, req, id3Tag ) == false )
+            "(id_album, title) VALUES(NULL, ?)";
+    if ( _Cache::insert( dbConnection, album, req, title ) == false )
         return nullptr;
     album->m_dbConnection = dbConnection;
     return album;
