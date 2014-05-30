@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include <iostream>
 #include <vlc/vlc.h>
+#include <chrono>
 #include <condition_variable>
 
 #include "IMediaLibrary.h"
@@ -80,9 +81,9 @@ TEST_F( VLCMetadataServices, ParseAudio )
     ASSERT_EQ( tracks.size(), 1u );
     auto track = tracks[0];
     ASSERT_EQ( track->codec(), "mpga" );
-    ASSERT_EQ( track->bitrate(), 128000 );
-    ASSERT_EQ( track->sampleRate(), 44100 );
-    ASSERT_EQ( track->nbChannels(), 2 );
+    ASSERT_EQ( track->bitrate(), 128000u );
+    ASSERT_EQ( track->sampleRate(), 44100u );
+    ASSERT_EQ( track->nbChannels(), 2u );
 }
 
 TEST_F( VLCMetadataServices, ParseAlbum )
