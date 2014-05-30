@@ -4,3 +4,7 @@ compiler:
   - clang
 script: mkdir build && cd build && cmake .. && make && ./test/unittest
 
+before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install -y libvlc-dev libvlccore-dev
+
