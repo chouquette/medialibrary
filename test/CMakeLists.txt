@@ -52,3 +52,6 @@ target_link_libraries(unittest gtest gtest_main)
 if(UNIX)
     target_link_libraries(unittest "pthread")
 endif()
+
+## Download files for parsing unit tests
+file(DOWNLOAD "http://streams.videolan.org/streams/mp3/05-Mr.%20Zebra.mp3" "${CMAKE_CURRENT_BINARY_DIR}/mr-zebra.mp3")

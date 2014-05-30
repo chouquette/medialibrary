@@ -67,12 +67,12 @@ libvlc_instance_t* VLCMetadataServices::vlcInstance;
 TEST_F( VLCMetadataServices, ParseAudio )
 {
     std::unique_lock<std::mutex> lock( cb->mutex );
-    auto file = ml->addFile( "/home/chouquette/samples/mr-zebra.mp3" );
+    auto file = ml->addFile( "mr-zebra.mp3" );
     std::vector<AudioTrackPtr> tracks;
     cb->waitCond.wait( lock, [&]{ return file->audioTracks( tracks ) == true && tracks.size() > 0; } );
 
     SetUp();
-    file = ml->file( "/home/chouquette/samples/mr-zebra.mp3" );
+    file = ml->file( "mr-zebra.mp3" );
     bool res = file->audioTracks( tracks );
     ASSERT_TRUE( res );
     ASSERT_EQ( tracks.size(), 1u );
