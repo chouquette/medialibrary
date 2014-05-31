@@ -90,7 +90,7 @@ TEST_F( VLCMetadataServices, ParseAlbum )
 {
     std::unique_lock<std::mutex> lock( cb->mutex );
     auto file = ml->addFile( "mr-zebra.mp3" );
-    bool res = cb->waitCond.wait_for( lock, std::chrono::nanoseconds( 2000000000 ),
+    bool res = cb->waitCond.wait_for( lock, std::chrono::microseconds( 2000000 ),
                            [&]{ return file->albumTrack() != nullptr; } );
 
     ASSERT_TRUE( res );
