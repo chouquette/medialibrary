@@ -160,6 +160,23 @@ TEST_F( Albums, SetArtworkUrl )
     ASSERT_EQ( a->artworkUrl(), a2->artworkUrl() );
 }
 
+TEST_F( Albums, SetArtist )
+{
+    auto a = ml->createAlbum( "album" );
+    auto t = a->addTrack("track1", 1);
+
+    t->setArtist( "The undead otters" );
+    ASSERT_EQ( t->artist(), "The undead otters" );
+
+    SetUp();
+
+    auto a2 = ml->album( "album" );
+    std::vector<AlbumTrackPtr> tracks;
+    a2->tracks( tracks );
+    auto t2 = tracks[0];
+    ASSERT_EQ( t->artist(), t2->artist() );
+}
+
 TEST_F( Albums, FetchAlbumFromTrack )
 {
     {

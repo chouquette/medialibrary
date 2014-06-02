@@ -15,7 +15,8 @@ AlbumTrack::AlbumTrack( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_title = Traits<std::string>::Load( stmt, 1 );
     m_genre = Traits<std::string>::Load( stmt, 2 );
     m_trackNumber = Traits<unsigned int>::Load( stmt, 3 );
-    m_albumId = Traits<unsigned int>::Load( stmt, 4 );
+    m_artist = Traits<std::string>::Load( stmt, 4 );
+    m_albumId = Traits<unsigned int>::Load( stmt, 5 );
 }
 
 AlbumTrack::AlbumTrack( const std::string& title, unsigned int trackNumber, unsigned int albumId )
@@ -39,6 +40,7 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
                 "title TEXT,"
                 "genre TEXT,"
                 "track_number UNSIGNED INTEGER,"
+                "artist TEXT,"
                 "album_id UNSIGNED INTEGER NOT NULL,"
                 "FOREIGN KEY (album_id) REFERENCES Album(id_album) ON DELETE CASCADE"
             ")";
@@ -105,6 +107,21 @@ bool AlbumTrack::destroy()
         File::discard( std::static_pointer_cast<File>( f ) );
     }
     return _Cache::destroy( m_dbConnection, this );
+}
+
+const std::string&AlbumTrack::artist() const
+{
+    return m_artist;
+}
+
+bool AlbumTrack::setArtist(const std::string& artist)
+{
+    static const std::string req = "UPDATE " + policy::AlbumTrackTable::Name +
+            " SET artist = ? WHERE id_track = ?";
+    if ( SqliteTools::executeUpdate( m_dbConnection, req, artist, m_id ) == false )
+        return false;
+    m_artist = artist;
+    return true;
 }
 
 bool AlbumTrack::files(std::vector<FilePtr>& files)
