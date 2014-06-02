@@ -105,6 +105,7 @@ TEST_F( VLCMetadataServices, ParseAlbum )
     auto album = track->album();
     ASSERT_NE( album, nullptr );
     ASSERT_EQ( album->title(), "Boys for Pele" );
+    ASSERT_NE( album->artworkUrl().length(), 0u );
 
     auto album2 = ml->album( "Boys for Pele" );
     ASSERT_EQ( album, album2 );

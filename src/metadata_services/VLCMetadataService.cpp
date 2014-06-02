@@ -119,6 +119,12 @@ void VLCMetadataService::parseAudioFile( VLCMetadataService::Context* ctx )
         std::cerr << "Failed to get track id" << std::endl;
         return ;
     }
+    char* artwork = libvlc_media_get_meta( ctx->media, libvlc_meta_ArtworkURL );
+    if ( artwork != nullptr )
+    {
+        album->setArtworkUrl( artwork );
+        free( artwork );
+    }
     char* trackTitle = libvlc_media_get_meta( ctx->media, libvlc_meta_Title );
     std::string title;
     if ( trackTitle == nullptr )
