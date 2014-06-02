@@ -145,6 +145,12 @@ void VLCMetadataService::parseAudioFile( VLCMetadataService::Context* ctx )
         track->setGenre( genre );
         free( genre );
     }
+    char* artist = libvlc_media_get_meta( ctx->media, libvlc_meta_Artist );
+    if ( artist != nullptr )
+    {
+        track->setArtist( artist );
+        free( artist );
+    }
 }
 
 void VLCMetadataService::parseVideoFile( VLCMetadataService::Context* )
