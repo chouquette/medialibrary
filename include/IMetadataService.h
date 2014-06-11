@@ -6,6 +6,7 @@
 class IMetadataServiceCb
 {
     public:
+        virtual ~IMetadataServiceCb(){}
         virtual void updated( FilePtr file ) = 0;
         virtual void error( FilePtr file, const std::string& error ) = 0;
 };
