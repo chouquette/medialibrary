@@ -42,10 +42,14 @@ class VLCMetadataServices : public testing::Test
         static libvlc_instance_t* vlcInstance;
 
     protected:
+        static void SetUpTestCase()
+        {
+            cb.reset( new ServiceCb );
+        }
+
         virtual void SetUp()
         {
             ml.reset( MediaLibraryFactory::create() );
-            cb.reset( new ServiceCb );
             vlcInstance = libvlc_new( 0, NULL );
             auto vlcService = new VLCMetadataService( vlcInstance );
 
