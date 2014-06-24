@@ -137,7 +137,9 @@ void VLCMetadataService::parseAudioFile( VLCMetadataService::Context* ctx )
     {
         title = trackTitle;
     }
+    free( trackTitle );
     unsigned int trackNb = atoi( trackNbStr );
+    free( trackNbStr );
     auto track = album->addTrack( title, trackNb );
     if ( track == nullptr )
     {

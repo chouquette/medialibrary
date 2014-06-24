@@ -54,6 +54,7 @@ class VLCMetadataServices : public testing::Test
             auto vlcService = new VLCMetadataService( vlcInstance );
 
             vlcService->initialize( cb.get(), ml.get() );
+            // This takes ownership of vlcService
             ml->addMetadataService( vlcService );
             bool res = ml->initialize( "test.db" );
             ASSERT_TRUE( res );
