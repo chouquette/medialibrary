@@ -30,6 +30,7 @@ add_definitions("-g")
 add_definitions("-Wall -Wextra")
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(${LIBVLC_INCLUDE_DIR})
 
 list(APPEND TEST_SRCS
     Files.cpp
