@@ -27,6 +27,7 @@ File::File( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_showEpisodeId = sqlite3_column_int( stmt, 5 );
     m_mrl = (const char*)sqlite3_column_text( stmt, 6 );
     m_movieId = Traits<unsigned int>::Load( stmt, 7 );
+    m_isReady = m_type != UnknownType;
 }
 
 File::File( const std::string& mrl )
@@ -38,6 +39,7 @@ File::File( const std::string& mrl )
     , m_showEpisodeId( 0 )
     , m_mrl( mrl )
     , m_movieId( 0 )
+    , m_isReady( false )
 {
 }
 
@@ -181,6 +183,17 @@ bool File::audioTracks( std::vector<AudioTrackPtr>& tracks )
             " t LEFT JOIN AudioTrackFileRelation atfr ON atfr.id_track = t.id_track"
             " WHERE atfr.id_file = ?";
     return SqliteTools::fetchAll<AudioTrack>( m_dbConnection, req, tracks, m_id );
+}
+
+bool File::isReady() const
+{
+    return m_isReady;
+}
+
+void File::setReady()
+{
+    assert( m_isReady == false );
+    m_isReady = true;
 }
 
 unsigned int File::id() const

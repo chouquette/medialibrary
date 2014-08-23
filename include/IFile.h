@@ -42,6 +42,8 @@ class IFile
         virtual bool addAudioTrack( const std::string& codec, unsigned int bitrate,
                                     unsigned int sampleRate, unsigned int nbChannels ) = 0;
         virtual bool audioTracks( std::vector<AudioTrackPtr>& tracks ) = 0;
+
+        virtual bool isReady() const = 0;
 };
 
 #endif // IFILE_H

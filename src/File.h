@@ -64,6 +64,9 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         virtual bool addAudioTrack(const std::string& codec, unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels);
         virtual bool audioTracks( std::vector<AudioTrackPtr>& tracks );
 
+        virtual bool isReady() const;
+        void setReady();
+
     private:
         DBConnection m_dbConnection;
 
@@ -82,6 +85,8 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         AlbumTrackPtr m_albumTrack;
         ShowEpisodePtr m_showEpisode;
         MoviePtr m_movie;
+
+        bool m_isReady;
 
         friend class Cache<File, IFile, policy::FileTable, policy::FileCache>;
         friend struct policy::FileTable;
