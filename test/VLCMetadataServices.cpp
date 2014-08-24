@@ -51,6 +51,7 @@ class VLCMetadataServices : public testing::Test
         {
             ml.reset( MediaLibraryFactory::create() );
             vlcInstance = libvlc_new( 0, NULL );
+            ASSERT_NE(vlcInstance, nullptr);
             auto vlcService = new VLCMetadataService( vlcInstance );
 
             vlcService->initialize( cb.get(), ml.get() );
