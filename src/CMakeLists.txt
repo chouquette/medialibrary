@@ -19,6 +19,7 @@ list(APPEND HEADERS_LIST
     ${CMAKE_SOURCE_DIR}/include/IMovie.h
 )
 include_directories("${CMAKE_SOURCE_DIR}/include")
+include_directories("${CMAKE_SOURCE_DIR}/src")
 
 list(APPEND SRC_LIST ${HEADERS_LIST}
     MediaLibrary.cpp

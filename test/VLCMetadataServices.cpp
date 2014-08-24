@@ -22,7 +22,7 @@ class ServiceCb : public IMetadataServiceCb
         {
         }
 
-        virtual void updated( FilePtr )
+        virtual void done( FilePtr )
         {
             waitCond.notify_all();
         }

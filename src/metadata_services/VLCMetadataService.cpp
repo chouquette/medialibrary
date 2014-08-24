@@ -5,6 +5,8 @@
 #include "IAlbum.h"
 #include "IAlbumTrack.h"
 
+#include "File.h"
+
 VLCMetadataService::VLCMetadataService( libvlc_instance_t* vlc )
     : m_instance( vlc )
     , m_cb( nullptr )
@@ -94,8 +96,13 @@ void VLCMetadataService::handleMediaMeta( VLCMetadataService::Context* ctx )
     {
         parseVideoFile( ctx );
     }
+    auto file = std::static_pointer_cast<File>( ctx->file );
+    file->setReady();
     libvlc_media_tracks_release( tracks, nbTracks );
-    ctx->self->m_cb->updated( ctx->file );
+    ctx->self->m_cb->done( ctx->file );
+    libvlc_event_detach( ctx->m_em, libvlc_MediaParsedChanged, &eventCallback, ctx );
+    libvlc_event_detach( ctx->mp_em, libvlc_MediaPlayerLengthChanged, &eventCallback, ctx );
+    delete ctx;
 }
 
 void VLCMetadataService::parseAudioFile( VLCMetadataService::Context* ctx )
