@@ -77,6 +77,7 @@ TEST_F( VLCMetadataServices, ParseAudio )
 {
     std::unique_lock<std::mutex> lock( cb->mutex );
     auto file = ml->addFile( "mr-zebra.mp3" );
+    ml->parse(file);
     std::vector<AudioTrackPtr> tracks;
     cb->waitCond.wait( lock, [&]{ return file->audioTracks( tracks ) == true && tracks.size() > 0; } );
 
@@ -96,6 +97,7 @@ TEST_F( VLCMetadataServices, ParseAlbum )
 {
     std::unique_lock<std::mutex> lock( cb->mutex );
     auto file = ml->addFile( "mr-zebra.mp3" );
+    ml->parse(file);
     bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 2 ),
                            [&]{ return file->albumTrack() != nullptr; } );
 

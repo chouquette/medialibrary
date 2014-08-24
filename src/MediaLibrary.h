@@ -32,6 +32,7 @@ class MediaLibrary : public IMediaLibrary
         virtual MoviePtr createMovie( const std::string& title );
 
         virtual void addMetadataService( IMetadataService* service );
+        virtual void parse( FilePtr file );
     private:
         std::shared_ptr<sqlite3> m_dbConnection;
         std::vector<std::unique_ptr<IMetadataService>> m_mdServices;

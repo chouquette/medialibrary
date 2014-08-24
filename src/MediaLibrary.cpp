@@ -67,8 +67,6 @@ FilePtr MediaLibrary::addFile( const std::string& path )
     auto file = File::create( m_dbConnection, path );
     if ( file == nullptr )
         return nullptr;
-    for ( const auto& s : m_mdServices )
-        s->run( file );
     return file;
 }
 
@@ -144,4 +142,9 @@ void MediaLibrary::addMetadataService(IMetadataService* service)
     };
     m_mdServices.push_back( MdsPtr( service ) );
     std::push_heap( m_mdServices.begin(), m_mdServices.end(), comp );
+}
+
+void MediaLibrary::parse( FilePtr file )
+{
+    assert(false);
 }

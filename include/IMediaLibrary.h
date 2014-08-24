@@ -26,7 +26,14 @@ class IMediaLibrary
         virtual MoviePtr movie( const std::string& title ) = 0;
         virtual MoviePtr createMovie( const std::string& title ) = 0;
 
+        /**
+         * @brief addMetadataService Adds a service to parse media
+         *
+         * Use is expected to add all services before calling parse for the first time.
+         * Once parse has been called, adding another service is an undefined behavior
+         */
         virtual void addMetadataService( IMetadataService* service ) = 0;
+        virtual void parse( FilePtr file ) = 0;
 };
 
 class MediaLibraryFactory
