@@ -1,5 +1,4 @@
 #include "gtest/gtest.h"
-#include <iostream>
 #include <vlc/vlc.h>
 #include <chrono>
 #include <condition_variable>
@@ -12,25 +11,31 @@
 #include "IAlbumTrack.h"
 #include "metadata_services/VLCMetadataService.h"
 
-class ServiceCb : public IMetadataServiceCb
+class ServiceCb : public IParserCb
 {
     public:
         std::condition_variable waitCond;
         std::mutex mutex;
+        volatile bool failed;
 
         ServiceCb()
+            : failed(false)
         {
         }
 
-        virtual void done( FilePtr )
+        ~ServiceCb()
         {
+        }
+
+        virtual void onServiceDone( FilePtr, ServiceStatus status )
+        {
+            if ( status != StatusSuccess )
+                failed = true;
             waitCond.notify_all();
         }
 
-        virtual void error( FilePtr, const std::string& error )
+        virtual void onFileDone( FilePtr )
         {
-            std::cerr << "Error: " << error << std::endl;
-            FAIL();
         }
 };
 
@@ -49,12 +54,17 @@ class VLCMetadataServices : public testing::Test
 
         virtual void SetUp()
         {
+            cb->failed = false;
             ml.reset( MediaLibraryFactory::create() );
-            vlcInstance = libvlc_new( 0, NULL );
+            if ( vlcInstance != nullptr )
+                libvlc_release( vlcInstance );
+            const char* args[] = {
+                "-vv"
+            };
+            vlcInstance = libvlc_new( sizeof(args) /sizeof(args[0]), args );
             ASSERT_NE(vlcInstance, nullptr);
             auto vlcService = new VLCMetadataService( vlcInstance );
 
-            vlcService->initialize( cb.get(), ml.get() );
             // This takes ownership of vlcService
             ml->addMetadataService( vlcService );
             bool res = ml->initialize( "test.db" );
@@ -64,6 +74,7 @@ class VLCMetadataServices : public testing::Test
         virtual void TearDown()
         {
             libvlc_release( vlcInstance );
+            vlcInstance = nullptr;
             ml.reset();
             unlink("test.db");
         }
@@ -77,13 +88,17 @@ TEST_F( VLCMetadataServices, ParseAudio )
 {
     std::unique_lock<std::mutex> lock( cb->mutex );
     auto file = ml->addFile( "mr-zebra.mp3" );
-    ml->parse(file);
+    ml->parse( file, cb.get() );
     std::vector<AudioTrackPtr> tracks;
-    cb->waitCond.wait( lock, [&]{ return file->audioTracks( tracks ) == true && tracks.size() > 0; } );
+    bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [&]{
+        return cb->failed == true || ( file->audioTracks( tracks ) == true && tracks.size() > 0 );
+    } );
 
+    ASSERT_TRUE( res );
+    ASSERT_FALSE( cb->failed );
     SetUp();
     file = ml->file( "mr-zebra.mp3" );
-    bool res = file->audioTracks( tracks );
+    res = file->audioTracks( tracks );
     ASSERT_TRUE( res );
     ASSERT_EQ( tracks.size(), 1u );
     auto track = tracks[0];
@@ -97,9 +112,10 @@ TEST_F( VLCMetadataServices, ParseAlbum )
 {
     std::unique_lock<std::mutex> lock( cb->mutex );
     auto file = ml->addFile( "mr-zebra.mp3" );
-    ml->parse(file);
-    bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 2 ),
-                           [&]{ return file->albumTrack() != nullptr; } );
+    ml->parse( file, cb.get() );
+    bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [&]{
+        return cb->failed == true || file->albumTrack() != nullptr;
+    } );
 
     ASSERT_TRUE( res );
     SetUp();

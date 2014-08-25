@@ -9,12 +9,14 @@
 #include "IMetadataService.h"
 #include "Label.h"
 #include "Movie.h"
+#include "Parser.h"
 #include "Show.h"
 #include "ShowEpisode.h"
 #include "SqliteTools.h"
 #include "VideoTrack.h"
 
 MediaLibrary::MediaLibrary()
+    : m_parser( new Parser )
 {
 }
 
@@ -134,17 +136,12 @@ MoviePtr MediaLibrary::createMovie( const std::string& title )
 
 void MediaLibrary::addMetadataService(IMetadataService* service)
 {
-    typedef std::unique_ptr<IMetadataService> MdsPtr;
-    std::function<bool(const MdsPtr&, const MdsPtr&)> comp = []( const MdsPtr& a, const MdsPtr& b )
-    {
-        // We want higher priority first
-        return a->priority() > b->priority();
-    };
-    m_mdServices.push_back( MdsPtr( service ) );
-    std::push_heap( m_mdServices.begin(), m_mdServices.end(), comp );
+    service->initialize( m_parser.get(), this );
+    m_parser->addService( service );
 }
 
-void MediaLibrary::parse( FilePtr file )
+void MediaLibrary::parse(FilePtr file , IParserCb* cb)
 {
-    assert(false);
+    m_parser->parse( file, cb );
 }
+

@@ -1,6 +1,8 @@
 #ifndef MEDIALIBRARY_H
 #define MEDIALIBRARY_H
 
+class Parser;
+
 #include <sqlite3.h>
 
 #include "IMediaLibrary.h"
@@ -32,9 +34,10 @@ class MediaLibrary : public IMediaLibrary
         virtual MoviePtr createMovie( const std::string& title );
 
         virtual void addMetadataService( IMetadataService* service );
-        virtual void parse( FilePtr file );
+        virtual void parse( FilePtr file, IParserCb* cb );
+
     private:
         std::shared_ptr<sqlite3> m_dbConnection;
-        std::vector<std::unique_ptr<IMetadataService>> m_mdServices;
+        std::unique_ptr<Parser> m_parser;
 };
 #endif // MEDIALIBRARY_H

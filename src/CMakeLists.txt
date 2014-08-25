@@ -33,6 +33,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     Movie.cpp
     VideoTrack.cpp
     AudioTrack.cpp
+    Parser.cpp
 
     metadata_services/VLCMetadataService.cpp
 )

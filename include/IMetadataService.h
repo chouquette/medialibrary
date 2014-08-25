@@ -7,8 +7,7 @@ class IMetadataServiceCb
 {
     public:
         virtual ~IMetadataServiceCb(){}
-        virtual void done( FilePtr file ) = 0;
-        virtual void error( FilePtr file, const std::string& error ) = 0;
+        virtual void done( FilePtr file, ServiceStatus status, void* data ) = 0;
 };
 
 class IMetadataService
@@ -17,7 +16,7 @@ class IMetadataService
         virtual ~IMetadataService() {}
         virtual bool initialize( IMetadataServiceCb* callback, IMediaLibrary* ml ) = 0;
         virtual unsigned int priority() const = 0;
-        virtual bool run( FilePtr file ) = 0;
+        virtual bool run( FilePtr file, void* data ) = 0;
 };
 
 #endif // IMETADATASERVICE_H

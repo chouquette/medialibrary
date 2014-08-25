@@ -6,6 +6,27 @@
 
 #include "Types.h"
 
+class IParserCb
+{
+    public:
+        virtual ~IParserCb() {}
+
+        /**
+         * @brief onServiceDone will be called after each MetadataService completes
+         * @param file      The file being parsed
+         * @param status    A flag describing the parsing outcome
+         */
+        virtual void onServiceDone( FilePtr file, ServiceStatus status ) = 0;
+        /**
+         * @brief onFileDone will be called when all parsing operations on a given file have been completed
+         *
+         * This doesn't imply all modules have succeeded
+         */
+        //FIXME: We should probably expose some way of telling if the user should retry later in
+        // case of tmeporary failure
+        virtual void onFileDone( FilePtr file ) = 0;
+};
+
 class IMediaLibrary
 {
     public:
@@ -29,11 +50,13 @@ class IMediaLibrary
         /**
          * @brief addMetadataService Adds a service to parse media
          *
-         * Use is expected to add all services before calling parse for the first time.
-         * Once parse has been called, adding another service is an undefined behavior
+         * User is expected to add all services before calling parse for the first time.
+         * Once parse has been called, adding another service is an undefined behavior.
+         * This method will call service->initialize(), therefor the passed ServiceStatus
+         * is expected to be uninitialized.
          */
         virtual void addMetadataService( IMetadataService* service ) = 0;
-        virtual void parse( FilePtr file ) = 0;
+        virtual void parse( FilePtr file, IParserCb* cb ) = 0;
 };
 
 class MediaLibraryFactory
