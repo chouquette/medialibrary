@@ -38,7 +38,6 @@ bool VLCMetadataService::run( FilePtr file, void* data )
     cleanup();
     auto ctx = new Context( this, file, data );
 //    libvlc_audio_output_set( ctx->mp, "dummy" );
-    //attach events
     ctx->media.parseAsync();
     return true;
 }
@@ -83,14 +82,15 @@ ServiceStatus VLCMetadataService::handleMediaMeta( VLCMetadataService::Context* 
     }
     else
     {
-        parseVideoFile( ctx );
+        if (parseVideoFile( ctx ) == false )
+            return StatusFatal;
     }
     auto file = std::static_pointer_cast<File>( ctx->file );
     file->setReady();
     return StatusSuccess;
 }
 
-void VLCMetadataService::parseAudioFile( VLCMetadataService::Context* ctx )
+bool VLCMetadataService::parseAudioFile( VLCMetadataService::Context* ctx )
 {
     auto albumTitle = ctx->media.meta( libvlc_meta_Album );
     if ( albumTitle.length() == 0 )
@@ -101,14 +101,14 @@ void VLCMetadataService::parseAudioFile( VLCMetadataService::Context* ctx )
     if ( album == nullptr )
     {
         std::cerr << "Failed to create/get album" << std::endl;
-        return;
+        return false;
     }
 
     auto trackNbStr = ctx->media.meta( libvlc_meta_TrackNumber );
     if ( trackNbStr.length() == 0 )
     {
         std::cerr << "Failed to get track id" << std::endl;
-        return ;
+        return false;
     }
     auto artwork = ctx->media.meta( libvlc_meta_ArtworkURL );
     if ( artwork.length() != 0 )
@@ -126,7 +126,7 @@ void VLCMetadataService::parseAudioFile( VLCMetadataService::Context* ctx )
     if ( track == nullptr )
     {
         std::cerr << "Failure while creating album track" << std::endl;
-        return ;
+        return false;
     }
     ctx->file->setAlbumTrack( track );
 
@@ -140,9 +140,40 @@ void VLCMetadataService::parseAudioFile( VLCMetadataService::Context* ctx )
     return true;
 }
 
-void VLCMetadataService::parseVideoFile( VLCMetadataService::Context* )
+bool VLCMetadataService::parseVideoFile( VLCMetadataService::Context* ctx )
 {
+    auto title = ctx->media.meta( libvlc_meta_Title );
+    if ( title.length() == 0 )
+        return true;
+    auto showName = ctx->media.meta( libvlc_meta_ShowName );
+    if ( showName.length() == 0 )
+    {
+        auto show = ctx->self->m_ml->show( showName );
+        if ( show == nullptr )
+        {
+            show = ctx->self->m_ml->createShow( showName );
+            if ( show == nullptr )
+                return false;
+        }
 
+        auto episodeIdStr = ctx->media.meta( libvlc_meta_Episode );
+        if ( episodeIdStr.length() > 0 )
+        {
+            size_t endpos;
+            int episodeId = std::stoi( episodeIdStr, &endpos );
+            if ( endpos != episodeIdStr.length() )
+            {
+                std::cerr << "Invalid episode id provided" << std::endl;
+                return true;
+            }
+            show->addEpisode( title, episodeId );
+        }
+    }
+    else
+    {
+        // How do we know if it's a movie or a random video?
+    }
+    return true;
 }
 
 void VLCMetadataService::cleanup()

@@ -36,8 +36,8 @@ class VLCMetadataService : public IMetadataService
         static void eventCallback( const libvlc_event_t* e, void* data );
         void parse( Context* ctx );
         ServiceStatus handleMediaMeta( Context* ctx );
-        void parseAudioFile( Context* ctx );
-        void parseVideoFile( Context* ctx );
+        bool parseAudioFile( Context* ctx );
+        bool parseVideoFile( Context* ctx );
         void cleanup();
 
         VLC::Instance m_instance;
