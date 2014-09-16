@@ -2,6 +2,7 @@
 #define VLCMETADATASERVICE_H
 
 #include <vlc/vlc.h>
+#include <vlcpp/vlc.hpp>
 #include <mutex>
 
 #include "IMetadataService.h"
@@ -9,7 +10,7 @@
 class VLCMetadataService : public IMetadataService
 {
     public:
-        VLCMetadataService(libvlc_instance_t* vlc);
+        VLCMetadataService(const VLC::Instance& vlc);
         virtual ~VLCMetadataService();
 
         virtual bool initialize( IMetadataServiceCb *callback, IMediaLibrary* ml );
@@ -17,18 +18,18 @@ class VLCMetadataService : public IMetadataService
         virtual bool run( FilePtr file, void *data );
 
     private:
-        struct Context
+        struct Context : public ::VLC::IMediaEventCb
         {
-            Context();
+            Context(VLCMetadataService* self, FilePtr file, void* data );
             ~Context();
 
             VLCMetadataService* self;
             FilePtr file;
             void* data;
-            libvlc_media_t* media;
-            libvlc_event_manager_t* m_em;
-            libvlc_media_player_t* mp;
-            libvlc_event_manager_t* mp_em;
+            VLC::Media media;
+
+            private:
+                virtual void parsedChanged( bool status ) override;
         };
 
     private:
@@ -39,7 +40,7 @@ class VLCMetadataService : public IMetadataService
         void parseVideoFile( Context* ctx );
         void cleanup();
 
-        libvlc_instance_t* m_instance;
+        VLC::Instance m_instance;
         IMetadataServiceCb* m_cb;
         IMediaLibrary* m_ml;
         // We can't cleanup from the callback since it's called from a VLC thread.
