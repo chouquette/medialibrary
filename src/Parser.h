@@ -1,6 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
@@ -43,7 +44,7 @@ class Parser : public IMetadataServiceCb
         std::unique_ptr<std::thread> m_thread;
         std::mutex m_lock;
         std::condition_variable m_cond;
-        volatile bool m_stopParser;
+        std::atomic_bool m_stopParser;
 };
 
 #endif // PARSER_H
