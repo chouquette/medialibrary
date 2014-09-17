@@ -26,8 +26,8 @@ ExternalProject_Get_Property(gtest-dependency binary_dir)
 link_directories(${binary_dir})
 
 EnableCpp11()
-add_definitions("-g")
-add_definitions("-Wall -Wextra")
+add_definitions("-Wall -Wextra -pedantic")
+
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${LIBVLC_INCLUDE_DIR})

@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 EnableCpp11()
-add_definitions("-Wall -Wextra -pedantic -O0")
+add_definitions("-Wall -Wextra -pedantic")
 
 list(APPEND HEADERS_LIST
     ${CMAKE_SOURCE_DIR}/include/IShow.h
@@ -51,4 +51,3 @@ include_directories(${LIBVLC_INCLUDE_DIR})
 find_package(vlcpp 2.2.0 REQUIRED)
 target_link_libraries( ${PROJECT_NAME} ${LIBVLCPP_LIBRARIES})
 include_directories(${LIBVLCPP_INCLUDE_DIR})
-
