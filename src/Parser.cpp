@@ -3,12 +3,12 @@
 #include "Parser.h"
 
 Parser::Parser()
+    : m_stopParser( false )
 {
 }
 
 Parser::~Parser()
 {
-
     if ( m_thread == nullptr )
         return;
 
