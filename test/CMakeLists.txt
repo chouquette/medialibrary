@@ -56,3 +56,4 @@ endif()
 
 ## Download files for parsing unit tests
 file(DOWNLOAD "http://streams.videolan.org/streams/mp3/05-Mr.%20Zebra.mp3" "${CMAKE_CURRENT_BINARY_DIR}/mr-zebra.mp3")
+file(DOWNLOAD "http://streams.videolan.org/streams/mp4/Mr_MrsSmith-h264_aac.mp4" "${CMAKE_CURRENT_BINARY_DIR}/mrmssmith.mp4")

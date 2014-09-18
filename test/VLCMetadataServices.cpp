@@ -9,6 +9,7 @@
 #include "IAudioTrack.h"
 #include "IAlbum.h"
 #include "IAlbumTrack.h"
+#include "IVideoTrack.h"
 #include "metadata_services/VLCMetadataService.h"
 
 class ServiceCb : public IParserCb
@@ -104,8 +105,8 @@ TEST_F( VLCMetadataServices, ParseAudio )
 
 TEST_F( VLCMetadataServices, ParseAlbum )
 {
-    std::unique_lock<std::mutex> lock( cb->mutex );
     auto file = ml->addFile( "mr-zebra.mp3" );
+    std::unique_lock<std::mutex> lock( cb->mutex );
     ml->parse( file, cb.get() );
     bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [&]{
         return cb->failed == true || file->albumTrack() != nullptr;
@@ -129,3 +130,37 @@ TEST_F( VLCMetadataServices, ParseAlbum )
     auto album2 = ml->album( "Boys for Pele" );
     ASSERT_EQ( album, album2 );
 }
+
+TEST_F( VLCMetadataServices, ParseVideo )
+{
+    std::unique_lock<std::mutex> lock( cb->mutex );
+    auto file = ml->addFile( "mrmssmith.mp4" );
+    ml->parse( file, cb.get() );
+    std::vector<VideoTrackPtr> tracks;
+    bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [&tracks, file]{
+        return cb->failed == true || (file->videoTracks(tracks) != false && tracks.size() != 0);
+    } );
+
+    ASSERT_TRUE( res );
+    SetUp();
+
+    file = ml->file( "mrmssmith.mp4" );
+
+    ASSERT_EQ( file->showEpisode(), nullptr );
+
+    res = file->videoTracks( tracks );
+    ASSERT_EQ( tracks.size(), 1u );
+    ASSERT_EQ( tracks[0]->codec(), "h264" );
+    ASSERT_EQ( tracks[0]->width(), 320u );
+    ASSERT_EQ( tracks[0]->height(), 176u );
+    ASSERT_EQ( tracks[0]->fps(), 25 );
+
+    std::vector<AudioTrackPtr> audioTracks;
+    res = file->audioTracks( audioTracks );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( audioTracks.size(), 1u );
+    ASSERT_EQ( audioTracks[0]->codec(), "mp4a" );
+    ASSERT_EQ( audioTracks[0]->sampleRate(), 44100u );
+    ASSERT_EQ( audioTracks[0]->nbChannels(), 2u );
+}
+
