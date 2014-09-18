@@ -67,7 +67,8 @@ ServiceStatus VLCMetadataService::handleMediaMeta( VLCMetadataService::Context* 
         if ( track.type() == VLC::MediaTrack::Video )
         {
             isAudio = false;
-            ctx->file->addVideoTrack( fcc, track.width(), track.height(), .0f );
+            auto fps = (float)track.fpsNum() / (float)track.fpsDen();
+            ctx->file->addVideoTrack( fcc, track.width(), track.height(), fps );
         }
         else if ( track.type() == VLC::MediaTrack::Audio )
         {
