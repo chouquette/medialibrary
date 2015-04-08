@@ -52,6 +52,15 @@ struct Traits<T, typename std::enable_if<std::is_floating_point<T>::value>::type
         (*Load)(sqlite3_stmt *, int) = &sqlite3_column_double;
 };
 
+template <>
+struct Traits<std::nullptr_t>
+{
+    static int Bind(sqlite3_stmt* stmt, int idx, std::nullptr_t)
+    {
+        return sqlite3_bind_null( stmt, idx );
+    }
+};
+
 class SqliteTools
 {
     private:
