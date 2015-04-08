@@ -6,6 +6,7 @@
 class IAlbum;
 class IAlbumTrack;
 class IFile;
+class IFolder;
 class ILabel;
 class IMetadataService;
 class IMovie;
@@ -17,6 +18,7 @@ class IVideoTrack;
 struct sqlite3;
 
 typedef std::shared_ptr<IFile> FilePtr;
+typedef std::shared_ptr<IFolder> FolderPtr;
 typedef std::shared_ptr<ILabel> LabelPtr;
 typedef std::shared_ptr<IAlbum> AlbumPtr;
 typedef std::shared_ptr<IAlbumTrack> AlbumTrackPtr;

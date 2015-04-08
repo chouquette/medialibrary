@@ -38,6 +38,7 @@ TEST_F( Files, Create )
     ASSERT_EQ( f->playCount(), 0 );
     ASSERT_EQ( f->albumTrack(), nullptr );
     ASSERT_EQ( f->showEpisode(), nullptr );
+    ASSERT_TRUE( f->isStandAlone() );
 
     std::vector<std::shared_ptr<IFile>> files;
     bool success = ml->files( files );
@@ -58,6 +59,7 @@ TEST_F( Files, Fetch )
 
     f2 = ml->file( "/dev/null" );
     ASSERT_EQ( f->mrl(), f2->mrl() );
+    ASSERT_TRUE( f2->isStandAlone() );
 }
 
 TEST_F( Files, Delete )

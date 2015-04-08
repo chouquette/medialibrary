@@ -40,9 +40,9 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         // shall be well-formed, and private constructor would prevent that.
         // There might be a way with a user-defined allocator, but we'll see that later...
         File(DBConnection dbConnection , sqlite3_stmt* stmt);
-        File( const std::string& mrl );
+        File(const std::string& mrl , unsigned int folderId);
 
-        static FilePtr create( DBConnection dbConnection, const std::string& mrl );
+        static FilePtr create(DBConnection dbConnection, const std::string& mrl , unsigned int folderId);
         static bool createTable( DBConnection connection );
 
         virtual unsigned int id() const;
@@ -63,6 +63,7 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         virtual bool videoTracks( std::vector<VideoTrackPtr>& tracks );
         virtual bool addAudioTrack(const std::string& codec, unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels);
         virtual bool audioTracks( std::vector<AudioTrackPtr>& tracks );
+        virtual bool isStandAlone() override;
 
         virtual bool isReady() const;
         void setReady();
@@ -79,6 +80,7 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         unsigned int m_showEpisodeId;
         std::string m_mrl;
         unsigned int m_movieId;
+        unsigned int m_folderId;
 
         // Auto fetched related properties
         Album* m_album;

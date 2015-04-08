@@ -196,6 +196,7 @@ class SqliteTools
             } while ( res == SQLITE_ROW );
             if ( res != SQLITE_DONE )
             {
+                std::cerr << "Failed to execute <" << req << '>' << std::endl;
                 std::cerr << "Invalid result: " <<
 #if SQLITE_VERSION_NUMBER >= 3007015
                             sqlite3_errstr( res )

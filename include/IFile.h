@@ -42,7 +42,9 @@ class IFile
         virtual bool addAudioTrack( const std::string& codec, unsigned int bitrate,
                                     unsigned int sampleRate, unsigned int nbChannels ) = 0;
         virtual bool audioTracks( std::vector<AudioTrackPtr>& tracks ) = 0;
-
+        /// Returns wether the file has been added as a stand alone file (true), or as
+        /// part of a folder (false)
+        virtual bool isStandAlone() = 0;
         virtual bool isReady() const = 0;
 };
 

@@ -6,6 +6,7 @@
 #include "AlbumTrack.h"
 #include "AudioTrack.h"
 #include "File.h"
+#include "Folder.h"
 #include "Label.h"
 #include "Movie.h"
 #include "ShowEpisode.h"
@@ -27,10 +28,12 @@ File::File( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_showEpisodeId = sqlite3_column_int( stmt, 5 );
     m_mrl = (const char*)sqlite3_column_text( stmt, 6 );
     m_movieId = Traits<unsigned int>::Load( stmt, 7 );
+    m_folderId = Traits<unsigned int>::Load( stmt, 8 );
+
     m_isReady = m_type != UnknownType;
 }
 
-File::File( const std::string& mrl )
+File::File( const std::string& mrl, unsigned int folderId )
     : m_id( 0 )
     , m_type( UnknownType )
     , m_duration( 0 )
@@ -39,18 +42,28 @@ File::File( const std::string& mrl )
     , m_showEpisodeId( 0 )
     , m_mrl( mrl )
     , m_movieId( 0 )
+    , m_folderId( folderId )
     , m_isReady( false )
 {
 }
 
-FilePtr File::create( DBConnection dbConnection, const std::string& mrl )
+FilePtr File::create( DBConnection dbConnection, const std::string& mrl, unsigned int folderId )
 {
-    auto self = std::make_shared<File>( mrl );
+    auto self = std::make_shared<File>( mrl, folderId );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
-            "(mrl) VALUES(?)";
-    bool pKey = _Cache::insert( dbConnection, self, req, mrl );
-    if ( pKey == false )
-        return nullptr;
+            "(mrl, folder_id) VALUES(?, ?)";
+
+    //FIXME: Consider having a ForeignKey type that will handle the '0' special case
+    if ( folderId != 0 )
+    {
+        if ( _Cache::insert( dbConnection, self, req, mrl, folderId ) == false )
+            return nullptr;
+    }
+    else
+    {
+        if ( _Cache::insert( dbConnection, self, req, mrl, nullptr ) == false )
+            return nullptr;
+    }
     self->m_dbConnection = dbConnection;
     return self;
 }
@@ -185,6 +198,11 @@ bool File::audioTracks( std::vector<AudioTrackPtr>& tracks )
     return SqliteTools::fetchAll<AudioTrack>( m_dbConnection, req, tracks, m_id );
 }
 
+bool File::isStandAlone()
+{
+    return m_folderId == 0;
+}
+
 bool File::isReady() const
 {
     return m_isReady;
@@ -212,12 +230,15 @@ bool File::createTable( DBConnection connection )
             "show_episode_id UNSIGNED INTEGER,"
             "mrl TEXT UNIQUE ON CONFLICT FAIL,"
             "movie_id UNSIGNED INTEGER,"
+            "folder_id UNSIGNED INTEGER,"
             "FOREIGN KEY (album_track_id) REFERENCES " + policy::AlbumTrackTable::Name
             + "(id_track) ON DELETE CASCADE,"
             "FOREIGN KEY (show_episode_id) REFERENCES " + policy::ShowEpisodeTable::Name
             + "(id_episode) ON DELETE CASCADE,"
             "FOREIGN KEY (movie_id) REFERENCES " + policy::MovieTable::Name
-            + "(id_movie) ON DELETE CASCADE"
+            + "(id_movie) ON DELETE CASCADE,"
+            "FOREIGN KEY (folder_id) REFERENCES " + policy::FolderTable::Name
+            + "(id_folder) ON DELETE CASCADE"
             ")";
     if ( SqliteTools::executeRequest( connection, req ) == false )
         return false;

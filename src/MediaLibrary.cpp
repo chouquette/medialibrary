@@ -5,6 +5,7 @@
 #include "AlbumTrack.h"
 #include "AudioTrack.h"
 #include "File.h"
+#include "Folder.h"
 #include "MediaLibrary.h"
 #include "IMetadataService.h"
 #include "Label.h"
@@ -15,6 +16,9 @@
 #include "SqliteTools.h"
 #include "VideoTrack.h"
 
+#include "filesystem/IDirectory.h"
+#include "filesystem/IFile.h"
+
 MediaLibrary::MediaLibrary()
     : m_parser( new Parser )
 {
@@ -23,6 +27,7 @@ MediaLibrary::MediaLibrary()
 MediaLibrary::~MediaLibrary()
 {
     File::clear();
+    Folder::clear();
     Label::clear();
     Album::clear();
     AlbumTrack::clear();
@@ -43,6 +48,7 @@ bool MediaLibrary::initialize(const std::string& dbPath)
     if ( SqliteTools::executeRequest( DBConnection(m_dbConnection), "PRAGMA foreign_keys = ON" ) == false )
         return false;
     return ( File::createTable( m_dbConnection ) &&
+        Folder::createTable( m_dbConnection ) &&
         Label::createTable( m_dbConnection ) &&
         Album::createTable( m_dbConnection ) &&
         AlbumTrack::createTable( m_dbConnection ) &&
@@ -66,10 +72,24 @@ FilePtr MediaLibrary::file( const std::string& path )
 
 FilePtr MediaLibrary::addFile( const std::string& path )
 {
-    auto file = File::create( m_dbConnection, path );
+    auto file = File::create( m_dbConnection, path, 0 );
     if ( file == nullptr )
         return nullptr;
     return file;
+}
+
+FolderPtr MediaLibrary::addFolder( const std::string& path )
+{
+    auto folder = Folder::create( m_dbConnection, path );
+    if ( folder == nullptr )
+        return nullptr;
+    auto dir = fs::createDirectory( path );
+    for ( auto& f : dir->files() )
+    {
+        if ( File::create( m_dbConnection, f->fullPath(), folder->id() ) == nullptr )
+            std::cerr << "Failed to add file " << f->fullPath() << " to the media library" << std::endl;
+    }
+    return folder;
 }
 
 bool MediaLibrary::deleteFile( const std::string& mrl )
@@ -80,6 +100,11 @@ bool MediaLibrary::deleteFile( const std::string& mrl )
 bool MediaLibrary::deleteFile( FilePtr file )
 {
     return File::destroy( m_dbConnection, std::static_pointer_cast<File>( file ) );
+}
+
+bool MediaLibrary::deleteFolder( FolderPtr folder )
+{
+    return Folder::destroy( m_dbConnection, std::static_pointer_cast<Folder>( folder ) );
 }
 
 LabelPtr MediaLibrary::createLabel( const std::string& label )
