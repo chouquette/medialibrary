@@ -83,7 +83,16 @@ FolderPtr MediaLibrary::addFolder( const std::string& path )
     auto folder = Folder::create( m_dbConnection, path );
     if ( folder == nullptr )
         return nullptr;
-    auto dir = fs::createDirectory( path );
+    std::unique_ptr<fs::IDirectory> dir;
+    try
+    {
+        dir = fs::createDirectory( path );
+    }
+    catch ( std::runtime_error& )
+    {
+        return nullptr;
+    }
+
     for ( auto& f : dir->files() )
     {
         if ( File::create( m_dbConnection, f->fullPath(), folder->id() ) == nullptr )

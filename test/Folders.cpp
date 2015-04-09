@@ -71,3 +71,14 @@ TEST_F( Folders, Load )
     ASSERT_FALSE( files[0]->isStandAlone() );
     ASSERT_FALSE( files[1]->isStandAlone() );
 }
+
+TEST_F( Folders, InvalidPath )
+{
+    auto f = ml->addFolder( "/invalid/path" );
+    ASSERT_EQ( f, nullptr );
+
+    auto files = std::vector<FilePtr>{};
+    bool res = ml->files( files );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( files.size(), 0u );
+}
