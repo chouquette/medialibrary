@@ -39,5 +39,5 @@ private:
     std::string m_path;
 
     friend class Cache<Folder, IFolder, policy::FolderTable>;
-    friend class policy::FolderTable;
+    friend struct policy::FolderTable;
 };
