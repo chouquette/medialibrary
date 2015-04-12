@@ -14,7 +14,7 @@ class MediaLibrary : public IMediaLibrary
         ~MediaLibrary();
         virtual bool initialize( const std::string& dbPath );
 
-        virtual bool files( std::vector<FilePtr>& res );
+        virtual std::vector<FilePtr> files();
         virtual FilePtr file( const std::string& path );
         virtual FilePtr addFile( const std::string& path );
         virtual FolderPtr addFolder( const std::string& path ) override;

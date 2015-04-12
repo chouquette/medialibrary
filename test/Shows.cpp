@@ -117,9 +117,7 @@ TEST_F( Shows, AddEpisode )
     ASSERT_EQ( e->show(), show );
     ASSERT_EQ( e->name(), "episode 1" );
 
-    std::vector<ShowEpisodePtr> episodes;
-    bool res = show->episodes( episodes );
-    ASSERT_TRUE( res );
+    auto episodes = show->episodes();
     ASSERT_EQ( episodes.size(), 1u );
     ASSERT_EQ( episodes[0], e );
 }
@@ -155,8 +153,7 @@ TEST_F( Shows, SetEpisodeArtwork )
     SetUp();
 
     show = ml->show( "show" );
-    std::vector<ShowEpisodePtr> episodes;
-    show->episodes( episodes );
+    auto episodes = show->episodes();
     ASSERT_EQ( episodes[0]->artworkUrl(), e->artworkUrl() );
 }
 
@@ -171,8 +168,7 @@ TEST_F( Shows, SetEpisodeSeasonNumber )
     SetUp();
 
     show = ml->show( "show" );
-    std::vector<ShowEpisodePtr> episodes;
-    show->episodes( episodes );
+    auto episodes = show->episodes();
     ASSERT_EQ( episodes[0]->seasonNumber(), e->seasonNumber() );
 }
 
@@ -187,8 +183,7 @@ TEST_F( Shows, SetEpisodeSummary )
     SetUp();
 
     show = ml->show( "show" );
-    std::vector<ShowEpisodePtr> episodes;
-    show->episodes( episodes );
+    auto episodes = show->episodes();
     ASSERT_EQ( episodes[0]->shortSummary(), e->shortSummary() );
 }
 
@@ -203,8 +198,7 @@ TEST_F( Shows, SetEpisodeTvdbId )
     SetUp();
 
     show = ml->show( "show" );
-    std::vector<ShowEpisodePtr> episodes;
-    show->episodes( episodes );
+    auto episodes = show->episodes();
     ASSERT_EQ( episodes[0]->tvdbId(), e->tvdbId() );
 }
 

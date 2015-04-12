@@ -23,7 +23,7 @@ class IShowEpisode
         virtual const std::string& tvdbId() const = 0;
         virtual bool setTvdbId( const std::string& tvdbId ) = 0;
         virtual std::shared_ptr<IShow> show() = 0;
-        virtual bool files( std::vector<FilePtr>& files ) = 0;
+        virtual std::vector<FilePtr> files() = 0;
         /**
          * @brief destroy Deletes the album track and the file(s) associated
          */

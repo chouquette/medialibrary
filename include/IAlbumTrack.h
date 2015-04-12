@@ -18,7 +18,7 @@ class IAlbumTrack
         virtual std::shared_ptr<IAlbum> album() = 0;
         virtual const std::string& artist() const = 0;
         virtual bool setArtist( const std::string& artist ) = 0;
-        virtual bool files( std::vector<FilePtr>& files ) = 0;
+        virtual std::vector<FilePtr> files() = 0;
         /**
          * @brief destroy Deletes the album track and the file(s) associated
          */

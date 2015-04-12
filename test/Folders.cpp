@@ -28,45 +28,36 @@ std::unique_ptr<IMediaLibrary> Folders::ml;
 
 TEST_F( Folders, Add )
 {
-    auto f = ml->addFolder( "." );
-    auto files = std::vector<FilePtr>{};
-    bool res = ml->files( files );
+    ml->addFolder( "." );
+    auto files = ml->files();
 
-    ASSERT_TRUE( res );
     ASSERT_EQ( files.size(), 2u );
-
     ASSERT_FALSE( files[0]->isStandAlone() );
 }
 
 TEST_F( Folders, Delete )
 {
     auto f = ml->addFolder( "." );
-    auto files = std::vector<FilePtr>{};
-    bool res = ml->files( files );
+    auto files = ml->files();
 
-    ASSERT_TRUE( res );
     ASSERT_EQ( files.size(), 2u );
 
     ml->deleteFolder( f );
 
-    res = ml->files( files );
-    ASSERT_TRUE( res );
+    files = ml->files();
     ASSERT_EQ( files.size(), 0u );
 }
 
 TEST_F( Folders, Load )
 {
     auto f = ml->addFolder( "." );
-    auto files = std::vector<FilePtr>{};
-    bool res = ml->files( files );
+    auto files = ml->files();
 
-    ASSERT_TRUE( res );
     ASSERT_EQ( files.size(), 2u );
 
     SetUp();
 
-    res = ml->files( files );
-    ASSERT_TRUE( res );
+    files = ml->files();
     ASSERT_EQ( files.size(), 2u );
     ASSERT_FALSE( files[0]->isStandAlone() );
     ASSERT_FALSE( files[1]->isStandAlone() );
@@ -77,8 +68,6 @@ TEST_F( Folders, InvalidPath )
     auto f = ml->addFolder( "/invalid/path" );
     ASSERT_EQ( f, nullptr );
 
-    auto files = std::vector<FilePtr>{};
-    bool res = ml->files( files );
-    ASSERT_TRUE( res );
+    auto files = ml->files();
     ASSERT_EQ( files.size(), 0u );
 }

@@ -84,17 +84,15 @@ TEST_F( VLCMetadataServices, ParseAudio )
     std::unique_lock<std::mutex> lock( cb->mutex );
     auto file = ml->addFile( "mr-zebra.mp3" );
     ml->parse( file, cb.get() );
-    std::vector<AudioTrackPtr> tracks;
     bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [&]{
-        return cb->failed == true || ( file->audioTracks( tracks ) == true && tracks.size() > 0 );
+        return cb->failed == true || ( file->audioTracks().size() > 0 );
     } );
 
     ASSERT_TRUE( res );
     ASSERT_FALSE( cb->failed );
     SetUp();
     file = ml->file( "mr-zebra.mp3" );
-    res = file->audioTracks( tracks );
-    ASSERT_TRUE( res );
+    auto tracks = file->audioTracks();
     ASSERT_EQ( tracks.size(), 1u );
     auto track = tracks[0];
     ASSERT_EQ( track->codec(), "mpga" );
@@ -136,9 +134,8 @@ TEST_F( VLCMetadataServices, ParseVideo )
     std::unique_lock<std::mutex> lock( cb->mutex );
     auto file = ml->addFile( "mrmssmith.mp4" );
     ml->parse( file, cb.get() );
-    std::vector<VideoTrackPtr> tracks;
-    bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [&tracks, file]{
-        return cb->failed == true || (file->videoTracks(tracks) != false && tracks.size() != 0);
+    bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [file]{
+        return cb->failed == true || (file->videoTracks().size() != 0);
     } );
 
     ASSERT_TRUE( res );
@@ -148,16 +145,14 @@ TEST_F( VLCMetadataServices, ParseVideo )
 
     ASSERT_EQ( file->showEpisode(), nullptr );
 
-    res = file->videoTracks( tracks );
+    auto tracks = file->videoTracks();
     ASSERT_EQ( tracks.size(), 1u );
     ASSERT_EQ( tracks[0]->codec(), "h264" );
     ASSERT_EQ( tracks[0]->width(), 320u );
     ASSERT_EQ( tracks[0]->height(), 176u );
     ASSERT_EQ( tracks[0]->fps(), 25 );
 
-    std::vector<AudioTrackPtr> audioTracks;
-    res = file->audioTracks( audioTracks );
-    ASSERT_TRUE( res );
+    auto audioTracks = file->audioTracks();
     ASSERT_EQ( audioTracks.size(), 1u );
     ASSERT_EQ( audioTracks[0]->codec(), "mp4a" );
     ASSERT_EQ( audioTracks[0]->sampleRate(), 44100u );

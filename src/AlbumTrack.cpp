@@ -95,9 +95,7 @@ std::shared_ptr<IAlbum> AlbumTrack::album()
 bool AlbumTrack::destroy()
 {
     // Manually remove Files from cache, and let foreign key handling delete them from the DB
-    std::vector<FilePtr> fs;
-    if ( files( fs ) == false )
-        return false;
+    auto fs = files();
     if ( fs.size() == 0 )
         std::cerr << "No files found for AlbumTrack " << m_id << std::endl;
     for ( auto& f : fs )
@@ -124,9 +122,9 @@ bool AlbumTrack::setArtist(const std::string& artist)
     return true;
 }
 
-bool AlbumTrack::files(std::vector<FilePtr>& files)
+std::vector<FilePtr> AlbumTrack::files()
 {
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
             + " WHERE album_track_id = ? ";
-    return SqliteTools::fetchAll<File>( m_dbConnection, req, files, m_id );
+    return SqliteTools::fetchAll<File, IFile>( m_dbConnection, req, m_id );
 }

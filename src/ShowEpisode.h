@@ -40,7 +40,7 @@ class ShowEpisode : public IShowEpisode, public Cache<ShowEpisode, IShowEpisode,
         virtual const std::string& tvdbId() const;
         virtual bool setTvdbId( const std::string& tvdbId );
         virtual std::shared_ptr<IShow> show();
-        virtual bool files( std::vector<FilePtr>& files );
+        virtual std::vector<FilePtr> files();
         virtual bool destroy();
 
         static bool createTable( DBConnection dbConnection );

@@ -13,7 +13,7 @@ class ILabel
 
         virtual unsigned int id() const = 0;
         virtual const std::string& name() = 0;
-        virtual bool files( std::vector<FilePtr>& files ) = 0;
+        virtual std::vector<FilePtr> files() = 0;
 };
 
 #endif // ILABEL_H

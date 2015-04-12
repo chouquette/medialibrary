@@ -33,12 +33,12 @@ const std::string& Label::name()
     return m_name;
 }
 
-bool Label::files( std::vector<FilePtr>& files )
+std::vector<FilePtr> Label::files()
 {
     static const std::string req = "SELECT f.* FROM " + policy::FileTable::Name + " f "
             "LEFT JOIN LabelFileRelation lfr ON lfr.id_file = f.id_file "
             "WHERE lfr.id_label = ?";
-    return SqliteTools::fetchAll<File>( m_dbConnection, req, files, m_id );
+    return SqliteTools::fetchAll<File, IFile>( m_dbConnection, req, m_id );
 }
 
 LabelPtr Label::create(DBConnection dbConnection, const std::string& name )

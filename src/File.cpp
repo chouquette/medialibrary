@@ -115,12 +115,10 @@ bool File::setShowEpisode(ShowEpisodePtr showEpisode)
 
 std::vector<std::shared_ptr<ILabel> > File::labels()
 {
-    std::vector<std::shared_ptr<ILabel> > labels;
     static const std::string req = "SELECT l.* FROM " + policy::LabelTable::Name + " l "
             "LEFT JOIN LabelFileRelation lfr ON lfr.id_label = l.id_label "
             "WHERE lfr.id_file = ?";
-    SqliteTools::fetchAll<Label>( m_dbConnection, req, labels, m_id );
-    return labels;
+    return SqliteTools::fetchAll<Label, ILabel>( m_dbConnection, req, m_id );
 }
 
 int File::playCount() const
@@ -167,12 +165,12 @@ bool File::addVideoTrack(const std::string& codec, unsigned int width, unsigned 
     return SqliteTools::executeRequest( m_dbConnection, req, track->id(), m_id );
 }
 
-bool File::videoTracks(std::vector<VideoTrackPtr>& tracks)
+std::vector<VideoTrackPtr> File::videoTracks()
 {
     static const std::string req = "SELECT t.* FROM " + policy::VideoTrackTable::Name +
             " t LEFT JOIN VideoTrackFileRelation vtfr ON vtfr.id_track = t.id_track"
             " WHERE vtfr.id_file = ?";
-    return SqliteTools::fetchAll<VideoTrack>( m_dbConnection, req, tracks, m_id );
+    return SqliteTools::fetchAll<VideoTrack, IVideoTrack>( m_dbConnection, req, m_id );
 }
 
 bool File::addAudioTrack( const std::string& codec, unsigned int bitrate,
@@ -190,12 +188,12 @@ bool File::addAudioTrack( const std::string& codec, unsigned int bitrate,
     return SqliteTools::executeRequest( m_dbConnection, req, track->id(), m_id );
 }
 
-bool File::audioTracks( std::vector<AudioTrackPtr>& tracks )
+std::vector<AudioTrackPtr> File::audioTracks()
 {
     static const std::string req = "SELECT t.* FROM " + policy::AudioTrackTable::Name +
             " t LEFT JOIN AudioTrackFileRelation atfr ON atfr.id_track = t.id_track"
             " WHERE atfr.id_file = ?";
-    return SqliteTools::fetchAll<AudioTrack>( m_dbConnection, req, tracks, m_id );
+    return SqliteTools::fetchAll<AudioTrack, IAudioTrack>( m_dbConnection, req, m_id );
 }
 
 bool File::isStandAlone()

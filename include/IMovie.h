@@ -18,7 +18,7 @@ class IMovie
         virtual const std::string& imdbId() const = 0;
         virtual bool setImdbId( const std::string& id ) = 0;
         virtual bool destroy() = 0;
-        virtual bool files( std::vector<FilePtr>& files ) = 0;
+        virtual std::vector<FilePtr> files() = 0;
 };
 
 #endif // IMOVIE_H

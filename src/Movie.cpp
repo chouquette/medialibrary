@@ -97,9 +97,7 @@ bool Movie::setImdbId( const std::string& imdbId )
 
 bool Movie::destroy()
 {
-    std::vector<FilePtr> fs;
-    if ( files( fs ) == false )
-        return false;
+    auto fs = files();
     for ( auto& f : fs )
     {
         File::discard( std::static_pointer_cast<File>( f ) );
@@ -107,11 +105,11 @@ bool Movie::destroy()
     return _Cache::destroy( m_dbConnection, this );
 }
 
-bool Movie::files( std::vector<FilePtr>& files )
+std::vector<FilePtr> Movie::files()
 {
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
             + " WHERE movie_id = ?";
-    return SqliteTools::fetchAll<File>( m_dbConnection, req, files, m_id );
+    return SqliteTools::fetchAll<File, IFile>( m_dbConnection, req, m_id );
 }
 
 bool Movie::createTable( DBConnection dbConnection )

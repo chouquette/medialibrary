@@ -72,10 +72,10 @@ class Cache
          * @param res   A reference to the result vector. All existing elements will
          *              be discarded.
          */
-        static bool fetchAll( DBConnection dbConnectionWeak, std::vector<std::shared_ptr<INTF> >& res )
+        static std::vector<std::shared_ptr<INTF>> fetchAll( DBConnection dbConnectionWeak )
         {
             static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name;
-            return SqliteTools::fetchAll<IMPL, INTF>( dbConnectionWeak, req.c_str(), res );
+            return SqliteTools::fetchAll<IMPL, INTF>( dbConnectionWeak, req.c_str() );
         }
 
         static std::shared_ptr<IMPL> load( std::shared_ptr<sqlite3> dbConnection, sqlite3_stmt* stmt )

@@ -38,9 +38,7 @@ TEST_F( AudioTracks, FetchTracks )
     f->addAudioTrack( "PCM", 44100, 128, 2 );
     f->addAudioTrack( "WMA", 48000, 128, 2 );
 
-    std::vector<AudioTrackPtr> ts;
-    bool res = f->audioTracks( ts );
-    ASSERT_TRUE( res );
+    auto ts = f->audioTracks();
     ASSERT_EQ( ts.size(), 2u );
 }
 
@@ -52,11 +50,9 @@ TEST_F( AudioTracks, CheckUnique )
     auto f2 = ml->addFile( "file2" );
     f2->addAudioTrack( "PCM", 44100, 128, 2 );
 
-    std::vector<AudioTrackPtr> ts;
-    f->audioTracks( ts );
+    auto ts = f->audioTracks();
 
-    std::vector<AudioTrackPtr> ts2;
-    f2->audioTracks( ts2 );
+    auto ts2 = f2->audioTracks();
 
     ASSERT_EQ( ts.size(), 1u );
     ASSERT_EQ( ts2.size(), 1u );

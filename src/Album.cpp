@@ -86,11 +86,11 @@ time_t Album::lastSyncDate() const
     return m_lastSyncDate;
 }
 
-bool Album::tracks( std::vector<std::shared_ptr<IAlbumTrack> >& tracks ) const
+std::vector<std::shared_ptr<IAlbumTrack>> Album::tracks() const
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTrackTable::Name
             + " WHERE album_id = ?";
-    return SqliteTools::fetchAll<AlbumTrack>( m_dbConnection, req, tracks, m_id );
+    return SqliteTools::fetchAll<AlbumTrack, IAlbumTrack>( m_dbConnection, req, m_id );
 }
 
 AlbumTrackPtr Album::addTrack( const std::string& title, unsigned int trackNb )
@@ -100,9 +100,7 @@ AlbumTrackPtr Album::addTrack( const std::string& title, unsigned int trackNb )
 
 bool Album::destroy()
 {
-    std::vector<AlbumTrackPtr> ts;
-    if ( tracks( ts ) == false )
-        return false;
+    auto ts = tracks();
     //FIXME: Have a single request to fetch all files at once, instead of having one per track
     for ( auto& t : ts )
     {

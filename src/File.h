@@ -60,9 +60,9 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         virtual bool setMovie( MoviePtr movie );
         virtual bool addVideoTrack( const std::string& codec, unsigned int width,
                                     unsigned int height, float fps );
-        virtual bool videoTracks( std::vector<VideoTrackPtr>& tracks );
+        virtual std::vector<VideoTrackPtr> videoTracks();
         virtual bool addAudioTrack(const std::string& codec, unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels);
-        virtual bool audioTracks( std::vector<AudioTrackPtr>& tracks );
+        virtual std::vector<AudioTrackPtr> audioTracks();
         virtual bool isStandAlone() override;
 
         virtual bool isReady() const;

@@ -119,18 +119,16 @@ std::shared_ptr<IShow> ShowEpisode::show()
     return m_show;
 }
 
-bool ShowEpisode::files( std::vector<FilePtr>& files )
+std::vector<FilePtr> ShowEpisode::files()
 {
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
             + " WHERE show_episode_id = ?";
-    return SqliteTools::fetchAll<File>( m_dbConnection, req, files, m_id );
+    return SqliteTools::fetchAll<File, IFile>( m_dbConnection, req, m_id );
 }
 
 bool ShowEpisode::destroy()
 {
-    std::vector<FilePtr> fs;
-    if ( files( fs ) == false )
-        return false;
+    auto fs = files();
     for ( auto& f : fs )
         File::discard( std::static_pointer_cast<File>( f ) );
     return _Cache::destroy( m_dbConnection, this );

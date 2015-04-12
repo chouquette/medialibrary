@@ -40,9 +40,7 @@ TEST_F( Files, Create )
     ASSERT_EQ( f->showEpisode(), nullptr );
     ASSERT_TRUE( f->isStandAlone() );
 
-    std::vector<std::shared_ptr<IFile>> files;
-    bool success = ml->files( files );
-    ASSERT_TRUE( success );
+    auto files = ml->files();
     ASSERT_EQ( files.size(), 1u );
     ASSERT_EQ( files[0]->mrl(), f->mrl() );
 }

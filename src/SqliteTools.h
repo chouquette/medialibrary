@@ -74,16 +74,16 @@ class SqliteTools
          *                  be discarded.
          */
         template <typename IMPL, typename INTF, typename... Args>
-        static bool fetchAll( DBConnection dbConnectionWeak, const std::string& req, std::vector<std::shared_ptr<INTF> >& results, const Args&... args )
+        static std::vector<std::shared_ptr<INTF> > fetchAll( DBConnection dbConnectionWeak, const std::string& req, const Args&... args )
         {
             auto dbConnection = dbConnectionWeak.lock();
             if ( dbConnection == nullptr )
-                return false;
+                throw std::runtime_error("Invalid SQlite connection");
 
-            results.clear();
+            std::vector<std::shared_ptr<INTF>> results;
             auto stmt = prepareRequest( dbConnection, req, args...);
             if ( stmt == nullptr )
-                return false;
+                throw std::runtime_error("Failed to execute SQlite request");
             int res = sqlite3_step( stmt.get() );
             while ( res == SQLITE_ROW )
             {
@@ -91,7 +91,7 @@ class SqliteTools
                 results.push_back( row );
                 res = sqlite3_step( stmt.get() );
             }
-            return true;
+            return results;
         }
 
         template <typename T, typename... Args>

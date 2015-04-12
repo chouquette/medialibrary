@@ -60,9 +60,9 @@ bool MediaLibrary::initialize(const std::string& dbPath)
 }
 
 
-bool MediaLibrary::files( std::vector<FilePtr>& res )
+std::vector<FilePtr> MediaLibrary::files()
 {
-    return File::fetchAll( m_dbConnection, res );
+    return File::fetchAll( m_dbConnection );
 }
 
 FilePtr MediaLibrary::file( const std::string& path )

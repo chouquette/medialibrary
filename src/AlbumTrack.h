@@ -38,7 +38,7 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
         virtual bool destroy();
         virtual const std::string& artist() const;
         virtual bool setArtist( const std::string& artist );
-        virtual bool files( std::vector<FilePtr>& files );
+        virtual std::vector<FilePtr> files();
 
         static bool createTable( DBConnection dbConnection );
         static AlbumTrackPtr create( DBConnection dbConnection, unsigned int albumId,

@@ -38,7 +38,7 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         virtual const std::string& artworkUrl() const;
         virtual bool setArtworkUrl( const std::string& artworkUrl );
         virtual time_t lastSyncDate() const;
-        virtual bool tracks( std::vector<std::shared_ptr<IAlbumTrack>>& tracks ) const;
+        virtual std::vector<std::shared_ptr<IAlbumTrack> > tracks() const;
         virtual AlbumTrackPtr addTrack( const std::string& title, unsigned int trackNb );
         virtual bool destroy();
 

@@ -39,7 +39,7 @@ class Label : public ILabel, public Cache<Label, ILabel, policy::LabelTable, pol
     public:
         virtual unsigned int id() const;
         virtual const std::string& name();
-        virtual bool files( std::vector<FilePtr>& files );
+        virtual std::vector<FilePtr> files();
 
         static LabelPtr create( DBConnection dbConnection, const std::string& name );
         static bool createTable( DBConnection dbConnection );

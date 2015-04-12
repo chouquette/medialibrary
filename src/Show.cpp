@@ -106,18 +106,16 @@ ShowEpisodePtr Show::addEpisode(const std::string& title, unsigned int episodeNu
     return ShowEpisode::create( m_dbConnection, title, episodeNumber, m_id );
 }
 
-bool Show::episodes( std::vector<ShowEpisodePtr>& episodes )
+std::vector<ShowEpisodePtr> Show::episodes()
 {
     static const std::string req = "SELECT * FROM " + policy::ShowEpisodeTable::Name
             + " WHERE show_id = ?";
-    return SqliteTools::fetchAll<ShowEpisode>( m_dbConnection, req, episodes, m_id );
+    return SqliteTools::fetchAll<ShowEpisode, IShowEpisode>( m_dbConnection, req, m_id );
 }
 
 bool Show::destroy()
 {
-    std::vector<ShowEpisodePtr> eps;
-    if ( episodes( eps ) == false )
-        return false;
+    auto eps = episodes();
     //FIXME: This is suboptimal. Each episode::destroy() will fire a SQL request of its own
     for ( auto& t : eps )
     {

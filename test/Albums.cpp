@@ -57,15 +57,14 @@ TEST_F( Albums, AddTrack )
     auto track = a->addTrack( "track", 10 );
     ASSERT_NE( track, nullptr );
 
-    std::vector<AlbumTrackPtr> tracks;
-    bool res = a->tracks( tracks );
-    ASSERT_TRUE( res );
+    auto tracks = a->tracks();
     ASSERT_EQ( tracks.size(), 1u );
     ASSERT_EQ( tracks[0], track );
 
     SetUp();
 
-    a->tracks( tracks );
+    a = ml->album( "albumtag" );
+    tracks = a->tracks();
     ASSERT_EQ( tracks.size(), 1u );
     ASSERT_EQ( tracks[0]->title(), track->title() );
 }
@@ -114,9 +113,8 @@ TEST_F( Albums, SetGenre )
 
     SetUp();
 
-    std::vector<AlbumTrackPtr> tracks;
     a = ml->album( "album" );
-    a->tracks( tracks );
+    auto tracks = a->tracks();
     auto t2 = tracks[0];
     ASSERT_EQ( t->genre(), t2->genre() );
 }
@@ -171,8 +169,7 @@ TEST_F( Albums, SetArtist )
     SetUp();
 
     auto a2 = ml->album( "album" );
-    std::vector<AlbumTrackPtr> tracks;
-    a2->tracks( tracks );
+    auto tracks = a2->tracks();
     auto t2 = tracks[0];
     ASSERT_EQ( t->artist(), t2->artist() );
 }
