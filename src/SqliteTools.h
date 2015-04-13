@@ -125,7 +125,7 @@ class SqliteTools
         template <typename... Args>
         static bool executeUpdate( DBConnection dbConnectionWeak, const std::string& req, const Args&... args )
         {
-            // The code would be exactly the same, do not freak out because it call delete :)
+            // The code would be exactly the same, do not freak out because it calls delete :)
             return executeDelete( dbConnectionWeak, req, args... );
         }
 
