@@ -118,7 +118,10 @@ bool MediaLibrary::deleteFile( FilePtr file )
 
 bool MediaLibrary::deleteFolder( FolderPtr folder )
 {
-    return Folder::destroy( m_dbConnection, std::static_pointer_cast<Folder>( folder ) );
+    if ( Folder::destroy( m_dbConnection, std::static_pointer_cast<Folder>( folder ) ) == false )
+        return false;
+    File::clear();
+    return true;
 }
 
 LabelPtr MediaLibrary::createLabel( const std::string& label )
