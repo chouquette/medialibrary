@@ -92,3 +92,18 @@ TEST_F( Folders, InvalidPath )
     auto files = ml->files();
     ASSERT_EQ( files.size(), 0u );
 }
+
+TEST_F( Folders, List )
+{
+    auto f = ml->addFolder( "." );
+    ASSERT_NE( f, nullptr );
+
+    auto files = f->files();
+    ASSERT_EQ( files.size(), 2u );
+
+    SetUp();
+
+    f = ml->folder( f->path() );
+    files = f->files();
+    ASSERT_EQ( files.size(), 2u );
+}
