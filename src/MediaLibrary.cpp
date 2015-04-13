@@ -80,10 +80,8 @@ FilePtr MediaLibrary::addFile( const std::string& path )
 
 FolderPtr MediaLibrary::addFolder( const std::string& path )
 {
-    auto folder = Folder::create( m_dbConnection, path );
-    if ( folder == nullptr )
-        return nullptr;
     std::unique_ptr<fs::IDirectory> dir;
+
     try
     {
         dir = fs::createDirectory( path );
@@ -92,6 +90,10 @@ FolderPtr MediaLibrary::addFolder( const std::string& path )
     {
         return nullptr;
     }
+
+    auto folder = Folder::create( m_dbConnection, dir->path() );
+    if ( folder == nullptr )
+        return nullptr;
 
     for ( auto& f : dir->files() )
     {
