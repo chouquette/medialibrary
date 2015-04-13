@@ -42,13 +42,30 @@ TEST_F( Folders, Delete )
     auto f = ml->addFolder( "." );
     ASSERT_NE( f, nullptr );
 
+    auto folderPath = f->path();
+
     auto files = ml->files();
     ASSERT_EQ( files.size(), 2u );
 
+    auto filePath = files[0]->mrl();
+
     ml->deleteFolder( f );
+
+    f = ml->folder( folderPath );
+    ASSERT_EQ( nullptr, f );
 
     files = ml->files();
     ASSERT_EQ( files.size(), 0u );
+
+    // Check the file isn't cached anymore:
+    auto file = ml->file( filePath );
+    ASSERT_EQ( nullptr, file );
+
+    SetUp();
+
+    // Recheck folder deletion from DB:
+    f = ml->folder( folderPath );
+    ASSERT_EQ( nullptr, f );
 }
 
 TEST_F( Folders, Load )
