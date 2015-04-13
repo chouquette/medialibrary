@@ -6,8 +6,19 @@
 namespace policy
 {
     const std::string FolderTable::Name = "Folder";
-    const std::string FolderTable::CacheColumn = "id_folder";
+    const std::string FolderTable::CacheColumn = "path";
     unsigned int Folder::* const FolderTable::PrimaryKey = &Folder::m_id;
+
+    const FolderCache::KeyType&FolderCache::key(const std::shared_ptr<Folder>& self)
+    {
+        return self->path();
+    }
+
+    FolderCache::KeyType FolderCache::key( sqlite3_stmt* stmt )
+    {
+        return Traits<FolderCache::KeyType>::Load( stmt, 1 );
+    }
+
 }
 
 Folder::Folder( DBConnection dbConnection, sqlite3_stmt* stmt )
@@ -25,7 +36,7 @@ Folder::Folder( const std::string& path )
 bool Folder::createTable(DBConnection connection)
 {
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::FolderTable::Name + "("
-            + policy::FolderTable::CacheColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            + "id_folder INTEGER PRIMARY KEY AUTOINCREMENT,"
             "path TEXT UNIQUE ON CONFLICT FAIL"
             ")";
     return SqliteTools::executeRequest( connection, req );

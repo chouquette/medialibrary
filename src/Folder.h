@@ -15,11 +15,19 @@ struct FolderTable
     static const std::string CacheColumn;
     static unsigned int Folder::*const PrimaryKey;
 };
+
+struct FolderCache
+{
+    using KeyType = std::string;
+    static const KeyType& key( const std::shared_ptr<Folder>& self );
+    static KeyType key( sqlite3_stmt* stmt );
+};
+
 }
 
-class Folder : public IFolder, public Cache<Folder, IFolder, policy::FolderTable>
+class Folder : public IFolder, public Cache<Folder, IFolder, policy::FolderTable, policy::FolderCache>
 {
-    using _Cache = Cache<Folder, IFolder, policy::FolderTable>;
+    using _Cache = Cache<Folder, IFolder, policy::FolderTable, policy::FolderCache>;
 
 public:
     Folder(DBConnection dbConnection, sqlite3_stmt* stmt);
@@ -38,6 +46,6 @@ private:
     unsigned int m_id;
     std::string m_path;
 
-    friend class Cache<Folder, IFolder, policy::FolderTable>;
+    friend _Cache;
     friend struct policy::FolderTable;
 };
