@@ -33,6 +33,11 @@ Directory::Directory( const std::string& path )
 {
 }
 
+const std::string&Directory::path() const
+{
+    return m_path;
+}
+
 std::vector<std::unique_ptr<IFile>> Directory::files() const
 {
     auto dir = std::unique_ptr<DIR, int(*)(DIR*)>( opendir( m_path.c_str() ), closedir );

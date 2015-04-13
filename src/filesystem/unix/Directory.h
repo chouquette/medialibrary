@@ -10,6 +10,7 @@ class Directory : public IDirectory
 {
 public:
     explicit Directory( const std::string& path );
+    virtual const std::string& path() const override;
     virtual std::vector<std::unique_ptr<IFile>> files() const override;
 
 public:
