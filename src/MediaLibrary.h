@@ -17,9 +17,11 @@ class MediaLibrary : public IMediaLibrary
         virtual std::vector<FilePtr> files();
         virtual FilePtr file( const std::string& path );
         virtual FilePtr addFile( const std::string& path );
-        virtual FolderPtr addFolder( const std::string& path ) override;
         virtual bool deleteFile( const std::string& mrl );
         virtual bool deleteFile( FilePtr file );
+
+        virtual FolderPtr addFolder( const std::string& path ) override;
+        virtual FolderPtr folder( const std::string& path ) override;
         virtual bool deleteFolder( FolderPtr folder ) override;
 
         virtual LabelPtr createLabel( const std::string& label );

@@ -34,12 +34,16 @@ class IMediaLibrary
         virtual bool initialize( const std::string& dbPath ) = 0;
         /// Adds a stand alone file
         virtual FilePtr addFile( const std::string& path ) = 0;
-        /// Adds a folder and all the files it contains
-        virtual FolderPtr addFolder( const std::string& path ) = 0;
         virtual FilePtr file( const std::string& path ) = 0;
         virtual bool deleteFile( const std::string& mrl ) = 0;
         virtual bool deleteFile( FilePtr file ) = 0;
+
+        /// Adds a folder and all the files it contains
+        virtual FolderPtr addFolder( const std::string& path ) = 0;
+        virtual FolderPtr folder( const std::string& path ) = 0;
         virtual bool deleteFolder( FolderPtr folder ) = 0;
+
+
         virtual LabelPtr createLabel( const std::string& label ) = 0;
         virtual bool deleteLabel( const std::string& label ) = 0;
         virtual bool deleteLabel( LabelPtr label ) = 0;

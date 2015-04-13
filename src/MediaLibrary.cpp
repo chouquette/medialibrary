@@ -101,6 +101,11 @@ FolderPtr MediaLibrary::addFolder( const std::string& path )
     return folder;
 }
 
+FolderPtr MediaLibrary::folder( const std::string& path )
+{
+    return Folder::fetch( m_dbConnection, path );
+}
+
 bool MediaLibrary::deleteFile( const std::string& mrl )
 {
     return File::destroy( m_dbConnection, mrl );
