@@ -23,6 +23,7 @@ list(APPEND HEADERS_LIST
     ${CMAKE_SOURCE_DIR}/include/IVideoTrack.h
     ${CMAKE_SOURCE_DIR}/include/IMovie.h
 
+    Cache.h
     SqliteTools.h
 
     filesystem/IDirectory.h
