@@ -107,3 +107,9 @@ TEST_F( Folders, List )
     files = f->files();
     ASSERT_EQ( files.size(), 2u );
 }
+
+TEST_F( Folders, AbsolutePath )
+{
+    auto f = ml->addFolder( "." );
+    ASSERT_NE( f->path(), "." );
+}
