@@ -28,7 +28,9 @@ std::unique_ptr<IMediaLibrary> Folders::ml;
 
 TEST_F( Folders, Add )
 {
-    ml->addFolder( "." );
+    auto f = ml->addFolder( "." );
+    ASSERT_NE( f, nullptr );
+
     auto files = ml->files();
 
     ASSERT_EQ( files.size(), 2u );
@@ -38,8 +40,9 @@ TEST_F( Folders, Add )
 TEST_F( Folders, Delete )
 {
     auto f = ml->addFolder( "." );
-    auto files = ml->files();
+    ASSERT_NE( f, nullptr );
 
+    auto files = ml->files();
     ASSERT_EQ( files.size(), 2u );
 
     ml->deleteFolder( f );
@@ -51,8 +54,9 @@ TEST_F( Folders, Delete )
 TEST_F( Folders, Load )
 {
     auto f = ml->addFolder( "." );
-    auto files = ml->files();
+    ASSERT_NE( f, nullptr );
 
+    auto files = ml->files();
     ASSERT_EQ( files.size(), 2u );
 
     SetUp();
