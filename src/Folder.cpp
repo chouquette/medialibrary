@@ -65,7 +65,7 @@ const std::string& Folder::path()
 
 std::vector<FilePtr> Folder::files()
 {
-    static const std::string req = "SELECT f.* FROM " + policy::FileTable::Name +
-        " WHERE f.id_folder = ?";
+    static const std::string req = "SELECT * FROM " + policy::FileTable::Name +
+        " WHERE folder_id = ?";
     return SqliteTools::fetchAll<File, IFile>( m_dbConection, req, m_id );
 }
