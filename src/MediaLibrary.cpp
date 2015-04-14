@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <functional>
+#include <queue>
 
 #include "Album.h"
 #include "AlbumTrack.h"
@@ -105,30 +106,47 @@ FilePtr MediaLibrary::addFile( const std::string& path )
 
 FolderPtr MediaLibrary::addFolder( const std::string& path )
 {
-    std::unique_ptr<fs::IDirectory> dir;
+    std::queue<std::string> folders;
+    FolderPtr root;
 
-    try
+    folders.emplace( path );
+    while ( folders.empty() == false )
     {
-        dir = m_fsFactory->createDirectory( path );
-    }
-    catch ( std::runtime_error& )
-    {
-        return nullptr;
-    }
+        std::unique_ptr<fs::IDirectory> dir;
 
-    auto folder = Folder::create( m_dbConnection, dir->path() );
-    if ( folder == nullptr )
-        return nullptr;
-
-    for ( auto& f : dir->files() )
-    {
-        if ( std::find( begin( supportedExtensions ), end( supportedExtensions ),
-                        utils::file::extension( f ) ) == end( supportedExtensions ) )
+        try
+        {
+            dir = m_fsFactory->createDirectory( folders.front() );
+            folders.pop();
+        }
+        catch ( std::runtime_error& )
+        {
+            // If the first directory fails to open, stop now.
+            // Otherwise, assume something went wrong in a subdirectory.
+            if (root == nullptr)
+                return nullptr;
+            folders.pop();
             continue;
-        if ( File::create( m_dbConnection, f, folder->id() ) == nullptr )
-            std::cerr << "Failed to add file " << f << " to the media library" << std::endl;
+        }
+
+        auto folder = Folder::create( m_dbConnection, dir->path() );
+        if ( folder == nullptr && root == nullptr )
+            return nullptr;
+        if ( root == nullptr )
+            root = folder;
+
+        for ( auto& f : dir->files() )
+        {
+            if ( std::find( begin( supportedExtensions ), end( supportedExtensions ),
+                            utils::file::extension( f ) ) == end( supportedExtensions ) )
+                continue;
+            if ( File::create( m_dbConnection, f, folder->id() ) == nullptr )
+                std::cerr << "Failed to add file " << f << " to the media library" << std::endl;
+        }
+        for ( auto& f : dir->dirs() )
+            folders.emplace( f );
     }
-    return folder;
+    return root;
 }
 
 FolderPtr MediaLibrary::folder( const std::string& path )

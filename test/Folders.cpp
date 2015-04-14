@@ -68,7 +68,7 @@ struct FileSystemFactory : public factory::IFileSystem
                 },
                 std::vector<std::string>
                 {
-                    "folder"
+                    "folder/"
                 }
             });
         }
