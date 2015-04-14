@@ -5,6 +5,7 @@
 #include <string>
 
 #include "Types.h"
+#include "factory/IFileSystem.h"
 
 class IParserCb
 {
@@ -31,7 +32,14 @@ class IMediaLibrary
 {
     public:
         virtual ~IMediaLibrary() {}
-        virtual bool initialize( const std::string& dbPath ) = 0;
+        ///
+        /// \brief initialize Initializes the media library.
+        /// \param dbPath       Path to the database
+        /// \param fsFactory    An instance to a filesystem factory.
+        ///                     In case this is a nullptr, a default factory will be used
+        /// \return true in case of success, false otherwise
+        ///
+        virtual bool initialize( const std::string& dbPath, std::unique_ptr<factory::IFileSystem> fsFactory = nullptr ) = 0;
         /// Adds a stand alone file
         virtual FilePtr addFile( const std::string& path ) = 0;
         virtual FilePtr file( const std::string& path ) = 0;

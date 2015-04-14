@@ -12,7 +12,7 @@ class MediaLibrary : public IMediaLibrary
     public:
         MediaLibrary();
         ~MediaLibrary();
-        virtual bool initialize( const std::string& dbPath );
+        virtual bool initialize( const std::string& dbPath, std::unique_ptr<factory::IFileSystem> fsFactory );
 
         virtual std::vector<FilePtr> files();
         virtual FilePtr file( const std::string& path );
@@ -43,5 +43,6 @@ class MediaLibrary : public IMediaLibrary
     private:
         std::shared_ptr<sqlite3> m_dbConnection;
         std::unique_ptr<Parser> m_parser;
+        std::unique_ptr<factory::IFileSystem> m_fsFactory;
 };
 #endif // MEDIALIBRARY_H

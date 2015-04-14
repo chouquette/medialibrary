@@ -15,6 +15,4 @@ namespace fs
         virtual const std::string& path() const = 0;
         virtual std::vector<std::unique_ptr<IFile>> files() const = 0;
     };
-
-    std::unique_ptr<IDirectory> createDirectory( const std::string& path );
 }

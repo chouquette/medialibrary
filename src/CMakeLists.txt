@@ -23,6 +23,8 @@ list(APPEND HEADERS_LIST
     ${CMAKE_SOURCE_DIR}/include/IVideoTrack.h
     ${CMAKE_SOURCE_DIR}/include/IMovie.h
 
+    ${CMAKE_SOURCE_DIR}/include/factory/IFileSystem.h
+
     Cache.h
     SqliteTools.h
 
@@ -31,6 +33,8 @@ list(APPEND HEADERS_LIST
 
     filesystem/${ARCH_FOLDER}/Directory.h
     filesystem/${ARCH_FOLDER}/File.h
+
+    factory/FileSystem.h
 )
 
 include_directories("${CMAKE_SOURCE_DIR}/include")
@@ -53,7 +57,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
 
     metadata_services/VLCMetadataService.cpp
 
-    filesystem/Factory.cpp
+    factory/FileSystem.cpp
     filesystem/${ARCH_FOLDER}/Directory.cpp
     filesystem/${ARCH_FOLDER}/File.cpp
 )

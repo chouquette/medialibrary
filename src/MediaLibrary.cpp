@@ -19,6 +19,8 @@
 #include "filesystem/IDirectory.h"
 #include "filesystem/IFile.h"
 
+#include "factory/FileSystem.h"
+
 MediaLibrary::MediaLibrary()
     : m_parser( new Parser )
 {
@@ -38,8 +40,13 @@ MediaLibrary::~MediaLibrary()
     AudioTrack::clear();
 }
 
-bool MediaLibrary::initialize(const std::string& dbPath)
+bool MediaLibrary::initialize( const std::string& dbPath, std::unique_ptr<factory::IFileSystem> fsFactory )
 {
+    if ( fsFactory != nullptr )
+        m_fsFactory = std::move( fsFactory );
+    else
+        m_fsFactory.reset( new factory::FileSystemDefaultFactory );
+
     sqlite3* dbConnection;
     int res = sqlite3_open( dbPath.c_str(), &dbConnection );
     if ( res != SQLITE_OK )
@@ -84,7 +91,7 @@ FolderPtr MediaLibrary::addFolder( const std::string& path )
 
     try
     {
-        dir = fs::createDirectory( path );
+        dir = m_fsFactory->createDirectory( path );
     }
     catch ( std::runtime_error& )
     {
