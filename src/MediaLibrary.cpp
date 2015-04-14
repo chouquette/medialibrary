@@ -104,8 +104,8 @@ FolderPtr MediaLibrary::addFolder( const std::string& path )
 
     for ( auto& f : dir->files() )
     {
-        if ( File::create( m_dbConnection, f->fullPath(), folder->id() ) == nullptr )
-            std::cerr << "Failed to add file " << f->fullPath() << " to the media library" << std::endl;
+        if ( File::create( m_dbConnection, f, folder->id() ) == nullptr )
+            std::cerr << "Failed to add file " << f << " to the media library" << std::endl;
     }
     return folder;
 }
