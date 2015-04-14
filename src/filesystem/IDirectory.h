@@ -14,5 +14,6 @@ namespace fs
         // Returns the absolute path to this directory
         virtual const std::string& path() const = 0;
         virtual const std::vector<std::string>& files() const = 0;
+        virtual const std::vector<std::string>& dirs() const = 0;
     };
 }

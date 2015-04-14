@@ -12,6 +12,7 @@ public:
     explicit Directory( const std::string& path );
     virtual const std::string& path() const override;
     virtual const std::vector<std::string>& files() const override;
+    virtual const std::vector<std::string>& dirs() const override;
 
 private:
     static std::string toAbsolute( const std::string& path );
@@ -22,6 +23,7 @@ private:
 private:
     const std::string m_path;
     std::vector<std::string> m_files;
+    std::vector<std::string> m_dirs;
 };
 
 }

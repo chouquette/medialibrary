@@ -28,6 +28,11 @@ const std::vector<std::string>& Directory::files() const
     return m_files;
 }
 
+const std::vector<std::string>&Directory::dirs() const
+{
+    return m_dirs;
+}
+
 std::string Directory::toAbsolute(const std::string& path)
 {
     auto abs = std::unique_ptr<char[]>( new char[PATH_MAX] );
@@ -61,12 +66,11 @@ void Directory::read()
         if ( S_ISDIR( s.st_mode ) )
         {
 #endif
-            //FIXME
-            continue;
+            m_dirs.emplace_back( toAbsolute( result->d_name ) );
         }
         else
         {
-            m_files.push_back( toAbsolute( result->d_name ) );
+            m_files.emplace_back( toAbsolute( result->d_name ) );
         }
     }
 }

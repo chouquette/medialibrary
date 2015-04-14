@@ -13,16 +13,16 @@ namespace mock
 class Directory : public fs::IDirectory
 {
 public:
-    Directory( const std::string& path, const std::vector<std::string>& files, const std::vector<std::string>& folders )
+    Directory( const std::string& path, const std::vector<std::string>& files, const std::vector<std::string>& dirs )
         : m_path( path )
     {
         for ( auto &f : files )
         {
             m_files.push_back( path + f );
         }
-        for ( auto& f : folders )
+        for ( auto& d : dirs )
         {
-            m_folders.push_back( path + f );
+            m_dirs.push_back( path + d );
         }
     }
 
@@ -36,10 +36,15 @@ public:
         return m_files;
     }
 
+    virtual const std::vector<std::string>& dirs() const
+    {
+        return m_dirs;
+    }
+
 private:
     std::string m_path;
     std::vector<std::string> m_files;
-    std::vector<std::string> m_folders;
+    std::vector<std::string> m_dirs;
 };
 
 
