@@ -35,6 +35,7 @@ list(APPEND HEADERS_LIST
     filesystem/${ARCH_FOLDER}/File.h
 
     factory/FileSystem.h
+    Utils.h
 )
 
 include_directories("${CMAKE_SOURCE_DIR}/include")
@@ -60,6 +61,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     factory/FileSystem.cpp
     filesystem/${ARCH_FOLDER}/Directory.cpp
     filesystem/${ARCH_FOLDER}/File.cpp
+    Utils.cpp
 )
 
 find_package(Sqlite3 REQUIRED)

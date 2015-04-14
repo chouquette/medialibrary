@@ -18,8 +18,6 @@ public:
     virtual const std::string& fullPath() const override;
     virtual const std::string& extension() const override;
 
-    static std::string extension( const std::string& fileName );
-
 private:
     const std::string m_path;
     const std::string m_name;

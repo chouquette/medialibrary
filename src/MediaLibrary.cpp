@@ -14,12 +14,30 @@
 #include "Show.h"
 #include "ShowEpisode.h"
 #include "SqliteTools.h"
+#include "Utils.h"
 #include "VideoTrack.h"
 
 #include "filesystem/IDirectory.h"
 #include "filesystem/IFile.h"
 
 #include "factory/FileSystem.h"
+
+const std::vector<std::string> MediaLibrary::supportedExtensions {
+    // Videos
+    "avi", "3gp", "amv", "asf", "divx", "dv", "flv", "gxf",
+    "iso", "m1v", "m2v", "m2t", "m2ts", "m4v", "mkv", "mov",
+    "mp2", "mp4", "mpeg", "mpeg1", "mpeg2", "mpeg4", "mpg",
+    "mts", "mxf", "nsv", "nuv", "ogg", "ogm", "ogv", "ogx", "ps",
+    "rec", "rm", "rmvb", "tod", "ts", "vob", "vro", "webm", "wmv",
+    // Images
+    "png", "jpg", "jpeg",
+    // Audio
+    "a52", "aac", "ac3", "aiff", "amr", "aob", "ape",
+    "dts", "flac", "it", "m4a", "m4p", "mid", "mka", "mlp",
+    "mod", "mp1", "mp2", "mp3", "mpc", "oga", "ogg", "oma",
+    "rmi", "s3m", "spx", "tta", "voc", "vqf", "w64", "wav",
+    "wma", "wv", "xa", "xm"
+};
 
 MediaLibrary::MediaLibrary()
     : m_parser( new Parser )
@@ -104,6 +122,9 @@ FolderPtr MediaLibrary::addFolder( const std::string& path )
 
     for ( auto& f : dir->files() )
     {
+        if ( std::find( begin( supportedExtensions ), end( supportedExtensions ),
+                        utils::file::extension( f ) ) == end( supportedExtensions ) )
+            continue;
         if ( File::create( m_dbConnection, f, folder->id() ) == nullptr )
             std::cerr << "Failed to add file " << f << " to the media library" << std::endl;
     }

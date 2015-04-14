@@ -41,6 +41,9 @@ class MediaLibrary : public IMediaLibrary
         virtual void parse( FilePtr file, IParserCb* cb );
 
     private:
+        static const std::vector<std::string> supportedExtensions;
+
+    private:
         std::shared_ptr<sqlite3> m_dbConnection;
         std::unique_ptr<Parser> m_parser;
         std::unique_ptr<factory::IFileSystem> m_fsFactory;
