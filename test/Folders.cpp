@@ -4,6 +4,87 @@
 #include "IFolder.h"
 #include "IMediaLibrary.h"
 
+#include "filesystem/IDirectory.h"
+#include "filesystem/IFile.h"
+
+namespace mock
+{
+
+class Directory : public fs::IDirectory
+{
+public:
+    Directory( const std::string& path, const std::vector<std::string>& files, const std::vector<std::string>& folders )
+        : m_path( path )
+    {
+        for ( auto &f : files )
+        {
+            m_files.push_back( path + f );
+        }
+        for ( auto& f : folders )
+        {
+            m_folders.push_back( path + f );
+        }
+    }
+
+    virtual const std::string& path() const
+    {
+        return m_path;
+    }
+
+    virtual const std::vector<std::string>& files() const
+    {
+        return m_files;
+    }
+
+private:
+    std::string m_path;
+    std::vector<std::string> m_files;
+    std::vector<std::string> m_folders;
+};
+
+
+struct FileSystemFactory : public factory::IFileSystem
+{
+    static constexpr const char* Root = "/a/";
+    static constexpr const char* SubFolder = "/a/folder/";
+    virtual std::unique_ptr<fs::IDirectory> createDirectory(const std::string& path) override
+    {
+        if ( path == Root || path == "." )
+        {
+            return std::unique_ptr<fs::IDirectory>( new Directory
+            {
+                Root,
+                std::vector<std::string>
+                {
+                    "video.avi",
+                    "audio.mp3",
+                    "not_a_media.something",
+                    "some_other_file.seaotter",
+                },
+                std::vector<std::string>
+                {
+                    "folder"
+                }
+            });
+        }
+        else if ( path == SubFolder )
+        {
+            return std::unique_ptr<fs::IDirectory>( new Directory
+            {
+                SubFolder,
+                std::vector<std::string>
+                {
+                    "subfile.mp4"
+                },
+                std::vector<std::string>{}
+            });
+        }
+        throw std::runtime_error("Invalid path");
+    }
+};
+
+}
+
 class Folders : public testing::Test
 {
     public:
@@ -13,7 +94,8 @@ class Folders : public testing::Test
         virtual void SetUp()
         {
             ml.reset( MediaLibraryFactory::create() );
-            bool res = ml->initialize( "test.db" );
+            bool res = ml->initialize( "test.db",
+                std::unique_ptr<factory::IFileSystem>( new mock::FileSystemFactory ) );
             ASSERT_TRUE( res );
         }
 
@@ -33,7 +115,7 @@ TEST_F( Folders, Add )
 
     auto files = ml->files();
 
-    ASSERT_EQ( files.size(), 2u );
+    ASSERT_EQ( files.size(), 3u );
     ASSERT_FALSE( files[0]->isStandAlone() );
 }
 
@@ -45,7 +127,7 @@ TEST_F( Folders, Delete )
     auto folderPath = f->path();
 
     auto files = ml->files();
-    ASSERT_EQ( files.size(), 2u );
+    ASSERT_EQ( files.size(), 3u );
 
     auto filePath = files[0]->mrl();
 
@@ -73,15 +155,12 @@ TEST_F( Folders, Load )
     auto f = ml->addFolder( "." );
     ASSERT_NE( f, nullptr );
 
-    auto files = ml->files();
-    ASSERT_EQ( files.size(), 2u );
-
     SetUp();
 
-    files = ml->files();
-    ASSERT_EQ( files.size(), 2u );
-    ASSERT_FALSE( files[0]->isStandAlone() );
-    ASSERT_FALSE( files[1]->isStandAlone() );
+    auto files = ml->files();
+    ASSERT_EQ( files.size(), 3u );
+    for ( auto& f : files )
+        ASSERT_FALSE( f->isStandAlone() );
 }
 
 TEST_F( Folders, InvalidPath )
