@@ -106,18 +106,19 @@ FilePtr MediaLibrary::addFile( const std::string& path )
 
 FolderPtr MediaLibrary::addFolder( const std::string& path )
 {
-    std::queue<std::string> folders;
+    std::queue<std::pair<std::string, unsigned int>> folders;
     FolderPtr root;
 
-    folders.emplace( path );
+    folders.emplace( path, 0 );
     while ( folders.empty() == false )
     {
         std::unique_ptr<fs::IDirectory> dir;
+        auto currentFolder = folders.front();
+        folders.pop();
 
         try
         {
-            dir = m_fsFactory->createDirectory( folders.front() );
-            folders.pop();
+            dir = m_fsFactory->createDirectory( currentFolder.first );
         }
         catch ( std::runtime_error& )
         {
@@ -125,11 +126,10 @@ FolderPtr MediaLibrary::addFolder( const std::string& path )
             // Otherwise, assume something went wrong in a subdirectory.
             if (root == nullptr)
                 return nullptr;
-            folders.pop();
             continue;
         }
 
-        auto folder = Folder::create( m_dbConnection, dir->path() );
+        auto folder = Folder::create( m_dbConnection, dir->path(), currentFolder.second );
         if ( folder == nullptr && root == nullptr )
             return nullptr;
         if ( root == nullptr )
@@ -144,7 +144,7 @@ FolderPtr MediaLibrary::addFolder( const std::string& path )
                 std::cerr << "Failed to add file " << f << " to the media library" << std::endl;
         }
         for ( auto& f : dir->dirs() )
-            folders.emplace( f );
+            folders.emplace( f, folder->id() );
     }
     return root;
 }
