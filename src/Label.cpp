@@ -4,7 +4,7 @@
 
 #include "Label.h"
 #include "File.h"
-#include "SqliteTools.h"
+#include "database/SqliteTools.h"
 
 const std::string policy::LabelTable::Name = "Label";
 const std::string policy::LabelTable::CacheColumn = "name";
@@ -38,7 +38,7 @@ std::vector<FilePtr> Label::files()
     static const std::string req = "SELECT f.* FROM " + policy::FileTable::Name + " f "
             "LEFT JOIN LabelFileRelation lfr ON lfr.id_file = f.id_file "
             "WHERE lfr.id_label = ?";
-    return SqliteTools::fetchAll<File, IFile>( m_dbConnection, req, m_id );
+    return sqlite::Tools::fetchAll<File, IFile>( m_dbConnection, req, m_id );
 }
 
 LabelPtr Label::create(DBConnection dbConnection, const std::string& name )
@@ -57,7 +57,7 @@ bool Label::createTable(DBConnection dbConnection)
                 "id_label INTEGER PRIMARY KEY AUTOINCREMENT, "
                 "name TEXT UNIQUE ON CONFLICT FAIL"
             ")";
-    if ( SqliteTools::executeRequest( dbConnection, req ) == false )
+    if ( sqlite::Tools::executeRequest( dbConnection, req ) == false )
         return false;
     req = "CREATE TABLE IF NOT EXISTS LabelFileRelation("
                 "id_label INTEGER,"
@@ -65,7 +65,7 @@ bool Label::createTable(DBConnection dbConnection)
             "PRIMARY KEY (id_label, id_file),"
             "FOREIGN KEY(id_label) REFERENCES Label(id_label) ON DELETE CASCADE,"
             "FOREIGN KEY(id_file) REFERENCES File(id_file) ON DELETE CASCADE);";
-    return SqliteTools::executeRequest( dbConnection, req );
+    return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
 const std::string&policy::LabelCachePolicy::key( const std::shared_ptr<ILabel> self )
@@ -75,5 +75,5 @@ const std::string&policy::LabelCachePolicy::key( const std::shared_ptr<ILabel> s
 
 std::string policy::LabelCachePolicy::key(sqlite3_stmt* stmt)
 {
-    return Traits<KeyType>::Load( stmt, 1 );
+    return sqlite::Traits<KeyType>::Load( stmt, 1 );
 }

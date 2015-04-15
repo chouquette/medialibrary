@@ -1,6 +1,6 @@
 #include "Show.h"
 #include "ShowEpisode.h"
-#include "SqliteTools.h"
+#include "database/SqliteTools.h"
 
 const std::string policy::ShowTable::Name = "Show";
 const std::string policy::ShowTable::CacheColumn = "id_show";
@@ -9,13 +9,13 @@ unsigned int Show::* const policy::ShowTable::PrimaryKey = &Show::m_id;
 Show::Show(DBConnection dbConnection, sqlite3_stmt* stmt)
     : m_dbConnection( dbConnection )
 {
-    m_id = Traits<unsigned int>::Load( stmt, 0 );
-    m_name = Traits<std::string>::Load( stmt, 1 );
-    m_releaseDate = Traits<unsigned int>::Load( stmt, 2 );
-    m_shortSummary = Traits<std::string>::Load( stmt, 3 );
-    m_artworkUrl = Traits<std::string>::Load( stmt, 4 );
-    m_lastSyncDate = Traits<unsigned int>::Load( stmt, 5 );
-    m_tvdbId = Traits<std::string>::Load( stmt, 6 );
+    m_id = sqlite::Traits<unsigned int>::Load( stmt, 0 );
+    m_name = sqlite::Traits<std::string>::Load( stmt, 1 );
+    m_releaseDate = sqlite::Traits<unsigned int>::Load( stmt, 2 );
+    m_shortSummary = sqlite::Traits<std::string>::Load( stmt, 3 );
+    m_artworkUrl = sqlite::Traits<std::string>::Load( stmt, 4 );
+    m_lastSyncDate = sqlite::Traits<unsigned int>::Load( stmt, 5 );
+    m_tvdbId = sqlite::Traits<std::string>::Load( stmt, 6 );
 }
 
 Show::Show( const std::string& name )
@@ -45,7 +45,7 @@ bool Show::setReleaseDate( time_t date )
 {
     static const std::string& req = "UPDATE " + policy::ShowTable::Name
             + " SET release_date = ? WHERE id_show = ?";
-    if ( SqliteTools::executeUpdate( m_dbConnection, req, date, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, date, m_id ) == false )
         return false;
     m_releaseDate = date;
     return true;
@@ -60,7 +60,7 @@ bool Show::setShortSummary( const std::string& summary )
 {
     static const std::string& req = "UPDATE " + policy::ShowTable::Name
             + " SET short_summary = ? WHERE id_show = ?";
-    if ( SqliteTools::executeUpdate( m_dbConnection, req, summary, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, summary, m_id ) == false )
         return false;
     m_shortSummary = summary;
     return true;
@@ -75,7 +75,7 @@ bool Show::setArtworkUrl( const std::string& artworkUrl )
 {
     static const std::string& req = "UPDATE " + policy::ShowTable::Name
             + " SET artwork_url = ? WHERE id_show = ?";
-    if ( SqliteTools::executeUpdate( m_dbConnection, req, artworkUrl, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkUrl, m_id ) == false )
         return false;
     m_artworkUrl = artworkUrl;
     return true;
@@ -95,7 +95,7 @@ bool Show::setTvdbId( const std::string& tvdbId )
 {
     static const std::string& req = "UPDATE " + policy::ShowTable::Name
             + " SET tvdb_id = ? WHERE id_show = ?";
-    if ( SqliteTools::executeUpdate( m_dbConnection, req, tvdbId, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, tvdbId, m_id ) == false )
         return false;
     m_tvdbId = tvdbId;
     return true;
@@ -110,7 +110,7 @@ std::vector<ShowEpisodePtr> Show::episodes()
 {
     static const std::string req = "SELECT * FROM " + policy::ShowEpisodeTable::Name
             + " WHERE show_id = ?";
-    return SqliteTools::fetchAll<ShowEpisode, IShowEpisode>( m_dbConnection, req, m_id );
+    return sqlite::Tools::fetchAll<ShowEpisode, IShowEpisode>( m_dbConnection, req, m_id );
 }
 
 bool Show::destroy()
@@ -135,7 +135,7 @@ bool Show::createTable(DBConnection dbConnection)
                         "last_sync_date UNSIGNED INTEGER,"
                         "tvdb_id TEXT"
                     ")";
-    return SqliteTools::executeRequest( dbConnection, req );
+    return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
 ShowPtr Show::create(DBConnection dbConnection, const std::string& name )

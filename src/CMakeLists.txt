@@ -25,8 +25,8 @@ list(APPEND HEADERS_LIST
 
     ${CMAKE_SOURCE_DIR}/include/factory/IFileSystem.h
 
-    Cache.h
-    SqliteTools.h
+    database/Cache.h
+    database/SqliteTools.h
 
     filesystem/IDirectory.h
     filesystem/IFile.h

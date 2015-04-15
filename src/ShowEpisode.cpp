@@ -1,5 +1,5 @@
 #include "ShowEpisode.h"
-#include "SqliteTools.h"
+#include "database/SqliteTools.h"
 #include "Show.h"
 #include "File.h"
 
@@ -10,15 +10,15 @@ unsigned int ShowEpisode::* const policy::ShowEpisodeTable::PrimaryKey = &ShowEp
 ShowEpisode::ShowEpisode( DBConnection dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
 {
-    m_id = Traits<unsigned int>::Load( stmt, 0 );
-    m_artworkUrl = Traits<std::string>::Load( stmt, 1 );
-    m_episodeNumber = Traits<unsigned int>::Load( stmt, 2 );
-    m_lastSyncDate = Traits<time_t>::Load( stmt, 3 );
-    m_name = Traits<std::string>::Load( stmt, 4 );
-    m_seasonNumber = Traits<unsigned int>::Load( stmt, 5 );
-    m_shortSummary = Traits<std::string>::Load( stmt, 6 );
-    m_tvdbId = Traits<std::string>::Load( stmt, 7 );
-    m_showId = Traits<unsigned int>::Load( stmt, 8 );
+    m_id = sqlite::Traits<unsigned int>::Load( stmt, 0 );
+    m_artworkUrl = sqlite::Traits<std::string>::Load( stmt, 1 );
+    m_episodeNumber = sqlite::Traits<unsigned int>::Load( stmt, 2 );
+    m_lastSyncDate = sqlite::Traits<time_t>::Load( stmt, 3 );
+    m_name = sqlite::Traits<std::string>::Load( stmt, 4 );
+    m_seasonNumber = sqlite::Traits<unsigned int>::Load( stmt, 5 );
+    m_shortSummary = sqlite::Traits<std::string>::Load( stmt, 6 );
+    m_tvdbId = sqlite::Traits<std::string>::Load( stmt, 7 );
+    m_showId = sqlite::Traits<unsigned int>::Load( stmt, 8 );
 }
 
 ShowEpisode::ShowEpisode( const std::string& name, unsigned int episodeNumber, unsigned int showId )
@@ -44,7 +44,7 @@ bool ShowEpisode::setArtworkUrl( const std::string& artworkUrl )
 {
     static const std::string req = "UPDATE " + policy::ShowEpisodeTable::Name
             + " SET artwork_url = ? WHERE id_episode = ?";
-    if ( SqliteTools::executeUpdate( m_dbConnection, req, artworkUrl, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkUrl, m_id ) == false )
         return false;
     m_artworkUrl = artworkUrl;
     return true;
@@ -74,7 +74,7 @@ bool ShowEpisode::setSeasonNumber( unsigned int seasonNumber )
 {
     static const std::string req = "UPDATE " + policy::ShowEpisodeTable::Name
             + " SET season_number = ? WHERE id_episode = ?";
-    if ( SqliteTools::executeUpdate( m_dbConnection, req, seasonNumber, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, seasonNumber, m_id ) == false )
         return false;
     m_seasonNumber = seasonNumber;
     return true;
@@ -89,7 +89,7 @@ bool ShowEpisode::setShortSummary( const std::string& summary )
 {
     static const std::string req = "UPDATE " + policy::ShowEpisodeTable::Name
             + " SET episode_summary = ? WHERE id_episode = ?";
-    if ( SqliteTools::executeUpdate( m_dbConnection, req, summary, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, summary, m_id ) == false )
         return false;
     m_shortSummary = summary;
     return true;
@@ -104,7 +104,7 @@ bool ShowEpisode::setTvdbId( const std::string& tvdbId )
 {
     static const std::string req = "UPDATE " + policy::ShowEpisodeTable::Name
             + " SET tvdb_id = ? WHERE id_episode = ?";
-    if ( SqliteTools::executeUpdate( m_dbConnection, req, tvdbId, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, tvdbId, m_id ) == false )
         return false;
     m_tvdbId = tvdbId;
     return true;
@@ -123,7 +123,7 @@ std::vector<FilePtr> ShowEpisode::files()
 {
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
             + " WHERE show_episode_id = ?";
-    return SqliteTools::fetchAll<File, IFile>( m_dbConnection, req, m_id );
+    return sqlite::Tools::fetchAll<File, IFile>( m_dbConnection, req, m_id );
 }
 
 bool ShowEpisode::destroy()
@@ -149,7 +149,7 @@ bool ShowEpisode::createTable( DBConnection dbConnection )
                 "show_id UNSIGNED INT,"
                 "FOREIGN KEY(show_id) REFERENCES " + policy::ShowTable::Name + "(id_show)"
             ")";
-    return SqliteTools::executeRequest( dbConnection, req );
+    return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
 ShowEpisodePtr ShowEpisode::create( DBConnection dbConnection, const std::string& title, unsigned int episodeNumber, unsigned int showId )

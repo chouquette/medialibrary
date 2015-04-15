@@ -8,7 +8,7 @@ class File;
 class Label;
 
 #include "ILabel.h"
-#include "Cache.h"
+#include "database/Cache.h"
 
 namespace policy
 {

@@ -6,7 +6,7 @@
 
 #include "IAlbumTrack.h"
 #include "IMediaLibrary.h"
-#include "Cache.h"
+#include "database/Cache.h"
 
 class Album;
 class AlbumTrack;

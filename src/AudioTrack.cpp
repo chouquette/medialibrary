@@ -6,11 +6,11 @@ unsigned int AudioTrack::* const policy::AudioTrackTable::PrimaryKey = &AudioTra
 
 AudioTrack::AudioTrack( DBConnection dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
-    , m_id( Traits<unsigned int>::Load( stmt, 0 ) )
-    , m_codec( Traits<std::string>::Load( stmt, 1 ) )
-    , m_bitrate( Traits<unsigned int>::Load( stmt, 2 ) )
-    , m_sampleRate( Traits<unsigned int>::Load( stmt, 3 ) )
-    , m_nbChannels( Traits<unsigned int>::Load( stmt, 4 ) )
+    , m_id( sqlite::Traits<unsigned int>::Load( stmt, 0 ) )
+    , m_codec( sqlite::Traits<std::string>::Load( stmt, 1 ) )
+    , m_bitrate( sqlite::Traits<unsigned int>::Load( stmt, 2 ) )
+    , m_sampleRate( sqlite::Traits<unsigned int>::Load( stmt, 3 ) )
+    , m_nbChannels( sqlite::Traits<unsigned int>::Load( stmt, 4 ) )
 {
 }
 
@@ -59,7 +59,7 @@ bool AudioTrack::createTable( DBConnection dbConnection )
                 "nb_channels UNSIGNED INTEGER,"
                 "UNIQUE ( codec, bitrate ) ON CONFLICT FAIL"
             ")";
-    return SqliteTools::executeRequest( dbConnection, req );
+    return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
 AudioTrackPtr AudioTrack::fetch(DBConnection dbConnection, const std::string& codec,
@@ -67,7 +67,7 @@ AudioTrackPtr AudioTrack::fetch(DBConnection dbConnection, const std::string& co
 {
     static const std::string req = "SELECT * FROM " + policy::AudioTrackTable::Name
             + " WHERE codec = ? AND bitrate = ? AND samplerate = ? AND nb_channels = ?";
-    return SqliteTools::fetchOne<AudioTrack>( dbConnection, req, codec, bitrate, sampleRate, nbChannels );
+    return sqlite::Tools::fetchOne<AudioTrack>( dbConnection, req, codec, bitrate, sampleRate, nbChannels );
 }
 
 AudioTrackPtr AudioTrack::create( DBConnection dbConnection, const std::string& codec,

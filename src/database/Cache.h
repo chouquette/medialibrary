@@ -23,7 +23,7 @@ class PrimaryKeyCacheKeyPolicy
         }
         static unsigned int key( sqlite3_stmt* stmt )
         {
-            return Traits<unsigned int>::Load( stmt, 0 );
+            return sqlite::Traits<unsigned int>::Load( stmt, 0 );
         }
 };
 
@@ -61,7 +61,7 @@ class Cache
                 return it->second;
             static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name +
                             " WHERE " + TABLEPOLICY::CacheColumn + " = ?";
-            auto res = SqliteTools::fetchOne<IMPL>( dbConnectionWeak, req.c_str(), key );
+            auto res = sqlite::Tools::fetchOne<IMPL>( dbConnectionWeak, req.c_str(), key );
             Store[key] = res;
             return res;
         }
@@ -75,7 +75,7 @@ class Cache
         static std::vector<std::shared_ptr<INTF>> fetchAll( DBConnection dbConnectionWeak )
         {
             static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name;
-            return SqliteTools::fetchAll<IMPL, INTF>( dbConnectionWeak, req.c_str() );
+            return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnectionWeak, req.c_str() );
         }
 
         static std::shared_ptr<IMPL> load( std::shared_ptr<sqlite3> dbConnection, sqlite3_stmt* stmt )
@@ -99,7 +99,7 @@ class Cache
                 Store.erase( it );
             static const std::string req = "DELETE FROM " + TABLEPOLICY::Name + " WHERE " +
                     TABLEPOLICY::CacheColumn + " = ?";
-            return SqliteTools::executeDelete( dbConnectionWeak, req.c_str(), key );
+            return sqlite::Tools::executeDelete( dbConnectionWeak, req.c_str(), key );
         }
 
         static bool destroy( DBConnection dbConnectionWeak, const std::shared_ptr<IMPL>& self )
@@ -143,7 +143,7 @@ class Cache
         template <typename... Args>
         static bool insert( DBConnection dbConnectionWeak, std::shared_ptr<IMPL> self, const std::string& req, const Args&... args )
         {
-            unsigned int pKey = SqliteTools::insert( dbConnectionWeak, req, args... );
+            unsigned int pKey = sqlite::Tools::insert( dbConnectionWeak, req, args... );
             if ( pKey == 0 )
                 return false;
             (self.get())->*TABLEPOLICY::PrimaryKey = pKey;

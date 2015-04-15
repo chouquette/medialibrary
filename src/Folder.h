@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Cache.h"
+#include "database/Cache.h"
 #include "IFolder.h"
 
 #include <sqlite3.h>

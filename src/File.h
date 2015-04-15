@@ -5,7 +5,7 @@
 #include <sqlite3.h>
 
 #include "IFile.h"
-#include "Cache.h"
+#include "database/Cache.h"
 
 class Album;
 class ShowEpisode;

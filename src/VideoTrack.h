@@ -1,7 +1,7 @@
 #ifndef VIDEOTRACK_H
 #define VIDEOTRACK_H
 
-#include "Cache.h"
+#include "database/Cache.h"
 #include "IVideoTrack.h"
 
 #include <sqlite3.h>

@@ -3,7 +3,7 @@
 
 #include "IMovie.h"
 #include <sqlite3.h>
-#include "Cache.h"
+#include "database/Cache.h"
 
 class Movie;
 

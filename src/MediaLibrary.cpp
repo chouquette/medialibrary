@@ -14,7 +14,7 @@
 #include "Parser.h"
 #include "Show.h"
 #include "ShowEpisode.h"
-#include "SqliteTools.h"
+#include "database/SqliteTools.h"
 #include "Utils.h"
 #include "VideoTrack.h"
 
@@ -71,7 +71,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, std::unique_ptr<factor
     if ( res != SQLITE_OK )
         return false;
     m_dbConnection.reset( dbConnection, &sqlite3_close );
-    if ( SqliteTools::executeRequest( DBConnection(m_dbConnection), "PRAGMA foreign_keys = ON" ) == false )
+    if ( sqlite::Tools::executeRequest( DBConnection(m_dbConnection), "PRAGMA foreign_keys = ON" ) == false )
         return false;
     return ( File::createTable( m_dbConnection ) &&
         Folder::createTable( m_dbConnection ) &&
@@ -192,7 +192,7 @@ AlbumPtr MediaLibrary::album(const std::string& title )
     // We can't use Cache helper, since albums are cached by primary keys
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
             " WHERE title = ?";
-    return SqliteTools::fetchOne<Album>( DBConnection( m_dbConnection ), req, title );
+    return sqlite::Tools::fetchOne<Album>( DBConnection( m_dbConnection ), req, title );
 }
 
 AlbumPtr MediaLibrary::createAlbum(const std::string& title )
@@ -204,7 +204,7 @@ ShowPtr MediaLibrary::show(const std::string& name)
 {
     static const std::string req = "SELECT * FROM " + policy::ShowTable::Name
             + " WHERE name = ?";
-    return SqliteTools::fetchOne<Show>( m_dbConnection, req, name );
+    return sqlite::Tools::fetchOne<Show>( m_dbConnection, req, name );
 }
 
 ShowPtr MediaLibrary::createShow(const std::string& name)
@@ -216,7 +216,7 @@ MoviePtr MediaLibrary::movie( const std::string& title )
 {
     static const std::string req = "SELECT * FROM " + policy::MovieTable::Name
             + " WHERE title = ?";
-    return SqliteTools::fetchOne<Movie>( m_dbConnection, req, title );
+    return sqlite::Tools::fetchOne<Movie>( m_dbConnection, req, title );
 }
 
 MoviePtr MediaLibrary::createMovie( const std::string& title )

@@ -3,7 +3,7 @@
 
 #include "IAudioTrack.h"
 #include "IMediaLibrary.h"
-#include "Cache.h"
+#include "database/Cache.h"
 
 class AudioTrack;
 

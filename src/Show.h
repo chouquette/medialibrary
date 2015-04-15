@@ -3,7 +3,7 @@
 
 #include <sqlite3.h>
 
-#include "Cache.h"
+#include "database/Cache.h"
 #include "IMediaLibrary.h"
 #include "IShow.h"
 

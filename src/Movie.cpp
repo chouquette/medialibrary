@@ -1,6 +1,6 @@
 #include "Movie.h"
 #include "File.h"
-#include "SqliteTools.h"
+#include "database/SqliteTools.h"
 
 const std::string policy::MovieTable::Name = "Movie";
 const std::string policy::MovieTable::CacheColumn = "id_movie";
@@ -9,12 +9,12 @@ unsigned int Movie::* const policy::MovieTable::PrimaryKey = &Movie::m_id;
 Movie::Movie( DBConnection dbConnection, sqlite3_stmt* stmt )
     : m_dbConnection( dbConnection )
 {
-    m_id = Traits<unsigned int>::Load( stmt, 0 );
-    m_title = Traits<std::string>::Load( stmt, 1 );
-    m_releaseDate = Traits<time_t>::Load( stmt, 2 );
-    m_summary = Traits<std::string>::Load( stmt, 3 );
-    m_artworkUrl = Traits<std::string>::Load( stmt, 4 );
-    m_imdbId = Traits<std::string>::Load( stmt, 5 );
+    m_id = sqlite::Traits<unsigned int>::Load( stmt, 0 );
+    m_title = sqlite::Traits<std::string>::Load( stmt, 1 );
+    m_releaseDate = sqlite::Traits<time_t>::Load( stmt, 2 );
+    m_summary = sqlite::Traits<std::string>::Load( stmt, 3 );
+    m_artworkUrl = sqlite::Traits<std::string>::Load( stmt, 4 );
+    m_imdbId = sqlite::Traits<std::string>::Load( stmt, 5 );
 }
 
 Movie::Movie( const std::string& title )
@@ -44,7 +44,7 @@ bool Movie::setReleaseDate( time_t date )
 {
     static const std::string req = "UPDATE " + policy::MovieTable::Name
             + " SET release_date = ? WHERE id_movie = ?";
-    if ( SqliteTools::executeUpdate( m_dbConnection, req, date, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, date, m_id ) == false )
         return false;
     m_releaseDate = date;
     return true;
@@ -59,7 +59,7 @@ bool Movie::setShortSummary( const std::string& summary )
 {
     static const std::string req = "UPDATE " + policy::MovieTable::Name
             + " SET summary = ? WHERE id_movie = ?";
-    if ( SqliteTools::executeUpdate( m_dbConnection, req, summary, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, summary, m_id ) == false )
         return false;
     m_summary = summary;
     return true;
@@ -74,7 +74,7 @@ bool Movie::setArtworkUrl( const std::string& artworkUrl )
 {
     static const std::string req = "UPDATE " + policy::MovieTable::Name
             + " SET artwork_url = ? WHERE id_movie = ?";
-    if ( SqliteTools::executeUpdate( m_dbConnection, req, artworkUrl, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkUrl, m_id ) == false )
         return false;
     m_artworkUrl = artworkUrl;
     return true;
@@ -89,7 +89,7 @@ bool Movie::setImdbId( const std::string& imdbId )
 {
     static const std::string req = "UPDATE " + policy::MovieTable::Name
             + " SET imdb_id = ? WHERE id_movie = ?";
-    if ( SqliteTools::executeUpdate( m_dbConnection, req, imdbId, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, imdbId, m_id ) == false )
         return false;
     m_imdbId = imdbId;
     return true;
@@ -109,7 +109,7 @@ std::vector<FilePtr> Movie::files()
 {
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
             + " WHERE movie_id = ?";
-    return SqliteTools::fetchAll<File, IFile>( m_dbConnection, req, m_id );
+    return sqlite::Tools::fetchAll<File, IFile>( m_dbConnection, req, m_id );
 }
 
 bool Movie::createTable( DBConnection dbConnection )
@@ -123,7 +123,7 @@ bool Movie::createTable( DBConnection dbConnection )
                 "artwork_url TEXT,"
                 "imdb_id TEXT"
             ")";
-    return SqliteTools::executeRequest( dbConnection, req );
+    return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
 MoviePtr Movie::create(DBConnection dbConnection, const std::string& title )

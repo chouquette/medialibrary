@@ -6,11 +6,11 @@ unsigned int VideoTrack::* const policy::VideoTrackTable::PrimaryKey = &VideoTra
 
 VideoTrack::VideoTrack(DBConnection dbConnection, sqlite3_stmt* stmt)
     : m_dbConnection( dbConnection )
-    , m_id( Traits<unsigned int>::Load( stmt, 0 ) )
-    , m_codec( Traits<std::string>::Load( stmt, 1 ) )
-    , m_width( Traits<unsigned int>::Load( stmt, 2 ) )
-    , m_height( Traits<unsigned int>::Load( stmt, 3 ) )
-    , m_fps( Traits<float>::Load( stmt, 4 ) )
+    , m_id( sqlite::Traits<unsigned int>::Load( stmt, 0 ) )
+    , m_codec( sqlite::Traits<std::string>::Load( stmt, 1 ) )
+    , m_width( sqlite::Traits<unsigned int>::Load( stmt, 2 ) )
+    , m_height( sqlite::Traits<unsigned int>::Load( stmt, 3 ) )
+    , m_fps( sqlite::Traits<float>::Load( stmt, 4 ) )
 {
 }
 
@@ -70,12 +70,12 @@ bool VideoTrack::createTable( DBConnection dbConnection )
                 "fps FLOAT,"
                 "UNIQUE ( codec, width, height, fps ) ON CONFLICT FAIL"
             ")";
-    return SqliteTools::executeRequest( dbConnection, req );
+    return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
 VideoTrackPtr VideoTrack::fetch( DBConnection dbConnection, const std::string& codec, unsigned int width, unsigned int height, float fps )
 {
     static const std::string req = "SELECT * FROM " + policy::VideoTrackTable::Name +
             " WHERE codec = ? AND width = ? AND height = ? AND fps = ?";
-    return SqliteTools::fetchOne<VideoTrack>( dbConnection, req, codec, width, height, fps );
+    return sqlite::Tools::fetchOne<VideoTrack>( dbConnection, req, codec, width, height, fps );
 }

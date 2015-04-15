@@ -11,6 +11,9 @@
 
 #include "Types.h"
 
+namespace sqlite
+{
+
 template <typename T, typename Enable = void>
 struct Traits;
 
@@ -61,7 +64,7 @@ struct Traits<std::nullptr_t>
     }
 };
 
-class SqliteTools
+class Tools
 {
     private:
         typedef std::unique_ptr<sqlite3_stmt, int (*)(sqlite3_stmt*)> StmtPtr;
@@ -209,5 +212,7 @@ class SqliteTools
             return true;
         }
 };
+
+}
 
 #endif // SQLITETOOLS_H

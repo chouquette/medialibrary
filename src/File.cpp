@@ -10,7 +10,7 @@
 #include "Label.h"
 #include "Movie.h"
 #include "ShowEpisode.h"
-#include "SqliteTools.h"
+#include "database/SqliteTools.h"
 #include "VideoTrack.h"
 
 const std::string policy::FileTable::Name = "File";
@@ -27,8 +27,8 @@ File::File( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_playCount = sqlite3_column_int( stmt, 4 );
     m_showEpisodeId = sqlite3_column_int( stmt, 5 );
     m_mrl = (const char*)sqlite3_column_text( stmt, 6 );
-    m_movieId = Traits<unsigned int>::Load( stmt, 7 );
-    m_folderId = Traits<unsigned int>::Load( stmt, 8 );
+    m_movieId = sqlite::Traits<unsigned int>::Load( stmt, 7 );
+    m_folderId = sqlite::Traits<unsigned int>::Load( stmt, 8 );
 
     m_isReady = m_type != UnknownType;
 }
@@ -81,7 +81,7 @@ bool File::setAlbumTrack( AlbumTrackPtr albumTrack )
 {
     static const std::string req = "UPDATE " + policy::FileTable::Name + " SET album_track_id = ? "
             "WHERE id_file = ?";
-    if ( SqliteTools::executeUpdate( m_dbConnection, req, albumTrack->id(), m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, albumTrack->id(), m_id ) == false )
         return false;
     m_albumTrackId = albumTrack->id();
     m_albumTrack = albumTrack;
@@ -106,7 +106,7 @@ bool File::setShowEpisode(ShowEpisodePtr showEpisode)
 {
     static const std::string req = "UPDATE " + policy::FileTable::Name
             + " SET show_episode_id = ?  WHERE id_file = ?";
-    if ( SqliteTools::executeUpdate( m_dbConnection, req, showEpisode->id(), m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, showEpisode->id(), m_id ) == false )
         return false;
     m_showEpisodeId = showEpisode->id();
     m_showEpisode = showEpisode;
@@ -118,7 +118,7 @@ std::vector<std::shared_ptr<ILabel> > File::labels()
     static const std::string req = "SELECT l.* FROM " + policy::LabelTable::Name + " l "
             "LEFT JOIN LabelFileRelation lfr ON lfr.id_label = l.id_label "
             "WHERE lfr.id_file = ?";
-    return SqliteTools::fetchAll<Label, ILabel>( m_dbConnection, req, m_id );
+    return sqlite::Tools::fetchAll<Label, ILabel>( m_dbConnection, req, m_id );
 }
 
 int File::playCount() const
@@ -144,7 +144,7 @@ bool File::setMovie( MoviePtr movie )
 {
     static const std::string req = "UPDATE " + policy::FileTable::Name
             + " SET movie_id = ? WHERE id_file = ?";
-    if ( SqliteTools::executeUpdate( m_dbConnection, req, movie->id(), m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, movie->id(), m_id ) == false )
         return false;
     m_movie = movie;
     m_movieId = movie->id();
@@ -162,7 +162,7 @@ bool File::addVideoTrack(const std::string& codec, unsigned int width, unsigned 
         if ( track == nullptr )
             return false;
     }
-    return SqliteTools::executeRequest( m_dbConnection, req, track->id(), m_id );
+    return sqlite::Tools::executeRequest( m_dbConnection, req, track->id(), m_id );
 }
 
 std::vector<VideoTrackPtr> File::videoTracks()
@@ -170,7 +170,7 @@ std::vector<VideoTrackPtr> File::videoTracks()
     static const std::string req = "SELECT t.* FROM " + policy::VideoTrackTable::Name +
             " t LEFT JOIN VideoTrackFileRelation vtfr ON vtfr.id_track = t.id_track"
             " WHERE vtfr.id_file = ?";
-    return SqliteTools::fetchAll<VideoTrack, IVideoTrack>( m_dbConnection, req, m_id );
+    return sqlite::Tools::fetchAll<VideoTrack, IVideoTrack>( m_dbConnection, req, m_id );
 }
 
 bool File::addAudioTrack( const std::string& codec, unsigned int bitrate,
@@ -185,7 +185,7 @@ bool File::addAudioTrack( const std::string& codec, unsigned int bitrate,
         if ( track == nullptr )
             return false;
     }
-    return SqliteTools::executeRequest( m_dbConnection, req, track->id(), m_id );
+    return sqlite::Tools::executeRequest( m_dbConnection, req, track->id(), m_id );
 }
 
 std::vector<AudioTrackPtr> File::audioTracks()
@@ -193,7 +193,7 @@ std::vector<AudioTrackPtr> File::audioTracks()
     static const std::string req = "SELECT t.* FROM " + policy::AudioTrackTable::Name +
             " t LEFT JOIN AudioTrackFileRelation atfr ON atfr.id_track = t.id_track"
             " WHERE atfr.id_file = ?";
-    return SqliteTools::fetchAll<AudioTrack, IAudioTrack>( m_dbConnection, req, m_id );
+    return sqlite::Tools::fetchAll<AudioTrack, IAudioTrack>( m_dbConnection, req, m_id );
 }
 
 bool File::isStandAlone()
@@ -238,7 +238,7 @@ bool File::createTable( DBConnection connection )
             "FOREIGN KEY (folder_id) REFERENCES " + policy::FolderTable::Name
             + "(id_folder) ON DELETE CASCADE"
             ")";
-    if ( SqliteTools::executeRequest( connection, req ) == false )
+    if ( sqlite::Tools::executeRequest( connection, req ) == false )
         return false;
     req = "CREATE TABLE IF NOT EXISTS VideoTrackFileRelation("
                 "id_track INTEGER,"
@@ -249,7 +249,7 @@ bool File::createTable( DBConnection connection )
                 "FOREIGN KEY ( id_file ) REFERENCES " + policy::FileTable::Name
                 + "(id_file) ON DELETE CASCADE"
             ")";
-    if ( SqliteTools::executeRequest( connection, req ) == false )
+    if ( sqlite::Tools::executeRequest( connection, req ) == false )
         return false;
     req = "CREATE TABLE IF NOT EXISTS AudioTrackFileRelation("
                 "id_track INTEGER,"
@@ -260,7 +260,7 @@ bool File::createTable( DBConnection connection )
                 "FOREIGN KEY ( id_file ) REFERENCES " + policy::FileTable::Name
                 + "(id_file) ON DELETE CASCADE"
             ")";
-    return SqliteTools::executeRequest( connection, req );
+    return sqlite::Tools::executeRequest( connection, req );
 }
 
 bool File::addLabel( LabelPtr label )
@@ -271,7 +271,7 @@ bool File::addLabel( LabelPtr label )
         return false;
     }
     const char* req = "INSERT INTO LabelFileRelation VALUES(?, ?)";
-    return SqliteTools::executeRequest( m_dbConnection, req, label->id(), m_id );
+    return sqlite::Tools::executeRequest( m_dbConnection, req, label->id(), m_id );
 }
 
 bool File::removeLabel( LabelPtr label )
@@ -282,7 +282,7 @@ bool File::removeLabel( LabelPtr label )
         return false;
     }
     const char* req = "DELETE FROM LabelFileRelation WHERE id_label = ? AND id_file = ?";
-    return SqliteTools::executeDelete( m_dbConnection, req, label->id(), m_id );
+    return sqlite::Tools::executeDelete( m_dbConnection, req, label->id(), m_id );
 }
 
 const std::string& policy::FileCache::key(const std::shared_ptr<File> self )
@@ -292,5 +292,5 @@ const std::string& policy::FileCache::key(const std::shared_ptr<File> self )
 
 std::string policy::FileCache::key(sqlite3_stmt* stmt)
 {
-    return Traits<std::string>::Load( stmt, 6 );
+    return sqlite::Traits<std::string>::Load( stmt, 6 );
 }

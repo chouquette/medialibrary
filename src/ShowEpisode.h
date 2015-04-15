@@ -9,7 +9,7 @@ class ShowEpisode;
 
 #include "IMediaLibrary.h"
 #include "IShowEpisode.h"
-#include "Cache.h"
+#include "database/Cache.h"
 
 namespace policy
 {

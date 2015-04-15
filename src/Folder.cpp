@@ -1,7 +1,7 @@
 #include "Folder.h"
 #include "File.h"
 
-#include "SqliteTools.h"
+#include "database/SqliteTools.h"
 
 namespace policy
 {
@@ -16,7 +16,7 @@ namespace policy
 
     FolderCache::KeyType FolderCache::key( sqlite3_stmt* stmt )
     {
-        return Traits<FolderCache::KeyType>::Load( stmt, 1 );
+        return sqlite::Traits<FolderCache::KeyType>::Load( stmt, 1 );
     }
 
 }
@@ -24,9 +24,9 @@ namespace policy
 Folder::Folder( DBConnection dbConnection, sqlite3_stmt* stmt )
     : m_dbConection( dbConnection )
 {
-    m_id = Traits<unsigned int>::Load( stmt, 0 );
-    m_path = Traits<std::string>::Load( stmt, 1 );
-    m_parent = Traits<unsigned int>::Load( stmt, 2 );
+    m_id = sqlite::Traits<unsigned int>::Load( stmt, 0 );
+    m_path = sqlite::Traits<std::string>::Load( stmt, 1 );
+    m_parent = sqlite::Traits<unsigned int>::Load( stmt, 2 );
 }
 
 Folder::Folder( const std::string& path, unsigned int parent )
@@ -45,7 +45,7 @@ bool Folder::createTable(DBConnection connection)
             "FOREIGN KEY (id_parent) REFERENCES " + policy::FolderTable::Name +
             "(id_folder) ON DELETE CASCADE"
             ")";
-    return SqliteTools::executeRequest( connection, req );
+    return sqlite::Tools::executeRequest( connection, req );
 }
 
 FolderPtr Folder::create(DBConnection connection, const std::string& path, unsigned int parent )
@@ -81,7 +81,7 @@ std::vector<FilePtr> Folder::files()
 {
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name +
         " WHERE folder_id = ?";
-    return SqliteTools::fetchAll<File, IFile>( m_dbConection, req, m_id );
+    return sqlite::Tools::fetchAll<File, IFile>( m_dbConection, req, m_id );
 }
 
 FolderPtr Folder::parent()
@@ -89,5 +89,5 @@ FolderPtr Folder::parent()
     //FIXME: use path to be able to fetch from cache?
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
             " WHERE id_folder = ?";
-    return SqliteTools::fetchOne<Folder>( m_dbConection, req, m_parent );
+    return sqlite::Tools::fetchOne<Folder>( m_dbConection, req, m_parent );
 }
