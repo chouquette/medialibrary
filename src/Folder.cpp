@@ -53,16 +53,8 @@ FolderPtr Folder::create(DBConnection connection, const std::string& path, unsig
     auto self = std::make_shared<Folder>( path, parent );
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
             "(path, id_parent) VALUES(?, ?)";
-    if ( parent == 0 )
-    {
-        if ( _Cache::insert( connection, self, req, path, nullptr ) == false )
-            return nullptr;
-    }
-    else
-    {
-        if ( _Cache::insert( connection, self, req, path, parent ) == false )
-            return nullptr;
-    }
+    if ( _Cache::insert( connection, self, req, path, sqlite::ForeignKey( parent ) ) == false )
+        return nullptr;
     self->m_dbConection = connection;
     return self;
 }

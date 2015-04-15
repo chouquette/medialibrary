@@ -53,17 +53,8 @@ FilePtr File::create( DBConnection dbConnection, const std::string& mrl, unsigne
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
             "(mrl, folder_id) VALUES(?, ?)";
 
-    //FIXME: Consider having a ForeignKey type that will handle the '0' special case
-    if ( folderId != 0 )
-    {
-        if ( _Cache::insert( dbConnection, self, req, mrl, folderId ) == false )
-            return nullptr;
-    }
-    else
-    {
-        if ( _Cache::insert( dbConnection, self, req, mrl, nullptr ) == false )
-            return nullptr;
-    }
+    if ( _Cache::insert( dbConnection, self, req, mrl, sqlite::ForeignKey( folderId ) ) == false )
+        return nullptr;
     self->m_dbConnection = dbConnection;
     return self;
 }

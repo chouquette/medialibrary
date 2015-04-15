@@ -14,6 +14,12 @@
 namespace sqlite
 {
 
+struct ForeignKey
+{
+    constexpr ForeignKey(unsigned int v) : value(v) {}
+    unsigned int value;
+};
+
 template <typename T, typename Enable = void>
 struct Traits;
 
@@ -25,6 +31,17 @@ struct Traits<T, typename std::enable_if<std::is_integral<T>::value>::type>
 
     static constexpr
     int (*Load)(sqlite3_stmt *, int) = &sqlite3_column_int;
+};
+
+template <>
+struct Traits<ForeignKey>
+{
+    static int Bind( sqlite3_stmt *stmt, int pos, ForeignKey fk)
+    {
+        if ( fk.value != 0 )
+            return Traits<unsigned int>::Bind( stmt, pos, fk.value );
+        return sqlite3_bind_null( stmt, pos );
+    }
 };
 
 template <>
