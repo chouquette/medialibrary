@@ -101,14 +101,14 @@ class Tools
          *                  be discarded.
          */
         template <typename IMPL, typename INTF, typename... Args>
-        static std::vector<std::shared_ptr<INTF> > fetchAll( DBConnection dbConnectionWeak, const std::string& req, const Args&... args )
+        static std::vector<std::shared_ptr<INTF> > fetchAll( DBConnection dbConnectionWeak, const std::string& req, Args&&... args )
         {
             auto dbConnection = dbConnectionWeak.lock();
             if ( dbConnection == nullptr )
                 throw std::runtime_error("Invalid SQlite connection");
 
             std::vector<std::shared_ptr<INTF>> results;
-            auto stmt = prepareRequest( dbConnection, req, args...);
+            auto stmt = prepareRequest( dbConnection, req, std::forward<Args>( args )...);
             if ( stmt == nullptr )
                 throw std::runtime_error("Failed to execute SQlite request");
             int res = sqlite3_step( stmt.get() );
@@ -122,14 +122,14 @@ class Tools
         }
 
         template <typename T, typename... Args>
-        static std::shared_ptr<T> fetchOne( DBConnection dbConnectionWeak, const std::string& req, const Args&... args )
+        static std::shared_ptr<T> fetchOne( DBConnection dbConnectionWeak, const std::string& req, Args&&... args )
         {
             auto dbConnection = dbConnectionWeak.lock();
             if ( dbConnection == nullptr )
                 return nullptr;
 
             std::shared_ptr<T> result;
-            auto stmt = prepareRequest( dbConnection, req, args... );
+            auto stmt = prepareRequest( dbConnection, req, std::forward<Args>( args )... );
             if ( stmt == nullptr )
                 return nullptr;
             if ( sqlite3_step( stmt.get() ) != SQLITE_ROW )
@@ -139,30 +139,30 @@ class Tools
         }
 
         template <typename... Args>
-        static bool executeDelete( DBConnection dbConnectionWeak, const std::string& req, const Args&... args )
+        static bool executeDelete( DBConnection dbConnectionWeak, const std::string& req, Args&&... args )
         {
             auto dbConnection = dbConnectionWeak.lock();
             if ( dbConnection == nullptr )
                 return false;
-            if ( executeRequest( dbConnection, req, args... ) == false )
+            if ( executeRequest( dbConnection, req, std::forward<Args>( args )... ) == false )
                 return false;
             return sqlite3_changes( dbConnection.get() ) > 0;
         }
 
         template <typename... Args>
-        static bool executeUpdate( DBConnection dbConnectionWeak, const std::string& req, const Args&... args )
+        static bool executeUpdate( DBConnection dbConnectionWeak, const std::string& req, Args&&... args )
         {
-            // The code would be exactly the same, do not freak out because it calls delete :)
-            return executeDelete( dbConnectionWeak, req, args... );
+            // The code would be exactly the same, do not freak out because it calls executeDelete :)
+            return executeDelete( dbConnectionWeak, req, std::forward<Args>( args )... );
         }
 
         template <typename... Args>
-        static bool executeRequest( DBConnection dbConnectionWeak, const std::string& req, const Args&... args )
+        static bool executeRequest( DBConnection dbConnectionWeak, const std::string& req, Args&&... args )
         {
             auto dbConnection = dbConnectionWeak.lock();
             if ( dbConnection == nullptr )
                 return false;
-            return executeRequest( dbConnection, req, args... );
+            return executeRequest( dbConnection, req, std::forward<Args>( args )... );
         }
 
         /**
@@ -170,22 +170,22 @@ class Tools
          * Returns 0 (which is an invalid sqlite primary key) when insertion fails.
          */
         template <typename... Args>
-        static unsigned int insert( DBConnection dbConnectionWeak, const std::string& req, const Args&... args )
+        static unsigned int insert( DBConnection dbConnectionWeak, const std::string& req, Args&&... args )
         {
             auto dbConnection = dbConnectionWeak.lock();
             if ( dbConnection == nullptr )
                 return false;
 
-            if ( executeRequest( dbConnection, req, args... ) == false )
+            if ( executeRequest( dbConnection, req, std::forward<Args>( args )... ) == false )
                 return 0;
             return sqlite3_last_insert_rowid( dbConnection.get() );
         }
 
     private:
         template <typename... Args>
-        static StmtPtr prepareRequest( std::shared_ptr<sqlite3> dbConnectionPtr, const std::string& req, const Args&... args )
+        static StmtPtr prepareRequest( std::shared_ptr<sqlite3> dbConnectionPtr, const std::string& req, Args&&... args )
         {
-            return _prepareRequest<1>( dbConnectionPtr, req, args... );
+            return _prepareRequest<1>( dbConnectionPtr, req, std::forward<Args>( args )... );
         }
 
         template <unsigned int>
@@ -203,17 +203,17 @@ class Tools
         }
 
         template <unsigned int COLIDX, typename T, typename... Args>
-        static StmtPtr _prepareRequest( std::shared_ptr<sqlite3> dbConnectionPtr, const std::string& req, const T& arg, const Args&... args )
+        static StmtPtr _prepareRequest( std::shared_ptr<sqlite3> dbConnectionPtr, const std::string& req, T&& arg, Args&&... args )
         {
-            auto stmt = _prepareRequest<COLIDX + 1>( dbConnectionPtr, req, args... );
-            Traits<T>::Bind( stmt.get(), COLIDX, arg );
+            auto stmt = _prepareRequest<COLIDX + 1>( dbConnectionPtr, req, std::forward<Args>( args )... );
+            Traits<T>::Bind( stmt.get(), COLIDX, std::forward<T>( arg ) );
             return stmt;
         }
 
         template <typename... Args>
-        static bool executeRequest( std::shared_ptr<sqlite3> dbConnection, const std::string& req, const Args&... args )
+        static bool executeRequest( std::shared_ptr<sqlite3> dbConnection, const std::string& req, Args&&... args )
         {
-            auto stmt = prepareRequest( dbConnection, req, args... );
+            auto stmt = prepareRequest( dbConnection, req, std::forward<Args>( args )... );
             if ( stmt == nullptr )
                 return false;
             int res;
