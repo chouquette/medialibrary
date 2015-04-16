@@ -20,11 +20,16 @@ struct ForeignKey
     unsigned int value;
 };
 
+template <typename ToCheck, typename T>
+using IsSameDecay = std::is_same<typename std::decay<ToCheck>::type, T>;
+
 template <typename T, typename Enable = void>
 struct Traits;
 
 template <typename T>
-struct Traits<T, typename std::enable_if<std::is_integral<T>::value>::type>
+struct Traits<T, typename std::enable_if<std::is_integral<
+        typename std::decay<T>::type
+    >::value>::type>
 {
     static constexpr
     int (*Bind)(sqlite3_stmt *, int, int) = &sqlite3_bind_int;
@@ -33,8 +38,8 @@ struct Traits<T, typename std::enable_if<std::is_integral<T>::value>::type>
     int (*Load)(sqlite3_stmt *, int) = &sqlite3_column_int;
 };
 
-template <>
-struct Traits<ForeignKey>
+template <typename T>
+struct Traits<T, typename std::enable_if<IsSameDecay<T, ForeignKey>::value>::type>
 {
     static int Bind( sqlite3_stmt *stmt, int pos, ForeignKey fk)
     {
@@ -44,8 +49,8 @@ struct Traits<ForeignKey>
     }
 };
 
-template <>
-struct Traits<std::string>
+template <typename T>
+struct Traits<T, typename std::enable_if<IsSameDecay<T, std::string>::value>::type>
 {
     static int Bind(sqlite3_stmt* stmt, int pos, const std::string& value )
     {
@@ -63,7 +68,9 @@ struct Traits<std::string>
 };
 
 template <typename T>
-struct Traits<T, typename std::enable_if<std::is_floating_point<T>::value>::type>
+struct Traits<T, typename std::enable_if<std::is_floating_point<
+        typename std::decay<T>::type
+    >::value>::type>
 {
         static constexpr int
         (*Bind)(sqlite3_stmt *, int, double) = &sqlite3_bind_double;
