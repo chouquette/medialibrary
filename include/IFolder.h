@@ -12,5 +12,6 @@ public:
     virtual const std::string& path() = 0;
     // This will only returns the files in this immediate folder
     virtual std::vector<FilePtr> files() = 0;
+    virtual std::vector<FolderPtr> folders() = 0;
     virtual FolderPtr parent() = 0;
 };

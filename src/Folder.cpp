@@ -76,6 +76,13 @@ std::vector<FilePtr> Folder::files()
     return sqlite::Tools::fetchAll<File, IFile>( m_dbConection, req, m_id );
 }
 
+std::vector<FolderPtr> Folder::folders()
+{
+    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
+            " WHERE id_parent = ?";
+    return sqlite::Tools::fetchAll<Folder, IFolder>( m_dbConection, req, m_id );
+}
+
 FolderPtr Folder::parent()
 {
     //FIXME: use path to be able to fetch from cache?

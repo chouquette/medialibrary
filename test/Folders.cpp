@@ -197,3 +197,31 @@ TEST_F( Folders, AbsolutePath )
     auto f = ml->addFolder( "." );
     ASSERT_NE( f->path(), "." );
 }
+
+TEST_F( Folders, ListFolders )
+{
+    auto f = ml->addFolder( "." );
+    auto subFolders = f->folders();
+    ASSERT_EQ( 1u, subFolders.size() );
+
+    auto subFolder = subFolders[0];
+    auto subFiles = subFolder->files();
+    ASSERT_EQ( 1u, subFiles.size() );
+
+    auto file = subFiles[0];
+    ASSERT_EQ( std::string{ mock::FileSystemFactory::SubFolder } + "subfile.mp4", file->mrl() );
+
+    // Now again, without cache
+    SetUp();
+
+    f = ml->folder( f->path() );
+    subFolders = f->folders();
+    ASSERT_EQ( 1u, subFolders.size() );
+
+    subFolder = subFolders[0];
+    subFiles = subFolder->files();
+    ASSERT_EQ( 1u, subFiles.size() );
+
+    file = subFiles[0];
+    ASSERT_EQ( std::string{ mock::FileSystemFactory::SubFolder } + "subfile.mp4", file->mrl() );
+}
