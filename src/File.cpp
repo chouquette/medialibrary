@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 
 #include "Album.h"
 #include "AlbumTrack.h"
@@ -29,6 +30,7 @@ File::File( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_mrl = (const char*)sqlite3_column_text( stmt, 6 );
     m_movieId = sqlite::Traits<unsigned int>::Load( stmt, 7 );
     m_folderId = sqlite::Traits<unsigned int>::Load( stmt, 8 );
+    m_lastModificationDate = sqlite::Traits<unsigned int>::Load( stmt, 9 );
 
     m_isReady = m_type != UnknownType;
 }
@@ -43,6 +45,7 @@ File::File( const std::string& mrl, unsigned int folderId )
     , m_mrl( mrl )
     , m_movieId( 0 )
     , m_folderId( folderId )
+    , m_lastModificationDate( time( nullptr ) )
     , m_isReady( false )
 {
 }
@@ -51,9 +54,9 @@ FilePtr File::create( DBConnection dbConnection, const std::string& mrl, unsigne
 {
     auto self = std::make_shared<File>( mrl, folderId );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
-            "(mrl, folder_id) VALUES(?, ?)";
+            "(mrl, folder_id, last_modification_date) VALUES(?, ?, ?)";
 
-    if ( _Cache::insert( dbConnection, self, req, mrl, sqlite::ForeignKey( folderId ) ) == false )
+    if ( _Cache::insert( dbConnection, self, req, mrl, sqlite::ForeignKey( folderId ), self->m_lastModificationDate ) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;
     return self;
@@ -192,6 +195,11 @@ bool File::isStandAlone()
     return m_folderId == 0;
 }
 
+unsigned int File::lastModificationDate()
+{
+    return m_lastModificationDate;
+}
+
 bool File::isReady() const
 {
     return m_isReady;
@@ -220,6 +228,7 @@ bool File::createTable( DBConnection connection )
             "mrl TEXT UNIQUE ON CONFLICT FAIL,"
             "movie_id UNSIGNED INTEGER,"
             "folder_id UNSIGNED INTEGER,"
+            "last_modification_date UNSIGNED INTEGER,"
             "FOREIGN KEY (album_track_id) REFERENCES " + policy::AlbumTrackTable::Name
             + "(id_track) ON DELETE CASCADE,"
             "FOREIGN KEY (show_episode_id) REFERENCES " + policy::ShowEpisodeTable::Name

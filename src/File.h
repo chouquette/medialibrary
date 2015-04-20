@@ -64,6 +64,7 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         virtual bool addAudioTrack(const std::string& codec, unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels);
         virtual std::vector<AudioTrackPtr> audioTracks();
         virtual bool isStandAlone() override;
+        virtual unsigned int lastModificationDate() override;
 
         virtual bool isReady() const;
         void setReady();
@@ -87,6 +88,7 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         AlbumTrackPtr m_albumTrack;
         ShowEpisodePtr m_showEpisode;
         MoviePtr m_movie;
+        unsigned int m_lastModificationDate;
 
         bool m_isReady;
 

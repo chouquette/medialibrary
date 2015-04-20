@@ -83,3 +83,13 @@ TEST_F( Files, Duplicate )
     f2 = ml->file( "/dev/moulaf" );
     ASSERT_EQ( f, f2 );
 }
+
+TEST_F( Files, LastModificationDate )
+{
+    auto f = ml->addFile( "/dev/seaotter" );
+    ASSERT_NE( 0u, f->lastModificationDate() );
+
+    SetUp();
+    auto f2 = ml->file( "/dev/seaotter" );
+    ASSERT_EQ( f->lastModificationDate(), f2->lastModificationDate() );
+}

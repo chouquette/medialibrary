@@ -46,6 +46,7 @@ class IFile
         /// part of a folder (false)
         virtual bool isStandAlone() = 0;
         virtual bool isReady() const = 0;
+        virtual unsigned int lastModificationDate() = 0;
 };
 
 #endif // IFILE_H
