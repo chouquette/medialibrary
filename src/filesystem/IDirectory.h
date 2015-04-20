@@ -15,5 +15,6 @@ namespace fs
         virtual const std::string& path() const = 0;
         virtual const std::vector<std::string>& files() const = 0;
         virtual const std::vector<std::string>& dirs() const = 0;
+        virtual unsigned int lastModificationDate() const = 0;
     };
 }

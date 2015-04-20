@@ -15,6 +15,9 @@ namespace fs
 Directory::Directory( const std::string& path )
     : m_path( toAbsolute( path ) )
 {
+    struct stat s;
+    lstat( path.c_str(), &s );
+    m_lastModificationDate = s.st_mtim.tv_sec;
     read();
 }
 
@@ -31,6 +34,11 @@ const std::vector<std::string>& Directory::files() const
 const std::vector<std::string>&Directory::dirs() const
 {
     return m_dirs;
+}
+
+unsigned int Directory::lastModificationDate() const
+{
+    return m_lastModificationDate;
 }
 
 std::string Directory::toAbsolute(const std::string& path)

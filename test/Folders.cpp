@@ -13,8 +13,9 @@ namespace mock
 class Directory : public fs::IDirectory
 {
 public:
-    Directory( const std::string& path, const std::vector<std::string>& files, const std::vector<std::string>& dirs )
+    Directory( const std::string& path, const std::vector<std::string>& files, const std::vector<std::string>& dirs, unsigned int lastModif )
         : m_path( path )
+        , m_lastModificationDate( lastModif )
     {
         for ( auto &f : files )
         {
@@ -41,10 +42,16 @@ public:
         return m_dirs;
     }
 
+    virtual unsigned int lastModificationDate() const override
+    {
+        return m_lastModificationDate;
+    }
+
 private:
     std::string m_path;
     std::vector<std::string> m_files;
     std::vector<std::string> m_dirs;
+    unsigned int m_lastModificationDate;
 };
 
 
@@ -69,7 +76,8 @@ struct FileSystemFactory : public factory::IFileSystem
                 std::vector<std::string>
                 {
                     "folder/"
-                }
+                },
+                123
             });
         }
         else if ( path == SubFolder )
@@ -81,7 +89,8 @@ struct FileSystemFactory : public factory::IFileSystem
                 {
                     "subfile.mp4"
                 },
-                std::vector<std::string>{}
+                std::vector<std::string>{},
+                456
             });
         }
         throw std::runtime_error("Invalid path");
@@ -224,4 +233,19 @@ TEST_F( Folders, ListFolders )
 
     file = subFiles[0];
     ASSERT_EQ( std::string{ mock::FileSystemFactory::SubFolder } + "subfile.mp4", file->mrl() );
+}
+
+TEST_F( Folders, LastModificationDate )
+{
+    auto f = ml->addFolder( "." );
+    ASSERT_EQ( 123u, f->lastModificationDate() );
+    auto subFolders = f->folders();
+    ASSERT_EQ( 456u, subFolders[0]->lastModificationDate() );
+
+    SetUp();
+
+    f = ml->folder( f->path() );
+    ASSERT_EQ( 123u, f->lastModificationDate() );
+    subFolders = f->folders();
+    ASSERT_EQ( 456u, subFolders[0]->lastModificationDate() );
 }

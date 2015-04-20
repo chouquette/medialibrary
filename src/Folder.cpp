@@ -27,11 +27,13 @@ Folder::Folder( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_id = sqlite::Traits<unsigned int>::Load( stmt, 0 );
     m_path = sqlite::Traits<std::string>::Load( stmt, 1 );
     m_parent = sqlite::Traits<unsigned int>::Load( stmt, 2 );
+    m_lastModificationDate = sqlite::Traits<unsigned int>::Load( stmt, 3 );
 }
 
-Folder::Folder( const std::string& path, unsigned int parent )
+Folder::Folder( const std::string& path, unsigned int parent, unsigned int lastModificationDate )
     : m_path( path )
     , m_parent( parent )
+    , m_lastModificationDate( lastModificationDate )
 {
 }
 
@@ -42,18 +44,19 @@ bool Folder::createTable(DBConnection connection)
             "id_folder INTEGER PRIMARY KEY AUTOINCREMENT,"
             "path TEXT UNIQUE ON CONFLICT FAIL,"
             "id_parent UNSIGNED INTEGER,"
+            "last_modification_date UNSIGNED INTEGER,"
             "FOREIGN KEY (id_parent) REFERENCES " + policy::FolderTable::Name +
             "(id_folder) ON DELETE CASCADE"
             ")";
     return sqlite::Tools::executeRequest( connection, req );
 }
 
-FolderPtr Folder::create(DBConnection connection, const std::string& path, unsigned int parent )
+FolderPtr Folder::create(DBConnection connection, const std::string& path, unsigned int parent, unsigned int lastModifDate )
 {
-    auto self = std::make_shared<Folder>( path, parent );
+    auto self = std::make_shared<Folder>( path, parent, lastModifDate );
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
-            "(path, id_parent) VALUES(?, ?)";
-    if ( _Cache::insert( connection, self, req, path, sqlite::ForeignKey( parent ) ) == false )
+            "(path, id_parent, last_modification_date) VALUES(?, ?, ?)";
+    if ( _Cache::insert( connection, self, req, path, sqlite::ForeignKey( parent ), lastModifDate ) == false )
         return nullptr;
     self->m_dbConection = connection;
     return self;
@@ -89,4 +92,9 @@ FolderPtr Folder::parent()
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
             " WHERE id_folder = ?";
     return sqlite::Tools::fetchOne<Folder>( m_dbConection, req, m_parent );
+}
+
+unsigned int Folder::lastModificationDate()
+{
+    return m_lastModificationDate;
 }
