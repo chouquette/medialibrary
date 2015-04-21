@@ -59,10 +59,10 @@ MediaLibrary::~MediaLibrary()
     AudioTrack::clear();
 }
 
-bool MediaLibrary::initialize( const std::string& dbPath, std::unique_ptr<factory::IFileSystem> fsFactory )
+bool MediaLibrary::initialize( const std::string& dbPath, std::shared_ptr<factory::IFileSystem> fsFactory )
 {
     if ( fsFactory != nullptr )
-        m_fsFactory = std::move( fsFactory );
+        m_fsFactory = fsFactory;
     else
         m_fsFactory.reset( new factory::FileSystemDefaultFactory );
 

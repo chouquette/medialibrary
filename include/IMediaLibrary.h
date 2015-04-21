@@ -39,7 +39,7 @@ class IMediaLibrary
         ///                     In case this is a nullptr, a default factory will be used
         /// \return true in case of success, false otherwise
         ///
-        virtual bool initialize( const std::string& dbPath, std::unique_ptr<factory::IFileSystem> fsFactory = nullptr ) = 0;
+        virtual bool initialize( const std::string& dbPath, std::shared_ptr<factory::IFileSystem> fsFactory = nullptr ) = 0;
         /// Adds a stand alone file
         virtual FilePtr addFile( const std::string& path ) = 0;
         virtual FilePtr file( const std::string& path ) = 0;
