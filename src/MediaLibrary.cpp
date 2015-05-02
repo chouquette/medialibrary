@@ -73,16 +73,21 @@ bool MediaLibrary::initialize( const std::string& dbPath, std::shared_ptr<factor
     m_dbConnection.reset( dbConnection, &sqlite3_close );
     if ( sqlite::Tools::executeRequest( DBConnection(m_dbConnection), "PRAGMA foreign_keys = ON" ) == false )
         return false;
-    return ( File::createTable( m_dbConnection ) &&
+    if ( ! ( File::createTable( m_dbConnection ) &&
         Folder::createTable( m_dbConnection ) &&
         Label::createTable( m_dbConnection ) &&
         Album::createTable( m_dbConnection ) &&
         AlbumTrack::createTable( m_dbConnection ) &&
         Show::createTable( m_dbConnection ) &&
         ShowEpisode::createTable( m_dbConnection ) &&
-        Movie::createTable( m_dbConnection ) ) &&
+        Movie::createTable( m_dbConnection ) &&
         VideoTrack::createTable( m_dbConnection ) &&
-        AudioTrack::createTable( m_dbConnection );
+        AudioTrack::createTable( m_dbConnection ) ) )
+    {
+        std::cerr << "Failed to create database structure" << std::endl;
+        return false;
+    }
+    return loadFolders();
 }
 
 
@@ -233,5 +238,68 @@ void MediaLibrary::addMetadataService(IMetadataService* service)
 void MediaLibrary::parse(FilePtr file , IParserCb* cb)
 {
     m_parser->parse( file, cb );
+}
+
+bool MediaLibrary::loadFolders()
+{
+    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
+            + " WHERE id_parent IS NULL";
+    auto rootFolders = sqlite::Tools::fetchAll<Folder, IFolder>( m_dbConnection, req );
+    if ( rootFolders.size() == 0 )
+        return true;
+    for ( const auto f : rootFolders )
+    {
+        auto folder = m_fsFactory->createDirectory( f->path() );
+        if ( folder->lastModificationDate() == f->lastModificationDate() )
+            continue;
+        checkSubfolders( folder.get(), f->id() );
+    }
+    return true;
+}
+
+bool MediaLibrary::checkSubfolders( fs::IDirectory* folder, unsigned int parentId )
+{
+    // From here we can have:
+    // - New subfolder(s)
+    // - Deleted subfolder(s)
+    // - New file(s)
+    // - Deleted file(s)
+    // - Changed file(s)
+    // ... in this folder, or in all the sub folders.
+
+    // Load the folders we already know of:
+    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
+            + " WHERE id_parent = ?";
+    auto subFoldersInDB = sqlite::Tools::fetchAll<Folder, IFolder>( m_dbConnection, req, parentId );
+    for ( const auto& subFolderPath : folder->dirs() )
+    {
+        auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [subFolderPath](const std::shared_ptr<IFolder>& f) {
+            return f->path() == subFolderPath;
+        });
+        // We don't know this folder, it's a new one
+        if ( it == end( subFoldersInDB ) )
+        {
+            addFolder( subFolderPath );
+            continue;
+        }
+        auto subFolder = m_fsFactory->createDirectory( subFolderPath );
+        if ( subFolder->lastModificationDate() == (*it)->lastModificationDate() )
+        {
+            // Remove all folders that still exist in FS. That way, the list of folders that
+            // will still be in subFoldersInDB when we're done is the list of folders that have
+            // been deleted from the FS
+            subFoldersInDB.erase( it );
+            continue;
+        }
+        // This folder was modified, let's recurse
+        checkSubfolders( subFolder.get(), (*it)->id() );
+        subFoldersInDB.erase( it );
+    }
+    // Now all folders we had in DB but haven't seen from the FS must have been deleted.
+    for ( auto f : subFoldersInDB )
+    {
+        deleteFolder( f );
+    }
+    return true;
 }
 

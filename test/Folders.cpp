@@ -174,15 +174,20 @@ class Folders : public testing::Test
 {
     public:
         static std::unique_ptr<IMediaLibrary> ml;
-        std::shared_ptr<factory::IFileSystem> fsMock;
+        std::shared_ptr<mock::FileSystemFactory> fsMock;
 
     protected:
-        virtual void SetUp()
+        virtual void Reload()
         {
             ml.reset( MediaLibraryFactory::create() );
-            fsMock.reset( new mock::FileSystemFactory );
             bool res = ml->initialize( "test.db", fsMock );
             ASSERT_TRUE( res );
+        }
+
+        virtual void SetUp()
+        {
+            fsMock.reset( new mock::FileSystemFactory );
+            Reload();
         }
 
         virtual void TearDown()
@@ -320,4 +325,22 @@ TEST_F( Folders, LastModificationDate )
     ASSERT_NE( 0u, f->lastModificationDate() );
     subFolders = f->folders();
     ASSERT_NE( 0u, subFolders[0]->lastModificationDate() );
+}
+
+TEST_F( Folders, NewFile )
+{
+    ml->addFolder( "." );
+
+    ASSERT_EQ( 3u, ml->files().size() );
+    // Do not watch for live changes
+    ml.reset();
+    auto newFolder = std::string(mock::FileSystemFactory::Root) + "newfolder/";
+    fsMock->addFolder( mock::FileSystemFactory::Root, "newfolder/", time( nullptr ) );
+    fsMock->addFile( newFolder, "newfile.avi" );
+
+    Reload();
+
+    ASSERT_EQ( 4u, ml->files().size() );
+    auto file = ml->file( newFolder + "newfile.avi" );
+    ASSERT_NE( nullptr, file );
 }

@@ -44,6 +44,10 @@ class MediaLibrary : public IMediaLibrary
         static const std::vector<std::string> supportedExtensions;
 
     private:
+        bool loadFolders();
+        bool checkSubfolders( fs::IDirectory* folder, unsigned int parentId );
+
+    private:
         std::shared_ptr<sqlite3> m_dbConnection;
         std::unique_ptr<Parser> m_parser;
         std::shared_ptr<factory::IFileSystem> m_fsFactory;
