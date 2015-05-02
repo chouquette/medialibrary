@@ -22,6 +22,4 @@ std::unique_ptr<fs::IFile> FileSystemDefaultFactory::createFile(const std::strin
     return std::unique_ptr<fs::IFile>( new fs::File( path, fileName ) );
 }
 
-
-
 }

@@ -92,11 +92,13 @@ public:
     void addFile( const std::string& fileName )
     {
         m_files.emplace_back( m_path + fileName );
+        m_lastModificationDate++;
     }
 
     void addFolder( const std::string& folder )
     {
         m_dirs.emplace_back( m_path + folder );
+        m_lastModificationDate++;
     }
 
 private:
@@ -121,7 +123,6 @@ struct FileSystemFactory : public factory::IFileSystem
             addFile( Root, "some_other_file.seaotter" );
             addFolder( Root, "folder/", 456 );
                 addFile( SubFolder, "subfile.mp4" );
-
     }
 
     void addFile( const std::string& path, const std::string& fileName )
@@ -309,14 +310,14 @@ TEST_F( Folders, ListFolders )
 TEST_F( Folders, LastModificationDate )
 {
     auto f = ml->addFolder( "." );
-    ASSERT_EQ( 123u, f->lastModificationDate() );
+    ASSERT_NE( 0u, f->lastModificationDate() );
     auto subFolders = f->folders();
-    ASSERT_EQ( 456u, subFolders[0]->lastModificationDate() );
+    ASSERT_NE( 0u, subFolders[0]->lastModificationDate() );
 
     SetUp();
 
     f = ml->folder( f->path() );
-    ASSERT_EQ( 123u, f->lastModificationDate() );
+    ASSERT_NE( 0u, f->lastModificationDate() );
     subFolders = f->folders();
-    ASSERT_EQ( 456u, subFolders[0]->lastModificationDate() );
+    ASSERT_NE( 0u, subFolders[0]->lastModificationDate() );
 }
