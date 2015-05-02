@@ -246,12 +246,20 @@ bool MediaLibrary::loadFolders()
             + " WHERE id_parent IS NULL";
     auto rootFolders = sqlite::Tools::fetchAll<Folder, IFolder>( m_dbConnection, req );
     if ( rootFolders.size() == 0 )
+    {
+        std::cout << "No folders in DB" << std::endl;
         return true;
+    }
     for ( const auto f : rootFolders )
     {
+        std::cout << "Checking " << f->path();
         auto folder = m_fsFactory->createDirectory( f->path() );
         if ( folder->lastModificationDate() == f->lastModificationDate() )
+        {
+            std::cout << " ... no modifications" << std::endl;
             continue;
+        }
+        std::cout << "... changes detected" << std::endl;
         checkSubfolders( folder.get(), f->id() );
     }
     return true;
@@ -273,24 +281,28 @@ bool MediaLibrary::checkSubfolders( fs::IDirectory* folder, unsigned int parentI
     auto subFoldersInDB = sqlite::Tools::fetchAll<Folder, IFolder>( m_dbConnection, req, parentId );
     for ( const auto& subFolderPath : folder->dirs() )
     {
+        std::cout << "Folder from FS: " << subFolderPath << "... ";
         auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [subFolderPath](const std::shared_ptr<IFolder>& f) {
             return f->path() == subFolderPath;
         });
         // We don't know this folder, it's a new one
         if ( it == end( subFoldersInDB ) )
         {
+            std::cout << "New folder detected" << std::endl;
             addFolder( subFolderPath );
             continue;
         }
         auto subFolder = m_fsFactory->createDirectory( subFolderPath );
         if ( subFolder->lastModificationDate() == (*it)->lastModificationDate() )
         {
+            std::cout << "No changes detected" << std::endl;
             // Remove all folders that still exist in FS. That way, the list of folders that
             // will still be in subFoldersInDB when we're done is the list of folders that have
             // been deleted from the FS
             subFoldersInDB.erase( it );
             continue;
         }
+        std::cout << "Changes detected, checking its children" << std::endl;
         // This folder was modified, let's recurse
         checkSubfolders( subFolder.get(), (*it)->id() );
         subFoldersInDB.erase( it );
@@ -298,6 +310,7 @@ bool MediaLibrary::checkSubfolders( fs::IDirectory* folder, unsigned int parentI
     // Now all folders we had in DB but haven't seen from the FS must have been deleted.
     for ( auto f : subFoldersInDB )
     {
+        std::cout << "Folder " << f->path() << " not found in FS, deleting it" << std::endl;
         deleteFolder( f );
     }
     return true;
