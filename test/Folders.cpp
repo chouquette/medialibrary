@@ -6,25 +6,67 @@
 
 #include "filesystem/IDirectory.h"
 #include "filesystem/IFile.h"
+#include "Utils.h"
+
+#include <memory>
+#include <unordered_map>
 
 namespace mock
 {
 
+class File : public fs::IFile
+{
+public:
+    File( const std::string& path, const std::string& fileName )
+        : m_name( fileName )
+        , m_path( path )
+        , m_fullPath( path + fileName )
+        , m_extension( utils::file::extension( fileName ) )
+        , m_lastModification( 0 )
+    {
+    }
+
+    File( const File& ) = default;
+
+    virtual const std::string& name() const override
+    {
+        return m_name;
+    }
+
+    virtual const std::string& path() const override
+    {
+        return m_path;
+    }
+
+    virtual const std::string& fullPath() const override
+    {
+        return m_fullPath;
+    }
+
+    virtual const std::string& extension() const override
+    {
+        return m_extension;
+    }
+
+    virtual unsigned int lastModificationDate() const override
+    {
+        return m_lastModification;
+    }
+
+    std::string m_name;
+    std::string m_path;
+    std::string m_fullPath;
+    std::string m_extension;
+    unsigned int m_lastModification;
+};
+
 class Directory : public fs::IDirectory
 {
 public:
-    Directory( const std::string& path, const std::vector<std::string>& files, const std::vector<std::string>& dirs, unsigned int lastModif )
+    Directory( const std::string& path, unsigned int lastModif )
         : m_path( path )
         , m_lastModificationDate( lastModif )
     {
-        for ( auto &f : files )
-        {
-            m_files.push_back( path + f );
-        }
-        for ( auto& d : dirs )
-        {
-            m_dirs.push_back( path + d );
-        }
     }
 
     virtual const std::string& path() const
@@ -47,6 +89,16 @@ public:
         return m_lastModificationDate;
     }
 
+    void addFile( const std::string& fileName )
+    {
+        m_files.emplace_back( m_path + fileName );
+    }
+
+    void addFolder( const std::string& folder )
+    {
+        m_dirs.emplace_back( m_path + folder );
+    }
+
 private:
     std::string m_path;
     std::vector<std::string> m_files;
@@ -59,42 +111,60 @@ struct FileSystemFactory : public factory::IFileSystem
 {
     static constexpr const char* Root = "/a/";
     static constexpr const char* SubFolder = "/a/folder/";
+
+    FileSystemFactory()
+    {
+        dirs[Root] = std::unique_ptr<mock::Directory>( new Directory{ Root, 123 } );
+            addFile( Root, "video.avi" );
+            addFile( Root, "audio.mp3" );
+            addFile( Root, "not_a_media.something" );
+            addFile( Root, "some_other_file.seaotter" );
+            addFolder( Root, "folder/", 456 );
+                addFile( SubFolder, "subfile.mp4" );
+
+    }
+
+    void addFile( const std::string& path, const std::string& fileName )
+    {
+        dirs[path]->addFile( fileName );
+        files[path + fileName] = std::unique_ptr<mock::File>( new mock::File( path, fileName ) );
+    }
+
+    void addFolder( const std::string& parent, const std::string& path, unsigned int lastModif )
+    {
+        dirs[parent]->addFolder( path );
+        dirs[parent + path] = std::unique_ptr<mock::Directory>( new Directory( parent + path, lastModif ) );
+    }
+
     virtual std::unique_ptr<fs::IDirectory> createDirectory(const std::string& path) override
     {
-        if ( path == Root || path == "." )
+        mock::Directory* res = nullptr;
+        if ( path == "." )
         {
-            return std::unique_ptr<fs::IDirectory>( new Directory
-            {
-                Root,
-                std::vector<std::string>
-                {
-                    "video.avi",
-                    "audio.mp3",
-                    "not_a_media.something",
-                    "some_other_file.seaotter",
-                },
-                std::vector<std::string>
-                {
-                    "folder/"
-                },
-                123
-            });
+            res = dirs[Root].get();
         }
-        else if ( path == SubFolder )
+        else
         {
-            return std::unique_ptr<fs::IDirectory>( new Directory
-            {
-                SubFolder,
-                std::vector<std::string>
-                {
-                    "subfile.mp4"
-                },
-                std::vector<std::string>{},
-                456
-            });
+            auto it = dirs.find( path );
+            if ( it != end( dirs ) )
+                res = it->second.get();
         }
-        throw std::runtime_error("Invalid path");
+        if ( res == nullptr )
+            throw std::runtime_error("Invalid path");
+        return std::unique_ptr<fs::IDirectory>( new Directory( *res ) );
     }
+
+    virtual std::unique_ptr<fs::IFile> createFile(const std::string &path, const std::string &fileName)
+    {
+        std::string fullpath = path + fileName;
+        const auto it = files.find( fullpath );
+        if ( it == end( files ) )
+            files[fullpath].reset( new File( path, fileName ) );
+        return std::unique_ptr<fs::IFile>( new File( static_cast<const mock::File&>( * it->second.get() ) ) );
+    }
+
+    std::unordered_map<std::string, std::unique_ptr<mock::File>> files;
+    std::unordered_map<std::string, std::unique_ptr<mock::Directory>> dirs;
 };
 
 }
@@ -103,13 +173,14 @@ class Folders : public testing::Test
 {
     public:
         static std::unique_ptr<IMediaLibrary> ml;
+        std::shared_ptr<factory::IFileSystem> fsMock;
 
     protected:
         virtual void SetUp()
         {
             ml.reset( MediaLibraryFactory::create() );
-            bool res = ml->initialize( "test.db",
-                std::unique_ptr<factory::IFileSystem>( new mock::FileSystemFactory ) );
+            fsMock.reset( new mock::FileSystemFactory );
+            bool res = ml->initialize( "test.db", fsMock );
             ASSERT_TRUE( res );
         }
 
