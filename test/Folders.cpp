@@ -102,6 +102,15 @@ public:
         markAsModified();
     }
 
+    void removeFile( const std::string& fileName )
+    {
+        auto it = std::find( begin( m_files ), end( m_files ), fileName );
+        if ( it == end( m_files ) )
+            throw std::runtime_error("Invalid filename");
+        m_files.erase( it );
+        markAsModified();
+    }
+
     void markAsModified()
     {
         if ( m_parent != nullptr )
@@ -145,6 +154,15 @@ struct FileSystemFactory : public factory::IFileSystem
         auto parent = dirs[parentPath];
         parent->addFolder( path );
         dirs[parentPath + path] = std::unique_ptr<mock::Directory>( new Directory( parent, parentPath + path, lastModif ) );
+    }
+
+    void removeFile( const std::string& path, const std::string& fileName )
+    {
+        auto it = files.find( path + fileName );
+        if ( it == end( files ) )
+            throw std::runtime_error( "Invalid path" );
+        files.erase( it );
+        dirs[path]->removeFile( path + fileName );
     }
 
     virtual std::unique_ptr<fs::IDirectory> createDirectory(const std::string& path) override
@@ -371,4 +389,22 @@ TEST_F( Folders, NewFileInSubFolder )
     ASSERT_EQ( 2u, f->files().size() );
     ASSERT_NE( nullptr, file );
     ASSERT_FALSE( file->isStandAlone() );
+}
+
+TEST_F( Folders, RemoveFileFromDirectory )
+{
+    ml->addFolder( "." );
+
+    ASSERT_EQ( 3u, ml->files().size() );
+    // Do not watch for live changes
+    ml.reset();
+    fsMock->removeFile( mock::FileSystemFactory::SubFolder, "subfile.mp4" );
+
+    Reload();
+
+    ASSERT_EQ( 2u, ml->files().size() );
+    auto file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "subfile.mp4" );
+    auto f = ml->folder( mock::FileSystemFactory::SubFolder );
+    ASSERT_EQ( 0u, f->files().size() );
+    ASSERT_EQ( nullptr, file );
 }
