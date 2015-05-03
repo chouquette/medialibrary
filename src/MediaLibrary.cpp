@@ -142,11 +142,7 @@ FolderPtr MediaLibrary::addFolder( const std::string& path )
 
         for ( auto& f : dir->files() )
         {
-            if ( std::find( begin( supportedExtensions ), end( supportedExtensions ),
-                            utils::file::extension( f ) ) == end( supportedExtensions ) )
-                continue;
-            if ( File::create( m_dbConnection, f, folder->id() ) == nullptr )
-                std::cerr << "Failed to add file " << f << " to the media library" << std::endl;
+            addFile( f, folder->id() );
         }
         for ( auto& f : dir->dirs() )
             folders.emplace( f, folder->id() );
@@ -305,6 +301,7 @@ bool MediaLibrary::checkSubfolders( fs::IDirectory* folder, unsigned int parentI
         std::cout << "Changes detected, checking its children" << std::endl;
         // This folder was modified, let's recurse
         checkSubfolders( subFolder.get(), (*it)->id() );
+        checkFiles( subFolder.get(), (*it)->id() );
         subFoldersInDB.erase( it );
     }
     // Now all folders we had in DB but haven't seen from the FS must have been deleted.
@@ -312,6 +309,50 @@ bool MediaLibrary::checkSubfolders( fs::IDirectory* folder, unsigned int parentI
     {
         std::cout << "Folder " << f->path() << " not found in FS, deleting it" << std::endl;
         deleteFolder( f );
+    }
+    return true;
+}
+
+void MediaLibrary::checkFiles( fs::IDirectory* folder, unsigned int parentId )
+{
+    static const std::string req = "SELECT * FROM " + policy::FileTable::Name
+            + " WHERE folder_id = ?";
+    auto files = sqlite::Tools::fetchAll<File, IFile>( m_dbConnection, req, parentId );
+    for ( const auto& filePath : folder->files() )
+    {
+        auto it = std::find_if( begin( files ), end( files ), [filePath](const std::shared_ptr<IFile>& file) {
+            return file->mrl() == filePath;
+        });
+        if ( it == end( files ) )
+        {
+            addFile( filePath, parentId );
+            continue;
+        }
+        auto file = m_fsFactory->createFile( filePath );
+        if ( file->lastModificationDate() == (*it)->lastModificationDate() )
+        {
+            // Unchanged file
+            files.erase( it );
+            continue;
+        }
+        //FIXME: What should we do when a file is modified?! Delete & re-add?
+        files.erase( it );
+    }
+    for ( auto file : files )
+    {
+        deleteFile( file );
+    }
+}
+
+bool MediaLibrary::addFile( const std::string& filePath, unsigned int folderId )
+{
+    if ( std::find( begin( supportedExtensions ), end( supportedExtensions ),
+                    utils::file::extension( filePath ) ) == end( supportedExtensions ) )
+        return false;
+    if ( File::create( m_dbConnection, filePath, folderId ) == nullptr )
+    {
+        std::cerr << "Failed to add file " << filePath << " to the media library" << std::endl;
+        return false;
     }
     return true;
 }

@@ -46,6 +46,8 @@ class MediaLibrary : public IMediaLibrary
     private:
         bool loadFolders();
         bool checkSubfolders( fs::IDirectory* folder, unsigned int parentId );
+        void checkFiles( fs::IDirectory* folder, unsigned int parentId );
+        bool addFile( const std::string& filePath, unsigned int folderId );
 
     private:
         std::shared_ptr<sqlite3> m_dbConnection;

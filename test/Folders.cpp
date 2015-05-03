@@ -336,7 +336,7 @@ TEST_F( Folders, LastModificationDate )
     ASSERT_NE( 0u, subFolders[0]->lastModificationDate() );
 }
 
-TEST_F( Folders, NewFile )
+TEST_F( Folders, NewFolderWithFile )
 {
     ml->addFolder( "." );
 
@@ -352,4 +352,23 @@ TEST_F( Folders, NewFile )
     ASSERT_EQ( 4u, ml->files().size() );
     auto file = ml->file( newFolder + "newfile.avi" );
     ASSERT_NE( nullptr, file );
+}
+
+TEST_F( Folders, NewFileInSubFolder )
+{
+    ml->addFolder( "." );
+
+    ASSERT_EQ( 3u, ml->files().size() );
+    // Do not watch for live changes
+    ml.reset();
+    fsMock->addFile( mock::FileSystemFactory::SubFolder, "newfile.avi" );
+
+    Reload();
+
+    ASSERT_EQ( 4u, ml->files().size() );
+    auto file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "newfile.avi" );
+    auto f = ml->folder( mock::FileSystemFactory::SubFolder );
+    ASSERT_EQ( 2u, f->files().size() );
+    ASSERT_NE( nullptr, file );
+    ASSERT_FALSE( file->isStandAlone() );
 }
