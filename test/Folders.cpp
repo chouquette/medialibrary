@@ -111,6 +111,22 @@ public:
         markAsModified();
     }
 
+    void remove()
+    {
+        if ( m_parent == nullptr )
+            return;
+        m_parent->removeFolder( m_path );
+    }
+
+    void removeFolder( const std::string& path )
+    {
+        auto it = std::find( begin( m_dirs ), end( m_dirs ), path );
+        if ( it == end( m_dirs ) )
+            throw std::runtime_error( "Invalid subfolder to remove" );
+        m_dirs.erase( it );
+        markAsModified();
+    }
+
     void markAsModified()
     {
         if ( m_parent != nullptr )
@@ -160,9 +176,22 @@ struct FileSystemFactory : public factory::IFileSystem
     {
         auto it = files.find( path + fileName );
         if ( it == end( files ) )
-            throw std::runtime_error( "Invalid path" );
+            throw std::runtime_error( "Invalid file to remove" );
         files.erase( it );
         dirs[path]->removeFile( path + fileName );
+    }
+
+    void removeFolder( const std::string& path )
+    {
+        auto it = dirs.find( path );
+        if ( it == end( dirs ) )
+            throw std::runtime_error( "Invalid directory to remove" );
+        for (const auto& f : it->second->files() )
+        {
+            removeFile( path, utils::file::fileName( f ) );
+        }
+        it->second->remove();
+        dirs.erase( it );
     }
 
     virtual std::unique_ptr<fs::IDirectory> createDirectory(const std::string& path) override
@@ -406,5 +435,23 @@ TEST_F( Folders, RemoveFileFromDirectory )
     auto file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "subfile.mp4" );
     auto f = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( 0u, f->files().size() );
+    ASSERT_EQ( nullptr, file );
+}
+
+TEST_F( Folders, RemoveDirectory )
+{
+    ml->addFolder( "." );
+
+    ASSERT_EQ( 3u, ml->files().size() );
+    // Do not watch for live changes
+    ml.reset();
+    fsMock->removeFolder( mock::FileSystemFactory::SubFolder );
+
+    Reload();
+
+    ASSERT_EQ( 2u, ml->files().size() );
+    auto file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "subfile.mp4" );
+    auto f = ml->folder( mock::FileSystemFactory::SubFolder );
+    ASSERT_EQ( nullptr, f );
     ASSERT_EQ( nullptr, file );
 }
