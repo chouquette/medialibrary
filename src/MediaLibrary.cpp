@@ -340,7 +340,8 @@ void MediaLibrary::checkFiles( fs::IDirectory* folder, unsigned int parentId )
             files.erase( it );
             continue;
         }
-        //FIXME: What should we do when a file is modified?! Delete & re-add?
+        deleteFile( filePath );
+        addFile( file.get(), parentId );
         files.erase( it );
     }
     for ( auto file : files )

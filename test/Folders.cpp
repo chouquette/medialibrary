@@ -53,6 +53,11 @@ public:
         return m_lastModification;
     }
 
+    void markAsModified()
+    {
+        m_lastModification++;
+    }
+
     std::string m_name;
     std::string m_path;
     std::string m_fullPath;
@@ -457,4 +462,23 @@ TEST_F( Folders, RemoveDirectory )
     auto f = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( nullptr, f );
     ASSERT_EQ( nullptr, file );
+}
+
+TEST_F( Folders, UpdateFile )
+{
+    ml->addFolder( "." );
+    auto filePath = std::string{ mock::FileSystemFactory::SubFolder } + "subfile.mp4";
+    auto f = ml->file( filePath );
+    auto id = f->id();
+
+    ml.reset();
+    fsMock->files[filePath]->markAsModified();
+    fsMock->dirs[mock::FileSystemFactory::SubFolder]->markAsModified();
+
+    Reload();
+    f = ml->file( filePath );
+    ASSERT_NE( nullptr, f );
+    // The file is expected to be deleted and re-added since it changed, so the
+    // id should have changed
+    ASSERT_NE( id, f->id() );
 }
