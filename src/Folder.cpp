@@ -98,3 +98,13 @@ unsigned int Folder::lastModificationDate()
 {
     return m_lastModificationDate;
 }
+
+bool Folder::setLastModificationDate( unsigned int lastModificationDate )
+{
+    static const std::string req = "UPDATE " + policy::FolderTable::Name +
+            " SET last_modification_date = ? WHERE id_folder = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConection, req, lastModificationDate, m_id ) == false )
+        return false;
+    m_lastModificationDate = lastModificationDate;
+    return true;
+}

@@ -403,9 +403,11 @@ TEST_F( Folders, NewFolderWithFile )
 
 TEST_F( Folders, NewFileInSubFolder )
 {
-    ml->addFolder( "." );
-
+    auto f = ml->addFolder( "." );
     ASSERT_EQ( 3u, ml->files().size() );
+
+    f = ml->folder( mock::FileSystemFactory::SubFolder );
+    auto lmd = f->lastModificationDate();
     // Do not watch for live changes
     ml.reset();
     fsMock->addFile( mock::FileSystemFactory::SubFolder, "newfile.avi" );
@@ -414,10 +416,11 @@ TEST_F( Folders, NewFileInSubFolder )
 
     ASSERT_EQ( 4u, ml->files().size() );
     auto file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "newfile.avi" );
-    auto f = ml->folder( mock::FileSystemFactory::SubFolder );
+    f = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( 2u, f->files().size() );
     ASSERT_NE( nullptr, file );
     ASSERT_FALSE( file->isStandAlone() );
+    ASSERT_NE( lmd, f->lastModificationDate() );
 }
 
 TEST_F( Folders, RemoveFileFromDirectory )

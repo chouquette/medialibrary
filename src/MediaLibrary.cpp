@@ -257,6 +257,7 @@ bool MediaLibrary::loadFolders()
         }
         std::cout << "... changes detected" << std::endl;
         checkSubfolders( folder.get(), f->id() );
+        f->setLastModificationDate( folder->lastModificationDate() );
     }
     return true;
 }
@@ -302,6 +303,7 @@ bool MediaLibrary::checkSubfolders( fs::IDirectory* folder, unsigned int parentI
         // This folder was modified, let's recurse
         checkSubfolders( subFolder.get(), (*it)->id() );
         checkFiles( subFolder.get(), (*it)->id() );
+        (*it)->setLastModificationDate( subFolder->lastModificationDate() );
         subFoldersInDB.erase( it );
     }
     // Now all folders we had in DB but haven't seen from the FS must have been deleted.
