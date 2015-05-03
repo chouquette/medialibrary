@@ -63,8 +63,9 @@ public:
 class Directory : public fs::IDirectory
 {
 public:
-    Directory( const std::string& path, unsigned int lastModif )
+    Directory( std::shared_ptr<mock::Directory> parent, const std::string& path, unsigned int lastModif )
         : m_path( path )
+        , m_parent( parent )
         , m_lastModificationDate( lastModif )
     {
     }
@@ -92,12 +93,19 @@ public:
     void addFile( const std::string& fileName )
     {
         m_files.emplace_back( m_path + fileName );
-        m_lastModificationDate++;
+        markAsModified();
     }
 
     void addFolder( const std::string& folder )
     {
         m_dirs.emplace_back( m_path + folder );
+        markAsModified();
+    }
+
+    void markAsModified()
+    {
+        if ( m_parent != nullptr )
+            m_parent->markAsModified();
         m_lastModificationDate++;
     }
 
@@ -105,6 +113,7 @@ private:
     std::string m_path;
     std::vector<std::string> m_files;
     std::vector<std::string> m_dirs;
+    std::shared_ptr<mock::Directory> m_parent;
     unsigned int m_lastModificationDate;
 };
 
@@ -116,7 +125,7 @@ struct FileSystemFactory : public factory::IFileSystem
 
     FileSystemFactory()
     {
-        dirs[Root] = std::unique_ptr<mock::Directory>( new Directory{ Root, 123 } );
+        dirs[Root] = std::unique_ptr<mock::Directory>( new Directory{ nullptr, Root, 123 } );
             addFile( Root, "video.avi" );
             addFile( Root, "audio.mp3" );
             addFile( Root, "not_a_media.something" );
@@ -164,8 +173,8 @@ struct FileSystemFactory : public factory::IFileSystem
         return std::unique_ptr<fs::IFile>( new File( static_cast<const mock::File&>( * it->second.get() ) ) );
     }
 
-    std::unordered_map<std::string, std::unique_ptr<mock::File>> files;
-    std::unordered_map<std::string, std::unique_ptr<mock::Directory>> dirs;
+    std::unordered_map<std::string, std::shared_ptr<mock::File>> files;
+    std::unordered_map<std::string, std::shared_ptr<mock::Directory>> dirs;
 };
 
 }
