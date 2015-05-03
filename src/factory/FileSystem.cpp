@@ -17,9 +17,9 @@ std::unique_ptr<fs::IDirectory> FileSystemDefaultFactory::createDirectory( const
     return std::unique_ptr<fs::IDirectory>( new fs::Directory( path ) );
 }
 
-std::unique_ptr<fs::IFile> FileSystemDefaultFactory::createFile(const std::string& path, const std::string& fileName)
+std::unique_ptr<fs::IFile> FileSystemDefaultFactory::createFile(const std::string& fileName)
 {
-    return std::unique_ptr<fs::IFile>( new fs::File( path, fileName ) );
+    return std::unique_ptr<fs::IFile>( new fs::File( fileName ) );
 }
 
 }

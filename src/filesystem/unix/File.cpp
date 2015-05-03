@@ -7,11 +7,11 @@
 namespace fs
 {
 
-File::File( const std::string& path, const std::string& fileName )
-    : m_path( path )
-    , m_name( fileName )
-    , m_fullPath( path + ( *path.rbegin() != '/' ? "/" : "" ) + fileName )
-    , m_extension( utils::file::extension( fileName ) )
+File::File( const std::string& filePath )
+    : m_path( utils::file::directory( filePath ) )
+    , m_name( utils::file::fileName( filePath ) )
+    , m_fullPath( filePath )
+    , m_extension( utils::file::extension( filePath ) )
 {
     struct stat s;
     if ( lstat( m_fullPath.c_str(), &s ) )

@@ -17,11 +17,11 @@ namespace mock
 class File : public fs::IFile
 {
 public:
-    File( const std::string& path, const std::string& fileName )
-        : m_name( fileName )
-        , m_path( path )
-        , m_fullPath( path + fileName )
-        , m_extension( utils::file::extension( fileName ) )
+    File( const std::string& filePath )
+        : m_name( utils::file::fileName( filePath ) )
+        , m_path( utils::file::directory( filePath ) )
+        , m_fullPath( filePath )
+        , m_extension( utils::file::extension( filePath ) )
         , m_lastModification( 0 )
     {
     }
@@ -128,13 +128,14 @@ struct FileSystemFactory : public factory::IFileSystem
     void addFile( const std::string& path, const std::string& fileName )
     {
         dirs[path]->addFile( fileName );
-        files[path + fileName] = std::unique_ptr<mock::File>( new mock::File( path, fileName ) );
+        files[path + fileName] = std::unique_ptr<mock::File>( new mock::File( path + fileName ) );
     }
 
-    void addFolder( const std::string& parent, const std::string& path, unsigned int lastModif )
+    void addFolder( const std::string& parentPath, const std::string& path, unsigned int lastModif )
     {
-        dirs[parent]->addFolder( path );
-        dirs[parent + path] = std::unique_ptr<mock::Directory>( new Directory( parent + path, lastModif ) );
+        auto parent = dirs[parentPath];
+        parent->addFolder( path );
+        dirs[parentPath + path] = std::unique_ptr<mock::Directory>( new Directory( parent, parentPath + path, lastModif ) );
     }
 
     virtual std::unique_ptr<fs::IDirectory> createDirectory(const std::string& path) override
@@ -155,12 +156,11 @@ struct FileSystemFactory : public factory::IFileSystem
         return std::unique_ptr<fs::IDirectory>( new Directory( *res ) );
     }
 
-    virtual std::unique_ptr<fs::IFile> createFile(const std::string &path, const std::string &fileName)
+    virtual std::unique_ptr<fs::IFile> createFile( const std::string &filePath ) override
     {
-        std::string fullpath = path + fileName;
-        const auto it = files.find( fullpath );
+        const auto it = files.find( filePath );
         if ( it == end( files ) )
-            files[fullpath].reset( new File( path, fileName ) );
+            files[filePath].reset( new File( filePath ) );
         return std::unique_ptr<fs::IFile>( new File( static_cast<const mock::File&>( * it->second.get() ) ) );
     }
 
