@@ -13,6 +13,7 @@
 #include "ShowEpisode.h"
 #include "database/SqliteTools.h"
 #include "VideoTrack.h"
+#include "filesystem/IFile.h"
 
 const std::string policy::FileTable::Name = "File";
 const std::string policy::FileTable::CacheColumn = "mrl";
@@ -35,28 +36,28 @@ File::File( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_isReady = m_type != UnknownType;
 }
 
-File::File( const std::string& mrl, unsigned int folderId )
+File::File( const fs::IFile* file, unsigned int folderId )
     : m_id( 0 )
     , m_type( UnknownType )
     , m_duration( 0 )
     , m_albumTrackId( 0 )
     , m_playCount( 0 )
     , m_showEpisodeId( 0 )
-    , m_mrl( mrl )
+    , m_mrl( file->fullPath() )
     , m_movieId( 0 )
     , m_folderId( folderId )
-    , m_lastModificationDate( time( nullptr ) )
+    , m_lastModificationDate( file->lastModificationDate() )
     , m_isReady( false )
 {
 }
 
-FilePtr File::create( DBConnection dbConnection, const std::string& mrl, unsigned int folderId )
+FilePtr File::create( DBConnection dbConnection, const fs::IFile* file, unsigned int folderId )
 {
-    auto self = std::make_shared<File>( mrl, folderId );
+    auto self = std::make_shared<File>( file, folderId );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
             "(mrl, folder_id, last_modification_date) VALUES(?, ?, ?)";
 
-    if ( _Cache::insert( dbConnection, self, req, mrl, sqlite::ForeignKey( folderId ), self->m_lastModificationDate ) == false )
+    if ( _Cache::insert( dbConnection, self, req, self->m_mrl, sqlite::ForeignKey( folderId ), self->m_lastModificationDate ) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;
     return self;

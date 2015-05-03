@@ -103,7 +103,8 @@ FilePtr MediaLibrary::file( const std::string& path )
 
 FilePtr MediaLibrary::addFile( const std::string& path )
 {
-    auto file = File::create( m_dbConnection, path, 0 );
+    auto fsFile = m_fsFactory->createFile( path );
+    auto file = File::create( m_dbConnection, fsFile.get(), 0 );
     if ( file == nullptr )
         return nullptr;
     return file;
@@ -142,7 +143,8 @@ FolderPtr MediaLibrary::addFolder( const std::string& path )
 
         for ( auto& f : dir->files() )
         {
-            addFile( f, folder->id() );
+            auto fsFile = m_fsFactory->createFile( f );
+            addFile( fsFile.get(), folder->id() );
         }
         for ( auto& f : dir->dirs() )
             folders.emplace( f, folder->id() );
@@ -238,6 +240,7 @@ void MediaLibrary::parse(FilePtr file , IParserCb* cb)
 
 bool MediaLibrary::loadFolders()
 {
+    //FIXME: This should probably be in a sql transaction
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
             + " WHERE id_parent IS NULL";
     auto rootFolders = sqlite::Tools::fetchAll<Folder, IFolder>( m_dbConnection, req );
@@ -322,15 +325,15 @@ void MediaLibrary::checkFiles( fs::IDirectory* folder, unsigned int parentId )
     auto files = sqlite::Tools::fetchAll<File, IFile>( m_dbConnection, req, parentId );
     for ( const auto& filePath : folder->files() )
     {
-        auto it = std::find_if( begin( files ), end( files ), [filePath](const std::shared_ptr<IFile>& file) {
-            return file->mrl() == filePath;
+        auto file = m_fsFactory->createFile( filePath );
+        auto it = std::find_if( begin( files ), end( files ), [filePath](const std::shared_ptr<IFile>& f) {
+            return f->mrl() == filePath;
         });
         if ( it == end( files ) )
         {
-            addFile( filePath, parentId );
+            addFile( file.get(), parentId );
             continue;
         }
-        auto file = m_fsFactory->createFile( filePath );
         if ( file->lastModificationDate() == (*it)->lastModificationDate() )
         {
             // Unchanged file
@@ -346,14 +349,14 @@ void MediaLibrary::checkFiles( fs::IDirectory* folder, unsigned int parentId )
     }
 }
 
-bool MediaLibrary::addFile( const std::string& filePath, unsigned int folderId )
+bool MediaLibrary::addFile( const fs::IFile* file, unsigned int folderId )
 {
     if ( std::find( begin( supportedExtensions ), end( supportedExtensions ),
-                    utils::file::extension( filePath ) ) == end( supportedExtensions ) )
+                    file->extension() ) == end( supportedExtensions ) )
         return false;
-    if ( File::create( m_dbConnection, filePath, folderId ) == nullptr )
+    if ( File::create( m_dbConnection, file, folderId ) == nullptr )
     {
-        std::cerr << "Failed to add file " << filePath << " to the media library" << std::endl;
+        std::cerr << "Failed to add file " << file->fullPath() << " to the media library" << std::endl;
         return false;
     }
     return true;
