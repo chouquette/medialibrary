@@ -1,30 +1,12 @@
-#include "gtest/gtest.h"
+#include "Tests.h"
 
 #include "IMediaLibrary.h"
 #include "IFile.h"
 #include "ILabel.h"
 
-class Labels : public testing::Test
+class Labels : public Tests
 {
-    public:
-        static std::unique_ptr<IMediaLibrary> ml;
-
-    protected:
-        virtual void SetUp()
-        {
-            ml.reset( MediaLibraryFactory::create() );
-            bool res = ml->initialize( "test.db" );
-            ASSERT_TRUE( res );
-        }
-
-        virtual void TearDown()
-        {
-            ml.reset();
-            unlink("test.db");
-        }
 };
-
-std::unique_ptr<IMediaLibrary> Labels::ml;
 
 TEST_F( Labels, Add )
 {

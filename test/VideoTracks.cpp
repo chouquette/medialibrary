@@ -1,29 +1,11 @@
-#include "gtest/gtest.h"
+#include "Tests.h"
 
 #include "IFile.h"
 #include "IVideoTrack.h"
 
-class VideoTracks : public testing::Test
+class VideoTracks : public Tests
 {
-    public:
-        static std::unique_ptr<IMediaLibrary> ml;
-
-    protected:
-        virtual void SetUp()
-        {
-            ml.reset( MediaLibraryFactory::create() );
-            bool res = ml->initialize( "test.db" );
-            ASSERT_TRUE( res );
-        }
-
-        virtual void TearDown()
-        {
-            ml.reset();
-            unlink("test.db");
-        }
 };
-
-std::unique_ptr<IMediaLibrary> VideoTracks::ml;
 
 TEST_F( VideoTracks, AddTrack )
 {

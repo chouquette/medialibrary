@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+#include "Tests.h"
 
 #include "IFile.h"
 #include "IFolder.h"
@@ -243,34 +243,24 @@ struct FileSystemFactory : public factory::IFileSystem
 
 }
 
-class Folders : public testing::Test
+class Folders : public Tests
 {
-    public:
-        static std::unique_ptr<IMediaLibrary> ml;
+    protected:
         std::shared_ptr<mock::FileSystemFactory> fsMock;
 
     protected:
-        virtual void Reload()
-        {
-            ml.reset( MediaLibraryFactory::create() );
-            bool res = ml->initialize( "test.db", fsMock );
-            ASSERT_TRUE( res );
-        }
-
-        virtual void SetUp()
+        virtual void SetUp() override
         {
             fsMock.reset( new mock::FileSystemFactory );
-            Reload();
+            Tests::Reload( fsMock );
         }
 
-        virtual void TearDown()
+        virtual void Reload()
         {
-            ml.reset();
-            unlink("test.db");
+            Tests::Reload( fsMock );
         }
-};
 
-std::unique_ptr<IMediaLibrary> Folders::ml;
+};
 
 TEST_F( Folders, Add )
 {
@@ -307,7 +297,7 @@ TEST_F( Folders, Delete )
     auto file = ml->file( filePath );
     ASSERT_EQ( nullptr, file );
 
-    SetUp();
+    Reload();
 
     // Recheck folder deletion from DB:
     f = ml->folder( folderPath );
@@ -319,7 +309,7 @@ TEST_F( Folders, Load )
     auto f = ml->addFolder( "." );
     ASSERT_NE( f, nullptr );
 
-    SetUp();
+    Reload();
 
     auto files = ml->files();
     ASSERT_EQ( files.size(), 3u );
@@ -344,7 +334,7 @@ TEST_F( Folders, List )
     auto files = f->files();
     ASSERT_EQ( files.size(), 2u );
 
-    SetUp();
+    Reload();
 
     f = ml->folder( f->path() );
     files = f->files();
@@ -371,7 +361,7 @@ TEST_F( Folders, ListFolders )
     ASSERT_EQ( std::string{ mock::FileSystemFactory::SubFolder } + "subfile.mp4", file->mrl() );
 
     // Now again, without cache
-    SetUp();
+    Reload();
 
     f = ml->folder( f->path() );
     subFolders = f->folders();
@@ -392,7 +382,7 @@ TEST_F( Folders, LastModificationDate )
     auto subFolders = f->folders();
     ASSERT_NE( 0u, subFolders[0]->lastModificationDate() );
 
-    SetUp();
+    Reload();
 
     f = ml->folder( f->path() );
     ASSERT_NE( 0u, f->lastModificationDate() );

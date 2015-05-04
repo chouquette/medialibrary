@@ -1,31 +1,13 @@
-#include "gtest/gtest.h"
+#include "Tests.h"
 
 #include "IAlbum.h"
 #include "IAlbumTrack.h"
 #include "IFile.h"
 #include "IMediaLibrary.h"
 
-class Albums : public testing::Test
+class Albums : public Tests
 {
-    public:
-        static std::unique_ptr<IMediaLibrary> ml;
-
-    protected:
-        virtual void SetUp()
-        {
-            ml.reset( MediaLibraryFactory::create() );
-            bool res = ml->initialize( "test.db" );
-            ASSERT_TRUE( res );
-        }
-
-        virtual void TearDown()
-        {
-            ml.reset();
-            unlink("test.db");
-        }
 };
-
-std::unique_ptr<IMediaLibrary> Albums::ml;
 
 TEST_F( Albums, Create )
 {
@@ -42,7 +24,7 @@ TEST_F( Albums, Fetch )
     auto a = ml->createAlbum( "album" );
 
     // Clear the cache
-    SetUp();
+    Reload();
 
     auto a2 = ml->album( "album" );
     // The shared pointer are expected to point to a different instance
@@ -61,7 +43,7 @@ TEST_F( Albums, AddTrack )
     ASSERT_EQ( tracks.size(), 1u );
     ASSERT_EQ( tracks[0], track );
 
-    SetUp();
+    Reload();
 
     a = ml->album( "albumtag" );
     tracks = a->tracks();
@@ -81,7 +63,7 @@ TEST_F( Albums, AssignTrack )
     ASSERT_NE( f->albumTrack(), nullptr );
     ASSERT_EQ( f->albumTrack(), t );
 
-    SetUp();
+    Reload();
 
     f = ml->file( "file" );
     t = f->albumTrack();
@@ -111,7 +93,7 @@ TEST_F( Albums, SetGenre )
     t->setGenre( "happy underground post progressive death metal" );
     ASSERT_EQ( t->genre(), "happy underground post progressive death metal" );
 
-    SetUp();
+    Reload();
 
     a = ml->album( "album" );
     auto tracks = a->tracks();
@@ -126,7 +108,7 @@ TEST_F( Albums, SetReleaseDate )
     a->setReleaseDate( 1234 );
     ASSERT_EQ( a->releaseDate(), 1234 );
 
-    SetUp();
+    Reload();
 
     auto a2 = ml->album( "album" );
     ASSERT_EQ( a->releaseDate(), a2->releaseDate() );
@@ -139,7 +121,7 @@ TEST_F( Albums, SetShortSummary )
     a->setShortSummary( "summary" );
     ASSERT_EQ( a->shortSummary(), "summary" );
 
-    SetUp();
+    Reload();
 
     auto a2 = ml->album( "album" );
     ASSERT_EQ( a->shortSummary(), a2->shortSummary() );
@@ -152,7 +134,7 @@ TEST_F( Albums, SetArtworkUrl )
     a->setArtworkUrl( "artwork" );
     ASSERT_EQ( a->artworkUrl(), "artwork" );
 
-    SetUp();
+    Reload();
 
     auto a2 = ml->album( "album" );
     ASSERT_EQ( a->artworkUrl(), a2->artworkUrl() );
@@ -166,7 +148,7 @@ TEST_F( Albums, SetArtist )
     t->setArtist( "The undead otters" );
     ASSERT_EQ( t->artist(), "The undead otters" );
 
-    SetUp();
+    Reload();
 
     auto a2 = ml->album( "album" );
     auto tracks = a2->tracks();
@@ -182,7 +164,7 @@ TEST_F( Albums, FetchAlbumFromTrack )
         auto t = a->addTrack( "track 1", 1 );
         f->setAlbumTrack( t );
     }
-    SetUp();
+    Reload();
 
     auto f = ml->file( "file" );
     auto t = f->albumTrack();

@@ -1,29 +1,11 @@
-#include "gtest/gtest.h"
+#include "Tests.h"
 
 #include "IFile.h"
 #include "IAudioTrack.h"
 
-class AudioTracks : public testing::Test
+class AudioTracks : public Tests
 {
-    public:
-        static std::unique_ptr<IMediaLibrary> ml;
-
-    protected:
-        virtual void SetUp()
-        {
-            ml.reset( MediaLibraryFactory::create() );
-            bool res = ml->initialize( "test.db" );
-            ASSERT_TRUE( res );
-        }
-
-        virtual void TearDown()
-        {
-            ml.reset();
-            unlink("test.db");
-        }
 };
-
-std::unique_ptr<IMediaLibrary> AudioTracks::ml;
 
 TEST_F( AudioTracks, AddTrack )
 {

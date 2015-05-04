@@ -1,31 +1,13 @@
-#include "gtest/gtest.h"
+#include "Tests.h"
 
 #include "IFile.h"
 #include "IMediaLibrary.h"
 #include "IShow.h"
 #include "IShowEpisode.h"
 
-class Shows : public testing::Test
+class Shows : public Tests
 {
-    public:
-        static std::unique_ptr<IMediaLibrary> ml;
-
-    protected:
-        virtual void SetUp()
-        {
-            ml.reset( MediaLibraryFactory::create() );
-            bool res = ml->initialize( "test.db" );
-            ASSERT_TRUE( res );
-        }
-
-        virtual void TearDown()
-        {
-            ml.reset();
-            unlink("test.db");
-        }
 };
-
-std::unique_ptr<IMediaLibrary> Shows::ml;
 
 TEST_F( Shows, Create )
 {
@@ -41,7 +23,7 @@ TEST_F( Shows, Fetch )
     auto s = ml->createShow( "show" );
 
     // Clear the cache
-    SetUp();
+    Reload();
 
     auto s2 = ml->show( "show" );
     // The shared pointers are expected to point to different instances
@@ -57,7 +39,7 @@ TEST_F( Shows, SetReleaseDate )
     s->setReleaseDate( 1234 );
     ASSERT_EQ( s->releaseDate(), 1234 );
 
-    SetUp();
+    Reload();
 
     auto s2 = ml->show( "show" );
     ASSERT_EQ( s->releaseDate(), s2->releaseDate() );
@@ -71,7 +53,7 @@ TEST_F( Shows, SetShortSummary )
     ASSERT_EQ( s->shortSummary(), "summary" );
 
 
-    SetUp();
+    Reload();
 
     auto s2 = ml->show( "show" );
     ASSERT_EQ( s->shortSummary(), s2->shortSummary() );
@@ -84,7 +66,7 @@ TEST_F( Shows, SetArtworkUrl )
     s->setArtworkUrl( "artwork" );
     ASSERT_EQ( s->artworkUrl(), "artwork" );
 
-    SetUp();
+    Reload();
 
     auto s2 = ml->show( "show" );
     ASSERT_EQ( s->artworkUrl(), s2->artworkUrl() );
@@ -97,7 +79,7 @@ TEST_F( Shows, SetTvdbId )
     s->setTvdbId( "TVDBID" );
     ASSERT_EQ( s->tvdbId(), "TVDBID" );
 
-    SetUp();
+    Reload();
 
     auto s2 = ml->show( "show" );
     ASSERT_EQ( s->tvdbId(), s2->tvdbId() );
@@ -134,7 +116,7 @@ TEST_F( Shows, FetchShowFromEpisode )
     ASSERT_NE( s2, nullptr );
     ASSERT_EQ( s, s2 );
 
-    SetUp();
+    Reload();
 
     f = ml->file( "file" );
     s2 = f->showEpisode()->show();
@@ -150,7 +132,7 @@ TEST_F( Shows, SetEpisodeArtwork )
     ASSERT_TRUE( res );
     ASSERT_EQ( e->artworkUrl(), "path-to-snapshot" );
 
-    SetUp();
+    Reload();
 
     show = ml->show( "show" );
     auto episodes = show->episodes();
@@ -165,7 +147,7 @@ TEST_F( Shows, SetEpisodeSeasonNumber )
     ASSERT_TRUE( res );
     ASSERT_EQ( e->seasonNumber(), 42u );
 
-    SetUp();
+    Reload();
 
     show = ml->show( "show" );
     auto episodes = show->episodes();
@@ -180,7 +162,7 @@ TEST_F( Shows, SetEpisodeSummary )
     ASSERT_TRUE( res );
     ASSERT_EQ( e->shortSummary(), "Insert spoilers here" );
 
-    SetUp();
+    Reload();
 
     show = ml->show( "show" );
     auto episodes = show->episodes();
@@ -195,7 +177,7 @@ TEST_F( Shows, SetEpisodeTvdbId )
     ASSERT_TRUE( res );
     ASSERT_EQ( e->tvdbId(), "TVDBID" );
 
-    SetUp();
+    Reload();
 
     show = ml->show( "show" );
     auto episodes = show->episodes();
@@ -216,7 +198,7 @@ TEST_F( Shows, FileSetShowEpisode )
     f->setShowEpisode( e );
     ASSERT_EQ( f->showEpisode(), e );
 
-    SetUp();
+    Reload();
 
     f = ml->file( "file" );
     e = f->showEpisode();
@@ -236,7 +218,7 @@ TEST_F( Shows, DeleteShowEpisode )
     f = ml->file( "file" );
     ASSERT_EQ( f, nullptr );
 
-    SetUp();
+    Reload();
 
     f = ml->file( "file" );
     ASSERT_EQ( f, nullptr );

@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+#include "Tests.h"
 #include <vlc/vlc.h>
 #include <chrono>
 #include <condition_variable>
@@ -40,10 +40,9 @@ class ServiceCb : public IParserCb
         }
 };
 
-class VLCMetadataServices : public testing::Test
+class VLCMetadataServices : public Tests
 {
-    public:
-        static std::unique_ptr<IMediaLibrary> ml;
+    protected:
         static std::unique_ptr<ServiceCb> cb;
 
     protected:
@@ -52,10 +51,11 @@ class VLCMetadataServices : public testing::Test
             cb.reset( new ServiceCb );
         }
 
-        virtual void SetUp()
+        virtual void SetUp() override
         {
+            Tests::SetUp();
+
             cb->failed = false;
-            ml.reset( MediaLibraryFactory::create() );
             const char* args[] = {
                 "-vv"
             };
@@ -65,18 +65,9 @@ class VLCMetadataServices : public testing::Test
 
             // This takes ownership of vlcService
             ml->addMetadataService( vlcService );
-            bool res = ml->initialize( "test.db" );
-            ASSERT_TRUE( res );
-        }
-
-        virtual void TearDown()
-        {
-            ml.reset();
-            unlink("test.db");
         }
 };
 
-std::unique_ptr<IMediaLibrary> VLCMetadataServices::ml;
 std::unique_ptr<ServiceCb> VLCMetadataServices::cb;
 
 TEST_F( VLCMetadataServices, ParseAudio )
@@ -90,7 +81,7 @@ TEST_F( VLCMetadataServices, ParseAudio )
 
     ASSERT_TRUE( res );
     ASSERT_FALSE( cb->failed );
-    SetUp();
+    Reload();
     file = ml->file( "mr-zebra.mp3" );
     auto tracks = file->audioTracks();
     ASSERT_EQ( tracks.size(), 1u );
@@ -111,7 +102,7 @@ TEST_F( VLCMetadataServices, ParseAlbum )
     } );
 
     ASSERT_TRUE( res );
-    SetUp();
+    Reload();
 
     file = ml->file( "mr-zebra.mp3" );
     auto track = file->albumTrack();
@@ -139,7 +130,7 @@ TEST_F( VLCMetadataServices, ParseVideo )
     } );
 
     ASSERT_TRUE( res );
-    SetUp();
+    Reload();
 
     file = ml->file( "mrmssmith.mp4" );
 

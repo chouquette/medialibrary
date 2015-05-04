@@ -1,30 +1,12 @@
-#include "gtest/gtest.h"
+#include "Tests.h"
 
 #include "IMediaLibrary.h"
 #include "IMovie.h"
 #include "IFile.h"
 
-class Movies : public testing::Test
+class Movies : public Tests
 {
-    public:
-        static std::unique_ptr<IMediaLibrary> ml;
-
-    protected:
-        virtual void SetUp()
-        {
-            ml.reset( MediaLibraryFactory::create() );
-            bool res = ml->initialize( "test.db" );
-            ASSERT_TRUE( res );
-        }
-
-        virtual void TearDown()
-        {
-            ml.reset();
-            unlink("test.db");
-        }
 };
-
-std::unique_ptr<IMediaLibrary> Movies::ml;
 
 TEST_F( Movies, Create )
 {
@@ -40,7 +22,7 @@ TEST_F( Movies, Fetch )
 
     ASSERT_EQ( m, m2 );
 
-    SetUp();
+    Reload();
 
     m2 = ml->movie( "movie" );
     ASSERT_NE( m2, nullptr );
@@ -54,7 +36,7 @@ TEST_F( Movies, SetReleaseDate )
     m->setReleaseDate( 1234 );
     ASSERT_EQ( m->releaseDate(), 1234u );
 
-    SetUp();
+    Reload();
 
     m = ml->movie( "movie" );
     ASSERT_EQ( m->releaseDate(), 1234u );
@@ -67,7 +49,7 @@ TEST_F( Movies, SetShortSummary )
     m->setShortSummary( "great movie" );
     ASSERT_EQ( m->shortSummary(), "great movie" );
 
-    SetUp();
+    Reload();
 
     m = ml->movie( "movie" );
     ASSERT_EQ( m->shortSummary(), "great movie" );
@@ -80,7 +62,7 @@ TEST_F( Movies, SetArtworkUrl )
     m->setArtworkUrl( "artwork" );
     ASSERT_EQ( m->artworkUrl(), "artwork" );
 
-    SetUp();
+    Reload();
 
     m = ml->movie( "movie" );
     ASSERT_EQ( m->artworkUrl(), "artwork" );
@@ -93,7 +75,7 @@ TEST_F( Movies, SetImdbId )
     m->setImdbId( "id" );
     ASSERT_EQ( m->imdbId(), "id" );
 
-    SetUp();
+    Reload();
 
     m = ml->movie( "movie" );
     ASSERT_EQ( m->imdbId(), "id" );
@@ -108,7 +90,7 @@ TEST_F( Movies, AssignToFile )
     f->setMovie( m );
     ASSERT_EQ( f->movie(), m );
 
-    SetUp();
+    Reload();
 
     f = ml->file( "file" );
     m = f->movie();
@@ -127,7 +109,7 @@ TEST_F( Movies, DestroyMovie )
     f = ml->file( "file" );
     ASSERT_EQ( f, nullptr );
 
-    SetUp();
+    Reload();
 
     f = ml->file( "file" );
     ASSERT_EQ( f, nullptr );

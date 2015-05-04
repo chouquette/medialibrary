@@ -1,29 +1,12 @@
-#include "gtest/gtest.h"
+#include "Tests.h"
 
 #include "IMediaLibrary.h"
 #include "IFile.h"
 
-class Files : public testing::Test
+class Files : public Tests
 {
-    public:
-        static std::unique_ptr<IMediaLibrary> ml;
-
-    protected:
-        virtual void SetUp()
-        {
-            ml.reset( MediaLibraryFactory::create() );
-            bool res = ml->initialize( "test.db" );
-            ASSERT_TRUE( res );
-        }
-
-        virtual void TearDown()
-        {
-            ml.reset();
-            unlink("test.db");
-        }
 };
 
-std::unique_ptr<IMediaLibrary> Files::ml;
 
 TEST_F( Files, Init )
 {
@@ -53,7 +36,7 @@ TEST_F( Files, Fetch )
     ASSERT_EQ( f, f2 );
 
     // Flush cache and fetch from DB
-    SetUp();
+    Reload();
 
     f2 = ml->file( "/dev/null" );
     ASSERT_EQ( f->mrl(), f2->mrl() );
@@ -89,7 +72,7 @@ TEST_F( Files, LastModificationDate )
     auto f = ml->addFile( "/dev/seaotter" );
     ASSERT_NE( 0u, f->lastModificationDate() );
 
-    SetUp();
+    Reload();
     auto f2 = ml->file( "/dev/seaotter" );
     ASSERT_EQ( f->lastModificationDate(), f2->lastModificationDate() );
 }
