@@ -31,10 +31,10 @@ class Folder : public IFolder, public Cache<Folder, IFolder, policy::FolderTable
 
 public:
     Folder(DBConnection dbConnection, sqlite3_stmt* stmt);
-    Folder(const std::string& path , unsigned int parent, unsigned int lastModificationDate );
+    Folder(const std::string& path , unsigned int parent, unsigned int lastModificationDate, bool isRemovable );
 
     static bool createTable( DBConnection connection );
-    static FolderPtr create(DBConnection connection, const std::string& path , unsigned int parent, unsigned int lastModifDate);
+    static FolderPtr create(DBConnection connection, const std::string& path , unsigned int parent, unsigned int lastModifDate, bool isRemovable);
 
     virtual unsigned int id() const override;
     virtual const std::string& path() override;
@@ -43,6 +43,7 @@ public:
     virtual FolderPtr parent() override;
     virtual unsigned int lastModificationDate() override;
     virtual bool setLastModificationDate(unsigned int lastModificationDate) override;
+    virtual bool isRemovable() override;
 
 private:
     DBConnection m_dbConection;
@@ -51,6 +52,7 @@ private:
     std::string m_path;
     unsigned int m_parent;
     unsigned int m_lastModificationDate;
+    bool m_isRemovable;
 
     friend _Cache;
     friend struct policy::FolderTable;

@@ -72,6 +72,7 @@ public:
         : m_path( path )
         , m_parent( parent )
         , m_lastModificationDate( lastModif )
+        , m_isRemovable( false )
     {
     }
 
@@ -139,12 +140,23 @@ public:
         m_lastModificationDate++;
     }
 
+    virtual bool isRemovable() const override
+    {
+        return m_isRemovable;
+    }
+
+    void markRemovable()
+    {
+        m_isRemovable = true;
+    }
+
 private:
     std::string m_path;
     std::vector<std::string> m_files;
     std::vector<std::string> m_dirs;
     std::shared_ptr<mock::Directory> m_parent;
     unsigned int m_lastModificationDate;
+    bool m_isRemovable;
 };
 
 
@@ -481,4 +493,21 @@ TEST_F( Folders, UpdateFile )
     // The file is expected to be deleted and re-added since it changed, so the
     // id should have changed
     ASSERT_NE( id, f->id() );
+}
+
+// This simply tests that the flag is properly stored in db
+TEST_F( Folders, CheckRemovable )
+{
+    fsMock->dirs[mock::FileSystemFactory::SubFolder]->markRemovable();
+    auto f = ml->addFolder( "." );
+    ASSERT_FALSE( f->isRemovable() );
+    auto subfolder = ml->folder( mock::FileSystemFactory::SubFolder );
+    ASSERT_TRUE( subfolder->isRemovable() );
+
+    Reload();
+
+    f = ml->folder( mock::FileSystemFactory::Root );
+    ASSERT_FALSE( f->isRemovable() );
+    subfolder = ml->folder( mock::FileSystemFactory::SubFolder );
+    ASSERT_TRUE( subfolder->isRemovable() );
 }

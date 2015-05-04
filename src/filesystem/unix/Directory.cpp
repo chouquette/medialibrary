@@ -41,6 +41,12 @@ unsigned int Directory::lastModificationDate() const
     return m_lastModificationDate;
 }
 
+bool Directory::isRemovable() const
+{
+    //FIXME
+    return false;
+}
+
 std::string Directory::toAbsolute(const std::string& path)
 {
     auto abs = std::unique_ptr<char[]>( new char[PATH_MAX] );

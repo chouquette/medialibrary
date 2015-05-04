@@ -28,12 +28,14 @@ Folder::Folder( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_path = sqlite::Traits<std::string>::Load( stmt, 1 );
     m_parent = sqlite::Traits<unsigned int>::Load( stmt, 2 );
     m_lastModificationDate = sqlite::Traits<unsigned int>::Load( stmt, 3 );
+    m_isRemovable = sqlite::Traits<bool>::Load( stmt, 4 );
 }
 
-Folder::Folder( const std::string& path, unsigned int parent, unsigned int lastModificationDate )
+Folder::Folder( const std::string& path, unsigned int parent, unsigned int lastModificationDate, bool isRemovable )
     : m_path( path )
     , m_parent( parent )
     , m_lastModificationDate( lastModificationDate )
+    , m_isRemovable( isRemovable )
 {
 }
 
@@ -45,18 +47,19 @@ bool Folder::createTable(DBConnection connection)
             "path TEXT UNIQUE ON CONFLICT FAIL,"
             "id_parent UNSIGNED INTEGER,"
             "last_modification_date UNSIGNED INTEGER,"
+            "is_removable INTEGER,"
             "FOREIGN KEY (id_parent) REFERENCES " + policy::FolderTable::Name +
             "(id_folder) ON DELETE CASCADE"
             ")";
     return sqlite::Tools::executeRequest( connection, req );
 }
 
-FolderPtr Folder::create(DBConnection connection, const std::string& path, unsigned int parent, unsigned int lastModifDate )
+FolderPtr Folder::create(DBConnection connection, const std::string& path, unsigned int parent, unsigned int lastModifDate, bool isRemovable )
 {
-    auto self = std::make_shared<Folder>( path, parent, lastModifDate );
+    auto self = std::make_shared<Folder>( path, parent, lastModifDate, isRemovable );
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
-            "(path, id_parent, last_modification_date) VALUES(?, ?, ?)";
-    if ( _Cache::insert( connection, self, req, path, sqlite::ForeignKey( parent ), lastModifDate ) == false )
+            "(path, id_parent, last_modification_date, is_removable) VALUES(?, ?, ?, ?)";
+    if ( _Cache::insert( connection, self, req, path, sqlite::ForeignKey( parent ), lastModifDate, isRemovable ) == false )
         return nullptr;
     self->m_dbConection = connection;
     return self;
@@ -107,4 +110,9 @@ bool Folder::setLastModificationDate( unsigned int lastModificationDate )
         return false;
     m_lastModificationDate = lastModificationDate;
     return true;
+}
+
+bool Folder::isRemovable()
+{
+    return m_isRemovable;
 }

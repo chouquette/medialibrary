@@ -14,6 +14,7 @@ public:
     virtual const std::vector<std::string>& files() const override;
     virtual const std::vector<std::string>& dirs() const override;
     virtual unsigned int lastModificationDate() const override;
+    virtual bool isRemovable() const override;
 
 private:
     static std::string toAbsolute( const std::string& path );
