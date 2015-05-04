@@ -135,7 +135,7 @@ FolderPtr MediaLibrary::addFolder( const std::string& path )
             continue;
         }
 
-        auto folder = Folder::create( m_dbConnection, dir->path(), currentFolder.second, dir->lastModificationDate(), dir->isRemovable() );
+        auto folder = Folder::create( m_dbConnection, dir.get(), currentFolder.second );
         if ( folder == nullptr && root == nullptr )
             return nullptr;
         if ( root == nullptr )

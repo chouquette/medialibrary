@@ -7,6 +7,11 @@
 
 class Folder;
 
+namespace fs
+{
+    class IDirectory;
+}
+
 namespace policy
 {
 struct FolderTable
@@ -31,10 +36,10 @@ class Folder : public IFolder, public Cache<Folder, IFolder, policy::FolderTable
 
 public:
     Folder(DBConnection dbConnection, sqlite3_stmt* stmt);
-    Folder(const std::string& path , unsigned int parent, unsigned int lastModificationDate, bool isRemovable );
+    Folder(const fs::IDirectory* dir , unsigned int parent);
 
     static bool createTable( DBConnection connection );
-    static FolderPtr create(DBConnection connection, const std::string& path , unsigned int parent, unsigned int lastModifDate, bool isRemovable);
+    static FolderPtr create(DBConnection connection, const fs::IDirectory* dir , unsigned int parentId);
 
     virtual unsigned int id() const override;
     virtual const std::string& path() override;

@@ -2,6 +2,7 @@
 #include "File.h"
 
 #include "database/SqliteTools.h"
+#include "filesystem/IDirectory.h"
 
 namespace policy
 {
@@ -31,11 +32,11 @@ Folder::Folder( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_isRemovable = sqlite::Traits<bool>::Load( stmt, 4 );
 }
 
-Folder::Folder( const std::string& path, unsigned int parent, unsigned int lastModificationDate, bool isRemovable )
-    : m_path( path )
+Folder::Folder( const fs::IDirectory* dir, unsigned int parent )
+    : m_path( dir->path() )
     , m_parent( parent )
-    , m_lastModificationDate( lastModificationDate )
-    , m_isRemovable( isRemovable )
+    , m_lastModificationDate( dir->lastModificationDate() )
+    , m_isRemovable( dir->isRemovable() )
 {
 }
 
@@ -54,12 +55,13 @@ bool Folder::createTable(DBConnection connection)
     return sqlite::Tools::executeRequest( connection, req );
 }
 
-FolderPtr Folder::create(DBConnection connection, const std::string& path, unsigned int parent, unsigned int lastModifDate, bool isRemovable )
+FolderPtr Folder::create( DBConnection connection, const fs::IDirectory* dir, unsigned int parentId )
 {
-    auto self = std::make_shared<Folder>( path, parent, lastModifDate, isRemovable );
+    auto self = std::make_shared<Folder>( dir, parentId );
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
             "(path, id_parent, last_modification_date, is_removable) VALUES(?, ?, ?, ?)";
-    if ( _Cache::insert( connection, self, req, path, sqlite::ForeignKey( parent ), lastModifDate, isRemovable ) == false )
+    if ( _Cache::insert( connection, self, req, dir->path(), sqlite::ForeignKey( parentId ),
+                         dir->lastModificationDate(), dir->isRemovable() ) == false )
         return nullptr;
     self->m_dbConection = connection;
     return self;
