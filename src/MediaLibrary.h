@@ -37,7 +37,7 @@ class MediaLibrary : public IMediaLibrary
         virtual MoviePtr movie( const std::string& title );
         virtual MoviePtr createMovie( const std::string& title );
 
-        virtual void addMetadataService( IMetadataService* service );
+        virtual void addMetadataService( std::unique_ptr<IMetadataService> service );
         virtual void parse( FilePtr file, IParserCb* cb );
 
     private:

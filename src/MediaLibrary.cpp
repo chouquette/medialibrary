@@ -227,10 +227,10 @@ MoviePtr MediaLibrary::createMovie( const std::string& title )
     return Movie::create( m_dbConnection, title );
 }
 
-void MediaLibrary::addMetadataService(IMetadataService* service)
+void MediaLibrary::addMetadataService(std::unique_ptr<IMetadataService> service)
 {
     service->initialize( m_parser.get(), this );
-    m_parser->addService( service );
+    m_parser->addService( std::move( service ) );
 }
 
 void MediaLibrary::parse(FilePtr file , IParserCb* cb)

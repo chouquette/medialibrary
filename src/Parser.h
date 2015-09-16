@@ -18,7 +18,7 @@ class Parser : public IMetadataServiceCb
     public:
         Parser();
         ~Parser();
-        void addService( IMetadataService* service );
+        void addService(std::unique_ptr<IMetadataService> service );
         void parse( FilePtr file, IParserCb* cb );
 
 

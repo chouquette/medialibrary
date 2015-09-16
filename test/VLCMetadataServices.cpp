@@ -59,11 +59,10 @@ class VLCMetadataServices : public Tests
                 "-vv"
             };
             VLC::Instance vlcInstance( sizeof(args) / sizeof(args[0]), args );
-            auto vlcService = new VLCMetadataService( vlcInstance );
+            auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService( vlcInstance ) );
 
             // This takes ownership of vlcService
-            //FIXME: This sucks because ownership isn't expressed properly...
-            ml->addMetadataService( vlcService );
+            ml->addMetadataService( std::move( vlcService ) );
         }
 };
 

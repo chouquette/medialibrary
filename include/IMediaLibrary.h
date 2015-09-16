@@ -10,7 +10,7 @@
 class IParserCb
 {
     public:
-        virtual ~IParserCb() {}
+        virtual ~IParserCb() = default;
 
         /**
          * @brief onServiceDone will be called after each MetadataService completes
@@ -71,7 +71,7 @@ class IMediaLibrary
          * This method will call service->initialize(), therefor the passed ServiceStatus
          * is expected to be uninitialized.
          */
-        virtual void addMetadataService( IMetadataService* service ) = 0;
+        virtual void addMetadataService( std::unique_ptr<IMetadataService> service ) = 0;
         virtual void parse( FilePtr file, IParserCb* cb ) = 0;
 };
 

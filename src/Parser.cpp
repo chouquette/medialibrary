@@ -21,15 +21,14 @@ Parser::~Parser()
     m_thread->join();
 }
 
-void Parser::addService(IMetadataService* service)
+void Parser::addService(std::unique_ptr<IMetadataService> service)
 {
-    std::function<bool(const ServicePtr&, const ServicePtr&)> comp = []( const ServicePtr& a, const ServicePtr& b )
+    m_services.push_back( std::move( service ) );
+    std::push_heap( m_services.begin(), m_services.end(), []( const ServicePtr& a, const ServicePtr& b )
     {
         // We want higher priority first
         return a->priority() > b->priority();
-    };
-    m_services.push_back( ServicePtr( service ) );
-    std::push_heap( m_services.begin(), m_services.end(), comp );
+    });
 }
 
 void Parser::parse(FilePtr file, IParserCb* cb)
