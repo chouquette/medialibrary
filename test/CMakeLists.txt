@@ -51,6 +51,7 @@ add_dependencies(unittest gtest-dependency)
 
 target_link_libraries(unittest medialibrary)
 target_link_libraries(unittest gtest gtest_main)
+include_directories(${LIBVLCPP_DIR})
 # Also add pthread, as gtest requires it
 if(UNIX)
     target_link_libraries(unittest "pthread")

@@ -13,7 +13,7 @@ class IMetadataServiceCb
 class IMetadataService
 {
     public:
-        virtual ~IMetadataService() {}
+        virtual ~IMetadataService() = default;
         virtual bool initialize( IMetadataServiceCb* callback, IMediaLibrary* ml ) = 0;
         virtual unsigned int priority() const = 0;
         virtual bool run( FilePtr file, void* data ) = 0;

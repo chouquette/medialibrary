@@ -1,5 +1,4 @@
 #include "Tests.h"
-#include <vlc/vlc.h>
 #include <chrono>
 #include <condition_variable>
 
@@ -59,11 +58,11 @@ class VLCMetadataServices : public Tests
             const char* args[] = {
                 "-vv"
             };
-            auto vlcInstance = VLC::Instance::create( sizeof(args) / sizeof(args[0]), args );
-            ASSERT_TRUE( vlcInstance.isValid() );
+            VLC::Instance vlcInstance( sizeof(args) / sizeof(args[0]), args );
             auto vlcService = new VLCMetadataService( vlcInstance );
 
             // This takes ownership of vlcService
+            //FIXME: This sucks because ownership isn't expressed properly...
             ml->addMetadataService( vlcService );
         }
 };
