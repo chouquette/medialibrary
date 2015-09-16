@@ -69,11 +69,9 @@ find_package(Sqlite3 REQUIRED)
 add_library(${PROJECT_NAME} ${SRC_LIST})
 target_link_libraries(${PROJECT_NAME} ${SQLITE3_LIBRARIES})
 
-
 find_package(LIBVLC REQUIRED)
 target_link_libraries( ${PROJECT_NAME} ${LIBVLC_LIBRARY} ${LIBVLCCORE_LIBRARY} )
 include_directories(${LIBVLC_INCLUDE_DIR})
 
-find_package(vlcpp 2.2.0 REQUIRED)
-target_link_libraries( ${PROJECT_NAME} ${LIBVLCPP_LIBRARIES})
-include_directories(${LIBVLCPP_INCLUDE_DIR})
+set(LIBVLCPP_DIR "" CACHE PATH "Path to libvlcpp's directory")
+include_directories(${LIBVLCPP_DIR})
