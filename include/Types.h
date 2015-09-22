@@ -5,6 +5,8 @@
 
 class IAlbum;
 class IAlbumTrack;
+class IAudioTrack;
+class IDiscoverer;
 class IFile;
 class IFolder;
 class ILabel;
@@ -12,7 +14,6 @@ class IMetadataService;
 class IMovie;
 class IShow;
 class IShowEpisode;
-class IAudioTrack;
 class IVideoTrack;
 
 struct sqlite3;

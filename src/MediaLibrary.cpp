@@ -1,7 +1,5 @@
 #include <algorithm>
 #include <functional>
-#include <queue>
-
 #include "Album.h"
 #include "AlbumTrack.h"
 #include "AudioTrack.h"
@@ -20,7 +18,6 @@
 
 #include "filesystem/IDirectory.h"
 #include "filesystem/IFile.h"
-
 #include "factory/FileSystem.h"
 
 const std::vector<std::string> MediaLibrary::supportedExtensions {
@@ -90,7 +87,6 @@ bool MediaLibrary::initialize( const std::string& dbPath, std::shared_ptr<factor
     return loadFolders();
 }
 
-
 std::vector<FilePtr> MediaLibrary::files()
 {
     return File::fetchAll( m_dbConnection );
@@ -108,48 +104,6 @@ FilePtr MediaLibrary::addFile( const std::string& path )
     if ( file == nullptr )
         return nullptr;
     return file;
-}
-
-FolderPtr MediaLibrary::addFolder( const std::string& path )
-{
-    std::queue<std::pair<std::string, unsigned int>> folders;
-    FolderPtr root;
-
-    folders.emplace( path, 0 );
-    while ( folders.empty() == false )
-    {
-        std::unique_ptr<fs::IDirectory> dir;
-        auto currentFolder = folders.front();
-        folders.pop();
-
-        try
-        {
-            dir = m_fsFactory->createDirectory( currentFolder.first );
-        }
-        catch ( std::runtime_error& )
-        {
-            // If the first directory fails to open, stop now.
-            // Otherwise, assume something went wrong in a subdirectory.
-            if (root == nullptr)
-                return nullptr;
-            continue;
-        }
-
-        auto folder = Folder::create( m_dbConnection, dir.get(), currentFolder.second );
-        if ( folder == nullptr && root == nullptr )
-            return nullptr;
-        if ( root == nullptr )
-            root = folder;
-
-        for ( auto& f : dir->files() )
-        {
-            auto fsFile = m_fsFactory->createFile( f );
-            addFile( fsFile.get(), folder->id() );
-        }
-        for ( auto& f : dir->dirs() )
-            folders.emplace( f, folder->id() );
-    }
-    return root;
 }
 
 FolderPtr MediaLibrary::folder( const std::string& path )
@@ -238,17 +192,41 @@ void MediaLibrary::parse(FilePtr file , IParserCb* cb)
     m_parser->parse( file, cb );
 }
 
+void MediaLibrary::addDiscoverer(std::unique_ptr<IDiscoverer> discoverer)
+{
+    m_discoverers.emplace_back( std::move( discoverer ) );
+}
+
+void MediaLibrary::discover( const std::string &entryPoint )
+{
+    for ( auto& d : m_discoverers )
+        d->discover( entryPoint );
+}
+
+FolderPtr MediaLibrary::onNewFolder( const fs::IDirectory* directory, FolderPtr parent )
+{
+    //FIXME: Since we insert files/folders with a UNIQUE constraint, maybe we should
+    //just let sqlite try to insert, throw an exception in case the contraint gets violated
+    //catch it and return nullptr from here.
+    //We previously were fetching the folder manually here, but that triggers an eroneous entry
+    //in the cache. This might also be something to fix...
+    return Folder::create( m_dbConnection, directory,
+                        parent == nullptr ? 0 : parent->id() );
+}
+
+FilePtr MediaLibrary::onNewFile( const fs::IFile *file, FolderPtr parent )
+{
+    //FIXME: Same uniqueness comment as onNewFolder above.
+    return addFile( file, parent == nullptr ? 0 : parent->id() );
+}
+
 bool MediaLibrary::loadFolders()
 {
     //FIXME: This should probably be in a sql transaction
+    //FIXME: This shouldn't be done for "removable"/network files
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
             + " WHERE id_parent IS NULL";
     auto rootFolders = sqlite::Tools::fetchAll<Folder, IFolder>( m_dbConnection, req );
-    if ( rootFolders.size() == 0 )
-    {
-        std::cout << "No folders in DB" << std::endl;
-        return true;
-    }
     for ( const auto f : rootFolders )
     {
         std::cout << "Checking " << f->path();
@@ -289,7 +267,9 @@ bool MediaLibrary::checkSubfolders( fs::IDirectory* folder, unsigned int parentI
         if ( it == end( subFoldersInDB ) )
         {
             std::cout << "New folder detected" << std::endl;
-            addFolder( subFolderPath );
+            //FIXME: In order to add the new folder, we need to use the same discoverer.
+            // This probably means we need to store which discoverer was used to add which file
+            // and store discoverers as a map instead of a vector
             continue;
         }
         auto subFolder = m_fsFactory->createDirectory( subFolderPath );
@@ -350,16 +330,17 @@ void MediaLibrary::checkFiles( fs::IDirectory* folder, unsigned int parentId )
     }
 }
 
-bool MediaLibrary::addFile( const fs::IFile* file, unsigned int folderId )
+FilePtr MediaLibrary::addFile( const fs::IFile* file, unsigned int folderId )
 {
     if ( std::find( begin( supportedExtensions ), end( supportedExtensions ),
                     file->extension() ) == end( supportedExtensions ) )
         return false;
-    if ( File::create( m_dbConnection, file, folderId ) == nullptr )
+    auto fptr = File::create( m_dbConnection, file, folderId );
+    if ( fptr == nullptr )
     {
         std::cerr << "Failed to add file " << file->fullPath() << " to the media library" << std::endl;
-        return false;
+        return nullptr;
     }
-    return true;
+    return fptr;
 }
 

@@ -6,6 +6,7 @@ class Parser;
 #include <sqlite3.h>
 
 #include "IMediaLibrary.h"
+#include "IDiscoverer.h"
 
 class MediaLibrary : public IMediaLibrary
 {
@@ -20,7 +21,6 @@ class MediaLibrary : public IMediaLibrary
         virtual bool deleteFile( const std::string& mrl );
         virtual bool deleteFile( FilePtr file );
 
-        virtual FolderPtr addFolder( const std::string& path ) override;
         virtual FolderPtr folder( const std::string& path ) override;
         virtual bool deleteFolder( FolderPtr folder ) override;
 
@@ -40,6 +40,12 @@ class MediaLibrary : public IMediaLibrary
         virtual void addMetadataService( std::unique_ptr<IMetadataService> service );
         virtual void parse( FilePtr file, IParserCb* cb );
 
+        virtual void addDiscoverer( std::unique_ptr<IDiscoverer> discoverer ) override;
+        virtual void discover( const std::string& entryPoint ) override;
+        // IDiscovererCb implementation
+        virtual FolderPtr onNewFolder( const fs::IDirectory* directory, FolderPtr parent ) override;
+        virtual FilePtr onNewFile(const fs::IFile* file, FolderPtr parent ) override;
+
     private:
         static const std::vector<std::string> supportedExtensions;
 
@@ -47,11 +53,12 @@ class MediaLibrary : public IMediaLibrary
         bool loadFolders();
         bool checkSubfolders( fs::IDirectory* folder, unsigned int parentId );
         void checkFiles( fs::IDirectory* folder, unsigned int parentId );
-        bool addFile( const fs::IFile* file, unsigned int folderId );
+        FilePtr addFile( const fs::IFile* file, unsigned int folderId );
 
     private:
         std::shared_ptr<sqlite3> m_dbConnection;
         std::unique_ptr<Parser> m_parser;
         std::shared_ptr<factory::IFileSystem> m_fsFactory;
+        std::vector<std::unique_ptr<IDiscoverer>> m_discoverers;
 };
 #endif // MEDIALIBRARY_H

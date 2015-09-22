@@ -2,6 +2,7 @@
 #include "filesystem/IFile.h"
 #include "filesystem/IDirectory.h"
 #include "Utils.h"
+#include "discoverer/FsDiscoverer.h"
 
 class TestEnv : public ::testing::Environment
 {
@@ -85,7 +86,12 @@ void Tests::TearDown()
 void Tests::Reload(std::shared_ptr<factory::IFileSystem> fs /* = nullptr */ )
 {
     ml.reset( MediaLibraryFactory::create() );
-    bool res = ml->initialize( "test.db", fs ? fs : defaultFs );
+    if ( fs != nullptr )
+    {
+        std::unique_ptr<IDiscoverer> discoverer( new FsDiscoverer( fs, ml.get() ) );
+        ml->addDiscoverer( std::move( discoverer ) );
+    }
+    bool res = ml->initialize( "test.db", fs );
     ASSERT_TRUE( res );
 }
 

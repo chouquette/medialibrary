@@ -6,6 +6,7 @@
 
 #include "Types.h"
 #include "factory/IFileSystem.h"
+#include "IDiscoverer.h"
 
 class IParserCb
 {
@@ -28,18 +29,18 @@ class IParserCb
         virtual void onFileDone( FilePtr file ) = 0;
 };
 
-class IMediaLibrary
+class IMediaLibrary : public IDiscovererCb
 {
     public:
         virtual ~IMediaLibrary() {}
         ///
-        /// \brief initialize Initializes the media library.
+        /// \brief  initialize Initializes the media library.
+        ///         This will use the provided discoverer to search for new media asynchronously.
+        ///
         /// \param dbPath       Path to the database
-        /// \param fsFactory    An instance to a filesystem factory.
-        ///                     In case this is a nullptr, a default factory will be used
         /// \return true in case of success, false otherwise
         ///
-        virtual bool initialize( const std::string& dbPath, std::shared_ptr<factory::IFileSystem> fsFactory = nullptr ) = 0;
+        virtual bool initialize( const std::string& dbPath, std::shared_ptr<factory::IFileSystem> fsFactory ) = 0;
         /// Adds a stand alone file
         virtual FilePtr addFile( const std::string& path ) = 0;
         virtual FilePtr file( const std::string& path ) = 0;
@@ -47,10 +48,8 @@ class IMediaLibrary
         virtual bool deleteFile( FilePtr file ) = 0;
 
         /// Adds a folder and all the files it contains
-        virtual FolderPtr addFolder( const std::string& path ) = 0;
         virtual FolderPtr folder( const std::string& path ) = 0;
         virtual bool deleteFolder( FolderPtr folder ) = 0;
-
 
         virtual LabelPtr createLabel( const std::string& label ) = 0;
         virtual bool deleteLabel( const std::string& label ) = 0;
@@ -73,6 +72,15 @@ class IMediaLibrary
          */
         virtual void addMetadataService( std::unique_ptr<IMetadataService> service ) = 0;
         virtual void parse( FilePtr file, IParserCb* cb ) = 0;
+
+        virtual void addDiscoverer( std::unique_ptr<IDiscoverer> discoverer ) = 0;
+        /**
+         * @brief discover Launch a discovery on the provided entry point.
+         * There no garanty on how this will be processed, or if it will be processed synchronously or not.
+         * Depending on which discoverer modules where provided, this might or might not work
+         * @param entryPoint What to discover.
+         */
+        virtual void discover( const std::string& entryPoint ) = 0;
 };
 
 class MediaLibraryFactory

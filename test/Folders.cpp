@@ -264,8 +264,7 @@ class Folders : public Tests
 
 TEST_F( Folders, Add )
 {
-    auto f = ml->addFolder( "." );
-    ASSERT_NE( f, nullptr );
+    ml->discover( "." );
 
     auto files = ml->files();
 
@@ -275,9 +274,9 @@ TEST_F( Folders, Add )
 
 TEST_F( Folders, Delete )
 {
-    auto f = ml->addFolder( "." );
-    ASSERT_NE( f, nullptr );
+    ml->discover( "." );
 
+    auto f = ml->folder( mock::FileSystemFactory::Root );
     auto folderPath = f->path();
 
     auto files = ml->files();
@@ -306,8 +305,7 @@ TEST_F( Folders, Delete )
 
 TEST_F( Folders, Load )
 {
-    auto f = ml->addFolder( "." );
-    ASSERT_NE( f, nullptr );
+    ml->discover( "." );
 
     Reload();
 
@@ -319,8 +317,7 @@ TEST_F( Folders, Load )
 
 TEST_F( Folders, InvalidPath )
 {
-    auto f = ml->addFolder( "/invalid/path" );
-    ASSERT_EQ( f, nullptr );
+    ml->discover( "/invalid/path" );
 
     auto files = ml->files();
     ASSERT_EQ( files.size(), 0u );
@@ -328,9 +325,9 @@ TEST_F( Folders, InvalidPath )
 
 TEST_F( Folders, List )
 {
-    auto f = ml->addFolder( "." );
-    ASSERT_NE( f, nullptr );
+    ml->discover( "." );
 
+    auto f = ml->folder( mock::FileSystemFactory::Root );
     auto files = f->files();
     ASSERT_EQ( files.size(), 2u );
 
@@ -343,13 +340,15 @@ TEST_F( Folders, List )
 
 TEST_F( Folders, AbsolutePath )
 {
-    auto f = ml->addFolder( "." );
-    ASSERT_NE( f->path(), "." );
+    ml->discover( "." );
+    auto f = ml->folder( "." );
+    ASSERT_EQ( f, nullptr );
 }
 
 TEST_F( Folders, ListFolders )
 {
-    auto f = ml->addFolder( "." );
+    ml->discover( "." );
+    auto f = ml->folder( mock::FileSystemFactory::Root );
     auto subFolders = f->folders();
     ASSERT_EQ( 1u, subFolders.size() );
 
@@ -377,7 +376,8 @@ TEST_F( Folders, ListFolders )
 
 TEST_F( Folders, LastModificationDate )
 {
-    auto f = ml->addFolder( "." );
+    ml->discover( "." );
+    auto f = ml->folder( mock::FileSystemFactory::Root );
     ASSERT_NE( 0u, f->lastModificationDate() );
     auto subFolders = f->folders();
     ASSERT_NE( 0u, subFolders[0]->lastModificationDate() );
@@ -392,7 +392,7 @@ TEST_F( Folders, LastModificationDate )
 
 TEST_F( Folders, NewFolderWithFile )
 {
-    ml->addFolder( "." );
+    ml->discover( "." );
 
     ASSERT_EQ( 3u, ml->files().size() );
     // Do not watch for live changes
@@ -410,7 +410,8 @@ TEST_F( Folders, NewFolderWithFile )
 
 TEST_F( Folders, NewFileInSubFolder )
 {
-    auto f = ml->addFolder( "." );
+    ml->discover( "." );
+    auto f = ml->folder( mock::FileSystemFactory::Root );
     ASSERT_EQ( 3u, ml->files().size() );
 
     f = ml->folder( mock::FileSystemFactory::SubFolder );
@@ -432,7 +433,7 @@ TEST_F( Folders, NewFileInSubFolder )
 
 TEST_F( Folders, RemoveFileFromDirectory )
 {
-    ml->addFolder( "." );
+    ml->discover( "." );
 
     ASSERT_EQ( 3u, ml->files().size() );
     // Do not watch for live changes
@@ -450,7 +451,7 @@ TEST_F( Folders, RemoveFileFromDirectory )
 
 TEST_F( Folders, RemoveDirectory )
 {
-    ml->addFolder( "." );
+    ml->discover( "." );
 
     ASSERT_EQ( 3u, ml->files().size() );
     // Do not watch for live changes
@@ -468,7 +469,7 @@ TEST_F( Folders, RemoveDirectory )
 
 TEST_F( Folders, UpdateFile )
 {
-    ml->addFolder( "." );
+    ml->discover( "." );
     auto filePath = std::string{ mock::FileSystemFactory::SubFolder } + "subfile.mp4";
     auto f = ml->file( filePath );
     auto id = f->id();
@@ -489,7 +490,8 @@ TEST_F( Folders, UpdateFile )
 TEST_F( Folders, CheckRemovable )
 {
     fsMock->dirs[mock::FileSystemFactory::SubFolder]->markRemovable();
-    auto f = ml->addFolder( "." );
+    ml->discover( "." );
+    auto f = ml->folder( mock::FileSystemFactory::Root );
     ASSERT_FALSE( f->isRemovable() );
     auto subfolder = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_TRUE( subfolder->isRemovable() );

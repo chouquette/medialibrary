@@ -22,17 +22,19 @@ list(APPEND HEADERS_LIST
     ${CMAKE_SOURCE_DIR}/include/IAudioTrack.h
     ${CMAKE_SOURCE_DIR}/include/IVideoTrack.h
     ${CMAKE_SOURCE_DIR}/include/IMovie.h
+    ${CMAKE_SOURCE_DIR}/include/IDiscoverer.h
+    ${CMAKE_SOURCE_DIR}/include/filesystem/IDirectory.h
+    ${CMAKE_SOURCE_DIR}/include/filesystem/IFile.h
 
     ${CMAKE_SOURCE_DIR}/include/factory/IFileSystem.h
 
     database/Cache.h
     database/SqliteTools.h
 
-    filesystem/IDirectory.h
-    filesystem/IFile.h
-
     filesystem/${ARCH_FOLDER}/Directory.h
     filesystem/${ARCH_FOLDER}/File.h
+
+    discoverer/FsDiscoverer.h
 
     factory/FileSystem.h
     Utils.h
@@ -61,6 +63,9 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     factory/FileSystem.cpp
     filesystem/${ARCH_FOLDER}/Directory.cpp
     filesystem/${ARCH_FOLDER}/File.cpp
+
+    discoverer/FsDiscoverer.cpp
+
     Utils.cpp
 )
 
