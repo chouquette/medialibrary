@@ -44,6 +44,8 @@ list(APPEND TEST_SRCS
     AudioTracks.cpp
     VLCMetadataServices.cpp
     FsUtilsTests.cpp
+
+    mocks/FileSystem.h
 )
 
 add_executable(unittest ${TEST_SRCS})
