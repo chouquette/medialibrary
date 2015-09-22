@@ -173,6 +173,7 @@ TEST_F( Folders, NewFolderWithFile )
     ASSERT_NE( nullptr, file );
 }
 
+// This is expected to fail until we fix the file system modifications detection
 TEST_F( Folders, NewFileInSubFolder )
 {
     ml->discover( "." );
