@@ -229,14 +229,9 @@ bool MediaLibrary::loadFolders()
     auto rootFolders = sqlite::Tools::fetchAll<Folder, IFolder>( m_dbConnection, req );
     for ( const auto f : rootFolders )
     {
-        std::cout << "Checking " << f->path();
         auto folder = m_fsFactory->createDirectory( f->path() );
         if ( folder->lastModificationDate() == f->lastModificationDate() )
-        {
-            std::cout << " ... no modifications" << std::endl;
             continue;
-        }
-        std::cout << "... changes detected" << std::endl;
         checkSubfolders( folder.get(), f->id() );
         f->setLastModificationDate( folder->lastModificationDate() );
     }
@@ -259,14 +254,12 @@ bool MediaLibrary::checkSubfolders( fs::IDirectory* folder, unsigned int parentI
     auto subFoldersInDB = sqlite::Tools::fetchAll<Folder, IFolder>( m_dbConnection, req, parentId );
     for ( const auto& subFolderPath : folder->dirs() )
     {
-        std::cout << "Folder from FS: " << subFolderPath << "... ";
         auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [subFolderPath](const std::shared_ptr<IFolder>& f) {
             return f->path() == subFolderPath;
         });
         // We don't know this folder, it's a new one
         if ( it == end( subFoldersInDB ) )
         {
-            std::cout << "New folder detected" << std::endl;
             //FIXME: In order to add the new folder, we need to use the same discoverer.
             // This probably means we need to store which discoverer was used to add which file
             // and store discoverers as a map instead of a vector
@@ -275,14 +268,12 @@ bool MediaLibrary::checkSubfolders( fs::IDirectory* folder, unsigned int parentI
         auto subFolder = m_fsFactory->createDirectory( subFolderPath );
         if ( subFolder->lastModificationDate() == (*it)->lastModificationDate() )
         {
-            std::cout << "No changes detected" << std::endl;
             // Remove all folders that still exist in FS. That way, the list of folders that
             // will still be in subFoldersInDB when we're done is the list of folders that have
             // been deleted from the FS
             subFoldersInDB.erase( it );
             continue;
         }
-        std::cout << "Changes detected, checking its children" << std::endl;
         // This folder was modified, let's recurse
         checkSubfolders( subFolder.get(), (*it)->id() );
         checkFiles( subFolder.get(), (*it)->id() );
