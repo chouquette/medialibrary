@@ -15,9 +15,9 @@ class VLCMetadataService : public IMetadataService
         virtual bool run( FilePtr file, void *data );
 
     private:
-        ServiceStatus handleMediaMeta(FilePtr file , VLC::Media &media);
-        bool parseAudioFile(FilePtr file , VLC::Media &media);
-        bool parseVideoFile(FilePtr file , VLC::Media &media);
+        ServiceStatus handleMediaMeta(FilePtr file , VLC::Media &media) const;
+        bool parseAudioFile(FilePtr file , VLC::Media &media) const;
+        bool parseVideoFile(FilePtr file , VLC::Media &media) const;
 
         VLC::Instance m_instance;
         IMetadataServiceCb* m_cb;

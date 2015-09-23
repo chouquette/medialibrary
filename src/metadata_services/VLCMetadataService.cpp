@@ -47,7 +47,7 @@ bool VLCMetadataService::run( FilePtr file, void* data )
     return true;
 }
 
-ServiceStatus VLCMetadataService::handleMediaMeta( FilePtr file, VLC::Media& media )
+ServiceStatus VLCMetadataService::handleMediaMeta( FilePtr file, VLC::Media& media ) const
 {
     auto tracks = media.tracks();
     if ( tracks.size() == 0 )
@@ -87,7 +87,7 @@ ServiceStatus VLCMetadataService::handleMediaMeta( FilePtr file, VLC::Media& med
     return StatusSuccess;
 }
 
-bool VLCMetadataService::parseAudioFile( FilePtr file, VLC::Media& media )
+bool VLCMetadataService::parseAudioFile( FilePtr file, VLC::Media& media ) const
 {
     auto albumTitle = media.meta( libvlc_meta_Album );
     if ( albumTitle.length() == 0 )
@@ -137,7 +137,7 @@ bool VLCMetadataService::parseAudioFile( FilePtr file, VLC::Media& media )
     return true;
 }
 
-bool VLCMetadataService::parseVideoFile( FilePtr file, VLC::Media& media )
+bool VLCMetadataService::parseVideoFile( FilePtr file, VLC::Media& media ) const
 {
     auto title = media.meta( libvlc_meta_Title );
     if ( title.length() == 0 )
