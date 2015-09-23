@@ -90,3 +90,19 @@ TEST_F( Files, Duration )
     f = ml->file( "/some/file" );
     ASSERT_EQ( f->duration(), 123u );
 }
+
+TEST_F( Files, Snapshot )
+{
+    auto f = ml->addFile( "/some/file" );
+    ASSERT_EQ( f->snapshot(), "" );
+
+    std::string newSnapshot( "/path/to/snapshot" );
+
+    f->setSnapshot( newSnapshot );
+    ASSERT_EQ( f->snapshot(), newSnapshot );
+
+    Reload();
+
+    f = ml->file( "/some/file" );
+    ASSERT_EQ( f->snapshot(), newSnapshot );
+}

@@ -64,6 +64,9 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         virtual std::vector<VideoTrackPtr> videoTracks();
         virtual bool addAudioTrack(const std::string& codec, unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels);
         virtual std::vector<AudioTrackPtr> audioTracks();
+        virtual const std::string& snapshot() override;
+        virtual bool setSnapshot( const std::string& snapshot ) override;
+
         virtual bool isStandAlone() override;
         virtual unsigned int lastModificationDate() override;
 
@@ -84,6 +87,7 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         unsigned int m_movieId;
         unsigned int m_folderId;
         unsigned int m_lastModificationDate;
+        std::string m_snapshot;
 
         // Auto fetched related properties
         Album* m_album;

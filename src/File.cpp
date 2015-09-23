@@ -32,6 +32,7 @@ File::File( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_movieId = sqlite::Traits<unsigned int>::Load( stmt, 7 );
     m_folderId = sqlite::Traits<unsigned int>::Load( stmt, 8 );
     m_lastModificationDate = sqlite::Traits<unsigned int>::Load( stmt, 9 );
+    m_snapshot = sqlite::Traits<std::string>::Load( stmt, 10 );
 
     m_isReady = m_type != UnknownType;
 }
@@ -201,6 +202,21 @@ std::vector<AudioTrackPtr> File::audioTracks()
     return sqlite::Tools::fetchAll<AudioTrack, IAudioTrack>( m_dbConnection, req, m_id );
 }
 
+const std::string &File::snapshot()
+{
+    return m_snapshot;
+}
+
+bool File::setSnapshot(const std::string &snapshot)
+{
+    static const std::string req = "UPDATE " + policy::FileTable::Name
+            + " SET snapshot = ? WHERE id_file = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, snapshot, m_id ) == false )
+        return false;
+    m_snapshot = snapshot;
+    return true;
+}
+
 bool File::isStandAlone()
 {
     return m_folderId == 0;
@@ -240,6 +256,7 @@ bool File::createTable( DBConnection connection )
             "movie_id UNSIGNED INTEGER,"
             "folder_id UNSIGNED INTEGER,"
             "last_modification_date UNSIGNED INTEGER,"
+            "snapshot TEXT,"
             "FOREIGN KEY (album_track_id) REFERENCES " + policy::AlbumTrackTable::Name
             + "(id_track) ON DELETE CASCADE,"
             "FOREIGN KEY (show_episode_id) REFERENCES " + policy::ShowEpisodeTable::Name

@@ -43,6 +43,10 @@ class IFile
         virtual bool addAudioTrack( const std::string& codec, unsigned int bitrate,
                                     unsigned int sampleRate, unsigned int nbChannels ) = 0;
         virtual std::vector<AudioTrackPtr> audioTracks() = 0;
+        // Returns the location of this file snapshot.
+        // This is likely to be used for album arts as well.
+        virtual const std::string& snapshot() = 0;
+        virtual bool setSnapshot( const std::string& snapshot ) = 0;
         /// Returns wether the file has been added as a stand alone file (true), or as
         /// part of a folder (false)
         virtual bool isStandAlone() = 0;
