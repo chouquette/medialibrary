@@ -243,6 +243,23 @@ unsigned int File::id() const
     return m_id;
 }
 
+IFile::Type File::type()
+{
+    return m_type;
+}
+
+bool File::setType( Type type )
+{
+    static const std::string req = "UPDATE " + policy::FileTable::Name
+            + " SET type = ? WHERE id_file = ?";
+    // We need to convert to an integer representation for the sqlite traits to work properly
+    using type_t = std::underlying_type<Type>::type;
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, static_cast<type_t>( type ), m_id ) == false )
+        return false;
+    m_type = type;
+    return true;
+}
+
 bool File::createTable( DBConnection connection )
 {
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::FileTable::Name + "("

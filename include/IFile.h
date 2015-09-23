@@ -24,6 +24,8 @@ class IFile
         virtual ~IFile() {}
 
         virtual unsigned int id() const = 0;
+        virtual Type type() = 0;
+        virtual bool setType( Type type ) = 0;
         virtual AlbumTrackPtr albumTrack() = 0;
         virtual bool setAlbumTrack(AlbumTrackPtr albumTrack ) = 0;
         virtual unsigned int duration() const = 0;

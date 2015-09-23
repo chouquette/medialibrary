@@ -46,6 +46,8 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         static bool createTable( DBConnection connection );
 
         virtual unsigned int id() const;
+        virtual Type type() override;
+        virtual bool setType( Type type ) override;
         virtual AlbumTrackPtr albumTrack();
         virtual bool setAlbumTrack( AlbumTrackPtr albumTrack );
         virtual unsigned int duration() const;
