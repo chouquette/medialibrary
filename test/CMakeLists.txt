@@ -48,6 +48,12 @@ list(APPEND TEST_SRCS
     mocks/FileSystem.h
 )
 
+if (${EMOTION_FOUND})
+list (APPEND TEST_SRCS
+    EmotionMetadataService_Test.cpp
+)
+endif()
+
 add_executable(unittest ${TEST_SRCS})
 add_dependencies(unittest gtest-dependency)
 

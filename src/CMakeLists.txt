@@ -4,6 +4,12 @@ cmake_minimum_required(VERSION 2.8)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 EnableCpp11()
+
+include(FindPkgConfig)
+pkg_check_modules(EMOTION emotion)
+pkg_check_modules(ECOREEVAS ecore-evas)
+pkg_check_modules(EVAS evas)
+
 add_definitions("-Wall -Wextra -pedantic")
 
 if(UNIX)
@@ -69,6 +75,12 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     Utils.cpp
 )
 
+if (${EMOTION_FOUND})
+    list(APPEND SRC_LIST
+        metadata_services/emotion/Emotion.cpp
+    )
+endif()
+
 find_package(Sqlite3 REQUIRED)
 
 add_library(${PROJECT_NAME} ${SRC_LIST})
@@ -80,3 +92,11 @@ include_directories(${LIBVLC_INCLUDE_DIR})
 
 set(LIBVLCPP_DIR "" CACHE PATH "Path to libvlcpp's directory")
 include_directories(${LIBVLCPP_DIR})
+
+if (${EMOTION_FOUND})
+    include_directories(${EMOTION_INCLUDE_DIRS})
+    include_directories(${ECOREEVAS_INCLUDE_DIRS})
+    target_link_libraries( ${PROJECT_NAME} ${EMOTION_LIBRARIES} )
+    target_link_libraries( ${PROJECT_NAME} ${ECOREEVAS_LIBRARIES} )
+    target_link_libraries( ${PROJECT_NAME} ${EVAS_LIBRARIES} )
+endif()
