@@ -104,6 +104,7 @@ ServiceStatus VLCMetadataService::handleMediaMeta( FilePtr file, VLC::Media& med
 
 bool VLCMetadataService::parseAudioFile( FilePtr file, VLC::Media& media ) const
 {
+    file->setType( IFile::Type::AudioType );
     auto albumTitle = media.meta( libvlc_meta_Album );
     if ( albumTitle.length() == 0 )
         return true;
@@ -154,6 +155,7 @@ bool VLCMetadataService::parseAudioFile( FilePtr file, VLC::Media& media ) const
 
 bool VLCMetadataService::parseVideoFile( FilePtr file, VLC::Media& media ) const
 {
+    file->setType( IFile::Type::VideoType );
     auto title = media.meta( libvlc_meta_Title );
     if ( title.length() == 0 )
         return true;
