@@ -76,3 +76,17 @@ TEST_F( Files, LastModificationDate )
     auto f2 = ml->file( "/dev/seaotter" );
     ASSERT_EQ( f->lastModificationDate(), f2->lastModificationDate() );
 }
+
+TEST_F( Files, Duration )
+{
+    auto f = ml->addFile( "/some/file" );
+    ASSERT_EQ( f->duration(), 0u );
+
+    f->setDuration( 123u );
+    ASSERT_EQ( f->duration(), 123u );
+
+    Reload();
+
+    f = ml->file( "/some/file" );
+    ASSERT_EQ( f->duration(), 123u );
+}

@@ -49,6 +49,7 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         virtual AlbumTrackPtr albumTrack();
         virtual bool setAlbumTrack( AlbumTrackPtr albumTrack );
         virtual unsigned int duration() const;
+        virtual bool setDuration( unsigned int duration) override;
         virtual std::shared_ptr<IShowEpisode> showEpisode();
         virtual bool setShowEpisode( ShowEpisodePtr showEpisode );
         virtual bool addLabel( LabelPtr label );

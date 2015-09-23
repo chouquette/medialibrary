@@ -88,6 +88,16 @@ unsigned int File::duration() const
     return m_duration;
 }
 
+bool File::setDuration( unsigned int duration )
+{
+    static const std::string req = "UPDATE " + policy::FileTable::Name + " SET duration = ? "
+            "WHERE id_file = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, duration, m_id ) == false )
+        return false;
+    m_duration = duration;
+    return true;
+}
+
 std::shared_ptr<IShowEpisode> File::showEpisode()
 {
     if ( m_showEpisode == nullptr && m_showEpisodeId != 0 )
