@@ -83,13 +83,13 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         std::string m_mrl;
         unsigned int m_movieId;
         unsigned int m_folderId;
+        unsigned int m_lastModificationDate;
 
         // Auto fetched related properties
         Album* m_album;
         AlbumTrackPtr m_albumTrack;
         ShowEpisodePtr m_showEpisode;
         MoviePtr m_movie;
-        unsigned int m_lastModificationDate;
 
         bool m_isReady;
 
