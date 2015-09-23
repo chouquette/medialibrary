@@ -27,7 +27,7 @@ void Parser::addService(std::unique_ptr<IMetadataService> service)
     std::push_heap( m_services.begin(), m_services.end(), []( const ServicePtr& a, const ServicePtr& b )
     {
         // We want higher priority first
-        return a->priority() > b->priority();
+        return a->priority() < b->priority();
     });
 }
 
