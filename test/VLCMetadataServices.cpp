@@ -9,7 +9,7 @@
 #include "IAlbum.h"
 #include "IAlbumTrack.h"
 #include "IVideoTrack.h"
-#include "metadata_services/VLCMetadataService.h"
+#include "metadata_services/vlc/VLCMetadataService.h"
 
 class ServiceCb : public IParserCb
 {

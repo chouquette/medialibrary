@@ -64,7 +64,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     AudioTrack.cpp
     Parser.cpp
 
-    metadata_services/VLCMetadataService.cpp
+    metadata_services/vlc/VLCMetadataService.cpp
 
     factory/FileSystem.cpp
     filesystem/${ARCH_FOLDER}/Directory.cpp
