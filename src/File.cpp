@@ -34,12 +34,12 @@ File::File( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_lastModificationDate = sqlite::Traits<unsigned int>::Load( stmt, 9 );
     m_snapshot = sqlite::Traits<std::string>::Load( stmt, 10 );
 
-    m_isReady = m_type != UnknownType;
+    m_isReady = m_type != Type::UnknownType;
 }
 
 File::File( const fs::IFile* file, unsigned int folderId )
     : m_id( 0 )
-    , m_type( UnknownType )
+    , m_type( Type::UnknownType )
     , m_duration( 0 )
     , m_albumTrackId( 0 )
     , m_playCount( 0 )

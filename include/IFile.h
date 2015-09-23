@@ -13,7 +13,7 @@ class ITrackInformation;
 class IFile
 {
     public:
-        enum Type
+        enum class Type : uint8_t
         {
             VideoType, // Any video file, not being a tv show episode
             AudioType, // Any kind of audio file, not being an album track
