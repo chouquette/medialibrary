@@ -90,4 +90,5 @@ void Parser::done( FilePtr file, ServiceStatus status, void* data )
     }
     std::lock_guard<std::mutex> lock( m_lock );
     m_tasks.push_back( t );
+    m_cond.notify_all();
 }
