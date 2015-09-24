@@ -88,7 +88,7 @@ add_library(${PROJECT_NAME} SHARED ${SRC_LIST})
 target_link_libraries(${PROJECT_NAME} ${SQLITE3_LIBRARIES})
 
 find_package(LIBVLC REQUIRED)
-target_link_libraries( ${PROJECT_NAME} ${LIBVLC_LIBRARY} ${LIBVLCCORE_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME} ${LIBVLC_LIBRARY})
 include_directories(${LIBVLC_INCLUDE_DIR})
 
 set(LIBVLCPP_DIR "" CACHE PATH "Path to libvlcpp's directory")
