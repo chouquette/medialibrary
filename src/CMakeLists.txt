@@ -84,7 +84,7 @@ endif()
 
 find_package(Sqlite3 REQUIRED)
 
-add_library(${PROJECT_NAME} ${SRC_LIST})
+add_library(${PROJECT_NAME} SHARED ${SRC_LIST})
 target_link_libraries(${PROJECT_NAME} ${SQLITE3_LIBRARIES})
 
 find_package(LIBVLC REQUIRED)
