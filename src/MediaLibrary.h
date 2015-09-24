@@ -13,7 +13,7 @@ class MediaLibrary : public IMediaLibrary
     public:
         MediaLibrary();
         ~MediaLibrary();
-        virtual bool initialize( const std::string& dbPath, std::shared_ptr<factory::IFileSystem> fsFactory );
+        virtual bool initialize( const std::string& dbPath, const std::string& snapshotPath, std::shared_ptr<factory::IFileSystem> fsFactory );
 
         virtual std::vector<FilePtr> files();
         virtual FilePtr file( const std::string& path );
@@ -46,6 +46,8 @@ class MediaLibrary : public IMediaLibrary
         virtual FolderPtr onNewFolder( const fs::IDirectory* directory, FolderPtr parent ) override;
         virtual FilePtr onNewFile(const fs::IFile* file, FolderPtr parent ) override;
 
+        virtual const std::string& snapshotPath() const override;
+
     private:
         static const std::vector<std::string> supportedExtensions;
 
@@ -57,8 +59,15 @@ class MediaLibrary : public IMediaLibrary
 
     private:
         std::shared_ptr<sqlite3> m_dbConnection;
-        std::unique_ptr<Parser> m_parser;
         std::shared_ptr<factory::IFileSystem> m_fsFactory;
         std::vector<std::unique_ptr<IDiscoverer>> m_discoverers;
+        std::string m_snapshotPath;
+
+        // Keep the parser as last field.
+        // The parser holds a (raw) pointer to the media library. When MediaLibrary's destructor gets called
+        // it might still finish a few operations before exiting the parser thread. Those operations are
+        // likely to require a valid MediaLibrary, which would be compromised if some fields have already been
+        // deleted/destroyed.
+        std::unique_ptr<Parser> m_parser;
 };
 #endif // MEDIALIBRARY_H

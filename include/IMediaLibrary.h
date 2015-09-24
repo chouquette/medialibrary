@@ -40,7 +40,7 @@ class IMediaLibrary : public IDiscovererCb
         /// \param dbPath       Path to the database
         /// \return true in case of success, false otherwise
         ///
-        virtual bool initialize( const std::string& dbPath, std::shared_ptr<factory::IFileSystem> fsFactory ) = 0;
+        virtual bool initialize( const std::string& dbPath, const std::string& snapshotPath, std::shared_ptr<factory::IFileSystem> fsFactory ) = 0;
         /// Adds a stand alone file
         virtual FilePtr addFile( const std::string& path ) = 0;
         virtual FilePtr file( const std::string& path ) = 0;
@@ -81,6 +81,7 @@ class IMediaLibrary : public IDiscovererCb
          * @param entryPoint What to discover.
          */
         virtual void discover( const std::string& entryPoint ) = 0;
+        virtual const std::string& snapshotPath() const = 0;
 };
 
 class MediaLibraryFactory

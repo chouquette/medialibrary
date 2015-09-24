@@ -53,7 +53,9 @@ bool VLCThumbnailer::run( FilePtr file, void *data )
     if ( seekAhead( file, mp, data ) == false )
         return false;
 
-    std::string path( "/tmp/test.jpg" );
+    auto path = m_ml->snapshotPath();
+    path += "/";
+    path += std::to_string( file->id() ) + ".jpg";
     if ( mp.takeSnapshot( 0, path, 320, 240 ) == false )
     {
         m_cb->done( file, StatusError, data );

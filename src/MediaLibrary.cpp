@@ -56,12 +56,13 @@ MediaLibrary::~MediaLibrary()
     AudioTrack::clear();
 }
 
-bool MediaLibrary::initialize( const std::string& dbPath, std::shared_ptr<factory::IFileSystem> fsFactory )
+bool MediaLibrary::initialize( const std::string& dbPath, const std::string& snapshotPath, std::shared_ptr<factory::IFileSystem> fsFactory )
 {
     if ( fsFactory != nullptr )
         m_fsFactory = fsFactory;
     else
         m_fsFactory.reset( new factory::FileSystemDefaultFactory );
+    m_snapshotPath = snapshotPath;
 
     sqlite3* dbConnection;
     int res = sqlite3_open( dbPath.c_str(), &dbConnection );
@@ -222,6 +223,11 @@ FilePtr MediaLibrary::onNewFile( const fs::IFile *file, FolderPtr parent )
 {
     //FIXME: Same uniqueness comment as onNewFolder above.
     return addFile( file, parent == nullptr ? 0 : parent->id() );
+}
+
+const std::string& MediaLibrary::snapshotPath() const
+{
+    return m_snapshotPath;
 }
 
 bool MediaLibrary::loadFolders()

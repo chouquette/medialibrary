@@ -37,7 +37,7 @@ void Tests::Reload(std::shared_ptr<factory::IFileSystem> fs /* = nullptr */ )
     {
         fs = std::shared_ptr<factory::IFileSystem>( new mock::NoopFsFactory );
     }
-    bool res = ml->initialize( "test.db", fs );
+    bool res = ml->initialize( "test.db", "/tmp", fs );
     ASSERT_TRUE( res );
 }
 
