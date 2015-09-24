@@ -183,7 +183,11 @@ MoviePtr MediaLibrary::createMovie( const std::string& title )
 
 void MediaLibrary::addMetadataService(std::unique_ptr<IMetadataService> service)
 {
-    service->initialize( m_parser.get(), this );
+    if ( service->initialize( m_parser.get(), this ) == false )
+    {
+        std::cout << "Failed to initialize service" << std::endl;
+        return;
+    }
     m_parser->addService( std::move( service ) );
 }
 
