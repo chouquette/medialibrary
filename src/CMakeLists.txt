@@ -65,6 +65,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     Parser.cpp
 
     metadata_services/vlc/VLCMetadataService.cpp
+    metadata_services/vlc/VLCThumbnailer.cpp
 
     factory/FileSystem.cpp
     filesystem/${ARCH_FOLDER}/Directory.cpp

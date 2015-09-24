@@ -10,6 +10,7 @@
 #include "IAlbumTrack.h"
 #include "IVideoTrack.h"
 #include "metadata_services/vlc/VLCMetadataService.h"
+#include "metadata_services/vlc/VLCThumbnailer.h"
 
 class ServiceCb : public IParserCb
 {
@@ -56,13 +57,15 @@ class VLCMetadataServices : public Tests
 
             cb->failed = false;
             const char* args[] = {
-                "-vv"
+                "-vv",
+                "--vout=dummy",
             };
             VLC::Instance vlcInstance( sizeof(args) / sizeof(args[0]), args );
             auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService( vlcInstance ) );
+            auto thumbnailerService = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer( vlcInstance ) );
 
-            // This takes ownership of vlcService
             ml->addMetadataService( std::move( vlcService ) );
+            ml->addMetadataService( std::move( thumbnailerService ) );
         }
 };
 
