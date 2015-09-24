@@ -87,6 +87,8 @@ ServiceStatus VLCMetadataService::handleMediaMeta( FilePtr file, VLC::Media& med
                                       track.channels() );
         }
     }
+    auto duration = media.duration();
+    file->setDuration( duration );
     if ( isAudio == true )
     {
         if ( parseAudioFile( file, media ) == false )
