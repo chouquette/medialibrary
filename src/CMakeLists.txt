@@ -2,6 +2,7 @@ project(medialibrary)
 include(cpp11)
 cmake_minimum_required(VERSION 2.8)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+option(WITH_VLC "Include VLC metadata services" ON)
 
 EnableCpp11()
 
@@ -64,9 +65,6 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     AudioTrack.cpp
     Parser.cpp
 
-    metadata_services/vlc/VLCMetadataService.cpp
-    metadata_services/vlc/VLCThumbnailer.cpp
-
     factory/FileSystem.cpp
     filesystem/${ARCH_FOLDER}/Directory.cpp
     filesystem/${ARCH_FOLDER}/File.cpp
@@ -82,17 +80,25 @@ if (${EMOTION_FOUND})
     )
 endif()
 
+if (${WITH_VLC})
+    list(APPEND SRC_LIST
+        metadata_services/vlc/VLCMetadataService.cpp
+        metadata_services/vlc/VLCThumbnailer.cpp
+    )
+endif()
+
 find_package(Sqlite3 REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED ${SRC_LIST})
 target_link_libraries(${PROJECT_NAME} ${SQLITE3_LIBRARIES})
 
-find_package(LIBVLC REQUIRED)
-target_link_libraries( ${PROJECT_NAME} ${LIBVLC_LIBRARY})
-include_directories(${LIBVLC_INCLUDE_DIR})
-
-set(LIBVLCPP_DIR "" CACHE PATH "Path to libvlcpp's directory")
-include_directories(${LIBVLCPP_DIR})
+if (${WITH_VLC})
+    find_package(LIBVLC REQUIRED)
+    target_link_libraries( ${PROJECT_NAME} ${LIBVLC_LIBRARY})
+    include_directories(${LIBVLC_INCLUDE_DIR})
+    set(LIBVLCPP_DIR "" CACHE PATH "Path to libvlcpp's directory")
+    include_directories(${LIBVLCPP_DIR})
+endif()
 
 if (${EMOTION_FOUND})
     include_directories(${EMOTION_INCLUDE_DIRS})
