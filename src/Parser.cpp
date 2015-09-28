@@ -35,6 +35,8 @@ void Parser::parse(FilePtr file, IMetadataCb* cb)
 {
     std::lock_guard<std::mutex> lock( m_lock );
 
+    if ( m_services.size() == 0 )
+        return;
     m_tasks.push_back( new Task( file, m_services, cb ) );
     if ( m_thread == nullptr )
         m_thread.reset( new std::thread( &Parser::run, this ) );
