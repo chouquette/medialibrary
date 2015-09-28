@@ -60,7 +60,7 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
         std::shared_ptr<factory::IFileSystem> m_fsFactory;
         std::vector<std::unique_ptr<IDiscoverer>> m_discoverers;
         std::string m_snapshotPath;
-        IMediaLibraryCb* m_metadataCb;
+        IMediaLibraryCb* m_callback;
 
         // Keep the parser as last field.
         // The parser holds a (raw) pointer to the media library. When MediaLibrary's destructor gets called

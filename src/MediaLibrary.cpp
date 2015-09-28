@@ -68,14 +68,14 @@ void MediaLibrary::setFsFactory(std::shared_ptr<factory::IFileSystem> fsFactory)
     m_fsFactory = fsFactory;
 }
 
-bool MediaLibrary::initialize( const std::string& dbPath, const std::string& snapshotPath, IMediaLibraryCb* metadataCb )
+bool MediaLibrary::initialize( const std::string& dbPath, const std::string& snapshotPath, IMediaLibraryCb* mlCallback )
 {
     if ( m_fsFactory == nullptr )
         m_fsFactory.reset( new factory::FileSystemDefaultFactory );
     m_snapshotPath = snapshotPath;
-    m_metadataCb = metadataCb;
+    m_callback = mlCallback;
 
-    if ( metadataCb != nullptr )
+    if ( mlCallback != nullptr )
     {
         const char* args[] = {
             "-vv",
@@ -355,7 +355,7 @@ FilePtr MediaLibrary::addFile( const fs::IFile* file, unsigned int folderId )
         std::cerr << "Failed to add file " << file->fullPath() << " to the media library" << std::endl;
         return nullptr;
     }
-    m_parser->parse( fptr, m_metadataCb );
+    m_parser->parse( fptr, m_callback );
     return fptr;
 }
 
