@@ -19,7 +19,7 @@ class Parser : public IMetadataServiceCb
         Parser();
         ~Parser();
         void addService(std::unique_ptr<IMetadataService> service );
-        void parse( FilePtr file, IMetadataCb* cb );
+        void parse( FilePtr file, IMediaLibraryCb* cb );
 
     private:
         virtual void done( FilePtr file, ServiceStatus status, void* data );
@@ -30,11 +30,11 @@ class Parser : public IMetadataServiceCb
         typedef std::vector<ServicePtr> ServiceList;
         struct Task
         {
-            Task(FilePtr file, ServiceList& serviceList , IMetadataCb* metadataCb);
+            Task(FilePtr file, ServiceList& serviceList , IMediaLibraryCb* metadataCb);
             FilePtr                 file;
             ServiceList::iterator   it;
             ServiceList::iterator   end;
-            IMetadataCb*            cb;
+            IMediaLibraryCb*            cb;
         };
 
     private:

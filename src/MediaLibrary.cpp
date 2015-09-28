@@ -68,7 +68,7 @@ void MediaLibrary::setFsFactory(std::shared_ptr<factory::IFileSystem> fsFactory)
     m_fsFactory = fsFactory;
 }
 
-bool MediaLibrary::initialize( const std::string& dbPath, const std::string& snapshotPath, IMetadataCb* metadataCb )
+bool MediaLibrary::initialize( const std::string& dbPath, const std::string& snapshotPath, IMediaLibraryCb* metadataCb )
 {
     if ( m_fsFactory == nullptr )
         m_fsFactory.reset( new factory::FileSystemDefaultFactory );
@@ -215,7 +215,7 @@ void MediaLibrary::addMetadataService(std::unique_ptr<IMetadataService> service)
     m_parser->addService( std::move( service ) );
 }
 
-void MediaLibrary::parse(FilePtr file , IMetadataCb *cb)
+void MediaLibrary::parse(FilePtr file , IMediaLibraryCb *cb)
 {
     m_parser->parse( file, cb );
 }

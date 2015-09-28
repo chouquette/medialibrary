@@ -31,7 +31,7 @@ void Parser::addService(std::unique_ptr<IMetadataService> service)
     });
 }
 
-void Parser::parse(FilePtr file, IMetadataCb* cb)
+void Parser::parse(FilePtr file, IMediaLibraryCb* cb)
 {
     std::lock_guard<std::mutex> lock( m_lock );
 
@@ -65,7 +65,7 @@ void Parser::run()
 }
 
 
-Parser::Task::Task( FilePtr file, Parser::ServiceList& serviceList, IMetadataCb* metadataCb )
+Parser::Task::Task( FilePtr file, Parser::ServiceList& serviceList, IMediaLibraryCb* metadataCb )
     : file(file)
     , it( serviceList.begin() )
     , end( serviceList.end() )

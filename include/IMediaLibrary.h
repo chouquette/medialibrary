@@ -8,10 +8,10 @@
 #include "factory/IFileSystem.h"
 #include "IDiscoverer.h"
 
-class IMetadataCb
+class IMediaLibraryCb
 {
 public:
-    virtual ~IMetadataCb() = default;
+    virtual ~IMediaLibraryCb() = default;
     /**
      * @brief onMetadataUpdated Will be called when a file gets some updated metadata
      * @param file The updated file.
@@ -30,7 +30,7 @@ class IMediaLibrary
         /// \param dbPath       Path to the database
         /// \return true in case of success, false otherwise
         ///
-        virtual bool initialize( const std::string& dbPath, const std::string& snapshotPath, IMetadataCb* metadataCb ) = 0;
+        virtual bool initialize( const std::string& dbPath, const std::string& snapshotPath, IMediaLibraryCb* metadataCb ) = 0;
         /**
          * Replaces the default filesystem factory
          * The default one will use standard opendir/readdir functions

@@ -10,7 +10,7 @@
 #include "IAlbumTrack.h"
 #include "IVideoTrack.h"
 
-class ServiceCb : public IMetadataCb
+class ServiceCb : public IMediaLibraryCb
 {
     public:
         std::condition_variable waitCond;
