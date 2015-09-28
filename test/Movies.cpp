@@ -83,7 +83,7 @@ TEST_F( Movies, SetImdbId )
 
 TEST_F( Movies, AssignToFile )
 {
-    auto f = ml->addFile( "file" );
+    auto f = ml->addFile( "file.avi" );
     auto m = ml->createMovie( "movie" );
 
     ASSERT_EQ( f->movie(), nullptr );
@@ -92,7 +92,7 @@ TEST_F( Movies, AssignToFile )
 
     Reload();
 
-    f = ml->file( "file" );
+    f = ml->file( "file.avi" );
     m = f->movie();
     ASSERT_NE( m, nullptr );
     ASSERT_EQ( m->title(), "movie" );
@@ -100,17 +100,17 @@ TEST_F( Movies, AssignToFile )
 
 TEST_F( Movies, DestroyMovie )
 {
-    auto f = ml->addFile( "file" );
+    auto f = ml->addFile( "file.avi" );
     auto m = ml->createMovie( "movie" );
 
     f->setMovie( m );
     m->destroy();
 
-    f = ml->file( "file" );
+    f = ml->file( "file.avi" );
     ASSERT_EQ( f, nullptr );
 
     Reload();
 
-    f = ml->file( "file" );
+    f = ml->file( "file.avi" );
     ASSERT_EQ( f, nullptr );
 }

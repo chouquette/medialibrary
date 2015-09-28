@@ -15,7 +15,7 @@ TEST_F( Files, Init )
 
 TEST_F( Files, Create )
 {
-    auto f = ml->addFile( "/dev/null" );
+    auto f = ml->addFile( "media.avi" );
     ASSERT_NE( f, nullptr );
 
     ASSERT_EQ( f->playCount(), 0 );
@@ -30,56 +30,56 @@ TEST_F( Files, Create )
 
 TEST_F( Files, Fetch )
 {
-    auto f = ml->addFile( "/dev/null" );
-    auto f2 = ml->file( "/dev/null" );
+    auto f = ml->addFile( "media.avi" );
+    auto f2 = ml->file( "media.avi" );
     ASSERT_EQ( f->mrl(), f2->mrl() );
     ASSERT_EQ( f, f2 );
 
     // Flush cache and fetch from DB
     Reload();
 
-    f2 = ml->file( "/dev/null" );
+    f2 = ml->file( "media.avi" );
     ASSERT_EQ( f->mrl(), f2->mrl() );
     ASSERT_TRUE( f2->isStandAlone() );
 }
 
 TEST_F( Files, Delete )
 {
-    auto f = ml->addFile( "/dev/loutre" );
-    auto f2 = ml->file( "/dev/loutre" );
+    auto f = ml->addFile( "media.avi" );
+    auto f2 = ml->file( "media.avi" );
 
     ASSERT_EQ( f, f2 );
 
     ml->deleteFile( f );
-    f2 = ml->file( "/dev/loutre" );
+    f2 = ml->file( "media.avi" );
     ASSERT_EQ( f2, nullptr );
 }
 
 TEST_F( Files, Duplicate )
 {
-    auto f = ml->addFile( "/dev/moulaf" );
-    auto f2 = ml->addFile( "/dev/moulaf" );
+    auto f = ml->addFile( "media.avi" );
+    auto f2 = ml->addFile( "media.avi" );
 
     ASSERT_NE( f, nullptr );
     ASSERT_EQ( f2, nullptr );
 
-    f2 = ml->file( "/dev/moulaf" );
+    f2 = ml->file( "media.avi" );
     ASSERT_EQ( f, f2 );
 }
 
 TEST_F( Files, LastModificationDate )
 {
-    auto f = ml->addFile( "/dev/seaotter" );
+    auto f = ml->addFile( "media.avi" );
     ASSERT_NE( 0u, f->lastModificationDate() );
 
     Reload();
-    auto f2 = ml->file( "/dev/seaotter" );
+    auto f2 = ml->file( "media.avi" );
     ASSERT_EQ( f->lastModificationDate(), f2->lastModificationDate() );
 }
 
 TEST_F( Files, Duration )
 {
-    auto f = ml->addFile( "/some/file" );
+    auto f = ml->addFile( "media.avi" );
     ASSERT_EQ( f->duration(), 0u );
 
     f->setDuration( 123u );
@@ -87,13 +87,13 @@ TEST_F( Files, Duration )
 
     Reload();
 
-    f = ml->file( "/some/file" );
+    f = ml->file( "media.avi" );
     ASSERT_EQ( f->duration(), 123u );
 }
 
 TEST_F( Files, Snapshot )
 {
-    auto f = ml->addFile( "/some/file" );
+    auto f = ml->addFile( "media.avi" );
     ASSERT_EQ( f->snapshot(), "" );
 
     std::string newSnapshot( "/path/to/snapshot" );
@@ -103,6 +103,6 @@ TEST_F( Files, Snapshot )
 
     Reload();
 
-    f = ml->file( "/some/file" );
+    f = ml->file( "media.avi" );
     ASSERT_EQ( f->snapshot(), newSnapshot );
 }

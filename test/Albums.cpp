@@ -53,7 +53,7 @@ TEST_F( Albums, AddTrack )
 
 TEST_F( Albums, AssignTrack )
 {
-    auto f = ml->addFile( "file" );
+    auto f = ml->addFile( "file.avi" );
     auto a = ml->createAlbum( "album" );
     auto t = a->addTrack( "track", 1 );
 
@@ -65,7 +65,7 @@ TEST_F( Albums, AssignTrack )
 
     Reload();
 
-    f = ml->file( "file" );
+    f = ml->file( "file.avi" );
     t = f->albumTrack();
     ASSERT_NE( t, nullptr );
     ASSERT_EQ( t->title(), "track" );
@@ -73,7 +73,7 @@ TEST_F( Albums, AssignTrack )
 
 TEST_F( Albums, DeleteTrack )
 {
-    auto f = ml->addFile( "file" );
+    auto f = ml->addFile( "file.avi" );
     auto a = ml->createAlbum( "album" );
     auto t = a->addTrack( "track", 1 );
     f->setAlbumTrack( t );
@@ -81,7 +81,7 @@ TEST_F( Albums, DeleteTrack )
     bool res = t->destroy();
     ASSERT_TRUE( res );
 
-    auto f2 = ml->file( "file" );
+    auto f2 = ml->file( "file.avi" );
     ASSERT_EQ( f2, nullptr );
 }
 
@@ -160,13 +160,13 @@ TEST_F( Albums, FetchAlbumFromTrack )
 {
     {
         auto a = ml->createAlbum( "album" );
-        auto f = ml->addFile( "file" );
+        auto f = ml->addFile( "file.avi" );
         auto t = a->addTrack( "track 1", 1 );
         f->setAlbumTrack( t );
     }
     Reload();
 
-    auto f = ml->file( "file" );
+    auto f = ml->file( "file.avi" );
     auto t = f->albumTrack();
     auto a = t->album();
     ASSERT_NE( a, nullptr );
@@ -176,13 +176,13 @@ TEST_F( Albums, FetchAlbumFromTrack )
 TEST_F( Albums, DestroyAlbum )
 {
     auto a = ml->createAlbum( "album" );
-    auto f = ml->addFile( "file" );
+    auto f = ml->addFile( "file.avi" );
     auto t = a->addTrack( "track 1", 1 );
     f->setAlbumTrack( t );
 
     bool res = a->destroy();
     ASSERT_TRUE( res );
 
-    f = ml->file( "file" );
+    f = ml->file( "file.avi" );
     ASSERT_EQ( f, nullptr );
 }
