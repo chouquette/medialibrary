@@ -38,7 +38,6 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
         virtual MoviePtr movie( const std::string& title );
         virtual MoviePtr createMovie( const std::string& title );
 
-        virtual void parse( FilePtr file, IMediaLibraryCb* cb );
 
         virtual void discover( const std::string& entryPoint ) override;
         // IDiscovererCb implementation

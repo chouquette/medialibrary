@@ -215,11 +215,6 @@ void MediaLibrary::addMetadataService(std::unique_ptr<IMetadataService> service)
     m_parser->addService( std::move( service ) );
 }
 
-void MediaLibrary::parse(FilePtr file , IMediaLibraryCb *cb)
-{
-    m_parser->parse( file, cb );
-}
-
 void MediaLibrary::discover( const std::string &entryPoint )
 {
     for ( auto& d : m_discoverers )
