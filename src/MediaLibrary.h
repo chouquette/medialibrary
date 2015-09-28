@@ -8,7 +8,7 @@ class Parser;
 #include "IMediaLibrary.h"
 #include "IDiscoverer.h"
 
-class MediaLibrary : public IMediaLibrary
+class MediaLibrary : public IMediaLibrary, public IDiscovererCb
 {
     public:
         MediaLibrary();

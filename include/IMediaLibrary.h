@@ -29,7 +29,7 @@ class IParserCb
         virtual void onFileDone( FilePtr file ) = 0;
 };
 
-class IMediaLibrary : public IDiscovererCb
+class IMediaLibrary
 {
     public:
         virtual ~IMediaLibrary() {}
