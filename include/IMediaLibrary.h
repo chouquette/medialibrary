@@ -30,7 +30,13 @@ class IMediaLibrary
         /// \param dbPath       Path to the database
         /// \return true in case of success, false otherwise
         ///
-        virtual bool initialize( const std::string& dbPath, const std::string& snapshotPath, std::shared_ptr<factory::IFileSystem> fsFactory, IMetadataCb* metadataCb ) = 0;
+        virtual bool initialize( const std::string& dbPath, const std::string& snapshotPath, IMetadataCb* metadataCb ) = 0;
+        /**
+         * Replaces the default filesystem factory
+         * The default one will use standard opendir/readdir functions
+         * Calling this after initialize() is not a supported scenario.
+         */
+        virtual void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory ) = 0;
         /// Adds a stand alone file
         virtual FilePtr addFile( const std::string& path ) = 0;
         virtual FilePtr file( const std::string& path ) = 0;

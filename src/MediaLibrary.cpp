@@ -63,11 +63,14 @@ MediaLibrary::~MediaLibrary()
     AudioTrack::clear();
 }
 
-bool MediaLibrary::initialize( const std::string& dbPath, const std::string& snapshotPath, std::shared_ptr<factory::IFileSystem> fsFactory, IMetadataCb* metadataCb )
+void MediaLibrary::setFsFactory(std::shared_ptr<factory::IFileSystem> fsFactory)
 {
-    if ( fsFactory != nullptr )
-        m_fsFactory = fsFactory;
-    else
+    m_fsFactory = fsFactory;
+}
+
+bool MediaLibrary::initialize( const std::string& dbPath, const std::string& snapshotPath, IMetadataCb* metadataCb )
+{
+    if ( m_fsFactory == nullptr )
         m_fsFactory.reset( new factory::FileSystemDefaultFactory );
     m_snapshotPath = snapshotPath;
     m_metadataCb = metadataCb;

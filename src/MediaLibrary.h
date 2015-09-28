@@ -13,7 +13,8 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
     public:
         MediaLibrary();
         ~MediaLibrary();
-        virtual bool initialize( const std::string& dbPath, const std::string& snapshotPath, std::shared_ptr<factory::IFileSystem> fsFactory, IMetadataCb* metadataCb );
+        virtual bool initialize( const std::string& dbPath, const std::string& snapshotPath, IMetadataCb* metadataCb );
+        virtual void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory ) override;
 
         virtual std::vector<FilePtr> files();
         virtual FilePtr file( const std::string& path );
