@@ -8,25 +8,15 @@
 #include "factory/IFileSystem.h"
 #include "IDiscoverer.h"
 
-class IParserCb
+class IMetadataCb
 {
-    public:
-        virtual ~IParserCb() = default;
-
-        /**
-         * @brief onServiceDone will be called after each MetadataService completes
-         * @param file      The file being parsed
-         * @param status    A flag describing the parsing outcome
-         */
-        virtual void onServiceDone( FilePtr file, ServiceStatus status ) = 0;
-        /**
-         * @brief onFileDone will be called when all parsing operations on a given file have been completed
-         *
-         * This doesn't imply all modules have succeeded
-         */
-        //FIXME: We should probably expose some way of telling if the user should retry later in
-        // case of tmeporary failure
-        virtual void onFileDone( FilePtr file ) = 0;
+public:
+    virtual ~IMetadataCb() = default;
+    /**
+     * @brief onMetadataUpdated Will be called when a file gets some updated metadata
+     * @param file The updated file.
+     */
+    virtual void onMetadataUpdated( FilePtr file ) = 0;
 };
 
 class IMediaLibrary
@@ -71,7 +61,7 @@ class IMediaLibrary
          * is expected to be uninitialized.
          */
         virtual void addMetadataService( std::unique_ptr<IMetadataService> service ) = 0;
-        virtual void parse( FilePtr file, IParserCb* cb ) = 0;
+        virtual void parse( FilePtr file, IMetadataCb* cb ) = 0;
 
         /**
          * @brief discover Launch a discovery on the provided entry point.

@@ -31,7 +31,7 @@ void Parser::addService(std::unique_ptr<IMetadataService> service)
     });
 }
 
-void Parser::parse(FilePtr file, IParserCb* cb)
+void Parser::parse(FilePtr file, IMetadataCb* cb)
 {
     std::lock_guard<std::mutex> lock( m_lock );
 
@@ -63,11 +63,11 @@ void Parser::run()
 }
 
 
-Parser::Task::Task( FilePtr file, Parser::ServiceList& serviceList, IParserCb* parserCb )
+Parser::Task::Task( FilePtr file, Parser::ServiceList& serviceList, IMetadataCb* metadataCb )
     : file(file)
     , it( serviceList.begin() )
     , end( serviceList.end() )
-    , cb( parserCb )
+    , cb( metadataCb )
 {
 }
 
@@ -75,7 +75,6 @@ Parser::Task::Task( FilePtr file, Parser::ServiceList& serviceList, IParserCb* p
 void Parser::done( FilePtr file, ServiceStatus status, void* data )
 {
     Task *t = reinterpret_cast<Task*>( data );
-    t->cb->onServiceDone( file, status );
     if ( status == StatusTemporaryUnavailable || status == StatusFatal )
     {
         delete t;
@@ -84,7 +83,7 @@ void Parser::done( FilePtr file, ServiceStatus status, void* data )
     ++t->it;
     if (t->it == t->end)
     {
-        t->cb->onFileDone( file );
+        t->cb->onMetadataUpdated( file );
         delete t;
         return;
     }

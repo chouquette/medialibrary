@@ -12,31 +12,15 @@
 #include "metadata_services/vlc/VLCMetadataService.h"
 #include "metadata_services/vlc/VLCThumbnailer.h"
 
-class ServiceCb : public IParserCb
+class ServiceCb : public IMetadataCb
 {
     public:
         std::condition_variable waitCond;
         std::mutex mutex;
-        volatile bool failed;
 
-        ServiceCb()
-            : failed(false)
+        virtual void onMetadataUpdated( FilePtr )
         {
-        }
-
-        ~ServiceCb()
-        {
-        }
-
-        virtual void onServiceDone( FilePtr, ServiceStatus status )
-        {
-            if ( status != StatusSuccess )
-                failed = true;
             waitCond.notify_all();
-        }
-
-        virtual void onFileDone( FilePtr )
-        {
         }
 };
 
@@ -55,7 +39,6 @@ class VLCMetadataServices : public Tests
         {
             Tests::SetUp();
 
-            cb->failed = false;
             const char* args[] = {
                 "-vv",
                 "--vout=dummy",
@@ -77,11 +60,10 @@ TEST_F( VLCMetadataServices, ParseAudio )
     auto file = ml->addFile( "mr-zebra.mp3" );
     ml->parse( file, cb.get() );
     bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [&]{
-        return cb->failed == true || ( file->audioTracks().size() > 0 );
+        return file->audioTracks().size() > 0;
     } );
 
     ASSERT_TRUE( res );
-    ASSERT_FALSE( cb->failed );
     Reload();
     file = ml->file( "mr-zebra.mp3" );
     auto tracks = file->audioTracks();
@@ -99,7 +81,7 @@ TEST_F( VLCMetadataServices, ParseAlbum )
     std::unique_lock<std::mutex> lock( cb->mutex );
     ml->parse( file, cb.get() );
     bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [&]{
-        return cb->failed == true || file->albumTrack() != nullptr;
+        return file->albumTrack() != nullptr;
     } );
 
     ASSERT_TRUE( res );
@@ -127,7 +109,7 @@ TEST_F( VLCMetadataServices, ParseVideo )
     auto file = ml->addFile( "mrmssmith.mp4" );
     ml->parse( file, cb.get() );
     bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [file]{
-        return cb->failed == true || (file->videoTracks().size() != 0);
+        return file->videoTracks().size() != 0;
     } );
 
     ASSERT_TRUE( res );

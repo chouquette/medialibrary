@@ -3,26 +3,20 @@
 #include <condition_variable>
 #include <mutex>
 #include "IFile.h"
+#include "IMediaLibrary.h"
 
 #include "metadata_services/emotion/Emotion.h"
 
-class EmotionMetadataServiceCb : public IParserCb
+class EmotionMetadataServiceCb : public IMetadataCb
 {
 public:
-    bool failed;
     std::condition_variable waitCond;
     std::mutex mutex;
 
-    virtual void onServiceDone( FilePtr, ServiceStatus status ) override
+    virtual void onMetadataUpdated( FilePtr )
     {
         std::unique_lock<std::mutex> lock( mutex );
-        if ( status == StatusSuccess )
-            failed = false;
         waitCond.notify_all();
-    }
-
-    virtual void onFileDone( FilePtr ) override
-    {
     }
 };
 
@@ -40,7 +34,6 @@ public:
     virtual void SetUp() override
     {
         Tests::SetUp();
-        cb->failed = true;
         auto emotionService = std::unique_ptr<EmotionMetadataService>( new EmotionMetadataService );
         ml->addMetadataService( std::move( emotionService ) );
     }
@@ -55,7 +48,7 @@ TEST_F( EmotionMetadataService_Tests, ParseAudio )
     std::unique_lock<std::mutex> lock( cb->mutex );
     ml->parse( file, cb.get() );
     bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [&]{
-        return cb->failed == true || ( file->audioTracks().size() > 0 );
+        return file->audioTracks().size() > 0;
     } );
     ASSERT_TRUE( res );
 }

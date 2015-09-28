@@ -38,7 +38,7 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
         virtual MoviePtr createMovie( const std::string& title );
 
         virtual void addMetadataService( std::unique_ptr<IMetadataService> service );
-        virtual void parse( FilePtr file, IParserCb* cb );
+        virtual void parse( FilePtr file, IMetadataCb* cb );
 
         virtual void discover( const std::string& entryPoint ) override;
         // IDiscovererCb implementation
