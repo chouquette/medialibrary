@@ -106,10 +106,7 @@ FilePtr MediaLibrary::file( const std::string& path )
 FilePtr MediaLibrary::addFile( const std::string& path )
 {
     auto fsFile = m_fsFactory->createFile( path );
-    auto file = File::create( m_dbConnection, fsFile.get(), 0 );
-    if ( file == nullptr )
-        return nullptr;
-    return file;
+    return addFile( fsFile.get(), 0 );
 }
 
 FolderPtr MediaLibrary::folder( const std::string& path )
