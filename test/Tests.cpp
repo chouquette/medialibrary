@@ -40,7 +40,6 @@ void Tests::Reload(std::shared_ptr<factory::IFileSystem> fs /*= nullptr*/, IMedi
 
 void Tests::SetUp()
 {
-    defaultFs = std::make_shared<mock::NoopFsFactory>();
     Reload();
 }
 
