@@ -30,7 +30,7 @@ class IMediaLibrary
         /// \param dbPath       Path to the database
         /// \return true in case of success, false otherwise
         ///
-        virtual bool initialize( const std::string& dbPath, const std::string& snapshotPath, std::shared_ptr<factory::IFileSystem> fsFactory ) = 0;
+        virtual bool initialize( const std::string& dbPath, const std::string& snapshotPath, std::shared_ptr<factory::IFileSystem> fsFactory, IMetadataCb* metadataCb ) = 0;
         /// Adds a stand alone file
         virtual FilePtr addFile( const std::string& path ) = 0;
         virtual FilePtr file( const std::string& path ) = 0;
@@ -61,7 +61,6 @@ class IMediaLibrary
          * is expected to be uninitialized.
          */
         virtual void addMetadataService( std::unique_ptr<IMetadataService> service ) = 0;
-        virtual void parse( FilePtr file, IMetadataCb* cb ) = 0;
 
         /**
          * @brief discover Launch a discovery on the provided entry point.

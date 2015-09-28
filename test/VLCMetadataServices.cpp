@@ -37,7 +37,7 @@ class VLCMetadataServices : public Tests
 
         virtual void SetUp() override
         {
-            Tests::SetUp();
+            Tests::Reload( nullptr, cb.get() );
 
             const char* args[] = {
                 "-vv",
@@ -58,7 +58,6 @@ TEST_F( VLCMetadataServices, ParseAudio )
 {
     std::unique_lock<std::mutex> lock( cb->mutex );
     auto file = ml->addFile( "mr-zebra.mp3" );
-    ml->parse( file, cb.get() );
     bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [&]{
         return file->audioTracks().size() > 0;
     } );
@@ -77,9 +76,8 @@ TEST_F( VLCMetadataServices, ParseAudio )
 
 TEST_F( VLCMetadataServices, ParseAlbum )
 {
-    auto file = ml->addFile( "mr-zebra.mp3" );
     std::unique_lock<std::mutex> lock( cb->mutex );
-    ml->parse( file, cb.get() );
+    auto file = ml->addFile( "mr-zebra.mp3" );
     bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [&]{
         return file->albumTrack() != nullptr;
     } );
@@ -107,7 +105,6 @@ TEST_F( VLCMetadataServices, ParseVideo )
 {
     std::unique_lock<std::mutex> lock( cb->mutex );
     auto file = ml->addFile( "mrmssmith.mp4" );
-    ml->parse( file, cb.get() );
     bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [file]{
         return file->videoTracks().size() != 0;
     } );

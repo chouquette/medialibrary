@@ -59,13 +59,14 @@ MediaLibrary::~MediaLibrary()
     AudioTrack::clear();
 }
 
-bool MediaLibrary::initialize( const std::string& dbPath, const std::string& snapshotPath, std::shared_ptr<factory::IFileSystem> fsFactory )
+bool MediaLibrary::initialize( const std::string& dbPath, const std::string& snapshotPath, std::shared_ptr<factory::IFileSystem> fsFactory, IMetadataCb* metadataCb )
 {
     if ( fsFactory != nullptr )
         m_fsFactory = fsFactory;
     else
         m_fsFactory.reset( new factory::FileSystemDefaultFactory );
     m_snapshotPath = snapshotPath;
+    m_metadataCb = metadataCb;
 
     m_discoverers.emplace_back( new FsDiscoverer( m_fsFactory, this ) );
 
@@ -339,6 +340,7 @@ FilePtr MediaLibrary::addFile( const fs::IFile* file, unsigned int folderId )
         std::cerr << "Failed to add file " << file->fullPath() << " to the media library" << std::endl;
         return nullptr;
     }
+    m_parser->parse( fptr, m_metadataCb );
     return fptr;
 }
 

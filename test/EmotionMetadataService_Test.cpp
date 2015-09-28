@@ -33,7 +33,7 @@ public:
 
     virtual void SetUp() override
     {
-        Tests::SetUp();
+        Tests::Reload( nullptr, cb.get() );
         auto emotionService = std::unique_ptr<EmotionMetadataService>( new EmotionMetadataService );
         ml->addMetadataService( std::move( emotionService ) );
     }
@@ -44,9 +44,8 @@ std::unique_ptr<EmotionMetadataServiceCb> EmotionMetadataService_Tests::cb;
 
 TEST_F( EmotionMetadataService_Tests, ParseAudio )
 {
-    auto file = ml->addFile( "mr-zebra.mp3" );
     std::unique_lock<std::mutex> lock( cb->mutex );
-    ml->parse( file, cb.get() );
+    auto file = ml->addFile( "mr-zebra.mp3" );
     bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [&]{
         return file->audioTracks().size() > 0;
     } );

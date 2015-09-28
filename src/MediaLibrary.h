@@ -13,7 +13,7 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
     public:
         MediaLibrary();
         ~MediaLibrary();
-        virtual bool initialize( const std::string& dbPath, const std::string& snapshotPath, std::shared_ptr<factory::IFileSystem> fsFactory );
+        virtual bool initialize( const std::string& dbPath, const std::string& snapshotPath, std::shared_ptr<factory::IFileSystem> fsFactory, IMetadataCb* metadataCb );
 
         virtual std::vector<FilePtr> files();
         virtual FilePtr file( const std::string& path );
@@ -61,6 +61,7 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
         std::shared_ptr<factory::IFileSystem> m_fsFactory;
         std::vector<std::unique_ptr<IDiscoverer>> m_discoverers;
         std::string m_snapshotPath;
+        IMetadataCb* m_metadataCb;
 
         // Keep the parser as last field.
         // The parser holds a (raw) pointer to the media library. When MediaLibrary's destructor gets called
