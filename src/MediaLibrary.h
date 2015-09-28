@@ -16,28 +16,27 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
         virtual bool initialize( const std::string& dbPath, const std::string& snapshotPath, IMediaLibraryCb* metadataCb );
         virtual void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory ) override;
 
-        virtual std::vector<FilePtr> files();
-        virtual FilePtr file( const std::string& path );
-        virtual FilePtr addFile( const std::string& path );
-        virtual bool deleteFile( const std::string& mrl );
-        virtual bool deleteFile( FilePtr file );
+        virtual std::vector<FilePtr> files() override;
+        virtual FilePtr file( const std::string& path ) override;
+        virtual FilePtr addFile( const std::string& path ) override;
+        virtual bool deleteFile( const std::string& mrl ) override;
+        virtual bool deleteFile( FilePtr file ) override;
 
         virtual FolderPtr folder( const std::string& path ) override;
         virtual bool deleteFolder( FolderPtr folder ) override;
 
-        virtual LabelPtr createLabel( const std::string& label );
-        virtual bool deleteLabel(const std::string& text );
-        virtual bool deleteLabel( LabelPtr label );
+        virtual LabelPtr createLabel( const std::string& label ) override;
+        virtual bool deleteLabel(const std::string& text ) override;
+        virtual bool deleteLabel( LabelPtr label ) override;
 
-        virtual AlbumPtr album( const std::string& title );
-        virtual AlbumPtr createAlbum( const std::string& title );
+        virtual AlbumPtr album( const std::string& title ) override;
+        virtual AlbumPtr createAlbum( const std::string& title ) override;
 
-        virtual ShowPtr show( const std::string& name );
-        virtual ShowPtr createShow( const std::string& name );
+        virtual ShowPtr show( const std::string& name ) override;
+        virtual ShowPtr createShow( const std::string& name ) override;
 
-        virtual MoviePtr movie( const std::string& title );
-        virtual MoviePtr createMovie( const std::string& title );
-
+        virtual MoviePtr movie( const std::string& title ) override;
+        virtual MoviePtr createMovie( const std::string& title ) override;
 
         virtual void discover( const std::string& entryPoint ) override;
         // IDiscovererCb implementation
