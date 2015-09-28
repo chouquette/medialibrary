@@ -19,6 +19,10 @@
 // Discoverers:
 #include "discoverer/FsDiscoverer.h"
 
+// Metadata services:
+#include "metadata_services/vlc/VLCMetadataService.h"
+#include "metadata_services/vlc/VLCThumbnailer.h"
+
 #include "filesystem/IDirectory.h"
 #include "filesystem/IFile.h"
 #include "factory/FileSystem.h"
@@ -67,6 +71,19 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         m_fsFactory.reset( new factory::FileSystemDefaultFactory );
     m_snapshotPath = snapshotPath;
     m_metadataCb = metadataCb;
+
+    if ( metadataCb != nullptr )
+    {
+        const char* args[] = {
+            "-vv",
+            "--vout=dummy",
+        };
+        VLC::Instance vlcInstance( sizeof(args) / sizeof(args[0]), args );
+        auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService( vlcInstance ) );
+        auto thumbnailerService = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer( vlcInstance ) );
+        addMetadataService( std::move( vlcService ) );
+        addMetadataService( std::move( thumbnailerService ) );
+    }
 
     m_discoverers.emplace_back( new FsDiscoverer( m_fsFactory, this ) );
 

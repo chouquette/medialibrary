@@ -53,16 +53,6 @@ class IMediaLibrary
         virtual MoviePtr createMovie( const std::string& title ) = 0;
 
         /**
-         * @brief addMetadataService Adds a service to parse media
-         *
-         * User is expected to add all services before calling parse for the first time.
-         * Once parse has been called, adding another service is an undefined behavior.
-         * This method will call service->initialize(), therefor the passed ServiceStatus
-         * is expected to be uninitialized.
-         */
-        virtual void addMetadataService( std::unique_ptr<IMetadataService> service ) = 0;
-
-        /**
          * @brief discover Launch a discovery on the provided entry point.
          * There no garanty on how this will be processed, or if it will be processed synchronously or not.
          * Depending on which discoverer modules where provided, this might or might not work

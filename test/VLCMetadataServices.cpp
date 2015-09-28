@@ -9,8 +9,6 @@
 #include "IAlbum.h"
 #include "IAlbumTrack.h"
 #include "IVideoTrack.h"
-#include "metadata_services/vlc/VLCMetadataService.h"
-#include "metadata_services/vlc/VLCThumbnailer.h"
 
 class ServiceCb : public IMetadataCb
 {
@@ -38,17 +36,6 @@ class VLCMetadataServices : public Tests
         virtual void SetUp() override
         {
             Tests::Reload( nullptr, cb.get() );
-
-            const char* args[] = {
-                "-vv",
-                "--vout=dummy",
-            };
-            VLC::Instance vlcInstance( sizeof(args) / sizeof(args[0]), args );
-            auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService( vlcInstance ) );
-            auto thumbnailerService = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer( vlcInstance ) );
-
-            ml->addMetadataService( std::move( vlcService ) );
-            ml->addMetadataService( std::move( thumbnailerService ) );
         }
 };
 

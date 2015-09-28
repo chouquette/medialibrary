@@ -37,7 +37,6 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
         virtual MoviePtr movie( const std::string& title );
         virtual MoviePtr createMovie( const std::string& title );
 
-        virtual void addMetadataService( std::unique_ptr<IMetadataService> service );
         virtual void parse( FilePtr file, IMetadataCb* cb );
 
         virtual void discover( const std::string& entryPoint ) override;
@@ -55,6 +54,7 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
         bool checkSubfolders( fs::IDirectory* folder, unsigned int parentId );
         void checkFiles( fs::IDirectory* folder, unsigned int parentId );
         FilePtr addFile( const fs::IFile* file, unsigned int folderId );
+        void addMetadataService( std::unique_ptr<IMetadataService> service );
 
     private:
         std::shared_ptr<sqlite3> m_dbConnection;
