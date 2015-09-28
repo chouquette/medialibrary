@@ -16,6 +16,9 @@
 #include "Utils.h"
 #include "VideoTrack.h"
 
+// Discoverers:
+#include "discoverer/FsDiscoverer.h"
+
 #include "filesystem/IDirectory.h"
 #include "filesystem/IFile.h"
 #include "factory/FileSystem.h"
@@ -63,6 +66,8 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
     else
         m_fsFactory.reset( new factory::FileSystemDefaultFactory );
     m_snapshotPath = snapshotPath;
+
+    m_discoverers.emplace_back( new FsDiscoverer( m_fsFactory, this ) );
 
     sqlite3* dbConnection;
     int res = sqlite3_open( dbPath.c_str(), &dbConnection );
@@ -195,11 +200,6 @@ void MediaLibrary::addMetadataService(std::unique_ptr<IMetadataService> service)
 void MediaLibrary::parse(FilePtr file , IParserCb* cb)
 {
     m_parser->parse( file, cb );
-}
-
-void MediaLibrary::addDiscoverer(std::unique_ptr<IDiscoverer> discoverer)
-{
-    m_discoverers.emplace_back( std::move( discoverer ) );
 }
 
 void MediaLibrary::discover( const std::string &entryPoint )

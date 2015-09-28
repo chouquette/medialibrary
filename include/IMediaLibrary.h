@@ -73,7 +73,6 @@ class IMediaLibrary : public IDiscovererCb
         virtual void addMetadataService( std::unique_ptr<IMetadataService> service ) = 0;
         virtual void parse( FilePtr file, IParserCb* cb ) = 0;
 
-        virtual void addDiscoverer( std::unique_ptr<IDiscoverer> discoverer ) = 0;
         /**
          * @brief discover Launch a discovery on the provided entry point.
          * There no garanty on how this will be processed, or if it will be processed synchronously or not.

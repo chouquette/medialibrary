@@ -28,12 +28,7 @@ void Tests::TearDown()
 void Tests::Reload(std::shared_ptr<factory::IFileSystem> fs /* = nullptr */ )
 {
     ml.reset( MediaLibraryFactory::create() );
-    if ( fs != nullptr )
-    {
-        std::unique_ptr<IDiscoverer> discoverer( new FsDiscoverer( fs, ml.get() ) );
-        ml->addDiscoverer( std::move( discoverer ) );
-    }
-    else
+    if ( fs == nullptr )
     {
         fs = std::shared_ptr<factory::IFileSystem>( new mock::NoopFsFactory );
     }

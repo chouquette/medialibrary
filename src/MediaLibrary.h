@@ -40,7 +40,6 @@ class MediaLibrary : public IMediaLibrary
         virtual void addMetadataService( std::unique_ptr<IMetadataService> service );
         virtual void parse( FilePtr file, IParserCb* cb );
 
-        virtual void addDiscoverer( std::unique_ptr<IDiscoverer> discoverer ) override;
         virtual void discover( const std::string& entryPoint ) override;
         // IDiscovererCb implementation
         virtual FolderPtr onNewFolder( const fs::IDirectory* directory, FolderPtr parent ) override;
