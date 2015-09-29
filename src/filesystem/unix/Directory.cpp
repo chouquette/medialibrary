@@ -51,7 +51,12 @@ std::string Directory::toAbsolute(const std::string& path)
 {
     auto abs = std::unique_ptr<char[]>( new char[PATH_MAX] );
     if ( realpath( path.c_str(), abs.get() ) == nullptr )
-        throw std::runtime_error( "Failed to convert to absolute path" );
+    {
+        std::string err( "Failed to convert to absolute path" );
+        err += "(" + path + "): ";
+        err += strerror(errno);
+        throw std::runtime_error( err );
+    }
     return std::string{ abs.get() };
 }
 
