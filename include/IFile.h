@@ -17,8 +17,6 @@ class IFile
         {
             VideoType, // Any video file, not being a tv show episode
             AudioType, // Any kind of audio file, not being an album track
-            ShowEpisodeType,
-            AlbumTrackType,
             UnknownType
         };
         virtual ~IFile() {}
