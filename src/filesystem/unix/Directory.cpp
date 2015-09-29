@@ -80,6 +80,8 @@ void Directory::read()
         {
             continue;
         }
+        std::string path = m_path + "/" + result->d_name;
+
 #if defined(_DIRENT_HAVE_D_TYPE) && defined(_BSD_SOURCE)
         if ( result->d_type == DT_DIR )
         {
@@ -95,11 +97,11 @@ void Directory::read()
         if ( S_ISDIR( s.st_mode ) )
         {
 #endif
-            m_dirs.emplace_back( toAbsolute( result->d_name ) );
+            m_dirs.emplace_back( toAbsolute( path ) );
         }
         else
         {
-            m_files.emplace_back( toAbsolute( result->d_name ) );
+            m_files.emplace_back( toAbsolute( path ) );
         }
     }
 }
