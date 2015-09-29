@@ -59,7 +59,12 @@ void Directory::read()
 {
     auto dir = std::unique_ptr<DIR, int(*)(DIR*)>( opendir( m_path.c_str() ), closedir );
     if ( dir == nullptr )
-        throw std::runtime_error("Failed to open directory");
+    {
+        std::string err( "Failed to open directory " );
+        err += m_path;
+        err += strerror(errno);
+        throw std::runtime_error( err );
+    }
 
     dirent* result = nullptr;
 
@@ -76,7 +81,12 @@ void Directory::read()
 #else
         struct stat s;
         if ( lstat( result->d_name, &s ) != 0 )
-            throw std::runtime_error("Failed to get file info" );
+        {
+            std::string err( "Failed to get file info " );
+            err += m_path;
+            err += strerror(errno);
+            throw std::runtime_error( err );
+        }
         if ( S_ISDIR( s.st_mode ) )
         {
 #endif

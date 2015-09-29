@@ -2,6 +2,7 @@
 
 #include "factory/FileSystem.h"
 #include <queue>
+#include <iostream>
 
 FsDiscoverer::FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, IDiscovererCb* discoveryCb )
     : m_discoveryCb( discoveryCb )
@@ -29,8 +30,9 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
         {
             dir = m_fsFactory->createDirectory( currentPath );
         }
-        catch ( std::runtime_error& )
+        catch ( std::runtime_error& ex )
         {
+            std::cerr << ex.what() << std::endl;
             // If the first directory fails to open, stop now.
             // Otherwise, assume something went wrong in a subdirectory.
             if (parent == nullptr)
