@@ -197,7 +197,7 @@ class Tools
             int res = sqlite3_prepare_v2( dbConnection.get(), req.c_str(), -1, &stmt, NULL );
             if ( res != SQLITE_OK )
             {
-                Log::Error( "Failed to execute request: ", req,
+                LOG_ERROR( "Failed to execute request: ", req,
                             sqlite3_errmsg( dbConnection.get() ) );
             }
             return StmtPtr( stmt, &sqlite3_finalize );
@@ -224,13 +224,13 @@ class Tools
             } while ( res == SQLITE_ROW );
             if ( res != SQLITE_DONE )
             {
-                Log::Error( "Failed to execute <", req, ">\nInvalid result: ",
 #if SQLITE_VERSION_NUMBER >= 3007015
-                            sqlite3_errstr( res )
+                auto err = sqlite3_errstr( res );
 #else
-                             res
+                auto err = res;
 #endif
-                          , ": ", sqlite3_errmsg( dbConnection.get() ) );
+                LOG_ERROR( "Failed to execute <", req, ">\nInvalid result: ", err,
+                          ": ", sqlite3_errmsg( dbConnection.get() ) );
                 return false;
             }
             return true;

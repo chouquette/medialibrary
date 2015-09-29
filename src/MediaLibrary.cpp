@@ -98,7 +98,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
     m_dbConnection.reset( dbConnection, &sqlite3_close );
     if ( sqlite::Tools::executeRequest( DBConnection(m_dbConnection), "PRAGMA foreign_keys = ON" ) == false )
     {
-        Log::Error( "Failed to enable foreign keys" );
+        LOG_ERROR( "Failed to enable foreign keys" );
         return false;
     }
     if ( ! ( File::createTable( m_dbConnection ) &&
@@ -112,7 +112,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         VideoTrack::createTable( m_dbConnection ) &&
         AudioTrack::createTable( m_dbConnection ) ) )
     {
-        Log::Error( "Failed to create database structure" );
+        LOG_ERROR( "Failed to create database structure" );
         return false;
     }
     return loadFolders();
@@ -372,7 +372,7 @@ FilePtr MediaLibrary::addFile( const fs::IFile* file, unsigned int folderId )
     auto fptr = File::create( m_dbConnection, file, folderId );
     if ( fptr == nullptr )
     {
-        Log::Error( "Failed to add file ", file->fullPath(), " to the media library" );
+        LOG_ERROR( "Failed to add file ", file->fullPath(), " to the media library" );
         return nullptr;
     }
     // Keep in mind that this is queued by the parser thread, there is no waranty about

@@ -313,7 +313,7 @@ bool File::addLabel( LabelPtr label )
 {
     if ( m_id == 0 || label->id() == 0 )
     {
-        Log::Error( "Both file & label need to be inserted in database before being linked together" );
+        LOG_ERROR( "Both file & label need to be inserted in database before being linked together" );
         return false;
     }
     const char* req = "INSERT INTO LabelFileRelation VALUES(?, ?)";
@@ -324,7 +324,7 @@ bool File::removeLabel( LabelPtr label )
 {
     if ( m_id == 0 || label->id() == 0 )
     {
-        Log::Error( "Can't unlink a label/file not inserted in database" );
+        LOG_ERROR( "Can't unlink a label/file not inserted in database" );
         return false;
     }
     const char* req = "DELETE FROM LabelFileRelation WHERE id_label = ? AND id_file = ?";

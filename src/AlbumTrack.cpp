@@ -98,7 +98,7 @@ bool AlbumTrack::destroy()
     // Manually remove Files from cache, and let foreign key handling delete them from the DB
     auto fs = files();
     if ( fs.size() == 0 )
-        Log::Warning( "No files found for AlbumTrack ", m_id );
+        LOG_WARN( "No files found for AlbumTrack ", m_id );
     for ( auto& f : fs )
     {
         // Ignore failures to discard from cache, we might want to discard records from
