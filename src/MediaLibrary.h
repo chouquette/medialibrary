@@ -7,6 +7,7 @@ class Parser;
 
 #include "IMediaLibrary.h"
 #include "IDiscoverer.h"
+#include "logging/Logger.h"
 
 class MediaLibrary : public IMediaLibrary, public IDiscovererCb
 {
@@ -44,6 +45,7 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
         virtual FilePtr onNewFile(const fs::IFile* file, FolderPtr parent ) override;
 
         virtual const std::string& snapshotPath() const override;
+        virtual void setLogger( ILogger* logger ) override;
 
     private:
         static const std::vector<std::string> supportedExtensions;

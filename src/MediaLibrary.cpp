@@ -8,6 +8,7 @@
 #include "MediaLibrary.h"
 #include "IMetadataService.h"
 #include "Label.h"
+#include "logging/Logger.h"
 #include "Movie.h"
 #include "Parser.h"
 #include "Show.h"
@@ -96,7 +97,10 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         return false;
     m_dbConnection.reset( dbConnection, &sqlite3_close );
     if ( sqlite::Tools::executeRequest( DBConnection(m_dbConnection), "PRAGMA foreign_keys = ON" ) == false )
+    {
+        Log::Error( "Failed to enable foreign keys" );
         return false;
+    }
     if ( ! ( File::createTable( m_dbConnection ) &&
         Folder::createTable( m_dbConnection ) &&
         Label::createTable( m_dbConnection ) &&
@@ -108,7 +112,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         VideoTrack::createTable( m_dbConnection ) &&
         AudioTrack::createTable( m_dbConnection ) ) )
     {
-        std::cerr << "Failed to create database structure" << std::endl;
+        Log::Error( "Failed to create database structure" );
         return false;
     }
     return loadFolders();
@@ -254,6 +258,11 @@ const std::string& MediaLibrary::snapshotPath() const
     return m_snapshotPath;
 }
 
+void MediaLibrary::setLogger( ILogger* logger )
+{
+    Log::SetLogger( logger );
+}
+
 bool MediaLibrary::loadFolders()
 {
     //FIXME: This should probably be in a sql transaction
@@ -363,7 +372,7 @@ FilePtr MediaLibrary::addFile( const fs::IFile* file, unsigned int folderId )
     auto fptr = File::create( m_dbConnection, file, folderId );
     if ( fptr == nullptr )
     {
-        std::cerr << "Failed to add file " << file->fullPath() << " to the media library" << std::endl;
+        Log::Error( "Failed to add file ", file->fullPath(), " to the media library" );
         return nullptr;
     }
     // Keep in mind that this is queued by the parser thread, there is no waranty about

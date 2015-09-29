@@ -15,6 +15,7 @@ class IMovie;
 class IShow;
 class IShowEpisode;
 class IVideoTrack;
+class ILogger;
 
 struct sqlite3;
 

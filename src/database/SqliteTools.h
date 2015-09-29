@@ -10,6 +10,7 @@
 #include <iostream>
 
 #include "Types.h"
+#include "logging/Logger.h"
 
 namespace sqlite
 {
@@ -196,8 +197,8 @@ class Tools
             int res = sqlite3_prepare_v2( dbConnection.get(), req.c_str(), -1, &stmt, NULL );
             if ( res != SQLITE_OK )
             {
-                std::cerr << "Failed to execute request: " << req << std::endl;
-                std::cerr << sqlite3_errmsg( dbConnection.get() ) << std::endl;
+                Log::Error( "Failed to execute request: ", req,
+                            sqlite3_errmsg( dbConnection.get() ) );
             }
             return StmtPtr( stmt, &sqlite3_finalize );
         }
@@ -223,14 +224,13 @@ class Tools
             } while ( res == SQLITE_ROW );
             if ( res != SQLITE_DONE )
             {
-                std::cerr << "Failed to execute <" << req << '>' << std::endl;
-                std::cerr << "Invalid result: " <<
+                Log::Error( "Failed to execute <", req, ">\nInvalid result: ",
 #if SQLITE_VERSION_NUMBER >= 3007015
                             sqlite3_errstr( res )
 #else
                              res
 #endif
-                          << ": " << sqlite3_errmsg( dbConnection.get() ) << std::endl;
+                          , ": ", sqlite3_errmsg( dbConnection.get() ) );
                 return false;
             }
             return true;

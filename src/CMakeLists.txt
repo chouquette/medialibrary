@@ -32,8 +32,8 @@ list(APPEND HEADERS_LIST
     ${CMAKE_SOURCE_DIR}/include/IDiscoverer.h
     ${CMAKE_SOURCE_DIR}/include/filesystem/IDirectory.h
     ${CMAKE_SOURCE_DIR}/include/filesystem/IFile.h
-
     ${CMAKE_SOURCE_DIR}/include/factory/IFileSystem.h
+    ${CMAKE_SOURCE_DIR}/include/ILogger.h
 
     database/Cache.h
     database/SqliteTools.h
@@ -72,6 +72,9 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     discoverer/FsDiscoverer.cpp
 
     Utils.cpp
+
+    logging/IostreamLogger.cpp
+    logging/Logger.cpp
 )
 
 if (${EMOTION_FOUND})

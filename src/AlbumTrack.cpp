@@ -2,6 +2,7 @@
 #include "Album.h"
 #include "File.h"
 #include "database/SqliteTools.h"
+#include "logging/Logger.h"
 
 const std::string policy::AlbumTrackTable::Name = "AlbumTrack";
 const std::string policy::AlbumTrackTable::CacheColumn = "id_track";
@@ -97,7 +98,7 @@ bool AlbumTrack::destroy()
     // Manually remove Files from cache, and let foreign key handling delete them from the DB
     auto fs = files();
     if ( fs.size() == 0 )
-        std::cerr << "No files found for AlbumTrack " << m_id << std::endl;
+        Log::Warning( "No files found for AlbumTrack ", m_id );
     for ( auto& f : fs )
     {
         // Ignore failures to discard from cache, we might want to discard records from

@@ -67,7 +67,7 @@ ServiceStatus VLCMetadataService::handleMediaMeta( FilePtr file, VLC::Media& med
     auto tracks = media.tracks();
     if ( tracks.size() == 0 )
     {
-        std::cerr << "Failed to fetch tracks" << std::endl;
+        Log::Error( "Failed to fetch tracks" );
         return StatusFatal;
     }
     bool isAudio = true;
@@ -115,14 +115,14 @@ bool VLCMetadataService::parseAudioFile( FilePtr file, VLC::Media& media ) const
         album = m_ml->createAlbum( albumTitle );
     if ( album == nullptr )
     {
-        std::cerr << "Failed to create/get album" << std::endl;
+        Log::Error( "Failed to create/get album" );
         return false;
     }
 
     auto trackNbStr = media.meta( libvlc_meta_TrackNumber );
     if ( trackNbStr.length() == 0 )
     {
-        std::cerr << "Failed to get track id" << std::endl;
+        Log::Error( "Failed to get track id" );
         return false;
     }
     auto artwork = media.meta( libvlc_meta_ArtworkURL );
@@ -132,7 +132,7 @@ bool VLCMetadataService::parseAudioFile( FilePtr file, VLC::Media& media ) const
     auto title = media.meta( libvlc_meta_Title );
     if ( title.length() == 0 )
     {
-        std::cerr << "Failed to compute track title" << std::endl;
+        Log::Error( "Failed to compute track title" );
         title = "Unknown track #";
         title += trackNbStr;
     }
@@ -140,7 +140,7 @@ bool VLCMetadataService::parseAudioFile( FilePtr file, VLC::Media& media ) const
     auto track = album->addTrack( title, trackNb );
     if ( track == nullptr )
     {
-        std::cerr << "Failure while creating album track" << std::endl;
+        Log::Error( "Failure while creating album track" );
         return false;
     }
     file->setAlbumTrack( track );
@@ -179,7 +179,7 @@ bool VLCMetadataService::parseVideoFile( FilePtr file, VLC::Media& media ) const
             int episodeId = std::stoi( episodeIdStr, &endpos );
             if ( endpos != episodeIdStr.length() )
             {
-                std::cerr << "Invalid episode id provided" << std::endl;
+                Log::Error( "Invalid episode id provided" );
                 return true;
             }
             show->addEpisode( title, episodeId );

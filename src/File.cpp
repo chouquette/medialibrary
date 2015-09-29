@@ -9,6 +9,7 @@
 #include "File.h"
 #include "Folder.h"
 #include "Label.h"
+#include "logging/Logger.h"
 #include "Movie.h"
 #include "ShowEpisode.h"
 #include "database/SqliteTools.h"
@@ -312,7 +313,7 @@ bool File::addLabel( LabelPtr label )
 {
     if ( m_id == 0 || label->id() == 0 )
     {
-        std::cerr << "Both file & label need to be inserted in database before being linked together" << std::endl;
+        Log::Error( "Both file & label need to be inserted in database before being linked together" );
         return false;
     }
     const char* req = "INSERT INTO LabelFileRelation VALUES(?, ?)";
@@ -323,7 +324,7 @@ bool File::removeLabel( LabelPtr label )
 {
     if ( m_id == 0 || label->id() == 0 )
     {
-        std::cerr << "Can't unlink a label/file not inserted in database" << std::endl;
+        Log::Error( "Can't unlink a label/file not inserted in database" );
         return false;
     }
     const char* req = "DELETE FROM LabelFileRelation WHERE id_label = ? AND id_file = ?";
