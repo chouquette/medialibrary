@@ -220,10 +220,15 @@ void MediaLibrary::discover( const std::string &entryPoint )
     std::thread t([this, entryPoint] {
         //FIXME: This will crash if the media library gets deleted while we
         //are discovering.
+        if ( m_callback != nullptr )
+            m_callback->onDiscoveryStarted( entryPoint );
+
         for ( auto& d : m_discoverers )
             d->discover( entryPoint );
-        }
-    );
+
+        if ( m_callback != nullptr )
+            m_callback->onDiscoveryCompleted( entryPoint );
+    });
     t.detach();
 }
 
@@ -361,6 +366,10 @@ FilePtr MediaLibrary::addFile( const fs::IFile* file, unsigned int folderId )
         std::cerr << "Failed to add file " << file->fullPath() << " to the media library" << std::endl;
         return nullptr;
     }
+    // Keep in mind that this is queued by the parser thread, there is no waranty about
+    // when the metadata will be available
+    if ( m_callback != nullptr )
+        m_callback->onFileAdded( fptr );
     m_parser->parse( fptr, m_callback );
     return fptr;
 }

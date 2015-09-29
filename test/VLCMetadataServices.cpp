@@ -20,6 +20,11 @@ class ServiceCb : public IMediaLibraryCb
         {
             waitCond.notify_all();
         }
+
+        // IMediaLibraryCb interface
+        virtual void onDiscoveryStarted( const std::string& ) override {}
+        virtual void onFileAdded( FilePtr ) override {}
+        virtual void onDiscoveryCompleted( const std::string& ) override {}
 };
 
 class VLCMetadataServices : public Tests
