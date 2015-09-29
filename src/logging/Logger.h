@@ -90,6 +90,6 @@ private:
     static std::atomic<ILogger*> s_logger;
 };
 
-#define LOG_ERROR( ... ) Log::Error( __FILE__, ":", __LINE__, ' ', __func__, __VA_ARGS__ )
-#define LOG_WARN( ... ) Log::Warning( __FILE__, ":", __LINE__, ' ', __func__, __VA_ARGS__ )
-#define LOG_INFO( ... ) Log::Info( __FILE__, ":", __LINE__, ' ', __func__, __VA_ARGS__ )
+#define LOG_ERROR( ... ) Log::Error( __FILE__, ":", __LINE__, ' ', __func__, ' ', __VA_ARGS__ )
+#define LOG_WARN( ... ) Log::Warning( __FILE__, ":", __LINE__, ' ', __func__, ' ', __VA_ARGS__ )
+#define LOG_INFO( ... ) Log::Info( __FILE__, ":", __LINE__, ' ', __func__, ' ', __VA_ARGS__ )
