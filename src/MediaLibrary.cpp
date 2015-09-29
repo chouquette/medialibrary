@@ -217,8 +217,14 @@ void MediaLibrary::addMetadataService(std::unique_ptr<IMetadataService> service)
 
 void MediaLibrary::discover( const std::string &entryPoint )
 {
-    for ( auto& d : m_discoverers )
-        d->discover( entryPoint );
+    std::thread t([this, entryPoint] {
+        //FIXME: This will crash if the media library gets deleted while we
+        //are discovering.
+        for ( auto& d : m_discoverers )
+            d->discover( entryPoint );
+        }
+    );
+    t.detach();
 }
 
 FolderPtr MediaLibrary::onNewFolder( const fs::IDirectory* directory, FolderPtr parent )

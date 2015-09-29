@@ -60,7 +60,7 @@ class IMediaLibrary
 
         /**
          * @brief discover Launch a discovery on the provided entry point.
-         * There no garanty on how this will be processed, or if it will be processed synchronously or not.
+         * The actuall discovery will run asynchronously, meaning this method will immediatly return.
          * Depending on which discoverer modules where provided, this might or might not work
          * @param entryPoint What to discover.
          */
