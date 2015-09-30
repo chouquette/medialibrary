@@ -13,18 +13,13 @@ class IMediaLibraryCb
 public:
     virtual ~IMediaLibraryCb() = default;
     /**
-     * @brief onMetadataUpdated Will be called when a file gets some updated metadata
+     * @brief onMetadataUpdated Will be called when a file gets added, or if its metadata
+     *                          got updated.
      * @param file The updated file.
      */
-    virtual void onMetadataUpdated( FilePtr file ) = 0;
+    virtual void onFileUpdated( FilePtr file ) = 0;
 
     virtual void onDiscoveryStarted( const std::string& entryPoint ) = 0;
-    /**
-     * @brief onFileAdded This will be called for each new file discovered
-     *                    or restored when reloading the media library.
-     * @param file
-     */
-    virtual void onFileAdded( FilePtr file ) = 0;
     virtual void onDiscoveryCompleted( const std::string& entryPoint ) = 0;
 };
 

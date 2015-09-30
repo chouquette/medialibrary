@@ -90,7 +90,7 @@ void Parser::done( FilePtr file, ServiceStatus status, void* data )
     if (t->it == t->end)
     {
         file->setReady();
-        t->cb->onMetadataUpdated( file );
+        t->cb->onFileUpdated( file );
         delete t;
         return;
     }

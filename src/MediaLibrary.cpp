@@ -394,10 +394,6 @@ FilePtr MediaLibrary::addFile( const fs::IFile* file, unsigned int folderId )
         return nullptr;
     }
     LOG_INFO( "Adding ", file->name() );
-    // Keep in mind that this is queued by the parser thread, there is no waranty about
-    // when the metadata will be available
-    if ( m_callback != nullptr )
-        m_callback->onFileAdded( fptr );
     m_parser->parse( fptr, m_callback );
     return fptr;
 }

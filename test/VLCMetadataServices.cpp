@@ -16,14 +16,13 @@ class ServiceCb : public IMediaLibraryCb
         std::condition_variable waitCond;
         std::mutex mutex;
 
-        virtual void onMetadataUpdated( FilePtr )
+        virtual void onFileUpdated( FilePtr ) override
         {
             waitCond.notify_all();
         }
 
         // IMediaLibraryCb interface
         virtual void onDiscoveryStarted( const std::string& ) override {}
-        virtual void onFileAdded( FilePtr ) override {}
         virtual void onDiscoveryCompleted( const std::string& ) override {}
 };
 
