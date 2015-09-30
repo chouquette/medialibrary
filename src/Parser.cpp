@@ -23,7 +23,7 @@ Parser::~Parser()
 
 void Parser::addService(std::unique_ptr<IMetadataService> service)
 {
-    m_services.push_back( std::move( service ) );
+    // Assume no services will be added after the parser has been initialized
     std::push_heap( m_services.begin(), m_services.end(), []( const ServicePtr& a, const ServicePtr& b )
     {
         // We want higher priority first
@@ -55,7 +55,7 @@ void Parser::run()
             {
                 m_cond.wait( lock, [this]() { return m_tasks.empty() == false || m_stopParser == true; });
                 // We might have been woken up because the parser is being destroyed
-                if ( m_stopParser  == true )
+                if ( m_stopParser == true )
                     return;
             }
             // Otherwise it's safe to assume we have at least one element.
