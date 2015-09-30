@@ -40,6 +40,8 @@ bool VLCMetadataService::run( FilePtr file, void* data )
 {
     cleanup();
 
+    LOG_INFO( "Parsing ", file->mrl() );
+
     auto ctx = new Context( file );
     ctx->media = VLC::Media( m_instance, file->mrl(), VLC::Media::FromPath );
 
