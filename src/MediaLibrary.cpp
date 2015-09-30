@@ -123,6 +123,21 @@ std::vector<FilePtr> MediaLibrary::files()
     return File::fetchAll( m_dbConnection );
 }
 
+std::vector<FilePtr> MediaLibrary::audioFiles()
+{
+    static const std::string req = "SELECT * FROM " + policy::FileTable::Name + " WHERE type = ?";
+    //FIXME: Replace this with template magic in sqlite's traits
+    using type_t = std::underlying_type<IFile::Type>::type;
+    return sqlite::Tools::fetchAll<File, IFile>( m_dbConnection, req, static_cast<type_t>( IFile::Type::AudioType ) );
+}
+
+std::vector<FilePtr> MediaLibrary::videoFiles()
+{
+    static const std::string req = "SELECT * FROM " + policy::FileTable::Name + " WHERE type = ?";
+    using type_t = std::underlying_type<IFile::Type>::type;
+    return sqlite::Tools::fetchAll<File, IFile>( m_dbConnection, req, static_cast<type_t>( IFile::Type::VideoType ) );
+}
+
 FilePtr MediaLibrary::file( const std::string& path )
 {
     return File::fetch( m_dbConnection, path );

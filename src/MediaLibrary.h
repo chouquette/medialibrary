@@ -18,6 +18,8 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
         virtual void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory ) override;
 
         virtual std::vector<FilePtr> files() override;
+        virtual std::vector<FilePtr> audioFiles() override;
+        virtual std::vector<FilePtr> videoFiles() override;
         virtual FilePtr file( const std::string& path ) override;
         virtual FilePtr addFile( const std::string& path ) override;
         virtual bool deleteFile( const std::string& mrl ) override;
