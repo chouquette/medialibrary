@@ -50,6 +50,8 @@ class IFile
         /// Returns wether the file has been added as a stand alone file (true), or as
         /// part of a folder (false)
         virtual bool isStandAlone() = 0;
+        /// Explicitely mark a file as "ready" (meaning all required metadata have been parsed)
+        virtual bool setReady() = 0;
         virtual bool isReady() const = 0;
         virtual unsigned int lastModificationDate() = 0;
 };

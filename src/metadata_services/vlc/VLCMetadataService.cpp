@@ -101,8 +101,6 @@ ServiceStatus VLCMetadataService::handleMediaMeta( FilePtr file, VLC::Media& med
         if (parseVideoFile( file, media ) == false )
             return StatusFatal;
     }
-    auto f = std::static_pointer_cast<File>( file );
-    f->setReady();
     return StatusSuccess;
 }
 

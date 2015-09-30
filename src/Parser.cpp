@@ -1,6 +1,8 @@
+#include "Parser.h"
+
 #include <algorithm>
 
-#include "Parser.h"
+#include "IFile.h"
 
 Parser::Parser()
     : m_stopParser( false )
@@ -87,6 +89,7 @@ void Parser::done( FilePtr file, ServiceStatus status, void* data )
     ++t->it;
     if (t->it == t->end)
     {
+        file->setReady();
         t->cb->onMetadataUpdated( file );
         delete t;
         return;

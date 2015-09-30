@@ -73,7 +73,7 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         virtual unsigned int lastModificationDate() override;
 
         virtual bool isReady() const;
-        void setReady();
+        bool setReady();
 
     private:
         DBConnection m_dbConnection;
@@ -90,14 +90,13 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         unsigned int m_folderId;
         unsigned int m_lastModificationDate;
         std::string m_snapshot;
+        bool m_isParsed;
 
         // Auto fetched related properties
         Album* m_album;
         AlbumTrackPtr m_albumTrack;
         ShowEpisodePtr m_showEpisode;
         MoviePtr m_movie;
-
-        bool m_isReady;
 
         friend class Cache<File, IFile, policy::FileTable, policy::FileCache>;
         friend struct policy::FileTable;

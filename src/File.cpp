@@ -34,8 +34,7 @@ File::File( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_folderId = sqlite::Traits<unsigned int>::Load( stmt, 8 );
     m_lastModificationDate = sqlite::Traits<unsigned int>::Load( stmt, 9 );
     m_snapshot = sqlite::Traits<std::string>::Load( stmt, 10 );
-
-    m_isReady = m_type != Type::UnknownType;
+    m_isParsed = sqlite::Traits<bool>::Load( stmt, 11 );
 }
 
 File::File( const fs::IFile* file, unsigned int folderId )
@@ -49,7 +48,7 @@ File::File( const fs::IFile* file, unsigned int folderId )
     , m_movieId( 0 )
     , m_folderId( folderId )
     , m_lastModificationDate( file->lastModificationDate() )
-    , m_isReady( false )
+    , m_isParsed( false )
 {
 }
 
@@ -230,13 +229,19 @@ unsigned int File::lastModificationDate()
 
 bool File::isReady() const
 {
-    return m_isReady;
+    return m_isParsed;
 }
 
-void File::setReady()
+bool File::setReady()
 {
-    assert( m_isReady == false );
-    m_isReady = true;
+    if ( m_isParsed == true )
+        return true;
+    static const std::string req = "UPDATE " + policy::FileTable::Name
+            + " SET parsed = ? WHERE id_file = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, true, m_id ) == false )
+        return false;
+    m_isParsed = true;
+    return true;
 }
 
 unsigned int File::id() const
@@ -275,6 +280,7 @@ bool File::createTable( DBConnection connection )
             "folder_id UNSIGNED INTEGER,"
             "last_modification_date UNSIGNED INTEGER,"
             "snapshot TEXT,"
+            "parsed BOOLEAN,"
             "FOREIGN KEY (album_track_id) REFERENCES " + policy::AlbumTrackTable::Name
             + "(id_track) ON DELETE CASCADE,"
             "FOREIGN KEY (show_episode_id) REFERENCES " + policy::ShowEpisodeTable::Name
