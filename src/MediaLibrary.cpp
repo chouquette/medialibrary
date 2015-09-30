@@ -368,13 +368,17 @@ FilePtr MediaLibrary::addFile( const fs::IFile* file, unsigned int folderId )
 {
     if ( std::find( begin( supportedExtensions ), end( supportedExtensions ),
                     file->extension() ) == end( supportedExtensions ) )
+    {
+        LOG_INFO( "Ignoring ", file->name(), " due to its extension" );
         return false;
+    }
     auto fptr = File::create( m_dbConnection, file, folderId );
     if ( fptr == nullptr )
     {
         LOG_ERROR( "Failed to add file ", file->fullPath(), " to the media library" );
         return nullptr;
     }
+    LOG_INFO( "Adding ", file->name() );
     // Keep in mind that this is queued by the parser thread, there is no waranty about
     // when the metadata will be available
     if ( m_callback != nullptr )
