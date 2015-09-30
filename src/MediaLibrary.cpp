@@ -384,7 +384,6 @@ FilePtr MediaLibrary::addFile( const fs::IFile* file, unsigned int folderId )
     if ( std::find( begin( supportedExtensions ), end( supportedExtensions ),
                     file->extension() ) == end( supportedExtensions ) )
     {
-        LOG_INFO( "Ignoring ", file->name(), " due to its extension" );
         return false;
     }
     auto fptr = File::create( m_dbConnection, file, folderId );
