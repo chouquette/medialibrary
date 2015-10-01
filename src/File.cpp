@@ -227,12 +227,12 @@ unsigned int File::lastModificationDate()
     return m_lastModificationDate;
 }
 
-bool File::isReady() const
+bool File::isParsed() const
 {
     return m_isParsed;
 }
 
-bool File::setReady()
+bool File::markParsed()
 {
     if ( m_isParsed == true )
         return true;

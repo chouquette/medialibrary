@@ -50,9 +50,12 @@ class IFile
         /// Returns wether the file has been added as a stand alone file (true), or as
         /// part of a folder (false)
         virtual bool isStandAlone() = 0;
-        /// Explicitely mark a file as "ready" (meaning all required metadata have been parsed)
-        virtual bool setReady() = 0;
-        virtual bool isReady() const = 0;
+        /// Explicitely mark a file as fully parsed, meaning no metadata service needs to run anymore.
+        //FIXME: This lacks granularity as we don't have a straight forward way to know which service
+        //needs to run or not.
+        virtual bool markParsed() = 0;
+        virtual bool isParsed() const = 0;
+
         virtual unsigned int lastModificationDate() = 0;
 };
 

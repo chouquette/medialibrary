@@ -72,8 +72,8 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         virtual bool isStandAlone() override;
         virtual unsigned int lastModificationDate() override;
 
-        virtual bool isReady() const;
-        bool setReady();
+        virtual bool markParsed() override;
+        virtual bool isParsed() const override;
 
     private:
         DBConnection m_dbConnection;

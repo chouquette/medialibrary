@@ -94,7 +94,7 @@ void Parser::done( FilePtr file, ServiceStatus status, void* data )
     ++t->it;
     if (t->it == t->end)
     {
-        file->setReady();
+        file->markParsed();
         delete t;
         return;
     }
