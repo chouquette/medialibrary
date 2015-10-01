@@ -38,9 +38,9 @@ File::File( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_name = sqlite::Traits<std::string>::Load( stmt, 12 );
 }
 
-File::File( const fs::IFile* file, unsigned int folderId, const std::string& name )
+File::File( const fs::IFile* file, unsigned int folderId, const std::string& name, Type type )
     : m_id( 0 )
-    , m_type( Type::UnknownType )
+    , m_type( type )
     , m_duration( 0 )
     , m_albumTrackId( 0 )
     , m_playCount( 0 )
@@ -54,14 +54,14 @@ File::File( const fs::IFile* file, unsigned int folderId, const std::string& nam
 {
 }
 
-//FIXME: Pass the guessed type and default name
-FilePtr File::create( DBConnection dbConnection, const fs::IFile* file, unsigned int folderId )
+FilePtr File::create( DBConnection dbConnection, Type type, const fs::IFile* file, unsigned int folderId )
 {
-    auto self = std::make_shared<File>( file, folderId, file->name() );
+    auto self = std::make_shared<File>( file, folderId, file->name(), type );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
-            "(mrl, folder_id, last_modification_date, name) VALUES(?, ?, ?, ?)";
+            "(type, mrl, folder_id, last_modification_date, name) VALUES(?, ?, ?, ?, ?)";
 
-    if ( _Cache::insert( dbConnection, self, req, self->m_mrl, sqlite::ForeignKey( folderId ),
+    using type_t = std::underlying_type<Type>::type;
+    if ( _Cache::insert( dbConnection, self, req, static_cast<type_t>( type ), self->m_mrl, sqlite::ForeignKey( folderId ),
                          self->m_lastModificationDate, self->m_name ) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;

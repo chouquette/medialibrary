@@ -396,13 +396,12 @@ FilePtr MediaLibrary::addFile( const fs::IFile* file, unsigned int folderId )
     if ( type == IFile::Type::UnknownType )
         return false;
 
-    auto fptr = File::create( m_dbConnection, file, folderId );
+    auto fptr = File::create( m_dbConnection, type, file, folderId );
     if ( fptr == nullptr )
     {
         LOG_ERROR( "Failed to add file ", file->fullPath(), " to the media library" );
         return nullptr;
     }
-    fptr->setType( type );
     LOG_INFO( "Adding ", file->name() );
     m_callback->onFileAdded( fptr );
     m_parser->parse( fptr, m_callback );

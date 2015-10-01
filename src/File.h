@@ -40,9 +40,9 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         // shall be well-formed, and private constructor would prevent that.
         // There might be a way with a user-defined allocator, but we'll see that later...
         File(DBConnection dbConnection , sqlite3_stmt* stmt);
-        File(const fs::IFile* file , unsigned int folderId, const std::string &name);
+        File(const fs::IFile* file, unsigned int folderId, const std::string &name, Type type);
 
-        static FilePtr create(DBConnection dbConnection, const fs::IFile* file , unsigned int folderId);
+        static FilePtr create(DBConnection dbConnection, Type type, const fs::IFile* file , unsigned int folderId);
         static bool createTable( DBConnection connection );
 
         virtual unsigned int id() const;
