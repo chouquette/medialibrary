@@ -35,6 +35,7 @@ File::File( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_lastModificationDate = sqlite::Traits<unsigned int>::Load( stmt, 9 );
     m_snapshot = sqlite::Traits<std::string>::Load( stmt, 10 );
     m_isParsed = sqlite::Traits<bool>::Load( stmt, 11 );
+    m_name = sqlite::Traits<std::string>::Load( stmt, 12 );
 }
 
 File::File( const fs::IFile* file, unsigned int folderId )
@@ -52,6 +53,7 @@ File::File( const fs::IFile* file, unsigned int folderId )
 {
 }
 
+//FIXME: Pass the guessed type and default name
 FilePtr File::create( DBConnection dbConnection, const fs::IFile* file, unsigned int folderId )
 {
     auto self = std::make_shared<File>( file, folderId );
@@ -266,6 +268,21 @@ bool File::setType( Type type )
     return true;
 }
 
+const std::string &File::name()
+{
+    return m_name;
+}
+
+bool File::setName( const std::string &name )
+{
+    static const std::string req = "UPDATE " + policy::FileTable::Name
+            + " SET name = ? WHERE id_file = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, name, m_id ) == false )
+        return false;
+    m_name = name;
+    return true;
+}
+
 bool File::createTable( DBConnection connection )
 {
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::FileTable::Name + "("
@@ -281,6 +298,7 @@ bool File::createTable( DBConnection connection )
             "last_modification_date UNSIGNED INTEGER,"
             "snapshot TEXT,"
             "parsed BOOLEAN,"
+            "name TEXT,"
             "FOREIGN KEY (album_track_id) REFERENCES " + policy::AlbumTrackTable::Name
             + "(id_track) ON DELETE CASCADE,"
             "FOREIGN KEY (show_episode_id) REFERENCES " + policy::ShowEpisodeTable::Name

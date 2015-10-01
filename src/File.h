@@ -48,6 +48,8 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         virtual unsigned int id() const;
         virtual Type type() override;
         virtual bool setType( Type type ) override;
+        virtual const std::string& name() override;
+        virtual bool setName( const std::string& name ) override;
         virtual AlbumTrackPtr albumTrack();
         virtual bool setAlbumTrack( AlbumTrackPtr albumTrack );
         virtual unsigned int duration() const;
@@ -91,6 +93,7 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         unsigned int m_lastModificationDate;
         std::string m_snapshot;
         bool m_isParsed;
+        std::string m_name;
 
         // Auto fetched related properties
         Album* m_album;
