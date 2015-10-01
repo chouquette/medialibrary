@@ -28,15 +28,16 @@
 #include "filesystem/IFile.h"
 #include "factory/FileSystem.h"
 
-const std::vector<std::string> MediaLibrary::supportedExtensions {
+const std::vector<std::string> MediaLibrary::supportedVideoExtensions {
     // Videos
     "avi", "3gp", "amv", "asf", "divx", "dv", "flv", "gxf",
     "iso", "m1v", "m2v", "m2t", "m2ts", "m4v", "mkv", "mov",
     "mp2", "mp4", "mpeg", "mpeg1", "mpeg2", "mpeg4", "mpg",
     "mts", "mxf", "nsv", "nuv", "ogg", "ogm", "ogv", "ogx", "ps",
-    "rec", "rm", "rmvb", "tod", "ts", "vob", "vro", "webm", "wmv",
-    // Images
-    "png", "jpg", "jpeg",
+    "rec", "rm", "rmvb", "tod", "ts", "vob", "vro", "webm", "wmv"
+};
+
+const std::vector<std::string> MediaLibrary::supportedAudioExtensions {
     // Audio
     "a52", "aac", "ac3", "aiff", "amr", "aob", "ape",
     "dts", "flac", "it", "m4a", "m4p", "mid", "mka", "mlp",
@@ -381,18 +382,29 @@ void MediaLibrary::checkFiles( fs::IDirectory* folder, unsigned int parentId )
 
 FilePtr MediaLibrary::addFile( const fs::IFile* file, unsigned int folderId )
 {
-    if ( std::find( begin( supportedExtensions ), end( supportedExtensions ),
-                    file->extension() ) == end( supportedExtensions ) )
+    auto type = IFile::Type::UnknownType;
+    if ( std::find( begin( supportedVideoExtensions ), end( supportedVideoExtensions ),
+                    file->extension() ) != end( supportedVideoExtensions ) )
     {
-        return false;
+        type = IFile::Type::VideoType;
     }
+    else if ( std::find( begin( supportedAudioExtensions ), end( supportedAudioExtensions ),
+                         file->extension() ) != end( supportedAudioExtensions ) )
+    {
+        type = IFile::Type::AudioType;
+    }
+    if ( type == IFile::Type::UnknownType )
+        return false;
+
     auto fptr = File::create( m_dbConnection, file, folderId );
     if ( fptr == nullptr )
     {
         LOG_ERROR( "Failed to add file ", file->fullPath(), " to the media library" );
         return nullptr;
     }
+    fptr->setType( type );
     LOG_INFO( "Adding ", file->name() );
+    m_callback->onFileAdded( fptr );
     m_parser->parse( fptr, m_callback );
     return fptr;
 }

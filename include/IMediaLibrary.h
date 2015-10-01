@@ -13,8 +13,16 @@ class IMediaLibraryCb
 public:
     virtual ~IMediaLibraryCb() = default;
     /**
-     * @brief onMetadataUpdated Will be called when a file gets added, or if its metadata
-     *                          got updated.
+     * @brief onFileAdded Will be called when a file gets added.
+     * Depending if the file is being restored or was just discovered,
+     * the file type might be a best effort guess. If the file was freshly
+     * discovered, it is extremely likely that no metadata will be
+     * available yet.
+     * @param file
+     */
+    virtual void onFileAdded( FilePtr file ) = 0;
+    /**
+     * @brief onFileUpdated Will be called when a file metadata gets updated.
      * @param file The updated file.
      */
     virtual void onFileUpdated( FilePtr file ) = 0;

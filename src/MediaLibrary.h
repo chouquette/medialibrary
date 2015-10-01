@@ -50,7 +50,8 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
         virtual void setLogger( ILogger* logger ) override;
 
     private:
-        static const std::vector<std::string> supportedExtensions;
+        static const std::vector<std::string> supportedVideoExtensions;
+        static const std::vector<std::string> supportedAudioExtensions;
 
     private:
         bool loadFolders();

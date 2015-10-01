@@ -86,11 +86,15 @@ void Parser::done( FilePtr file, ServiceStatus status, void* data )
         delete t;
         return ;
     }
+    else if ( status == StatusSuccess )
+    {
+        t->cb->onFileUpdated( file );
+    }
+
     ++t->it;
     if (t->it == t->end)
     {
         file->setReady();
-        t->cb->onFileUpdated( file );
         delete t;
         return;
     }

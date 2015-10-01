@@ -16,6 +16,10 @@ class ServiceCb : public IMediaLibraryCb
         std::condition_variable waitCond;
         std::mutex mutex;
 
+        virtual void onFileAdded( FilePtr ) override
+        {
+        }
+
         virtual void onFileUpdated( FilePtr ) override
         {
             waitCond.notify_all();
