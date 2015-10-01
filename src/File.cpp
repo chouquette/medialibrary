@@ -38,7 +38,7 @@ File::File( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_name = sqlite::Traits<std::string>::Load( stmt, 12 );
 }
 
-File::File( const fs::IFile* file, unsigned int folderId )
+File::File( const fs::IFile* file, unsigned int folderId, const std::string& name )
     : m_id( 0 )
     , m_type( Type::UnknownType )
     , m_duration( 0 )
@@ -50,17 +50,19 @@ File::File( const fs::IFile* file, unsigned int folderId )
     , m_folderId( folderId )
     , m_lastModificationDate( file->lastModificationDate() )
     , m_isParsed( false )
+    , m_name( name )
 {
 }
 
 //FIXME: Pass the guessed type and default name
 FilePtr File::create( DBConnection dbConnection, const fs::IFile* file, unsigned int folderId )
 {
-    auto self = std::make_shared<File>( file, folderId );
+    auto self = std::make_shared<File>( file, folderId, file->name() );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
-            "(mrl, folder_id, last_modification_date) VALUES(?, ?, ?)";
+            "(mrl, folder_id, last_modification_date, name) VALUES(?, ?, ?, ?)";
 
-    if ( _Cache::insert( dbConnection, self, req, self->m_mrl, sqlite::ForeignKey( folderId ), self->m_lastModificationDate ) == false )
+    if ( _Cache::insert( dbConnection, self, req, self->m_mrl, sqlite::ForeignKey( folderId ),
+                         self->m_lastModificationDate, self->m_name ) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;
     return self;
