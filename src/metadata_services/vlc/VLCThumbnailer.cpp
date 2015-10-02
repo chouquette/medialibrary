@@ -261,7 +261,7 @@ bool VLCThumbnailer::compress(uint8_t* buff, FilePtr file, void *data)
 #error FIXME
 #endif
 
-    m_cb->done( file, StatusSuccess, data );
     file->setSnapshot( path );
+    m_cb->done( file, StatusSuccess, data );
     return true;
 }
