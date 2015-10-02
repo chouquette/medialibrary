@@ -97,8 +97,12 @@ target_link_libraries(${PROJECT_NAME} ${SQLITE3_LIBRARIES})
 
 if (${WITH_VLC})
     find_package(LIBVLC REQUIRED)
-    target_link_libraries( ${PROJECT_NAME} ${LIBVLC_LIBRARY})
+    # Since VLC include a thumbnailer, we need libjpeg to encode the result
+    find_package(JPEG REQUIRED)
+    target_link_libraries( ${PROJECT_NAME} ${LIBVLC_LIBRARY} )
+    target_link_libraries( ${PROJECT_NAME} ${JPEG_LIBRARIES} )
     include_directories(${LIBVLC_INCLUDE_DIR})
+    include_directories(${JPEG_INCLUDE_DIR})
     set(LIBVLCPP_DIR "" CACHE PATH "Path to libvlcpp's directory")
     include_directories(${LIBVLCPP_DIR})
 endif()

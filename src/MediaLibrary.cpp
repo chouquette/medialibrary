@@ -81,7 +81,6 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
     {
         const char* args[] = {
             "-vv",
-            "--vout=dummy",
         };
         m_vlcInstance = VLC::Instance( sizeof(args) / sizeof(args[0]), args );
         m_vlcInstance.logSet([](int lvl, const libvlc_log_t*, std::string msg) {
