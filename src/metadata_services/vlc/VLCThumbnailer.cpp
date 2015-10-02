@@ -182,13 +182,14 @@ bool VLCThumbnailer::takeSnapshot(FilePtr file, VLC::MediaPlayer &mp, void *data
 
 bool VLCThumbnailer::compress(uint8_t* buff, FilePtr file, void *data)
 {
-    jpeg_compress_struct compInfo;
-    jpeg_error_mgr jerr;
-    JSAMPROW row_pointer[1];
-
     auto path = m_ml->snapshotPath();
     path += "/";
     path += std::to_string( file->id() ) + ".jpg";
+
+#ifdef WITH_JPEG
+    jpeg_compress_struct compInfo;
+    jpeg_error_mgr jerr;
+    JSAMPROW row_pointer[1];
 
     compInfo.err = jpeg_std_error(&jerr);
     jpeg_create_compress(&compInfo);
@@ -222,6 +223,9 @@ bool VLCThumbnailer::compress(uint8_t* buff, FilePtr file, void *data)
     }
     jpeg_finish_compress(&compInfo);
     jpeg_destroy_compress(&compInfo);
+#else
+#error FIXME
+#endif
 
     m_cb->done( file, StatusSuccess, data );
     file->setSnapshot( path );
