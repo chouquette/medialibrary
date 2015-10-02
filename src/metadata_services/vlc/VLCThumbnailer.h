@@ -24,7 +24,7 @@ private:
 private:
     // Force a base width, let height be computed depending on A/R
     static const uint32_t Width = 320;
-    static const uint8_t Bpp = 4;
+    static const uint8_t Bpp = 3;
 
 private:
     VLC::Instance m_instance;

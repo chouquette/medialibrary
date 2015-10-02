@@ -118,7 +118,7 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
     mp.setVideoFormatCallbacks(
         // Setup
         [this, &mp](char* chroma, unsigned int* width, unsigned int *height, unsigned int *pitches, unsigned int *lines) {
-            strcpy( chroma, "RV32" );
+            strcpy( chroma, "RV24" );
 
             const float inputAR = (float)*width / *height;
 
@@ -239,7 +239,11 @@ bool VLCThumbnailer::compress(uint8_t* buff, FilePtr file, void *data)
     compInfo.image_width = Width;
     compInfo.image_height = m_height;
     compInfo.input_components = Bpp;
+#if JPEG_LIB_VERSION <= 80
     compInfo.in_color_space = JCS_EXT_BGRX;
+#else
+    compInfo.in_color_space = JCS_RGB;
+#endif
     jpeg_set_defaults( &compInfo );
     jpeg_set_quality( &compInfo, 85, TRUE );
 
