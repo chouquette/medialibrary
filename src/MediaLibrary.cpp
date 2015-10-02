@@ -84,6 +84,15 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
             "--vout=dummy",
         };
         VLC::Instance vlcInstance( sizeof(args) / sizeof(args[0]), args );
+        vlcInstance.logSet([](int lvl, const libvlc_log_t*, std::string msg) {
+            if ( lvl == LIBVLC_ERROR )
+                Log::Error( msg );
+            else if ( lvl == LIBVLC_WARNING )
+                Log::Warning( msg );
+            else
+                Log::Info( msg );
+        });
+
         auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService( vlcInstance ) );
         auto thumbnailerService = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer( vlcInstance ) );
         addMetadataService( std::move( vlcService ) );
