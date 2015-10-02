@@ -8,6 +8,7 @@ class Parser;
 #include "IMediaLibrary.h"
 #include "IDiscoverer.h"
 #include "logging/Logger.h"
+#include "vlcpp/vlc.hpp"
 
 class MediaLibrary : public IMediaLibrary, public IDiscovererCb
 {
@@ -66,6 +67,10 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
         std::vector<std::unique_ptr<IDiscoverer>> m_discoverers;
         std::string m_snapshotPath;
         IMediaLibraryCb* m_callback;
+
+        // This probably qualifies as a work around, but we need to keep the VLC::Instance
+        // alive to be able to use the logging wrapper lambda
+        VLC::Instance m_vlcInstance;
 
         // Keep the parser as last field.
         // The parser holds a (raw) pointer to the media library. When MediaLibrary's destructor gets called

@@ -83,8 +83,8 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
             "-vv",
             "--vout=dummy",
         };
-        VLC::Instance vlcInstance( sizeof(args) / sizeof(args[0]), args );
-        vlcInstance.logSet([](int lvl, const libvlc_log_t*, std::string msg) {
+        m_vlcInstance = VLC::Instance( sizeof(args) / sizeof(args[0]), args );
+        m_vlcInstance.logSet([](int lvl, const libvlc_log_t*, std::string msg) {
             if ( lvl == LIBVLC_ERROR )
                 Log::Error( msg );
             else if ( lvl == LIBVLC_WARNING )
@@ -93,8 +93,8 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
                 Log::Info( msg );
         });
 
-        auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService( vlcInstance ) );
-        auto thumbnailerService = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer( vlcInstance ) );
+        auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService( m_vlcInstance ) );
+        auto thumbnailerService = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer( m_vlcInstance ) );
         addMetadataService( std::move( vlcService ) );
         addMetadataService( std::move( thumbnailerService ) );
     }
