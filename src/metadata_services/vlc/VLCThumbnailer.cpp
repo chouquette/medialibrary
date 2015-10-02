@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <jpeglib.h>
+#include <setjmp.h>
 
 #include "IFile.h"
 #include "logging/Logger.h"
@@ -180,19 +181,28 @@ bool VLCThumbnailer::takeSnapshot(FilePtr file, VLC::MediaPlayer &mp, void *data
     return compress( buff.get(), file, data );
 }
 
+#ifdef WITH_JPEG
+
+struct jpegError : public jpeg_error_mgr
+{
+    jmp_buf buff;
+    char message[JMSG_LENGTH_MAX];
+
+    static void jpegErrorHandler(j_common_ptr common)
+    {
+        auto error = reinterpret_cast<jpegError*>(common->err);
+        (*error->format_message)( common, error->message );
+        longjmp(error->buff, 1);
+    }
+};
+
+#endif
+
 bool VLCThumbnailer::compress(uint8_t* buff, FilePtr file, void *data)
 {
     auto path = m_ml->snapshotPath();
     path += "/";
     path += std::to_string( file->id() ) + ".jpg";
-
-#ifdef WITH_JPEG
-    jpeg_compress_struct compInfo;
-    jpeg_error_mgr jerr;
-    JSAMPROW row_pointer[1];
-
-    compInfo.err = jpeg_std_error(&jerr);
-    jpeg_create_compress(&compInfo);
 
     //FIXME: Abstract this away, though libjpeg requires a FILE*...
     auto fOut = fopen(path.c_str(), "wb");
@@ -204,6 +214,26 @@ bool VLCThumbnailer::compress(uint8_t* buff, FilePtr file, void *data)
         m_cb->done( file, StatusError, data );
         return false;
     }
+
+#ifdef WITH_JPEG
+    jpeg_compress_struct compInfo;
+    JSAMPROW row_pointer[1];
+
+    jpeg_create_compress(&compInfo);
+    //libjpeg's default error handling is to call exit(), which would
+    //be slightly problematic...
+    jpegError err;
+    compInfo.err = jpeg_std_error(&err);
+    err.error_exit = jpegError::jpegErrorHandler;
+
+    if ( setjmp( err.buff ) )
+    {
+        LOG_ERROR("JPEG failure: ", err.message);
+        jpeg_destroy_compress(&compInfo);
+        m_cb->done( file, StatusError, data );
+        return false;
+    }
+
     jpeg_stdio_dest(&compInfo, fOut);
 
     compInfo.image_width = Width;
