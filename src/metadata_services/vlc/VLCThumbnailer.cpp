@@ -219,7 +219,6 @@ bool VLCThumbnailer::compress(uint8_t* buff, FilePtr file, void *data)
     jpeg_compress_struct compInfo;
     JSAMPROW row_pointer[1];
 
-    jpeg_create_compress(&compInfo);
     //libjpeg's default error handling is to call exit(), which would
     //be slightly problematic...
     jpegError err;
@@ -234,6 +233,7 @@ bool VLCThumbnailer::compress(uint8_t* buff, FilePtr file, void *data)
         return false;
     }
 
+    jpeg_create_compress(&compInfo);
     jpeg_stdio_dest(&compInfo, fOut);
 
     compInfo.image_width = Width;
