@@ -34,7 +34,7 @@ public:
 class IMediaLibrary
 {
     public:
-        virtual ~IMediaLibrary() {}
+        virtual ~IMediaLibrary() = default;
         ///
         /// \brief  initialize Initializes the media library.
         ///         This will use the provided discoverer to search for new media asynchronously.
