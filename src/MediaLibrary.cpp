@@ -215,6 +215,11 @@ AlbumPtr MediaLibrary::createAlbum(const std::string& title )
     return Album::create( m_dbConnection, title );
 }
 
+std::vector<AlbumPtr> MediaLibrary::albums()
+{
+    return Album::fetchAll( m_dbConnection );
+}
+
 ShowPtr MediaLibrary::show(const std::string& name)
 {
     static const std::string req = "SELECT * FROM " + policy::ShowTable::Name

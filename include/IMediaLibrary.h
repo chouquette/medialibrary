@@ -67,6 +67,7 @@ class IMediaLibrary
         virtual std::vector<FilePtr> videoFiles() = 0;
         virtual AlbumPtr album( const std::string& title ) = 0;
         virtual AlbumPtr createAlbum( const std::string& title ) = 0;
+        virtual std::vector<AlbumPtr> albums() = 0;
         virtual ShowPtr show( const std::string& name ) = 0;
         virtual ShowPtr createShow( const std::string& name ) = 0;
         virtual MoviePtr movie( const std::string& title ) = 0;

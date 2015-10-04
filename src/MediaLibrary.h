@@ -35,6 +35,7 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
 
         virtual AlbumPtr album( const std::string& title ) override;
         virtual AlbumPtr createAlbum( const std::string& title ) override;
+        virtual std::vector<AlbumPtr> albums() override;
 
         virtual ShowPtr show( const std::string& name ) override;
         virtual ShowPtr createShow( const std::string& name ) override;
