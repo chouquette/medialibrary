@@ -53,6 +53,12 @@ MediaLibrary::MediaLibrary()
 
 MediaLibrary::~MediaLibrary()
 {
+    // The log callback isn't shared by all VLC::Instance's, yet since
+    // they all share a single libvlc_instance_t, any VLC::Instance still alive
+    // with a log callback set will try to invoke it.
+    // We manually call logUnset to ensure that the callback that is about to be deleted will
+    // not be called anymore.
+    m_vlcInstance.logUnset();
     File::clear();
     Folder::clear();
     Label::clear();
