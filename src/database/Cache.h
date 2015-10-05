@@ -69,8 +69,6 @@ class Cache
         /*
          * Will fetch all elements from the database & cache them.
          *
-         * @param res   A reference to the result vector. All existing elements will
-         *              be discarded.
          */
         static std::vector<std::shared_ptr<INTF>> fetchAll( DBConnection dbConnectionWeak )
         {
