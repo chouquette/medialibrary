@@ -127,7 +127,7 @@ bool Album::createTable(DBConnection dbConnection )
 AlbumPtr Album::create(DBConnection dbConnection, const std::string& title )
 {
     auto album = std::make_shared<Album>( title );
-    static const std::string& req = "INSERT INTO " + policy::AlbumTable::Name +
+    static const std::string req = "INSERT INTO " + policy::AlbumTable::Name +
             "(id_album, title) VALUES(NULL, ?)";
     if ( _Cache::insert( dbConnection, album, req, title ) == false )
         return nullptr;
