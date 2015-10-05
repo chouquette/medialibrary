@@ -1,5 +1,6 @@
 #include "Album.h"
 #include "AlbumTrack.h"
+#include "Artist.h"
 
 #include "database/SqliteTools.h"
 
@@ -98,6 +99,25 @@ AlbumTrackPtr Album::addTrack( const std::string& title, unsigned int trackNb )
     return AlbumTrack::create( m_dbConnection, m_id, title, trackNb );
 }
 
+std::vector<ArtistPtr> Album::artists() const
+{
+    static const std::string req = "SELECT art.* FROM " + policy::ArtistTable::Name + " art "
+            "LEFT JOIN AlbumArtistRelation aar ON aar.id_artist = art.id_artist "
+            "WHERE aar.id_album = ?";
+    return sqlite::Tools::fetchAll<Artist, IArtist>( m_dbConnection, req, m_id );
+}
+
+bool Album::addArtist( ArtistPtr artist )
+{
+    static const std::string req = "INSERT INTO AlbumArtistRelation VALUES(?, ?)";
+    if ( m_id == 0 || artist->id() == 0 )
+    {
+        LOG_ERROR("Both artist * album need to be inserted in database before being linked together" );
+        return false;
+    }
+    return sqlite::Tools::executeRequest( m_dbConnection, req, m_id, artist->id() );
+}
+
 bool Album::destroy()
 {
     auto ts = tracks();
@@ -121,7 +141,17 @@ bool Album::createTable(DBConnection dbConnection )
                 "artwork_url TEXT,"
                 "UNSIGNED INTEGER last_sync_date"
             ")";
-   return sqlite::Tools::executeRequest( dbConnection, req );
+    static const std::string reqRel = "CREATE TABLE IF NOT EXISTS AlbumArtistRelation("
+                "id_album INTEGER,"
+                "id_artist INTEGER,"
+                "PRIMARY KEY (id_album, id_artist),"
+                "FOREIGN KEY(id_album) REFERENCES " + policy::AlbumTable::Name + "("
+                    + policy::AlbumTable::CacheColumn + ") ON DELETE CASCADE,"
+                "FOREIGN KEY(id_artist) REFERENCES " + policy::ArtistTable::Name + "("
+                    + policy::ArtistTable::CacheColumn + ") ON DELETE CASCADE"
+            ")";
+    return sqlite::Tools::executeRequest( dbConnection, req ) &&
+            sqlite::Tools::executeRequest( dbConnection, reqRel );
 }
 
 AlbumPtr Album::create(DBConnection dbConnection, const std::string& title )

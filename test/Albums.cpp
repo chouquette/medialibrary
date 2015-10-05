@@ -186,3 +186,29 @@ TEST_F( Albums, DestroyAlbum )
     f = ml->file( "file.avi" );
     ASSERT_EQ( f, nullptr );
 }
+
+TEST_F( Albums, Artists )
+{
+    auto album = ml->createAlbum( "album" );
+    auto artist1 = ml->createArtist( "john" );
+    auto artist2 = ml->createArtist( "doe" );
+
+    ASSERT_NE( album, nullptr );
+    ASSERT_NE( artist1, nullptr );
+    ASSERT_NE( artist2, nullptr );
+
+    auto res = album->addArtist( artist1 );
+    ASSERT_EQ( res, true );
+
+    res = album->addArtist( artist2 );
+    ASSERT_EQ( res, true );
+
+    auto artists = album->artists();
+    ASSERT_EQ( artists.size(), 2u );
+
+    Reload();
+
+    album = ml->album( "album" );
+    artists = album->artists();
+    ASSERT_EQ( artists.size(), 2u );
+}

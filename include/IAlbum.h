@@ -19,6 +19,8 @@ class IAlbum
         virtual bool setArtworkUrl( const std::string& artworkUrl ) = 0;
         virtual std::vector<std::shared_ptr<IAlbumTrack>> tracks() const = 0;
         virtual AlbumTrackPtr addTrack( const std::string& title, unsigned int trackId ) = 0;
+        virtual std::vector<ArtistPtr> artists() const = 0;
+        virtual bool addArtist( ArtistPtr artist ) = 0;
         virtual bool destroy() = 0;
 };
 

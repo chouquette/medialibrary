@@ -40,6 +40,10 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         virtual time_t lastSyncDate() const;
         virtual std::vector<std::shared_ptr<IAlbumTrack> > tracks() const;
         virtual AlbumTrackPtr addTrack( const std::string& title, unsigned int trackNb );
+
+        virtual std::vector<ArtistPtr> artists() const override;
+        virtual bool addArtist( ArtistPtr artist ) override;
+
         virtual bool destroy();
 
         static bool createTable( DBConnection dbConnection );

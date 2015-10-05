@@ -1,4 +1,5 @@
 #include "Artist.h"
+#include "Album.h"
 
 #include "database/SqliteTools.h"
 
@@ -48,7 +49,10 @@ bool Artist::setShortBio(const std::string &shortBio)
 
 std::vector<AlbumPtr> Artist::albums() const
 {
-    //FIXME
+    static const std::string req = "SELECT alb.* FROM " + policy::AlbumTable::Name + " alb "
+            "LEFT JOIN AlbumArtistRelation aar ON aar.id_album = alb.id_album "
+            "WHERE aar.id_artist = ?";
+    return sqlite::Tools::fetchAll<Album, IAlbum>( m_dbConnection, req, m_id );
 }
 
 bool Artist::createTable( DBConnection dbConnection )
