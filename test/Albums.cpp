@@ -53,7 +53,7 @@ TEST_F( Albums, AddTrack )
 
 TEST_F( Albums, AssignTrack )
 {
-    auto f = ml->addFile( "file.avi" );
+    auto f = ml->addFile( "file.avi", nullptr );
     auto a = ml->createAlbum( "album" );
     auto t = a->addTrack( "track", 1 );
 
@@ -73,7 +73,7 @@ TEST_F( Albums, AssignTrack )
 
 TEST_F( Albums, DeleteTrack )
 {
-    auto f = ml->addFile( "file.avi" );
+    auto f = ml->addFile( "file.avi", nullptr );
     auto a = ml->createAlbum( "album" );
     auto t = a->addTrack( "track", 1 );
     f->setAlbumTrack( t );
@@ -144,7 +144,7 @@ TEST_F( Albums, FetchAlbumFromTrack )
 {
     {
         auto a = ml->createAlbum( "album" );
-        auto f = ml->addFile( "file.avi" );
+        auto f = ml->addFile( "file.avi", nullptr );
         auto t = a->addTrack( "track 1", 1 );
         f->setAlbumTrack( t );
     }
@@ -160,7 +160,7 @@ TEST_F( Albums, FetchAlbumFromTrack )
 TEST_F( Albums, DestroyAlbum )
 {
     auto a = ml->createAlbum( "album" );
-    auto f = ml->addFile( "file.avi" );
+    auto f = ml->addFile( "file.avi", nullptr );
     auto t = a->addTrack( "track 1", 1 );
     f->setAlbumTrack( t );
 

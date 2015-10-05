@@ -10,7 +10,7 @@ class Parser;
 #include "logging/Logger.h"
 #include "vlcpp/vlc.hpp"
 
-class MediaLibrary : public IMediaLibrary, public IDiscovererCb
+class MediaLibrary : public IMediaLibrary
 {
     public:
         MediaLibrary();
@@ -22,7 +22,7 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
         virtual std::vector<FilePtr> audioFiles() override;
         virtual std::vector<FilePtr> videoFiles() override;
         virtual FilePtr file( const std::string& path ) override;
-        virtual FilePtr addFile( const std::string& path ) override;
+        virtual FilePtr addFile(const std::string& path , FolderPtr parentFolder) override;
         virtual bool deleteFile( const std::string& mrl ) override;
         virtual bool deleteFile( FilePtr file ) override;
 
@@ -48,9 +48,6 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
         virtual std::vector<ArtistPtr> artists() const override;
 
         virtual void discover( const std::string& entryPoint ) override;
-        // IDiscovererCb implementation
-        virtual FolderPtr onNewFolder( const fs::IDirectory* directory, FolderPtr parent ) override;
-        virtual FilePtr onNewFile(const fs::IFile* file, FolderPtr parent ) override;
 
         virtual const std::string& snapshotPath() const override;
         virtual void setLogger( ILogger* logger ) override;
@@ -60,11 +57,8 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
         static const std::vector<std::string> supportedAudioExtensions;
 
     private:
-        bool loadFolders();
-        bool checkSubfolders( fs::IDirectory* folder, unsigned int parentId );
-        void checkFiles( fs::IDirectory* folder, unsigned int parentId );
-        FilePtr addFile( const fs::IFile* file, unsigned int folderId );
         void addMetadataService( std::unique_ptr<IMetadataService> service );
+        void reload();
 
     private:
         std::shared_ptr<sqlite3> m_dbConnection;

@@ -9,12 +9,16 @@
 class FsDiscoverer : public IDiscoverer
 {
 public:
-    FsDiscoverer(std::shared_ptr<factory::IFileSystem> fsFactory , IDiscovererCb *discoveryCb);
-    virtual bool discover( const std::string &entryPoint ) override;
+    FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory );
+    virtual bool discover(IMediaLibrary *ml, DBConnection dbConn, const std::string &entryPoint ) override;
+    virtual void reload( IMediaLibrary* ml, DBConnection dbConn ) override;
+
+private:
+    bool checkSubfolders(IMediaLibrary *ml, DBConnection dbConn, fs::IDirectory *folder, FolderPtr parentFolder );
+    void checkFiles(IMediaLibrary *ml, DBConnection dbConn, fs::IDirectory *folder, FolderPtr parentFolder );
 
 private:
     std::shared_ptr<factory::IFileSystem> m_fsFactory;
-    IDiscovererCb* m_discoveryCb;
 };
 
 #endif // FS_DISCOVERER_H

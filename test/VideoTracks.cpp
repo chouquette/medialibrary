@@ -9,14 +9,14 @@ class VideoTracks : public Tests
 
 TEST_F( VideoTracks, AddTrack )
 {
-    auto f = ml->addFile( "file.avi" );
+    auto f = ml->addFile( "file.avi", nullptr );
     bool res = f->addVideoTrack( "H264", 1920, 1080, 29.97 );
     ASSERT_TRUE( res );
 }
 
 TEST_F( VideoTracks, FetchTracks )
 {
-    auto f = ml->addFile( "file.avi" );
+    auto f = ml->addFile( "file.avi", nullptr );
     f->addVideoTrack( "H264", 1920, 1080, 29.97 );
     f->addVideoTrack( "VP80", 640, 480, 29.97 );
 
@@ -26,10 +26,10 @@ TEST_F( VideoTracks, FetchTracks )
 
 TEST_F( VideoTracks, CheckUnique )
 {
-    auto f = ml->addFile( "file.avi" );
+    auto f = ml->addFile( "file.avi", nullptr );
     f->addVideoTrack( "H264", 1920, 1080, 29.97 );
 
-    auto f2 = ml->addFile( "file2.avi" );
+    auto f2 = ml->addFile( "file2.avi", nullptr );
     f2->addVideoTrack( "H264", 1920, 1080, 29.97 );
 
     auto ts = f->videoTracks();

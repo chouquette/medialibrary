@@ -24,7 +24,6 @@ class Folders : public Tests
         {
             Tests::Reload( fsMock );
         }
-
 };
 
 TEST_F( Folders, Add )

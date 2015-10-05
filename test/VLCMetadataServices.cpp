@@ -53,7 +53,7 @@ std::unique_ptr<ServiceCb> VLCMetadataServices::cb;
 TEST_F( VLCMetadataServices, ParseAudio )
 {
     std::unique_lock<std::mutex> lock( cb->mutex );
-    auto file = ml->addFile( "mr-zebra.mp3" );
+    auto file = ml->addFile( "mr-zebra.mp3", nullptr );
     bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [&]{
         return file->audioTracks().size() > 0;
     } );
@@ -73,7 +73,7 @@ TEST_F( VLCMetadataServices, ParseAudio )
 TEST_F( VLCMetadataServices, ParseAlbum )
 {
     std::unique_lock<std::mutex> lock( cb->mutex );
-    auto file = ml->addFile( "mr-zebra.mp3" );
+    auto file = ml->addFile( "mr-zebra.mp3", nullptr );
     bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [&]{
         return file->albumTrack() != nullptr;
     } );
@@ -102,7 +102,7 @@ TEST_F( VLCMetadataServices, ParseAlbum )
 TEST_F( VLCMetadataServices, ParseVideo )
 {
     std::unique_lock<std::mutex> lock( cb->mutex );
-    auto file = ml->addFile( "mrmssmith.mp4" );
+    auto file = ml->addFile( "mrmssmith.mp4", nullptr );
     bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [file]{
         return file->videoTracks().size() != 0;
     } );

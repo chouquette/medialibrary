@@ -108,7 +108,7 @@ TEST_F( Shows, FetchShowFromEpisode )
 {
     auto s = ml->createShow( "show" );
     auto e = s->addEpisode( "episode 1", 1 );
-    auto f = ml->addFile( "file.avi" );
+    auto f = ml->addFile( "file.avi", nullptr );
     f->setShowEpisode( e );
 
     auto e2 = f->showEpisode();
@@ -192,7 +192,7 @@ TEST_F( Shows, FileSetShowEpisode )
 {
     auto show = ml->createShow( "show" );
     auto e = show->addEpisode( "episode 1", 1 );
-    auto f = ml->addFile( "file.avi" );
+    auto f = ml->addFile( "file.avi", nullptr );
 
     ASSERT_EQ( f->showEpisode(), nullptr );
     f->setShowEpisode( e );
@@ -210,7 +210,7 @@ TEST_F( Shows, DeleteShowEpisode )
 {
     auto show = ml->createShow( "show" );
     auto e = show->addEpisode( "episode 1", 1 );
-    auto f = ml->addFile( "file.avi" );
+    auto f = ml->addFile( "file.avi", nullptr );
 
     f->setShowEpisode( e );
     e->destroy();
@@ -228,7 +228,7 @@ TEST_F( Shows, DeleteShow )
 {
     auto show = ml->createShow( "show" );
     auto e = show->addEpisode( "episode 1", 1 );
-    auto f = ml->addFile( "file.avi" );
+    auto f = ml->addFile( "file.avi", nullptr );
     f->setShowEpisode( e );
 
     bool res = show->destroy();

@@ -107,7 +107,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         addMetadataService( std::move( thumbnailerService ) );
     }
 
-    m_discoverers.emplace_back( new FsDiscoverer( m_fsFactory, this ) );
+    m_discoverers.emplace_back( new FsDiscoverer( m_fsFactory ) );
 
     sqlite3* dbConnection;
     int res = sqlite3_open( dbPath.c_str(), &dbConnection );
@@ -134,7 +134,8 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         LOG_ERROR( "Failed to create database structure" );
         return false;
     }
-    return loadFolders();
+    reload();
+    return true;
 }
 
 std::vector<FilePtr> MediaLibrary::files()
@@ -162,10 +163,44 @@ FilePtr MediaLibrary::file( const std::string& path )
     return File::fetch( m_dbConnection, path );
 }
 
-FilePtr MediaLibrary::addFile( const std::string& path )
+FilePtr MediaLibrary::addFile( const std::string& path, FolderPtr parentFolder )
 {
-    auto fsFile = m_fsFactory->createFile( path );
-    return addFile( fsFile.get(), 0 );
+    std::unique_ptr<fs::IFile> file;
+    try
+    {
+        file = m_fsFactory->createFile( path );
+    }
+    catch (std::exception& ex)
+    {
+        LOG_ERROR( "Failed to create an IFile for ", path, ": ", ex.what() );
+        return nullptr;
+    }
+
+    auto type = IFile::Type::UnknownType;
+    if ( std::find( begin( supportedVideoExtensions ), end( supportedVideoExtensions ),
+                    file->extension() ) != end( supportedVideoExtensions ) )
+    {
+        type = IFile::Type::VideoType;
+    }
+    else if ( std::find( begin( supportedAudioExtensions ), end( supportedAudioExtensions ),
+                         file->extension() ) != end( supportedAudioExtensions ) )
+    {
+        type = IFile::Type::AudioType;
+    }
+    if ( type == IFile::Type::UnknownType )
+        return false;
+
+    auto fptr = File::create( m_dbConnection, type, file.get(), parentFolder != nullptr ? parentFolder->id() : 0 );
+    if ( fptr == nullptr )
+    {
+        LOG_ERROR( "Failed to add file ", file->fullPath(), " to the media library" );
+        return nullptr;
+    }
+    LOG_INFO( "Adding ", file->name() );
+    if ( m_callback != nullptr )
+        m_callback->onFileAdded( fptr );
+    m_parser->parse( fptr, m_callback );
+    return fptr;
 }
 
 FolderPtr MediaLibrary::folder( const std::string& path )
@@ -276,6 +311,18 @@ void MediaLibrary::addMetadataService(std::unique_ptr<IMetadataService> service)
     m_parser->addService( std::move( service ) );
 }
 
+void MediaLibrary::reload()
+{
+    //FIXME: Create a proper wrapper to handle discoverer threading
+    std::thread t([this] {
+        //FIXME: This will crash if the media library gets deleted while we
+        //are discovering.
+        for ( auto& d : m_discoverers )
+            d->reload( this, this->m_dbConnection );
+    });
+    t.detach();
+}
+
 void MediaLibrary::discover( const std::string &entryPoint )
 {
     std::thread t([this, entryPoint] {
@@ -285,29 +332,12 @@ void MediaLibrary::discover( const std::string &entryPoint )
             m_callback->onDiscoveryStarted( entryPoint );
 
         for ( auto& d : m_discoverers )
-            d->discover( entryPoint );
+            d->discover( this, this->m_dbConnection, entryPoint );
 
         if ( m_callback != nullptr )
             m_callback->onDiscoveryCompleted( entryPoint );
     });
     t.detach();
-}
-
-FolderPtr MediaLibrary::onNewFolder( const fs::IDirectory* directory, FolderPtr parent )
-{
-    //FIXME: Since we insert files/folders with a UNIQUE constraint, maybe we should
-    //just let sqlite try to insert, throw an exception in case the contraint gets violated
-    //catch it and return nullptr from here.
-    //We previously were fetching the folder manually here, but that triggers an eroneous entry
-    //in the cache. This might also be something to fix...
-    return Folder::create( m_dbConnection, directory,
-                        parent == nullptr ? 0 : parent->id() );
-}
-
-FilePtr MediaLibrary::onNewFile( const fs::IFile *file, FolderPtr parent )
-{
-    //FIXME: Same uniqueness comment as onNewFolder above.
-    return addFile( file, parent == nullptr ? 0 : parent->id() );
 }
 
 const std::string& MediaLibrary::snapshotPath() const
@@ -318,134 +348,5 @@ const std::string& MediaLibrary::snapshotPath() const
 void MediaLibrary::setLogger( ILogger* logger )
 {
     Log::SetLogger( logger );
-}
-
-bool MediaLibrary::loadFolders()
-{
-    //FIXME: This should probably be in a sql transaction
-    //FIXME: This shouldn't be done for "removable"/network files
-    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
-            + " WHERE id_parent IS NULL";
-    auto rootFolders = sqlite::Tools::fetchAll<Folder, IFolder>( m_dbConnection, req );
-    for ( const auto f : rootFolders )
-    {
-        auto folder = m_fsFactory->createDirectory( f->path() );
-        if ( folder->lastModificationDate() == f->lastModificationDate() )
-            continue;
-        checkSubfolders( folder.get(), f->id() );
-        f->setLastModificationDate( folder->lastModificationDate() );
-    }
-    return true;
-}
-
-bool MediaLibrary::checkSubfolders( fs::IDirectory* folder, unsigned int parentId )
-{
-    // From here we can have:
-    // - New subfolder(s)
-    // - Deleted subfolder(s)
-    // - New file(s)
-    // - Deleted file(s)
-    // - Changed file(s)
-    // ... in this folder, or in all the sub folders.
-
-    // Load the folders we already know of:
-    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
-            + " WHERE id_parent = ?";
-    auto subFoldersInDB = sqlite::Tools::fetchAll<Folder, IFolder>( m_dbConnection, req, parentId );
-    for ( const auto& subFolderPath : folder->dirs() )
-    {
-        auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [subFolderPath](const std::shared_ptr<IFolder>& f) {
-            return f->path() == subFolderPath;
-        });
-        // We don't know this folder, it's a new one
-        if ( it == end( subFoldersInDB ) )
-        {
-            //FIXME: In order to add the new folder, we need to use the same discoverer.
-            // This probably means we need to store which discoverer was used to add which file
-            // and store discoverers as a map instead of a vector
-            continue;
-        }
-        auto subFolder = m_fsFactory->createDirectory( subFolderPath );
-        if ( subFolder->lastModificationDate() == (*it)->lastModificationDate() )
-        {
-            // Remove all folders that still exist in FS. That way, the list of folders that
-            // will still be in subFoldersInDB when we're done is the list of folders that have
-            // been deleted from the FS
-            subFoldersInDB.erase( it );
-            continue;
-        }
-        // This folder was modified, let's recurse
-        checkSubfolders( subFolder.get(), (*it)->id() );
-        checkFiles( subFolder.get(), (*it)->id() );
-        (*it)->setLastModificationDate( subFolder->lastModificationDate() );
-        subFoldersInDB.erase( it );
-    }
-    // Now all folders we had in DB but haven't seen from the FS must have been deleted.
-    for ( auto f : subFoldersInDB )
-    {
-        std::cout << "Folder " << f->path() << " not found in FS, deleting it" << std::endl;
-        deleteFolder( f );
-    }
-    return true;
-}
-
-void MediaLibrary::checkFiles( fs::IDirectory* folder, unsigned int parentId )
-{
-    static const std::string req = "SELECT * FROM " + policy::FileTable::Name
-            + " WHERE folder_id = ?";
-    auto files = sqlite::Tools::fetchAll<File, IFile>( m_dbConnection, req, parentId );
-    for ( const auto& filePath : folder->files() )
-    {
-        auto file = m_fsFactory->createFile( filePath );
-        auto it = std::find_if( begin( files ), end( files ), [filePath](const std::shared_ptr<IFile>& f) {
-            return f->mrl() == filePath;
-        });
-        if ( it == end( files ) )
-        {
-            addFile( file.get(), parentId );
-            continue;
-        }
-        if ( file->lastModificationDate() == (*it)->lastModificationDate() )
-        {
-            // Unchanged file
-            files.erase( it );
-            continue;
-        }
-        deleteFile( filePath );
-        addFile( file.get(), parentId );
-        files.erase( it );
-    }
-    for ( auto file : files )
-    {
-        deleteFile( file );
-    }
-}
-
-FilePtr MediaLibrary::addFile( const fs::IFile* file, unsigned int folderId )
-{
-    auto type = IFile::Type::UnknownType;
-    if ( std::find( begin( supportedVideoExtensions ), end( supportedVideoExtensions ),
-                    file->extension() ) != end( supportedVideoExtensions ) )
-    {
-        type = IFile::Type::VideoType;
-    }
-    else if ( std::find( begin( supportedAudioExtensions ), end( supportedAudioExtensions ),
-                         file->extension() ) != end( supportedAudioExtensions ) )
-    {
-        type = IFile::Type::AudioType;
-    }
-    if ( type == IFile::Type::UnknownType )
-        return false;
-
-    auto fptr = File::create( m_dbConnection, type, file, folderId );
-    if ( fptr == nullptr )
-    {
-        LOG_ERROR( "Failed to add file ", file->fullPath(), " to the media library" );
-        return nullptr;
-    }
-    LOG_INFO( "Adding ", file->name() );
-    m_callback->onFileAdded( fptr );
-    m_parser->parse( fptr, m_callback );
-    return fptr;
 }
 

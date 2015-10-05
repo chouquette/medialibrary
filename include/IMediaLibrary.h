@@ -6,7 +6,6 @@
 
 #include "Types.h"
 #include "factory/IFileSystem.h"
-#include "IDiscoverer.h"
 
 class IMediaLibraryCb
 {
@@ -49,8 +48,14 @@ class IMediaLibrary
          * Calling this after initialize() is not a supported scenario.
          */
         virtual void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory ) = 0;
-        /// Adds a stand alone file
-        virtual FilePtr addFile( const std::string& path ) = 0;
+        ///
+        /// \brief addFile Adds a file to the media library.
+        /// \param path The absolute path to this file
+        /// \param parentFolder The parent folder, or nullptr to add this file as
+        ///                     a stand alone file.
+        /// \return The newly created file, or nullptr in case of error
+        ///
+        virtual FilePtr addFile( const std::string& path, FolderPtr parentFolder ) = 0;
         virtual FilePtr file( const std::string& path ) = 0;
         virtual bool deleteFile( const std::string& mrl ) = 0;
         virtual bool deleteFile( FilePtr file ) = 0;
