@@ -4,6 +4,7 @@
 #include "AlbumTrack.h"
 #include "Artist.h"
 #include "AudioTrack.h"
+#include "discoverer/DiscovererWorker.h"
 #include "File.h"
 #include "Folder.h"
 #include "MediaLibrary.h"
@@ -49,6 +50,7 @@ const std::vector<std::string> MediaLibrary::supportedAudioExtensions {
 
 MediaLibrary::MediaLibrary()
     : m_parser( new Parser )
+    , m_discoverer( new DiscovererWorker )
 {
 }
 
@@ -107,8 +109,6 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         addMetadataService( std::move( thumbnailerService ) );
     }
 
-    m_discoverers.emplace_back( new FsDiscoverer( m_fsFactory ) );
-
     sqlite3* dbConnection;
     int res = sqlite3_open( dbPath.c_str(), &dbConnection );
     if ( res != SQLITE_OK )
@@ -134,7 +134,9 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         LOG_ERROR( "Failed to create database structure" );
         return false;
     }
-    reload();
+    m_discoverer->setCallback( m_callback );
+    m_discoverer->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( m_fsFactory, this, m_dbConnection ) ) );
+    m_discoverer->reload();
     return true;
 }
 
@@ -313,31 +315,12 @@ void MediaLibrary::addMetadataService(std::unique_ptr<IMetadataService> service)
 
 void MediaLibrary::reload()
 {
-    //FIXME: Create a proper wrapper to handle discoverer threading
-    std::thread t([this] {
-        //FIXME: This will crash if the media library gets deleted while we
-        //are discovering.
-        for ( auto& d : m_discoverers )
-            d->reload( this, this->m_dbConnection );
-    });
-    t.detach();
+    m_discoverer->reload();
 }
 
 void MediaLibrary::discover( const std::string &entryPoint )
 {
-    std::thread t([this, entryPoint] {
-        //FIXME: This will crash if the media library gets deleted while we
-        //are discovering.
-        if ( m_callback != nullptr )
-            m_callback->onDiscoveryStarted( entryPoint );
-
-        for ( auto& d : m_discoverers )
-            d->discover( this, this->m_dbConnection, entryPoint );
-
-        if ( m_callback != nullptr )
-            m_callback->onDiscoveryCompleted( entryPoint );
-    });
-    t.detach();
+    m_discoverer->discover( entryPoint );
 }
 
 const std::string& MediaLibrary::snapshotPath() const

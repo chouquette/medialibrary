@@ -2,6 +2,7 @@
 #define MEDIALIBRARY_H
 
 class Parser;
+class DiscovererWorker;
 
 #include <sqlite3.h>
 
@@ -63,7 +64,6 @@ class MediaLibrary : public IMediaLibrary
     private:
         std::shared_ptr<sqlite3> m_dbConnection;
         std::shared_ptr<factory::IFileSystem> m_fsFactory;
-        std::vector<std::unique_ptr<IDiscoverer>> m_discoverers;
         std::string m_snapshotPath;
         IMediaLibraryCb* m_callback;
 
@@ -77,5 +77,8 @@ class MediaLibrary : public IMediaLibrary
         // likely to require a valid MediaLibrary, which would be compromised if some fields have already been
         // deleted/destroyed.
         std::unique_ptr<Parser> m_parser;
+        // Same reasoning applies here.
+        //FIXME: Having to maintain a specific ordering sucks, let's use shared_ptr or something
+        std::unique_ptr<DiscovererWorker> m_discoverer;
 };
 #endif // MEDIALIBRARY_H

@@ -14,8 +14,8 @@ public:
     // We assume the media library will always outlive the discoverers.
     //FIXME: This is currently false since there is no way of interrupting
     //a discoverer thread
-    virtual bool discover( IMediaLibrary* ml, DBConnection dbConn, const std::string& entryPoint ) = 0;
-    virtual void reload( IMediaLibrary* ml, DBConnection dbConn ) = 0;
+    virtual bool discover( const std::string& entryPoint ) = 0;
+    virtual void reload() = 0;
 };
 
 #endif // IDISCOVERER_H

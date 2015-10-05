@@ -72,6 +72,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     filesystem/${ARCH_FOLDER}/File.cpp
 
     discoverer/FsDiscoverer.cpp
+    discoverer/DiscovererWorker.cpp
 
     Utils.cpp
 

@@ -7,7 +7,9 @@
 #include <queue>
 #include <iostream>
 
-FsDiscoverer::FsDiscoverer(std::shared_ptr<factory::IFileSystem> fsFactory)
+FsDiscoverer::FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, IMediaLibrary* ml, DBConnection dbConn )
+    : m_ml( ml )
+    , m_dbConn( dbConn )
 {
     if ( fsFactory != nullptr )
         m_fsFactory = fsFactory;
@@ -15,14 +17,14 @@ FsDiscoverer::FsDiscoverer(std::shared_ptr<factory::IFileSystem> fsFactory)
         m_fsFactory.reset( new factory::FileSystemDefaultFactory );
 }
 
-bool FsDiscoverer::discover( IMediaLibrary* ml, DBConnection dbConn, const std::string &entryPoint )
+bool FsDiscoverer::discover( const std::string &entryPoint )
 {
     // Assume :// denotes a scheme that isn't a file path, and refuse to discover it.
     if ( entryPoint.find( "://" ) != std::string::npos )
         return false;
 
     {
-        auto f = Folder::fetch( dbConn, entryPoint );
+        auto f = Folder::fetch( m_dbConn, entryPoint );
         // If the folder exists, we assume it is up to date
         if ( f != nullptr )
             return true;
@@ -38,31 +40,31 @@ bool FsDiscoverer::discover( IMediaLibrary* ml, DBConnection dbConn, const std::
         LOG_ERROR("Failed to create an IDirectory for ", entryPoint, ": ", ex.what());
         return false;
     }
-    auto f = Folder::create( dbConn, fsDir.get(), 0 );
+    auto f = Folder::create( m_dbConn, fsDir.get(), 0 );
     if ( f == nullptr )
         return false;
-    checkSubfolders( ml, dbConn, fsDir.get(), f );
+    checkSubfolders( fsDir.get(), f );
     return true;
 }
 
-void FsDiscoverer::reload( IMediaLibrary *ml, DBConnection dbConn )
+void FsDiscoverer::reload()
 {
     //FIXME: This should probably be in a sql transaction
     //FIXME: This shouldn't be done for "removable"/network files
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
             + " WHERE id_parent IS NULL";
-    auto rootFolders = sqlite::Tools::fetchAll<Folder, IFolder>( dbConn, req );
+    auto rootFolders = sqlite::Tools::fetchAll<Folder, IFolder>( m_dbConn, req );
     for ( const auto f : rootFolders )
     {
         auto folder = m_fsFactory->createDirectory( f->path() );
         if ( folder->lastModificationDate() == f->lastModificationDate() )
             continue;
-        checkSubfolders( ml, dbConn, folder.get(), f );
+        checkSubfolders( folder.get(), f );
         f->setLastModificationDate( folder->lastModificationDate() );
     }
 }
 
-bool FsDiscoverer::checkSubfolders( IMediaLibrary* ml, DBConnection dbConn, fs::IDirectory* folder, FolderPtr parentFolder )
+bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, FolderPtr parentFolder )
 {
     // From here we can have:
     // - New subfolder(s)
@@ -75,7 +77,7 @@ bool FsDiscoverer::checkSubfolders( IMediaLibrary* ml, DBConnection dbConn, fs::
     // Load the folders we already know of:
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
             + " WHERE id_parent = ?";
-    auto subFoldersInDB = sqlite::Tools::fetchAll<Folder, IFolder>( dbConn, req, parentFolder->id() );
+    auto subFoldersInDB = sqlite::Tools::fetchAll<Folder, IFolder>( m_dbConn, req, parentFolder->id() );
     for ( const auto& subFolderPath : folder->dirs() )
     {
         auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [subFolderPath](const std::shared_ptr<IFolder>& f) {
@@ -99,25 +101,25 @@ bool FsDiscoverer::checkSubfolders( IMediaLibrary* ml, DBConnection dbConn, fs::
             continue;
         }
         // This folder was modified, let's recurse
-        checkSubfolders( ml, dbConn, subFolder.get(), *it );
-        checkFiles( ml, dbConn, subFolder.get(), *it );
+        checkSubfolders( subFolder.get(), *it );
+        checkFiles( subFolder.get(), *it );
         (*it)->setLastModificationDate( subFolder->lastModificationDate() );
         subFoldersInDB.erase( it );
     }
     // Now all folders we had in DB but haven't seen from the FS must have been deleted.
     for ( auto f : subFoldersInDB )
     {
-        std::cout << "Folder " << f->path() << " not found in FS, deleting it" << std::endl;
-        ml->deleteFolder( f );
+        LOG_INFO( "Folder ", f->path(), " not found in FS, deleting it" );
+        m_ml->deleteFolder( f );
     }
     return true;
 }
 
-void FsDiscoverer::checkFiles( IMediaLibrary *ml, DBConnection dbConn, fs::IDirectory* folder, FolderPtr parentFolder )
+void FsDiscoverer::checkFiles( fs::IDirectory* folder, FolderPtr parentFolder )
 {
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
             + " WHERE folder_id = ?";
-    auto files = sqlite::Tools::fetchAll<File, IFile>( dbConn, req, parentFolder->id() );
+    auto files = sqlite::Tools::fetchAll<File, IFile>( m_dbConn, req, parentFolder->id() );
     for ( const auto& filePath : folder->files() )
     {        
         auto it = std::find_if( begin( files ), end( files ), [filePath](const std::shared_ptr<IFile>& f) {
@@ -125,7 +127,7 @@ void FsDiscoverer::checkFiles( IMediaLibrary *ml, DBConnection dbConn, fs::IDire
         });
         if ( it == end( files ) )
         {
-            ml->addFile( filePath, parentFolder );
+            m_ml->addFile( filePath, parentFolder );
             continue;
         }
         auto file = m_fsFactory->createFile( filePath );
@@ -135,12 +137,12 @@ void FsDiscoverer::checkFiles( IMediaLibrary *ml, DBConnection dbConn, fs::IDire
             files.erase( it );
             continue;
         }
-        ml->deleteFile( filePath );
-        ml->addFile( filePath, parentFolder );
+        m_ml->deleteFile( filePath );
+        m_ml->addFile( filePath, parentFolder );
         files.erase( it );
     }
     for ( auto file : files )
     {
-        ml->deleteFile( file );
+        m_ml->deleteFile( file );
     }
 }
