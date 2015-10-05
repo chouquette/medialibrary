@@ -44,6 +44,7 @@ list(APPEND TEST_SRCS
     AudioTracks.cpp
     VLCMetadataServices.cpp
     FsUtilsTests.cpp
+    ArtistTests.cpp
 
     mocks/FileSystem.h
 )

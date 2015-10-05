@@ -34,6 +34,7 @@ list(APPEND HEADERS_LIST
     ${CMAKE_SOURCE_DIR}/include/filesystem/IFile.h
     ${CMAKE_SOURCE_DIR}/include/factory/IFileSystem.h
     ${CMAKE_SOURCE_DIR}/include/ILogger.h
+    ${CMAKE_SOURCE_DIR}/include/IArtist.h
 
     database/Cache.h
     database/SqliteTools.h
@@ -64,6 +65,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     VideoTrack.cpp
     AudioTrack.cpp
     Parser.cpp
+    Artist.cpp
 
     factory/FileSystem.cpp
     filesystem/${ARCH_FOLDER}/Directory.cpp

@@ -43,6 +43,9 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
         virtual MoviePtr movie( const std::string& title ) override;
         virtual MoviePtr createMovie( const std::string& title ) override;
 
+        virtual ArtistPtr artist( const std::string& name ) override;
+        virtual ArtistPtr createArtist( const std::string& name ) override;
+
         virtual void discover( const std::string& entryPoint ) override;
         // IDiscovererCb implementation
         virtual FolderPtr onNewFolder( const fs::IDirectory* directory, FolderPtr parent ) override;

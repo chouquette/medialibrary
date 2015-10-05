@@ -2,6 +2,7 @@
 #include <functional>
 #include "Album.h"
 #include "AlbumTrack.h"
+#include "Artist.h"
 #include "AudioTrack.h"
 #include "File.h"
 #include "Folder.h"
@@ -69,6 +70,7 @@ MediaLibrary::~MediaLibrary()
     Movie::clear();
     VideoTrack::clear();
     AudioTrack::clear();
+    Artist::clear();
 }
 
 void MediaLibrary::setFsFactory(std::shared_ptr<factory::IFileSystem> fsFactory)
@@ -125,7 +127,8 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         ShowEpisode::createTable( m_dbConnection ) &&
         Movie::createTable( m_dbConnection ) &&
         VideoTrack::createTable( m_dbConnection ) &&
-        AudioTrack::createTable( m_dbConnection ) ) )
+        AudioTrack::createTable( m_dbConnection ) &&
+        Artist::createTable( m_dbConnection ) ) )
     {
         LOG_ERROR( "Failed to create database structure" );
         return false;
@@ -242,6 +245,18 @@ MoviePtr MediaLibrary::movie( const std::string& title )
 MoviePtr MediaLibrary::createMovie( const std::string& title )
 {
     return Movie::create( m_dbConnection, title );
+}
+
+ArtistPtr MediaLibrary::artist(const std::string &name)
+{
+    static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name
+            + " WHERE name = ?";
+    return sqlite::Tools::fetchOne<Artist>( m_dbConnection, req, name );
+}
+
+ArtistPtr MediaLibrary::createArtist( const std::string& name )
+{
+    return Artist::create( m_dbConnection, name );
 }
 
 void MediaLibrary::addMetadataService(std::unique_ptr<IMetadataService> service)

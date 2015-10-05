@@ -16,6 +16,7 @@ class IShow;
 class IShowEpisode;
 class IVideoTrack;
 class ILogger;
+class IArtist;
 
 struct sqlite3;
 
@@ -29,6 +30,7 @@ typedef std::shared_ptr<IShowEpisode> ShowEpisodePtr;
 typedef std::shared_ptr<IMovie> MoviePtr;
 typedef std::shared_ptr<IAudioTrack> AudioTrackPtr;
 typedef std::shared_ptr<IVideoTrack> VideoTrackPtr;
+typedef std::shared_ptr<IArtist> ArtistPtr;
 
 typedef std::weak_ptr<sqlite3> DBConnection;
 
