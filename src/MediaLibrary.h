@@ -45,6 +45,7 @@ class MediaLibrary : public IMediaLibrary, public IDiscovererCb
 
         virtual ArtistPtr artist( const std::string& name ) override;
         virtual ArtistPtr createArtist( const std::string& name ) override;
+        virtual std::vector<ArtistPtr> artists() const override;
 
         virtual void discover( const std::string& entryPoint ) override;
         // IDiscovererCb implementation

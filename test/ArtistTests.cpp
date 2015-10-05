@@ -59,3 +59,19 @@ TEST_F( Artists, Albums )
     albums = artist->albums();
     ASSERT_EQ( albums.size(), 2u );
 }
+
+TEST_F( Artists, GetAll )
+{
+    for ( int i = 0; i < 5; i++ )
+    {
+        auto a = ml->createArtist( std::to_string( i ) );
+        ASSERT_NE( a, nullptr );
+    }
+    auto artists = ml->artists();
+    ASSERT_EQ( artists.size(), 5u );
+
+    Reload();
+
+    artists = ml->artists();
+    ASSERT_EQ( artists.size(), 5u );
+}

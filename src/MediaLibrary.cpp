@@ -259,6 +259,12 @@ ArtistPtr MediaLibrary::createArtist( const std::string& name )
     return Artist::create( m_dbConnection, name );
 }
 
+std::vector<ArtistPtr> MediaLibrary::artists() const
+{
+    static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name;
+    return sqlite::Tools::fetchAll<Artist, IArtist>( m_dbConnection, req );
+}
+
 void MediaLibrary::addMetadataService(std::unique_ptr<IMetadataService> service)
 {
     if ( service->initialize( m_parser.get(), this ) == false )
