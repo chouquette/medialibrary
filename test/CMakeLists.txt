@@ -48,6 +48,7 @@ list(APPEND TEST_SRCS
     AlbumTrackTests.cpp
 
     mocks/FileSystem.h
+    mocks/DiscovererCbMock.h
 )
 
 if (${EMOTION_FOUND})
