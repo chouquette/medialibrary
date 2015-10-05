@@ -59,7 +59,8 @@ MediaLibrary::~MediaLibrary()
     // with a log callback set will try to invoke it.
     // We manually call logUnset to ensure that the callback that is about to be deleted will
     // not be called anymore.
-    m_vlcInstance.logUnset();
+    if ( m_vlcInstance.isValid() )
+        m_vlcInstance.logUnset();
     File::clear();
     Folder::clear();
     Label::clear();
