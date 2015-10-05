@@ -32,11 +32,11 @@ Folder::Folder( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_isRemovable = sqlite::Traits<bool>::Load( stmt, 4 );
 }
 
-Folder::Folder( const fs::IDirectory* dir, unsigned int parent )
-    : m_path( dir->path() )
+Folder::Folder( const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parent )
+    : m_path( path )
     , m_parent( parent )
-    , m_lastModificationDate( dir->lastModificationDate() )
-    , m_isRemovable( dir->isRemovable() )
+    , m_lastModificationDate( lastModificationDate )
+    , m_isRemovable( isRemovable )
 {
 }
 
@@ -55,13 +55,13 @@ bool Folder::createTable(DBConnection connection)
     return sqlite::Tools::executeRequest( connection, req );
 }
 
-FolderPtr Folder::create( DBConnection connection, const fs::IDirectory* dir, unsigned int parentId )
+FolderPtr Folder::create( DBConnection connection, const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parentId )
 {
-    auto self = std::make_shared<Folder>( dir, parentId );
+    auto self = std::make_shared<Folder>( path, lastModificationDate, isRemovable, parentId );
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
             "(path, id_parent, last_modification_date, is_removable) VALUES(?, ?, ?, ?)";
-    if ( _Cache::insert( connection, self, req, dir->path(), sqlite::ForeignKey( parentId ),
-                         dir->lastModificationDate(), dir->isRemovable() ) == false )
+    if ( _Cache::insert( connection, self, req, path, sqlite::ForeignKey( parentId ),
+                         lastModificationDate, isRemovable ) == false )
         return nullptr;
     self->m_dbConection = connection;
     return self;

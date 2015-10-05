@@ -1,11 +1,12 @@
 #include "FsDiscoverer.h"
 
 #include <algorithm>
+#include <queue>
+
 #include "factory/FileSystem.h"
 #include "File.h"
 #include "Folder.h"
-#include <queue>
-#include <iostream>
+#include "logging/Logger.h"
 
 FsDiscoverer::FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, IMediaLibrary* ml, DBConnection dbConn )
     : m_ml( ml )
@@ -40,9 +41,12 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
         LOG_ERROR("Failed to create an IDirectory for ", entryPoint, ": ", ex.what());
         return false;
     }
-    auto f = Folder::create( m_dbConn, fsDir.get(), 0 );
+    // Force <0> as lastModificationDate, so this folder is detected as outdated
+    // by the modification checking code
+    auto f = Folder::create( m_dbConn, fsDir->path(), 0, fsDir->isRemovable(), 0 );
     if ( f == nullptr )
         return false;
+    checkFiles( fsDir.get(), f );
     checkSubfolders( fsDir.get(), f );
     return true;
 }
@@ -77,21 +81,25 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, FolderPtr parentFold
     // Load the folders we already know of:
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
             + " WHERE id_parent = ?";
+    LOG_INFO( "Checking for modifications in ", folder->path() );
     auto subFoldersInDB = sqlite::Tools::fetchAll<Folder, IFolder>( m_dbConn, req, parentFolder->id() );
     for ( const auto& subFolderPath : folder->dirs() )
     {
+        auto subFolder = m_fsFactory->createDirectory( subFolderPath );
+
         auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [subFolderPath](const std::shared_ptr<IFolder>& f) {
             return f->path() == subFolderPath;
         });
         // We don't know this folder, it's a new one
         if ( it == end( subFoldersInDB ) )
         {
-            //FIXME: In order to add the new folder, we need to use the same discoverer.
-            // This probably means we need to store which discoverer was used to add which file
-            // and store discoverers as a map instead of a vector
+            LOG_INFO( "New folder detected: ", subFolderPath );
+            // Force a scan by setting lastModificationDate to 0
+            auto f = Folder::create( m_dbConn, subFolder->path(), 0, subFolder->isRemovable(), parentFolder->id() );
+            checkFiles( subFolder.get(), f );
+            checkSubfolders( subFolder.get(), f );
             continue;
         }
-        auto subFolder = m_fsFactory->createDirectory( subFolderPath );
         if ( subFolder->lastModificationDate() == (*it)->lastModificationDate() )
         {
             // Remove all folders that still exist in FS. That way, the list of folders that

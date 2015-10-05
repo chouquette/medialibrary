@@ -35,11 +35,11 @@ class Folder : public IFolder, public Cache<Folder, IFolder, policy::FolderTable
     using _Cache = Cache<Folder, IFolder, policy::FolderTable, policy::FolderCache>;
 
 public:
-    Folder(DBConnection dbConnection, sqlite3_stmt* stmt);
-    Folder(const fs::IDirectory* dir , unsigned int parent);
+    Folder( DBConnection dbConnection, sqlite3_stmt* stmt );
+    Folder( const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parent );
 
     static bool createTable( DBConnection connection );
-    static FolderPtr create(DBConnection connection, const fs::IDirectory* dir , unsigned int parentId);
+    static FolderPtr create( DBConnection connection, const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parentId );
 
     virtual unsigned int id() const override;
     virtual const std::string& path() override;
