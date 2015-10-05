@@ -62,6 +62,8 @@ class Cache
             static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name +
                             " WHERE " + TABLEPOLICY::CacheColumn + " = ?";
             auto res = sqlite::Tools::fetchOne<IMPL>( dbConnectionWeak, req.c_str(), key );
+            if ( res == nullptr )
+                return nullptr;
             Store[key] = res;
             return res;
         }
