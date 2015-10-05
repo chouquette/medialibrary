@@ -239,7 +239,7 @@ bool VLCThumbnailer::compress(uint8_t* buff, FilePtr file, void *data)
     compInfo.image_width = Width;
     compInfo.image_height = m_height;
     compInfo.input_components = Bpp;
-#if JPEG_LIB_VERSION <= 80
+#if JPEG_LIB_VERSION_MAJOR <= 8 && JPEG_LIB_VERSION_MINOR < 4
     compInfo.in_color_space = JCS_EXT_BGRX;
 #else
     compInfo.in_color_space = JCS_RGB;
