@@ -1,5 +1,6 @@
 #include "AlbumTrack.h"
 #include "Album.h"
+#include "Artist.h"
 #include "File.h"
 #include "database/SqliteTools.h"
 #include "logging/Logger.h"
@@ -16,8 +17,7 @@ AlbumTrack::AlbumTrack( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_title = sqlite::Traits<std::string>::Load( stmt, 1 );
     m_genre = sqlite::Traits<std::string>::Load( stmt, 2 );
     m_trackNumber = sqlite::Traits<unsigned int>::Load( stmt, 3 );
-    m_artist = sqlite::Traits<std::string>::Load( stmt, 4 );
-    m_albumId = sqlite::Traits<unsigned int>::Load( stmt, 5 );
+    m_albumId = sqlite::Traits<unsigned int>::Load( stmt, 4 );
 }
 
 AlbumTrack::AlbumTrack( const std::string& title, unsigned int trackNumber, unsigned int albumId )
@@ -36,16 +36,25 @@ unsigned int AlbumTrack::id() const
 
 bool AlbumTrack::createTable( DBConnection dbConnection )
 {
-    const char* req = "CREATE TABLE IF NOT EXISTS AlbumTrack ("
+    static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AlbumTrackTable::Name + "("
                 "id_track INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "title TEXT,"
                 "genre TEXT,"
                 "track_number UNSIGNED INTEGER,"
-                "artist TEXT,"
                 "album_id UNSIGNED INTEGER NOT NULL,"
                 "FOREIGN KEY (album_id) REFERENCES Album(id_album) ON DELETE CASCADE"
             ")";
-    return sqlite::Tools::executeRequest( dbConnection, req );
+    static const std::string reqRel = "CREATE TABLE IF NOT EXISTS TrackArtistRelation("
+                "id_track INTEGER,"
+                "id_artist INTEGER,"
+                "PRIMARY KEY (id_track, id_artist),"
+                "FOREIGN KEY(id_track) REFERENCES " + policy::AlbumTrackTable::Name + "("
+                    + policy::AlbumTrackTable::CacheColumn + ") ON DELETE CASCADE,"
+                "FOREIGN KEY(id_artist) REFERENCES " + policy::ArtistTable::Name + "("
+                    + policy::ArtistTable::CacheColumn + ") ON DELETE CASCADE"
+            ")";
+    return sqlite::Tools::executeRequest( dbConnection, req ) &&
+            sqlite::Tools::executeRequest( dbConnection, reqRel );
 }
 
 AlbumTrackPtr AlbumTrack::create(DBConnection dbConnection, unsigned int albumId, const std::string& name, unsigned int trackNb)
@@ -108,19 +117,23 @@ bool AlbumTrack::destroy()
     return _Cache::destroy( m_dbConnection, this );
 }
 
-const std::string&AlbumTrack::artist() const
+bool AlbumTrack::addArtist( ArtistPtr artist )
 {
-    return m_artist;
+    static const std::string req = "INSERT INTO TrackArtistRelation VALUES(?, ?)";
+    if ( m_id == 0 || artist->id() == 0 )
+    {
+        LOG_ERROR("Both artist * album need to be inserted in database before being linked together" );
+        return false;
+    }
+    return sqlite::Tools::executeRequest( m_dbConnection, req, m_id, artist->id() );
 }
 
-bool AlbumTrack::setArtist(const std::string& artist)
+std::vector<ArtistPtr> AlbumTrack::artists() const
 {
-    static const std::string req = "UPDATE " + policy::AlbumTrackTable::Name +
-            " SET artist = ? WHERE id_track = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artist, m_id ) == false )
-        return false;
-    m_artist = artist;
-    return true;
+    static const std::string req = "SELECT art.* FROM " + policy::ArtistTable::Name + " art "
+            "LEFT JOIN TrackArtistRelation tar ON tar.id_artist = art.id_artist "
+            "WHERE tar.id_track = ?";
+    return sqlite::Tools::fetchAll<Artist, IArtist>( m_dbConnection, req, m_id );
 }
 
 std::vector<FilePtr> AlbumTrack::files()

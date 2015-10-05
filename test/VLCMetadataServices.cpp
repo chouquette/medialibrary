@@ -8,6 +8,7 @@
 #include "IAudioTrack.h"
 #include "IAlbum.h"
 #include "IAlbumTrack.h"
+#include "IArtist.h"
 #include "IVideoTrack.h"
 
 class ServiceCb : public IMediaLibraryCb
@@ -85,7 +86,9 @@ TEST_F( VLCMetadataServices, ParseAlbum )
     ASSERT_NE( track, nullptr );
     ASSERT_EQ( track->title(), "Mr. Zebra" );
     ASSERT_EQ( track->genre(), "Rock" );
-    ASSERT_EQ( track->artist(), "Tori Amos" );
+    auto artists = track->artists();
+    ASSERT_EQ( artists.size(), 2u );
+    ASSERT_EQ( artists[0]->name(), "Tori Amos" );
 
     auto album = track->album();
     ASSERT_NE( album, nullptr );

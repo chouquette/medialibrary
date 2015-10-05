@@ -149,9 +149,22 @@ bool VLCMetadataService::parseAudioFile( FilePtr file, VLC::Media& media ) const
     if ( genre.length() != 0 )
         track->setGenre( genre );
 
-    auto artist = media.meta( libvlc_meta_Artist );
-    if ( artist.length() != 0 )
-        track->setArtist( artist );
+    auto artistName = media.meta( libvlc_meta_Artist );
+    if ( artistName.length() != 0 )
+    {
+        auto artist = m_ml->artist( artistName );
+        if ( artist == nullptr )
+        {
+            artist = m_ml->createArtist( artistName );
+            if ( artist == nullptr )
+            {
+                LOG_ERROR( "Failed to create new artist ", artistName );
+                // Consider this a minor failure and go on nevertheless
+                return true;
+            }
+        }
+        track->addArtist( artist );
+    }
     return true;
 }
 

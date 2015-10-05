@@ -14,4 +14,5 @@ public:
     virtual const std::string& shortBio() const = 0;
     virtual bool setShortBio( const std::string& shortBio ) = 0;
     virtual std::vector<AlbumPtr> albums() const = 0;
+    virtual std::vector<AlbumTrackPtr> tracks() const = 0;
 };

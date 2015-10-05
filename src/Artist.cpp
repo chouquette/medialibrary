@@ -1,5 +1,6 @@
 #include "Artist.h"
 #include "Album.h"
+#include "AlbumTrack.h"
 
 #include "database/SqliteTools.h"
 
@@ -53,6 +54,14 @@ std::vector<AlbumPtr> Artist::albums() const
             "LEFT JOIN AlbumArtistRelation aar ON aar.id_album = alb.id_album "
             "WHERE aar.id_artist = ?";
     return sqlite::Tools::fetchAll<Album, IAlbum>( m_dbConnection, req, m_id );
+}
+
+std::vector<AlbumTrackPtr> Artist::tracks() const
+{
+    static const std::string req = "SELECT tra.* FROM " + policy::AlbumTrackTable::Name + " tra "
+            "LEFT JOIN TrackArtistRelation tar ON tar.id_track = tra.id_track "
+            "WHERE tar.id_artist = ?";
+    return sqlite::Tools::fetchAll<AlbumTrack, IAlbumTrack>( m_dbConnection, req, m_id );
 }
 
 bool Artist::createTable( DBConnection dbConnection )

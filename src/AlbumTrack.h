@@ -36,8 +36,8 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
         virtual unsigned int trackNumber();
         virtual std::shared_ptr<IAlbum> album();
         virtual bool destroy();
-        virtual const std::string& artist() const;
-        virtual bool setArtist( const std::string& artist );
+        virtual bool addArtist( ArtistPtr artist ) override;
+        virtual std::vector<ArtistPtr> artists() const override;
         virtual std::vector<FilePtr> files();
 
         static bool createTable( DBConnection dbConnection );
@@ -50,7 +50,6 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
         std::string m_title;
         std::string m_genre;
         unsigned int m_trackNumber;
-        std::string m_artist;
         unsigned int m_albumId;
 
         std::shared_ptr<Album> m_album;

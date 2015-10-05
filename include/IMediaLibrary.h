@@ -74,6 +74,7 @@ class IMediaLibrary
         virtual MoviePtr createMovie( const std::string& title ) = 0;
         virtual ArtistPtr artist( const std::string& name ) = 0;
         virtual ArtistPtr createArtist( const std::string& name ) = 0;
+        virtual std::vector<ArtistPtr> artists() const = 0;
 
         /**
          * @brief discover Launch a discovery on the provided entry point.
