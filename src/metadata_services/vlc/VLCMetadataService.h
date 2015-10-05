@@ -1,6 +1,7 @@
 #ifndef VLCMETADATASERVICE_H
 #define VLCMETADATASERVICE_H
 
+#include <condition_variable>
 #include <vlcpp/vlc.hpp>
 #include <mutex>
 
@@ -21,7 +22,6 @@ class VLCMetadataService : public IMetadataService
 
     public:
         VLCMetadataService(const VLC::Instance& vlc);
-        ~VLCMetadataService();
 
         virtual bool initialize( IMetadataServiceCb *callback, IMediaLibrary* ml );
         virtual unsigned int priority() const;
@@ -32,13 +32,12 @@ class VLCMetadataService : public IMetadataService
         bool parseAudioFile(FilePtr file , VLC::Media &media) const;
         bool parseVideoFile(FilePtr file , VLC::Media &media) const;
 
-        void cleanup();
-
         VLC::Instance m_instance;
         IMetadataServiceCb* m_cb;
         IMediaLibrary* m_ml;
-        std::mutex m_cleanupLock;
-        std::vector<Context*> m_cleanup;
+        std::vector<Context*> m_keepAlive;
+        std::mutex m_mutex;
+        std::condition_variable m_cond;
 };
 
 #endif // VLCMETADATASERVICE_H

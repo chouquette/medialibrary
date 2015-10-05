@@ -19,11 +19,6 @@ VLCMetadataService::VLCMetadataService( const VLC::Instance& vlc )
 {
 }
 
-VLCMetadataService::~VLCMetadataService()
-{
-    cleanup();
-}
-
 bool VLCMetadataService::initialize( IMetadataServiceCb* callback, IMediaLibrary* ml )
 {
     m_cb = callback;
@@ -38,29 +33,26 @@ unsigned int VLCMetadataService::priority() const
 
 bool VLCMetadataService::run( FilePtr file, void* data )
 {
-    cleanup();
-
     LOG_INFO( "Parsing ", file->mrl() );
 
     auto ctx = new Context( file );
     ctx->media = VLC::Media( m_instance, file->mrl(), VLC::Media::FromPath );
 
-    ctx->media.eventManager().onParsedChanged([this, ctx, data](bool status) mutable {
+    std::unique_lock<std::mutex> lock( m_mutex );
+    bool parsed;
+
+    ctx->media.eventManager().onParsedChanged([this, ctx, data, &parsed](bool status) mutable {
         if ( status == false )
             return;
         auto res = handleMediaMeta( ctx->file, ctx->media );
         m_cb->done( ctx->file, res, data );
-        // Delegate cleanup for a later time.
-        // Context owns a media, which owns an EventManager, which owns this lambda
-        // If we were to delete the context from here, the Media refcount would reach 0,
-        // thus deleting the media while in use.
-        // If we use a smart_ptr, then we get cyclic ownership:
-        // ctx -> media -> eventmanager -> event lambda -> ctx
-        // leading resources to never be released.
-        std::unique_lock<std::mutex> lock( m_cleanupLock );
-        m_cleanup.push_back( ctx );
+
+        std::unique_lock<std::mutex> lock( m_mutex );
+        parsed = true;
+        m_cond.notify_all();
     });
     ctx->media.parseAsync();
+    m_cond.wait( lock, [&parsed]() { return parsed == true; } );
     return true;
 }
 
@@ -203,12 +195,4 @@ bool VLCMetadataService::parseVideoFile( FilePtr file, VLC::Media& media ) const
         // How do we know if it's a movie or a random video?
     }
     return true;
-}
-
-void VLCMetadataService::cleanup()
-{
-    std::unique_lock<std::mutex> lock( m_cleanupLock );
-    for ( auto ctx : m_cleanup )
-        delete ctx;
-    m_cleanup.clear();
 }
