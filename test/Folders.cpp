@@ -92,6 +92,7 @@ TEST_F( Folders, List )
     ml->discover( "." );
 
     auto f = ml->folder( mock::FileSystemFactory::Root );
+    ASSERT_NE( f, nullptr );
     auto files = f->files();
     ASSERT_EQ( files.size(), 2u );
 
@@ -113,6 +114,7 @@ TEST_F( Folders, ListFolders )
 {
     ml->discover( "." );
     auto f = ml->folder( mock::FileSystemFactory::Root );
+    ASSERT_NE( f, nullptr );
     auto subFolders = f->folders();
     ASSERT_EQ( 1u, subFolders.size() );
 
@@ -237,6 +239,7 @@ TEST_F( Folders, UpdateFile )
     ml->discover( "." );
     auto filePath = std::string{ mock::FileSystemFactory::SubFolder } + "subfile.mp4";
     auto f = ml->file( filePath );
+    ASSERT_NE( f, nullptr );
     auto id = f->id();
 
     ml.reset();
@@ -257,8 +260,10 @@ TEST_F( Folders, CheckRemovable )
     fsMock->dirs[mock::FileSystemFactory::SubFolder]->markRemovable();
     ml->discover( "." );
     auto f = ml->folder( mock::FileSystemFactory::Root );
+    ASSERT_NE( f, nullptr );
     ASSERT_FALSE( f->isRemovable() );
     auto subfolder = ml->folder( mock::FileSystemFactory::SubFolder );
+    ASSERT_NE( subfolder, nullptr );
     ASSERT_TRUE( subfolder->isRemovable() );
 
     Reload();
