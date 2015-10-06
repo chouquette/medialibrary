@@ -29,6 +29,8 @@ class ServiceCb : public IMediaLibraryCb
         // IMediaLibraryCb interface
         virtual void onDiscoveryStarted( const std::string& ) override {}
         virtual void onDiscoveryCompleted( const std::string& ) override {}
+        virtual void onReloadStarted() override {}
+        virtual void onReloadCompleted() override {}
 };
 
 class VLCMetadataServices : public Tests

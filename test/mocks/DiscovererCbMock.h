@@ -19,34 +19,65 @@ public:
     {
     }
 
-    virtual void onDiscoveryStarted( const std::string& )
+    virtual void onDiscoveryStarted( const std::string& ) override
     {
     }
 
-    virtual void onDiscoveryCompleted( const std::string& )
+    virtual void onDiscoveryCompleted( const std::string& ) override
     {
-        --m_nbDiscoveryToWait;
-        m_cond.notify_all();
+        if ( --m_nbDiscoveryToWait == 0 )
+            m_cond.notify_all();
+    }
+
+    virtual void onReloadStarted() override
+    {
+    }
+
+    virtual void onReloadCompleted() override
+    {
+        if ( --m_nbReloadExpected == 0 )
+            m_reloadCond.notify_all();
     }
 
     bool wait()
     {
-        // If m_nbDiscoveryToWait is 0 when entering this function, it means the discovery
-        // hasn't started yet. This is only used for tests, and so far, with a single discovery module.
-        // Obviously, this is a hack and won't work if (when) we add another discovery module...
-        // Hello future self, enjoy.
-        auto v = 0;
-        m_nbDiscoveryToWait.compare_exchange_strong(v, 1);
         std::unique_lock<std::mutex> lock( m_mutex );
         return m_cond.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
             return m_nbDiscoveryToWait == 0;
         } );
     }
 
+    // We don't synchronously trigger the discovery, so we can't rely on started/completed being called
+    // Instead, we manually tell this mock how much discovery we expect. This sucks, but the alternative
+    // would probably be to have an extra IMediaLibraryCb member to signal that a discovery has been queue.
+    // however, in practice, this is a callback that says "yep, you've called IMediaLibrary::discover()"
+    // which is probably lame.
+    void prepareForWait(int nbExpected)
+    {
+        m_nbDiscoveryToWait = nbExpected;
+    }
+
+    void prepareForReload()
+    {
+        m_nbReloadExpected = 1;
+    }
+
+    bool waitForReload()
+    {
+        std::unique_lock<std::mutex> lock( m_mutex );
+        return m_reloadCond.wait_for( lock, std::chrono::seconds( 5 ), [this](){
+            return m_nbReloadExpected == 0;
+        });
+    }
+
 private:
     std::atomic_int m_nbDiscoveryToWait;
     std::condition_variable m_cond;
     std::mutex m_mutex;
+
+    std::atomic_int m_nbReloadExpected;
+    std::condition_variable m_reloadCond;
+    std::mutex m_reloadMutex;
 };
 
 }

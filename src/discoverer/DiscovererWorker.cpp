@@ -95,12 +95,16 @@ void DiscovererWorker::run()
         }
         else
         {
+            if ( m_cb != nullptr )
+                m_cb->onReloadStarted();
             for ( auto& d : m_discoverers )
             {
                 d->reload();
                 if ( m_run == false )
                     break;
             }
+            if ( m_cb != nullptr )
+                m_cb->onReloadCompleted();
         }
     }
     LOG_INFO( "Exiting DiscovererWorker thread" );

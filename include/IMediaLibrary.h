@@ -28,6 +28,8 @@ public:
 
     virtual void onDiscoveryStarted( const std::string& entryPoint ) = 0;
     virtual void onDiscoveryCompleted( const std::string& entryPoint ) = 0;
+    virtual void onReloadStarted() = 0;
+    virtual void onReloadCompleted() = 0;
 };
 
 class IMediaLibrary
