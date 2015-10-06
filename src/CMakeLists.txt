@@ -120,3 +120,8 @@ if (${EMOTION_FOUND})
     target_link_libraries( ${PROJECT_NAME} ${ECOREEVAS_LIBRARIES} )
     target_link_libraries( ${PROJECT_NAME} ${EVAS_LIBRARIES} )
 endif()
+
+# Work around for tizen platform
+if (NOT "${EXTRA_LIBS}" STREQUAL "")
+    target_link_libraries( ${PROJECT_NAME} ${EXTRA_LIBS} )
+endif()
