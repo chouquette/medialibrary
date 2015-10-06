@@ -48,6 +48,7 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
         return false;
     checkFiles( fsDir.get(), f );
     checkSubfolders( fsDir.get(), f );
+    f->setLastModificationDate( fsDir->lastModificationDate() );
     return true;
 }
 
@@ -98,6 +99,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, FolderPtr parentFold
             auto f = Folder::create( m_dbConn, subFolder->path(), 0, subFolder->isRemovable(), parentFolder->id() );
             checkFiles( subFolder.get(), f );
             checkSubfolders( subFolder.get(), f );
+            f->setLastModificationDate( subFolder->lastModificationDate() );
             continue;
         }
         if ( subFolder->lastModificationDate() == (*it)->lastModificationDate() )
