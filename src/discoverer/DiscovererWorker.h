@@ -18,6 +18,7 @@ public:
     virtual ~DiscovererWorker();
     void addDiscoverer( std::unique_ptr<IDiscoverer> discoverer );
     void setCallback( IMediaLibraryCb* cb );
+    void stop();
 
     virtual bool discover( const std::string& entryPoint ) override;
     virtual void reload() override;

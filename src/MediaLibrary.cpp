@@ -63,6 +63,8 @@ MediaLibrary::~MediaLibrary()
     // not be called anymore.
     if ( m_vlcInstance.isValid() )
         m_vlcInstance.logUnset();
+    // Explicitely stop the discoverer, to avoid it writting while tearing down.
+    m_discoverer->stop();
     File::clear();
     Folder::clear();
     Label::clear();

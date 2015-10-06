@@ -9,14 +9,7 @@ DiscovererWorker::DiscovererWorker()
 
 DiscovererWorker::~DiscovererWorker()
 {
-    {
-        std::unique_lock<std::mutex> lock( m_mutex );
-        while ( m_entryPoints.empty() == false )
-            m_entryPoints.pop();
-        m_run = false;
-    }
-    m_cond.notify_all();
-    m_thread.join();
+    stop();
 }
 
 void DiscovererWorker::addDiscoverer( std::unique_ptr<IDiscoverer> discoverer )
@@ -27,6 +20,21 @@ void DiscovererWorker::addDiscoverer( std::unique_ptr<IDiscoverer> discoverer )
 void DiscovererWorker::setCallback(IMediaLibraryCb* cb)
 {
     m_cb = cb;
+}
+
+void DiscovererWorker::stop()
+{
+    bool running = true;
+    if ( m_run.compare_exchange_strong( running, false ) )
+    {
+        {
+            std::unique_lock<std::mutex> lock( m_mutex );
+            while ( m_entryPoints.empty() == false )
+                m_entryPoints.pop();
+        }
+        m_cond.notify_all();
+        m_thread.join();
+    }
 }
 
 bool DiscovererWorker::discover( const std::string& entryPoint )
