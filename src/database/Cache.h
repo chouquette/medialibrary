@@ -141,9 +141,9 @@ class Cache
          * Create a new instance of the cache class.
          */
         template <typename... Args>
-        static bool insert( DBConnection dbConnectionWeak, std::shared_ptr<IMPL> self, const std::string& req, const Args&... args )
+        static bool insert( DBConnection dbConnectionWeak, std::shared_ptr<IMPL> self, const std::string& req, Args&&... args )
         {
-            unsigned int pKey = sqlite::Tools::insert( dbConnectionWeak, req, args... );
+            unsigned int pKey = sqlite::Tools::insert( dbConnectionWeak, req, std::forward<Args>( args )... );
             if ( pKey == 0 )
                 return false;
             (self.get())->*TABLEPOLICY::PrimaryKey = pKey;
