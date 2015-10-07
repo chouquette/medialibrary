@@ -203,7 +203,7 @@ FilePtr MediaLibrary::addFile( const std::string& path, FolderPtr parentFolder )
     LOG_INFO( "Adding ", file->name() );
     if ( m_callback != nullptr )
         m_callback->onFileAdded( fptr );
-    m_parser->parse( fptr, m_callback );
+//    m_parser->parse( fptr, m_callback );
     return fptr;
 }
 
