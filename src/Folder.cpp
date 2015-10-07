@@ -33,7 +33,8 @@ Folder::Folder( DBConnection dbConnection, sqlite3_stmt* stmt )
 }
 
 Folder::Folder( const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parent )
-    : m_path( path )
+    : m_id( 0 )
+    , m_path( path )
     , m_parent( parent )
     , m_lastModificationDate( lastModificationDate )
     , m_isRemovable( isRemovable )
