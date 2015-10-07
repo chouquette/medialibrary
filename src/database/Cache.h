@@ -53,7 +53,7 @@ template <typename IMPL, typename INTF, typename TABLEPOLICY, typename CACHEPOLI
 class Cache
 {
     public:
-        static std::shared_ptr<IMPL> fetch( DBConnection dbConnectionWeak, const typename CACHEPOLICY::KeyType& key )
+        static std::shared_ptr<IMPL> fetch( DBConnection dbConnection, const typename CACHEPOLICY::KeyType& key )
         {
             Lock lock( Mutex );
             auto it = Store.find( key );
@@ -61,7 +61,7 @@ class Cache
                 return it->second;
             static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name +
                             " WHERE " + TABLEPOLICY::CacheColumn + " = ?";
-            auto res = sqlite::Tools::fetchOne<IMPL>( dbConnectionWeak, req.c_str(), key );
+            auto res = sqlite::Tools::fetchOne<IMPL>( dbConnection, req.c_str(), key );
             if ( res == nullptr )
                 return nullptr;
             Store[key] = res;
@@ -78,7 +78,7 @@ class Cache
             return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnectionWeak, req.c_str() );
         }
 
-        static std::shared_ptr<IMPL> load( std::shared_ptr<sqlite3> dbConnection, sqlite3_stmt* stmt )
+        static std::shared_ptr<IMPL> load( DBConnection dbConnection, sqlite3_stmt* stmt )
         {
             auto cacheKey = CACHEPOLICY::key( stmt );
 
@@ -91,7 +91,7 @@ class Cache
             return inst;
         }
 
-        static bool destroy( DBConnection dbConnectionWeak, const typename CACHEPOLICY::KeyType& key )
+        static bool destroy( DBConnection dbConnection, const typename CACHEPOLICY::KeyType& key )
         {
             Lock lock( Mutex );
             auto it = Store.find( key );
@@ -99,19 +99,19 @@ class Cache
                 Store.erase( it );
             static const std::string req = "DELETE FROM " + TABLEPOLICY::Name + " WHERE " +
                     TABLEPOLICY::CacheColumn + " = ?";
-            return sqlite::Tools::executeDelete( dbConnectionWeak, req.c_str(), key );
+            return sqlite::Tools::executeDelete( dbConnection, req.c_str(), key );
         }
 
-        static bool destroy( DBConnection dbConnectionWeak, const std::shared_ptr<IMPL>& self )
+        static bool destroy( DBConnection dbConnection, const std::shared_ptr<IMPL>& self )
         {
             const auto& key = CACHEPOLICY::key( self );
-            return destroy( dbConnectionWeak, key );
+            return destroy( dbConnection, key );
         }
 
-        static bool destroy( DBConnection dbConnectionWeak, const IMPL* self )
+        static bool destroy( DBConnection dbConnection, const IMPL* self )
         {
             const auto& key = CACHEPOLICY::key( self );
-            return destroy( dbConnectionWeak, key );
+            return destroy( dbConnection, key );
         }
 
         static void clear()
@@ -141,9 +141,9 @@ class Cache
          * Create a new instance of the cache class.
          */
         template <typename... Args>
-        static bool insert( DBConnection dbConnectionWeak, std::shared_ptr<IMPL> self, const std::string& req, Args&&... args )
+        static bool insert( DBConnection dbConnection, std::shared_ptr<IMPL> self, const std::string& req, Args&&... args )
         {
-            unsigned int pKey = sqlite::Tools::insert( dbConnectionWeak, req, std::forward<Args>( args )... );
+            unsigned int pKey = sqlite::Tools::insert( dbConnection, req, std::forward<Args>( args )... );
             if ( pKey == 0 )
                 return false;
             (self.get())->*TABLEPOLICY::PrimaryKey = pKey;

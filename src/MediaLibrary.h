@@ -3,6 +3,7 @@
 
 class Parser;
 class DiscovererWorker;
+class SqliteConnection;
 
 #include <sqlite3.h>
 
@@ -62,7 +63,7 @@ class MediaLibrary : public IMediaLibrary
         void reload();
 
     private:
-        std::shared_ptr<sqlite3> m_dbConnection;
+        std::unique_ptr<SqliteConnection> m_dbConnection;
         std::shared_ptr<factory::IFileSystem> m_fsFactory;
         std::string m_snapshotPath;
         IMediaLibraryCb* m_callback;

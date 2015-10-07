@@ -17,8 +17,7 @@ class IShowEpisode;
 class IVideoTrack;
 class ILogger;
 class IArtist;
-
-struct sqlite3;
+class SqliteConnection;
 
 typedef std::shared_ptr<IFile> FilePtr;
 typedef std::shared_ptr<IFolder> FolderPtr;
@@ -32,7 +31,7 @@ typedef std::shared_ptr<IAudioTrack> AudioTrackPtr;
 typedef std::shared_ptr<IVideoTrack> VideoTrackPtr;
 typedef std::shared_ptr<IArtist> ArtistPtr;
 
-typedef std::weak_ptr<sqlite3> DBConnection;
+typedef SqliteConnection* DBConnection;
 
 enum ServiceStatus
 {

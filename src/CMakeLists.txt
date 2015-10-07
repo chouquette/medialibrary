@@ -75,6 +75,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     discoverer/DiscovererWorker.cpp
 
     Utils.cpp
+    database/SqliteConnection.cpp
 
     logging/IostreamLogger.cpp
     logging/Logger.cpp
