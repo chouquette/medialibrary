@@ -127,6 +127,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, FolderPtr parentFold
 
 void FsDiscoverer::checkFiles( fs::IDirectory* folder, FolderPtr parentFolder )
 {
+    LOG_INFO( "Checking file in ", folder->path() );
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
             + " WHERE folder_id = ?";
     auto files = sqlite::Tools::fetchAll<File, IFile>( m_dbConn, req, parentFolder->id() );
