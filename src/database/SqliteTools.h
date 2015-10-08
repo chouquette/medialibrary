@@ -57,8 +57,7 @@ struct Traits<T, typename std::enable_if<IsSameDecay<T, std::string>::value>::ty
 {
     static int Bind(sqlite3_stmt* stmt, int pos, const std::string& value )
     {
-        char* tmp = strdup( value.c_str() );
-        return sqlite3_bind_text( stmt, pos, tmp, -1, free );
+        return sqlite3_bind_text( stmt, pos, value.c_str(), -1, SQLITE_STATIC );
     }
 
     static std::string Load( sqlite3_stmt* stmt, int pos )
