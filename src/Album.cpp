@@ -91,7 +91,7 @@ std::vector<std::shared_ptr<IAlbumTrack>> Album::tracks() const
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTrackTable::Name
             + " WHERE album_id = ?";
-    return sqlite::Tools::fetchAll<AlbumTrack, IAlbumTrack>( m_dbConnection, req, m_id );
+    return AlbumTrack::fetchAll( m_dbConnection, req, m_id );
 }
 
 AlbumTrackPtr Album::addTrack( const std::string& title, unsigned int trackNb )
@@ -104,7 +104,7 @@ std::vector<ArtistPtr> Album::artists() const
     static const std::string req = "SELECT art.* FROM " + policy::ArtistTable::Name + " art "
             "LEFT JOIN AlbumArtistRelation aar ON aar.id_artist = art.id_artist "
             "WHERE aar.id_album = ?";
-    return sqlite::Tools::fetchAll<Artist, IArtist>( m_dbConnection, req, m_id );
+    return Artist::fetchAll( m_dbConnection, req, m_id );
 }
 
 bool Album::addArtist( ArtistPtr artist )

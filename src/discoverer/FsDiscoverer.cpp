@@ -58,7 +58,7 @@ void FsDiscoverer::reload()
     //FIXME: This shouldn't be done for "removable"/network files
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
             + " WHERE id_parent IS NULL";
-    auto rootFolders = sqlite::Tools::fetchAll<Folder, IFolder>( m_dbConn, req );
+    auto rootFolders = Folder::fetchAll( m_dbConn, req );
     for ( const auto f : rootFolders )
     {
         auto folder = m_fsFactory->createDirectory( f->path() );
@@ -83,7 +83,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, FolderPtr parentFold
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
             + " WHERE id_parent = ?";
     LOG_INFO( "Checking for modifications in ", folder->path() );
-    auto subFoldersInDB = sqlite::Tools::fetchAll<Folder, IFolder>( m_dbConn, req, parentFolder->id() );
+    auto subFoldersInDB = Folder::fetchAll( m_dbConn, req, parentFolder->id() );
     for ( const auto& subFolderPath : folder->dirs() )
     {
         auto subFolder = m_fsFactory->createDirectory( subFolderPath );
@@ -130,7 +130,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory* folder, FolderPtr parentFolder )
     LOG_INFO( "Checking file in ", folder->path() );
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
             + " WHERE folder_id = ?";
-    auto files = sqlite::Tools::fetchAll<File, IFile>( m_dbConn, req, parentFolder->id() );
+    auto files = File::fetchAll( m_dbConn, req, parentFolder->id() );
     for ( const auto& filePath : folder->files() )
     {        
         auto it = std::find_if( begin( files ), end( files ), [filePath](const std::shared_ptr<IFile>& f) {

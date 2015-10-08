@@ -67,7 +67,7 @@ AudioTrackPtr AudioTrack::fetch(DBConnection dbConnection, const std::string& co
 {
     static const std::string req = "SELECT * FROM " + policy::AudioTrackTable::Name
             + " WHERE codec = ? AND bitrate = ? AND samplerate = ? AND nb_channels = ?";
-    return sqlite::Tools::fetchOne<AudioTrack>( dbConnection, req, codec, bitrate, sampleRate, nbChannels );
+    return AudioTrack::fetchOne( dbConnection, req, codec, bitrate, sampleRate, nbChannels );
 }
 
 AudioTrackPtr AudioTrack::create( DBConnection dbConnection, const std::string& codec,

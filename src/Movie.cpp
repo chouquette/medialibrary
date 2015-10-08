@@ -109,7 +109,7 @@ std::vector<FilePtr> Movie::files()
 {
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
             + " WHERE movie_id = ?";
-    return sqlite::Tools::fetchAll<File, IFile>( m_dbConnection, req, m_id );
+    return File::fetchAll( m_dbConnection, req, m_id );
 }
 
 bool Movie::createTable( DBConnection dbConnection )

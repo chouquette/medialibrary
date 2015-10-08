@@ -146,14 +146,14 @@ std::vector<FilePtr> MediaLibrary::audioFiles()
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name + " WHERE type = ?";
     //FIXME: Replace this with template magic in sqlite's traits
     using type_t = std::underlying_type<IFile::Type>::type;
-    return sqlite::Tools::fetchAll<File, IFile>( m_dbConnection.get(), req, static_cast<type_t>( IFile::Type::AudioType ) );
+    return File::fetchAll( m_dbConnection.get(), req, static_cast<type_t>( IFile::Type::AudioType ) );
 }
 
 std::vector<FilePtr> MediaLibrary::videoFiles()
 {
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name + " WHERE type = ?";
     using type_t = std::underlying_type<IFile::Type>::type;
-    return sqlite::Tools::fetchAll<File, IFile>( m_dbConnection.get(), req, static_cast<type_t>( IFile::Type::VideoType ) );
+    return File::fetchAll( m_dbConnection.get(), req, static_cast<type_t>( IFile::Type::VideoType ) );
 }
 
 FilePtr MediaLibrary::file( const std::string& path )
@@ -244,7 +244,7 @@ AlbumPtr MediaLibrary::album(const std::string& title )
     // We can't use Cache helper, since albums are cached by primary keys
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
             " WHERE title = ?";
-    return sqlite::Tools::fetchOne<Album>( m_dbConnection.get(), req, title );
+    return Album::fetchOne( m_dbConnection.get(), req, title );
 }
 
 AlbumPtr MediaLibrary::createAlbum(const std::string& title )
@@ -261,7 +261,7 @@ ShowPtr MediaLibrary::show(const std::string& name)
 {
     static const std::string req = "SELECT * FROM " + policy::ShowTable::Name
             + " WHERE name = ?";
-    return sqlite::Tools::fetchOne<Show>( m_dbConnection.get(), req, name );
+    return Show::fetchOne( m_dbConnection.get(), req, name );
 }
 
 ShowPtr MediaLibrary::createShow(const std::string& name)
@@ -273,7 +273,7 @@ MoviePtr MediaLibrary::movie( const std::string& title )
 {
     static const std::string req = "SELECT * FROM " + policy::MovieTable::Name
             + " WHERE title = ?";
-    return sqlite::Tools::fetchOne<Movie>( m_dbConnection.get(), req, title );
+    return Movie::fetchOne( m_dbConnection.get(), req, title );
 }
 
 MoviePtr MediaLibrary::createMovie( const std::string& title )
@@ -285,7 +285,7 @@ ArtistPtr MediaLibrary::artist(const std::string &name)
 {
     static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name
             + " WHERE name = ?";
-    return sqlite::Tools::fetchOne<Artist>( m_dbConnection.get(), req, name );
+    return Artist::fetchOne( m_dbConnection.get(), req, name );
 }
 
 ArtistPtr MediaLibrary::createArtist( const std::string& name )
@@ -296,7 +296,7 @@ ArtistPtr MediaLibrary::createArtist( const std::string& name )
 std::vector<ArtistPtr> MediaLibrary::artists() const
 {
     static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name;
-    return sqlite::Tools::fetchAll<Artist, IArtist>( m_dbConnection.get(), req );
+    return Artist::fetchAll( m_dbConnection.get(), req );
 }
 
 void MediaLibrary::addMetadataService(std::unique_ptr<IMetadataService> service)

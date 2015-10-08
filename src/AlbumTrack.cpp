@@ -133,12 +133,12 @@ std::vector<ArtistPtr> AlbumTrack::artists() const
     static const std::string req = "SELECT art.* FROM " + policy::ArtistTable::Name + " art "
             "LEFT JOIN TrackArtistRelation tar ON tar.id_artist = art.id_artist "
             "WHERE tar.id_track = ?";
-    return sqlite::Tools::fetchAll<Artist, IArtist>( m_dbConnection, req, m_id );
+    return Artist::fetchAll( m_dbConnection, req, m_id );
 }
 
 std::vector<FilePtr> AlbumTrack::files()
 {
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
             + " WHERE album_track_id = ? ";
-    return sqlite::Tools::fetchAll<File, IFile>( m_dbConnection, req, m_id );
+    return File::fetchAll( m_dbConnection, req, m_id );
 }

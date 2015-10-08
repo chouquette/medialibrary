@@ -110,7 +110,7 @@ std::vector<ShowEpisodePtr> Show::episodes()
 {
     static const std::string req = "SELECT * FROM " + policy::ShowEpisodeTable::Name
             + " WHERE show_id = ?";
-    return sqlite::Tools::fetchAll<ShowEpisode, IShowEpisode>( m_dbConnection, req, m_id );
+    return ShowEpisode::fetchAll( m_dbConnection, req, m_id );
 }
 
 bool Show::destroy()

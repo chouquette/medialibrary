@@ -82,14 +82,14 @@ std::vector<FilePtr> Folder::files()
 {
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name +
         " WHERE folder_id = ?";
-    return sqlite::Tools::fetchAll<File, IFile>( m_dbConection, req, m_id );
+    return File::fetchAll( m_dbConection, req, m_id );
 }
 
 std::vector<FolderPtr> Folder::folders()
 {
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
             " WHERE id_parent = ?";
-    return sqlite::Tools::fetchAll<Folder, IFolder>( m_dbConection, req, m_id );
+    return fetchAll( m_dbConection, req, m_id );
 }
 
 FolderPtr Folder::parent()
@@ -97,7 +97,7 @@ FolderPtr Folder::parent()
     //FIXME: use path to be able to fetch from cache?
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
             " WHERE id_folder = ?";
-    return sqlite::Tools::fetchOne<Folder>( m_dbConection, req, m_parent );
+    return fetchOne( m_dbConection, req, m_parent );
 }
 
 unsigned int Folder::lastModificationDate()

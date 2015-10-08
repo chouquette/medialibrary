@@ -128,7 +128,7 @@ std::vector<std::shared_ptr<ILabel> > File::labels()
     static const std::string req = "SELECT l.* FROM " + policy::LabelTable::Name + " l "
             "LEFT JOIN LabelFileRelation lfr ON lfr.id_label = l.id_label "
             "WHERE lfr.id_file = ?";
-    return sqlite::Tools::fetchAll<Label, ILabel>( m_dbConnection, req, m_id );
+    return Label::fetchAll( m_dbConnection, req, m_id );
 }
 
 int File::playCount() const
@@ -180,7 +180,7 @@ std::vector<VideoTrackPtr> File::videoTracks()
     static const std::string req = "SELECT t.* FROM " + policy::VideoTrackTable::Name +
             " t LEFT JOIN VideoTrackFileRelation vtfr ON vtfr.id_track = t.id_track"
             " WHERE vtfr.id_file = ?";
-    return sqlite::Tools::fetchAll<VideoTrack, IVideoTrack>( m_dbConnection, req, m_id );
+    return VideoTrack::fetchAll( m_dbConnection, req, m_id );
 }
 
 bool File::addAudioTrack( const std::string& codec, unsigned int bitrate,
@@ -203,7 +203,7 @@ std::vector<AudioTrackPtr> File::audioTracks()
     static const std::string req = "SELECT t.* FROM " + policy::AudioTrackTable::Name +
             " t LEFT JOIN AudioTrackFileRelation atfr ON atfr.id_track = t.id_track"
             " WHERE atfr.id_file = ?";
-    return sqlite::Tools::fetchAll<AudioTrack, IAudioTrack>( m_dbConnection, req, m_id );
+    return AudioTrack::fetchAll( m_dbConnection, req, m_id );
 }
 
 const std::string &File::snapshot()

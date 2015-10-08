@@ -77,5 +77,5 @@ VideoTrackPtr VideoTrack::fetch( DBConnection dbConnection, const std::string& c
 {
     static const std::string req = "SELECT * FROM " + policy::VideoTrackTable::Name +
             " WHERE codec = ? AND width = ? AND height = ? AND fps = ?";
-    return sqlite::Tools::fetchOne<VideoTrack>( dbConnection, req, codec, width, height, fps );
+    return VideoTrack::fetchOne( dbConnection, req, codec, width, height, fps );
 }

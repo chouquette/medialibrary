@@ -68,14 +68,26 @@ class Cache
             return res;
         }
 
+        template <typename... Args>
+        static std::shared_ptr<IMPL> fetchOne( DBConnection dbConnection, const std::string& req, Args&&... args )
+        {
+            return sqlite::Tools::fetchOne<IMPL>( dbConnection, req, std::forward<Args>( args )... );
+        }
+
         /*
          * Will fetch all elements from the database & cache them.
          *
          */
-        static std::vector<std::shared_ptr<INTF>> fetchAll( DBConnection dbConnectionWeak )
+        static std::vector<std::shared_ptr<INTF>> fetchAll( DBConnection dbConnection )
         {
             static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name;
-            return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnectionWeak, req.c_str() );
+            return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnection, req.c_str() );
+        }
+
+        template <typename... Args>
+        static std::vector<std::shared_ptr<INTF>> fetchAll( DBConnection dbConnection, const std::string &req, Args&&... args )
+        {
+            return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnection, req, std::forward<Args>( args )... );
         }
 
         static std::shared_ptr<IMPL> load( DBConnection dbConnection, sqlite3_stmt* stmt )
