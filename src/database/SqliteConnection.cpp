@@ -26,7 +26,7 @@ sqlite3 *SqliteConnection::getConn()
             LOG_WARN( "Failed to enable sqlite busy timeout" );
         m_conns.emplace(std::this_thread::get_id(), ConnPtr( dbConnection, &sqlite3_close ) );
         lock.unlock();
-        if ( sqlite::Tools::executeRequest( this, "PRAGMA foreign_keys = ON" ) == false )
+        if ( sqlite::Tools::executeRequestLocked( this, "PRAGMA foreign_keys = ON" ) == false )
             throw std::runtime_error( "Failed to enable foreign keys" );
         return dbConnection;
     }
@@ -37,4 +37,9 @@ void SqliteConnection::release()
 {
     std::unique_lock<std::mutex> lock( m_connMutex );
     m_conns.erase( std::this_thread::get_id() );
+}
+
+SqliteConnection::RequestContext SqliteConnection::acquireContext()
+{
+    return RequestContext{ m_contextMutex };
 }

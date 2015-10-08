@@ -106,6 +106,8 @@ class Tools
         template <typename IMPL, typename INTF, typename... Args>
         static std::vector<std::shared_ptr<INTF> > fetchAll( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
+            auto ctx = dbConnection->acquireContext();
+
             std::vector<std::shared_ptr<INTF>> results;
             auto stmt = prepareRequest( dbConnection, req, std::forward<Args>( args )...);
             if ( stmt == nullptr )
@@ -123,6 +125,8 @@ class Tools
         template <typename T, typename... Args>
         static std::shared_ptr<T> fetchOne( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
+            auto ctx = dbConnection->acquireContext();
+
             auto stmt = prepareRequest( dbConnection, req, std::forward<Args>( args )... );
             if ( stmt == nullptr )
                 return nullptr;
@@ -134,6 +138,43 @@ class Tools
 
         template <typename... Args>
         static bool executeRequest( DBConnection dbConnection, const std::string& req, Args&&... args )
+        {
+            auto ctx = dbConnection->acquireContext();
+            return executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
+        }
+
+        template <typename... Args>
+        static bool executeDelete( DBConnection dbConnection, const std::string& req, Args&&... args )
+        {
+            auto ctx = dbConnection->acquireContext();
+            if ( executeRequestLocked( dbConnection, req, std::forward<Args>( args )... ) == false )
+                return false;
+            return sqlite3_changes( dbConnection->getConn() ) > 0;
+        }
+
+        template <typename... Args>
+        static bool executeUpdate( DBConnection dbConnectionWeak, const std::string& req, Args&&... args )
+        {
+            // The code would be exactly the same, do not freak out because it calls executeDelete :)
+            return executeDelete( dbConnectionWeak, req, std::forward<Args>( args )... );
+        }
+
+        /**
+         * Inserts a record to the DB and return the newly created primary key.
+         * Returns 0 (which is an invalid sqlite primary key) when insertion fails.
+         */
+        template <typename... Args>
+        static unsigned int insert( DBConnection dbConnection, const std::string& req, Args&&... args )
+        {
+            auto ctx = dbConnection->acquireContext();
+            if ( executeRequestLocked( dbConnection, req, std::forward<Args>( args )... ) == false )
+                return 0;
+            return sqlite3_last_insert_rowid( dbConnection->getConn() );
+        }
+
+    private:
+        template <typename... Args>
+        static bool executeRequestLocked( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
             auto stmt = prepareRequest( dbConnection, req, std::forward<Args>( args )... );
             if ( stmt == nullptr )
@@ -157,34 +198,6 @@ class Tools
             return true;
         }
 
-        template <typename... Args>
-        static bool executeDelete( DBConnection dbConnection, const std::string& req, Args&&... args )
-        {
-            if ( executeRequest( dbConnection, req, std::forward<Args>( args )... ) == false )
-                return false;
-            return sqlite3_changes( dbConnection->getConn() ) > 0;
-        }
-
-        template <typename... Args>
-        static bool executeUpdate( DBConnection dbConnectionWeak, const std::string& req, Args&&... args )
-        {
-            // The code would be exactly the same, do not freak out because it calls executeDelete :)
-            return executeDelete( dbConnectionWeak, req, std::forward<Args>( args )... );
-        }
-
-        /**
-         * Inserts a record to the DB and return the newly created primary key.
-         * Returns 0 (which is an invalid sqlite primary key) when insertion fails.
-         */
-        template <typename... Args>
-        static unsigned int insert( DBConnection dbConnection, const std::string& req, Args&&... args )
-        {
-            if ( executeRequest( dbConnection, req, std::forward<Args>( args )... ) == false )
-                return 0;
-            return sqlite3_last_insert_rowid( dbConnection->getConn() );
-        }
-
-    private:
         template <typename... Args>
         static StmtPtr prepareRequest( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
@@ -211,6 +224,8 @@ class Tools
             Traits<T>::Bind( stmt.get(), COLIDX, std::forward<T>( arg ) );
             return stmt;
         }
+
+        friend SqliteConnection;
 };
 
 }
