@@ -61,7 +61,7 @@ class Cache
                 return it->second;
             static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name +
                             " WHERE " + TABLEPOLICY::CacheColumn + " = ?";
-            auto res = sqlite::Tools::fetchOne<IMPL>( dbConnection, req.c_str(), key );
+            auto res = sqlite::Tools::fetchOne<IMPL>( dbConnection, req, key );
             if ( res == nullptr )
                 return nullptr;
             Store[key] = res;
@@ -81,7 +81,7 @@ class Cache
         static std::vector<std::shared_ptr<INTF>> fetchAll( DBConnection dbConnection )
         {
             static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name;
-            return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnection, req.c_str() );
+            return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnection, req );
         }
 
         template <typename... Args>
@@ -111,7 +111,7 @@ class Cache
                 Store.erase( it );
             static const std::string req = "DELETE FROM " + TABLEPOLICY::Name + " WHERE " +
                     TABLEPOLICY::CacheColumn + " = ?";
-            return sqlite::Tools::executeDelete( dbConnection, req.c_str(), key );
+            return sqlite::Tools::executeDelete( dbConnection, req, key );
         }
 
         static bool destroy( DBConnection dbConnection, const std::shared_ptr<IMPL>& self )
