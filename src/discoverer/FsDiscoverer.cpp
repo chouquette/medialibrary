@@ -65,6 +65,7 @@ void FsDiscoverer::reload()
         if ( folder->lastModificationDate() == f->lastModificationDate() )
             continue;
         checkSubfolders( folder.get(), f );
+        checkFiles( folder.get(), f );
         f->setLastModificationDate( folder->lastModificationDate() );
     }
 }
