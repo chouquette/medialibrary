@@ -104,7 +104,15 @@ bool VLCMetadataService::parseAudioFile( FilePtr file, VLC::Media& media ) const
         return true;
     auto album = m_ml->album( albumTitle );
     if ( album == nullptr )
+    {
         album = m_ml->createAlbum( albumTitle );
+        if ( album != nullptr )
+        {
+            auto date = media.meta( libvlc_meta_Date );
+            if ( date.length() > 0 )
+                album->setReleaseDate( std::stoul( date ) );
+        }
+    }
     if ( album == nullptr )
     {
         LOG_ERROR( "Failed to create/get album" );

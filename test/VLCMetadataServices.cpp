@@ -97,6 +97,9 @@ TEST_F( VLCMetadataServices, ParseAlbum )
     ASSERT_EQ( album->title(), "Boys for Pele" );
 //    ASSERT_NE( album->artworkUrl().length(), 0u );
 
+    auto releaseDate = album->releaseDate();
+    ASSERT_NE( releaseDate, 0 );
+
     auto album2 = ml->album( "Boys for Pele" );
     ASSERT_EQ( album, album2 );
 }
