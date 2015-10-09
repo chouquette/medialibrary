@@ -30,9 +30,10 @@ template <typename T, typename Enable = void>
 struct Traits;
 
 template <typename T>
-struct Traits<T, typename std::enable_if<std::is_integral<
-        typename std::decay<T>::type
-    >::value>::type>
+struct Traits<T, typename std::enable_if<
+        std::is_integral<typename std::decay<T>::type>::value
+        && ! IsSameDecay<T, int64_t>::value
+    >::type>
 {
     static constexpr
     int (*Bind)(sqlite3_stmt *, int, int) = &sqlite3_bind_int;
@@ -88,6 +89,16 @@ struct Traits<std::nullptr_t>
     {
         return sqlite3_bind_null( stmt, idx );
     }
+};
+
+template <typename T>
+struct Traits<T, typename std::enable_if<IsSameDecay<T, int64_t>::value>::type>
+{
+    static constexpr int
+    (*Bind)(sqlite3_stmt *, int, sqlite_int64) = &sqlite3_bind_int64;
+
+    static constexpr sqlite_int64
+    (*Load)(sqlite3_stmt *, int) = &sqlite3_column_int64;
 };
 
 class Tools
