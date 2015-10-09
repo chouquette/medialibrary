@@ -52,8 +52,8 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         virtual bool setName( const std::string& name ) override;
         virtual AlbumTrackPtr albumTrack();
         virtual bool setAlbumTrack( AlbumTrackPtr albumTrack );
-        virtual unsigned int duration() const;
-        virtual bool setDuration( unsigned int duration) override;
+        virtual int64_t duration() const;
+        virtual bool setDuration( int64_t duration) override;
         virtual std::shared_ptr<IShowEpisode> showEpisode();
         virtual bool setShowEpisode( ShowEpisodePtr showEpisode );
         virtual bool addLabel( LabelPtr label );
@@ -83,7 +83,7 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         // DB fields:
         unsigned int m_id;
         Type m_type;
-        unsigned int m_duration;
+        int64_t m_duration;
         unsigned int m_albumTrackId;
         unsigned int m_playCount;
         unsigned int m_showEpisodeId;

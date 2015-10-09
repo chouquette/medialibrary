@@ -28,8 +28,11 @@ class IFile
         virtual bool setName( const std::string& name ) = 0;
         virtual AlbumTrackPtr albumTrack() = 0;
         virtual bool setAlbumTrack(AlbumTrackPtr albumTrack ) = 0;
-        virtual unsigned int duration() const = 0;
-        virtual bool setDuration( unsigned int duration) = 0;
+        /**
+         * @brief duration Returns the file duration in ms
+         */
+        virtual int64_t duration() const = 0;
+        virtual bool setDuration( int64_t duration ) = 0;
         virtual std::shared_ptr<IShowEpisode> showEpisode() = 0;
         virtual bool setShowEpisode( ShowEpisodePtr showEpisode ) = 0;
         virtual int playCount() const = 0;

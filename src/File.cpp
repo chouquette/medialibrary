@@ -25,7 +25,7 @@ File::File( DBConnection dbConnection, sqlite3_stmt* stmt )
 {
     m_id = sqlite3_column_int( stmt, 0 );
     m_type = (Type)sqlite3_column_int( stmt, 1 );
-    m_duration = sqlite3_column_int( stmt, 2 );
+    m_duration = sqlite::Traits<int64_t>::Load( stmt, 2 );
     m_albumTrackId = sqlite3_column_int( stmt, 3 );
     m_playCount = sqlite3_column_int( stmt, 4 );
     m_showEpisodeId = sqlite3_column_int( stmt, 5 );
@@ -41,7 +41,7 @@ File::File( DBConnection dbConnection, sqlite3_stmt* stmt )
 File::File( const fs::IFile* file, unsigned int folderId, const std::string& name, Type type )
     : m_id( 0 )
     , m_type( type )
-    , m_duration( 0 )
+    , m_duration( -1 )
     , m_albumTrackId( 0 )
     , m_playCount( 0 )
     , m_showEpisodeId( 0 )
@@ -88,12 +88,12 @@ bool File::setAlbumTrack( AlbumTrackPtr albumTrack )
     return true;
 }
 
-unsigned int File::duration() const
+int64_t File::duration() const
 {
     return m_duration;
 }
 
-bool File::setDuration( unsigned int duration )
+bool File::setDuration( int64_t duration )
 {
     static const std::string req = "UPDATE " + policy::FileTable::Name + " SET duration = ? "
             "WHERE id_file = ?";
@@ -290,7 +290,7 @@ bool File::createTable( DBConnection connection )
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::FileTable::Name + "("
             "id_file INTEGER PRIMARY KEY AUTOINCREMENT,"
             "type INTEGER,"
-            "duration UNSIGNED INTEGER,"
+            "duration INTEGER,"
             "album_track_id UNSIGNED INTEGER,"
             "play_count UNSIGNED INTEGER,"
             "show_episode_id UNSIGNED INTEGER,"

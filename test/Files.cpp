@@ -80,15 +80,18 @@ TEST_F( Files, LastModificationDate )
 TEST_F( Files, Duration )
 {
     auto f = ml->addFile( "media.avi", nullptr );
-    ASSERT_EQ( f->duration(), 0u );
+    ASSERT_EQ( f->duration(), -1 );
 
-    f->setDuration( 123u );
-    ASSERT_EQ( f->duration(), 123u );
+    // Use a value that checks we're using a 64bits value
+    int64_t d = int64_t(1) << 40;
+
+    f->setDuration( d );
+    ASSERT_EQ( f->duration(), d );
 
     Reload();
 
     f = ml->file( "media.avi" );
-    ASSERT_EQ( f->duration(), 123u );
+    ASSERT_EQ( f->duration(), d );
 }
 
 TEST_F( Files, Snapshot )
