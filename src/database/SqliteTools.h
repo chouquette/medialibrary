@@ -214,7 +214,7 @@ class Tools
             return _prepareRequest<1>( dbConnection, req, std::forward<Args>( args )... );
         }
 
-        template <unsigned int>
+        template <int>
         static StmtPtr _prepareRequest( DBConnection dbConnection, const std::string& req )
         {
             sqlite3_stmt* stmt = nullptr;
@@ -227,7 +227,7 @@ class Tools
             return StmtPtr( stmt, &sqlite3_finalize );
         }
 
-        template <unsigned int COLIDX, typename T, typename... Args>
+        template <int COLIDX, typename T, typename... Args>
         static StmtPtr _prepareRequest( DBConnection dbConnection, const std::string& req, T&& arg, Args&&... args )
         {
             auto stmt = _prepareRequest<COLIDX + 1>( dbConnection, req, std::forward<Args>( args )... );
