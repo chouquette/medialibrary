@@ -75,6 +75,8 @@ class MediaLibrary : public IMediaLibrary
 
         virtual const std::string& snapshotPath() const override;
         virtual void setLogger( ILogger* logger ) override;
+        //Temporarily public, move back to private as soon as we start monitoring the FS
+        virtual void reload() override;
 
     private:
         static const std::vector<std::string> supportedVideoExtensions;
@@ -82,7 +84,6 @@ class MediaLibrary : public IMediaLibrary
 
     private:
         void addMetadataService( std::unique_ptr<IMetadataService> service );
-        void reload();
 
     private:
         std::unique_ptr<SqliteConnection> m_dbConnection;

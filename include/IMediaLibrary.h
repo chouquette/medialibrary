@@ -114,6 +114,8 @@ class IMediaLibrary
         virtual void discover( const std::string& entryPoint ) = 0;
         virtual const std::string& snapshotPath() const = 0;
         virtual void setLogger( ILogger* logger ) = 0;
+
+        virtual void reload() = 0;
 };
 
 class MediaLibraryFactory
