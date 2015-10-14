@@ -22,10 +22,6 @@
 
 #include <iostream>
 
-//debug
-#include <chrono>
-#include <thread>
-
 #include "VLCMetadataService.h"
 #include "IFile.h"
 #include "IAlbum.h"
