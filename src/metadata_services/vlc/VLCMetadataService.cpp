@@ -30,6 +30,7 @@
 #include "IFile.h"
 #include "IAlbum.h"
 #include "IAlbumTrack.h"
+#include "IArtist.h"
 #include "IShow.h"
 
 #include "File.h"
@@ -124,12 +125,14 @@ bool VLCMetadataService::parseAudioFile( FilePtr file, VLC::Media& media ) const
     auto albumTitle = media.meta( libvlc_meta_Album );
     if ( albumTitle.length() == 0 )
         return true;
+    auto newAlbum = false;
     auto album = m_ml->album( albumTitle );
     if ( album == nullptr )
     {
         album = m_ml->createAlbum( albumTitle );
         if ( album != nullptr )
         {
+            newAlbum = true;
             auto date = media.meta( libvlc_meta_Date );
             if ( date.length() > 0 )
                 album->setReleaseDate( std::stoul( date ) );
@@ -171,22 +174,7 @@ bool VLCMetadataService::parseAudioFile( FilePtr file, VLC::Media& media ) const
     if ( genre.length() != 0 )
         track->setGenre( genre );
 
-    auto artistName = media.meta( libvlc_meta_Artist );
-    if ( artistName.length() != 0 )
-    {
-        auto artist = m_ml->artist( artistName );
-        if ( artist == nullptr )
-        {
-            artist = m_ml->createArtist( artistName );
-            if ( artist == nullptr )
-            {
-                LOG_ERROR( "Failed to create new artist ", artistName );
-                // Consider this a minor failure and go on nevertheless
-                return true;
-            }
-        }
-        track->addArtist( artist );
-    }
+    return handleArtist( album, track, media, newAlbum );
     return true;
 }
 
@@ -223,6 +211,35 @@ bool VLCMetadataService::parseVideoFile( FilePtr file, VLC::Media& media ) const
     else
     {
         // How do we know if it's a movie or a random video?
+    }
+    return true;
+}
+
+bool VLCMetadataService::handleArtist( AlbumPtr album, AlbumTrackPtr track, VLC::Media& media, bool newAlbum ) const
+{
+    auto newArtist = false;
+    auto artistName = media.meta( libvlc_meta_Artist );
+    if ( artistName.length() != 0 )
+    {
+        auto artist = m_ml->artist( artistName );
+        if ( artist == nullptr )
+        {
+            artist = m_ml->createArtist( artistName );
+            if ( artist == nullptr )
+            {
+                LOG_ERROR( "Failed to create new artist ", artistName );
+                // Consider this a minor failure and go on nevertheless
+                return true;
+            }
+            newArtist = true;
+        }
+        track->addArtist( artist );
+        // If this is either a new album or a new artist, we need to add the relationship between the two.
+        if ( newAlbum == true || newArtist == true )
+        {
+            if ( album->addArtist( artist ) == false )
+                LOG_WARN( "Failed to add artist ", artist->name(), " to album ", album->title() );
+        }
     }
     return true;
 }

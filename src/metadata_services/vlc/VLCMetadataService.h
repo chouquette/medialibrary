@@ -53,6 +53,7 @@ class VLCMetadataService : public IMetadataService
         ServiceStatus handleMediaMeta(FilePtr file , VLC::Media &media) const;
         bool parseAudioFile(FilePtr file , VLC::Media &media) const;
         bool parseVideoFile(FilePtr file , VLC::Media &media) const;
+        bool handleArtist( AlbumPtr album, AlbumTrackPtr track, VLC::Media& media, bool newAlbum ) const;
 
         VLC::Instance m_instance;
         IMetadataServiceCb* m_cb;
