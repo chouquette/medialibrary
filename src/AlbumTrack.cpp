@@ -67,7 +67,7 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
                 "FOREIGN KEY (album_id) REFERENCES Album(id_album) ON DELETE CASCADE"
             ")";
     static const std::string reqRel = "CREATE TABLE IF NOT EXISTS TrackArtistRelation("
-                "id_track INTEGER,"
+                "id_track INTEGER NOT NULL,"
                 "id_artist INTEGER,"
                 "PRIMARY KEY (id_track, id_artist),"
                 "FOREIGN KEY(id_track) REFERENCES " + policy::AlbumTrackTable::Name + "("
