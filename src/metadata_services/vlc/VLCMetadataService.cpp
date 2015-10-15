@@ -119,56 +119,30 @@ bool VLCMetadataService::parseAudioFile( FilePtr file, VLC::Media& media ) const
 {
     file->setType( IFile::Type::AudioType );
     auto albumTitle = media.meta( libvlc_meta_Album );
-    if ( albumTitle.length() == 0 )
-        return true;
     auto newAlbum = false;
-    auto album = m_ml->album( albumTitle );
-    if ( album == nullptr )
+    AlbumPtr album;
+    if ( albumTitle.length() > 0 )
     {
-        album = m_ml->createAlbum( albumTitle );
-        if ( album != nullptr )
+        auto album = m_ml->album( albumTitle );
+        if ( album == nullptr )
         {
-            newAlbum = true;
-            auto date = media.meta( libvlc_meta_Date );
-            if ( date.length() > 0 )
-                album->setReleaseDate( std::stoul( date ) );
+            album = m_ml->createAlbum( albumTitle );
+            if ( album != nullptr )
+            {
+                newAlbum = true;
+                auto date = media.meta( libvlc_meta_Date );
+                if ( date.length() > 0 )
+                    album->setReleaseDate( std::stoul( date ) );
+            }
         }
     }
-    if ( album == nullptr )
+    AlbumTrackPtr track;
+    if ( album != nullptr )
     {
-        LOG_ERROR( "Failed to create/get album" );
-        return false;
+        track = handleTrack( album, media );
+        if ( track != nullptr )
+            file->setAlbumTrack( track );
     }
-
-    auto trackNbStr = media.meta( libvlc_meta_TrackNumber );
-    if ( trackNbStr.length() == 0 )
-    {
-        LOG_ERROR( "Failed to get track id" );
-        return false;
-    }
-    auto artwork = media.meta( libvlc_meta_ArtworkURL );
-    if ( artwork.length() != 0 )
-        album->setArtworkUrl( artwork );
-
-    auto title = media.meta( libvlc_meta_Title );
-    if ( title.length() == 0 )
-    {
-        LOG_ERROR( "Failed to compute track title" );
-        title = "Unknown track #";
-        title += trackNbStr;
-    }
-    unsigned int trackNb = std::stoi( trackNbStr );
-    auto track = album->addTrack( title, trackNb );
-    if ( track == nullptr )
-    {
-        LOG_ERROR( "Failure while creating album track" );
-        return false;
-    }
-    file->setAlbumTrack( track );
-
-    auto genre = media.meta( libvlc_meta_Genre );
-    if ( genre.length() != 0 )
-        track->setGenre( genre );
 
     return handleArtist( album, track, media, newAlbum );
 }
@@ -230,7 +204,7 @@ bool VLCMetadataService::handleArtist( AlbumPtr album, AlbumTrackPtr track, VLC:
         }
         track->addArtist( artist );
         // If this is either a new album or a new artist, we need to add the relationship between the two.
-        if ( newAlbum == true || newArtist == true )
+        if ( album != nullptr && ( newAlbum == true || newArtist == true ) )
         {
             if ( album->addArtist( artist ) == false )
                 LOG_WARN( "Failed to add artist ", artist->name(), " to album ", album->title() );
@@ -239,4 +213,36 @@ bool VLCMetadataService::handleArtist( AlbumPtr album, AlbumTrackPtr track, VLC:
     else
         track->addArtist( nullptr );
     return true;
+}
+
+AlbumTrackPtr VLCMetadataService::handleTrack(AlbumPtr album, VLC::Media& media) const
+{
+    auto trackNbStr = media.meta( libvlc_meta_TrackNumber );
+    if ( trackNbStr.length() == 0 )
+    {
+        LOG_WARN( "Failed to get track id" );
+        return nullptr;
+    }
+    auto artwork = media.meta( libvlc_meta_ArtworkURL );
+    if ( artwork.length() != 0 )
+        album->setArtworkUrl( artwork );
+
+    auto title = media.meta( libvlc_meta_Title );
+    if ( title.length() == 0 )
+    {
+        LOG_WARN( "Failed to get track title" );
+        title = "Unknown track #";
+        title += trackNbStr;
+    }
+    unsigned int trackNb = std::stoi( trackNbStr );
+    auto track = album->addTrack( title, trackNb );
+    if ( track == nullptr )
+    {
+        LOG_ERROR( "Failed to create album track" );
+        return nullptr;
+    }
+    auto genre = media.meta( libvlc_meta_Genre );
+    if ( genre.length() != 0 )
+        track->setGenre( genre );
+    return track;
 }
