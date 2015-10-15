@@ -171,7 +171,6 @@ bool VLCMetadataService::parseAudioFile( FilePtr file, VLC::Media& media ) const
         track->setGenre( genre );
 
     return handleArtist( album, track, media, newAlbum );
-    return true;
 }
 
 bool VLCMetadataService::parseVideoFile( FilePtr file, VLC::Media& media ) const
