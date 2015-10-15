@@ -142,12 +142,9 @@ bool AlbumTrack::destroy()
 bool AlbumTrack::addArtist( ArtistPtr artist )
 {
     static const std::string req = "INSERT INTO TrackArtistRelation VALUES(?, ?)";
-    if ( m_id == 0 || artist->id() == 0 )
-    {
-        LOG_ERROR("Both artist * album need to be inserted in database before being linked together" );
-        return false;
-    }
-    return sqlite::Tools::executeRequest( m_dbConnection, req, m_id, artist->id() );
+    // If track's ID is 0, the request will fail due to table constraints
+    sqlite::ForeignKey artistForeignKey( artist != nullptr ? artist->id() : 0 );
+    return sqlite::Tools::executeRequest( m_dbConnection, req, m_id, artistForeignKey );
 }
 
 std::vector<ArtistPtr> AlbumTrack::artists() const

@@ -24,6 +24,7 @@
 
 #include "IArtist.h"
 #include "IAlbum.h"
+#include "IAlbumTrack.h"
 
 class Artists : public Tests
 {
@@ -96,4 +97,31 @@ TEST_F( Artists, GetAll )
 
     artists = ml->artists();
     ASSERT_EQ( artists.size(), 5u );
+}
+
+TEST_F( Artists, UnknownArtist )
+{
+    // If no song has been added, unknown artist should be null.
+    auto a = ml->unknownArtist();
+    ASSERT_EQ( a, nullptr );
+
+    auto album = ml->createAlbum( "Rise of the otters" );
+    auto t = album->addTrack( "Otters: awakening", 1 );
+    // explicitely set the artist to nullptr (aka "unknown artist")
+    auto res = t->addArtist( nullptr );
+    ASSERT_EQ( res, true );
+
+    // Now, querying unknownArtist should give out some results.
+    a = ml->unknownArtist();
+    ASSERT_NE( a, nullptr );
+    auto tracks = a->tracks();
+    ASSERT_EQ( tracks.size(), 1u );
+
+    Reload();
+
+    // Check that unknown artist tracks listing persists in DB
+    a = ml->unknownArtist();
+    ASSERT_NE( a, nullptr );
+    tracks = a->tracks();
+    ASSERT_EQ( tracks.size(), 1u );
 }

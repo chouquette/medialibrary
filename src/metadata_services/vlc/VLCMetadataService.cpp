@@ -237,5 +237,7 @@ bool VLCMetadataService::handleArtist( AlbumPtr album, AlbumTrackPtr track, VLC:
                 LOG_WARN( "Failed to add artist ", artist->name(), " to album ", album->title() );
         }
     }
+    else
+        track->addArtist( nullptr );
     return true;
 }

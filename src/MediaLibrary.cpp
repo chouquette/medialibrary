@@ -310,6 +310,19 @@ ArtistPtr MediaLibrary::artist(const std::string &name)
     return Artist::fetchOne( m_dbConnection.get(), req, name );
 }
 
+ArtistPtr MediaLibrary::unknownArtist()
+{
+    if ( m_unknownArtist != nullptr )
+        return m_unknownArtist;
+    static const std::string req = "SELECT id_track FROM TrackArtistRelation "
+            "WHERE id_artist IS NULL LIMIT 1";
+    if ( sqlite::Tools::hasResults( m_dbConnection.get(), req ) == true )
+    {
+        m_unknownArtist = std::make_shared<Artist>( m_dbConnection.get() );
+    }
+    return m_unknownArtist;
+}
+
 ArtistPtr MediaLibrary::createArtist( const std::string& name )
 {
     return Artist::create( m_dbConnection.get(), name );
@@ -333,6 +346,9 @@ void MediaLibrary::addMetadataService(std::unique_ptr<IMetadataService> service)
 
 void MediaLibrary::reload()
 {
+    // For the sake of simplicity, just flush the unknownArtist cache, regardless of any change
+    // FIXME: Replicate this for "live" change handling, once we have it.
+    m_unknownArtist = nullptr;
     m_discoverer->reload();
 }
 

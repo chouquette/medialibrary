@@ -169,6 +169,20 @@ class Tools
         }
 
         template <typename... Args>
+        static bool hasResults( DBConnection dbConnection, const std::string& req, Args&&... args )
+        {
+            auto ctx = dbConnection->acquireContext();
+
+            auto stmt = prepareRequest( dbConnection, req, std::forward<Args>( args )... );
+            if ( stmt == nullptr )
+                return false;
+            int res = sqlite3_step( stmt.get() );
+            if ( res != SQLITE_ROW )
+                return false;
+            return true;
+        }
+
+        template <typename... Args>
         static bool executeRequest( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
             auto ctx = dbConnection->acquireContext();

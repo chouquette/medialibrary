@@ -46,6 +46,11 @@ private:
 public:
     Artist( DBConnection dbConnection, sqlite3_stmt* stmt );
     Artist( const std::string& name );
+    /**
+     * @brief Artist Construct an empty artist, with a DB connection.
+     * This is only meant to construct the Unknown Artist virtual representation
+     */
+    Artist( DBConnection dbConnection );
 
     virtual unsigned int id() const override;
     virtual const std::string &name() const override;

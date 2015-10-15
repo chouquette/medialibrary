@@ -45,6 +45,12 @@ Artist::Artist( const std::string& name )
 {
 }
 
+Artist::Artist(DBConnection dbConnection)
+    : m_dbConnection( dbConnection )
+    , m_id( 0 )
+{
+}
+
 unsigned int Artist::id() const
 {
     return m_id;
@@ -72,6 +78,8 @@ bool Artist::setShortBio(const std::string &shortBio)
 
 std::vector<AlbumPtr> Artist::albums() const
 {
+    if ( m_id == 0 )
+        return {};
     static const std::string req = "SELECT alb.* FROM " + policy::AlbumTable::Name + " alb "
             "LEFT JOIN AlbumArtistRelation aar ON aar.id_album = alb.id_album "
             "WHERE aar.id_artist = ?";
@@ -80,10 +88,22 @@ std::vector<AlbumPtr> Artist::albums() const
 
 std::vector<AlbumTrackPtr> Artist::tracks() const
 {
-    static const std::string req = "SELECT tra.* FROM " + policy::AlbumTrackTable::Name + " tra "
-            "LEFT JOIN TrackArtistRelation tar ON tar.id_track = tra.id_track "
-            "WHERE tar.id_artist = ?";
-    return AlbumTrack::fetchAll( m_dbConnection, req, m_id );
+    if ( m_id )
+    {
+        static const std::string req = "SELECT tra.* FROM " + policy::AlbumTrackTable::Name + " tra "
+                "LEFT JOIN TrackArtistRelation tar ON tar.id_track = tra.id_track "
+                "WHERE tar.id_artist = ?";
+        return AlbumTrack::fetchAll( m_dbConnection, req, m_id );
+    }
+    else
+    {
+        // Not being able to rely on ForeignKey here makes me a saaaaad panda...
+        // But sqlite only accepts "IS NULL" to compare against NULL...
+        static const std::string req = "SELECT tra.* FROM " + policy::AlbumTrackTable::Name + " tra "
+                "LEFT JOIN TrackArtistRelation tar ON tar.id_track = tra.id_track "
+                "WHERE tar.id_artist IS NULL";
+        return AlbumTrack::fetchAll( m_dbConnection, req, m_id );
+    }
 }
 
 bool Artist::createTable( DBConnection dbConnection )
