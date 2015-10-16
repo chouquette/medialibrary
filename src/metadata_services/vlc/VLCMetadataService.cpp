@@ -186,6 +186,10 @@ bool VLCMetadataService::parseVideoFile( FilePtr file, VLC::Media& media ) const
 
 bool VLCMetadataService::handleArtist( AlbumPtr album, AlbumTrackPtr track, VLC::Media& media, bool newAlbum ) const
 {
+    // For now we don't handle artist if the file isn't an AlbumTrack.
+    // Let's not crash first, then fix it properly
+    if (track == nullptr)
+        return true;
     auto newArtist = false;
     auto artistName = media.meta( libvlc_meta_Artist );
     if ( artistName.length() != 0 )
