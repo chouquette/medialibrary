@@ -29,8 +29,9 @@
 #include "File.h"
 #include "Folder.h"
 #include "logging/Logger.h"
+#include "MediaLibrary.h"
 
-FsDiscoverer::FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, IMediaLibrary* ml, DBConnection dbConn )
+FsDiscoverer::FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, MediaLibrary* ml, DBConnection dbConn )
     : m_ml( ml )
     , m_dbConn( dbConn )
 {
@@ -81,8 +82,9 @@ void FsDiscoverer::reload()
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
             + " WHERE id_parent IS NULL";
     auto rootFolders = Folder::fetchAll( m_dbConn, req );
-    for ( const auto f : rootFolders )
+    for ( const auto& it : rootFolders )
     {
+        auto f = std::static_pointer_cast<Folder>( it );
         auto folder = m_fsFactory->createDirectory( f->path() );
         if ( folder->lastModificationDate() == f->lastModificationDate() )
             continue;
@@ -125,7 +127,8 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, FolderPtr parentFold
             f->setLastModificationDate( subFolder->lastModificationDate() );
             continue;
         }
-        if ( subFolder->lastModificationDate() == (*it)->lastModificationDate() )
+        auto folderInDb = std::static_pointer_cast<Folder>( *it );
+        if ( subFolder->lastModificationDate() == folderInDb->lastModificationDate() )
         {
             // Remove all folders that still exist in FS. That way, the list of folders that
             // will still be in subFoldersInDB when we're done is the list of folders that have
@@ -134,9 +137,9 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, FolderPtr parentFold
             continue;
         }
         // This folder was modified, let's recurse
-        checkSubfolders( subFolder.get(), *it );
-        checkFiles( subFolder.get(), *it );
-        (*it)->setLastModificationDate( subFolder->lastModificationDate() );
+        checkSubfolders( subFolder.get(), folderInDb );
+        checkFiles( subFolder.get(), folderInDb );
+        folderInDb->setLastModificationDate( subFolder->lastModificationDate() );
         subFoldersInDB.erase( it );
     }
     // Now all folders we had in DB but haven't seen from the FS must have been deleted.
@@ -165,7 +168,8 @@ void FsDiscoverer::checkFiles( fs::IDirectory* folder, FolderPtr parentFolder )
             continue;
         }
         auto file = m_fsFactory->createFile( filePath );
-        if ( file->lastModificationDate() == (*it)->lastModificationDate() )
+        auto fileInDb = std::static_pointer_cast<File>( *it );
+        if ( file->lastModificationDate() == fileInDb->lastModificationDate() )
         {
             // Unchanged file
             files.erase( it );

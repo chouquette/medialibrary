@@ -22,9 +22,9 @@
 
 #include "Tests.h"
 
-#include "IArtist.h"
-#include "IAlbum.h"
-#include "IAlbumTrack.h"
+#include "Artist.h"
+#include "Album.h"
+#include "AlbumTrack.h"
 
 class Artists : public Tests
 {
@@ -38,9 +38,9 @@ TEST_F( Artists, Create )
 
     Reload();
 
-    a = ml->artist( "Flying Otters" );
-    ASSERT_NE( a, nullptr );
-    ASSERT_EQ( a->name(), "Flying Otters" );
+    auto a2 = ml->artist( "Flying Otters" );
+    ASSERT_NE( a2, nullptr );
+    ASSERT_EQ( a2->name(), "Flying Otters" );
 }
 
 TEST_F( Artists, ShortBio )
@@ -55,9 +55,9 @@ TEST_F( Artists, ShortBio )
 
     Reload();
 
-    a = ml->artist( "Raging Otters" );
-    ASSERT_NE( a, nullptr );
-    ASSERT_EQ( a->shortBio(), bio );
+    auto a2 = ml->artist( "Raging Otters" );
+    ASSERT_NE( a2, nullptr );
+    ASSERT_EQ( a2->shortBio(), bio );
 }
 
 TEST_F( Artists, Albums )
@@ -78,8 +78,8 @@ TEST_F( Artists, Albums )
 
     Reload();
 
-    artist = ml->artist( "Cannibal Otters" );
-    albums = artist->albums();
+    auto artist2 = ml->artist( "Cannibal Otters" );
+    auto albums2 = artist2->albums();
     ASSERT_EQ( albums.size(), 2u );
 }
 
@@ -95,8 +95,8 @@ TEST_F( Artists, GetAll )
 
     Reload();
 
-    artists = ml->artists();
-    ASSERT_EQ( artists.size(), 5u );
+    auto artists2 = ml->artists();
+    ASSERT_EQ( artists2.size(), 5u );
 }
 
 TEST_F( Artists, UnknownArtist )
@@ -120,8 +120,8 @@ TEST_F( Artists, UnknownArtist )
     Reload();
 
     // Check that unknown artist tracks listing persists in DB
-    a = ml->unknownArtist();
-    ASSERT_NE( a, nullptr );
-    tracks = a->tracks();
-    ASSERT_EQ( tracks.size(), 1u );
+    auto a2 = ml->unknownArtist();
+    ASSERT_NE( a2, nullptr );
+    auto tracks2 = a2->tracks();
+    ASSERT_EQ( tracks2.size(), 1u );
 }

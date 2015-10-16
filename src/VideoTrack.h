@@ -53,9 +53,9 @@ class VideoTrack : public IVideoTrack, public Cache<VideoTrack, IVideoTrack, pol
         virtual float fps() const;
 
         static bool createTable( DBConnection dbConnection );
-        static VideoTrackPtr fetch( DBConnection dbConnection, const std::string& codec,
+        static std::shared_ptr<VideoTrack> fetch( DBConnection dbConnection, const std::string& codec,
                                     unsigned int width, unsigned int height, float fps );
-        static VideoTrackPtr create( DBConnection dbConnection, const std::string& codec,
+        static std::shared_ptr<VideoTrack> create( DBConnection dbConnection, const std::string& codec,
                                     unsigned int width, unsigned int height, float fps );
 
     private:

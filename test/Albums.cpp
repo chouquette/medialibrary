@@ -22,9 +22,9 @@
 
 #include "Tests.h"
 
-#include "IAlbum.h"
-#include "IAlbumTrack.h"
-#include "IFile.h"
+#include "Album.h"
+#include "AlbumTrack.h"
+#include "File.h"
 #include "IMediaLibrary.h"
 
 class Albums : public Tests
@@ -67,7 +67,7 @@ TEST_F( Albums, AddTrack )
 
     Reload();
 
-    a = ml->album( "albumtag" );
+    a = std::static_pointer_cast<Album>( ml->album( "albumtag" ) );
     tracks = a->tracks();
     ASSERT_EQ( tracks.size(), 1u );
     ASSERT_EQ( tracks[0]->title(), track->title() );
@@ -87,8 +87,8 @@ TEST_F( Albums, AssignTrack )
 
     Reload();
 
-    f = ml->file( "file.avi" );
-    t = f->albumTrack();
+    f = std::static_pointer_cast<File>( ml->file( "file.avi" ) );
+    t = std::static_pointer_cast<AlbumTrack>( f->albumTrack() );
     ASSERT_NE( t, nullptr );
     ASSERT_EQ( t->title(), "track" );
 }
@@ -117,7 +117,7 @@ TEST_F( Albums, SetGenre )
 
     Reload();
 
-    a = ml->album( "album" );
+    a = std::static_pointer_cast<Album>( ml->album( "album" ) );
     auto tracks = a->tracks();
     auto t2 = tracks[0];
     ASSERT_EQ( t->genre(), t2->genre() );
@@ -189,7 +189,7 @@ TEST_F( Albums, DestroyAlbum )
     bool res = a->destroy();
     ASSERT_TRUE( res );
 
-    f = ml->file( "file.avi" );
+    f = std::static_pointer_cast<File>( ml->file( "file.avi" ) );
     ASSERT_EQ( f, nullptr );
 }
 
@@ -214,7 +214,7 @@ TEST_F( Albums, Artists )
 
     Reload();
 
-    album = ml->album( "album" );
+    album = std::static_pointer_cast<Album>( ml->album( "album" ) );
     artists = album->artists();
     ASSERT_EQ( artists.size(), 2u );
 }

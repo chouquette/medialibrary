@@ -27,12 +27,16 @@ class Parser;
 class DiscovererWorker;
 class SqliteConnection;
 
-#include <sqlite3.h>
-
 #include "IMediaLibrary.h"
 #include "IDiscoverer.h"
 #include "logging/Logger.h"
 #include "vlcpp/vlc.hpp"
+
+class Album;
+class Artist;
+class File;
+class Movie;
+class Show;
 
 class MediaLibrary : public IMediaLibrary
 {
@@ -46,7 +50,7 @@ class MediaLibrary : public IMediaLibrary
         virtual std::vector<FilePtr> audioFiles() override;
         virtual std::vector<FilePtr> videoFiles() override;
         virtual FilePtr file( const std::string& path ) override;
-        virtual FilePtr addFile(const std::string& path , FolderPtr parentFolder) override;
+        std::shared_ptr<File> addFile(const std::string& path , FolderPtr parentFolder);
         virtual bool deleteFile( const std::string& mrl ) override;
         virtual bool deleteFile( FilePtr file ) override;
 
@@ -58,18 +62,18 @@ class MediaLibrary : public IMediaLibrary
         virtual bool deleteLabel( LabelPtr label ) override;
 
         virtual AlbumPtr album( const std::string& title ) override;
-        virtual AlbumPtr createAlbum( const std::string& title ) override;
+        virtual std::shared_ptr<Album> createAlbum( const std::string& title );
         virtual std::vector<AlbumPtr> albums() override;
 
         virtual ShowPtr show( const std::string& name ) override;
-        virtual ShowPtr createShow( const std::string& name ) override;
+        virtual std::shared_ptr<Show> createShow( const std::string& name );
 
         virtual MoviePtr movie( const std::string& title ) override;
-        virtual MoviePtr createMovie( const std::string& title ) override;
+        virtual std::shared_ptr<Movie> createMovie( const std::string& title );
 
         virtual ArtistPtr artist( const std::string& name ) override;
         virtual ArtistPtr unknownArtist() override;
-        virtual ArtistPtr createArtist( const std::string& name ) override;
+        std::shared_ptr<Artist> createArtist( const std::string& name );
         virtual std::vector<ArtistPtr> artists() const override;
 
         virtual void discover( const std::string& entryPoint ) override;

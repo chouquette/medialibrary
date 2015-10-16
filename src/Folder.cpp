@@ -78,7 +78,7 @@ bool Folder::createTable(DBConnection connection)
     return sqlite::Tools::executeRequest( connection, req );
 }
 
-FolderPtr Folder::create( DBConnection connection, const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parentId )
+std::shared_ptr<Folder> Folder::create( DBConnection connection, const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parentId )
 {
     auto self = std::make_shared<Folder>( path, lastModificationDate, isRemovable, parentId );
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +

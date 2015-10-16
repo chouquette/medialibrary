@@ -76,7 +76,7 @@ File::File( const fs::IFile* file, unsigned int folderId, const std::string& nam
 {
 }
 
-FilePtr File::create( DBConnection dbConnection, Type type, const fs::IFile* file, unsigned int folderId )
+std::shared_ptr<File> File::create( DBConnection dbConnection, Type type, const fs::IFile* file, unsigned int folderId )
 {
     auto self = std::make_shared<File>( file, folderId, file->name(), type );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +

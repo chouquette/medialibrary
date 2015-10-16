@@ -32,16 +32,16 @@ class VLCThumbnailer : public IMetadataService
 {
 public:
     VLCThumbnailer( const VLC::Instance& vlc );
-    virtual bool initialize(IMetadataServiceCb *callback, IMediaLibrary *ml) override;
+    virtual bool initialize(IMetadataServiceCb *callback, MediaLibrary *ml) override;
     virtual unsigned int priority() const override;
-    virtual bool run(FilePtr file, void *data) override;
+    virtual bool run(std::shared_ptr<File> file, void *data) override;
 
 private:
-    bool startPlayback(FilePtr file, VLC::MediaPlayer& mp , void *data);
-    bool seekAhead(FilePtr file, VLC::MediaPlayer &mp, void *data);
+    bool startPlayback( std::shared_ptr<File> file, VLC::MediaPlayer& mp, void *data);
+    bool seekAhead(std::shared_ptr<File> file, VLC::MediaPlayer &mp, void *data);
     void setupVout(VLC::MediaPlayer &mp);
-    bool takeSnapshot(FilePtr file, VLC::MediaPlayer &mp, void* data);
-    bool compress(uint8_t* buff, FilePtr file, void* data );
+    bool takeSnapshot(std::shared_ptr<File> file, VLC::MediaPlayer &mp, void* data);
+    bool compress(uint8_t* buff, std::shared_ptr<File> file, void* data );
 
 private:
     // Force a base width, let height be computed depending on A/R
@@ -51,7 +51,7 @@ private:
 private:
     VLC::Instance m_instance;
     IMetadataServiceCb* m_cb;
-    IMediaLibrary* m_ml;
+    MediaLibrary* m_ml;
     std::mutex m_mutex;
     std::condition_variable m_cond;
     // Per snapshot variables

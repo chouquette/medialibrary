@@ -84,7 +84,7 @@ bool AudioTrack::createTable( DBConnection dbConnection )
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-AudioTrackPtr AudioTrack::fetch(DBConnection dbConnection, const std::string& codec,
+std::shared_ptr<AudioTrack> AudioTrack::fetch(DBConnection dbConnection, const std::string& codec,
                 unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels )
 {
     static const std::string req = "SELECT * FROM " + policy::AudioTrackTable::Name
@@ -92,7 +92,7 @@ AudioTrackPtr AudioTrack::fetch(DBConnection dbConnection, const std::string& co
     return AudioTrack::fetchOne( dbConnection, req, codec, bitrate, sampleRate, nbChannels );
 }
 
-AudioTrackPtr AudioTrack::create( DBConnection dbConnection, const std::string& codec,
+std::shared_ptr<AudioTrack> AudioTrack::create( DBConnection dbConnection, const std::string& codec,
                 unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels )
 {
     static const std::string req = "INSERT INTO " + policy::AudioTrackTable::Name

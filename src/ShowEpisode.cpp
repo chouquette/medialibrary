@@ -174,7 +174,7 @@ bool ShowEpisode::createTable( DBConnection dbConnection )
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-ShowEpisodePtr ShowEpisode::create( DBConnection dbConnection, const std::string& title, unsigned int episodeNumber, unsigned int showId )
+std::shared_ptr<ShowEpisode> ShowEpisode::create( DBConnection dbConnection, const std::string& title, unsigned int episodeNumber, unsigned int showId )
 {
     auto episode = std::make_shared<ShowEpisode>( title, episodeNumber, showId );
     static const std::string req = "INSERT INTO " + policy::ShowEpisodeTable::Name

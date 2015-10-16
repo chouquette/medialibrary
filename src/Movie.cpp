@@ -148,7 +148,7 @@ bool Movie::createTable( DBConnection dbConnection )
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-MoviePtr Movie::create(DBConnection dbConnection, const std::string& title )
+std::shared_ptr<Movie> Movie::create(DBConnection dbConnection, const std::string& title )
 {
     auto movie = std::make_shared<Movie>( title );
     static const std::string req = "INSERT INTO " + policy::MovieTable::Name

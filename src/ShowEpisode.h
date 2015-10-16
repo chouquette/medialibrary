@@ -51,22 +51,22 @@ class ShowEpisode : public IShowEpisode, public Cache<ShowEpisode, IShowEpisode,
 
         virtual unsigned int id() const;
         virtual const std::string& artworkUrl() const;
-        virtual bool setArtworkUrl( const std::string& artworkUrl );
+        bool setArtworkUrl( const std::string& artworkUrl );
         virtual unsigned int episodeNumber() const;
         virtual time_t lastSyncDate() const;
         virtual const std::string& name() const;
-        virtual unsigned int seasonNumber() const;
-        virtual bool setSeasonNumber(unsigned int seasonNumber);
+        unsigned int seasonNumber() const;
+        bool setSeasonNumber(unsigned int seasonNumber);
         virtual const std::string& shortSummary() const;
-        virtual bool setShortSummary( const std::string& summary );
+        bool setShortSummary( const std::string& summary );
         virtual const std::string& tvdbId() const;
-        virtual bool setTvdbId( const std::string& tvdbId );
+        bool setTvdbId( const std::string& tvdbId );
         virtual std::shared_ptr<IShow> show();
         virtual std::vector<FilePtr> files();
-        virtual bool destroy();
+        bool destroy();
 
         static bool createTable( DBConnection dbConnection );
-        static ShowEpisodePtr create( DBConnection dbConnection, const std::string& title, unsigned int episodeNumber, unsigned int showId );
+        static std::shared_ptr<ShowEpisode> create( DBConnection dbConnection, const std::string& title, unsigned int episodeNumber, unsigned int showId );
 
     private:
         DBConnection m_dbConnection;

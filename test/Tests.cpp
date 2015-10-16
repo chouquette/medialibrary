@@ -49,7 +49,7 @@ void Tests::TearDown()
 
 void Tests::Reload(std::shared_ptr<factory::IFileSystem> fs /*= nullptr*/, IMediaLibraryCb* metadataCb /*= nullptr*/ )
 {
-    ml.reset( MediaLibraryFactory::create() );
+    ml.reset( new MediaLibrary );
     if ( fs == nullptr )
     {
         fs = std::shared_ptr<factory::IFileSystem>( new mock::NoopFsFactory );

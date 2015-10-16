@@ -63,7 +63,7 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
         virtual std::vector<FilePtr> files();
 
         static bool createTable( DBConnection dbConnection );
-        static AlbumTrackPtr create( DBConnection dbConnection, unsigned int albumId,
+        static std::shared_ptr<AlbumTrack> create( DBConnection dbConnection, unsigned int albumId,
                                      const std::string& name, unsigned int trackNb );
 
     private:

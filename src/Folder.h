@@ -61,7 +61,7 @@ public:
     Folder( const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parent );
 
     static bool createTable( DBConnection connection );
-    static FolderPtr create( DBConnection connection, const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parentId );
+    static std::shared_ptr<Folder> create( DBConnection connection, const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parentId );
 
     virtual unsigned int id() const override;
     virtual const std::string& path() override;
@@ -69,7 +69,7 @@ public:
     virtual std::vector<FolderPtr> folders() override;
     virtual FolderPtr parent() override;
     virtual unsigned int lastModificationDate() override;
-    virtual bool setLastModificationDate(unsigned int lastModificationDate) override;
+    virtual bool setLastModificationDate(unsigned int lastModificationDate);
     virtual bool isRemovable() override;
 
 private:

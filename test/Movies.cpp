@@ -22,9 +22,9 @@
 
 #include "Tests.h"
 
-#include "IMediaLibrary.h"
-#include "IMovie.h"
-#include "IFile.h"
+#include "MediaLibrary.h"
+#include "Movie.h"
+#include "File.h"
 
 class Movies : public Tests
 {
@@ -60,8 +60,8 @@ TEST_F( Movies, SetReleaseDate )
 
     Reload();
 
-    m = ml->movie( "movie" );
-    ASSERT_EQ( m->releaseDate(), 1234u );
+    auto m2 = ml->movie( "movie" );
+    ASSERT_EQ( m2->releaseDate(), 1234u );
 }
 
 TEST_F( Movies, SetShortSummary )
@@ -73,8 +73,8 @@ TEST_F( Movies, SetShortSummary )
 
     Reload();
 
-    m = ml->movie( "movie" );
-    ASSERT_EQ( m->shortSummary(), "great movie" );
+    auto m2 = ml->movie( "movie" );
+    ASSERT_EQ( m2->shortSummary(), "great movie" );
 }
 
 TEST_F( Movies, SetArtworkUrl )
@@ -86,8 +86,8 @@ TEST_F( Movies, SetArtworkUrl )
 
     Reload();
 
-    m = ml->movie( "movie" );
-    ASSERT_EQ( m->artworkUrl(), "artwork" );
+    auto m2 = ml->movie( "movie" );
+    ASSERT_EQ( m2->artworkUrl(), "artwork" );
 }
 
 TEST_F( Movies, SetImdbId )
@@ -99,8 +99,8 @@ TEST_F( Movies, SetImdbId )
 
     Reload();
 
-    m = ml->movie( "movie" );
-    ASSERT_EQ( m->imdbId(), "id" );
+    auto m2 = ml->movie( "movie" );
+    ASSERT_EQ( m2->imdbId(), "id" );
 }
 
 TEST_F( Movies, AssignToFile )
@@ -114,10 +114,10 @@ TEST_F( Movies, AssignToFile )
 
     Reload();
 
-    f = ml->file( "file.avi" );
-    m = f->movie();
-    ASSERT_NE( m, nullptr );
-    ASSERT_EQ( m->title(), "movie" );
+    auto f2 = ml->file( "file.avi" );
+    auto m2 = f2->movie();
+    ASSERT_NE( m2, nullptr );
+    ASSERT_EQ( m2->title(), "movie" );
 }
 
 TEST_F( Movies, DestroyMovie )
@@ -128,11 +128,11 @@ TEST_F( Movies, DestroyMovie )
     f->setMovie( m );
     m->destroy();
 
-    f = ml->file( "file.avi" );
-    ASSERT_EQ( f, nullptr );
+    auto f2 = ml->file( "file.avi" );
+    ASSERT_EQ( f2, nullptr );
 
     Reload();
 
-    f = ml->file( "file.avi" );
-    ASSERT_EQ( f, nullptr );
+    f2 = ml->file( "file.avi" );
+    ASSERT_EQ( f2, nullptr );
 }

@@ -22,9 +22,9 @@
 
 #include "Tests.h"
 
-#include "IAlbum.h"
-#include "IAlbumTrack.h"
-#include "IArtist.h"
+#include "Album.h"
+#include "AlbumTrack.h"
+#include "Artist.h"
 
 class AlbumTracks : public Tests
 {
@@ -61,16 +61,16 @@ TEST_F( AlbumTracks, Artists )
 
     Reload();
 
-    album = ml->album( "album" );
-    tracks = album->tracks();
-    for ( auto& t : tracks )
+    auto album2 = ml->album( "album" );
+    auto tracks2 = album2->tracks();
+    for ( auto& t : tracks2 )
     {
         auto artists = t->artists();
         ASSERT_EQ( artists.size(), 2u );
     }
 
-    artists = ml->artists();
-    for ( auto& a : artists )
+    auto artists2 = ml->artists();
+    for ( auto& a : artists2 )
     {
         auto tracks = a->tracks();
         ASSERT_EQ( tracks.size(), 3u );

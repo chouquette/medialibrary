@@ -79,7 +79,7 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
             sqlite::Tools::executeRequest( dbConnection, reqRel );
 }
 
-AlbumTrackPtr AlbumTrack::create(DBConnection dbConnection, unsigned int albumId, const std::string& name, unsigned int trackNb)
+std::shared_ptr<AlbumTrack> AlbumTrack::create(DBConnection dbConnection, unsigned int albumId, const std::string& name, unsigned int trackNb)
 {
     auto self = std::make_shared<AlbumTrack>( name, trackNb, albumId );
     static const std::string req = "INSERT INTO " + policy::AlbumTrackTable::Name

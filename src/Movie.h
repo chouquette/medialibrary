@@ -59,7 +59,7 @@ class Movie : public IMovie, public Cache<Movie, IMovie, policy::MovieTable>
         virtual std::vector<FilePtr> files();
 
         static bool createTable( DBConnection dbConnection );
-        static MoviePtr create( DBConnection dbConnection, const std::string& title );
+        static std::shared_ptr<Movie> create( DBConnection dbConnection, const std::string& title );
 
     private:
         DBConnection m_dbConnection;

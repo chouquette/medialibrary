@@ -52,9 +52,9 @@ class AudioTrack : public IAudioTrack, public Cache<AudioTrack, IAudioTrack, pol
         virtual unsigned int nbChannels() const;
 
         static bool createTable( DBConnection dbConnection );
-        static AudioTrackPtr fetch( DBConnection dbConnection, const std::string& codec,
+        static std::shared_ptr<AudioTrack> fetch( DBConnection dbConnection, const std::string& codec,
                                     unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels );
-        static AudioTrackPtr create(DBConnection dbConnection, const std::string& codec, unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels);
+        static std::shared_ptr<AudioTrack> create(DBConnection dbConnection, const std::string& codec, unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels);
 
     private:
         DBConnection m_dbConnection;

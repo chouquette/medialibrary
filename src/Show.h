@@ -30,6 +30,7 @@
 #include "IShow.h"
 
 class Show;
+class ShowEpisode;
 
 namespace policy
 {
@@ -58,12 +59,12 @@ class Show : public IShow, public Cache<Show, IShow, policy::ShowTable>
         virtual time_t lastSyncDate() const;
         virtual const std::string& tvdbId();
         virtual bool setTvdbId( const std::string& summary );
-        virtual ShowEpisodePtr addEpisode( const std::string& title, unsigned int episodeNumber );
+        virtual std::shared_ptr<ShowEpisode> addEpisode( const std::string& title, unsigned int episodeNumber );
         virtual std::vector<ShowEpisodePtr> episodes();
         virtual bool destroy();
 
         static bool createTable( DBConnection dbConnection );
-        static ShowPtr create( DBConnection dbConnection, const std::string& name );
+        static std::shared_ptr<Show> create( DBConnection dbConnection, const std::string& name );
 
     protected:
         DBConnection m_dbConnection;

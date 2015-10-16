@@ -123,7 +123,7 @@ bool Show::setTvdbId( const std::string& tvdbId )
     return true;
 }
 
-ShowEpisodePtr Show::addEpisode(const std::string& title, unsigned int episodeNumber)
+std::shared_ptr<ShowEpisode> Show::addEpisode(const std::string& title, unsigned int episodeNumber)
 {
     return ShowEpisode::create( m_dbConnection, title, episodeNumber, m_id );
 }
@@ -139,9 +139,10 @@ bool Show::destroy()
 {
     auto eps = episodes();
     //FIXME: This is suboptimal. Each episode::destroy() will fire a SQL request of its own
-    for ( auto& t : eps )
+    for ( auto& it : eps )
     {
-        t->destroy();
+        auto e = std::static_pointer_cast<ShowEpisode>( it );
+        e->destroy();
     }
     return _Cache::destroy( m_dbConnection, this );
 }
@@ -160,7 +161,7 @@ bool Show::createTable(DBConnection dbConnection)
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-ShowPtr Show::create(DBConnection dbConnection, const std::string& name )
+std::shared_ptr<Show> Show::create(DBConnection dbConnection, const std::string& name )
 {
     auto show = std::make_shared<Show>( name );
     static const std::string req = "INSERT INTO " + policy::ShowTable::Name

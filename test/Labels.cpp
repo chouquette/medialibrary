@@ -23,7 +23,7 @@
 #include "Tests.h"
 
 #include "IMediaLibrary.h"
-#include "IFile.h"
+#include "File.h"
 #include "ILabel.h"
 
 class Labels : public Tests

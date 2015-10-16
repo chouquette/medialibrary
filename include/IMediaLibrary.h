@@ -79,7 +79,6 @@ class IMediaLibrary
         ///                     a stand alone file.
         /// \return The newly created file, or nullptr in case of error
         ///
-        virtual FilePtr addFile( const std::string& path, FolderPtr parentFolder ) = 0;
         virtual FilePtr file( const std::string& path ) = 0;
         virtual bool deleteFile( const std::string& mrl ) = 0;
         virtual bool deleteFile( FilePtr file ) = 0;
@@ -95,19 +94,15 @@ class IMediaLibrary
         virtual std::vector<FilePtr> audioFiles() = 0;
         virtual std::vector<FilePtr> videoFiles() = 0;
         virtual AlbumPtr album( const std::string& title ) = 0;
-        virtual AlbumPtr createAlbum( const std::string& title ) = 0;
         virtual std::vector<AlbumPtr> albums() = 0;
         virtual ShowPtr show( const std::string& name ) = 0;
-        virtual ShowPtr createShow( const std::string& name ) = 0;
         virtual MoviePtr movie( const std::string& title ) = 0;
-        virtual MoviePtr createMovie( const std::string& title ) = 0;
         virtual ArtistPtr artist( const std::string& name ) = 0;
         /**
          * @brief unknownArtist returns a representation of a virtual "unknown" artist.
          * If all tracks have an associated artist, this returns nullptr.
          */
         virtual ArtistPtr unknownArtist() = 0;
-        virtual ArtistPtr createArtist( const std::string& name ) = 0;
         virtual std::vector<ArtistPtr> artists() const = 0;
 
         /**

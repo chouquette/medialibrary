@@ -70,7 +70,7 @@ float VideoTrack::fps() const
     return m_fps;
 }
 
-VideoTrackPtr VideoTrack::create( DBConnection dbConnection, const std::string &codec, unsigned int width, unsigned int height, float fps )
+std::shared_ptr<VideoTrack> VideoTrack::create( DBConnection dbConnection, const std::string &codec, unsigned int width, unsigned int height, float fps )
 {
     static const std::string req  = "INSERT INTO " + policy::VideoTrackTable::Name
             + "(codec, width, height, fps) VALUES(?, ?, ?, ?)";
@@ -95,7 +95,7 @@ bool VideoTrack::createTable( DBConnection dbConnection )
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-VideoTrackPtr VideoTrack::fetch( DBConnection dbConnection, const std::string& codec, unsigned int width, unsigned int height, float fps )
+std::shared_ptr<VideoTrack> VideoTrack::fetch( DBConnection dbConnection, const std::string& codec, unsigned int width, unsigned int height, float fps )
 {
     static const std::string req = "SELECT * FROM " + policy::VideoTrackTable::Name +
             " WHERE codec = ? AND width = ? AND height = ? AND fps = ?";

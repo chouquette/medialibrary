@@ -116,7 +116,7 @@ std::vector<std::shared_ptr<IAlbumTrack>> Album::tracks() const
     return AlbumTrack::fetchAll( m_dbConnection, req, m_id );
 }
 
-AlbumTrackPtr Album::addTrack( const std::string& title, unsigned int trackNb )
+std::shared_ptr<AlbumTrack> Album::addTrack( const std::string& title, unsigned int trackNb )
 {
     return AlbumTrack::create( m_dbConnection, m_id, title, trackNb );
 }
@@ -129,7 +129,7 @@ std::vector<ArtistPtr> Album::artists() const
     return Artist::fetchAll( m_dbConnection, req, m_id );
 }
 
-bool Album::addArtist( ArtistPtr artist )
+bool Album::addArtist( std::shared_ptr<Artist> artist )
 {
     static const std::string req = "INSERT INTO AlbumArtistRelation VALUES(?, ?)";
     if ( m_id == 0 || artist->id() == 0 )
@@ -144,8 +144,9 @@ bool Album::destroy()
 {
     auto ts = tracks();
     //FIXME: Have a single request to fetch all files at once, instead of having one per track
-    for ( auto& t : ts )
+    for ( auto& it : ts )
     {
+        auto t = std::static_pointer_cast<AlbumTrack>( it );
         t->destroy();
     }
     return _Cache::destroy( m_dbConnection, this );
@@ -176,7 +177,7 @@ bool Album::createTable(DBConnection dbConnection )
             sqlite::Tools::executeRequest( dbConnection, reqRel );
 }
 
-AlbumPtr Album::create(DBConnection dbConnection, const std::string& title )
+std::shared_ptr<Album> Album::create(DBConnection dbConnection, const std::string& title )
 {
     auto album = std::make_shared<Album>( title );
     static const std::string req = "INSERT INTO " + policy::AlbumTable::Name +

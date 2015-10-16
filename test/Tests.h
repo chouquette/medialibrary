@@ -23,12 +23,12 @@
 #include "gtest/gtest.h"
 
 #include "factory/IFileSystem.h"
-#include "IMediaLibrary.h"
+#include "MediaLibrary.h"
 
 class Tests : public testing::Test
 {
 protected:
-    std::unique_ptr<IMediaLibrary> ml;
+    std::unique_ptr<MediaLibrary> ml;
 
     virtual void SetUp() override;
     void Reload( std::shared_ptr<factory::IFileSystem> fs = nullptr, IMediaLibraryCb* metadataCb = nullptr );

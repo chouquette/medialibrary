@@ -22,8 +22,8 @@
 
 #include "Tests.h"
 
-#include "IFile.h"
-#include "IVideoTrack.h"
+#include "File.h"
+#include "VideoTrack.h"
 
 class VideoTracks : public Tests
 {
@@ -31,14 +31,14 @@ class VideoTracks : public Tests
 
 TEST_F( VideoTracks, AddTrack )
 {
-    auto f = ml->addFile( "file.avi", nullptr );
+    auto f = std::static_pointer_cast<File>( ml->addFile( "file.avi", nullptr ) );
     bool res = f->addVideoTrack( "H264", 1920, 1080, 29.97 );
     ASSERT_TRUE( res );
 }
 
 TEST_F( VideoTracks, FetchTracks )
 {
-    auto f = ml->addFile( "file.avi", nullptr );
+    auto f = std::static_pointer_cast<File>( ml->addFile( "file.avi", nullptr ) );
     f->addVideoTrack( "H264", 1920, 1080, 29.97 );
     f->addVideoTrack( "VP80", 640, 480, 29.97 );
 
@@ -48,10 +48,10 @@ TEST_F( VideoTracks, FetchTracks )
 
 TEST_F( VideoTracks, CheckUnique )
 {
-    auto f = ml->addFile( "file.avi", nullptr );
+    auto f = std::static_pointer_cast<File>( ml->addFile( "file.avi", nullptr ) );
     f->addVideoTrack( "H264", 1920, 1080, 29.97 );
 
-    auto f2 = ml->addFile( "file2.avi", nullptr );
+    auto f2 = std::static_pointer_cast<File>( ml->addFile( "file2.avi", nullptr ) );
     f2->addVideoTrack( "H264", 1920, 1080, 29.97 );
 
     auto ts = f->videoTracks();

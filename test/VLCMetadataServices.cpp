@@ -84,7 +84,7 @@ TEST_F( VLCMetadataServices, ParseAudio )
 
     ASSERT_TRUE( res );
     Reload();
-    file = ml->file( "mr-zebra.mp3" );
+    file = std::static_pointer_cast<File>( ml->file( "mr-zebra.mp3" ) );
     auto tracks = file->audioTracks();
     ASSERT_EQ( tracks.size(), 1u );
     auto track = tracks[0];
@@ -105,7 +105,7 @@ TEST_F( VLCMetadataServices, ParseAlbum )
     ASSERT_TRUE( res );
     Reload();
 
-    file = ml->file( "mr-zebra.mp3" );
+    file = std::static_pointer_cast<File>( ml->file( "mr-zebra.mp3" ) );
     auto track = file->albumTrack();
     ASSERT_NE( track, nullptr );
     ASSERT_EQ( track->title(), "Mr. Zebra" );
@@ -137,7 +137,7 @@ TEST_F( VLCMetadataServices, ParseVideo )
     ASSERT_TRUE( res );
     Reload();
 
-    file = ml->file( "mrmssmith.mp4" );
+    file = std::static_pointer_cast<File>( ml->file( "mrmssmith.mp4" ) );
 
     ASSERT_EQ( file->showEpisode(), nullptr );
 

@@ -118,7 +118,7 @@ bool Artist::createTable( DBConnection dbConnection )
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-ArtistPtr Artist::create( DBConnection dbConnection, const std::string &name )
+std::shared_ptr<Artist> Artist::create( DBConnection dbConnection, const std::string &name )
 {
     auto artist = std::make_shared<Artist>( name );
     static const std::string req = "INSERT INTO " + policy::ArtistTable::Name +

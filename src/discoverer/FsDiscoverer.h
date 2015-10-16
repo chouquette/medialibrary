@@ -28,10 +28,12 @@
 #include "IDiscoverer.h"
 #include "factory/IFileSystem.h"
 
+class MediaLibrary;
+
 class FsDiscoverer : public IDiscoverer
 {
 public:
-    FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, IMediaLibrary *ml, DBConnection dbConn );
+    FsDiscoverer(std::shared_ptr<factory::IFileSystem> fsFactory, MediaLibrary* ml, DBConnection dbConn );
     virtual bool discover(const std::string &entryPoint ) override;
     virtual void reload() override;
 
@@ -40,7 +42,7 @@ private:
     void checkFiles( fs::IDirectory *folder, FolderPtr parentFolder );
 
 private:
-    IMediaLibrary* m_ml;
+    MediaLibrary* m_ml;
     DBConnection m_dbConn;
     std::shared_ptr<factory::IFileSystem> m_fsFactory;
 };

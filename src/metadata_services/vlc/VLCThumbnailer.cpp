@@ -28,6 +28,7 @@
 
 #include "IFile.h"
 #include "logging/Logger.h"
+#include "MediaLibrary.h"
 
 VLCThumbnailer::VLCThumbnailer(const VLC::Instance &vlc)
     : m_instance( vlc )
@@ -36,7 +37,7 @@ VLCThumbnailer::VLCThumbnailer(const VLC::Instance &vlc)
 {
 }
 
-bool VLCThumbnailer::initialize(IMetadataServiceCb *callback, IMediaLibrary *ml)
+bool VLCThumbnailer::initialize(IMetadataServiceCb *callback, MediaLibrary* ml)
 {
     m_cb = callback;
     m_ml = ml;
@@ -49,7 +50,7 @@ unsigned int VLCThumbnailer::priority() const
     return 50;
 }
 
-bool VLCThumbnailer::run( FilePtr file, void *data )
+bool VLCThumbnailer::run(std::shared_ptr<File> file, void *data )
 {
     if ( file->type() == IFile::Type::UnknownType )
     {
@@ -84,7 +85,7 @@ bool VLCThumbnailer::run( FilePtr file, void *data )
     return true;
 }
 
-bool VLCThumbnailer::startPlayback( FilePtr file, VLC::MediaPlayer &mp, void* data )
+bool VLCThumbnailer::startPlayback(std::shared_ptr<File> file, VLC::MediaPlayer &mp, void* data )
 {
     bool failed = true;
 
@@ -112,7 +113,7 @@ bool VLCThumbnailer::startPlayback( FilePtr file, VLC::MediaPlayer &mp, void* da
     return true;
 }
 
-bool VLCThumbnailer::seekAhead( FilePtr file, VLC::MediaPlayer& mp, void* data )
+bool VLCThumbnailer::seekAhead(std::shared_ptr<File> file, VLC::MediaPlayer& mp, void* data )
 {
     std::unique_lock<std::mutex> lock( m_mutex );
     float pos = .0f;
@@ -178,7 +179,7 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
     );
 }
 
-bool VLCThumbnailer::takeSnapshot(FilePtr file, VLC::MediaPlayer &mp, void *data)
+bool VLCThumbnailer::takeSnapshot(std::shared_ptr<File> file, VLC::MediaPlayer &mp, void *data)
 {
     std::unique_ptr<uint8_t[]> buff;
     // lock, signal that we want a snapshot, and wait.
@@ -220,7 +221,7 @@ struct jpegError : public jpeg_error_mgr
 
 #endif
 
-bool VLCThumbnailer::compress(uint8_t* buff, FilePtr file, void *data)
+bool VLCThumbnailer::compress(uint8_t* buff, std::shared_ptr<File> file, void *data)
 {
     auto path = m_ml->snapshotPath();
     path += "/";

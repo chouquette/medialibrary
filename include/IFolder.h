@@ -36,7 +36,6 @@ public:
     virtual std::vector<FilePtr> files() = 0;
     virtual std::vector<FolderPtr> folders() = 0;
     virtual unsigned int lastModificationDate() = 0;
-    virtual bool setLastModificationDate( unsigned int lastModificationDate ) = 0;
     virtual bool isRemovable() = 0;
     virtual FolderPtr parent() = 0;
 };

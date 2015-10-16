@@ -64,18 +64,18 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         File(DBConnection dbConnection , sqlite3_stmt* stmt);
         File(const fs::IFile* file, unsigned int folderId, const std::string &name, Type type);
 
-        static FilePtr create(DBConnection dbConnection, Type type, const fs::IFile* file , unsigned int folderId);
+        static std::shared_ptr<File> create(DBConnection dbConnection, Type type, const fs::IFile* file , unsigned int folderId);
         static bool createTable( DBConnection connection );
 
         virtual unsigned int id() const;
         virtual Type type() override;
-        virtual bool setType( Type type ) override;
+        virtual bool setType( Type type );
         virtual const std::string& name() override;
-        virtual bool setName( const std::string& name ) override;
+        virtual bool setName( const std::string& name );
         virtual AlbumTrackPtr albumTrack();
         virtual bool setAlbumTrack( AlbumTrackPtr albumTrack );
         virtual int64_t duration() const;
-        virtual bool setDuration( int64_t duration) override;
+        virtual bool setDuration( int64_t duration);
         virtual std::shared_ptr<IShowEpisode> showEpisode();
         virtual bool setShowEpisode( ShowEpisodePtr showEpisode );
         virtual bool addLabel( LabelPtr label );
@@ -91,13 +91,16 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         virtual bool addAudioTrack(const std::string& codec, unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels);
         virtual std::vector<AudioTrackPtr> audioTracks();
         virtual const std::string& snapshot() override;
-        virtual bool setSnapshot( const std::string& snapshot ) override;
+        virtual bool setSnapshot( const std::string& snapshot );
 
-        virtual bool isStandAlone() override;
-        virtual unsigned int lastModificationDate() override;
+        virtual bool isStandAlone();
+        virtual unsigned int lastModificationDate();
 
-        virtual bool markParsed() override;
-        virtual bool isParsed() const override;
+        /// Explicitely mark a file as fully parsed, meaning no metadata service needs to run anymore.
+        //FIXME: This lacks granularity as we don't have a straight forward way to know which service
+        //needs to run or not.
+        virtual bool markParsed();
+        virtual bool isParsed() const;
 
     private:
         DBConnection m_dbConnection;

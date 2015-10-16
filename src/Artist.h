@@ -55,12 +55,12 @@ public:
     virtual unsigned int id() const override;
     virtual const std::string &name() const override;
     virtual const std::string& shortBio() const override;
-    virtual bool setShortBio( const std::string& shortBio ) override;
+    virtual bool setShortBio( const std::string& shortBio );
     virtual std::vector<AlbumPtr> albums() const override;
     virtual std::vector<AlbumTrackPtr> tracks() const override;
 
     static bool createTable( DBConnection dbConnection );
-    static ArtistPtr create( DBConnection dbConnection, const std::string& name );
+    static std::shared_ptr<Artist> create( DBConnection dbConnection, const std::string& name );
 
 private:
     DBConnection m_dbConnection;

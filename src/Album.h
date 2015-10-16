@@ -32,6 +32,8 @@
 #include "IAlbum.h"
 
 class Album;
+class AlbumTrack;
+class Artist;
 
 namespace policy
 {
@@ -61,15 +63,15 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         virtual bool setArtworkUrl( const std::string& artworkUrl );
         virtual time_t lastSyncDate() const;
         virtual std::vector<std::shared_ptr<IAlbumTrack> > tracks() const;
-        virtual AlbumTrackPtr addTrack( const std::string& title, unsigned int trackNb );
+        std::shared_ptr<AlbumTrack> addTrack( const std::string& title, unsigned int trackNb );
 
         virtual std::vector<ArtistPtr> artists() const override;
-        virtual bool addArtist( ArtistPtr artist ) override;
+        virtual bool addArtist( std::shared_ptr<Artist> artist );
 
         virtual bool destroy();
 
         static bool createTable( DBConnection dbConnection );
-        static AlbumPtr create(DBConnection dbConnection, const std::string& title );
+        static std::shared_ptr<Album> create(DBConnection dbConnection, const std::string& title );
 
     protected:
         DBConnection m_dbConnection;

@@ -23,11 +23,11 @@
 #include <iostream>
 
 #include "VLCMetadataService.h"
-#include "IFile.h"
-#include "IAlbum.h"
-#include "IAlbumTrack.h"
-#include "IArtist.h"
-#include "IShow.h"
+#include "File.h"
+#include "Album.h"
+#include "AlbumTrack.h"
+#include "Artist.h"
+#include "Show.h"
 
 #include "File.h"
 
@@ -38,7 +38,7 @@ VLCMetadataService::VLCMetadataService( const VLC::Instance& vlc )
 {
 }
 
-bool VLCMetadataService::initialize( IMetadataServiceCb* callback, IMediaLibrary* ml )
+bool VLCMetadataService::initialize(IMetadataServiceCb* callback, MediaLibrary* ml )
 {
     m_cb = callback;
     m_ml = ml;
@@ -50,7 +50,7 @@ unsigned int VLCMetadataService::priority() const
     return 100;
 }
 
-bool VLCMetadataService::run( FilePtr file, void* data )
+bool VLCMetadataService::run( std::shared_ptr<File> file, void* data )
 {
     LOG_INFO( "Parsing ", file->mrl() );
 
@@ -75,7 +75,7 @@ bool VLCMetadataService::run( FilePtr file, void* data )
     return true;
 }
 
-ServiceStatus VLCMetadataService::handleMediaMeta( FilePtr file, VLC::Media& media ) const
+ServiceStatus VLCMetadataService::handleMediaMeta( std::shared_ptr<File> file, VLC::Media& media ) const
 {
     auto tracks = media.tracks();
     if ( tracks.size() == 0 )
@@ -115,15 +115,15 @@ ServiceStatus VLCMetadataService::handleMediaMeta( FilePtr file, VLC::Media& med
     return StatusSuccess;
 }
 
-bool VLCMetadataService::parseAudioFile( FilePtr file, VLC::Media& media ) const
+bool VLCMetadataService::parseAudioFile( std::shared_ptr<File> file, VLC::Media& media ) const
 {
     file->setType( IFile::Type::AudioType );
     auto albumTitle = media.meta( libvlc_meta_Album );
     auto newAlbum = false;
-    AlbumPtr album;
+    std::shared_ptr<Album> album;
     if ( albumTitle.length() > 0 )
     {
-        auto album = m_ml->album( albumTitle );
+        album = std::static_pointer_cast<Album>( m_ml->album( albumTitle ) );
         if ( album == nullptr )
         {
             album = m_ml->createAlbum( albumTitle );
@@ -136,7 +136,7 @@ bool VLCMetadataService::parseAudioFile( FilePtr file, VLC::Media& media ) const
             }
         }
     }
-    AlbumTrackPtr track;
+    std::shared_ptr<AlbumTrack> track;
     if ( album != nullptr )
     {
         track = handleTrack( album, media );
@@ -147,7 +147,7 @@ bool VLCMetadataService::parseAudioFile( FilePtr file, VLC::Media& media ) const
     return handleArtist( album, track, media, newAlbum );
 }
 
-bool VLCMetadataService::parseVideoFile( FilePtr file, VLC::Media& media ) const
+bool VLCMetadataService::parseVideoFile( std::shared_ptr<File> file, VLC::Media& media ) const
 {
     file->setType( IFile::Type::VideoType );
     auto title = media.meta( libvlc_meta_Title );
@@ -174,7 +174,8 @@ bool VLCMetadataService::parseVideoFile( FilePtr file, VLC::Media& media ) const
                 LOG_ERROR( "Invalid episode id provided" );
                 return true;
             }
-            show->addEpisode( title, episodeId );
+            std::shared_ptr<Show> s = std::static_pointer_cast<Show>( show );
+            s->addEpisode( title, episodeId );
         }
     }
     else
@@ -184,7 +185,7 @@ bool VLCMetadataService::parseVideoFile( FilePtr file, VLC::Media& media ) const
     return true;
 }
 
-bool VLCMetadataService::handleArtist( AlbumPtr album, AlbumTrackPtr track, VLC::Media& media, bool newAlbum ) const
+bool VLCMetadataService::handleArtist( std::shared_ptr<Album> album, std::shared_ptr<AlbumTrack> track, VLC::Media& media, bool newAlbum ) const
 {
     // For now we don't handle artist if the file isn't an AlbumTrack.
     // Let's not crash first, then fix it properly
@@ -194,7 +195,7 @@ bool VLCMetadataService::handleArtist( AlbumPtr album, AlbumTrackPtr track, VLC:
     auto artistName = media.meta( libvlc_meta_Artist );
     if ( artistName.length() != 0 )
     {
-        auto artist = m_ml->artist( artistName );
+        auto artist = std::static_pointer_cast<Artist>( m_ml->artist( artistName ) );
         if ( artist == nullptr )
         {
             artist = m_ml->createArtist( artistName );
@@ -219,7 +220,7 @@ bool VLCMetadataService::handleArtist( AlbumPtr album, AlbumTrackPtr track, VLC:
     return true;
 }
 
-AlbumTrackPtr VLCMetadataService::handleTrack(AlbumPtr album, VLC::Media& media) const
+std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack(std::shared_ptr<Album> album, VLC::Media& media) const
 {
     auto trackNbStr = media.meta( libvlc_meta_TrackNumber );
     if ( trackNbStr.length() == 0 )
@@ -239,7 +240,7 @@ AlbumTrackPtr VLCMetadataService::handleTrack(AlbumPtr album, VLC::Media& media)
         title += trackNbStr;
     }
     unsigned int trackNb = std::stoi( trackNbStr );
-    auto track = album->addTrack( title, trackNb );
+    auto track = std::static_pointer_cast<AlbumTrack>( album->addTrack( title, trackNb ) );
     if ( track == nullptr )
     {
         LOG_ERROR( "Failed to create album track" );
@@ -247,6 +248,8 @@ AlbumTrackPtr VLCMetadataService::handleTrack(AlbumPtr album, VLC::Media& media)
     }
     auto genre = media.meta( libvlc_meta_Genre );
     if ( genre.length() != 0 )
+    {
         track->setGenre( genre );
+    }
     return track;
 }

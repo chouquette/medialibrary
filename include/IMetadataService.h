@@ -24,21 +24,24 @@
 #define IMETADATASERVICE_H
 
 #include "IMediaLibrary.h"
+#include "File.h"
+
+class MediaLibrary;
 
 class IMetadataServiceCb
 {
     public:
         virtual ~IMetadataServiceCb(){}
-        virtual void done( FilePtr file, ServiceStatus status, void* data ) = 0;
+        virtual void done( std::shared_ptr<File> file, ServiceStatus status, void* data ) = 0;
 };
 
 class IMetadataService
 {
     public:
         virtual ~IMetadataService() = default;
-        virtual bool initialize( IMetadataServiceCb* callback, IMediaLibrary* ml ) = 0;
+        virtual bool initialize( IMetadataServiceCb* callback, MediaLibrary* ml ) = 0;
         virtual unsigned int priority() const = 0;
-        virtual bool run( FilePtr file, void* data ) = 0;
+        virtual bool run( std::shared_ptr<File> file, void* data ) = 0;
 };
 
 #endif // IMETADATASERVICE_H

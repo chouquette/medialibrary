@@ -183,7 +183,7 @@ FilePtr MediaLibrary::file( const std::string& path )
     return File::fetch( m_dbConnection.get(), path );
 }
 
-FilePtr MediaLibrary::addFile( const std::string& path, FolderPtr parentFolder )
+std::shared_ptr<File> MediaLibrary::addFile( const std::string& path, FolderPtr parentFolder )
 {
     std::unique_ptr<fs::IFile> file;
     try
@@ -269,7 +269,7 @@ AlbumPtr MediaLibrary::album(const std::string& title )
     return Album::fetchOne( m_dbConnection.get(), req, title );
 }
 
-AlbumPtr MediaLibrary::createAlbum(const std::string& title )
+std::shared_ptr<Album> MediaLibrary::createAlbum(const std::string& title )
 {
     return Album::create( m_dbConnection.get(), title );
 }
@@ -286,7 +286,7 @@ ShowPtr MediaLibrary::show(const std::string& name)
     return Show::fetchOne( m_dbConnection.get(), req, name );
 }
 
-ShowPtr MediaLibrary::createShow(const std::string& name)
+std::shared_ptr<Show> MediaLibrary::createShow(const std::string& name)
 {
     return Show::create( m_dbConnection.get(), name );
 }
@@ -298,7 +298,7 @@ MoviePtr MediaLibrary::movie( const std::string& title )
     return Movie::fetchOne( m_dbConnection.get(), req, title );
 }
 
-MoviePtr MediaLibrary::createMovie( const std::string& title )
+std::shared_ptr<Movie> MediaLibrary::createMovie( const std::string& title )
 {
     return Movie::create( m_dbConnection.get(), title );
 }
@@ -323,7 +323,7 @@ ArtistPtr MediaLibrary::unknownArtist()
     return m_unknownArtist;
 }
 
-ArtistPtr MediaLibrary::createArtist( const std::string& name )
+std::shared_ptr<Artist> MediaLibrary::createArtist( const std::string& name )
 {
     return Artist::create( m_dbConnection.get(), name );
 }

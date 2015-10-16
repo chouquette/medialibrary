@@ -22,8 +22,8 @@
 
 #include "Tests.h"
 
-#include "IFile.h"
-#include "IAudioTrack.h"
+#include "File.h"
+#include "AudioTrack.h"
 
 class AudioTracks : public Tests
 {
@@ -31,14 +31,14 @@ class AudioTracks : public Tests
 
 TEST_F( AudioTracks, AddTrack )
 {
-    auto f = ml->addFile( "file.mp3", nullptr );
+    auto f = std::static_pointer_cast<File>( ml->addFile( "file.mp3", nullptr ) );
     bool res = f->addAudioTrack( "PCM", 44100, 128, 2 );
     ASSERT_TRUE( res );
 }
 
 TEST_F( AudioTracks, FetchTracks )
 {
-    auto f = ml->addFile( "file.mp3", nullptr );
+    auto f = std::static_pointer_cast<File>( ml->addFile( "file.mp3", nullptr ) );
     f->addAudioTrack( "PCM", 44100, 128, 2 );
     f->addAudioTrack( "WMA", 48000, 128, 2 );
 
@@ -48,10 +48,10 @@ TEST_F( AudioTracks, FetchTracks )
 
 TEST_F( AudioTracks, CheckUnique )
 {
-    auto f = ml->addFile( "file.mp3", nullptr );
+    auto f = std::static_pointer_cast<File>( ml->addFile( "file.mp3", nullptr ) );
     f->addAudioTrack( "PCM", 44100, 128, 2 );
 
-    auto f2 = ml->addFile( "file2.mp3", nullptr );
+    auto f2 = std::static_pointer_cast<File>( ml->addFile( "file2.mp3", nullptr ) );
     f2->addAudioTrack( "PCM", 44100, 128, 2 );
 
     auto ts = f->audioTracks();
