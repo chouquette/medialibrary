@@ -23,13 +23,13 @@
 #include <iostream>
 
 #include "VLCMetadataService.h"
-#include "File.h"
+#include "Media.h"
 #include "Album.h"
 #include "AlbumTrack.h"
 #include "Artist.h"
 #include "Show.h"
 
-#include "File.h"
+#include "Media.h"
 
 VLCMetadataService::VLCMetadataService( const VLC::Instance& vlc )
     : m_instance( vlc )
@@ -50,7 +50,7 @@ unsigned int VLCMetadataService::priority() const
     return 100;
 }
 
-bool VLCMetadataService::run( std::shared_ptr<File> file, void* data )
+bool VLCMetadataService::run( std::shared_ptr<Media> file, void* data )
 {
     LOG_INFO( "Parsing ", file->mrl() );
 
@@ -75,7 +75,7 @@ bool VLCMetadataService::run( std::shared_ptr<File> file, void* data )
     return true;
 }
 
-ServiceStatus VLCMetadataService::handleMediaMeta( std::shared_ptr<File> file, VLC::Media& media ) const
+ServiceStatus VLCMetadataService::handleMediaMeta( std::shared_ptr<Media> file, VLC::Media& media ) const
 {
     auto tracks = media.tracks();
     if ( tracks.size() == 0 )
@@ -115,9 +115,9 @@ ServiceStatus VLCMetadataService::handleMediaMeta( std::shared_ptr<File> file, V
     return StatusSuccess;
 }
 
-bool VLCMetadataService::parseAudioFile( std::shared_ptr<File> file, VLC::Media& media ) const
+bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> file, VLC::Media& media ) const
 {
-    file->setType( IFile::Type::AudioType );
+    file->setType( IMedia::Type::AudioType );
     auto albumTitle = media.meta( libvlc_meta_Album );
     auto newAlbum = false;
     std::shared_ptr<Album> album;
@@ -147,9 +147,9 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<File> file, VLC::Media&
     return handleArtist( album, track, media, newAlbum );
 }
 
-bool VLCMetadataService::parseVideoFile( std::shared_ptr<File> file, VLC::Media& media ) const
+bool VLCMetadataService::parseVideoFile( std::shared_ptr<Media> file, VLC::Media& media ) const
 {
-    file->setType( IFile::Type::VideoType );
+    file->setType( IMedia::Type::VideoType );
     auto title = media.meta( libvlc_meta_Title );
     if ( title.length() == 0 )
         return true;

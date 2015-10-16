@@ -23,7 +23,7 @@
 #include "AlbumTrack.h"
 #include "Album.h"
 #include "Artist.h"
-#include "File.h"
+#include "Media.h"
 #include "database/SqliteTools.h"
 #include "logging/Logger.h"
 
@@ -134,7 +134,7 @@ bool AlbumTrack::destroy()
     {
         // Ignore failures to discard from cache, we might want to discard records from
         // cache in a near future to avoid running out of memory on mobile devices
-        File::discard( std::static_pointer_cast<File>( f ) );
+        Media::discard( std::static_pointer_cast<Media>( f ) );
     }
     return _Cache::destroy( m_dbConnection, this );
 }
@@ -155,9 +155,9 @@ std::vector<ArtistPtr> AlbumTrack::artists() const
     return Artist::fetchAll( m_dbConnection, req, m_id );
 }
 
-std::vector<FilePtr> AlbumTrack::files()
+std::vector<MediaPtr> AlbumTrack::files()
 {
-    static const std::string req = "SELECT * FROM " + policy::FileTable::Name
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
             + " WHERE album_track_id = ? ";
-    return File::fetchAll( m_dbConnection, req, m_id );
+    return Media::fetchAll( m_dbConnection, req, m_id );
 }

@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 #include "Folder.h"
-#include "File.h"
+#include "Media.h"
 
 #include "database/SqliteTools.h"
 #include "filesystem/IDirectory.h"
@@ -100,11 +100,11 @@ const std::string& Folder::path()
     return m_path;
 }
 
-std::vector<FilePtr> Folder::files()
+std::vector<MediaPtr> Folder::files()
 {
-    static const std::string req = "SELECT * FROM " + policy::FileTable::Name +
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name +
         " WHERE folder_id = ?";
-    return File::fetchAll( m_dbConection, req, m_id );
+    return Media::fetchAll( m_dbConection, req, m_id );
 }
 
 std::vector<FolderPtr> Folder::folders()

@@ -24,7 +24,7 @@
 
 #include "Album.h"
 #include "AlbumTrack.h"
-#include "File.h"
+#include "Media.h"
 #include "IMediaLibrary.h"
 
 class Albums : public Tests
@@ -87,7 +87,7 @@ TEST_F( Albums, AssignTrack )
 
     Reload();
 
-    f = std::static_pointer_cast<File>( ml->file( "file.avi" ) );
+    f = std::static_pointer_cast<Media>( ml->file( "file.avi" ) );
     t = std::static_pointer_cast<AlbumTrack>( f->albumTrack() );
     ASSERT_NE( t, nullptr );
     ASSERT_EQ( t->title(), "track" );
@@ -189,7 +189,7 @@ TEST_F( Albums, DestroyAlbum )
     bool res = a->destroy();
     ASSERT_TRUE( res );
 
-    f = std::static_pointer_cast<File>( ml->file( "file.avi" ) );
+    f = std::static_pointer_cast<Media>( ml->file( "file.avi" ) );
     ASSERT_EQ( f, nullptr );
 }
 

@@ -26,7 +26,7 @@
 #include <queue>
 
 #include "factory/FileSystem.h"
-#include "File.h"
+#include "Media.h"
 #include "Folder.h"
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
@@ -154,12 +154,12 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, FolderPtr parentFold
 void FsDiscoverer::checkFiles( fs::IDirectory* folder, FolderPtr parentFolder )
 {
     LOG_INFO( "Checking file in ", folder->path() );
-    static const std::string req = "SELECT * FROM " + policy::FileTable::Name
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
             + " WHERE folder_id = ?";
-    auto files = File::fetchAll( m_dbConn, req, parentFolder->id() );
+    auto files = Media::fetchAll( m_dbConn, req, parentFolder->id() );
     for ( const auto& filePath : folder->files() )
     {        
-        auto it = std::find_if( begin( files ), end( files ), [filePath](const std::shared_ptr<IFile>& f) {
+        auto it = std::find_if( begin( files ), end( files ), [filePath](const std::shared_ptr<IMedia>& f) {
             return f->mrl() == filePath;
         });
         if ( it == end( files ) )
@@ -168,7 +168,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory* folder, FolderPtr parentFolder )
             continue;
         }
         auto file = m_fsFactory->createFile( filePath );
-        auto fileInDb = std::static_pointer_cast<File>( *it );
+        auto fileInDb = std::static_pointer_cast<Media>( *it );
         if ( file->lastModificationDate() == fileInDb->lastModificationDate() )
         {
             // Unchanged file

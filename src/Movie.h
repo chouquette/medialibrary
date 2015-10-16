@@ -56,7 +56,7 @@ class Movie : public IMovie, public Cache<Movie, IMovie, policy::MovieTable>
         virtual const std::string& imdbId() const;
         virtual bool setImdbId(const std::string& imdbId);
         virtual bool destroy();
-        virtual std::vector<FilePtr> files();
+        virtual std::vector<MediaPtr> files();
 
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<Movie> create( DBConnection dbConnection, const std::string& title );

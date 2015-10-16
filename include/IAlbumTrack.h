@@ -39,7 +39,7 @@ class IAlbumTrack
         virtual std::shared_ptr<IAlbum> album() = 0;
         virtual bool addArtist( ArtistPtr artist ) = 0;
         virtual std::vector<ArtistPtr> artists() const = 0;
-        virtual std::vector<FilePtr> files() = 0;
+        virtual std::vector<MediaPtr> files() = 0;
 };
 
 #endif // IALBUMTRACK_H

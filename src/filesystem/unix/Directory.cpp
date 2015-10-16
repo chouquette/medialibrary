@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 #include "Directory.h"
-#include "File.h"
+#include "Media.h"
 
 #include <cstring>
 #include <cstdlib>

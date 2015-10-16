@@ -33,11 +33,11 @@ namespace mock
 class WaitForDiscoveryComplete : public IMediaLibraryCb
 {
 public:
-    virtual void onFileAdded( FilePtr ) override
+    virtual void onFileAdded( MediaPtr ) override
     {
     }
 
-    virtual void onFileUpdated( FilePtr ) override
+    virtual void onFileUpdated( MediaPtr ) override
     {
     }
 

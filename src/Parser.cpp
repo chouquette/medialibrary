@@ -24,7 +24,7 @@
 
 #include <algorithm>
 
-#include "IFile.h"
+#include "IMedia.h"
 
 Parser::Parser()
     : m_stopParser( false )
@@ -55,7 +55,7 @@ void Parser::addService(std::unique_ptr<IMetadataService> service)
     });
 }
 
-void Parser::parse(std::shared_ptr<File> file, IMediaLibraryCb* cb)
+void Parser::parse(std::shared_ptr<Media> file, IMediaLibraryCb* cb)
 {
     std::lock_guard<std::mutex> lock( m_lock );
 
@@ -91,7 +91,7 @@ void Parser::run()
 }
 
 
-Parser::Task::Task(std::shared_ptr<File> file, Parser::ServiceList& serviceList, IMediaLibraryCb* metadataCb )
+Parser::Task::Task(std::shared_ptr<Media> file, Parser::ServiceList& serviceList, IMediaLibraryCb* metadataCb )
     : file(file)
     , it( serviceList.begin() )
     , end( serviceList.end() )
@@ -100,7 +100,7 @@ Parser::Task::Task(std::shared_ptr<File> file, Parser::ServiceList& serviceList,
 }
 
 
-void Parser::done(std::shared_ptr<File> file, ServiceStatus status, void* data )
+void Parser::done(std::shared_ptr<Media> file, ServiceStatus status, void* data )
 {
     Task *t = reinterpret_cast<Task*>( data );
     if ( status == StatusTemporaryUnavailable || status == StatusFatal )

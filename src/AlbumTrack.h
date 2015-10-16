@@ -60,7 +60,7 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
         virtual bool destroy();
         virtual bool addArtist( ArtistPtr artist ) override;
         virtual std::vector<ArtistPtr> artists() const override;
-        virtual std::vector<FilePtr> files();
+        virtual std::vector<MediaPtr> files();
 
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<AlbumTrack> create( DBConnection dbConnection, unsigned int albumId,

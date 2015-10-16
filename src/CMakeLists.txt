@@ -22,7 +22,7 @@ list(APPEND HEADERS_LIST
     ${CMAKE_SOURCE_DIR}/include/IShowEpisode.h
     ${CMAKE_SOURCE_DIR}/include/IAlbum.h
     ${CMAKE_SOURCE_DIR}/include/IAlbumTrack.h
-    ${CMAKE_SOURCE_DIR}/include/IFile.h
+    ${CMAKE_SOURCE_DIR}/include/IMedia.h
     ${CMAKE_SOURCE_DIR}/include/IFolder.h
     ${CMAKE_SOURCE_DIR}/include/IMediaLibrary.h
     ${CMAKE_SOURCE_DIR}/include/ILabel.h
@@ -53,7 +53,7 @@ include_directories("${CMAKE_SOURCE_DIR}/src")
 
 list(APPEND SRC_LIST ${HEADERS_LIST}
     MediaLibrary.cpp
-    File.cpp
+    Media.cpp
     Folder.cpp
     Album.cpp
     Show.cpp

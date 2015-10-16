@@ -25,7 +25,7 @@
 #include <cstring>
 
 #include "Label.h"
-#include "File.h"
+#include "Media.h"
 #include "database/SqliteTools.h"
 
 const std::string policy::LabelTable::Name = "Label";
@@ -55,12 +55,12 @@ const std::string& Label::name()
     return m_name;
 }
 
-std::vector<FilePtr> Label::files()
+std::vector<MediaPtr> Label::files()
 {
-    static const std::string req = "SELECT f.* FROM " + policy::FileTable::Name + " f "
+    static const std::string req = "SELECT f.* FROM " + policy::MediaTable::Name + " f "
             "LEFT JOIN LabelFileRelation lfr ON lfr.id_file = f.id_file "
             "WHERE lfr.id_label = ?";
-    return File::fetchAll( m_dbConnection, req, m_id );
+    return Media::fetchAll( m_dbConnection, req, m_id );
 }
 
 LabelPtr Label::create(DBConnection dbConnection, const std::string& name )

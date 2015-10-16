@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 #include "Movie.h"
-#include "File.h"
+#include "Media.h"
 #include "database/SqliteTools.h"
 
 const std::string policy::MovieTable::Name = "Movie";
@@ -122,16 +122,16 @@ bool Movie::destroy()
     auto fs = files();
     for ( auto& f : fs )
     {
-        File::discard( std::static_pointer_cast<File>( f ) );
+        Media::discard( std::static_pointer_cast<Media>( f ) );
     }
     return _Cache::destroy( m_dbConnection, this );
 }
 
-std::vector<FilePtr> Movie::files()
+std::vector<MediaPtr> Movie::files()
 {
-    static const std::string req = "SELECT * FROM " + policy::FileTable::Name
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
             + " WHERE movie_id = ?";
-    return File::fetchAll( m_dbConnection, req, m_id );
+    return Media::fetchAll( m_dbConnection, req, m_id );
 }
 
 bool Movie::createTable( DBConnection dbConnection )

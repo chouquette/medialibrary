@@ -26,45 +26,45 @@
 
 #include <sqlite3.h>
 
-#include "IFile.h"
+#include "IMedia.h"
 #include "database/Cache.h"
 
 class Album;
 class ShowEpisode;
 class AlbumTrack;
 
-class File;
+class Media;
 
 namespace policy
 {
-struct FileTable
+struct MediaTable
 {
     static const std::string Name;
     static const std::string CacheColumn;
-    static unsigned int File::*const PrimaryKey;
+    static unsigned int Media::*const PrimaryKey;
 };
-struct FileCache
+struct MediaCache
 {
     typedef std::string KeyType;
-    static const std::string& key(const std::shared_ptr<File> self);
+    static const std::string& key(const std::shared_ptr<Media> self);
     static std::string key( sqlite3_stmt* stmt );
 };
 }
 
-class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::FileCache>
+class Media : public IMedia, public Cache<Media, IMedia, policy::MediaTable, policy::MediaCache>
 {
     private:
-        typedef Cache<File, IFile, policy::FileTable, policy::FileCache> _Cache;
+        typedef Cache<Media, IMedia, policy::MediaTable, policy::MediaCache> _Cache;
     public:
 
         // Those should be private, however the standard states that the expression
         // ::new (pv) T(std::forward(args)...)
         // shall be well-formed, and private constructor would prevent that.
         // There might be a way with a user-defined allocator, but we'll see that later...
-        File(DBConnection dbConnection , sqlite3_stmt* stmt);
-        File(const fs::IFile* file, unsigned int folderId, const std::string &name, Type type);
+        Media(DBConnection dbConnection , sqlite3_stmt* stmt);
+        Media(const fs::IFile* file, unsigned int folderId, const std::string &name, Type type);
 
-        static std::shared_ptr<File> create(DBConnection dbConnection, Type type, const fs::IFile* file , unsigned int folderId);
+        static std::shared_ptr<Media> create(DBConnection dbConnection, Type type, const fs::IFile* file , unsigned int folderId);
         static bool createTable( DBConnection connection );
 
         virtual unsigned int id() const;
@@ -126,8 +126,8 @@ class File : public IFile, public Cache<File, IFile, policy::FileTable, policy::
         ShowEpisodePtr m_showEpisode;
         MoviePtr m_movie;
 
-        friend class Cache<File, IFile, policy::FileTable, policy::FileCache>;
-        friend struct policy::FileTable;
+        friend class Cache<Media, IMedia, policy::MediaTable, policy::MediaCache>;
+        friend struct policy::MediaTable;
 };
 
 #endif // FILE_H

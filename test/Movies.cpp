@@ -24,7 +24,7 @@
 
 #include "MediaLibrary.h"
 #include "Movie.h"
-#include "File.h"
+#include "Media.h"
 
 class Movies : public Tests
 {

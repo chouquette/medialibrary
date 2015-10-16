@@ -41,10 +41,10 @@ class Parser : public IMetadataServiceCb
         Parser();
         ~Parser();
         void addService(std::unique_ptr<IMetadataService> service );
-        void parse( std::shared_ptr<File> file, IMediaLibraryCb* cb );
+        void parse( std::shared_ptr<Media> file, IMediaLibraryCb* cb );
 
     private:
-        virtual void done( std::shared_ptr<File> file, ServiceStatus status, void* data );
+        virtual void done( std::shared_ptr<Media> file, ServiceStatus status, void* data );
         void run();
 
     private:
@@ -52,8 +52,8 @@ class Parser : public IMetadataServiceCb
         typedef std::vector<ServicePtr> ServiceList;
         struct Task
         {
-            Task(std::shared_ptr<File> file, ServiceList& serviceList , IMediaLibraryCb* metadataCb);
-            std::shared_ptr<File>   file;
+            Task(std::shared_ptr<Media> file, ServiceList& serviceList , IMediaLibraryCb* metadataCb);
+            std::shared_ptr<Media>   file;
             ServiceList::iterator   it;
             ServiceList::iterator   end;
             IMediaLibraryCb*        cb;

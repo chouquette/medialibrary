@@ -27,7 +27,7 @@
 #include "Artist.h"
 #include "AudioTrack.h"
 #include "discoverer/DiscovererWorker.h"
-#include "File.h"
+#include "Media.h"
 #include "Folder.h"
 #include "MediaLibrary.h"
 #include "IMetadataService.h"
@@ -88,7 +88,7 @@ MediaLibrary::~MediaLibrary()
         m_vlcInstance.logUnset();
     // Explicitely stop the discoverer, to avoid it writting while tearing down.
     m_discoverer->stop();
-    File::clear();
+    Media::clear();
     Folder::clear();
     Label::clear();
     Album::clear();
@@ -137,7 +137,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         addMetadataService( std::move( thumbnailerService ) );
     }
 
-    if ( ! ( File::createTable( m_dbConnection.get() ) &&
+    if ( ! ( Media::createTable( m_dbConnection.get() ) &&
         Folder::createTable( m_dbConnection.get() ) &&
         Label::createTable( m_dbConnection.get() ) &&
         Album::createTable( m_dbConnection.get() ) &&
@@ -158,32 +158,32 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
     return true;
 }
 
-std::vector<FilePtr> MediaLibrary::files()
+std::vector<MediaPtr> MediaLibrary::files()
 {
-    return File::fetchAll( m_dbConnection.get() );
+    return Media::fetchAll( m_dbConnection.get() );
 }
 
-std::vector<FilePtr> MediaLibrary::audioFiles()
+std::vector<MediaPtr> MediaLibrary::audioFiles()
 {
-    static const std::string req = "SELECT * FROM " + policy::FileTable::Name + " WHERE type = ?";
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ?";
     //FIXME: Replace this with template magic in sqlite's traits
-    using type_t = std::underlying_type<IFile::Type>::type;
-    return File::fetchAll( m_dbConnection.get(), req, static_cast<type_t>( IFile::Type::AudioType ) );
+    using type_t = std::underlying_type<IMedia::Type>::type;
+    return Media::fetchAll( m_dbConnection.get(), req, static_cast<type_t>( IMedia::Type::AudioType ) );
 }
 
-std::vector<FilePtr> MediaLibrary::videoFiles()
+std::vector<MediaPtr> MediaLibrary::videoFiles()
 {
-    static const std::string req = "SELECT * FROM " + policy::FileTable::Name + " WHERE type = ?";
-    using type_t = std::underlying_type<IFile::Type>::type;
-    return File::fetchAll( m_dbConnection.get(), req, static_cast<type_t>( IFile::Type::VideoType ) );
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ?";
+    using type_t = std::underlying_type<IMedia::Type>::type;
+    return Media::fetchAll( m_dbConnection.get(), req, static_cast<type_t>( IMedia::Type::VideoType ) );
 }
 
-FilePtr MediaLibrary::file( const std::string& path )
+MediaPtr MediaLibrary::file( const std::string& path )
 {
-    return File::fetch( m_dbConnection.get(), path );
+    return Media::fetch( m_dbConnection.get(), path );
 }
 
-std::shared_ptr<File> MediaLibrary::addFile( const std::string& path, FolderPtr parentFolder )
+std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, FolderPtr parentFolder )
 {
     std::unique_ptr<fs::IFile> file;
     try
@@ -196,21 +196,21 @@ std::shared_ptr<File> MediaLibrary::addFile( const std::string& path, FolderPtr 
         return nullptr;
     }
 
-    auto type = IFile::Type::UnknownType;
+    auto type = IMedia::Type::UnknownType;
     if ( std::find( begin( supportedVideoExtensions ), end( supportedVideoExtensions ),
                     file->extension() ) != end( supportedVideoExtensions ) )
     {
-        type = IFile::Type::VideoType;
+        type = IMedia::Type::VideoType;
     }
     else if ( std::find( begin( supportedAudioExtensions ), end( supportedAudioExtensions ),
                          file->extension() ) != end( supportedAudioExtensions ) )
     {
-        type = IFile::Type::AudioType;
+        type = IMedia::Type::AudioType;
     }
-    if ( type == IFile::Type::UnknownType )
+    if ( type == IMedia::Type::UnknownType )
         return false;
 
-    auto fptr = File::create( m_dbConnection.get(), type, file.get(), parentFolder != nullptr ? parentFolder->id() : 0 );
+    auto fptr = Media::create( m_dbConnection.get(), type, file.get(), parentFolder != nullptr ? parentFolder->id() : 0 );
     if ( fptr == nullptr )
     {
         LOG_ERROR( "Failed to add file ", file->fullPath(), " to the media library" );
@@ -230,19 +230,19 @@ FolderPtr MediaLibrary::folder( const std::string& path )
 
 bool MediaLibrary::deleteFile( const std::string& mrl )
 {
-    return File::destroy( m_dbConnection.get(), mrl );
+    return Media::destroy( m_dbConnection.get(), mrl );
 }
 
-bool MediaLibrary::deleteFile( FilePtr file )
+bool MediaLibrary::deleteFile( MediaPtr file )
 {
-    return File::destroy( m_dbConnection.get(), std::static_pointer_cast<File>( file ) );
+    return Media::destroy( m_dbConnection.get(), std::static_pointer_cast<Media>( file ) );
 }
 
 bool MediaLibrary::deleteFolder( FolderPtr folder )
 {
     if ( Folder::destroy( m_dbConnection.get(), std::static_pointer_cast<Folder>( folder ) ) == false )
         return false;
-    File::clear();
+    Media::clear();
     return true;
 }
 

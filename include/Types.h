@@ -29,7 +29,7 @@ class IAlbum;
 class IAlbumTrack;
 class IAudioTrack;
 class IDiscoverer;
-class IFile;
+class IMedia;
 class IFolder;
 class ILabel;
 class IMetadataService;
@@ -41,7 +41,7 @@ class ILogger;
 class IArtist;
 class SqliteConnection;
 
-typedef std::shared_ptr<IFile> FilePtr;
+typedef std::shared_ptr<IMedia> MediaPtr;
 typedef std::shared_ptr<IFolder> FolderPtr;
 typedef std::shared_ptr<ILabel> LabelPtr;
 typedef std::shared_ptr<IAlbum> AlbumPtr;

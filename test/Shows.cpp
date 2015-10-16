@@ -22,7 +22,7 @@
 
 #include "Tests.h"
 
-#include "File.h"
+#include "Media.h"
 #include "MediaLibrary.h"
 #include "Show.h"
 #include "ShowEpisode.h"
@@ -140,7 +140,7 @@ TEST_F( Shows, FetchShowFromEpisode )
 
     Reload();
 
-    f = std::static_pointer_cast<File>( ml->file( "file.avi" ) );
+    f = std::static_pointer_cast<Media>( ml->file( "file.avi" ) );
     s2 = f->showEpisode()->show();
     ASSERT_NE( s2, nullptr );
     ASSERT_EQ( s->name(), s2->name() );
@@ -222,7 +222,7 @@ TEST_F( Shows, FileSetShowEpisode )
 
     Reload();
 
-    f = std::static_pointer_cast<File>( ml->file( "file.avi" ) );
+    f = std::static_pointer_cast<Media>( ml->file( "file.avi" ) );
     auto e2 = f->showEpisode();
     ASSERT_NE( e2, nullptr );
     ASSERT_EQ( e2->name(), "episode 1" );
@@ -237,7 +237,7 @@ TEST_F( Shows, DeleteShowEpisode )
     f->setShowEpisode( e );
     e->destroy();
 
-    f = std::static_pointer_cast<File>( ml->file( "file.avi" ) );
+    f = std::static_pointer_cast<Media>( ml->file( "file.avi" ) );
     ASSERT_EQ( f, nullptr );
 
     Reload();

@@ -32,7 +32,7 @@ class IAlbumTrack;
 class IShowEpisode;
 class ITrackInformation;
 
-class IFile
+class IMedia
 {
     public:
         enum class Type : uint8_t
@@ -41,7 +41,7 @@ class IFile
             AudioType, // Any kind of audio file, not being an album track
             UnknownType
         };
-        virtual ~IFile() {}
+        virtual ~IMedia() {}
 
         virtual unsigned int id() const = 0;
         virtual Type type() = 0;

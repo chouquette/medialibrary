@@ -26,7 +26,7 @@
 #include <jpeglib.h>
 #include <setjmp.h>
 
-#include "IFile.h"
+#include "IMedia.h"
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
 
@@ -50,9 +50,9 @@ unsigned int VLCThumbnailer::priority() const
     return 50;
 }
 
-bool VLCThumbnailer::run(std::shared_ptr<File> file, void *data )
+bool VLCThumbnailer::run(std::shared_ptr<Media> file, void *data )
 {
-    if ( file->type() == IFile::Type::UnknownType )
+    if ( file->type() == IMedia::Type::UnknownType )
     {
         // If we don't know the file type yet, it actually looks more like a bug
         // since this should run after file type deduction, and not run in case
@@ -60,7 +60,7 @@ bool VLCThumbnailer::run(std::shared_ptr<File> file, void *data )
         m_cb->done( file, StatusError, data );
         return false;
     }
-    else if ( file->type() != IFile::Type::VideoType )
+    else if ( file->type() != IMedia::Type::VideoType )
     {
         // There's no point in generating a thumbnail for a non-video file.
         m_cb->done( file, StatusSuccess, data );
@@ -85,7 +85,7 @@ bool VLCThumbnailer::run(std::shared_ptr<File> file, void *data )
     return true;
 }
 
-bool VLCThumbnailer::startPlayback(std::shared_ptr<File> file, VLC::MediaPlayer &mp, void* data )
+bool VLCThumbnailer::startPlayback(std::shared_ptr<Media> file, VLC::MediaPlayer &mp, void* data )
 {
     bool failed = true;
 
@@ -113,7 +113,7 @@ bool VLCThumbnailer::startPlayback(std::shared_ptr<File> file, VLC::MediaPlayer 
     return true;
 }
 
-bool VLCThumbnailer::seekAhead(std::shared_ptr<File> file, VLC::MediaPlayer& mp, void* data )
+bool VLCThumbnailer::seekAhead(std::shared_ptr<Media> file, VLC::MediaPlayer& mp, void* data )
 {
     std::unique_lock<std::mutex> lock( m_mutex );
     float pos = .0f;
@@ -179,7 +179,7 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
     );
 }
 
-bool VLCThumbnailer::takeSnapshot(std::shared_ptr<File> file, VLC::MediaPlayer &mp, void *data)
+bool VLCThumbnailer::takeSnapshot(std::shared_ptr<Media> file, VLC::MediaPlayer &mp, void *data)
 {
     std::unique_ptr<uint8_t[]> buff;
     // lock, signal that we want a snapshot, and wait.
@@ -221,7 +221,7 @@ struct jpegError : public jpeg_error_mgr
 
 #endif
 
-bool VLCThumbnailer::compress(uint8_t* buff, std::shared_ptr<File> file, void *data)
+bool VLCThumbnailer::compress(uint8_t* buff, std::shared_ptr<Media> file, void *data)
 {
     auto path = m_ml->snapshotPath();
     path += "/";

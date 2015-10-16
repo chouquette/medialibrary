@@ -41,12 +41,12 @@ public:
      * available yet.
      * @param file
      */
-    virtual void onFileAdded( FilePtr file ) = 0;
+    virtual void onFileAdded( MediaPtr file ) = 0;
     /**
      * @brief onFileUpdated Will be called when a file metadata gets updated.
      * @param file The updated file.
      */
-    virtual void onFileUpdated( FilePtr file ) = 0;
+    virtual void onFileUpdated( MediaPtr file ) = 0;
 
     virtual void onDiscoveryStarted( const std::string& entryPoint ) = 0;
     virtual void onDiscoveryCompleted( const std::string& entryPoint ) = 0;
@@ -79,9 +79,9 @@ class IMediaLibrary
         ///                     a stand alone file.
         /// \return The newly created file, or nullptr in case of error
         ///
-        virtual FilePtr file( const std::string& path ) = 0;
+        virtual MediaPtr file( const std::string& path ) = 0;
         virtual bool deleteFile( const std::string& mrl ) = 0;
-        virtual bool deleteFile( FilePtr file ) = 0;
+        virtual bool deleteFile( MediaPtr file ) = 0;
 
         /// Adds a folder and all the files it contains
         virtual FolderPtr folder( const std::string& path ) = 0;
@@ -90,9 +90,9 @@ class IMediaLibrary
         virtual LabelPtr createLabel( const std::string& label ) = 0;
         virtual bool deleteLabel( const std::string& label ) = 0;
         virtual bool deleteLabel( LabelPtr label ) = 0;
-        virtual std::vector<FilePtr> files() = 0;
-        virtual std::vector<FilePtr> audioFiles() = 0;
-        virtual std::vector<FilePtr> videoFiles() = 0;
+        virtual std::vector<MediaPtr> files() = 0;
+        virtual std::vector<MediaPtr> audioFiles() = 0;
+        virtual std::vector<MediaPtr> videoFiles() = 0;
         virtual AlbumPtr album( const std::string& title ) = 0;
         virtual std::vector<AlbumPtr> albums() = 0;
         virtual ShowPtr show( const std::string& name ) = 0;

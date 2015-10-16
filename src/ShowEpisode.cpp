@@ -23,7 +23,7 @@
 #include "ShowEpisode.h"
 #include "database/SqliteTools.h"
 #include "Show.h"
-#include "File.h"
+#include "Media.h"
 
 const std::string policy::ShowEpisodeTable::Name = "ShowEpisode";
 const std::string policy::ShowEpisodeTable::CacheColumn = "show_id";
@@ -141,18 +141,18 @@ std::shared_ptr<IShow> ShowEpisode::show()
     return m_show;
 }
 
-std::vector<FilePtr> ShowEpisode::files()
+std::vector<MediaPtr> ShowEpisode::files()
 {
-    static const std::string req = "SELECT * FROM " + policy::FileTable::Name
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
             + " WHERE show_episode_id = ?";
-    return File::fetchAll( m_dbConnection, req, m_id );
+    return Media::fetchAll( m_dbConnection, req, m_id );
 }
 
 bool ShowEpisode::destroy()
 {
     auto fs = files();
     for ( auto& f : fs )
-        File::discard( std::static_pointer_cast<File>( f ) );
+        Media::discard( std::static_pointer_cast<Media>( f ) );
     return _Cache::destroy( m_dbConnection, this );
 }
 

@@ -26,7 +26,7 @@
 #include <sqlite3.h>
 #include <string>
 
-class File;
+class Media;
 class Label;
 
 #include "ILabel.h"
@@ -61,7 +61,7 @@ class Label : public ILabel, public Cache<Label, ILabel, policy::LabelTable, pol
     public:
         virtual unsigned int id() const;
         virtual const std::string& name();
-        virtual std::vector<FilePtr> files();
+        virtual std::vector<MediaPtr> files();
 
         static LabelPtr create( DBConnection dbConnection, const std::string& name );
         static bool createTable( DBConnection dbConnection );

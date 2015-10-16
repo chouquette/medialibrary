@@ -34,12 +34,12 @@ class VLCMetadataService : public IMetadataService
 {
     struct Context
     {
-        Context(std::shared_ptr<File> file_)
+        Context(std::shared_ptr<Media> file_)
             : file( file_ )
         {
         }
 
-        std::shared_ptr<File> file;
+        std::shared_ptr<Media> file;
         VLC::Media media;
     };
 
@@ -48,12 +48,12 @@ class VLCMetadataService : public IMetadataService
 
         virtual bool initialize( IMetadataServiceCb *callback, MediaLibrary* ml ) override;
         virtual unsigned int priority() const override;
-        virtual bool run( std::shared_ptr<File> file, void *data ) override;
+        virtual bool run( std::shared_ptr<Media> file, void *data ) override;
 
     private:
-        ServiceStatus handleMediaMeta(std::shared_ptr<File> file , VLC::Media &media) const;
-        bool parseAudioFile(std::shared_ptr<File> file, VLC::Media &media) const;
-        bool parseVideoFile(std::shared_ptr<File> file, VLC::Media &media) const;
+        ServiceStatus handleMediaMeta(std::shared_ptr<Media> file , VLC::Media &media) const;
+        bool parseAudioFile(std::shared_ptr<Media> file, VLC::Media &media) const;
+        bool parseVideoFile(std::shared_ptr<Media> file, VLC::Media &media) const;
         bool handleArtist(std::shared_ptr<Album> album, std::shared_ptr<AlbumTrack> track, VLC::Media& media, bool newAlbum ) const;
         std::shared_ptr<AlbumTrack> handleTrack(std::shared_ptr<Album> album, VLC::Media& media ) const;
 

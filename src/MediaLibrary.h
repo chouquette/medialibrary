@@ -34,7 +34,7 @@ class SqliteConnection;
 
 class Album;
 class Artist;
-class File;
+class Media;
 class Movie;
 class Show;
 
@@ -46,13 +46,13 @@ class MediaLibrary : public IMediaLibrary
         virtual bool initialize( const std::string& dbPath, const std::string& snapshotPath, IMediaLibraryCb* metadataCb );
         virtual void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory ) override;
 
-        virtual std::vector<FilePtr> files() override;
-        virtual std::vector<FilePtr> audioFiles() override;
-        virtual std::vector<FilePtr> videoFiles() override;
-        virtual FilePtr file( const std::string& path ) override;
-        std::shared_ptr<File> addFile(const std::string& path , FolderPtr parentFolder);
+        virtual std::vector<MediaPtr> files() override;
+        virtual std::vector<MediaPtr> audioFiles() override;
+        virtual std::vector<MediaPtr> videoFiles() override;
+        virtual MediaPtr file( const std::string& path ) override;
+        std::shared_ptr<Media> addFile(const std::string& path , FolderPtr parentFolder);
         virtual bool deleteFile( const std::string& mrl ) override;
-        virtual bool deleteFile( FilePtr file ) override;
+        virtual bool deleteFile( MediaPtr file ) override;
 
         virtual FolderPtr folder( const std::string& path ) override;
         virtual bool deleteFolder( FolderPtr folder ) override;

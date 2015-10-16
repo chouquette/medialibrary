@@ -23,7 +23,7 @@
 #include "Tests.h"
 
 #include "IMediaLibrary.h"
-#include "File.h"
+#include "Media.h"
 
 class Files : public Tests
 {
@@ -53,14 +53,14 @@ TEST_F( Files, Create )
 TEST_F( Files, Fetch )
 {
     auto f = ml->addFile( "media.avi", nullptr );
-    auto f2 = std::static_pointer_cast<File>( ml->file( "media.avi" ) );
+    auto f2 = std::static_pointer_cast<Media>( ml->file( "media.avi" ) );
     ASSERT_EQ( f->mrl(), f2->mrl() );
     ASSERT_EQ( f, f2 );
 
     // Flush cache and fetch from DB
     Reload();
 
-    f2 = std::static_pointer_cast<File>( ml->file( "media.avi" ) );
+    f2 = std::static_pointer_cast<Media>( ml->file( "media.avi" ) );
     ASSERT_EQ( f->mrl(), f2->mrl() );
     ASSERT_TRUE( f2->isStandAlone() );
 }
@@ -80,12 +80,12 @@ TEST_F( Files, Delete )
 TEST_F( Files, Duplicate )
 {
     auto f = ml->addFile( "media.avi", nullptr );
-    auto f2 = std::static_pointer_cast<File>( ml->addFile( "media.avi", nullptr ) );
+    auto f2 = std::static_pointer_cast<Media>( ml->addFile( "media.avi", nullptr ) );
 
     ASSERT_NE( f, nullptr );
     ASSERT_EQ( f2, nullptr );
 
-    f2 = std::static_pointer_cast<File>( ml->file( "media.avi" ) );
+    f2 = std::static_pointer_cast<Media>( ml->file( "media.avi" ) );
     ASSERT_EQ( f, f2 );
 }
 
@@ -95,7 +95,7 @@ TEST_F( Files, LastModificationDate )
     ASSERT_NE( 0u, f->lastModificationDate() );
 
     Reload();
-    auto f2 = std::static_pointer_cast<File>( ml->file( "media.avi" ) );
+    auto f2 = std::static_pointer_cast<Media>( ml->file( "media.avi" ) );
     ASSERT_EQ( f->lastModificationDate(), f2->lastModificationDate() );
 }
 

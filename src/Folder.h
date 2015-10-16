@@ -65,7 +65,7 @@ public:
 
     virtual unsigned int id() const override;
     virtual const std::string& path() override;
-    virtual std::vector<FilePtr> files() override;
+    virtual std::vector<MediaPtr> files() override;
     virtual std::vector<FolderPtr> folders() override;
     virtual FolderPtr parent() override;
     virtual unsigned int lastModificationDate() override;

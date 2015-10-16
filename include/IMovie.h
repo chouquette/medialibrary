@@ -35,7 +35,7 @@ class IMovie
         virtual const std::string& shortSummary() const = 0;
         virtual const std::string& artworkUrl() const = 0;
         virtual const std::string& imdbId() const = 0;
-        virtual std::vector<FilePtr> files() = 0;
+        virtual std::vector<MediaPtr> files() = 0;
 };
 
 #endif // IMOVIE_H
