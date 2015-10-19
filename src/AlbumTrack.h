@@ -32,6 +32,7 @@
 
 class Album;
 class AlbumTrack;
+class Media;
 
 namespace policy
 {
@@ -49,7 +50,7 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
         typedef Cache<AlbumTrack, IAlbumTrack, policy::AlbumTrackTable> _Cache;
     public:
         AlbumTrack( DBConnection dbConnection, sqlite3_stmt* stmt );
-        AlbumTrack( const std::string& title, unsigned int trackNumber, unsigned int albumId );
+        AlbumTrack(Media* media, unsigned int trackNumber, unsigned int albumId );
 
         virtual unsigned int id() const override;
         virtual const std::string& genre() override;
@@ -59,14 +60,14 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
         virtual std::shared_ptr<IAlbum> album() override;
         virtual std::vector<MediaPtr> files() override;
 
-        bool destroy();
         static bool createTable( DBConnection dbConnection );
-        static std::shared_ptr<AlbumTrack> create( DBConnection dbConnection, unsigned int albumId,
-                                     const std::string& name, unsigned int trackNb );
+        static std::shared_ptr<AlbumTrack> create(DBConnection dbConnection, unsigned int albumId,
+                                     Media* media, unsigned int trackNb );
 
     private:
         DBConnection m_dbConnection;
         unsigned int m_id;
+        unsigned int m_mediaId;
         std::string m_title;
         std::string m_genre;
         unsigned int m_trackNumber;

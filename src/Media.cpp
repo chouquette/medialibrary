@@ -49,23 +49,21 @@ Media::Media( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_id = sqlite3_column_int( stmt, 0 );
     m_type = (Type)sqlite3_column_int( stmt, 1 );
     m_duration = sqlite::Traits<int64_t>::Load( stmt, 2 );
-    m_albumTrackId = sqlite3_column_int( stmt, 3 );
-    m_playCount = sqlite3_column_int( stmt, 4 );
-    m_showEpisodeId = sqlite3_column_int( stmt, 5 );
-    m_mrl = (const char*)sqlite3_column_text( stmt, 6 );
-    m_movieId = sqlite::Traits<unsigned int>::Load( stmt, 7 );
-    m_folderId = sqlite::Traits<unsigned int>::Load( stmt, 8 );
-    m_lastModificationDate = sqlite::Traits<unsigned int>::Load( stmt, 9 );
-    m_snapshot = sqlite::Traits<std::string>::Load( stmt, 10 );
-    m_isParsed = sqlite::Traits<bool>::Load( stmt, 11 );
-    m_name = sqlite::Traits<std::string>::Load( stmt, 12 );
+    m_playCount = sqlite3_column_int( stmt, 3 );
+    m_showEpisodeId = sqlite3_column_int( stmt, 4 );
+    m_mrl = (const char*)sqlite3_column_text( stmt, 5 );
+    m_movieId = sqlite::Traits<unsigned int>::Load( stmt, 6 );
+    m_folderId = sqlite::Traits<unsigned int>::Load( stmt, 7 );
+    m_lastModificationDate = sqlite::Traits<unsigned int>::Load( stmt, 8 );
+    m_snapshot = sqlite::Traits<std::string>::Load( stmt, 9 );
+    m_isParsed = sqlite::Traits<bool>::Load( stmt, 10 );
+    m_name = sqlite::Traits<std::string>::Load( stmt, 11 );
 }
 
 Media::Media( const fs::IFile* file, unsigned int folderId, const std::string& name, Type type )
     : m_id( 0 )
     , m_type( type )
     , m_duration( -1 )
-    , m_albumTrackId( 0 )
     , m_playCount( 0 )
     , m_showEpisodeId( 0 )
     , m_mrl( file->fullPath() )
@@ -93,20 +91,17 @@ std::shared_ptr<Media> Media::create( DBConnection dbConnection, Type type, cons
 
 AlbumTrackPtr Media::albumTrack()
 {
-    if ( m_albumTrack == nullptr && m_albumTrackId != 0 )
+    if ( m_albumTrack == nullptr )
     {
-        m_albumTrack = AlbumTrack::fetch( m_dbConnection, m_albumTrackId );
+        std::string req = "SELECT * FROM " + policy::AlbumTrackTable::Name +
+                " WHERE media_id = ?";
+        m_albumTrack = AlbumTrack::fetchOne( m_dbConnection, req, m_id );
     }
     return m_albumTrack;
 }
 
 bool Media::setAlbumTrack( AlbumTrackPtr albumTrack )
 {
-    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET album_track_id = ? "
-            "WHERE id_media = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, albumTrack->id(), m_id ) == false )
-        return false;
-    m_albumTrackId = albumTrack->id();
     m_albumTrack = albumTrack;
     return true;
 }
@@ -330,7 +325,6 @@ bool Media::createTable( DBConnection connection )
             "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
             "type INTEGER,"
             "duration INTEGER,"
-            "album_track_id UNSIGNED INTEGER,"
             "play_count UNSIGNED INTEGER,"
             "show_episode_id UNSIGNED INTEGER,"
             "mrl TEXT UNIQUE ON CONFLICT FAIL,"
@@ -340,8 +334,6 @@ bool Media::createTable( DBConnection connection )
             "snapshot TEXT,"
             "parsed BOOLEAN,"
             "name TEXT,"
-            "FOREIGN KEY (album_track_id) REFERENCES " + policy::AlbumTrackTable::Name
-            + "(id_track) ON DELETE CASCADE,"
             "FOREIGN KEY (show_episode_id) REFERENCES " + policy::ShowEpisodeTable::Name
             + "(id_episode) ON DELETE CASCADE,"
             "FOREIGN KEY (movie_id) REFERENCES " + policy::MovieTable::Name
@@ -403,5 +395,5 @@ const std::string& policy::MediaCache::key(const std::shared_ptr<Media> self )
 
 std::string policy::MediaCache::key(sqlite3_stmt* stmt)
 {
-    return sqlite::Traits<std::string>::Load( stmt, 6 );
+    return sqlite::Traits<std::string>::Load( stmt, 5 );
 }

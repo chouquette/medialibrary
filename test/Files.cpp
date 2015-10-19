@@ -180,21 +180,17 @@ TEST_F( Files, Artists )
     }
 
     auto tracks = album->tracks();
+    ASSERT_NE( tracks.size(), 0u );
     for ( auto& it : tracks )
     {
         //FIXME: This should return a std::vector<IMedia>
-        auto t = std::static_pointer_cast<AlbumTrack>( it );
-        ASSERT_NE( t->files().size(), 0u );
-        for ( auto& it : t->files() )
-        {
-            auto f = std::static_pointer_cast<Media>( it );
-            auto res = f->addArtist( artist1 );
-            ASSERT_EQ( res, true );
-            res = f->addArtist( artist2 );
-            ASSERT_EQ( res, true );
-            auto artists = f->artists();
-            ASSERT_EQ( artists.size(), 2u );
-        }
+        auto f = std::static_pointer_cast<Media>( it );
+        auto res = f->addArtist( artist1 );
+        ASSERT_EQ( res, true );
+        res = f->addArtist( artist2 );
+        ASSERT_EQ( res, true );
+        auto artists = f->artists();
+        ASSERT_EQ( artists.size(), 2u );
     }
 
     auto artists = ml->artists();
@@ -208,13 +204,10 @@ TEST_F( Files, Artists )
 
     auto album2 = ml->album( "album" );
     auto tracks2 = album2->tracks();
-    for ( auto& t : tracks2 )
+    for ( auto& f : tracks2 )
     {
-        for ( auto& f : t->files() )
-        {
-            auto artists = f->artists();
-            ASSERT_EQ( artists.size(), 2u );
-        }
+        auto artists = f->artists();
+        ASSERT_EQ( artists.size(), 2u );
     }
 
     auto artists2 = ml->artists();

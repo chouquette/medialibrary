@@ -110,16 +110,19 @@ time_t Album::lastSyncDate() const
     return m_lastSyncDate;
 }
 
-std::vector<AlbumTrackPtr> Album::tracks() const
+std::vector<MediaPtr> Album::tracks() const
 {
-    static const std::string req = "SELECT * FROM " + policy::AlbumTrackTable::Name
-            + " WHERE album_id = ?";
-    return AlbumTrack::fetchAll( m_dbConnection, req, m_id );
+    static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
+            " LEFT JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
+            " WHERE att.album_id = ?";
+    return Media::fetchAll( m_dbConnection, req, m_id );
 }
 
 std::shared_ptr<AlbumTrack> Album::addTrack(std::shared_ptr<Media> media, unsigned int trackNb )
 {
-    return AlbumTrack::create( m_dbConnection, m_id, media->name(), trackNb );
+    auto track = AlbumTrack::create( m_dbConnection, m_id, media.get(), trackNb );
+    media->setAlbumTrack( track );
+    return track;
 }
 
 std::vector<ArtistPtr> Album::artists() const
@@ -143,13 +146,6 @@ bool Album::addArtist( std::shared_ptr<Artist> artist )
 
 bool Album::destroy()
 {
-    auto ts = tracks();
-    //FIXME: Have a single request to fetch all files at once, instead of having one per track
-    for ( auto& it : ts )
-    {
-        auto t = std::static_pointer_cast<AlbumTrack>( it );
-        t->destroy();
-    }
     return _Cache::destroy( m_dbConnection, this );
 }
 

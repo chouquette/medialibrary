@@ -111,7 +111,6 @@ class Media : public IMedia, public Cache<Media, IMedia, policy::MediaTable, pol
         unsigned int m_id;
         Type m_type;
         int64_t m_duration;
-        unsigned int m_albumTrackId;
         unsigned int m_playCount;
         unsigned int m_showEpisodeId;
         std::string m_mrl;

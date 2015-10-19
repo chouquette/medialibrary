@@ -35,15 +35,18 @@ AlbumTrack::AlbumTrack( DBConnection dbConnection, sqlite3_stmt* stmt )
     , m_album( nullptr )
 {
     m_id = sqlite::Traits<unsigned int>::Load( stmt, 0 );
-    m_title = sqlite::Traits<std::string>::Load( stmt, 1 );
-    m_genre = sqlite::Traits<std::string>::Load( stmt, 2 );
-    m_trackNumber = sqlite::Traits<unsigned int>::Load( stmt, 3 );
-    m_albumId = sqlite::Traits<unsigned int>::Load( stmt, 4 );
+    m_mediaId = sqlite::Traits<unsigned int>::Load( stmt, 1 );
+    m_title = sqlite::Traits<std::string>::Load( stmt, 2 );
+    m_genre = sqlite::Traits<std::string>::Load( stmt, 3 );
+    m_trackNumber = sqlite::Traits<unsigned int>::Load( stmt, 4 );
+    m_albumId = sqlite::Traits<unsigned int>::Load( stmt, 5 );
 }
 
-AlbumTrack::AlbumTrack( const std::string& title, unsigned int trackNumber, unsigned int albumId )
+//FIXME: constify media
+AlbumTrack::AlbumTrack( Media* media, unsigned int trackNumber, unsigned int albumId )
     : m_id( 0 )
-    , m_title( title )
+    , m_mediaId( media->id() )
+    , m_title( media->name() )
     , m_trackNumber( trackNumber )
     , m_albumId( albumId )
     , m_album( nullptr )
@@ -59,21 +62,25 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
 {
     static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AlbumTrackTable::Name + "("
                 "id_track INTEGER PRIMARY KEY AUTOINCREMENT,"
+                "media_id INTEGER,"
                 "title TEXT,"
                 "genre TEXT,"
                 "track_number UNSIGNED INTEGER,"
                 "album_id UNSIGNED INTEGER NOT NULL,"
-                "FOREIGN KEY (album_id) REFERENCES Album(id_album) ON DELETE CASCADE"
+                "FOREIGN KEY (media_id) REFERENCES " + policy::MediaTable::Name + "(id_media)"
+                    " ON DELETE CASCADE, "
+                "FOREIGN KEY (album_id) REFERENCES Album(id_album) "
+                    " ON DELETE CASCADE"
             ")";
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-std::shared_ptr<AlbumTrack> AlbumTrack::create(DBConnection dbConnection, unsigned int albumId, const std::string& name, unsigned int trackNb)
+std::shared_ptr<AlbumTrack> AlbumTrack::create(DBConnection dbConnection, unsigned int albumId, Media* media, unsigned int trackNb)
 {
-    auto self = std::make_shared<AlbumTrack>( name, trackNb, albumId );
+    auto self = std::make_shared<AlbumTrack>( media, trackNb, albumId );
     static const std::string req = "INSERT INTO " + policy::AlbumTrackTable::Name
-            + "(title, track_number, album_id) VALUES(?, ?, ?)";
-    if ( _Cache::insert( dbConnection, self, req, name, trackNb, albumId ) == false )
+            + "(media_id, title, track_number, album_id) VALUES(?, ?, ?, ?)";
+    if ( _Cache::insert( dbConnection, self, req, media->id(), media->name(), trackNb, albumId ) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;
     return self;
@@ -111,21 +118,6 @@ std::shared_ptr<IAlbum> AlbumTrack::album()
         m_album = Album::fetch( m_dbConnection, m_albumId );
     }
     return m_album;
-}
-
-bool AlbumTrack::destroy()
-{
-    // Manually remove Files from cache, and let foreign key handling delete them from the DB
-    auto fs = files();
-    if ( fs.size() == 0 )
-        LOG_WARN( "No files found for AlbumTrack ", m_id );
-    for ( auto& f : fs )
-    {
-        // Ignore failures to discard from cache, we might want to discard records from
-        // cache in a near future to avoid running out of memory on mobile devices
-        Media::discard( std::static_pointer_cast<Media>( f ) );
-    }
-    return _Cache::destroy( m_dbConnection, this );
 }
 
 std::vector<MediaPtr> AlbumTrack::files()
