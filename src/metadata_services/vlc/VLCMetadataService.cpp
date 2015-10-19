@@ -234,9 +234,10 @@ std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack(std::shared_ptr<Albu
     if ( title.length() == 0 )
     {
         LOG_WARN( "Failed to get track title" );
-        title = "Unknown track #";
+        title = "Track #";
         title += trackNbStr;
     }
+    media->setName( title );
     unsigned int trackNb = std::stoi( trackNbStr );
     auto track = std::static_pointer_cast<AlbumTrack>( album->addTrack( media, trackNb ) );
     if ( track == nullptr )

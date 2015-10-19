@@ -36,17 +36,15 @@ AlbumTrack::AlbumTrack( DBConnection dbConnection, sqlite3_stmt* stmt )
 {
     m_id = sqlite::Traits<unsigned int>::Load( stmt, 0 );
     m_mediaId = sqlite::Traits<unsigned int>::Load( stmt, 1 );
-    m_title = sqlite::Traits<std::string>::Load( stmt, 2 );
-    m_genre = sqlite::Traits<std::string>::Load( stmt, 3 );
-    m_trackNumber = sqlite::Traits<unsigned int>::Load( stmt, 4 );
-    m_albumId = sqlite::Traits<unsigned int>::Load( stmt, 5 );
+    m_genre = sqlite::Traits<std::string>::Load( stmt, 2 );
+    m_trackNumber = sqlite::Traits<unsigned int>::Load( stmt, 3 );
+    m_albumId = sqlite::Traits<unsigned int>::Load( stmt, 4 );
 }
 
 //FIXME: constify media
 AlbumTrack::AlbumTrack( Media* media, unsigned int trackNumber, unsigned int albumId )
     : m_id( 0 )
     , m_mediaId( media->id() )
-    , m_title( media->name() )
     , m_trackNumber( trackNumber )
     , m_albumId( albumId )
     , m_album( nullptr )
@@ -63,7 +61,6 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
     static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AlbumTrackTable::Name + "("
                 "id_track INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "media_id INTEGER,"
-                "title TEXT,"
                 "genre TEXT,"
                 "track_number UNSIGNED INTEGER,"
                 "album_id UNSIGNED INTEGER NOT NULL,"
@@ -79,8 +76,8 @@ std::shared_ptr<AlbumTrack> AlbumTrack::create(DBConnection dbConnection, unsign
 {
     auto self = std::make_shared<AlbumTrack>( media, trackNb, albumId );
     static const std::string req = "INSERT INTO " + policy::AlbumTrackTable::Name
-            + "(media_id, title, track_number, album_id) VALUES(?, ?, ?, ?)";
-    if ( _Cache::insert( dbConnection, self, req, media->id(), media->name(), trackNb, albumId ) == false )
+            + "(media_id, track_number, album_id) VALUES(?, ?, ?)";
+    if ( _Cache::insert( dbConnection, self, req, media->id(), trackNb, albumId ) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;
     return self;
@@ -101,11 +98,6 @@ bool AlbumTrack::setGenre(const std::string& genre)
     return true;
 }
 
-const std::string& AlbumTrack::title()
-{
-    return m_title;
-}
-
 unsigned int AlbumTrack::trackNumber()
 {
     return m_trackNumber;
@@ -118,11 +110,4 @@ std::shared_ptr<IAlbum> AlbumTrack::album()
         m_album = Album::fetch( m_dbConnection, m_albumId );
     }
     return m_album;
-}
-
-std::vector<MediaPtr> AlbumTrack::files()
-{
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
-            + " WHERE album_track_id = ? ";
-    return Media::fetchAll( m_dbConnection, req, m_id );
 }
