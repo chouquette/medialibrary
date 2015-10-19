@@ -70,24 +70,7 @@ TEST_F( Albums, AddTrack )
     a = std::static_pointer_cast<Album>( ml->album( "albumtag" ) );
     tracks = a->tracks();
     ASSERT_EQ( tracks.size(), 1u );
-    ASSERT_EQ( tracks[0]->name(), track->title() );
-}
-
-TEST_F( Albums, AssignTrack )
-{
-    auto f = ml->addFile( "file.mp3", nullptr );
-    auto a = ml->createAlbum( "album" );
-    auto t = a->addTrack( f, 1 );
-
-    ASSERT_NE( f->albumTrack(), nullptr );
-    ASSERT_EQ( f->albumTrack(), t );
-
-    Reload();
-
-    f = std::static_pointer_cast<Media>( ml->file( "file.mp3" ) );
-    t = std::static_pointer_cast<AlbumTrack>( f->albumTrack() );
-    ASSERT_NE( t, nullptr );
-    ASSERT_EQ( t->title(), f->name() );
+    ASSERT_EQ( tracks[0]->albumTrack()->trackNumber(), track->trackNumber() );
 }
 
 TEST_F( Albums, SetGenre )
