@@ -25,6 +25,7 @@
 #include "Artist.h"
 #include "Album.h"
 #include "AlbumTrack.h"
+#include "Media.h"
 
 class Artists : public Tests
 {
@@ -81,6 +82,28 @@ TEST_F( Artists, Albums )
     auto artist2 = ml->artist( "Cannibal Otters" );
     auto albums2 = artist2->albums();
     ASSERT_EQ( albums.size(), 2u );
+}
+
+TEST_F( Artists, AllSongs )
+{
+    auto artist = ml->createArtist( "Cannibal Otters" );
+    ASSERT_NE( artist, nullptr );
+
+    for (auto i = 1; i <= 3; ++i)
+    {
+        auto f = ml->addFile( "song" + std::to_string(i) + ".mp3", nullptr );
+        auto res = f->addArtist( artist );
+        ASSERT_TRUE( res );
+    }
+
+    auto songs = artist->media();
+    ASSERT_EQ( songs.size(), 3u );
+
+    Reload();
+
+    auto artist2 = ml->artist( "Cannibal Otters" );
+    songs = artist2->media();
+    ASSERT_EQ( songs.size(), 3u );
 }
 
 TEST_F( Artists, GetAll )

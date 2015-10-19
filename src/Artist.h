@@ -57,7 +57,7 @@ public:
     virtual const std::string& shortBio() const override;
     bool setShortBio( const std::string& shortBio );
     virtual std::vector<AlbumPtr> albums() const override;
-    virtual std::vector<AlbumTrackPtr> media() const override;
+    virtual std::vector<MediaPtr> media() const override;
 
     static bool createTable( DBConnection dbConnection );
     static std::shared_ptr<Artist> create( DBConnection dbConnection, const std::string& name );
