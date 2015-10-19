@@ -103,12 +103,16 @@ class Cache
         static std::vector<std::shared_ptr<INTF>> fetchAll( DBConnection dbConnection )
         {
             static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name;
+            // Lock the cache mutex before attempting to acquire a context, otherwise
+            // we could have a thread locking cache then DB, and a thread locking DB then cache
+            Lock lock( Mutex );
             return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnection, req );
         }
 
         template <typename... Args>
         static std::vector<std::shared_ptr<INTF>> fetchAll( DBConnection dbConnection, const std::string &req, Args&&... args )
         {
+            Lock lock( Mutex );
             return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnection, req, std::forward<Args>( args )... );
         }
 
