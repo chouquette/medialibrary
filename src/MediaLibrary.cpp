@@ -314,7 +314,7 @@ ArtistPtr MediaLibrary::unknownArtist()
 {
     if ( m_unknownArtist != nullptr )
         return m_unknownArtist;
-    static const std::string req = "SELECT id_track FROM TrackArtistRelation "
+    static const std::string req = "SELECT id_media FROM MediaArtistRelation "
             "WHERE id_artist IS NULL LIMIT 1";
     if ( sqlite::Tools::hasResults( m_dbConnection.get(), req ) == true )
     {

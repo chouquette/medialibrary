@@ -58,7 +58,8 @@ TEST_F( Albums, Fetch )
 TEST_F( Albums, AddTrack )
 {
     auto a = ml->createAlbum( "albumtag" );
-    auto track = a->addTrack( "track", 10 );
+    auto f = ml->addFile( "track.mp3", nullptr );
+    auto track = a->addTrack( f, 10 );
     ASSERT_NE( track, nullptr );
 
     auto tracks = a->tracks();
@@ -75,9 +76,9 @@ TEST_F( Albums, AddTrack )
 
 TEST_F( Albums, AssignTrack )
 {
-    auto f = ml->addFile( "file.avi", nullptr );
+    auto f = ml->addFile( "file.mp3", nullptr );
     auto a = ml->createAlbum( "album" );
-    auto t = a->addTrack( "track", 1 );
+    auto t = a->addTrack( f, 1 );
 
     ASSERT_EQ( f->albumTrack(), nullptr );
     bool res = f->setAlbumTrack( t );
@@ -87,30 +88,31 @@ TEST_F( Albums, AssignTrack )
 
     Reload();
 
-    f = std::static_pointer_cast<Media>( ml->file( "file.avi" ) );
+    f = std::static_pointer_cast<Media>( ml->file( "file.mp3" ) );
     t = std::static_pointer_cast<AlbumTrack>( f->albumTrack() );
     ASSERT_NE( t, nullptr );
-    ASSERT_EQ( t->title(), "track" );
+    ASSERT_EQ( t->title(), f->name() );
 }
 
 TEST_F( Albums, DeleteTrack )
 {
-    auto f = ml->addFile( "file.avi", nullptr );
+    auto f = ml->addFile( "file.mp3", nullptr );
     auto a = ml->createAlbum( "album" );
-    auto t = a->addTrack( "track", 1 );
+    auto t = a->addTrack( f, 1 );
     f->setAlbumTrack( t );
 
     bool res = t->destroy();
     ASSERT_TRUE( res );
 
-    auto f2 = ml->file( "file.avi" );
+    auto f2 = ml->file( "file.mp3" );
     ASSERT_EQ( f2, nullptr );
 }
 
 TEST_F( Albums, SetGenre )
 {
     auto a = ml->createAlbum( "album" );
-    auto t = a->addTrack( "track", 1 );
+    auto f = ml->addFile( "track.mp3", nullptr );
+    auto t = a->addTrack( f, 1 );
 
     t->setGenre( "happy underground post progressive death metal" );
     ASSERT_EQ( t->genre(), "happy underground post progressive death metal" );
@@ -166,13 +168,13 @@ TEST_F( Albums, FetchAlbumFromTrack )
 {
     {
         auto a = ml->createAlbum( "album" );
-        auto f = ml->addFile( "file.avi", nullptr );
-        auto t = a->addTrack( "track 1", 1 );
+        auto f = ml->addFile( "file.mp3", nullptr );
+        auto t = a->addTrack( f, 1 );
         f->setAlbumTrack( t );
     }
     Reload();
 
-    auto f = ml->file( "file.avi" );
+    auto f = ml->file( "file.mp3" );
     auto t = f->albumTrack();
     auto a = t->album();
     ASSERT_NE( a, nullptr );
@@ -182,14 +184,14 @@ TEST_F( Albums, FetchAlbumFromTrack )
 TEST_F( Albums, DestroyAlbum )
 {
     auto a = ml->createAlbum( "album" );
-    auto f = ml->addFile( "file.avi", nullptr );
-    auto t = a->addTrack( "track 1", 1 );
+    auto f = ml->addFile( "file.mp3", nullptr );
+    auto t = a->addTrack( f, 1 );
     f->setAlbumTrack( t );
 
     bool res = a->destroy();
     ASSERT_TRUE( res );
 
-    f = std::static_pointer_cast<Media>( ml->file( "file.avi" ) );
+    f = std::static_pointer_cast<Media>( ml->file( "file.mp3" ) );
     ASSERT_EQ( f, nullptr );
 }
 

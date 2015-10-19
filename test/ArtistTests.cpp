@@ -98,30 +98,3 @@ TEST_F( Artists, GetAll )
     auto artists2 = ml->artists();
     ASSERT_EQ( artists2.size(), 5u );
 }
-
-TEST_F( Artists, UnknownArtist )
-{
-    // If no song has been added, unknown artist should be null.
-    auto a = ml->unknownArtist();
-    ASSERT_EQ( a, nullptr );
-
-    auto album = ml->createAlbum( "Rise of the otters" );
-    auto t = album->addTrack( "Otters: awakening", 1 );
-    // explicitely set the artist to nullptr (aka "unknown artist")
-    auto res = t->addArtist( nullptr );
-    ASSERT_EQ( res, true );
-
-    // Now, querying unknownArtist should give out some results.
-    a = ml->unknownArtist();
-    ASSERT_NE( a, nullptr );
-    auto tracks = a->tracks();
-    ASSERT_EQ( tracks.size(), 1u );
-
-    Reload();
-
-    // Check that unknown artist tracks listing persists in DB
-    auto a2 = ml->unknownArtist();
-    ASSERT_NE( a2, nullptr );
-    auto tracks2 = a2->tracks();
-    ASSERT_EQ( tracks2.size(), 1u );
-}

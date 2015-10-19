@@ -27,6 +27,7 @@
 
 #include "Album.h"
 #include "AlbumTrack.h"
+#include "Artist.h"
 #include "AudioTrack.h"
 #include "Media.h"
 #include "Folder.h"
@@ -108,6 +109,22 @@ bool Media::setAlbumTrack( AlbumTrackPtr albumTrack )
     m_albumTrackId = albumTrack->id();
     m_albumTrack = albumTrack;
     return true;
+}
+
+bool Media::addArtist( ArtistPtr artist )
+{
+    static const std::string req = "INSERT INTO MediaArtistRelation VALUES(?, ?)";
+    // If track's ID is 0, the request will fail due to table constraints
+    sqlite::ForeignKey artistForeignKey( artist != nullptr ? artist->id() : 0 );
+    return sqlite::Tools::executeRequest( m_dbConnection, req, m_id, artistForeignKey );
+}
+
+std::vector<ArtistPtr> Media::artists() const
+{
+    static const std::string req = "SELECT art.* FROM " + policy::ArtistTable::Name + " art "
+            "LEFT JOIN MediaArtistRelation mar ON mar.id_artist = art.id_artist "
+            "WHERE mar.id_media = ?";
+    return Artist::fetchAll( m_dbConnection, req, m_id );
 }
 
 int64_t Media::duration() const

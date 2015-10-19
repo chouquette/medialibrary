@@ -58,7 +58,7 @@ const std::string& Label::name()
 std::vector<MediaPtr> Label::files()
 {
     static const std::string req = "SELECT f.* FROM " + policy::MediaTable::Name + " f "
-            "LEFT JOIN LabelFileRelation lfr ON lfr.id_file = f.id_file "
+            "LEFT JOIN LabelFileRelation lfr ON lfr.id_media = f.id_media "
             "WHERE lfr.id_label = ?";
     return Media::fetchAll( m_dbConnection, req, m_id );
 }
@@ -83,10 +83,10 @@ bool Label::createTable(DBConnection dbConnection)
         return false;
     req = "CREATE TABLE IF NOT EXISTS LabelFileRelation("
                 "id_label INTEGER,"
-                "id_file INTEGER,"
-            "PRIMARY KEY (id_label, id_file),"
+                "id_media INTEGER,"
+            "PRIMARY KEY (id_label, id_media),"
             "FOREIGN KEY(id_label) REFERENCES Label(id_label) ON DELETE CASCADE,"
-            "FOREIGN KEY(id_file) REFERENCES File(id_file) ON DELETE CASCADE);";
+            "FOREIGN KEY(id_media) REFERENCES Media(id_media) ON DELETE CASCADE);";
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 

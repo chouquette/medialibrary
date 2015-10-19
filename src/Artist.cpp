@@ -23,6 +23,7 @@
 #include "Artist.h"
 #include "Album.h"
 #include "AlbumTrack.h"
+#include "Media.h"
 
 #include "database/SqliteTools.h"
 
@@ -86,22 +87,22 @@ std::vector<AlbumPtr> Artist::albums() const
     return Album::fetchAll( m_dbConnection, req, m_id );
 }
 
-std::vector<AlbumTrackPtr> Artist::tracks() const
+std::vector<AlbumTrackPtr> Artist::media() const
 {
     if ( m_id )
     {
-        static const std::string req = "SELECT tra.* FROM " + policy::AlbumTrackTable::Name + " tra "
-                "LEFT JOIN TrackArtistRelation tar ON tar.id_track = tra.id_track "
-                "WHERE tar.id_artist = ?";
+        static const std::string req = "SELECT mar.* FROM " + policy::MediaTable::Name + " med "
+                "LEFT JOIN MediaArtistRelation mar ON mar.id_media = med.id_media "
+                "WHERE mar.id_artist = ?";
         return AlbumTrack::fetchAll( m_dbConnection, req, m_id );
     }
     else
     {
         // Not being able to rely on ForeignKey here makes me a saaaaad panda...
         // But sqlite only accepts "IS NULL" to compare against NULL...
-        static const std::string req = "SELECT tra.* FROM " + policy::AlbumTrackTable::Name + " tra "
-                "LEFT JOIN TrackArtistRelation tar ON tar.id_track = tra.id_track "
-                "WHERE tar.id_artist IS NULL";
+        static const std::string req = "SELECT mar.* FROM " + policy::MediaTable::Name + " med "
+                "LEFT JOIN MediaArtistRelation mar ON mar.id_media = med.id_media "
+                "WHERE mar.id_artist IS NULL";
         return AlbumTrack::fetchAll( m_dbConnection, req, m_id );
     }
 }
@@ -115,7 +116,17 @@ bool Artist::createTable( DBConnection dbConnection )
                 "name TEXT UNIQUE ON CONFLICT FAIL,"
                 "shortbio TEXT"
             ")";
-    return sqlite::Tools::executeRequest( dbConnection, req );
+    static const std::string reqRel = "CREATE TABLE IF NOT EXISTS MediaArtistRelation("
+                "id_media INTEGER NOT NULL,"
+                "id_artist INTEGER,"
+                "PRIMARY KEY (id_media, id_artist),"
+                "FOREIGN KEY(id_media) REFERENCES " + policy::MediaTable::Name +
+                "(id_media) ON DELETE CASCADE,"
+                "FOREIGN KEY(id_artist) REFERENCES " + policy::ArtistTable::Name + "("
+                    + policy::ArtistTable::CacheColumn + ") ON DELETE CASCADE"
+            ")";
+    return sqlite::Tools::executeRequest( dbConnection, req ) &&
+            sqlite::Tools::executeRequest( dbConnection, reqRel );
 }
 
 std::shared_ptr<Artist> Artist::create( DBConnection dbConnection, const std::string &name )

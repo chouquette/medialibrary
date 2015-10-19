@@ -22,7 +22,6 @@
 
 #include "AlbumTrack.h"
 #include "Album.h"
-#include "Artist.h"
 #include "Media.h"
 #include "database/SqliteTools.h"
 #include "logging/Logger.h"
@@ -66,17 +65,7 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
                 "album_id UNSIGNED INTEGER NOT NULL,"
                 "FOREIGN KEY (album_id) REFERENCES Album(id_album) ON DELETE CASCADE"
             ")";
-    static const std::string reqRel = "CREATE TABLE IF NOT EXISTS TrackArtistRelation("
-                "id_track INTEGER NOT NULL,"
-                "id_artist INTEGER,"
-                "PRIMARY KEY (id_track, id_artist),"
-                "FOREIGN KEY(id_track) REFERENCES " + policy::AlbumTrackTable::Name + "("
-                    + policy::AlbumTrackTable::CacheColumn + ") ON DELETE CASCADE,"
-                "FOREIGN KEY(id_artist) REFERENCES " + policy::ArtistTable::Name + "("
-                    + policy::ArtistTable::CacheColumn + ") ON DELETE CASCADE"
-            ")";
-    return sqlite::Tools::executeRequest( dbConnection, req ) &&
-            sqlite::Tools::executeRequest( dbConnection, reqRel );
+    return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
 std::shared_ptr<AlbumTrack> AlbumTrack::create(DBConnection dbConnection, unsigned int albumId, const std::string& name, unsigned int trackNb)
@@ -137,22 +126,6 @@ bool AlbumTrack::destroy()
         Media::discard( std::static_pointer_cast<Media>( f ) );
     }
     return _Cache::destroy( m_dbConnection, this );
-}
-
-bool AlbumTrack::addArtist( ArtistPtr artist )
-{
-    static const std::string req = "INSERT INTO TrackArtistRelation VALUES(?, ?)";
-    // If track's ID is 0, the request will fail due to table constraints
-    sqlite::ForeignKey artistForeignKey( artist != nullptr ? artist->id() : 0 );
-    return sqlite::Tools::executeRequest( m_dbConnection, req, m_id, artistForeignKey );
-}
-
-std::vector<ArtistPtr> AlbumTrack::artists() const
-{
-    static const std::string req = "SELECT art.* FROM " + policy::ArtistTable::Name + " art "
-            "LEFT JOIN TrackArtistRelation tar ON tar.id_artist = art.id_artist "
-            "WHERE tar.id_track = ?";
-    return Artist::fetchAll( m_dbConnection, req, m_id );
 }
 
 std::vector<MediaPtr> AlbumTrack::files()

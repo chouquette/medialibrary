@@ -23,6 +23,7 @@
 #include "Album.h"
 #include "AlbumTrack.h"
 #include "Artist.h"
+#include "Media.h"
 
 #include "database/SqliteTools.h"
 
@@ -109,16 +110,16 @@ time_t Album::lastSyncDate() const
     return m_lastSyncDate;
 }
 
-std::vector<std::shared_ptr<IAlbumTrack>> Album::tracks() const
+std::vector<AlbumTrackPtr> Album::tracks() const
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTrackTable::Name
             + " WHERE album_id = ?";
     return AlbumTrack::fetchAll( m_dbConnection, req, m_id );
 }
 
-std::shared_ptr<AlbumTrack> Album::addTrack( const std::string& title, unsigned int trackNb )
+std::shared_ptr<AlbumTrack> Album::addTrack(std::shared_ptr<Media> media, unsigned int trackNb )
 {
-    return AlbumTrack::create( m_dbConnection, m_id, title, trackNb );
+    return AlbumTrack::create( m_dbConnection, m_id, media->name(), trackNb );
 }
 
 std::vector<ArtistPtr> Album::artists() const

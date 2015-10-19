@@ -139,12 +139,12 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> file, VLC::Media
     std::shared_ptr<AlbumTrack> track;
     if ( album != nullptr )
     {
-        track = handleTrack( album, media );
+        track = handleTrack( album, file, media );
         if ( track != nullptr )
             file->setAlbumTrack( track );
     }
 
-    return handleArtist( album, track, media, newAlbum );
+    return handleArtist( album, file, media, newAlbum );
 }
 
 bool VLCMetadataService::parseVideoFile( std::shared_ptr<Media> file, VLC::Media& media ) const
@@ -185,14 +185,12 @@ bool VLCMetadataService::parseVideoFile( std::shared_ptr<Media> file, VLC::Media
     return true;
 }
 
-bool VLCMetadataService::handleArtist( std::shared_ptr<Album> album, std::shared_ptr<AlbumTrack> track, VLC::Media& media, bool newAlbum ) const
+bool VLCMetadataService::handleArtist( std::shared_ptr<Album> album, std::shared_ptr<Media> media, VLC::Media& vlcMedia, bool newAlbum ) const
 {
-    // For now we don't handle artist if the file isn't an AlbumTrack.
-    // Let's not crash first, then fix it properly
-    if (track == nullptr)
-        return true;
+    assert(media != nullptr);
+
     auto newArtist = false;
-    auto artistName = media.meta( libvlc_meta_Artist );
+    auto artistName = vlcMedia.meta( libvlc_meta_Artist );
     if ( artistName.length() != 0 )
     {
         auto artist = std::static_pointer_cast<Artist>( m_ml->artist( artistName ) );
@@ -207,7 +205,7 @@ bool VLCMetadataService::handleArtist( std::shared_ptr<Album> album, std::shared
             }
             newArtist = true;
         }
-        track->addArtist( artist );
+        media->addArtist( artist );
         // If this is either a new album or a new artist, we need to add the relationship between the two.
         if ( album != nullptr && ( newAlbum == true || newArtist == true ) )
         {
@@ -216,23 +214,23 @@ bool VLCMetadataService::handleArtist( std::shared_ptr<Album> album, std::shared
         }
     }
     else
-        track->addArtist( nullptr );
+        media->addArtist( nullptr );
     return true;
 }
 
-std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack(std::shared_ptr<Album> album, VLC::Media& media) const
+std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack(std::shared_ptr<Album> album, std::shared_ptr<Media> media, VLC::Media& vlcMedia) const
 {
-    auto trackNbStr = media.meta( libvlc_meta_TrackNumber );
+    auto trackNbStr = vlcMedia.meta( libvlc_meta_TrackNumber );
     if ( trackNbStr.length() == 0 )
     {
         LOG_WARN( "Failed to get track id" );
         return nullptr;
     }
-    auto artwork = media.meta( libvlc_meta_ArtworkURL );
+    auto artwork = vlcMedia.meta( libvlc_meta_ArtworkURL );
     if ( artwork.length() != 0 )
         album->setArtworkUrl( artwork );
 
-    auto title = media.meta( libvlc_meta_Title );
+    auto title = vlcMedia.meta( libvlc_meta_Title );
     if ( title.length() == 0 )
     {
         LOG_WARN( "Failed to get track title" );
@@ -240,13 +238,13 @@ std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack(std::shared_ptr<Albu
         title += trackNbStr;
     }
     unsigned int trackNb = std::stoi( trackNbStr );
-    auto track = std::static_pointer_cast<AlbumTrack>( album->addTrack( title, trackNb ) );
+    auto track = std::static_pointer_cast<AlbumTrack>( album->addTrack( media, trackNb ) );
     if ( track == nullptr )
     {
         LOG_ERROR( "Failed to create album track" );
         return nullptr;
     }
-    auto genre = media.meta( libvlc_meta_Genre );
+    auto genre = vlcMedia.meta( libvlc_meta_Genre );
     if ( genre.length() != 0 )
     {
         track->setGenre( genre );

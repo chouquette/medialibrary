@@ -74,6 +74,8 @@ class Media : public IMedia, public Cache<Media, IMedia, policy::MediaTable, pol
         bool setName( const std::string& name );
         virtual AlbumTrackPtr albumTrack() override;
         bool setAlbumTrack( AlbumTrackPtr albumTrack );
+        bool addArtist( ArtistPtr artist );
+        virtual std::vector<ArtistPtr> artists() const override;
         virtual int64_t duration() const override;
         bool setDuration( int64_t duration);
         virtual std::shared_ptr<IShowEpisode> showEpisode() override;

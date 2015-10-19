@@ -110,7 +110,7 @@ TEST_F( VLCMetadataServices, ParseAlbum )
     ASSERT_NE( track, nullptr );
     ASSERT_EQ( track->title(), "Mr. Zebra" );
     ASSERT_EQ( track->genre(), "Rock" );
-    auto artists = track->artists();
+    auto artists = file->artists();
     ASSERT_EQ( artists.size(), 1u );
     ASSERT_EQ( artists[0]->name(), "Tori Amos" );
 
