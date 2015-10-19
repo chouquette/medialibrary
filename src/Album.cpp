@@ -144,11 +144,6 @@ bool Album::addArtist( std::shared_ptr<Artist> artist )
     return sqlite::Tools::executeRequest( m_dbConnection, req, m_id, artist->id() );
 }
 
-bool Album::destroy()
-{
-    return _Cache::destroy( m_dbConnection, this );
-}
-
 bool Album::createTable(DBConnection dbConnection )
 {
     static const std::string req = "CREATE TABLE IF NOT EXISTS " +

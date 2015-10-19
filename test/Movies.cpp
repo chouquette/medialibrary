@@ -119,20 +119,3 @@ TEST_F( Movies, AssignToFile )
     ASSERT_NE( m2, nullptr );
     ASSERT_EQ( m2->title(), "movie" );
 }
-
-TEST_F( Movies, DestroyMovie )
-{
-    auto f = ml->addFile( "file.avi", nullptr );
-    auto m = ml->createMovie( "movie" );
-
-    f->setMovie( m );
-    m->destroy();
-
-    auto f2 = ml->file( "file.avi" );
-    ASSERT_EQ( f2, nullptr );
-
-    Reload();
-
-    f2 = ml->file( "file.avi" );
-    ASSERT_EQ( f2, nullptr );
-}

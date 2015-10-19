@@ -228,33 +228,3 @@ TEST_F( Shows, FileSetShowEpisode )
     ASSERT_EQ( e2->name(), "episode 1" );
 }
 
-TEST_F( Shows, DeleteShowEpisode )
-{
-    auto show = ml->createShow( "show" );
-    auto e = show->addEpisode( "episode 1", 1 );
-    auto f = ml->addFile( "file.avi", nullptr );
-
-    f->setShowEpisode( e );
-    e->destroy();
-
-    f = std::static_pointer_cast<Media>( ml->file( "file.avi" ) );
-    ASSERT_EQ( f, nullptr );
-
-    Reload();
-
-    auto f2 = ml->file( "file.avi" );
-    ASSERT_EQ( f2, nullptr );
-}
-
-TEST_F( Shows, DeleteShow )
-{
-    auto show = ml->createShow( "show" );
-    auto e = show->addEpisode( "episode 1", 1 );
-    auto f = ml->addFile( "file.avi", nullptr );
-    f->setShowEpisode( e );
-
-    bool res = show->destroy();
-    ASSERT_TRUE( res );
-    auto f2 = ml->file( "file.avi" );
-    ASSERT_EQ( f2, nullptr );
-}

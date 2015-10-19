@@ -117,16 +117,6 @@ bool Movie::setImdbId( const std::string& imdbId )
     return true;
 }
 
-bool Movie::destroy()
-{
-    auto fs = files();
-    for ( auto& f : fs )
-    {
-        Media::discard( std::static_pointer_cast<Media>( f ) );
-    }
-    return _Cache::destroy( m_dbConnection, this );
-}
-
 std::vector<MediaPtr> Movie::files()
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name

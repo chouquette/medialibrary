@@ -135,18 +135,6 @@ std::vector<ShowEpisodePtr> Show::episodes()
     return ShowEpisode::fetchAll( m_dbConnection, req, m_id );
 }
 
-bool Show::destroy()
-{
-    auto eps = episodes();
-    //FIXME: This is suboptimal. Each episode::destroy() will fire a SQL request of its own
-    for ( auto& it : eps )
-    {
-        auto e = std::static_pointer_cast<ShowEpisode>( it );
-        e->destroy();
-    }
-    return _Cache::destroy( m_dbConnection, this );
-}
-
 bool Show::createTable(DBConnection dbConnection)
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::ShowTable::Name + "("

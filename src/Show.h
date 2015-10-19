@@ -62,7 +62,6 @@ class Show : public IShow, public Cache<Show, IShow, policy::ShowTable>
         std::shared_ptr<ShowEpisode> addEpisode( const std::string& title, unsigned int episodeNumber );
         virtual std::vector<ShowEpisodePtr> episodes() override;
 
-        bool destroy();
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<Show> create( DBConnection dbConnection, const std::string& name );
 

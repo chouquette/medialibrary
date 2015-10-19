@@ -63,7 +63,6 @@ class ShowEpisode : public IShowEpisode, public Cache<ShowEpisode, IShowEpisode,
         bool setTvdbId( const std::string& tvdbId );
         virtual std::shared_ptr<IShow> show() override;
         virtual std::vector<MediaPtr> files() override;
-        bool destroy();
 
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<ShowEpisode> create( DBConnection dbConnection, const std::string& title, unsigned int episodeNumber, unsigned int showId );

@@ -148,14 +148,6 @@ std::vector<MediaPtr> ShowEpisode::files()
     return Media::fetchAll( m_dbConnection, req, m_id );
 }
 
-bool ShowEpisode::destroy()
-{
-    auto fs = files();
-    for ( auto& f : fs )
-        Media::discard( std::static_pointer_cast<Media>( f ) );
-    return _Cache::destroy( m_dbConnection, this );
-}
-
 bool ShowEpisode::createTable( DBConnection dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::ShowEpisodeTable::Name

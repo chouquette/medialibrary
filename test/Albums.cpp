@@ -90,20 +90,6 @@ TEST_F( Albums, AssignTrack )
     ASSERT_EQ( t->title(), f->name() );
 }
 
-//TEST_F( Albums, DeleteTrack )
-//{
-//    auto f = ml->addFile( "file.mp3", nullptr );
-//    auto a = ml->createAlbum( "album" );
-//    auto t = a->addTrack( f, 1 );
-//    f->setAlbumTrack( t );
-
-//    bool res = t->destroy();
-//    ASSERT_TRUE( res );
-
-//    auto f2 = ml->file( "file.mp3" );
-//    ASSERT_EQ( f2, nullptr );
-//}
-
 TEST_F( Albums, SetGenre )
 {
     auto a = ml->createAlbum( "album" );
@@ -176,20 +162,6 @@ TEST_F( Albums, FetchAlbumFromTrack )
     auto a = t->album();
     ASSERT_NE( a, nullptr );
     ASSERT_EQ( a->title(), "album" );
-}
-
-TEST_F( Albums, DestroyAlbum )
-{
-//    auto a = ml->createAlbum( "album" );
-//    auto f = ml->addFile( "file.mp3", nullptr );
-//    auto t = a->addTrack( f, 1 );
-//    f->setAlbumTrack( t );
-
-//    bool res = a->destroy();
-//    ASSERT_TRUE( res );
-
-//    f = std::static_pointer_cast<Media>( ml->file( "file.mp3" ) );
-//    ASSERT_EQ( f, nullptr );
 }
 
 TEST_F( Albums, Artists )
