@@ -237,7 +237,7 @@ std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack(std::shared_ptr<Albu
         title = "Track #";
         title += trackNbStr;
     }
-    media->setName( title );
+    media->setTitle( title );
     unsigned int trackNb = std::stoi( trackNbStr );
     auto track = std::static_pointer_cast<AlbumTrack>( album->addTrack( media, trackNb ) );
     if ( track == nullptr )

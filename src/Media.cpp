@@ -57,10 +57,10 @@ Media::Media( DBConnection dbConnection, sqlite3_stmt* stmt )
     m_lastModificationDate = sqlite::Traits<unsigned int>::Load( stmt, 8 );
     m_snapshot = sqlite::Traits<std::string>::Load( stmt, 9 );
     m_isParsed = sqlite::Traits<bool>::Load( stmt, 10 );
-    m_name = sqlite::Traits<std::string>::Load( stmt, 11 );
+    m_title = sqlite::Traits<std::string>::Load( stmt, 11 );
 }
 
-Media::Media( const fs::IFile* file, unsigned int folderId, const std::string& name, Type type )
+Media::Media( const fs::IFile* file, unsigned int folderId, const std::string& title, Type type )
     : m_id( 0 )
     , m_type( type )
     , m_duration( -1 )
@@ -71,7 +71,7 @@ Media::Media( const fs::IFile* file, unsigned int folderId, const std::string& n
     , m_folderId( folderId )
     , m_lastModificationDate( file->lastModificationDate() )
     , m_isParsed( false )
-    , m_name( name )
+    , m_title( title )
 {
 }
 
@@ -79,11 +79,11 @@ std::shared_ptr<Media> Media::create( DBConnection dbConnection, Type type, cons
 {
     auto self = std::make_shared<Media>( file, folderId, file->name(), type );
     static const std::string req = "INSERT INTO " + policy::MediaTable::Name +
-            "(type, mrl, folder_id, last_modification_date, name) VALUES(?, ?, ?, ?, ?)";
+            "(type, mrl, folder_id, last_modification_date, title) VALUES(?, ?, ?, ?, ?)";
 
     using type_t = std::underlying_type<Type>::type;
     if ( _Cache::insert( dbConnection, self, req, static_cast<type_t>( type ), self->m_mrl, sqlite::ForeignKey( folderId ),
-                         self->m_lastModificationDate, self->m_name ) == false )
+                         self->m_lastModificationDate, self->m_title) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;
     return self;
@@ -304,18 +304,18 @@ bool Media::setType( Type type )
     return true;
 }
 
-const std::string &Media::name()
+const std::string &Media::title()
 {
-    return m_name;
+    return m_title;
 }
 
-bool Media::setName( const std::string &name )
+bool Media::setTitle( const std::string &title )
 {
     static const std::string req = "UPDATE " + policy::MediaTable::Name
-            + " SET name = ? WHERE id_media = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, name, m_id ) == false )
+            + " SET title = ? WHERE id_media = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, title, m_id ) == false )
         return false;
-    m_name = name;
+    m_title = title;
     return true;
 }
 
@@ -333,7 +333,7 @@ bool Media::createTable( DBConnection connection )
             "last_modification_date UNSIGNED INTEGER,"
             "snapshot TEXT,"
             "parsed BOOLEAN,"
-            "name TEXT,"
+            "title TEXT,"
             "FOREIGN KEY (show_episode_id) REFERENCES " + policy::ShowEpisodeTable::Name
             + "(id_episode) ON DELETE CASCADE,"
             "FOREIGN KEY (movie_id) REFERENCES " + policy::MovieTable::Name

@@ -96,19 +96,20 @@ TEST_F( VLCMetadataServices, ParseAudio )
 
 TEST_F( VLCMetadataServices, ParseAlbum )
 {
-    std::unique_lock<std::mutex> lock( cb->mutex );
-    auto file = ml->addFile( "mr-zebra.mp3", nullptr );
-    bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [&]{
-        return file->albumTrack() != nullptr;
-    } );
-
-    ASSERT_TRUE( res );
+    {
+        std::unique_lock<std::mutex> lock( cb->mutex );
+        auto file = ml->addFile( "mr-zebra.mp3", nullptr );
+        bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [&]{
+            return file->albumTrack() != nullptr;
+        } );
+        ASSERT_TRUE( res );
+    }
     Reload();
 
-    file = std::static_pointer_cast<Media>( ml->file( "mr-zebra.mp3" ) );
+    auto file = ml->file( "mr-zebra.mp3" );
     auto track = file->albumTrack();
     ASSERT_NE( track, nullptr );
-    ASSERT_EQ( file->name(), "Mr. Zebra" );
+    ASSERT_EQ( file->title(), "Mr. Zebra" );
     ASSERT_EQ( track->genre(), "Rock" );
     auto artists = file->artists();
     ASSERT_EQ( artists.size(), 1u );

@@ -45,7 +45,7 @@ class IMedia
 
         virtual unsigned int id() const = 0;
         virtual Type type() = 0;
-        virtual const std::string& name() = 0;
+        virtual const std::string& title() = 0;
         virtual AlbumTrackPtr albumTrack() = 0;
         /**
          * @brief duration Returns the file duration in ms

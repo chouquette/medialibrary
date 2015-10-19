@@ -62,7 +62,7 @@ class Media : public IMedia, public Cache<Media, IMedia, policy::MediaTable, pol
         // shall be well-formed, and private constructor would prevent that.
         // There might be a way with a user-defined allocator, but we'll see that later...
         Media(DBConnection dbConnection , sqlite3_stmt* stmt);
-        Media(const fs::IFile* file, unsigned int folderId, const std::string &name, Type type);
+        Media(const fs::IFile* file, unsigned int folderId, const std::string &title, Type type);
 
         static std::shared_ptr<Media> create(DBConnection dbConnection, Type type, const fs::IFile* file , unsigned int folderId);
         static bool createTable( DBConnection connection );
@@ -70,8 +70,8 @@ class Media : public IMedia, public Cache<Media, IMedia, policy::MediaTable, pol
         virtual unsigned int id() const override;
         virtual Type type() override;
         bool setType( Type type );
-        virtual const std::string& name() override;
-        bool setName( const std::string& name );
+        virtual const std::string& title() override;
+        bool setTitle( const std::string& title );
         virtual AlbumTrackPtr albumTrack() override;
         bool setAlbumTrack( AlbumTrackPtr albumTrack );
         bool addArtist( ArtistPtr artist );
@@ -119,7 +119,7 @@ class Media : public IMedia, public Cache<Media, IMedia, policy::MediaTable, pol
         unsigned int m_lastModificationDate;
         std::string m_snapshot;
         bool m_isParsed;
-        std::string m_name;
+        std::string m_title;
 
         // Auto fetched related properties
         Album* m_album;
