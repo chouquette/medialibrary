@@ -62,14 +62,14 @@ class MediaLibrary : public IMediaLibrary
         virtual bool deleteLabel( LabelPtr label ) override;
 
         virtual AlbumPtr album( const std::string& title ) override;
-        virtual std::shared_ptr<Album> createAlbum( const std::string& title );
+        std::shared_ptr<Album> createAlbum( const std::string& title );
         virtual std::vector<AlbumPtr> albums() override;
 
         virtual ShowPtr show( const std::string& name ) override;
-        virtual std::shared_ptr<Show> createShow( const std::string& name );
+        std::shared_ptr<Show> createShow( const std::string& name );
 
         virtual MoviePtr movie( const std::string& title ) override;
-        virtual std::shared_ptr<Movie> createMovie( const std::string& title );
+        std::shared_ptr<Movie> createMovie( const std::string& title );
 
         virtual ArtistPtr artist( const std::string& name ) override;
         virtual ArtistPtr unknownArtist() override;

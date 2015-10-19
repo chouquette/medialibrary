@@ -45,18 +45,19 @@ class Movie : public IMovie, public Cache<Movie, IMovie, policy::MovieTable>
         Movie( DBConnection dbConnection, sqlite3_stmt* stmt );
         Movie( const std::string& title );
 
-        virtual unsigned int id() const;
-        virtual const std::string& title() const;
-        virtual time_t releaseDate() const;
-        virtual bool setReleaseDate(time_t date);
-        virtual const std::string& shortSummary() const;
-        virtual bool setShortSummary(const std::string& summary);
-        virtual const std::string& artworkUrl() const;
-        virtual bool setArtworkUrl(const std::string& artworkUrl);
-        virtual const std::string& imdbId() const;
-        virtual bool setImdbId(const std::string& imdbId);
-        virtual bool destroy();
-        virtual std::vector<MediaPtr> files();
+        virtual unsigned int id() const override;
+        virtual const std::string& title() const override;
+        virtual time_t releaseDate() const override;
+        bool setReleaseDate(time_t date);
+        virtual const std::string& shortSummary() const override;
+        bool setShortSummary(const std::string& summary);
+        virtual const std::string& artworkUrl() const override;
+        bool setArtworkUrl(const std::string& artworkUrl);
+        virtual const std::string& imdbId() const override;
+        bool setImdbId(const std::string& imdbId);
+        virtual std::vector<MediaPtr> files() override;
+
+        bool destroy();
 
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<Movie> create( DBConnection dbConnection, const std::string& title );

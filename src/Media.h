@@ -67,40 +67,40 @@ class Media : public IMedia, public Cache<Media, IMedia, policy::MediaTable, pol
         static std::shared_ptr<Media> create(DBConnection dbConnection, Type type, const fs::IFile* file , unsigned int folderId);
         static bool createTable( DBConnection connection );
 
-        virtual unsigned int id() const;
+        virtual unsigned int id() const override;
         virtual Type type() override;
-        virtual bool setType( Type type );
+        bool setType( Type type );
         virtual const std::string& name() override;
-        virtual bool setName( const std::string& name );
-        virtual AlbumTrackPtr albumTrack();
-        virtual bool setAlbumTrack( AlbumTrackPtr albumTrack );
-        virtual int64_t duration() const;
-        virtual bool setDuration( int64_t duration);
-        virtual std::shared_ptr<IShowEpisode> showEpisode();
-        virtual bool setShowEpisode( ShowEpisodePtr showEpisode );
-        virtual bool addLabel( LabelPtr label );
-        virtual bool removeLabel( LabelPtr label );
-        virtual std::vector<std::shared_ptr<ILabel> > labels();
-        virtual int playCount() const;
-        virtual const std::string& mrl() const;
-        virtual MoviePtr movie();
-        virtual bool setMovie( MoviePtr movie );
-        virtual bool addVideoTrack( const std::string& codec, unsigned int width,
+        bool setName( const std::string& name );
+        virtual AlbumTrackPtr albumTrack() override;
+        bool setAlbumTrack( AlbumTrackPtr albumTrack );
+        virtual int64_t duration() const override;
+        bool setDuration( int64_t duration);
+        virtual std::shared_ptr<IShowEpisode> showEpisode() override;
+        bool setShowEpisode( ShowEpisodePtr showEpisode );
+        virtual bool addLabel( LabelPtr label ) override;
+        virtual bool removeLabel( LabelPtr label ) override;
+        virtual std::vector<std::shared_ptr<ILabel> > labels() override;
+        virtual int playCount() const  override;
+        virtual const std::string& mrl() const override;
+        virtual MoviePtr movie() override;
+        bool setMovie( MoviePtr movie );
+        bool addVideoTrack( const std::string& codec, unsigned int width,
                                     unsigned int height, float fps );
-        virtual std::vector<VideoTrackPtr> videoTracks();
-        virtual bool addAudioTrack(const std::string& codec, unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels);
-        virtual std::vector<AudioTrackPtr> audioTracks();
+        virtual std::vector<VideoTrackPtr> videoTracks() override;
+        bool addAudioTrack(const std::string& codec, unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels);
+        virtual std::vector<AudioTrackPtr> audioTracks() override;
         virtual const std::string& snapshot() override;
-        virtual bool setSnapshot( const std::string& snapshot );
+        bool setSnapshot( const std::string& snapshot );
 
-        virtual bool isStandAlone();
-        virtual unsigned int lastModificationDate();
+        bool isStandAlone();
+        unsigned int lastModificationDate();
 
         /// Explicitely mark a file as fully parsed, meaning no metadata service needs to run anymore.
         //FIXME: This lacks granularity as we don't have a straight forward way to know which service
         //needs to run or not.
-        virtual bool markParsed();
-        virtual bool isParsed() const;
+        bool markParsed();
+        bool isParsed() const;
 
     private:
         DBConnection m_dbConnection;

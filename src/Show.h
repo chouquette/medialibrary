@@ -48,21 +48,21 @@ class Show : public IShow, public Cache<Show, IShow, policy::ShowTable>
         Show( DBConnection dbConnection, sqlite3_stmt* stmt );
         Show( const std::string& name );
 
-        virtual unsigned int id() const;
-        virtual const std::string& name() const;
-        virtual time_t releaseDate() const;
-        virtual bool setReleaseDate( time_t date );
-        virtual const std::string& shortSummary() const;
-        virtual bool setShortSummary( const std::string& summary );
-        virtual const std::string& artworkUrl() const;
-        virtual bool setArtworkUrl( const std::string& artworkUrl );
-        virtual time_t lastSyncDate() const;
-        virtual const std::string& tvdbId();
-        virtual bool setTvdbId( const std::string& summary );
-        virtual std::shared_ptr<ShowEpisode> addEpisode( const std::string& title, unsigned int episodeNumber );
-        virtual std::vector<ShowEpisodePtr> episodes();
-        virtual bool destroy();
+        virtual unsigned int id() const override;
+        virtual const std::string& name() const override;
+        virtual time_t releaseDate() const override;
+        bool setReleaseDate( time_t date );
+        virtual const std::string& shortSummary() const override;
+        bool setShortSummary( const std::string& summary );
+        virtual const std::string& artworkUrl() const override;
+        bool setArtworkUrl( const std::string& artworkUrl );
+        virtual time_t lastSyncDate() const override;
+        virtual const std::string& tvdbId() override;
+        bool setTvdbId( const std::string& summary );
+        std::shared_ptr<ShowEpisode> addEpisode( const std::string& title, unsigned int episodeNumber );
+        virtual std::vector<ShowEpisodePtr> episodes() override;
 
+        bool destroy();
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<Show> create( DBConnection dbConnection, const std::string& name );
 

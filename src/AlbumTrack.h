@@ -51,16 +51,16 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
         AlbumTrack( DBConnection dbConnection, sqlite3_stmt* stmt );
         AlbumTrack( const std::string& title, unsigned int trackNumber, unsigned int albumId );
 
-        virtual unsigned int id() const;
-        virtual const std::string& genre();
-        virtual bool setGenre( const std::string& genre );
-        virtual const std::string& title();
-        virtual unsigned int trackNumber();
-        virtual std::shared_ptr<IAlbum> album();
-        virtual bool destroy();
-        virtual bool addArtist( ArtistPtr artist ) override;
+        virtual unsigned int id() const override;
+        virtual const std::string& genre() override;
+        bool setGenre( const std::string& genre );
+        virtual const std::string& title() override;
+        virtual unsigned int trackNumber() override;
+        virtual std::shared_ptr<IAlbum> album() override;
+        bool destroy();
+        bool addArtist( ArtistPtr artist );
         virtual std::vector<ArtistPtr> artists() const override;
-        virtual std::vector<MediaPtr> files();
+        virtual std::vector<MediaPtr> files() override;
 
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<AlbumTrack> create( DBConnection dbConnection, unsigned int albumId,

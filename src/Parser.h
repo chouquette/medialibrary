@@ -44,7 +44,7 @@ class Parser : public IMetadataServiceCb
         void parse( std::shared_ptr<Media> file, IMediaLibraryCb* cb );
 
     private:
-        virtual void done( std::shared_ptr<Media> file, ServiceStatus status, void* data );
+        virtual void done( std::shared_ptr<Media> file, ServiceStatus status, void* data ) override;
         void run();
 
     private:

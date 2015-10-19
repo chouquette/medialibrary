@@ -69,8 +69,8 @@ public:
     virtual std::vector<FolderPtr> folders() override;
     virtual FolderPtr parent() override;
     virtual unsigned int lastModificationDate() override;
-    virtual bool setLastModificationDate(unsigned int lastModificationDate);
-    virtual bool isRemovable() override;
+    bool setLastModificationDate(unsigned int lastModificationDate);
+    bool isRemovable();
 
 private:
     DBConnection m_dbConection;

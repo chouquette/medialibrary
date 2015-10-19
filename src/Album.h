@@ -53,22 +53,22 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         Album( DBConnection dbConnection, sqlite3_stmt* stmt );
         Album( const std::string& title );
 
-        virtual unsigned int id() const;
-        virtual const std::string& title() const;
-        virtual time_t releaseDate() const;
-        virtual bool setReleaseDate( time_t date );
-        virtual const std::string& shortSummary() const;
-        virtual bool setShortSummary( const std::string& summary );
-        virtual const std::string& artworkUrl() const;
-        virtual bool setArtworkUrl( const std::string& artworkUrl );
-        virtual time_t lastSyncDate() const;
-        virtual std::vector<std::shared_ptr<IAlbumTrack> > tracks() const;
+        virtual unsigned int id() const override;
+        virtual const std::string& title() const override;
+        virtual time_t releaseDate() const override;
+        bool setReleaseDate( time_t date );
+        virtual const std::string& shortSummary() const override;
+        bool setShortSummary( const std::string& summary );
+        virtual const std::string& artworkUrl() const override;
+        bool setArtworkUrl( const std::string& artworkUrl );
+        virtual time_t lastSyncDate() const override;
+        virtual std::vector<std::shared_ptr<IAlbumTrack> > tracks() const override;
         std::shared_ptr<AlbumTrack> addTrack( const std::string& title, unsigned int trackNb );
 
         virtual std::vector<ArtistPtr> artists() const override;
-        virtual bool addArtist( std::shared_ptr<Artist> artist );
+        bool addArtist( std::shared_ptr<Artist> artist );
 
-        virtual bool destroy();
+        bool destroy();
 
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<Album> create(DBConnection dbConnection, const std::string& title );

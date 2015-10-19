@@ -49,20 +49,20 @@ class ShowEpisode : public IShowEpisode, public Cache<ShowEpisode, IShowEpisode,
         ShowEpisode( DBConnection dbConnection, sqlite3_stmt* stmt );
         ShowEpisode(const std::string& name, unsigned int episodeNumber, unsigned int showId );
 
-        virtual unsigned int id() const;
-        virtual const std::string& artworkUrl() const;
+        virtual unsigned int id() const override;
+        virtual const std::string& artworkUrl() const override;
         bool setArtworkUrl( const std::string& artworkUrl );
-        virtual unsigned int episodeNumber() const;
-        virtual time_t lastSyncDate() const;
-        virtual const std::string& name() const;
+        virtual unsigned int episodeNumber() const override;
+        virtual time_t lastSyncDate() const override;
+        virtual const std::string& name() const override;
         unsigned int seasonNumber() const;
         bool setSeasonNumber(unsigned int seasonNumber);
-        virtual const std::string& shortSummary() const;
+        virtual const std::string& shortSummary() const override;
         bool setShortSummary( const std::string& summary );
-        virtual const std::string& tvdbId() const;
+        virtual const std::string& tvdbId() const override;
         bool setTvdbId( const std::string& tvdbId );
-        virtual std::shared_ptr<IShow> show();
-        virtual std::vector<MediaPtr> files();
+        virtual std::shared_ptr<IShow> show() override;
+        virtual std::vector<MediaPtr> files() override;
         bool destroy();
 
         static bool createTable( DBConnection dbConnection );

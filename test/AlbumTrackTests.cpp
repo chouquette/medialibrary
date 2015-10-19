@@ -43,8 +43,9 @@ TEST_F( AlbumTracks, Artists )
     ASSERT_NE( artist2, nullptr );
 
     auto tracks = album->tracks();
-    for ( auto& t : tracks )
+    for ( auto& it : tracks )
     {
+        auto t = std::static_pointer_cast<AlbumTrack>( it );
         t->addArtist( artist1 );
         t->addArtist( artist2 );
 

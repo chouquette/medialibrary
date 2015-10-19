@@ -59,9 +59,9 @@ class Label : public ILabel, public Cache<Label, ILabel, policy::LabelTable, pol
         Label( const std::string& name );
 
     public:
-        virtual unsigned int id() const;
-        virtual const std::string& name();
-        virtual std::vector<MediaPtr> files();
+        virtual unsigned int id() const override;
+        virtual const std::string& name() override;
+        virtual std::vector<MediaPtr> files() override;
 
         static LabelPtr create( DBConnection dbConnection, const std::string& name );
         static bool createTable( DBConnection dbConnection );

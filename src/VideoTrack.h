@@ -46,11 +46,11 @@ class VideoTrack : public IVideoTrack, public Cache<VideoTrack, IVideoTrack, pol
         VideoTrack( DBConnection dbConnection, sqlite3_stmt* stmt );
         VideoTrack( const std::string& codec, unsigned int width, unsigned int height, float fps );
 
-        virtual unsigned int id() const;
-        virtual const std::string& codec() const;
-        virtual unsigned int width() const;
-        virtual unsigned int height() const;
-        virtual float fps() const;
+        virtual unsigned int id() const override;
+        virtual const std::string& codec() const override;
+        virtual unsigned int width() const override;
+        virtual unsigned int height() const override;
+        virtual float fps() const override;
 
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<VideoTrack> fetch( DBConnection dbConnection, const std::string& codec,

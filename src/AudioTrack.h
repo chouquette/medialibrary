@@ -45,11 +45,11 @@ class AudioTrack : public IAudioTrack, public Cache<AudioTrack, IAudioTrack, pol
         AudioTrack( DBConnection dbConnection, sqlite3_stmt* stmt );
         AudioTrack( const std::string& codec, unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels );
 
-        virtual unsigned int id() const;
-        virtual const std::string&codec() const;
-        virtual unsigned int bitrate() const;
-        virtual unsigned int sampleRate() const;
-        virtual unsigned int nbChannels() const;
+        virtual unsigned int id() const override;
+        virtual const std::string&codec() const override;
+        virtual unsigned int bitrate() const override;
+        virtual unsigned int sampleRate() const override;
+        virtual unsigned int nbChannels() const override;
 
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<AudioTrack> fetch( DBConnection dbConnection, const std::string& codec,
