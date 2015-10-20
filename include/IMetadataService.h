@@ -31,7 +31,7 @@ class MediaLibrary;
 class IMetadataServiceCb
 {
     public:
-        virtual ~IMetadataServiceCb(){}
+        virtual ~IMetadataServiceCb() = default;
         virtual void done( std::shared_ptr<Media> file, ServiceStatus status, void* data ) = 0;
 };
 
