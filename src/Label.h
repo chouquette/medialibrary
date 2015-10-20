@@ -45,7 +45,7 @@ struct LabelCachePolicy
 {
     typedef std::string KeyType;
     static const std::string& key(const std::shared_ptr<ILabel> self );
-    static std::string key( sqlite3_stmt* stmt );
+    static std::string key( sqlite::Row& row );
 };
 
 }
@@ -55,7 +55,7 @@ class Label : public ILabel, public Cache<Label, ILabel, policy::LabelTable, pol
     private:
         typedef Cache<Label, ILabel, policy::LabelTable, policy::LabelCachePolicy> _Cache;
     public:
-        Label( DBConnection dbConnection, sqlite3_stmt* stmt);
+        Label( DBConnection dbConnection, sqlite::Row& row );
         Label( const std::string& name );
 
     public:

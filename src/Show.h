@@ -45,7 +45,7 @@ struct ShowTable
 class Show : public IShow, public Cache<Show, IShow, policy::ShowTable>
 {
     public:
-        Show( DBConnection dbConnection, sqlite3_stmt* stmt );
+        Show( DBConnection dbConnection, sqlite::Row& row );
         Show( const std::string& name );
 
         virtual unsigned int id() const override;

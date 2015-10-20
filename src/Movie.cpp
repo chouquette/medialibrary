@@ -28,15 +28,15 @@ const std::string policy::MovieTable::Name = "Movie";
 const std::string policy::MovieTable::CacheColumn = "id_movie";
 unsigned int Movie::* const policy::MovieTable::PrimaryKey = &Movie::m_id;
 
-Movie::Movie( DBConnection dbConnection, sqlite3_stmt* stmt )
+Movie::Movie(DBConnection dbConnection, sqlite::Row& row )
     : m_dbConnection( dbConnection )
 {
-    m_id = sqlite::Traits<unsigned int>::Load( stmt, 0 );
-    m_title = sqlite::Traits<std::string>::Load( stmt, 1 );
-    m_releaseDate = sqlite::Traits<time_t>::Load( stmt, 2 );
-    m_summary = sqlite::Traits<std::string>::Load( stmt, 3 );
-    m_artworkUrl = sqlite::Traits<std::string>::Load( stmt, 4 );
-    m_imdbId = sqlite::Traits<std::string>::Load( stmt, 5 );
+    row >> m_id
+        >> m_title
+        >> m_releaseDate
+        >> m_summary
+        >> m_artworkUrl
+        >> m_imdbId;
 }
 
 Movie::Movie( const std::string& title )

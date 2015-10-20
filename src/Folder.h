@@ -47,7 +47,7 @@ struct FolderCache
 {
     using KeyType = std::string;
     static const KeyType& key( const std::shared_ptr<Folder>& self );
-    static KeyType key( sqlite3_stmt* stmt );
+    static KeyType key( sqlite::Row& row );
 };
 
 }
@@ -57,7 +57,7 @@ class Folder : public IFolder, public Cache<Folder, IFolder, policy::FolderTable
     using _Cache = Cache<Folder, IFolder, policy::FolderTable, policy::FolderCache>;
 
 public:
-    Folder( DBConnection dbConnection, sqlite3_stmt* stmt );
+    Folder( DBConnection dbConnection, sqlite::Row& row );
     Folder( const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parent );
 
     static bool createTable( DBConnection connection );

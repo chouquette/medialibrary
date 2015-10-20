@@ -31,15 +31,15 @@ const std::string policy::AlbumTable::Name = "Album";
 const std::string policy::AlbumTable::CacheColumn = "id_album";
 unsigned int Album::* const policy::AlbumTable::PrimaryKey = &Album::m_id;
 
-Album::Album(DBConnection dbConnection, sqlite3_stmt* stmt)
+Album::Album(DBConnection dbConnection, sqlite::Row& row)
     : m_dbConnection( dbConnection )
 {
-    m_id = sqlite3_column_int( stmt, 0 );
-    m_title = sqlite::Traits<std::string>::Load( stmt, 1 );
-    m_releaseDate = sqlite3_column_int( stmt, 2 );
-    m_shortSummary = sqlite::Traits<std::string>::Load( stmt, 3 );
-    m_artworkUrl = sqlite::Traits<std::string>::Load( stmt, 4 );
-    m_lastSyncDate = sqlite3_column_int( stmt, 5 );
+    row >> m_id
+        >> m_title
+        >> m_releaseDate
+        >> m_shortSummary
+        >> m_artworkUrl
+        >> m_lastSyncDate;
 }
 
 Album::Album(const std::string& title )

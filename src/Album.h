@@ -51,7 +51,7 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
     private:
         typedef Cache<Album, IAlbum, policy::AlbumTable> _Cache;
     public:
-        Album( DBConnection dbConnection, sqlite3_stmt* stmt );
+        Album( DBConnection dbConnection, sqlite::Row& row );
         Album( const std::string& title );
 
         virtual unsigned int id() const override;

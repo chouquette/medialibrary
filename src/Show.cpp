@@ -28,16 +28,16 @@ const std::string policy::ShowTable::Name = "Show";
 const std::string policy::ShowTable::CacheColumn = "id_show";
 unsigned int Show::* const policy::ShowTable::PrimaryKey = &Show::m_id;
 
-Show::Show(DBConnection dbConnection, sqlite3_stmt* stmt)
+Show::Show( DBConnection dbConnection, sqlite::Row& row )
     : m_dbConnection( dbConnection )
 {
-    m_id = sqlite::Traits<unsigned int>::Load( stmt, 0 );
-    m_name = sqlite::Traits<std::string>::Load( stmt, 1 );
-    m_releaseDate = sqlite::Traits<unsigned int>::Load( stmt, 2 );
-    m_shortSummary = sqlite::Traits<std::string>::Load( stmt, 3 );
-    m_artworkUrl = sqlite::Traits<std::string>::Load( stmt, 4 );
-    m_lastSyncDate = sqlite::Traits<unsigned int>::Load( stmt, 5 );
-    m_tvdbId = sqlite::Traits<std::string>::Load( stmt, 6 );
+    row >> m_id
+        >> m_name
+        >> m_releaseDate
+        >> m_shortSummary
+        >> m_artworkUrl
+        >> m_lastSyncDate
+        >> m_tvdbId;
 }
 
 Show::Show( const std::string& name )

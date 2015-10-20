@@ -29,11 +29,17 @@
 #include "IMedia.h"
 #include "database/Cache.h"
 
+
 class Album;
 class ShowEpisode;
 class AlbumTrack;
 
 class Media;
+
+namespace sqlite
+{
+class Row;
+}
 
 namespace policy
 {
@@ -47,7 +53,7 @@ struct MediaCache
 {
     typedef std::string KeyType;
     static const std::string& key(const std::shared_ptr<Media> self);
-    static std::string key( sqlite3_stmt* stmt );
+    static std::string key( sqlite::Row& row );
 };
 }
 
@@ -61,7 +67,7 @@ class Media : public IMedia, public Cache<Media, IMedia, policy::MediaTable, pol
         // ::new (pv) T(std::forward(args)...)
         // shall be well-formed, and private constructor would prevent that.
         // There might be a way with a user-defined allocator, but we'll see that later...
-        Media(DBConnection dbConnection , sqlite3_stmt* stmt);
+        Media(DBConnection dbConnection , sqlite::Row& row);
         Media(const fs::IFile* file, unsigned int folderId, const std::string &title, Type type);
 
         static std::shared_ptr<Media> create(DBConnection dbConnection, Type type, const fs::IFile* file , unsigned int folderId);

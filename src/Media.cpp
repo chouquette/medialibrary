@@ -43,21 +43,21 @@ const std::string policy::MediaTable::Name = "Media";
 const std::string policy::MediaTable::CacheColumn = "mrl";
 unsigned int Media::* const policy::MediaTable::PrimaryKey = &Media::m_id;
 
-Media::Media( DBConnection dbConnection, sqlite3_stmt* stmt )
+Media::Media( DBConnection dbConnection, sqlite::Row& row )
     : m_dbConnection( dbConnection )
 {
-    m_id = sqlite3_column_int( stmt, 0 );
-    m_type = (Type)sqlite3_column_int( stmt, 1 );
-    m_duration = sqlite::Traits<int64_t>::Load( stmt, 2 );
-    m_playCount = sqlite3_column_int( stmt, 3 );
-    m_showEpisodeId = sqlite3_column_int( stmt, 4 );
-    m_mrl = (const char*)sqlite3_column_text( stmt, 5 );
-    m_movieId = sqlite::Traits<unsigned int>::Load( stmt, 6 );
-    m_folderId = sqlite::Traits<unsigned int>::Load( stmt, 7 );
-    m_lastModificationDate = sqlite::Traits<unsigned int>::Load( stmt, 8 );
-    m_snapshot = sqlite::Traits<std::string>::Load( stmt, 9 );
-    m_isParsed = sqlite::Traits<bool>::Load( stmt, 10 );
-    m_title = sqlite::Traits<std::string>::Load( stmt, 11 );
+    row >> m_id
+        >> m_type
+        >> m_duration
+        >> m_playCount
+        >> m_showEpisodeId
+        >> m_mrl
+        >> m_movieId
+        >> m_folderId
+        >> m_lastModificationDate
+        >> m_snapshot
+        >> m_isParsed
+        >> m_title;
 }
 
 Media::Media( const fs::IFile* file, unsigned int folderId, const std::string& title, Type type )
@@ -391,7 +391,7 @@ const std::string& policy::MediaCache::key(const std::shared_ptr<Media> self )
     return self->mrl();
 }
 
-std::string policy::MediaCache::key(sqlite3_stmt* stmt)
+std::string policy::MediaCache::key(sqlite::Row& row)
 {
-    return sqlite::Traits<std::string>::Load( stmt, 5 );
+    return row.load<std::string>( 5 );
 }

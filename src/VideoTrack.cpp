@@ -26,14 +26,14 @@ const std::string policy::VideoTrackTable::Name = "VideoTrack";
 const std::string policy::VideoTrackTable::CacheColumn = "id_track";
 unsigned int VideoTrack::* const policy::VideoTrackTable::PrimaryKey = &VideoTrack::m_id;
 
-VideoTrack::VideoTrack(DBConnection dbConnection, sqlite3_stmt* stmt)
+VideoTrack::VideoTrack( DBConnection dbConnection, sqlite::Row& row )
     : m_dbConnection( dbConnection )
-    , m_id( sqlite::Traits<unsigned int>::Load( stmt, 0 ) )
-    , m_codec( sqlite::Traits<std::string>::Load( stmt, 1 ) )
-    , m_width( sqlite::Traits<unsigned int>::Load( stmt, 2 ) )
-    , m_height( sqlite::Traits<unsigned int>::Load( stmt, 3 ) )
-    , m_fps( sqlite::Traits<float>::Load( stmt, 4 ) )
 {
+    row >> m_id
+        >> m_codec
+        >> m_width
+        >> m_height
+        >> m_fps;
 }
 
 VideoTrack::VideoTrack( const std::string& codec, unsigned int width, unsigned int height, float fps )

@@ -30,15 +30,15 @@ const std::string policy::AlbumTrackTable::Name = "AlbumTrack";
 const std::string policy::AlbumTrackTable::CacheColumn = "id_track";
 unsigned int AlbumTrack::* const policy::AlbumTrackTable::PrimaryKey = &AlbumTrack::m_id;
 
-AlbumTrack::AlbumTrack( DBConnection dbConnection, sqlite3_stmt* stmt )
+AlbumTrack::AlbumTrack(DBConnection dbConnection, sqlite::Row& row )
     : m_dbConnection( dbConnection )
     , m_album( nullptr )
 {
-    m_id = sqlite::Traits<unsigned int>::Load( stmt, 0 );
-    m_mediaId = sqlite::Traits<unsigned int>::Load( stmt, 1 );
-    m_genre = sqlite::Traits<std::string>::Load( stmt, 2 );
-    m_trackNumber = sqlite::Traits<unsigned int>::Load( stmt, 3 );
-    m_albumId = sqlite::Traits<unsigned int>::Load( stmt, 4 );
+    row >> m_id
+        >> m_mediaId
+        >> m_genre
+        >> m_trackNumber
+        >> m_albumId;
 }
 
 //FIXME: constify media

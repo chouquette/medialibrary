@@ -26,14 +26,14 @@ const std::string policy::AudioTrackTable::Name = "AudioTrack";
 const std::string policy::AudioTrackTable::CacheColumn  = "id_track";
 unsigned int AudioTrack::* const policy::AudioTrackTable::PrimaryKey = &AudioTrack::m_id;
 
-AudioTrack::AudioTrack( DBConnection dbConnection, sqlite3_stmt* stmt )
+AudioTrack::AudioTrack( DBConnection dbConnection, sqlite::Row& row )
     : m_dbConnection( dbConnection )
-    , m_id( sqlite::Traits<unsigned int>::Load( stmt, 0 ) )
-    , m_codec( sqlite::Traits<std::string>::Load( stmt, 1 ) )
-    , m_bitrate( sqlite::Traits<unsigned int>::Load( stmt, 2 ) )
-    , m_sampleRate( sqlite::Traits<unsigned int>::Load( stmt, 3 ) )
-    , m_nbChannels( sqlite::Traits<unsigned int>::Load( stmt, 4 ) )
 {
+    row >> m_id
+        >> m_codec
+        >> m_bitrate
+        >> m_sampleRate
+        >> m_nbChannels;
 }
 
 AudioTrack::AudioTrack(const std::string& codec, unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels )

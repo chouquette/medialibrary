@@ -32,11 +32,11 @@ const std::string policy::LabelTable::Name = "Label";
 const std::string policy::LabelTable::CacheColumn = "name";
 unsigned int Label::* const policy::LabelTable::PrimaryKey = &Label::m_id;
 
-Label::Label( DBConnection dbConnection, sqlite3_stmt* stmt )
+Label::Label( DBConnection dbConnection, sqlite::Row& row )
     : m_dbConnection( dbConnection )
 {
-    m_id = sqlite3_column_int( stmt, 0 );
-    m_name = (const char*)sqlite3_column_text( stmt, 1 );
+    row >> m_id
+        >> m_name;
 }
 
 Label::Label( const std::string& name )
@@ -95,7 +95,7 @@ const std::string&policy::LabelCachePolicy::key( const std::shared_ptr<ILabel> s
     return self->name();
 }
 
-std::string policy::LabelCachePolicy::key(sqlite3_stmt* stmt)
+std::string policy::LabelCachePolicy::key(sqlite::Row& row)
 {
-    return sqlite::Traits<KeyType>::Load( stmt, 1 );
+    return row.load<KeyType>( 1 );
 }

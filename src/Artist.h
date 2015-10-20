@@ -44,7 +44,7 @@ private:
     using _Cache = Cache<Artist, IArtist, policy::ArtistTable>;
 
 public:
-    Artist( DBConnection dbConnection, sqlite3_stmt* stmt );
+    Artist( DBConnection dbConnection, sqlite::Row& row );
     Artist( const std::string& name );
     /**
      * @brief Artist Construct an empty artist, with a DB connection.

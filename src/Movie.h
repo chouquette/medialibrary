@@ -42,7 +42,7 @@ struct MovieTable
 class Movie : public IMovie, public Cache<Movie, IMovie, policy::MovieTable>
 {
     public:
-        Movie( DBConnection dbConnection, sqlite3_stmt* stmt );
+        Movie( DBConnection dbConnection, sqlite::Row& row );
         Movie( const std::string& title );
 
         virtual unsigned int id() const override;

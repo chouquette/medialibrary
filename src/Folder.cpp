@@ -37,21 +37,21 @@ namespace policy
         return self->path();
     }
 
-    FolderCache::KeyType FolderCache::key( sqlite3_stmt* stmt )
+    FolderCache::KeyType FolderCache::key(sqlite::Row& row )
     {
-        return sqlite::Traits<FolderCache::KeyType>::Load( stmt, 1 );
+        return row.load<FolderCache::KeyType>( 1 );
     }
 
 }
 
-Folder::Folder( DBConnection dbConnection, sqlite3_stmt* stmt )
+Folder::Folder(DBConnection dbConnection, sqlite::Row& row )
     : m_dbConection( dbConnection )
 {
-    m_id = sqlite::Traits<unsigned int>::Load( stmt, 0 );
-    m_path = sqlite::Traits<std::string>::Load( stmt, 1 );
-    m_parent = sqlite::Traits<unsigned int>::Load( stmt, 2 );
-    m_lastModificationDate = sqlite::Traits<unsigned int>::Load( stmt, 3 );
-    m_isRemovable = sqlite::Traits<bool>::Load( stmt, 4 );
+    row >> m_id
+        >> m_path
+        >> m_parent
+        >> m_lastModificationDate
+        >> m_isRemovable;
 }
 
 Folder::Folder( const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parent )

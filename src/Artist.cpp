@@ -32,12 +32,12 @@ const std::string policy::ArtistTable::CacheColumn = "id_artist";
 unsigned int Artist::*const policy::ArtistTable::PrimaryKey = &Artist::m_id;
 
 
-Artist::Artist( DBConnection dbConnection, sqlite3_stmt *stmt )
+Artist::Artist( DBConnection dbConnection, sqlite::Row& row )
     : m_dbConnection( dbConnection )
 {
-    m_id = sqlite::Traits<unsigned int>::Load( stmt, 0 );
-    m_name = sqlite::Traits<std::string>::Load( stmt, 1 );
-    m_shortBio = sqlite::Traits<std::string>::Load( stmt, 2 );
+    row >> m_id
+        >> m_name
+        >> m_shortBio;
 }
 
 Artist::Artist( const std::string& name )

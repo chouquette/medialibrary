@@ -49,7 +49,7 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
     private:
         typedef Cache<AlbumTrack, IAlbumTrack, policy::AlbumTrackTable> _Cache;
     public:
-        AlbumTrack( DBConnection dbConnection, sqlite3_stmt* stmt );
+        AlbumTrack( DBConnection dbConnection, sqlite::Row& row );
         AlbumTrack(Media* media, unsigned int trackNumber, unsigned int albumId );
 
         virtual unsigned int id() const override;

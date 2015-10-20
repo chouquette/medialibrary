@@ -141,6 +141,40 @@ struct Traits<T, typename std::enable_if<IsSameDecay<T, int64_t>::value>::type>
     (*Load)(sqlite3_stmt *, int) = &sqlite3_column_int64;
 };
 
+class Row
+{
+public:
+    Row( sqlite3_stmt* stmt )
+        : m_stmt( stmt )
+        , m_idx( 0 )
+    {
+    }
+
+    /**
+     * @brief operator >> Extracts the next column from this result row.
+     */
+    template <typename T>
+    Row& operator>>(T& t)
+    {
+        t = sqlite::Traits<T>::Load( m_stmt, m_idx );
+        m_idx++;
+        return *this;
+    }
+
+    /**
+     * @brief Returns the value in column idx, but doesn't advance to the next column
+     */
+    template <typename T>
+    T load(unsigned int idx)
+    {
+        return sqlite::Traits<T>::Load( m_stmt, idx );
+    }
+
+private:
+    sqlite3_stmt* m_stmt;
+    unsigned int m_idx;
+};
+
 class Tools
 {
     private:
@@ -165,7 +199,8 @@ class Tools
             int res = sqlite3_step( stmt.get() );
             while ( res == SQLITE_ROW )
             {
-                auto row = IMPL::load( dbConnection, stmt.get() );
+                sqlite::Row sqliteRow( stmt.get() );
+                auto row = IMPL::load( dbConnection, sqliteRow );
                 results.push_back( row );
                 res = sqlite3_step( stmt.get() );
             }
@@ -183,7 +218,8 @@ class Tools
             int res = sqlite3_step( stmt.get() );
             if ( res != SQLITE_ROW )
                 return nullptr;
-            return T::load( dbConnection, stmt.get() );
+            sqlite::Row sqliteRow( stmt.get() );
+            return T::load( dbConnection, sqliteRow );
         }
 
         template <typename... Args>

@@ -46,7 +46,7 @@ struct ShowEpisodeTable
 class ShowEpisode : public IShowEpisode, public Cache<ShowEpisode, IShowEpisode, policy::ShowEpisodeTable>
 {
     public:
-        ShowEpisode( DBConnection dbConnection, sqlite3_stmt* stmt );
+        ShowEpisode( DBConnection dbConnection, sqlite::Row& row );
         ShowEpisode(const std::string& name, unsigned int episodeNumber, unsigned int showId );
 
         virtual unsigned int id() const override;

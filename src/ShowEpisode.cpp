@@ -29,18 +29,18 @@ const std::string policy::ShowEpisodeTable::Name = "ShowEpisode";
 const std::string policy::ShowEpisodeTable::CacheColumn = "show_id";
 unsigned int ShowEpisode::* const policy::ShowEpisodeTable::PrimaryKey = &ShowEpisode::m_id;
 
-ShowEpisode::ShowEpisode( DBConnection dbConnection, sqlite3_stmt* stmt )
+ShowEpisode::ShowEpisode(DBConnection dbConnection, sqlite::Row& row )
     : m_dbConnection( dbConnection )
 {
-    m_id = sqlite::Traits<unsigned int>::Load( stmt, 0 );
-    m_artworkUrl = sqlite::Traits<std::string>::Load( stmt, 1 );
-    m_episodeNumber = sqlite::Traits<unsigned int>::Load( stmt, 2 );
-    m_lastSyncDate = sqlite::Traits<time_t>::Load( stmt, 3 );
-    m_name = sqlite::Traits<std::string>::Load( stmt, 4 );
-    m_seasonNumber = sqlite::Traits<unsigned int>::Load( stmt, 5 );
-    m_shortSummary = sqlite::Traits<std::string>::Load( stmt, 6 );
-    m_tvdbId = sqlite::Traits<std::string>::Load( stmt, 7 );
-    m_showId = sqlite::Traits<unsigned int>::Load( stmt, 8 );
+    row >> m_id
+        >> m_artworkUrl
+        >> m_episodeNumber
+        >> m_lastSyncDate
+        >> m_name
+        >> m_seasonNumber
+        >> m_shortSummary
+        >> m_tvdbId
+        >> m_showId;
 }
 
 ShowEpisode::ShowEpisode( const std::string& name, unsigned int episodeNumber, unsigned int showId )

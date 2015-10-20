@@ -42,7 +42,7 @@ struct AudioTrackTable
 class AudioTrack : public IAudioTrack, public Cache<AudioTrack, IAudioTrack, policy::AudioTrackTable>
 {
     public:
-        AudioTrack( DBConnection dbConnection, sqlite3_stmt* stmt );
+        AudioTrack( DBConnection dbConnection, sqlite::Row& row );
         AudioTrack( const std::string& codec, unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels );
 
         virtual unsigned int id() const override;
@@ -59,10 +59,10 @@ class AudioTrack : public IAudioTrack, public Cache<AudioTrack, IAudioTrack, pol
     private:
         DBConnection m_dbConnection;
         unsigned int m_id;
-        const std::string m_codec;
-        const unsigned int m_bitrate;
-        const unsigned int m_sampleRate;
-        const unsigned int m_nbChannels;
+        std::string m_codec;
+        unsigned int m_bitrate;
+        unsigned int m_sampleRate;
+        unsigned int m_nbChannels;
 
 
     private:

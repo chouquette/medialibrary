@@ -43,7 +43,7 @@ struct VideoTrackTable
 class VideoTrack : public IVideoTrack, public Cache<VideoTrack, IVideoTrack, policy::VideoTrackTable>
 {
     public:
-        VideoTrack( DBConnection dbConnection, sqlite3_stmt* stmt );
+        VideoTrack( DBConnection dbConnection, sqlite::Row& row );
         VideoTrack( const std::string& codec, unsigned int width, unsigned int height, float fps );
 
         virtual unsigned int id() const override;
@@ -61,10 +61,10 @@ class VideoTrack : public IVideoTrack, public Cache<VideoTrack, IVideoTrack, pol
     private:
         DBConnection m_dbConnection;
         unsigned int m_id;
-        const std::string m_codec;
-        const unsigned int m_width;
-        const unsigned int m_height;
-        const float m_fps;
+        std::string m_codec;
+        unsigned int m_width;
+        unsigned int m_height;
+        float m_fps;
 
     private:
         typedef Cache<VideoTrack, IVideoTrack, policy::VideoTrackTable> _Cache;

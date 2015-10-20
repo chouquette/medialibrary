@@ -43,9 +43,9 @@ class PrimaryKeyCacheKeyPolicy
         {
             return self->id();
         }
-        static unsigned int key( sqlite3_stmt* stmt )
+        static unsigned int key( sqlite::Row& row )
         {
-            return sqlite::Traits<unsigned int>::Load( stmt, 0 );
+            return row.load<unsigned int>( 0 );
         }
 };
 
@@ -57,7 +57,7 @@ class PrimaryKeyCacheKeyPolicy
  *      - Name: the table name
  *      - CacheColumn: The column used to cache records.
  * - CACHEPOLICY describes which column to use for caching by providing two "key" methods.
- *   One that takes a sqlite3_stmt and one that takes an instance of the type being cached
+ *   One that takes a sqlite::Row and one that takes an instance of the type being cached
  *
  * The default CACHEPOLICY implementation bases itself on an unsigned int column, assumed
  * to be the primary key, at index 0 of a fetch statement.
@@ -116,15 +116,15 @@ class Cache
             return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnection, req, std::forward<Args>( args )... );
         }
 
-        static std::shared_ptr<IMPL> load( DBConnection dbConnection, sqlite3_stmt* stmt )
+        static std::shared_ptr<IMPL> load( DBConnection dbConnection, sqlite::Row& row )
         {
-            auto cacheKey = CACHEPOLICY::key( stmt );
+            auto cacheKey = CACHEPOLICY::key( row );
 
             Lock lock( Mutex );
             auto it = Store.find( cacheKey );
             if ( it != Store.end() )
                 return it->second;
-            auto inst = std::make_shared<IMPL>( dbConnection, stmt );
+            auto inst = std::make_shared<IMPL>( dbConnection, row );
             Store[cacheKey] = inst;
             return inst;
         }
