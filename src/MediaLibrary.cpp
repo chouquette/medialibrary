@@ -166,16 +166,13 @@ std::vector<MediaPtr> MediaLibrary::files()
 std::vector<MediaPtr> MediaLibrary::audioFiles()
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ?";
-    //FIXME: Replace this with template magic in sqlite's traits
-    using type_t = std::underlying_type<IMedia::Type>::type;
-    return Media::fetchAll( m_dbConnection.get(), req, static_cast<type_t>( IMedia::Type::AudioType ) );
+    return Media::fetchAll( m_dbConnection.get(), req, IMedia::Type::AudioType );
 }
 
 std::vector<MediaPtr> MediaLibrary::videoFiles()
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ?";
-    using type_t = std::underlying_type<IMedia::Type>::type;
-    return Media::fetchAll( m_dbConnection.get(), req, static_cast<type_t>( IMedia::Type::VideoType ) );
+    return Media::fetchAll( m_dbConnection.get(), req, IMedia::Type::VideoType );
 }
 
 MediaPtr MediaLibrary::file( const std::string& path )

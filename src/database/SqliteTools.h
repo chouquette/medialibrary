@@ -114,6 +114,24 @@ struct Traits<std::nullptr_t>
 };
 
 template <typename T>
+struct Traits<T, typename std::enable_if<std::is_enum<
+        typename std::decay<T>::type
+    >::value>::type>
+{
+    using type_t = typename std::underlying_type<typename std::decay<T>::type>::type;
+    static int Bind(sqlite3_stmt* stmt, int pos, T value )
+    {
+        return sqlite3_bind_int( stmt, pos, static_cast<type_t>( value ) );
+    }
+
+    static T Load( sqlite3_stmt* stmt, int pos )
+    {
+        return static_cast<T>( sqlite3_column_int( stmt, pos ) );
+    }
+};
+
+
+template <typename T>
 struct Traits<T, typename std::enable_if<IsSameDecay<T, int64_t>::value>::type>
 {
     static constexpr int

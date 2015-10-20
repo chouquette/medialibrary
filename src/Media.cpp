@@ -81,8 +81,7 @@ std::shared_ptr<Media> Media::create( DBConnection dbConnection, Type type, cons
     static const std::string req = "INSERT INTO " + policy::MediaTable::Name +
             "(type, mrl, folder_id, last_modification_date, title) VALUES(?, ?, ?, ?, ?)";
 
-    using type_t = std::underlying_type<Type>::type;
-    if ( _Cache::insert( dbConnection, self, req, static_cast<type_t>( type ), self->m_mrl, sqlite::ForeignKey( folderId ),
+    if ( _Cache::insert( dbConnection, self, req, type, self->m_mrl, sqlite::ForeignKey( folderId ),
                          self->m_lastModificationDate, self->m_title) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;
@@ -297,8 +296,7 @@ bool Media::setType( Type type )
     static const std::string req = "UPDATE " + policy::MediaTable::Name
             + " SET type = ? WHERE id_media = ?";
     // We need to convert to an integer representation for the sqlite traits to work properly
-    using type_t = std::underlying_type<Type>::type;
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, static_cast<type_t>( type ), m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, type, m_id ) == false )
         return false;
     m_type = type;
     return true;
