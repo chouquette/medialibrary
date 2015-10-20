@@ -28,15 +28,13 @@
 #include <mutex>
 #include <thread>
 #include <memory>
-#include <vector>
+#include <queue>
 
 #include "IMetadataService.h"
 #include "IMediaLibrary.h"
 
 class Parser : public IMetadataServiceCb
 {
-    public:
-
     public:
         Parser();
         ~Parser();
@@ -61,7 +59,7 @@ class Parser : public IMetadataServiceCb
 
     private:
         ServiceList m_services;
-        std::vector<Task*> m_tasks;
+        std::queue<Task*> m_tasks;
         std::unique_ptr<std::thread> m_thread;
         std::mutex m_lock;
         std::condition_variable m_cond;

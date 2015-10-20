@@ -61,7 +61,7 @@ void Parser::parse(std::shared_ptr<Media> file, IMediaLibraryCb* cb)
 
     if ( m_services.size() == 0 )
         return;
-    m_tasks.push_back( new Task( file, m_services, cb ) );
+    m_tasks.push( new Task( file, m_services, cb ) );
     if ( m_thread == nullptr )
         m_thread.reset( new std::thread( &Parser::run, this ) );
     else
@@ -84,7 +84,7 @@ void Parser::run()
             }
             // Otherwise it's safe to assume we have at least one element.
             task = m_tasks.front();
-            m_tasks.erase(m_tasks.begin());
+            m_tasks.pop();
         }
         (*task->it)->run( task->file, task );
     }
@@ -121,6 +121,6 @@ void Parser::done(std::shared_ptr<Media> file, ServiceStatus status, void* data 
         return;
     }
     std::lock_guard<std::mutex> lock( m_lock );
-    m_tasks.push_back( t );
+    m_tasks.push( t );
     m_cond.notify_all();
 }
