@@ -111,7 +111,7 @@ void Parser::done(std::shared_ptr<Media> file, ServiceStatus status, void* data 
     if ( status == StatusTemporaryUnavailable || status == StatusFatal )
     {
         delete t;
-        return ;
+        return;
     }
     else if ( status == StatusSuccess )
     {

@@ -57,6 +57,9 @@ typedef SqliteConnection* DBConnection;
 
 enum ServiceStatus
 {
+    /// Default value.
+    /// Also, having success = 0 is not the best idea ever.
+    StatusUnknown,
     /// All good
     StatusSuccess,
     /// Something failed, but it's not critical (For instance, no internet connection for a
