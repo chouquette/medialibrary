@@ -43,6 +43,11 @@ Parser::~Parser()
         m_stopParser = true;
     }
     m_thread->join();
+    while ( m_tasks.empty() == false )
+    {
+        delete m_tasks.front();
+        m_tasks.pop();
+    }
 }
 
 void Parser::addService(std::unique_ptr<IMetadataService> service)
