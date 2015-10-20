@@ -133,6 +133,9 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> file, VLC::Media
                 auto date = media.meta( libvlc_meta_Date );
                 if ( date.length() > 0 )
                     album->setReleaseDate( std::stoul( date ) );
+                auto artwork = media.meta( libvlc_meta_ArtworkURL );
+                if ( artwork.length() != 0 )
+                    album->setArtworkUrl( artwork );
             }
         }
     }
@@ -226,9 +229,6 @@ std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack(std::shared_ptr<Albu
         LOG_WARN( "Failed to get track id" );
         return nullptr;
     }
-    auto artwork = vlcMedia.meta( libvlc_meta_ArtworkURL );
-    if ( artwork.length() != 0 )
-        album->setArtworkUrl( artwork );
 
     auto title = vlcMedia.meta( libvlc_meta_Title );
     if ( title.length() == 0 )
