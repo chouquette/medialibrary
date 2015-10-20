@@ -4,6 +4,12 @@ cmake_minimum_required(VERSION 2.8)
 include(ExternalProject)
 include(cpp11)
 
+if (UNIX)
+    option(WITH_ASAN "Build with address sanitizer" OFF)
+    option(WITH_TSAN "Build with thread sanitizer" OFF)
+    option(WITH_UBSAN "Build with undefined behavior sanitizer" OFF)
+endif()
+
 # Fetch gtest
 ExternalProject_Add(
     gtest-dependency
@@ -66,6 +72,30 @@ include_directories(${LIBVLCPP_DIR})
 # Also add pthread, as gtest requires it
 if(UNIX)
     target_link_libraries(unittest "pthread")
+
+    if(${WITH_ASAN})
+        if(${WITH_TSAN} OR ${WITH_UBSAN})
+            message(SEND_ERROR "Sanitizers are mutually exclusive")
+        endif()
+        add_definitions("-fsanitize=address -fno-omit-frame-pointer")
+        target_link_libraries(unittest "asan")
+    endif()
+
+    if(${WITH_TSAN})
+        if(${WITH_ASAN} OR ${WITH_UBSAN})
+            message(SEND_ERROR "Sanitizers are mutually exclusive")
+        endif()
+        add_definitions("-fsanitize=thread -fno-omit-frame-pointer")
+        target_link_libraries(unittest "tsan")
+    endif()
+
+    if(${WITH_UBSAN})
+        if(${WITH_ASAN} OR ${WITH_TSAN})
+            message(SEND_ERROR "Sanitizers are mutually exclusive")
+        endif()
+        add_definitions("-fsanitize=undefined -fno-omit-frame-pointer")
+        target_link_libraries(unittest "ubsan")
+    endif()
 endif()
 
 ## Download files for parsing unit tests
