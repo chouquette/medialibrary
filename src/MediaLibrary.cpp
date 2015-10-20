@@ -182,6 +182,7 @@ MediaPtr MediaLibrary::file( const std::string& path )
 
 std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, FolderPtr parentFolder )
 {
+    LOG_INFO( "Adding ", path );
     std::unique_ptr<fs::IFile> file;
     try
     {
@@ -213,7 +214,6 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, FolderPtr
         LOG_ERROR( "Failed to add file ", file->fullPath(), " to the media library" );
         return nullptr;
     }
-    LOG_INFO( "Adding ", file->name() );
     if ( m_callback != nullptr )
         m_callback->onFileAdded( fptr );
     m_parser->parse( fptr, m_callback );
