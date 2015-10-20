@@ -115,10 +115,10 @@ ServiceStatus VLCMetadataService::handleMediaMeta( std::shared_ptr<Media> file, 
     return StatusSuccess;
 }
 
-bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> file, VLC::Media& media ) const
+bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
 {
-    file->setType( IMedia::Type::AudioType );
-    auto albumTitle = media.meta( libvlc_meta_Album );
+    media->setType( IMedia::Type::AudioType );
+    auto albumTitle = vlcMedia.meta( libvlc_meta_Album );
     auto newAlbum = false;
     std::shared_ptr<Album> album;
     if ( albumTitle.length() > 0 )
@@ -130,10 +130,10 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> file, VLC::Media
             if ( album != nullptr )
             {
                 newAlbum = true;
-                auto date = media.meta( libvlc_meta_Date );
+                auto date = vlcMedia.meta( libvlc_meta_Date );
                 if ( date.length() > 0 )
                     album->setReleaseDate( std::stoul( date ) );
-                auto artwork = media.meta( libvlc_meta_ArtworkURL );
+                auto artwork = vlcMedia.meta( libvlc_meta_ArtworkURL );
                 if ( artwork.length() != 0 )
                     album->setArtworkUrl( artwork );
             }
@@ -142,12 +142,12 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> file, VLC::Media
     std::shared_ptr<AlbumTrack> track;
     if ( album != nullptr )
     {
-        track = handleTrack( album, file, media );
+        track = handleTrack( album, media, vlcMedia );
         if ( track != nullptr )
-            file->setAlbumTrack( track );
+            media->setAlbumTrack( track );
     }
 
-    return handleArtist( album, file, media, newAlbum );
+    return handleArtist( album, media, vlcMedia, newAlbum );
 }
 
 bool VLCMetadataService::parseVideoFile( std::shared_ptr<Media> file, VLC::Media& media ) const

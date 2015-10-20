@@ -52,7 +52,7 @@ class VLCMetadataService : public IMetadataService
 
     private:
         ServiceStatus handleMediaMeta(std::shared_ptr<Media> file , VLC::Media &media) const;
-        bool parseAudioFile(std::shared_ptr<Media> file, VLC::Media &media) const;
+        bool parseAudioFile(std::shared_ptr<Media> media, VLC::Media &vlcMedia) const;
         bool parseVideoFile(std::shared_ptr<Media> file, VLC::Media &media) const;
         bool handleArtist(std::shared_ptr<Album> album, std::shared_ptr<Media> media, VLC::Media& vlcMedia, bool newAlbum ) const;
         std::shared_ptr<AlbumTrack> handleTrack(std::shared_ptr<Album> album, std::shared_ptr<Media> media , VLC::Media& vlcMedia) const;
