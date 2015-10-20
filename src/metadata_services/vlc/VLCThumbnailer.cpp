@@ -50,7 +50,7 @@ unsigned int VLCThumbnailer::priority() const
     return 50;
 }
 
-bool VLCThumbnailer::run(std::shared_ptr<Media> file, void *data )
+void VLCThumbnailer::run(std::shared_ptr<Media> file, void *data )
 {
     if ( file->type() == IMedia::Type::UnknownType )
     {
@@ -58,13 +58,13 @@ bool VLCThumbnailer::run(std::shared_ptr<Media> file, void *data )
         // since this should run after file type deduction, and not run in case
         // that step fails.
         m_cb->done( file, StatusError, data );
-        return false;
+        return;
     }
     else if ( file->type() != IMedia::Type::VideoType )
     {
         // There's no point in generating a thumbnail for a non-video file.
         m_cb->done( file, StatusSuccess, data );
-        return true;
+        return;
     }
 
     VLC::Media media( m_instance, file->mrl(), VLC::Media::FromPath );
@@ -74,15 +74,13 @@ bool VLCThumbnailer::run(std::shared_ptr<Media> file, void *data )
     setupVout( mp );
 
     if ( startPlayback( file, mp, data ) == false )
-        return false;
+        return;
 
     // Seek ahead to have a significant preview
     if ( seekAhead( file, mp, data ) == false )
-        return false;
+        return;
 
-    if ( takeSnapshot( file, mp, data ) == false )
-        return false;
-    return true;
+    takeSnapshot( file, mp, data );
 }
 
 bool VLCThumbnailer::startPlayback(std::shared_ptr<Media> file, VLC::MediaPlayer &mp, void* data )

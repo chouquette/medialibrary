@@ -48,7 +48,7 @@ class VLCMetadataService : public IMetadataService
 
         virtual bool initialize( IMetadataServiceCb *callback, MediaLibrary* ml ) override;
         virtual unsigned int priority() const override;
-        virtual bool run( std::shared_ptr<Media> file, void *data ) override;
+        virtual void run( std::shared_ptr<Media> file, void *data ) override;
 
     private:
         ServiceStatus handleMediaMeta(std::shared_ptr<Media> file , VLC::Media &media) const;

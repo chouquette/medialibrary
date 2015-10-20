@@ -50,7 +50,7 @@ unsigned int VLCMetadataService::priority() const
     return 100;
 }
 
-bool VLCMetadataService::run( std::shared_ptr<Media> file, void* data )
+void VLCMetadataService::run( std::shared_ptr<Media> file, void* data )
 {
     LOG_INFO( "Parsing ", file->mrl() );
 

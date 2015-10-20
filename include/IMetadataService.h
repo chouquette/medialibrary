@@ -41,7 +41,7 @@ class IMetadataService
         virtual ~IMetadataService() = default;
         virtual bool initialize( IMetadataServiceCb* callback, MediaLibrary* ml ) = 0;
         virtual unsigned int priority() const = 0;
-        virtual bool run( std::shared_ptr<Media> file, void* data ) = 0;
+        virtual void run( std::shared_ptr<Media> file, void* data ) = 0;
 };
 
 #endif // IMETADATASERVICE_H

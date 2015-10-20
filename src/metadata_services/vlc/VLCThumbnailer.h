@@ -34,7 +34,7 @@ public:
     VLCThumbnailer( const VLC::Instance& vlc );
     virtual bool initialize(IMetadataServiceCb *callback, MediaLibrary *ml) override;
     virtual unsigned int priority() const override;
-    virtual bool run(std::shared_ptr<Media> file, void *data) override;
+    virtual void run(std::shared_ptr<Media> file, void *data) override;
 
 private:
     bool startPlayback( std::shared_ptr<Media> file, VLC::MediaPlayer& mp, void *data);
