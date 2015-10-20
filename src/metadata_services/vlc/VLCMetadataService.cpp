@@ -73,8 +73,9 @@ bool VLCMetadataService::run( std::shared_ptr<Media> file, void* data )
         m_cond.notify_all();
     });
     ctx->media.parseAsync();
-    m_cond.wait( lock, [&parsed]() { return parsed == true; } );
-    return true;
+    auto success = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [&parsed]() { return parsed == true; } );
+    if ( success == false )
+        m_cb->done( ctx->file, StatusFatal, data );
 }
 
 ServiceStatus VLCMetadataService::handleMediaMeta( std::shared_ptr<Media> file, VLC::Media& media ) const
