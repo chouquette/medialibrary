@@ -55,6 +55,8 @@ bool VLCMetadataService::run( std::shared_ptr<Media> file, void* data )
     LOG_INFO( "Parsing ", file->mrl() );
 
     auto ctx = new Context( file );
+    std::unique_ptr<Context> ctxPtr( ctx );
+
     ctx->media = VLC::Media( m_instance, file->mrl(), VLC::Media::FromPath );
 
     std::unique_lock<std::mutex> lock( m_mutex );
