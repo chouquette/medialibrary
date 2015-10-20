@@ -28,20 +28,39 @@
 
 class MediaLibrary;
 
-class IMetadataServiceCb
-{
-    public:
-        virtual ~IMetadataServiceCb() = default;
-        virtual void done( std::shared_ptr<Media> file, ServiceStatus status, void* data ) = 0;
-};
+class IMetadataServiceCb;
 
 class IMetadataService
 {
     public:
+        enum class Status
+        {
+            /// Default value.
+            /// Also, having success = 0 is not the best idea ever.
+            Unknown,
+            /// All good
+            Success,
+            /// Something failed, but it's not critical (For instance, no internet connection for a
+            /// module that uses an online database)
+            Error,
+            /// We can't compute this file for now (for instance the file was on a network drive which
+            /// isn't connected anymore)
+            TemporaryUnavailable,
+            /// Something failed and we won't continue
+            Fatal
+       };
+
         virtual ~IMetadataService() = default;
         virtual bool initialize( IMetadataServiceCb* callback, MediaLibrary* ml ) = 0;
         virtual unsigned int priority() const = 0;
         virtual void run( std::shared_ptr<Media> file, void* data ) = 0;
+};
+
+class IMetadataServiceCb
+{
+    public:
+        virtual ~IMetadataServiceCb() = default;
+        virtual void done( std::shared_ptr<Media> file, IMetadataService::Status status, void* data ) = 0;
 };
 
 #endif // IMETADATASERVICE_H

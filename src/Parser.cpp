@@ -105,15 +105,16 @@ Parser::Task::Task(std::shared_ptr<Media> file, Parser::ServiceList& serviceList
 }
 
 
-void Parser::done(std::shared_ptr<Media> file, ServiceStatus status, void* data )
+void Parser::done(std::shared_ptr<Media> file, IMetadataService::Status status, void* data )
 {
     Task *t = reinterpret_cast<Task*>( data );
-    if ( status == StatusTemporaryUnavailable || status == StatusFatal )
+    if ( status == IMetadataService::Status::TemporaryUnavailable ||
+         status == IMetadataService::Status::Fatal )
     {
         delete t;
         return;
     }
-    else if ( status == StatusSuccess )
+    else if ( status == IMetadataService::Status::Success )
     {
         t->cb->onFileUpdated( file );
     }

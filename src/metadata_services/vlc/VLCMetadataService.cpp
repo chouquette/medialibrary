@@ -60,7 +60,7 @@ void VLCMetadataService::run( std::shared_ptr<Media> file, void* data )
     ctx->media = VLC::Media( m_instance, file->mrl(), VLC::Media::FromPath );
 
     std::unique_lock<std::mutex> lock( m_mutex );
-    auto status = StatusUnknown;
+    auto status = Status::Unknown;
 
     ctx->media.eventManager().onParsedChanged([this, ctx, &status](bool parsed) mutable {
         if ( parsed == false )
@@ -75,20 +75,20 @@ void VLCMetadataService::run( std::shared_ptr<Media> file, void* data )
         m_cond.notify_all();
     });
     ctx->media.parseAsync();
-    auto success = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [&status]() { return status != StatusUnknown; } );
+    auto success = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [&status]() { return status != Status::Unknown; } );
     if ( success == false )
-        m_cb->done( ctx->file, StatusFatal, data );
+        m_cb->done( ctx->file, Status::Fatal, data );
     else
         m_cb->done( ctx->file, status, data );
 }
 
-ServiceStatus VLCMetadataService::handleMediaMeta( std::shared_ptr<Media> file, VLC::Media& media ) const
+IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Media> file, VLC::Media& media ) const
 {
     auto tracks = media.tracks();
     if ( tracks.size() == 0 )
     {
         LOG_ERROR( "Failed to fetch tracks" );
-        return StatusFatal;
+        return Status::Fatal;
     }
     bool isAudio = true;
     for ( auto& track : tracks )
@@ -112,14 +112,14 @@ ServiceStatus VLCMetadataService::handleMediaMeta( std::shared_ptr<Media> file, 
     if ( isAudio == true )
     {
         if ( parseAudioFile( file, media ) == false )
-            return StatusFatal;
+            return Status::Fatal;
     }
     else
     {
         if (parseVideoFile( file, media ) == false )
-            return StatusFatal;
+            return Status::Fatal;
     }
-    return StatusSuccess;
+    return Status::Success;
 }
 
 bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const

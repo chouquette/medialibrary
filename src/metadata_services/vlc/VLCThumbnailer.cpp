@@ -57,13 +57,13 @@ void VLCThumbnailer::run(std::shared_ptr<Media> file, void *data )
         // If we don't know the file type yet, it actually looks more like a bug
         // since this should run after file type deduction, and not run in case
         // that step fails.
-        m_cb->done( file, StatusError, data );
+        m_cb->done( file, Status::Error, data );
         return;
     }
     else if ( file->type() != IMedia::Type::VideoType )
     {
         // There's no point in generating a thumbnail for a non-video file.
-        m_cb->done( file, StatusSuccess, data );
+        m_cb->done( file, Status::Success, data );
         return;
     }
 
@@ -105,7 +105,7 @@ bool VLCThumbnailer::startPlayback(std::shared_ptr<Media> file, VLC::MediaPlayer
     if ( success == false || failed == true )
     {
         // In case of timeout or error, don't go any further
-        m_cb->done( file, StatusError, data );
+        m_cb->done( file, Status::Error, data );
         return false;
     }
     return true;
@@ -128,7 +128,7 @@ bool VLCThumbnailer::seekAhead(std::shared_ptr<Media> file, VLC::MediaPlayer& mp
     event->unregister();
     if ( success == false )
     {
-        m_cb->done( file, StatusError, data );
+        m_cb->done( file, Status::Error, data );
         return false;
     }
     return true;
@@ -190,7 +190,7 @@ bool VLCThumbnailer::takeSnapshot(std::shared_ptr<Media> file, VLC::MediaPlayer 
         });
         if ( success == false )
         {
-            m_cb->done( file, StatusError, data );
+            m_cb->done( file, Status::Error, data );
             return false;
         }
         // Prevent the vmem from screwing our snapshot over.
@@ -232,7 +232,7 @@ bool VLCThumbnailer::compress(uint8_t* buff, std::shared_ptr<Media> file, void *
     if ( fOut == nullptr )
     {
         LOG_ERROR("Failed to open snapshot file ", path);
-        m_cb->done( file, StatusError, data );
+        m_cb->done( file, Status::Error, data );
         return false;
     }
 
@@ -250,7 +250,7 @@ bool VLCThumbnailer::compress(uint8_t* buff, std::shared_ptr<Media> file, void *
     {
         LOG_ERROR("JPEG failure: ", err.message);
         jpeg_destroy_compress(&compInfo);
-        m_cb->done( file, StatusError, data );
+        m_cb->done( file, Status::Error, data );
         return false;
     }
 
@@ -284,6 +284,6 @@ bool VLCThumbnailer::compress(uint8_t* buff, std::shared_ptr<Media> file, void *
 #endif
 
     file->setSnapshot( path );
-    m_cb->done( file, StatusSuccess, data );
+    m_cb->done( file, Status::Success, data );
     return true;
 }

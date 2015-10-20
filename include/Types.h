@@ -55,21 +55,4 @@ typedef std::shared_ptr<IArtist> ArtistPtr;
 
 typedef SqliteConnection* DBConnection;
 
-enum ServiceStatus
-{
-    /// Default value.
-    /// Also, having success = 0 is not the best idea ever.
-    StatusUnknown,
-    /// All good
-    StatusSuccess,
-    /// Something failed, but it's not critical (For instance, no internet connection for a
-    /// module that uses an online database)
-    StatusError,
-    /// We can't compute this file for now (for instance the file was on a network drive which
-    /// isn't connected anymore)
-    StatusTemporaryUnavailable,
-    /// Something failed and we won't continue
-    StatusFatal
-};
-
 #endif // TYPES_H
