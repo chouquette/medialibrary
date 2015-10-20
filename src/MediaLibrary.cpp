@@ -205,7 +205,7 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, FolderPtr
         type = IMedia::Type::AudioType;
     }
     if ( type == IMedia::Type::UnknownType )
-        return false;
+        return nullptr;
 
     auto fptr = Media::create( m_dbConnection.get(), type, file.get(), parentFolder != nullptr ? parentFolder->id() : 0 );
     if ( fptr == nullptr )
