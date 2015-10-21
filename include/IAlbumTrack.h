@@ -33,6 +33,15 @@ class IAlbumTrack
         virtual ~IAlbumTrack() {}
 
         virtual unsigned int id() const = 0;
+        /**
+         * @brief artist Returns the artist, as tagger in the media.
+         * This can be different from the associated media's artist.
+         * For instance, in case of a featuring, Media::artist() might return
+         * "Artist 1", while IAlbumTrack::artist() might return something like
+         * "Artist 1 featuring Artist 2 and also artist 3 and a whole bunch of people"
+         * @return
+         */
+        virtual const std::string& artist() const = 0;
         virtual const std::string& genre() = 0;
         virtual unsigned int trackNumber() = 0;
         virtual std::shared_ptr<IAlbum> album() = 0;

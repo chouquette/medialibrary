@@ -53,6 +53,8 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
         AlbumTrack(Media* media, unsigned int trackNumber, unsigned int albumId );
 
         virtual unsigned int id() const override;
+        virtual const std::string& artist() const override;
+        bool setArtist( const std::string& artist );
         virtual const std::string& genre() override;
         bool setGenre( const std::string& genre );
         virtual unsigned int trackNumber() override;
@@ -66,6 +68,7 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
         DBConnection m_dbConnection;
         unsigned int m_id;
         unsigned int m_mediaId;
+        std::string m_artist;
         std::string m_genre;
         unsigned int m_trackNumber;
         unsigned int m_albumId;

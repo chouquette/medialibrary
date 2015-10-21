@@ -36,6 +36,7 @@ AlbumTrack::AlbumTrack(DBConnection dbConnection, sqlite::Row& row )
 {
     row >> m_id
         >> m_mediaId
+        >> m_artist
         >> m_genre
         >> m_trackNumber
         >> m_albumId;
@@ -56,11 +57,29 @@ unsigned int AlbumTrack::id() const
     return m_id;
 }
 
+const std::string&AlbumTrack::artist() const
+{
+    return m_artist;
+}
+
+bool AlbumTrack::setArtist( const std::string& artist )
+{
+    static const std::string req = "UPDATE " + policy::AlbumTrackTable::Name +
+            " SET artist = ? WHERE id_track = ?";
+    if ( artist == m_artist )
+        return true;
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artist, m_id ) == false )
+        return false;
+    m_artist = artist;
+    return true;
+}
+
 bool AlbumTrack::createTable( DBConnection dbConnection )
 {
     static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AlbumTrackTable::Name + "("
                 "id_track INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "media_id INTEGER,"
+                "artist TEXT,"
                 "genre TEXT,"
                 "track_number UNSIGNED INTEGER,"
                 "album_id UNSIGNED INTEGER NOT NULL,"

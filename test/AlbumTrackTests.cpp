@@ -25,9 +25,27 @@
 #include "Album.h"
 #include "AlbumTrack.h"
 #include "Artist.h"
+#include "Media.h"
 
 class AlbumTracks : public Tests
 {
 };
 
 
+TEST_F( AlbumTracks, Artist )
+{
+    auto album = ml->createAlbum( "album" );
+    auto f = ml->addFile( "track1.mp3", nullptr );
+    auto track = album->addTrack( f, 1 );
+
+    ASSERT_EQ( track->artist(), "" );
+    track->setArtist( "artist" );
+    ASSERT_EQ( track->artist(), "artist" );
+
+    Reload();
+
+    // Don't reuse the "track" and "f" variable, their type differ
+    auto file = ml->file( "track1.mp3" );
+    auto albumTrack = file->albumTrack();
+    ASSERT_EQ( albumTrack->artist(), "artist" );
+}
