@@ -39,7 +39,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${LIBVLC_INCLUDE_DIR})
 
 list(APPEND TEST_SRCS
-    Files.cpp
+    MediaTests.cpp
     Folders.cpp
     Labels.cpp
     Albums.cpp
