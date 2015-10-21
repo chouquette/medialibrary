@@ -145,13 +145,12 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
                     album->setArtworkUrl( artwork );
             }
         }
-    }
-    std::shared_ptr<AlbumTrack> track;
-    if ( album != nullptr )
-    {
-        track = handleTrack( album, media, vlcMedia );
-        if ( track != nullptr )
-            media->setAlbumTrack( track );
+        if ( album != nullptr )
+        {
+            auto track = handleTrack( album, media, vlcMedia );
+            if ( track != nullptr )
+                media->setAlbumTrack( track );
+        }
     }
 
     return handleArtist( album, media, vlcMedia, newAlbum );
