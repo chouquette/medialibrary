@@ -107,6 +107,14 @@ std::vector<MediaPtr> Artist::media() const
     }
 }
 
+bool Artist::addMedia(Media* media)
+{
+    static const std::string req = "INSERT INTO MediaArtistRelation VALUES(?, ?)";
+    // If track's ID is 0, the request will fail due to table constraints
+    sqlite::ForeignKey artistForeignKey( m_id );
+    return sqlite::Tools::executeRequest( m_dbConnection, req, media->id(), artistForeignKey );
+}
+
 bool Artist::createTable( DBConnection dbConnection )
 {
     static const std::string req = "CREATE TABLE IF NOT EXISTS " +

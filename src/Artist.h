@@ -27,6 +27,7 @@
 #include "IMediaLibrary.h"
 
 class Artist;
+class Media;
 
 namespace policy
 {
@@ -58,6 +59,7 @@ public:
     bool setShortBio( const std::string& shortBio );
     virtual std::vector<AlbumPtr> albums() const override;
     virtual std::vector<MediaPtr> media() const override;
+    bool addMedia( Media* media );
 
     static bool createTable( DBConnection dbConnection );
     static std::shared_ptr<Artist> create( DBConnection dbConnection, const std::string& name );

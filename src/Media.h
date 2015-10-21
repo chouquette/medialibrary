@@ -80,8 +80,8 @@ class Media : public IMedia, public Cache<Media, IMedia, policy::MediaTable, pol
         bool setTitle( const std::string& title );
         virtual AlbumTrackPtr albumTrack() override;
         bool setAlbumTrack( AlbumTrackPtr albumTrack );
-        bool addArtist( ArtistPtr artist );
-        virtual std::vector<ArtistPtr> artists() const override;
+        virtual const std::string& artist() const override;
+        bool setArtist( const std::string& artist );
         virtual int64_t duration() const override;
         bool setDuration( int64_t duration);
         virtual std::shared_ptr<IShowEpisode> showEpisode() override;
@@ -120,6 +120,7 @@ class Media : public IMedia, public Cache<Media, IMedia, policy::MediaTable, pol
         unsigned int m_playCount;
         unsigned int m_showEpisodeId;
         std::string m_mrl;
+        std::string m_artist;
         unsigned int m_movieId;
         unsigned int m_folderId;
         unsigned int m_lastModificationDate;

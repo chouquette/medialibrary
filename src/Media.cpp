@@ -52,6 +52,7 @@ Media::Media( DBConnection dbConnection, sqlite::Row& row )
         >> m_playCount
         >> m_showEpisodeId
         >> m_mrl
+        >> m_artist
         >> m_movieId
         >> m_folderId
         >> m_lastModificationDate
@@ -105,20 +106,21 @@ bool Media::setAlbumTrack( AlbumTrackPtr albumTrack )
     return true;
 }
 
-bool Media::addArtist( ArtistPtr artist )
+const std::string& Media::artist() const
 {
-    static const std::string req = "INSERT INTO MediaArtistRelation VALUES(?, ?)";
-    // If track's ID is 0, the request will fail due to table constraints
-    sqlite::ForeignKey artistForeignKey( artist != nullptr ? artist->id() : 0 );
-    return sqlite::Tools::executeRequest( m_dbConnection, req, m_id, artistForeignKey );
+    return m_artist;
 }
 
-std::vector<ArtistPtr> Media::artists() const
+bool Media::setArtist(const std::string& artist)
 {
-    static const std::string req = "SELECT art.* FROM " + policy::ArtistTable::Name + " art "
-            "LEFT JOIN MediaArtistRelation mar ON mar.id_artist = art.id_artist "
-            "WHERE mar.id_media = ?";
-    return Artist::fetchAll( m_dbConnection, req, m_id );
+    if ( m_artist == artist )
+        return true;
+    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET artist = ? "
+            "WHERE id_media = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artist, m_id ) == false )
+        return false;
+    m_artist = artist;
+    return true;
 }
 
 int64_t Media::duration() const
@@ -326,6 +328,7 @@ bool Media::createTable( DBConnection connection )
             "play_count UNSIGNED INTEGER,"
             "show_episode_id UNSIGNED INTEGER,"
             "mrl TEXT UNIQUE ON CONFLICT FAIL,"
+            "artist TEXT,"
             "movie_id UNSIGNED INTEGER,"
             "folder_id UNSIGNED INTEGER,"
             "last_modification_date UNSIGNED INTEGER,"

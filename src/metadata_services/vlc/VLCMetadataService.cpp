@@ -154,7 +154,7 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
         }
     }
 
-    return handleArtist( album, track, media, vlcMedia, newAlbum );
+    return handleArtist( album, media, vlcMedia, newAlbum );
 }
 
 bool VLCMetadataService::parseVideoFile( std::shared_ptr<Media> file, VLC::Media& media ) const
@@ -195,7 +195,7 @@ bool VLCMetadataService::parseVideoFile( std::shared_ptr<Media> file, VLC::Media
     return true;
 }
 
-bool VLCMetadataService::handleArtist( std::shared_ptr<Album> album, std::shared_ptr<AlbumTrack> track, std::shared_ptr<Media> media, VLC::Media& vlcMedia, bool newAlbum ) const
+bool VLCMetadataService::handleArtist( std::shared_ptr<Album> album, std::shared_ptr<Media> media, VLC::Media& vlcMedia, bool newAlbum ) const
 {
     assert(media != nullptr);
 
@@ -215,7 +215,7 @@ bool VLCMetadataService::handleArtist( std::shared_ptr<Album> album, std::shared
             }
             newArtist = true;
         }
-        media->addArtist( artist );
+        artist->addMedia( media.get() );
         // If this is either a new album or a new artist, we need to add the relationship between the two.
         if ( album != nullptr && ( newAlbum == true || newArtist == true ) )
         {
@@ -224,19 +224,16 @@ bool VLCMetadataService::handleArtist( std::shared_ptr<Album> album, std::shared
         }
     }
     else
-        media->addArtist( nullptr );
-    // We don't care about the Artist if we have no track to tag it with.
-    if ( track != nullptr )
+        std::static_pointer_cast<Artist>( m_ml->unknownArtist() )->addMedia( media.get() );
+
+    auto artistName = vlcMedia.meta( libvlc_meta_Artist );
+    if ( artistName.length() > 0 )
+        media->setArtist( artistName );
+    else if ( albumArtistName.length() > 0 )
     {
-        auto artistName = vlcMedia.meta( libvlc_meta_Artist );
-        if ( artistName.length() > 0 )
-            track->setArtist( artistName );
-        else if ( albumArtistName.length() > 0 )
-        {
-            // Always provide an artist, to avoid the user from having to fallback
-            // to the album artist by himself
-            track->setArtist( albumArtistName );
-        }
+        // Always provide an artist, to avoid the user from having to fallback
+        // to the album artist by himself
+        media->setArtist( albumArtistName );
     }
     return true;
 }
