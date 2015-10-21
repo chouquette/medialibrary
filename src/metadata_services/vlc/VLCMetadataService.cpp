@@ -201,6 +201,10 @@ bool VLCMetadataService::handleArtist( std::shared_ptr<Album> album, std::shared
 
     auto newArtist = false;
     auto albumArtistName = vlcMedia.meta( libvlc_meta_AlbumArtist );
+    auto artistName = vlcMedia.meta( libvlc_meta_Artist );
+    if ( albumArtistName.empty() == true )
+        albumArtistName = artistName;
+
     if ( albumArtistName.length() > 0 )
     {
         auto artist = std::static_pointer_cast<Artist>( m_ml->artist( albumArtistName ) );
@@ -224,9 +228,12 @@ bool VLCMetadataService::handleArtist( std::shared_ptr<Album> album, std::shared
         }
     }
     else
+    {
         std::static_pointer_cast<Artist>( m_ml->unknownArtist() )->addMedia( media.get() );
+        // If we get here, it means we have neither artist nor albumartist tags. We can't do much more.
+        return true;
+    }
 
-    auto artistName = vlcMedia.meta( libvlc_meta_Artist );
     if ( artistName.length() > 0 )
         media->setArtist( artistName );
     else if ( albumArtistName.length() > 0 )
