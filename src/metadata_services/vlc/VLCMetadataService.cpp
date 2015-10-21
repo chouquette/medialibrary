@@ -82,9 +82,9 @@ void VLCMetadataService::run( std::shared_ptr<Media> file, void* data )
         m_cb->done( ctx->file, status, data );
 }
 
-IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Media> file, VLC::Media& media ) const
+IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
 {
-    auto tracks = media.tracks();
+    auto tracks = vlcMedia.tracks();
     if ( tracks.size() == 0 )
     {
         LOG_ERROR( "Failed to fetch tracks" );
@@ -99,24 +99,24 @@ IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Me
         {
             isAudio = false;
             auto fps = (float)track.fpsNum() / (float)track.fpsDen();
-            file->addVideoTrack( fcc, track.width(), track.height(), fps );
+            media->addVideoTrack( fcc, track.width(), track.height(), fps );
         }
         else if ( track.type() == VLC::MediaTrack::Audio )
         {
-            file->addAudioTrack( fcc, track.bitrate(), track.rate(),
+            media->addAudioTrack( fcc, track.bitrate(), track.rate(),
                                       track.channels() );
         }
     }
-    auto duration = media.duration();
-    file->setDuration( duration );
+    auto duration = vlcMedia.duration();
+    media->setDuration( duration );
     if ( isAudio == true )
     {
-        if ( parseAudioFile( file, media ) == false )
+        if ( parseAudioFile( media, vlcMedia ) == false )
             return Status::Fatal;
     }
     else
     {
-        if (parseVideoFile( file, media ) == false )
+        if (parseVideoFile( media, vlcMedia ) == false )
             return Status::Fatal;
     }
     return Status::Success;

@@ -51,11 +51,11 @@ class VLCMetadataService : public IMetadataService
         virtual void run( std::shared_ptr<Media> file, void *data ) override;
 
     private:
-        Status handleMediaMeta(std::shared_ptr<Media> file , VLC::Media &media) const;
-        bool parseAudioFile(std::shared_ptr<Media> media, VLC::Media &vlcMedia) const;
-        bool parseVideoFile(std::shared_ptr<Media> file, VLC::Media &media) const;
-        bool handleArtist(std::shared_ptr<Album> album, std::shared_ptr<Media> media, VLC::Media& vlcMedia, bool newAlbum ) const;
-        std::shared_ptr<AlbumTrack> handleTrack(std::shared_ptr<Album> album, std::shared_ptr<Media> media , VLC::Media& vlcMedia) const;
+        Status handleMediaMeta( std::shared_ptr<Media> media , VLC::Media &vlcMedia ) const;
+        bool parseAudioFile( std::shared_ptr<Media> media, VLC::Media &vlcMedia ) const;
+        bool parseVideoFile( std::shared_ptr<Media> file, VLC::Media &media ) const;
+        bool handleArtist( std::shared_ptr<Album> album, std::shared_ptr<Media> media, VLC::Media& vlcMedia, bool newAlbum ) const;
+        std::shared_ptr<AlbumTrack> handleTrack( std::shared_ptr<Album> album, std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const;
 
         VLC::Instance m_instance;
         IMetadataServiceCb* m_cb;
