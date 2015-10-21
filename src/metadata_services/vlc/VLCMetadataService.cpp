@@ -199,7 +199,7 @@ bool VLCMetadataService::handleArtist( std::shared_ptr<Album> album, std::shared
     assert(media != nullptr);
 
     auto newArtist = false;
-    auto artistName = vlcMedia.meta( libvlc_meta_Artist );
+    auto artistName = vlcMedia.meta( libvlc_meta_AlbumArtist );
     if ( artistName.length() != 0 )
     {
         auto artist = std::static_pointer_cast<Artist>( m_ml->artist( artistName ) );
