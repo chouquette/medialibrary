@@ -57,7 +57,7 @@ void VLCThumbnailer::run(std::shared_ptr<Media> file, void *data )
         // If we don't know the file type yet, it actually looks more like a bug
         // since this should run after file type deduction, and not run in case
         // that step fails.
-        m_cb->done( file, Status::Error, data );
+        m_cb->done( file, Status::Fatal, data );
         return;
     }
     else if ( file->type() != IMedia::Type::VideoType )
