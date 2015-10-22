@@ -66,6 +66,12 @@ void VLCThumbnailer::run(std::shared_ptr<Media> file, void *data )
         m_cb->done( file, Status::Success, data );
         return;
     }
+    else if ( file->snapshot().empty() == false )
+    {
+        LOG_INFO(file->snapshot(), " already has a snapshot" );
+        m_cb->done( file, Status::Success, data );
+        return;
+    }
 
     VLC::Media media( m_instance, file->mrl(), VLC::Media::FromPath );
     media.addOption( ":no-audio" );
