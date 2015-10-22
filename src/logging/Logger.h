@@ -112,6 +112,14 @@ private:
     static std::atomic<ILogger*> s_logger;
 };
 
-#define LOG_ERROR( ... ) Log::Error( __FILE__, ":", __LINE__, ' ', __func__, ' ', __VA_ARGS__ )
-#define LOG_WARN( ... ) Log::Warning( __FILE__, ":", __LINE__, ' ', __func__, ' ', __VA_ARGS__ )
-#define LOG_INFO( ... ) Log::Info( __FILE__, ":", __LINE__, ' ', __func__, ' ', __VA_ARGS__ )
+#if defined(__clang__) || defined(__GNUG__)
+# define LOG_ORIGIN __PRETTY_FUNCTION__, ':', __LINE__
+#elif defined(_MSC_VER)
+# define LOG_ORIGIN __FUNCDNAME__
+#else
+# define LOG_ORIGIN __FILE__, ":", __LINE__, ' ', __func__
+#endif
+
+#define LOG_ERROR( ... ) Log::Error( LOG_ORIGIN, ' ', __VA_ARGS__ )
+#define LOG_WARN( ... ) Log::Warning( LOG_ORIGIN, ' ', __VA_ARGS__ )
+#define LOG_INFO( ... ) Log::Info( LOG_ORIGIN, ' ', __VA_ARGS__ )
