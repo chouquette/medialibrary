@@ -52,6 +52,12 @@ unsigned int VLCMetadataService::priority() const
 
 void VLCMetadataService::run( std::shared_ptr<Media> file, void* data )
 {
+    if ( file->duration() != -1 )
+    {
+        LOG_INFO( file->mrl(), " was already parsed" );
+        m_cb->done( file, Status::Success, data );
+        return;
+    }
     LOG_INFO( "Parsing ", file->mrl() );
 
     auto ctx = new Context( file );
@@ -107,8 +113,6 @@ IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Me
                                       track.channels() );
         }
     }
-    auto duration = vlcMedia.duration();
-    media->setDuration( duration );
     if ( isAudio == true )
     {
         if ( parseAudioFile( media, vlcMedia ) == false )
@@ -119,6 +123,9 @@ IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Me
         if (parseVideoFile( media, vlcMedia ) == false )
             return Status::Fatal;
     }
+    auto duration = vlcMedia.duration();
+    if ( media->setDuration( duration ) == false )
+        return Status::Error;
     return Status::Success;
 }
 
