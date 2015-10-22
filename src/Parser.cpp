@@ -137,7 +137,7 @@ void Parser::updateStats( bool newMediaParsed, bool newMediaQueued )
 
     if ( m_nbParsed == m_nbToParse )
     {
-        m_callback->onParsingStatsUpdated( m_nbParsed + 1, m_nbToParse );
+        m_callback->onParsingStatsUpdated( m_nbParsed, m_nbToParse );
         m_nbParsed = 0;
         m_nbToParse = 0;
         return;
