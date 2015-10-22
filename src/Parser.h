@@ -36,10 +36,10 @@
 class Parser : public IMetadataServiceCb
 {
     public:
-        Parser(DBConnection dbConnection);
+        Parser( DBConnection dbConnection, IMediaLibraryCb* cb );
         ~Parser();
         void addService(std::unique_ptr<IMetadataService> service );
-        void parse( std::shared_ptr<Media> file, IMediaLibraryCb* cb );
+        void parse( std::shared_ptr<Media> file );
 
     private:
         virtual void done( std::shared_ptr<Media> file, IMetadataService::Status status, void* data ) override;
@@ -67,6 +67,7 @@ class Parser : public IMetadataServiceCb
         std::condition_variable m_cond;
         std::atomic_bool m_stopParser;
         DBConnection m_dbConnection;
+        IMediaLibraryCb* m_callback;
 };
 
 #endif // PARSER_H

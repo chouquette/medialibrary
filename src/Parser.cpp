@@ -26,10 +26,11 @@
 
 #include "IMedia.h"
 
-Parser::Parser( DBConnection dbConnection )
+Parser::Parser(DBConnection dbConnection , IMediaLibraryCb* cb)
     : m_thread( &Parser::run, this )
     , m_stopParser( false )
     , m_dbConnection( dbConnection )
+    , m_callback( cb )
 {
 }
 
@@ -105,8 +106,7 @@ void Parser::restore()
     for ( auto& it : media )
     {
         auto m = std::static_pointer_cast<Media>( it );
-        //FIXME: No callback here
-        m_tasks.push( new Task( m, m_services, nullptr ) );
+        m_tasks.push( new Task( m, m_services, m_callback ) );
     }
 }
 

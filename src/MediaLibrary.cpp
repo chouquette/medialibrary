@@ -114,7 +114,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
     m_snapshotPath = snapshotPath;
     m_callback = mlCallback;
     m_dbConnection.reset( new SqliteConnection( dbPath ) );
-    m_parser.reset( new Parser( m_dbConnection.get() ) );
+    m_parser.reset( new Parser( m_dbConnection.get(), m_callback ) );
 
 
     if ( mlCallback != nullptr )
@@ -217,7 +217,7 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, FolderPtr
     }
     if ( m_callback != nullptr )
         m_callback->onFileAdded( fptr );
-    m_parser->parse( fptr, m_callback );
+    m_parser->parse( fptr );
     return fptr;
 }
 
