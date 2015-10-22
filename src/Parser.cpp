@@ -75,6 +75,7 @@ void Parser::parse(std::shared_ptr<Media> file, IMediaLibraryCb* cb)
 
 void Parser::run()
 {
+    LOG_INFO("Starting Parser thread");
     while ( m_stopParser == false )
     {
         Task* task = nullptr;
@@ -85,7 +86,7 @@ void Parser::run()
                 m_cond.wait( lock, [this]() { return m_tasks.empty() == false || m_stopParser == true; });
                 // We might have been woken up because the parser is being destroyed
                 if ( m_stopParser  == true )
-                    return;
+                    break;
             }
             // Otherwise it's safe to assume we have at least one element.
             task = m_tasks.front();
@@ -93,6 +94,7 @@ void Parser::run()
         }
         (*task->it)->run( task->file, task );
     }
+    LOG_INFO("Exiting Parser thread");
 }
 
 

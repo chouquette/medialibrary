@@ -86,6 +86,7 @@ void DiscovererWorker::enqueue( const std::string& entryPoint )
 
 void DiscovererWorker::run()
 {
+    LOG_INFO( "Entering DiscovererWorker thread" );
     while ( m_run == true )
     {
         std::string entryPoint;
