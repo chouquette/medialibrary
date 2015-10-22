@@ -232,6 +232,9 @@ bool VLCMetadataService::handleArtist( std::shared_ptr<Album> album, std::shared
         {
             if ( album->addArtist( artist ) == false )
                 LOG_WARN( "Failed to add artist ", artist->name(), " to album ", album->title() );
+            // This is the first time we have both artist & album, use this opportunity to set an artist artwork.
+            if ( artist->artworkUrl().empty() == true )
+                artist->setArtworkUrl( album->artworkUrl() );
         }
     }
     else
