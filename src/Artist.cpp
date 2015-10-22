@@ -37,7 +37,8 @@ Artist::Artist( DBConnection dbConnection, sqlite::Row& row )
 {
     row >> m_id
         >> m_name
-        >> m_shortBio;
+        >> m_shortBio
+        >> m_artworkUrl;
 }
 
 Artist::Artist( const std::string& name )
@@ -115,6 +116,23 @@ bool Artist::addMedia(Media* media)
     return sqlite::Tools::executeRequest( m_dbConnection, req, media->id(), artistForeignKey );
 }
 
+const std::string& Artist::artworkUrl() const
+{
+    return m_artworkUrl;
+}
+
+bool Artist::setArtworkUrl( const std::string& artworkUrl )
+{
+    if ( m_artworkUrl == artworkUrl )
+        return true;
+    static const std::string req = "UPDATE " + policy::ArtistTable::Name +
+            " SET artwork_url = ? WHERE id_artist = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkUrl, m_id ) == false )
+        return false;
+    m_artworkUrl = artworkUrl;
+    return true;
+}
+
 bool Artist::createTable( DBConnection dbConnection )
 {
     static const std::string req = "CREATE TABLE IF NOT EXISTS " +
@@ -122,7 +140,8 @@ bool Artist::createTable( DBConnection dbConnection )
             "("
                 "id_artist INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "name TEXT UNIQUE ON CONFLICT FAIL,"
-                "shortbio TEXT"
+                "shortbio TEXT,"
+                "artwork_url TEXT"
             ")";
     static const std::string reqRel = "CREATE TABLE IF NOT EXISTS MediaArtistRelation("
                 "id_media INTEGER NOT NULL,"

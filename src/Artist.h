@@ -60,6 +60,8 @@ public:
     virtual std::vector<AlbumPtr> albums() const override;
     virtual std::vector<MediaPtr> media() const override;
     bool addMedia( Media* media );
+    virtual const std::string& artworkUrl() const override;
+    bool setArtworkUrl( const std::string& artworkUrl );
 
     static bool createTable( DBConnection dbConnection );
     static std::shared_ptr<Artist> create( DBConnection dbConnection, const std::string& name );
@@ -69,6 +71,7 @@ private:
     unsigned int m_id;
     std::string m_name;
     std::string m_shortBio;
+    std::string m_artworkUrl;
 
     friend _Cache;
     friend struct policy::ArtistTable;
