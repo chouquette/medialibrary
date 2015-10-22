@@ -36,7 +36,7 @@
 class Parser : public IMetadataServiceCb
 {
     public:
-        Parser();
+        Parser(DBConnection dbConnection);
         ~Parser();
         void addService(std::unique_ptr<IMetadataService> service );
         void parse( std::shared_ptr<Media> file, IMediaLibraryCb* cb );
@@ -44,6 +44,8 @@ class Parser : public IMetadataServiceCb
     private:
         virtual void done( std::shared_ptr<Media> file, IMetadataService::Status status, void* data ) override;
         void run();
+        // Queues all unparsed files for parsing.
+        void restore();
 
     private:
         typedef std::unique_ptr<IMetadataService> ServicePtr;
@@ -64,6 +66,7 @@ class Parser : public IMetadataServiceCb
         std::mutex m_lock;
         std::condition_variable m_cond;
         std::atomic_bool m_stopParser;
+        DBConnection m_dbConnection;
 };
 
 #endif // PARSER_H

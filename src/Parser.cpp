@@ -26,9 +26,10 @@
 
 #include "IMedia.h"
 
-Parser::Parser()
+Parser::Parser( DBConnection dbConnection )
     : m_thread( &Parser::run, this )
     , m_stopParser( false )
+    , m_dbConnection( dbConnection )
 {
 }
 
@@ -58,19 +59,21 @@ void Parser::addService(std::unique_ptr<IMetadataService> service)
     });
 }
 
-void Parser::parse(std::shared_ptr<Media> file, IMediaLibraryCb* cb)
+void Parser::parse( std::shared_ptr<Media> file )
 {
     std::lock_guard<std::mutex> lock( m_lock );
 
     if ( m_services.size() == 0 )
         return;
-    m_tasks.push( new Task( file, m_services, cb ) );
+    m_tasks.push( new Task( file, m_services, m_callback ) );
     m_cond.notify_all();
 }
 
 void Parser::run()
 {
     LOG_INFO("Starting Parser thread");
+    restore();
+
     while ( m_stopParser == false )
     {
         Task* task = nullptr;
@@ -90,6 +93,21 @@ void Parser::run()
         (*task->it)->run( task->file, task );
     }
     LOG_INFO("Exiting Parser thread");
+}
+
+void Parser::restore()
+{
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
+            + " WHERE parsed = 0";
+    auto media = Media::fetchAll( m_dbConnection, req );
+
+    std::lock_guard<std::mutex> lock( m_lock );
+    for ( auto& it : media )
+    {
+        auto m = std::static_pointer_cast<Media>( it );
+        //FIXME: No callback here
+        m_tasks.push( new Task( m, m_services, nullptr ) );
+    }
 }
 
 

@@ -72,8 +72,7 @@ const std::vector<std::string> MediaLibrary::supportedAudioExtensions {
 };
 
 MediaLibrary::MediaLibrary()
-    : m_parser( new Parser )
-    , m_discoverer( new DiscovererWorker )
+    : m_discoverer( new DiscovererWorker )
 {
 }
 
@@ -115,6 +114,8 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
     m_snapshotPath = snapshotPath;
     m_callback = mlCallback;
     m_dbConnection.reset( new SqliteConnection( dbPath ) );
+    m_parser.reset( new Parser( m_dbConnection.get() ) );
+
 
     if ( mlCallback != nullptr )
     {
