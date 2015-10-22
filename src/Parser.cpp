@@ -27,22 +27,20 @@
 #include "IMedia.h"
 
 Parser::Parser()
-    : m_stopParser( false )
+    : m_thread( &Parser::run, this )
+    , m_stopParser( false )
 {
 }
 
 Parser::~Parser()
 {
-    if ( m_thread == nullptr )
-        return;
-
     {
         std::lock_guard<std::mutex> lock( m_lock );
         if ( m_tasks.empty() == true )
             m_cond.notify_all();
         m_stopParser = true;
     }
-    m_thread->join();
+    m_thread.join();
     while ( m_tasks.empty() == false )
     {
         delete m_tasks.front();
@@ -67,10 +65,7 @@ void Parser::parse(std::shared_ptr<Media> file, IMediaLibraryCb* cb)
     if ( m_services.size() == 0 )
         return;
     m_tasks.push( new Task( file, m_services, cb ) );
-    if ( m_thread == nullptr )
-        m_thread.reset( new std::thread( &Parser::run, this ) );
-    else
-        m_cond.notify_all();
+    m_cond.notify_all();
 }
 
 void Parser::run()

@@ -60,7 +60,7 @@ class Parser : public IMetadataServiceCb
     private:
         ServiceList m_services;
         std::queue<Task*> m_tasks;
-        std::unique_ptr<std::thread> m_thread;
+        std::thread m_thread;
         std::mutex m_lock;
         std::condition_variable m_cond;
         std::atomic_bool m_stopParser;
