@@ -6,11 +6,6 @@ option(WITH_VLC "Include VLC metadata services" ON)
 
 EnableCpp11()
 
-include(FindPkgConfig)
-pkg_check_modules(EMOTION emotion)
-pkg_check_modules(ECOREEVAS ecore-evas)
-pkg_check_modules(EVAS evas)
-
 add_definitions("-Wall -Wextra -pedantic")
 
 if(UNIX)
@@ -81,12 +76,6 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     logging/Logger.cpp
 )
 
-if (${EMOTION_FOUND})
-    list(APPEND SRC_LIST
-        metadata_services/emotion/Emotion.cpp
-    )
-endif()
-
 if (${WITH_VLC})
     list(APPEND SRC_LIST
         metadata_services/vlc/VLCMetadataService.cpp
@@ -112,14 +101,6 @@ if (${WITH_VLC})
     endif()
     set(LIBVLCPP_DIR "" CACHE PATH "Path to libvlcpp's directory")
     include_directories(${LIBVLCPP_DIR})
-endif()
-
-if (${EMOTION_FOUND})
-    include_directories(${EMOTION_INCLUDE_DIRS})
-    include_directories(${ECOREEVAS_INCLUDE_DIRS})
-    target_link_libraries( ${PROJECT_NAME} ${EMOTION_LIBRARIES} )
-    target_link_libraries( ${PROJECT_NAME} ${ECOREEVAS_LIBRARIES} )
-    target_link_libraries( ${PROJECT_NAME} ${EVAS_LIBRARIES} )
 endif()
 
 # Work around for tizen platform
