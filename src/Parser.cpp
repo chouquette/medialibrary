@@ -27,8 +27,7 @@
 #include "IMedia.h"
 
 Parser::Parser(DBConnection dbConnection , IMediaLibraryCb* cb)
-    : m_thread( &Parser::run, this )
-    , m_stopParser( false )
+    : m_stopParser( false )
     , m_dbConnection( dbConnection )
     , m_callback( cb )
 {
@@ -36,13 +35,16 @@ Parser::Parser(DBConnection dbConnection , IMediaLibraryCb* cb)
 
 Parser::~Parser()
 {
+    if ( m_thread.joinable() )
     {
-        std::lock_guard<std::mutex> lock( m_lock );
-        if ( m_tasks.empty() == true )
-            m_cond.notify_all();
-        m_stopParser = true;
+        {
+            std::lock_guard<std::mutex> lock( m_lock );
+            if ( m_tasks.empty() == true )
+                m_cond.notify_all();
+            m_stopParser = true;
+        }
+        m_thread.join();
     }
-    m_thread.join();
     while ( m_tasks.empty() == false )
     {
         delete m_tasks.front();
@@ -68,6 +70,14 @@ void Parser::parse( std::shared_ptr<Media> file )
         return;
     m_tasks.push( new Task( file, m_services, m_callback ) );
     m_cond.notify_all();
+}
+
+void Parser::start()
+{
+    // Ensure we don't start multiple times.
+    assert( m_thread.joinable() == false );
+
+    m_thread = std::thread{ &Parser::run, this };
 }
 
 void Parser::run()

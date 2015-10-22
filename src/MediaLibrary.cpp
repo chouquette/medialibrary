@@ -156,6 +156,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
     m_discoverer->setCallback( m_callback );
     m_discoverer->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( m_fsFactory, this, m_dbConnection.get() ) ) );
     m_discoverer->reload();
+    m_parser->start();
     return true;
 }
 

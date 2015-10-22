@@ -40,6 +40,7 @@ class Parser : public IMetadataServiceCb
         ~Parser();
         void addService(std::unique_ptr<IMetadataService> service );
         void parse( std::shared_ptr<Media> file );
+        void start();
 
     private:
         virtual void done( std::shared_ptr<Media> file, IMetadataService::Status status, void* data ) override;
