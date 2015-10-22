@@ -52,6 +52,16 @@ public:
     virtual void onDiscoveryCompleted( const std::string& entryPoint ) = 0;
     virtual void onReloadStarted() = 0;
     virtual void onReloadCompleted() = 0;
+    /**
+     * @brief onParsingStatsUpdated Called when the parser statistics are updated
+     *
+     * There is no waranty about how often this will be called. However: when
+     * nbParsed == nbToParse, the callback will be invoked, and nbToParse will be reset to 0
+     *
+     * @param nbParsed The number of media that have been parsed
+     * @param nbToParse The total number of media to parse.
+     */
+    virtual void onParsingStatsUpdated( uint32_t nbParsed, uint32_t nbToParse ) = 0;
 };
 
 class IMediaLibrary

@@ -47,6 +47,7 @@ class Parser : public IMetadataServiceCb
         void run();
         // Queues all unparsed files for parsing.
         void restore();
+        void updateStats(bool newMediaParsed, bool newMediaQueue);
 
     private:
         typedef std::unique_ptr<IMetadataService> ServicePtr;
@@ -69,6 +70,8 @@ class Parser : public IMetadataServiceCb
         std::atomic_bool m_stopParser;
         DBConnection m_dbConnection;
         IMediaLibraryCb* m_callback;
+        std::atomic_uint m_nbParsed;
+        std::atomic_uint m_nbToParse;
 };
 
 #endif // PARSER_H

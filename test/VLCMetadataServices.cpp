@@ -52,7 +52,8 @@ class ServiceCb : public IMediaLibraryCb
         virtual void onDiscoveryStarted( const std::string& ) override {}
         virtual void onDiscoveryCompleted( const std::string& ) override {}
         virtual void onReloadStarted() override {}
-        virtual void onReloadCompleted() override {}
+        virtual void onReloadCompleted() override {}        
+        virtual void onParsingStatsUpdated( uint32_t, uint32_t ) {}
 };
 
 class VLCMetadataServices : public Tests

@@ -61,6 +61,8 @@ public:
             m_reloadCond.notify_all();
     }
 
+    virtual void onParsingStatsUpdated( uint32_t, uint32_t ) {}
+
     bool wait()
     {
         std::unique_lock<std::mutex> lock( m_mutex );

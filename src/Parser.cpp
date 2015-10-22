@@ -30,6 +30,8 @@ Parser::Parser(DBConnection dbConnection , IMediaLibraryCb* cb)
     : m_stopParser( false )
     , m_dbConnection( dbConnection )
     , m_callback( cb )
+    , m_nbParsed( 0 )
+    , m_nbToParse( 0 )
 {
 }
 
@@ -69,6 +71,7 @@ void Parser::parse( std::shared_ptr<Media> file )
     if ( m_services.size() == 0 )
         return;
     m_tasks.push( new Task( file, m_services, m_callback ) );
+    updateStats( false, true );
     m_cond.notify_all();
 }
 
@@ -120,6 +123,34 @@ void Parser::restore()
     }
 }
 
+void Parser::updateStats( bool newMediaParsed, bool newMediaQueued )
+{
+    if ( m_callback == nullptr )
+        return;
+
+    if ( newMediaParsed == true )
+        m_nbParsed++;
+    else if ( newMediaQueued == true )
+        m_nbToParse++;
+    else
+        assert(false);
+
+    if ( m_nbParsed == m_nbToParse )
+    {
+        m_callback->onParsingStatsUpdated( m_nbParsed + 1, m_nbToParse );
+        m_nbParsed = 0;
+        m_nbToParse = 0;
+        return;
+    }
+    // Only send an update every X new elem
+    const uint32_t NbElems = 10;
+    if ( ( newMediaParsed == true && m_nbParsed % NbElems == 0 ) ||
+         ( newMediaQueued == true && m_nbToParse % NbElems == 0 ) )
+    {
+        m_callback->onParsingStatsUpdated( m_nbParsed, m_nbToParse );
+    }
+}
+
 
 Parser::Task::Task(std::shared_ptr<Media> file, Parser::ServiceList& serviceList, IMediaLibraryCb* metadataCb )
     : file(file)
@@ -136,6 +167,7 @@ void Parser::done(std::shared_ptr<Media> file, IMetadataService::Status status, 
     if ( status == IMetadataService::Status::TemporaryUnavailable ||
          status == IMetadataService::Status::Fatal )
     {
+        updateStats( true, false );
         delete t;
         return;
     }
@@ -147,6 +179,7 @@ void Parser::done(std::shared_ptr<Media> file, IMetadataService::Status status, 
     ++t->it;
     if (t->it == t->end)
     {
+        updateStats( true, false );
         file->markParsed();
         delete t;
         return;
