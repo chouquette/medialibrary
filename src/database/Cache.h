@@ -181,13 +181,14 @@ class Cache
         template <typename... Args>
         static bool insert( DBConnection dbConnection, std::shared_ptr<IMPL> self, const std::string& req, Args&&... args )
         {
+            Lock lock( Mutex );
+
             unsigned int pKey = sqlite::Tools::insert( dbConnection, req, std::forward<Args>( args )... );
             if ( pKey == 0 )
                 return false;
             (self.get())->*TABLEPOLICY::PrimaryKey = pKey;
             auto cacheKey = CACHEPOLICY::key( self );
 
-            Lock lock( Mutex );
             // We expect the cache column to be PRIMARY KEY / UNIQUE, so an insertion with
             // a duplicated key should have been rejected by sqlite. This indicates an invalid state
             assert( Store.find( cacheKey ) == Store.end() );
