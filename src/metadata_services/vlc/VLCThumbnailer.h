@@ -46,7 +46,7 @@ private:
     bool seekAhead(std::shared_ptr<Media> file, VLC::MediaPlayer &mp, void *data);
     void setupVout(VLC::MediaPlayer &mp);
     bool takeSnapshot(std::shared_ptr<Media> file, VLC::MediaPlayer &mp, void* data);
-    bool compress(uint8_t* buff, std::shared_ptr<Media> file, void* data );
+    bool compress(std::shared_ptr<Media> file, void* data );
 
 private:
     // Force a base width, let height be computed depending on A/R

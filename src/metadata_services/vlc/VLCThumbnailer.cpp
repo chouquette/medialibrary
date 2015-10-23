@@ -221,7 +221,6 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
 
 bool VLCThumbnailer::takeSnapshot(std::shared_ptr<Media> file, VLC::MediaPlayer &mp, void *data)
 {
-    std::unique_ptr<uint8_t[]> buff;
     // lock, signal that we want a snapshot, and wait.
     {
         std::unique_lock<std::mutex> lock( m_mutex );
@@ -235,13 +234,9 @@ bool VLCThumbnailer::takeSnapshot(std::shared_ptr<Media> file, VLC::MediaPlayer 
             m_cb->done( file, Status::Error, data );
             return false;
         }
-        // Prevent the vmem from screwing our snapshot over.
-        buff = std::move( m_buff );
-        // set a new buffer for next snapshot, and to avoid crashing while we stop the media player
-        m_buff.reset( new uint8_t[Width * m_height * Bpp] );
     }
     mp.stop();
-    return compress( buff.get(), file, data );
+    return compress( file, data );
 }
 
 #ifdef WITH_JPEG
@@ -261,7 +256,7 @@ struct jpegError : public jpeg_error_mgr
 
 #endif
 
-bool VLCThumbnailer::compress(uint8_t* buff, std::shared_ptr<Media> file, void *data)
+bool VLCThumbnailer::compress( std::shared_ptr<Media> file, void *data )
 {
     auto path = m_ml->snapshotPath();
     path += "/";
@@ -321,7 +316,7 @@ bool VLCThumbnailer::compress(uint8_t* buff, std::shared_ptr<Media> file, void *
     auto stride = compInfo.image_width * Bpp;
 
     while (compInfo.next_scanline < compInfo.image_height) {
-      row_pointer[0] = &buff[compInfo.next_scanline * stride];
+      row_pointer[0] = &m_buff[compInfo.next_scanline * stride];
       jpeg_write_scanlines(&compInfo, row_pointer, 1);
     }
     jpeg_finish_compress(&compInfo);
@@ -332,7 +327,7 @@ bool VLCThumbnailer::compress(uint8_t* buff, std::shared_ptr<Media> file, void *
         return false;
     evas_object_image_colorspace_set( evas_obj.get(), EVAS_COLORSPACE_ARGB8888 );
     evas_object_image_size_set( evas_obj.get(), Width, m_height );
-    evas_object_image_data_set( evas_obj.get(), buff );
+    evas_object_image_data_set( evas_obj.get(), m_buff.get() );
 
     evas_object_image_save( evas_obj.get(), path.c_str(), NULL, "quality=100 compress=9");
 #else
