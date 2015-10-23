@@ -141,7 +141,7 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
                 newAlbum = true;
                 auto date = vlcMedia.meta( libvlc_meta_Date );
                 if ( date.length() > 0 )
-                    album->setReleaseDate( std::stoul( date ) );
+                    album->setReleaseYear( std::stoul( date ) );
                 auto artwork = vlcMedia.meta( libvlc_meta_ArtworkURL );
                 if ( artwork.length() != 0 )
                     album->setArtworkUrl( artwork );

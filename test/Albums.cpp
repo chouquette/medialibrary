@@ -114,13 +114,13 @@ TEST_F( Albums, SetReleaseDate )
 {
     auto a = ml->createAlbum( "album" );
 
-    a->setReleaseDate( 1234 );
-    ASSERT_EQ( a->releaseDate(), 1234 );
+    a->setReleaseYear( 1234 );
+    ASSERT_EQ( a->releaseYear(), 1234 );
 
     Reload();
 
     auto a2 = ml->album( "album" );
-    ASSERT_EQ( a->releaseDate(), a2->releaseDate() );
+    ASSERT_EQ( a->releaseYear(), a2->releaseYear() );
 }
 
 TEST_F( Albums, SetShortSummary )

@@ -56,8 +56,8 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
 
         virtual unsigned int id() const override;
         virtual const std::string& title() const override;
-        virtual time_t releaseDate() const override;
-        bool setReleaseDate( time_t date );
+        virtual time_t releaseYear() const override;
+        bool setReleaseYear( time_t date );
         virtual const std::string& shortSummary() const override;
         bool setShortSummary( const std::string& summary );
         virtual const std::string& artworkUrl() const override;
@@ -77,7 +77,7 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         DBConnection m_dbConnection;
         unsigned int m_id;
         std::string m_title;
-        unsigned int m_releaseDate;
+        unsigned int m_releaseYear;
         std::string m_shortSummary;
         std::string m_artworkUrl;
         time_t m_lastSyncDate;
