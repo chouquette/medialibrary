@@ -205,13 +205,18 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, FolderPtr
     }
 
     auto type = IMedia::Type::UnknownType;
-    if ( std::find( begin( supportedVideoExtensions ), end( supportedVideoExtensions ),
-                    file->extension() ) != end( supportedVideoExtensions ) )
+    auto ext = file->extension();
+    auto predicate = [ext](const std::string& v) {
+        return strcasecmp(v.c_str(), ext.c_str()) == 0;
+    };
+
+    if ( std::find_if( begin( supportedVideoExtensions ), end( supportedVideoExtensions ),
+                    predicate ) != end( supportedVideoExtensions ) )
     {
         type = IMedia::Type::VideoType;
     }
-    else if ( std::find( begin( supportedAudioExtensions ), end( supportedAudioExtensions ),
-                         file->extension() ) != end( supportedAudioExtensions ) )
+    else if ( std::find_if( begin( supportedAudioExtensions ), end( supportedAudioExtensions ),
+                         predicate ) != end( supportedAudioExtensions ) )
     {
         type = IMedia::Type::AudioType;
     }
