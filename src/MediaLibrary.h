@@ -47,7 +47,7 @@ class MediaLibrary : public IMediaLibrary
         virtual void setVerbosity( LogLevel v ) override;
         virtual void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory ) override;
 
-        virtual std::vector<MediaPtr> files() override;
+        std::vector<MediaPtr> files();
         virtual std::vector<MediaPtr> audioFiles() override;
         virtual std::vector<MediaPtr> videoFiles() override;
         virtual MediaPtr file( const std::string& path ) override;
