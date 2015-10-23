@@ -28,17 +28,17 @@
 class IostreamLogger : public ILogger
 {
 public:
-    virtual void Error(const std::string& msg)
+    virtual void Error(const std::string& msg) override
     {
         std::cout << "Error: " << msg;
     }
 
-    virtual void Warning(const std::string& msg)
+    virtual void Warning(const std::string& msg) override
     {
         std::cout << "Warning: " << msg;
     }
 
-    virtual void Info(const std::string& msg)
+    virtual void Info(const std::string& msg) override
     {
         std::cout << "Info: " << msg;
     }
