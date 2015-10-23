@@ -58,9 +58,9 @@ typedef SqliteConnection* DBConnection;
 enum class LogLevel
 {
     Debug,
-    Error,
-    Warning,
     Info,
+    Warning,
+    Error,
 };
 
 
