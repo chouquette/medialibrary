@@ -73,6 +73,7 @@ const std::vector<std::string> MediaLibrary::supportedAudioExtensions {
 
 MediaLibrary::MediaLibrary()
     : m_discoverer( new DiscovererWorker )
+    , m_verbosity( LogLevel::Error )
 {
 }
 
@@ -116,14 +117,15 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
     m_dbConnection.reset( new SqliteConnection( dbPath ) );
     m_parser.reset( new Parser( m_dbConnection.get(), m_callback ) );
 
-
     if ( mlCallback != nullptr )
     {
         const char* args[] = {
             "-vv",
         };
         m_vlcInstance = VLC::Instance( sizeof(args) / sizeof(args[0]), args );
-        m_vlcInstance.logSet([](int lvl, const libvlc_log_t*, std::string msg) {
+        m_vlcInstance.logSet([this](int lvl, const libvlc_log_t*, std::string msg) {
+            if ( m_verbosity != LogLevel::Debug )
+                return ;
             if ( lvl == LIBVLC_ERROR )
                 Log::Error( msg );
             else if ( lvl == LIBVLC_WARNING )
@@ -158,6 +160,12 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
     m_discoverer->reload();
     m_parser->start();
     return true;
+}
+
+void MediaLibrary::setVerbosity(LogLevel v)
+{
+    m_verbosity = v;
+    Log::setLogLevel( v );
 }
 
 std::vector<MediaPtr> MediaLibrary::files()

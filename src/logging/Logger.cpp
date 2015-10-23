@@ -25,3 +25,4 @@
 
 std::unique_ptr<ILogger> Log::s_defaultLogger = std::unique_ptr<ILogger>( new IostreamLogger );
 std::atomic<ILogger*> Log::s_logger;
+std::atomic<LogLevel> Log::s_logLevel;

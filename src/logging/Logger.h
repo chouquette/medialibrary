@@ -27,17 +27,11 @@
 #include <sstream>
 
 #include "ILogger.h"
+#include "Types.h"
 
 class Log
 {
 private:
-    enum class Level
-    {
-        Error,
-        Warning,
-        Info,
-    };
-
     template <typename T>
     static void createMsg( std::stringstream& s, T&& t )
     {
@@ -61,21 +55,26 @@ private:
     }
 
     template <typename... Args>
-    static void log(Level lvl, Args&&... args)
+    static void log(LogLevel lvl, Args&&... args)
     {
+        if ( lvl < s_logLevel.load( std::memory_order_relaxed ) )
+            return;
+
         auto msg = createMsg( std::forward<Args>( args )... );
         auto l = s_logger.load( std::memory_order_consume );
         if ( l == nullptr )
            l = s_defaultLogger.get();
+
         switch ( lvl )
         {
-        case Level::Error:
+        case LogLevel::Error:
             l->Error( msg );
             break;
-        case Level::Warning:
+        case LogLevel::Warning:
             l->Warning( msg );
             break;
-        case Level::Info:
+        case LogLevel::Debug:
+        case LogLevel::Info:
             l->Info( msg );
             break;
         }
@@ -87,22 +86,27 @@ public:
         s_logger.store( logger, std::memory_order_relaxed );
     }
 
+    static void setLogLevel( LogLevel level )
+    {
+        s_logLevel.store( level, std::memory_order_relaxed );
+    }
+
     template <typename... Args>
     static void Error( Args... args )
     {
-        log( Level::Error, std::forward<Args>( args )... );
+        log( LogLevel::Error, std::forward<Args>( args )... );
     }
 
     template <typename... Args>
     static void Warning( Args... args )
     {
-        log( Level::Warning, std::forward<Args>( args )... );
+        log( LogLevel::Warning, std::forward<Args>( args )... );
     }
 
     template <typename... Args>
     static void Info( Args... args )
     {
-        log( Level::Info, std::forward<Args>( args )... );
+        log( LogLevel::Info, std::forward<Args>( args )... );
     }
 
 private:
@@ -110,6 +114,7 @@ private:
 private:
     static std::unique_ptr<ILogger> s_defaultLogger;
     static std::atomic<ILogger*> s_logger;
+    static std::atomic<LogLevel> s_logLevel;
 };
 
 #if defined(__clang__) || defined(__GNUG__)

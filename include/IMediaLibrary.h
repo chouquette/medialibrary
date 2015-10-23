@@ -76,6 +76,7 @@ class IMediaLibrary
         /// \return true in case of success, false otherwise
         ///
         virtual bool initialize( const std::string& dbPath, const std::string& snapshotPath, IMediaLibraryCb* metadataCb ) = 0;
+        virtual void setVerbosity( LogLevel v ) = 0;
         /**
          * Replaces the default filesystem factory
          * The default one will use standard opendir/readdir functions

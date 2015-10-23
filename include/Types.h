@@ -55,4 +55,13 @@ typedef std::shared_ptr<IArtist> ArtistPtr;
 
 typedef SqliteConnection* DBConnection;
 
+enum class LogLevel
+{
+    Debug,
+    Error,
+    Warning,
+    Info,
+};
+
+
 #endif // TYPES_H

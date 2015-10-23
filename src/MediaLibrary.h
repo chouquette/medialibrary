@@ -44,6 +44,7 @@ class MediaLibrary : public IMediaLibrary
         MediaLibrary();
         ~MediaLibrary();
         virtual bool initialize( const std::string& dbPath, const std::string& snapshotPath, IMediaLibraryCb* metadataCb ) override;
+        virtual void setVerbosity( LogLevel v ) override;
         virtual void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory ) override;
 
         virtual std::vector<MediaPtr> files() override;
@@ -112,5 +113,6 @@ class MediaLibrary : public IMediaLibrary
         // Same reasoning applies here.
         //FIXME: Having to maintain a specific ordering sucks, let's use shared_ptr or something
         std::unique_ptr<DiscovererWorker> m_discoverer;
+        LogLevel m_verbosity;
 };
 #endif // MEDIALIBRARY_H
