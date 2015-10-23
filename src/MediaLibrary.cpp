@@ -175,13 +175,13 @@ std::vector<MediaPtr> MediaLibrary::files()
 
 std::vector<MediaPtr> MediaLibrary::audioFiles()
 {
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ?";
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? ORDER BY title";
     return Media::fetchAll( m_dbConnection.get(), req, IMedia::Type::AudioType );
 }
 
 std::vector<MediaPtr> MediaLibrary::videoFiles()
 {
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ?";
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? ORDER BY title";
     return Media::fetchAll( m_dbConnection.get(), req, IMedia::Type::VideoType );
 }
 
@@ -283,7 +283,9 @@ std::shared_ptr<Album> MediaLibrary::createAlbum(const std::string& title )
 
 std::vector<AlbumPtr> MediaLibrary::albums()
 {
-    return Album::fetchAll( m_dbConnection.get() );
+    static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
+            " ORDER BY title ASC";
+    return Album::fetchAll( m_dbConnection.get(), req );
 }
 
 ShowPtr MediaLibrary::show(const std::string& name)
