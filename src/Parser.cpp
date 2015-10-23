@@ -143,7 +143,7 @@ void Parser::updateStats( bool newMediaParsed, bool newMediaQueued )
         return;
     }
     // Only send an update every X new elem
-    const uint32_t NbElems = 10;
+    const uint32_t NbElems = 3;
     if ( ( newMediaParsed == true && m_nbParsed % NbElems == 0 ) ||
          ( newMediaQueued == true && m_nbToParse % NbElems == 0 ) )
     {
