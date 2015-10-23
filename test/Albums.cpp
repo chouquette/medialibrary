@@ -73,6 +73,25 @@ TEST_F( Albums, AddTrack )
     ASSERT_EQ( tracks[0]->albumTrack()->trackNumber(), track->trackNumber() );
 }
 
+TEST_F( Albums, NbTracks )
+{
+    auto a = ml->createAlbum( "albumtag" );
+    for ( auto i = 1u; i <= 10; ++i )
+    {
+        auto f = ml->addFile( "track" + std::to_string(i) + ".mp3", nullptr );
+        auto track = a->addTrack( f, i );
+        ASSERT_NE( track, nullptr );
+    }
+    auto tracks = a->tracks();
+    ASSERT_EQ( tracks.size(), a->nbTracks() );
+
+    Reload();
+
+    a = std::static_pointer_cast<Album>( ml->album( "albumtag" ) );
+    tracks = a->tracks();
+    ASSERT_EQ( tracks.size(), a->nbTracks() );
+}
+
 TEST_F( Albums, SetGenre )
 {
     auto a = ml->createAlbum( "album" );

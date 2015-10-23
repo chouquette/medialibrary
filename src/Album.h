@@ -65,6 +65,7 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         virtual time_t lastSyncDate() const override;
         virtual std::vector<MediaPtr> tracks() const override;
         std::shared_ptr<AlbumTrack> addTrack( std::shared_ptr<Media> media, unsigned int trackNb );
+        unsigned int nbTracks() const override;
 
         virtual std::vector<ArtistPtr> artists() const override;
         bool addArtist( std::shared_ptr<Artist> artist );
@@ -80,6 +81,7 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         std::string m_shortSummary;
         std::string m_artworkUrl;
         time_t m_lastSyncDate;
+        unsigned int m_nbTracks;
 
         friend class Cache<Album, IAlbum, policy::AlbumTable>;
         friend struct policy::AlbumTable;

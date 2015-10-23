@@ -39,7 +39,8 @@ Album::Album(DBConnection dbConnection, sqlite::Row& row)
         >> m_releaseDate
         >> m_shortSummary
         >> m_artworkUrl
-        >> m_lastSyncDate;
+        >> m_lastSyncDate
+        >> m_nbTracks;
 }
 
 Album::Album(const std::string& title )
@@ -47,6 +48,7 @@ Album::Album(const std::string& title )
     , m_title( title )
     , m_releaseDate( 0 )
     , m_lastSyncDate( 0 )
+    , m_nbTracks( 0 )
 {
 }
 
@@ -67,7 +69,7 @@ time_t Album::releaseDate() const
 
 bool Album::setReleaseDate( time_t date )
 {
-    static const std::string& req = "UPDATE " + policy::AlbumTable::Name
+    static const std::string req = "UPDATE " + policy::AlbumTable::Name
             + " SET release_date = ? WHERE id_album = ?";
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, date, m_id ) == false )
         return false;
@@ -115,14 +117,29 @@ std::vector<MediaPtr> Album::tracks() const
     static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
             " LEFT JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
             " WHERE att.album_id = ? ORDER BY att.track_number";
+
     return Media::fetchAll( m_dbConnection, req, m_id );
 }
 
 std::shared_ptr<AlbumTrack> Album::addTrack(std::shared_ptr<Media> media, unsigned int trackNb )
 {
+    //FIXME: This MUST be executed as a transaction
     auto track = AlbumTrack::create( m_dbConnection, m_id, media.get(), trackNb );
-    media->setAlbumTrack( track );
+    if ( track == nullptr )
+        return nullptr;
+    if ( media->setAlbumTrack( track ) == false )
+        return nullptr;
+    static const std::string req = "UPDATE " + policy::AlbumTable::Name +
+            " SET nb_tracks = nb_tracks + 1 WHERE id_album = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, m_id ) == false )
+        return nullptr;
+    m_nbTracks++;
     return track;
+}
+
+unsigned int Album::nbTracks() const
+{
+    return m_nbTracks;
 }
 
 std::vector<ArtistPtr> Album::artists() const
@@ -154,7 +171,8 @@ bool Album::createTable(DBConnection dbConnection )
                 "release_date UNSIGNED INTEGER,"
                 "short_summary TEXT,"
                 "artwork_url TEXT,"
-                "UNSIGNED INTEGER last_sync_date"
+                "last_sync_date UNSIGNED INTEGER,"
+                "nb_tracks UNSIGNED INTEGER DEFAULT 0"
             ")";
     static const std::string reqRel = "CREATE TABLE IF NOT EXISTS AlbumArtistRelation("
                 "id_album INTEGER,"

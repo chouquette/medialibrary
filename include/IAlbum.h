@@ -35,8 +35,16 @@ class IAlbum
         virtual const std::string& shortSummary() const = 0;
         virtual const std::string& artworkUrl() const = 0;
         virtual time_t lastSyncDate() const = 0;
+        /**
+         * @brief tracks fetches album tracks from the database
+         */
         virtual std::vector<std::shared_ptr<IMedia>> tracks() const = 0;
         virtual std::vector<ArtistPtr> artists() const = 0;
+        /**
+         * @brief nbTracks Returns the amount of track in this album.
+         * The value is cached, and doesn't require fetching anything.
+         */
+        virtual uint32_t nbTracks() const = 0;
 };
 
 #endif // IALBUM_H
