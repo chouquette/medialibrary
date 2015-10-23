@@ -339,7 +339,8 @@ void MediaLibrary::addMetadataService(std::unique_ptr<IMetadataService> service)
 {
     if ( service->initialize( m_parser.get(), this ) == false )
     {
-        std::cout << "Failed to initialize service" << std::endl;
+        //FIXME: This is missing a name or something more specific
+        LOG_ERROR( "Failed to initialize service" );
         return;
     }
     m_parser->addService( std::move( service ) );

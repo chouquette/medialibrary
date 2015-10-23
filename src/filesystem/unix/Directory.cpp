@@ -26,7 +26,6 @@
 #include <cstring>
 #include <cstdlib>
 #include <dirent.h>
-#include <iostream>
 #include <limits.h>
 #include <sys/stat.h>
 #include <unistd.h>
