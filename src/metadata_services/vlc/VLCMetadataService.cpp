@@ -69,13 +69,9 @@ void VLCMetadataService::run( std::shared_ptr<Media> file, void* data )
     ctx->media.eventManager().onParsedChanged([this, ctx, &status](bool parsed) mutable {
         if ( parsed == false )
             return;
-        // We are parsing the metadata from a locked context, but the parser thread is waiting for us
-        // anyway, so contention isn't really an issue here, since there are only 2 threads involved with
-        // this mutex.
-        {
-            std::unique_lock<std::mutex> lock( m_mutex );
-            status = handleMediaMeta( ctx->file, ctx->media );
-        } // unlock early to avoid the waiting thread to be blocked again
+        auto s = handleMediaMeta( ctx->file, ctx->media );
+        std::lock_guard<std::mutex> lock( m_mutex );
+        status = s;
         m_cond.notify_all();
     });
     ctx->media.parseAsync();
