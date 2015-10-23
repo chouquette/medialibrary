@@ -252,21 +252,24 @@ bool VLCMetadataService::handleArtist( std::shared_ptr<Album> album, std::shared
 std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack(std::shared_ptr<Album> album, std::shared_ptr<Media> media, VLC::Media& vlcMedia) const
 {
     auto trackNbStr = vlcMedia.meta( libvlc_meta_TrackNumber );
-    if ( trackNbStr.length() == 0 )
-    {
-        LOG_WARN( "Failed to get track id" );
-        return nullptr;
-    }
 
     auto title = vlcMedia.meta( libvlc_meta_Title );
-    if ( title.length() == 0 )
+    if ( title.empty() == true )
     {
         LOG_WARN( "Failed to get track title" );
-        title = "Track #";
-        title += trackNbStr;
+        if ( trackNbStr.empty() == false )
+        {
+            title = "Track #";
+            title += trackNbStr;
+        }
     }
-    media->setTitle( title );
-    unsigned int trackNb = std::stoi( trackNbStr );
+    if ( title.empty() == false )
+        media->setTitle( title );
+    unsigned int trackNb;
+    if ( trackNbStr.empty() == false )
+        trackNb = std::stoi( trackNbStr );
+    else
+        trackNb = 0;
     auto track = std::static_pointer_cast<AlbumTrack>( album->addTrack( media, trackNb ) );
     if ( track == nullptr )
     {
