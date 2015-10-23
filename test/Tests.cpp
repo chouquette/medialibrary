@@ -43,7 +43,7 @@ class TestEnv : public ::testing::Environment
 void Tests::TearDown()
 {
     ml.reset();
-//    unlink("test.db");
+    unlink("test.db");
 }
 
 
