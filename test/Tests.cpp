@@ -43,7 +43,7 @@ class TestEnv : public ::testing::Environment
 void Tests::TearDown()
 {
     ml.reset();
-    unlink("test.db");
+//    unlink("test.db");
 }
 
 
@@ -55,6 +55,7 @@ void Tests::Reload(std::shared_ptr<factory::IFileSystem> fs /*= nullptr*/, IMedi
         fs = std::shared_ptr<factory::IFileSystem>( new mock::NoopFsFactory );
     }
     ml->setFsFactory( fs );
+    ml->setVerbosity( LogLevel::Error );
     bool res = ml->initialize( "test.db", "/tmp", metadataCb );
     ASSERT_TRUE( res );
 }
