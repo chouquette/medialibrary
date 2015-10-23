@@ -26,12 +26,17 @@
 
 #include <vlcpp/vlc.hpp>
 
+#if defined(WITH_EVAS)
+#include <Evas.h>
+#endif
+
 #include "IMetadataService.h"
 
 class VLCThumbnailer : public IMetadataService
 {
 public:
     VLCThumbnailer( const VLC::Instance& vlc );
+    ~VLCThumbnailer();
     virtual bool initialize(IMetadataServiceCb *callback, MediaLibrary *ml) override;
     virtual unsigned int priority() const override;
     virtual void run(std::shared_ptr<Media> file, void *data) override;
@@ -46,7 +51,7 @@ private:
 private:
     // Force a base width, let height be computed depending on A/R
     static const uint32_t Width = 320;
-    static const uint8_t Bpp = 3;
+    static const uint8_t Bpp = 4;
 
 private:
     VLC::Instance m_instance;
@@ -55,6 +60,9 @@ private:
     std::mutex m_mutex;
     std::condition_variable m_cond;
     // Per snapshot variables
+#ifdef WITH_EVAS
+    std::unique_ptr<Evas, void(*)(Evas*)> m_canvas;
+#endif
     std::unique_ptr<uint8_t[]> m_buff;
     bool m_snapshotRequired;
     uint32_t m_height;

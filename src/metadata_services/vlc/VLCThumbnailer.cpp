@@ -23,7 +23,11 @@
 #include "VLCThumbnailer.h"
 
 #include <cstring>
+#ifdef WITH_JPEG
 #include <jpeglib.h>
+#elif defined(WITH_EVAS)
+#include <Evas_Engine_Buffer.h>
+#endif
 #include <setjmp.h>
 
 #include "IMedia.h"
@@ -32,9 +36,39 @@
 
 VLCThumbnailer::VLCThumbnailer(const VLC::Instance &vlc)
     : m_instance( vlc )
+#ifdef WITH_EVAS
+    , m_canvas( nullptr, &evas_free )
+#endif
     , m_snapshotRequired( false )
     , m_height( 0 )
 {
+#ifdef WITH_EVAS
+    static int fakeBuffer;
+    evas_init();
+    auto method = evas_render_method_lookup("buffer");
+    m_canvas.reset( evas_new() );
+    if ( m_canvas == nullptr )
+        throw std::runtime_error( "Failed to allocate canvas" );
+    evas_output_method_set( m_canvas.get(), method );
+    evas_output_size_set(m_canvas.get(), 1, 1 );
+    evas_output_viewport_set( m_canvas.get(), 0, 0, 1, 1 );
+    auto einfo = (Evas_Engine_Info_Buffer *)evas_engine_info_get( m_canvas.get() );
+    einfo->info.depth_type = EVAS_ENGINE_BUFFER_DEPTH_ARGB32;
+    einfo->info.dest_buffer = &fakeBuffer;
+    einfo->info.dest_buffer_row_bytes = 4;
+    einfo->info.use_color_key = 0;
+    einfo->info.alpha_threshold = 0;
+    einfo->info.func.new_update_region = NULL;
+    einfo->info.func.free_update_region = NULL;
+    evas_engine_info_set( m_canvas.get(), (Evas_Engine_Info *)einfo );
+#endif
+}
+
+VLCThumbnailer::~VLCThumbnailer()
+{
+#ifdef WITH_EVAS
+    evas_shutdown();
+#endif
 }
 
 bool VLCThumbnailer::initialize(IMetadataServiceCb *callback, MediaLibrary* ml)
@@ -145,7 +179,7 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
     mp.setVideoFormatCallbacks(
         // Setup
         [this, &mp](char* chroma, unsigned int* width, unsigned int *height, unsigned int *pitches, unsigned int *lines) {
-            strcpy( chroma, "RV24" );
+            strcpy( chroma, "RV32" );
 
             const float inputAR = (float)*width / *height;
 
@@ -154,7 +188,9 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
             m_height = (float)Width / inputAR + 1;
             // If our buffer isn't enough anymore, reallocate a new one.
             if ( m_height > prevHeight )
+            {
                 m_buff.reset( new uint8_t[Width * m_height * Bpp] );
+            }
             *height = m_height;
             *pitches = Width * Bpp;
             *lines = m_height;
@@ -229,8 +265,14 @@ bool VLCThumbnailer::compress(uint8_t* buff, std::shared_ptr<Media> file, void *
 {
     auto path = m_ml->snapshotPath();
     path += "/";
-    path += std::to_string( file->id() ) + ".jpg";
+    path += std::to_string( file->id() ) +
+#ifdef WITH_EVAS
+            ".png";
+#else
+            ".jpg";
+#endif
 
+#ifdef WITH_JPEG
     //FIXME: Abstract this away, though libjpeg requires a FILE*...
     auto fOut = fopen(path.c_str(), "wb");
     // ensure we always close the file.
@@ -242,7 +284,6 @@ bool VLCThumbnailer::compress(uint8_t* buff, std::shared_ptr<Media> file, void *
         return false;
     }
 
-#ifdef WITH_JPEG
     jpeg_compress_struct compInfo;
     JSAMPROW row_pointer[1];
 
@@ -285,6 +326,15 @@ bool VLCThumbnailer::compress(uint8_t* buff, std::shared_ptr<Media> file, void *
     }
     jpeg_finish_compress(&compInfo);
     jpeg_destroy_compress(&compInfo);
+#elif defined(WITH_EVAS)
+    auto evas_obj = std::unique_ptr<Evas_Object, void(*)(Evas_Object*)>( evas_object_image_add( m_canvas.get() ), evas_object_del );
+    if ( evas_obj == nullptr )
+        return false;
+    evas_object_image_colorspace_set( evas_obj.get(), EVAS_COLORSPACE_ARGB8888 );
+    evas_object_image_size_set( evas_obj.get(), Width, m_height );
+    evas_object_image_data_set( evas_obj.get(), buff );
+
+    evas_object_image_save( evas_obj.get(), path.c_str(), NULL, "quality=100 compress=9");
 #else
 #error FIXME
 #endif
