@@ -84,6 +84,9 @@ class MediaLibrary : public IMediaLibrary
         //Temporarily public, move back to private as soon as we start monitoring the FS
         virtual void reload() override;
 
+        virtual void pauseBackgroundOperations() override;
+        virtual void resumeBackgroundOperations() override;
+
     private:
         static const std::vector<std::string> supportedVideoExtensions;
         static const std::vector<std::string> supportedAudioExtensions;

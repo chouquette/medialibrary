@@ -123,7 +123,17 @@ class IMediaLibrary
         virtual void discover( const std::string& entryPoint ) = 0;
         virtual const std::string& snapshotPath() const = 0;
         virtual void setLogger( ILogger* logger ) = 0;
-
+        /**
+         * @brief pauseBackgroundOperations Will stop potentially CPU intensive background
+         * operations, until resumeBackgroundOperations() is called.
+         * If an operation is currently running, it will finish before pausing.
+         */
+        virtual void pauseBackgroundOperations() = 0;
+        /**
+         * @brief resumeBackgroundOperations Resumes background tasks, previously
+         * interrupted by pauseBackgroundOperations().
+         */
+        virtual void resumeBackgroundOperations() = 0;
         virtual void reload() = 0;
 };
 

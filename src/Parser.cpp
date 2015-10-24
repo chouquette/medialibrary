@@ -32,6 +32,7 @@ Parser::Parser(DBConnection dbConnection , IMediaLibraryCb* cb)
     , m_callback( cb )
     , m_nbParsed( 0 )
     , m_nbToParse( 0 )
+    , m_paused( false )
 {
 }
 
@@ -72,7 +73,8 @@ void Parser::parse( std::shared_ptr<Media> file )
         return;
     m_tasks.push( new Task( file, m_services, m_callback ) );
     updateStats( false, true );
-    m_cond.notify_all();
+    if ( m_paused == false )
+        m_cond.notify_all();
 }
 
 void Parser::start()
@@ -81,6 +83,19 @@ void Parser::start()
     assert( m_thread.joinable() == false );
 
     m_thread = std::thread{ &Parser::run, this };
+}
+
+void Parser::pause()
+{
+    std::lock_guard<std::mutex> lock( m_lock );
+    m_paused = true;
+}
+
+void Parser::resume()
+{
+    std::lock_guard<std::mutex> lock( m_lock );
+    m_paused = false;
+    m_cond.notify_all();
 }
 
 void Parser::run()
@@ -93,9 +108,12 @@ void Parser::run()
         Task* task = nullptr;
         {
             std::unique_lock<std::mutex> lock( m_lock );
-            if ( m_tasks.empty() == true )
+            if ( m_tasks.empty() == true || m_paused == true )
             {
-                m_cond.wait( lock, [this]() { return m_tasks.empty() == false || m_stopParser == true; });
+                m_cond.wait( lock, [this]() {
+                    return ( m_tasks.empty() == false && m_paused == false )
+                            || m_stopParser == true;
+                });
                 // We might have been woken up because the parser is being destroyed
                 if ( m_stopParser  == true )
                     break;

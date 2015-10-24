@@ -41,6 +41,8 @@ class Parser : public IMetadataServiceCb
         void addService(std::unique_ptr<IMetadataService> service );
         void parse( std::shared_ptr<Media> file );
         void start();
+        void pause();
+        void resume();
 
     private:
         virtual void done( std::shared_ptr<Media> file, IMetadataService::Status status, void* data ) override;
@@ -72,6 +74,7 @@ class Parser : public IMetadataServiceCb
         IMediaLibraryCb* m_callback;
         std::atomic_uint m_nbParsed;
         std::atomic_uint m_nbToParse;
+        bool m_paused;
 };
 
 #endif // PARSER_H

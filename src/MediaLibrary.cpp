@@ -361,6 +361,16 @@ void MediaLibrary::reload()
     m_discoverer->reload();
 }
 
+void MediaLibrary::pauseBackgroundOperations()
+{
+    m_parser->pause();
+}
+
+void MediaLibrary::resumeBackgroundOperations()
+{
+    m_parser->resume();
+}
+
 void MediaLibrary::discover( const std::string &entryPoint )
 {
     m_discoverer->discover( entryPoint );
