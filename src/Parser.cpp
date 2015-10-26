@@ -129,6 +129,9 @@ void Parser::run()
 
 void Parser::restore()
 {
+    if ( m_services.empty() == true )
+        return;
+
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
             + " WHERE parsed = 0";
     auto media = Media::fetchAll( m_dbConnection, req );
