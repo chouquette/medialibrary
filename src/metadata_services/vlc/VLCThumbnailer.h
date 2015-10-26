@@ -64,6 +64,6 @@ private:
     std::unique_ptr<Evas, void(*)(Evas*)> m_canvas;
 #endif
     std::unique_ptr<uint8_t[]> m_buff;
-    bool m_snapshotRequired;
+    std::atomic_bool m_snapshotRequired;
     uint32_t m_height;
 };

@@ -206,10 +206,9 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
         },
         //unlock
         [this](void*, void*const*) {
-            std::unique_lock<std::mutex> lock(m_mutex);
-            if ( m_snapshotRequired == true )
+            bool expected = true;
+            if ( m_snapshotRequired.compare_exchange_strong( expected, false ) )
             {
-                m_snapshotRequired = false;
                 m_cond.notify_all();
             }
         }
