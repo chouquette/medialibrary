@@ -28,17 +28,17 @@
 #include "Album.h"
 #include "AlbumTrack.h"
 
-class Files : public Tests
+class Medias : public Tests
 {
 };
 
 
-TEST_F( Files, Init )
+TEST_F( Medias, Init )
 {
     // only test for correct test fixture behavior
 }
 
-TEST_F( Files, Create )
+TEST_F( Medias, Create )
 {
     auto f = ml->addFile( "media.avi", nullptr );
     ASSERT_NE( f, nullptr );
@@ -55,7 +55,7 @@ TEST_F( Files, Create )
     ASSERT_EQ( files[0]->mrl(), f->mrl() );
 }
 
-TEST_F( Files, Fetch )
+TEST_F( Medias, Fetch )
 {
     auto f = ml->addFile( "media.avi", nullptr );
     auto f2 = std::static_pointer_cast<Media>( ml->file( "media.avi" ) );
@@ -70,7 +70,7 @@ TEST_F( Files, Fetch )
     ASSERT_TRUE( f2->isStandAlone() );
 }
 
-TEST_F( Files, Delete )
+TEST_F( Medias, Delete )
 {
     auto f = ml->addFile( "media.avi", nullptr );
     auto f2 = ml->file( "media.avi" );
@@ -82,7 +82,7 @@ TEST_F( Files, Delete )
     ASSERT_EQ( f2, nullptr );
 }
 
-TEST_F( Files, Duplicate )
+TEST_F( Medias, Duplicate )
 {
     auto f = ml->addFile( "media.avi", nullptr );
     ASSERT_NE( f, nullptr );
@@ -93,7 +93,7 @@ TEST_F( Files, Duplicate )
     ASSERT_EQ( f, f2 );
 }
 
-TEST_F( Files, LastModificationDate )
+TEST_F( Medias, LastModificationDate )
 {
     auto f = ml->addFile( "media.avi", nullptr );
     ASSERT_NE( 0u, f->lastModificationDate() );
@@ -103,7 +103,7 @@ TEST_F( Files, LastModificationDate )
     ASSERT_EQ( f->lastModificationDate(), f2->lastModificationDate() );
 }
 
-TEST_F( Files, Duration )
+TEST_F( Medias, Duration )
 {
     auto f = ml->addFile( "media.avi", nullptr );
     ASSERT_EQ( f->duration(), -1 );
@@ -121,7 +121,7 @@ TEST_F( Files, Duration )
 }
 
 
-TEST_F( Files, Artist )
+TEST_F( Medias, Artist )
 {
     auto f = std::static_pointer_cast<Media>( ml->addFile( "media.avi", nullptr ) );
     ASSERT_EQ( f->artist(), "" );
@@ -137,7 +137,7 @@ TEST_F( Files, Artist )
     ASSERT_EQ( f2->artist(), newArtist );
 }
 
-TEST_F( Files, Snapshot )
+TEST_F( Medias, Snapshot )
 {
     auto f = ml->addFile( "media.avi", nullptr );
     ASSERT_EQ( f->snapshot(), "" );
@@ -153,7 +153,7 @@ TEST_F( Files, Snapshot )
     ASSERT_EQ( f2->snapshot(), newSnapshot );
 }
 
-TEST_F( Files, UnknownArtist )
+TEST_F( Medias, UnknownArtist )
 {
     auto a = std::static_pointer_cast<Artist>( ml->unknownArtist() );
     ASSERT_NE( a, nullptr );
