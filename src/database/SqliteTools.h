@@ -149,6 +149,12 @@ public:
     {
     }
 
+    Row()
+        : m_stmt( nullptr )
+        , m_idx( 0 )
+    {
+    }
+
     /**
      * @brief operator >> Extracts the next column from this result row.
      */
@@ -169,15 +175,78 @@ public:
         return sqlite::Traits<T>::Load( m_stmt, idx );
     }
 
+    bool operator==(std::nullptr_t)
+    {
+        return m_stmt == nullptr;
+    }
+
+    bool operator!=(std::nullptr_t)
+    {
+        return m_stmt != nullptr;
+    }
+
 private:
     sqlite3_stmt* m_stmt;
     unsigned int m_idx;
 };
 
+class Statement
+{
+public:
+    Statement( DBConnection dbConnection, const std::string& req )
+        : m_stmt( nullptr, &sqlite3_finalize )
+    {
+        sqlite3_stmt* stmt;
+        int res = sqlite3_prepare_v2( dbConnection->getConn(), req.c_str(), -1, &stmt, NULL );
+        if ( res != SQLITE_OK )
+        {
+            throw std::runtime_error( std::string( "Failed to execute request: " ) + req + " " +
+                        sqlite3_errmsg( dbConnection->getConn() ) );
+        }
+        m_stmt.reset( stmt );
+    }
+
+    template <typename... Args>
+    void execute(Args&&... args)
+    {
+        _bind<1>( std::forward<Args>( args )... );
+    }
+
+    Row row()
+    {
+        auto res = sqlite3_step( m_stmt.get() );
+        if ( res == SQLITE_ROW )
+            return Row( m_stmt.get() );
+        else if ( res == SQLITE_DONE )
+            return Row();
+#if SQLITE_VERSION_NUMBER >= 3007015
+        auto err = sqlite3_errstr( res );
+#else
+        auto err = std::to_string( res );
+#endif
+        throw std::runtime_error( err );
+    }
+
+private:
+    // variadic recursion termination
+    template <int>
+    void _bind() {}
+
+    template <int Idx, typename T, typename... Args>
+    void _bind( T&& value, Args&&... args )
+    {
+        auto res = Traits<T>::Bind( m_stmt.get(), Idx, std::forward<T>( value ) );
+        if ( res != SQLITE_OK )
+            throw std::runtime_error( "Failed to bind parameter" );
+        _bind<Idx + 1, Args...>( std::forward<Args>( args )... );
+    }
+
+private:
+    std::unique_ptr<sqlite3_stmt, int (*)(sqlite3_stmt*)> m_stmt;
+};
+
 class Tools
 {
-    private:
-        typedef std::unique_ptr<sqlite3_stmt, int (*)(sqlite3_stmt*)> StmtPtr;
     public:
         /**
          * Will fetch all records of type IMPL and return them as a shared_ptr to INTF
@@ -192,16 +261,13 @@ class Tools
             auto ctx = dbConnection->acquireContext();
 
             std::vector<std::shared_ptr<INTF>> results;
-            auto stmt = prepareRequest( dbConnection, req, std::forward<Args>( args )...);
-            if ( stmt == nullptr )
-                throw std::runtime_error("Failed to execute SQlite request");
-            int res = sqlite3_step( stmt.get() );
-            while ( res == SQLITE_ROW )
+            auto stmt = Statement( dbConnection, req );
+            stmt.execute( std::forward<Args>( args )... );
+            Row sqliteRow;
+            while ( ( sqliteRow = stmt.row() ) != nullptr )
             {
-                sqlite::Row sqliteRow( stmt.get() );
                 auto row = IMPL::load( dbConnection, sqliteRow );
                 results.push_back( row );
-                res = sqlite3_step( stmt.get() );
             }
             return results;
         }
@@ -211,28 +277,12 @@ class Tools
         {
             auto ctx = dbConnection->acquireContext();
 
-            auto stmt = prepareRequest( dbConnection, req, std::forward<Args>( args )... );
-            if ( stmt == nullptr )
+            auto stmt = Statement( dbConnection, req );
+            stmt.execute( std::forward<Args>( args )... );
+            auto row = stmt.row();
+            if ( row == nullptr )
                 return nullptr;
-            int res = sqlite3_step( stmt.get() );
-            if ( res != SQLITE_ROW )
-                return nullptr;
-            sqlite::Row sqliteRow( stmt.get() );
-            return T::load( dbConnection, sqliteRow );
-        }
-
-        template <typename... Args>
-        static bool hasResults( DBConnection dbConnection, const std::string& req, Args&&... args )
-        {
-            auto ctx = dbConnection->acquireContext();
-
-            auto stmt = prepareRequest( dbConnection, req, std::forward<Args>( args )... );
-            if ( stmt == nullptr )
-                return false;
-            int res = sqlite3_step( stmt.get() );
-            if ( res != SQLITE_ROW )
-                return false;
-            return true;
+            return T::load( dbConnection, row );
         }
 
         template <typename... Args>
@@ -275,55 +325,14 @@ class Tools
         template <typename... Args>
         static bool executeRequestLocked( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
-            auto stmt = prepareRequest( dbConnection, req, std::forward<Args>( args )... );
-            if ( stmt == nullptr )
-                return false;
-            int res;
-            do
-            {
-                res = sqlite3_step( stmt.get() );
-            } while ( res == SQLITE_ROW );
-            if ( res != SQLITE_DONE )
-            {
-#if SQLITE_VERSION_NUMBER >= 3007015
-                auto err = sqlite3_errstr( res );
-#else
-                auto err = res;
-#endif
-                LOG_ERROR( "Failed to execute <", req, ">\nInvalid result: ", err,
-                          ": ", sqlite3_errmsg( dbConnection->getConn() ) );
-                return false;
-            }
+            auto stmt = Statement( dbConnection, req );
+            stmt.execute( std::forward<Args>( args )... );
+            while ( stmt.row() != nullptr )
+                ;
             return true;
         }
 
-        template <typename... Args>
-        static StmtPtr prepareRequest( DBConnection dbConnection, const std::string& req, Args&&... args )
-        {
-            return _prepareRequest<1>( dbConnection, req, std::forward<Args>( args )... );
-        }
-
-        template <int>
-        static StmtPtr _prepareRequest( DBConnection dbConnection, const std::string& req )
-        {
-            sqlite3_stmt* stmt = nullptr;
-            int res = sqlite3_prepare_v2( dbConnection->getConn(), req.c_str(), -1, &stmt, NULL );
-            if ( res != SQLITE_OK )
-            {
-                LOG_ERROR( "Failed to execute request: ", req, ' ',
-                            sqlite3_errmsg( dbConnection->getConn() ) );
-            }
-            return StmtPtr( stmt, &sqlite3_finalize );
-        }
-
-        template <int COLIDX, typename T, typename... Args>
-        static StmtPtr _prepareRequest( DBConnection dbConnection, const std::string& req, T&& arg, Args&&... args )
-        {
-            auto stmt = _prepareRequest<COLIDX + 1>( dbConnection, req, std::forward<Args>( args )... );
-            Traits<T>::Bind( stmt.get(), COLIDX, std::forward<T>( arg ) );
-            return stmt;
-        }
-
+        // Let SqliteConnection access executeRequestLocked
         friend SqliteConnection;
 };
 
