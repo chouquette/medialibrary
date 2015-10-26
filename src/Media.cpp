@@ -219,14 +219,15 @@ std::vector<VideoTrackPtr> Media::videoTracks()
 }
 
 bool Media::addAudioTrack( const std::string& codec, unsigned int bitrate,
-                          unsigned int sampleRate, unsigned int nbChannels )
+                          unsigned int sampleRate, unsigned int nbChannels,
+                          const std::string& language, const std::string& desc )
 {
     static const std::string req = "INSERT INTO AudioTrackFileRelation VALUES(?, ?)";
 
-    auto track = AudioTrack::fetch( m_dbConnection, codec, bitrate, sampleRate, nbChannels );
+    auto track = AudioTrack::fetch( m_dbConnection, codec, bitrate, sampleRate, nbChannels, language, desc );
     if ( track == nullptr )
     {
-        track = AudioTrack::create( m_dbConnection, codec, bitrate, sampleRate, nbChannels );
+        track = AudioTrack::create( m_dbConnection, codec, bitrate, sampleRate, nbChannels, language, desc );
         if ( track == nullptr )
             return false;
     }

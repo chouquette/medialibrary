@@ -43,18 +43,23 @@ class AudioTrack : public IAudioTrack, public Cache<AudioTrack, IAudioTrack, pol
 {
     public:
         AudioTrack( DBConnection dbConnection, sqlite::Row& row );
-        AudioTrack( const std::string& codec, unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels );
+        AudioTrack( const std::string& codec, unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels, const std::string& language, const std::string& desc );
 
         virtual unsigned int id() const override;
         virtual const std::string&codec() const override;
         virtual unsigned int bitrate() const override;
         virtual unsigned int sampleRate() const override;
         virtual unsigned int nbChannels() const override;
+        virtual const std::string& language() const override;
+        virtual const std::string& description() const override;
 
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<AudioTrack> fetch( DBConnection dbConnection, const std::string& codec,
-                                    unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels );
-        static std::shared_ptr<AudioTrack> create(DBConnection dbConnection, const std::string& codec, unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels);
+                                    unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels,
+                                                  const std::string& language, const std::string& desc );
+        static std::shared_ptr<AudioTrack> create( DBConnection dbConnection, const std::string& codec,
+                                                   unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels,
+                                                   const std::string& language, const std::string& desc );
 
     private:
         DBConnection m_dbConnection;
@@ -63,6 +68,8 @@ class AudioTrack : public IAudioTrack, public Cache<AudioTrack, IAudioTrack, pol
         unsigned int m_bitrate;
         unsigned int m_sampleRate;
         unsigned int m_nbChannels;
+        std::string m_language;
+        std::string m_description;
 
 
     private:

@@ -103,8 +103,8 @@ IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Me
         }
         else if ( track.type() == VLC::MediaTrack::Audio )
         {
-            media->addAudioTrack( fcc, track.bitrate(), track.rate(),
-                                      track.channels() );
+            media->addAudioTrack( fcc, track.bitrate(), track.rate(), track.channels(),
+                                  track.language(), track.description() );
         }
     }
     if ( isAudio == true )
