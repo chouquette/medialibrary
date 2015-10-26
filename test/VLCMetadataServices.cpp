@@ -108,6 +108,7 @@ TEST_F( VLCMetadataServices, ParseAlbum )
     Reload();
 
     auto file = ml->file( "mr-zebra.mp3" );
+    ASSERT_TRUE( std::static_pointer_cast<Media>( file )->isParsed() );
     auto track = file->albumTrack();
     ASSERT_NE( track, nullptr );
     ASSERT_EQ( file->title(), "Mr. Zebra" );

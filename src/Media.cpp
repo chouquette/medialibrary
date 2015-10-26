@@ -333,7 +333,7 @@ bool Media::createTable( DBConnection connection )
             "folder_id UNSIGNED INTEGER,"
             "last_modification_date UNSIGNED INTEGER,"
             "snapshot TEXT,"
-            "parsed BOOLEAN,"
+            "parsed BOOLEAN NOT NULL DEFAULT 0,"
             "title TEXT,"
             "FOREIGN KEY (show_episode_id) REFERENCES " + policy::ShowEpisodeTable::Name
             + "(id_episode) ON DELETE CASCADE,"
