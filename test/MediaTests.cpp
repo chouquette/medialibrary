@@ -83,12 +83,11 @@ TEST_F( Files, Delete )
 TEST_F( Files, Duplicate )
 {
     auto f = ml->addFile( "media.avi", nullptr );
-    auto f2 = std::static_pointer_cast<Media>( ml->addFile( "media.avi", nullptr ) );
-
     ASSERT_NE( f, nullptr );
-    ASSERT_EQ( f2, nullptr );
+    ASSERT_THROW( ml->addFile( "media.avi", nullptr ), sqlite::errors::ConstraintViolation );
 
-    f2 = std::static_pointer_cast<Media>( ml->file( "media.avi" ) );
+
+    auto f2 = ml->file( "media.avi" );
     ASSERT_EQ( f, f2 );
 }
 

@@ -140,6 +140,26 @@ struct Traits<T, typename std::enable_if<IsSameDecay<T, int64_t>::value>::type>
     (*Load)(sqlite3_stmt *, int) = &sqlite3_column_int64;
 };
 
+namespace errors
+{
+class ConstraintViolation : std::exception
+{
+public:
+    ConstraintViolation( const std::string& req )
+    {
+        m_reason = std::string( "Request <" ) + req + "> aborted due to "
+                "constraint violation";
+    }
+
+    virtual const char* what() const noexcept override
+    {
+        return m_reason.c_str();
+    }
+private:
+    std::string m_reason;
+};
+}
+
 class Row
 {
 public:
@@ -195,6 +215,7 @@ class Statement
 public:
     Statement( DBConnection dbConnection, const std::string& req )
         : m_stmt( nullptr, &sqlite3_finalize )
+        , m_req( req )
     {
         sqlite3_stmt* stmt;
         int res = sqlite3_prepare_v2( dbConnection->getConn(), req.c_str(), -1, &stmt, NULL );
@@ -215,16 +236,24 @@ public:
     Row row()
     {
         auto res = sqlite3_step( m_stmt.get() );
-        if ( res == SQLITE_ROW )
+        switch ( res )
+        {
+        case SQLITE_ROW:
             return Row( m_stmt.get() );
-        else if ( res == SQLITE_DONE )
+        case SQLITE_DONE:
             return Row();
+        case SQLITE_CONSTRAINT:
+            throw errors::ConstraintViolation( m_req );
+        default:
+        {
 #if SQLITE_VERSION_NUMBER >= 3007015
-        auto err = sqlite3_errstr( res );
+            auto err = sqlite3_errstr( res );
 #else
-        auto err = std::to_string( res );
+            auto err = std::to_string( res );
 #endif
-        throw std::runtime_error( err );
+            throw std::runtime_error( err );
+        }
+        }
     }
 
 private:
@@ -243,6 +272,7 @@ private:
 
 private:
     std::unique_ptr<sqlite3_stmt, int (*)(sqlite3_stmt*)> m_stmt;
+    std::string m_req;
 };
 
 class Tools
