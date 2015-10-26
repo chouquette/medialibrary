@@ -79,7 +79,7 @@ bool AudioTrack::createTable( DBConnection dbConnection )
                 "bitrate UNSIGNED INTEGER,"
                 "samplerate UNSIGNED INTEGER,"
                 "nb_channels UNSIGNED INTEGER,"
-                "UNIQUE ( codec, bitrate ) ON CONFLICT FAIL"
+                "UNIQUE ( codec, bitrate, samplerate, nb_channels ) ON CONFLICT FAIL"
             ")";
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
