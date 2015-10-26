@@ -227,7 +227,7 @@ bool VLCThumbnailer::takeSnapshot(std::shared_ptr<Media> file, VLC::MediaPlayer 
         m_snapshotRequired = true;
         bool success = m_cond.wait_for( lock, std::chrono::seconds( 3 ), [this]() {
             // Keep waiting if the vmem thread hasn't restored m_snapshotRequired to false
-            return m_snapshotRequired == true;
+            return m_snapshotRequired == false;
         });
         if ( success == false )
         {
