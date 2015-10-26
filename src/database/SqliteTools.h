@@ -145,10 +145,10 @@ namespace errors
 class ConstraintViolation : std::exception
 {
 public:
-    ConstraintViolation( const std::string& req )
+    ConstraintViolation( const std::string& req, const std::string& err )
     {
         m_reason = std::string( "Request <" ) + req + "> aborted due to "
-                "constraint violation";
+                "constraint violation (" + err + ")";
     }
 
     virtual const char* what() const noexcept override
@@ -215,6 +215,7 @@ class Statement
 public:
     Statement( DBConnection dbConnection, const std::string& req )
         : m_stmt( nullptr, &sqlite3_finalize )
+        , m_dbConn( dbConnection )
         , m_req( req )
         , m_bindIdx( 0 )
     {
@@ -238,23 +239,20 @@ public:
     Row row()
     {
         auto res = sqlite3_step( m_stmt.get() );
-        switch ( res )
-        {
-        case SQLITE_ROW:
+        if ( res == SQLITE_ROW )
             return Row( m_stmt.get() );
-        case SQLITE_DONE:
+        else if ( res == SQLITE_DONE )
             return Row();
-        case SQLITE_CONSTRAINT:
-            throw errors::ConstraintViolation( m_req );
-        default:
+        else
         {
-#if SQLITE_VERSION_NUMBER >= 3007015
-            auto err = sqlite3_errstr( res );
-#else
-            auto err = std::to_string( res );
-#endif
-            throw std::runtime_error( err );
-        }
+            std::string errMsg = sqlite3_errmsg( m_dbConn->getConn() );
+            switch ( res )
+            {
+                case SQLITE_CONSTRAINT:
+                    throw errors::ConstraintViolation( m_req, errMsg );
+                default:
+                  throw std::runtime_error( errMsg );
+            }
         }
     }
 
@@ -271,6 +269,7 @@ private:
 
 private:
     std::unique_ptr<sqlite3_stmt, int (*)(sqlite3_stmt*)> m_stmt;
+    DBConnection m_dbConn;
     std::string m_req;
     unsigned int m_bindIdx;
 };
