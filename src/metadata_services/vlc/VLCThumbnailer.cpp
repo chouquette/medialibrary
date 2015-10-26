@@ -41,6 +41,7 @@ VLCThumbnailer::VLCThumbnailer(const VLC::Instance &vlc)
 #endif
     , m_snapshotRequired( false )
     , m_height( 0 )
+    , m_prevSize( 0 )
 {
 #ifdef WITH_EVAS
     static int fakeBuffer;
@@ -184,12 +185,13 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
             const float inputAR = (float)*width / *height;
 
             *width = Width;
-            auto prevHeight = m_height;
             m_height = (float)Width / inputAR + 1;
+            auto size = Width * m_height * Bpp;
             // If our buffer isn't enough anymore, reallocate a new one.
-            if ( m_height > prevHeight )
+            if ( size > m_prevSize )
             {
-                m_buff.reset( new uint8_t[Width * m_height * Bpp] );
+                m_buff.reset( new uint8_t[size] );
+                m_prevSize = size;
             }
             *height = m_height;
             *pitches = Width * Bpp;

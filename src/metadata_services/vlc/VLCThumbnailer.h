@@ -66,4 +66,5 @@ private:
     std::unique_ptr<uint8_t[]> m_buff;
     std::atomic_bool m_snapshotRequired;
     uint32_t m_height;
+    uint32_t m_prevSize;
 };
