@@ -104,7 +104,7 @@ std::vector<MediaPtr> Artist::media() const
         static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
                 "LEFT JOIN MediaArtistRelation mar ON mar.id_media = med.id_media "
                 "WHERE mar.id_artist IS NULL";
-        return Media::fetchAll( m_dbConnection, req, m_id );
+        return Media::fetchAll( m_dbConnection, req );
     }
 }
 
