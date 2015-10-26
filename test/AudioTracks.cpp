@@ -32,15 +32,45 @@ class AudioTracks : public Tests
 TEST_F( AudioTracks, AddTrack )
 {
     auto f = std::static_pointer_cast<Media>( ml->addFile( "file.mp3", nullptr ) );
-    bool res = f->addAudioTrack( "PCM", 44100, 128, 2 );
+    bool res = f->addAudioTrack( "PCM", 128, 44100, 2, "fr", "test" );
     ASSERT_TRUE( res );
+}
+
+TEST_F( AudioTracks, GetSetProperties )
+{
+    auto f = std::static_pointer_cast<Media>( ml->addFile( "file.mp3", nullptr ) );
+    ASSERT_NE( f, nullptr );
+    f->addAudioTrack( "PCM", 128, 44100, 2, "en", "test desc" );
+    auto tracks = f->audioTracks();
+    ASSERT_EQ( tracks.size(), 1u );
+    auto t = tracks[0];
+    ASSERT_NE( t, nullptr );
+    ASSERT_EQ( t->codec(), "PCM" );
+    ASSERT_EQ( t->sampleRate(), 44100u );
+    ASSERT_EQ( t->bitrate(), 128u );
+    ASSERT_EQ( t->nbChannels(), 2u );
+    ASSERT_EQ( t->language(), "en" );
+    ASSERT_EQ( t->description(), "test desc" );
+
+    Reload();
+
+    auto f2 = ml->file( "file.mp3" );
+    tracks = f2->audioTracks();
+    ASSERT_EQ( tracks.size(), 1u );
+    t = tracks[0];
+    ASSERT_EQ( t->codec(), "PCM" );
+    ASSERT_EQ( t->sampleRate(), 44100u );
+    ASSERT_EQ( t->bitrate(), 128u );
+    ASSERT_EQ( t->nbChannels(), 2u );
+    ASSERT_EQ( t->language(), "en" );
+    ASSERT_EQ( t->description(), "test desc" );
 }
 
 TEST_F( AudioTracks, FetchTracks )
 {
     auto f = std::static_pointer_cast<Media>( ml->addFile( "file.mp3", nullptr ) );
-    f->addAudioTrack( "PCM", 44100, 128, 2 );
-    f->addAudioTrack( "WMA", 48000, 128, 2 );
+    f->addAudioTrack( "PCM", 128, 44100, 2, "en", "test desc" );
+    f->addAudioTrack( "WMA", 128, 48000, 2, "fr", "test desc 2" );
 
     auto ts = f->audioTracks();
     ASSERT_EQ( ts.size(), 2u );
@@ -49,10 +79,10 @@ TEST_F( AudioTracks, FetchTracks )
 TEST_F( AudioTracks, CheckUnique )
 {
     auto f = std::static_pointer_cast<Media>( ml->addFile( "file.mp3", nullptr ) );
-    f->addAudioTrack( "PCM", 44100, 128, 2 );
+    f->addAudioTrack( "PCM", 128, 44100, 2, "en", "test desc" );
 
     auto f2 = std::static_pointer_cast<Media>( ml->addFile( "file2.mp3", nullptr ) );
-    f2->addAudioTrack( "PCM", 44100, 128, 2 );
+    f2->addAudioTrack( "PCM", 128, 44100, 2, "en", "test desc" );
 
     auto ts = f->audioTracks();
 
