@@ -216,6 +216,7 @@ public:
     Statement( DBConnection dbConnection, const std::string& req )
         : m_stmt( nullptr, &sqlite3_finalize )
         , m_req( req )
+        , m_bindIdx( 0 )
     {
         sqlite3_stmt* stmt;
         int res = sqlite3_prepare_v2( dbConnection->getConn(), req.c_str(), -1, &stmt, NULL );
@@ -230,7 +231,8 @@ public:
     template <typename... Args>
     void execute(Args&&... args)
     {
-        _bind<1>( std::forward<Args>( args )... );
+        m_bindIdx = 1;
+        (void)std::initializer_list<bool>{ _bind( std::forward<Args>( args ) )... };
     }
 
     Row row()
@@ -257,22 +259,20 @@ public:
     }
 
 private:
-    // variadic recursion termination
-    template <int>
-    void _bind() {}
-
-    template <int Idx, typename T, typename... Args>
-    void _bind( T&& value, Args&&... args )
+    template <typename T>
+    bool _bind( T&& value )
     {
-        auto res = Traits<T>::Bind( m_stmt.get(), Idx, std::forward<T>( value ) );
+        auto res = Traits<T>::Bind( m_stmt.get(), m_bindIdx, std::forward<T>( value ) );
         if ( res != SQLITE_OK )
             throw std::runtime_error( "Failed to bind parameter" );
-        _bind<Idx + 1, Args...>( std::forward<Args>( args )... );
+        m_bindIdx++;
+        return true;
     }
 
 private:
     std::unique_ptr<sqlite3_stmt, int (*)(sqlite3_stmt*)> m_stmt;
     std::string m_req;
+    unsigned int m_bindIdx;
 };
 
 class Tools
