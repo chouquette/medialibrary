@@ -48,6 +48,7 @@ TEST_F( Files, Create )
     ASSERT_EQ( f->showEpisode(), nullptr );
     ASSERT_TRUE( f->isStandAlone() );
     ASSERT_FALSE( f->isParsed() );
+    ASSERT_EQ( f->duration(), -1 );
 
     auto files = ml->files();
     ASSERT_EQ( files.size(), 1u );
