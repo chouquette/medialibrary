@@ -40,6 +40,7 @@ VLCThumbnailer::VLCThumbnailer(const VLC::Instance &vlc)
     , m_canvas( nullptr, &evas_free )
 #endif
     , m_snapshotRequired( false )
+    , m_width( 0 )
     , m_height( 0 )
     , m_prevSize( 0 )
 {
@@ -62,6 +63,7 @@ VLCThumbnailer::VLCThumbnailer(const VLC::Instance &vlc)
     einfo->info.func.new_update_region = NULL;
     einfo->info.func.free_update_region = NULL;
     evas_engine_info_set( m_canvas.get(), (Evas_Engine_Info *)einfo );
+    m_cropBuffer.reset( new uint8_t[ DesiredWidth * DesiredHeight * Bpp ] );
 #endif
 }
 
@@ -184,17 +186,24 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
 
             const float inputAR = (float)*width / *height;
 
-            *width = Width;
-            m_height = (float)Width / inputAR + 1;
-            auto size = Width * m_height * Bpp;
+            m_width = DesiredWidth;
+            m_height = (float)m_width / inputAR + 1;
+            if ( m_height < DesiredHeight )
+            {
+                // Avoid downscaling too much for really wide pictures
+                m_width = inputAR * DesiredHeight;
+                m_height = DesiredHeight;
+            }
+            auto size = m_width * m_height * Bpp;
             // If our buffer isn't enough anymore, reallocate a new one.
             if ( size > m_prevSize )
             {
                 m_buff.reset( new uint8_t[size] );
                 m_prevSize = size;
             }
+            *width = m_width;
             *height = m_height;
-            *pitches = Width * Bpp;
+            *pitches = m_width * Bpp;
             *lines = m_height;
             return 1;
         },
@@ -268,6 +277,10 @@ bool VLCThumbnailer::compress( std::shared_ptr<Media> file, void *data )
             ".jpg";
 #endif
 
+    auto hOffset = m_width > DesiredWidth ? ( m_width - DesiredWidth ) / 2 : 0;
+    auto vOffset = m_height > DesiredHeight ? ( m_height - DesiredHeight ) / 2 : 0;
+    const auto stride = m_width * Bpp;
+
 #ifdef WITH_JPEG
     //FIXME: Abstract this away, though libjpeg requires a FILE*...
     auto fOut = fopen(path.c_str(), "wb");
@@ -300,8 +313,8 @@ bool VLCThumbnailer::compress( std::shared_ptr<Media> file, void *data )
     jpeg_create_compress(&compInfo);
     jpeg_stdio_dest(&compInfo, fOut);
 
-    compInfo.image_width = Width;
-    compInfo.image_height = m_height;
+    compInfo.image_width = DesiredWidth;
+    compInfo.image_height = DesiredHeight;
     compInfo.input_components = Bpp;
 #if ( !defined(JPEG_LIB_VERSION_MAJOR) && !defined(JPEG_LIB_VERSION_MINOR) ) || \
     ( JPEG_LIB_VERSION_MAJOR <= 8 && JPEG_LIB_VERSION_MINOR < 4 )
@@ -314,11 +327,10 @@ bool VLCThumbnailer::compress( std::shared_ptr<Media> file, void *data )
 
     jpeg_start_compress( &compInfo, TRUE );
 
-    auto stride = compInfo.image_width * Bpp;
-
-    while (compInfo.next_scanline < compInfo.image_height) {
-      row_pointer[0] = &m_buff[compInfo.next_scanline * stride];
-      jpeg_write_scanlines(&compInfo, row_pointer, 1);
+    while (compInfo.next_scanline < DesiredHeight)
+    {
+        row_pointer[0] = &m_buff[(compInfo.next_scanline + vOffset ) * stride + hOffset];
+        jpeg_write_scanlines(&compInfo, row_pointer, 1);
     }
     jpeg_finish_compress(&compInfo);
     jpeg_destroy_compress(&compInfo);
@@ -326,10 +338,23 @@ bool VLCThumbnailer::compress( std::shared_ptr<Media> file, void *data )
     auto evas_obj = std::unique_ptr<Evas_Object, void(*)(Evas_Object*)>( evas_object_image_add( m_canvas.get() ), evas_object_del );
     if ( evas_obj == nullptr )
         return false;
-    evas_object_image_colorspace_set( evas_obj.get(), EVAS_COLORSPACE_ARGB8888 );
-    evas_object_image_size_set( evas_obj.get(), Width, m_height );
-    evas_object_image_data_set( evas_obj.get(), m_buff.get() );
 
+    uint8_t *p_buff = m_buff.get();
+    if ( DesiredWidth != m_width )
+    {
+        p_buff += vOffset * stride;
+        for ( auto y = 0u; y < DesiredHeight; ++y )
+        {
+            memcpy( m_cropBuffer.get() + y * DesiredWidth * Bpp, p_buff + (hOffset * Bpp), DesiredWidth * Bpp );
+            p_buff += stride;
+        }
+        vOffset = 0;
+        p_buff = m_cropBuffer.get();
+    }
+
+    evas_object_image_colorspace_set( evas_obj.get(), EVAS_COLORSPACE_ARGB8888 );
+    evas_object_image_size_set( evas_obj.get(), DesiredWidth, DesiredHeight );
+    evas_object_image_data_set( evas_obj.get(), p_buff + vOffset * stride );
     evas_object_image_save( evas_obj.get(), path.c_str(), NULL, "quality=100 compress=9");
 #else
 #error FIXME

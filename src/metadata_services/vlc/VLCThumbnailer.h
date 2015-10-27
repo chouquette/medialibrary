@@ -50,7 +50,8 @@ private:
 
 private:
     // Force a base width, let height be computed depending on A/R
-    static const uint32_t Width = 320;
+    static const uint32_t DesiredWidth = 320;
+    static const uint32_t DesiredHeight = 200; // Aim for a 16:10 thumbnail
     static const uint8_t Bpp = 4;
 
 private:
@@ -62,9 +63,11 @@ private:
     // Per snapshot variables
 #ifdef WITH_EVAS
     std::unique_ptr<Evas, void(*)(Evas*)> m_canvas;
+    std::unique_ptr<uint8_t[]> m_cropBuffer;
 #endif
     std::unique_ptr<uint8_t[]> m_buff;
     std::atomic_bool m_snapshotRequired;
+    uint32_t m_width;
     uint32_t m_height;
     uint32_t m_prevSize;
 };
