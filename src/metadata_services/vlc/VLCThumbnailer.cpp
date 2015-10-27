@@ -292,9 +292,7 @@ bool VLCThumbnailer::compress( std::shared_ptr<Media> file, void *data )
 
 #ifdef WITH_JPEG
     //FIXME: Abstract this away, though libjpeg requires a FILE*...
-    auto fOut = fopen(path.c_str(), "wb");
-    // ensure we always close the file.
-    auto fOutPtr = std::unique_ptr<FILE, int(*)(FILE*)>( fOut, &fclose );
+    auto fOut = std::unique_ptr<FILE, int(*)(FILE*)>( fopen( path.c_str(), "wb" ), &fclose );
     if ( fOut == nullptr )
     {
         LOG_ERROR("Failed to open snapshot file ", path);
@@ -320,7 +318,7 @@ bool VLCThumbnailer::compress( std::shared_ptr<Media> file, void *data )
     }
 
     jpeg_create_compress(&compInfo);
-    jpeg_stdio_dest(&compInfo, fOut);
+    jpeg_stdio_dest(&compInfo, fOut.get());
 
     compInfo.image_width = DesiredWidth;
     compInfo.image_height = DesiredHeight;
