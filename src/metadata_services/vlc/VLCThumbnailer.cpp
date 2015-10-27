@@ -25,6 +25,13 @@
 #include <cstring>
 #ifdef WITH_JPEG
 #include <jpeglib.h>
+#if ( !defined(JPEG_LIB_VERSION_MAJOR) && !defined(JPEG_LIB_VERSION_MINOR) ) || \
+    ( JPEG_LIB_VERSION_MAJOR <= 8 && JPEG_LIB_VERSION_MINOR < 4 )
+//FIXME: I don't think we can expect this to work without VLC outputing BGR...
+#define JPEG_COLORSPACE JCS_EXT_BGR
+#else
+#define JPEG_COLORSPACE JCS_RGB
+#endif
 #elif defined(WITH_EVAS)
 #include <Evas_Engine_Buffer.h>
 #endif
@@ -182,7 +189,7 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
     mp.setVideoFormatCallbacks(
         // Setup
         [this, &mp](char* chroma, unsigned int* width, unsigned int *height, unsigned int *pitches, unsigned int *lines) {
-            strcpy( chroma, "RV32" );
+            strcpy( chroma, VLC_FOURCC );
 
             const float inputAR = (float)*width / *height;
 
@@ -316,12 +323,7 @@ bool VLCThumbnailer::compress( std::shared_ptr<Media> file, void *data )
     compInfo.image_width = DesiredWidth;
     compInfo.image_height = DesiredHeight;
     compInfo.input_components = Bpp;
-#if ( !defined(JPEG_LIB_VERSION_MAJOR) && !defined(JPEG_LIB_VERSION_MINOR) ) || \
-    ( JPEG_LIB_VERSION_MAJOR <= 8 && JPEG_LIB_VERSION_MINOR < 4 )
-    compInfo.in_color_space = JCS_EXT_BGR;
-#else
-    compInfo.in_color_space = JCS_RGB;
-#endif
+    compInfo.in_color_space = JPEG_COLORSPACE;
     jpeg_set_defaults( &compInfo );
     jpeg_set_quality( &compInfo, 85, TRUE );
 

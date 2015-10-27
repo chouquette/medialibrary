@@ -32,6 +32,16 @@
 
 #include "IMetadataService.h"
 
+#ifdef WITH_JPEG
+#define BPP 3
+#define VLC_FOURCC "RV24"
+#elif defined(WITH_EVAS)
+#define BPP 4
+#define VLC_FOURCC "RV32"
+#else
+#error No compression strategy
+#endif
+
 class VLCThumbnailer : public IMetadataService
 {
 public:
@@ -52,7 +62,7 @@ private:
     // Force a base width, let height be computed depending on A/R
     static const uint32_t DesiredWidth = 320;
     static const uint32_t DesiredHeight = 200; // Aim for a 16:10 thumbnail
-    static const uint8_t Bpp = 4;
+    static const uint8_t Bpp = BPP;
 
 private:
     VLC::Instance m_instance;
