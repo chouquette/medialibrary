@@ -35,7 +35,7 @@ class SqliteConnection
 private:
     using RequestContext = std::unique_lock<std::mutex>;
 public:
-    SqliteConnection( const std::string& dbPath );
+    explicit SqliteConnection( const std::string& dbPath );
     // Returns the current thread's connection
     // This will initiate a connection if required
     sqlite3* getConn();

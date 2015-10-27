@@ -34,7 +34,7 @@ class VLCMetadataService : public IMetadataService
 {
     struct Context
     {
-        Context(std::shared_ptr<Media> file_)
+        explicit Context(std::shared_ptr<Media> file_)
             : file( file_ )
         {
         }
@@ -44,7 +44,7 @@ class VLCMetadataService : public IMetadataService
     };
 
     public:
-        VLCMetadataService(const VLC::Instance& vlc);
+        explicit VLCMetadataService(const VLC::Instance& vlc);
 
         virtual bool initialize( IMetadataServiceCb *callback, MediaLibrary* ml ) override;
         virtual unsigned int priority() const override;

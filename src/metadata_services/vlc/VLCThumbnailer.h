@@ -45,7 +45,7 @@
 class VLCThumbnailer : public IMetadataService
 {
 public:
-    VLCThumbnailer( const VLC::Instance& vlc );
+    explicit VLCThumbnailer( const VLC::Instance& vlc );
     ~VLCThumbnailer();
     virtual bool initialize(IMetadataServiceCb *callback, MediaLibrary *ml) override;
     virtual unsigned int priority() const override;

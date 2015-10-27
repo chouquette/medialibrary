@@ -43,6 +43,8 @@
 
 VLCThumbnailer::VLCThumbnailer(const VLC::Instance &vlc)
     : m_instance( vlc )
+    , m_cb( nullptr )
+    , m_ml( nullptr )
 #ifdef WITH_EVAS
     , m_canvas( nullptr, &evas_free )
 #endif

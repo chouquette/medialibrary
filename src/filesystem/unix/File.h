@@ -32,7 +32,7 @@ namespace fs
 class File : public IFile
 {
 public:
-    File( const std::string& filePath );
+    explicit File( const std::string& filePath );
     virtual ~File() = default;
 
     virtual const std::string& name() const override;

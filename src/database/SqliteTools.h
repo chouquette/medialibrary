@@ -40,7 +40,7 @@ namespace sqlite
 
 struct ForeignKey
 {
-    constexpr ForeignKey(unsigned int v) : value(v) {}
+    constexpr explicit ForeignKey(unsigned int v) : value(v) {}
     unsigned int value;
 };
 

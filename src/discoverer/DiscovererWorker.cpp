@@ -26,6 +26,7 @@
 
 DiscovererWorker::DiscovererWorker()
     : m_run( true )
+    , m_cb( nullptr )
 {
 }
 
