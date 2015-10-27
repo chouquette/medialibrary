@@ -66,7 +66,7 @@ void VLCMetadataService::run( std::shared_ptr<Media> file, void* data )
     std::unique_lock<std::mutex> lock( m_mutex );
     std::atomic<Status> status( Status::Unknown );
 
-    ctx->media.eventManager().onParsedChanged([this, ctx, &status](bool parsed) mutable {
+    ctx->media.eventManager().onParsedChanged([this, ctx, &status](bool parsed) {
         if ( parsed == false )
             return;
         auto s = handleMediaMeta( ctx->file, ctx->media );
