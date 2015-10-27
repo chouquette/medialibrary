@@ -64,14 +64,15 @@ void VLCMetadataService::run( std::shared_ptr<Media> file, void* data )
     ctx->media = VLC::Media( m_instance, file->mrl(), VLC::Media::FromPath );
 
     std::unique_lock<std::mutex> lock( m_mutex );
-    auto status = Status::Unknown;
+    std::atomic<Status> status( Status::Unknown );
 
     ctx->media.eventManager().onParsedChanged([this, ctx, &status](bool parsed) mutable {
         if ( parsed == false )
             return;
         auto s = handleMediaMeta( ctx->file, ctx->media );
-        std::lock_guard<std::mutex> lock( m_mutex );
-        status = s;
+        auto expected = Status::Unknown;
+        while ( status.compare_exchange_weak( expected, s ) == false )
+            ;
         m_cond.notify_all();
     });
     ctx->media.parseAsync();
