@@ -125,6 +125,70 @@ IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Me
     return Status::Success;
 }
 
+/* Video files */
+
+bool VLCMetadataService::parseVideoFile( std::shared_ptr<Media> file, VLC::Media& media ) const
+{
+    file->setType( IMedia::Type::VideoType );
+    auto title = media.meta( libvlc_meta_Title );
+    if ( title.length() == 0 )
+        return true;
+    auto showName = media.meta( libvlc_meta_ShowName );
+    if ( showName.length() == 0 )
+    {
+        auto show = m_ml->show( showName );
+        if ( show == nullptr )
+        {
+            show = m_ml->createShow( showName );
+            if ( show == nullptr )
+                return false;
+        }
+
+        auto episodeIdStr = media.meta( libvlc_meta_Episode );
+        if ( episodeIdStr.length() > 0 )
+        {
+            size_t endpos;
+            int episodeId = std::stoi( episodeIdStr, &endpos );
+            if ( endpos != episodeIdStr.length() )
+            {
+                LOG_ERROR( "Invalid episode id provided" );
+                return true;
+            }
+            std::shared_ptr<Show> s = std::static_pointer_cast<Show>( show );
+            s->addEpisode( title, episodeId );
+        }
+    }
+    else
+    {
+        // How do we know if it's a movie or a random video?
+    }
+    return true;
+}
+
+/* Audio files */
+
+bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
+{
+    media->setType( IMedia::Type::AudioType );
+
+    auto artistPair = handleArtist( media, vlcMedia );
+    if ( artistPair.first == nullptr && artistPair.second == true )
+    {
+        LOG_WARN( "Failed to create a new artist" );
+        return false;
+    }
+    auto albumPair = handleAlbum( media, vlcMedia );
+    if ( albumPair.first == nullptr && albumPair.second == true )
+    {
+        LOG_WARN( "Failed to create a new album" );
+        return false;
+    }
+
+    return link( media, albumPair.first, artistPair.first, albumPair.second, artistPair.second );
+}
+
+/* Album handling */
+
 std::shared_ptr<Album> VLCMetadataService::findAlbum( const std::string& title, VLC::Media& vlcMedia ) const
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
@@ -174,63 +238,7 @@ std::pair<std::shared_ptr<Album>, bool> VLCMetadataService::handleAlbum( std::sh
     return {nullptr, false};
 }
 
-bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
-{
-    media->setType( IMedia::Type::AudioType );
-
-    auto artistPair = handleArtist( media, vlcMedia );
-    if ( artistPair.first == nullptr && artistPair.second == true )
-    {
-        LOG_WARN( "Failed to create a new artist" );
-        return false;
-    }
-    auto albumPair = handleAlbum( media, vlcMedia );
-    if ( albumPair.first == nullptr && albumPair.second == true )
-    {
-        LOG_WARN( "Failed to create a new album" );
-        return false;
-    }
-
-    return link( media, albumPair.first, artistPair.first, albumPair.second, artistPair.second );
-}
-
-bool VLCMetadataService::parseVideoFile( std::shared_ptr<Media> file, VLC::Media& media ) const
-{
-    file->setType( IMedia::Type::VideoType );
-    auto title = media.meta( libvlc_meta_Title );
-    if ( title.length() == 0 )
-        return true;
-    auto showName = media.meta( libvlc_meta_ShowName );
-    if ( showName.length() == 0 )
-    {
-        auto show = m_ml->show( showName );
-        if ( show == nullptr )
-        {
-            show = m_ml->createShow( showName );
-            if ( show == nullptr )
-                return false;
-        }
-
-        auto episodeIdStr = media.meta( libvlc_meta_Episode );
-        if ( episodeIdStr.length() > 0 )
-        {
-            size_t endpos;
-            int episodeId = std::stoi( episodeIdStr, &endpos );
-            if ( endpos != episodeIdStr.length() )
-            {
-                LOG_ERROR( "Invalid episode id provided" );
-                return true;
-            }
-            std::shared_ptr<Show> s = std::static_pointer_cast<Show>( show );
-            s->addEpisode( title, episodeId );
-        }
-    }
-    else
-    {
-        // How do we know if it's a movie or a random video?
-    }
-    return true;
-}
+/* Artists handling */
 
 std::pair<std::shared_ptr<Artist>, bool> VLCMetadataService::handleArtist( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
 {
@@ -271,6 +279,8 @@ std::pair<std::shared_ptr<Artist>, bool> VLCMetadataService::handleArtist( std::
     return {artist, newArtist};
 }
 
+/* Tracks handling */
+
 std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack(std::shared_ptr<Album> album, std::shared_ptr<Media> media, VLC::Media& vlcMedia) const
 {
     auto trackNbStr = vlcMedia.meta( libvlc_meta_TrackNumber );
@@ -306,9 +316,10 @@ std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack(std::shared_ptr<Albu
     return track;
 }
 
+/* Misc */
+
 bool VLCMetadataService::link(std::shared_ptr<Media> media, std::shared_ptr<Album> album, std::shared_ptr<Artist> artist, bool newAlbum, bool newArtist) const
 {
-
     // If this is either a new album or a new artist, we need to add the relationship between the two.
     if ( album != nullptr && artist != nullptr && ( newAlbum == true || newArtist == true ) )
     {
