@@ -124,7 +124,7 @@ TEST_F( VLCMetadataServices, ParseAlbum )
     auto releaseYear = album->releaseYear();
     ASSERT_NE( releaseYear, 0 );
 
-    auto album2 = ml->album( "Boys for Pele" );
+    auto album2 = ml->album( album->id() );
     ASSERT_EQ( album, album2 );
 }
 

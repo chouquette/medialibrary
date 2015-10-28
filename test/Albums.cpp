@@ -36,7 +36,7 @@ TEST_F( Albums, Create )
     auto a = ml->createAlbum( "album" );
     ASSERT_NE( a, nullptr );
 
-    auto a2 = ml->album( "album" );
+    auto a2 = ml->album( a->id() );
     ASSERT_EQ( a, a2 );
     ASSERT_EQ( a2->title(), "album" );
 }
@@ -48,7 +48,7 @@ TEST_F( Albums, Fetch )
     // Clear the cache
     Reload();
 
-    auto a2 = ml->album( "album" );
+    auto a2 = ml->album( a->id() );
     // The shared pointer are expected to point to a different instance
     ASSERT_NE( a, a2 );
 
@@ -67,7 +67,7 @@ TEST_F( Albums, AddTrack )
 
     Reload();
 
-    a = std::static_pointer_cast<Album>( ml->album( "albumtag" ) );
+    a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
     tracks = a->tracks();
     ASSERT_EQ( tracks.size(), 1u );
     ASSERT_EQ( tracks[0]->albumTrack()->trackNumber(), track->trackNumber() );
@@ -87,7 +87,7 @@ TEST_F( Albums, NbTracks )
 
     Reload();
 
-    a = std::static_pointer_cast<Album>( ml->album( "albumtag" ) );
+    a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
     tracks = a->tracks();
     ASSERT_EQ( tracks.size(), a->nbTracks() );
 }
@@ -103,7 +103,7 @@ TEST_F( Albums, SetGenre )
 
     Reload();
 
-    a = std::static_pointer_cast<Album>( ml->album( "album" ) );
+    a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
     auto tracks = a->tracks();
     ASSERT_EQ( tracks.size(), 1u );
     auto t2 = tracks[0];
@@ -119,7 +119,7 @@ TEST_F( Albums, SetReleaseDate )
 
     Reload();
 
-    auto a2 = ml->album( "album" );
+    auto a2 = ml->album( a->id() );
     ASSERT_EQ( a->releaseYear(), a2->releaseYear() );
 }
 
@@ -132,7 +132,7 @@ TEST_F( Albums, SetShortSummary )
 
     Reload();
 
-    auto a2 = ml->album( "album" );
+    auto a2 = ml->album( a->id() );
     ASSERT_EQ( a->shortSummary(), a2->shortSummary() );
 }
 
@@ -145,7 +145,7 @@ TEST_F( Albums, SetArtworkUrl )
 
     Reload();
 
-    auto a2 = ml->album( "album" );
+    auto a2 = ml->album( a->id() );
     ASSERT_EQ( a->artworkUrl(), a2->artworkUrl() );
 }
 
@@ -187,7 +187,7 @@ TEST_F( Albums, Artists )
 
     Reload();
 
-    album = std::static_pointer_cast<Album>( ml->album( "album" ) );
+    album = std::static_pointer_cast<Album>( ml->album( album->id() ) );
     artists = album->artists();
     ASSERT_EQ( artists.size(), 2u );
 }

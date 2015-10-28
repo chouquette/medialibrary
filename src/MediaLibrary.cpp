@@ -134,7 +134,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
                 Log::Info( msg );
         });
 
-        auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService( m_vlcInstance ) );
+        auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService( m_vlcInstance, m_dbConnection.get() ) );
         auto thumbnailerService = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer( m_vlcInstance ) );
         addMetadataService( std::move( vlcService ) );
         addMetadataService( std::move( thumbnailerService ) );
@@ -273,12 +273,9 @@ bool MediaLibrary::deleteLabel( LabelPtr label )
     return Label::destroy( m_dbConnection.get(), std::static_pointer_cast<Label>( label ) );
 }
 
-AlbumPtr MediaLibrary::album(const std::string& title )
+AlbumPtr MediaLibrary::album( unsigned int id )
 {
-    // We can't use Cache helper, since albums are cached by primary keys
-    static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
-            " WHERE title = ?";
-    return Album::fetchOne( m_dbConnection.get(), req, title );
+    return Album::fetch( m_dbConnection.get(), id );
 }
 
 std::shared_ptr<Album> MediaLibrary::createAlbum(const std::string& title )

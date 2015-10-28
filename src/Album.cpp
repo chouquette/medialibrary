@@ -167,7 +167,7 @@ bool Album::createTable(DBConnection dbConnection )
             policy::AlbumTable::Name +
             "("
                 "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
-                "title TEXT UNIQUE ON CONFLICT FAIL,"
+                "title TEXT,"
                 "release_year UNSIGNED INTEGER,"
                 "short_summary TEXT,"
                 "artwork_url TEXT,"

@@ -29,10 +29,11 @@
 
 #include "Media.h"
 
-VLCMetadataService::VLCMetadataService( const VLC::Instance& vlc )
+VLCMetadataService::VLCMetadataService(const VLC::Instance& vlc, DBConnection dbConnection )
     : m_instance( vlc )
     , m_cb( nullptr )
     , m_ml( nullptr )
+    , m_dbConn( dbConnection )
 {
 }
 
@@ -124,6 +125,22 @@ IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Me
     return Status::Success;
 }
 
+std::shared_ptr<Album> VLCMetadataService::findAlbum( const std::string& title, VLC::Media& vlcMedia ) const
+{
+    static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
+            " WHERE title = ?";
+    auto albums = Album::fetchAll( m_dbConn, req, title );
+
+    if ( albums.size() == 0 )
+        return nullptr;
+
+    if ( albums.size() == 1 )
+        return std::static_pointer_cast<Album>( albums[0] );
+
+    // FIXME: Attempt to find the proper album
+    return std::static_pointer_cast<Album>( albums[0] );
+}
+
 bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
 {
     media->setType( IMedia::Type::AudioType );
@@ -133,7 +150,7 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
     std::shared_ptr<AlbumTrack> track;
     if ( albumTitle.length() > 0 )
     {
-        album = std::static_pointer_cast<Album>( m_ml->album( albumTitle ) );
+        album = findAlbum( albumTitle, vlcMedia );
         if ( album == nullptr )
         {
             album = m_ml->createAlbum( albumTitle );
