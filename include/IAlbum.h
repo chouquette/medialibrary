@@ -39,6 +39,13 @@ class IAlbum
          * @brief tracks fetches album tracks from the database
          */
         virtual std::vector<std::shared_ptr<IMedia>> tracks() const = 0;
+        /**
+         * @brief albumArtist Returns the album main artist (generally tagged as album-artist)
+         */
+        virtual ArtistPtr albumArtist() const = 0;
+        /**
+         * @brief artists Returns a vector of all additional artists appearing on the album.
+         */
         virtual std::vector<ArtistPtr> artists() const = 0;
         /**
          * @brief nbTracks Returns the amount of track in this album.

@@ -36,6 +36,7 @@ Album::Album(DBConnection dbConnection, sqlite::Row& row)
 {
     row >> m_id
         >> m_title
+        >> m_artistId
         >> m_releaseYear
         >> m_shortSummary
         >> m_artworkUrl
@@ -46,6 +47,7 @@ Album::Album(DBConnection dbConnection, sqlite::Row& row)
 Album::Album(const std::string& title )
     : m_id( 0 )
     , m_title( title )
+    , m_artistId( 0 )
     , m_releaseYear( 0 )
     , m_lastSyncDate( 0 )
     , m_nbTracks( 0 )
@@ -142,6 +144,27 @@ unsigned int Album::nbTracks() const
     return m_nbTracks;
 }
 
+ArtistPtr Album::albumArtist() const
+{
+    if ( m_artistId == 0 )
+        return nullptr;
+    return Artist::fetch( m_dbConnection, m_artistId );
+}
+
+bool Album::setAlbumArtist(Artist* artist)
+{
+    if ( m_artistId == artist->id() )
+        return true;
+    if ( artist->id() == 0 )
+        return false;
+    static const std::string req = "UPDATE " + policy::AlbumTable::Name + " SET "
+            "artist_id = ? WHERE id_album = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artist->id(), m_id ) == false )
+        return false;
+    m_artistId = artist->id();
+    return true;
+}
+
 std::vector<ArtistPtr> Album::artists() const
 {
     static const std::string req = "SELECT art.* FROM " + policy::ArtistTable::Name + " art "
@@ -168,6 +191,7 @@ bool Album::createTable(DBConnection dbConnection )
             "("
                 "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "title TEXT,"
+                "artist_id UNSIGNED INTEGER,"
                 "release_year UNSIGNED INTEGER,"
                 "short_summary TEXT,"
                 "artwork_url TEXT,"

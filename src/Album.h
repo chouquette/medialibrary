@@ -67,6 +67,8 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         std::shared_ptr<AlbumTrack> addTrack( std::shared_ptr<Media> media, unsigned int trackNb );
         unsigned int nbTracks() const override;
 
+        virtual ArtistPtr albumArtist() const override;
+        bool setAlbumArtist( Artist* artist );
         virtual std::vector<ArtistPtr> artists() const override;
         bool addArtist( std::shared_ptr<Artist> artist );
 
@@ -77,6 +79,7 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         DBConnection m_dbConnection;
         unsigned int m_id;
         std::string m_title;
+        unsigned int m_artistId;
         unsigned int m_releaseYear;
         std::string m_shortSummary;
         std::string m_artworkUrl;

@@ -24,6 +24,7 @@
 
 #include "Album.h"
 #include "AlbumTrack.h"
+#include "Artist.h"
 #include "Media.h"
 #include "IMediaLibrary.h"
 
@@ -189,5 +190,22 @@ TEST_F( Albums, Artists )
 
     album = std::static_pointer_cast<Album>( ml->album( album->id() ) );
     artists = album->artists();
+    ASSERT_EQ( album->albumArtist(), nullptr );
     ASSERT_EQ( artists.size(), 2u );
+}
+
+TEST_F( Albums, AlbumArtist )
+{
+    auto album = ml->createAlbum( "test" );
+    ASSERT_EQ( album->albumArtist(), nullptr );
+    auto artist = ml->createArtist( "artist" );
+    album->setAlbumArtist( artist.get() );
+    ASSERT_NE( album->albumArtist(), nullptr );
+
+    Reload();
+
+    album = std::static_pointer_cast<Album>( ml->album( album->id() ) );
+    auto albumArtist = album->albumArtist();
+    ASSERT_NE( albumArtist, nullptr );
+    ASSERT_EQ( albumArtist->name(), artist->name() );
 }
