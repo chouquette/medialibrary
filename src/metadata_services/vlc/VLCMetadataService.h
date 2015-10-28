@@ -55,8 +55,9 @@ class VLCMetadataService : public IMetadataService
         std::shared_ptr<Album> findAlbum( const std::string& title, VLC::Media& vlcMedia ) const;
         bool parseAudioFile( std::shared_ptr<Media> media, VLC::Media &vlcMedia ) const;
         bool parseVideoFile( std::shared_ptr<Media> file, VLC::Media &media ) const;
-        bool handleArtist( std::shared_ptr<Album> album, std::shared_ptr<Media> media, VLC::Media& vlcMedia, bool newAlbum ) const;
+        std::pair<std::shared_ptr<Artist>, bool> handleArtist( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const;
         std::shared_ptr<AlbumTrack> handleTrack( std::shared_ptr<Album> album, std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const;
+        bool link( std::shared_ptr<Media> media, std::shared_ptr<Album> album, std::shared_ptr<Artist> artist, bool newAlbum, bool newArtist ) const;
 
         VLC::Instance m_instance;
         IMetadataServiceCb* m_cb;
