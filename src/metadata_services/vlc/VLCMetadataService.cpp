@@ -141,24 +141,14 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( const std::string& title, 
     return std::static_pointer_cast<Album>( albums[0] );
 }
 
-bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
+std::pair<std::shared_ptr<Album>, bool> VLCMetadataService::handleAlbum( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
 {
-    media->setType( IMedia::Type::AudioType );
     auto albumTitle = vlcMedia.meta( libvlc_meta_Album );
-    auto newAlbum = false;
-    std::shared_ptr<Album> album;
-    std::shared_ptr<AlbumTrack> track;
-
-    auto artistPair = handleArtist( media, vlcMedia );
-    if ( artistPair.first == nullptr && artistPair.second == true )
-    {
-        LOG_WARN( "Failed to create a new artist" );
-        return false;
-    }
-
     if ( albumTitle.length() > 0 )
     {
-        album = findAlbum( albumTitle, vlcMedia );
+        auto newAlbum = false;
+        auto album = findAlbum( albumTitle, vlcMedia );
+
         if ( album == nullptr )
         {
             album = m_ml->createAlbum( albumTitle );
@@ -175,12 +165,33 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
         }
         if ( album != nullptr )
         {
-            track = handleTrack( album, media, vlcMedia );
+            auto track = handleTrack( album, media, vlcMedia );
             if ( track != nullptr )
                 media->setAlbumTrack( track );
         }
+        return {album, newAlbum};
     }
-    return link( media, album, artistPair.first, newAlbum, artistPair.second );
+    return {nullptr, false};
+}
+
+bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
+{
+    media->setType( IMedia::Type::AudioType );
+
+    auto artistPair = handleArtist( media, vlcMedia );
+    if ( artistPair.first == nullptr && artistPair.second == true )
+    {
+        LOG_WARN( "Failed to create a new artist" );
+        return false;
+    }
+    auto albumPair = handleAlbum( media, vlcMedia );
+    if ( albumPair.first == nullptr && albumPair.second == true )
+    {
+        LOG_WARN( "Failed to create a new album" );
+        return false;
+    }
+
+    return link( media, albumPair.first, artistPair.first, albumPair.second, artistPair.second );
 }
 
 bool VLCMetadataService::parseVideoFile( std::shared_ptr<Media> file, VLC::Media& media ) const
