@@ -88,8 +88,8 @@ TEST_F( Artists, Albums )
     ASSERT_NE( album1, nullptr );
     ASSERT_NE( album2, nullptr );
 
-    album1->addArtist( artist );
-    album2->addArtist( artist );
+    album1->setAlbumArtist( artist.get() );
+    album2->setAlbumArtist( artist.get() );
 
     auto albums = artist->albums();
     ASSERT_EQ( albums.size(), 2u );

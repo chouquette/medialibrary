@@ -85,9 +85,8 @@ std::vector<AlbumPtr> Artist::albums() const
 {
     if ( m_id == 0 )
         return {};
-    static const std::string req = "SELECT alb.* FROM " + policy::AlbumTable::Name + " alb "
-            "LEFT JOIN AlbumArtistRelation aar ON aar.id_album = alb.id_album "
-            "WHERE aar.id_artist = ? ORDER BY alb.title";
+    static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " alb "
+            "WHERE artist_id = ? ORDER BY title";
     return Album::fetchAll( m_dbConnection, req, m_id );
 }
 
