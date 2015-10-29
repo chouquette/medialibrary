@@ -171,8 +171,9 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
 {
     media->setType( IMedia::Type::AudioType );
 
-    auto artistPair = handleArtist( media, vlcMedia );
-    if ( artistPair.first == nullptr && artistPair.second == true )
+    auto artistTuple = handleArtist( media, vlcMedia );
+    if ( ( std::get<0>( artistTuple ) == nullptr || std::get<1>( artistTuple ) == nullptr )
+         && std::get<2>( artistTuple ) == true )
     {
         LOG_WARN( "Failed to create a new artist" );
         return false;
@@ -184,7 +185,8 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
         return false;
     }
 
-    return link( media, albumPair.first, artistPair.first, albumPair.second, artistPair.second );
+    return link( media, albumPair.first, std::get<0>( artistTuple ), std::get<1>( artistTuple ),
+                 albumPair.second, std::get<2>( artistTuple ) );
 }
 
 /* Album handling */
@@ -240,33 +242,48 @@ std::pair<std::shared_ptr<Album>, bool> VLCMetadataService::handleAlbum( std::sh
 
 /* Artists handling */
 
-std::pair<std::shared_ptr<Artist>, bool> VLCMetadataService::handleArtist( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
+std::tuple<std::shared_ptr<Artist>, std::shared_ptr<Artist>, bool> VLCMetadataService::handleArtist( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
 {
-    assert(media != nullptr);
+    using ReturnType = std::tuple<std::shared_ptr<Artist>, std::shared_ptr<Artist>, bool>;
 
+    std::shared_ptr<Artist> albumArtist;
     std::shared_ptr<Artist> artist;
     auto newArtist = false;
     auto albumArtistName = vlcMedia.meta( libvlc_meta_AlbumArtist );
     auto artistName = vlcMedia.meta( libvlc_meta_Artist );
-    if ( albumArtistName.empty() == true )
-        albumArtistName = artistName;
 
-    if ( albumArtistName.length() > 0 )
+    if ( albumArtistName.empty() == true && artistName.empty() == true )
     {
-        artist = std::static_pointer_cast<Artist>( m_ml->artist( albumArtistName ) );
-        if ( artist == nullptr )
+        return ReturnType{nullptr, nullptr, false};
+    }
+
+    if ( albumArtistName.empty() == false )
+    {
+        albumArtist = std::static_pointer_cast<Artist>( m_ml->artist( albumArtistName ) );
+        if ( albumArtist == nullptr )
         {
-            artist = m_ml->createArtist( albumArtistName );
-            if ( artist == nullptr )
+            albumArtist = m_ml->createArtist( albumArtistName );
+            if ( albumArtist == nullptr )
             {
                 LOG_ERROR( "Failed to create new artist ", albumArtistName );
-                return {nullptr, true};
+                return ReturnType{nullptr, nullptr, true};
             }
             newArtist = true;
         }
     }
-    else
-        return {nullptr, false};
+    if ( artistName.empty() == false )
+    {
+        artist = std::static_pointer_cast<Artist>( m_ml->artist( artistName ) );
+        if ( artist == nullptr )
+        {
+            artist = m_ml->createArtist( artistName );
+            if ( artist == nullptr )
+            {
+                LOG_ERROR( "Failed to create new artist ", artistName );
+                return ReturnType{nullptr, nullptr, true};
+            }
+        }
+    }
 
     if ( artistName.length() > 0 )
         media->setArtist( artistName );
@@ -276,7 +293,7 @@ std::pair<std::shared_ptr<Artist>, bool> VLCMetadataService::handleArtist( std::
         // to the album artist by himself
         media->setArtist( albumArtistName );
     }
-    return {artist, newArtist};
+    return ReturnType{albumArtist, artist, newArtist};
 }
 
 /* Tracks handling */
@@ -318,19 +335,27 @@ std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack(std::shared_ptr<Albu
 
 /* Misc */
 
-bool VLCMetadataService::link(std::shared_ptr<Media> media, std::shared_ptr<Album> album, std::shared_ptr<Artist> artist, bool newAlbum, bool newArtist) const
+bool VLCMetadataService::link( std::shared_ptr<Media> media, std::shared_ptr<Album> album,
+                               std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist,
+                               bool newAlbum, bool newArtist ) const
 {
     // If this is either a new album or a new artist, we need to add the relationship between the two.
-    if ( album != nullptr && artist != nullptr && ( newAlbum == true || newArtist == true ) )
+    if ( album != nullptr && albumArtist != nullptr && ( newAlbum == true || newArtist == true ) )
     {
-        if ( album->addArtist( artist ) == false )
-            LOG_WARN( "Failed to add artist ", artist->name(), " to album ", album->title() );
+        if ( album->setAlbumArtist( albumArtist.get() ) == false )
+            LOG_WARN( "Failed to add artist ", albumArtist->name(), " to album ", album->title() );
         // This is the first time we have both artist & album, use this opportunity to set an artist artwork.
-        if ( artist->artworkUrl().empty() == true )
-            artist->setArtworkUrl( album->artworkUrl() );
+        if ( albumArtist->artworkUrl().empty() == true )
+            albumArtist->setArtworkUrl( album->artworkUrl() );
     }
-    if ( artist != nullptr )
-        artist->addMedia( media.get() );
+    else if ( artist != nullptr && album != nullptr && ( albumArtist == nullptr || artist->id() != albumArtist->id() ) )
+    {
+        album->addArtist( artist );
+    }
+
+
+    if ( albumArtist != nullptr )
+        albumArtist->addMedia( media.get() );
     else
         std::static_pointer_cast<Artist>( m_ml->unknownArtist() )->addMedia( media.get() );
     return true;

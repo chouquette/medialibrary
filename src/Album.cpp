@@ -175,7 +175,7 @@ std::vector<ArtistPtr> Album::artists() const
 
 bool Album::addArtist( std::shared_ptr<Artist> artist )
 {
-    static const std::string req = "INSERT INTO AlbumArtistRelation VALUES(?, ?)";
+    static const std::string req = "INSERT OR IGNORE INTO AlbumArtistRelation VALUES(?, ?)";
     if ( m_id == 0 || artist->id() == 0 )
     {
         LOG_ERROR("Both artist * album need to be inserted in database before being linked together" );
