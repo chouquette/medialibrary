@@ -203,6 +203,9 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( const std::string& title, 
     auto artistName = vlcMedia.meta( libvlc_meta_AlbumArtist );
     if ( artistName.empty() == true )
         artistName = vlcMedia.meta( libvlc_meta_Artist );
+    auto date = vlcMedia.meta( libvlc_meta_Date );
+    auto i_date = (time_t)atoi( date.c_str() );
+
     for ( auto it = begin( albums ); it != end( albums ); )
     {
         auto a = static_cast<Album*>( (*it).get() );
@@ -212,6 +215,14 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( const std::string& title, 
             // At the end of the day, without proper tags, there's only so much we can do.
             auto albumArtist = a->albumArtist();
             if ( albumArtist != nullptr && albumArtist->name() != artistName )
+            {
+                it = albums.erase( it );
+                continue;
+            }
+        }
+        if ( date.empty() == false )
+        {
+            if ( i_date != a->releaseYear() )
             {
                 it = albums.erase( it );
                 continue;
