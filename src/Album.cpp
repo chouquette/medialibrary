@@ -179,7 +179,7 @@ bool Album::addArtist( std::shared_ptr<Artist> artist )
     static const std::string req = "INSERT OR IGNORE INTO AlbumArtistRelation VALUES(?, ?)";
     if ( m_id == 0 || artist->id() == 0 )
     {
-        LOG_ERROR("Both artist * album need to be inserted in database before being linked together" );
+        LOG_ERROR("Both artist & album need to be inserted in database before being linked together" );
         return false;
     }
     return sqlite::Tools::executeRequest( m_dbConnection, req, m_id, artist->id() );
