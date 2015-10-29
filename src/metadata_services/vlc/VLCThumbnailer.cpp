@@ -144,22 +144,21 @@ void VLCThumbnailer::run(std::shared_ptr<Media> file, void *data )
 
 bool VLCThumbnailer::startPlayback(std::shared_ptr<Media> file, VLC::MediaPlayer &mp, void* data )
 {
-    std::unique_lock<std::mutex> lock( m_mutex );
 
     mp.eventManager().onPlaying([this]() {
-        std::unique_lock<std::mutex> lock( m_mutex );
         m_cond.notify_all();
     });
     mp.eventManager().onEncounteredError([this]() {
-        std::unique_lock<std::mutex> lock( m_mutex );
         m_cond.notify_all();
     });
     mp.play();
+    std::unique_lock<std::mutex> lock( m_mutex );
     bool success = m_cond.wait_for( lock, std::chrono::seconds( 3 ), [&mp]() {
         auto s = mp.state();
         return s == libvlc_Playing || s == libvlc_Error || s == libvlc_Ended;
     });
-    if ( success == false || mp.state() == libvlc_Error || mp.state() == libvlc_Ended )
+    auto s = mp.state();
+    if ( success == false || s == libvlc_Error || s == libvlc_Ended )
     {
         // In case of timeout or error, don't go any further
         m_cb->done( file, Status::Error, data );
