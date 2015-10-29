@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include "VideoTrack.h"
+#include "Media.h"
 
 const std::string policy::VideoTrackTable::Name = "VideoTrack";
 const std::string policy::VideoTrackTable::CacheColumn = "id_track";
@@ -33,15 +34,17 @@ VideoTrack::VideoTrack( DBConnection dbConnection, sqlite::Row& row )
         >> m_codec
         >> m_width
         >> m_height
-        >> m_fps;
+        >> m_fps
+        >> m_mediaId;
 }
 
-VideoTrack::VideoTrack( const std::string& codec, unsigned int width, unsigned int height, float fps )
+VideoTrack::VideoTrack( const std::string& codec, unsigned int width, unsigned int height, float fps, unsigned int mediaId )
     : m_id( 0 )
     , m_codec( codec )
     , m_width( width )
     , m_height( height )
     , m_fps( fps )
+    , m_mediaId( mediaId )
 {
 }
 
@@ -70,12 +73,13 @@ float VideoTrack::fps() const
     return m_fps;
 }
 
-std::shared_ptr<VideoTrack> VideoTrack::create( DBConnection dbConnection, const std::string &codec, unsigned int width, unsigned int height, float fps )
+std::shared_ptr<VideoTrack> VideoTrack::create( DBConnection dbConnection, const std::string &codec, unsigned int width,
+                                                unsigned int height, float fps, unsigned int mediaId )
 {
     static const std::string req  = "INSERT INTO " + policy::VideoTrackTable::Name
-            + "(codec, width, height, fps) VALUES(?, ?, ?, ?)";
-    auto track = std::make_shared<VideoTrack>( codec, width, height, fps );
-    if ( _Cache::insert( dbConnection, track, req, codec, width, height, fps ) == false )
+            + "(codec, width, height, fps, media_id) VALUES(?, ?, ?, ?, ?)";
+    auto track = std::make_shared<VideoTrack>( codec, width, height, fps, mediaId );
+    if ( _Cache::insert( dbConnection, track, req, codec, width, height, fps, mediaId ) == false )
         return nullptr;
     track->m_dbConnection = dbConnection;
     return track;
@@ -90,14 +94,9 @@ bool VideoTrack::createTable( DBConnection dbConnection )
                 "width UNSIGNED INTEGER,"
                 "height UNSIGNED INTEGER,"
                 "fps FLOAT,"
-                "UNIQUE ( codec, width, height, fps ) ON CONFLICT FAIL"
+                "media_id UNSIGNED INT,"
+                "FOREIGN KEY ( media_id ) REFERENCES " + policy::MediaTable::Name +
+                    "(id_media) ON DELETE CASCADE"
             ")";
     return sqlite::Tools::executeRequest( dbConnection, req );
-}
-
-std::shared_ptr<VideoTrack> VideoTrack::fetch( DBConnection dbConnection, const std::string& codec, unsigned int width, unsigned int height, float fps )
-{
-    static const std::string req = "SELECT * FROM " + policy::VideoTrackTable::Name +
-            " WHERE codec = ? AND width = ? AND height = ? AND fps = ?";
-    return VideoTrack::fetchOne( dbConnection, req, codec, width, height, fps );
 }

@@ -44,7 +44,7 @@ class VideoTrack : public IVideoTrack, public Cache<VideoTrack, IVideoTrack, pol
 {
     public:
         VideoTrack( DBConnection dbConnection, sqlite::Row& row );
-        VideoTrack( const std::string& codec, unsigned int width, unsigned int height, float fps );
+        VideoTrack( const std::string& codec, unsigned int width, unsigned int height, float fps, unsigned int mediaId );
 
         virtual unsigned int id() const override;
         virtual const std::string& codec() const override;
@@ -53,10 +53,8 @@ class VideoTrack : public IVideoTrack, public Cache<VideoTrack, IVideoTrack, pol
         virtual float fps() const override;
 
         static bool createTable( DBConnection dbConnection );
-        static std::shared_ptr<VideoTrack> fetch( DBConnection dbConnection, const std::string& codec,
-                                    unsigned int width, unsigned int height, float fps );
         static std::shared_ptr<VideoTrack> create( DBConnection dbConnection, const std::string& codec,
-                                    unsigned int width, unsigned int height, float fps );
+                                    unsigned int width, unsigned int height, float fps, unsigned int mediaId );
 
     private:
         DBConnection m_dbConnection;
@@ -65,6 +63,7 @@ class VideoTrack : public IVideoTrack, public Cache<VideoTrack, IVideoTrack, pol
         unsigned int m_width;
         unsigned int m_height;
         float m_fps;
+        unsigned int m_mediaId;
 
     private:
         typedef Cache<VideoTrack, IVideoTrack, policy::VideoTrackTable> _Cache;

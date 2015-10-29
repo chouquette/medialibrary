@@ -46,20 +46,3 @@ TEST_F( VideoTracks, FetchTracks )
     ASSERT_EQ( ts.size(), 2u );
 }
 
-TEST_F( VideoTracks, CheckUnique )
-{
-    auto f = std::static_pointer_cast<Media>( ml->addFile( "file.avi", nullptr ) );
-    f->addVideoTrack( "H264", 1920, 1080, 29.97 );
-
-    auto f2 = std::static_pointer_cast<Media>( ml->addFile( "file2.avi", nullptr ) );
-    f2->addVideoTrack( "H264", 1920, 1080, 29.97 );
-
-    auto ts = f->videoTracks();
-    auto ts2 = f2->videoTracks();
-
-    ASSERT_EQ( ts.size(), 1u );
-    ASSERT_EQ( ts2.size(), 1u );
-
-    // Check that only 1 track has been created in DB
-    ASSERT_EQ( ts[0]->id(), ts2[0]->id() );
-}

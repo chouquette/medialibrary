@@ -75,23 +75,3 @@ TEST_F( AudioTracks, FetchTracks )
     auto ts = f->audioTracks();
     ASSERT_EQ( ts.size(), 2u );
 }
-
-TEST_F( AudioTracks, CheckUnique )
-{
-    auto f = std::static_pointer_cast<Media>( ml->addFile( "file.mp3", nullptr ) );
-    f->addAudioTrack( "PCM", 128, 44100, 2, "en", "test desc" );
-
-    auto f2 = std::static_pointer_cast<Media>( ml->addFile( "file2.mp3", nullptr ) );
-    f2->addAudioTrack( "PCM", 128, 44100, 2, "en", "test desc" );
-
-    auto ts = f->audioTracks();
-
-    auto ts2 = f2->audioTracks();
-
-    ASSERT_EQ( ts.size(), 1u );
-    ASSERT_EQ( ts2.size(), 1u );
-
-    // Check that only 1 track has been created in DB
-    ASSERT_EQ( ts[0]->id(), ts2[0]->id() );
-}
-

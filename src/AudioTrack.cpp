@@ -22,6 +22,8 @@
 
 #include "AudioTrack.h"
 
+#include "Media.h"
+
 const std::string policy::AudioTrackTable::Name = "AudioTrack";
 const std::string policy::AudioTrackTable::CacheColumn  = "id_track";
 unsigned int AudioTrack::* const policy::AudioTrackTable::PrimaryKey = &AudioTrack::m_id;
@@ -35,11 +37,13 @@ AudioTrack::AudioTrack( DBConnection dbConnection, sqlite::Row& row )
         >> m_sampleRate
         >> m_nbChannels
         >> m_language
-        >> m_description;
+        >> m_description
+        >> m_mediaId;
 }
 
 AudioTrack::AudioTrack( const std::string& codec, unsigned int bitrate , unsigned int sampleRate,
-                        unsigned int nbChannels, const std::string& language, const std::string& desc )
+                        unsigned int nbChannels, const std::string& language, const std::string& desc,
+                        unsigned int mediaId )
     : m_id( 0 )
     , m_codec( codec )
     , m_bitrate( bitrate )
@@ -47,6 +51,7 @@ AudioTrack::AudioTrack( const std::string& codec, unsigned int bitrate , unsigne
     , m_nbChannels( nbChannels )
     , m_language( language )
     , m_description( desc )
+    , m_mediaId( mediaId )
 {
 }
 
@@ -87,6 +92,7 @@ const std::string& AudioTrack::description() const
 
 bool AudioTrack::createTable( DBConnection dbConnection )
 {
+    //FIXME: Index on media_id ? Unless it's already implied by the foreign key
     static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AudioTrackTable::Name
             + "(" +
                 policy::AudioTrackTable::CacheColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -96,29 +102,21 @@ bool AudioTrack::createTable( DBConnection dbConnection )
                 "nb_channels UNSIGNED INTEGER,"
                 "language TEXT,"
                 "description TEXT,"
-                "UNIQUE ( codec, bitrate, samplerate, nb_channels, language, description ) ON CONFLICT FAIL"
+                "media_id UNSIGNED INT,"
+                "FOREIGN KEY ( media_id ) REFERENCES " + policy::MediaTable::Name
+                    + "( id_media ) ON DELETE CASCADE"
             ")";
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-std::shared_ptr<AudioTrack> AudioTrack::fetch(DBConnection dbConnection, const std::string& codec,
-                unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels,
-                                              const std::string& language, const std::string& desc )
-{
-    static const std::string req = "SELECT * FROM " + policy::AudioTrackTable::Name
-            + " WHERE codec = ? AND bitrate = ? AND samplerate = ? AND nb_channels = ?"
-            " AND language = ? AND description = ?";
-    return AudioTrack::fetchOne( dbConnection, req, codec, bitrate, sampleRate, nbChannels, language, desc );
-}
-
 std::shared_ptr<AudioTrack> AudioTrack::create( DBConnection dbConnection, const std::string& codec,
                 unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels,
-                                                const std::string& language, const std::string& desc )
+                                                const std::string& language, const std::string& desc, unsigned int mediaId )
 {
     static const std::string req = "INSERT INTO " + policy::AudioTrackTable::Name
-            + "(codec, bitrate, samplerate, nb_channels, language, description) VALUES(?, ?, ?, ?, ?, ?)";
-    auto track = std::make_shared<AudioTrack>( codec, bitrate, sampleRate, nbChannels, language, desc );
-    if ( _Cache::insert( dbConnection, track, req, codec, bitrate, sampleRate, nbChannels, language, desc ) == false )
+            + "(codec, bitrate, samplerate, nb_channels, language, description, media_id) VALUES(?, ?, ?, ?, ?, ?, ?)";
+    auto track = std::make_shared<AudioTrack>( codec, bitrate, sampleRate, nbChannels, language, desc, mediaId );
+    if ( _Cache::insert( dbConnection, track, req, codec, bitrate, sampleRate, nbChannels, language, desc, mediaId ) == false )
         return nullptr;
     track->m_dbConnection = dbConnection;
     return track;

@@ -198,23 +198,13 @@ bool Media::setMovie( MoviePtr movie )
 
 bool Media::addVideoTrack(const std::string& codec, unsigned int width, unsigned int height, float fps)
 {
-    static const std::string req = "INSERT INTO VideoTrackFileRelation VALUES(?, ?)";
-
-    auto track = VideoTrack::fetch( m_dbConnection, codec, width, height, fps );
-    if ( track == nullptr )
-    {
-        track = VideoTrack::create( m_dbConnection, codec, width, height, fps );
-        if ( track == nullptr )
-            return false;
-    }
-    return sqlite::Tools::executeRequest( m_dbConnection, req, track->id(), m_id );
+    return VideoTrack::create( m_dbConnection, codec, width, height, fps, m_id ) != nullptr;
 }
 
 std::vector<VideoTrackPtr> Media::videoTracks()
 {
-    static const std::string req = "SELECT t.* FROM " + policy::VideoTrackTable::Name +
-            " t LEFT JOIN VideoTrackFileRelation vtfr ON vtfr.id_track = t.id_track"
-            " WHERE vtfr.id_media = ?";
+    static const std::string req = "SELECT * FROM " + policy::VideoTrackTable::Name +
+            " WHERE media_id = ?";
     return VideoTrack::fetchAll( m_dbConnection, req, m_id );
 }
 
@@ -222,23 +212,13 @@ bool Media::addAudioTrack( const std::string& codec, unsigned int bitrate,
                           unsigned int sampleRate, unsigned int nbChannels,
                           const std::string& language, const std::string& desc )
 {
-    static const std::string req = "INSERT INTO AudioTrackFileRelation VALUES(?, ?)";
-
-    auto track = AudioTrack::fetch( m_dbConnection, codec, bitrate, sampleRate, nbChannels, language, desc );
-    if ( track == nullptr )
-    {
-        track = AudioTrack::create( m_dbConnection, codec, bitrate, sampleRate, nbChannels, language, desc );
-        if ( track == nullptr )
-            return false;
-    }
-    return sqlite::Tools::executeRequest( m_dbConnection, req, track->id(), m_id );
+    return AudioTrack::create( m_dbConnection, codec, bitrate, sampleRate, nbChannels, language, desc, m_id ) != nullptr;
 }
 
 std::vector<AudioTrackPtr> Media::audioTracks()
 {
-    static const std::string req = "SELECT t.* FROM " + policy::AudioTrackTable::Name +
-            " t LEFT JOIN AudioTrackFileRelation atfr ON atfr.id_track = t.id_track"
-            " WHERE atfr.id_media = ?";
+    static const std::string req = "SELECT * FROM " + policy::AudioTrackTable::Name +
+            " WHERE media_id = ?";
     return AudioTrack::fetchAll( m_dbConnection, req, m_id );
 }
 
@@ -342,28 +322,6 @@ bool Media::createTable( DBConnection connection )
             + "(id_movie) ON DELETE CASCADE,"
             "FOREIGN KEY (folder_id) REFERENCES " + policy::FolderTable::Name
             + "(id_folder) ON DELETE CASCADE"
-            ")";
-    if ( sqlite::Tools::executeRequest( connection, req ) == false )
-        return false;
-    req = "CREATE TABLE IF NOT EXISTS VideoTrackFileRelation("
-                "id_track INTEGER,"
-                "id_media INTEGER,"
-                "PRIMARY KEY ( id_track, id_media ), "
-                "FOREIGN KEY ( id_track ) REFERENCES " + policy::VideoTrackTable::Name +
-                    "(id_track) ON DELETE CASCADE,"
-                "FOREIGN KEY ( id_media ) REFERENCES " + policy::MediaTable::Name
-                + "(id_media) ON DELETE CASCADE"
-            ")";
-    if ( sqlite::Tools::executeRequest( connection, req ) == false )
-        return false;
-    req = "CREATE TABLE IF NOT EXISTS AudioTrackFileRelation("
-                "id_track INTEGER,"
-                "id_media INTEGER,"
-                "PRIMARY KEY ( id_track, id_media ), "
-                "FOREIGN KEY ( id_track ) REFERENCES " + policy::AudioTrackTable::Name +
-                    "(id_track) ON DELETE CASCADE,"
-                "FOREIGN KEY ( id_media ) REFERENCES " + policy::MediaTable::Name
-                + "(id_media) ON DELETE CASCADE"
             ")";
     return sqlite::Tools::executeRequest( connection, req );
 }

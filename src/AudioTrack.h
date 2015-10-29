@@ -43,7 +43,7 @@ class AudioTrack : public IAudioTrack, public Cache<AudioTrack, IAudioTrack, pol
 {
     public:
         AudioTrack( DBConnection dbConnection, sqlite::Row& row );
-        AudioTrack( const std::string& codec, unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels, const std::string& language, const std::string& desc );
+        AudioTrack(const std::string& codec, unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels, const std::string& language, const std::string& desc , unsigned int mediaId);
 
         virtual unsigned int id() const override;
         virtual const std::string&codec() const override;
@@ -54,12 +54,9 @@ class AudioTrack : public IAudioTrack, public Cache<AudioTrack, IAudioTrack, pol
         virtual const std::string& description() const override;
 
         static bool createTable( DBConnection dbConnection );
-        static std::shared_ptr<AudioTrack> fetch( DBConnection dbConnection, const std::string& codec,
-                                    unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels,
-                                                  const std::string& language, const std::string& desc );
         static std::shared_ptr<AudioTrack> create( DBConnection dbConnection, const std::string& codec,
                                                    unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels,
-                                                   const std::string& language, const std::string& desc );
+                                                   const std::string& language, const std::string& desc, unsigned int mediaId );
 
     private:
         DBConnection m_dbConnection;
@@ -70,6 +67,7 @@ class AudioTrack : public IAudioTrack, public Cache<AudioTrack, IAudioTrack, pol
         unsigned int m_nbChannels;
         std::string m_language;
         std::string m_description;
+        unsigned int m_mediaId;
 
 
     private:
