@@ -122,7 +122,15 @@ void Parser::run()
             task = m_tasks.front();
             m_tasks.pop();
         }
-        (*task->it)->run( task->file, task );
+        try
+        {
+            (*task->it)->run( task->file, task );
+        }
+        catch (const std::exception& ex)
+        {
+            LOG_ERROR( "Caught an exception during ", task->file->mrl(), " parsing: ", ex.what() );
+            done( task->file, IMetadataService::Status::Fatal, task );
+        }
     }
     LOG_INFO("Exiting Parser thread");
 }
