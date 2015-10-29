@@ -119,6 +119,8 @@ void VLCThumbnailer::run(std::shared_ptr<Media> file, void *data )
         return;
     }
 
+    LOG_INFO( "Generating ", file->mrl(), " thumbnail..." );
+
     VLC::Media media( m_instance, file->mrl(), VLC::Media::FromPath );
     media.addOption( ":no-audio" );
     VLC::MediaPlayer mp( media );
@@ -126,13 +128,18 @@ void VLCThumbnailer::run(std::shared_ptr<Media> file, void *data )
     setupVout( mp );
 
     if ( startPlayback( file, mp, data ) == false )
+    {
+        LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail" );
         return;
-
+    }
     // Seek ahead to have a significant preview
     if ( seekAhead( file, mp, data ) == false )
+    {
+        LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail" );
         return;
-
+    }
     takeSnapshot( file, mp, data );
+    LOG_INFO( "Done generating ", file->mrl(), " thumbnail" );
 }
 
 bool VLCThumbnailer::startPlayback(std::shared_ptr<Media> file, VLC::MediaPlayer &mp, void* data )
