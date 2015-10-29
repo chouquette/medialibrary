@@ -128,6 +128,7 @@ TEST_F( Artists, GetAll )
     for ( int i = 0; i < 5; i++ )
     {
         auto a = ml->createArtist( std::to_string( i ) );
+        a->markAsAlbumArtist();
         ASSERT_NE( a, nullptr );
     }
     auto artists = ml->artists();
