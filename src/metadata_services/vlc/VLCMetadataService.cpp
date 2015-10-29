@@ -193,10 +193,38 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( const std::string& title, 
     if ( albums.size() == 0 )
         return nullptr;
 
-    if ( albums.size() == 1 )
-        return std::static_pointer_cast<Album>( albums[0] );
-
-    // FIXME: Attempt to find the proper album
+    /*
+     * Even if we get only 1 album, we need to filter out invalid matches.
+     * For instance, if we have already inserted an album "A" by an artist "john"
+     * but we are now trying to handle an album "A" by an artist "doe", not filtering
+     * candidates would yield the only "A" album we know, while we should return
+     * nullptr, so handleAlbum can create a new one.
+     */
+    auto artistName = vlcMedia.meta( libvlc_meta_AlbumArtist );
+    if ( artistName.empty() == true )
+        artistName = vlcMedia.meta( libvlc_meta_Artist );
+    for ( auto it = begin( albums ); it != end( albums ); )
+    {
+        auto a = static_cast<Album*>( (*it).get() );
+        if ( artistName.empty() == false )
+        {
+            // We assume that an album without album artist is a positive match.
+            // At the end of the day, without proper tags, there's only so much we can do.
+            auto albumArtist = a->albumArtist();
+            if ( albumArtist != nullptr && albumArtist->name() != artistName )
+            {
+                it = albums.erase( it );
+                continue;
+            }
+        }
+        ++it;
+    }
+    if ( albums.size() == 0 )
+        return nullptr;
+    if ( albums.size() > 1 )
+    {
+        LOG_WARN( "Multiple candidates for album ", title, ". Selecting first one out of luck" );
+    }
     return std::static_pointer_cast<Album>( albums[0] );
 }
 
