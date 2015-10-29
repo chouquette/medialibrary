@@ -62,6 +62,7 @@ public:
     bool addMedia( Media* media );
     virtual const std::string& artworkUrl() const override;
     bool setArtworkUrl( const std::string& artworkUrl );
+    bool markAsAlbumArtist();
 
     static bool createTable( DBConnection dbConnection );
     static std::shared_ptr<Artist> create( DBConnection dbConnection, const std::string& name );
@@ -72,6 +73,7 @@ private:
     std::string m_name;
     std::string m_shortBio;
     std::string m_artworkUrl;
+    bool m_isAlbumArtist;
 
     friend _Cache;
     friend struct policy::ArtistTable;

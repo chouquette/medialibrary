@@ -138,3 +138,23 @@ TEST_F( Artists, GetAll )
     auto artists2 = ml->artists();
     ASSERT_EQ( artists2.size(), 5u );
 }
+
+TEST_F( Artists, MarkAlbumArtist )
+{
+    auto artist = ml->createArtist( "Explotters In The Sky" );
+    ASSERT_NE( artist, nullptr );
+
+    // Since it's not an album artist, we shouldn't have it in the artist listing
+    auto artists = ml->artists();
+    ASSERT_EQ( artists.size(), 0u );
+
+    artist->markAsAlbumArtist();
+
+    artists = ml->artists();
+    ASSERT_EQ( artists.size(), 1u );
+
+    Reload();
+
+    artists = ml->artists();
+    ASSERT_EQ( artists.size(), 1u );
+}

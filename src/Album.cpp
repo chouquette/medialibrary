@@ -162,6 +162,7 @@ bool Album::setAlbumArtist(Artist* artist)
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artist->id(), m_id ) == false )
         return false;
     m_artistId = artist->id();
+    artist->markAsAlbumArtist();
     return true;
 }
 

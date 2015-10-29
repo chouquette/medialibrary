@@ -38,18 +38,21 @@ Artist::Artist( DBConnection dbConnection, sqlite::Row& row )
     row >> m_id
         >> m_name
         >> m_shortBio
-        >> m_artworkUrl;
+        >> m_artworkUrl
+        >> m_isAlbumArtist;
 }
 
 Artist::Artist( const std::string& name )
     : m_id( 0 )
     , m_name( name )
+    , m_isAlbumArtist( false )
 {
 }
 
 Artist::Artist(DBConnection dbConnection)
     : m_dbConnection( dbConnection )
     , m_id( 0 )
+    , m_isAlbumArtist( false )
 {
 }
 
@@ -133,6 +136,21 @@ bool Artist::setArtworkUrl( const std::string& artworkUrl )
     return true;
 }
 
+bool Artist::markAsAlbumArtist()
+{
+    if ( m_isAlbumArtist == true )
+        return true;
+    // UnknownArtist can't be an album artist.
+    if ( m_id == 0 )
+        return false;
+    static const std::string req = "UPDATE " + policy::ArtistTable::Name +
+            " SET is_album_artist=1 WHERE id_artist = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, m_id ) == false )
+        return false;
+    m_isAlbumArtist = true;
+    return true;
+}
+
 bool Artist::createTable( DBConnection dbConnection )
 {
     static const std::string req = "CREATE TABLE IF NOT EXISTS " +
@@ -141,7 +159,8 @@ bool Artist::createTable( DBConnection dbConnection )
                 "id_artist INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "name TEXT UNIQUE ON CONFLICT FAIL,"
                 "shortbio TEXT,"
-                "artwork_url TEXT"
+                "artwork_url TEXT,"
+                "is_album_artist BOOLEAN DEFAULT 0"
             ")";
     static const std::string reqRel = "CREATE TABLE IF NOT EXISTS MediaArtistRelation("
                 "id_media INTEGER NOT NULL,"
