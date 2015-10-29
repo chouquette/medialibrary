@@ -26,7 +26,6 @@
 #include <condition_variable>
 #include <vlcpp/vlc.hpp>
 #include <mutex>
-#include <tuple>
 
 #include "IMetadataService.h"
 #include "MediaLibrary.h"
@@ -56,9 +55,9 @@ private:
         std::shared_ptr<Album> findAlbum( const std::string& title, VLC::Media& vlcMedia ) const;
         bool parseAudioFile( std::shared_ptr<Media> media, VLC::Media &vlcMedia ) const;
         bool parseVideoFile( std::shared_ptr<Media> file, VLC::Media &media ) const;
-        std::tuple<std::shared_ptr<Artist>, std::shared_ptr<Artist>, bool> handleArtist( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const;
+        std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> handleArtists( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const;
         std::shared_ptr<AlbumTrack> handleTrack( std::shared_ptr<Album> album, std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const;
-        bool link(std::shared_ptr<Media> media, std::shared_ptr<Album> album, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist, bool newAlbum, bool newArtist ) const;
+        bool link(std::shared_ptr<Media> media, std::shared_ptr<Album> album, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist, bool newAlbum) const;
         std::pair<std::shared_ptr<Album>, bool> handleAlbum( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const;
 
         VLC::Instance m_instance;
