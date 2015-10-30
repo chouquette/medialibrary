@@ -36,22 +36,23 @@ add_definitions("-Wall -Wextra -pedantic")
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(${CMAKE_SOURCE_DIR}/test)
 include_directories(${LIBVLC_INCLUDE_DIR})
 
 list(APPEND TEST_SRCS
-    MediaTests.cpp
-    Folders.cpp
-    Labels.cpp
-    Albums.cpp
-    Tests.cpp
-    Shows.cpp
-    Movies.cpp
-    VideoTracks.cpp
-    AudioTracks.cpp
-    VLCMetadataServices.cpp
-    FsUtilsTests.cpp
-    ArtistTests.cpp
-    AlbumTrackTests.cpp
+    unittest/MediaTests.cpp
+    unittest/Folders.cpp
+    unittest/Labels.cpp
+    unittest/Albums.cpp
+    unittest/Tests.cpp
+    unittest/Shows.cpp
+    unittest/Movies.cpp
+    unittest/VideoTracks.cpp
+    unittest/AudioTracks.cpp
+    unittest/VLCMetadataServices.cpp
+    unittest/FsUtilsTests.cpp
+    unittest/ArtistTests.cpp
+    unittest/AlbumTrackTests.cpp
 
     mocks/FileSystem.h
     mocks/DiscovererCbMock.h
