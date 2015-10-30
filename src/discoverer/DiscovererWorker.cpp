@@ -25,7 +25,7 @@
 #include "logging/Logger.h"
 
 DiscovererWorker::DiscovererWorker()
-    : m_run( true )
+    : m_run( false )
     , m_cb( nullptr )
 {
 }
@@ -79,7 +79,10 @@ void DiscovererWorker::enqueue( const std::string& entryPoint )
 
     m_entryPoints.emplace( entryPoint );
     if ( m_thread.get_id() == std::thread::id{} )
+    {
+        m_run = true;
         m_thread = std::thread( &DiscovererWorker::run, this );
+    }
     // Since we just added an element, let's not check for size == 0 :)
     else if ( m_entryPoints.size() == 1 )
         m_cond.notify_all();
