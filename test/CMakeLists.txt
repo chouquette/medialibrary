@@ -1,14 +1,6 @@
 project(medialibrary)
 
-cmake_minimum_required(VERSION 2.8)
 include(ExternalProject)
-include(cpp11)
-
-if (UNIX)
-    option(WITH_ASAN "Build with address sanitizer" OFF)
-    option(WITH_TSAN "Build with thread sanitizer" OFF)
-    option(WITH_UBSAN "Build with undefined behavior sanitizer" OFF)
-endif()
 
 # Fetch gtest
 ExternalProject_Add(
@@ -31,6 +23,15 @@ include_directories(${source_dir}/include)
 ExternalProject_Get_Property(gtest-dependency binary_dir)
 link_directories(${binary_dir})
 
+cmake_minimum_required(VERSION 2.8)
+include(cpp11)
+
+if (UNIX)
+    option(WITH_ASAN "Build with address sanitizer" OFF)
+    option(WITH_TSAN "Build with thread sanitizer" OFF)
+    option(WITH_UBSAN "Build with undefined behavior sanitizer" OFF)
+endif()
+
 EnableCpp11()
 add_definitions("-Wall -Wextra -pedantic")
 
@@ -39,34 +40,14 @@ include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/test)
 include_directories(${LIBVLC_INCLUDE_DIR})
 
-list(APPEND TEST_SRCS
-    unittest/MediaTests.cpp
-    unittest/FolderTests.cpp
-    unittest/LabelTests.cpp
-    unittest/AlbumTests.cpp
-    unittest/Tests.cpp
-    unittest/ShowTests.cpp
-    unittest/MovieTests.cpp
-    unittest/VideoTrackTests.cpp
-    unittest/AudioTrackTests.cpp
-    unittest/VLCMetadataServiceTests.cpp
-    unittest/FsUtilsTests.cpp
-    unittest/ArtistTests.cpp
-    unittest/AlbumTrackTests.cpp
+include(unittest/unittest.cmake)
+include(samples/samples.cmake)
 
-    mocks/FileSystem.h
-    mocks/DiscovererCbMock.h
-)
-
-add_executable(unittest ${TEST_SRCS})
-add_dependencies(unittest gtest-dependency)
-
-target_link_libraries(unittest medialibrary)
-target_link_libraries(unittest gtest gtest_main)
 include_directories(${LIBVLCPP_DIR})
 # Also add pthread, as gtest requires it
 if(UNIX)
     target_link_libraries(unittest "pthread")
+    target_link_libraries(samples "pthread")
 
     if(${WITH_ASAN})
         if(${WITH_TSAN} OR ${WITH_UBSAN})
@@ -74,6 +55,7 @@ if(UNIX)
         endif()
         add_definitions("-fsanitize=address -fno-omit-frame-pointer")
         target_link_libraries(unittest "asan")
+        target_link_libraries(samples "asan")
     endif()
 
     if(${WITH_TSAN})
@@ -82,6 +64,7 @@ if(UNIX)
         endif()
         add_definitions("-fsanitize=thread -fno-omit-frame-pointer")
         target_link_libraries(unittest "tsan")
+        target_link_libraries(samples "tsan")
     endif()
 
     if(${WITH_UBSAN})
@@ -90,6 +73,7 @@ if(UNIX)
         endif()
         add_definitions("-fsanitize=undefined -fno-omit-frame-pointer")
         target_link_libraries(unittest "ubsan")
+        target_link_libraries(samples "ubsan")
     endif()
 endif()
 
