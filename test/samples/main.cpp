@@ -5,6 +5,10 @@
 #include <rapidjson/document.h>
 
 #include "MediaLibrary.h"
+#include "IAlbum.h"
+#include "IArtist.h"
+#include "IMedia.h"
+#include "IAlbumTrack.h"
 
 static const char* testCases[] = {
     "simple",
@@ -60,6 +64,9 @@ protected:
         m_ml.reset();
         m_cb.reset();
     }
+
+    void checkAlbums( const rapidjson::Value& expectedAlbums);
+    void checkTracks( const IAlbum* album, const std::vector<MediaPtr>& tracks, const rapidjson::Value& expectedTracks );
 };
 
 MockCallback::MockCallback()
@@ -88,6 +95,70 @@ void MockCallback::onParsingStatsUpdated(uint32_t nbParsed, uint32_t nbToParse)
     }
 }
 
+void Tests::checkAlbums(const rapidjson::Value& expectedAlbums )
+{
+    ASSERT_TRUE( expectedAlbums.IsArray() );
+    auto albums = m_ml->albums();
+    ASSERT_EQ( expectedAlbums.Size(), albums.size() );
+    for ( auto i = 0u; i < expectedAlbums.Size(); ++i )
+    {
+        const auto& expectedAlbum = expectedAlbums[i];
+        ASSERT_TRUE( expectedAlbum.HasMember( "title" ) );
+        // Start by checking if the album was found
+        const auto title = expectedAlbum["title"].GetString();
+        auto it = std::find_if( begin( albums ), end( albums ), [title](const AlbumPtr& a) {
+            return strcasecmp( a->title().c_str(), title ) == 0;
+        });
+        ASSERT_NE( end( albums ), it );
+        auto album = *it;
+        // Now check if we have matching metadata
+        if ( expectedAlbum.HasMember( "artist" ) )
+        {
+            auto expectedArtist = expectedAlbum["artist"].GetString();
+            auto artist = album->albumArtist();
+            ASSERT_NE( nullptr, artist );
+            ASSERT_STRCASEEQ( expectedArtist, artist->name().c_str() );
+        }
+        if ( expectedAlbum.HasMember( "nbTracks" ) || expectedAlbum.HasMember( "tracks" ) )
+        {
+            const auto tracks = album->tracks();
+            if ( expectedAlbum.HasMember( "nbTracks" ) )
+            {
+                ASSERT_EQ( expectedAlbum["nbTracks"].GetUint(), tracks.size() );
+            }
+            if ( expectedAlbum.HasMember( "tracks" ) )
+            {
+                checkTracks( album.get(), tracks, expectedAlbum["tracks"] );
+            }
+        }
+    }
+}
+
+void Tests::checkTracks( const IAlbum* album, const std::vector<MediaPtr>& tracks, const rapidjson::Value& expectedTracks)
+{
+    // Don't mandate all tracks to be defined
+    for ( auto i = 0u; i < expectedTracks.Size(); ++i )
+    {
+        auto& expectedTrack = expectedTracks[i];
+        ASSERT_TRUE( expectedTrack.HasMember( "title" ) );
+        auto expectedTitle = expectedTrack["title"].GetString();
+        auto it = std::find_if( begin( tracks ), end( tracks ), [expectedTitle](const MediaPtr& media) {
+            return strcasecmp( expectedTitle, media->title().c_str() ) == 0;
+        });
+        ASSERT_NE( end( tracks ), it );
+        const auto track = *it;
+        const auto albumTrack = track->albumTrack();
+        if ( expectedTrack.HasMember( "number" ) )
+        {
+            ASSERT_EQ( expectedTrack["number"].GetUint(), albumTrack->trackNumber() );
+        }
+        const auto trackAlbum = albumTrack->album();
+        ASSERT_NE( nullptr, trackAlbum );
+        ASSERT_EQ( album->id(), trackAlbum->id() );
+    }
+}
+
+
 TEST_P( Tests, Parse )
 {
     auto casePath = std::string("testcases/") + GetParam() + ".json";
@@ -104,10 +175,19 @@ TEST_P( Tests, Parse )
     const auto& input = doc["input"];
     for ( auto i = 0u; i < input.Size(); ++i )
     {
-        std::cout << "Input folder" << input[i].GetString() << std::endl;
         m_ml->discover( "media/" + std::string( input[i].GetString() ) );
     }
-    m_cb->waitForParsingComplete();
+    ASSERT_TRUE( m_cb->waitForParsingComplete() );
+
+    if ( doc.HasMember( "expected" ) == false )
+    {
+        // That's a lousy test case with no assumptions, but ok.
+        return;
+    }
+    const auto& expected = doc["expected"];
+
+    if ( expected.HasMember( "albums" ) == true )
+        checkAlbums( expected["albums" ] );
 }
 
 INSTANTIATE_TEST_CASE_P(SamplesTests, Tests,
