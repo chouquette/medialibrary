@@ -100,7 +100,8 @@ MediaLibrary::~MediaLibrary()
     AudioTrack::clear();
     Artist::clear();
     // Explicitely release the connection's TLS
-    m_dbConnection->release();
+    if ( m_dbConnection != nullptr )
+        m_dbConnection->release();
 }
 
 void MediaLibrary::setFsFactory(std::shared_ptr<factory::IFileSystem> fsFactory)
