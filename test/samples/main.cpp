@@ -10,9 +10,11 @@
 #include "IMedia.h"
 #include "IAlbumTrack.h"
 
+static std::string SamplesDirectory = ".";
+static std::string TestCaseDirectory = SRC_DIR "/test/samples/testcases";
+
 static const char* testCases[] = {
     "simple",
-
 };
 
 class TestEnv : public ::testing::Environment
@@ -161,7 +163,7 @@ void Tests::checkTracks( const IAlbum* album, const std::vector<MediaPtr>& track
 
 TEST_P( Tests, Parse )
 {
-    auto casePath = std::string("testcases/") + GetParam() + ".json";
+    auto casePath = TestCaseDirectory + "/" + GetParam() + ".json";
     std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
     ASSERT_NE( nullptr, f );
     char buff[65536]; // That's how ugly I am!
@@ -175,7 +177,13 @@ TEST_P( Tests, Parse )
     const auto& input = doc["input"];
     for ( auto i = 0u; i < input.Size(); ++i )
     {
-        m_ml->discover( "media/" + std::string( input[i].GetString() ) );
+        // Quick and dirty check to ensure we're discovering something that exists
+        auto samplesDir = SamplesDirectory + "/" + input[i].GetString();
+        struct stat s;
+        auto res = stat( samplesDir.c_str(), &s );
+        ASSERT_EQ( res, 0 );
+
+        m_ml->discover( samplesDir );
     }
     ASSERT_TRUE( m_cb->waitForParsingComplete() );
 
@@ -188,6 +196,21 @@ TEST_P( Tests, Parse )
 
     if ( expected.HasMember( "albums" ) == true )
         checkAlbums( expected["albums" ] );
+}
+
+int main(int ac, char** av)
+{
+    ::testing::InitGoogleTest(&ac, av);
+    const std::string samplesArg = "--samples-directory=";
+    const std::string testCasesArg = "--testcases-directory=";
+    for ( auto i = 1; i < ac; ++i )
+    {
+        if ( strncmp( samplesArg.c_str(), av[i], samplesArg.length() ) == 0 )
+            SamplesDirectory = av[i] + samplesArg.size();
+        else if ( strncmp( testCasesArg.c_str(), av[i], testCasesArg.length() ) == 0 )
+            TestCaseDirectory = av[i] + testCasesArg.size();
+    }
+    return RUN_ALL_TESTS();
 }
 
 INSTANTIATE_TEST_CASE_P(SamplesTests, Tests,
