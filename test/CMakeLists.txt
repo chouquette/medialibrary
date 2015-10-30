@@ -41,15 +41,15 @@ include_directories(${LIBVLC_INCLUDE_DIR})
 
 list(APPEND TEST_SRCS
     unittest/MediaTests.cpp
-    unittest/Folders.cpp
-    unittest/Labels.cpp
-    unittest/Albums.cpp
+    unittest/FolderTests.cpp
+    unittest/LabelTests.cpp
+    unittest/AlbumTests.cpp
     unittest/Tests.cpp
-    unittest/Shows.cpp
-    unittest/Movies.cpp
-    unittest/VideoTracks.cpp
-    unittest/AudioTracks.cpp
-    unittest/VLCMetadataServices.cpp
+    unittest/ShowTests.cpp
+    unittest/MovieTests.cpp
+    unittest/VideoTrackTests.cpp
+    unittest/AudioTrackTests.cpp
+    unittest/VLCMetadataServiceTests.cpp
     unittest/FsUtilsTests.cpp
     unittest/ArtistTests.cpp
     unittest/AlbumTrackTests.cpp
