@@ -34,7 +34,7 @@ class IAlbumTrack
 
         virtual unsigned int id() const = 0;
         /**
-         * @brief artist Returns the artist, as tagger in the media.
+         * @brief artist Returns the artist, as tagged in the media.
          * This can be different from the associated media's artist.
          * For instance, in case of a featuring, Media::artist() might return
          * "Artist 1", while IAlbumTrack::artist() might return something like
