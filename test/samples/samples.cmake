@@ -1,5 +1,6 @@
 list(APPEND SAMPLE_TEST_SRCS
     samples/main.cpp
+    samples/Tester.cpp
 )
 
 add_executable(samples ${SAMPLE_TEST_SRCS})
