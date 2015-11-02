@@ -181,7 +181,7 @@ TEST_P( Tests, Parse )
         auto samplesDir = SamplesDirectory + "/" + input[i].GetString();
         struct stat s;
         auto res = stat( samplesDir.c_str(), &s );
-        ASSERT_EQ( res, 0 );
+        ASSERT_EQ( 0, res );
 
         m_ml->discover( samplesDir );
     }
