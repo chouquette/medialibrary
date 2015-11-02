@@ -1,0 +1,26 @@
+{
+    "input": [
+        "video/mrmssmith"
+    ],
+    "expected": {
+        "nbVideos": 1,
+        "nbAudios": 0,
+        "media": [{
+            "title": "mrmssmith.mp4",
+            "nbVideoTracks": 1,
+            "nbAudioTracks": 1,
+            "snapshotExpected": true,
+            "videoTracks": [{
+                "codec": "h264",
+                "width": 320,
+                "height": 176,
+                "fps": 25
+            }],
+            "audioTracks": [{
+                "codec": "mp4a",
+                "sampleRate": 44100,
+                "nbChannels": 2
+            }]
+        }]
+    }
+}

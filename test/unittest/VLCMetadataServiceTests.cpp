@@ -128,32 +128,3 @@ TEST_F( VLCMetadataServices, ParseAlbum )
     ASSERT_EQ( album, album2 );
 }
 
-TEST_F( VLCMetadataServices, ParseVideo )
-{
-    std::unique_lock<std::mutex> lock( cb->mutex );
-    auto file = ml->addFile( "mrmssmith.mp4", nullptr );
-    bool res = cb->waitCond.wait_for( lock, std::chrono::seconds( 5 ), [file]{
-        return file->videoTracks().size() != 0;
-    } );
-
-    ASSERT_TRUE( res );
-    Reload();
-
-    file = std::static_pointer_cast<Media>( ml->file( "mrmssmith.mp4" ) );
-
-    ASSERT_EQ( file->showEpisode(), nullptr );
-
-    auto tracks = file->videoTracks();
-    ASSERT_EQ( tracks.size(), 1u );
-    ASSERT_EQ( tracks[0]->codec(), "h264" );
-    ASSERT_EQ( tracks[0]->width(), 320u );
-    ASSERT_EQ( tracks[0]->height(), 176u );
-    ASSERT_EQ( tracks[0]->fps(), 25 );
-
-    auto audioTracks = file->audioTracks();
-    ASSERT_EQ( audioTracks.size(), 1u );
-    ASSERT_EQ( audioTracks[0]->codec(), "mp4a" );
-    ASSERT_EQ( audioTracks[0]->sampleRate(), 44100u );
-    ASSERT_EQ( audioTracks[0]->nbChannels(), 2u );
-}
-
