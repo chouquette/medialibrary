@@ -52,6 +52,18 @@ TEST_P( Tests, Parse )
 
     if ( expected.HasMember( "albums" ) == true )
         checkAlbums( expected["albums" ] );
+    if ( expected.HasMember( "media" ) == true )
+        checkMedias( expected["media"] );
+    if ( expected.HasMember( "nbVideos" ) == true )
+    {
+        const auto videos = m_ml->videoFiles();
+        ASSERT_EQ( expected["nbVideos"].GetUint(), videos.size() );
+    }
+    if ( expected.HasMember( "nbAudios" ) == true )
+    {
+        const auto audios = m_ml->audioFiles();
+        ASSERT_EQ( expected["nbAudios"].GetUint(), audios.size() );
+    }
 }
 
 int main(int ac, char** av)

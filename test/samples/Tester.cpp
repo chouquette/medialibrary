@@ -1,6 +1,5 @@
 #include "Tester.h"
 
-
 MockCallback::MockCallback()
 {
     // Start locked. The locked will be released when waiting for parsing to be completed
@@ -24,6 +23,85 @@ void MockCallback::onParsingStatsUpdated(uint32_t nbParsed, uint32_t nbToParse)
         std::lock_guard<std::mutex> lock( m_parsingMutex );
         m_done = true;
         m_parsingCompleteVar.notify_all();
+    }
+}
+
+void Tests::checkVideoTracks( const rapidjson::Value& expectedTracks, const std::vector<VideoTrackPtr>& tracks )
+{
+    // There is no reliable way of discriminating between tracks, so we just assume the test case will
+    // only check for simple cases... like a single track?
+    ASSERT_TRUE( expectedTracks.IsArray() );
+    ASSERT_EQ( expectedTracks.Size(), tracks.size() );
+    for ( auto i = 0u; i < expectedTracks.Size(); ++i )
+    {
+        const auto& track = tracks[i];
+        const auto& expectedTrack = expectedTracks[i];
+        ASSERT_TRUE( expectedTrack.IsObject() );
+        if ( expectedTrack.HasMember( "codec" ) )
+            ASSERT_STRCASEEQ( expectedTrack["codec"].GetString(), track->codec().c_str() );
+        if ( expectedTrack.HasMember( "width" ) )
+            ASSERT_EQ( expectedTrack["width"].GetUint(), track->width() );
+        if ( expectedTrack.HasMember( "height" ) )
+            ASSERT_EQ( expectedTrack["height"].GetUint(), track->height() );
+        if ( expectedTrack.HasMember( "fps" ) )
+            ASSERT_EQ( expectedTrack["fps"].GetDouble(), track->fps() );
+    }
+}
+
+void Tests::checkAudioTracks(const rapidjson::Value& expectedTracks, const std::vector<AudioTrackPtr>& tracks)
+{
+    ASSERT_TRUE( expectedTracks.IsArray() );
+    ASSERT_EQ( expectedTracks.Size(), tracks.size() );
+    for ( auto i = 0u; i < expectedTracks.Size(); ++i )
+    {
+        const auto& track = tracks[i];
+        const auto& expectedTrack = expectedTracks[i];
+        ASSERT_TRUE( expectedTrack.IsObject() );
+        if ( expectedTrack.HasMember( "codec" ) )
+            ASSERT_STRCASEEQ( expectedTrack["codec"].GetString(), track->codec().c_str() );
+        if ( expectedTrack.HasMember( "sampleRate" ) )
+            ASSERT_EQ( expectedTrack["sampleRate"].GetUint(), track->sampleRate() );
+        if ( expectedTrack.HasMember( "nbChannels" ) )
+            ASSERT_EQ( expectedTrack["nbChannels"].GetUint(), track->nbChannels() );
+    }
+}
+
+void Tests::checkMedias(const rapidjson::Value& expectedMedias)
+{
+    ASSERT_TRUE( expectedMedias.IsArray() );
+    auto medias = m_ml->files();
+    for ( auto i = 0u; i < expectedMedias.Size(); ++i )
+    {
+        const auto& expectedMedia = expectedMedias[i];
+        ASSERT_TRUE( expectedMedia.HasMember( "title" ) );
+        const auto expectedTitle = expectedMedia["title"].GetString();
+        auto it = std::find_if( begin( medias ), end( medias ), [expectedTitle](const MediaPtr& m) {
+            return strcasecmp( expectedTitle, m->title().c_str() ) == 0;
+        });
+        ASSERT_NE( end( medias ), it );
+        const auto& media = *it;
+        medias.erase( it );
+        if ( expectedMedia.HasMember( "nbVideoTracks" ) || expectedMedia.HasMember( "videoTracks" ) )
+        {
+            auto videoTracks = media->videoTracks();
+            if ( expectedMedia.HasMember( "nbVideoTracks" ) )
+                ASSERT_EQ( expectedMedia[ "nbVideoTracks" ].GetUint(), videoTracks.size() );
+            if ( expectedMedia.HasMember( "videoTracks" ) )
+                checkVideoTracks( expectedMedia["videoTracks"], videoTracks );
+        }
+        if ( expectedMedia.HasMember( "nbAudioTracks" ) || expectedMedia.HasMember( "audioTracks" ) )
+        {
+            auto audioTracks = media->audioTracks();
+            if ( expectedMedia.HasMember( "nbAudioTracks" ) )
+                ASSERT_EQ( expectedMedia[ "nbAudioTracks" ].GetUint(), audioTracks.size() );
+            if ( expectedMedia.HasMember( "audioTracks" ) )
+                checkAudioTracks( expectedMedia[ "audioTracks" ], audioTracks );
+        }
+        if ( expectedMedia.HasMember( "snapshotExpected" ) == true )
+        {
+            auto snapshotExpected = expectedMedia["snapshotExpected"].GetBool();
+            ASSERT_EQ( !snapshotExpected, media->snapshot().empty() );
+        }
     }
 }
 

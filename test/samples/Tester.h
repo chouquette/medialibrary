@@ -11,6 +11,8 @@
 #include "IArtist.h"
 #include "IMedia.h"
 #include "IAlbumTrack.h"
+#include "IAudioTrack.h"
+#include "IVideoTrack.h"
 
 class MockCallback : public IMediaLibraryCb
 {
@@ -47,6 +49,9 @@ protected:
         m_ml->initialize( "test.db", "/tmp", m_cb.get() );
     }
 
+    void checkVideoTracks( const rapidjson::Value& expectedTracks, const std::vector<VideoTrackPtr>& tracks );
+    void checkAudioTracks(const rapidjson::Value& expectedTracks, const std::vector<AudioTrackPtr>& tracks );
+    void checkMedias( const rapidjson::Value& expectedMedias );
     void checkAlbums( const rapidjson::Value& expectedAlbums);
     void checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& tracks, const rapidjson::Value& expectedTracks );
 };
