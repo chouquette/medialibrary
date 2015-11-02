@@ -68,7 +68,7 @@ protected:
     }
 
     void checkAlbums( const rapidjson::Value& expectedAlbums);
-    void checkTracks( const IAlbum* album, const std::vector<MediaPtr>& tracks, const rapidjson::Value& expectedTracks );
+    void checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& tracks, const rapidjson::Value& expectedTracks );
 };
 
 MockCallback::MockCallback()
@@ -144,13 +144,13 @@ void Tests::checkAlbums(const rapidjson::Value& expectedAlbums )
             }
             if ( expectedAlbum.HasMember( "tracks" ) )
             {
-                checkTracks( album.get(), tracks, expectedAlbum["tracks"] );
+                checkAlbumTracks( album.get(), tracks, expectedAlbum["tracks"] );
             }
         }
     }
 }
 
-void Tests::checkTracks( const IAlbum* album, const std::vector<MediaPtr>& tracks, const rapidjson::Value& expectedTracks)
+void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& tracks, const rapidjson::Value& expectedTracks)
 {
     // Don't mandate all tracks to be defined
     for ( auto i = 0u; i < expectedTracks.Size(); ++i )
