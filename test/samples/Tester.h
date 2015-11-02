@@ -40,16 +40,11 @@ protected:
 
     virtual void SetUp() override
     {
+        unlink("test.db");
         m_cb.reset( new MockCallback );
         m_ml.reset( new MediaLibrary );
         m_ml->setVerbosity( LogLevel::Error );
         m_ml->initialize( "test.db", "/tmp", m_cb.get() );
-    }
-
-    virtual void TearDown() override
-    {
-        m_ml.reset();
-        m_cb.reset();
     }
 
     void checkAlbums( const rapidjson::Value& expectedAlbums);
