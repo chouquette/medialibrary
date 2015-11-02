@@ -1,0 +1,23 @@
+{
+    "input": [
+        "music/featuring/"
+    ],
+    "expected": {
+        "albums": [
+            {
+                "title": "dummy album",
+                "artist": "dummy album artist",
+                "artists": [
+                    "dummy album artist",
+                    "dummy featuring"
+                ],
+                "nbTracks": 3,
+                "tracks": [{
+                    "number": 3,
+                    "artist": "dummy featuring",
+                    "title": "dummy track 3"
+                }]
+            }
+        ]
+    }
+}

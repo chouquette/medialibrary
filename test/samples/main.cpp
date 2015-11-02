@@ -14,7 +14,7 @@ static std::string SamplesDirectory = ".";
 static std::string TestCaseDirectory = SRC_DIR "/test/samples/testcases";
 
 static const char* testCases[] = {
-    "simple",
+    "featuring",
 };
 
 class TestEnv : public ::testing::Environment
