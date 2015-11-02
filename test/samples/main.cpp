@@ -121,6 +121,20 @@ void Tests::checkAlbums(const rapidjson::Value& expectedAlbums )
             ASSERT_NE( nullptr, artist );
             ASSERT_STRCASEEQ( expectedArtist, artist->name().c_str() );
         }
+        if ( expectedAlbum.HasMember( "artists" ) )
+        {
+            const auto& expectedArtists = expectedAlbum["artists"];
+            auto artists = album->artists();
+            ASSERT_EQ( expectedArtists.Size(), artists.size() );
+            for ( auto i = 0u; i < expectedArtists.Size(); ++i )
+            {
+                auto expectedArtist = expectedArtists[i].GetString();
+                auto it = std::find_if( begin( artists ), end( artists), [expectedArtist](const ArtistPtr& a) {
+                    return strcasecmp( expectedArtist, a->name().c_str() ) == 0;
+                });
+                ASSERT_NE( end( artists ), it );
+            }
+        }
         if ( expectedAlbum.HasMember( "nbTracks" ) || expectedAlbum.HasMember( "tracks" ) )
         {
             const auto tracks = album->tracks();
