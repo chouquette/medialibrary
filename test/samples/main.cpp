@@ -168,6 +168,11 @@ void Tests::checkTracks( const IAlbum* album, const std::vector<MediaPtr>& track
         {
             ASSERT_EQ( expectedTrack["number"].GetUint(), albumTrack->trackNumber() );
         }
+        if ( expectedTrack.HasMember( "artist" ) )
+        {
+            ASSERT_STRCASEEQ( expectedTrack["artist"].GetString(), track->artist().c_str() );
+        }
+        // Always check if the album link is correct
         const auto trackAlbum = albumTrack->album();
         ASSERT_NE( nullptr, trackAlbum );
         ASSERT_EQ( album->id(), trackAlbum->id() );
