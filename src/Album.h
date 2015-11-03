@@ -25,6 +25,7 @@
 
 #include <memory>
 #include <sqlite3.h>
+#include <mutex>
 
 #include "IMediaLibrary.h"
 
@@ -84,6 +85,10 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         std::string m_artworkUrl;
         time_t m_lastSyncDate;
         unsigned int m_nbTracks;
+
+        mutable std::vector<MediaPtr> m_tracks;
+        mutable bool m_tracksCached;
+        mutable std::mutex m_tracksLock;
 
         friend class Cache<Album, IAlbum, policy::AlbumTable>;
         friend struct policy::AlbumTable;

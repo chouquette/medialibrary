@@ -221,7 +221,6 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, const std::s
             }
         }
         // Assume album files will be in the same folder.
-        //FIXME: This is going to murder our performances unless we cache tracks.
         const auto tracks = a->tracks();
         if ( tracks.size() == 0 )
         {

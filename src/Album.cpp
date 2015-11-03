@@ -33,6 +33,7 @@ unsigned int Album::* const policy::AlbumTable::PrimaryKey = &Album::m_id;
 
 Album::Album(DBConnection dbConnection, sqlite::Row& row)
     : m_dbConnection( dbConnection )
+    , m_tracksCached( false )
 {
     row >> m_id
         >> m_title
@@ -49,6 +50,7 @@ Album::Album(const std::string& title )
     , m_artistId( 0 )
     , m_lastSyncDate( 0 )
     , m_nbTracks( 0 )
+    , m_tracksCached( false )
 {
 }
 
@@ -99,11 +101,16 @@ time_t Album::lastSyncDate() const
 
 std::vector<MediaPtr> Album::tracks() const
 {
+    std::lock_guard<std::mutex> lock( m_tracksLock );
+    if ( m_tracksCached == true )
+        return m_tracks;
     static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
             " LEFT JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
             " WHERE att.album_id = ? ORDER BY att.track_number";
 
-    return Media::fetchAll( m_dbConnection, req, m_id );
+    m_tracks = Media::fetchAll( m_dbConnection, req, m_id );
+    m_tracksCached = true;
+    return m_tracks;
 }
 
 std::shared_ptr<AlbumTrack> Album::addTrack(std::shared_ptr<Media> media, unsigned int trackNb )
@@ -116,9 +123,12 @@ std::shared_ptr<AlbumTrack> Album::addTrack(std::shared_ptr<Media> media, unsign
         return nullptr;
     static const std::string req = "UPDATE " + policy::AlbumTable::Name +
             " SET nb_tracks = nb_tracks + 1 WHERE id_album = ?";
+    std::lock_guard<std::mutex> lock( m_tracksLock );
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, m_id ) == false )
         return nullptr;
     m_nbTracks++;
+    m_tracks.push_back( std::move( media ) );
+    m_tracksCached = true;
     return track;
 }
 
