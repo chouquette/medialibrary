@@ -39,7 +39,8 @@ AlbumTrack::AlbumTrack(DBConnection dbConnection, sqlite::Row& row )
         >> m_artist
         >> m_genre
         >> m_trackNumber
-        >> m_albumId;
+        >> m_albumId
+        >> m_releaseYear;
 }
 
 //FIXME: constify media
@@ -48,6 +49,7 @@ AlbumTrack::AlbumTrack( Media* media, unsigned int trackNumber, unsigned int alb
     , m_mediaId( media->id() )
     , m_trackNumber( trackNumber )
     , m_albumId( albumId )
+    , m_releaseYear( 0 )
     , m_album( nullptr )
 {
 }
@@ -83,6 +85,7 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
                 "genre TEXT,"
                 "track_number UNSIGNED INTEGER,"
                 "album_id UNSIGNED INTEGER NOT NULL,"
+                "release_year UNSIGNED INTEGER,"
                 "FOREIGN KEY (media_id) REFERENCES " + policy::MediaTable::Name + "(id_media)"
                     " ON DELETE CASCADE, "
                 "FOREIGN KEY (album_id) REFERENCES Album(id_album) "
@@ -110,7 +113,7 @@ const std::string& AlbumTrack::genre()
 bool AlbumTrack::setGenre(const std::string& genre)
 {
     static const std::string req = "UPDATE " + policy::AlbumTrackTable::Name
-            + " SET genre = ? WHERE id_track = ? ";
+            + " SET genre = ? WHERE id_track = ?";
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, genre, m_id ) == false )
         return false;
     m_genre = genre;
@@ -120,6 +123,23 @@ bool AlbumTrack::setGenre(const std::string& genre)
 unsigned int AlbumTrack::trackNumber()
 {
     return m_trackNumber;
+}
+
+unsigned int AlbumTrack::releaseYear() const
+{
+    return m_releaseYear;
+}
+
+bool AlbumTrack::setReleaseYear(unsigned int year)
+{
+    if ( m_releaseYear == year )
+        return true;
+    static const std::string req = "UPDATE " + policy::AlbumTrackTable::Name +
+            " SET release_year = ? WHERE id_track = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, year, m_id ) == false )
+        return false;
+    m_releaseYear = year;
+    return true;
 }
 
 std::shared_ptr<IAlbum> AlbumTrack::album()

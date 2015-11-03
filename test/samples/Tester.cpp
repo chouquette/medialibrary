@@ -119,15 +119,11 @@ void Tests::checkAlbums(const rapidjson::Value& expectedAlbums )
         // Start by checking if the album was found
         const auto title = expectedAlbum["title"].GetString();
         const char* artist = nullptr;
-        auto releaseYear = -1;
-        if ( expectedAlbum.HasMember( "releaseYear" ) )
-            releaseYear = expectedAlbum["releaseYear"].GetInt();
         if ( expectedAlbum.HasMember( "artist" ) )
             artist = expectedAlbum["artist"].GetString();
-        auto it = std::find_if( begin( albums ), end( albums ), [title, artist, releaseYear](const AlbumPtr& a) {
+        auto it = std::find_if( begin( albums ), end( albums ), [title, artist](const AlbumPtr& a) {
             return strcasecmp( a->title().c_str(), title ) == 0 &&
-                    ( artist == nullptr || strcasecmp( a->albumArtist()->name().c_str(), artist ) == 0 ) &&
-                    ( releaseYear == -1 || releaseYear == a->releaseYear() );
+                    ( artist == nullptr || strcasecmp( a->albumArtist()->name().c_str(), artist ) == 0 );
         });
         ASSERT_NE( end( albums ), it );
         auto album = *it;
@@ -164,10 +160,6 @@ void Tests::checkAlbums(const rapidjson::Value& expectedAlbums )
             {
                 checkAlbumTracks( album.get(), tracks, expectedAlbum["tracks"] );
             }
-        }
-        if ( releaseYear != -1 )
-        {
-            ASSERT_EQ( releaseYear, album->releaseYear() );
         }
     }
 }

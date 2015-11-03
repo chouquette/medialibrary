@@ -37,7 +37,6 @@ Album::Album(DBConnection dbConnection, sqlite::Row& row)
     row >> m_id
         >> m_title
         >> m_artistId
-        >> m_releaseYear
         >> m_shortSummary
         >> m_artworkUrl
         >> m_lastSyncDate
@@ -48,7 +47,6 @@ Album::Album(const std::string& title )
     : m_id( 0 )
     , m_title( title )
     , m_artistId( 0 )
-    , m_releaseYear( 0 )
     , m_lastSyncDate( 0 )
     , m_nbTracks( 0 )
 {
@@ -62,21 +60,6 @@ unsigned int Album::id() const
 const std::string& Album::title() const
 {
     return m_title;
-}
-
-time_t Album::releaseYear() const
-{
-    return m_releaseYear;
-}
-
-bool Album::setReleaseYear( time_t date )
-{
-    static const std::string req = "UPDATE " + policy::AlbumTable::Name
-            + " SET release_year = ? WHERE id_album = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, date, m_id ) == false )
-        return false;
-    m_releaseYear = date;
-    return true;
 }
 
 const std::string& Album::shortSummary() const
@@ -205,7 +188,6 @@ bool Album::createTable(DBConnection dbConnection )
                 "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "title TEXT,"
                 "artist_id UNSIGNED INTEGER,"
-                "release_year UNSIGNED INTEGER,"
                 "short_summary TEXT,"
                 "artwork_url TEXT,"
                 "last_sync_date UNSIGNED INTEGER,"

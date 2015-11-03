@@ -58,6 +58,8 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
         virtual const std::string& genre() override;
         bool setGenre( const std::string& genre );
         virtual unsigned int trackNumber() override;
+        virtual unsigned int releaseYear() const override;
+        bool setReleaseYear( unsigned int year );
         virtual std::shared_ptr<IAlbum> album() override;
 
         static bool createTable( DBConnection dbConnection );
@@ -72,6 +74,7 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
         std::string m_genre;
         unsigned int m_trackNumber;
         unsigned int m_albumId;
+        unsigned int m_releaseYear;
 
         std::shared_ptr<Album> m_album;
 

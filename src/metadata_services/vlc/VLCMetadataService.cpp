@@ -204,7 +204,6 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( const std::string& title, 
     if ( artistName.empty() == true )
         artistName = vlcMedia.meta( libvlc_meta_Artist );
     auto date = vlcMedia.meta( libvlc_meta_Date );
-    auto i_date = (time_t)atoi( date.c_str() );
 
     for ( auto it = begin( albums ); it != end( albums ); )
     {
@@ -215,14 +214,6 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( const std::string& title, 
             // At the end of the day, without proper tags, there's only so much we can do.
             auto albumArtist = a->albumArtist();
             if ( albumArtist != nullptr && albumArtist->name() != artistName )
-            {
-                it = albums.erase( it );
-                continue;
-            }
-        }
-        if ( date.empty() == false )
-        {
-            if ( i_date != a->releaseYear() )
             {
                 it = albums.erase( it );
                 continue;
@@ -253,9 +244,6 @@ std::pair<std::shared_ptr<Album>, bool> VLCMetadataService::handleAlbum( std::sh
             if ( album != nullptr )
             {
                 newAlbum = true;
-                auto date = vlcMedia.meta( libvlc_meta_Date );
-                if ( date.length() > 0 )
-                    album->setReleaseYear( std::stoul( date ) );
                 auto artwork = vlcMedia.meta( libvlc_meta_ArtworkURL );
                 if ( artwork.length() != 0 )
                     album->setArtworkUrl( artwork );

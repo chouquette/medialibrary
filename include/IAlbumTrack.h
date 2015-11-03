@@ -45,6 +45,12 @@ class IAlbumTrack
         virtual const std::string& genre() = 0;
         virtual unsigned int trackNumber() = 0;
         virtual std::shared_ptr<IAlbum> album() = 0;
+        /**
+         * @brief releaseYear Represent the track release year. It doesn't
+         *                      imply anything regarding the album's release year.
+         * @return This track release year, or 0 if unknown.
+         */
+        virtual unsigned int releaseYear() const = 0;
 };
 
 #endif // IALBUMTRACK_H
