@@ -44,7 +44,7 @@ class VLCMetadataService : public IMetadataService
     };
 
     public:
-        explicit VLCMetadataService(const VLC::Instance& vlc, DBConnection dbConnection);
+        explicit VLCMetadataService(const VLC::Instance& vlc, DBConnection dbConnection, std::shared_ptr<factory::IFileSystem> fsFactory);
 
         virtual bool initialize( IMetadataServiceCb *callback, MediaLibrary* ml ) override;
         virtual unsigned int priority() const override;
@@ -52,7 +52,7 @@ class VLCMetadataService : public IMetadataService
 
 private:
         Status handleMediaMeta( std::shared_ptr<Media> media , VLC::Media &vlcMedia ) const;
-        std::shared_ptr<Album> findAlbum( const std::string& title, VLC::Media& vlcMedia ) const;
+        std::shared_ptr<Album> findAlbum( Media* media, const std::string& title, VLC::Media& vlcMedia ) const;
         bool parseAudioFile( std::shared_ptr<Media> media, VLC::Media &vlcMedia ) const;
         bool parseVideoFile( std::shared_ptr<Media> file, VLC::Media &media ) const;
         std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> handleArtists( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const;
@@ -67,6 +67,7 @@ private:
         std::mutex m_mutex;
         std::condition_variable m_cond;
         DBConnection m_dbConn;
+        std::shared_ptr<factory::IFileSystem> m_fsFactory;
 };
 
 #endif // VLCMETADATASERVICE_H

@@ -135,7 +135,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
                 Log::Info( msg );
         });
 
-        auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService( m_vlcInstance, m_dbConnection.get() ) );
+        auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService( m_vlcInstance, m_dbConnection.get(), m_fsFactory ) );
         auto thumbnailerService = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer( m_vlcInstance ) );
         addMetadataService( std::move( vlcService ) );
         addMetadataService( std::move( thumbnailerService ) );
