@@ -7,7 +7,8 @@ static const char* testCases[] = {
     "featuring",
     "parse_video",
     "parse_audio",
-    "same_album_name_different_artist"
+    "same_album_name_different_artist",
+    "same_album_name_same_artist"
 };
 
 class TestEnv : public ::testing::Environment

@@ -1,0 +1,25 @@
+{
+    "input": [
+        "music/same_album_name_same_artist"
+    ],
+    "expected": {
+        "nbAudios": 2,
+        "nbVideos": 0,
+        "albums": [{
+            "title": "Album",
+            "artist": "Artist",
+            "releaseYear": 2000,
+            "tracks": [{
+                "title": "Track A"
+            }]
+        },
+        {
+            "title": "Album",
+            "artist": "Artist",
+            "releaseYear": 2010,
+            "tracks": [{
+                "title": "Track B"
+            }]
+        }]
+    }
+}
