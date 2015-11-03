@@ -1,0 +1,23 @@
+{
+    "input": [
+        "music/same_album_name_different_artist"
+    ],
+    "expected": {
+        "nbAudios": 2,
+        "nbVideos": 0,
+        "albums": [{
+            "title": "Album",
+            "artist": "Artist A",
+            "tracks": [{
+                "title": "Track A"
+            }]
+        },
+        {
+            "title": "Album",
+            "artist": "Artist B",
+            "tracks": [{
+                "title": "Track B"
+            }]
+        }]
+    }
+}
