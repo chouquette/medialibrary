@@ -38,6 +38,8 @@ Directory::Directory( const std::string& path )
 {
     struct stat s;
     lstat( path.c_str(), &s );
+    if ( S_ISDIR( s.st_mode ) == false )
+        throw std::runtime_error( "The provided path isn't a directory" );
     m_lastModificationDate = s.st_mtim.tv_sec;
     read();
 }
