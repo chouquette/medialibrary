@@ -202,7 +202,8 @@ void Parser::done(std::shared_ptr<Media> file, IMetadataService::Status status, 
     }
     else if ( status == IMetadataService::Status::Success )
     {
-        t->cb->onFileUpdated( file );
+        if ( t->cb != nullptr )
+            t->cb->onFileUpdated( file );
     }
 
     ++t->it;
