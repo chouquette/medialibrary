@@ -8,7 +8,6 @@ list(APPEND TEST_SRCS
     unittest/MovieTests.cpp
     unittest/VideoTrackTests.cpp
     unittest/AudioTrackTests.cpp
-    unittest/VLCMetadataServiceTests.cpp
     unittest/FsUtilsTests.cpp
     unittest/ArtistTests.cpp
     unittest/AlbumTrackTests.cpp

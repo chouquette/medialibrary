@@ -1,0 +1,30 @@
+{
+    "input": [
+        "music/mrzebra"
+    ],
+    "expected": {
+        "nbVideos": 0,
+        "nbAudios": 1,
+        "media": [{
+            "title": "mr. zebra",
+            "nbVideoTracks": 0,
+            "nbAudioTracks": 1,
+            "audioTracks": [{
+                "codec": "mpga",
+                "bitrate": 128000,
+                "sampleRate": 44100,
+                "nbChannels": 2
+            }]
+        }],
+        "albums": [{
+            "title": "Boys for Pele",
+            "artist": "Tori Amos",
+            "nbTracks": 1,
+            "tracks": [{
+                "number": 5,
+                "title": "Mr. Zebra",
+                "genre": "Rock"
+            }]
+        }]
+    }
+}

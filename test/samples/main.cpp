@@ -6,6 +6,7 @@ static std::string TestCaseDirectory = SRC_DIR "/test/samples/testcases";
 static const char* testCases[] = {
     "featuring",
     "parse_video",
+    "parse_audio"
 };
 
 class TestEnv : public ::testing::Environment

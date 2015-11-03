@@ -63,6 +63,8 @@ void Tests::checkAudioTracks(const rapidjson::Value& expectedTracks, const std::
             ASSERT_EQ( expectedTrack["sampleRate"].GetUint(), track->sampleRate() );
         if ( expectedTrack.HasMember( "nbChannels" ) )
             ASSERT_EQ( expectedTrack["nbChannels"].GetUint(), track->nbChannels() );
+        if ( expectedTrack.HasMember( "bitrate" ) )
+            ASSERT_EQ( expectedTrack["bitrate"].GetUint(), track->bitrate() );
     }
 }
 
@@ -155,6 +157,10 @@ void Tests::checkAlbums(const rapidjson::Value& expectedAlbums )
                 checkAlbumTracks( album.get(), tracks, expectedAlbum["tracks"] );
             }
         }
+        if ( expectedAlbum.HasMember( "releaseYear" ) )
+        {
+            ASSERT_EQ( expectedAlbum["releaseYear"].GetUint(), album->releaseYear() );
+        }
     }
 }
 
@@ -179,6 +185,10 @@ void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& 
         if ( expectedTrack.HasMember( "artist" ) )
         {
             ASSERT_STRCASEEQ( expectedTrack["artist"].GetString(), track->artist().c_str() );
+        }
+        if ( expectedTrack.HasMember( "genre" ) )
+        {
+            ASSERT_STRCASEEQ( expectedTrack["genre"].GetString(), albumTrack->genre().c_str() );
         }
         // Always check if the album link is correct
         const auto trackAlbum = albumTrack->album();
