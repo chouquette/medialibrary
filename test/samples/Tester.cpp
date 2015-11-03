@@ -117,81 +117,92 @@ void Tests::checkAlbums(const rapidjson::Value& expectedAlbums )
         const auto& expectedAlbum = expectedAlbums[i];
         ASSERT_TRUE( expectedAlbum.HasMember( "title" ) );
         // Start by checking if the album was found
-        const auto title = expectedAlbum["title"].GetString();
-        const char* expectedArtist = nullptr;
-        if ( expectedAlbum.HasMember( "artist" ) )
-            expectedArtist = expectedAlbum["artist"].GetString();
-        auto it = std::find_if( begin( albums ), end( albums ), [title, expectedArtist](const AlbumPtr& a) {
-            return strcasecmp( a->title().c_str(), title ) == 0 &&
-                    ( expectedArtist == nullptr || strcasecmp( a->albumArtist()->name().c_str(), expectedArtist ) == 0 );
+        auto it = std::find_if( begin( albums ), end( albums ), [this, &expectedAlbum](const AlbumPtr& a) {
+            const auto expectedTitle = expectedAlbum["title"].GetString();
+            if ( strcasecmp( a->title().c_str(), expectedTitle ) != 0 )
+                return false;
+            if ( expectedAlbum.HasMember( "artist" ) )
+            {
+                const auto expectedArtist = expectedAlbum["artist"].GetString();
+                auto artist = a->albumArtist();
+                if ( artist != nullptr && strcasecmp( artist->name().c_str(), expectedArtist ) != 0 )
+                    return false;
+            }
+            if ( expectedAlbum.HasMember( "artists" ) )
+            {
+                const auto& expectedArtists = expectedAlbum["artists"];
+                auto artists = a->artists();
+                if ( expectedArtists.Size() != artists.size() )
+                    return false;
+                for ( auto i = 0u; i < expectedArtists.Size(); ++i )
+                {
+                    auto expectedArtist = expectedArtists[i].GetString();
+                    auto it = std::find_if( begin( artists ), end( artists), [expectedArtist](const ArtistPtr& a) {
+                        return strcasecmp( expectedArtist, a->name().c_str() ) == 0;
+                    });
+                    if ( it == end( artists ) )
+                        return false;
+                }
+            }
+            if ( expectedAlbum.HasMember( "nbTracks" ) || expectedAlbum.HasMember( "tracks" ) )
+            {
+                const auto tracks = a->tracks();
+                if ( expectedAlbum.HasMember( "nbTracks" ) )
+                {
+                    if ( expectedAlbum["nbTracks"].GetUint() != tracks.size() )
+                        return false;
+                }
+                if ( expectedAlbum.HasMember( "tracks" ) )
+                {
+                    bool tracksOk = false;
+                    checkAlbumTracks( a.get(), tracks, expectedAlbum["tracks"], tracksOk );
+                    if ( tracksOk == false )
+                        return false;
+                }
+            }
+            return true;
         });
         ASSERT_NE( end( albums ), it );
-        auto album = *it;
-        // Now check if we have matching metadata
-        if ( expectedArtist != nullptr )
-        {
-            auto artist = album->albumArtist();
-            ASSERT_NE( nullptr, artist );
-            ASSERT_STRCASEEQ( expectedArtist, artist->name().c_str() );
-        }
-        if ( expectedAlbum.HasMember( "artists" ) )
-        {
-            const auto& expectedArtists = expectedAlbum["artists"];
-            auto artists = album->artists();
-            ASSERT_EQ( expectedArtists.Size(), artists.size() );
-            for ( auto i = 0u; i < expectedArtists.Size(); ++i )
-            {
-                auto expectedArtist = expectedArtists[i].GetString();
-                auto it = std::find_if( begin( artists ), end( artists), [expectedArtist](const ArtistPtr& a) {
-                    return strcasecmp( expectedArtist, a->name().c_str() ) == 0;
-                });
-                ASSERT_NE( end( artists ), it );
-            }
-        }
-        if ( expectedAlbum.HasMember( "nbTracks" ) || expectedAlbum.HasMember( "tracks" ) )
-        {
-            const auto tracks = album->tracks();
-            if ( expectedAlbum.HasMember( "nbTracks" ) )
-            {
-                ASSERT_EQ( expectedAlbum["nbTracks"].GetUint(), tracks.size() );
-            }
-            if ( expectedAlbum.HasMember( "tracks" ) )
-            {
-                checkAlbumTracks( album.get(), tracks, expectedAlbum["tracks"] );
-            }
-        }
+        albums.erase( it );
     }
 }
 
-void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& tracks, const rapidjson::Value& expectedTracks)
+void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& tracks, const rapidjson::Value& expectedTracks, bool& found ) const
 {
+    found = false;
     // Don't mandate all tracks to be defined
     for ( auto i = 0u; i < expectedTracks.Size(); ++i )
     {
-        auto& expectedTrack = expectedTracks[i];
+        const auto& expectedTrack = expectedTracks[i];
         ASSERT_TRUE( expectedTrack.HasMember( "title" ) );
         auto expectedTitle = expectedTrack["title"].GetString();
         auto it = std::find_if( begin( tracks ), end( tracks ), [expectedTitle](const MediaPtr& media) {
             return strcasecmp( expectedTitle, media->title().c_str() ) == 0;
         });
-        ASSERT_NE( end( tracks ), it );
+        if ( it == end( tracks ) )
+            return ;
         const auto track = *it;
         const auto albumTrack = track->albumTrack();
         if ( expectedTrack.HasMember( "number" ) )
         {
-            ASSERT_EQ( expectedTrack["number"].GetUint(), albumTrack->trackNumber() );
+            if ( expectedTrack["number"].GetUint() != albumTrack->trackNumber() )
+                return ;
         }
         if ( expectedTrack.HasMember( "artist" ) )
         {
-            ASSERT_STRCASEEQ( expectedTrack["artist"].GetString(), track->artist().c_str() );
+            if ( strcasecmp( expectedTrack["artist"].GetString(), track->artist().c_str() ) != 0 )
+                return ;
         }
         if ( expectedTrack.HasMember( "genre" ) )
         {
-            ASSERT_STRCASEEQ( expectedTrack["genre"].GetString(), albumTrack->genre().c_str() );
+            if ( strcasecmp( expectedTrack["genre"].GetString(), albumTrack->genre().c_str() ) != 0 )
+                 return ;
         }
-        // Always check if the album link is correct
+        // Always check if the album link is correct. This isn't part of finding the proper album, so just fail hard
+        // if the check fails.
         const auto trackAlbum = albumTrack->album();
         ASSERT_NE( nullptr, trackAlbum );
         ASSERT_EQ( album->id(), trackAlbum->id() );
     }
+    found = true;
 }
