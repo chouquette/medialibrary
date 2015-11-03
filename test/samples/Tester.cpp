@@ -118,19 +118,18 @@ void Tests::checkAlbums(const rapidjson::Value& expectedAlbums )
         ASSERT_TRUE( expectedAlbum.HasMember( "title" ) );
         // Start by checking if the album was found
         const auto title = expectedAlbum["title"].GetString();
-        const char* artist = nullptr;
+        const char* expectedArtist = nullptr;
         if ( expectedAlbum.HasMember( "artist" ) )
-            artist = expectedAlbum["artist"].GetString();
-        auto it = std::find_if( begin( albums ), end( albums ), [title, artist](const AlbumPtr& a) {
+            expectedArtist = expectedAlbum["artist"].GetString();
+        auto it = std::find_if( begin( albums ), end( albums ), [title, expectedArtist](const AlbumPtr& a) {
             return strcasecmp( a->title().c_str(), title ) == 0 &&
-                    ( artist == nullptr || strcasecmp( a->albumArtist()->name().c_str(), artist ) == 0 );
+                    ( expectedArtist == nullptr || strcasecmp( a->albumArtist()->name().c_str(), expectedArtist ) == 0 );
         });
         ASSERT_NE( end( albums ), it );
         auto album = *it;
         // Now check if we have matching metadata
-        if ( artist != nullptr )
+        if ( expectedArtist != nullptr )
         {
-            auto expectedArtist = expectedAlbum["artist"].GetString();
             auto artist = album->albumArtist();
             ASSERT_NE( nullptr, artist );
             ASSERT_STRCASEEQ( expectedArtist, artist->name().c_str() );
