@@ -151,7 +151,8 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         Movie::createTable( m_dbConnection.get() ) &&
         VideoTrack::createTable( m_dbConnection.get() ) &&
         AudioTrack::createTable( m_dbConnection.get() ) &&
-        Artist::createTable( m_dbConnection.get() ) ) )
+        Artist::createTable( m_dbConnection.get() ) &&
+        Artist::createDefaultArtists( m_dbConnection.get() ) ) )
     {
         LOG_ERROR( "Failed to create database structure" );
         return false;

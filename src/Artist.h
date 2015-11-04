@@ -65,6 +65,7 @@ public:
     bool markAsAlbumArtist();
 
     static bool createTable( DBConnection dbConnection );
+    static bool createDefaultArtists( DBConnection dbConnection );
     static std::shared_ptr<Artist> create( DBConnection dbConnection, const std::string& name );
 
 private:

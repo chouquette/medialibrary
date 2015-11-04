@@ -29,6 +29,12 @@
 #include "Types.h"
 #include "factory/IFileSystem.h"
 
+namespace medialibrary
+{
+    static constexpr auto UnknownArtistID = 1u;
+    static constexpr auto VariousArtistID = 2u;
+}
+
 class IMediaLibraryCb
 {
 public:

@@ -174,6 +174,16 @@ bool Artist::createTable( DBConnection dbConnection )
             sqlite::Tools::executeRequest( dbConnection, reqRel );
 }
 
+bool Artist::createDefaultArtists( DBConnection dbConnection )
+{
+    // Don't rely on Artist::create, since we want to insert or do nothing here.
+    // This will skip the cache for those new entities, but they will be inserted soon enough anyway.
+    static const std::string req = "INSERT OR IGNORE INTO " + policy::ArtistTable::Name +
+            "(id_artist) VALUES(?),(?)";
+    return sqlite::Tools::executeRequest( dbConnection, req, medialibrary::UnknownArtistID,
+                                          medialibrary::VariousArtistID );
+}
+
 std::shared_ptr<Artist> Artist::create( DBConnection dbConnection, const std::string &name )
 {
     auto artist = std::make_shared<Artist>( name );
