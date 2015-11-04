@@ -111,6 +111,19 @@ TEST_F( Albums, SetGenre )
     ASSERT_EQ( t->genre(), t2->albumTrack()->genre() );
 }
 
+TEST_F( Albums, SetReleaseDate )
+{
+    auto a = ml->createAlbum( "album" );
+
+    a->setReleaseYear( 1234 );
+    ASSERT_EQ( a->releaseYear(), 1234 );
+
+    Reload();
+
+    auto a2 = ml->album( a->id() );
+    ASSERT_EQ( a->releaseYear(), a2->releaseYear() );
+}
+
 TEST_F( Albums, SetShortSummary )
 {
     auto a = ml->createAlbum( "album" );
