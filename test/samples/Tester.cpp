@@ -160,6 +160,12 @@ void Tests::checkAlbums(const rapidjson::Value& expectedAlbums )
                         return false;
                 }
             }
+            if ( expectedAlbum.HasMember( "releaseYear" ) )
+            {
+                const auto releaseYear = expectedAlbum["releaseYear"].GetUint();
+                if ( a->releaseYear() != releaseYear )
+                    return false;
+            }
             return true;
         });
         ASSERT_NE( end( albums ), it );
@@ -196,7 +202,12 @@ void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& 
         if ( expectedTrack.HasMember( "genre" ) )
         {
             if ( strcasecmp( expectedTrack["genre"].GetString(), albumTrack->genre().c_str() ) != 0 )
-                 return ;
+                return ;
+        }
+        if ( expectedTrack.HasMember( "releaseYear" ) )
+        {
+            if ( albumTrack->releaseYear() != expectedTrack["releaseYear"].GetUint() )
+                return;
         }
         // Always check if the album link is correct. This isn't part of finding the proper album, so just fail hard
         // if the check fails.
