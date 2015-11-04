@@ -135,13 +135,17 @@ TEST_F( Artists, AllSongs )
 
 TEST_F( Artists, GetAll )
 {
+    auto artists = ml->artists();
+    // Ensure we don't include Unknown Artist // Various Artists
+    ASSERT_EQ( artists.size(), 0u );
+
     for ( int i = 0; i < 5; i++ )
     {
         auto a = ml->createArtist( std::to_string( i ) );
         a->markAsAlbumArtist();
         ASSERT_NE( a, nullptr );
     }
-    auto artists = ml->artists();
+    artists = ml->artists();
     ASSERT_EQ( artists.size(), 5u );
 
     Reload();

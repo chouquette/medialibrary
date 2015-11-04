@@ -386,7 +386,8 @@ bool VLCMetadataService::link( std::shared_ptr<Media> media, std::shared_ptr<Alb
     if ( albumArtist == nullptr && artist == nullptr )
     {
         // We don't know anything about the artist, simply mark it as a track from unknown artist.
-        std::static_pointer_cast<Artist>( m_ml->unknownArtist() )->addMedia( media.get() );
+        auto unknownArtist = Artist::fetch( m_dbConn, medialibrary::UnknownArtistID );
+        unknownArtist->addMedia( media.get() );
         return true;
     }
 

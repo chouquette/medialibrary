@@ -114,10 +114,6 @@ class IMediaLibrary
         virtual ShowPtr show( const std::string& name ) = 0;
         virtual MoviePtr movie( const std::string& title ) = 0;
         virtual ArtistPtr artist( const std::string& name ) = 0;
-        /**
-         * @brief unknownArtist returns a representation of a virtual "unknown" artist.
-         */
-        virtual ArtistPtr unknownArtist() = 0;
         virtual std::vector<ArtistPtr> artists() const = 0;
 
         /**

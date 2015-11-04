@@ -73,7 +73,6 @@ class MediaLibrary : public IMediaLibrary
         std::shared_ptr<Movie> createMovie( const std::string& title );
 
         virtual ArtistPtr artist( const std::string& name ) override;
-        virtual ArtistPtr unknownArtist() override;
         std::shared_ptr<Artist> createArtist( const std::string& name );
         virtual std::vector<ArtistPtr> artists() const override;
 
@@ -99,9 +98,6 @@ class MediaLibrary : public IMediaLibrary
         std::shared_ptr<factory::IFileSystem> m_fsFactory;
         std::string m_snapshotPath;
         IMediaLibraryCb* m_callback;
-        // Unknown artist "cache". If a track has been parsed with an unknown artist, this
-        // won't change (until we reload or detect a change)
-        ArtistPtr m_unknownArtist;
 
         // This probably qualifies as a work around, but we need to keep the VLC::Instance
         // alive to be able to use the logging wrapper lambda

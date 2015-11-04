@@ -152,29 +152,3 @@ TEST_F( Medias, Snapshot )
     auto f2 = ml->file( "media.avi" );
     ASSERT_EQ( f2->snapshot(), newSnapshot );
 }
-
-TEST_F( Medias, UnknownArtist )
-{
-    auto a = std::static_pointer_cast<Artist>( ml->unknownArtist() );
-    ASSERT_NE( a, nullptr );
-
-    auto tracks = a->media();
-    ASSERT_EQ( tracks.size(), 0u );
-
-    auto f = ml->addFile( "file.mp3", nullptr );
-    // explicitely set the artist to nullptr (aka "unknown artist")
-    auto res = a->addMedia( f.get() );
-    ASSERT_EQ( res, true );
-
-    // Now, querying unknownArtist should give out some results.
-    tracks = a->media();
-    ASSERT_EQ( tracks.size(), 1u );
-
-    Reload();
-
-    // Check that unknown artist tracks listing persists in DB
-    auto a2 = ml->unknownArtist();
-    ASSERT_NE( a2, nullptr );
-    auto tracks2 = a2->media();
-    ASSERT_EQ( tracks2.size(), 1u );
-}
