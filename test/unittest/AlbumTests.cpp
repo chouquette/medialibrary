@@ -115,8 +115,22 @@ TEST_F( Albums, SetReleaseDate )
 {
     auto a = ml->createAlbum( "album" );
 
-    a->setReleaseYear( 1234 );
-    ASSERT_EQ( a->releaseYear(), 1234 );
+    ASSERT_EQ( 0u, a->releaseYear() );
+
+    a->setReleaseYear( 1234, false );
+    ASSERT_EQ( a->releaseYear(), 1234u );
+
+    a->setReleaseYear( 4321, false );
+    // We now have conflicting dates, it should be restored to 0.
+    ASSERT_EQ( 0u, a->releaseYear() );
+
+    // Check that this is not considered initial state anymore, and that pretty much any other date will be ignored.
+    a->setReleaseYear( 666, false );
+    ASSERT_EQ( 0u, a->releaseYear() );
+
+    // Now check that forcing a date actually forces it
+    a->setReleaseYear( 9876, true );
+    ASSERT_EQ( 9876u, a->releaseYear() );
 
     Reload();
 

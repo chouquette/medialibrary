@@ -49,7 +49,7 @@ Album::Album(const std::string& title )
     : m_id( 0 )
     , m_title( title )
     , m_artistId( 0 )
-    , m_releaseYear( 0 )
+    , m_releaseYear( ~0u )
     , m_lastSyncDate( 0 )
     , m_nbTracks( 0 )
     , m_tracksCached( false )
@@ -66,13 +66,27 @@ const std::string& Album::title() const
     return m_title;
 }
 
-time_t Album::releaseYear() const
+unsigned int Album::releaseYear() const
 {
+    if ( m_releaseYear == ~0U )
+        return 0;
     return m_releaseYear;
 }
 
-bool Album::setReleaseYear( time_t date )
+bool Album::setReleaseYear( unsigned int date, bool force )
 {
+    if ( date == m_releaseYear )
+        return true;
+    if ( force == false )
+    {
+        if ( m_releaseYear != ~0u && date != m_releaseYear )
+        {
+            // If we already have set the date back to 0, don't do it again.
+            if ( m_releaseYear == 0 )
+                return true;
+            date = 0;
+        }
+    }
     static const std::string req = "UPDATE " + policy::AlbumTable::Name
             + " SET release_year = ? WHERE id_album = ?";
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, date, m_id ) == false )

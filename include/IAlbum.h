@@ -31,7 +31,12 @@ class IAlbum
         virtual ~IAlbum() {}
         virtual unsigned int id() const = 0;
         virtual const std::string& title() const = 0;
-        virtual time_t releaseYear() const = 0;
+        /**
+         * @brief releaseYear returns the release year, or 0 if unknown.
+         * The release date of an album is considered unknown if multiple tracks
+         * of the same album have different release dates
+         */
+        virtual unsigned int releaseYear() const = 0;
         virtual const std::string& shortSummary() const = 0;
         virtual const std::string& artworkUrl() const = 0;
         virtual time_t lastSyncDate() const = 0;

@@ -369,12 +369,10 @@ std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack(std::shared_ptr<Albu
     {
         auto releaseYear = atoi( releaseYearStr.c_str() );
         track->setReleaseYear( releaseYear );
-        // If the album release year is unset, set it based on track
-        if ( album->releaseYear() == 0 )
-            album->setReleaseYear( releaseYear );
-        // However, if it's now different, unset it
-        else if ( album->releaseYear() != releaseYear )
-            album->setReleaseYear( 0 );
+        // Let the album handle multiple dates. In order to do this properly, we need
+        // to know if the date has been changed before, which can be known only by
+        // using Album class internals.
+        album->setReleaseYear( releaseYear, false );
     }
     return track;
 }

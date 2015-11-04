@@ -57,8 +57,17 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
 
         virtual unsigned int id() const override;
         virtual const std::string& title() const override;
-        virtual time_t releaseYear() const override;
-        bool setReleaseYear( time_t date );
+        virtual unsigned int releaseYear() const override;
+        /**
+         * @brief setReleaseYear Updates the release year
+         * @param date The desired date.
+         * @param force If force is true, the date will be applied no matter what.
+         *              If force is false, the date will be applied if it never was
+         *              applied before. Otherwise, setReleaseYear() will restore the release
+         *              date to 0.
+         * @return
+         */
+        bool setReleaseYear( unsigned int date, bool force );
         virtual const std::string& shortSummary() const override;
         bool setShortSummary( const std::string& summary );
         virtual const std::string& artworkUrl() const override;
