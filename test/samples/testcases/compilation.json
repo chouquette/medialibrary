@@ -1,0 +1,31 @@
+{
+    "input": [
+        "music/compilation"
+    ],
+    "expected": {
+        "nbAudios": 4,
+        "nbVideos": 0,
+        "albums": [{
+            "title": "Compilation",
+            "artist": "Various Artists",
+            "releaseYear": 0,
+            "tracks": [
+            {
+                "title": "Track 1",
+                "releaseYear": 2015
+            },
+            {
+                "title": "Track 2",
+                "releaseYear": 2011
+            },
+            {
+                "title": "Track 3",
+                "releaseYear": 0
+            },
+            {
+                "title": "Track 4",
+                "releaseYear": 2013
+            }]
+        }]
+    }
+}
