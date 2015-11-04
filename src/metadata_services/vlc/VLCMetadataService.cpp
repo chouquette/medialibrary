@@ -364,6 +364,18 @@ std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack(std::shared_ptr<Albu
     {
         track->setGenre( genre );
     }
+    auto releaseYearStr = vlcMedia.meta( libvlc_meta_Date );
+    if ( releaseYearStr.empty() == false )
+    {
+        auto releaseYear = atoi( releaseYearStr.c_str() );
+        track->setReleaseYear( releaseYear );
+        // If the album release year is unset, set it based on track
+        if ( album->releaseYear() == 0 )
+            album->setReleaseYear( releaseYear );
+        // However, if it's now different, unset it
+        else if ( album->releaseYear() != releaseYear )
+            album->setReleaseYear( 0 );
+    }
     return track;
 }
 

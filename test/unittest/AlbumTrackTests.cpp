@@ -56,10 +56,10 @@ TEST_F( AlbumTracks, SetReleaseYear )
     auto m = ml->addFile( "test.mp3", nullptr );
     auto t = a->addTrack( m, 1 );
 
-    ASSERT_EQ( 0, t->releaseYear() );
+    ASSERT_EQ( 0u, t->releaseYear() );
 
     t->setReleaseYear( 1234 );
-    ASSERT_EQ( t->releaseYear(), 1234 );
+    ASSERT_EQ( t->releaseYear(), 1234u );
 
     Reload();
 
