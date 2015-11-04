@@ -350,7 +350,7 @@ std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack(std::shared_ptr<Albu
         media->setTitle( title );
     unsigned int trackNb;
     if ( trackNbStr.empty() == false )
-        trackNb = std::stoi( trackNbStr );
+        trackNb = atoi( trackNbStr.c_str() );
     else
         trackNb = 0;
     auto track = std::static_pointer_cast<AlbumTrack>( album->addTrack( media, trackNb ) );
