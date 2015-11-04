@@ -9,7 +9,8 @@ static const char* testCases[] = {
     "parse_audio",
     "same_album_name_different_artist",
     "same_album_name_same_artist",
-    "compilation"
+    "compilation",
+    "release_year_same"
 };
 
 class TestEnv : public ::testing::Environment

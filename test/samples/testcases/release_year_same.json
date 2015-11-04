@@ -1,0 +1,14 @@
+{
+    "input": [
+        "music/release_year_same"
+    ],
+    "expected": {
+        "nbAudios": 3,
+        "nbVideos": 0,
+        "albums": [{
+            "title": "Album",
+            "releaseYear": 2000,
+            "nbTracks": 3
+        }]
+    }
+}
