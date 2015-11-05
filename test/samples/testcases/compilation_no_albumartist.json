@@ -1,0 +1,36 @@
+{
+    "input": [
+        "music/compilation_no_albumartist"
+    ],
+    "expected": {
+        "nbAudios": 4,
+        "nbVideos": 0,
+        "albums": [{
+            "title": "Compilation",
+            "artist": "",
+            "releaseYear": 0,
+            "tracks": [
+            {
+                "title": "Track 1",
+                "artist": "Artist 1"
+            },
+            {
+                "title": "Track 2",
+                "artist": "Artist 2"
+            },
+            {
+                "title": "Track 3",
+                "artist": "Artist 3"
+            },
+            {
+                "title": "Track 4",
+                "artist": "Artist 4"
+            }]
+        }],
+        "artists": [{
+            "name": "",
+            "id": 2,
+            "nbAlbums": 1
+        }]
+    }
+}
