@@ -81,7 +81,6 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         bool setAlbumArtist( Artist* artist );
         virtual std::vector<ArtistPtr> artists() const override;
         bool addArtist( std::shared_ptr<Artist> artist );
-        bool hasAlbumArtist() const;
         bool removeArtist( Artist* artist );
 
         static bool createTable( DBConnection dbConnection );

@@ -212,11 +212,9 @@ TEST_F( Albums, AlbumArtist )
 {
     auto album = ml->createAlbum( "test" );
     ASSERT_EQ( album->albumArtist(), nullptr );
-    ASSERT_FALSE( album->hasAlbumArtist() );
     auto artist = ml->createArtist( "artist" );
     album->setAlbumArtist( artist.get() );
     ASSERT_NE( album->albumArtist(), nullptr );
-    ASSERT_TRUE( album->hasAlbumArtist() );
 
     Reload();
 
@@ -224,5 +222,4 @@ TEST_F( Albums, AlbumArtist )
     auto albumArtist = album->albumArtist();
     ASSERT_NE( albumArtist, nullptr );
     ASSERT_EQ( albumArtist->name(), artist->name() );
-    ASSERT_TRUE( album->hasAlbumArtist() );
 }

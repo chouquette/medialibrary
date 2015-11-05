@@ -174,14 +174,14 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
     media->setType( IMedia::Type::AudioType );
 
     auto artists = handleArtists( media, vlcMedia );
-    auto albumPair = handleAlbum( media, vlcMedia, artists.first.get() );
-    if ( albumPair.first == nullptr && albumPair.second == true )
+    auto album = handleAlbum( media, vlcMedia, artists.first.get() );
+    if ( album == nullptr )
     {
-        LOG_WARN( "Failed to create a new album" );
+        LOG_WARN( "Failed to get/create associated album" );
         return false;
     }
 
-    return link( media, albumPair.first, artists.first, artists.second, albumPair.second );
+    return link( media, album, artists.first, artists.second );
 }
 
 /* Album handling */
@@ -244,12 +244,11 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, const std::s
     return std::static_pointer_cast<Album>( albums[0] );
 }
 
-std::pair<std::shared_ptr<Album>, bool> VLCMetadataService::handleAlbum( std::shared_ptr<Media> media, VLC::Media& vlcMedia, Artist* albumArtist ) const
+std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> media, VLC::Media& vlcMedia, Artist* albumArtist ) const
 {
     auto albumTitle = vlcMedia.meta( libvlc_meta_Album );
     if ( albumTitle.length() > 0 )
     {
-        auto newAlbum = false;
         auto album = findAlbum( media.get(), albumTitle, albumArtist );
 
         if ( album == nullptr )
@@ -257,7 +256,6 @@ std::pair<std::shared_ptr<Album>, bool> VLCMetadataService::handleAlbum( std::sh
             album = m_ml->createAlbum( albumTitle );
             if ( album != nullptr )
             {
-                newAlbum = true;
                 auto artwork = vlcMedia.meta( libvlc_meta_ArtworkURL );
                 if ( artwork.length() != 0 )
                     album->setArtworkUrl( artwork );
@@ -269,9 +267,9 @@ std::pair<std::shared_ptr<Album>, bool> VLCMetadataService::handleAlbum( std::sh
             if ( track != nullptr )
                 media->setAlbumTrack( track );
         }
-        return {album, newAlbum};
+        return album;
     }
-    return {nullptr, false};
+    return nullptr;
 }
 
 /* Artists handling */
@@ -376,8 +374,7 @@ std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack(std::shared_ptr<Albu
 /* Misc */
 
 bool VLCMetadataService::link( std::shared_ptr<Media> media, std::shared_ptr<Album> album,
-                               std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist,
-                               bool newAlbum ) const
+                               std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist ) const
 {
     if ( albumArtist == nullptr && artist == nullptr )
     {
@@ -387,60 +384,63 @@ bool VLCMetadataService::link( std::shared_ptr<Media> media, std::shared_ptr<Alb
         return true;
     }
 
-    // If this is either a new album or a new artist, we need to add the relationship between the two.
-    if ( album != nullptr && albumArtist != nullptr && album->hasAlbumArtist() == false )
-    {
-        if ( album->setAlbumArtist( albumArtist.get() ) == false )
-            LOG_WARN( "Failed to add artist ", albumArtist->name(), " to album ", album->title() );
-        if ( albumArtist->artworkUrl().empty() == true )
-            albumArtist->setArtworkUrl( album->artworkUrl() );
-    }
-    if ( artist != nullptr && album != nullptr )
-    {
-        // This is a new album, don't try to be smart now.
-        if ( newAlbum == true )
-        {
-            // If we have an artist that is different from the album artist, add it as a "featuring"
-            if ( albumArtist == nullptr || artist->id() != albumArtist->id() )
-                album->addArtist( artist );
-        }
-        else
-        {
-            // We have seen this album before, let's check if we can improve things
-            // We assume that after 3 (because 3, magic numbers are cool) tracks, if the album has
-            // only one artist appearing, it's the album artist. This allows us to NOT assume
-            // albumartist == artist when parsing tags, but will have the same effet for most cases.
-            // However, it should be specific enough to avoid having the first track's artist set as
-            // albumArtist for compilations.
-            if ( album->hasAlbumArtist() == false && album->nbTracks() == 3 )
-            {
-                auto artists = album->artists();
-                if ( artists.size() == 1 && artists[0]->id() == artist->id() )
-                {
-                    LOG_INFO("Assuming album ", album->title(), "'s AlbumArtist is ", artist->name() );
-                    album->removeArtist( artist.get() );
-                    album->setAlbumArtist( artist.get() );
-                    // In case this is the artist's first album we see, link it with info from the album
-                    //FIXME: Extract this in a another method
-                    if ( artist->artworkUrl().empty() == true )
-                        artist->setArtworkUrl( album->artworkUrl() );
-                }
-                else
-                {
-                    // If the artist isn't unique, simply proceed with adding the new artist
-                    // to this album. It won't have an album artist, too bad.
-                    album->addArtist( artist );
-                }
-            }
-            else
-                album->addArtist( artist );
-        }
-    }
+    // We might modify albumArtist later, hence handle snapshots before.
+    // If we have an albumArtist (meaning the track was properly tagged, we
+    // can assume this artist is a correct match. We can use the thumbnail from
+    // the current album for the albumArtist, if none has been set before.
+    if ( albumArtist != nullptr && albumArtist->artworkUrl().empty() == true && album != nullptr )
+        albumArtist->setArtworkUrl( album->artworkUrl() );
 
     if ( albumArtist != nullptr )
         albumArtist->addMedia( media.get() );
     if ( artist != nullptr && ( albumArtist == nullptr || albumArtist->id() != artist->id() ) )
         artist->addMedia( media.get() );
+
+
+    auto currentAlbumArtist = album->albumArtist();
+
+    // If we have no main artist yet, that's easy, we need to assign one.
+    if ( currentAlbumArtist == nullptr )
+    {
+        // If the track was properly tagged, that's even better.
+        if ( albumArtist != nullptr )
+        {
+            album->setAlbumArtist( albumArtist.get() );
+            // Always add the album artist as an artist
+            album->addArtist( albumArtist );
+            if ( artist != nullptr )
+                album->addArtist( artist );
+        }
+        // If however we only have an artist, as opposed to an album artist, we
+        // add it, until proven we were wrong (ie. until one of the next tracks has a different artist)
+        else
+        {
+            // Guaranteed to be true since we need at least an artist to enter here.
+            assert( artist != nullptr );
+            album->setAlbumArtist( artist.get() );
+        }
+    }
+    else
+    {
+        if ( albumArtist == nullptr )
+        {
+            // Fallback to artist, since the same logic would apply anyway
+            albumArtist = artist;
+        }
+        if ( albumArtist->id() != currentAlbumArtist->id() )
+        {
+            // We have more than a single artist on this album, fallback to various artists
+            auto variousArtists = Artist::fetch( m_dbConn, medialibrary::VariousArtistID );
+            album->setAlbumArtist( variousArtists.get() );
+            // Add those two artists as "featuring".
+            album->addArtist( albumArtist );
+        }
+        if ( artist != nullptr && artist->id() != albumArtist->id() )
+        {
+            if ( albumArtist->id() != artist->id() )
+               album->addArtist( artist );
+        }
+    }
 
     return true;
 }
