@@ -54,6 +54,7 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
     public:
         Album( DBConnection dbConnection, sqlite::Row& row );
         Album( const std::string& title );
+        Album( const Artist* artist );
 
         virtual unsigned int id() const override;
         virtual const std::string& title() const override;
@@ -85,6 +86,7 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
 
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<Album> create(DBConnection dbConnection, const std::string& title );
+        static std::shared_ptr<Album> createUnknownAlbum( DBConnection dbConnection, const Artist* artist );
 
     protected:
         DBConnection m_dbConnection;

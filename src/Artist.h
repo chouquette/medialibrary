@@ -27,6 +27,7 @@
 #include "IMediaLibrary.h"
 
 class Artist;
+class Album;
 class Media;
 
 namespace policy
@@ -58,6 +59,7 @@ public:
     virtual const std::string& artworkUrl() const override;
     bool setArtworkUrl( const std::string& artworkUrl );
     bool updateNbAlbum( int increment );
+    std::shared_ptr<Album> unknownAlbum();
 
     static bool createTable( DBConnection dbConnection );
     static bool createDefaultArtists( DBConnection dbConnection );

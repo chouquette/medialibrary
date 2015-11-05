@@ -155,3 +155,21 @@ TEST_F( Artists, GetAll )
     auto artists2 = ml->artists();
     ASSERT_EQ( artists2.size(), 5u );
 }
+
+TEST_F( Artists, UnknownAlbum )
+{
+    auto a = ml->createArtist( "Explotters in the sky" );
+    auto album = a->unknownAlbum();
+    auto album2 = a->unknownAlbum();
+
+    ASSERT_NE( nullptr, album );
+    ASSERT_NE( nullptr, album2 );
+    ASSERT_EQ( album->id(), album2->id() );
+
+    Reload();
+
+    a = std::static_pointer_cast<Artist>( ml->artist( a->name() ) );
+    album2 = a->unknownAlbum();
+    ASSERT_NE( nullptr, album2 );
+    ASSERT_EQ( album2->id(), album->id() );
+}

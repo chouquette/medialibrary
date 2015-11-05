@@ -185,7 +185,6 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
 }
 
 /* Album handling */
-
 std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, const std::string& title, Artist* albumArtist ) const
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +

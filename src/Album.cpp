@@ -56,6 +56,16 @@ Album::Album(const std::string& title )
 {
 }
 
+Album::Album( const Artist* artist )
+    : m_id( 0 )
+    , m_artistId( artist->id() )
+    , m_releaseYear( ~0u )
+    , m_lastSyncDate( 0 )
+    , m_nbTracks( 0 )
+    , m_tracksCached( false )
+{
+}
+
 unsigned int Album::id() const
 {
     return m_id;
@@ -254,6 +264,17 @@ std::shared_ptr<Album> Album::create(DBConnection dbConnection, const std::strin
     static const std::string req = "INSERT INTO " + policy::AlbumTable::Name +
             "(id_album, title) VALUES(NULL, ?)";
     if ( _Cache::insert( dbConnection, album, req, title ) == false )
+        return nullptr;
+    album->m_dbConnection = dbConnection;
+    return album;
+}
+
+std::shared_ptr<Album> Album::createUnknownAlbum( DBConnection dbConnection, const Artist* artist )
+{
+    auto album = std::make_shared<Album>( artist );
+    static const std::string req = "INSERT INTO " + policy::AlbumTable::Name +
+            "(id_album, artist_id) VALUES(NULL, ?)";
+    if ( _Cache::insert( dbConnection, album, req, artist->id() ) == false )
         return nullptr;
     album->m_dbConnection = dbConnection;
     return album;

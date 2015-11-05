@@ -141,6 +141,18 @@ bool Artist::updateNbAlbum( int increment )
     return true;
 }
 
+std::shared_ptr<Album> Artist::unknownAlbum()
+{
+    static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
+                        " WHERE artist_id = ? AND title IS NULL";
+    auto album = Album::fetchOne( m_dbConnection, req, m_id );
+    if ( album == nullptr )
+    {
+        album = Album::createUnknownAlbum( m_dbConnection, this );
+    }
+    return album;
+}
+
 bool Artist::createTable( DBConnection dbConnection )
 {
     static const std::string req = "CREATE TABLE IF NOT EXISTS " +
