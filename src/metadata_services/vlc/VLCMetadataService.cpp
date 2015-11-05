@@ -174,7 +174,7 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
     media->setType( IMedia::Type::AudioType );
 
     auto artists = handleArtists( media, vlcMedia );
-    auto album = handleAlbum( media, vlcMedia, artists.first.get() );
+    auto album = handleAlbum( media, vlcMedia, artists.first.get(), artists.second.get() );
     if ( album == nullptr )
     {
         LOG_WARN( "Failed to get/create associated album" );
@@ -243,7 +243,7 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, const std::s
     return std::static_pointer_cast<Album>( albums[0] );
 }
 
-std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> media, VLC::Media& vlcMedia, Artist* albumArtist ) const
+std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> media, VLC::Media& vlcMedia, Artist* albumArtist, Artist* artist ) const
 {
     auto albumTitle = vlcMedia.meta( libvlc_meta_Album );
     if ( albumTitle.length() > 0 )
@@ -268,7 +268,16 @@ std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> m
         }
         return album;
     }
-    return nullptr;
+    if ( albumArtist != nullptr )
+        return albumArtist->unknownAlbum();
+    else if ( artist != nullptr )
+        return artist->unknownAlbum();
+    else
+    {
+        //FIXME: We might fetch the unknown artist twice while parsing the same file, that sucks.
+        auto unknownArtist = Artist::fetch( m_dbConn, medialibrary::UnknownArtistID );
+        return unknownArtist->unknownAlbum();
+    }
 }
 
 /* Artists handling */
