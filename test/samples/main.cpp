@@ -72,6 +72,10 @@ TEST_P( Tests, Parse )
         const auto audios = m_ml->audioFiles();
         ASSERT_EQ( expected["nbAudios"].GetUint(), audios.size() );
     }
+    if ( expected.HasMember( "artists" ) )
+    {
+        checkArtists( expected["artists"], m_ml->artists() );
+    }
 }
 
 int main(int ac, char** av)

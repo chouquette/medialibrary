@@ -172,6 +172,41 @@ void Tests::checkAlbums( const rapidjson::Value& expectedAlbums, std::vector<Alb
     }
 }
 
+void Tests::checkArtists(const rapidjson::Value& expectedArtists, std::vector<ArtistPtr> artists)
+{
+    ASSERT_TRUE( expectedArtists.IsArray() );
+    ASSERT_EQ( expectedArtists.Size(), artists.size() );
+    for ( auto i = 0u; i < expectedArtists.Size(); ++i )
+    {
+        const auto& expectedArtist = expectedArtists[i];
+        auto it = std::find_if( begin( artists ), end( artists ), [&expectedArtist, this](const ArtistPtr& artist) {
+            if ( expectedArtist.HasMember( "name" ) )
+            {
+                if ( strcasecmp( expectedArtist["name"].GetString(), artist->name().c_str() ) != 0 )
+                    return false;
+            }
+            if ( expectedArtist.HasMember( "id" ) )
+            {
+                if ( expectedArtist["id"].GetUint() != artist->id() )
+                    return false;
+            }
+            if ( expectedArtist.HasMember( "nbAlbums" ) || expectedArtist.HasMember( "albums" ) )
+            {
+                auto albums = artist->albums();
+                if ( expectedArtist.HasMember( "nbAlbums" ) )
+                {
+                    if ( albums.size() != expectedArtist["nbAlbums"].GetUint() )
+                        return false;
+                    if ( expectedArtist.HasMember( "albums" ) )
+                        checkAlbums( expectedArtist["albums"], albums );
+                }
+            }
+            return true;
+        });
+        ASSERT_NE( it, end( artists ) );
+    }
+}
+
 void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& tracks, const rapidjson::Value& expectedTracks, bool& found ) const
 {
     found = false;

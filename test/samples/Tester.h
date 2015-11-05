@@ -53,6 +53,7 @@ protected:
     void checkAudioTracks(const rapidjson::Value& expectedTracks, const std::vector<AudioTrackPtr>& tracks );
     void checkMedias( const rapidjson::Value& expectedMedias );
     void checkAlbums(const rapidjson::Value& expectedAlbums, std::vector<AlbumPtr> albums);
+    void checkArtists( const rapidjson::Value& expectedArtists, std::vector<ArtistPtr> artists );
     void checkAlbumTracks(const IAlbum* album, const std::vector<MediaPtr>& tracks, const rapidjson::Value& expectedTracks , bool& found) const;
 };
 
