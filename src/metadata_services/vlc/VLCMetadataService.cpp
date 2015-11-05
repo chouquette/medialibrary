@@ -174,7 +174,7 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
     media->setType( IMedia::Type::AudioType );
 
     auto artists = handleArtists( media, vlcMedia );
-    auto albumPair = handleAlbum( media, vlcMedia );
+    auto albumPair = handleAlbum( media, vlcMedia, artists.first.get() );
     if ( albumPair.first == nullptr && albumPair.second == true )
     {
         LOG_WARN( "Failed to create a new album" );
@@ -186,7 +186,7 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
 
 /* Album handling */
 
-std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, const std::string& title, VLC::Media& vlcMedia ) const
+std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, const std::string& title, Artist* albumArtist ) const
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
             " WHERE title = ?";
@@ -202,19 +202,15 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, const std::s
      * candidates would yield the only "A" album we know, while we should return
      * nullptr, so handleAlbum can create a new one.
      */
-    auto artistName = vlcMedia.meta( libvlc_meta_AlbumArtist );
-    if ( artistName.empty() == true )
-        artistName = vlcMedia.meta( libvlc_meta_Artist );
-
     for ( auto it = begin( albums ); it != end( albums ); )
     {
         auto a = static_cast<Album*>( (*it).get() );
-        if ( artistName.empty() == false )
+        if ( albumArtist != nullptr )
         {
             // We assume that an album without album artist is a positive match.
             // At the end of the day, without proper tags, there's only so much we can do.
-            auto albumArtist = a->albumArtist();
-            if ( albumArtist != nullptr && albumArtist->name() != artistName )
+            auto candidateAlbumArtist = a->albumArtist();
+            if ( candidateAlbumArtist != nullptr && candidateAlbumArtist->id() != albumArtist->id() )
             {
                 it = albums.erase( it );
                 continue;
@@ -248,13 +244,13 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, const std::s
     return std::static_pointer_cast<Album>( albums[0] );
 }
 
-std::pair<std::shared_ptr<Album>, bool> VLCMetadataService::handleAlbum( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
+std::pair<std::shared_ptr<Album>, bool> VLCMetadataService::handleAlbum( std::shared_ptr<Media> media, VLC::Media& vlcMedia, Artist* albumArtist ) const
 {
     auto albumTitle = vlcMedia.meta( libvlc_meta_Album );
     if ( albumTitle.length() > 0 )
     {
         auto newAlbum = false;
-        auto album = findAlbum( media.get(), albumTitle, vlcMedia );
+        auto album = findAlbum( media.get(), albumTitle, albumArtist );
 
         if ( album == nullptr )
         {
