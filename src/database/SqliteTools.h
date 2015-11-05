@@ -158,6 +158,24 @@ public:
 private:
     std::string m_reason;
 };
+
+class ColumnOutOfRange : std::exception
+{
+public:
+    ColumnOutOfRange( unsigned int idx, unsigned int nbColumns )
+    {
+        m_reason = "Attempting to extract column at index " + std::to_string( idx ) +
+                " from a request with " + std::to_string( nbColumns ) + "columns";
+    }
+
+    virtual const char* what() const noexcept override
+    {
+        return m_reason.c_str();
+    }
+
+private:
+    std::string m_reason;
+};
 }
 
 class Row
@@ -166,6 +184,7 @@ public:
     Row( sqlite3_stmt* stmt )
         : m_stmt( stmt )
         , m_idx( 0 )
+        , m_nbColumns( sqlite3_column_count( stmt ) )
     {
     }
 
@@ -181,6 +200,8 @@ public:
     template <typename T>
     Row& operator>>(T& t)
     {
+        if ( m_idx + 1 > m_nbColumns )
+            throw errors::ColumnOutOfRange( m_idx, m_nbColumns );
         t = sqlite::Traits<T>::Load( m_stmt, m_idx );
         m_idx++;
         return *this;
@@ -192,6 +213,8 @@ public:
     template <typename T>
     T load(unsigned int idx)
     {
+        if ( m_idx + 1 > m_nbColumns )
+            throw errors::ColumnOutOfRange( m_idx, m_nbColumns );
         return sqlite::Traits<T>::Load( m_stmt, idx );
     }
 
@@ -208,6 +231,7 @@ public:
 private:
     sqlite3_stmt* m_stmt;
     unsigned int m_idx;
+    unsigned int m_nbColumns;
 };
 
 class Statement
