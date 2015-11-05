@@ -185,8 +185,13 @@ bool Album::setAlbumArtist(Artist* artist)
             "artist_id = ? WHERE id_album = ?";
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artist->id(), m_id ) == false )
         return false;
+    if ( m_artistId != 0 )
+    {
+        auto previousArtist = Artist::fetch( m_dbConnection, m_artistId );
+        previousArtist->updateNbAlbum( -1 );
+    }
     m_artistId = artist->id();
-    artist->markAsAlbumArtist();
+    artist->updateNbAlbum( 1 );
     return true;
 }
 

@@ -47,11 +47,6 @@ private:
 public:
     Artist( DBConnection dbConnection, sqlite::Row& row );
     Artist( const std::string& name );
-    /**
-     * @brief Artist Construct an empty artist, with a DB connection.
-     * This is only meant to construct the Unknown Artist virtual representation
-     */
-    Artist( DBConnection dbConnection );
 
     virtual unsigned int id() const override;
     virtual const std::string &name() const override;
@@ -62,7 +57,7 @@ public:
     bool addMedia( Media* media );
     virtual const std::string& artworkUrl() const override;
     bool setArtworkUrl( const std::string& artworkUrl );
-    bool markAsAlbumArtist();
+    bool updateNbAlbum( int increment );
 
     static bool createTable( DBConnection dbConnection );
     static bool createDefaultArtists( DBConnection dbConnection );
@@ -74,7 +69,7 @@ private:
     std::string m_name;
     std::string m_shortBio;
     std::string m_artworkUrl;
-    bool m_isAlbumArtist;
+    unsigned int m_nbAlbums;
 
     friend _Cache;
     friend struct policy::ArtistTable;

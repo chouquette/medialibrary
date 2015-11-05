@@ -331,7 +331,7 @@ std::shared_ptr<Artist> MediaLibrary::createArtist( const std::string& name )
 std::vector<ArtistPtr> MediaLibrary::artists() const
 {
     static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name +
-            " WHERE is_album_artist = 1";
+            " WHERE nb_albums > 0";
     return Artist::fetchAll( m_dbConnection.get(), req );
 }
 
