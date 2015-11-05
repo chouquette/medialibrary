@@ -57,7 +57,9 @@ TEST_P( Tests, Parse )
     const auto& expected = doc["expected"];
 
     if ( expected.HasMember( "albums" ) == true )
-        checkAlbums( expected["albums" ] );
+    {
+        checkAlbums( expected["albums" ], m_ml->albums() );
+    }
     if ( expected.HasMember( "media" ) == true )
         checkMedias( expected["media"] );
     if ( expected.HasMember( "nbVideos" ) == true )

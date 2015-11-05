@@ -107,10 +107,9 @@ void Tests::checkMedias(const rapidjson::Value& expectedMedias)
     }
 }
 
-void Tests::checkAlbums(const rapidjson::Value& expectedAlbums )
+void Tests::checkAlbums( const rapidjson::Value& expectedAlbums, std::vector<AlbumPtr> albums )
 {
     ASSERT_TRUE( expectedAlbums.IsArray() );
-    auto albums = m_ml->albums();
     ASSERT_EQ( expectedAlbums.Size(), albums.size() );
     for ( auto i = 0u; i < expectedAlbums.Size(); ++i )
     {
