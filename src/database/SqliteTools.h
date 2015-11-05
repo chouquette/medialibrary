@@ -142,7 +142,7 @@ struct Traits<T, typename std::enable_if<IsSameDecay<T, int64_t>::value>::type>
 
 namespace errors
 {
-class ConstraintViolation : std::exception
+class ConstraintViolation : public std::exception
 {
 public:
     ConstraintViolation( const std::string& req, const std::string& err )
@@ -159,7 +159,7 @@ private:
     std::string m_reason;
 };
 
-class ColumnOutOfRange : std::exception
+class ColumnOutOfRange : public std::exception
 {
 public:
     ColumnOutOfRange( unsigned int idx, unsigned int nbColumns )
