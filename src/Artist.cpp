@@ -79,7 +79,7 @@ std::vector<AlbumPtr> Artist::albums() const
     if ( m_id == 0 )
         return {};
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " alb "
-            "WHERE artist_id = ? ORDER BY title";
+            "WHERE artist_id = ? ORDER BY release_year, title";
     return Album::fetchAll( m_dbConnection, req, m_id );
 }
 
