@@ -36,7 +36,7 @@ TEST_F( AlbumTracks, Artist )
 {
     auto album = ml->createAlbum( "album" );
     auto f = ml->addFile( "track1.mp3", nullptr );
-    auto track = album->addTrack( f, 1 );
+    auto track = album->addTrack( f, 1, 0 );
 
     ASSERT_EQ( track->artist(), "" );
     track->setArtist( "artist" );
@@ -54,7 +54,7 @@ TEST_F( AlbumTracks, SetReleaseYear )
 {
     auto a = ml->createAlbum( "album" );
     auto m = ml->addFile( "test.mp3", nullptr );
-    auto t = a->addTrack( m, 1 );
+    auto t = a->addTrack( m, 1, 0 );
 
     ASSERT_EQ( 0u, t->releaseYear() );
 

@@ -40,16 +40,18 @@ AlbumTrack::AlbumTrack(DBConnection dbConnection, sqlite::Row& row )
         >> m_genre
         >> m_trackNumber
         >> m_albumId
-        >> m_releaseYear;
+        >> m_releaseYear
+        >> m_discNumber;
 }
 
 //FIXME: constify media
-AlbumTrack::AlbumTrack( Media* media, unsigned int trackNumber, unsigned int albumId )
+AlbumTrack::AlbumTrack( Media* media, unsigned int trackNumber, unsigned int albumId, unsigned int discNumber )
     : m_id( 0 )
     , m_mediaId( media->id() )
     , m_trackNumber( trackNumber )
     , m_albumId( albumId )
     , m_releaseYear( 0 )
+    , m_discNumber( discNumber )
     , m_album( nullptr )
 {
 }
@@ -86,6 +88,7 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
                 "track_number UNSIGNED INTEGER,"
                 "album_id UNSIGNED INTEGER NOT NULL,"
                 "release_year UNSIGNED INTEGER,"
+                "disc_number UNSIGNED INTEGER,"
                 "FOREIGN KEY (media_id) REFERENCES " + policy::MediaTable::Name + "(id_media)"
                     " ON DELETE CASCADE, "
                 "FOREIGN KEY (album_id) REFERENCES Album(id_album) "
@@ -94,12 +97,12 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-std::shared_ptr<AlbumTrack> AlbumTrack::create(DBConnection dbConnection, unsigned int albumId, Media* media, unsigned int trackNb)
+std::shared_ptr<AlbumTrack> AlbumTrack::create(DBConnection dbConnection, unsigned int albumId, Media* media, unsigned int trackNb, unsigned int discNumber )
 {
-    auto self = std::make_shared<AlbumTrack>( media, trackNb, albumId );
+    auto self = std::make_shared<AlbumTrack>( media, trackNb, albumId, discNumber );
     static const std::string req = "INSERT INTO " + policy::AlbumTrackTable::Name
-            + "(media_id, track_number, album_id) VALUES(?, ?, ?)";
-    if ( _Cache::insert( dbConnection, self, req, media->id(), trackNb, albumId ) == false )
+            + "(media_id, track_number, album_id, disc_number) VALUES(?, ?, ?, ?)";
+    if ( _Cache::insert( dbConnection, self, req, media->id(), trackNb, albumId, discNumber ) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;
     return self;
@@ -140,6 +143,11 @@ bool AlbumTrack::setReleaseYear(unsigned int year)
         return false;
     m_releaseYear = year;
     return true;
+}
+
+unsigned int AlbumTrack::discNumber() const
+{
+    return m_discNumber;
 }
 
 std::shared_ptr<IAlbum> AlbumTrack::album()

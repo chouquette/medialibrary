@@ -50,7 +50,7 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
         typedef Cache<AlbumTrack, IAlbumTrack, policy::AlbumTrackTable> _Cache;
     public:
         AlbumTrack( DBConnection dbConnection, sqlite::Row& row );
-        AlbumTrack(Media* media, unsigned int trackNumber, unsigned int albumId );
+        AlbumTrack(Media* media, unsigned int trackNumber, unsigned int albumId , unsigned int discNumber);
 
         virtual unsigned int id() const override;
         virtual const std::string& artist() const override;
@@ -60,11 +60,12 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
         virtual unsigned int trackNumber() override;
         virtual unsigned int releaseYear() const override;
         bool setReleaseYear( unsigned int year );
+        virtual unsigned int discNumber() const override;
         virtual std::shared_ptr<IAlbum> album() override;
 
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<AlbumTrack> create(DBConnection dbConnection, unsigned int albumId,
-                                     Media* media, unsigned int trackNb );
+                                     Media* media, unsigned int trackNb , unsigned int discNumber);
 
     private:
         DBConnection m_dbConnection;
@@ -75,6 +76,7 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
         unsigned int m_trackNumber;
         unsigned int m_albumId;
         unsigned int m_releaseYear;
+        unsigned int m_discNumber;
 
         std::shared_ptr<Album> m_album;
 

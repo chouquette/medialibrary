@@ -358,7 +358,13 @@ std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack(std::shared_ptr<Albu
         trackNb = atoi( trackNbStr.c_str() );
     else
         trackNb = 0;
-    auto track = std::static_pointer_cast<AlbumTrack>( album->addTrack( media, trackNb ) );
+
+    auto discNumberStr = vlcMedia.meta( libvlc_meta_DiscNumber );
+    auto discNumber = 0;
+    if ( discNumberStr.empty() == false )
+        discNumber = atoi( discNumberStr.c_str() );
+
+    auto track = std::static_pointer_cast<AlbumTrack>( album->addTrack( media, trackNb, discNumber ) );
     if ( track == nullptr )
     {
         LOG_ERROR( "Failed to create album track" );

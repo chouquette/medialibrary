@@ -46,6 +46,10 @@ class IAlbumTrack
         virtual unsigned int trackNumber() = 0;
         virtual std::shared_ptr<IAlbum> album() = 0;
         /**
+         * @return Which disc this tracks appears on (or 0 if unspecified)
+         */
+        virtual unsigned int discNumber() const = 0;
+        /**
          * @brief releaseYear Represent the track release year. It doesn't
          *                      imply anything regarding the album's release year.
          * @return This track release year, or 0 if unknown.

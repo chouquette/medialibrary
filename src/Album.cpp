@@ -156,10 +156,10 @@ std::vector<MediaPtr> Album::tracks() const
     return m_tracks;
 }
 
-std::shared_ptr<AlbumTrack> Album::addTrack(std::shared_ptr<Media> media, unsigned int trackNb )
+std::shared_ptr<AlbumTrack> Album::addTrack(std::shared_ptr<Media> media, unsigned int trackNb, unsigned int discNumber )
 {
     //FIXME: This MUST be executed as a transaction
-    auto track = AlbumTrack::create( m_dbConnection, m_id, media.get(), trackNb );
+    auto track = AlbumTrack::create( m_dbConnection, m_id, media.get(), trackNb, discNumber );
     if ( track == nullptr )
         return nullptr;
     if ( media->setAlbumTrack( track ) == false )

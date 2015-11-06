@@ -75,7 +75,7 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         bool setArtworkUrl( const std::string& artworkUrl );
         virtual time_t lastSyncDate() const override;
         virtual std::vector<MediaPtr> tracks() const override;
-        std::shared_ptr<AlbumTrack> addTrack( std::shared_ptr<Media> media, unsigned int trackNb );
+        std::shared_ptr<AlbumTrack> addTrack(std::shared_ptr<Media> media, unsigned int trackNb , unsigned int discNumber);
         unsigned int nbTracks() const override;
 
         virtual ArtistPtr albumArtist() const override;
