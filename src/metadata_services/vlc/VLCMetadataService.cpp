@@ -185,7 +185,7 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
 }
 
 /* Album handling */
-std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, const std::string& title, Artist* albumArtist ) const
+std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, VLC::Media& vlcMedia, const std::string& title, Artist* albumArtist ) const
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
             " WHERE title = ?";
@@ -193,6 +193,8 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, const std::s
 
     if ( albums.size() == 0 )
         return nullptr;
+
+    auto discNumber = vlcMedia.meta( libvlc_meta_DiscNumber );
 
     /*
      * Even if we get only 1 album, we need to filter out invalid matches.
@@ -215,21 +217,25 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, const std::s
                 continue;
             }
         }
-        // Assume album files will be in the same folder.
-        const auto tracks = a->tracks();
-        if ( tracks.size() == 0 )
+        // If this is a multidisc album, assume it could be in a multiple amount of folders.
+        if ( discNumber.empty() == true )
         {
-            LOG_ERROR( "Empty album ", a->title() );
-            assert(false);
-        }
-        else
-        {
-            auto candidateFolder = m_fsFactory->createDirectory( utils::file::directory( tracks[0]->mrl() ) );
-            auto newFileFolder = m_fsFactory->createDirectory( utils::file::directory( media->mrl() ) );
-            if ( candidateFolder->path() != newFileFolder->path() )
+            // Assume album files will be in the same folder.
+            const auto tracks = a->tracks();
+            if ( tracks.size() == 0 )
             {
-                it = albums.erase( it );
-                continue;
+                LOG_ERROR( "Empty album ", a->title() );
+                assert(false);
+            }
+            else
+            {
+                auto candidateFolder = m_fsFactory->createDirectory( utils::file::directory( tracks[0]->mrl() ) );
+                auto newFileFolder = m_fsFactory->createDirectory( utils::file::directory( media->mrl() ) );
+                if ( candidateFolder->path() != newFileFolder->path() )
+                {
+                    it = albums.erase( it );
+                    continue;
+                }
             }
         }
         ++it;
@@ -249,7 +255,7 @@ std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> m
     std::shared_ptr<Album> album;
     if ( albumTitle.length() > 0 )
     {
-        album = findAlbum( media.get(), albumTitle, albumArtist );
+        album = findAlbum( media.get(), vlcMedia, albumTitle, albumArtist );
 
         if ( album == nullptr )
         {
