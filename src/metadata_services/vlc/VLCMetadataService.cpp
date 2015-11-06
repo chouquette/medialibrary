@@ -246,9 +246,10 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, const std::s
 std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> media, VLC::Media& vlcMedia, Artist* albumArtist, Artist* artist ) const
 {
     auto albumTitle = vlcMedia.meta( libvlc_meta_Album );
+    std::shared_ptr<Album> album;
     if ( albumTitle.length() > 0 )
     {
-        auto album = findAlbum( media.get(), albumTitle, albumArtist );
+        album = findAlbum( media.get(), albumTitle, albumArtist );
 
         if ( album == nullptr )
         {
@@ -260,24 +261,26 @@ std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> m
                     album->setArtworkUrl( artwork );
             }
         }
-        if ( album != nullptr )
-        {
-            auto track = handleTrack( album, media, vlcMedia );
-            if ( track != nullptr )
-                media->setAlbumTrack( track );
-        }
-        return album;
     }
-    if ( albumArtist != nullptr )
-        return albumArtist->unknownAlbum();
-    else if ( artist != nullptr )
-        return artist->unknownAlbum();
     else
     {
-        //FIXME: We might fetch the unknown artist twice while parsing the same file, that sucks.
-        auto unknownArtist = Artist::fetch( m_dbConn, medialibrary::UnknownArtistID );
-        return unknownArtist->unknownAlbum();
+        if ( albumArtist != nullptr )
+            album = albumArtist->unknownAlbum();
+        else if ( artist != nullptr )
+            album = artist->unknownAlbum();
+        else
+        {
+            //FIXME: We might fetch the unknown artist twice while parsing the same file, that sucks.
+            auto unknownArtist = Artist::fetch( m_dbConn, medialibrary::UnknownArtistID );
+            album = unknownArtist->unknownAlbum();
+        }
     }
+    if ( album == nullptr )
+        return nullptr;
+    auto track = handleTrack( album, media, vlcMedia );
+    if ( track != nullptr )
+        media->setAlbumTrack( track );
+    return album;
 }
 
 /* Artists handling */
