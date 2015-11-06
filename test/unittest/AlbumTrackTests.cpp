@@ -31,6 +31,19 @@ class AlbumTracks : public Tests
 {
 };
 
+TEST_F( AlbumTracks, Create )
+{
+    auto album = ml->createAlbum( "album" );
+    auto f = ml->addFile( "track1.mp3", nullptr );
+    auto track = album->addTrack( f, 1, 10 );
+    ASSERT_NE( nullptr, track );
+    ASSERT_EQ( 10u, track->discNumber() );
+
+    Reload();
+
+    f = std::static_pointer_cast<Media>( ml->file( "track1.mp3" ) );
+    ASSERT_EQ( 10u, f->albumTrack()->discNumber() );
+}
 
 TEST_F( AlbumTracks, Artist )
 {
