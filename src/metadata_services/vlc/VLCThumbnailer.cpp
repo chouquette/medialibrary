@@ -55,7 +55,9 @@ VLCThumbnailer::VLCThumbnailer(const VLC::Instance &vlc)
 {
 #ifdef WITH_EVAS
     static int fakeBuffer;
+#ifndef TIZEN
     evas_init();
+#endif
     auto method = evas_render_method_lookup("buffer");
     m_canvas.reset( evas_new() );
     if ( m_canvas == nullptr )
@@ -78,7 +80,7 @@ VLCThumbnailer::VLCThumbnailer(const VLC::Instance &vlc)
 
 VLCThumbnailer::~VLCThumbnailer()
 {
-#ifdef WITH_EVAS
+#if defined(WITH_EVAS) && !defined(TIZEN)
     evas_shutdown();
 #endif
 }
