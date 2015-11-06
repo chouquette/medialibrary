@@ -1,0 +1,25 @@
+{
+    "input": [
+        "music/multi_cd"
+    ],
+    "expected": {
+        "nbAudios": 3,
+        "nbVideos": 0,
+        "albums": [{
+            "title": "Album",
+            "nbTracks": 3,
+            "tracks": [{
+                "title": "Track 1",
+                "cd": 1
+            },
+            {
+                "title": "Track 2",
+                "cd": 2
+            },
+            {
+                "title": "Track 3",
+                "cd": 3
+            }]
+        }]
+    }
+}
