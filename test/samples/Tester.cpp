@@ -249,6 +249,11 @@ void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& 
             if ( albumTrack->releaseYear() != expectedTrack["releaseYear"].GetUint() )
                 return;
         }
+        if ( expectedTrack.HasMember( "cd" ) )
+        {
+            if ( expectedTrack["cd"].GetUint() != albumTrack->discNumber() )
+                return;
+        }
         // Always check if the album link is correct. This isn't part of finding the proper album, so just fail hard
         // if the check fails.
         const auto trackAlbum = albumTrack->album();
