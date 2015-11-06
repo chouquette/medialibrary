@@ -20,6 +20,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
+#include <algorithm>
+
 #include "Album.h"
 #include "AlbumTrack.h"
 #include "Artist.h"
@@ -169,6 +171,9 @@ std::shared_ptr<AlbumTrack> Album::addTrack(std::shared_ptr<Media> media, unsign
         return nullptr;
     m_nbTracks++;
     m_tracks.push_back( std::move( media ) );
+    std::sort( begin( m_tracks ), end( m_tracks ), [](const MediaPtr& a, const MediaPtr& b) {
+        return a->albumTrack()->trackNumber() < b->albumTrack()->trackNumber();
+    });
     m_tracksCached = true;
     return track;
 }
