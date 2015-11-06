@@ -201,6 +201,12 @@ void Tests::checkArtists(const rapidjson::Value& expectedArtists, std::vector<Ar
                         checkAlbums( expectedArtist["albums"], albums );
                 }
             }
+            if ( expectedArtist.HasMember( "nbTracks" ) )
+            {
+                auto tracks = artist->media();
+                if ( expectedArtist["nbTracks"].GetUint() != tracks.size() )
+                    return false;
+            }
             return true;
         });
         ASSERT_NE( it, end( artists ) );
