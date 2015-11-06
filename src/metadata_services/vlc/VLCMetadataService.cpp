@@ -173,6 +173,10 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
 {
     media->setType( IMedia::Type::AudioType );
 
+    auto cover = vlcMedia.meta( libvlc_meta_ArtworkURL );
+    if ( cover.empty() == false )
+        media->setSnapshot( cover );
+
     auto artists = handleArtists( media, vlcMedia );
     auto album = handleAlbum( media, vlcMedia, artists.first.get(), artists.second.get() );
     if ( album == nullptr )
