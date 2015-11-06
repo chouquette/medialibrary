@@ -10,7 +10,8 @@ static const char* testCases[] = {
     "same_album_name_different_artist",
     "same_album_name_same_artist",
     "compilation",
-    "release_year_same"
+    "release_year_same",
+    "notags"
 };
 
 class TestEnv : public ::testing::Environment

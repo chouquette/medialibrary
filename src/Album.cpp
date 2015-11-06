@@ -190,7 +190,7 @@ ArtistPtr Album::albumArtist() const
     return Artist::fetch( m_dbConnection, m_artistId );
 }
 
-bool Album::setAlbumArtist(Artist* artist)
+bool Album::setAlbumArtist( Artist* artist )
 {
     if ( m_artistId == artist->id() )
         return true;

@@ -1,0 +1,32 @@
+{
+    "input": [
+        "music/notags"
+    ],
+    "expected": {
+        "nbAudios": 3,
+        "nbVideos": 0,
+        "albums": [{
+            "title": "",
+            "artist": "",
+            "tracks": [
+            {
+                "title": "track.mp3",
+                "artist": ""
+            },
+            {
+                "title": "track2.mp3",
+                "artist": ""
+            },
+            {
+                "title": "track3.mp3",
+                "artist": ""
+            }]
+        }],
+        "artists": [{
+            "name": "",
+            "id": 1,
+            "nbAlbums": 1,
+            "nbTracks": 3
+        }]
+    }
+}
