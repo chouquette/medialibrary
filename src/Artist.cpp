@@ -149,6 +149,13 @@ std::shared_ptr<Album> Artist::unknownAlbum()
     if ( album == nullptr )
     {
         album = Album::createUnknownAlbum( m_dbConnection, this );
+        if ( album == nullptr )
+            return nullptr;
+        if ( updateNbAlbum( 1 ) == false )
+        {
+            Album::destroy( m_dbConnection, album );
+            return nullptr;
+        }
     }
     return album;
 }
