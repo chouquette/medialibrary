@@ -72,7 +72,8 @@ class MediaLibrary : public IMediaLibrary
         virtual MoviePtr movie( const std::string& title ) override;
         std::shared_ptr<Movie> createMovie( const std::string& title );
 
-        virtual ArtistPtr artist( const std::string& name ) override;
+        virtual ArtistPtr artist( unsigned int id ) override;
+        ArtistPtr artist( const std::string& name );
         std::shared_ptr<Artist> createArtist( const std::string& name );
         virtual std::vector<ArtistPtr> artists() const override;
 

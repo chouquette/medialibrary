@@ -113,7 +113,7 @@ class IMediaLibrary
         virtual std::vector<AlbumPtr> albums() = 0;
         virtual ShowPtr show( const std::string& name ) = 0;
         virtual MoviePtr movie( const std::string& title ) = 0;
-        virtual ArtistPtr artist( const std::string& name ) = 0;
+        virtual ArtistPtr artist( unsigned int id ) = 0;
         virtual std::vector<ArtistPtr> artists() const = 0;
 
         /**

@@ -316,7 +316,12 @@ std::shared_ptr<Movie> MediaLibrary::createMovie( const std::string& title )
     return Movie::create( m_dbConnection.get(), title );
 }
 
-ArtistPtr MediaLibrary::artist(const std::string &name)
+ArtistPtr MediaLibrary::artist(unsigned int id)
+{
+    return Artist::fetch( m_dbConnection.get(), id );
+}
+
+ArtistPtr MediaLibrary::artist( const std::string& name )
 {
     static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name
             + " WHERE name = ?";
