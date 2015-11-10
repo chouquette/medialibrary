@@ -31,4 +31,5 @@ public:
     virtual void Error( const std::string& msg ) = 0;
     virtual void Warning( const std::string& msg ) = 0;
     virtual void Info( const std::string& msg ) = 0;
+    virtual void Debug( const std::string& msg ) = 0;
 };

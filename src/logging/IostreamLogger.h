@@ -42,4 +42,9 @@ public:
     {
         std::cout << "Info: " << msg;
     }
+
+    virtual void Debug(const std::string& msg) override
+    {
+        std::cout << "Debug: " << msg;
+    }
 };

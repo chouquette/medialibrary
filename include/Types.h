@@ -57,8 +57,9 @@ typedef SqliteConnection* DBConnection;
 
 enum class LogLevel
 {
-    /// Debug: Extra logs (currently used by to enable third parties logs
+    /// Verbose: Extra logs (currently used by to enable third parties logs
     /// such as VLC)
+    Verbose,
     Debug,
     Info,
     Warning,

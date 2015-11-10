@@ -73,9 +73,12 @@ private:
         case LogLevel::Warning:
             l->Warning( msg );
             break;
-        case LogLevel::Debug:
         case LogLevel::Info:
             l->Info( msg );
+            break;
+        case LogLevel::Verbose:
+        case LogLevel::Debug:
+            l->Debug( msg );
             break;
         }
     }
@@ -109,6 +112,12 @@ public:
         log( LogLevel::Info, std::forward<Args>( args )... );
     }
 
+    template <typename... Args>
+    static void Debug( Args... args )
+    {
+        log( LogLevel::Debug, std::forward<Args>( args )... );
+    }
+
 private:
 
 private:
@@ -128,3 +137,4 @@ private:
 #define LOG_ERROR( ... ) Log::Error( LOG_ORIGIN, ' ', __VA_ARGS__ )
 #define LOG_WARN( ... ) Log::Warning( LOG_ORIGIN, ' ', __VA_ARGS__ )
 #define LOG_INFO( ... ) Log::Info( LOG_ORIGIN, ' ', __VA_ARGS__ )
+#define LOG_DEBUG( ... ) Log::Debug( LOG_ORIGIN, ' ', __VA_ARGS__ )
