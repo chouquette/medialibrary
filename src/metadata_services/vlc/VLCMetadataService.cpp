@@ -198,7 +198,15 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, VLC::Media& 
     if ( albums.size() == 0 )
         return nullptr;
 
-    auto discNumber = vlcMedia.meta( libvlc_meta_DiscNumber );
+    auto discNumberStr = vlcMedia.meta( libvlc_meta_DiscNumber );
+    auto discNumber = 0u;
+    if ( discNumberStr.empty() == false )
+        discNumber = atoi( discNumberStr.c_str() );
+
+    auto discTotalStr = vlcMedia.meta( libvlc_meta_DiscTotal );
+    auto discTotal = 0u;
+    if ( discTotalStr.empty() == false )
+        discTotal = atoi( discTotalStr.c_str() );
 
     /*
      * Even if we get only 1 album, we need to filter out invalid matches.
@@ -222,7 +230,7 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, VLC::Media& 
             }
         }
         // If this is a multidisc album, assume it could be in a multiple amount of folders.
-        if ( discNumber.empty() == true )
+        if ( discTotal <= 1 && discNumber <= 1 )
         {
             // Assume album files will be in the same folder.
             const auto tracks = a->tracks();
