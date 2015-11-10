@@ -24,6 +24,7 @@
 #define SQLITETOOLS_H
 
 #include <cassert>
+#include <chrono>
 #include <cstring>
 #include <memory>
 #include <sqlite3.h>
@@ -312,6 +313,7 @@ class Tools
         static std::vector<std::shared_ptr<INTF> > fetchAll( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
             auto ctx = dbConnection->acquireContext();
+            auto chrono = std::chrono::steady_clock::now();
 
             std::vector<std::shared_ptr<INTF>> results;
             auto stmt = Statement( dbConnection, req );
@@ -322,6 +324,9 @@ class Tools
                 auto row = IMPL::load( dbConnection, sqliteRow );
                 results.push_back( row );
             }
+            auto duration = std::chrono::steady_clock::now() - chrono;
+            LOG_DEBUG("Executed ", req, " in ",
+                     std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
             return results;
         }
 
@@ -329,13 +334,18 @@ class Tools
         static std::shared_ptr<T> fetchOne( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
             auto ctx = dbConnection->acquireContext();
+            auto chrono = std::chrono::steady_clock::now();
 
             auto stmt = Statement( dbConnection, req );
             stmt.execute( std::forward<Args>( args )... );
             auto row = stmt.row();
             if ( row == nullptr )
                 return nullptr;
-            return T::load( dbConnection, row );
+            auto res = T::load( dbConnection, row );
+            auto duration = std::chrono::steady_clock::now() - chrono;
+            LOG_DEBUG("Executed ", req, " in ",
+                     std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
+            return res;
         }
 
         template <typename... Args>
@@ -378,10 +388,14 @@ class Tools
         template <typename... Args>
         static bool executeRequestLocked( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
+            auto chrono = std::chrono::steady_clock::now();
             auto stmt = Statement( dbConnection, req );
             stmt.execute( std::forward<Args>( args )... );
             while ( stmt.row() != nullptr )
                 ;
+            auto duration = std::chrono::steady_clock::now() - chrono;
+            LOG_DEBUG("Executed ", req, " in ",
+                     std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
             return true;
         }
 
