@@ -170,11 +170,10 @@ std::shared_ptr<AlbumTrack> Album::addTrack(std::shared_ptr<Media> media, unsign
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, m_id ) == false )
         return nullptr;
     m_nbTracks++;
-    m_tracks.push_back( std::move( media ) );
-    std::sort( begin( m_tracks ), end( m_tracks ), [](const MediaPtr& a, const MediaPtr& b) {
-        return a->albumTrack()->trackNumber() < b->albumTrack()->trackNumber();
-    });
-    m_tracksCached = true;
+    // Invalide the cache instead of trying to maintain it from here.
+    // Keeping the ordering consistent while adding items is going to be hard
+    // once we start to expose multiple sorting criteria
+    m_tracksCached = false;
     return track;
 }
 
