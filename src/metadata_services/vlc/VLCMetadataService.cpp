@@ -20,6 +20,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
+#include <chrono>
+
 #include "VLCMetadataService.h"
 #include "Media.h"
 #include "Album.h"
@@ -60,6 +62,7 @@ void VLCMetadataService::run( std::shared_ptr<Media> file, void* data )
         return;
     }
     LOG_INFO( "Parsing ", file->mrl() );
+    auto chrono = std::chrono::steady_clock::now();
 
     auto ctx = new Context( file );
     std::unique_ptr<Context> ctxPtr( ctx );
@@ -84,6 +87,8 @@ void VLCMetadataService::run( std::shared_ptr<Media> file, void* data )
         m_cb->done( ctx->file, Status::Fatal, data );
     else
         m_cb->done( ctx->file, status, data );
+    auto duration = std::chrono::steady_clock::now() - chrono;
+    LOG_INFO( "Parsed ", file->mrl(), " in ", std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
 }
 
 IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
