@@ -166,7 +166,7 @@ bool Artist::createTable( DBConnection dbConnection )
             policy::ArtistTable::Name +
             "("
                 "id_artist INTEGER PRIMARY KEY AUTOINCREMENT,"
-                "name TEXT UNIQUE ON CONFLICT FAIL,"
+                "name TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
                 "shortbio TEXT,"
                 "artwork_url TEXT,"
                 "nb_albums UNSIGNED INT DEFAULT 0"

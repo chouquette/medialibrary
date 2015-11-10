@@ -242,7 +242,7 @@ bool Album::createTable(DBConnection dbConnection )
             policy::AlbumTable::Name +
             "("
                 "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
-                "title TEXT,"
+                "title TEXT COLLATE NOCASE,"
                 "artist_id UNSIGNED INTEGER,"
                 "release_year UNSIGNED INTEGER,"
                 "short_summary TEXT,"
