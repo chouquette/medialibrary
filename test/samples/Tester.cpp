@@ -26,6 +26,15 @@ void MockCallback::onParsingStatsUpdated(uint32_t nbParsed, uint32_t nbToParse)
     }
 }
 
+void Tests::SetUp()
+{
+    unlink("test.db");
+    m_cb.reset( new MockCallback );
+    m_ml.reset( new MediaLibrary );
+    m_ml->setVerbosity( LogLevel::Error );
+    m_ml->initialize( "test.db", "/tmp", m_cb.get() );
+}
+
 void Tests::checkVideoTracks( const rapidjson::Value& expectedTracks, const std::vector<VideoTrackPtr>& tracks )
 {
     // There is no reliable way of discriminating between tracks, so we just assume the test case will
