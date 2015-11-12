@@ -40,8 +40,10 @@ struct VideoTrackTable
 };
 }
 
-class VideoTrack : public IVideoTrack, public Cache<VideoTrack, IVideoTrack, policy::VideoTrackTable>
+class VideoTrack : public IVideoTrack, public Cache<VideoTrack, policy::VideoTrackTable>
 {
+    using _Cache = Cache<VideoTrack, policy::VideoTrackTable>;
+
     public:
         VideoTrack( DBConnection dbConnection, sqlite::Row& row );
         VideoTrack( const std::string& codec, unsigned int width, unsigned int height, float fps, unsigned int mediaId );
@@ -66,7 +68,6 @@ class VideoTrack : public IVideoTrack, public Cache<VideoTrack, IVideoTrack, pol
         unsigned int m_mediaId;
 
     private:
-        typedef Cache<VideoTrack, IVideoTrack, policy::VideoTrackTable> _Cache;
         friend struct policy::VideoTrackTable;
 };
 

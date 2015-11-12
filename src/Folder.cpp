@@ -104,14 +104,14 @@ std::vector<MediaPtr> Folder::files()
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name +
         " WHERE folder_id = ?";
-    return Media::fetchAll( m_dbConection, req, m_id );
+    return Media::fetchAll<IMedia>( m_dbConection, req, m_id );
 }
 
 std::vector<FolderPtr> Folder::folders()
 {
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
             " WHERE id_parent = ?";
-    return fetchAll( m_dbConection, req, m_id );
+    return fetchAll<IFolder>( m_dbConection, req, m_id );
 }
 
 FolderPtr Folder::parent()

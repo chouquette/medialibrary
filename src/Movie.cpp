@@ -121,7 +121,7 @@ std::vector<MediaPtr> Movie::files()
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
             + " WHERE movie_id = ?";
-    return Media::fetchAll( m_dbConnection, req, m_id );
+    return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
 }
 
 bool Movie::createTable( DBConnection dbConnection )

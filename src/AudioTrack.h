@@ -39,8 +39,10 @@ struct AudioTrackTable
 };
 }
 
-class AudioTrack : public IAudioTrack, public Cache<AudioTrack, IAudioTrack, policy::AudioTrackTable>
+class AudioTrack : public IAudioTrack, public Cache<AudioTrack, policy::AudioTrackTable>
 {
+    using _Cache = Cache<AudioTrack, policy::AudioTrackTable>;
+
     public:
         AudioTrack( DBConnection dbConnection, sqlite::Row& row );
         AudioTrack(const std::string& codec, unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels, const std::string& language, const std::string& desc , unsigned int mediaId);
@@ -71,7 +73,6 @@ class AudioTrack : public IAudioTrack, public Cache<AudioTrack, IAudioTrack, pol
 
 
     private:
-        typedef Cache<AudioTrack, IAudioTrack, policy::AudioTrackTable> _Cache;
         friend struct policy::AudioTrackTable;
 };
 

@@ -81,10 +81,9 @@ void FsDiscoverer::reload()
     //FIXME: This shouldn't be done for "removable"/network files
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
             + " WHERE id_parent IS NULL";
-    auto rootFolders = Folder::fetchAll( m_dbConn, req );
-    for ( const auto& it : rootFolders )
+    auto rootFolders = Folder::fetchAll<Folder>( m_dbConn, req );
+    for ( const auto& f : rootFolders )
     {
-        auto f = std::static_pointer_cast<Folder>( it );
         auto folder = m_fsFactory->createDirectory( f->path() );
         if ( folder->lastModificationDate() == f->lastModificationDate() )
             continue;
@@ -108,7 +107,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, FolderPtr parentFold
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
             + " WHERE id_parent = ?";
     LOG_INFO( "Checking for modifications in ", folder->path() );
-    auto subFoldersInDB = Folder::fetchAll( m_dbConn, req, parentFolder->id() );
+    auto subFoldersInDB = Folder::fetchAll<Folder>( m_dbConn, req, parentFolder->id() );
     for ( const auto& subFolderPath : folder->dirs() )
     {
         auto subFolder = m_fsFactory->createDirectory( subFolderPath );
@@ -127,7 +126,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, FolderPtr parentFold
             f->setLastModificationDate( subFolder->lastModificationDate() );
             continue;
         }
-        auto folderInDb = std::static_pointer_cast<Folder>( *it );
+        auto folderInDb = *it;
         if ( subFolder->lastModificationDate() == folderInDb->lastModificationDate() )
         {
             // Remove all folders that still exist in FS. That way, the list of folders that
@@ -156,7 +155,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory* folder, FolderPtr parentFolder )
     LOG_INFO( "Checking file in ", folder->path() );
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
             + " WHERE folder_id = ?";
-    auto files = Media::fetchAll( m_dbConn, req, parentFolder->id() );
+    auto files = Media::fetchAll<Media>( m_dbConn, req, parentFolder->id() );
     for ( const auto& filePath : folder->files() )
     {        
         auto it = std::find_if( begin( files ), end( files ), [filePath](const std::shared_ptr<IMedia>& f) {
@@ -168,8 +167,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory* folder, FolderPtr parentFolder )
             continue;
         }
         auto file = m_fsFactory->createFile( filePath );
-        auto fileInDb = std::static_pointer_cast<Media>( *it );
-        if ( file->lastModificationDate() == fileInDb->lastModificationDate() )
+        if ( file->lastModificationDate() == (*it)->lastModificationDate() )
         {
             // Unchanged file
             files.erase( it );

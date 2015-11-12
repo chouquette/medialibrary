@@ -42,8 +42,10 @@ struct ShowTable
 };
 }
 
-class Show : public IShow, public Cache<Show, IShow, policy::ShowTable>
+class Show : public IShow, public Cache<Show, policy::ShowTable>
 {
+    using _Cache = Cache<Show, policy::ShowTable>;
+
     public:
         Show( DBConnection dbConnection, sqlite::Row& row );
         Show( const std::string& name );
@@ -75,9 +77,8 @@ class Show : public IShow, public Cache<Show, IShow, policy::ShowTable>
         time_t m_lastSyncDate;
         std::string m_tvdbId;
 
-        friend class Cache<Show, IShow, policy::ShowTable>;
+        friend _Cache;
         friend struct policy::ShowTable;
-        typedef Cache<Show, IShow, policy::ShowTable> _Cache;
 };
 
 #endif // SHOW_H

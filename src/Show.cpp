@@ -132,7 +132,7 @@ std::vector<ShowEpisodePtr> Show::episodes()
 {
     static const std::string req = "SELECT * FROM " + policy::ShowEpisodeTable::Name
             + " WHERE show_id = ?";
-    return ShowEpisode::fetchAll( m_dbConnection, req, m_id );
+    return ShowEpisode::fetchAll<IShowEpisode>( m_dbConnection, req, m_id );
 }
 
 bool Show::createTable(DBConnection dbConnection)

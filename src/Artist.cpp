@@ -80,7 +80,7 @@ std::vector<AlbumPtr> Artist::albums() const
         return {};
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " alb "
             "WHERE artist_id = ? ORDER BY release_year, title";
-    return Album::fetchAll( m_dbConnection, req, m_id );
+    return Album::fetchAll<IAlbum>( m_dbConnection, req, m_id );
 }
 
 std::vector<MediaPtr> Artist::media() const
@@ -90,7 +90,7 @@ std::vector<MediaPtr> Artist::media() const
         static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
                 "LEFT JOIN MediaArtistRelation mar ON mar.id_media = med.id_media "
                 "WHERE mar.id_artist = ?";
-        return Media::fetchAll( m_dbConnection, req, m_id );
+        return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
     }
     else
     {
@@ -99,7 +99,7 @@ std::vector<MediaPtr> Artist::media() const
         static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
                 "LEFT JOIN MediaArtistRelation mar ON mar.id_media = med.id_media "
                 "WHERE mar.id_artist IS NULL";
-        return Media::fetchAll( m_dbConnection, req );
+        return Media::fetchAll<IMedia>( m_dbConnection, req );
     }
 }
 

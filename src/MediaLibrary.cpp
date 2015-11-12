@@ -173,19 +173,19 @@ void MediaLibrary::setVerbosity(LogLevel v)
 
 std::vector<MediaPtr> MediaLibrary::files()
 {
-    return Media::fetchAll( m_dbConnection.get() );
+    return Media::fetchAll<IMedia>( m_dbConnection.get() );
 }
 
 std::vector<MediaPtr> MediaLibrary::audioFiles()
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? ORDER BY title";
-    return Media::fetchAll( m_dbConnection.get(), req, IMedia::Type::AudioType );
+    return Media::fetchAll<IMedia>( m_dbConnection.get(), req, IMedia::Type::AudioType );
 }
 
 std::vector<MediaPtr> MediaLibrary::videoFiles()
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? ORDER BY title";
-    return Media::fetchAll( m_dbConnection.get(), req, IMedia::Type::VideoType );
+    return Media::fetchAll<IMedia>( m_dbConnection.get(), req, IMedia::Type::VideoType );
 }
 
 MediaPtr MediaLibrary::file( const std::string& path )
@@ -290,7 +290,7 @@ std::vector<AlbumPtr> MediaLibrary::albums()
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
             " ORDER BY title ASC";
-    return Album::fetchAll( m_dbConnection.get(), req );
+    return Album::fetchAll<IAlbum>( m_dbConnection.get(), req );
 }
 
 ShowPtr MediaLibrary::show(const std::string& name)
@@ -338,7 +338,7 @@ std::vector<ArtistPtr> MediaLibrary::artists() const
 {
     static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name +
             " WHERE nb_albums > 0";
-    return Artist::fetchAll( m_dbConnection.get(), req );
+    return Artist::fetchAll<IArtist>( m_dbConnection.get(), req );
 }
 
 void MediaLibrary::addMetadataService(std::unique_ptr<IMetadataService> service)

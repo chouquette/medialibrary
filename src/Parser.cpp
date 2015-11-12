@@ -142,12 +142,11 @@ void Parser::restore()
 
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
             + " WHERE parsed = 0";
-    auto media = Media::fetchAll( m_dbConnection, req );
+    auto media = Media::fetchAll<Media>( m_dbConnection, req );
 
     std::lock_guard<std::mutex> lock( m_lock );
-    for ( auto& it : media )
+    for ( auto& m : media )
     {
-        auto m = std::static_pointer_cast<Media>( it );
         m_tasks.push( new Task( m, m_services, m_callback ) );
     }
 }

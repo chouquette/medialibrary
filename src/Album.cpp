@@ -151,7 +151,7 @@ std::vector<MediaPtr> Album::tracks() const
             " LEFT JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
             " WHERE att.album_id = ? ORDER BY att.disc_number, att.track_number";
 
-    m_tracks = Media::fetchAll( m_dbConnection, req, m_id );
+    m_tracks = Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
     m_tracksCached = true;
     return m_tracks;
 }
@@ -214,7 +214,7 @@ std::vector<ArtistPtr> Album::artists() const
     static const std::string req = "SELECT art.* FROM " + policy::ArtistTable::Name + " art "
             "LEFT JOIN AlbumArtistRelation aar ON aar.id_artist = art.id_artist "
             "WHERE aar.id_album = ?";
-    return Artist::fetchAll( m_dbConnection, req, m_id );
+    return Artist::fetchAll<IArtist>( m_dbConnection, req, m_id );
 }
 
 bool Album::addArtist( std::shared_ptr<Artist> artist )

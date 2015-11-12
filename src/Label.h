@@ -50,10 +50,10 @@ struct LabelCachePolicy
 
 }
 
-class Label : public ILabel, public Cache<Label, ILabel, policy::LabelTable, policy::LabelCachePolicy>
+class Label : public ILabel, public Cache<Label, policy::LabelTable, policy::LabelCachePolicy>
 {
-    private:
-        typedef Cache<Label, ILabel, policy::LabelTable, policy::LabelCachePolicy> _Cache;
+    using _Cache = Cache<Label, policy::LabelTable, policy::LabelCachePolicy>;
+
     public:
         Label( DBConnection dbConnection, sqlite::Row& row );
         Label( const std::string& name );
@@ -70,7 +70,7 @@ class Label : public ILabel, public Cache<Label, ILabel, policy::LabelTable, pol
         unsigned int m_id;
         std::string m_name;
 
-        friend class Cache<Label, ILabel, policy::LabelTable>;
+        friend _Cache;
         friend struct policy::LabelTable;
 };
 

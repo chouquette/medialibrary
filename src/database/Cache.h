@@ -68,7 +68,7 @@ class PrimaryKeyCacheKeyPolicy
  * - Inherit this class and specify the template parameter & policies accordingly
  * - Make this class a friend class of the class you inherit from
  */
-template <typename IMPL, typename INTF, typename TABLEPOLICY, typename CACHEPOLICY = PrimaryKeyCacheKeyPolicy >
+template <typename IMPL, typename TABLEPOLICY, typename CACHEPOLICY = PrimaryKeyCacheKeyPolicy >
 class Cache
 {
     public:
@@ -96,6 +96,7 @@ class Cache
         /*
          * Will fetch all elements from the database & cache them.
          */
+        template <typename INTF = IMPL>
         static std::vector<std::shared_ptr<INTF>> fetchAll( DBConnection dbConnection )
         {
             static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name;
@@ -105,7 +106,7 @@ class Cache
             return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnection, req );
         }
 
-        template <typename... Args>
+        template <typename INTF, typename... Args>
         static std::vector<std::shared_ptr<INTF>> fetchAll( DBConnection dbConnection, const std::string &req, Args&&... args )
         {
             Lock lock( Mutex );
@@ -136,7 +137,8 @@ class Cache
             return sqlite::Tools::executeDelete( dbConnection, req, key );
         }
 
-        static bool destroy( DBConnection dbConnection, const INTF* self )
+        template <typename T>
+        static bool destroy( DBConnection dbConnection, const T* self )
         {
             const auto& key = CACHEPOLICY::key( self );
             return destroy( dbConnection, key );
@@ -192,11 +194,11 @@ class Cache
         typedef std::lock_guard<std::recursive_mutex> Lock;
 };
 
-template <typename IMPL, typename INTF, typename TABLEPOLICY, typename CACHEPOLICY>
+template <typename IMPL, typename TABLEPOLICY, typename CACHEPOLICY>
 std::unordered_map<typename CACHEPOLICY::KeyType, std::shared_ptr<IMPL> >
-Cache<IMPL, INTF, TABLEPOLICY, CACHEPOLICY>::Store;
+Cache<IMPL, TABLEPOLICY, CACHEPOLICY>::Store;
 
-template <typename IMPL, typename INTF, typename TABLEPOLICY, typename CACHEPOLICY>
-std::recursive_mutex Cache<IMPL, INTF, TABLEPOLICY, CACHEPOLICY>::Mutex;
+template <typename IMPL, typename TABLEPOLICY, typename CACHEPOLICY>
+std::recursive_mutex Cache<IMPL, TABLEPOLICY, CACHEPOLICY>::Mutex;
 
 #endif // CACHE_H

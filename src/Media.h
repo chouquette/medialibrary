@@ -57,10 +57,10 @@ struct MediaCache
 };
 }
 
-class Media : public IMedia, public Cache<Media, IMedia, policy::MediaTable, policy::MediaCache>
+class Media : public IMedia, public Cache<Media, policy::MediaTable, policy::MediaCache>
 {
     private:
-        typedef Cache<Media, IMedia, policy::MediaTable, policy::MediaCache> _Cache;
+        using _Cache = Cache<Media, policy::MediaTable, policy::MediaCache>;
     public:
 
         // Those should be private, however the standard states that the expression
@@ -88,7 +88,7 @@ class Media : public IMedia, public Cache<Media, IMedia, policy::MediaTable, pol
         bool setShowEpisode( ShowEpisodePtr showEpisode );
         virtual bool addLabel( LabelPtr label ) override;
         virtual bool removeLabel( LabelPtr label ) override;
-        virtual std::vector<std::shared_ptr<ILabel> > labels() override;
+        virtual std::vector<LabelPtr> labels() override;
         virtual int playCount() const  override;
         virtual const std::string& mrl() const override;
         virtual MoviePtr movie() override;
@@ -135,7 +135,7 @@ class Media : public IMedia, public Cache<Media, IMedia, policy::MediaTable, pol
         ShowEpisodePtr m_showEpisode;
         MoviePtr m_movie;
 
-        friend class Cache<Media, IMedia, policy::MediaTable, policy::MediaCache>;
+        friend _Cache;
         friend struct policy::MediaTable;
 };
 

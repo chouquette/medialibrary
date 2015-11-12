@@ -39,8 +39,10 @@ struct MovieTable
 };
 }
 
-class Movie : public IMovie, public Cache<Movie, IMovie, policy::MovieTable>
+class Movie : public IMovie, public Cache<Movie, policy::MovieTable>
 {
+    using _Cache = Cache<Movie, policy::MovieTable>;
+
     public:
         Movie( DBConnection dbConnection, sqlite::Row& row );
         Movie( const std::string& title );
@@ -69,7 +71,6 @@ class Movie : public IMovie, public Cache<Movie, IMovie, policy::MovieTable>
         std::string m_artworkUrl;
         std::string m_imdbId;
 
-        typedef Cache<Movie, IMovie, policy::MovieTable> _Cache;
         friend struct policy::MovieTable;
 };
 

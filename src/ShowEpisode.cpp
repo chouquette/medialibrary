@@ -145,7 +145,7 @@ std::vector<MediaPtr> ShowEpisode::files()
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
             + " WHERE show_episode_id = ?";
-    return Media::fetchAll( m_dbConnection, req, m_id );
+    return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
 }
 
 bool ShowEpisode::createTable( DBConnection dbConnection )

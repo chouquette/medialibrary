@@ -200,7 +200,7 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, VLC::Media& 
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
             " WHERE title = ?";
-    auto albums = Album::fetchAll( m_dbConn, req, title );
+    auto albums = Album::fetchAll<Album>( m_dbConn, req, title );
 
     if ( albums.size() == 0 )
         return nullptr;
@@ -224,7 +224,7 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, VLC::Media& 
      */
     for ( auto it = begin( albums ); it != end( albums ); )
     {
-        auto a = static_cast<Album*>( (*it).get() );
+        auto a = (*it).get();
         if ( albumArtist != nullptr )
         {
             // We assume that an album without album artist is a positive match.

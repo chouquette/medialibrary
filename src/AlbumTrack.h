@@ -44,10 +44,10 @@ struct AlbumTrackTable
 };
 }
 
-class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, policy::AlbumTrackTable>
+class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, policy::AlbumTrackTable>
 {
-    private:
-        typedef Cache<AlbumTrack, IAlbumTrack, policy::AlbumTrackTable> _Cache;
+    using _Cache = Cache<AlbumTrack, policy::AlbumTrackTable>;
+
     public:
         AlbumTrack( DBConnection dbConnection, sqlite::Row& row );
         AlbumTrack(Media* media, unsigned int trackNumber, unsigned int albumId , unsigned int discNumber);
@@ -80,7 +80,7 @@ class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, IAlbumTrack, pol
 
         std::shared_ptr<Album> m_album;
 
-        friend class Cache<AlbumTrack, IAlbumTrack, policy::AlbumTrackTable>;
+        friend _Cache;
         friend struct policy::AlbumTrackTable;
 };
 

@@ -58,7 +58,7 @@ class IMedia
         virtual bool removeLabel( LabelPtr label ) = 0;
         virtual MoviePtr movie() = 0;
         virtual const std::string& artist() const = 0;
-        virtual std::vector<std::shared_ptr<ILabel> > labels() = 0;
+        virtual std::vector<LabelPtr> labels() = 0;
         virtual std::vector<VideoTrackPtr> videoTracks() = 0;
         virtual std::vector<AudioTrackPtr> audioTracks() = 0;
         // Returns the location of this file snapshot.

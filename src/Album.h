@@ -47,10 +47,10 @@ struct AlbumTable
 };
 }
 
-class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
+class Album : public IAlbum, public Cache<Album, policy::AlbumTable>
 {
-    private:
-        typedef Cache<Album, IAlbum, policy::AlbumTable> _Cache;
+    using _Cache = Cache<Album, policy::AlbumTable>;
+
     public:
         Album( DBConnection dbConnection, sqlite::Row& row );
         Album( const std::string& title );
@@ -103,7 +103,7 @@ class Album : public IAlbum, public Cache<Album, IAlbum, policy::AlbumTable>
         mutable bool m_tracksCached;
         mutable std::mutex m_tracksLock;
 
-        friend class Cache<Album, IAlbum, policy::AlbumTable>;
+        friend _Cache;
         friend struct policy::AlbumTable;
 };
 

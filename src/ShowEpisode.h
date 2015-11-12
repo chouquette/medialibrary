@@ -43,8 +43,10 @@ struct ShowEpisodeTable
 };
 }
 
-class ShowEpisode : public IShowEpisode, public Cache<ShowEpisode, IShowEpisode, policy::ShowEpisodeTable>
+class ShowEpisode : public IShowEpisode, public Cache<ShowEpisode, policy::ShowEpisodeTable>
 {
+    using _Cache = Cache<ShowEpisode, policy::ShowEpisodeTable>;
+
     public:
         ShowEpisode( DBConnection dbConnection, sqlite::Row& row );
         ShowEpisode(const std::string& name, unsigned int episodeNumber, unsigned int showId );
@@ -80,9 +82,8 @@ class ShowEpisode : public IShowEpisode, public Cache<ShowEpisode, IShowEpisode,
         unsigned int m_showId;
         ShowPtr m_show;
 
-        friend class Cache<ShowEpisode, IShowEpisode, policy::ShowEpisodeTable>;
+        friend _Cache;
         friend struct policy::ShowEpisodeTable;
-        typedef Cache<ShowEpisode, IShowEpisode, policy::ShowEpisodeTable> _Cache;
 };
 
 #endif // SHOWEPISODE_H

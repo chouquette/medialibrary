@@ -158,12 +158,12 @@ bool Media::setShowEpisode(ShowEpisodePtr showEpisode)
     return true;
 }
 
-std::vector<std::shared_ptr<ILabel> > Media::labels()
+std::vector<LabelPtr> Media::labels()
 {
     static const std::string req = "SELECT l.* FROM " + policy::LabelTable::Name + " l "
             "LEFT JOIN LabelFileRelation lfr ON lfr.id_label = l.id_label "
             "WHERE lfr.id_media = ?";
-    return Label::fetchAll( m_dbConnection, req, m_id );
+    return Label::fetchAll<ILabel>( m_dbConnection, req, m_id );
 }
 
 int Media::playCount() const
@@ -205,7 +205,7 @@ std::vector<VideoTrackPtr> Media::videoTracks()
 {
     static const std::string req = "SELECT * FROM " + policy::VideoTrackTable::Name +
             " WHERE media_id = ?";
-    return VideoTrack::fetchAll( m_dbConnection, req, m_id );
+    return VideoTrack::fetchAll<IVideoTrack>( m_dbConnection, req, m_id );
 }
 
 bool Media::addAudioTrack( const std::string& codec, unsigned int bitrate,
@@ -219,7 +219,7 @@ std::vector<AudioTrackPtr> Media::audioTracks()
 {
     static const std::string req = "SELECT * FROM " + policy::AudioTrackTable::Name +
             " WHERE media_id = ?";
-    return AudioTrack::fetchAll( m_dbConnection, req, m_id );
+    return AudioTrack::fetchAll<IAudioTrack>( m_dbConnection, req, m_id );
 }
 
 const std::string &Media::snapshot()

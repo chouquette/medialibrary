@@ -60,7 +60,7 @@ std::vector<MediaPtr> Label::files()
     static const std::string req = "SELECT f.* FROM " + policy::MediaTable::Name + " f "
             "LEFT JOIN LabelFileRelation lfr ON lfr.id_media = f.id_media "
             "WHERE lfr.id_label = ?";
-    return Media::fetchAll( m_dbConnection, req, m_id );
+    return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
 }
 
 LabelPtr Label::create(DBConnection dbConnection, const std::string& name )
