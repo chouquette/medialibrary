@@ -40,7 +40,7 @@ class PrimaryKeyCacheKeyPolicy
         {
             return self->id();
         }
-        static unsigned int key( sqlite::Row& row )
+        static unsigned int key( const sqlite::Row& row )
         {
             return row.load<unsigned int>( 0 );
         }

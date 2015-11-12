@@ -74,7 +74,7 @@ public:
      * @brief Returns the value in column idx, but doesn't advance to the next column
      */
     template <typename T>
-    T load(unsigned int idx)
+    T load(unsigned int idx) const
     {
         if ( m_idx + 1 > m_nbColumns )
             throw errors::ColumnOutOfRange( m_idx, m_nbColumns );

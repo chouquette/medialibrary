@@ -53,7 +53,7 @@ struct MediaCache
 {
     typedef std::string KeyType;
     static const std::string& key(const IMedia* self);
-    static std::string key( sqlite::Row& row );
+    static std::string key( const sqlite::Row& row );
 };
 }
 

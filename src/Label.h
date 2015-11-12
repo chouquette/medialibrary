@@ -45,7 +45,7 @@ struct LabelCachePolicy
 {
     typedef std::string KeyType;
     static const std::string& key(const ILabel* self );
-    static std::string key( sqlite::Row& row );
+    static std::string key( const sqlite::Row& row );
 };
 
 }

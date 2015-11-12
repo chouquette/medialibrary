@@ -37,7 +37,7 @@ namespace policy
         return self->path();
     }
 
-    FolderCache::KeyType FolderCache::key(sqlite::Row& row )
+    FolderCache::KeyType FolderCache::key(const sqlite::Row& row )
     {
         return row.load<FolderCache::KeyType>( 1 );
     }

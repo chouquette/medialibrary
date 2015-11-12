@@ -47,7 +47,7 @@ struct FolderCache
 {
     using KeyType = std::string;
     static const KeyType& key( const IFolder* self );
-    static KeyType key( sqlite::Row& row );
+    static KeyType key( const sqlite::Row& row );
 };
 
 }

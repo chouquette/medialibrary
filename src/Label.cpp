@@ -95,7 +95,7 @@ const std::string&policy::LabelCachePolicy::key( const ILabel* self )
     return self->name();
 }
 
-std::string policy::LabelCachePolicy::key(sqlite::Row& row)
+std::string policy::LabelCachePolicy::key( const sqlite::Row& row )
 {
     return row.load<KeyType>( 1 );
 }

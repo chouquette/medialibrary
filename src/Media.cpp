@@ -353,7 +353,7 @@ const std::string& policy::MediaCache::key( const IMedia* self )
     return self->mrl();
 }
 
-std::string policy::MediaCache::key(sqlite::Row& row)
+std::string policy::MediaCache::key( const sqlite::Row& row )
 {
     return row.load<std::string>( 5 );
 }
