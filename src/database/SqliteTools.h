@@ -34,6 +34,7 @@
 
 #include "Types.h"
 #include "database/SqliteConnection.h"
+#include "database/SqliteErrors.h"
 #include "logging/Logger.h"
 
 namespace sqlite
@@ -140,44 +141,6 @@ struct Traits<T, typename std::enable_if<IsSameDecay<T, int64_t>::value>::type>
     static constexpr sqlite_int64
     (*Load)(sqlite3_stmt *, int) = &sqlite3_column_int64;
 };
-
-namespace errors
-{
-class ConstraintViolation : public std::exception
-{
-public:
-    ConstraintViolation( const std::string& req, const std::string& err )
-    {
-        m_reason = std::string( "Request <" ) + req + "> aborted due to "
-                "constraint violation (" + err + ")";
-    }
-
-    virtual const char* what() const noexcept override
-    {
-        return m_reason.c_str();
-    }
-private:
-    std::string m_reason;
-};
-
-class ColumnOutOfRange : public std::exception
-{
-public:
-    ColumnOutOfRange( unsigned int idx, unsigned int nbColumns )
-    {
-        m_reason = "Attempting to extract column at index " + std::to_string( idx ) +
-                " from a request with " + std::to_string( nbColumns ) + "columns";
-    }
-
-    virtual const char* what() const noexcept override
-    {
-        return m_reason.c_str();
-    }
-
-private:
-    std::string m_reason;
-};
-}
 
 class Row
 {
