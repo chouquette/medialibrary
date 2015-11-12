@@ -42,7 +42,7 @@ namespace policy
 struct AlbumTable
 {
     static const std::string Name;
-    static const std::string CacheColumn;
+    static const std::string PrimaryKeyColumn;
     static unsigned int Album::*const PrimaryKey;
 };
 }

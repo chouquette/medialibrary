@@ -48,7 +48,7 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
         return false;
 
     {
-        auto f = Folder::fetch( m_dbConn, entryPoint );
+        auto f = Folder::fromPath( m_dbConn, entryPoint );
         // If the folder exists, we assume it is up to date
         if ( f != nullptr )
             return true;

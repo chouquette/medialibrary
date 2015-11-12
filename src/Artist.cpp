@@ -28,7 +28,7 @@
 #include "database/SqliteTools.h"
 
 const std::string policy::ArtistTable::Name = "artist";
-const std::string policy::ArtistTable::CacheColumn = "id_artist";
+const std::string policy::ArtistTable::PrimaryKeyColumn = "id_artist";
 unsigned int Artist::*const policy::ArtistTable::PrimaryKey = &Artist::m_id;
 
 
@@ -145,7 +145,7 @@ std::shared_ptr<Album> Artist::unknownAlbum()
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
                         " WHERE artist_id = ? AND title IS NULL";
-    auto album = Album::fetchOne( m_dbConnection, req, m_id );
+    auto album = Album::fetch( m_dbConnection, req, m_id );
     if ( album == nullptr )
     {
         album = Album::createUnknownAlbum( m_dbConnection, this );
@@ -153,7 +153,7 @@ std::shared_ptr<Album> Artist::unknownAlbum()
             return nullptr;
         if ( updateNbAlbum( 1 ) == false )
         {
-            Album::destroy( m_dbConnection, album.get() );
+            Album::destroy( m_dbConnection, album->id() );
             return nullptr;
         }
     }
@@ -178,7 +178,7 @@ bool Artist::createTable( DBConnection dbConnection )
                 "FOREIGN KEY(id_media) REFERENCES " + policy::MediaTable::Name +
                 "(id_media) ON DELETE CASCADE,"
                 "FOREIGN KEY(id_artist) REFERENCES " + policy::ArtistTable::Name + "("
-                    + policy::ArtistTable::CacheColumn + ") ON DELETE CASCADE"
+                    + policy::ArtistTable::PrimaryKeyColumn + ") ON DELETE CASCADE"
             ")";
     return sqlite::Tools::executeRequest( dbConnection, req ) &&
             sqlite::Tools::executeRequest( dbConnection, reqRel );

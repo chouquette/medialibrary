@@ -37,7 +37,7 @@ namespace policy
 struct LabelTable
 {
     static const std::string Name;
-    static const std::string CacheColumn;
+    static const std::string PrimaryKeyColumn;
     static unsigned int Label::*const PrimaryKey;
 };
 
@@ -50,9 +50,9 @@ struct LabelCachePolicy
 
 }
 
-class Label : public ILabel, public Table<Label, policy::LabelTable, policy::LabelCachePolicy>
+class Label : public ILabel, public Table<Label, policy::LabelTable>
 {
-    using _Cache = Table<Label, policy::LabelTable, policy::LabelCachePolicy>;
+    using _Cache = Table<Label, policy::LabelTable>;
 
     public:
         Label( DBConnection dbConnection, sqlite::Row& row );

@@ -134,7 +134,7 @@ TEST_F( Labels, Delete )
     auto labels = f->labels();
     ASSERT_EQ( labels.size(), 2u );
 
-    ml->deleteLabel( "sea otter" );
+    ml->deleteLabel( l1 );
     labels = f->labels();
     ASSERT_EQ( labels.size(), 1u );
 

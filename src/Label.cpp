@@ -29,7 +29,7 @@
 #include "database/SqliteTools.h"
 
 const std::string policy::LabelTable::Name = "Label";
-const std::string policy::LabelTable::CacheColumn = "name";
+const std::string policy::LabelTable::PrimaryKeyColumn = "id_label";
 unsigned int Label::* const policy::LabelTable::PrimaryKey = &Label::m_id;
 
 Label::Label( DBConnection dbConnection, sqlite::Row& row )

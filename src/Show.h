@@ -37,7 +37,7 @@ namespace policy
 struct ShowTable
 {
     static const std::string Name;
-    static const std::string CacheColumn;
+    static const std::string PrimaryKeyColumn;
     static unsigned int Show::*const PrimaryKey;
 };
 }

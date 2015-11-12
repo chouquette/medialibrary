@@ -46,21 +46,15 @@ namespace policy
 struct MediaTable
 {
     static const std::string Name;
-    static const std::string CacheColumn;
+    static const std::string PrimaryKeyColumn;
     static unsigned int Media::*const PrimaryKey;
-};
-struct MediaCache
-{
-    typedef std::string KeyType;
-    static const std::string& key(const IMedia* self);
-    static std::string key( const sqlite::Row& row );
 };
 }
 
-class Media : public IMedia, public Table<Media, policy::MediaTable, policy::MediaCache>
+class Media : public IMedia, public Table<Media, policy::MediaTable>
 {
     private:
-        using _Cache = Table<Media, policy::MediaTable, policy::MediaCache>;
+        using _Cache = Table<Media, policy::MediaTable>;
     public:
 
         // Those should be private, however the standard states that the expression

@@ -39,22 +39,15 @@ namespace policy
 struct FolderTable
 {
     static const std::string Name;
-    static const std::string CacheColumn;
+    static const std::string PrimaryKeyColumn;
     static unsigned int Folder::*const PrimaryKey;
-};
-
-struct FolderCache
-{
-    using KeyType = std::string;
-    static const KeyType& key( const IFolder* self );
-    static KeyType key( const sqlite::Row& row );
 };
 
 }
 
-class Folder : public IFolder, public Table<Folder, policy::FolderTable, policy::FolderCache>
+class Folder : public IFolder, public Table<Folder, policy::FolderTable>
 {
-    using _Cache = Table<Folder, policy::FolderTable, policy::FolderCache>;
+    using _Cache = Table<Folder, policy::FolderTable>;
 
 public:
     Folder( DBConnection dbConnection, sqlite::Row& row );
@@ -62,6 +55,8 @@ public:
 
     static bool createTable( DBConnection connection );
     static std::shared_ptr<Folder> create( DBConnection connection, const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parentId );
+
+    static std::shared_ptr<Folder> fromPath( DBConnection conn, const std::string& path );
 
     virtual unsigned int id() const override;
     virtual const std::string& path() const override;

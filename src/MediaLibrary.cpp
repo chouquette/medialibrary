@@ -190,7 +190,9 @@ std::vector<MediaPtr> MediaLibrary::videoFiles()
 
 MediaPtr MediaLibrary::file( const std::string& path )
 {
-    return Media::fetch( m_dbConnection.get(), path );
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name +
+            " WHERE mrl = ?";
+    return Media::fetch( m_dbConnection.get(), req, path );
 }
 
 std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, FolderPtr parentFolder )
@@ -240,17 +242,17 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, FolderPtr
 
 FolderPtr MediaLibrary::folder( const std::string& path )
 {
-    return Folder::fetch( m_dbConnection.get(), path );
+    return Folder::fromPath( m_dbConnection.get(), path );
 }
 
 bool MediaLibrary::deleteFile( const Media* file )
 {
-    return Media::destroy( m_dbConnection.get(), file );
+    return Media::destroy( m_dbConnection.get(), file->id() );
 }
 
 bool MediaLibrary::deleteFolder( FolderPtr folder )
 {
-    if ( Folder::destroy( m_dbConnection.get(), folder.get() ) == false )
+    if ( Folder::destroy( m_dbConnection.get(), folder->id() ) == false )
         return false;
     Media::clear();
     return true;
@@ -261,14 +263,9 @@ LabelPtr MediaLibrary::createLabel( const std::string& label )
     return Label::create( m_dbConnection.get(), label );
 }
 
-bool MediaLibrary::deleteLabel( const std::string& text )
-{
-    return Label::destroy( m_dbConnection.get(), text );
-}
-
 bool MediaLibrary::deleteLabel( LabelPtr label )
 {
-    return Label::destroy( m_dbConnection.get(), label.get() );
+    return Label::destroy( m_dbConnection.get(), label->id() );
 }
 
 AlbumPtr MediaLibrary::album( unsigned int id )
@@ -292,7 +289,7 @@ ShowPtr MediaLibrary::show(const std::string& name)
 {
     static const std::string req = "SELECT * FROM " + policy::ShowTable::Name
             + " WHERE name = ?";
-    return Show::fetchOne( m_dbConnection.get(), req, name );
+    return Show::fetch( m_dbConnection.get(), req, name );
 }
 
 std::shared_ptr<Show> MediaLibrary::createShow(const std::string& name)
@@ -304,7 +301,7 @@ MoviePtr MediaLibrary::movie( const std::string& title )
 {
     static const std::string req = "SELECT * FROM " + policy::MovieTable::Name
             + " WHERE title = ?";
-    return Movie::fetchOne( m_dbConnection.get(), req, title );
+    return Movie::fetch( m_dbConnection.get(), req, title );
 }
 
 std::shared_ptr<Movie> MediaLibrary::createMovie( const std::string& title )
@@ -321,7 +318,7 @@ ArtistPtr MediaLibrary::artist( const std::string& name )
 {
     static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name
             + " WHERE name = ?";
-    return Artist::fetchOne( m_dbConnection.get(), req, name );
+    return Artist::fetch( m_dbConnection.get(), req, name );
 }
 
 std::shared_ptr<Artist> MediaLibrary::createArtist( const std::string& name )

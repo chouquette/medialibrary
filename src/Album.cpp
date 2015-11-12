@@ -30,7 +30,7 @@
 #include "database/SqliteTools.h"
 
 const std::string policy::AlbumTable::Name = "Album";
-const std::string policy::AlbumTable::CacheColumn = "id_album";
+const std::string policy::AlbumTable::PrimaryKeyColumn = "id_album";
 unsigned int Album::* const policy::AlbumTable::PrimaryKey = &Album::m_id;
 
 Album::Album(DBConnection dbConnection, sqlite::Row& row)
@@ -254,9 +254,9 @@ bool Album::createTable(DBConnection dbConnection )
                 "id_artist INTEGER,"
                 "PRIMARY KEY (id_album, id_artist),"
                 "FOREIGN KEY(id_album) REFERENCES " + policy::AlbumTable::Name + "("
-                    + policy::AlbumTable::CacheColumn + ") ON DELETE CASCADE,"
+                    + policy::AlbumTable::PrimaryKeyColumn + ") ON DELETE CASCADE,"
                 "FOREIGN KEY(id_artist) REFERENCES " + policy::ArtistTable::Name + "("
-                    + policy::ArtistTable::CacheColumn + ") ON DELETE CASCADE"
+                    + policy::ArtistTable::PrimaryKeyColumn + ") ON DELETE CASCADE"
             ")";
     return sqlite::Tools::executeRequest( dbConnection, req ) &&
             sqlite::Tools::executeRequest( dbConnection, reqRel );

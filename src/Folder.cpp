@@ -29,19 +29,8 @@
 namespace policy
 {
     const std::string FolderTable::Name = "Folder";
-    const std::string FolderTable::CacheColumn = "path";
+    const std::string FolderTable::PrimaryKeyColumn = "id_folder";
     unsigned int Folder::* const FolderTable::PrimaryKey = &Folder::m_id;
-
-    const FolderCache::KeyType&FolderCache::key( const IFolder* self )
-    {
-        return self->path();
-    }
-
-    FolderCache::KeyType FolderCache::key(const sqlite::Row& row )
-    {
-        return row.load<FolderCache::KeyType>( 1 );
-    }
-
 }
 
 Folder::Folder(DBConnection dbConnection, sqlite::Row& row )
@@ -90,6 +79,12 @@ std::shared_ptr<Folder> Folder::create( DBConnection connection, const std::stri
     return self;
 }
 
+std::shared_ptr<Folder> Folder::fromPath( DBConnection conn, const std::string& path )
+{
+    const std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ?";
+    return fetch( conn, req, path );
+}
+
 unsigned int Folder::id() const
 {
     return m_id;
@@ -116,10 +111,7 @@ std::vector<FolderPtr> Folder::folders()
 
 FolderPtr Folder::parent()
 {
-    //FIXME: use path to be able to fetch from cache?
-    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
-            " WHERE id_folder = ?";
-    return fetchOne( m_dbConection, req, m_parent );
+    return fetch( m_dbConection, m_parent );
 }
 
 unsigned int Folder::lastModificationDate()

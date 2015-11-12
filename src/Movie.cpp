@@ -25,7 +25,7 @@
 #include "database/SqliteTools.h"
 
 const std::string policy::MovieTable::Name = "Movie";
-const std::string policy::MovieTable::CacheColumn = "id_movie";
+const std::string policy::MovieTable::PrimaryKeyColumn = "id_movie";
 unsigned int Movie::* const policy::MovieTable::PrimaryKey = &Movie::m_id;
 
 Movie::Movie(DBConnection dbConnection, sqlite::Row& row )

@@ -24,32 +24,23 @@
 
 #include "Cache.h"
 
-template <typename IMPL, typename TABLEPOLICY, typename CACHEPOLICY = PrimaryKeyCacheKeyPolicy >
+template <typename IMPL, typename TABLEPOLICY>
 class Table
 {
-    using _Cache = Cache<IMPL, CACHEPOLICY>;
+    using _Cache = Cache<IMPL>;
 
     public:
-        static std::shared_ptr<IMPL> fetch( DBConnection dbConnection, const typename CACHEPOLICY::KeyType& key )
-        {
-            auto l = _Cache::lock();
-
-            auto res = _Cache::load( key );
-            if ( res != nullptr )
-                return res;
-            static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name +
-                            " WHERE " + TABLEPOLICY::CacheColumn + " = ?";
-            res = sqlite::Tools::fetchOne<IMPL>( dbConnection, req, key );
-            if ( res == nullptr )
-                return nullptr;
-            _Cache::store( res );
-            return res;
-        }
-
         template <typename... Args>
-        static std::shared_ptr<IMPL> fetchOne( DBConnection dbConnection, const std::string& req, Args&&... args )
+        static std::shared_ptr<IMPL> fetch( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
             return sqlite::Tools::fetchOne<IMPL>( dbConnection, req, std::forward<Args>( args )... );
+        }
+
+        static std::shared_ptr<IMPL> fetch( DBConnection dbConnection, unsigned int pkValue )
+        {
+            static std::string req = "SELECT * FROM " + TABLEPOLICY::Name + " WHERE " +
+                    TABLEPOLICY::PrimaryKeyColumn + " = ?";
+            return sqlite::Tools::fetchOne<IMPL>( dbConnection, req, pkValue );
         }
 
         /*
@@ -76,7 +67,8 @@ class Table
         {
             auto l = _Cache::lock();
 
-            auto res = _Cache::load( row );
+            auto key = row.load<unsigned int>( 0 );
+            auto res = _Cache::load( key );
             if ( res != nullptr )
                 return res;
             res = std::make_shared<IMPL>( dbConnection, row );
@@ -84,20 +76,22 @@ class Table
             return res;
         }
 
-        static bool destroy( DBConnection dbConnection, const typename CACHEPOLICY::KeyType& key )
+        template <typename... Args>
+        static bool destroy( DBConnection dbConnection, unsigned int pkValue )
         {
             auto l = _Cache::lock();
-            _Cache::discard( key );
-            static const std::string req = "DELETE FROM " + TABLEPOLICY::Name + " WHERE " +
-                    TABLEPOLICY::CacheColumn + " = ?";
-            return sqlite::Tools::executeDelete( dbConnection, req, key );
-        }
-
-        template <typename T>
-        static bool destroy( DBConnection dbConnection, const T* self )
-        {
-            const auto& key = CACHEPOLICY::key( self );
-            return destroy( dbConnection, key );
+            static const std::string req = "DELETE FROM " + TABLEPOLICY::Name + " WHERE "
+                    + TABLEPOLICY::PrimaryKeyColumn + " = ?";
+            auto res = sqlite::Tools::executeDelete( dbConnection, req, pkValue );
+            if ( res == true )
+                _Cache::discard( pkValue );
+            else
+            {
+                // Simply ensure nothing was cached for this value if there's nothing to
+                // delete from DB
+                assert( _Cache::discard( pkValue ) == false );
+            }
+            return res;
         }
 
         static void clear()

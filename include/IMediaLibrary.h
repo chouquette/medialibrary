@@ -103,7 +103,6 @@ class IMediaLibrary
         virtual bool deleteFolder( FolderPtr folder ) = 0;
 
         virtual LabelPtr createLabel( const std::string& label ) = 0;
-        virtual bool deleteLabel( const std::string& label ) = 0;
         virtual bool deleteLabel( LabelPtr label ) = 0;
         virtual std::vector<MediaPtr> audioFiles() = 0;
         virtual std::vector<MediaPtr> videoFiles() = 0;

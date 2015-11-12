@@ -26,7 +26,7 @@
 #include "Media.h"
 
 const std::string policy::ShowEpisodeTable::Name = "ShowEpisode";
-const std::string policy::ShowEpisodeTable::CacheColumn = "show_id";
+const std::string policy::ShowEpisodeTable::PrimaryKeyColumn = "show_id";
 unsigned int ShowEpisode::* const policy::ShowEpisodeTable::PrimaryKey = &ShowEpisode::m_id;
 
 ShowEpisode::ShowEpisode(DBConnection dbConnection, sqlite::Row& row )

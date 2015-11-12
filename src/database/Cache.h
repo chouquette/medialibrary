@@ -30,23 +30,7 @@
 
 #include "SqliteTools.h"
 
-class PrimaryKeyCacheKeyPolicy
-{
-    public:
-        typedef unsigned int KeyType;
-
-        template <typename T>
-        static unsigned int key( const T* self )
-        {
-            return self->id();
-        }
-        static unsigned int key( const sqlite::Row& row )
-        {
-            return row.load<unsigned int>( 0 );
-        }
-};
-
-template <typename IMPL, typename CACHEPOLICY>
+template <typename IMPL>
 class Cache
 {
     using lock_t = std::unique_lock<std::recursive_mutex>;
@@ -57,7 +41,7 @@ public:
         return lock_t{ Mutex };
     }
 
-    static std::shared_ptr<IMPL> load( const typename CACHEPOLICY::KeyType& key )
+    static std::shared_ptr<IMPL> load( unsigned int key )
     {
         auto it = Store.find( key );
         if ( it == Store.end() )
@@ -65,23 +49,15 @@ public:
         return it->second;
     }
 
-    template <typename T>
-    static std::shared_ptr<IMPL> load( const T& value )
-    {
-        auto key = CACHEPOLICY::key( value );
-        return load( key );
-    }
-
     static void store( const std::shared_ptr<IMPL> value )
     {
-        auto key = CACHEPOLICY::key( value.get() );
-        Store[key] = value;
+        Store[value->id()] = value;
     }
 
     /**
      * @brief discard Discard a record from the cache
      */
-    static bool discard( const typename CACHEPOLICY::KeyType& key )
+    static bool discard( unsigned int key )
     {
         auto it = Store.find( key );
         if ( it == Store.end() )
@@ -96,16 +72,16 @@ public:
     }
 
 private:
-    static std::unordered_map<typename CACHEPOLICY::KeyType, std::shared_ptr<IMPL>> Store;
+    static std::unordered_map<unsigned int, std::shared_ptr<IMPL>> Store;
     static std::recursive_mutex Mutex;
 };
 
-template <typename IMPL, typename CACHEPOLICY>
-std::unordered_map<typename CACHEPOLICY::KeyType, std::shared_ptr<IMPL>>
-Cache<IMPL, CACHEPOLICY>::Store;
+template <typename IMPL>
+std::unordered_map<unsigned int, std::shared_ptr<IMPL>>
+Cache<IMPL>::Store;
 
-template <typename IMPL, typename CACHEPOLICY>
-std::recursive_mutex Cache<IMPL, CACHEPOLICY>::Mutex;
+template <typename IMPL>
+std::recursive_mutex Cache<IMPL>::Mutex;
 
 
 #endif // CACHE_H

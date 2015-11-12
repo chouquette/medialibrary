@@ -25,7 +25,7 @@
 #include "database/SqliteTools.h"
 
 const std::string policy::ShowTable::Name = "Show";
-const std::string policy::ShowTable::CacheColumn = "id_show";
+const std::string policy::ShowTable::PrimaryKeyColumn = "id_show";
 unsigned int Show::* const policy::ShowTable::PrimaryKey = &Show::m_id;
 
 Show::Show( DBConnection dbConnection, sqlite::Row& row )

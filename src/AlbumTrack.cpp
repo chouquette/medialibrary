@@ -27,7 +27,7 @@
 #include "logging/Logger.h"
 
 const std::string policy::AlbumTrackTable::Name = "AlbumTrack";
-const std::string policy::AlbumTrackTable::CacheColumn = "id_track";
+const std::string policy::AlbumTrackTable::PrimaryKeyColumn = "id_track";
 unsigned int AlbumTrack::* const policy::AlbumTrackTable::PrimaryKey = &AlbumTrack::m_id;
 
 AlbumTrack::AlbumTrack(DBConnection dbConnection, sqlite::Row& row )

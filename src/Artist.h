@@ -35,7 +35,7 @@ namespace policy
 struct ArtistTable
 {
     static const std::string Name;
-    static const std::string CacheColumn;
+    static const std::string PrimaryKeyColumn;
     static unsigned int Artist::*const PrimaryKey;
 };
 }

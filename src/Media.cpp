@@ -40,7 +40,7 @@
 #include "filesystem/IFile.h"
 
 const std::string policy::MediaTable::Name = "Media";
-const std::string policy::MediaTable::CacheColumn = "mrl";
+const std::string policy::MediaTable::PrimaryKeyColumn = "id_media";
 unsigned int Media::* const policy::MediaTable::PrimaryKey = &Media::m_id;
 
 Media::Media( DBConnection dbConnection, sqlite::Row& row )
@@ -95,7 +95,7 @@ AlbumTrackPtr Media::albumTrack()
     {
         std::string req = "SELECT * FROM " + policy::AlbumTrackTable::Name +
                 " WHERE media_id = ?";
-        m_albumTrack = AlbumTrack::fetchOne( m_dbConnection, req, m_id );
+        m_albumTrack = AlbumTrack::fetch( m_dbConnection, req, m_id );
     }
     return m_albumTrack;
 }
@@ -346,14 +346,4 @@ bool Media::removeLabel( LabelPtr label )
     }
     const char* req = "DELETE FROM LabelFileRelation WHERE id_label = ? AND id_media = ?";
     return sqlite::Tools::executeDelete( m_dbConnection, req, label->id(), m_id );
-}
-
-const std::string& policy::MediaCache::key( const IMedia* self )
-{
-    return self->mrl();
-}
-
-std::string policy::MediaCache::key( const sqlite::Row& row )
-{
-    return row.load<std::string>( 5 );
 }
