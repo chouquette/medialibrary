@@ -75,6 +75,7 @@ MediaLibrary::MediaLibrary()
     : m_discoverer( new DiscovererWorker )
     , m_verbosity( LogLevel::Error )
 {
+    Log::setLogLevel( m_verbosity );
 }
 
 MediaLibrary::~MediaLibrary()
