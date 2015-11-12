@@ -23,7 +23,7 @@
 #ifndef VIDEOTRACK_H
 #define VIDEOTRACK_H
 
-#include "database/Cache.h"
+#include "database/SqliteTable.h"
 #include "IVideoTrack.h"
 
 #include <sqlite3.h>

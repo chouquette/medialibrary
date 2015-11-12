@@ -25,7 +25,7 @@
 
 #include "IAudioTrack.h"
 #include "IMediaLibrary.h"
-#include "database/Cache.h"
+#include "database/SqliteTable.h"
 
 class AudioTrack;
 

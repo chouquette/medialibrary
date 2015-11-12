@@ -30,7 +30,7 @@ class Media;
 class Label;
 
 #include "ILabel.h"
-#include "database/Cache.h"
+#include "database/SqliteTable.h"
 
 namespace policy
 {

@@ -25,7 +25,7 @@
 
 #include "IMovie.h"
 #include <sqlite3.h>
-#include "database/Cache.h"
+#include "database/SqliteTable.h"
 
 class Movie;
 

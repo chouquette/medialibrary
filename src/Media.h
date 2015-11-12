@@ -27,7 +27,7 @@
 #include <sqlite3.h>
 
 #include "IMedia.h"
-#include "database/Cache.h"
+#include "database/SqliteTable.h"
 
 
 class Album;

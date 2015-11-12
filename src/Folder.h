@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "database/Cache.h"
+#include "database/SqliteTable.h"
 #include "IFolder.h"
 
 #include <sqlite3.h>

@@ -31,7 +31,7 @@ class ShowEpisode;
 
 #include "IMediaLibrary.h"
 #include "IShowEpisode.h"
-#include "database/Cache.h"
+#include "database/SqliteTable.h"
 
 namespace policy
 {

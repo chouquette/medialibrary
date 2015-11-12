@@ -29,7 +29,7 @@
 
 #include "IMediaLibrary.h"
 
-#include "database/Cache.h"
+#include "database/SqliteTable.h"
 #include "IAlbum.h"
 
 class Album;

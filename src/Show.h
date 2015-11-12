@@ -25,7 +25,7 @@
 
 #include <sqlite3.h>
 
-#include "database/Cache.h"
+#include "database/SqliteTable.h"
 #include "IMediaLibrary.h"
 #include "IShow.h"
 
