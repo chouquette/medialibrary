@@ -34,7 +34,7 @@ class ILabel
         virtual ~ILabel() {}
 
         virtual unsigned int id() const = 0;
-        virtual const std::string& name() = 0;
+        virtual const std::string& name() const = 0;
         virtual std::vector<MediaPtr> files() = 0;
 };
 

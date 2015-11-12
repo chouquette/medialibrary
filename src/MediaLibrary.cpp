@@ -250,12 +250,12 @@ bool MediaLibrary::deleteFile( const std::string& mrl )
 
 bool MediaLibrary::deleteFile( MediaPtr file )
 {
-    return Media::destroy( m_dbConnection.get(), std::static_pointer_cast<Media>( file ) );
+    return Media::destroy( m_dbConnection.get(), file.get() );
 }
 
 bool MediaLibrary::deleteFolder( FolderPtr folder )
 {
-    if ( Folder::destroy( m_dbConnection.get(), std::static_pointer_cast<Folder>( folder ) ) == false )
+    if ( Folder::destroy( m_dbConnection.get(), folder.get() ) == false )
         return false;
     Media::clear();
     return true;
@@ -273,7 +273,7 @@ bool MediaLibrary::deleteLabel( const std::string& text )
 
 bool MediaLibrary::deleteLabel( LabelPtr label )
 {
-    return Label::destroy( m_dbConnection.get(), std::static_pointer_cast<Label>( label ) );
+    return Label::destroy( m_dbConnection.get(), label.get() );
 }
 
 AlbumPtr MediaLibrary::album( unsigned int id )

@@ -35,10 +35,6 @@ class PrimaryKeyCacheKeyPolicy
 {
     public:
         typedef unsigned int KeyType;
-        static unsigned int key( const std::shared_ptr<TYPE>& self )
-        {
-            return self->id();
-        }
         static unsigned int key( const TYPE* self )
         {
             return self->id();
@@ -71,7 +67,7 @@ class PrimaryKeyCacheKeyPolicy
  * - Inherit this class and specify the template parameter & policies accordingly
  * - Make this class a friend class of the class you inherit from
  */
-template <typename IMPL, typename INTF, typename TABLEPOLICY, typename CACHEPOLICY = PrimaryKeyCacheKeyPolicy<IMPL> >
+template <typename IMPL, typename INTF, typename TABLEPOLICY, typename CACHEPOLICY = PrimaryKeyCacheKeyPolicy<INTF> >
 class Cache
 {
     public:
@@ -140,13 +136,7 @@ class Cache
             return sqlite::Tools::executeDelete( dbConnection, req, key );
         }
 
-        static bool destroy( DBConnection dbConnection, const std::shared_ptr<IMPL>& self )
-        {
-            const auto& key = CACHEPOLICY::key( self );
-            return destroy( dbConnection, key );
-        }
-
-        static bool destroy( DBConnection dbConnection, const IMPL* self )
+        static bool destroy( DBConnection dbConnection, const INTF* self )
         {
             const auto& key = CACHEPOLICY::key( self );
             return destroy( dbConnection, key );
@@ -163,7 +153,7 @@ class Cache
          * @param key The key used for cache
          * @return
          */
-        static bool discard( const std::shared_ptr<IMPL>& record )
+        static bool discard( const IMPL* record )
         {
             auto key = CACHEPOLICY::key( record );
             Lock lock( Mutex );
@@ -187,7 +177,7 @@ class Cache
             if ( pKey == 0 )
                 return false;
             (self.get())->*TABLEPOLICY::PrimaryKey = pKey;
-            auto cacheKey = CACHEPOLICY::key( self );
+            auto cacheKey = CACHEPOLICY::key( self.get() );
 
             // We expect the cache column to be PRIMARY KEY / UNIQUE, so an insertion with
             // a duplicated key should have been rejected by sqlite. This indicates an invalid state

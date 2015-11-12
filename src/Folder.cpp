@@ -32,7 +32,7 @@ namespace policy
     const std::string FolderTable::CacheColumn = "path";
     unsigned int Folder::* const FolderTable::PrimaryKey = &Folder::m_id;
 
-    const FolderCache::KeyType&FolderCache::key(const std::shared_ptr<Folder>& self)
+    const FolderCache::KeyType&FolderCache::key( const IFolder* self )
     {
         return self->path();
     }
@@ -95,7 +95,7 @@ unsigned int Folder::id() const
     return m_id;
 }
 
-const std::string& Folder::path()
+const std::string& Folder::path() const
 {
     return m_path;
 }

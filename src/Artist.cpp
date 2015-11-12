@@ -153,7 +153,7 @@ std::shared_ptr<Album> Artist::unknownAlbum()
             return nullptr;
         if ( updateNbAlbum( 1 ) == false )
         {
-            Album::destroy( m_dbConnection, album );
+            Album::destroy( m_dbConnection, album.get() );
             return nullptr;
         }
     }

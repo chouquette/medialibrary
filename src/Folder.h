@@ -46,7 +46,7 @@ struct FolderTable
 struct FolderCache
 {
     using KeyType = std::string;
-    static const KeyType& key( const std::shared_ptr<Folder>& self );
+    static const KeyType& key( const IFolder* self );
     static KeyType key( sqlite::Row& row );
 };
 
@@ -64,7 +64,7 @@ public:
     static std::shared_ptr<Folder> create( DBConnection connection, const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parentId );
 
     virtual unsigned int id() const override;
-    virtual const std::string& path() override;
+    virtual const std::string& path() const override;
     virtual std::vector<MediaPtr> files() override;
     virtual std::vector<FolderPtr> folders() override;
     virtual FolderPtr parent() override;

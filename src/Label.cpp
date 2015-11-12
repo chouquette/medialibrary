@@ -50,7 +50,7 @@ unsigned int Label::id() const
     return m_id;
 }
 
-const std::string& Label::name()
+const std::string& Label::name() const
 {
     return m_name;
 }
@@ -90,7 +90,7 @@ bool Label::createTable(DBConnection dbConnection)
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-const std::string&policy::LabelCachePolicy::key( const std::shared_ptr<ILabel> self )
+const std::string&policy::LabelCachePolicy::key( const ILabel* self )
 {
     return self->name();
 }

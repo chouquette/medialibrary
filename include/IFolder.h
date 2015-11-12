@@ -31,7 +31,7 @@ class IFolder
 public:
     virtual ~IFolder() = default;
     virtual unsigned int id() const = 0;
-    virtual const std::string& path() = 0;
+    virtual const std::string& path() const = 0;
     // This will only returns the files in this immediate folder
     virtual std::vector<MediaPtr> files() = 0;
     virtual std::vector<FolderPtr> folders() = 0;

@@ -348,7 +348,7 @@ bool Media::removeLabel( LabelPtr label )
     return sqlite::Tools::executeDelete( m_dbConnection, req, label->id(), m_id );
 }
 
-const std::string& policy::MediaCache::key(const std::shared_ptr<Media> self )
+const std::string& policy::MediaCache::key( const IMedia* self )
 {
     return self->mrl();
 }

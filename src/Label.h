@@ -44,7 +44,7 @@ struct LabelTable
 struct LabelCachePolicy
 {
     typedef std::string KeyType;
-    static const std::string& key(const std::shared_ptr<ILabel> self );
+    static const std::string& key(const ILabel* self );
     static std::string key( sqlite::Row& row );
 };
 
@@ -60,7 +60,7 @@ class Label : public ILabel, public Cache<Label, ILabel, policy::LabelTable, pol
 
     public:
         virtual unsigned int id() const override;
-        virtual const std::string& name() override;
+        virtual const std::string& name() const override;
         virtual std::vector<MediaPtr> files() override;
 
         static LabelPtr create( DBConnection dbConnection, const std::string& name );

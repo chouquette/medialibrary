@@ -52,7 +52,7 @@ struct MediaTable
 struct MediaCache
 {
     typedef std::string KeyType;
-    static const std::string& key(const std::shared_ptr<Media> self);
+    static const std::string& key(const IMedia* self);
     static std::string key( sqlite::Row& row );
 };
 }
