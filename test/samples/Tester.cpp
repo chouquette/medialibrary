@@ -1,5 +1,7 @@
 #include "Tester.h"
 
+extern bool Verbose;
+
 MockCallback::MockCallback()
 {
     // Start locked. The locked will be released when waiting for parsing to be completed
@@ -31,7 +33,8 @@ void Tests::SetUp()
     unlink("test.db");
     m_cb.reset( new MockCallback );
     m_ml.reset( new MediaLibrary );
-    m_ml->setVerbosity( LogLevel::Error );
+    if ( Verbose == true )
+        m_ml->setVerbosity( LogLevel::Debug );
     m_ml->initialize( "test.db", "/tmp", m_cb.get() );
 }
 

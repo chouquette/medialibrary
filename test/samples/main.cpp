@@ -2,6 +2,7 @@
 
 static std::string SamplesDirectory = ".";
 static std::string TestCaseDirectory = SRC_DIR "/test/samples/testcases";
+bool Verbose = false;
 
 static const char* testCases[] = {
     "featuring",
@@ -85,12 +86,15 @@ int main(int ac, char** av)
     ::testing::InitGoogleTest(&ac, av);
     const std::string samplesArg = "--samples-directory=";
     const std::string testCasesArg = "--testcases-directory=";
+    const std::string verboseArg = "-v";
     for ( auto i = 1; i < ac; ++i )
     {
         if ( strncmp( samplesArg.c_str(), av[i], samplesArg.length() ) == 0 )
             SamplesDirectory = av[i] + samplesArg.size();
         else if ( strncmp( testCasesArg.c_str(), av[i], testCasesArg.length() ) == 0 )
             TestCaseDirectory = av[i] + testCasesArg.size();
+        else if ( av[i] == verboseArg )
+            Verbose = true;
     }
     return RUN_ALL_TESTS();
 }
