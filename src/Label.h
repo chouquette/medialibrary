@@ -50,9 +50,9 @@ struct LabelCachePolicy
 
 }
 
-class Label : public ILabel, public Cache<Label, policy::LabelTable, policy::LabelCachePolicy>
+class Label : public ILabel, public Table<Label, policy::LabelTable, policy::LabelCachePolicy>
 {
-    using _Cache = Cache<Label, policy::LabelTable, policy::LabelCachePolicy>;
+    using _Cache = Table<Label, policy::LabelTable, policy::LabelCachePolicy>;
 
     public:
         Label( DBConnection dbConnection, sqlite::Row& row );

@@ -39,9 +39,9 @@ struct AudioTrackTable
 };
 }
 
-class AudioTrack : public IAudioTrack, public Cache<AudioTrack, policy::AudioTrackTable>
+class AudioTrack : public IAudioTrack, public Table<AudioTrack, policy::AudioTrackTable>
 {
-    using _Cache = Cache<AudioTrack, policy::AudioTrackTable>;
+    using _Cache = Table<AudioTrack, policy::AudioTrackTable>;
 
     public:
         AudioTrack( DBConnection dbConnection, sqlite::Row& row );

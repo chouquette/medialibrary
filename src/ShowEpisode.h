@@ -43,9 +43,9 @@ struct ShowEpisodeTable
 };
 }
 
-class ShowEpisode : public IShowEpisode, public Cache<ShowEpisode, policy::ShowEpisodeTable>
+class ShowEpisode : public IShowEpisode, public Table<ShowEpisode, policy::ShowEpisodeTable>
 {
-    using _Cache = Cache<ShowEpisode, policy::ShowEpisodeTable>;
+    using _Cache = Table<ShowEpisode, policy::ShowEpisodeTable>;
 
     public:
         ShowEpisode( DBConnection dbConnection, sqlite::Row& row );

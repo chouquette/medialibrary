@@ -44,9 +44,9 @@ struct AlbumTrackTable
 };
 }
 
-class AlbumTrack : public IAlbumTrack, public Cache<AlbumTrack, policy::AlbumTrackTable>
+class AlbumTrack : public IAlbumTrack, public Table<AlbumTrack, policy::AlbumTrackTable>
 {
-    using _Cache = Cache<AlbumTrack, policy::AlbumTrackTable>;
+    using _Cache = Table<AlbumTrack, policy::AlbumTrackTable>;
 
     public:
         AlbumTrack( DBConnection dbConnection, sqlite::Row& row );

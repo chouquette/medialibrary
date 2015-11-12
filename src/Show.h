@@ -42,9 +42,9 @@ struct ShowTable
 };
 }
 
-class Show : public IShow, public Cache<Show, policy::ShowTable>
+class Show : public IShow, public Table<Show, policy::ShowTable>
 {
-    using _Cache = Cache<Show, policy::ShowTable>;
+    using _Cache = Table<Show, policy::ShowTable>;
 
     public:
         Show( DBConnection dbConnection, sqlite::Row& row );

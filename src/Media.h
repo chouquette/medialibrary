@@ -57,10 +57,10 @@ struct MediaCache
 };
 }
 
-class Media : public IMedia, public Cache<Media, policy::MediaTable, policy::MediaCache>
+class Media : public IMedia, public Table<Media, policy::MediaTable, policy::MediaCache>
 {
     private:
-        using _Cache = Cache<Media, policy::MediaTable, policy::MediaCache>;
+        using _Cache = Table<Media, policy::MediaTable, policy::MediaCache>;
     public:
 
         // Those should be private, however the standard states that the expression

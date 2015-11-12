@@ -46,6 +46,68 @@ class PrimaryKeyCacheKeyPolicy
         }
 };
 
+template <typename IMPL, typename CACHEPOLICY>
+class Cache
+{
+    using lock_t = std::unique_lock<std::recursive_mutex>;
+
+public:
+    static lock_t lock()
+    {
+        return lock_t{ Mutex };
+    }
+
+    static std::shared_ptr<IMPL> load( const typename CACHEPOLICY::KeyType& key )
+    {
+        auto it = Store.find( key );
+        if ( it == Store.end() )
+            return nullptr;
+        return it->second;
+    }
+
+    template <typename T>
+    static std::shared_ptr<IMPL> load( const T& value )
+    {
+        auto key = CACHEPOLICY::key( value );
+        return load( key );
+    }
+
+    static void store( const std::shared_ptr<IMPL> value )
+    {
+        auto key = CACHEPOLICY::key( value.get() );
+        Store[key] = value;
+    }
+
+    /**
+     * @brief discard Discard a record from the cache
+     */
+    static bool discard( const typename CACHEPOLICY::KeyType& key )
+    {
+        auto it = Store.find( key );
+        if ( it == Store.end() )
+            return false;
+        Store.erase( it );
+        return true;
+    }
+
+    static void clear()
+    {
+        Store.clear();
+    }
+
+private:
+    static std::unordered_map<typename CACHEPOLICY::KeyType, std::shared_ptr<IMPL>> Store;
+    static std::recursive_mutex Mutex;
+};
+
+template <typename IMPL, typename CACHEPOLICY>
+std::unordered_map<typename CACHEPOLICY::KeyType, std::shared_ptr<IMPL>>
+Cache<IMPL, CACHEPOLICY>::Store;
+
+template <typename IMPL, typename CACHEPOLICY>
+std::recursive_mutex Cache<IMPL, CACHEPOLICY>::Mutex;
+
+
 /**
  * This utility class eases up the implementation of caching.
  *
@@ -69,21 +131,24 @@ class PrimaryKeyCacheKeyPolicy
  * - Make this class a friend class of the class you inherit from
  */
 template <typename IMPL, typename TABLEPOLICY, typename CACHEPOLICY = PrimaryKeyCacheKeyPolicy >
-class Cache
+class Table
 {
+    using _Cache = Cache<IMPL, CACHEPOLICY>;
+
     public:
         static std::shared_ptr<IMPL> fetch( DBConnection dbConnection, const typename CACHEPOLICY::KeyType& key )
         {
-            Lock lock( Mutex );
-            auto it = Store.find( key );
-            if ( it != Store.end() )
-                return it->second;
+            auto l = _Cache::lock();
+
+            auto res = _Cache::load( key );
+            if ( res != nullptr )
+                return res;
             static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name +
                             " WHERE " + TABLEPOLICY::CacheColumn + " = ?";
-            auto res = sqlite::Tools::fetchOne<IMPL>( dbConnection, req, key );
+            res = sqlite::Tools::fetchOne<IMPL>( dbConnection, req, key );
             if ( res == nullptr )
                 return nullptr;
-            Store[key] = res;
+            _Cache::store( res );
             return res;
         }
 
@@ -102,36 +167,33 @@ class Cache
             static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name;
             // Lock the cache mutex before attempting to acquire a context, otherwise
             // we could have a thread locking cache then DB, and a thread locking DB then cache
-            Lock lock( Mutex );
+            auto l = _Cache::lock();
             return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnection, req );
         }
 
         template <typename INTF, typename... Args>
         static std::vector<std::shared_ptr<INTF>> fetchAll( DBConnection dbConnection, const std::string &req, Args&&... args )
         {
-            Lock lock( Mutex );
+            auto l = _Cache::lock();
             return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnection, req, std::forward<Args>( args )... );
         }
 
         static std::shared_ptr<IMPL> load( DBConnection dbConnection, sqlite::Row& row )
         {
-            auto cacheKey = CACHEPOLICY::key( row );
+            auto l = _Cache::lock();
 
-            Lock lock( Mutex );
-            auto it = Store.find( cacheKey );
-            if ( it != Store.end() )
-                return it->second;
-            auto inst = std::make_shared<IMPL>( dbConnection, row );
-            Store[cacheKey] = inst;
-            return inst;
+            auto res = _Cache::load( row );
+            if ( res != nullptr )
+                return res;
+            res = std::make_shared<IMPL>( dbConnection, row );
+            _Cache::store( res );
+            return res;
         }
 
         static bool destroy( DBConnection dbConnection, const typename CACHEPOLICY::KeyType& key )
         {
-            Lock lock( Mutex );
-            auto it = Store.find( key );
-            if ( it != Store.end() )
-                Store.erase( it );
+            auto l = _Cache::lock();
+            _Cache::discard( key );
             static const std::string req = "DELETE FROM " + TABLEPOLICY::Name + " WHERE " +
                     TABLEPOLICY::CacheColumn + " = ?";
             return sqlite::Tools::executeDelete( dbConnection, req, key );
@@ -146,24 +208,8 @@ class Cache
 
         static void clear()
         {
-            Lock lock( Mutex );
-            Store.clear();
-        }
-
-        /**
-         * @brief discard Discard a record from the cache
-         * @param key The key used for cache
-         * @return
-         */
-        static bool discard( const IMPL* record )
-        {
-            auto key = CACHEPOLICY::key( record );
-            Lock lock( Mutex );
-            auto it = Store.find( key );
-            if ( it == Store.end() )
-                return false;
-            Store.erase( it );
-            return true;
+            auto l = _Cache::lock();
+            _Cache::clear();
         }
 
     protected:
@@ -173,32 +219,15 @@ class Cache
         template <typename... Args>
         static bool insert( DBConnection dbConnection, std::shared_ptr<IMPL> self, const std::string& req, Args&&... args )
         {
-            Lock lock( Mutex );
+            auto l = _Cache::lock();
 
             unsigned int pKey = sqlite::Tools::insert( dbConnection, req, std::forward<Args>( args )... );
             if ( pKey == 0 )
                 return false;
             (self.get())->*TABLEPOLICY::PrimaryKey = pKey;
-            auto cacheKey = CACHEPOLICY::key( self.get() );
-
-            // We expect the cache column to be PRIMARY KEY / UNIQUE, so an insertion with
-            // a duplicated key should have been rejected by sqlite. This indicates an invalid state
-            assert( Store.find( cacheKey ) == Store.end() );
-            Store[cacheKey] = self;
+            _Cache::store( self );
             return true;
         }
-
-    private:
-        static std::unordered_map<typename CACHEPOLICY::KeyType, std::shared_ptr<IMPL> > Store;
-        static std::recursive_mutex Mutex;
-        typedef std::lock_guard<std::recursive_mutex> Lock;
 };
-
-template <typename IMPL, typename TABLEPOLICY, typename CACHEPOLICY>
-std::unordered_map<typename CACHEPOLICY::KeyType, std::shared_ptr<IMPL> >
-Cache<IMPL, TABLEPOLICY, CACHEPOLICY>::Store;
-
-template <typename IMPL, typename TABLEPOLICY, typename CACHEPOLICY>
-std::recursive_mutex Cache<IMPL, TABLEPOLICY, CACHEPOLICY>::Mutex;
 
 #endif // CACHE_H

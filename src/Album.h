@@ -47,9 +47,9 @@ struct AlbumTable
 };
 }
 
-class Album : public IAlbum, public Cache<Album, policy::AlbumTable>
+class Album : public IAlbum, public Table<Album, policy::AlbumTable>
 {
-    using _Cache = Cache<Album, policy::AlbumTable>;
+    using _Cache = Table<Album, policy::AlbumTable>;
 
     public:
         Album( DBConnection dbConnection, sqlite::Row& row );

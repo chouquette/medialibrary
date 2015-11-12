@@ -39,9 +39,9 @@ struct MovieTable
 };
 }
 
-class Movie : public IMovie, public Cache<Movie, policy::MovieTable>
+class Movie : public IMovie, public Table<Movie, policy::MovieTable>
 {
-    using _Cache = Cache<Movie, policy::MovieTable>;
+    using _Cache = Table<Movie, policy::MovieTable>;
 
     public:
         Movie( DBConnection dbConnection, sqlite::Row& row );

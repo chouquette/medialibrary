@@ -40,9 +40,9 @@ struct VideoTrackTable
 };
 }
 
-class VideoTrack : public IVideoTrack, public Cache<VideoTrack, policy::VideoTrackTable>
+class VideoTrack : public IVideoTrack, public Table<VideoTrack, policy::VideoTrackTable>
 {
-    using _Cache = Cache<VideoTrack, policy::VideoTrackTable>;
+    using _Cache = Table<VideoTrack, policy::VideoTrackTable>;
 
     public:
         VideoTrack( DBConnection dbConnection, sqlite::Row& row );

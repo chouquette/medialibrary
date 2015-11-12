@@ -52,9 +52,9 @@ struct FolderCache
 
 }
 
-class Folder : public IFolder, public Cache<Folder, policy::FolderTable, policy::FolderCache>
+class Folder : public IFolder, public Table<Folder, policy::FolderTable, policy::FolderCache>
 {
-    using _Cache = Cache<Folder, policy::FolderTable, policy::FolderCache>;
+    using _Cache = Table<Folder, policy::FolderTable, policy::FolderCache>;
 
 public:
     Folder( DBConnection dbConnection, sqlite::Row& row );

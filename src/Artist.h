@@ -40,10 +40,10 @@ struct ArtistTable
 };
 }
 
-class Artist : public IArtist, public Cache<Artist, policy::ArtistTable>
+class Artist : public IArtist, public Table<Artist, policy::ArtistTable>
 {
 private:
-    using _Cache = Cache<Artist, policy::ArtistTable>;
+    using _Cache = Table<Artist, policy::ArtistTable>;
 
 public:
     Artist( DBConnection dbConnection, sqlite::Row& row );
