@@ -125,7 +125,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         };
         m_vlcInstance = VLC::Instance( sizeof(args) / sizeof(args[0]), args );
         m_vlcInstance.logSet([this](int lvl, const libvlc_log_t*, std::string msg) {
-            if ( m_verbosity != LogLevel::Debug )
+            if ( m_verbosity != LogLevel::Verbose )
                 return ;
             if ( lvl == LIBVLC_ERROR )
                 Log::Error( msg );
