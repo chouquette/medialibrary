@@ -174,13 +174,13 @@ void FsDiscoverer::checkFiles( fs::IDirectory* folder, FolderPtr parentFolder )
             continue;
         }
         LOG_INFO( "Forcing file refresh ", filePath );
-        m_ml->deleteFile( filePath );
+        m_ml->deleteFile( (*it).get() );
         m_ml->addFile( filePath, parentFolder );
         files.erase( it );
     }
     for ( auto file : files )
     {
         LOG_INFO( "File ", file->mrl(), " not found on filesystem, deleting it" );
-        m_ml->deleteFile( file );
+        m_ml->deleteFile( file.get() );
     }
 }

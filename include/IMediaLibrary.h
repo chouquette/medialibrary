@@ -97,8 +97,6 @@ class IMediaLibrary
         /// \return The newly created file, or nullptr in case of error
         ///
         virtual MediaPtr file( const std::string& path ) = 0;
-        virtual bool deleteFile( const std::string& mrl ) = 0;
-        virtual bool deleteFile( MediaPtr file ) = 0;
 
         /// Adds a folder and all the files it contains
         virtual FolderPtr folder( const std::string& path ) = 0;

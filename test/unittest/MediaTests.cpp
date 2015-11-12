@@ -77,7 +77,7 @@ TEST_F( Medias, Delete )
 
     ASSERT_EQ( f, f2 );
 
-    ml->deleteFile( f );
+    ml->deleteFile( f.get() );
     f2 = ml->file( "media.avi" );
     ASSERT_EQ( f2, nullptr );
 }

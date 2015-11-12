@@ -243,14 +243,9 @@ FolderPtr MediaLibrary::folder( const std::string& path )
     return Folder::fetch( m_dbConnection.get(), path );
 }
 
-bool MediaLibrary::deleteFile( const std::string& mrl )
+bool MediaLibrary::deleteFile( const Media* file )
 {
-    return Media::destroy( m_dbConnection.get(), mrl );
-}
-
-bool MediaLibrary::deleteFile( MediaPtr file )
-{
-    return Media::destroy( m_dbConnection.get(), file.get() );
+    return Media::destroy( m_dbConnection.get(), file );
 }
 
 bool MediaLibrary::deleteFolder( FolderPtr folder )
