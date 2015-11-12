@@ -30,12 +30,13 @@
 
 #include "SqliteTools.h"
 
-template <typename TYPE>
 class PrimaryKeyCacheKeyPolicy
 {
     public:
         typedef unsigned int KeyType;
-        static unsigned int key( const TYPE* self )
+
+        template <typename T>
+        static unsigned int key( const T* self )
         {
             return self->id();
         }
@@ -67,7 +68,7 @@ class PrimaryKeyCacheKeyPolicy
  * - Inherit this class and specify the template parameter & policies accordingly
  * - Make this class a friend class of the class you inherit from
  */
-template <typename IMPL, typename INTF, typename TABLEPOLICY, typename CACHEPOLICY = PrimaryKeyCacheKeyPolicy<INTF> >
+template <typename IMPL, typename INTF, typename TABLEPOLICY, typename CACHEPOLICY = PrimaryKeyCacheKeyPolicy >
 class Cache
 {
     public:
@@ -94,7 +95,6 @@ class Cache
 
         /*
          * Will fetch all elements from the database & cache them.
-         *
          */
         static std::vector<std::shared_ptr<INTF>> fetchAll( DBConnection dbConnection )
         {
