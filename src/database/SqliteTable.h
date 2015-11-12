@@ -22,12 +22,18 @@
 
 #pragma once
 
-#include "Cache.h"
+#include <memory>
+#include <mutex>
+#include <unordered_map>
+#include <vector>
+
+#include "Types.h"
+#include "SqliteTools.h"
 
 template <typename IMPL, typename TABLEPOLICY>
 class Table
 {
-    using _Cache = Cache<IMPL>;
+    using Lock = std::unique_lock<std::recursive_mutex>;
 
     public:
         template <typename... Args>
@@ -52,52 +58,50 @@ class Table
             static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name;
             // Lock the cache mutex before attempting to acquire a context, otherwise
             // we could have a thread locking cache then DB, and a thread locking DB then cache
-            auto l = _Cache::lock();
+            Lock l{ Mutex };
             return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnection, req );
         }
 
         template <typename INTF, typename... Args>
         static std::vector<std::shared_ptr<INTF>> fetchAll( DBConnection dbConnection, const std::string &req, Args&&... args )
         {
-            auto l = _Cache::lock();
+            Lock l{ Mutex };
             return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnection, req, std::forward<Args>( args )... );
         }
 
         static std::shared_ptr<IMPL> load( DBConnection dbConnection, sqlite::Row& row )
         {
-            auto l = _Cache::lock();
+            Lock l{ Mutex };
 
             auto key = row.load<unsigned int>( 0 );
-            auto res = _Cache::load( key );
-            if ( res != nullptr )
-                return res;
-            res = std::make_shared<IMPL>( dbConnection, row );
-            _Cache::store( res );
+            auto it = Store.find( key );
+            if ( it != Store.end() )
+                return it->second;
+            auto res = std::make_shared<IMPL>( dbConnection, row );
+            Store[key] = res;
             return res;
         }
 
         template <typename... Args>
         static bool destroy( DBConnection dbConnection, unsigned int pkValue )
         {
-            auto l = _Cache::lock();
+            Lock l{ Mutex };
             static const std::string req = "DELETE FROM " + TABLEPOLICY::Name + " WHERE "
                     + TABLEPOLICY::PrimaryKeyColumn + " = ?";
             auto res = sqlite::Tools::executeDelete( dbConnection, req, pkValue );
             if ( res == true )
-                _Cache::discard( pkValue );
-            else
             {
-                // Simply ensure nothing was cached for this value if there's nothing to
-                // delete from DB
-                assert( _Cache::discard( pkValue ) == false );
+                auto it = Store.find( pkValue );
+                if ( it != end( Store ) )
+                    Store.erase( it );
             }
             return res;
         }
 
         static void clear()
         {
-            auto l = _Cache::lock();
-            _Cache::clear();
+            Lock l{ Mutex };
+            Store.clear();
         }
 
     protected:
@@ -107,13 +111,26 @@ class Table
         template <typename... Args>
         static bool insert( DBConnection dbConnection, std::shared_ptr<IMPL> self, const std::string& req, Args&&... args )
         {
-            auto l = _Cache::lock();
+            Lock l{ Mutex };
 
             unsigned int pKey = sqlite::Tools::insert( dbConnection, req, std::forward<Args>( args )... );
             if ( pKey == 0 )
                 return false;
             (self.get())->*TABLEPOLICY::PrimaryKey = pKey;
-            _Cache::store( self );
+            assert( Store.find( pKey ) == end( Store ) );
+            Store[pKey] = self;
             return true;
         }
+
+    private:
+        static std::unordered_map<unsigned int, std::shared_ptr<IMPL>> Store;
+        static std::recursive_mutex Mutex;
 };
+
+
+template <typename IMPL, typename TABLEPOLICY>
+std::unordered_map<unsigned int, std::shared_ptr<IMPL>>
+Table<IMPL, TABLEPOLICY>::Store;
+
+template <typename IMPL, typename TABLEPOLICY>
+std::recursive_mutex Table<IMPL, TABLEPOLICY>::Mutex;
