@@ -108,7 +108,7 @@ bool Artist::addMedia(Media* media)
     static const std::string req = "INSERT INTO MediaArtistRelation VALUES(?, ?)";
     // If track's ID is 0, the request will fail due to table constraints
     sqlite::ForeignKey artistForeignKey( m_id );
-    return sqlite::Tools::executeRequest( m_dbConnection, req, media->id(), artistForeignKey );
+    return sqlite::Tools::executeInsert( m_dbConnection, req, media->id(), artistForeignKey );
 }
 
 const std::string& Artist::artworkUrl() const
@@ -190,7 +190,7 @@ bool Artist::createDefaultArtists( DBConnection dbConnection )
     // This will skip the cache for those new entities, but they will be inserted soon enough anyway.
     static const std::string req = "INSERT OR IGNORE INTO " + policy::ArtistTable::Name +
             "(id_artist) VALUES(?),(?)";
-    return sqlite::Tools::executeRequest( dbConnection, req, medialibrary::UnknownArtistID,
+    return sqlite::Tools::executeInsert( dbConnection, req, medialibrary::UnknownArtistID,
                                           medialibrary::VariousArtistID );
 }
 
