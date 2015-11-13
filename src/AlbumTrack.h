@@ -46,8 +46,6 @@ struct AlbumTrackTable
 
 class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy::AlbumTrackTable>
 {
-    using _Cache = DatabaseHelpers<AlbumTrack, policy::AlbumTrackTable>;
-
     public:
         AlbumTrack( DBConnection dbConnection, sqlite::Row& row );
         AlbumTrack(Media* media, unsigned int trackNumber, unsigned int albumId , unsigned int discNumber);
@@ -80,7 +78,6 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
 
         std::shared_ptr<Album> m_album;
 
-        friend _Cache;
         friend struct policy::AlbumTrackTable;
 };
 

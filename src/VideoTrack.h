@@ -42,8 +42,6 @@ struct VideoTrackTable
 
 class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy::VideoTrackTable>
 {
-    using _Cache = DatabaseHelpers<VideoTrack, policy::VideoTrackTable>;
-
     public:
         VideoTrack( DBConnection dbConnection, sqlite::Row& row );
         VideoTrack( const std::string& codec, unsigned int width, unsigned int height, float fps, unsigned int mediaId );

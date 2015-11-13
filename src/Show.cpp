@@ -154,7 +154,7 @@ std::shared_ptr<Show> Show::create(DBConnection dbConnection, const std::string&
     auto show = std::make_shared<Show>( name );
     static const std::string req = "INSERT INTO " + policy::ShowTable::Name
             + "(name) VALUES(?)";
-    if ( _Cache::insert( dbConnection, show, req, name ) == false )
+    if ( insert( dbConnection, show, req, name ) == false )
         return nullptr;
     show->m_dbConnection = dbConnection;
     return show;

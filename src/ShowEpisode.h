@@ -45,8 +45,6 @@ struct ShowEpisodeTable
 
 class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, policy::ShowEpisodeTable>
 {
-    using _Cache = DatabaseHelpers<ShowEpisode, policy::ShowEpisodeTable>;
-
     public:
         ShowEpisode( DBConnection dbConnection, sqlite::Row& row );
         ShowEpisode(const std::string& name, unsigned int episodeNumber, unsigned int showId );
@@ -82,7 +80,6 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, pol
         unsigned int m_showId;
         ShowPtr m_show;
 
-        friend _Cache;
         friend struct policy::ShowEpisodeTable;
 };
 

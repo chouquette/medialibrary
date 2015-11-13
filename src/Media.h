@@ -53,10 +53,7 @@ struct MediaTable
 
 class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
 {
-    private:
-        using _Cache = DatabaseHelpers<Media, policy::MediaTable>;
     public:
-
         // Those should be private, however the standard states that the expression
         // ::new (pv) T(std::forward(args)...)
         // shall be well-formed, and private constructor would prevent that.
@@ -129,7 +126,6 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         ShowEpisodePtr m_showEpisode;
         MoviePtr m_movie;
 
-        friend _Cache;
         friend struct policy::MediaTable;
 };
 

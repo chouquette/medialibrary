@@ -79,7 +79,7 @@ std::shared_ptr<VideoTrack> VideoTrack::create( DBConnection dbConnection, const
     static const std::string req  = "INSERT INTO " + policy::VideoTrackTable::Name
             + "(codec, width, height, fps, media_id) VALUES(?, ?, ?, ?, ?)";
     auto track = std::make_shared<VideoTrack>( codec, width, height, fps, mediaId );
-    if ( _Cache::insert( dbConnection, track, req, codec, width, height, fps, mediaId ) == false )
+    if ( insert( dbConnection, track, req, codec, width, height, fps, mediaId ) == false )
         return nullptr;
     track->m_dbConnection = dbConnection;
     return track;

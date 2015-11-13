@@ -41,8 +41,6 @@ struct AudioTrackTable
 
 class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack, policy::AudioTrackTable>
 {
-    using _Cache = DatabaseHelpers<AudioTrack, policy::AudioTrackTable>;
-
     public:
         AudioTrack( DBConnection dbConnection, sqlite::Row& row );
         AudioTrack(const std::string& codec, unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels, const std::string& language, const std::string& desc , unsigned int mediaId);
@@ -70,7 +68,6 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack, policy
         std::string m_language;
         std::string m_description;
         unsigned int m_mediaId;
-
 
     private:
         friend struct policy::AudioTrackTable;

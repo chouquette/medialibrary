@@ -41,8 +41,6 @@ struct MovieTable
 
 class Movie : public IMovie, public DatabaseHelpers<Movie, policy::MovieTable>
 {
-    using _Cache = DatabaseHelpers<Movie, policy::MovieTable>;
-
     public:
         Movie( DBConnection dbConnection, sqlite::Row& row );
         Movie( const std::string& title );

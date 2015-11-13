@@ -47,8 +47,6 @@ struct FolderTable
 
 class Folder : public IFolder, public DatabaseHelpers<Folder, policy::FolderTable>
 {
-    using _Cache = DatabaseHelpers<Folder, policy::FolderTable>;
-
 public:
     Folder( DBConnection dbConnection, sqlite::Row& row );
     Folder( const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parent );
@@ -76,6 +74,5 @@ private:
     unsigned int m_lastModificationDate;
     bool m_isRemovable;
 
-    friend _Cache;
     friend struct policy::FolderTable;
 };

@@ -67,7 +67,7 @@ LabelPtr Label::create(DBConnection dbConnection, const std::string& name )
 {
     auto self = std::make_shared<Label>( name );
     const char* req = "INSERT INTO Label VALUES(NULL, ?)";
-    if ( _Cache::insert( dbConnection, self, req, self->m_name ) == false )
+    if ( insert( dbConnection, self, req, self->m_name ) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;
     return self;

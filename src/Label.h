@@ -52,8 +52,6 @@ struct LabelCachePolicy
 
 class Label : public ILabel, public DatabaseHelpers<Label, policy::LabelTable>
 {
-    using _Cache = DatabaseHelpers<Label, policy::LabelTable>;
-
     public:
         Label( DBConnection dbConnection, sqlite::Row& row );
         Label( const std::string& name );
@@ -70,7 +68,6 @@ class Label : public ILabel, public DatabaseHelpers<Label, policy::LabelTable>
         unsigned int m_id;
         std::string m_name;
 
-        friend _Cache;
         friend struct policy::LabelTable;
 };
 

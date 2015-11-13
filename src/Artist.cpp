@@ -199,7 +199,7 @@ std::shared_ptr<Artist> Artist::create( DBConnection dbConnection, const std::st
     auto artist = std::make_shared<Artist>( name );
     static const std::string req = "INSERT INTO " + policy::ArtistTable::Name +
             "(id_artist, name) VALUES(NULL, ?)";
-    if ( _Cache::insert( dbConnection, artist, req, name ) == false )
+    if ( insert( dbConnection, artist, req, name ) == false )
         return nullptr;
     artist->m_dbConnection = dbConnection;
     return artist;

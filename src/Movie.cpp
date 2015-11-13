@@ -143,7 +143,7 @@ std::shared_ptr<Movie> Movie::create(DBConnection dbConnection, const std::strin
     auto movie = std::make_shared<Movie>( title );
     static const std::string req = "INSERT INTO " + policy::MovieTable::Name
             + "(title) VALUES(?)";
-    if ( _Cache::insert( dbConnection, movie, req, title ) == false )
+    if ( insert( dbConnection, movie, req, title ) == false )
         return nullptr;
     movie->m_dbConnection = dbConnection;
     return movie;

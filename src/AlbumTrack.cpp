@@ -102,7 +102,7 @@ std::shared_ptr<AlbumTrack> AlbumTrack::create(DBConnection dbConnection, unsign
     auto self = std::make_shared<AlbumTrack>( media, trackNb, albumId, discNumber );
     static const std::string req = "INSERT INTO " + policy::AlbumTrackTable::Name
             + "(media_id, track_number, album_id, disc_number) VALUES(?, ?, ?, ?)";
-    if ( _Cache::insert( dbConnection, self, req, media->id(), trackNb, albumId, discNumber ) == false )
+    if ( insert( dbConnection, self, req, media->id(), trackNb, albumId, discNumber ) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;
     return self;

@@ -44,8 +44,6 @@ struct ShowTable
 
 class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
 {
-    using _Cache = DatabaseHelpers<Show, policy::ShowTable>;
-
     public:
         Show( DBConnection dbConnection, sqlite::Row& row );
         Show( const std::string& name );
@@ -77,7 +75,6 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
         time_t m_lastSyncDate;
         std::string m_tvdbId;
 
-        friend _Cache;
         friend struct policy::ShowTable;
 };
 

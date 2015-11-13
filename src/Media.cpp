@@ -82,7 +82,7 @@ std::shared_ptr<Media> Media::create( DBConnection dbConnection, Type type, cons
     static const std::string req = "INSERT INTO " + policy::MediaTable::Name +
             "(type, mrl, folder_id, last_modification_date, title) VALUES(?, ?, ?, ?, ?)";
 
-    if ( _Cache::insert( dbConnection, self, req, type, self->m_mrl, sqlite::ForeignKey( folderId ),
+    if ( insert( dbConnection, self, req, type, self->m_mrl, sqlite::ForeignKey( folderId ),
                          self->m_lastModificationDate, self->m_title) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;

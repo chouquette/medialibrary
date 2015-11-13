@@ -72,7 +72,7 @@ std::shared_ptr<Folder> Folder::create( DBConnection connection, const std::stri
     auto self = std::make_shared<Folder>( path, lastModificationDate, isRemovable, parentId );
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
             "(path, id_parent, last_modification_date, is_removable) VALUES(?, ?, ?, ?)";
-    if ( _Cache::insert( connection, self, req, path, sqlite::ForeignKey( parentId ),
+    if ( insert( connection, self, req, path, sqlite::ForeignKey( parentId ),
                          lastModificationDate, isRemovable ) == false )
         return nullptr;
     self->m_dbConection = connection;

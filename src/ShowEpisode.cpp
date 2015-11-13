@@ -171,7 +171,7 @@ std::shared_ptr<ShowEpisode> ShowEpisode::create( DBConnection dbConnection, con
     auto episode = std::make_shared<ShowEpisode>( title, episodeNumber, showId );
     static const std::string req = "INSERT INTO " + policy::ShowEpisodeTable::Name
             + "(episode_number, title, show_id) VALUES(? , ?, ?)";
-    if ( _Cache::insert( dbConnection, episode, req, episodeNumber, title, showId ) == false )
+    if ( insert( dbConnection, episode, req, episodeNumber, title, showId ) == false )
         return nullptr;
     episode->m_dbConnection = dbConnection;
     return episode;

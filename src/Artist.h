@@ -42,9 +42,6 @@ struct ArtistTable
 
 class Artist : public IArtist, public DatabaseHelpers<Artist, policy::ArtistTable>
 {
-private:
-    using _Cache = DatabaseHelpers<Artist, policy::ArtistTable>;
-
 public:
     Artist( DBConnection dbConnection, sqlite::Row& row );
     Artist( const std::string& name );
@@ -73,6 +70,5 @@ private:
     std::string m_artworkUrl;
     unsigned int m_nbAlbums;
 
-    friend _Cache;
     friend struct policy::ArtistTable;
 };

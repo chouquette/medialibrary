@@ -116,7 +116,7 @@ std::shared_ptr<AudioTrack> AudioTrack::create( DBConnection dbConnection, const
     static const std::string req = "INSERT INTO " + policy::AudioTrackTable::Name
             + "(codec, bitrate, samplerate, nb_channels, language, description, media_id) VALUES(?, ?, ?, ?, ?, ?, ?)";
     auto track = std::make_shared<AudioTrack>( codec, bitrate, sampleRate, nbChannels, language, desc, mediaId );
-    if ( _Cache::insert( dbConnection, track, req, codec, bitrate, sampleRate, nbChannels, language, desc, mediaId ) == false )
+    if ( insert( dbConnection, track, req, codec, bitrate, sampleRate, nbChannels, language, desc, mediaId ) == false )
         return nullptr;
     track->m_dbConnection = dbConnection;
     return track;

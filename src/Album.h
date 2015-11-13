@@ -49,8 +49,6 @@ struct AlbumTable
 
 class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
 {
-    using _Cache = DatabaseHelpers<Album, policy::AlbumTable>;
-
     public:
         Album( DBConnection dbConnection, sqlite::Row& row );
         Album( const std::string& title );
@@ -103,7 +101,6 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         mutable bool m_tracksCached;
         mutable std::mutex m_tracksLock;
 
-        friend _Cache;
         friend struct policy::AlbumTable;
 };
 
