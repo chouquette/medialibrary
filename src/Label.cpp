@@ -89,13 +89,3 @@ bool Label::createTable(DBConnection dbConnection)
             "FOREIGN KEY(id_media) REFERENCES Media(id_media) ON DELETE CASCADE);";
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
-
-const std::string&policy::LabelCachePolicy::key( const ILabel* self )
-{
-    return self->name();
-}
-
-std::string policy::LabelCachePolicy::key( const sqlite::Row& row )
-{
-    return row.load<KeyType>( 1 );
-}

@@ -24,7 +24,7 @@
 #include "Media.h"
 
 const std::string policy::VideoTrackTable::Name = "VideoTrack";
-const std::string policy::VideoTrackTable::CacheColumn = "id_track";
+const std::string policy::VideoTrackTable::PrimaryKeyColumn = "id_track";
 unsigned int VideoTrack::* const policy::VideoTrackTable::PrimaryKey = &VideoTrack::m_id;
 
 VideoTrack::VideoTrack( DBConnection dbConnection, sqlite::Row& row )
@@ -89,7 +89,7 @@ bool VideoTrack::createTable( DBConnection dbConnection )
 {
     static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::VideoTrackTable::Name
             + "(" +
-                policy::VideoTrackTable::CacheColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                policy::VideoTrackTable::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "codec TEXT,"
                 "width UNSIGNED INTEGER,"
                 "height UNSIGNED INTEGER,"

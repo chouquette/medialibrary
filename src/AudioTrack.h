@@ -34,7 +34,7 @@ namespace policy
 struct AudioTrackTable
 {
     static const std::string Name;
-    static const std::string CacheColumn;
+    static const std::string PrimaryKeyColumn;
     static unsigned int AudioTrack::* const PrimaryKey;
 };
 }

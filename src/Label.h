@@ -40,14 +40,6 @@ struct LabelTable
     static const std::string PrimaryKeyColumn;
     static unsigned int Label::*const PrimaryKey;
 };
-
-struct LabelCachePolicy
-{
-    typedef std::string KeyType;
-    static const std::string& key(const ILabel* self );
-    static std::string key( const sqlite::Row& row );
-};
-
 }
 
 class Label : public ILabel, public DatabaseHelpers<Label, policy::LabelTable>

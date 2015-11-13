@@ -25,7 +25,7 @@
 #include "Media.h"
 
 const std::string policy::AudioTrackTable::Name = "AudioTrack";
-const std::string policy::AudioTrackTable::CacheColumn  = "id_track";
+const std::string policy::AudioTrackTable::PrimaryKeyColumn  = "id_track";
 unsigned int AudioTrack::* const policy::AudioTrackTable::PrimaryKey = &AudioTrack::m_id;
 
 AudioTrack::AudioTrack( DBConnection dbConnection, sqlite::Row& row )
@@ -95,7 +95,7 @@ bool AudioTrack::createTable( DBConnection dbConnection )
     //FIXME: Index on media_id ? Unless it's already implied by the foreign key
     static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AudioTrackTable::Name
             + "(" +
-                policy::AudioTrackTable::CacheColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                policy::AudioTrackTable::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "codec TEXT,"
                 "bitrate UNSIGNED INTEGER,"
                 "samplerate UNSIGNED INTEGER,"
