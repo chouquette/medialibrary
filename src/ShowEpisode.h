@@ -31,7 +31,7 @@ class ShowEpisode;
 
 #include "IMediaLibrary.h"
 #include "IShowEpisode.h"
-#include "database/SqliteTable.h"
+#include "database/DatabaseHelpers.h"
 
 namespace policy
 {
@@ -43,9 +43,9 @@ struct ShowEpisodeTable
 };
 }
 
-class ShowEpisode : public IShowEpisode, public Table<ShowEpisode, policy::ShowEpisodeTable>
+class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, policy::ShowEpisodeTable>
 {
-    using _Cache = Table<ShowEpisode, policy::ShowEpisodeTable>;
+    using _Cache = DatabaseHelpers<ShowEpisode, policy::ShowEpisodeTable>;
 
     public:
         ShowEpisode( DBConnection dbConnection, sqlite::Row& row );

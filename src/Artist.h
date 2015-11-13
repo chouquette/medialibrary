@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "database/SqliteTable.h"
+#include "database/DatabaseHelpers.h"
 #include "IArtist.h"
 #include "IMediaLibrary.h"
 
@@ -40,10 +40,10 @@ struct ArtistTable
 };
 }
 
-class Artist : public IArtist, public Table<Artist, policy::ArtistTable>
+class Artist : public IArtist, public DatabaseHelpers<Artist, policy::ArtistTable>
 {
 private:
-    using _Cache = Table<Artist, policy::ArtistTable>;
+    using _Cache = DatabaseHelpers<Artist, policy::ArtistTable>;
 
 public:
     Artist( DBConnection dbConnection, sqlite::Row& row );

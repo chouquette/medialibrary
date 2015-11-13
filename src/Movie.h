@@ -25,7 +25,7 @@
 
 #include "IMovie.h"
 #include <sqlite3.h>
-#include "database/SqliteTable.h"
+#include "database/DatabaseHelpers.h"
 
 class Movie;
 
@@ -39,9 +39,9 @@ struct MovieTable
 };
 }
 
-class Movie : public IMovie, public Table<Movie, policy::MovieTable>
+class Movie : public IMovie, public DatabaseHelpers<Movie, policy::MovieTable>
 {
-    using _Cache = Table<Movie, policy::MovieTable>;
+    using _Cache = DatabaseHelpers<Movie, policy::MovieTable>;
 
     public:
         Movie( DBConnection dbConnection, sqlite::Row& row );

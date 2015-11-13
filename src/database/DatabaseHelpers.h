@@ -31,7 +31,7 @@
 #include "SqliteTools.h"
 
 template <typename IMPL, typename TABLEPOLICY>
-class Table
+class DatabaseHelpers
 {
     using Lock = std::unique_lock<std::recursive_mutex>;
 
@@ -130,7 +130,7 @@ class Table
 
 template <typename IMPL, typename TABLEPOLICY>
 std::unordered_map<unsigned int, std::shared_ptr<IMPL>>
-Table<IMPL, TABLEPOLICY>::Store;
+DatabaseHelpers<IMPL, TABLEPOLICY>::Store;
 
 template <typename IMPL, typename TABLEPOLICY>
-std::recursive_mutex Table<IMPL, TABLEPOLICY>::Mutex;
+std::recursive_mutex DatabaseHelpers<IMPL, TABLEPOLICY>::Mutex;

@@ -28,7 +28,7 @@
 
 #include "IAlbumTrack.h"
 #include "IMediaLibrary.h"
-#include "database/SqliteTable.h"
+#include "database/DatabaseHelpers.h"
 
 class Album;
 class AlbumTrack;
@@ -44,9 +44,9 @@ struct AlbumTrackTable
 };
 }
 
-class AlbumTrack : public IAlbumTrack, public Table<AlbumTrack, policy::AlbumTrackTable>
+class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy::AlbumTrackTable>
 {
-    using _Cache = Table<AlbumTrack, policy::AlbumTrackTable>;
+    using _Cache = DatabaseHelpers<AlbumTrack, policy::AlbumTrackTable>;
 
     public:
         AlbumTrack( DBConnection dbConnection, sqlite::Row& row );

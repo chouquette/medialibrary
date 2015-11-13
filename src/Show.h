@@ -25,7 +25,7 @@
 
 #include <sqlite3.h>
 
-#include "database/SqliteTable.h"
+#include "database/DatabaseHelpers.h"
 #include "IMediaLibrary.h"
 #include "IShow.h"
 
@@ -42,9 +42,9 @@ struct ShowTable
 };
 }
 
-class Show : public IShow, public Table<Show, policy::ShowTable>
+class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
 {
-    using _Cache = Table<Show, policy::ShowTable>;
+    using _Cache = DatabaseHelpers<Show, policy::ShowTable>;
 
     public:
         Show( DBConnection dbConnection, sqlite::Row& row );

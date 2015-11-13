@@ -30,7 +30,7 @@ class Media;
 class Label;
 
 #include "ILabel.h"
-#include "database/SqliteTable.h"
+#include "database/DatabaseHelpers.h"
 
 namespace policy
 {
@@ -50,9 +50,9 @@ struct LabelCachePolicy
 
 }
 
-class Label : public ILabel, public Table<Label, policy::LabelTable>
+class Label : public ILabel, public DatabaseHelpers<Label, policy::LabelTable>
 {
-    using _Cache = Table<Label, policy::LabelTable>;
+    using _Cache = DatabaseHelpers<Label, policy::LabelTable>;
 
     public:
         Label( DBConnection dbConnection, sqlite::Row& row );

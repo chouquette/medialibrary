@@ -29,7 +29,7 @@
 
 #include "IMediaLibrary.h"
 
-#include "database/SqliteTable.h"
+#include "database/DatabaseHelpers.h"
 #include "IAlbum.h"
 
 class Album;
@@ -47,9 +47,9 @@ struct AlbumTable
 };
 }
 
-class Album : public IAlbum, public Table<Album, policy::AlbumTable>
+class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
 {
-    using _Cache = Table<Album, policy::AlbumTable>;
+    using _Cache = DatabaseHelpers<Album, policy::AlbumTable>;
 
     public:
         Album( DBConnection dbConnection, sqlite::Row& row );

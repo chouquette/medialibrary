@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "database/SqliteTable.h"
+#include "database/DatabaseHelpers.h"
 #include "IFolder.h"
 
 #include <sqlite3.h>
@@ -45,9 +45,9 @@ struct FolderTable
 
 }
 
-class Folder : public IFolder, public Table<Folder, policy::FolderTable>
+class Folder : public IFolder, public DatabaseHelpers<Folder, policy::FolderTable>
 {
-    using _Cache = Table<Folder, policy::FolderTable>;
+    using _Cache = DatabaseHelpers<Folder, policy::FolderTable>;
 
 public:
     Folder( DBConnection dbConnection, sqlite::Row& row );

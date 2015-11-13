@@ -23,7 +23,7 @@
 #ifndef VIDEOTRACK_H
 #define VIDEOTRACK_H
 
-#include "database/SqliteTable.h"
+#include "database/DatabaseHelpers.h"
 #include "IVideoTrack.h"
 
 #include <sqlite3.h>
@@ -40,9 +40,9 @@ struct VideoTrackTable
 };
 }
 
-class VideoTrack : public IVideoTrack, public Table<VideoTrack, policy::VideoTrackTable>
+class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy::VideoTrackTable>
 {
-    using _Cache = Table<VideoTrack, policy::VideoTrackTable>;
+    using _Cache = DatabaseHelpers<VideoTrack, policy::VideoTrackTable>;
 
     public:
         VideoTrack( DBConnection dbConnection, sqlite::Row& row );

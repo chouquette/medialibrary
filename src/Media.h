@@ -27,7 +27,7 @@
 #include <sqlite3.h>
 
 #include "IMedia.h"
-#include "database/SqliteTable.h"
+#include "database/DatabaseHelpers.h"
 
 
 class Album;
@@ -51,10 +51,10 @@ struct MediaTable
 };
 }
 
-class Media : public IMedia, public Table<Media, policy::MediaTable>
+class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
 {
     private:
-        using _Cache = Table<Media, policy::MediaTable>;
+        using _Cache = DatabaseHelpers<Media, policy::MediaTable>;
     public:
 
         // Those should be private, however the standard states that the expression

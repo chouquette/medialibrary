@@ -25,7 +25,7 @@
 
 #include "IAudioTrack.h"
 #include "IMediaLibrary.h"
-#include "database/SqliteTable.h"
+#include "database/DatabaseHelpers.h"
 
 class AudioTrack;
 
@@ -39,9 +39,9 @@ struct AudioTrackTable
 };
 }
 
-class AudioTrack : public IAudioTrack, public Table<AudioTrack, policy::AudioTrackTable>
+class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack, policy::AudioTrackTable>
 {
-    using _Cache = Table<AudioTrack, policy::AudioTrackTable>;
+    using _Cache = DatabaseHelpers<AudioTrack, policy::AudioTrackTable>;
 
     public:
         AudioTrack( DBConnection dbConnection, sqlite::Row& row );
