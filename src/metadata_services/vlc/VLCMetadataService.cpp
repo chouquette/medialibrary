@@ -103,6 +103,7 @@ IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Me
         return Status::Fatal;
     }
 
+    auto t = m_dbConn->newTransaction();
     bool isAudio = true;
     for ( auto& track : tracks )
     {
@@ -120,6 +121,7 @@ IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Me
                                   track.language(), track.description() );
         }
     }
+    t->commit();
     if ( isAudio == true )
     {
         if ( parseAudioFile( media, vlcMedia ) == false )
