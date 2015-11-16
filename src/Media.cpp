@@ -334,7 +334,7 @@ bool Media::addLabel( LabelPtr label )
         return false;
     }
     const char* req = "INSERT INTO LabelFileRelation VALUES(?, ?)";
-    return sqlite::Tools::executeInsert( m_dbConnection, req, label->id(), m_id );
+    return sqlite::Tools::insert( m_dbConnection, req, label->id(), m_id ) != 0;
 }
 
 bool Media::removeLabel( LabelPtr label )

@@ -240,13 +240,6 @@ class Tools
             return executeDelete( dbConnectionWeak, req, std::forward<Args>( args )... );
         }
 
-        template <typename... Args>
-        static bool executeInsert( DBConnection dbConnectionWeak, const std::string& req, Args&&... args )
-        {
-            // The code would be exactly the same, do not freak out because it calls executeDelete :)
-            return executeDelete( dbConnectionWeak, req, std::forward<Args>( args )... );
-        }
-
         /**
          * Inserts a record to the DB and return the newly created primary key.
          * Returns 0 (which is an invalid sqlite primary key) when insertion fails.
