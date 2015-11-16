@@ -216,10 +216,9 @@ class Tools
         template <typename... Args>
         static bool executeRequest( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
-            // This is only used to create tables, assume there can't be a transaction
-            // running at the same time.
-            assert(Transaction::transactionInProgress() == false);
-            auto ctx = dbConnection->acquireContext();
+            SqliteConnection::RequestContext ctx;
+            if (Transaction::transactionInProgress() == false)
+                ctx = dbConnection->acquireContext();
             return executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
         }
 

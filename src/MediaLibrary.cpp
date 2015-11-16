@@ -142,6 +142,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         addMetadataService( std::move( thumbnailerService ) );
     }
 
+    auto t = m_dbConnection->newTransaction();
     if ( ! ( Media::createTable( m_dbConnection.get() ) &&
         Folder::createTable( m_dbConnection.get() ) &&
         Label::createTable( m_dbConnection.get() ) &&
@@ -158,6 +159,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         LOG_ERROR( "Failed to create database structure" );
         return false;
     }
+    t->commit();
     m_discoverer->setCallback( m_callback );
     m_discoverer->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( m_fsFactory, this, m_dbConnection.get() ) ) );
     m_discoverer->reload();
