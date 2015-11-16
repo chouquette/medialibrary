@@ -139,7 +139,7 @@ public:
                 case SQLITE_CONSTRAINT:
                     throw errors::ConstraintViolation( m_req, errMsg );
                 default:
-                    throw std::runtime_error( errMsg );
+                    throw std::runtime_error( m_req + ": " + errMsg );
             }
         }
     }
