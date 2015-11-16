@@ -30,7 +30,10 @@
 #include <thread>
 #include <unordered_map>
 
-#include "SqliteTransaction.h"
+namespace sqlite
+{
+    class Transaction;
+}
 
 class SqliteConnection
 {

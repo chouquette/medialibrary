@@ -36,6 +36,7 @@
 #include "database/SqliteConnection.h"
 #include "database/SqliteErrors.h"
 #include "database/SqliteTraits.h"
+#include "database/SqliteTransaction.h"
 #include "logging/Logger.h"
 
 namespace sqlite

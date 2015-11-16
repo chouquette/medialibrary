@@ -23,6 +23,7 @@
 #pragma once
 
 #include "Types.h"
+#include "SqliteConnection.h"
 
 namespace sqlite
 {
@@ -37,6 +38,7 @@ public:
 
 private:
     DBConnection m_dbConn;
+    SqliteConnection::RequestContext m_ctx;
 
     static thread_local Transaction* CurrentTransaction;
 };

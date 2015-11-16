@@ -31,6 +31,7 @@ thread_local Transaction* Transaction::CurrentTransaction = nullptr;
 
 Transaction::Transaction(DBConnection dbConn)
     : m_dbConn( dbConn )
+    , m_ctx( dbConn->acquireContext() )
 {
     assert( CurrentTransaction == nullptr );
     LOG_DEBUG( "Starting SQLite transaction" );
@@ -43,8 +44,6 @@ Transaction::Transaction(DBConnection dbConn)
 
 void Transaction::commit()
 {
-    auto ctx = m_dbConn->acquireContext();
-
     auto chrono = std::chrono::steady_clock::now();
     Statement s( m_dbConn, "COMMIT" );
     s.execute();
