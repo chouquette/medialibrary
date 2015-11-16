@@ -53,6 +53,7 @@ void Transaction::commit()
     LOG_DEBUG( "Flushed transaction in ",
              std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
     CurrentTransaction = nullptr;
+    m_ctx.unlock();
 }
 
 bool Transaction::transactionInProgress()
