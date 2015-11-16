@@ -34,7 +34,6 @@ list(APPEND HEADERS_LIST
     ${CMAKE_SOURCE_DIR}/include/ILogger.h
     ${CMAKE_SOURCE_DIR}/include/IArtist.h
 
-    database/Cache.h
     database/SqliteTools.h
 
     filesystem/${ARCH_FOLDER}/Directory.h
