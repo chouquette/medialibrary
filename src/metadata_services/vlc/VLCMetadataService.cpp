@@ -101,6 +101,7 @@ IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Me
         LOG_ERROR( "Failed to fetch tracks" );
         return Status::Fatal;
     }
+
     bool isAudio = true;
     for ( auto& track : tracks )
     {

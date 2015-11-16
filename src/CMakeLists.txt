@@ -74,6 +74,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
 
     Utils.cpp
     database/SqliteConnection.cpp
+    database/SqliteTransaction.cpp
 
     logging/IostreamLogger.cpp
     logging/Logger.cpp

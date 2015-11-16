@@ -174,6 +174,7 @@ class Tools
         template <typename IMPL, typename INTF, typename... Args>
         static std::vector<std::shared_ptr<INTF> > fetchAll( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
+            assert(Transaction::transactionInProgress() == false);
             auto ctx = dbConnection->acquireContext();
             auto chrono = std::chrono::steady_clock::now();
 
@@ -195,6 +196,7 @@ class Tools
         template <typename T, typename... Args>
         static std::shared_ptr<T> fetchOne( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
+            assert(Transaction::transactionInProgress() == false);
             auto ctx = dbConnection->acquireContext();
             auto chrono = std::chrono::steady_clock::now();
 
@@ -213,6 +215,9 @@ class Tools
         template <typename... Args>
         static bool executeRequest( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
+            // This is only used to create tables, assume there can't be a transaction
+            // running at the same time.
+            assert(Transaction::transactionInProgress() == false);
             auto ctx = dbConnection->acquireContext();
             return executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
         }
@@ -220,7 +225,9 @@ class Tools
         template <typename... Args>
         static bool executeDelete( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
-            auto ctx = dbConnection->acquireContext();
+            SqliteConnection::RequestContext ctx;
+            if (Transaction::transactionInProgress() == false)
+                ctx = dbConnection->acquireContext();
             if ( executeRequestLocked( dbConnection, req, std::forward<Args>( args )... ) == false )
                 return false;
             return sqlite3_changes( dbConnection->getConn() ) > 0;
@@ -247,7 +254,9 @@ class Tools
         template <typename... Args>
         static unsigned int insert( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
-            auto ctx = dbConnection->acquireContext();
+            SqliteConnection::RequestContext ctx;
+            if (Transaction::transactionInProgress() == false)
+                ctx = dbConnection->acquireContext();
             if ( executeRequestLocked( dbConnection, req, std::forward<Args>( args )... ) == false )
                 return 0;
             return sqlite3_last_insert_rowid( dbConnection->getConn() );

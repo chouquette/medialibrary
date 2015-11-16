@@ -158,7 +158,8 @@ std::vector<MediaPtr> Album::tracks() const
 
 std::shared_ptr<AlbumTrack> Album::addTrack(std::shared_ptr<Media> media, unsigned int trackNb, unsigned int discNumber )
 {
-    //FIXME: This MUST be executed as a transaction
+    auto t = m_dbConnection->newTransaction();
+
     auto track = AlbumTrack::create( m_dbConnection, m_id, media.get(), trackNb, discNumber );
     if ( track == nullptr )
         return nullptr;
@@ -174,6 +175,7 @@ std::shared_ptr<AlbumTrack> Album::addTrack(std::shared_ptr<Media> media, unsign
     // Keeping the ordering consistent while adding items is going to be hard
     // once we start to expose multiple sorting criteria
     m_tracksCached = false;
+    t->commit();
     return track;
 }
 

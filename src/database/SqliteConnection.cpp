@@ -61,6 +61,21 @@ void SqliteConnection::release()
     m_conns.erase( std::this_thread::get_id() );
 }
 
+std::unique_ptr<sqlite::Transaction> SqliteConnection::newTransaction()
+{
+    sqlite::Transaction* ptr = nullptr;
+    try
+    {
+        ptr = new sqlite::Transaction( this );
+        return std::unique_ptr<sqlite::Transaction>{ ptr };
+    }
+    catch(...)
+    {
+        delete ptr;
+        return nullptr;
+    }
+}
+
 SqliteConnection::RequestContext SqliteConnection::acquireContext()
 {
     return RequestContext{ m_contextMutex };
