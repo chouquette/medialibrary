@@ -70,25 +70,26 @@ void VLCMetadataService::run( std::shared_ptr<Media> file, void* data )
     ctx->media = VLC::Media( m_instance, file->mrl(), VLC::Media::FromPath );
 
     std::unique_lock<std::mutex> lock( m_mutex );
-    std::atomic<Status> status( Status::Unknown );
+    bool done = false;
 
-    ctx->media.eventManager().onParsedChanged([this, ctx, &status, &chrono](bool parsed) {
+    ctx->media.eventManager().onParsedChanged([this, ctx, &done, &chrono](bool parsed) {
         if ( parsed == false )
             return;
         auto duration = std::chrono::steady_clock::now() - chrono;
         LOG_DEBUG("VLC parsing done in ", std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
-        auto s = handleMediaMeta( ctx->file, ctx->media );
-        auto expected = Status::Unknown;
-        while ( status.compare_exchange_weak( expected, s ) == false )
-            ;
+        std::lock_guard<std::mutex> lock( m_mutex );
+        done = true;
         m_cond.notify_all();
     });
     ctx->media.parseAsync();
-    auto success = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [&status]() { return status != Status::Unknown; } );
+    auto success = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [&done]() { return done == true; } );
     if ( success == false )
         m_cb->done( ctx->file, Status::Fatal, data );
     else
+    {
+        auto status = handleMediaMeta( ctx->file, ctx->media );
         m_cb->done( ctx->file, status, data );
+    }
     auto duration = std::chrono::steady_clock::now() - chrono;
     LOG_DEBUG( "Parsed ", file->mrl(), " in ", std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
 }
