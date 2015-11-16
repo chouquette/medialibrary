@@ -39,6 +39,7 @@ class DatabaseHelpers
         template <typename... Args>
         static std::shared_ptr<IMPL> fetch( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
+            Lock l{ Mutex };
             return sqlite::Tools::fetchOne<IMPL>( dbConnection, req, std::forward<Args>( args )... );
         }
 
@@ -46,6 +47,7 @@ class DatabaseHelpers
         {
             static std::string req = "SELECT * FROM " + TABLEPOLICY::Name + " WHERE " +
                     TABLEPOLICY::PrimaryKeyColumn + " = ?";
+            Lock l{ Mutex };
             return sqlite::Tools::fetchOne<IMPL>( dbConnection, req, pkValue );
         }
 
