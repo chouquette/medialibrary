@@ -130,7 +130,8 @@ IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Me
             return Status::Fatal;
     }
     auto duration = vlcMedia.duration();
-    if ( media->setDuration( duration ) == false )
+    media->setDuration( duration );
+    if ( media->save() == false )
         return Status::Error;
     return Status::Success;
 }

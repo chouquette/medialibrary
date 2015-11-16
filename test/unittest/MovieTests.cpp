@@ -110,6 +110,7 @@ TEST_F( Movies, AssignToFile )
 
     ASSERT_EQ( f->movie(), nullptr );
     f->setMovie( m );
+    f->save();
     ASSERT_EQ( f->movie(), m );
 
     Reload();

@@ -66,24 +66,24 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
 
         virtual unsigned int id() const override;
         virtual Type type() override;
-        bool setType( Type type );
+        void setType( Type type );
         virtual const std::string& title() override;
-        bool setTitle( const std::string& title );
+        void setTitle( const std::string& title );
         virtual AlbumTrackPtr albumTrack() override;
         bool setAlbumTrack( AlbumTrackPtr albumTrack );
         virtual const std::string& artist() const override;
-        bool setArtist( const std::string& artist );
+        void setArtist( const std::string& artist );
         virtual int64_t duration() const override;
-        bool setDuration( int64_t duration);
+        void setDuration( int64_t duration);
         virtual std::shared_ptr<IShowEpisode> showEpisode() override;
-        bool setShowEpisode( ShowEpisodePtr showEpisode );
+        void setShowEpisode( ShowEpisodePtr showEpisode );
         virtual bool addLabel( LabelPtr label ) override;
         virtual bool removeLabel( LabelPtr label ) override;
         virtual std::vector<LabelPtr> labels() override;
         virtual int playCount() const  override;
         virtual const std::string& mrl() const override;
         virtual MoviePtr movie() override;
-        bool setMovie( MoviePtr movie );
+        void setMovie( MoviePtr movie );
         bool addVideoTrack( const std::string& codec, unsigned int width,
                                     unsigned int height, float fps );
         virtual std::vector<VideoTrackPtr> videoTracks() override;
@@ -91,7 +91,8 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
                            unsigned int nbChannels, const std::string& language, const std::string& desc );
         virtual std::vector<AudioTrackPtr> audioTracks() override;
         virtual const std::string& snapshot() override;
-        bool setSnapshot( const std::string& snapshot );
+        void setSnapshot( const std::string& snapshot );
+        bool save();
 
         bool isStandAlone();
         unsigned int lastModificationDate();
@@ -99,7 +100,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         /// Explicitely mark a file as fully parsed, meaning no metadata service needs to run anymore.
         //FIXME: This lacks granularity as we don't have a straight forward way to know which service
         //needs to run or not.
-        bool markParsed();
+        void markParsed();
         bool isParsed() const;
 
     private:
@@ -125,6 +126,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         AlbumTrackPtr m_albumTrack;
         ShowEpisodePtr m_showEpisode;
         MoviePtr m_movie;
+        bool m_changed;
 
         friend struct policy::MediaTable;
 };

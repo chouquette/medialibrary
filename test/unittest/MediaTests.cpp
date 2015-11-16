@@ -112,6 +112,7 @@ TEST_F( Medias, Duration )
     int64_t d = int64_t(1) << 40;
 
     f->setDuration( d );
+    f->save();
     ASSERT_EQ( f->duration(), d );
 
     Reload();
@@ -129,6 +130,7 @@ TEST_F( Medias, Artist )
     std::string newArtist( "Rage Against The Otters" );
 
     f->setArtist( newArtist );
+    f->save();
     ASSERT_EQ( f->artist(), newArtist );
 
     Reload();
@@ -145,6 +147,7 @@ TEST_F( Medias, Snapshot )
     std::string newSnapshot( "/path/to/snapshot" );
 
     f->setSnapshot( newSnapshot );
+    f->save();
     ASSERT_EQ( f->snapshot(), newSnapshot );
 
     Reload();

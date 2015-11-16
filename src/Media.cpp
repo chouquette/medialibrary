@@ -45,6 +45,7 @@ unsigned int Media::* const policy::MediaTable::PrimaryKey = &Media::m_id;
 
 Media::Media( DBConnection dbConnection, sqlite::Row& row )
     : m_dbConnection( dbConnection )
+    , m_changed( false )
 {
     row >> m_id
         >> m_type
@@ -73,6 +74,7 @@ Media::Media( const fs::IFile* file, unsigned int folderId, const std::string& t
     , m_lastModificationDate( file->lastModificationDate() )
     , m_isParsed( false )
     , m_title( title )
+    , m_changed( false )
 {
 }
 
@@ -111,16 +113,12 @@ const std::string& Media::artist() const
     return m_artist;
 }
 
-bool Media::setArtist(const std::string& artist)
+void Media::setArtist(const std::string& artist)
 {
     if ( m_artist == artist )
-        return true;
-    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET artist = ? "
-            "WHERE id_media = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artist, m_id ) == false )
-        return false;
+        return;
     m_artist = artist;
-    return true;
+    m_changed = true;
 }
 
 int64_t Media::duration() const
@@ -128,14 +126,12 @@ int64_t Media::duration() const
     return m_duration;
 }
 
-bool Media::setDuration( int64_t duration )
+void Media::setDuration( int64_t duration )
 {
-    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET duration = ? "
-            "WHERE id_media = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, duration, m_id ) == false )
-        return false;
+    if ( m_duration == duration )
+        return;
     m_duration = duration;
-    return true;
+    m_changed = true;
 }
 
 std::shared_ptr<IShowEpisode> Media::showEpisode()
@@ -147,15 +143,13 @@ std::shared_ptr<IShowEpisode> Media::showEpisode()
     return m_showEpisode;
 }
 
-bool Media::setShowEpisode(ShowEpisodePtr showEpisode)
+void Media::setShowEpisode( ShowEpisodePtr showEpisode )
 {
-    static const std::string req = "UPDATE " + policy::MediaTable::Name
-            + " SET show_episode_id = ?  WHERE id_media = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, showEpisode->id(), m_id ) == false )
-        return false;
+    if ( showEpisode == nullptr || m_showEpisodeId == showEpisode->id() )
+        return;
     m_showEpisodeId = showEpisode->id();
     m_showEpisode = showEpisode;
-    return true;
+    m_changed = true;
 }
 
 std::vector<LabelPtr> Media::labels()
@@ -185,15 +179,13 @@ MoviePtr Media::movie()
     return m_movie;
 }
 
-bool Media::setMovie( MoviePtr movie )
+void Media::setMovie( MoviePtr movie )
 {
-    static const std::string req = "UPDATE " + policy::MediaTable::Name
-            + " SET movie_id = ? WHERE id_media = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, movie->id(), m_id ) == false )
-        return false;
+    if ( movie == nullptr || m_movieId == movie->id() )
+        return;
     m_movie = movie;
     m_movieId = movie->id();
-    return true;
+    m_changed = true;
 }
 
 bool Media::addVideoTrack(const std::string& codec, unsigned int width, unsigned int height, float fps)
@@ -227,13 +219,30 @@ const std::string &Media::snapshot()
     return m_snapshot;
 }
 
-bool Media::setSnapshot(const std::string &snapshot)
+void Media::setSnapshot( const std::string& snapshot )
 {
-    static const std::string req = "UPDATE " + policy::MediaTable::Name
-            + " SET snapshot = ? WHERE id_media = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, snapshot, m_id ) == false )
-        return false;
+    if ( m_snapshot == snapshot )
+        return;
     m_snapshot = snapshot;
+    m_changed = true;
+}
+
+bool Media::save()
+{
+    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
+            "type = ?, duration = ?, play_count = ?, show_episode_id = ?, artist = ?,"
+            "movie_id = ?, last_modification_date = ?, snapshot = ?, parsed = ?, title = ? "
+            "WHERE id_media = ?";
+    if ( m_changed == false )
+        return true;
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, m_type, m_duration, m_playCount,
+                                       sqlite::ForeignKey{ m_showEpisodeId }, m_artist,
+                                       sqlite::ForeignKey{ m_movieId }, m_lastModificationDate,
+                                       m_snapshot, m_isParsed, m_title, m_id ) == false )
+    {
+        return false;
+    }
+    m_changed = false;
     return true;
 }
 
@@ -252,16 +261,12 @@ bool Media::isParsed() const
     return m_isParsed;
 }
 
-bool Media::markParsed()
+void Media::markParsed()
 {
     if ( m_isParsed == true )
-        return true;
-    static const std::string req = "UPDATE " + policy::MediaTable::Name
-            + " SET parsed = ? WHERE id_media = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, true, m_id ) == false )
-        return false;
+        return;
     m_isParsed = true;
-    return true;
+    m_changed = true;
 }
 
 unsigned int Media::id() const
@@ -274,15 +279,12 @@ IMedia::Type Media::type()
     return m_type;
 }
 
-bool Media::setType( Type type )
+void Media::setType( Type type )
 {
-    static const std::string req = "UPDATE " + policy::MediaTable::Name
-            + " SET type = ? WHERE id_media = ?";
-    // We need to convert to an integer representation for the sqlite traits to work properly
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, type, m_id ) == false )
-        return false;
+    if ( m_type != type )
+        return;
     m_type = type;
-    return true;
+    m_changed = true;
 }
 
 const std::string &Media::title()
@@ -290,14 +292,12 @@ const std::string &Media::title()
     return m_title;
 }
 
-bool Media::setTitle( const std::string &title )
+void Media::setTitle( const std::string &title )
 {
-    static const std::string req = "UPDATE " + policy::MediaTable::Name
-            + " SET title = ? WHERE id_media = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, title, m_id ) == false )
-        return false;
+    if ( m_title == title )
+        return;
     m_title = title;
-    return true;
+    m_changed = true;
 }
 
 bool Media::createTable( DBConnection connection )
