@@ -57,6 +57,7 @@ Media::Media( DBConnection dbConnection, sqlite::Row& row )
         >> m_movieId
         >> m_folderId
         >> m_lastModificationDate
+        >> m_insertionDate
         >> m_snapshot
         >> m_isParsed
         >> m_title;
@@ -72,6 +73,7 @@ Media::Media( const fs::IFile* file, unsigned int folderId, const std::string& t
     , m_movieId( 0 )
     , m_folderId( folderId )
     , m_lastModificationDate( file->lastModificationDate() )
+    , m_insertionDate( time( nullptr ) )
     , m_isParsed( false )
     , m_title( title )
     , m_changed( false )
@@ -82,10 +84,10 @@ std::shared_ptr<Media> Media::create( DBConnection dbConnection, Type type, cons
 {
     auto self = std::make_shared<Media>( file, folderId, file->name(), type );
     static const std::string req = "INSERT INTO " + policy::MediaTable::Name +
-            "(type, mrl, folder_id, last_modification_date, title) VALUES(?, ?, ?, ?, ?)";
+            "(type, mrl, folder_id, last_modification_date, insertion_date, title) VALUES(?, ?, ?, ?, ?, ?)";
 
     if ( insert( dbConnection, self, req, type, self->m_mrl, sqlite::ForeignKey( folderId ),
-                         self->m_lastModificationDate, self->m_title) == false )
+                         self->m_lastModificationDate, self->m_insertionDate, self->m_title) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;
     return self;
@@ -225,6 +227,11 @@ const std::string &Media::snapshot()
     return m_snapshot;
 }
 
+unsigned int Media::insertionDate() const
+{
+    return m_insertionDate;
+}
+
 void Media::setSnapshot( const std::string& snapshot )
 {
     if ( m_snapshot == snapshot )
@@ -319,6 +326,7 @@ bool Media::createTable( DBConnection connection )
             "movie_id UNSIGNED INTEGER,"
             "folder_id UNSIGNED INTEGER,"
             "last_modification_date UNSIGNED INTEGER,"
+            "insertion_date UNSIGNED INTEGER,"
             "snapshot TEXT,"
             "parsed BOOLEAN NOT NULL DEFAULT 0,"
             "title TEXT,"

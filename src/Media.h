@@ -92,6 +92,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
                            unsigned int nbChannels, const std::string& language, const std::string& desc );
         virtual std::vector<AudioTrackPtr> audioTracks() override;
         virtual const std::string& snapshot() override;
+        virtual unsigned int insertionDate() const override;
         void setSnapshot( const std::string& snapshot );
         bool save();
 
@@ -118,6 +119,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         unsigned int m_movieId;
         unsigned int m_folderId;
         unsigned int m_lastModificationDate;
+        unsigned int m_insertionDate;
         std::string m_snapshot;
         bool m_isParsed;
         std::string m_title;

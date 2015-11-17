@@ -49,6 +49,7 @@ TEST_F( Medias, Create )
     ASSERT_TRUE( f->isStandAlone() );
     ASSERT_FALSE( f->isParsed() );
     ASSERT_EQ( f->duration(), -1 );
+    ASSERT_NE( 0u, f->insertionDate() );
 
     auto files = ml->files();
     ASSERT_EQ( files.size(), 1u );
