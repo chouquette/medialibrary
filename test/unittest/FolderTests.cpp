@@ -373,3 +373,37 @@ TEST_F( Folders, CheckRemovable )
     subfolder = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_TRUE( subfolder->isRemovable() );
 }
+
+TEST_F( Folders, Blacklist )
+{
+    cbMock->prepareForWait( 1 );
+    ml->ignoreFolder( mock::FileSystemFactory::SubFolder );
+    ml->discover( "." );
+    bool discovered = cbMock->wait();
+    ASSERT_TRUE( discovered );
+
+    auto f = ml->folder( mock::FileSystemFactory::SubFolder );
+    ASSERT_EQ( nullptr, f );
+}
+
+TEST_F( Folders, BlacklistAfterDiscovery )
+{
+    cbMock->prepareForWait( 1 );
+    ml->discover( "." );
+    bool discovered = cbMock->wait();
+    ASSERT_TRUE( discovered );
+    auto f = ml->folder( mock::FileSystemFactory::SubFolder );
+    ASSERT_NE( nullptr, f );
+    auto files = f->files();
+    ASSERT_NE( 0u, files.size() );
+
+    ml->ignoreFolder( mock::FileSystemFactory::SubFolder );
+    auto f2 = ml->folder( mock::FileSystemFactory::SubFolder );
+    ASSERT_EQ( nullptr, f2 );
+    for ( auto& file : files )
+    {
+        auto m = ml->file( file->mrl() );
+        ASSERT_EQ( nullptr, m );
+    }
+
+}

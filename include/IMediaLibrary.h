@@ -120,6 +120,10 @@ class IMediaLibrary
          * @param entryPoint What to discover.
          */
         virtual void discover( const std::string& entryPoint ) = 0;
+        /**
+         * @brief ignoreFolder will blacklist a folder for discovery
+         */
+        virtual bool ignoreFolder( const std::string& path ) = 0;
         virtual const std::string& snapshotPath() const = 0;
         virtual void setLogger( ILogger* logger ) = 0;
         /**

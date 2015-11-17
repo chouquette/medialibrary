@@ -49,10 +49,11 @@ class Folder : public IFolder, public DatabaseHelpers<Folder, policy::FolderTabl
 {
 public:
     Folder( DBConnection dbConnection, sqlite::Row& row );
-    Folder( const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parent );
+    Folder(const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parent );
 
     static bool createTable( DBConnection connection );
-    static std::shared_ptr<Folder> create( DBConnection connection, const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parentId );
+    static std::shared_ptr<Folder> create(DBConnection connection, const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parentId );
+    static bool blacklist( DBConnection connection, const std::string& path );
 
     static std::shared_ptr<Folder> fromPath( DBConnection conn, const std::string& path );
 
@@ -73,6 +74,7 @@ private:
     unsigned int m_parent;
     unsigned int m_lastModificationDate;
     bool m_isRemovable;
+    bool m_isBlacklisted;
 
     friend struct policy::FolderTable;
 };

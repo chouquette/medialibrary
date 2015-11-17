@@ -46,7 +46,6 @@ void Tests::TearDown()
     unlink("test.db");
 }
 
-
 void Tests::Reload(std::shared_ptr<factory::IFileSystem> fs /*= nullptr*/, IMediaLibraryCb* metadataCb /*= nullptr*/ )
 {
     ml.reset( new MediaLibrary );

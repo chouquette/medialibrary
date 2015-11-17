@@ -40,7 +40,8 @@ Folder::Folder(DBConnection dbConnection, sqlite::Row& row )
         >> m_path
         >> m_parent
         >> m_lastModificationDate
-        >> m_isRemovable;
+        >> m_isRemovable
+        >> m_isBlacklisted;
 }
 
 Folder::Folder( const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parent )
@@ -49,6 +50,7 @@ Folder::Folder( const std::string& path, time_t lastModificationDate, bool isRem
     , m_parent( parent )
     , m_lastModificationDate( lastModificationDate )
     , m_isRemovable( isRemovable )
+    , m_isBlacklisted( false )
 {
 }
 
@@ -61,6 +63,7 @@ bool Folder::createTable(DBConnection connection)
             "id_parent UNSIGNED INTEGER,"
             "last_modification_date UNSIGNED INTEGER,"
             "is_removable INTEGER,"
+            "is_blacklisted INTEGER,"
             "FOREIGN KEY (id_parent) REFERENCES " + policy::FolderTable::Name +
             "(id_folder) ON DELETE CASCADE"
             ")";
@@ -79,9 +82,16 @@ std::shared_ptr<Folder> Folder::create( DBConnection connection, const std::stri
     return self;
 }
 
+bool Folder::blacklist( DBConnection connection, const std::string& path )
+{
+    static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
+            "(path, id_parent, is_blacklisted) VALUES(?, ?, ?)";
+    return sqlite::Tools::insert( connection, req, path, nullptr, true ) != 0;
+}
+
 std::shared_ptr<Folder> Folder::fromPath( DBConnection conn, const std::string& path )
 {
-    const std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ?";
+    const std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND is_blacklisted IS NULL";
     return fetch( conn, req, path );
 }
 
@@ -105,7 +115,7 @@ std::vector<MediaPtr> Folder::files()
 std::vector<FolderPtr> Folder::folders()
 {
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
-            " WHERE id_parent = ?";
+            " WHERE id_parent = ? AND is_blacklisted IS NULL";
     return fetchAll<IFolder>( m_dbConection, req, m_id );
 }
 

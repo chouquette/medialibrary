@@ -29,6 +29,7 @@
 #include "factory/IFileSystem.h"
 
 class MediaLibrary;
+class Folder;
 
 class FsDiscoverer : public IDiscoverer
 {
@@ -38,8 +39,9 @@ public:
     virtual void reload() override;
 
 private:
-    bool checkSubfolders( fs::IDirectory *folder, FolderPtr parentFolder );
+    bool checkSubfolders(fs::IDirectory *folder, FolderPtr parentFolder , const std::vector<std::shared_ptr<Folder> > blacklist);
     void checkFiles( fs::IDirectory *folder, FolderPtr parentFolder );
+    std::vector<std::shared_ptr<Folder>> blacklist() const;
 
 private:
     MediaLibrary* m_ml;

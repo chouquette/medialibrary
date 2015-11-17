@@ -49,7 +49,7 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
 
     {
         auto f = Folder::fromPath( m_dbConn, entryPoint );
-        // If the folder exists, we assume it is up to date
+        // If the folder exists, we assume it will be handled by reload()
         if ( f != nullptr )
             return true;
     }
@@ -64,13 +64,19 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
         LOG_ERROR("Failed to create an IDirectory for ", entryPoint, ": ", ex.what());
         return false;
     }
+    auto blist = blacklist();
+    auto it = std::find_if( begin( blist ), end( blist ), [&fsDir]( const std::shared_ptr<Folder>& f ) {
+        return f->path() == fsDir->path();
+    });
+    if ( it != end( blist ) )
+        return false;
     // Force <0> as lastModificationDate, so this folder is detected as outdated
     // by the modification checking code
     auto f = Folder::create( m_dbConn, fsDir->path(), 0, fsDir->isRemovable(), 0 );
     if ( f == nullptr )
         return false;
     checkFiles( fsDir.get(), f );
-    checkSubfolders( fsDir.get(), f );
+    checkSubfolders( fsDir.get(), f, blist );
     f->setLastModificationDate( fsDir->lastModificationDate() );
     return true;
 }
@@ -82,18 +88,19 @@ void FsDiscoverer::reload()
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
             + " WHERE id_parent IS NULL";
     auto rootFolders = Folder::fetchAll<Folder>( m_dbConn, req );
+    auto blist = blacklist();
     for ( const auto& f : rootFolders )
     {
         auto folder = m_fsFactory->createDirectory( f->path() );
         if ( folder->lastModificationDate() == f->lastModificationDate() )
             continue;
-        checkSubfolders( folder.get(), f );
+        checkSubfolders( folder.get(), f, blist );
         checkFiles( folder.get(), f );
         f->setLastModificationDate( folder->lastModificationDate() );
     }
 }
 
-bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, FolderPtr parentFolder )
+bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, FolderPtr parentFolder, const std::vector<std::shared_ptr<Folder>> blacklist )
 {
     // From here we can have:
     // - New subfolder(s)
@@ -118,11 +125,20 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, FolderPtr parentFold
         // We don't know this folder, it's a new one
         if ( it == end( subFoldersInDB ) )
         {
+            // Check if it is blacklisted
+            auto it = std::find_if( begin( blacklist ), end( blacklist ), [subFolderPath](const std::shared_ptr<Folder>& f) {
+                return f->path() == subFolderPath;
+            });
+            if ( it != end( blacklist ) )
+            {
+                LOG_INFO( "Ignoring blacklisted folder: ", subFolderPath );
+                continue;
+            }
             LOG_INFO( "New folder detected: ", subFolderPath );
             // Force a scan by setting lastModificationDate to 0
             auto f = Folder::create( m_dbConn, subFolder->path(), 0, subFolder->isRemovable(), parentFolder->id() );
             checkFiles( subFolder.get(), f );
-            checkSubfolders( subFolder.get(), f );
+            checkSubfolders( subFolder.get(), f, blacklist );
             f->setLastModificationDate( subFolder->lastModificationDate() );
             continue;
         }
@@ -136,7 +152,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, FolderPtr parentFold
             continue;
         }
         // This folder was modified, let's recurse
-        checkSubfolders( subFolder.get(), folderInDb );
+        checkSubfolders( subFolder.get(), folderInDb, blacklist );
         checkFiles( subFolder.get(), folderInDb );
         folderInDb->setLastModificationDate( subFolder->lastModificationDate() );
         subFoldersInDB.erase( it );
@@ -183,4 +199,10 @@ void FsDiscoverer::checkFiles( fs::IDirectory* folder, FolderPtr parentFolder )
         LOG_INFO( "File ", file->mrl(), " not found on filesystem, deleting it" );
         m_ml->deleteFile( file.get() );
     }
+}
+
+std::vector<std::shared_ptr<Folder> > FsDiscoverer::blacklist() const
+{
+    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE is_blacklisted = 1";
+    return sqlite::Tools::fetchAll<Folder, Folder>( m_dbConn, req );
 }

@@ -76,6 +76,7 @@ class MediaLibrary : public IMediaLibrary
         virtual std::vector<ArtistPtr> artists() const override;
 
         virtual void discover( const std::string& entryPoint ) override;
+        bool ignoreFolder( const std::string& path ) override;
 
         virtual const std::string& snapshotPath() const override;
         virtual void setLogger( ILogger* logger ) override;
