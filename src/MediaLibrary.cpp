@@ -71,6 +71,8 @@ const std::vector<std::string> MediaLibrary::supportedAudioExtensions {
     "wma", "wv", "xa", "xm"
 };
 
+const uint32_t MediaLibrary::DbModelVersion = 1;
+
 MediaLibrary::MediaLibrary()
     : m_discoverer( new DiscovererWorker )
     , m_verbosity( LogLevel::Error )
@@ -143,7 +145,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
     }
 
     auto t = m_dbConnection->newTransaction();
-    if ( ! ( Media::createTable( m_dbConnection.get() ) &&
+    if ( ( Media::createTable( m_dbConnection.get() ) &&
         Folder::createTable( m_dbConnection.get() ) &&
         Label::createTable( m_dbConnection.get() ) &&
         Album::createTable( m_dbConnection.get() ) &&
@@ -154,11 +156,17 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         VideoTrack::createTable( m_dbConnection.get() ) &&
         AudioTrack::createTable( m_dbConnection.get() ) &&
         Artist::createTable( m_dbConnection.get() ) &&
-        Artist::createDefaultArtists( m_dbConnection.get() ) ) )
+        Artist::createDefaultArtists( m_dbConnection.get() ) &&
+        Settings::createTable( m_dbConnection.get() ) ) == false )
     {
         LOG_ERROR( "Failed to create database structure" );
         return false;
     }
+    if ( m_settings.load( m_dbConnection.get() ) == false )
+        return false;
+    // We only have one version so far, so a mismatching version is an error
+    if ( m_settings.dbModelVersion() != DbModelVersion )
+        return false;
     t->commit();
     m_discoverer->setCallback( m_callback );
     m_discoverer->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( m_fsFactory, this, m_dbConnection.get() ) ) );

@@ -31,6 +31,7 @@ class SqliteConnection;
 #include "IDiscoverer.h"
 #include "logging/Logger.h"
 #include "vlcpp/vlc.hpp"
+#include "Settings.h"
 
 class Album;
 class Artist;
@@ -86,6 +87,9 @@ class MediaLibrary : public IMediaLibrary
         virtual void pauseBackgroundOperations() override;
         virtual void resumeBackgroundOperations() override;
 
+    public:
+        static const uint32_t DbModelVersion;
+
     private:
         static const std::vector<std::string> supportedVideoExtensions;
         static const std::vector<std::string> supportedAudioExtensions;
@@ -113,5 +117,6 @@ class MediaLibrary : public IMediaLibrary
         //FIXME: Having to maintain a specific ordering sucks, let's use shared_ptr or something
         std::unique_ptr<DiscovererWorker> m_discoverer;
         LogLevel m_verbosity;
+        Settings m_settings;
 };
 #endif // MEDIALIBRARY_H

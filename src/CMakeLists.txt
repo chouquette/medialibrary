@@ -63,6 +63,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     AudioTrack.cpp
     Parser.cpp
     Artist.cpp
+    Settings.cpp
 
     factory/FileSystem.cpp
     filesystem/${ARCH_FOLDER}/Directory.cpp
