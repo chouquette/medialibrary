@@ -81,6 +81,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual bool removeLabel( LabelPtr label ) override;
         virtual std::vector<LabelPtr> labels() override;
         virtual int playCount() const  override;
+        virtual void increasePlayCount() override;
         virtual const std::string& mrl() const override;
         virtual MoviePtr movie() override;
         void setMovie( MoviePtr movie );

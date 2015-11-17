@@ -155,3 +155,17 @@ TEST_F( Medias, Snapshot )
     auto f2 = ml->file( "media.avi" );
     ASSERT_EQ( f2->snapshot(), newSnapshot );
 }
+
+TEST_F( Medias, PlayCount )
+{
+    auto f = ml->addFile( "media.avi", nullptr );
+    ASSERT_EQ( 0, f->playCount() );
+    f->increasePlayCount();
+    ASSERT_EQ( 1, f->playCount() );
+    f->save();
+
+    Reload();
+
+    f = std::static_pointer_cast<Media>( ml->file( "media.avi" ) );
+    ASSERT_EQ( 1, f->playCount() );
+}

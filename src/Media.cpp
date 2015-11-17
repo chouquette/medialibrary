@@ -165,6 +165,12 @@ int Media::playCount() const
     return m_playCount;
 }
 
+void Media::increasePlayCount()
+{
+    m_playCount++;
+    m_changed = true;
+}
+
 const std::string& Media::mrl() const
 {
     return m_mrl;

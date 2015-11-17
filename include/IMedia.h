@@ -53,6 +53,7 @@ class IMedia
         virtual int64_t duration() const = 0;
         virtual std::shared_ptr<IShowEpisode> showEpisode() = 0;
         virtual int playCount() const = 0;
+        virtual void increasePlayCount() = 0;
         virtual const std::string& mrl() const = 0;
         virtual bool addLabel( LabelPtr label ) = 0;
         virtual bool removeLabel( LabelPtr label ) = 0;
