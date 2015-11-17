@@ -1,6 +1,7 @@
 #include "Tester.h"
 
 extern bool Verbose;
+extern bool ExtraVerbose;
 
 MockCallback::MockCallback()
 {
@@ -42,8 +43,11 @@ void Tests::SetUp()
     unlink("test.db");
     m_cb.reset( new MockCallback );
     m_ml.reset( new MediaLibrary );
-    if ( Verbose == true )
+    if ( ExtraVerbose == true )
         m_ml->setVerbosity( LogLevel::Debug );
+    else if ( Verbose == true )
+        m_ml->setVerbosity( LogLevel::Info );
+
     m_ml->initialize( "test.db", "/tmp", m_cb.get() );
 }
 

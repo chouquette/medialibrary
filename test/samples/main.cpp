@@ -3,6 +3,7 @@
 static std::string SamplesDirectory = ".";
 static std::string TestCaseDirectory = SRC_DIR "/test/samples/testcases";
 bool Verbose = false;
+bool ExtraVerbose = false;
 
 static const char* testCases[] = {
     "featuring",
@@ -87,6 +88,7 @@ int main(int ac, char** av)
     const std::string samplesArg = "--samples-directory=";
     const std::string testCasesArg = "--testcases-directory=";
     const std::string verboseArg = "-v";
+    const std::string extraVerboseArg = "-vv";
     for ( auto i = 1; i < ac; ++i )
     {
         if ( strncmp( samplesArg.c_str(), av[i], samplesArg.length() ) == 0 )
@@ -95,6 +97,8 @@ int main(int ac, char** av)
             TestCaseDirectory = av[i] + testCasesArg.size();
         else if ( av[i] == verboseArg )
             Verbose = true;
+        else if ( av[i] == extraVerboseArg )
+            ExtraVerbose = true;
     }
     return RUN_ALL_TESTS();
 }
