@@ -24,7 +24,7 @@ private:
     void onFileAdded(MediaPtr) {}
     void onFileUpdated(MediaPtr) {}
     void onDiscoveryStarted(const std::string&) {}
-    void onDiscoveryCompleted(const std::string&) {}
+    void onDiscoveryCompleted(const std::string&);
     void onReloadStarted() {}
     void onReloadCompleted() {}
     void onParsingStatsUpdated(uint32_t nbParsed, uint32_t nbToParse);
@@ -32,6 +32,7 @@ private:
     std::condition_variable m_parsingCompleteVar;
     std::mutex m_parsingMutex;
     bool m_done;
+    bool m_discoveryCompleted;
 };
 
 class Tests : public ::testing::TestWithParam<const char*>

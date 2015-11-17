@@ -12,10 +12,17 @@ bool MockCallback::waitForParsingComplete()
 {
     std::unique_lock<std::mutex> lock( m_parsingMutex, std::adopt_lock );
     m_done = false;
+    m_discoveryCompleted = false;
     // Wait for a while, generating snapshots can be heavy...
     return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds( 30 ), [this]() {
         return m_done;
     });
+}
+
+void MockCallback::onDiscoveryCompleted(const std::string&)
+{
+    std::lock_guard<std::mutex> lock( m_parsingMutex );
+    m_discoveryCompleted = true;
 }
 
 void MockCallback::onParsingStatsUpdated(uint32_t nbParsed, uint32_t nbToParse)
@@ -23,6 +30,8 @@ void MockCallback::onParsingStatsUpdated(uint32_t nbParsed, uint32_t nbToParse)
     if ( nbParsed == nbToParse && nbToParse > 0 )
     {
         std::lock_guard<std::mutex> lock( m_parsingMutex );
+        if ( m_discoveryCompleted == false )
+            return;
         m_done = true;
         m_parsingCompleteVar.notify_all();
     }
