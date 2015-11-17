@@ -210,11 +210,6 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, VLC::Media& 
     if ( albums.size() == 0 )
         return nullptr;
 
-    auto discNumberStr = vlcMedia.meta( libvlc_meta_DiscNumber );
-    auto discNumber = 0u;
-    if ( discNumberStr.empty() == false )
-        discNumber = atoi( discNumberStr.c_str() );
-
     auto discTotalStr = vlcMedia.meta( libvlc_meta_DiscTotal );
     auto discTotal = 0u;
     if ( discTotalStr.empty() == false )
@@ -242,25 +237,43 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, VLC::Media& 
             }
         }
         // If this is a multidisc album, assume it could be in a multiple amount of folders.
-        if ( discTotal <= 1 && discNumber <= 1 )
+        // Since folders can come in any order, we can't assume the first album will be the
+        // first media we see. If the discTotal meta is provided, that's easy. If not,
+        // we assume that another CD with the same name & artists, and a discu number > 1
+        // denotes a multi disc album
+        // Check the first case early to avoid fetching tracks if unrequired.
+        if ( discTotal > 1 )
         {
-            // Assume album files will be in the same folder.
-            const auto tracks = a->tracks();
-            if ( tracks.size() == 0 )
+            ++it;
+            continue;
+        }
+        const auto tracks = a->tracks();
+        assert( tracks.size() > 0 );
+
+        auto multiDisc = false;
+        for ( auto& t : tracks )
+        {
+            auto at = t->albumTrack();
+            assert( at != nullptr );
+            if ( at != nullptr && at->discNumber() > 1 )
             {
-                LOG_ERROR( "Empty album ", a->title() );
-                assert(false);
+                multiDisc = true;
+                break;
             }
-            else
-            {
-                auto candidateFolder = m_fsFactory->createDirectory( utils::file::directory( tracks[0]->mrl() ) );
-                auto newFileFolder = m_fsFactory->createDirectory( utils::file::directory( media->mrl() ) );
-                if ( candidateFolder->path() != newFileFolder->path() )
-                {
-                    it = albums.erase( it );
-                    continue;
-                }
-            }
+        }
+        if ( multiDisc )
+        {
+            ++it;
+            continue;
+        }
+
+        // Assume album files will be in the same folder.
+        auto candidateFolder = m_fsFactory->createDirectory( utils::file::directory( tracks[0]->mrl() ) );
+        auto newFileFolder = m_fsFactory->createDirectory( utils::file::directory( media->mrl() ) );
+        if ( candidateFolder->path() != newFileFolder->path() )
+        {
+            it = albums.erase( it );
+            continue;
         }
         ++it;
     }
