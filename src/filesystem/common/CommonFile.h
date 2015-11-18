@@ -20,26 +20,27 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#include "File.h"
+#pragma once
 
-#include <stdexcept>
-#include <sys/stat.h>
+#include "filesystem/IFile.h"
 
 namespace fs
 {
 
-File::File( const std::string& filePath )
-    : CommonFile( filePath )
+class CommonFile : public IFile
 {
-    struct stat s;
-    if ( lstat( m_fullPath.c_str(), &s ) )
-        throw std::runtime_error( "Failed to get file stats" );
-    m_lastModificationDate = s.st_mtim.tv_sec;
-}
+public:
+    CommonFile( const std::string& filePath );
+    virtual const std::string& name() const override;
+    virtual const std::string& path() const override;
+    virtual const std::string& fullPath() const override;
+    virtual const std::string& extension() const override;
 
-unsigned int File::lastModificationDate() const
-{
-    return m_lastModificationDate;
-}
+protected:
+    const std::string m_path;
+    const std::string m_name;
+    const std::string m_fullPath;
+    const std::string m_extension;
+};
 
 }

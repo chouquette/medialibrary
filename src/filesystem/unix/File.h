@@ -22,30 +22,19 @@
 
 #pragma once
 
-#include "filesystem/IFile.h"
-
-#include <string>
+#include "filesystem/common/CommonFile.h"
 
 namespace fs
 {
 
-class File : public IFile
+class File : public CommonFile
 {
 public:
     explicit File( const std::string& filePath );
-    virtual ~File() = default;
 
-    virtual const std::string& name() const override;
-    virtual const std::string& path() const override;
-    virtual const std::string& fullPath() const override;
-    virtual const std::string& extension() const override;
     virtual unsigned int lastModificationDate() const override;
 
 private:
-    const std::string m_path;
-    const std::string m_name;
-    const std::string m_fullPath;
-    const std::string m_extension;
     unsigned int m_lastModificationDate;
 };
 

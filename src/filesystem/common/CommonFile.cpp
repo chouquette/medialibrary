@@ -20,26 +20,38 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#include "File.h"
-
-#include <stdexcept>
-#include <sys/stat.h>
+#include "CommonFile.h"
+#include "Utils.h"
 
 namespace fs
 {
 
-File::File( const std::string& filePath )
-    : CommonFile( filePath )
+CommonFile::CommonFile( const std::string& filePath )
+    : m_path( utils::file::directory( filePath ) )
+    , m_name( utils::file::fileName( filePath ) )
+    , m_fullPath( filePath )
+    , m_extension( utils::file::extension( filePath ) )
 {
-    struct stat s;
-    if ( lstat( m_fullPath.c_str(), &s ) )
-        throw std::runtime_error( "Failed to get file stats" );
-    m_lastModificationDate = s.st_mtim.tv_sec;
 }
 
-unsigned int File::lastModificationDate() const
+const std::string& CommonFile::name() const
 {
-    return m_lastModificationDate;
+    return m_name;
+}
+
+const std::string& CommonFile::path() const
+{
+    return m_path;
+}
+
+const std::string& CommonFile::fullPath() const
+{
+    return m_fullPath;
+}
+
+const std::string& CommonFile::extension() const
+{
+    return m_extension;
 }
 
 }

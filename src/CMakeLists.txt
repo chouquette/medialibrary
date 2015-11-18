@@ -66,6 +66,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     Settings.cpp
 
     factory/FileSystem.cpp
+    filesystem/common/CommonFile.cpp
     filesystem/${ARCH_FOLDER}/Directory.cpp
     filesystem/${ARCH_FOLDER}/File.cpp
 
