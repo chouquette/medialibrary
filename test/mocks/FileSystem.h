@@ -96,17 +96,17 @@ public:
     {
     }
 
-    virtual const std::string& path() const
+    virtual const std::string& path() const override
     {
         return m_path;
     }
 
-    virtual const std::vector<std::string>& files() const
+    virtual const std::vector<std::string>& files() override
     {
         return m_files;
     }
 
-    virtual const std::vector<std::string>& dirs() const
+    virtual const std::vector<std::string>& dirs() override
     {
         return m_dirs;
     }

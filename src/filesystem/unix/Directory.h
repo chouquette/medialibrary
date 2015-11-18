@@ -33,8 +33,8 @@ class Directory : public IDirectory
 public:
     explicit Directory( const std::string& path );
     virtual const std::string& path() const override;
-    virtual const std::vector<std::string>& files() const override;
-    virtual const std::vector<std::string>& dirs() const override;
+    virtual const std::vector<std::string>& files() override;
+    virtual const std::vector<std::string>& dirs() override;
     virtual unsigned int lastModificationDate() const override;
     virtual bool isRemovable() const override;
 
@@ -48,7 +48,7 @@ private:
     const std::string m_path;
     std::vector<std::string> m_files;
     std::vector<std::string> m_dirs;
-    unsigned int m_lastModificationDate;
+    mutable unsigned int m_lastModificationDate;
 };
 
 }
