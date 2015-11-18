@@ -13,6 +13,8 @@ add_definitions("-Wall -Wextra -pedantic")
 
 if(UNIX)
     set(ARCH_FOLDER "unix")
+elseif(WIN32)
+    set(ARCH_FOLDER "win32")
 endif()
 
 list(APPEND HEADERS_LIST

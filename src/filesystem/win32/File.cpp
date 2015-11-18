@@ -20,31 +20,31 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#include "factory/FileSystem.h"
-#include "filesystem/IDirectory.h"
-#include "filesystem/IFile.h"
+#include "File.h"
 
-#if defined(__linux__) || defined(__APPLE__)
-# include "filesystem/unix/Directory.h"
-# include "filesystem/unix/File.h"
-#elif defined(_WIN32)
-# include "filesystem/win32/Directory.h"
-# include "filesystem/win32/File.h"
-#else
-# error No filesystem implementation for this architecture
-#endif
+#include <sys/types.h>
+#include <sys/stat.h>
 
-namespace factory
+#include <stdexcept>
+
+namespace fs
 {
 
-std::unique_ptr<fs::IDirectory> FileSystemDefaultFactory::createDirectory( const std::string& path )
+File::File( const std::string &filePath )
+    : CommonFile( filePath )
 {
-    return std::unique_ptr<fs::IDirectory>( new fs::Directory( path ) );
 }
 
-std::unique_ptr<fs::IFile> FileSystemDefaultFactory::createFile(const std::string& fileName)
+unsigned int File::lastModificationDate() const
 {
-    return std::unique_ptr<fs::IFile>( new fs::File( fileName ) );
+    if ( m_lastModificationDate == 0 )
+    {
+        struct _stat32 s;
+        if ( _stat( m_fullPath.c_str(), &s ) )
+            throw std::runtime_error( "Failed to get file stats" );
+        m_lastModificationDate = s.st_mtime;
+    }
+    return m_lastModificationDate;
 }
 
 }

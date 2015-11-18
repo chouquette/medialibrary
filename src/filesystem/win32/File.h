@@ -20,31 +20,22 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#include "factory/FileSystem.h"
-#include "filesystem/IDirectory.h"
-#include "filesystem/IFile.h"
+#pragma once
 
-#if defined(__linux__) || defined(__APPLE__)
-# include "filesystem/unix/Directory.h"
-# include "filesystem/unix/File.h"
-#elif defined(_WIN32)
-# include "filesystem/win32/Directory.h"
-# include "filesystem/win32/File.h"
-#else
-# error No filesystem implementation for this architecture
-#endif
+#include "filesystem/common/CommonFile.h"
 
-namespace factory
+namespace fs
 {
 
-std::unique_ptr<fs::IDirectory> FileSystemDefaultFactory::createDirectory( const std::string& path )
+class File : public CommonFile
 {
-    return std::unique_ptr<fs::IDirectory>( new fs::Directory( path ) );
-}
+public:
+    File( const std::string& filePath );
 
-std::unique_ptr<fs::IFile> FileSystemDefaultFactory::createFile(const std::string& fileName)
-{
-    return std::unique_ptr<fs::IFile>( new fs::File( fileName ) );
-}
+    unsigned int lastModificationDate() const override;
+
+private:
+    mutable unsigned int m_lastModificationDate;
+};
 
 }

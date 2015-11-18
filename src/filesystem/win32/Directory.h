@@ -20,31 +20,35 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#include "factory/FileSystem.h"
+#pragma once
+
 #include "filesystem/IDirectory.h"
-#include "filesystem/IFile.h"
 
-#if defined(__linux__) || defined(__APPLE__)
-# include "filesystem/unix/Directory.h"
-# include "filesystem/unix/File.h"
-#elif defined(_WIN32)
-# include "filesystem/win32/Directory.h"
-# include "filesystem/win32/File.h"
-#else
-# error No filesystem implementation for this architecture
-#endif
-
-namespace factory
+namespace fs
 {
 
-std::unique_ptr<fs::IDirectory> FileSystemDefaultFactory::createDirectory( const std::string& path )
+class Directory : public IDirectory
 {
-    return std::unique_ptr<fs::IDirectory>( new fs::Directory( path ) );
-}
+public:
+    Directory( const std::string& path );
 
-std::unique_ptr<fs::IFile> FileSystemDefaultFactory::createFile(const std::string& fileName)
-{
-    return std::unique_ptr<fs::IFile>( new fs::File( fileName ) );
-}
+    virtual const std::string& path() const override;
+    virtual const std::vector<std::string>& files() override;
+    virtual const std::vector<std::string>& dirs() override;
+    virtual unsigned int lastModificationDate() const override;
+    virtual bool isRemovable() const override;
+
+private:
+    void read();
+
+private:
+    static std::string toAbsolute( const std::string& path );
+
+private:
+    const std::string m_path;
+    std::vector<std::string> m_files;
+    std::vector<std::string> m_dirs;
+    mutable unsigned int m_lastModificationDate;
+};
 
 }
