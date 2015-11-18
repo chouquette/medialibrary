@@ -30,7 +30,6 @@
 #include <sqlite3.h>
 #include <string>
 #include <vector>
-#include <thread>
 
 #include "Types.h"
 #include "database/SqliteConnection.h"
