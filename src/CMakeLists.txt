@@ -91,6 +91,7 @@ if (${WITH_VLC})
 endif()
 
 find_package(Sqlite3 REQUIRED)
+include_directories(${SQLITE3_INCLUDE_DIR})
 
 add_library(${PROJECT_NAME} SHARED ${SRC_LIST})
 target_link_libraries(${PROJECT_NAME} ${SQLITE3_LIBRARIES})
