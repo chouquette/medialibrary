@@ -32,7 +32,6 @@ unsigned int AlbumTrack::* const policy::AlbumTrackTable::PrimaryKey = &AlbumTra
 
 AlbumTrack::AlbumTrack(DBConnection dbConnection, sqlite::Row& row )
     : m_dbConnection( dbConnection )
-    , m_album( nullptr )
 {
     row >> m_id
         >> m_mediaId
@@ -52,7 +51,6 @@ AlbumTrack::AlbumTrack( Media* media, unsigned int trackNumber, unsigned int alb
     , m_albumId( albumId )
     , m_releaseYear( 0 )
     , m_discNumber( discNumber )
-    , m_album( nullptr )
 {
 }
 
