@@ -125,7 +125,6 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         std::string m_title;
 
         // Auto fetched related properties
-        Album* m_album;
         AlbumTrackPtr m_albumTrack;
         ShowEpisodePtr m_showEpisode;
         MoviePtr m_movie;
