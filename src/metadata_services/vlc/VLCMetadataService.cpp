@@ -217,6 +217,11 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, VLC::Media& 
     if ( discTotalStr.empty() == false )
         discTotal = atoi( discTotalStr.c_str() );
 
+    auto discNumberStr = vlcMedia.meta( libvlc_meta_DiscNumber );
+    auto discNumber = 0u;
+    if ( discNumberStr.empty() == false )
+        discNumber = atoi( discNumberStr.c_str() );
+
     /*
      * Even if we get only 1 album, we need to filter out invalid matches.
      * For instance, if we have already inserted an album "A" by an artist "john"
@@ -240,11 +245,11 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, VLC::Media& 
         }
         // If this is a multidisc album, assume it could be in a multiple amount of folders.
         // Since folders can come in any order, we can't assume the first album will be the
-        // first media we see. If the discTotal meta is provided, that's easy. If not,
-        // we assume that another CD with the same name & artists, and a discu number > 1
+        // first media we see. If the discTotal or discNumber meta are provided, that's easy. If not,
+        // we assume that another CD with the same name & artists, and a disc number > 1
         // denotes a multi disc album
         // Check the first case early to avoid fetching tracks if unrequired.
-        if ( discTotal > 1 )
+        if ( discTotal > 1 || discNumber > 1 )
         {
             ++it;
             continue;
