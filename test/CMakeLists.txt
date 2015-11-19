@@ -5,6 +5,7 @@ include(ExternalProject)
 # Fetch gtest
 ExternalProject_Add(
     gtest-dependency
+    CMAKE_COMMAND cmake -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
     SVN_REPOSITORY http://googletest.googlecode.com/svn/trunk/
     TIMEOUT 10
     # Disable install step
