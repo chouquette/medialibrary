@@ -35,6 +35,8 @@ endif()
 EnableCpp11()
 add_definitions("-Wall -Wextra -pedantic")
 
+include_directories(${SQLITE3_INCLUDE_DIR})
+
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/test)
