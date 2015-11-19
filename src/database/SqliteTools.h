@@ -174,8 +174,9 @@ class Tools
         template <typename IMPL, typename INTF, typename... Args>
         static std::vector<std::shared_ptr<INTF> > fetchAll( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
-            assert(Transaction::transactionInProgress() == false);
-            auto ctx = dbConnection->acquireContext();
+            SqliteConnection::RequestContext ctx;
+            if (Transaction::transactionInProgress() == false)
+                ctx = dbConnection->acquireContext();
             auto chrono = std::chrono::steady_clock::now();
 
             std::vector<std::shared_ptr<INTF>> results;
@@ -196,8 +197,9 @@ class Tools
         template <typename T, typename... Args>
         static std::shared_ptr<T> fetchOne( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
-            assert(Transaction::transactionInProgress() == false);
-            auto ctx = dbConnection->acquireContext();
+            SqliteConnection::RequestContext ctx;
+            if (Transaction::transactionInProgress() == false)
+                ctx = dbConnection->acquireContext();
             auto chrono = std::chrono::steady_clock::now();
 
             auto stmt = Statement( dbConnection, req );
