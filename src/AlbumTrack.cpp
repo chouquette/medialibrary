@@ -150,9 +150,11 @@ unsigned int AlbumTrack::discNumber() const
 
 std::shared_ptr<IAlbum> AlbumTrack::album()
 {
-    if ( m_album == nullptr && m_albumId != 0 )
+    auto album = m_album.lock();
+    if ( album == nullptr && m_albumId != 0 )
     {
-        m_album = Album::fetch( m_dbConnection, m_albumId );
+        album = Album::fetch( m_dbConnection, m_albumId );
+        m_album = album;
     }
-    return m_album;
+    return album;
 }

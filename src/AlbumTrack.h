@@ -76,7 +76,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         unsigned int m_releaseYear;
         unsigned int m_discNumber;
 
-        std::shared_ptr<Album> m_album;
+        std::weak_ptr<Album> m_album;
 
         friend struct policy::AlbumTrackTable;
 };
