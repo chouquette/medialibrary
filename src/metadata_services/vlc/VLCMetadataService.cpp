@@ -196,8 +196,10 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
         LOG_WARN( "Failed to get/create associated album" );
         return false;
     }
-
-    return link( media, album, artists.first, artists.second );
+    auto t = m_dbConn->newTransaction();
+    auto res = link( media, album, artists.first, artists.second );
+    t->commit();
+    return res;
 }
 
 /* Album handling */
@@ -452,7 +454,6 @@ bool VLCMetadataService::link( std::shared_ptr<Media> media, std::shared_ptr<Alb
         albumArtist->addMedia( media.get() );
     if ( artist != nullptr && ( albumArtist == nullptr || albumArtist->id() != artist->id() ) )
         artist->addMedia( media.get() );
-
 
     auto currentAlbumArtist = album->albumArtist();
 
