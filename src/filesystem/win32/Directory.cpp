@@ -60,7 +60,7 @@ unsigned int Directory::lastModificationDate() const
     {
         struct _stat32 s;
         _stat32( m_path.c_str(), &s );
-        if ( S_ISDIR( s.st_mode ) == false )
+        if ( ( S_IFDIR & s.st_mode ) == 0 )
             throw std::runtime_error( "The provided path isn't a directory" );
         m_lastModificationDate = s.st_mtime;
     }
