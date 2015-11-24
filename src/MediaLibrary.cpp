@@ -22,6 +22,9 @@
 
 #include <algorithm>
 #include <functional>
+
+#include "Fixup.h"
+
 #include "Album.h"
 #include "AlbumTrack.h"
 #include "Artist.h"
