@@ -140,10 +140,9 @@ class IMediaLibrary
         virtual void reload() = 0;
 };
 
-class MediaLibraryFactory
+extern "C"
 {
-    public:
-        static IMediaLibrary* create();
-};
+    IMediaLibrary* NewMediaLibrary();
+}
 
 #endif // IMEDIALIBRARY_H
