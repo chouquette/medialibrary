@@ -117,7 +117,7 @@ void Directory::read()
         {
 #else
         struct stat s;
-        if ( lstat( result->d_name, &s ) != 0 )
+        if ( lstat( path.c_str(), &s ) != 0 )
         {
             std::string err( "Failed to get file info " );
             err += m_path;
