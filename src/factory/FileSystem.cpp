@@ -37,9 +37,9 @@
 namespace factory
 {
 
-std::unique_ptr<fs::IDirectory> FileSystemDefaultFactory::createDirectory( const std::string& path )
+std::shared_ptr<fs::IDirectory> FileSystemDefaultFactory::createDirectory( const std::string& path )
 {
-    return std::unique_ptr<fs::IDirectory>( new fs::Directory( path ) );
+    return std::shared_ptr<fs::IDirectory>( new fs::Directory( path ) );
 }
 
 std::unique_ptr<fs::IFile> FileSystemDefaultFactory::createFile(const std::string& fileName)

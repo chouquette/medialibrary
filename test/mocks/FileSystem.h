@@ -231,7 +231,7 @@ struct FileSystemFactory : public factory::IFileSystem
         dirs.erase( it );
     }
 
-    virtual std::unique_ptr<fs::IDirectory> createDirectory(const std::string& path) override
+    virtual std::shared_ptr<fs::IDirectory> createDirectory(const std::string& path) override
     {
         mock::Directory* res = nullptr;
         if ( path == "." )
@@ -246,7 +246,7 @@ struct FileSystemFactory : public factory::IFileSystem
         }
         if ( res == nullptr )
             throw std::runtime_error("Invalid path");
-        return std::unique_ptr<fs::IDirectory>( new Directory( *res ) );
+        return std::shared_ptr<fs::IDirectory>( new Directory( *res ) );
     }
 
     virtual std::unique_ptr<fs::IFile> createFile( const std::string &filePath ) override
@@ -307,7 +307,7 @@ public:
 class NoopFsFactory : public factory::IFileSystem
 {
 public:
-    virtual std::unique_ptr<fs::IDirectory> createDirectory( const std::string& ) override
+    virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& ) override
     {
         return nullptr;
     }

@@ -54,7 +54,7 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
             return true;
     }
     // Otherwise, create a directory, and check it for modifications
-    std::unique_ptr<fs::IDirectory> fsDir;
+    std::shared_ptr<fs::IDirectory> fsDir;
     try
     {
         fsDir = m_fsFactory->createDirectory( entryPoint );
