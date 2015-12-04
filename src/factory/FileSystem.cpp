@@ -39,7 +39,13 @@ namespace factory
 
 std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::string& path )
 {
-    return std::shared_ptr<fs::IDirectory>( new fs::Directory( path ) );
+    std::lock_guard<std::mutex> lock( m_mutex );
+    const auto it = m_dirs.find( path );
+    if ( it != end( m_dirs ) )
+        return it->second;
+    auto dir = std::make_shared<fs::Directory>( path );
+    m_dirs[path] = dir;
+    return dir;
 }
 
 std::unique_ptr<fs::IFile> FileSystemFactory::createFile(const std::string& fileName)

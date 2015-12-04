@@ -24,6 +24,10 @@
 
 #include "factory/IFileSystem.h"
 
+#include <mutex>
+#include <string>
+#include <unordered_map>
+
 namespace factory
 {
     class FileSystemFactory : public IFileSystem
@@ -31,5 +35,9 @@ namespace factory
     public:
         virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& path ) override;
         virtual std::unique_ptr<fs::IFile> createFile( const std::string& fileName ) override;
+
+    private:
+        std::unordered_map<std::string, std::shared_ptr<fs::IDirectory>> m_dirs;
+        std::mutex m_mutex;
     };
 }
