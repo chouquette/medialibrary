@@ -93,6 +93,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual std::vector<AudioTrackPtr> audioTracks() override;
         virtual const std::string& snapshot() override;
         virtual unsigned int insertionDate() const override;
+        virtual bool isAvailable() const override;
         void setSnapshot( const std::string& snapshot );
         bool save();
 
