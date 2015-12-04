@@ -38,7 +38,7 @@ FsDiscoverer::FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, Med
     if ( fsFactory != nullptr )
         m_fsFactory = fsFactory;
     else
-        m_fsFactory.reset( new factory::FileSystemDefaultFactory );
+        m_fsFactory.reset( new factory::FileSystemFactory );
 }
 
 bool FsDiscoverer::discover( const std::string &entryPoint )

@@ -37,12 +37,12 @@
 namespace factory
 {
 
-std::shared_ptr<fs::IDirectory> FileSystemDefaultFactory::createDirectory( const std::string& path )
+std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::string& path )
 {
     return std::shared_ptr<fs::IDirectory>( new fs::Directory( path ) );
 }
 
-std::unique_ptr<fs::IFile> FileSystemDefaultFactory::createFile(const std::string& fileName)
+std::unique_ptr<fs::IFile> FileSystemFactory::createFile(const std::string& fileName)
 {
     return std::unique_ptr<fs::IFile>( new fs::File( fileName ) );
 }

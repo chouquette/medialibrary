@@ -26,7 +26,7 @@
 
 namespace factory
 {
-    class FileSystemDefaultFactory : public IFileSystem
+    class FileSystemFactory : public IFileSystem
     {
     public:
         virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& path ) override;

@@ -111,7 +111,7 @@ void MediaLibrary::setFsFactory(std::shared_ptr<factory::IFileSystem> fsFactory)
 bool MediaLibrary::initialize( const std::string& dbPath, const std::string& snapshotPath, IMediaLibraryCb* mlCallback )
 {
     if ( m_fsFactory == nullptr )
-        m_fsFactory.reset( new factory::FileSystemDefaultFactory );
+        m_fsFactory.reset( new factory::FileSystemFactory );
     m_snapshotPath = snapshotPath;
     m_callback = mlCallback;
     m_dbConnection.reset( new SqliteConnection( dbPath ) );
