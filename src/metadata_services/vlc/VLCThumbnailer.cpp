@@ -369,6 +369,9 @@ bool VLCThumbnailer::compress( std::shared_ptr<Media> file, void *data )
 #endif
 
     file->setSnapshot( path );
-    m_cb->done( file, Status::Success, data );
+    if ( file->save() == false )
+        m_cb->done( file, Status::Error, data );
+    else
+        m_cb->done( file, Status::Success, data );
     return true;
 }
