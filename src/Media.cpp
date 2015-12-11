@@ -232,11 +232,6 @@ unsigned int Media::insertionDate() const
     return m_insertionDate;
 }
 
-bool Media::isAvailable() const
-{
-    return true;
-}
-
 void Media::setSnapshot( const std::string& snapshot )
 {
     if ( m_snapshot == snapshot )

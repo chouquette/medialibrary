@@ -66,7 +66,6 @@ class IMedia
         // This is likely to be used for album arts as well.
         virtual const std::string& snapshot() = 0;
         virtual unsigned int insertionDate() const = 0;
-        virtual bool isAvailable() const = 0;
 };
 
 #endif // IFILE_H
