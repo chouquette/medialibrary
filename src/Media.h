@@ -36,11 +36,6 @@ class AlbumTrack;
 
 class Media;
 
-namespace sqlite
-{
-class Row;
-}
-
 namespace policy
 {
 struct MediaTable
