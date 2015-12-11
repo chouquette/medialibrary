@@ -114,7 +114,7 @@ const std::string& Album::shortSummary() const
 
 bool Album::setShortSummary( const std::string& summary )
 {
-    static const std::string& req = "UPDATE " + policy::AlbumTable::Name
+    static const std::string req = "UPDATE " + policy::AlbumTable::Name
             + " SET short_summary = ? WHERE id_album = ?";
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, summary, m_id ) == false )
         return false;
@@ -129,7 +129,7 @@ const std::string& Album::artworkUrl() const
 
 bool Album::setArtworkUrl( const std::string& artworkUrl )
 {
-    static const std::string& req = "UPDATE " + policy::AlbumTable::Name
+    static const std::string req = "UPDATE " + policy::AlbumTable::Name
             + " SET artwork_url = ? WHERE id_album = ?";
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkUrl, m_id ) == false )
         return false;

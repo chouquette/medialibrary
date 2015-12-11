@@ -65,7 +65,7 @@ time_t Show::releaseDate() const
 
 bool Show::setReleaseDate( time_t date )
 {
-    static const std::string& req = "UPDATE " + policy::ShowTable::Name
+    static const std::string req = "UPDATE " + policy::ShowTable::Name
             + " SET release_date = ? WHERE id_show = ?";
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, date, m_id ) == false )
         return false;
@@ -80,7 +80,7 @@ const std::string& Show::shortSummary() const
 
 bool Show::setShortSummary( const std::string& summary )
 {
-    static const std::string& req = "UPDATE " + policy::ShowTable::Name
+    static const std::string req = "UPDATE " + policy::ShowTable::Name
             + " SET short_summary = ? WHERE id_show = ?";
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, summary, m_id ) == false )
         return false;
@@ -95,7 +95,7 @@ const std::string& Show::artworkUrl() const
 
 bool Show::setArtworkUrl( const std::string& artworkUrl )
 {
-    static const std::string& req = "UPDATE " + policy::ShowTable::Name
+    static const std::string req = "UPDATE " + policy::ShowTable::Name
             + " SET artwork_url = ? WHERE id_show = ?";
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkUrl, m_id ) == false )
         return false;
@@ -115,7 +115,7 @@ const std::string& Show::tvdbId()
 
 bool Show::setTvdbId( const std::string& tvdbId )
 {
-    static const std::string& req = "UPDATE " + policy::ShowTable::Name
+    static const std::string req = "UPDATE " + policy::ShowTable::Name
             + " SET tvdb_id = ? WHERE id_show = ?";
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, tvdbId, m_id ) == false )
         return false;
