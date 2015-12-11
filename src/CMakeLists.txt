@@ -66,6 +66,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     Parser.cpp
     Artist.cpp
     Settings.cpp
+    Mountpoint.cpp
 
     factory/FileSystem.cpp
     filesystem/common/CommonFile.cpp

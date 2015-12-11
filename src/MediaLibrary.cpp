@@ -31,6 +31,7 @@
 #include "AudioTrack.h"
 #include "discoverer/DiscovererWorker.h"
 #include "Media.h"
+#include "Mountpoint.h"
 #include "Folder.h"
 #include "MediaLibrary.h"
 #include "IMetadataService.h"
@@ -98,6 +99,7 @@ MediaLibrary::~MediaLibrary()
     VideoTrack::clear();
     AudioTrack::clear();
     Artist::clear();
+    Mountpoint::clear();
     // Explicitely release the connection's TLS
     if ( m_dbConnection != nullptr )
         m_dbConnection->release();
@@ -153,7 +155,8 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         AudioTrack::createTable( m_dbConnection.get() ) &&
         Artist::createTable( m_dbConnection.get() ) &&
         Artist::createDefaultArtists( m_dbConnection.get() ) &&
-        Settings::createTable( m_dbConnection.get() ) ) == false )
+        Settings::createTable( m_dbConnection.get() ) &&
+        Mountpoint::createTable( m_dbConnection.get() ) ) == false )
     {
         LOG_ERROR( "Failed to create database structure" );
         return false;
@@ -262,6 +265,16 @@ bool MediaLibrary::deleteFolder( FolderPtr folder )
         return false;
     Media::clear();
     return true;
+}
+
+std::shared_ptr<Mountpoint> MediaLibrary::mountpoint( const std::string& uuid )
+{
+    return Mountpoint::fromUuid( m_dbConnection.get(), uuid );
+}
+
+std::shared_ptr<Mountpoint> MediaLibrary::addMountpoint( const std::string& uuid, bool isRemovable )
+{
+    return Mountpoint::create( m_dbConnection.get(), uuid, isRemovable );
 }
 
 LabelPtr MediaLibrary::createLabel( const std::string& label )
