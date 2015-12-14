@@ -22,6 +22,7 @@
 
 #include "Directory.h"
 #include "Media.h"
+#include "Mountpoint.h"
 
 #include <cstring>
 #include <cstdlib>
@@ -69,6 +70,12 @@ unsigned int Directory::lastModificationDate() const
         m_lastModificationDate = s.st_mtim.tv_sec;
     }
     return m_lastModificationDate;
+}
+
+std::shared_ptr<IMountpoint> Directory::mountpoint() const
+{
+    //FIXME: Cache this?
+    return Mountpoint::fromPath( m_path );
 }
 
 bool Directory::isRemovable() const

@@ -36,6 +36,7 @@ public:
     virtual const std::vector<std::string>& files() override;
     virtual const std::vector<std::string>& dirs() override;
     virtual unsigned int lastModificationDate() const override;
+    virtual std::shared_ptr<IMountpoint> mountpoint() const override;
     virtual bool isRemovable() const override;
 
 private:

@@ -72,6 +72,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     filesystem/common/CommonFile.cpp
     filesystem/${ARCH_FOLDER}/Directory.cpp
     filesystem/${ARCH_FOLDER}/File.cpp
+    filesystem/${ARCH_FOLDER}/Mountpoint.cpp
 
     discoverer/FsDiscoverer.cpp
     discoverer/DiscovererWorker.cpp

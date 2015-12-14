@@ -22,31 +22,49 @@
 
 #pragma once
 
+#include "filesystem/IMountpoint.h"
 #include <memory>
-#include <string>
+#include <unordered_map>
 
 namespace fs
 {
-    class IDirectory;
-    class IFile;
-    class IMountpoint;
-}
 
-namespace factory
+class UnknownMountpoint : public IMountpoint
 {
-    class IFileSystem
-    {
-    public:
-        virtual ~IFileSystem() = default;
-        ///
-        /// \brief createDirectory creates a representation of a directory
-        /// \param path An absolute path to a directory
-        ///
-        virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& path ) = 0;
-        ///
-        /// \brief createFile creates a representation of a file
-        /// \param fileName an absolute path to a file
-        ///
-        virtual std::unique_ptr<fs::IFile> createFile( const std::string& fileName ) = 0;
-    };
+public:
+    UnknownMountpoint() : m_uuid( "unknown" ) {}
+    virtual const std::string& uuid() const override { return m_uuid; }
+    virtual bool isPresent() const override { return true; }
+    virtual bool isRemovable() const override { return false; }
+private:
+    std::string m_uuid;
+};
+
+class Mountpoint : public IMountpoint
+{
+public:
+    using MountpointMap = std::unordered_map<std::string, std::shared_ptr<IMountpoint>>;
+
+    virtual const std::string& uuid() const override;
+    virtual bool isPresent() const override;
+    virtual bool isRemovable() const override;
+
+
+    static std::shared_ptr<IMountpoint> fromPath( const std::string& path );
+
+protected:
+    Mountpoint( const std::string& devicePath );
+
+private:
+    static MountpointMap listMountpoints();
+    static std::shared_ptr<IMountpoint> unknownMountpoint;
+
+private:
+    static const MountpointMap Cache;
+
+private:
+    std::string m_device;
+    std::string m_uuid;
+};
+
 }

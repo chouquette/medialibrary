@@ -116,6 +116,11 @@ public:
         return m_lastModificationDate;
     }
 
+    virtual std::shared_ptr<fs::IMountpoint> mountpoint() const override
+    {
+        return nullptr;
+    }
+
     void addFile( const std::string& fileName )
     {
         m_files.emplace_back( m_path + fileName );

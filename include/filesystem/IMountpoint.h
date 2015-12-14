@@ -22,31 +22,16 @@
 
 #pragma once
 
-#include <memory>
 #include <string>
 
 namespace fs
 {
-    class IDirectory;
-    class IFile;
-    class IMountpoint;
-}
-
-namespace factory
+class IMountpoint
 {
-    class IFileSystem
-    {
-    public:
-        virtual ~IFileSystem() = default;
-        ///
-        /// \brief createDirectory creates a representation of a directory
-        /// \param path An absolute path to a directory
-        ///
-        virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& path ) = 0;
-        ///
-        /// \brief createFile creates a representation of a file
-        /// \param fileName an absolute path to a file
-        ///
-        virtual std::unique_ptr<fs::IFile> createFile( const std::string& fileName ) = 0;
-    };
+public:
+    virtual ~IMountpoint() = default;
+    virtual const std::string& uuid() const = 0;
+    virtual bool isPresent() const = 0;
+    virtual bool isRemovable() const = 0;
+};
 }
