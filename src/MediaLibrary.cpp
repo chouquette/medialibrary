@@ -43,7 +43,7 @@
 #include "ShowEpisode.h"
 #include "database/SqliteTools.h"
 #include "database/SqliteConnection.h"
-#include "Utils.h"
+#include "utils/Filename.h"
 #include "VideoTrack.h"
 
 // Discoverers:

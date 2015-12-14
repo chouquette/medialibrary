@@ -26,7 +26,7 @@
 
 #include "filesystem/IFile.h"
 #include "filesystem/IDirectory.h"
-#include "Utils.h"
+#include "utils/Filename.h"
 #include "discoverer/FsDiscoverer.h"
 #include "mocks/FileSystem.h"
 

@@ -22,7 +22,7 @@
 
 #include "gtest/gtest.h"
 
-#include "Utils.h"
+#include "utils/Filename.h"
 
 TEST( FsUtils, extension )
 {

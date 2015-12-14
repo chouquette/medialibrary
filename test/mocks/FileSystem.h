@@ -29,7 +29,7 @@
 #include "filesystem/IDirectory.h"
 #include "filesystem/IFile.h"
 #include "factory/IFileSystem.h"
-#include "Utils.h"
+#include "utils/Filename.h"
 
 namespace mock
 {

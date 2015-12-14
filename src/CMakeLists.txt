@@ -44,7 +44,7 @@ list(APPEND HEADERS_LIST
     discoverer/FsDiscoverer.h
 
     factory/FileSystem.h
-    Utils.h
+    utils/Filename.h
 )
 
 include_directories("${CMAKE_SOURCE_DIR}/include")
@@ -77,7 +77,8 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     discoverer/FsDiscoverer.cpp
     discoverer/DiscovererWorker.cpp
 
-    Utils.cpp
+    utils/Filename.cpp
+
     database/SqliteConnection.cpp
     database/SqliteTransaction.cpp
 
