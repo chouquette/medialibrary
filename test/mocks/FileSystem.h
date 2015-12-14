@@ -28,6 +28,7 @@
 
 #include "filesystem/IDirectory.h"
 #include "filesystem/IFile.h"
+#include "filesystem/IMountpoint.h"
 #include "factory/IFileSystem.h"
 #include "utils/Filename.h"
 
@@ -85,14 +86,32 @@ public:
     unsigned int m_lastModification;
 };
 
+class Mountpoint : public fs::IMountpoint
+{
+public:
+    Mountpoint( const std::string& uuid ) : m_uuid( uuid ), m_present( true ), m_removable( false ) {}
+    virtual const std::string& uuid() const override { return m_uuid; }
+    virtual bool isPresent() const override { return m_present; }
+    virtual bool isRemovable() const override { return m_removable; }
+
+    void setPresent( bool value ) { m_present = value; }
+    void setRemovable( bool value ) { m_removable = value; }
+
+private:
+    std::string m_uuid;
+    bool m_present;
+    bool m_removable;
+};
+
 class Directory : public fs::IDirectory
 {
 public:
-    Directory( std::shared_ptr<mock::Directory> parent, const std::string& path, unsigned int lastModif )
+    Directory( std::shared_ptr<mock::Directory> parent, const std::string& path, unsigned int lastModif, std::shared_ptr<fs::IMountpoint> mountpoint )
         : m_path( path )
         , m_parent( parent )
         , m_lastModificationDate( lastModif )
         , m_isRemovable( false )
+        , m_mountpoint( mountpoint )
     {
     }
 
@@ -118,7 +137,7 @@ public:
 
     virtual std::shared_ptr<fs::IMountpoint> mountpoint() const override
     {
-        return nullptr;
+        return m_mountpoint;
     }
 
     void addFile( const std::string& fileName )
@@ -182,6 +201,7 @@ private:
     std::shared_ptr<mock::Directory> m_parent;
     unsigned int m_lastModificationDate;
     bool m_isRemovable;
+    std::shared_ptr<fs::IMountpoint> m_mountpoint;
 };
 
 
@@ -192,12 +212,16 @@ struct FileSystemFactory : public factory::IFileSystem
 
     FileSystemFactory()
     {
-        dirs[Root] = std::unique_ptr<mock::Directory>( new Directory{ nullptr, Root, 123 } );
+        auto rootMountpoint = std::make_shared<Mountpoint>( "root" );
+        auto removableMountpoint = std::make_shared<Mountpoint>( "removable" );
+        removableMountpoint->setRemovable( true );
+        removableMountpoint->setPresent( true );
+        dirs[Root] = std::unique_ptr<mock::Directory>( new Directory{ nullptr, Root, 123, rootMountpoint } );
             addFile( Root, "video.avi" );
             addFile( Root, "audio.mp3" );
             addFile( Root, "not_a_media.something" );
             addFile( Root, "some_other_file.seaotter" );
-            addFolder( Root, "folder/", 456 );
+            addFolder( Root, "folder/", 456, removableMountpoint );
                 addFile( SubFolder, "subfile.mp4" );
     }
 
@@ -207,11 +231,11 @@ struct FileSystemFactory : public factory::IFileSystem
         files[path + fileName] = std::unique_ptr<mock::File>( new mock::File( path + fileName ) );
     }
 
-    void addFolder( const std::string& parentPath, const std::string& path, unsigned int lastModif )
+    void addFolder( const std::string& parentPath, const std::string& path, unsigned int lastModif, std::shared_ptr<fs::IMountpoint> mountpoint )
     {
         auto parent = dirs[parentPath];
         parent->addFolder( path );
-        dirs[parentPath + path] = std::unique_ptr<mock::Directory>( new Directory( parent, parentPath + path, lastModif ) );
+        dirs[parentPath + path] = std::unique_ptr<mock::Directory>( new Directory( parent, parentPath + path, lastModif, mountpoint ) );
     }
 
     void removeFile( const std::string& path, const std::string& fileName )
