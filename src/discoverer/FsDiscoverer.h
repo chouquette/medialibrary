@@ -39,10 +39,11 @@ public:
     virtual void reload() override;
 
 private:
-    bool checkSubfolders(fs::IDirectory *folder, Folder* parentFolder , const std::vector<std::shared_ptr<Folder> > blacklist);
-    void checkFiles(fs::IDirectory *folder, Folder* parentFolder );
+    bool checkSubfolders( fs::IDirectory *folder, Folder* parentFolder, const std::vector<std::shared_ptr<Folder>> blacklist ) const;
+    void checkFiles( fs::IDirectory *folder, Folder* parentFolder ) const;
     std::vector<std::shared_ptr<Folder>> blacklist() const;
     bool isBlacklisted( const std::string& path, const std::vector<std::shared_ptr<Folder>>& blacklist ) const;
+    bool addFolder( fs::IDirectory* folder, Folder* parentFolder, fs::IDirectory* parent , const std::vector<std::shared_ptr<Folder> >& blacklist ) const;
 
 private:
     MediaLibrary* m_ml;

@@ -69,24 +69,7 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
     auto blist = blacklist();
     if ( isBlacklisted( fsDir->path(), blist ) == true )
         return false;
-    // Force <0> as lastModificationDate, so this folder is detected as outdated
-    // by the modification checking code
-    auto f = Folder::create( m_dbConn, fsDir->path(), 0, fsDir->isRemovable(), 0 );
-    if ( f == nullptr )
-        return false;
-    // Since this is the "root" folder, we will always try to add the device it's located on
-    // to our devices list. We can then check if the subfolders containing device are different
-    auto deviceFs = fsDir->device();
-    auto device = Device::fromUuid( m_dbConn, deviceFs->uuid() );
-    if ( device == nullptr )
-    {
-        LOG_INFO( "Creating new device in DB ", deviceFs->uuid() );
-        device = Device::create( m_dbConn, deviceFs->uuid(), deviceFs->isRemovable() );
-    }
-    checkFiles( fsDir.get(), f.get() );
-    checkSubfolders( fsDir.get(), f.get(), blist );
-    f->setLastModificationDate( fsDir->lastModificationDate() );
-    return true;
+    return addFolder( fsDir.get(), nullptr, nullptr, blist );
 }
 
 void FsDiscoverer::reload()
@@ -108,7 +91,7 @@ void FsDiscoverer::reload()
     }
 }
 
-bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder, const std::vector<std::shared_ptr<Folder>> blacklist )
+bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder, const std::vector<std::shared_ptr<Folder>> blacklist ) const
 {
     // From here we can have:
     // - New subfolder(s)
@@ -140,11 +123,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder
                 continue;
             }
             LOG_INFO( "New folder detected: ", subFolderPath );
-            // Force a scan by setting lastModificationDate to 0
-            auto f = Folder::create( m_dbConn, subFolder->path(), 0, subFolder->isRemovable(), parentFolder->id() );
-            checkFiles( subFolder.get(), f.get() );
-            checkSubfolders( subFolder.get(), f.get(), blacklist );
-            f->setLastModificationDate( subFolder->lastModificationDate() );
+            addFolder( subFolder.get(), parentFolder, folder, blacklist );
             continue;
         }
         auto folderInDb = *it;
@@ -171,7 +150,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder
     return true;
 }
 
-void FsDiscoverer::checkFiles( fs::IDirectory* folder, Folder* parentFolder )
+void FsDiscoverer::checkFiles( fs::IDirectory* folder, Folder* parentFolder ) const
 {
     LOG_INFO( "Checking file in ", folder->path() );
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
@@ -217,4 +196,31 @@ bool FsDiscoverer::isBlacklisted(const std::string& path, const std::vector<std:
     return std::find_if( begin( blacklist ), end( blacklist ), [&path]( const std::shared_ptr<Folder>& f ) {
         return path == f->path();
     }) != end( blacklist );
+}
+
+bool FsDiscoverer::addFolder( fs::IDirectory* folder, Folder* parentFolder, fs::IDirectory* parent, const std::vector<std::shared_ptr<Folder>>& blacklist ) const
+{
+    // Force <0> as lastModificationDate, so this folder is detected as outdated
+    // by the modification checking code
+    auto deviceFs = folder->device();
+    // In case this is an entry point, we always want to create a device representation.
+    // Otherwise, we only need to know if this we discovered a new mountpoint.
+    if ( parent == nullptr || parent->device() != deviceFs )
+    {
+        auto device = Device::fromUuid( m_dbConn, deviceFs->uuid() );
+        if ( device == nullptr )
+        {
+            LOG_INFO( "Creating new device in DB ", deviceFs->uuid() );
+            device = Device::create( m_dbConn, deviceFs->uuid(), deviceFs->isRemovable() );
+        }
+    }
+
+    auto f = Folder::create( m_dbConn, folder->path(), 0, folder->isRemovable(),
+                             parentFolder != nullptr ? parentFolder->id() : 0 );
+    if ( f == nullptr )
+        return false;
+    checkFiles( folder, f.get() );
+    checkSubfolders( folder, f.get(), blacklist );
+    f->setLastModificationDate( folder->lastModificationDate() );
+    return true;
 }
