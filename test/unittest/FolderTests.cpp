@@ -228,7 +228,8 @@ TEST_F( Folders, NewFolderWithFile )
     // Do not watch for live changes
     ml.reset();
     auto newFolder = std::string(mock::FileSystemFactory::Root) + "newfolder/";
-    fsMock->addFolder( mock::FileSystemFactory::Root, "newfolder/", time( nullptr ), nullptr );
+    auto device = std::make_shared<mock::Device>( std::string{ mock::FileSystemFactory::Root } + "newfolder/", "newfolderuuid" );
+    fsMock->addFolder( mock::FileSystemFactory::Root, "newfolder/", time( nullptr ), device );
     fsMock->addFile( newFolder, "newfile.avi" );
 
     // This will trigger a reload
