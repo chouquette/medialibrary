@@ -42,6 +42,7 @@ private:
     bool checkSubfolders(fs::IDirectory *folder, FolderPtr parentFolder , const std::vector<std::shared_ptr<Folder> > blacklist);
     void checkFiles( fs::IDirectory *folder, FolderPtr parentFolder );
     std::vector<std::shared_ptr<Folder>> blacklist() const;
+    bool isBlacklisted( const std::string& path, const std::vector<std::shared_ptr<Folder>>& blacklist ) const;
 
 private:
     MediaLibrary* m_ml;
