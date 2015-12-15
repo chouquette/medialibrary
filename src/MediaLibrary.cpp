@@ -204,7 +204,7 @@ MediaPtr MediaLibrary::file( const std::string& path )
     return Media::fetch( m_dbConnection.get(), req, path );
 }
 
-std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, FolderPtr parentFolder )
+std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder* parentFolder )
 {
     LOG_INFO( "Adding ", path );
     std::unique_ptr<fs::IFile> file;

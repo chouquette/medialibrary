@@ -83,8 +83,8 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
         LOG_INFO( "Creating new device in DB ", deviceFs->uuid() );
         device = Device::create( m_dbConn, deviceFs->uuid(), deviceFs->isRemovable() );
     }
-    checkFiles( fsDir.get(), f );
-    checkSubfolders( fsDir.get(), f, blist );
+    checkFiles( fsDir.get(), f.get() );
+    checkSubfolders( fsDir.get(), f.get(), blist );
     f->setLastModificationDate( fsDir->lastModificationDate() );
     return true;
 }
@@ -102,13 +102,13 @@ void FsDiscoverer::reload()
         auto folder = m_fsFactory->createDirectory( f->path() );
         if ( folder->lastModificationDate() == f->lastModificationDate() )
             continue;
-        checkSubfolders( folder.get(), f, blist );
-        checkFiles( folder.get(), f );
+        checkSubfolders( folder.get(), f.get(), blist );
+        checkFiles( folder.get(), f.get() );
         f->setLastModificationDate( folder->lastModificationDate() );
     }
 }
 
-bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, FolderPtr parentFolder, const std::vector<std::shared_ptr<Folder>> blacklist )
+bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder, const std::vector<std::shared_ptr<Folder>> blacklist )
 {
     // From here we can have:
     // - New subfolder(s)
@@ -142,8 +142,8 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, FolderPtr parentFold
             LOG_INFO( "New folder detected: ", subFolderPath );
             // Force a scan by setting lastModificationDate to 0
             auto f = Folder::create( m_dbConn, subFolder->path(), 0, subFolder->isRemovable(), parentFolder->id() );
-            checkFiles( subFolder.get(), f );
-            checkSubfolders( subFolder.get(), f, blacklist );
+            checkFiles( subFolder.get(), f.get() );
+            checkSubfolders( subFolder.get(), f.get(), blacklist );
             f->setLastModificationDate( subFolder->lastModificationDate() );
             continue;
         }
@@ -157,8 +157,8 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, FolderPtr parentFold
             continue;
         }
         // This folder was modified, let's recurse
-        checkSubfolders( subFolder.get(), folderInDb, blacklist );
-        checkFiles( subFolder.get(), folderInDb );
+        checkSubfolders( subFolder.get(), folderInDb.get(), blacklist );
+        checkFiles( subFolder.get(), folderInDb.get() );
         folderInDb->setLastModificationDate( subFolder->lastModificationDate() );
         subFoldersInDB.erase( it );
     }
@@ -171,7 +171,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, FolderPtr parentFold
     return true;
 }
 
-void FsDiscoverer::checkFiles( fs::IDirectory* folder, FolderPtr parentFolder )
+void FsDiscoverer::checkFiles( fs::IDirectory* folder, Folder* parentFolder )
 {
     LOG_INFO( "Checking file in ", folder->path() );
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
