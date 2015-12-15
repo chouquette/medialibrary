@@ -89,10 +89,11 @@ public:
 class Device : public fs::IDevice
 {
 public:
-    Device( const std::string& uuid ) : m_uuid( uuid ), m_present( true ), m_removable( false ) {}
+    Device( const std::string& mountpoint, const std::string& uuid ) : m_uuid( uuid ),
+        m_present( true ), m_removable( false ), m_mountpoint( mountpoint ) {}
     virtual const std::string& uuid() const override { return m_uuid; }
-    virtual bool isPresent() const override { return m_present; }
     virtual bool isRemovable() const override { return m_removable; }
+    virtual const std::string& mountpoint() const override { return m_mountpoint; }
 
     void setPresent( bool value ) { m_present = value; }
     void setRemovable( bool value ) { m_removable = value; }
@@ -101,6 +102,7 @@ private:
     std::string m_uuid;
     bool m_present;
     bool m_removable;
+    std::string m_mountpoint;
 };
 
 class Directory : public fs::IDirectory
@@ -212,8 +214,8 @@ struct FileSystemFactory : public factory::IFileSystem
 
     FileSystemFactory()
     {
-        auto rootDevice = std::make_shared<Device>( "root" );
-        auto removableDevice = std::make_shared<Device>( "removable" );
+        auto rootDevice = std::make_shared<Device>( std::string{ Root }, "root" );
+        auto removableDevice = std::make_shared<Device>( std::string{ SubFolder }, "removable" );
         removableDevice ->setRemovable( true );
         removableDevice ->setPresent( true );
         dirs[Root] = std::unique_ptr<mock::Directory>( new Directory{ nullptr, Root, 123, rootDevice  } );

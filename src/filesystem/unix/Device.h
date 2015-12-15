@@ -35,9 +35,8 @@ public:
     using DeviceMap = std::unordered_map<std::string, std::shared_ptr<IDevice>>;
 
     virtual const std::string& uuid() const override;
-    virtual bool isPresent() const override;
     virtual bool isRemovable() const override;
-
+    virtual const std::string& mountpoint() const override;
 
     static std::shared_ptr<IDevice> fromPath( const std::string& path );
 
@@ -53,6 +52,7 @@ private:
 private:
     std::string m_device;
     std::string m_uuid;
+    std::string m_mountpoint;
 };
 
 }

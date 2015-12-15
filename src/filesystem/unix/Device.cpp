@@ -42,6 +42,7 @@ const Device::DeviceMap Device::Cache = Device::listDevices();
 Device::Device( const std::string& devicePath )
     : m_device( devicePath )
     , m_uuid( "fake uuid" )
+    , m_mountpoint( "/mnt/fixme" )
 {
 }
 
@@ -50,14 +51,14 @@ const std::string& Device::uuid() const
     return m_uuid;
 }
 
-bool Device::isPresent() const
-{
-    return true;
-}
-
 bool Device::isRemovable() const
 {
     return false;
+}
+
+const std::string&Device::mountpoint() const
+{
+    return m_mountpoint;
 }
 
 std::shared_ptr<IDevice> Device::fromPath( const std::string& path )
