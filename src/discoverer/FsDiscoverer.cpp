@@ -69,13 +69,12 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
     auto blist = blacklist();
     if ( isBlacklisted( fsDir->path(), blist ) == true )
         return false;
-    return addFolder( fsDir.get(), nullptr, nullptr, blist );
+    return addFolder( fsDir.get(), nullptr, blist );
 }
 
 void FsDiscoverer::reload()
 {
     //FIXME: This should probably be in a sql transaction
-    //FIXME: This shouldn't be done for "removable"/network files
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
             + " WHERE id_parent IS NULL";
     auto rootFolders = Folder::fetchAll<Folder>( m_dbConn, req );
@@ -83,6 +82,15 @@ void FsDiscoverer::reload()
     for ( const auto& f : rootFolders )
     {
         auto folder = m_fsFactory->createDirectory( f->path() );
+        // Don't assume a folder that is a mountpoint will get its modification date updated on all platforms
+        // So first, we check if the device containing this folder is available:
+        auto deviceFs = folder->device();
+        if ( deviceFs == nullptr )
+        {
+            auto device = Device::fetch( m_dbConn, f->deviceId() );
+            device->setPresent( false );
+            continue;
+        }
         if ( folder->lastModificationDate() == f->lastModificationDate() )
             continue;
         checkSubfolders( folder.get(), f.get(), blist );
@@ -123,7 +131,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder
                 continue;
             }
             LOG_INFO( "New folder detected: ", subFolderPath );
-            addFolder( subFolder.get(), parentFolder, folder, blacklist );
+            addFolder( subFolder.get(), parentFolder, blacklist );
             continue;
         }
         auto folderInDb = *it;
@@ -198,25 +206,22 @@ bool FsDiscoverer::isBlacklisted(const std::string& path, const std::vector<std:
     }) != end( blacklist );
 }
 
-bool FsDiscoverer::addFolder( fs::IDirectory* folder, Folder* parentFolder, fs::IDirectory* parent, const std::vector<std::shared_ptr<Folder>>& blacklist ) const
+bool FsDiscoverer::addFolder( fs::IDirectory* folder, Folder* parentFolder, const std::vector<std::shared_ptr<Folder>>& blacklist ) const
 {
     // Force <0> as lastModificationDate, so this folder is detected as outdated
     // by the modification checking code
     auto deviceFs = folder->device();
-    // In case this is an entry point, we always want to create a device representation.
-    // Otherwise, we only need to know if this we discovered a new mountpoint.
-    if ( parent == nullptr || parent->device() != deviceFs )
+    // We are creating a folder, there has to be a device containing it.
+    assert( deviceFs != nullptr );
+    auto device = Device::fromUuid( m_dbConn, deviceFs->uuid() );
+    if ( device == nullptr )
     {
-        auto device = Device::fromUuid( m_dbConn, deviceFs->uuid() );
-        if ( device == nullptr )
-        {
-            LOG_INFO( "Creating new device in DB ", deviceFs->uuid() );
-            device = Device::create( m_dbConn, deviceFs->uuid(), deviceFs->isRemovable() );
-        }
+        LOG_INFO( "Creating new device in DB ", deviceFs->uuid() );
+        device = Device::create( m_dbConn, deviceFs->uuid(), deviceFs->isRemovable() );
     }
 
-    auto f = Folder::create( m_dbConn, folder->path(), 0, folder->isRemovable(),
-                             parentFolder != nullptr ? parentFolder->id() : 0 );
+    auto f = Folder::create( m_dbConn, folder->path(), 0,
+                             parentFolder != nullptr ? parentFolder->id() : 0, *device );
     if ( f == nullptr )
         return false;
     checkFiles( folder, f.get() );

@@ -212,9 +212,9 @@ struct FileSystemFactory : public factory::IFileSystem
 
     FileSystemFactory()
     {
-        auto rootDevice = std::make_shared<Device>( std::string{ Root }, "root" );
-        auto removableDevice = std::make_shared<Device>( std::string{ SubFolder }, "removable" );
-        removableDevice ->setRemovable( true );
+        rootDevice = std::make_shared<Device>( std::string{ Root }, "root" );
+        removableDevice = std::make_shared<Device>( std::string{ SubFolder }, "removable" );
+        removableDevice->setRemovable( true );
         dirs[Root] = std::unique_ptr<mock::Directory>( new Directory{ nullptr, Root, 123, rootDevice  } );
             addFile( Root, "video.avi" );
             addFile( Root, "audio.mp3" );
@@ -285,8 +285,19 @@ struct FileSystemFactory : public factory::IFileSystem
         return std::unique_ptr<fs::IFile>( new File( static_cast<const mock::File&>( * it->second.get() ) ) );
     }
 
+    virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override
+    {
+        if ( uuid == "root" )
+            return rootDevice;
+        if ( uuid == "removable" )
+            return removableDevice;
+        return nullptr;
+    }
+
     std::unordered_map<std::string, std::shared_ptr<mock::File>> files;
     std::unordered_map<std::string, std::shared_ptr<mock::Directory>> dirs;
+    std::shared_ptr<Device> rootDevice;
+    std::shared_ptr<Device> removableDevice;
 };
 
 // Noop FS (basically just returns file names, and don't try to access those.)
@@ -343,6 +354,11 @@ public:
     virtual std::unique_ptr<fs::IFile> createFile( const std::string &fileName ) override
     {
         return std::unique_ptr<fs::IFile>( new NoopFile( fileName ) );
+    }
+
+    virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& ) override
+    {
+        return nullptr;
     }
 };
 

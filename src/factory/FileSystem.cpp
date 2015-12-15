@@ -27,6 +27,7 @@
 #if defined(__linux__) || defined(__APPLE__)
 # include "filesystem/unix/Directory.h"
 # include "filesystem/unix/File.h"
+# include "filesystem/unix/Device.h"
 #elif defined(_WIN32)
 # include "filesystem/win32/Directory.h"
 # include "filesystem/win32/File.h"
@@ -52,5 +53,12 @@ std::unique_ptr<fs::IFile> FileSystemFactory::createFile(const std::string& file
 {
     return std::unique_ptr<fs::IFile>( new fs::File( fileName ) );
 }
+
+std::shared_ptr<fs::IDevice> FileSystemFactory::createDevice( const std::string& uuid )
+{
+    return fs::Device::fromUuid( uuid );
+}
+
+
 
 }

@@ -38,7 +38,11 @@ public:
     virtual bool isRemovable() const override;
     virtual const std::string& mountpoint() const override;
 
+    ///
+    /// \brief fromPath Returns the device that contains the given path
+    ///
     static std::shared_ptr<IDevice> fromPath( const std::string& path );
+    static std::shared_ptr<IDevice> fromUuid( const std::string& uuid );
 
 protected:
     Device( const std::string& devicePath );

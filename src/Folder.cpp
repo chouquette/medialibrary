@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include "Folder.h"
+#include "Device.h"
 #include "Media.h"
 
 #include "database/SqliteTools.h"
@@ -40,17 +41,17 @@ Folder::Folder(DBConnection dbConnection, sqlite::Row& row )
         >> m_path
         >> m_parent
         >> m_lastModificationDate
-        >> m_isRemovable
-        >> m_isBlacklisted;
+        >> m_isBlacklisted
+        >> m_deviceId;
 }
 
-Folder::Folder( const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parent )
+Folder::Folder( const std::string& path, time_t lastModificationDate, unsigned int parent, unsigned int deviceId )
     : m_id( 0 )
     , m_path( path )
     , m_parent( parent )
     , m_lastModificationDate( lastModificationDate )
-    , m_isRemovable( isRemovable )
     , m_isBlacklisted( false )
+    , m_deviceId( deviceId )
 {
 }
 
@@ -62,21 +63,21 @@ bool Folder::createTable(DBConnection connection)
             "path TEXT UNIQUE ON CONFLICT FAIL,"
             "id_parent UNSIGNED INTEGER,"
             "last_modification_date UNSIGNED INTEGER,"
-            "is_removable INTEGER,"
             "is_blacklisted INTEGER,"
+            "device_id UNSIGNED INTEGER,"
             "FOREIGN KEY (id_parent) REFERENCES " + policy::FolderTable::Name +
             "(id_folder) ON DELETE CASCADE"
             ")";
     return sqlite::Tools::executeRequest( connection, req );
 }
 
-std::shared_ptr<Folder> Folder::create( DBConnection connection, const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parentId )
+std::shared_ptr<Folder> Folder::create(DBConnection connection, const std::string& path, time_t lastModificationDate, unsigned int parentId, Device& device )
 {
-    auto self = std::make_shared<Folder>( path, lastModificationDate, isRemovable, parentId );
+    auto self = std::make_shared<Folder>( path, lastModificationDate, parentId, device.id() );
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
-            "(path, id_parent, last_modification_date, is_removable) VALUES(?, ?, ?, ?)";
+            "(path, id_parent, last_modification_date, device_id) VALUES(?, ?, ?, ?)";
     if ( insert( connection, self, req, path, sqlite::ForeignKey( parentId ),
-                         lastModificationDate, isRemovable ) == false )
+                         lastModificationDate, device.id() ) == false )
         return nullptr;
     self->m_dbConection = connection;
     return self;
@@ -139,7 +140,7 @@ bool Folder::setLastModificationDate( unsigned int lastModificationDate )
     return true;
 }
 
-bool Folder::isRemovable()
+unsigned int Folder::deviceId() const
 {
-    return m_isRemovable;
+    return m_deviceId;
 }

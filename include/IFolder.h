@@ -36,6 +36,5 @@ public:
     virtual std::vector<MediaPtr> files() = 0;
     virtual std::vector<FolderPtr> folders() = 0;
     virtual unsigned int lastModificationDate() = 0;
-    virtual bool isRemovable() = 0;
     virtual FolderPtr parent() = 0;
 };

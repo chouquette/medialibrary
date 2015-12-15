@@ -350,31 +350,6 @@ TEST_F( Folders, UpdateFile )
     ASSERT_NE( id, f->id() );
 }
 
-// This simply tests that the flag is properly stored in db
-TEST_F( Folders, CheckRemovable )
-{
-    fsMock->dirs[mock::FileSystemFactory::SubFolder]->markRemovable();
-    cbMock->prepareForWait( 1 );
-    ml->discover( "." );
-    bool discovered = cbMock->wait();
-    ASSERT_TRUE( discovered );
-
-    auto f = ml->folder( mock::FileSystemFactory::Root );
-    ASSERT_NE( f, nullptr );
-    ASSERT_FALSE( f->isRemovable() );
-    auto subfolder = ml->folder( mock::FileSystemFactory::SubFolder );
-    ASSERT_NE( subfolder, nullptr );
-    ASSERT_TRUE( subfolder->isRemovable() );
-
-    // No actual FS change, no need to wait for the actual FS reload
-    Reload();
-
-    f = ml->folder( mock::FileSystemFactory::Root );
-    ASSERT_FALSE( f->isRemovable() );
-    subfolder = ml->folder( mock::FileSystemFactory::SubFolder );
-    ASSERT_TRUE( subfolder->isRemovable() );
-}
-
 TEST_F( Folders, Blacklist )
 {
     cbMock->prepareForWait( 1 );

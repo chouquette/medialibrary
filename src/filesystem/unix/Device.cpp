@@ -71,6 +71,17 @@ std::shared_ptr<IDevice> Device::fromPath( const std::string& path )
     return nullptr;
 }
 
+std::shared_ptr<IDevice> Device::fromUuid( const std::string& uuid )
+{
+    for ( const auto& p : Cache )
+    {
+        const auto& d = p.second;
+        if ( d->uuid() == uuid )
+            return d;
+    }
+    return nullptr;
+}
+
 Device::DeviceMap Device::listDevices()
 {
     DeviceMap res;

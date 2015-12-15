@@ -28,6 +28,7 @@
 #include <sqlite3.h>
 
 class Folder;
+class Device;
 
 namespace fs
 {
@@ -49,10 +50,10 @@ class Folder : public IFolder, public DatabaseHelpers<Folder, policy::FolderTabl
 {
 public:
     Folder( DBConnection dbConnection, sqlite::Row& row );
-    Folder(const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parent );
+    Folder(const std::string& path, time_t lastModificationDate, unsigned int parent , unsigned int deviceId);
 
     static bool createTable( DBConnection connection );
-    static std::shared_ptr<Folder> create(DBConnection connection, const std::string& path, time_t lastModificationDate, bool isRemovable, unsigned int parentId );
+    static std::shared_ptr<Folder> create(DBConnection connection, const std::string& path, time_t lastModificationDate, unsigned int parentId, Device& device );
     static bool blacklist( DBConnection connection, const std::string& path );
 
     static std::shared_ptr<Folder> fromPath( DBConnection conn, const std::string& path );
@@ -64,7 +65,7 @@ public:
     virtual FolderPtr parent() override;
     virtual unsigned int lastModificationDate() override;
     bool setLastModificationDate(unsigned int lastModificationDate);
-    bool isRemovable();
+    unsigned int deviceId() const;
 
 private:
     DBConnection m_dbConection;
@@ -73,8 +74,8 @@ private:
     std::string m_path;
     unsigned int m_parent;
     unsigned int m_lastModificationDate;
-    bool m_isRemovable;
     bool m_isBlacklisted;
+    unsigned int m_deviceId;
 
     friend struct policy::FolderTable;
 };
