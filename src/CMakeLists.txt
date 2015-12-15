@@ -66,13 +66,13 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     Parser.cpp
     Artist.cpp
     Settings.cpp
-    Mountpoint.cpp
+    Device.cpp
 
     factory/FileSystem.cpp
     filesystem/common/CommonFile.cpp
     filesystem/${ARCH_FOLDER}/Directory.cpp
     filesystem/${ARCH_FOLDER}/File.cpp
-    filesystem/${ARCH_FOLDER}/Mountpoint.cpp
+    filesystem/${ARCH_FOLDER}/Device.cpp
 
     discoverer/FsDiscoverer.cpp
     discoverer/DiscovererWorker.cpp

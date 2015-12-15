@@ -20,13 +20,13 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#include "Mountpoint.h"
+#include "Device.h"
 
-const std::string policy::MountpointTable::Name = "Mountpoint";
-const std::string policy::MountpointTable::PrimaryKeyColumn = "id_mountpoint";
-unsigned int Mountpoint::* const policy::MountpointTable::PrimaryKey = &Mountpoint::m_id;
+const std::string policy::DeviceTable::Name = "Device";
+const std::string policy::DeviceTable::PrimaryKeyColumn = "id_device";
+unsigned int Device::* const policy::DeviceTable::PrimaryKey = &Device::m_id;
 
-Mountpoint::Mountpoint( DBConnection dbConnection, sqlite::Row& row )
+Device::Device( DBConnection dbConnection, sqlite::Row& row )
     : m_dbConn( dbConnection )
 {
     row >> m_id
@@ -37,58 +37,58 @@ Mountpoint::Mountpoint( DBConnection dbConnection, sqlite::Row& row )
     //only be here for sqlite triggering purposes
 }
 
-Mountpoint::Mountpoint( const std::string& uuid, bool isRemovable )
+Device::Device( const std::string& uuid, bool isRemovable )
     : m_uuid( uuid )
     , m_isRemovable( isRemovable )
-    // Assume we can't add an unmounted/absent mountpoint
+    // Assume we can't add an absent device
     , m_isPresent( true )
 {
 }
 
-unsigned int Mountpoint::id() const
+unsigned int Device::id() const
 {
     return m_id;
 }
 
-const std::string&Mountpoint::uuid() const
+const std::string&Device::uuid() const
 {
     return m_uuid;
 }
 
-bool Mountpoint::isRemovable() const
+bool Device::isRemovable() const
 {
     return m_isRemovable;
 }
 
-bool Mountpoint::isPresent() const
+bool Device::isPresent() const
 {
     return m_isPresent;
 }
 
-void Mountpoint::setPresent(bool value)
+void Device::setPresent(bool value)
 {
-    static const std::string req = "UPDATE " + policy::MountpointTable::Name +
+    static const std::string req = "UPDATE " + policy::DeviceTable::Name +
             " SET is_present = ?";
     if ( sqlite::Tools::executeUpdate( m_dbConn, req, value ) == false )
         return;
     m_isPresent = value;
 }
 
-std::shared_ptr<Mountpoint> Mountpoint::create(DBConnection dbConnection, const std::string& uuid, bool isRemovable )
+std::shared_ptr<Device> Device::create(DBConnection dbConnection, const std::string& uuid, bool isRemovable )
 {
-    static const std::string req = "INSERT INTO " + policy::MountpointTable::Name
+    static const std::string req = "INSERT INTO " + policy::DeviceTable::Name
             + "(uuid, is_removable, is_present) VALUES(?, ?, ?)";
-    auto self = std::make_shared<Mountpoint>( uuid, isRemovable );
+    auto self = std::make_shared<Device>( uuid, isRemovable );
     if ( insert( dbConnection, self, req, uuid, isRemovable, self->isPresent() ) == false )
         return nullptr;
     self->m_dbConn = dbConnection;
     return self;
 }
 
-bool Mountpoint::createTable(DBConnection connection)
+bool Device::createTable(DBConnection connection)
 {
-    std::string req = "CREATE TABLE IF NOT EXISTS " + policy::MountpointTable::Name + "("
-                "id_mountpoint INTEGER PRIMARY KEY AUTOINCREMENT,"
+    std::string req = "CREATE TABLE IF NOT EXISTS " + policy::DeviceTable::Name + "("
+                "id_device INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "uuid TEXT UNIQUE ON CONFLICT FAIL,"
                 "is_removable BOOLEAN,"
                 "is_present BOOLEAN"
@@ -96,9 +96,9 @@ bool Mountpoint::createTable(DBConnection connection)
     return sqlite::Tools::executeRequest( connection, req );
 }
 
-std::shared_ptr<Mountpoint> Mountpoint::fromUuid( DBConnection dbConnection, const std::string& uuid )
+std::shared_ptr<Device> Device::fromUuid( DBConnection dbConnection, const std::string& uuid )
 {
-    static const std::string req = "SELECT * FROM " + policy::MountpointTable::Name +
+    static const std::string req = "SELECT * FROM " + policy::DeviceTable::Name +
             " WHERE uuid = ?";
     return fetch( dbConnection, req, uuid );
 }

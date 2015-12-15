@@ -22,49 +22,16 @@
 
 #pragma once
 
-#include "filesystem/IMountpoint.h"
-#include <memory>
-#include <unordered_map>
+#include <string>
 
 namespace fs
 {
-
-class UnknownMountpoint : public IMountpoint
+class IDevice
 {
 public:
-    UnknownMountpoint() : m_uuid( "unknown" ) {}
-    virtual const std::string& uuid() const override { return m_uuid; }
-    virtual bool isPresent() const override { return true; }
-    virtual bool isRemovable() const override { return false; }
-private:
-    std::string m_uuid;
+    virtual ~IDevice() = default;
+    virtual const std::string& uuid() const = 0;
+    virtual bool isPresent() const = 0;
+    virtual bool isRemovable() const = 0;
 };
-
-class Mountpoint : public IMountpoint
-{
-public:
-    using MountpointMap = std::unordered_map<std::string, std::shared_ptr<IMountpoint>>;
-
-    virtual const std::string& uuid() const override;
-    virtual bool isPresent() const override;
-    virtual bool isRemovable() const override;
-
-
-    static std::shared_ptr<IMountpoint> fromPath( const std::string& path );
-
-protected:
-    Mountpoint( const std::string& devicePath );
-
-private:
-    static MountpointMap listMountpoints();
-    static std::shared_ptr<IMountpoint> unknownMountpoint;
-
-private:
-    static const MountpointMap Cache;
-
-private:
-    std::string m_device;
-    std::string m_uuid;
-};
-
 }

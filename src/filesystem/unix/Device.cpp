@@ -20,7 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#include "Mountpoint.h"
+#include "Device.h"
 
 #include <mntent.h>
 #include <cstring>
@@ -28,52 +28,51 @@
 namespace
 {
     // Allow private ctors to be used from make_shared
-    struct MountpointBuilder : fs::Mountpoint
+    struct DeviceBuilder : fs::Device
     {
-        MountpointBuilder( const std::string& path ) : Mountpoint( path ) {}
+        DeviceBuilder( const std::string& path ) : Device( path ) {}
     };
 }
 
 namespace fs
 {
 
-const Mountpoint::MountpointMap Mountpoint::Cache = Mountpoint::listMountpoints();
-std::shared_ptr<IMountpoint> Mountpoint::unknownMountpoint = std::make_shared<UnknownMountpoint>();
+const Device::DeviceMap Device::Cache = Device::listDevices();
 
-Mountpoint::Mountpoint( const std::string& devicePath )
+Device::Device( const std::string& devicePath )
     : m_device( devicePath )
     , m_uuid( "fake uuid" )
 {
 }
 
-const std::string& Mountpoint::uuid() const
+const std::string& Device::uuid() const
 {
     return m_uuid;
 }
 
-bool Mountpoint::isPresent() const
+bool Device::isPresent() const
 {
     return true;
 }
 
-bool Mountpoint::isRemovable() const
+bool Device::isRemovable() const
 {
     return false;
 }
 
-std::shared_ptr<IMountpoint> Mountpoint::fromPath( const std::string& path )
+std::shared_ptr<IDevice> Device::fromPath( const std::string& path )
 {
     for ( const auto& p : Cache )
     {
         if ( path.find( p.first ) == 0 )
             return p.second;
     }
-    return unknownMountpoint;
+    return nullptr;
 }
 
-Mountpoint::MountpointMap Mountpoint::listMountpoints()
+Device::DeviceMap Device::listDevices()
 {
-    MountpointMap res;
+    DeviceMap res;
     FILE* f = setmntent("/etc/mtab", "r");
     if ( f == nullptr )
         throw std::runtime_error( "Failed to read /etc/mtab" );
@@ -98,7 +97,7 @@ Mountpoint::MountpointMap Mountpoint::listMountpoints()
                 || strcmp( s.mnt_type, "binfmt_misc" ) == 0
                 || strcmp( s.mnt_type, "tmpfs" ) == 0 )
             continue;
-        res[s.mnt_dir] = std::make_shared<MountpointBuilder>( s.mnt_fsname );
+        res[s.mnt_dir] = std::make_shared<DeviceBuilder>( s.mnt_fsname );
     }
     return res;
 }

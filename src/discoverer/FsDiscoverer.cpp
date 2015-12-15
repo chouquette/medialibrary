@@ -26,9 +26,9 @@
 #include <queue>
 
 #include "factory/FileSystem.h"
-#include "filesystem/IMountpoint.h"
+#include "filesystem/IDevice.h"
 #include "Media.h"
-#include "Mountpoint.h"
+#include "Device.h"
 #include "Folder.h"
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
@@ -74,14 +74,14 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
     auto f = Folder::create( m_dbConn, fsDir->path(), 0, fsDir->isRemovable(), 0 );
     if ( f == nullptr )
         return false;
-    // Since this is the "root" folder, we will always try to add its mountpoint to our mountpoint list.
-    // We can then check if the subfolders mountpoint are different
-    auto mountpointFs = fsDir->mountpoint();
-    auto mountpoint = Mountpoint::fromUuid( m_dbConn, mountpointFs->uuid() );
-    if ( mountpoint == nullptr )
+    // Since this is the "root" folder, we will always try to add the device it's located on
+    // to our devices list. We can then check if the subfolders containing device are different
+    auto deviceFs = fsDir->device();
+    auto device = Device::fromUuid( m_dbConn, deviceFs->uuid() );
+    if ( device == nullptr )
     {
-        LOG_INFO( "Creating new mountpoint ", mountpointFs->uuid() );
-        mountpoint = Mountpoint::create( m_dbConn, mountpointFs->uuid(), mountpointFs->isRemovable() );
+        LOG_INFO( "Creating new device in DB ", deviceFs->uuid() );
+        device = Device::create( m_dbConn, deviceFs->uuid(), deviceFs->isRemovable() );
     }
     checkFiles( fsDir.get(), f );
     checkSubfolders( fsDir.get(), f, blist );

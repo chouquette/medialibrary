@@ -29,7 +29,7 @@
 namespace fs
 {
     class IFile;
-    class IMountpoint;
+    class IDevice;
 
     class IDirectory
     {
@@ -42,7 +42,7 @@ namespace fs
         /// Returns a list of absolute path to this folder subdirectories
         virtual const std::vector<std::string>& dirs() = 0;
         virtual unsigned int lastModificationDate() const = 0;
-        virtual std::shared_ptr<IMountpoint> mountpoint() const = 0;
+        virtual std::shared_ptr<IDevice> device() const = 0;
         virtual bool isRemovable() const = 0;
     };
 }

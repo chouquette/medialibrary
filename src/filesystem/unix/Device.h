@@ -20,42 +20,39 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#include "Tests.h"
+#pragma once
 
-#include "Mountpoint.h"
+#include "filesystem/IDevice.h"
+#include <memory>
+#include <unordered_map>
 
-class Mountpoints : public Tests
+namespace fs
 {
+
+class Device : public IDevice
+{
+public:
+    using DeviceMap = std::unordered_map<std::string, std::shared_ptr<IDevice>>;
+
+    virtual const std::string& uuid() const override;
+    virtual bool isPresent() const override;
+    virtual bool isRemovable() const override;
+
+
+    static std::shared_ptr<IDevice> fromPath( const std::string& path );
+
+protected:
+    Device( const std::string& devicePath );
+
+private:
+    static DeviceMap listDevices();
+
+private:
+    static const DeviceMap Cache;
+
+private:
+    std::string m_device;
+    std::string m_uuid;
 };
 
-TEST_F( Mountpoints, Create )
-{
-    auto m = ml->addMountpoint( "dummy", true );
-    ASSERT_NE( nullptr, m );
-    ASSERT_EQ( "dummy", m->uuid() );
-    ASSERT_TRUE( m->isRemovable() );
-    ASSERT_TRUE( m->isPresent() );
-
-    Reload();
-
-    m = ml->mountpoint( "dummy" );
-    ASSERT_NE( nullptr, m );
-    ASSERT_EQ( "dummy", m->uuid() );
-    ASSERT_TRUE( m->isRemovable() );
-    ASSERT_TRUE( m->isPresent() );
-}
-
-TEST_F( Mountpoints, SetPresent )
-{
-    auto m = ml->addMountpoint( "dummy", true );
-    ASSERT_NE( nullptr, m );
-    ASSERT_TRUE( m->isPresent() );
-
-    m->setPresent( false );
-    ASSERT_FALSE( m->isPresent() );
-
-    Reload();
-
-    m = ml->mountpoint( "dummy" );
-    ASSERT_FALSE( m->isPresent() );
 }

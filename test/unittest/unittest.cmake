@@ -11,7 +11,7 @@ list(APPEND TEST_SRCS
     unittest/FsUtilsTests.cpp
     unittest/ArtistTests.cpp
     unittest/AlbumTrackTests.cpp
-    unittest/MountpointTests.cpp
+    unittest/DeviceTests.cpp
 
     mocks/FileSystem.h
     mocks/DiscovererCbMock.h

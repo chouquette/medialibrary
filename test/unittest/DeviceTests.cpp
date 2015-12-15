@@ -20,18 +20,42 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#pragma once
+#include "Tests.h"
 
-#include <string>
+#include "Device.h"
 
-namespace fs
+class Devices : public Tests
 {
-class IMountpoint
-{
-public:
-    virtual ~IMountpoint() = default;
-    virtual const std::string& uuid() const = 0;
-    virtual bool isPresent() const = 0;
-    virtual bool isRemovable() const = 0;
 };
+
+TEST_F( Devices, Create )
+{
+    auto d = ml->addDevice( "dummy", true );
+    ASSERT_NE( nullptr, d );
+    ASSERT_EQ( "dummy", d->uuid() );
+    ASSERT_TRUE( d->isRemovable() );
+    ASSERT_TRUE( d->isPresent() );
+
+    Reload();
+
+    d = ml->device( "dummy" );
+    ASSERT_NE( nullptr, d );
+    ASSERT_EQ( "dummy", d->uuid() );
+    ASSERT_TRUE( d->isRemovable() );
+    ASSERT_TRUE( d->isPresent() );
+}
+
+TEST_F( Devices, SetPresent )
+{
+    auto d = ml->addDevice( "dummy", true );
+    ASSERT_NE( nullptr, d );
+    ASSERT_TRUE( d->isPresent() );
+
+    d->setPresent( false );
+    ASSERT_FALSE( d->isPresent() );
+
+    Reload();
+
+    d = ml->device( "dummy" );
+    ASSERT_FALSE( d->isPresent() );
 }

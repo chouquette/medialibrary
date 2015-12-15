@@ -25,32 +25,32 @@
 #include "Types.h"
 #include "database/DatabaseHelpers.h"
 
-class Mountpoint;
+class Device;
 
 namespace policy
 {
-struct MountpointTable
+struct DeviceTable
 {
     static const std::string Name;
     static const std::string PrimaryKeyColumn;
-    static unsigned int Mountpoint::*const PrimaryKey;
+    static unsigned int Device::*const PrimaryKey;
 };
 }
 
-class Mountpoint : public DatabaseHelpers<Mountpoint, policy::MountpointTable>
+class Device : public DatabaseHelpers<Device, policy::DeviceTable>
 {
 public:
-    Mountpoint( const std::string& uuid, bool isRemovable );
-    Mountpoint( DBConnection dbConnection, sqlite::Row& row );
+    Device( const std::string& uuid, bool isRemovable );
+    Device( DBConnection dbConnection, sqlite::Row& row );
     unsigned int id() const;
     const std::string& uuid() const;
     bool isRemovable() const;
     bool isPresent() const;
     void setPresent( bool value );
 
-    static std::shared_ptr<Mountpoint> create( DBConnection dbConnection, const std::string& uuid, bool isRemovable );
+    static std::shared_ptr<Device> create( DBConnection dbConnection, const std::string& uuid, bool isRemovable );
     static bool createTable( DBConnection connection );
-    static std::shared_ptr<Mountpoint> fromUuid( DBConnection dbConnection, const std::string& uuid );
+    static std::shared_ptr<Device> fromUuid( DBConnection dbConnection, const std::string& uuid );
 
 private:
     DBConnection m_dbConn;
@@ -62,5 +62,5 @@ private:
     bool m_isRemovable;
     bool m_isPresent;
 
-    friend struct policy::MountpointTable;
+    friend struct policy::DeviceTable;
 };

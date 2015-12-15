@@ -29,7 +29,7 @@ namespace fs
 {
     class IDirectory;
     class IFile;
-    class IMountpoint;
+    class IDevice;
 }
 
 namespace factory
