@@ -26,7 +26,9 @@
 #include <queue>
 
 #include "factory/FileSystem.h"
+#include "filesystem/IMountpoint.h"
 #include "Media.h"
+#include "Mountpoint.h"
 #include "Folder.h"
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
@@ -72,6 +74,15 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
     auto f = Folder::create( m_dbConn, fsDir->path(), 0, fsDir->isRemovable(), 0 );
     if ( f == nullptr )
         return false;
+    // Since this is the "root" folder, we will always try to add its mountpoint to our mountpoint list.
+    // We can then check if the subfolders mountpoint are different
+    auto mountpointFs = fsDir->mountpoint();
+    auto mountpoint = Mountpoint::fromUuid( m_dbConn, mountpointFs->uuid() );
+    if ( mountpoint == nullptr )
+    {
+        LOG_INFO( "Creating new mountpoint ", mountpointFs->uuid() );
+        mountpoint = Mountpoint::create( m_dbConn, mountpointFs->uuid(), mountpointFs->isRemovable() );
+    }
     checkFiles( fsDir.get(), f );
     checkSubfolders( fsDir.get(), f, blist );
     f->setLastModificationDate( fsDir->lastModificationDate() );
