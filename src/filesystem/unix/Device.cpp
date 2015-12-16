@@ -43,6 +43,7 @@ Device::Device( const std::string& devicePath )
     : m_device( devicePath )
     , m_uuid( "fake uuid" )
     , m_mountpoint( "/mnt/fixme" )
+    , m_present( true )
 {
 }
 
@@ -54,6 +55,11 @@ const std::string& Device::uuid() const
 bool Device::isRemovable() const
 {
     return false;
+}
+
+bool Device::isPresent() const
+{
+    return m_present;
 }
 
 const std::string&Device::mountpoint() const

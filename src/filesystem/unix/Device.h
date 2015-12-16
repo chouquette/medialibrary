@@ -36,6 +36,7 @@ public:
 
     virtual const std::string& uuid() const override;
     virtual bool isRemovable() const override;
+    virtual bool isPresent() const override;
     virtual const std::string& mountpoint() const override;
 
     ///
@@ -57,6 +58,7 @@ private:
     std::string m_device;
     std::string m_uuid;
     std::string m_mountpoint;
+    bool m_present;
 };
 
 }

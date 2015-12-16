@@ -90,16 +90,19 @@ class Device : public fs::IDevice
 {
 public:
     Device( const std::string& mountpoint, const std::string& uuid ) : m_uuid( uuid ),
-        m_removable( false ), m_mountpoint( mountpoint ) {}
+        m_removable( false ), m_present( true ), m_mountpoint( mountpoint ) {}
     virtual const std::string& uuid() const override { return m_uuid; }
     virtual bool isRemovable() const override { return m_removable; }
+    virtual bool isPresent() const override { return m_present; }
     virtual const std::string& mountpoint() const override { return m_mountpoint; }
 
     void setRemovable( bool value ) { m_removable = value; }
+    void setPresent( bool value ) { m_present = value; }
 
 private:
     std::string m_uuid;
     bool m_removable;
+    bool m_present;
     std::string m_mountpoint;
 };
 
