@@ -155,3 +155,8 @@ unsigned int Folder::deviceId() const
 {
     return m_deviceId;
 }
+
+bool Folder::isPresent() const
+{
+    return m_isPresent;
+}

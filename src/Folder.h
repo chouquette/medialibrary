@@ -66,6 +66,7 @@ public:
     virtual unsigned int lastModificationDate() override;
     bool setLastModificationDate(unsigned int lastModificationDate);
     unsigned int deviceId() const;
+    bool isPresent() const;
 
 private:
     DBConnection m_dbConection;

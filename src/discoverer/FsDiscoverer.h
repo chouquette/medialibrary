@@ -44,6 +44,7 @@ private:
     std::vector<std::shared_ptr<Folder>> blacklist() const;
     bool isBlacklisted( const std::string& path, const std::vector<std::shared_ptr<Folder>>& blacklist ) const;
     bool addFolder(fs::IDirectory* folder, Folder* parentFolder, const std::vector<std::shared_ptr<Folder> >& blacklist ) const;
+    void checkDevices();
 
 private:
     MediaLibrary* m_ml;

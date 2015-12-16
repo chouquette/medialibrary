@@ -74,6 +74,8 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
 
 void FsDiscoverer::reload()
 {
+    // Start by checking if previously known devices have been plugged/unplugged
+    checkDevices();
     //FIXME: This should probably be in a sql transaction
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
             + " WHERE id_parent IS NULL";
@@ -82,18 +84,30 @@ void FsDiscoverer::reload()
     for ( const auto& f : rootFolders )
     {
         auto folder = m_fsFactory->createDirectory( f->path() );
-        // Don't assume a folder that is a mountpoint will get its modification date updated on all platforms
-        // So first, we check if the device containing this folder is available:
-        auto deviceFs = folder->device();
-        if ( deviceFs == nullptr )
-        {
-            auto device = Device::fetch( m_dbConn, f->deviceId() );
-            device->setPresent( false );
+        if ( folder->lastModificationDate() == f->lastModificationDate() )
             continue;
-        }
         checkSubfolders( folder.get(), f.get(), blist );
         checkFiles( folder.get(), f.get() );
         f->setLastModificationDate( folder->lastModificationDate() );
+    }
+}
+
+void FsDiscoverer::checkDevices()
+{
+    auto devices = Device::fetchAll( m_dbConn );
+    for ( auto& d : devices )
+    {
+        auto deviceFs = m_fsFactory->createDevice( d->uuid() );
+        auto fsDevicePresent = deviceFs != nullptr && deviceFs->isPresent();
+        if ( d->isPresent() != fsDevicePresent )
+        {
+            LOG_INFO( "Device ", d->uuid(), " changed presence state: ", d->isPresent(), " -> ", fsDevicePresent );
+            d->setPresent( fsDevicePresent );
+        }
+        else
+        {
+            LOG_INFO( "Device ", d->uuid(), " unchanged" );
+        }
     }
 }
 
@@ -133,19 +147,14 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder
             continue;
         }
         auto folderInDb = *it;
-        auto deviceFs = subFolder->device();
-        // If the device supposed to contain this folder is not present anymore, flag it as removed
-        if ( deviceFs == nullptr || deviceFs->isPresent() == false )
+        // If the folder isn't present, don't check it for modifications
+        if ( folderInDb->isPresent() == false )
         {
-            auto device = Device::fetch( m_dbConn, folderInDb->deviceId() );
-            if ( device == nullptr )
-            {
-                LOG_ERROR( "Failed to fetch device containing folder ", folderInDb->path() );
-                continue;
-            }
-            LOG_INFO( "Device containing ", folderInDb->path(), " is not present anymore" );
-            device->setPresent( false );
-            // Don't let this folder be deleted after the main loop.
+            subFoldersInDB.erase( it );
+            continue;
+        }
+        if ( subFolder->lastModificationDate() == folderInDb->lastModificationDate() )
+        {
             subFoldersInDB.erase( it );
             continue;
         }
@@ -237,3 +246,4 @@ bool FsDiscoverer::addFolder( fs::IDirectory* folder, Folder* parentFolder, cons
     f->setLastModificationDate( folder->lastModificationDate() );
     return true;
 }
+

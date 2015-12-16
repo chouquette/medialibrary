@@ -74,7 +74,7 @@ void Device::setPresent(bool value)
     m_isPresent = value;
 }
 
-std::shared_ptr<Device> Device::create(DBConnection dbConnection, const std::string& uuid, bool isRemovable )
+std::shared_ptr<Device> Device::create( DBConnection dbConnection, const std::string& uuid, bool isRemovable )
 {
     static const std::string req = "INSERT INTO " + policy::DeviceTable::Name
             + "(uuid, is_removable, is_present) VALUES(?, ?, ?)";
