@@ -140,6 +140,11 @@ public:
         return m_device;
     }
 
+    void removeDevice()
+    {
+        m_device = nullptr;
+    }
+
     void addFile( const std::string& fileName )
     {
         m_files.emplace_back( m_path + fileName );
@@ -257,6 +262,14 @@ struct FileSystemFactory : public factory::IFileSystem
         }
         it->second->remove();
         dirs.erase( it );
+    }
+
+    std::shared_ptr<Directory> directory( const std::string& path )
+    {
+        auto it = dirs.find( path );
+        if ( it != end( dirs ) )
+            return it->second;
+        return nullptr;
     }
 
     virtual std::shared_ptr<fs::IDirectory> createDirectory(const std::string& path) override

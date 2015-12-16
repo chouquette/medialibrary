@@ -23,10 +23,30 @@
 #include "Tests.h"
 
 #include "Device.h"
+#include "mocks/FileSystem.h"
+#include "mocks/DiscovererCbMock.h"
 
 class Devices : public Tests
 {
+protected:
+    std::shared_ptr<mock::FileSystemFactory> fsMock;
+    std::unique_ptr<mock::WaitForDiscoveryComplete> cbMock;
+
+protected:
+    virtual void SetUp() override
+    {
+        fsMock.reset( new mock::FileSystemFactory );
+        cbMock.reset( new mock::WaitForDiscoveryComplete );
+        Reload();
+    }
+
+    virtual void Reload()
+    {
+        Tests::Reload( fsMock, cbMock.get() );
+    }
 };
+
+// Database/Entity tests
 
 TEST_F( Devices, Create )
 {
@@ -58,4 +78,34 @@ TEST_F( Devices, SetPresent )
 
     d = ml->device( "dummy" );
     ASSERT_FALSE( d->isPresent() );
+}
+
+// Filesystem tests:
+
+TEST_F( Devices, RemoveDisk )
+{
+    cbMock->prepareForWait( 1 );
+    ml->discover( "." );
+    bool discovered = cbMock->wait();
+    ASSERT_TRUE( discovered );
+
+    auto files = ml->files();
+    ASSERT_EQ( 3u, files.size() );
+
+    auto file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "subfile.mp4" );
+    ASSERT_NE( nullptr, file );
+
+    auto subdir = fsMock->directory( mock::FileSystemFactory::SubFolder );
+    subdir->removeDevice();
+
+    cbMock->prepareForReload();
+    Reload();
+    bool reloaded = cbMock->waitForReload();
+    ASSERT_TRUE( reloaded );
+
+    files = ml->files();
+    ASSERT_EQ( 2u, files.size() );
+
+    file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "subfile.mp4" );
+    ASSERT_EQ( nullptr, file );
 }
