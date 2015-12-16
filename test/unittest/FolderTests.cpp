@@ -45,6 +45,11 @@ class Folders : public Tests
             Reload();
         }
 
+        virtual void InstantiateMediaLibrary() override
+        {
+            ml.reset( new MediaLibraryWithoutParser );
+        }
+
         virtual void Reload()
         {
             Tests::Reload( fsMock, cbMock.get() );

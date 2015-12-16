@@ -48,7 +48,7 @@ void Tests::TearDown()
 
 void Tests::Reload(std::shared_ptr<factory::IFileSystem> fs /*= nullptr*/, IMediaLibraryCb* metadataCb /*= nullptr*/ )
 {
-    ml.reset( new MediaLibrary );
+    InstantiateMediaLibrary();
     if ( fs == nullptr )
     {
         fs = std::shared_ptr<factory::IFileSystem>( new mock::NoopFsFactory );
@@ -63,6 +63,11 @@ void Tests::Reload(std::shared_ptr<factory::IFileSystem> fs /*= nullptr*/, IMedi
 void Tests::SetUp()
 {
     Reload();
+}
+
+void Tests::InstantiateMediaLibrary()
+{
+    ml.reset( new MediaLibraryWithoutBackground );
 }
 
 ::testing::Environment* const env = ::testing::AddGlobalTestEnvironment(new TestEnv);

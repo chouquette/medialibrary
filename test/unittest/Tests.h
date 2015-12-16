@@ -25,12 +25,23 @@
 #include "factory/IFileSystem.h"
 #include "MediaLibrary.h"
 
+class MediaLibraryWithoutParser : public MediaLibrary
+{
+    virtual void startParser() override {}
+};
+
+class MediaLibraryWithoutBackground : public MediaLibraryWithoutParser
+{
+    virtual void startDiscoverer() override {}
+};
+
 class Tests : public testing::Test
 {
 protected:
     std::unique_ptr<MediaLibrary> ml;
 
     virtual void SetUp() override;
+    virtual void InstantiateMediaLibrary();
     void Reload( std::shared_ptr<factory::IFileSystem> fs = nullptr, IMediaLibraryCb* metadataCb = nullptr );
     virtual void TearDown() override;
 };

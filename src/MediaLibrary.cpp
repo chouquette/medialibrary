@@ -224,7 +224,8 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder* p
     }
     if ( m_callback != nullptr )
         m_callback->onFileAdded( fptr );
-    m_parser->parse( fptr );
+    if ( m_parser != nullptr )
+        m_parser->parse( fptr );
     return fptr;
 }
 
@@ -384,12 +385,14 @@ void MediaLibrary::reload()
 
 void MediaLibrary::pauseBackgroundOperations()
 {
-    m_parser->pause();
+    if ( m_parser != nullptr )
+        m_parser->pause();
 }
 
 void MediaLibrary::resumeBackgroundOperations()
 {
-    m_parser->resume();
+    if ( m_parser != nullptr )
+        m_parser->resume();
 }
 
 void MediaLibrary::discover( const std::string &entryPoint )
