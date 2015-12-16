@@ -147,9 +147,9 @@ public:
         return m_device;
     }
 
-    void removeDevice()
+    void setDevice( std::shared_ptr<fs::IDevice> device )
     {
-        m_device = nullptr;
+        m_device = device;
     }
 
     void addFile( const std::string& fileName )
