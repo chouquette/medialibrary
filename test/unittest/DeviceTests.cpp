@@ -26,7 +26,11 @@
 #include "mocks/FileSystem.h"
 #include "mocks/DiscovererCbMock.h"
 
-class Devices : public Tests
+class DeviceEntity : public Tests
+{
+};
+
+class DeviceFs : public Tests
 {
 protected:
     std::shared_ptr<mock::FileSystemFactory> fsMock;
@@ -53,7 +57,7 @@ protected:
 
 // Database/Entity tests
 
-TEST_F( Devices, Create )
+TEST_F( DeviceEntity, Create )
 {
     auto d = ml->addDevice( "dummy", true );
     ASSERT_NE( nullptr, d );
@@ -70,7 +74,7 @@ TEST_F( Devices, Create )
     ASSERT_TRUE( d->isPresent() );
 }
 
-TEST_F( Devices, SetPresent )
+TEST_F( DeviceEntity, SetPresent )
 {
     auto d = ml->addDevice( "dummy", true );
     ASSERT_NE( nullptr, d );
@@ -87,7 +91,7 @@ TEST_F( Devices, SetPresent )
 
 // Filesystem tests:
 
-TEST_F( Devices, RemoveDisk )
+TEST_F( DeviceFs, RemoveDisk )
 {
     cbMock->prepareForWait( 1 );
     ml->discover( "." );
@@ -115,7 +119,7 @@ TEST_F( Devices, RemoveDisk )
     ASSERT_EQ( nullptr, file );
 }
 
-TEST_F( Devices, UnmountDisk )
+TEST_F( DeviceFs, UnmountDisk )
 {
     cbMock->prepareForWait( 1 );
     ml->discover( "." );
