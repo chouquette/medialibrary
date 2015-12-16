@@ -68,8 +68,8 @@ bool Device::isPresent() const
 void Device::setPresent(bool value)
 {
     static const std::string req = "UPDATE " + policy::DeviceTable::Name +
-            " SET is_present = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConn, req, value ) == false )
+            " SET is_present = ? WHERE id_device = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConn, req, value, m_id ) == false )
         return;
     m_isPresent = value;
 }
