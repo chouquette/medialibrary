@@ -185,7 +185,6 @@ MediaPtr MediaLibrary::file( const std::string& path )
 
 std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder* parentFolder )
 {
-    LOG_INFO( "Adding ", path );
     std::unique_ptr<fs::IFile> file;
     try
     {
@@ -216,6 +215,7 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder* p
     if ( type == IMedia::Type::UnknownType )
         return nullptr;
 
+    LOG_INFO( "Adding ", path );
     auto fptr = Media::create( m_dbConnection.get(), type, file.get(), parentFolder != nullptr ? parentFolder->id() : 0 );
     if ( fptr == nullptr )
     {
