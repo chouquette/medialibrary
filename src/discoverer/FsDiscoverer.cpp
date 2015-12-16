@@ -135,7 +135,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder
         auto folderInDb = *it;
         auto deviceFs = subFolder->device();
         // If the device supposed to contain this folder is not present anymore, flag it as removed
-        if ( deviceFs == nullptr )
+        if ( deviceFs == nullptr || deviceFs->isPresent() == false )
         {
             auto device = Device::fetch( m_dbConn, folderInDb->deviceId() );
             if ( device == nullptr )
