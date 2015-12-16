@@ -125,11 +125,15 @@ public:
 
     virtual const std::vector<std::string>& files() override
     {
+        if ( m_device == nullptr || m_device->isPresent() == false )
+            return m_emptyfiles;
         return m_files;
     }
 
     virtual const std::vector<std::string>& dirs() override
     {
+        if ( m_device == nullptr || m_device->isPresent() == false )
+            return m_emptydirs;
         return m_dirs;
     }
 
@@ -206,6 +210,8 @@ private:
     std::string m_path;
     std::vector<std::string> m_files;
     std::vector<std::string> m_dirs;
+    std::vector<std::string> m_emptyfiles;
+    std::vector<std::string> m_emptydirs;
     std::shared_ptr<mock::Directory> m_parent;
     unsigned int m_lastModificationDate;
     bool m_isRemovable;
