@@ -42,7 +42,8 @@ Folder::Folder(DBConnection dbConnection, sqlite::Row& row )
         >> m_parent
         >> m_lastModificationDate
         >> m_isBlacklisted
-        >> m_deviceId;
+        >> m_deviceId
+        >> m_isPresent;
 }
 
 Folder::Folder( const std::string& path, time_t lastModificationDate, unsigned int parent, unsigned int deviceId )
@@ -52,6 +53,7 @@ Folder::Folder( const std::string& path, time_t lastModificationDate, unsigned i
     , m_lastModificationDate( lastModificationDate )
     , m_isBlacklisted( false )
     , m_deviceId( deviceId )
+    , m_isPresent( true )
 {
 }
 
@@ -65,10 +67,19 @@ bool Folder::createTable(DBConnection connection)
             "last_modification_date UNSIGNED INTEGER,"
             "is_blacklisted INTEGER,"
             "device_id UNSIGNED INTEGER,"
+            "is_present BOOLEAN NOT NULL DEFAULT 1,"
             "FOREIGN KEY (id_parent) REFERENCES " + policy::FolderTable::Name +
-            "(id_folder) ON DELETE CASCADE"
+            "(id_folder) ON DELETE CASCADE,"
+            "FOREIGN KEY (device_id) REFERENCES " + policy::DeviceTable::Name +
+            "(id_device) ON DELETE CASCADE"
             ")";
-    return sqlite::Tools::executeRequest( connection, req );
+    std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_device_present AFTER UPDATE OF is_present ON "
+            + policy::DeviceTable::Name +
+            " BEGIN"
+            " UPDATE " + policy::FolderTable::Name + " SET is_present = new.is_present WHERE device_id = new.id_device;"
+            " END";
+    return sqlite::Tools::executeRequest( connection, req ) &&
+            sqlite::Tools::executeRequest( connection, triggerReq );
 }
 
 std::shared_ptr<Folder> Folder::create(DBConnection connection, const std::string& path, time_t lastModificationDate, unsigned int parentId, Device& device )

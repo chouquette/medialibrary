@@ -60,7 +60,8 @@ Media::Media( DBConnection dbConnection, sqlite::Row& row )
         >> m_insertionDate
         >> m_snapshot
         >> m_isParsed
-        >> m_title;
+        >> m_title
+        >> m_isPresent;
 }
 
 Media::Media( const fs::IFile* file, unsigned int folderId, const std::string& title, Type type )
@@ -76,6 +77,7 @@ Media::Media( const fs::IFile* file, unsigned int folderId, const std::string& t
     , m_insertionDate( time( nullptr ) )
     , m_isParsed( false )
     , m_title( title )
+    , m_isPresent( true )
     , m_changed( false )
 {
 }
@@ -330,6 +332,7 @@ bool Media::createTable( DBConnection connection )
             "snapshot TEXT,"
             "parsed BOOLEAN NOT NULL DEFAULT 0,"
             "title TEXT,"
+            "is_present BOOLEAN NOT NULL DEFAULT 1,"
             "FOREIGN KEY (show_episode_id) REFERENCES " + policy::ShowEpisodeTable::Name
             + "(id_episode) ON DELETE CASCADE,"
             "FOREIGN KEY (movie_id) REFERENCES " + policy::MovieTable::Name
@@ -337,7 +340,13 @@ bool Media::createTable( DBConnection connection )
             "FOREIGN KEY (folder_id) REFERENCES " + policy::FolderTable::Name
             + "(id_folder) ON DELETE CASCADE"
             ")";
-    return sqlite::Tools::executeRequest( connection, req );
+    std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_folder_present AFTER UPDATE OF is_present ON "
+            + policy::FolderTable::Name +
+            " BEGIN"
+            " UPDATE " + policy::MediaTable::Name + " SET is_present = new.is_present WHERE folder_id = new.id_folder;"
+            " END";
+    return sqlite::Tools::executeRequest( connection, req ) &&
+            sqlite::Tools::executeRequest( connection, triggerReq );
 }
 
 bool Media::addLabel( LabelPtr label )

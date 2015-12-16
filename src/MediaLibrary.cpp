@@ -143,8 +143,13 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
     }
 
     auto t = m_dbConnection->newTransaction();
-    if ( ( Media::createTable( m_dbConnection.get() ) &&
+    // We need to create the tables in order of triggers creation
+    // Device is the "root of all evil". When a device is modified,
+    // we will trigger an update on folder, which will trigger
+    // an update on files, and so on.
+    if ( ( Device::createTable( m_dbConnection.get() ) &&
         Folder::createTable( m_dbConnection.get() ) &&
+        Media::createTable( m_dbConnection.get() ) &&
         Label::createTable( m_dbConnection.get() ) &&
         Album::createTable( m_dbConnection.get() ) &&
         AlbumTrack::createTable( m_dbConnection.get() ) &&
@@ -155,8 +160,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         AudioTrack::createTable( m_dbConnection.get() ) &&
         Artist::createTable( m_dbConnection.get() ) &&
         Artist::createDefaultArtists( m_dbConnection.get() ) &&
-        Settings::createTable( m_dbConnection.get() ) &&
-        Device::createTable( m_dbConnection.get() ) ) == false )
+        Settings::createTable( m_dbConnection.get() ) ) == false )
     {
         LOG_ERROR( "Failed to create database structure" );
         return false;
@@ -182,25 +186,26 @@ void MediaLibrary::setVerbosity(LogLevel v)
 
 std::vector<MediaPtr> MediaLibrary::files()
 {
-    return Media::fetchAll<IMedia>( m_dbConnection.get() );
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE is_present = 1";
+    return Media::fetchAll<IMedia>( m_dbConnection.get(), req );
 }
 
 std::vector<MediaPtr> MediaLibrary::audioFiles()
 {
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? ORDER BY title";
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? AND is_present = 1 ORDER BY title";
     return Media::fetchAll<IMedia>( m_dbConnection.get(), req, IMedia::Type::AudioType );
 }
 
 std::vector<MediaPtr> MediaLibrary::videoFiles()
 {
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? ORDER BY title";
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? AND is_present = 1 ORDER BY title";
     return Media::fetchAll<IMedia>( m_dbConnection.get(), req, IMedia::Type::VideoType );
 }
 
 MediaPtr MediaLibrary::file( const std::string& path )
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name +
-            " WHERE mrl = ?";
+            " WHERE mrl = ? AND is_present = 1";
     return Media::fetch( m_dbConnection.get(), req, path );
 }
 

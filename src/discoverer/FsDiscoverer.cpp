@@ -91,8 +91,6 @@ void FsDiscoverer::reload()
             device->setPresent( false );
             continue;
         }
-        if ( folder->lastModificationDate() == f->lastModificationDate() )
-            continue;
         checkSubfolders( folder.get(), f.get(), blist );
         checkFiles( folder.get(), f.get() );
         f->setLastModificationDate( folder->lastModificationDate() );
@@ -135,15 +133,25 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder
             continue;
         }
         auto folderInDb = *it;
-        if ( subFolder->lastModificationDate() == folderInDb->lastModificationDate() )
+        auto deviceFs = subFolder->device();
+        // If the device supposed to contain this folder is not present anymore, flag it as removed
+        if ( deviceFs == nullptr )
         {
-            // Remove all folders that still exist in FS. That way, the list of folders that
-            // will still be in subFoldersInDB when we're done is the list of folders that have
-            // been deleted from the FS
+            auto device = Device::fetch( m_dbConn, folderInDb->deviceId() );
+            if ( device == nullptr )
+            {
+                LOG_ERROR( "Failed to fetch device containing folder ", folderInDb->path() );
+                continue;
+            }
+            LOG_INFO( "Device containing ", folderInDb->path(), " is not present anymore" );
+            device->setPresent( false );
+            // Don't let this folder be deleted after the main loop.
             subFoldersInDB.erase( it );
             continue;
         }
-        // This folder was modified, let's recurse
+        // In any case, check for modifications, as a change related to a mountpoint might
+        // not update the folder modification date.
+        // Also, relying on the modification date probably isn't portable
         checkSubfolders( subFolder.get(), folderInDb.get(), blacklist );
         checkFiles( subFolder.get(), folderInDb.get() );
         folderInDb->setLastModificationDate( subFolder->lastModificationDate() );

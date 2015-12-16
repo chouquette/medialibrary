@@ -76,6 +76,7 @@ private:
     unsigned int m_lastModificationDate;
     bool m_isBlacklisted;
     unsigned int m_deviceId;
+    bool m_isPresent;
 
     friend struct policy::FolderTable;
 };

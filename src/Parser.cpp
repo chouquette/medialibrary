@@ -143,7 +143,7 @@ void Parser::restore()
         return;
 
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
-            + " WHERE parsed = 0";
+            + " WHERE parsed = 0 AND is_present = 1";
     auto media = Media::fetchAll<Media>( m_dbConnection, req );
 
     std::lock_guard<std::mutex> lock( m_lock );

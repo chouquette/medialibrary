@@ -118,6 +118,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         std::string m_snapshot;
         bool m_isParsed;
         std::string m_title;
+        bool m_isPresent;
 
         // Auto fetched related properties
         AlbumTrackPtr m_albumTrack;
