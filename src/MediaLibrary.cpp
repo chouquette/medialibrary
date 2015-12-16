@@ -78,8 +78,7 @@ const std::vector<std::string> MediaLibrary::supportedAudioExtensions {
 const uint32_t MediaLibrary::DbModelVersion = 1;
 
 MediaLibrary::MediaLibrary()
-    : m_discoverer( new DiscovererWorker )
-    , m_verbosity( LogLevel::Error )
+    : m_verbosity( LogLevel::Error )
 {
     Log::setLogLevel( m_verbosity );
 }
@@ -87,7 +86,8 @@ MediaLibrary::MediaLibrary()
 MediaLibrary::~MediaLibrary()
 {
     // Explicitely stop the discoverer, to avoid it writting while tearing down.
-    m_discoverer->stop();
+    if ( m_discoverer != nullptr )
+        m_discoverer->stop();
     Media::clear();
     Folder::clear();
     Label::clear();
@@ -117,30 +117,6 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
     m_snapshotPath = snapshotPath;
     m_callback = mlCallback;
     m_dbConnection.reset( new SqliteConnection( dbPath ) );
-    m_parser.reset( new Parser( m_dbConnection.get(), m_callback ) );
-
-    if ( mlCallback != nullptr )
-    {
-        const char* args[] = {
-            "-vv",
-        };
-        m_vlcInstance = VLC::Instance( sizeof(args) / sizeof(args[0]), args );
-        m_vlcInstance.logSet([this](int lvl, const libvlc_log_t*, std::string msg) {
-            if ( m_verbosity != LogLevel::Verbose )
-                return ;
-            if ( lvl == LIBVLC_ERROR )
-                Log::Error( msg );
-            else if ( lvl == LIBVLC_WARNING )
-                Log::Warning( msg );
-            else
-                Log::Info( msg );
-        });
-
-        auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService( m_vlcInstance, m_dbConnection.get(), m_fsFactory ) );
-        auto thumbnailerService = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer( m_vlcInstance ) );
-        addMetadataService( std::move( vlcService ) );
-        addMetadataService( std::move( thumbnailerService ) );
-    }
 
     auto t = m_dbConnection->newTransaction();
     // We need to create the tables in order of triggers creation
@@ -171,10 +147,8 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
     if ( m_settings.dbModelVersion() != DbModelVersion )
         return false;
     t->commit();
-    m_discoverer->setCallback( m_callback );
-    m_discoverer->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( m_fsFactory, this, m_dbConnection.get() ) ) );
-    m_discoverer->reload();
-    m_parser->start();
+    startDiscoverer();
+    startParser();
     return true;
 }
 
@@ -368,9 +342,44 @@ void MediaLibrary::addMetadataService(std::unique_ptr<IMetadataService> service)
     m_parser->addService( std::move( service ) );
 }
 
+void MediaLibrary::startParser()
+{
+    m_parser.reset( new Parser( m_dbConnection.get(), m_callback ) );
+
+    const char* args[] = {
+        "-vv",
+    };
+    m_vlcInstance = VLC::Instance( sizeof(args) / sizeof(args[0]), args );
+    m_vlcInstance.logSet([this](int lvl, const libvlc_log_t*, std::string msg) {
+        if ( m_verbosity != LogLevel::Verbose )
+            return ;
+        if ( lvl == LIBVLC_ERROR )
+            Log::Error( msg );
+        else if ( lvl == LIBVLC_WARNING )
+            Log::Warning( msg );
+        else
+            Log::Info( msg );
+    });
+
+    auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService( m_vlcInstance, m_dbConnection.get(), m_fsFactory ) );
+    auto thumbnailerService = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer( m_vlcInstance ) );
+    addMetadataService( std::move( vlcService ) );
+    addMetadataService( std::move( thumbnailerService ) );
+    m_parser->start();
+}
+
+void MediaLibrary::startDiscoverer()
+{
+    m_discoverer.reset( new DiscovererWorker );
+    m_discoverer->setCallback( m_callback );
+    m_discoverer->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( m_fsFactory, this, m_dbConnection.get() ) ) );
+    m_discoverer->reload();
+}
+
 void MediaLibrary::reload()
 {
-    m_discoverer->reload();
+    if ( m_discoverer != nullptr )
+        m_discoverer->reload();
 }
 
 void MediaLibrary::pauseBackgroundOperations()
@@ -385,7 +394,8 @@ void MediaLibrary::resumeBackgroundOperations()
 
 void MediaLibrary::discover( const std::string &entryPoint )
 {
-    m_discoverer->discover( entryPoint );
+    if ( m_discoverer != nullptr )
+        m_discoverer->discover( entryPoint );
 }
 
 bool MediaLibrary::ignoreFolder( const std::string& path )

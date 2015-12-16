@@ -100,6 +100,8 @@ class MediaLibrary : public IMediaLibrary
 
     private:
         void addMetadataService( std::unique_ptr<IMetadataService> service );
+        virtual void startParser();
+        virtual void startDiscoverer();
 
     private:
         std::unique_ptr<SqliteConnection> m_dbConnection;
