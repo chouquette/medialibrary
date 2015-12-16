@@ -191,3 +191,36 @@ TEST_F( DeviceFs, ReplugDisk )
     file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "subfile.mp4" );
     ASSERT_NE( nullptr, file );
 }
+
+TEST_F( DeviceFs, ReplugDiskWithExtraFiles )
+{
+    cbMock->prepareForWait( 1 );
+    ml->discover( "." );
+    bool discovered = cbMock->wait();
+    ASSERT_TRUE( discovered );
+
+    auto files = ml->files();
+    ASSERT_EQ( 3u, files.size() );
+
+    auto subdir = fsMock->directory( mock::FileSystemFactory::SubFolder );
+    auto device = std::static_pointer_cast<mock::Device>( subdir->device() );
+    subdir->setDevice( nullptr );
+    fsMock->removableDevice = nullptr;
+
+    cbMock->prepareForReload();
+    Reload();
+    bool reloaded = cbMock->waitForReload();
+    ASSERT_TRUE( reloaded );
+
+    subdir->setDevice( device );
+    fsMock->removableDevice = device;
+    fsMock->addFile( mock::FileSystemFactory::SubFolder, "newfile.mkv" );
+
+    cbMock->prepareForReload();
+    Reload();
+    reloaded = cbMock->waitForReload();
+    ASSERT_TRUE( reloaded );
+
+    files = ml->files();
+    ASSERT_EQ( 4u, files.size() );
+}
