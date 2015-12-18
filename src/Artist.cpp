@@ -39,13 +39,15 @@ Artist::Artist( DBConnection dbConnection, sqlite::Row& row )
         >> m_name
         >> m_shortBio
         >> m_artworkUrl
-        >> m_nbAlbums;
+        >> m_nbAlbums
+        >> m_isPresent;
 }
 
 Artist::Artist( const std::string& name )
     : m_id( 0 )
     , m_name( name )
     , m_nbAlbums( 0 )
+    , m_isPresent( true )
 {
 }
 
@@ -169,7 +171,8 @@ bool Artist::createTable( DBConnection dbConnection )
                 "name TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
                 "shortbio TEXT,"
                 "artwork_url TEXT,"
-                "nb_albums UNSIGNED INT DEFAULT 0"
+                "nb_albums UNSIGNED INT DEFAULT 0,"
+                "is_present BOOLEAN NOT NULL DEFAULT 1"
             ")";
     static const std::string reqRel = "CREATE TABLE IF NOT EXISTS MediaArtistRelation("
                 "id_media INTEGER NOT NULL,"
@@ -182,6 +185,18 @@ bool Artist::createTable( DBConnection dbConnection )
             ")";
     return sqlite::Tools::executeRequest( dbConnection, req ) &&
             sqlite::Tools::executeRequest( dbConnection, reqRel );
+}
+
+bool Artist::createTriggers(DBConnection dbConnection)
+{
+    static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS has_album_present AFTER UPDATE OF "
+            "is_present ON " + policy::AlbumTable::Name +
+            " BEGIN "
+            " UPDATE " + policy::ArtistTable::Name + " SET is_present="
+                "(SELECT COUNT(id_album) FROM " + policy::AlbumTable::Name + " WHERE artist_id=new.artist_id AND is_present=1) "
+                "WHERE id_artist=new.artist_id;"
+            " END";
+    return sqlite::Tools::executeRequest( dbConnection, triggerReq );
 }
 
 bool Artist::createDefaultArtists( DBConnection dbConnection )

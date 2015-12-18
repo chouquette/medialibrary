@@ -137,6 +137,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         AudioTrack::createTable( m_dbConnection.get() ) &&
         Artist::createTable( m_dbConnection.get() ) &&
         Artist::createDefaultArtists( m_dbConnection.get() ) &&
+        Artist::createTriggers( m_dbConnection.get() ) &&
         Settings::createTable( m_dbConnection.get() ) ) == false )
     {
         LOG_ERROR( "Failed to create database structure" );
@@ -330,7 +331,7 @@ std::shared_ptr<Artist> MediaLibrary::createArtist( const std::string& name )
 std::vector<ArtistPtr> MediaLibrary::artists() const
 {
     static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name +
-            " WHERE nb_albums > 0";
+            " WHERE nb_albums > 0 AND is_present = 1";
     return Artist::fetchAll<IArtist>( m_dbConnection.get(), req );
 }
 

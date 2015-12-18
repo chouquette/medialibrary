@@ -59,6 +59,7 @@ public:
     std::shared_ptr<Album> unknownAlbum();
 
     static bool createTable( DBConnection dbConnection );
+    static bool createTriggers( DBConnection dbConnection );
     static bool createDefaultArtists( DBConnection dbConnection );
     static std::shared_ptr<Artist> create( DBConnection dbConnection, const std::string& name );
 
@@ -69,6 +70,7 @@ private:
     std::string m_shortBio;
     std::string m_artworkUrl;
     unsigned int m_nbAlbums;
+    bool m_isPresent;
 
     friend struct policy::ArtistTable;
 };
