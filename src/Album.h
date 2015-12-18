@@ -83,6 +83,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         bool removeArtist( Artist* artist );
 
         static bool createTable( DBConnection dbConnection );
+        static bool createTriggers( DBConnection dbConnection );
         static std::shared_ptr<Album> create(DBConnection dbConnection, const std::string& title );
         static std::shared_ptr<Album> createUnknownAlbum( DBConnection dbConnection, const Artist* artist );
 
@@ -96,6 +97,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         std::string m_artworkUrl;
         time_t m_lastSyncDate;
         unsigned int m_nbTracks;
+        bool m_isPresent;
 
         mutable std::vector<MediaPtr> m_tracks;
         mutable bool m_tracksCached;

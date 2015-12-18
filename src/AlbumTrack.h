@@ -75,6 +75,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         unsigned int m_albumId;
         unsigned int m_releaseYear;
         unsigned int m_discNumber;
+        bool m_isPresent;
 
         std::weak_ptr<Album> m_album;
 

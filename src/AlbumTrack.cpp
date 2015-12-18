@@ -40,7 +40,8 @@ AlbumTrack::AlbumTrack(DBConnection dbConnection, sqlite::Row& row )
         >> m_trackNumber
         >> m_albumId
         >> m_releaseYear
-        >> m_discNumber;
+        >> m_discNumber
+        >> m_isPresent;
 }
 
 //FIXME: constify media
@@ -51,6 +52,7 @@ AlbumTrack::AlbumTrack( Media* media, unsigned int trackNumber, unsigned int alb
     , m_albumId( albumId )
     , m_releaseYear( 0 )
     , m_discNumber( discNumber )
+    , m_isPresent( true )
 {
 }
 
@@ -87,12 +89,19 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
                 "album_id UNSIGNED INTEGER NOT NULL,"
                 "release_year UNSIGNED INTEGER,"
                 "disc_number UNSIGNED INTEGER,"
+                "is_present BOOLEAN NOT NULL DEFAULT 1,"
                 "FOREIGN KEY (media_id) REFERENCES " + policy::MediaTable::Name + "(id_media)"
                     " ON DELETE CASCADE, "
                 "FOREIGN KEY (album_id) REFERENCES Album(id_album) "
                     " ON DELETE CASCADE"
             ")";
-    return sqlite::Tools::executeRequest( dbConnection, req );
+    static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_track_present AFTER UPDATE OF is_present "
+            "ON " + policy::MediaTable::Name +
+            " BEGIN"
+            " UPDATE " + policy::AlbumTrackTable::Name + " SET is_present = new.is_present WHERE media_id = new.id_media;"
+            " END";
+    return sqlite::Tools::executeRequest( dbConnection, req ) &&
+            sqlite::Tools::executeRequest( dbConnection, triggerReq );
 }
 
 std::shared_ptr<AlbumTrack> AlbumTrack::create(DBConnection dbConnection, unsigned int albumId, Media* media, unsigned int trackNb, unsigned int discNumber )

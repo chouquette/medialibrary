@@ -44,7 +44,8 @@ Album::Album(DBConnection dbConnection, sqlite::Row& row)
         >> m_shortSummary
         >> m_artworkUrl
         >> m_lastSyncDate
-        >> m_nbTracks;
+        >> m_nbTracks
+        >> m_isPresent;
 }
 
 Album::Album(const std::string& title )
@@ -54,6 +55,7 @@ Album::Album(const std::string& title )
     , m_releaseYear( ~0u )
     , m_lastSyncDate( 0 )
     , m_nbTracks( 0 )
+    , m_isPresent( true )
     , m_tracksCached( false )
 {
 }
@@ -64,6 +66,7 @@ Album::Album( const Artist* artist )
     , m_releaseYear( ~0u )
     , m_lastSyncDate( 0 )
     , m_nbTracks( 0 )
+    , m_isPresent( true )
     , m_tracksCached( false )
 {
 }
@@ -249,7 +252,8 @@ bool Album::createTable(DBConnection dbConnection )
                 "short_summary TEXT,"
                 "artwork_url TEXT,"
                 "last_sync_date UNSIGNED INTEGER,"
-                "nb_tracks UNSIGNED INTEGER DEFAULT 0"
+                "nb_tracks UNSIGNED INTEGER DEFAULT 0,"
+                "is_present BOOLEAN NOT NULL DEFAULT 1"
             ")";
     static const std::string reqRel = "CREATE TABLE IF NOT EXISTS AlbumArtistRelation("
                 "id_album INTEGER,"
@@ -262,6 +266,18 @@ bool Album::createTable(DBConnection dbConnection )
             ")";
     return sqlite::Tools::executeRequest( dbConnection, req ) &&
             sqlite::Tools::executeRequest( dbConnection, reqRel );
+}
+
+bool Album::createTriggers(DBConnection dbConnection)
+{
+    static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_album_present AFTER UPDATE OF "
+            "is_present ON " + policy::AlbumTrackTable::Name +
+            " BEGIN "
+            " UPDATE " + policy::AlbumTable::Name + " SET is_present="
+                "(SELECT COUNT(id_track) FROM " + policy::AlbumTrackTable::Name + " WHERE album_id=new.album_id AND is_present=1) "
+                "WHERE id_album=new.album_id;"
+            " END";
+    return sqlite::Tools::executeRequest( dbConnection, triggerReq );
 }
 
 std::shared_ptr<Album> Album::create(DBConnection dbConnection, const std::string& title )

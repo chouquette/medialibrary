@@ -129,6 +129,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         Label::createTable( m_dbConnection.get() ) &&
         Album::createTable( m_dbConnection.get() ) &&
         AlbumTrack::createTable( m_dbConnection.get() ) &&
+        Album::createTriggers( m_dbConnection.get() ) &&
         Show::createTable( m_dbConnection.get() ) &&
         ShowEpisode::createTable( m_dbConnection.get() ) &&
         Movie::createTable( m_dbConnection.get() ) &&
@@ -280,6 +281,7 @@ std::shared_ptr<Album> MediaLibrary::createAlbum(const std::string& title )
 std::vector<AlbumPtr> MediaLibrary::albums()
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
+            " WHERE is_present=1"
             " ORDER BY title ASC";
     return Album::fetchAll<IAlbum>( m_dbConnection.get(), req );
 }
