@@ -63,17 +63,7 @@ void SqliteConnection::release()
 
 std::unique_ptr<sqlite::Transaction> SqliteConnection::newTransaction()
 {
-    sqlite::Transaction* ptr = nullptr;
-    try
-    {
-        ptr = new sqlite::Transaction( this );
-        return std::unique_ptr<sqlite::Transaction>{ ptr };
-    }
-    catch(...)
-    {
-        delete ptr;
-        return nullptr;
-    }
+    return std::unique_ptr<sqlite::Transaction>{ new sqlite::Transaction( this ) };
 }
 
 SqliteConnection::RequestContext SqliteConnection::acquireContext()
