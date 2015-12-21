@@ -56,7 +56,7 @@ class MediaLibrary : public IMediaLibrary
         virtual bool deleteFile(const Media* file );
 
         virtual FolderPtr folder( const std::string& path ) override;
-        virtual bool deleteFolder( FolderPtr folder ) override;
+        bool deleteFolder( FolderPtr folder );
 
         virtual LabelPtr createLabel( const std::string& label ) override;
         virtual bool deleteLabel( LabelPtr label ) override;

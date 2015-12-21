@@ -100,7 +100,6 @@ class IMediaLibrary
 
         /// Adds a folder and all the files it contains
         virtual FolderPtr folder( const std::string& path ) = 0;
-        virtual bool deleteFolder( FolderPtr folder ) = 0;
 
         virtual LabelPtr createLabel( const std::string& label ) = 0;
         virtual bool deleteLabel( LabelPtr label ) = 0;
