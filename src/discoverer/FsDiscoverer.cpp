@@ -91,12 +91,21 @@ void FsDiscoverer::reload()
     auto blist = blacklist();
     for ( const auto& f : rootFolders )
     {
-        auto folder = m_fsFactory->createDirectory( f->path() );
-        if ( folder->lastModificationDate() == f->lastModificationDate() )
-            continue;
-        checkSubfolders( folder.get(), f, blist );
-        checkFiles( folder.get(), f );
-        f->setLastModificationDate( folder->lastModificationDate() );
+        try
+        {
+            auto folder = m_fsFactory->createDirectory( f->path() );
+            if ( folder->lastModificationDate() == f->lastModificationDate() )
+                continue;
+            checkSubfolders( folder.get(), f, blist );
+            checkFiles( folder.get(), f );
+            f->setLastModificationDate( folder->lastModificationDate() );
+        }
+        //FIXME: Have a proper filesystem exception to catch
+        catch(...)
+        {
+            LOG_INFO( "Failed to open ", f->path(), ". Considering it deleted." );
+            m_ml->deleteFolder( f );
+        }
     }
 }
 
