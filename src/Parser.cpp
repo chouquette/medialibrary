@@ -125,6 +125,8 @@ void Parser::run()
         try
         {
             (*task->it)->run( task->file, task );
+            // Consider the task invalid starting from this point. If it completed
+            // it cleared itself afterward.
         }
         catch (const std::exception& ex)
         {
