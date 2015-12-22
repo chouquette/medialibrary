@@ -96,7 +96,7 @@ void VLCMetadataService::run( std::shared_ptr<Media> file, void* data )
 
 IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
 {
-    auto tracks = vlcMedia.tracks();
+    const auto tracks = vlcMedia.tracks();
     if ( tracks.size() == 0 )
     {
         LOG_ERROR( "Failed to fetch tracks" );
@@ -105,7 +105,7 @@ IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Me
 
     auto t = m_dbConn->newTransaction();
     bool isAudio = true;
-    for ( auto& track : tracks )
+    for ( const auto& track : tracks )
     {
         auto codec = track.codec();
         std::string fcc( (const char*)&codec, 4 );
