@@ -33,13 +33,12 @@
 template <typename IMPL, typename TABLEPOLICY>
 class DatabaseHelpers
 {
-    using Lock = std::lock_guard<std::recursive_mutex>;
+    using Lock = std::lock_guard<std::mutex>;
 
     public:
         template <typename... Args>
         static std::shared_ptr<IMPL> fetch( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
-            Lock l{ Mutex };
             return sqlite::Tools::fetchOne<IMPL>( dbConnection, req, std::forward<Args>( args )... );
         }
 
@@ -47,7 +46,6 @@ class DatabaseHelpers
         {
             static std::string req = "SELECT * FROM " + TABLEPOLICY::Name + " WHERE " +
                     TABLEPOLICY::PrimaryKeyColumn + " = ?";
-            Lock l{ Mutex };
             return sqlite::Tools::fetchOne<IMPL>( dbConnection, req, pkValue );
         }
 
@@ -58,16 +56,12 @@ class DatabaseHelpers
         static std::vector<std::shared_ptr<INTF>> fetchAll( DBConnection dbConnection )
         {
             static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name;
-            // Lock the cache mutex before attempting to acquire a context, otherwise
-            // we could have a thread locking cache then DB, and a thread locking DB then cache
-            Lock l{ Mutex };
             return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnection, req );
         }
 
         template <typename INTF, typename... Args>
         static std::vector<std::shared_ptr<INTF>> fetchAll( DBConnection dbConnection, const std::string &req, Args&&... args )
         {
-            Lock l{ Mutex };
             return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnection, req, std::forward<Args>( args )... );
         }
 
@@ -87,12 +81,12 @@ class DatabaseHelpers
         template <typename... Args>
         static bool destroy( DBConnection dbConnection, unsigned int pkValue )
         {
-            Lock l{ Mutex };
             static const std::string req = "DELETE FROM " + TABLEPOLICY::Name + " WHERE "
                     + TABLEPOLICY::PrimaryKeyColumn + " = ?";
             auto res = sqlite::Tools::executeDelete( dbConnection, req, pkValue );
             if ( res == true )
             {
+                Lock l{ Mutex };
                 auto it = Store.find( pkValue );
                 if ( it != end( Store ) )
                     Store.erase( it );
@@ -113,11 +107,10 @@ class DatabaseHelpers
         template <typename... Args>
         static bool insert( DBConnection dbConnection, std::shared_ptr<IMPL> self, const std::string& req, Args&&... args )
         {
-            Lock l{ Mutex };
-
             unsigned int pKey = sqlite::Tools::insert( dbConnection, req, std::forward<Args>( args )... );
             if ( pKey == 0 )
                 return false;
+            Lock l{ Mutex };
             (self.get())->*TABLEPOLICY::PrimaryKey = pKey;
             assert( Store.find( pKey ) == end( Store ) );
             Store[pKey] = self;
@@ -126,7 +119,7 @@ class DatabaseHelpers
 
     private:
         static std::unordered_map<unsigned int, std::shared_ptr<IMPL>> Store;
-        static std::recursive_mutex Mutex;
+        static std::mutex Mutex;
 };
 
 
@@ -135,4 +128,4 @@ std::unordered_map<unsigned int, std::shared_ptr<IMPL>>
 DatabaseHelpers<IMPL, TABLEPOLICY>::Store;
 
 template <typename IMPL, typename TABLEPOLICY>
-std::recursive_mutex DatabaseHelpers<IMPL, TABLEPOLICY>::Mutex;
+std::mutex DatabaseHelpers<IMPL, TABLEPOLICY>::Mutex;
