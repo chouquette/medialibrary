@@ -33,7 +33,7 @@
 template <typename IMPL, typename TABLEPOLICY>
 class DatabaseHelpers
 {
-    using Lock = std::unique_lock<std::recursive_mutex>;
+    using Lock = std::lock_guard<std::recursive_mutex>;
 
     public:
         template <typename... Args>
