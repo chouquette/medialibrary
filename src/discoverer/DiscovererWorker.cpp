@@ -112,8 +112,16 @@ void DiscovererWorker::run()
             for ( auto& d : m_discoverers )
             {
                 // Assume only one discoverer can handle an entrypoint.
-                if ( d->discover( entryPoint ) == true )
-                    break;
+                try
+                {
+                    if ( d->discover( entryPoint ) == true )
+                        break;
+                }
+                catch(std::exception& ex)
+                {
+                    LOG_ERROR( "Fatal error while discovering ", entryPoint, ": ", ex.what() );
+                }
+
                 if ( m_run == false )
                     break;
             }
@@ -126,7 +134,14 @@ void DiscovererWorker::run()
                 m_cb->onReloadStarted();
             for ( auto& d : m_discoverers )
             {
-                d->reload();
+                try
+                {
+                    d->reload();
+                }
+                catch(std::exception& ex)
+                {
+                    LOG_ERROR( "Fatal error while reloading: ", ex.what() );
+                }
                 if ( m_run == false )
                     break;
             }
