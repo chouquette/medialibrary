@@ -119,8 +119,10 @@ void Directory::read()
         struct stat s;
         if ( lstat( path.c_str(), &s ) != 0 )
         {
+            if ( errno == EACCES )
+                continue;
             std::string err( "Failed to get file info " );
-            err += path;
+            err += path + ": ";
             err += strerror(errno);
             throw std::runtime_error( err );
         }
