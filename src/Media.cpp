@@ -323,7 +323,7 @@ bool Media::createTable( DBConnection connection )
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::MediaTable::Name + "("
             "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
             "type INTEGER,"
-            "duration INTEGER,"
+            "duration INTEGER DEFAULT -1,"
             "play_count UNSIGNED INTEGER,"
             "show_episode_id UNSIGNED INTEGER,"
             "mrl TEXT UNIQUE ON CONFLICT FAIL,"
