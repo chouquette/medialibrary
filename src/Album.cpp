@@ -146,7 +146,7 @@ std::vector<MediaPtr> Album::tracks() const
 {
     static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
             " LEFT JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
-            " WHERE att.album_id = ? ORDER BY att.disc_number, att.track_number";
+            " WHERE att.album_id = ? AND med.is_present = 1 ORDER BY att.disc_number, att.track_number";
     return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
 }
 
