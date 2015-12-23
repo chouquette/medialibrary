@@ -14,6 +14,7 @@ list(APPEND TEST_SRCS
     unittest/DeviceTests.cpp
 
     mocks/FileSystem.h
+    mocks/FileSystem.cpp
     mocks/DiscovererCbMock.h
 )
 

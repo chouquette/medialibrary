@@ -46,3 +46,29 @@ TEST( FsUtils, fileName )
     ASSERT_EQ( "noextfile", utils::file::fileName( "/a/b/noextfile" ) );
     ASSERT_EQ( "file.test", utils::file::fileName( "file.test" ) );
 }
+
+TEST( FsUtils, firstFolder )
+{
+    ASSERT_EQ( "f00", utils::file::firstFolder( "f00/bar/" ) );
+    ASSERT_EQ( "f00", utils::file::firstFolder( "/f00/bar" ) );
+    ASSERT_EQ( "f00", utils::file::firstFolder( "////f00/bar" ) );
+    ASSERT_EQ( "f00", utils::file::firstFolder( "/f00/" ) );
+    ASSERT_EQ( "f00", utils::file::firstFolder( "f00/" ) );
+    ASSERT_EQ( "", utils::file::firstFolder( "/f00" ) );
+    ASSERT_EQ( "", utils::file::firstFolder( "" ) );
+    ASSERT_EQ( "", utils::file::firstFolder( "/" ) );
+    ASSERT_EQ( "", utils::file::firstFolder( "/foo.bar" ) );
+}
+
+TEST( FsUtils, removeSlice )
+{
+    ASSERT_EQ( "bar/", utils::file::removeFirstFolder( "f00/bar/" ) );
+    ASSERT_EQ( "bar/", utils::file::removeFirstFolder( "/f00/bar/" ) );
+    ASSERT_EQ( "bar", utils::file::removeFirstFolder( "f00/bar" ) );
+    ASSERT_EQ( "bar", utils::file::removeFirstFolder( "/f00/bar" ) );
+    ASSERT_EQ( "bar", utils::file::removeFirstFolder( "////f00/bar" ) );
+    ASSERT_EQ( "bar", utils::file::removeFirstFolder( "/f00///bar" ) );
+    ASSERT_EQ( "bar", utils::file::removeFirstFolder( "bar" ) );
+    ASSERT_EQ( "", utils::file::removeFirstFolder( "bar/" ) );
+    ASSERT_EQ( "", utils::file::removeFirstFolder( "/f00/") );
+}

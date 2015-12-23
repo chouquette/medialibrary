@@ -52,6 +52,30 @@ std::string fileName(const std::string& filePath)
     return filePath.substr( pos + 1 );
 }
 
+std::string firstFolder( const std::string& path )
+{
+    size_t offset = 0;
+    while ( path[offset] == '/' )
+        offset++;
+    auto pos = path.find_first_of( '/', offset );
+    if ( pos == std::string::npos )
+        return {};
+    return path.substr( offset, pos - offset );
+}
+
+std::string removeFirstFolder( const std::string& path )
+{
+    auto f = firstFolder( path );
+    if ( f.length() == 0 )
+        return path;
+    auto pos = path.find( f ) + f.length();
+    while ( path[pos] == '/' )
+        pos++;
+    if ( pos >= path.length() )
+        return {};
+    return path.substr( pos );
+}
+
 }
 
 }

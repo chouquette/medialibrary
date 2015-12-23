@@ -59,7 +59,7 @@ class Folders : public Tests
 TEST_F( Folders, Add )
 {
     cbMock->prepareForWait( 1 );
-    ml->discover( "." );
+    ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
 
@@ -72,7 +72,7 @@ TEST_F( Folders, Add )
 TEST_F( Folders, Delete )
 {
     cbMock->prepareForWait( 1 );
-    ml->discover( "." );
+    ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
 
@@ -109,7 +109,7 @@ TEST_F( Folders, Delete )
 TEST_F( Folders, Load )
 {
     cbMock->prepareForWait( 1 );
-    ml->discover( "." );
+    ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
 
@@ -138,7 +138,7 @@ TEST_F( Folders, InvalidPath )
 TEST_F( Folders, List )
 {
     cbMock->prepareForWait( 1 );
-    ml->discover( "." );
+    ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
 
@@ -157,21 +157,10 @@ TEST_F( Folders, List )
     ASSERT_EQ( files.size(), 2u );
 }
 
-TEST_F( Folders, AbsolutePath )
-{
-    cbMock->prepareForWait( 1 );
-    ml->discover( "." );
-    bool discovered = cbMock->wait();
-    ASSERT_TRUE( discovered );
-
-    auto f = ml->folder( "." );
-    ASSERT_EQ( f, nullptr );
-}
-
 TEST_F( Folders, ListFolders )
 {
     cbMock->prepareForWait( 1 );
-    ml->discover( "." );
+    ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
 
@@ -185,7 +174,7 @@ TEST_F( Folders, ListFolders )
     ASSERT_EQ( 1u, subFiles.size() );
 
     auto file = subFiles[0];
-    ASSERT_EQ( std::string{ mock::FileSystemFactory::SubFolder } + "subfile.mp4", file->mrl() );
+    ASSERT_EQ( mock::FileSystemFactory::SubFolder + "/subfile.mp4", file->mrl() );
 
     // Now again, without cache. No need to wait for fs discovery reload here
     Reload();
@@ -199,13 +188,13 @@ TEST_F( Folders, ListFolders )
     ASSERT_EQ( 1u, subFiles.size() );
 
     file = subFiles[0];
-    ASSERT_EQ( std::string{ mock::FileSystemFactory::SubFolder } + "subfile.mp4", file->mrl() );
+    ASSERT_EQ( mock::FileSystemFactory::SubFolder + "/subfile.mp4", file->mrl() );
 }
 
 TEST_F( Folders, LastModificationDate )
 {
     cbMock->prepareForWait( 1 );
-    ml->discover( "." );
+    ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
 
@@ -225,17 +214,16 @@ TEST_F( Folders, LastModificationDate )
 TEST_F( Folders, NewFolderWithFile )
 {
     cbMock->prepareForWait( 1 );
-    ml->discover( "." );
+    ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
 
     ASSERT_EQ( 3u, ml->files().size() );
     // Do not watch for live changes
     ml.reset();
-    auto newFolder = std::string(mock::FileSystemFactory::Root) + "newfolder/";
-    auto device = std::make_shared<mock::Device>( std::string{ mock::FileSystemFactory::Root } + "newfolder/", "newfolderuuid" );
-    fsMock->addFolder( mock::FileSystemFactory::Root, "newfolder/", time( nullptr ), device );
-    fsMock->addFile( newFolder, "newfile.avi" );
+    auto newFolder = mock::FileSystemFactory::Root + "/newfolder";
+    fsMock->addFolder( newFolder, time( nullptr ) );
+    fsMock->addFile( newFolder + "/newfile.avi" );
 
     // This will trigger a reload
     cbMock->prepareForReload();
@@ -244,7 +232,7 @@ TEST_F( Folders, NewFolderWithFile )
     ASSERT_TRUE( reloaded );
 
     ASSERT_EQ( 4u, ml->files().size() );
-    auto file = ml->file( newFolder + "newfile.avi" );
+    auto file = ml->file( newFolder + "/newfile.avi" );
     ASSERT_NE( nullptr, file );
 }
 
@@ -252,7 +240,7 @@ TEST_F( Folders, NewFolderWithFile )
 TEST_F( Folders, NewFileInSubFolder )
 {
     cbMock->prepareForWait( 1 );
-    ml->discover( "." );
+    ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
 
@@ -263,7 +251,7 @@ TEST_F( Folders, NewFileInSubFolder )
     auto lmd = f->lastModificationDate();
     // Do not watch for live changes
     ml.reset();
-    fsMock->addFile( mock::FileSystemFactory::SubFolder, "newfile.avi" );
+    fsMock->addFile( mock::FileSystemFactory::SubFolder + "/newfile.avi" );
 
     cbMock->prepareForReload();
     Reload();
@@ -271,7 +259,7 @@ TEST_F( Folders, NewFileInSubFolder )
     ASSERT_TRUE( reloaded );
 
     ASSERT_EQ( 4u, ml->files().size() );
-    auto file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "newfile.avi" );
+    auto file = ml->file( mock::FileSystemFactory::SubFolder + "/newfile.avi" );
     f = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( 2u, f->files().size() );
     ASSERT_NE( nullptr, file );
@@ -282,14 +270,14 @@ TEST_F( Folders, NewFileInSubFolder )
 TEST_F( Folders, RemoveFileFromDirectory )
 {
     cbMock->prepareForWait( 1 );
-    ml->discover( "." );
+    ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
 
     ASSERT_EQ( 3u, ml->files().size() );
     // Do not watch for live changes
     ml.reset();
-    fsMock->removeFile( mock::FileSystemFactory::SubFolder, "subfile.mp4" );
+    fsMock->removeFile( mock::FileSystemFactory::SubFolder + "/subfile.mp4" );
 
     cbMock->prepareForReload();
     Reload();
@@ -297,7 +285,7 @@ TEST_F( Folders, RemoveFileFromDirectory )
     ASSERT_TRUE( reloaded );
 
     ASSERT_EQ( 2u, ml->files().size() );
-    auto file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "subfile.mp4" );
+    auto file = ml->file( mock::FileSystemFactory::SubFolder + "/subfile.mp4" );
     auto f = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( 0u, f->files().size() );
     ASSERT_EQ( nullptr, file );
@@ -306,7 +294,7 @@ TEST_F( Folders, RemoveFileFromDirectory )
 TEST_F( Folders, RemoveDirectory )
 {
     cbMock->prepareForWait( 1 );
-    ml->discover( "." );
+    ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
 
@@ -321,7 +309,7 @@ TEST_F( Folders, RemoveDirectory )
     ASSERT_TRUE( reloaded );
 
     ASSERT_EQ( 2u, ml->files().size() );
-    auto file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "subfile.mp4" );
+    auto file = ml->file( mock::FileSystemFactory::SubFolder + "/subfile.mp4" );
     auto f = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( nullptr, f );
     ASSERT_EQ( nullptr, file );
@@ -330,18 +318,18 @@ TEST_F( Folders, RemoveDirectory )
 TEST_F( Folders, UpdateFile )
 {
     cbMock->prepareForWait( 1 );
-    ml->discover( "." );
+    ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
 
-    auto filePath = std::string{ mock::FileSystemFactory::SubFolder } + "subfile.mp4";
+    auto filePath = mock::FileSystemFactory::SubFolder + "/subfile.mp4";
     auto f = ml->file( filePath );
     ASSERT_NE( f, nullptr );
     auto id = f->id();
 
     ml.reset();
-    fsMock->files[filePath]->markAsModified();
-    fsMock->dirs[mock::FileSystemFactory::SubFolder]->markAsModified();
+    fsMock->file( filePath )->markAsModified();
+    fsMock->directory( mock::FileSystemFactory::SubFolder )->markAsModified();
 
     cbMock->prepareForReload();
     Reload();
@@ -359,7 +347,7 @@ TEST_F( Folders, Blacklist )
 {
     cbMock->prepareForWait( 1 );
     ml->ignoreFolder( mock::FileSystemFactory::SubFolder );
-    ml->discover( "." );
+    ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
 
@@ -370,7 +358,7 @@ TEST_F( Folders, Blacklist )
 TEST_F( Folders, BlacklistAfterDiscovery )
 {
     cbMock->prepareForWait( 1 );
-    ml->discover( "." );
+    ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
     auto f = ml->folder( mock::FileSystemFactory::SubFolder );

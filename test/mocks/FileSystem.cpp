@@ -20,20 +20,11 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#pragma once
+#include "FileSystem.h"
 
-#include <string>
-
-namespace utils
+namespace mock
 {
-
-namespace file
-{
-    std::string extension( const std::string& fileName );
-    std::string directory( const std::string& filePath );
-    std::string fileName( const std::string& filePath );
-    std::string firstFolder( const std::string& path );
-    std::string removeFirstFolder( const std::string& path );
-}
-
+const std::string FileSystemFactory::Root =  "/a";
+const std::string FileSystemFactory::SubFolder = "/a/folder";
+const std::string FileSystemFactory::RootDeviceUuid = "{fake-root-device}";
 }

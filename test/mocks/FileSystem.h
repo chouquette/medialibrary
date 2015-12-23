@@ -25,12 +25,18 @@
 
 #include <string>
 #include <unordered_map>
+#include <memory>
+#include <algorithm>
+#include <cassert>
 
 #include "filesystem/IDirectory.h"
 #include "filesystem/IFile.h"
 #include "filesystem/IDevice.h"
 #include "factory/IFileSystem.h"
 #include "utils/Filename.h"
+
+//REMOVE ME
+#include "logging/Logger.h"
 
 namespace mock
 {
@@ -86,30 +92,12 @@ public:
     unsigned int m_lastModification;
 };
 
-class Device : public fs::IDevice
-{
-public:
-    Device( const std::string& mountpoint, const std::string& uuid ) : m_uuid( uuid ),
-        m_removable( false ), m_present( true ), m_mountpoint( mountpoint ) {}
-    virtual const std::string& uuid() const override { return m_uuid; }
-    virtual bool isRemovable() const override { return m_removable; }
-    virtual bool isPresent() const override { return m_present; }
-    virtual const std::string& mountpoint() const override { return m_mountpoint; }
-
-    void setRemovable( bool value ) { m_removable = value; }
-    void setPresent( bool value ) { m_present = value; }
-
-private:
-    std::string m_uuid;
-    bool m_removable;
-    bool m_present;
-    std::string m_mountpoint;
-};
+class Device;
 
 class Directory : public fs::IDirectory
 {
 public:
-    Directory( std::shared_ptr<mock::Directory> parent, const std::string& path, unsigned int lastModif, std::shared_ptr<fs::IDevice> device  )
+    Directory( Directory* parent, const std::string& path, unsigned int lastModif, std::shared_ptr<Device> device )
         : m_path( path )
         , m_parent( parent )
         , m_lastModificationDate( lastModif )
@@ -125,16 +113,22 @@ public:
 
     virtual const std::vector<std::string>& files() override
     {
-        if ( m_device == nullptr || m_device->isPresent() == false )
-            return m_emptyfiles;
-        return m_files;
+        if ( m_filePathes.size() == 0 )
+        {
+            for ( const auto& f : m_files )
+                m_filePathes.push_back( m_path + '/' + f.first );
+        }
+        return m_filePathes;
     }
 
     virtual const std::vector<std::string>& dirs() override
     {
-        if ( m_device == nullptr || m_device->isPresent() == false )
-            return m_emptydirs;
-        return m_dirs;
+        if ( m_dirPathes.size() == 0 )
+        {
+            for ( const auto& d : m_dirs )
+                m_dirPathes.push_back( m_path + "/" + d.first );
+        }
+        return m_dirPathes;
     }
 
     virtual unsigned int lastModificationDate() const override
@@ -144,49 +138,138 @@ public:
 
     virtual std::shared_ptr<fs::IDevice> device() const override
     {
-        return m_device;
+        return std::static_pointer_cast<fs::IDevice>( m_device );
     }
 
-    void setDevice( std::shared_ptr<fs::IDevice> device )
+    void addFile( const std::string& filePath )
     {
-        m_device = device;
+        auto subFolder = utils::file::firstFolder( filePath );
+        if ( subFolder.empty() == true )
+        {
+            m_files[utils::file::fileName( filePath )] = std::make_shared<File>( m_path + "/" + filePath );
+            m_filePathes.clear();
+            markAsModified();
+        }
+        else
+        {
+            auto it = m_dirs.find( subFolder );
+            assert( it != end( m_dirs ) );
+            auto remainingPath = utils::file::removeFirstFolder( filePath );
+            it->second->addFile( remainingPath );
+        }
     }
 
-    void addFile( const std::string& fileName )
+    void addFolder( const std::string& folder, unsigned int lastModif )
     {
-        m_files.emplace_back( m_path + fileName );
-        markAsModified();
+        auto subFolder = utils::file::firstFolder( folder );
+        if ( subFolder.empty() == true )
+        {
+            auto folderName = utils::file::fileName( folder );
+            auto dir = std::make_shared<Directory>( this, m_path + "/" + folderName,
+                                                    lastModif, m_device );
+            m_dirs[folderName] = dir;
+            m_dirPathes.clear();
+            markAsModified();
+        }
+        else
+        {
+            auto it = m_dirs.find( subFolder );
+            assert( it != end( m_dirs ) );
+            auto remainingPath = utils::file::removeFirstFolder( folder );
+            it->second->addFolder( remainingPath, lastModif );
+        }
     }
 
-    void addFolder( const std::string& folder )
+    void removeFile( const std::string& filePath  )
     {
-        m_dirs.emplace_back( m_path + folder );
-        markAsModified();
+        auto subFolder = utils::file::firstFolder( filePath );
+        if ( subFolder.empty() == true )
+        {
+            auto it = m_files.find( filePath );
+            assert( it != end( m_files ) );
+            m_files.erase( it );
+            m_filePathes.clear();
+            markAsModified();
+        }
+        else
+        {
+            auto it = m_dirs.find( subFolder );
+            assert( it != end( m_dirs ) );
+            auto remainingPath = utils::file::removeFirstFolder( filePath );
+            it->second->removeFile( remainingPath );
+        }
     }
 
-    void removeFile( const std::string& fileName )
+    std::shared_ptr<File> file( const std::string& filePath )
     {
-        auto it = std::find( begin( m_files ), end( m_files ), fileName );
-        if ( it == end( m_files ) )
-            throw std::runtime_error("Invalid filename");
-        m_files.erase( it );
-        markAsModified();
+        auto subFolder = utils::file::firstFolder( filePath );
+        if ( subFolder.empty() == true )
+        {
+            auto it = m_files.find( filePath );
+            assert( it != end( m_files ) );
+            return it->second;
+        }
+        else
+        {
+            auto it = m_dirs.find( subFolder );
+            assert( it != end( m_dirs ) );
+            auto remainingPath = utils::file::removeFirstFolder( filePath );
+            return it->second->file( remainingPath );
+        }
     }
 
-    void remove()
+    std::shared_ptr<Directory> directory( const std::string& path )
     {
-        if ( m_parent == nullptr )
-            return;
-        m_parent->removeFolder( m_path );
+        auto subFolder = utils::file::firstFolder( path );
+        if ( subFolder.empty() == true )
+        {
+            auto it = m_dirs.find( path );
+            assert( it != end( m_dirs ) );
+            return it->second;
+        }
+        else
+        {
+            auto it = m_dirs.find( subFolder );
+            assert( it != end( m_dirs ) );
+            auto remainingPath = utils::file::removeFirstFolder( path );
+            return it->second->directory( remainingPath );
+        }
     }
 
     void removeFolder( const std::string& path )
     {
-        auto it = std::find( begin( m_dirs ), end( m_dirs ), path );
-        if ( it == end( m_dirs ) )
-            throw std::runtime_error( "Invalid subfolder to remove" );
-        m_dirs.erase( it );
-        markAsModified();
+        auto subFolder = utils::file::firstFolder( path );
+        if ( subFolder.empty() == true )
+        {
+            auto it = m_dirs.find( path );
+            assert( it != end( m_dirs ) );
+            m_dirs.erase( it );
+            m_dirPathes.clear();
+            markAsModified();
+        }
+        else
+        {
+            auto it = m_dirs.find( subFolder );
+            assert( it != end( m_dirs ) );
+            auto remainingPath = utils::file::removeFirstFolder( path );
+            it->second->removeFolder( remainingPath );
+        }
+    }
+
+    void addMountpoint( const std::string& path )
+    {
+        auto subFolder = utils::file::firstFolder( path );
+        if ( subFolder.empty() == true )
+        {
+            m_dirs[path] = nullptr;
+        }
+        else
+        {
+            auto it = m_dirs.find( subFolder );
+            assert( it != end( m_dirs ) );
+            auto remainingPath = utils::file::removeFirstFolder( path );
+            it->second->addMountpoint( remainingPath );
+        }
     }
 
     void markAsModified()
@@ -206,120 +289,237 @@ public:
         m_isRemovable = true;
     }
 
+
+
 private:
     std::string m_path;
-    std::vector<std::string> m_files;
-    std::vector<std::string> m_dirs;
-    std::vector<std::string> m_emptyfiles;
-    std::vector<std::string> m_emptydirs;
-    std::shared_ptr<mock::Directory> m_parent;
+    std::unordered_map<std::string, std::shared_ptr<File>> m_files;
+    std::unordered_map<std::string, std::shared_ptr<Directory>> m_dirs;
+    std::vector<std::string> m_filePathes;
+    std::vector<std::string> m_dirPathes;
+    Directory* m_parent;
     unsigned int m_lastModificationDate;
     bool m_isRemovable;
-    std::shared_ptr<fs::IDevice> m_device;
+    std::shared_ptr<Device> m_device;
 };
 
-
-struct FileSystemFactory : public factory::IFileSystem
+class Device : public fs::IDevice, public std::enable_shared_from_this<Device>
 {
-    static constexpr const char* Root = "/a/";
-    static constexpr const char* SubFolder = "/a/folder/";
-
-    FileSystemFactory()
+public:
+    Device( const std::string& mountpoint, const std::string& uuid )
+        : m_uuid( uuid )
+        , m_removable( false )
+        , m_present( true )
+        , m_mountpoint( mountpoint )
     {
-        rootDevice = std::make_shared<Device>( std::string{ Root }, "root" );
-        removableDevice = std::make_shared<Device>( std::string{ SubFolder }, "removable" );
-        removableDevice->setRemovable( true );
-        dirs[Root] = std::unique_ptr<mock::Directory>( new Directory{ nullptr, Root, 123, rootDevice  } );
-            addFile( Root, "video.avi" );
-            addFile( Root, "audio.mp3" );
-            addFile( Root, "not_a_media.something" );
-            addFile( Root, "some_other_file.seaotter" );
-            addFolder( Root, "folder/", 456, removableDevice  );
-                addFile( SubFolder, "subfile.mp4" );
     }
 
-    void addFile( const std::string& path, const std::string& fileName )
+    // We need at least one existing shared ptr before calling shared_from_this.
+    // Let the device be initialized and stored in a shared_ptr by the FileSystemFactory, and then
+    // initialize our fake root folder
+    void setupRoot()
     {
-        dirs[path]->addFile( fileName );
-        files[path + fileName] = std::unique_ptr<mock::File>( new mock::File( path + fileName ) );
+        m_root = std::make_shared<Directory>( nullptr, m_mountpoint, 0, shared_from_this() );
     }
 
-    void addFolder( const std::string& parentPath, const std::string& path, unsigned int lastModif, std::shared_ptr<fs::IDevice> device )
+    virtual const std::string& uuid() const override { return m_uuid; }
+    virtual bool isRemovable() const override { return m_removable; }
+    virtual bool isPresent() const override { return m_present; }
+    virtual const std::string& mountpoint() const override { return m_mountpoint; }
+
+    void setRemovable( bool value ) { m_removable = value; }
+    void setPresent( bool value ) { m_present = value; }
+
+    std::string relativePath( const std::string& path )
     {
-        auto parent = dirs[parentPath];
-        parent->addFolder( path );
-        dirs[parentPath + path] = std::unique_ptr<mock::Directory>( new Directory( parent, parentPath + path, lastModif, device ) );
+        auto res = path.substr( m_mountpoint.length() );
+        while ( res[0] == '/' )
+            res.erase( res.begin() );
+        return res;
     }
 
-    void removeFile( const std::string& path, const std::string& fileName )
+    void addFile( const std::string& filePath )
     {
-        auto it = files.find( path + fileName );
-        if ( it == end( files ) )
-            throw std::runtime_error( "Invalid file to remove" );
-        files.erase( it );
-        dirs[path]->removeFile( path + fileName );
+        m_root->addFile( relativePath( filePath ) );
     }
 
-    void removeFolder( const std::string& path )
+    void addFolder( const std::string& path, unsigned int lastModif )
     {
-        auto it = dirs.find( path );
-        if ( it == end( dirs ) )
-            throw std::runtime_error( "Invalid directory to remove" );
-        for (const auto& f : it->second->files() )
-        {
-            removeFile( path, utils::file::fileName( f ) );
-        }
-        it->second->remove();
-        dirs.erase( it );
+        m_root->addFolder( relativePath( path ), lastModif );
+    }
+
+    void removeFile( const std::string& filePath )
+    {
+        m_root->removeFile( relativePath( filePath ) );
+    }
+
+    void removeFolder( const std::string& filePath )
+    {
+        auto relPath = relativePath( filePath );
+        if ( relPath.empty() == true )
+            m_root = nullptr;
+        else
+            m_root->removeFolder( relPath );
+    }
+
+    std::shared_ptr<File> file( const std::string& filePath )
+    {
+        if ( m_root == nullptr )
+            return nullptr;
+        return m_root->file( relativePath( filePath ) );
     }
 
     std::shared_ptr<Directory> directory( const std::string& path )
     {
-        auto it = dirs.find( path );
-        if ( it != end( dirs ) )
-            return it->second;
-        return nullptr;
+        if ( m_root == nullptr )
+            return nullptr;
+        const auto relPath = relativePath( path );
+        if ( relPath.empty() == true )
+            return m_root;
+        return m_root->directory( relPath );
     }
 
-    virtual std::shared_ptr<fs::IDirectory> createDirectory(const std::string& path) override
+    void addMountpoint( const std::string& path )
     {
-        mock::Directory* res = nullptr;
-        if ( path == "." )
-        {
-            res = dirs[Root].get();
-        }
-        else
-        {
-            auto it = dirs.find( path );
-            if ( it != end( dirs ) )
-                res = it->second.get();
-        }
-        if ( res == nullptr )
-            throw std::runtime_error("Invalid path");
-        return std::shared_ptr<fs::IDirectory>( new Directory( *res ) );
+        auto relPath = relativePath( path );
+        // m_root is already a mountpoint, we can't add a mountpoint to it.
+        assert( relPath.empty() == false );
+        m_root->addMountpoint( relPath );
+    }
+
+private:
+    std::string m_uuid;
+    bool m_removable;
+    bool m_present;
+    std::string m_mountpoint;
+    std::shared_ptr<Directory> m_root;
+};
+
+struct FileSystemFactory : public factory::IFileSystem
+{
+    static const std::string Root;
+    static const std::string SubFolder;
+    static const std::string RootDeviceUuid;
+
+    FileSystemFactory()
+    {
+        // Add a root device unremovable
+        auto rootDevice = addDevice( Root, RootDeviceUuid );
+        rootDevice->addFile( Root + "/video.avi" );
+        rootDevice->addFile( Root + "/audio.mp3" );
+        rootDevice->addFile( Root + "/not_a_media.something" );
+        rootDevice->addFile( Root + "/some_other_file.seaotter" );
+        rootDevice->addFolder( SubFolder, 456 );
+        rootDevice->addFile( SubFolder + "/subfile.mp4" );
+    }
+
+    std::shared_ptr<Device> addDevice( const std::string& mountpoint, const std::string& uuid )
+    {
+        auto dev = std::make_shared<Device>( mountpoint, uuid );
+        dev->setupRoot();
+        // If this folder is already known, mark it as a nullptr and assume this means a mountpoint
+        auto d = device( mountpoint );
+        if ( d != nullptr )
+            d->addMountpoint( mountpoint );
+        devices.push_back( dev );
+        return dev;
+    }
+
+    void addDevice( std::shared_ptr<Device> device )
+    {
+        devices.push_back( device );
+    }
+
+    void addFile( const std::string& filePath )
+    {
+        auto d = device( filePath );
+        d->addFile( filePath );
+    }
+
+    void addFolder( const std::string& path, unsigned int lastModif )
+    {
+        auto d = device( path );
+        d->addFolder( path, lastModif );
+    }
+
+    void removeFile( const std::string& filePath )
+    {
+        auto d = device( filePath );
+        d->removeFile( filePath );
+    }
+
+    void removeFolder( const std::string& path )
+    {
+        auto d = device( path );
+        d->removeFolder( path );
+    }
+
+    std::shared_ptr<File> file( const std::string& filePath )
+    {
+        auto d = device( filePath );
+        return d->file( filePath );
+    }
+
+    std::shared_ptr<Directory> directory( const std::string& path )
+    {
+        auto d = device( path );
+        return d->directory( path );
+    }
+
+    virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& path ) override
+    {
+        auto d = device( path );
+        if ( d == nullptr )
+            return nullptr;
+        return d->directory( path );
     }
 
     virtual std::unique_ptr<fs::IFile> createFile( const std::string &filePath ) override
     {
-        const auto it = files.find( filePath );
-        if ( it == end( files ) )
-            files[filePath].reset( new File( filePath ) );
-        return std::unique_ptr<fs::IFile>( new File( static_cast<const mock::File&>( * it->second.get() ) ) );
+        auto d = device( filePath );
+        if ( d == nullptr )
+            return nullptr;
+        auto f = d->file( filePath );
+        if ( f == nullptr )
+            return nullptr;
+        return std::unique_ptr<fs::IFile>( new File( *f ) );
     }
 
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override
     {
-        if ( uuid == "root" )
-            return rootDevice;
-        if ( uuid == "removable" )
-            return removableDevice;
-        return nullptr;
+        auto it = std::find_if( begin( devices ), end( devices ), [uuid]( const std::shared_ptr<Device>& d ) {
+            return d->uuid() == uuid;
+        } );
+        if ( it == end( devices ) )
+            return nullptr;
+        return *it;
     }
 
-    std::unordered_map<std::string, std::shared_ptr<mock::File>> files;
-    std::unordered_map<std::string, std::shared_ptr<mock::Directory>> dirs;
-    std::shared_ptr<Device> rootDevice;
-    std::shared_ptr<Device> removableDevice;
+    std::shared_ptr<Device> device( const std::string& path )
+    {
+        std::shared_ptr<Device> ret;
+        for ( auto& d : devices )
+        {
+            if ( path.find( d->mountpoint() ) == 0 &&
+                 ( ret == nullptr || ret->mountpoint().length() < d->mountpoint().length() ) )
+                ret = d;
+        }
+        return ret;
+    }
+
+    std::shared_ptr<Device> removeDevice( const std::string& uuid )
+    {
+        auto it = std::find_if( begin( devices ), end( devices ), [uuid]( const std::shared_ptr<Device>& d ) {
+            return d->uuid() == uuid;
+        } );
+        if ( it == end( devices ) )
+            return nullptr;
+        auto ret = *it;
+        devices.erase( it );
+        return ret;
+    }
+
+    std::vector<std::shared_ptr<Device>> devices;
 };
 
 // Noop FS (basically just returns file names, and don't try to access those.)

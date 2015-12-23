@@ -66,6 +66,11 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
         LOG_ERROR("Failed to create an IDirectory for ", entryPoint, ": ", ex.what());
         return false;
     }
+    if ( fsDir == nullptr )
+    {
+        LOG_ERROR("Failed to create an IDirectory for ", entryPoint );
+        return false;
+    }
     auto blist = blacklist();
     if ( isBlacklisted( fsDir->path(), blist ) == true )
         return false;
@@ -85,7 +90,10 @@ void FsDiscoverer::reload()
     {
         auto folder = m_fsFactory->createDirectory( f->path() );
         if ( folder->lastModificationDate() == f->lastModificationDate() )
+        {
+            LOG_INFO( f->path(), " isn't modified" );
             continue;
+        }
         checkSubfolders( folder.get(), f.get(), blist );
         checkFiles( folder.get(), f.get() );
         f->setLastModificationDate( folder->lastModificationDate() );

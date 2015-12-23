@@ -35,6 +35,8 @@ class DeviceEntity : public Tests
 class DeviceFs : public Tests
 {
 protected:
+    static const std::string RemovableDeviceUuid;
+    static const std::string RemovableDeviceMountpoint;
     std::shared_ptr<mock::FileSystemFactory> fsMock;
     std::unique_ptr<mock::WaitForDiscoveryComplete> cbMock;
 
@@ -43,6 +45,10 @@ protected:
     {
         fsMock.reset( new mock::FileSystemFactory );
         cbMock.reset( new mock::WaitForDiscoveryComplete );
+        fsMock->addFolder( "/a/mnt", 0 );
+        fsMock->addDevice( RemovableDeviceMountpoint, RemovableDeviceUuid );
+        fsMock->addFile( RemovableDeviceMountpoint + "/removablefile.mp3" );
+        fsMock->addFile( RemovableDeviceMountpoint + "/removablefile2.mp3" );
         Reload();
     }
 
@@ -56,6 +62,9 @@ protected:
         Tests::Reload( fsMock, cbMock.get() );
     }
 };
+
+const std::string DeviceFs::RemovableDeviceUuid = "{fake-removable-device}";
+const std::string DeviceFs::RemovableDeviceMountpoint = "/a/mnt/fake-device";
 
 // Database/Entity tests
 
@@ -96,19 +105,17 @@ TEST_F( DeviceEntity, SetPresent )
 TEST_F( DeviceFs, RemoveDisk )
 {
     cbMock->prepareForWait( 1 );
-    ml->discover( "." );
+    ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
 
     auto files = ml->files();
-    ASSERT_EQ( 3u, files.size() );
+    ASSERT_EQ( 5u, files.size() );
 
-    auto file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "subfile.mp4" );
+    auto file = ml->file( RemovableDeviceMountpoint + "/removablefile.mp3" );
     ASSERT_NE( nullptr, file );
 
-    auto subdir = fsMock->directory( mock::FileSystemFactory::SubFolder );
-    subdir->setDevice( nullptr );
-    fsMock->removableDevice = nullptr;
+    fsMock->removeDevice( RemovableDeviceUuid );
 
     cbMock->prepareForReload();
     Reload();
@@ -116,27 +123,26 @@ TEST_F( DeviceFs, RemoveDisk )
     ASSERT_TRUE( reloaded );
 
     files = ml->files();
-    ASSERT_EQ( 2u, files.size() );
+    ASSERT_EQ( 3u, files.size() );
 
-    file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "subfile.mp4" );
+    file = ml->file( RemovableDeviceMountpoint + "/removablefile.mp3" );
     ASSERT_EQ( nullptr, file );
 }
 
 TEST_F( DeviceFs, UnmountDisk )
 {
     cbMock->prepareForWait( 1 );
-    ml->discover( "." );
+    ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
 
     auto files = ml->files();
-    ASSERT_EQ( 3u, files.size() );
+    ASSERT_EQ( 5u, files.size() );
 
-    auto file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "subfile.mp4" );
+    auto file = ml->file( RemovableDeviceMountpoint + "/removablefile.mp3" );
     ASSERT_NE( nullptr, file );
 
-    auto subdir = fsMock->directory( mock::FileSystemFactory::SubFolder );
-    auto device = std::static_pointer_cast<mock::Device>( subdir->device() );
+    auto device = std::static_pointer_cast<mock::Device>( fsMock->createDevice( RemovableDeviceUuid ) );
     device->setPresent( false );
 
     cbMock->prepareForReload();
@@ -145,29 +151,26 @@ TEST_F( DeviceFs, UnmountDisk )
     ASSERT_TRUE( reloaded );
 
     files = ml->files();
-    ASSERT_EQ( 2u, files.size() );
+    ASSERT_EQ( 3u, files.size() );
 
-    file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "subfile.mp4" );
+    file = ml->file( RemovableDeviceMountpoint + "/removablefile.mp3" );
     ASSERT_EQ( nullptr, file );
 }
 
 TEST_F( DeviceFs, ReplugDisk )
 {
     cbMock->prepareForWait( 1 );
-    ml->discover( "." );
+    ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
 
     auto files = ml->files();
-    ASSERT_EQ( 3u, files.size() );
+    ASSERT_EQ( 5u, files.size() );
 
-    auto file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "subfile.mp4" );
+    auto file = ml->file( RemovableDeviceMountpoint + "/removablefile.mp3" );
     ASSERT_NE( nullptr, file );
 
-    auto subdir = fsMock->directory( mock::FileSystemFactory::SubFolder );
-    auto device = std::static_pointer_cast<mock::Device>( subdir->device() );
-    subdir->setDevice( nullptr );
-    fsMock->removableDevice = nullptr;
+    auto device = fsMock->removeDevice( RemovableDeviceUuid );
 
     cbMock->prepareForReload();
     Reload();
@@ -175,48 +178,46 @@ TEST_F( DeviceFs, ReplugDisk )
     ASSERT_TRUE( reloaded );
 
     files = ml->files();
-    ASSERT_EQ( 2u, files.size() );
+    ASSERT_EQ( 3u, files.size() );
 
-    file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "subfile.mp4" );
+    file = ml->file( RemovableDeviceMountpoint + "/removablefile.mp3" );
     ASSERT_EQ( nullptr, file );
 
-    subdir->setDevice( device );
-    fsMock->removableDevice = device;
+    fsMock->addDevice( device );
     cbMock->prepareForReload();
     Reload();
     reloaded = cbMock->waitForReload();
     ASSERT_TRUE( reloaded );
 
     files = ml->files();
-    ASSERT_EQ( 3u, files.size() );
+    ASSERT_EQ( 5u, files.size() );
 
-    file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "subfile.mp4" );
+    file = ml->file( RemovableDeviceMountpoint + "/removablefile.mp3" );
     ASSERT_NE( nullptr, file );
 }
 
 TEST_F( DeviceFs, ReplugDiskWithExtraFiles )
 {
     cbMock->prepareForWait( 1 );
-    ml->discover( "." );
+    ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
 
     auto files = ml->files();
-    ASSERT_EQ( 3u, files.size() );
+    ASSERT_EQ( 5u, files.size() );
 
-    auto subdir = fsMock->directory( mock::FileSystemFactory::SubFolder );
-    auto device = std::static_pointer_cast<mock::Device>( subdir->device() );
-    subdir->setDevice( nullptr );
-    fsMock->removableDevice = nullptr;
+    auto device = fsMock->removeDevice( RemovableDeviceUuid );
 
     cbMock->prepareForReload();
     Reload();
     bool reloaded = cbMock->waitForReload();
     ASSERT_TRUE( reloaded );
 
-    subdir->setDevice( device );
-    fsMock->removableDevice = device;
-    fsMock->addFile( mock::FileSystemFactory::SubFolder, "newfile.mkv" );
+    files = ml->files();
+    ASSERT_EQ( 3u, files.size() );
+
+    fsMock->addDevice( device );
+    fsMock->addFile( mock::FileSystemFactory::SubFolder + "/newfile.mkv" );
 
     cbMock->prepareForReload();
     Reload();
@@ -224,20 +225,20 @@ TEST_F( DeviceFs, ReplugDiskWithExtraFiles )
     ASSERT_TRUE( reloaded );
 
     files = ml->files();
-    ASSERT_EQ( 4u, files.size() );
+    ASSERT_EQ( 6u, files.size() );
 }
 
 TEST_F( DeviceFs, RemoveAlbum )
 {
     cbMock->prepareForWait( 1 );
-    ml->discover( "." );
+    ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
 
     // Create an album on a non-removable device
     {
         auto album = std::static_pointer_cast<Album>( ml->createAlbum( "album" ) );
-        auto file = ml->file( std::string( mock::FileSystemFactory::Root ) + "audio.mp3" );
+        auto file = ml->file( mock::FileSystemFactory::Root + "/audio.mp3" );
         album->addTrack( std::static_pointer_cast<Media>( file ), 1, 1 );
         auto artist = ml->createArtist( "artist" );
         album->setAlbumArtist( artist.get() );
@@ -245,8 +246,10 @@ TEST_F( DeviceFs, RemoveAlbum )
     // And an album that will disappear, along with its artist
     {
         auto album = std::static_pointer_cast<Album>( ml->createAlbum( "album 2" ) );
-        auto file = ml->file( std::string( mock::FileSystemFactory::SubFolder ) + "subfile.mp4" );
+        auto file = ml->file( RemovableDeviceMountpoint + "/removablefile.mp3" );
+        auto file2 = ml->file( RemovableDeviceMountpoint + "/removablefile2.mp3" );
         album->addTrack( std::static_pointer_cast<Media>( file ), 1, 1 );
+        album->addTrack( std::static_pointer_cast<Media>( file ), 2, 1 );
         auto artist = ml->createArtist( "artist 2" );
         album->setAlbumArtist( artist.get() );
     }
@@ -256,9 +259,7 @@ TEST_F( DeviceFs, RemoveAlbum )
     auto artists = ml->artists();
     ASSERT_EQ( 2u, artists.size() );
 
-    auto subdir = fsMock->directory( mock::FileSystemFactory::SubFolder );
-    subdir->setDevice( nullptr );
-    fsMock->removableDevice = nullptr;
+    fsMock->removeDevice( RemovableDeviceUuid );
 
     cbMock->prepareForReload();
     Reload();
