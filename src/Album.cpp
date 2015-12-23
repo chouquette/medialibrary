@@ -35,7 +35,6 @@ unsigned int Album::* const policy::AlbumTable::PrimaryKey = &Album::m_id;
 
 Album::Album(DBConnection dbConnection, sqlite::Row& row)
     : m_dbConnection( dbConnection )
-    , m_tracksCached( false )
 {
     row >> m_id
         >> m_title
@@ -56,7 +55,6 @@ Album::Album(const std::string& title )
     , m_lastSyncDate( 0 )
     , m_nbTracks( 0 )
     , m_isPresent( true )
-    , m_tracksCached( false )
 {
 }
 
@@ -67,7 +65,6 @@ Album::Album( const Artist* artist )
     , m_lastSyncDate( 0 )
     , m_nbTracks( 0 )
     , m_isPresent( true )
-    , m_tracksCached( false )
 {
 }
 
@@ -147,16 +144,10 @@ time_t Album::lastSyncDate() const
 
 std::vector<MediaPtr> Album::tracks() const
 {
-    std::lock_guard<std::mutex> lock( m_tracksLock );
-    if ( m_tracksCached == true )
-        return m_tracks;
     static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
             " LEFT JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
             " WHERE att.album_id = ? ORDER BY att.disc_number, att.track_number";
-
-    m_tracks = Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
-    m_tracksCached = true;
-    return m_tracks;
+    return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
 }
 
 std::shared_ptr<AlbumTrack> Album::addTrack(std::shared_ptr<Media> media, unsigned int trackNb, unsigned int discNumber )
@@ -170,14 +161,9 @@ std::shared_ptr<AlbumTrack> Album::addTrack(std::shared_ptr<Media> media, unsign
         return nullptr;
     static const std::string req = "UPDATE " + policy::AlbumTable::Name +
             " SET nb_tracks = nb_tracks + 1 WHERE id_album = ?";
-    std::lock_guard<std::mutex> lock( m_tracksLock );
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, m_id ) == false )
         return nullptr;
     m_nbTracks++;
-    // Invalide the cache instead of trying to maintain it from here.
-    // Keeping the ordering consistent while adding items is going to be hard
-    // once we start to expose multiple sorting criteria
-    m_tracksCached = false;
     t->commit();
     return track;
 }

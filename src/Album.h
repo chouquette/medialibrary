@@ -99,10 +99,6 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         unsigned int m_nbTracks;
         bool m_isPresent;
 
-        mutable std::vector<MediaPtr> m_tracks;
-        mutable bool m_tracksCached;
-        mutable std::mutex m_tracksLock;
-
         friend struct policy::AlbumTable;
 };
 
