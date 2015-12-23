@@ -275,9 +275,9 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, VLC::Media& 
         }
 
         // Assume album files will be in the same folder.
-        auto candidateFolder = m_fsFactory->createDirectory( utils::file::directory( tracks[0]->mrl() ) );
-        auto newFileFolder = m_fsFactory->createDirectory( utils::file::directory( media->mrl() ) );
-        if ( candidateFolder->path() != newFileFolder->path() )
+        auto candidateFolder = utils::file::directory( tracks[0]->mrl() );
+        auto newFileFolder = utils::file::directory( media->mrl() );
+        if ( candidateFolder != newFileFolder )
         {
             it = albums.erase( it );
             continue;
