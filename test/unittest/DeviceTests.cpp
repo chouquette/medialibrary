@@ -25,6 +25,7 @@
 #include "Album.h"
 #include "Device.h"
 #include "Media.h"
+#include "Artist.h"
 #include "mocks/FileSystem.h"
 #include "mocks/DiscovererCbMock.h"
 
@@ -270,4 +271,44 @@ TEST_F( DeviceFs, RemoveAlbum )
     ASSERT_EQ( 1u, albums.size() );
     artists = ml->artists();
     ASSERT_EQ( 1u, artists.size() );
+}
+
+TEST_F( DeviceFs, PartialAlbumRemoval )
+{
+    cbMock->prepareForWait( 1 );
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->wait();
+    ASSERT_TRUE( discovered );
+
+    {
+        auto album = std::static_pointer_cast<Album>( ml->createAlbum( "album" ) );
+        auto file = ml->file( mock::FileSystemFactory::SubFolder + "/subfile.mp4" );
+        auto file2 = ml->file( RemovableDeviceMountpoint + "/removablefile2.mp3" );
+        album->addTrack( std::static_pointer_cast<Media>( file ), 1, 1 );
+        album->addTrack( std::static_pointer_cast<Media>( file2 ), 2, 1 );
+        auto newArtist = ml->createArtist( "artist" );
+        album->setAlbumArtist( newArtist.get() );
+        newArtist->addMedia( static_cast<Media*>( file.get() ) );
+        newArtist->addMedia( static_cast<Media*>( file2.get() ) );
+    }
+
+    auto albums = ml->albums();
+    ASSERT_EQ( 1u, albums.size() );
+    auto artists = ml->artists();
+    ASSERT_EQ( 1u, artists.size() );
+    auto artist = artists[0];
+    ASSERT_EQ( 2u, artist->media().size() );
+
+    fsMock->removeDevice( RemovableDeviceUuid );
+    cbMock->prepareForReload();
+    Reload();
+    bool reloaded = cbMock->waitForReload();
+    ASSERT_TRUE( reloaded );
+
+    albums = ml->albums();
+    ASSERT_EQ( 1u, albums.size() );
+    artists = ml->artists();
+    ASSERT_EQ( 1u, artists.size() );
+    ASSERT_EQ( 1u, albums[0]->tracks().size() );
+    ASSERT_EQ( 1u, artists[0]->media().size() );
 }
