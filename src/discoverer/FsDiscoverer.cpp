@@ -56,16 +56,7 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
             return true;
     }
     // Otherwise, create a directory, and check it for modifications
-    std::shared_ptr<fs::IDirectory> fsDir;
-    try
-    {
-        fsDir = m_fsFactory->createDirectory( entryPoint );
-    }
-    catch (std::exception& ex)
-    {
-        LOG_ERROR("Failed to create an IDirectory for ", entryPoint, ": ", ex.what());
-        return false;
-    }
+    std::shared_ptr<fs::IDirectory> fsDir = m_fsFactory->createDirectory( entryPoint );
     if ( fsDir == nullptr )
     {
         LOG_ERROR("Failed to create an IDirectory for ", entryPoint );
@@ -89,6 +80,12 @@ void FsDiscoverer::reload()
     for ( const auto& f : rootFolders )
     {
         auto folder = m_fsFactory->createDirectory( f->path() );
+        if ( folder == nullptr )
+        {
+            LOG_INFO( "Removing folder ", f->path() );
+            m_ml->deleteFolder( f );
+            continue;
+        }
         if ( folder->lastModificationDate() == f->lastModificationDate() )
         {
             LOG_INFO( f->path(), " isn't modified" );
@@ -137,6 +134,8 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder
     for ( const auto& subFolderPath : folder->dirs() )
     {
         auto subFolder = m_fsFactory->createDirectory( subFolderPath );
+        if ( subFolder == nullptr )
+            continue;
 
         auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [subFolderPath](const std::shared_ptr<IFolder>& f) {
             return f->path() == subFolderPath;

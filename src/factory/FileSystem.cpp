@@ -23,6 +23,7 @@
 #include "factory/FileSystem.h"
 #include "filesystem/IDirectory.h"
 #include "filesystem/IFile.h"
+#include "logging/Logger.h"
 
 #if defined(__linux__) || defined(__APPLE__)
 # include "filesystem/unix/Directory.h"
@@ -44,9 +45,17 @@ std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::s
     const auto it = m_dirs.find( path );
     if ( it != end( m_dirs ) )
         return it->second;
-    auto dir = std::make_shared<fs::Directory>( path );
-    m_dirs[path] = dir;
-    return dir;
+    try
+    {
+        auto dir = std::make_shared<fs::Directory>( path );
+        m_dirs[path] = dir;
+        return dir;
+    }
+    catch(std::exception& ex)
+    {
+        LOG_ERROR( "Failed to create fs::IDirectory for ", path, ": ", ex.what());
+        return nullptr;
+    }
 }
 
 std::unique_ptr<fs::IFile> FileSystemFactory::createFile(const std::string& fileName)
