@@ -319,7 +319,7 @@ ArtistPtr MediaLibrary::artist(unsigned int id)
 ArtistPtr MediaLibrary::artist( const std::string& name )
 {
     static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name
-            + " WHERE name = ?";
+            + " WHERE name = ? AND is_present = 1";
     return Artist::fetch( m_dbConnection.get(), req, name );
 }
 
