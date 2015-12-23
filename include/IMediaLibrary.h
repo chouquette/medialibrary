@@ -89,14 +89,6 @@ class IMediaLibrary
          * Calling this after initialize() is not a supported scenario.
          */
         virtual void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory ) = 0;
-        ///
-        /// \brief addFile Adds a file to the media library.
-        /// \param path The absolute path to this file
-        /// \param parentFolder The parent folder, or nullptr to add this file as
-        ///                     a stand alone file.
-        /// \return The newly created file, or nullptr in case of error
-        ///
-        virtual MediaPtr file( const std::string& path ) = 0;
 
         /// Adds a folder and all the files it contains
         virtual FolderPtr folder( const std::string& path ) = 0;
