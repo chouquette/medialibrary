@@ -37,7 +37,6 @@ public:
     virtual const std::vector<std::string>& dirs() override;
     virtual unsigned int lastModificationDate() const override;
     virtual std::shared_ptr<IDevice> device() const override;
-    virtual bool isRemovable() const override;
 
 private:
     static std::string toAbsolute( const std::string& path );

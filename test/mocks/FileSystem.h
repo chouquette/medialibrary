@@ -101,7 +101,6 @@ public:
         : m_path( path )
         , m_parent( parent )
         , m_lastModificationDate( lastModif )
-        , m_isRemovable( false )
         , m_device( device )
     {
     }
@@ -279,18 +278,6 @@ public:
         m_lastModificationDate++;
     }
 
-    virtual bool isRemovable() const override
-    {
-        return m_isRemovable;
-    }
-
-    void markRemovable()
-    {
-        m_isRemovable = true;
-    }
-
-
-
 private:
     std::string m_path;
     std::unordered_map<std::string, std::shared_ptr<File>> m_files;
@@ -299,7 +286,6 @@ private:
     std::vector<std::string> m_dirPathes;
     Directory* m_parent;
     unsigned int m_lastModificationDate;
-    bool m_isRemovable;
     std::shared_ptr<Device> m_device;
 };
 

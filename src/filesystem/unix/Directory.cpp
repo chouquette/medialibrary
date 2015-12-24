@@ -78,12 +78,6 @@ std::shared_ptr<IDevice> Directory::device() const
     return Device::fromPath( m_path );
 }
 
-bool Directory::isRemovable() const
-{
-    //FIXME
-    return false;
-}
-
 std::string Directory::toAbsolute(const std::string& path)
 {
     auto abs = std::unique_ptr<char[]>( new char[PATH_MAX] );

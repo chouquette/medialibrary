@@ -43,6 +43,5 @@ namespace fs
         virtual const std::vector<std::string>& dirs() = 0;
         virtual unsigned int lastModificationDate() const = 0;
         virtual std::shared_ptr<IDevice> device() const = 0;
-        virtual bool isRemovable() const = 0;
     };
 }
