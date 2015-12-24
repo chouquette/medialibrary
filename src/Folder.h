@@ -23,7 +23,6 @@
 #pragma once
 
 #include "database/DatabaseHelpers.h"
-#include "IFolder.h"
 
 #include <sqlite3.h>
 
@@ -46,7 +45,7 @@ struct FolderTable
 
 }
 
-class Folder : public IFolder, public DatabaseHelpers<Folder, policy::FolderTable>
+class Folder : public DatabaseHelpers<Folder, policy::FolderTable>
 {
 public:
     Folder( DBConnection dbConnection, sqlite::Row& row );
@@ -58,12 +57,12 @@ public:
 
     static std::shared_ptr<Folder> fromPath( DBConnection conn, const std::string& path );
 
-    virtual unsigned int id() const override;
-    virtual const std::string& path() const override;
-    virtual std::vector<MediaPtr> files() override;
-    virtual std::vector<FolderPtr> folders() override;
-    virtual FolderPtr parent() override;
-    virtual unsigned int lastModificationDate() override;
+    unsigned int id() const;
+    const std::string& path() const;
+    std::vector<MediaPtr> files();
+    std::vector<std::shared_ptr<Folder>> folders();
+    std::shared_ptr<Folder> parent();
+    unsigned int lastModificationDate();
     bool setLastModificationDate(unsigned int lastModificationDate);
     unsigned int deviceId() const;
     bool isPresent() const;

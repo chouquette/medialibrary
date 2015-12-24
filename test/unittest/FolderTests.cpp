@@ -23,7 +23,7 @@
 #include "Tests.h"
 
 #include "Media.h"
-#include "IFolder.h"
+#include "Folder.h"
 #include "IMediaLibrary.h"
 #include "utils/Filename.h"
 #include "mocks/FileSystem.h"
@@ -84,7 +84,7 @@ TEST_F( Folders, Delete )
 
     auto filePath = files[0]->mrl();
 
-    ml->deleteFolder( f );
+    ml->deleteFolder( f.get() );
 
     f = ml->folder( folderPath );
     ASSERT_EQ( nullptr, f );

@@ -83,7 +83,7 @@ void FsDiscoverer::reload()
         if ( folder == nullptr )
         {
             LOG_INFO( "Removing folder ", f->path() );
-            m_ml->deleteFolder( f );
+            m_ml->deleteFolder( f.get() );
             continue;
         }
         if ( folder->lastModificationDate() == f->lastModificationDate() )
@@ -137,7 +137,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder
         if ( subFolder == nullptr )
             continue;
 
-        auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [subFolderPath](const std::shared_ptr<IFolder>& f) {
+        auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [subFolderPath](const std::shared_ptr<Folder>& f) {
             return f->path() == subFolderPath;
         });
         // We don't know this folder, it's a new one
@@ -177,7 +177,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder
     for ( auto f : subFoldersInDB )
     {
         LOG_INFO( "Folder ", f->path(), " not found in FS, deleting it" );
-        m_ml->deleteFolder( f );
+        m_ml->deleteFolder( f.get() );
     }
     return true;
 }

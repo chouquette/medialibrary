@@ -124,14 +124,14 @@ std::vector<MediaPtr> Folder::files()
     return Media::fetchAll<IMedia>( m_dbConection, req, m_id );
 }
 
-std::vector<FolderPtr> Folder::folders()
+std::vector<std::shared_ptr<Folder> > Folder::folders()
 {
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
             " WHERE id_parent = ? AND is_blacklisted IS NULL";
-    return fetchAll<IFolder>( m_dbConection, req, m_id );
+    return fetchAll<Folder>( m_dbConection, req, m_id );
 }
 
-FolderPtr Folder::parent()
+std::shared_ptr<Folder> Folder::parent()
 {
     return fetch( m_dbConection, m_parent );
 }

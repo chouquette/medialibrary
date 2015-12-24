@@ -23,7 +23,6 @@ list(APPEND HEADERS_LIST
     ${CMAKE_SOURCE_DIR}/include/IAlbum.h
     ${CMAKE_SOURCE_DIR}/include/IAlbumTrack.h
     ${CMAKE_SOURCE_DIR}/include/IMedia.h
-    ${CMAKE_SOURCE_DIR}/include/IFolder.h
     ${CMAKE_SOURCE_DIR}/include/IMediaLibrary.h
     ${CMAKE_SOURCE_DIR}/include/ILabel.h
     ${CMAKE_SOURCE_DIR}/include/IAudioTrack.h

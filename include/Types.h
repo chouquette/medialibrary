@@ -42,7 +42,6 @@ class IArtist;
 class SqliteConnection;
 
 typedef std::shared_ptr<IMedia> MediaPtr;
-typedef std::shared_ptr<IFolder> FolderPtr;
 typedef std::shared_ptr<ILabel> LabelPtr;
 typedef std::shared_ptr<IAlbum> AlbumPtr;
 typedef std::shared_ptr<IAlbumTrack> AlbumTrackPtr;

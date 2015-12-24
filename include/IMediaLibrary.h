@@ -90,9 +90,6 @@ class IMediaLibrary
          */
         virtual void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory ) = 0;
 
-        /// Adds a folder and all the files it contains
-        virtual FolderPtr folder( const std::string& path ) = 0;
-
         virtual LabelPtr createLabel( const std::string& label ) = 0;
         virtual bool deleteLabel( LabelPtr label ) = 0;
         virtual std::vector<MediaPtr> audioFiles() = 0;

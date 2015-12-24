@@ -231,7 +231,7 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder* p
     return fptr;
 }
 
-FolderPtr MediaLibrary::folder( const std::string& path )
+std::shared_ptr<Folder> MediaLibrary::folder( const std::string& path )
 {
     return Folder::fromPath( m_dbConnection.get(), path );
 }
@@ -241,7 +241,7 @@ bool MediaLibrary::deleteFile( const Media* file )
     return Media::destroy( m_dbConnection.get(), file->id() );
 }
 
-bool MediaLibrary::deleteFolder( FolderPtr folder )
+bool MediaLibrary::deleteFolder( const Folder* folder )
 {
     if ( Folder::destroy( m_dbConnection.get(), folder->id() ) == false )
         return false;
