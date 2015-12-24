@@ -63,17 +63,16 @@ std::string firstFolder( const std::string& path )
     return path.substr( offset, pos - offset );
 }
 
-std::string removeFirstFolder( const std::string& path )
+std::string removePath( const std::string& fullPath, const std::string& toRemove )
 {
-    auto f = firstFolder( path );
-    if ( f.length() == 0 )
-        return path;
-    auto pos = path.find( f ) + f.length();
-    while ( path[pos] == '/' )
+    if ( toRemove.length() == 0 )
+        return fullPath;
+    auto pos = fullPath.find( toRemove ) + toRemove.length();
+    while ( fullPath[pos] == '/' )
         pos++;
-    if ( pos >= path.length() )
+    if ( pos >= fullPath.length() )
         return {};
-    return path.substr( pos );
+    return fullPath.substr( pos );
 }
 
 }

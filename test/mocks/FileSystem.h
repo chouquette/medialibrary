@@ -153,7 +153,7 @@ public:
         {
             auto it = m_dirs.find( subFolder );
             assert( it != end( m_dirs ) );
-            auto remainingPath = utils::file::removeFirstFolder( filePath );
+            auto remainingPath = utils::file::removePath( filePath, subFolder );
             it->second->addFile( remainingPath );
         }
     }
@@ -174,7 +174,7 @@ public:
         {
             auto it = m_dirs.find( subFolder );
             assert( it != end( m_dirs ) );
-            auto remainingPath = utils::file::removeFirstFolder( folder );
+            auto remainingPath = utils::file::removePath( folder, subFolder );
             it->second->addFolder( remainingPath, lastModif );
         }
     }
@@ -194,7 +194,7 @@ public:
         {
             auto it = m_dirs.find( subFolder );
             assert( it != end( m_dirs ) );
-            auto remainingPath = utils::file::removeFirstFolder( filePath );
+            auto remainingPath = utils::file::removePath( filePath, subFolder );
             it->second->removeFile( remainingPath );
         }
     }
@@ -212,7 +212,7 @@ public:
         {
             auto it = m_dirs.find( subFolder );
             assert( it != end( m_dirs ) );
-            auto remainingPath = utils::file::removeFirstFolder( filePath );
+            auto remainingPath = utils::file::removePath( filePath, subFolder );
             return it->second->file( remainingPath );
         }
     }
@@ -230,7 +230,7 @@ public:
         {
             auto it = m_dirs.find( subFolder );
             assert( it != end( m_dirs ) );
-            auto remainingPath = utils::file::removeFirstFolder( path );
+            auto remainingPath = utils::file::removePath( path, subFolder );
             return it->second->directory( remainingPath );
         }
     }
@@ -250,7 +250,7 @@ public:
         {
             auto it = m_dirs.find( subFolder );
             assert( it != end( m_dirs ) );
-            auto remainingPath = utils::file::removeFirstFolder( path );
+            auto remainingPath = utils::file::removePath( path, subFolder );
             it->second->removeFolder( remainingPath );
         }
     }
@@ -266,7 +266,7 @@ public:
         {
             auto it = m_dirs.find( subFolder );
             assert( it != end( m_dirs ) );
-            auto remainingPath = utils::file::removeFirstFolder( path );
+            auto remainingPath = utils::file::removePath( path, subFolder );
             it->second->addMountpoint( remainingPath );
         }
     }

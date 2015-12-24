@@ -33,7 +33,7 @@ namespace file
     std::string directory( const std::string& filePath );
     std::string fileName( const std::string& filePath );
     std::string firstFolder( const std::string& path );
-    std::string removeFirstFolder( const std::string& path );
+    std::string removePath( const std::string& fullPath, const std::string& toRemove );
 }
 
 }
