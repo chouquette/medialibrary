@@ -23,6 +23,7 @@
 #pragma once
 
 #include "database/DatabaseHelpers.h"
+#include "factory/IFileSystem.h"
 
 #include <sqlite3.h>
 
@@ -54,6 +55,12 @@ public:
     static bool createTable( DBConnection connection );
     static std::shared_ptr<Folder> create(DBConnection connection, const std::string& path, time_t lastModificationDate, unsigned int parentId, Device& device );
     static bool blacklist( DBConnection connection, const std::string& path );
+    ///
+    /// \brief setFileSystemFactory Sets a file system factory to be used when building IDevices
+    /// This is assumed to be called once, before any discovery/reloading process is launched.
+    /// \param fsFactory The factory to be used
+    ///
+    static void setFileSystemFactory( std::shared_ptr<factory::IFileSystem> fsFactory );
 
     static std::shared_ptr<Folder> fromPath( DBConnection conn, const std::string& path );
 

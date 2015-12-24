@@ -114,6 +114,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
 {
     if ( m_fsFactory == nullptr )
         m_fsFactory.reset( new factory::FileSystemFactory );
+    Folder::setFileSystemFactory( m_fsFactory );
     m_snapshotPath = snapshotPath;
     m_callback = mlCallback;
     m_dbConnection.reset( new SqliteConnection( dbPath ) );

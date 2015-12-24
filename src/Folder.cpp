@@ -34,7 +34,9 @@ namespace policy
     unsigned int Folder::* const FolderTable::PrimaryKey = &Folder::m_id;
 }
 
-Folder::Folder(DBConnection dbConnection, sqlite::Row& row )
+std::shared_ptr<factory::IFileSystem> Folder::FsFactory;
+
+Folder::Folder( DBConnection dbConnection, sqlite::Row& row )
     : m_dbConection( dbConnection )
 {
     row >> m_id
@@ -99,6 +101,11 @@ bool Folder::blacklist( DBConnection connection, const std::string& path )
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
             "(path, id_parent, is_blacklisted) VALUES(?, ?, ?)";
     return sqlite::Tools::insert( connection, req, path, nullptr, true ) != 0;
+}
+
+void Folder::setFileSystemFactory( std::shared_ptr<factory::IFileSystem> fsFactory )
+{
+    FsFactory = fsFactory;
 }
 
 std::shared_ptr<Folder> Folder::fromPath( DBConnection conn, const std::string& path )
