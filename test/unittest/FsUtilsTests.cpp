@@ -68,6 +68,7 @@ TEST( FsUtils, removePath )
     ASSERT_EQ( "bar", utils::file::removePath( "/f00/bar", "/f00" ) );
     ASSERT_EQ( "bar", utils::file::removePath( "////f00/bar", "/f00" ) );
     ASSERT_EQ( "bar", utils::file::removePath( "/f00///bar", "/f00" ) );
+    ASSERT_EQ( "bar", utils::file::removePath( "/f00///bar", "/f00/" ) );
     ASSERT_EQ( "bar", utils::file::removePath( "bar", "" ) );
     ASSERT_EQ( "", utils::file::removePath( "bar/", "bar" ) );
     ASSERT_EQ( "", utils::file::removePath( "/f00/", "/f00/" ) );
