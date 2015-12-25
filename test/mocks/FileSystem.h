@@ -223,7 +223,8 @@ public:
         if ( subFolder.empty() == true )
         {
             auto it = m_dirs.find( path );
-            assert( it != end( m_dirs ) );
+            if ( it == end( m_dirs ) )
+                return nullptr;
             return it->second;
         }
         else

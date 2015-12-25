@@ -26,6 +26,10 @@
 
 #include "database/SqliteTools.h"
 #include "filesystem/IDirectory.h"
+#include "filesystem/IDevice.h"
+#include "utils/Filename.h"
+
+#include <unordered_map>
 
 namespace policy
 {
@@ -57,6 +61,7 @@ Folder::Folder( const std::string& path, time_t lastModificationDate, unsigned i
     , m_deviceId( deviceId )
     , m_isPresent( true )
 {
+    // Don't fetch the device mountpoint from here, we don't have a DBConnection yet.
 }
 
 bool Folder::createTable(DBConnection connection)
@@ -64,7 +69,7 @@ bool Folder::createTable(DBConnection connection)
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::FolderTable::Name +
             "("
             "id_folder INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "path TEXT UNIQUE ON CONFLICT FAIL,"
+            "path TEXT,"
             "id_parent UNSIGNED INTEGER,"
             "last_modification_date UNSIGNED INTEGER,"
             "is_blacklisted INTEGER,"
@@ -84,8 +89,9 @@ bool Folder::createTable(DBConnection connection)
             sqlite::Tools::executeRequest( connection, triggerReq );
 }
 
-std::shared_ptr<Folder> Folder::create(DBConnection connection, const std::string& path, time_t lastModificationDate, unsigned int parentId, Device& device )
+std::shared_ptr<Folder> Folder::create( DBConnection connection, const std::string& fullPath, time_t lastModificationDate, unsigned int parentId, Device& device, fs::IDevice& deviceFs )
 {
+    auto path = utils::file::removePath( fullPath, deviceFs.mountpoint() );
     auto self = std::make_shared<Folder>( path, lastModificationDate, parentId, device.id() );
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
             "(path, id_parent, last_modification_date, device_id) VALUES(?, ?, ?, ?)";
@@ -93,14 +99,22 @@ std::shared_ptr<Folder> Folder::create(DBConnection connection, const std::strin
                          lastModificationDate, device.id() ) == false )
         return nullptr;
     self->m_dbConection = connection;
+    self->m_deviceMountpoint = deviceFs.mountpoint();
+    self->computeFullPath();
     return self;
 }
 
-bool Folder::blacklist( DBConnection connection, const std::string& path )
+bool Folder::blacklist( DBConnection connection, const std::string& fullPath )
 {
+    auto folderFs = FsFactory->createDirectory( fullPath );
+    auto deviceFs = folderFs->device();
+    auto device = Device::fromUuid( connection, deviceFs->uuid() );
+    if ( device == nullptr )
+        device = Device::create( connection, deviceFs->uuid(), deviceFs->isRemovable() );
+    auto path = utils::file::removePath( fullPath, deviceFs->mountpoint() );
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
-            "(path, id_parent, is_blacklisted) VALUES(?, ?, ?)";
-    return sqlite::Tools::insert( connection, req, path, nullptr, true ) != 0;
+            "(path, id_parent, is_blacklisted, device_id) VALUES(?, ?, ?, ?)";
+    return sqlite::Tools::insert( connection, req, path, nullptr, true, device->id() ) != 0;
 }
 
 void Folder::setFileSystemFactory( std::shared_ptr<factory::IFileSystem> fsFactory )
@@ -108,10 +122,30 @@ void Folder::setFileSystemFactory( std::shared_ptr<factory::IFileSystem> fsFacto
     FsFactory = fsFactory;
 }
 
-std::shared_ptr<Folder> Folder::fromPath( DBConnection conn, const std::string& path )
+std::shared_ptr<Folder> Folder::fromPath( DBConnection conn, const std::string& fullPath )
 {
-    const std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND is_blacklisted IS NULL";
-    return fetch( conn, req, path );
+    auto folderFs = FsFactory->createDirectory( fullPath );
+    if ( folderFs == nullptr )
+        return nullptr;
+    auto deviceFs = folderFs->device();
+    if ( deviceFs == nullptr )
+    {
+        LOG_ERROR( "Failed to get device containing an existing folder: ", fullPath );
+        return nullptr;
+    }
+    auto device = Device::fromUuid( conn, deviceFs->uuid() );
+    // We are trying to find a folder. If we don't know the device it's on, we don't know the folder.
+    if ( device == nullptr )
+        return nullptr;
+    auto path = utils::file::removePath( fullPath, deviceFs->mountpoint() );
+    const std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND device_id = ? "
+            "AND is_blacklisted IS NULL";
+    auto folder = fetch( conn, req, path, device->id() );
+    if ( folder == nullptr )
+        return nullptr;
+    folder->m_deviceMountpoint = deviceFs->mountpoint();
+    folder->computeFullPath();
+    return folder;
 }
 
 unsigned int Folder::id() const
@@ -121,7 +155,7 @@ unsigned int Folder::id() const
 
 const std::string& Folder::path() const
 {
-    return m_path;
+    return m_fullPath;
 }
 
 std::vector<MediaPtr> Folder::files()
@@ -131,11 +165,9 @@ std::vector<MediaPtr> Folder::files()
     return Media::fetchAll<IMedia>( m_dbConection, req, m_id );
 }
 
-std::vector<std::shared_ptr<Folder> > Folder::folders()
+std::vector<std::shared_ptr<Folder>> Folder::folders()
 {
-    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
-            " WHERE id_parent = ? AND is_blacklisted IS NULL";
-    return fetchAll<Folder>( m_dbConection, req, m_id );
+    return fetchAll( m_dbConection, m_id );
 }
 
 std::shared_ptr<Folder> Folder::parent()
@@ -166,4 +198,44 @@ unsigned int Folder::deviceId() const
 bool Folder::isPresent() const
 {
     return m_isPresent;
+}
+
+void Folder::computeFullPath()
+{
+    if ( ( *m_deviceMountpoint.crbegin() ) != '/' )
+        m_deviceMountpoint += '/';
+    m_fullPath = m_deviceMountpoint + m_path;
+}
+
+std::vector<std::shared_ptr<Folder>> Folder::fetchAll( DBConnection dbConn, unsigned int parentFolderId )
+{
+    std::vector<std::shared_ptr<Folder>> res;
+    if ( parentFolderId == 0 )
+    {
+        static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
+                + " WHERE id_parent IS NULL AND is_blacklisted is NULL";
+        res = DatabaseHelpers::fetchAll<Folder>( dbConn, req );
+    }
+    else
+    {
+        static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
+                + " WHERE id_parent = ? AND is_blacklisted is NULL";
+        res = DatabaseHelpers::fetchAll<Folder>( dbConn, req, parentFolderId );
+    }
+    std::unordered_map<unsigned int, std::string> deviceMountpoints;
+    for ( auto& f : res )
+    {
+        auto it = deviceMountpoints.find( f->deviceId() );
+        if ( it == end( deviceMountpoints ) )
+        {
+            auto device = Device::fetch( dbConn, f->deviceId() );
+            auto deviceFs = FsFactory->createDevice( device->uuid() );
+            deviceMountpoints[f->deviceId()] = deviceFs->mountpoint();
+            f->m_deviceMountpoint = deviceFs->mountpoint();
+        }
+        else
+            f->m_deviceMountpoint = it->second;
+        f->computeFullPath();
+    }
+    return res;
 }

@@ -32,6 +32,7 @@
 #include "Folder.h"
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
+#include "utils/Filename.h"
 
 FsDiscoverer::FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, MediaLibrary* ml, DBConnection dbConn )
     : m_ml( ml )
@@ -49,21 +50,21 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
     if ( entryPoint.find( "://" ) != std::string::npos )
         return false;
 
+    std::shared_ptr<fs::IDirectory> fsDir = m_fsFactory->createDirectory( entryPoint );
     {
         auto f = Folder::fromPath( m_dbConn, entryPoint );
         // If the folder exists, we assume it will be handled by reload()
         if ( f != nullptr )
             return true;
     }
-    // Otherwise, create a directory, and check it for modifications
-    std::shared_ptr<fs::IDirectory> fsDir = m_fsFactory->createDirectory( entryPoint );
+    // Otherwise, create a directory and check it for modifications
     if ( fsDir == nullptr )
     {
         LOG_ERROR("Failed to create an IDirectory for ", entryPoint );
         return false;
     }
     auto blist = blacklist();
-    if ( isBlacklisted( fsDir->path(), blist ) == true )
+    if ( isBlacklisted( *fsDir, blist ) == true )
         return false;
     return addFolder( fsDir.get(), nullptr, blist );
 }
@@ -72,10 +73,7 @@ void FsDiscoverer::reload()
 {
     // Start by checking if previously known devices have been plugged/unplugged
     checkDevices();
-    //FIXME: This should probably be in a sql transaction
-    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
-            + " WHERE id_parent IS NULL";
-    auto rootFolders = Folder::fetchAll<Folder>( m_dbConn, req );
+    auto rootFolders = Folder::fetchAll( m_dbConn, 0 );
     auto blist = blacklist();
     for ( const auto& f : rootFolders )
     {
@@ -127,10 +125,9 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder
     // ... in this folder, or in all the sub folders.
 
     // Load the folders we already know of:
-    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
-            + " WHERE id_parent = ?";
+
     LOG_INFO( "Checking for modifications in ", folder->path() );
-    auto subFoldersInDB = Folder::fetchAll<Folder>( m_dbConn, req, parentFolder->id() );
+    auto subFoldersInDB = Folder::fetchAll( m_dbConn, parentFolder->id() );
     for ( const auto& subFolderPath : folder->dirs() )
     {
         auto subFolder = m_fsFactory->createDirectory( subFolderPath );
@@ -144,7 +141,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder
         if ( it == end( subFoldersInDB ) )
         {
             // Check if it is blacklisted
-            if ( isBlacklisted( subFolderPath, blacklist ) == true )
+            if ( isBlacklisted( *subFolder, blacklist ) == true )
             {
                 LOG_INFO( "Ignoring blacklisted folder: ", subFolderPath );
                 continue;
@@ -223,10 +220,19 @@ std::vector<std::shared_ptr<Folder> > FsDiscoverer::blacklist() const
     return sqlite::Tools::fetchAll<Folder, Folder>( m_dbConn, req );
 }
 
-bool FsDiscoverer::isBlacklisted(const std::string& path, const std::vector<std::shared_ptr<Folder>>& blacklist ) const
+bool FsDiscoverer::isBlacklisted(const fs::IDirectory& directory, const std::vector<std::shared_ptr<Folder>>& blacklist ) const
 {
-    return std::find_if( begin( blacklist ), end( blacklist ), [&path]( const std::shared_ptr<Folder>& f ) {
-        return path == f->path();
+    auto deviceFs = directory.device();
+    auto device = Device::fromUuid( m_dbConn, deviceFs->uuid() );
+    // When blacklisting, we would insert the device if we haven't encoutered it yet.
+    // So when reading, a missing device means a non-blacklisted device.
+    if ( device == nullptr )
+        return false;
+    auto relPath = utils::file::removePath( directory.path(), deviceFs->mountpoint() );
+    auto deviceId = device->id();
+
+    return std::find_if( begin( blacklist ), end( blacklist ), [&relPath, deviceId]( const std::shared_ptr<Folder>& f ) {
+        return f->path() == relPath && f->deviceId() == deviceId;
     }) != end( blacklist );
 }
 
@@ -245,7 +251,7 @@ bool FsDiscoverer::addFolder( fs::IDirectory* folder, Folder* parentFolder, cons
     }
 
     auto f = Folder::create( m_dbConn, folder->path(), 0,
-                             parentFolder != nullptr ? parentFolder->id() : 0, *device );
+                             parentFolder != nullptr ? parentFolder->id() : 0, *device, *deviceFs );
     if ( f == nullptr )
         return false;
     checkFiles( folder, f.get() );

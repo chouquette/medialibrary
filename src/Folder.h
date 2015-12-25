@@ -46,6 +46,9 @@ struct FolderTable
 
 }
 
+// This doesn't publicly expose the DatabaseHelper inheritance in order to force
+// the user to go through Folder's overloads, as they take care of the device mountpoint
+// fetching & path composition
 class Folder : public DatabaseHelpers<Folder, policy::FolderTable>
 {
 public:
@@ -53,8 +56,9 @@ public:
     Folder(const std::string& path, time_t lastModificationDate, unsigned int parent , unsigned int deviceId);
 
     static bool createTable( DBConnection connection );
-    static std::shared_ptr<Folder> create(DBConnection connection, const std::string& path, time_t lastModificationDate, unsigned int parentId, Device& device );
-    static bool blacklist( DBConnection connection, const std::string& path );
+    static std::shared_ptr<Folder> create(DBConnection connection, const std::string& path, time_t lastModificationDate, unsigned int parentId, Device& device , fs::IDevice& deviceFs);
+    static bool blacklist(DBConnection connection, const std::string& fullPath );
+    static std::vector<std::shared_ptr<Folder>> fetchAll( DBConnection dbConn, unsigned int parentFolderId );
     ///
     /// \brief setFileSystemFactory Sets a file system factory to be used when building IDevices
     /// This is assumed to be called once, before any discovery/reloading process is launched.
@@ -62,7 +66,7 @@ public:
     ///
     static void setFileSystemFactory( std::shared_ptr<factory::IFileSystem> fsFactory );
 
-    static std::shared_ptr<Folder> fromPath( DBConnection conn, const std::string& path );
+    static std::shared_ptr<Folder> fromPath( DBConnection conn, const std::string& fullPath );
 
     unsigned int id() const;
     const std::string& path() const;
@@ -75,15 +79,25 @@ public:
     bool isPresent() const;
 
 private:
+    void computeFullPath();
+
+    static std::shared_ptr<factory::IFileSystem> FsFactory;
+
+private:
     DBConnection m_dbConection;
 
     unsigned int m_id;
+    // This contains the path relative to the device mountpoint (ie. excluding it)
     std::string m_path;
     unsigned int m_parent;
     unsigned int m_lastModificationDate;
     bool m_isBlacklisted;
     unsigned int m_deviceId;
     bool m_isPresent;
+
+    std::string m_deviceMountpoint;
+    // This contains the full path, including device mountpoint.
+    std::string m_fullPath;
 
     friend struct policy::FolderTable;
 };
