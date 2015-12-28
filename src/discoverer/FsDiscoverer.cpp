@@ -176,6 +176,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder
         LOG_INFO( "Folder ", f->path(), " not found in FS, deleting it" );
         m_ml->deleteFolder( f.get() );
     }
+    LOG_INFO( "Done checking subfolders in ", folder->path() );
     return true;
 }
 
@@ -212,6 +213,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory* folder, Folder* parentFolder ) co
         LOG_INFO( "File ", file->mrl(), " not found on filesystem, deleting it" );
         m_ml->deleteFile( file.get() );
     }
+    LOG_INFO( "Done checking files ", folder->path() );
 }
 
 std::vector<std::shared_ptr<Folder> > FsDiscoverer::blacklist() const
