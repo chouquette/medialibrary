@@ -181,9 +181,22 @@ std::vector<MediaPtr> MediaLibrary::videoFiles()
 
 MediaPtr MediaLibrary::file( const std::string& path )
 {
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name +
-            " WHERE mrl = ? AND is_present = 1";
-    return Media::fetch( m_dbConnection.get(), req, path );
+    auto folderPath = utils::file::directory( path );
+    auto folder = Folder::fromPath( m_dbConnection.get(), folderPath );
+    auto folderId = folder != nullptr ? folder->id() : 0;
+    if ( folderId != 0 )
+    {
+        static const std::string req = "SELECT * FROM " + policy::MediaTable::Name +
+                " WHERE mrl = ? AND folder_id = ? AND is_present = 1";
+        auto fileName = utils::file::fileName( path );
+        return Media::fetch( m_dbConnection.get(), req, fileName, folderId );
+    }
+    else
+    {
+        static const std::string req = "SELECT * FROM " + policy::MediaTable::Name +
+                " WHERE mrl = ? AND folder_id IS NULL AND is_present = 1";
+        return Media::fetch( m_dbConnection.get(), req, path );
+    }
 }
 
 std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder* parentFolder )

@@ -28,7 +28,7 @@
 
 #include "IMedia.h"
 #include "database/DatabaseHelpers.h"
-
+#include "utils/Cache.h"
 
 class Album;
 class ShowEpisode;
@@ -125,6 +125,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         ShowEpisodePtr m_showEpisode;
         MoviePtr m_movie;
         bool m_changed;
+        mutable Cache<std::string> m_fullPath;
 
         friend struct policy::MediaTable;
 };

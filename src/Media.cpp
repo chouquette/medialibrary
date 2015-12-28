@@ -70,7 +70,7 @@ Media::Media( const fs::IFile* file, unsigned int folderId, const std::string& t
     , m_duration( -1 )
     , m_playCount( 0 )
     , m_showEpisodeId( 0 )
-    , m_mrl( file->fullPath() )
+    , m_mrl( file->name() )
     , m_movieId( 0 )
     , m_folderId( folderId )
     , m_lastModificationDate( file->lastModificationDate() )
@@ -92,6 +92,7 @@ std::shared_ptr<Media> Media::create( DBConnection dbConnection, Type type, cons
                          self->m_lastModificationDate, self->m_insertionDate, self->m_title) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;
+    self->m_fullPath = file->fullPath();
     return self;
 }
 
@@ -177,7 +178,14 @@ void Media::increasePlayCount()
 
 const std::string& Media::mrl() const
 {
-    return m_mrl;
+    auto lock = m_fullPath.lock();
+    if ( m_fullPath.isCached() )
+        return m_fullPath;
+    auto folder = Folder::fetch( m_dbConnection, m_folderId );
+    if ( folder == nullptr )
+        return m_mrl;
+    m_fullPath = folder->path() + m_mrl;
+    return m_fullPath;
 }
 
 MoviePtr Media::movie()
@@ -323,7 +331,7 @@ bool Media::createTable( DBConnection connection )
             "duration INTEGER DEFAULT -1,"
             "play_count UNSIGNED INTEGER,"
             "show_episode_id UNSIGNED INTEGER,"
-            "mrl TEXT UNIQUE ON CONFLICT FAIL,"
+            "mrl TEXT,"
             "artist TEXT,"
             "movie_id UNSIGNED INTEGER,"
             "folder_id UNSIGNED INTEGER,"
@@ -338,7 +346,8 @@ bool Media::createTable( DBConnection connection )
             "FOREIGN KEY (movie_id) REFERENCES " + policy::MovieTable::Name
             + "(id_movie) ON DELETE CASCADE,"
             "FOREIGN KEY (folder_id) REFERENCES " + policy::FolderTable::Name
-            + "(id_folder) ON DELETE CASCADE"
+            + "(id_folder) ON DELETE CASCADE,"
+            "UNIQUE( mrl, folder_id ) ON CONFLICT FAIL"
             ")";
     std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_folder_present AFTER UPDATE OF is_present ON "
             + policy::FolderTable::Name +

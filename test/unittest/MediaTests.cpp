@@ -83,17 +83,6 @@ TEST_F( Medias, Delete )
     ASSERT_EQ( f2, nullptr );
 }
 
-TEST_F( Medias, Duplicate )
-{
-    auto f = ml->addFile( "media.avi", nullptr );
-    ASSERT_NE( f, nullptr );
-    ASSERT_THROW( ml->addFile( "media.avi", nullptr ), sqlite::errors::ConstraintViolation );
-
-
-    auto f2 = ml->file( "media.avi" );
-    ASSERT_EQ( f, f2 );
-}
-
 TEST_F( Medias, LastModificationDate )
 {
     auto f = ml->addFile( "media.avi", nullptr );
