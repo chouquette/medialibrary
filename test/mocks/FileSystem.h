@@ -103,6 +103,8 @@ public:
         , m_lastModificationDate( lastModif )
         , m_device( device )
     {
+        if ( ( *m_path.crbegin() ) != '/' )
+            m_path += '/';
     }
 
     virtual const std::string& path() const override
@@ -115,7 +117,7 @@ public:
         if ( m_filePathes.size() == 0 )
         {
             for ( const auto& f : m_files )
-                m_filePathes.push_back( m_path + '/' + f.first );
+                m_filePathes.push_back( m_path + f.first );
         }
         return m_filePathes;
     }
@@ -125,7 +127,7 @@ public:
         if ( m_dirPathes.size() == 0 )
         {
             for ( const auto& d : m_dirs )
-                m_dirPathes.push_back( m_path + "/" + d.first );
+                m_dirPathes.push_back( m_path + d.first + "/" );
         }
         return m_dirPathes;
     }
@@ -145,7 +147,7 @@ public:
         auto subFolder = utils::file::firstFolder( filePath );
         if ( subFolder.empty() == true )
         {
-            m_files[utils::file::fileName( filePath )] = std::make_shared<File>( m_path + "/" + filePath );
+            m_files[filePath] = std::make_shared<File>( m_path + filePath );
             m_filePathes.clear();
             markAsModified();
         }
@@ -161,12 +163,12 @@ public:
     void addFolder( const std::string& folder, unsigned int lastModif )
     {
         auto subFolder = utils::file::firstFolder( folder );
-        if ( subFolder.empty() == true )
+        auto remainingPath = utils::file::removePath( folder, subFolder );
+        if ( remainingPath.empty() == true )
         {
-            auto folderName = utils::file::fileName( folder );
-            auto dir = std::make_shared<Directory>( this, m_path + "/" + folderName,
+            auto dir = std::make_shared<Directory>( this, m_path + subFolder,
                                                     lastModif, m_device );
-            m_dirs[folderName] = dir;
+            m_dirs[subFolder] = dir;
             m_dirPathes.clear();
             markAsModified();
         }
@@ -174,7 +176,6 @@ public:
         {
             auto it = m_dirs.find( subFolder );
             assert( it != end( m_dirs ) );
-            auto remainingPath = utils::file::removePath( folder, subFolder );
             it->second->addFolder( remainingPath, lastModif );
         }
     }
@@ -220,9 +221,10 @@ public:
     std::shared_ptr<Directory> directory( const std::string& path )
     {
         auto subFolder = utils::file::firstFolder( path );
-        if ( subFolder.empty() == true )
+        auto remainingPath = utils::file::removePath( path, subFolder );
+        if ( remainingPath.empty() == true )
         {
-            auto it = m_dirs.find( path );
+            auto it = m_dirs.find( subFolder );
             if ( it == end( m_dirs ) )
                 return nullptr;
             return it->second;
@@ -231,7 +233,6 @@ public:
         {
             auto it = m_dirs.find( subFolder );
             assert( it != end( m_dirs ) );
-            auto remainingPath = utils::file::removePath( path, subFolder );
             return it->second->directory( remainingPath );
         }
     }
@@ -239,9 +240,10 @@ public:
     void removeFolder( const std::string& path )
     {
         auto subFolder = utils::file::firstFolder( path );
-        if ( subFolder.empty() == true )
+        auto remainingPath = utils::file::removePath( path, subFolder );
+        if ( remainingPath.empty() == true )
         {
-            auto it = m_dirs.find( path );
+            auto it = m_dirs.find( subFolder );
             assert( it != end( m_dirs ) );
             m_dirs.erase( it );
             m_dirPathes.clear();
@@ -251,7 +253,6 @@ public:
         {
             auto it = m_dirs.find( subFolder );
             assert( it != end( m_dirs ) );
-            auto remainingPath = utils::file::removePath( path, subFolder );
             it->second->removeFolder( remainingPath );
         }
     }
@@ -259,15 +260,15 @@ public:
     void addMountpoint( const std::string& path )
     {
         auto subFolder = utils::file::firstFolder( path );
-        if ( subFolder.empty() == true )
+        auto remainingPath = utils::file::removePath( path, subFolder );
+        if ( remainingPath.empty() == true )
         {
-            m_dirs[path] = nullptr;
+            m_dirs[subFolder] = nullptr;
         }
         else
         {
             auto it = m_dirs.find( subFolder );
             assert( it != end( m_dirs ) );
-            auto remainingPath = utils::file::removePath( path, subFolder );
             it->second->addMountpoint( remainingPath );
         }
     }
@@ -299,6 +300,8 @@ public:
         , m_present( true )
         , m_mountpoint( mountpoint )
     {
+        if ( ( *m_mountpoint.crbegin() ) != '/' )
+            m_mountpoint += '/';
     }
 
     // We need at least one existing shared ptr before calling shared_from_this.
@@ -392,12 +395,12 @@ struct FileSystemFactory : public factory::IFileSystem
     {
         // Add a root device unremovable
         auto rootDevice = addDevice( Root, RootDeviceUuid );
-        rootDevice->addFile( Root + "/video.avi" );
-        rootDevice->addFile( Root + "/audio.mp3" );
-        rootDevice->addFile( Root + "/not_a_media.something" );
-        rootDevice->addFile( Root + "/some_other_file.seaotter" );
+        rootDevice->addFile( Root + "video.avi" );
+        rootDevice->addFile( Root + "audio.mp3" );
+        rootDevice->addFile( Root + "not_a_media.something" );
+        rootDevice->addFile( Root + "some_other_file.seaotter" );
         rootDevice->addFolder( SubFolder, 456 );
-        rootDevice->addFile( SubFolder + "/subfile.mp4" );
+        rootDevice->addFile( SubFolder + "subfile.mp4" );
     }
 
     std::shared_ptr<Device> addDevice( const std::string& mountpoint, const std::string& uuid )
