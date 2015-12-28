@@ -107,6 +107,8 @@ std::shared_ptr<Folder> Folder::create( DBConnection connection, const std::stri
 bool Folder::blacklist( DBConnection connection, const std::string& fullPath )
 {
     auto folderFs = FsFactory->createDirectory( fullPath );
+    if ( folderFs == nullptr )
+        return false;
     auto deviceFs = folderFs->device();
     auto device = Device::fromUuid( connection, deviceFs->uuid() );
     if ( device == nullptr )
