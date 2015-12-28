@@ -24,6 +24,7 @@
 
 #include "database/DatabaseHelpers.h"
 #include "factory/IFileSystem.h"
+#include "utils/Cache.h"
 
 #include <sqlite3.h>
 
@@ -79,8 +80,6 @@ public:
     bool isPresent() const;
 
 private:
-    void computeFullPath();
-
     static std::shared_ptr<factory::IFileSystem> FsFactory;
 
 private:
@@ -95,9 +94,9 @@ private:
     unsigned int m_deviceId;
     bool m_isPresent;
 
-    std::string m_deviceMountpoint;
+    mutable Cache<std::string> m_deviceMountpoint;
     // This contains the full path, including device mountpoint.
-    std::string m_fullPath;
+    mutable std::string m_fullPath;
 
     friend struct policy::FolderTable;
 };

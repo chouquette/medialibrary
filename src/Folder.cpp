@@ -100,7 +100,7 @@ std::shared_ptr<Folder> Folder::create( DBConnection connection, const std::stri
         return nullptr;
     self->m_dbConection = connection;
     self->m_deviceMountpoint = deviceFs.mountpoint();
-    self->computeFullPath();
+    self->m_fullPath = self->m_deviceMountpoint.get() + path;
     return self;
 }
 
@@ -146,7 +146,7 @@ std::shared_ptr<Folder> Folder::fromPath( DBConnection conn, const std::string& 
     if ( folder == nullptr )
         return nullptr;
     folder->m_deviceMountpoint = deviceFs->mountpoint();
-    folder->computeFullPath();
+    folder->m_fullPath = folder->m_deviceMountpoint.get() + path;
     return folder;
 }
 
@@ -157,6 +157,14 @@ unsigned int Folder::id() const
 
 const std::string& Folder::path() const
 {
+    auto lock = m_deviceMountpoint.lock();
+    if ( m_deviceMountpoint.isCached() == true )
+        return m_fullPath;
+
+    auto device = Device::fetch( m_dbConection, m_deviceId );
+    auto deviceFs = FsFactory->createDevice( device->uuid() );
+    m_deviceMountpoint = deviceFs->mountpoint();
+    m_fullPath = m_deviceMountpoint.get() + m_path;
     return m_fullPath;
 }
 
@@ -202,42 +210,18 @@ bool Folder::isPresent() const
     return m_isPresent;
 }
 
-void Folder::computeFullPath()
-{
-    if ( ( *m_deviceMountpoint.crbegin() ) != '/' )
-        m_deviceMountpoint += '/';
-    m_fullPath = m_deviceMountpoint + m_path;
-}
-
 std::vector<std::shared_ptr<Folder>> Folder::fetchAll( DBConnection dbConn, unsigned int parentFolderId )
 {
-    std::vector<std::shared_ptr<Folder>> res;
     if ( parentFolderId == 0 )
     {
         static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
                 + " WHERE id_parent IS NULL AND is_blacklisted is NULL";
-        res = DatabaseHelpers::fetchAll<Folder>( dbConn, req );
+        return DatabaseHelpers::fetchAll<Folder>( dbConn, req );
     }
     else
     {
         static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
                 + " WHERE id_parent = ? AND is_blacklisted is NULL";
-        res = DatabaseHelpers::fetchAll<Folder>( dbConn, req, parentFolderId );
+        return DatabaseHelpers::fetchAll<Folder>( dbConn, req, parentFolderId );
     }
-    std::unordered_map<unsigned int, std::string> deviceMountpoints;
-    for ( auto& f : res )
-    {
-        auto it = deviceMountpoints.find( f->deviceId() );
-        if ( it == end( deviceMountpoints ) )
-        {
-            auto device = Device::fetch( dbConn, f->deviceId() );
-            auto deviceFs = FsFactory->createDevice( device->uuid() );
-            deviceMountpoints[f->deviceId()] = deviceFs->mountpoint();
-            f->m_deviceMountpoint = deviceFs->mountpoint();
-        }
-        else
-            f->m_deviceMountpoint = it->second;
-        f->computeFullPath();
-    }
-    return res;
 }
