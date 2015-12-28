@@ -220,7 +220,7 @@ std::vector<std::shared_ptr<Folder> > FsDiscoverer::blacklist() const
     return sqlite::Tools::fetchAll<Folder, Folder>( m_dbConn, req );
 }
 
-bool FsDiscoverer::isBlacklisted(const fs::IDirectory& directory, const std::vector<std::shared_ptr<Folder>>& blacklist ) const
+bool FsDiscoverer::isBlacklisted( const fs::IDirectory& directory, const std::vector<std::shared_ptr<Folder>>& blacklist ) const
 {
     auto deviceFs = directory.device();
     auto device = Device::fromUuid( m_dbConn, deviceFs->uuid() );
@@ -228,11 +228,10 @@ bool FsDiscoverer::isBlacklisted(const fs::IDirectory& directory, const std::vec
     // So when reading, a missing device means a non-blacklisted device.
     if ( device == nullptr )
         return false;
-    auto relPath = utils::file::removePath( directory.path(), deviceFs->mountpoint() );
     auto deviceId = device->id();
 
-    return std::find_if( begin( blacklist ), end( blacklist ), [&relPath, deviceId]( const std::shared_ptr<Folder>& f ) {
-        return f->path() == relPath && f->deviceId() == deviceId;
+    return std::find_if( begin( blacklist ), end( blacklist ), [&directory, deviceId]( const std::shared_ptr<Folder>& f ) {
+        return f->path() == directory.path() && f->deviceId() == deviceId;
     }) != end( blacklist );
 }
 
