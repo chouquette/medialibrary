@@ -108,12 +108,12 @@ void FsDiscoverer::checkDevices()
     }
 }
 
-bool FsDiscoverer::checkSubfolders( fs::IDirectory& folder, Folder& parentFolder, const std::vector<std::shared_ptr<Folder>> blacklist ) const
+bool FsDiscoverer::checkSubfolders( fs::IDirectory& parentFolderFs, Folder& parentFolder, const std::vector<std::shared_ptr<Folder>> blacklist ) const
 {
     // Load the folders we already know of:
-    LOG_INFO( "Checking for modifications in ", folder.path() );
+    LOG_INFO( "Checking for modifications in ", parentFolderFs.path() );
     auto subFoldersInDB = Folder::fetchAll( m_dbConn, parentFolder.id() );
-    for ( const auto& subFolderPath : folder.dirs() )
+    for ( const auto& subFolderPath : parentFolderFs.dirs() )
     {
         auto subFolder = m_fsFactory->createDirectory( subFolderPath );
         if ( subFolder == nullptr )
@@ -149,24 +149,24 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory& folder, Folder& parentFolder
         LOG_INFO( "Folder ", f->path(), " not found in FS, deleting it" );
         m_ml->deleteFolder( f.get() );
     }
-    LOG_INFO( "Done checking subfolders in ", folder.path() );
+    LOG_INFO( "Done checking subfolders in ", parentFolderFs.path() );
     return true;
 }
 
-void FsDiscoverer::checkFiles( fs::IDirectory& folder, Folder& parentFolder ) const
+void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFolder ) const
 {
-    LOG_INFO( "Checking file in ", folder.path() );
+    LOG_INFO( "Checking file in ", parentFolderFs.path() );
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
             + " WHERE folder_id = ?";
     auto files = Media::fetchAll<Media>( m_dbConn, req, parentFolder.id() );
-    for ( const auto& filePath : folder.files() )
+    for ( const auto& filePath : parentFolderFs.files() )
     {        
         auto it = std::find_if( begin( files ), end( files ), [filePath](const std::shared_ptr<IMedia>& f) {
             return f->mrl() == filePath;
         });
         if ( it == end( files ) )
         {
-            m_ml->addFile( filePath, parentFolder, folder );
+            m_ml->addFile( filePath, parentFolder, parentFolderFs );
             continue;
         }
         auto file = m_fsFactory->createFile( filePath );
@@ -178,7 +178,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory& folder, Folder& parentFolder ) co
         }
         LOG_INFO( "Forcing file refresh ", filePath );
         m_ml->deleteFile( (*it).get() );
-        m_ml->addFile( filePath, parentFolder, folder );
+        m_ml->addFile( filePath, parentFolder, parentFolderFs );
         files.erase( it );
     }
     for ( auto file : files )
@@ -186,7 +186,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory& folder, Folder& parentFolder ) co
         LOG_INFO( "File ", file->mrl(), " not found on filesystem, deleting it" );
         m_ml->deleteFile( file.get() );
     }
-    LOG_INFO( "Done checking files ", folder.path() );
+    LOG_INFO( "Done checking files ", parentFolderFs.path() );
 }
 
 std::vector<std::shared_ptr<Folder> > FsDiscoverer::blacklist() const
