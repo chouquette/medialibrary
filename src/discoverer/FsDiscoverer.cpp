@@ -116,16 +116,7 @@ void FsDiscoverer::checkDevices()
 
 bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder, const std::vector<std::shared_ptr<Folder>> blacklist ) const
 {
-    // From here we can have:
-    // - New subfolder(s)
-    // - Deleted subfolder(s)
-    // - New file(s)
-    // - Deleted file(s)
-    // - Changed file(s)
-    // ... in this folder, or in all the sub folders.
-
     // Load the folders we already know of:
-
     LOG_INFO( "Checking for modifications in ", folder->path() );
     auto subFoldersInDB = Folder::fetchAll( m_dbConn, parentFolder->id() );
     for ( const auto& subFolderPath : folder->dirs() )
