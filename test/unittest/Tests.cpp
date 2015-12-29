@@ -30,6 +30,7 @@
 #include "discoverer/FsDiscoverer.h"
 #include "mocks/FileSystem.h"
 #include "Media.h"
+#include "Folder.h"
 
 class TestEnv : public ::testing::Environment
 {
@@ -84,6 +85,19 @@ MediaPtr MediaLibraryTester::media( const std::string& path )
     for ( auto& f : medias )
     {
         if ( f->mrl() == path )
+            return f;
+    }
+    return nullptr;
+}
+
+std::shared_ptr<Folder> MediaLibraryTester::folder( const std::string& path )
+{
+    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
+            " WHERE is_blacklisted IS NULL AND is_present = 1";
+    auto folders = Folder::DatabaseHelpers::fetchAll<Folder>( m_dbConnection.get(), req );
+    for ( auto &f : folders )
+    {
+        if ( f->path() == path )
             return f;
     }
     return nullptr;

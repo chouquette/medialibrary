@@ -30,6 +30,7 @@ class MediaLibraryTester : public MediaLibrary
 public:
     std::shared_ptr<Media> media( unsigned int id );
     MediaPtr media( const std::string& path );
+    std::shared_ptr<Folder> folder( const std::string& path );
 };
 
 class MediaLibraryWithoutParser : public MediaLibraryTester

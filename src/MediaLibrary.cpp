@@ -228,11 +228,6 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder* p
     return fptr;
 }
 
-std::shared_ptr<Folder> MediaLibrary::folder( const std::string& path )
-{
-    return Folder::fromPath( m_dbConnection.get(), path );
-}
-
 bool MediaLibrary::deleteFile( const Media* file )
 {
     return Media::destroy( m_dbConnection.get(), file->id() );
