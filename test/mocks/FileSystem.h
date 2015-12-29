@@ -333,14 +333,14 @@ public:
 
     std::shared_ptr<File> file( const std::string& filePath )
     {
-        if ( m_root == nullptr )
+        if ( m_root == nullptr || m_present == false )
             return nullptr;
         return m_root->file( relativePath( filePath ) );
     }
 
     std::shared_ptr<Directory> directory( const std::string& path )
     {
-        if ( m_root == nullptr )
+        if ( m_root == nullptr || m_present == false )
             return nullptr;
         const auto relPath = relativePath( path );
         if ( relPath.empty() == true )
