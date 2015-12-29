@@ -74,7 +74,8 @@ bool Folder::createTable(DBConnection connection)
             "FOREIGN KEY (id_parent) REFERENCES " + policy::FolderTable::Name +
             "(id_folder) ON DELETE CASCADE,"
             "FOREIGN KEY (device_id) REFERENCES " + policy::DeviceTable::Name +
-            "(id_device) ON DELETE CASCADE"
+            "(id_device) ON DELETE CASCADE,"
+            "UNIQUE(path, device_id) ON CONFLICT FAIL"
             ")";
     std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_device_present AFTER UPDATE OF is_present ON "
             + policy::DeviceTable::Name +
