@@ -38,15 +38,11 @@
 #include "database/SqliteTools.h"
 #include "VideoTrack.h"
 #include "filesystem/IFile.h"
-#include "filesystem/IDevice.h"
-#include "filesystem/IDirectory.h"
 #include "utils/Filename.h"
 
 const std::string policy::MediaTable::Name = "Media";
 const std::string policy::MediaTable::PrimaryKeyColumn = "id_media";
 unsigned int Media::* const policy::MediaTable::PrimaryKey = &Media::m_id;
-
-std::shared_ptr<factory::IFileSystem> Media::FsFactory;
 
 Media::Media( DBConnection dbConnection, sqlite::Row& row )
     : m_dbConnection( dbConnection )
@@ -294,11 +290,6 @@ bool Media::isParsed() const
     return m_isParsed;
 }
 
-void Media::setFileSystemFactory(std::shared_ptr<factory::IFileSystem> fsFactory)
-{
-    FsFactory = fsFactory;
-}
-
 void Media::markParsed()
 {
     if ( m_isParsed == true )
@@ -372,37 +363,6 @@ bool Media::createTable( DBConnection connection )
             " END";
     return sqlite::Tools::executeRequest( connection, req ) &&
             sqlite::Tools::executeRequest( connection, triggerReq );
-}
-
-MediaPtr Media::fromPath( DBConnection connection, const std::string& fullPath )
-{
-    auto folderPath = utils::file::directory( fullPath );
-    auto folderFs = FsFactory->createDirectory( folderPath );
-    if ( folderFs != nullptr )
-    {
-        auto deviceFs = folderFs->device();
-        if ( deviceFs->isRemovable() == false )
-        {
-            static const std::string req = "SELECT * FROM " + policy::MediaTable::Name +
-                    " WHERE mrl = ? AND is_present = 1";
-            return Media::fetch( connection, req, fullPath );
-        }
-    }
-    auto folder = Folder::fromPath( connection, folderPath );
-    auto folderId = folder != nullptr ? folder->id() : 0;
-    if ( folderId != 0 )
-    {
-        static const std::string req = "SELECT * FROM " + policy::MediaTable::Name +
-                " WHERE mrl = ? AND folder_id = ? AND is_present = 1";
-        auto fileName = utils::file::fileName( fullPath );
-        return Media::fetch( connection, req, fileName, folderId );
-    }
-    else
-    {
-        static const std::string req = "SELECT * FROM " + policy::MediaTable::Name +
-                " WHERE mrl = ? AND folder_id IS NULL AND is_present = 1";
-        return Media::fetch( connection, req, fullPath );
-    }
 }
 
 bool Media::addLabel( LabelPtr label )

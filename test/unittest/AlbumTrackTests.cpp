@@ -41,7 +41,7 @@ TEST_F( AlbumTracks, Create )
 
     Reload();
 
-    f = std::static_pointer_cast<Media>( ml->file( "track1.mp3" ) );
+    f = std::static_pointer_cast<Media>( ml->media( f->id() ) );
     ASSERT_EQ( 10u, f->albumTrack()->discNumber() );
 }
 
@@ -58,7 +58,7 @@ TEST_F( AlbumTracks, Artist )
     Reload();
 
     // Don't reuse the "track" and "f" variable, their type differ
-    auto file = ml->file( "track1.mp3" );
+    auto file = ml->media( f->id() );
     auto albumTrack = file->albumTrack();
     ASSERT_EQ( albumTrack->artist(), "artist" );
 }
@@ -76,7 +76,7 @@ TEST_F( AlbumTracks, SetReleaseYear )
 
     Reload();
 
-    auto m2 = ml->file( "test.mp3" );
+    auto m2 = ml->media( m->id() );
     auto t2 = m2->albumTrack();
     ASSERT_EQ( t->releaseYear(), t2->releaseYear() );
 }

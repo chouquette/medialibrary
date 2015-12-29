@@ -115,7 +115,6 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
 {
     if ( m_fsFactory == nullptr )
         m_fsFactory.reset( new factory::FileSystemFactory );
-    Media::setFileSystemFactory( m_fsFactory );
     Folder::setFileSystemFactory( m_fsFactory );
     m_snapshotPath = snapshotPath;
     m_callback = mlCallback;
@@ -179,11 +178,6 @@ std::vector<MediaPtr> MediaLibrary::videoFiles()
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? AND is_present = 1 ORDER BY title";
     return Media::fetchAll<IMedia>( m_dbConnection.get(), req, IMedia::Type::VideoType );
-}
-
-MediaPtr MediaLibrary::file( const std::string& path )
-{
-    return Media::fromPath( m_dbConnection.get(), path );
 }
 
 std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder* parentFolder, fs::IDirectory* parentFolderFs )

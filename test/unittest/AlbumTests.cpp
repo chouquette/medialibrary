@@ -166,19 +166,18 @@ TEST_F( Albums, SetArtworkUrl )
 
 TEST_F( Albums, FetchAlbumFromTrack )
 {
-    {
-        auto a = ml->createAlbum( "album" );
-        auto f = ml->addFile( "file.mp3", nullptr, nullptr );
-        auto t = a->addTrack( f, 1, 0 );
-        f->setAlbumTrack( t );
-    }
+    auto a = ml->createAlbum( "album" );
+    auto f = ml->addFile( "file.mp3", nullptr, nullptr );
+    auto t = a->addTrack( f, 1, 0 );
+    f->setAlbumTrack( t );
+
     Reload();
 
-    auto f = ml->file( "file.mp3" );
-    auto t = f->albumTrack();
-    auto a = t->album();
-    ASSERT_NE( a, nullptr );
-    ASSERT_EQ( a->title(), "album" );
+    f = ml->media( f->id() );
+    auto t2 = f->albumTrack();
+    auto a2 = t2->album();
+    ASSERT_NE( a2, nullptr );
+    ASSERT_EQ( a2->title(), "album" );
 }
 
 TEST_F( Albums, Artists )

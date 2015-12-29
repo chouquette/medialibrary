@@ -73,7 +73,7 @@ TEST_F( Labels, Remove )
     ASSERT_EQ( labels[0]->name(), "cony the cone" );
 
     // And now clean fetch another instance of the file & check again for DB replication
-    auto f2 = ml->file( f->mrl() );
+    auto f2 = ml->media( f->id() );
     labels = f2->labels();
     ASSERT_EQ( labels.size(), 1u );
     ASSERT_EQ( labels[0]->name(), "cony the cone" );
@@ -90,7 +90,7 @@ TEST_F( Labels, Remove )
     ASSERT_EQ( labels.size(), 0u );
 
     // Check again for DB replication
-    f2 = ml->file( f->mrl() );
+    f2 = ml->media( f->id() );
     labels = f2->labels();
     ASSERT_EQ( labels.size(), 0u );
 }

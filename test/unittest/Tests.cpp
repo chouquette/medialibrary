@@ -29,6 +29,7 @@
 #include "utils/Filename.h"
 #include "discoverer/FsDiscoverer.h"
 #include "mocks/FileSystem.h"
+#include "Media.h"
 
 class TestEnv : public ::testing::Environment
 {
@@ -71,3 +72,19 @@ void Tests::InstantiateMediaLibrary()
 }
 
 ::testing::Environment* const env = ::testing::AddGlobalTestEnvironment(new TestEnv);
+
+std::shared_ptr<Media> MediaLibraryTester::media( unsigned int id )
+{
+    return Media::fetch( m_dbConnection.get(), id );
+}
+
+MediaPtr MediaLibraryTester::media( const std::string& path )
+{
+    auto medias = files();
+    for ( auto& f : medias )
+    {
+        if ( f->mrl() == path )
+            return f;
+    }
+    return nullptr;
+}

@@ -54,7 +54,7 @@ TEST_F( AudioTracks, GetSetProperties )
 
     Reload();
 
-    auto f2 = ml->file( "file.mp3" );
+    auto f2 = ml->media( f->id() );
     tracks = f2->audioTracks();
     ASSERT_EQ( tracks.size(), 1u );
     t = tracks[0];

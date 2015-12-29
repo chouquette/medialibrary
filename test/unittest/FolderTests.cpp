@@ -92,10 +92,6 @@ TEST_F( Folders, Delete )
     files = ml->files();
     ASSERT_EQ( files.size(), 0u );
 
-    // Check the file isn't cached anymore:
-    auto file = ml->file( filePath );
-    ASSERT_EQ( nullptr, file );
-
     cbMock->prepareForReload();
     Reload();
     bool reloaded = cbMock->waitForReload();
@@ -212,8 +208,8 @@ TEST_F( Folders, NewFolderWithFile )
     ASSERT_TRUE( reloaded );
 
     ASSERT_EQ( 4u, ml->files().size() );
-    auto file = ml->file( newFolder + "newfile.avi" );
-    ASSERT_NE( nullptr, file );
+    auto f = ml->media( newFolder + "newfile.avi" );
+    ASSERT_NE( nullptr, f );
 }
 
 // This is expected to fail until we fix the file system modifications detection
@@ -238,7 +234,7 @@ TEST_F( Folders, NewFileInSubFolder )
     ASSERT_TRUE( reloaded );
 
     ASSERT_EQ( 4u, ml->files().size() );
-    auto file = ml->file( mock::FileSystemFactory::SubFolder + "newfile.avi" );
+    auto file = ml->media( mock::FileSystemFactory::SubFolder + "newfile.avi" );
     f = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( 2u, f->files().size() );
     ASSERT_NE( nullptr, file );
@@ -263,7 +259,7 @@ TEST_F( Folders, RemoveFileFromDirectory )
     ASSERT_TRUE( reloaded );
 
     ASSERT_EQ( 2u, ml->files().size() );
-    auto file = ml->file( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+    auto file = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
     auto f = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( 0u, f->files().size() );
     ASSERT_EQ( nullptr, file );
@@ -287,7 +283,7 @@ TEST_F( Folders, RemoveDirectory )
     ASSERT_TRUE( reloaded );
 
     ASSERT_EQ( 2u, ml->files().size() );
-    auto file = ml->file( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+    auto file = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
     auto f = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( nullptr, f );
     ASSERT_EQ( nullptr, file );
@@ -301,7 +297,7 @@ TEST_F( Folders, UpdateFile )
     ASSERT_TRUE( discovered );
 
     auto filePath = mock::FileSystemFactory::SubFolder + "subfile.mp4";
-    auto f = ml->file( filePath );
+    auto f = ml->media( filePath );
     ASSERT_NE( f, nullptr );
     auto id = f->id();
 
@@ -313,7 +309,7 @@ TEST_F( Folders, UpdateFile )
     bool reloaded = cbMock->waitForReload();
     ASSERT_TRUE( reloaded );
 
-    f = ml->file( filePath );
+    f = ml->media( filePath );
     ASSERT_NE( nullptr, f );
     // The file is expected to be deleted and re-added since it changed, so the
     // id should have changed
@@ -348,7 +344,7 @@ TEST_F( Folders, BlacklistAfterDiscovery )
     ASSERT_EQ( nullptr, f2 );
     for ( auto& file : files )
     {
-        auto m = ml->file( file->mrl() );
+        auto m = ml->media( file->mrl() );
         ASSERT_EQ( nullptr, m );
     }
 

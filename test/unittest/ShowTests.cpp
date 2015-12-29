@@ -141,7 +141,7 @@ TEST_F( Shows, FetchShowFromEpisode )
 
     Reload();
 
-    f = std::static_pointer_cast<Media>( ml->file( "file.avi" ) );
+    f = std::static_pointer_cast<Media>( ml->media( f->id() ) );
     ASSERT_NE( nullptr, f->showEpisode() );
     s2 = f->showEpisode()->show();
     ASSERT_NE( s2, nullptr );
@@ -225,7 +225,7 @@ TEST_F( Shows, FileSetShowEpisode )
 
     Reload();
 
-    f = std::static_pointer_cast<Media>( ml->file( "file.avi" ) );
+    f = std::static_pointer_cast<Media>( ml->media( f->id() ) );
     auto e2 = f->showEpisode();
     ASSERT_NE( e2, nullptr );
     ASSERT_EQ( e2->name(), "episode 1" );

@@ -115,7 +115,7 @@ TEST_F( Movies, AssignToFile )
 
     Reload();
 
-    auto f2 = ml->file( "file.avi" );
+    auto f2 = ml->media( f->id() );
     auto m2 = f2->movie();
     ASSERT_NE( m2, nullptr );
     ASSERT_EQ( m2->title(), "movie" );

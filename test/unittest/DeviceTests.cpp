@@ -114,7 +114,7 @@ TEST_F( DeviceFs, RemoveDisk )
     auto files = ml->files();
     ASSERT_EQ( 5u, files.size() );
 
-    auto file = ml->file( RemovableDeviceMountpoint + "removablefile.mp3" );
+    auto file = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, file );
 
     fsMock->removeDevice( RemovableDeviceUuid );
@@ -127,7 +127,7 @@ TEST_F( DeviceFs, RemoveDisk )
     files = ml->files();
     ASSERT_EQ( 3u, files.size() );
 
-    file = ml->file( RemovableDeviceMountpoint + "removablefile.mp3" );
+    file = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_EQ( nullptr, file );
 }
 
@@ -141,7 +141,7 @@ TEST_F( DeviceFs, UnmountDisk )
     auto files = ml->files();
     ASSERT_EQ( 5u, files.size() );
 
-    auto file = ml->file( RemovableDeviceMountpoint + "removablefile.mp3" );
+    auto file = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, file );
 
     auto device = std::static_pointer_cast<mock::Device>( fsMock->createDevice( RemovableDeviceUuid ) );
@@ -155,7 +155,7 @@ TEST_F( DeviceFs, UnmountDisk )
     files = ml->files();
     ASSERT_EQ( 3u, files.size() );
 
-    file = ml->file( RemovableDeviceMountpoint + "removablefile.mp3" );
+    file = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_EQ( nullptr, file );
 }
 
@@ -169,7 +169,7 @@ TEST_F( DeviceFs, ReplugDisk )
     auto files = ml->files();
     ASSERT_EQ( 5u, files.size() );
 
-    auto file = ml->file( RemovableDeviceMountpoint + "removablefile.mp3" );
+    auto file = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, file );
 
     auto device = fsMock->removeDevice( RemovableDeviceUuid );
@@ -182,7 +182,7 @@ TEST_F( DeviceFs, ReplugDisk )
     files = ml->files();
     ASSERT_EQ( 3u, files.size() );
 
-    file = ml->file( RemovableDeviceMountpoint + "removablefile.mp3" );
+    file = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_EQ( nullptr, file );
 
     fsMock->addDevice( device );
@@ -194,7 +194,7 @@ TEST_F( DeviceFs, ReplugDisk )
     files = ml->files();
     ASSERT_EQ( 5u, files.size() );
 
-    file = ml->file( RemovableDeviceMountpoint + "removablefile.mp3" );
+    file = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, file );
 }
 
@@ -240,7 +240,7 @@ TEST_F( DeviceFs, RemoveAlbum )
     // Create an album on a non-removable device
     {
         auto album = std::static_pointer_cast<Album>( ml->createAlbum( "album" ) );
-        auto file = ml->file( mock::FileSystemFactory::Root + "audio.mp3" );
+        auto file = ml->media( mock::FileSystemFactory::Root + "audio.mp3" );
         album->addTrack( std::static_pointer_cast<Media>( file ), 1, 1 );
         auto artist = ml->createArtist( "artist" );
         album->setAlbumArtist( artist.get() );
@@ -248,8 +248,8 @@ TEST_F( DeviceFs, RemoveAlbum )
     // And an album that will disappear, along with its artist
     {
         auto album = std::static_pointer_cast<Album>( ml->createAlbum( "album 2" ) );
-        auto file = ml->file( RemovableDeviceMountpoint + "removablefile.mp3" );
-        auto file2 = ml->file( RemovableDeviceMountpoint + "removablefile2.mp3" );
+        auto file = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
+        ml->media( RemovableDeviceMountpoint + "removablefile2.mp3" );
         album->addTrack( std::static_pointer_cast<Media>( file ), 1, 1 );
         album->addTrack( std::static_pointer_cast<Media>( file ), 2, 1 );
         auto artist = ml->createArtist( "artist 2" );
@@ -283,8 +283,8 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
 
     {
         auto album = std::static_pointer_cast<Album>( ml->createAlbum( "album" ) );
-        auto file = ml->file( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
-        auto file2 = ml->file( RemovableDeviceMountpoint + "removablefile2.mp3" );
+        auto file = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+        auto file2 = ml->media( RemovableDeviceMountpoint + "removablefile2.mp3" );
         album->addTrack( std::static_pointer_cast<Media>( file ), 1, 1 );
         album->addTrack( std::static_pointer_cast<Media>( file2 ), 2, 1 );
         auto newArtist = ml->createArtist( "artist" );
@@ -322,7 +322,7 @@ TEST_F( DeviceFs, ChangeDevice )
     ASSERT_TRUE( discovered );
 
     // Fetch a removable file's ID
-    auto f = ml->file( RemovableDeviceMountpoint + "removablefile.mp3" );
+    auto f = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( f, nullptr );
     auto firstRemovableFileId = f->id();
     auto firstRemovableFilePath = f->mrl();
@@ -341,7 +341,7 @@ TEST_F( DeviceFs, ChangeDevice )
 
     // Check that new files with the same name have different IDs
     // but the same "full path"
-    f = ml->file( RemovableDeviceMountpoint + "removablefile.mp3" );
+    f = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, f );
     ASSERT_EQ( firstRemovableFilePath, f->mrl() );
     ASSERT_NE( firstRemovableFileId, f->id() );
@@ -354,7 +354,7 @@ TEST_F( DeviceFs, ChangeDevice )
     reloaded = cbMock->waitForReload();
     ASSERT_TRUE( reloaded );
 
-    f = ml->file( RemovableDeviceMountpoint + "removablefile.mp3" );
+    f = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, f );
     ASSERT_EQ( firstRemovableFileId, f->id() );
 }

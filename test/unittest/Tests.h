@@ -25,7 +25,14 @@
 #include "factory/IFileSystem.h"
 #include "MediaLibrary.h"
 
-class MediaLibraryWithoutParser : public MediaLibrary
+class MediaLibraryTester : public MediaLibrary
+{
+public:
+    std::shared_ptr<Media> media( unsigned int id );
+    MediaPtr media( const std::string& path );
+};
+
+class MediaLibraryWithoutParser : public MediaLibraryTester
 {
     virtual void startParser() override {}
 };
@@ -38,7 +45,7 @@ class MediaLibraryWithoutBackground : public MediaLibraryWithoutParser
 class Tests : public testing::Test
 {
 protected:
-    std::unique_ptr<MediaLibrary> ml;
+    std::unique_ptr<MediaLibraryTester> ml;
 
     virtual void SetUp() override;
     virtual void InstantiateMediaLibrary();

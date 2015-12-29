@@ -53,7 +53,6 @@ class MediaLibrary : public IMediaLibrary
         std::vector<MediaPtr> files();
         virtual std::vector<MediaPtr> audioFiles() override;
         virtual std::vector<MediaPtr> videoFiles() override;
-        MediaPtr file( const std::string& path );
         std::shared_ptr<Media> addFile(const std::string& path, Folder* parentFolder, fs::IDirectory* parentFolderFs);
         virtual bool deleteFile(const Media* file );
 
@@ -103,7 +102,7 @@ class MediaLibrary : public IMediaLibrary
         virtual void startParser();
         virtual void startDiscoverer();
 
-    private:
+    protected:
         std::unique_ptr<SqliteConnection> m_dbConnection;
         std::shared_ptr<factory::IFileSystem> m_fsFactory;
         std::string m_snapshotPath;

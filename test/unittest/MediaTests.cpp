@@ -59,14 +59,14 @@ TEST_F( Medias, Create )
 TEST_F( Medias, Fetch )
 {
     auto f = ml->addFile( "media.avi", nullptr, nullptr );
-    auto f2 = std::static_pointer_cast<Media>( ml->file( "media.avi" ) );
+    auto f2 = std::static_pointer_cast<Media>( ml->media( f->id() ) );
     ASSERT_EQ( f->mrl(), f2->mrl() );
     ASSERT_EQ( f, f2 );
 
     // Flush cache and fetch from DB
     Reload();
 
-    f2 = std::static_pointer_cast<Media>( ml->file( "media.avi" ) );
+    f2 = std::static_pointer_cast<Media>( ml->media( f->id() ) );
     ASSERT_EQ( f->mrl(), f2->mrl() );
     ASSERT_TRUE( f2->isStandAlone() );
 }
@@ -74,12 +74,12 @@ TEST_F( Medias, Fetch )
 TEST_F( Medias, Delete )
 {
     auto f = ml->addFile( "media.avi", nullptr, nullptr );
-    auto f2 = ml->file( "media.avi" );
+    auto f2 = ml->media( f->id() );
 
     ASSERT_EQ( f, f2 );
 
     ml->deleteFile( f.get() );
-    f2 = ml->file( "media.avi" );
+    f2 = ml->media( f->id() );
     ASSERT_EQ( f2, nullptr );
 }
 
@@ -89,7 +89,7 @@ TEST_F( Medias, LastModificationDate )
     ASSERT_NE( 0u, f->lastModificationDate() );
 
     Reload();
-    auto f2 = std::static_pointer_cast<Media>( ml->file( "media.avi" ) );
+    auto f2 = std::static_pointer_cast<Media>( ml->media( f->id() ) );
     ASSERT_EQ( f->lastModificationDate(), f2->lastModificationDate() );
 }
 
@@ -107,7 +107,7 @@ TEST_F( Medias, Duration )
 
     Reload();
 
-    auto f2 = ml->file( "media.avi" );
+    auto f2 = ml->media( f->id() );
     ASSERT_EQ( f2->duration(), d );
 }
 
@@ -125,7 +125,7 @@ TEST_F( Medias, Artist )
 
     Reload();
 
-    auto f2 = ml->file( "media.avi" );
+    auto f2 = ml->media( f->id() );
     ASSERT_EQ( f2->artist(), newArtist );
 }
 
@@ -142,7 +142,7 @@ TEST_F( Medias, Snapshot )
 
     Reload();
 
-    auto f2 = ml->file( "media.avi" );
+    auto f2 = ml->media( f->id() );
     ASSERT_EQ( f2->snapshot(), newSnapshot );
 }
 
@@ -156,6 +156,6 @@ TEST_F( Medias, PlayCount )
 
     Reload();
 
-    f = std::static_pointer_cast<Media>( ml->file( "media.avi" ) );
+    f = std::static_pointer_cast<Media>( ml->media( f->id() ) );
     ASSERT_EQ( 1, f->playCount() );
 }

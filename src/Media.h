@@ -58,8 +58,6 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
 
         static std::shared_ptr<Media> create( DBConnection dbConnection, Type type, const fs::IFile* file , unsigned int folderId, bool isRemovable );
         static bool createTable( DBConnection connection );
-        static MediaPtr fromPath( DBConnection connection, const std::string& fullPath );
-        static void setFileSystemFactory( std::shared_ptr<factory::IFileSystem> fsFactory );
 
         virtual unsigned int id() const override;
         virtual Type type() override;
@@ -101,9 +99,6 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         //needs to run or not.
         void markParsed();
         bool isParsed() const;
-
-    private:
-        static std::shared_ptr<factory::IFileSystem> FsFactory;
 
     private:
         DBConnection m_dbConnection;
