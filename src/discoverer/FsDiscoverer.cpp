@@ -142,12 +142,6 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder
             continue;
         }
         auto folderInDb = *it;
-        // If the folder isn't present, don't check it for modifications
-        if ( folderInDb->isPresent() == false )
-        {
-            subFoldersInDB.erase( it );
-            continue;
-        }
         if ( subFolder->lastModificationDate() == folderInDb->lastModificationDate() )
         {
             subFoldersInDB.erase( it );

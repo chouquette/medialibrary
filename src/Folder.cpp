@@ -215,13 +215,13 @@ std::vector<std::shared_ptr<Folder>> Folder::fetchAll( DBConnection dbConn, unsi
     if ( parentFolderId == 0 )
     {
         static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
-                + " WHERE id_parent IS NULL AND is_blacklisted is NULL";
+                + " WHERE id_parent IS NULL AND is_blacklisted is NULL AND is_present = 1";
         return DatabaseHelpers::fetchAll<Folder>( dbConn, req );
     }
     else
     {
         static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
-                + " WHERE id_parent = ? AND is_blacklisted is NULL";
+                + " WHERE id_parent = ? AND is_blacklisted is NULL AND is_present = 1";
         return DatabaseHelpers::fetchAll<Folder>( dbConn, req, parentFolderId );
     }
 }
