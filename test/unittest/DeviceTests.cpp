@@ -312,3 +312,48 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
     ASSERT_EQ( 1u, albums[0]->tracks().size() );
     ASSERT_EQ( 1u, artists[0]->media().size() );
 }
+
+TEST_F( DeviceFs, ChangeDevice )
+{
+    cbMock->prepareForWait( 1 );
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->wait();
+    ASSERT_TRUE( discovered );
+
+    // Fetch a removable file's ID
+    auto f = ml->file( RemovableDeviceMountpoint + "removablefile.mp3" );
+    ASSERT_NE( f, nullptr );
+    auto firstRemovableFileId = f->id();
+    auto firstRemovableFilePath = f->mrl();
+
+    // Remove & store the device
+    auto oldRemovableDevice = fsMock->removeDevice( RemovableDeviceUuid );
+
+    // Add a new device on the same mountpoint
+    fsMock->addDevice( RemovableDeviceMountpoint, "{another-removable-device}" );
+    fsMock->addFile( RemovableDeviceMountpoint + "removablefile.mp3" );
+
+    cbMock->prepareForReload();
+    Reload();
+    auto reloaded = cbMock->waitForReload();
+    ASSERT_TRUE( reloaded );
+
+    // Check that new files with the same name have different IDs
+    // but the same "full path"
+    f = ml->file( RemovableDeviceMountpoint + "removablefile.mp3" );
+    ASSERT_NE( nullptr, f );
+    ASSERT_EQ( firstRemovableFilePath, f->mrl() );
+    ASSERT_NE( firstRemovableFileId, f->id() );
+
+    fsMock->removeDevice( "{another-removable-device}" );
+    fsMock->addDevice( oldRemovableDevice );
+
+    cbMock->prepareForReload();
+    Reload();
+    reloaded = cbMock->waitForReload();
+    ASSERT_TRUE( reloaded );
+
+    f = ml->file( RemovableDeviceMountpoint + "removablefile.mp3" );
+    ASSERT_NE( nullptr, f );
+    ASSERT_EQ( firstRemovableFileId, f->id() );
+}
