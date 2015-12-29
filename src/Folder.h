@@ -54,10 +54,10 @@ class Folder : public DatabaseHelpers<Folder, policy::FolderTable>
 {
 public:
     Folder( DBConnection dbConnection, sqlite::Row& row );
-    Folder(const std::string& path, time_t lastModificationDate, unsigned int parent , unsigned int deviceId);
+    Folder( const std::string& path, unsigned int parent , unsigned int deviceId );
 
     static bool createTable( DBConnection connection );
-    static std::shared_ptr<Folder> create(DBConnection connection, const std::string& path, time_t lastModificationDate, unsigned int parentId, Device& device , fs::IDevice& deviceFs);
+    static std::shared_ptr<Folder> create( DBConnection connection, const std::string& path, unsigned int parentId, Device& device, fs::IDevice& deviceFs );
     static bool blacklist(DBConnection connection, const std::string& fullPath );
     static std::vector<std::shared_ptr<Folder>> fetchAll( DBConnection dbConn, unsigned int parentFolderId );
     ///
@@ -74,8 +74,6 @@ public:
     std::vector<MediaPtr> files();
     std::vector<std::shared_ptr<Folder>> folders();
     std::shared_ptr<Folder> parent();
-    unsigned int lastModificationDate();
-    bool setLastModificationDate(unsigned int lastModificationDate);
     unsigned int deviceId() const;
     bool isPresent() const;
 
@@ -89,7 +87,6 @@ private:
     // This contains the path relative to the device mountpoint (ie. excluding it)
     std::string m_path;
     unsigned int m_parent;
-    unsigned int m_lastModificationDate;
     bool m_isBlacklisted;
     unsigned int m_deviceId;
     bool m_isPresent;

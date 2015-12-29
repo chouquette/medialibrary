@@ -84,14 +84,8 @@ void FsDiscoverer::reload()
             m_ml->deleteFolder( f.get() );
             continue;
         }
-        if ( folder->lastModificationDate() == f->lastModificationDate() )
-        {
-            LOG_INFO( f->path(), " isn't modified" );
-            continue;
-        }
         checkSubfolders( folder.get(), f.get(), blist );
         checkFiles( folder.get(), f.get() );
-        f->setLastModificationDate( folder->lastModificationDate() );
     }
 }
 
@@ -142,17 +136,11 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder
             continue;
         }
         auto folderInDb = *it;
-        if ( subFolder->lastModificationDate() == folderInDb->lastModificationDate() )
-        {
-            subFoldersInDB.erase( it );
-            continue;
-        }
         // In any case, check for modifications, as a change related to a mountpoint might
         // not update the folder modification date.
         // Also, relying on the modification date probably isn't portable
         checkSubfolders( subFolder.get(), folderInDb.get(), blacklist );
         checkFiles( subFolder.get(), folderInDb.get() );
-        folderInDb->setLastModificationDate( subFolder->lastModificationDate() );
         subFoldersInDB.erase( it );
     }
     // Now all folders we had in DB but haven't seen from the FS must have been deleted.
@@ -224,8 +212,6 @@ bool FsDiscoverer::isBlacklisted( const fs::IDirectory& directory, const std::ve
 
 bool FsDiscoverer::addFolder( fs::IDirectory* folder, Folder* parentFolder, const std::vector<std::shared_ptr<Folder>>& blacklist ) const
 {
-    // Force <0> as lastModificationDate, so this folder is detected as outdated
-    // by the modification checking code
     auto deviceFs = folder->device();
     // We are creating a folder, there has to be a device containing it.
     assert( deviceFs != nullptr );
@@ -236,13 +222,12 @@ bool FsDiscoverer::addFolder( fs::IDirectory* folder, Folder* parentFolder, cons
         device = Device::create( m_dbConn, deviceFs->uuid(), deviceFs->isRemovable() );
     }
 
-    auto f = Folder::create( m_dbConn, folder->path(), 0,
-                             parentFolder != nullptr ? parentFolder->id() : 0, *device, *deviceFs );
+    auto f = Folder::create( m_dbConn, folder->path(), parentFolder != nullptr ? parentFolder->id() : 0,
+                             *device, *deviceFs );
     if ( f == nullptr )
         return false;
     checkFiles( folder, f.get() );
     checkSubfolders( folder, f.get(), blacklist );
-    f->setLastModificationDate( folder->lastModificationDate() );
     return true;
 }
 

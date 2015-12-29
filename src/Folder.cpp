@@ -46,22 +46,19 @@ Folder::Folder( DBConnection dbConnection, sqlite::Row& row )
     row >> m_id
         >> m_path
         >> m_parent
-        >> m_lastModificationDate
         >> m_isBlacklisted
         >> m_deviceId
         >> m_isPresent;
 }
 
-Folder::Folder( const std::string& path, time_t lastModificationDate, unsigned int parent, unsigned int deviceId )
+Folder::Folder( const std::string& path, unsigned int parent, unsigned int deviceId )
     : m_id( 0 )
     , m_path( path )
     , m_parent( parent )
-    , m_lastModificationDate( lastModificationDate )
     , m_isBlacklisted( false )
     , m_deviceId( deviceId )
     , m_isPresent( true )
 {
-    // Don't fetch the device mountpoint from here, we don't have a DBConnection yet.
 }
 
 bool Folder::createTable(DBConnection connection)
@@ -71,7 +68,6 @@ bool Folder::createTable(DBConnection connection)
             "id_folder INTEGER PRIMARY KEY AUTOINCREMENT,"
             "path TEXT,"
             "id_parent UNSIGNED INTEGER,"
-            "last_modification_date UNSIGNED INTEGER,"
             "is_blacklisted INTEGER,"
             "device_id UNSIGNED INTEGER,"
             "is_present BOOLEAN NOT NULL DEFAULT 1,"
@@ -89,14 +85,13 @@ bool Folder::createTable(DBConnection connection)
             sqlite::Tools::executeRequest( connection, triggerReq );
 }
 
-std::shared_ptr<Folder> Folder::create( DBConnection connection, const std::string& fullPath, time_t lastModificationDate, unsigned int parentId, Device& device, fs::IDevice& deviceFs )
+std::shared_ptr<Folder> Folder::create( DBConnection connection, const std::string& fullPath, unsigned int parentId, Device& device, fs::IDevice& deviceFs )
 {
     auto path = utils::file::removePath( fullPath, deviceFs.mountpoint() );
-    auto self = std::make_shared<Folder>( path, lastModificationDate, parentId, device.id() );
+    auto self = std::make_shared<Folder>( path, parentId, device.id() );
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
-            "(path, id_parent, last_modification_date, device_id) VALUES(?, ?, ?, ?)";
-    if ( insert( connection, self, req, path, sqlite::ForeignKey( parentId ),
-                         lastModificationDate, device.id() ) == false )
+            "(path, id_parent, device_id) VALUES(?, ?, ?)";
+    if ( insert( connection, self, req, path, sqlite::ForeignKey( parentId ), device.id() ) == false )
         return nullptr;
     self->m_dbConection = connection;
     self->m_deviceMountpoint = deviceFs.mountpoint();
@@ -183,21 +178,6 @@ std::vector<std::shared_ptr<Folder>> Folder::folders()
 std::shared_ptr<Folder> Folder::parent()
 {
     return fetch( m_dbConection, m_parent );
-}
-
-unsigned int Folder::lastModificationDate()
-{
-    return m_lastModificationDate;
-}
-
-bool Folder::setLastModificationDate( unsigned int lastModificationDate )
-{
-    static const std::string req = "UPDATE " + policy::FolderTable::Name +
-            " SET last_modification_date = ? WHERE id_folder = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConection, req, lastModificationDate, m_id ) == false )
-        return false;
-    m_lastModificationDate = lastModificationDate;
-    return true;
 }
 
 unsigned int Folder::deviceId() const

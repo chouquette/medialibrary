@@ -191,26 +191,6 @@ TEST_F( Folders, ListFolders )
     ASSERT_EQ( mock::FileSystemFactory::SubFolder + "subfile.mp4", file->mrl() );
 }
 
-TEST_F( Folders, LastModificationDate )
-{
-    cbMock->prepareForWait( 1 );
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
-    ASSERT_TRUE( discovered );
-
-    auto f = ml->folder( mock::FileSystemFactory::Root );
-    ASSERT_NE( 0u, f->lastModificationDate() );
-    auto subFolders = f->folders();
-    ASSERT_NE( 0u, subFolders[0]->lastModificationDate() );
-
-    Reload();
-
-    f = ml->folder( f->path() );
-    ASSERT_NE( 0u, f->lastModificationDate() );
-    subFolders = f->folders();
-    ASSERT_NE( 0u, subFolders[0]->lastModificationDate() );
-}
-
 TEST_F( Folders, NewFolderWithFile )
 {
     cbMock->prepareForWait( 1 );
@@ -248,7 +228,6 @@ TEST_F( Folders, NewFileInSubFolder )
     ASSERT_EQ( 3u, ml->files().size() );
 
     f = ml->folder( mock::FileSystemFactory::SubFolder );
-    auto lmd = f->lastModificationDate();
     // Do not watch for live changes
     ml.reset();
     fsMock->addFile( mock::FileSystemFactory::SubFolder + "newfile.avi" );
@@ -264,7 +243,6 @@ TEST_F( Folders, NewFileInSubFolder )
     ASSERT_EQ( 2u, f->files().size() );
     ASSERT_NE( nullptr, file );
     ASSERT_FALSE( std::static_pointer_cast<Media>( file )->isStandAlone() );
-    ASSERT_NE( lmd, f->lastModificationDate() );
 }
 
 TEST_F( Folders, RemoveFileFromDirectory )
