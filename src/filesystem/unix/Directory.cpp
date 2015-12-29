@@ -72,15 +72,15 @@ std::shared_ptr<IDevice> Directory::device() const
 
 std::string Directory::toAbsolute(const std::string& path)
 {
-    auto abs = std::unique_ptr<char[]>( new char[PATH_MAX] );
-    if ( realpath( path.c_str(), abs.get() ) == nullptr )
+    char abs[PATH_MAX];
+    if ( realpath( path.c_str(), abs ) == nullptr )
     {
         std::string err( "Failed to convert to absolute path" );
         err += "(" + path + "): ";
         err += strerror(errno);
         throw std::runtime_error( err );
     }
-    return std::string{ abs.get() };
+    return std::string{ abs };
 }
 
 void Directory::read()
