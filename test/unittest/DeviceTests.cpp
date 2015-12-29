@@ -47,7 +47,8 @@ protected:
         fsMock.reset( new mock::FileSystemFactory );
         cbMock.reset( new mock::WaitForDiscoveryComplete );
         fsMock->addFolder( "/a/mnt/" );
-        fsMock->addDevice( RemovableDeviceMountpoint, RemovableDeviceUuid );
+        auto device = std::static_pointer_cast<mock::Device>( fsMock->addDevice( RemovableDeviceMountpoint, RemovableDeviceUuid ) );
+        device->setRemovable( true );
         fsMock->addFile( RemovableDeviceMountpoint + "removablefile.mp3" );
         fsMock->addFile( RemovableDeviceMountpoint + "removablefile2.mp3" );
         Reload();
