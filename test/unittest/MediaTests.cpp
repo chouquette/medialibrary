@@ -40,7 +40,7 @@ TEST_F( Medias, Init )
 
 TEST_F( Medias, Create )
 {
-    auto f = ml->addFile( "media.avi", nullptr );
+    auto f = ml->addFile( "media.avi", nullptr, nullptr );
     ASSERT_NE( f, nullptr );
 
     ASSERT_EQ( f->playCount(), 0 );
@@ -58,7 +58,7 @@ TEST_F( Medias, Create )
 
 TEST_F( Medias, Fetch )
 {
-    auto f = ml->addFile( "media.avi", nullptr );
+    auto f = ml->addFile( "media.avi", nullptr, nullptr );
     auto f2 = std::static_pointer_cast<Media>( ml->file( "media.avi" ) );
     ASSERT_EQ( f->mrl(), f2->mrl() );
     ASSERT_EQ( f, f2 );
@@ -73,7 +73,7 @@ TEST_F( Medias, Fetch )
 
 TEST_F( Medias, Delete )
 {
-    auto f = ml->addFile( "media.avi", nullptr );
+    auto f = ml->addFile( "media.avi", nullptr, nullptr );
     auto f2 = ml->file( "media.avi" );
 
     ASSERT_EQ( f, f2 );
@@ -85,7 +85,7 @@ TEST_F( Medias, Delete )
 
 TEST_F( Medias, LastModificationDate )
 {
-    auto f = ml->addFile( "media.avi", nullptr );
+    auto f = ml->addFile( "media.avi", nullptr, nullptr );
     ASSERT_NE( 0u, f->lastModificationDate() );
 
     Reload();
@@ -95,7 +95,7 @@ TEST_F( Medias, LastModificationDate )
 
 TEST_F( Medias, Duration )
 {
-    auto f = ml->addFile( "media.avi", nullptr );
+    auto f = ml->addFile( "media.avi", nullptr, nullptr );
     ASSERT_EQ( f->duration(), -1 );
 
     // Use a value that checks we're using a 64bits value
@@ -114,7 +114,7 @@ TEST_F( Medias, Duration )
 
 TEST_F( Medias, Artist )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addFile( "media.avi", nullptr ) );
+    auto f = std::static_pointer_cast<Media>( ml->addFile( "media.avi", nullptr, nullptr ) );
     ASSERT_EQ( f->artist(), "" );
 
     std::string newArtist( "Rage Against The Otters" );
@@ -131,7 +131,7 @@ TEST_F( Medias, Artist )
 
 TEST_F( Medias, Snapshot )
 {
-    auto f = ml->addFile( "media.avi", nullptr );
+    auto f = ml->addFile( "media.avi", nullptr, nullptr );
     ASSERT_EQ( f->snapshot(), "" );
 
     std::string newSnapshot( "/path/to/snapshot" );
@@ -148,7 +148,7 @@ TEST_F( Medias, Snapshot )
 
 TEST_F( Medias, PlayCount )
 {
-    auto f = ml->addFile( "media.avi", nullptr );
+    auto f = ml->addFile( "media.avi", nullptr, nullptr );
     ASSERT_EQ( 0, f->playCount() );
     f->increasePlayCount();
     ASSERT_EQ( 1, f->playCount() );

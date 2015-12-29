@@ -54,7 +54,7 @@ class Folder : public DatabaseHelpers<Folder, policy::FolderTable>
 {
 public:
     Folder( DBConnection dbConnection, sqlite::Row& row );
-    Folder( const std::string& path, unsigned int parent , unsigned int deviceId );
+    Folder( const std::string& path, unsigned int parent , unsigned int deviceId , bool isRemovable );
 
     static bool createTable( DBConnection connection );
     static std::shared_ptr<Folder> create( DBConnection connection, const std::string& path, unsigned int parentId, Device& device, fs::IDevice& deviceFs );
@@ -90,6 +90,7 @@ private:
     bool m_isBlacklisted;
     unsigned int m_deviceId;
     bool m_isPresent;
+    bool m_isRemovable;
 
     mutable Cache<std::string> m_deviceMountpoint;
     // This contains the full path, including device mountpoint.

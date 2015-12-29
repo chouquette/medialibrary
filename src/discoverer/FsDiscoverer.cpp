@@ -166,7 +166,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory* folder, Folder* parentFolder ) co
         });
         if ( it == end( files ) )
         {
-            m_ml->addFile( filePath, parentFolder );
+            m_ml->addFile( filePath, parentFolder, folder );
             continue;
         }
         auto file = m_fsFactory->createFile( filePath );
@@ -178,7 +178,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory* folder, Folder* parentFolder ) co
         }
         LOG_INFO( "Forcing file refresh ", filePath );
         m_ml->deleteFile( (*it).get() );
-        m_ml->addFile( filePath, parentFolder );
+        m_ml->addFile( filePath, parentFolder, folder );
         files.erase( it );
     }
     for ( auto file : files )

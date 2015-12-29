@@ -38,10 +38,15 @@
 #include "database/SqliteTools.h"
 #include "VideoTrack.h"
 #include "filesystem/IFile.h"
+#include "filesystem/IDevice.h"
+#include "filesystem/IDirectory.h"
+#include "utils/Filename.h"
 
 const std::string policy::MediaTable::Name = "Media";
 const std::string policy::MediaTable::PrimaryKeyColumn = "id_media";
 unsigned int Media::* const policy::MediaTable::PrimaryKey = &Media::m_id;
+
+std::shared_ptr<factory::IFileSystem> Media::FsFactory;
 
 Media::Media( DBConnection dbConnection, sqlite::Row& row )
     : m_dbConnection( dbConnection )
@@ -61,16 +66,17 @@ Media::Media( DBConnection dbConnection, sqlite::Row& row )
         >> m_snapshot
         >> m_isParsed
         >> m_title
-        >> m_isPresent;
+        >> m_isPresent
+        >> m_isRemovable;
 }
 
-Media::Media( const fs::IFile* file, unsigned int folderId, const std::string& title, Type type )
+Media::Media( const fs::IFile* file, unsigned int folderId, const std::string& title, Type type, bool isRemovable )
     : m_id( 0 )
     , m_type( type )
     , m_duration( -1 )
     , m_playCount( 0 )
     , m_showEpisodeId( 0 )
-    , m_mrl( file->name() )
+    , m_mrl( isRemovable == true ? file->name() : file->fullPath() )
     , m_movieId( 0 )
     , m_folderId( folderId )
     , m_lastModificationDate( file->lastModificationDate() )
@@ -78,18 +84,19 @@ Media::Media( const fs::IFile* file, unsigned int folderId, const std::string& t
     , m_isParsed( false )
     , m_title( title )
     , m_isPresent( true )
+    , m_isRemovable( isRemovable )
     , m_changed( false )
 {
 }
 
-std::shared_ptr<Media> Media::create( DBConnection dbConnection, Type type, const fs::IFile* file, unsigned int folderId )
+std::shared_ptr<Media> Media::create( DBConnection dbConnection, Type type, const fs::IFile* file, unsigned int folderId, bool isRemovable )
 {
-    auto self = std::make_shared<Media>( file, folderId, file->name(), type );
+    auto self = std::make_shared<Media>( file, folderId, file->name(), type, isRemovable );
     static const std::string req = "INSERT INTO " + policy::MediaTable::Name +
-            "(type, mrl, folder_id, last_modification_date, insertion_date, title) VALUES(?, ?, ?, ?, ?, ?)";
+            "(type, mrl, folder_id, last_modification_date, insertion_date, title, is_removable) VALUES(?, ?, ?, ?, ?, ?, ?)";
 
     if ( insert( dbConnection, self, req, type, self->m_mrl, sqlite::ForeignKey( folderId ),
-                         self->m_lastModificationDate, self->m_insertionDate, self->m_title) == false )
+                         self->m_lastModificationDate, self->m_insertionDate, self->m_title, isRemovable ) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;
     self->m_fullPath = file->fullPath();
@@ -178,6 +185,9 @@ void Media::increasePlayCount()
 
 const std::string& Media::mrl() const
 {
+    if ( m_isRemovable == false )
+        return m_mrl;
+
     auto lock = m_fullPath.lock();
     if ( m_fullPath.isCached() )
         return m_fullPath;
@@ -284,6 +294,11 @@ bool Media::isParsed() const
     return m_isParsed;
 }
 
+void Media::setFileSystemFactory(std::shared_ptr<factory::IFileSystem> fsFactory)
+{
+    FsFactory = fsFactory;
+}
+
 void Media::markParsed()
 {
     if ( m_isParsed == true )
@@ -341,6 +356,7 @@ bool Media::createTable( DBConnection connection )
             "parsed BOOLEAN NOT NULL DEFAULT 0,"
             "title TEXT,"
             "is_present BOOLEAN NOT NULL DEFAULT 1,"
+            "is_removable BOOLEAN NOT NULL,"
             "FOREIGN KEY (show_episode_id) REFERENCES " + policy::ShowEpisodeTable::Name
             + "(id_episode) ON DELETE CASCADE,"
             "FOREIGN KEY (movie_id) REFERENCES " + policy::MovieTable::Name
@@ -356,6 +372,37 @@ bool Media::createTable( DBConnection connection )
             " END";
     return sqlite::Tools::executeRequest( connection, req ) &&
             sqlite::Tools::executeRequest( connection, triggerReq );
+}
+
+MediaPtr Media::fromPath( DBConnection connection, const std::string& fullPath )
+{
+    auto folderPath = utils::file::directory( fullPath );
+    auto folderFs = FsFactory->createDirectory( folderPath );
+    if ( folderFs != nullptr )
+    {
+        auto deviceFs = folderFs->device();
+        if ( deviceFs->isRemovable() == false )
+        {
+            static const std::string req = "SELECT * FROM " + policy::MediaTable::Name +
+                    " WHERE mrl = ? AND is_present = 1";
+            return Media::fetch( connection, req, fullPath );
+        }
+    }
+    auto folder = Folder::fromPath( connection, folderPath );
+    auto folderId = folder != nullptr ? folder->id() : 0;
+    if ( folderId != 0 )
+    {
+        static const std::string req = "SELECT * FROM " + policy::MediaTable::Name +
+                " WHERE mrl = ? AND folder_id = ? AND is_present = 1";
+        auto fileName = utils::file::fileName( fullPath );
+        return Media::fetch( connection, req, fileName, folderId );
+    }
+    else
+    {
+        static const std::string req = "SELECT * FROM " + policy::MediaTable::Name +
+                " WHERE mrl = ? AND folder_id IS NULL AND is_present = 1";
+        return Media::fetch( connection, req, fullPath );
+    }
 }
 
 bool Media::addLabel( LabelPtr label )

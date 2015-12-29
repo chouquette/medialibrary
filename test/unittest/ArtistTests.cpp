@@ -118,7 +118,7 @@ TEST_F( Artists, AllSongs )
 
     for (auto i = 1; i <= 3; ++i)
     {
-        auto f = ml->addFile( "song" + std::to_string(i) + ".mp3", nullptr );
+        auto f = ml->addFile( "song" + std::to_string(i) + ".mp3", nullptr, nullptr );
         auto res = artist->addMedia( f.get() );
         ASSERT_TRUE( res );
     }

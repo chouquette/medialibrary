@@ -130,7 +130,7 @@ TEST_F( Shows, FetchShowFromEpisode )
 {
     auto s = ml->createShow( "show" );
     auto e = s->addEpisode( "episode 1", 1 );
-    auto f = ml->addFile( "file.avi", nullptr );
+    auto f = ml->addFile( "file.avi", nullptr, nullptr );
     f->setShowEpisode( e );
     f->save();
 
@@ -216,7 +216,7 @@ TEST_F( Shows, FileSetShowEpisode )
 {
     auto show = ml->createShow( "show" );
     auto e = show->addEpisode( "episode 1", 1 );
-    auto f = ml->addFile( "file.avi", nullptr );
+    auto f = ml->addFile( "file.avi", nullptr, nullptr );
 
     ASSERT_EQ( f->showEpisode(), nullptr );
     f->setShowEpisode( e );

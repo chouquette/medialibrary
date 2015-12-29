@@ -105,7 +105,7 @@ TEST_F( Movies, SetImdbId )
 
 TEST_F( Movies, AssignToFile )
 {
-    auto f = ml->addFile( "file.avi", nullptr );
+    auto f = ml->addFile( "file.avi", nullptr, nullptr );
     auto m = ml->createMovie( "movie" );
 
     ASSERT_EQ( f->movie(), nullptr );

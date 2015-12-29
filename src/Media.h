@@ -54,10 +54,12 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         // shall be well-formed, and private constructor would prevent that.
         // There might be a way with a user-defined allocator, but we'll see that later...
         Media(DBConnection dbConnection , sqlite::Row& row);
-        Media(const fs::IFile* file, unsigned int folderId, const std::string &title, Type type);
+        Media( const fs::IFile* file, unsigned int folderId, const std::string &title, Type type, bool isRemovable );
 
-        static std::shared_ptr<Media> create(DBConnection dbConnection, Type type, const fs::IFile* file , unsigned int folderId);
+        static std::shared_ptr<Media> create( DBConnection dbConnection, Type type, const fs::IFile* file , unsigned int folderId, bool isRemovable );
         static bool createTable( DBConnection connection );
+        static MediaPtr fromPath( DBConnection connection, const std::string& fullPath );
+        static void setFileSystemFactory( std::shared_ptr<factory::IFileSystem> fsFactory );
 
         virtual unsigned int id() const override;
         virtual Type type() override;
@@ -101,6 +103,9 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         bool isParsed() const;
 
     private:
+        static std::shared_ptr<factory::IFileSystem> FsFactory;
+
+    private:
         DBConnection m_dbConnection;
 
         // DB fields:
@@ -119,6 +124,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         bool m_isParsed;
         std::string m_title;
         bool m_isPresent;
+        bool m_isRemovable;
 
         // Auto fetched related properties
         AlbumTrackPtr m_albumTrack;

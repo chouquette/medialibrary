@@ -55,6 +55,7 @@
 
 #include "filesystem/IDirectory.h"
 #include "filesystem/IFile.h"
+#include "filesystem/IDevice.h"
 #include "factory/FileSystem.h"
 
 const std::vector<std::string> MediaLibrary::supportedVideoExtensions {
@@ -114,6 +115,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
 {
     if ( m_fsFactory == nullptr )
         m_fsFactory.reset( new factory::FileSystemFactory );
+    Media::setFileSystemFactory( m_fsFactory );
     Folder::setFileSystemFactory( m_fsFactory );
     m_snapshotPath = snapshotPath;
     m_callback = mlCallback;
@@ -181,25 +183,10 @@ std::vector<MediaPtr> MediaLibrary::videoFiles()
 
 MediaPtr MediaLibrary::file( const std::string& path )
 {
-    auto folderPath = utils::file::directory( path );
-    auto folder = Folder::fromPath( m_dbConnection.get(), folderPath );
-    auto folderId = folder != nullptr ? folder->id() : 0;
-    if ( folderId != 0 )
-    {
-        static const std::string req = "SELECT * FROM " + policy::MediaTable::Name +
-                " WHERE mrl = ? AND folder_id = ? AND is_present = 1";
-        auto fileName = utils::file::fileName( path );
-        return Media::fetch( m_dbConnection.get(), req, fileName, folderId );
-    }
-    else
-    {
-        static const std::string req = "SELECT * FROM " + policy::MediaTable::Name +
-                " WHERE mrl = ? AND folder_id IS NULL AND is_present = 1";
-        return Media::fetch( m_dbConnection.get(), req, path );
-    }
+    return Media::fromPath( m_dbConnection.get(), path );
 }
 
-std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder* parentFolder )
+std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder* parentFolder, fs::IDirectory* parentFolderFs )
 {
     std::unique_ptr<fs::IFile> file;
     try
@@ -232,7 +219,9 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder* p
         return nullptr;
 
     LOG_INFO( "Adding ", path );
-    auto fptr = Media::create( m_dbConnection.get(), type, file.get(), parentFolder != nullptr ? parentFolder->id() : 0 );
+    auto fptr = Media::create( m_dbConnection.get(), type, file.get(),
+                               parentFolder != nullptr ? parentFolder->id() : 0,
+                               parentFolderFs != nullptr ? parentFolderFs->device()->isRemovable() : false );
     if ( fptr == nullptr )
     {
         LOG_ERROR( "Failed to add file ", file->fullPath(), " to the media library" );
