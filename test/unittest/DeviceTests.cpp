@@ -218,7 +218,7 @@ TEST_F( DeviceFs, ReplugDiskWithExtraFiles )
     ASSERT_EQ( 3u, files.size() );
 
     fsMock->addDevice( device );
-    fsMock->addFile( mock::FileSystemFactory::SubFolder + "newfile.mkv" );
+    fsMock->addFile( RemovableDeviceMountpoint + "newfile.mkv" );
 
     cbMock->prepareForReload();
     Reload();
