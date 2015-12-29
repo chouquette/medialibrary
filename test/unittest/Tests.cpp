@@ -74,6 +74,12 @@ void Tests::InstantiateMediaLibrary()
 
 ::testing::Environment* const env = ::testing::AddGlobalTestEnvironment(new TestEnv);
 
+MediaLibraryTester::MediaLibraryTester()
+    : dummyDirectory( new mock::NoopDirectory )
+    , dummyFolder( "./", 0, 0, false )
+{
+}
+
 std::shared_ptr<Media> MediaLibraryTester::media( unsigned int id )
 {
     return Media::fetch( m_dbConnection.get(), id );
@@ -101,4 +107,9 @@ std::shared_ptr<Folder> MediaLibraryTester::folder( const std::string& path )
             return f;
     }
     return nullptr;
+}
+
+std::shared_ptr<Media> MediaLibraryTester::addFile( const std::string& path )
+{
+    return MediaLibrary::addFile( path, dummyFolder, *dummyDirectory );
 }

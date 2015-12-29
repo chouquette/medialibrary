@@ -34,7 +34,7 @@ class AlbumTracks : public Tests
 TEST_F( AlbumTracks, Create )
 {
     auto album = ml->createAlbum( "album" );
-    auto f = ml->addFile( "track1.mp3", nullptr, nullptr );
+    auto f = ml->addFile( "track1.mp3" );
     auto track = album->addTrack( f, 1, 10 );
     ASSERT_NE( nullptr, track );
     ASSERT_EQ( 10u, track->discNumber() );
@@ -48,7 +48,7 @@ TEST_F( AlbumTracks, Create )
 TEST_F( AlbumTracks, Artist )
 {
     auto album = ml->createAlbum( "album" );
-    auto f = ml->addFile( "track1.mp3", nullptr, nullptr );
+    auto f = ml->addFile( "track1.mp3" );
     auto track = album->addTrack( f, 1, 0 );
 
     ASSERT_EQ( track->artist(), "" );
@@ -66,7 +66,7 @@ TEST_F( AlbumTracks, Artist )
 TEST_F( AlbumTracks, SetReleaseYear )
 {
     auto a = ml->createAlbum( "album" );
-    auto m = ml->addFile( "test.mp3", nullptr, nullptr );
+    auto m = ml->addFile( "test.mp3" );
     auto t = a->addTrack( m, 1, 0 );
 
     ASSERT_EQ( 0u, t->releaseYear() );

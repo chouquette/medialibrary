@@ -59,7 +59,7 @@ TEST_F( Albums, Fetch )
 TEST_F( Albums, AddTrack )
 {
     auto a = ml->createAlbum( "albumtag" );
-    auto f = ml->addFile( "track.mp3", nullptr, nullptr );
+    auto f = ml->addFile( "track.mp3" );
     auto track = a->addTrack( f, 10, 0 );
     ASSERT_NE( track, nullptr );
 
@@ -79,7 +79,7 @@ TEST_F( Albums, NbTracks )
     auto a = ml->createAlbum( "albumtag" );
     for ( auto i = 1u; i <= 10; ++i )
     {
-        auto f = ml->addFile( "track" + std::to_string(i) + ".mp3", nullptr, nullptr );
+        auto f = ml->addFile( "track" + std::to_string(i) + ".mp3" );
         auto track = a->addTrack( f, i, i );
         ASSERT_NE( track, nullptr );
     }
@@ -96,7 +96,7 @@ TEST_F( Albums, NbTracks )
 TEST_F( Albums, SetGenre )
 {
     auto a = ml->createAlbum( "album" );
-    auto f = ml->addFile( "track.mp3", nullptr, nullptr );
+    auto f = ml->addFile( "track.mp3" );
     auto t = a->addTrack( f, 1, 0 );
 
     t->setGenre( "happy underground post progressive death metal" );
@@ -167,7 +167,7 @@ TEST_F( Albums, SetArtworkUrl )
 TEST_F( Albums, FetchAlbumFromTrack )
 {
     auto a = ml->createAlbum( "album" );
-    auto f = ml->addFile( "file.mp3", nullptr, nullptr );
+    auto f = ml->addFile( "file.mp3" );
     auto t = a->addTrack( f, 1, 0 );
     f->setAlbumTrack( t );
 

@@ -275,11 +275,6 @@ bool Media::save()
     return true;
 }
 
-bool Media::isStandAlone()
-{
-    return m_folderId == 0;
-}
-
 unsigned int Media::lastModificationDate()
 {
     return m_lastModificationDate;

@@ -91,7 +91,6 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         void setSnapshot( const std::string& snapshot );
         bool save();
 
-        bool isStandAlone();
         unsigned int lastModificationDate();
 
         /// Explicitely mark a file as fully parsed, meaning no metadata service needs to run anymore.

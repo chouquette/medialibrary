@@ -24,13 +24,20 @@
 
 #include "factory/IFileSystem.h"
 #include "MediaLibrary.h"
+#include "Folder.h"
 
 class MediaLibraryTester : public MediaLibrary
 {
 public:
+    MediaLibraryTester();
     std::shared_ptr<Media> media( unsigned int id );
     MediaPtr media( const std::string& path );
     std::shared_ptr<Folder> folder( const std::string& path );
+    std::shared_ptr<Media> addFile( const std::string& path );
+
+private:
+    std::unique_ptr<fs::IDirectory> dummyDirectory;
+    Folder dummyFolder;
 };
 
 class MediaLibraryWithoutParser : public MediaLibraryTester

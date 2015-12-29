@@ -66,7 +66,6 @@ TEST_F( Folders, Add )
     auto files = ml->files();
 
     ASSERT_EQ( files.size(), 3u );
-    ASSERT_FALSE( std::static_pointer_cast<Media>( files[0] )->isStandAlone() );
 }
 
 TEST_F( Folders, Delete )
@@ -116,8 +115,6 @@ TEST_F( Folders, Load )
 
     auto files = ml->files();
     ASSERT_EQ( files.size(), 3u );
-    for ( auto& f : files )
-        ASSERT_FALSE( std::static_pointer_cast<Media>( f )->isStandAlone() );
 }
 
 TEST_F( Folders, InvalidPath )
@@ -238,7 +235,6 @@ TEST_F( Folders, NewFileInSubFolder )
     f = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( 2u, f->files().size() );
     ASSERT_NE( nullptr, file );
-    ASSERT_FALSE( std::static_pointer_cast<Media>( file )->isStandAlone() );
 }
 
 TEST_F( Folders, RemoveFileFromDirectory )

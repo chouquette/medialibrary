@@ -53,7 +53,7 @@ class MediaLibrary : public IMediaLibrary
         std::vector<MediaPtr> files();
         virtual std::vector<MediaPtr> audioFiles() override;
         virtual std::vector<MediaPtr> videoFiles() override;
-        std::shared_ptr<Media> addFile(const std::string& path, Folder* parentFolder, fs::IDirectory* parentFolderFs);
+        std::shared_ptr<Media> addFile( const std::string& path, Folder& parentFolder, fs::IDirectory& parentFolderFs );
         virtual bool deleteFile(const Media* file );
 
         bool deleteFolder( const Folder* folder );

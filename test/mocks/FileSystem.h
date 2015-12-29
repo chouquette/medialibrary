@@ -534,6 +534,54 @@ public:
     }
 };
 
+class NoopDevice : public fs::IDevice
+{
+public:
+    virtual const std::string&uuid() const override
+    {
+        assert(false);
+    }
+
+    virtual bool isRemovable() const override
+    {
+        return false;
+    }
+
+    virtual bool isPresent() const override
+    {
+        return true;
+    }
+
+    virtual const std::string& mountpoint() const override
+    {
+        assert(false);
+    }
+};
+
+// We just need a valid instance of this one
+class NoopDirectory : public fs::IDirectory
+{
+    virtual const std::string& path() const override
+    {
+        assert(false);
+    }
+
+    virtual const std::vector<std::string>&files() override
+    {
+        assert(false);
+    }
+
+    virtual const std::vector<std::string>&dirs() override
+    {
+        assert(false);
+    }
+
+    virtual std::shared_ptr<fs::IDevice> device() const override
+    {
+        return std::make_shared<NoopDevice>();
+    }
+};
+
 class NoopFsFactory : public factory::IFileSystem
 {
 public:

@@ -66,7 +66,7 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
     auto blist = blacklist();
     if ( isBlacklisted( *fsDir, blist ) == true )
         return false;
-    return addFolder( fsDir.get(), nullptr, blist );
+    return addFolder( *fsDir, nullptr, blist );
 }
 
 void FsDiscoverer::reload()
@@ -84,8 +84,8 @@ void FsDiscoverer::reload()
             m_ml->deleteFolder( f.get() );
             continue;
         }
-        checkSubfolders( folder.get(), f.get(), blist );
-        checkFiles( folder.get(), f.get() );
+        checkSubfolders( *folder, *f, blist );
+        checkFiles( *folder, *f );
     }
 }
 
@@ -108,12 +108,12 @@ void FsDiscoverer::checkDevices()
     }
 }
 
-bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder, const std::vector<std::shared_ptr<Folder>> blacklist ) const
+bool FsDiscoverer::checkSubfolders( fs::IDirectory& folder, Folder& parentFolder, const std::vector<std::shared_ptr<Folder>> blacklist ) const
 {
     // Load the folders we already know of:
-    LOG_INFO( "Checking for modifications in ", folder->path() );
-    auto subFoldersInDB = Folder::fetchAll( m_dbConn, parentFolder->id() );
-    for ( const auto& subFolderPath : folder->dirs() )
+    LOG_INFO( "Checking for modifications in ", folder.path() );
+    auto subFoldersInDB = Folder::fetchAll( m_dbConn, parentFolder.id() );
+    for ( const auto& subFolderPath : folder.dirs() )
     {
         auto subFolder = m_fsFactory->createDirectory( subFolderPath );
         if ( subFolder == nullptr )
@@ -132,15 +132,15 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder
                 continue;
             }
             LOG_INFO( "New folder detected: ", subFolderPath );
-            addFolder( subFolder.get(), parentFolder, blacklist );
+            addFolder( *subFolder, &parentFolder, blacklist );
             continue;
         }
         auto folderInDb = *it;
         // In any case, check for modifications, as a change related to a mountpoint might
         // not update the folder modification date.
         // Also, relying on the modification date probably isn't portable
-        checkSubfolders( subFolder.get(), folderInDb.get(), blacklist );
-        checkFiles( subFolder.get(), folderInDb.get() );
+        checkSubfolders( *subFolder, *folderInDb, blacklist );
+        checkFiles( *subFolder, *folderInDb );
         subFoldersInDB.erase( it );
     }
     // Now all folders we had in DB but haven't seen from the FS must have been deleted.
@@ -149,17 +149,17 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory* folder, Folder* parentFolder
         LOG_INFO( "Folder ", f->path(), " not found in FS, deleting it" );
         m_ml->deleteFolder( f.get() );
     }
-    LOG_INFO( "Done checking subfolders in ", folder->path() );
+    LOG_INFO( "Done checking subfolders in ", folder.path() );
     return true;
 }
 
-void FsDiscoverer::checkFiles( fs::IDirectory* folder, Folder* parentFolder ) const
+void FsDiscoverer::checkFiles( fs::IDirectory& folder, Folder& parentFolder ) const
 {
-    LOG_INFO( "Checking file in ", folder->path() );
+    LOG_INFO( "Checking file in ", folder.path() );
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
             + " WHERE folder_id = ?";
-    auto files = Media::fetchAll<Media>( m_dbConn, req, parentFolder->id() );
-    for ( const auto& filePath : folder->files() )
+    auto files = Media::fetchAll<Media>( m_dbConn, req, parentFolder.id() );
+    for ( const auto& filePath : folder.files() )
     {        
         auto it = std::find_if( begin( files ), end( files ), [filePath](const std::shared_ptr<IMedia>& f) {
             return f->mrl() == filePath;
@@ -186,7 +186,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory* folder, Folder* parentFolder ) co
         LOG_INFO( "File ", file->mrl(), " not found on filesystem, deleting it" );
         m_ml->deleteFile( file.get() );
     }
-    LOG_INFO( "Done checking files ", folder->path() );
+    LOG_INFO( "Done checking files ", folder.path() );
 }
 
 std::vector<std::shared_ptr<Folder> > FsDiscoverer::blacklist() const
@@ -210,9 +210,9 @@ bool FsDiscoverer::isBlacklisted( const fs::IDirectory& directory, const std::ve
     }) != end( blacklist );
 }
 
-bool FsDiscoverer::addFolder( fs::IDirectory* folder, Folder* parentFolder, const std::vector<std::shared_ptr<Folder>>& blacklist ) const
+bool FsDiscoverer::addFolder( fs::IDirectory& folder, Folder* parentFolder, const std::vector<std::shared_ptr<Folder>>& blacklist ) const
 {
-    auto deviceFs = folder->device();
+    auto deviceFs = folder.device();
     // We are creating a folder, there has to be a device containing it.
     assert( deviceFs != nullptr );
     auto device = Device::fromUuid( m_dbConn, deviceFs->uuid() );
@@ -222,12 +222,13 @@ bool FsDiscoverer::addFolder( fs::IDirectory* folder, Folder* parentFolder, cons
         device = Device::create( m_dbConn, deviceFs->uuid(), deviceFs->isRemovable() );
     }
 
-    auto f = Folder::create( m_dbConn, folder->path(), parentFolder != nullptr ? parentFolder->id() : 0,
+    auto f = Folder::create( m_dbConn, folder.path(),
+                             parentFolder != nullptr ? parentFolder->id() : 0,
                              *device, *deviceFs );
     if ( f == nullptr )
         return false;
-    checkFiles( folder, f.get() );
-    checkSubfolders( folder, f.get(), blacklist );
+    checkFiles( folder, *f );
+    checkSubfolders( folder, *f, blacklist );
     return true;
 }
 

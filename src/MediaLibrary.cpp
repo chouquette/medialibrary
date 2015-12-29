@@ -180,7 +180,7 @@ std::vector<MediaPtr> MediaLibrary::videoFiles()
     return Media::fetchAll<IMedia>( m_dbConnection.get(), req, IMedia::Type::VideoType );
 }
 
-std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder* parentFolder, fs::IDirectory* parentFolderFs )
+std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder& parentFolder, fs::IDirectory& parentFolderFs )
 {
     std::unique_ptr<fs::IFile> file;
     try
@@ -213,9 +213,8 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder* p
         return nullptr;
 
     LOG_INFO( "Adding ", path );
-    auto fptr = Media::create( m_dbConnection.get(), type, file.get(),
-                               parentFolder != nullptr ? parentFolder->id() : 0,
-                               parentFolderFs != nullptr ? parentFolderFs->device()->isRemovable() : false );
+    auto fptr = Media::create( m_dbConnection.get(), type, file.get(), parentFolder.id(),
+                               parentFolderFs.device()->isRemovable() );
     if ( fptr == nullptr )
     {
         LOG_ERROR( "Failed to add file ", file->fullPath(), " to the media library" );
