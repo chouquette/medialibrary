@@ -202,7 +202,7 @@ TEST_F( Folders, NewFolderWithFile )
     // Do not watch for live changes
     ml.reset();
     auto newFolder = mock::FileSystemFactory::Root + "newfolder/";
-    fsMock->addFolder( newFolder, time( nullptr ) );
+    fsMock->addFolder( newFolder );
     fsMock->addFile( newFolder + "newfile.avi" );
 
     // This will trigger a reload
@@ -307,7 +307,6 @@ TEST_F( Folders, UpdateFile )
 
     ml.reset();
     fsMock->file( filePath )->markAsModified();
-    fsMock->directory( mock::FileSystemFactory::SubFolder )->markAsModified();
 
     cbMock->prepareForReload();
     Reload();

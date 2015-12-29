@@ -97,10 +97,8 @@ class Device;
 class Directory : public fs::IDirectory
 {
 public:
-    Directory( Directory* parent, const std::string& path, unsigned int lastModif, std::shared_ptr<Device> device )
+    Directory( const std::string& path, std::shared_ptr<Device> device )
         : m_path( path )
-        , m_parent( parent )
-        , m_lastModificationDate( lastModif )
         , m_device( device )
     {
         if ( ( *m_path.crbegin() ) != '/' )
@@ -132,11 +130,6 @@ public:
         return m_dirPathes;
     }
 
-    virtual unsigned int lastModificationDate() const override
-    {
-        return m_lastModificationDate;
-    }
-
     virtual std::shared_ptr<fs::IDevice> device() const override
     {
         return std::static_pointer_cast<fs::IDevice>( m_device );
@@ -149,7 +142,6 @@ public:
         {
             m_files[filePath] = std::make_shared<File>( m_path + filePath );
             m_filePathes.clear();
-            markAsModified();
         }
         else
         {
@@ -160,23 +152,21 @@ public:
         }
     }
 
-    void addFolder( const std::string& folder, unsigned int lastModif )
+    void addFolder( const std::string& folder )
     {
         auto subFolder = utils::file::firstFolder( folder );
         auto remainingPath = utils::file::removePath( folder, subFolder );
         if ( remainingPath.empty() == true )
         {
-            auto dir = std::make_shared<Directory>( this, m_path + subFolder,
-                                                    lastModif, m_device );
+            auto dir = std::make_shared<Directory>( m_path + subFolder, m_device );
             m_dirs[subFolder] = dir;
             m_dirPathes.clear();
-            markAsModified();
         }
         else
         {
             auto it = m_dirs.find( subFolder );
             assert( it != end( m_dirs ) );
-            it->second->addFolder( remainingPath, lastModif );
+            it->second->addFolder( remainingPath );
         }
     }
 
@@ -189,7 +179,6 @@ public:
             assert( it != end( m_files ) );
             m_files.erase( it );
             m_filePathes.clear();
-            markAsModified();
         }
         else
         {
@@ -247,7 +236,6 @@ public:
             assert( it != end( m_dirs ) );
             m_dirs.erase( it );
             m_dirPathes.clear();
-            markAsModified();
         }
         else
         {
@@ -273,21 +261,12 @@ public:
         }
     }
 
-    void markAsModified()
-    {
-        if ( m_parent != nullptr )
-            m_parent->markAsModified();
-        m_lastModificationDate++;
-    }
-
 private:
     std::string m_path;
     std::unordered_map<std::string, std::shared_ptr<File>> m_files;
     std::unordered_map<std::string, std::shared_ptr<Directory>> m_dirs;
     std::vector<std::string> m_filePathes;
     std::vector<std::string> m_dirPathes;
-    Directory* m_parent;
-    unsigned int m_lastModificationDate;
     std::shared_ptr<Device> m_device;
 };
 
@@ -309,7 +288,7 @@ public:
     // initialize our fake root folder
     void setupRoot()
     {
-        m_root = std::make_shared<Directory>( nullptr, m_mountpoint, 0, shared_from_this() );
+        m_root = std::make_shared<Directory>( m_mountpoint, shared_from_this() );
     }
 
     virtual const std::string& uuid() const override { return m_uuid; }
@@ -333,9 +312,9 @@ public:
         m_root->addFile( relativePath( filePath ) );
     }
 
-    void addFolder( const std::string& path, unsigned int lastModif )
+    void addFolder( const std::string& path )
     {
-        m_root->addFolder( relativePath( path ), lastModif );
+        m_root->addFolder( relativePath( path ) );
     }
 
     void removeFile( const std::string& filePath )
@@ -399,7 +378,7 @@ struct FileSystemFactory : public factory::IFileSystem
         rootDevice->addFile( Root + "audio.mp3" );
         rootDevice->addFile( Root + "not_a_media.something" );
         rootDevice->addFile( Root + "some_other_file.seaotter" );
-        rootDevice->addFolder( SubFolder, 456 );
+        rootDevice->addFolder( SubFolder );
         rootDevice->addFile( SubFolder + "subfile.mp4" );
     }
 
@@ -426,10 +405,10 @@ struct FileSystemFactory : public factory::IFileSystem
         d->addFile( filePath );
     }
 
-    void addFolder( const std::string& path, unsigned int lastModif )
+    void addFolder( const std::string& path )
     {
         auto d = device( path );
-        d->addFolder( path, lastModif );
+        d->addFolder( path );
     }
 
     void removeFile( const std::string& filePath )

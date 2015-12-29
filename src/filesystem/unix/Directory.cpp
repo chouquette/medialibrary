@@ -36,8 +36,13 @@ namespace fs
 
 Directory::Directory( const std::string& path )
     : m_path( toAbsolute( path ) )
-    , m_lastModificationDate( 0 )
 {
+#ifndef NDEBUG
+    struct stat s;
+    lstat( m_path.c_str(), &s );
+    if ( S_ISDIR( s.st_mode ) == false )
+        throw std::runtime_error( "The provided path isn't a directory" );
+#endif
 }
 
 const std::string&Directory::path() const
@@ -57,19 +62,6 @@ const std::vector<std::string>&Directory::dirs()
     if ( m_dirs.size() == 0 && m_files.size() == 0 )
         read();
     return m_dirs;
-}
-
-unsigned int Directory::lastModificationDate() const
-{
-    if ( m_lastModificationDate == 0 )
-    {
-        struct stat s;
-        lstat( m_path.c_str(), &s );
-        if ( S_ISDIR( s.st_mode ) == false )
-            throw std::runtime_error( "The provided path isn't a directory" );
-        m_lastModificationDate = s.st_mtim.tv_sec;
-    }
-    return m_lastModificationDate;
 }
 
 std::shared_ptr<IDevice> Directory::device() const

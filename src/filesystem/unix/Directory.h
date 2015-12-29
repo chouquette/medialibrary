@@ -35,7 +35,6 @@ public:
     virtual const std::string& path() const override;
     virtual const std::vector<std::string>& files() override;
     virtual const std::vector<std::string>& dirs() override;
-    virtual unsigned int lastModificationDate() const override;
     virtual std::shared_ptr<IDevice> device() const override;
 
 private:
@@ -48,7 +47,6 @@ private:
     const std::string m_path;
     std::vector<std::string> m_files;
     std::vector<std::string> m_dirs;
-    mutable unsigned int m_lastModificationDate;
 };
 
 }

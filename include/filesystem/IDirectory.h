@@ -41,7 +41,6 @@ namespace fs
         virtual const std::vector<std::string>& files() = 0;
         /// Returns a list of absolute path to this folder subdirectories
         virtual const std::vector<std::string>& dirs() = 0;
-        virtual unsigned int lastModificationDate() const = 0;
         virtual std::shared_ptr<IDevice> device() const = 0;
     };
 }
