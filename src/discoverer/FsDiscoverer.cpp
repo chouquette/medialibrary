@@ -37,11 +37,8 @@
 FsDiscoverer::FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, MediaLibrary* ml, DBConnection dbConn )
     : m_ml( ml )
     , m_dbConn( dbConn )
+    , m_fsFactory( fsFactory )
 {
-    if ( fsFactory != nullptr )
-        m_fsFactory = fsFactory;
-    else
-        m_fsFactory.reset( new factory::FileSystemFactory );
 }
 
 bool FsDiscoverer::discover( const std::string &entryPoint )
