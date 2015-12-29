@@ -397,12 +397,6 @@ void MediaLibrary::discover( const std::string &entryPoint )
 
 bool MediaLibrary::ignoreFolder( const std::string& path )
 {
-    auto f = Folder::fromPath( m_dbConnection.get(), path );
-    if ( f != nullptr )
-    {
-        // Let the foreign key destroy everything beneath this folder
-        Folder::destroy( m_dbConnection.get(), f->id() );
-    }
     return Folder::blacklist( m_dbConnection.get(), path );
 }
 

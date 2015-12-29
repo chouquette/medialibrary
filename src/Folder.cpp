@@ -112,6 +112,12 @@ std::shared_ptr<Folder> Folder::create( DBConnection connection, const std::stri
 
 bool Folder::blacklist( DBConnection connection, const std::string& fullPath )
 {
+    auto f = fromPath( connection, fullPath );
+    if ( f != nullptr )
+    {
+        // Let the foreign key destroy everything beneath this folder
+        destroy( connection, f->id() );
+    }
     auto folderFs = FsFactory->createDirectory( fullPath );
     if ( folderFs == nullptr )
         return false;
