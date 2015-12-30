@@ -57,6 +57,8 @@ Device::Device( const std::string& uuid, const std::string& mountpoint, bool isR
     , m_present( true )
     , m_removable( isRemovable )
 {
+    if ( *m_mountpoint.crbegin() != '/' )
+        m_mountpoint += '/';
 }
 
 const std::string& Device::uuid() const
