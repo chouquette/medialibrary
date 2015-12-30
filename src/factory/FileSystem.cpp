@@ -39,6 +39,13 @@
 namespace factory
 {
 
+FileSystemFactory::FileSystemFactory()
+{
+    static bool isCachePopulated = fs::Device::populateCache();
+    if ( isCachePopulated == false )
+        throw std::runtime_error( "Failed to populate device cache" );
+}
+
 std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::string& path )
 {
     std::lock_guard<std::mutex> lock( m_mutex );

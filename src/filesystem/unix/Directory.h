@@ -23,6 +23,7 @@
 #pragma once
 
 #include "filesystem/IDirectory.h"
+#include "utils/Cache.h"
 #include <string>
 
 namespace fs
@@ -47,6 +48,7 @@ private:
     const std::string m_path;
     std::vector<std::string> m_files;
     std::vector<std::string> m_dirs;
+    mutable Cache<std::shared_ptr<IDevice>> m_device;
 };
 
 }

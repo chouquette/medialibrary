@@ -195,6 +195,7 @@ std::vector<std::shared_ptr<Folder> > FsDiscoverer::blacklist() const
 bool FsDiscoverer::isBlacklisted( const fs::IDirectory& directory, const std::vector<std::shared_ptr<Folder>>& blacklist ) const
 {
     auto deviceFs = directory.device();
+    //FIXME: We could avoid fetching the device if the directory is non removable.
     auto device = Device::fromUuid( m_dbConn, deviceFs->uuid() );
     // When blacklisting, we would insert the device if we haven't encoutered it yet.
     // So when reading, a missing device means a non-blacklisted device.

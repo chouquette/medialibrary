@@ -32,7 +32,12 @@ namespace fs
 class Device : public IDevice
 {
 public:
-    using DeviceMap = std::unordered_map<std::string, std::shared_ptr<IDevice>>;
+    // Device name / UUID map
+    using DeviceMap = std::unordered_map<std::string, std::string>;
+    // Device path / Mountpoints map
+    using MountpointMap = std::unordered_map<std::string, std::string>;
+    // UUID -> Device instance map
+    using DeviceCacheMap = std::unordered_map<std::string, std::shared_ptr<IDevice>>;
 
     virtual const std::string& uuid() const override;
     virtual bool isRemovable() const override;
@@ -44,21 +49,28 @@ public:
     ///
     static std::shared_ptr<IDevice> fromPath( const std::string& path );
     static std::shared_ptr<IDevice> fromUuid( const std::string& uuid );
+    static bool populateCache();
 
 protected:
-    Device( const std::string& devicePath );
+    Device( const std::string& uuid, const std::string& mountpoint, bool isRemovable );
 
 private:
     static DeviceMap listDevices();
+    static MountpointMap listMountpoints();
+    static DeviceCacheMap populateDeviceCache();
+    static std::string deviceFromDeviceMapper( const std::string& devicePath );
+    static bool isRemovable( const std::string& deviceName );
 
 private:
-    static const DeviceMap Cache;
+    static DeviceMap Devices;
+    static MountpointMap Mountpoints;
+    static DeviceCacheMap DeviceCache;
 
 private:
-    std::string m_device;
     std::string m_uuid;
     std::string m_mountpoint;
     bool m_present;
+    bool m_removable;
 };
 
 }

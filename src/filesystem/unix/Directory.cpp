@@ -66,8 +66,10 @@ const std::vector<std::string>&Directory::dirs()
 
 std::shared_ptr<IDevice> Directory::device() const
 {
-    //FIXME: Cache this?
-    return Device::fromPath( m_path );
+    auto lock = m_device.lock();
+    if ( m_device.isCached() == false )
+        m_device = Device::fromPath( m_path );
+    return m_device.get();
 }
 
 std::string Directory::toAbsolute(const std::string& path)
