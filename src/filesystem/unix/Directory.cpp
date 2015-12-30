@@ -85,7 +85,7 @@ std::string Directory::toAbsolute(const std::string& path)
 
 void Directory::read()
 {
-    auto dir = std::unique_ptr<DIR, int(*)(DIR*)>( opendir( m_path.c_str() ), closedir );
+    std::unique_ptr<DIR, int(*)(DIR*)> dir( opendir( m_path.c_str() ), closedir );
     if ( dir == nullptr )
     {
         std::string err( "Failed to open directory " );
