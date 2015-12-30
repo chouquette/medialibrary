@@ -63,7 +63,12 @@ private:
         auto msg = createMsg( std::forward<Args>( args )... );
         auto l = s_logger.load( std::memory_order_consume );
         if ( l == nullptr )
-           l = s_defaultLogger.get();
+        {
+            l = s_defaultLogger.get();
+            // In case we're logging early (as in, before the static default logger has been constructed, don't blow up)
+            if ( l == nullptr )
+                return;
+        }
 
         switch ( lvl )
         {
