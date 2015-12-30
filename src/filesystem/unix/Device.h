@@ -59,7 +59,7 @@ private:
     static MountpointMap listMountpoints();
     static DeviceCacheMap populateDeviceCache();
     static std::string deviceFromDeviceMapper( const std::string& devicePath );
-    static bool isRemovable( const std::string& deviceName );
+    static bool isRemovable( const std::string& deviceName, const std::string& mountpoint );
 
 private:
     static DeviceMap Devices;

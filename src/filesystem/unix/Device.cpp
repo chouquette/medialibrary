@@ -206,7 +206,7 @@ Device::DeviceCacheMap Device::populateDeviceCache()
                 continue;
             }
         }
-        auto removable = isRemovable( deviceName );
+        auto removable = isRemovable( deviceName, mountpoint );
         LOG_INFO( "Adding device to cache: {", uuid, "} mounted on ", mountpoint, " Removable: ", removable );
         res[uuid] = std::make_shared<DeviceBuilder>( uuid, mountpoint, removable );
     }
@@ -248,8 +248,10 @@ std::string Device::deviceFromDeviceMapper( const std::string& devicePath )
     return res;
 }
 
-bool Device::isRemovable( const std::string& deviceName )
+bool Device::isRemovable( const std::string& deviceName, const std::string& mountpoint )
 {
+#ifndef TIZEN
+    (void)mountpoint;
     std::stringstream removableFilePath;
     removableFilePath << "/sys/block/" << deviceName << "/removable";
     std::unique_ptr<FILE, int(*)(FILE*)> removableFile( fopen( removableFilePath.str().c_str(), "r" ), &fclose );
@@ -260,6 +262,18 @@ bool Device::isRemovable( const std::string& deviceName )
         fread(&buff, sizeof(buff), 1, removableFile.get() );
         return buff == '1';
     }
+#else
+    (void)deviceName;
+    static const std::vector<std::string> SDMountpoints = { "/opt/storage/sdcard" };
+    auto it = std::find_if( begin( SDMountpoints ), end( SDMountpoints ), [mountpoint]( const std::string& pattern ) {
+        return mountpoint.length() >= pattern.length() && mountpoint.find( pattern ) == 0;
+    });
+    if ( it != end( SDMountpoints ) )
+    {
+        LOG_INFO( "Considering mountpoint ", mountpoint, " a removable SDCard" );
+        return true;
+    }
+#endif
     return false;
 }
 
