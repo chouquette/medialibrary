@@ -171,7 +171,7 @@ Device::MountpointMap Device::listMountpoints()
         if ( std::find( begin( allowedFsType ), end( allowedFsType ), s.mnt_type ) == end( allowedFsType ) )
             continue;
         auto deviceName = s.mnt_fsname;
-        LOG_INFO( "Discovered device ", deviceName, " mounted on ", s.mnt_dir );
+        LOG_INFO( "Discovered mountpoint ", deviceName, " mounted on ", s.mnt_dir, " (", s.mnt_type, ')' );
         res[deviceName] = s.mnt_dir;
         errno = 0;
     }
