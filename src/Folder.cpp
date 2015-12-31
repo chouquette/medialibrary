@@ -69,12 +69,12 @@ bool Folder::createTable(DBConnection connection)
             "("
             "id_folder INTEGER PRIMARY KEY AUTOINCREMENT,"
             "path TEXT,"
-            "id_parent UNSIGNED INTEGER,"
+            "parent_id UNSIGNED INTEGER,"
             "is_blacklisted INTEGER,"
             "device_id UNSIGNED INTEGER,"
             "is_present BOOLEAN NOT NULL DEFAULT 1,"
             "is_removable BOOLEAN NOT NULL,"
-            "FOREIGN KEY (id_parent) REFERENCES " + policy::FolderTable::Name +
+            "FOREIGN KEY (parent_id) REFERENCES " + policy::FolderTable::Name +
             "(id_folder) ON DELETE CASCADE,"
             "FOREIGN KEY (device_id) REFERENCES " + policy::DeviceTable::Name +
             "(id_device) ON DELETE CASCADE,"
@@ -98,7 +98,7 @@ std::shared_ptr<Folder> Folder::create( DBConnection connection, const std::stri
         path = fullPath;
     auto self = std::make_shared<Folder>( path, parentId, device.id(), device.isRemovable() );
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
-            "(path, id_parent, device_id, is_removable) VALUES(?, ?, ?, ?)";
+            "(path, parent_id, device_id, is_removable) VALUES(?, ?, ?, ?)";
     if ( insert( connection, self, req, path, sqlite::ForeignKey( parentId ), device.id(), device.isRemovable() ) == false )
         return nullptr;
     self->m_dbConection = connection;
@@ -131,7 +131,7 @@ bool Folder::blacklist( DBConnection connection, const std::string& fullPath )
     else
         path = fullPath;
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
-            "(path, id_parent, is_blacklisted, device_id, is_removable) VALUES(?, ?, ?, ?, ?)";
+            "(path, parent_id, is_blacklisted, device_id, is_removable) VALUES(?, ?, ?, ?, ?)";
     return sqlite::Tools::insert( connection, req, path, nullptr, true, device->id(), deviceFs->isRemovable() ) != 0;
 }
 
@@ -226,13 +226,13 @@ std::vector<std::shared_ptr<Folder>> Folder::fetchAll( DBConnection dbConn, unsi
     if ( parentFolderId == 0 )
     {
         static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
-                + " WHERE id_parent IS NULL AND is_blacklisted is NULL AND is_present = 1";
+                + " WHERE parent_id IS NULL AND is_blacklisted is NULL AND is_present = 1";
         return DatabaseHelpers::fetchAll<Folder>( dbConn, req );
     }
     else
     {
         static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
-                + " WHERE id_parent = ? AND is_blacklisted is NULL AND is_present = 1";
+                + " WHERE parent_id = ? AND is_blacklisted is NULL AND is_present = 1";
         return DatabaseHelpers::fetchAll<Folder>( dbConn, req, parentFolderId );
     }
 }
