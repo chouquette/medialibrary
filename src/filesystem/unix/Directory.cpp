@@ -59,7 +59,7 @@ const std::vector<std::string>& Directory::files()
     return m_files;
 }
 
-const std::vector<std::string>&Directory::dirs()
+const std::vector<std::string>& Directory::dirs()
 {
     if ( m_dirs.size() == 0 && m_files.size() == 0 )
         read();
@@ -74,7 +74,7 @@ std::shared_ptr<IDevice> Directory::device() const
     return m_device.get();
 }
 
-std::string Directory::toAbsolute(const std::string& path)
+std::string Directory::toAbsolute( const std::string& path )
 {
     char abs[PATH_MAX];
     if ( realpath( path.c_str(), abs ) == nullptr )
