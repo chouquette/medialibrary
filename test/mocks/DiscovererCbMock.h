@@ -61,7 +61,7 @@ public:
             m_reloadCond.notify_all();
     }
 
-    virtual void onParsingStatsUpdated( uint32_t, uint32_t ) {}
+    virtual void onParsingStatsUpdated( uint32_t ) override {}
 
     bool wait()
     {

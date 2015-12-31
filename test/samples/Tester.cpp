@@ -26,9 +26,9 @@ void MockCallback::onDiscoveryCompleted(const std::string&)
     m_discoveryCompleted = true;
 }
 
-void MockCallback::onParsingStatsUpdated(uint32_t nbParsed, uint32_t nbToParse)
+void MockCallback::onParsingStatsUpdated(uint32_t percent)
 {
-    if ( nbParsed == nbToParse && nbToParse > 0 )
+    if ( percent == 100 )
     {
         std::lock_guard<std::mutex> lock( m_parsingMutex );
         if ( m_discoveryCompleted == false )

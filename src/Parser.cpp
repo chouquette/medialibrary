@@ -30,8 +30,9 @@ Parser::Parser(DBConnection dbConnection , IMediaLibraryCb* cb)
     : m_stopParser( false )
     , m_dbConnection( dbConnection )
     , m_callback( cb )
-    , m_nbParsed( 0 )
-    , m_nbToParse( 0 )
+    , m_opToDo( 0 )
+    , m_opDone( 0 )
+    , m_percent( 0 )
     , m_paused( false )
 {
 }
@@ -72,7 +73,8 @@ void Parser::parse( std::shared_ptr<Media> file )
     if ( m_services.size() == 0 )
         return;
     m_tasks.push( new Task( file, m_services, m_callback ) );
-    updateStats( false, true );
+    ++m_opToDo;
+    updateStats();
     if ( m_paused == false )
         m_cond.notify_all();
 }
@@ -153,31 +155,16 @@ void Parser::restore()
     }
 }
 
-void Parser::updateStats( bool newMediaParsed, bool newMediaQueued )
+void Parser::updateStats()
 {
     if ( m_callback == nullptr )
         return;
 
-    if ( newMediaParsed == true )
-        m_nbParsed++;
-    else if ( newMediaQueued == true )
-        m_nbToParse++;
-    else
-        assert(false);
-
-    if ( m_nbParsed == m_nbToParse )
+    auto percent = m_opToDo > 0 ? ( m_opDone * 100 / m_opToDo ) : 0;
+    if ( percent != m_percent )
     {
-        m_callback->onParsingStatsUpdated( m_nbParsed, m_nbToParse );
-        m_nbParsed = 0;
-        m_nbToParse = 0;
-        return;
-    }
-    // Only send an update every X new elem
-    const uint32_t NbElems = 3;
-    if ( ( newMediaParsed == true && m_nbParsed % NbElems == 0 ) ||
-         ( newMediaQueued == true && m_nbToParse % NbElems == 0 ) )
-    {
-        m_callback->onParsingStatsUpdated( m_nbParsed, m_nbToParse );
+        m_percent = percent;
+        m_callback->onParsingStatsUpdated( m_percent );
     }
 }
 
@@ -197,7 +184,8 @@ void Parser::done(std::shared_ptr<Media> file, IMetadataService::Status status, 
     if ( status == IMetadataService::Status::TemporaryUnavailable ||
          status == IMetadataService::Status::Fatal )
     {
-        updateStats( true, false );
+        ++m_opDone;
+        updateStats();
         delete t;
         return;
     }
@@ -210,7 +198,8 @@ void Parser::done(std::shared_ptr<Media> file, IMetadataService::Status status, 
     ++t->it;
     if (t->it == t->end)
     {
-        updateStats( true, false );
+        ++m_opDone;
+        updateStats();
         file->markParsed();
         delete t;
         return;

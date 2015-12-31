@@ -27,7 +27,7 @@ private:
     void onDiscoveryCompleted(const std::string&);
     void onReloadStarted() {}
     void onReloadCompleted() {}
-    void onParsingStatsUpdated(uint32_t nbParsed, uint32_t nbToParse);
+    void onParsingStatsUpdated(uint32_t percent);
 
     std::condition_variable m_parsingCompleteVar;
     std::mutex m_parsingMutex;

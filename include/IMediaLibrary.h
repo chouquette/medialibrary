@@ -61,13 +61,11 @@ public:
     /**
      * @brief onParsingStatsUpdated Called when the parser statistics are updated
      *
-     * There is no waranty about how often this will be called. However: when
-     * nbParsed == nbToParse, the callback will be invoked, and nbToParse will be reset to 0
+     * There is no waranty about how often this will be called.
+     * @param percent The progress percentage [0,100]
      *
-     * @param nbParsed The number of media that have been parsed
-     * @param nbToParse The total number of media to parse.
      */
-    virtual void onParsingStatsUpdated( uint32_t nbParsed, uint32_t nbToParse ) = 0;
+    virtual void onParsingStatsUpdated( uint32_t percent) = 0;
 };
 
 class IMediaLibrary
