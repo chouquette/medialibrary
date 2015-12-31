@@ -464,6 +464,8 @@ struct FileSystemFactory : public factory::IFileSystem
         return *it;
     }
 
+    virtual void refresh() override {}
+
     std::shared_ptr<Device> device( const std::string& path )
     {
         std::shared_ptr<Device> ret;
@@ -598,6 +600,10 @@ public:
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& ) override
     {
         return nullptr;
+    }
+
+    virtual void refresh() override
+    {
     }
 };
 

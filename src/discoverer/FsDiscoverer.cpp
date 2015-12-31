@@ -88,6 +88,7 @@ void FsDiscoverer::reload()
 
 void FsDiscoverer::checkDevices()
 {
+    m_fsFactory->refresh();
     auto devices = Device::fetchAll( m_dbConn );
     for ( auto& d : devices )
     {

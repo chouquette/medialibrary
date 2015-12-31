@@ -41,9 +41,6 @@ namespace factory
 
 FileSystemFactory::FileSystemFactory()
 {
-    static bool isCachePopulated = fs::Device::populateCache();
-    if ( isCachePopulated == false )
-        throw std::runtime_error( "Failed to populate device cache" );
 }
 
 std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::string& path )
@@ -73,6 +70,11 @@ std::unique_ptr<fs::IFile> FileSystemFactory::createFile(const std::string& file
 std::shared_ptr<fs::IDevice> FileSystemFactory::createDevice( const std::string& uuid )
 {
     return fs::Device::fromUuid( uuid );
+}
+
+void FileSystemFactory::refresh()
+{
+    fs::Device::populateCache();
 }
 
 

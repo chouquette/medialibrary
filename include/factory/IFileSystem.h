@@ -54,5 +54,9 @@ namespace factory
         /// \return A representation of the device, or nullptr if the device is currently unavailable.
         ///
         virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) = 0;
+        ///
+        /// \brief refresh Will cause any FS cache to be refreshed.
+        ///
+        virtual void refresh() = 0;
     };
 }
