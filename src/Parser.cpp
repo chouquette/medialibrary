@@ -73,7 +73,7 @@ void Parser::parse( std::shared_ptr<Media> file )
     if ( m_services.size() == 0 )
         return;
     m_tasks.push( new Task( file, m_services, m_callback ) );
-    ++m_opToDo;
+    m_opToDo += m_services.size();
     updateStats();
     if ( m_paused == false )
         m_cond.notify_all();
@@ -180,12 +180,13 @@ Parser::Task::Task(std::shared_ptr<Media> file, Parser::ServiceList& serviceList
 
 void Parser::done(std::shared_ptr<Media> file, IMetadataService::Status status, void* data )
 {
+    ++m_opDone;
+    updateStats();
+
     Task *t = reinterpret_cast<Task*>( data );
     if ( status == IMetadataService::Status::TemporaryUnavailable ||
          status == IMetadataService::Status::Fatal )
     {
-        ++m_opDone;
-        updateStats();
         delete t;
         return;
     }
@@ -198,8 +199,6 @@ void Parser::done(std::shared_ptr<Media> file, IMetadataService::Status status, 
     ++t->it;
     if (t->it == t->end)
     {
-        ++m_opDone;
-        updateStats();
         file->markParsed();
         delete t;
         return;
