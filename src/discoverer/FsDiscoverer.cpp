@@ -43,6 +43,7 @@ FsDiscoverer::FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, Med
 
 bool FsDiscoverer::discover( const std::string &entryPoint )
 {
+    LOG_INFO( "Adding to discovery list: ", entryPoint );
     // Assume :// denotes a scheme that isn't a file path, and refuse to discover it.
     if ( entryPoint.find( "://" ) != std::string::npos )
         return false;
