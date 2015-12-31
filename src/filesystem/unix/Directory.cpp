@@ -43,6 +43,8 @@ Directory::Directory( const std::string& path )
     if ( S_ISDIR( s.st_mode ) == false )
         throw std::runtime_error( "The provided path isn't a directory" );
 #endif
+    if ( *m_path.crbegin() != '/' )
+        m_path += '/';
 }
 
 const std::string&Directory::path() const

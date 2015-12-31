@@ -45,7 +45,7 @@ private:
     void read();
 
 private:
-    const std::string m_path;
+    std::string m_path;
     std::vector<std::string> m_files;
     std::vector<std::string> m_dirs;
     mutable Cache<std::shared_ptr<IDevice>> m_device;
