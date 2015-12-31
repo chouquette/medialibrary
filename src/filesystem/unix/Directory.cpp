@@ -126,7 +126,10 @@ void Directory::read()
         if ( S_ISDIR( s.st_mode ) )
         {
 #endif
-            m_dirs.emplace_back( toAbsolute( path ) );
+            auto dirPath = toAbsolute( path );
+            if ( *dirPath.crbegin() != '/' )
+                dirPath += '/';
+            m_dirs.emplace_back( dirPath );
         }
         else
         {
