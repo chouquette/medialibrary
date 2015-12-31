@@ -20,8 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef PARSER_H
-#define PARSER_H
+#pragma once
 
 #include <atomic>
 #include <condition_variable>
@@ -35,47 +34,45 @@
 
 class Parser : public IMetadataServiceCb
 {
-    public:
-        Parser( DBConnection dbConnection, IMediaLibraryCb* cb );
-        ~Parser();
-        void addService(std::unique_ptr<IMetadataService> service );
-        void parse( std::shared_ptr<Media> file );
-        void start();
-        void pause();
-        void resume();
+public:
+    Parser( DBConnection dbConnection, IMediaLibraryCb* cb );
+    ~Parser();
+    void addService( std::unique_ptr<IMetadataService> service );
+    void parse( std::shared_ptr<Media> file );
+    void start();
+    void pause();
+    void resume();
 
-    private:
-        virtual void done( std::shared_ptr<Media> file, IMetadataService::Status status, void* data ) override;
-        void run();
-        // Queues all unparsed files for parsing.
-        void restore();
-        void updateStats();
+private:
+    virtual void done( std::shared_ptr<Media> file, IMetadataService::Status status, void* data ) override;
+    void run();
+    // Queues all unparsed files for parsing.
+    void restore();
+    void updateStats();
 
-    private:
-        typedef std::unique_ptr<IMetadataService> ServicePtr;
-        typedef std::vector<ServicePtr> ServiceList;
-        struct Task
-        {
-            Task(std::shared_ptr<Media> file, ServiceList& serviceList , IMediaLibraryCb* metadataCb);
-            std::shared_ptr<Media>   file;
-            ServiceList::iterator   it;
-            ServiceList::iterator   end;
-            IMediaLibraryCb*        cb;
-        };
+private:
+    typedef std::unique_ptr<IMetadataService> ServicePtr;
+    typedef std::vector<ServicePtr> ServiceList;
+    struct Task
+    {
+        Task( std::shared_ptr<Media> file, ServiceList& serviceList, IMediaLibraryCb* metadataCb );
+        std::shared_ptr<Media>   file;
+        ServiceList::iterator   it;
+        ServiceList::iterator   end;
+        IMediaLibraryCb*        cb;
+    };
 
-    private:
-        ServiceList m_services;
-        std::queue<Task*> m_tasks;
-        std::thread m_thread;
-        std::mutex m_lock;
-        std::condition_variable m_cond;
-        std::atomic_bool m_stopParser;
-        DBConnection m_dbConnection;
-        IMediaLibraryCb* m_callback;
-        std::atomic_uint m_opToDo;
-        std::atomic_uint m_opDone;
-        std::atomic_uint m_percent;
-        bool m_paused;
+private:
+    ServiceList m_services;
+    std::queue<Task*> m_tasks;
+    std::thread m_thread;
+    std::mutex m_lock;
+    std::condition_variable m_cond;
+    std::atomic_bool m_stopParser;
+    DBConnection m_dbConnection;
+    IMediaLibraryCb* m_callback;
+    std::atomic_uint m_opToDo;
+    std::atomic_uint m_opDone;
+    std::atomic_uint m_percent;
+    bool m_paused;
 };
-
-#endif // PARSER_H

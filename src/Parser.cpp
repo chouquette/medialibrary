@@ -26,7 +26,7 @@
 
 #include "IMedia.h"
 
-Parser::Parser(DBConnection dbConnection , IMediaLibraryCb* cb)
+Parser::Parser( DBConnection dbConnection, IMediaLibraryCb* cb )
     : m_stopParser( false )
     , m_dbConnection( dbConnection )
     , m_callback( cb )
@@ -56,7 +56,7 @@ Parser::~Parser()
     }
 }
 
-void Parser::addService(std::unique_ptr<IMetadataService> service)
+void Parser::addService( std::unique_ptr<IMetadataService> service )
 {
     m_services.emplace_back( std::move( service ) );
     std::push_heap( m_services.begin(), m_services.end(), []( const ServicePtr& a, const ServicePtr& b )
@@ -168,17 +168,15 @@ void Parser::updateStats()
     }
 }
 
-
-Parser::Task::Task(std::shared_ptr<Media> file, Parser::ServiceList& serviceList, IMediaLibraryCb* metadataCb )
-    : file(file)
+Parser::Task::Task( std::shared_ptr<Media> file, Parser::ServiceList& serviceList, IMediaLibraryCb* metadataCb )
+    : file( file )
     , it( serviceList.begin() )
     , end( serviceList.end() )
     , cb( metadataCb )
 {
 }
 
-
-void Parser::done(std::shared_ptr<Media> file, IMetadataService::Status status, void* data )
+void Parser::done( std::shared_ptr<Media> file, IMetadataService::Status status, void* data )
 {
     ++m_opDone;
     updateStats();
