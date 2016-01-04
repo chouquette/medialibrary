@@ -76,7 +76,7 @@ const std::vector<std::string> MediaLibrary::supportedAudioExtensions {
     "wma", "wv", "xa", "xm"
 };
 
-const uint32_t MediaLibrary::DbModelVersion = 1;
+const uint32_t MediaLibrary::DbModelVersion = 2;
 
 MediaLibrary::MediaLibrary()
     : m_verbosity( LogLevel::Error )
@@ -157,9 +157,11 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
     }
     if ( m_settings.load( m_dbConnection.get() ) == false )
         return false;
-    // We only have one version so far, so a mismatching version is an error
     if ( m_settings.dbModelVersion() != DbModelVersion )
-        return false;
+    {
+        if ( updateDatabaseModel( m_settings.dbModelVersion() ) == false )
+            return false;
+    }
     startDiscoverer();
     startParser();
     return true;
@@ -378,6 +380,29 @@ void MediaLibrary::startDiscoverer()
     m_discoverer->setCallback( m_callback );
     m_discoverer->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( m_fsFactory, this, m_dbConnection.get() ) ) );
     m_discoverer->reload();
+}
+
+bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
+{
+    if ( previousVersion == 1 )
+    {
+        // Way too much differences, introduction of devices, and almost unused in the wild, just drop everything
+        std::string req = "PRAGMA writable_schema = 1;"
+                            "delete from sqlite_master;"
+                            "PRAGMA writable_schema = 0;";
+        if ( sqlite::Tools::executeRequest( m_dbConnection.get(), req ) == false )
+            return false;
+        if ( createAllTables() == false )
+            return false;
+        ++previousVersion;
+    }
+    // To be continued in the future!
+
+    // Safety check: ensure we didn't forget a migration along the way
+    assert( previousVersion == DbModelVersion );
+    m_settings.setDbModelVersion( DbModelVersion );
+    m_settings.save();
+    return true;
 }
 
 void MediaLibrary::reload()

@@ -100,6 +100,7 @@ class MediaLibrary : public IMediaLibrary
         void addMetadataService( std::unique_ptr<IMetadataService> service );
         virtual void startParser();
         virtual void startDiscoverer();
+        bool updateDatabaseModel( unsigned int previousVersion );
         bool createAllTables();
 
     protected:
