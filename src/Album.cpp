@@ -41,7 +41,7 @@ Album::Album(DBConnection dbConnection, sqlite::Row& row)
         >> m_artistId
         >> m_releaseYear
         >> m_shortSummary
-        >> m_artworkUrl
+        >> m_artworkMrl
         >> m_lastSyncDate
         >> m_nbTracks
         >> m_isPresent;
@@ -122,18 +122,18 @@ bool Album::setShortSummary( const std::string& summary )
     return true;
 }
 
-const std::string& Album::artworkUrl() const
+const std::string& Album::artworkMrl() const
 {
-    return m_artworkUrl;
+    return m_artworkMrl;
 }
 
-bool Album::setArtworkUrl( const std::string& artworkUrl )
+bool Album::setArtworkMrl( const std::string& artworkMrl )
 {
     static const std::string req = "UPDATE " + policy::AlbumTable::Name
-            + " SET artwork_url = ? WHERE id_album = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkUrl, m_id ) == false )
+            + " SET artwork_mrl = ? WHERE id_album = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkMrl, m_id ) == false )
         return false;
-    m_artworkUrl = artworkUrl;
+    m_artworkMrl = artworkMrl;
     return true;
 }
 
@@ -236,7 +236,7 @@ bool Album::createTable(DBConnection dbConnection )
                 "artist_id UNSIGNED INTEGER,"
                 "release_year UNSIGNED INTEGER,"
                 "short_summary TEXT,"
-                "artwork_url TEXT,"
+                "artwork_mrl TEXT,"
                 "last_sync_date UNSIGNED INTEGER,"
                 "nb_tracks UNSIGNED INTEGER DEFAULT 0,"
                 "is_present BOOLEAN NOT NULL DEFAULT 1"

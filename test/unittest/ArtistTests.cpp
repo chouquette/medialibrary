@@ -71,21 +71,21 @@ TEST_F( Artists, ShortBio )
     ASSERT_EQ( a2->shortBio(), bio );
 }
 
-TEST_F( Artists, ArtworkUrl )
+TEST_F( Artists, ArtworkMrl )
 {
     auto a = ml->createArtist( "Dream seaotter" );
     ASSERT_NE( a, nullptr );
-    ASSERT_EQ( a->artworkUrl(), "" );
+    ASSERT_EQ( a->artworkMrl(), "" );
 
     std::string artwork("/tmp/otter.png");
-    a->setArtworkUrl( artwork );
-    ASSERT_EQ( a->artworkUrl(), artwork );
+    a->setArtworkMrl( artwork );
+    ASSERT_EQ( a->artworkMrl(), artwork );
 
     Reload();
 
     auto a2 = ml->artist( "Dream seaotter" );
     ASSERT_NE( a2, nullptr );
-    ASSERT_EQ( a2->artworkUrl(), artwork );
+    ASSERT_EQ( a2->artworkMrl(), artwork );
 }
 
 TEST_F( Artists, Albums )

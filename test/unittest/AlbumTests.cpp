@@ -151,17 +151,17 @@ TEST_F( Albums, SetShortSummary )
     ASSERT_EQ( a->shortSummary(), a2->shortSummary() );
 }
 
-TEST_F( Albums, SetArtworkUrl )
+TEST_F( Albums, SetArtworkMrl )
 {
     auto a = ml->createAlbum( "album" );
 
-    a->setArtworkUrl( "artwork" );
-    ASSERT_EQ( a->artworkUrl(), "artwork" );
+    a->setArtworkMrl( "artwork" );
+    ASSERT_EQ( a->artworkMrl(), "artwork" );
 
     Reload();
 
     auto a2 = ml->album( a->id() );
-    ASSERT_EQ( a->artworkUrl(), a2->artworkUrl() );
+    ASSERT_EQ( a->artworkMrl(), a2->artworkMrl() );
 }
 
 TEST_F( Albums, FetchAlbumFromTrack )

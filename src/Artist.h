@@ -53,8 +53,8 @@ public:
     virtual std::vector<AlbumPtr> albums() const override;
     virtual std::vector<MediaPtr> media() const override;
     bool addMedia( Media* media );
-    virtual const std::string& artworkUrl() const override;
-    bool setArtworkUrl( const std::string& artworkUrl );
+    virtual const std::string& artworkMrl() const override;
+    bool setArtworkMrl( const std::string& artworkMrl );
     bool updateNbAlbum( int increment );
     std::shared_ptr<Album> unknownAlbum();
 
@@ -68,7 +68,7 @@ private:
     unsigned int m_id;
     std::string m_name;
     std::string m_shortBio;
-    std::string m_artworkUrl;
+    std::string m_artworkMrl;
     unsigned int m_nbAlbums;
     bool m_isPresent;
 

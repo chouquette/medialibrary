@@ -54,8 +54,8 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
         bool setReleaseDate( time_t date );
         virtual const std::string& shortSummary() const override;
         bool setShortSummary( const std::string& summary );
-        virtual const std::string& artworkUrl() const override;
-        bool setArtworkUrl( const std::string& artworkUrl );
+        virtual const std::string& artworkMrl() const override;
+        bool setArtworkMrl( const std::string& artworkMrl );
         virtual time_t lastSyncDate() const override;
         virtual const std::string& tvdbId() override;
         bool setTvdbId( const std::string& summary );
@@ -71,7 +71,7 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
         std::string m_name;
         time_t m_releaseDate;
         std::string m_shortSummary;
-        std::string m_artworkUrl;
+        std::string m_artworkMrl;
         time_t m_lastSyncDate;
         std::string m_tvdbId;
 

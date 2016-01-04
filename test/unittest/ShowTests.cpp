@@ -81,17 +81,17 @@ TEST_F( Shows, SetShortSummary )
     ASSERT_EQ( s->shortSummary(), s2->shortSummary() );
 }
 
-TEST_F( Shows, SetArtworkUrl )
+TEST_F( Shows, SetArtworkMrl )
 {
     auto s = ml->createShow( "show" );
 
-    s->setArtworkUrl( "artwork" );
-    ASSERT_EQ( s->artworkUrl(), "artwork" );
+    s->setArtworkMrl( "artwork" );
+    ASSERT_EQ( s->artworkMrl(), "artwork" );
 
     Reload();
 
     auto s2 = ml->show( "show" );
-    ASSERT_EQ( s->artworkUrl(), s2->artworkUrl() );
+    ASSERT_EQ( s->artworkMrl(), s2->artworkMrl() );
 }
 
 TEST_F( Shows, SetTvdbId )
@@ -152,15 +152,15 @@ TEST_F( Shows, SetEpisodeArtwork )
 {
     auto show = ml->createShow( "show" );
     auto e = show->addEpisode( "episode 1", 1 );
-    bool res = e->setArtworkUrl( "path-to-art" );
+    bool res = e->setArtworkMrl( "path-to-art" );
     ASSERT_TRUE( res );
-    ASSERT_EQ( e->artworkUrl(), "path-to-art" );
+    ASSERT_EQ( e->artworkMrl(), "path-to-art" );
 
     Reload();
 
     show = std::static_pointer_cast<Show>( ml->show( "show" ) );
     auto episodes = show->episodes();
-    ASSERT_EQ( episodes[0]->artworkUrl(), e->artworkUrl() );
+    ASSERT_EQ( episodes[0]->artworkMrl(), e->artworkMrl() );
 }
 
 TEST_F( Shows, SetEpisodeSeasonNumber )

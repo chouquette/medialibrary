@@ -35,7 +35,7 @@ Movie::Movie(DBConnection dbConnection, sqlite::Row& row )
         >> m_title
         >> m_releaseDate
         >> m_summary
-        >> m_artworkUrl
+        >> m_artworkMrl
         >> m_imdbId;
 }
 
@@ -87,18 +87,18 @@ bool Movie::setShortSummary( const std::string& summary )
     return true;
 }
 
-const std::string&Movie::artworkUrl() const
+const std::string&Movie::artworkMrl() const
 {
-    return m_artworkUrl;
+    return m_artworkMrl;
 }
 
-bool Movie::setArtworkUrl( const std::string& artworkUrl )
+bool Movie::setArtworkMrl( const std::string& artworkMrl )
 {
     static const std::string req = "UPDATE " + policy::MovieTable::Name
-            + " SET artwork_url = ? WHERE id_movie = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkUrl, m_id ) == false )
+            + " SET artwork_mrl = ? WHERE id_movie = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkMrl, m_id ) == false )
         return false;
-    m_artworkUrl = artworkUrl;
+    m_artworkMrl = artworkMrl;
     return true;
 }
 
@@ -132,7 +132,7 @@ bool Movie::createTable( DBConnection dbConnection )
                 "title TEXT UNIQUE ON CONFLICT FAIL,"
                 "release_date UNSIGNED INTEGER,"
                 "summary TEXT,"
-                "artwork_url TEXT,"
+                "artwork_mrl TEXT,"
                 "imdb_id TEXT"
             ")";
     return sqlite::Tools::executeRequest( dbConnection, req );

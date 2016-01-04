@@ -35,7 +35,7 @@ Show::Show( DBConnection dbConnection, sqlite::Row& row )
         >> m_name
         >> m_releaseDate
         >> m_shortSummary
-        >> m_artworkUrl
+        >> m_artworkMrl
         >> m_lastSyncDate
         >> m_tvdbId;
 }
@@ -88,18 +88,18 @@ bool Show::setShortSummary( const std::string& summary )
     return true;
 }
 
-const std::string& Show::artworkUrl() const
+const std::string& Show::artworkMrl() const
 {
-    return m_artworkUrl;
+    return m_artworkMrl;
 }
 
-bool Show::setArtworkUrl( const std::string& artworkUrl )
+bool Show::setArtworkMrl( const std::string& artworkMrl )
 {
     static const std::string req = "UPDATE " + policy::ShowTable::Name
-            + " SET artwork_url = ? WHERE id_show = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkUrl, m_id ) == false )
+            + " SET artwork_mrl = ? WHERE id_show = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkMrl, m_id ) == false )
         return false;
-    m_artworkUrl = artworkUrl;
+    m_artworkMrl = artworkMrl;
     return true;
 }
 
@@ -142,7 +142,7 @@ bool Show::createTable(DBConnection dbConnection)
                         "name TEXT, "
                         "release_date UNSIGNED INTEGER,"
                         "short_summary TEXT,"
-                        "artwork_url TEXT,"
+                        "artwork_mrl TEXT,"
                         "last_sync_date UNSIGNED INTEGER,"
                         "tvdb_id TEXT"
                     ")";

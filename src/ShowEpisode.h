@@ -50,8 +50,8 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, pol
         ShowEpisode(const std::string& name, unsigned int episodeNumber, unsigned int showId );
 
         virtual unsigned int id() const override;
-        virtual const std::string& artworkUrl() const override;
-        bool setArtworkUrl( const std::string& artworkUrl );
+        virtual const std::string& artworkMrl() const override;
+        bool setArtworkMrl( const std::string& artworkMrl );
         virtual unsigned int episodeNumber() const override;
         virtual time_t lastSyncDate() const override;
         virtual const std::string& name() const override;
@@ -70,7 +70,7 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, pol
     private:
         DBConnection m_dbConnection;
         unsigned int m_id;
-        std::string m_artworkUrl;
+        std::string m_artworkMrl;
         unsigned int m_episodeNumber;
         time_t m_lastSyncDate;
         std::string m_name;

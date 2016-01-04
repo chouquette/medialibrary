@@ -34,7 +34,7 @@ class IShow
         virtual time_t releaseDate() const = 0;
         virtual time_t lastSyncDate() const = 0;
         virtual const std::string& shortSummary() const = 0;
-        virtual const std::string& artworkUrl() const = 0;
+        virtual const std::string& artworkMrl() const = 0;
         virtual const std::string& tvdbId() = 0;
         virtual std::vector<ShowEpisodePtr> episodes() = 0;
 };

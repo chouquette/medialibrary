@@ -33,7 +33,7 @@ ShowEpisode::ShowEpisode(DBConnection dbConnection, sqlite::Row& row )
     : m_dbConnection( dbConnection )
 {
     row >> m_id
-        >> m_artworkUrl
+        >> m_artworkMrl
         >> m_episodeNumber
         >> m_lastSyncDate
         >> m_name
@@ -57,18 +57,18 @@ unsigned int ShowEpisode::id() const
     return m_id;
 }
 
-const std::string& ShowEpisode::artworkUrl() const
+const std::string& ShowEpisode::artworkMrl() const
 {
-    return m_artworkUrl;
+    return m_artworkMrl;
 }
 
-bool ShowEpisode::setArtworkUrl( const std::string& artworkUrl )
+bool ShowEpisode::setArtworkMrl( const std::string& artworkMrl )
 {
     static const std::string req = "UPDATE " + policy::ShowEpisodeTable::Name
-            + " SET artwork_url = ? WHERE id_episode = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkUrl, m_id ) == false )
+            + " SET artwork_mrl = ? WHERE id_episode = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkMrl, m_id ) == false )
         return false;
-    m_artworkUrl = artworkUrl;
+    m_artworkMrl = artworkMrl;
     return true;
 }
 
@@ -153,7 +153,7 @@ bool ShowEpisode::createTable( DBConnection dbConnection )
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::ShowEpisodeTable::Name
             + "("
                 "id_episode INTEGER PRIMARY KEY AUTOINCREMENT,"
-                "artwork_url TEXT,"
+                "artwork_mrl TEXT,"
                 "episode_number UNSIGNED INT,"
                 "last_sync_date UNSIGNED INT,"
                 "title TEXT,"

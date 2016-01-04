@@ -77,17 +77,17 @@ TEST_F( Movies, SetShortSummary )
     ASSERT_EQ( m2->shortSummary(), "great movie" );
 }
 
-TEST_F( Movies, SetArtworkUrl )
+TEST_F( Movies, SetArtworkMrl )
 {
     auto m = ml->createMovie( "movie" );
-    ASSERT_EQ( m->artworkUrl().length(), 0u );
-    m->setArtworkUrl( "artwork" );
-    ASSERT_EQ( m->artworkUrl(), "artwork" );
+    ASSERT_EQ( m->artworkMrl().length(), 0u );
+    m->setArtworkMrl( "artwork" );
+    ASSERT_EQ( m->artworkMrl(), "artwork" );
 
     Reload();
 
     auto m2 = ml->movie( "movie" );
-    ASSERT_EQ( m2->artworkUrl(), "artwork" );
+    ASSERT_EQ( m2->artworkMrl(), "artwork" );
 }
 
 TEST_F( Movies, SetImdbId )

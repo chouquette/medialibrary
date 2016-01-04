@@ -308,7 +308,7 @@ std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> m
             {
                 auto artwork = vlcMedia.meta( libvlc_meta_ArtworkURL );
                 if ( artwork.length() != 0 )
-                    album->setArtworkUrl( artwork );
+                    album->setArtworkMrl( artwork );
             }
         }
     }
@@ -452,8 +452,8 @@ bool VLCMetadataService::link( std::shared_ptr<Media> media, std::shared_ptr<Alb
     // If we have an albumArtist (meaning the track was properly tagged, we
     // can assume this artist is a correct match. We can use the thumbnail from
     // the current album for the albumArtist, if none has been set before.
-    if ( albumArtist != nullptr && albumArtist->artworkUrl().empty() == true && album != nullptr )
-        albumArtist->setArtworkUrl( album->artworkUrl() );
+    if ( albumArtist != nullptr && albumArtist->artworkMrl().empty() == true && album != nullptr )
+        albumArtist->setArtworkMrl( album->artworkMrl() );
 
     if ( albumArtist != nullptr )
         albumArtist->addMedia( media.get() );

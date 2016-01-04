@@ -36,5 +36,5 @@ public:
     virtual const std::string& shortBio() const = 0;
     virtual std::vector<AlbumPtr> albums() const = 0;
     virtual std::vector<MediaPtr> media() const = 0;
-    virtual const std::string& artworkUrl() const = 0;
+    virtual const std::string& artworkMrl() const = 0;
 };

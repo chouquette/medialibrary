@@ -38,7 +38,7 @@ Artist::Artist( DBConnection dbConnection, sqlite::Row& row )
     row >> m_id
         >> m_name
         >> m_shortBio
-        >> m_artworkUrl
+        >> m_artworkMrl
         >> m_nbAlbums
         >> m_isPresent;
 }
@@ -113,20 +113,20 @@ bool Artist::addMedia(Media* media)
     return sqlite::Tools::insert( m_dbConnection, req, media->id(), artistForeignKey ) != 0;
 }
 
-const std::string& Artist::artworkUrl() const
+const std::string& Artist::artworkMrl() const
 {
-    return m_artworkUrl;
+    return m_artworkMrl;
 }
 
-bool Artist::setArtworkUrl( const std::string& artworkUrl )
+bool Artist::setArtworkMrl( const std::string& artworkMrl )
 {
-    if ( m_artworkUrl == artworkUrl )
+    if ( m_artworkMrl == artworkMrl )
         return true;
     static const std::string req = "UPDATE " + policy::ArtistTable::Name +
-            " SET artwork_url = ? WHERE id_artist = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkUrl, m_id ) == false )
+            " SET artwork_mrl = ? WHERE id_artist = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkMrl, m_id ) == false )
         return false;
-    m_artworkUrl = artworkUrl;
+    m_artworkMrl = artworkMrl;
     return true;
 }
 
@@ -170,7 +170,7 @@ bool Artist::createTable( DBConnection dbConnection )
                 "id_artist INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "name TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
                 "shortbio TEXT,"
-                "artwork_url TEXT,"
+                "artwork_mrl TEXT,"
                 "nb_albums UNSIGNED INT DEFAULT 0,"
                 "is_present BOOLEAN NOT NULL DEFAULT 1"
             ")";
