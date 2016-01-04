@@ -111,21 +111,11 @@ void MediaLibrary::setFsFactory(std::shared_ptr<factory::IFileSystem> fsFactory)
     m_fsFactory = fsFactory;
 }
 
-bool MediaLibrary::initialize( const std::string& dbPath, const std::string& snapshotPath, IMediaLibraryCb* mlCallback )
-{
-    if ( m_fsFactory == nullptr )
-        m_fsFactory.reset( new factory::FileSystemFactory );
-    Folder::setFileSystemFactory( m_fsFactory );
-    m_snapshotPath = snapshotPath;
-    m_callback = mlCallback;
-    m_dbConnection.reset( new SqliteConnection( dbPath ) );
 
+bool MediaLibrary::createAllTables()
+{
     auto t = m_dbConnection->newTransaction();
-    // We need to create the tables in order of triggers creation
-    // Device is the "root of all evil". When a device is modified,
-    // we will trigger an update on folder, which will trigger
-    // an update on files, and so on.
-    if ( ( Device::createTable( m_dbConnection.get() ) &&
+    auto res = Device::createTable( m_dbConnection.get() ) &&
         Folder::createTable( m_dbConnection.get() ) &&
         Media::createTable( m_dbConnection.get() ) &&
         Label::createTable( m_dbConnection.get() ) &&
@@ -140,7 +130,27 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
         Artist::createTable( m_dbConnection.get() ) &&
         Artist::createDefaultArtists( m_dbConnection.get() ) &&
         Artist::createTriggers( m_dbConnection.get() ) &&
-        Settings::createTable( m_dbConnection.get() ) ) == false )
+        Settings::createTable( m_dbConnection.get() );
+    if ( res == false )
+        return false;
+    t->commit();
+    return true;
+}
+
+bool MediaLibrary::initialize( const std::string& dbPath, const std::string& snapshotPath, IMediaLibraryCb* mlCallback )
+{
+    if ( m_fsFactory == nullptr )
+        m_fsFactory.reset( new factory::FileSystemFactory );
+    Folder::setFileSystemFactory( m_fsFactory );
+    m_snapshotPath = snapshotPath;
+    m_callback = mlCallback;
+    m_dbConnection.reset( new SqliteConnection( dbPath ) );
+
+    // We need to create the tables in order of triggers creation
+    // Device is the "root of all evil". When a device is modified,
+    // we will trigger an update on folder, which will trigger
+    // an update on files, and so on.
+    if ( createAllTables() == false )
     {
         LOG_ERROR( "Failed to create database structure" );
         return false;
@@ -150,7 +160,6 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& sna
     // We only have one version so far, so a mismatching version is an error
     if ( m_settings.dbModelVersion() != DbModelVersion )
         return false;
-    t->commit();
     startDiscoverer();
     startParser();
     return true;
