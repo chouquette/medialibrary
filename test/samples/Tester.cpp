@@ -127,7 +127,7 @@ void Tests::checkMedias(const rapidjson::Value& expectedMedias)
         if ( expectedMedia.HasMember( "snapshotExpected" ) == true )
         {
             auto snapshotExpected = expectedMedia["snapshotExpected"].GetBool();
-            ASSERT_EQ( !snapshotExpected, media->snapshot().empty() );
+            ASSERT_EQ( !snapshotExpected, media->thumbnail().empty() );
         }
     }
 }

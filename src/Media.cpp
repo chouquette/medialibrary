@@ -61,7 +61,7 @@ Media::Media( DBConnection dbConnection, sqlite::Row& row )
         >> m_folderId
         >> m_lastModificationDate
         >> m_insertionDate
-        >> m_snapshot
+        >> m_thumbnail
         >> m_isParsed
         >> m_title
         >> m_isPresent
@@ -268,9 +268,9 @@ std::vector<AudioTrackPtr> Media::audioTracks()
     return AudioTrack::fetchAll<IAudioTrack>( m_dbConnection, req, m_id );
 }
 
-const std::string &Media::snapshot()
+const std::string &Media::thumbnail()
 {
-    return m_snapshot;
+    return m_thumbnail;
 }
 
 unsigned int Media::insertionDate() const
@@ -278,11 +278,11 @@ unsigned int Media::insertionDate() const
     return m_insertionDate;
 }
 
-void Media::setSnapshot( const std::string& snapshot )
+void Media::setThumbnail(const std::string& thumbnail )
 {
-    if ( m_snapshot == snapshot )
+    if ( m_thumbnail == thumbnail )
         return;
-    m_snapshot = snapshot;
+    m_thumbnail = thumbnail;
     m_changed = true;
 }
 
@@ -290,7 +290,7 @@ bool Media::save()
 {
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
             "type = ?, duration = ?, play_count = ?, progress = ?, rating = ?, show_episode_id = ?,"
-            "artist = ?, movie_id = ?, last_modification_date = ?, snapshot = ?, parsed = ?,"
+            "artist = ?, movie_id = ?, last_modification_date = ?, thumbnail = ?, parsed = ?,"
             "title = ? WHERE id_media = ?";
     if ( m_changed == false )
         return true;
@@ -298,7 +298,7 @@ bool Media::save()
                                        m_progress, m_rating,
                                        sqlite::ForeignKey{ m_showEpisodeId }, m_artist,
                                        sqlite::ForeignKey{ m_movieId }, m_lastModificationDate,
-                                       m_snapshot, m_isParsed, m_title, m_id ) == false )
+                                       m_thumbnail, m_isParsed, m_title, m_id ) == false )
     {
         return false;
     }
@@ -371,7 +371,7 @@ bool Media::createTable( DBConnection connection )
             "folder_id UNSIGNED INTEGER,"
             "last_modification_date UNSIGNED INTEGER,"
             "insertion_date UNSIGNED INTEGER,"
-            "snapshot TEXT,"
+            "thumbnail TEXT,"
             "parsed BOOLEAN NOT NULL DEFAULT 0,"
             "title TEXT,"
             "is_present BOOLEAN NOT NULL DEFAULT 1,"

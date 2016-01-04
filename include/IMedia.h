@@ -75,9 +75,12 @@ class IMedia
         virtual std::vector<LabelPtr> labels() = 0;
         virtual std::vector<VideoTrackPtr> videoTracks() = 0;
         virtual std::vector<AudioTrackPtr> audioTracks() = 0;
-        // Returns the location of this file snapshot.
-        // This is likely to be used for album arts as well.
-        virtual const std::string& snapshot() = 0;
+        ///
+        /// \brief thumbnail Returns the path of a thumbnail for this file
+        /// \return A path, relative to the thumbnailPath configured when initializing
+        ///  The media library
+        ///
+        virtual const std::string& thumbnail() = 0;
         virtual unsigned int insertionDate() const = 0;
 };
 

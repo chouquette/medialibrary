@@ -152,9 +152,9 @@ TEST_F( Shows, SetEpisodeArtwork )
 {
     auto show = ml->createShow( "show" );
     auto e = show->addEpisode( "episode 1", 1 );
-    bool res = e->setArtworkUrl( "path-to-snapshot" );
+    bool res = e->setArtworkUrl( "path-to-art" );
     ASSERT_TRUE( res );
-    ASSERT_EQ( e->artworkUrl(), "path-to-snapshot" );
+    ASSERT_EQ( e->artworkUrl(), "path-to-art" );
 
     Reload();
 

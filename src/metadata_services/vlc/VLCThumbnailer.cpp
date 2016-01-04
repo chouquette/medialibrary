@@ -48,7 +48,7 @@ VLCThumbnailer::VLCThumbnailer(const VLC::Instance &vlc)
 #ifdef WITH_EVAS
     , m_canvas( nullptr, &evas_free )
 #endif
-    , m_snapshotRequired( false )
+    , m_thumbnailRequired( false )
     , m_width( 0 )
     , m_height( 0 )
     , m_prevSize( 0 )
@@ -114,9 +114,9 @@ void VLCThumbnailer::run(std::shared_ptr<Media> file, void *data )
         m_cb->done( file, Status::Success, data );
         return;
     }
-    else if ( file->snapshot().empty() == false )
+    else if ( file->thumbnail().empty() == false )
     {
-        LOG_INFO(file->snapshot(), " already has a snapshot" );
+        LOG_INFO(file->thumbnail(), " already has a thumbnail" );
         m_cb->done( file, Status::Success, data );
         return;
     }
@@ -140,7 +140,7 @@ void VLCThumbnailer::run(std::shared_ptr<Media> file, void *data )
         LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail" );
         return;
     }
-    takeSnapshot( file, mp, data );
+    takeThumbnail( file, mp, data );
     LOG_INFO( "Done generating ", file->mrl(), " thumbnail" );
 }
 
@@ -233,7 +233,7 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
         //unlock
         [this](void*, void*const*) {
             bool expected = true;
-            if ( m_snapshotRequired.compare_exchange_strong( expected, false ) )
+            if ( m_thumbnailRequired.compare_exchange_strong( expected, false ) )
             {
                 m_cond.notify_all();
             }
@@ -244,15 +244,15 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
     );
 }
 
-bool VLCThumbnailer::takeSnapshot(std::shared_ptr<Media> file, VLC::MediaPlayer &mp, void *data)
+bool VLCThumbnailer::takeThumbnail(std::shared_ptr<Media> file, VLC::MediaPlayer &mp, void *data)
 {
-    // lock, signal that we want a snapshot, and wait.
+    // lock, signal that we want a thumbnail, and wait.
     {
         std::unique_lock<std::mutex> lock( m_mutex );
-        m_snapshotRequired = true;
+        m_thumbnailRequired = true;
         bool success = m_cond.wait_for( lock, std::chrono::seconds( 3 ), [this]() {
-            // Keep waiting if the vmem thread hasn't restored m_snapshotRequired to false
-            return m_snapshotRequired == false;
+            // Keep waiting if the vmem thread hasn't restored m_thumbnailRequired to false
+            return m_thumbnailRequired == false;
         });
         if ( success == false )
         {
@@ -283,7 +283,7 @@ struct jpegError : public jpeg_error_mgr
 
 bool VLCThumbnailer::compress( std::shared_ptr<Media> file, void *data )
 {
-    auto path = m_ml->snapshotPath();
+    auto path = m_ml->thumbnailPath();
     path += "/";
     path += std::to_string( file->id() ) +
 #ifdef WITH_EVAS
@@ -301,7 +301,7 @@ bool VLCThumbnailer::compress( std::shared_ptr<Media> file, void *data )
     auto fOut = std::unique_ptr<FILE, int(*)(FILE*)>( fopen( path.c_str(), "wb" ), &fclose );
     if ( fOut == nullptr )
     {
-        LOG_ERROR("Failed to open snapshot file ", path);
+        LOG_ERROR("Failed to open thumbnail file ", path);
         m_cb->done( file, Status::Error, data );
         return false;
     }
@@ -368,7 +368,7 @@ bool VLCThumbnailer::compress( std::shared_ptr<Media> file, void *data )
 #error FIXME
 #endif
 
-    file->setSnapshot( path );
+    file->setThumbnail( path );
     if ( file->save() == false )
         m_cb->done( file, Status::Error, data );
     else

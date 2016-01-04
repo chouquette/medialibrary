@@ -55,7 +55,7 @@ private:
     bool startPlayback( std::shared_ptr<Media> file, VLC::MediaPlayer& mp, void *data);
     bool seekAhead(std::shared_ptr<Media> file, VLC::MediaPlayer &mp, void *data);
     void setupVout(VLC::MediaPlayer &mp);
-    bool takeSnapshot(std::shared_ptr<Media> file, VLC::MediaPlayer &mp, void* data);
+    bool takeThumbnail(std::shared_ptr<Media> file, VLC::MediaPlayer &mp, void* data);
     bool compress(std::shared_ptr<Media> file, void* data );
 
 private:
@@ -70,13 +70,13 @@ private:
     MediaLibrary* m_ml;
     std::mutex m_mutex;
     std::condition_variable m_cond;
-    // Per snapshot variables
+    // Per thumbnail variables
 #ifdef WITH_EVAS
     std::unique_ptr<Evas, void(*)(Evas*)> m_canvas;
     std::unique_ptr<uint8_t[]> m_cropBuffer;
 #endif
     std::unique_ptr<uint8_t[]> m_buff;
-    std::atomic_bool m_snapshotRequired;
+    std::atomic_bool m_thumbnailRequired;
     uint32_t m_width;
     uint32_t m_height;
     uint32_t m_prevSize;

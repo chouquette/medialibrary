@@ -90,9 +90,9 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         bool addAudioTrack(const std::string& codec, unsigned int bitrate, unsigned int sampleRate,
                            unsigned int nbChannels, const std::string& language, const std::string& desc );
         virtual std::vector<AudioTrackPtr> audioTracks() override;
-        virtual const std::string& snapshot() override;
+        virtual const std::string& thumbnail() override;
         virtual unsigned int insertionDate() const override;
-        void setSnapshot( const std::string& snapshot );
+        void setThumbnail( const std::string& thumbnail );
         bool save();
 
         unsigned int lastModificationDate();
@@ -120,7 +120,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         unsigned int m_folderId;
         unsigned int m_lastModificationDate;
         unsigned int m_insertionDate;
-        std::string m_snapshot;
+        std::string m_thumbnail;
         bool m_isParsed;
         std::string m_title;
         bool m_isPresent;

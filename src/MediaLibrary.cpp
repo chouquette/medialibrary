@@ -137,12 +137,12 @@ bool MediaLibrary::createAllTables()
     return true;
 }
 
-bool MediaLibrary::initialize( const std::string& dbPath, const std::string& snapshotPath, IMediaLibraryCb* mlCallback )
+bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* mlCallback )
 {
     if ( m_fsFactory == nullptr )
         m_fsFactory.reset( new factory::FileSystemFactory );
     Folder::setFileSystemFactory( m_fsFactory );
-    m_snapshotPath = snapshotPath;
+    m_thumbnailPath = thumbnailPath;
     m_callback = mlCallback;
     m_dbConnection.reset( new SqliteConnection( dbPath ) );
 
@@ -434,9 +434,9 @@ bool MediaLibrary::ignoreFolder( const std::string& path )
     return Folder::blacklist( m_dbConnection.get(), path );
 }
 
-const std::string& MediaLibrary::snapshotPath() const
+const std::string& MediaLibrary::thumbnailPath() const
 {
-    return m_snapshotPath;
+    return m_thumbnailPath;
 }
 
 void MediaLibrary::setLogger( ILogger* logger )

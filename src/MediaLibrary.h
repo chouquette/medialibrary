@@ -46,7 +46,7 @@ class MediaLibrary : public IMediaLibrary
     public:
         MediaLibrary();
         ~MediaLibrary();
-        virtual bool initialize( const std::string& dbPath, const std::string& snapshotPath, IMediaLibraryCb* metadataCb ) override;
+        virtual bool initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* metadataCb ) override;
         virtual void setVerbosity( LogLevel v ) override;
         virtual void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory ) override;
 
@@ -81,7 +81,7 @@ class MediaLibrary : public IMediaLibrary
         virtual void discover( const std::string& entryPoint ) override;
         bool ignoreFolder( const std::string& path ) override;
 
-        virtual const std::string& snapshotPath() const override;
+        virtual const std::string& thumbnailPath() const override;
         virtual void setLogger( ILogger* logger ) override;
         //Temporarily public, move back to private as soon as we start monitoring the FS
         virtual void reload() override;
@@ -106,7 +106,7 @@ class MediaLibrary : public IMediaLibrary
     protected:
         std::unique_ptr<SqliteConnection> m_dbConnection;
         std::shared_ptr<factory::IFileSystem> m_fsFactory;
-        std::string m_snapshotPath;
+        std::string m_thumbnailPath;
         IMediaLibraryCb* m_callback;
 
         // This probably qualifies as a work around, but we need to keep the VLC::Instance

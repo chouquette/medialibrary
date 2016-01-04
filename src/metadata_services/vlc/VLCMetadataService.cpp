@@ -187,7 +187,7 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
 
     auto cover = vlcMedia.meta( libvlc_meta_ArtworkURL );
     if ( cover.empty() == false )
-        media->setSnapshot( cover );
+        media->setThumbnail( cover );
 
     auto artists = handleArtists( media, vlcMedia );
     auto album = handleAlbum( media, vlcMedia, artists.first.get(), artists.second.get() );
@@ -448,7 +448,7 @@ bool VLCMetadataService::link( std::shared_ptr<Media> media, std::shared_ptr<Alb
         albumArtist = Artist::fetch( m_dbConn, medialibrary::UnknownArtistID );
     }
 
-    // We might modify albumArtist later, hence handle snapshots before.
+    // We might modify albumArtist later, hence handle thumbnails before.
     // If we have an albumArtist (meaning the track was properly tagged, we
     // can assume this artist is a correct match. We can use the thumbnail from
     // the current album for the albumArtist, if none has been set before.

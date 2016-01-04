@@ -127,21 +127,21 @@ TEST_F( Medias, Artist )
     ASSERT_EQ( f2->artist(), newArtist );
 }
 
-TEST_F( Medias, Snapshot )
+TEST_F( Medias, Thumbnail )
 {
     auto f = ml->addFile( "media.avi" );
-    ASSERT_EQ( f->snapshot(), "" );
+    ASSERT_EQ( f->thumbnail(), "" );
 
-    std::string newSnapshot( "/path/to/snapshot" );
+    std::string newThumbnail( "/path/to/thumbnail" );
 
-    f->setSnapshot( newSnapshot );
+    f->setThumbnail( newThumbnail );
     f->save();
-    ASSERT_EQ( f->snapshot(), newSnapshot );
+    ASSERT_EQ( f->thumbnail(), newThumbnail );
 
     Reload();
 
     auto f2 = ml->media( f->id() );
-    ASSERT_EQ( f2->snapshot(), newSnapshot );
+    ASSERT_EQ( f2->thumbnail(), newThumbnail );
 }
 
 TEST_F( Medias, PlayCount )

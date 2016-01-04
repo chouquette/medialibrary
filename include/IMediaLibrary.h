@@ -79,7 +79,7 @@ class IMediaLibrary
         /// \param dbPath       Path to the database
         /// \return true in case of success, false otherwise
         ///
-        virtual bool initialize( const std::string& dbPath, const std::string& snapshotPath, IMediaLibraryCb* metadataCb ) = 0;
+        virtual bool initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* metadataCb ) = 0;
         virtual void setVerbosity( LogLevel v ) = 0;
         /**
          * Replaces the default filesystem factory
@@ -110,7 +110,7 @@ class IMediaLibrary
          * @brief ignoreFolder will blacklist a folder for discovery
          */
         virtual bool ignoreFolder( const std::string& path ) = 0;
-        virtual const std::string& snapshotPath() const = 0;
+        virtual const std::string& thumbnailPath() const = 0;
         virtual void setLogger( ILogger* logger ) = 0;
         /**
          * @brief pauseBackgroundOperations Will stop potentially CPU intensive background
