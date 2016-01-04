@@ -195,8 +195,8 @@ bool Album::setAlbumArtist( Artist* artist )
 std::vector<ArtistPtr> Album::artists() const
 {
     static const std::string req = "SELECT art.* FROM " + policy::ArtistTable::Name + " art "
-            "LEFT JOIN AlbumArtistRelation aar ON aar.id_artist = art.id_artist "
-            "WHERE aar.id_album = ?";
+            "LEFT JOIN AlbumArtistRelation aar ON aar.artist_id = art.id_artist "
+            "WHERE aar.album_id = ?";
     return Artist::fetchAll<IArtist>( m_dbConnection, req, m_id );
 }
 
@@ -213,7 +213,7 @@ bool Album::addArtist( std::shared_ptr<Artist> artist )
 
 bool Album::removeArtist(Artist* artist)
 {
-    static const std::string req = "DELETE FROM AlbumArtistRelation WHERE id_album = ? "
+    static const std::string req = "DELETE FROM AlbumArtistRelation WHERE album_id = ? "
             "AND id_artist = ?";
     return sqlite::Tools::executeDelete( m_dbConnection, req, m_id, artist->id() );
 }
@@ -235,12 +235,12 @@ bool Album::createTable(DBConnection dbConnection )
                 + "(id_artist) ON DELETE CASCADE"
             ")";
     static const std::string reqRel = "CREATE TABLE IF NOT EXISTS AlbumArtistRelation("
-                "id_album INTEGER,"
-                "id_artist INTEGER,"
-                "PRIMARY KEY (id_album, id_artist),"
-                "FOREIGN KEY(id_album) REFERENCES " + policy::AlbumTable::Name + "("
+                "album_id INTEGER,"
+                "artist_id INTEGER,"
+                "PRIMARY KEY (album_id, artist_id),"
+                "FOREIGN KEY(album_id) REFERENCES " + policy::AlbumTable::Name + "("
                     + policy::AlbumTable::PrimaryKeyColumn + ") ON DELETE CASCADE,"
-                "FOREIGN KEY(id_artist) REFERENCES " + policy::ArtistTable::Name + "("
+                "FOREIGN KEY(artist_id) REFERENCES " + policy::ArtistTable::Name + "("
                     + policy::ArtistTable::PrimaryKeyColumn + ") ON DELETE CASCADE"
             ")";
     return sqlite::Tools::executeRequest( dbConnection, req ) &&

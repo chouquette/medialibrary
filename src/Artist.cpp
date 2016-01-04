@@ -91,8 +91,8 @@ std::vector<MediaPtr> Artist::media() const
     if ( m_id )
     {
         static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
-                "LEFT JOIN MediaArtistRelation mar ON mar.id_media = med.id_media "
-                "WHERE mar.id_artist = ? AND med.is_present = 1";
+                "LEFT JOIN MediaArtistRelation mar ON mar.media_id = med.id_media "
+                "WHERE mar.artist_id = ? AND med.is_present = 1";
         return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
     }
     else
@@ -100,8 +100,8 @@ std::vector<MediaPtr> Artist::media() const
         // Not being able to rely on ForeignKey here makes me a saaaaad panda...
         // But sqlite only accepts "IS NULL" to compare against NULL...
         static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
-                "LEFT JOIN MediaArtistRelation mar ON mar.id_media = med.id_media "
-                "WHERE mar.id_artist IS NULL";
+                "LEFT JOIN MediaArtistRelation mar ON mar.media_id = med.id_media "
+                "WHERE mar.artist_id IS NULL";
         return Media::fetchAll<IMedia>( m_dbConnection, req );
     }
 }
@@ -194,12 +194,12 @@ bool Artist::createTable( DBConnection dbConnection )
                 "is_present BOOLEAN NOT NULL DEFAULT 1"
             ")";
     static const std::string reqRel = "CREATE TABLE IF NOT EXISTS MediaArtistRelation("
-                "id_media INTEGER NOT NULL,"
-                "id_artist INTEGER,"
-                "PRIMARY KEY (id_media, id_artist),"
-                "FOREIGN KEY(id_media) REFERENCES " + policy::MediaTable::Name +
+                "media_id INTEGER NOT NULL,"
+                "artist_id INTEGER,"
+                "PRIMARY KEY (media_id, artist_id),"
+                "FOREIGN KEY(media_id) REFERENCES " + policy::MediaTable::Name +
                 "(id_media) ON DELETE CASCADE,"
-                "FOREIGN KEY(id_artist) REFERENCES " + policy::ArtistTable::Name + "("
+                "FOREIGN KEY(artist_id) REFERENCES " + policy::ArtistTable::Name + "("
                     + policy::ArtistTable::PrimaryKeyColumn + ") ON DELETE CASCADE"
             ")";
     return sqlite::Tools::executeRequest( dbConnection, req ) &&

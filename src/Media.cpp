@@ -167,8 +167,8 @@ void Media::setShowEpisode( ShowEpisodePtr showEpisode )
 std::vector<LabelPtr> Media::labels()
 {
     static const std::string req = "SELECT l.* FROM " + policy::LabelTable::Name + " l "
-            "LEFT JOIN LabelFileRelation lfr ON lfr.id_label = l.id_label "
-            "WHERE lfr.id_media = ?";
+            "LEFT JOIN LabelFileRelation lfr ON lfr.label_id = l.id_label "
+            "WHERE lfr.media_id = ?";
     return Label::fetchAll<ILabel>( m_dbConnection, req, m_id );
 }
 
@@ -411,6 +411,6 @@ bool Media::removeLabel( LabelPtr label )
         LOG_ERROR( "Can't unlink a label/file not inserted in database" );
         return false;
     }
-    const char* req = "DELETE FROM LabelFileRelation WHERE id_label = ? AND id_media = ?";
+    const char* req = "DELETE FROM LabelFileRelation WHERE label_id = ? AND media_id = ?";
     return sqlite::Tools::executeDelete( m_dbConnection, req, label->id(), m_id );
 }
