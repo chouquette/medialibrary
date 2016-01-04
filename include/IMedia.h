@@ -55,6 +55,19 @@ class IMedia
         virtual int playCount() const = 0;
         virtual void increasePlayCount() = 0;
         virtual const std::string& mrl() const = 0;
+        ///
+        /// \brief progress Returns the progress, in the [0;1] range
+        ///
+        virtual float progress() const = 0;
+        virtual void setProgress( float progress ) = 0;
+        ///
+        /// \brief rating The media rating, or -1 if unset.
+        /// It is up to the application to determine the values it wishes to use.
+        /// No value is enforced, and any positive value (less or equal to INT32_MAX)
+        /// will be accepted.
+        ///
+        virtual int rating() const = 0;
+        virtual void setRating( int rating ) = 0;
         virtual bool addLabel( LabelPtr label ) = 0;
         virtual bool removeLabel( LabelPtr label ) = 0;
         virtual MoviePtr movie() = 0;

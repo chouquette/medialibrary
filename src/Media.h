@@ -77,6 +77,10 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual std::vector<LabelPtr> labels() override;
         virtual int playCount() const  override;
         virtual void increasePlayCount() override;
+        virtual float progress() const override;
+        virtual void setProgress( float progress ) override;
+        virtual int rating() const override;
+        virtual void setRating( int rating ) override;
         virtual const std::string& mrl() const override;
         virtual MoviePtr movie() override;
         void setMovie( MoviePtr movie );
@@ -107,6 +111,8 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         Type m_type;
         int64_t m_duration;
         unsigned int m_playCount;
+        float m_progress;
+        int m_rating;
         unsigned int m_showEpisodeId;
         std::string m_mrl;
         std::string m_artist;

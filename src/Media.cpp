@@ -52,6 +52,8 @@ Media::Media( DBConnection dbConnection, sqlite::Row& row )
         >> m_type
         >> m_duration
         >> m_playCount
+        >> m_progress
+        >> m_rating
         >> m_showEpisodeId
         >> m_mrl
         >> m_artist
@@ -71,6 +73,8 @@ Media::Media( const fs::IFile* file, unsigned int folderId, const std::string& t
     , m_type( type )
     , m_duration( -1 )
     , m_playCount( 0 )
+    , m_progress( .0f )
+    , m_rating( -1 )
     , m_showEpisodeId( 0 )
     , m_mrl( isRemovable == true ? file->name() : file->fullPath() )
     , m_movieId( 0 )
@@ -179,6 +183,32 @@ void Media::increasePlayCount()
     m_changed = true;
 }
 
+float Media::progress() const
+{
+    return m_progress;
+}
+
+void Media::setProgress( float progress )
+{
+    if ( progress == m_progress || progress < 0 || progress > 1.0 )
+        return;
+    m_progress = progress;
+    m_changed = true;
+}
+
+int Media::rating() const
+{
+    return m_rating;
+}
+
+void Media::setRating( int rating )
+{
+    if ( m_rating == rating )
+        return;
+    m_rating = rating;
+    m_changed = true;
+}
+
 const std::string& Media::mrl() const
 {
     if ( m_isRemovable == false )
@@ -259,12 +289,13 @@ void Media::setSnapshot( const std::string& snapshot )
 bool Media::save()
 {
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
-            "type = ?, duration = ?, play_count = ?, show_episode_id = ?, artist = ?,"
-            "movie_id = ?, last_modification_date = ?, snapshot = ?, parsed = ?, title = ? "
-            "WHERE id_media = ?";
+            "type = ?, duration = ?, play_count = ?, progress = ?, rating = ?, show_episode_id = ?,"
+            "artist = ?, movie_id = ?, last_modification_date = ?, snapshot = ?, parsed = ?,"
+            "title = ? WHERE id_media = ?";
     if ( m_changed == false )
         return true;
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, m_type, m_duration, m_playCount,
+                                       m_progress, m_rating,
                                        sqlite::ForeignKey{ m_showEpisodeId }, m_artist,
                                        sqlite::ForeignKey{ m_movieId }, m_lastModificationDate,
                                        m_snapshot, m_isParsed, m_title, m_id ) == false )
@@ -331,6 +362,8 @@ bool Media::createTable( DBConnection connection )
             "type INTEGER,"
             "duration INTEGER DEFAULT -1,"
             "play_count UNSIGNED INTEGER,"
+            "progress REAL,"
+            "rating INTEGER DEFAULT -1,"
             "show_episode_id UNSIGNED INTEGER,"
             "mrl TEXT,"
             "artist TEXT,"

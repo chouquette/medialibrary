@@ -157,3 +157,34 @@ TEST_F( Medias, PlayCount )
     f = std::static_pointer_cast<Media>( ml->media( f->id() ) );
     ASSERT_EQ( 1, f->playCount() );
 }
+
+TEST_F( Medias, Progress )
+{
+    auto f = ml->addFile( "media.avi" );
+    ASSERT_EQ( .0f, f->progress() );
+    f->setProgress( 123.0f );
+    // Check that a non-sensical value is ignored
+    ASSERT_EQ( .0f, f->progress() );
+    f->setProgress( 0.666f );
+    ASSERT_EQ( .666f, f->progress() );
+    f->save();
+
+    Reload();
+
+    f = ml->media( f->id() );
+    ASSERT_EQ( .666f, f->progress() );
+}
+
+TEST_F( Medias, Rating )
+{
+    auto f = ml->addFile( "media.avi" );
+    ASSERT_EQ( -1, f->rating() );
+    f->setRating( 12345 );
+    f->save();
+    ASSERT_EQ( 12345, f->rating() );
+
+    Reload();
+
+    f = ml->media( f->id() );
+    ASSERT_EQ( 12345, f->rating() );
+}
