@@ -57,6 +57,8 @@ public:
     bool setArtworkMrl( const std::string& artworkMrl );
     bool updateNbAlbum( int increment );
     std::shared_ptr<Album> unknownAlbum();
+    virtual const std::string& musicBrainzId() const override;
+    bool setMusicBrainzId( const std::string& musicBrainzId );
 
     static bool createTable( DBConnection dbConnection );
     static bool createTriggers( DBConnection dbConnection );
@@ -71,6 +73,7 @@ private:
     std::string m_artworkMrl;
     unsigned int m_nbAlbums;
     bool m_isPresent;
+    std::string m_mbId;
 
     friend struct policy::ArtistTable;
 };

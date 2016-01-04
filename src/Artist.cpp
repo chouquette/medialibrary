@@ -40,6 +40,7 @@ Artist::Artist( DBConnection dbConnection, sqlite::Row& row )
         >> m_shortBio
         >> m_artworkMrl
         >> m_nbAlbums
+        >> m_mbId
         >> m_isPresent;
 }
 
@@ -162,6 +163,23 @@ std::shared_ptr<Album> Artist::unknownAlbum()
     return album;
 }
 
+const std::string& Artist::musicBrainzId() const
+{
+    return m_mbId;
+}
+
+bool Artist::setMusicBrainzId( const std::string& mbId )
+{
+    static const std::string req = "UPDATE " + policy::ArtistTable::Name
+            + " SET mb_id = ? WHERE id_artist = ?";
+    if ( mbId == m_mbId )
+        return true;
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, mbId, m_id ) == false )
+        return false;
+    m_mbId = mbId;
+    return true;
+}
+
 bool Artist::createTable( DBConnection dbConnection )
 {
     static const std::string req = "CREATE TABLE IF NOT EXISTS " +
@@ -172,6 +190,7 @@ bool Artist::createTable( DBConnection dbConnection )
                 "shortbio TEXT,"
                 "artwork_mrl TEXT,"
                 "nb_albums UNSIGNED INT DEFAULT 0,"
+                "mb_id TEXT,"
                 "is_present BOOLEAN NOT NULL DEFAULT 1"
             ")";
     static const std::string reqRel = "CREATE TABLE IF NOT EXISTS MediaArtistRelation("

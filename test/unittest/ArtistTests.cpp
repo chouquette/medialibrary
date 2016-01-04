@@ -173,3 +173,20 @@ TEST_F( Artists, UnknownAlbum )
     ASSERT_NE( nullptr, album2 );
     ASSERT_EQ( album2->id(), album->id() );
 }
+
+TEST_F( Artists, MusicBrainzId )
+{
+    auto a = ml->createArtist( "Otters Never Say Die" );
+    ASSERT_NE( a, nullptr );
+    ASSERT_EQ( a->musicBrainzId(), "" );
+
+    std::string mbId("{this-id-an-id}");
+    a->setMusicBrainzId( mbId );
+    ASSERT_EQ( a->musicBrainzId(), mbId );
+
+    Reload();
+
+    auto a2 = ml->artist( "Otters Never Say Die" );
+    ASSERT_NE( a2, nullptr );
+    ASSERT_EQ( a2->musicBrainzId(), mbId );
+}
