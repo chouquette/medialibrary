@@ -239,7 +239,9 @@ bool Album::createTable(DBConnection dbConnection )
                 "artwork_mrl TEXT,"
                 "last_sync_date UNSIGNED INTEGER,"
                 "nb_tracks UNSIGNED INTEGER DEFAULT 0,"
-                "is_present BOOLEAN NOT NULL DEFAULT 1"
+                "is_present BOOLEAN NOT NULL DEFAULT 1,"
+                "FOREIGN KEY( artist_id ) REFERENCES " + policy::ArtistTable::Name
+                + "(id_artist) ON DELETE CASCADE"
             ")";
     static const std::string reqRel = "CREATE TABLE IF NOT EXISTS AlbumArtistRelation("
                 "id_album INTEGER,"
