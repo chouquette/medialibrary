@@ -56,7 +56,6 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
         bool setShortSummary( const std::string& summary );
         virtual const std::string& artworkMrl() const override;
         bool setArtworkMrl( const std::string& artworkMrl );
-        virtual time_t lastSyncDate() const override;
         virtual const std::string& tvdbId() override;
         bool setTvdbId( const std::string& summary );
         std::shared_ptr<ShowEpisode> addEpisode( const std::string& title, unsigned int episodeNumber );
@@ -72,7 +71,6 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
         time_t m_releaseDate;
         std::string m_shortSummary;
         std::string m_artworkMrl;
-        time_t m_lastSyncDate;
         std::string m_tvdbId;
 
         friend struct policy::ShowTable;

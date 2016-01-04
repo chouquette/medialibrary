@@ -39,7 +39,6 @@ class IAlbum
         virtual unsigned int releaseYear() const = 0;
         virtual const std::string& shortSummary() const = 0;
         virtual const std::string& artworkMrl() const = 0;
-        virtual time_t lastSyncDate() const = 0;
         /**
          * @brief tracks fetches album tracks from the database
          */

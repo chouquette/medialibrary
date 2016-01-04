@@ -53,7 +53,6 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, pol
         virtual const std::string& artworkMrl() const override;
         bool setArtworkMrl( const std::string& artworkMrl );
         virtual unsigned int episodeNumber() const override;
-        virtual time_t lastSyncDate() const override;
         virtual const std::string& name() const override;
         unsigned int seasonNumber() const;
         bool setSeasonNumber(unsigned int seasonNumber);
@@ -72,7 +71,6 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, pol
         unsigned int m_id;
         std::string m_artworkMrl;
         unsigned int m_episodeNumber;
-        time_t m_lastSyncDate;
         std::string m_name;
         unsigned int m_seasonNumber;
         std::string m_shortSummary;

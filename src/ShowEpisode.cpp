@@ -35,7 +35,6 @@ ShowEpisode::ShowEpisode(DBConnection dbConnection, sqlite::Row& row )
     row >> m_id
         >> m_artworkMrl
         >> m_episodeNumber
-        >> m_lastSyncDate
         >> m_name
         >> m_seasonNumber
         >> m_shortSummary
@@ -75,11 +74,6 @@ bool ShowEpisode::setArtworkMrl( const std::string& artworkMrl )
 unsigned int ShowEpisode::episodeNumber() const
 {
     return m_episodeNumber;
-}
-
-time_t ShowEpisode::lastSyncDate() const
-{
-    return m_lastSyncDate;
 }
 
 const std::string& ShowEpisode::name() const
@@ -155,7 +149,6 @@ bool ShowEpisode::createTable( DBConnection dbConnection )
                 "id_episode INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "artwork_mrl TEXT,"
                 "episode_number UNSIGNED INT,"
-                "last_sync_date UNSIGNED INT,"
                 "title TEXT,"
                 "season_number UNSIGNED INT,"
                 "episode_summary TEXT,"

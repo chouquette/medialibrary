@@ -42,7 +42,6 @@ Album::Album(DBConnection dbConnection, sqlite::Row& row)
         >> m_releaseYear
         >> m_shortSummary
         >> m_artworkMrl
-        >> m_lastSyncDate
         >> m_nbTracks
         >> m_isPresent;
 }
@@ -52,7 +51,6 @@ Album::Album(const std::string& title )
     , m_title( title )
     , m_artistId( 0 )
     , m_releaseYear( ~0u )
-    , m_lastSyncDate( 0 )
     , m_nbTracks( 0 )
     , m_isPresent( true )
 {
@@ -62,7 +60,6 @@ Album::Album( const Artist* artist )
     : m_id( 0 )
     , m_artistId( artist->id() )
     , m_releaseYear( ~0u )
-    , m_lastSyncDate( 0 )
     , m_nbTracks( 0 )
     , m_isPresent( true )
 {
@@ -135,11 +132,6 @@ bool Album::setArtworkMrl( const std::string& artworkMrl )
         return false;
     m_artworkMrl = artworkMrl;
     return true;
-}
-
-time_t Album::lastSyncDate() const
-{
-    return m_lastSyncDate;
 }
 
 std::vector<MediaPtr> Album::tracks() const
@@ -237,7 +229,6 @@ bool Album::createTable(DBConnection dbConnection )
                 "release_year UNSIGNED INTEGER,"
                 "short_summary TEXT,"
                 "artwork_mrl TEXT,"
-                "last_sync_date UNSIGNED INTEGER,"
                 "nb_tracks UNSIGNED INTEGER DEFAULT 0,"
                 "is_present BOOLEAN NOT NULL DEFAULT 1,"
                 "FOREIGN KEY( artist_id ) REFERENCES " + policy::ArtistTable::Name

@@ -36,7 +36,6 @@ Show::Show( DBConnection dbConnection, sqlite::Row& row )
         >> m_releaseDate
         >> m_shortSummary
         >> m_artworkMrl
-        >> m_lastSyncDate
         >> m_tvdbId;
 }
 
@@ -44,7 +43,6 @@ Show::Show( const std::string& name )
     : m_id( 0 )
     , m_name( name )
     , m_releaseDate( 0 )
-    , m_lastSyncDate( 0 )
 {
 }
 
@@ -103,11 +101,6 @@ bool Show::setArtworkMrl( const std::string& artworkMrl )
     return true;
 }
 
-time_t Show::lastSyncDate() const
-{
-    return m_lastSyncDate;
-}
-
 const std::string& Show::tvdbId()
 {
     return m_tvdbId;
@@ -143,7 +136,6 @@ bool Show::createTable(DBConnection dbConnection)
                         "release_date UNSIGNED INTEGER,"
                         "short_summary TEXT,"
                         "artwork_mrl TEXT,"
-                        "last_sync_date UNSIGNED INTEGER,"
                         "tvdb_id TEXT"
                     ")";
     return sqlite::Tools::executeRequest( dbConnection, req );

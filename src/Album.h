@@ -71,7 +71,6 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         bool setShortSummary( const std::string& summary );
         virtual const std::string& artworkMrl() const override;
         bool setArtworkMrl( const std::string& artworkMrl );
-        virtual time_t lastSyncDate() const override;
         virtual std::vector<MediaPtr> tracks() const override;
         std::shared_ptr<AlbumTrack> addTrack(std::shared_ptr<Media> media, unsigned int trackNb , unsigned int discNumber);
         unsigned int nbTracks() const override;
@@ -95,7 +94,6 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         unsigned int m_releaseYear;
         std::string m_shortSummary;
         std::string m_artworkMrl;
-        time_t m_lastSyncDate;
         unsigned int m_nbTracks;
         bool m_isPresent;
 
