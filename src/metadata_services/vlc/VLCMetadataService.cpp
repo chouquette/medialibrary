@@ -313,6 +313,8 @@ std::shared_ptr<Album> VLCMetadataService::handleAlbum( Media& media, VLC::Media
 
     if ( albumTitle.length() > 0 )
     {
+        // Album matching depends on the difference between artist & album artist.
+        // Specificaly pass the albumArtist here.
         album = findAlbum( media, vlcMedia, albumTitle, albumArtist.get() );
 
         if ( album == nullptr )
@@ -344,7 +346,7 @@ std::shared_ptr<Album> VLCMetadataService::handleAlbum( Media& media, VLC::Media
 /// \param vlcMedia VLC's media
 /// \return A pair containing:
 /// The album artist as a first element
-/// The track artist as a second element, if it differs from the album artist.
+/// The track artist as a second element, or nullptr if it is the same as album artist
 ///
 std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> VLCMetadataService::handleArtists( VLC::Media& vlcMedia ) const
 {
@@ -384,8 +386,6 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> VLCMetadataService::
             }
         }
     }
-    if ( albumArtist == nullptr )
-        return { artist, nullptr };
     return {albumArtist, artist};
 }
 
@@ -450,13 +450,11 @@ bool VLCMetadataService::link( Media& media, std::shared_ptr<Album> album,
                                std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist ) const
 {
     if ( albumArtist == nullptr && artist == nullptr )
-    {
         albumArtist = m_unknownArtist;
-    }
     else
     {
-        // If we fetch at least one artist, we consider it the albumartist (see handleArtist() doc)
-        assert(albumArtist != nullptr);
+        if ( albumArtist == nullptr )
+            albumArtist = artist;
     }
 
     // We might modify albumArtist later, hence handle thumbnails before.
