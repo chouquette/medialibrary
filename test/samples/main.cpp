@@ -15,6 +15,7 @@ static const char* testCases[] = {
     "release_year_same",
     "notags",
     "multi_cd",
+    "no_album_artist",
 };
 
 class TestEnv : public ::testing::Environment

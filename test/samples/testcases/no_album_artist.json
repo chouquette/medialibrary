@@ -1,0 +1,26 @@
+{
+    "input": [
+        "music/no_album_artist/"
+    ],
+    "expected": {
+        "albums": [
+            {
+                "title": "Album",
+                "artist": "Artist",
+                "artists": [
+                    "Artist"
+                ],
+                "nbTracks": 2,
+                "tracks": [{
+                    "artist": "Artist",
+                    "title": "Track 1"
+                },
+                {
+                    "artist": "Artist",
+                    "title": "Track 2"
+                }
+                ]
+            }
+        ]
+    }
+}
