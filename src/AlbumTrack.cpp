@@ -45,7 +45,6 @@ AlbumTrack::AlbumTrack(DBConnection dbConnection, sqlite::Row& row )
         >> m_isPresent;
 }
 
-//FIXME: constify media
 AlbumTrack::AlbumTrack( unsigned int mediaId, unsigned int trackNumber, unsigned int albumId, unsigned int discNumber )
     : m_id( 0 )
     , m_mediaId( mediaId )
