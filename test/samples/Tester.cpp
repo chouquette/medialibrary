@@ -261,7 +261,13 @@ void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& 
         }
         if ( expectedTrack.HasMember( "artist" ) )
         {
-            if ( strcasecmp( expectedTrack["artist"].GetString(), track->artist().c_str() ) != 0 )
+            auto artist = albumTrack->artist();
+            if ( artist == nullptr )
+                return ;
+            if ( strlen( expectedTrack["artist"].GetString() ) == 0 &&
+                 artist->id() != medialibrary::UnknownArtistID )
+                return ;
+            else if ( strcasecmp( expectedTrack["artist"].GetString(), artist->name().c_str() ) != 0 )
                 return ;
         }
         if ( expectedTrack.HasMember( "genre" ) )
