@@ -189,7 +189,7 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
     if ( cover.empty() == false )
         media->setThumbnail( cover );
 
-    auto artists = handleArtists( media, vlcMedia );
+    auto artists = handleArtists( vlcMedia );
     auto album = handleAlbum( media, vlcMedia, artists.first, artists.second );
     if ( album == nullptr )
     {
@@ -344,7 +344,7 @@ std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> m
 /// The album artist as a first element
 /// The track artist as a second element, if it differs from the album artist.
 ///
-std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> VLCMetadataService::handleArtists( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
+std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> VLCMetadataService::handleArtists( VLC::Media& vlcMedia ) const
 {
     std::shared_ptr<Artist> albumArtist;
     std::shared_ptr<Artist> artist;
@@ -383,14 +383,6 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> VLCMetadataService::
         }
     }
 
-    if ( artistName.length() > 0 )
-        media->setArtist( artistName );
-    else if ( albumArtistName.length() > 0 )
-    {
-        // Always provide an artist, to avoid the user from having to fallback
-        // to the album artist by himself
-        media->setArtist( albumArtistName );
-    }
     return {albumArtist, artist};
 }
 

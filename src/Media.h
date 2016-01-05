@@ -66,8 +66,6 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         void setTitle( const std::string& title );
         virtual AlbumTrackPtr albumTrack() override;
         bool setAlbumTrack( AlbumTrackPtr albumTrack );
-        virtual const std::string& artist() const override;
-        void setArtist( const std::string& artist );
         virtual int64_t duration() const override;
         void setDuration( int64_t duration);
         virtual std::shared_ptr<IShowEpisode> showEpisode() override;
@@ -115,7 +113,6 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         int m_rating;
         unsigned int m_showEpisodeId;
         std::string m_mrl;
-        std::string m_artist;
         unsigned int m_movieId;
         unsigned int m_folderId;
         unsigned int m_lastModificationDate;

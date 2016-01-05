@@ -71,7 +71,6 @@ class IMedia
         virtual bool addLabel( LabelPtr label ) = 0;
         virtual bool removeLabel( LabelPtr label ) = 0;
         virtual MoviePtr movie() = 0;
-        virtual const std::string& artist() const = 0;
         virtual std::vector<LabelPtr> labels() = 0;
         virtual std::vector<VideoTrackPtr> videoTracks() = 0;
         virtual std::vector<AudioTrackPtr> audioTracks() = 0;

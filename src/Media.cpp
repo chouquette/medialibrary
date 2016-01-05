@@ -56,7 +56,6 @@ Media::Media( DBConnection dbConnection, sqlite::Row& row )
         >> m_rating
         >> m_showEpisodeId
         >> m_mrl
-        >> m_artist
         >> m_movieId
         >> m_folderId
         >> m_lastModificationDate
@@ -118,19 +117,6 @@ bool Media::setAlbumTrack( AlbumTrackPtr albumTrack )
 {
     m_albumTrack = albumTrack;
     return true;
-}
-
-const std::string& Media::artist() const
-{
-    return m_artist;
-}
-
-void Media::setArtist(const std::string& artist)
-{
-    if ( m_artist == artist )
-        return;
-    m_artist = artist;
-    m_changed = true;
 }
 
 int64_t Media::duration() const
@@ -290,13 +276,13 @@ bool Media::save()
 {
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
             "type = ?, duration = ?, play_count = ?, progress = ?, rating = ?, show_episode_id = ?,"
-            "artist = ?, movie_id = ?, last_modification_date = ?, thumbnail = ?, parsed = ?,"
+            "movie_id = ?, last_modification_date = ?, thumbnail = ?, parsed = ?,"
             "title = ? WHERE id_media = ?";
     if ( m_changed == false )
         return true;
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, m_type, m_duration, m_playCount,
                                        m_progress, m_rating,
-                                       sqlite::ForeignKey{ m_showEpisodeId }, m_artist,
+                                       sqlite::ForeignKey{ m_showEpisodeId },
                                        sqlite::ForeignKey{ m_movieId }, m_lastModificationDate,
                                        m_thumbnail, m_isParsed, m_title, m_id ) == false )
     {
@@ -366,7 +352,6 @@ bool Media::createTable( DBConnection connection )
             "rating INTEGER DEFAULT -1,"
             "show_episode_id UNSIGNED INTEGER,"
             "mrl TEXT,"
-            "artist TEXT,"
             "movie_id UNSIGNED INTEGER,"
             "folder_id UNSIGNED INTEGER,"
             "last_modification_date UNSIGNED INTEGER,"

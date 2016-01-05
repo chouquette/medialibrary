@@ -109,24 +109,6 @@ TEST_F( Medias, Duration )
     ASSERT_EQ( f2->duration(), d );
 }
 
-
-TEST_F( Medias, Artist )
-{
-    auto f = std::static_pointer_cast<Media>( ml->addFile( "media.avi" ) );
-    ASSERT_EQ( f->artist(), "" );
-
-    std::string newArtist( "Rage Against The Otters" );
-
-    f->setArtist( newArtist );
-    f->save();
-    ASSERT_EQ( f->artist(), newArtist );
-
-    Reload();
-
-    auto f2 = ml->media( f->id() );
-    ASSERT_EQ( f2->artist(), newArtist );
-}
-
 TEST_F( Medias, Thumbnail )
 {
     auto f = ml->addFile( "media.avi" );
