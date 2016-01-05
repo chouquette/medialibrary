@@ -41,7 +41,7 @@ class IAlbumTrack
          * "Artist 1 featuring Artist 2 and also artist 3 and a whole bunch of people"
          * @return
          */
-        virtual const std::string& artist() const = 0;
+        virtual ArtistPtr artist() const = 0;
         virtual const std::string& genre() = 0;
         virtual unsigned int trackNumber() = 0;
         virtual std::shared_ptr<IAlbum> album() = 0;

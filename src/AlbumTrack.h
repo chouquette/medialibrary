@@ -29,9 +29,11 @@
 #include "IAlbumTrack.h"
 #include "IMediaLibrary.h"
 #include "database/DatabaseHelpers.h"
+#include "utils/Cache.h"
 
 class Album;
 class AlbumTrack;
+class Artist;
 class Media;
 
 namespace policy
@@ -51,8 +53,8 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         AlbumTrack(Media* media, unsigned int trackNumber, unsigned int albumId , unsigned int discNumber);
 
         virtual unsigned int id() const override;
-        virtual const std::string& artist() const override;
-        bool setArtist( const std::string& artist );
+        virtual ArtistPtr artist() const override;
+        bool setArtist( std::shared_ptr<Artist> artist );
         virtual const std::string& genre() override;
         bool setGenre( const std::string& genre );
         virtual unsigned int trackNumber() override;
@@ -69,7 +71,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         DBConnection m_dbConnection;
         unsigned int m_id;
         unsigned int m_mediaId;
-        std::string m_artist;
+        unsigned int m_artistId;
         std::string m_genre;
         unsigned int m_trackNumber;
         unsigned int m_albumId;
@@ -78,6 +80,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         bool m_isPresent;
 
         std::weak_ptr<Album> m_album;
+        mutable Cache<std::shared_ptr<Artist>> m_artist;
 
         friend struct policy::AlbumTrackTable;
 };

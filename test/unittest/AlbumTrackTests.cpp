@@ -51,16 +51,23 @@ TEST_F( AlbumTracks, Artist )
     auto f = ml->addFile( "track1.mp3" );
     auto track = album->addTrack( f, 1, 0 );
 
-    ASSERT_EQ( track->artist(), "" );
-    track->setArtist( "artist" );
-    ASSERT_EQ( track->artist(), "artist" );
+    auto artist = track->artist();
+    ASSERT_EQ( nullptr, artist );
+    auto newArtist = ml->createArtist( "Dream Seaotter" );
+    track->setArtist( newArtist );
+    artist = track->artist();
+    ASSERT_NE( nullptr, artist );
+    ASSERT_EQ( artist->name(), newArtist->name() );
 
     Reload();
 
     // Don't reuse the "track" and "f" variable, their type differ
     auto file = ml->media( f->id() );
     auto albumTrack = file->albumTrack();
-    ASSERT_EQ( albumTrack->artist(), "artist" );
+    artist = albumTrack->artist();
+    ASSERT_NE( nullptr, artist );
+    ASSERT_EQ( newArtist->name(), artist->name() );
+    ASSERT_EQ( newArtist->id(), artist->id() );
 }
 
 TEST_F( AlbumTracks, SetReleaseYear )

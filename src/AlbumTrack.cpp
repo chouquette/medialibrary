@@ -22,6 +22,7 @@
 
 #include "AlbumTrack.h"
 #include "Album.h"
+#include "Artist.h"
 #include "Media.h"
 #include "database/SqliteTools.h"
 #include "logging/Logger.h"
@@ -35,7 +36,7 @@ AlbumTrack::AlbumTrack(DBConnection dbConnection, sqlite::Row& row )
 {
     row >> m_id
         >> m_mediaId
-        >> m_artist
+        >> m_artistId
         >> m_genre
         >> m_trackNumber
         >> m_albumId
@@ -61,19 +62,25 @@ unsigned int AlbumTrack::id() const
     return m_id;
 }
 
-const std::string&AlbumTrack::artist() const
+ArtistPtr AlbumTrack::artist() const
 {
-    return m_artist;
+    auto lock = m_artist.lock();
+    if ( m_artist.isCached() == false && m_artistId != 0 )
+    {
+        m_artist = Artist::fetch( m_dbConnection, m_artistId );
+    }
+    return m_artist.get();
 }
 
-bool AlbumTrack::setArtist( const std::string& artist )
+bool AlbumTrack::setArtist( std::shared_ptr<Artist> artist )
 {
     static const std::string req = "UPDATE " + policy::AlbumTrackTable::Name +
-            " SET artist = ? WHERE id_track = ?";
-    if ( artist == m_artist )
+            " SET artist_id = ? WHERE id_track = ?";
+    if ( artist->id() == m_artistId )
         return true;
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artist, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artist->id(), m_id ) == false )
         return false;
+    m_artistId = artist->id();
     m_artist = artist;
     return true;
 }
@@ -83,7 +90,7 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
     static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AlbumTrackTable::Name + "("
                 "id_track INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "media_id INTEGER,"
-                "artist TEXT,"
+                "artist_id UNSIGNED INTEGER,"
                 "genre TEXT,"
                 "track_number UNSIGNED INTEGER,"
                 "album_id UNSIGNED INTEGER NOT NULL,"
@@ -91,7 +98,9 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
                 "disc_number UNSIGNED INTEGER,"
                 "is_present BOOLEAN NOT NULL DEFAULT 1,"
                 "FOREIGN KEY (media_id) REFERENCES " + policy::MediaTable::Name + "(id_media)"
-                    " ON DELETE CASCADE, "
+                    " ON DELETE CASCADE,"
+                "FOREIGN KEY (artist_id) REFERENCES " + policy::ArtistTable::Name + "(id_artist)"
+                    " ON DELETE CASCADE,"
                 "FOREIGN KEY (album_id) REFERENCES Album(id_album) "
                     " ON DELETE CASCADE"
             ")";
