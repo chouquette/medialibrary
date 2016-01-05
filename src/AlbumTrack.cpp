@@ -46,9 +46,9 @@ AlbumTrack::AlbumTrack(DBConnection dbConnection, sqlite::Row& row )
 }
 
 //FIXME: constify media
-AlbumTrack::AlbumTrack( Media* media, unsigned int trackNumber, unsigned int albumId, unsigned int discNumber )
+AlbumTrack::AlbumTrack( unsigned int mediaId, unsigned int trackNumber, unsigned int albumId, unsigned int discNumber )
     : m_id( 0 )
-    , m_mediaId( media->id() )
+    , m_mediaId( mediaId )
     , m_trackNumber( trackNumber )
     , m_albumId( albumId )
     , m_releaseYear( 0 )
@@ -113,12 +113,12 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
             sqlite::Tools::executeRequest( dbConnection, triggerReq );
 }
 
-std::shared_ptr<AlbumTrack> AlbumTrack::create(DBConnection dbConnection, unsigned int albumId, Media* media, unsigned int trackNb, unsigned int discNumber )
+std::shared_ptr<AlbumTrack> AlbumTrack::create( DBConnection dbConnection, unsigned int albumId, unsigned int mediaId, unsigned int trackNb, unsigned int discNumber )
 {
-    auto self = std::make_shared<AlbumTrack>( media, trackNb, albumId, discNumber );
+    auto self = std::make_shared<AlbumTrack>( mediaId, trackNb, albumId, discNumber );
     static const std::string req = "INSERT INTO " + policy::AlbumTrackTable::Name
             + "(media_id, track_number, album_id, disc_number) VALUES(?, ?, ?, ?)";
-    if ( insert( dbConnection, self, req, media->id(), trackNb, albumId, discNumber ) == false )
+    if ( insert( dbConnection, self, req, mediaId, trackNb, albumId, discNumber ) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;
     return self;

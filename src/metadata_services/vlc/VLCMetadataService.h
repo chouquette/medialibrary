@@ -52,13 +52,13 @@ class VLCMetadataService : public IMetadataService
 
 private:
         Status handleMediaMeta( std::shared_ptr<Media> media , VLC::Media &vlcMedia ) const;
-        std::shared_ptr<Album> findAlbum(Media* media, VLC::Media& vlcMedia, const std::string& title, Artist* albumArtist ) const;
-        bool parseAudioFile( std::shared_ptr<Media> media, VLC::Media &vlcMedia ) const;
+        std::shared_ptr<Album> findAlbum(Media& media, VLC::Media& vlcMedia, const std::string& title, Artist* albumArtist ) const;
+        bool parseAudioFile(Media& media, VLC::Media &vlcMedia ) const;
         bool parseVideoFile( std::shared_ptr<Media> file, VLC::Media &media ) const;
         std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> handleArtists(VLC::Media& vlcMedia ) const;
-        std::shared_ptr<AlbumTrack> handleTrack(std::shared_ptr<Album> album, std::shared_ptr<Media> media, VLC::Media& vlcMedia , std::shared_ptr<Artist> artist) const;
-        bool link(std::shared_ptr<Media> media, std::shared_ptr<Album> album, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist ) const;
-        std::shared_ptr<Album> handleAlbum(std::shared_ptr<Media> media, VLC::Media& vlcMedia, std::shared_ptr<Artist> albumArtist , std::shared_ptr<Artist> artist) const;
+        std::shared_ptr<AlbumTrack> handleTrack(std::shared_ptr<Album> album, Media& media, VLC::Media& vlcMedia , std::shared_ptr<Artist> artist) const;
+        bool link(Media& media, std::shared_ptr<Album> album, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist ) const;
+        std::shared_ptr<Album> handleAlbum( Media& media, VLC::Media& vlcMedia, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist ) const;
 
         VLC::Instance m_instance;
         IMetadataServiceCb* m_cb;

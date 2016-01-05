@@ -72,7 +72,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         virtual const std::string& artworkMrl() const override;
         bool setArtworkMrl( const std::string& artworkMrl );
         virtual std::vector<MediaPtr> tracks() const override;
-        std::shared_ptr<AlbumTrack> addTrack(std::shared_ptr<Media> media, unsigned int trackNb , unsigned int discNumber);
+        std::shared_ptr<AlbumTrack> addTrack(Media& media, unsigned int trackNb , unsigned int discNumber);
         unsigned int nbTracks() const override;
 
         virtual ArtistPtr albumArtist() const override;

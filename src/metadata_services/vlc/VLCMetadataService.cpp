@@ -124,7 +124,7 @@ IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Me
     t->commit();
     if ( isAudio == true )
     {
-        if ( parseAudioFile( media, vlcMedia ) == false )
+        if ( parseAudioFile( *media, vlcMedia ) == false )
             return Status::Fatal;
     }
     else
@@ -181,13 +181,13 @@ bool VLCMetadataService::parseVideoFile( std::shared_ptr<Media> file, VLC::Media
 
 /* Audio files */
 
-bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
+bool VLCMetadataService::parseAudioFile( Media& media, VLC::Media& vlcMedia ) const
 {
-    media->setType( IMedia::Type::AudioType );
+    media.setType( IMedia::Type::AudioType );
 
     auto cover = vlcMedia.meta( libvlc_meta_ArtworkURL );
     if ( cover.empty() == false )
-        media->setThumbnail( cover );
+        media.setThumbnail( cover );
 
     auto artists = handleArtists( vlcMedia );
     auto album = handleAlbum( media, vlcMedia, artists.first, artists.second );
@@ -203,7 +203,7 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
 }
 
 /* Album handling */
-std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, VLC::Media& vlcMedia, const std::string& title, Artist* albumArtist ) const
+std::shared_ptr<Album> VLCMetadataService::findAlbum( Media& media, VLC::Media& vlcMedia, const std::string& title, Artist* albumArtist ) const
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
             " WHERE title = ?";
@@ -276,7 +276,7 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, VLC::Media& 
 
         // Assume album files will be in the same folder.
         auto candidateFolder = utils::file::directory( tracks[0]->mrl() );
-        auto newFileFolder = utils::file::directory( media->mrl() );
+        auto newFileFolder = utils::file::directory( media.mrl() );
         if ( candidateFolder != newFileFolder )
         {
             it = albums.erase( it );
@@ -293,7 +293,7 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, VLC::Media& 
     return std::static_pointer_cast<Album>( albums[0] );
 }
 
-std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> media, VLC::Media& vlcMedia, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> trackArtist ) const
+std::shared_ptr<Album> VLCMetadataService::handleAlbum( Media& media, VLC::Media& vlcMedia, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> trackArtist ) const
 {
     auto albumTitle = vlcMedia.meta( libvlc_meta_Album );
     std::shared_ptr<Album> album;
@@ -311,7 +311,7 @@ std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> m
 
     if ( albumTitle.length() > 0 )
     {
-        album = findAlbum( media.get(), vlcMedia, albumTitle, albumArtist.get() );
+        album = findAlbum( media, vlcMedia, albumTitle, albumArtist.get() );
 
         if ( album == nullptr )
         {
@@ -332,7 +332,7 @@ std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> m
     // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist
     auto track = handleTrack( album, media, vlcMedia, trackArtist ? trackArtist : artist );
     if ( track != nullptr )
-        media->setAlbumTrack( track );
+        media.setAlbumTrack( track );
     return album;
 }
 
@@ -388,7 +388,7 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> VLCMetadataService::
 
 /* Tracks handling */
 
-std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack( std::shared_ptr<Album> album, std::shared_ptr<Media> media, VLC::Media& vlcMedia, std::shared_ptr<Artist> artist ) const
+std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack( std::shared_ptr<Album> album, Media& media, VLC::Media& vlcMedia, std::shared_ptr<Artist> artist ) const
 {
     auto trackNbStr = vlcMedia.meta( libvlc_meta_TrackNumber );
 
@@ -403,7 +403,7 @@ std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack( std::shared_ptr<Alb
         }
     }
     if ( title.empty() == false )
-        media->setTitle( title );
+        media.setTitle( title );
     unsigned int trackNb;
     if ( trackNbStr.empty() == false )
         trackNb = atoi( trackNbStr.c_str() );
@@ -443,7 +443,7 @@ std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack( std::shared_ptr<Alb
 
 /* Misc */
 
-bool VLCMetadataService::link( std::shared_ptr<Media> media, std::shared_ptr<Album> album,
+bool VLCMetadataService::link( Media& media, std::shared_ptr<Album> album,
                                std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist ) const
 {
     if ( albumArtist == nullptr && artist == nullptr )
@@ -459,9 +459,9 @@ bool VLCMetadataService::link( std::shared_ptr<Media> media, std::shared_ptr<Alb
         albumArtist->setArtworkMrl( album->artworkMrl() );
 
     if ( albumArtist != nullptr )
-        albumArtist->addMedia( media.get() );
+        albumArtist->addMedia( media );
     if ( artist != nullptr && ( albumArtist == nullptr || albumArtist->id() != artist->id() ) )
-        artist->addMedia( media.get() );
+        artist->addMedia( media );
 
     auto currentAlbumArtist = album->albumArtist();
 

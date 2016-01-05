@@ -142,14 +142,14 @@ std::vector<MediaPtr> Album::tracks() const
     return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
 }
 
-std::shared_ptr<AlbumTrack> Album::addTrack(std::shared_ptr<Media> media, unsigned int trackNb, unsigned int discNumber )
+std::shared_ptr<AlbumTrack> Album::addTrack( Media& media, unsigned int trackNb, unsigned int discNumber )
 {
     auto t = m_dbConnection->newTransaction();
 
-    auto track = AlbumTrack::create( m_dbConnection, m_id, media.get(), trackNb, discNumber );
+    auto track = AlbumTrack::create( m_dbConnection, m_id, media.id(), trackNb, discNumber );
     if ( track == nullptr )
         return nullptr;
-    if ( media->setAlbumTrack( track ) == false )
+    if ( media.setAlbumTrack( track ) == false )
         return nullptr;
     static const std::string req = "UPDATE " + policy::AlbumTable::Name +
             " SET nb_tracks = nb_tracks + 1 WHERE id_album = ?";

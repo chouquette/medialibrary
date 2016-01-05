@@ -50,7 +50,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
 {
     public:
         AlbumTrack( DBConnection dbConnection, sqlite::Row& row );
-        AlbumTrack(Media* media, unsigned int trackNumber, unsigned int albumId , unsigned int discNumber);
+        AlbumTrack( unsigned int mediaId, unsigned int trackNumber, unsigned int albumId , unsigned int discNumber);
 
         virtual unsigned int id() const override;
         virtual ArtistPtr artist() const override;
@@ -64,8 +64,8 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         virtual std::shared_ptr<IAlbum> album() override;
 
         static bool createTable( DBConnection dbConnection );
-        static std::shared_ptr<AlbumTrack> create(DBConnection dbConnection, unsigned int albumId,
-                                     Media* media, unsigned int trackNb , unsigned int discNumber);
+        static std::shared_ptr<AlbumTrack> create( DBConnection dbConnection, unsigned int albumId,
+                                     unsigned int mediaId, unsigned int trackNb , unsigned int discNumber );
 
     private:
         DBConnection m_dbConnection;

@@ -241,7 +241,7 @@ TEST_F( DeviceFs, RemoveAlbum )
     {
         auto album = std::static_pointer_cast<Album>( ml->createAlbum( "album" ) );
         auto file = ml->media( mock::FileSystemFactory::Root + "audio.mp3" );
-        album->addTrack( std::static_pointer_cast<Media>( file ), 1, 1 );
+        album->addTrack( static_cast<Media&>( *file ), 1, 1 );
         auto artist = ml->createArtist( "artist" );
         album->setAlbumArtist( artist.get() );
     }
@@ -250,8 +250,8 @@ TEST_F( DeviceFs, RemoveAlbum )
         auto album = std::static_pointer_cast<Album>( ml->createAlbum( "album 2" ) );
         auto file = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
         ml->media( RemovableDeviceMountpoint + "removablefile2.mp3" );
-        album->addTrack( std::static_pointer_cast<Media>( file ), 1, 1 );
-        album->addTrack( std::static_pointer_cast<Media>( file ), 2, 1 );
+        album->addTrack( static_cast<Media&>( *file ), 1, 1 );
+        album->addTrack( static_cast<Media&>( *file ), 2, 1 );
         auto artist = ml->createArtist( "artist 2" );
         album->setAlbumArtist( artist.get() );
     }
@@ -285,12 +285,12 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
         auto album = std::static_pointer_cast<Album>( ml->createAlbum( "album" ) );
         auto file = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
         auto file2 = ml->media( RemovableDeviceMountpoint + "removablefile2.mp3" );
-        album->addTrack( std::static_pointer_cast<Media>( file ), 1, 1 );
-        album->addTrack( std::static_pointer_cast<Media>( file2 ), 2, 1 );
+        album->addTrack( static_cast<Media&>( *file ), 1, 1 );
+        album->addTrack( static_cast<Media&>( *file2 ), 2, 1 );
         auto newArtist = ml->createArtist( "artist" );
         album->setAlbumArtist( newArtist.get() );
-        newArtist->addMedia( static_cast<Media*>( file.get() ) );
-        newArtist->addMedia( static_cast<Media*>( file2.get() ) );
+        newArtist->addMedia( static_cast<Media&>( *file ) );
+        newArtist->addMedia( static_cast<Media&>( *file2 ) );
     }
 
     auto albums = ml->albums();

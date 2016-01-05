@@ -52,7 +52,7 @@ public:
     bool setShortBio( const std::string& shortBio );
     virtual std::vector<AlbumPtr> albums() const override;
     virtual std::vector<MediaPtr> media() const override;
-    bool addMedia( Media* media );
+    bool addMedia( Media& media );
     virtual const std::string& artworkMrl() const override;
     bool setArtworkMrl( const std::string& artworkMrl );
     bool updateNbAlbum( int increment );
