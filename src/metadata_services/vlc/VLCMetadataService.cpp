@@ -190,7 +190,7 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
         media->setThumbnail( cover );
 
     auto artists = handleArtists( media, vlcMedia );
-    auto album = handleAlbum( media, vlcMedia, artists.first.get(), artists.second.get() );
+    auto album = handleAlbum( media, vlcMedia, artists.first.get(), artists.second );
     if ( album == nullptr )
     {
         LOG_WARN( "Failed to get/create associated album" );
@@ -293,7 +293,7 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, VLC::Media& 
     return std::static_pointer_cast<Album>( albums[0] );
 }
 
-std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> media, VLC::Media& vlcMedia, Artist* albumArtist, Artist* artist ) const
+std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> media, VLC::Media& vlcMedia, Artist* albumArtist, std::shared_ptr<Artist> artist ) const
 {
     auto albumTitle = vlcMedia.meta( libvlc_meta_Album );
     std::shared_ptr<Album> album;
@@ -327,7 +327,7 @@ std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> m
     }
     if ( album == nullptr )
         return nullptr;
-    auto track = handleTrack( album, media, vlcMedia );
+    auto track = handleTrack( album, media, vlcMedia, artist );
     if ( track != nullptr )
         media->setAlbumTrack( track );
     return album;
@@ -387,7 +387,7 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> VLCMetadataService::
 
 /* Tracks handling */
 
-std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack(std::shared_ptr<Album> album, std::shared_ptr<Media> media, VLC::Media& vlcMedia) const
+std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack( std::shared_ptr<Album> album, std::shared_ptr<Media> media, VLC::Media& vlcMedia, std::shared_ptr<Artist> artist ) const
 {
     auto trackNbStr = vlcMedia.meta( libvlc_meta_TrackNumber );
 
@@ -420,6 +420,8 @@ std::shared_ptr<AlbumTrack> VLCMetadataService::handleTrack(std::shared_ptr<Albu
         LOG_ERROR( "Failed to create album track" );
         return nullptr;
     }
+    if ( artist != nullptr )
+        track->setArtist( artist );
     auto genre = vlcMedia.meta( libvlc_meta_Genre );
     if ( genre.length() != 0 )
     {
