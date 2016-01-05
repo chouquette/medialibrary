@@ -88,22 +88,10 @@ std::vector<AlbumPtr> Artist::albums() const
 
 std::vector<MediaPtr> Artist::media() const
 {
-    if ( m_id )
-    {
-        static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
-                "LEFT JOIN MediaArtistRelation mar ON mar.media_id = med.id_media "
-                "WHERE mar.artist_id = ? AND med.is_present = 1";
-        return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
-    }
-    else
-    {
-        // Not being able to rely on ForeignKey here makes me a saaaaad panda...
-        // But sqlite only accepts "IS NULL" to compare against NULL...
-        static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
-                "LEFT JOIN MediaArtistRelation mar ON mar.media_id = med.id_media "
-                "WHERE mar.artist_id IS NULL";
-        return Media::fetchAll<IMedia>( m_dbConnection, req );
-    }
+    static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
+            "LEFT JOIN MediaArtistRelation mar ON mar.media_id = med.id_media "
+            "WHERE mar.artist_id = ? AND med.is_present = 1";
+    return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
 }
 
 bool Artist::addMedia( Media& media )
