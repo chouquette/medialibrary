@@ -336,8 +336,14 @@ std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> m
     return album;
 }
 
-/* Artists handling */
-
+///
+/// \brief VLCMetadataService::handleArtists Returns Artist's involved on a track
+/// \param media The track to analyze
+/// \param vlcMedia VLC's media
+/// \return A pair containing:
+/// The album artist as a first element
+/// The track artist as a second element, if it differs from the album artist.
+///
 std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> VLCMetadataService::handleArtists( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
 {
     std::shared_ptr<Artist> albumArtist;
@@ -363,7 +369,7 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> VLCMetadataService::
             }
         }
     }
-    if ( artistName.empty() == false )
+    if ( artistName.empty() == false && artistName != albumArtistName )
     {
         artist = std::static_pointer_cast<Artist>( m_ml->artist( artistName ) );
         if ( artist == nullptr )
