@@ -41,11 +41,14 @@ VLCMetadataService::VLCMetadataService(const VLC::Instance& vlc, DBConnection db
 {
 }
 
-bool VLCMetadataService::initialize(IMetadataServiceCb* callback, MediaLibrary* ml )
+bool VLCMetadataService::initialize( IMetadataServiceCb* callback, MediaLibrary* ml )
 {
     m_cb = callback;
     m_ml = ml;
-    return true;
+    m_unknownArtist = Artist::fetch( m_dbConn, medialibrary::UnknownArtistID );
+    if ( m_unknownArtist == nullptr )
+        LOG_ERROR( "Failed to cache unknown artist" );
+    return m_unknownArtist != nullptr;
 }
 
 unsigned int VLCMetadataService::priority() const
@@ -304,8 +307,7 @@ std::shared_ptr<Album> VLCMetadataService::handleAlbum( Media& media, VLC::Media
             artist = trackArtist;
         else
         {
-            //FIXME: We might fetch the unknown artist twice while parsing the same file, that sucks.
-            artist = Artist::fetch( m_dbConn, medialibrary::UnknownArtistID );
+            artist = m_unknownArtist;
         }
     }
 
@@ -449,7 +451,7 @@ bool VLCMetadataService::link( Media& media, std::shared_ptr<Album> album,
 {
     if ( albumArtist == nullptr && artist == nullptr )
     {
-        albumArtist = Artist::fetch( m_dbConn, medialibrary::UnknownArtistID );
+        albumArtist = m_unknownArtist;
     }
     else
     {

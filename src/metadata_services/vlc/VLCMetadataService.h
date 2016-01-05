@@ -68,6 +68,7 @@ private:
         std::condition_variable m_cond;
         DBConnection m_dbConn;
         std::shared_ptr<factory::IFileSystem> m_fsFactory;
+        std::shared_ptr<Artist> m_unknownArtist;
 };
 
 #endif // VLCMETADATASERVICE_H
