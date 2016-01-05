@@ -461,7 +461,8 @@ bool VLCMetadataService::link( Media& media, std::shared_ptr<Album> album,
     // If we have an albumArtist (meaning the track was properly tagged, we
     // can assume this artist is a correct match. We can use the thumbnail from
     // the current album for the albumArtist, if none has been set before.
-    if ( albumArtist != nullptr && albumArtist->artworkMrl().empty() == true && album != nullptr )
+    if ( albumArtist != nullptr && albumArtist->artworkMrl().empty() == true &&
+         album != nullptr && album->artworkMrl().empty() == false )
         albumArtist->setArtworkMrl( album->artworkMrl() );
 
     if ( albumArtist != nullptr )
