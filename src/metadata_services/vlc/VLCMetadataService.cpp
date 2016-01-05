@@ -382,7 +382,8 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> VLCMetadataService::
             }
         }
     }
-
+    if ( albumArtist == nullptr )
+        return { artist, nullptr };
     return {albumArtist, artist};
 }
 
@@ -450,6 +451,11 @@ bool VLCMetadataService::link( Media& media, std::shared_ptr<Album> album,
     {
         albumArtist = Artist::fetch( m_dbConn, medialibrary::UnknownArtistID );
     }
+    else
+    {
+        // If we fetch at least one artist, we consider it the albumartist (see handleArtist() doc)
+        assert(albumArtist != nullptr);
+    }
 
     // We might modify albumArtist later, hence handle thumbnails before.
     // If we have an albumArtist (meaning the track was properly tagged, we
@@ -468,31 +474,17 @@ bool VLCMetadataService::link( Media& media, std::shared_ptr<Album> album,
     // If we have no main artist yet, that's easy, we need to assign one.
     if ( currentAlbumArtist == nullptr )
     {
-        // If the track was properly tagged, that's even better.
-        if ( albumArtist != nullptr )
-        {
-            album->setAlbumArtist( albumArtist.get() );
-            // Always add the album artist as an artist
-            album->addArtist( albumArtist );
-            if ( artist != nullptr )
-                album->addArtist( artist );
-        }
-        // If however we only have an artist, as opposed to an album artist, we
-        // add it, until proven we were wrong (ie. until one of the next tracks has a different artist)
-        else
-        {
-            // Guaranteed to be true since we need at least an artist to enter here.
-            assert( artist != nullptr );
-            album->setAlbumArtist( artist.get() );
-        }
+        // We don't know if the artist was tagged as artist or albumartist, however, we simply add it
+        // as the albumartist until proven we were wrong (ie. until one of the next tracks
+        // has a different artist)
+        album->setAlbumArtist( albumArtist.get() );
+        // Always add the album artist as an artist
+        album->addArtist( albumArtist );
+        if ( artist != nullptr )
+            album->addArtist( artist );
     }
     else
     {
-        if ( albumArtist == nullptr )
-        {
-            // Fallback to artist, since the same logic would apply anyway
-            albumArtist = artist;
-        }
         if ( albumArtist->id() != currentAlbumArtist->id() )
         {
             // We have more than a single artist on this album, fallback to various artists
