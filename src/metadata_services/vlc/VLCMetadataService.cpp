@@ -190,7 +190,7 @@ bool VLCMetadataService::parseAudioFile( std::shared_ptr<Media> media, VLC::Medi
         media->setThumbnail( cover );
 
     auto artists = handleArtists( media, vlcMedia );
-    auto album = handleAlbum( media, vlcMedia, artists.first.get(), artists.second );
+    auto album = handleAlbum( media, vlcMedia, artists.first, artists.second );
     if ( album == nullptr )
     {
         LOG_WARN( "Failed to get/create associated album" );
@@ -293,13 +293,25 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media* media, VLC::Media& 
     return std::static_pointer_cast<Album>( albums[0] );
 }
 
-std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> media, VLC::Media& vlcMedia, Artist* albumArtist, std::shared_ptr<Artist> artist ) const
+std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> media, VLC::Media& vlcMedia, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> trackArtist ) const
 {
     auto albumTitle = vlcMedia.meta( libvlc_meta_Album );
     std::shared_ptr<Album> album;
+    std::shared_ptr<Artist> artist = albumArtist;
+    if ( artist == nullptr )
+    {
+        if ( trackArtist != nullptr )
+            artist = trackArtist;
+        else
+        {
+            //FIXME: We might fetch the unknown artist twice while parsing the same file, that sucks.
+            artist = Artist::fetch( m_dbConn, medialibrary::UnknownArtistID );
+        }
+    }
+
     if ( albumTitle.length() > 0 )
     {
-        album = findAlbum( media.get(), vlcMedia, albumTitle, albumArtist );
+        album = findAlbum( media.get(), vlcMedia, albumTitle, albumArtist.get() );
 
         if ( album == nullptr )
         {
@@ -313,21 +325,12 @@ std::shared_ptr<Album> VLCMetadataService::handleAlbum( std::shared_ptr<Media> m
         }
     }
     else
-    {
-        if ( albumArtist != nullptr )
-            album = albumArtist->unknownAlbum();
-        else if ( artist != nullptr )
-            album = artist->unknownAlbum();
-        else
-        {
-            //FIXME: We might fetch the unknown artist twice while parsing the same file, that sucks.
-            auto unknownArtist = Artist::fetch( m_dbConn, medialibrary::UnknownArtistID );
-            album = unknownArtist->unknownAlbum();
-        }
-    }
+        album = artist->unknownAlbum();
+
     if ( album == nullptr )
         return nullptr;
-    auto track = handleTrack( album, media, vlcMedia, artist );
+    // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist
+    auto track = handleTrack( album, media, vlcMedia, trackArtist ? trackArtist : artist );
     if ( track != nullptr )
         media->setAlbumTrack( track );
     return album;
