@@ -12,6 +12,7 @@ static const char* testCases[] = {
     "same_album_name_different_artist",
     "same_album_name_same_artist",
     "compilation",
+    "compilation_no_albumartist",
     "release_year_same",
     "notags",
     "multi_cd",
