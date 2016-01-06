@@ -36,8 +36,8 @@ class IMedia
     public:
         enum class Type : uint8_t
         {
-            VideoType, // Any video file, not being a tv show episode
-            AudioType, // Any kind of audio file, not being an album track
+            VideoType,
+            AudioType,
             UnknownType
         };
         virtual ~IMedia() = default;
@@ -47,7 +47,7 @@ class IMedia
         virtual const std::string& title() = 0;
         virtual AlbumTrackPtr albumTrack() const = 0;
         /**
-         * @brief duration Returns the file duration in ms
+         * @brief duration Returns the media duration in ms
          */
         virtual int64_t duration() const = 0;
         virtual ShowEpisodePtr showEpisode() const = 0;
@@ -74,7 +74,7 @@ class IMedia
         virtual std::vector<VideoTrackPtr> videoTracks() = 0;
         virtual std::vector<AudioTrackPtr> audioTracks() = 0;
         ///
-        /// \brief thumbnail Returns the path of a thumbnail for this file
+        /// \brief thumbnail Returns the path of a thumbnail for this media
         /// \return A path, relative to the thumbnailPath configured when initializing
         ///  The media library
         ///

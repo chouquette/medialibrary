@@ -54,44 +54,44 @@ TEST_F( Labels, Add )
 
 TEST_F( Labels, Remove )
 {
-    auto f = ml->addFile( "media.avi" );
+    auto m = ml->addFile( "media.avi" );
     auto l1 = ml->createLabel( "sea otter" );
     auto l2 = ml->createLabel( "cony the cone" );
 
-    f->addLabel( l1 );
-    f->addLabel( l2 );
+    m->addLabel( l1 );
+    m->addLabel( l2 );
 
-    auto labels = f->labels();
+    auto labels = m->labels();
     ASSERT_EQ( labels.size(), 2u );
 
-    bool res = f->removeLabel( l1 );
+    bool res = m->removeLabel( l1 );
     ASSERT_TRUE( res );
 
-    // Check for existing file first
-    labels = f->labels();
+    // Check for existing media first
+    labels = m->labels();
     ASSERT_EQ( labels.size(), 1u );
     ASSERT_EQ( labels[0]->name(), "cony the cone" );
 
-    // And now clean fetch another instance of the file & check again for DB replication
-    auto f2 = ml->media( f->id() );
-    labels = f2->labels();
+    // And now clean fetch another instance of the media & check again for DB replication
+    auto media = ml->media( m->id() );
+    labels = media->labels();
     ASSERT_EQ( labels.size(), 1u );
     ASSERT_EQ( labels[0]->name(), "cony the cone" );
 
     // Remove a non-linked label
-    res = f->removeLabel( l1 );
+    res = m->removeLabel( l1 );
     ASSERT_FALSE( res );
 
     // Remove the last label
-    res = f->removeLabel( l2 );
+    res = m->removeLabel( l2 );
     ASSERT_TRUE( res );
 
-    labels = f->labels();
+    labels = m->labels();
     ASSERT_EQ( labels.size(), 0u );
 
     // Check again for DB replication
-    f2 = ml->media( f->id() );
-    labels = f2->labels();
+    media = ml->media( m->id() );
+    labels = media->labels();
     ASSERT_EQ( labels.size(), 0u );
 }
 

@@ -232,15 +232,15 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder& p
         return nullptr;
     }
     if ( m_callback != nullptr )
-        m_callback->onFileAdded( fptr );
+        m_callback->onMediaAdded( fptr );
     if ( m_parser != nullptr )
         m_parser->parse( fptr );
     return fptr;
 }
 
-bool MediaLibrary::deleteFile( const Media* file )
+bool MediaLibrary::deleteFile(const Media* media )
 {
-    return Media::destroy( m_dbConnection.get(), file->id() );
+    return Media::destroy( m_dbConnection.get(), media->id() );
 }
 
 bool MediaLibrary::deleteFolder( const Folder* folder )

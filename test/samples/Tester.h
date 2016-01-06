@@ -21,7 +21,7 @@ public:
     bool waitForParsingComplete();
 
 private:
-    void onFileAdded(MediaPtr) {}
+    void onMediaAdded(MediaPtr) {}
     void onFileUpdated(MediaPtr) {}
     void onDiscoveryStarted(const std::string&) {}
     void onDiscoveryCompleted(const std::string&);

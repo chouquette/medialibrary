@@ -103,7 +103,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
 
         unsigned int lastModificationDate();
 
-        /// Explicitely mark a file as fully parsed, meaning no metadata service needs to run anymore.
+        /// Explicitely mark a media as fully parsed, meaning no metadata service needs to run anymore.
         //FIXME: This lacks granularity as we don't have a straight forward way to know which service
         //needs to run or not.
         void markParsed();

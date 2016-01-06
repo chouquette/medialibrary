@@ -62,8 +62,8 @@ TEST_F( AlbumTracks, Artist )
     Reload();
 
     // Don't reuse the "track" and "f" variable, their type differ
-    auto file = ml->media( f->id() );
-    auto albumTrack = file->albumTrack();
+    auto media = ml->media( f->id() );
+    auto albumTrack = media->albumTrack();
     artist = albumTrack->artist();
     ASSERT_NE( nullptr, artist );
     ASSERT_EQ( newArtist->name(), artist->name() );

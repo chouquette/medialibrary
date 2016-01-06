@@ -56,26 +56,26 @@ unsigned int VLCMetadataService::priority() const
     return 100;
 }
 
-void VLCMetadataService::run( std::shared_ptr<Media> file, void* data )
+void VLCMetadataService::run( std::shared_ptr<Media> media, void* data )
 {
-    if ( file->duration() != -1 )
+    if ( media->duration() != -1 )
     {
-        LOG_INFO( file->mrl(), " was already parsed" );
-        m_cb->done( file, Status::Success, data );
+        LOG_INFO( media->mrl(), " was already parsed" );
+        m_cb->done( media, Status::Success, data );
         return;
     }
-    LOG_INFO( "Parsing ", file->mrl() );
+    LOG_INFO( "Parsing ", media->mrl() );
     auto chrono = std::chrono::steady_clock::now();
 
-    auto ctx = new Context( file );
+    auto ctx = new Context( media );
     std::unique_ptr<Context> ctxPtr( ctx );
 
-    ctx->media = VLC::Media( m_instance, file->mrl(), VLC::Media::FromPath );
+    ctx->vlcMedia = VLC::Media( m_instance, media->mrl(), VLC::Media::FromPath );
 
     std::unique_lock<std::mutex> lock( m_mutex );
     bool done = false;
 
-    ctx->media.eventManager().onParsedChanged([this, ctx, &done, &chrono](bool parsed) {
+    ctx->vlcMedia.eventManager().onParsedChanged([this, ctx, &done, &chrono](bool parsed) {
         if ( parsed == false )
             return;
         auto duration = std::chrono::steady_clock::now() - chrono;
@@ -84,17 +84,17 @@ void VLCMetadataService::run( std::shared_ptr<Media> file, void* data )
         done = true;
         m_cond.notify_all();
     });
-    ctx->media.parseAsync();
+    ctx->vlcMedia.parseAsync();
     auto success = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [&done]() { return done == true; } );
     if ( success == false )
-        m_cb->done( ctx->file, Status::Fatal, data );
+        m_cb->done( ctx->media, Status::Fatal, data );
     else
     {
-        auto status = handleMediaMeta( ctx->file, ctx->media );
-        m_cb->done( ctx->file, status, data );
+        auto status = handleMediaMeta( ctx->media, ctx->vlcMedia );
+        m_cb->done( ctx->media, status, data );
     }
     auto duration = std::chrono::steady_clock::now() - chrono;
-    LOG_DEBUG( "Parsed ", file->mrl(), " in ", std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
+    LOG_DEBUG( "Parsed ", media->mrl(), " in ", std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
 }
 
 IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
@@ -144,13 +144,13 @@ IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Me
 
 /* Video files */
 
-bool VLCMetadataService::parseVideoFile( std::shared_ptr<Media> file, VLC::Media& media ) const
+bool VLCMetadataService::parseVideoFile( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
 {
-    file->setType( IMedia::Type::VideoType );
-    auto title = media.meta( libvlc_meta_Title );
+    media->setType( IMedia::Type::VideoType );
+    auto title = vlcMedia.meta( libvlc_meta_Title );
     if ( title.length() == 0 )
         return true;
-    auto showName = media.meta( libvlc_meta_ShowName );
+    auto showName = vlcMedia.meta( libvlc_meta_ShowName );
     if ( showName.length() == 0 )
     {
         auto show = m_ml->show( showName );
@@ -161,7 +161,7 @@ bool VLCMetadataService::parseVideoFile( std::shared_ptr<Media> file, VLC::Media
                 return false;
         }
 
-        auto episodeIdStr = media.meta( libvlc_meta_Episode );
+        auto episodeIdStr = vlcMedia.meta( libvlc_meta_Episode );
         if ( episodeIdStr.length() > 0 )
         {
             size_t endpos;
@@ -172,7 +172,7 @@ bool VLCMetadataService::parseVideoFile( std::shared_ptr<Media> file, VLC::Media
                 return true;
             }
             std::shared_ptr<Show> s = std::static_pointer_cast<Show>( show );
-            s->addEpisode( *file, title, episodeId );
+            s->addEpisode( *media, title, episodeId );
         }
     }
     else

@@ -38,13 +38,13 @@ public:
     Parser( DBConnection dbConnection, IMediaLibraryCb* cb );
     ~Parser();
     void addService( std::unique_ptr<IMetadataService> service );
-    void parse( std::shared_ptr<Media> file );
+    void parse( std::shared_ptr<Media> media );
     void start();
     void pause();
     void resume();
 
 private:
-    virtual void done( std::shared_ptr<Media> file, IMetadataService::Status status, void* data ) override;
+    virtual void done( std::shared_ptr<Media> media, IMetadataService::Status status, void* data ) override;
     void run();
     // Queues all unparsed files for parsing.
     void restore();
@@ -55,8 +55,8 @@ private:
     typedef std::vector<ServicePtr> ServiceList;
     struct Task
     {
-        Task( std::shared_ptr<Media> file, ServiceList& serviceList, IMediaLibraryCb* metadataCb );
-        std::shared_ptr<Media>   file;
+        Task( std::shared_ptr<Media> media, ServiceList& serviceList, IMediaLibraryCb* metadataCb );
+        std::shared_ptr<Media>   media;
         ServiceList::iterator   it;
         ServiceList::iterator   end;
         IMediaLibraryCb*        cb;

@@ -46,17 +46,17 @@ class VLCThumbnailer : public IMetadataService
 {
 public:
     explicit VLCThumbnailer( const VLC::Instance& vlc );
-    ~VLCThumbnailer();
+    virtual ~VLCThumbnailer();
     virtual bool initialize(IMetadataServiceCb *callback, MediaLibrary *ml) override;
     virtual unsigned int priority() const override;
-    virtual void run(std::shared_ptr<Media> file, void *data) override;
+    virtual void run( std::shared_ptr<Media> media, void *data ) override;
 
 private:
-    bool startPlayback( std::shared_ptr<Media> file, VLC::MediaPlayer& mp, void *data);
-    bool seekAhead(std::shared_ptr<Media> file, VLC::MediaPlayer &mp, void *data);
+    bool startPlayback( std::shared_ptr<Media> media, VLC::MediaPlayer& mp, void *data);
+    bool seekAhead( std::shared_ptr<Media> media, VLC::MediaPlayer &mp, void *data);
     void setupVout(VLC::MediaPlayer &mp);
-    bool takeThumbnail(std::shared_ptr<Media> file, VLC::MediaPlayer &mp, void* data);
-    bool compress(std::shared_ptr<Media> file, void* data );
+    bool takeThumbnail(std::shared_ptr<Media> media, VLC::MediaPlayer &mp, void* data);
+    bool compress(std::shared_ptr<Media> media, void* data );
 
 private:
     // Force a base width, let height be computed depending on A/R

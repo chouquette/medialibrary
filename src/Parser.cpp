@@ -66,13 +66,13 @@ void Parser::addService( std::unique_ptr<IMetadataService> service )
     });
 }
 
-void Parser::parse( std::shared_ptr<Media> file )
+void Parser::parse( std::shared_ptr<Media> media )
 {
     std::lock_guard<std::mutex> lock( m_lock );
 
     if ( m_services.size() == 0 )
         return;
-    m_tasks.push( new Task( file, m_services, m_callback ) );
+    m_tasks.push( new Task( media, m_services, m_callback ) );
     m_opToDo += m_services.size();
     updateStats();
     if ( m_paused == false )
@@ -126,14 +126,14 @@ void Parser::run()
         }
         try
         {
-            (*task->it)->run( task->file, task );
+            (*task->it)->run( task->media, task );
             // Consider the task invalid starting from this point. If it completed
             // it cleared itself afterward.
         }
         catch (const std::exception& ex)
         {
-            LOG_ERROR( "Caught an exception during ", task->file->mrl(), " parsing: ", ex.what() );
-            done( task->file, IMetadataService::Status::Fatal, task );
+            LOG_ERROR( "Caught an exception during ", task->media->mrl(), " parsing: ", ex.what() );
+            done( task->media, IMetadataService::Status::Fatal, task );
         }
     }
     LOG_INFO("Exiting Parser thread");
@@ -168,15 +168,15 @@ void Parser::updateStats()
     }
 }
 
-Parser::Task::Task( std::shared_ptr<Media> file, Parser::ServiceList& serviceList, IMediaLibraryCb* metadataCb )
-    : file( file )
+Parser::Task::Task( std::shared_ptr<Media> media, Parser::ServiceList& serviceList, IMediaLibraryCb* metadataCb )
+    : media( media )
     , it( serviceList.begin() )
     , end( serviceList.end() )
     , cb( metadataCb )
 {
 }
 
-void Parser::done( std::shared_ptr<Media> file, IMetadataService::Status status, void* data )
+void Parser::done( std::shared_ptr<Media> media, IMetadataService::Status status, void* data )
 {
     ++m_opDone;
     updateStats();
@@ -191,13 +191,13 @@ void Parser::done( std::shared_ptr<Media> file, IMetadataService::Status status,
     else if ( status == IMetadataService::Status::Success )
     {
         if ( t->cb != nullptr )
-            t->cb->onFileUpdated( file );
+            t->cb->onFileUpdated( media );
     }
 
     ++t->it;
     if (t->it == t->end)
     {
-        file->markParsed();
+        media->markParsed();
         delete t;
         return;
     }

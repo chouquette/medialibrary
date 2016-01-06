@@ -166,8 +166,8 @@ TEST_F( Folders, ListFolders )
     auto subFiles = subFolder->files();
     ASSERT_EQ( 1u, subFiles.size() );
 
-    auto file = subFiles[0];
-    ASSERT_EQ( mock::FileSystemFactory::SubFolder + "subfile.mp4", file->mrl() );
+    auto media = subFiles[0];
+    ASSERT_EQ( mock::FileSystemFactory::SubFolder + "subfile.mp4", media->mrl() );
 
     // Now again, without cache. No need to wait for fs discovery reload here
     Reload();
@@ -180,8 +180,8 @@ TEST_F( Folders, ListFolders )
     subFiles = subFolder->files();
     ASSERT_EQ( 1u, subFiles.size() );
 
-    file = subFiles[0];
-    ASSERT_EQ( mock::FileSystemFactory::SubFolder + "subfile.mp4", file->mrl() );
+    media = subFiles[0];
+    ASSERT_EQ( mock::FileSystemFactory::SubFolder + "subfile.mp4", media->mrl() );
 }
 
 TEST_F( Folders, NewFolderWithFile )
@@ -231,10 +231,10 @@ TEST_F( Folders, NewFileInSubFolder )
     ASSERT_TRUE( reloaded );
 
     ASSERT_EQ( 4u, ml->files().size() );
-    auto file = ml->media( mock::FileSystemFactory::SubFolder + "newfile.avi" );
+    auto media = ml->media( mock::FileSystemFactory::SubFolder + "newfile.avi" );
     f = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( 2u, f->files().size() );
-    ASSERT_NE( nullptr, file );
+    ASSERT_NE( nullptr, media );
 }
 
 TEST_F( Folders, RemoveFileFromDirectory )
@@ -255,10 +255,10 @@ TEST_F( Folders, RemoveFileFromDirectory )
     ASSERT_TRUE( reloaded );
 
     ASSERT_EQ( 2u, ml->files().size() );
-    auto file = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+    auto media = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
     auto f = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( 0u, f->files().size() );
-    ASSERT_EQ( nullptr, file );
+    ASSERT_EQ( nullptr, media );
 }
 
 TEST_F( Folders, RemoveDirectory )
@@ -279,10 +279,10 @@ TEST_F( Folders, RemoveDirectory )
     ASSERT_TRUE( reloaded );
 
     ASSERT_EQ( 2u, ml->files().size() );
-    auto file = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+    auto media = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
     auto f = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( nullptr, f );
-    ASSERT_EQ( nullptr, file );
+    ASSERT_EQ( nullptr, media );
 }
 
 TEST_F( Folders, UpdateFile )
@@ -338,9 +338,9 @@ TEST_F( Folders, BlacklistAfterDiscovery )
     ml->ignoreFolder( mock::FileSystemFactory::SubFolder );
     auto f2 = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( nullptr, f2 );
-    for ( auto& file : files )
+    for ( auto& media : files )
     {
-        auto m = ml->media( file->mrl() );
+        auto m = ml->media( media->mrl() );
         ASSERT_EQ( nullptr, m );
     }
 
