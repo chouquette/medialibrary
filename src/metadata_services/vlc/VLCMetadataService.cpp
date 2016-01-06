@@ -335,8 +335,6 @@ std::shared_ptr<Album> VLCMetadataService::handleAlbum( Media& media, VLC::Media
         return nullptr;
     // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist
     auto track = handleTrack( album, media, vlcMedia, trackArtist ? trackArtist : artist );
-    if ( track != nullptr )
-        media.setAlbumTrack( track );
     return album;
 }
 
