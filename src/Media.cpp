@@ -50,6 +50,7 @@ Media::Media( DBConnection dbConnection, sqlite::Row& row )
 {
     row >> m_id
         >> m_type
+        >> m_subType
         >> m_duration
         >> m_playCount
         >> m_progress
@@ -68,6 +69,7 @@ Media::Media( DBConnection dbConnection, sqlite::Row& row )
 Media::Media( const fs::IFile* file, unsigned int folderId, const std::string& title, Type type, bool isRemovable )
     : m_id( 0 )
     , m_type( type )
+    , m_subType( SubType::Unknown )
     , m_duration( -1 )
     , m_playCount( 0 )
     , m_progress( .0f )
@@ -102,7 +104,7 @@ AlbumTrackPtr Media::albumTrack() const
 {
     auto lock = m_albumTrack.lock();
 
-    if ( m_albumTrack.isCached() == false )
+    if ( m_albumTrack.isCached() == false && m_subType == SubType::AlbumTrack )
         m_albumTrack = AlbumTrack::fromMedia( m_dbConnection, m_id );
     return m_albumTrack.get();
 }
@@ -111,6 +113,8 @@ void Media::setAlbumTrack( AlbumTrackPtr albumTrack )
 {
     auto lock = m_albumTrack.lock();
     m_albumTrack = albumTrack;
+    m_subType = SubType::AlbumTrack;
+    m_changed = true;
 }
 
 int64_t Media::duration() const
@@ -130,7 +134,7 @@ ShowEpisodePtr Media::showEpisode() const
 {
     auto lock = m_showEpisode.lock();
 
-    if ( m_showEpisode.isCached() == false )
+    if ( m_showEpisode.isCached() == false && m_subType == SubType::ShowEpisode )
         m_showEpisode = ShowEpisode::fromMedia( m_dbConnection, m_id );
     return m_showEpisode.get();
 }
@@ -139,6 +143,8 @@ void Media::setShowEpisode( ShowEpisodePtr episode )
 {
     auto lock = m_showEpisode.lock();
     m_showEpisode = episode;
+    m_subType = SubType::ShowEpisode;
+    m_changed = true;
 }
 
 std::vector<LabelPtr> Media::labels()
@@ -205,7 +211,7 @@ MoviePtr Media::movie() const
 {
     auto lock = m_movie.lock();
 
-    if ( m_movie.isCached() == false )
+    if ( m_movie.isCached() == false && m_subType == SubType::Movie )
         m_movie = Movie::fromMedia( m_dbConnection, m_id );
     return m_movie.get();
 }
@@ -214,6 +220,8 @@ void Media::setMovie(MoviePtr movie)
 {
     auto lock = m_movie.lock();
     m_movie = movie;
+    m_subType = SubType::Movie;
+    m_changed = true;
 }
 
 bool Media::addVideoTrack(const std::string& codec, unsigned int width, unsigned int height, float fps)
@@ -263,12 +271,12 @@ void Media::setThumbnail(const std::string& thumbnail )
 bool Media::save()
 {
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
-            "type = ?, duration = ?, play_count = ?, progress = ?, rating = ?,"
+            "type = ?, subtype = ?, duration = ?, play_count = ?, progress = ?, rating = ?,"
             "last_modification_date = ?, thumbnail = ?, parsed = ?,"
             "title = ? WHERE id_media = ?";
     if ( m_changed == false )
         return true;
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, m_type, m_duration, m_playCount,
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, m_type, m_subType, m_duration, m_playCount,
                                        m_progress, m_rating, m_lastModificationDate,
                                        m_thumbnail, m_isParsed, m_title, m_id ) == false )
     {
@@ -332,6 +340,7 @@ bool Media::createTable( DBConnection connection )
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::MediaTable::Name + "("
             "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
             "type INTEGER,"
+            "subtype INTEGER,"
             "duration INTEGER DEFAULT -1,"
             "play_count UNSIGNED INTEGER,"
             "progress REAL,"

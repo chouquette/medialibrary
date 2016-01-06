@@ -123,6 +123,7 @@ std::shared_ptr<ShowEpisode> Show::addEpisode( Media& media, const std::string& 
 {
     auto episode = ShowEpisode::create( m_dbConnection, media.id(), title, episodeNumber, m_id );
     media.setShowEpisode( episode );
+    media.save();
     return episode;
 }
 

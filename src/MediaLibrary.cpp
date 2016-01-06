@@ -312,6 +312,7 @@ std::shared_ptr<Movie> MediaLibrary::createMovie( Media& media, const std::strin
 {
     auto movie = Movie::create( m_dbConnection.get(), media.id(), title );
     media.setMovie( movie );
+    media.save();
     return movie;
 }
 

@@ -169,7 +169,6 @@ TEST_F( Albums, FetchAlbumFromTrack )
     auto a = ml->createAlbum( "album" );
     auto f = ml->addFile( "file.mp3" );
     auto t = a->addTrack( *f, 1, 0 );
-    f->setAlbumTrack( t );
 
     Reload();
 

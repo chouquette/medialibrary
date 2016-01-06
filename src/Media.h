@@ -48,6 +48,14 @@ struct MediaTable
 
 class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
 {
+    enum class SubType : uint8_t
+    {
+        Unknown,
+        ShowEpisode,
+        Movie,
+        AlbumTrack,
+    };
+
     public:
         // Those should be private, however the standard states that the expression
         // ::new (pv) T(std::forward(args)...)
@@ -69,7 +77,6 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual int64_t duration() const override;
         void setDuration( int64_t duration);
         virtual ShowEpisodePtr showEpisode() const override;
-        // Used to cache the episode only. This doesn't update anything in DB
         void setShowEpisode( ShowEpisodePtr episode );
         virtual bool addLabel( LabelPtr label ) override;
         virtual bool removeLabel( LabelPtr label ) override;
@@ -82,7 +89,6 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual void setRating( int rating ) override;
         virtual const std::string& mrl() const override;
         virtual MoviePtr movie() const override;
-        // Used to cache the movie only. This doesn't update anything in DB
         void setMovie( MoviePtr movie );
         bool addVideoTrack( const std::string& codec, unsigned int width,
                                     unsigned int height, float fps );
@@ -109,6 +115,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         // DB fields:
         unsigned int m_id;
         Type m_type;
+        SubType m_subType;
         int64_t m_duration;
         unsigned int m_playCount;
         float m_progress;
