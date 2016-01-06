@@ -53,7 +53,7 @@ public:
     ColumnOutOfRange( unsigned int idx, unsigned int nbColumns )
     {
         m_reason = "Attempting to extract column at index " + std::to_string( idx ) +
-                " from a request with " + std::to_string( nbColumns ) + "columns";
+                " from a request with " + std::to_string( nbColumns ) + " columns";
     }
 
     virtual const char* what() const noexcept override
