@@ -20,8 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef IFILE_H
-#define IFILE_H
+#pragma once
 
 #include <vector>
 #include <memory>
@@ -41,7 +40,7 @@ class IMedia
             AudioType, // Any kind of audio file, not being an album track
             UnknownType
         };
-        virtual ~IMedia() {}
+        virtual ~IMedia() = default;
 
         virtual unsigned int id() const = 0;
         virtual Type type() = 0;
@@ -82,5 +81,3 @@ class IMedia
         virtual const std::string& thumbnail() = 0;
         virtual unsigned int insertionDate() const = 0;
 };
-
-#endif // IFILE_H
