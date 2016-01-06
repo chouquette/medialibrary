@@ -32,14 +32,16 @@ class Movies : public Tests
 
 TEST_F( Movies, Create )
 {
-    auto m = ml->createMovie( "movie" );
+    auto media = ml->addFile( "movie.mkv" );
+    auto m = ml->createMovie( *media, "movie" );
     ASSERT_NE( m, nullptr );
     ASSERT_EQ( m->title(), "movie" );
 }
 
 TEST_F( Movies, Fetch )
 {
-    auto m = ml->createMovie( "movie" );
+    auto media = ml->addFile( "movie.mkv" );
+    auto m = ml->createMovie( *media, "movie" );
     auto m2 = ml->movie( "movie" );
 
     ASSERT_EQ( m, m2 );
@@ -53,7 +55,9 @@ TEST_F( Movies, Fetch )
 
 TEST_F( Movies, SetReleaseDate )
 {
-    auto m = ml->createMovie( "movie" );
+    auto media = ml->addFile( "movie.mkv" );
+    auto m = ml->createMovie( *media, "movie" );
+
     ASSERT_EQ( m->releaseDate(), 0u );
     m->setReleaseDate( 1234 );
     ASSERT_EQ( m->releaseDate(), 1234u );
@@ -66,7 +70,9 @@ TEST_F( Movies, SetReleaseDate )
 
 TEST_F( Movies, SetShortSummary )
 {
-    auto m = ml->createMovie( "movie" );
+    auto media = ml->addFile( "movie.mkv" );
+    auto m = ml->createMovie( *media, "movie" );
+
     ASSERT_EQ( m->shortSummary().length(), 0u );
     m->setShortSummary( "great movie" );
     ASSERT_EQ( m->shortSummary(), "great movie" );
@@ -79,7 +85,9 @@ TEST_F( Movies, SetShortSummary )
 
 TEST_F( Movies, SetArtworkMrl )
 {
-    auto m = ml->createMovie( "movie" );
+    auto media = ml->addFile( "movie.mkv" );
+    auto m = ml->createMovie( *media, "movie" );
+
     ASSERT_EQ( m->artworkMrl().length(), 0u );
     m->setArtworkMrl( "artwork" );
     ASSERT_EQ( m->artworkMrl(), "artwork" );
@@ -92,7 +100,9 @@ TEST_F( Movies, SetArtworkMrl )
 
 TEST_F( Movies, SetImdbId )
 {
-    auto m = ml->createMovie( "movie" );
+    auto media = ml->addFile( "movie.mkv" );
+    auto m = ml->createMovie( *media, "movie" );
+
     ASSERT_EQ( m->imdbId().length(), 0u );
     m->setImdbId( "id" );
     ASSERT_EQ( m->imdbId(), "id" );
@@ -106,11 +116,10 @@ TEST_F( Movies, SetImdbId )
 TEST_F( Movies, AssignToFile )
 {
     auto f = ml->addFile( "file.avi" );
-    auto m = ml->createMovie( "movie" );
-
     ASSERT_EQ( f->movie(), nullptr );
-    f->setMovie( m );
-    f->save();
+
+    auto m = ml->createMovie( *f, "movie" );
+
     ASSERT_EQ( f->movie(), m );
 
     Reload();

@@ -308,9 +308,11 @@ MoviePtr MediaLibrary::movie( const std::string& title )
     return Movie::fetch( m_dbConnection.get(), req, title );
 }
 
-std::shared_ptr<Movie> MediaLibrary::createMovie( const std::string& title )
+std::shared_ptr<Movie> MediaLibrary::createMovie( Media& media, const std::string& title )
 {
-    return Movie::create( m_dbConnection.get(), title );
+    auto movie = Movie::create( m_dbConnection.get(), media.id(), title );
+    media.setMovie( movie );
+    return movie;
 }
 
 ArtistPtr MediaLibrary::artist(unsigned int id)

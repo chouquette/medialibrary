@@ -172,7 +172,7 @@ bool VLCMetadataService::parseVideoFile( std::shared_ptr<Media> file, VLC::Media
                 return true;
             }
             std::shared_ptr<Show> s = std::static_pointer_cast<Show>( show );
-            s->addEpisode( title, episodeId );
+            s->addEpisode( *file, title, episodeId );
         }
     }
     else

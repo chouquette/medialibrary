@@ -31,7 +31,7 @@ const std::string policy::AlbumTrackTable::Name = "AlbumTrack";
 const std::string policy::AlbumTrackTable::PrimaryKeyColumn = "id_track";
 unsigned int AlbumTrack::* const policy::AlbumTrackTable::PrimaryKey = &AlbumTrack::m_id;
 
-AlbumTrack::AlbumTrack(DBConnection dbConnection, sqlite::Row& row )
+AlbumTrack::AlbumTrack( DBConnection dbConnection, sqlite::Row& row )
     : m_dbConnection( dbConnection )
 {
     row >> m_id
@@ -121,6 +121,13 @@ std::shared_ptr<AlbumTrack> AlbumTrack::create( DBConnection dbConnection, unsig
         return nullptr;
     self->m_dbConnection = dbConnection;
     return self;
+}
+
+AlbumTrackPtr AlbumTrack::fromMedia( DBConnection dbConnection, unsigned int mediaId )
+{
+    static const std::string req = "SELECT * FROM " + policy::AlbumTrackTable::Name +
+            " WHERE media_id = ?";
+    return fetch( dbConnection, req, mediaId );
 }
 
 const std::string& AlbumTrack::genre()

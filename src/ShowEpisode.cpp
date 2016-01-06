@@ -33,6 +33,7 @@ ShowEpisode::ShowEpisode(DBConnection dbConnection, sqlite::Row& row )
     : m_dbConnection( dbConnection )
 {
     row >> m_id
+        >> m_mediaId
         >> m_artworkMrl
         >> m_episodeNumber
         >> m_name
@@ -42,8 +43,9 @@ ShowEpisode::ShowEpisode(DBConnection dbConnection, sqlite::Row& row )
         >> m_showId;
 }
 
-ShowEpisode::ShowEpisode( const std::string& name, unsigned int episodeNumber, unsigned int showId )
+ShowEpisode::ShowEpisode( unsigned int mediaId, const std::string& name, unsigned int episodeNumber, unsigned int showId )
     : m_id( 0 )
+    , m_mediaId( mediaId )
     , m_episodeNumber( episodeNumber )
     , m_name( name )
     , m_seasonNumber( 0 )
@@ -147,6 +149,7 @@ bool ShowEpisode::createTable( DBConnection dbConnection )
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::ShowEpisodeTable::Name
             + "("
                 "id_episode INTEGER PRIMARY KEY AUTOINCREMENT,"
+                "media_id UNSIGNED INTEGER NOT NULL,"
                 "artwork_mrl TEXT,"
                 "episode_number UNSIGNED INT,"
                 "title TEXT,"
@@ -154,18 +157,26 @@ bool ShowEpisode::createTable( DBConnection dbConnection )
                 "episode_summary TEXT,"
                 "tvdb_id TEXT,"
                 "show_id UNSIGNED INT,"
+                "FOREIGN KEY(media_id) REFERENCES " + policy::MediaTable::Name
+                    + "(id_media) ON DELETE CASCADE,"
                 "FOREIGN KEY(show_id) REFERENCES " + policy::ShowTable::Name + "(id_show)"
             ")";
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-std::shared_ptr<ShowEpisode> ShowEpisode::create( DBConnection dbConnection, const std::string& title, unsigned int episodeNumber, unsigned int showId )
+std::shared_ptr<ShowEpisode> ShowEpisode::create( DBConnection dbConnection, unsigned int mediaId, const std::string& title, unsigned int episodeNumber, unsigned int showId )
 {
-    auto episode = std::make_shared<ShowEpisode>( title, episodeNumber, showId );
+    auto episode = std::make_shared<ShowEpisode>( mediaId, title, episodeNumber, showId );
     static const std::string req = "INSERT INTO " + policy::ShowEpisodeTable::Name
-            + "(episode_number, title, show_id) VALUES(? , ?, ?)";
-    if ( insert( dbConnection, episode, req, episodeNumber, title, showId ) == false )
+            + "(media_id, episode_number, title, show_id) VALUES(?, ? , ?, ?)";
+    if ( insert( dbConnection, episode, req, mediaId, episodeNumber, title, showId ) == false )
         return nullptr;
     episode->m_dbConnection = dbConnection;
     return episode;
+}
+
+ShowEpisodePtr ShowEpisode::fromMedia( DBConnection dbConnection, unsigned int mediaId )
+{
+    static const std::string req = "SELECT * FROM " + policy::ShowEpisodeTable::Name + " WHERE media_id = ?";
+    return fetch( dbConnection, req, mediaId );
 }

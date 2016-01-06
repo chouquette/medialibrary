@@ -46,12 +46,12 @@ class IMedia
         virtual unsigned int id() const = 0;
         virtual Type type() = 0;
         virtual const std::string& title() = 0;
-        virtual AlbumTrackPtr albumTrack() = 0;
+        virtual AlbumTrackPtr albumTrack() const = 0;
         /**
          * @brief duration Returns the file duration in ms
          */
         virtual int64_t duration() const = 0;
-        virtual std::shared_ptr<IShowEpisode> showEpisode() = 0;
+        virtual ShowEpisodePtr showEpisode() const = 0;
         virtual int playCount() const = 0;
         virtual void increasePlayCount() = 0;
         virtual const std::string& mrl() const = 0;
@@ -70,7 +70,7 @@ class IMedia
         virtual void setRating( int rating ) = 0;
         virtual bool addLabel( LabelPtr label ) = 0;
         virtual bool removeLabel( LabelPtr label ) = 0;
-        virtual MoviePtr movie() = 0;
+        virtual MoviePtr movie() const = 0;
         virtual std::vector<LabelPtr> labels() = 0;
         virtual std::vector<VideoTrackPtr> videoTracks() = 0;
         virtual std::vector<AudioTrackPtr> audioTracks() = 0;

@@ -32,6 +32,7 @@ Movie::Movie(DBConnection dbConnection, sqlite::Row& row )
     : m_dbConnection( dbConnection )
 {
     row >> m_id
+        >> m_mediaId
         >> m_title
         >> m_releaseDate
         >> m_summary
@@ -39,13 +40,13 @@ Movie::Movie(DBConnection dbConnection, sqlite::Row& row )
         >> m_imdbId;
 }
 
-Movie::Movie( const std::string& title )
+Movie::Movie( unsigned int mediaId, const std::string& title )
     : m_id( 0 )
+    , m_mediaId( mediaId )
     , m_title( title )
     , m_releaseDate( 0 )
 {
 }
-
 
 unsigned int Movie::id() const
 {
@@ -72,7 +73,7 @@ bool Movie::setReleaseDate( time_t date )
     return true;
 }
 
-const std::string&Movie::shortSummary() const
+const std::string& Movie::shortSummary() const
 {
     return m_summary;
 }
@@ -129,22 +130,31 @@ bool Movie::createTable( DBConnection dbConnection )
     static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::MovieTable::Name
             + "("
                 "id_movie INTEGER PRIMARY KEY AUTOINCREMENT,"
+                "media_id UNSIGNED INTEGER NOT NULL,"
                 "title TEXT UNIQUE ON CONFLICT FAIL,"
                 "release_date UNSIGNED INTEGER,"
                 "summary TEXT,"
                 "artwork_mrl TEXT,"
-                "imdb_id TEXT"
+                "imdb_id TEXT,"
+                "FOREIGN KEY(media_id) REFERENCES " + policy::MediaTable::Name
+                + "(id_media) ON DELETE CASCADE"
             ")";
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-std::shared_ptr<Movie> Movie::create(DBConnection dbConnection, const std::string& title )
+std::shared_ptr<Movie> Movie::create( DBConnection dbConnection, unsigned int mediaId, const std::string& title )
 {
-    auto movie = std::make_shared<Movie>( title );
+    auto movie = std::make_shared<Movie>( mediaId, title );
     static const std::string req = "INSERT INTO " + policy::MovieTable::Name
-            + "(title) VALUES(?)";
-    if ( insert( dbConnection, movie, req, title ) == false )
+            + "(media_id, title) VALUES(?, ?)";
+    if ( insert( dbConnection, movie, req, mediaId, title ) == false )
         return nullptr;
     movie->m_dbConnection = dbConnection;
     return movie;
+}
+
+MoviePtr Movie::fromMedia( DBConnection dbConnection, unsigned int mediaId )
+{
+    static const std::string req = "SELECT * FROM " + policy::MovieTable::Name + " WHERE media_id = ?";
+    return fetch( dbConnection, req, mediaId );
 }

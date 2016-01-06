@@ -114,7 +114,8 @@ TEST_F( Shows, SetTvdbId )
 TEST_F( Shows, AddEpisode )
 {
     auto show = ml->createShow( "show" );
-    auto e = show->addEpisode( "episode 1", 1 );
+    auto media = ml->addFile( "episode.avi" );
+    auto e = show->addEpisode( *media, "episode 1", 1 );
     ASSERT_NE( e, nullptr );
 
     ASSERT_EQ( e->episodeNumber(), 1u );
@@ -129,9 +130,8 @@ TEST_F( Shows, AddEpisode )
 TEST_F( Shows, FetchShowFromEpisode )
 {
     auto s = ml->createShow( "show" );
-    auto e = s->addEpisode( "episode 1", 1 );
     auto f = ml->addFile( "file.avi" );
-    f->setShowEpisode( e );
+    auto e = s->addEpisode( *f, "episode 1", 1 );
     f->save();
 
     auto e2 = f->showEpisode();
@@ -151,7 +151,8 @@ TEST_F( Shows, FetchShowFromEpisode )
 TEST_F( Shows, SetEpisodeArtwork )
 {
     auto show = ml->createShow( "show" );
-    auto e = show->addEpisode( "episode 1", 1 );
+    auto media = ml->addFile( "episode.mkv" );
+    auto e = show->addEpisode( *media, "episode 1", 1 );
     bool res = e->setArtworkMrl( "path-to-art" );
     ASSERT_TRUE( res );
     ASSERT_EQ( e->artworkMrl(), "path-to-art" );
@@ -166,7 +167,8 @@ TEST_F( Shows, SetEpisodeArtwork )
 TEST_F( Shows, SetEpisodeSeasonNumber )
 {
     auto show = ml->createShow( "show" );
-    auto e = show->addEpisode( "episode 1", 1 );
+    auto media = ml->addFile( "episode.mkv" );
+    auto e = show->addEpisode( *media, "episode 1", 1 );
     bool res = e->setSeasonNumber( 42 );
     ASSERT_TRUE( res );
     ASSERT_EQ( e->seasonNumber(), 42u );
@@ -181,7 +183,8 @@ TEST_F( Shows, SetEpisodeSeasonNumber )
 TEST_F( Shows, SetEpisodeSummary )
 {
     auto show = ml->createShow( "show" );
-    auto e = show->addEpisode( "episode 1", 1 );
+    auto media = ml->addFile( "episode.mkv" );
+    auto e = show->addEpisode( *media, "episode 1", 1 );
     bool res = e->setShortSummary( "Insert spoilers here" );
     ASSERT_TRUE( res );
     ASSERT_EQ( e->shortSummary(), "Insert spoilers here" );
@@ -196,7 +199,8 @@ TEST_F( Shows, SetEpisodeSummary )
 TEST_F( Shows, SetEpisodeTvdbId )
 {
     auto show = ml->createShow( "show" );
-    auto e = show->addEpisode( "episode 1", 1 );
+    auto media = ml->addFile( "episode.mkv" );
+    auto e = show->addEpisode( *media, "episode 1", 1 );
     bool res = e->setTvdbId( "TVDBID" );
     ASSERT_TRUE( res );
     ASSERT_EQ( e->tvdbId(), "TVDBID" );
@@ -215,17 +219,16 @@ TEST_F( Shows, SetEpisodeTvdbId )
 TEST_F( Shows, FileSetShowEpisode )
 {
     auto show = ml->createShow( "show" );
-    auto e = show->addEpisode( "episode 1", 1 );
     auto f = ml->addFile( "file.avi" );
-
     ASSERT_EQ( f->showEpisode(), nullptr );
-    f->setShowEpisode( e );
-    f->save();
+
+    auto e = show->addEpisode( *f, "episode 1", 1 );
+
     ASSERT_EQ( f->showEpisode(), e );
 
     Reload();
 
-    f = std::static_pointer_cast<Media>( ml->media( f->id() ) );
+    f = ml->media( f->id() );
     auto e2 = f->showEpisode();
     ASSERT_NE( e2, nullptr );
     ASSERT_EQ( e2->name(), "episode 1" );

@@ -54,9 +54,7 @@ Media::Media( DBConnection dbConnection, sqlite::Row& row )
         >> m_playCount
         >> m_progress
         >> m_rating
-        >> m_showEpisodeId
         >> m_mrl
-        >> m_movieId
         >> m_folderId
         >> m_lastModificationDate
         >> m_insertionDate
@@ -74,9 +72,7 @@ Media::Media( const fs::IFile* file, unsigned int folderId, const std::string& t
     , m_playCount( 0 )
     , m_progress( .0f )
     , m_rating( -1 )
-    , m_showEpisodeId( 0 )
     , m_mrl( isRemovable == true ? file->name() : file->fullPath() )
-    , m_movieId( 0 )
     , m_folderId( folderId )
     , m_lastModificationDate( file->lastModificationDate() )
     , m_insertionDate( time( nullptr ) )
@@ -102,21 +98,19 @@ std::shared_ptr<Media> Media::create( DBConnection dbConnection, Type type, cons
     return self;
 }
 
-AlbumTrackPtr Media::albumTrack()
+AlbumTrackPtr Media::albumTrack() const
 {
-    if ( m_albumTrack == nullptr )
-    {
-        std::string req = "SELECT * FROM " + policy::AlbumTrackTable::Name +
-                " WHERE media_id = ?";
-        m_albumTrack = AlbumTrack::fetch( m_dbConnection, req, m_id );
-    }
-    return m_albumTrack;
+    auto lock = m_albumTrack.lock();
+
+    if ( m_albumTrack.isCached() == false )
+        m_albumTrack = AlbumTrack::fromMedia( m_dbConnection, m_id );
+    return m_albumTrack.get();
 }
 
-bool Media::setAlbumTrack( AlbumTrackPtr albumTrack )
+void Media::setAlbumTrack( AlbumTrackPtr albumTrack )
 {
+    auto lock = m_albumTrack.lock();
     m_albumTrack = albumTrack;
-    return true;
 }
 
 int64_t Media::duration() const
@@ -132,22 +126,19 @@ void Media::setDuration( int64_t duration )
     m_changed = true;
 }
 
-std::shared_ptr<IShowEpisode> Media::showEpisode()
+ShowEpisodePtr Media::showEpisode() const
 {
-    if ( m_showEpisode == nullptr && m_showEpisodeId != 0 )
-    {
-        m_showEpisode = ShowEpisode::fetch( m_dbConnection, m_showEpisodeId );
-    }
-    return m_showEpisode;
+    auto lock = m_showEpisode.lock();
+
+    if ( m_showEpisode.isCached() == false )
+        m_showEpisode = ShowEpisode::fromMedia( m_dbConnection, m_id );
+    return m_showEpisode.get();
 }
 
-void Media::setShowEpisode( ShowEpisodePtr showEpisode )
+void Media::setShowEpisode( ShowEpisodePtr episode )
 {
-    if ( showEpisode == nullptr || m_showEpisodeId == showEpisode->id() )
-        return;
-    m_showEpisodeId = showEpisode->id();
-    m_showEpisode = showEpisode;
-    m_changed = true;
+    auto lock = m_showEpisode.lock();
+    m_showEpisode = episode;
 }
 
 std::vector<LabelPtr> Media::labels()
@@ -210,22 +201,19 @@ const std::string& Media::mrl() const
     return m_fullPath;
 }
 
-MoviePtr Media::movie()
+MoviePtr Media::movie() const
 {
-    if ( m_movie == nullptr && m_movieId != 0 )
-    {
-        m_movie = Movie::fetch( m_dbConnection, m_movieId );
-    }
-    return m_movie;
+    auto lock = m_movie.lock();
+
+    if ( m_movie.isCached() == false )
+        m_movie = Movie::fromMedia( m_dbConnection, m_id );
+    return m_movie.get();
 }
 
-void Media::setMovie( MoviePtr movie )
+void Media::setMovie(MoviePtr movie)
 {
-    if ( movie == nullptr || m_movieId == movie->id() )
-        return;
+    auto lock = m_movie.lock();
     m_movie = movie;
-    m_movieId = movie->id();
-    m_changed = true;
 }
 
 bool Media::addVideoTrack(const std::string& codec, unsigned int width, unsigned int height, float fps)
@@ -275,15 +263,13 @@ void Media::setThumbnail(const std::string& thumbnail )
 bool Media::save()
 {
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
-            "type = ?, duration = ?, play_count = ?, progress = ?, rating = ?, show_episode_id = ?,"
-            "movie_id = ?, last_modification_date = ?, thumbnail = ?, parsed = ?,"
+            "type = ?, duration = ?, play_count = ?, progress = ?, rating = ?,"
+            "last_modification_date = ?, thumbnail = ?, parsed = ?,"
             "title = ? WHERE id_media = ?";
     if ( m_changed == false )
         return true;
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, m_type, m_duration, m_playCount,
-                                       m_progress, m_rating,
-                                       sqlite::ForeignKey{ m_showEpisodeId },
-                                       sqlite::ForeignKey{ m_movieId }, m_lastModificationDate,
+                                       m_progress, m_rating, m_lastModificationDate,
                                        m_thumbnail, m_isParsed, m_title, m_id ) == false )
     {
         return false;
@@ -350,9 +336,7 @@ bool Media::createTable( DBConnection connection )
             "play_count UNSIGNED INTEGER,"
             "progress REAL,"
             "rating INTEGER DEFAULT -1,"
-            "show_episode_id UNSIGNED INTEGER,"
             "mrl TEXT,"
-            "movie_id UNSIGNED INTEGER,"
             "folder_id UNSIGNED INTEGER,"
             "last_modification_date UNSIGNED INTEGER,"
             "insertion_date UNSIGNED INTEGER,"
@@ -361,10 +345,6 @@ bool Media::createTable( DBConnection connection )
             "title TEXT,"
             "is_present BOOLEAN NOT NULL DEFAULT 1,"
             "is_removable BOOLEAN NOT NULL,"
-            "FOREIGN KEY (show_episode_id) REFERENCES " + policy::ShowEpisodeTable::Name
-            + "(id_episode) ON DELETE CASCADE,"
-            "FOREIGN KEY (movie_id) REFERENCES " + policy::MovieTable::Name
-            + "(id_movie) ON DELETE CASCADE,"
             "FOREIGN KEY (folder_id) REFERENCES " + policy::FolderTable::Name
             + "(id_folder) ON DELETE CASCADE,"
             "UNIQUE( mrl, folder_id ) ON CONFLICT FAIL"

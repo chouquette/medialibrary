@@ -21,7 +21,10 @@
  *****************************************************************************/
 
 #include "Show.h"
+
+#include "Media.h"
 #include "ShowEpisode.h"
+
 #include "database/SqliteTools.h"
 
 const std::string policy::ShowTable::Name = "Show";
@@ -116,9 +119,11 @@ bool Show::setTvdbId( const std::string& tvdbId )
     return true;
 }
 
-std::shared_ptr<ShowEpisode> Show::addEpisode(const std::string& title, unsigned int episodeNumber)
+std::shared_ptr<ShowEpisode> Show::addEpisode( Media& media, const std::string& title, unsigned int episodeNumber)
 {
-    return ShowEpisode::create( m_dbConnection, title, episodeNumber, m_id );
+    auto episode = ShowEpisode::create( m_dbConnection, media.id(), title, episodeNumber, m_id );
+    media.setShowEpisode( episode );
+    return episode;
 }
 
 std::vector<ShowEpisodePtr> Show::episodes()

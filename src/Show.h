@@ -29,6 +29,7 @@
 #include "IMediaLibrary.h"
 #include "IShow.h"
 
+class Media;
 class Show;
 class ShowEpisode;
 
@@ -58,7 +59,7 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
         bool setArtworkMrl( const std::string& artworkMrl );
         virtual const std::string& tvdbId() override;
         bool setTvdbId( const std::string& summary );
-        std::shared_ptr<ShowEpisode> addEpisode( const std::string& title, unsigned int episodeNumber );
+        std::shared_ptr<ShowEpisode> addEpisode( Media& media, const std::string& title, unsigned int episodeNumber );
         virtual std::vector<ShowEpisodePtr> episodes() override;
 
         static bool createTable( DBConnection dbConnection );

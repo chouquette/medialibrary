@@ -64,12 +64,13 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         void setType( Type type );
         virtual const std::string& title() override;
         void setTitle( const std::string& title );
-        virtual AlbumTrackPtr albumTrack() override;
-        bool setAlbumTrack( AlbumTrackPtr albumTrack );
+        virtual AlbumTrackPtr albumTrack() const override;
+        void setAlbumTrack( AlbumTrackPtr albumTrack );
         virtual int64_t duration() const override;
         void setDuration( int64_t duration);
-        virtual std::shared_ptr<IShowEpisode> showEpisode() override;
-        void setShowEpisode( ShowEpisodePtr showEpisode );
+        virtual ShowEpisodePtr showEpisode() const override;
+        // Used to cache the episode only. This doesn't update anything in DB
+        void setShowEpisode( ShowEpisodePtr episode );
         virtual bool addLabel( LabelPtr label ) override;
         virtual bool removeLabel( LabelPtr label ) override;
         virtual std::vector<LabelPtr> labels() override;
@@ -80,7 +81,8 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual int rating() const override;
         virtual void setRating( int rating ) override;
         virtual const std::string& mrl() const override;
-        virtual MoviePtr movie() override;
+        virtual MoviePtr movie() const override;
+        // Used to cache the movie only. This doesn't update anything in DB
         void setMovie( MoviePtr movie );
         bool addVideoTrack( const std::string& codec, unsigned int width,
                                     unsigned int height, float fps );
@@ -111,9 +113,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         unsigned int m_playCount;
         float m_progress;
         int m_rating;
-        unsigned int m_showEpisodeId;
         std::string m_mrl;
-        unsigned int m_movieId;
         unsigned int m_folderId;
         unsigned int m_lastModificationDate;
         unsigned int m_insertionDate;
@@ -124,9 +124,9 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         bool m_isRemovable;
 
         // Auto fetched related properties
-        AlbumTrackPtr m_albumTrack;
-        ShowEpisodePtr m_showEpisode;
-        MoviePtr m_movie;
+        mutable Cache<AlbumTrackPtr> m_albumTrack;
+        mutable Cache<ShowEpisodePtr> m_showEpisode;
+        mutable Cache<MoviePtr> m_movie;
         bool m_changed;
         mutable Cache<std::string> m_fullPath;
 

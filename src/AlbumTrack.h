@@ -66,6 +66,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<AlbumTrack> create( DBConnection dbConnection, unsigned int albumId,
                                      unsigned int mediaId, unsigned int trackNb , unsigned int discNumber );
+        static AlbumTrackPtr fromMedia( DBConnection dbConnection, unsigned int mediaId );
 
     private:
         DBConnection m_dbConnection;
