@@ -42,9 +42,11 @@ protected:
 
 TEST_F( Files, Create )
 {
+    ASSERT_NE( 0u, f->id() );
     ASSERT_FALSE( f->isParsed() );
     ASSERT_EQ( "media.mkv", f->mrl() );
     ASSERT_NE( 0u, f->lastModificationDate() );
+    ASSERT_EQ( File::Type::Entire, f->type() );
 }
 
 TEST_F( Files, Remove )
