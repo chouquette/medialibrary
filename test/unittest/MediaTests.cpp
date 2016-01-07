@@ -23,6 +23,7 @@
 #include "Tests.h"
 
 #include "IMediaLibrary.h"
+#include "File.h"
 #include "Media.h"
 #include "Artist.h"
 #include "Album.h"
@@ -40,55 +41,28 @@ TEST_F( Medias, Init )
 
 TEST_F( Medias, Create )
 {
-    auto f = ml->addFile( "media.avi" );
-    ASSERT_NE( f, nullptr );
+    auto m = ml->addFile( "media.avi" );
+    ASSERT_NE( m, nullptr );
 
-    ASSERT_EQ( f->playCount(), 0 );
-    ASSERT_EQ( f->albumTrack(), nullptr );
-    ASSERT_EQ( f->showEpisode(), nullptr );
-    ASSERT_FALSE( f->isParsed() );
-    ASSERT_EQ( f->duration(), -1 );
-    ASSERT_NE( 0u, f->insertionDate() );
-
-    auto files = ml->files();
-    ASSERT_EQ( files.size(), 1u );
-    ASSERT_EQ( files[0]->mrl(), f->mrl() );
+    ASSERT_EQ( m->playCount(), 0 );
+    ASSERT_EQ( m->albumTrack(), nullptr );
+    ASSERT_EQ( m->showEpisode(), nullptr );
+    ASSERT_EQ( m->duration(), -1 );
+    ASSERT_NE( 0u, m->insertionDate() );
 }
 
 TEST_F( Medias, Fetch )
 {
     auto f = ml->addFile( "media.avi" );
-    auto f2 = std::static_pointer_cast<Media>( ml->media( f->id() ) );
-    ASSERT_EQ( f->mrl(), f2->mrl() );
+    auto f2 = ml->media( f->id() );
+    ASSERT_EQ( f->id(), f2->id() );
     ASSERT_EQ( f, f2 );
 
     // Flush cache and fetch from DB
     Reload();
 
     f2 = std::static_pointer_cast<Media>( ml->media( f->id() ) );
-    ASSERT_EQ( f->mrl(), f2->mrl() );
-}
-
-TEST_F( Medias, Delete )
-{
-    auto f = ml->addFile( "media.avi" );
-    auto f2 = ml->media( f->id() );
-
-    ASSERT_EQ( f, f2 );
-
-    ml->deleteFile( f.get() );
-    f2 = ml->media( f->id() );
-    ASSERT_EQ( f2, nullptr );
-}
-
-TEST_F( Medias, LastModificationDate )
-{
-    auto f = ml->addFile( "media.avi" );
-    ASSERT_NE( 0u, f->lastModificationDate() );
-
-    Reload();
-    auto f2 = std::static_pointer_cast<Media>( ml->media( f->id() ) );
-    ASSERT_EQ( f->lastModificationDate(), f2->lastModificationDate() );
+    ASSERT_EQ( f->id(), f2->id() );
 }
 
 TEST_F( Medias, Duration )

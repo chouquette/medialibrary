@@ -20,6 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
+#include <algorithm>
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
@@ -30,6 +31,7 @@
 #include "Artist.h"
 #include "AudioTrack.h"
 #include "Media.h"
+#include "File.h"
 #include "Folder.h"
 #include "Label.h"
 #include "logging/Logger.h"
@@ -38,6 +40,8 @@
 #include "database/SqliteTools.h"
 #include "VideoTrack.h"
 #include "filesystem/IFile.h"
+#include "filesystem/IDirectory.h"
+#include "filesystem/IDevice.h"
 #include "utils/Filename.h"
 
 const std::string policy::MediaTable::Name = "Media";
@@ -55,18 +59,12 @@ Media::Media( DBConnection dbConnection, sqlite::Row& row )
         >> m_playCount
         >> m_progress
         >> m_rating
-        >> m_mrl
-        >> m_folderId
-        >> m_lastModificationDate
         >> m_insertionDate
         >> m_thumbnail
-        >> m_isParsed
-        >> m_title
-        >> m_isPresent
-        >> m_isRemovable;
+        >> m_title;
 }
 
-Media::Media( const fs::IFile* file, unsigned int folderId, const std::string& title, Type type, bool isRemovable )
+Media::Media( const std::string& title, Type type )
     : m_id( 0 )
     , m_type( type )
     , m_subType( SubType::Unknown )
@@ -74,29 +72,21 @@ Media::Media( const fs::IFile* file, unsigned int folderId, const std::string& t
     , m_playCount( 0 )
     , m_progress( .0f )
     , m_rating( -1 )
-    , m_mrl( isRemovable == true ? file->name() : file->fullPath() )
-    , m_folderId( folderId )
-    , m_lastModificationDate( file->lastModificationDate() )
     , m_insertionDate( time( nullptr ) )
-    , m_isParsed( false )
     , m_title( title )
-    , m_isPresent( true )
-    , m_isRemovable( isRemovable )
     , m_changed( false )
 {
 }
 
-std::shared_ptr<Media> Media::create( DBConnection dbConnection, Type type, const fs::IFile* file, unsigned int folderId, bool isRemovable )
+std::shared_ptr<Media> Media::create( DBConnection dbConnection, Type type, const fs::IFile* file )
 {
-    auto self = std::make_shared<Media>( file, folderId, file->name(), type, isRemovable );
+    auto self = std::make_shared<Media>( file->name(), type );
     static const std::string req = "INSERT INTO " + policy::MediaTable::Name +
-            "(type, mrl, folder_id, last_modification_date, insertion_date, title, is_removable) VALUES(?, ?, ?, ?, ?, ?, ?)";
+            "(type, insertion_date, title) VALUES(?, ?, ?)";
 
-    if ( insert( dbConnection, self, req, type, self->m_mrl, sqlite::ForeignKey( folderId ),
-                         self->m_lastModificationDate, self->m_insertionDate, self->m_title, isRemovable ) == false )
+    if ( insert( dbConnection, self, req, type, self->m_insertionDate, self->m_title ) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;
-    self->m_fullPath = file->fullPath();
     return self;
 }
 
@@ -192,19 +182,16 @@ void Media::setRating( int rating )
     m_changed = true;
 }
 
-const std::string& Media::mrl() const
+const std::vector<FilePtr>& Media::files() const
 {
-    if ( m_isRemovable == false )
-        return m_mrl;
-
-    auto lock = m_fullPath.lock();
-    if ( m_fullPath.isCached() )
-        return m_fullPath;
-    auto folder = Folder::fetch( m_dbConnection, m_folderId );
-    if ( folder == nullptr )
-        return m_mrl;
-    m_fullPath = folder->path() + m_mrl;
-    return m_fullPath;
+    auto lock = m_files.lock();
+    if ( m_files.isCached() == false )
+    {
+        static const std::string req = "SELECT * FROM " + policy::FileTable::Name
+                + " WHERE media_id = ?";
+        m_files = File::fetchAll<IFile>( m_dbConnection, req, m_id );
+    }
+    return m_files;
 }
 
 MoviePtr Media::movie() const
@@ -272,13 +259,11 @@ bool Media::save()
 {
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
             "type = ?, subtype = ?, duration = ?, play_count = ?, progress = ?, rating = ?,"
-            "last_modification_date = ?, thumbnail = ?, parsed = ?,"
-            "title = ? WHERE id_media = ?";
+            "thumbnail = ?, title = ? WHERE id_media = ?";
     if ( m_changed == false )
         return true;
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, m_type, m_subType, m_duration, m_playCount,
-                                       m_progress, m_rating, m_lastModificationDate,
-                                       m_thumbnail, m_isParsed, m_title, m_id ) == false )
+                                       m_progress, m_rating, m_thumbnail, m_title, m_id ) == false )
     {
         return false;
     }
@@ -286,22 +271,26 @@ bool Media::save()
     return true;
 }
 
-unsigned int Media::lastModificationDate()
+std::shared_ptr<File> Media::addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs )
 {
-    return m_lastModificationDate;
+    auto file = File::create( m_dbConnection, m_id, fileFs, parentFolder.id(), parentFolderFs.device()->isRemovable() );
+    if ( file == nullptr )
+        return nullptr;
+    auto lock = m_files.lock();
+    if ( m_files.isCached() )
+        m_files.get().push_back( file );
+    return file;
 }
 
-bool Media::isParsed() const
+void Media::removeFile( File& file )
 {
-    return m_isParsed;
-}
-
-void Media::markParsed()
-{
-    if ( m_isParsed == true )
+    file.destroy();
+    auto lock = m_files.lock();
+    if ( m_files.isCached() == false )
         return;
-    m_isParsed = true;
-    m_changed = true;
+    m_files.get().erase( std::remove_if( begin( m_files.get() ), end( m_files.get() ), [&file]( const FilePtr& f ) {
+        return f->id() == file.id();
+    }));
 }
 
 unsigned int Media::id() const
@@ -345,26 +334,32 @@ bool Media::createTable( DBConnection connection )
             "play_count UNSIGNED INTEGER,"
             "progress REAL,"
             "rating INTEGER DEFAULT -1,"
-            "mrl TEXT,"
-            "folder_id UNSIGNED INTEGER,"
-            "last_modification_date UNSIGNED INTEGER,"
             "insertion_date UNSIGNED INTEGER,"
             "thumbnail TEXT,"
-            "parsed BOOLEAN NOT NULL DEFAULT 0,"
             "title TEXT,"
-            "is_present BOOLEAN NOT NULL DEFAULT 1,"
-            "is_removable BOOLEAN NOT NULL,"
-            "FOREIGN KEY (folder_id) REFERENCES " + policy::FolderTable::Name
-            + "(id_folder) ON DELETE CASCADE,"
-            "UNIQUE( mrl, folder_id ) ON CONFLICT FAIL"
+            "is_present BOOLEAN NOT NULL DEFAULT 1"
             ")";
-    std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_folder_present AFTER UPDATE OF is_present ON "
-            + policy::FolderTable::Name +
-            " BEGIN"
-            " UPDATE " + policy::MediaTable::Name + " SET is_present = new.is_present WHERE folder_id = new.id_folder;"
-            " END";
-    return sqlite::Tools::executeRequest( connection, req ) &&
-            sqlite::Tools::executeRequest( connection, triggerReq );
+    return sqlite::Tools::executeRequest( connection, req );
+}
+
+bool Media::createTriggers( DBConnection connection )
+{
+    static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS has_files_present AFTER UPDATE OF "
+            "is_present ON " + policy::FileTable::Name +
+            " BEGIN "
+            " UPDATE " + policy::MediaTable::Name + " SET is_present="
+                "(SELECT COUNT(id_file) FROM " + policy::FileTable::Name + " WHERE media_id=new.media_id AND is_present=1) "
+                "WHERE id_media=new.media_id;"
+            " END;";
+    static const std::string triggerReq2 = "CREATE TRIGGER IF NOT EXISTS cascade_file_deletion AFTER DELETE ON "
+            + policy::FileTable::Name +
+            " BEGIN "
+            " DELETE FROM " + policy::MediaTable::Name + " WHERE "
+                "(SELECT COUNT(id_file) FROM " + policy::FileTable::Name + " WHERE media_id=old.media_id) = 0"
+                " AND id_media=old.media_id;"
+            " END;";
+    return sqlite::Tools::executeRequest( connection, triggerReq ) &&
+            sqlite::Tools::executeRequest( connection, triggerReq2 );
 }
 
 bool Media::addLabel( LabelPtr label )

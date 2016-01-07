@@ -53,14 +53,14 @@ class IMetadataService
         virtual ~IMetadataService() = default;
         virtual bool initialize( IMetadataServiceCb* callback, MediaLibrary* ml ) = 0;
         virtual unsigned int priority() const = 0;
-        virtual void run( std::shared_ptr<Media> file, void* data ) = 0;
+        virtual void run( std::shared_ptr<Media> media, std::shared_ptr<File> file, void* data ) = 0;
 };
 
 class IMetadataServiceCb
 {
     public:
         virtual ~IMetadataServiceCb() = default;
-        virtual void done( std::shared_ptr<Media> file, IMetadataService::Status status, void* data ) = 0;
+        virtual void done( std::shared_ptr<Media> media, std::shared_ptr<File> file, IMetadataService::Status status, void* data ) = 0;
 };
 
 #endif // IMETADATASERVICE_H

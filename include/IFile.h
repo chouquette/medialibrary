@@ -20,51 +20,32 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef TYPES_H
-#define TYPES_H
+#pragma once
 
-#include <memory>
+#include <string>
 
-class IAlbum;
-class IAlbumTrack;
-class IAudioTrack;
-class IDiscoverer;
-class IFile;
-class IMedia;
-class ILabel;
-class IMetadataService;
-class IMovie;
-class IShow;
-class IShowEpisode;
-class IVideoTrack;
-class ILogger;
-class IArtist;
-class SqliteConnection;
-
-typedef std::shared_ptr<IMedia> MediaPtr;
-typedef std::shared_ptr<ILabel> LabelPtr;
-typedef std::shared_ptr<IAlbum> AlbumPtr;
-typedef std::shared_ptr<IAlbumTrack> AlbumTrackPtr;
-typedef std::shared_ptr<IFile> FilePtr;
-typedef std::shared_ptr<IShow> ShowPtr;
-typedef std::shared_ptr<IShowEpisode> ShowEpisodePtr;
-typedef std::shared_ptr<IMovie> MoviePtr;
-typedef std::shared_ptr<IAudioTrack> AudioTrackPtr;
-typedef std::shared_ptr<IVideoTrack> VideoTrackPtr;
-typedef std::shared_ptr<IArtist> ArtistPtr;
-
-typedef SqliteConnection* DBConnection;
-
-enum class LogLevel
+class IFile
 {
-    /// Verbose: Extra logs (currently used by to enable third parties logs
-    /// such as VLC)
-    Verbose,
-    Debug,
-    Info,
-    Warning,
-    Error,
+public:
+    enum class Type
+    {
+        /// Unknown type, so far
+        Unknown,
+        /// The main file of a media
+        Main,
+        /// A part of a media (for instance, the first half of a movie)
+        Part,
+        /// The file is the entire media
+        Entire,
+        /// External soundtracks
+        Soundtracks,
+        /// External subtitles
+        Subtitles,
+    };
+
+    virtual ~IFile() = default;
+    virtual unsigned int id() const = 0;
+    virtual const std::string& mrl() const = 0;
+    virtual Type type() const = 0;
+    virtual unsigned int lastModificationDate() const = 0;
 };
-
-
-#endif // TYPES_H

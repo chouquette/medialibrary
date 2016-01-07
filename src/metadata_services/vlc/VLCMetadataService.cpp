@@ -23,14 +23,13 @@
 #include <chrono>
 
 #include "VLCMetadataService.h"
-#include "Media.h"
 #include "Album.h"
 #include "AlbumTrack.h"
 #include "Artist.h"
+#include "File.h"
+#include "Media.h"
 #include "Show.h"
 #include "utils/Filename.h"
-
-#include "Media.h"
 
 VLCMetadataService::VLCMetadataService(const VLC::Instance& vlc, DBConnection dbConnection, std::shared_ptr<factory::IFileSystem> fsFactory )
     : m_instance( vlc )
@@ -56,21 +55,21 @@ unsigned int VLCMetadataService::priority() const
     return 100;
 }
 
-void VLCMetadataService::run( std::shared_ptr<Media> media, void* data )
+void VLCMetadataService::run(std::shared_ptr<Media> media, std::shared_ptr<File> file, void* data )
 {
     if ( media->duration() != -1 )
     {
-        LOG_INFO( media->mrl(), " was already parsed" );
-        m_cb->done( media, Status::Success, data );
+        LOG_INFO( file->mrl(), " was already parsed" );
+        m_cb->done( media, file, Status::Success, data );
         return;
     }
-    LOG_INFO( "Parsing ", media->mrl() );
+    LOG_INFO( "Parsing ", file->mrl() );
     auto chrono = std::chrono::steady_clock::now();
 
     auto ctx = new Context( media );
     std::unique_ptr<Context> ctxPtr( ctx );
 
-    ctx->vlcMedia = VLC::Media( m_instance, media->mrl(), VLC::Media::FromPath );
+    ctx->vlcMedia = VLC::Media( m_instance, file->mrl(), VLC::Media::FromPath );
 
     std::unique_lock<std::mutex> lock( m_mutex );
     bool done = false;
@@ -87,17 +86,17 @@ void VLCMetadataService::run( std::shared_ptr<Media> media, void* data )
     ctx->vlcMedia.parseAsync();
     auto success = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [&done]() { return done == true; } );
     if ( success == false )
-        m_cb->done( ctx->media, Status::Fatal, data );
+        m_cb->done( ctx->media, file,  Status::Fatal, data );
     else
     {
-        auto status = handleMediaMeta( ctx->media, ctx->vlcMedia );
-        m_cb->done( ctx->media, status, data );
+        auto status = handleMediaMeta( media, file, ctx->vlcMedia );
+        m_cb->done( ctx->media, file, status, data );
     }
     auto duration = std::chrono::steady_clock::now() - chrono;
-    LOG_DEBUG( "Parsed ", media->mrl(), " in ", std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
+    LOG_DEBUG( "Parsed ", file->mrl(), " in ", std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
 }
 
-IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
+IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::Media& vlcMedia ) const
 {
     const auto tracks = vlcMedia.tracks();
     if ( tracks.size() == 0 )
@@ -127,7 +126,7 @@ IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Me
     t->commit();
     if ( isAudio == true )
     {
-        if ( parseAudioFile( *media, vlcMedia ) == false )
+        if ( parseAudioFile( *media, *file, vlcMedia ) == false )
             return Status::Fatal;
     }
     else
@@ -184,7 +183,7 @@ bool VLCMetadataService::parseVideoFile( std::shared_ptr<Media> media, VLC::Medi
 
 /* Audio files */
 
-bool VLCMetadataService::parseAudioFile( Media& media, VLC::Media& vlcMedia ) const
+bool VLCMetadataService::parseAudioFile( Media& media, File& file, VLC::Media& vlcMedia ) const
 {
     media.setType( IMedia::Type::AudioType );
 
@@ -193,7 +192,7 @@ bool VLCMetadataService::parseAudioFile( Media& media, VLC::Media& vlcMedia ) co
         media.setThumbnail( cover );
 
     auto artists = handleArtists( vlcMedia );
-    auto album = handleAlbum( media, vlcMedia, artists.first, artists.second );
+    auto album = handleAlbum( media, file, vlcMedia, artists.first, artists.second );
     if ( album == nullptr )
     {
         LOG_WARN( "Failed to get/create associated album" );
@@ -206,7 +205,7 @@ bool VLCMetadataService::parseAudioFile( Media& media, VLC::Media& vlcMedia ) co
 }
 
 /* Album handling */
-std::shared_ptr<Album> VLCMetadataService::findAlbum( Media& media, VLC::Media& vlcMedia, const std::string& title, Artist* albumArtist ) const
+std::shared_ptr<Album> VLCMetadataService::findAlbum( File& file, VLC::Media& vlcMedia, const std::string& title, Artist* albumArtist ) const
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
             " WHERE title = ?";
@@ -278,9 +277,19 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media& media, VLC::Media& 
         }
 
         // Assume album files will be in the same folder.
-        auto candidateFolder = utils::file::directory( tracks[0]->mrl() );
-        auto newFileFolder = utils::file::directory( media.mrl() );
-        if ( candidateFolder != newFileFolder )
+        auto trackFiles = tracks[0]->files();
+        auto newFileFolder = utils::file::directory( file.mrl() );
+        bool excluded = false;
+        for ( auto& f : trackFiles )
+        {
+            auto candidateFolder = utils::file::directory( f->mrl() );
+            if ( candidateFolder != newFileFolder )
+            {
+                excluded = true;
+                break;
+            }
+        }
+        if ( excluded == true )
         {
             it = albums.erase( it );
             continue;
@@ -296,7 +305,7 @@ std::shared_ptr<Album> VLCMetadataService::findAlbum( Media& media, VLC::Media& 
     return std::static_pointer_cast<Album>( albums[0] );
 }
 
-std::shared_ptr<Album> VLCMetadataService::handleAlbum( Media& media, VLC::Media& vlcMedia, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> trackArtist ) const
+std::shared_ptr<Album> VLCMetadataService::handleAlbum( Media& media, File& file, VLC::Media& vlcMedia, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> trackArtist ) const
 {
     auto albumTitle = vlcMedia.meta( libvlc_meta_Album );
     std::shared_ptr<Album> album;
@@ -315,7 +324,7 @@ std::shared_ptr<Album> VLCMetadataService::handleAlbum( Media& media, VLC::Media
     {
         // Album matching depends on the difference between artist & album artist.
         // Specificaly pass the albumArtist here.
-        album = findAlbum( media, vlcMedia, albumTitle, albumArtist.get() );
+        album = findAlbum( file, vlcMedia, albumTitle, albumArtist.get() );
 
         if ( album == nullptr )
         {

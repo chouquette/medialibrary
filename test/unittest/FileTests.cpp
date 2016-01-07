@@ -20,51 +20,40 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef TYPES_H
-#define TYPES_H
+#include "Tests.h"
 
-#include <memory>
+#include "Media.h"
+#include "File.h"
 
-class IAlbum;
-class IAlbumTrack;
-class IAudioTrack;
-class IDiscoverer;
-class IFile;
-class IMedia;
-class ILabel;
-class IMetadataService;
-class IMovie;
-class IShow;
-class IShowEpisode;
-class IVideoTrack;
-class ILogger;
-class IArtist;
-class SqliteConnection;
-
-typedef std::shared_ptr<IMedia> MediaPtr;
-typedef std::shared_ptr<ILabel> LabelPtr;
-typedef std::shared_ptr<IAlbum> AlbumPtr;
-typedef std::shared_ptr<IAlbumTrack> AlbumTrackPtr;
-typedef std::shared_ptr<IFile> FilePtr;
-typedef std::shared_ptr<IShow> ShowPtr;
-typedef std::shared_ptr<IShowEpisode> ShowEpisodePtr;
-typedef std::shared_ptr<IMovie> MoviePtr;
-typedef std::shared_ptr<IAudioTrack> AudioTrackPtr;
-typedef std::shared_ptr<IVideoTrack> VideoTrackPtr;
-typedef std::shared_ptr<IArtist> ArtistPtr;
-
-typedef SqliteConnection* DBConnection;
-
-enum class LogLevel
+class Files : public Tests
 {
-    /// Verbose: Extra logs (currently used by to enable third parties logs
-    /// such as VLC)
-    Verbose,
-    Debug,
-    Info,
-    Warning,
-    Error,
+protected:
+    std::shared_ptr<File> f;
+    std::shared_ptr<Media> m;
+    virtual void SetUp() override
+    {
+        Tests::SetUp();
+        m = ml->addFile( "media.mkv" );
+        auto files = m->files();
+        ASSERT_EQ( 1u, files.size() );
+        f = std::static_pointer_cast<File>( files[0] );
+    }
 };
 
+TEST_F( Files, Create )
+{
+    ASSERT_FALSE( f->isParsed() );
+    ASSERT_EQ( "media.mkv", f->mrl() );
+    ASSERT_NE( 0u, f->lastModificationDate() );
+}
 
-#endif // TYPES_H
+TEST_F( Files, Remove )
+{
+    m->removeFile( *f );
+    // The instance should now have 0 files listed:
+    auto files = m->files();
+    ASSERT_EQ( 0u, files.size() );
+    auto media = ml->media( m->id() );
+    // This file should now be removed from the DB
+    ASSERT_EQ( nullptr, media );
+}

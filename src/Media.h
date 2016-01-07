@@ -31,6 +31,8 @@
 #include "utils/Cache.h"
 
 class Album;
+class File;
+class Folder;
 class ShowEpisode;
 class AlbumTrack;
 
@@ -62,10 +64,11 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         // shall be well-formed, and private constructor would prevent that.
         // There might be a way with a user-defined allocator, but we'll see that later...
         Media(DBConnection dbConnection , sqlite::Row& row);
-        Media( const fs::IFile* file, unsigned int folderId, const std::string &title, Type type, bool isRemovable );
+        Media( const std::string &title, Type type);
 
-        static std::shared_ptr<Media> create( DBConnection dbConnection, Type type, const fs::IFile* file , unsigned int folderId, bool isRemovable );
+        static std::shared_ptr<Media> create( DBConnection dbConnection, Type type, const fs::IFile* file );
         static bool createTable( DBConnection connection );
+        static bool createTriggers( DBConnection connection );
 
         virtual unsigned int id() const override;
         virtual Type type() override;
@@ -87,7 +90,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual void setProgress( float progress ) override;
         virtual int rating() const override;
         virtual void setRating( int rating ) override;
-        virtual const std::string& mrl() const override;
+        virtual const std::vector<FilePtr>& files() const override;
         virtual MoviePtr movie() const override;
         void setMovie( MoviePtr movie );
         bool addVideoTrack( const std::string& codec, unsigned int width,
@@ -101,13 +104,8 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         void setThumbnail( const std::string& thumbnail );
         bool save();
 
-        unsigned int lastModificationDate();
-
-        /// Explicitely mark a media as fully parsed, meaning no metadata service needs to run anymore.
-        //FIXME: This lacks granularity as we don't have a straight forward way to know which service
-        //needs to run or not.
-        void markParsed();
-        bool isParsed() const;
+        std::shared_ptr<File> addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs );
+        void removeFile( File& file );
 
     private:
         DBConnection m_dbConnection;
@@ -120,22 +118,16 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         unsigned int m_playCount;
         float m_progress;
         int m_rating;
-        std::string m_mrl;
-        unsigned int m_folderId;
-        unsigned int m_lastModificationDate;
         unsigned int m_insertionDate;
         std::string m_thumbnail;
-        bool m_isParsed;
         std::string m_title;
-        bool m_isPresent;
-        bool m_isRemovable;
 
         // Auto fetched related properties
         mutable Cache<AlbumTrackPtr> m_albumTrack;
         mutable Cache<ShowEpisodePtr> m_showEpisode;
         mutable Cache<MoviePtr> m_movie;
+        mutable Cache<std::vector<FilePtr>> m_files;
         bool m_changed;
-        mutable Cache<std::string> m_fullPath;
 
         friend struct policy::MediaTable;
 };

@@ -66,6 +66,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     Artist.cpp
     Settings.cpp
     Device.cpp
+    File.cpp
 
     factory/FileSystem.cpp
     filesystem/common/CommonFile.cpp

@@ -37,7 +37,8 @@
 #endif
 #include <setjmp.h>
 
-#include "IMedia.h"
+#include "Media.h"
+#include "File.h"
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
 
@@ -98,53 +99,53 @@ unsigned int VLCThumbnailer::priority() const
     return 50;
 }
 
-void VLCThumbnailer::run( std::shared_ptr<Media> media, void *data )
+void VLCThumbnailer::run( std::shared_ptr<Media> media, std::shared_ptr<File> file, void *data )
 {
     if ( media->type() == IMedia::Type::UnknownType )
     {
         // If we don't know the media type yet, it actually looks more like a bug
         // since this should run after media type deduction, and not run in case
         // that step fails.
-        m_cb->done( media, Status::Fatal, data );
+        m_cb->done( media, file, Status::Fatal, data );
         return;
     }
     else if ( media->type() != IMedia::Type::VideoType )
     {
         // There's no point in generating a thumbnail for a non-video media.
-        m_cb->done( media, Status::Success, data );
+        m_cb->done( media, file, Status::Success, data );
         return;
     }
     else if ( media->thumbnail().empty() == false )
     {
         LOG_INFO(media->thumbnail(), " already has a thumbnail" );
-        m_cb->done( media, Status::Success, data );
+        m_cb->done( media, file, Status::Success, data );
         return;
     }
 
-    LOG_INFO( "Generating ", media->mrl(), " thumbnail..." );
+    LOG_INFO( "Generating ", file->mrl(), " thumbnail..." );
 
-    VLC::Media vlcMedia( m_instance, media->mrl(), VLC::Media::FromPath );
+    VLC::Media vlcMedia( m_instance, file->mrl(), VLC::Media::FromPath );
     vlcMedia.addOption( ":no-audio" );
     VLC::MediaPlayer mp( vlcMedia );
 
     setupVout( mp );
 
-    if ( startPlayback( media, mp, data ) == false )
+    if ( startPlayback( media, file, mp, data ) == false )
     {
-        LOG_WARN( "Failed to generate ", media->mrl(), " thumbnail" );
+        LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail" );
         return;
     }
     // Seek ahead to have a significant preview
-    if ( seekAhead( media, mp, data ) == false )
+    if ( seekAhead( media, file, mp, data ) == false )
     {
-        LOG_WARN( "Failed to generate ", media->mrl(), " thumbnail" );
+        LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail" );
         return;
     }
-    takeThumbnail( media, mp, data );
-    LOG_INFO( "Done generating ", media->mrl(), " thumbnail" );
+    takeThumbnail( media, file, mp, data );
+    LOG_INFO( "Done generating ", file->mrl(), " thumbnail" );
 }
 
-bool VLCThumbnailer::startPlayback(std::shared_ptr<Media> media, VLC::MediaPlayer &mp, void* data )
+bool VLCThumbnailer::startPlayback(std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::MediaPlayer &mp, void* data )
 {
 
     mp.eventManager().onPlaying([this]() {
@@ -163,13 +164,13 @@ bool VLCThumbnailer::startPlayback(std::shared_ptr<Media> media, VLC::MediaPlaye
     if ( success == false || s == libvlc_Error || s == libvlc_Ended )
     {
         // In case of timeout or error, don't go any further
-        m_cb->done( media, Status::Error, data );
+        m_cb->done( media, file, Status::Error, data );
         return false;
     }
     return true;
 }
 
-bool VLCThumbnailer::seekAhead(std::shared_ptr<Media> media, VLC::MediaPlayer& mp, void* data )
+bool VLCThumbnailer::seekAhead(std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::MediaPlayer& mp, void* data )
 {
     std::unique_lock<std::mutex> lock( m_mutex );
     float pos = .0f;
@@ -186,7 +187,7 @@ bool VLCThumbnailer::seekAhead(std::shared_ptr<Media> media, VLC::MediaPlayer& m
     event->unregister();
     if ( success == false )
     {
-        m_cb->done( media, Status::Error, data );
+        m_cb->done( media, file, Status::Error, data );
         return false;
     }
     return true;
@@ -244,7 +245,7 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
     );
 }
 
-bool VLCThumbnailer::takeThumbnail(std::shared_ptr<Media> media, VLC::MediaPlayer &mp, void *data)
+bool VLCThumbnailer::takeThumbnail(std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::MediaPlayer &mp, void *data)
 {
     // lock, signal that we want a thumbnail, and wait.
     {
@@ -256,12 +257,12 @@ bool VLCThumbnailer::takeThumbnail(std::shared_ptr<Media> media, VLC::MediaPlaye
         });
         if ( success == false )
         {
-            m_cb->done( media, Status::Error, data );
+            m_cb->done( media, file, Status::Error, data );
             return false;
         }
     }
     mp.stop();
-    return compress( media, data );
+    return compress( media, file, data );
 }
 
 #ifdef WITH_JPEG
@@ -281,7 +282,7 @@ struct jpegError : public jpeg_error_mgr
 
 #endif
 
-bool VLCThumbnailer::compress( std::shared_ptr<Media> media, void *data )
+bool VLCThumbnailer::compress( std::shared_ptr<Media> media, std::shared_ptr<File> file, void *data )
 {
     auto path = m_ml->thumbnailPath();
     path += "/";
@@ -302,7 +303,7 @@ bool VLCThumbnailer::compress( std::shared_ptr<Media> media, void *data )
     if ( fOut == nullptr )
     {
         LOG_ERROR("Failed to open thumbnail file ", path);
-        m_cb->done( media, Status::Error, data );
+        m_cb->done( media, file, Status::Error, data );
         return false;
     }
 
@@ -319,7 +320,7 @@ bool VLCThumbnailer::compress( std::shared_ptr<Media> media, void *data )
     {
         LOG_ERROR("JPEG failure: ", err.message);
         jpeg_destroy_compress(&compInfo);
-        m_cb->done( media, Status::Error, data );
+        m_cb->done( media, file, Status::Error, data );
         return false;
     }
 
@@ -370,8 +371,8 @@ bool VLCThumbnailer::compress( std::shared_ptr<Media> media, void *data )
 
     media->setThumbnail( path );
     if ( media->save() == false )
-        m_cb->done( media, Status::Error, data );
+        m_cb->done( media, file, Status::Error, data );
     else
-        m_cb->done( media, Status::Success, data );
+        m_cb->done( media, file, Status::Success, data );
     return true;
 }

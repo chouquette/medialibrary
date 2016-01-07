@@ -53,7 +53,7 @@ class IMedia
         virtual ShowEpisodePtr showEpisode() const = 0;
         virtual int playCount() const = 0;
         virtual void increasePlayCount() = 0;
-        virtual const std::string& mrl() const = 0;
+        virtual const std::vector<FilePtr>& files() const = 0;
         ///
         /// \brief progress Returns the progress, in the [0;1] range
         ///

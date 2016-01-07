@@ -24,6 +24,7 @@
 
 #include "Album.h"
 #include "Device.h"
+#include "File.h"
 #include "Media.h"
 #include "Artist.h"
 #include "mocks/FileSystem.h"
@@ -44,6 +45,7 @@ protected:
 protected:
     virtual void SetUp() override
     {
+        unlink( "test.db" );
         fsMock.reset( new mock::FileSystemFactory );
         cbMock.reset( new mock::WaitForDiscoveryComplete );
         fsMock->addFolder( "/a/mnt/" );
@@ -282,15 +284,15 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
     ASSERT_TRUE( discovered );
 
     {
-        auto album = std::static_pointer_cast<Album>( ml->createAlbum( "album" ) );
+        auto album = ml->createAlbum( "album" );
         auto media = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
-        auto file2 = ml->media( RemovableDeviceMountpoint + "removablefile2.mp3" );
+        auto media2 = ml->media( RemovableDeviceMountpoint + "removablefile2.mp3" );
         album->addTrack( static_cast<Media&>( *media ), 1, 1 );
-        album->addTrack( static_cast<Media&>( *file2 ), 2, 1 );
+        album->addTrack( static_cast<Media&>( *media2 ), 2, 1 );
         auto newArtist = ml->createArtist( "artist" );
         album->setAlbumArtist( newArtist.get() );
         newArtist->addMedia( static_cast<Media&>( *media ) );
-        newArtist->addMedia( static_cast<Media&>( *file2 ) );
+        newArtist->addMedia( static_cast<Media&>( *media2 ) );
     }
 
     auto albums = ml->albums();
@@ -325,7 +327,9 @@ TEST_F( DeviceFs, ChangeDevice )
     auto f = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( f, nullptr );
     auto firstRemovableFileId = f->id();
-    auto firstRemovableFilePath = f->mrl();
+    auto files = f->files();
+    ASSERT_EQ( 1u, files.size() );
+    auto firstRemovableFilePath = files[0]->mrl();
 
     // Remove & store the device
     auto oldRemovableDevice = fsMock->removeDevice( RemovableDeviceUuid );
@@ -343,7 +347,9 @@ TEST_F( DeviceFs, ChangeDevice )
     // but the same "full path"
     f = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, f );
-    ASSERT_EQ( firstRemovableFilePath, f->mrl() );
+    files = f->files();
+    ASSERT_EQ( 1u, files.size() );
+    ASSERT_EQ( firstRemovableFilePath, files[0]->mrl() );
     ASSERT_NE( firstRemovableFileId, f->id() );
 
     fsMock->removeDevice( "{another-removable-device}" );

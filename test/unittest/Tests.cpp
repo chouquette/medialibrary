@@ -24,6 +24,7 @@
 
 #include <memory>
 
+#include "File.h"
 #include "filesystem/IFile.h"
 #include "filesystem/IDirectory.h"
 #include "utils/Filename.h"
@@ -45,7 +46,6 @@ class TestEnv : public ::testing::Environment
 void Tests::TearDown()
 {
     ml.reset();
-    unlink("test.db");
 }
 
 void Tests::Reload(std::shared_ptr<factory::IFileSystem> fs /*= nullptr*/, IMediaLibraryCb* metadataCb /*= nullptr*/ )
@@ -64,6 +64,7 @@ void Tests::Reload(std::shared_ptr<factory::IFileSystem> fs /*= nullptr*/, IMedi
 
 void Tests::SetUp()
 {
+    unlink("test.db");
     Reload();
 }
 
@@ -88,10 +89,14 @@ std::shared_ptr<Media> MediaLibraryTester::media( unsigned int id )
 MediaPtr MediaLibraryTester::media( const std::string& path )
 {
     auto medias = files();
-    for ( auto& f : medias )
+    for ( auto& m : medias )
     {
-        if ( f->mrl() == path )
-            return f;
+        auto files = m->files();
+        for ( auto& f : files )
+        {
+            if ( f->mrl() == path )
+                return m;
+        }
     }
     return nullptr;
 }

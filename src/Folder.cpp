@@ -20,6 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
+#include "File.h"
 #include "Folder.h"
 #include "Device.h"
 #include "Media.h"
@@ -194,11 +195,11 @@ const std::string& Folder::path() const
     return m_fullPath;
 }
 
-std::vector<MediaPtr> Folder::files()
+std::vector<std::shared_ptr<File>> Folder::files()
 {
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name +
+    static const std::string req = "SELECT * FROM " + policy::FileTable::Name +
         " WHERE folder_id = ?";
-    return Media::fetchAll<IMedia>( m_dbConection, req, m_id );
+    return File::fetchAll<File>( m_dbConection, req, m_id );
 }
 
 std::vector<std::shared_ptr<Folder>> Folder::folders()

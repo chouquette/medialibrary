@@ -28,6 +28,7 @@
 
 #include <sqlite3.h>
 
+class File;
 class Folder;
 class Device;
 
@@ -71,7 +72,7 @@ public:
 
     unsigned int id() const;
     const std::string& path() const;
-    std::vector<MediaPtr> files();
+    std::vector<std::shared_ptr<File>> files();
     std::vector<std::shared_ptr<Folder>> folders();
     std::shared_ptr<Folder> parent();
     unsigned int deviceId() const;

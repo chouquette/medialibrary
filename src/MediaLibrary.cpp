@@ -30,9 +30,10 @@
 #include "Artist.h"
 #include "AudioTrack.h"
 #include "discoverer/DiscovererWorker.h"
-#include "Media.h"
 #include "Device.h"
+#include "File.h"
 #include "Folder.h"
+#include "Media.h"
 #include "MediaLibrary.h"
 #include "IMetadataService.h"
 #include "Label.h"
@@ -101,6 +102,7 @@ MediaLibrary::~MediaLibrary()
     AudioTrack::clear();
     Artist::clear();
     Device::clear();
+    File::clear();
     // Explicitely release the connection's TLS
     if ( m_dbConnection != nullptr )
         m_dbConnection->release();
@@ -118,6 +120,7 @@ bool MediaLibrary::createAllTables()
     auto res = Device::createTable( m_dbConnection.get() ) &&
         Folder::createTable( m_dbConnection.get() ) &&
         Media::createTable( m_dbConnection.get() ) &&
+        File::createTable( m_dbConnection.get() ) &&
         Label::createTable( m_dbConnection.get() ) &&
         Album::createTable( m_dbConnection.get() ) &&
         AlbumTrack::createTable( m_dbConnection.get() ) &&
@@ -130,6 +133,7 @@ bool MediaLibrary::createAllTables()
         Artist::createTable( m_dbConnection.get() ) &&
         Artist::createDefaultArtists( m_dbConnection.get() ) &&
         Artist::createTriggers( m_dbConnection.get() ) &&
+        Media::createTriggers( m_dbConnection.get() ) &&
         Settings::createTable( m_dbConnection.get() );
     if ( res == false )
         return false;
@@ -193,10 +197,10 @@ std::vector<MediaPtr> MediaLibrary::videoFiles()
 
 std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder& parentFolder, fs::IDirectory& parentFolderFs )
 {
-    std::unique_ptr<fs::IFile> file;
+    std::unique_ptr<fs::IFile> fileFs;
     try
     {
-        file = m_fsFactory->createFile( path );
+        fileFs = m_fsFactory->createFile( path );
     }
     catch (std::exception& ex)
     {
@@ -205,7 +209,7 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder& p
     }
 
     auto type = IMedia::Type::UnknownType;
-    auto ext = file->extension();
+    auto ext = fileFs->extension();
     auto predicate = [ext](const std::string& v) {
         return strcasecmp(v.c_str(), ext.c_str()) == 0;
     };
@@ -224,23 +228,24 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder& p
         return nullptr;
 
     LOG_INFO( "Adding ", path );
-    auto fptr = Media::create( m_dbConnection.get(), type, file.get(), parentFolder.id(),
-                               parentFolderFs.device()->isRemovable() );
-    if ( fptr == nullptr )
+    auto mptr = Media::create( m_dbConnection.get(), type, fileFs.get() );
+    if ( mptr == nullptr )
     {
-        LOG_ERROR( "Failed to add file ", file->fullPath(), " to the media library" );
+        LOG_ERROR( "Failed to add media ", fileFs->fullPath(), " to the media library" );
+        return nullptr;
+    }
+    auto file = mptr->addFile( *fileFs, parentFolder, parentFolderFs );
+    if ( file == nullptr )
+    {
+        LOG_ERROR( "Failed to add file ", fileFs->fullPath(), " to media #", mptr->id() );
+        Media::destroy( m_dbConnection.get(), mptr->id() );
         return nullptr;
     }
     if ( m_callback != nullptr )
-        m_callback->onMediaAdded( fptr );
+        m_callback->onMediaAdded( mptr );
     if ( m_parser != nullptr )
-        m_parser->parse( fptr );
-    return fptr;
-}
-
-bool MediaLibrary::deleteFile(const Media* media )
-{
-    return Media::destroy( m_dbConnection.get(), media->id() );
+        m_parser->parse( mptr, file );
+    return mptr;
 }
 
 bool MediaLibrary::deleteFolder( const Folder* folder )

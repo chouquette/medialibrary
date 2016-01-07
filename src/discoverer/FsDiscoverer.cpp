@@ -28,6 +28,7 @@
 #include "factory/FileSystem.h"
 #include "filesystem/IDevice.h"
 #include "Media.h"
+#include "File.h"
 #include "Device.h"
 #include "Folder.h"
 #include "logging/Logger.h"
@@ -153,12 +154,12 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory& parentFolderFs, Folder& pare
 void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFolder ) const
 {
     LOG_INFO( "Checking file in ", parentFolderFs.path() );
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
+    static const std::string req = "SELECT * FROM " + policy::FileTable::Name
             + " WHERE folder_id = ?";
-    auto files = Media::fetchAll<Media>( m_dbConn, req, parentFolder.id() );
+    auto files = File::fetchAll<File>( m_dbConn, req, parentFolder.id() );
     for ( const auto& filePath : parentFolderFs.files() )
     {        
-        auto it = std::find_if( begin( files ), end( files ), [filePath](const std::shared_ptr<IMedia>& f) {
+        auto it = std::find_if( begin( files ), end( files ), [filePath](const std::shared_ptr<File>& f) {
             return f->mrl() == filePath;
         });
         if ( it == end( files ) )
@@ -166,22 +167,23 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
             m_ml->addFile( filePath, parentFolder, parentFolderFs );
             continue;
         }
-        auto file = m_fsFactory->createFile( filePath );
-        if ( file->lastModificationDate() == (*it)->lastModificationDate() )
+        auto fileFs = m_fsFactory->createFile( filePath );
+        if ( fileFs->lastModificationDate() == (*it)->lastModificationDate() )
         {
             // Unchanged file
             files.erase( it );
             continue;
         }
+        auto& file = (*it);
         LOG_INFO( "Forcing file refresh ", filePath );
-        m_ml->deleteFile( (*it).get() );
+        file->media()->removeFile( *file );
         m_ml->addFile( filePath, parentFolder, parentFolderFs );
         files.erase( it );
     }
     for ( auto file : files )
     {
         LOG_INFO( "File ", file->mrl(), " not found on filesystem, deleting it" );
-        m_ml->deleteFile( file.get() );
+        file->media()->removeFile( *file );
     }
     LOG_INFO( "Done checking files ", parentFolderFs.path() );
 }

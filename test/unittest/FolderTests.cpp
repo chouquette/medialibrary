@@ -23,6 +23,7 @@
 #include "Tests.h"
 
 #include "Media.h"
+#include "File.h"
 #include "Folder.h"
 #include "IMediaLibrary.h"
 #include "utils/Filename.h"
@@ -40,6 +41,7 @@ class Folders : public Tests
     protected:
         virtual void SetUp() override
         {
+            unlink("test.db");
             fsMock.reset( new mock::FileSystemFactory );
             cbMock.reset( new mock::WaitForDiscoveryComplete );
             Reload();
@@ -80,8 +82,6 @@ TEST_F( Folders, Delete )
 
     auto files = ml->files();
     ASSERT_EQ( files.size(), 3u );
-
-    auto filePath = files[0]->mrl();
 
     ml->deleteFolder( f.get() );
 
@@ -166,8 +166,7 @@ TEST_F( Folders, ListFolders )
     auto subFiles = subFolder->files();
     ASSERT_EQ( 1u, subFiles.size() );
 
-    auto media = subFiles[0];
-    ASSERT_EQ( mock::FileSystemFactory::SubFolder + "subfile.mp4", media->mrl() );
+    ASSERT_EQ( mock::FileSystemFactory::SubFolder + "subfile.mp4", subFiles[0]->mrl() );
 
     // Now again, without cache. No need to wait for fs discovery reload here
     Reload();
@@ -180,8 +179,7 @@ TEST_F( Folders, ListFolders )
     subFiles = subFolder->files();
     ASSERT_EQ( 1u, subFiles.size() );
 
-    media = subFiles[0];
-    ASSERT_EQ( mock::FileSystemFactory::SubFolder + "subfile.mp4", media->mrl() );
+    ASSERT_EQ( mock::FileSystemFactory::SubFolder + "subfile.mp4", subFiles[0]->mrl() );
 }
 
 TEST_F( Folders, NewFolderWithFile )
@@ -338,10 +336,4 @@ TEST_F( Folders, BlacklistAfterDiscovery )
     ml->ignoreFolder( mock::FileSystemFactory::SubFolder );
     auto f2 = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( nullptr, f2 );
-    for ( auto& media : files )
-    {
-        auto m = ml->media( media->mrl() );
-        ASSERT_EQ( nullptr, m );
-    }
-
 }
