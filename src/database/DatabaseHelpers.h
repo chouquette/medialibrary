@@ -78,7 +78,6 @@ class DatabaseHelpers
             return res;
         }
 
-        template <typename... Args>
         static bool destroy( DBConnection dbConnection, unsigned int pkValue )
         {
             static const std::string req = "DELETE FROM " + TABLEPOLICY::Name + " WHERE "
