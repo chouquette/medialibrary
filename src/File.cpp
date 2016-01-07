@@ -43,11 +43,11 @@ File::File( DBConnection dbConnection, sqlite::Row& row )
         >> m_isRemovable;
 }
 
-File::File( unsigned int mediaId, const fs::IFile& file, unsigned int folderId, bool isRemovable )
+File::File( unsigned int mediaId, Type type, const fs::IFile& file, unsigned int folderId, bool isRemovable )
     : m_id( 0 )
     , m_mediaId( mediaId )
     , m_mrl( isRemovable == true ? file.name() : file.fullPath() )
-    , m_type( Type::Unknown )
+    , m_type( type )
     , m_lastModificationDate( file.lastModificationDate() )
     , m_isParsed( false )
     , m_folderId( folderId )
@@ -143,13 +143,13 @@ bool File::createTable( DBConnection dbConnection )
             sqlite::Tools::executeRequest( dbConnection, triggerReq );
 }
 
-std::shared_ptr<File> File::create( DBConnection dbConnection, unsigned int mediaId, const fs::IFile& fileFs, unsigned int folderId, bool isRemovable )
+std::shared_ptr<File> File::create( DBConnection dbConnection, unsigned int mediaId, Type type, const fs::IFile& fileFs, unsigned int folderId, bool isRemovable )
 {
-    auto self = std::make_shared<File>( mediaId, fileFs, folderId, isRemovable );
+    auto self = std::make_shared<File>( mediaId, type, fileFs, folderId, isRemovable );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
-            "(media_id, mrl, folder_id, last_modification_date, is_removable) VALUES(?, ?, ?, ?, ?)";
+            "(media_id, mrl, type, folder_id, last_modification_date, is_removable) VALUES(?, ?, ?, ?, ?, ?)";
 
-    if ( insert( dbConnection, self, req, mediaId, self->m_mrl, sqlite::ForeignKey( folderId ),
+    if ( insert( dbConnection, self, req, mediaId, self->m_mrl, type, sqlite::ForeignKey( folderId ),
                          self->m_lastModificationDate, isRemovable ) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;

@@ -45,7 +45,7 @@ class File : public IFile, public DatabaseHelpers<File, policy::FileTable>
 {
 public:
     File( DBConnection dbConnection, sqlite::Row& row );
-    File(unsigned int mediaId, const fs::IFile& file, unsigned int folderId, bool isRemovable );
+    File( unsigned int mediaId, Type type, const fs::IFile& file, unsigned int folderId, bool isRemovable );
     virtual unsigned int id() const override;
     virtual const std::string& mrl() const override;
     virtual Type type() const override;
@@ -59,7 +59,7 @@ public:
     bool destroy();
 
     static bool createTable( DBConnection dbConnection );
-    static std::shared_ptr<File> create(DBConnection dbConnection, unsigned int mediaId, const fs::IFile& file, unsigned int folderId, bool isRemovable );
+    static std::shared_ptr<File> create( DBConnection dbConnection, unsigned int mediaId, Type type, const fs::IFile& file, unsigned int folderId, bool isRemovable );
 
 private:
     unsigned int m_id;

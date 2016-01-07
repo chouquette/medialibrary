@@ -27,11 +27,11 @@
 #include <sqlite3.h>
 
 #include "IMedia.h"
+#include "File.h"
 #include "database/DatabaseHelpers.h"
 #include "utils/Cache.h"
 
 class Album;
-class File;
 class Folder;
 class ShowEpisode;
 class AlbumTrack;
@@ -104,7 +104,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         void setThumbnail( const std::string& thumbnail );
         bool save();
 
-        std::shared_ptr<File> addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs );
+        std::shared_ptr<File> addFile(const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs , IFile::Type type);
         void removeFile( File& file );
 
     private:

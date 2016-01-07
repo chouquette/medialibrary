@@ -271,9 +271,9 @@ bool Media::save()
     return true;
 }
 
-std::shared_ptr<File> Media::addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs )
+std::shared_ptr<File> Media::addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs, IFile::Type type )
 {
-    auto file = File::create( m_dbConnection, m_id, fileFs, parentFolder.id(), parentFolderFs.device()->isRemovable() );
+    auto file = File::create( m_dbConnection, m_id, type, fileFs, parentFolder.id(), parentFolderFs.device()->isRemovable() );
     if ( file == nullptr )
         return nullptr;
     auto lock = m_files.lock();
