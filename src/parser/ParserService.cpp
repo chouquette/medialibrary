@@ -90,7 +90,11 @@ bool ParserService::initialize()
 
 void ParserService::mainloop()
 {
-    LOG_INFO("Entering ParserService thread");
+    // It would be unsafe to call name() at the end of this function, since
+    // we might stop the thread during ParserService destruction. This implies
+    // that the underlying service has been deleted already.
+    std::string serviceName = name();
+    LOG_INFO("Entering ParserService [", serviceName, "] thread");
 
     while ( m_stopParser == false )
     {
@@ -122,6 +126,6 @@ void ParserService::mainloop()
             m_parserCb->done( std::move( task ), parser::Task::Status::Fatal );
         }
     }
-    LOG_INFO("Exiting Parser thread");
+    LOG_INFO("Exiting ParserService [", serviceName, "] thread");
 }
 

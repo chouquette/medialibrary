@@ -359,3 +359,8 @@ parser::Task::Status VLCThumbnailer::compress( std::shared_ptr<Media> media, std
         return parser::Task::Status::Error;
     return parser::Task::Status::Success;
 }
+
+const char*VLCThumbnailer::name() const
+{
+    return "Thumbnailer";
+}

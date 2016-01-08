@@ -86,6 +86,11 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
     return status;
 }
 
+const char* VLCMetadataService::name() const
+{
+    return "VLC";
+}
+
 parser::Task::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::Media& vlcMedia ) const
 {
     const auto tracks = vlcMedia.tracks();

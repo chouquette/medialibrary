@@ -57,6 +57,8 @@ private:
     parser::Task::Status takeThumbnail( std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::MediaPlayer &mp );
     parser::Task::Status compress( std::shared_ptr<Media> media, std::shared_ptr<File> file );
 
+    virtual const char* name() const;
+
 private:
     // Force a base width, let height be computed depending on A/R
     static const uint32_t DesiredWidth = 320;

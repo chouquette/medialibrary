@@ -50,6 +50,7 @@ protected:
     /// Can be overriden to run service dependent initializations
     virtual bool initialize();
     virtual parser::Task::Status run( parser::Task& task ) = 0;
+    virtual const char* name() const = 0;
 
 private:
     // Thread(s) entry point

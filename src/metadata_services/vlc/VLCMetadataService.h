@@ -49,6 +49,7 @@ class VLCMetadataService : public ParserService
 
         virtual bool initialize() override;
         virtual parser::Task::Status run( parser::Task& task ) override;
+        virtual const char* name() const override;
 
 private:
         parser::Task::Status handleMediaMeta(std::shared_ptr<Media> media , std::shared_ptr<File> file, VLC::Media &vlcMedia ) const;
