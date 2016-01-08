@@ -70,6 +70,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     Playlist.cpp
 
     parser/Parser.cpp
+    parser/ParserService.cpp
 
     factory/FileSystem.cpp
     filesystem/common/CommonFile.cpp

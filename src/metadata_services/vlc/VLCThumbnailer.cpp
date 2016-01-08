@@ -42,9 +42,8 @@
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
 
-VLCThumbnailer::VLCThumbnailer(const VLC::Instance &vlc)
+VLCThumbnailer::VLCThumbnailer( const VLC::Instance &vlc )
     : m_instance( vlc )
-    , m_cb( nullptr )
     , m_ml( nullptr )
 #ifdef WITH_EVAS
     , m_canvas( nullptr, &evas_free )
@@ -86,40 +85,33 @@ VLCThumbnailer::~VLCThumbnailer()
 #endif
 }
 
-bool VLCThumbnailer::initialize(IMetadataServiceCb *callback, MediaLibrary* ml)
+bool VLCThumbnailer::initialize()
 {
-    m_cb = callback;
-    m_ml = ml;
+    m_ml = mediaLibrary();
     return true;
 }
 
-unsigned int VLCThumbnailer::priority() const
+parser::Task::Status VLCThumbnailer::run( parser::Task& task )
 {
-    // This needs to be lower than the VLCMetadataService, since we want to know the media type.
-    return 50;
-}
+    auto media = task.media;
+    auto file = task.file;
 
-void VLCThumbnailer::run( std::shared_ptr<Media> media, std::shared_ptr<File> file, void *data )
-{
     if ( media->type() == IMedia::Type::UnknownType )
     {
         // If we don't know the media type yet, it actually looks more like a bug
         // since this should run after media type deduction, and not run in case
         // that step fails.
-        m_cb->done( media, file, Status::Fatal, data );
-        return;
+        return parser::Task::Status::Fatal;
     }
     else if ( media->type() != IMedia::Type::VideoType )
     {
         // There's no point in generating a thumbnail for a non-video media.
-        m_cb->done( media, file, Status::Success, data );
-        return;
+        return parser::Task::Status::Success;
     }
     else if ( media->thumbnail().empty() == false )
     {
         LOG_INFO(media->thumbnail(), " already has a thumbnail" );
-        m_cb->done( media, file, Status::Success, data );
-        return;
+        return parser::Task::Status::Success;
     }
 
     LOG_INFO( "Generating ", file->mrl(), " thumbnail..." );
@@ -130,22 +122,23 @@ void VLCThumbnailer::run( std::shared_ptr<Media> media, std::shared_ptr<File> fi
 
     setupVout( mp );
 
-    if ( startPlayback( media, file, mp, data ) == false )
+    auto res = startPlayback( mp );
+    if ( res != parser::Task::Status::Success )
     {
         LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail" );
-        return;
+        return res;
     }
     // Seek ahead to have a significant preview
-    if ( seekAhead( media, file, mp, data ) == false )
+    res = seekAhead( mp );
+    if ( res != parser::Task::Status::Success )
     {
         LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail" );
-        return;
+        return res;
     }
-    takeThumbnail( media, file, mp, data );
-    LOG_INFO( "Done generating ", file->mrl(), " thumbnail" );
+    return takeThumbnail( media, file, mp );
 }
 
-bool VLCThumbnailer::startPlayback(std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::MediaPlayer &mp, void* data )
+parser::Task::Status VLCThumbnailer::startPlayback( VLC::MediaPlayer &mp )
 {
 
     mp.eventManager().onPlaying([this]() {
@@ -164,13 +157,12 @@ bool VLCThumbnailer::startPlayback(std::shared_ptr<Media> media, std::shared_ptr
     if ( success == false || s == libvlc_Error || s == libvlc_Ended )
     {
         // In case of timeout or error, don't go any further
-        m_cb->done( media, file, Status::Error, data );
-        return false;
+        return parser::Task::Status::Error;
     }
-    return true;
+    return parser::Task::Status::Success;
 }
 
-bool VLCThumbnailer::seekAhead(std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::MediaPlayer& mp, void* data )
+parser::Task::Status VLCThumbnailer::seekAhead( VLC::MediaPlayer& mp )
 {
     std::unique_lock<std::mutex> lock( m_mutex );
     float pos = .0f;
@@ -186,11 +178,8 @@ bool VLCThumbnailer::seekAhead(std::shared_ptr<Media> media, std::shared_ptr<Fil
     // Since we're locking a mutex for each position changed, let's unregister ASAP
     event->unregister();
     if ( success == false )
-    {
-        m_cb->done( media, file, Status::Error, data );
-        return false;
-    }
-    return true;
+        return parser::Task::Status::Error;
+    return parser::Task::Status::Success;
 }
 
 void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
@@ -245,7 +234,7 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
     );
 }
 
-bool VLCThumbnailer::takeThumbnail(std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::MediaPlayer &mp, void *data)
+parser::Task::Status VLCThumbnailer::takeThumbnail( std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::MediaPlayer &mp )
 {
     // lock, signal that we want a thumbnail, and wait.
     {
@@ -256,13 +245,10 @@ bool VLCThumbnailer::takeThumbnail(std::shared_ptr<Media> media, std::shared_ptr
             return m_thumbnailRequired == false;
         });
         if ( success == false )
-        {
-            m_cb->done( media, file, Status::Error, data );
-            return false;
-        }
+            return parser::Task::Status::Error;
     }
     mp.stop();
-    return compress( media, file, data );
+    return compress( media, file );
 }
 
 #ifdef WITH_JPEG
@@ -282,7 +268,7 @@ struct jpegError : public jpeg_error_mgr
 
 #endif
 
-bool VLCThumbnailer::compress( std::shared_ptr<Media> media, std::shared_ptr<File> file, void *data )
+parser::Task::Status VLCThumbnailer::compress( std::shared_ptr<Media> media, std::shared_ptr<File> file )
 {
     auto path = m_ml->thumbnailPath();
     path += "/";
@@ -303,8 +289,7 @@ bool VLCThumbnailer::compress( std::shared_ptr<Media> media, std::shared_ptr<Fil
     if ( fOut == nullptr )
     {
         LOG_ERROR("Failed to open thumbnail file ", path);
-        m_cb->done( media, file, Status::Error, data );
-        return false;
+        return parser::Task::Status::Error;
     }
 
     jpeg_compress_struct compInfo;
@@ -320,8 +305,7 @@ bool VLCThumbnailer::compress( std::shared_ptr<Media> media, std::shared_ptr<Fil
     {
         LOG_ERROR("JPEG failure: ", err.message);
         jpeg_destroy_compress(&compInfo);
-        m_cb->done( media, file, Status::Error, data );
-        return false;
+        return parser::Task::Status::Error;
     }
 
     jpeg_create_compress(&compInfo);
@@ -346,7 +330,7 @@ bool VLCThumbnailer::compress( std::shared_ptr<Media> media, std::shared_ptr<Fil
 #elif defined(WITH_EVAS)
     auto evas_obj = std::unique_ptr<Evas_Object, void(*)(Evas_Object*)>( evas_object_image_add( m_canvas.get() ), evas_object_del );
     if ( evas_obj == nullptr )
-        return false;
+        return parser::Task::Status::Error;
 
     uint8_t *p_buff = m_buff.get();
     if ( DesiredWidth != m_width )
@@ -370,9 +354,8 @@ bool VLCThumbnailer::compress( std::shared_ptr<Media> media, std::shared_ptr<Fil
 #endif
 
     media->setThumbnail( path );
+    LOG_INFO( "Done generating ", file->mrl(), " thumbnail" );
     if ( media->save() == false )
-        m_cb->done( media, file, Status::Error, data );
-    else
-        m_cb->done( media, file, Status::Success, data );
-    return true;
+        return parser::Task::Status::Error;
+    return parser::Task::Status::Success;
 }

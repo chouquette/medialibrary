@@ -22,51 +22,46 @@
 
 #pragma once
 
-#include <memory>
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
 #include <queue>
 
-#include "ParserService.h"
+#include "Task.h"
 
-#include "File.h"
+class MediaLibrary;
+class IParserCb;
 
-class IMediaLibraryCb;
-
-// Use an interface to expose only the "done" method
-class IParserCb
+class ParserService
 {
 public:
-    virtual ~IParserCb() = default;
-    virtual void done( std::unique_ptr<parser::Task> task, parser::Task::Status status ) = 0;
-};
+    ParserService();
+    virtual ~ParserService();
 
-class Parser : IParserCb
-{
-public:
-    using ServicePtr = std::unique_ptr<ParserService>;
-
-    Parser( DBConnection dbConnection, MediaLibrary* ml, IMediaLibraryCb* cb );
-    void addService( ServicePtr service );
-    void parse( std::shared_ptr<Media> media, std::shared_ptr<File> file );
     void start();
     void pause();
     void resume();
+    void parse( std::unique_ptr<parser::Task> t );
+    void initialize( MediaLibrary* mediaLibrary, IParserCb* parserCb );
+
+protected:
+    MediaLibrary* mediaLibrary();
+    /// Can be overriden to run service dependent initializations
+    virtual bool initialize();
+    virtual parser::Task::Status run( parser::Task& task ) = 0;
 
 private:
-    // Queues all unparsed files for parsing.
-    void restore();
-    void updateStats();
-    virtual void done( std::unique_ptr<parser::Task> task, parser::Task::Status status ) override;
+    // Thread(s) entry point
+    void mainloop();
 
 private:
-    typedef std::vector<ServicePtr> ServiceList;
-
-private:
-    ServiceList m_services;
-
-    DBConnection m_dbConnection;
     MediaLibrary* m_ml;
-    IMediaLibraryCb* m_callback;
-    std::atomic_uint m_opToDo;
-    std::atomic_uint m_opDone;
-    std::atomic_uint m_percent;
+    IParserCb* m_parserCb;
+    bool m_stopParser;
+    bool m_paused;
+    std::condition_variable m_cond;
+    std::queue<std::unique_ptr<parser::Task>> m_tasks;
+    std::thread m_thread;
+    std::mutex m_lock;
 };

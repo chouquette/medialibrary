@@ -24,120 +24,52 @@
 
 #include <algorithm>
 
+#include "IMediaLibrary.h"
 #include "Media.h"
 #include "File.h"
 
-Parser::Parser( DBConnection dbConnection, IMediaLibraryCb* cb )
-    : m_stopParser( false )
-    , m_dbConnection( dbConnection )
+Parser::Parser( DBConnection dbConnection, MediaLibrary* ml, IMediaLibraryCb* cb )
+    : m_dbConnection( dbConnection )
+    , m_ml( ml )
     , m_callback( cb )
     , m_opToDo( 0 )
     , m_opDone( 0 )
     , m_percent( 0 )
-    , m_paused( false )
 {
 }
 
-Parser::~Parser()
+void Parser::addService( ServicePtr service )
 {
-    if ( m_thread.joinable() )
-    {
-        {
-            std::lock_guard<std::mutex> lock( m_lock );
-            if ( m_tasks.empty() == true )
-                m_cond.notify_all();
-            m_stopParser = true;
-        }
-        m_thread.join();
-    }
-    while ( m_tasks.empty() == false )
-    {
-        delete m_tasks.front();
-        m_tasks.pop();
-    }
-}
-
-void Parser::addService( std::unique_ptr<IMetadataService> service )
-{
-    m_services.emplace_back( std::move( service ) );
-    std::push_heap( m_services.begin(), m_services.end(), []( const ServicePtr& a, const ServicePtr& b )
-    {
-        // We want higher priority first
-        return a->priority() < b->priority();
-    });
+    service->initialize( m_ml, this );
+    m_services.push_back( std::move( service ) );
 }
 
 void Parser::parse( std::shared_ptr<Media> media, std::shared_ptr<File> file )
 {
-    std::lock_guard<std::mutex> lock( m_lock );
-
     if ( m_services.size() == 0 )
         return;
-    m_tasks.push( new Task( media, file, m_services, m_callback ) );
+    m_services[0]->parse( std::unique_ptr<parser::Task>( new parser::Task( media, file ) ) );
     m_opToDo += m_services.size();
     updateStats();
-    if ( m_paused == false )
-        m_cond.notify_all();
 }
 
 void Parser::start()
 {
-    // Ensure we don't start multiple times.
-    assert( m_thread.joinable() == false );
-
-    m_thread = std::thread{ &Parser::run, this };
+    restore();
+    for ( auto& s : m_services )
+        s->start();
 }
 
 void Parser::pause()
 {
-    std::lock_guard<std::mutex> lock( m_lock );
-    m_paused = true;
+    for ( auto& s : m_services )
+        s->pause();
 }
 
 void Parser::resume()
 {
-    std::lock_guard<std::mutex> lock( m_lock );
-    m_paused = false;
-    m_cond.notify_all();
-}
-
-void Parser::run()
-{
-    LOG_INFO("Starting Parser thread");
-    restore();
-
-    while ( m_stopParser == false )
-    {
-        Task* task = nullptr;
-        {
-            std::unique_lock<std::mutex> lock( m_lock );
-            if ( m_tasks.empty() == true || m_paused == true )
-            {
-                m_cond.wait( lock, [this]() {
-                    return ( m_tasks.empty() == false && m_paused == false )
-                            || m_stopParser == true;
-                });
-                // We might have been woken up because the parser is being destroyed
-                if ( m_stopParser  == true )
-                    break;
-            }
-            // Otherwise it's safe to assume we have at least one element.
-            task = m_tasks.front();
-            m_tasks.pop();
-        }
-        try
-        {
-            (*task->it)->run( task->media, task->file, task );
-            // Consider the task invalid starting from this point. If it completed
-            // it cleared itself afterward.
-        }
-        catch (const std::exception& ex)
-        {
-            LOG_ERROR( "Caught an exception during ", task->file->mrl(), " parsing: ", ex.what() );
-            done( task->media, task->file, IMetadataService::Status::Fatal, task );
-        }
-    }
-    LOG_INFO("Exiting Parser thread");
+    for ( auto& s : m_services )
+        s->resume();
 }
 
 void Parser::restore()
@@ -149,11 +81,10 @@ void Parser::restore()
             + " WHERE parsed = 0 AND is_present = 1";
     auto files = File::fetchAll<File>( m_dbConnection, req );
 
-    std::lock_guard<std::mutex> lock( m_lock );
     for ( auto& f : files )
     {
         auto m = f->media();
-        m_tasks.push( new Task( m, f, m_services, m_callback ) );
+        parse( m, f );
     }
 }
 
@@ -170,41 +101,27 @@ void Parser::updateStats()
     }
 }
 
-Parser::Task::Task( std::shared_ptr<Media> media, std::shared_ptr<File> file, Parser::ServiceList& serviceList, IMediaLibraryCb* metadataCb )
-    : media( media )
-    , file( file )
-    , it( serviceList.begin() )
-    , end( serviceList.end() )
-    , cb( metadataCb )
-{
-}
-
-void Parser::done( std::shared_ptr<Media> media, std::shared_ptr<File> file, IMetadataService::Status status, void* data )
+void Parser::done( std::unique_ptr<parser::Task> t, parser::Task::Status status )
 {
     ++m_opDone;
     updateStats();
 
-    Task *t = reinterpret_cast<Task*>( data );
-    if ( status == IMetadataService::Status::TemporaryUnavailable ||
-         status == IMetadataService::Status::Fatal )
+    if ( status == parser::Task::Status::TemporaryUnavailable ||
+         status == parser::Task::Status::Fatal )
     {
-        delete t;
         return;
     }
-    else if ( status == IMetadataService::Status::Success )
+    if ( status == parser::Task::Status::Success )
     {
-        if ( t->cb != nullptr )
-            t->cb->onFileUpdated( media );
+        if ( m_callback != nullptr )
+            m_callback->onFileUpdated( t->media );
     }
 
-    ++t->it;
-    if (t->it == t->end)
+    auto serviceIdx = ++t->currentService;
+    if ( serviceIdx == m_services.size() )
     {
-        file->markParsed();
-        delete t;
+        t->file->markParsed();
         return;
     }
-    std::lock_guard<std::mutex> lock( m_lock );
-    m_tasks.push( t );
-    m_cond.notify_all();
+    m_services[serviceIdx]->parse( std::move( t ) );
 }

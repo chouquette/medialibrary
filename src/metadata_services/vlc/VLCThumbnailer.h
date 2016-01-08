@@ -30,7 +30,7 @@
 #include <Evas.h>
 #endif
 
-#include "IMetadataService.h"
+#include "parser/ParserService.h"
 
 #ifdef WITH_JPEG
 #define BPP 3
@@ -42,21 +42,20 @@
 #error No compression strategy
 #endif
 
-class VLCThumbnailer : public IMetadataService
+class VLCThumbnailer : public ParserService
 {
 public:
     explicit VLCThumbnailer( const VLC::Instance& vlc );
     virtual ~VLCThumbnailer();
-    virtual bool initialize(IMetadataServiceCb *callback, MediaLibrary *ml) override;
-    virtual unsigned int priority() const override;
-    virtual void run(std::shared_ptr<Media> media, std::shared_ptr<File> file, void *data ) override;
+    virtual parser::Task::Status run( parser::Task& task ) override;
+    virtual bool initialize() override;
 
 private:
-    bool startPlayback(std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::MediaPlayer& mp, void *data);
-    bool seekAhead( std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::MediaPlayer &mp, void *data);
-    void setupVout(VLC::MediaPlayer &mp);
-    bool takeThumbnail(std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::MediaPlayer &mp, void* data);
-    bool compress(std::shared_ptr<Media> media, std::shared_ptr<File> file, void* data );
+    parser::Task::Status startPlayback( VLC::MediaPlayer& mp );
+    parser::Task::Status seekAhead( VLC::MediaPlayer &mp );
+    void setupVout( VLC::MediaPlayer &mp );
+    parser::Task::Status takeThumbnail( std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::MediaPlayer &mp );
+    parser::Task::Status compress( std::shared_ptr<Media> media, std::shared_ptr<File> file );
 
 private:
     // Force a base width, let height be computed depending on A/R
@@ -66,7 +65,6 @@ private:
 
 private:
     VLC::Instance m_instance;
-    IMetadataServiceCb* m_cb;
     MediaLibrary* m_ml;
     std::mutex m_mutex;
     std::condition_variable m_cond;

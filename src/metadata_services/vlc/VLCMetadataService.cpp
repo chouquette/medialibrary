@@ -31,37 +31,30 @@
 #include "Show.h"
 #include "utils/Filename.h"
 
-VLCMetadataService::VLCMetadataService(const VLC::Instance& vlc, DBConnection dbConnection, std::shared_ptr<factory::IFileSystem> fsFactory )
+VLCMetadataService::VLCMetadataService( const VLC::Instance& vlc, DBConnection dbConnection, std::shared_ptr<factory::IFileSystem> fsFactory )
     : m_instance( vlc )
-    , m_cb( nullptr )
-    , m_ml( nullptr )
     , m_dbConn( dbConnection )
     , m_fsFactory( fsFactory )
 {
 }
 
-bool VLCMetadataService::initialize( IMetadataServiceCb* callback, MediaLibrary* ml )
+bool VLCMetadataService::initialize()
 {
-    m_cb = callback;
-    m_ml = ml;
+    m_ml = mediaLibrary();
     m_unknownArtist = Artist::fetch( m_dbConn, medialibrary::UnknownArtistID );
     if ( m_unknownArtist == nullptr )
         LOG_ERROR( "Failed to cache unknown artist" );
     return m_unknownArtist != nullptr;
 }
 
-unsigned int VLCMetadataService::priority() const
+parser::Task::Status VLCMetadataService::run( parser::Task& task )
 {
-    return 100;
-}
-
-void VLCMetadataService::run(std::shared_ptr<Media> media, std::shared_ptr<File> file, void* data )
-{
+    auto media = task.media;
+    auto file = task.file;
     if ( media->duration() != -1 )
     {
         LOG_INFO( file->mrl(), " was already parsed" );
-        m_cb->done( media, file, Status::Success, data );
-        return;
+        return parser::Task::Status::Success;
     }
     LOG_INFO( "Parsing ", file->mrl() );
     auto chrono = std::chrono::steady_clock::now();
@@ -86,23 +79,20 @@ void VLCMetadataService::run(std::shared_ptr<Media> media, std::shared_ptr<File>
     ctx->vlcMedia.parseAsync();
     auto success = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [&done]() { return done == true; } );
     if ( success == false )
-        m_cb->done( ctx->media, file,  Status::Fatal, data );
-    else
-    {
-        auto status = handleMediaMeta( media, file, ctx->vlcMedia );
-        m_cb->done( ctx->media, file, status, data );
-    }
+        return parser::Task::Status::Fatal;
+    auto status = handleMediaMeta( media, file, ctx->vlcMedia );
     auto duration = std::chrono::steady_clock::now() - chrono;
     LOG_DEBUG( "Parsed ", file->mrl(), " in ", std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
+    return status;
 }
 
-IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::Media& vlcMedia ) const
+parser::Task::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::Media& vlcMedia ) const
 {
     const auto tracks = vlcMedia.tracks();
     if ( tracks.size() == 0 )
     {
         LOG_ERROR( "Failed to fetch tracks" );
-        return Status::Fatal;
+        return parser::Task::Status::Fatal;
     }
 
     auto t = m_dbConn->newTransaction();
@@ -127,18 +117,18 @@ IMetadataService::Status VLCMetadataService::handleMediaMeta( std::shared_ptr<Me
     if ( isAudio == true )
     {
         if ( parseAudioFile( *media, *file, vlcMedia ) == false )
-            return Status::Fatal;
+            return parser::Task::Status::Fatal;
     }
     else
     {
         if (parseVideoFile( media, vlcMedia ) == false )
-            return Status::Fatal;
+            return parser::Task::Status::Fatal;
     }
     auto duration = vlcMedia.duration();
     media->setDuration( duration );
     if ( media->save() == false )
-        return Status::Error;
-    return Status::Success;
+        return parser::Task::Status::Error;
+    return parser::Task::Status::Success;
 }
 
 /* Video files */

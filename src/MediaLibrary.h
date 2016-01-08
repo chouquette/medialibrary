@@ -24,6 +24,7 @@
 #define MEDIALIBRARY_H
 
 class Parser;
+class ParserService;
 class DiscovererWorker;
 class SqliteConnection;
 
@@ -100,7 +101,6 @@ class MediaLibrary : public IMediaLibrary
         static const std::vector<std::string> supportedAudioExtensions;
 
     private:
-        void addMetadataService( std::unique_ptr<IMetadataService> service );
         virtual void startParser();
         virtual void startDiscoverer();
         bool updateDatabaseModel( unsigned int previousVersion );

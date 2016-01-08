@@ -35,7 +35,6 @@
 #include "Folder.h"
 #include "Media.h"
 #include "MediaLibrary.h"
-#include "IMetadataService.h"
 #include "Label.h"
 #include "logging/Logger.h"
 #include "Movie.h"
@@ -365,20 +364,9 @@ bool MediaLibrary::deletePlaylist( unsigned int playlistId )
     return Playlist::destroy( m_dbConnection.get(), playlistId );
 }
 
-void MediaLibrary::addMetadataService(std::unique_ptr<IMetadataService> service)
-{
-    if ( service->initialize( m_parser.get(), this ) == false )
-    {
-        //FIXME: This is missing a name or something more specific
-        LOG_ERROR( "Failed to initialize service" );
-        return;
-    }
-    m_parser->addService( std::move( service ) );
-}
-
 void MediaLibrary::startParser()
 {
-    m_parser.reset( new Parser( m_dbConnection.get(), m_callback ) );
+    m_parser.reset( new Parser( m_dbConnection.get(), this, m_callback ) );
 
     const char* args[] = {
         "-vv",
@@ -397,8 +385,8 @@ void MediaLibrary::startParser()
 
     auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService( m_vlcInstance, m_dbConnection.get(), m_fsFactory ) );
     auto thumbnailerService = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer( m_vlcInstance ) );
-    addMetadataService( std::move( vlcService ) );
-    addMetadataService( std::move( thumbnailerService ) );
+    m_parser->addService( std::move( vlcService ) );
+    m_parser->addService( std::move( thumbnailerService ) );
     m_parser->start();
 }
 

@@ -27,15 +27,16 @@
 #include <vlcpp/vlc.hpp>
 #include <mutex>
 
-#include "IMetadataService.h"
+#include "parser/ParserService.h"
 #include "MediaLibrary.h"
+#include "AlbumTrack.h"
 
-class VLCMetadataService : public IMetadataService
+class VLCMetadataService : public ParserService
 {
     struct Context
     {
-        explicit Context( std::shared_ptr<Media> media_ )
-            : media( media_ )
+        explicit Context( std::shared_ptr<Media> media )
+            : media( media )
         {
         }
 
@@ -44,14 +45,13 @@ class VLCMetadataService : public IMetadataService
     };
 
     public:
-        explicit VLCMetadataService(const VLC::Instance& vlc, DBConnection dbConnection, std::shared_ptr<factory::IFileSystem> fsFactory);
+        explicit VLCMetadataService( const VLC::Instance& vlc, DBConnection dbConnection, std::shared_ptr<factory::IFileSystem> fsFactory );
 
-        virtual bool initialize( IMetadataServiceCb *callback, MediaLibrary* ml ) override;
-        virtual unsigned int priority() const override;
-        virtual void run( std::shared_ptr<Media> media, std::shared_ptr<File> file, void *data ) override;
+        virtual bool initialize() override;
+        virtual parser::Task::Status run( parser::Task& task ) override;
 
 private:
-        Status handleMediaMeta(std::shared_ptr<Media> media , std::shared_ptr<File> file, VLC::Media &vlcMedia ) const;
+        parser::Task::Status handleMediaMeta(std::shared_ptr<Media> media , std::shared_ptr<File> file, VLC::Media &vlcMedia ) const;
         std::shared_ptr<Album> findAlbum(File& file, VLC::Media& vlcMedia, const std::string& title, Artist* albumArtist ) const;
         bool parseAudioFile(Media& media, File& file, VLC::Media &vlcMedia ) const;
         bool parseVideoFile( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const;
@@ -61,14 +61,13 @@ private:
         std::shared_ptr<Album> handleAlbum(Media& media, File& file, VLC::Media& vlcMedia, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist ) const;
 
         VLC::Instance m_instance;
-        IMetadataServiceCb* m_cb;
-        MediaLibrary* m_ml;
         std::vector<Context*> m_keepAlive;
         std::mutex m_mutex;
         std::condition_variable m_cond;
         DBConnection m_dbConn;
         std::shared_ptr<factory::IFileSystem> m_fsFactory;
         std::shared_ptr<Artist> m_unknownArtist;
+        MediaLibrary* m_ml;
 };
 
 #endif // VLCMETADATASERVICE_H
