@@ -31,23 +31,32 @@ ParserService::ParserService()
 
 ParserService::~ParserService()
 {
-    if ( m_thread.joinable() )
+    // Alert first:
+    for ( auto& t : m_threads )
     {
+        if ( t.joinable() )
         {
-            std::lock_guard<std::mutex> lock( m_lock );
-            m_cond.notify_all();
-            m_stopParser = true;
+            {
+                std::lock_guard<std::mutex> lock( m_lock );
+                m_cond.notify_all();
+                m_stopParser = true;
+            }
         }
-        m_thread.join();
+    }
+    // Join afterward:
+    for ( auto& t : m_threads )
+    {
+        if ( t.joinable() )
+            t.join();
     }
 }
 
 void ParserService::start()
 {
     // Ensure we don't start multiple times.
-    assert( m_thread.joinable() == false );
-
-    m_thread = std::thread{ &ParserService::mainloop, this };
+    assert( m_threads.size() == 0 );
+    for ( auto i = 0u; i < nbThreads(); ++i )
+        m_threads.emplace_back( &ParserService::mainloop, this );
 }
 
 void ParserService::pause()

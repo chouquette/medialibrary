@@ -58,6 +58,7 @@ private:
     parser::Task::Status compress( std::shared_ptr<Media> media, std::shared_ptr<File> file );
 
     virtual const char* name() const;
+    virtual uint8_t nbThreads() const override;
 
 private:
     // Force a base width, let height be computed depending on A/R

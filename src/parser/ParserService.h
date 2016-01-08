@@ -51,6 +51,7 @@ protected:
     virtual bool initialize();
     virtual parser::Task::Status run( parser::Task& task ) = 0;
     virtual const char* name() const = 0;
+    virtual uint8_t nbThreads() const = 0;
 
 private:
     // Thread(s) entry point
@@ -63,6 +64,6 @@ private:
     bool m_paused;
     std::condition_variable m_cond;
     std::queue<std::unique_ptr<parser::Task>> m_tasks;
-    std::thread m_thread;
+    std::vector<std::thread> m_threads;
     std::mutex m_lock;
 };

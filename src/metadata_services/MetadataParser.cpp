@@ -468,3 +468,13 @@ const char* MetadataParser::name() const
 {
     return "Metadata";
 }
+
+uint8_t MetadataParser::nbThreads() const
+{
+//    auto nbProcs = std::thread::hardware_concurrency();
+//    if ( nbProcs == 0 )
+//        return 1;
+//    return nbProcs;
+    // Let's make this code thread-safe first :)
+    return 1;
+}

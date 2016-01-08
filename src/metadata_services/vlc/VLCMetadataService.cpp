@@ -71,3 +71,8 @@ const char* VLCMetadataService::name() const
     return "VLC";
 }
 
+uint8_t VLCMetadataService::nbThreads() const
+{
+    return 1;
+}
+

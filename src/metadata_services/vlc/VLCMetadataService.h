@@ -35,8 +35,10 @@ class VLCMetadataService : public ParserService
     public:
         explicit VLCMetadataService(const VLC::Instance& vlc);
 
+private:
         virtual parser::Task::Status run( parser::Task& task ) override;
         virtual const char* name() const override;
+        virtual uint8_t nbThreads() const override;
 
 private:
         VLC::Instance m_instance;

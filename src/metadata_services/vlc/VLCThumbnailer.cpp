@@ -364,3 +364,8 @@ const char*VLCThumbnailer::name() const
 {
     return "Thumbnailer";
 }
+
+uint8_t VLCThumbnailer::nbThreads() const
+{
+    return 1;
+}

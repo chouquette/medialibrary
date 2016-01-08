@@ -35,6 +35,7 @@ protected:
     virtual bool initialize() override;
     virtual parser::Task::Status run( parser::Task& task ) override;
     virtual const char* name() const override;
+    virtual uint8_t nbThreads() const override;
 
     std::shared_ptr<Album> findAlbum(File& file, VLC::Media& vlcMedia, const std::string& title, Artist* albumArtist ) const;
     bool parseAudioFile(Media& media, File& file, VLC::Media &vlcMedia ) const;
