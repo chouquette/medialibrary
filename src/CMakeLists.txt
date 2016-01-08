@@ -94,6 +94,7 @@ if (${WITH_VLC})
     list(APPEND SRC_LIST
         metadata_services/vlc/VLCMetadataService.cpp
         metadata_services/vlc/VLCThumbnailer.cpp
+        metadata_services/MetadataParser.cpp
     )
 endif()
 

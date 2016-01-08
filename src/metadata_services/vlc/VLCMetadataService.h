@@ -28,47 +28,20 @@
 #include <mutex>
 
 #include "parser/ParserService.h"
-#include "MediaLibrary.h"
 #include "AlbumTrack.h"
 
 class VLCMetadataService : public ParserService
 {
-    struct Context
-    {
-        explicit Context( std::shared_ptr<Media> media )
-            : media( media )
-        {
-        }
-
-        std::shared_ptr<Media> media;
-        VLC::Media vlcMedia;
-    };
-
     public:
-        explicit VLCMetadataService( const VLC::Instance& vlc, DBConnection dbConnection, std::shared_ptr<factory::IFileSystem> fsFactory );
+        explicit VLCMetadataService(const VLC::Instance& vlc);
 
-        virtual bool initialize() override;
         virtual parser::Task::Status run( parser::Task& task ) override;
         virtual const char* name() const override;
 
 private:
-        parser::Task::Status handleMediaMeta(std::shared_ptr<Media> media , std::shared_ptr<File> file, VLC::Media &vlcMedia ) const;
-        std::shared_ptr<Album> findAlbum(File& file, VLC::Media& vlcMedia, const std::string& title, Artist* albumArtist ) const;
-        bool parseAudioFile(Media& media, File& file, VLC::Media &vlcMedia ) const;
-        bool parseVideoFile( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const;
-        std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> handleArtists(VLC::Media& vlcMedia ) const;
-        std::shared_ptr<AlbumTrack> handleTrack(std::shared_ptr<Album> album, Media& media, VLC::Media& vlcMedia , std::shared_ptr<Artist> artist) const;
-        bool link(Media& media, std::shared_ptr<Album> album, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist ) const;
-        std::shared_ptr<Album> handleAlbum(Media& media, File& file, VLC::Media& vlcMedia, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist ) const;
-
         VLC::Instance m_instance;
-        std::vector<Context*> m_keepAlive;
         std::mutex m_mutex;
         std::condition_variable m_cond;
-        DBConnection m_dbConn;
-        std::shared_ptr<factory::IFileSystem> m_fsFactory;
-        std::shared_ptr<Artist> m_unknownArtist;
-        MediaLibrary* m_ml;
 };
 
 #endif // VLCMETADATASERVICE_H

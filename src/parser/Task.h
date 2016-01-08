@@ -26,6 +26,8 @@ class Media;
 class File;
 
 #include <memory>
+// This sucks quite a bit in term of dependencies and compile time :/
+#include <vlcpp/vlc.hpp>
 
 namespace parser
 {
@@ -58,6 +60,7 @@ struct Task
 
     std::shared_ptr<Media>  media;
     std::shared_ptr<File>   file;
+    VLC::Media              vlcMedia;
     unsigned int            currentService;
 };
 

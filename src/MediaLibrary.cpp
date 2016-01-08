@@ -53,6 +53,7 @@
 // Metadata services:
 #include "metadata_services/vlc/VLCMetadataService.h"
 #include "metadata_services/vlc/VLCThumbnailer.h"
+#include "metadata_services/MetadataParser.h"
 
 #include "filesystem/IDirectory.h"
 #include "filesystem/IFile.h"
@@ -383,9 +384,11 @@ void MediaLibrary::startParser()
             Log::Info( msg );
     });
 
-    auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService( m_vlcInstance, m_dbConnection.get(), m_fsFactory ) );
+    auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService( m_vlcInstance ) );
+    auto metadataService = std::unique_ptr<MetadataParser>( new MetadataParser( m_dbConnection.get(), m_fsFactory ) );
     auto thumbnailerService = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer( m_vlcInstance ) );
     m_parser->addService( std::move( vlcService ) );
+    m_parser->addService( std::move( metadataService ) );
     m_parser->addService( std::move( thumbnailerService ) );
     m_parser->start();
 }
