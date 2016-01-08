@@ -39,7 +39,7 @@
 #include "Label.h"
 #include "logging/Logger.h"
 #include "Movie.h"
-#include "Parser.h"
+#include "parser/Parser.h"
 #include "Playlist.h"
 #include "Show.h"
 #include "ShowEpisode.h"

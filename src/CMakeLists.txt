@@ -63,12 +63,13 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     Movie.cpp
     VideoTrack.cpp
     AudioTrack.cpp
-    Parser.cpp
     Artist.cpp
     Settings.cpp
     Device.cpp
     File.cpp
     Playlist.cpp
+
+    parser/Parser.cpp
 
     factory/FileSystem.cpp
     filesystem/common/CommonFile.cpp
