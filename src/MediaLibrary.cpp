@@ -340,7 +340,15 @@ ArtistPtr MediaLibrary::artist( const std::string& name )
 
 std::shared_ptr<Artist> MediaLibrary::createArtist( const std::string& name )
 {
-    return Artist::create( m_dbConnection.get(), name );
+    try
+    {
+        return Artist::create( m_dbConnection.get(), name );
+    }
+    catch( sqlite::errors::ConstraintViolation &ex )
+    {
+        LOG_WARN( "ContraintViolation while creating an artist (", ex.what(), ") attempting to fetch it instead" );
+        return std::static_pointer_cast<Artist>( artist( name ) );
+    }
 }
 
 std::vector<ArtistPtr> MediaLibrary::artists() const
