@@ -58,7 +58,7 @@ const std::string& Label::name() const
 std::vector<MediaPtr> Label::files()
 {
     static const std::string req = "SELECT f.* FROM " + policy::MediaTable::Name + " f "
-            "LEFT JOIN LabelFileRelation lfr ON lfr.media_id = f.id_media "
+            "INNER JOIN LabelFileRelation lfr ON lfr.media_id = f.id_media "
             "WHERE lfr.label_id = ?";
     return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
 }

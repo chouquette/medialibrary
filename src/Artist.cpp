@@ -89,7 +89,7 @@ std::vector<AlbumPtr> Artist::albums() const
 std::vector<MediaPtr> Artist::media() const
 {
     static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
-            "LEFT JOIN MediaArtistRelation mar ON mar.media_id = med.id_media "
+            "INNER JOIN MediaArtistRelation mar ON mar.media_id = med.id_media "
             "WHERE mar.artist_id = ? AND med.is_present = 1";
     return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
 }

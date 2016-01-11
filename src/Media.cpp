@@ -144,7 +144,7 @@ void Media::setShowEpisode( ShowEpisodePtr episode )
 std::vector<LabelPtr> Media::labels()
 {
     static const std::string req = "SELECT l.* FROM " + policy::LabelTable::Name + " l "
-            "LEFT JOIN LabelFileRelation lfr ON lfr.label_id = l.id_label "
+            "INNER JOIN LabelFileRelation lfr ON lfr.label_id = l.id_label "
             "WHERE lfr.media_id = ?";
     return Label::fetchAll<ILabel>( m_dbConnection, req, m_id );
 }

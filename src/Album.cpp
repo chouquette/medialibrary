@@ -139,7 +139,7 @@ std::vector<MediaPtr> Album::tracks() const
     // This doesn't return the cached version, because it would be fairly complicated, if not impossible or
     // counter productive, to maintain a cache that respects all orderings.
     static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
-            " LEFT JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
+            " INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
             " WHERE att.album_id = ? AND med.is_present = 1 ORDER BY att.disc_number, att.track_number";
     return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
 }
@@ -215,7 +215,7 @@ bool Album::setAlbumArtist( Artist* artist )
 std::vector<ArtistPtr> Album::artists() const
 {
     static const std::string req = "SELECT art.* FROM " + policy::ArtistTable::Name + " art "
-            "LEFT JOIN AlbumArtistRelation aar ON aar.artist_id = art.id_artist "
+            "INNER JOIN AlbumArtistRelation aar ON aar.artist_id = art.id_artist "
             "WHERE aar.album_id = ?";
     return Artist::fetchAll<IArtist>( m_dbConnection, req, m_id );
 }
