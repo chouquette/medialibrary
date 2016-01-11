@@ -98,7 +98,7 @@ std::shared_ptr<Media> File::media() const
     {
         m_media = Media::fetch( m_dbConnection, m_mediaId );
     }
-    return m_media.get();
+    return m_media.get().lock();
 }
 
 bool File::destroy()

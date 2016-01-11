@@ -74,7 +74,7 @@ private:
 
     DBConnection m_dbConnection;
     mutable Cache<std::string> m_fullPath;
-    mutable Cache<std::shared_ptr<Media>> m_media;
+    mutable Cache<std::weak_ptr<Media>> m_media;
 
     friend class policy::FileTable;
 };
