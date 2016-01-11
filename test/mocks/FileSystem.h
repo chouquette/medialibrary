@@ -132,7 +132,7 @@ public:
 
     virtual std::shared_ptr<fs::IDevice> device() const override
     {
-        return std::static_pointer_cast<fs::IDevice>( m_device );
+        return std::static_pointer_cast<fs::IDevice>( m_device.lock() );
     }
 
     void addFile( const std::string& filePath )
@@ -158,7 +158,7 @@ public:
         auto remainingPath = utils::file::removePath( folder, subFolder );
         if ( remainingPath.empty() == true )
         {
-            auto dir = std::make_shared<Directory>( m_path + subFolder, m_device );
+            auto dir = std::make_shared<Directory>( m_path + subFolder, m_device.lock() );
             m_dirs[subFolder] = dir;
             m_dirPathes.clear();
         }
@@ -267,7 +267,7 @@ private:
     std::unordered_map<std::string, std::shared_ptr<Directory>> m_dirs;
     std::vector<std::string> m_filePathes;
     std::vector<std::string> m_dirPathes;
-    std::shared_ptr<Device> m_device;
+    std::weak_ptr<Device> m_device;
 };
 
 class Device : public fs::IDevice, public std::enable_shared_from_this<Device>
