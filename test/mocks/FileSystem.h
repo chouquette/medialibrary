@@ -539,9 +539,9 @@ public:
 class NoopDevice : public fs::IDevice
 {
 public:
-    virtual const std::string&uuid() const override
+    virtual const std::string& uuid() const override
     {
-        assert(false);
+        abort();
     }
 
     virtual bool isRemovable() const override
@@ -556,7 +556,7 @@ public:
 
     virtual const std::string& mountpoint() const override
     {
-        assert(false);
+        abort();
     }
 };
 
@@ -565,17 +565,17 @@ class NoopDirectory : public fs::IDirectory
 {
     virtual const std::string& path() const override
     {
-        assert(false);
+        abort();
     }
 
     virtual const std::vector<std::string>&files() override
     {
-        assert(false);
+        abort();
     }
 
     virtual const std::vector<std::string>&dirs() override
     {
-        assert(false);
+        abort();
     }
 
     virtual std::shared_ptr<fs::IDevice> device() const override
