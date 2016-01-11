@@ -33,6 +33,8 @@ public:
 
     bool isCached() const { return m_cached; }
 
+    void markCached() { m_cached = true; }
+
     operator T() const
     {
         assert( m_cached );

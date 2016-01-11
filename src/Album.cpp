@@ -168,6 +168,13 @@ std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsig
     m_nbTracks++;
     t->commit();
     auto lock = m_tracks.lock();
+    // Don't assume we have always have a valid value in m_tracks.
+    // While it's ok to assume that if we are currently parsing the album, we
+    // have a valid cache tracks, this isn't true when restarting an interrupted parsing.
+    // The nbTracks value will be correct however. If it's equal to one, it means we're inserting
+    // the first track in this album
+    if ( m_tracks.isCached() == false && m_nbTracks == 1 )
+        m_tracks.markCached();
     if ( m_tracks.isCached() == true )
         m_tracks.get().push_back( media );
     return track;
