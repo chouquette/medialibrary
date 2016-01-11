@@ -29,6 +29,7 @@
 #include <memory>
 #include <sqlite3.h>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "Types.h"
@@ -101,19 +102,28 @@ class Statement
 {
 public:
     Statement( DBConnection dbConnection, const std::string& req )
-        : m_stmt( nullptr, &sqlite3_finalize )
+        : m_stmt( nullptr, &sqlite3_reset )
         , m_dbConn( dbConnection )
         , m_req( req )
         , m_bindIdx( 0 )
     {
-        sqlite3_stmt* stmt;
-        int res = sqlite3_prepare_v2( dbConnection->getConn(), req.c_str(), -1, &stmt, NULL );
-        if ( res != SQLITE_OK )
+        auto it = StatementsCache.find( req );
+        if ( it == end( StatementsCache ) )
         {
-            throw std::runtime_error( std::string( "Failed to execute request: " ) + req + " " +
-                        sqlite3_errmsg( dbConnection->getConn() ) );
+            sqlite3_stmt* stmt;
+            int res = sqlite3_prepare_v2( dbConnection->getConn(), req.c_str(), -1, &stmt, NULL );
+            if ( res != SQLITE_OK )
+            {
+                throw std::runtime_error( std::string( "Failed to execute request: " ) + req + " " +
+                            sqlite3_errmsg( dbConnection->getConn() ) );
+            }
+            m_stmt.reset( stmt );
+            StatementsCache.emplace( req, CachedStmtPtr( stmt, &sqlite3_finalize ) );
         }
-        m_stmt.reset( stmt );
+        else
+        {
+            m_stmt.reset( it->second.get() );
+        }
     }
 
     template <typename... Args>
@@ -155,10 +165,13 @@ private:
     }
 
 private:
-    std::unique_ptr<sqlite3_stmt, int (*)(sqlite3_stmt*)> m_stmt;
+    using CachedStmtPtr = std::unique_ptr<sqlite3_stmt, int (*)(sqlite3_stmt*)>;
+    using StmtPtr = CachedStmtPtr;
+    StmtPtr m_stmt;
     DBConnection m_dbConn;
     std::string m_req;
     unsigned int m_bindIdx;
+    static thread_local std::unordered_map<std::string, CachedStmtPtr> StatementsCache;
 };
 
 class Tools
