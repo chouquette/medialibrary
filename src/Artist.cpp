@@ -27,7 +27,7 @@
 
 #include "database/SqliteTools.h"
 
-const std::string policy::ArtistTable::Name = "artist";
+const std::string policy::ArtistTable::Name = "Artist";
 const std::string policy::ArtistTable::PrimaryKeyColumn = "id_artist";
 unsigned int Artist::*const policy::ArtistTable::PrimaryKey = &Artist::m_id;
 
