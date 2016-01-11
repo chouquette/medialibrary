@@ -97,6 +97,13 @@ class IMediaLibrary
         virtual ArtistPtr artist( unsigned int id ) = 0;
         virtual std::vector<ArtistPtr> artists() const = 0;
 
+        /***
+         *  Playlists
+         */
+        virtual PlaylistPtr createPlaylist( const std::string& name ) = 0;
+        virtual std::vector<PlaylistPtr> playlists() = 0;
+        virtual bool deletePlaylist( unsigned int playlistId ) = 0;
+
         /**
          * @brief discover Launch a discovery on the provided entry point.
          * The actuall discovery will run asynchronously, meaning this method will immediatly return.

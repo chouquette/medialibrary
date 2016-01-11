@@ -22,6 +22,8 @@
 
 #include "gtest/gtest.h"
 
+class Playlist;
+
 #include "factory/IFileSystem.h"
 #include "MediaLibrary.h"
 #include "Folder.h"
@@ -34,6 +36,7 @@ public:
     MediaPtr media( const std::string& path );
     std::shared_ptr<Folder> folder( const std::string& path );
     std::shared_ptr<Media> addFile( const std::string& path );
+    std::shared_ptr<Playlist> playlist( unsigned int playlistId );
 
 private:
     std::unique_ptr<fs::IDirectory> dummyDirectory;

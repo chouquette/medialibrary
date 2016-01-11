@@ -34,6 +34,7 @@ list(APPEND HEADERS_LIST
     ${CMAKE_SOURCE_DIR}/include/factory/IFileSystem.h
     ${CMAKE_SOURCE_DIR}/include/ILogger.h
     ${CMAKE_SOURCE_DIR}/include/IArtist.h
+    ${CMAKE_SOURCE_DIR}/include/IPlaylist.h
 
     database/SqliteTools.h
 
@@ -67,6 +68,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     Settings.cpp
     Device.cpp
     File.cpp
+    Playlist.cpp
 
     factory/FileSystem.cpp
     filesystem/common/CommonFile.cpp

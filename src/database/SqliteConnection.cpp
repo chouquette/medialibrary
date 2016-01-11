@@ -50,6 +50,8 @@ sqlite3 *SqliteConnection::getConn()
         lock.unlock();
         if ( sqlite::Tools::executeRequestLocked( this, "PRAGMA foreign_keys = ON" ) == false )
             throw std::runtime_error( "Failed to enable foreign keys" );
+        if ( sqlite::Tools::executeRequestLocked( this, "PRAGMA recursive_triggers = ON" ) == false )
+            throw std::runtime_error( "Failed to enable recursive triggers" );
         return dbConnection;
     }
     return it->second.get();

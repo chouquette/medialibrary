@@ -13,6 +13,7 @@ list(APPEND TEST_SRCS
     unittest/AlbumTrackTests.cpp
     unittest/DeviceTests.cpp
     unittest/FileTests.cpp
+    unittest/PlaylistTests.cpp
 
     mocks/FileSystem.h
     mocks/FileSystem.cpp

@@ -39,6 +39,7 @@ class IShowEpisode;
 class IVideoTrack;
 class ILogger;
 class IArtist;
+class IPlaylist;
 class SqliteConnection;
 
 typedef std::shared_ptr<IMedia> MediaPtr;
@@ -52,6 +53,7 @@ typedef std::shared_ptr<IMovie> MoviePtr;
 typedef std::shared_ptr<IAudioTrack> AudioTrackPtr;
 typedef std::shared_ptr<IVideoTrack> VideoTrackPtr;
 typedef std::shared_ptr<IArtist> ArtistPtr;
+typedef std::shared_ptr<IPlaylist> PlaylistPtr;
 
 typedef SqliteConnection* DBConnection;
 

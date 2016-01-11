@@ -32,6 +32,7 @@
 #include "mocks/FileSystem.h"
 #include "Media.h"
 #include "Folder.h"
+#include "Playlist.h"
 
 class TestEnv : public ::testing::Environment
 {
@@ -117,4 +118,9 @@ std::shared_ptr<Folder> MediaLibraryTester::folder( const std::string& path )
 std::shared_ptr<Media> MediaLibraryTester::addFile( const std::string& path )
 {
     return MediaLibrary::addFile( path, dummyFolder, *dummyDirectory );
+}
+
+std::shared_ptr<Playlist> MediaLibraryTester::playlist(unsigned int playlistId)
+{
+    return Playlist::fetch( m_dbConnection.get(), playlistId );
 }

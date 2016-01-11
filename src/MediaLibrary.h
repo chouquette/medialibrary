@@ -77,6 +77,10 @@ class MediaLibrary : public IMediaLibrary
         std::shared_ptr<Artist> createArtist( const std::string& name );
         virtual std::vector<ArtistPtr> artists() const override;
 
+        virtual PlaylistPtr createPlaylist( const std::string& name ) override;
+        virtual std::vector<PlaylistPtr> playlists() override;
+        virtual bool deletePlaylist( unsigned int playlistId ) override;
+
         virtual void discover( const std::string& entryPoint ) override;
         bool ignoreFolder( const std::string& path ) override;
 

@@ -40,6 +40,7 @@
 #include "logging/Logger.h"
 #include "Movie.h"
 #include "Parser.h"
+#include "Playlist.h"
 #include "Show.h"
 #include "ShowEpisode.h"
 #include "database/SqliteTools.h"
@@ -103,6 +104,7 @@ MediaLibrary::~MediaLibrary()
     Artist::clear();
     Device::clear();
     File::clear();
+    Playlist::clear();
     // Explicitely release the connection's TLS
     if ( m_dbConnection != nullptr )
         m_dbConnection->release();
@@ -122,6 +124,7 @@ bool MediaLibrary::createAllTables()
         Media::createTable( m_dbConnection.get() ) &&
         File::createTable( m_dbConnection.get() ) &&
         Label::createTable( m_dbConnection.get() ) &&
+        Playlist::createTable( m_dbConnection.get() ) &&
         Album::createTable( m_dbConnection.get() ) &&
         AlbumTrack::createTable( m_dbConnection.get() ) &&
         Album::createTriggers( m_dbConnection.get() ) &&
@@ -134,6 +137,7 @@ bool MediaLibrary::createAllTables()
         Artist::createDefaultArtists( m_dbConnection.get() ) &&
         Artist::createTriggers( m_dbConnection.get() ) &&
         Media::createTriggers( m_dbConnection.get() ) &&
+        Playlist::createTriggers( m_dbConnection.get() ) &&
         Settings::createTable( m_dbConnection.get() );
     if ( res == false )
         return false;
@@ -344,6 +348,21 @@ std::vector<ArtistPtr> MediaLibrary::artists() const
     static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name +
             " WHERE nb_albums > 0 AND is_present = 1";
     return Artist::fetchAll<IArtist>( m_dbConnection.get(), req );
+}
+
+PlaylistPtr MediaLibrary::createPlaylist( const std::string& name )
+{
+    return Playlist::create( m_dbConnection.get(), name );
+}
+
+std::vector<PlaylistPtr> MediaLibrary::playlists()
+{
+    return Playlist::fetchAll<IPlaylist>( m_dbConnection.get() );
+}
+
+bool MediaLibrary::deletePlaylist( unsigned int playlistId )
+{
+    return Playlist::destroy( m_dbConnection.get(), playlistId );
 }
 
 void MediaLibrary::addMetadataService(std::unique_ptr<IMetadataService> service)
