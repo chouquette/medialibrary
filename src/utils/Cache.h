@@ -41,16 +41,19 @@ public:
 
     operator const T&() const
     {
+        assert( m_cached );
         return m_value;
     }
 
     const T& get() const
     {
+        assert( m_cached );
         return m_value;
     }
 
     T& get()
     {
+        assert( m_cached );
         return m_value;
     }
 
