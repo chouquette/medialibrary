@@ -60,7 +60,7 @@ public:
     template <typename U>
     T& operator=( U&& value )
     {
-        static_assert( std::is_same<typename std::decay<T>::type, typename std::decay<U>::type>::value, "Mismatching types" );
+        static_assert( std::is_convertible<typename std::decay<U>::type, typename std::decay<T>::type>::value, "Mismatching types" );
         m_value = std::forward<U>( value );
         m_cached = true;
         return m_value;
