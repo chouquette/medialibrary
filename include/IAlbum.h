@@ -22,7 +22,10 @@
 
 #pragma once
 
-#include "IMediaLibrary.h"
+#include <vector>
+#include <string>
+
+#include "Types.h"
 
 class IAlbum
 {
