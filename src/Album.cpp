@@ -136,27 +136,40 @@ bool Album::setArtworkMrl( const std::string& artworkMrl )
 
 std::vector<MediaPtr> Album::tracks() const
 {
+    // This doesn't return the cached version, because it would be fairly complicated, if not impossible or
+    // counter productive, to maintain a cache that respects all orderings.
     static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
             " LEFT JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
             " WHERE att.album_id = ? AND med.is_present = 1 ORDER BY att.disc_number, att.track_number";
     return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
 }
 
-std::shared_ptr<AlbumTrack> Album::addTrack( Media& media, unsigned int trackNb, unsigned int discNumber )
+std::vector<MediaPtr> Album::cachedTracks() const
+{
+    auto lock = m_tracks.lock();
+    if ( m_tracks.isCached() == false )
+        m_tracks = tracks();
+    return m_tracks.get();
+}
+
+std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsigned int trackNb, unsigned int discNumber )
 {
     auto t = m_dbConnection->newTransaction();
 
-    auto track = AlbumTrack::create( m_dbConnection, m_id, media.id(), trackNb, discNumber );
+    auto track = AlbumTrack::create( m_dbConnection, m_id, media->id(), trackNb, discNumber );
     if ( track == nullptr )
         return nullptr;
-    media.setAlbumTrack( track );
-    media.save();
+    media->setAlbumTrack( track );
+    media->save();
     static const std::string req = "UPDATE " + policy::AlbumTable::Name +
             " SET nb_tracks = nb_tracks + 1 WHERE id_album = ?";
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, m_id ) == false )
         return nullptr;
     m_nbTracks++;
     t->commit();
+    auto lock = m_tracks.lock();
+    if ( m_tracks.isCached() == true )
+        m_tracks.get().push_back( media );
     return track;
 }
 

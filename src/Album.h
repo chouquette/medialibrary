@@ -31,6 +31,7 @@
 
 #include "database/DatabaseHelpers.h"
 #include "IAlbum.h"
+#include "utils/Cache.h"
 
 class Album;
 class AlbumTrack;
@@ -72,7 +73,13 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         virtual const std::string& artworkMrl() const override;
         bool setArtworkMrl( const std::string& artworkMrl );
         virtual std::vector<MediaPtr> tracks() const override;
-        std::shared_ptr<AlbumTrack> addTrack(Media& media, unsigned int trackNb , unsigned int discNumber);
+        ///
+        /// \brief cachedTracks Returns a cached list of tracks
+        /// This has no warranty of ordering, validity, or anything else.
+        /// \return An unordered-list of this album's tracks
+        ///
+        std::vector<MediaPtr> cachedTracks() const;
+        std::shared_ptr<AlbumTrack> addTrack( std::shared_ptr<Media> media, unsigned int trackNb , unsigned int discNumber);
         unsigned int nbTracks() const override;
 
         virtual ArtistPtr albumArtist() const override;
@@ -96,6 +103,8 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         std::string m_artworkMrl;
         unsigned int m_nbTracks;
         bool m_isPresent;
+
+        mutable Cache<std::vector<MediaPtr>> m_tracks;
 
         friend struct policy::AlbumTable;
 };

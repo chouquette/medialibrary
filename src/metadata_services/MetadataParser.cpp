@@ -78,7 +78,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
     t->commit();
     if ( isAudio == true )
     {
-        if ( parseAudioFile( *media, *file, vlcMedia ) == false )
+        if ( parseAudioFile( media, *file, vlcMedia ) == false )
             return parser::Task::Status::Fatal;
     }
     else
@@ -135,13 +135,13 @@ bool MetadataParser::parseVideoFile( std::shared_ptr<Media> media, VLC::Media& v
 
 /* Audio files */
 
-bool MetadataParser::parseAudioFile( Media& media, File& file, VLC::Media& vlcMedia ) const
+bool MetadataParser::parseAudioFile( std::shared_ptr<Media> media, File& file, VLC::Media& vlcMedia ) const
 {
-    media.setType( IMedia::Type::AudioType );
+    media->setType( IMedia::Type::AudioType );
 
     auto cover = vlcMedia.meta( libvlc_meta_ArtworkURL );
     if ( cover.empty() == false )
-        media.setThumbnail( cover );
+        media->setThumbnail( cover );
 
     auto artists = handleArtists( vlcMedia );
     auto album = handleAlbum( media, file, vlcMedia, artists.first, artists.second );
@@ -151,7 +151,7 @@ bool MetadataParser::parseAudioFile( Media& media, File& file, VLC::Media& vlcMe
         return false;
     }
     auto t = m_dbConn->newTransaction();
-    auto res = link( media, album, artists.first, artists.second );
+    auto res = link( *media, album, artists.first, artists.second );
     t->commit();
     return res;
 }
@@ -208,7 +208,7 @@ std::shared_ptr<Album> MetadataParser::findAlbum( File& file, VLC::Media& vlcMed
             ++it;
             continue;
         }
-        const auto tracks = a->tracks();
+        const auto tracks = a->cachedTracks();
         assert( tracks.size() > 0 );
 
         auto multiDisc = false;
@@ -257,7 +257,7 @@ std::shared_ptr<Album> MetadataParser::findAlbum( File& file, VLC::Media& vlcMed
     return std::static_pointer_cast<Album>( albums[0] );
 }
 
-std::shared_ptr<Album> MetadataParser::handleAlbum( Media& media, File& file, VLC::Media& vlcMedia, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> trackArtist ) const
+std::shared_ptr<Album> MetadataParser::handleAlbum( std::shared_ptr<Media> media, File& file, VLC::Media& vlcMedia, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> trackArtist ) const
 {
     auto albumTitle = vlcMedia.meta( libvlc_meta_Album );
     std::shared_ptr<Album> album;
@@ -350,7 +350,7 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::hand
 
 /* Tracks handling */
 
-std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> album, Media& media, VLC::Media& vlcMedia, std::shared_ptr<Artist> artist ) const
+std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> album, std::shared_ptr<Media> media, VLC::Media& vlcMedia, std::shared_ptr<Artist> artist ) const
 {
     auto trackNbStr = vlcMedia.meta( libvlc_meta_TrackNumber );
 
@@ -365,7 +365,7 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
         }
     }
     if ( title.empty() == false )
-        media.setTitle( title );
+        media->setTitle( title );
     unsigned int trackNb;
     if ( trackNbStr.empty() == false )
         trackNb = atoi( trackNbStr.c_str() );
