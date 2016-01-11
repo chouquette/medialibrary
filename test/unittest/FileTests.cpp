@@ -59,3 +59,16 @@ TEST_F( Files, Remove )
     // This file should now be removed from the DB
     ASSERT_EQ( nullptr, media );
 }
+
+TEST_F( Files, Media )
+{
+    ASSERT_EQ( f->id(), f->media()->id() );
+
+    Reload();
+
+    auto m = ml->media( "media.mkv" );
+    auto files = m->files();
+    ASSERT_EQ( 1u, files.size() );
+    f = std::static_pointer_cast<File>( files[0] );
+    ASSERT_EQ( m->id(), f->media()->id() );
+}
