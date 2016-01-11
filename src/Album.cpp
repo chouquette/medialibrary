@@ -160,7 +160,7 @@ std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsig
     if ( track == nullptr )
         return nullptr;
     media->setAlbumTrack( track );
-    media->save();
+    // Assume the media will be saved by the caller
     static const std::string req = "UPDATE " + policy::AlbumTable::Name +
             " SET nb_tracks = nb_tracks + 1 WHERE id_album = ?";
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, m_id ) == false )

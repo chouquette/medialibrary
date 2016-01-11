@@ -79,7 +79,12 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         /// \return An unordered-list of this album's tracks
         ///
         std::vector<MediaPtr> cachedTracks() const;
-        std::shared_ptr<AlbumTrack> addTrack( std::shared_ptr<Media> media, unsigned int trackNb , unsigned int discNumber);
+        ///
+        /// \brief addTrack Add a track to the album.
+        /// This will modify the modify, but *not* save it.
+        /// The media will be added to the tracks cache.
+        ///
+        std::shared_ptr<AlbumTrack> addTrack( std::shared_ptr<Media> media, unsigned int trackNb, unsigned int discNumber);
         unsigned int nbTracks() const override;
 
         virtual ArtistPtr albumArtist() const override;
