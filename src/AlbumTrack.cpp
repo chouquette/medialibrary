@@ -63,8 +63,10 @@ unsigned int AlbumTrack::id() const
 
 ArtistPtr AlbumTrack::artist() const
 {
+    if ( m_artistId == 0 )
+        return nullptr;
     auto lock = m_artist.lock();
-    if ( m_artist.isCached() == false && m_artistId != 0 )
+    if ( m_artist.isCached() == false )
     {
         m_artist = Artist::fetch( m_dbConnection, m_artistId );
     }

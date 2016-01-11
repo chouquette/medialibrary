@@ -92,9 +92,11 @@ std::shared_ptr<Media> Media::create( DBConnection dbConnection, Type type, cons
 
 AlbumTrackPtr Media::albumTrack() const
 {
+    if ( m_subType != SubType::AlbumTrack )
+        return nullptr;
     auto lock = m_albumTrack.lock();
 
-    if ( m_albumTrack.isCached() == false && m_subType == SubType::AlbumTrack )
+    if ( m_albumTrack.isCached() == false )
         m_albumTrack = AlbumTrack::fromMedia( m_dbConnection, m_id );
     return m_albumTrack.get();
 }
@@ -122,9 +124,11 @@ void Media::setDuration( int64_t duration )
 
 ShowEpisodePtr Media::showEpisode() const
 {
-    auto lock = m_showEpisode.lock();
+    if ( m_subType != SubType::ShowEpisode )
+        return nullptr;
 
-    if ( m_showEpisode.isCached() == false && m_subType == SubType::ShowEpisode )
+    auto lock = m_showEpisode.lock();
+    if ( m_showEpisode.isCached() == false )
         m_showEpisode = ShowEpisode::fromMedia( m_dbConnection, m_id );
     return m_showEpisode.get();
 }
@@ -196,9 +200,12 @@ const std::vector<FilePtr>& Media::files() const
 
 MoviePtr Media::movie() const
 {
+    if ( m_subType != SubType::Movie )
+        return nullptr;
+
     auto lock = m_movie.lock();
 
-    if ( m_movie.isCached() == false && m_subType == SubType::Movie )
+    if ( m_movie.isCached() == false )
         m_movie = Movie::fromMedia( m_dbConnection, m_id );
     return m_movie.get();
 }
