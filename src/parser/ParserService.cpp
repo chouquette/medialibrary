@@ -92,6 +92,14 @@ MediaLibrary* ParserService::mediaLibrary()
     return m_ml;
 }
 
+uint8_t ParserService::nbNativeThreads() const
+{
+    auto nbProcs = std::thread::hardware_concurrency();
+    if ( nbProcs == 0 )
+        return 1;
+    return nbProcs;
+}
+
 bool ParserService::initialize()
 {
     return true;

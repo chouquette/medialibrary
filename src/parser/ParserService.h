@@ -47,6 +47,7 @@ public:
 
 protected:
     MediaLibrary* mediaLibrary();
+    uint8_t nbNativeThreads() const;
     /// Can be overriden to run service dependent initializations
     virtual bool initialize();
     virtual parser::Task::Status run( parser::Task& task ) = 0;
