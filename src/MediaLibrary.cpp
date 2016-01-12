@@ -232,7 +232,6 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder& p
         return nullptr;
 
     LOG_INFO( "Adding ", path );
-    auto t = m_dbConnection->newTransaction();
     auto mptr = Media::create( m_dbConnection.get(), type, fileFs.get() );
     if ( mptr == nullptr )
     {
@@ -247,7 +246,6 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder& p
         Media::destroy( m_dbConnection.get(), mptr->id() );
         return nullptr;
     }
-    t->commit();
     if ( m_callback != nullptr )
         m_callback->onMediaAdded( mptr );
     if ( m_parser != nullptr )

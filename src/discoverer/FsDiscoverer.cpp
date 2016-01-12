@@ -157,6 +157,8 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
             + " WHERE folder_id = ?";
     auto files = File::fetchAll<File>( m_dbConn, req, parentFolder.id() );
+    std::vector<std::string> filesToAdd;
+    std::vector<std::shared_ptr<File>> filesToRemove;
     for ( const auto& filePath : parentFolderFs.files() )
     {        
         auto it = std::find_if( begin( files ), end( files ), [filePath](const std::shared_ptr<File>& f) {
@@ -164,7 +166,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
         });
         if ( it == end( files ) )
         {
-            m_ml->addFile( filePath, parentFolder, parentFolderFs );
+            filesToAdd.push_back( filePath );
             continue;
         }
         auto fileFs = m_fsFactory->createFile( filePath );
@@ -176,15 +178,25 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
         }
         auto& file = (*it);
         LOG_INFO( "Forcing file refresh ", filePath );
-        file->media()->removeFile( *file );
-        m_ml->addFile( filePath, parentFolder, parentFolderFs );
+        // Pre-cache the file's media, since we need it to remove. However, better doing it
+        // out of a write context, since that way, other threads can also read the database.
+        file->media();
+        filesToRemove.push_back( file );
+        filesToAdd.push_back( filePath );
         files.erase( it );
     }
+    auto t = m_dbConn->newTransaction();
     for ( auto file : files )
     {
         LOG_INFO( "File ", file->mrl(), " not found on filesystem, deleting it" );
         file->media()->removeFile( *file );
     }
+    for ( auto& f : filesToRemove )
+        f->media()->removeFile( *f );
+    // Insert all files at once to avoid SQL write contention
+    for ( auto& p : filesToAdd )
+        m_ml->addFile( p, parentFolder, parentFolderFs );
+    t->commit();
     LOG_INFO( "Done checking files ", parentFolderFs.path() );
 }
 
