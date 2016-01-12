@@ -187,9 +187,9 @@ class Tools
         template <typename IMPL, typename INTF, typename... Args>
         static std::vector<std::shared_ptr<INTF> > fetchAll( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
-            SqliteConnection::RequestContext ctx;
+            SqliteConnection::ReadContext ctx;
             if (Transaction::transactionInProgress() == false)
-                ctx = dbConnection->acquireContext();
+                ctx = dbConnection->acquireReadContext();
             auto chrono = std::chrono::steady_clock::now();
 
             std::vector<std::shared_ptr<INTF>> results;
@@ -210,9 +210,9 @@ class Tools
         template <typename T, typename... Args>
         static std::shared_ptr<T> fetchOne( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
-            SqliteConnection::RequestContext ctx;
+            SqliteConnection::ReadContext ctx;
             if (Transaction::transactionInProgress() == false)
-                ctx = dbConnection->acquireContext();
+                ctx = dbConnection->acquireReadContext();
             auto chrono = std::chrono::steady_clock::now();
 
             auto stmt = Statement( dbConnection, req );
@@ -230,18 +230,18 @@ class Tools
         template <typename... Args>
         static bool executeRequest( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
-            SqliteConnection::RequestContext ctx;
+            SqliteConnection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
-                ctx = dbConnection->acquireContext();
+                ctx = dbConnection->acquireWriteContext();
             return executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
         }
 
         template <typename... Args>
         static bool executeDelete( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
-            SqliteConnection::RequestContext ctx;
+            SqliteConnection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
-                ctx = dbConnection->acquireContext();
+                ctx = dbConnection->acquireWriteContext();
             if ( executeRequestLocked( dbConnection, req, std::forward<Args>( args )... ) == false )
                 return false;
             return sqlite3_changes( dbConnection->getConn() ) > 0;
@@ -261,9 +261,9 @@ class Tools
         template <typename... Args>
         static unsigned int insert( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
-            SqliteConnection::RequestContext ctx;
+            SqliteConnection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
-                ctx = dbConnection->acquireContext();
+                ctx = dbConnection->acquireWriteContext();
             if ( executeRequestLocked( dbConnection, req, std::forward<Args>( args )... ) == false )
                 return 0;
             return sqlite3_last_insert_rowid( dbConnection->getConn() );

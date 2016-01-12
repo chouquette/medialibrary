@@ -31,7 +31,7 @@ thread_local Transaction* Transaction::CurrentTransaction = nullptr;
 
 Transaction::Transaction(DBConnection dbConn)
     : m_dbConn( dbConn )
-    , m_ctx( dbConn->acquireContext() )
+    , m_ctx( dbConn->acquireWriteContext() )
 {
     assert( CurrentTransaction == nullptr );
     LOG_DEBUG( "Starting SQLite transaction" );

@@ -26,6 +26,8 @@
 
 SqliteConnection::SqliteConnection( const std::string &dbPath )
     : m_dbPath( dbPath )
+    , m_readLock( m_contextLock )
+    , m_writeLock( m_contextLock )
 {
     if ( sqlite3_threadsafe() == 0 )
         throw std::runtime_error( "SQLite isn't built with threadsafe mode" );
@@ -68,7 +70,12 @@ std::unique_ptr<sqlite::Transaction> SqliteConnection::newTransaction()
     return std::unique_ptr<sqlite::Transaction>{ new sqlite::Transaction( this ) };
 }
 
-SqliteConnection::RequestContext SqliteConnection::acquireContext()
+SqliteConnection::ReadContext SqliteConnection::acquireReadContext()
 {
-    return RequestContext{ m_contextMutex };
+    return ReadContext{ m_readLock };
+}
+
+SqliteConnection::WriteContext SqliteConnection::acquireWriteContext()
+{
+    return WriteContext{ m_writeLock };
 }

@@ -38,7 +38,7 @@ public:
 
 private:
     DBConnection m_dbConn;
-    SqliteConnection::RequestContext m_ctx;
+    SqliteConnection::WriteContext m_ctx;
 
     static thread_local Transaction* CurrentTransaction;
 };

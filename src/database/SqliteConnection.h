@@ -30,6 +30,8 @@
 #include <thread>
 #include <unordered_map>
 
+#include "utils/SWMRLock.h"
+
 namespace sqlite
 {
     class Transaction;
@@ -38,7 +40,8 @@ namespace sqlite
 class SqliteConnection
 {
 public:
-    using RequestContext = std::unique_lock<std::mutex>;
+    using ReadContext = std::unique_lock<utils::ReadLocker>;
+    using WriteContext = std::unique_lock<utils::WriteLocker>;
 
     explicit SqliteConnection( const std::string& dbPath );
     // Returns the current thread's connection
@@ -47,14 +50,17 @@ public:
     // Release the current thread's connection
     void release();
     std::unique_ptr<sqlite::Transaction> newTransaction();
-    RequestContext acquireContext();
+    ReadContext acquireReadContext();
+    WriteContext acquireWriteContext();
 
 private:
     using ConnPtr = std::unique_ptr<sqlite3, int(*)(sqlite3*)>;
     const std::string m_dbPath;
     std::mutex m_connMutex;
     std::unordered_map<std::thread::id, ConnPtr> m_conns;
-    std::mutex m_contextMutex;
+    utils::SWMRLock m_contextLock;
+    utils::ReadLocker m_readLock;
+    utils::WriteLocker m_writeLock;
 };
 
 #endif // SQLITECONNECTION_H
