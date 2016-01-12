@@ -132,16 +132,17 @@ void ParserService::mainloop()
             task = std::move( m_tasks.front() );
             m_tasks.pop();
         }
+        parser::Task::Status status;
         try
         {
-            auto status = run( *task );
-            m_parserCb->done( std::move( task ), status );
+            status = run( *task );
         }
-        catch (const std::exception& ex)
+        catch ( const std::exception& ex )
         {
             LOG_ERROR( "Caught an exception during ", task->file->mrl(), " parsing: ", ex.what() );
-            m_parserCb->done( std::move( task ), parser::Task::Status::Fatal );
+            status = parser::Task::Status::Fatal;
         }
+        m_parserCb->done( std::move( task ), status );
     }
     LOG_INFO("Exiting ParserService [", serviceName, "] thread");
 }
