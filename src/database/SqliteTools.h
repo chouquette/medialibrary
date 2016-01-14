@@ -107,8 +107,10 @@ public:
         , m_req( req )
         , m_bindIdx( 0 )
     {
-        auto it = StatementsCache.find( req );
-        if ( it == end( StatementsCache ) )
+        std::lock_guard<std::mutex> lock( StatementsCacheLock );
+        auto& connMap = StatementsCache[ dbConnection ];
+        auto it = connMap.find( req );
+        if ( it == end( connMap ) )
         {
             sqlite3_stmt* stmt;
             int res = sqlite3_prepare_v2( dbConnection, req.c_str(), -1, &stmt, NULL );
@@ -118,7 +120,7 @@ public:
                             sqlite3_errmsg( dbConnection ) );
             }
             m_stmt.reset( stmt );
-            StatementsCache.emplace( req, CachedStmtPtr( stmt, &sqlite3_finalize ) );
+            connMap.emplace( req, CachedStmtPtr( stmt, &sqlite3_finalize ) );
         }
         else
         {
@@ -153,6 +155,12 @@ public:
         }
     }
 
+    static void FlushStatementCache()
+    {
+        std::lock_guard<std::mutex> lock( StatementsCacheLock );
+        StatementsCache.clear();
+    }
+
 private:
     template <typename T>
     bool _bind( T&& value )
@@ -171,7 +179,9 @@ private:
     SqliteConnection::Handle m_dbConn;
     std::string m_req;
     unsigned int m_bindIdx;
-    static thread_local std::unordered_map<std::string, CachedStmtPtr> StatementsCache;
+    static std::mutex StatementsCacheLock;
+    static std::unordered_map<SqliteConnection::Handle,
+                            std::unordered_map<std::string, CachedStmtPtr>> StatementsCache;
 };
 
 class Tools

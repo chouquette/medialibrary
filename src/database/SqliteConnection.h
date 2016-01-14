@@ -45,6 +45,7 @@ public:
     using Handle = sqlite3*;
 
     explicit SqliteConnection( const std::string& dbPath );
+    ~SqliteConnection();
     // Returns the current thread's connection
     // This will initiate a connection if required
     Handle getConn();
