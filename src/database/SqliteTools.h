@@ -283,9 +283,6 @@ class Tools
                      std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
             return true;
         }
-
-        // Let SqliteConnection access executeRequestLocked
-        friend SqliteConnection;
 };
 
 }

@@ -50,10 +50,14 @@ SqliteConnection::Handle SqliteConnection::getConn()
             LOG_WARN( "Failed to enable sqlite busy timeout" );
         m_conns.emplace(std::this_thread::get_id(), ConnPtr( dbConnection, &sqlite3_close ) );
         lock.unlock();
-        if ( sqlite::Tools::executeRequestLocked( this, "PRAGMA foreign_keys = ON" ) == false )
-            throw std::runtime_error( "Failed to enable foreign keys" );
-        if ( sqlite::Tools::executeRequestLocked( this, "PRAGMA recursive_triggers = ON" ) == false )
-            throw std::runtime_error( "Failed to enable recursive triggers" );
+        sqlite::Statement s( dbConnection, "PRAGMA foreign_keys = ON" );
+        s.execute();
+        while ( s.row() != nullptr )
+            ;
+        s = sqlite::Statement( dbConnection, "PRAGMA recursive_triggers = ON" );
+        s.execute();
+        while ( s.row() != nullptr )
+            ;
         return dbConnection;
     }
     return it->second.get();
