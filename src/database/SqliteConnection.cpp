@@ -48,8 +48,6 @@ SqliteConnection::Handle SqliteConnection::getConn()
         res = sqlite3_busy_timeout( dbConnection, 500 );
         if ( res != SQLITE_OK )
             LOG_WARN( "Failed to enable sqlite busy timeout" );
-        m_conns.emplace(std::this_thread::get_id(), ConnPtr( dbConnection, &sqlite3_close ) );
-        lock.unlock();
         sqlite::Statement s( dbConnection, "PRAGMA foreign_keys = ON" );
         s.execute();
         while ( s.row() != nullptr )
@@ -58,6 +56,7 @@ SqliteConnection::Handle SqliteConnection::getConn()
         s.execute();
         while ( s.row() != nullptr )
             ;
+        m_conns.emplace(std::this_thread::get_id(), ConnPtr( dbConnection, &sqlite3_close ) );
         return dbConnection;
     }
     return it->second.get();
