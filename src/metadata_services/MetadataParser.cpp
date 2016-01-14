@@ -47,46 +47,30 @@ bool MetadataParser::initialize()
 parser::Task::Status MetadataParser::run( parser::Task& task )
 {
     auto& media = task.media;
-    auto& vlcMedia = task.vlcMedia;
-    auto& file = task.file;
-
-    const auto tracks = vlcMedia.tracks();
-    if ( tracks.size() == 0 )
-    {
-        LOG_ERROR( "Failed to fetch tracks" );
-        return parser::Task::Status::Fatal;
-    }
 
     auto t = m_dbConn->newTransaction();
-    bool isAudio = true;
-    for ( const auto& track : tracks )
+    bool isAudio = task.videoTracks.empty();
+    for ( const auto& t : task.videoTracks )
     {
-        auto codec = track.codec();
-        std::string fcc( (const char*)&codec, 4 );
-        if ( track.type() == VLC::MediaTrack::Video )
-        {
-            isAudio = false;
-            auto fps = (float)track.fpsNum() / (float)track.fpsDen();
-            media->addVideoTrack( fcc, track.width(), track.height(), fps );
-        }
-        else if ( track.type() == VLC::MediaTrack::Audio )
-        {
-            media->addAudioTrack( fcc, track.bitrate(), track.rate(), track.channels(),
-                                  track.language(), track.description() );
-        }
+        media->addVideoTrack( t.fcc, t.width, t.height, t.fps );
+    }
+    for ( const auto& t : task.audioTracks )
+    {
+        media->addAudioTrack( t.fcc, t.bitrate, t.samplerate, t.nbChannels,
+                              t.language, t.description );
     }
     t->commit();
     if ( isAudio == true )
     {
-        if ( parseAudioFile( media, *file, vlcMedia ) == false )
+        if ( parseAudioFile( task ) == false )
             return parser::Task::Status::Fatal;
     }
     else
     {
-        if (parseVideoFile( media, vlcMedia ) == false )
+        if (parseVideoFile( task ) == false )
             return parser::Task::Status::Fatal;
     }
-    auto duration = vlcMedia.duration();
+    auto duration = task.duration;
     media->setDuration( duration );
     if ( media->save() == false )
         return parser::Task::Status::Error;
@@ -95,35 +79,27 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
 
 /* Video files */
 
-bool MetadataParser::parseVideoFile( std::shared_ptr<Media> media, VLC::Media& vlcMedia ) const
+bool MetadataParser::parseVideoFile( parser::Task& task ) const
 {
+    auto media = task.media.get();
     media->setType( IMedia::Type::VideoType );
-    auto title = vlcMedia.meta( libvlc_meta_Title );
-    if ( title.length() == 0 )
+    if ( task.title.length() == 0 )
         return true;
-    auto showName = vlcMedia.meta( libvlc_meta_ShowName );
-    if ( showName.length() == 0 )
+
+    if ( task.showName.length() == 0 )
     {
-        auto show = m_ml->show( showName );
+        auto show = m_ml->show( task.showName );
         if ( show == nullptr )
         {
-            show = m_ml->createShow( showName );
+            show = m_ml->createShow( task.showName );
             if ( show == nullptr )
                 return false;
         }
 
-        auto episodeIdStr = vlcMedia.meta( libvlc_meta_Episode );
-        if ( episodeIdStr.length() > 0 )
+        if ( task.episode != 0 )
         {
-            size_t endpos;
-            int episodeId = std::stoi( episodeIdStr, &endpos );
-            if ( endpos != episodeIdStr.length() )
-            {
-                LOG_ERROR( "Invalid episode id provided" );
-                return true;
-            }
             std::shared_ptr<Show> s = std::static_pointer_cast<Show>( show );
-            s->addEpisode( *media, title, episodeId );
+            s->addEpisode( *media, task.title, task.episode );
         }
     }
     else
@@ -135,46 +111,35 @@ bool MetadataParser::parseVideoFile( std::shared_ptr<Media> media, VLC::Media& v
 
 /* Audio files */
 
-bool MetadataParser::parseAudioFile( std::shared_ptr<Media> media, File& file, VLC::Media& vlcMedia ) const
+bool MetadataParser::parseAudioFile( parser::Task& task ) const
 {
-    media->setType( IMedia::Type::AudioType );
+    task.media->setType( IMedia::Type::AudioType );
 
-    auto cover = vlcMedia.meta( libvlc_meta_ArtworkURL );
-    if ( cover.empty() == false )
-        media->setThumbnail( cover );
+    if ( task.artworkMrl.empty() == false )
+        task.media->setThumbnail( task.artworkMrl );
 
-    auto artists = handleArtists( vlcMedia );
-    auto album = handleAlbum( media, file, vlcMedia, artists.first, artists.second );
+    auto artists = handleArtists( task );
+    auto album = handleAlbum( task, artists.first, artists.second );
     if ( album == nullptr )
     {
         LOG_WARN( "Failed to get/create associated album" );
         return false;
     }
     auto t = m_dbConn->newTransaction();
-    auto res = link( *media, album, artists.first, artists.second );
+    auto res = link( *task.media, album, artists.first, artists.second );
     t->commit();
     return res;
 }
 
 /* Album handling */
-std::shared_ptr<Album> MetadataParser::findAlbum( File& file, VLC::Media& vlcMedia, const std::string& title, Artist* albumArtist ) const
+std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, Artist* albumArtist ) const
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
             " WHERE title = ?";
-    auto albums = Album::fetchAll<Album>( m_dbConn, req, title );
+    auto albums = Album::fetchAll<Album>( m_dbConn, req, task.albumName );
 
     if ( albums.size() == 0 )
         return nullptr;
-
-    auto discTotalStr = vlcMedia.meta( libvlc_meta_DiscTotal );
-    auto discTotal = 0u;
-    if ( discTotalStr.empty() == false )
-        discTotal = atoi( discTotalStr.c_str() );
-
-    auto discNumberStr = vlcMedia.meta( libvlc_meta_DiscNumber );
-    auto discNumber = 0u;
-    if ( discNumberStr.empty() == false )
-        discNumber = atoi( discNumberStr.c_str() );
 
     /*
      * Even if we get only 1 album, we need to filter out invalid matches.
@@ -203,7 +168,7 @@ std::shared_ptr<Album> MetadataParser::findAlbum( File& file, VLC::Media& vlcMed
         // we assume that another CD with the same name & artists, and a disc number > 1
         // denotes a multi disc album
         // Check the first case early to avoid fetching tracks if unrequired.
-        if ( discTotal > 1 || discNumber > 1 )
+        if ( task.discTotal > 1 || task.discNumber > 1 )
         {
             ++it;
             continue;
@@ -229,8 +194,8 @@ std::shared_ptr<Album> MetadataParser::findAlbum( File& file, VLC::Media& vlcMed
         }
 
         // Assume album files will be in the same folder.
+        auto newFileFolder = utils::file::directory( task.file->mrl() );
         auto trackFiles = tracks[0]->files();
-        auto newFileFolder = utils::file::directory( file.mrl() );
         bool excluded = false;
         for ( auto& f : trackFiles )
         {
@@ -252,14 +217,13 @@ std::shared_ptr<Album> MetadataParser::findAlbum( File& file, VLC::Media& vlcMed
         return nullptr;
     if ( albums.size() > 1 )
     {
-        LOG_WARN( "Multiple candidates for album ", title, ". Selecting first one out of luck" );
+        LOG_WARN( "Multiple candidates for album ", task.albumName, ". Selecting first one out of luck" );
     }
     return std::static_pointer_cast<Album>( albums[0] );
 }
 
-std::shared_ptr<Album> MetadataParser::handleAlbum( std::shared_ptr<Media> media, File& file, VLC::Media& vlcMedia, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> trackArtist ) const
+std::shared_ptr<Album> MetadataParser::handleAlbum( parser::Task& task, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> trackArtist ) const
 {
-    auto albumTitle = vlcMedia.meta( libvlc_meta_Album );
     std::shared_ptr<Album> album;
     std::shared_ptr<Artist> artist = albumArtist;
     if ( artist == nullptr )
@@ -272,20 +236,19 @@ std::shared_ptr<Album> MetadataParser::handleAlbum( std::shared_ptr<Media> media
         }
     }
 
-    if ( albumTitle.length() > 0 )
+    if ( task.albumName.length() > 0 )
     {
         // Album matching depends on the difference between artist & album artist.
         // Specificaly pass the albumArtist here.
-        album = findAlbum( file, vlcMedia, albumTitle, albumArtist.get() );
+        album = findAlbum( task, albumArtist.get() );
 
         if ( album == nullptr )
         {
-            album = m_ml->createAlbum( albumTitle );
+            album = m_ml->createAlbum( task.albumName );
             if ( album != nullptr )
             {
-                auto artwork = vlcMedia.meta( libvlc_meta_ArtworkURL );
-                if ( artwork.length() != 0 )
-                    album->setArtworkMrl( artwork );
+                if ( task.artworkMrl.length() != 0 )
+                    album->setArtworkMrl( task.artworkMrl );
             }
         }
     }
@@ -295,7 +258,7 @@ std::shared_ptr<Album> MetadataParser::handleAlbum( std::shared_ptr<Media> media
     if ( album == nullptr )
         return nullptr;
     // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist
-    auto track = handleTrack( album, media, vlcMedia, trackArtist ? trackArtist : artist );
+    auto track = handleTrack( album, task, trackArtist ? trackArtist : artist );
     return album;
 }
 
@@ -307,40 +270,38 @@ std::shared_ptr<Album> MetadataParser::handleAlbum( std::shared_ptr<Media> media
 /// The album artist as a first element
 /// The track artist as a second element, or nullptr if it is the same as album artist
 ///
-std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::handleArtists( VLC::Media& vlcMedia ) const
+std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::handleArtists( parser::Task& task ) const
 {
     std::shared_ptr<Artist> albumArtist;
     std::shared_ptr<Artist> artist;
-    auto albumArtistName = vlcMedia.meta( libvlc_meta_AlbumArtist );
-    auto artistName = vlcMedia.meta( libvlc_meta_Artist );
 
-    if ( albumArtistName.empty() == true && artistName.empty() == true )
+    if ( task.albumArtist.empty() == true && task.artist.empty() == true )
     {
         return {nullptr, nullptr};
     }
 
-    if ( albumArtistName.empty() == false )
+    if ( task.albumArtist.empty() == false )
     {
-        albumArtist = std::static_pointer_cast<Artist>( m_ml->artist( albumArtistName ) );
+        albumArtist = std::static_pointer_cast<Artist>( m_ml->artist( task.albumArtist ) );
         if ( albumArtist == nullptr )
         {
-            albumArtist = m_ml->createArtist( albumArtistName );
+            albumArtist = m_ml->createArtist( task.albumArtist );
             if ( albumArtist == nullptr )
             {
-                LOG_ERROR( "Failed to create new artist ", albumArtistName );
+                LOG_ERROR( "Failed to create new artist ", task.albumArtist );
                 return {nullptr, nullptr};
             }
         }
     }
-    if ( artistName.empty() == false && artistName != albumArtistName )
+    if ( task.artist.empty() == false && task.artist != task.albumArtist )
     {
-        artist = std::static_pointer_cast<Artist>( m_ml->artist( artistName ) );
+        artist = std::static_pointer_cast<Artist>( m_ml->artist( task.artist ) );
         if ( artist == nullptr )
         {
-            artist = m_ml->createArtist( artistName );
+            artist = m_ml->createArtist( task.artist );
             if ( artist == nullptr )
             {
-                LOG_ERROR( "Failed to create new artist ", artistName );
+                LOG_ERROR( "Failed to create new artist ", task.artist );
                 return {nullptr, nullptr};
             }
         }
@@ -350,34 +311,22 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::hand
 
 /* Tracks handling */
 
-std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> album, std::shared_ptr<Media> media, VLC::Media& vlcMedia, std::shared_ptr<Artist> artist ) const
+std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> album, parser::Task& task, std::shared_ptr<Artist> artist ) const
 {
-    auto trackNbStr = vlcMedia.meta( libvlc_meta_TrackNumber );
-
-    auto title = vlcMedia.meta( libvlc_meta_Title );
+    auto title = task.title;
     if ( title.empty() == true )
     {
         LOG_WARN( "Failed to get track title" );
-        if ( trackNbStr.empty() == false )
+        if ( task.trackNumber != 0 )
         {
             title = "Track #";
-            title += trackNbStr;
+            title += std::to_string( task.trackNumber );
         }
     }
     if ( title.empty() == false )
-        media->setTitle( title );
-    unsigned int trackNb;
-    if ( trackNbStr.empty() == false )
-        trackNb = atoi( trackNbStr.c_str() );
-    else
-        trackNb = 0;
+        task.media->setTitle( title );
 
-    auto discNumberStr = vlcMedia.meta( libvlc_meta_DiscNumber );
-    auto discNumber = 0;
-    if ( discNumberStr.empty() == false )
-        discNumber = atoi( discNumberStr.c_str() );
-
-    auto track = std::static_pointer_cast<AlbumTrack>( album->addTrack( media, trackNb, discNumber ) );
+    auto track = std::static_pointer_cast<AlbumTrack>( album->addTrack( task.media, task.trackNumber, task.discNumber ) );
     if ( track == nullptr )
     {
         LOG_ERROR( "Failed to create album track" );
@@ -385,15 +334,14 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
     }
     if ( artist != nullptr )
         track->setArtist( artist );
-    auto genre = vlcMedia.meta( libvlc_meta_Genre );
-    if ( genre.length() != 0 )
+
+    if ( task.genre.length() != 0 )
     {
-        track->setGenre( genre );
+        track->setGenre( task.genre );
     }
-    auto releaseYearStr = vlcMedia.meta( libvlc_meta_Date );
-    if ( releaseYearStr.empty() == false )
+    if ( task.releaseDate.empty() == false )
     {
-        auto releaseYear = atoi( releaseYearStr.c_str() );
+        auto releaseYear = atoi( task.releaseDate.c_str() );
         track->setReleaseYear( releaseYear );
         // Let the album handle multiple dates. In order to do this properly, we need
         // to know if the date has been changed before, which can be known only by
