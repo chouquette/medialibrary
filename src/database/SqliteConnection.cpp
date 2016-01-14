@@ -35,7 +35,7 @@ SqliteConnection::SqliteConnection( const std::string &dbPath )
         throw std::runtime_error( "Failed to enable sqlite multithreaded mode" );
 }
 
-sqlite3 *SqliteConnection::getConn()
+SqliteConnection::Handle SqliteConnection::getConn()
 {
     std::unique_lock<std::mutex> lock( m_connMutex );
     sqlite3* dbConnection;

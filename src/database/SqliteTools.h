@@ -101,7 +101,7 @@ private:
 class Statement
 {
 public:
-    Statement( DBConnection dbConnection, const std::string& req )
+    Statement( SqliteConnection::Handle dbConnection, const std::string& req )
         : m_stmt( nullptr, &sqlite3_reset )
         , m_dbConn( dbConnection )
         , m_req( req )
@@ -111,11 +111,11 @@ public:
         if ( it == end( StatementsCache ) )
         {
             sqlite3_stmt* stmt;
-            int res = sqlite3_prepare_v2( dbConnection->getConn(), req.c_str(), -1, &stmt, NULL );
+            int res = sqlite3_prepare_v2( dbConnection, req.c_str(), -1, &stmt, NULL );
             if ( res != SQLITE_OK )
             {
                 throw std::runtime_error( std::string( "Failed to execute request: " ) + req + " " +
-                            sqlite3_errmsg( dbConnection->getConn() ) );
+                            sqlite3_errmsg( dbConnection ) );
             }
             m_stmt.reset( stmt );
             StatementsCache.emplace( req, CachedStmtPtr( stmt, &sqlite3_finalize ) );
@@ -142,7 +142,7 @@ public:
             return Row();
         else
         {
-            std::string errMsg = sqlite3_errmsg( m_dbConn->getConn() );
+            std::string errMsg = sqlite3_errmsg( m_dbConn );
             switch ( res )
             {
                 case SQLITE_CONSTRAINT:
@@ -168,7 +168,7 @@ private:
     using CachedStmtPtr = std::unique_ptr<sqlite3_stmt, int (*)(sqlite3_stmt*)>;
     using StmtPtr = CachedStmtPtr;
     StmtPtr m_stmt;
-    DBConnection m_dbConn;
+    SqliteConnection::Handle m_dbConn;
     std::string m_req;
     unsigned int m_bindIdx;
     static thread_local std::unordered_map<std::string, CachedStmtPtr> StatementsCache;
@@ -193,7 +193,7 @@ class Tools
             auto chrono = std::chrono::steady_clock::now();
 
             std::vector<std::shared_ptr<INTF>> results;
-            auto stmt = Statement( dbConnection, req );
+            auto stmt = Statement( dbConnection->getConn(), req );
             stmt.execute( std::forward<Args>( args )... );
             Row sqliteRow;
             while ( ( sqliteRow = stmt.row() ) != nullptr )
@@ -215,7 +215,7 @@ class Tools
                 ctx = dbConnection->acquireReadContext();
             auto chrono = std::chrono::steady_clock::now();
 
-            auto stmt = Statement( dbConnection, req );
+            auto stmt = Statement( dbConnection->getConn(), req );
             stmt.execute( std::forward<Args>( args )... );
             auto row = stmt.row();
             if ( row == nullptr )
@@ -274,7 +274,7 @@ class Tools
         static bool executeRequestLocked( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
             auto chrono = std::chrono::steady_clock::now();
-            auto stmt = Statement( dbConnection, req );
+            auto stmt = Statement( dbConnection->getConn(), req );
             stmt.execute( std::forward<Args>( args )... );
             while ( stmt.row() != nullptr )
                 ;

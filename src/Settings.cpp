@@ -34,7 +34,7 @@ Settings::Settings()
 bool Settings::load( DBConnection dbConn )
 {
     m_dbConn = dbConn;
-    sqlite::Statement s( m_dbConn, "SELECT * FROM Settings" );
+    sqlite::Statement s( m_dbConn->getConn(), "SELECT * FROM Settings" );
     auto row = s.row();
     // First launch: no settings
     if ( row == nullptr )

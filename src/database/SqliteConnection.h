@@ -42,11 +42,12 @@ class SqliteConnection
 public:
     using ReadContext = std::unique_lock<utils::ReadLocker>;
     using WriteContext = std::unique_lock<utils::WriteLocker>;
+    using Handle = sqlite3*;
 
     explicit SqliteConnection( const std::string& dbPath );
     // Returns the current thread's connection
     // This will initiate a connection if required
-    sqlite3* getConn();
+    Handle getConn();
     // Release the current thread's connection
     void release();
     std::unique_ptr<sqlite::Transaction> newTransaction();

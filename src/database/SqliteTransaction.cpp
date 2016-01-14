@@ -35,7 +35,7 @@ Transaction::Transaction(DBConnection dbConn)
 {
     assert( CurrentTransaction == nullptr );
     LOG_DEBUG( "Starting SQLite transaction" );
-    Statement s( dbConn, "BEGIN" );
+    Statement s( dbConn->getConn(), "BEGIN" );
     s.execute();
     while ( s.row() != nullptr )
         ;
@@ -45,7 +45,7 @@ Transaction::Transaction(DBConnection dbConn)
 void Transaction::commit()
 {
     auto chrono = std::chrono::steady_clock::now();
-    Statement s( m_dbConn, "COMMIT" );
+    Statement s( m_dbConn->getConn(), "COMMIT" );
     s.execute();
     while ( s.row() != nullptr )
         ;
@@ -65,7 +65,7 @@ Transaction::~Transaction()
 {
     if ( CurrentTransaction != nullptr )
     {
-        Statement s( m_dbConn, "ROLLBACK" );
+        Statement s( m_dbConn->getConn(), "ROLLBACK" );
         s.execute();
         while ( s.row() != nullptr )
             ;
