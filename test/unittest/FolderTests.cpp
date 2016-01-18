@@ -32,39 +32,48 @@
 
 #include <memory>
 
-class Folders : public Tests
-{
-    protected:
-        std::shared_ptr<mock::FileSystemFactory> fsMock;
-        std::unique_ptr<mock::WaitForDiscoveryComplete> cbMock;
 
+class FoldersNoDiscover : public Tests
+{
+protected:
+    std::shared_ptr<mock::FileSystemFactory> fsMock;
+    std::unique_ptr<mock::WaitForDiscoveryComplete> cbMock;
+
+public:
+    virtual void SetUp() override
+    {
+        unlink("test.db");
+        fsMock.reset( new mock::FileSystemFactory );
+        cbMock.reset( new mock::WaitForDiscoveryComplete );
+        Reload();
+    }
+
+    virtual void InstantiateMediaLibrary() override
+    {
+        ml.reset( new MediaLibraryWithoutParser );
+    }
+
+    virtual void Reload()
+    {
+        Tests::Reload( fsMock, cbMock.get() );
+    }
+};
+
+class Folders : public FoldersNoDiscover
+{
     protected:
         virtual void SetUp() override
         {
-            unlink("test.db");
-            fsMock.reset( new mock::FileSystemFactory );
-            cbMock.reset( new mock::WaitForDiscoveryComplete );
-            Reload();
-        }
-
-        virtual void InstantiateMediaLibrary() override
-        {
-            ml.reset( new MediaLibraryWithoutParser );
-        }
-
-        virtual void Reload()
-        {
-            Tests::Reload( fsMock, cbMock.get() );
+            FoldersNoDiscover::SetUp();
+            cbMock->prepareForWait( 1 );
+            ml->discover( mock::FileSystemFactory::Root );
+            bool discovered = cbMock->wait();
+            ASSERT_TRUE( discovered );
         }
 };
 
 TEST_F( Folders, Add )
 {
-    cbMock->prepareForWait( 1 );
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
-    ASSERT_TRUE( discovered );
-
     auto files = ml->files();
 
     ASSERT_EQ( files.size(), 3u );
@@ -72,11 +81,6 @@ TEST_F( Folders, Add )
 
 TEST_F( Folders, Delete )
 {
-    cbMock->prepareForWait( 1 );
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
-    ASSERT_TRUE( discovered );
-
     auto f = ml->folder( mock::FileSystemFactory::Root );
     auto folderPath = f->path();
 
@@ -103,11 +107,6 @@ TEST_F( Folders, Delete )
 
 TEST_F( Folders, Load )
 {
-    cbMock->prepareForWait( 1 );
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
-    ASSERT_TRUE( discovered );
-
     cbMock->prepareForReload();
     Reload();
     bool reloaded = cbMock->waitForReload();
@@ -117,7 +116,7 @@ TEST_F( Folders, Load )
     ASSERT_EQ( files.size(), 3u );
 }
 
-TEST_F( Folders, InvalidPath )
+TEST_F( FoldersNoDiscover, InvalidPath )
 {
     cbMock->prepareForWait( 1 );
     ml->discover( "/invalid/path" );
@@ -130,11 +129,6 @@ TEST_F( Folders, InvalidPath )
 
 TEST_F( Folders, List )
 {
-    cbMock->prepareForWait( 1 );
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
-    ASSERT_TRUE( discovered );
-
     auto f = ml->folder( mock::FileSystemFactory::Root );
     ASSERT_NE( f, nullptr );
     auto files = f->files();
@@ -152,11 +146,6 @@ TEST_F( Folders, List )
 
 TEST_F( Folders, ListFolders )
 {
-    cbMock->prepareForWait( 1 );
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
-    ASSERT_TRUE( discovered );
-
     auto f = ml->folder( mock::FileSystemFactory::Root );
     ASSERT_NE( f, nullptr );
     auto subFolders = f->folders();
@@ -184,11 +173,6 @@ TEST_F( Folders, ListFolders )
 
 TEST_F( Folders, NewFolderWithFile )
 {
-    cbMock->prepareForWait( 1 );
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
-    ASSERT_TRUE( discovered );
-
     ASSERT_EQ( 3u, ml->files().size() );
     // Do not watch for live changes
     ml.reset();
@@ -210,11 +194,6 @@ TEST_F( Folders, NewFolderWithFile )
 // This is expected to fail until we fix the file system modifications detection
 TEST_F( Folders, NewFileInSubFolder )
 {
-    cbMock->prepareForWait( 1 );
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
-    ASSERT_TRUE( discovered );
-
     auto f = ml->folder( mock::FileSystemFactory::Root );
     ASSERT_EQ( 3u, ml->files().size() );
 
@@ -237,11 +216,6 @@ TEST_F( Folders, NewFileInSubFolder )
 
 TEST_F( Folders, RemoveFileFromDirectory )
 {
-    cbMock->prepareForWait( 1 );
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
-    ASSERT_TRUE( discovered );
-
     ASSERT_EQ( 3u, ml->files().size() );
     // Do not watch for live changes
     ml.reset();
@@ -261,11 +235,6 @@ TEST_F( Folders, RemoveFileFromDirectory )
 
 TEST_F( Folders, RemoveDirectory )
 {
-    cbMock->prepareForWait( 1 );
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
-    ASSERT_TRUE( discovered );
-
     ASSERT_EQ( 3u, ml->files().size() );
     // Do not watch for live changes
     ml.reset();
@@ -285,11 +254,6 @@ TEST_F( Folders, RemoveDirectory )
 
 TEST_F( Folders, UpdateFile )
 {
-    cbMock->prepareForWait( 1 );
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
-    ASSERT_TRUE( discovered );
-
     auto filePath = mock::FileSystemFactory::SubFolder + "subfile.mp4";
     auto f = ml->media( filePath );
     ASSERT_NE( f, nullptr );
@@ -310,7 +274,7 @@ TEST_F( Folders, UpdateFile )
     ASSERT_NE( id, f->id() );
 }
 
-TEST_F( Folders, Blacklist )
+TEST_F( FoldersNoDiscover, Blacklist )
 {
     cbMock->prepareForWait( 1 );
     ml->ignoreFolder( mock::FileSystemFactory::SubFolder );
@@ -324,10 +288,6 @@ TEST_F( Folders, Blacklist )
 
 TEST_F( Folders, BlacklistAfterDiscovery )
 {
-    cbMock->prepareForWait( 1 );
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
-    ASSERT_TRUE( discovered );
     auto f = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_NE( nullptr, f );
     auto files = f->files();
