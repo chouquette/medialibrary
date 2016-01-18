@@ -83,10 +83,7 @@ void FsDiscoverer::reload()
             m_ml->deleteFolder( *f );
             continue;
         }
-        if ( checkSubfolders( *folder, *f, blist ) == true )
-        {
-            checkFiles( *folder, *f );
-        }
+        checkFolder( *folder, *f, blist );
     }
 }
 
@@ -110,7 +107,7 @@ void FsDiscoverer::checkDevices()
     }
 }
 
-bool FsDiscoverer::checkSubfolders( fs::IDirectory& currentFolderFs, Folder& currentFolder, const std::vector<std::shared_ptr<Folder>> blacklist ) const
+void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& currentFolder, const std::vector<std::shared_ptr<Folder>> blacklist ) const
 {
     // We already know of this folder, though it may now contain a .nomedia file.
     // In this case, simply delete the folder.
@@ -118,7 +115,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory& currentFolderFs, Folder& cur
     {
         LOG_INFO( "Deleting folder ", currentFolderFs.path(), " due to a .nomedia file" );
         m_ml->deleteFolder( currentFolder );
-        return false;
+        return;
     }
     // Load the folders we already know of:
     LOG_INFO( "Checking for modifications in ", currentFolderFs.path() );
@@ -154,10 +151,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory& currentFolderFs, Folder& cur
         // In any case, check for modifications, as a change related to a mountpoint might
         // not update the folder modification date.
         // Also, relying on the modification date probably isn't portable
-        if ( checkSubfolders( *subFolder, *folderInDb, blacklist ) == true )
-        {
-            checkFiles( *subFolder, *folderInDb );
-        }
+        checkFolder( *subFolder, *folderInDb, blacklist );
         subFoldersInDB.erase( it );
     }
     // Now all folders we had in DB but haven't seen from the FS must have been deleted.
@@ -166,8 +160,8 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory& currentFolderFs, Folder& cur
         LOG_INFO( "Folder ", f->path(), " not found in FS, deleting it" );
         m_ml->deleteFolder( *f );
     }
+    checkFiles( currentFolderFs, currentFolder );
     LOG_INFO( "Done checking subfolders in ", currentFolderFs.path() );
-    return true;
 }
 
 void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFolder ) const
@@ -267,8 +261,7 @@ bool FsDiscoverer::addFolder( fs::IDirectory& folder, Folder* parentFolder, cons
                              *device, *deviceFs );
     if ( f == nullptr )
         return false;
-    checkFiles( folder, *f );
-    checkSubfolders( folder, *f, blacklist );
+    checkFolder( folder, *f, blacklist );
     return true;
 }
 
