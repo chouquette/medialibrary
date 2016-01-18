@@ -197,7 +197,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
     for ( auto& p : filesToAdd )
         m_ml->addFile( p, parentFolder, parentFolderFs );
     t->commit();
-    LOG_INFO( "Done checking files ", parentFolderFs.path() );
+    LOG_INFO( "Done checking files in ", parentFolderFs.path() );
 }
 
 std::vector<std::shared_ptr<Folder> > FsDiscoverer::blacklist() const
