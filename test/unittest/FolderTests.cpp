@@ -297,3 +297,48 @@ TEST_F( Folders, BlacklistAfterDiscovery )
     auto f2 = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( nullptr, f2 );
 }
+
+TEST_F( FoldersNoDiscover, NoMediaBeforeDiscovery )
+{
+    auto newFolder = mock::FileSystemFactory::Root + "newfolder/";
+    fsMock->addFolder( newFolder );
+    fsMock->addFile( newFolder + "newfile.avi" );
+    fsMock->addFile( newFolder + ".nomedia" );
+
+    cbMock->prepareForWait( 1 );
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->wait();
+    ASSERT_TRUE( discovered );
+
+    auto files = ml->files();
+    // We add 3 files before, and the new one shouldn't be account for since there is a .nomedia file
+    ASSERT_EQ( 3u, files.size() );
+}
+
+TEST_F( Folders, InsertNoMedia )
+{
+    auto files = ml->files();
+    ASSERT_EQ( 3u, files.size() );
+    fsMock->addFile( mock::FileSystemFactory::SubFolder + ".nomedia" );
+
+    cbMock->prepareForReload();
+    Reload();
+    bool reloaded = cbMock->waitForReload();
+    ASSERT_TRUE( reloaded );
+
+    files = ml->files();
+    ASSERT_EQ( 2u, files.size() );
+}
+
+TEST_F( Folders, InsertNoMediaInRoot )
+{
+    fsMock->addFile( mock::FileSystemFactory::Root + ".nomedia" );
+
+    cbMock->prepareForReload();
+    Reload();
+    bool reloaded = cbMock->waitForReload();
+    ASSERT_TRUE( reloaded );
+
+    auto files = ml->files();
+    ASSERT_EQ( 0u, files.size() );
+}

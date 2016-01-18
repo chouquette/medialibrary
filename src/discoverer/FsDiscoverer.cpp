@@ -63,6 +63,8 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
     auto blist = blacklist();
     if ( isBlacklisted( *fsDir, blist ) == true )
         return false;
+    if ( hasDotNoMediaFile( *fsDir ) )
+        return false;
     return addFolder( *fsDir, nullptr, blist );
 }
 
@@ -81,8 +83,10 @@ void FsDiscoverer::reload()
             m_ml->deleteFolder( *f );
             continue;
         }
-        checkSubfolders( *folder, *f, blist );
-        checkFiles( *folder, *f );
+        if ( checkSubfolders( *folder, *f, blist ) == true )
+        {
+            checkFiles( *folder, *f );
+        }
     }
 }
 
@@ -108,6 +112,14 @@ void FsDiscoverer::checkDevices()
 
 bool FsDiscoverer::checkSubfolders( fs::IDirectory& parentFolderFs, Folder& parentFolder, const std::vector<std::shared_ptr<Folder>> blacklist ) const
 {
+    // We already know of this folder, though it may now contain a .nomedia file.
+    // In this case, simply delete the folder.
+    if ( hasDotNoMediaFile( parentFolderFs ) )
+    {
+        LOG_INFO( "Deleting folder ", parentFolderFs.path(), " due to a .nomedia file" );
+        m_ml->deleteFolder( parentFolder );
+        return false;
+    }
     // Load the folders we already know of:
     LOG_INFO( "Checking for modifications in ", parentFolderFs.path() );
     auto subFoldersInDB = Folder::fetchAll( m_dbConn, parentFolder.id() );
@@ -129,6 +141,11 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory& parentFolderFs, Folder& pare
                 LOG_INFO( "Ignoring blacklisted folder: ", subFolderPath );
                 continue;
             }
+            if ( hasDotNoMediaFile( *subFolder ) )
+            {
+                LOG_INFO( "Ignoring folder with a .nomedia file" );
+                continue;
+            }
             LOG_INFO( "New folder detected: ", subFolderPath );
             addFolder( *subFolder, &parentFolder, blacklist );
             continue;
@@ -137,8 +154,10 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory& parentFolderFs, Folder& pare
         // In any case, check for modifications, as a change related to a mountpoint might
         // not update the folder modification date.
         // Also, relying on the modification date probably isn't portable
-        checkSubfolders( *subFolder, *folderInDb, blacklist );
-        checkFiles( *subFolder, *folderInDb );
+        if ( checkSubfolders( *subFolder, *folderInDb, blacklist ) == true )
+        {
+            checkFiles( *subFolder, *folderInDb );
+        }
         subFoldersInDB.erase( it );
     }
     // Now all folders we had in DB but haven't seen from the FS must have been deleted.
@@ -220,6 +239,15 @@ bool FsDiscoverer::isBlacklisted( const fs::IDirectory& directory, const std::ve
     return std::find_if( begin( blacklist ), end( blacklist ), [&directory, deviceId]( const std::shared_ptr<Folder>& f ) {
         return f->path() == directory.path() && f->deviceId() == deviceId;
     }) != end( blacklist );
+}
+
+bool FsDiscoverer::hasDotNoMediaFile( const fs::IDirectory& directory )
+{
+    const auto& files = directory.files();
+    return std::find_if( begin( files ), end( files ), []( const std::string& filePath ){
+        constexpr unsigned int endLength = strlen( "/.nomedia" );
+        return filePath.compare( filePath.length() - endLength, endLength, "/.nomedia" ) == 0;
+    }) != end( files );
 }
 
 bool FsDiscoverer::addFolder( fs::IDirectory& folder, Folder* parentFolder, const std::vector<std::shared_ptr<Folder>>& blacklist ) const
