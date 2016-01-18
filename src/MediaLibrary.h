@@ -83,7 +83,7 @@ class MediaLibrary : public IMediaLibrary
         virtual bool deletePlaylist( unsigned int playlistId ) override;
 
         virtual void discover( const std::string& entryPoint ) override;
-        bool ignoreFolder( const std::string& path ) override;
+        bool banFolder( const std::string& path ) override;
 
         virtual const std::string& thumbnailPath() const override;
         virtual void setLogger( ILogger* logger ) override;

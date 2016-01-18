@@ -462,7 +462,7 @@ void MediaLibrary::discover( const std::string &entryPoint )
         m_discoverer->discover( entryPoint );
 }
 
-bool MediaLibrary::ignoreFolder( const std::string& path )
+bool MediaLibrary::banFolder( const std::string& path )
 {
     return Folder::blacklist( m_dbConnection.get(), path );
 }

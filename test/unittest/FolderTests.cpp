@@ -277,7 +277,7 @@ TEST_F( Folders, UpdateFile )
 TEST_F( FoldersNoDiscover, Blacklist )
 {
     cbMock->prepareForWait( 1 );
-    ml->ignoreFolder( mock::FileSystemFactory::SubFolder );
+    ml->banFolder( mock::FileSystemFactory::SubFolder );
     ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
@@ -293,7 +293,7 @@ TEST_F( Folders, BlacklistAfterDiscovery )
     auto files = f->files();
     ASSERT_NE( 0u, files.size() );
 
-    ml->ignoreFolder( mock::FileSystemFactory::SubFolder );
+    ml->banFolder( mock::FileSystemFactory::SubFolder );
     auto f2 = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( nullptr, f2 );
 }
