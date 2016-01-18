@@ -342,3 +342,26 @@ TEST_F( Folders, InsertNoMediaInRoot )
     auto files = ml->files();
     ASSERT_EQ( 0u, files.size() );
 }
+
+TEST_F( Folders, ReloadSubDir )
+{
+    auto files = ml->files();
+    ASSERT_EQ( 3u, files.size() );
+    fsMock->addFile( mock::FileSystemFactory::Root + "newmedia.mkv" );
+
+    cbMock->prepareForReload();
+    ml->reload( mock::FileSystemFactory::SubFolder );
+    bool reloaded = cbMock->waitForReload();
+    ASSERT_TRUE( reloaded );
+
+    files = ml->files();
+    ASSERT_EQ( 3u, files.size() );
+
+    cbMock->prepareForReload();
+    ml->reload();
+    reloaded = cbMock->waitForReload();
+    ASSERT_TRUE( reloaded );
+
+    files = ml->files();
+    ASSERT_EQ( 4u, files.size() );
+}

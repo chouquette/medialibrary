@@ -438,6 +438,12 @@ void MediaLibrary::reload()
         m_discoverer->reload();
 }
 
+void MediaLibrary::reload( const std::string& entryPoint )
+{
+    if ( m_discoverer != nullptr )
+        m_discoverer->reload( entryPoint );
+}
+
 void MediaLibrary::pauseBackgroundOperations()
 {
     if ( m_parser != nullptr )

@@ -51,11 +51,11 @@ public:
             m_cond.notify_all();
     }
 
-    virtual void onReloadStarted() override
+    virtual void onReloadStarted( const std::string& ) override
     {
     }
 
-    virtual void onReloadCompleted() override
+    virtual void onReloadCompleted( const std::string& ) override
     {
         if ( --m_nbReloadExpected == 0 )
             m_reloadCond.notify_all();

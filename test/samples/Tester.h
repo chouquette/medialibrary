@@ -25,8 +25,8 @@ private:
     void onFileUpdated(MediaPtr) {}
     void onDiscoveryStarted(const std::string&) {}
     void onDiscoveryCompleted(const std::string&);
-    void onReloadStarted() {}
-    void onReloadCompleted() {}
+    void onReloadStarted( const std::string& ) {}
+    void onReloadCompleted( const std::string& ) {}
     void onParsingStatsUpdated(uint32_t percent);
 
     std::condition_variable m_parsingCompleteVar;

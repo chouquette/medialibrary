@@ -38,6 +38,7 @@ public:
     //a discoverer thread
     virtual bool discover( const std::string& entryPoint ) = 0;
     virtual void reload() = 0;
+    virtual void reload( const std::string& entryPoint ) = 0;
 };
 
 #endif // IDISCOVERER_H

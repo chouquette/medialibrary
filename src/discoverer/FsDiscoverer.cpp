@@ -70,6 +70,7 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
 
 void FsDiscoverer::reload()
 {
+    LOG_INFO( "Reloading all folders" );
     // Start by checking if previously known devices have been plugged/unplugged
     checkDevices();
     auto rootFolders = Folder::fetchAll( m_dbConn, 0 );
@@ -85,6 +86,24 @@ void FsDiscoverer::reload()
         }
         checkFolder( *folder, *f, blist );
     }
+}
+
+void FsDiscoverer::reload( const std::string& entryPoint )
+{
+    LOG_INFO( "Reloading folder ", entryPoint );
+    auto folder = Folder::fromPath( m_dbConn, entryPoint );
+    if ( folder == nullptr )
+    {
+        LOG_ERROR( "Can't reload ", entryPoint, ": folder wasn't found in database" );
+        return;
+    }
+    auto folderFs = m_fsFactory->createDirectory( folder->path() );
+    if ( folderFs == nullptr )
+    {
+        LOG_ERROR(" Failed to create a fs::IDirectory representing ", folder->path() );
+    }
+    auto blist = blacklist();
+    checkFolder( *folderFs, *folder, blist );
 }
 
 void FsDiscoverer::checkDevices()

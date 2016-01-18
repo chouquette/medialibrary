@@ -54,8 +54,8 @@ public:
 
     virtual void onDiscoveryStarted( const std::string& entryPoint ) = 0;
     virtual void onDiscoveryCompleted( const std::string& entryPoint ) = 0;
-    virtual void onReloadStarted() = 0;
-    virtual void onReloadCompleted() = 0;
+    virtual void onReloadStarted( const std::string& entryPoint ) = 0;
+    virtual void onReloadCompleted( const std::string& entryPoint ) = 0;
     /**
      * @brief onParsingStatsUpdated Called when the parser statistics are updated
      *
@@ -129,6 +129,7 @@ class IMediaLibrary
          */
         virtual void resumeBackgroundOperations() = 0;
         virtual void reload() = 0;
+        virtual void reload( const std::string& entryPoint ) = 0;
 };
 
 extern "C"

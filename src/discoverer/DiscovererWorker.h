@@ -44,6 +44,7 @@ public:
 
     virtual bool discover( const std::string& entryPoint ) override;
     virtual void reload() override;
+    virtual void reload( const std::string& entryPoint ) override;
 
 private:
     void enqueue(const std::string& entryPoint , bool reload);

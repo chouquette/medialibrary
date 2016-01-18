@@ -73,6 +73,11 @@ void DiscovererWorker::reload()
     enqueue( "", true );
 }
 
+void DiscovererWorker::reload( const std::string& entryPoint )
+{
+    enqueue( entryPoint, true );
+}
+
 void DiscovererWorker::enqueue( const std::string& entryPoint, bool reload )
 {
     std::unique_lock<std::mutex> lock( m_mutex );
@@ -131,12 +136,15 @@ void DiscovererWorker::run()
         else
         {
             if ( m_cb != nullptr )
-                m_cb->onReloadStarted();
+                m_cb->onReloadStarted( task.entryPoint );
             for ( auto& d : m_discoverers )
             {
                 try
                 {
-                    d->reload();
+                    if ( task.entryPoint.empty() == true )
+                        d->reload();
+                    else
+                        d->reload( task.entryPoint );
                 }
                 catch(std::exception& ex)
                 {
@@ -146,7 +154,7 @@ void DiscovererWorker::run()
                     break;
             }
             if ( m_cb != nullptr )
-                m_cb->onReloadCompleted();
+                m_cb->onReloadCompleted( task.entryPoint );
         }
     }
     LOG_INFO( "Exiting DiscovererWorker thread" );
