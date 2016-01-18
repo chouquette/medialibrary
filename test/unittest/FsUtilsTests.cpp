@@ -73,3 +73,10 @@ TEST( FsUtils, removePath )
     ASSERT_EQ( "", utils::file::removePath( "bar/", "bar" ) );
     ASSERT_EQ( "", utils::file::removePath( "/f00/", "/f00/" ) );
 }
+
+TEST( FsUtils, parentFolder )
+{
+    ASSERT_EQ( "/a/b/", utils::file::parentDirectory( "/a/b/c/" ) );
+    ASSERT_EQ( "/a/b/", utils::file::parentDirectory( "/a/b/c" ) );
+    ASSERT_EQ( "", utils::file::parentDirectory( "" ) );
+}

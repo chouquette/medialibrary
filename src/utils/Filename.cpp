@@ -44,6 +44,14 @@ std::string directory( const std::string& filePath )
     return filePath.substr( 0, pos + 1 );
 }
 
+std::string parentDirectory( const std::string& path )
+{
+    auto pos = path.find_last_of( '/' );
+    if ( pos == path.length() - 1 )
+        pos = path.find_last_of( '/', pos - 1 );
+    return path.substr( 0, pos + 1 );
+}
+
 std::string fileName(const std::string& filePath)
 {
     auto pos = filePath.find_last_of( '/' );
