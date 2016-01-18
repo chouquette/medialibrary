@@ -71,7 +71,7 @@ bool Folder::createTable(DBConnection connection)
             "id_folder INTEGER PRIMARY KEY AUTOINCREMENT,"
             "path TEXT,"
             "parent_id UNSIGNED INTEGER,"
-            "is_blacklisted INTEGER,"
+            "is_blacklisted INTEGER NOT NULL DEFAULT 0,"
             "device_id UNSIGNED INTEGER,"
             "is_present BOOLEAN NOT NULL DEFAULT 1,"
             "is_removable BOOLEAN NOT NULL,"
@@ -164,25 +164,17 @@ std::shared_ptr<Folder> Folder::fromPath( DBConnection conn, const std::string& 
     }
     if ( deviceFs->isRemovable() == false )
     {
-        std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND is_removable = 0";
-        if ( blacklisted == false )
-            req += " AND is_blacklisted IS NULL";
-        else
-            req += " AND is_blacklisted = 1";
-        return fetch( conn, req, fullPath );
+        std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND is_removable = 0 AND is_blacklisted = ?";
+        return fetch( conn, req, fullPath, blacklisted );
     }
-    std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND device_id = ?";
-    if ( blacklisted == false )
-        req += " AND is_blacklisted IS NULL";
-    else
-        req += " AND is_blacklisted = 1";
+    std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND device_id = ? AND is_blacklisted = ?";
 
     auto device = Device::fromUuid( conn, deviceFs->uuid() );
     // We are trying to find a folder. If we don't know the device it's on, we don't know the folder.
     if ( device == nullptr )
         return nullptr;
     auto path = utils::file::removePath( fullPath, deviceFs->mountpoint() );
-    auto folder = fetch( conn, req, path, device->id() );
+    auto folder = fetch( conn, req, path, device->id(), blacklisted );
     if ( folder == nullptr )
         return nullptr;
     folder->m_deviceMountpoint = deviceFs->mountpoint();
@@ -243,13 +235,13 @@ std::vector<std::shared_ptr<Folder>> Folder::fetchAll( DBConnection dbConn, unsi
     if ( parentFolderId == 0 )
     {
         static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
-                + " WHERE parent_id IS NULL AND is_blacklisted is NULL AND is_present = 1";
+                + " WHERE parent_id IS NULL AND is_blacklisted = 0 AND is_present = 1";
         return DatabaseHelpers::fetchAll<Folder>( dbConn, req );
     }
     else
     {
         static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
-                + " WHERE parent_id = ? AND is_blacklisted is NULL AND is_present = 1";
+                + " WHERE parent_id = ? AND is_blacklisted = 0 AND is_present = 1";
         return DatabaseHelpers::fetchAll<Folder>( dbConn, req, parentFolderId );
     }
 }

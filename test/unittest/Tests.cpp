@@ -105,7 +105,7 @@ MediaPtr MediaLibraryTester::media( const std::string& path )
 std::shared_ptr<Folder> MediaLibraryTester::folder( const std::string& path )
 {
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
-            " WHERE is_blacklisted IS NULL AND is_present = 1";
+            " WHERE is_blacklisted = 0 AND is_present = 1";
     auto folders = Folder::DatabaseHelpers::fetchAll<Folder>( m_dbConnection.get(), req );
     for ( auto &f : folders )
     {
