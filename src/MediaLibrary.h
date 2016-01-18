@@ -84,6 +84,7 @@ class MediaLibrary : public IMediaLibrary
 
         virtual void discover( const std::string& entryPoint ) override;
         bool banFolder( const std::string& path ) override;
+        bool unbanFolder( const std::string& path ) override;
 
         virtual const std::string& thumbnailPath() const override;
         virtual void setLogger( ILogger* logger ) override;

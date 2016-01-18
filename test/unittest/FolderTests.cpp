@@ -298,6 +298,31 @@ TEST_F( Folders, BlacklistAfterDiscovery )
     ASSERT_EQ( nullptr, f2 );
 }
 
+TEST_F( FoldersNoDiscover, RemoveFromBlacklist )
+{
+    cbMock->prepareForWait( 1 );
+    ml->banFolder( mock::FileSystemFactory::SubFolder );
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->wait();
+    ASSERT_TRUE( discovered );
+    auto files = ml->files();
+    ASSERT_EQ( 2u, files.size() );
+
+    auto f = ml->folder( mock::FileSystemFactory::SubFolder );
+    ASSERT_EQ( nullptr, f );
+
+    cbMock->prepareForReload();
+    auto res = ml->unbanFolder( mock::FileSystemFactory::SubFolder );
+    ASSERT_TRUE( res );
+    bool reloaded = cbMock->waitForReload();
+    ASSERT_TRUE( reloaded );
+    files = ml->files();
+    ASSERT_EQ( 3u, files.size() );
+    f = ml->folder( mock::FileSystemFactory::SubFolder );
+    ASSERT_NE( nullptr, f );
+
+}
+
 TEST_F( FoldersNoDiscover, NoMediaBeforeDiscovery )
 {
     auto newFolder = mock::FileSystemFactory::Root + "newfolder/";

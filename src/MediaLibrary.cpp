@@ -467,6 +467,24 @@ bool MediaLibrary::banFolder( const std::string& path )
     return Folder::blacklist( m_dbConnection.get(), path );
 }
 
+bool MediaLibrary::unbanFolder( const std::string& path )
+{
+    auto folder = Folder::blacklistedFolder( m_dbConnection.get(), path );
+    if ( folder == nullptr )
+        return false;
+    deleteFolder( *folder );
+
+    // We are about to refresh the folder we blacklisted earlier, if we don't have a discoverer, stop early
+    if ( m_discoverer == nullptr )
+        return true;
+
+    auto parentPath = utils::file::parentDirectory( path );
+    // If the parent folder was never added to the media library, the discoverer will reject it.
+    // We could check it from here, but that would mean fetching the folder twice, which would be a waste.
+    m_discoverer->reload( parentPath );
+    return true;
+}
+
 const std::string& MediaLibrary::thumbnailPath() const
 {
     return m_thumbnailPath;

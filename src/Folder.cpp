@@ -143,6 +143,16 @@ void Folder::setFileSystemFactory( std::shared_ptr<factory::IFileSystem> fsFacto
 
 std::shared_ptr<Folder> Folder::fromPath( DBConnection conn, const std::string& fullPath )
 {
+    return fromPath( conn, fullPath, false );
+}
+
+std::shared_ptr<Folder> Folder::blacklistedFolder( DBConnection conn, const std::string& fullPath )
+{
+    return fromPath( conn, fullPath, true );
+}
+
+std::shared_ptr<Folder> Folder::fromPath( DBConnection conn, const std::string& fullPath, bool blacklisted )
+{
     auto folderFs = FsFactory->createDirectory( fullPath );
     if ( folderFs == nullptr )
         return nullptr;
@@ -154,12 +164,18 @@ std::shared_ptr<Folder> Folder::fromPath( DBConnection conn, const std::string& 
     }
     if ( deviceFs->isRemovable() == false )
     {
-        const std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND is_removable = 0"
-                " AND is_blacklisted IS NULL";
+        std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND is_removable = 0";
+        if ( blacklisted == false )
+            req += " AND is_blacklisted IS NULL";
+        else
+            req += " AND is_blacklisted = 1";
         return fetch( conn, req, fullPath );
     }
-    const std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND device_id = ? "
-            "AND is_blacklisted IS NULL";
+    std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND device_id = ?";
+    if ( blacklisted == false )
+        req += " AND is_blacklisted IS NULL";
+    else
+        req += " AND is_blacklisted = 1";
 
     auto device = Device::fromUuid( conn, deviceFs->uuid() );
     // We are trying to find a folder. If we don't know the device it's on, we don't know the folder.

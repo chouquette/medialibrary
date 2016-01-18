@@ -69,6 +69,7 @@ public:
     static void setFileSystemFactory( std::shared_ptr<factory::IFileSystem> fsFactory );
 
     static std::shared_ptr<Folder> fromPath( DBConnection conn, const std::string& fullPath );
+    static std::shared_ptr<Folder> blacklistedFolder( DBConnection conn, const std::string& fullPath );
 
     unsigned int id() const;
     const std::string& path() const;
@@ -80,6 +81,7 @@ public:
 
 private:
     static std::shared_ptr<factory::IFileSystem> FsFactory;
+    static std::shared_ptr<Folder> fromPath( DBConnection conn, const std::string& fullPath, bool includeBlacklisted );
 
 private:
     DBConnection m_dbConection;

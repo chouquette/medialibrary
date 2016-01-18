@@ -115,6 +115,7 @@ class IMediaLibrary
          * @brief banFolder will blacklist a folder for discovery
          */
         virtual bool banFolder( const std::string& path ) = 0;
+        virtual bool unbanFolder( const std::string& path ) = 0;
         virtual const std::string& thumbnailPath() const = 0;
         virtual void setLogger( ILogger* logger ) = 0;
         /**
