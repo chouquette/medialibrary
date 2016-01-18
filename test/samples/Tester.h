@@ -21,13 +21,13 @@ public:
     bool waitForParsingComplete();
 
 private:
-    void onMediaAdded(MediaPtr) {}
-    void onFileUpdated(MediaPtr) {}
-    void onDiscoveryStarted(const std::string&) {}
-    void onDiscoveryCompleted(const std::string&);
-    void onReloadStarted( const std::string& ) {}
-    void onReloadCompleted( const std::string& ) {}
-    void onParsingStatsUpdated(uint32_t percent);
+    virtual void onMediaAdded(MediaPtr) override {}
+    virtual void onFileUpdated(MediaPtr) override {}
+    virtual void onDiscoveryStarted(const std::string&) override {}
+    virtual void onDiscoveryCompleted(const std::string&) override;
+    virtual void onReloadStarted( const std::string& ) override {}
+    virtual void onReloadCompleted( const std::string& ) override {}
+    virtual void onParsingStatsUpdated(uint32_t percent) override;
 
     std::condition_variable m_parsingCompleteVar;
     std::mutex m_parsingMutex;
