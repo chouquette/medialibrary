@@ -52,8 +52,8 @@ void DiscovererWorker::stop()
     {
         {
             std::unique_lock<std::mutex> lock( m_mutex );
-            while ( m_entryPoints.empty() == false )
-                m_entryPoints.pop();
+            while ( m_tasks.empty() == false )
+                m_tasks.pop();
         }
         m_cond.notify_all();
         m_thread.join();
@@ -64,27 +64,27 @@ bool DiscovererWorker::discover( const std::string& entryPoint )
 {
     if ( entryPoint.length() == 0 )
         return false;
-    enqueue( entryPoint );
+    enqueue( entryPoint, false );
     return true;
 }
 
 void DiscovererWorker::reload()
 {
-    enqueue( "" );
+    enqueue( "", true );
 }
 
-void DiscovererWorker::enqueue( const std::string& entryPoint )
+void DiscovererWorker::enqueue( const std::string& entryPoint, bool reload )
 {
     std::unique_lock<std::mutex> lock( m_mutex );
 
-    m_entryPoints.emplace( entryPoint );
+    m_tasks.emplace( entryPoint, reload );
     if ( m_thread.get_id() == std::thread::id{} )
     {
         m_run = true;
         m_thread = std::thread( &DiscovererWorker::run, this );
     }
     // Since we just added an element, let's not check for size == 0 :)
-    else if ( m_entryPoints.size() == 1 )
+    else if ( m_tasks.size() == 1 )
         m_cond.notify_all();
 }
 
@@ -93,40 +93,40 @@ void DiscovererWorker::run()
     LOG_INFO( "Entering DiscovererWorker thread" );
     while ( m_run == true )
     {
-        std::string entryPoint;
+        Task task;
         {
             std::unique_lock<std::mutex> lock( m_mutex );
-            if ( m_entryPoints.size() == 0 )
+            if ( m_tasks.size() == 0 )
             {
-                m_cond.wait( lock, [this]() { return m_entryPoints.size() > 0 || m_run == false ; } );
+                m_cond.wait( lock, [this]() { return m_tasks.size() > 0 || m_run == false ; } );
                 if ( m_run == false )
                     break;
             }
-            entryPoint = m_entryPoints.front();
-            m_entryPoints.pop();
+            task = m_tasks.front();
+            m_tasks.pop();
         }
-        if ( entryPoint.length() > 0 )
+        if ( task.reload == false )
         {
             if ( m_cb != nullptr )
-                m_cb->onDiscoveryStarted( entryPoint );
+                m_cb->onDiscoveryStarted( task.entryPoint );
             for ( auto& d : m_discoverers )
             {
                 // Assume only one discoverer can handle an entrypoint.
                 try
                 {
-                    if ( d->discover( entryPoint ) == true )
+                    if ( d->discover( task.entryPoint ) == true )
                         break;
                 }
                 catch(std::exception& ex)
                 {
-                    LOG_ERROR( "Fatal error while discovering ", entryPoint, ": ", ex.what() );
+                    LOG_ERROR( "Fatal error while discovering ", task.entryPoint, ": ", ex.what() );
                 }
 
                 if ( m_run == false )
                     break;
             }
             if ( m_cb != nullptr )
-                m_cb->onDiscoveryCompleted( entryPoint );
+                m_cb->onDiscoveryCompleted( task.entryPoint );
         }
         else
         {

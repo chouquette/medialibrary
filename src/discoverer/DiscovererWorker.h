@@ -46,12 +46,21 @@ public:
     virtual void reload() override;
 
 private:
-    void enqueue( const std::string& entryPoint );
+    void enqueue(const std::string& entryPoint , bool reload);
     void run();
 
 private:
+    struct Task
+    {
+        Task() = default;
+        Task( const std::string& entryPoint, bool reload )
+            : entryPoint( entryPoint ), reload( reload ) {}
+        std::string entryPoint;
+        bool reload;
+    };
+
     std::thread m_thread;
-    std::queue<std::string> m_entryPoints;
+    std::queue<Task> m_tasks;
     std::mutex m_mutex;
     std::condition_variable m_cond;
     std::atomic_bool m_run;
