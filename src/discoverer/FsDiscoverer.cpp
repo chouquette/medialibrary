@@ -110,20 +110,20 @@ void FsDiscoverer::checkDevices()
     }
 }
 
-bool FsDiscoverer::checkSubfolders( fs::IDirectory& parentFolderFs, Folder& parentFolder, const std::vector<std::shared_ptr<Folder>> blacklist ) const
+bool FsDiscoverer::checkSubfolders( fs::IDirectory& currentFolderFs, Folder& currentFolder, const std::vector<std::shared_ptr<Folder>> blacklist ) const
 {
     // We already know of this folder, though it may now contain a .nomedia file.
     // In this case, simply delete the folder.
-    if ( hasDotNoMediaFile( parentFolderFs ) )
+    if ( hasDotNoMediaFile( currentFolderFs ) )
     {
-        LOG_INFO( "Deleting folder ", parentFolderFs.path(), " due to a .nomedia file" );
-        m_ml->deleteFolder( parentFolder );
+        LOG_INFO( "Deleting folder ", currentFolderFs.path(), " due to a .nomedia file" );
+        m_ml->deleteFolder( currentFolder );
         return false;
     }
     // Load the folders we already know of:
-    LOG_INFO( "Checking for modifications in ", parentFolderFs.path() );
-    auto subFoldersInDB = Folder::fetchAll( m_dbConn, parentFolder.id() );
-    for ( const auto& subFolderPath : parentFolderFs.dirs() )
+    LOG_INFO( "Checking for modifications in ", currentFolderFs.path() );
+    auto subFoldersInDB = Folder::fetchAll( m_dbConn, currentFolder.id() );
+    for ( const auto& subFolderPath : currentFolderFs.dirs() )
     {
         auto subFolder = m_fsFactory->createDirectory( subFolderPath );
         if ( subFolder == nullptr )
@@ -147,7 +147,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory& parentFolderFs, Folder& pare
                 continue;
             }
             LOG_INFO( "New folder detected: ", subFolderPath );
-            addFolder( *subFolder, &parentFolder, blacklist );
+            addFolder( *subFolder, &currentFolder, blacklist );
             continue;
         }
         auto folderInDb = *it;
@@ -166,7 +166,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory& parentFolderFs, Folder& pare
         LOG_INFO( "Folder ", f->path(), " not found in FS, deleting it" );
         m_ml->deleteFolder( *f );
     }
-    LOG_INFO( "Done checking subfolders in ", parentFolderFs.path() );
+    LOG_INFO( "Done checking subfolders in ", currentFolderFs.path() );
     return true;
 }
 
