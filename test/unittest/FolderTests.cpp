@@ -87,7 +87,7 @@ TEST_F( Folders, Delete )
     auto files = ml->files();
     ASSERT_EQ( files.size(), 3u );
 
-    ml->deleteFolder( f.get() );
+    ml->deleteFolder( *f );
 
     f = ml->folder( folderPath );
     ASSERT_EQ( nullptr, f );

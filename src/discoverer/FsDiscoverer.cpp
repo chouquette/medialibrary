@@ -78,7 +78,7 @@ void FsDiscoverer::reload()
         if ( folder == nullptr )
         {
             LOG_INFO( "Removing folder ", f->path() );
-            m_ml->deleteFolder( f.get() );
+            m_ml->deleteFolder( *f );
             continue;
         }
         checkSubfolders( *folder, *f, blist );
@@ -145,7 +145,7 @@ bool FsDiscoverer::checkSubfolders( fs::IDirectory& parentFolderFs, Folder& pare
     for ( auto f : subFoldersInDB )
     {
         LOG_INFO( "Folder ", f->path(), " not found in FS, deleting it" );
-        m_ml->deleteFolder( f.get() );
+        m_ml->deleteFolder( *f );
     }
     LOG_INFO( "Done checking subfolders in ", parentFolderFs.path() );
     return true;

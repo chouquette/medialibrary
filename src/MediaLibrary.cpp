@@ -253,9 +253,9 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder& p
     return mptr;
 }
 
-bool MediaLibrary::deleteFolder( const Folder* folder )
+bool MediaLibrary::deleteFolder( const Folder& folder )
 {
-    if ( Folder::destroy( m_dbConnection.get(), folder->id() ) == false )
+    if ( Folder::destroy( m_dbConnection.get(), folder.id() ) == false )
         return false;
     Media::clear();
     return true;
