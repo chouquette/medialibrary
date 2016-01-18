@@ -52,14 +52,14 @@ const std::string&Directory::path() const
     return m_path;
 }
 
-const std::vector<std::string>& Directory::files()
+const std::vector<std::string>& Directory::files() const
 {
     if ( m_dirs.size() == 0 && m_files.size() == 0 )
         read();
     return m_files;
 }
 
-const std::vector<std::string>& Directory::dirs()
+const std::vector<std::string>& Directory::dirs() const
 {
     if ( m_dirs.size() == 0 && m_files.size() == 0 )
         read();
@@ -87,7 +87,7 @@ std::string Directory::toAbsolute( const std::string& path )
     return std::string{ abs };
 }
 
-void Directory::read()
+void Directory::read() const
 {
     std::unique_ptr<DIR, int(*)(DIR*)> dir( opendir( m_path.c_str() ), closedir );
     if ( dir == nullptr )

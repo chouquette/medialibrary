@@ -110,7 +110,7 @@ public:
         return m_path;
     }
 
-    virtual const std::vector<std::string>& files() override
+    virtual const std::vector<std::string>& files() const override
     {
         if ( m_filePathes.size() == 0 )
         {
@@ -120,7 +120,7 @@ public:
         return m_filePathes;
     }
 
-    virtual const std::vector<std::string>& dirs() override
+    virtual const std::vector<std::string>& dirs() const override
     {
         if ( m_dirPathes.size() == 0 )
         {
@@ -265,8 +265,8 @@ private:
     std::string m_path;
     std::unordered_map<std::string, std::shared_ptr<File>> m_files;
     std::unordered_map<std::string, std::shared_ptr<Directory>> m_dirs;
-    std::vector<std::string> m_filePathes;
-    std::vector<std::string> m_dirPathes;
+    mutable std::vector<std::string> m_filePathes;
+    mutable std::vector<std::string> m_dirPathes;
     std::weak_ptr<Device> m_device;
 };
 
@@ -568,12 +568,12 @@ class NoopDirectory : public fs::IDirectory
         abort();
     }
 
-    virtual const std::vector<std::string>&files() override
+    virtual const std::vector<std::string>&files() const override
     {
         abort();
     }
 
-    virtual const std::vector<std::string>&dirs() override
+    virtual const std::vector<std::string>&dirs() const override
     {
         abort();
     }

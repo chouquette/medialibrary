@@ -34,20 +34,20 @@ class Directory : public IDirectory
 public:
     explicit Directory( const std::string& path );
     virtual const std::string& path() const override;
-    virtual const std::vector<std::string>& files() override;
-    virtual const std::vector<std::string>& dirs() override;
+    virtual const std::vector<std::string>& files() const override;
+    virtual const std::vector<std::string>& dirs() const override;
     virtual std::shared_ptr<IDevice> device() const override;
 
 private:
     static std::string toAbsolute( const std::string& path );
 
 private:
-    void read();
+    void read() const;
 
 private:
     std::string m_path;
-    std::vector<std::string> m_files;
-    std::vector<std::string> m_dirs;
+    mutable std::vector<std::string> m_files;
+    mutable std::vector<std::string> m_dirs;
     mutable Cache<std::shared_ptr<IDevice>> m_device;
 };
 
