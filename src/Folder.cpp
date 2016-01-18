@@ -71,7 +71,7 @@ bool Folder::createTable(DBConnection connection)
             "id_folder INTEGER PRIMARY KEY AUTOINCREMENT,"
             "path TEXT,"
             "parent_id UNSIGNED INTEGER,"
-            "is_blacklisted INTEGER NOT NULL DEFAULT 0,"
+            "is_blacklisted BOOLEAN NOT NULL DEFAULT 0,"
             "device_id UNSIGNED INTEGER,"
             "is_present BOOLEAN NOT NULL DEFAULT 1,"
             "is_removable BOOLEAN NOT NULL,"
