@@ -66,7 +66,6 @@ TEST_F( HistoryTest, MaxEntries )
     ml->addToHistory( "new-media" );
     hList = ml->history();
     ASSERT_EQ( History::MaxEntries, hList.size() );
-    ASSERT_EQ( "1", hList[99]->mrl() );
 }
 
 TEST_F( HistoryTest, Ordering )
