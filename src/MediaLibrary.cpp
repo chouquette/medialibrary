@@ -33,6 +33,7 @@
 #include "Device.h"
 #include "File.h"
 #include "Folder.h"
+#include "History.h"
 #include "Media.h"
 #include "MediaLibrary.h"
 #include "Label.h"
@@ -105,6 +106,7 @@ MediaLibrary::~MediaLibrary()
     Device::clear();
     File::clear();
     Playlist::clear();
+    History::clear();
     // Explicitely release the connection's TLS
     if ( m_dbConnection != nullptr )
         m_dbConnection->release();
@@ -138,6 +140,7 @@ bool MediaLibrary::createAllTables()
         Artist::createTriggers( m_dbConnection.get() ) &&
         Media::createTriggers( m_dbConnection.get() ) &&
         Playlist::createTriggers( m_dbConnection.get() ) &&
+        History::createTable( m_dbConnection.get() ) &&
         Settings::createTable( m_dbConnection.get() );
     if ( res == false )
         return false;
@@ -371,6 +374,23 @@ std::vector<PlaylistPtr> MediaLibrary::playlists()
 bool MediaLibrary::deletePlaylist( unsigned int playlistId )
 {
     return Playlist::destroy( m_dbConnection.get(), playlistId );
+}
+
+bool MediaLibrary::addToHistory( MediaPtr media )
+{
+    if ( media == nullptr )
+        return false;
+    return History::insert( m_dbConnection.get(), *media );
+}
+
+bool MediaLibrary::addToHistory( const std::string& mrl )
+{
+    return History::insert( m_dbConnection.get(), mrl );
+}
+
+std::vector<HistoryPtr> MediaLibrary::history() const
+{
+    return History::fetch( m_dbConnection.get() );
 }
 
 void MediaLibrary::startParser()

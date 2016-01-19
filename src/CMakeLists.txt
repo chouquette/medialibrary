@@ -68,6 +68,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     Device.cpp
     File.cpp
     Playlist.cpp
+    History.cpp
 
     parser/Parser.cpp
     parser/ParserService.cpp

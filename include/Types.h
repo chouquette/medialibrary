@@ -30,6 +30,7 @@ class IAlbumTrack;
 class IAudioTrack;
 class IDiscoverer;
 class IFile;
+class IHistoryEntry;
 class IMedia;
 class ILabel;
 class IMetadataService;
@@ -54,6 +55,7 @@ typedef std::shared_ptr<IAudioTrack> AudioTrackPtr;
 typedef std::shared_ptr<IVideoTrack> VideoTrackPtr;
 typedef std::shared_ptr<IArtist> ArtistPtr;
 typedef std::shared_ptr<IPlaylist> PlaylistPtr;
+typedef std::shared_ptr<IHistoryEntry> HistoryPtr;
 
 typedef SqliteConnection* DBConnection;
 
