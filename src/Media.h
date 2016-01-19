@@ -63,7 +63,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         // ::new (pv) T(std::forward(args)...)
         // shall be well-formed, and private constructor would prevent that.
         // There might be a way with a user-defined allocator, but we'll see that later...
-        Media(DBConnection dbConnection , sqlite::Row& row);
+        Media( DBConnection dbConnection , sqlite::Row& row );
         Media( const std::string &title, Type type);
 
         static std::shared_ptr<Media> create( DBConnection dbConnection, Type type, const fs::IFile* file );

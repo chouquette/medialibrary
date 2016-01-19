@@ -13,6 +13,7 @@
 #include "IAlbumTrack.h"
 #include "IAudioTrack.h"
 #include "IVideoTrack.h"
+#include "IGenre.h"
 
 class MockCallback : public IMediaLibraryCb
 {

@@ -25,8 +25,6 @@
 
 #include "IMediaLibrary.h"
 
-class IAlbum;
-
 class IAlbumTrack
 {
     public:
@@ -42,9 +40,9 @@ class IAlbumTrack
          * @return
          */
         virtual ArtistPtr artist() const = 0;
-        virtual const std::string& genre() = 0;
+        virtual GenrePtr genre() = 0;
         virtual unsigned int trackNumber() = 0;
-        virtual std::shared_ptr<IAlbum> album() = 0;
+        virtual AlbumPtr album() = 0;
         /**
          * @return Which disc this tracks appears on (or 0 if unspecified)
          */

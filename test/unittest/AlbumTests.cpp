@@ -95,25 +95,6 @@ TEST_F( Albums, NbTracks )
     ASSERT_EQ( tracks.size(), a->nbTracks() );
 }
 
-TEST_F( Albums, SetGenre )
-{
-    auto a = ml->createAlbum( "album" );
-    auto f = ml->addFile( "track.mp3" );
-    auto t = a->addTrack( f, 1, 0 );
-    f->save();
-
-    t->setGenre( "happy underground post progressive death metal" );
-    ASSERT_EQ( t->genre(), "happy underground post progressive death metal" );
-
-    Reload();
-
-    a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
-    auto tracks = a->tracks();
-    ASSERT_EQ( tracks.size(), 1u );
-    auto t2 = tracks[0];
-    ASSERT_EQ( t->genre(), t2->albumTrack()->genre() );
-}
-
 TEST_F( Albums, SetReleaseDate )
 {
     auto a = ml->createAlbum( "album" );

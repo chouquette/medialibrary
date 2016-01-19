@@ -15,6 +15,7 @@ list(APPEND TEST_SRCS
     unittest/FileTests.cpp
     unittest/PlaylistTests.cpp
     unittest/HistoryTests.cpp
+    unittest/GenreTests.cpp
 
     mocks/FileSystem.h
     mocks/FileSystem.cpp

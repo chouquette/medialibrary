@@ -25,6 +25,7 @@
 #include "AlbumTrack.h"
 #include "Artist.h"
 #include "File.h"
+#include "Genre.h"
 #include "Media.h"
 #include "Show.h"
 #include "utils/Filename.h"
@@ -337,7 +338,17 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
 
     if ( task.genre.length() != 0 )
     {
-        track->setGenre( task.genre );
+        auto genre = Genre::fromName( m_dbConn, task.genre );
+        if ( genre == nullptr )
+        {
+            genre = m_ml->createGenre( task.genre );
+            if ( genre == nullptr )
+            {
+                LOG_ERROR( "Failed to create a genre in database" );
+                return nullptr;
+            }
+        }
+        track->setGenre( genre );
     }
     if ( task.releaseDate.empty() == false )
     {

@@ -272,7 +272,8 @@ void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& 
         }
         if ( expectedTrack.HasMember( "genre" ) )
         {
-            if ( strcasecmp( expectedTrack["genre"].GetString(), albumTrack->genre().c_str() ) != 0 )
+            auto genre = albumTrack->genre();
+            if ( genre == nullptr || strcasecmp( expectedTrack["genre"].GetString(), genre->name().c_str() ) != 0 )
                 return ;
         }
         if ( expectedTrack.HasMember( "releaseYear" ) )

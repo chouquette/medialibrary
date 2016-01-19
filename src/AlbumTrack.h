@@ -25,6 +25,7 @@
 
 #include <sqlite3.h>
 #include <string>
+#include <vector>
 
 #include "IAlbumTrack.h"
 #include "IMediaLibrary.h"
@@ -35,6 +36,7 @@ class Album;
 class AlbumTrack;
 class Artist;
 class Media;
+class Genre;
 
 namespace policy
 {
@@ -55,8 +57,8 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         virtual unsigned int id() const override;
         virtual ArtistPtr artist() const override;
         bool setArtist( std::shared_ptr<Artist> artist );
-        virtual const std::string& genre() override;
-        bool setGenre( const std::string& genre );
+        virtual GenrePtr genre() override;
+        bool setGenre( std::shared_ptr<Genre> genre );
         virtual unsigned int trackNumber() override;
         virtual unsigned int releaseYear() const override;
         bool setReleaseYear( unsigned int year );
@@ -67,13 +69,14 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         static std::shared_ptr<AlbumTrack> create( DBConnection dbConnection, unsigned int albumId,
                                      unsigned int mediaId, unsigned int trackNb , unsigned int discNumber );
         static AlbumTrackPtr fromMedia( DBConnection dbConnection, unsigned int mediaId );
+        static std::vector<AlbumTrackPtr> fromGenre( DBConnection dbConn, unsigned int genreId );
 
     private:
         DBConnection m_dbConnection;
         unsigned int m_id;
         unsigned int m_mediaId;
         unsigned int m_artistId;
-        std::string m_genre;
+        unsigned int m_genreId;
         unsigned int m_trackNumber;
         unsigned int m_albumId;
         unsigned int m_releaseYear;
@@ -82,6 +85,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
 
         std::weak_ptr<Album> m_album;
         mutable Cache<std::shared_ptr<Artist>> m_artist;
+        mutable Cache<std::shared_ptr<Genre>> m_genre;
 
         friend struct policy::AlbumTrackTable;
 };

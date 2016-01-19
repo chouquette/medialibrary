@@ -96,6 +96,7 @@ class IMediaLibrary
         virtual MoviePtr movie( const std::string& title ) = 0;
         virtual ArtistPtr artist( unsigned int id ) = 0;
         virtual std::vector<ArtistPtr> artists() const = 0;
+        virtual std::vector<GenrePtr> genres() const = 0;
 
         /***
          *  Playlists

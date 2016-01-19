@@ -24,6 +24,7 @@
 #include "Album.h"
 #include "Artist.h"
 #include "Media.h"
+#include "Genre.h"
 #include "database/SqliteTools.h"
 #include "logging/Logger.h"
 
@@ -37,7 +38,7 @@ AlbumTrack::AlbumTrack( DBConnection dbConnection, sqlite::Row& row )
     row >> m_id
         >> m_mediaId
         >> m_artistId
-        >> m_genre
+        >> m_genreId
         >> m_trackNumber
         >> m_albumId
         >> m_releaseYear
@@ -92,7 +93,7 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
                 "id_track INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "media_id INTEGER,"
                 "artist_id UNSIGNED INTEGER,"
-                "genre TEXT,"
+                "genre_id INTEGER,"
                 "track_number UNSIGNED INTEGER,"
                 "album_id UNSIGNED INTEGER NOT NULL,"
                 "release_year UNSIGNED INTEGER,"
@@ -102,6 +103,7 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
                     " ON DELETE CASCADE,"
                 "FOREIGN KEY (artist_id) REFERENCES " + policy::ArtistTable::Name + "(id_artist)"
                     " ON DELETE CASCADE,"
+                "FOREIGN KEY (genre_id) REFERENCES " + policy::GenreTable::Name + "(id_genre),"
                 "FOREIGN KEY (album_id) REFERENCES Album(id_album) "
                     " ON DELETE CASCADE"
             ")";
@@ -132,18 +134,34 @@ AlbumTrackPtr AlbumTrack::fromMedia( DBConnection dbConnection, unsigned int med
     return fetch( dbConnection, req, mediaId );
 }
 
-const std::string& AlbumTrack::genre()
+std::vector<AlbumTrackPtr> AlbumTrack::fromGenre( DBConnection dbConn, unsigned int genreId )
 {
-    return m_genre;
+    static const std::string req = "SELECT * FROM " + policy::AlbumTrackTable::Name +
+            " WHERE genre_id = ?";
+    return fetchAll<IAlbumTrack>( dbConn, req, genreId );
 }
 
-bool AlbumTrack::setGenre(const std::string& genre)
+GenrePtr AlbumTrack::genre()
+{
+    auto l = m_genre.lock();
+    if ( m_genre.isCached() == false )
+    {
+        m_genre = Genre::fetch( m_dbConnection, m_genreId );
+    }
+    return m_genre.get();
+}
+
+bool AlbumTrack::setGenre( std::shared_ptr<Genre> genre )
 {
     static const std::string req = "UPDATE " + policy::AlbumTrackTable::Name
-            + " SET genre = ? WHERE id_track = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, genre, m_id ) == false )
+            + " SET genre_id = ? WHERE id_track = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConnection, req,
+                                       sqlite::ForeignKey( genre != nullptr ? genre->id() : 0 ),
+                                       m_id ) == false )
         return false;
+    auto l = m_genre.lock();
     m_genre = genre;
+    m_genreId = genre != nullptr ? genre->id() : 0;
     return true;
 }
 

@@ -33,6 +33,7 @@
 #include "Device.h"
 #include "File.h"
 #include "Folder.h"
+#include "Genre.h"
 #include "History.h"
 #include "Media.h"
 #include "MediaLibrary.h"
@@ -107,6 +108,7 @@ MediaLibrary::~MediaLibrary()
     File::clear();
     Playlist::clear();
     History::clear();
+    Genre::clear();
     // Explicitely release the connection's TLS
     if ( m_dbConnection != nullptr )
         m_dbConnection->release();
@@ -127,6 +129,7 @@ bool MediaLibrary::createAllTables()
         File::createTable( m_dbConnection.get() ) &&
         Label::createTable( m_dbConnection.get() ) &&
         Playlist::createTable( m_dbConnection.get() ) &&
+        Genre::createTable( m_dbConnection.get() ) &&
         Album::createTable( m_dbConnection.get() ) &&
         AlbumTrack::createTable( m_dbConnection.get() ) &&
         Album::createTriggers( m_dbConnection.get() ) &&
@@ -300,6 +303,16 @@ std::vector<AlbumPtr> MediaLibrary::albums()
             " WHERE is_present=1"
             " ORDER BY title ASC";
     return Album::fetchAll<IAlbum>( m_dbConnection.get(), req );
+}
+
+std::vector<GenrePtr> MediaLibrary::genres() const
+{
+    return Genre::fetchAll<IGenre>( m_dbConnection.get() );
+}
+
+std::shared_ptr<Genre> MediaLibrary::createGenre( const std::string& name )
+{
+    return Genre::create( m_dbConnection.get(), name );
 }
 
 ShowPtr MediaLibrary::show(const std::string& name)

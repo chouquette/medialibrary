@@ -69,6 +69,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     File.cpp
     Playlist.cpp
     History.cpp
+    Genre.cpp
 
     parser/Parser.cpp
     parser/ParserService.cpp
