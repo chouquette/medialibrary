@@ -169,7 +169,7 @@ std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsig
 {
     auto t = m_dbConnection->newTransaction();
 
-    auto track = AlbumTrack::create( m_dbConnection, m_id, media->id(), trackNb, discNumber );
+    auto track = AlbumTrack::create( m_dbConnection, m_id, *media, trackNb, discNumber );
     if ( track == nullptr )
         return nullptr;
     media->setAlbumTrack( track );

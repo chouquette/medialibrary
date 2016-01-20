@@ -113,6 +113,11 @@ class IMediaLibrary
         virtual std::vector<HistoryPtr> history() const = 0;
 
         /**
+         * Search
+         */
+        virtual std::vector<MediaPtr> searchAlbumTracks( const std::string& title ) const = 0;
+
+        /**
          * @brief discover Launch a discovery on the provided entry point.
          * The actuall discovery will run asynchronously, meaning this method will immediatly return.
          * Depending on which discoverer modules where provided, this might or might not work

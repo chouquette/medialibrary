@@ -405,6 +405,11 @@ std::vector<HistoryPtr> MediaLibrary::history() const
     return History::fetch( m_dbConnection.get() );
 }
 
+std::vector<MediaPtr> MediaLibrary::searchAlbumTracks( const std::string& title ) const
+{
+    return AlbumTrack::search( m_dbConnection.get(), title );
+}
+
 void MediaLibrary::startParser()
 {
     m_parser.reset( new Parser( m_dbConnection.get(), this, m_callback ) );

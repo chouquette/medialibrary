@@ -66,10 +66,11 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         virtual std::shared_ptr<IAlbum> album() override;
 
         static bool createTable( DBConnection dbConnection );
-        static std::shared_ptr<AlbumTrack> create( DBConnection dbConnection, unsigned int albumId,
-                                     unsigned int mediaId, unsigned int trackNb , unsigned int discNumber );
+        static std::shared_ptr<AlbumTrack> create(DBConnection dbConnection, unsigned int albumId,
+                                     const Media& media, unsigned int trackNb , unsigned int discNumber );
         static AlbumTrackPtr fromMedia( DBConnection dbConnection, unsigned int mediaId );
         static std::vector<AlbumTrackPtr> fromGenre( DBConnection dbConn, unsigned int genreId );
+        static std::vector<MediaPtr> search(DBConnection dbConn, const std::string& title );
 
     private:
         DBConnection m_dbConnection;
