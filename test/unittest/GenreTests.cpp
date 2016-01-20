@@ -98,3 +98,43 @@ TEST_F( Genres, ListArtists )
     artists = g->artists();
     ASSERT_EQ( 2u, artists.size() );
 }
+
+TEST_F( Genres, ListAlbums )
+{
+    auto album = ml->createAlbum( "album" );
+    auto m = ml->addFile( "some track.mp3" );
+    auto t = album->addTrack( m, 10, 1 );
+    t->setGenre( g );
+
+    auto album2 = ml->createAlbum( "album2" );
+    m = ml->addFile( "some other track.mp3" );
+    t = album2->addTrack( m, 10, 1 );
+    t->setGenre( g );
+
+    // We have 2 albums with at least a song with genre "g" (as defined in SetUp)
+    // Now we create more albums with "random" genre, all of them should have 1 album
+    for ( auto i = 1u; i <= 5u; ++i )
+    {
+        auto m = ml->addFile( std::to_string( i ) + ".mp3" );
+        auto track = album->addTrack( m, i, 1 );
+        auto g = ml->createGenre( std::to_string( i ) );
+        track->setGenre( g );
+    }
+
+    auto genres = ml->genres();
+    for ( auto& genre : genres )
+    {
+        auto albums = genre->albums();
+
+        if ( genre->id() == g->id() )
+        {
+            // Initial genre with 2 albums:
+            ASSERT_EQ( 2u, albums.size() );
+        }
+        else
+        {
+            ASSERT_EQ( 1u, albums.size() );
+            ASSERT_EQ( album->id(), albums[0]->id() );
+        }
+    }
+}

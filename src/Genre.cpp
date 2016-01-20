@@ -22,6 +22,7 @@
 
 #include "Genre.h"
 
+#include "Album.h"
 #include "AlbumTrack.h"
 #include "Artist.h"
 
@@ -65,6 +66,14 @@ std::vector<ArtistPtr> Genre::artists() const
 std::vector<AlbumTrackPtr> Genre::tracks() const
 {
     return AlbumTrack::fromGenre( m_dbConnection, m_id );
+}
+
+std::vector<AlbumPtr> Genre::albums() const
+{
+    static const std::string req = "SELECT a.* FROM " + policy::AlbumTable::Name + " a "
+            "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.album_id = a.id_album "
+            "WHERE att.genre_id = ? GROUP BY att.album_id";
+    return Album::fetchAll<IAlbum>( m_dbConnection, req, m_id );
 }
 
 bool Genre::createTable( DBConnection dbConn )
