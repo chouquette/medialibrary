@@ -68,3 +68,33 @@ TEST_F( Genres, ListAlbumTracks )
     auto tracks = g->tracks();
     ASSERT_EQ( 2u, tracks.size() );
 }
+
+TEST_F( Genres, ListArtists )
+{
+    auto artists = g->artists();
+    ASSERT_EQ( 0u, artists.size() );
+
+    auto a = ml->createArtist( "artist" );
+    auto a2 = ml->createArtist( "artist 2" );
+    // Ensure we're not just returning all the artists:
+    auto a3 = ml->createArtist( "artist 3" );
+    auto album = ml->createAlbum( "album" );
+    auto album2 = ml->createAlbum( "album2" );
+
+    for ( auto i = 1u; i <= 5; ++i )
+    {
+        auto m = ml->addFile( std::to_string( i ) + ".mp3" );
+        auto track = album->addTrack( m, i, 1 );
+        track->setGenre( g );
+        track->setArtist( a );
+    }
+    for ( auto i = 1u; i <= 5; ++i )
+    {
+        auto m = ml->addFile( std::to_string( i ) + "_2.mp3" );
+        auto track = album2->addTrack( m, i, 1 );
+        track->setGenre( g );
+        track->setArtist( a2 );
+    }
+    artists = g->artists();
+    ASSERT_EQ( 2u, artists.size() );
+}

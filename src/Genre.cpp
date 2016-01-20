@@ -23,6 +23,7 @@
 #include "Genre.h"
 
 #include "AlbumTrack.h"
+#include "Artist.h"
 
 namespace policy
 {
@@ -55,7 +56,10 @@ const std::string& Genre::name() const
 
 std::vector<ArtistPtr> Genre::artists() const
 {
-
+    static const std::string req = "SELECT a.* FROM " + policy::ArtistTable::Name + " a "
+            "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.artist_id = a.id_artist "
+            "WHERE att.genre_id = ? GROUP BY att.artist_id";
+    return Artist::fetchAll<IArtist>( m_dbConnection, req, m_id );
 }
 
 std::vector<AlbumTrackPtr> Genre::tracks() const
