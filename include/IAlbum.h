@@ -46,6 +46,12 @@ public:
      */
     virtual std::vector<std::shared_ptr<IMedia>> tracks() const = 0;
     /**
+     * @brief tracks fetches album tracks, filtered by genre
+     * @param genre A musical genre. Only tracks of this genre will be returned
+     * @return
+     */
+    virtual std::vector<std::shared_ptr<IMedia>> tracks( GenrePtr genre ) const = 0;
+    /**
      * @brief albumArtist Returns the album main artist (generally tagged as album-artist)
      */
     virtual ArtistPtr albumArtist() const = 0;

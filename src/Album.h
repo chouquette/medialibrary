@@ -73,6 +73,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         virtual const std::string& artworkMrl() const override;
         bool setArtworkMrl( const std::string& artworkMrl );
         virtual std::vector<MediaPtr> tracks() const override;
+        virtual std::vector<std::shared_ptr<IMedia>> tracks( GenrePtr genre ) const override;
         ///
         /// \brief cachedTracks Returns a cached list of tracks
         /// This has no warranty of ordering, validity, or anything else.

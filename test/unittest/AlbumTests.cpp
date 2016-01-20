@@ -25,6 +25,7 @@
 #include "Album.h"
 #include "AlbumTrack.h"
 #include "Artist.h"
+#include "Genre.h"
 #include "Media.h"
 #include "IMediaLibrary.h"
 
@@ -93,6 +94,31 @@ TEST_F( Albums, NbTracks )
     a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
     tracks = a->tracks();
     ASSERT_EQ( tracks.size(), a->nbTracks() );
+}
+
+TEST_F( Albums, TracksByGenre )
+{
+    auto a = ml->createAlbum( "albumtag" );
+    auto g = ml->createGenre( "genre" );
+
+    for ( auto i = 1u; i <= 10; ++i )
+    {
+        auto f = ml->addFile( "track" + std::to_string(i) + ".mp3" );
+        auto track = a->addTrack( f, i, i );
+        f->save();
+        ASSERT_NE( track, nullptr );
+        if ( i <= 5 )
+            track->setGenre( g );
+    }
+    auto tracks = a->tracks( g );
+    ASSERT_EQ( 5u, tracks.size() );
+
+    Reload();
+
+    a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
+    tracks = a->tracks( g );
+    ASSERT_NE( tracks.size(), a->nbTracks() );
+    ASSERT_EQ( 5u, tracks.size() );
 }
 
 TEST_F( Albums, SetReleaseDate )

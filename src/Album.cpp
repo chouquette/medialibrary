@@ -25,6 +25,7 @@
 #include "Album.h"
 #include "AlbumTrack.h"
 #include "Artist.h"
+#include "IGenre.h"
 #include "Media.h"
 
 #include "database/SqliteTools.h"
@@ -142,6 +143,18 @@ std::vector<MediaPtr> Album::tracks() const
             " INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
             " WHERE att.album_id = ? AND med.is_present = 1 ORDER BY att.disc_number, att.track_number";
     return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
+}
+
+std::vector<std::shared_ptr<IMedia> > Album::tracks( GenrePtr genre ) const
+{
+    if ( genre == nullptr )
+        return {};
+    static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
+            " INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
+            " WHERE att.album_id = ? AND med.is_present = 1"
+            " AND genre_id = ?"
+            " ORDER BY att.disc_number, att.track_number";
+    return Media::fetchAll<IMedia>( m_dbConnection, req, m_id, genre->id() );
 }
 
 std::vector<MediaPtr> Album::cachedTracks() const
