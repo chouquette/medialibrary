@@ -318,7 +318,7 @@ void Media::setType( Type type )
     m_changed = true;
 }
 
-const std::string &Media::title()
+const std::string &Media::title() const
 {
     return m_title;
 }

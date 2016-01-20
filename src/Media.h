@@ -73,7 +73,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual unsigned int id() const override;
         virtual Type type() override;
         void setType( Type type );
-        virtual const std::string& title() override;
+        virtual const std::string& title() const override;
         void setTitle( const std::string& title );
         virtual AlbumTrackPtr albumTrack() const override;
         void setAlbumTrack( AlbumTrackPtr albumTrack );
