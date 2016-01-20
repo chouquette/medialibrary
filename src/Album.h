@@ -82,7 +82,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         std::vector<MediaPtr> cachedTracks() const;
         ///
         /// \brief addTrack Add a track to the album.
-        /// This will modify the modify, but *not* save it.
+        /// This will modify the media, but *not* save it.
         /// The media will be added to the tracks cache.
         ///
         std::shared_ptr<AlbumTrack> addTrack( std::shared_ptr<Media> media, unsigned int trackNb, unsigned int discNumber);
