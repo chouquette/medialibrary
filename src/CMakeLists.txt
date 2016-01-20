@@ -9,7 +9,7 @@ EnableCpp11()
 include(FindPkgConfig)
 pkg_check_modules(EVAS evas)
 
-add_definitions("-Wall -Wextra -pedantic -O0")
+add_definitions("-Wall -Wextra -pedantic")
 
 if(UNIX)
     set(ARCH_FOLDER "unix")
