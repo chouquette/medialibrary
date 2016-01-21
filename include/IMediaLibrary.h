@@ -96,12 +96,6 @@ class IMediaLibrary
         ///
         virtual bool initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* metadataCb ) = 0;
         virtual void setVerbosity( LogLevel v ) = 0;
-        /**
-         * Replaces the default filesystem factory
-         * The default one will use standard opendir/readdir functions
-         * Calling this after initialize() is not a supported scenario.
-         */
-        virtual void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory ) = 0;
 
         virtual LabelPtr createLabel( const std::string& label ) = 0;
         virtual bool deleteLabel( LabelPtr label ) = 0;

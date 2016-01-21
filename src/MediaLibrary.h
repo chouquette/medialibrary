@@ -50,7 +50,6 @@ class MediaLibrary : public IMediaLibrary
         ~MediaLibrary();
         virtual bool initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* metadataCb ) override;
         virtual void setVerbosity( LogLevel v ) override;
-        virtual void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory ) override;
 
         std::vector<MediaPtr> files();
         virtual std::vector<MediaPtr> audioFiles() override;

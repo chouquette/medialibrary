@@ -114,11 +114,6 @@ MediaLibrary::~MediaLibrary()
         m_dbConnection->release();
 }
 
-void MediaLibrary::setFsFactory(std::shared_ptr<factory::IFileSystem> fsFactory)
-{
-    m_fsFactory = fsFactory;
-}
-
 bool MediaLibrary::createAllTables()
 {
     auto t = m_dbConnection->newTransaction();

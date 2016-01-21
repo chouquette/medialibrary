@@ -42,6 +42,7 @@ public:
     void deleteGenre( unsigned int genreId );
     void deleteArtist( unsigned int artistId );
     std::shared_ptr<Device> addDevice( const std::string& uuid, bool isRemovable );
+    void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory );
 
 private:
     std::unique_ptr<fs::IDirectory> dummyDirectory;

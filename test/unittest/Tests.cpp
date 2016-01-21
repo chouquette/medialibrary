@@ -153,3 +153,8 @@ std::shared_ptr<Device> MediaLibraryTester::addDevice( const std::string& uuid, 
 {
     return Device::create( m_dbConnection.get(), uuid, isRemovable );
 }
+
+void MediaLibraryTester::setFsFactory(std::shared_ptr<factory::IFileSystem> fsFactory)
+{
+    m_fsFactory = fsFactory;
+}
