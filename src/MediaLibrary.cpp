@@ -465,6 +465,7 @@ medialibrary::SearchAggregate MediaLibrary::search( const std::string& pattern )
     medialibrary::SearchAggregate res;
     res.albums = searchAlbums( pattern );
     res.artists = searchArtists( pattern );
+    res.genres = searchGenre( pattern );
     res.media = searchMedia( pattern );
     res.playlists = searchPlaylists( pattern );
     return res;
