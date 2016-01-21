@@ -40,10 +40,19 @@ class IMedia
             AudioType,
             UnknownType
         };
+        enum class SubType : uint8_t
+        {
+            Unknown,
+            ShowEpisode,
+            Movie,
+            AlbumTrack,
+        };
+
         virtual ~IMedia() = default;
 
         virtual unsigned int id() const = 0;
         virtual Type type() = 0;
+        virtual SubType subType() const = 0;
         virtual const std::string& title() const = 0;
         virtual AlbumTrackPtr albumTrack() const = 0;
         /**

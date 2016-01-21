@@ -50,14 +50,6 @@ struct MediaTable
 
 class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
 {
-    enum class SubType : uint8_t
-    {
-        Unknown,
-        ShowEpisode,
-        Movie,
-        AlbumTrack,
-    };
-
     public:
         // Those should be private, however the standard states that the expression
         // ::new (pv) T(std::forward(args)...)
@@ -72,6 +64,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
 
         virtual unsigned int id() const override;
         virtual Type type() override;
+        virtual SubType subType() const override;
         void setType( Type type );
         virtual const std::string& title() const override;
         void setTitle( const std::string& title );

@@ -310,6 +310,11 @@ IMedia::Type Media::type()
     return m_type;
 }
 
+IMedia::SubType Media::subType() const
+{
+    return m_subType;
+}
+
 void Media::setType( Type type )
 {
     if ( m_type != type )
