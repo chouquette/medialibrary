@@ -25,6 +25,7 @@
 #include <memory>
 
 #include "Album.h"
+#include "Artist.h"
 #include "File.h"
 #include "filesystem/IFile.h"
 #include "filesystem/IDirectory.h"
@@ -140,4 +141,9 @@ std::shared_ptr<Genre> MediaLibraryTester::createGenre( const std::string& name 
 void MediaLibraryTester::deleteGenre( unsigned int genreId )
 {
     Genre::destroy( m_dbConnection.get(), genreId );
+}
+
+void MediaLibraryTester::deleteArtist( unsigned int artistId )
+{
+    Artist::destroy( m_dbConnection.get(), artistId );
 }

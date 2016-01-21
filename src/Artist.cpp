@@ -190,8 +190,13 @@ bool Artist::createTable( DBConnection dbConnection )
                 "FOREIGN KEY(artist_id) REFERENCES " + policy::ArtistTable::Name + "("
                     + policy::ArtistTable::PrimaryKeyColumn + ") ON DELETE CASCADE"
             ")";
+    static const std::string reqFts = "CREATE VIRTUAL TABLE IF NOT EXISTS " +
+                policy::ArtistTable::Name + "Fts USING FTS3("
+                "name"
+            ")";
     return sqlite::Tools::executeRequest( dbConnection, req ) &&
-            sqlite::Tools::executeRequest( dbConnection, reqRel );
+            sqlite::Tools::executeRequest( dbConnection, reqRel ) &&
+            sqlite::Tools::executeRequest( dbConnection, reqFts );
 }
 
 bool Artist::createTriggers(DBConnection dbConnection)
@@ -203,7 +208,19 @@ bool Artist::createTriggers(DBConnection dbConnection)
                 "(SELECT COUNT(id_album) FROM " + policy::AlbumTable::Name + " WHERE artist_id=new.artist_id AND is_present=1) "
                 "WHERE id_artist=new.artist_id;"
             " END";
-    return sqlite::Tools::executeRequest( dbConnection, triggerReq );
+    static const std::string ftsInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_artist_fts"
+            " AFTER INSERT ON " + policy::ArtistTable::Name +
+            " BEGIN"
+            " INSERT INTO " + policy::ArtistTable::Name + "Fts(rowid,name) VALUES(new.id_artist, new.name);"
+            " END";
+    static const std::string ftsDeleteTrigger = "CREATE TRIGGER IF NOT EXISTS delete_artist_fts"
+            " BEFORE DELETE ON " + policy::ArtistTable::Name +
+            " BEGIN"
+            " DELETE FROM " + policy::ArtistTable::Name + "Fts WHERE rowid=old.id_artist;"
+            " END";
+    return sqlite::Tools::executeRequest( dbConnection, triggerReq ) &&
+            sqlite::Tools::executeRequest( dbConnection, ftsInsertTrigger ) &&
+            sqlite::Tools::executeRequest( dbConnection, ftsDeleteTrigger );
 }
 
 bool Artist::createDefaultArtists( DBConnection dbConnection )
@@ -228,5 +245,13 @@ std::shared_ptr<Artist> Artist::create( DBConnection dbConnection, const std::st
         return nullptr;
     artist->m_dbConnection = dbConnection;
     return artist;
+}
+
+std::vector<ArtistPtr> Artist::search( DBConnection dbConnection, const std::string& name )
+{
+    static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name + " WHERE id_artist IN "
+            "(SELECT rowid FROM " + policy::ArtistTable::Name + "Fts WHERE name MATCH ?)"
+            "AND is_present != 0";
+    return fetchAll<IArtist>( dbConnection, req, name + "*" );
 }
 

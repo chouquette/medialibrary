@@ -64,6 +64,7 @@ public:
     static bool createTriggers( DBConnection dbConnection );
     static bool createDefaultArtists( DBConnection dbConnection );
     static std::shared_ptr<Artist> create( DBConnection dbConnection, const std::string& name );
+    static std::vector<ArtistPtr> search( DBConnection dbConnection, const std::string& name );
 
 private:
     DBConnection m_dbConnection;

@@ -40,6 +40,7 @@ public:
     void deleteAlbum( unsigned int albumId );
     std::shared_ptr<Genre> createGenre( const std::string& name );
     void deleteGenre( unsigned int genreId );
+    void deleteArtist( unsigned int artistId );
 
 private:
     std::unique_ptr<fs::IDirectory> dummyDirectory;

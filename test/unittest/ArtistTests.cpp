@@ -190,3 +190,28 @@ TEST_F( Artists, MusicBrainzId )
     ASSERT_NE( a2, nullptr );
     ASSERT_EQ( a2->musicBrainzId(), mbId );
 }
+
+TEST_F( Artists, Search )
+{
+    ml->createArtist( "artist 1" );
+    ml->createArtist( "artist 2" );
+    ml->createArtist( "dream seaotter" );
+
+    auto artists = ml->searchArtists( "artist" );
+    ASSERT_EQ( 2u, artists.size() );
+}
+
+TEST_F( Artists, SearchAfterDelete )
+{
+    auto a = ml->createArtist( "artist 1" );
+    ml->createArtist( "artist 2" );
+    ml->createArtist( "dream seaotter" );
+
+    auto artists = ml->searchArtists( "artist" );
+    ASSERT_EQ( 2u, artists.size() );
+
+    ml->deleteArtist( a->id() );
+
+    artists = ml->searchArtists( "artist" );
+    ASSERT_EQ( 1u, artists.size() );
+}
