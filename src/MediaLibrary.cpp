@@ -150,6 +150,11 @@ bool MediaLibrary::createAllTables()
     return true;
 }
 
+bool MediaLibrary::validateSearchPattern( const std::string& pattern )
+{
+    return pattern.size() >= 3;
+}
+
 bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* mlCallback )
 {
     if ( m_fsFactory == nullptr )
@@ -407,16 +412,22 @@ std::vector<HistoryPtr> MediaLibrary::history() const
 
 std::vector<MediaPtr> MediaLibrary::searchAlbumTracks( const std::string& title ) const
 {
+    if ( validateSearchPattern( title ) == false )
+        return {};
     return AlbumTrack::search( m_dbConnection.get(), title );
 }
 
 std::vector<PlaylistPtr> MediaLibrary::searchPlaylists( const std::string& name ) const
 {
+    if ( validateSearchPattern( name ) == false )
+        return {};
     return Playlist::search( m_dbConnection.get(), name );
 }
 
 std::vector<AlbumPtr> MediaLibrary::searchAlbums( const std::string& pattern ) const
 {
+    if ( validateSearchPattern( pattern ) == false )
+        return {};
     return Album::search( m_dbConnection.get(), pattern );
 }
 

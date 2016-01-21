@@ -119,6 +119,7 @@ class MediaLibrary : public IMediaLibrary
         virtual void startDiscoverer();
         bool updateDatabaseModel( unsigned int previousVersion );
         bool createAllTables();
+        static bool validateSearchPattern( const std::string& pattern );
 
     protected:
         std::unique_ptr<SqliteConnection> m_dbConnection;

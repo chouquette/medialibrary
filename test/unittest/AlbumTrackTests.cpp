@@ -124,7 +124,7 @@ TEST_F( AlbumTracks, Search )
     auto tracks = ml->searchAlbumTracks( "tra" );
     ASSERT_EQ( 10u, tracks.size() );
 
-    tracks = ml->searchAlbumTracks( "1" );
+    tracks = ml->searchAlbumTracks( "track 1" );
     ASSERT_EQ( 2u, tracks.size() );
 
     tracks = ml->searchAlbumTracks( "grouik" );
