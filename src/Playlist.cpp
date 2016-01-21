@@ -128,7 +128,8 @@ bool Playlist::createTable( DBConnection dbConn )
             "FOREIGN KEY(playlist_id) REFERENCES " + policy::PlaylistTable::Name + "("
                 + policy::PlaylistTable::PrimaryKeyColumn + ") ON DELETE CASCADE"
         ")";
-    static const std::string vtableReq = "CREATE VIRTUAL TABLE " + policy::PlaylistTable::Name + "Fts USING FTS3("
+    static const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
+                + policy::PlaylistTable::Name + "Fts USING FTS3("
                 "name"
             ")";
     //FIXME Enforce (playlist_id,position) uniqueness

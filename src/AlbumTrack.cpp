@@ -112,7 +112,8 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
             " BEGIN"
             " UPDATE " + policy::AlbumTrackTable::Name + " SET is_present = new.is_present WHERE media_id = new.id_media;"
             " END";
-    static const std::string vtableReq = "CREATE VIRTUAL TABLE " + policy::AlbumTrackTable::Name + "Fts USING FTS3("
+    static const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
+                + policy::AlbumTrackTable::Name + "Fts USING FTS3("
                 "title"
             ")";
     static const std::string vtableTrigger = "CREATE TRIGGER IF NOT EXISTS delete_fts_track"

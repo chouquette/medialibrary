@@ -279,7 +279,8 @@ bool Album::createTable(DBConnection dbConnection )
                 "FOREIGN KEY(artist_id) REFERENCES " + policy::ArtistTable::Name + "("
                     + policy::ArtistTable::PrimaryKeyColumn + ") ON DELETE CASCADE"
             ")";
-    static const std::string vtableReq = "CREATE VIRTUAL TABLE " + policy::AlbumTable::Name + "Fts USING FTS3("
+    static const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
+                + policy::AlbumTable::Name + "Fts USING FTS3("
                 "title,"
                 "artist"
             ")";
