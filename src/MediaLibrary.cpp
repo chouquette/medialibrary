@@ -410,11 +410,11 @@ std::vector<HistoryPtr> MediaLibrary::history() const
     return History::fetch( m_dbConnection.get() );
 }
 
-std::vector<MediaPtr> MediaLibrary::searchAlbumTracks( const std::string& title ) const
+std::vector<MediaPtr> MediaLibrary::searchMedia( const std::string& title ) const
 {
     if ( validateSearchPattern( title ) == false )
         return {};
-    return AlbumTrack::search( m_dbConnection.get(), title );
+    return Media::search( m_dbConnection.get(), title );
 }
 
 std::vector<PlaylistPtr> MediaLibrary::searchPlaylists( const std::string& name ) const

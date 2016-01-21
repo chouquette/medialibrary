@@ -107,7 +107,10 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         std::shared_ptr<File> addFile(const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs , IFile::Type type);
         void removeFile( File& file );
 
-    private:
+        static std::vector<MediaPtr> search( DBConnection dbConn, const std::string& title );
+
+
+private:
         DBConnection m_dbConnection;
 
         // DB fields:

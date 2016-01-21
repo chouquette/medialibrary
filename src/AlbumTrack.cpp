@@ -112,25 +112,9 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
             " BEGIN"
             " UPDATE " + policy::AlbumTrackTable::Name + " SET is_present = new.is_present WHERE media_id = new.id_media;"
             " END";
-    static const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
-                + policy::AlbumTrackTable::Name + "Fts USING FTS3("
-                "title"
-            ")";
-    static const std::string vtableTrigger = "CREATE TRIGGER IF NOT EXISTS delete_fts_track"
-            " AFTER DELETE ON " + policy::MediaTable::Name +
-            " BEGIN"
-            " DELETE FROM " + policy::AlbumTrackTable::Name + "Fts WHERE rowid = old.id_media;"
-            " END";
-    static const std::string vtableTrigger2 = "CREATE TRIGGER IF NOT EXISTS update_fts_track"
-              " AFTER UPDATE OF title ON " + policy::MediaTable::Name +
-              " BEGIN"
-              " UPDATE " + policy::AlbumTrackTable::Name + "Fts SET title = new.title WHERE rowid = new.id_media;"
-              " END";
+
     return sqlite::Tools::executeRequest( dbConnection, req ) &&
-            sqlite::Tools::executeRequest( dbConnection, triggerReq ) &&
-            sqlite::Tools::executeRequest( dbConnection, vtableReq ) &&
-            sqlite::Tools::executeRequest( dbConnection, vtableTrigger ) &&
-            sqlite::Tools::executeRequest( dbConnection, vtableTrigger2 );
+            sqlite::Tools::executeRequest( dbConnection, triggerReq );
 }
 
 std::shared_ptr<AlbumTrack> AlbumTrack::create( DBConnection dbConnection, unsigned int albumId, const Media& media, unsigned int trackNb, unsigned int discNumber )
@@ -141,9 +125,6 @@ std::shared_ptr<AlbumTrack> AlbumTrack::create( DBConnection dbConnection, unsig
     if ( insert( dbConnection, self, req, media.id(), trackNb, albumId, discNumber ) == false )
         return nullptr;
     self->m_dbConnection = dbConnection;
-    static const std::string ftsReq = "INSERT INTO " + policy::AlbumTrackTable::Name + "Fts"
-            "(rowid, title) VALUES(?, ?)";
-    sqlite::Tools::insert( dbConnection, ftsReq, self->m_id, media.title() );
     return self;
 }
 
@@ -159,14 +140,6 @@ std::vector<AlbumTrackPtr> AlbumTrack::fromGenre( DBConnection dbConn, unsigned 
     static const std::string req = "SELECT * FROM " + policy::AlbumTrackTable::Name +
             " WHERE genre_id = ?";
     return fetchAll<IAlbumTrack>( dbConn, req, genreId );
-}
-
-std::vector<MediaPtr> AlbumTrack::search( DBConnection dbConn, const std::string& title )
-{
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE"
-            " id_media IN (SELECT rowid FROM " + policy::AlbumTrackTable::Name + "Fts"
-            " WHERE title MATCH ?)";
-    return Media::fetchAll<IMedia>( dbConn, req, title + "*" );
 }
 
 GenrePtr AlbumTrack::genre()

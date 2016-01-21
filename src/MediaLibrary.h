@@ -90,7 +90,7 @@ class MediaLibrary : public IMediaLibrary
         virtual bool addToHistory( const std::string& mrl );
         virtual std::vector<HistoryPtr> history() const;
 
-        virtual std::vector<MediaPtr> searchAlbumTracks( const std::string& title ) const override;
+        virtual std::vector<MediaPtr> searchMedia( const std::string& title ) const override;
         virtual std::vector<PlaylistPtr> searchPlaylists( const std::string& name ) const override;
         virtual std::vector<AlbumPtr> searchAlbums( const std::string& pattern ) const override;
 

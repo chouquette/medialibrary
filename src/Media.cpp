@@ -346,7 +346,12 @@ bool Media::createTable( DBConnection connection )
             "title TEXT,"
             "is_present BOOLEAN NOT NULL DEFAULT 1"
             ")";
-    return sqlite::Tools::executeRequest( connection, req );
+    static const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
+                + policy::MediaTable::Name + "Fts USING FTS3("
+                "title"
+            ")";
+    return sqlite::Tools::executeRequest( connection, req ) &&
+            sqlite::Tools::executeRequest( connection, vtableReq );
 }
 
 bool Media::createTriggers( DBConnection connection )
@@ -365,8 +370,27 @@ bool Media::createTriggers( DBConnection connection )
                 "(SELECT COUNT(id_file) FROM " + policy::FileTable::Name + " WHERE media_id=old.media_id) = 0"
                 " AND id_media=old.media_id;"
             " END;";
+
+    static const std::string vtableInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_media_fts"
+            " AFTER INSERT ON " + policy::MediaTable::Name +
+            " BEGIN"
+            " INSERT INTO " + policy::MediaTable::Name + "Fts(rowid,title) VALUES(new.id_media, new.title);"
+            " END";
+    static const std::string vtableDeleteTrigger = "CREATE TRIGGER IF NOT EXISTS delete_media_fts"
+            " AFTER DELETE ON " + policy::MediaTable::Name +
+            " BEGIN"
+            " DELETE FROM " + policy::MediaTable::Name + "Fts WHERE rowid = old.id_media;"
+            " END";
+    static const std::string vtableUpdateTitleTrigger2 = "CREATE TRIGGER IF NOT EXISTS update_media_title_fts"
+              " AFTER UPDATE OF title ON " + policy::MediaTable::Name +
+              " BEGIN"
+              " UPDATE " + policy::MediaTable::Name + "Fts SET title = new.title WHERE rowid = new.id_media;"
+              " END";
     return sqlite::Tools::executeRequest( connection, triggerReq ) &&
-            sqlite::Tools::executeRequest( connection, triggerReq2 );
+            sqlite::Tools::executeRequest( connection, triggerReq2 ) &&
+            sqlite::Tools::executeRequest( connection, vtableInsertTrigger ) &&
+            sqlite::Tools::executeRequest( connection, vtableDeleteTrigger ) &&
+            sqlite::Tools::executeRequest( connection, vtableUpdateTitleTrigger2 );
 }
 
 bool Media::addLabel( LabelPtr label )
@@ -389,4 +413,13 @@ bool Media::removeLabel( LabelPtr label )
     }
     const char* req = "DELETE FROM LabelFileRelation WHERE label_id = ? AND media_id = ?";
     return sqlite::Tools::executeDelete( m_dbConnection, req, label->id(), m_id );
+}
+
+
+std::vector<MediaPtr> Media::search( DBConnection dbConn, const std::string& title )
+{
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE"
+            " id_media IN (SELECT rowid FROM " + policy::MediaTable::Name + "Fts"
+            " WHERE " + policy::MediaTable::Name + "Fts MATCH ?)";
+    return Media::fetchAll<IMedia>( dbConn, req, title + "*" );
 }

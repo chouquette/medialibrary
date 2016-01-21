@@ -144,3 +144,53 @@ TEST_F( Medias, Rating )
     f = ml->media( f->id() );
     ASSERT_EQ( 12345, f->rating() );
 }
+
+TEST_F( Medias, Search )
+{
+    for ( auto i = 1u; i <= 10u; ++i )
+    {
+        auto m = ml->addFile( "track " + std::to_string( i ) + ".mp3" );
+    }
+    auto media = ml->searchMedia( "tra" );
+    ASSERT_EQ( 10u, media.size() );
+
+    media = ml->searchMedia( "track 1" );
+    ASSERT_EQ( 2u, media.size() );
+
+    media = ml->searchMedia( "grouik" );
+    ASSERT_EQ( 0u, media.size() );
+
+    media = ml->searchMedia( "rack" );
+    ASSERT_EQ( 0u, media.size() );
+}
+
+TEST_F( Medias, SearchAfterEdit )
+{
+    auto m = ml->addFile( "media.mp3" );
+
+    auto media = ml->searchMedia( "media" );
+    ASSERT_EQ( 1u, media.size() );
+
+    m->setTitle( "otters are awesome" );
+    m->save();
+
+    media = ml->searchMedia( "media" );
+    ASSERT_EQ( 0u, media.size() );
+
+    media = ml->searchMedia( "otters" );
+    ASSERT_EQ( 1u, media.size() );
+}
+
+TEST_F( Medias, SearchAfterDelete )
+{
+    auto m = ml->addFile( "media.mp3" );
+
+    auto media = ml->searchMedia( "media" );
+    ASSERT_EQ( 1u, media.size() );
+
+    auto f = m->files()[0];
+    m->removeFile( static_cast<File&>( *f ) );
+
+    media = ml->searchMedia( "media" );
+    ASSERT_EQ( 0u, media.size() );
+}
