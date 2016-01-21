@@ -132,6 +132,11 @@ void MediaLibraryTester::deleteAlbum( unsigned int albumId )
     Album::destroy( m_dbConnection.get(), albumId );
 }
 
+std::shared_ptr<Genre> MediaLibraryTester::createGenre( const std::string& name )
+{
+    return Genre::create( m_dbConnection.get(), name );
+}
+
 void MediaLibraryTester::deleteGenre( unsigned int genreId )
 {
     Genre::destroy( m_dbConnection.get(), genreId );

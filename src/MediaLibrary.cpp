@@ -314,11 +314,6 @@ std::vector<GenrePtr> MediaLibrary::genres() const
     return Genre::fetchAll<IGenre>( m_dbConnection.get() );
 }
 
-std::shared_ptr<Genre> MediaLibrary::createGenre( const std::string& name )
-{
-    return Genre::create( m_dbConnection.get(), name );
-}
-
 ShowPtr MediaLibrary::show(const std::string& name)
 {
     static const std::string req = "SELECT * FROM " + policy::ShowTable::Name

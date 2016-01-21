@@ -341,7 +341,7 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
         auto genre = Genre::fromName( m_dbConn, task.genre );
         if ( genre == nullptr )
         {
-            genre = m_ml->createGenre( task.genre );
+            genre = Genre::create( m_dbConn, task.genre );
             if ( genre == nullptr )
             {
                 LOG_ERROR( "Failed to create a genre in database" );
