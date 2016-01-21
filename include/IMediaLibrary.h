@@ -34,11 +34,19 @@ namespace medialibrary
     static constexpr auto UnknownArtistID = 1u;
     static constexpr auto VariousArtistID = 2u;
 
+    struct MediaSearchAggregate
+    {
+        std::vector<MediaPtr> episodes;
+        std::vector<MediaPtr> movies;
+        std::vector<MediaPtr> others;
+        std::vector<MediaPtr> tracks;
+    };
+
     struct SearchAggregate
     {
         std::vector<AlbumPtr> albums;
         std::vector<ArtistPtr> artists;
-        std::vector<MediaPtr> media;
+        MediaSearchAggregate media;
         std::vector<PlaylistPtr> playlists;
     };
 }
@@ -123,7 +131,7 @@ class IMediaLibrary
         /**
          * Search
          */
-        virtual std::vector<MediaPtr> searchMedia( const std::string& pattern ) const = 0;
+        virtual medialibrary::MediaSearchAggregate searchMedia( const std::string& pattern ) const = 0;
         virtual std::vector<PlaylistPtr> searchPlaylists( const std::string& name ) const = 0;
         virtual std::vector<AlbumPtr> searchAlbums( const std::string& pattern ) const = 0;
         virtual std::vector<GenrePtr> searchGenre( const std::string& genre ) const = 0;

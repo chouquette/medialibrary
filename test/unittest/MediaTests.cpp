@@ -151,16 +151,16 @@ TEST_F( Medias, Search )
     {
         auto m = ml->addFile( "track " + std::to_string( i ) + ".mp3" );
     }
-    auto media = ml->searchMedia( "tra" );
+    auto media = ml->searchMedia( "tra" ).others;
     ASSERT_EQ( 10u, media.size() );
 
-    media = ml->searchMedia( "track 1" );
+    media = ml->searchMedia( "track 1" ).others;
     ASSERT_EQ( 2u, media.size() );
 
-    media = ml->searchMedia( "grouik" );
+    media = ml->searchMedia( "grouik" ).others;
     ASSERT_EQ( 0u, media.size() );
 
-    media = ml->searchMedia( "rack" );
+    media = ml->searchMedia( "rack" ).others;
     ASSERT_EQ( 0u, media.size() );
 }
 
@@ -168,16 +168,16 @@ TEST_F( Medias, SearchAfterEdit )
 {
     auto m = ml->addFile( "media.mp3" );
 
-    auto media = ml->searchMedia( "media" );
+    auto media = ml->searchMedia( "media" ).others;
     ASSERT_EQ( 1u, media.size() );
 
     m->setTitle( "otters are awesome" );
     m->save();
 
-    media = ml->searchMedia( "media" );
+    media = ml->searchMedia( "media" ).others;
     ASSERT_EQ( 0u, media.size() );
 
-    media = ml->searchMedia( "otters" );
+    media = ml->searchMedia( "otters" ).others;
     ASSERT_EQ( 1u, media.size() );
 }
 
@@ -185,58 +185,79 @@ TEST_F( Medias, SearchAfterDelete )
 {
     auto m = ml->addFile( "media.mp3" );
 
-    auto media = ml->searchMedia( "media" );
+    auto media = ml->searchMedia( "media" ).others;
     ASSERT_EQ( 1u, media.size() );
 
     auto f = m->files()[0];
     m->removeFile( static_cast<File&>( *f ) );
 
-    media = ml->searchMedia( "media" );
+    media = ml->searchMedia( "media" ).others;
     ASSERT_EQ( 0u, media.size() );
 }
 
 TEST_F( Medias, SearchByLabel )
 {
     auto m = ml->addFile( "media.mkv" );
-    auto media = ml->searchMedia( "otter" );
+    auto media = ml->searchMedia( "otter" ).others;
     ASSERT_EQ( 0u, media.size() );
 
     auto l = ml->createLabel( "otter" );
     m->addLabel( l );
 
-    media = ml->searchMedia( "otter" );
+    media = ml->searchMedia( "otter" ).others;
     ASSERT_EQ( 1u, media.size() );
 
     auto l2 = ml->createLabel( "pangolins" );
     m->addLabel( l2 );
 
-    media = ml->searchMedia( "otter" );
+    media = ml->searchMedia( "otter" ).others;
     ASSERT_EQ( 1u, media.size() );
 
-    media = ml->searchMedia( "pangolin" );
+    media = ml->searchMedia( "pangolin" ).others;
     ASSERT_EQ( 1u, media.size() );
 
     m->removeLabel( l );
 
-    media = ml->searchMedia( "otter" );
+    media = ml->searchMedia( "otter" ).others;
     ASSERT_EQ( 0u, media.size() );
 
-    media = ml->searchMedia( "pangolin" );
+    media = ml->searchMedia( "pangolin" ).others;
     ASSERT_EQ( 1u, media.size() );
 
     m->addLabel( l );
 
-    media = ml->searchMedia( "otter" );
+    media = ml->searchMedia( "otter" ).others;
     ASSERT_EQ( 1u, media.size() );
 
-    media = ml->searchMedia( "pangolin" );
+    media = ml->searchMedia( "pangolin" ).others;
     ASSERT_EQ( 1u, media.size() );
 
     ml->deleteLabel( l );
 
-    media = ml->searchMedia( "otter" );
+    media = ml->searchMedia( "otter" ).others;
     ASSERT_EQ( 0u, media.size() );
 
-    media = ml->searchMedia( "pangolin" );
+    media = ml->searchMedia( "pangolin" ).others;
     ASSERT_EQ( 1u, media.size() );
+}
+
+TEST_F( Medias, SearchTracks )
+{
+    auto a = ml->createAlbum( "album" );
+    for ( auto i = 1u; i <= 10u; ++i )
+    {
+       auto m = ml->addFile( "track " + std::to_string( i ) + ".mp3" );
+       a->addTrack( m, i, 1 );
+    }
+    auto tracks = ml->searchMedia( "tra" ).tracks;
+    ASSERT_EQ( 10u, tracks.size() );
+
+    tracks = ml->searchMedia( "track 1" ).tracks;
+    ASSERT_EQ( 2u, tracks.size() );
+
+    tracks = ml->searchMedia( "grouik" ).tracks;
+    ASSERT_EQ( 0u, tracks.size() );
+
+    tracks = ml->searchMedia( "rack" ).tracks;
+    ASSERT_EQ( 0u, tracks.size() );
 }

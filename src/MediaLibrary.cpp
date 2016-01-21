@@ -405,11 +405,31 @@ std::vector<HistoryPtr> MediaLibrary::history() const
     return History::fetch( m_dbConnection.get() );
 }
 
-std::vector<MediaPtr> MediaLibrary::searchMedia( const std::string& title ) const
+medialibrary::MediaSearchAggregate MediaLibrary::searchMedia( const std::string& title ) const
 {
     if ( validateSearchPattern( title ) == false )
         return {};
-    return Media::search( m_dbConnection.get(), title );
+    auto tmp = Media::search( m_dbConnection.get(), title );
+    medialibrary::MediaSearchAggregate res;
+    for ( auto& m : tmp )
+    {
+        switch ( m->subType() )
+        {
+        case IMedia::SubType::AlbumTrack:
+            res.tracks.emplace_back( std::move( m ) );
+            break;
+        case IMedia::SubType::Movie:
+            res.movies.emplace_back( std::move( m ) );
+            break;
+        case IMedia::SubType::ShowEpisode:
+            res.episodes.emplace_back( std::move( m ) );
+            break;
+        default:
+            res.others.emplace_back( std::move( m ) );
+            break;
+        }
+    }
+    return res;
 }
 
 std::vector<PlaylistPtr> MediaLibrary::searchPlaylists( const std::string& name ) const
