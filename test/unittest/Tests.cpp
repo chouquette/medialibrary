@@ -31,6 +31,7 @@
 #include "utils/Filename.h"
 #include "discoverer/FsDiscoverer.h"
 #include "mocks/FileSystem.h"
+#include "Genre.h"
 #include "Media.h"
 #include "Folder.h"
 #include "Playlist.h"
@@ -129,4 +130,9 @@ std::shared_ptr<Playlist> MediaLibraryTester::playlist(unsigned int playlistId)
 void MediaLibraryTester::deleteAlbum( unsigned int albumId )
 {
     Album::destroy( m_dbConnection.get(), albumId );
+}
+
+void MediaLibraryTester::deleteGenre( unsigned int genreId )
+{
+    Genre::destroy( m_dbConnection.get(), genreId );
 }

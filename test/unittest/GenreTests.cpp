@@ -138,3 +138,23 @@ TEST_F( Genres, ListAlbums )
         }
     }
 }
+
+TEST_F( Genres, Search )
+{
+    ml->createGenre( "something" );
+    ml->createGenre( "blork" );
+
+    auto genres = ml->searchGenre( "genr" );
+    ASSERT_EQ( 1u, genres.size() );
+}
+
+TEST_F( Genres, SearchAfterDelete )
+{
+    auto genres = ml->searchGenre( "genre" );
+    ASSERT_EQ( 1u, genres.size() );
+
+    ml->deleteGenre( g->id() );
+
+    genres = ml->searchGenre( "genre" );
+    ASSERT_EQ( 0u, genres.size() );
+}

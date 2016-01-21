@@ -377,7 +377,7 @@ bool Media::createTriggers( DBConnection connection )
             " INSERT INTO " + policy::MediaTable::Name + "Fts(rowid,title) VALUES(new.id_media, new.title);"
             " END";
     static const std::string vtableDeleteTrigger = "CREATE TRIGGER IF NOT EXISTS delete_media_fts"
-            " AFTER DELETE ON " + policy::MediaTable::Name +
+            " BEFORE DELETE ON " + policy::MediaTable::Name +
             " BEGIN"
             " DELETE FROM " + policy::MediaTable::Name + "Fts WHERE rowid = old.id_media;"
             " END";

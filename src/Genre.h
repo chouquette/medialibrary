@@ -52,6 +52,7 @@ public:
     static bool createTable( DBConnection dbConn );
     static std::shared_ptr<Genre> create( DBConnection dbConn, const std::string& name );
     static std::shared_ptr<Genre> fromName( DBConnection dbConn, const std::string& name );
+    static std::vector<GenrePtr> search( DBConnection dbConn, const std::string& name );
 
 private:
     DBConnection m_dbConnection;

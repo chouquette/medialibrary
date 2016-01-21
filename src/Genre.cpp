@@ -83,7 +83,25 @@ bool Genre::createTable( DBConnection dbConn )
             "id_genre INTEGER PRIMARY KEY AUTOINCREMENT,"
             "name TEXT UNIQUE ON CONFLICT FAIL"
         ")";
-    return sqlite::Tools::executeRequest( dbConn, req );
+    static const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
+                + policy::GenreTable::Name + "Fts USING FTS3("
+                "name"
+            ")";
+
+    static const std::string vtableInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_genre_fts"
+            " AFTER INSERT ON " + policy::GenreTable::Name +
+            " BEGIN"
+            " INSERT INTO " + policy::GenreTable::Name + "Fts(rowid,name) VALUES(new.id_genre, new.name);"
+            " END";
+    static const std::string vtableDeleteTrigger = "CREATE TRIGGER IF NOT EXISTS delete_genre_fts"
+            " BEFORE DELETE ON " + policy::GenreTable::Name +
+            " BEGIN"
+            " DELETE FROM " + policy::GenreTable::Name + "Fts WHERE rowid = old.id_genre;"
+            " END";
+    return sqlite::Tools::executeRequest( dbConn, req ) &&
+            sqlite::Tools::executeRequest( dbConn, vtableReq ) &&
+            sqlite::Tools::executeRequest( dbConn, vtableInsertTrigger ) &&
+            sqlite::Tools::executeRequest( dbConn, vtableDeleteTrigger );
 }
 
 std::shared_ptr<Genre> Genre::create( DBConnection dbConn, const std::string& name )
@@ -101,5 +119,12 @@ std::shared_ptr<Genre> Genre::fromName(DBConnection dbConn, const std::string& n
 {
     static const std::string req = "SELECT * FROM " + policy::GenreTable::Name + " WHERE name = ?";
     return fetch( dbConn, req, name );
+}
+
+std::vector<GenrePtr> Genre::search( DBConnection dbConn, const std::string& name )
+{
+    static const std::string req = "SELECT * FROM " + policy::GenreTable::Name + " WHERE id_genre IN "
+            "(SELECT rowid FROM " + policy::GenreTable::Name + "Fts WHERE name MATCH ?)";
+    return fetchAll<IGenre>( dbConn, req, name + "*" );
 }
 

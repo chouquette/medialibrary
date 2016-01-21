@@ -38,6 +38,7 @@ public:
     std::shared_ptr<Media> addFile( const std::string& path );
     std::shared_ptr<Playlist> playlist( unsigned int playlistId );
     void deleteAlbum( unsigned int albumId );
+    void deleteGenre( unsigned int genreId );
 
 private:
     std::unique_ptr<fs::IDirectory> dummyDirectory;

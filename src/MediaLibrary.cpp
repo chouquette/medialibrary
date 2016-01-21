@@ -431,6 +431,11 @@ std::vector<AlbumPtr> MediaLibrary::searchAlbums( const std::string& pattern ) c
     return Album::search( m_dbConnection.get(), pattern );
 }
 
+std::vector<GenrePtr> MediaLibrary::searchGenre( const std::string& genre ) const
+{
+    return Genre::search( m_dbConnection.get(), genre );
+}
+
 void MediaLibrary::startParser()
 {
     m_parser.reset( new Parser( m_dbConnection.get(), this, m_callback ) );
