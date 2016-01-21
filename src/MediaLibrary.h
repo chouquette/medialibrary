@@ -94,6 +94,7 @@ class MediaLibrary : public IMediaLibrary
         virtual std::vector<AlbumPtr> searchAlbums( const std::string& pattern ) const override;
         virtual std::vector<GenrePtr> searchGenre( const std::string& genre ) const override;
         virtual std::vector<ArtistPtr> searchArtists( const std::string& name ) const override;
+        virtual medialibrary::SearchAggregate search( const std::string& pattern ) const override;
 
         virtual void discover( const std::string& entryPoint ) override;
         bool banFolder( const std::string& path ) override;

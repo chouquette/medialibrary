@@ -440,6 +440,16 @@ std::vector<ArtistPtr> MediaLibrary::searchArtists(const std::string& name ) con
     return Artist::search( m_dbConnection.get(), name );
 }
 
+medialibrary::SearchAggregate MediaLibrary::search( const std::string& pattern ) const
+{
+    medialibrary::SearchAggregate res;
+    res.albums = searchAlbums( pattern );
+    res.artists = searchArtists( pattern );
+    res.media = searchMedia( pattern );
+    res.playlists = searchPlaylists( pattern );
+    return res;
+}
+
 void MediaLibrary::startParser()
 {
     m_parser.reset( new Parser( m_dbConnection.get(), this, m_callback ) );
