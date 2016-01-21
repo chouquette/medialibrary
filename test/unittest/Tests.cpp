@@ -24,6 +24,7 @@
 
 #include <memory>
 
+#include "Album.h"
 #include "File.h"
 #include "filesystem/IFile.h"
 #include "filesystem/IDirectory.h"
@@ -123,4 +124,9 @@ std::shared_ptr<Media> MediaLibraryTester::addFile( const std::string& path )
 std::shared_ptr<Playlist> MediaLibraryTester::playlist(unsigned int playlistId)
 {
     return Playlist::fetch( m_dbConnection.get(), playlistId );
+}
+
+void MediaLibraryTester::deleteAlbum( unsigned int albumId )
+{
+    Album::destroy( m_dbConnection.get(), albumId );
 }

@@ -117,6 +117,7 @@ class IMediaLibrary
          */
         virtual std::vector<MediaPtr> searchAlbumTracks( const std::string& title ) const = 0;
         virtual std::vector<PlaylistPtr> searchPlaylists( const std::string& name ) const = 0;
+        virtual std::vector<AlbumPtr> searchAlbums( const std::string& pattern ) const = 0;
 
         /**
          * @brief discover Launch a discovery on the provided entry point.

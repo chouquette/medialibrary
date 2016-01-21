@@ -98,6 +98,12 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         static bool createTriggers( DBConnection dbConnection );
         static std::shared_ptr<Album> create(DBConnection dbConnection, const std::string& title );
         static std::shared_ptr<Album> createUnknownAlbum( DBConnection dbConnection, const Artist* artist );
+        ///
+        /// \brief search search for an album, through its albumartist or title
+        /// \param pattern A pattern representing the title, or the name of the main artist
+        /// \return
+        ///
+        static std::vector<AlbumPtr> search(DBConnection dbConn, const std::string& pattern );
 
     protected:
         DBConnection m_dbConnection;

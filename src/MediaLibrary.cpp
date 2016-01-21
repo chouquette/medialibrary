@@ -415,6 +415,11 @@ std::vector<PlaylistPtr> MediaLibrary::searchPlaylists( const std::string& name 
     return Playlist::search( m_dbConnection.get(), name );
 }
 
+std::vector<AlbumPtr> MediaLibrary::searchAlbums( const std::string& pattern ) const
+{
+    return Album::search( m_dbConnection.get(), pattern );
+}
+
 void MediaLibrary::startParser()
 {
     m_parser.reset( new Parser( m_dbConnection.get(), this, m_callback ) );

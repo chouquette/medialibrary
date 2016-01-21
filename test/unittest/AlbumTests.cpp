@@ -232,3 +232,77 @@ TEST_F( Albums, AlbumArtist )
     ASSERT_NE( albumArtist, nullptr );
     ASSERT_EQ( albumArtist->name(), artist->name() );
 }
+
+TEST_F( Albums, SearchByTitle )
+{
+    ml->createAlbum( "sea otters" );
+    ml->createAlbum( "pangolins of fire" );
+
+    auto albums = ml->searchAlbums( "otte" );
+    ASSERT_EQ( 1u, albums.size() );
+}
+
+TEST_F( Albums, SearchByArtist )
+{
+    auto a = ml->createAlbum( "sea otters" );
+    auto artist = ml->createArtist( "pangolins" );
+    a->setAlbumArtist( artist.get() );
+
+    auto albums = ml->searchAlbums( "pangol" );
+    ASSERT_EQ( 1u, albums.size() );
+}
+
+TEST_F( Albums, SearchNoDuplicate )
+{
+    auto a = ml->createAlbum( "sea otters" );
+    auto artist = ml->createArtist( "otters" );
+    a->setAlbumArtist( artist.get() );
+
+    auto albums = ml->searchAlbums( "otters" );
+    ASSERT_EQ( 1u, albums.size() );
+}
+
+TEST_F( Albums, SearchNoUnknownAlbum )
+{
+    auto artist = ml->createArtist( "otters" );
+    auto album = artist->unknownAlbum();
+    ASSERT_NE( nullptr, album );
+
+    auto albums = ml->searchAlbums( "otters" );
+    ASSERT_EQ( 0u, albums.size() );
+    // Can't search by name since there is no name set for unknown albums
+}
+
+TEST_F( Albums, SearchAfterDeletion )
+{
+    auto a = ml->createAlbum( "sea otters" );
+    auto albums = ml->searchAlbums( "sea" );
+    ASSERT_EQ( 1u, albums.size() );
+
+    ml->deleteAlbum( a->id() );
+
+    albums = ml->searchAlbums( "sea" );
+    ASSERT_EQ( 0u, albums.size() );
+}
+
+TEST_F( Albums, SearchAfterArtistUpdate )
+{
+    auto a = ml->createAlbum( "sea otters" );
+    auto artist = ml->createArtist( "pangolin of fire" );
+    auto artist2 = ml->createArtist( "pangolin of ice" );
+    a->setAlbumArtist( artist.get() );
+
+    auto albums = ml->searchAlbums( "fire" );
+    ASSERT_EQ( 1u, albums.size() );
+
+    albums = ml->searchAlbums( "ice" );
+    ASSERT_EQ( 0u, albums.size() );
+
+    a->setAlbumArtist( artist2.get() );
+
+    albums = ml->searchAlbums( "fire" );
+    ASSERT_EQ( 0u, albums.size() );
+
+    albums = ml->searchAlbums( "ice" );
+    ASSERT_EQ( 1u, albums.size() );
+}

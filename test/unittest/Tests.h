@@ -37,6 +37,7 @@ public:
     std::shared_ptr<Folder> folder( const std::string& path );
     std::shared_ptr<Media> addFile( const std::string& path );
     std::shared_ptr<Playlist> playlist( unsigned int playlistId );
+    void deleteAlbum( unsigned int albumId );
 
 private:
     std::unique_ptr<fs::IDirectory> dummyDirectory;

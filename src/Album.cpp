@@ -222,6 +222,9 @@ bool Album::setAlbumArtist( Artist* artist )
     }
     m_artistId = artist->id();
     artist->updateNbAlbum( 1 );
+    static const std::string ftsReq = "UPDATE " + policy::AlbumTable::Name + "Fts SET "
+            " artist = ? WHERE rowid = ?";
+    sqlite::Tools::executeUpdate( m_dbConnection, ftsReq, artist->name(), m_id );
     return true;
 }
 
@@ -276,8 +279,13 @@ bool Album::createTable(DBConnection dbConnection )
                 "FOREIGN KEY(artist_id) REFERENCES " + policy::ArtistTable::Name + "("
                     + policy::ArtistTable::PrimaryKeyColumn + ") ON DELETE CASCADE"
             ")";
+    static const std::string vtableReq = "CREATE VIRTUAL TABLE " + policy::AlbumTable::Name + "Fts USING FTS3("
+                "title,"
+                "artist"
+            ")";
     return sqlite::Tools::executeRequest( dbConnection, req ) &&
-            sqlite::Tools::executeRequest( dbConnection, reqRel );
+            sqlite::Tools::executeRequest( dbConnection, reqRel ) &&
+            sqlite::Tools::executeRequest( dbConnection, vtableReq );
 }
 
 bool Album::createTriggers(DBConnection dbConnection)
@@ -289,7 +297,23 @@ bool Album::createTriggers(DBConnection dbConnection)
                 "(SELECT COUNT(id_track) FROM " + policy::AlbumTrackTable::Name + " WHERE album_id=new.album_id AND is_present=1) "
                 "WHERE id_album=new.album_id;"
             " END";
-    return sqlite::Tools::executeRequest( dbConnection, triggerReq );
+    static const std::string vtriggerInsert = "CREATE TRIGGER IF NOT EXISTS insert_album_fts AFTER INSERT ON "
+            + policy::AlbumTable::Name +
+            // Skip unknown albums
+            " WHEN new.title IS NOT NULL"
+            " BEGIN"
+            " INSERT INTO " + policy::AlbumTable::Name + "Fts(rowid, title) VALUES(new.id_album, new.title);"
+            " END";
+    static const std::string vtriggerDelete = "CREATE TRIGGER IF NOT EXISTS delete_album_fts BEFORE DELETE ON "
+            + policy::AlbumTable::Name +
+            // Unknown album probably won't be deleted, but better safe than sorry
+            " WHEN old.title IS NOT NULL"
+            " BEGIN"
+            " DELETE FROM " + policy::AlbumTable::Name + "Fts WHERE rowid = old.id_album;"
+            " END";
+    return sqlite::Tools::executeRequest( dbConnection, triggerReq ) &&
+            sqlite::Tools::executeRequest( dbConnection, vtriggerInsert ) &&
+            sqlite::Tools::executeRequest( dbConnection, vtriggerDelete );
 }
 
 std::shared_ptr<Album> Album::create(DBConnection dbConnection, const std::string& title )
@@ -312,4 +336,12 @@ std::shared_ptr<Album> Album::createUnknownAlbum( DBConnection dbConnection, con
         return nullptr;
     album->m_dbConnection = dbConnection;
     return album;
+}
+
+std::vector<AlbumPtr> Album::search( DBConnection dbConn, const std::string& pattern )
+{
+    static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " WHERE id_album IN "
+            "(SELECT rowid FROM " + policy::AlbumTable::Name + "Fts WHERE " +
+            policy::AlbumTable::Name + "Fts MATCH ?)";
+    return fetchAll<IAlbum>( dbConn, req, pattern + "*" );
 }
