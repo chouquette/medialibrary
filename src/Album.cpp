@@ -343,6 +343,7 @@ std::vector<AlbumPtr> Album::search( DBConnection dbConn, const std::string& pat
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " WHERE id_album IN "
             "(SELECT rowid FROM " + policy::AlbumTable::Name + "Fts WHERE " +
-            policy::AlbumTable::Name + "Fts MATCH ?)";
+            policy::AlbumTable::Name + "Fts MATCH ?)"
+            "AND is_present = 1";
     return fetchAll<IAlbum>( dbConn, req, pattern + "*" );
 }
