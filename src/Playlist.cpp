@@ -128,9 +128,13 @@ bool Playlist::createTable( DBConnection dbConn )
             "FOREIGN KEY(playlist_id) REFERENCES " + policy::PlaylistTable::Name + "("
                 + policy::PlaylistTable::PrimaryKeyColumn + ") ON DELETE CASCADE"
         ")";
+    static const std::string vtableReq = "CREATE VIRTUAL TABLE " + policy::PlaylistTable::Name + "Fts USING FTS3("
+                "name"
+            ")";
     //FIXME Enforce (playlist_id,position) uniqueness
     return sqlite::Tools::executeRequest( dbConn, req ) &&
-            sqlite::Tools::executeRequest( dbConn, relTableReq );
+            sqlite::Tools::executeRequest( dbConn, relTableReq ) &&
+            sqlite::Tools::executeRequest( dbConn, vtableReq );
 }
 
 bool Playlist::createTriggers( DBConnection dbConn )
@@ -161,7 +165,32 @@ bool Playlist::createTriggers( DBConnection dbConn )
                 " AND position = new.position"
                 " AND media_id != new.media_id;"
             " END";
+    static const std::string vtriggerInsert = "CREATE TRIGGER IF NOT EXISTS insert_playlist_fts AFTER INSERT ON "
+            + policy::PlaylistTable::Name +
+            " BEGIN"
+            " INSERT INTO " + policy::PlaylistTable::Name + "Fts(rowid, name) VALUES(new.id_playlist, new.name);"
+            " END";
+    static const std::string vtriggerUpdate = "CREATE TRIGGER IF NOT EXISTS update_playlist_fts AFTER UPDATE OF name"
+            " ON " + policy::PlaylistTable::Name +
+            " BEGIN"
+            " UPDATE " + policy::PlaylistTable::Name + "Fts SET name = new.name WHERE rowid = new.id_playlist;"
+            " END";
+    static const std::string vtriggerDelete = "CREATE TRIGGER IF NOT EXISTS delete_playlist_fts BEFORE DELETE ON "
+            + policy::PlaylistTable::Name +
+            " BEGIN"
+            " DELETE FROM " + policy::PlaylistTable::Name + "Fts WHERE rowid = old.id_playlist;"
+            " END";
     return sqlite::Tools::executeRequest( dbConn, req ) &&
             sqlite::Tools::executeRequest( dbConn, autoAppendReq ) &&
-            sqlite::Tools::executeRequest( dbConn, autoShiftPosReq );
+            sqlite::Tools::executeRequest( dbConn, autoShiftPosReq ) &&
+            sqlite::Tools::executeRequest( dbConn, vtriggerInsert ) &&
+            sqlite::Tools::executeRequest( dbConn, vtriggerUpdate ) &&
+            sqlite::Tools::executeRequest( dbConn, vtriggerDelete );
+}
+
+std::vector<PlaylistPtr> Playlist::search( DBConnection dbConnection, const std::string& name )
+{
+    static const std::string req = "SELECT * FROM " + policy::PlaylistTable::Name + " WHERE id_playlist IN "
+            "(SELECT rowid FROM " + policy::PlaylistTable::Name + "Fts WHERE name MATCH ?)";
+    return fetchAll<IPlaylist>( dbConnection, req, name + "*" );
 }

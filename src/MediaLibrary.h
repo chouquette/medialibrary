@@ -91,6 +91,7 @@ class MediaLibrary : public IMediaLibrary
         virtual std::vector<HistoryPtr> history() const;
 
         virtual std::vector<MediaPtr> searchAlbumTracks( const std::string& title ) const override;
+        virtual std::vector<PlaylistPtr> searchPlaylists( const std::string& name ) const override;
 
         virtual void discover( const std::string& entryPoint ) override;
         bool banFolder( const std::string& path ) override;

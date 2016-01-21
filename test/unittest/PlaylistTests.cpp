@@ -240,3 +240,38 @@ TEST_F( Playlists, DeleteFile )
     ASSERT_NE( nullptr, pl );
 }
 
+TEST_F( Playlists, Search )
+{
+    ml->createPlaylist( "playlist 2" );
+    ml->createPlaylist( "laylist 3" );
+
+    auto playlists = ml->searchPlaylists( "play" );
+    ASSERT_EQ( 2u, playlists.size() );
+}
+
+TEST_F( Playlists, SearchAfterDelete )
+{
+    auto pl = ml->createPlaylist( "sea otters greatest hits" );
+    auto pls = ml->searchPlaylists( "sea otters" );
+    ASSERT_EQ( 1u, pls.size() );
+
+    ml->deletePlaylist( pl->id() );
+
+    pls = ml->searchPlaylists( "sea otters" );
+    ASSERT_EQ( 0u, pls.size() );
+}
+
+TEST_F( Playlists, SearchAfterUpdate )
+{
+    auto pl = ml->createPlaylist( "sea otters greatest hits" );
+    auto pls = ml->searchPlaylists( "sea otters" );
+    ASSERT_EQ( 1u, pls.size() );
+
+    pl->setName( "pangolins are cool too" );
+
+    pls = ml->searchPlaylists( "sea otters" );
+    ASSERT_EQ( 0u, pls.size() );
+
+    pls = ml->searchPlaylists( "pangolins" );
+    ASSERT_EQ( 1u, pls.size() );
+}

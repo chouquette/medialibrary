@@ -59,6 +59,7 @@ public:
 
     static bool createTable( DBConnection dbConn );
     static bool createTriggers( DBConnection dbConn );
+    static std::vector<PlaylistPtr> search( DBConnection dbConnection, const std::string& name );
 
 private:
     DBConnection m_dbConnection;
