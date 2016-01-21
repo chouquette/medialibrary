@@ -194,3 +194,49 @@ TEST_F( Medias, SearchAfterDelete )
     media = ml->searchMedia( "media" );
     ASSERT_EQ( 0u, media.size() );
 }
+
+TEST_F( Medias, SearchByLabel )
+{
+    auto m = ml->addFile( "media.mkv" );
+    auto media = ml->searchMedia( "otter" );
+    ASSERT_EQ( 0u, media.size() );
+
+    auto l = ml->createLabel( "otter" );
+    m->addLabel( l );
+
+    media = ml->searchMedia( "otter" );
+    ASSERT_EQ( 1u, media.size() );
+
+    auto l2 = ml->createLabel( "pangolins" );
+    m->addLabel( l2 );
+
+    media = ml->searchMedia( "otter" );
+    ASSERT_EQ( 1u, media.size() );
+
+    media = ml->searchMedia( "pangolin" );
+    ASSERT_EQ( 1u, media.size() );
+
+    m->removeLabel( l );
+
+    media = ml->searchMedia( "otter" );
+    ASSERT_EQ( 0u, media.size() );
+
+    media = ml->searchMedia( "pangolin" );
+    ASSERT_EQ( 1u, media.size() );
+
+    m->addLabel( l );
+
+    media = ml->searchMedia( "otter" );
+    ASSERT_EQ( 1u, media.size() );
+
+    media = ml->searchMedia( "pangolin" );
+    ASSERT_EQ( 1u, media.size() );
+
+    ml->deleteLabel( l );
+
+    media = ml->searchMedia( "otter" );
+    ASSERT_EQ( 0u, media.size() );
+
+    media = ml->searchMedia( "pangolin" );
+    ASSERT_EQ( 1u, media.size() );
+}

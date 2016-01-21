@@ -428,6 +428,8 @@ std::vector<AlbumPtr> MediaLibrary::searchAlbums( const std::string& pattern ) c
 
 std::vector<GenrePtr> MediaLibrary::searchGenre( const std::string& genre ) const
 {
+    if ( validateSearchPattern( genre ) == false )
+        return {};
     return Genre::search( m_dbConnection.get(), genre );
 }
 

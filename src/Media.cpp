@@ -348,7 +348,8 @@ bool Media::createTable( DBConnection connection )
             ")";
     static const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
                 + policy::MediaTable::Name + "Fts USING FTS3("
-                "title"
+                "title,"
+                "labels"
             ")";
     return sqlite::Tools::executeRequest( connection, req ) &&
             sqlite::Tools::executeRequest( connection, vtableReq );
@@ -374,7 +375,7 @@ bool Media::createTriggers( DBConnection connection )
     static const std::string vtableInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_media_fts"
             " AFTER INSERT ON " + policy::MediaTable::Name +
             " BEGIN"
-            " INSERT INTO " + policy::MediaTable::Name + "Fts(rowid,title) VALUES(new.id_media, new.title);"
+            " INSERT INTO " + policy::MediaTable::Name + "Fts(rowid,title,labels) VALUES(new.id_media, new.title, '');"
             " END";
     static const std::string vtableDeleteTrigger = "CREATE TRIGGER IF NOT EXISTS delete_media_fts"
             " BEFORE DELETE ON " + policy::MediaTable::Name +
@@ -401,7 +402,11 @@ bool Media::addLabel( LabelPtr label )
         return false;
     }
     const char* req = "INSERT INTO LabelFileRelation VALUES(?, ?)";
-    return sqlite::Tools::insert( m_dbConnection, req, label->id(), m_id ) != 0;
+    if ( sqlite::Tools::insert( m_dbConnection, req, label->id(), m_id ) == 0 )
+        return false;
+    const std::string reqFts = "UPDATE " + policy::MediaTable::Name + "Fts "
+        "SET labels = labels || ' ' || ? WHERE rowid = ?";
+    return sqlite::Tools::executeUpdate( m_dbConnection, reqFts, label->name(), m_id );
 }
 
 bool Media::removeLabel( LabelPtr label )
@@ -412,7 +417,11 @@ bool Media::removeLabel( LabelPtr label )
         return false;
     }
     const char* req = "DELETE FROM LabelFileRelation WHERE label_id = ? AND media_id = ?";
-    return sqlite::Tools::executeDelete( m_dbConnection, req, label->id(), m_id );
+    if ( sqlite::Tools::executeDelete( m_dbConnection, req, label->id(), m_id ) == false )
+        return false;
+    const std::string reqFts = "UPDATE " + policy::MediaTable::Name + "Fts "
+            "SET labels = TRIM(REPLACE(labels, ?, '')) WHERE rowid = ?";
+    return sqlite::Tools::executeUpdate( m_dbConnection, reqFts, label->name(), m_id );
 }
 
 

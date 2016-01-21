@@ -75,17 +75,23 @@ LabelPtr Label::create(DBConnection dbConnection, const std::string& name )
 
 bool Label::createTable(DBConnection dbConnection)
 {
-    std::string req = "CREATE TABLE IF NOT EXISTS " + policy::LabelTable::Name + "("
+    static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::LabelTable::Name + "("
                 "id_label INTEGER PRIMARY KEY AUTOINCREMENT, "
                 "name TEXT UNIQUE ON CONFLICT FAIL"
             ")";
-    if ( sqlite::Tools::executeRequest( dbConnection, req ) == false )
-        return false;
-    req = "CREATE TABLE IF NOT EXISTS LabelFileRelation("
+    static const std::string relReq = "CREATE TABLE IF NOT EXISTS LabelFileRelation("
                 "label_id INTEGER,"
                 "media_id INTEGER,"
             "PRIMARY KEY (label_id, media_id),"
             "FOREIGN KEY(label_id) REFERENCES Label(id_label) ON DELETE CASCADE,"
             "FOREIGN KEY(media_id) REFERENCES Media(id_media) ON DELETE CASCADE);";
-    return sqlite::Tools::executeRequest( dbConnection, req );
+    static const std::string ftsTrigger = "CREATE TRIGGER IF NOT EXISTS delete_label_fts "
+            "BEFORE DELETE ON " + policy::LabelTable::Name +
+            " BEGIN"
+            " UPDATE " + policy::MediaTable::Name + "Fts SET labels = TRIM(REPLACE(labels, old.name, ''))"
+            " WHERE labels MATCH old.name;"
+            " END";
+    return sqlite::Tools::executeRequest( dbConnection, req ) &&
+            sqlite::Tools::executeRequest( dbConnection, relReq ) &&
+            sqlite::Tools::executeRequest( dbConnection, ftsTrigger );
 }
