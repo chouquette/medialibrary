@@ -43,6 +43,11 @@ class Device;
 class Folder;
 class Genre;
 
+namespace factory
+{
+class IFileSystem;
+}
+
 class MediaLibrary : public IMediaLibrary
 {
     public:

@@ -27,7 +27,6 @@
 #include <string>
 
 #include "Types.h"
-#include "factory/IFileSystem.h"
 
 namespace medialibrary
 {
