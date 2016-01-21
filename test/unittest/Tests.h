@@ -41,6 +41,7 @@ public:
     std::shared_ptr<Genre> createGenre( const std::string& name );
     void deleteGenre( unsigned int genreId );
     void deleteArtist( unsigned int artistId );
+    std::shared_ptr<Device> addDevice( const std::string& uuid, bool isRemovable );
 
 private:
     std::unique_ptr<fs::IDirectory> dummyDirectory;

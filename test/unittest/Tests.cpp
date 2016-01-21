@@ -26,6 +26,7 @@
 
 #include "Album.h"
 #include "Artist.h"
+#include "Device.h"
 #include "File.h"
 #include "filesystem/IFile.h"
 #include "filesystem/IDirectory.h"
@@ -146,4 +147,9 @@ void MediaLibraryTester::deleteGenre( unsigned int genreId )
 void MediaLibraryTester::deleteArtist( unsigned int artistId )
 {
     Artist::destroy( m_dbConnection.get(), artistId );
+}
+
+std::shared_ptr<Device> MediaLibraryTester::addDevice( const std::string& uuid, bool isRemovable )
+{
+    return Device::create( m_dbConnection.get(), uuid, isRemovable );
 }

@@ -276,11 +276,6 @@ std::shared_ptr<Device> MediaLibrary::device( const std::string& uuid )
     return Device::fromUuid( m_dbConnection.get(), uuid );
 }
 
-std::shared_ptr<Device> MediaLibrary::addDevice( const std::string& uuid, bool isRemovable )
-{
-    return Device::create( m_dbConnection.get(), uuid, isRemovable );
-}
-
 LabelPtr MediaLibrary::createLabel( const std::string& label )
 {
     return Label::create( m_dbConnection.get(), label );
