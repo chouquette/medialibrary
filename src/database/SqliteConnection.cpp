@@ -50,9 +50,6 @@ SqliteConnection::Handle SqliteConnection::getConn()
         auto res = sqlite3_open( m_dbPath.c_str(), &dbConnection );
         if ( res != SQLITE_OK )
             throw std::runtime_error( "Failed to connect to database" );
-        res = sqlite3_busy_timeout( dbConnection, 500 );
-        if ( res != SQLITE_OK )
-            LOG_WARN( "Failed to enable sqlite busy timeout" );
         sqlite::Statement s( dbConnection, "PRAGMA foreign_keys = ON" );
         s.execute();
         while ( s.row() != nullptr )
