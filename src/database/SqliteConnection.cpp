@@ -61,16 +61,10 @@ SqliteConnection::Handle SqliteConnection::getConn()
         s.execute();
         while ( s.row() != nullptr )
             ;
-        m_conns.emplace(std::this_thread::get_id(), ConnPtr( dbConnection, &sqlite3_close ) );
+        m_conns.emplace( std::this_thread::get_id(), ConnPtr( dbConnection, &sqlite3_close ) );
         return dbConnection;
     }
     return it->second.get();
-}
-
-void SqliteConnection::release()
-{
-    std::unique_lock<std::mutex> lock( m_connMutex );
-    m_conns.erase( std::this_thread::get_id() );
 }
 
 std::unique_ptr<sqlite::Transaction> SqliteConnection::newTransaction()

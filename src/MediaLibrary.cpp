@@ -109,9 +109,6 @@ MediaLibrary::~MediaLibrary()
     Playlist::clear();
     History::clear();
     Genre::clear();
-    // Explicitely release the connection's TLS
-    if ( m_dbConnection != nullptr )
-        m_dbConnection->release();
 }
 
 bool MediaLibrary::createAllTables()

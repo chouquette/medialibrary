@@ -49,8 +49,6 @@ public:
     // Returns the current thread's connection
     // This will initiate a connection if required
     Handle getConn();
-    // Release the current thread's connection
-    void release();
     std::unique_ptr<sqlite::Transaction> newTransaction();
     ReadContext acquireReadContext();
     WriteContext acquireWriteContext();
