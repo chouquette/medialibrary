@@ -102,7 +102,10 @@ class Statement
 {
 public:
     Statement( SqliteConnection::Handle dbConnection, const std::string& req )
-        : m_stmt( nullptr, &sqlite3_reset )
+        : m_stmt( nullptr, [](sqlite3_stmt* stmt) {
+                sqlite3_clear_bindings( stmt );
+                sqlite3_reset( stmt );
+            })
         , m_dbConn( dbConnection )
         , m_req( req )
         , m_bindIdx( 0 )
@@ -173,9 +176,12 @@ private:
     }
 
 private:
+    // Used during the connection lifetime. This holds a compiled request
     using CachedStmtPtr = std::unique_ptr<sqlite3_stmt, int (*)(sqlite3_stmt*)>;
-    using StmtPtr = CachedStmtPtr;
-    StmtPtr m_stmt;
+    // Used for the current statement execution, this
+    // basically holds the state of the currently executed request.
+    using StatementPtr = std::unique_ptr<sqlite3_stmt, void(*)(sqlite3_stmt*)>;
+    StatementPtr m_stmt;
     SqliteConnection::Handle m_dbConn;
     std::string m_req;
     unsigned int m_bindIdx;
