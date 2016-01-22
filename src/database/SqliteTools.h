@@ -107,7 +107,6 @@ public:
                 sqlite3_reset( stmt );
             })
         , m_dbConn( dbConnection )
-        , m_req( req )
         , m_bindIdx( 0 )
     {
         std::lock_guard<std::mutex> lock( StatementsCacheLock );
@@ -151,9 +150,10 @@ public:
             switch ( res )
             {
                 case SQLITE_CONSTRAINT:
-                    throw errors::ConstraintViolation( m_req, errMsg );
+                    throw errors::ConstraintViolation( sqlite3_sql( m_stmt.get() ), errMsg );
                 default:
-                    throw std::runtime_error( m_req + ": " + errMsg );
+                    throw std::runtime_error( std::string{ sqlite3_sql( m_stmt.get() ) }
+                                              + ": " + errMsg );
             }
         }
     }
@@ -183,7 +183,6 @@ private:
     using StatementPtr = std::unique_ptr<sqlite3_stmt, void(*)(sqlite3_stmt*)>;
     StatementPtr m_stmt;
     SqliteConnection::Handle m_dbConn;
-    std::string m_req;
     unsigned int m_bindIdx;
     static std::mutex StatementsCacheLock;
     static std::unordered_map<SqliteConnection::Handle,
