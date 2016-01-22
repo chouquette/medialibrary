@@ -48,6 +48,7 @@ SqliteConnection::Handle SqliteConnection::getConn()
     if ( it == end( m_conns ) )
     {
         auto res = sqlite3_open( m_dbPath.c_str(), &dbConnection );
+        ConnPtr dbConn( dbConnection, &sqlite3_close );
         if ( res != SQLITE_OK )
             throw std::runtime_error( "Failed to connect to database" );
         sqlite::Statement s( dbConnection, "PRAGMA foreign_keys = ON" );
@@ -58,7 +59,7 @@ SqliteConnection::Handle SqliteConnection::getConn()
         s.execute();
         while ( s.row() != nullptr )
             ;
-        m_conns.emplace( std::this_thread::get_id(), ConnPtr( dbConnection, &sqlite3_close ) );
+        m_conns.emplace( std::this_thread::get_id(), std::move( dbConn ) );
         return dbConnection;
     }
     return it->second.get();
