@@ -35,7 +35,7 @@ namespace factory
     public:
         FileSystemFactory();
         virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& path ) override;
-        virtual std::unique_ptr<fs::IFile> createFile( const std::string& fileName ) override;
+        virtual std::shared_ptr<fs::IFile> createFile( const std::string& fileName ) override;
         virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override;
         virtual void refresh() override;
 

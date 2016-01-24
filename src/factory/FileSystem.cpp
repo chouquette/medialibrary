@@ -62,7 +62,7 @@ std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::s
     }
 }
 
-std::unique_ptr<fs::IFile> FileSystemFactory::createFile(const std::string& fileName)
+std::shared_ptr<fs::IFile> FileSystemFactory::createFile(const std::string& fileName)
 {
     return std::unique_ptr<fs::IFile>( new fs::File( fileName ) );
 }

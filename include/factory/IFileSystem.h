@@ -47,7 +47,7 @@ namespace factory
         /// \brief createFile creates a representation of a file
         /// \param fileName an absolute path to a file
         ///
-        virtual std::unique_ptr<fs::IFile> createFile( const std::string& fileName ) = 0;
+        virtual std::shared_ptr<fs::IFile> createFile( const std::string& fileName ) = 0;
         ///
         /// \brief createDevice creates a representation of a device
         /// \param uuid The device UUID

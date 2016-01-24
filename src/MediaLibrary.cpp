@@ -203,7 +203,7 @@ std::vector<MediaPtr> MediaLibrary::videoFiles()
 
 std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder& parentFolder, fs::IDirectory& parentFolderFs )
 {
-    std::unique_ptr<fs::IFile> fileFs;
+    std::shared_ptr<fs::IFile> fileFs;
     try
     {
         fileFs = m_fsFactory->createFile( path );

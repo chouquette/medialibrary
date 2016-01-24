@@ -443,15 +443,13 @@ struct FileSystemFactory : public factory::IFileSystem
         return d->directory( path );
     }
 
-    virtual std::unique_ptr<fs::IFile> createFile( const std::string &filePath ) override
+    virtual std::shared_ptr<fs::IFile> createFile( const std::string &filePath ) override
     {
         auto d = device( filePath );
         if ( d == nullptr )
             return nullptr;
         auto f = d->file( filePath );
-        if ( f == nullptr )
-            return nullptr;
-        return std::unique_ptr<fs::IFile>( new File( *f ) );
+        return f;
     }
 
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override
@@ -592,9 +590,9 @@ public:
         return nullptr;
     }
 
-    virtual std::unique_ptr<fs::IFile> createFile( const std::string &fileName ) override
+    virtual std::shared_ptr<fs::IFile> createFile( const std::string &fileName ) override
     {
-        return std::unique_ptr<fs::IFile>( new NoopFile( fileName ) );
+        return std::shared_ptr<fs::IFile>( new NoopFile( fileName ) );
     }
 
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& ) override
