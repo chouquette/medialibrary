@@ -104,6 +104,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         void removeFile( File& file );
 
         static std::vector<MediaPtr> search( DBConnection dbConn, const std::string& title );
+        static std::vector<MediaPtr> fetchHistory( DBConnection dbConn );
 
 
 private:
@@ -115,6 +116,7 @@ private:
         SubType m_subType;
         int64_t m_duration;
         unsigned int m_playCount;
+        unsigned int m_lastPlayedDate;
         float m_progress;
         int m_rating;
         unsigned int m_insertionDate;

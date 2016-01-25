@@ -276,3 +276,27 @@ TEST_F( Medias, Favorite )
     m = ml->media( m->id() );
     ASSERT_TRUE( m->isFavorite() );
 }
+
+TEST_F( Medias, History )
+{
+    auto m = ml->addFile( "media.mkv" );
+
+    auto history = ml->lastMediaPlayed();
+    ASSERT_EQ( 0u, history.size() );
+
+    m->increasePlayCount();
+    m->save();
+    history = ml->lastMediaPlayed();
+    ASSERT_EQ( 1u, history.size() );
+    ASSERT_EQ( m->id(), history[0]->id() );
+
+    std::this_thread::sleep_for( std::chrono::seconds{ 1 } );
+    auto m2 = ml->addFile( "media.mkv" );
+    m2->increasePlayCount();
+    m2->save();
+
+    history = ml->lastMediaPlayed();
+    ASSERT_EQ( 2u, history.size() );
+    ASSERT_EQ( m2->id(), history[0]->id() );
+    ASSERT_EQ( m->id(), history[1]->id() );
+}

@@ -57,6 +57,7 @@ Media::Media( DBConnection dbConnection, sqlite::Row& row )
         >> m_subType
         >> m_duration
         >> m_playCount
+        >> m_lastPlayedDate
         >> m_progress
         >> m_rating
         >> m_insertionDate
@@ -72,6 +73,7 @@ Media::Media( const std::string& title, Type type )
     , m_subType( SubType::Unknown )
     , m_duration( -1 )
     , m_playCount( 0 )
+    , m_lastPlayedDate( 0 )
     , m_progress( .0f )
     , m_rating( -1 )
     , m_insertionDate( time( nullptr ) )
@@ -160,6 +162,7 @@ int Media::playCount() const
 void Media::increasePlayCount()
 {
     m_playCount++;
+    m_lastPlayedDate = time( nullptr );
     m_changed = true;
 }
 
@@ -281,12 +284,13 @@ void Media::setThumbnail(const std::string& thumbnail )
 bool Media::save()
 {
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
-            "type = ?, subtype = ?, duration = ?, play_count = ?, progress = ?, rating = ?,"
+            "type = ?, subtype = ?, duration = ?, play_count = ?, last_played_date = ?, progress = ?, rating = ?,"
             "thumbnail = ?, title = ?, is_favorite = ? WHERE id_media = ?";
     if ( m_changed == false )
         return true;
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, m_type, m_subType, m_duration, m_playCount,
-                                       m_progress, m_rating, m_thumbnail, m_title, m_isFavorite, m_id ) == false )
+                                       m_lastPlayedDate, m_progress, m_rating, m_thumbnail, m_title,
+                                       m_isFavorite, m_id ) == false )
     {
         return false;
     }
@@ -360,6 +364,7 @@ bool Media::createTable( DBConnection connection )
             "subtype INTEGER,"
             "duration INTEGER DEFAULT -1,"
             "play_count UNSIGNED INTEGER,"
+            "last_played_date UNSIGNED INTEGER,"
             "progress REAL,"
             "rating INTEGER DEFAULT -1,"
             "insertion_date UNSIGNED INTEGER,"
@@ -368,12 +373,15 @@ bool Media::createTable( DBConnection connection )
             "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
             "is_present BOOLEAN NOT NULL DEFAULT 1"
             ")";
+    static const std::string indexReq = "CREATE INDEX IF NOT EXISTS index_last_played_date ON "
+            + policy::MediaTable::Name + "(last_played_date DESC)";
     static const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
                 + policy::MediaTable::Name + "Fts USING FTS3("
                 "title,"
                 "labels"
             ")";
     return sqlite::Tools::executeRequest( connection, req ) &&
+            sqlite::Tools::executeRequest( connection, indexReq ) &&
             sqlite::Tools::executeRequest( connection, vtableReq );
 }
 
@@ -454,4 +462,11 @@ std::vector<MediaPtr> Media::search( DBConnection dbConn, const std::string& tit
             " WHERE " + policy::MediaTable::Name + "Fts MATCH ?)"
             "AND is_present = 1";
     return Media::fetchAll<IMedia>( dbConn, req, title + "*" );
+}
+
+std::vector<MediaPtr> Media::fetchHistory( DBConnection dbConn )
+{
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE last_played_date IS NOT NULL"
+            " ORDER BY last_played_date DESC LIMIT 100";
+    return fetchAll<IMedia>( dbConn, req );
 }

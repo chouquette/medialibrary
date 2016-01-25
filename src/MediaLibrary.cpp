@@ -380,9 +380,14 @@ bool MediaLibrary::addToHistory( const std::string& mrl )
     return History::insert( m_dbConnection.get(), mrl );
 }
 
-std::vector<HistoryPtr> MediaLibrary::history() const
+std::vector<HistoryPtr> MediaLibrary::lastStreamsPlayed() const
 {
     return History::fetch( m_dbConnection.get() );
+}
+
+std::vector<MediaPtr> MediaLibrary::lastMediaPlayed() const
+{
+    return Media::fetchHistory( m_dbConnection.get() );
 }
 
 medialibrary::MediaSearchAggregate MediaLibrary::searchMedia( const std::string& title ) const
