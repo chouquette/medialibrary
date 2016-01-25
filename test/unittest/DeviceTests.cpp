@@ -158,6 +158,19 @@ TEST_F( DeviceFs, UnmountDisk )
 
     media = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_EQ( nullptr, media );
+
+    fsMock->remountDevice( RemovableDeviceUuid );
+
+    cbMock->prepareForReload();
+    Reload();
+    reloaded = cbMock->waitForReload();
+    ASSERT_TRUE( reloaded );
+
+    files = ml->files();
+    ASSERT_EQ( 5u, files.size() );
+
+    media = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
+    ASSERT_NE( nullptr, media );
 }
 
 TEST_F( DeviceFs, ReplugDisk )
