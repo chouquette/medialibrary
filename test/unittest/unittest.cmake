@@ -20,6 +20,10 @@ list(APPEND TEST_SRCS
     mocks/FileSystem.h
     mocks/FileSystem.cpp
     mocks/DiscovererCbMock.h
+
+    mocks/filesystem/MockDevice.cpp
+    mocks/filesystem/MockFile.cpp
+    mocks/filesystem/MockDirectory.cpp
 )
 
 add_executable(unittest ${TEST_SRCS})
