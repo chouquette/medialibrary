@@ -49,7 +49,7 @@ protected:
         fsMock.reset( new mock::FileSystemFactory );
         cbMock.reset( new mock::WaitForDiscoveryComplete );
         fsMock->addFolder( "/a/mnt/" );
-        auto device = std::static_pointer_cast<mock::Device>( fsMock->addDevice( RemovableDeviceMountpoint, RemovableDeviceUuid ) );
+        auto device = fsMock->addDevice( RemovableDeviceMountpoint, RemovableDeviceUuid );
         device->setRemovable( true );
         fsMock->addFile( RemovableDeviceMountpoint + "removablefile.mp3" );
         fsMock->addFile( RemovableDeviceMountpoint + "removablefile2.mp3" );
@@ -119,7 +119,7 @@ TEST_F( DeviceFs, RemoveDisk )
     auto media = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, media );
 
-    fsMock->removeDevice( RemovableDeviceUuid );
+    auto device = fsMock->removeDevice( RemovableDeviceUuid );
 
     cbMock->prepareForReload();
     Reload();
@@ -263,7 +263,7 @@ TEST_F( DeviceFs, RemoveAlbum )
     auto artists = ml->artists();
     ASSERT_EQ( 2u, artists.size() );
 
-    fsMock->removeDevice( RemovableDeviceUuid );
+    auto device = fsMock->removeDevice( RemovableDeviceUuid );
 
     cbMock->prepareForReload();
     Reload();
@@ -302,7 +302,7 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
     auto artist = artists[0];
     ASSERT_EQ( 2u, artist->media().size() );
 
-    fsMock->removeDevice( RemovableDeviceUuid );
+    auto device = fsMock->removeDevice( RemovableDeviceUuid );
     cbMock->prepareForReload();
     Reload();
     bool reloaded = cbMock->waitForReload();
@@ -352,7 +352,7 @@ TEST_F( DeviceFs, ChangeDevice )
     ASSERT_EQ( firstRemovableFilePath, files[0]->mrl() );
     ASSERT_NE( firstRemovableFileId, f->id() );
 
-    fsMock->removeDevice( "{another-removable-device}" );
+    auto device = fsMock->removeDevice( "{another-removable-device}" );
     fsMock->addDevice( oldRemovableDevice );
 
     cbMock->prepareForReload();

@@ -110,23 +110,19 @@ public:
         return m_path;
     }
 
-    virtual const std::vector<std::string>& files() const override
+    virtual const std::vector<std::shared_ptr<fs::IFile>>& files() const override
     {
-        if ( m_filePathes.size() == 0 )
-        {
-            for ( const auto& f : m_files )
-                m_filePathes.push_back( m_path + f.first );
-        }
+        m_filePathes.clear();
+        for ( auto& f : m_files )
+            m_filePathes.push_back( f.second );
         return m_filePathes;
     }
 
-    virtual const std::vector<std::string>& dirs() const override
+    virtual const std::vector<std::shared_ptr<fs::IDirectory>>& dirs() const override
     {
-        if ( m_dirPathes.size() == 0 )
-        {
-            for ( const auto& d : m_dirs )
-                m_dirPathes.push_back( m_path + d.first + "/" );
-        }
+        m_dirPathes.clear();
+        for ( const auto& d : m_dirs )
+            m_dirPathes.push_back( d.second );
         return m_dirPathes;
     }
 
@@ -141,7 +137,6 @@ public:
         if ( subFolder.empty() == true )
         {
             m_files[filePath] = std::make_shared<File>( m_path + filePath );
-            m_filePathes.clear();
         }
         else
         {
@@ -160,7 +155,6 @@ public:
         {
             auto dir = std::make_shared<Directory>( m_path + subFolder, m_device.lock() );
             m_dirs[subFolder] = dir;
-            m_dirPathes.clear();
         }
         else
         {
@@ -178,7 +172,6 @@ public:
             auto it = m_files.find( filePath );
             assert( it != end( m_files ) );
             m_files.erase( it );
-            m_filePathes.clear();
         }
         else
         {
@@ -235,7 +228,6 @@ public:
             auto it = m_dirs.find( subFolder );
             assert( it != end( m_dirs ) );
             m_dirs.erase( it );
-            m_dirPathes.clear();
         }
         else
         {
@@ -245,19 +237,35 @@ public:
         }
     }
 
-    void addMountpoint( const std::string& path )
+    void setMountpointRoot( const std::string& path, std::shared_ptr<Directory> root )
     {
         auto subFolder = utils::file::firstFolder( path );
         auto remainingPath = utils::file::removePath( path, subFolder );
         if ( remainingPath.empty() == true )
         {
-            m_dirs[subFolder] = nullptr;
+            m_dirs[subFolder] = root;
         }
         else
         {
             auto it = m_dirs.find( subFolder );
             assert( it != end( m_dirs ) );
-            it->second->addMountpoint( remainingPath );
+            it->second->setMountpointRoot( remainingPath, root );
+        }
+    }
+
+    void invalidateMountpoint( const std::string& path )
+    {
+        auto subFolder = utils::file::firstFolder( path );
+        auto remainingPath = utils::file::removePath( path, subFolder );
+        if ( remainingPath.empty() == true )
+        {
+            m_dirs[subFolder] = std::make_shared<Directory>( m_path + subFolder, m_device.lock() );
+        }
+        else
+        {
+            auto it = m_dirs.find( subFolder );
+            assert( it != end( m_dirs ) );
+            it->second->invalidateMountpoint( remainingPath );
         }
     }
 
@@ -265,8 +273,8 @@ private:
     std::string m_path;
     std::unordered_map<std::string, std::shared_ptr<File>> m_files;
     std::unordered_map<std::string, std::shared_ptr<Directory>> m_dirs;
-    mutable std::vector<std::string> m_filePathes;
-    mutable std::vector<std::string> m_dirPathes;
+    mutable std::vector<std::shared_ptr<fs::IFile>> m_filePathes;
+    mutable std::vector<std::shared_ptr<fs::IDirectory>> m_dirPathes;
     std::weak_ptr<Device> m_device;
 };
 
@@ -289,6 +297,11 @@ public:
     void setupRoot()
     {
         m_root = std::make_shared<Directory>( m_mountpoint, shared_from_this() );
+    }
+
+    std::shared_ptr<Directory> root()
+    {
+        return m_root;
     }
 
     virtual const std::string& uuid() const override { return m_uuid; }
@@ -348,12 +361,19 @@ public:
         return m_root->directory( relPath );
     }
 
-    void addMountpoint( const std::string& path )
+    void setMountpointRoot( const std::string& path, std::shared_ptr<Directory> root )
     {
         auto relPath = relativePath( path );
         // m_root is already a mountpoint, we can't add a mountpoint to it.
         assert( relPath.empty() == false );
-        m_root->addMountpoint( relPath );
+        m_root->setMountpointRoot( relPath, root );
+    }
+
+    void invalidateMountpoint( const std::string& path )
+    {
+        auto relPath = relativePath( path );
+        assert( relPath.empty() == false );
+        m_root->invalidateMountpoint( relPath );
     }
 
 private:
@@ -386,17 +406,19 @@ struct FileSystemFactory : public factory::IFileSystem
     {
         auto dev = std::make_shared<Device>( mountpoint, uuid );
         dev->setupRoot();
-        // If this folder is already known, mark it as a nullptr and assume this means a mountpoint
         auto d = device( mountpoint );
         if ( d != nullptr )
-            d->addMountpoint( mountpoint );
+            d->setMountpointRoot( mountpoint, dev->root() );
         devices.push_back( dev );
         return dev;
     }
 
-    void addDevice( std::shared_ptr<Device> device )
+    void addDevice( std::shared_ptr<Device> dev )
     {
-        devices.push_back( device );
+        auto d = device( dev->mountpoint() );
+        if ( d != nullptr )
+            d->setMountpointRoot( dev->mountpoint(), dev->root() );
+        devices.push_back( dev );
     }
 
     void addFile( const std::string& filePath )
@@ -469,7 +491,7 @@ struct FileSystemFactory : public factory::IFileSystem
         std::shared_ptr<Device> ret;
         for ( auto& d : devices )
         {
-            if ( path.find( d->mountpoint() ) == 0 &&
+            if ( path.find( d->mountpoint() ) == 0 && d->isPresent() == true &&
                  ( ret == nullptr || ret->mountpoint().length() < d->mountpoint().length() ) )
                 ret = d;
         }
@@ -485,6 +507,10 @@ struct FileSystemFactory : public factory::IFileSystem
             return nullptr;
         auto ret = *it;
         devices.erase( it );
+        // Now flag the mountpoint as belonging to its containing device, since it's now
+        // just a regular folder
+        auto d = device( ret->mountpoint() );
+        d->invalidateMountpoint( ret->mountpoint() );
         return ret;
     }
 
@@ -566,12 +592,12 @@ class NoopDirectory : public fs::IDirectory
         abort();
     }
 
-    virtual const std::vector<std::string>&files() const override
+    virtual const std::vector<std::shared_ptr<fs::IFile>>& files() const override
     {
         abort();
     }
 
-    virtual const std::vector<std::string>&dirs() const override
+    virtual const std::vector<std::shared_ptr<fs::IDirectory>>& dirs() const override
     {
         abort();
     }

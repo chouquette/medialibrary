@@ -34,8 +34,8 @@ class Directory : public IDirectory
 public:
     explicit Directory( const std::string& path );
     virtual const std::string& path() const override;
-    virtual const std::vector<std::string>& files() const override;
-    virtual const std::vector<std::string>& dirs() const override;
+    virtual const std::vector<std::shared_ptr<IFile>>& files() const override;
+    virtual const std::vector<std::shared_ptr<IDirectory>>& dirs() const override;
     virtual std::shared_ptr<IDevice> device() const override;
 
 private:
@@ -46,8 +46,8 @@ private:
 
 private:
     std::string m_path;
-    mutable std::vector<std::string> m_files;
-    mutable std::vector<std::string> m_dirs;
+    mutable std::vector<std::shared_ptr<IFile>> m_files;
+    mutable std::vector<std::shared_ptr<IDirectory>> m_dirs;
     mutable Cache<std::shared_ptr<IDevice>> m_device;
 };
 

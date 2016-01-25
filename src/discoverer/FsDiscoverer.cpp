@@ -139,14 +139,10 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
     // Load the folders we already know of:
     LOG_INFO( "Checking for modifications in ", currentFolderFs.path() );
     auto subFoldersInDB = Folder::fetchAll( m_dbConn, currentFolder.id() );
-    for ( const auto& subFolderPath : currentFolderFs.dirs() )
+    for ( const auto& subFolder : currentFolderFs.dirs() )
     {
-        auto subFolder = m_fsFactory->createDirectory( subFolderPath );
-        if ( subFolder == nullptr )
-            continue;
-
-        auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [subFolderPath](const std::shared_ptr<Folder>& f) {
-            return f->path() == subFolderPath;
+        auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [&subFolder](const std::shared_ptr<Folder>& f) {
+            return f->path() == subFolder->path();
         });
         // We don't know this folder, it's a new one
         if ( it == end( subFoldersInDB ) )
@@ -154,7 +150,7 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
             // Check if it is blacklisted
             if ( isBlacklisted( *subFolder, blacklist ) == true )
             {
-                LOG_INFO( "Ignoring blacklisted folder: ", subFolderPath );
+                LOG_INFO( "Ignoring blacklisted folder: ", subFolder->path() );
                 continue;
             }
             if ( hasDotNoMediaFile( *subFolder ) )
@@ -162,7 +158,7 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
                 LOG_INFO( "Ignoring folder with a .nomedia file" );
                 continue;
             }
-            LOG_INFO( "New folder detected: ", subFolderPath );
+            LOG_INFO( "New folder detected: ", subFolder->path() );
             addFolder( *subFolder, &currentFolder, blacklist );
             continue;
         }
@@ -189,19 +185,18 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
             + " WHERE folder_id = ?";
     auto files = File::fetchAll<File>( m_dbConn, req, parentFolder.id() );
-    std::vector<std::string> filesToAdd;
+    std::vector<std::shared_ptr<fs::IFile>> filesToAdd;
     std::vector<std::shared_ptr<File>> filesToRemove;
-    for ( const auto& filePath : parentFolderFs.files() )
+    for ( const auto& fileFs: parentFolderFs.files() )
     {        
-        auto it = std::find_if( begin( files ), end( files ), [filePath](const std::shared_ptr<File>& f) {
-            return f->mrl() == filePath;
+        auto it = std::find_if( begin( files ), end( files ), [fileFs](const std::shared_ptr<File>& f) {
+            return f->mrl() == fileFs->fullPath();
         });
         if ( it == end( files ) )
         {
-            filesToAdd.push_back( filePath );
+            filesToAdd.push_back( fileFs );
             continue;
         }
-        auto fileFs = m_fsFactory->createFile( filePath );
         if ( fileFs->lastModificationDate() == (*it)->lastModificationDate() )
         {
             // Unchanged file
@@ -209,12 +204,12 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
             continue;
         }
         auto& file = (*it);
-        LOG_INFO( "Forcing file refresh ", filePath );
+        LOG_INFO( "Forcing file refresh ", fileFs->fullPath() );
         // Pre-cache the file's media, since we need it to remove. However, better doing it
         // out of a write context, since that way, other threads can also read the database.
         file->media();
         filesToRemove.push_back( file );
-        filesToAdd.push_back( filePath );
+        filesToAdd.push_back( fileFs );
         files.erase( it );
     }
     auto t = m_dbConn->newTransaction();
@@ -227,7 +222,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
         f->media()->removeFile( *f );
     // Insert all files at once to avoid SQL write contention
     for ( auto& p : filesToAdd )
-        m_ml->addFile( p, parentFolder, parentFolderFs );
+        m_ml->addFile( p->fullPath(), parentFolder, parentFolderFs );
     t->commit();
     LOG_INFO( "Done checking files in ", parentFolderFs.path() );
 }
@@ -257,9 +252,8 @@ bool FsDiscoverer::isBlacklisted( const fs::IDirectory& directory, const std::ve
 bool FsDiscoverer::hasDotNoMediaFile( const fs::IDirectory& directory )
 {
     const auto& files = directory.files();
-    return std::find_if( begin( files ), end( files ), []( const std::string& filePath ){
-        constexpr unsigned int endLength = strlen( "/.nomedia" );
-        return filePath.compare( filePath.length() - endLength, endLength, "/.nomedia" ) == 0;
+    return std::find_if( begin( files ), end( files ), []( const std::shared_ptr<fs::IFile>& file ){
+        return file->name() == ".nomedia";
     }) != end( files );
 }
 

@@ -23,6 +23,7 @@
 #include "Directory.h"
 #include "Media.h"
 #include "Device.h"
+#include "filesystem/unix/File.h"
 
 #include <cstring>
 #include <cstdlib>
@@ -52,14 +53,14 @@ const std::string&Directory::path() const
     return m_path;
 }
 
-const std::vector<std::string>& Directory::files() const
+const std::vector<std::shared_ptr<IFile>>& Directory::files() const
 {
     if ( m_dirs.size() == 0 && m_files.size() == 0 )
         read();
     return m_files;
 }
 
-const std::vector<std::string>& Directory::dirs() const
+const std::vector<std::shared_ptr<IDirectory>>& Directory::dirs() const
 {
     if ( m_dirs.size() == 0 && m_files.size() == 0 )
         read();
@@ -129,11 +130,13 @@ void Directory::read() const
             auto dirPath = toAbsolute( path );
             if ( *dirPath.crbegin() != '/' )
                 dirPath += '/';
-            m_dirs.emplace_back( dirPath );
+            //FIXME: This will use toAbsolute again in the constructor.
+            m_dirs.emplace_back( std::make_shared<Directory>( dirPath ) );
         }
         else
         {
-            m_files.emplace_back( toAbsolute( path ) );
+            auto filePath = toAbsolute( path );
+            m_files.emplace_back( std::make_shared<File>( filePath ) );
         }
     }
 }
