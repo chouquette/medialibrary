@@ -37,21 +37,7 @@ TEST_F( HistoryTest, InsertMrl )
     auto hList = ml->history();
     ASSERT_EQ( 1u, hList.size() );
     auto h = hList[0];
-    ASSERT_EQ( nullptr, h->media() );
     ASSERT_EQ( h->mrl(), "upnp://stream" );
-    ASSERT_NE( 0u, h->insertionDate() );
-}
-
-TEST_F( HistoryTest, InsertMedia )
-{
-    auto media = ml->addFile( "media.mkv" );
-    ml->addToHistory( media );
-    auto hList = ml->history();
-    ASSERT_EQ( 1u, hList.size() );
-    auto h = hList[0];
-    ASSERT_NE( nullptr, h->media() );
-    ASSERT_EQ( media->id(), h->media()->id() );
-    ASSERT_EQ( h->mrl(), "" );
     ASSERT_NE( 0u, h->insertionDate() );
 }
 
@@ -90,18 +76,6 @@ TEST_F( HistoryTest, UpdateInsertionDate )
     hList = ml->history();
     ASSERT_EQ( 1u, hList.size() );
     ASSERT_NE( date, hList[0]->insertionDate() );
-}
-
-TEST_F( HistoryTest, DeleteMedia )
-{
-    auto m = ml->addFile( "media.mkv" );
-    ml->addToHistory( m );
-    auto hList = ml->history();
-    ASSERT_EQ( 1u, hList.size() );
-    auto f = m->files()[0];
-    m->removeFile( static_cast<File&>( *f ) );
-    hList = ml->history();
-    ASSERT_EQ( 0u, hList.size() );
 }
 
 TEST_F( HistoryTest, FavoriteMrl )

@@ -118,7 +118,6 @@ class IMediaLibrary
         /**
          * History
          */
-        virtual bool addToHistory( MediaPtr media ) = 0;
         virtual bool addToHistory( const std::string& mrl ) = 0;
         virtual std::vector<HistoryPtr> history() const = 0;
 

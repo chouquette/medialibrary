@@ -22,7 +22,6 @@
 
 #include "History.h"
 
-#include "Media.h"
 #include "database/SqliteTools.h"
 
 namespace policy
@@ -39,13 +38,8 @@ History::History( DBConnection dbConn, sqlite::Row& row )
 {
     row >> m_id
         >> m_mrl
-        >> m_mediaId
         >> m_date
         >> m_favorite;
-    if ( m_mediaId != 0 )
-    {
-        m_media = Media::load( dbConn, row );
-    }
 }
 
 bool History::createTable( DBConnection dbConnection )
@@ -54,11 +48,8 @@ bool History::createTable( DBConnection dbConnection )
             "("
                 "id_record INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "mrl TEXT UNIQUE ON CONFLICT FAIL,"
-                "media_id INTEGER UNIQUE ON CONFLICT REPLACE,"
                 "insertion_date UNSIGNED INT NOT NULL DEFAULT (strftime('%s', 'now')),"
-                "favorite BOOLEAN NOT NULL DEFAULT 0,"
-                "FOREIGN KEY (media_id) REFERENCES " + policy::MediaTable::Name
-                + "(id_media) ON DELETE CASCADE"
+                "favorite BOOLEAN NOT NULL DEFAULT 0"
             ")";
     static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS limit_nb_records AFTER INSERT ON "
             + policy::HistoryTable::Name +
@@ -69,14 +60,6 @@ bool History::createTable( DBConnection dbConnection )
             " END";
     return sqlite::Tools::executeRequest( dbConnection, req ) &&
             sqlite::Tools::executeRequest( dbConnection, triggerReq );
-}
-
-bool History::insert(DBConnection dbConn, const IMedia& media )
-{
-    History::clear();
-    static const std::string req = "INSERT INTO " + policy::HistoryTable::Name + "(media_id)"
-            "VALUES(?)";
-    return sqlite::Tools::insert( dbConn, req, media.id() ) != 0;
 }
 
 bool History::insert( DBConnection dbConn, const std::string& mrl )
@@ -94,15 +77,8 @@ bool History::insert( DBConnection dbConn, const std::string& mrl )
 
 std::vector<std::shared_ptr<IHistoryEntry> > History::fetch( DBConnection dbConn )
 {
-    static const std::string req = "SELECT * FROM " + policy::HistoryTable::Name + " h "
-            " LEFT OUTER JOIN " + policy::MediaTable::Name + " m ON m.id_media = h.media_id"
-            " ORDER BY insertion_date DESC";
-    return sqlite::Tools::fetchAll<History, IHistoryEntry>( dbConn, req );
-}
-
-MediaPtr History::media() const
-{
-    return m_media;
+    static const std::string req = "SELECT * FROM " + policy::HistoryTable::Name + " ORDER BY insertion_date DESC";
+    return fetchAll<IHistoryEntry>( dbConn, req );
 }
 
 const std::string& History::mrl() const

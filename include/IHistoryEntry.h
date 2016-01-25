@@ -22,13 +22,12 @@
 
 #pragma once
 
-#include "Types.h"
+#include <string>
 
 class IHistoryEntry
 {
 public:
     virtual ~IHistoryEntry() = default;
-    virtual MediaPtr media() const = 0;
     virtual const std::string& mrl() const = 0;
     virtual unsigned int insertionDate() const = 0;
     virtual bool isFavorite() const = 0;

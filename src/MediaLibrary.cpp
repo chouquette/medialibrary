@@ -375,13 +375,6 @@ bool MediaLibrary::deletePlaylist( unsigned int playlistId )
     return Playlist::destroy( m_dbConnection.get(), playlistId );
 }
 
-bool MediaLibrary::addToHistory( MediaPtr media )
-{
-    if ( media == nullptr )
-        return false;
-    return History::insert( m_dbConnection.get(), *media );
-}
-
 bool MediaLibrary::addToHistory( const std::string& mrl )
 {
     return History::insert( m_dbConnection.get(), mrl );

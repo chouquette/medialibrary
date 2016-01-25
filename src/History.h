@@ -47,11 +47,9 @@ class History : public IHistoryEntry, public DatabaseHelpers<History, policy::Hi
 public:
     History( DBConnection dbConn, sqlite::Row& row );
     static bool createTable( DBConnection dbConnection );
-    static bool insert( DBConnection dbConn, const IMedia& media );
     static bool insert( DBConnection dbConn, const std::string& mrl );
-    static std::vector<std::shared_ptr<IHistoryEntry>> fetch(DBConnection dbConn);
+    static std::vector<std::shared_ptr<IHistoryEntry>> fetch( DBConnection dbConn );
 
-    virtual MediaPtr media() const override;
     virtual const std::string& mrl() const override;
     virtual unsigned int insertionDate() const override;
     virtual bool isFavorite() const override;
@@ -64,10 +62,8 @@ private:
 
     unsigned int m_id;
     std::string m_mrl;
-    unsigned int m_mediaId;
     unsigned int m_date;
     bool m_favorite;
-    std::shared_ptr<Media> m_media;
 
     friend policy::HistoryTable;
 };

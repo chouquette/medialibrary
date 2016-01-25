@@ -88,7 +88,6 @@ class MediaLibrary : public IMediaLibrary
         virtual std::vector<PlaylistPtr> playlists() override;
         virtual bool deletePlaylist( unsigned int playlistId ) override;
 
-        virtual bool addToHistory( MediaPtr media );
         virtual bool addToHistory( const std::string& mrl );
         virtual std::vector<HistoryPtr> history() const;
 
