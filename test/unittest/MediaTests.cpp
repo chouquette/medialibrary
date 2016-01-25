@@ -261,3 +261,18 @@ TEST_F( Medias, SearchTracks )
     tracks = ml->searchMedia( "rack" ).tracks;
     ASSERT_EQ( 0u, tracks.size() );
 }
+
+TEST_F( Medias, Favorite )
+{
+    auto m = ml->addFile( "media.mkv" );
+    ASSERT_FALSE( m->isFavorite() );
+
+    m->setFavorite( true );
+    m->save();
+    ASSERT_TRUE( m->isFavorite() );
+
+    Reload();
+
+    m = ml->media( m->id() );
+    ASSERT_TRUE( m->isFavorite() );
+}

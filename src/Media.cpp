@@ -61,7 +61,8 @@ Media::Media( DBConnection dbConnection, sqlite::Row& row )
         >> m_rating
         >> m_insertionDate
         >> m_thumbnail
-        >> m_title;
+        >> m_title
+        >> m_isFavorite;
 }
 
 Media::Media( const std::string& title, Type type )
@@ -74,6 +75,7 @@ Media::Media( const std::string& title, Type type )
     , m_rating( -1 )
     , m_insertionDate( time( nullptr ) )
     , m_title( title )
+    , m_isFavorite( false )
     , m_changed( false )
 {
 }
@@ -186,6 +188,19 @@ void Media::setRating( int rating )
     m_changed = true;
 }
 
+bool Media::isFavorite() const
+{
+    return m_isFavorite;
+}
+
+void Media::setFavorite( bool favorite )
+{
+    if ( m_isFavorite == favorite )
+        return;
+    m_isFavorite = favorite;
+    m_changed = true;
+}
+
 const std::vector<FilePtr>& Media::files() const
 {
     auto lock = m_files.lock();
@@ -266,11 +281,11 @@ bool Media::save()
 {
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
             "type = ?, subtype = ?, duration = ?, play_count = ?, progress = ?, rating = ?,"
-            "thumbnail = ?, title = ? WHERE id_media = ?";
+            "thumbnail = ?, title = ?, is_favorite = ? WHERE id_media = ?";
     if ( m_changed == false )
         return true;
     if ( sqlite::Tools::executeUpdate( m_dbConnection, req, m_type, m_subType, m_duration, m_playCount,
-                                       m_progress, m_rating, m_thumbnail, m_title, m_id ) == false )
+                                       m_progress, m_rating, m_thumbnail, m_title, m_isFavorite, m_id ) == false )
     {
         return false;
     }
@@ -349,6 +364,7 @@ bool Media::createTable( DBConnection connection )
             "insertion_date UNSIGNED INTEGER,"
             "thumbnail TEXT,"
             "title TEXT,"
+            "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
             "is_present BOOLEAN NOT NULL DEFAULT 1"
             ")";
     static const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "

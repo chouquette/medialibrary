@@ -76,6 +76,8 @@ class IMedia
         ///
         virtual int rating() const = 0;
         virtual void setRating( int rating ) = 0;
+        virtual bool isFavorite() const = 0;
+        virtual void setFavorite( bool favorite ) = 0;
         virtual bool addLabel( LabelPtr label ) = 0;
         virtual bool removeLabel( LabelPtr label ) = 0;
         virtual MoviePtr movie() const = 0;

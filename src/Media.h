@@ -84,6 +84,8 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual void setProgress( float progress ) override;
         virtual int rating() const override;
         virtual void setRating( int rating ) override;
+        virtual bool isFavorite() const override;
+        virtual void setFavorite( bool favorite ) override;
         virtual const std::vector<FilePtr>& files() const override;
         virtual MoviePtr movie() const override;
         void setMovie( MoviePtr movie );
@@ -118,6 +120,7 @@ private:
         unsigned int m_insertionDate;
         std::string m_thumbnail;
         std::string m_title;
+        bool m_isFavorite;
 
         // Auto fetched related properties
         mutable Cache<AlbumTrackPtr> m_albumTrack;
