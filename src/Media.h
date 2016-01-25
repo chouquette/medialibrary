@@ -121,6 +121,7 @@ private:
         std::string m_thumbnail;
         std::string m_title;
         bool m_isFavorite;
+        bool m_isPresent;
 
         // Auto fetched related properties
         mutable Cache<AlbumTrackPtr> m_albumTrack;

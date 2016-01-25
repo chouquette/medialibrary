@@ -62,7 +62,8 @@ Media::Media( DBConnection dbConnection, sqlite::Row& row )
         >> m_insertionDate
         >> m_thumbnail
         >> m_title
-        >> m_isFavorite;
+        >> m_isFavorite
+        >> m_isPresent;
 }
 
 Media::Media( const std::string& title, Type type )
