@@ -103,3 +103,29 @@ TEST_F( HistoryTest, DeleteMedia )
     hList = ml->history();
     ASSERT_EQ( 0u, hList.size() );
 }
+
+TEST_F( HistoryTest, FavoriteMrl )
+{
+    ml->addToHistory( "stream" );
+    auto hList = ml->history();
+    ASSERT_EQ( 1u, hList.size() );
+    auto item = hList[0];
+    ASSERT_FALSE( item->isFavorite() );
+    item->setFavorite( true );
+    ASSERT_TRUE( item->isFavorite() );
+}
+
+TEST_F( HistoryTest, ReinsertFavorited )
+{
+    ml->addToHistory( "stream" );
+    auto hList = ml->history();
+    auto item = hList[0];
+    auto date = item->insertionDate();
+    item->setFavorite( true );
+    std::this_thread::sleep_for( std::chrono::seconds{ 1 } );
+    ml->addToHistory( "stream" );
+    hList = ml->history();
+    item = hList[0];
+    ASSERT_NE( date, item->insertionDate() );
+    ASSERT_TRUE( item->isFavorite() );
+}

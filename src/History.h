@@ -54,14 +54,19 @@ public:
     virtual MediaPtr media() const override;
     virtual const std::string& mrl() const override;
     virtual unsigned int insertionDate() const override;
+    virtual bool isFavorite() const override;
+    virtual bool setFavorite( bool isFavorite ) override;
 
     static constexpr unsigned int MaxEntries = 100u;
 
 private:
+    DBConnection m_dbConn;
+
     unsigned int m_id;
     std::string m_mrl;
     unsigned int m_mediaId;
     unsigned int m_date;
+    bool m_favorite;
     std::shared_ptr<Media> m_media;
 
     friend policy::HistoryTable;

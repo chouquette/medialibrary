@@ -35,11 +35,13 @@ unsigned int History::* const HistoryTable::PrimaryKey = &History::m_id;
 constexpr unsigned int History::MaxEntries;
 
 History::History( DBConnection dbConn, sqlite::Row& row )
+    : m_dbConn( dbConn )
 {
     row >> m_id
         >> m_mrl
         >> m_mediaId
-        >> m_date;
+        >> m_date
+        >> m_favorite;
     if ( m_mediaId != 0 )
     {
         m_media = Media::load( dbConn, row );
@@ -51,9 +53,10 @@ bool History::createTable( DBConnection dbConnection )
     static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::HistoryTable::Name +
             "("
                 "id_record INTEGER PRIMARY KEY AUTOINCREMENT,"
-                "mrl TEXT UNIQUE ON CONFLICT REPLACE,"
+                "mrl TEXT UNIQUE ON CONFLICT FAIL,"
                 "media_id INTEGER UNIQUE ON CONFLICT REPLACE,"
-                "insertion_date UNSIGNED INT DEFAULT (strftime('%s', 'now')),"
+                "insertion_date UNSIGNED INT NOT NULL DEFAULT (strftime('%s', 'now')),"
+                "favorite BOOLEAN NOT NULL DEFAULT 0,"
                 "FOREIGN KEY (media_id) REFERENCES " + policy::MediaTable::Name
                 + "(id_media) ON DELETE CASCADE"
             ")";
@@ -70,6 +73,7 @@ bool History::createTable( DBConnection dbConnection )
 
 bool History::insert(DBConnection dbConn, const IMedia& media )
 {
+    History::clear();
     static const std::string req = "INSERT INTO " + policy::HistoryTable::Name + "(media_id)"
             "VALUES(?)";
     return sqlite::Tools::insert( dbConn, req, media.id() ) != 0;
@@ -77,9 +81,15 @@ bool History::insert(DBConnection dbConn, const IMedia& media )
 
 bool History::insert( DBConnection dbConn, const std::string& mrl )
 {
-    static const std::string req = "INSERT INTO " + policy::HistoryTable::Name + "(mrl)"
-            "VALUES(?)";
-    return sqlite::Tools::insert( dbConn, req, mrl ) != 0;
+    History::clear();
+    static const std::string req = "INSERT OR REPLACE INTO " + policy::HistoryTable::Name +
+            "(id_record, mrl, insertion_date, favorite)"
+            " SELECT id_record, mrl, strftime('%s', 'now'), favorite FROM " +
+            policy::HistoryTable::Name + " WHERE mrl = ?"
+            " UNION SELECT NULL, ?, NULL, NULL"
+            " ORDER BY id_record DESC"
+            " LIMIT 1";
+    return sqlite::Tools::insert( dbConn, req, mrl, mrl ) != 0;
 }
 
 std::vector<std::shared_ptr<IHistoryEntry> > History::fetch( DBConnection dbConn )
@@ -103,4 +113,21 @@ const std::string& History::mrl() const
 unsigned int History::insertionDate() const
 {
     return m_date;
+}
+
+bool History::isFavorite() const
+{
+    return m_favorite;
+}
+
+bool History::setFavorite( bool isFavorite )
+{
+    if ( isFavorite == m_favorite )
+        return true;
+
+    static const std::string req = "UPDATE " + policy::HistoryTable::Name + " SET favorite = ? WHERE id_record = ?";
+    if ( sqlite::Tools::executeUpdate( m_dbConn, req, isFavorite, m_id ) == false )
+        return false;
+    m_favorite = isFavorite;
+    return true;
 }

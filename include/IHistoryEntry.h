@@ -31,4 +31,6 @@ public:
     virtual MediaPtr media() const = 0;
     virtual const std::string& mrl() const = 0;
     virtual unsigned int insertionDate() const = 0;
+    virtual bool isFavorite() const = 0;
+    virtual bool setFavorite( bool isFavorite ) = 0;
 };
