@@ -126,7 +126,7 @@ void FsDiscoverer::checkDevices()
     }
 }
 
-void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& currentFolder, const std::vector<std::shared_ptr<Folder>> blacklist ) const
+void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& currentFolder, const std::vector<std::shared_ptr<Folder>>& blacklist ) const
 {
     // We already know of this folder, though it may now contain a .nomedia file.
     // In this case, simply delete the folder.
