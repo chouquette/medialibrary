@@ -44,7 +44,7 @@ const std::string&Directory::path() const
     return m_path;
 }
 
-const std::vector<std::shared_ptr<fs::IFile> >&Directory::files() const
+const std::vector<std::shared_ptr<fs::IFile>>& Directory::files() const
 {
     m_filePathes.clear();
     for ( auto& f : m_files )
@@ -52,7 +52,7 @@ const std::vector<std::shared_ptr<fs::IFile> >&Directory::files() const
     return m_filePathes;
 }
 
-const std::vector<std::shared_ptr<fs::IDirectory> >&Directory::dirs() const
+const std::vector<std::shared_ptr<fs::IDirectory>>& Directory::dirs() const
 {
     m_dirPathes.clear();
     for ( const auto& d : m_dirs )

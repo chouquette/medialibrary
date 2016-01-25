@@ -146,8 +146,7 @@ TEST_F( DeviceFs, UnmountDisk )
     auto media = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, media );
 
-    auto device = std::static_pointer_cast<mock::Device>( fsMock->createDevice( RemovableDeviceUuid ) );
-    device->setPresent( false );
+    fsMock->unmountDevice( RemovableDeviceUuid );
 
     cbMock->prepareForReload();
     Reload();

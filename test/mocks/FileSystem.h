@@ -69,6 +69,51 @@ struct FileSystemFactory : public factory::IFileSystem
         return dev;
     }
 
+    std::shared_ptr<Device> removeDevice( const std::string& uuid )
+    {
+        auto it = std::find_if( begin( devices ), end( devices ), [uuid]( const std::shared_ptr<Device>& d ) {
+            return d->uuid() == uuid;
+        } );
+        if ( it == end( devices ) )
+            return nullptr;
+        auto ret = *it;
+        devices.erase( it );
+        // Now flag the mountpoint as belonging to its containing device, since it's now
+        // just a regular folder
+        auto d = device( ret->mountpoint() );
+        d->invalidateMountpoint( ret->mountpoint() );
+        return ret;
+    }
+
+    void unmountDevice( const std::string& uuid )
+    {
+        auto it = std::find_if( begin( devices ), end( devices ), [uuid]( const std::shared_ptr<Device>& d ) {
+            return d->uuid() == uuid;
+        } );
+        if ( it == end( devices ) )
+            return;
+        auto d = *it;
+        d->setPresent( false );
+        auto mountpointDevice = device( d->mountpoint() );
+        mountpointDevice->invalidateMountpoint( d->mountpoint() );
+    }
+
+    void remountDevice( const std::string& uuid )
+    {
+        auto it = std::find_if( begin( devices ), end( devices ), [uuid]( const std::shared_ptr<Device>& d ) {
+            return d->uuid() == uuid;
+        } );
+        if ( it == end( devices ) )
+            return;
+        auto d = *it;
+        // Look for the containing device before marking the actual device back as present.
+        // otherwise, we will get the device mountpoint itself, instead of the device that contains
+        // the mountpoint
+        auto mountpointDevice = device( d->mountpoint() );
+        d->setPresent( true );
+        mountpointDevice->setMountpointRoot( d->mountpoint(), d->root() );
+    }
+
     void addDevice( std::shared_ptr<Device> dev )
     {
         auto d = device( dev->mountpoint() );
@@ -151,22 +196,6 @@ struct FileSystemFactory : public factory::IFileSystem
                  ( ret == nullptr || ret->mountpoint().length() < d->mountpoint().length() ) )
                 ret = d;
         }
-        return ret;
-    }
-
-    std::shared_ptr<Device> removeDevice( const std::string& uuid )
-    {
-        auto it = std::find_if( begin( devices ), end( devices ), [uuid]( const std::shared_ptr<Device>& d ) {
-            return d->uuid() == uuid;
-        } );
-        if ( it == end( devices ) )
-            return nullptr;
-        auto ret = *it;
-        devices.erase( it );
-        // Now flag the mountpoint as belonging to its containing device, since it's now
-        // just a regular folder
-        auto d = device( ret->mountpoint() );
-        d->invalidateMountpoint( ret->mountpoint() );
         return ret;
     }
 
