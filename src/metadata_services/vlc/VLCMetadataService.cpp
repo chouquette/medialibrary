@@ -100,7 +100,14 @@ uint8_t VLCMetadataService::nbThreads() const
 
 void VLCMetadataService::storeMeta( parser::Task& task, VLC::Media& vlcMedia )
 {
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(3, 0, 0, 0)
     task.albumArtist = vlcMedia.meta( libvlc_meta_AlbumArtist );
+    task.discNumber = toInt( vlcMedia, libvlc_meta_DiscNumber, "disc number" );
+    task.discTotal = toInt( vlcMedia, libvlc_meta_DiscTotal, "disc total" );
+#else
+    task.discNumber = 0;
+    task.discTotal = 0;
+#endif
     task.artist = vlcMedia.meta( libvlc_meta_Artist );
     task.artworkMrl = vlcMedia.meta( libvlc_meta_ArtworkURL );
     task.title = vlcMedia.meta( libvlc_meta_Title );
@@ -111,8 +118,6 @@ void VLCMetadataService::storeMeta( parser::Task& task, VLC::Media& vlcMedia )
     task.duration = vlcMedia.duration();
 
     task.trackNumber = toInt( vlcMedia, libvlc_meta_TrackNumber, "track number" );
-    task.discNumber = toInt( vlcMedia, libvlc_meta_DiscNumber, "disc number" );
-    task.discTotal = toInt( vlcMedia, libvlc_meta_DiscTotal, "disc total" );
     task.episode = toInt( vlcMedia, libvlc_meta_Episode, "episode number" );
 }
 
