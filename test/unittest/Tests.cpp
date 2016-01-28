@@ -121,7 +121,8 @@ std::shared_ptr<Folder> MediaLibraryTester::folder( const std::string& path )
 
 std::shared_ptr<Media> MediaLibraryTester::addFile( const std::string& path )
 {
-    return MediaLibrary::addFile( path, dummyFolder, *dummyDirectory );
+    mock::NoopFile file( path );
+    return MediaLibrary::addFile( file, dummyFolder, *dummyDirectory );
 }
 
 std::shared_ptr<Playlist> MediaLibraryTester::playlist(unsigned int playlistId)

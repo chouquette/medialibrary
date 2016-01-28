@@ -222,7 +222,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
         f->media()->removeFile( *f );
     // Insert all files at once to avoid SQL write contention
     for ( auto& p : filesToAdd )
-        m_ml->addFile( p->fullPath(), parentFolder, parentFolderFs );
+        m_ml->addFile( *p, parentFolder, parentFolderFs );
     t->commit();
     LOG_INFO( "Done checking files in ", parentFolderFs.path() );
 }

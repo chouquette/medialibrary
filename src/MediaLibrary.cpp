@@ -201,21 +201,10 @@ std::vector<MediaPtr> MediaLibrary::videoFiles()
     return Media::fetchAll<IMedia>( m_dbConnection.get(), req, IMedia::Type::VideoType );
 }
 
-std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder& parentFolder, fs::IDirectory& parentFolderFs )
+std::shared_ptr<Media> MediaLibrary::addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs )
 {
-    std::shared_ptr<fs::IFile> fileFs;
-    try
-    {
-        fileFs = m_fsFactory->createFile( path );
-    }
-    catch (std::exception& ex)
-    {
-        LOG_ERROR( "Failed to create an IFile for ", path, ": ", ex.what() );
-        return nullptr;
-    }
-
     auto type = IMedia::Type::UnknownType;
-    auto ext = fileFs->extension();
+    auto ext = fileFs.extension();
     auto predicate = [ext](const std::string& v) {
         return strcasecmp(v.c_str(), ext.c_str()) == 0;
     };
@@ -233,18 +222,18 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder& p
     if ( type == IMedia::Type::UnknownType )
         return nullptr;
 
-    LOG_INFO( "Adding ", path );
-    auto mptr = Media::create( m_dbConnection.get(), type, *fileFs );
+    LOG_INFO( "Adding ", fileFs.fullPath() );
+    auto mptr = Media::create( m_dbConnection.get(), type, fileFs );
     if ( mptr == nullptr )
     {
-        LOG_ERROR( "Failed to add media ", fileFs->fullPath(), " to the media library" );
+        LOG_ERROR( "Failed to add media ", fileFs.fullPath(), " to the media library" );
         return nullptr;
     }
     // For now, assume all media are made of a single file
-    auto file = mptr->addFile( *fileFs, parentFolder, parentFolderFs, File::Type::Entire );
+    auto file = mptr->addFile( fileFs, parentFolder, parentFolderFs, File::Type::Entire );
     if ( file == nullptr )
     {
-        LOG_ERROR( "Failed to add file ", fileFs->fullPath(), " to media #", mptr->id() );
+        LOG_ERROR( "Failed to add file ", fileFs.fullPath(), " to media #", mptr->id() );
         Media::destroy( m_dbConnection.get(), mptr->id() );
         return nullptr;
     }
