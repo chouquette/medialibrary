@@ -84,6 +84,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
     discoverer/DiscovererWorker.cpp
 
     utils/Filename.cpp
+    utils/VLCInstance.cpp
 
     database/SqliteConnection.cpp
     database/SqliteTransaction.cpp

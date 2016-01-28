@@ -31,7 +31,6 @@ class SqliteConnection;
 #include "IMediaLibrary.h"
 #include "IDiscoverer.h"
 #include "logging/Logger.h"
-#include "vlcpp/vlc.hpp"
 #include "Settings.h"
 
 class Album;
@@ -131,10 +130,6 @@ class MediaLibrary : public IMediaLibrary
         std::shared_ptr<factory::IFileSystem> m_fsFactory;
         std::string m_thumbnailPath;
         IMediaLibraryCb* m_callback;
-
-        // This probably qualifies as a work around, but we need to keep the VLC::Instance
-        // alive to be able to use the logging wrapper lambda
-        VLC::Instance m_vlcInstance;
 
         // Keep the parser as last field.
         // The parser holds a (raw) pointer to the media library. When MediaLibrary's destructor gets called

@@ -99,6 +99,11 @@ public:
         s_logLevel.store( level, std::memory_order_relaxed );
     }
 
+    static LogLevel logLevel()
+    {
+        return s_logLevel.load( std::memory_order_relaxed );
+    }
+
     template <typename... Args>
     static void Error( Args... args )
     {

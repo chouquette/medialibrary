@@ -41,9 +41,10 @@
 #include "File.h"
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
+#include "utils/VLCInstance.h"
 
-VLCThumbnailer::VLCThumbnailer( const VLC::Instance &vlc )
-    : m_instance( vlc )
+VLCThumbnailer::VLCThumbnailer()
+    : m_instance( VLCInstance::get() )
     , m_ml( nullptr )
 #ifdef WITH_EVAS
     , m_canvas( nullptr, &evas_free )

@@ -20,32 +20,15 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef VLCMETADATASERVICE_H
-#define VLCMETADATASERVICE_H
+#pragma once
 
-#include <condition_variable>
-#include <vlcpp/vlc.hpp>
-#include <mutex>
-
-#include "parser/ParserService.h"
-#include "AlbumTrack.h"
-
-class VLCMetadataService : public ParserService
+namespace VLC
 {
-    public:
-        explicit VLCMetadataService();
+class Instance;
+}
 
-private:
-        virtual parser::Task::Status run( parser::Task& task ) override;
-        virtual const char* name() const override;
-        virtual uint8_t nbThreads() const override;
-        void storeMeta(parser::Task& task, VLC::Media& vlcMedia );
-        int toInt(VLC::Media& vlcMedia, libvlc_meta_t meta, const char* name );
-
-private:
-        VLC::Instance m_instance;
-        std::mutex m_mutex;
-        std::condition_variable m_cond;
+class VLCInstance
+{
+public:
+    static VLC::Instance& get();
 };
-
-#endif // VLCMETADATASERVICE_H

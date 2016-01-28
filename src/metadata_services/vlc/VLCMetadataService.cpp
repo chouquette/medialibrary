@@ -24,9 +24,10 @@
 
 #include "VLCMetadataService.h"
 #include "Media.h"
+#include "utils/VLCInstance.h"
 
-VLCMetadataService::VLCMetadataService( const VLC::Instance& vlc )
-    : m_instance( vlc )
+VLCMetadataService::VLCMetadataService()
+    : m_instance( VLCInstance::get() )
 {
 }
 

@@ -20,32 +20,40 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef VLCMETADATASERVICE_H
-#define VLCMETADATASERVICE_H
+#include "VLCInstance.h"
+#include "logging/Logger.h"
+#include "vlcpp/vlc.hpp"
 
-#include <condition_variable>
-#include <vlcpp/vlc.hpp>
-#include <mutex>
-
-#include "parser/ParserService.h"
-#include "AlbumTrack.h"
-
-class VLCMetadataService : public ParserService
+namespace
 {
-    public:
-        explicit VLCMetadataService();
+// Define this in the .cpp file to avoid including libvlcpp from the header.
+struct Init
+{
+    Init()
+    {
+        const char* args[] = {
+            "-vv",
+        };
+        instance = VLC::Instance( sizeof(args) / sizeof(args[0]), args );
+        instance.logSet([this](int lvl, const libvlc_log_t*, std::string msg) {
+            if ( Log::logLevel() != LogLevel::Verbose )
+                return;
+            if ( lvl == LIBVLC_ERROR )
+                Log::Error( msg );
+            else if ( lvl == LIBVLC_WARNING )
+                Log::Warning( msg );
+            else
+                Log::Info( msg );
+        });
+    }
 
-private:
-        virtual parser::Task::Status run( parser::Task& task ) override;
-        virtual const char* name() const override;
-        virtual uint8_t nbThreads() const override;
-        void storeMeta(parser::Task& task, VLC::Media& vlcMedia );
-        int toInt(VLC::Media& vlcMedia, libvlc_meta_t meta, const char* name );
-
-private:
-        VLC::Instance m_instance;
-        std::mutex m_mutex;
-        std::condition_variable m_cond;
+    VLC::Instance instance;
 };
+}
 
-#endif // VLCMETADATASERVICE_H
+VLC::Instance& VLCInstance::get()
+{
+    // Instanciate the wrapper only once, and run initialization in its constructor.
+    static Init wrapper;
+    return wrapper.instance;
+}

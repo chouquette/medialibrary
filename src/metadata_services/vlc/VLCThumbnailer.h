@@ -45,7 +45,7 @@
 class VLCThumbnailer : public ParserService
 {
 public:
-    explicit VLCThumbnailer( const VLC::Instance& vlc );
+    explicit VLCThumbnailer();
     virtual ~VLCThumbnailer();
     virtual parser::Task::Status run( parser::Task& task ) override;
     virtual bool initialize() override;
