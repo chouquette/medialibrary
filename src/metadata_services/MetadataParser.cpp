@@ -30,9 +30,8 @@
 #include "Show.h"
 #include "utils/Filename.h"
 
-MetadataParser::MetadataParser( DBConnection dbConnection, std::shared_ptr<factory::IFileSystem> fsFactory)
+MetadataParser::MetadataParser( DBConnection dbConnection )
     : m_dbConn( dbConnection )
-    , m_fsFactory( fsFactory )
 {
 }
 
