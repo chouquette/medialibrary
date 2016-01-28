@@ -166,15 +166,6 @@ struct FileSystemFactory : public factory::IFileSystem
         return d->directory( path );
     }
 
-    virtual std::shared_ptr<fs::IFile> createFile( const std::string &filePath ) override
-    {
-        auto d = device( filePath );
-        if ( d == nullptr )
-            return nullptr;
-        auto f = d->file( filePath );
-        return f;
-    }
-
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override
     {
         auto it = std::find_if( begin( devices ), end( devices ), [uuid]( const std::shared_ptr<Device>& d ) {
@@ -299,11 +290,6 @@ public:
     virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& ) override
     {
         return nullptr;
-    }
-
-    virtual std::shared_ptr<fs::IFile> createFile( const std::string &fileName ) override
-    {
-        return std::shared_ptr<fs::IFile>( new NoopFile( fileName ) );
     }
 
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& ) override

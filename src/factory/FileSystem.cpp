@@ -62,11 +62,6 @@ std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::s
     }
 }
 
-std::shared_ptr<fs::IFile> FileSystemFactory::createFile(const std::string& fileName)
-{
-    return std::unique_ptr<fs::IFile>( new fs::File( fileName ) );
-}
-
 std::shared_ptr<fs::IDevice> FileSystemFactory::createDevice( const std::string& uuid )
 {
     return fs::Device::fromUuid( uuid );

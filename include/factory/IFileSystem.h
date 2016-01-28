@@ -44,11 +44,6 @@ namespace factory
         ///
         virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& path ) = 0;
         ///
-        /// \brief createFile creates a representation of a file
-        /// \param fileName an absolute path to a file
-        ///
-        virtual std::shared_ptr<fs::IFile> createFile( const std::string& fileName ) = 0;
-        ///
         /// \brief createDevice creates a representation of a device
         /// \param uuid The device UUID
         /// \return A representation of the device, or nullptr if the device is currently unavailable.
