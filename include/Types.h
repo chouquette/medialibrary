@@ -20,8 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef TYPES_H
-#define TYPES_H
+#pragma once
 
 #include <memory>
 
@@ -44,20 +43,20 @@ class IArtist;
 class IPlaylist;
 class SqliteConnection;
 
-typedef std::shared_ptr<IMedia> MediaPtr;
-typedef std::shared_ptr<ILabel> LabelPtr;
-typedef std::shared_ptr<IAlbum> AlbumPtr;
-typedef std::shared_ptr<IAlbumTrack> AlbumTrackPtr;
-typedef std::shared_ptr<IFile> FilePtr;
-typedef std::shared_ptr<IShow> ShowPtr;
-typedef std::shared_ptr<IShowEpisode> ShowEpisodePtr;
-typedef std::shared_ptr<IMovie> MoviePtr;
-typedef std::shared_ptr<IAudioTrack> AudioTrackPtr;
-typedef std::shared_ptr<IVideoTrack> VideoTrackPtr;
-typedef std::shared_ptr<IArtist> ArtistPtr;
-typedef std::shared_ptr<IPlaylist> PlaylistPtr;
-typedef std::shared_ptr<IHistoryEntry> HistoryPtr;
-typedef std::shared_ptr<IGenre> GenrePtr;
+using AlbumPtr = std::shared_ptr<IAlbum>;
+using AlbumTrackPtr = std::shared_ptr<IAlbumTrack>;
+using ArtistPtr = std::shared_ptr<IArtist>;
+using AudioTrackPtr = std::shared_ptr<IAudioTrack>;
+using FilePtr = std::shared_ptr<IFile>;
+using GenrePtr = std::shared_ptr<IGenre>;
+using HistoryPtr = std::shared_ptr<IHistoryEntry>;
+using LabelPtr = std::shared_ptr<ILabel>;
+using MediaPtr = std::shared_ptr<IMedia>;
+using MoviePtr = std::shared_ptr<IMovie>;
+using PlaylistPtr = std::shared_ptr<IPlaylist>;
+using ShowEpisodePtr = std::shared_ptr<IShowEpisode>;
+using ShowPtr = std::shared_ptr<IShow>;
+using VideoTrackPtr = std::shared_ptr<IVideoTrack>;
 
 typedef SqliteConnection* DBConnection;
 
@@ -71,6 +70,3 @@ enum class LogLevel
     Warning,
     Error,
 };
-
-
-#endif // TYPES_H
