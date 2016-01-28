@@ -59,7 +59,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         Media( DBConnection dbConnection , sqlite::Row& row );
         Media( const std::string &title, Type type);
 
-        static std::shared_ptr<Media> create( DBConnection dbConnection, Type type, const fs::IFile* file );
+        static std::shared_ptr<Media> create( DBConnection dbConnection, Type type, const fs::IFile& file );
         static bool createTable( DBConnection connection );
         static bool createTriggers( DBConnection connection );
 

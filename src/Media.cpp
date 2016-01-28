@@ -83,9 +83,9 @@ Media::Media( const std::string& title, Type type )
 {
 }
 
-std::shared_ptr<Media> Media::create( DBConnection dbConnection, Type type, const fs::IFile* file )
+std::shared_ptr<Media> Media::create( DBConnection dbConnection, Type type, const fs::IFile& file )
 {
-    auto self = std::make_shared<Media>( file->name(), type );
+    auto self = std::make_shared<Media>( file.name(), type );
     static const std::string req = "INSERT INTO " + policy::MediaTable::Name +
             "(type, insertion_date, title) VALUES(?, ?, ?)";
 

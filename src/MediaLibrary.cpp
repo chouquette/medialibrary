@@ -234,7 +234,7 @@ std::shared_ptr<Media> MediaLibrary::addFile( const std::string& path, Folder& p
         return nullptr;
 
     LOG_INFO( "Adding ", path );
-    auto mptr = Media::create( m_dbConnection.get(), type, fileFs.get() );
+    auto mptr = Media::create( m_dbConnection.get(), type, *fileFs );
     if ( mptr == nullptr )
     {
         LOG_ERROR( "Failed to add media ", fileFs->fullPath(), " to the media library" );
