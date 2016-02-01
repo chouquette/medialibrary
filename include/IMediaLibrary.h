@@ -66,7 +66,7 @@ public:
     /**
      * @brief onFileUpdated Will be called when a file metadata gets updated.
      */
-    virtual void onFileUpdated( MediaPtr media ) = 0;
+    virtual void onMediaUpdated( MediaPtr media ) = 0;
 
     virtual void onDiscoveryStarted( const std::string& entryPoint ) = 0;
     virtual void onDiscoveryCompleted( const std::string& entryPoint ) = 0;

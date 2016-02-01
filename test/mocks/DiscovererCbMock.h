@@ -37,7 +37,7 @@ public:
     {
     }
 
-    virtual void onFileUpdated( MediaPtr ) override
+    virtual void onMediaUpdated( MediaPtr ) override
     {
     }
 

@@ -114,7 +114,7 @@ void Parser::done( std::unique_ptr<parser::Task> t, parser::Task::Status status 
     if ( status == parser::Task::Status::Success )
     {
         if ( m_callback != nullptr )
-            m_callback->onFileUpdated( t->media );
+            m_callback->onMediaUpdated( t->media );
     }
 
     auto serviceIdx = ++t->currentService;
