@@ -68,6 +68,16 @@ public:
      */
     virtual void onMediaUpdated( MediaPtr media ) = 0;
 
+    virtual void onArtistAdded( ArtistPtr artist ) = 0;
+    virtual void onAlbumAdded( AlbumPtr album ) = 0;
+    /**
+     * @brief onTrackAdded Called when a media gets detected as an album track
+     * and after it has been added to the album representation
+     * @param media The media, containing most of the informations
+     * @param track Some track specific informations
+     */
+    virtual void onTrackAdded( MediaPtr media, AlbumTrackPtr track ) = 0;
+
     virtual void onDiscoveryStarted( const std::string& entryPoint ) = 0;
     virtual void onDiscoveryCompleted( const std::string& entryPoint ) = 0;
     virtual void onReloadStarted( const std::string& entryPoint ) = 0;

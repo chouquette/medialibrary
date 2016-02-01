@@ -41,6 +41,18 @@ public:
     {
     }
 
+    virtual void onArtistAdded( ArtistPtr ) override
+    {
+    }
+
+    virtual void onAlbumAdded( AlbumPtr ) override
+    {
+    }
+
+    virtual void onTrackAdded( MediaPtr, AlbumTrackPtr ) override
+    {
+    }
+
     virtual void onDiscoveryStarted( const std::string& ) override
     {
     }

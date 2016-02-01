@@ -450,7 +450,7 @@ void MediaLibrary::startParser()
     m_parser.reset( new Parser( m_dbConnection.get(), this, m_callback ) );
 
     auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService );
-    auto metadataService = std::unique_ptr<MetadataParser>( new MetadataParser( m_dbConnection.get() ) );
+    auto metadataService = std::unique_ptr<MetadataParser>( new MetadataParser( m_dbConnection.get(), m_callback ) );
     auto thumbnailerService = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer );
     m_parser->addService( std::move( vlcService ) );
     m_parser->addService( std::move( metadataService ) );

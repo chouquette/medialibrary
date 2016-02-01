@@ -30,8 +30,9 @@
 #include "Show.h"
 #include "utils/Filename.h"
 
-MetadataParser::MetadataParser( DBConnection dbConnection )
+MetadataParser::MetadataParser( DBConnection dbConnection, IMediaLibraryCb* cb )
     : m_dbConn( dbConnection )
+    , m_cb( cb )
 {
 }
 
@@ -250,6 +251,7 @@ std::shared_ptr<Album> MetadataParser::handleAlbum( parser::Task& task, std::sha
                 if ( task.artworkMrl.length() != 0 )
                     album->setArtworkMrl( task.artworkMrl );
             }
+            m_cb->onAlbumAdded( album );
         }
     }
     else
@@ -291,6 +293,7 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::hand
                 LOG_ERROR( "Failed to create new artist ", task.albumArtist );
                 return {nullptr, nullptr};
             }
+            m_cb->onArtistAdded( albumArtist );
         }
     }
     if ( task.artist.empty() == false && task.artist != task.albumArtist )
@@ -304,6 +307,7 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::hand
                 LOG_ERROR( "Failed to create new artist ", task.artist );
                 return {nullptr, nullptr};
             }
+            m_cb->onArtistAdded( artist );
         }
     }
     return {albumArtist, artist};
@@ -358,6 +362,7 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
         // using Album class internals.
         album->setReleaseYear( releaseYear, false );
     }
+    m_cb->onTrackAdded( task.media, track );
     return track;
 }
 

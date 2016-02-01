@@ -30,7 +30,7 @@ class AlbumTrack;
 class MetadataParser : public ParserService
 {
 public:
-    MetadataParser( DBConnection dbConnection );
+    MetadataParser( DBConnection dbConnection , IMediaLibraryCb* cb );
 protected:
     virtual bool initialize() override;
     virtual parser::Task::Status run( parser::Task& task ) override;
@@ -47,6 +47,7 @@ protected:
 
 private:
     MediaLibrary* m_ml;
+    IMediaLibraryCb* m_cb;
     std::shared_ptr<Artist> m_unknownArtist;
     DBConnection m_dbConn;
 };
