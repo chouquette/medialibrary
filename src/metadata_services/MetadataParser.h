@@ -47,7 +47,7 @@ protected:
 
 private:
     MediaLibrary* m_ml;
-    IMediaLibraryCb* m_cb;
     std::shared_ptr<Artist> m_unknownArtist;
     DBConnection m_dbConn;
+    IMediaLibraryCb* m_cb;
 };
