@@ -113,6 +113,11 @@ MediaLibrary::~MediaLibrary()
 
 bool MediaLibrary::createAllTables()
 {
+    // We need to create the tables in order of triggers creation
+    // Device is the "root of all evil". When a device is modified,
+    // we will trigger an update on folder, which will trigger
+    // an update on files, and so on.
+
     auto t = m_dbConnection->newTransaction();
     auto res = Device::createTable( m_dbConnection.get() ) &&
         Folder::createTable( m_dbConnection.get() ) &&
@@ -156,10 +161,6 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
     m_callback = mlCallback;
     m_dbConnection.reset( new SqliteConnection( dbPath ) );
 
-    // We need to create the tables in order of triggers creation
-    // Device is the "root of all evil". When a device is modified,
-    // we will trigger an update on folder, which will trigger
-    // an update on files, and so on.
     if ( createAllTables() == false )
     {
         LOG_ERROR( "Failed to create database structure" );
