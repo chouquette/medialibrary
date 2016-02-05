@@ -60,6 +60,7 @@ SqliteConnection::Handle SqliteConnection::getConn()
         while ( s.row() != nullptr )
             ;
         m_conns.emplace( std::this_thread::get_id(), std::move( dbConn ) );
+        sqlite3_update_hook( dbConnection, &updateHook, this );
         return dbConnection;
     }
     return it->second.get();
@@ -78,4 +79,30 @@ SqliteConnection::ReadContext SqliteConnection::acquireReadContext()
 SqliteConnection::WriteContext SqliteConnection::acquireWriteContext()
 {
     return WriteContext{ m_writeLock };
+}
+
+void SqliteConnection::registerUpdateHook( const std::string& table, SqliteConnection::UpdateHookCb cb )
+{
+    m_hooks.emplace( table, cb );
+}
+
+void SqliteConnection::updateHook( void* data, int reason, const char*,
+                                   const char* table, sqlite_int64 rowId )
+{
+    const auto self = reinterpret_cast<SqliteConnection*>( data );
+    auto it = self->m_hooks.find( table );
+    if ( it == end( self->m_hooks ) )
+        return;
+    switch ( reason )
+    {
+    case SQLITE_INSERT:
+        it->second( HookReason::Insert, rowId );
+        break;
+    case SQLITE_UPDATE:
+        it->second( HookReason::Update, rowId );
+        break;
+    case SQLITE_DELETE:
+        it->second( HookReason::Delete, rowId );
+        break;
+    }
 }

@@ -23,6 +23,7 @@
 #ifndef SQLITECONNECTION_H
 #define SQLITECONNECTION_H
 
+#include <functional>
 #include <memory>
 #include <sqlite3.h>
 #include <condition_variable>
@@ -43,6 +44,13 @@ public:
     using ReadContext = std::unique_lock<utils::ReadLocker>;
     using WriteContext = std::unique_lock<utils::WriteLocker>;
     using Handle = sqlite3*;
+    enum class HookReason
+    {
+        Insert,
+        Delete,
+        Update
+    };
+    using UpdateHookCb = std::function<void(HookReason, int64_t)>;
 
     explicit SqliteConnection( const std::string& dbPath );
     ~SqliteConnection();
@@ -53,6 +61,12 @@ public:
     ReadContext acquireReadContext();
     WriteContext acquireWriteContext();
 
+    void registerUpdateHook( const std::string& table, UpdateHookCb cb );
+
+private:
+    static void updateHook( void* data, int reason, const char* database,
+                            const char* table, sqlite_int64 rowId );
+
 private:
     using ConnPtr = std::unique_ptr<sqlite3, int(*)(sqlite3*)>;
     const std::string m_dbPath;
@@ -61,6 +75,7 @@ private:
     utils::SWMRLock m_contextLock;
     utils::ReadLocker m_readLock;
     utils::WriteLocker m_writeLock;
+    std::unordered_map<std::string, UpdateHookCb> m_hooks;
 };
 
 #endif // SQLITECONNECTION_H
