@@ -84,13 +84,16 @@ class DatabaseHelpers
                     + TABLEPOLICY::PrimaryKeyColumn + " = ?";
             auto res = sqlite::Tools::executeDelete( dbConnection, req, pkValue );
             if ( res == true )
-            {
-                Lock l{ Mutex };
-                auto it = Store.find( pkValue );
-                if ( it != end( Store ) )
-                    Store.erase( it );
-            }
+                removeFromCache( pkValue );
             return res;
+        }
+
+        static void removeFromCache( unsigned int pkValue )
+        {
+            Lock l{ Mutex };
+            auto it = Store.find( pkValue );
+            if ( it != end( Store ) )
+                Store.erase( it );
         }
 
         static void clear()
