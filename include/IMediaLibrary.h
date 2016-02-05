@@ -68,6 +68,8 @@ public:
      */
     virtual void onMediaUpdated( MediaPtr media ) = 0;
 
+    virtual void onMediaDeleted( std::vector<int64_t> ids ) = 0;
+
     virtual void onArtistAdded( ArtistPtr artist ) = 0;
     virtual void onAlbumAdded( AlbumPtr album ) = 0;
     /**

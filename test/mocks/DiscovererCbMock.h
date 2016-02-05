@@ -41,6 +41,10 @@ public:
     {
     }
 
+    virtual void onMediaDeleted( std::vector<int64_t> ) override
+    {
+    }
+
     virtual void onArtistAdded( ArtistPtr ) override
     {
     }
