@@ -54,8 +54,8 @@ struct FolderTable
 class Folder : public DatabaseHelpers<Folder, policy::FolderTable>
 {
 public:
-    Folder(MediaLibraryPtr ml, sqlite::Row& row );
-    Folder( const std::string& path, unsigned int parent , unsigned int deviceId , bool isRemovable );
+    Folder( MediaLibraryPtr ml, sqlite::Row& row );
+    Folder( MediaLibraryPtr ml, const std::string& path, unsigned int parent , unsigned int deviceId , bool isRemovable );
 
     static bool createTable( DBConnection connection );
     static std::shared_ptr<Folder> create( MediaLibraryPtr ml, const std::string& path, unsigned int parentId, Device& device, fs::IDevice& deviceFs );

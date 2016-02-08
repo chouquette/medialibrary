@@ -42,7 +42,7 @@ class Genre : public IGenre, public DatabaseHelpers<Genre, policy::GenreTable>
 {
 public:
     Genre( MediaLibraryPtr ml, sqlite::Row& row );
-    Genre( const std::string& name );
+    Genre( MediaLibraryPtr ml, const std::string& name );
     virtual unsigned int id() const;
     virtual const std::string& name() const override;
     virtual std::vector<ArtistPtr> artists() const override;

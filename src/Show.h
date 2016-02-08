@@ -47,7 +47,7 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
 {
     public:
         Show( MediaLibraryPtr ml, sqlite::Row& row );
-        Show( const std::string& name );
+        Show( MediaLibraryPtr ml, const std::string& name );
 
         virtual unsigned int id() const override;
         virtual const std::string& name() const override;

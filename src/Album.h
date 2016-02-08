@@ -52,8 +52,8 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
 {
     public:
         Album( MediaLibraryPtr ml, sqlite::Row& row );
-        Album( const std::string& title );
-        Album( const Artist* artist );
+        Album( MediaLibraryPtr ml, const std::string& title );
+        Album( MediaLibraryPtr ml, const Artist* artist );
 
         virtual unsigned int id() const override;
         virtual const std::string& title() const override;

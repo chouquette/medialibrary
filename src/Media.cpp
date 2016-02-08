@@ -67,8 +67,9 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_isPresent;
 }
 
-Media::Media( const std::string& title, Type type )
-    : m_id( 0 )
+Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
+    : m_ml( ml )
+    , m_id( 0 )
     , m_type( type )
     , m_subType( SubType::Unknown )
     , m_duration( -1 )
@@ -85,13 +86,12 @@ Media::Media( const std::string& title, Type type )
 
 std::shared_ptr<Media> Media::create( MediaLibraryPtr ml, Type type, const fs::IFile& file )
 {
-    auto self = std::make_shared<Media>( file.name(), type );
+    auto self = std::make_shared<Media>( ml, file.name(), type );
     static const std::string req = "INSERT INTO " + policy::MediaTable::Name +
             "(type, insertion_date, title) VALUES(?, ?, ?)";
 
     if ( insert( ml, self, req, type, self->m_insertionDate, self->m_title ) == false )
         return nullptr;
-    self->m_ml = ml;
     return self;
 }
 

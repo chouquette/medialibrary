@@ -52,7 +52,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
 {
     public:
         AlbumTrack( MediaLibraryPtr ml, sqlite::Row& row );
-        AlbumTrack( unsigned int mediaId, unsigned int trackNumber, unsigned int albumId , unsigned int discNumber);
+        AlbumTrack( MediaLibraryPtr ml, unsigned int mediaId, unsigned int trackNumber, unsigned int albumId , unsigned int discNumber);
 
         virtual unsigned int id() const override;
         virtual ArtistPtr artist() const override;

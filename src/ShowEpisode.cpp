@@ -43,8 +43,9 @@ ShowEpisode::ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_showId;
 }
 
-ShowEpisode::ShowEpisode( unsigned int mediaId, const std::string& name, unsigned int episodeNumber, unsigned int showId )
-    : m_id( 0 )
+ShowEpisode::ShowEpisode( MediaLibraryPtr ml, unsigned int mediaId, const std::string& name, unsigned int episodeNumber, unsigned int showId )
+    : m_ml( ml )
+    , m_id( 0 )
     , m_mediaId( mediaId )
     , m_episodeNumber( episodeNumber )
     , m_name( name )
@@ -166,12 +167,11 @@ bool ShowEpisode::createTable( DBConnection dbConnection )
 
 std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml, unsigned int mediaId, const std::string& title, unsigned int episodeNumber, unsigned int showId )
 {
-    auto episode = std::make_shared<ShowEpisode>( mediaId, title, episodeNumber, showId );
+    auto episode = std::make_shared<ShowEpisode>( ml, mediaId, title, episodeNumber, showId );
     static const std::string req = "INSERT INTO " + policy::ShowEpisodeTable::Name
             + "(media_id, episode_number, title, show_id) VALUES(?, ? , ?, ?)";
     if ( insert( ml, episode, req, mediaId, episodeNumber, title, showId ) == false )
         return nullptr;
-    episode->m_ml = ml;
     return episode;
 }
 

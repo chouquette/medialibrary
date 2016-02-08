@@ -53,8 +53,9 @@ Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_isRemovable;
 }
 
-Folder::Folder( const std::string& path, unsigned int parent, unsigned int deviceId, bool isRemovable )
-    : m_id( 0 )
+Folder::Folder(MediaLibraryPtr ml, const std::string& path, unsigned int parent, unsigned int deviceId, bool isRemovable )
+    : m_ml( ml )
+    , m_id( 0 )
     , m_path( path )
     , m_parent( parent )
     , m_isBlacklisted( false )
@@ -97,12 +98,11 @@ std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& f
         path = utils::file::removePath( fullPath, deviceFs.mountpoint() );
     else
         path = fullPath;
-    auto self = std::make_shared<Folder>( path, parentId, device.id(), device.isRemovable() );
+    auto self = std::make_shared<Folder>( ml, path, parentId, device.id(), device.isRemovable() );
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
             "(path, parent_id, device_id, is_removable) VALUES(?, ?, ?, ?)";
     if ( insert( ml, self, req, path, sqlite::ForeignKey( parentId ), device.id(), device.isRemovable() ) == false )
         return nullptr;
-    self->m_ml = ml;
     if ( device.isRemovable() == true )
     {
         self->m_deviceMountpoint = deviceFs.mountpoint();

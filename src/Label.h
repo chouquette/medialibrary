@@ -46,7 +46,7 @@ class Label : public ILabel, public DatabaseHelpers<Label, policy::LabelTable>
 {
     public:
         Label( MediaLibraryPtr ml, sqlite::Row& row );
-        Label( const std::string& name );
+        Label( MediaLibraryPtr ml, const std::string& name );
 
     public:
         virtual unsigned int id() const override;

@@ -82,7 +82,7 @@ void Tests::InstantiateMediaLibrary()
 
 MediaLibraryTester::MediaLibraryTester()
     : dummyDirectory( new mock::NoopDirectory )
-    , dummyFolder( "./", 0, 0, false )
+    , dummyFolder( nullptr, "./", 0, 0, false )
 {
 }
 

@@ -41,10 +41,11 @@ AudioTrack::AudioTrack( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_mediaId;
 }
 
-AudioTrack::AudioTrack( const std::string& codec, unsigned int bitrate , unsigned int sampleRate,
+AudioTrack::AudioTrack( MediaLibraryPtr ml, const std::string& codec, unsigned int bitrate, unsigned int sampleRate,
                         unsigned int nbChannels, const std::string& language, const std::string& desc,
                         unsigned int mediaId )
-    : m_id( 0 )
+    : m_ml( ml )
+    , m_id( 0 )
     , m_codec( codec )
     , m_bitrate( bitrate )
     , m_sampleRate( sampleRate )
@@ -115,9 +116,8 @@ std::shared_ptr<AudioTrack> AudioTrack::create( MediaLibraryPtr ml, const std::s
 {
     static const std::string req = "INSERT INTO " + policy::AudioTrackTable::Name
             + "(codec, bitrate, samplerate, nb_channels, language, description, media_id) VALUES(?, ?, ?, ?, ?, ?, ?)";
-    auto track = std::make_shared<AudioTrack>( codec, bitrate, sampleRate, nbChannels, language, desc, mediaId );
+    auto track = std::make_shared<AudioTrack>( ml, codec, bitrate, sampleRate, nbChannels, language, desc, mediaId );
     if ( insert( ml, track, req, codec, bitrate, sampleRate, nbChannels, language, desc, mediaId ) == false )
         return nullptr;
-    track->m_ml = ml;
     return track;
 }

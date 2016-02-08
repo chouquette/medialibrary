@@ -43,7 +43,7 @@ class Movie : public IMovie, public DatabaseHelpers<Movie, policy::MovieTable>
 {
     public:
         Movie( MediaLibraryPtr ml, sqlite::Row& row );
-        Movie( unsigned int mediaId, const std::string& title );
+        Movie( MediaLibraryPtr ml, unsigned int mediaId, const std::string& title );
 
         virtual unsigned int id() const override;
         virtual const std::string& title() const override;

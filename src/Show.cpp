@@ -43,8 +43,9 @@ Show::Show( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_tvdbId;
 }
 
-Show::Show( const std::string& name )
-    : m_id( 0 )
+Show::Show( MediaLibraryPtr ml, const std::string& name )
+    : m_ml( ml )
+    , m_id( 0 )
     , m_name( name )
     , m_releaseDate( 0 )
 {
@@ -150,11 +151,10 @@ bool Show::createTable( DBConnection dbConnection )
 
 std::shared_ptr<Show> Show::create( MediaLibraryPtr ml, const std::string& name )
 {
-    auto show = std::make_shared<Show>( name );
+    auto show = std::make_shared<Show>( ml, name );
     static const std::string req = "INSERT INTO " + policy::ShowTable::Name
             + "(name) VALUES(?)";
     if ( insert( ml, show, req, name ) == false )
         return nullptr;
-    show->m_ml = ml;
     return show;
 }

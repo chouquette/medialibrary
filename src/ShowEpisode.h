@@ -47,7 +47,7 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, pol
 {
     public:
         ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row );
-        ShowEpisode( unsigned int mediaId, const std::string& name, unsigned int episodeNumber, unsigned int showId );
+        ShowEpisode( MediaLibraryPtr ml, unsigned int mediaId, const std::string& name, unsigned int episodeNumber, unsigned int showId );
 
         virtual unsigned int id() const override;
         virtual const std::string& artworkMrl() const override;

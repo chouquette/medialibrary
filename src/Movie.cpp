@@ -40,8 +40,9 @@ Movie::Movie(MediaLibraryPtr ml, sqlite::Row& row )
         >> m_imdbId;
 }
 
-Movie::Movie( unsigned int mediaId, const std::string& title )
-    : m_id( 0 )
+Movie::Movie( MediaLibraryPtr ml, unsigned int mediaId, const std::string& title )
+    : m_ml( ml )
+    , m_id( 0 )
     , m_mediaId( mediaId )
     , m_title( title )
     , m_releaseDate( 0 )
@@ -144,12 +145,11 @@ bool Movie::createTable( DBConnection dbConnection )
 
 std::shared_ptr<Movie> Movie::create( MediaLibraryPtr ml, unsigned int mediaId, const std::string& title )
 {
-    auto movie = std::make_shared<Movie>( mediaId, title );
+    auto movie = std::make_shared<Movie>( ml, mediaId, title );
     static const std::string req = "INSERT INTO " + policy::MovieTable::Name
             + "(media_id, title) VALUES(?, ?)";
     if ( insert( ml, movie, req, mediaId, title ) == false )
         return nullptr;
-    movie->m_ml = ml;
     return movie;
 }
 

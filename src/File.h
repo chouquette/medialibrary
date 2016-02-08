@@ -45,7 +45,7 @@ class File : public IFile, public DatabaseHelpers<File, policy::FileTable>
 {
 public:
     File( MediaLibraryPtr ml, sqlite::Row& row );
-    File( unsigned int mediaId, Type type, const fs::IFile& file, unsigned int folderId, bool isRemovable );
+    File(MediaLibraryPtr ml, unsigned int mediaId, Type type, const fs::IFile& file, unsigned int folderId, bool isRemovable );
     virtual unsigned int id() const override;
     virtual const std::string& mrl() const override;
     virtual Type type() const override;

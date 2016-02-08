@@ -47,8 +47,9 @@ Album::Album(MediaLibraryPtr ml, sqlite::Row& row)
         >> m_isPresent;
 }
 
-Album::Album(const std::string& title )
-    : m_id( 0 )
+Album::Album( MediaLibraryPtr ml, const std::string& title )
+    : m_ml( ml )
+    , m_id( 0 )
     , m_title( title )
     , m_artistId( 0 )
     , m_releaseYear( ~0u )
@@ -57,8 +58,9 @@ Album::Album(const std::string& title )
 {
 }
 
-Album::Album( const Artist* artist )
-    : m_id( 0 )
+Album::Album( MediaLibraryPtr ml, const Artist* artist )
+    : m_ml( ml )
+    , m_id( 0 )
     , m_artistId( artist->id() )
     , m_releaseYear( ~0u )
     , m_nbTracks( 0 )
@@ -319,23 +321,21 @@ bool Album::createTriggers(DBConnection dbConnection)
 
 std::shared_ptr<Album> Album::create( MediaLibraryPtr ml, const std::string& title )
 {
-    auto album = std::make_shared<Album>( title );
+    auto album = std::make_shared<Album>( ml, title );
     static const std::string req = "INSERT INTO " + policy::AlbumTable::Name +
             "(id_album, title) VALUES(NULL, ?)";
     if ( insert( ml, album, req, title ) == false )
         return nullptr;
-    album->m_ml = ml;
     return album;
 }
 
 std::shared_ptr<Album> Album::createUnknownAlbum( MediaLibraryPtr ml, const Artist* artist )
 {
-    auto album = std::make_shared<Album>( artist );
+    auto album = std::make_shared<Album>( ml, artist );
     static const std::string req = "INSERT INTO " + policy::AlbumTable::Name +
             "(id_album, artist_id) VALUES(NULL, ?)";
     if ( insert( ml, album, req, artist->id() ) == false )
         return nullptr;
-    album->m_ml = ml;
     return album;
 }
 

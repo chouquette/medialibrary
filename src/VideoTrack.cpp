@@ -38,8 +38,9 @@ VideoTrack::VideoTrack( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_mediaId;
 }
 
-VideoTrack::VideoTrack( const std::string& codec, unsigned int width, unsigned int height, float fps, unsigned int mediaId )
-    : m_id( 0 )
+VideoTrack::VideoTrack( MediaLibraryPtr ml, const std::string& codec, unsigned int width, unsigned int height, float fps, unsigned int mediaId )
+    : m_ml( ml )
+    , m_id( 0 )
     , m_codec( codec )
     , m_width( width )
     , m_height( height )
@@ -78,10 +79,9 @@ std::shared_ptr<VideoTrack> VideoTrack::create( MediaLibraryPtr ml, const std::s
 {
     static const std::string req  = "INSERT INTO " + policy::VideoTrackTable::Name
             + "(codec, width, height, fps, media_id) VALUES(?, ?, ?, ?, ?)";
-    auto track = std::make_shared<VideoTrack>( codec, width, height, fps, mediaId );
+    auto track = std::make_shared<VideoTrack>( ml, codec, width, height, fps, mediaId );
     if ( insert( ml, track, req, codec, width, height, fps, mediaId ) == false )
         return nullptr;
-    track->m_ml = ml;
     return track;
 }
 

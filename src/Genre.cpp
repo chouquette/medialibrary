@@ -40,8 +40,9 @@ Genre::Genre( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_name;
 }
 
-Genre::Genre( const std::string& name )
-    : m_name( name )
+Genre::Genre( MediaLibraryPtr ml, const std::string& name )
+    : m_ml( ml )
+    , m_name( name )
 {
 }
 
@@ -108,10 +109,9 @@ std::shared_ptr<Genre> Genre::create( MediaLibraryPtr ml, const std::string& nam
 {
     static const std::string req = "INSERT INTO " + policy::GenreTable::Name + "(name)"
             "VALUES(?)";
-    auto self = std::make_shared<Genre>( name );
+    auto self = std::make_shared<Genre>( ml, name );
     if ( insert( ml, self, req, name ) == false )
         return nullptr;
-    self->m_ml = ml;
     return self;
 }
 

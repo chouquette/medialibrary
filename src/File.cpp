@@ -43,8 +43,9 @@ File::File( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_isRemovable;
 }
 
-File::File( unsigned int mediaId, Type type, const fs::IFile& file, unsigned int folderId, bool isRemovable )
-    : m_id( 0 )
+File::File( MediaLibraryPtr ml, unsigned int mediaId, Type type, const fs::IFile& file, unsigned int folderId, bool isRemovable )
+    : m_ml( ml )
+    , m_id( 0 )
     , m_mediaId( mediaId )
     , m_mrl( isRemovable == true ? file.name() : file.fullPath() )
     , m_type( type )
@@ -148,14 +149,13 @@ bool File::createTable( DBConnection dbConnection )
 
 std::shared_ptr<File> File::create( MediaLibraryPtr ml, unsigned int mediaId, Type type, const fs::IFile& fileFs, unsigned int folderId, bool isRemovable )
 {
-    auto self = std::make_shared<File>( mediaId, type, fileFs, folderId, isRemovable );
+    auto self = std::make_shared<File>( ml, mediaId, type, fileFs, folderId, isRemovable );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
             "(media_id, mrl, type, folder_id, last_modification_date, is_removable) VALUES(?, ?, ?, ?, ?, ?)";
 
     if ( insert( ml, self, req, mediaId, self->m_mrl, type, sqlite::ForeignKey( folderId ),
                          self->m_lastModificationDate, isRemovable ) == false )
         return nullptr;
-    self->m_ml = ml;
     self->m_fullPath = fileFs.fullPath();
     return self;
 }

@@ -26,7 +26,7 @@ const std::string policy::DeviceTable::Name = "Device";
 const std::string policy::DeviceTable::PrimaryKeyColumn = "id_device";
 unsigned int Device::* const policy::DeviceTable::PrimaryKey = &Device::m_id;
 
-Device::Device(MediaLibraryPtr ml, sqlite::Row& row )
+Device::Device( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
 {
     row >> m_id
@@ -37,8 +37,9 @@ Device::Device(MediaLibraryPtr ml, sqlite::Row& row )
     //only be here for sqlite triggering purposes
 }
 
-Device::Device( const std::string& uuid, bool isRemovable )
-    : m_uuid( uuid )
+Device::Device( MediaLibraryPtr ml, const std::string& uuid, bool isRemovable )
+    : m_ml( ml )
+    , m_uuid( uuid )
     , m_isRemovable( isRemovable )
     // Assume we can't add an absent device
     , m_isPresent( true )
@@ -78,10 +79,9 @@ std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& u
 {
     static const std::string req = "INSERT INTO " + policy::DeviceTable::Name
             + "(uuid, is_removable, is_present) VALUES(?, ?, ?)";
-    auto self = std::make_shared<Device>( uuid, isRemovable );
+    auto self = std::make_shared<Device>( ml, uuid, isRemovable );
     if ( insert( ml, self, req, uuid, isRemovable, self->isPresent() ) == false )
         return nullptr;
-    self->m_ml = ml;
     return self;
 }
 

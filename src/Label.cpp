@@ -39,8 +39,9 @@ Label::Label(MediaLibraryPtr ml, sqlite::Row& row )
         >> m_name;
 }
 
-Label::Label( const std::string& name )
-    : m_id( 0 )
+Label::Label( MediaLibraryPtr ml, const std::string& name )
+    : m_ml( ml )
+    , m_id( 0 )
     , m_name( name )
 {
 }
@@ -65,11 +66,10 @@ std::vector<MediaPtr> Label::files()
 
 LabelPtr Label::create( MediaLibraryPtr ml, const std::string& name )
 {
-    auto self = std::make_shared<Label>( name );
+    auto self = std::make_shared<Label>( ml, name );
     const char* req = "INSERT INTO Label VALUES(NULL, ?)";
     if ( insert( ml, self, req, self->m_name ) == false )
         return nullptr;
-    self->m_ml = ml;
     return self;
 }
 

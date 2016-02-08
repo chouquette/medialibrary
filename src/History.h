@@ -45,7 +45,7 @@ struct HistoryTable
 class History : public IHistoryEntry, public DatabaseHelpers<History, policy::HistoryTable>
 {
 public:
-    History(MediaLibraryPtr ml, sqlite::Row& row );
+    History( MediaLibraryPtr ml, sqlite::Row& row );
     static bool createTable( DBConnection dbConnection );
     static bool insert( DBConnection dbConn, const std::string& mrl );
     static std::vector<std::shared_ptr<IHistoryEntry>> fetch( MediaLibraryPtr ml );

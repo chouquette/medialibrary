@@ -44,8 +44,9 @@ Artist::Artist( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_isPresent;
 }
 
-Artist::Artist( const std::string& name )
-    : m_id( 0 )
+Artist::Artist( MediaLibraryPtr ml, const std::string& name )
+    : m_ml( ml )
+    , m_id( 0 )
     , m_name( name )
     , m_nbAlbums( 0 )
     , m_isPresent( true )
@@ -238,12 +239,11 @@ bool Artist::createDefaultArtists( DBConnection dbConnection )
 
 std::shared_ptr<Artist> Artist::create( MediaLibraryPtr ml, const std::string &name )
 {
-    auto artist = std::make_shared<Artist>( name );
+    auto artist = std::make_shared<Artist>( ml, name );
     static const std::string req = "INSERT INTO " + policy::ArtistTable::Name +
             "(id_artist, name) VALUES(NULL, ?)";
     if ( insert( ml, artist, req, name ) == false )
         return nullptr;
-    artist->m_ml = ml;
     return artist;
 }
 

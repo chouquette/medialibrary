@@ -44,7 +44,8 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy
 {
     public:
         VideoTrack( MediaLibraryPtr ml, sqlite::Row& row );
-        VideoTrack( const std::string& codec, unsigned int width, unsigned int height, float fps, unsigned int mediaId );
+        VideoTrack( MediaLibraryPtr ml, const std::string& codec,
+                    unsigned int width, unsigned int height, float fps, unsigned int mediaId );
 
         virtual unsigned int id() const override;
         virtual const std::string& codec() const override;

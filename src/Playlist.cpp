@@ -31,26 +31,26 @@ const std::string PlaylistTable::PrimaryKeyColumn = "id_playlist";
 unsigned int Playlist::* const PlaylistTable::PrimaryKey = &Playlist::m_id;
 }
 
-Playlist::Playlist(MediaLibraryPtr ml, sqlite::Row& row )
+Playlist::Playlist( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
 {
     row >> m_id
-            >> m_name;
+        >> m_name;
 }
 
-Playlist::Playlist( const std::string& name )
-    : m_id( 0 )
+Playlist::Playlist( MediaLibraryPtr ml, const std::string& name )
+    : m_ml( ml )
+    , m_id( 0 )
     , m_name( name )
 {
 }
 
 std::shared_ptr<Playlist> Playlist::create( MediaLibraryPtr ml, const std::string& name )
 {
-    auto self = std::make_shared<Playlist>( name );
+    auto self = std::make_shared<Playlist>( ml, name );
     static const std::string req = "INSERT INTO " + policy::PlaylistTable::Name + "(name) VALUES(?)";
     if ( insert( ml, self, req, name ) == false )
         return nullptr;
-    self->m_ml = ml;
     return self;
 }
 

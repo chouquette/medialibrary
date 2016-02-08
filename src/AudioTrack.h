@@ -43,7 +43,7 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack, policy
 {
     public:
         AudioTrack(MediaLibraryPtr ml, sqlite::Row& row );
-        AudioTrack(const std::string& codec, unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels, const std::string& language, const std::string& desc , unsigned int mediaId);
+        AudioTrack( MediaLibraryPtr ml, const std::string& codec, unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels, const std::string& language, const std::string& desc , unsigned int mediaId);
 
         virtual unsigned int id() const override;
         virtual const std::string&codec() const override;
@@ -59,7 +59,7 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack, policy
                                                    const std::string& language, const std::string& desc, unsigned int mediaId );
 
     private:
-        MediaLibraryPtr  m_ml;
+        MediaLibraryPtr m_ml;
         unsigned int m_id;
         std::string m_codec;
         unsigned int m_bitrate;

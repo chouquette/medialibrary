@@ -40,7 +40,7 @@ struct DeviceTable
 class Device : public DatabaseHelpers<Device, policy::DeviceTable>
 {
 public:
-    Device( const std::string& uuid, bool isRemovable );
+    Device( MediaLibraryPtr ml, const std::string& uuid, bool isRemovable );
     Device( MediaLibraryPtr ml, sqlite::Row& row );
     unsigned int id() const;
     const std::string& uuid() const;

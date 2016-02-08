@@ -43,8 +43,8 @@ struct ArtistTable
 class Artist : public IArtist, public DatabaseHelpers<Artist, policy::ArtistTable>
 {
 public:
-    Artist(MediaLibraryPtr ml, sqlite::Row& row );
-    Artist( const std::string& name );
+    Artist( MediaLibraryPtr ml, sqlite::Row& row );
+    Artist( MediaLibraryPtr ml, const std::string& name );
 
     virtual unsigned int id() const override;
     virtual const std::string &name() const override;
