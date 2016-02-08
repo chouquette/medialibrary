@@ -31,8 +31,8 @@ const std::string PlaylistTable::PrimaryKeyColumn = "id_playlist";
 unsigned int Playlist::* const PlaylistTable::PrimaryKey = &Playlist::m_id;
 }
 
-Playlist::Playlist( DBConnection dbConn, sqlite::Row& row )
-    : m_dbConnection( dbConn )
+Playlist::Playlist(MediaLibraryPtr ml, sqlite::Row& row )
+    : m_ml( ml )
 {
     row >> m_id
             >> m_name;
@@ -44,13 +44,13 @@ Playlist::Playlist( const std::string& name )
 {
 }
 
-std::shared_ptr<Playlist> Playlist::create( DBConnection dbConn, const std::string& name )
+std::shared_ptr<Playlist> Playlist::create( MediaLibraryPtr ml, const std::string& name )
 {
     auto self = std::make_shared<Playlist>( name );
     static const std::string req = "INSERT INTO " + policy::PlaylistTable::Name + "(name) VALUES(?)";
-    if ( insert( dbConn, self, req, name ) == false )
+    if ( insert( ml, self, req, name ) == false )
         return nullptr;
-    self->m_dbConnection = dbConn;
+    self->m_ml = ml;
     return self;
 }
 
@@ -69,7 +69,7 @@ bool Playlist::setName( const std::string& name )
     if ( name == m_name )
         return true;
     static const std::string req = "UPDATE " + policy::PlaylistTable::Name + " SET name = ? WHERE id_playlist = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, name, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, name, m_id ) == false )
         return false;
     m_name = name;
     return true;
@@ -81,7 +81,7 @@ std::vector<MediaPtr> Playlist::media() const
             "LEFT JOIN PlaylistMediaRelation pmr ON pmr.media_id = m.id_media "
             "WHERE pmr.playlist_id = ? AND m.is_present = 1 "
             "ORDER BY pmr.position";
-    return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
+    return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
 
 bool Playlist::append( unsigned int mediaId )
@@ -94,7 +94,7 @@ bool Playlist::add( unsigned int mediaId, unsigned int position )
     static const std::string req = "INSERT INTO PlaylistMediaRelation(media_id, playlist_id, position) VALUES(?, ?, ?)";
     // position isn't a foreign key, but we want it to be passed as NULL if it equals to 0
     // When the position is NULL, the insertion triggers takes care of counting the number of records to auto append.
-    return sqlite::Tools::insert( m_dbConnection, req, mediaId, m_id, sqlite::ForeignKey{ position } );
+    return sqlite::Tools::insert( m_ml->getConn(), req, mediaId, m_id, sqlite::ForeignKey{ position } );
 }
 
 bool Playlist::move( unsigned int mediaId, unsigned int position )
@@ -103,13 +103,13 @@ bool Playlist::move( unsigned int mediaId, unsigned int position )
         return false;
     static const std::string req = "UPDATE PlaylistMediaRelation SET position = ? WHERE "
             "playlist_id = ? AND media_id = ?";
-    return sqlite::Tools::executeUpdate( m_dbConnection, req, position, m_id, mediaId );
+    return sqlite::Tools::executeUpdate( m_ml->getConn(), req, position, m_id, mediaId );
 }
 
 bool Playlist::remove( unsigned int mediaId )
 {
     static const std::string req = "DELETE FROM PlaylistMediaRelation WHERE playlist_id = ? AND media_id = ?";
-    return sqlite::Tools::executeDelete( m_dbConnection, req, m_id, mediaId );
+    return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, mediaId );
 }
 
 bool Playlist::createTable( DBConnection dbConn )
@@ -189,9 +189,9 @@ bool Playlist::createTriggers( DBConnection dbConn )
             sqlite::Tools::executeRequest( dbConn, vtriggerDelete );
 }
 
-std::vector<PlaylistPtr> Playlist::search( DBConnection dbConnection, const std::string& name )
+std::vector<PlaylistPtr> Playlist::search( MediaLibraryPtr ml, const std::string& name )
 {
     static const std::string req = "SELECT * FROM " + policy::PlaylistTable::Name + " WHERE id_playlist IN "
             "(SELECT rowid FROM " + policy::PlaylistTable::Name + "Fts WHERE name MATCH ?)";
-    return fetchAll<IPlaylist>( dbConnection, req, name + "*" );
+    return fetchAll<IPlaylist>( ml, req, name + "*" );
 }

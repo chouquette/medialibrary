@@ -38,6 +38,7 @@
 #include "database/SqliteTraits.h"
 #include "database/SqliteTransaction.h"
 #include "logging/Logger.h"
+#include "MediaLibrary.h"
 
 namespace sqlite
 {
@@ -200,8 +201,9 @@ class Tools
          *                  be discarded.
          */
         template <typename IMPL, typename INTF, typename... Args>
-        static std::vector<std::shared_ptr<INTF> > fetchAll( DBConnection dbConnection, const std::string& req, Args&&... args )
+        static std::vector<std::shared_ptr<INTF> > fetchAll( MediaLibraryPtr ml, const std::string& req, Args&&... args )
         {
+            auto dbConnection = ml->getConn();
             SqliteConnection::ReadContext ctx;
             if (Transaction::transactionInProgress() == false)
                 ctx = dbConnection->acquireReadContext();
@@ -213,7 +215,7 @@ class Tools
             Row sqliteRow;
             while ( ( sqliteRow = stmt.row() ) != nullptr )
             {
-                auto row = IMPL::load( dbConnection, sqliteRow );
+                auto row = IMPL::load( ml, sqliteRow );
                 results.push_back( row );
             }
             auto duration = std::chrono::steady_clock::now() - chrono;
@@ -223,8 +225,9 @@ class Tools
         }
 
         template <typename T, typename... Args>
-        static std::shared_ptr<T> fetchOne( DBConnection dbConnection, const std::string& req, Args&&... args )
+        static std::shared_ptr<T> fetchOne( MediaLibraryPtr ml, const std::string& req, Args&&... args )
         {
+            auto dbConnection = ml->getConn();
             SqliteConnection::ReadContext ctx;
             if (Transaction::transactionInProgress() == false)
                 ctx = dbConnection->acquireReadContext();
@@ -235,7 +238,7 @@ class Tools
             auto row = stmt.row();
             if ( row == nullptr )
                 return nullptr;
-            auto res = T::load( dbConnection, row );
+            auto res = T::load( ml, row );
             auto duration = std::chrono::steady_clock::now() - chrono;
             LOG_DEBUG("Executed ", req, " in ",
                      std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
@@ -263,10 +266,10 @@ class Tools
         }
 
         template <typename... Args>
-        static bool executeUpdate( DBConnection dbConnectionWeak, const std::string& req, Args&&... args )
+        static bool executeUpdate( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
             // The code would be exactly the same, do not freak out because it calls executeDelete :)
-            return executeDelete( dbConnectionWeak, req, std::forward<Args>( args )... );
+            return executeDelete( dbConnection, req, std::forward<Args>( args )... );
         }
 
         /**

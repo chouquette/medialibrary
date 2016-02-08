@@ -42,7 +42,7 @@ struct MovieTable
 class Movie : public IMovie, public DatabaseHelpers<Movie, policy::MovieTable>
 {
     public:
-        Movie( DBConnection dbConnection, sqlite::Row& row );
+        Movie( MediaLibraryPtr ml, sqlite::Row& row );
         Movie( unsigned int mediaId, const std::string& title );
 
         virtual unsigned int id() const override;
@@ -58,11 +58,11 @@ class Movie : public IMovie, public DatabaseHelpers<Movie, policy::MovieTable>
         virtual std::vector<MediaPtr> files() override;
 
         static bool createTable( DBConnection dbConnection );
-        static std::shared_ptr<Movie> create( DBConnection dbConnection, unsigned int mediaId, const std::string& title );
-        static MoviePtr fromMedia( DBConnection dbConnection, unsigned int mediaId );
+        static std::shared_ptr<Movie> create( MediaLibraryPtr ml, unsigned int mediaId, const std::string& title );
+        static MoviePtr fromMedia( MediaLibraryPtr ml, unsigned int mediaId );
 
     private:
-        DBConnection m_dbConnection;
+        MediaLibraryPtr m_ml;
         unsigned int m_id;
         unsigned int m_mediaId;
         std::string m_title;

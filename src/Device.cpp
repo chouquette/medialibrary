@@ -26,8 +26,8 @@ const std::string policy::DeviceTable::Name = "Device";
 const std::string policy::DeviceTable::PrimaryKeyColumn = "id_device";
 unsigned int Device::* const policy::DeviceTable::PrimaryKey = &Device::m_id;
 
-Device::Device( DBConnection dbConnection, sqlite::Row& row )
-    : m_dbConn( dbConnection )
+Device::Device(MediaLibraryPtr ml, sqlite::Row& row )
+    : m_ml( ml )
 {
     row >> m_id
         >> m_uuid
@@ -69,19 +69,19 @@ void Device::setPresent(bool value)
 {
     static const std::string req = "UPDATE " + policy::DeviceTable::Name +
             " SET is_present = ? WHERE id_device = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConn, req, value, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, value, m_id ) == false )
         return;
     m_isPresent = value;
 }
 
-std::shared_ptr<Device> Device::create( DBConnection dbConnection, const std::string& uuid, bool isRemovable )
+std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& uuid, bool isRemovable )
 {
     static const std::string req = "INSERT INTO " + policy::DeviceTable::Name
             + "(uuid, is_removable, is_present) VALUES(?, ?, ?)";
     auto self = std::make_shared<Device>( uuid, isRemovable );
-    if ( insert( dbConnection, self, req, uuid, isRemovable, self->isPresent() ) == false )
+    if ( insert( ml, self, req, uuid, isRemovable, self->isPresent() ) == false )
         return nullptr;
-    self->m_dbConn = dbConnection;
+    self->m_ml = ml;
     return self;
 }
 
@@ -96,10 +96,10 @@ bool Device::createTable(DBConnection connection)
     return sqlite::Tools::executeRequest( connection, req );
 }
 
-std::shared_ptr<Device> Device::fromUuid( DBConnection dbConnection, const std::string& uuid )
+std::shared_ptr<Device> Device::fromUuid( MediaLibraryPtr ml, const std::string& uuid )
 {
     static const std::string req = "SELECT * FROM " + policy::DeviceTable::Name +
             " WHERE uuid = ?";
-    return fetch( dbConnection, req, uuid );
+    return fetch( ml, req, uuid );
 }
 

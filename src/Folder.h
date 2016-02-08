@@ -54,13 +54,13 @@ struct FolderTable
 class Folder : public DatabaseHelpers<Folder, policy::FolderTable>
 {
 public:
-    Folder( DBConnection dbConnection, sqlite::Row& row );
+    Folder(MediaLibraryPtr ml, sqlite::Row& row );
     Folder( const std::string& path, unsigned int parent , unsigned int deviceId , bool isRemovable );
 
     static bool createTable( DBConnection connection );
-    static std::shared_ptr<Folder> create( DBConnection connection, const std::string& path, unsigned int parentId, Device& device, fs::IDevice& deviceFs );
-    static bool blacklist(DBConnection connection, const std::string& fullPath );
-    static std::vector<std::shared_ptr<Folder>> fetchAll( DBConnection dbConn, unsigned int parentFolderId );
+    static std::shared_ptr<Folder> create( MediaLibraryPtr ml, const std::string& path, unsigned int parentId, Device& device, fs::IDevice& deviceFs );
+    static bool blacklist( MediaLibraryPtr ml, const std::string& fullPath );
+    static std::vector<std::shared_ptr<Folder>> fetchAll(MediaLibraryPtr ml, unsigned int parentFolderId );
     ///
     /// \brief setFileSystemFactory Sets a file system factory to be used when building IDevices
     /// This is assumed to be called once, before any discovery/reloading process is launched.
@@ -68,8 +68,8 @@ public:
     ///
     static void setFileSystemFactory( std::shared_ptr<factory::IFileSystem> fsFactory );
 
-    static std::shared_ptr<Folder> fromPath( DBConnection conn, const std::string& fullPath );
-    static std::shared_ptr<Folder> blacklistedFolder( DBConnection conn, const std::string& fullPath );
+    static std::shared_ptr<Folder> fromPath(MediaLibraryPtr ml, const std::string& fullPath );
+    static std::shared_ptr<Folder> blacklistedFolder(MediaLibraryPtr ml, const std::string& fullPath );
 
     unsigned int id() const;
     const std::string& path() const;
@@ -81,10 +81,10 @@ public:
 
 private:
     static std::shared_ptr<factory::IFileSystem> FsFactory;
-    static std::shared_ptr<Folder> fromPath( DBConnection conn, const std::string& fullPath, bool includeBlacklisted );
+    static std::shared_ptr<Folder> fromPath( MediaLibraryPtr ml, const std::string& fullPath, bool includeBlacklisted );
 
 private:
-    DBConnection m_dbConection;
+    MediaLibraryPtr m_ml;
 
     unsigned int m_id;
     // This contains the path relative to the device mountpoint (ie. excluding it)

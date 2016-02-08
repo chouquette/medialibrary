@@ -32,8 +32,8 @@ const std::string policy::LabelTable::Name = "Label";
 const std::string policy::LabelTable::PrimaryKeyColumn = "id_label";
 unsigned int Label::* const policy::LabelTable::PrimaryKey = &Label::m_id;
 
-Label::Label( DBConnection dbConnection, sqlite::Row& row )
-    : m_dbConnection( dbConnection )
+Label::Label(MediaLibraryPtr ml, sqlite::Row& row )
+    : m_ml( ml )
 {
     row >> m_id
         >> m_name;
@@ -60,20 +60,20 @@ std::vector<MediaPtr> Label::files()
     static const std::string req = "SELECT f.* FROM " + policy::MediaTable::Name + " f "
             "INNER JOIN LabelFileRelation lfr ON lfr.media_id = f.id_media "
             "WHERE lfr.label_id = ?";
-    return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
+    return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
 
-LabelPtr Label::create(DBConnection dbConnection, const std::string& name )
+LabelPtr Label::create( MediaLibraryPtr ml, const std::string& name )
 {
     auto self = std::make_shared<Label>( name );
     const char* req = "INSERT INTO Label VALUES(NULL, ?)";
-    if ( insert( dbConnection, self, req, self->m_name ) == false )
+    if ( insert( ml, self, req, self->m_name ) == false )
         return nullptr;
-    self->m_dbConnection = dbConnection;
+    self->m_ml = ml;
     return self;
 }
 
-bool Label::createTable(DBConnection dbConnection)
+bool Label::createTable( DBConnection dbConnection )
 {
     static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::LabelTable::Name + "("
                 "id_label INTEGER PRIMARY KEY AUTOINCREMENT, "

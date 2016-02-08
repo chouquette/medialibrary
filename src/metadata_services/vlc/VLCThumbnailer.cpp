@@ -45,7 +45,6 @@
 
 VLCThumbnailer::VLCThumbnailer()
     : m_instance( VLCInstance::get() )
-    , m_ml( nullptr )
 #ifdef WITH_EVAS
     , m_canvas( nullptr, &evas_free )
 #endif
@@ -88,7 +87,6 @@ VLCThumbnailer::~VLCThumbnailer()
 
 bool VLCThumbnailer::initialize()
 {
-    m_ml = mediaLibrary();
     return true;
 }
 

@@ -32,8 +32,8 @@ const std::string policy::AlbumTrackTable::Name = "AlbumTrack";
 const std::string policy::AlbumTrackTable::PrimaryKeyColumn = "id_track";
 unsigned int AlbumTrack::* const policy::AlbumTrackTable::PrimaryKey = &AlbumTrack::m_id;
 
-AlbumTrack::AlbumTrack( DBConnection dbConnection, sqlite::Row& row )
-    : m_dbConnection( dbConnection )
+AlbumTrack::AlbumTrack( MediaLibraryPtr ml, sqlite::Row& row )
+    : m_ml( ml )
 {
     row >> m_id
         >> m_mediaId
@@ -69,7 +69,7 @@ ArtistPtr AlbumTrack::artist() const
     auto lock = m_artist.lock();
     if ( m_artist.isCached() == false )
     {
-        m_artist = Artist::fetch( m_dbConnection, m_artistId );
+        m_artist = Artist::fetch( m_ml, m_artistId );
     }
     return m_artist.get();
 }
@@ -80,7 +80,7 @@ bool AlbumTrack::setArtist( std::shared_ptr<Artist> artist )
             " SET artist_id = ? WHERE id_track = ?";
     if ( artist->id() == m_artistId )
         return true;
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artist->id(), m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, artist->id(), m_id ) == false )
         return false;
     m_artistId = artist->id();
     m_artist = artist;
@@ -117,29 +117,29 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
             sqlite::Tools::executeRequest( dbConnection, triggerReq );
 }
 
-std::shared_ptr<AlbumTrack> AlbumTrack::create( DBConnection dbConnection, unsigned int albumId, const Media& media, unsigned int trackNb, unsigned int discNumber )
+std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, unsigned int albumId, const Media& media, unsigned int trackNb, unsigned int discNumber )
 {
     auto self = std::make_shared<AlbumTrack>( media.id(), trackNb, albumId, discNumber );
     static const std::string req = "INSERT INTO " + policy::AlbumTrackTable::Name
             + "(media_id, track_number, album_id, disc_number) VALUES(?, ?, ?, ?)";
-    if ( insert( dbConnection, self, req, media.id(), trackNb, albumId, discNumber ) == false )
+    if ( insert( ml, self, req, media.id(), trackNb, albumId, discNumber ) == false )
         return nullptr;
-    self->m_dbConnection = dbConnection;
+    self->m_ml = ml;
     return self;
 }
 
-AlbumTrackPtr AlbumTrack::fromMedia( DBConnection dbConnection, unsigned int mediaId )
+AlbumTrackPtr AlbumTrack::fromMedia( MediaLibraryPtr ml, unsigned int mediaId )
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTrackTable::Name +
             " WHERE media_id = ?";
-    return fetch( dbConnection, req, mediaId );
+    return fetch( ml, req, mediaId );
 }
 
-std::vector<AlbumTrackPtr> AlbumTrack::fromGenre( DBConnection dbConn, unsigned int genreId )
+std::vector<AlbumTrackPtr> AlbumTrack::fromGenre( MediaLibraryPtr ml, unsigned int genreId )
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTrackTable::Name +
             " WHERE genre_id = ?";
-    return fetchAll<IAlbumTrack>( dbConn, req, genreId );
+    return fetchAll<IAlbumTrack>( ml, req, genreId );
 }
 
 GenrePtr AlbumTrack::genre()
@@ -147,7 +147,7 @@ GenrePtr AlbumTrack::genre()
     auto l = m_genre.lock();
     if ( m_genre.isCached() == false )
     {
-        m_genre = Genre::fetch( m_dbConnection, m_genreId );
+        m_genre = Genre::fetch( m_ml, m_genreId );
     }
     return m_genre.get();
 }
@@ -156,7 +156,7 @@ bool AlbumTrack::setGenre( std::shared_ptr<Genre> genre )
 {
     static const std::string req = "UPDATE " + policy::AlbumTrackTable::Name
             + " SET genre_id = ? WHERE id_track = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req,
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req,
                                        sqlite::ForeignKey( genre != nullptr ? genre->id() : 0 ),
                                        m_id ) == false )
         return false;
@@ -182,7 +182,7 @@ bool AlbumTrack::setReleaseYear(unsigned int year)
         return true;
     static const std::string req = "UPDATE " + policy::AlbumTrackTable::Name +
             " SET release_year = ? WHERE id_track = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, year, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, year, m_id ) == false )
         return false;
     m_releaseYear = year;
     return true;
@@ -198,7 +198,7 @@ std::shared_ptr<IAlbum> AlbumTrack::album()
     auto album = m_album.lock();
     if ( album == nullptr && m_albumId != 0 )
     {
-        album = Album::fetch( m_dbConnection, m_albumId );
+        album = Album::fetch( m_ml, m_albumId );
         m_album = album;
     }
     return album;

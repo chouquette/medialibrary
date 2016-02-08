@@ -30,16 +30,9 @@
 #include "Show.h"
 #include "utils/Filename.h"
 
-MetadataParser::MetadataParser( DBConnection dbConnection, IMediaLibraryCb* cb )
-    : m_dbConn( dbConnection )
-    , m_cb( cb )
-{
-}
-
 bool MetadataParser::initialize()
 {
-    m_ml = mediaLibrary();
-    m_unknownArtist = Artist::fetch( m_dbConn, medialibrary::UnknownArtistID );
+    m_unknownArtist = Artist::fetch( m_ml, medialibrary::UnknownArtistID );
     if ( m_unknownArtist == nullptr )
         LOG_ERROR( "Failed to cache unknown artist" );
     return m_unknownArtist != nullptr;
@@ -49,7 +42,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
 {
     auto& media = task.media;
 
-    auto t = m_dbConn->newTransaction();
+    auto t = m_ml->getConn()->newTransaction();
     bool isAudio = task.videoTracks.empty();
     for ( const auto& t : task.videoTracks )
     {
@@ -126,7 +119,7 @@ bool MetadataParser::parseAudioFile( parser::Task& task ) const
         LOG_WARN( "Failed to get/create associated album" );
         return false;
     }
-    auto t = m_dbConn->newTransaction();
+    auto t = m_ml->getConn()->newTransaction();
     auto res = link( *task.media, album, artists.first, artists.second );
     t->commit();
     return res;
@@ -137,7 +130,7 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, Artist* al
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
             " WHERE title = ?";
-    auto albums = Album::fetchAll<Album>( m_dbConn, req, task.albumName );
+    auto albums = Album::fetchAll<Album>( m_ml, req, task.albumName );
 
     if ( albums.size() == 0 )
         return nullptr;
@@ -341,10 +334,10 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
 
     if ( task.genre.length() != 0 )
     {
-        auto genre = Genre::fromName( m_dbConn, task.genre );
+        auto genre = Genre::fromName( m_ml, task.genre );
         if ( genre == nullptr )
         {
-            genre = Genre::create( m_dbConn, task.genre );
+            genre = Genre::create( m_ml, task.genre );
             if ( genre == nullptr )
             {
                 LOG_ERROR( "Failed to create a genre in database" );
@@ -411,7 +404,7 @@ bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
         if ( albumArtist->id() != currentAlbumArtist->id() )
         {
             // We have more than a single artist on this album, fallback to various artists
-            auto variousArtists = Artist::fetch( m_dbConn, medialibrary::VariousArtistID );
+            auto variousArtists = Artist::fetch( m_ml, medialibrary::VariousArtistID );
             album->setAlbumArtist( variousArtists.get() );
             // Add those two artists as "featuring".
             album->addArtist( albumArtist );

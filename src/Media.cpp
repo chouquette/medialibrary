@@ -48,8 +48,8 @@ const std::string policy::MediaTable::Name = "Media";
 const std::string policy::MediaTable::PrimaryKeyColumn = "id_media";
 unsigned int Media::* const policy::MediaTable::PrimaryKey = &Media::m_id;
 
-Media::Media( DBConnection dbConnection, sqlite::Row& row )
-    : m_dbConnection( dbConnection )
+Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
+    : m_ml( ml )
     , m_changed( false )
 {
     row >> m_id
@@ -83,15 +83,15 @@ Media::Media( const std::string& title, Type type )
 {
 }
 
-std::shared_ptr<Media> Media::create( DBConnection dbConnection, Type type, const fs::IFile& file )
+std::shared_ptr<Media> Media::create( MediaLibraryPtr ml, Type type, const fs::IFile& file )
 {
     auto self = std::make_shared<Media>( file.name(), type );
     static const std::string req = "INSERT INTO " + policy::MediaTable::Name +
             "(type, insertion_date, title) VALUES(?, ?, ?)";
 
-    if ( insert( dbConnection, self, req, type, self->m_insertionDate, self->m_title ) == false )
+    if ( insert( ml, self, req, type, self->m_insertionDate, self->m_title ) == false )
         return nullptr;
-    self->m_dbConnection = dbConnection;
+    self->m_ml = ml;
     return self;
 }
 
@@ -102,7 +102,7 @@ AlbumTrackPtr Media::albumTrack() const
     auto lock = m_albumTrack.lock();
 
     if ( m_albumTrack.isCached() == false )
-        m_albumTrack = AlbumTrack::fromMedia( m_dbConnection, m_id );
+        m_albumTrack = AlbumTrack::fromMedia( m_ml, m_id );
     return m_albumTrack.get();
 }
 
@@ -134,7 +134,7 @@ ShowEpisodePtr Media::showEpisode() const
 
     auto lock = m_showEpisode.lock();
     if ( m_showEpisode.isCached() == false )
-        m_showEpisode = ShowEpisode::fromMedia( m_dbConnection, m_id );
+        m_showEpisode = ShowEpisode::fromMedia( m_ml, m_id );
     return m_showEpisode.get();
 }
 
@@ -151,7 +151,7 @@ std::vector<LabelPtr> Media::labels()
     static const std::string req = "SELECT l.* FROM " + policy::LabelTable::Name + " l "
             "INNER JOIN LabelFileRelation lfr ON lfr.label_id = l.id_label "
             "WHERE lfr.media_id = ?";
-    return Label::fetchAll<ILabel>( m_dbConnection, req, m_id );
+    return Label::fetchAll<ILabel>( m_ml, req, m_id );
 }
 
 int Media::playCount() const
@@ -212,7 +212,7 @@ const std::vector<FilePtr>& Media::files() const
     {
         static const std::string req = "SELECT * FROM " + policy::FileTable::Name
                 + " WHERE media_id = ?";
-        m_files = File::fetchAll<IFile>( m_dbConnection, req, m_id );
+        m_files = File::fetchAll<IFile>( m_ml, req, m_id );
     }
     return m_files;
 }
@@ -225,7 +225,7 @@ MoviePtr Media::movie() const
     auto lock = m_movie.lock();
 
     if ( m_movie.isCached() == false )
-        m_movie = Movie::fromMedia( m_dbConnection, m_id );
+        m_movie = Movie::fromMedia( m_ml, m_id );
     return m_movie.get();
 }
 
@@ -239,28 +239,28 @@ void Media::setMovie(MoviePtr movie)
 
 bool Media::addVideoTrack(const std::string& codec, unsigned int width, unsigned int height, float fps)
 {
-    return VideoTrack::create( m_dbConnection, codec, width, height, fps, m_id ) != nullptr;
+    return VideoTrack::create( m_ml, codec, width, height, fps, m_id ) != nullptr;
 }
 
 std::vector<VideoTrackPtr> Media::videoTracks()
 {
     static const std::string req = "SELECT * FROM " + policy::VideoTrackTable::Name +
             " WHERE media_id = ?";
-    return VideoTrack::fetchAll<IVideoTrack>( m_dbConnection, req, m_id );
+    return VideoTrack::fetchAll<IVideoTrack>( m_ml, req, m_id );
 }
 
 bool Media::addAudioTrack( const std::string& codec, unsigned int bitrate,
                           unsigned int sampleRate, unsigned int nbChannels,
                           const std::string& language, const std::string& desc )
 {
-    return AudioTrack::create( m_dbConnection, codec, bitrate, sampleRate, nbChannels, language, desc, m_id ) != nullptr;
+    return AudioTrack::create( m_ml, codec, bitrate, sampleRate, nbChannels, language, desc, m_id ) != nullptr;
 }
 
 std::vector<AudioTrackPtr> Media::audioTracks()
 {
     static const std::string req = "SELECT * FROM " + policy::AudioTrackTable::Name +
             " WHERE media_id = ?";
-    return AudioTrack::fetchAll<IAudioTrack>( m_dbConnection, req, m_id );
+    return AudioTrack::fetchAll<IAudioTrack>( m_ml, req, m_id );
 }
 
 const std::string &Media::thumbnail()
@@ -288,7 +288,7 @@ bool Media::save()
             "thumbnail = ?, title = ?, is_favorite = ? WHERE id_media = ?";
     if ( m_changed == false )
         return true;
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, m_type, m_subType, m_duration, m_playCount,
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_type, m_subType, m_duration, m_playCount,
                                        m_lastPlayedDate, m_progress, m_rating, m_thumbnail, m_title,
                                        m_isFavorite, m_id ) == false )
     {
@@ -300,7 +300,7 @@ bool Media::save()
 
 std::shared_ptr<File> Media::addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs, IFile::Type type )
 {
-    auto file = File::create( m_dbConnection, m_id, type, fileFs, parentFolder.id(), parentFolderFs.device()->isRemovable() );
+    auto file = File::create( m_ml, m_id, type, fileFs, parentFolder.id(), parentFolderFs.device()->isRemovable() );
     if ( file == nullptr )
         return nullptr;
     auto lock = m_files.lock();
@@ -432,11 +432,11 @@ bool Media::addLabel( LabelPtr label )
         return false;
     }
     const char* req = "INSERT INTO LabelFileRelation VALUES(?, ?)";
-    if ( sqlite::Tools::insert( m_dbConnection, req, label->id(), m_id ) == 0 )
+    if ( sqlite::Tools::insert( m_ml->getConn(), req, label->id(), m_id ) == 0 )
         return false;
     const std::string reqFts = "UPDATE " + policy::MediaTable::Name + "Fts "
         "SET labels = labels || ' ' || ? WHERE rowid = ?";
-    return sqlite::Tools::executeUpdate( m_dbConnection, reqFts, label->name(), m_id );
+    return sqlite::Tools::executeUpdate( m_ml->getConn(), reqFts, label->name(), m_id );
 }
 
 bool Media::removeLabel( LabelPtr label )
@@ -447,26 +447,26 @@ bool Media::removeLabel( LabelPtr label )
         return false;
     }
     const char* req = "DELETE FROM LabelFileRelation WHERE label_id = ? AND media_id = ?";
-    if ( sqlite::Tools::executeDelete( m_dbConnection, req, label->id(), m_id ) == false )
+    if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, label->id(), m_id ) == false )
         return false;
     const std::string reqFts = "UPDATE " + policy::MediaTable::Name + "Fts "
             "SET labels = TRIM(REPLACE(labels, ?, '')) WHERE rowid = ?";
-    return sqlite::Tools::executeUpdate( m_dbConnection, reqFts, label->name(), m_id );
+    return sqlite::Tools::executeUpdate( m_ml->getConn(), reqFts, label->name(), m_id );
 }
 
 
-std::vector<MediaPtr> Media::search( DBConnection dbConn, const std::string& title )
+std::vector<MediaPtr> Media::search( MediaLibraryPtr ml, const std::string& title )
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE"
             " id_media IN (SELECT rowid FROM " + policy::MediaTable::Name + "Fts"
             " WHERE " + policy::MediaTable::Name + "Fts MATCH ?)"
             "AND is_present = 1";
-    return Media::fetchAll<IMedia>( dbConn, req, title + "*" );
+    return Media::fetchAll<IMedia>( ml, req, title + "*" );
 }
 
-std::vector<MediaPtr> Media::fetchHistory( DBConnection dbConn )
+std::vector<MediaPtr> Media::fetchHistory( MediaLibraryPtr ml )
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE last_played_date IS NOT NULL"
             " ORDER BY last_played_date DESC LIMIT 100";
-    return fetchAll<IMedia>( dbConn, req );
+    return fetchAll<IMedia>( ml, req );
 }

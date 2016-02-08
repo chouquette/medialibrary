@@ -111,6 +111,9 @@ class MediaLibrary : public IMediaLibrary
         virtual void pauseBackgroundOperations() override;
         virtual void resumeBackgroundOperations() override;
 
+        DBConnection getConn() const;
+        IMediaLibraryCb* getCb() const;
+
     public:
         static const uint32_t DbModelVersion;
 

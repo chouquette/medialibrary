@@ -42,6 +42,7 @@ class ILogger;
 class IArtist;
 class IPlaylist;
 class SqliteConnection;
+class MediaLibrary;
 
 using AlbumPtr = std::shared_ptr<IAlbum>;
 using AlbumTrackPtr = std::shared_ptr<IAlbumTrack>;
@@ -57,6 +58,8 @@ using PlaylistPtr = std::shared_ptr<IPlaylist>;
 using ShowEpisodePtr = std::shared_ptr<IShowEpisode>;
 using ShowPtr = std::shared_ptr<IShow>;
 using VideoTrackPtr = std::shared_ptr<IVideoTrack>;
+
+using MediaLibraryPtr = const MediaLibrary*;
 
 typedef SqliteConnection* DBConnection;
 

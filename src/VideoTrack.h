@@ -43,7 +43,7 @@ struct VideoTrackTable
 class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy::VideoTrackTable>
 {
     public:
-        VideoTrack( DBConnection dbConnection, sqlite::Row& row );
+        VideoTrack( MediaLibraryPtr ml, sqlite::Row& row );
         VideoTrack( const std::string& codec, unsigned int width, unsigned int height, float fps, unsigned int mediaId );
 
         virtual unsigned int id() const override;
@@ -53,11 +53,11 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy
         virtual float fps() const override;
 
         static bool createTable( DBConnection dbConnection );
-        static std::shared_ptr<VideoTrack> create( DBConnection dbConnection, const std::string& codec,
+        static std::shared_ptr<VideoTrack> create( MediaLibraryPtr ml, const std::string& codec,
                                     unsigned int width, unsigned int height, float fps, unsigned int mediaId );
 
     private:
-        DBConnection m_dbConnection;
+        MediaLibraryPtr m_ml;
         unsigned int m_id;
         std::string m_codec;
         unsigned int m_width;

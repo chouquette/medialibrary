@@ -56,10 +56,10 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         // ::new (pv) T(std::forward(args)...)
         // shall be well-formed, and private constructor would prevent that.
         // There might be a way with a user-defined allocator, but we'll see that later...
-        Media( DBConnection dbConnection , sqlite::Row& row );
+        Media(MediaLibraryPtr ml , sqlite::Row& row );
         Media( const std::string &title, Type type);
 
-        static std::shared_ptr<Media> create( DBConnection dbConnection, Type type, const fs::IFile& file );
+        static std::shared_ptr<Media> create( MediaLibraryPtr ml, Type type, const fs::IFile& file );
         static bool createTable( DBConnection connection );
         static bool createTriggers( DBConnection connection );
 
@@ -92,23 +92,23 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         bool addVideoTrack( const std::string& codec, unsigned int width,
                                     unsigned int height, float fps );
         virtual std::vector<VideoTrackPtr> videoTracks() override;
-        bool addAudioTrack(const std::string& codec, unsigned int bitrate, unsigned int sampleRate,
-                           unsigned int nbChannels, const std::string& language, const std::string& desc );
+        bool addAudioTrack( const std::string& codec, unsigned int bitrate, unsigned int sampleRate,
+                            unsigned int nbChannels, const std::string& language, const std::string& desc );
         virtual std::vector<AudioTrackPtr> audioTracks() override;
         virtual const std::string& thumbnail() override;
         virtual unsigned int insertionDate() const override;
         void setThumbnail( const std::string& thumbnail );
         bool save();
 
-        std::shared_ptr<File> addFile(const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs , IFile::Type type);
+        std::shared_ptr<File> addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs , IFile::Type type);
         void removeFile( File& file );
 
-        static std::vector<MediaPtr> search( DBConnection dbConn, const std::string& title );
-        static std::vector<MediaPtr> fetchHistory( DBConnection dbConn );
+        static std::vector<MediaPtr> search( MediaLibraryPtr ml, const std::string& title );
+        static std::vector<MediaPtr> fetchHistory( MediaLibraryPtr ml );
 
 
 private:
-        DBConnection m_dbConnection;
+        MediaLibraryPtr m_ml;
 
         // DB fields:
         unsigned int m_id;

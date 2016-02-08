@@ -35,9 +35,8 @@
 #include "MediaLibrary.h"
 #include "utils/Filename.h"
 
-FsDiscoverer::FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, MediaLibrary* ml, DBConnection dbConn )
+FsDiscoverer::FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, MediaLibrary* ml )
     : m_ml( ml )
-    , m_dbConn( dbConn )
     , m_fsFactory( fsFactory )
 {
 }
@@ -56,7 +55,7 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
         LOG_ERROR("Failed to create an IDirectory for ", entryPoint );
         return false;
     }
-    auto f = Folder::fromPath( m_dbConn, fsDir->path() );
+    auto f = Folder::fromPath( m_ml, fsDir->path() );
     // If the folder exists, we assume it will be handled by reload()
     if ( f != nullptr )
         return true;
@@ -73,7 +72,7 @@ void FsDiscoverer::reload()
     LOG_INFO( "Reloading all folders" );
     // Start by checking if previously known devices have been plugged/unplugged
     checkDevices();
-    auto rootFolders = Folder::fetchAll( m_dbConn, 0 );
+    auto rootFolders = Folder::fetchAll( m_ml, 0 );
     auto blist = blacklist();
     for ( const auto& f : rootFolders )
     {
@@ -91,7 +90,7 @@ void FsDiscoverer::reload()
 void FsDiscoverer::reload( const std::string& entryPoint )
 {
     LOG_INFO( "Reloading folder ", entryPoint );
-    auto folder = Folder::fromPath( m_dbConn, entryPoint );
+    auto folder = Folder::fromPath( m_ml, entryPoint );
     if ( folder == nullptr )
     {
         LOG_ERROR( "Can't reload ", entryPoint, ": folder wasn't found in database" );
@@ -109,7 +108,7 @@ void FsDiscoverer::reload( const std::string& entryPoint )
 void FsDiscoverer::checkDevices()
 {
     m_fsFactory->refresh();
-    auto devices = Device::fetchAll( m_dbConn );
+    auto devices = Device::fetchAll( m_ml );
     for ( auto& d : devices )
     {
         auto deviceFs = m_fsFactory->createDevice( d->uuid() );
@@ -138,7 +137,7 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
     }
     // Load the folders we already know of:
     LOG_INFO( "Checking for modifications in ", currentFolderFs.path() );
-    auto subFoldersInDB = Folder::fetchAll( m_dbConn, currentFolder.id() );
+    auto subFoldersInDB = Folder::fetchAll( m_ml, currentFolder.id() );
     for ( const auto& subFolder : currentFolderFs.dirs() )
     {
         auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [&subFolder](const std::shared_ptr<Folder>& f) {
@@ -184,7 +183,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
     LOG_INFO( "Checking file in ", parentFolderFs.path() );
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
             + " WHERE folder_id = ?";
-    auto files = File::fetchAll<File>( m_dbConn, req, parentFolder.id() );
+    auto files = File::fetchAll<File>( m_ml, req, parentFolder.id() );
     std::vector<std::shared_ptr<fs::IFile>> filesToAdd;
     std::vector<std::shared_ptr<File>> filesToRemove;
     for ( const auto& fileFs: parentFolderFs.files() )
@@ -212,7 +211,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
         filesToAdd.push_back( fileFs );
         files.erase( it );
     }
-    auto t = m_dbConn->newTransaction();
+    auto t = m_ml->getConn()->newTransaction();
     for ( auto file : files )
     {
         LOG_INFO( "File ", file->mrl(), " not found on filesystem, deleting it" );
@@ -230,14 +229,14 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
 std::vector<std::shared_ptr<Folder> > FsDiscoverer::blacklist() const
 {
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE is_blacklisted = 1";
-    return sqlite::Tools::fetchAll<Folder, Folder>( m_dbConn, req );
+    return sqlite::Tools::fetchAll<Folder, Folder>( m_ml, req );
 }
 
 bool FsDiscoverer::isBlacklisted( const fs::IDirectory& directory, const std::vector<std::shared_ptr<Folder>>& blacklist ) const
 {
     auto deviceFs = directory.device();
     //FIXME: We could avoid fetching the device if the directory is non removable.
-    auto device = Device::fromUuid( m_dbConn, deviceFs->uuid() );
+    auto device = Device::fromUuid( m_ml, deviceFs->uuid() );
     // When blacklisting, we would insert the device if we haven't encoutered it yet.
     // So when reading, a missing device means a non-blacklisted device.
     if ( device == nullptr )
@@ -262,14 +261,14 @@ bool FsDiscoverer::addFolder( fs::IDirectory& folder, Folder* parentFolder, cons
     auto deviceFs = folder.device();
     // We are creating a folder, there has to be a device containing it.
     assert( deviceFs != nullptr );
-    auto device = Device::fromUuid( m_dbConn, deviceFs->uuid() );
+    auto device = Device::fromUuid( m_ml, deviceFs->uuid() );
     if ( device == nullptr )
     {
         LOG_INFO( "Creating new device in DB ", deviceFs->uuid() );
-        device = Device::create( m_dbConn, deviceFs->uuid(), deviceFs->isRemovable() );
+        device = Device::create( m_ml, deviceFs->uuid(), deviceFs->isRemovable() );
     }
 
-    auto f = Folder::create( m_dbConn, folder.path(),
+    auto f = Folder::create( m_ml, folder.path(),
                              parentFolder != nullptr ? parentFolder->id() : 0,
                              *device, *deviceFs );
     if ( f == nullptr )

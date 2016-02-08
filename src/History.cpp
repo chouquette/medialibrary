@@ -33,8 +33,8 @@ unsigned int History::* const HistoryTable::PrimaryKey = &History::m_id;
 
 constexpr unsigned int History::MaxEntries;
 
-History::History( DBConnection dbConn, sqlite::Row& row )
-    : m_dbConn( dbConn )
+History::History( MediaLibraryPtr ml, sqlite::Row& row )
+    : m_ml( ml )
 {
     row >> m_id
         >> m_mrl
@@ -75,10 +75,10 @@ bool History::insert( DBConnection dbConn, const std::string& mrl )
     return sqlite::Tools::insert( dbConn, req, mrl, mrl ) != 0;
 }
 
-std::vector<std::shared_ptr<IHistoryEntry> > History::fetch( DBConnection dbConn )
+std::vector<std::shared_ptr<IHistoryEntry> > History::fetch( MediaLibraryPtr ml )
 {
     static const std::string req = "SELECT * FROM " + policy::HistoryTable::Name + " ORDER BY insertion_date DESC";
-    return fetchAll<IHistoryEntry>( dbConn, req );
+    return fetchAll<IHistoryEntry>( ml, req );
 }
 
 const std::string& History::mrl() const
@@ -102,7 +102,7 @@ bool History::setFavorite( bool isFavorite )
         return true;
 
     static const std::string req = "UPDATE " + policy::HistoryTable::Name + " SET favorite = ? WHERE id_record = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConn, req, isFavorite, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, isFavorite, m_id ) == false )
         return false;
     m_favorite = isFavorite;
     return true;

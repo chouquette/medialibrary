@@ -29,9 +29,10 @@
 #include <queue>
 
 #include "Task.h"
+#include "Types.h"
 
-class MediaLibrary;
 class IParserCb;
+class IMediaLibraryCb;
 
 class ParserService
 {
@@ -46,7 +47,6 @@ public:
     void initialize( MediaLibrary* mediaLibrary, IParserCb* parserCb );
 
 protected:
-    MediaLibrary* mediaLibrary();
     uint8_t nbNativeThreads() const;
     /// Can be overriden to run service dependent initializations
     virtual bool initialize();
@@ -58,8 +58,11 @@ private:
     // Thread(s) entry point
     void mainloop();
 
-private:
+protected:
     MediaLibrary* m_ml;
+    IMediaLibraryCb* m_cb;
+
+private:
     IParserCb* m_parserCb;
     bool m_stopParser;
     bool m_paused;

@@ -44,7 +44,7 @@ struct FileTable
 class File : public IFile, public DatabaseHelpers<File, policy::FileTable>
 {
 public:
-    File( DBConnection dbConnection, sqlite::Row& row );
+    File( MediaLibraryPtr ml, sqlite::Row& row );
     File( unsigned int mediaId, Type type, const fs::IFile& file, unsigned int folderId, bool isRemovable );
     virtual unsigned int id() const override;
     virtual const std::string& mrl() const override;
@@ -59,9 +59,11 @@ public:
     bool destroy();
 
     static bool createTable( DBConnection dbConnection );
-    static std::shared_ptr<File> create( DBConnection dbConnection, unsigned int mediaId, Type type, const fs::IFile& file, unsigned int folderId, bool isRemovable );
+    static std::shared_ptr<File> create( MediaLibraryPtr ml, unsigned int mediaId, Type type, const fs::IFile& file, unsigned int folderId, bool isRemovable );
 
 private:
+    MediaLibraryPtr m_ml;
+
     unsigned int m_id;
     unsigned int m_mediaId;
     std::string m_mrl;
@@ -72,7 +74,6 @@ private:
     bool m_isPresent;
     bool m_isRemovable;
 
-    DBConnection m_dbConnection;
     mutable Cache<std::string> m_fullPath;
     mutable Cache<std::weak_ptr<Media>> m_media;
 

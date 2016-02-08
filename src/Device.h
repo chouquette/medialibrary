@@ -41,19 +41,19 @@ class Device : public DatabaseHelpers<Device, policy::DeviceTable>
 {
 public:
     Device( const std::string& uuid, bool isRemovable );
-    Device( DBConnection dbConnection, sqlite::Row& row );
+    Device( MediaLibraryPtr ml, sqlite::Row& row );
     unsigned int id() const;
     const std::string& uuid() const;
     bool isRemovable() const;
     bool isPresent() const;
     void setPresent( bool value );
 
-    static std::shared_ptr<Device> create( DBConnection dbConnection, const std::string& uuid, bool isRemovable );
+    static std::shared_ptr<Device> create( MediaLibraryPtr ml, const std::string& uuid, bool isRemovable );
     static bool createTable( DBConnection connection );
-    static std::shared_ptr<Device> fromUuid( DBConnection dbConnection, const std::string& uuid );
+    static std::shared_ptr<Device> fromUuid( MediaLibraryPtr ml, const std::string& uuid );
 
 private:
-    DBConnection m_dbConn;
+    MediaLibraryPtr m_ml;
     // This is a database ID
     unsigned int m_id;
     // This is a unique ID on the system side, in the /dev/disk/by-uuid sense.

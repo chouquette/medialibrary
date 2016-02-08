@@ -46,7 +46,7 @@ struct ShowTable
 class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
 {
     public:
-        Show( DBConnection dbConnection, sqlite::Row& row );
+        Show( MediaLibraryPtr ml, sqlite::Row& row );
         Show( const std::string& name );
 
         virtual unsigned int id() const override;
@@ -63,10 +63,11 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
         virtual std::vector<ShowEpisodePtr> episodes() override;
 
         static bool createTable( DBConnection dbConnection );
-        static std::shared_ptr<Show> create( DBConnection dbConnection, const std::string& name );
+        static std::shared_ptr<Show> create( MediaLibraryPtr ml, const std::string& name );
 
     protected:
-        DBConnection m_dbConnection;
+        MediaLibraryPtr m_ml;
+
         unsigned int m_id;
         std::string m_name;
         time_t m_releaseDate;

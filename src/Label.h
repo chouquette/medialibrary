@@ -45,7 +45,7 @@ struct LabelTable
 class Label : public ILabel, public DatabaseHelpers<Label, policy::LabelTable>
 {
     public:
-        Label( DBConnection dbConnection, sqlite::Row& row );
+        Label( MediaLibraryPtr ml, sqlite::Row& row );
         Label( const std::string& name );
 
     public:
@@ -53,10 +53,11 @@ class Label : public ILabel, public DatabaseHelpers<Label, policy::LabelTable>
         virtual const std::string& name() const override;
         virtual std::vector<MediaPtr> files() override;
 
-        static LabelPtr create( DBConnection dbConnection, const std::string& name );
+        static LabelPtr create( MediaLibraryPtr ml, const std::string& name );
         static bool createTable( DBConnection dbConnection );
+
     private:
-        DBConnection m_dbConnection;
+        MediaLibraryPtr m_ml;
         unsigned int m_id;
         std::string m_name;
 

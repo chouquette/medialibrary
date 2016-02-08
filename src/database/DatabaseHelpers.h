@@ -37,35 +37,35 @@ class DatabaseHelpers
 
     public:
         template <typename... Args>
-        static std::shared_ptr<IMPL> fetch( DBConnection dbConnection, const std::string& req, Args&&... args )
+        static std::shared_ptr<IMPL> fetch( MediaLibraryPtr ml, const std::string& req, Args&&... args )
         {
-            return sqlite::Tools::fetchOne<IMPL>( dbConnection, req, std::forward<Args>( args )... );
+            return sqlite::Tools::fetchOne<IMPL>( ml, req, std::forward<Args>( args )... );
         }
 
-        static std::shared_ptr<IMPL> fetch( DBConnection dbConnection, unsigned int pkValue )
+        static std::shared_ptr<IMPL> fetch( MediaLibraryPtr ml, unsigned int pkValue )
         {
             static std::string req = "SELECT * FROM " + TABLEPOLICY::Name + " WHERE " +
                     TABLEPOLICY::PrimaryKeyColumn + " = ?";
-            return sqlite::Tools::fetchOne<IMPL>( dbConnection, req, pkValue );
+            return sqlite::Tools::fetchOne<IMPL>( ml, req, pkValue );
         }
 
         /*
          * Will fetch all elements from the database & cache them.
          */
         template <typename INTF = IMPL>
-        static std::vector<std::shared_ptr<INTF>> fetchAll( DBConnection dbConnection )
+        static std::vector<std::shared_ptr<INTF>> fetchAll( MediaLibraryPtr ml )
         {
             static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name;
-            return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnection, req );
+            return sqlite::Tools::fetchAll<IMPL, INTF>( ml, req );
         }
 
         template <typename INTF, typename... Args>
-        static std::vector<std::shared_ptr<INTF>> fetchAll( DBConnection dbConnection, const std::string &req, Args&&... args )
+        static std::vector<std::shared_ptr<INTF>> fetchAll( MediaLibraryPtr ml, const std::string &req, Args&&... args )
         {
-            return sqlite::Tools::fetchAll<IMPL, INTF>( dbConnection, req, std::forward<Args>( args )... );
+            return sqlite::Tools::fetchAll<IMPL, INTF>( ml, req, std::forward<Args>( args )... );
         }
 
-        static std::shared_ptr<IMPL> load( DBConnection dbConnection, sqlite::Row& row )
+        static std::shared_ptr<IMPL> load( MediaLibraryPtr ml, sqlite::Row& row )
         {
             Lock l{ Mutex };
 
@@ -73,16 +73,16 @@ class DatabaseHelpers
             auto it = Store.find( key );
             if ( it != Store.end() )
                 return it->second;
-            auto res = std::make_shared<IMPL>( dbConnection, row );
+            auto res = std::make_shared<IMPL>( ml, row );
             Store[key] = res;
             return res;
         }
 
-        static bool destroy( DBConnection dbConnection, unsigned int pkValue )
+        static bool destroy( MediaLibraryPtr ml, unsigned int pkValue )
         {
             static const std::string req = "DELETE FROM " + TABLEPOLICY::Name + " WHERE "
                     + TABLEPOLICY::PrimaryKeyColumn + " = ?";
-            auto res = sqlite::Tools::executeDelete( dbConnection, req, pkValue );
+            auto res = sqlite::Tools::executeDelete( ml->getConn(), req, pkValue );
             if ( res == true )
                 removeFromCache( pkValue );
             return res;
@@ -107,9 +107,9 @@ class DatabaseHelpers
          * Create a new instance of the cache class.
          */
         template <typename... Args>
-        static bool insert( DBConnection dbConnection, std::shared_ptr<IMPL> self, const std::string& req, Args&&... args )
+        static bool insert( MediaLibraryPtr ml, std::shared_ptr<IMPL> self, const std::string& req, Args&&... args )
         {
-            unsigned int pKey = sqlite::Tools::insert( dbConnection, req, std::forward<Args>( args )... );
+            unsigned int pKey = sqlite::Tools::insert( ml->getConn(), req, std::forward<Args>( args )... );
             if ( pKey == 0 )
                 return false;
             Lock l{ Mutex };

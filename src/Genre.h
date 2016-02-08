@@ -41,7 +41,7 @@ struct GenreTable
 class Genre : public IGenre, public DatabaseHelpers<Genre, policy::GenreTable>
 {
 public:
-    Genre( DBConnection dbConn, sqlite::Row& row );
+    Genre( MediaLibraryPtr ml, sqlite::Row& row );
     Genre( const std::string& name );
     virtual unsigned int id() const;
     virtual const std::string& name() const override;
@@ -50,12 +50,12 @@ public:
     virtual std::vector<AlbumPtr> albums() const override;
 
     static bool createTable( DBConnection dbConn );
-    static std::shared_ptr<Genre> create( DBConnection dbConn, const std::string& name );
-    static std::shared_ptr<Genre> fromName( DBConnection dbConn, const std::string& name );
-    static std::vector<GenrePtr> search( DBConnection dbConn, const std::string& name );
+    static std::shared_ptr<Genre> create( MediaLibraryPtr ml, const std::string& name );
+    static std::shared_ptr<Genre> fromName( MediaLibraryPtr ml, const std::string& name );
+    static std::vector<GenrePtr> search( MediaLibraryPtr ml, const std::string& name );
 
 private:
-    DBConnection m_dbConnection;
+    MediaLibraryPtr m_ml;
 
     unsigned int m_id;
     std::string m_name;

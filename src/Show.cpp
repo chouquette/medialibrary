@@ -24,6 +24,7 @@
 
 #include "Media.h"
 #include "ShowEpisode.h"
+#include "MediaLibrary.h"
 
 #include "database/SqliteTools.h"
 
@@ -31,8 +32,8 @@ const std::string policy::ShowTable::Name = "Show";
 const std::string policy::ShowTable::PrimaryKeyColumn = "id_show";
 unsigned int Show::* const policy::ShowTable::PrimaryKey = &Show::m_id;
 
-Show::Show( DBConnection dbConnection, sqlite::Row& row )
-    : m_dbConnection( dbConnection )
+Show::Show( MediaLibraryPtr ml, sqlite::Row& row )
+    : m_ml( ml )
 {
     row >> m_id
         >> m_name
@@ -68,7 +69,7 @@ bool Show::setReleaseDate( time_t date )
 {
     static const std::string req = "UPDATE " + policy::ShowTable::Name
             + " SET release_date = ? WHERE id_show = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, date, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, date, m_id ) == false )
         return false;
     m_releaseDate = date;
     return true;
@@ -83,7 +84,7 @@ bool Show::setShortSummary( const std::string& summary )
 {
     static const std::string req = "UPDATE " + policy::ShowTable::Name
             + " SET short_summary = ? WHERE id_show = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, summary, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, summary, m_id ) == false )
         return false;
     m_shortSummary = summary;
     return true;
@@ -98,7 +99,7 @@ bool Show::setArtworkMrl( const std::string& artworkMrl )
 {
     static const std::string req = "UPDATE " + policy::ShowTable::Name
             + " SET artwork_mrl = ? WHERE id_show = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkMrl, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, artworkMrl, m_id ) == false )
         return false;
     m_artworkMrl = artworkMrl;
     return true;
@@ -113,7 +114,7 @@ bool Show::setTvdbId( const std::string& tvdbId )
 {
     static const std::string req = "UPDATE " + policy::ShowTable::Name
             + " SET tvdb_id = ? WHERE id_show = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, tvdbId, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, tvdbId, m_id ) == false )
         return false;
     m_tvdbId = tvdbId;
     return true;
@@ -121,7 +122,7 @@ bool Show::setTvdbId( const std::string& tvdbId )
 
 std::shared_ptr<ShowEpisode> Show::addEpisode( Media& media, const std::string& title, unsigned int episodeNumber)
 {
-    auto episode = ShowEpisode::create( m_dbConnection, media.id(), title, episodeNumber, m_id );
+    auto episode = ShowEpisode::create( m_ml, media.id(), title, episodeNumber, m_id );
     media.setShowEpisode( episode );
     media.save();
     return episode;
@@ -131,10 +132,10 @@ std::vector<ShowEpisodePtr> Show::episodes()
 {
     static const std::string req = "SELECT * FROM " + policy::ShowEpisodeTable::Name
             + " WHERE show_id = ?";
-    return ShowEpisode::fetchAll<IShowEpisode>( m_dbConnection, req, m_id );
+    return ShowEpisode::fetchAll<IShowEpisode>( m_ml, req, m_id );
 }
 
-bool Show::createTable(DBConnection dbConnection)
+bool Show::createTable( DBConnection dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::ShowTable::Name + "("
                         "id_show INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -147,13 +148,13 @@ bool Show::createTable(DBConnection dbConnection)
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-std::shared_ptr<Show> Show::create(DBConnection dbConnection, const std::string& name )
+std::shared_ptr<Show> Show::create( MediaLibraryPtr ml, const std::string& name )
 {
     auto show = std::make_shared<Show>( name );
     static const std::string req = "INSERT INTO " + policy::ShowTable::Name
             + "(name) VALUES(?)";
-    if ( insert( dbConnection, show, req, name ) == false )
+    if ( insert( ml, show, req, name ) == false )
         return nullptr;
-    show->m_dbConnection = dbConnection;
+    show->m_ml = ml;
     return show;
 }

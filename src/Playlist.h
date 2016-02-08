@@ -43,10 +43,10 @@ struct PlaylistTable
 class Playlist : public IPlaylist, public DatabaseHelpers<Playlist, policy::PlaylistTable>
 {
 public:
-    Playlist( DBConnection dbConn, sqlite::Row& row );
+    Playlist( MediaLibraryPtr ml, sqlite::Row& row );
     Playlist( const std::string& name );
 
-    static std::shared_ptr<Playlist> create( DBConnection dbConn, const std::string& name );
+    static std::shared_ptr<Playlist> create( MediaLibraryPtr ml, const std::string& name );
 
     virtual unsigned int id() const override;
     virtual const std::string& name() const override;
@@ -59,10 +59,10 @@ public:
 
     static bool createTable( DBConnection dbConn );
     static bool createTriggers( DBConnection dbConn );
-    static std::vector<PlaylistPtr> search( DBConnection dbConnection, const std::string& name );
+    static std::vector<PlaylistPtr> search( MediaLibraryPtr ml, const std::string& name );
 
 private:
-    DBConnection m_dbConnection;
+    MediaLibraryPtr m_ml;
 
     unsigned int m_id;
     std::string m_name;

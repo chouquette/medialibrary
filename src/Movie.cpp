@@ -28,8 +28,8 @@ const std::string policy::MovieTable::Name = "Movie";
 const std::string policy::MovieTable::PrimaryKeyColumn = "id_movie";
 unsigned int Movie::* const policy::MovieTable::PrimaryKey = &Movie::m_id;
 
-Movie::Movie(DBConnection dbConnection, sqlite::Row& row )
-    : m_dbConnection( dbConnection )
+Movie::Movie(MediaLibraryPtr ml, sqlite::Row& row )
+    : m_ml( ml )
 {
     row >> m_id
         >> m_mediaId
@@ -67,7 +67,7 @@ bool Movie::setReleaseDate( time_t date )
 {
     static const std::string req = "UPDATE " + policy::MovieTable::Name
             + " SET release_date = ? WHERE id_movie = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, date, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, date, m_id ) == false )
         return false;
     m_releaseDate = date;
     return true;
@@ -82,7 +82,7 @@ bool Movie::setShortSummary( const std::string& summary )
 {
     static const std::string req = "UPDATE " + policy::MovieTable::Name
             + " SET summary = ? WHERE id_movie = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, summary, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, summary, m_id ) == false )
         return false;
     m_summary = summary;
     return true;
@@ -97,7 +97,7 @@ bool Movie::setArtworkMrl( const std::string& artworkMrl )
 {
     static const std::string req = "UPDATE " + policy::MovieTable::Name
             + " SET artwork_mrl = ? WHERE id_movie = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkMrl, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, artworkMrl, m_id ) == false )
         return false;
     m_artworkMrl = artworkMrl;
     return true;
@@ -112,7 +112,7 @@ bool Movie::setImdbId( const std::string& imdbId )
 {
     static const std::string req = "UPDATE " + policy::MovieTable::Name
             + " SET imdb_id = ? WHERE id_movie = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, imdbId, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, imdbId, m_id ) == false )
         return false;
     m_imdbId = imdbId;
     return true;
@@ -122,7 +122,7 @@ std::vector<MediaPtr> Movie::files()
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
             + " WHERE movie_id = ?";
-    return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
+    return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
 
 bool Movie::createTable( DBConnection dbConnection )
@@ -142,19 +142,19 @@ bool Movie::createTable( DBConnection dbConnection )
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-std::shared_ptr<Movie> Movie::create( DBConnection dbConnection, unsigned int mediaId, const std::string& title )
+std::shared_ptr<Movie> Movie::create( MediaLibraryPtr ml, unsigned int mediaId, const std::string& title )
 {
     auto movie = std::make_shared<Movie>( mediaId, title );
     static const std::string req = "INSERT INTO " + policy::MovieTable::Name
             + "(media_id, title) VALUES(?, ?)";
-    if ( insert( dbConnection, movie, req, mediaId, title ) == false )
+    if ( insert( ml, movie, req, mediaId, title ) == false )
         return nullptr;
-    movie->m_dbConnection = dbConnection;
+    movie->m_ml = ml;
     return movie;
 }
 
-MoviePtr Movie::fromMedia( DBConnection dbConnection, unsigned int mediaId )
+MoviePtr Movie::fromMedia( MediaLibraryPtr ml, unsigned int mediaId )
 {
     static const std::string req = "SELECT * FROM " + policy::MovieTable::Name + " WHERE media_id = ?";
-    return fetch( dbConnection, req, mediaId );
+    return fetch( ml, req, mediaId );
 }

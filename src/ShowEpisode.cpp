@@ -29,8 +29,8 @@ const std::string policy::ShowEpisodeTable::Name = "ShowEpisode";
 const std::string policy::ShowEpisodeTable::PrimaryKeyColumn = "show_id";
 unsigned int ShowEpisode::* const policy::ShowEpisodeTable::PrimaryKey = &ShowEpisode::m_id;
 
-ShowEpisode::ShowEpisode(DBConnection dbConnection, sqlite::Row& row )
-    : m_dbConnection( dbConnection )
+ShowEpisode::ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row )
+    : m_ml( ml )
 {
     row >> m_id
         >> m_mediaId
@@ -67,7 +67,7 @@ bool ShowEpisode::setArtworkMrl( const std::string& artworkMrl )
 {
     static const std::string req = "UPDATE " + policy::ShowEpisodeTable::Name
             + " SET artwork_mrl = ? WHERE id_episode = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkMrl, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, artworkMrl, m_id ) == false )
         return false;
     m_artworkMrl = artworkMrl;
     return true;
@@ -92,7 +92,7 @@ bool ShowEpisode::setSeasonNumber( unsigned int seasonNumber )
 {
     static const std::string req = "UPDATE " + policy::ShowEpisodeTable::Name
             + " SET season_number = ? WHERE id_episode = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, seasonNumber, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, seasonNumber, m_id ) == false )
         return false;
     m_seasonNumber = seasonNumber;
     return true;
@@ -107,7 +107,7 @@ bool ShowEpisode::setShortSummary( const std::string& summary )
 {
     static const std::string req = "UPDATE " + policy::ShowEpisodeTable::Name
             + " SET episode_summary = ? WHERE id_episode = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, summary, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, summary, m_id ) == false )
         return false;
     m_shortSummary = summary;
     return true;
@@ -122,7 +122,7 @@ bool ShowEpisode::setTvdbId( const std::string& tvdbId )
 {
     static const std::string req = "UPDATE " + policy::ShowEpisodeTable::Name
             + " SET tvdb_id = ? WHERE id_episode = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, tvdbId, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, tvdbId, m_id ) == false )
         return false;
     m_tvdbId = tvdbId;
     return true;
@@ -132,7 +132,7 @@ std::shared_ptr<IShow> ShowEpisode::show()
 {
     if ( m_show == nullptr && m_showId != 0 )
     {
-        m_show = Show::fetch( m_dbConnection, m_showId );
+        m_show = Show::fetch( m_ml, m_showId );
     }
     return m_show;
 }
@@ -141,7 +141,7 @@ std::vector<MediaPtr> ShowEpisode::files()
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
             + " WHERE show_episode_id = ?";
-    return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
+    return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
 
 bool ShowEpisode::createTable( DBConnection dbConnection )
@@ -164,19 +164,19 @@ bool ShowEpisode::createTable( DBConnection dbConnection )
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-std::shared_ptr<ShowEpisode> ShowEpisode::create( DBConnection dbConnection, unsigned int mediaId, const std::string& title, unsigned int episodeNumber, unsigned int showId )
+std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml, unsigned int mediaId, const std::string& title, unsigned int episodeNumber, unsigned int showId )
 {
     auto episode = std::make_shared<ShowEpisode>( mediaId, title, episodeNumber, showId );
     static const std::string req = "INSERT INTO " + policy::ShowEpisodeTable::Name
             + "(media_id, episode_number, title, show_id) VALUES(?, ? , ?, ?)";
-    if ( insert( dbConnection, episode, req, mediaId, episodeNumber, title, showId ) == false )
+    if ( insert( ml, episode, req, mediaId, episodeNumber, title, showId ) == false )
         return nullptr;
-    episode->m_dbConnection = dbConnection;
+    episode->m_ml = ml;
     return episode;
 }
 
-ShowEpisodePtr ShowEpisode::fromMedia( DBConnection dbConnection, unsigned int mediaId )
+ShowEpisodePtr ShowEpisode::fromMedia( MediaLibraryPtr ml, unsigned int mediaId )
 {
     static const std::string req = "SELECT * FROM " + policy::ShowEpisodeTable::Name + " WHERE media_id = ?";
-    return fetch( dbConnection, req, mediaId );
+    return fetch( ml, req, mediaId );
 }

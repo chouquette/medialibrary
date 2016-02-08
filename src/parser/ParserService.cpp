@@ -24,7 +24,9 @@
 #include "Parser.h"
 
 ParserService::ParserService()
-    : m_stopParser( false )
+    : m_ml( nullptr )
+    , m_cb( nullptr )
+    , m_stopParser( false )
     , m_paused( false )
 {
 }
@@ -82,14 +84,10 @@ void ParserService::parse( std::unique_ptr<parser::Task> t )
 void ParserService::initialize( MediaLibrary* ml, IParserCb* parserCb )
 {
     m_ml = ml;
+    m_cb = ml->getCb();
     m_parserCb = parserCb;
     // Run the service specific initializer
     initialize();
-}
-
-MediaLibrary* ParserService::mediaLibrary()
-{
-    return m_ml;
 }
 
 uint8_t ParserService::nbNativeThreads() const

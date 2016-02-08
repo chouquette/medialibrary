@@ -42,7 +42,7 @@ struct AudioTrackTable
 class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack, policy::AudioTrackTable>
 {
     public:
-        AudioTrack( DBConnection dbConnection, sqlite::Row& row );
+        AudioTrack(MediaLibraryPtr ml, sqlite::Row& row );
         AudioTrack(const std::string& codec, unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels, const std::string& language, const std::string& desc , unsigned int mediaId);
 
         virtual unsigned int id() const override;
@@ -54,12 +54,12 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack, policy
         virtual const std::string& description() const override;
 
         static bool createTable( DBConnection dbConnection );
-        static std::shared_ptr<AudioTrack> create( DBConnection dbConnection, const std::string& codec,
+        static std::shared_ptr<AudioTrack> create( MediaLibraryPtr ml, const std::string& codec,
                                                    unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels,
                                                    const std::string& language, const std::string& desc, unsigned int mediaId );
 
     private:
-        DBConnection m_dbConnection;
+        MediaLibraryPtr  m_ml;
         unsigned int m_id;
         std::string m_codec;
         unsigned int m_bitrate;

@@ -44,7 +44,7 @@ class Parser : IParserCb
 public:
     using ServicePtr = std::unique_ptr<ParserService>;
 
-    Parser( DBConnection dbConnection, MediaLibrary* ml, IMediaLibraryCb* cb );
+    Parser( MediaLibrary* ml );
     void addService( ServicePtr service );
     void parse( std::shared_ptr<Media> media, std::shared_ptr<File> file );
     void start();
@@ -63,7 +63,6 @@ private:
 private:
     ServiceList m_services;
 
-    DBConnection m_dbConnection;
     MediaLibrary* m_ml;
     IMediaLibraryCb* m_callback;
     std::atomic_uint m_opToDo;

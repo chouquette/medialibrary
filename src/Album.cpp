@@ -34,8 +34,8 @@ const std::string policy::AlbumTable::Name = "Album";
 const std::string policy::AlbumTable::PrimaryKeyColumn = "id_album";
 unsigned int Album::* const policy::AlbumTable::PrimaryKey = &Album::m_id;
 
-Album::Album(DBConnection dbConnection, sqlite::Row& row)
-    : m_dbConnection( dbConnection )
+Album::Album(MediaLibraryPtr ml, sqlite::Row& row)
+    : m_ml( ml )
 {
     row >> m_id
         >> m_title
@@ -99,7 +99,7 @@ bool Album::setReleaseYear( unsigned int date, bool force )
     }
     static const std::string req = "UPDATE " + policy::AlbumTable::Name
             + " SET release_year = ? WHERE id_album = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, date, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, date, m_id ) == false )
         return false;
     m_releaseYear = date;
     return true;
@@ -114,7 +114,7 @@ bool Album::setShortSummary( const std::string& summary )
 {
     static const std::string req = "UPDATE " + policy::AlbumTable::Name
             + " SET short_summary = ? WHERE id_album = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, summary, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, summary, m_id ) == false )
         return false;
     m_shortSummary = summary;
     return true;
@@ -129,7 +129,7 @@ bool Album::setArtworkMrl( const std::string& artworkMrl )
 {
     static const std::string req = "UPDATE " + policy::AlbumTable::Name
             + " SET artwork_mrl = ? WHERE id_album = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artworkMrl, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, artworkMrl, m_id ) == false )
         return false;
     m_artworkMrl = artworkMrl;
     return true;
@@ -142,7 +142,7 @@ std::vector<MediaPtr> Album::tracks() const
     static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
             " INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
             " WHERE att.album_id = ? AND med.is_present = 1 ORDER BY att.disc_number, att.track_number";
-    return Media::fetchAll<IMedia>( m_dbConnection, req, m_id );
+    return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
 
 std::vector<std::shared_ptr<IMedia> > Album::tracks( GenrePtr genre ) const
@@ -154,7 +154,7 @@ std::vector<std::shared_ptr<IMedia> > Album::tracks( GenrePtr genre ) const
             " WHERE att.album_id = ? AND med.is_present = 1"
             " AND genre_id = ?"
             " ORDER BY att.disc_number, att.track_number";
-    return Media::fetchAll<IMedia>( m_dbConnection, req, m_id, genre->id() );
+    return Media::fetchAll<IMedia>( m_ml, req, m_id, genre->id() );
 }
 
 std::vector<MediaPtr> Album::cachedTracks() const
@@ -167,16 +167,16 @@ std::vector<MediaPtr> Album::cachedTracks() const
 
 std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsigned int trackNb, unsigned int discNumber )
 {
-    auto t = m_dbConnection->newTransaction();
+    auto t = m_ml->getConn()->newTransaction();
 
-    auto track = AlbumTrack::create( m_dbConnection, m_id, *media, trackNb, discNumber );
+    auto track = AlbumTrack::create( m_ml, m_id, *media, trackNb, discNumber );
     if ( track == nullptr )
         return nullptr;
     media->setAlbumTrack( track );
     // Assume the media will be saved by the caller
     static const std::string req = "UPDATE " + policy::AlbumTable::Name +
             " SET nb_tracks = nb_tracks + 1 WHERE id_album = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id ) == false )
         return nullptr;
     m_nbTracks++;
     t->commit();
@@ -202,7 +202,7 @@ ArtistPtr Album::albumArtist() const
 {
     if ( m_artistId == 0 )
         return nullptr;
-    return Artist::fetch( m_dbConnection, m_artistId );
+    return Artist::fetch( m_ml, m_artistId );
 }
 
 bool Album::setAlbumArtist( Artist* artist )
@@ -213,18 +213,18 @@ bool Album::setAlbumArtist( Artist* artist )
         return false;
     static const std::string req = "UPDATE " + policy::AlbumTable::Name + " SET "
             "artist_id = ? WHERE id_album = ?";
-    if ( sqlite::Tools::executeUpdate( m_dbConnection, req, artist->id(), m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, artist->id(), m_id ) == false )
         return false;
     if ( m_artistId != 0 )
     {
-        auto previousArtist = Artist::fetch( m_dbConnection, m_artistId );
+        auto previousArtist = Artist::fetch( m_ml, m_artistId );
         previousArtist->updateNbAlbum( -1 );
     }
     m_artistId = artist->id();
     artist->updateNbAlbum( 1 );
     static const std::string ftsReq = "UPDATE " + policy::AlbumTable::Name + "Fts SET "
             " artist = ? WHERE rowid = ?";
-    sqlite::Tools::executeUpdate( m_dbConnection, ftsReq, artist->name(), m_id );
+    sqlite::Tools::executeUpdate( m_ml->getConn(), ftsReq, artist->name(), m_id );
     return true;
 }
 
@@ -233,7 +233,7 @@ std::vector<ArtistPtr> Album::artists() const
     static const std::string req = "SELECT art.* FROM " + policy::ArtistTable::Name + " art "
             "INNER JOIN AlbumArtistRelation aar ON aar.artist_id = art.id_artist "
             "WHERE aar.album_id = ?";
-    return Artist::fetchAll<IArtist>( m_dbConnection, req, m_id );
+    return Artist::fetchAll<IArtist>( m_ml, req, m_id );
 }
 
 bool Album::addArtist( std::shared_ptr<Artist> artist )
@@ -244,14 +244,14 @@ bool Album::addArtist( std::shared_ptr<Artist> artist )
         LOG_ERROR("Both artist & album need to be inserted in database before being linked together" );
         return false;
     }
-    return sqlite::Tools::insert( m_dbConnection, req, m_id, artist->id() ) != 0;
+    return sqlite::Tools::insert( m_ml->getConn(), req, m_id, artist->id() ) != 0;
 }
 
 bool Album::removeArtist(Artist* artist)
 {
     static const std::string req = "DELETE FROM AlbumArtistRelation WHERE album_id = ? "
             "AND id_artist = ?";
-    return sqlite::Tools::executeDelete( m_dbConnection, req, m_id, artist->id() );
+    return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, artist->id() );
 }
 
 bool Album::createTable(DBConnection dbConnection )
@@ -317,33 +317,33 @@ bool Album::createTriggers(DBConnection dbConnection)
             sqlite::Tools::executeRequest( dbConnection, vtriggerDelete );
 }
 
-std::shared_ptr<Album> Album::create(DBConnection dbConnection, const std::string& title )
+std::shared_ptr<Album> Album::create( MediaLibraryPtr ml, const std::string& title )
 {
     auto album = std::make_shared<Album>( title );
     static const std::string req = "INSERT INTO " + policy::AlbumTable::Name +
             "(id_album, title) VALUES(NULL, ?)";
-    if ( insert( dbConnection, album, req, title ) == false )
+    if ( insert( ml, album, req, title ) == false )
         return nullptr;
-    album->m_dbConnection = dbConnection;
+    album->m_ml = ml;
     return album;
 }
 
-std::shared_ptr<Album> Album::createUnknownAlbum( DBConnection dbConnection, const Artist* artist )
+std::shared_ptr<Album> Album::createUnknownAlbum( MediaLibraryPtr ml, const Artist* artist )
 {
     auto album = std::make_shared<Album>( artist );
     static const std::string req = "INSERT INTO " + policy::AlbumTable::Name +
             "(id_album, artist_id) VALUES(NULL, ?)";
-    if ( insert( dbConnection, album, req, artist->id() ) == false )
+    if ( insert( ml, album, req, artist->id() ) == false )
         return nullptr;
-    album->m_dbConnection = dbConnection;
+    album->m_ml = ml;
     return album;
 }
 
-std::vector<AlbumPtr> Album::search( DBConnection dbConn, const std::string& pattern )
+std::vector<AlbumPtr> Album::search( MediaLibraryPtr ml, const std::string& pattern )
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " WHERE id_album IN "
             "(SELECT rowid FROM " + policy::AlbumTable::Name + "Fts WHERE " +
             policy::AlbumTable::Name + "Fts MATCH ?)"
             "AND is_present = 1";
-    return fetchAll<IAlbum>( dbConn, req, pattern + "*" );
+    return fetchAll<IAlbum>( ml, req, pattern + "*" );
 }

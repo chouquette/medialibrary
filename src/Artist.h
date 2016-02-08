@@ -43,7 +43,7 @@ struct ArtistTable
 class Artist : public IArtist, public DatabaseHelpers<Artist, policy::ArtistTable>
 {
 public:
-    Artist( DBConnection dbConnection, sqlite::Row& row );
+    Artist(MediaLibraryPtr ml, sqlite::Row& row );
     Artist( const std::string& name );
 
     virtual unsigned int id() const override;
@@ -63,11 +63,11 @@ public:
     static bool createTable( DBConnection dbConnection );
     static bool createTriggers( DBConnection dbConnection );
     static bool createDefaultArtists( DBConnection dbConnection );
-    static std::shared_ptr<Artist> create( DBConnection dbConnection, const std::string& name );
-    static std::vector<ArtistPtr> search( DBConnection dbConnection, const std::string& name );
+    static std::shared_ptr<Artist> create( MediaLibraryPtr ml, const std::string& name );
+    static std::vector<ArtistPtr> search( MediaLibraryPtr ml, const std::string& name );
 
 private:
-    DBConnection m_dbConnection;
+    MediaLibraryPtr m_ml;
     unsigned int m_id;
     std::string m_name;
     std::string m_shortBio;

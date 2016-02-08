@@ -88,7 +88,7 @@ MediaLibraryTester::MediaLibraryTester()
 
 std::shared_ptr<Media> MediaLibraryTester::media( unsigned int id )
 {
-    return Media::fetch( m_dbConnection.get(), id );
+    return Media::fetch( this, id );
 }
 
 MediaPtr MediaLibraryTester::media( const std::string& path )
@@ -110,7 +110,7 @@ std::shared_ptr<Folder> MediaLibraryTester::folder( const std::string& path )
 {
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
             " WHERE is_blacklisted = 0 AND is_present = 1";
-    auto folders = Folder::DatabaseHelpers::fetchAll<Folder>( m_dbConnection.get(), req );
+    auto folders = Folder::DatabaseHelpers::fetchAll<Folder>( this, req );
     for ( auto &f : folders )
     {
         if ( f->path() == path )
@@ -127,32 +127,32 @@ std::shared_ptr<Media> MediaLibraryTester::addFile( const std::string& path )
 
 std::shared_ptr<Playlist> MediaLibraryTester::playlist(unsigned int playlistId)
 {
-    return Playlist::fetch( m_dbConnection.get(), playlistId );
+    return Playlist::fetch( this, playlistId );
 }
 
 void MediaLibraryTester::deleteAlbum( unsigned int albumId )
 {
-    Album::destroy( m_dbConnection.get(), albumId );
+    Album::destroy( this, albumId );
 }
 
 std::shared_ptr<Genre> MediaLibraryTester::createGenre( const std::string& name )
 {
-    return Genre::create( m_dbConnection.get(), name );
+    return Genre::create( this, name );
 }
 
 void MediaLibraryTester::deleteGenre( unsigned int genreId )
 {
-    Genre::destroy( m_dbConnection.get(), genreId );
+    Genre::destroy( this, genreId );
 }
 
 void MediaLibraryTester::deleteArtist( unsigned int artistId )
 {
-    Artist::destroy( m_dbConnection.get(), artistId );
+    Artist::destroy( this, artistId );
 }
 
 std::shared_ptr<Device> MediaLibraryTester::addDevice( const std::string& uuid, bool isRemovable )
 {
-    return Device::create( m_dbConnection.get(), uuid, isRemovable );
+    return Device::create( this, uuid, isRemovable );
 }
 
 void MediaLibraryTester::setFsFactory(std::shared_ptr<factory::IFileSystem> fsFactory)

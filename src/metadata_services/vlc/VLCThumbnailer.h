@@ -68,7 +68,6 @@ private:
 
 private:
     VLC::Instance m_instance;
-    MediaLibrary* m_ml;
     std::mutex m_mutex;
     std::condition_variable m_cond;
     // Per thumbnail variables

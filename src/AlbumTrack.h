@@ -51,7 +51,7 @@ struct AlbumTrackTable
 class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy::AlbumTrackTable>
 {
     public:
-        AlbumTrack( DBConnection dbConnection, sqlite::Row& row );
+        AlbumTrack( MediaLibraryPtr ml, sqlite::Row& row );
         AlbumTrack( unsigned int mediaId, unsigned int trackNumber, unsigned int albumId , unsigned int discNumber);
 
         virtual unsigned int id() const override;
@@ -66,14 +66,14 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         virtual std::shared_ptr<IAlbum> album() override;
 
         static bool createTable( DBConnection dbConnection );
-        static std::shared_ptr<AlbumTrack> create(DBConnection dbConnection, unsigned int albumId,
+        static std::shared_ptr<AlbumTrack> create( MediaLibraryPtr ml, unsigned int albumId,
                                      const Media& media, unsigned int trackNb , unsigned int discNumber );
-        static AlbumTrackPtr fromMedia( DBConnection dbConnection, unsigned int mediaId );
-        static std::vector<AlbumTrackPtr> fromGenre( DBConnection dbConn, unsigned int genreId );
+        static AlbumTrackPtr fromMedia( MediaLibraryPtr ml, unsigned int mediaId );
+        static std::vector<AlbumTrackPtr> fromGenre( MediaLibraryPtr ml, unsigned int genreId );
         static std::vector<MediaPtr> search(DBConnection dbConn, const std::string& title );
 
     private:
-        DBConnection m_dbConnection;
+        MediaLibraryPtr m_ml;
         unsigned int m_id;
         unsigned int m_mediaId;
         unsigned int m_artistId;

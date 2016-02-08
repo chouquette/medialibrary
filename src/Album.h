@@ -51,7 +51,7 @@ struct AlbumTable
 class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
 {
     public:
-        Album( DBConnection dbConnection, sqlite::Row& row );
+        Album( MediaLibraryPtr ml, sqlite::Row& row );
         Album( const std::string& title );
         Album( const Artist* artist );
 
@@ -96,17 +96,17 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
 
         static bool createTable( DBConnection dbConnection );
         static bool createTriggers( DBConnection dbConnection );
-        static std::shared_ptr<Album> create(DBConnection dbConnection, const std::string& title );
-        static std::shared_ptr<Album> createUnknownAlbum( DBConnection dbConnection, const Artist* artist );
+        static std::shared_ptr<Album> create( MediaLibraryPtr ml, const std::string& title );
+        static std::shared_ptr<Album> createUnknownAlbum( MediaLibraryPtr ml, const Artist* artist );
         ///
         /// \brief search search for an album, through its albumartist or title
         /// \param pattern A pattern representing the title, or the name of the main artist
         /// \return
         ///
-        static std::vector<AlbumPtr> search(DBConnection dbConn, const std::string& pattern );
+        static std::vector<AlbumPtr> search( MediaLibraryPtr ml, const std::string& pattern );
 
     protected:
-        DBConnection m_dbConnection;
+        MediaLibraryPtr m_ml;
         unsigned int m_id;
         std::string m_title;
         unsigned int m_artistId;

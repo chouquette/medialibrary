@@ -33,8 +33,8 @@ const std::string GenreTable::PrimaryKeyColumn = "id_genre";
 unsigned int Genre::* const GenreTable::PrimaryKey = &Genre::m_id;
 }
 
-Genre::Genre( DBConnection dbConn, sqlite::Row& row )
-    : m_dbConnection( dbConn )
+Genre::Genre( MediaLibraryPtr ml, sqlite::Row& row )
+    : m_ml( ml )
 {
     row >> m_id
         >> m_name;
@@ -60,12 +60,12 @@ std::vector<ArtistPtr> Genre::artists() const
     static const std::string req = "SELECT a.* FROM " + policy::ArtistTable::Name + " a "
             "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.artist_id = a.id_artist "
             "WHERE att.genre_id = ? GROUP BY att.artist_id";
-    return Artist::fetchAll<IArtist>( m_dbConnection, req, m_id );
+    return Artist::fetchAll<IArtist>( m_ml, req, m_id );
 }
 
 std::vector<AlbumTrackPtr> Genre::tracks() const
 {
-    return AlbumTrack::fromGenre( m_dbConnection, m_id );
+    return AlbumTrack::fromGenre( m_ml, m_id );
 }
 
 std::vector<AlbumPtr> Genre::albums() const
@@ -73,7 +73,7 @@ std::vector<AlbumPtr> Genre::albums() const
     static const std::string req = "SELECT a.* FROM " + policy::AlbumTable::Name + " a "
             "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.album_id = a.id_album "
             "WHERE att.genre_id = ? GROUP BY att.album_id";
-    return Album::fetchAll<IAlbum>( m_dbConnection, req, m_id );
+    return Album::fetchAll<IAlbum>( m_ml, req, m_id );
 }
 
 bool Genre::createTable( DBConnection dbConn )
@@ -104,27 +104,27 @@ bool Genre::createTable( DBConnection dbConn )
             sqlite::Tools::executeRequest( dbConn, vtableDeleteTrigger );
 }
 
-std::shared_ptr<Genre> Genre::create( DBConnection dbConn, const std::string& name )
+std::shared_ptr<Genre> Genre::create( MediaLibraryPtr ml, const std::string& name )
 {
     static const std::string req = "INSERT INTO " + policy::GenreTable::Name + "(name)"
             "VALUES(?)";
     auto self = std::make_shared<Genre>( name );
-    if ( insert( dbConn, self, req, name ) == false )
+    if ( insert( ml, self, req, name ) == false )
         return nullptr;
-    self->m_dbConnection = dbConn;
+    self->m_ml = ml;
     return self;
 }
 
-std::shared_ptr<Genre> Genre::fromName(DBConnection dbConn, const std::string& name )
+std::shared_ptr<Genre> Genre::fromName( MediaLibraryPtr ml, const std::string& name )
 {
     static const std::string req = "SELECT * FROM " + policy::GenreTable::Name + " WHERE name = ?";
-    return fetch( dbConn, req, name );
+    return fetch( ml, req, name );
 }
 
-std::vector<GenrePtr> Genre::search( DBConnection dbConn, const std::string& name )
+std::vector<GenrePtr> Genre::search( MediaLibraryPtr ml, const std::string& name )
 {
     static const std::string req = "SELECT * FROM " + policy::GenreTable::Name + " WHERE id_genre IN "
             "(SELECT rowid FROM " + policy::GenreTable::Name + "Fts WHERE name MATCH ?)";
-    return fetchAll<IGenre>( dbConn, req, name + "*" );
+    return fetchAll<IGenre>( ml, req, name + "*" );
 }
 

@@ -28,10 +28,9 @@
 #include "Media.h"
 #include "File.h"
 
-Parser::Parser( DBConnection dbConnection, MediaLibrary* ml, IMediaLibraryCb* cb )
-    : m_dbConnection( dbConnection )
-    , m_ml( ml )
-    , m_callback( cb )
+Parser::Parser(MediaLibrary* ml )
+    : m_ml( ml )
+    , m_callback( ml->getCb() )
     , m_opToDo( 0 )
     , m_opDone( 0 )
     , m_percent( 0 )
@@ -79,7 +78,7 @@ void Parser::restore()
 
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
             + " WHERE parsed = 0 AND is_present = 1";
-    auto files = File::fetchAll<File>( m_dbConnection, req );
+    auto files = File::fetchAll<File>( m_ml, req );
 
     for ( auto& f : files )
     {

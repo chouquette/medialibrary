@@ -27,8 +27,8 @@ const std::string policy::VideoTrackTable::Name = "VideoTrack";
 const std::string policy::VideoTrackTable::PrimaryKeyColumn = "id_track";
 unsigned int VideoTrack::* const policy::VideoTrackTable::PrimaryKey = &VideoTrack::m_id;
 
-VideoTrack::VideoTrack( DBConnection dbConnection, sqlite::Row& row )
-    : m_dbConnection( dbConnection )
+VideoTrack::VideoTrack( MediaLibraryPtr ml, sqlite::Row& row )
+    : m_ml( ml )
 {
     row >> m_id
         >> m_codec
@@ -73,15 +73,15 @@ float VideoTrack::fps() const
     return m_fps;
 }
 
-std::shared_ptr<VideoTrack> VideoTrack::create( DBConnection dbConnection, const std::string &codec, unsigned int width,
+std::shared_ptr<VideoTrack> VideoTrack::create( MediaLibraryPtr ml, const std::string &codec, unsigned int width,
                                                 unsigned int height, float fps, unsigned int mediaId )
 {
     static const std::string req  = "INSERT INTO " + policy::VideoTrackTable::Name
             + "(codec, width, height, fps, media_id) VALUES(?, ?, ?, ?, ?)";
     auto track = std::make_shared<VideoTrack>( codec, width, height, fps, mediaId );
-    if ( insert( dbConnection, track, req, codec, width, height, fps, mediaId ) == false )
+    if ( insert( ml, track, req, codec, width, height, fps, mediaId ) == false )
         return nullptr;
-    track->m_dbConnection = dbConnection;
+    track->m_ml = ml;
     return track;
 }
 

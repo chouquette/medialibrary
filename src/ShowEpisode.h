@@ -46,7 +46,7 @@ struct ShowEpisodeTable
 class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, policy::ShowEpisodeTable>
 {
     public:
-        ShowEpisode( DBConnection dbConnection, sqlite::Row& row );
+        ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row );
         ShowEpisode( unsigned int mediaId, const std::string& name, unsigned int episodeNumber, unsigned int showId );
 
         virtual unsigned int id() const override;
@@ -64,11 +64,11 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, pol
         virtual std::vector<MediaPtr> files() override;
 
         static bool createTable( DBConnection dbConnection );
-        static std::shared_ptr<ShowEpisode> create( DBConnection dbConnection, unsigned int mediaId, const std::string& title, unsigned int episodeNumber, unsigned int showId );
-        static ShowEpisodePtr fromMedia( DBConnection dbConnection, unsigned int mediaId );
+        static std::shared_ptr<ShowEpisode> create(MediaLibraryPtr ml, unsigned int mediaId, const std::string& title, unsigned int episodeNumber, unsigned int showId );
+        static ShowEpisodePtr fromMedia( MediaLibraryPtr ml, unsigned int mediaId );
 
     private:
-        DBConnection m_dbConnection;
+        MediaLibraryPtr m_ml;
         unsigned int m_id;
         unsigned int m_mediaId;
         std::string m_artworkMrl;

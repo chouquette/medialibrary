@@ -28,8 +28,8 @@ const std::string policy::AudioTrackTable::Name = "AudioTrack";
 const std::string policy::AudioTrackTable::PrimaryKeyColumn  = "id_track";
 unsigned int AudioTrack::* const policy::AudioTrackTable::PrimaryKey = &AudioTrack::m_id;
 
-AudioTrack::AudioTrack( DBConnection dbConnection, sqlite::Row& row )
-    : m_dbConnection( dbConnection )
+AudioTrack::AudioTrack( MediaLibraryPtr ml, sqlite::Row& row )
+    : m_ml( ml )
 {
     row >> m_id
         >> m_codec
@@ -109,15 +109,15 @@ bool AudioTrack::createTable( DBConnection dbConnection )
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-std::shared_ptr<AudioTrack> AudioTrack::create( DBConnection dbConnection, const std::string& codec,
-                unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels,
+std::shared_ptr<AudioTrack> AudioTrack::create( MediaLibraryPtr ml, const std::string& codec,
+                                                unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels,
                                                 const std::string& language, const std::string& desc, unsigned int mediaId )
 {
     static const std::string req = "INSERT INTO " + policy::AudioTrackTable::Name
             + "(codec, bitrate, samplerate, nb_channels, language, description, media_id) VALUES(?, ?, ?, ?, ?, ?, ?)";
     auto track = std::make_shared<AudioTrack>( codec, bitrate, sampleRate, nbChannels, language, desc, mediaId );
-    if ( insert( dbConnection, track, req, codec, bitrate, sampleRate, nbChannels, language, desc, mediaId ) == false )
+    if ( insert( ml, track, req, codec, bitrate, sampleRate, nbChannels, language, desc, mediaId ) == false )
         return nullptr;
-    track->m_dbConnection = dbConnection;
+    track->m_ml = ml;
     return track;
 }

@@ -187,19 +187,19 @@ void MediaLibrary::setVerbosity(LogLevel v)
 std::vector<MediaPtr> MediaLibrary::files()
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE is_present = 1";
-    return Media::fetchAll<IMedia>( m_dbConnection.get(), req );
+    return Media::fetchAll<IMedia>( this, req );
 }
 
 std::vector<MediaPtr> MediaLibrary::audioFiles()
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? AND is_present = 1 ORDER BY title";
-    return Media::fetchAll<IMedia>( m_dbConnection.get(), req, IMedia::Type::AudioType );
+    return Media::fetchAll<IMedia>( this, req, IMedia::Type::AudioType );
 }
 
 std::vector<MediaPtr> MediaLibrary::videoFiles()
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? AND is_present = 1 ORDER BY title";
-    return Media::fetchAll<IMedia>( m_dbConnection.get(), req, IMedia::Type::VideoType );
+    return Media::fetchAll<IMedia>( this, req, IMedia::Type::VideoType );
 }
 
 std::shared_ptr<Media> MediaLibrary::addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs )
@@ -224,7 +224,7 @@ std::shared_ptr<Media> MediaLibrary::addFile( const fs::IFile& fileFs, Folder& p
         return nullptr;
 
     LOG_INFO( "Adding ", fileFs.fullPath() );
-    auto mptr = Media::create( m_dbConnection.get(), type, fileFs );
+    auto mptr = Media::create( this, type, fileFs );
     if ( mptr == nullptr )
     {
         LOG_ERROR( "Failed to add media ", fileFs.fullPath(), " to the media library" );
@@ -235,7 +235,7 @@ std::shared_ptr<Media> MediaLibrary::addFile( const fs::IFile& fileFs, Folder& p
     if ( file == nullptr )
     {
         LOG_ERROR( "Failed to add file ", fileFs.fullPath(), " to media #", mptr->id() );
-        Media::destroy( m_dbConnection.get(), mptr->id() );
+        Media::destroy( this, mptr->id() );
         return nullptr;
     }
     if ( m_callback != nullptr )
@@ -247,7 +247,7 @@ std::shared_ptr<Media> MediaLibrary::addFile( const fs::IFile& fileFs, Folder& p
 
 bool MediaLibrary::deleteFolder( const Folder& folder )
 {
-    if ( Folder::destroy( m_dbConnection.get(), folder.id() ) == false )
+    if ( Folder::destroy( this, folder.id() ) == false )
         return false;
     Media::clear();
     return true;
@@ -255,27 +255,27 @@ bool MediaLibrary::deleteFolder( const Folder& folder )
 
 std::shared_ptr<Device> MediaLibrary::device( const std::string& uuid )
 {
-    return Device::fromUuid( m_dbConnection.get(), uuid );
+    return Device::fromUuid( this, uuid );
 }
 
 LabelPtr MediaLibrary::createLabel( const std::string& label )
 {
-    return Label::create( m_dbConnection.get(), label );
+    return Label::create( this, label );
 }
 
 bool MediaLibrary::deleteLabel( LabelPtr label )
 {
-    return Label::destroy( m_dbConnection.get(), label->id() );
+    return Label::destroy( this, label->id() );
 }
 
 AlbumPtr MediaLibrary::album( unsigned int id )
 {
-    return Album::fetch( m_dbConnection.get(), id );
+    return Album::fetch( this, id );
 }
 
 std::shared_ptr<Album> MediaLibrary::createAlbum(const std::string& title )
 {
-    return Album::create( m_dbConnection.get(), title );
+    return Album::create( this, title );
 }
 
 std::vector<AlbumPtr> MediaLibrary::albums()
@@ -283,36 +283,36 @@ std::vector<AlbumPtr> MediaLibrary::albums()
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
             " WHERE is_present=1"
             " ORDER BY title ASC";
-    return Album::fetchAll<IAlbum>( m_dbConnection.get(), req );
+    return Album::fetchAll<IAlbum>( this, req );
 }
 
 std::vector<GenrePtr> MediaLibrary::genres() const
 {
-    return Genre::fetchAll<IGenre>( m_dbConnection.get() );
+    return Genre::fetchAll<IGenre>( this );
 }
 
-ShowPtr MediaLibrary::show(const std::string& name)
+ShowPtr MediaLibrary::show( const std::string& name )
 {
     static const std::string req = "SELECT * FROM " + policy::ShowTable::Name
             + " WHERE name = ?";
-    return Show::fetch( m_dbConnection.get(), req, name );
+    return Show::fetch( this, req, name );
 }
 
 std::shared_ptr<Show> MediaLibrary::createShow(const std::string& name)
 {
-    return Show::create( m_dbConnection.get(), name );
+    return Show::create( this, name );
 }
 
 MoviePtr MediaLibrary::movie( const std::string& title )
 {
     static const std::string req = "SELECT * FROM " + policy::MovieTable::Name
             + " WHERE title = ?";
-    return Movie::fetch( m_dbConnection.get(), req, title );
+    return Movie::fetch( this, req, title );
 }
 
 std::shared_ptr<Movie> MediaLibrary::createMovie( Media& media, const std::string& title )
 {
-    auto movie = Movie::create( m_dbConnection.get(), media.id(), title );
+    auto movie = Movie::create( this, media.id(), title );
     media.setMovie( movie );
     media.save();
     return movie;
@@ -320,21 +320,21 @@ std::shared_ptr<Movie> MediaLibrary::createMovie( Media& media, const std::strin
 
 ArtistPtr MediaLibrary::artist(unsigned int id)
 {
-    return Artist::fetch( m_dbConnection.get(), id );
+    return Artist::fetch( this, id );
 }
 
 ArtistPtr MediaLibrary::artist( const std::string& name )
 {
     static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name
             + " WHERE name = ? AND is_present = 1";
-    return Artist::fetch( m_dbConnection.get(), req, name );
+    return Artist::fetch( this, req, name );
 }
 
 std::shared_ptr<Artist> MediaLibrary::createArtist( const std::string& name )
 {
     try
     {
-        return Artist::create( m_dbConnection.get(), name );
+        return Artist::create( this, name );
     }
     catch( sqlite::errors::ConstraintViolation &ex )
     {
@@ -347,44 +347,44 @@ std::vector<ArtistPtr> MediaLibrary::artists() const
 {
     static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name +
             " WHERE nb_albums > 0 AND is_present = 1";
-    return Artist::fetchAll<IArtist>( m_dbConnection.get(), req );
+    return Artist::fetchAll<IArtist>( this, req );
 }
 
 PlaylistPtr MediaLibrary::createPlaylist( const std::string& name )
 {
-    return Playlist::create( m_dbConnection.get(), name );
+    return Playlist::create( this, name );
 }
 
 std::vector<PlaylistPtr> MediaLibrary::playlists()
 {
-    return Playlist::fetchAll<IPlaylist>( m_dbConnection.get() );
+    return Playlist::fetchAll<IPlaylist>( this );
 }
 
 bool MediaLibrary::deletePlaylist( unsigned int playlistId )
 {
-    return Playlist::destroy( m_dbConnection.get(), playlistId );
+    return Playlist::destroy( this, playlistId );
 }
 
 bool MediaLibrary::addToHistory( const std::string& mrl )
 {
-    return History::insert( m_dbConnection.get(), mrl );
+    return History::insert( getConn(), mrl );
 }
 
 std::vector<HistoryPtr> MediaLibrary::lastStreamsPlayed() const
 {
-    return History::fetch( m_dbConnection.get() );
+    return History::fetch( this );
 }
 
 std::vector<MediaPtr> MediaLibrary::lastMediaPlayed() const
 {
-    return Media::fetchHistory( m_dbConnection.get() );
+    return Media::fetchHistory( this );
 }
 
 medialibrary::MediaSearchAggregate MediaLibrary::searchMedia( const std::string& title ) const
 {
     if ( validateSearchPattern( title ) == false )
         return {};
-    auto tmp = Media::search( m_dbConnection.get(), title );
+    auto tmp = Media::search( this, title );
     medialibrary::MediaSearchAggregate res;
     for ( auto& m : tmp )
     {
@@ -411,28 +411,28 @@ std::vector<PlaylistPtr> MediaLibrary::searchPlaylists( const std::string& name 
 {
     if ( validateSearchPattern( name ) == false )
         return {};
-    return Playlist::search( m_dbConnection.get(), name );
+    return Playlist::search( this, name );
 }
 
 std::vector<AlbumPtr> MediaLibrary::searchAlbums( const std::string& pattern ) const
 {
     if ( validateSearchPattern( pattern ) == false )
         return {};
-    return Album::search( m_dbConnection.get(), pattern );
+    return Album::search( this, pattern );
 }
 
 std::vector<GenrePtr> MediaLibrary::searchGenre( const std::string& genre ) const
 {
     if ( validateSearchPattern( genre ) == false )
         return {};
-    return Genre::search( m_dbConnection.get(), genre );
+    return Genre::search( this, genre );
 }
 
 std::vector<ArtistPtr> MediaLibrary::searchArtists(const std::string& name ) const
 {
     if ( validateSearchPattern( name ) == false )
         return {};
-    return Artist::search( m_dbConnection.get(), name );
+    return Artist::search( this, name );
 }
 
 medialibrary::SearchAggregate MediaLibrary::search( const std::string& pattern ) const
@@ -448,10 +448,10 @@ medialibrary::SearchAggregate MediaLibrary::search( const std::string& pattern )
 
 void MediaLibrary::startParser()
 {
-    m_parser.reset( new Parser( m_dbConnection.get(), this, m_callback ) );
+    m_parser.reset( new Parser( this ) );
 
     auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService );
-    auto metadataService = std::unique_ptr<MetadataParser>( new MetadataParser( m_dbConnection.get(), m_callback ) );
+    auto metadataService = std::unique_ptr<MetadataParser>( new MetadataParser );
     auto thumbnailerService = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer );
     m_parser->addService( std::move( vlcService ) );
     m_parser->addService( std::move( metadataService ) );
@@ -463,7 +463,7 @@ void MediaLibrary::startDiscoverer()
 {
     m_discoverer.reset( new DiscovererWorker );
     m_discoverer->setCallback( m_callback );
-    m_discoverer->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( m_fsFactory, this, m_dbConnection.get() ) ) );
+    m_discoverer->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( m_fsFactory, this ) ) );
     m_discoverer->reload();
 }
 
@@ -475,7 +475,7 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
         std::string req = "PRAGMA writable_schema = 1;"
                             "delete from sqlite_master;"
                             "PRAGMA writable_schema = 0;";
-        if ( sqlite::Tools::executeRequest( m_dbConnection.get(), req ) == false )
+        if ( sqlite::Tools::executeRequest( getConn(), req ) == false )
             return false;
         if ( createAllTables() == false )
             return false;
@@ -514,6 +514,16 @@ void MediaLibrary::resumeBackgroundOperations()
         m_parser->resume();
 }
 
+DBConnection MediaLibrary::getConn() const
+{
+    return m_dbConnection.get();
+}
+
+IMediaLibraryCb* MediaLibrary::getCb() const
+{
+    return m_callback;
+}
+
 void MediaLibrary::discover( const std::string &entryPoint )
 {
     if ( m_discoverer != nullptr )
@@ -522,12 +532,12 @@ void MediaLibrary::discover( const std::string &entryPoint )
 
 bool MediaLibrary::banFolder( const std::string& path )
 {
-    return Folder::blacklist( m_dbConnection.get(), path );
+    return Folder::blacklist( this, path );
 }
 
 bool MediaLibrary::unbanFolder( const std::string& path )
 {
-    auto folder = Folder::blacklistedFolder( m_dbConnection.get(), path );
+    auto folder = Folder::blacklistedFolder( this, path );
     if ( folder == nullptr )
         return false;
     deleteFolder( *folder );
