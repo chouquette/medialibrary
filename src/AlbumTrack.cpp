@@ -118,13 +118,16 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
             sqlite::Tools::executeRequest( dbConnection, triggerReq );
 }
 
-std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, unsigned int albumId, const Media& media, unsigned int trackNb, unsigned int discNumber )
+std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, unsigned int albumId,
+                                                std::shared_ptr<Media> media, unsigned int trackNb,
+                                                unsigned int discNumber )
 {
-    auto self = std::make_shared<AlbumTrack>( ml, media.id(), trackNb, albumId, discNumber );
+    auto self = std::make_shared<AlbumTrack>( ml, media->id(), trackNb, albumId, discNumber );
     static const std::string req = "INSERT INTO " + policy::AlbumTrackTable::Name
             + "(media_id, track_number, album_id, disc_number) VALUES(?, ?, ?, ?)";
-    if ( insert( ml, self, req, media.id(), trackNb, albumId, discNumber ) == false )
+    if ( insert( ml, self, req, media->id(), trackNb, albumId, discNumber ) == false )
         return nullptr;
+    self->m_media = media;
     return self;
 }
 
