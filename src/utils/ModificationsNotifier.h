@@ -48,6 +48,10 @@ public:
     void notifyArtistModification( ArtistPtr artist );
     void notifyArtistRemoval( int64_t artist );
 
+    void notifyAlbumCreation( AlbumPtr album );
+    void notifyAlbumModification( AlbumPtr album );
+    void notifyAlbumRemoval( int64_t albumId );
+
 private:
     void run();
     void notify();
@@ -134,6 +138,7 @@ private:
     // Queues
     Queue<IMedia> m_media;
     Queue<IArtist> m_artists;
+    Queue<IAlbum> m_albums;
 
     // Notifier thread
     std::mutex m_lock;

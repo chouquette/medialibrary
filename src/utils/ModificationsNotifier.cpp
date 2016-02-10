@@ -68,7 +68,7 @@ void ModificationNotifier::notifyArtistCreation( ArtistPtr artist )
     notifyCreation( std::move( artist ), m_artists );
 }
 
-void ModificationNotifier::notifyArtistModification(ArtistPtr artist)
+void ModificationNotifier::notifyArtistModification( ArtistPtr artist )
 {
     notifyModification( std::move( artist ), m_artists );
 }
@@ -76,6 +76,21 @@ void ModificationNotifier::notifyArtistModification(ArtistPtr artist)
 void ModificationNotifier::notifyArtistRemoval( int64_t artist )
 {
     notifyRemoval( std::move( artist ), m_artists );
+}
+
+void ModificationNotifier::notifyAlbumCreation( AlbumPtr album )
+{
+    notifyCreation( std::move( album ), m_albums );
+}
+
+void ModificationNotifier::notifyAlbumModification( AlbumPtr album )
+{
+    notifyModification( std::move( album ), m_albums );
+}
+
+void ModificationNotifier::notifyAlbumRemoval( int64_t albumId )
+{
+    notifyRemoval( albumId, m_albums );
 }
 
 void ModificationNotifier::run()
@@ -87,6 +102,7 @@ void ModificationNotifier::run()
     // more insertions to proceed
     Queue<IMedia> media;
     Queue<IArtist> artists;
+    Queue<IAlbum> albums;
 
     while ( m_stop == false )
     {
@@ -101,9 +117,11 @@ void ModificationNotifier::run()
             auto nextTimeout = ZeroTimeout;
             checkQueue( m_media, media, nextTimeout, now );
             checkQueue( m_artists, artists, nextTimeout, now );
+            checkQueue( m_albums, albums, nextTimeout, now );
             m_timeout = nextTimeout;
         }
         notify( std::move( media ), &IMediaLibraryCb::onMediaAdded, &IMediaLibraryCb::onMediaUpdated, &IMediaLibraryCb::onMediaDeleted );
         notify( std::move( artists ), &IMediaLibraryCb::onArtistsAdded, &IMediaLibraryCb::onArtistsModified, &IMediaLibraryCb::onArtistsDeleted );
+        notify( std::move( albums ), &IMediaLibraryCb::onAlbumsAdded, &IMediaLibraryCb::onAlbumsModified, &IMediaLibraryCb::onAlbumsDeleted );
     }
 }

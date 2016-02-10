@@ -245,7 +245,7 @@ std::shared_ptr<Album> MetadataParser::handleAlbum( parser::Task& task, std::sha
                 if ( task.artworkMrl.length() != 0 )
                     album->setArtworkMrl( task.artworkMrl );
             }
-            m_cb->onAlbumAdded( album );
+            m_notifier->notifyAlbumCreation( album );
         }
     }
     else

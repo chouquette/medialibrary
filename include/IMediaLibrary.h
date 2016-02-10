@@ -75,7 +75,9 @@ public:
     virtual void onArtistsModified( std::vector<ArtistPtr> artist ) = 0;
     virtual void onArtistsDeleted( std::vector<int64_t> ids ) = 0;
 
-    virtual void onAlbumAdded( AlbumPtr album ) = 0;
+    virtual void onAlbumsAdded( std::vector<AlbumPtr> albums ) = 0;
+    virtual void onAlbumsModified( std::vector<AlbumPtr> albums ) = 0;
+    virtual void onAlbumsDeleted( std::vector<int64_t> ids ) = 0;
     /**
      * @brief onTrackAdded Called when a media gets detected as an album track
      * and after it has been added to the album representation
