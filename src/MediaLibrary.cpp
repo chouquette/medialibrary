@@ -228,14 +228,12 @@ void MediaLibrary::setVerbosity(LogLevel v)
 
 std::vector<MediaPtr> MediaLibrary::audioFiles()
 {
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? AND is_present = 1 ORDER BY title";
-    return Media::fetchAll<IMedia>( this, req, IMedia::Type::AudioType );
+    return Media::listAll( this, IMedia::Type::AudioType );
 }
 
 std::vector<MediaPtr> MediaLibrary::videoFiles()
 {
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? AND is_present = 1 ORDER BY title";
-    return Media::fetchAll<IMedia>( this, req, IMedia::Type::VideoType );
+    return Media::listAll( this, IMedia::Type::VideoType );
 }
 
 std::shared_ptr<Media> MediaLibrary::addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs )

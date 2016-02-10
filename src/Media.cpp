@@ -333,6 +333,12 @@ void Media::removeFile( File& file )
     }));
 }
 
+std::vector<MediaPtr> Media::listAll( MediaLibraryPtr ml, IMedia::Type type )
+{
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? AND is_present = 1 ORDER BY title";
+    return DatabaseHelpers::fetchAll<IMedia>( ml, req, type );
+}
+
 unsigned int Media::id() const
 {
     return m_id;
