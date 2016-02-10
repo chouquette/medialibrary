@@ -25,6 +25,7 @@
 #include <memory>
 
 #include "Album.h"
+#include "AlbumTrack.h"
 #include "Artist.h"
 #include "Device.h"
 #include "File.h"
@@ -165,4 +166,9 @@ std::shared_ptr<Device> MediaLibraryTester::addDevice( const std::string& uuid, 
 void MediaLibraryTester::setFsFactory(std::shared_ptr<factory::IFileSystem> fsFactory)
 {
     m_fsFactory = fsFactory;
+}
+
+void MediaLibraryTester::deleteTrack(unsigned int trackId)
+{
+    AlbumTrack::destroy( this, trackId );
 }

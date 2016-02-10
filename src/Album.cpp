@@ -300,6 +300,13 @@ bool Album::createTriggers(DBConnection dbConnection)
                 "(SELECT COUNT(id_track) FROM " + policy::AlbumTrackTable::Name + " WHERE album_id=new.album_id AND is_present=1) "
                 "WHERE id_album=new.album_id;"
             " END";
+    static const std::string deleteTriggerReq = "CREATE TRIGGER IF NOT EXISTS delete_album AFTER DELETE ON "
+             + policy::AlbumTrackTable::Name +
+            " BEGIN "
+            " DELETE FROM " + policy::AlbumTable::Name +
+                " WHERE id_album=old.album_id AND "
+                "(SELECT COUNT(id_track) FROM " + policy::AlbumTrackTable::Name + " WHERE album_id=old.album_id) = 0;"
+            " END";
     static const std::string vtriggerInsert = "CREATE TRIGGER IF NOT EXISTS insert_album_fts AFTER INSERT ON "
             + policy::AlbumTable::Name +
             // Skip unknown albums
@@ -315,6 +322,7 @@ bool Album::createTriggers(DBConnection dbConnection)
             " DELETE FROM " + policy::AlbumTable::Name + "Fts WHERE rowid = old.id_album;"
             " END";
     return sqlite::Tools::executeRequest( dbConnection, triggerReq ) &&
+            sqlite::Tools::executeRequest( dbConnection, deleteTriggerReq ) &&
             sqlite::Tools::executeRequest( dbConnection, vtriggerInsert ) &&
             sqlite::Tools::executeRequest( dbConnection, vtriggerDelete );
 }

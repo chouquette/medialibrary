@@ -306,3 +306,18 @@ TEST_F( Albums, SearchAfterArtistUpdate )
     albums = ml->searchAlbums( "ice" );
     ASSERT_EQ( 1u, albums.size() );
 }
+
+TEST_F( Albums, AutoDelete )
+{
+    auto a = ml->createAlbum( "album" );
+    auto m = ml->addFile( "media.mp3" );
+    auto t = a->addTrack( m, 1, 1 );
+
+    auto album = ml->album( a->id() );
+    ASSERT_NE( nullptr, album );
+
+    ml->deleteTrack( t->id() );
+
+    album = ml->album( a->id() );
+    ASSERT_EQ( nullptr, album );
+}
