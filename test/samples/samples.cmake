@@ -1,6 +1,7 @@
 list(APPEND SAMPLE_TEST_SRCS
     samples/main.cpp
     samples/Tester.cpp
+    common/MediaLibraryTester.cpp
 )
 
 find_package(rapidjson REQUIRED)

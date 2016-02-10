@@ -28,7 +28,7 @@
 #include <mutex>
 #include <rapidjson/document.h>
 
-#include "MediaLibrary.h"
+#include "common/MediaLibraryTester.h"
 #include "IAlbum.h"
 #include "IArtist.h"
 #include "IMedia.h"
@@ -58,7 +58,7 @@ class Tests : public ::testing::TestWithParam<const char*>
 {
 protected:
     std::unique_ptr<MockCallback> m_cb;
-    std::unique_ptr<MediaLibrary> m_ml;
+    std::unique_ptr<MediaLibraryTester> m_ml;
 
     virtual void SetUp() override;
 

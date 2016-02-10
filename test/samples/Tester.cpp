@@ -42,7 +42,7 @@ void Tests::SetUp()
 {
     unlink("test.db");
     m_cb.reset( new MockCallback );
-    m_ml.reset( new MediaLibrary );
+    m_ml.reset( new MediaLibraryTester );
     if ( ExtraVerbose == true )
         m_ml->setVerbosity( LogLevel::Debug );
     else if ( Verbose == true )

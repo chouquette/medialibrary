@@ -22,22 +22,7 @@
 
 #include "Tests.h"
 
-#include <memory>
-
-#include "Album.h"
-#include "AlbumTrack.h"
-#include "Artist.h"
-#include "Device.h"
-#include "File.h"
-#include "filesystem/IFile.h"
-#include "filesystem/IDirectory.h"
-#include "utils/Filename.h"
-#include "discoverer/FsDiscoverer.h"
 #include "mocks/FileSystem.h"
-#include "Genre.h"
-#include "Media.h"
-#include "Folder.h"
-#include "Playlist.h"
 
 class TestEnv : public ::testing::Environment
 {
@@ -88,92 +73,3 @@ void Tests::InstantiateMediaLibrary()
 
 ::testing::Environment* const env = ::testing::AddGlobalTestEnvironment(new TestEnv);
 
-MediaLibraryTester::MediaLibraryTester()
-    : dummyDirectory( new mock::NoopDirectory )
-    , dummyFolder( nullptr, "./", 0, 0, false )
-{
-}
-
-std::shared_ptr<Media> MediaLibraryTester::media( unsigned int id )
-{
-    return Media::fetch( this, id );
-}
-
-MediaPtr MediaLibraryTester::media( const std::string& path )
-{
-    auto medias = files();
-    for ( auto& m : medias )
-    {
-        auto files = m->files();
-        for ( auto& f : files )
-        {
-            if ( f->mrl() == path )
-                return m;
-        }
-    }
-    return nullptr;
-}
-
-std::shared_ptr<Folder> MediaLibraryTester::folder( const std::string& path )
-{
-    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
-            " WHERE is_blacklisted = 0 AND is_present = 1";
-    auto folders = Folder::DatabaseHelpers::fetchAll<Folder>( this, req );
-    for ( auto &f : folders )
-    {
-        if ( f->path() == path )
-            return f;
-    }
-    return nullptr;
-}
-
-std::shared_ptr<Media> MediaLibraryTester::addFile( const std::string& path )
-{
-    mock::NoopFile file( path );
-    return MediaLibrary::addFile( file, dummyFolder, *dummyDirectory );
-}
-
-std::shared_ptr<Playlist> MediaLibraryTester::playlist(unsigned int playlistId)
-{
-    return Playlist::fetch( this, playlistId );
-}
-
-void MediaLibraryTester::deleteAlbum( unsigned int albumId )
-{
-    Album::destroy( this, albumId );
-}
-
-std::shared_ptr<Genre> MediaLibraryTester::createGenre( const std::string& name )
-{
-    return Genre::create( this, name );
-}
-
-void MediaLibraryTester::deleteGenre( unsigned int genreId )
-{
-    Genre::destroy( this, genreId );
-}
-
-void MediaLibraryTester::deleteArtist( unsigned int artistId )
-{
-    Artist::destroy( this, artistId );
-}
-
-std::shared_ptr<Device> MediaLibraryTester::addDevice( const std::string& uuid, bool isRemovable )
-{
-    return Device::create( this, uuid, isRemovable );
-}
-
-void MediaLibraryTester::setFsFactory(std::shared_ptr<factory::IFileSystem> fsFactory)
-{
-    m_fsFactory = fsFactory;
-}
-
-void MediaLibraryTester::deleteTrack(unsigned int trackId)
-{
-    AlbumTrack::destroy( this, trackId );
-}
-
-std::shared_ptr<AlbumTrack> MediaLibraryTester::albumTrack( unsigned int id )
-{
-    return AlbumTrack::fetch( this, id );
-}

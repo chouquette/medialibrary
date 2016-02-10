@@ -25,6 +25,8 @@ list(APPEND TEST_SRCS
     mocks/filesystem/MockDevice.cpp
     mocks/filesystem/MockFile.cpp
     mocks/filesystem/MockDirectory.cpp
+
+    common/MediaLibraryTester.cpp
 )
 
 add_executable(unittest ${TEST_SRCS})
