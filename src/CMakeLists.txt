@@ -85,6 +85,7 @@ list(APPEND SRC_LIST ${HEADERS_LIST}
 
     utils/Filename.cpp
     utils/VLCInstance.cpp
+    utils/DeletionNotifier.cpp
 
     database/SqliteConnection.cpp
     database/SqliteTransaction.cpp
