@@ -27,6 +27,7 @@ class Playlist;
 #include "factory/IFileSystem.h"
 #include "MediaLibrary.h"
 #include "Folder.h"
+#include "mocks/NoopCallback.h"
 
 class MediaLibraryTester : public MediaLibrary
 {
@@ -71,6 +72,7 @@ class Tests : public testing::Test
 {
 protected:
     std::unique_ptr<MediaLibraryTester> ml;
+    std::unique_ptr<mock::NoopCallback> cbMock;
 
     virtual void SetUp() override;
     virtual void InstantiateMediaLibrary();

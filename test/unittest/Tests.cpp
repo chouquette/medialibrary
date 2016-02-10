@@ -53,13 +53,20 @@ void Tests::TearDown()
     ml.reset();
 }
 
-void Tests::Reload(std::shared_ptr<factory::IFileSystem> fs /*= nullptr*/, IMediaLibraryCb* metadataCb /*= nullptr*/ )
+void Tests::Reload( std::shared_ptr<factory::IFileSystem> fs /*= nullptr*/, IMediaLibraryCb* metadataCb /*= nullptr*/ )
 {
     InstantiateMediaLibrary();
     if ( fs == nullptr )
     {
         fs = std::shared_ptr<factory::IFileSystem>( new mock::NoopFsFactory );
     }
+    if ( metadataCb == nullptr )
+    {
+        if ( cbMock == nullptr )
+            cbMock.reset( new mock::NoopCallback );
+        metadataCb = cbMock.get();
+    }
+
     ml->setFsFactory( fs );
     ml->setVerbosity( LogLevel::Error );
     bool res = ml->initialize( "test.db", "/tmp", metadataCb );
