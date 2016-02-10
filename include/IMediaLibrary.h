@@ -81,10 +81,10 @@ public:
     /**
      * @brief onTrackAdded Called when a media gets detected as an album track
      * and after it has been added to the album representation
-     * @param media The media, containing most of the informations
-     * @param track Some track specific informations
      */
-    virtual void onTrackAdded( MediaPtr media, AlbumTrackPtr track ) = 0;
+    virtual void onTracksAdded( std::vector<AlbumTrackPtr> tracks ) = 0;
+    // Tracks are never modified after their creation, so there is no tracksModified event
+    virtual void onTracksDeleted( std::vector<int64_t> trackIds ) = 0;
 
     virtual void onDiscoveryStarted( const std::string& entryPoint ) = 0;
     virtual void onDiscoveryCompleted( const std::string& entryPoint ) = 0;

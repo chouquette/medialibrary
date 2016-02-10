@@ -356,7 +356,7 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
         // using Album class internals.
         album->setReleaseYear( releaseYear, false );
     }
-    m_cb->onTrackAdded( task.media, track );
+    m_notifier->notifyAlbumTrackCreation( track );
     return track;
 }
 
