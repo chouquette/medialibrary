@@ -481,8 +481,7 @@ void MediaLibrary::startParser()
 
 void MediaLibrary::startDiscoverer()
 {
-    m_discoverer.reset( new DiscovererWorker );
-    m_discoverer->setCallback( m_callback );
+    m_discoverer.reset( new DiscovererWorker( this ) );
     m_discoverer->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( m_fsFactory, this ) ) );
     m_discoverer->reload();
 }

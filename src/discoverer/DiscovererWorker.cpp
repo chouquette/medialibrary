@@ -23,10 +23,11 @@
 #include "DiscovererWorker.h"
 
 #include "logging/Logger.h"
+#include "MediaLibrary.h"
 
-DiscovererWorker::DiscovererWorker()
+DiscovererWorker::DiscovererWorker( MediaLibraryPtr ml )
     : m_run( false )
-    , m_cb( nullptr )
+    , m_cb( ml->getCb() )
 {
 }
 
@@ -38,11 +39,6 @@ DiscovererWorker::~DiscovererWorker()
 void DiscovererWorker::addDiscoverer( std::unique_ptr<IDiscoverer> discoverer )
 {
     m_discoverers.push_back( std::move( discoverer ) );
-}
-
-void DiscovererWorker::setCallback(IMediaLibraryCb* cb)
-{
-    m_cb = cb;
 }
 
 void DiscovererWorker::stop()

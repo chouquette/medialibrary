@@ -36,10 +36,9 @@
 class DiscovererWorker : public IDiscoverer
 {
 public:
-    DiscovererWorker();
+    DiscovererWorker( MediaLibraryPtr ml );
     virtual ~DiscovererWorker();
     void addDiscoverer( std::unique_ptr<IDiscoverer> discoverer );
-    void setCallback( IMediaLibraryCb* cb );
     void stop();
 
     virtual bool discover( const std::string& entryPoint ) override;
