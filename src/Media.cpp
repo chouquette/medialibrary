@@ -159,11 +159,16 @@ int Media::playCount() const
     return m_playCount;
 }
 
-void Media::increasePlayCount()
+bool Media::increasePlayCount()
 {
+    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
+            "play_count = ?, last_played_date = ? WHERE id_media = ?";
+    auto lastPlayedDate = time( nullptr );
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_playCount + 1, lastPlayedDate, m_id ) == false )
+        return false;
     m_playCount++;
-    m_lastPlayedDate = time( nullptr );
-    m_changed = true;
+    m_lastPlayedDate = lastPlayedDate;
+    return true;
 }
 
 float Media::progress() const
@@ -171,12 +176,15 @@ float Media::progress() const
     return m_progress;
 }
 
-void Media::setProgress( float progress )
+bool Media::setProgress( float progress )
 {
+    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET progress = ? WHERE id_media = ?";
     if ( progress == m_progress || progress < 0 || progress > 1.0 )
-        return;
+        return true;
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, progress, m_id ) == false )
+        return false;
     m_progress = progress;
-    m_changed = true;
+    return true;
 }
 
 int Media::rating() const
@@ -184,12 +192,15 @@ int Media::rating() const
     return m_rating;
 }
 
-void Media::setRating( int rating )
+bool Media::setRating( int rating )
 {
+    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET rating = ? WHERE id_media = ?";
     if ( m_rating == rating )
-        return;
+        return true;
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, rating, m_id ) == false )
+        return false;
     m_rating = rating;
-    m_changed = true;
+    return true;
 }
 
 bool Media::isFavorite() const
@@ -197,12 +208,15 @@ bool Media::isFavorite() const
     return m_isFavorite;
 }
 
-void Media::setFavorite( bool favorite )
+bool Media::setFavorite( bool favorite )
 {
+    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET is_favorite = ? WHERE id_media = ?";
     if ( m_isFavorite == favorite )
-        return;
+        return true;
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, favorite, m_id ) == false )
+        return false;
     m_isFavorite = favorite;
-    m_changed = true;
+    return true;
 }
 
 const std::vector<FilePtr>& Media::files() const
@@ -284,13 +298,12 @@ void Media::setThumbnail(const std::string& thumbnail )
 bool Media::save()
 {
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
-            "type = ?, subtype = ?, duration = ?, play_count = ?, last_played_date = ?, progress = ?, rating = ?,"
-            "thumbnail = ?, title = ?, is_favorite = ? WHERE id_media = ?";
+            "type = ?, subtype = ?, duration = ?, progress = ?,"
+            "thumbnail = ?, title = ? WHERE id_media = ?";
     if ( m_changed == false )
         return true;
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_type, m_subType, m_duration, m_playCount,
-                                       m_lastPlayedDate, m_progress, m_rating, m_thumbnail, m_title,
-                                       m_isFavorite, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_type, m_subType, m_duration,
+                                       m_progress, m_thumbnail, m_title, m_id ) == false )
     {
         return false;
     }

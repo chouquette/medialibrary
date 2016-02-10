@@ -106,7 +106,6 @@ TEST_F( Medias, PlayCount )
     ASSERT_EQ( 0, f->playCount() );
     f->increasePlayCount();
     ASSERT_EQ( 1, f->playCount() );
-    f->save();
 
     Reload();
 
@@ -123,7 +122,6 @@ TEST_F( Medias, Progress )
     ASSERT_EQ( .0f, f->progress() );
     f->setProgress( 0.666f );
     ASSERT_EQ( .666f, f->progress() );
-    f->save();
 
     Reload();
 
@@ -136,7 +134,6 @@ TEST_F( Medias, Rating )
     auto f = ml->addFile( "media.avi" );
     ASSERT_EQ( -1, f->rating() );
     f->setRating( 12345 );
-    f->save();
     ASSERT_EQ( 12345, f->rating() );
 
     Reload();
@@ -268,7 +265,6 @@ TEST_F( Medias, Favorite )
     ASSERT_FALSE( m->isFavorite() );
 
     m->setFavorite( true );
-    m->save();
     ASSERT_TRUE( m->isFavorite() );
 
     Reload();

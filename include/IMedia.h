@@ -61,13 +61,13 @@ class IMedia
         virtual int64_t duration() const = 0;
         virtual ShowEpisodePtr showEpisode() const = 0;
         virtual int playCount() const = 0;
-        virtual void increasePlayCount() = 0;
+        virtual bool increasePlayCount() = 0;
         virtual const std::vector<FilePtr>& files() const = 0;
         ///
         /// \brief progress Returns the progress, in the [0;1] range
         ///
         virtual float progress() const = 0;
-        virtual void setProgress( float progress ) = 0;
+        virtual bool setProgress( float progress ) = 0;
         ///
         /// \brief rating The media rating, or -1 if unset.
         /// It is up to the application to determine the values it wishes to use.
@@ -75,9 +75,9 @@ class IMedia
         /// will be accepted.
         ///
         virtual int rating() const = 0;
-        virtual void setRating( int rating ) = 0;
+        virtual bool setRating( int rating ) = 0;
         virtual bool isFavorite() const = 0;
-        virtual void setFavorite( bool favorite ) = 0;
+        virtual bool setFavorite( bool favorite ) = 0;
         virtual bool addLabel( LabelPtr label ) = 0;
         virtual bool removeLabel( LabelPtr label ) = 0;
         virtual MoviePtr movie() const = 0;

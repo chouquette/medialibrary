@@ -79,13 +79,13 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual bool removeLabel( LabelPtr label ) override;
         virtual std::vector<LabelPtr> labels() override;
         virtual int playCount() const  override;
-        virtual void increasePlayCount() override;
+        virtual bool increasePlayCount() override;
         virtual float progress() const override;
-        virtual void setProgress( float progress ) override;
+        virtual bool setProgress( float progress ) override;
         virtual int rating() const override;
-        virtual void setRating( int rating ) override;
+        virtual bool setRating( int rating ) override;
         virtual bool isFavorite() const override;
-        virtual void setFavorite( bool favorite ) override;
+        virtual bool setFavorite( bool favorite ) override;
         virtual const std::vector<FilePtr>& files() const override;
         virtual MoviePtr movie() const override;
         void setMovie( MoviePtr movie );
