@@ -54,9 +54,17 @@ class MediaLibraryWithoutParser : public MediaLibraryTester
     virtual void startParser() override {}
 };
 
-class MediaLibraryWithoutBackground : public MediaLibraryWithoutParser
+class MediaLibraryWithoutBackground : public MediaLibraryTester
 {
     virtual void startDiscoverer() override {}
+    virtual void startParser() override {}
+    virtual void startDeletionNotifier() override {}
+};
+
+class MediaLibraryWithNotifier : public MediaLibraryTester
+{
+    virtual void startDiscoverer() override {}
+    virtual void startParser() override {}
 };
 
 class Tests : public testing::Test
