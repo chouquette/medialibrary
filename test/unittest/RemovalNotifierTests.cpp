@@ -94,7 +94,7 @@ TEST_F( RemovalNotifierTests, DeleteOne )
     m->removeFile( static_cast<File&>( *m->files()[0] ) );
     // This media doesn't have any associated files, and should be removed by a sqlite hook
     // The notification will arrive "late", as it will need to timeout first
-    auto res = cbMock->waitForNotif( std::move( lock ), std::chrono::seconds{ 6 } );
+    auto res = cbMock->waitForNotif( std::move( lock ), std::chrono::seconds{ 1 } );
     ASSERT_EQ( 1u, res );
 }
 
@@ -110,21 +110,4 @@ TEST_F( RemovalNotifierTests, DeleteBatch )
         media[i]->removeFile( static_cast<File&>( *media[i]->files()[0] ) );
     auto res = cbMock->waitForNotif( std::move( lock ), std::chrono::seconds{ 1 } );
     ASSERT_EQ( 5u, res );
-}
-
-TEST_F( RemovalNotifierTests, DeleteBatchPlusOne )
-{
-    std::shared_ptr<Media> media[6];
-    for ( auto i = 0u; i < 6; ++i )
-    {
-        media[i] = ml->addFile( "media.avi" );
-    }
-    auto lock = cbMock->prepareWait();
-    for ( auto i = 0u; i < 6; ++i )
-        media[i]->removeFile( static_cast<File&>( *media[i]->files()[0] ) );
-    auto res = cbMock->waitForNotif( std::move( lock ), std::chrono::seconds{ 1 } );
-    ASSERT_EQ( 5u, res );
-    lock = cbMock->prepareWait();
-    res = cbMock->waitForNotif( std::move( lock ), std::chrono::seconds{ 6 } );
-    ASSERT_EQ( 1u, res );
 }

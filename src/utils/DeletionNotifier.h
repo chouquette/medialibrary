@@ -79,10 +79,6 @@ private:
     std::thread m_notifierThread;
     std::atomic_bool m_stop;
     std::chrono::time_point<std::chrono::steady_clock> m_timeout;
-
-    static constexpr auto BatchSize = 5u;
-    // Maximum duration until the notifications are fired.
-    static constexpr auto Timeout = std::chrono::seconds{ 5 };
 };
 
 

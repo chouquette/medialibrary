@@ -57,17 +57,11 @@ void DeletionNotifier::notifyRemoval( int64_t rowId, DeletionNotifier::Queue& qu
 {
     std::lock_guard<std::mutex> lock( m_lock );
     queue.entities.push_back( rowId );
-    queue.timeout = std::chrono::steady_clock::now() + std::chrono::seconds{ 5 };
+    queue.timeout = std::chrono::steady_clock::now() + std::chrono::milliseconds{ 500 };
     if ( m_timeout == std::chrono::time_point<std::chrono::steady_clock>{} )
     {
-        LOG_ERROR( "Scheduling wakeup in 5s" );
         // If no wake up has been scheduled, schedule one now
         m_timeout = queue.timeout;
-        m_cond.notify_all();
-    }
-    else if ( queue.entities.size() >= BatchSize )
-    {
-        LOG_ERROR("Batch size reached");
         m_cond.notify_all();
     }
 }
@@ -88,13 +82,7 @@ void DeletionNotifier::run()
             std::unique_lock<std::mutex> lock( m_lock );
             if ( m_timeout == ZeroTimeout )
                 m_cond.wait( lock, [this, ZeroTimeout](){ return m_timeout != ZeroTimeout || m_stop == true; } );
-            LOG_ERROR("Waking up from endless cond" );
-            m_cond.wait_until( lock, m_timeout, [this]() {
-                LOG_ERROR("Checking pred");
-                return m_stop == true ||
-                    m_media.entities.size() == BatchSize;
-            });
-            LOG_ERROR("Notifier timedout");
+            m_cond.wait_until( lock, m_timeout, [this]() { return m_stop == true; });
             if ( m_stop == true )
                 break;
             auto now = std::chrono::steady_clock::now();
@@ -112,16 +100,14 @@ void DeletionNotifier::checkQueue( DeletionNotifier::Queue& input, DeletionNotif
 {
     constexpr auto ZeroTimeout = std::chrono::time_point<std::chrono::steady_clock>{};
 //    LOG_ERROR( "Input timeout: ", input.timeout.time_since_epoch(), " - Now: ", now.time_since_epoch() );
-    if ( input.timeout <= now || input.entities.size() >= BatchSize )
+    if ( input.timeout <= now && input.entities.size() > 0 )
     {
-        LOG_ERROR("Swapping tmp & actual queues");
         using std::swap;
         swap( input, output );
     }
     // Or is scheduled for timeout soon:
     else if ( input.timeout != ZeroTimeout && ( nextTimeout == ZeroTimeout || input.timeout < nextTimeout ) )
     {
-        LOG_ERROR("Refreshing timeout");
         nextTimeout = input.timeout;
     }
 }
