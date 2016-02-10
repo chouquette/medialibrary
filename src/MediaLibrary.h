@@ -23,9 +23,10 @@
 #ifndef MEDIALIBRARY_H
 #define MEDIALIBRARY_H
 
+class DeletionNotifier;
+class DiscovererWorker;
 class Parser;
 class ParserService;
-class DiscovererWorker;
 class SqliteConnection;
 
 #include "IMediaLibrary.h"
@@ -124,8 +125,10 @@ class MediaLibrary : public IMediaLibrary
     private:
         virtual void startParser();
         virtual void startDiscoverer();
+        virtual void startDeletionNotifier();
         bool updateDatabaseModel( unsigned int previousVersion );
         bool createAllTables();
+        void registerEntityHooks();
         static bool validateSearchPattern( const std::string& pattern );
 
     protected:
@@ -143,6 +146,7 @@ class MediaLibrary : public IMediaLibrary
         // Same reasoning applies here.
         //FIXME: Having to maintain a specific ordering sucks, let's use shared_ptr or something
         std::unique_ptr<DiscovererWorker> m_discoverer;
+        std::unique_ptr<DeletionNotifier> m_deletionNotifier;
         LogLevel m_verbosity;
         Settings m_settings;
 };

@@ -30,6 +30,7 @@
 #include "Artist.h"
 #include "AudioTrack.h"
 #include "discoverer/DiscovererWorker.h"
+#include "utils/DeletionNotifier.h"
 #include "Device.h"
 #include "File.h"
 #include "Folder.h"
@@ -147,6 +148,18 @@ bool MediaLibrary::createAllTables()
     return true;
 }
 
+void MediaLibrary::registerEntityHooks()
+{
+    m_dbConnection->registerUpdateHook( policy::MediaTable::Name,
+                                        [this]( SqliteConnection::HookReason reason, int64_t rowId ) {
+        if ( reason != SqliteConnection::HookReason::Delete )
+            return;
+        Media::removeFromCache( rowId );
+        m_deletionNotifier->notifyMediaRemoval( rowId );
+    });
+}
+
+
 bool MediaLibrary::validateSearchPattern( const std::string& pattern )
 {
     return pattern.size() >= 3;
@@ -160,6 +173,8 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
     m_thumbnailPath = thumbnailPath;
     m_callback = mlCallback;
     m_dbConnection.reset( new SqliteConnection( dbPath ) );
+
+    registerEntityHooks();
 
     if ( createAllTables() == false )
     {
@@ -175,6 +190,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
     }
     startDiscoverer();
     startParser();
+    startDeletionNotifier();
     return true;
 }
 
@@ -465,6 +481,12 @@ void MediaLibrary::startDiscoverer()
     m_discoverer->setCallback( m_callback );
     m_discoverer->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( m_fsFactory, this ) ) );
     m_discoverer->reload();
+}
+
+void MediaLibrary::startDeletionNotifier()
+{
+    m_deletionNotifier.reset( new DeletionNotifier( this ) );
+    m_deletionNotifier->start();
 }
 
 bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
