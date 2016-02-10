@@ -23,6 +23,7 @@
 #include "gtest/gtest.h"
 
 class Playlist;
+class AlbumTrack;
 
 #include "factory/IFileSystem.h"
 #include "MediaLibrary.h"
@@ -45,6 +46,7 @@ public:
     std::shared_ptr<Device> addDevice( const std::string& uuid, bool isRemovable );
     void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory );
     void deleteTrack( unsigned int trackId );
+    std::shared_ptr<AlbumTrack> albumTrack( unsigned int id );
 
 private:
     std::unique_ptr<fs::IDirectory> dummyDirectory;

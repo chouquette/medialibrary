@@ -64,6 +64,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         bool setReleaseYear( unsigned int year );
         virtual unsigned int discNumber() const override;
         virtual std::shared_ptr<IAlbum> album() override;
+        virtual std::shared_ptr<IMedia> media() override;
 
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<AlbumTrack> create( MediaLibraryPtr ml, unsigned int albumId,
@@ -87,6 +88,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         std::weak_ptr<Album> m_album;
         mutable Cache<std::shared_ptr<Artist>> m_artist;
         mutable Cache<std::shared_ptr<Genre>> m_genre;
+        mutable Cache<std::weak_ptr<Media>> m_media;
 
         friend struct policy::AlbumTrackTable;
 };

@@ -112,3 +112,22 @@ TEST_F( AlbumTracks, SetGenre )
     auto t2 = tracks[0];
     ASSERT_EQ( t->genre()->id(), t2->albumTrack()->genre()->id() );
 }
+
+TEST_F( AlbumTracks, Media )
+{
+    auto album = ml->createAlbum( "album" );
+    auto f = ml->addFile( "track1.mp3" );
+    auto track = album->addTrack( f, 1, 10 );
+    f->save();
+
+    auto media = track->media();
+    ASSERT_NE( nullptr, media );
+    ASSERT_EQ( media->id(), f->id() );
+
+    Reload();
+
+    track = ml->albumTrack( track->id() );
+    media = track->media();
+    ASSERT_NE( nullptr, media );
+    ASSERT_EQ( media->id(), f->id() );
+}

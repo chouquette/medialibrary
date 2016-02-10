@@ -43,6 +43,7 @@ class IAlbumTrack
         virtual GenrePtr genre() = 0;
         virtual unsigned int trackNumber() = 0;
         virtual AlbumPtr album() = 0;
+        virtual MediaPtr media() = 0;
         /**
          * @return Which disc this tracks appears on (or 0 if unspecified)
          */

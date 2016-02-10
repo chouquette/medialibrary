@@ -172,3 +172,8 @@ void MediaLibraryTester::deleteTrack(unsigned int trackId)
 {
     AlbumTrack::destroy( this, trackId );
 }
+
+std::shared_ptr<AlbumTrack> MediaLibraryTester::albumTrack( unsigned int id )
+{
+    return AlbumTrack::fetch( this, id );
+}

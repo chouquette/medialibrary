@@ -203,3 +203,13 @@ std::shared_ptr<IAlbum> AlbumTrack::album()
     }
     return album;
 }
+
+std::shared_ptr<IMedia> AlbumTrack::media()
+{
+    auto lock = m_media.lock();
+    if ( m_media.isCached() == false )
+    {
+        m_media = Media::fetch( m_ml, m_mediaId );
+    }
+    return m_media.get().lock();
+}
