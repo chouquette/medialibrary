@@ -27,10 +27,12 @@
 #include "IMediaLibrary.h"
 #include "Media.h"
 #include "File.h"
+#include "utils/DeletionNotifier.h"
 
-Parser::Parser(MediaLibrary* ml )
+Parser::Parser( MediaLibrary* ml )
     : m_ml( ml )
     , m_callback( ml->getCb() )
+    , m_notifier( ml->getNotifier() )
     , m_opToDo( 0 )
     , m_opDone( 0 )
     , m_percent( 0 )
@@ -109,7 +111,7 @@ void Parser::done( std::unique_ptr<parser::Task> t, parser::Task::Status status 
     }
     if ( status == parser::Task::Status::Success )
     {
-        m_callback->onMediaUpdated( t->media );
+        m_notifier->notifyMediaModification( t->media );
     }
 
     auto serviceIdx = ++t->currentService;

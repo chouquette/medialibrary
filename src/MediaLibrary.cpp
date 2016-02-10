@@ -150,7 +150,7 @@ bool MediaLibrary::createAllTables()
 
 void MediaLibrary::registerEntityHooks()
 {
-    if ( m_deletionNotifier == nullptr )
+    if ( m_modificationNotifier == nullptr )
         return;
 
     m_dbConnection->registerUpdateHook( policy::MediaTable::Name,
@@ -158,7 +158,7 @@ void MediaLibrary::registerEntityHooks()
         if ( reason != SqliteConnection::HookReason::Delete )
             return;
         Media::removeFromCache( rowId );
-        m_deletionNotifier->notifyMediaRemoval( rowId );
+        m_modificationNotifier->notifyMediaRemoval( rowId );
     });
 }
 
@@ -259,7 +259,7 @@ std::shared_ptr<Media> MediaLibrary::addFile( const fs::IFile& fileFs, Folder& p
         Media::destroy( this, mptr->id() );
         return nullptr;
     }
-    m_callback->onMediaAdded( mptr );
+    m_modificationNotifier->notifyMediaCreation( mptr );
     if ( m_parser != nullptr )
         m_parser->parse( mptr, file );
     return mptr;
@@ -488,8 +488,8 @@ void MediaLibrary::startDiscoverer()
 
 void MediaLibrary::startDeletionNotifier()
 {
-    m_deletionNotifier.reset( new DeletionNotifier( this ) );
-    m_deletionNotifier->start();
+    m_modificationNotifier.reset( new ModificationNotifier( this ) );
+    m_modificationNotifier->start();
 }
 
 bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
@@ -547,6 +547,11 @@ DBConnection MediaLibrary::getConn() const
 IMediaLibraryCb* MediaLibrary::getCb() const
 {
     return m_callback;
+}
+
+std::shared_ptr<ModificationNotifier> MediaLibrary::getNotifier() const
+{
+    return m_modificationNotifier;
 }
 
 void MediaLibrary::discover( const std::string &entryPoint )

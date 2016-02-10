@@ -25,13 +25,13 @@
 #include "DeletionNotifier.h"
 #include "MediaLibrary.h"
 
-DeletionNotifier::DeletionNotifier( MediaLibraryPtr ml )
+ModificationNotifier::ModificationNotifier( MediaLibraryPtr ml )
     : m_ml( ml )
     , m_cb( ml->getCb() )
 {
 }
 
-DeletionNotifier::~DeletionNotifier()
+ModificationNotifier::~ModificationNotifier()
 {
     if ( m_notifierThread.joinable() == true )
     {
@@ -41,40 +41,36 @@ DeletionNotifier::~DeletionNotifier()
     }
 }
 
-void DeletionNotifier::start()
+void ModificationNotifier::start()
 {
     assert( m_notifierThread.get_id() == std::thread::id{} );
     m_stop = false;
-    m_notifierThread = std::thread{ &DeletionNotifier::run, this };
+    m_notifierThread = std::thread{ &ModificationNotifier::run, this };
 }
 
-void DeletionNotifier::notifyMediaRemoval( int64_t mediaId )
+void ModificationNotifier::notifyMediaCreation( MediaPtr media )
+{
+    notifyCreation( std::move( media ), m_media );
+}
+
+void ModificationNotifier::notifyMediaModification( MediaPtr media )
+{
+    notifyModification( std::move( media ), m_media );
+}
+
+void ModificationNotifier::notifyMediaRemoval( int64_t mediaId )
 {
     notifyRemoval( mediaId, m_media );
 }
 
-void DeletionNotifier::notifyRemoval( int64_t rowId, DeletionNotifier::Queue& queue )
-{
-    std::lock_guard<std::mutex> lock( m_lock );
-    queue.entities.push_back( rowId );
-    queue.timeout = std::chrono::steady_clock::now() + std::chrono::milliseconds{ 500 };
-    if ( m_timeout == std::chrono::time_point<std::chrono::steady_clock>{} )
-    {
-        // If no wake up has been scheduled, schedule one now
-        m_timeout = queue.timeout;
-        m_cond.notify_all();
-    }
-}
-
-
-void DeletionNotifier::run()
+void ModificationNotifier::run()
 {
     constexpr auto ZeroTimeout = std::chrono::time_point<std::chrono::steady_clock>{};
 
     // Create some other queue to swap with the ones that are used
     // by other threads. That way we can release those early and allow
     // more insertions to proceed
-    Queue media;
+    Queue<IMedia> media;
 
     while ( m_stop == false )
     {
@@ -90,24 +86,10 @@ void DeletionNotifier::run()
             checkQueue( m_media, media, nextTimeout, now );
             m_timeout = nextTimeout;
         }
-        notify( std::move( media ), &IMediaLibraryCb::onMediaDeleted );
+        notify( std::move( media ), &IMediaLibraryCb::onMediaAdded, &IMediaLibraryCb::onMediaUpdated, &IMediaLibraryCb::onMediaDeleted );
     }
 }
 
-void DeletionNotifier::checkQueue( DeletionNotifier::Queue& input, DeletionNotifier::Queue& output,
-                                   std::chrono::time_point<std::chrono::steady_clock>& nextTimeout,
-                                   std::chrono::time_point<std::chrono::steady_clock> now)
-{
-    constexpr auto ZeroTimeout = std::chrono::time_point<std::chrono::steady_clock>{};
-//    LOG_ERROR( "Input timeout: ", input.timeout.time_since_epoch(), " - Now: ", now.time_since_epoch() );
-    if ( input.timeout <= now && input.entities.size() > 0 )
-    {
-        using std::swap;
-        swap( input, output );
-    }
-    // Or is scheduled for timeout soon:
-    else if ( input.timeout != ZeroTimeout && ( nextTimeout == ZeroTimeout || input.timeout < nextTimeout ) )
-    {
-        nextTimeout = input.timeout;
-    }
-}
+
+
+

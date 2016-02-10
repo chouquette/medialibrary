@@ -23,7 +23,7 @@
 #ifndef MEDIALIBRARY_H
 #define MEDIALIBRARY_H
 
-class DeletionNotifier;
+class ModificationNotifier;
 class DiscovererWorker;
 class Parser;
 class ParserService;
@@ -114,6 +114,7 @@ class MediaLibrary : public IMediaLibrary
 
         DBConnection getConn() const;
         IMediaLibraryCb* getCb() const;
+        std::shared_ptr<ModificationNotifier> getNotifier() const;
 
     public:
         static const uint32_t DbModelVersion;
@@ -146,7 +147,7 @@ class MediaLibrary : public IMediaLibrary
         // Same reasoning applies here.
         //FIXME: Having to maintain a specific ordering sucks, let's use shared_ptr or something
         std::unique_ptr<DiscovererWorker> m_discoverer;
-        std::unique_ptr<DeletionNotifier> m_deletionNotifier;
+        std::shared_ptr<ModificationNotifier> m_modificationNotifier;
         LogLevel m_verbosity;
         Settings m_settings;
 };

@@ -65,6 +65,7 @@ private:
 
     MediaLibrary* m_ml;
     IMediaLibraryCb* m_callback;
+    std::shared_ptr<ModificationNotifier> m_notifier;
     std::atomic_uint m_opToDo;
     std::atomic_uint m_opDone;
     std::atomic_uint m_percent;

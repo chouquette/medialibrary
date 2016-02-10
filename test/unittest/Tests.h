@@ -59,7 +59,6 @@ class MediaLibraryWithoutBackground : public MediaLibraryTester
 {
     virtual void startDiscoverer() override {}
     virtual void startParser() override {}
-    virtual void startDeletionNotifier() override {}
 };
 
 class MediaLibraryWithNotifier : public MediaLibraryTester

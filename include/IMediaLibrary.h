@@ -56,21 +56,23 @@ class IMediaLibraryCb
 public:
     virtual ~IMediaLibraryCb() = default;
     /**
-     * @brief onFileAdded Will be called when a media gets added.
+     * @brief onFileAdded Will be called when some media get added.
      * Depending if the media is being restored or was just discovered,
      * the media type might be a best effort guess. If the media was freshly
      * discovered, it is extremely likely that no metadata will be
      * available yet.
+     * The number of media is undefined, but is guaranteed to be at least 1.
      */
-    virtual void onMediaAdded( MediaPtr media ) = 0;
+    virtual void onMediaAdded( std::vector<MediaPtr> media ) = 0;
     /**
      * @brief onFileUpdated Will be called when a file metadata gets updated.
      */
-    virtual void onMediaUpdated( MediaPtr media ) = 0;
+    virtual void onMediaUpdated( std::vector<MediaPtr> media ) = 0;
 
     virtual void onMediaDeleted( std::vector<int64_t> ids ) = 0;
 
     virtual void onArtistAdded( ArtistPtr artist ) = 0;
+
     virtual void onAlbumAdded( AlbumPtr album ) = 0;
     /**
      * @brief onTrackAdded Called when a media gets detected as an album track

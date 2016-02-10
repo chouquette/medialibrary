@@ -33,13 +33,15 @@
 
 class IMediaLibraryCb;
 
-class DeletionNotifier
+class ModificationNotifier
 {
 public:
-    DeletionNotifier( MediaLibraryPtr ml );
-    ~DeletionNotifier();
+    ModificationNotifier( MediaLibraryPtr ml );
+    ~ModificationNotifier();
 
     void start();
+    void notifyMediaCreation(MediaPtr media );
+    void notifyMediaModification(MediaPtr media );
     void notifyMediaRemoval( int64_t media );
 
 private:
@@ -47,31 +49,86 @@ private:
     void notify();
 
 private:
+    template <typename T>
     struct Queue
     {
-        std::vector<int64_t> entities;
+        std::vector<std::shared_ptr<T>> added;
+        std::vector<std::shared_ptr<T>> modified;
+        std::vector<int64_t> removed;
         std::chrono::time_point<std::chrono::steady_clock> timeout;
     };
 
-    template <typename Func>
-    void notify( Queue&& queue, Func f )
+    template <typename T, typename AddedCb, typename ModifiedCb, typename RemovedCb>
+    void notify( Queue<T>&& queue, AddedCb addedCb, ModifiedCb modifiedCb, RemovedCb removedCb )
     {
-        if ( queue.entities.size() == 0 )
-            return;
-        (*m_cb.*f)( std::move( queue.entities ) );
+        if ( queue.added.size() > 0 )
+            (*m_cb.*addedCb)( std::move( queue.added ) );
+        if ( queue.modified.size() > 0 )
+            (*m_cb.*modifiedCb)( std::move( queue.modified ) );
+        if ( queue.removed.size() > 0 )
+            (*m_cb.*removedCb)( std::move( queue.removed ) );
     }
 
-    void notifyRemoval( int64_t rowId, Queue& queue );
+    template <typename T>
+    void notifyCreation( std::shared_ptr<T> entity, Queue<T>& queue )
+    {
+        std::lock_guard<std::mutex> lock( m_lock );
+        queue.added.push_back( std::move( entity ) );
+        updateTimeout( queue );
+    }
 
-    void checkQueue( Queue& input, Queue& output, std::chrono::time_point<std::chrono::steady_clock>& nextTimeout,
-                     std::chrono::time_point<std::chrono::steady_clock> now );
+    template <typename T>
+    void notifyModification( std::shared_ptr<T> entity, Queue<T>& queue )
+    {
+        std::lock_guard<std::mutex> lock( m_lock );
+        queue.modified.push_back( std::move( entity ) );
+        updateTimeout( queue );
+    }
+
+    template <typename T>
+    void notifyRemoval( int64_t rowId, Queue<T>& queue )
+    {
+        std::lock_guard<std::mutex> lock( m_lock );
+        queue.removed.push_back( rowId );
+        updateTimeout( m_media );
+    }
+
+    template <typename T>
+    void updateTimeout( Queue<T>& queue )
+    {
+        queue.timeout = std::chrono::steady_clock::now() + std::chrono::milliseconds{ 500 };
+        if ( m_timeout == std::chrono::time_point<std::chrono::steady_clock>{} )
+        {
+            // If no wake up has been scheduled, schedule one now
+            m_timeout = queue.timeout;
+            m_cond.notify_all();
+        }
+    }
+
+    template <typename T>
+    void checkQueue( Queue<T>& input, Queue<T>& output, std::chrono::time_point<std::chrono::steady_clock>& nextTimeout,
+                     std::chrono::time_point<std::chrono::steady_clock> now )
+    {
+        constexpr auto ZeroTimeout = std::chrono::time_point<std::chrono::steady_clock>{};
+        //    LOG_ERROR( "Input timeout: ", input.timeout.time_since_epoch(), " - Now: ", now.time_since_epoch() );
+        if ( input.timeout <= now )
+        {
+            using std::swap;
+            swap( input, output );
+        }
+        // Or is scheduled for timeout soon:
+        else if ( input.timeout != ZeroTimeout && ( nextTimeout == ZeroTimeout || input.timeout < nextTimeout ) )
+        {
+            nextTimeout = input.timeout;
+        }
+    }
 
 private:
     MediaLibraryPtr m_ml;
     IMediaLibraryCb* m_cb;
 
     // Queues
-    Queue m_media;
+    Queue<IMedia> m_media;
 
     // Notifier thread
     std::mutex m_lock;
