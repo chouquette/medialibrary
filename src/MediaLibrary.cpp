@@ -150,6 +150,9 @@ bool MediaLibrary::createAllTables()
 
 void MediaLibrary::registerEntityHooks()
 {
+    if ( m_deletionNotifier == nullptr )
+        return;
+
     m_dbConnection->registerUpdateHook( policy::MediaTable::Name,
                                         [this]( SqliteConnection::HookReason reason, int64_t rowId ) {
         if ( reason != SqliteConnection::HookReason::Delete )
@@ -174,6 +177,9 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
     m_callback = mlCallback;
     m_dbConnection.reset( new SqliteConnection( dbPath ) );
 
+    // Give a chance to test overloads to reject the creation of a notifier
+    startDeletionNotifier();
+    // Which allows us to register hooks, or not, depending on the presence of a notifier
     registerEntityHooks();
 
     if ( createAllTables() == false )
@@ -190,7 +196,6 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
     }
     startDiscoverer();
     startParser();
-    startDeletionNotifier();
     return true;
 }
 
