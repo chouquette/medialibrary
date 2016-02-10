@@ -26,49 +26,18 @@
 #include <condition_variable>
 
 #include "IMediaLibrary.h"
+#include "mocks/NoopCallback.h"
 
 namespace mock
 {
 
-class WaitForDiscoveryComplete : public IMediaLibraryCb
+class WaitForDiscoveryComplete : public mock::NoopCallback
 {
 public:
-    virtual void onMediaAdded( MediaPtr ) override
-    {
-    }
-
-    virtual void onMediaUpdated( MediaPtr ) override
-    {
-    }
-
-    virtual void onMediaDeleted( std::vector<int64_t> ) override
-    {
-    }
-
-    virtual void onArtistAdded( ArtistPtr ) override
-    {
-    }
-
-    virtual void onAlbumAdded( AlbumPtr ) override
-    {
-    }
-
-    virtual void onTrackAdded( MediaPtr, AlbumTrackPtr ) override
-    {
-    }
-
-    virtual void onDiscoveryStarted( const std::string& ) override
-    {
-    }
-
     virtual void onDiscoveryCompleted( const std::string& ) override
     {
         if ( --m_nbDiscoveryToWait == 0 )
             m_cond.notify_all();
-    }
-
-    virtual void onReloadStarted( const std::string& ) override
-    {
     }
 
     virtual void onReloadCompleted( const std::string& ) override
@@ -76,8 +45,6 @@ public:
         if ( --m_nbReloadExpected == 0 )
             m_reloadCond.notify_all();
     }
-
-    virtual void onParsingStatsUpdated( uint32_t ) override {}
 
     bool wait()
     {

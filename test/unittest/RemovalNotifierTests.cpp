@@ -23,29 +23,19 @@
 #include "Tests.h"
 #include "Media.h"
 #include "File.h"
+#include "mocks/NoopCallback.h"
 
-class MockCallback : public IMediaLibraryCb
+class MockCallback : public mock::NoopCallback
 {
 public:
     MockCallback() : m_nbMedia( 0 ) {}
 private:
-    virtual void onMediaAdded(MediaPtr) override {}
-    virtual void onMediaUpdated(MediaPtr) override {}
-
     virtual void onMediaDeleted( std::vector<int64_t> batch ) override
     {
         std::lock_guard<std::mutex> lock( m_lock );
         m_nbMedia = batch.size();
         m_cond.notify_all();
     }
-    virtual void onDiscoveryStarted(const std::string&) override {}
-    virtual void onDiscoveryCompleted(const std::string&) override {}
-    virtual void onReloadStarted( const std::string& ) override {}
-    virtual void onReloadCompleted( const std::string& ) override {}
-    virtual void onArtistAdded( ArtistPtr ) override {}
-    virtual void onAlbumAdded( AlbumPtr ) override {}
-    virtual void onTrackAdded( MediaPtr, AlbumTrackPtr ) override {}
-    virtual void onParsingStatsUpdated( uint32_t ) override {}
 public:
     std::unique_lock<std::mutex> prepareWait()
     {

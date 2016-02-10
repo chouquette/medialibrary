@@ -36,25 +36,16 @@
 #include "IAudioTrack.h"
 #include "IVideoTrack.h"
 #include "IGenre.h"
+#include "mocks/NoopCallback.h"
 
-class MockCallback : public IMediaLibraryCb
+class MockCallback : public mock::NoopCallback
 {
 public:
     MockCallback();
     bool waitForParsingComplete();
 
 private:
-    virtual void onMediaAdded(MediaPtr) override {}
-    virtual void onMediaUpdated(MediaPtr) override {}
-    virtual void onMediaDeleted( std::vector<int64_t> ) override {}
-    virtual void onDiscoveryStarted(const std::string&) override {}
     virtual void onDiscoveryCompleted(const std::string&) override;
-    virtual void onReloadStarted( const std::string& ) override {}
-    virtual void onReloadCompleted( const std::string& ) override {}
-    virtual void onArtistAdded( ArtistPtr ) override {}
-    virtual void onAlbumAdded( AlbumPtr ) override {}
-    virtual void onTrackAdded( MediaPtr, AlbumTrackPtr ) override {}
-
     virtual void onParsingStatsUpdated(uint32_t percent) override;
 
     std::condition_variable m_parsingCompleteVar;
