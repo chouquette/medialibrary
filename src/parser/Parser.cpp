@@ -89,9 +89,6 @@ void Parser::restore()
 
 void Parser::updateStats()
 {
-    if ( m_callback == nullptr )
-        return;
-
     auto percent = m_opToDo > 0 ? ( m_opDone * 100 / m_opToDo ) : 0;
     if ( percent != m_percent )
     {
@@ -112,8 +109,7 @@ void Parser::done( std::unique_ptr<parser::Task> t, parser::Task::Status status 
     }
     if ( status == parser::Task::Status::Success )
     {
-        if ( m_callback != nullptr )
-            m_callback->onMediaUpdated( t->media );
+        m_callback->onMediaUpdated( t->media );
     }
 
     auto serviceIdx = ++t->currentService;
