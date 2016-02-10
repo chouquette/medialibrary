@@ -29,6 +29,7 @@
 #include "Media.h"
 #include "Show.h"
 #include "utils/Filename.h"
+#include "utils/ModificationsNotifier.h"
 
 bool MetadataParser::initialize()
 {
@@ -286,7 +287,7 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::hand
                 LOG_ERROR( "Failed to create new artist ", task.albumArtist );
                 return {nullptr, nullptr};
             }
-            m_cb->onArtistAdded( albumArtist );
+            m_notifier->notifyArtistCreation( albumArtist );
         }
     }
     if ( task.artist.empty() == false && task.artist != task.albumArtist )
@@ -300,7 +301,7 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::hand
                 LOG_ERROR( "Failed to create new artist ", task.artist );
                 return {nullptr, nullptr};
             }
-            m_cb->onArtistAdded( artist );
+            m_notifier->notifyArtistCreation( albumArtist );
         }
     }
     return {albumArtist, artist};

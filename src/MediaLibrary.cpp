@@ -160,6 +160,13 @@ void MediaLibrary::registerEntityHooks()
         Media::removeFromCache( rowId );
         m_modificationNotifier->notifyMediaRemoval( rowId );
     });
+    m_dbConnection->registerUpdateHook( policy::ArtistTable::Name,
+                                        [this]( SqliteConnection::HookReason reason, int64_t rowId ) {
+        if ( reason != SqliteConnection::HookReason::Delete )
+            return;
+        Artist::removeFromCache( rowId );
+        m_modificationNotifier->notifyArtistRemoval( rowId );
+    });
 }
 
 

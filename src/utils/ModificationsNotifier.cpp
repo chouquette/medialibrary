@@ -63,6 +63,21 @@ void ModificationNotifier::notifyMediaRemoval( int64_t mediaId )
     notifyRemoval( mediaId, m_media );
 }
 
+void ModificationNotifier::notifyArtistCreation( ArtistPtr artist )
+{
+    notifyCreation( std::move( artist ), m_artists );
+}
+
+void ModificationNotifier::notifyArtistModification(ArtistPtr artist)
+{
+    notifyModification( std::move( artist ), m_artists );
+}
+
+void ModificationNotifier::notifyArtistRemoval( int64_t artist )
+{
+    notifyRemoval( std::move( artist ), m_artists );
+}
+
 void ModificationNotifier::run()
 {
     constexpr auto ZeroTimeout = std::chrono::time_point<std::chrono::steady_clock>{};
@@ -71,6 +86,7 @@ void ModificationNotifier::run()
     // by other threads. That way we can release those early and allow
     // more insertions to proceed
     Queue<IMedia> media;
+    Queue<IArtist> artists;
 
     while ( m_stop == false )
     {
@@ -84,12 +100,10 @@ void ModificationNotifier::run()
             auto now = std::chrono::steady_clock::now();
             auto nextTimeout = ZeroTimeout;
             checkQueue( m_media, media, nextTimeout, now );
+            checkQueue( m_artists, artists, nextTimeout, now );
             m_timeout = nextTimeout;
         }
         notify( std::move( media ), &IMediaLibraryCb::onMediaAdded, &IMediaLibraryCb::onMediaUpdated, &IMediaLibraryCb::onMediaDeleted );
+        notify( std::move( artists ), &IMediaLibraryCb::onArtistsAdded, &IMediaLibraryCb::onArtistsModified, &IMediaLibraryCb::onArtistsDeleted );
     }
 }
-
-
-
-

@@ -40,9 +40,13 @@ public:
     ~ModificationNotifier();
 
     void start();
-    void notifyMediaCreation(MediaPtr media );
-    void notifyMediaModification(MediaPtr media );
+    void notifyMediaCreation( MediaPtr media );
+    void notifyMediaModification( MediaPtr media );
     void notifyMediaRemoval( int64_t media );
+
+    void notifyArtistCreation( ArtistPtr artist );
+    void notifyArtistModification( ArtistPtr artist );
+    void notifyArtistRemoval( int64_t artist );
 
 private:
     void run();
@@ -129,6 +133,7 @@ private:
 
     // Queues
     Queue<IMedia> m_media;
+    Queue<IArtist> m_artists;
 
     // Notifier thread
     std::mutex m_lock;

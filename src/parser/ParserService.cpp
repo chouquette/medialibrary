@@ -85,6 +85,7 @@ void ParserService::initialize( MediaLibrary* ml, IParserCb* parserCb )
 {
     m_ml = ml;
     m_cb = ml->getCb();
+    m_notifier = ml->getNotifier();
     m_parserCb = parserCb;
     // Run the service specific initializer
     initialize();
