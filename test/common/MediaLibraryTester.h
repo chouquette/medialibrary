@@ -32,6 +32,7 @@ class MediaLibraryTester : public MediaLibrary
 {
 public:
     MediaLibraryTester();
+    std::vector<MediaPtr> files();
     std::shared_ptr<Media> media( unsigned int id );
     MediaPtr media( const std::string& path );
     std::shared_ptr<Folder> folder( const std::string& path );

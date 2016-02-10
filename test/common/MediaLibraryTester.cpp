@@ -122,3 +122,9 @@ std::shared_ptr<AlbumTrack> MediaLibraryTester::albumTrack( unsigned int id )
 {
     return AlbumTrack::fetch( this, id );
 }
+
+std::vector<MediaPtr> MediaLibraryTester::files()
+{
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE is_present = 1";
+    return Media::fetchAll<IMedia>( this, req );
+}

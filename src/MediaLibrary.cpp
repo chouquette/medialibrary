@@ -226,12 +226,6 @@ void MediaLibrary::setVerbosity(LogLevel v)
     Log::setLogLevel( v );
 }
 
-std::vector<MediaPtr> MediaLibrary::files()
-{
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE is_present = 1";
-    return Media::fetchAll<IMedia>( this, req );
-}
-
 std::vector<MediaPtr> MediaLibrary::audioFiles()
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? AND is_present = 1 ORDER BY title";
