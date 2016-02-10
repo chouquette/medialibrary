@@ -30,7 +30,7 @@
 #include "Artist.h"
 #include "AudioTrack.h"
 #include "discoverer/DiscovererWorker.h"
-#include "utils/DeletionNotifier.h"
+#include "utils/ModificationsNotifier.h"
 #include "Device.h"
 #include "File.h"
 #include "Folder.h"

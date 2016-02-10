@@ -22,7 +22,7 @@
 
 #include <cassert>
 
-#include "DeletionNotifier.h"
+#include "ModificationsNotifier.h"
 #include "MediaLibrary.h"
 
 ModificationNotifier::ModificationNotifier( MediaLibraryPtr ml )

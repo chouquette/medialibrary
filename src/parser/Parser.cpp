@@ -27,7 +27,7 @@
 #include "IMediaLibrary.h"
 #include "Media.h"
 #include "File.h"
-#include "utils/DeletionNotifier.h"
+#include "utils/ModificationsNotifier.h"
 
 Parser::Parser( MediaLibrary* ml )
     : m_ml( ml )
