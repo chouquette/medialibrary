@@ -256,11 +256,13 @@ bool Album::setAlbumArtist( Artist* artist )
     return true;
 }
 
-std::vector<ArtistPtr> Album::artists() const
+std::vector<ArtistPtr> Album::artists( bool desc ) const
 {
-    static const std::string req = "SELECT art.* FROM " + policy::ArtistTable::Name + " art "
+    std::string req = "SELECT art.* FROM " + policy::ArtistTable::Name + " art "
             "INNER JOIN AlbumArtistRelation aar ON aar.artist_id = art.id_artist "
-            "WHERE aar.album_id = ?";
+            "WHERE aar.album_id = ? ORDER BY art.name";
+    if ( desc == true )
+        req += " DESC";
     return Artist::fetchAll<IArtist>( m_ml, req, m_id );
 }
 

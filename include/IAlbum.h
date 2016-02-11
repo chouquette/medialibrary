@@ -55,8 +55,10 @@ public:
     virtual ArtistPtr albumArtist() const = 0;
     /**
      * @brief artists Returns a vector of all additional artists appearing on the album.
+     * Artists are sorted by name.
+     * @param desc
      */
-    virtual std::vector<ArtistPtr> artists() const = 0;
+    virtual std::vector<ArtistPtr> artists( bool desc ) const = 0;
     /**
      * @brief nbTracks Returns the amount of track in this album.
      * The value is cached, and doesn't require fetching anything.
