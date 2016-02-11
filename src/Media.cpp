@@ -64,6 +64,7 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_releaseDate
         >> m_thumbnail
         >> m_title
+        >> m_filename
         >> m_isFavorite
         >> m_isPresent;
 }
@@ -81,6 +82,8 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
     , m_insertionDate( time( nullptr ) )
     , m_releaseDate( 0 )
     , m_title( title )
+    // When creating a Media, meta aren't parsed, and therefor, is the filename
+    , m_filename( title )
     , m_isFavorite( false )
     , m_changed( false )
 {
@@ -90,9 +93,9 @@ std::shared_ptr<Media> Media::create( MediaLibraryPtr ml, Type type, const fs::I
 {
     auto self = std::make_shared<Media>( ml, file.name(), type );
     static const std::string req = "INSERT INTO " + policy::MediaTable::Name +
-            "(type, insertion_date, title) VALUES(?, ?, ?)";
+            "(type, insertion_date, title, filename) VALUES(?, ?, ?, ?)";
 
-    if ( insert( ml, self, req, type, self->m_insertionDate, self->m_title ) == false )
+    if ( insert( ml, self, req, type, self->m_insertionDate, self->m_title, self->m_filename ) == false )
         return nullptr;
     return self;
 }
@@ -438,6 +441,7 @@ bool Media::createTable( DBConnection connection )
             "release_date UNSIGNED INTEGER,"
             "thumbnail TEXT,"
             "title TEXT,"
+            "filename TEXT,"
             "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
             "is_present BOOLEAN NOT NULL DEFAULT 1"
             ")";

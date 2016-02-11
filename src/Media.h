@@ -126,6 +126,9 @@ private:
         unsigned int m_releaseDate;
         std::string m_thumbnail;
         std::string m_title;
+        // We store the filename as a shortcut when sorting. The filename (*not* the title
+        // might be used as a fallback
+        std::string m_filename;
         bool m_isFavorite;
         bool m_isPresent;
 
