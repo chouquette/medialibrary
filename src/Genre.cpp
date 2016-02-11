@@ -64,9 +64,9 @@ std::vector<ArtistPtr> Genre::artists() const
     return Artist::fetchAll<IArtist>( m_ml, req, m_id );
 }
 
-std::vector<AlbumTrackPtr> Genre::tracks() const
+std::vector<AlbumTrackPtr> Genre::tracks( medialibrary::SortingCriteria sort, bool desc ) const
 {
-    return AlbumTrack::fromGenre( m_ml, m_id );
+    return AlbumTrack::fromGenre( m_ml, m_id, sort, desc );
 }
 
 std::vector<AlbumPtr> Genre::albums() const

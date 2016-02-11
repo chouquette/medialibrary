@@ -135,10 +135,29 @@ AlbumTrackPtr AlbumTrack::fromMedia( MediaLibraryPtr ml, unsigned int mediaId )
     return fetch( ml, req, mediaId );
 }
 
-std::vector<AlbumTrackPtr> AlbumTrack::fromGenre( MediaLibraryPtr ml, unsigned int genreId )
+std::vector<AlbumTrackPtr> AlbumTrack::fromGenre( MediaLibraryPtr ml, unsigned int genreId, medialibrary::SortingCriteria sort, bool desc )
 {
-    static const std::string req = "SELECT * FROM " + policy::AlbumTrackTable::Name +
-            " WHERE genre_id = ?";
+    std::string req = "SELECT t.* FROM " + policy::AlbumTrackTable::Name + " t"
+            " INNER JOIN " + policy::MediaTable::Name + " m ON m.id_media = t.media_id"
+            " WHERE genre_id = ? ORDER BY ";
+    switch ( sort )
+    {
+    case medialibrary::SortingCriteria::Duration:
+        req += "m.duration";
+        break;
+    case medialibrary::SortingCriteria::InsertionDate:
+        req += "m.insertion_date";
+        break;
+    case medialibrary::SortingCriteria::ReleaseDate:
+        req += "m.release_date";
+        break;
+    default:
+        req += "t.disc_number, t.track_number, med.filename";
+        break;
+    }
+
+    if ( desc == true )
+        req += " DESC";
     return fetchAll<IAlbumTrack>( ml, req, genreId );
 }
 

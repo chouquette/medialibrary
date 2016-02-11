@@ -25,6 +25,7 @@
 #include "Genre.h"
 #include "Album.h"
 #include "AlbumTrack.h"
+#include "Media.h"
 
 class Genres : public Tests
 {
@@ -42,7 +43,7 @@ TEST_F( Genres, Create )
 {
     ASSERT_NE( nullptr, g );
     ASSERT_EQ( "genre", g->name() );
-    auto tracks = g->tracks();
+    auto tracks = g->tracks( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( 0u, tracks.size() );
 }
 
@@ -65,7 +66,7 @@ TEST_F( Genres, ListAlbumTracks )
         if ( i != 1 )
             t->setGenre( g );
     }
-    auto tracks = g->tracks();
+    auto tracks = g->tracks( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( 2u, tracks.size() );
 }
 
@@ -157,4 +158,27 @@ TEST_F( Genres, SearchAfterDelete )
 
     genres = ml->searchGenre( "genre" );
     ASSERT_EQ( 0u, genres.size() );
+}
+
+TEST_F( Genres, SortTracks )
+{
+    auto a = ml->createAlbum( "album" );
+
+    for ( auto i = 1u; i <= 2; i++ )
+    {
+        auto m = ml->addFile( "track" + std::to_string( i ) + ".mp3" );
+        auto t = a->addTrack( m, i, 1 );
+        m->setDuration( i );
+        m->save();
+        t->setGenre( g );
+    }
+    auto tracks = g->tracks( medialibrary::SortingCriteria::Duration, false );
+    ASSERT_EQ( 2u, tracks.size() );
+    ASSERT_EQ( 1u, tracks[0]->trackNumber() );
+    ASSERT_EQ( 2u, tracks[1]->trackNumber() );
+
+    tracks = g->tracks( medialibrary::SortingCriteria::Duration, true );
+    ASSERT_EQ( 2u, tracks.size() );
+    ASSERT_EQ( 1u, tracks[1]->trackNumber() );
+    ASSERT_EQ( 2u, tracks[0]->trackNumber() );
 }

@@ -68,7 +68,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         static std::shared_ptr<AlbumTrack> create( MediaLibraryPtr ml, unsigned int albumId,
                                      std::shared_ptr<Media> media, unsigned int trackNb , unsigned int discNumber );
         static AlbumTrackPtr fromMedia( MediaLibraryPtr ml, unsigned int mediaId );
-        static std::vector<AlbumTrackPtr> fromGenre( MediaLibraryPtr ml, unsigned int genreId );
+        static std::vector<AlbumTrackPtr> fromGenre( MediaLibraryPtr ml, unsigned int genreId, medialibrary::SortingCriteria sort, bool desc );
         static std::vector<MediaPtr> search(DBConnection dbConn, const std::string& title );
 
     private:
