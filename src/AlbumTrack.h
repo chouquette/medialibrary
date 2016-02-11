@@ -60,8 +60,6 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         virtual GenrePtr genre() override;
         bool setGenre( std::shared_ptr<Genre> genre );
         virtual unsigned int trackNumber() override;
-        virtual unsigned int releaseYear() const override;
-        bool setReleaseYear( unsigned int year );
         virtual unsigned int discNumber() const override;
         virtual std::shared_ptr<IAlbum> album() override;
         virtual std::shared_ptr<IMedia> media() override;
@@ -81,7 +79,6 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         unsigned int m_genreId;
         unsigned int m_trackNumber;
         unsigned int m_albumId;
-        unsigned int m_releaseYear;
         unsigned int m_discNumber;
         bool m_isPresent;
 

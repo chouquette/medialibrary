@@ -278,7 +278,7 @@ void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& 
         }
         if ( expectedTrack.HasMember( "releaseYear" ) )
         {
-            if ( albumTrack->releaseYear() != expectedTrack["releaseYear"].GetUint() )
+            if ( track->releaseDate() != expectedTrack["releaseYear"].GetUint() )
                 return;
         }
         if ( expectedTrack.HasMember( "cd" ) )

@@ -97,6 +97,8 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual std::vector<AudioTrackPtr> audioTracks() override;
         virtual const std::string& thumbnail() override;
         virtual unsigned int insertionDate() const override;
+        virtual unsigned int releaseDate() const override;
+        void setReleaseDate( unsigned int date );
         void setThumbnail( const std::string& thumbnail );
         bool save();
 
@@ -121,6 +123,7 @@ private:
         float m_progress;
         int m_rating;
         unsigned int m_insertionDate;
+        unsigned int m_releaseDate;
         std::string m_thumbnail;
         std::string m_title;
         bool m_isFavorite;

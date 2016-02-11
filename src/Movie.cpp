@@ -34,7 +34,6 @@ Movie::Movie(MediaLibraryPtr ml, sqlite::Row& row )
     row >> m_id
         >> m_mediaId
         >> m_title
-        >> m_releaseDate
         >> m_summary
         >> m_artworkMrl
         >> m_imdbId;
@@ -45,7 +44,6 @@ Movie::Movie( MediaLibraryPtr ml, unsigned int mediaId, const std::string& title
     , m_id( 0 )
     , m_mediaId( mediaId )
     , m_title( title )
-    , m_releaseDate( 0 )
 {
 }
 
@@ -57,21 +55,6 @@ unsigned int Movie::id() const
 const std::string&Movie::title() const
 {
     return m_title;
-}
-
-time_t Movie::releaseDate() const
-{
-    return m_releaseDate;
-}
-
-bool Movie::setReleaseDate( time_t date )
-{
-    static const std::string req = "UPDATE " + policy::MovieTable::Name
-            + " SET release_date = ? WHERE id_movie = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, date, m_id ) == false )
-        return false;
-    m_releaseDate = date;
-    return true;
 }
 
 const std::string& Movie::shortSummary() const
@@ -133,7 +116,6 @@ bool Movie::createTable( DBConnection dbConnection )
                 "id_movie INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "media_id UNSIGNED INTEGER NOT NULL,"
                 "title TEXT UNIQUE ON CONFLICT FAIL,"
-                "release_date UNSIGNED INTEGER,"
                 "summary TEXT,"
                 "artwork_mrl TEXT,"
                 "imdb_id TEXT,"

@@ -47,8 +47,6 @@ class Movie : public IMovie, public DatabaseHelpers<Movie, policy::MovieTable>
 
         virtual unsigned int id() const override;
         virtual const std::string& title() const override;
-        virtual time_t releaseDate() const override;
-        bool setReleaseDate(time_t date);
         virtual const std::string& shortSummary() const override;
         bool setShortSummary(const std::string& summary);
         virtual const std::string& artworkMrl() const override;
@@ -66,7 +64,6 @@ class Movie : public IMovie, public DatabaseHelpers<Movie, policy::MovieTable>
         unsigned int m_id;
         unsigned int m_mediaId;
         std::string m_title;
-        time_t m_releaseDate;
         std::string m_summary;
         std::string m_artworkMrl;
         std::string m_imdbId;

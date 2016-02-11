@@ -41,7 +41,6 @@ AlbumTrack::AlbumTrack( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_genreId
         >> m_trackNumber
         >> m_albumId
-        >> m_releaseYear
         >> m_discNumber
         >> m_isPresent;
 }
@@ -52,7 +51,6 @@ AlbumTrack::AlbumTrack( MediaLibraryPtr ml, unsigned int mediaId, unsigned int t
     , m_mediaId( mediaId )
     , m_trackNumber( trackNumber )
     , m_albumId( albumId )
-    , m_releaseYear( 0 )
     , m_discNumber( discNumber )
     , m_isPresent( true )
 {
@@ -97,7 +95,6 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
                 "genre_id INTEGER,"
                 "track_number UNSIGNED INTEGER,"
                 "album_id UNSIGNED INTEGER NOT NULL,"
-                "release_year UNSIGNED INTEGER,"
                 "disc_number UNSIGNED INTEGER,"
                 "is_present BOOLEAN NOT NULL DEFAULT 1,"
                 "FOREIGN KEY (media_id) REFERENCES " + policy::MediaTable::Name + "(id_media)"
@@ -172,23 +169,6 @@ bool AlbumTrack::setGenre( std::shared_ptr<Genre> genre )
 unsigned int AlbumTrack::trackNumber()
 {
     return m_trackNumber;
-}
-
-unsigned int AlbumTrack::releaseYear() const
-{
-    return m_releaseYear;
-}
-
-bool AlbumTrack::setReleaseYear(unsigned int year)
-{
-    if ( m_releaseYear == year )
-        return true;
-    static const std::string req = "UPDATE " + policy::AlbumTrackTable::Name +
-            " SET release_year = ? WHERE id_track = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, year, m_id ) == false )
-        return false;
-    m_releaseYear = year;
-    return true;
 }
 
 unsigned int AlbumTrack::discNumber() const

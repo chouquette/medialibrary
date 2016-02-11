@@ -296,3 +296,18 @@ TEST_F( Medias, History )
     ASSERT_EQ( m2->id(), history[0]->id() );
     ASSERT_EQ( m->id(), history[1]->id() );
 }
+
+TEST_F( Medias, SetReleaseDate )
+{
+    auto m = ml->addFile( "movie.mkv" );
+
+    ASSERT_EQ( m->releaseDate(), 0u );
+    m->setReleaseDate( 1234 );
+    m->save();
+    ASSERT_EQ( m->releaseDate(), 1234u );
+
+    Reload();
+
+    auto m2 = ml->media( m->id() );
+    ASSERT_EQ( m2->releaseDate(), 1234u );
+}

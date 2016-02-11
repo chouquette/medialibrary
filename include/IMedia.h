@@ -91,4 +91,5 @@ class IMedia
         ///
         virtual const std::string& thumbnail() = 0;
         virtual unsigned int insertionDate() const = 0;
+        virtual unsigned int releaseDate() const = 0;
 };

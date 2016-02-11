@@ -53,21 +53,6 @@ TEST_F( Movies, Fetch )
     ASSERT_EQ( m2->title(), "movie" );
 }
 
-TEST_F( Movies, SetReleaseDate )
-{
-    auto media = ml->addFile( "movie.mkv" );
-    auto m = ml->createMovie( *media, "movie" );
-
-    ASSERT_EQ( m->releaseDate(), 0u );
-    m->setReleaseDate( 1234 );
-    ASSERT_EQ( m->releaseDate(), 1234u );
-
-    Reload();
-
-    auto m2 = ml->movie( "movie" );
-    ASSERT_EQ( m2->releaseDate(), 1234u );
-}
-
 TEST_F( Movies, SetShortSummary )
 {
     auto media = ml->addFile( "movie.mkv" );

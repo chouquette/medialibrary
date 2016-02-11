@@ -48,12 +48,6 @@ class IAlbumTrack
          * @return Which disc this tracks appears on (or 0 if unspecified)
          */
         virtual unsigned int discNumber() const = 0;
-        /**
-         * @brief releaseYear Represent the track release year. It doesn't
-         *                      imply anything regarding the album's release year.
-         * @return This track release year, or 0 if unknown.
-         */
-        virtual unsigned int releaseYear() const = 0;
 };
 
 #endif // IALBUMTRACK_H

@@ -61,6 +61,7 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_progress
         >> m_rating
         >> m_insertionDate
+        >> m_releaseDate
         >> m_thumbnail
         >> m_title
         >> m_isFavorite
@@ -78,6 +79,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
     , m_progress( .0f )
     , m_rating( -1 )
     , m_insertionDate( time( nullptr ) )
+    , m_releaseDate( 0 )
     , m_title( title )
     , m_isFavorite( false )
     , m_changed( false )
@@ -287,6 +289,19 @@ unsigned int Media::insertionDate() const
     return m_insertionDate;
 }
 
+unsigned int Media::releaseDate() const
+{
+    return m_releaseDate;
+}
+
+void Media::setReleaseDate( unsigned int date )
+{
+    if ( m_releaseDate == date )
+        return;
+    m_releaseDate = date;
+    m_changed = true;
+}
+
 void Media::setThumbnail(const std::string& thumbnail )
 {
     if ( m_thumbnail == thumbnail )
@@ -298,12 +313,12 @@ void Media::setThumbnail(const std::string& thumbnail )
 bool Media::save()
 {
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
-            "type = ?, subtype = ?, duration = ?, progress = ?,"
+            "type = ?, subtype = ?, duration = ?, progress = ?, release_date = ?,"
             "thumbnail = ?, title = ? WHERE id_media = ?";
     if ( m_changed == false )
         return true;
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_type, m_subType, m_duration,
-                                       m_progress, m_thumbnail, m_title, m_id ) == false )
+                                       m_progress, m_releaseDate, m_thumbnail, m_title, m_id ) == false )
     {
         return false;
     }
@@ -387,6 +402,7 @@ bool Media::createTable( DBConnection connection )
             "progress REAL,"
             "rating INTEGER DEFAULT -1,"
             "insertion_date UNSIGNED INTEGER,"
+            "release_date UNSIGNED INTEGER,"
             "thumbnail TEXT,"
             "title TEXT,"
             "is_favorite BOOLEAN NOT NULL DEFAULT 0,"

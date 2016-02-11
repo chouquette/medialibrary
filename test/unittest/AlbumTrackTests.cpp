@@ -73,25 +73,6 @@ TEST_F( AlbumTracks, Artist )
     ASSERT_EQ( newArtist->id(), artist->id() );
 }
 
-TEST_F( AlbumTracks, SetReleaseYear )
-{
-    auto a = ml->createAlbum( "album" );
-    auto m = ml->addFile( "test.mp3" );
-    auto t = a->addTrack( m, 1, 0 );
-    m->save();
-
-    ASSERT_EQ( 0u, t->releaseYear() );
-
-    t->setReleaseYear( 1234 );
-    ASSERT_EQ( t->releaseYear(), 1234u );
-
-    Reload();
-
-    auto m2 = ml->media( m->id() );
-    auto t2 = m2->albumTrack();
-    ASSERT_EQ( t->releaseYear(), t2->releaseYear() );
-}
-
 TEST_F( AlbumTracks, SetGenre )
 {
     auto a = ml->createAlbum( "album" );
