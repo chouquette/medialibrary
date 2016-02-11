@@ -72,8 +72,8 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         bool setShortSummary( const std::string& summary );
         virtual const std::string& artworkMrl() const override;
         bool setArtworkMrl( const std::string& artworkMrl );
-        virtual std::vector<MediaPtr> tracks() const override;
-        virtual std::vector<std::shared_ptr<IMedia>> tracks( GenrePtr genre ) const override;
+        virtual std::vector<MediaPtr> tracks( medialibrary::SortingCriteria sort, bool desc ) const override;
+        virtual std::vector<std::shared_ptr<IMedia>> tracks( GenrePtr genre, medialibrary::SortingCriteria sort, bool desc ) const override;
         ///
         /// \brief cachedTracks Returns a cached list of tracks
         /// This has no warranty of ordering, validity, or anything else.
@@ -104,6 +104,9 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         /// \return
         ///
         static std::vector<AlbumPtr> search( MediaLibraryPtr ml, const std::string& pattern );
+
+    private:
+        std::string orderBy( medialibrary::SortingCriteria sort, bool desc ) const;
 
     protected:
         MediaLibraryPtr m_ml;

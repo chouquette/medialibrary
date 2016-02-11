@@ -170,7 +170,7 @@ void Tests::checkAlbums( const rapidjson::Value& expectedAlbums, std::vector<Alb
             }
             if ( expectedAlbum.HasMember( "nbTracks" ) || expectedAlbum.HasMember( "tracks" ) )
             {
-                const auto tracks = a->tracks();
+                const auto tracks = a->tracks( medialibrary::SortingCriteria::Default, false );
                 if ( expectedAlbum.HasMember( "nbTracks" ) )
                 {
                     if ( expectedAlbum["nbTracks"].GetUint() != tracks.size() )

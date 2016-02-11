@@ -324,7 +324,7 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
     ASSERT_EQ( 1u, albums.size() );
     artists = ml->artists();
     ASSERT_EQ( 1u, artists.size() );
-    ASSERT_EQ( 1u, albums[0]->tracks().size() );
+    ASSERT_EQ( 1u, albums[0]->tracks( medialibrary::SortingCriteria::Default, false ).size() );
     ASSERT_EQ( 1u, artists[0]->media().size() );
 }
 

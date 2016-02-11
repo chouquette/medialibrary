@@ -137,25 +137,51 @@ bool Album::setArtworkMrl( const std::string& artworkMrl )
     return true;
 }
 
-std::vector<MediaPtr> Album::tracks() const
+std::string Album::orderBy( medialibrary::SortingCriteria sort, bool desc ) const
+{
+    std::string req = " ORDER BY ";
+    switch ( sort )
+    {
+    case medialibrary::SortingCriteria::Alpha:
+        req += "med.title";
+        break;
+    case medialibrary::SortingCriteria::Duration:
+        req += "med.duration";
+        break;
+    case medialibrary::SortingCriteria::ReleaseDate:
+        req +=  "med.release_date";
+        break;
+    default:
+        req += "att.disc_number, att.track_number";
+        break;
+    }
+
+    if ( desc == true )
+        req += " DESC";
+    return req;
+}
+
+
+std::vector<MediaPtr> Album::tracks( medialibrary::SortingCriteria sort, bool desc ) const
 {
     // This doesn't return the cached version, because it would be fairly complicated, if not impossible or
     // counter productive, to maintain a cache that respects all orderings.
-    static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
-            " INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
-            " WHERE att.album_id = ? AND med.is_present = 1 ORDER BY att.disc_number, att.track_number";
+    std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
+        " INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
+        " WHERE att.album_id = ? AND med.is_present = 1";
+    req += orderBy( sort, desc );
     return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
 
-std::vector<std::shared_ptr<IMedia> > Album::tracks( GenrePtr genre ) const
+std::vector<std::shared_ptr<IMedia>> Album::tracks( GenrePtr genre, medialibrary::SortingCriteria sort, bool desc ) const
 {
     if ( genre == nullptr )
         return {};
-    static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
+    std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
             " INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
             " WHERE att.album_id = ? AND med.is_present = 1"
-            " AND genre_id = ?"
-            " ORDER BY att.disc_number, att.track_number";
+            " AND genre_id = ?";
+    req += orderBy( sort, desc );
     return Media::fetchAll<IMedia>( m_ml, req, m_id, genre->id() );
 }
 
@@ -163,7 +189,7 @@ std::vector<MediaPtr> Album::cachedTracks() const
 {
     auto lock = m_tracks.lock();
     if ( m_tracks.isCached() == false )
-        m_tracks = tracks();
+        m_tracks = tracks( medialibrary::SortingCriteria::Default, false );
     return m_tracks.get();
 }
 

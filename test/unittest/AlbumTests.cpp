@@ -65,13 +65,13 @@ TEST_F( Albums, AddTrack )
     f->save();
     ASSERT_NE( track, nullptr );
 
-    auto tracks = a->tracks();
+    auto tracks = a->tracks( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( tracks.size(), 1u );
 
     Reload();
 
     a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
-    tracks = a->tracks();
+    tracks = a->tracks( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( tracks.size(), 1u );
     ASSERT_EQ( tracks[0]->albumTrack()->trackNumber(), track->trackNumber() );
 }
@@ -86,13 +86,13 @@ TEST_F( Albums, NbTracks )
         f->save();
         ASSERT_NE( track, nullptr );
     }
-    auto tracks = a->tracks();
+    auto tracks = a->tracks( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( tracks.size(), a->nbTracks() );
 
     Reload();
 
     a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
-    tracks = a->tracks();
+    tracks = a->tracks( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( tracks.size(), a->nbTracks() );
 }
 
@@ -110,13 +110,13 @@ TEST_F( Albums, TracksByGenre )
         if ( i <= 5 )
             track->setGenre( g );
     }
-    auto tracks = a->tracks( g );
+    auto tracks = a->tracks( g, medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( 5u, tracks.size() );
 
     Reload();
 
     a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
-    tracks = a->tracks( g );
+    tracks = a->tracks( g, medialibrary::SortingCriteria::Default, false );
     ASSERT_NE( tracks.size(), a->nbTracks() );
     ASSERT_EQ( 5u, tracks.size() );
 }
@@ -320,4 +320,31 @@ TEST_F( Albums, AutoDelete )
 
     album = ml->album( a->id() );
     ASSERT_EQ( nullptr, album );
+}
+
+TEST_F( Albums, SortTracks )
+{
+    auto a = ml->createAlbum( "album" );
+    auto m1 = ml->addFile( "B-track1.mp3" );
+    auto m2 = ml->addFile( "A-track2.mp3" );
+    auto t1 = a->addTrack( m1, 1, 1 );
+    auto t2 = a->addTrack( m2, 2, 1 );
+
+    // Default order is by disc number & track number
+    auto tracks = a->tracks( medialibrary::SortingCriteria::Default, false );
+    ASSERT_EQ( 2u, tracks.size() );
+    ASSERT_EQ( t1->id(), tracks[0]->id() );
+    ASSERT_EQ( t2->id(), tracks[1]->id() );
+
+    // Reverse order
+    tracks = a->tracks( medialibrary::SortingCriteria::Default, true );
+    ASSERT_EQ( 2u, tracks.size() );
+    ASSERT_EQ( t1->id(), tracks[1]->id() );
+    ASSERT_EQ( t2->id(), tracks[0]->id() );
+
+    // Try a media based criteria
+    tracks = a->tracks( medialibrary::SortingCriteria::Alpha, false );
+    ASSERT_EQ( 2u, tracks.size() );
+    ASSERT_EQ( t1->id(), tracks[1]->id() ); // B-track -> first
+    ASSERT_EQ( t2->id(), tracks[0]->id() ); // A-track -> second
 }
