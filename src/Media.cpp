@@ -348,10 +348,43 @@ void Media::removeFile( File& file )
     }));
 }
 
-std::vector<MediaPtr> Media::listAll( MediaLibraryPtr ml, IMedia::Type type )
+std::vector<MediaPtr> Media::listAll( MediaLibraryPtr ml, IMedia::Type type, medialibrary::SortingCriteria sort, bool desc )
 {
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? AND is_present = 1 ORDER BY title";
-    return DatabaseHelpers::fetchAll<IMedia>( ml, req, type );
+    std::string req;
+    if ( sort == medialibrary::SortingCriteria::LastModificationDate )
+    {
+        req = "SELECT m.* FROM " + policy::MediaTable::Name + " m INNER JOIN "
+                + policy::FileTable::Name + " f ON m.id_media = f.media_id"
+                " WHERE m.type = ?"
+                " AND ( f.type = ? OR f.type = ? )"
+                " ORDER BY f.last_modification_date";
+        if ( desc == true )
+            req += " DESC";
+        return fetchAll<IMedia>( ml, req, type, File::Type::Entire, File::Type::Main );
+    }
+    req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? AND is_present = 1 ORDER BY ";
+    switch ( sort )
+    {
+    case medialibrary::SortingCriteria::Alpha:
+    case medialibrary::SortingCriteria::Default:
+        req += "title";
+        break;
+    case medialibrary::SortingCriteria::Duration:
+        req += "duration";
+        break;
+    case medialibrary::SortingCriteria::InsertionDate:
+        req += "insertion_date";
+        break;
+    case medialibrary::SortingCriteria::ReleaseDate:
+        req += "release_date";
+        break;
+    default:
+        break;
+    }
+    if ( desc == true )
+        req += " DESC";
+
+    return fetchAll<IMedia>( ml, req, type );
 }
 
 unsigned int Media::id() const

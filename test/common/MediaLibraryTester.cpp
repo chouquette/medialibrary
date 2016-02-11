@@ -78,6 +78,11 @@ std::shared_ptr<Media> MediaLibraryTester::addFile( const std::string& path )
     return MediaLibrary::addFile( file, dummyFolder, *dummyDirectory );
 }
 
+std::shared_ptr<Media> MediaLibraryTester::addFile( fs::IFile& file )
+{
+    return MediaLibrary::addFile( file, dummyFolder, *dummyDirectory );
+}
+
 std::shared_ptr<Playlist> MediaLibraryTester::playlist(unsigned int playlistId)
 {
     return Playlist::fetch( this, playlistId );

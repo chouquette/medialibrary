@@ -226,14 +226,14 @@ void MediaLibrary::setVerbosity(LogLevel v)
     Log::setLogLevel( v );
 }
 
-std::vector<MediaPtr> MediaLibrary::audioFiles()
+std::vector<MediaPtr> MediaLibrary::audioFiles( medialibrary::SortingCriteria sort, bool desc )
 {
-    return Media::listAll( this, IMedia::Type::AudioType );
+    return Media::listAll( this, IMedia::Type::AudioType, sort, desc );
 }
 
-std::vector<MediaPtr> MediaLibrary::videoFiles()
+std::vector<MediaPtr> MediaLibrary::videoFiles( medialibrary::SortingCriteria sort, bool desc )
 {
-    return Media::listAll( this, IMedia::Type::VideoType );
+    return Media::listAll( this, IMedia::Type::VideoType, sort, desc );
 }
 
 std::shared_ptr<Media> MediaLibrary::addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs )

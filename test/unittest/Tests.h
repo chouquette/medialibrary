@@ -31,6 +31,7 @@ class Tests : public testing::Test
 protected:
     std::unique_ptr<MediaLibraryTester> ml;
     std::unique_ptr<mock::NoopCallback> cbMock;
+    std::shared_ptr<factory::IFileSystem> fsFactory;
 
     virtual void SetUp() override;
     virtual void InstantiateMediaLibrary();

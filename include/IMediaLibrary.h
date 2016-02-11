@@ -49,6 +49,21 @@ namespace medialibrary
         MediaSearchAggregate media;
         std::vector<PlaylistPtr> playlists;
     };
+
+    enum class SortingCriteria
+    {
+        /*
+         * Default depends on the entity type:
+         * - By track number (and disc number) for album tracks
+         * - Alphabetical order for others
+         */
+        Default,
+        Alpha,
+        Duration,
+        InsertionDate,
+        LastModificationDate,
+        ReleaseDate,
+    };
 }
 
 class IMediaLibraryCb
@@ -116,8 +131,8 @@ class IMediaLibrary
 
         virtual LabelPtr createLabel( const std::string& label ) = 0;
         virtual bool deleteLabel( LabelPtr label ) = 0;
-        virtual std::vector<MediaPtr> audioFiles() = 0;
-        virtual std::vector<MediaPtr> videoFiles() = 0;
+        virtual std::vector<MediaPtr> audioFiles( medialibrary::SortingCriteria sort, bool desc ) = 0;
+        virtual std::vector<MediaPtr> videoFiles( medialibrary::SortingCriteria sort, bool desc ) = 0;
         virtual AlbumPtr album( unsigned int id ) = 0;
         virtual std::vector<AlbumPtr> albums() = 0;
         virtual ShowPtr show( const std::string& name ) = 0;

@@ -28,6 +28,7 @@
 #include "Artist.h"
 #include "Album.h"
 #include "AlbumTrack.h"
+#include "mocks/FileSystem.h"
 
 class Medias : public Tests
 {
@@ -310,4 +311,46 @@ TEST_F( Medias, SetReleaseDate )
 
     auto m2 = ml->media( m->id() );
     ASSERT_EQ( m2->releaseDate(), 1234u );
+}
+
+TEST_F( Medias, SortByAlpha )
+{
+    auto m1 = ml->addFile( "media1.mp3" );
+    m1->setTitle( "Abcd" );
+    m1->save();
+
+    auto m2 = ml->addFile( "media2.mp3" );
+    m2->setTitle( "Zyxw" );
+    m2->save();
+
+    auto media = ml->audioFiles( medialibrary::SortingCriteria::Alpha, false );
+    ASSERT_EQ( 2u, media.size() );
+    ASSERT_EQ( m1->id(), media[0]->id() );
+    ASSERT_EQ( m2->id(), media[1]->id() );
+
+    media = ml->audioFiles( medialibrary::SortingCriteria::Alpha, true );
+    ASSERT_EQ( 2u, media.size() );
+    ASSERT_EQ( m2->id(), media[0]->id() );
+    ASSERT_EQ( m1->id(), media[1]->id() );
+}
+
+TEST_F( Medias, SortByLastModifDate )
+{
+    auto file1 = std::make_shared<mock::NoopFile>( "media.mkv" );
+    file1->setLastModificationDate( 666 );
+    auto m1 = ml->addFile( *file1 );
+
+    auto file2 = std::make_shared<mock::NoopFile>( "media2.mkv" );
+    file2->setLastModificationDate( 111 );
+    auto m2 = ml->addFile( *file2 );
+
+    auto media = ml->videoFiles( medialibrary::SortingCriteria::LastModificationDate, false );
+    ASSERT_EQ( 2u, media.size() );
+    ASSERT_EQ( m2->id(), media[0]->id() );
+    ASSERT_EQ( m1->id(), media[1]->id() );
+
+    media = ml->videoFiles( medialibrary::SortingCriteria::LastModificationDate, true );
+    ASSERT_EQ( 2u, media.size() );
+    ASSERT_EQ( m2->id(), media[1]->id() );
+    ASSERT_EQ( m1->id(), media[0]->id() );
 }

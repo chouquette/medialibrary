@@ -105,7 +105,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         std::shared_ptr<File> addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs , IFile::Type type);
         void removeFile( File& file );
 
-        static std::vector<MediaPtr> listAll( MediaLibraryPtr ml, Type type );
+        static std::vector<MediaPtr> listAll(MediaLibraryPtr ml, Type type , medialibrary::SortingCriteria sort, bool desc);
         static std::vector<MediaPtr> search( MediaLibraryPtr ml, const std::string& title );
         static std::vector<MediaPtr> fetchHistory( MediaLibraryPtr ml );
 

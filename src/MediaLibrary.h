@@ -56,8 +56,9 @@ class MediaLibrary : public IMediaLibrary
         virtual bool initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* metadataCb ) override;
         virtual void setVerbosity( LogLevel v ) override;
 
-        virtual std::vector<MediaPtr> audioFiles() override;
-        virtual std::vector<MediaPtr> videoFiles() override;
+        virtual std::vector<MediaPtr> audioFiles( medialibrary::SortingCriteria sort, bool desc) override;
+        virtual std::vector<MediaPtr> videoFiles( medialibrary::SortingCriteria sort, bool desc) override;
+
         std::shared_ptr<Media> addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs );
 
         bool deleteFolder(const Folder& folder );

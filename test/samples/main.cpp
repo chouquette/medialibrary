@@ -70,12 +70,12 @@ TEST_P( Tests, Parse )
         checkMedias( expected["media"] );
     if ( expected.HasMember( "nbVideos" ) == true )
     {
-        const auto videos = m_ml->videoFiles();
+        const auto videos = m_ml->videoFiles( medialibrary::SortingCriteria::Default, false );
         ASSERT_EQ( expected["nbVideos"].GetUint(), videos.size() );
     }
     if ( expected.HasMember( "nbAudios" ) == true )
     {
-        const auto audios = m_ml->audioFiles();
+        const auto audios = m_ml->audioFiles( medialibrary::SortingCriteria::Default, false );
         ASSERT_EQ( expected["nbAudios"].GetUint(), audios.size() );
     }
     if ( expected.HasMember( "artists" ) )

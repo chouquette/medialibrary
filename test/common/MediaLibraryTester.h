@@ -46,6 +46,7 @@ public:
     void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory );
     void deleteTrack( unsigned int trackId );
     std::shared_ptr<AlbumTrack> albumTrack( unsigned int id );
+    std::shared_ptr<Media> addFile(fs::IFile& file);
 
 private:
     std::unique_ptr<fs::IDirectory> dummyDirectory;

@@ -199,12 +199,14 @@ class NoopFile : public fs::IFile
     std::string m_path;
     std::string m_fileName;
     std::string m_extension;
+    unsigned int m_lastModifDate;
 
 public:
     NoopFile( const std::string& file )
         : m_path( file )
         , m_fileName( utils::file::fileName( file ) )
         , m_extension( utils::file::extension( file ) )
+        , m_lastModifDate( 123 )
     {
     }
 
@@ -232,7 +234,12 @@ public:
     {
         // Ensure a non-0 value so tests can easily verify that the value
         // is initialized
-        return 123;
+        return m_lastModifDate;
+    }
+
+    void setLastModificationDate( unsigned int date )
+    {
+        m_lastModifDate = date;
     }
 };
 
