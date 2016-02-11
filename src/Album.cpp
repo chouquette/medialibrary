@@ -152,7 +152,7 @@ std::string Album::orderBy( medialibrary::SortingCriteria sort, bool desc ) cons
         req +=  "med.release_date";
         break;
     default:
-        req += "att.disc_number, att.track_number";
+        req += "att.disc_number, att.track_number, med.filename";
         break;
     }
 
