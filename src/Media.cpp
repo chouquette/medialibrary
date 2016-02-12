@@ -368,10 +368,6 @@ std::vector<MediaPtr> Media::listAll( MediaLibraryPtr ml, IMedia::Type type, med
     req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? AND is_present = 1 ORDER BY ";
     switch ( sort )
     {
-    case medialibrary::SortingCriteria::Alpha:
-    case medialibrary::SortingCriteria::Default:
-        req += "title";
-        break;
     case medialibrary::SortingCriteria::Duration:
         req += "duration";
         break;
@@ -382,6 +378,7 @@ std::vector<MediaPtr> Media::listAll( MediaLibraryPtr ml, IMedia::Type type, med
         req += "release_date";
         break;
     default:
+        req += "title";
         break;
     }
     if ( desc == true )
