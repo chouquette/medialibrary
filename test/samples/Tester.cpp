@@ -228,7 +228,7 @@ void Tests::checkArtists(const rapidjson::Value& expectedArtists, std::vector<Ar
             }
             if ( expectedArtist.HasMember( "nbTracks" ) )
             {
-                auto tracks = artist->media();
+                auto tracks = artist->media( medialibrary::SortingCriteria::Default, false );
                 if ( expectedArtist["nbTracks"].GetUint() != tracks.size() )
                     return false;
             }

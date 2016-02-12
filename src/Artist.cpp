@@ -87,11 +87,29 @@ std::vector<AlbumPtr> Artist::albums() const
     return Album::fetchAll<IAlbum>( m_ml, req, m_id );
 }
 
-std::vector<MediaPtr> Artist::media() const
+std::vector<MediaPtr> Artist::media( medialibrary::SortingCriteria sort, bool desc ) const
 {
-    static const std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
+    std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
             "INNER JOIN MediaArtistRelation mar ON mar.media_id = med.id_media "
-            "WHERE mar.artist_id = ? AND med.is_present = 1";
+            "WHERE mar.artist_id = ? AND med.is_present = 1 ORDER BY ";
+    switch ( sort )
+    {
+    case medialibrary::SortingCriteria::Duration:
+        req += "med.duration";
+        break;
+    case medialibrary::SortingCriteria::InsertionDate:
+        req += "med.insertion_date";
+        break;
+    case medialibrary::SortingCriteria::ReleaseDate:
+        req += "med.release_date";
+        break;
+    default:
+        req += "med.title";
+        break;
+    }
+
+    if ( desc == true )
+        req += " DESC";
     return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
 

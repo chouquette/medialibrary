@@ -51,7 +51,7 @@ public:
     virtual const std::string& shortBio() const override;
     bool setShortBio( const std::string& shortBio );
     virtual std::vector<AlbumPtr> albums() const override;
-    virtual std::vector<MediaPtr> media() const override;
+    virtual std::vector<MediaPtr> media(medialibrary::SortingCriteria sort, bool desc) const override;
     bool addMedia( Media& media );
     virtual const std::string& artworkMrl() const override;
     bool setArtworkMrl( const std::string& artworkMrl );

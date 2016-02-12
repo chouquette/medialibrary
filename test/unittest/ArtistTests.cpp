@@ -123,13 +123,13 @@ TEST_F( Artists, AllSongs )
         ASSERT_TRUE( res );
     }
 
-    auto songs = artist->media();
+    auto songs = artist->media( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( songs.size(), 3u );
 
     Reload();
 
     auto artist2 = ml->artist( "Cannibal Otters" );
-    songs = artist2->media();
+    songs = artist2->media( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( songs.size(), 3u );
 }
 
@@ -214,4 +214,29 @@ TEST_F( Artists, SearchAfterDelete )
 
     artists = ml->searchArtists( "artist" );
     ASSERT_EQ( 1u, artists.size() );
+}
+
+TEST_F( Artists, SortMedia )
+{
+    auto artist = ml->createArtist( "Russian Otters" );
+
+    for (auto i = 1; i <= 3; ++i)
+    {
+        auto f = ml->addFile( "song" + std::to_string(i) + ".mp3" );
+        f->setDuration( 10 - i );
+        f->save();
+        artist->addMedia( *f );
+    }
+
+    auto tracks = artist->media( medialibrary::SortingCriteria::Duration, false );
+    ASSERT_EQ( 3u, tracks.size() );
+    ASSERT_EQ( "song3.mp3", tracks[0]->title() ); // Duration: 8
+    ASSERT_EQ( "song2.mp3", tracks[1]->title() ); // Duration: 9
+    ASSERT_EQ( "song1.mp3", tracks[2]->title() ); // Duration: 10
+
+    tracks = artist->media( medialibrary::SortingCriteria::Duration, true );
+    ASSERT_EQ( 3u, tracks.size() );
+    ASSERT_EQ( "song1.mp3", tracks[0]->title() );
+    ASSERT_EQ( "song2.mp3", tracks[1]->title() );
+    ASSERT_EQ( "song3.mp3", tracks[2]->title() );
 }
