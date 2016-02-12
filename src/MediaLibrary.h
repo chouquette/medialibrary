@@ -100,8 +100,8 @@ class MediaLibrary : public IMediaLibrary
         virtual medialibrary::SearchAggregate search( const std::string& pattern ) const override;
 
         virtual void discover( const std::string& entryPoint ) override;
-        bool banFolder( const std::string& path ) override;
-        bool unbanFolder( const std::string& path ) override;
+        virtual bool banFolder( const std::string& path ) override;
+        virtual bool unbanFolder( const std::string& path ) override;
 
         virtual const std::string& thumbnailPath() const override;
         virtual void setLogger( ILogger* logger ) override;
