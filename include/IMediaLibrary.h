@@ -138,7 +138,14 @@ class IMediaLibrary
         virtual ShowPtr show( const std::string& name ) = 0;
         virtual MoviePtr movie( const std::string& title ) = 0;
         virtual ArtistPtr artist( unsigned int id ) = 0;
-        virtual std::vector<ArtistPtr> artists() const = 0;
+        /**
+         * @brief artists List all artists that have at least an album.
+         * Artists that only appear on albums as guests won't be listed from here, but will be
+         * returned when querying an album for all its appearing artists
+         * @param sort A sorting criteria. So far, this is ignored, and artists are sorted by lexial order
+         * @param desc If true, the provided sorting criteria will be reversed.
+         */
+        virtual std::vector<ArtistPtr> artists( medialibrary::SortingCriteria sort, bool desc ) const = 0;
         virtual std::vector<GenrePtr> genres() const = 0;
 
         /***

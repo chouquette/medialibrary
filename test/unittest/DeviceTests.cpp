@@ -272,7 +272,7 @@ TEST_F( DeviceFs, RemoveAlbum )
 
     auto albums = ml->albums( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( 2u, albums.size() );
-    auto artists = ml->artists();
+    auto artists = ml->artists( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( 2u, artists.size() );
 
     auto device = fsMock->removeDevice( RemovableDeviceUuid );
@@ -284,7 +284,7 @@ TEST_F( DeviceFs, RemoveAlbum )
 
     albums = ml->albums( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( 1u, albums.size() );
-    artists = ml->artists();
+    artists = ml->artists( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( 1u, artists.size() );
 }
 
@@ -309,7 +309,7 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
 
     auto albums = ml->albums( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( 1u, albums.size() );
-    auto artists = ml->artists();
+    auto artists = ml->artists( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( 1u, artists.size() );
     auto artist = artists[0];
     ASSERT_EQ( 2u, artist->media( medialibrary::SortingCriteria::Default, false ).size() );
@@ -322,7 +322,7 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
 
     albums = ml->albums( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( 1u, albums.size() );
-    artists = ml->artists();
+    artists = ml->artists( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( 1u, artists.size() );
     ASSERT_EQ( 1u, albums[0]->tracks( medialibrary::SortingCriteria::Default, false ).size() );
     ASSERT_EQ( 1u, artists[0]->media( medialibrary::SortingCriteria::Default, false ).size() );

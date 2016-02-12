@@ -65,6 +65,7 @@ public:
     static bool createDefaultArtists( DBConnection dbConnection );
     static std::shared_ptr<Artist> create( MediaLibraryPtr ml, const std::string& name );
     static std::vector<ArtistPtr> search( MediaLibraryPtr ml, const std::string& name );
+    static std::vector<ArtistPtr> listAll( MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc );
 
 private:
     MediaLibraryPtr m_ml;

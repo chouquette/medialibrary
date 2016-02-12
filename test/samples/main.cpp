@@ -80,7 +80,7 @@ TEST_P( Tests, Parse )
     }
     if ( expected.HasMember( "artists" ) )
     {
-        checkArtists( expected["artists"], m_ml->artists() );
+        checkArtists( expected["artists"], m_ml->artists( medialibrary::SortingCriteria::Default, false ) );
     }
 }
 

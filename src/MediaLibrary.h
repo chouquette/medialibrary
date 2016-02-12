@@ -82,7 +82,7 @@ class MediaLibrary : public IMediaLibrary
         virtual ArtistPtr artist( unsigned int id ) override;
         ArtistPtr artist( const std::string& name );
         std::shared_ptr<Artist> createArtist( const std::string& name );
-        virtual std::vector<ArtistPtr> artists() const override;
+        virtual std::vector<ArtistPtr> artists( medialibrary::SortingCriteria sort, bool desc ) const override;
 
         virtual PlaylistPtr createPlaylist( const std::string& name ) override;
         virtual std::vector<PlaylistPtr> playlists() override;

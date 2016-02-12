@@ -373,11 +373,9 @@ std::shared_ptr<Artist> MediaLibrary::createArtist( const std::string& name )
     }
 }
 
-std::vector<ArtistPtr> MediaLibrary::artists() const
+std::vector<ArtistPtr> MediaLibrary::artists(medialibrary::SortingCriteria sort, bool desc) const
 {
-    static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name +
-            " WHERE nb_albums > 0 AND is_present = 1";
-    return Artist::fetchAll<IArtist>( this, req );
+    return Artist::listAll( this, sort, desc );
 }
 
 PlaylistPtr MediaLibrary::createPlaylist( const std::string& name )

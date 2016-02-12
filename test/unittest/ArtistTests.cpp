@@ -135,7 +135,7 @@ TEST_F( Artists, AllSongs )
 
 TEST_F( Artists, GetAll )
 {
-    auto artists = ml->artists();
+    auto artists = ml->artists( medialibrary::SortingCriteria::Default, false );
     // Ensure we don't include Unknown Artist // Various Artists
     ASSERT_EQ( artists.size(), 0u );
 
@@ -147,12 +147,12 @@ TEST_F( Artists, GetAll )
         alb->setAlbumArtist( a.get() );
         ASSERT_NE( a, nullptr );
     }
-    artists = ml->artists();
+    artists = ml->artists( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( artists.size(), 5u );
 
     Reload();
 
-    auto artists2 = ml->artists();
+    auto artists2 = ml->artists( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( artists2.size(), 5u );
 }
 
@@ -279,4 +279,25 @@ TEST_F( Artists, SortAlbum )
     ASSERT_EQ( album3->id(), albums[0]->id() );
     ASSERT_EQ( album2->id(), albums[1]->id() );
     ASSERT_EQ( album1->id(), albums[2]->id() );
+}
+
+TEST_F( Artists, Sort )
+{
+    // Keep in mind that artists are only listed when they are marked as album artist at least once
+    auto a1 = ml->createArtist( "A" );
+    auto alb1 = ml->createAlbum( "albumA" );
+    alb1->setAlbumArtist( a1.get() );
+    auto a2 = ml->createArtist( "B" );
+    auto alb2 = ml->createAlbum( "albumB" );
+    alb2->setAlbumArtist( a2.get() );
+
+    auto artists = ml->artists( medialibrary::SortingCriteria::Alpha, false );
+    ASSERT_EQ( 2u, artists.size() );
+    ASSERT_EQ( a1->id(), artists[0]->id() );
+    ASSERT_EQ( a2->id(), artists[1]->id() );
+
+    artists = ml->artists( medialibrary::SortingCriteria::Alpha, true );
+    ASSERT_EQ( 2u, artists.size() );
+    ASSERT_EQ( a1->id(), artists[1]->id() );
+    ASSERT_EQ( a2->id(), artists[0]->id() );
 }

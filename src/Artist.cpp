@@ -269,3 +269,17 @@ std::vector<ArtistPtr> Artist::search( MediaLibraryPtr ml, const std::string& na
     return fetchAll<IArtist>( ml, req, name + "*" );
 }
 
+std::vector<ArtistPtr> Artist::listAll(MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc)
+{
+    std::string req = "SELECT * FROM " + policy::ArtistTable::Name +
+            " WHERE nb_albums > 0 AND is_present = 1 ORDER BY ";
+    switch ( sort )
+    {
+    default:
+        req += "name";
+    }
+    if ( desc == true )
+        req +=  " DESC";
+    return fetchAll<IArtist>( ml, req );
+}
+
