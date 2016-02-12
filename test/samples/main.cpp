@@ -64,7 +64,7 @@ TEST_P( Tests, Parse )
 
     if ( expected.HasMember( "albums" ) == true )
     {
-        checkAlbums( expected["albums" ], m_ml->albums() );
+        checkAlbums( expected["albums" ], m_ml->albums( medialibrary::SortingCriteria::Default, false ) );
     }
     if ( expected.HasMember( "media" ) == true )
         checkMedias( expected["media"] );

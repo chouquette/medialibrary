@@ -137,7 +137,7 @@ bool Album::setArtworkMrl( const std::string& artworkMrl )
     return true;
 }
 
-std::string Album::orderBy( medialibrary::SortingCriteria sort, bool desc ) const
+std::string Album::orderTracksBy( medialibrary::SortingCriteria sort, bool desc )
 {
     std::string req = " ORDER BY ";
     switch ( sort )
@@ -164,7 +164,6 @@ std::string Album::orderBy( medialibrary::SortingCriteria sort, bool desc ) cons
     return req;
 }
 
-
 std::vector<MediaPtr> Album::tracks( medialibrary::SortingCriteria sort, bool desc ) const
 {
     // This doesn't return the cached version, because it would be fairly complicated, if not impossible or
@@ -172,7 +171,7 @@ std::vector<MediaPtr> Album::tracks( medialibrary::SortingCriteria sort, bool de
     std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
         " INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
         " WHERE att.album_id = ? AND med.is_present = 1";
-    req += orderBy( sort, desc );
+    req += orderTracksBy( sort, desc );
     return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
 
@@ -184,7 +183,7 @@ std::vector<std::shared_ptr<IMedia>> Album::tracks( GenrePtr genre, medialibrary
             " INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
             " WHERE att.album_id = ? AND med.is_present = 1"
             " AND genre_id = ?";
-    req += orderBy( sort, desc );
+    req += orderTracksBy( sort, desc );
     return Media::fetchAll<IMedia>( m_ml, req, m_id, genre->id() );
 }
 
@@ -385,4 +384,50 @@ std::vector<AlbumPtr> Album::search( MediaLibraryPtr ml, const std::string& patt
             policy::AlbumTable::Name + "Fts MATCH ?)"
             "AND is_present = 1";
     return fetchAll<IAlbum>( ml, req, pattern + "*" );
+}
+
+std::vector<AlbumPtr> Album::fromArtist( MediaLibraryPtr ml, unsigned int artistId, medialibrary::SortingCriteria sort, bool desc )
+{
+    std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " alb "
+                    "WHERE artist_id = ? AND is_present=1 ORDER BY ";
+    switch ( sort )
+    {
+    case medialibrary::SortingCriteria::Alpha:
+        req += "title";
+        if ( desc == true )
+            req += " DESC";
+        break;
+    default:
+        // When listing albums of an artist, default order is by descending year (with album title
+        // discrimination in case 2+ albums went out the same year)
+        // This leads to DESC being used for "non-desc" case
+        if ( desc == true )
+            req += "release_year, title";
+        else
+            req += "release_year DESC, title";
+        break;
+    }
+
+    return fetchAll<IAlbum>( ml, req, artistId );
+}
+
+std::vector<AlbumPtr> Album::listAll( MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc )
+{
+    std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
+                    " WHERE is_present=1 ORDER BY ";
+    switch ( sort )
+    {
+    case medialibrary::SortingCriteria::ReleaseDate:
+        if ( desc == true )
+            req += "release_year DESC, title";
+        else
+            req += "release_year, title";
+        break;
+    default:
+        req += "title";
+        if ( desc == true )
+            req += " DESC";
+        break;
+    }
+    return fetchAll<IAlbum>( ml, req );
 }

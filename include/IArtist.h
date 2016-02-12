@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 
-#include "Types.h"
+#include "IMediaLibrary.h"
 
 class IArtist
 {
@@ -34,7 +34,7 @@ public:
     virtual unsigned int id() const = 0;
     virtual const std::string& name() const = 0;
     virtual const std::string& shortBio() const = 0;
-    virtual std::vector<AlbumPtr> albums() const = 0;
+    virtual std::vector<AlbumPtr> albums( medialibrary::SortingCriteria sort, bool desc ) const = 0;
     virtual std::vector<MediaPtr> media( medialibrary::SortingCriteria sort, bool desc ) const = 0;
     virtual const std::string& artworkMrl() const = 0;
     virtual const std::string& musicBrainzId() const = 0;

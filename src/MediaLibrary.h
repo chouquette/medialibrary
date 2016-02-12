@@ -69,7 +69,7 @@ class MediaLibrary : public IMediaLibrary
 
         virtual AlbumPtr album( unsigned int id ) override;
         std::shared_ptr<Album> createAlbum( const std::string& title );
-        virtual std::vector<AlbumPtr> albums() override;
+        virtual std::vector<AlbumPtr> albums(medialibrary::SortingCriteria sort, bool desc) override;
 
         virtual std::vector<GenrePtr> genres() const override;
 

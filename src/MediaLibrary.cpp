@@ -311,12 +311,9 @@ std::shared_ptr<Album> MediaLibrary::createAlbum(const std::string& title )
     return Album::create( this, title );
 }
 
-std::vector<AlbumPtr> MediaLibrary::albums()
+std::vector<AlbumPtr> MediaLibrary::albums( medialibrary::SortingCriteria sort, bool desc )
 {
-    static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
-            " WHERE is_present=1"
-            " ORDER BY title ASC";
-    return Album::fetchAll<IAlbum>( this, req );
+    return Album::listAll( this, sort, desc );
 }
 
 std::vector<GenrePtr> MediaLibrary::genres() const

@@ -78,13 +78,9 @@ bool Artist::setShortBio(const std::string &shortBio)
     return true;
 }
 
-std::vector<AlbumPtr> Artist::albums() const
+std::vector<AlbumPtr> Artist::albums( medialibrary::SortingCriteria sort, bool desc ) const
 {
-    if ( m_id == 0 )
-        return {};
-    static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " alb "
-            "WHERE artist_id = ? ORDER BY release_year, title";
-    return Album::fetchAll<IAlbum>( m_ml, req, m_id );
+    return Album::fromArtist( m_ml, m_id, sort, desc );
 }
 
 std::vector<MediaPtr> Artist::media( medialibrary::SortingCriteria sort, bool desc ) const

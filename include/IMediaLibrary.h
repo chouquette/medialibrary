@@ -134,7 +134,7 @@ class IMediaLibrary
         virtual std::vector<MediaPtr> audioFiles( medialibrary::SortingCriteria sort, bool desc ) = 0;
         virtual std::vector<MediaPtr> videoFiles( medialibrary::SortingCriteria sort, bool desc ) = 0;
         virtual AlbumPtr album( unsigned int id ) = 0;
-        virtual std::vector<AlbumPtr> albums() = 0;
+        virtual std::vector<AlbumPtr> albums( medialibrary::SortingCriteria sort, bool desc ) = 0;
         virtual ShowPtr show( const std::string& name ) = 0;
         virtual MoviePtr movie( const std::string& title ) = 0;
         virtual ArtistPtr artist( unsigned int id ) = 0;

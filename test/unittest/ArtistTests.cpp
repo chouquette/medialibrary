@@ -101,13 +101,13 @@ TEST_F( Artists, Albums )
     album1->setAlbumArtist( artist.get() );
     album2->setAlbumArtist( artist.get() );
 
-    auto albums = artist->albums();
+    auto albums = artist->albums( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( albums.size(), 2u );
 
     Reload();
 
     auto artist2 = ml->artist( "Cannibal Otters" );
-    auto albums2 = artist2->albums();
+    auto albums2 = artist2->albums( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( albums.size(), 2u );
 }
 
@@ -239,4 +239,44 @@ TEST_F( Artists, SortMedia )
     ASSERT_EQ( "song1.mp3", tracks[0]->title() );
     ASSERT_EQ( "song2.mp3", tracks[1]->title() );
     ASSERT_EQ( "song3.mp3", tracks[2]->title() );
+}
+
+TEST_F( Artists, SortAlbum )
+{
+    auto artist = ml->createArtist( "Dream Seaotter" );
+    auto album1 = ml->createAlbum( "album1" );
+    album1->setReleaseYear( 2000, false );
+    auto album2 = ml->createAlbum( "album2" );
+    album2->setReleaseYear( 1000, false );
+    auto album3 = ml->createAlbum( "album3" );
+    album3->setReleaseYear( 2000, false );
+
+    album1->setAlbumArtist( artist.get() );
+    album2->setAlbumArtist( artist.get() );
+    album3->setAlbumArtist( artist.get() );
+
+    // Default order is by descending year, discriminated by lexical order
+    auto albums = artist->albums( medialibrary::SortingCriteria::Default, false );
+    ASSERT_EQ( 3u, albums.size() );
+    ASSERT_EQ( album1->id(), albums[0]->id() );
+    ASSERT_EQ( album3->id(), albums[1]->id() );
+    ASSERT_EQ( album2->id(), albums[2]->id() );
+
+    albums = artist->albums( medialibrary::SortingCriteria::Default, true );
+    ASSERT_EQ( 3u, albums.size() );
+    ASSERT_EQ( album2->id(), albums[0]->id() );
+    ASSERT_EQ( album1->id(), albums[1]->id() );
+    ASSERT_EQ( album3->id(), albums[2]->id() );
+
+    albums = artist->albums( medialibrary::SortingCriteria::Alpha, false );
+    ASSERT_EQ( 3u, albums.size() );
+    ASSERT_EQ( album1->id(), albums[0]->id() );
+    ASSERT_EQ( album2->id(), albums[1]->id() );
+    ASSERT_EQ( album3->id(), albums[2]->id() );
+
+    albums = artist->albums( medialibrary::SortingCriteria::Alpha, true );
+    ASSERT_EQ( 3u, albums.size() );
+    ASSERT_EQ( album3->id(), albums[0]->id() );
+    ASSERT_EQ( album2->id(), albums[1]->id() );
+    ASSERT_EQ( album1->id(), albums[2]->id() );
 }

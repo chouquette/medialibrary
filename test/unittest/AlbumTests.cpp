@@ -368,3 +368,39 @@ TEST_F( Albums, SortTracks )
     ASSERT_EQ( t1->id(), tracks[1]->id() ); // B-track -> first
     ASSERT_EQ( t2->id(), tracks[0]->id() ); // A-track -> second
 }
+
+TEST_F( Albums, Sort )
+{
+    auto a1 = ml->createAlbum( "A" );
+    a1->setReleaseYear( 1000, false );
+    auto a2 = ml->createAlbum( "B" );
+    a2->setReleaseYear( 2000, false );
+    auto a3 = ml->createAlbum( "C" );
+    a3->setReleaseYear( 1000, false );
+
+    auto albums = ml->albums( medialibrary::SortingCriteria::ReleaseDate, false );
+    ASSERT_EQ( 3u, albums.size() );
+    ASSERT_EQ( a1->id(), albums[0]->id() );
+    ASSERT_EQ( a3->id(), albums[1]->id() );
+    ASSERT_EQ( a2->id(), albums[2]->id() );
+
+    albums = ml->albums( medialibrary::SortingCriteria::ReleaseDate, true );
+    // We do not invert the lexical order when sorting by DESC release date:
+    ASSERT_EQ( 3u, albums.size() );
+    ASSERT_EQ( a2->id(), albums[0]->id() );
+    ASSERT_EQ( a1->id(), albums[1]->id() );
+    ASSERT_EQ( a3->id(), albums[2]->id() );
+
+    // When listing all albums, default order is lexical order
+    albums = ml->albums( medialibrary::SortingCriteria::Default, false );
+    ASSERT_EQ( 3u, albums.size() );
+    ASSERT_EQ( a1->id(), albums[0]->id() );
+    ASSERT_EQ( a2->id(), albums[1]->id() );
+    ASSERT_EQ( a3->id(), albums[2]->id() );
+
+    albums = ml->albums( medialibrary::SortingCriteria::Default, true );
+    ASSERT_EQ( 3u, albums.size() );
+    ASSERT_EQ( a3->id(), albums[0]->id() );
+    ASSERT_EQ( a2->id(), albums[1]->id() );
+    ASSERT_EQ( a1->id(), albums[2]->id() );
+}
