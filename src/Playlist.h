@@ -51,6 +51,7 @@ public:
     virtual unsigned int id() const override;
     virtual const std::string& name() const override;
     virtual bool setName( const std::string& name ) override;
+    virtual unsigned int creationDate() const override;
     virtual std::vector<MediaPtr> media() const override;
     virtual bool append( unsigned int mediaId ) override;
     virtual bool add( unsigned int mediaId, unsigned int position ) override;
@@ -66,6 +67,7 @@ private:
 
     unsigned int m_id;
     std::string m_name;
+    unsigned int m_creationDate;
 
     friend class policy::PlaylistTable;
 };

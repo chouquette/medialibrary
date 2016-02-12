@@ -43,6 +43,7 @@ TEST_F( Playlists, Create )
     ASSERT_NE( nullptr, pl );
     ASSERT_NE( 0u, pl->id() );
     ASSERT_EQ( "test playlist", pl->name() );
+    ASSERT_NE( 0u, pl->creationDate() );
 }
 
 TEST_F( Playlists, Fetch )

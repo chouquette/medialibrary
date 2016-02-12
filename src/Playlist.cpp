@@ -35,21 +35,24 @@ Playlist::Playlist( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
 {
     row >> m_id
-        >> m_name;
+        >> m_name
+        >> m_creationDate;
 }
 
 Playlist::Playlist( MediaLibraryPtr ml, const std::string& name )
     : m_ml( ml )
     , m_id( 0 )
     , m_name( name )
+    , m_creationDate( time( nullptr ) )
 {
 }
 
 std::shared_ptr<Playlist> Playlist::create( MediaLibraryPtr ml, const std::string& name )
 {
     auto self = std::make_shared<Playlist>( ml, name );
-    static const std::string req = "INSERT INTO " + policy::PlaylistTable::Name + "(name) VALUES(?)";
-    if ( insert( ml, self, req, name ) == false )
+    static const std::string req = "INSERT INTO " + policy::PlaylistTable::Name + \
+            "(name, creation_date) VALUES(?, ?)";
+    if ( insert( ml, self, req, name, self->m_creationDate ) == false )
         return nullptr;
     return self;
 }
@@ -73,6 +76,11 @@ bool Playlist::setName( const std::string& name )
         return false;
     m_name = name;
     return true;
+}
+
+unsigned int Playlist::creationDate() const
+{
+    return m_creationDate;
 }
 
 std::vector<MediaPtr> Playlist::media() const
@@ -116,7 +124,8 @@ bool Playlist::createTable( DBConnection dbConn )
 {
     static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::PlaylistTable::Name + "("
             + policy::PlaylistTable::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "name TEXT"
+            "name TEXT,"
+            "creation_date UNSIGNED INT NOT NULL"
         ")";
     static const std::string relTableReq = "CREATE TABLE IF NOT EXISTS PlaylistMediaRelation("
             "media_id INTEGER,"
