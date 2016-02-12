@@ -383,9 +383,9 @@ PlaylistPtr MediaLibrary::createPlaylist( const std::string& name )
     return Playlist::create( this, name );
 }
 
-std::vector<PlaylistPtr> MediaLibrary::playlists()
+std::vector<PlaylistPtr> MediaLibrary::playlists(medialibrary::SortingCriteria sort, bool desc)
 {
-    return Playlist::fetchAll<IPlaylist>( this );
+    return Playlist::listAll( this, sort, desc );
 }
 
 bool MediaLibrary::deletePlaylist( unsigned int playlistId )

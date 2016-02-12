@@ -204,3 +204,20 @@ std::vector<PlaylistPtr> Playlist::search( MediaLibraryPtr ml, const std::string
             "(SELECT rowid FROM " + policy::PlaylistTable::Name + "Fts WHERE name MATCH ?)";
     return fetchAll<IPlaylist>( ml, req, name + "*" );
 }
+
+std::vector<PlaylistPtr> Playlist::listAll( MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc )
+{
+    std::string req = "SELECT * FROM " + policy::PlaylistTable::Name + " ORDER BY ";
+    switch ( sort )
+    {
+    case medialibrary::SortingCriteria::InsertionDate:
+        req += "creation_date";
+        break;
+    default:
+        req += "name";
+        break;
+    }
+    if ( desc == true )
+        req += " DESC";
+    return fetchAll<IPlaylist>( ml, req );
+}

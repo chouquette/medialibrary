@@ -85,7 +85,7 @@ class MediaLibrary : public IMediaLibrary
         virtual std::vector<ArtistPtr> artists( medialibrary::SortingCriteria sort, bool desc ) const override;
 
         virtual PlaylistPtr createPlaylist( const std::string& name ) override;
-        virtual std::vector<PlaylistPtr> playlists() override;
+        virtual std::vector<PlaylistPtr> playlists( medialibrary::SortingCriteria sort, bool desc ) override;
         virtual bool deletePlaylist( unsigned int playlistId ) override;
 
         virtual bool addToHistory( const std::string& mrl );

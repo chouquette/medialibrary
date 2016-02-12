@@ -61,6 +61,7 @@ public:
     static bool createTable( DBConnection dbConn );
     static bool createTriggers( DBConnection dbConn );
     static std::vector<PlaylistPtr> search( MediaLibraryPtr ml, const std::string& name );
+    static std::vector<PlaylistPtr> listAll( MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc );
 
 private:
     MediaLibraryPtr m_ml;

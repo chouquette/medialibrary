@@ -157,7 +157,7 @@ class IMediaLibrary
          *  Playlists
          */
         virtual PlaylistPtr createPlaylist( const std::string& name ) = 0;
-        virtual std::vector<PlaylistPtr> playlists() = 0;
+        virtual std::vector<PlaylistPtr> playlists( medialibrary::SortingCriteria sort, bool desc ) = 0;
         virtual bool deletePlaylist( unsigned int playlistId ) = 0;
 
         /**
