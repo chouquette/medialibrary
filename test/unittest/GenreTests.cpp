@@ -125,7 +125,7 @@ TEST_F( Genres, ListAlbums )
     auto genres = ml->genres( medialibrary::SortingCriteria::Default, false );
     for ( auto& genre : genres )
     {
-        auto albums = genre->albums();
+        auto albums = genre->albums( medialibrary::SortingCriteria::Default, false );
 
         if ( genre->id() == g->id() )
         {

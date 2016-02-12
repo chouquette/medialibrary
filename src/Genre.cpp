@@ -72,12 +72,9 @@ std::vector<AlbumTrackPtr> Genre::tracks( medialibrary::SortingCriteria sort, bo
     return AlbumTrack::fromGenre( m_ml, m_id, sort, desc );
 }
 
-std::vector<AlbumPtr> Genre::albums() const
+std::vector<AlbumPtr> Genre::albums( medialibrary::SortingCriteria sort, bool desc ) const
 {
-    static const std::string req = "SELECT a.* FROM " + policy::AlbumTable::Name + " a "
-            "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.album_id = a.id_album "
-            "WHERE att.genre_id = ? GROUP BY att.album_id";
-    return Album::fetchAll<IAlbum>( m_ml, req, m_id );
+    return Album::fromGenre( m_ml, m_id, sort, desc );
 }
 
 bool Genre::createTable( DBConnection dbConn )

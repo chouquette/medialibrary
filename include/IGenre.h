@@ -34,5 +34,5 @@ public:
     virtual const std::string& name() const = 0;
     virtual std::vector<ArtistPtr> artists( medialibrary::SortingCriteria sort, bool desc ) const = 0;
     virtual std::vector<AlbumTrackPtr> tracks( medialibrary::SortingCriteria sort, bool desc ) const = 0;
-    virtual std::vector<AlbumPtr> albums() const = 0;
+    virtual std::vector<AlbumPtr> albums( medialibrary::SortingCriteria sort, bool desc ) const = 0;
 };

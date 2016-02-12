@@ -104,12 +104,13 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         /// \return
         ///
         static std::vector<AlbumPtr> search( MediaLibraryPtr ml, const std::string& pattern );
-        static std::vector<AlbumPtr> fromArtist(MediaLibraryPtr ml, unsigned int artistId , medialibrary::SortingCriteria sort, bool desc );
+        static std::vector<AlbumPtr> fromArtist( MediaLibraryPtr ml, unsigned int artistId, medialibrary::SortingCriteria sort, bool desc );
+        static std::vector<AlbumPtr> fromGenre( MediaLibraryPtr ml, unsigned int genreId, medialibrary::SortingCriteria sort, bool desc );
         static std::vector<AlbumPtr> listAll( MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc );
 
     private:
         static std::string orderTracksBy( medialibrary::SortingCriteria sort, bool desc );
-
+        static std::string orderBy( medialibrary::SortingCriteria sort, bool desc );
     protected:
         MediaLibraryPtr m_ml;
         unsigned int m_id;

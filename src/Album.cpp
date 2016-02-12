@@ -164,6 +164,26 @@ std::string Album::orderTracksBy( medialibrary::SortingCriteria sort, bool desc 
     return req;
 }
 
+std::string Album::orderBy( medialibrary::SortingCriteria sort, bool desc )
+{
+    std::string req = " ORDER BY ";
+    switch ( sort )
+    {
+    case medialibrary::SortingCriteria::ReleaseDate:
+        if ( desc == true )
+            req += "release_year DESC, title";
+        else
+            req += "release_year, title";
+        break;
+    default:
+        req += "title";
+        if ( desc == true )
+            req += " DESC";
+        break;
+    }
+    return req;
+}
+
 std::vector<MediaPtr> Album::tracks( medialibrary::SortingCriteria sort, bool desc ) const
 {
     // This doesn't return the cached version, because it would be fairly complicated, if not impossible or
@@ -416,23 +436,19 @@ std::vector<AlbumPtr> Album::fromArtist( MediaLibraryPtr ml, unsigned int artist
     return fetchAll<IAlbum>( ml, req, artistId );
 }
 
+std::vector<AlbumPtr> Album::fromGenre(MediaLibraryPtr ml, unsigned int genreId, medialibrary::SortingCriteria sort, bool desc)
+{
+    std::string req = "SELECT a.* FROM " + policy::AlbumTable::Name + " a "
+            "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.album_id = a.id_album "
+            "WHERE att.genre_id = ? GROUP BY att.album_id";
+    req += orderBy( sort, desc );
+    return fetchAll<IAlbum>( ml, req, genreId );
+}
+
 std::vector<AlbumPtr> Album::listAll( MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc )
 {
     std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
-                    " WHERE is_present=1 ORDER BY ";
-    switch ( sort )
-    {
-    case medialibrary::SortingCriteria::ReleaseDate:
-        if ( desc == true )
-            req += "release_year DESC, title";
-        else
-            req += "release_year, title";
-        break;
-    default:
-        req += "title";
-        if ( desc == true )
-            req += " DESC";
-        break;
-    }
+                    " WHERE is_present=1";
+    req += orderBy( sort, desc );
     return fetchAll<IAlbum>( ml, req );
 }
