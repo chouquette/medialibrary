@@ -1,7 +1,6 @@
 #include "Tester.h"
 
-static std::string SamplesDirectory = ".";
-static std::string TestCaseDirectory = SRC_DIR "/test/samples/testcases";
+static std::string TestDirectory = SRC_DIR "/test/samples/";
 bool Verbose = false;
 bool ExtraVerbose = false;
 
@@ -31,7 +30,7 @@ class TestEnv : public ::testing::Environment
 
 TEST_P( Tests, Parse )
 {
-    auto casePath = TestCaseDirectory + "/" + GetParam() + ".json";
+    auto casePath = TestDirectory + "testcases/" + GetParam() + ".json";
     std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
     ASSERT_NE( nullptr, f );
     char buff[65536]; // That's how ugly I am!
@@ -46,7 +45,7 @@ TEST_P( Tests, Parse )
     for ( auto i = 0u; i < input.Size(); ++i )
     {
         // Quick and dirty check to ensure we're discovering something that exists
-        auto samplesDir = SamplesDirectory + "/" + input[i].GetString();
+        auto samplesDir = TestDirectory + "/samples/" + input[i].GetString();
         struct stat s;
         auto res = stat( samplesDir.c_str(), &s );
         ASSERT_EQ( 0, res );
@@ -87,17 +86,11 @@ TEST_P( Tests, Parse )
 int main(int ac, char** av)
 {
     ::testing::InitGoogleTest(&ac, av);
-    const std::string samplesArg = "--samples-directory=";
-    const std::string testCasesArg = "--testcases-directory=";
     const std::string verboseArg = "-v";
     const std::string extraVerboseArg = "-vv";
     for ( auto i = 1; i < ac; ++i )
     {
-        if ( strncmp( samplesArg.c_str(), av[i], samplesArg.length() ) == 0 )
-            SamplesDirectory = av[i] + samplesArg.size();
-        else if ( strncmp( testCasesArg.c_str(), av[i], testCasesArg.length() ) == 0 )
-            TestCaseDirectory = av[i] + testCasesArg.size();
-        else if ( av[i] == verboseArg )
+        if ( av[i] == verboseArg )
             Verbose = true;
         else if ( av[i] == extraVerboseArg )
             ExtraVerbose = true;

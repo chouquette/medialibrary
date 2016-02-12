@@ -1,0 +1,3 @@
+[submodule "test/samples/samples"]
+	path = test/samples/samples
+	url = git@code.videolan.org:videolan/medialibrary-test-samples.git
