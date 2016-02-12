@@ -72,7 +72,7 @@ TEST_F( Genres, ListAlbumTracks )
 
 TEST_F( Genres, ListArtists )
 {
-    auto artists = g->artists();
+    auto artists = g->artists( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( 0u, artists.size() );
 
     auto a = ml->createArtist( "artist" );
@@ -96,7 +96,7 @@ TEST_F( Genres, ListArtists )
         track->setGenre( g );
         track->setArtist( a2 );
     }
-    artists = g->artists();
+    artists = g->artists( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( 2u, artists.size() );
 }
 

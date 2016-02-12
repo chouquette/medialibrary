@@ -45,7 +45,7 @@ public:
     Genre( MediaLibraryPtr ml, const std::string& name );
     virtual unsigned int id() const;
     virtual const std::string& name() const override;
-    virtual std::vector<ArtistPtr> artists() const override;
+    virtual std::vector<ArtistPtr> artists( medialibrary::SortingCriteria sort, bool desc ) const override;
     virtual std::vector<AlbumTrackPtr> tracks(medialibrary::SortingCriteria sort, bool desc) const override;
     virtual std::vector<AlbumPtr> albums() const override;
 

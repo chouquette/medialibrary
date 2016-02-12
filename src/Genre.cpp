@@ -56,11 +56,14 @@ const std::string& Genre::name() const
     return m_name;
 }
 
-std::vector<ArtistPtr> Genre::artists() const
+std::vector<ArtistPtr> Genre::artists( medialibrary::SortingCriteria, bool desc ) const
 {
-    static const std::string req = "SELECT a.* FROM " + policy::ArtistTable::Name + " a "
+    std::string req = "SELECT a.* FROM " + policy::ArtistTable::Name + " a "
             "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.artist_id = a.id_artist "
-            "WHERE att.genre_id = ? GROUP BY att.artist_id";
+            "WHERE att.genre_id = ? GROUP BY att.artist_id"
+            " ORDER BY a.name";
+    if ( desc == true )
+        req += " DESC";
     return Artist::fetchAll<IArtist>( m_ml, req, m_id );
 }
 
