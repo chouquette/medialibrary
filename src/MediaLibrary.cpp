@@ -226,12 +226,12 @@ void MediaLibrary::setVerbosity(LogLevel v)
     Log::setLogLevel( v );
 }
 
-std::vector<MediaPtr> MediaLibrary::audioFiles( medialibrary::SortingCriteria sort, bool desc )
+std::vector<MediaPtr> MediaLibrary::audioFiles( medialibrary::SortingCriteria sort, bool desc ) const
 {
     return Media::listAll( this, IMedia::Type::AudioType, sort, desc );
 }
 
-std::vector<MediaPtr> MediaLibrary::videoFiles( medialibrary::SortingCriteria sort, bool desc )
+std::vector<MediaPtr> MediaLibrary::videoFiles( medialibrary::SortingCriteria sort, bool desc ) const
 {
     return Media::listAll( this, IMedia::Type::VideoType, sort, desc );
 }
@@ -301,7 +301,7 @@ bool MediaLibrary::deleteLabel( LabelPtr label )
     return Label::destroy( this, label->id() );
 }
 
-AlbumPtr MediaLibrary::album( unsigned int id )
+AlbumPtr MediaLibrary::album( unsigned int id ) const
 {
     return Album::fetch( this, id );
 }
@@ -311,7 +311,7 @@ std::shared_ptr<Album> MediaLibrary::createAlbum(const std::string& title )
     return Album::create( this, title );
 }
 
-std::vector<AlbumPtr> MediaLibrary::albums( medialibrary::SortingCriteria sort, bool desc )
+std::vector<AlbumPtr> MediaLibrary::albums( medialibrary::SortingCriteria sort, bool desc ) const
 {
     return Album::listAll( this, sort, desc );
 }
@@ -321,7 +321,7 @@ std::vector<GenrePtr> MediaLibrary::genres( medialibrary::SortingCriteria sort, 
     return Genre::listAll( this, sort, desc );
 }
 
-ShowPtr MediaLibrary::show( const std::string& name )
+ShowPtr MediaLibrary::show( const std::string& name ) const
 {
     static const std::string req = "SELECT * FROM " + policy::ShowTable::Name
             + " WHERE name = ?";
@@ -333,7 +333,7 @@ std::shared_ptr<Show> MediaLibrary::createShow(const std::string& name)
     return Show::create( this, name );
 }
 
-MoviePtr MediaLibrary::movie( const std::string& title )
+MoviePtr MediaLibrary::movie( const std::string& title ) const
 {
     static const std::string req = "SELECT * FROM " + policy::MovieTable::Name
             + " WHERE title = ?";
@@ -348,7 +348,7 @@ std::shared_ptr<Movie> MediaLibrary::createMovie( Media& media, const std::strin
     return movie;
 }
 
-ArtistPtr MediaLibrary::artist(unsigned int id)
+ArtistPtr MediaLibrary::artist(unsigned int id) const
 {
     return Artist::fetch( this, id );
 }

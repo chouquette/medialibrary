@@ -56,8 +56,8 @@ class MediaLibrary : public IMediaLibrary
         virtual bool initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* metadataCb ) override;
         virtual void setVerbosity( LogLevel v ) override;
 
-        virtual std::vector<MediaPtr> audioFiles( medialibrary::SortingCriteria sort, bool desc) override;
-        virtual std::vector<MediaPtr> videoFiles( medialibrary::SortingCriteria sort, bool desc) override;
+        virtual std::vector<MediaPtr> audioFiles( medialibrary::SortingCriteria sort, bool desc) const override;
+        virtual std::vector<MediaPtr> videoFiles( medialibrary::SortingCriteria sort, bool desc) const override;
 
         std::shared_ptr<Media> addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs );
 
@@ -67,19 +67,19 @@ class MediaLibrary : public IMediaLibrary
         virtual LabelPtr createLabel( const std::string& label ) override;
         virtual bool deleteLabel( LabelPtr label ) override;
 
-        virtual AlbumPtr album( unsigned int id ) override;
+        virtual AlbumPtr album( unsigned int id ) const override;
         std::shared_ptr<Album> createAlbum( const std::string& title );
-        virtual std::vector<AlbumPtr> albums(medialibrary::SortingCriteria sort, bool desc) override;
+        virtual std::vector<AlbumPtr> albums(medialibrary::SortingCriteria sort, bool desc) const override;
 
         virtual std::vector<GenrePtr> genres( medialibrary::SortingCriteria sort, bool desc ) const override;
 
-        virtual ShowPtr show( const std::string& name ) override;
+        virtual ShowPtr show( const std::string& name ) const override;
         std::shared_ptr<Show> createShow( const std::string& name );
 
-        virtual MoviePtr movie( const std::string& title ) override;
+        virtual MoviePtr movie( const std::string& title ) const override;
         std::shared_ptr<Movie> createMovie( Media& media, const std::string& title );
 
-        virtual ArtistPtr artist( unsigned int id ) override;
+        virtual ArtistPtr artist( unsigned int id ) const override;
         ArtistPtr artist( const std::string& name );
         std::shared_ptr<Artist> createArtist( const std::string& name );
         virtual std::vector<ArtistPtr> artists( medialibrary::SortingCriteria sort, bool desc ) const override;
