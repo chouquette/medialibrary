@@ -51,7 +51,7 @@ TEST_F( Genres, List )
 {
     auto g2 = ml->createGenre( "genre 2" );
     ASSERT_NE( nullptr, g2 );
-    auto genres = ml->genres();
+    auto genres = ml->genres( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( 2u, genres.size() );
 }
 
@@ -122,7 +122,7 @@ TEST_F( Genres, ListAlbums )
         track->setGenre( g );
     }
 
-    auto genres = ml->genres();
+    auto genres = ml->genres( medialibrary::SortingCriteria::Default, false );
     for ( auto& genre : genres )
     {
         auto albums = genre->albums();
@@ -181,4 +181,19 @@ TEST_F( Genres, SortTracks )
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( 1u, tracks[1]->trackNumber() );
     ASSERT_EQ( 2u, tracks[0]->trackNumber() );
+}
+
+TEST_F( Genres, Sort )
+{
+    auto g2 = ml->createGenre( "metal" );
+
+    auto genres = ml->genres( medialibrary::SortingCriteria::Default, false );
+    ASSERT_EQ( 2u, genres.size() );
+    ASSERT_EQ( g->id(), genres[0]->id() );
+    ASSERT_EQ( g2->id(), genres[1]->id() );
+
+    genres = ml->genres( medialibrary::SortingCriteria::Default, true );
+    ASSERT_EQ( 2u, genres.size() );
+    ASSERT_EQ( g->id(), genres[1]->id() );
+    ASSERT_EQ( g2->id(), genres[0]->id() );
 }

@@ -128,3 +128,11 @@ std::vector<GenrePtr> Genre::search( MediaLibraryPtr ml, const std::string& name
     return fetchAll<IGenre>( ml, req, name + "*" );
 }
 
+std::vector<GenrePtr> Genre::listAll( MediaLibraryPtr ml, medialibrary::SortingCriteria, bool desc )
+{
+    std::string req = "SELECT * FROM " + policy::GenreTable::Name + " ORDER BY name";
+    if ( desc == true )
+        req += " DESC";
+    return fetchAll<IGenre>( ml, req );
+}
+

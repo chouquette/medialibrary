@@ -316,9 +316,9 @@ std::vector<AlbumPtr> MediaLibrary::albums( medialibrary::SortingCriteria sort, 
     return Album::listAll( this, sort, desc );
 }
 
-std::vector<GenrePtr> MediaLibrary::genres() const
+std::vector<GenrePtr> MediaLibrary::genres( medialibrary::SortingCriteria sort, bool desc ) const
 {
-    return Genre::fetchAll<IGenre>( this );
+    return Genre::listAll( this, sort, desc );
 }
 
 ShowPtr MediaLibrary::show( const std::string& name )

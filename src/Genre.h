@@ -53,6 +53,7 @@ public:
     static std::shared_ptr<Genre> create( MediaLibraryPtr ml, const std::string& name );
     static std::shared_ptr<Genre> fromName( MediaLibraryPtr ml, const std::string& name );
     static std::vector<GenrePtr> search( MediaLibraryPtr ml, const std::string& name );
+    static std::vector<GenrePtr> listAll( MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc );
 
 private:
     MediaLibraryPtr m_ml;

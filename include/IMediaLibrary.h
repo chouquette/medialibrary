@@ -146,7 +146,12 @@ class IMediaLibrary
          * @param desc If true, the provided sorting criteria will be reversed.
          */
         virtual std::vector<ArtistPtr> artists( medialibrary::SortingCriteria sort, bool desc ) const = 0;
-        virtual std::vector<GenrePtr> genres() const = 0;
+        /**
+         * @brief genres Return the list of music genres
+         * @param sort A sorting criteria. So far, this is ignored, and artists are sorted by lexial order
+         * @param desc If true, the provided sorting criteria will be reversed.
+         */
+        virtual std::vector<GenrePtr> genres( medialibrary::SortingCriteria sort, bool desc ) const = 0;
 
         /***
          *  Playlists
