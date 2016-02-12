@@ -152,7 +152,10 @@ std::vector<AlbumTrackPtr> AlbumTrack::fromGenre( MediaLibraryPtr ml, unsigned i
         req += "m.release_date";
         break;
     default:
-        req += "t.disc_number, t.track_number, med.filename";
+        if ( desc == true )
+            req += "t.disc_number DESC, t.track_number DESC, m.filename";
+        else
+            req += "t.disc_number, t.track_number, m.filename";
         break;
     }
 
