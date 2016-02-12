@@ -242,7 +242,7 @@ TEST_F( Albums, AlbumArtist )
     auto album = ml->createAlbum( "test" );
     ASSERT_EQ( album->albumArtist(), nullptr );
     auto artist = ml->createArtist( "artist" );
-    album->setAlbumArtist( artist.get() );
+    album->setAlbumArtist( artist );
     ASSERT_NE( album->albumArtist(), nullptr );
 
     Reload();
@@ -266,7 +266,7 @@ TEST_F( Albums, SearchByArtist )
 {
     auto a = ml->createAlbum( "sea otters" );
     auto artist = ml->createArtist( "pangolins" );
-    a->setAlbumArtist( artist.get() );
+    a->setAlbumArtist( artist );
 
     auto albums = ml->searchAlbums( "pangol" );
     ASSERT_EQ( 1u, albums.size() );
@@ -276,7 +276,7 @@ TEST_F( Albums, SearchNoDuplicate )
 {
     auto a = ml->createAlbum( "sea otters" );
     auto artist = ml->createArtist( "otters" );
-    a->setAlbumArtist( artist.get() );
+    a->setAlbumArtist( artist );
 
     auto albums = ml->searchAlbums( "otters" );
     ASSERT_EQ( 1u, albums.size() );
@@ -310,7 +310,7 @@ TEST_F( Albums, SearchAfterArtistUpdate )
     auto a = ml->createAlbum( "sea otters" );
     auto artist = ml->createArtist( "pangolin of fire" );
     auto artist2 = ml->createArtist( "pangolin of ice" );
-    a->setAlbumArtist( artist.get() );
+    a->setAlbumArtist( artist );
 
     auto albums = ml->searchAlbums( "fire" );
     ASSERT_EQ( 1u, albums.size() );
@@ -318,7 +318,7 @@ TEST_F( Albums, SearchAfterArtistUpdate )
     albums = ml->searchAlbums( "ice" );
     ASSERT_EQ( 0u, albums.size() );
 
-    a->setAlbumArtist( artist2.get() );
+    a->setAlbumArtist( artist2 );
 
     albums = ml->searchAlbums( "fire" );
     ASSERT_EQ( 0u, albums.size() );

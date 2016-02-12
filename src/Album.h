@@ -89,7 +89,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         unsigned int nbTracks() const override;
 
         virtual ArtistPtr albumArtist() const override;
-        bool setAlbumArtist( Artist* artist );
+        bool setAlbumArtist( std::shared_ptr<Artist> artist );
         virtual std::vector<ArtistPtr> artists(bool desc) const override;
         bool addArtist( std::shared_ptr<Artist> artist );
         bool removeArtist( Artist* artist );
@@ -122,6 +122,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         bool m_isPresent;
 
         mutable Cache<std::vector<MediaPtr>> m_tracks;
+        mutable Cache<std::shared_ptr<Artist>> m_albumArtist;
 
         friend struct policy::AlbumTable;
 };

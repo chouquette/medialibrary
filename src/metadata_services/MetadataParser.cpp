@@ -394,7 +394,7 @@ bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
         // We don't know if the artist was tagged as artist or albumartist, however, we simply add it
         // as the albumartist until proven we were wrong (ie. until one of the next tracks
         // has a different artist)
-        album->setAlbumArtist( albumArtist.get() );
+        album->setAlbumArtist( albumArtist );
         // Always add the album artist as an artist
         album->addArtist( albumArtist );
         if ( artist != nullptr )
@@ -406,7 +406,7 @@ bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
         {
             // We have more than a single artist on this album, fallback to various artists
             auto variousArtists = Artist::fetch( m_ml, medialibrary::VariousArtistID );
-            album->setAlbumArtist( variousArtists.get() );
+            album->setAlbumArtist( variousArtists );
             // Add those two artists as "featuring".
             album->addArtist( albumArtist );
         }

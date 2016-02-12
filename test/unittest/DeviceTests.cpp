@@ -257,7 +257,7 @@ TEST_F( DeviceFs, RemoveAlbum )
         auto media = ml->media( mock::FileSystemFactory::Root + "audio.mp3" );
         album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1 );
         auto artist = ml->createArtist( "artist" );
-        album->setAlbumArtist( artist.get() );
+        album->setAlbumArtist( artist );
     }
     // And an album that will disappear, along with its artist
     {
@@ -267,7 +267,7 @@ TEST_F( DeviceFs, RemoveAlbum )
         album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1 );
         album->addTrack( std::static_pointer_cast<Media>( media ), 2, 1 );
         auto artist = ml->createArtist( "artist 2" );
-        album->setAlbumArtist( artist.get() );
+        album->setAlbumArtist( artist );
     }
 
     auto albums = ml->albums( medialibrary::SortingCriteria::Default, false );
@@ -302,7 +302,7 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
         album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1 );
         album->addTrack( std::static_pointer_cast<Media>( media2 ), 2, 1 );
         auto newArtist = ml->createArtist( "artist" );
-        album->setAlbumArtist( newArtist.get() );
+        album->setAlbumArtist( newArtist );
         newArtist->addMedia( static_cast<Media&>( *media ) );
         newArtist->addMedia( static_cast<Media&>( *media2 ) );
     }

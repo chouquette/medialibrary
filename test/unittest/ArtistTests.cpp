@@ -98,8 +98,8 @@ TEST_F( Artists, Albums )
     ASSERT_NE( album1, nullptr );
     ASSERT_NE( album2, nullptr );
 
-    album1->setAlbumArtist( artist.get() );
-    album2->setAlbumArtist( artist.get() );
+    album1->setAlbumArtist( artist );
+    album2->setAlbumArtist( artist );
 
     auto albums = artist->albums( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( albums.size(), 2u );
@@ -144,7 +144,7 @@ TEST_F( Artists, GetAll )
         auto a = ml->createArtist( std::to_string( i ) );
         auto alb = ml->createAlbum( std::to_string( i ) );
         ASSERT_NE( nullptr, alb );
-        alb->setAlbumArtist( a.get() );
+        alb->setAlbumArtist( a );
         ASSERT_NE( a, nullptr );
     }
     artists = ml->artists( medialibrary::SortingCriteria::Default, false );
@@ -251,9 +251,9 @@ TEST_F( Artists, SortAlbum )
     auto album3 = ml->createAlbum( "album3" );
     album3->setReleaseYear( 2000, false );
 
-    album1->setAlbumArtist( artist.get() );
-    album2->setAlbumArtist( artist.get() );
-    album3->setAlbumArtist( artist.get() );
+    album1->setAlbumArtist( artist );
+    album2->setAlbumArtist( artist );
+    album3->setAlbumArtist( artist );
 
     // Default order is by descending year, discriminated by lexical order
     auto albums = artist->albums( medialibrary::SortingCriteria::Default, false );
@@ -286,10 +286,10 @@ TEST_F( Artists, Sort )
     // Keep in mind that artists are only listed when they are marked as album artist at least once
     auto a1 = ml->createArtist( "A" );
     auto alb1 = ml->createAlbum( "albumA" );
-    alb1->setAlbumArtist( a1.get() );
+    alb1->setAlbumArtist( a1 );
     auto a2 = ml->createArtist( "B" );
     auto alb2 = ml->createAlbum( "albumB" );
-    alb2->setAlbumArtist( a2.get() );
+    alb2->setAlbumArtist( a2 );
 
     auto artists = ml->artists( medialibrary::SortingCriteria::Alpha, false );
     ASSERT_EQ( 2u, artists.size() );

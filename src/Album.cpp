@@ -232,10 +232,13 @@ ArtistPtr Album::albumArtist() const
 {
     if ( m_artistId == 0 )
         return nullptr;
-    return Artist::fetch( m_ml, m_artistId );
+    auto lock = m_albumArtist.lock();
+    if ( m_albumArtist.isCached() == false )
+        m_albumArtist = Artist::fetch( m_ml, m_artistId );
+    return m_albumArtist.get();
 }
 
-bool Album::setAlbumArtist( Artist* artist )
+bool Album::setAlbumArtist( std::shared_ptr<Artist> artist )
 {
     if ( m_artistId == artist->id() )
         return true;
@@ -247,10 +250,12 @@ bool Album::setAlbumArtist( Artist* artist )
         return false;
     if ( m_artistId != 0 )
     {
-        auto previousArtist = Artist::fetch( m_ml, m_artistId );
-        previousArtist->updateNbAlbum( -1 );
+        if ( m_albumArtist.isCached() == false )
+            albumArtist();
+        m_albumArtist.get()->updateNbAlbum( -1 );
     }
     m_artistId = artist->id();
+    m_albumArtist = artist;
     artist->updateNbAlbum( 1 );
     static const std::string ftsReq = "UPDATE " + policy::AlbumTable::Name + "Fts SET "
             " artist = ? WHERE rowid = ?";
