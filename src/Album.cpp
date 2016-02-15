@@ -178,6 +178,11 @@ std::string Album::orderBy( medialibrary::SortingCriteria sort, bool desc )
         else
             req += "release_year, title";
         break;
+    case medialibrary::SortingCriteria::Duration:
+        req += "duration";
+        if ( desc == true )
+            req += " DESC";
+        break;
     default:
         req += "title";
         if ( desc == true )
