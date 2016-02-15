@@ -277,7 +277,7 @@ class Tools
          * Returns 0 (which is an invalid sqlite primary key) when insertion fails.
          */
         template <typename... Args>
-        static unsigned int insert( DBConnection dbConnection, const std::string& req, Args&&... args )
+        static int64_t insert( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
             SqliteConnection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)

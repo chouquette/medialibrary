@@ -25,7 +25,7 @@
 
 const std::string policy::VideoTrackTable::Name = "VideoTrack";
 const std::string policy::VideoTrackTable::PrimaryKeyColumn = "id_track";
-unsigned int VideoTrack::* const policy::VideoTrackTable::PrimaryKey = &VideoTrack::m_id;
+int64_t VideoTrack::* const policy::VideoTrackTable::PrimaryKey = &VideoTrack::m_id;
 
 VideoTrack::VideoTrack( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -38,7 +38,7 @@ VideoTrack::VideoTrack( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_mediaId;
 }
 
-VideoTrack::VideoTrack( MediaLibraryPtr ml, const std::string& codec, unsigned int width, unsigned int height, float fps, unsigned int mediaId )
+VideoTrack::VideoTrack( MediaLibraryPtr ml, const std::string& codec, unsigned int width, unsigned int height, float fps, int64_t mediaId )
     : m_ml( ml )
     , m_id( 0 )
     , m_codec( codec )
@@ -49,7 +49,7 @@ VideoTrack::VideoTrack( MediaLibraryPtr ml, const std::string& codec, unsigned i
 {
 }
 
-unsigned int VideoTrack::id() const
+int64_t VideoTrack::id() const
 {
     return m_id;
 }
@@ -75,7 +75,7 @@ float VideoTrack::fps() const
 }
 
 std::shared_ptr<VideoTrack> VideoTrack::create( MediaLibraryPtr ml, const std::string &codec, unsigned int width,
-                                                unsigned int height, float fps, unsigned int mediaId )
+                                                unsigned int height, float fps, int64_t mediaId )
 {
     static const std::string req  = "INSERT INTO " + policy::VideoTrackTable::Name
             + "(codec, width, height, fps, media_id) VALUES(?, ?, ?, ?, ?)";

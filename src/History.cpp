@@ -28,7 +28,7 @@ namespace policy
 {
 const std::string HistoryTable::Name = "History";
 const std::string HistoryTable::PrimaryKeyColumn = "id_record";
-unsigned int History::* const HistoryTable::PrimaryKey = &History::m_id;
+int64_t History::* const HistoryTable::PrimaryKey = &History::m_id;
 }
 
 constexpr unsigned int History::MaxEntries;

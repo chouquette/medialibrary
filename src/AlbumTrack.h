@@ -44,7 +44,7 @@ struct AlbumTrackTable
 {
     static const std::string Name;
     static const std::string PrimaryKeyColumn;
-    static unsigned int AlbumTrack::*const PrimaryKey;
+    static int64_t AlbumTrack::*const PrimaryKey;
 };
 }
 
@@ -52,9 +52,9 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
 {
     public:
         AlbumTrack( MediaLibraryPtr ml, sqlite::Row& row );
-        AlbumTrack( MediaLibraryPtr ml, unsigned int mediaId, unsigned int trackNumber, unsigned int albumId , unsigned int discNumber);
+        AlbumTrack( MediaLibraryPtr ml, int64_t mediaId, unsigned int trackNumber, int64_t albumId, unsigned int discNumber);
 
-        virtual unsigned int id() const override;
+        virtual int64_t id() const override;
         virtual ArtistPtr artist() const override;
         bool setArtist( std::shared_ptr<Artist> artist );
         virtual GenrePtr genre() override;
@@ -65,20 +65,20 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         virtual std::shared_ptr<IMedia> media() override;
 
         static bool createTable( DBConnection dbConnection );
-        static std::shared_ptr<AlbumTrack> create( MediaLibraryPtr ml, unsigned int albumId,
+        static std::shared_ptr<AlbumTrack> create( MediaLibraryPtr ml, int64_t albumId,
                                      std::shared_ptr<Media> media, unsigned int trackNb , unsigned int discNumber );
-        static AlbumTrackPtr fromMedia( MediaLibraryPtr ml, unsigned int mediaId );
-        static std::vector<AlbumTrackPtr> fromGenre( MediaLibraryPtr ml, unsigned int genreId, medialibrary::SortingCriteria sort, bool desc );
+        static AlbumTrackPtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
+        static std::vector<AlbumTrackPtr> fromGenre( MediaLibraryPtr ml, int64_t genreId, medialibrary::SortingCriteria sort, bool desc );
         static std::vector<MediaPtr> search(DBConnection dbConn, const std::string& title );
 
     private:
         MediaLibraryPtr m_ml;
-        unsigned int m_id;
-        unsigned int m_mediaId;
-        unsigned int m_artistId;
-        unsigned int m_genreId;
+        int64_t m_id;
+        int64_t m_mediaId;
+        int64_t m_artistId;
+        int64_t m_genreId;
         unsigned int m_trackNumber;
-        unsigned int m_albumId;
+        int64_t m_albumId;
         unsigned int m_discNumber;
         bool m_isPresent;
 

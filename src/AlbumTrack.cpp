@@ -30,7 +30,7 @@
 
 const std::string policy::AlbumTrackTable::Name = "AlbumTrack";
 const std::string policy::AlbumTrackTable::PrimaryKeyColumn = "id_track";
-unsigned int AlbumTrack::* const policy::AlbumTrackTable::PrimaryKey = &AlbumTrack::m_id;
+int64_t AlbumTrack::* const policy::AlbumTrackTable::PrimaryKey = &AlbumTrack::m_id;
 
 AlbumTrack::AlbumTrack( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -45,7 +45,7 @@ AlbumTrack::AlbumTrack( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_isPresent;
 }
 
-AlbumTrack::AlbumTrack( MediaLibraryPtr ml, unsigned int mediaId, unsigned int trackNumber, unsigned int albumId, unsigned int discNumber )
+AlbumTrack::AlbumTrack( MediaLibraryPtr ml, int64_t mediaId, unsigned int trackNumber, int64_t albumId, unsigned int discNumber )
     : m_ml( ml )
     , m_id( 0 )
     , m_mediaId( mediaId )
@@ -56,7 +56,7 @@ AlbumTrack::AlbumTrack( MediaLibraryPtr ml, unsigned int mediaId, unsigned int t
 {
 }
 
-unsigned int AlbumTrack::id() const
+int64_t AlbumTrack::id() const
 {
     return m_id;
 }
@@ -115,7 +115,7 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
             sqlite::Tools::executeRequest( dbConnection, triggerReq );
 }
 
-std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, unsigned int albumId,
+std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, int64_t albumId,
                                                 std::shared_ptr<Media> media, unsigned int trackNb,
                                                 unsigned int discNumber )
 {
@@ -128,14 +128,14 @@ std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, unsigned int
     return self;
 }
 
-AlbumTrackPtr AlbumTrack::fromMedia( MediaLibraryPtr ml, unsigned int mediaId )
+AlbumTrackPtr AlbumTrack::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTrackTable::Name +
             " WHERE media_id = ?";
     return fetch( ml, req, mediaId );
 }
 
-std::vector<AlbumTrackPtr> AlbumTrack::fromGenre( MediaLibraryPtr ml, unsigned int genreId, medialibrary::SortingCriteria sort, bool desc )
+std::vector<AlbumTrackPtr> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId, medialibrary::SortingCriteria sort, bool desc )
 {
     std::string req = "SELECT t.* FROM " + policy::AlbumTrackTable::Name + " t"
             " INNER JOIN " + policy::MediaTable::Name + " m ON m.id_media = t.media_id"

@@ -28,7 +28,7 @@ namespace policy
 {
 const std::string PlaylistTable::Name = "Playlist";
 const std::string PlaylistTable::PrimaryKeyColumn = "id_playlist";
-unsigned int Playlist::* const PlaylistTable::PrimaryKey = &Playlist::m_id;
+int64_t Playlist::* const PlaylistTable::PrimaryKey = &Playlist::m_id;
 }
 
 Playlist::Playlist( MediaLibraryPtr ml, sqlite::Row& row )
@@ -57,7 +57,7 @@ std::shared_ptr<Playlist> Playlist::create( MediaLibraryPtr ml, const std::strin
     return self;
 }
 
-unsigned int Playlist::id() const
+int64_t Playlist::id() const
 {
     return m_id;
 }
@@ -92,12 +92,12 @@ std::vector<MediaPtr> Playlist::media() const
     return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
 
-bool Playlist::append( unsigned int mediaId )
+bool Playlist::append( int64_t mediaId )
 {
     return add( mediaId, 0 );
 }
 
-bool Playlist::add( unsigned int mediaId, unsigned int position )
+bool Playlist::add( int64_t mediaId, unsigned int position )
 {
     static const std::string req = "INSERT INTO PlaylistMediaRelation(media_id, playlist_id, position) VALUES(?, ?, ?)";
     // position isn't a foreign key, but we want it to be passed as NULL if it equals to 0
@@ -105,7 +105,7 @@ bool Playlist::add( unsigned int mediaId, unsigned int position )
     return sqlite::Tools::insert( m_ml->getConn(), req, mediaId, m_id, sqlite::ForeignKey{ position } );
 }
 
-bool Playlist::move( unsigned int mediaId, unsigned int position )
+bool Playlist::move( int64_t mediaId, unsigned int position )
 {
     if ( position == 0 )
         return false;
@@ -114,7 +114,7 @@ bool Playlist::move( unsigned int mediaId, unsigned int position )
     return sqlite::Tools::executeUpdate( m_ml->getConn(), req, position, m_id, mediaId );
 }
 
-bool Playlist::remove( unsigned int mediaId )
+bool Playlist::remove( int64_t mediaId )
 {
     static const std::string req = "DELETE FROM PlaylistMediaRelation WHERE playlist_id = ? AND media_id = ?";
     return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, mediaId );

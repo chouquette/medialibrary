@@ -35,7 +35,7 @@ struct MovieTable
 {
     static const std::string Name;
     static const std::string PrimaryKeyColumn;
-    static unsigned int Movie::*const PrimaryKey;
+    static int64_t Movie::*const PrimaryKey;
 };
 }
 
@@ -43,9 +43,9 @@ class Movie : public IMovie, public DatabaseHelpers<Movie, policy::MovieTable>
 {
     public:
         Movie( MediaLibraryPtr ml, sqlite::Row& row );
-        Movie( MediaLibraryPtr ml, unsigned int mediaId, const std::string& title );
+        Movie( MediaLibraryPtr ml, int64_t mediaId, const std::string& title );
 
-        virtual unsigned int id() const override;
+        virtual int64_t id() const override;
         virtual const std::string& title() const override;
         virtual const std::string& shortSummary() const override;
         bool setShortSummary(const std::string& summary);
@@ -56,13 +56,13 @@ class Movie : public IMovie, public DatabaseHelpers<Movie, policy::MovieTable>
         virtual std::vector<MediaPtr> files() override;
 
         static bool createTable( DBConnection dbConnection );
-        static std::shared_ptr<Movie> create( MediaLibraryPtr ml, unsigned int mediaId, const std::string& title );
-        static MoviePtr fromMedia( MediaLibraryPtr ml, unsigned int mediaId );
+        static std::shared_ptr<Movie> create( MediaLibraryPtr ml, int64_t mediaId, const std::string& title );
+        static MoviePtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
 
     private:
         MediaLibraryPtr m_ml;
-        unsigned int m_id;
-        unsigned int m_mediaId;
+        int64_t m_id;
+        int64_t m_mediaId;
         std::string m_title;
         std::string m_summary;
         std::string m_artworkMrl;

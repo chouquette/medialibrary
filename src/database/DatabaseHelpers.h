@@ -42,7 +42,7 @@ class DatabaseHelpers
             return sqlite::Tools::fetchOne<IMPL>( ml, req, std::forward<Args>( args )... );
         }
 
-        static std::shared_ptr<IMPL> fetch( MediaLibraryPtr ml, unsigned int pkValue )
+        static std::shared_ptr<IMPL> fetch( MediaLibraryPtr ml, int64_t pkValue )
         {
             static std::string req = "SELECT * FROM " + TABLEPOLICY::Name + " WHERE " +
                     TABLEPOLICY::PrimaryKeyColumn + " = ?";
@@ -69,7 +69,7 @@ class DatabaseHelpers
         {
             Lock l{ Mutex };
 
-            auto key = row.load<unsigned int>( 0 );
+            auto key = row.load<int64_t>( 0 );
             auto it = Store.find( key );
             if ( it != Store.end() )
                 return it->second;
@@ -78,7 +78,7 @@ class DatabaseHelpers
             return res;
         }
 
-        static bool destroy( MediaLibraryPtr ml, unsigned int pkValue )
+        static bool destroy( MediaLibraryPtr ml, int64_t pkValue )
         {
             static const std::string req = "DELETE FROM " + TABLEPOLICY::Name + " WHERE "
                     + TABLEPOLICY::PrimaryKeyColumn + " = ?";
@@ -88,7 +88,7 @@ class DatabaseHelpers
             return res;
         }
 
-        static void removeFromCache( unsigned int pkValue )
+        static void removeFromCache( int64_t pkValue )
         {
             Lock l{ Mutex };
             auto it = Store.find( pkValue );
@@ -109,7 +109,7 @@ class DatabaseHelpers
         template <typename... Args>
         static bool insert( MediaLibraryPtr ml, std::shared_ptr<IMPL> self, const std::string& req, Args&&... args )
         {
-            unsigned int pKey = sqlite::Tools::insert( ml->getConn(), req, std::forward<Args>( args )... );
+            int64_t pKey = sqlite::Tools::insert( ml->getConn(), req, std::forward<Args>( args )... );
             if ( pKey == 0 )
                 return false;
             Lock l{ Mutex };
@@ -120,13 +120,13 @@ class DatabaseHelpers
         }
 
     private:
-        static std::unordered_map<unsigned int, std::shared_ptr<IMPL>> Store;
+        static std::unordered_map<int64_t, std::shared_ptr<IMPL>> Store;
         static std::mutex Mutex;
 };
 
 
 template <typename IMPL, typename TABLEPOLICY>
-std::unordered_map<unsigned int, std::shared_ptr<IMPL>>
+std::unordered_map<int64_t, std::shared_ptr<IMPL>>
 DatabaseHelpers<IMPL, TABLEPOLICY>::Store;
 
 template <typename IMPL, typename TABLEPOLICY>

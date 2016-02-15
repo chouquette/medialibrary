@@ -27,7 +27,7 @@
 
 const std::string policy::FileTable::Name = "File";
 const std::string policy::FileTable::PrimaryKeyColumn = "id_file";
-unsigned int File::* const policy::FileTable::PrimaryKey = &File::m_id;
+int64_t File::* const policy::FileTable::PrimaryKey = &File::m_id;
 
 File::File( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -43,7 +43,7 @@ File::File( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_isRemovable;
 }
 
-File::File( MediaLibraryPtr ml, unsigned int mediaId, Type type, const fs::IFile& file, unsigned int folderId, bool isRemovable )
+File::File( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& file, int64_t folderId, bool isRemovable )
     : m_ml( ml )
     , m_id( 0 )
     , m_mediaId( mediaId )
@@ -57,7 +57,7 @@ File::File( MediaLibraryPtr ml, unsigned int mediaId, Type type, const fs::IFile
 {
 }
 
-unsigned int File::id() const
+int64_t File::id() const
 {
     return m_id;
 }
@@ -147,7 +147,7 @@ bool File::createTable( DBConnection dbConnection )
             sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
 
-std::shared_ptr<File> File::create( MediaLibraryPtr ml, unsigned int mediaId, Type type, const fs::IFile& fileFs, unsigned int folderId, bool isRemovable )
+std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& fileFs, int64_t folderId, bool isRemovable )
 {
     auto self = std::make_shared<File>( ml, mediaId, type, fileFs, folderId, isRemovable );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +

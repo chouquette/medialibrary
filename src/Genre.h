@@ -34,7 +34,7 @@ struct GenreTable
 {
     static const std::string Name;
     static const std::string PrimaryKeyColumn;
-    static unsigned int Genre::*const PrimaryKey;
+    static int64_t Genre::*const PrimaryKey;
 };
 }
 
@@ -43,7 +43,7 @@ class Genre : public IGenre, public DatabaseHelpers<Genre, policy::GenreTable>
 public:
     Genre( MediaLibraryPtr ml, sqlite::Row& row );
     Genre( MediaLibraryPtr ml, const std::string& name );
-    virtual unsigned int id() const;
+    virtual int64_t id() const;
     virtual const std::string& name() const override;
     virtual std::vector<ArtistPtr> artists( medialibrary::SortingCriteria sort, bool desc ) const override;
     virtual std::vector<AlbumTrackPtr> tracks(medialibrary::SortingCriteria sort, bool desc) const override;
@@ -58,7 +58,7 @@ public:
 private:
     MediaLibraryPtr m_ml;
 
-    unsigned int m_id;
+    int64_t m_id;
     std::string m_name;
 
     friend policy::GenreTable;

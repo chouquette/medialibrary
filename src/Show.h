@@ -39,7 +39,7 @@ struct ShowTable
 {
     static const std::string Name;
     static const std::string PrimaryKeyColumn;
-    static unsigned int Show::*const PrimaryKey;
+    static int64_t Show::*const PrimaryKey;
 };
 }
 
@@ -49,7 +49,7 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
         Show( MediaLibraryPtr ml, sqlite::Row& row );
         Show( MediaLibraryPtr ml, const std::string& name );
 
-        virtual unsigned int id() const override;
+        virtual int64_t id() const override;
         virtual const std::string& name() const override;
         virtual time_t releaseDate() const override;
         bool setReleaseDate( time_t date );
@@ -68,7 +68,7 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
     protected:
         MediaLibraryPtr m_ml;
 
-        unsigned int m_id;
+        int64_t m_id;
         std::string m_name;
         time_t m_releaseDate;
         std::string m_shortSummary;

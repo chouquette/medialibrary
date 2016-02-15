@@ -26,7 +26,7 @@
 
 const std::string policy::AudioTrackTable::Name = "AudioTrack";
 const std::string policy::AudioTrackTable::PrimaryKeyColumn  = "id_track";
-unsigned int AudioTrack::* const policy::AudioTrackTable::PrimaryKey = &AudioTrack::m_id;
+int64_t AudioTrack::* const policy::AudioTrackTable::PrimaryKey = &AudioTrack::m_id;
 
 AudioTrack::AudioTrack( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -43,7 +43,7 @@ AudioTrack::AudioTrack( MediaLibraryPtr ml, sqlite::Row& row )
 
 AudioTrack::AudioTrack( MediaLibraryPtr ml, const std::string& codec, unsigned int bitrate, unsigned int sampleRate,
                         unsigned int nbChannels, const std::string& language, const std::string& desc,
-                        unsigned int mediaId )
+                        int64_t mediaId )
     : m_ml( ml )
     , m_id( 0 )
     , m_codec( codec )
@@ -56,7 +56,7 @@ AudioTrack::AudioTrack( MediaLibraryPtr ml, const std::string& codec, unsigned i
 {
 }
 
-unsigned int AudioTrack::id() const
+int64_t AudioTrack::id() const
 {
     return m_id;
 }
@@ -112,7 +112,7 @@ bool AudioTrack::createTable( DBConnection dbConnection )
 
 std::shared_ptr<AudioTrack> AudioTrack::create( MediaLibraryPtr ml, const std::string& codec,
                                                 unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels,
-                                                const std::string& language, const std::string& desc, unsigned int mediaId )
+                                                const std::string& language, const std::string& desc, int64_t mediaId )
 {
     static const std::string req = "INSERT INTO " + policy::AudioTrackTable::Name
             + "(codec, bitrate, samplerate, nb_channels, language, description, media_id) VALUES(?, ?, ?, ?, ?, ?, ?)";

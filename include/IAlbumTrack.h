@@ -30,7 +30,7 @@ class IAlbumTrack
     public:
         virtual ~IAlbumTrack() {}
 
-        virtual unsigned int id() const = 0;
+        virtual int64_t id() const = 0;
         /**
          * @brief artist Returns the artist, as tagged in the media.
          * This can be different from the associated media's artist.

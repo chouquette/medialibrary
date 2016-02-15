@@ -35,7 +35,7 @@ struct AudioTrackTable
 {
     static const std::string Name;
     static const std::string PrimaryKeyColumn;
-    static unsigned int AudioTrack::* const PrimaryKey;
+    static int64_t AudioTrack::* const PrimaryKey;
 };
 }
 
@@ -43,9 +43,11 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack, policy
 {
     public:
         AudioTrack(MediaLibraryPtr ml, sqlite::Row& row );
-        AudioTrack( MediaLibraryPtr ml, const std::string& codec, unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels, const std::string& language, const std::string& desc , unsigned int mediaId);
+        AudioTrack( MediaLibraryPtr ml, const std::string& codec, unsigned int bitrate,
+                    unsigned int sampleRate, unsigned int nbChannels, const std::string& language,
+                    const std::string& desc, int64_t mediaId );
 
-        virtual unsigned int id() const override;
+        virtual int64_t id() const override;
         virtual const std::string&codec() const override;
         virtual unsigned int bitrate() const override;
         virtual unsigned int sampleRate() const override;
@@ -55,19 +57,19 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack, policy
 
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<AudioTrack> create( MediaLibraryPtr ml, const std::string& codec,
-                                                   unsigned int bitrate , unsigned int sampleRate, unsigned int nbChannels,
-                                                   const std::string& language, const std::string& desc, unsigned int mediaId );
+                                                   unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels,
+                                                   const std::string& language, const std::string& desc, int64_t mediaId );
 
     private:
         MediaLibraryPtr m_ml;
-        unsigned int m_id;
+        int64_t m_id;
         std::string m_codec;
         unsigned int m_bitrate;
         unsigned int m_sampleRate;
         unsigned int m_nbChannels;
         std::string m_language;
         std::string m_description;
-        unsigned int m_mediaId;
+        int64_t m_mediaId;
 
     private:
         friend struct policy::AudioTrackTable;

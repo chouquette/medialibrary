@@ -33,7 +33,7 @@ struct DeviceTable
 {
     static const std::string Name;
     static const std::string PrimaryKeyColumn;
-    static unsigned int Device::*const PrimaryKey;
+    static int64_t Device::*const PrimaryKey;
 };
 }
 
@@ -42,7 +42,7 @@ class Device : public DatabaseHelpers<Device, policy::DeviceTable>
 public:
     Device( MediaLibraryPtr ml, const std::string& uuid, bool isRemovable );
     Device( MediaLibraryPtr ml, sqlite::Row& row );
-    unsigned int id() const;
+    int64_t id() const;
     const std::string& uuid() const;
     bool isRemovable() const;
     bool isPresent() const;
@@ -55,7 +55,7 @@ public:
 private:
     MediaLibraryPtr m_ml;
     // This is a database ID
-    unsigned int m_id;
+    int64_t m_id;
     // This is a unique ID on the system side, in the /dev/disk/by-uuid sense.
     // It can be a name or what not, depending on the OS.
     std::string m_uuid;

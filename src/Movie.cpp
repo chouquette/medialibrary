@@ -26,7 +26,7 @@
 
 const std::string policy::MovieTable::Name = "Movie";
 const std::string policy::MovieTable::PrimaryKeyColumn = "id_movie";
-unsigned int Movie::* const policy::MovieTable::PrimaryKey = &Movie::m_id;
+int64_t Movie::* const policy::MovieTable::PrimaryKey = &Movie::m_id;
 
 Movie::Movie(MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -39,7 +39,7 @@ Movie::Movie(MediaLibraryPtr ml, sqlite::Row& row )
         >> m_imdbId;
 }
 
-Movie::Movie( MediaLibraryPtr ml, unsigned int mediaId, const std::string& title )
+Movie::Movie( MediaLibraryPtr ml, int64_t mediaId, const std::string& title )
     : m_ml( ml )
     , m_id( 0 )
     , m_mediaId( mediaId )
@@ -47,7 +47,7 @@ Movie::Movie( MediaLibraryPtr ml, unsigned int mediaId, const std::string& title
 {
 }
 
-unsigned int Movie::id() const
+int64_t Movie::id() const
 {
     return m_id;
 }
@@ -125,7 +125,7 @@ bool Movie::createTable( DBConnection dbConnection )
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-std::shared_ptr<Movie> Movie::create( MediaLibraryPtr ml, unsigned int mediaId, const std::string& title )
+std::shared_ptr<Movie> Movie::create(MediaLibraryPtr ml, int64_t mediaId, const std::string& title )
 {
     auto movie = std::make_shared<Movie>( ml, mediaId, title );
     static const std::string req = "INSERT INTO " + policy::MovieTable::Name
@@ -135,7 +135,7 @@ std::shared_ptr<Movie> Movie::create( MediaLibraryPtr ml, unsigned int mediaId, 
     return movie;
 }
 
-MoviePtr Movie::fromMedia( MediaLibraryPtr ml, unsigned int mediaId )
+MoviePtr Movie::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
 {
     static const std::string req = "SELECT * FROM " + policy::MovieTable::Name + " WHERE media_id = ?";
     return fetch( ml, req, mediaId );

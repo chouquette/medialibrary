@@ -133,11 +133,11 @@ class IMediaLibrary
         virtual bool deleteLabel( LabelPtr label ) = 0;
         virtual std::vector<MediaPtr> audioFiles( medialibrary::SortingCriteria sort, bool desc ) const = 0;
         virtual std::vector<MediaPtr> videoFiles( medialibrary::SortingCriteria sort, bool desc ) const = 0;
-        virtual AlbumPtr album( unsigned int id ) const = 0;
+        virtual AlbumPtr album( int64_t id ) const = 0;
         virtual std::vector<AlbumPtr> albums( medialibrary::SortingCriteria sort, bool desc ) const = 0;
         virtual ShowPtr show( const std::string& name ) const = 0;
         virtual MoviePtr movie( const std::string& title ) const = 0;
-        virtual ArtistPtr artist( unsigned int id ) const = 0;
+        virtual ArtistPtr artist( int64_t id ) const = 0;
         /**
          * @brief artists List all artists that have at least an album.
          * Artists that only appear on albums as guests won't be listed from here, but will be
@@ -158,7 +158,7 @@ class IMediaLibrary
          */
         virtual PlaylistPtr createPlaylist( const std::string& name ) = 0;
         virtual std::vector<PlaylistPtr> playlists( medialibrary::SortingCriteria sort, bool desc ) = 0;
-        virtual bool deletePlaylist( unsigned int playlistId ) = 0;
+        virtual bool deletePlaylist( int64_t playlistId ) = 0;
 
         /**
          * History

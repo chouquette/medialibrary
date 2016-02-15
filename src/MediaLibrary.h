@@ -67,7 +67,7 @@ class MediaLibrary : public IMediaLibrary
         virtual LabelPtr createLabel( const std::string& label ) override;
         virtual bool deleteLabel( LabelPtr label ) override;
 
-        virtual AlbumPtr album( unsigned int id ) const override;
+        virtual AlbumPtr album( int64_t id ) const override;
         std::shared_ptr<Album> createAlbum( const std::string& title );
         virtual std::vector<AlbumPtr> albums(medialibrary::SortingCriteria sort, bool desc) const override;
 
@@ -79,14 +79,14 @@ class MediaLibrary : public IMediaLibrary
         virtual MoviePtr movie( const std::string& title ) const override;
         std::shared_ptr<Movie> createMovie( Media& media, const std::string& title );
 
-        virtual ArtistPtr artist( unsigned int id ) const override;
+        virtual ArtistPtr artist( int64_t id ) const override;
         ArtistPtr artist( const std::string& name );
         std::shared_ptr<Artist> createArtist( const std::string& name );
         virtual std::vector<ArtistPtr> artists( medialibrary::SortingCriteria sort, bool desc ) const override;
 
         virtual PlaylistPtr createPlaylist( const std::string& name ) override;
         virtual std::vector<PlaylistPtr> playlists( medialibrary::SortingCriteria sort, bool desc ) override;
-        virtual bool deletePlaylist( unsigned int playlistId ) override;
+        virtual bool deletePlaylist( int64_t playlistId ) override;
 
         virtual bool addToHistory( const std::string& mrl );
         virtual std::vector<HistoryPtr> lastStreamsPlayed() const override;

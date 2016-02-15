@@ -30,7 +30,7 @@ namespace policy
 {
 const std::string GenreTable::Name = "Genre";
 const std::string GenreTable::PrimaryKeyColumn = "id_genre";
-unsigned int Genre::* const GenreTable::PrimaryKey = &Genre::m_id;
+int64_t Genre::* const GenreTable::PrimaryKey = &Genre::m_id;
 }
 
 Genre::Genre( MediaLibraryPtr ml, sqlite::Row& row )
@@ -46,7 +46,7 @@ Genre::Genre( MediaLibraryPtr ml, const std::string& name )
 {
 }
 
-unsigned int Genre::id() const
+int64_t Genre::id() const
 {
     return m_id;
 }

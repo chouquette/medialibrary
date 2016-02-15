@@ -29,7 +29,7 @@
 
 const std::string policy::ArtistTable::Name = "Artist";
 const std::string policy::ArtistTable::PrimaryKeyColumn = "id_artist";
-unsigned int Artist::*const policy::ArtistTable::PrimaryKey = &Artist::m_id;
+int64_t Artist::*const policy::ArtistTable::PrimaryKey = &Artist::m_id;
 
 
 Artist::Artist( MediaLibraryPtr ml, sqlite::Row& row )
@@ -53,7 +53,7 @@ Artist::Artist( MediaLibraryPtr ml, const std::string& name )
 {
 }
 
-unsigned int Artist::id() const
+int64_t Artist::id() const
 {
     return m_id;
 }

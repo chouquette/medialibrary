@@ -29,7 +29,7 @@ class IAudioTrack
 {
     public:
         virtual ~IAudioTrack() {}
-        virtual unsigned int id() const = 0;
+        virtual int64_t id() const = 0;
         virtual const std::string& codec() const = 0;
         /**
          * @return The bitrate in bits per second

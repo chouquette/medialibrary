@@ -37,7 +37,7 @@ struct FileTable
 {
     static const std::string Name;
     static const std::string PrimaryKeyColumn;
-    static unsigned int File::*const PrimaryKey;
+    static int64_t File::*const PrimaryKey;
 };
 }
 
@@ -45,8 +45,8 @@ class File : public IFile, public DatabaseHelpers<File, policy::FileTable>
 {
 public:
     File( MediaLibraryPtr ml, sqlite::Row& row );
-    File(MediaLibraryPtr ml, unsigned int mediaId, Type type, const fs::IFile& file, unsigned int folderId, bool isRemovable );
-    virtual unsigned int id() const override;
+    File( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& file, int64_t folderId, bool isRemovable );
+    virtual int64_t id() const override;
     virtual const std::string& mrl() const override;
     virtual Type type() const override;
     virtual unsigned int lastModificationDate() const override;
@@ -59,18 +59,19 @@ public:
     bool destroy();
 
     static bool createTable( DBConnection dbConnection );
-    static std::shared_ptr<File> create( MediaLibraryPtr ml, unsigned int mediaId, Type type, const fs::IFile& file, unsigned int folderId, bool isRemovable );
+    static std::shared_ptr<File> create( MediaLibraryPtr ml, int64_t mediaId, Type type,
+                                         const fs::IFile& file, int64_t folderId, bool isRemovable );
 
 private:
     MediaLibraryPtr m_ml;
 
-    unsigned int m_id;
-    unsigned int m_mediaId;
+    int64_t m_id;
+    int64_t m_mediaId;
     std::string m_mrl;
     Type m_type;
     unsigned int m_lastModificationDate;
     bool m_isParsed;
-    unsigned int m_folderId;
+    int64_t m_folderId;
     bool m_isPresent;
     bool m_isRemovable;
 

@@ -39,7 +39,7 @@ MediaLibraryTester::MediaLibraryTester()
 {
 }
 
-std::shared_ptr<Media> MediaLibraryTester::media( unsigned int id )
+std::shared_ptr<Media> MediaLibraryTester::media( int64_t id )
 {
     return Media::fetch( this, id );
 }
@@ -83,12 +83,12 @@ std::shared_ptr<Media> MediaLibraryTester::addFile( fs::IFile& file )
     return MediaLibrary::addFile( file, dummyFolder, *dummyDirectory );
 }
 
-std::shared_ptr<Playlist> MediaLibraryTester::playlist(unsigned int playlistId)
+std::shared_ptr<Playlist> MediaLibraryTester::playlist( int64_t playlistId )
 {
     return Playlist::fetch( this, playlistId );
 }
 
-void MediaLibraryTester::deleteAlbum( unsigned int albumId )
+void MediaLibraryTester::deleteAlbum( int64_t albumId )
 {
     Album::destroy( this, albumId );
 }
@@ -98,12 +98,12 @@ std::shared_ptr<Genre> MediaLibraryTester::createGenre( const std::string& name 
     return Genre::create( this, name );
 }
 
-void MediaLibraryTester::deleteGenre( unsigned int genreId )
+void MediaLibraryTester::deleteGenre( int64_t genreId )
 {
     Genre::destroy( this, genreId );
 }
 
-void MediaLibraryTester::deleteArtist( unsigned int artistId )
+void MediaLibraryTester::deleteArtist( int64_t artistId )
 {
     Artist::destroy( this, artistId );
 }
@@ -118,12 +118,12 @@ void MediaLibraryTester::setFsFactory(std::shared_ptr<factory::IFileSystem> fsFa
     m_fsFactory = fsFactory;
 }
 
-void MediaLibraryTester::deleteTrack(unsigned int trackId)
+void MediaLibraryTester::deleteTrack( int64_t trackId )
 {
     AlbumTrack::destroy( this, trackId );
 }
 
-std::shared_ptr<AlbumTrack> MediaLibraryTester::albumTrack( unsigned int id )
+std::shared_ptr<AlbumTrack> MediaLibraryTester::albumTrack( int64_t id )
 {
     return AlbumTrack::fetch( this, id );
 }

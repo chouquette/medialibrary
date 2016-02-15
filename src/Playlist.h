@@ -36,7 +36,7 @@ struct PlaylistTable
 {
     static const std::string Name;
     static const std::string PrimaryKeyColumn;
-    static unsigned int Playlist::*const PrimaryKey;
+    static int64_t Playlist::*const PrimaryKey;
 };
 }
 
@@ -48,15 +48,15 @@ public:
 
     static std::shared_ptr<Playlist> create( MediaLibraryPtr ml, const std::string& name );
 
-    virtual unsigned int id() const override;
+    virtual int64_t id() const override;
     virtual const std::string& name() const override;
     virtual bool setName( const std::string& name ) override;
     virtual unsigned int creationDate() const override;
     virtual std::vector<MediaPtr> media() const override;
-    virtual bool append( unsigned int mediaId ) override;
-    virtual bool add( unsigned int mediaId, unsigned int position ) override;
-    virtual bool move( unsigned int mediaId, unsigned int position ) override;
-    virtual bool remove( unsigned int mediaId ) override;
+    virtual bool append( int64_t mediaId ) override;
+    virtual bool add( int64_t mediaId, unsigned int position ) override;
+    virtual bool move( int64_t mediaId, unsigned int position ) override;
+    virtual bool remove( int64_t mediaId ) override;
 
     static bool createTable( DBConnection dbConn );
     static bool createTriggers( DBConnection dbConn );
@@ -66,7 +66,7 @@ public:
 private:
     MediaLibraryPtr m_ml;
 
-    unsigned int m_id;
+    int64_t m_id;
     std::string m_name;
     unsigned int m_creationDate;
 

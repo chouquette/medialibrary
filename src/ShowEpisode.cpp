@@ -27,7 +27,7 @@
 
 const std::string policy::ShowEpisodeTable::Name = "ShowEpisode";
 const std::string policy::ShowEpisodeTable::PrimaryKeyColumn = "show_id";
-unsigned int ShowEpisode::* const policy::ShowEpisodeTable::PrimaryKey = &ShowEpisode::m_id;
+int64_t ShowEpisode::* const policy::ShowEpisodeTable::PrimaryKey = &ShowEpisode::m_id;
 
 ShowEpisode::ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -43,7 +43,7 @@ ShowEpisode::ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_showId;
 }
 
-ShowEpisode::ShowEpisode( MediaLibraryPtr ml, unsigned int mediaId, const std::string& name, unsigned int episodeNumber, unsigned int showId )
+ShowEpisode::ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, const std::string& name, unsigned int episodeNumber, int64_t showId )
     : m_ml( ml )
     , m_id( 0 )
     , m_mediaId( mediaId )
@@ -54,7 +54,7 @@ ShowEpisode::ShowEpisode( MediaLibraryPtr ml, unsigned int mediaId, const std::s
 {
 }
 
-unsigned int ShowEpisode::id() const
+int64_t ShowEpisode::id() const
 {
     return m_id;
 }
@@ -165,7 +165,7 @@ bool ShowEpisode::createTable( DBConnection dbConnection )
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml, unsigned int mediaId, const std::string& title, unsigned int episodeNumber, unsigned int showId )
+std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml, int64_t mediaId, const std::string& title, unsigned int episodeNumber, int64_t showId )
 {
     auto episode = std::make_shared<ShowEpisode>( ml, mediaId, title, episodeNumber, showId );
     static const std::string req = "INSERT INTO " + policy::ShowEpisodeTable::Name
@@ -175,7 +175,7 @@ std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml, unsigned i
     return episode;
 }
 
-ShowEpisodePtr ShowEpisode::fromMedia( MediaLibraryPtr ml, unsigned int mediaId )
+ShowEpisodePtr ShowEpisode::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
 {
     static const std::string req = "SELECT * FROM " + policy::ShowEpisodeTable::Name + " WHERE media_id = ?";
     return fetch( ml, req, mediaId );

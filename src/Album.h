@@ -44,7 +44,7 @@ struct AlbumTable
 {
     static const std::string Name;
     static const std::string PrimaryKeyColumn;
-    static unsigned int Album::*const PrimaryKey;
+    static int64_t Album::*const PrimaryKey;
 };
 }
 
@@ -55,7 +55,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         Album( MediaLibraryPtr ml, const std::string& title );
         Album( MediaLibraryPtr ml, const Artist* artist );
 
-        virtual unsigned int id() const override;
+        virtual int64_t id() const override;
         virtual const std::string& title() const override;
         virtual unsigned int releaseYear() const override;
         /**
@@ -104,8 +104,8 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         /// \return
         ///
         static std::vector<AlbumPtr> search( MediaLibraryPtr ml, const std::string& pattern );
-        static std::vector<AlbumPtr> fromArtist( MediaLibraryPtr ml, unsigned int artistId, medialibrary::SortingCriteria sort, bool desc );
-        static std::vector<AlbumPtr> fromGenre( MediaLibraryPtr ml, unsigned int genreId, medialibrary::SortingCriteria sort, bool desc );
+        static std::vector<AlbumPtr> fromArtist( MediaLibraryPtr ml, int64_t artistId, medialibrary::SortingCriteria sort, bool desc );
+        static std::vector<AlbumPtr> fromGenre( MediaLibraryPtr ml, int64_t genreId, medialibrary::SortingCriteria sort, bool desc );
         static std::vector<AlbumPtr> listAll( MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc );
 
     private:
@@ -113,9 +113,9 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         static std::string orderBy( medialibrary::SortingCriteria sort, bool desc );
     protected:
         MediaLibraryPtr m_ml;
-        unsigned int m_id;
+        int64_t m_id;
         std::string m_title;
-        unsigned int m_artistId;
+        int64_t m_artistId;
         unsigned int m_releaseYear;
         std::string m_shortSummary;
         std::string m_artworkMrl;

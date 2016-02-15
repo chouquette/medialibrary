@@ -31,7 +31,7 @@ class IAlbum
 {
 public:
     virtual ~IAlbum() = default;
-    virtual unsigned int id() const = 0;
+    virtual int64_t id() const = 0;
     virtual const std::string& title() const = 0;
     /**
      * @brief releaseYear returns the release year, or 0 if unknown.

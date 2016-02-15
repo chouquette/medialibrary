@@ -46,7 +46,7 @@
 
 const std::string policy::MediaTable::Name = "Media";
 const std::string policy::MediaTable::PrimaryKeyColumn = "id_media";
-unsigned int Media::* const policy::MediaTable::PrimaryKey = &Media::m_id;
+int64_t Media::* const policy::MediaTable::PrimaryKey = &Media::m_id;
 
 Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -387,7 +387,7 @@ std::vector<MediaPtr> Media::listAll( MediaLibraryPtr ml, IMedia::Type type, med
     return fetchAll<IMedia>( ml, req, type );
 }
 
-unsigned int Media::id() const
+int64_t Media::id() const
 {
     return m_id;
 }

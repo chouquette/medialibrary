@@ -33,19 +33,19 @@ class MediaLibraryTester : public MediaLibrary
 public:
     MediaLibraryTester();
     std::vector<MediaPtr> files();
-    std::shared_ptr<Media> media( unsigned int id );
+    std::shared_ptr<Media> media( int64_t id );
     MediaPtr media( const std::string& path );
     std::shared_ptr<Folder> folder( const std::string& path );
     std::shared_ptr<Media> addFile( const std::string& path );
-    std::shared_ptr<Playlist> playlist( unsigned int playlistId );
-    void deleteAlbum( unsigned int albumId );
+    std::shared_ptr<Playlist> playlist( int64_t playlistId );
+    void deleteAlbum( int64_t albumId );
     std::shared_ptr<Genre> createGenre( const std::string& name );
-    void deleteGenre( unsigned int genreId );
-    void deleteArtist( unsigned int artistId );
+    void deleteGenre( int64_t genreId );
+    void deleteArtist( int64_t artistId );
     std::shared_ptr<Device> addDevice( const std::string& uuid, bool isRemovable );
     void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory );
-    void deleteTrack( unsigned int trackId );
-    std::shared_ptr<AlbumTrack> albumTrack( unsigned int id );
+    void deleteTrack( int64_t trackId );
+    std::shared_ptr<AlbumTrack> albumTrack( int64_t id );
     std::shared_ptr<Media> addFile(fs::IFile& file);
 
 private:

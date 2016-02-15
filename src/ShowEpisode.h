@@ -39,7 +39,7 @@ struct ShowEpisodeTable
 {
     static const std::string Name;
     static const std::string PrimaryKeyColumn;
-    static unsigned int ShowEpisode::*const PrimaryKey;
+    static int64_t ShowEpisode::*const PrimaryKey;
 };
 }
 
@@ -47,9 +47,9 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, pol
 {
     public:
         ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row );
-        ShowEpisode( MediaLibraryPtr ml, unsigned int mediaId, const std::string& name, unsigned int episodeNumber, unsigned int showId );
+        ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, const std::string& name, unsigned int episodeNumber, int64_t showId );
 
-        virtual unsigned int id() const override;
+        virtual int64_t id() const override;
         virtual const std::string& artworkMrl() const override;
         bool setArtworkMrl( const std::string& artworkMrl );
         virtual unsigned int episodeNumber() const override;
@@ -64,20 +64,20 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, pol
         virtual std::vector<MediaPtr> files() override;
 
         static bool createTable( DBConnection dbConnection );
-        static std::shared_ptr<ShowEpisode> create(MediaLibraryPtr ml, unsigned int mediaId, const std::string& title, unsigned int episodeNumber, unsigned int showId );
-        static ShowEpisodePtr fromMedia( MediaLibraryPtr ml, unsigned int mediaId );
+        static std::shared_ptr<ShowEpisode> create( MediaLibraryPtr ml, int64_t mediaId, const std::string& title, unsigned int episodeNumber, int64_t showId );
+        static ShowEpisodePtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
 
     private:
         MediaLibraryPtr m_ml;
-        unsigned int m_id;
-        unsigned int m_mediaId;
+        int64_t m_id;
+        int64_t m_mediaId;
         std::string m_artworkMrl;
         unsigned int m_episodeNumber;
         std::string m_name;
         unsigned int m_seasonNumber;
         std::string m_shortSummary;
         std::string m_tvdbId;
-        unsigned int m_showId;
+        int64_t m_showId;
         ShowPtr m_show;
 
         friend struct policy::ShowEpisodeTable;

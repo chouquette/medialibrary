@@ -43,7 +43,7 @@ struct FolderTable
 {
     static const std::string Name;
     static const std::string PrimaryKeyColumn;
-    static unsigned int Folder::*const PrimaryKey;
+    static int64_t Folder::*const PrimaryKey;
 };
 
 }
@@ -55,12 +55,12 @@ class Folder : public DatabaseHelpers<Folder, policy::FolderTable>
 {
 public:
     Folder( MediaLibraryPtr ml, sqlite::Row& row );
-    Folder( MediaLibraryPtr ml, const std::string& path, unsigned int parent , unsigned int deviceId , bool isRemovable );
+    Folder(MediaLibraryPtr ml, const std::string& path, int64_t parent , int64_t deviceId , bool isRemovable );
 
     static bool createTable( DBConnection connection );
-    static std::shared_ptr<Folder> create( MediaLibraryPtr ml, const std::string& path, unsigned int parentId, Device& device, fs::IDevice& deviceFs );
+    static std::shared_ptr<Folder> create( MediaLibraryPtr ml, const std::string& path, int64_t parentId, Device& device, fs::IDevice& deviceFs );
     static bool blacklist( MediaLibraryPtr ml, const std::string& fullPath );
-    static std::vector<std::shared_ptr<Folder>> fetchAll(MediaLibraryPtr ml, unsigned int parentFolderId );
+    static std::vector<std::shared_ptr<Folder>> fetchAll( MediaLibraryPtr ml, int64_t parentFolderId );
     ///
     /// \brief setFileSystemFactory Sets a file system factory to be used when building IDevices
     /// This is assumed to be called once, before any discovery/reloading process is launched.
@@ -71,12 +71,12 @@ public:
     static std::shared_ptr<Folder> fromPath(MediaLibraryPtr ml, const std::string& fullPath );
     static std::shared_ptr<Folder> blacklistedFolder(MediaLibraryPtr ml, const std::string& fullPath );
 
-    unsigned int id() const;
+    int64_t id() const;
     const std::string& path() const;
     std::vector<std::shared_ptr<File>> files();
     std::vector<std::shared_ptr<Folder>> folders();
     std::shared_ptr<Folder> parent();
-    unsigned int deviceId() const;
+    int64_t deviceId() const;
     bool isPresent() const;
 
 private:
@@ -86,12 +86,12 @@ private:
 private:
     MediaLibraryPtr m_ml;
 
-    unsigned int m_id;
+    int64_t m_id;
     // This contains the path relative to the device mountpoint (ie. excluding it)
     std::string m_path;
-    unsigned int m_parent;
+    int64_t m_parent;
     bool m_isBlacklisted;
-    unsigned int m_deviceId;
+    int64_t m_deviceId;
     bool m_isPresent;
     bool m_isRemovable;
 

@@ -30,7 +30,7 @@ class IGenre
 {
 public:
     virtual ~IGenre() = default;
-    virtual unsigned int id() const = 0;
+    virtual int64_t id() const = 0;
     virtual const std::string& name() const = 0;
     virtual std::vector<ArtistPtr> artists( medialibrary::SortingCriteria sort, bool desc ) const = 0;
     virtual std::vector<AlbumTrackPtr> tracks( medialibrary::SortingCriteria sort, bool desc ) const = 0;

@@ -301,7 +301,7 @@ bool MediaLibrary::deleteLabel( LabelPtr label )
     return Label::destroy( this, label->id() );
 }
 
-AlbumPtr MediaLibrary::album( unsigned int id ) const
+AlbumPtr MediaLibrary::album( int64_t id ) const
 {
     return Album::fetch( this, id );
 }
@@ -348,7 +348,7 @@ std::shared_ptr<Movie> MediaLibrary::createMovie( Media& media, const std::strin
     return movie;
 }
 
-ArtistPtr MediaLibrary::artist(unsigned int id) const
+ArtistPtr MediaLibrary::artist( int64_t id ) const
 {
     return Artist::fetch( this, id );
 }
@@ -388,7 +388,7 @@ std::vector<PlaylistPtr> MediaLibrary::playlists(medialibrary::SortingCriteria s
     return Playlist::listAll( this, sort, desc );
 }
 
-bool MediaLibrary::deletePlaylist( unsigned int playlistId )
+bool MediaLibrary::deletePlaylist( int64_t playlistId )
 {
     return Playlist::destroy( this, playlistId );
 }

@@ -38,7 +38,7 @@ struct LabelTable
 {
     static const std::string Name;
     static const std::string PrimaryKeyColumn;
-    static unsigned int Label::*const PrimaryKey;
+    static int64_t Label::*const PrimaryKey;
 };
 }
 
@@ -49,7 +49,7 @@ class Label : public ILabel, public DatabaseHelpers<Label, policy::LabelTable>
         Label( MediaLibraryPtr ml, const std::string& name );
 
     public:
-        virtual unsigned int id() const override;
+        virtual int64_t id() const override;
         virtual const std::string& name() const override;
         virtual std::vector<MediaPtr> files() override;
 
@@ -58,7 +58,7 @@ class Label : public ILabel, public DatabaseHelpers<Label, policy::LabelTable>
 
     private:
         MediaLibraryPtr m_ml;
-        unsigned int m_id;
+        int64_t m_id;
         std::string m_name;
 
         friend struct policy::LabelTable;

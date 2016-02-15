@@ -48,7 +48,7 @@ public:
     };
 
     virtual ~IFile() = default;
-    virtual unsigned int id() const = 0;
+    virtual int64_t id() const = 0;
     virtual const std::string& mrl() const = 0;
     virtual Type type() const = 0;
     virtual unsigned int lastModificationDate() const = 0;

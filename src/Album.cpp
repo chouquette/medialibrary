@@ -32,7 +32,7 @@
 
 const std::string policy::AlbumTable::Name = "Album";
 const std::string policy::AlbumTable::PrimaryKeyColumn = "id_album";
-unsigned int Album::* const policy::AlbumTable::PrimaryKey = &Album::m_id;
+int64_t Album::* const policy::AlbumTable::PrimaryKey = &Album::m_id;
 
 Album::Album(MediaLibraryPtr ml, sqlite::Row& row)
     : m_ml( ml )
@@ -68,7 +68,7 @@ Album::Album( MediaLibraryPtr ml, const Artist* artist )
 {
 }
 
-unsigned int Album::id() const
+int64_t Album::id() const
 {
     return m_id;
 }
@@ -411,7 +411,7 @@ std::vector<AlbumPtr> Album::search( MediaLibraryPtr ml, const std::string& patt
     return fetchAll<IAlbum>( ml, req, pattern + "*" );
 }
 
-std::vector<AlbumPtr> Album::fromArtist( MediaLibraryPtr ml, unsigned int artistId, medialibrary::SortingCriteria sort, bool desc )
+std::vector<AlbumPtr> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, medialibrary::SortingCriteria sort, bool desc )
 {
     std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " alb "
                     "WHERE artist_id = ? AND is_present=1 ORDER BY ";
@@ -436,7 +436,7 @@ std::vector<AlbumPtr> Album::fromArtist( MediaLibraryPtr ml, unsigned int artist
     return fetchAll<IAlbum>( ml, req, artistId );
 }
 
-std::vector<AlbumPtr> Album::fromGenre(MediaLibraryPtr ml, unsigned int genreId, medialibrary::SortingCriteria sort, bool desc)
+std::vector<AlbumPtr> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId, medialibrary::SortingCriteria sort, bool desc)
 {
     std::string req = "SELECT a.* FROM " + policy::AlbumTable::Name + " a "
             "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.album_id = a.id_album "

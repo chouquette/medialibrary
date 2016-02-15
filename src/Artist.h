@@ -36,7 +36,7 @@ struct ArtistTable
 {
     static const std::string Name;
     static const std::string PrimaryKeyColumn;
-    static unsigned int Artist::*const PrimaryKey;
+    static int64_t Artist::*const PrimaryKey;
 };
 }
 
@@ -46,7 +46,7 @@ public:
     Artist( MediaLibraryPtr ml, sqlite::Row& row );
     Artist( MediaLibraryPtr ml, const std::string& name );
 
-    virtual unsigned int id() const override;
+    virtual int64_t id() const override;
     virtual const std::string &name() const override;
     virtual const std::string& shortBio() const override;
     bool setShortBio( const std::string& shortBio );
@@ -69,7 +69,7 @@ public:
 
 private:
     MediaLibraryPtr m_ml;
-    unsigned int m_id;
+    int64_t m_id;
     std::string m_name;
     std::string m_shortBio;
     std::string m_artworkMrl;

@@ -24,7 +24,7 @@
 
 const std::string policy::DeviceTable::Name = "Device";
 const std::string policy::DeviceTable::PrimaryKeyColumn = "id_device";
-unsigned int Device::* const policy::DeviceTable::PrimaryKey = &Device::m_id;
+int64_t Device::* const policy::DeviceTable::PrimaryKey = &Device::m_id;
 
 Device::Device( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -46,7 +46,7 @@ Device::Device( MediaLibraryPtr ml, const std::string& uuid, bool isRemovable )
 {
 }
 
-unsigned int Device::id() const
+int64_t Device::id() const
 {
     return m_id;
 }

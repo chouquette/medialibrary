@@ -30,7 +30,7 @@
 
 const std::string policy::LabelTable::Name = "Label";
 const std::string policy::LabelTable::PrimaryKeyColumn = "id_label";
-unsigned int Label::* const policy::LabelTable::PrimaryKey = &Label::m_id;
+int64_t Label::* const policy::LabelTable::PrimaryKey = &Label::m_id;
 
 Label::Label(MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -46,7 +46,7 @@ Label::Label( MediaLibraryPtr ml, const std::string& name )
 {
 }
 
-unsigned int Label::id() const
+int64_t Label::id() const
 {
     return m_id;
 }

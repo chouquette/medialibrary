@@ -36,7 +36,7 @@ namespace policy
 {
     const std::string FolderTable::Name = "Folder";
     const std::string FolderTable::PrimaryKeyColumn = "id_folder";
-    unsigned int Folder::* const FolderTable::PrimaryKey = &Folder::m_id;
+    int64_t Folder::* const FolderTable::PrimaryKey = &Folder::m_id;
 }
 
 std::shared_ptr<factory::IFileSystem> Folder::FsFactory;
@@ -53,7 +53,7 @@ Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_isRemovable;
 }
 
-Folder::Folder(MediaLibraryPtr ml, const std::string& path, unsigned int parent, unsigned int deviceId, bool isRemovable )
+Folder::Folder(MediaLibraryPtr ml, const std::string& path, int64_t parent, int64_t deviceId, bool isRemovable )
     : m_ml( ml )
     , m_id( 0 )
     , m_path( path )
@@ -91,7 +91,8 @@ bool Folder::createTable( DBConnection connection)
             sqlite::Tools::executeRequest( connection, triggerReq );
 }
 
-std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& fullPath, unsigned int parentId, Device& device, fs::IDevice& deviceFs )
+std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& fullPath,
+                                        int64_t parentId, Device& device, fs::IDevice& deviceFs )
 {
     std::string path;
     if ( device.isRemovable() == true )
@@ -182,7 +183,7 @@ std::shared_ptr<Folder> Folder::fromPath( MediaLibraryPtr ml, const std::string&
     return folder;
 }
 
-unsigned int Folder::id() const
+int64_t Folder::id() const
 {
     return m_id;
 }
@@ -220,7 +221,7 @@ std::shared_ptr<Folder> Folder::parent()
     return fetch( m_ml, m_parent );
 }
 
-unsigned int Folder::deviceId() const
+int64_t Folder::deviceId() const
 {
     return m_deviceId;
 }
@@ -230,7 +231,7 @@ bool Folder::isPresent() const
     return m_isPresent;
 }
 
-std::vector<std::shared_ptr<Folder>> Folder::fetchAll( MediaLibraryPtr ml, unsigned int parentFolderId )
+std::vector<std::shared_ptr<Folder>> Folder::fetchAll( MediaLibraryPtr ml, int64_t parentFolderId )
 {
     if ( parentFolderId == 0 )
     {

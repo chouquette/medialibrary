@@ -29,7 +29,7 @@ class IShow
 {
     public:
         virtual ~IShow() {}
-        virtual unsigned int id() const = 0;
+        virtual int64_t id() const = 0;
         virtual const std::string& name() const = 0;
         virtual time_t releaseDate() const = 0;
         virtual const std::string& shortSummary() const = 0;

@@ -30,7 +30,7 @@
 
 const std::string policy::ShowTable::Name = "Show";
 const std::string policy::ShowTable::PrimaryKeyColumn = "id_show";
-unsigned int Show::* const policy::ShowTable::PrimaryKey = &Show::m_id;
+int64_t Show::* const policy::ShowTable::PrimaryKey = &Show::m_id;
 
 Show::Show( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -51,7 +51,7 @@ Show::Show( MediaLibraryPtr ml, const std::string& name )
 {
 }
 
-unsigned int Show::id() const
+int64_t Show::id() const
 {
     return m_id;
 }

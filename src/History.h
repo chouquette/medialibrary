@@ -38,7 +38,7 @@ struct HistoryTable
 {
     static const std::string Name;
     static const std::string PrimaryKeyColumn;
-    static unsigned int History::* const PrimaryKey;
+    static int64_t History::* const PrimaryKey;
 };
 }
 
@@ -60,7 +60,7 @@ public:
 private:
     MediaLibraryPtr m_ml;
 
-    unsigned int m_id;
+    int64_t m_id;
     std::string m_mrl;
     unsigned int m_date;
     bool m_favorite;

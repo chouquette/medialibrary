@@ -45,7 +45,7 @@ struct MediaTable
 {
     static const std::string Name;
     static const std::string PrimaryKeyColumn;
-    static unsigned int Media::*const PrimaryKey;
+    static int64_t Media::*const PrimaryKey;
 };
 }
 
@@ -63,7 +63,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         static bool createTable( DBConnection connection );
         static bool createTriggers( DBConnection connection );
 
-        virtual unsigned int id() const override;
+        virtual int64_t id() const override;
         virtual Type type() override;
         virtual SubType subType() const override;
         void setType( Type type );
@@ -114,7 +114,7 @@ private:
         MediaLibraryPtr m_ml;
 
         // DB fields:
-        unsigned int m_id;
+        int64_t m_id;
         Type m_type;
         SubType m_subType;
         int64_t m_duration;

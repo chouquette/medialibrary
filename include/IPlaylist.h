@@ -30,7 +30,7 @@ class IPlaylist
 {
 public:
     virtual ~IPlaylist() = default;
-    virtual unsigned int id() const = 0;
+    virtual int64_t id() const = 0;
     virtual const std::string& name() const = 0;
     virtual bool setName( const std::string& name ) = 0;
     virtual unsigned int creationDate() const = 0;
@@ -42,7 +42,7 @@ public:
     /// \param media The media to add
     /// \return true on success, false on failure.
     ///
-    virtual bool append( unsigned int mediaId ) = 0;
+    virtual bool append( int64_t mediaId ) = 0;
     ///
     /// \brief add Add a media to the playlist at the given position.
     /// Valid positions start at 1. 0 means appending.
@@ -50,7 +50,7 @@ public:
     /// \param position The position of this new media
     /// \return true on success, false on failure
     ///
-    virtual bool add( unsigned int mediaId, unsigned int position ) = 0;
+    virtual bool add( int64_t mediaId, unsigned int position ) = 0;
     ///
     /// \brief move Change the position of a media
     /// \param mediaId The media to move reorder
@@ -64,11 +64,11 @@ public:
     /// [<1,2>, <2,3>, <3,4>]
     /// \return true on success, false on failure
     ///
-    virtual bool move( unsigned int mediaId, unsigned int position ) = 0;
+    virtual bool move( int64_t mediaId, unsigned int position ) = 0;
     ///
     /// \brief remove Removes a media from the playlist
     /// \param mediaId The media to remove.
     /// \return true on success, false on failure
     ///
-    virtual bool remove( unsigned int mediaId ) = 0;
+    virtual bool remove( int64_t mediaId ) = 0;
 };

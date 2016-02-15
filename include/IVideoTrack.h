@@ -29,7 +29,7 @@ class IVideoTrack
 {
     public:
         virtual ~IVideoTrack() {}
-        virtual unsigned int id() const = 0;
+        virtual int64_t id() const = 0;
         virtual const std::string& codec() const = 0;
         virtual unsigned int width() const = 0;
         virtual unsigned int height() const = 0;
