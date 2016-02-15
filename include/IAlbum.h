@@ -64,4 +64,5 @@ public:
      * The value is cached, and doesn't require fetching anything.
      */
     virtual uint32_t nbTracks() const = 0;
+    virtual unsigned int duration() const = 0;
 };

@@ -87,6 +87,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         ///
         std::shared_ptr<AlbumTrack> addTrack( std::shared_ptr<Media> media, unsigned int trackNb, unsigned int discNumber);
         unsigned int nbTracks() const override;
+        unsigned int duration() const override;
 
         virtual ArtistPtr albumArtist() const override;
         bool setAlbumArtist( std::shared_ptr<Artist> artist );
@@ -120,6 +121,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         std::string m_shortSummary;
         std::string m_artworkMrl;
         unsigned int m_nbTracks;
+        unsigned int m_duration;
         bool m_isPresent;
 
         mutable Cache<std::vector<MediaPtr>> m_tracks;

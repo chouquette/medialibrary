@@ -44,6 +44,7 @@ Album::Album(MediaLibraryPtr ml, sqlite::Row& row)
         >> m_shortSummary
         >> m_artworkMrl
         >> m_nbTracks
+        >> m_duration
         >> m_isPresent;
 }
 
@@ -54,6 +55,7 @@ Album::Album( MediaLibraryPtr ml, const std::string& title )
     , m_artistId( 0 )
     , m_releaseYear( ~0u )
     , m_nbTracks( 0 )
+    , m_duration( 0 )
     , m_isPresent( true )
 {
 }
@@ -64,6 +66,7 @@ Album::Album( MediaLibraryPtr ml, const Artist* artist )
     , m_artistId( artist->id() )
     , m_releaseYear( ~0u )
     , m_nbTracks( 0 )
+    , m_duration( 0 )
     , m_isPresent( true )
 {
 }
@@ -229,6 +232,7 @@ std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsig
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id ) == false )
         return nullptr;
     m_nbTracks++;
+    m_duration += media->duration();
     t->commit();
     auto lock = m_tracks.lock();
     // Don't assume we have always have a valid value in m_tracks.
@@ -246,6 +250,11 @@ std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsig
 unsigned int Album::nbTracks() const
 {
     return m_nbTracks;
+}
+
+unsigned int Album::duration() const
+{
+    return m_duration;
 }
 
 ArtistPtr Album::albumArtist() const
@@ -323,6 +332,7 @@ bool Album::createTable(DBConnection dbConnection )
                 "short_summary TEXT,"
                 "artwork_mrl TEXT,"
                 "nb_tracks UNSIGNED INTEGER DEFAULT 0,"
+                "duration UNSIGNED INTEGER NOT NULL DEFAULT 0,"
                 "is_present BOOLEAN NOT NULL DEFAULT 1,"
                 "FOREIGN KEY( artist_id ) REFERENCES " + policy::ArtistTable::Name
                 + "(id_artist) ON DELETE CASCADE"
@@ -362,6 +372,13 @@ bool Album::createTriggers(DBConnection dbConnection)
                 " WHERE id_album=old.album_id AND "
                 "(SELECT COUNT(id_track) FROM " + policy::AlbumTrackTable::Name + " WHERE album_id=old.album_id) = 0;"
             " END";
+    static const std::string updateDurationTriggerReq = "CREATE TRIGGER IF NOT EXISTS update_album_duration"
+            " AFTER INSERT ON " + policy::AlbumTrackTable::Name +
+            " BEGIN"
+            " UPDATE " + policy::AlbumTable::Name +
+            " SET duration = duration + (SELECT duration FROM " + policy::MediaTable::Name + " WHERE id_media=new.media_id)"
+            " WHERE id_album = new.album_id;"
+            " END";
     static const std::string vtriggerInsert = "CREATE TRIGGER IF NOT EXISTS insert_album_fts AFTER INSERT ON "
             + policy::AlbumTable::Name +
             // Skip unknown albums
@@ -378,6 +395,7 @@ bool Album::createTriggers(DBConnection dbConnection)
             " END";
     return sqlite::Tools::executeRequest( dbConnection, triggerReq ) &&
             sqlite::Tools::executeRequest( dbConnection, deleteTriggerReq ) &&
+            sqlite::Tools::executeRequest( dbConnection, updateDurationTriggerReq ) &&
             sqlite::Tools::executeRequest( dbConnection, vtriggerInsert ) &&
             sqlite::Tools::executeRequest( dbConnection, vtriggerDelete );
 }

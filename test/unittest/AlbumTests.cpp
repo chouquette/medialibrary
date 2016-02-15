@@ -404,3 +404,26 @@ TEST_F( Albums, Sort )
     ASSERT_EQ( a2->id(), albums[1]->id() );
     ASSERT_EQ( a1->id(), albums[2]->id() );
 }
+
+TEST_F( Albums, Duration )
+{
+    auto a = ml->createAlbum( "album" );
+    ASSERT_EQ( 0u, a->duration() );
+
+    auto m = ml->addFile( "track.mp3" );
+    m->setDuration( 100 );
+    m->save();
+    a->addTrack( m, 1, 1 );
+    ASSERT_EQ( 100u, a->duration() );
+
+    auto m2 = ml->addFile( "track2.mp3" );
+    m2->setDuration( 200 );
+    m2->save();
+    a->addTrack( m2, 1, 1 );
+    ASSERT_EQ( 300u, a->duration() );
+
+    Reload();
+
+    auto a2 = ml->album( a->id() );
+    ASSERT_EQ( 300u, a2->duration() );
+}
