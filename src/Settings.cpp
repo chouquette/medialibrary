@@ -39,7 +39,7 @@ bool Settings::load( DBConnection dbConn )
     // First launch: no settings
     if ( row == nullptr )
     {
-        if ( sqlite::Tools::insert( m_dbConn, "INSERT INTO Settings VALUES(?)", MediaLibrary::DbModelVersion ) == false )
+        if ( sqlite::Tools::executeInsert( m_dbConn, "INSERT INTO Settings VALUES(?)", MediaLibrary::DbModelVersion ) == false )
             return false;
         m_dbModelVersion = MediaLibrary::DbModelVersion;
     }

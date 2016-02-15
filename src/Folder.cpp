@@ -134,7 +134,7 @@ bool Folder::blacklist( MediaLibraryPtr ml, const std::string& fullPath )
         path = fullPath;
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
             "(path, parent_id, is_blacklisted, device_id, is_removable) VALUES(?, ?, ?, ?, ?)";
-    return sqlite::Tools::insert( ml->getConn(), req, path, nullptr, true, device->id(), deviceFs->isRemovable() ) != 0;
+    return sqlite::Tools::executeInsert( ml->getConn(), req, path, nullptr, true, device->id(), deviceFs->isRemovable() ) != 0;
 }
 
 void Folder::setFileSystemFactory( std::shared_ptr<factory::IFileSystem> fsFactory )

@@ -311,7 +311,7 @@ bool Album::addArtist( std::shared_ptr<Artist> artist )
         LOG_ERROR("Both artist & album need to be inserted in database before being linked together" );
         return false;
     }
-    return sqlite::Tools::insert( m_ml->getConn(), req, m_id, artist->id() ) != 0;
+    return sqlite::Tools::executeInsert( m_ml->getConn(), req, m_id, artist->id() ) != 0;
 }
 
 bool Album::removeArtist(Artist* artist)

@@ -109,7 +109,7 @@ class DatabaseHelpers
         template <typename... Args>
         static bool insert( MediaLibraryPtr ml, std::shared_ptr<IMPL> self, const std::string& req, Args&&... args )
         {
-            int64_t pKey = sqlite::Tools::insert( ml->getConn(), req, std::forward<Args>( args )... );
+            int64_t pKey = sqlite::Tools::executeInsert( ml->getConn(), req, std::forward<Args>( args )... );
             if ( pKey == 0 )
                 return false;
             Lock l{ Mutex };

@@ -72,7 +72,7 @@ bool History::insert( DBConnection dbConn, const std::string& mrl )
             " UNION SELECT NULL, ?, NULL, NULL"
             " ORDER BY id_record DESC"
             " LIMIT 1";
-    return sqlite::Tools::insert( dbConn, req, mrl, mrl ) != 0;
+    return sqlite::Tools::executeInsert( dbConn, req, mrl, mrl ) != 0;
 }
 
 std::vector<std::shared_ptr<IHistoryEntry> > History::fetch( MediaLibraryPtr ml )

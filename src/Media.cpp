@@ -501,7 +501,7 @@ bool Media::addLabel( LabelPtr label )
         return false;
     }
     const char* req = "INSERT INTO LabelFileRelation VALUES(?, ?)";
-    if ( sqlite::Tools::insert( m_ml->getConn(), req, label->id(), m_id ) == 0 )
+    if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, label->id(), m_id ) == 0 )
         return false;
     const std::string reqFts = "UPDATE " + policy::MediaTable::Name + "Fts "
         "SET labels = labels || ' ' || ? WHERE rowid = ?";
