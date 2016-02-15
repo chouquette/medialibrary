@@ -232,10 +232,6 @@ std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsig
         return nullptr;
     media->setAlbumTrack( track );
     // Assume the media will be saved by the caller
-    static const std::string req = "UPDATE " + policy::AlbumTable::Name +
-            " SET nb_tracks = nb_tracks + 1 WHERE id_album = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id ) == false )
-        return nullptr;
     m_nbTracks++;
     m_duration += media->duration();
     t->commit();
@@ -370,18 +366,19 @@ bool Album::createTriggers(DBConnection dbConnection)
                 "(SELECT COUNT(id_track) FROM " + policy::AlbumTrackTable::Name + " WHERE album_id=new.album_id AND is_present=1) "
                 "WHERE id_album=new.album_id;"
             " END";
-    static const std::string deleteTriggerReq = "CREATE TRIGGER IF NOT EXISTS delete_album AFTER DELETE ON "
+    static const std::string deleteTriggerReq = "CREATE TRIGGER IF NOT EXISTS delete_album_track AFTER DELETE ON "
              + policy::AlbumTrackTable::Name +
             " BEGIN "
+            " UPDATE " + policy::AlbumTable::Name + " SET nb_tracks = nb_tracks - 1 WHERE id_album = old.album_id;"
             " DELETE FROM " + policy::AlbumTable::Name +
-                " WHERE id_album=old.album_id AND "
-                "(SELECT COUNT(id_track) FROM " + policy::AlbumTrackTable::Name + " WHERE album_id=old.album_id) = 0;"
+                " WHERE id_album=old.album_id AND nb_tracks = 0;"
             " END";
-    static const std::string updateDurationTriggerReq = "CREATE TRIGGER IF NOT EXISTS update_album_duration"
+    static const std::string updateAddTrackTriggerReq = "CREATE TRIGGER IF NOT EXISTS add_album_track"
             " AFTER INSERT ON " + policy::AlbumTrackTable::Name +
             " BEGIN"
             " UPDATE " + policy::AlbumTable::Name +
-            " SET duration = duration + (SELECT duration FROM " + policy::MediaTable::Name + " WHERE id_media=new.media_id)"
+            " SET duration = duration + (SELECT duration FROM " + policy::MediaTable::Name + " WHERE id_media=new.media_id),"
+            " nb_tracks = nb_tracks + 1"
             " WHERE id_album = new.album_id;"
             " END";
     static const std::string vtriggerInsert = "CREATE TRIGGER IF NOT EXISTS insert_album_fts AFTER INSERT ON "
@@ -400,7 +397,7 @@ bool Album::createTriggers(DBConnection dbConnection)
             " END";
     return sqlite::Tools::executeRequest( dbConnection, triggerReq ) &&
             sqlite::Tools::executeRequest( dbConnection, deleteTriggerReq ) &&
-            sqlite::Tools::executeRequest( dbConnection, updateDurationTriggerReq ) &&
+            sqlite::Tools::executeRequest( dbConnection, updateAddTrackTriggerReq ) &&
             sqlite::Tools::executeRequest( dbConnection, vtriggerInsert ) &&
             sqlite::Tools::executeRequest( dbConnection, vtriggerDelete );
 }
