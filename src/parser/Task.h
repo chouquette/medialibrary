@@ -54,6 +54,11 @@ struct Task
         : media( media )
         , file( file )
         , currentService( 0 )
+        , trackNumber( 0 )
+        , discNumber( 0 )
+        , discTotal( 0 )
+        , episode( 0 )
+        , duration( 0 )
     {
     }
 
