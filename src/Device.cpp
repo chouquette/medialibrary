@@ -39,6 +39,7 @@ Device::Device( MediaLibraryPtr ml, sqlite::Row& row )
 
 Device::Device( MediaLibraryPtr ml, const std::string& uuid, bool isRemovable )
     : m_ml( ml )
+    , m_id( 0 )
     , m_uuid( uuid )
     , m_isRemovable( isRemovable )
     // Assume we can't add an absent device
