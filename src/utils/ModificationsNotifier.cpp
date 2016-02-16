@@ -28,6 +28,7 @@
 ModificationNotifier::ModificationNotifier( MediaLibraryPtr ml )
     : m_ml( ml )
     , m_cb( ml->getCb() )
+    , m_stop( false )
 {
 }
 
@@ -44,7 +45,6 @@ ModificationNotifier::~ModificationNotifier()
 void ModificationNotifier::start()
 {
     assert( m_notifierThread.get_id() == std::thread::id{} );
-    m_stop = false;
     m_notifierThread = std::thread{ &ModificationNotifier::run, this };
 }
 
