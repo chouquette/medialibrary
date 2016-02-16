@@ -49,6 +49,8 @@ AlbumTrack::AlbumTrack( MediaLibraryPtr ml, int64_t mediaId, unsigned int trackN
     : m_ml( ml )
     , m_id( 0 )
     , m_mediaId( mediaId )
+    , m_artistId( 0 )
+    , m_genreId( 0 )
     , m_trackNumber( trackNumber )
     , m_albumId( albumId )
     , m_discNumber( discNumber )
