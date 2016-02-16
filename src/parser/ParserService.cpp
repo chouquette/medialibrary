@@ -26,6 +26,7 @@
 ParserService::ParserService()
     : m_ml( nullptr )
     , m_cb( nullptr )
+    , m_parserCb( nullptr )
     , m_stopParser( false )
     , m_paused( false )
 {
