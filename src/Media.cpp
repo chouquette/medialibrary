@@ -85,6 +85,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
     // When creating a Media, meta aren't parsed, and therefor, is the filename
     , m_filename( title )
     , m_isFavorite( false )
+    , m_isPresent( true )
     , m_changed( false )
 {
 }
