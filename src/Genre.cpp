@@ -42,6 +42,7 @@ Genre::Genre( MediaLibraryPtr ml, sqlite::Row& row )
 
 Genre::Genre( MediaLibraryPtr ml, const std::string& name )
     : m_ml( ml )
+    , m_id( 0 )
     , m_name( name )
 {
 }
