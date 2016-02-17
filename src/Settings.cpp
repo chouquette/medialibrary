@@ -26,7 +26,8 @@
 #include "MediaLibrary.h"
 
 Settings::Settings()
-    : m_dbModelVersion( 0 )
+    : m_dbConn( nullptr )
+    , m_dbModelVersion( 0 )
     , m_changed( false )
 {
 }
