@@ -46,7 +46,7 @@ public:
     virtual void reload( const std::string& entryPoint ) override;
 
 private:
-    void enqueue(const std::string& entryPoint , bool reload);
+    void enqueue( const std::string& entryPoint, bool reload );
     void run();
 
 private:

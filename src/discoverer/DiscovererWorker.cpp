@@ -99,7 +99,7 @@ void DiscovererWorker::run()
             std::unique_lock<std::mutex> lock( m_mutex );
             if ( m_tasks.size() == 0 )
             {
-                m_cond.wait( lock, [this]() { return m_tasks.size() > 0 || m_run == false ; } );
+                m_cond.wait( lock, [this]() { return m_tasks.size() > 0 || m_run == false; } );
                 if ( m_run == false )
                     break;
             }
