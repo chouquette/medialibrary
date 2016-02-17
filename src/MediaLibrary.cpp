@@ -84,7 +84,8 @@ const std::vector<std::string> MediaLibrary::supportedAudioExtensions {
 const uint32_t MediaLibrary::DbModelVersion = 2;
 
 MediaLibrary::MediaLibrary()
-    : m_verbosity( LogLevel::Error )
+    : m_callback( nullptr )
+    , m_verbosity( LogLevel::Error )
 {
     Log::setLogLevel( m_verbosity );
 }
