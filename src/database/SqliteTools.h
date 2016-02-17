@@ -56,6 +56,7 @@ public:
     Row()
         : m_stmt( nullptr )
         , m_idx( 0 )
+        , m_nbColumns( 0 )
     {
     }
 
