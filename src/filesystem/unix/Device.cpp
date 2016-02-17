@@ -261,8 +261,9 @@ bool Device::isRemovable( const std::string& deviceName, const std::string& moun
     if ( removableFile != nullptr )
     {
         char buff;
-        fread(&buff, sizeof(buff), 1, removableFile.get() );
-        return buff == '1';
+        if ( fread(&buff, sizeof(buff), 1, removableFile.get() ) != 1 )
+            return buff == '1';
+        return false;
     }
 #else
     (void)deviceName;
