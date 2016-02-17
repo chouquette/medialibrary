@@ -53,7 +53,7 @@ public:
     {
     }
 
-    Row()
+    constexpr Row()
         : m_stmt( nullptr )
         , m_idx( 0 )
         , m_nbColumns( 0 )
@@ -84,12 +84,12 @@ public:
         return sqlite::Traits<T>::Load( m_stmt, idx );
     }
 
-    bool operator==(std::nullptr_t)
+    bool operator==(std::nullptr_t) const
     {
         return m_stmt == nullptr;
     }
 
-    bool operator!=(std::nullptr_t)
+    bool operator!=(std::nullptr_t) const
     {
         return m_stmt != nullptr;
     }
