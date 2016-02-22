@@ -34,8 +34,8 @@ public:
     virtual int64_t id() const = 0;
     virtual const std::string& name() const = 0;
     virtual const std::string& shortBio() const = 0;
-    virtual std::vector<AlbumPtr> albums( medialibrary::SortingCriteria sort, bool desc ) const = 0;
-    virtual std::vector<MediaPtr> media( medialibrary::SortingCriteria sort, bool desc ) const = 0;
+    virtual std::vector<AlbumPtr> albums( medialibrary::SortingCriteria sort = medialibrary::SortingCriteria::Default, bool desc = false ) const = 0;
+    virtual std::vector<MediaPtr> media( medialibrary::SortingCriteria sort = medialibrary::SortingCriteria::Default, bool desc = false ) const = 0;
     virtual const std::string& artworkMrl() const = 0;
     virtual const std::string& musicBrainzId() const = 0;
 };

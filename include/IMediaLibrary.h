@@ -131,10 +131,10 @@ class IMediaLibrary
 
         virtual LabelPtr createLabel( const std::string& label ) = 0;
         virtual bool deleteLabel( LabelPtr label ) = 0;
-        virtual std::vector<MediaPtr> audioFiles( medialibrary::SortingCriteria sort, bool desc ) const = 0;
-        virtual std::vector<MediaPtr> videoFiles( medialibrary::SortingCriteria sort, bool desc ) const = 0;
+        virtual std::vector<MediaPtr> audioFiles( medialibrary::SortingCriteria sort = medialibrary::SortingCriteria::Default, bool desc = false ) const = 0;
+        virtual std::vector<MediaPtr> videoFiles( medialibrary::SortingCriteria sort = medialibrary::SortingCriteria::Default, bool desc = false ) const = 0;
         virtual AlbumPtr album( int64_t id ) const = 0;
-        virtual std::vector<AlbumPtr> albums( medialibrary::SortingCriteria sort, bool desc ) const = 0;
+        virtual std::vector<AlbumPtr> albums( medialibrary::SortingCriteria sort = medialibrary::SortingCriteria::Default, bool desc = false ) const = 0;
         virtual ShowPtr show( const std::string& name ) const = 0;
         virtual MoviePtr movie( const std::string& title ) const = 0;
         virtual ArtistPtr artist( int64_t id ) const = 0;
@@ -145,19 +145,19 @@ class IMediaLibrary
          * @param sort A sorting criteria. So far, this is ignored, and artists are sorted by lexial order
          * @param desc If true, the provided sorting criteria will be reversed.
          */
-        virtual std::vector<ArtistPtr> artists( medialibrary::SortingCriteria sort, bool desc ) const = 0;
+        virtual std::vector<ArtistPtr> artists( medialibrary::SortingCriteria sort = medialibrary::SortingCriteria::Default, bool desc = false ) const = 0;
         /**
          * @brief genres Return the list of music genres
          * @param sort A sorting criteria. So far, this is ignored, and artists are sorted by lexial order
          * @param desc If true, the provided sorting criteria will be reversed.
          */
-        virtual std::vector<GenrePtr> genres( medialibrary::SortingCriteria sort, bool desc ) const = 0;
+        virtual std::vector<GenrePtr> genres( medialibrary::SortingCriteria sort = medialibrary::SortingCriteria::Default, bool desc = false ) const = 0;
 
         /***
          *  Playlists
          */
         virtual PlaylistPtr createPlaylist( const std::string& name ) = 0;
-        virtual std::vector<PlaylistPtr> playlists( medialibrary::SortingCriteria sort, bool desc ) = 0;
+        virtual std::vector<PlaylistPtr> playlists( medialibrary::SortingCriteria sort = medialibrary::SortingCriteria::Default, bool desc = false ) = 0;
         virtual bool deletePlaylist( int64_t playlistId ) = 0;
 
         /**
