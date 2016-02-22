@@ -174,13 +174,13 @@ TEST_F( Genres, SortTracks )
     }
     auto tracks = g->tracks( medialibrary::SortingCriteria::Duration, false );
     ASSERT_EQ( 2u, tracks.size() );
-    ASSERT_EQ( 1u, tracks[0]->trackNumber() );
-    ASSERT_EQ( 2u, tracks[1]->trackNumber() );
+    ASSERT_EQ( 1u, tracks[0]->albumTrack()->trackNumber() );
+    ASSERT_EQ( 2u, tracks[1]->albumTrack()->trackNumber() );
 
     tracks = g->tracks( medialibrary::SortingCriteria::Duration, true );
     ASSERT_EQ( 2u, tracks.size() );
-    ASSERT_EQ( 1u, tracks[1]->trackNumber() );
-    ASSERT_EQ( 2u, tracks[0]->trackNumber() );
+    ASSERT_EQ( 1u, tracks[1]->albumTrack()->trackNumber() );
+    ASSERT_EQ( 2u, tracks[0]->albumTrack()->trackNumber() );
 }
 
 TEST_F( Genres, Sort )

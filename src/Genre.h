@@ -46,7 +46,7 @@ public:
     virtual int64_t id() const;
     virtual const std::string& name() const override;
     virtual std::vector<ArtistPtr> artists( medialibrary::SortingCriteria sort, bool desc ) const override;
-    virtual std::vector<AlbumTrackPtr> tracks(medialibrary::SortingCriteria sort, bool desc) const override;
+    virtual std::vector<MediaPtr> tracks(medialibrary::SortingCriteria sort, bool desc) const override;
     virtual std::vector<AlbumPtr> albums( medialibrary::SortingCriteria sort, bool desc ) const override;
 
     static bool createTable( DBConnection dbConn );

@@ -137,11 +137,11 @@ AlbumTrackPtr AlbumTrack::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
     return fetch( ml, req, mediaId );
 }
 
-std::vector<AlbumTrackPtr> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId, medialibrary::SortingCriteria sort, bool desc )
+std::vector<MediaPtr> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId, medialibrary::SortingCriteria sort, bool desc )
 {
-    std::string req = "SELECT t.* FROM " + policy::AlbumTrackTable::Name + " t"
-            " INNER JOIN " + policy::MediaTable::Name + " m ON m.id_media = t.media_id"
-            " WHERE genre_id = ? ORDER BY ";
+    std::string req = "SELECT m.* FROM " + policy::MediaTable::Name + " m"
+            " INNER JOIN " + policy::AlbumTrackTable::Name + " t ON m.id_media = t.media_id"
+            " WHERE t.genre_id = ? ORDER BY ";
     switch ( sort )
     {
     case medialibrary::SortingCriteria::Duration:
@@ -163,7 +163,7 @@ std::vector<AlbumTrackPtr> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t ge
 
     if ( desc == true )
         req += " DESC";
-    return fetchAll<IAlbumTrack>( ml, req, genreId );
+    return Media::fetchAll<IMedia>( ml, req, genreId );
 }
 
 GenrePtr AlbumTrack::genre()
