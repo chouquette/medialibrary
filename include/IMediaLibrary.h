@@ -152,7 +152,7 @@ class IMediaLibrary
          * @param desc If true, the provided sorting criteria will be reversed.
          */
         virtual std::vector<GenrePtr> genres( medialibrary::SortingCriteria sort = medialibrary::SortingCriteria::Default, bool desc = false ) const = 0;
-
+        virtual GenrePtr genre( int64_t id ) const = 0;
         /***
          *  Playlists
          */

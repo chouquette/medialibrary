@@ -322,6 +322,11 @@ std::vector<GenrePtr> MediaLibrary::genres( medialibrary::SortingCriteria sort, 
     return Genre::listAll( this, sort, desc );
 }
 
+GenrePtr MediaLibrary::genre(int64_t id) const
+{
+    return Genre::fetch( this, id );
+}
+
 ShowPtr MediaLibrary::show( const std::string& name ) const
 {
     static const std::string req = "SELECT * FROM " + policy::ShowTable::Name
