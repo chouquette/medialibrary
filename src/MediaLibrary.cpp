@@ -394,6 +394,11 @@ std::vector<PlaylistPtr> MediaLibrary::playlists(medialibrary::SortingCriteria s
     return Playlist::listAll( this, sort, desc );
 }
 
+PlaylistPtr MediaLibrary::playlist( int64_t id ) const
+{
+    return Playlist::fetch( this, id );
+}
+
 bool MediaLibrary::deletePlaylist( int64_t playlistId )
 {
     return Playlist::destroy( this, playlistId );
