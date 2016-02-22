@@ -153,11 +153,14 @@ std::vector<MediaPtr> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId
     case medialibrary::SortingCriteria::ReleaseDate:
         req += "m.release_date";
         break;
+    case medialibrary::SortingCriteria::Alpha:
+        req += "m.title";
+        break;
     default:
         if ( desc == true )
-            req += "t.disc_number DESC, t.track_number DESC, m.filename";
+            req += "t.artist_id DESC, t.album_id DESC, t.disc_number DESC, t.track_number DESC, m.filename";
         else
-            req += "t.disc_number, t.track_number, m.filename";
+            req += "t.artist_id, t.album_id, t.disc_number, t.track_number, m.filename";
         break;
     }
 
