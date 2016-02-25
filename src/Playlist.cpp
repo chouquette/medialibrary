@@ -102,7 +102,15 @@ bool Playlist::add( int64_t mediaId, unsigned int position )
     static const std::string req = "INSERT INTO PlaylistMediaRelation(media_id, playlist_id, position) VALUES(?, ?, ?)";
     // position isn't a foreign key, but we want it to be passed as NULL if it equals to 0
     // When the position is NULL, the insertion triggers takes care of counting the number of records to auto append.
-    return sqlite::Tools::executeInsert( m_ml->getConn(), req, mediaId, m_id, sqlite::ForeignKey{ position } );
+    try
+    {
+        return sqlite::Tools::executeInsert( m_ml->getConn(), req, mediaId, m_id, sqlite::ForeignKey{ position } );
+    }
+    catch (const sqlite::errors::ConstraintViolation& ex)
+    {
+        LOG_WARN( "Rejected playlist insertion: ", ex.what() );
+        return false;
+    }
 }
 
 bool Playlist::move( int64_t mediaId, unsigned int position )

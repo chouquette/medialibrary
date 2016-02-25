@@ -291,3 +291,12 @@ TEST_F( Playlists, Sort )
     ASSERT_EQ( pl2->id(), pls[1]->id() );
     ASSERT_EQ( pl->id(), pls[0]->id() );
 }
+
+TEST_F( Playlists, AddDuplicate )
+{
+    auto m = ml->addFile( "file.mkv" );
+    auto res = pl->append( m->id() );
+    ASSERT_TRUE( res );
+    res = pl->append( m->id() );
+    ASSERT_FALSE( res );
+}
