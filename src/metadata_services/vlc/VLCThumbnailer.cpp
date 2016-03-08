@@ -220,16 +220,16 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
             return nullptr;
         },
         //unlock
-        [this](void*, void*const*) {
+        nullptr,
+
+        //display
+        [this](void*) {
             bool expected = true;
             if ( m_thumbnailRequired.compare_exchange_strong( expected, false ) )
             {
                 m_cond.notify_all();
             }
         }
-        ,
-        //display
-        nullptr
     );
 }
 
