@@ -112,10 +112,6 @@ void Directory::read() const
         }
         std::string path = m_path + "/" + result->d_name;
 
-#if defined(_DIRENT_HAVE_D_TYPE) && defined(_BSD_SOURCE)
-        if ( result->d_type == DT_DIR )
-        {
-#else
         struct stat s;
         if ( lstat( path.c_str(), &s ) != 0 )
         {
@@ -128,7 +124,6 @@ void Directory::read() const
         }
         if ( S_ISDIR( s.st_mode ) )
         {
-#endif
             auto dirPath = toAbsolute( path );
             if ( *dirPath.crbegin() != '/' )
                 dirPath += '/';
@@ -138,7 +133,7 @@ void Directory::read() const
         else
         {
             auto filePath = toAbsolute( path );
-            m_files.emplace_back( std::make_shared<File>( filePath ) );
+            m_files.emplace_back( std::make_shared<File>( filePath, s ) );
         }
     }
 }

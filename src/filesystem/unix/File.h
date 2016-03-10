@@ -24,13 +24,15 @@
 
 #include "filesystem/common/CommonFile.h"
 
+struct stat;
+
 namespace fs
 {
 
 class File : public CommonFile
 {
 public:
-    explicit File( const std::string& filePath );
+    explicit File( const std::string& filePath, const struct stat& s );
 
     virtual unsigned int lastModificationDate() const override;
 

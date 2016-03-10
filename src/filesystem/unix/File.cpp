@@ -28,12 +28,9 @@
 namespace fs
 {
 
-File::File( const std::string& filePath )
+File::File( const std::string& filePath, const struct stat& s )
     : CommonFile( filePath )
 {
-    struct stat s;
-    if ( lstat( m_fullPath.c_str(), &s ) )
-        throw std::runtime_error( "Failed to get file stats" );
     m_lastModificationDate = s.st_mtim.tv_sec;
 }
 
