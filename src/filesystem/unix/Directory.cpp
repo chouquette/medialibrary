@@ -117,10 +117,14 @@ void Directory::read() const
         {
             if ( errno == EACCES )
                 continue;
-            std::string err( "Failed to get file info " );
-            err += path + ": ";
-            err += strerror(errno);
-            throw std::runtime_error( err );
+            // Ignore EOVERFLOW since we are not (yet?) interested in the file size
+            if ( errno != EOVERFLOW )
+            {
+                std::string err( "Failed to get file info " );
+                err += path + ": ";
+                err += strerror(errno);
+                throw std::runtime_error( err );
+            }
         }
         if ( S_ISDIR( s.st_mode ) )
         {
