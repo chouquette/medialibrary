@@ -38,14 +38,6 @@ namespace fs
 Directory::Directory( const std::string& path )
     : m_path( toAbsolute( path ) )
 {
-#ifndef NDEBUG
-    struct stat s;
-    if ( lstat( m_path.c_str(), &s ) != 0 )
-        throw std::runtime_error( "Failed to stat directory " + path + "(" +
-                                  strerror( errno ) + ")" );
-    if ( S_ISDIR( s.st_mode ) == false )
-        throw std::runtime_error( "The provided path isn't a directory" );
-#endif
     if ( *m_path.crbegin() != '/' )
         m_path += '/';
 }
