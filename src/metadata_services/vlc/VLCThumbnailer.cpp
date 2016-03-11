@@ -139,11 +139,13 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
 
 parser::Task::Status VLCThumbnailer::startPlayback( VLC::MediaPlayer &mp )
 {
-
-    mp.eventManager().onPlaying([this]() {
+    // Use a copy of the event manager to automatically unregister all events as soon
+    // as we leave this method.
+    auto em = mp.eventManager();
+    em.onPlaying([this]() {
         m_cond.notify_all();
     });
-    mp.eventManager().onEncounteredError([this]() {
+    em.onEncounteredError([this]() {
         m_cond.notify_all();
     });
     std::unique_lock<std::mutex> lock( m_mutex );
