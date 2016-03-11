@@ -146,8 +146,8 @@ parser::Task::Status VLCThumbnailer::startPlayback( VLC::MediaPlayer &mp )
     mp.eventManager().onEncounteredError([this]() {
         m_cond.notify_all();
     });
-    mp.play();
     std::unique_lock<std::mutex> lock( m_mutex );
+    mp.play();
     bool success = m_cond.wait_for( lock, std::chrono::seconds( 3 ), [&mp]() {
         auto s = mp.state();
         return s == libvlc_Playing || s == libvlc_Error || s == libvlc_Ended;
