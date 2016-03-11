@@ -102,19 +102,27 @@ void Parser::updateStats()
 void Parser::done( std::unique_ptr<parser::Task> t, parser::Task::Status status )
 {
     ++m_opDone;
-    updateStats();
+
+    auto serviceIdx = ++t->currentService;
 
     if ( status == parser::Task::Status::TemporaryUnavailable ||
          status == parser::Task::Status::Fatal )
     {
+        if ( serviceIdx < m_services.size() )
+        {
+            // We won't process the next tasks, so we need to keep the number of "todo" operations coherent:
+            m_opToDo -= m_services.size() - serviceIdx;
+            updateStats();
+        }
         return;
     }
+    updateStats();
+
     if ( status == parser::Task::Status::Success )
     {
         m_notifier->notifyMediaModification( t->media );
     }
 
-    auto serviceIdx = ++t->currentService;
     if ( serviceIdx == m_services.size() )
     {
         t->file->markParsed();
