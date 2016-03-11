@@ -32,28 +32,6 @@ ParserService::ParserService()
 {
 }
 
-ParserService::~ParserService()
-{
-    // Alert first:
-    for ( auto& t : m_threads )
-    {
-        if ( t.joinable() )
-        {
-            {
-                std::lock_guard<std::mutex> lock( m_lock );
-                m_cond.notify_all();
-                m_stopParser = true;
-            }
-        }
-    }
-    // Join afterward:
-    for ( auto& t : m_threads )
-    {
-        if ( t.joinable() )
-            t.join();
-    }
-}
-
 void ParserService::start()
 {
     // Ensure we don't start multiple times.
@@ -73,6 +51,30 @@ void ParserService::resume()
     std::lock_guard<std::mutex> lock( m_lock );
     m_paused = false;
     m_cond.notify_all();
+}
+
+void ParserService::signalStop()
+{
+    for ( auto& t : m_threads )
+    {
+        if ( t.joinable() )
+        {
+            {
+                std::lock_guard<std::mutex> lock( m_lock );
+                m_cond.notify_all();
+                m_stopParser = true;
+            }
+        }
+    }
+}
+
+void ParserService::stop()
+{
+    for ( auto& t : m_threads )
+    {
+        if ( t.joinable() )
+            t.join();
+    }
 }
 
 void ParserService::parse( std::unique_ptr<parser::Task> t )

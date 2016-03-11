@@ -45,6 +45,7 @@ public:
     using ServicePtr = std::unique_ptr<ParserService>;
 
     Parser( MediaLibrary* ml );
+    virtual ~Parser();
     void addService( ServicePtr service );
     void parse( std::shared_ptr<Media> media, std::shared_ptr<File> file );
     void start();

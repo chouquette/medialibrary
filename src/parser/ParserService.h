@@ -39,11 +39,23 @@ class ParserService
 {
 public:
     ParserService();
-    virtual ~ParserService();
+    virtual ~ParserService() = default;
 
     void start();
     void pause();
     void resume();
+    ///
+    /// \brief signalStop Will trigger the threads for termination.
+    /// This doesn't wait for the threads to be done, but ensure they won't
+    /// queue another operation.
+    /// This is usefull to ask all the threads to terminate asynchronously, before
+    /// waiting for them to actually stop in the stop() method.
+    ///
+    void signalStop();
+    ///
+    /// \brief stop Effectively wait the the underlying threads to join.
+    ///
+    void stop();
     void parse( std::unique_ptr<parser::Task> t );
     void initialize( MediaLibrary* mediaLibrary, IParserCb* parserCb );
 

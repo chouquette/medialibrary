@@ -39,6 +39,18 @@ Parser::Parser( MediaLibrary* ml )
 {
 }
 
+Parser::~Parser()
+{
+    for ( auto& s : m_services )
+    {
+        s->signalStop();
+    }
+    for ( auto& s : m_services )
+    {
+        s->stop();
+    }
+}
+
 void Parser::addService( ServicePtr service )
 {
     service->initialize( m_ml, this );
