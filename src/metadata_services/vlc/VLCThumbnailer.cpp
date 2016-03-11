@@ -124,14 +124,14 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     auto res = startPlayback( mp );
     if ( res != parser::Task::Status::Success )
     {
-        LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail" );
+        LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail: Can't start playback" );
         return res;
     }
     // Seek ahead to have a significant preview
     res = seekAhead( mp );
     if ( res != parser::Task::Status::Success )
     {
-        LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail" );
+        LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail: Failed to seek ahead" );
         return res;
     }
     return takeThumbnail( media, file, mp );
@@ -244,7 +244,10 @@ parser::Task::Status VLCThumbnailer::takeThumbnail( std::shared_ptr<Media> media
             return m_thumbnailRequired == false;
         });
         if ( success == false )
+        {
+            LOG_WARN( "Timed out while computing ", file->mrl(), " snapshot" );
             return parser::Task::Status::Error;
+        }
     }
     mp.stop();
     return compress( media, file );
