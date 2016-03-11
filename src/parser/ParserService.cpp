@@ -120,10 +120,12 @@ void ParserService::mainloop()
             std::unique_lock<std::mutex> lock( m_lock );
             if ( m_tasks.empty() == true || m_paused == true )
             {
+                LOG_INFO( "Halting ParserService mainloop" );
                 m_cond.wait( lock, [this]() {
                     return ( m_tasks.empty() == false && m_paused == false )
                             || m_stopParser == true;
                 });
+                LOG_INFO( "Resuming ParserService mainloop" );
                 // We might have been woken up because the parser is being destroyed
                 if ( m_stopParser  == true )
                     break;
@@ -135,11 +137,13 @@ void ParserService::mainloop()
         parser::Task::Status status;
         try
         {
+            LOG_INFO( "Executing ", serviceName, " task on ", task->file->mrl() );
             status = run( *task );
+            LOG_INFO( "Done executing ", serviceName, " task on ", task->file->mrl() );
         }
         catch ( const std::exception& ex )
         {
-            LOG_ERROR( "Caught an exception during ", task->file->mrl(), " parsing: ", ex.what() );
+            LOG_ERROR( "Caught an exception during ", task->file->mrl(), " ", serviceName, " parsing: ", ex.what() );
             status = parser::Task::Status::Fatal;
         }
         m_parserCb->done( std::move( task ), status );
