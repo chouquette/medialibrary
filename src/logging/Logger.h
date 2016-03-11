@@ -105,25 +105,25 @@ public:
     }
 
     template <typename... Args>
-    static void Error( Args... args )
+    static void Error( Args&&... args )
     {
         log( LogLevel::Error, std::forward<Args>( args )... );
     }
 
     template <typename... Args>
-    static void Warning( Args... args )
+    static void Warning( Args&&... args )
     {
         log( LogLevel::Warning, std::forward<Args>( args )... );
     }
 
     template <typename... Args>
-    static void Info( Args... args )
+    static void Info( Args&&... args )
     {
         log( LogLevel::Info, std::forward<Args>( args )... );
     }
 
     template <typename... Args>
-    static void Debug( Args... args )
+    static void Debug( Args&&... args )
     {
         log( LogLevel::Debug, std::forward<Args>( args )... );
     }
