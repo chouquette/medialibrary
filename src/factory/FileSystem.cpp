@@ -39,10 +39,6 @@
 namespace factory
 {
 
-FileSystemFactory::FileSystemFactory()
-{
-}
-
 std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::string& path )
 {
     std::lock_guard<std::mutex> lock( m_mutex );
