@@ -70,6 +70,8 @@ std::shared_ptr<fs::IDevice> FileSystemFactory::createDevice( const std::string&
 void FileSystemFactory::refresh()
 {
     fs::Device::populateCache();
+    std::lock_guard<std::mutex> lock( m_mutex );
+    m_dirs.clear();
 }
 
 
