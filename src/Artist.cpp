@@ -78,12 +78,12 @@ bool Artist::setShortBio(const std::string &shortBio)
     return true;
 }
 
-std::vector<AlbumPtr> Artist::albums( medialibrary::SortingCriteria sort, bool desc ) const
+std::vector<medialibrary::AlbumPtr> Artist::albums( medialibrary::SortingCriteria sort, bool desc ) const
 {
     return Album::fromArtist( m_ml, m_id, sort, desc );
 }
 
-std::vector<MediaPtr> Artist::media( medialibrary::SortingCriteria sort, bool desc ) const
+std::vector<medialibrary::MediaPtr> Artist::media( medialibrary::SortingCriteria sort, bool desc ) const
 {
     std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
             "INNER JOIN MediaArtistRelation mar ON mar.media_id = med.id_media "
@@ -106,7 +106,7 @@ std::vector<MediaPtr> Artist::media( medialibrary::SortingCriteria sort, bool de
 
     if ( desc == true )
         req += " DESC";
-    return Media::fetchAll<IMedia>( m_ml, req, m_id );
+    return Media::fetchAll<medialibrary::IMedia>( m_ml, req, m_id );
 }
 
 bool Artist::addMedia( Media& media )
@@ -261,7 +261,7 @@ std::shared_ptr<Artist> Artist::create( MediaLibraryPtr ml, const std::string &n
     return artist;
 }
 
-std::vector<ArtistPtr> Artist::search( MediaLibraryPtr ml, const std::string& name )
+std::vector<medialibrary::ArtistPtr> Artist::search( MediaLibraryPtr ml, const std::string& name )
 {
     static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name + " WHERE id_artist IN "
             "(SELECT rowid FROM " + policy::ArtistTable::Name + "Fts WHERE name MATCH ?)"
@@ -269,7 +269,7 @@ std::vector<ArtistPtr> Artist::search( MediaLibraryPtr ml, const std::string& na
     return fetchAll<IArtist>( ml, req, name + "*" );
 }
 
-std::vector<ArtistPtr> Artist::listAll(MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc)
+std::vector<medialibrary::ArtistPtr> Artist::listAll(MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc)
 {
     std::string req = "SELECT * FROM " + policy::ArtistTable::Name +
             " WHERE nb_albums > 0 AND is_present = 1 ORDER BY ";

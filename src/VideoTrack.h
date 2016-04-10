@@ -40,7 +40,7 @@ struct VideoTrackTable
 };
 }
 
-class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy::VideoTrackTable>
+class VideoTrack : public medialibrary::IVideoTrack, public DatabaseHelpers<VideoTrack, policy::VideoTrackTable>
 {
     public:
         VideoTrack( MediaLibraryPtr ml, sqlite::Row& row );

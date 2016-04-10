@@ -52,59 +52,57 @@ class IFile;
 class IDirectory;
 }
 
-using namespace medialibrary;
-
-class MediaLibrary : public IMediaLibrary
+class MediaLibrary : public medialibrary::IMediaLibrary
 {
     public:
         MediaLibrary();
         ~MediaLibrary();
-        virtual bool initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* metadataCb ) override;
-        virtual void setVerbosity( LogLevel v ) override;
+        virtual bool initialize( const std::string& dbPath, const std::string& thumbnailPath, medialibrary::IMediaLibraryCb* metadataCb ) override;
+        virtual void setVerbosity( medialibrary::LogLevel v ) override;
 
-        virtual std::vector<MediaPtr> audioFiles( medialibrary::SortingCriteria sort, bool desc) const override;
-        virtual std::vector<MediaPtr> videoFiles( medialibrary::SortingCriteria sort, bool desc) const override;
+        virtual std::vector<medialibrary::MediaPtr> audioFiles( medialibrary::SortingCriteria sort, bool desc) const override;
+        virtual std::vector<medialibrary::MediaPtr> videoFiles( medialibrary::SortingCriteria sort, bool desc) const override;
 
         std::shared_ptr<Media> addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs );
 
         bool deleteFolder(const Folder& folder );
         std::shared_ptr<Device> device( const std::string& uuid );
 
-        virtual LabelPtr createLabel( const std::string& label ) override;
-        virtual bool deleteLabel( LabelPtr label ) override;
+        virtual medialibrary::LabelPtr createLabel( const std::string& label ) override;
+        virtual bool deleteLabel( medialibrary::LabelPtr label ) override;
 
-        virtual AlbumPtr album( int64_t id ) const override;
+        virtual medialibrary::AlbumPtr album( int64_t id ) const override;
         std::shared_ptr<Album> createAlbum( const std::string& title );
-        virtual std::vector<AlbumPtr> albums(medialibrary::SortingCriteria sort, bool desc) const override;
+        virtual std::vector<medialibrary::AlbumPtr> albums(medialibrary::SortingCriteria sort, bool desc) const override;
 
-        virtual std::vector<GenrePtr> genres( medialibrary::SortingCriteria sort, bool desc ) const override;
-        virtual GenrePtr genre( int64_t id ) const override;
+        virtual std::vector<medialibrary::GenrePtr> genres( medialibrary::SortingCriteria sort, bool desc ) const override;
+        virtual medialibrary::GenrePtr genre( int64_t id ) const override;
 
-        virtual ShowPtr show( const std::string& name ) const override;
+        virtual medialibrary::ShowPtr show( const std::string& name ) const override;
         std::shared_ptr<Show> createShow( const std::string& name );
 
-        virtual MoviePtr movie( const std::string& title ) const override;
+        virtual medialibrary::MoviePtr movie( const std::string& title ) const override;
         std::shared_ptr<Movie> createMovie( Media& media, const std::string& title );
 
-        virtual ArtistPtr artist( int64_t id ) const override;
-        ArtistPtr artist( const std::string& name );
+        virtual medialibrary::ArtistPtr artist( int64_t id ) const override;
+        medialibrary::ArtistPtr artist( const std::string& name );
         std::shared_ptr<Artist> createArtist( const std::string& name );
-        virtual std::vector<ArtistPtr> artists( medialibrary::SortingCriteria sort, bool desc ) const override;
+        virtual std::vector<medialibrary::ArtistPtr> artists( medialibrary::SortingCriteria sort, bool desc ) const override;
 
-        virtual PlaylistPtr createPlaylist( const std::string& name ) override;
-        virtual std::vector<PlaylistPtr> playlists( medialibrary::SortingCriteria sort, bool desc ) override;
-        virtual PlaylistPtr playlist( int64_t id ) const override;
+        virtual medialibrary::PlaylistPtr createPlaylist( const std::string& name ) override;
+        virtual std::vector<medialibrary::PlaylistPtr> playlists( medialibrary::SortingCriteria sort, bool desc ) override;
+        virtual medialibrary::PlaylistPtr playlist( int64_t id ) const override;
         virtual bool deletePlaylist( int64_t playlistId ) override;
 
         virtual bool addToHistory( const std::string& mrl );
-        virtual std::vector<HistoryPtr> lastStreamsPlayed() const override;
-        virtual std::vector<MediaPtr> lastMediaPlayed() const override;
+        virtual std::vector<medialibrary::HistoryPtr> lastStreamsPlayed() const override;
+        virtual std::vector<medialibrary::MediaPtr> lastMediaPlayed() const override;
 
         virtual medialibrary::MediaSearchAggregate searchMedia( const std::string& title ) const override;
-        virtual std::vector<PlaylistPtr> searchPlaylists( const std::string& name ) const override;
-        virtual std::vector<AlbumPtr> searchAlbums( const std::string& pattern ) const override;
-        virtual std::vector<GenrePtr> searchGenre( const std::string& genre ) const override;
-        virtual std::vector<ArtistPtr> searchArtists( const std::string& name ) const override;
+        virtual std::vector<medialibrary::PlaylistPtr> searchPlaylists( const std::string& name ) const override;
+        virtual std::vector<medialibrary::AlbumPtr> searchAlbums( const std::string& pattern ) const override;
+        virtual std::vector<medialibrary::GenrePtr> searchGenre( const std::string& genre ) const override;
+        virtual std::vector<medialibrary::ArtistPtr> searchArtists( const std::string& name ) const override;
         virtual medialibrary::SearchAggregate search( const std::string& pattern ) const override;
 
         virtual void discover( const std::string& entryPoint ) override;
@@ -112,7 +110,7 @@ class MediaLibrary : public IMediaLibrary
         virtual bool unbanFolder( const std::string& path ) override;
 
         virtual const std::string& thumbnailPath() const override;
-        virtual void setLogger( ILogger* logger ) override;
+        virtual void setLogger( medialibrary::ILogger* logger ) override;
         //Temporarily public, move back to private as soon as we start monitoring the FS
         virtual void reload() override;
         virtual void reload( const std::string& entryPoint ) override;
@@ -121,7 +119,7 @@ class MediaLibrary : public IMediaLibrary
         virtual void resumeBackgroundOperations() override;
 
         DBConnection getConn() const;
-        IMediaLibraryCb* getCb() const;
+        medialibrary::IMediaLibraryCb* getCb() const;
         std::shared_ptr<ModificationNotifier> getNotifier() const;
 
     public:
@@ -144,7 +142,7 @@ class MediaLibrary : public IMediaLibrary
         std::unique_ptr<SqliteConnection> m_dbConnection;
         std::shared_ptr<factory::IFileSystem> m_fsFactory;
         std::string m_thumbnailPath;
-        IMediaLibraryCb* m_callback;
+        medialibrary::IMediaLibraryCb* m_callback;
 
         // Keep the parser as last field.
         // The parser holds a (raw) pointer to the media library. When MediaLibrary's destructor gets called
@@ -156,7 +154,7 @@ class MediaLibrary : public IMediaLibrary
         //FIXME: Having to maintain a specific ordering sucks, let's use shared_ptr or something
         std::unique_ptr<DiscovererWorker> m_discoverer;
         std::shared_ptr<ModificationNotifier> m_modificationNotifier;
-        LogLevel m_verbosity;
+        medialibrary::LogLevel m_verbosity;
         Settings m_settings;
 };
 #endif // MEDIALIBRARY_H

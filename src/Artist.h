@@ -40,7 +40,7 @@ struct ArtistTable
 };
 }
 
-class Artist : public IArtist, public DatabaseHelpers<Artist, policy::ArtistTable>
+class Artist : public medialibrary::IArtist, public DatabaseHelpers<Artist, policy::ArtistTable>
 {
 public:
     Artist( MediaLibraryPtr ml, sqlite::Row& row );
@@ -50,8 +50,8 @@ public:
     virtual const std::string &name() const override;
     virtual const std::string& shortBio() const override;
     bool setShortBio( const std::string& shortBio );
-    virtual std::vector<AlbumPtr> albums( medialibrary::SortingCriteria sort, bool desc ) const override;
-    virtual std::vector<MediaPtr> media(medialibrary::SortingCriteria sort, bool desc) const override;
+    virtual std::vector<medialibrary::AlbumPtr> albums( medialibrary::SortingCriteria sort, bool desc ) const override;
+    virtual std::vector<medialibrary::MediaPtr> media(medialibrary::SortingCriteria sort, bool desc) const override;
     bool addMedia( Media& media );
     virtual const std::string& artworkMrl() const override;
     bool setArtworkMrl( const std::string& artworkMrl );
@@ -64,8 +64,8 @@ public:
     static bool createTriggers( DBConnection dbConnection );
     static bool createDefaultArtists( DBConnection dbConnection );
     static std::shared_ptr<Artist> create( MediaLibraryPtr ml, const std::string& name );
-    static std::vector<ArtistPtr> search( MediaLibraryPtr ml, const std::string& name );
-    static std::vector<ArtistPtr> listAll( MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc );
+    static std::vector<medialibrary::ArtistPtr> search( MediaLibraryPtr ml, const std::string& name );
+    static std::vector<medialibrary::ArtistPtr> listAll( MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc );
 
 private:
     MediaLibraryPtr m_ml;

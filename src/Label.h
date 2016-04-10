@@ -42,7 +42,7 @@ struct LabelTable
 };
 }
 
-class Label : public ILabel, public DatabaseHelpers<Label, policy::LabelTable>
+class Label : public medialibrary::ILabel, public DatabaseHelpers<Label, policy::LabelTable>
 {
     public:
         Label( MediaLibraryPtr ml, sqlite::Row& row );
@@ -51,9 +51,9 @@ class Label : public ILabel, public DatabaseHelpers<Label, policy::LabelTable>
     public:
         virtual int64_t id() const override;
         virtual const std::string& name() const override;
-        virtual std::vector<MediaPtr> files() override;
+        virtual std::vector<medialibrary::MediaPtr> files() override;
 
-        static LabelPtr create( MediaLibraryPtr ml, const std::string& name );
+        static medialibrary::LabelPtr create( MediaLibraryPtr ml, const std::string& name );
         static bool createTable( DBConnection dbConnection );
 
     private:

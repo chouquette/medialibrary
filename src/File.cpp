@@ -77,7 +77,7 @@ const std::string& File::mrl() const
     return m_fullPath;
 }
 
-IFile::Type File::type() const
+medialibrary::IFile::Type File::type() const
 {
     return m_type;
 }

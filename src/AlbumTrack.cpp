@@ -63,7 +63,7 @@ int64_t AlbumTrack::id() const
     return m_id;
 }
 
-ArtistPtr AlbumTrack::artist() const
+medialibrary::ArtistPtr AlbumTrack::artist() const
 {
     if ( m_artistId == 0 )
         return nullptr;
@@ -130,14 +130,14 @@ std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, int64_t albu
     return self;
 }
 
-AlbumTrackPtr AlbumTrack::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
+medialibrary::AlbumTrackPtr AlbumTrack::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTrackTable::Name +
             " WHERE media_id = ?";
     return fetch( ml, req, mediaId );
 }
 
-std::vector<MediaPtr> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId, medialibrary::SortingCriteria sort, bool desc )
+std::vector<medialibrary::MediaPtr> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId, medialibrary::SortingCriteria sort, bool desc )
 {
     std::string req = "SELECT m.* FROM " + policy::MediaTable::Name + " m"
             " INNER JOIN " + policy::AlbumTrackTable::Name + " t ON m.id_media = t.media_id"
@@ -166,10 +166,10 @@ std::vector<MediaPtr> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId
 
     if ( desc == true )
         req += " DESC";
-    return Media::fetchAll<IMedia>( ml, req, genreId );
+    return Media::fetchAll<medialibrary::IMedia>( ml, req, genreId );
 }
 
-GenrePtr AlbumTrack::genre()
+medialibrary::GenrePtr AlbumTrack::genre()
 {
     auto l = m_genre.lock();
     if ( m_genre.isCached() == false )
@@ -203,7 +203,7 @@ unsigned int AlbumTrack::discNumber() const
     return m_discNumber;
 }
 
-std::shared_ptr<IAlbum> AlbumTrack::album()
+std::shared_ptr<medialibrary::IAlbum> AlbumTrack::album()
 {
     auto album = m_album.lock();
     if ( album == nullptr && m_albumId != 0 )
@@ -214,7 +214,7 @@ std::shared_ptr<IAlbum> AlbumTrack::album()
     return album;
 }
 
-std::shared_ptr<IMedia> AlbumTrack::media()
+std::shared_ptr<medialibrary::IMedia> AlbumTrack::media()
 {
     auto lock = m_media.lock();
     if ( m_media.isCached() == false )

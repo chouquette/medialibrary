@@ -22,7 +22,7 @@
 
 #include "MediaLibrary.h"
 
-extern "C" IMediaLibrary* NewMediaLibrary()
+extern "C" medialibrary::IMediaLibrary* NewMediaLibrary()
 {
     return new MediaLibrary();
 }

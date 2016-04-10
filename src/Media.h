@@ -49,7 +49,7 @@ struct MediaTable
 };
 }
 
-class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
+class Media : public medialibrary::IMedia, public DatabaseHelpers<Media, policy::MediaTable>
 {
     public:
         // Those should be private, however the standard states that the expression
@@ -69,15 +69,15 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         void setType( Type type );
         virtual const std::string& title() const override;
         void setTitle( const std::string& title );
-        virtual AlbumTrackPtr albumTrack() const override;
-        void setAlbumTrack( AlbumTrackPtr albumTrack );
+        virtual medialibrary::AlbumTrackPtr albumTrack() const override;
+        void setAlbumTrack( medialibrary::AlbumTrackPtr albumTrack );
         virtual int64_t duration() const override;
         void setDuration( int64_t duration);
-        virtual ShowEpisodePtr showEpisode() const override;
-        void setShowEpisode( ShowEpisodePtr episode );
-        virtual bool addLabel( LabelPtr label ) override;
-        virtual bool removeLabel( LabelPtr label ) override;
-        virtual std::vector<LabelPtr> labels() override;
+        virtual medialibrary::ShowEpisodePtr showEpisode() const override;
+        void setShowEpisode( medialibrary::ShowEpisodePtr episode );
+        virtual bool addLabel( medialibrary::LabelPtr label ) override;
+        virtual bool removeLabel( medialibrary::LabelPtr label ) override;
+        virtual std::vector<medialibrary::LabelPtr> labels() override;
         virtual int playCount() const  override;
         virtual bool increasePlayCount() override;
         virtual float progress() const override;
@@ -86,15 +86,15 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual bool setRating( int rating ) override;
         virtual bool isFavorite() const override;
         virtual bool setFavorite( bool favorite ) override;
-        virtual const std::vector<FilePtr>& files() const override;
-        virtual MoviePtr movie() const override;
-        void setMovie( MoviePtr movie );
+        virtual const std::vector<medialibrary::FilePtr>& files() const override;
+        virtual medialibrary::MoviePtr movie() const override;
+        void setMovie( medialibrary::MoviePtr movie );
         bool addVideoTrack( const std::string& codec, unsigned int width,
                                     unsigned int height, float fps );
-        virtual std::vector<VideoTrackPtr> videoTracks() override;
+        virtual std::vector<medialibrary::VideoTrackPtr> videoTracks() override;
         bool addAudioTrack( const std::string& codec, unsigned int bitrate, unsigned int sampleRate,
                             unsigned int nbChannels, const std::string& language, const std::string& desc );
-        virtual std::vector<AudioTrackPtr> audioTracks() override;
+        virtual std::vector<medialibrary::AudioTrackPtr> audioTracks() override;
         virtual const std::string& thumbnail() override;
         virtual unsigned int insertionDate() const override;
         virtual unsigned int releaseDate() const override;
@@ -102,12 +102,12 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         void setThumbnail( const std::string& thumbnail );
         bool save();
 
-        std::shared_ptr<File> addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs , IFile::Type type);
+        std::shared_ptr<File> addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs , medialibrary::IFile::Type type);
         void removeFile( File& file );
 
-        static std::vector<MediaPtr> listAll(MediaLibraryPtr ml, Type type , medialibrary::SortingCriteria sort, bool desc);
-        static std::vector<MediaPtr> search( MediaLibraryPtr ml, const std::string& title );
-        static std::vector<MediaPtr> fetchHistory( MediaLibraryPtr ml );
+        static std::vector<medialibrary::MediaPtr> listAll(MediaLibraryPtr ml, Type type , medialibrary::SortingCriteria sort, bool desc);
+        static std::vector<medialibrary::MediaPtr> search( MediaLibraryPtr ml, const std::string& title );
+        static std::vector<medialibrary::MediaPtr> fetchHistory( MediaLibraryPtr ml );
 
 
 private:
@@ -133,10 +133,10 @@ private:
         bool m_isPresent;
 
         // Auto fetched related properties
-        mutable Cache<AlbumTrackPtr> m_albumTrack;
-        mutable Cache<ShowEpisodePtr> m_showEpisode;
-        mutable Cache<MoviePtr> m_movie;
-        mutable Cache<std::vector<FilePtr>> m_files;
+        mutable Cache<medialibrary::AlbumTrackPtr> m_albumTrack;
+        mutable Cache<medialibrary::ShowEpisodePtr> m_showEpisode;
+        mutable Cache<medialibrary::MoviePtr> m_movie;
+        mutable Cache<std::vector<medialibrary::FilePtr>> m_files;
         bool m_changed;
 
         friend struct policy::MediaTable;

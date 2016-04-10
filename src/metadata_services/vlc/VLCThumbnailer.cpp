@@ -95,14 +95,14 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     auto media = task.media;
     auto file = task.file;
 
-    if ( media->type() == IMedia::Type::UnknownType )
+    if ( media->type() == medialibrary::IMedia::Type::UnknownType )
     {
         // If we don't know the media type yet, it actually looks more like a bug
         // since this should run after media type deduction, and not run in case
         // that step fails.
         return parser::Task::Status::Fatal;
     }
-    else if ( media->type() != IMedia::Type::VideoType )
+    else if ( media->type() != medialibrary::IMedia::Type::VideoType )
     {
         // There's no point in generating a thumbnail for a non-video media.
         return parser::Task::Status::Success;

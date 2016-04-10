@@ -43,7 +43,7 @@ struct ShowEpisodeTable
 };
 }
 
-class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, policy::ShowEpisodeTable>
+class ShowEpisode : public medialibrary::IShowEpisode, public DatabaseHelpers<ShowEpisode, policy::ShowEpisodeTable>
 {
     public:
         ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row );
@@ -60,12 +60,12 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, pol
         bool setShortSummary( const std::string& summary );
         virtual const std::string& tvdbId() const override;
         bool setTvdbId( const std::string& tvdbId );
-        virtual std::shared_ptr<IShow> show() override;
-        virtual std::vector<MediaPtr> files() override;
+        virtual medialibrary::ShowPtr show() override;
+        virtual std::vector<medialibrary::MediaPtr> files() override;
 
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<ShowEpisode> create( MediaLibraryPtr ml, int64_t mediaId, const std::string& title, unsigned int episodeNumber, int64_t showId );
-        static ShowEpisodePtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
+        static medialibrary::ShowEpisodePtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
 
     private:
         MediaLibraryPtr m_ml;
@@ -78,7 +78,7 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, pol
         std::string m_shortSummary;
         std::string m_tvdbId;
         int64_t m_showId;
-        ShowPtr m_show;
+        medialibrary::ShowPtr m_show;
 
         friend struct policy::ShowEpisodeTable;
 };

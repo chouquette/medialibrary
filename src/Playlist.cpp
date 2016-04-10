@@ -91,13 +91,13 @@ unsigned int Playlist::creationDate() const
     return m_creationDate;
 }
 
-std::vector<MediaPtr> Playlist::media() const
+std::vector<medialibrary::MediaPtr> Playlist::media() const
 {
     static const std::string req = "SELECT m.* FROM " + policy::MediaTable::Name + " m "
             "LEFT JOIN PlaylistMediaRelation pmr ON pmr.media_id = m.id_media "
             "WHERE pmr.playlist_id = ? AND m.is_present = 1 "
             "ORDER BY pmr.position";
-    return Media::fetchAll<IMedia>( m_ml, req, m_id );
+    return Media::fetchAll<medialibrary::IMedia>( m_ml, req, m_id );
 }
 
 bool Playlist::append( int64_t mediaId )
@@ -214,14 +214,14 @@ bool Playlist::createTriggers( DBConnection dbConn )
             sqlite::Tools::executeRequest( dbConn, vtriggerDelete );
 }
 
-std::vector<PlaylistPtr> Playlist::search( MediaLibraryPtr ml, const std::string& name )
+std::vector<medialibrary::PlaylistPtr> Playlist::search( MediaLibraryPtr ml, const std::string& name )
 {
     static const std::string req = "SELECT * FROM " + policy::PlaylistTable::Name + " WHERE id_playlist IN "
             "(SELECT rowid FROM " + policy::PlaylistTable::Name + "Fts WHERE name MATCH ?)";
     return fetchAll<IPlaylist>( ml, req, name + "*" );
 }
 
-std::vector<PlaylistPtr> Playlist::listAll( MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc )
+std::vector<medialibrary::PlaylistPtr> Playlist::listAll( MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc )
 {
     std::string req = "SELECT * FROM " + policy::PlaylistTable::Name + " ORDER BY ";
     switch ( sort )

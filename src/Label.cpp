@@ -56,15 +56,15 @@ const std::string& Label::name() const
     return m_name;
 }
 
-std::vector<MediaPtr> Label::files()
+std::vector<medialibrary::MediaPtr> Label::files()
 {
     static const std::string req = "SELECT f.* FROM " + policy::MediaTable::Name + " f "
             "INNER JOIN LabelFileRelation lfr ON lfr.media_id = f.id_media "
             "WHERE lfr.label_id = ?";
-    return Media::fetchAll<IMedia>( m_ml, req, m_id );
+    return Media::fetchAll<medialibrary::IMedia>( m_ml, req, m_id );
 }
 
-LabelPtr Label::create( MediaLibraryPtr ml, const std::string& name )
+medialibrary::LabelPtr Label::create( MediaLibraryPtr ml, const std::string& name )
 {
     auto self = std::make_shared<Label>( ml, name );
     const char* req = "INSERT INTO Label VALUES(NULL, ?)";

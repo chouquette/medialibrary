@@ -39,7 +39,7 @@ struct AudioTrackTable
 };
 }
 
-class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack, policy::AudioTrackTable>
+class AudioTrack : public medialibrary::IAudioTrack, public DatabaseHelpers<AudioTrack, policy::AudioTrackTable>
 {
     public:
         AudioTrack(MediaLibraryPtr ml, sqlite::Row& row );

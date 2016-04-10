@@ -40,7 +40,7 @@ struct PlaylistTable
 };
 }
 
-class Playlist : public IPlaylist, public DatabaseHelpers<Playlist, policy::PlaylistTable>
+class Playlist : public medialibrary::IPlaylist, public DatabaseHelpers<Playlist, policy::PlaylistTable>
 {
 public:
     Playlist( MediaLibraryPtr ml, sqlite::Row& row );
@@ -52,7 +52,7 @@ public:
     virtual const std::string& name() const override;
     virtual bool setName( const std::string& name ) override;
     virtual unsigned int creationDate() const override;
-    virtual std::vector<MediaPtr> media() const override;
+    virtual std::vector<medialibrary::MediaPtr> media() const override;
     virtual bool append( int64_t mediaId ) override;
     virtual bool add( int64_t mediaId, unsigned int position ) override;
     virtual bool move( int64_t mediaId, unsigned int position ) override;
@@ -60,8 +60,8 @@ public:
 
     static bool createTable( DBConnection dbConn );
     static bool createTriggers( DBConnection dbConn );
-    static std::vector<PlaylistPtr> search( MediaLibraryPtr ml, const std::string& name );
-    static std::vector<PlaylistPtr> listAll( MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc );
+    static std::vector<medialibrary::PlaylistPtr> search( MediaLibraryPtr ml, const std::string& name );
+    static std::vector<medialibrary::PlaylistPtr> listAll( MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc );
 
 private:
     MediaLibraryPtr m_ml;

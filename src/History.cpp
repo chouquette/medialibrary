@@ -75,7 +75,7 @@ bool History::insert( DBConnection dbConn, const std::string& mrl )
     return sqlite::Tools::executeInsert( dbConn, req, mrl, mrl ) != 0;
 }
 
-std::vector<std::shared_ptr<IHistoryEntry> > History::fetch( MediaLibraryPtr ml )
+std::vector<medialibrary::HistoryPtr> History::fetch( MediaLibraryPtr ml )
 {
     static const std::string req = "SELECT * FROM " + policy::HistoryTable::Name + " ORDER BY insertion_date DESC";
     return fetchAll<IHistoryEntry>( ml, req );
