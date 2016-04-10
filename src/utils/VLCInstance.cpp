@@ -36,7 +36,7 @@ struct Init
         };
         instance = VLC::Instance( sizeof(args) / sizeof(args[0]), args );
         instance.logSet([this](int lvl, const libvlc_log_t*, std::string msg) {
-            if ( Log::logLevel() != LogLevel::Verbose )
+            if ( Log::logLevel() != medialibrary::LogLevel::Verbose )
                 return;
             if ( lvl == LIBVLC_ERROR )
                 Log::Error( msg );

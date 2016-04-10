@@ -29,9 +29,10 @@
 #include <thread>
 #include <vector>
 #include <chrono>
+
 #include "Types.h"
 
-class IMediaLibraryCb;
+using namespace medialibrary;
 
 class ModificationNotifier
 {

@@ -64,7 +64,6 @@ namespace medialibrary
         LastModificationDate,
         ReleaseDate,
     };
-}
 
 class IMediaLibraryCb
 {
@@ -207,9 +206,11 @@ class IMediaLibrary
         virtual void reload( const std::string& entryPoint ) = 0;
 };
 
+}
+
 extern "C"
 {
-    IMediaLibrary* NewMediaLibrary();
+    medialibrary::IMediaLibrary* NewMediaLibrary();
 }
 
 #endif // IMEDIALIBRARY_H

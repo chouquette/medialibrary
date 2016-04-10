@@ -28,6 +28,9 @@
 
 #include "IMediaLibrary.h"
 
+namespace medialibrary
+{
+
 class ILabel
 {
     public:
@@ -37,5 +40,7 @@ class ILabel
         virtual const std::string& name() const = 0;
         virtual std::vector<MediaPtr> files() = 0;
 };
+
+}
 
 #endif // ILABEL_H

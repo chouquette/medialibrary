@@ -25,6 +25,9 @@
 
 #include "IMediaLibrary.h"
 
+namespace medialibrary
+{
+
 class IAlbumTrack
 {
     public:
@@ -49,5 +52,7 @@ class IAlbumTrack
          */
         virtual unsigned int discNumber() const = 0;
 };
+
+}
 
 #endif // IALBUMTRACK_H

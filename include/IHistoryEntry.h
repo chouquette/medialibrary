@@ -24,6 +24,9 @@
 
 #include <string>
 
+namespace medialibrary
+{
+
 class IHistoryEntry
 {
 public:
@@ -33,3 +36,5 @@ public:
     virtual bool isFavorite() const = 0;
     virtual bool setFavorite( bool isFavorite ) = 0;
 };
+
+}

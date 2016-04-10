@@ -25,6 +25,9 @@
 
 #include "IMediaLibrary.h"
 
+namespace medialibrary
+{
+
 class IAudioTrack
 {
     public:
@@ -40,5 +43,7 @@ class IAudioTrack
         virtual const std::string& language() const = 0;
         virtual const std::string& description() const = 0;
 };
+
+}
 
 #endif // IAUDIOTRACK_H

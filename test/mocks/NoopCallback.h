@@ -24,6 +24,8 @@
 
 #include "IMediaLibrary.h"
 
+using namespace medialibrary;
+
 namespace mock
 {
 

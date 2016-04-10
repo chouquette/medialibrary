@@ -26,6 +26,9 @@
 
 #include "Types.h"
 
+namespace medialibrary
+{
+
 class IPlaylist
 {
 public:
@@ -72,3 +75,5 @@ public:
     ///
     virtual bool remove( int64_t mediaId ) = 0;
 };
+
+}

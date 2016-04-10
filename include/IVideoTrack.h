@@ -25,6 +25,9 @@
 
 #include "IMediaLibrary.h"
 
+namespace medialibrary
+{
+
 class IVideoTrack
 {
     public:
@@ -35,5 +38,7 @@ class IVideoTrack
         virtual unsigned int height() const = 0;
         virtual float fps() const = 0;
 };
+
+}
 
 #endif // IVIDEOTRACK_H

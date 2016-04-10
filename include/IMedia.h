@@ -27,6 +27,9 @@
 
 #include "IMediaLibrary.h"
 
+namespace medialibrary
+{
+
 class IAlbumTrack;
 class IShowEpisode;
 class ITrackInformation;
@@ -93,3 +96,5 @@ class IMedia
         virtual unsigned int insertionDate() const = 0;
         virtual unsigned int releaseDate() const = 0;
 };
+
+}

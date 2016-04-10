@@ -25,6 +25,9 @@
 
 #include "IMediaLibrary.h"
 
+namespace medialibrary
+{
+
 class IShow
 {
     public:
@@ -37,5 +40,7 @@ class IShow
         virtual const std::string& tvdbId() = 0;
         virtual std::vector<ShowEpisodePtr> episodes() = 0;
 };
+
+}
 
 #endif // ISHOW_H

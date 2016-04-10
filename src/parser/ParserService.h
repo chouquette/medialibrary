@@ -32,7 +32,6 @@
 #include "Types.h"
 
 class IParserCb;
-class IMediaLibraryCb;
 class ModificationNotifier;
 
 class ParserService
@@ -73,7 +72,7 @@ private:
 
 protected:
     MediaLibrary* m_ml;
-    IMediaLibraryCb* m_cb;
+    medialibrary::IMediaLibraryCb* m_cb;
     std::shared_ptr<ModificationNotifier> m_notifier;
 
 private:

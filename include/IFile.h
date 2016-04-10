@@ -24,6 +24,9 @@
 
 #include <string>
 
+namespace medialibrary
+{
+
 class IFile
 {
 public:
@@ -53,3 +56,5 @@ public:
     virtual Type type() const = 0;
     virtual unsigned int lastModificationDate() const = 0;
 };
+
+}

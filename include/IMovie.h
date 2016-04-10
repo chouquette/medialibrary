@@ -25,6 +25,9 @@
 
 #include "IMediaLibrary.h"
 
+namespace medialibrary
+{
+
 class IMovie
 {
     public:
@@ -36,5 +39,7 @@ class IMovie
         virtual const std::string& imdbId() const = 0;
         virtual std::vector<MediaPtr> files() = 0;
 };
+
+}
 
 #endif // IMOVIE_H

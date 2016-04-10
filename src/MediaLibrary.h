@@ -48,6 +48,8 @@ namespace factory
 class IFileSystem;
 }
 
+using namespace medialibrary;
+
 class MediaLibrary : public IMediaLibrary
 {
     public:

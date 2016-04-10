@@ -23,9 +23,10 @@
 #ifndef ISHOWEPISODE_H
 #define ISHOWEPISODE_H
 
-class IShow;
-
 #include "IMediaLibrary.h"
+
+namespace medialibrary
+{
 
 class IShowEpisode
 {
@@ -42,5 +43,7 @@ class IShowEpisode
         virtual std::shared_ptr<IShow> show() = 0;
         virtual std::vector<MediaPtr> files() = 0;
 };
+
+}
 
 #endif // ISHOWEPISODE_H

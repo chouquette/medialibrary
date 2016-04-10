@@ -27,6 +27,9 @@
 
 #include "IMediaLibrary.h"
 
+namespace medialibrary
+{
+
 class IAlbum
 {
 public:
@@ -66,3 +69,5 @@ public:
     virtual uint32_t nbTracks() const = 0;
     virtual unsigned int duration() const = 0;
 };
+
+}

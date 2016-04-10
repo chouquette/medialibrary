@@ -41,7 +41,7 @@ struct FileTable
 };
 }
 
-class File : public IFile, public DatabaseHelpers<File, policy::FileTable>
+class File : public medialibrary::IFile, public DatabaseHelpers<File, policy::FileTable>
 {
 public:
     File( MediaLibraryPtr ml, sqlite::Row& row );

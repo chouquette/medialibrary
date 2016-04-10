@@ -27,6 +27,9 @@
 
 #include "IMediaLibrary.h"
 
+namespace medialibrary
+{
+
 class IArtist
 {
 public:
@@ -39,3 +42,5 @@ public:
     virtual const std::string& artworkMrl() const = 0;
     virtual const std::string& musicBrainzId() const = 0;
 };
+
+}

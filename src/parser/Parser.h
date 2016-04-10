@@ -29,8 +29,6 @@
 
 #include "File.h"
 
-class IMediaLibraryCb;
-
 // Use an interface to expose only the "done" method
 class IParserCb
 {

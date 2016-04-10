@@ -24,10 +24,12 @@
 
 #include <memory>
 
+namespace medialibrary
+{
+
 class IAlbum;
 class IAlbumTrack;
 class IAudioTrack;
-class IDiscoverer;
 class IFile;
 class IGenre;
 class IHistoryEntry;
@@ -41,8 +43,7 @@ class IVideoTrack;
 class ILogger;
 class IArtist;
 class IPlaylist;
-class SqliteConnection;
-class MediaLibrary;
+class IMediaLibraryCb;
 
 using AlbumPtr = std::shared_ptr<IAlbum>;
 using AlbumTrackPtr = std::shared_ptr<IAlbumTrack>;
@@ -59,10 +60,6 @@ using ShowEpisodePtr = std::shared_ptr<IShowEpisode>;
 using ShowPtr = std::shared_ptr<IShow>;
 using VideoTrackPtr = std::shared_ptr<IVideoTrack>;
 
-using MediaLibraryPtr = const MediaLibrary*;
-
-typedef SqliteConnection* DBConnection;
-
 enum class LogLevel
 {
     /// Verbose: Extra logs (currently used by to enable third parties logs
@@ -73,3 +70,11 @@ enum class LogLevel
     Warning,
     Error,
 };
+
+}
+
+class SqliteConnection;
+class MediaLibrary;
+typedef SqliteConnection* DBConnection;
+using MediaLibraryPtr = const MediaLibrary*;
+

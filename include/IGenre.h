@@ -26,6 +26,9 @@
 
 #include <vector>
 
+namespace medialibrary
+{
+
 class IGenre
 {
 public:
@@ -36,3 +39,5 @@ public:
     virtual std::vector<MediaPtr> tracks( medialibrary::SortingCriteria sort = medialibrary::SortingCriteria::Default, bool desc = false ) const = 0;
     virtual std::vector<AlbumPtr> albums( medialibrary::SortingCriteria sort = medialibrary::SortingCriteria::Default, bool desc = false ) const = 0;
 };
+
+}

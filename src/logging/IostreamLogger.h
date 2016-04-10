@@ -22,10 +22,10 @@
 
 #pragma once
 
-#include <ILogger.h>
+#include "ILogger.h"
 #include <iostream>
 
-class IostreamLogger : public ILogger
+class IostreamLogger : public medialibrary::ILogger
 {
 public:
     virtual void Error(const std::string& msg) override

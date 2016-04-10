@@ -24,6 +24,9 @@
 
 #include <string>
 
+namespace medialibrary
+{
+
 class ILogger
 {
 public:
@@ -33,3 +36,5 @@ public:
     virtual void Info( const std::string& msg ) = 0;
     virtual void Debug( const std::string& msg ) = 0;
 };
+
+}

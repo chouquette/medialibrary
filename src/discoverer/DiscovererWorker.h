@@ -65,6 +65,6 @@ private:
     std::condition_variable m_cond;
     std::atomic_bool m_run;
     std::vector<std::unique_ptr<IDiscoverer>> m_discoverers;
-    IMediaLibraryCb* m_cb;
+    medialibrary::IMediaLibraryCb* m_cb;
 };
 
