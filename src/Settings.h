@@ -24,12 +24,13 @@
 #define SETTINGS_H
 
 #include "Types.h"
+#include <cstdint>
 
 class Settings
 {
 public:
     Settings();
-    bool load(DBConnection dbConn);
+    bool load( DBConnection dbConn );
     uint32_t dbModelVersion() const;
     bool save();
     void setDbModelVersion( uint32_t dbModelVersion );

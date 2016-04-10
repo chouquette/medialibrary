@@ -18,23 +18,23 @@ elseif(WIN32)
 endif()
 
 list(APPEND HEADERS_LIST
-    ${CMAKE_SOURCE_DIR}/include/IShow.h
-    ${CMAKE_SOURCE_DIR}/include/IShowEpisode.h
-    ${CMAKE_SOURCE_DIR}/include/IAlbum.h
-    ${CMAKE_SOURCE_DIR}/include/IAlbumTrack.h
-    ${CMAKE_SOURCE_DIR}/include/IMedia.h
-    ${CMAKE_SOURCE_DIR}/include/IMediaLibrary.h
-    ${CMAKE_SOURCE_DIR}/include/ILabel.h
-    ${CMAKE_SOURCE_DIR}/include/IAudioTrack.h
-    ${CMAKE_SOURCE_DIR}/include/IVideoTrack.h
-    ${CMAKE_SOURCE_DIR}/include/IMovie.h
-    ${CMAKE_SOURCE_DIR}/include/IDiscoverer.h
+    ${CMAKE_SOURCE_DIR}/include/medialibrary/IShow.h
+    ${CMAKE_SOURCE_DIR}/include/medialibrary/IShowEpisode.h
+    ${CMAKE_SOURCE_DIR}/include/medialibrary/IAlbum.h
+    ${CMAKE_SOURCE_DIR}/include/medialibrary/IAlbumTrack.h
+    ${CMAKE_SOURCE_DIR}/include/medialibrary/IMedia.h
+    ${CMAKE_SOURCE_DIR}/include/medialibrary/IMediaLibrary.h
+    ${CMAKE_SOURCE_DIR}/include/medialibrary/ILabel.h
+    ${CMAKE_SOURCE_DIR}/include/medialibrary/IAudioTrack.h
+    ${CMAKE_SOURCE_DIR}/include/medialibrary/IVideoTrack.h
+    ${CMAKE_SOURCE_DIR}/include/medialibrary/IMovie.h
+    ${CMAKE_SOURCE_DIR}/include/medialibrary/ILogger.h
+    ${CMAKE_SOURCE_DIR}/include/medialibrary/IArtist.h
+    ${CMAKE_SOURCE_DIR}/include/medialibrary/IPlaylist.h
+    ${CMAKE_SOURCE_DIR}/include/discoverer/IDiscoverer.h
     ${CMAKE_SOURCE_DIR}/include/filesystem/IDirectory.h
     ${CMAKE_SOURCE_DIR}/include/filesystem/IFile.h
     ${CMAKE_SOURCE_DIR}/include/factory/IFileSystem.h
-    ${CMAKE_SOURCE_DIR}/include/ILogger.h
-    ${CMAKE_SOURCE_DIR}/include/IArtist.h
-    ${CMAKE_SOURCE_DIR}/include/IPlaylist.h
 
     database/SqliteTools.h
 

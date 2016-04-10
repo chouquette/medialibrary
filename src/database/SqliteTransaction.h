@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include "Types.h"
 #include "SqliteConnection.h"
+#include "Types.h"
 
 namespace sqlite
 {

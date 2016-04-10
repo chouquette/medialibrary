@@ -32,7 +32,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "Types.h"
 #include "database/SqliteConnection.h"
 #include "database/SqliteErrors.h"
 #include "database/SqliteTraits.h"

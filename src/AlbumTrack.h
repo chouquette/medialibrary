@@ -27,8 +27,8 @@
 #include <string>
 #include <vector>
 
-#include "IAlbumTrack.h"
-#include "IMediaLibrary.h"
+#include "medialibrary/IAlbumTrack.h"
+#include "medialibrary/IMediaLibrary.h"
 #include "database/DatabaseHelpers.h"
 #include "utils/Cache.h"
 

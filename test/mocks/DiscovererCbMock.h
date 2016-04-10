@@ -25,7 +25,7 @@
 #include <atomic>
 #include <condition_variable>
 
-#include "IMediaLibrary.h"
+#include "medialibrary/IMediaLibrary.h"
 #include "mocks/NoopCallback.h"
 
 namespace mock

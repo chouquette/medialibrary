@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "ILogger.h"
+#include "medialibrary/ILogger.h"
 #include <iostream>
 
 class IostreamLogger : public medialibrary::ILogger

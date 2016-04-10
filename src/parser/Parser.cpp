@@ -24,7 +24,7 @@
 
 #include <algorithm>
 
-#include "IMediaLibrary.h"
+#include "medialibrary/IMediaLibrary.h"
 #include "Media.h"
 #include "File.h"
 #include "utils/ModificationsNotifier.h"

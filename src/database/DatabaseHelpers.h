@@ -27,7 +27,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "Types.h"
 #include "SqliteTools.h"
 
 template <typename IMPL, typename TABLEPOLICY>

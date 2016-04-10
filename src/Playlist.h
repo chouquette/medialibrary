@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "IPlaylist.h"
+#include "medialibrary/IPlaylist.h"
 
 #include "database/SqliteTools.h"
 #include "database/DatabaseHelpers.h"

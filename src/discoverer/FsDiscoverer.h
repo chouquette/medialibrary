@@ -25,7 +25,7 @@
 
 #include <memory>
 
-#include "IDiscoverer.h"
+#include "discoverer/IDiscoverer.h"
 #include "factory/IFileSystem.h"
 
 class MediaLibrary;

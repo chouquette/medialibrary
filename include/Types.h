@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Media Library
  *****************************************************************************
- * Copyright (C) 2015 Hugo Beauzée-Luyssen, Videolabs
+ * Copyright (C) 2016 Hugo Beauzée-Luyssen, Videolabs
  *
  * Authors: Hugo Beauzée-Luyssen<hugo@beauzee.fr>
  *
@@ -22,59 +22,7 @@
 
 #pragma once
 
-#include <memory>
-
-namespace medialibrary
-{
-
-class IAlbum;
-class IAlbumTrack;
-class IAudioTrack;
-class IFile;
-class IGenre;
-class IHistoryEntry;
-class IMedia;
-class ILabel;
-class IMetadataService;
-class IMovie;
-class IShow;
-class IShowEpisode;
-class IVideoTrack;
-class ILogger;
-class IArtist;
-class IPlaylist;
-class IMediaLibraryCb;
-
-using AlbumPtr = std::shared_ptr<IAlbum>;
-using AlbumTrackPtr = std::shared_ptr<IAlbumTrack>;
-using ArtistPtr = std::shared_ptr<IArtist>;
-using AudioTrackPtr = std::shared_ptr<IAudioTrack>;
-using FilePtr = std::shared_ptr<IFile>;
-using GenrePtr = std::shared_ptr<IGenre>;
-using HistoryPtr = std::shared_ptr<IHistoryEntry>;
-using LabelPtr = std::shared_ptr<ILabel>;
-using MediaPtr = std::shared_ptr<IMedia>;
-using MoviePtr = std::shared_ptr<IMovie>;
-using PlaylistPtr = std::shared_ptr<IPlaylist>;
-using ShowEpisodePtr = std::shared_ptr<IShowEpisode>;
-using ShowPtr = std::shared_ptr<IShow>;
-using VideoTrackPtr = std::shared_ptr<IVideoTrack>;
-
-enum class LogLevel
-{
-    /// Verbose: Extra logs (currently used by to enable third parties logs
-    /// such as VLC)
-    Verbose,
-    Debug,
-    Info,
-    Warning,
-    Error,
-};
-
-}
-
 class SqliteConnection;
 class MediaLibrary;
 typedef SqliteConnection* DBConnection;
 using MediaLibraryPtr = const MediaLibrary*;
-

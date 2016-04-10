@@ -29,10 +29,11 @@
 #include <queue>
 
 #include "Task.h"
-#include "Types.h"
+#include "medialibrary/Types.h"
 
 class IParserCb;
 class ModificationNotifier;
+class MediaLibrary;
 
 class ParserService
 {

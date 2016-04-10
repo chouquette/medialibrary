@@ -29,8 +29,8 @@ class ShowEpisode;
 #include <string>
 #include <sqlite3.h>
 
-#include "IMediaLibrary.h"
-#include "IShowEpisode.h"
+#include "medialibrary/IMediaLibrary.h"
+#include "medialibrary/IShowEpisode.h"
 #include "database/DatabaseHelpers.h"
 
 namespace policy

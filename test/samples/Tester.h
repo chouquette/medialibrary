@@ -29,13 +29,13 @@
 #include <rapidjson/document.h>
 
 #include "common/MediaLibraryTester.h"
-#include "IAlbum.h"
-#include "IArtist.h"
-#include "IMedia.h"
-#include "IAlbumTrack.h"
-#include "IAudioTrack.h"
-#include "IVideoTrack.h"
-#include "IGenre.h"
+#include "medialibrary/IAlbum.h"
+#include "medialibrary/IArtist.h"
+#include "medialibrary/IMedia.h"
+#include "medialibrary/IAlbumTrack.h"
+#include "medialibrary/IAudioTrack.h"
+#include "medialibrary/IVideoTrack.h"
+#include "medialibrary/IGenre.h"
 #include "mocks/NoopCallback.h"
 
 class MockCallback : public mock::NoopCallback

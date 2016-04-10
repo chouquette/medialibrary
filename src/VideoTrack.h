@@ -24,7 +24,7 @@
 #define VIDEOTRACK_H
 
 #include "database/DatabaseHelpers.h"
-#include "IVideoTrack.h"
+#include "medialibrary/IVideoTrack.h"
 
 #include <sqlite3.h>
 

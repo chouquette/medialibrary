@@ -22,48 +22,30 @@
 
 #pragma once
 
-#include "Types.h"
-#include "database/DatabaseHelpers.h"
-#include "medialibrary/IHistoryEntry.h"
-
-#include <vector>
 #include <string>
 
-class History;
-class Media;
+namespace medialibrary
+{
 
-namespace policy
+enum class LogLevel
 {
-struct HistoryTable
-{
-    static const std::string Name;
-    static const std::string PrimaryKeyColumn;
-    static int64_t History::* const PrimaryKey;
+    /// Verbose: Extra logs (currently used by to enable third parties logs
+    /// such as VLC)
+    Verbose,
+    Debug,
+    Info,
+    Warning,
+    Error,
 };
-}
 
-class History : public IHistoryEntry, public DatabaseHelpers<History, policy::HistoryTable>
+class ILogger
 {
 public:
-    History( MediaLibraryPtr ml, sqlite::Row& row );
-    static bool createTable( DBConnection dbConnection );
-    static bool insert( DBConnection dbConn, const std::string& mrl );
-    static std::vector<std::shared_ptr<IHistoryEntry>> fetch( MediaLibraryPtr ml );
-
-    virtual const std::string& mrl() const override;
-    virtual unsigned int insertionDate() const override;
-    virtual bool isFavorite() const override;
-    virtual bool setFavorite( bool isFavorite ) override;
-
-    static constexpr unsigned int MaxEntries = 100u;
-
-private:
-    MediaLibraryPtr m_ml;
-
-    int64_t m_id;
-    std::string m_mrl;
-    unsigned int m_date;
-    bool m_favorite;
-
-    friend policy::HistoryTable;
+    virtual ~ILogger() = default;
+    virtual void Error( const std::string& msg ) = 0;
+    virtual void Warning( const std::string& msg ) = 0;
+    virtual void Info( const std::string& msg ) = 0;
+    virtual void Debug( const std::string& msg ) = 0;
 };
+
+}

@@ -26,8 +26,8 @@
 #include <sqlite3.h>
 
 #include "database/DatabaseHelpers.h"
-#include "IMediaLibrary.h"
-#include "IShow.h"
+#include "medialibrary/IMediaLibrary.h"
+#include "medialibrary/IShow.h"
 
 class Media;
 class Show;

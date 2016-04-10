@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "IGenre.h"
+#include "medialibrary/IGenre.h"
 
 #include "database/DatabaseHelpers.h"
 

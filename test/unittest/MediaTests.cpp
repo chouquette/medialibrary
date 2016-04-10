@@ -22,7 +22,7 @@
 
 #include "Tests.h"
 
-#include "IMediaLibrary.h"
+#include "medialibrary/IMediaLibrary.h"
 #include "File.h"
 #include "Media.h"
 #include "Artist.h"

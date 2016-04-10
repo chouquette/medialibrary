@@ -27,7 +27,7 @@
 #include "Types.h"
 #include "filesystem/IDirectory.h"
 #include "filesystem/IFile.h"
-#include "IMediaLibrary.h"
+#include "medialibrary/IMediaLibrary.h"
 
 class IDiscoverer
 {

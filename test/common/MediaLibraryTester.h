@@ -24,6 +24,7 @@
 
 #include "MediaLibrary.h"
 #include "Folder.h"
+#include "filesystem/IDirectory.h"
 
 class Playlist;
 class AlbumTrack;

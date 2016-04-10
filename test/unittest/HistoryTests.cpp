@@ -22,7 +22,7 @@
 
 #include "Tests.h"
 
-#include "IHistoryEntry.h"
+#include "medialibrary/IHistoryEntry.h"
 #include "History.h"
 #include "Media.h"
 

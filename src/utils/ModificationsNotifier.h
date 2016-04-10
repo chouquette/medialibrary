@@ -30,6 +30,7 @@
 #include <vector>
 #include <chrono>
 
+#include "medialibrary/Types.h"
 #include "Types.h"
 
 using namespace medialibrary;

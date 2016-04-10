@@ -22,9 +22,9 @@
 
 #include "Tests.h"
 
-#include "IMediaLibrary.h"
+#include "medialibrary/IMediaLibrary.h"
 #include "Media.h"
-#include "ILabel.h"
+#include "medialibrary/ILabel.h"
 
 class Labels : public Tests
 {

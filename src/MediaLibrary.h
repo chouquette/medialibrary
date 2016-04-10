@@ -29,8 +29,7 @@ class Parser;
 class ParserService;
 class SqliteConnection;
 
-#include "IMediaLibrary.h"
-#include "IDiscoverer.h"
+#include "medialibrary/IMediaLibrary.h"
 #include "logging/Logger.h"
 #include "Settings.h"
 
@@ -46,6 +45,11 @@ class Genre;
 namespace factory
 {
 class IFileSystem;
+}
+namespace fs
+{
+class IFile;
+class IDirectory;
 }
 
 using namespace medialibrary;

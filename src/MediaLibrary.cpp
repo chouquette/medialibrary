@@ -58,9 +58,6 @@
 #include "metadata_services/vlc/VLCThumbnailer.h"
 #include "metadata_services/MetadataParser.h"
 
-#include "filesystem/IDirectory.h"
-#include "filesystem/IFile.h"
-#include "filesystem/IDevice.h"
 #include "factory/FileSystem.h"
 
 const std::vector<std::string> MediaLibrary::supportedVideoExtensions {

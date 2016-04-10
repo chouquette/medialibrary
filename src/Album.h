@@ -27,10 +27,10 @@
 #include <sqlite3.h>
 #include <mutex>
 
-#include "IMediaLibrary.h"
+#include "medialibrary/IMediaLibrary.h"
 
 #include "database/DatabaseHelpers.h"
-#include "IAlbum.h"
+#include "medialibrary/IAlbum.h"
 #include "utils/Cache.h"
 
 class Album;

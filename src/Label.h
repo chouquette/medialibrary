@@ -29,7 +29,7 @@
 class Media;
 class Label;
 
-#include "ILabel.h"
+#include "medialibrary/ILabel.h"
 #include "database/DatabaseHelpers.h"
 
 namespace policy

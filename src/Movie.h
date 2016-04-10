@@ -23,7 +23,7 @@
 #ifndef MOVIE_H
 #define MOVIE_H
 
-#include "IMovie.h"
+#include "medialibrary/IMovie.h"
 #include <sqlite3.h>
 #include "database/DatabaseHelpers.h"
 

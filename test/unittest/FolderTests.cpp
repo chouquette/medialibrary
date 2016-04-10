@@ -25,7 +25,7 @@
 #include "Media.h"
 #include "File.h"
 #include "Folder.h"
-#include "IMediaLibrary.h"
+#include "medialibrary/IMediaLibrary.h"
 #include "utils/Filename.h"
 #include "mocks/FileSystem.h"
 #include "mocks/DiscovererCbMock.h"

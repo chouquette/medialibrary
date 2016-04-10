@@ -23,8 +23,8 @@
 #pragma once
 
 #include "database/DatabaseHelpers.h"
-#include "IArtist.h"
-#include "IMediaLibrary.h"
+#include "medialibrary/IArtist.h"
+#include "medialibrary/IMediaLibrary.h"
 
 class Artist;
 class Album;

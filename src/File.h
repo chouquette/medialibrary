@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "IFile.h"
+#include "medialibrary/IFile.h"
 #include "database/DatabaseHelpers.h"
 #include "database/SqliteConnection.h"
 #include "filesystem/IFile.h"

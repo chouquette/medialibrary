@@ -27,7 +27,7 @@
 #include "Artist.h"
 #include "Genre.h"
 #include "Media.h"
-#include "IMediaLibrary.h"
+#include "medialibrary/IMediaLibrary.h"
 
 class Albums : public Tests
 {

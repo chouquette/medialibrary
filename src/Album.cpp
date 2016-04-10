@@ -25,7 +25,7 @@
 #include "Album.h"
 #include "AlbumTrack.h"
 #include "Artist.h"
-#include "IGenre.h"
+#include "medialibrary/IGenre.h"
 #include "Media.h"
 
 #include "database/SqliteTools.h"

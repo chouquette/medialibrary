@@ -26,8 +26,8 @@
 #include <memory>
 #include <sstream>
 
-#include "ILogger.h"
-#include "Types.h"
+#include "medialibrary/ILogger.h"
+#include "medialibrary/Types.h"
 
 class Log
 {

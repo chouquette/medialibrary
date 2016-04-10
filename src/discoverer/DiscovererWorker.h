@@ -31,7 +31,7 @@
 #include <thread>
 #include <vector>
 
-#include "IDiscoverer.h"
+#include "discoverer/IDiscoverer.h"
 
 class DiscovererWorker : public IDiscoverer
 {

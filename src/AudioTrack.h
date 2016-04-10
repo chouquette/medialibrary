@@ -23,8 +23,8 @@
 #ifndef AUDIOTRACK_H
 #define AUDIOTRACK_H
 
-#include "IAudioTrack.h"
-#include "IMediaLibrary.h"
+#include "medialibrary/IAudioTrack.h"
+#include "medialibrary/IMediaLibrary.h"
 #include "database/DatabaseHelpers.h"
 
 class AudioTrack;

@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "IMediaLibrary.h"
+#include "medialibrary/IMediaLibrary.h"
 
 using namespace medialibrary;
 

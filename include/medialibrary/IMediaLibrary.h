@@ -26,6 +26,7 @@
 #include <vector>
 #include <string>
 
+#include "medialibrary/ILogger.h"
 #include "Types.h"
 
 namespace medialibrary
