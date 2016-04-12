@@ -45,7 +45,7 @@ TEST_P( Tests, Parse )
     for ( auto i = 0u; i < input.Size(); ++i )
     {
         // Quick and dirty check to ensure we're discovering something that exists
-        auto samplesDir = TestDirectory + "/samples/" + input[i].GetString();
+        auto samplesDir = TestDirectory + "samples/" + input[i].GetString();
         struct stat s;
         auto res = stat( samplesDir.c_str(), &s );
         ASSERT_EQ( 0, res );
@@ -99,9 +99,6 @@ int main(int ac, char** av)
 }
 
 INSTANTIATE_TEST_CASE_P(SamplesTests, Tests,
-                        ::testing::ValuesIn(testCases),
-                        // gtest default parameter name displayer (testing::PrintToStringParamName)
-                        // seems to add " " around the parameter name, making it invalid.
-                        [](::testing::TestParamInfo<const char*> i){ return i.param; } );
+                        ::testing::ValuesIn(testCases) );
 
 ::testing::Environment* const env = ::testing::AddGlobalTestEnvironment(new TestEnv);

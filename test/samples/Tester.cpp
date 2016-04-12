@@ -1,4 +1,5 @@
 #include "Tester.h"
+#include <algorithm>
 
 extern bool Verbose;
 extern bool ExtraVerbose;

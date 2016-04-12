@@ -22,20 +22,24 @@
 
 #pragma once
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <condition_variable>
 
 #include <vlcpp/vlc.hpp>
 
-#if defined(WITH_EVAS)
+#if defined(HAVE_EVAS)
 #include <Evas.h>
 #endif
 
 #include "parser/ParserService.h"
 
-#ifdef WITH_JPEG
+#ifdef HAVE_JPEG
 #define BPP 3
 #define VLC_FOURCC "RV24"
-#elif defined(WITH_EVAS)
+#elif defined(HAVE_EVAS)
 #define BPP 4
 #define VLC_FOURCC "RV32"
 #else
@@ -71,7 +75,7 @@ private:
     std::mutex m_mutex;
     std::condition_variable m_cond;
     // Per thumbnail variables
-#ifdef WITH_EVAS
+#ifdef HAVE_EVAS
     std::unique_ptr<Evas, void(*)(Evas*)> m_canvas;
     std::unique_ptr<uint8_t[]> m_cropBuffer;
 #endif

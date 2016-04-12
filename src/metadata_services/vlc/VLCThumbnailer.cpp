@@ -23,7 +23,7 @@
 #include "VLCThumbnailer.h"
 
 #include <cstring>
-#ifdef WITH_JPEG
+#ifdef HAVE_JPEG
 #include <jpeglib.h>
 #if ( ( !defined(JPEG_LIB_VERSION_MAJOR) && !defined(JPEG_LIB_VERSION_MINOR) ) || \
     ( JPEG_LIB_VERSION_MAJOR <= 8 && JPEG_LIB_VERSION_MINOR < 4 ) ) && \
@@ -33,7 +33,7 @@
 #else
 #define JPEG_COLORSPACE JCS_RGB
 #endif
-#elif defined(WITH_EVAS)
+#elif defined(HAVE_EVAS)
 #include <Evas_Engine_Buffer.h>
 #endif
 #include <setjmp.h>
@@ -47,7 +47,7 @@
 
 VLCThumbnailer::VLCThumbnailer()
     : m_instance( VLCInstance::get() )
-#ifdef WITH_EVAS
+#ifdef HAVE_EVAS
     , m_canvas( nullptr, &evas_free )
 #endif
     , m_thumbnailRequired( false )
@@ -55,7 +55,7 @@ VLCThumbnailer::VLCThumbnailer()
     , m_height( 0 )
     , m_prevSize( 0 )
 {
-#ifdef WITH_EVAS
+#ifdef HAVE_EVAS
     static int fakeBuffer;
 #ifndef TIZEN
     evas_init();
@@ -82,7 +82,7 @@ VLCThumbnailer::VLCThumbnailer()
 
 VLCThumbnailer::~VLCThumbnailer()
 {
-#if defined(WITH_EVAS) && !defined(TIZEN)
+#if defined(HAVE_EVAS) && !defined(TIZEN)
     evas_shutdown();
 #endif
 }
@@ -257,7 +257,7 @@ parser::Task::Status VLCThumbnailer::takeThumbnail( std::shared_ptr<Media> media
     return compress( media, file );
 }
 
-#ifdef WITH_JPEG
+#ifdef HAVE_JPEG
 
 struct jpegError : public jpeg_error_mgr
 {
@@ -279,7 +279,7 @@ parser::Task::Status VLCThumbnailer::compress( std::shared_ptr<Media> media, std
     auto path = m_ml->thumbnailPath();
     path += "/";
     path += toString( media->id() ) +
-#ifdef WITH_EVAS
+#ifdef HAVE_EVAS
             ".png";
 #else
             ".jpg";
@@ -289,7 +289,7 @@ parser::Task::Status VLCThumbnailer::compress( std::shared_ptr<Media> media, std
     auto vOffset = m_height > DesiredHeight ? ( m_height - DesiredHeight ) / 2 : 0;
     const auto stride = m_width * Bpp;
 
-#ifdef WITH_JPEG
+#ifdef HAVE_JPEG
     //FIXME: Abstract this away, though libjpeg requires a FILE*...
     auto fOut = std::unique_ptr<FILE, int(*)(FILE*)>( fopen( path.c_str(), "wb" ), &fclose );
     if ( fOut == nullptr )
@@ -333,7 +333,7 @@ parser::Task::Status VLCThumbnailer::compress( std::shared_ptr<Media> media, std
     }
     jpeg_finish_compress(&compInfo);
     jpeg_destroy_compress(&compInfo);
-#elif defined(WITH_EVAS)
+#elif defined(HAVE_EVAS)
     auto evas_obj = std::unique_ptr<Evas_Object, void(*)(Evas_Object*)>( evas_object_image_add( m_canvas.get() ), evas_object_del );
     if ( evas_obj == nullptr )
         return parser::Task::Status::Error;
