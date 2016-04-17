@@ -7,6 +7,28 @@ AM_CPPFLAGS = -Wall -Wsign-compare -Wextra -Wstrict-aliasing -Wstrict-overflow \
 
 MEDIALIB_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/include -I$(top_srcdir)/src
 
+libmedialibrary_ladir = $(includedir)/medialibrary
+
+libmedialibrary_la_HEADERS = \
+	include/medialibrary/IAlbum.h \
+	include/medialibrary/IAlbumTrack.h \
+	include/medialibrary/IArtist.h \
+	include/medialibrary/IAudioTrack.h \
+	include/medialibrary/IFile.h \
+	include/medialibrary/IGenre.h \
+	include/medialibrary/IHistoryEntry.h \
+	include/medialibrary/ILabel.h \
+	include/medialibrary/ILogger.h \
+	include/medialibrary/IMedia.h \
+	include/medialibrary/IMediaLibrary.h \
+	include/medialibrary/IMovie.h \
+	include/medialibrary/IPlaylist.h \
+	include/medialibrary/IShowEpisode.h \
+	include/medialibrary/IShow.h \
+	include/medialibrary/IVideoTrack.h \
+	include/medialibrary/Types.h \
+	$(NULL)
+
 libmedialibrary_la_SOURCES = \
 	src/Album.cpp \
 	src/AlbumTrack.cpp \
