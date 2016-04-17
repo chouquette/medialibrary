@@ -68,6 +68,80 @@ libmedialibrary_la_SOURCES = \
 	src/utils/VLCInstance.cpp \
 	$(NULL)
 
+noinst_HEADERS = \
+	include/discoverer/IDiscoverer.h \
+	include/factory/IFileSystem.h \
+	include/filesystem/IDevice.h \
+	include/filesystem/IDirectory.h \
+	include/filesystem/IFile.h \
+	include/Fixup.h \
+	include/medialibrary/IAlbum.h \
+	include/medialibrary/IAlbumTrack.h \
+	include/medialibrary/IArtist.h \
+	include/medialibrary/IAudioTrack.h \
+	include/medialibrary/IFile.h \
+	include/medialibrary/IGenre.h \
+	include/medialibrary/IHistoryEntry.h \
+	include/medialibrary/ILabel.h \
+	include/medialibrary/ILogger.h \
+	include/medialibrary/IMedia.h \
+	include/medialibrary/IMediaLibrary.h \
+	include/medialibrary/IMovie.h \
+	include/medialibrary/IPlaylist.h \
+	include/medialibrary/IShowEpisode.h \
+	include/medialibrary/IShow.h \
+	include/medialibrary/IVideoTrack.h \
+	include/medialibrary/Types.h \
+	include/Types.h \
+	src/Album.h \
+	src/AlbumTrack.h \
+	src/Artist.h \
+	src/AudioTrack.h \
+	src/database/DatabaseHelpers.h \
+	src/database/SqliteConnection.h \
+	src/database/SqliteErrors.h \
+	src/database/SqliteTools.h \
+	src/database/SqliteTraits.h \
+	src/database/SqliteTransaction.h \
+	src/Device.h \
+	src/discoverer/DiscovererWorker.h \
+	src/discoverer/FsDiscoverer.h \
+	src/factory/FileSystem.h \
+	src/File.h \
+	src/filesystem/common/CommonFile.h \
+	src/filesystem/unix/Device.h \
+	src/filesystem/unix/Directory.h \
+	src/filesystem/unix/File.h \
+	src/filesystem/win32/Directory.h \
+	src/filesystem/win32/File.h \
+	src/Folder.h \
+	src/Genre.h \
+	src/History.h \
+	src/Label.h \
+	src/logging/IostreamLogger.h \
+	src/logging/Logger.h \
+	src/Media.h \
+	src/MediaLibrary.h \
+	src/metadata_services/MetadataParser.h \
+	src/metadata_services/vlc/VLCMetadataService.h \
+	src/metadata_services/vlc/VLCThumbnailer.h \
+	src/Movie.h \
+	src/parser/Parser.h \
+	src/parser/ParserService.h \
+	src/parser/Task.h \
+	src/Playlist.h \
+	src/Settings.h \
+	src/ShowEpisode.h \
+	src/Show.h \
+	src/utils/Cache.h \
+	src/utils/Filename.h \
+	src/utils/ModificationsNotifier.h \
+	src/utils/SWMRLock.h \
+	src/utils/VLCInstance.h \
+	src/VideoTrack.h \
+	$(NULL)
+
+
 if HAVE_WIN32
 libmedialibrary_la_SOURCES += \
 	src/filesystem/win32/Directory.cpp \
