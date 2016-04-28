@@ -31,6 +31,7 @@
 #include "ToString.h"
 #include "utils/Filename.h"
 #include "utils/ModificationsNotifier.h"
+#include <cstdlib>
 
 bool MetadataParser::initialize()
 {
