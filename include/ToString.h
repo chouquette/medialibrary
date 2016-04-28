@@ -23,48 +23,27 @@
 #pragma once
 
 #include <string>
-#include <exception>
-#include "ToString.h"
 
-namespace sqlite
+#ifndef __ANDROID__
+
+template <typename T>
+inline std::string toString(T t)
 {
-namespace errors
+    static_assert(std::is_fundamental<T>::value, "This only supports fundamental types");
+    return std::to_string(t);
+}
+
+#else
+
+#include <sstream>
+
+template <typename T>
+inline std::string toString(T t)
 {
+    static_assert(std::is_fundamental<T>::value, "This only supports fundamental types");
+    std::ostringstream ss;
+    ss << std::forward<T>(t);
+    return ss.str();
+}
 
-class ConstraintViolation : public std::exception
-{
-public:
-    ConstraintViolation( const std::string& req, const std::string& err )
-    {
-        m_reason = std::string( "Request <" ) + req + "> aborted due to "
-                "constraint violation (" + err + ")";
-    }
-
-    virtual const char* what() const noexcept override
-    {
-        return m_reason.c_str();
-    }
-private:
-    std::string m_reason;
-};
-
-class ColumnOutOfRange : public std::exception
-{
-public:
-    ColumnOutOfRange( unsigned int idx, unsigned int nbColumns )
-    {
-        m_reason = "Attempting to extract column at index " + toString( idx ) +
-                " from a request with " + toString( nbColumns ) + " columns";
-    }
-
-    virtual const char* what() const noexcept override
-    {
-        return m_reason.c_str();
-    }
-
-private:
-    std::string m_reason;
-};
-
-} // namespace errors
-} // namespace sqlite
+#endif

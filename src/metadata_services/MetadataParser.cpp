@@ -28,6 +28,7 @@
 #include "Genre.h"
 #include "Media.h"
 #include "Show.h"
+#include "ToString.h"
 #include "utils/Filename.h"
 #include "utils/ModificationsNotifier.h"
 
@@ -318,7 +319,7 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
         if ( task.trackNumber != 0 )
         {
             title = "Track #";
-            title += std::to_string( task.trackNumber );
+            title += toString( task.trackNumber );
         }
     }
     if ( title.empty() == false )

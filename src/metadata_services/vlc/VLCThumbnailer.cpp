@@ -42,6 +42,7 @@
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
 #include "utils/VLCInstance.h"
+#include "ToString.h"
 
 VLCThumbnailer::VLCThumbnailer()
     : m_instance( VLCInstance::get() )
@@ -276,7 +277,7 @@ parser::Task::Status VLCThumbnailer::compress( std::shared_ptr<Media> media, std
 {
     auto path = m_ml->thumbnailPath();
     path += "/";
-    path += std::to_string( media->id() ) +
+    path += toString( media->id() ) +
 #ifdef WITH_EVAS
             ".png";
 #else

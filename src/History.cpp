@@ -23,6 +23,7 @@
 #include "History.h"
 
 #include "database/SqliteTools.h"
+#include "ToString.h"
 
 namespace policy
 {
@@ -56,7 +57,7 @@ bool History::createTable( DBConnection dbConnection )
             " BEGIN "
             "DELETE FROM " + policy::HistoryTable::Name + " WHERE id_record in "
                 "(SELECT id_record FROM " + policy::HistoryTable::Name +
-                " ORDER BY insertion_date DESC LIMIT -1 OFFSET " + std::to_string( MaxEntries ) + ");"
+                " ORDER BY insertion_date DESC LIMIT -1 OFFSET " + toString( MaxEntries ) + ");"
             " END";
     return sqlite::Tools::executeRequest( dbConnection, req ) &&
             sqlite::Tools::executeRequest( dbConnection, triggerReq );
