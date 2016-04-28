@@ -21,6 +21,9 @@
  *****************************************************************************/
 
 #include <chrono>
+#ifdef __ANDROID__
+# include <cstdlib>
+#endif
 
 #include "VLCMetadataService.h"
 #include "Media.h"
@@ -48,19 +51,22 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
     auto vlcMedia = VLC::Media( m_instance, file->mrl(), VLC::Media::FromPath );
 
     std::unique_lock<std::mutex> lock( m_mutex );
-    bool done = false;
+    VLC::Media::ParseStatus status;
 
-    auto event = vlcMedia.eventManager().onParsedChanged([this, &done](bool parsed) {
-        if ( parsed == false )
-            return;
+    auto event = vlcMedia.eventManager().onParsedStatus([this, &status](VLC::Media::ParseStatus s) {
         std::lock_guard<std::mutex> lock( m_mutex );
-        done = true;
+        status = s;
         m_cond.notify_all();
     });
-    vlcMedia.parseAsync();
-    auto success = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [&done]() { return done == true; } );
+    if ( vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local ) == false )
+        return parser::Task::Status::Fatal;
+    auto success = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [&status]() {
+        return status == VLC::Media::ParseStatus::Done ||
+                status == VLC::Media::ParseStatus::Skipped ||
+                status == VLC::Media::ParseStatus::Failed;
+    });
     event->unregister();
-    if ( success == false )
+    if ( success == false || status != VLC::Media::ParseStatus::Done )
         return parser::Task::Status::Fatal;
     auto tracks = vlcMedia.tracks();
     if ( tracks.size() == 0 )
@@ -127,6 +133,7 @@ int VLCMetadataService::toInt( VLC::Media& vlcMedia, libvlc_meta_t meta, const c
     auto str = vlcMedia.meta( meta );
     if ( str.empty() == false )
     {
+#ifndef __ANDROID__
         try
         {
             return std::stoi( str );
@@ -135,6 +142,9 @@ int VLCMetadataService::toInt( VLC::Media& vlcMedia, libvlc_meta_t meta, const c
         {
             LOG_WARN( "Invalid ", name, " provided (", str, "): ", ex.what() );
         }
+#else
+        return atoi( str.c_str() );
+#endif
     }
     return 0;
 }
