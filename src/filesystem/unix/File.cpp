@@ -31,7 +31,7 @@ namespace fs
 File::File( const std::string& filePath, const struct stat& s )
     : CommonFile( filePath )
 {
-    m_lastModificationDate = s.st_mtim.tv_sec;
+    m_lastModificationDate = s.st_mtime;
 }
 
 unsigned int File::lastModificationDate() const
