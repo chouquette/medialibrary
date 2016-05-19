@@ -25,8 +25,9 @@
 #include <cstring>
 #ifdef WITH_JPEG
 #include <jpeglib.h>
-#if ( !defined(JPEG_LIB_VERSION_MAJOR) && !defined(JPEG_LIB_VERSION_MINOR) ) || \
-    ( JPEG_LIB_VERSION_MAJOR <= 8 && JPEG_LIB_VERSION_MINOR < 4 )
+#if ( ( !defined(JPEG_LIB_VERSION_MAJOR) && !defined(JPEG_LIB_VERSION_MINOR) ) || \
+    ( JPEG_LIB_VERSION_MAJOR <= 8 && JPEG_LIB_VERSION_MINOR < 4 ) ) && \
+    ( !defined( JPEG_LIB_VERSION ) || JPEG_LIB_VERSION < 62 )
 //FIXME: I don't think we can expect this to work without VLC outputing BGR...
 #define JPEG_COLORSPACE JCS_EXT_BGR
 #else
