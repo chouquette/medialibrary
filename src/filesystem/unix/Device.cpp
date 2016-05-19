@@ -161,20 +161,29 @@ Device::MountpointMap Device::listMountpoints()
     static const std::vector<std::string> allowedFsType = { "vfat", "exfat", "sdcardfs", "fuse",
                                                             "ntfs", "fat32", "ext3", "ext4", "esdfs" };
     MountpointMap res;
+    char buff[512];
+    errno = 0;
+    mntent* s;
+#ifndef __ANDROID__
+    mntent smnt;
     FILE* f = setmntent("/etc/mtab", "r");
     if ( f == nullptr )
         throw std::runtime_error( "Failed to read /etc/mtab" );
     std::unique_ptr<FILE, int(*)(FILE*)> fPtr( f, &endmntent );
-    char buff[512];
-    mntent s;
-    errno = 0;
-    while ( getmntent_r( f, &s, buff, sizeof(buff) ) != nullptr )
+    while ( getmntent_r( f, &smnt, buff, sizeof(buff) ) != nullptr )
     {
-        if ( std::find( begin( allowedFsType ), end( allowedFsType ), s.mnt_type ) == end( allowedFsType ) )
+        s = &smnt;
+#else
+    FILE* f = fopen( "/proc/mounts", "r" );
+    std::unique_ptr<FILE, int(*)(FILE*)> fPtr( f, &fclose );
+    while ( s = getmntent( f ) )
+    {
+#endif
+        if ( std::find( begin( allowedFsType ), end( allowedFsType ), s->mnt_type ) == end( allowedFsType ) )
             continue;
-        auto deviceName = s.mnt_fsname;
-        LOG_INFO( "Discovered mountpoint ", deviceName, " mounted on ", s.mnt_dir, " (", s.mnt_type, ')' );
-        res[deviceName] = s.mnt_dir;
+        auto deviceName = s->mnt_fsname;
+        LOG_INFO( "Discovered mountpoint ", deviceName, " mounted on ", s->mnt_dir, " (", s->mnt_type, ')' );
+        res[deviceName] = s->mnt_dir;
         errno = 0;
     }
     if ( errno != 0 )
