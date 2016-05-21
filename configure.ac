@@ -219,7 +219,7 @@ PKG_CHECK_MODULES(LIBJPEG, libjpeg, [
  ])
 AM_CONDITIONAL([HAVE_LIBJPEG], [test "${have_libjpeg}" = "yes"])
 
-AC_ARG_ENABLE(tests,[build automated tests suites],enable_tests="yes")
+AC_ARG_ENABLE(tests,AC_HELP_STRING([--disable-tests], [Disable build of automated tests suites]))
 AM_CONDITIONAL([HAVE_TESTS], [test "${enable_tests}" = "yes"])
 AS_IF([test "${enable_tests}" = "yes"], [
     AX_PTHREAD([have_pthread=yes],[have_pthread=no])
