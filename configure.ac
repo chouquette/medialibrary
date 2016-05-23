@@ -211,7 +211,16 @@ AM_CONDITIONAL(HAVE_WIN32,   test "${SYS}" = "mingw32")
 
 PKG_CHECK_MODULES(SQLITE, sqlite3)
 PKG_CHECK_MODULES(VLC, libvlc >= 3.0)
-PKG_CHECK_MODULES(VLCPP, libvlcpp)
+PKG_CHECK_MODULES(VLCPP, libvlcpp,
+    [AC_MSG_RESULT([Found libvlcpp.pc])],
+    [AC_CHECK_FILES([${srcdir}/libvlcpp/vlcpp/vlc.hpp],
+                 [
+                    AC_MSG_RESULT([Found submodule])
+                    AC_SUBST([VLCPP_CFLAGS],[-I${srcdir}/libvlcpp])
+                 ],
+                 [AC_MSG_FAILURE([libvlcpp is required to build medialibrary])]
+    )]
+)
 
 PKG_CHECK_MODULES(LIBJPEG, libjpeg, [
      have_libjpeg="yes"
