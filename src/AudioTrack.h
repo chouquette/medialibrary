@@ -61,7 +61,6 @@ class AudioTrack : public medialibrary::IAudioTrack, public DatabaseHelpers<Audi
                                                    const std::string& language, const std::string& desc, int64_t mediaId );
 
     private:
-        MediaLibraryPtr m_ml;
         int64_t m_id;
         std::string m_codec;
         unsigned int m_bitrate;

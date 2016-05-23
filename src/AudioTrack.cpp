@@ -28,8 +28,7 @@ const std::string policy::AudioTrackTable::Name = "AudioTrack";
 const std::string policy::AudioTrackTable::PrimaryKeyColumn  = "id_track";
 int64_t AudioTrack::* const policy::AudioTrackTable::PrimaryKey = &AudioTrack::m_id;
 
-AudioTrack::AudioTrack( MediaLibraryPtr ml, sqlite::Row& row )
-    : m_ml( ml )
+AudioTrack::AudioTrack( MediaLibraryPtr, sqlite::Row& row )
 {
     row >> m_id
         >> m_codec
@@ -41,11 +40,10 @@ AudioTrack::AudioTrack( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_mediaId;
 }
 
-AudioTrack::AudioTrack( MediaLibraryPtr ml, const std::string& codec, unsigned int bitrate, unsigned int sampleRate,
+AudioTrack::AudioTrack( MediaLibraryPtr, const std::string& codec, unsigned int bitrate, unsigned int sampleRate,
                         unsigned int nbChannels, const std::string& language, const std::string& desc,
                         int64_t mediaId )
-    : m_ml( ml )
-    , m_id( 0 )
+    : m_id( 0 )
     , m_codec( codec )
     , m_bitrate( bitrate )
     , m_sampleRate( sampleRate )
