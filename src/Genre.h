@@ -43,7 +43,7 @@ class Genre : public medialibrary::IGenre, public DatabaseHelpers<Genre, policy:
 public:
     Genre( MediaLibraryPtr ml, sqlite::Row& row );
     Genre( MediaLibraryPtr ml, const std::string& name );
-    virtual int64_t id() const;
+    virtual int64_t id() const override;
     virtual const std::string& name() const override;
     virtual std::vector<medialibrary::ArtistPtr> artists( medialibrary::SortingCriteria sort, bool desc ) const override;
     virtual std::vector<medialibrary::MediaPtr> tracks(medialibrary::SortingCriteria sort, bool desc) const override;

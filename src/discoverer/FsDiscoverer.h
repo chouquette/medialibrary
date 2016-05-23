@@ -37,7 +37,7 @@ public:
     FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, MediaLibrary* ml );
     virtual bool discover(const std::string &entryPoint ) override;
     virtual void reload() override;
-    virtual void reload( const std::string& entryPoint );
+    virtual void reload( const std::string& entryPoint ) override;
 
 private:
     ///

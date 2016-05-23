@@ -54,7 +54,7 @@ class ShowEpisode : public medialibrary::IShowEpisode, public DatabaseHelpers<Sh
         bool setArtworkMrl( const std::string& artworkMrl );
         virtual unsigned int episodeNumber() const override;
         virtual const std::string& name() const override;
-        unsigned int seasonNumber() const;
+        unsigned int seasonNumber() const override;
         bool setSeasonNumber(unsigned int seasonNumber);
         virtual const std::string& shortSummary() const override;
         bool setShortSummary( const std::string& summary );

@@ -61,7 +61,7 @@ private:
     parser::Task::Status takeThumbnail( std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::MediaPlayer &mp );
     parser::Task::Status compress( std::shared_ptr<Media> media, std::shared_ptr<File> file );
 
-    virtual const char* name() const;
+    virtual const char* name() const override;
     virtual uint8_t nbThreads() const override;
 
 private:

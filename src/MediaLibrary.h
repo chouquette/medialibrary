@@ -94,7 +94,7 @@ class MediaLibrary : public medialibrary::IMediaLibrary
         virtual medialibrary::PlaylistPtr playlist( int64_t id ) const override;
         virtual bool deletePlaylist( int64_t playlistId ) override;
 
-        virtual bool addToHistory( const std::string& mrl );
+        virtual bool addToHistory( const std::string& mrl ) override;
         virtual std::vector<medialibrary::HistoryPtr> lastStreamsPlayed() const override;
         virtual std::vector<medialibrary::MediaPtr> lastMediaPlayed() const override;
 
