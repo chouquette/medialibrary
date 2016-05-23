@@ -70,5 +70,5 @@ private:
     std::string m_name;
     unsigned int m_creationDate;
 
-    friend class policy::PlaylistTable;
+    friend policy::PlaylistTable;
 };

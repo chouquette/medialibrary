@@ -78,5 +78,5 @@ private:
     mutable Cache<std::string> m_fullPath;
     mutable Cache<std::weak_ptr<Media>> m_media;
 
-    friend class policy::FileTable;
+    friend policy::FileTable;
 };
