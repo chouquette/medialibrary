@@ -160,6 +160,7 @@ libmedialibrary_la_CPPFLAGS = \
 	$(SQLITE_CFLAGS) \
 	$(VLC_CFLAGS) \
 	$(VLCPP_CFLAGS) \
+	$(LIBJPEG_CFLAGS) \
 	$(NULL)
 
 libmedialibrary_la_LIBADD = \
