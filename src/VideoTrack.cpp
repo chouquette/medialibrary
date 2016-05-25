@@ -27,8 +27,7 @@ const std::string policy::VideoTrackTable::Name = "VideoTrack";
 const std::string policy::VideoTrackTable::PrimaryKeyColumn = "id_track";
 int64_t VideoTrack::* const policy::VideoTrackTable::PrimaryKey = &VideoTrack::m_id;
 
-VideoTrack::VideoTrack( MediaLibraryPtr ml, sqlite::Row& row )
-    : m_ml( ml )
+VideoTrack::VideoTrack( MediaLibraryPtr, sqlite::Row& row )
 {
     row >> m_id
         >> m_codec
@@ -38,9 +37,8 @@ VideoTrack::VideoTrack( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_mediaId;
 }
 
-VideoTrack::VideoTrack( MediaLibraryPtr ml, const std::string& codec, unsigned int width, unsigned int height, float fps, int64_t mediaId )
-    : m_ml( ml )
-    , m_id( 0 )
+VideoTrack::VideoTrack( MediaLibraryPtr, const std::string& codec, unsigned int width, unsigned int height, float fps, int64_t mediaId )
+    : m_id( 0 )
     , m_codec( codec )
     , m_width( width )
     , m_height( height )

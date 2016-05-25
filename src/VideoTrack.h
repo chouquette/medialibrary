@@ -43,8 +43,8 @@ struct VideoTrackTable
 class VideoTrack : public medialibrary::IVideoTrack, public DatabaseHelpers<VideoTrack, policy::VideoTrackTable>
 {
     public:
-        VideoTrack( MediaLibraryPtr ml, sqlite::Row& row );
-        VideoTrack( MediaLibraryPtr ml, const std::string& codec,
+        VideoTrack( MediaLibraryPtr, sqlite::Row& row );
+        VideoTrack( MediaLibraryPtr, const std::string& codec,
                     unsigned int width, unsigned int height, float fps, int64_t mediaId );
 
         virtual int64_t id() const override;
@@ -58,7 +58,6 @@ class VideoTrack : public medialibrary::IVideoTrack, public DatabaseHelpers<Vide
                                     unsigned int width, unsigned int height, float fps, int64_t mediaId );
 
     private:
-        MediaLibraryPtr m_ml;
         int64_t m_id;
         std::string m_codec;
         unsigned int m_width;
