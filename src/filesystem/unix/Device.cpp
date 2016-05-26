@@ -176,7 +176,7 @@ Device::MountpointMap Device::listMountpoints()
 #else
     FILE* f = fopen( "/proc/mounts", "r" );
     std::unique_ptr<FILE, int(*)(FILE*)> fPtr( f, &fclose );
-    while ( s = getmntent( f ) )
+    while ( ( s = getmntent( f ) ) )
     {
 #endif
         if ( std::find( begin( allowedFsType ), end( allowedFsType ), s->mnt_type ) == end( allowedFsType ) )
