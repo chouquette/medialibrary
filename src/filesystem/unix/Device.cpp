@@ -161,10 +161,10 @@ Device::MountpointMap Device::listMountpoints()
     static const std::vector<std::string> allowedFsType = { "vfat", "exfat", "sdcardfs", "fuse",
                                                             "ntfs", "fat32", "ext3", "ext4", "esdfs" };
     MountpointMap res;
-    char buff[512];
     errno = 0;
     mntent* s;
 #ifndef __ANDROID__
+    char buff[512];
     mntent smnt;
     FILE* f = setmntent("/etc/mtab", "r");
     if ( f == nullptr )
