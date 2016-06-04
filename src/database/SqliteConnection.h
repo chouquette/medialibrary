@@ -30,6 +30,7 @@
 #include <mutex>
 #include <thread>
 #include <unordered_map>
+#include <string>
 
 #include "utils/SWMRLock.h"
 
