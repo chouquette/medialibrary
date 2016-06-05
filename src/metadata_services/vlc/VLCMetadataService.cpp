@@ -52,21 +52,21 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
 
     std::unique_lock<std::mutex> lock( m_mutex );
     VLC::Media::ParsedStatus status;
+    bool done = false;
 
-    auto event = vlcMedia.eventManager().onParsedChanged( [this, &status](VLC::Media::ParsedStatus s ) {
+    auto event = vlcMedia.eventManager().onParsedChanged( [this, &status, &done](VLC::Media::ParsedStatus s ) {
         std::lock_guard<std::mutex> lock( m_mutex );
         status = s;
+        done = true;
         m_cond.notify_all();
     });
-    if ( vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local ) == false )
+    if ( vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local, 5000 ) == false )
         return parser::Task::Status::Fatal;
-    auto success = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [&status]() {
-        return status == VLC::Media::ParsedStatus::Done ||
-                status == VLC::Media::ParsedStatus::Skipped ||
-                status == VLC::Media::ParsedStatus::Failed;
+    m_cond.wait( lock, [&status, &done]() {
+        return done == true;
     });
     event->unregister();
-    if ( success == false || status != VLC::Media::ParsedStatus::Done )
+    if ( status == VLC::Media::ParsedStatus::Failed || status == VLC::Media::ParsedStatus::Timeout )
         return parser::Task::Status::Fatal;
     auto tracks = vlcMedia.tracks();
     if ( tracks.size() == 0 )
