@@ -153,7 +153,7 @@ libmedialibrary_la_SOURCES += \
 	src/filesystem/unix/File.cpp
 endif
 
-libmedialibrary_la_LDFLAGS = -no-undefined
+libmedialibrary_la_LDFLAGS = -no-undefined -export-symbols-regex 'NewMediaLibrary'
 
 libmedialibrary_la_CPPFLAGS = \
 	$(MEDIALIB_CPPFLAGS) \
