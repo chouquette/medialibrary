@@ -31,7 +31,7 @@ namespace medialibrary
 class IAlbumTrack
 {
     public:
-        virtual ~IAlbumTrack() {}
+        virtual ~IAlbumTrack() = default;
 
         virtual int64_t id() const = 0;
         /**
