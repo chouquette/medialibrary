@@ -24,5 +24,5 @@
 
 extern "C" medialibrary::IMediaLibrary* NewMediaLibrary()
 {
-    return new MediaLibrary();
+    return new medialibrary::MediaLibrary();
 }

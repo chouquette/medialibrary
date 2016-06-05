@@ -31,40 +31,41 @@
 
 namespace medialibrary
 {
-    static constexpr auto UnknownArtistID = 1u;
-    static constexpr auto VariousArtistID = 2u;
 
-    struct MediaSearchAggregate
-    {
-        std::vector<MediaPtr> episodes;
-        std::vector<MediaPtr> movies;
-        std::vector<MediaPtr> others;
-        std::vector<MediaPtr> tracks;
-    };
+static constexpr auto UnknownArtistID = 1u;
+static constexpr auto VariousArtistID = 2u;
 
-    struct SearchAggregate
-    {
-        std::vector<AlbumPtr> albums;
-        std::vector<ArtistPtr> artists;
-        std::vector<GenrePtr> genres;
-        MediaSearchAggregate media;
-        std::vector<PlaylistPtr> playlists;
-    };
+struct MediaSearchAggregate
+{
+    std::vector<MediaPtr> episodes;
+    std::vector<MediaPtr> movies;
+    std::vector<MediaPtr> others;
+    std::vector<MediaPtr> tracks;
+};
 
-    enum class SortingCriteria
-    {
-        /*
-         * Default depends on the entity type:
-         * - By track number (and disc number) for album tracks
-         * - Alphabetical order for others
-         */
-        Default,
-        Alpha,
-        Duration,
-        InsertionDate,
-        LastModificationDate,
-        ReleaseDate,
-    };
+struct SearchAggregate
+{
+    std::vector<AlbumPtr> albums;
+    std::vector<ArtistPtr> artists;
+    std::vector<GenrePtr> genres;
+    MediaSearchAggregate media;
+    std::vector<PlaylistPtr> playlists;
+};
+
+enum class SortingCriteria
+{
+    /*
+     * Default depends on the entity type:
+     * - By track number (and disc number) for album tracks
+     * - Alphabetical order for others
+     */
+    Default,
+    Alpha,
+    Duration,
+    InsertionDate,
+    LastModificationDate,
+    ReleaseDate,
+};
 
 class IMediaLibraryCb
 {
@@ -131,10 +132,10 @@ class IMediaLibrary
 
         virtual LabelPtr createLabel( const std::string& label ) = 0;
         virtual bool deleteLabel( LabelPtr label ) = 0;
-        virtual std::vector<MediaPtr> audioFiles( medialibrary::SortingCriteria sort = medialibrary::SortingCriteria::Default, bool desc = false ) const = 0;
-        virtual std::vector<MediaPtr> videoFiles( medialibrary::SortingCriteria sort = medialibrary::SortingCriteria::Default, bool desc = false ) const = 0;
+        virtual std::vector<MediaPtr> audioFiles( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
+        virtual std::vector<MediaPtr> videoFiles( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
         virtual AlbumPtr album( int64_t id ) const = 0;
-        virtual std::vector<AlbumPtr> albums( medialibrary::SortingCriteria sort = medialibrary::SortingCriteria::Default, bool desc = false ) const = 0;
+        virtual std::vector<AlbumPtr> albums( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
         virtual ShowPtr show( const std::string& name ) const = 0;
         virtual MoviePtr movie( const std::string& title ) const = 0;
         virtual ArtistPtr artist( int64_t id ) const = 0;
@@ -145,19 +146,19 @@ class IMediaLibrary
          * @param sort A sorting criteria. So far, this is ignored, and artists are sorted by lexial order
          * @param desc If true, the provided sorting criteria will be reversed.
          */
-        virtual std::vector<ArtistPtr> artists( medialibrary::SortingCriteria sort = medialibrary::SortingCriteria::Default, bool desc = false ) const = 0;
+        virtual std::vector<ArtistPtr> artists( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
         /**
          * @brief genres Return the list of music genres
          * @param sort A sorting criteria. So far, this is ignored, and artists are sorted by lexial order
          * @param desc If true, the provided sorting criteria will be reversed.
          */
-        virtual std::vector<GenrePtr> genres( medialibrary::SortingCriteria sort = medialibrary::SortingCriteria::Default, bool desc = false ) const = 0;
+        virtual std::vector<GenrePtr> genres( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
         virtual GenrePtr genre( int64_t id ) const = 0;
         /***
          *  Playlists
          */
         virtual PlaylistPtr createPlaylist( const std::string& name ) = 0;
-        virtual std::vector<PlaylistPtr> playlists( medialibrary::SortingCriteria sort = medialibrary::SortingCriteria::Default, bool desc = false ) = 0;
+        virtual std::vector<PlaylistPtr> playlists( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) = 0;
         virtual PlaylistPtr playlist( int64_t id ) const = 0;
         virtual bool deletePlaylist( int64_t playlistId ) = 0;
 
@@ -171,12 +172,12 @@ class IMediaLibrary
         /**
          * Search
          */
-        virtual medialibrary::MediaSearchAggregate searchMedia( const std::string& pattern ) const = 0;
+        virtual MediaSearchAggregate searchMedia( const std::string& pattern ) const = 0;
         virtual std::vector<PlaylistPtr> searchPlaylists( const std::string& name ) const = 0;
         virtual std::vector<AlbumPtr> searchAlbums( const std::string& pattern ) const = 0;
         virtual std::vector<GenrePtr> searchGenre( const std::string& genre ) const = 0;
         virtual std::vector<ArtistPtr> searchArtists( const std::string& name ) const = 0;
-        virtual medialibrary::SearchAggregate search( const std::string& pattern ) const = 0;
+        virtual SearchAggregate search( const std::string& pattern ) const = 0;
 
         /**
          * @brief discover Launch a discovery on the provided entry point.

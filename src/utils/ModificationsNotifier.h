@@ -33,7 +33,8 @@
 #include "medialibrary/Types.h"
 #include "Types.h"
 
-using namespace medialibrary;
+namespace medialibrary
+{
 
 class ModificationNotifier
 {
@@ -155,4 +156,4 @@ private:
     std::chrono::time_point<std::chrono::steady_clock> m_timeout;
 };
 
-
+}

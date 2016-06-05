@@ -29,6 +29,9 @@
 #include "File.h"
 #include "utils/ModificationsNotifier.h"
 
+namespace medialibrary
+{
+
 Parser::Parser( MediaLibrary* ml )
     : m_ml( ml )
     , m_callback( ml->getCb() )
@@ -141,4 +144,6 @@ void Parser::done( std::unique_ptr<parser::Task> t, parser::Task::Status status 
         return;
     }
     m_services[serviceIdx]->parse( std::move( t ) );
+}
+
 }

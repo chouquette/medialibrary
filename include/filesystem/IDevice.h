@@ -24,6 +24,9 @@
 
 #include <string>
 
+namespace medialibrary
+{
+
 namespace fs
 {
 class IDevice
@@ -35,4 +38,6 @@ public:
     virtual bool isPresent() const = 0;
     virtual const std::string& mountpoint() const = 0;
 };
+}
+
 }

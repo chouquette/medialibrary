@@ -28,6 +28,9 @@
 
 #include <sqlite3.h>
 
+namespace medialibrary
+{
+
 class File;
 class Folder;
 class Device;
@@ -45,7 +48,6 @@ struct FolderTable
     static const std::string PrimaryKeyColumn;
     static int64_t Folder::*const PrimaryKey;
 };
-
 }
 
 // This doesn't publicly expose the DatabaseHelper inheritance in order to force
@@ -101,3 +103,5 @@ private:
 
     friend struct policy::FolderTable;
 };
+
+}

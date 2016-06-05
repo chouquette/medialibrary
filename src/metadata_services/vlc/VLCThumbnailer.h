@@ -46,6 +46,9 @@
 #error No compression strategy
 #endif
 
+namespace medialibrary
+{
+
 class VLCThumbnailer : public ParserService
 {
 public:
@@ -85,3 +88,5 @@ private:
     uint32_t m_height;
     uint32_t m_prevSize;
 };
+
+}

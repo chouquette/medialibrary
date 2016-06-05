@@ -28,6 +28,9 @@
 
 #include "database/SqliteTools.h"
 
+namespace medialibrary
+{
+
 const std::string policy::ShowTable::Name = "Show";
 const std::string policy::ShowTable::PrimaryKeyColumn = "id_show";
 int64_t Show::* const policy::ShowTable::PrimaryKey = &Show::m_id;
@@ -129,11 +132,11 @@ std::shared_ptr<ShowEpisode> Show::addEpisode( Media& media, const std::string& 
     return episode;
 }
 
-std::vector<medialibrary::ShowEpisodePtr> Show::episodes()
+std::vector<ShowEpisodePtr> Show::episodes()
 {
     static const std::string req = "SELECT * FROM " + policy::ShowEpisodeTable::Name
             + " WHERE show_id = ?";
-    return ShowEpisode::fetchAll<medialibrary::IShowEpisode>( m_ml, req, m_id );
+    return ShowEpisode::fetchAll<IShowEpisode>( m_ml, req, m_id );
 }
 
 bool Show::createTable( DBConnection dbConnection )
@@ -157,4 +160,6 @@ std::shared_ptr<Show> Show::create( MediaLibraryPtr ml, const std::string& name 
     if ( insert( ml, show, req, name ) == false )
         return nullptr;
     return show;
+}
+
 }

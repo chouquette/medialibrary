@@ -26,6 +26,9 @@
 #include <string>
 #include <vector>
 
+namespace medialibrary
+{
+
 namespace fs
 {
     class IFile;
@@ -43,4 +46,6 @@ namespace fs
         virtual const std::vector<std::shared_ptr<IDirectory>>& dirs() const = 0;
         virtual std::shared_ptr<IDevice> device() const = 0;
     };
+}
+
 }

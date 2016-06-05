@@ -38,14 +38,14 @@ struct Init
         // Do not take the string by reference. libvlcpp is constructing the std::string
         // as it calls the log callback, so the string we receive will be move constructed
         instance.logSet([this](int lvl, const libvlc_log_t*, std::string msg) {
-            if ( Log::logLevel() != medialibrary::LogLevel::Verbose )
+            if ( medialibrary::Log::logLevel() != medialibrary::LogLevel::Verbose )
                 return;
             if ( lvl == LIBVLC_ERROR )
-                Log::Error( msg );
+                medialibrary::Log::Error( msg );
             else if ( lvl == LIBVLC_WARNING )
-                Log::Warning( msg );
+                medialibrary::Log::Warning( msg );
             else
-                Log::Info( msg );
+                medialibrary::Log::Info( msg );
         });
     }
 
@@ -53,9 +53,14 @@ struct Init
 };
 }
 
+namespace medialibrary
+{
+
 VLC::Instance& VLCInstance::get()
 {
     // Instanciate the wrapper only once, and run initialization in its constructor.
     static Init wrapper;
     return wrapper.instance;
+}
+
 }

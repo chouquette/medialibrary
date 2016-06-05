@@ -44,7 +44,7 @@ std::shared_ptr<Media> MediaLibraryTester::media( int64_t id )
     return Media::fetch( this, id );
 }
 
-medialibrary::MediaPtr MediaLibraryTester::media( const std::string& path )
+MediaPtr MediaLibraryTester::media( const std::string& path )
 {
     auto medias = files();
     for ( auto& m : medias )
@@ -128,8 +128,8 @@ std::shared_ptr<AlbumTrack> MediaLibraryTester::albumTrack( int64_t id )
     return AlbumTrack::fetch( this, id );
 }
 
-std::vector<medialibrary::MediaPtr> MediaLibraryTester::files()
+std::vector<MediaPtr> MediaLibraryTester::files()
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE is_present = 1";
-    return Media::fetchAll<medialibrary::IMedia>( this, req );
+    return Media::fetchAll<IMedia>( this, req );
 }

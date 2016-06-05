@@ -26,6 +26,9 @@
 #include <exception>
 #include "ToString.h"
 
+namespace medialibrary
+{
+
 namespace sqlite
 {
 namespace errors
@@ -68,3 +71,5 @@ private:
 
 } // namespace errors
 } // namespace sqlite
+
+} // namespace medialibrary

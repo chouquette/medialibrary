@@ -24,6 +24,9 @@
 
 #include <sqlite3.h>
 
+namespace medialibrary
+{
+
 namespace sqlite
 {
 
@@ -131,4 +134,4 @@ struct Traits<T, typename std::enable_if<IsSameDecay<T, int64_t>::value>::type>
 
 } // namespace sqlite
 
-
+}

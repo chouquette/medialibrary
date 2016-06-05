@@ -27,6 +27,8 @@
 
 #include "filesystem/IDirectory.h"
 
+using namespace medialibrary;
+
 namespace mock
 {
 

@@ -27,6 +27,9 @@
 #include <sqlite3.h>
 #include "database/DatabaseHelpers.h"
 
+namespace medialibrary
+{
+
 class Movie;
 
 namespace policy
@@ -39,7 +42,7 @@ struct MovieTable
 };
 }
 
-class Movie : public medialibrary::IMovie, public DatabaseHelpers<Movie, policy::MovieTable>
+class Movie : public IMovie, public DatabaseHelpers<Movie, policy::MovieTable>
 {
     public:
         Movie( MediaLibraryPtr ml, sqlite::Row& row );
@@ -53,11 +56,11 @@ class Movie : public medialibrary::IMovie, public DatabaseHelpers<Movie, policy:
         bool setArtworkMrl(const std::string& artworkMrl);
         virtual const std::string& imdbId() const override;
         bool setImdbId(const std::string& imdbId);
-        virtual std::vector<medialibrary::MediaPtr> files() override;
+        virtual std::vector<MediaPtr> files() override;
 
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<Movie> create( MediaLibraryPtr ml, int64_t mediaId, const std::string& title );
-        static medialibrary::MoviePtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
+        static MoviePtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
 
     private:
         MediaLibraryPtr m_ml;
@@ -70,5 +73,7 @@ class Movie : public medialibrary::IMovie, public DatabaseHelpers<Movie, policy:
 
         friend struct policy::MovieTable;
 };
+
+}
 
 #endif // MOVIE_H

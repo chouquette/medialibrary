@@ -36,6 +36,9 @@
 # error No filesystem implementation for this architecture
 #endif
 
+namespace medialibrary
+{
+
 namespace factory
 {
 
@@ -70,6 +73,6 @@ void FileSystemFactory::refresh()
     m_dirs.clear();
 }
 
-
+}
 
 }

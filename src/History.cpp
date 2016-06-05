@@ -25,6 +25,9 @@
 #include "database/SqliteTools.h"
 #include "ToString.h"
 
+namespace medialibrary
+{
+
 namespace policy
 {
 const std::string HistoryTable::Name = "History";
@@ -76,7 +79,7 @@ bool History::insert( DBConnection dbConn, const std::string& mrl )
     return sqlite::Tools::executeInsert( dbConn, req, mrl, mrl ) != 0;
 }
 
-std::vector<medialibrary::HistoryPtr> History::fetch( MediaLibraryPtr ml )
+std::vector<HistoryPtr> History::fetch( MediaLibraryPtr ml )
 {
     static const std::string req = "SELECT * FROM " + policy::HistoryTable::Name + " ORDER BY insertion_date DESC";
     return fetchAll<IHistoryEntry>( ml, req );
@@ -107,4 +110,6 @@ bool History::setFavorite( bool isFavorite )
         return false;
     m_favorite = isFavorite;
     return true;
+}
+
 }

@@ -28,6 +28,9 @@
 #include "Media.h"
 #include "database/SqliteTools.h"
 
+namespace medialibrary
+{
+
 const std::string policy::LabelTable::Name = "Label";
 const std::string policy::LabelTable::PrimaryKeyColumn = "id_label";
 int64_t Label::* const policy::LabelTable::PrimaryKey = &Label::m_id;
@@ -56,15 +59,15 @@ const std::string& Label::name() const
     return m_name;
 }
 
-std::vector<medialibrary::MediaPtr> Label::files()
+std::vector<MediaPtr> Label::files()
 {
     static const std::string req = "SELECT f.* FROM " + policy::MediaTable::Name + " f "
             "INNER JOIN LabelFileRelation lfr ON lfr.media_id = f.id_media "
             "WHERE lfr.label_id = ?";
-    return Media::fetchAll<medialibrary::IMedia>( m_ml, req, m_id );
+    return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
 
-medialibrary::LabelPtr Label::create( MediaLibraryPtr ml, const std::string& name )
+LabelPtr Label::create( MediaLibraryPtr ml, const std::string& name )
 {
     auto self = std::make_shared<Label>( ml, name );
     const char* req = "INSERT INTO Label VALUES(NULL, ?)";
@@ -94,4 +97,6 @@ bool Label::createTable( DBConnection dbConnection )
     return sqlite::Tools::executeRequest( dbConnection, req ) &&
             sqlite::Tools::executeRequest( dbConnection, relReq ) &&
             sqlite::Tools::executeRequest( dbConnection, ftsTrigger );
+}
+
 }

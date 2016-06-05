@@ -24,6 +24,8 @@
 
 #include "utils/Filename.h"
 
+using namespace medialibrary;
+
 TEST( FsUtils, extension )
 {
     ASSERT_EQ( "ext", utils::file::extension( "file.ext" ) );

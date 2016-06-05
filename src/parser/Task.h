@@ -22,12 +22,15 @@
 
 #pragma once
 
-class Media;
-class File;
-
 #include <memory>
 #include <vector>
 #include <string>
+
+namespace medialibrary
+{
+
+class Media;
+class File;
 
 namespace parser
 {
@@ -113,5 +116,7 @@ struct Task
     int episode;
     int64_t duration;
 };
+
+}
 
 }

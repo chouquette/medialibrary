@@ -25,6 +25,9 @@
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
 
+namespace medialibrary
+{
+
 DiscovererWorker::DiscovererWorker( MediaLibraryPtr ml )
     : m_run( false )
     , m_cb( ml->getCb() )
@@ -152,3 +155,4 @@ void DiscovererWorker::run()
     LOG_INFO( "Exiting DiscovererWorker thread" );
 }
 
+}

@@ -27,6 +27,9 @@
 
 #include <stdexcept>
 
+namespace medialibrary
+{
+
 namespace fs
 {
 
@@ -45,6 +48,8 @@ unsigned int File::lastModificationDate() const
         m_lastModificationDate = s.st_mtime;
     }
     return m_lastModificationDate;
+}
+
 }
 
 }

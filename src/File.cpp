@@ -25,6 +25,9 @@
 #include "Media.h"
 #include "Folder.h"
 
+namespace medialibrary
+{
+
 const std::string policy::FileTable::Name = "File";
 const std::string policy::FileTable::PrimaryKeyColumn = "id_file";
 int64_t File::* const policy::FileTable::PrimaryKey = &File::m_id;
@@ -77,7 +80,7 @@ const std::string& File::mrl() const
     return m_fullPath;
 }
 
-medialibrary::IFile::Type File::type() const
+IFile::Type File::type() const
 {
     return m_type;
 }
@@ -158,4 +161,6 @@ std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, Type ty
         return nullptr;
     self->m_fullPath = fileFs.fullPath();
     return self;
+}
+
 }

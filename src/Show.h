@@ -29,6 +29,9 @@
 #include "medialibrary/IMediaLibrary.h"
 #include "medialibrary/IShow.h"
 
+namespace medialibrary
+{
+
 class Media;
 class Show;
 class ShowEpisode;
@@ -43,7 +46,7 @@ struct ShowTable
 };
 }
 
-class Show : public medialibrary::IShow, public DatabaseHelpers<Show, policy::ShowTable>
+class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
 {
     public:
         Show( MediaLibraryPtr ml, sqlite::Row& row );
@@ -60,7 +63,7 @@ class Show : public medialibrary::IShow, public DatabaseHelpers<Show, policy::Sh
         virtual const std::string& tvdbId() override;
         bool setTvdbId( const std::string& summary );
         std::shared_ptr<ShowEpisode> addEpisode( Media& media, const std::string& title, unsigned int episodeNumber );
-        virtual std::vector<medialibrary::ShowEpisodePtr> episodes() override;
+        virtual std::vector<ShowEpisodePtr> episodes() override;
 
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<Show> create( MediaLibraryPtr ml, const std::string& name );
@@ -77,5 +80,7 @@ class Show : public medialibrary::IShow, public DatabaseHelpers<Show, policy::Sh
 
         friend struct policy::ShowTable;
 };
+
+}
 
 #endif // SHOW_H

@@ -25,6 +25,9 @@
 #include <memory>
 #include <string>
 
+namespace medialibrary
+{
+
 namespace fs
 {
     class IDirectory;
@@ -54,4 +57,6 @@ namespace factory
         ///
         virtual void refresh() = 0;
     };
+}
+
 }

@@ -22,6 +22,9 @@
 
 #include "utils/Filename.h"
 
+namespace medialibrary
+{
+
 namespace utils
 {
 
@@ -81,6 +84,8 @@ std::string removePath( const std::string& fullPath, const std::string& toRemove
     if ( pos >= fullPath.length() )
         return {};
     return fullPath.substr( pos );
+}
+
 }
 
 }

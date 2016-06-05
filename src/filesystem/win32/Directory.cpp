@@ -26,6 +26,9 @@
 #include <sys/stat.h>
 #include <windows.h>
 
+namespace medialibrary
+{
+
 namespace fs
 {
 
@@ -108,6 +111,8 @@ std::string Directory::toAbsolute( const std::string& path )
                                  std::to_string( GetLastError() ) + ")" );
     }
     return std::string( buff );
+}
+
 }
 
 }

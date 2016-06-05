@@ -65,13 +65,13 @@ TEST_F( Albums, AddTrack )
     f->save();
     ASSERT_NE( track, nullptr );
 
-    auto tracks = a->tracks( medialibrary::SortingCriteria::Default, false );
+    auto tracks = a->tracks( SortingCriteria::Default, false );
     ASSERT_EQ( tracks.size(), 1u );
 
     Reload();
 
     a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
-    tracks = a->tracks( medialibrary::SortingCriteria::Default, false );
+    tracks = a->tracks( SortingCriteria::Default, false );
     ASSERT_EQ( tracks.size(), 1u );
     ASSERT_EQ( tracks[0]->albumTrack()->trackNumber(), track->trackNumber() );
 }
@@ -86,13 +86,13 @@ TEST_F( Albums, NbTracks )
         f->save();
         ASSERT_NE( track, nullptr );
     }
-    auto tracks = a->tracks( medialibrary::SortingCriteria::Default, false );
+    auto tracks = a->tracks( SortingCriteria::Default, false );
     ASSERT_EQ( tracks.size(), a->nbTracks() );
 
     Reload();
 
     a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
-    tracks = a->tracks( medialibrary::SortingCriteria::Default, false );
+    tracks = a->tracks( SortingCriteria::Default, false );
     ASSERT_EQ( tracks.size(), a->nbTracks() );
 }
 
@@ -110,13 +110,13 @@ TEST_F( Albums, TracksByGenre )
         if ( i <= 5 )
             track->setGenre( g );
     }
-    auto tracks = a->tracks( g, medialibrary::SortingCriteria::Default, false );
+    auto tracks = a->tracks( g, SortingCriteria::Default, false );
     ASSERT_EQ( 5u, tracks.size() );
 
     Reload();
 
     a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
-    tracks = a->tracks( g, medialibrary::SortingCriteria::Default, false );
+    tracks = a->tracks( g, SortingCriteria::Default, false );
     ASSERT_NE( tracks.size(), a->nbTracks() );
     ASSERT_EQ( 5u, tracks.size() );
 }
@@ -351,19 +351,19 @@ TEST_F( Albums, SortTracks )
     auto t2 = a->addTrack( m2, 2, 1 );
 
     // Default order is by disc number & track number
-    auto tracks = a->tracks( medialibrary::SortingCriteria::Default, false );
+    auto tracks = a->tracks( SortingCriteria::Default, false );
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( t1->id(), tracks[0]->id() );
     ASSERT_EQ( t2->id(), tracks[1]->id() );
 
     // Reverse order
-    tracks = a->tracks( medialibrary::SortingCriteria::Default, true );
+    tracks = a->tracks( SortingCriteria::Default, true );
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( t1->id(), tracks[1]->id() );
     ASSERT_EQ( t2->id(), tracks[0]->id() );
 
     // Try a media based criteria
-    tracks = a->tracks( medialibrary::SortingCriteria::Alpha, false );
+    tracks = a->tracks( SortingCriteria::Alpha, false );
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( t1->id(), tracks[1]->id() ); // B-track -> first
     ASSERT_EQ( t2->id(), tracks[0]->id() ); // A-track -> second
@@ -378,13 +378,13 @@ TEST_F( Albums, Sort )
     auto a3 = ml->createAlbum( "C" );
     a3->setReleaseYear( 1000, false );
 
-    auto albums = ml->albums( medialibrary::SortingCriteria::ReleaseDate, false );
+    auto albums = ml->albums( SortingCriteria::ReleaseDate, false );
     ASSERT_EQ( 3u, albums.size() );
     ASSERT_EQ( a1->id(), albums[0]->id() );
     ASSERT_EQ( a3->id(), albums[1]->id() );
     ASSERT_EQ( a2->id(), albums[2]->id() );
 
-    albums = ml->albums( medialibrary::SortingCriteria::ReleaseDate, true );
+    albums = ml->albums( SortingCriteria::ReleaseDate, true );
     // We do not invert the lexical order when sorting by DESC release date:
     ASSERT_EQ( 3u, albums.size() );
     ASSERT_EQ( a2->id(), albums[0]->id() );
@@ -392,13 +392,13 @@ TEST_F( Albums, Sort )
     ASSERT_EQ( a3->id(), albums[2]->id() );
 
     // When listing all albums, default order is lexical order
-    albums = ml->albums( medialibrary::SortingCriteria::Default, false );
+    albums = ml->albums( SortingCriteria::Default, false );
     ASSERT_EQ( 3u, albums.size() );
     ASSERT_EQ( a1->id(), albums[0]->id() );
     ASSERT_EQ( a2->id(), albums[1]->id() );
     ASSERT_EQ( a3->id(), albums[2]->id() );
 
-    albums = ml->albums( medialibrary::SortingCriteria::Default, true );
+    albums = ml->albums( SortingCriteria::Default, true );
     ASSERT_EQ( 3u, albums.size() );
     ASSERT_EQ( a3->id(), albums[0]->id() );
     ASSERT_EQ( a2->id(), albums[1]->id() );

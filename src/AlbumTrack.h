@@ -32,6 +32,9 @@
 #include "database/DatabaseHelpers.h"
 #include "utils/Cache.h"
 
+namespace medialibrary
+{
+
 class Album;
 class AlbumTrack;
 class Artist;
@@ -48,28 +51,28 @@ struct AlbumTrackTable
 };
 }
 
-class AlbumTrack : public medialibrary::IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy::AlbumTrackTable>
+class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy::AlbumTrackTable>
 {
     public:
         AlbumTrack( MediaLibraryPtr ml, sqlite::Row& row );
         AlbumTrack( MediaLibraryPtr ml, int64_t mediaId, unsigned int trackNumber, int64_t albumId, unsigned int discNumber);
 
         virtual int64_t id() const override;
-        virtual medialibrary::ArtistPtr artist() const override;
+        virtual ArtistPtr artist() const override;
         bool setArtist( std::shared_ptr<Artist> artist );
-        virtual medialibrary::GenrePtr genre() override;
+        virtual GenrePtr genre() override;
         bool setGenre( std::shared_ptr<Genre> genre );
         virtual unsigned int trackNumber() override;
         virtual unsigned int discNumber() const override;
-        virtual std::shared_ptr<medialibrary::IAlbum> album() override;
-        virtual std::shared_ptr<medialibrary::IMedia> media() override;
+        virtual std::shared_ptr<IAlbum> album() override;
+        virtual std::shared_ptr<IMedia> media() override;
 
         static bool createTable( DBConnection dbConnection );
         static std::shared_ptr<AlbumTrack> create( MediaLibraryPtr ml, int64_t albumId,
                                      std::shared_ptr<Media> media, unsigned int trackNb , unsigned int discNumber );
-        static medialibrary::AlbumTrackPtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
-        static std::vector<medialibrary::MediaPtr> fromGenre( MediaLibraryPtr ml, int64_t genreId, medialibrary::SortingCriteria sort, bool desc );
-        static std::vector<medialibrary::MediaPtr> search(DBConnection dbConn, const std::string& title );
+        static AlbumTrackPtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
+        static std::vector<MediaPtr> fromGenre( MediaLibraryPtr ml, int64_t genreId, SortingCriteria sort, bool desc );
+        static std::vector<MediaPtr> search(DBConnection dbConn, const std::string& title );
 
     private:
         MediaLibraryPtr m_ml;
@@ -89,5 +92,7 @@ class AlbumTrack : public medialibrary::IAlbumTrack, public DatabaseHelpers<Albu
 
         friend struct policy::AlbumTrackTable;
 };
+
+}
 
 #endif // ALBUMTRACK_H

@@ -27,6 +27,8 @@
 
 #include "filesystem/IDevice.h"
 
+using namespace medialibrary;
+
 namespace mock
 {
 

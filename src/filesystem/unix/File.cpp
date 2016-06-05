@@ -25,6 +25,9 @@
 #include <stdexcept>
 #include <sys/stat.h>
 
+namespace medialibrary
+{
+
 namespace fs
 {
 
@@ -37,6 +40,8 @@ File::File( const std::string& filePath, const struct stat& s )
 unsigned int File::lastModificationDate() const
 {
     return m_lastModificationDate;
+}
+
 }
 
 }

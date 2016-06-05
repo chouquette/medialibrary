@@ -22,7 +22,12 @@
 
 #pragma once
 
+namespace medialibrary
+{
+
 class SqliteConnection;
 class MediaLibrary;
 typedef SqliteConnection* DBConnection;
 using MediaLibraryPtr = const MediaLibrary*;
+
+}

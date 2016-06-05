@@ -24,6 +24,9 @@
 #include "Media.h"
 #include "database/SqliteTools.h"
 
+namespace medialibrary
+{
+
 const std::string policy::MovieTable::Name = "Movie";
 const std::string policy::MovieTable::PrimaryKeyColumn = "id_movie";
 int64_t Movie::* const policy::MovieTable::PrimaryKey = &Movie::m_id;
@@ -102,11 +105,11 @@ bool Movie::setImdbId( const std::string& imdbId )
     return true;
 }
 
-std::vector<medialibrary::MediaPtr> Movie::files()
+std::vector<MediaPtr> Movie::files()
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
             + " WHERE movie_id = ?";
-    return Media::fetchAll<medialibrary::IMedia>( m_ml, req, m_id );
+    return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
 
 bool Movie::createTable( DBConnection dbConnection )
@@ -135,8 +138,10 @@ std::shared_ptr<Movie> Movie::create(MediaLibraryPtr ml, int64_t mediaId, const 
     return movie;
 }
 
-medialibrary::MoviePtr Movie::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
+MoviePtr Movie::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
 {
     static const std::string req = "SELECT * FROM " + policy::MovieTable::Name + " WHERE media_id = ?";
     return fetch( ml, req, mediaId );
+}
+
 }

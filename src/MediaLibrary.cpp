@@ -60,6 +60,9 @@
 
 #include "factory/FileSystem.h"
 
+namespace medialibrary
+{
+
 const std::vector<std::string> MediaLibrary::supportedVideoExtensions {
     // Videos
     "avi", "3gp", "amv", "asf", "divx", "dv", "flv", "gxf",
@@ -224,12 +227,12 @@ void MediaLibrary::setVerbosity(LogLevel v)
     Log::setLogLevel( v );
 }
 
-std::vector<MediaPtr> MediaLibrary::audioFiles( medialibrary::SortingCriteria sort, bool desc ) const
+std::vector<MediaPtr> MediaLibrary::audioFiles( SortingCriteria sort, bool desc ) const
 {
     return Media::listAll( this, IMedia::Type::AudioType, sort, desc );
 }
 
-std::vector<MediaPtr> MediaLibrary::videoFiles( medialibrary::SortingCriteria sort, bool desc ) const
+std::vector<MediaPtr> MediaLibrary::videoFiles( SortingCriteria sort, bool desc ) const
 {
     return Media::listAll( this, IMedia::Type::VideoType, sort, desc );
 }
@@ -309,12 +312,12 @@ std::shared_ptr<Album> MediaLibrary::createAlbum(const std::string& title )
     return Album::create( this, title );
 }
 
-std::vector<AlbumPtr> MediaLibrary::albums( medialibrary::SortingCriteria sort, bool desc ) const
+std::vector<AlbumPtr> MediaLibrary::albums( SortingCriteria sort, bool desc ) const
 {
     return Album::listAll( this, sort, desc );
 }
 
-std::vector<GenrePtr> MediaLibrary::genres( medialibrary::SortingCriteria sort, bool desc ) const
+std::vector<GenrePtr> MediaLibrary::genres( SortingCriteria sort, bool desc ) const
 {
     return Genre::listAll( this, sort, desc );
 }
@@ -376,7 +379,7 @@ std::shared_ptr<Artist> MediaLibrary::createArtist( const std::string& name )
     }
 }
 
-std::vector<ArtistPtr> MediaLibrary::artists(medialibrary::SortingCriteria sort, bool desc) const
+std::vector<ArtistPtr> MediaLibrary::artists(SortingCriteria sort, bool desc) const
 {
     return Artist::listAll( this, sort, desc );
 }
@@ -386,7 +389,7 @@ PlaylistPtr MediaLibrary::createPlaylist( const std::string& name )
     return Playlist::create( this, name );
 }
 
-std::vector<PlaylistPtr> MediaLibrary::playlists(medialibrary::SortingCriteria sort, bool desc)
+std::vector<PlaylistPtr> MediaLibrary::playlists(SortingCriteria sort, bool desc)
 {
     return Playlist::listAll( this, sort, desc );
 }
@@ -416,12 +419,12 @@ std::vector<MediaPtr> MediaLibrary::lastMediaPlayed() const
     return Media::fetchHistory( this );
 }
 
-medialibrary::MediaSearchAggregate MediaLibrary::searchMedia( const std::string& title ) const
+MediaSearchAggregate MediaLibrary::searchMedia( const std::string& title ) const
 {
     if ( validateSearchPattern( title ) == false )
         return {};
     auto tmp = Media::search( this, title );
-    medialibrary::MediaSearchAggregate res;
+    MediaSearchAggregate res;
     for ( auto& m : tmp )
     {
         switch ( m->subType() )
@@ -471,9 +474,9 @@ std::vector<ArtistPtr> MediaLibrary::searchArtists(const std::string& name ) con
     return Artist::search( this, name );
 }
 
-medialibrary::SearchAggregate MediaLibrary::search( const std::string& pattern ) const
+SearchAggregate MediaLibrary::search( const std::string& pattern ) const
 {
-    medialibrary::SearchAggregate res;
+    SearchAggregate res;
     res.albums = searchAlbums( pattern );
     res.artists = searchArtists( pattern );
     res.genres = searchGenre( pattern );
@@ -609,3 +612,4 @@ void MediaLibrary::setLogger( ILogger* logger )
     Log::SetLogger( logger );
 }
 
+}

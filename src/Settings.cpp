@@ -25,6 +25,9 @@
 #include "database/SqliteTools.h"
 #include "MediaLibrary.h"
 
+namespace medialibrary
+{
+
 Settings::Settings()
     : m_dbConn( nullptr )
     , m_dbModelVersion( 0 )
@@ -85,3 +88,4 @@ bool Settings::createTable( DBConnection dbConn )
     return sqlite::Tools::executeRequest( dbConn, req );
 }
 
+}

@@ -27,6 +27,9 @@
 #include "medialibrary/IMediaLibrary.h"
 #include "database/DatabaseHelpers.h"
 
+namespace medialibrary
+{
+
 class AudioTrack;
 
 namespace policy
@@ -39,7 +42,7 @@ struct AudioTrackTable
 };
 }
 
-class AudioTrack : public medialibrary::IAudioTrack, public DatabaseHelpers<AudioTrack, policy::AudioTrackTable>
+class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack, policy::AudioTrackTable>
 {
     public:
         AudioTrack(MediaLibraryPtr ml, sqlite::Row& row );
@@ -73,5 +76,7 @@ class AudioTrack : public medialibrary::IAudioTrack, public DatabaseHelpers<Audi
     private:
         friend struct policy::AudioTrackTable;
 };
+
+}
 
 #endif // AUDIOTRACK_H

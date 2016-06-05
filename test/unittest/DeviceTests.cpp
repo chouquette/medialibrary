@@ -270,9 +270,9 @@ TEST_F( DeviceFs, RemoveAlbum )
         album->setAlbumArtist( artist );
     }
 
-    auto albums = ml->albums( medialibrary::SortingCriteria::Default, false );
+    auto albums = ml->albums( SortingCriteria::Default, false );
     ASSERT_EQ( 2u, albums.size() );
-    auto artists = ml->artists( medialibrary::SortingCriteria::Default, false );
+    auto artists = ml->artists( SortingCriteria::Default, false );
     ASSERT_EQ( 2u, artists.size() );
 
     auto device = fsMock->removeDevice( RemovableDeviceUuid );
@@ -282,9 +282,9 @@ TEST_F( DeviceFs, RemoveAlbum )
     bool reloaded = cbMock->waitForReload();
     ASSERT_TRUE( reloaded );
 
-    albums = ml->albums( medialibrary::SortingCriteria::Default, false );
+    albums = ml->albums( SortingCriteria::Default, false );
     ASSERT_EQ( 1u, albums.size() );
-    artists = ml->artists( medialibrary::SortingCriteria::Default, false );
+    artists = ml->artists( SortingCriteria::Default, false );
     ASSERT_EQ( 1u, artists.size() );
 }
 
@@ -307,12 +307,12 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
         newArtist->addMedia( static_cast<Media&>( *media2 ) );
     }
 
-    auto albums = ml->albums( medialibrary::SortingCriteria::Default, false );
+    auto albums = ml->albums( SortingCriteria::Default, false );
     ASSERT_EQ( 1u, albums.size() );
-    auto artists = ml->artists( medialibrary::SortingCriteria::Default, false );
+    auto artists = ml->artists( SortingCriteria::Default, false );
     ASSERT_EQ( 1u, artists.size() );
     auto artist = artists[0];
-    ASSERT_EQ( 2u, artist->media( medialibrary::SortingCriteria::Default, false ).size() );
+    ASSERT_EQ( 2u, artist->media( SortingCriteria::Default, false ).size() );
 
     auto device = fsMock->removeDevice( RemovableDeviceUuid );
     cbMock->prepareForReload();
@@ -320,12 +320,12 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
     bool reloaded = cbMock->waitForReload();
     ASSERT_TRUE( reloaded );
 
-    albums = ml->albums( medialibrary::SortingCriteria::Default, false );
+    albums = ml->albums( SortingCriteria::Default, false );
     ASSERT_EQ( 1u, albums.size() );
-    artists = ml->artists( medialibrary::SortingCriteria::Default, false );
+    artists = ml->artists( SortingCriteria::Default, false );
     ASSERT_EQ( 1u, artists.size() );
-    ASSERT_EQ( 1u, albums[0]->tracks( medialibrary::SortingCriteria::Default, false ).size() );
-    ASSERT_EQ( 1u, artists[0]->media( medialibrary::SortingCriteria::Default, false ).size() );
+    ASSERT_EQ( 1u, albums[0]->tracks( SortingCriteria::Default, false ).size() );
+    ASSERT_EQ( 1u, artists[0]->media( SortingCriteria::Default, false ).size() );
 }
 
 TEST_F( DeviceFs, ChangeDevice )

@@ -39,6 +39,9 @@
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
 
+namespace medialibrary
+{
+
 namespace sqlite
 {
 
@@ -302,6 +305,8 @@ class Tools
             return true;
         }
 };
+
+}
 
 }
 

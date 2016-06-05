@@ -35,6 +35,9 @@
 #include "MediaLibrary.h"
 #include "utils/Filename.h"
 
+namespace medialibrary
+{
+
 FsDiscoverer::FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, MediaLibrary* ml )
     : m_ml( ml )
     , m_fsFactory( fsFactory )
@@ -277,3 +280,4 @@ bool FsDiscoverer::addFolder( fs::IDirectory& folder, Folder* parentFolder, cons
     return true;
 }
 
+}

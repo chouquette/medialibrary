@@ -28,6 +28,9 @@
 
 #include <sqlite3.h>
 
+namespace medialibrary
+{
+
 class VideoTrack;
 
 namespace policy
@@ -40,7 +43,7 @@ struct VideoTrackTable
 };
 }
 
-class VideoTrack : public medialibrary::IVideoTrack, public DatabaseHelpers<VideoTrack, policy::VideoTrackTable>
+class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy::VideoTrackTable>
 {
     public:
         VideoTrack( MediaLibraryPtr, sqlite::Row& row );
@@ -68,5 +71,7 @@ class VideoTrack : public medialibrary::IVideoTrack, public DatabaseHelpers<Vide
     private:
         friend struct policy::VideoTrackTable;
 };
+
+}
 
 #endif // VIDEOTRACK_H

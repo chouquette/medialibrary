@@ -26,6 +26,9 @@
 #include <mutex>
 #include <atomic>
 
+namespace medialibrary
+{
+
 namespace utils
 {
 
@@ -133,5 +136,7 @@ public:
 private:
     SWMRLock& m_lock;
 };
+
+}
 
 }

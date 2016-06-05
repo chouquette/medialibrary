@@ -26,6 +26,9 @@
 
 #include "database/DatabaseHelpers.h"
 
+namespace medialibrary
+{
+
 class Genre;
 
 namespace policy
@@ -38,22 +41,22 @@ struct GenreTable
 };
 }
 
-class Genre : public medialibrary::IGenre, public DatabaseHelpers<Genre, policy::GenreTable>
+class Genre : public IGenre, public DatabaseHelpers<Genre, policy::GenreTable>
 {
 public:
     Genre( MediaLibraryPtr ml, sqlite::Row& row );
     Genre( MediaLibraryPtr ml, const std::string& name );
     virtual int64_t id() const override;
     virtual const std::string& name() const override;
-    virtual std::vector<medialibrary::ArtistPtr> artists( medialibrary::SortingCriteria sort, bool desc ) const override;
-    virtual std::vector<medialibrary::MediaPtr> tracks(medialibrary::SortingCriteria sort, bool desc) const override;
-    virtual std::vector<medialibrary::AlbumPtr> albums( medialibrary::SortingCriteria sort, bool desc ) const override;
+    virtual std::vector<ArtistPtr> artists( SortingCriteria sort, bool desc ) const override;
+    virtual std::vector<MediaPtr> tracks(SortingCriteria sort, bool desc) const override;
+    virtual std::vector<AlbumPtr> albums( SortingCriteria sort, bool desc ) const override;
 
     static bool createTable( DBConnection dbConn );
     static std::shared_ptr<Genre> create( MediaLibraryPtr ml, const std::string& name );
     static std::shared_ptr<Genre> fromName( MediaLibraryPtr ml, const std::string& name );
-    static std::vector<medialibrary::GenrePtr> search( MediaLibraryPtr ml, const std::string& name );
-    static std::vector<medialibrary::GenrePtr> listAll( MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc );
+    static std::vector<GenrePtr> search( MediaLibraryPtr ml, const std::string& name );
+    static std::vector<GenrePtr> listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc );
 
 private:
     MediaLibraryPtr m_ml;
@@ -63,3 +66,5 @@ private:
 
     friend policy::GenreTable;
 };
+
+}

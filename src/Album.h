@@ -33,6 +33,9 @@
 #include "medialibrary/IAlbum.h"
 #include "utils/Cache.h"
 
+namespace medialibrary
+{
+
 class Album;
 class AlbumTrack;
 class Artist;
@@ -48,7 +51,7 @@ struct AlbumTable
 };
 }
 
-class Album : public medialibrary::IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
+class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
 {
     public:
         Album( MediaLibraryPtr ml, sqlite::Row& row );
@@ -72,14 +75,14 @@ class Album : public medialibrary::IAlbum, public DatabaseHelpers<Album, policy:
         bool setShortSummary( const std::string& summary );
         virtual const std::string& artworkMrl() const override;
         bool setArtworkMrl( const std::string& artworkMrl );
-        virtual std::vector<medialibrary::MediaPtr> tracks( medialibrary::SortingCriteria sort, bool desc ) const override;
-        virtual std::vector<medialibrary::MediaPtr> tracks( medialibrary::GenrePtr genre, medialibrary::SortingCriteria sort, bool desc ) const override;
+        virtual std::vector<MediaPtr> tracks( SortingCriteria sort, bool desc ) const override;
+        virtual std::vector<MediaPtr> tracks( GenrePtr genre, SortingCriteria sort, bool desc ) const override;
         ///
         /// \brief cachedTracks Returns a cached list of tracks
         /// This has no warranty of ordering, validity, or anything else.
         /// \return An unordered-list of this album's tracks
         ///
-        std::vector<medialibrary::MediaPtr> cachedTracks() const;
+        std::vector<MediaPtr> cachedTracks() const;
         ///
         /// \brief addTrack Add a track to the album.
         /// This will modify the media, but *not* save it.
@@ -89,9 +92,9 @@ class Album : public medialibrary::IAlbum, public DatabaseHelpers<Album, policy:
         unsigned int nbTracks() const override;
         unsigned int duration() const override;
 
-        virtual medialibrary::ArtistPtr albumArtist() const override;
+        virtual ArtistPtr albumArtist() const override;
         bool setAlbumArtist( std::shared_ptr<Artist> artist );
-        virtual std::vector<medialibrary::ArtistPtr> artists(bool desc) const override;
+        virtual std::vector<ArtistPtr> artists(bool desc) const override;
         bool addArtist( std::shared_ptr<Artist> artist );
         bool removeArtist( Artist* artist );
 
@@ -104,14 +107,14 @@ class Album : public medialibrary::IAlbum, public DatabaseHelpers<Album, policy:
         /// \param pattern A pattern representing the title, or the name of the main artist
         /// \return
         ///
-        static std::vector<medialibrary::AlbumPtr> search( MediaLibraryPtr ml, const std::string& pattern );
-        static std::vector<medialibrary::AlbumPtr> fromArtist( MediaLibraryPtr ml, int64_t artistId, medialibrary::SortingCriteria sort, bool desc );
-        static std::vector<medialibrary::AlbumPtr> fromGenre( MediaLibraryPtr ml, int64_t genreId, medialibrary::SortingCriteria sort, bool desc );
-        static std::vector<medialibrary::AlbumPtr> listAll( MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc );
+        static std::vector<AlbumPtr> search( MediaLibraryPtr ml, const std::string& pattern );
+        static std::vector<AlbumPtr> fromArtist( MediaLibraryPtr ml, int64_t artistId, SortingCriteria sort, bool desc );
+        static std::vector<AlbumPtr> fromGenre( MediaLibraryPtr ml, int64_t genreId, SortingCriteria sort, bool desc );
+        static std::vector<AlbumPtr> listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc );
 
     private:
-        static std::string orderTracksBy( medialibrary::SortingCriteria sort, bool desc );
-        static std::string orderBy( medialibrary::SortingCriteria sort, bool desc );
+        static std::string orderTracksBy( SortingCriteria sort, bool desc );
+        static std::string orderBy( SortingCriteria sort, bool desc );
     protected:
         MediaLibraryPtr m_ml;
         int64_t m_id;
@@ -124,10 +127,12 @@ class Album : public medialibrary::IAlbum, public DatabaseHelpers<Album, policy:
         unsigned int m_duration;
         bool m_isPresent;
 
-        mutable Cache<std::vector<medialibrary::MediaPtr>> m_tracks;
+        mutable Cache<std::vector<MediaPtr>> m_tracks;
         mutable Cache<std::shared_ptr<Artist>> m_albumArtist;
 
         friend struct policy::AlbumTable;
 };
+
+}
 
 #endif // ALBUM_H

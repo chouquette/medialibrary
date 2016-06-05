@@ -323,12 +323,12 @@ TEST_F( Medias, SortByAlpha )
     m2->setTitle( "Zyxw" );
     m2->save();
 
-    auto media = ml->audioFiles( medialibrary::SortingCriteria::Alpha, false );
+    auto media = ml->audioFiles( SortingCriteria::Alpha, false );
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m1->id(), media[0]->id() );
     ASSERT_EQ( m2->id(), media[1]->id() );
 
-    media = ml->audioFiles( medialibrary::SortingCriteria::Alpha, true );
+    media = ml->audioFiles( SortingCriteria::Alpha, true );
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m2->id(), media[0]->id() );
     ASSERT_EQ( m1->id(), media[1]->id() );
@@ -344,12 +344,12 @@ TEST_F( Medias, SortByLastModifDate )
     file2->setLastModificationDate( 111 );
     auto m2 = ml->addFile( *file2 );
 
-    auto media = ml->videoFiles( medialibrary::SortingCriteria::LastModificationDate, false );
+    auto media = ml->videoFiles( SortingCriteria::LastModificationDate, false );
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m2->id(), media[0]->id() );
     ASSERT_EQ( m1->id(), media[1]->id() );
 
-    media = ml->videoFiles( medialibrary::SortingCriteria::LastModificationDate, true );
+    media = ml->videoFiles( SortingCriteria::LastModificationDate, true );
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m2->id(), media[1]->id() );
     ASSERT_EQ( m1->id(), media[0]->id() );

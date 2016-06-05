@@ -33,9 +33,12 @@
 #include "utils/ModificationsNotifier.h"
 #include <cstdlib>
 
+namespace medialibrary
+{
+
 bool MetadataParser::initialize()
 {
-    m_unknownArtist = Artist::fetch( m_ml, medialibrary::UnknownArtistID );
+    m_unknownArtist = Artist::fetch( m_ml, UnknownArtistID );
     if ( m_unknownArtist == nullptr )
         LOG_ERROR( "Failed to cache unknown artist" );
     return m_unknownArtist != nullptr;
@@ -407,7 +410,7 @@ bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
         if ( albumArtist->id() != currentAlbumArtist->id() )
         {
             // We have more than a single artist on this album, fallback to various artists
-            auto variousArtists = Artist::fetch( m_ml, medialibrary::VariousArtistID );
+            auto variousArtists = Artist::fetch( m_ml, VariousArtistID );
             album->setAlbumArtist( variousArtists );
             // Add those two artists as "featuring".
             album->addArtist( albumArtist );
@@ -436,4 +439,6 @@ uint8_t MetadataParser::nbThreads() const
 //    return nbProcs;
     // Let's make this code thread-safe first :)
     return 1;
+}
+
 }

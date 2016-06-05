@@ -27,10 +27,12 @@
 
 #include "database/SqliteTools.h"
 
+namespace medialibrary
+{
+
 const std::string policy::ArtistTable::Name = "Artist";
 const std::string policy::ArtistTable::PrimaryKeyColumn = "id_artist";
 int64_t Artist::*const policy::ArtistTable::PrimaryKey = &Artist::m_id;
-
 
 Artist::Artist( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -78,25 +80,25 @@ bool Artist::setShortBio(const std::string &shortBio)
     return true;
 }
 
-std::vector<medialibrary::AlbumPtr> Artist::albums( medialibrary::SortingCriteria sort, bool desc ) const
+std::vector<AlbumPtr> Artist::albums( SortingCriteria sort, bool desc ) const
 {
     return Album::fromArtist( m_ml, m_id, sort, desc );
 }
 
-std::vector<medialibrary::MediaPtr> Artist::media( medialibrary::SortingCriteria sort, bool desc ) const
+std::vector<MediaPtr> Artist::media( SortingCriteria sort, bool desc ) const
 {
     std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
             "INNER JOIN MediaArtistRelation mar ON mar.media_id = med.id_media "
             "WHERE mar.artist_id = ? AND med.is_present = 1 ORDER BY ";
     switch ( sort )
     {
-    case medialibrary::SortingCriteria::Duration:
+    case SortingCriteria::Duration:
         req += "med.duration";
         break;
-    case medialibrary::SortingCriteria::InsertionDate:
+    case SortingCriteria::InsertionDate:
         req += "med.insertion_date";
         break;
-    case medialibrary::SortingCriteria::ReleaseDate:
+    case SortingCriteria::ReleaseDate:
         req += "med.release_date";
         break;
     default:
@@ -106,7 +108,7 @@ std::vector<medialibrary::MediaPtr> Artist::media( medialibrary::SortingCriteria
 
     if ( desc == true )
         req += " DESC";
-    return Media::fetchAll<medialibrary::IMedia>( m_ml, req, m_id );
+    return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
 
 bool Artist::addMedia( Media& media )
@@ -244,8 +246,8 @@ bool Artist::createDefaultArtists( DBConnection dbConnection )
     // This will skip the cache for those new entities, but they will be inserted soon enough anyway.
     static const std::string req = "INSERT OR IGNORE INTO " + policy::ArtistTable::Name +
             "(id_artist) VALUES(?),(?)";
-    sqlite::Tools::executeInsert( dbConnection, req, medialibrary::UnknownArtistID,
-                                          medialibrary::VariousArtistID );
+    sqlite::Tools::executeInsert( dbConnection, req, UnknownArtistID,
+                                          VariousArtistID );
     // Always return true. The insertion might succeed, but we consider it a failure when 0 row
     // gets inserted, while we are explicitely specifying "OR IGNORE" here.
     return true;
@@ -261,7 +263,7 @@ std::shared_ptr<Artist> Artist::create( MediaLibraryPtr ml, const std::string &n
     return artist;
 }
 
-std::vector<medialibrary::ArtistPtr> Artist::search( MediaLibraryPtr ml, const std::string& name )
+std::vector<ArtistPtr> Artist::search( MediaLibraryPtr ml, const std::string& name )
 {
     static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name + " WHERE id_artist IN "
             "(SELECT rowid FROM " + policy::ArtistTable::Name + "Fts WHERE name MATCH ?)"
@@ -269,7 +271,7 @@ std::vector<medialibrary::ArtistPtr> Artist::search( MediaLibraryPtr ml, const s
     return fetchAll<IArtist>( ml, req, name + "*" );
 }
 
-std::vector<medialibrary::ArtistPtr> Artist::listAll(MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc)
+std::vector<ArtistPtr> Artist::listAll(MediaLibraryPtr ml, SortingCriteria sort, bool desc)
 {
     std::string req = "SELECT * FROM " + policy::ArtistTable::Name +
             " WHERE nb_albums > 0 AND is_present = 1 ORDER BY ";
@@ -283,3 +285,4 @@ std::vector<medialibrary::ArtistPtr> Artist::listAll(MediaLibraryPtr ml, mediali
     return fetchAll<IArtist>( ml, req );
 }
 
+}

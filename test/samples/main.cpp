@@ -63,23 +63,23 @@ TEST_P( Tests, Parse )
 
     if ( expected.HasMember( "albums" ) == true )
     {
-        checkAlbums( expected["albums" ], m_ml->albums( medialibrary::SortingCriteria::Default, false ) );
+        checkAlbums( expected["albums" ], m_ml->albums( SortingCriteria::Default, false ) );
     }
     if ( expected.HasMember( "media" ) == true )
         checkMedias( expected["media"] );
     if ( expected.HasMember( "nbVideos" ) == true )
     {
-        const auto videos = m_ml->videoFiles( medialibrary::SortingCriteria::Default, false );
+        const auto videos = m_ml->videoFiles( SortingCriteria::Default, false );
         ASSERT_EQ( expected["nbVideos"].GetUint(), videos.size() );
     }
     if ( expected.HasMember( "nbAudios" ) == true )
     {
-        const auto audios = m_ml->audioFiles( medialibrary::SortingCriteria::Default, false );
+        const auto audios = m_ml->audioFiles( SortingCriteria::Default, false );
         ASSERT_EQ( expected["nbAudios"].GetUint(), audios.size() );
     }
     if ( expected.HasMember( "artists" ) )
     {
-        checkArtists( expected["artists"], m_ml->artists( medialibrary::SortingCriteria::Default, false ) );
+        checkArtists( expected["artists"], m_ml->artists( SortingCriteria::Default, false ) );
     }
 }
 

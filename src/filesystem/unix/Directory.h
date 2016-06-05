@@ -26,6 +26,9 @@
 #include "utils/Cache.h"
 #include <string>
 
+namespace medialibrary
+{
+
 namespace fs
 {
 
@@ -50,5 +53,7 @@ private:
     mutable std::vector<std::shared_ptr<IDirectory>> m_dirs;
     mutable Cache<std::shared_ptr<IDevice>> m_device;
 };
+
+}
 
 }

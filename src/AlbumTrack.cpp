@@ -28,6 +28,9 @@
 #include "database/SqliteTools.h"
 #include "logging/Logger.h"
 
+namespace medialibrary
+{
+
 const std::string policy::AlbumTrackTable::Name = "AlbumTrack";
 const std::string policy::AlbumTrackTable::PrimaryKeyColumn = "id_track";
 int64_t AlbumTrack::* const policy::AlbumTrackTable::PrimaryKey = &AlbumTrack::m_id;
@@ -63,7 +66,7 @@ int64_t AlbumTrack::id() const
     return m_id;
 }
 
-medialibrary::ArtistPtr AlbumTrack::artist() const
+ArtistPtr AlbumTrack::artist() const
 {
     if ( m_artistId == 0 )
         return nullptr;
@@ -130,30 +133,30 @@ std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, int64_t albu
     return self;
 }
 
-medialibrary::AlbumTrackPtr AlbumTrack::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
+AlbumTrackPtr AlbumTrack::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTrackTable::Name +
             " WHERE media_id = ?";
     return fetch( ml, req, mediaId );
 }
 
-std::vector<medialibrary::MediaPtr> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId, medialibrary::SortingCriteria sort, bool desc )
+std::vector<MediaPtr> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId, SortingCriteria sort, bool desc )
 {
     std::string req = "SELECT m.* FROM " + policy::MediaTable::Name + " m"
             " INNER JOIN " + policy::AlbumTrackTable::Name + " t ON m.id_media = t.media_id"
             " WHERE t.genre_id = ? ORDER BY ";
     switch ( sort )
     {
-    case medialibrary::SortingCriteria::Duration:
+    case SortingCriteria::Duration:
         req += "m.duration";
         break;
-    case medialibrary::SortingCriteria::InsertionDate:
+    case SortingCriteria::InsertionDate:
         req += "m.insertion_date";
         break;
-    case medialibrary::SortingCriteria::ReleaseDate:
+    case SortingCriteria::ReleaseDate:
         req += "m.release_date";
         break;
-    case medialibrary::SortingCriteria::Alpha:
+    case SortingCriteria::Alpha:
         req += "m.title";
         break;
     default:
@@ -166,10 +169,10 @@ std::vector<medialibrary::MediaPtr> AlbumTrack::fromGenre( MediaLibraryPtr ml, i
 
     if ( desc == true )
         req += " DESC";
-    return Media::fetchAll<medialibrary::IMedia>( ml, req, genreId );
+    return Media::fetchAll<IMedia>( ml, req, genreId );
 }
 
-medialibrary::GenrePtr AlbumTrack::genre()
+GenrePtr AlbumTrack::genre()
 {
     auto l = m_genre.lock();
     if ( m_genre.isCached() == false )
@@ -203,7 +206,7 @@ unsigned int AlbumTrack::discNumber() const
     return m_discNumber;
 }
 
-std::shared_ptr<medialibrary::IAlbum> AlbumTrack::album()
+std::shared_ptr<IAlbum> AlbumTrack::album()
 {
     auto album = m_album.lock();
     if ( album == nullptr && m_albumId != 0 )
@@ -214,7 +217,7 @@ std::shared_ptr<medialibrary::IAlbum> AlbumTrack::album()
     return album;
 }
 
-std::shared_ptr<medialibrary::IMedia> AlbumTrack::media()
+std::shared_ptr<IMedia> AlbumTrack::media()
 {
     auto lock = m_media.lock();
     if ( m_media.isCached() == false )
@@ -222,4 +225,6 @@ std::shared_ptr<medialibrary::IMedia> AlbumTrack::media()
         m_media = Media::fetch( m_ml, m_mediaId );
     }
     return m_media.get().lock();
+}
+
 }

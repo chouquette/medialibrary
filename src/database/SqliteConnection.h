@@ -34,6 +34,9 @@
 
 #include "utils/SWMRLock.h"
 
+namespace medialibrary
+{
+
 namespace sqlite
 {
     class Transaction;
@@ -78,5 +81,7 @@ private:
     utils::WriteLocker m_writeLock;
     std::unordered_map<std::string, UpdateHookCb> m_hooks;
 };
+
+}
 
 #endif // SQLITECONNECTION_H

@@ -27,8 +27,13 @@ namespace VLC
 class Instance;
 }
 
+namespace medialibrary
+{
+
 class VLCInstance
 {
 public:
     static VLC::Instance& get();
 };
+
+}

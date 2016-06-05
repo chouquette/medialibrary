@@ -25,7 +25,10 @@
 #include "medialibrary/ILogger.h"
 #include <iostream>
 
-class IostreamLogger : public medialibrary::ILogger
+namespace medialibrary
+{
+
+class IostreamLogger : public ILogger
 {
 public:
     virtual void Error(const std::string& msg) override
@@ -48,3 +51,5 @@ public:
         std::cout << "Debug: " << msg;
     }
 };
+
+}

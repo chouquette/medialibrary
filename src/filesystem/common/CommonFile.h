@@ -24,6 +24,9 @@
 
 #include "filesystem/IFile.h"
 
+namespace medialibrary
+{
+
 namespace fs
 {
 
@@ -42,5 +45,7 @@ protected:
     const std::string m_fullPath;
     const std::string m_extension;
 };
+
+}
 
 }

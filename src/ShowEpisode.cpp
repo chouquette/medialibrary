@@ -25,6 +25,9 @@
 #include "Show.h"
 #include "Media.h"
 
+namespace medialibrary
+{
+
 const std::string policy::ShowEpisodeTable::Name = "ShowEpisode";
 const std::string policy::ShowEpisodeTable::PrimaryKeyColumn = "show_id";
 int64_t ShowEpisode::* const policy::ShowEpisodeTable::PrimaryKey = &ShowEpisode::m_id;
@@ -129,7 +132,7 @@ bool ShowEpisode::setTvdbId( const std::string& tvdbId )
     return true;
 }
 
-std::shared_ptr<medialibrary::IShow> ShowEpisode::show()
+std::shared_ptr<IShow> ShowEpisode::show()
 {
     if ( m_show == nullptr && m_showId != 0 )
     {
@@ -138,11 +141,11 @@ std::shared_ptr<medialibrary::IShow> ShowEpisode::show()
     return m_show;
 }
 
-std::vector<medialibrary::MediaPtr> ShowEpisode::files()
+std::vector<MediaPtr> ShowEpisode::files()
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
             + " WHERE show_episode_id = ?";
-    return Media::fetchAll<medialibrary::IMedia>( m_ml, req, m_id );
+    return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
 
 bool ShowEpisode::createTable( DBConnection dbConnection )
@@ -175,8 +178,10 @@ std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml, int64_t me
     return episode;
 }
 
-medialibrary::ShowEpisodePtr ShowEpisode::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
+ShowEpisodePtr ShowEpisode::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
 {
     static const std::string req = "SELECT * FROM " + policy::ShowEpisodeTable::Name + " WHERE media_id = ?";
     return fetch( ml, req, mediaId );
+}
+
 }

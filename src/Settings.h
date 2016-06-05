@@ -26,6 +26,9 @@
 #include "Types.h"
 #include <cstdint>
 
+namespace medialibrary
+{
+
 class Settings
 {
 public:
@@ -44,5 +47,7 @@ private:
 
     bool m_changed;
 };
+
+}
 
 #endif // SETTINGS_H

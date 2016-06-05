@@ -26,6 +26,9 @@
 
 struct stat;
 
+namespace medialibrary
+{
+
 namespace fs
 {
 
@@ -39,5 +42,7 @@ public:
 private:
     unsigned int m_lastModificationDate;
 };
+
+}
 
 }

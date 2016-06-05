@@ -33,6 +33,9 @@
 
 #include "discoverer/IDiscoverer.h"
 
+namespace medialibrary
+{
+
 class DiscovererWorker : public IDiscoverer
 {
 public:
@@ -65,6 +68,7 @@ private:
     std::condition_variable m_cond;
     std::atomic_bool m_run;
     std::vector<std::unique_ptr<IDiscoverer>> m_discoverers;
-    medialibrary::IMediaLibraryCb* m_cb;
+    IMediaLibraryCb* m_cb;
 };
 
+}

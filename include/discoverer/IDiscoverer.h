@@ -29,6 +29,9 @@
 #include "filesystem/IFile.h"
 #include "medialibrary/IMediaLibrary.h"
 
+namespace medialibrary
+{
+
 class IDiscoverer
 {
 public:
@@ -40,5 +43,7 @@ public:
     virtual void reload() = 0;
     virtual void reload( const std::string& entryPoint ) = 0;
 };
+
+}
 
 #endif // IDISCOVERER_H

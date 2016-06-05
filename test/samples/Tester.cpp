@@ -171,7 +171,7 @@ void Tests::checkAlbums( const rapidjson::Value& expectedAlbums, std::vector<Alb
             }
             if ( expectedAlbum.HasMember( "nbTracks" ) || expectedAlbum.HasMember( "tracks" ) )
             {
-                const auto tracks = a->tracks( medialibrary::SortingCriteria::Default, false );
+                const auto tracks = a->tracks( SortingCriteria::Default, false );
                 if ( expectedAlbum.HasMember( "nbTracks" ) )
                 {
                     if ( expectedAlbum["nbTracks"].GetUint() != tracks.size() )
@@ -218,7 +218,7 @@ void Tests::checkArtists(const rapidjson::Value& expectedArtists, std::vector<Ar
             }
             if ( expectedArtist.HasMember( "nbAlbums" ) || expectedArtist.HasMember( "albums" ) )
             {
-                auto albums = artist->albums( medialibrary::SortingCriteria::Default, false );
+                auto albums = artist->albums( SortingCriteria::Default, false );
                 if ( expectedArtist.HasMember( "nbAlbums" ) )
                 {
                     if ( albums.size() != expectedArtist["nbAlbums"].GetUint() )
@@ -229,7 +229,7 @@ void Tests::checkArtists(const rapidjson::Value& expectedArtists, std::vector<Ar
             }
             if ( expectedArtist.HasMember( "nbTracks" ) )
             {
-                auto tracks = artist->media( medialibrary::SortingCriteria::Default, false );
+                auto tracks = artist->media( SortingCriteria::Default, false );
                 if ( expectedArtist["nbTracks"].GetUint() != tracks.size() )
                     return false;
             }
@@ -266,7 +266,7 @@ void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& 
             if ( artist == nullptr )
                 return ;
             if ( strlen( expectedTrack["artist"].GetString() ) == 0 &&
-                 artist->id() != medialibrary::UnknownArtistID )
+                 artist->id() != UnknownArtistID )
                 return ;
             else if ( strcasecmp( expectedTrack["artist"].GetString(), artist->name().c_str() ) != 0 )
                 return ;

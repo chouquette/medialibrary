@@ -24,6 +24,9 @@
 
 #include "filesystem/common/CommonFile.h"
 
+namespace medialibrary
+{
+
 namespace fs
 {
 
@@ -37,5 +40,7 @@ public:
 private:
     mutable unsigned int m_lastModificationDate;
 };
+
+}
 
 }

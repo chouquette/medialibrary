@@ -24,6 +24,9 @@
 
 #include "database/SqliteTools.h"
 
+namespace medialibrary
+{
+
 SqliteConnection::SqliteConnection( const std::string &dbPath )
     : m_dbPath( dbPath )
     , m_readLock( m_contextLock )
@@ -105,4 +108,6 @@ void SqliteConnection::updateHook( void* data, int reason, const char*,
         it->second( HookReason::Delete, rowId );
         break;
     }
+}
+
 }

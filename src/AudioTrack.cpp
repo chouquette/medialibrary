@@ -24,6 +24,10 @@
 
 #include "Media.h"
 
+
+namespace medialibrary
+{
+
 const std::string policy::AudioTrackTable::Name = "AudioTrack";
 const std::string policy::AudioTrackTable::PrimaryKeyColumn  = "id_track";
 int64_t AudioTrack::* const policy::AudioTrackTable::PrimaryKey = &AudioTrack::m_id;
@@ -118,4 +122,6 @@ std::shared_ptr<AudioTrack> AudioTrack::create( MediaLibraryPtr ml, const std::s
     if ( insert( ml, track, req, codec, bitrate, sampleRate, nbChannels, language, desc, mediaId ) == false )
         return nullptr;
     return track;
+}
+
 }

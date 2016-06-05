@@ -28,6 +28,9 @@
 #include "discoverer/IDiscoverer.h"
 #include "factory/IFileSystem.h"
 
+namespace medialibrary
+{
+
 class MediaLibrary;
 class Folder;
 
@@ -56,5 +59,7 @@ private:
     MediaLibrary* m_ml;
     std::shared_ptr<factory::IFileSystem> m_fsFactory;
 };
+
+}
 
 #endif // FS_DISCOVERER_H

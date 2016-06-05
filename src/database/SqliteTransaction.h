@@ -25,6 +25,9 @@
 #include "SqliteConnection.h"
 #include "Types.h"
 
+namespace medialibrary
+{
+
 namespace sqlite
 {
 
@@ -42,5 +45,7 @@ private:
 
     static thread_local Transaction* CurrentTransaction;
 };
+
+}
 
 }

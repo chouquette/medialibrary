@@ -29,6 +29,9 @@
 #include "Media.h"
 #include "utils/VLCInstance.h"
 
+namespace medialibrary
+{
+
 VLCMetadataService::VLCMetadataService()
     : m_instance( VLCInstance::get() )
 {
@@ -149,3 +152,4 @@ int VLCMetadataService::toInt( VLC::Media& vlcMedia, libvlc_meta_t meta, const c
     return 0;
 }
 
+}

@@ -22,10 +22,15 @@
 
 #include "SqliteTools.h"
 
+namespace medialibrary
+{
+
 namespace sqlite
 {
 std::unordered_map<SqliteConnection::Handle,
                     std::unordered_map<std::string, Statement::CachedStmtPtr>> Statement::StatementsCache;
 
 std::mutex Statement::StatementsCacheLock;
+}
+
 }

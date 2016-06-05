@@ -24,6 +24,9 @@
 
 #include "filesystem/IDirectory.h"
 
+namespace medialibrary
+{
+
 namespace fs
 {
 
@@ -50,5 +53,7 @@ private:
     std::vector<std::string> m_dirs;
     mutable unsigned int m_lastModificationDate;
 };
+
+}
 
 }

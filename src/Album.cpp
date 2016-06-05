@@ -30,6 +30,9 @@
 
 #include "database/SqliteTools.h"
 
+namespace medialibrary
+{
+
 const std::string policy::AlbumTable::Name = "Album";
 const std::string policy::AlbumTable::PrimaryKeyColumn = "id_album";
 int64_t Album::* const policy::AlbumTable::PrimaryKey = &Album::m_id;
@@ -140,18 +143,18 @@ bool Album::setArtworkMrl( const std::string& artworkMrl )
     return true;
 }
 
-std::string Album::orderTracksBy( medialibrary::SortingCriteria sort, bool desc )
+std::string Album::orderTracksBy( SortingCriteria sort, bool desc )
 {
     std::string req = " ORDER BY ";
     switch ( sort )
     {
-    case medialibrary::SortingCriteria::Alpha:
+    case SortingCriteria::Alpha:
         req += "med.title";
         break;
-    case medialibrary::SortingCriteria::Duration:
+    case SortingCriteria::Duration:
         req += "med.duration";
         break;
-    case medialibrary::SortingCriteria::ReleaseDate:
+    case SortingCriteria::ReleaseDate:
         req += "med.release_date";
         break;
     default:
@@ -167,18 +170,18 @@ std::string Album::orderTracksBy( medialibrary::SortingCriteria sort, bool desc 
     return req;
 }
 
-std::string Album::orderBy( medialibrary::SortingCriteria sort, bool desc )
+std::string Album::orderBy( SortingCriteria sort, bool desc )
 {
     std::string req = " ORDER BY ";
     switch ( sort )
     {
-    case medialibrary::SortingCriteria::ReleaseDate:
+    case SortingCriteria::ReleaseDate:
         if ( desc == true )
             req += "release_year DESC, title";
         else
             req += "release_year, title";
         break;
-    case medialibrary::SortingCriteria::Duration:
+    case SortingCriteria::Duration:
         req += "duration";
         if ( desc == true )
             req += " DESC";
@@ -192,7 +195,7 @@ std::string Album::orderBy( medialibrary::SortingCriteria sort, bool desc )
     return req;
 }
 
-std::vector<medialibrary::MediaPtr> Album::tracks( medialibrary::SortingCriteria sort, bool desc ) const
+std::vector<MediaPtr> Album::tracks( SortingCriteria sort, bool desc ) const
 {
     // This doesn't return the cached version, because it would be fairly complicated, if not impossible or
     // counter productive, to maintain a cache that respects all orderings.
@@ -200,10 +203,10 @@ std::vector<medialibrary::MediaPtr> Album::tracks( medialibrary::SortingCriteria
         " INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
         " WHERE att.album_id = ? AND med.is_present = 1";
     req += orderTracksBy( sort, desc );
-    return Media::fetchAll<medialibrary::IMedia>( m_ml, req, m_id );
+    return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
 
-std::vector<medialibrary::MediaPtr> Album::tracks( medialibrary::GenrePtr genre, medialibrary::SortingCriteria sort, bool desc ) const
+std::vector<MediaPtr> Album::tracks( GenrePtr genre, SortingCriteria sort, bool desc ) const
 {
     if ( genre == nullptr )
         return {};
@@ -212,14 +215,14 @@ std::vector<medialibrary::MediaPtr> Album::tracks( medialibrary::GenrePtr genre,
             " WHERE att.album_id = ? AND med.is_present = 1"
             " AND genre_id = ?";
     req += orderTracksBy( sort, desc );
-    return Media::fetchAll<medialibrary::IMedia>( m_ml, req, m_id, genre->id() );
+    return Media::fetchAll<IMedia>( m_ml, req, m_id, genre->id() );
 }
 
-std::vector<medialibrary::MediaPtr> Album::cachedTracks() const
+std::vector<MediaPtr> Album::cachedTracks() const
 {
     auto lock = m_tracks.lock();
     if ( m_tracks.isCached() == false )
-        m_tracks = tracks( medialibrary::SortingCriteria::Default, false );
+        m_tracks = tracks( SortingCriteria::Default, false );
     return m_tracks.get();
 }
 
@@ -258,7 +261,7 @@ unsigned int Album::duration() const
     return m_duration;
 }
 
-medialibrary::ArtistPtr Album::albumArtist() const
+ArtistPtr Album::albumArtist() const
 {
     if ( m_artistId == 0 )
         return nullptr;
@@ -293,14 +296,14 @@ bool Album::setAlbumArtist( std::shared_ptr<Artist> artist )
     return true;
 }
 
-std::vector<medialibrary::ArtistPtr> Album::artists( bool desc ) const
+std::vector<ArtistPtr> Album::artists( bool desc ) const
 {
     std::string req = "SELECT art.* FROM " + policy::ArtistTable::Name + " art "
             "INNER JOIN AlbumArtistRelation aar ON aar.artist_id = art.id_artist "
             "WHERE aar.album_id = ? ORDER BY art.name";
     if ( desc == true )
         req += " DESC";
-    return Artist::fetchAll<medialibrary::IArtist>( m_ml, req, m_id );
+    return Artist::fetchAll<IArtist>( m_ml, req, m_id );
 }
 
 bool Album::addArtist( std::shared_ptr<Artist> artist )
@@ -422,7 +425,7 @@ std::shared_ptr<Album> Album::createUnknownAlbum( MediaLibraryPtr ml, const Arti
     return album;
 }
 
-std::vector<medialibrary::AlbumPtr> Album::search( MediaLibraryPtr ml, const std::string& pattern )
+std::vector<AlbumPtr> Album::search( MediaLibraryPtr ml, const std::string& pattern )
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " WHERE id_album IN "
             "(SELECT rowid FROM " + policy::AlbumTable::Name + "Fts WHERE " +
@@ -431,13 +434,13 @@ std::vector<medialibrary::AlbumPtr> Album::search( MediaLibraryPtr ml, const std
     return fetchAll<IAlbum>( ml, req, pattern + "*" );
 }
 
-std::vector<medialibrary::AlbumPtr> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, medialibrary::SortingCriteria sort, bool desc )
+std::vector<AlbumPtr> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, SortingCriteria sort, bool desc )
 {
     std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " alb "
                     "WHERE artist_id = ? AND is_present=1 ORDER BY ";
     switch ( sort )
     {
-    case medialibrary::SortingCriteria::Alpha:
+    case SortingCriteria::Alpha:
         req += "title";
         if ( desc == true )
             req += " DESC";
@@ -456,7 +459,7 @@ std::vector<medialibrary::AlbumPtr> Album::fromArtist( MediaLibraryPtr ml, int64
     return fetchAll<IAlbum>( ml, req, artistId );
 }
 
-std::vector<medialibrary::AlbumPtr> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId, medialibrary::SortingCriteria sort, bool desc)
+std::vector<AlbumPtr> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId, SortingCriteria sort, bool desc)
 {
     std::string req = "SELECT a.* FROM " + policy::AlbumTable::Name + " a "
             "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.album_id = a.id_album "
@@ -465,10 +468,12 @@ std::vector<medialibrary::AlbumPtr> Album::fromGenre( MediaLibraryPtr ml, int64_
     return fetchAll<IAlbum>( ml, req, genreId );
 }
 
-std::vector<medialibrary::AlbumPtr> Album::listAll( MediaLibraryPtr ml, medialibrary::SortingCriteria sort, bool desc )
+std::vector<AlbumPtr> Album::listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc )
 {
     std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
                     " WHERE is_present=1";
     req += orderBy( sort, desc );
     return fetchAll<IAlbum>( ml, req );
+}
+
 }

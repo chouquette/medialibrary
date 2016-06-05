@@ -26,16 +26,21 @@
 #include "Folder.h"
 #include "filesystem/IDirectory.h"
 
-class Playlist;
-class AlbumTrack;
+using namespace medialibrary;
+
+namespace medialibrary
+{
+    class Playlist;
+    class AlbumTrack;
+}
 
 class MediaLibraryTester : public MediaLibrary
 {
 public:
     MediaLibraryTester();
-    std::vector<medialibrary::MediaPtr> files();
+    std::vector<MediaPtr> files();
     std::shared_ptr<Media> media( int64_t id );
-    medialibrary::MediaPtr media( const std::string& path );
+    MediaPtr media( const std::string& path );
     std::shared_ptr<Folder> folder( const std::string& path );
     std::shared_ptr<Media> addFile( const std::string& path );
     std::shared_ptr<Playlist> playlist( int64_t playlistId );

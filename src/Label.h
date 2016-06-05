@@ -26,11 +26,14 @@
 #include <sqlite3.h>
 #include <string>
 
-class Media;
-class Label;
-
 #include "medialibrary/ILabel.h"
 #include "database/DatabaseHelpers.h"
+
+namespace medialibrary
+{
+
+class Media;
+class Label;
 
 namespace policy
 {
@@ -42,7 +45,7 @@ struct LabelTable
 };
 }
 
-class Label : public medialibrary::ILabel, public DatabaseHelpers<Label, policy::LabelTable>
+class Label : public ILabel, public DatabaseHelpers<Label, policy::LabelTable>
 {
     public:
         Label( MediaLibraryPtr ml, sqlite::Row& row );
@@ -51,9 +54,9 @@ class Label : public medialibrary::ILabel, public DatabaseHelpers<Label, policy:
     public:
         virtual int64_t id() const override;
         virtual const std::string& name() const override;
-        virtual std::vector<medialibrary::MediaPtr> files() override;
+        virtual std::vector<MediaPtr> files() override;
 
-        static medialibrary::LabelPtr create( MediaLibraryPtr ml, const std::string& name );
+        static LabelPtr create( MediaLibraryPtr ml, const std::string& name );
         static bool createTable( DBConnection dbConnection );
 
     private:
@@ -63,5 +66,7 @@ class Label : public medialibrary::ILabel, public DatabaseHelpers<Label, policy:
 
         friend struct policy::LabelTable;
 };
+
+}
 
 #endif // LABEL_H

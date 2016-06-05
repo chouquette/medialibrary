@@ -23,6 +23,9 @@
 #include "CommonFile.h"
 #include "utils/Filename.h"
 
+namespace medialibrary
+{
+
 namespace fs
 {
 
@@ -52,6 +55,8 @@ const std::string& CommonFile::fullPath() const
 const std::string& CommonFile::extension() const
 {
     return m_extension;
+}
+
 }
 
 }

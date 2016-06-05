@@ -23,6 +23,9 @@
 #include "VideoTrack.h"
 #include "Media.h"
 
+namespace medialibrary
+{
+
 const std::string policy::VideoTrackTable::Name = "VideoTrack";
 const std::string policy::VideoTrackTable::PrimaryKeyColumn = "id_track";
 int64_t VideoTrack::* const policy::VideoTrackTable::PrimaryKey = &VideoTrack::m_id;
@@ -97,4 +100,6 @@ bool VideoTrack::createTable( DBConnection dbConnection )
                     "(id_media) ON DELETE CASCADE"
             ")";
     return sqlite::Tools::executeRequest( dbConnection, req );
+}
+
 }

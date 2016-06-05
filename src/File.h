@@ -28,6 +28,9 @@
 #include "filesystem/IFile.h"
 #include "utils/Cache.h"
 
+namespace medialibrary
+{
+
 class File;
 class Media;
 
@@ -41,7 +44,7 @@ struct FileTable
 };
 }
 
-class File : public medialibrary::IFile, public DatabaseHelpers<File, policy::FileTable>
+class File : public IFile, public DatabaseHelpers<File, policy::FileTable>
 {
 public:
     File( MediaLibraryPtr ml, sqlite::Row& row );
@@ -80,3 +83,5 @@ private:
 
     friend policy::FileTable;
 };
+
+}

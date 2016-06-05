@@ -26,6 +26,9 @@
 
 #ifndef __ANDROID__
 
+namespace medialibrary
+{
+
 template <typename T>
 inline std::string toString(T t)
 {
@@ -33,9 +36,14 @@ inline std::string toString(T t)
     return std::to_string(t);
 }
 
+}
+
 #else
 
 #include <sstream>
+
+namespace medialibrary
+{
 
 template <typename T>
 inline std::string toString(T t)
@@ -44,6 +52,8 @@ inline std::string toString(T t)
     std::ostringstream ss;
     ss << std::forward<T>(t);
     return ss.str();
+}
+
 }
 
 #endif

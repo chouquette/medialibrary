@@ -29,6 +29,9 @@
 #include "medialibrary/ILogger.h"
 #include "medialibrary/Types.h"
 
+namespace medialibrary
+{
+
 class Log
 {
 private:
@@ -55,7 +58,7 @@ private:
     }
 
     template <typename... Args>
-    static void log( medialibrary::LogLevel lvl, Args&&... args)
+    static void log( LogLevel lvl, Args&&... args)
     {
         if ( lvl < s_logLevel.load( std::memory_order_relaxed ) )
             return;
@@ -72,34 +75,34 @@ private:
 
         switch ( lvl )
         {
-        case medialibrary::LogLevel::Error:
+        case LogLevel::Error:
             l->Error( msg );
             break;
-        case medialibrary::LogLevel::Warning:
+        case LogLevel::Warning:
             l->Warning( msg );
             break;
-        case medialibrary::LogLevel::Info:
+        case LogLevel::Info:
             l->Info( msg );
             break;
-        case medialibrary::LogLevel::Verbose:
-        case medialibrary::LogLevel::Debug:
+        case LogLevel::Verbose:
+        case LogLevel::Debug:
             l->Debug( msg );
             break;
         }
     }
 
 public:
-    static void SetLogger( medialibrary::ILogger* logger )
+    static void SetLogger( ILogger* logger )
     {
         s_logger.store( logger, std::memory_order_relaxed );
     }
 
-    static void setLogLevel( medialibrary::LogLevel level )
+    static void setLogLevel( LogLevel level )
     {
         s_logLevel.store( level, std::memory_order_relaxed );
     }
 
-    static medialibrary::LogLevel logLevel()
+    static LogLevel logLevel()
     {
         return s_logLevel.load( std::memory_order_relaxed );
     }
@@ -107,34 +110,36 @@ public:
     template <typename... Args>
     static void Error( Args&&... args )
     {
-        log( medialibrary::LogLevel::Error, std::forward<Args>( args )... );
+        log( LogLevel::Error, std::forward<Args>( args )... );
     }
 
     template <typename... Args>
     static void Warning( Args&&... args )
     {
-        log( medialibrary::LogLevel::Warning, std::forward<Args>( args )... );
+        log( LogLevel::Warning, std::forward<Args>( args )... );
     }
 
     template <typename... Args>
     static void Info( Args&&... args )
     {
-        log( medialibrary::LogLevel::Info, std::forward<Args>( args )... );
+        log( LogLevel::Info, std::forward<Args>( args )... );
     }
 
     template <typename... Args>
     static void Debug( Args&&... args )
     {
-        log( medialibrary::LogLevel::Debug, std::forward<Args>( args )... );
+        log( LogLevel::Debug, std::forward<Args>( args )... );
     }
 
 private:
 
 private:
-    static std::unique_ptr<medialibrary::ILogger> s_defaultLogger;
-    static std::atomic<medialibrary::ILogger*> s_logger;
-    static std::atomic<medialibrary::LogLevel> s_logLevel;
+    static std::unique_ptr<ILogger> s_defaultLogger;
+    static std::atomic<ILogger*> s_logger;
+    static std::atomic<LogLevel> s_logLevel;
 };
+
+}
 
 #if defined(__clang__) || defined(__GNUG__)
 # define LOG_ORIGIN __PRETTY_FUNCTION__, ':', __LINE__

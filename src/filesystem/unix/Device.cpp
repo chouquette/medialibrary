@@ -37,12 +37,15 @@
 namespace
 {
     // Allow private ctors to be used from make_shared
-    struct DeviceBuilder : public fs::Device
+    struct DeviceBuilder : public medialibrary::fs::Device
     {
         template <typename... Args>
         DeviceBuilder( Args&&... args ) : Device( std::forward<Args>( args )... ) {}
     };
 }
+
+namespace medialibrary
+{
 
 namespace fs
 {
@@ -287,6 +290,8 @@ bool Device::isRemovable( const std::string& deviceName, const std::string& moun
     }
 #endif
     return false;
+}
+
 }
 
 }

@@ -25,6 +25,9 @@
 #include "Types.h"
 #include "database/DatabaseHelpers.h"
 
+namespace medialibrary
+{
+
 class Device;
 
 namespace policy
@@ -64,3 +67,5 @@ private:
 
     friend struct policy::DeviceTable;
 };
+
+}

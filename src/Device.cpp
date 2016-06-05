@@ -22,6 +22,9 @@
 
 #include "Device.h"
 
+namespace medialibrary
+{
+
 const std::string policy::DeviceTable::Name = "Device";
 const std::string policy::DeviceTable::PrimaryKeyColumn = "id_device";
 int64_t Device::* const policy::DeviceTable::PrimaryKey = &Device::m_id;
@@ -104,3 +107,4 @@ std::shared_ptr<Device> Device::fromUuid( MediaLibraryPtr ml, const std::string&
     return fetch( ml, req, uuid );
 }
 
+}

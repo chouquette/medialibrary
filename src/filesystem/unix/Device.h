@@ -26,6 +26,9 @@
 #include <memory>
 #include <unordered_map>
 
+namespace medialibrary
+{
+
 namespace fs
 {
 
@@ -72,5 +75,7 @@ private:
     bool m_present;
     bool m_removable;
 };
+
+}
 
 }

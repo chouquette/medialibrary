@@ -24,6 +24,9 @@
 
 #include <string>
 
+namespace medialibrary
+{
+
 namespace fs
 {
     class IFile
@@ -39,4 +42,6 @@ namespace fs
         virtual const std::string& extension() const = 0;
         virtual unsigned int lastModificationDate() const = 0;
     };
+}
+
 }

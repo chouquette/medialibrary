@@ -28,6 +28,9 @@
 #include <string>
 #include <unordered_map>
 
+namespace medialibrary
+{
+
 namespace factory
 {
     class FileSystemFactory : public IFileSystem
@@ -41,4 +44,6 @@ namespace factory
         std::unordered_map<std::string, std::shared_ptr<fs::IDirectory>> m_dirs;
         std::mutex m_mutex;
     };
+}
+
 }

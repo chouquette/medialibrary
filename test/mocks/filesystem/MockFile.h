@@ -26,6 +26,8 @@
 
 #include "filesystem/IFile.h"
 
+using namespace medialibrary;
+
 namespace mock
 {
 

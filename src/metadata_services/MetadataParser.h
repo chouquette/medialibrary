@@ -25,6 +25,9 @@
 #include "MediaLibrary.h"
 #include "parser/ParserService.h"
 
+namespace medialibrary
+{
+
 class AlbumTrack;
 
 class MetadataParser : public ParserService
@@ -46,3 +49,5 @@ protected:
 private:
     std::shared_ptr<Artist> m_unknownArtist;
 };
+
+}

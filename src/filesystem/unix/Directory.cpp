@@ -32,6 +32,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+namespace medialibrary
+{
+
 namespace fs
 {
 
@@ -132,6 +135,8 @@ void Directory::read() const
             m_files.emplace_back( std::make_shared<File>( filePath, s ) );
         }
     }
+}
+
 }
 
 }

@@ -32,6 +32,9 @@
 
 #include <unordered_map>
 
+namespace medialibrary
+{
+
 namespace policy
 {
     const std::string FolderTable::Name = "Folder";
@@ -245,4 +248,6 @@ std::vector<std::shared_ptr<Folder>> Folder::fetchAll( MediaLibraryPtr ml, int64
                 + " WHERE parent_id = ? AND is_blacklisted = 0 AND is_present = 1";
         return DatabaseHelpers::fetchAll<Folder>( ml, req, parentFolderId );
     }
+}
+
 }

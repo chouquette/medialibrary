@@ -29,6 +29,9 @@
 
 #include "File.h"
 
+namespace medialibrary
+{
+
 // Use an interface to expose only the "done" method
 class IParserCb
 {
@@ -63,9 +66,11 @@ private:
     ServiceList m_services;
 
     MediaLibrary* m_ml;
-    medialibrary::IMediaLibraryCb* m_callback;
+    IMediaLibraryCb* m_callback;
     std::shared_ptr<ModificationNotifier> m_notifier;
     std::atomic_uint m_opToDo;
     std::atomic_uint m_opDone;
     std::atomic_uint m_percent;
 };
+
+}

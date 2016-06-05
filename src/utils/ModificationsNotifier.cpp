@@ -25,6 +25,9 @@
 #include "ModificationsNotifier.h"
 #include "MediaLibrary.h"
 
+namespace medialibrary
+{
+
 ModificationNotifier::ModificationNotifier( MediaLibraryPtr ml )
     : m_ml( ml )
     , m_cb( ml->getCb() )
@@ -144,4 +147,6 @@ void ModificationNotifier::run()
         // for nullptr callbacks. There is no onTracksModified callback, as tracks are never modified.
         notify( std::move( tracks ), &IMediaLibraryCb::onTracksAdded, &IMediaLibraryCb::onTracksAdded, &IMediaLibraryCb::onTracksDeleted );
     }
+}
+
 }

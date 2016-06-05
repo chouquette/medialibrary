@@ -29,6 +29,9 @@
 
 #include "SqliteTools.h"
 
+namespace medialibrary
+{
+
 template <typename IMPL, typename TABLEPOLICY>
 class DatabaseHelpers
 {
@@ -130,3 +133,5 @@ DatabaseHelpers<IMPL, TABLEPOLICY>::Store;
 
 template <typename IMPL, typename TABLEPOLICY>
 std::mutex DatabaseHelpers<IMPL, TABLEPOLICY>::Mutex;
+
+}

@@ -31,6 +31,9 @@
 #include "Task.h"
 #include "medialibrary/Types.h"
 
+namespace medialibrary
+{
+
 class IParserCb;
 class ModificationNotifier;
 class MediaLibrary;
@@ -73,7 +76,7 @@ private:
 
 protected:
     MediaLibrary* m_ml;
-    medialibrary::IMediaLibraryCb* m_cb;
+    IMediaLibraryCb* m_cb;
     std::shared_ptr<ModificationNotifier> m_notifier;
 
 private:
@@ -85,3 +88,5 @@ private:
     std::vector<std::thread> m_threads;
     std::mutex m_lock;
 };
+
+}

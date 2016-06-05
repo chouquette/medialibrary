@@ -23,6 +23,9 @@
 #include "ParserService.h"
 #include "Parser.h"
 
+namespace medialibrary
+{
+
 ParserService::ParserService()
     : m_ml( nullptr )
     , m_cb( nullptr )
@@ -153,3 +156,4 @@ void ParserService::mainloop()
     LOG_INFO("Exiting ParserService [", serviceName, "] thread");
 }
 
+}

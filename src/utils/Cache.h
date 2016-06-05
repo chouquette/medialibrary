@@ -25,6 +25,9 @@
 #include <mutex>
 #include <cassert>
 
+namespace medialibrary
+{
+
 template <typename T>
 class Cache
 {
@@ -78,3 +81,5 @@ private:
     std::mutex m_lock;
     bool m_cached;
 };
+
+}

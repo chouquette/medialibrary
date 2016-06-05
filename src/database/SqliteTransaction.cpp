@@ -24,6 +24,9 @@
 
 #include "SqliteTools.h"
 
+namespace medialibrary
+{
+
 namespace sqlite
 {
 
@@ -71,6 +74,8 @@ Transaction::~Transaction()
             ;
         CurrentTransaction = nullptr;
     }
+}
+
 }
 
 }

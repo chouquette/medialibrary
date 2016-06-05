@@ -30,6 +30,9 @@
 #include "parser/ParserService.h"
 #include "AlbumTrack.h"
 
+namespace medialibrary
+{
+
 class VLCMetadataService : public ParserService
 {
     public:
@@ -47,5 +50,7 @@ private:
         std::mutex m_mutex;
         std::condition_variable m_cond;
 };
+
+}
 
 #endif // VLCMETADATASERVICE_H
