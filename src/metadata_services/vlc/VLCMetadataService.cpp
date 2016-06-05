@@ -77,10 +77,10 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
     for ( const auto& track : tracks )
     {
         auto codec = track.codec();
-        std::string fcc( (const char*)&codec, 4 );
+        std::string fcc( reinterpret_cast<const char*>( &codec ), 4 );
         if ( track.type() == VLC::MediaTrack::Video )
         {
-            auto fps = (float)track.fpsNum() / (float)track.fpsDen();
+            auto fps = static_cast<float>( track.fpsNum() ) / static_cast<float>( track.fpsDen() );
             task.videoTracks.emplace_back( fcc, fps, track.width(), track.height() );
         }
         else if ( track.type() == VLC::MediaTrack::Audio )
