@@ -208,6 +208,27 @@ case "${host_os}" in
     ;;
 esac
 AM_CONDITIONAL(HAVE_WIN32,   test "${SYS}" = "mingw32")
+AM_CONDITIONAL(HAVE_LINUX,   test "${SYS}" = "linux")
+AM_CONDITIONAL(HAVE_DARWIN,  test "${SYS}" = "darwin")
+AM_CONDITIONAL(HAVE_IOS,     test "${HAVE_IOS}" = "1")
+AM_CONDITIONAL(HAVE_OSX,     test "${HAVE_OSX}" = "1")
+AM_CONDITIONAL(HAVE_TVOS,    test "${HAVE_TVOS}" = "1")
+
+dnl Android is linux, but a bit different
+AS_IF([test "$SYS" = linux],[
+    AC_MSG_CHECKING([for an Android system])
+    AC_PREPROC_IFELSE([AC_LANG_PROGRAM(
+                      [[#ifndef __ANDROID__
+                       # error Not Android
+                       #endif
+                       ]],[[;]])
+        ],[
+            HAVE_ANDROID="1"
+            AC_MSG_RESULT([yes])
+        ],[AC_MSG_RESULT([no])
+    ])
+])
+AM_CONDITIONAL(HAVE_ANDROID, test "${HAVE_ANDROID}" = "1")
 
 PKG_CHECK_MODULES(SQLITE, sqlite3)
 PKG_CHECK_MODULES(VLC, libvlc >= 3.0)
