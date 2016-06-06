@@ -34,7 +34,6 @@ namespace fs
 
 class Device : public IDevice
 {
-public:
     // Device name / UUID map
     using DeviceMap = std::unordered_map<std::string, std::string>;
     // Device path / Mountpoints map
@@ -42,6 +41,7 @@ public:
     // UUID -> Device instance map
     using DeviceCacheMap = std::unordered_map<std::string, std::shared_ptr<IDevice>>;
 
+public:
     virtual const std::string& uuid() const override;
     virtual bool isRemovable() const override;
     virtual bool isPresent() const override;
