@@ -148,9 +148,12 @@ libmedialibrary_la_SOURCES += \
 	src/filesystem/win32/File.cpp
 else
 libmedialibrary_la_SOURCES += \
-	src/filesystem/unix/Device.cpp \
 	src/filesystem/unix/Directory.cpp \
 	src/filesystem/unix/File.cpp
+if HAVE_LINUX
+libmedialibrary_la_SOURCES += \
+	src/filesystem/unix/Device.cpp
+endif
 endif
 
 libmedialibrary_la_LDFLAGS = -no-undefined -export-symbols-regex 'NewMediaLibrary'
