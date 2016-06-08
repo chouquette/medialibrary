@@ -52,6 +52,7 @@ public:
     void start();
     void pause();
     void resume();
+    void stop();
 
 private:
     // Queues all unparsed files for parsing.

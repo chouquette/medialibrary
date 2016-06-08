@@ -95,6 +95,8 @@ MediaLibrary::~MediaLibrary()
     // Explicitely stop the discoverer, to avoid it writting while tearing down.
     if ( m_discoverer != nullptr )
         m_discoverer->stop();
+    if ( m_parser != nullptr )
+        m_parser->stop();
     Media::clear();
     Folder::clear();
     Label::clear();
