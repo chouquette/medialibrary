@@ -68,8 +68,10 @@ struct Task
 
     struct VideoTrackInfo
     {
-        VideoTrackInfo( const std::string& fcc, float fps, unsigned int width, unsigned int height )
+        VideoTrackInfo( const std::string& fcc, float fps, unsigned int width, unsigned int height,
+                        const std::string& language, const std::string& description )
             : fcc( fcc ), fps( fps ), width( width ), height( height )
+            , language( language ), description( description )
         {
         }
 
@@ -77,6 +79,8 @@ struct Task
         float fps;
         unsigned int width;
         unsigned int height;
+        std::string language;
+        std::string description;
     };
 
     struct AudioTrackInfo

@@ -48,17 +48,21 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy
     public:
         VideoTrack( MediaLibraryPtr, sqlite::Row& row );
         VideoTrack( MediaLibraryPtr, const std::string& codec,
-                    unsigned int width, unsigned int height, float fps, int64_t mediaId );
+                    unsigned int width, unsigned int height, float fps, int64_t mediaId,
+                    const std::string& language, const std::string& description );
 
         virtual int64_t id() const override;
         virtual const std::string& codec() const override;
         virtual unsigned int width() const override;
         virtual unsigned int height() const override;
         virtual float fps() const override;
+        virtual const std::string& language() const override;
+        virtual const std::string& description() const override;
 
         static bool createTable( DBConnection dbConnection );
-        static std::shared_ptr<VideoTrack> create(MediaLibraryPtr ml, const std::string& codec,
-                                    unsigned int width, unsigned int height, float fps, int64_t mediaId );
+        static std::shared_ptr<VideoTrack> create( MediaLibraryPtr ml, const std::string& codec,
+                                    unsigned int width, unsigned int height, float fps, int64_t mediaId,
+                                    const std::string& language, const std::string& description );
 
     private:
         int64_t m_id;
@@ -67,6 +71,8 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy
         unsigned int m_height;
         float m_fps;
         int64_t m_mediaId;
+        std::string m_language;
+        std::string m_description;
 
     private:
         friend struct policy::VideoTrackTable;

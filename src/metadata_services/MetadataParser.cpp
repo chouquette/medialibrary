@@ -52,7 +52,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
     bool isAudio = task.videoTracks.empty();
     for ( const auto& t : task.videoTracks )
     {
-        media->addVideoTrack( t.fcc, t.width, t.height, t.fps );
+        media->addVideoTrack( t.fcc, t.width, t.height, t.fps, t.language, t.description );
     }
     for ( const auto& t : task.audioTracks )
     {

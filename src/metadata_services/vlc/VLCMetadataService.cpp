@@ -84,7 +84,8 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
         if ( track.type() == VLC::MediaTrack::Video )
         {
             auto fps = static_cast<float>( track.fpsNum() ) / static_cast<float>( track.fpsDen() );
-            task.videoTracks.emplace_back( fcc, fps, track.width(), track.height() );
+            task.videoTracks.emplace_back( fcc, fps, track.width(), track.height(), track.language(),
+                                           track.description() );
         }
         else if ( track.type() == VLC::MediaTrack::Audio )
         {

@@ -260,9 +260,10 @@ void Media::setMovie(MoviePtr movie)
     m_changed = true;
 }
 
-bool Media::addVideoTrack(const std::string& codec, unsigned int width, unsigned int height, float fps)
+bool Media::addVideoTrack(const std::string& codec, unsigned int width, unsigned int height, float fps,
+                          const std::string& language, const std::string& description )
 {
-    return VideoTrack::create( m_ml, codec, width, height, fps, m_id ) != nullptr;
+    return VideoTrack::create( m_ml, codec, width, height, fps, m_id, language, description ) != nullptr;
 }
 
 std::vector<VideoTrackPtr> Media::videoTracks()

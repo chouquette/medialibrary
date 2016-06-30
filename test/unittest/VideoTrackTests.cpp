@@ -32,17 +32,40 @@ class VideoTracks : public Tests
 TEST_F( VideoTracks, AddTrack )
 {
     auto f = std::static_pointer_cast<Media>( ml->addFile( "file.avi" ) );
-    bool res = f->addVideoTrack( "H264", 1920, 1080, 29.97 );
+    bool res = f->addVideoTrack( "H264", 1920, 1080, 29.97, "language", "description" );
     ASSERT_TRUE( res );
 }
 
 TEST_F( VideoTracks, FetchTracks )
 {
     auto f = std::static_pointer_cast<Media>( ml->addFile( "file.avi" ) );
-    f->addVideoTrack( "H264", 1920, 1080, 29.97 );
-    f->addVideoTrack( "VP80", 640, 480, 29.97 );
+    f->addVideoTrack( "H264", 1920, 1080, 29.97, "l1", "d1" );
+    f->addVideoTrack( "VP80", 640, 480, 29.97, "l2", "d2" );
 
+    // Testing fetch from initially created instance:
     auto ts = f->videoTracks();
     ASSERT_EQ( ts.size(), 2u );
+    auto t2 = ts[0];
+    ASSERT_EQ( t2->codec(), "H264" );
+    ASSERT_EQ( t2->width(), 1920 );
+    ASSERT_EQ( t2->height(), 1080 );
+    ASSERT_EQ( t2->fps(), 29.97f );
+    ASSERT_EQ( t2->language(), "l1" );
+    ASSERT_EQ( t2->description(), "d1" );
+
+    // Reload from DB
+    Reload();
+
+    auto m = ml->media( "file.avi" );
+    ts = m->videoTracks();
+    ASSERT_EQ( ts.size(), 2u );
+    t2 = ts[0];
+    ASSERT_EQ( t2->codec(), "H264" );
+    ASSERT_EQ( t2->width(), 1920 );
+    ASSERT_EQ( t2->height(), 1080 );
+    ASSERT_EQ( t2->fps(), 29.97f );
+    ASSERT_EQ( t2->language(), "l1" );
+    ASSERT_EQ( t2->description(), "d1" );
 }
+
 
