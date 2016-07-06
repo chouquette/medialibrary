@@ -109,7 +109,7 @@ bool JpegCompressor::compress( const uint8_t* buffer, const std::string& outputF
 
     while ( compInfo.next_scanline < outputHeight )
     {
-        row_pointer[0] = const_cast<uint8_t*>( &buffer[(compInfo.next_scanline + vOffset ) * stride + hOffset] );
+        row_pointer[0] = const_cast<uint8_t*>( &buffer[(compInfo.next_scanline + vOffset ) * stride + hOffset * bpp()] );
         jpeg_write_scanlines(&compInfo, row_pointer, 1);
     }
     jpeg_finish_compress(&compInfo);
