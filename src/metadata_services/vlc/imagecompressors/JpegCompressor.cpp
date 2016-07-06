@@ -77,7 +77,7 @@ bool JpegCompressor::compress( const uint8_t* buffer, const std::string& outputF
                               uint32_t outputWidth, uint32_t outputHeight,
                               uint32_t hOffset, uint32_t vOffset )
 {
-    const auto stride = inputWidth * 3;
+    const auto stride = inputWidth * bpp();
 
     //FIXME: Abstract this away, though libjpeg requires a FILE*...
     auto fOut = std::unique_ptr<FILE, int(*)(FILE*)>( fopen( outputFile.c_str(), "wb" ), &fclose );
@@ -108,7 +108,7 @@ bool JpegCompressor::compress( const uint8_t* buffer, const std::string& outputF
 
     compInfo.image_width = outputWidth;
     compInfo.image_height = outputHeight;
-    compInfo.input_components = 3;
+    compInfo.input_components = bpp();
     compInfo.in_color_space = JPEG_COLORSPACE;
     jpeg_set_defaults( &compInfo );
     jpeg_set_quality( &compInfo, 85, TRUE );
