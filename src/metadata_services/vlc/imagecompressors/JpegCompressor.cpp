@@ -29,14 +29,6 @@
 #include "logging/Logger.h"
 
 #include <jpeglib.h>
-#if ( ( !defined(JPEG_LIB_VERSION_MAJOR) && !defined(JPEG_LIB_VERSION_MINOR) ) || \
-    ( JPEG_LIB_VERSION_MAJOR <= 8 && JPEG_LIB_VERSION_MINOR < 4 ) ) && \
-    ( !defined( JPEG_LIB_VERSION ) || JPEG_LIB_VERSION < 62 )
-//FIXME: I don't think we can expect this to work without VLC outputing BGR...
-#define JPEG_COLORSPACE JCS_EXT_BGR
-#else
-#define JPEG_COLORSPACE JCS_RGB
-#endif
 
 #include <memory>
 #include <setjmp.h>
@@ -109,7 +101,7 @@ bool JpegCompressor::compress( const uint8_t* buffer, const std::string& outputF
     compInfo.image_width = outputWidth;
     compInfo.image_height = outputHeight;
     compInfo.input_components = bpp();
-    compInfo.in_color_space = JPEG_COLORSPACE;
+    compInfo.in_color_space = JCS_RGB;
     jpeg_set_defaults( &compInfo );
     jpeg_set_quality( &compInfo, 85, TRUE );
 
