@@ -22,29 +22,12 @@
 
 #pragma once
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <condition_variable>
 
 #include <vlcpp/vlc.hpp>
 
-#if defined(HAVE_EVAS)
-#include <Evas.h>
-#endif
-
+#include "imagecompressors/IImageCompressor.h"
 #include "parser/ParserService.h"
-
-#ifdef HAVE_JPEG
-#define BPP 3
-#define VLC_FOURCC "RV24"
-#elif defined(HAVE_EVAS)
-#define BPP 4
-#define VLC_FOURCC "RV32"
-#else
-#error No compression strategy
-#endif
 
 namespace medialibrary
 {
@@ -53,7 +36,7 @@ class VLCThumbnailer : public ParserService
 {
 public:
     explicit VLCThumbnailer();
-    virtual ~VLCThumbnailer();
+    virtual ~VLCThumbnailer() = default;
     virtual parser::Task::Status run( parser::Task& task ) override;
     virtual bool initialize() override;
 
@@ -71,17 +54,13 @@ private:
     // Force a base width, let height be computed depending on A/R
     static const uint32_t DesiredWidth = 320;
     static const uint32_t DesiredHeight = 200; // Aim for a 16:10 thumbnail
-    static const uint8_t Bpp = BPP;
 
 private:
     VLC::Instance m_instance;
     std::mutex m_mutex;
     std::condition_variable m_cond;
+    std::unique_ptr<IImageCompressor> m_compressor;
     // Per thumbnail variables
-#ifdef HAVE_EVAS
-    std::unique_ptr<Evas, void(*)(Evas*)> m_canvas;
-    std::unique_ptr<uint8_t[]> m_cropBuffer;
-#endif
     std::unique_ptr<uint8_t[]> m_buff;
     std::atomic_bool m_thumbnailRequired;
     uint32_t m_width;

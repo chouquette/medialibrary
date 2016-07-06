@@ -20,23 +20,11 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#include "VLCThumbnailer.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
-#include <cstring>
-#ifdef HAVE_JPEG
-#include <jpeglib.h>
-#if ( ( !defined(JPEG_LIB_VERSION_MAJOR) && !defined(JPEG_LIB_VERSION_MINOR) ) || \
-    ( JPEG_LIB_VERSION_MAJOR <= 8 && JPEG_LIB_VERSION_MINOR < 4 ) ) && \
-    ( !defined( JPEG_LIB_VERSION ) || JPEG_LIB_VERSION < 62 )
-//FIXME: I don't think we can expect this to work without VLC outputing BGR...
-#define JPEG_COLORSPACE JCS_EXT_BGR
-#else
-#define JPEG_COLORSPACE JCS_RGB
-#endif
-#elif defined(HAVE_EVAS)
-#include <Evas_Engine_Buffer.h>
-#endif
-#include <setjmp.h>
+#include "VLCThumbnailer.h"
 
 #include "Media.h"
 #include "File.h"
@@ -45,48 +33,28 @@
 #include "utils/VLCInstance.h"
 #include "ToString.h"
 
+#ifdef HAVE_JPEG
+#include "imagecompressors/JpegCompressor.h"
+#elif defined(HAVE_EVAS)
+#include "imagecompressors/EvasCompressor.h"
+#else
+#error No image compressor available
+#endif
+
 namespace medialibrary
 {
 
 VLCThumbnailer::VLCThumbnailer()
     : m_instance( VLCInstance::get() )
-#ifdef HAVE_EVAS
-    , m_canvas( nullptr, &evas_free )
-#endif
     , m_thumbnailRequired( false )
     , m_width( 0 )
     , m_height( 0 )
     , m_prevSize( 0 )
 {
-#ifdef HAVE_EVAS
-    static int fakeBuffer;
-#ifndef TIZEN
-    evas_init();
-#endif
-    auto method = evas_render_method_lookup("buffer");
-    m_canvas.reset( evas_new() );
-    if ( m_canvas == nullptr )
-        throw std::runtime_error( "Failed to allocate canvas" );
-    evas_output_method_set( m_canvas.get(), method );
-    evas_output_size_set(m_canvas.get(), 1, 1 );
-    evas_output_viewport_set( m_canvas.get(), 0, 0, 1, 1 );
-    auto einfo = (Evas_Engine_Info_Buffer *)evas_engine_info_get( m_canvas.get() );
-    einfo->info.depth_type = EVAS_ENGINE_BUFFER_DEPTH_ARGB32;
-    einfo->info.dest_buffer = &fakeBuffer;
-    einfo->info.dest_buffer_row_bytes = 4;
-    einfo->info.use_color_key = 0;
-    einfo->info.alpha_threshold = 0;
-    einfo->info.func.new_update_region = NULL;
-    einfo->info.func.free_update_region = NULL;
-    evas_engine_info_set( m_canvas.get(), (Evas_Engine_Info *)einfo );
-    m_cropBuffer.reset( new uint8_t[ DesiredWidth * DesiredHeight * Bpp ] );
-#endif
-}
-
-VLCThumbnailer::~VLCThumbnailer()
-{
-#if defined(HAVE_EVAS) && !defined(TIZEN)
-    evas_shutdown();
+#ifdef HAVE_JPEG
+    m_compressor.reset( new JpegCompressor );
+#elif defined(HAVE_EVAS)
+    m_compressor.reset( new EvasCompressor );
 #endif
 }
 
@@ -193,7 +161,7 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
     mp.setVideoFormatCallbacks(
         // Setup
         [this, &mp](char* chroma, unsigned int* width, unsigned int *height, unsigned int *pitches, unsigned int *lines) {
-            strcpy( chroma, VLC_FOURCC );
+            strcpy( chroma, m_compressor->fourCC() );
 
             const float inputAR = (float)*width / *height;
 
@@ -205,7 +173,7 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
                 m_width = inputAR * DesiredHeight;
                 m_height = DesiredHeight;
             }
-            auto size = m_width * m_height * Bpp;
+            auto size = m_width * m_height * m_compressor->bpp();
             // If our buffer isn't enough anymore, reallocate a new one.
             if ( size > m_prevSize )
             {
@@ -214,7 +182,7 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
             }
             *width = m_width;
             *height = m_height;
-            *pitches = m_width * Bpp;
+            *pitches = m_width * m_compressor->bpp();
             *lines = m_height;
             return 1;
         },
@@ -260,107 +228,18 @@ parser::Task::Status VLCThumbnailer::takeThumbnail( std::shared_ptr<Media> media
     return compress( media, file );
 }
 
-#ifdef HAVE_JPEG
-
-struct jpegError : public jpeg_error_mgr
-{
-    jmp_buf buff;
-    char message[JMSG_LENGTH_MAX];
-
-    static void jpegErrorHandler(j_common_ptr common)
-    {
-        auto error = reinterpret_cast<jpegError*>(common->err);
-        (*error->format_message)( common, error->message );
-        longjmp(error->buff, 1);
-    }
-};
-
-#endif
-
 parser::Task::Status VLCThumbnailer::compress( std::shared_ptr<Media> media, std::shared_ptr<File> file )
 {
     auto path = m_ml->thumbnailPath();
     path += "/";
-    path += toString( media->id() ) +
-#ifdef HAVE_EVAS
-            ".png";
-#else
-            ".jpg";
-#endif
+    path += toString( media->id() ) + "." + m_compressor->extension();
 
     auto hOffset = m_width > DesiredWidth ? ( m_width - DesiredWidth ) / 2 : 0;
     auto vOffset = m_height > DesiredHeight ? ( m_height - DesiredHeight ) / 2 : 0;
-    const auto stride = m_width * Bpp;
 
-#ifdef HAVE_JPEG
-    //FIXME: Abstract this away, though libjpeg requires a FILE*...
-    auto fOut = std::unique_ptr<FILE, int(*)(FILE*)>( fopen( path.c_str(), "wb" ), &fclose );
-    if ( fOut == nullptr )
-    {
-        LOG_ERROR("Failed to open thumbnail file ", path);
-        return parser::Task::Status::Error;
-    }
-
-    jpeg_compress_struct compInfo;
-    JSAMPROW row_pointer[1];
-
-    //libjpeg's default error handling is to call exit(), which would
-    //be slightly problematic...
-    jpegError err;
-    compInfo.err = jpeg_std_error(&err);
-    err.error_exit = jpegError::jpegErrorHandler;
-
-    if ( setjmp( err.buff ) )
-    {
-        LOG_ERROR("JPEG failure: ", err.message);
-        jpeg_destroy_compress(&compInfo);
-        return parser::Task::Status::Error;
-    }
-
-    jpeg_create_compress(&compInfo);
-    jpeg_stdio_dest(&compInfo, fOut.get());
-
-    compInfo.image_width = DesiredWidth;
-    compInfo.image_height = DesiredHeight;
-    compInfo.input_components = Bpp;
-    compInfo.in_color_space = JPEG_COLORSPACE;
-    jpeg_set_defaults( &compInfo );
-    jpeg_set_quality( &compInfo, 85, TRUE );
-
-    jpeg_start_compress( &compInfo, TRUE );
-
-    while (compInfo.next_scanline < DesiredHeight)
-    {
-        row_pointer[0] = &m_buff[(compInfo.next_scanline + vOffset ) * stride + hOffset];
-        jpeg_write_scanlines(&compInfo, row_pointer, 1);
-    }
-    jpeg_finish_compress(&compInfo);
-    jpeg_destroy_compress(&compInfo);
-#elif defined(HAVE_EVAS)
-    auto evas_obj = std::unique_ptr<Evas_Object, void(*)(Evas_Object*)>( evas_object_image_add( m_canvas.get() ), evas_object_del );
-    if ( evas_obj == nullptr )
-        return parser::Task::Status::Error;
-
-    uint8_t *p_buff = m_buff.get();
-    if ( DesiredWidth != m_width )
-    {
-        p_buff += vOffset * stride;
-        for ( auto y = 0u; y < DesiredHeight; ++y )
-        {
-            memcpy( m_cropBuffer.get() + y * DesiredWidth * Bpp, p_buff + (hOffset * Bpp), DesiredWidth * Bpp );
-            p_buff += stride;
-        }
-        vOffset = 0;
-        p_buff = m_cropBuffer.get();
-    }
-
-    evas_object_image_colorspace_set( evas_obj.get(), EVAS_COLORSPACE_ARGB8888 );
-    evas_object_image_size_set( evas_obj.get(), DesiredWidth, DesiredHeight );
-    evas_object_image_data_set( evas_obj.get(), p_buff + vOffset * stride );
-    evas_object_image_save( evas_obj.get(), path.c_str(), NULL, "quality=100 compress=9");
-#else
-#error FIXME
-#endif
+    if ( m_compressor->compress( m_buff.get(), path, m_width, m_height, DesiredWidth, DesiredHeight,
+                            hOffset, vOffset ) == false )
+        return parser::Task::Status::Fatal;
 
     media->setThumbnail( path );
     LOG_INFO( "Done generating ", file->mrl(), " thumbnail" );

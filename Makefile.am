@@ -125,6 +125,7 @@ noinst_HEADERS = \
 	src/metadata_services/MetadataParser.h \
 	src/metadata_services/vlc/VLCMetadataService.h \
 	src/metadata_services/vlc/VLCThumbnailer.h \
+	src/metadata_services/vlc/imagecompressors/IImageCompressor.h \
 	src/Movie.h \
 	src/parser/Parser.h \
 	src/parser/ParserService.h \
@@ -163,14 +164,24 @@ libmedialibrary_la_CPPFLAGS = \
 	$(SQLITE_CFLAGS) \
 	$(VLC_CFLAGS) \
 	$(VLCPP_CFLAGS) \
-	$(LIBJPEG_CFLAGS) \
 	$(NULL)
 
 libmedialibrary_la_LIBADD = \
 	$(SQLITE_LIBS) 			\
 	$(VLC_LIBS) 			\
-	$(LIBJPEG_LIBS)			\
 	$(NULL)
+
+if HAVE_EVAS
+libmedialibrary_la_SOURCES += src/metadata_services/vlc/imagecompressors/EvasCompressor.cpp
+noinst_HEADERS += src/metadata_services/vlc/imagecompressors/EvasCompressor.h
+else
+if HAVE_LIBJPEG
+libmedialibrary_la_SOURCES += src/metadata_services/vlc/imagecompressors/JpegCompressor.cpp
+noinst_HEADERS += src/metadata_services/vlc/imagecompressors/JpegCompressor.h
+libmedialibrary_la_CPPFLAGS += $(LIBJPEG_CFLAGS)
+libmedialibrary_la_LIBADD += $(LIBJPEG_LIBS)
+endif
+endif
 
 lib_LTLIBRARIES = libmedialibrary.la
 

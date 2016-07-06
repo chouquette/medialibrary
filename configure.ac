@@ -249,6 +249,12 @@ PKG_CHECK_MODULES(LIBJPEG, libjpeg, [
  ])
 AM_CONDITIONAL([HAVE_LIBJPEG], [test "${have_libjpeg}" = "yes"])
 
+PKG_CHECK_MODULES(EVAS, evas, [
+     have_evas="yes"
+     AC_DEFINE(HAVE_EVAS, 1, [Define to 1 if evas is available])
+ ], [have_evas="no"])
+AM_CONDITIONAL([HAVE_EVAS], [test "${have_evas}" = "yes"])
+
 AC_ARG_ENABLE(tests,AC_HELP_STRING([--disable-tests], [Disable build of automated tests suites]))
 AM_CONDITIONAL([HAVE_TESTS], [test "${enable_tests}" = "yes"])
 AS_IF([test "${enable_tests}" = "yes"], [
