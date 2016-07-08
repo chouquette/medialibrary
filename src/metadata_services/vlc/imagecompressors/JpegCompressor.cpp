@@ -30,6 +30,7 @@
 
 #include <jpeglib.h>
 
+#include <cstring>
 #include <memory>
 #include <setjmp.h>
 
@@ -75,7 +76,7 @@ bool JpegCompressor::compress( const uint8_t* buffer, const std::string& outputF
     auto fOut = std::unique_ptr<FILE, int(*)(FILE*)>( fopen( outputFile.c_str(), "wb" ), &fclose );
     if ( fOut == nullptr )
     {
-        LOG_ERROR( "Failed to open thumbnail file ", outputFile );
+        LOG_ERROR( "Failed to open thumbnail file ", outputFile, '(', strerror( errno ), ')' );
         return false;
     }
 
