@@ -35,9 +35,7 @@ class NoopCallback : public IMediaLibraryCb
     virtual void onMediaUpdated( std::vector<MediaPtr> ) override {}
     virtual void onMediaDeleted( std::vector<int64_t> ) override {}
     virtual void onDiscoveryStarted(const std::string&) override {}
-    virtual void onDiscoveryCompleted(const std::string&) override {}
-    virtual void onReloadStarted( const std::string& ) override {}
-    virtual void onReloadCompleted( const std::string& ) override {}
+    virtual void onDiscoveryCompleted( const std::string& ) override {}
     virtual void onArtistsAdded( std::vector<ArtistPtr> ) override {}
     virtual void onArtistsModified( std::vector<ArtistPtr> ) override {}
     virtual void onArtistsDeleted( std::vector<int64_t> ) override {}

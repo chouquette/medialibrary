@@ -45,7 +45,7 @@ public:
     bool waitForParsingComplete();
 
 private:
-    virtual void onDiscoveryCompleted(const std::string&) override;
+    virtual void onDiscoveryCompleted( const std::string& ) override;
     virtual void onParsingStatsUpdated(uint32_t percent) override;
 
     std::condition_variable m_parsingCompleteVar;

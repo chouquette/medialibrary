@@ -21,8 +21,10 @@ bool MockCallback::waitForParsingComplete()
     });
 }
 
-void MockCallback::onDiscoveryCompleted(const std::string&)
+void MockCallback::onDiscoveryCompleted(const std::string& entryPoint )
 {
+    if ( entryPoint.empty() == true )
+        return;
     std::lock_guard<std::mutex> lock( m_parsingMutex );
     m_discoveryCompleted = true;
 }

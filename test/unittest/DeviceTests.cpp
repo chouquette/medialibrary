@@ -108,7 +108,7 @@ TEST_F( DeviceEntity, SetPresent )
 
 TEST_F( DeviceFs, RemoveDisk )
 {
-    cbMock->prepareForWait( 1 );
+    cbMock->prepareForWait();
     ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
@@ -123,7 +123,7 @@ TEST_F( DeviceFs, RemoveDisk )
 
     cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->waitForReload();
+    bool reloaded = cbMock->wait();
     ASSERT_TRUE( reloaded );
 
     files = ml->files();
@@ -135,7 +135,7 @@ TEST_F( DeviceFs, RemoveDisk )
 
 TEST_F( DeviceFs, UnmountDisk )
 {
-    cbMock->prepareForWait( 1 );
+    cbMock->prepareForWait();
     ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
@@ -150,7 +150,7 @@ TEST_F( DeviceFs, UnmountDisk )
 
     cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->waitForReload();
+    bool reloaded = cbMock->wait();
     ASSERT_TRUE( reloaded );
 
     files = ml->files();
@@ -163,7 +163,7 @@ TEST_F( DeviceFs, UnmountDisk )
 
     cbMock->prepareForReload();
     Reload();
-    reloaded = cbMock->waitForReload();
+    reloaded = cbMock->wait();
     ASSERT_TRUE( reloaded );
 
     files = ml->files();
@@ -175,7 +175,7 @@ TEST_F( DeviceFs, UnmountDisk )
 
 TEST_F( DeviceFs, ReplugDisk )
 {
-    cbMock->prepareForWait( 1 );
+    cbMock->prepareForWait();
     ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
@@ -190,7 +190,7 @@ TEST_F( DeviceFs, ReplugDisk )
 
     cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->waitForReload();
+    bool reloaded = cbMock->wait();
     ASSERT_TRUE( reloaded );
 
     files = ml->files();
@@ -202,7 +202,7 @@ TEST_F( DeviceFs, ReplugDisk )
     fsMock->addDevice( device );
     cbMock->prepareForReload();
     Reload();
-    reloaded = cbMock->waitForReload();
+    reloaded = cbMock->wait();
     ASSERT_TRUE( reloaded );
 
     files = ml->files();
@@ -214,7 +214,7 @@ TEST_F( DeviceFs, ReplugDisk )
 
 TEST_F( DeviceFs, ReplugDiskWithExtraFiles )
 {
-    cbMock->prepareForWait( 1 );
+    cbMock->prepareForWait();
     ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
@@ -226,7 +226,7 @@ TEST_F( DeviceFs, ReplugDiskWithExtraFiles )
 
     cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->waitForReload();
+    bool reloaded = cbMock->wait();
     ASSERT_TRUE( reloaded );
 
     files = ml->files();
@@ -237,7 +237,7 @@ TEST_F( DeviceFs, ReplugDiskWithExtraFiles )
 
     cbMock->prepareForReload();
     Reload();
-    reloaded = cbMock->waitForReload();
+    reloaded = cbMock->wait();
     ASSERT_TRUE( reloaded );
 
     files = ml->files();
@@ -246,7 +246,7 @@ TEST_F( DeviceFs, ReplugDiskWithExtraFiles )
 
 TEST_F( DeviceFs, RemoveAlbum )
 {
-    cbMock->prepareForWait( 1 );
+    cbMock->prepareForWait();
     ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
@@ -279,7 +279,7 @@ TEST_F( DeviceFs, RemoveAlbum )
 
     cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->waitForReload();
+    bool reloaded = cbMock->wait();
     ASSERT_TRUE( reloaded );
 
     albums = ml->albums( SortingCriteria::Default, false );
@@ -290,7 +290,7 @@ TEST_F( DeviceFs, RemoveAlbum )
 
 TEST_F( DeviceFs, PartialAlbumRemoval )
 {
-    cbMock->prepareForWait( 1 );
+    cbMock->prepareForWait();
     ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
@@ -317,7 +317,7 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
     auto device = fsMock->removeDevice( RemovableDeviceUuid );
     cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->waitForReload();
+    bool reloaded = cbMock->wait();
     ASSERT_TRUE( reloaded );
 
     albums = ml->albums( SortingCriteria::Default, false );
@@ -330,7 +330,7 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
 
 TEST_F( DeviceFs, ChangeDevice )
 {
-    cbMock->prepareForWait( 1 );
+    cbMock->prepareForWait();
     ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
@@ -352,7 +352,7 @@ TEST_F( DeviceFs, ChangeDevice )
 
     cbMock->prepareForReload();
     Reload();
-    auto reloaded = cbMock->waitForReload();
+    auto reloaded = cbMock->wait();
     ASSERT_TRUE( reloaded );
 
     // Check that new files with the same name have different IDs
@@ -369,7 +369,7 @@ TEST_F( DeviceFs, ChangeDevice )
 
     cbMock->prepareForReload();
     Reload();
-    reloaded = cbMock->waitForReload();
+    reloaded = cbMock->wait();
     ASSERT_TRUE( reloaded );
 
     f = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );

@@ -34,23 +34,24 @@ namespace mock
 class WaitForDiscoveryComplete : public mock::NoopCallback
 {
 public:
-    virtual void onDiscoveryCompleted( const std::string& ) override
+    WaitForDiscoveryComplete()
+        : m_waitingReload( false )
     {
-        if ( --m_nbDiscoveryToWait == 0 )
-            m_cond.notify_all();
     }
 
-    virtual void onReloadCompleted( const std::string& ) override
+    virtual void onDiscoveryCompleted( const std::string& entryPoint ) override
     {
-        if ( --m_nbReloadExpected == 0 )
-            m_reloadCond.notify_all();
+        if ( entryPoint.empty() == true && m_waitingReload == false )
+            return;
+        m_done = true;
+        m_cond.notify_all();
     }
 
     bool wait()
     {
         std::unique_lock<std::mutex> lock( m_mutex );
         return m_cond.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
-            return m_nbDiscoveryToWait == 0;
+            return m_done.load();
         } );
     }
 
@@ -59,32 +60,23 @@ public:
     // would probably be to have an extra IMediaLibraryCb member to signal that a discovery has been queue.
     // however, in practice, this is a callback that says "yep, you've called IMediaLibrary::discover()"
     // which is probably lame.
-    void prepareForWait(int nbExpected)
+    void prepareForWait()
     {
-        m_nbDiscoveryToWait = nbExpected;
+        m_done = false;
+        m_waitingReload = false;
     }
 
     void prepareForReload()
     {
-        m_nbReloadExpected = 1;
-    }
-
-    bool waitForReload()
-    {
-        std::unique_lock<std::mutex> lock( m_mutex );
-        return m_reloadCond.wait_for( lock, std::chrono::seconds( 5 ), [this](){
-            return m_nbReloadExpected == 0;
-        });
+        m_done = false;
+        m_waitingReload = true;
     }
 
 private:
-    std::atomic_int m_nbDiscoveryToWait;
+    std::atomic_bool m_done;
+    std::atomic_bool m_waitingReload;
     std::condition_variable m_cond;
     std::mutex m_mutex;
-
-    std::atomic_int m_nbReloadExpected;
-    std::condition_variable m_reloadCond;
-    std::mutex m_reloadMutex;
 };
 
 }

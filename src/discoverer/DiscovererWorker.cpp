@@ -109,9 +109,9 @@ void DiscovererWorker::run()
             task = m_tasks.front();
             m_tasks.pop();
         }
+        m_cb->onDiscoveryStarted( task.entryPoint );
         if ( task.reload == false )
         {
-            m_cb->onDiscoveryStarted( task.entryPoint );
             for ( auto& d : m_discoverers )
             {
                 // Assume only one discoverer can handle an entrypoint.
@@ -128,11 +128,9 @@ void DiscovererWorker::run()
                 if ( m_run == false )
                     break;
             }
-            m_cb->onDiscoveryCompleted( task.entryPoint );
         }
         else
         {
-            m_cb->onReloadStarted( task.entryPoint );
             for ( auto& d : m_discoverers )
             {
                 try
@@ -149,8 +147,8 @@ void DiscovererWorker::run()
                 if ( m_run == false )
                     break;
             }
-            m_cb->onReloadCompleted( task.entryPoint );
         }
+        m_cb->onDiscoveryCompleted( task.entryPoint );
     }
     LOG_INFO( "Exiting DiscovererWorker thread" );
 }

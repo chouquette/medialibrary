@@ -102,10 +102,24 @@ public:
     // Tracks are never modified after their creation, so there is no tracksModified event
     virtual void onTracksDeleted( std::vector<int64_t> trackIds ) = 0;
 
+    /**
+     * @brief onDiscoveryStarted This callback will be invoked each time the discoverer enters a new
+     * entrypoint. Typically, everytime it enters a new folder
+     * @param entryPoint The entrypoint being discovered
+     * This callback can be invoked multiple times even though a single entry point was asked to be
+     * discovered. ie. In the case of a file system discovery, discovering a folder would make this
+     * callback being invoked for all subfolders
+     */
     virtual void onDiscoveryStarted( const std::string& entryPoint ) = 0;
+    /**
+     * @brief onDiscoveryCompleted Will be invoked when the discovery of a specified entrypoint has
+     * completed.
+     * ie. in the case of a filesystem discovery, once the folder, and all its files and subfolders
+     * have been discovered.
+     * This will also be invoked with an empty entryPoint when the initial reload of the medialibrary
+     * has completed.
+     */
     virtual void onDiscoveryCompleted( const std::string& entryPoint ) = 0;
-    virtual void onReloadStarted( const std::string& entryPoint ) = 0;
-    virtual void onReloadCompleted( const std::string& entryPoint ) = 0;
     /**
      * @brief onParsingStatsUpdated Called when the parser statistics are updated
      *
