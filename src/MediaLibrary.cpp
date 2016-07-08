@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <sys/stat.h>
 
 #include "Fixup.h"
 
@@ -197,6 +198,12 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
     if ( m_fsFactory == nullptr )
         m_fsFactory.reset( new factory::FileSystemFactory );
     Folder::setFileSystemFactory( m_fsFactory );
+    if ( mkdir( thumbnailPath.c_str(), S_IRWXU ) != 0 )
+    {
+        if ( errno != EEXIST )
+            throw std::runtime_error( std::string( "Failed to create thumbnail directory: " ) +
+                                      strerror( errno ) );
+    }
     m_thumbnailPath = thumbnailPath;
     m_callback = mlCallback;
     m_dbConnection.reset( new SqliteConnection( dbPath ) );
