@@ -30,6 +30,7 @@
 
 #include <jpeglib.h>
 
+#include <cerrno>
 #include <cstring>
 #include <memory>
 #include <setjmp.h>
