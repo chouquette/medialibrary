@@ -510,7 +510,7 @@ void MediaLibrary::startParser()
 void MediaLibrary::startDiscoverer()
 {
     m_discoverer.reset( new DiscovererWorker( this ) );
-    m_discoverer->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( m_fsFactory, this ) ) );
+    m_discoverer->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( m_fsFactory, this, m_callback ) ) );
     m_discoverer->reload();
 }
 

@@ -37,7 +37,7 @@ class Folder;
 class FsDiscoverer : public IDiscoverer
 {
 public:
-    FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, MediaLibrary* ml );
+    FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, MediaLibrary* ml , IMediaLibraryCb* cb );
     virtual bool discover(const std::string &entryPoint ) override;
     virtual void reload() override;
     virtual void reload( const std::string& entryPoint ) override;
@@ -58,6 +58,7 @@ private:
 private:
     MediaLibrary* m_ml;
     std::shared_ptr<factory::IFileSystem> m_fsFactory;
+    IMediaLibraryCb* m_cb;
 };
 
 }
