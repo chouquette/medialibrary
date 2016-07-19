@@ -205,7 +205,8 @@ libgtestmain_la_SOURCES = \
 	googletest/src/gtest_main.cc
 
 libgtest_la_CPPFLAGS = \
-	-I$(top_srcdir)/googletest
+	-I$(top_srcdir)/googletest \
+	-I$(top_srcdir)/googletest/include
 
 if HAVE_PTHREAD
 	libgtest_la_CPPFLAGS += -DGTEST_HAS_PTHREAD=1
@@ -248,6 +249,7 @@ unittest_SOURCES = \
 unittest_CXXFLAGS = 		\
 	$(MEDIALIB_CPPFLAGS) 	\
 	-I$(top_srcdir)/test	\
+	-I$(top_srcdir)/googletest/include \
 	$(NULL)
 
 unittest_LDADD = 		\
@@ -268,6 +270,7 @@ samples_CXXFLAGS = 			\
 	$(MEDIALIB_CPPFLAGS)	\
 	-DSRC_DIR=\"$(top_srcdir)\"	\
 	-I$(top_srcdir)/test	\
+	-I$(top_srcdir)/googletest/include \
 	$(NULL)
 
 samples_LDADD = 		\
