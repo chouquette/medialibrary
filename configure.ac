@@ -22,6 +22,7 @@ AC_SUBST(MEDIALIBRARY_MICRO)
 
 LT_INIT([win32-dll shared disable-static])
 AC_PROG_CXX
+AC_PROG_OBJCXX
 AX_CXX_COMPILE_STDCXX_11([noext])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -90,7 +91,8 @@ case "${host_os}" in
     CXX="${CXX} -stdlib=libc++ -std=c++11"
     CXXFLAGS="${CXXFLAGS} -D_INTL_REDIRECT_MACROS ${ARCH_flag}"
     CPPFLAGS="${CPPFLAGS} ${ARCH_flag}"
-    OBJCFLAGS="${OBJCFLAGS} -D_INTL_REDIRECT_MACROS -std=gnu11 ${ARCH_flag}"
+    OBJCXX="${OBJCXX} -stdlib=libc++ -std=c++11"
+    OBJCXXFLAGS="${OBJCXXFLAGS} -D_INTL_REDIRECT_MACROS ${ARCH_flag}"
     LDFLAGS="${LDFLAGS} -Wl,-headerpad_max_install_names ${ARCH_flag}"
 
     AC_EGREP_CPP(yes,
@@ -134,6 +136,7 @@ case "${host_os}" in
         CC="${CC} -isysroot ${with_macosx_sdk}"
         CXX="${CXX} -isysroot ${with_macosx_sdk}"
         OBJC="${OBJC} -isysroot ${with_macosx_sdk}"
+        OBJCXX="${OBJCXX} -isysroot ${with_macosx_sdk}"
         LD="${LD} -syslibroot ${with_macosx_sdk}"
     fi
     AC_ARG_WITH(macosx-version-min,
@@ -144,6 +147,7 @@ case "${host_os}" in
         CC="${CC} -mmacosx-version-min=${with_macosx_version_min}"
         CXX="${CXX} -mmacosx-version-min=${with_macosx_version_min}"
         OBJC="${OBJC} -mmacosx-version-min=${with_macosx_version_min}"
+        OBJCXX="${OBJCXX} -mmacosx-version-min=${with_macosx_version_min}"
         LD="${LD} -mmacosx_version_min=${with_macosx_version_min}"
     fi
     ;;
