@@ -155,9 +155,16 @@ if HAVE_LINUX
 libmedialibrary_la_SOURCES += \
 	src/filesystem/unix/Device.cpp
 endif
+if HAVE_DARWIN
+libmedialibrary_la_SOURCES += \
+	src/filesystem/darwin/Device.mm
+endif
 endif
 
 libmedialibrary_la_LDFLAGS = -no-undefined -export-symbols-regex 'NewMediaLibrary'
+if HAVE_DARWIN
+libmedialibrary_la_LDFLAGS += -Wl,-undefined,dynamic_lookup,-framework,Foundation
+endif
 
 libmedialibrary_la_CPPFLAGS = \
 	$(MEDIALIB_CPPFLAGS) \
