@@ -149,6 +149,7 @@ case "${host_os}" in
         OBJC="${OBJC} -mmacosx-version-min=${with_macosx_version_min}"
         OBJCXX="${OBJCXX} -mmacosx-version-min=${with_macosx_version_min}"
         LD="${LD} -mmacosx_version_min=${with_macosx_version_min}"
+        OBJCXXLD="${OBJCXXLD} -mmacosx_version_min=${with_macosx_version_min}"
     fi
     ;;
   *mingw32* | *cygwin* | *wince* | *mingwce*)
