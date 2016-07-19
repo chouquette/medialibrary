@@ -26,6 +26,7 @@
 #include <string>
 #include <memory>
 #include <algorithm>
+#include <cstdlib>
 
 #include "filesystem/IDirectory.h"
 #include "filesystem/IFile.h"
