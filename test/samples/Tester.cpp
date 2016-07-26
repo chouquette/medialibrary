@@ -16,7 +16,7 @@ bool MockCallback::waitForParsingComplete()
     m_done = false;
     m_discoveryCompleted = false;
     // Wait for a while, generating snapshots can be heavy...
-    return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds( 30 ), [this]() {
+    return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
         return m_done;
     });
 }
