@@ -65,9 +65,9 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
         return true;
     auto blist = blacklist();
     if ( isBlacklisted( *fsDir, blist ) == true )
-        return false;
+        return true;
     if ( hasDotNoMediaFile( *fsDir ) )
-        return false;
+        return true;
     return addFolder( *fsDir, nullptr, blist );
 }
 
