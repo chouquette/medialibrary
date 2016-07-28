@@ -47,7 +47,7 @@ SqliteConnection::Handle SqliteConnection::getConn()
 {
     std::unique_lock<std::mutex> lock( m_connMutex );
     sqlite3* dbConnection;
-    auto it = m_conns.find( std::this_thread::get_id() );
+    auto it = m_conns.find( compat::this_thread::get_id() );
     if ( it == end( m_conns ) )
     {
         auto res = sqlite3_open( m_dbPath.c_str(), &dbConnection );
@@ -62,7 +62,7 @@ SqliteConnection::Handle SqliteConnection::getConn()
         s.execute();
         while ( s.row() != nullptr )
             ;
-        m_conns.emplace( std::this_thread::get_id(), std::move( dbConn ) );
+        m_conns.emplace( compat::this_thread::get_id(), std::move( dbConn ) );
         sqlite3_update_hook( dbConnection, &updateHook, this );
         return dbConnection;
     }

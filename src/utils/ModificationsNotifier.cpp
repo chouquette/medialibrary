@@ -47,8 +47,8 @@ ModificationNotifier::~ModificationNotifier()
 
 void ModificationNotifier::start()
 {
-    assert( m_notifierThread.get_id() == std::thread::id{} );
-    m_notifierThread = std::thread{ &ModificationNotifier::run, this };
+    assert( m_notifierThread.get_id() == compat::Thread::id{} );
+    m_notifierThread = compat::Thread{ &ModificationNotifier::run, this };
 }
 
 void ModificationNotifier::notifyMediaCreation( MediaPtr media )

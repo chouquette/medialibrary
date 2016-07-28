@@ -219,6 +219,15 @@ AM_CONDITIONAL(HAVE_IOS,     test "${HAVE_IOS}" = "1")
 AM_CONDITIONAL(HAVE_OSX,     test "${HAVE_OSX}" = "1")
 AM_CONDITIONAL(HAVE_TVOS,    test "${HAVE_TVOS}" = "1")
 
+AC_LANG_PUSH([C++])
+AC_MSG_CHECKING([c++11 thread support])
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([#include <thread>
+                   int main() { std::thread t; }])], [
+        AC_MSG_RESULT([ok])
+        AC_DEFINE(CXX11_THREADS, 1, [Defined to 1 if C++11 threads are supported])
+    ],[ AC_MSG_RESULT([no])])
+AC_LANG_PUSH([C++])
+
 dnl Android is linux, but a bit different
 AS_IF([test "$SYS" = linux],[
     AC_MSG_CHECKING([for an Android system])

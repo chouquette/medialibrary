@@ -28,9 +28,9 @@
 #include <mutex>
 #include <queue>
 #include <string>
-#include <thread>
 #include <vector>
 
+#include "compat/Thread.h"
 #include "discoverer/IDiscoverer.h"
 
 namespace medialibrary
@@ -62,7 +62,7 @@ private:
         bool reload;
     };
 
-    std::thread m_thread;
+    compat::Thread m_thread;
     std::queue<Task> m_tasks;
     std::mutex m_mutex;
     std::condition_variable m_cond;

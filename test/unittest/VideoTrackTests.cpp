@@ -61,8 +61,8 @@ TEST_F( VideoTracks, FetchTracks )
     ASSERT_EQ( ts.size(), 2u );
     t2 = ts[0];
     ASSERT_EQ( t2->codec(), "H264" );
-    ASSERT_EQ( t2->width(), 1920 );
-    ASSERT_EQ( t2->height(), 1080 );
+    ASSERT_EQ( t2->width(), 1920u );
+    ASSERT_EQ( t2->height(), 1080u );
     ASSERT_EQ( t2->fps(), 29.97f );
     ASSERT_EQ( t2->language(), "l1" );
     ASSERT_EQ( t2->description(), "d1" );

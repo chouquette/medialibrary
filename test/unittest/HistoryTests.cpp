@@ -26,6 +26,8 @@
 #include "History.h"
 #include "Media.h"
 
+#include <thread>
+
 class HistoryTest : public Tests
 {
 

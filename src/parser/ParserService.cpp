@@ -99,7 +99,7 @@ void ParserService::initialize( MediaLibrary* ml, IParserCb* parserCb )
 
 uint8_t ParserService::nbNativeThreads() const
 {
-    auto nbProcs = std::thread::hardware_concurrency();
+    auto nbProcs = compat::Thread::hardware_concurrency();
     if ( nbProcs == 0 )
         return 1;
     return nbProcs;

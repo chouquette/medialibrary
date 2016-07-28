@@ -30,6 +30,8 @@
 #include "AlbumTrack.h"
 #include "mocks/FileSystem.h"
 
+#include <thread>
+
 class Medias : public Tests
 {
 };

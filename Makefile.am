@@ -140,6 +140,7 @@ noinst_HEADERS = \
 	src/utils/SWMRLock.h \
 	src/utils/VLCInstance.h \
 	src/VideoTrack.h \
+	src/compat/Thread.h \
 	$(NULL)
 
 

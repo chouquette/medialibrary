@@ -82,10 +82,10 @@ void DiscovererWorker::enqueue( const std::string& entryPoint, bool reload )
     std::unique_lock<std::mutex> lock( m_mutex );
 
     m_tasks.emplace( entryPoint, reload );
-    if ( m_thread.get_id() == std::thread::id{} )
+    if ( m_thread.get_id() == compat::Thread::id{} )
     {
         m_run = true;
-        m_thread = std::thread( &DiscovererWorker::run, this );
+        m_thread = compat::Thread( &DiscovererWorker::run, this );
     }
     // Since we just added an element, let's not check for size == 0 :)
     else if ( m_tasks.size() == 1 )

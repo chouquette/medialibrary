@@ -26,12 +26,12 @@
 #include <condition_variable>
 #include <functional>
 #include <mutex>
-#include <thread>
 #include <vector>
 #include <chrono>
 
 #include "medialibrary/Types.h"
 #include "Types.h"
+#include "compat/Thread.h"
 
 namespace medialibrary
 {
@@ -151,7 +151,7 @@ private:
     // Notifier thread
     std::mutex m_lock;
     std::condition_variable m_cond;
-    std::thread m_notifierThread;
+    compat::Thread m_notifierThread;
     std::atomic_bool m_stop;
     std::chrono::time_point<std::chrono::steady_clock> m_timeout;
 };
