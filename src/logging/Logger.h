@@ -141,9 +141,7 @@ private:
 
 }
 
-#if defined(__clang__) || defined(__GNUG__)
-# define LOG_ORIGIN __PRETTY_FUNCTION__, ':', __LINE__
-#elif defined(_MSC_VER)
+#if defined(_MSC_VER)
 # define LOG_ORIGIN __FUNCDNAME__
 #else
 # define LOG_ORIGIN __FILE__, ":", __LINE__, ' ', __func__
