@@ -289,3 +289,6 @@ samples_LDADD = 		\
 
 endif
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = medialibrary.pc
+EXTRA_DIST = medialibrary.pc

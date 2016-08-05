@@ -280,6 +280,7 @@ PKG_INSTALLDIR
 
 AC_CONFIG_FILES([
 Makefile
+medialibrary.pc
 ])
 
 AC_OUTPUT
