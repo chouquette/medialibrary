@@ -24,7 +24,7 @@
 
 #include <string>
 #include <exception>
-#include "ToString.h"
+#include "utils/ToString.h"
 
 namespace medialibrary
 {

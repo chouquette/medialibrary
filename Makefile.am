@@ -139,6 +139,7 @@ noinst_HEADERS = \
 	src/utils/ModificationsNotifier.h \
 	src/utils/SWMRLock.h \
 	src/utils/VLCInstance.h \
+	src/utils/ToString.h \
 	src/VideoTrack.h \
 	src/compat/Thread.h \
 	$(NULL)
