@@ -157,14 +157,9 @@ libmedialibrary_la_SOURCES += \
 	src/filesystem/unix/Device.cpp
 endif
 if HAVE_DARWIN
-libmedialibrary_la_SOURCES += \
+libmedialibrary_macos_la_SOURCES = \
 	src/filesystem/darwin/Device.mm
 endif
-endif
-
-libmedialibrary_la_LDFLAGS = -no-undefined -export-symbols-regex 'NewMediaLibrary'
-if HAVE_DARWIN
-libmedialibrary_la_LDFLAGS += -Wl,-undefined,dynamic_lookup,-framework,Foundation
 endif
 
 libmedialibrary_la_CPPFLAGS = \
@@ -179,6 +174,13 @@ libmedialibrary_la_LIBADD = \
 	$(VLC_LIBS) 			\
 	$(NULL)
 
+libmedialibrary_la_LDFLAGS = -no-undefined -export-symbols-regex 'NewMediaLibrary'
+if HAVE_DARWIN
+libmedialibrary_la_LIBADD += libmedialibrary_macos.la
+libmedialibrary_la_LDFLAGS += -Wl,-undefined,dynamic_lookup,-framework,Foundation
+endif
+
+
 if HAVE_EVAS
 libmedialibrary_la_SOURCES += src/metadata_services/vlc/imagecompressors/EvasCompressor.cpp
 noinst_HEADERS += src/metadata_services/vlc/imagecompressors/EvasCompressor.h
@@ -192,6 +194,9 @@ endif
 endif
 
 lib_LTLIBRARIES = libmedialibrary.la
+if HAVE_DARWIN
+lib_LTLIBRARIES += libmedialibrary_macos.la
+endif
 
 if HAVE_TESTS
 
