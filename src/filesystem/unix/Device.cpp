@@ -209,11 +209,13 @@ Device::DeviceCacheMap Device::populateDeviceCache()
             uuid = it->second;
         else
         {
+#ifndef __ANDROID__
             deviceName = deviceFromDeviceMapper( devicePath );
             it = Devices.find( deviceName );
             if ( it != end( Devices ) )
                 uuid = it->second;
             else
+#endif
             {
                 LOG_ERROR( "Failed to resolve mountpoint ", mountpoint, " to any known device" );
                 continue;
