@@ -116,7 +116,6 @@ bool Device::populateCache()
 
 Device::DeviceMap Device::listDevices()
 {
-
     static const std::vector<std::string> deviceBlacklist = { "loop", "dm-" };
     const std::string devPath = "/dev/disk/by-uuid/";
     // Don't use fs::Directory to iterate, as it resolves the symbolic links automatically.
