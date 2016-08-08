@@ -42,8 +42,6 @@ namespace policy
     int64_t Folder::* const FolderTable::PrimaryKey = &Folder::m_id;
 }
 
-std::shared_ptr<factory::IFileSystem> Folder::FsFactory;
-
 Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
 {
@@ -123,7 +121,7 @@ bool Folder::blacklist( MediaLibraryPtr ml, const std::string& fullPath )
         // Let the foreign key destroy everything beneath this folder
         destroy( ml, f->id() );
     }
-    auto folderFs = FsFactory->createDirectory( fullPath );
+    auto folderFs = ml->fsFactory()->createDirectory( fullPath );
     if ( folderFs == nullptr )
         return false;
     auto deviceFs = folderFs->device();
@@ -140,11 +138,6 @@ bool Folder::blacklist( MediaLibraryPtr ml, const std::string& fullPath )
     return sqlite::Tools::executeInsert( ml->getConn(), req, path, nullptr, true, device->id(), deviceFs->isRemovable() ) != 0;
 }
 
-void Folder::setFileSystemFactory( std::shared_ptr<factory::IFileSystem> fsFactory )
-{
-    FsFactory = fsFactory;
-}
-
 std::shared_ptr<Folder> Folder::fromPath( MediaLibraryPtr ml, const std::string& fullPath )
 {
     return fromPath( ml, fullPath, false );
@@ -157,7 +150,7 @@ std::shared_ptr<Folder> Folder::blacklistedFolder( MediaLibraryPtr ml, const std
 
 std::shared_ptr<Folder> Folder::fromPath( MediaLibraryPtr ml, const std::string& fullPath, bool blacklisted )
 {
-    auto folderFs = FsFactory->createDirectory( fullPath );
+    auto folderFs = ml->fsFactory()->createDirectory( fullPath );
     if ( folderFs == nullptr )
         return nullptr;
     auto deviceFs = folderFs->device();
@@ -201,7 +194,7 @@ const std::string& Folder::path() const
         return m_fullPath;
 
     auto device = Device::fetch( m_ml, m_deviceId );
-    auto deviceFs = FsFactory->createDevice( device->uuid() );
+    auto deviceFs = m_ml->fsFactory()->createDevice( device->uuid() );
     m_deviceMountpoint = deviceFs->mountpoint();
     m_fullPath = m_deviceMountpoint.get() + m_path;
     return m_fullPath;

@@ -128,6 +128,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         std::shared_ptr<ModificationNotifier> getNotifier() const;
 
         virtual IDeviceListerCb* setDeviceLister( DeviceListerPtr lister ) override;
+        std::shared_ptr<factory::IFileSystem> fsFactory() const;
 
     public:
         static const uint32_t DbModelVersion;

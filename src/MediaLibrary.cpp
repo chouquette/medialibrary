@@ -205,7 +205,6 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
     }
     if ( m_fsFactory == nullptr )
         m_fsFactory.reset( new factory::FileSystemFactory( m_deviceLister ) );
-    Folder::setFileSystemFactory( m_fsFactory );
     if ( mkdir( thumbnailPath.c_str(), S_IRWXU ) != 0 )
     {
         if ( errno != EEXIST )
@@ -594,6 +593,11 @@ IDeviceListerCb* MediaLibrary::setDeviceLister( DeviceListerPtr lister )
 {
     m_deviceLister = lister;
     return static_cast<IDeviceListerCb*>( this );
+}
+
+std::shared_ptr<factory::IFileSystem> MediaLibrary::fsFactory() const
+{
+    return m_fsFactory;
 }
 
 void MediaLibrary::discover( const std::string &entryPoint )
