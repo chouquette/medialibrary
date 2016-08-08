@@ -156,17 +156,18 @@ libmedialibrary_la_SOURCES += \
 else
 libmedialibrary_la_SOURCES += \
 	src/filesystem/unix/Directory.cpp \
-	src/filesystem/unix/File.cpp
+	src/filesystem/unix/File.cpp \
+	src/filesystem/unix/Device.cpp \
+	$(NULL)
 if HAVE_LINUX
 libmedialibrary_la_SOURCES += \
-	src/filesystem/unix/Device.cpp \
 	src/filesystem/unix/DeviceLister.cpp \
 	$(NULL)
 endif
 if HAVE_DARWIN
 libmedialibrary_macos_la_OBJCXXFLAGS = $(libmedialibrary_la_CPPFLAGS)
 libmedialibrary_macos_la_SOURCES = \
-	src/filesystem/darwin/Device.mm
+	src/filesystem/darwin/DeviceLister.mm
 endif
 endif
 
