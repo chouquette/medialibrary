@@ -2,7 +2,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 AM_CPPFLAGS = -Wall -Wsign-compare -Wextra -Wstrict-aliasing -Wstrict-overflow \
 			  -Wformat=2 -Wno-unused-parameter -Wcast-align -Wpointer-arith \
-			  -Wwrite-strings -Wlogical-op \
+			  -Wwrite-strings \
 			  -pipe
 
 MEDIALIB_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/include -I$(top_srcdir)/src
