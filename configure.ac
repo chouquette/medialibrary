@@ -276,6 +276,8 @@ AS_IF([test "${enable_tests}" = "yes"], [
 ])
 AM_CONDITIONAL([HAVE_PTHREAD], [test "${have_pthread}" = "yes"])
 
+AH_BOTTOM([#include "Fixup.h"])
+
 PKG_INSTALLDIR
 
 AC_CONFIG_FILES([

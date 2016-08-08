@@ -20,11 +20,13 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include <algorithm>
 #include <functional>
 #include <sys/stat.h>
-
-#include "Fixup.h"
 
 #include "Album.h"
 #include "AlbumTrack.h"
