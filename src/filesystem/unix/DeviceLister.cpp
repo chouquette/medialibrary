@@ -137,6 +137,7 @@ std::string DeviceLister::deviceFromDeviceMapper( const std::string& devicePath 
             << devicePath << " (" << strerror(errno) << ')';
         throw std::runtime_error( err.str() );
     }
+    LOG_INFO( "Resolved ", devicePath, " to ", linkPath, " device mapper" );
     const auto dmName = utils::file::fileName( linkPath );
     std::string dmSlavePath = "/sys/block/" + dmName + "/slaves";
     std::unique_ptr<DIR, int(*)(DIR*)> dir( opendir( dmSlavePath.c_str() ), &closedir );
