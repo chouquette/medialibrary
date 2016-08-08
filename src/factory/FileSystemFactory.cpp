@@ -20,7 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#include "factory/FileSystem.h"
+#include "factory/FileSystemFactory.h"
 #include "filesystem/IDirectory.h"
 #include "filesystem/IFile.h"
 #include "logging/Logger.h"

@@ -25,7 +25,7 @@
 #include <algorithm>
 #include <queue>
 
-#include "factory/FileSystem.h"
+#include "factory/FileSystemFactory.h"
 #include "filesystem/IDevice.h"
 #include "Media.h"
 #include "File.h"

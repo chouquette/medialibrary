@@ -61,7 +61,7 @@
 
 // FileSystem
 #include "factory/DeviceListerFactory.h"
-#include "factory/FileSystem.h"
+#include "factory/FileSystemFactory.h"
 
 namespace medialibrary
 {

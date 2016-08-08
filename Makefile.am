@@ -54,7 +54,7 @@ libmedialibrary_la_SOURCES = \
 	src/database/SqliteTransaction.cpp \
 	src/discoverer/DiscovererWorker.cpp \
 	src/discoverer/FsDiscoverer.cpp \
-	src/factory/FileSystem.cpp \
+	src/factory/FileSystemFactory.cpp \
 	src/factory/DeviceListerFactory.cpp \
 	src/filesystem/common/CommonFile.cpp \
 	src/logging/IostreamLogger.cpp \
@@ -107,7 +107,7 @@ noinst_HEADERS = \
 	src/Device.h \
 	src/discoverer/DiscovererWorker.h \
 	src/discoverer/FsDiscoverer.h \
-	src/factory/FileSystem.h \
+	src/factory/FileSystemFactory.h \
 	src/factory/DeviceListerFactory.h \
 	src/File.h \
 	src/filesystem/common/CommonFile.h \
