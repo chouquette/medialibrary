@@ -228,6 +228,14 @@ AC_COMPILE_IFELSE([AC_LANG_SOURCE([#include <thread>
     ],[ AC_MSG_RESULT([no])])
 AC_LANG_PUSH([C++])
 
+AC_MSG_CHECKING([c++11 thread_local support])
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([thread_local int seaOtter = 0;
+                   int main() {}])], [
+        AC_MSG_RESULT([ok])
+        AC_DEFINE(CXX11_THREAD_LOCAL, 1, [Defined to 1 if C++11 thread_local storage qualifier is supported])
+    ],[ AC_MSG_RESULT([no])])
+AC_LANG_POP([C++])
+
 dnl Android is linux, but a bit different
 AS_IF([test "$SYS" = linux],[
     AC_MSG_CHECKING([for an Android system])
