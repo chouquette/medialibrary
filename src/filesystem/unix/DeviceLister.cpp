@@ -109,8 +109,13 @@ DeviceLister::MountpointMap DeviceLister::listMountpoints() const
         if ( std::find( begin( allowedFsType ), end( allowedFsType ), s->mnt_type ) == end( allowedFsType ) )
             continue;
         auto deviceName = s->mnt_fsname;
-        LOG_INFO( "Discovered mountpoint ", deviceName, " mounted on ", s->mnt_dir, " (", s->mnt_type, ')' );
-        res[deviceName] = s->mnt_dir;
+        if ( res.count( deviceName ) == 0 )
+        {
+            LOG_INFO( "Discovered mountpoint ", deviceName, " mounted on ", s->mnt_dir, " (", s->mnt_type, ')' );
+            res[deviceName] = s->mnt_dir;
+        }
+        else
+            LOG_INFO( "Ignoring duplicated mountpoint (", s->mnt_dir, ") for device ", deviceName );
         errno = 0;
     }
     if ( errno != 0 )
