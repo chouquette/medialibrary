@@ -164,6 +164,7 @@ libmedialibrary_la_SOURCES += \
 	$(NULL)
 endif
 if HAVE_DARWIN
+libmedialibrary_macos_la_OBJCXXFLAGS = $(libmedialibrary_la_CPPFLAGS)
 libmedialibrary_macos_la_SOURCES = \
 	src/filesystem/darwin/Device.mm
 endif
