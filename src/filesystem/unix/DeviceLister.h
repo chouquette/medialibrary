@@ -22,46 +22,31 @@
 
 #pragma once
 
-#include <memory>
+#include "IDeviceLister.h"
+
+#include <unordered_map>
 
 namespace medialibrary
 {
+namespace fs
+{
 
-class IAlbum;
-class IAlbumTrack;
-class IAudioTrack;
-class IFile;
-class IGenre;
-class IHistoryEntry;
-class IMedia;
-class ILabel;
-class IMetadataService;
-class IMovie;
-class IShow;
-class IShowEpisode;
-class IVideoTrack;
-class ILogger;
-class IArtist;
-class IPlaylist;
-class IMediaLibraryCb;
-class IDeviceLister;
-class IDeviceListerCb;
+class DeviceLister : public IDeviceLister
+{
+private:
+    // Device name / UUID map
+    using DeviceMap = std::unordered_map<std::string, std::string>;
+    // Device path / Mountpoints map
+    using MountpointMap = std::unordered_map<std::string, std::string>;
 
-using AlbumPtr = std::shared_ptr<IAlbum>;
-using AlbumTrackPtr = std::shared_ptr<IAlbumTrack>;
-using ArtistPtr = std::shared_ptr<IArtist>;
-using AudioTrackPtr = std::shared_ptr<IAudioTrack>;
-using FilePtr = std::shared_ptr<IFile>;
-using GenrePtr = std::shared_ptr<IGenre>;
-using HistoryPtr = std::shared_ptr<IHistoryEntry>;
-using LabelPtr = std::shared_ptr<ILabel>;
-using MediaPtr = std::shared_ptr<IMedia>;
-using MoviePtr = std::shared_ptr<IMovie>;
-using PlaylistPtr = std::shared_ptr<IPlaylist>;
-using ShowEpisodePtr = std::shared_ptr<IShowEpisode>;
-using ShowPtr = std::shared_ptr<IShow>;
-using VideoTrackPtr = std::shared_ptr<IVideoTrack>;
-using DeviceListerPtr = std::shared_ptr<IDeviceLister>;
+    DeviceMap listDevices() const;
+    MountpointMap listMountpoints() const;
+    std::string deviceFromDeviceMapper( const std::string& devicePath ) const;
+    bool isRemovable( const std::string& deviceName, const std::string& mountpoint ) const;
+
+public:
+    virtual std::vector<std::tuple<std::string, std::string, bool>> devices() const override;
+};
 
 }
-
+}

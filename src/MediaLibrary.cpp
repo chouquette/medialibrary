@@ -59,6 +59,8 @@
 #include "metadata_services/vlc/VLCThumbnailer.h"
 #include "metadata_services/MetadataParser.h"
 
+// FileSystem
+#include "factory/DeviceListerFactory.h"
 #include "factory/FileSystem.h"
 
 namespace medialibrary
@@ -195,8 +197,14 @@ bool MediaLibrary::validateSearchPattern( const std::string& pattern )
 
 bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* mlCallback )
 {
+    if ( m_deviceLister == nullptr )
+    {
+        m_deviceLister = factory::createDeviceLister();
+        if ( m_deviceLister == nullptr )
+            return false;
+    }
     if ( m_fsFactory == nullptr )
-        m_fsFactory.reset( new factory::FileSystemFactory );
+        m_fsFactory.reset( new factory::FileSystemFactory( m_deviceLister ) );
     Folder::setFileSystemFactory( m_fsFactory );
     if ( mkdir( thumbnailPath.c_str(), S_IRWXU ) != 0 )
     {
@@ -582,6 +590,12 @@ std::shared_ptr<ModificationNotifier> MediaLibrary::getNotifier() const
     return m_modificationNotifier;
 }
 
+IDeviceListerCb* MediaLibrary::setDeviceLister( DeviceListerPtr lister )
+{
+    m_deviceLister = lister;
+    return static_cast<IDeviceListerCb*>( this );
+}
+
 void MediaLibrary::discover( const std::string &entryPoint )
 {
     if ( m_discoverer != nullptr )
@@ -619,6 +633,14 @@ const std::string& MediaLibrary::thumbnailPath() const
 void MediaLibrary::setLogger( ILogger* logger )
 {
     Log::SetLogger( logger );
+}
+
+void MediaLibrary::onDevicePlugged( const std::string&, const std::string& )
+{
+}
+
+void MediaLibrary::onDeviceUnplugged( const std::string& )
+{
 }
 
 }

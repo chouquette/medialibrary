@@ -22,17 +22,8 @@
 
 #include "Device.h"
 #include "Directory.h"
-#include "utils/Filename.h"
 #include "logging/Logger.h"
-
-#include <algorithm>
-#include <cstring>
-#include <cstdio>
-#include <dirent.h>
-#include <limits.h>
-#include <mntent.h>
-#include <unistd.h>
-#include <sys/types.h>
+#include "IDeviceLister.h"
 
 namespace
 {
@@ -50,9 +41,8 @@ namespace medialibrary
 namespace fs
 {
 
-Device::DeviceMap Device::Devices;
-Device::MountpointMap Device::Mountpoints;
-Device::DeviceCacheMap Device::DeviceCache;
+Cache<Device::DeviceCacheMap> Device::DeviceCache;
+DeviceListerPtr Device::DeviceLister;
 
 Device::Device( const std::string& uuid, const std::string& mountpoint, bool isRemovable )
     : m_uuid( uuid )
@@ -86,8 +76,9 @@ const std::string&Device::mountpoint() const
 
 std::shared_ptr<IDevice> Device::fromPath( const std::string& path )
 {
+    auto lock = DeviceCache.lock();
     std::shared_ptr<IDevice> res;
-    for ( const auto& p : DeviceCache )
+    for ( const auto& p : DeviceCache.get() )
     {
         if ( path.find( p.second->mountpoint() ) == 0 )
         {
@@ -100,197 +91,40 @@ std::shared_ptr<IDevice> Device::fromPath( const std::string& path )
 
 std::shared_ptr<IDevice> Device::fromUuid( const std::string& uuid )
 {
-    auto it = DeviceCache.find( uuid );
-    if ( it != end( DeviceCache ) )
+    auto lock = DeviceCache.lock();
+
+    auto it = DeviceCache.get().find( uuid );
+    if ( it != end( DeviceCache.get() ) )
         return it->second;
     return nullptr;
 }
 
-bool Device::populateCache()
+void Device::setDeviceLister( DeviceListerPtr lister )
 {
-    Devices = listDevices();
-    Mountpoints = listMountpoints();
-    DeviceCache = populateDeviceCache();
-    return true;
+    auto lock = DeviceCache.lock();
+    DeviceLister = lister;
+    refreshDeviceCacheLocked();
 }
 
-Device::DeviceMap Device::listDevices()
+void Device::refreshDeviceCache()
 {
-    static const std::vector<std::string> deviceBlacklist = { "loop", "dm-" };
-    const std::string devPath = "/dev/disk/by-uuid/";
-    // Don't use fs::Directory to iterate, as it resolves the symbolic links automatically.
-    // We need the link name & what it points to.
-    std::unique_ptr<DIR, int(*)(DIR*)> dir( opendir( devPath.c_str() ), &closedir );
-    if ( dir == nullptr )
-    {
-        std::stringstream err;
-        err << "Failed to open /dev/disk/by-uuid: " << strerror(errno);
-        throw std::runtime_error( err.str() );
-    }
-    DeviceMap res;
-    dirent* result = nullptr;
-
-    while ( ( result = readdir( dir.get() ) ) != nullptr )
-    {
-        if ( strcmp( result->d_name, "." ) == 0 ||
-             strcmp( result->d_name, ".." ) == 0 )
-        {
-            continue;
-        }
-        std::string path = devPath + result->d_name;
-        char linkPath[PATH_MAX] = {};
-        if ( readlink( path.c_str(), linkPath, PATH_MAX ) < 0 )
-        {
-            std::stringstream err;
-            err << "Failed to resolve uuid -> device link: "
-                << result->d_name << " (" << strerror(errno) << ')';
-            throw std::runtime_error( err.str() );
-        }
-        auto deviceName = utils::file::fileName( linkPath );
-        if ( std::find_if( begin( deviceBlacklist ), end( deviceBlacklist ), [&deviceName]( const std::string& pattern ) {
-                return deviceName.length() >= pattern.length() && deviceName.find( pattern ) == 0;
-            }) != end( deviceBlacklist ) )
-            continue;
-        auto uuid = result->d_name;
-        LOG_INFO( "Discovered device ", deviceName, " -> {", uuid, '}' );
-        res[deviceName] = uuid;
-    }
-    return res;
+    auto lock = DeviceCache.lock();
+    refreshDeviceCacheLocked();
 }
 
-Device::MountpointMap Device::listMountpoints()
+void Device::refreshDeviceCacheLocked()
 {
-    static const std::vector<std::string> allowedFsType = { "vfat", "exfat", "sdcardfs", "fuse",
-                                                            "ntfs", "fat32", "ext3", "ext4", "esdfs" };
-    MountpointMap res;
-    errno = 0;
-    mntent* s;
-#ifndef __ANDROID__
-    char buff[512];
-    mntent smnt;
-    FILE* f = setmntent("/etc/mtab", "r");
-    if ( f == nullptr )
-        throw std::runtime_error( "Failed to read /etc/mtab" );
-    std::unique_ptr<FILE, int(*)(FILE*)> fPtr( f, &endmntent );
-    while ( getmntent_r( f, &smnt, buff, sizeof(buff) ) != nullptr )
+    if ( DeviceCache.isCached() == false )
+        DeviceCache = DeviceCacheMap{};
+    DeviceCache.get().clear();
+    auto devices = DeviceLister->devices();
+    for ( const auto& d : devices )
     {
-        s = &smnt;
-#else
-    FILE* f = fopen( "/proc/mounts", "r" );
-    std::unique_ptr<FILE, int(*)(FILE*)> fPtr( f, &fclose );
-    while ( ( s = getmntent( f ) ) )
-    {
-#endif
-        if ( std::find( begin( allowedFsType ), end( allowedFsType ), s->mnt_type ) == end( allowedFsType ) )
-            continue;
-        auto deviceName = s->mnt_fsname;
-        LOG_INFO( "Discovered mountpoint ", deviceName, " mounted on ", s->mnt_dir, " (", s->mnt_type, ')' );
-        res[deviceName] = s->mnt_dir;
-        errno = 0;
+        const auto& uuid = std::get<0>( d );
+        const auto& mountpoint = std::get<1>( d );
+        const auto removable = std::get<2>( d );
+        DeviceCache.get().emplace( uuid, std::make_shared<DeviceBuilder>( uuid, mountpoint, removable ) );
     }
-    if ( errno != 0 )
-    {
-        LOG_ERROR( "Failed to read mountpoints: ", strerror( errno ) );
-    }
-    return res;
-}
-
-Device::DeviceCacheMap Device::populateDeviceCache()
-{
-    Device::DeviceCacheMap res;
-    for ( const auto& p : Mountpoints )
-    {
-        const auto& devicePath = p.first;
-        auto deviceName = utils::file::fileName( devicePath );
-        const auto& mountpoint = p.second;
-        auto it = Devices.find( deviceName );
-        std::string uuid;
-        if ( it != end( Devices ) )
-            uuid = it->second;
-        else
-        {
-#ifndef __ANDROID__
-            deviceName = deviceFromDeviceMapper( devicePath );
-            it = Devices.find( deviceName );
-            if ( it != end( Devices ) )
-                uuid = it->second;
-            else
-#endif
-            {
-                LOG_ERROR( "Failed to resolve mountpoint ", mountpoint, " to any known device" );
-                continue;
-            }
-        }
-        auto removable = isRemovable( deviceName, mountpoint );
-        LOG_INFO( "Adding device to cache: {", uuid, "} mounted on ", mountpoint, " Removable: ", removable );
-        res[uuid] = std::make_shared<DeviceBuilder>( uuid, mountpoint, removable );
-    }
-    return res;
-}
-
-std::string Device::deviceFromDeviceMapper( const std::string& devicePath )
-{
-    if ( devicePath.find( "/dev/mapper" ) != 0 )
-        return {};
-    char linkPath[PATH_MAX];
-    if ( readlink( devicePath.c_str(), linkPath, PATH_MAX ) < 0 )
-    {
-        std::stringstream err;
-        err << "Failed to resolve device -> mapper link: "
-            << devicePath << " (" << strerror(errno) << ')';
-        throw std::runtime_error( err.str() );
-    }
-    const auto dmName = utils::file::fileName( linkPath );
-    std::string dmSlavePath = "/sys/block/" + dmName + "/slaves";
-    std::unique_ptr<DIR, int(*)(DIR*)> dir( opendir( dmSlavePath.c_str() ), &closedir );
-    std::string res;
-    if ( dir == nullptr )
-        return {};
-    dirent* result;
-    while ( ( result = readdir( dir.get() ) ) != nullptr )
-    {
-        if ( strcmp( result->d_name, "." ) == 0 ||
-             strcmp( result->d_name, ".." ) == 0 )
-        {
-            continue;
-        }
-        if ( res.empty() == true )
-            res = result->d_name;
-        else
-            LOG_WARN( "More than one slave for device mapper ", linkPath );
-    }
-    LOG_INFO( "Device mapper ", dmName, " maps to ", res );
-    return res;
-}
-
-bool Device::isRemovable( const std::string& deviceName, const std::string& mountpoint )
-{
-#ifndef TIZEN
-    (void)mountpoint;
-    std::stringstream removableFilePath;
-    removableFilePath << "/sys/block/" << deviceName << "/removable";
-    std::unique_ptr<FILE, int(*)(FILE*)> removableFile( fopen( removableFilePath.str().c_str(), "r" ), &fclose );
-    // Assume the file isn't removable by default
-    if ( removableFile != nullptr )
-    {
-        char buff;
-        if ( fread(&buff, sizeof(buff), 1, removableFile.get() ) != 1 )
-            return buff == '1';
-        return false;
-    }
-#else
-    (void)deviceName;
-    static const std::vector<std::string> SDMountpoints = { "/opt/storage/sdcard" };
-    auto it = std::find_if( begin( SDMountpoints ), end( SDMountpoints ), [mountpoint]( const std::string& pattern ) {
-        return mountpoint.length() >= pattern.length() && mountpoint.find( pattern ) == 0;
-    });
-    if ( it != end( SDMountpoints ) )
-    {
-        LOG_INFO( "Considering mountpoint ", mountpoint, " a removable SDCard" );
-        return true;
-    }
-#endif
-    return false;
 }
 
 }

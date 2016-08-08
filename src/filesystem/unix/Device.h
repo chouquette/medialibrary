@@ -23,6 +23,9 @@
 #pragma once
 
 #include "filesystem/IDevice.h"
+#include "medialibrary/Types.h"
+#include "utils/Cache.h"
+
 #include <memory>
 #include <unordered_map>
 
@@ -34,10 +37,6 @@ namespace fs
 
 class Device : public IDevice
 {
-    // Device name / UUID map
-    using DeviceMap = std::unordered_map<std::string, std::string>;
-    // Device path / Mountpoints map
-    using MountpointMap = std::unordered_map<std::string, std::string>;
     // UUID -> Device instance map
     using DeviceCacheMap = std::unordered_map<std::string, std::shared_ptr<IDevice>>;
 
@@ -52,22 +51,19 @@ public:
     ///
     static std::shared_ptr<IDevice> fromPath( const std::string& path );
     static std::shared_ptr<IDevice> fromUuid( const std::string& uuid );
-    static bool populateCache();
+
+    static void setDeviceLister( DeviceListerPtr lister );
+    static void refreshDeviceCache();
 
 protected:
     Device( const std::string& uuid, const std::string& mountpoint, bool isRemovable );
 
 private:
-    static DeviceMap listDevices();
-    static MountpointMap listMountpoints();
-    static DeviceCacheMap populateDeviceCache();
-    static std::string deviceFromDeviceMapper( const std::string& devicePath );
-    static bool isRemovable( const std::string& deviceName, const std::string& mountpoint );
+    static void refreshDeviceCacheLocked();
 
 private:
-    static DeviceMap Devices;
-    static MountpointMap Mountpoints;
-    static DeviceCacheMap DeviceCache;
+    static Cache<DeviceCacheMap> DeviceCache;
+    static DeviceListerPtr DeviceLister;
 
 private:
     std::string m_uuid;

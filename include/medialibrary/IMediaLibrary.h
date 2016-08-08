@@ -220,6 +220,20 @@ class IMediaLibrary
         virtual void resumeBackgroundOperations() = 0;
         virtual void reload() = 0;
         virtual void reload( const std::string& entryPoint ) = 0;
+
+        /**
+         * @brief setDeviceLister Sets a device lister.
+         * This is meant for OSes with complicated/impossible to achieve device listing (due to
+         * missing APIs, permissions problems...)
+         * @param lister A device lister
+         * @return In case of successfull registration, this will return a IDeviceListerCb, which
+         * can be used to signal changes related to the devices available. This callback is owned by
+         * the medialibrary, and must *NOT* be released by the application.
+         * In case of failure, nullptr will be returned.
+         *
+         * This must be called *before* initialize()
+         */
+        virtual IDeviceListerCb* setDeviceLister( DeviceListerPtr lister ) = 0;
 };
 
 }

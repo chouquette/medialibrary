@@ -22,46 +22,40 @@
 
 #pragma once
 
-#include <memory>
+#include <tuple>
+#include <vector>
 
 namespace medialibrary
 {
 
-class IAlbum;
-class IAlbumTrack;
-class IAudioTrack;
-class IFile;
-class IGenre;
-class IHistoryEntry;
-class IMedia;
-class ILabel;
-class IMetadataService;
-class IMovie;
-class IShow;
-class IShowEpisode;
-class IVideoTrack;
-class ILogger;
-class IArtist;
-class IPlaylist;
-class IMediaLibraryCb;
-class IDeviceLister;
-class IDeviceListerCb;
+class IDeviceListerCb
+{
+public:
+    virtual ~IDeviceListerCb() = default;
+    /**
+     * @brief onDevicePlugged Shall be invoked when a known device gets plugged
+     * @param uuid The device UUID
+     * @param mountpoint The device new mountpoint
+     */
+    virtual void onDevicePlugged( const std::string& uuid, const std::string& mountpoint ) = 0;
+    /**
+     * @brief onDeviceUnplugged Shall be invoked when a known device gets unplugged
+     * @param uuid The device UUID
+     */
+    virtual void onDeviceUnplugged( const std::string& uuid ) = 0;
+};
 
-using AlbumPtr = std::shared_ptr<IAlbum>;
-using AlbumTrackPtr = std::shared_ptr<IAlbumTrack>;
-using ArtistPtr = std::shared_ptr<IArtist>;
-using AudioTrackPtr = std::shared_ptr<IAudioTrack>;
-using FilePtr = std::shared_ptr<IFile>;
-using GenrePtr = std::shared_ptr<IGenre>;
-using HistoryPtr = std::shared_ptr<IHistoryEntry>;
-using LabelPtr = std::shared_ptr<ILabel>;
-using MediaPtr = std::shared_ptr<IMedia>;
-using MoviePtr = std::shared_ptr<IMovie>;
-using PlaylistPtr = std::shared_ptr<IPlaylist>;
-using ShowEpisodePtr = std::shared_ptr<IShowEpisode>;
-using ShowPtr = std::shared_ptr<IShow>;
-using VideoTrackPtr = std::shared_ptr<IVideoTrack>;
-using DeviceListerPtr = std::shared_ptr<IDeviceLister>;
-
+class IDeviceLister
+{
+public:
+    virtual ~IDeviceLister() = default;
+    /**
+     * @brief devices Returns a tuple containing:
+     * - The device UUID
+     * - The device mountpoint
+     * - A 'removable' state, being true if the device can be removed, false otherwise.
+     * @return
+     */
+    virtual std::vector<std::tuple<std::string, std::string, bool>> devices() const = 0;
+};
 }
-

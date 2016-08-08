@@ -23,6 +23,7 @@
 #pragma once
 
 #include "factory/IFileSystem.h"
+#include "medialibrary/Types.h"
 
 #include <mutex>
 #include <string>
@@ -36,6 +37,7 @@ namespace factory
     class FileSystemFactory : public IFileSystem
     {
     public:
+        FileSystemFactory( DeviceListerPtr lister );
         virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& path ) override;
         virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override;
         virtual void refresh() override;

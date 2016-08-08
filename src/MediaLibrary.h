@@ -27,6 +27,8 @@
 #include "logging/Logger.h"
 #include "Settings.h"
 
+#include <IDeviceLister.h>
+
 namespace medialibrary
 {
 
@@ -55,7 +57,7 @@ class IFile;
 class IDirectory;
 }
 
-class MediaLibrary : public IMediaLibrary
+class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 {
     public:
         MediaLibrary();
@@ -125,6 +127,8 @@ class MediaLibrary : public IMediaLibrary
         IMediaLibraryCb* getCb() const;
         std::shared_ptr<ModificationNotifier> getNotifier() const;
 
+        virtual IDeviceListerCb* setDeviceLister( DeviceListerPtr lister ) override;
+
     public:
         static const uint32_t DbModelVersion;
 
@@ -141,11 +145,17 @@ class MediaLibrary : public IMediaLibrary
         void registerEntityHooks();
         static bool validateSearchPattern( const std::string& pattern );
 
+        // Mark IDeviceListerCb callbacks as private. They must be invoked through the interface.
+    private:
+        virtual void onDevicePlugged(const std::string& uuid, const std::string& mountpoint) override;
+        virtual void onDeviceUnplugged(const std::string& uuid) override;
+
     protected:
         std::unique_ptr<SqliteConnection> m_dbConnection;
         std::shared_ptr<factory::IFileSystem> m_fsFactory;
         std::string m_thumbnailPath;
         IMediaLibraryCb* m_callback;
+        DeviceListerPtr m_deviceLister;
 
         // Keep the parser as last field.
         // The parser holds a (raw) pointer to the media library. When MediaLibrary's destructor gets called

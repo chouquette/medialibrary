@@ -20,48 +20,16 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#pragma once
+#include "DeviceListerFactory.h"
 
-#include <memory>
+#if defined(__linux__) && !defined(__ANDROID__)
+#include "filesystem/unix/DeviceLister.h"
+#endif
 
-namespace medialibrary
+medialibrary::DeviceListerPtr medialibrary::factory::createDeviceLister()
 {
-
-class IAlbum;
-class IAlbumTrack;
-class IAudioTrack;
-class IFile;
-class IGenre;
-class IHistoryEntry;
-class IMedia;
-class ILabel;
-class IMetadataService;
-class IMovie;
-class IShow;
-class IShowEpisode;
-class IVideoTrack;
-class ILogger;
-class IArtist;
-class IPlaylist;
-class IMediaLibraryCb;
-class IDeviceLister;
-class IDeviceListerCb;
-
-using AlbumPtr = std::shared_ptr<IAlbum>;
-using AlbumTrackPtr = std::shared_ptr<IAlbumTrack>;
-using ArtistPtr = std::shared_ptr<IArtist>;
-using AudioTrackPtr = std::shared_ptr<IAudioTrack>;
-using FilePtr = std::shared_ptr<IFile>;
-using GenrePtr = std::shared_ptr<IGenre>;
-using HistoryPtr = std::shared_ptr<IHistoryEntry>;
-using LabelPtr = std::shared_ptr<ILabel>;
-using MediaPtr = std::shared_ptr<IMedia>;
-using MoviePtr = std::shared_ptr<IMovie>;
-using PlaylistPtr = std::shared_ptr<IPlaylist>;
-using ShowEpisodePtr = std::shared_ptr<IShowEpisode>;
-using ShowPtr = std::shared_ptr<IShow>;
-using VideoTrackPtr = std::shared_ptr<IVideoTrack>;
-using DeviceListerPtr = std::shared_ptr<IDeviceLister>;
-
+#if defined(__linux__) && !defined(__ANDROID__)
+    return std::make_shared<fs::DeviceLister>();
+#endif
+    return nullptr;
 }
-
