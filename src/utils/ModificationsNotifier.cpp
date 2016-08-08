@@ -113,7 +113,11 @@ void ModificationNotifier::notifyAlbumTrackRemoval( int64_t trackId )
 
 void ModificationNotifier::run()
 {
+#if !defined(_LIBCPP_STD_VER) || (_LIBCPP_STD_VER > 11 && !defined(_LIBCPP_HAS_NO_CXX14_CONSTEXPR))
     constexpr auto ZeroTimeout = std::chrono::time_point<std::chrono::steady_clock>{};
+#else
+    const auto ZeroTimeout = std::chrono::time_point<std::chrono::steady_clock>{};
+#endif
 
     // Create some other queue to swap with the ones that are used
     // by other threads. That way we can release those early and allow

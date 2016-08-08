@@ -124,7 +124,11 @@ private:
     void checkQueue( Queue<T>& input, Queue<T>& output, std::chrono::time_point<std::chrono::steady_clock>& nextTimeout,
                      std::chrono::time_point<std::chrono::steady_clock> now )
     {
+#if !defined(_LIBCPP_STD_VER) || (_LIBCPP_STD_VER > 11 && !defined(_LIBCPP_HAS_NO_CXX14_CONSTEXPR))
         constexpr auto ZeroTimeout = std::chrono::time_point<std::chrono::steady_clock>{};
+#else
+        const auto ZeroTimeout = std::chrono::time_point<std::chrono::steady_clock>{};
+#endif
         //    LOG_ERROR( "Input timeout: ", input.timeout.time_since_epoch(), " - Now: ", now.time_since_epoch() );
         if ( input.timeout <= now )
         {
