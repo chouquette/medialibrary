@@ -27,7 +27,7 @@
 #include "logging/Logger.h"
 #include "Settings.h"
 
-#include <IDeviceLister.h>
+#include "medialibrary/IDeviceLister.h"
 
 namespace medialibrary
 {

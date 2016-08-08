@@ -23,7 +23,7 @@
 #include "Device.h"
 #include "Directory.h"
 #include "logging/Logger.h"
-#include "IDeviceLister.h"
+#include "medialibrary/IDeviceLister.h"
 
 namespace
 {
@@ -42,7 +42,6 @@ namespace fs
 {
 
 Cache<Device::DeviceCacheMap> Device::DeviceCache;
-DeviceListerPtr Device::DeviceLister;
 
 Device::Device( const std::string& uuid, const std::string& mountpoint, bool isRemovable )
     : m_uuid( uuid )

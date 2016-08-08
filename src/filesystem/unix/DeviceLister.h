@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "IDeviceLister.h"
+#include "medialibrary/IDeviceLister.h"
 
 #include <unordered_map>
 
