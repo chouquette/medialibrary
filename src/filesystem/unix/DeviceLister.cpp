@@ -194,44 +194,53 @@ bool DeviceLister::isRemovable( const std::string& deviceName, const std::string
 std::vector<std::tuple<std::string, std::string, bool>> medialibrary::fs::DeviceLister::devices() const
 {
     std::vector<std::tuple<std::string, std::string, bool>> res;
-    auto mountpoints = listMountpoints();
-    if ( mountpoints.empty() == true )
+    try
     {
-        LOG_WARN( "Failed to detect any mountpoint" );
-        return res;
-    }
-    auto devices = listDevices();
-    if ( devices.empty() == true )
-    {
-        LOG_WARN( "Failed to detect any device" );
-        return res;
-    }
-    for ( const auto& p : mountpoints )
-    {
-        const auto& devicePath = p.first;
-        auto deviceName = utils::file::fileName( devicePath );
-        const auto& mountpoint = p.second;
-        auto it = devices.find( deviceName );
-        std::string uuid;
-        if ( it != end( devices ) )
-            uuid = it->second;
-        else
+        DeviceMap mountpoints = listMountpoints();
+        if ( mountpoints.empty() == true )
         {
-            LOG_INFO( "Failed to find device for mountpoint ", mountpoint, ". Attempting to resolve"
-                      " using device mapper" );
-            deviceName = deviceFromDeviceMapper( devicePath );
-            it = devices.find( deviceName );
+            LOG_WARN( "Failed to detect any mountpoint" );
+            return res;
+        }
+        auto devices = listDevices();
+        if ( devices.empty() == true )
+        {
+            LOG_WARN( "Failed to detect any device" );
+            return res;
+        }
+        for ( const auto& p : mountpoints )
+        {
+            const auto& devicePath = p.first;
+            auto deviceName = utils::file::fileName( devicePath );
+            const auto& mountpoint = p.second;
+            auto it = devices.find( deviceName );
+            std::string uuid;
             if ( it != end( devices ) )
                 uuid = it->second;
             else
             {
-                LOG_ERROR( "Failed to resolve mountpoint ", mountpoint, " to any known device" );
-                continue;
+                LOG_INFO( "Failed to find device for mountpoint ", mountpoint, ". Attempting to resolve"
+                          " using device mapper" );
+                deviceName = deviceFromDeviceMapper( devicePath );
+                it = devices.find( deviceName );
+                if ( it != end( devices ) )
+                    uuid = it->second;
+                else
+                {
+                    LOG_ERROR( "Failed to resolve mountpoint ", mountpoint, " to any known device" );
+                    continue;
+                }
             }
+            auto removable = isRemovable( deviceName, mountpoint );
+            res.emplace_back( std::make_tuple( uuid, mountpoint, removable ) );
         }
-        auto removable = isRemovable( deviceName, mountpoint );
-        res.emplace_back( std::make_tuple( uuid, mountpoint, removable ) );
     }
+    catch(std::runtime_error& ex)
+    {
+        LOG_WARN( "Failed to list devices: ", ex.what(), ". Falling back to a dummy device containing '/'");
+        res.emplace_back( std::make_tuple( "{dummy-device}", "/", false ) );
+    }
+
     return res;
 }
 
