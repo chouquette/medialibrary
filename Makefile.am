@@ -275,7 +275,7 @@ unittest_SOURCES = \
 	test/unittest/VideoTrackTests.cpp \
 	$(NULL)
 
-unittest_CXXFLAGS = 		\
+unittest_CPPFLAGS = 		\
 	$(MEDIALIB_CPPFLAGS) 	\
 	-I$(top_srcdir)/test	\
 	-I$(top_srcdir)/googletest/include \
@@ -295,7 +295,7 @@ samples_SOURCES = 						\
 	test/samples/Tester.cpp 			\
 	$(NULL)
 
-samples_CXXFLAGS = 			\
+samples_CPPFLAGS = 			\
 	$(MEDIALIB_CPPFLAGS)	\
 	-DSRC_DIR=\"$(top_srcdir)\"	\
 	-I$(top_srcdir)/test	\
