@@ -256,13 +256,12 @@ PKG_CHECK_MODULES(SQLITE, sqlite3)
 PKG_CHECK_MODULES(VLC, libvlc >= 3.0)
 PKG_CHECK_MODULES(VLCPP, libvlcpp,
     [AC_MSG_RESULT([Found libvlcpp.pc])],
-    [AC_CHECK_FILES([${srcdir}/libvlcpp/vlcpp/vlc.hpp],
-                 [
-                    AC_MSG_RESULT([Found submodule])
-                    AC_SUBST([VLCPP_CFLAGS],[-I${srcdir}/libvlcpp])
-                 ],
-                 [AC_MSG_FAILURE([libvlcpp is required to build medialibrary])]
-    )]
+    [
+        # Checking for files doesn't work when cross compiling. Simply assume
+        # The file is there
+        AC_MSG_RESULT([Falling back to submodule])
+        AC_SUBST([VLCPP_CFLAGS],[-I${srcdir}/libvlcpp])
+    ]
 )
 
 PKG_CHECK_MODULES(LIBJPEG, libjpeg, [
