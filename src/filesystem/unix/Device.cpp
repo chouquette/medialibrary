@@ -46,6 +46,7 @@ namespace fs
 {
 
 Cache<Device::DeviceCacheMap> Device::DeviceCache;
+DeviceListerPtr Device::DeviceLister;
 
 Device::Device( const std::string& uuid, const std::string& mountpoint, bool isRemovable )
     : m_uuid( uuid )
