@@ -47,7 +47,7 @@ private:
 
 private:
         VLC::Instance m_instance;
-        std::mutex m_mutex;
+        compat::Mutex m_mutex;
         std::condition_variable m_cond;
 };
 

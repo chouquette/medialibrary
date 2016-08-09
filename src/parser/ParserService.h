@@ -24,11 +24,11 @@
 
 #include <atomic>
 #include <condition_variable>
-#include <mutex>
 #include <queue>
 
 #include "Task.h"
 #include "medialibrary/Types.h"
+#include "compat/Mutex.h"
 #include "compat/Thread.h"
 
 namespace medialibrary
@@ -86,7 +86,7 @@ private:
     std::condition_variable m_cond;
     std::queue<std::unique_ptr<parser::Task>> m_tasks;
     std::vector<compat::Thread> m_threads;
-    std::mutex m_lock;
+    compat::Mutex m_lock;
 };
 
 }

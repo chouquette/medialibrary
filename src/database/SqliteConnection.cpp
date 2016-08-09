@@ -49,7 +49,7 @@ SqliteConnection::~SqliteConnection()
 
 SqliteConnection::Handle SqliteConnection::getConn()
 {
-    std::unique_lock<std::mutex> lock( m_connMutex );
+    std::unique_lock<compat::Mutex> lock( m_connMutex );
     sqlite3* dbConnection;
     auto it = m_conns.find( compat::this_thread::get_id() );
     if ( it == end( m_conns ) )

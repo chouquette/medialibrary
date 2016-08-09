@@ -54,7 +54,7 @@ void DiscovererWorker::stop()
     if ( m_run.compare_exchange_strong( running, false ) )
     {
         {
-            std::unique_lock<std::mutex> lock( m_mutex );
+            std::unique_lock<compat::Mutex> lock( m_mutex );
             while ( m_tasks.empty() == false )
                 m_tasks.pop();
         }
@@ -83,7 +83,7 @@ void DiscovererWorker::reload( const std::string& entryPoint )
 
 void DiscovererWorker::enqueue( const std::string& entryPoint, bool reload )
 {
-    std::unique_lock<std::mutex> lock( m_mutex );
+    std::unique_lock<compat::Mutex> lock( m_mutex );
 
     m_tasks.emplace( entryPoint, reload );
     if ( m_thread.get_id() == compat::Thread::id{} )
@@ -103,7 +103,7 @@ void DiscovererWorker::run()
     {
         Task task;
         {
-            std::unique_lock<std::mutex> lock( m_mutex );
+            std::unique_lock<compat::Mutex> lock( m_mutex );
             if ( m_tasks.size() == 0 )
             {
                 m_cond.wait( lock, [this]() { return m_tasks.size() > 0 || m_run == false; } );

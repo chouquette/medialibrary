@@ -27,11 +27,11 @@
 #include <memory>
 #include <sqlite3.h>
 #include <condition_variable>
-#include <mutex>
 #include <unordered_map>
 #include <string>
 
 #include "utils/SWMRLock.h"
+#include "compat/Mutex.h"
 #include "compat/Thread.h"
 
 namespace medialibrary
@@ -74,7 +74,7 @@ private:
 private:
     using ConnPtr = std::unique_ptr<sqlite3, int(*)(sqlite3*)>;
     const std::string m_dbPath;
-    std::mutex m_connMutex;
+    compat::Mutex m_connMutex;
     std::unordered_map<compat::Thread::id, ConnPtr> m_conns;
     utils::SWMRLock m_contextLock;
     utils::ReadLocker m_readLock;

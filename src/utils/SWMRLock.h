@@ -23,7 +23,7 @@
 #pragma once
 
 #include <condition_variable>
-#include <mutex>
+#include "compat/Mutex.h"
 #include <atomic>
 
 namespace medialibrary
@@ -48,7 +48,7 @@ public:
 
     void lock_read()
     {
-        std::unique_lock<std::mutex> lock( m_lock );
+        std::unique_lock<compat::Mutex> lock( m_lock );
         ++m_nbReaderWaiting;
         m_writeDoneCond.wait( lock, [this](){
             return m_writing == false;
@@ -59,7 +59,7 @@ public:
 
     void unlock_read()
     {
-        std::unique_lock<std::mutex> lock( m_lock );
+        std::unique_lock<compat::Mutex> lock( m_lock );
         --m_nbReader;
         if ( m_nbReader == 0 && m_nbWriterWaiting > 0 )
             m_writeDoneCond.notify_one();
@@ -67,7 +67,7 @@ public:
 
     void lock_write()
     {
-        std::unique_lock<std::mutex> lock( m_lock );
+        std::unique_lock<compat::Mutex> lock( m_lock );
         ++m_nbWriterWaiting;
         m_writeDoneCond.wait( lock, [this](){
             return m_writing == false && m_nbReader == 0;
@@ -78,7 +78,7 @@ public:
 
     void unlock_write()
     {
-        std::unique_lock<std::mutex> lock( m_lock );
+        std::unique_lock<compat::Mutex> lock( m_lock );
         m_writing = false;
         if ( m_nbReaderWaiting > 0 || m_nbWriterWaiting > 0 )
             m_writeDoneCond.notify_one();
@@ -86,7 +86,7 @@ public:
 
 private:
     std::condition_variable m_writeDoneCond;
-    std::mutex m_lock;
+    compat::Mutex m_lock;
     unsigned int m_nbReader;
     unsigned int m_nbReaderWaiting;
     bool m_writing;

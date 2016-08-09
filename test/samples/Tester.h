@@ -49,7 +49,7 @@ private:
     virtual void onParsingStatsUpdated(uint32_t percent) override;
 
     std::condition_variable m_parsingCompleteVar;
-    std::mutex m_parsingMutex;
+    compat::Mutex m_parsingMutex;
     bool m_done;
     bool m_discoveryCompleted;
 };

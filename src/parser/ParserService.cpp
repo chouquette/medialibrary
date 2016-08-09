@@ -49,13 +49,13 @@ void ParserService::start()
 
 void ParserService::pause()
 {
-    std::lock_guard<std::mutex> lock( m_lock );
+    std::lock_guard<compat::Mutex> lock( m_lock );
     m_paused = true;
 }
 
 void ParserService::resume()
 {
-    std::lock_guard<std::mutex> lock( m_lock );
+    std::lock_guard<compat::Mutex> lock( m_lock );
     m_paused = false;
     m_cond.notify_all();
 }
@@ -67,7 +67,7 @@ void ParserService::signalStop()
         if ( t.joinable() )
         {
             {
-                std::lock_guard<std::mutex> lock( m_lock );
+                std::lock_guard<compat::Mutex> lock( m_lock );
                 m_cond.notify_all();
                 m_stopParser = true;
             }
@@ -86,7 +86,7 @@ void ParserService::stop()
 
 void ParserService::parse( std::unique_ptr<parser::Task> t )
 {
-    std::lock_guard<std::mutex> lock( m_lock );
+    std::lock_guard<compat::Mutex> lock( m_lock );
     m_tasks.push( std::move( t ) );
     m_cond.notify_all();
 }
@@ -126,7 +126,7 @@ void ParserService::mainloop()
     {
         std::unique_ptr<parser::Task> task;
         {
-            std::unique_lock<std::mutex> lock( m_lock );
+            std::unique_lock<compat::Mutex> lock( m_lock );
             if ( m_tasks.empty() == true || m_paused == true )
             {
                 LOG_INFO( "Halting ParserService mainloop" );

@@ -25,13 +25,13 @@
 #include <atomic>
 #include <condition_variable>
 #include <functional>
-#include <mutex>
 #include <vector>
 #include <chrono>
 
 #include "medialibrary/Types.h"
 #include "Types.h"
 #include "compat/Thread.h"
+#include "compat/Mutex.h"
 
 namespace medialibrary
 {
@@ -87,7 +87,7 @@ private:
     template <typename T>
     void notifyCreation( std::shared_ptr<T> entity, Queue<T>& queue )
     {
-        std::lock_guard<std::mutex> lock( m_lock );
+        std::lock_guard<compat::Mutex> lock( m_lock );
         queue.added.push_back( std::move( entity ) );
         updateTimeout( queue );
     }
@@ -95,7 +95,7 @@ private:
     template <typename T>
     void notifyModification( std::shared_ptr<T> entity, Queue<T>& queue )
     {
-        std::lock_guard<std::mutex> lock( m_lock );
+        std::lock_guard<compat::Mutex> lock( m_lock );
         queue.modified.push_back( std::move( entity ) );
         updateTimeout( queue );
     }
@@ -103,7 +103,7 @@ private:
     template <typename T>
     void notifyRemoval( int64_t rowId, Queue<T>& queue )
     {
-        std::lock_guard<std::mutex> lock( m_lock );
+        std::lock_guard<compat::Mutex> lock( m_lock );
         queue.removed.push_back( rowId );
         updateTimeout( m_media );
     }
@@ -153,7 +153,7 @@ private:
     Queue<IAlbumTrack> m_tracks;
 
     // Notifier thread
-    std::mutex m_lock;
+    compat::Mutex m_lock;
     std::condition_variable m_cond;
     compat::Thread m_notifierThread;
     std::atomic_bool m_stop;

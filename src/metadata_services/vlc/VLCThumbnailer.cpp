@@ -121,7 +121,7 @@ parser::Task::Status VLCThumbnailer::startPlayback( VLC::MediaPlayer &mp )
     em.onEncounteredError([this]() {
         m_cond.notify_all();
     });
-    std::unique_lock<std::mutex> lock( m_mutex );
+    std::unique_lock<compat::Mutex> lock( m_mutex );
     mp.play();
     bool success = m_cond.wait_for( lock, std::chrono::seconds( 3 ), [&mp]() {
         auto s = mp.state();
@@ -138,10 +138,10 @@ parser::Task::Status VLCThumbnailer::startPlayback( VLC::MediaPlayer &mp )
 
 parser::Task::Status VLCThumbnailer::seekAhead( VLC::MediaPlayer& mp )
 {
-    std::unique_lock<std::mutex> lock( m_mutex );
+    std::unique_lock<compat::Mutex> lock( m_mutex );
     float pos = .0f;
     auto event = mp.eventManager().onPositionChanged([this, &pos](float p) {
-        std::unique_lock<std::mutex> lock( m_mutex );
+        std::unique_lock<compat::Mutex> lock( m_mutex );
         pos = p;
         m_cond.notify_all();
     });
@@ -212,7 +212,7 @@ parser::Task::Status VLCThumbnailer::takeThumbnail( std::shared_ptr<Media> media
 {
     // lock, signal that we want a thumbnail, and wait.
     {
-        std::unique_lock<std::mutex> lock( m_mutex );
+        std::unique_lock<compat::Mutex> lock( m_mutex );
         m_thumbnailRequired = true;
         bool success = m_cond.wait_for( lock, std::chrono::seconds( 3 ), [this]() {
             // Keep waiting if the vmem thread hasn't restored m_thumbnailRequired to false

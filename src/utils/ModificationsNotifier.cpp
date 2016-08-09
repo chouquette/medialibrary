@@ -134,7 +134,7 @@ void ModificationNotifier::run()
     while ( m_stop == false )
     {
         {
-            std::unique_lock<std::mutex> lock( m_lock );
+            std::unique_lock<compat::Mutex> lock( m_lock );
             if ( m_timeout == ZeroTimeout )
                 m_cond.wait( lock, [this, ZeroTimeout](){ return m_timeout != ZeroTimeout || m_stop == true; } );
             m_cond.wait_until( lock, m_timeout, [this]() { return m_stop == true; });

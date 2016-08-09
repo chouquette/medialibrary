@@ -53,7 +53,7 @@ FileSystemFactory::FileSystemFactory( DeviceListerPtr lister )
 
 std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::string& path )
 {
-    std::lock_guard<std::mutex> lock( m_mutex );
+    std::lock_guard<compat::Mutex> lock( m_mutex );
     const auto it = m_dirs.find( path );
     if ( it != end( m_dirs ) )
         return it->second;
@@ -77,7 +77,7 @@ std::shared_ptr<fs::IDevice> FileSystemFactory::createDevice( const std::string&
 
 void FileSystemFactory::refresh()
 {
-    std::lock_guard<std::mutex> lock( m_mutex );
+    std::lock_guard<compat::Mutex> lock( m_mutex );
     m_dirs.clear();
 }
 

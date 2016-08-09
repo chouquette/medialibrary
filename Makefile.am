@@ -146,6 +146,7 @@ noinst_HEADERS = \
 	src/utils/ToString.h \
 	src/VideoTrack.h \
 	src/compat/Thread.h \
+	src/compat/Mutex.h \
 	$(NULL)
 
 

@@ -16,7 +16,7 @@ MockCallback::MockCallback()
 
 bool MockCallback::waitForParsingComplete()
 {
-    std::unique_lock<std::mutex> lock( m_parsingMutex, std::adopt_lock );
+    std::unique_lock<compat::Mutex> lock( m_parsingMutex, std::adopt_lock );
     m_done = false;
     m_discoveryCompleted = false;
     // Wait for a while, generating snapshots can be heavy...
@@ -29,7 +29,7 @@ void MockCallback::onDiscoveryCompleted(const std::string& entryPoint )
 {
     if ( entryPoint.empty() == true )
         return;
-    std::lock_guard<std::mutex> lock( m_parsingMutex );
+    std::lock_guard<compat::Mutex> lock( m_parsingMutex );
     m_discoveryCompleted = true;
 }
 
@@ -37,7 +37,7 @@ void MockCallback::onParsingStatsUpdated(uint32_t percent)
 {
     if ( percent == 100 )
     {
-        std::lock_guard<std::mutex> lock( m_parsingMutex );
+        std::lock_guard<compat::Mutex> lock( m_parsingMutex );
         if ( m_discoveryCompleted == false )
             return;
         m_done = true;

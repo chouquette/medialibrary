@@ -22,8 +22,9 @@
 
 #pragma once
 
-#include <mutex>
 #include <cassert>
+
+#include "compat/Mutex.h"
 
 namespace medialibrary
 {
@@ -71,14 +72,14 @@ public:
         return m_value;
     }
 
-    std::unique_lock<std::mutex> lock()
+    std::unique_lock<compat::Mutex> lock()
     {
-        return std::unique_lock<std::mutex>( m_lock );
+        return std::unique_lock<compat::Mutex>( m_lock );
     }
 
 private:
     T m_value;
-    std::mutex m_lock;
+    compat::Mutex m_lock;
     bool m_cached;
 };
 

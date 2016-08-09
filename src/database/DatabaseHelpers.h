@@ -23,10 +23,10 @@
 #pragma once
 
 #include <memory>
-#include <mutex>
 #include <unordered_map>
 #include <vector>
 
+#include "compat/Mutex.h"
 #include "SqliteTools.h"
 
 namespace medialibrary
@@ -35,7 +35,7 @@ namespace medialibrary
 template <typename IMPL, typename TABLEPOLICY>
 class DatabaseHelpers
 {
-    using Lock = std::lock_guard<std::mutex>;
+    using Lock = std::lock_guard<compat::Mutex>;
 
     public:
         template <typename... Args>
@@ -123,7 +123,7 @@ class DatabaseHelpers
 
     private:
         static std::unordered_map<int64_t, std::shared_ptr<IMPL>> Store;
-        static std::mutex Mutex;
+        static compat::Mutex Mutex;
 };
 
 
@@ -132,6 +132,6 @@ std::unordered_map<int64_t, std::shared_ptr<IMPL>>
 DatabaseHelpers<IMPL, TABLEPOLICY>::Store;
 
 template <typename IMPL, typename TABLEPOLICY>
-std::mutex DatabaseHelpers<IMPL, TABLEPOLICY>::Mutex;
+compat::Mutex DatabaseHelpers<IMPL, TABLEPOLICY>::Mutex;
 
 }

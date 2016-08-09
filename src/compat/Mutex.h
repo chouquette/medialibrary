@@ -22,53 +22,68 @@
 
 #pragma once
 
-#include <atomic>
-#include <condition_variable>
-#include <memory>
-#include <queue>
-#include <string>
-#include <vector>
+// Include mutex unconditionnaly for lock_gard & unique_lock
+#include <mutex>
 
-#include "compat/Mutex.h"
-#include "compat/Thread.h"
-#include "discoverer/IDiscoverer.h"
+#if CXX11_MUTEX
+#include <mutex>
+namespace medialibrary
+{
+namespace compat
+{
+using Mutex = std::mutex;
+}
+}
+
+#else
+
+#include <windows.h>
 
 namespace medialibrary
 {
+namespace compat
+{
 
-class DiscovererWorker : public IDiscoverer
+class Mutex
 {
 public:
-    DiscovererWorker( MediaLibraryPtr ml );
-    virtual ~DiscovererWorker();
-    void addDiscoverer( std::unique_ptr<IDiscoverer> discoverer );
-    void stop();
+    using native_handle_type = CRITICAL_SECTION*;
 
-    virtual bool discover( const std::string& entryPoint ) override;
-    virtual void reload() override;
-    virtual void reload( const std::string& entryPoint ) override;
-
-private:
-    void enqueue( const std::string& entryPoint, bool reload );
-    void run();
-
-private:
-    struct Task
+    Mutex()
     {
-        Task() = default;
-        Task( const std::string& entryPoint, bool reload )
-            : entryPoint( entryPoint ), reload( reload ) {}
-        std::string entryPoint;
-        bool reload;
-    };
+        InitializeCriticalSection( &m_lock );
+    }
 
-    compat::Thread m_thread;
-    std::queue<Task> m_tasks;
-    compat::Mutex m_mutex;
-    std::condition_variable m_cond;
-    std::atomic_bool m_run;
-    std::vector<std::unique_ptr<IDiscoverer>> m_discoverers;
-    IMediaLibraryCb* m_cb;
+    ~Mutex()
+    {
+        DeleteCriticalSection( &m_lock );
+    }
+
+    void lock()
+    {
+        EnterCriticalSection( &m_lock );
+    }
+
+    bool try_lock()
+    {
+        return TryEnterCriticalSection( &m_lock );
+    }
+
+    void unlock()
+    {
+        LeaveCriticalSection( &m_lock );
+    }
+
+    native_handle_type native_handle()
+    {
+        return &m_lock;
+    }
+
+private:
+    CRITICAL_SECTION m_lock;
 };
 
 }
+}
+
+#endif

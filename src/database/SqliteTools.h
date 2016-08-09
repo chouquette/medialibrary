@@ -32,6 +32,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <compat/Mutex.h>
 #include "database/SqliteConnection.h"
 #include "database/SqliteErrors.h"
 #include "database/SqliteTraits.h"
@@ -113,7 +114,7 @@ public:
         , m_dbConn( dbConnection )
         , m_bindIdx( 0 )
     {
-        std::lock_guard<std::mutex> lock( StatementsCacheLock );
+        std::lock_guard<compat::Mutex> lock( StatementsCacheLock );
         auto& connMap = StatementsCache[ dbConnection ];
         auto it = connMap.find( req );
         if ( it == end( connMap ) )
@@ -164,7 +165,7 @@ public:
 
     static void FlushStatementCache()
     {
-        std::lock_guard<std::mutex> lock( StatementsCacheLock );
+        std::lock_guard<compat::Mutex> lock( StatementsCacheLock );
         StatementsCache.clear();
     }
 
@@ -188,7 +189,7 @@ private:
     StatementPtr m_stmt;
     SqliteConnection::Handle m_dbConn;
     unsigned int m_bindIdx;
-    static std::mutex StatementsCacheLock;
+    static compat::Mutex StatementsCacheLock;
     static std::unordered_map<SqliteConnection::Handle,
                             std::unordered_map<std::string, CachedStmtPtr>> StatementsCache;
 };

@@ -49,7 +49,7 @@ public:
 
     bool wait()
     {
-        std::unique_lock<std::mutex> lock( m_mutex );
+        std::unique_lock<compat::Mutex> lock( m_mutex );
         return m_cond.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
             return m_done.load();
         } );
@@ -76,7 +76,7 @@ private:
     std::atomic_bool m_done;
     std::atomic_bool m_waitingReload;
     std::condition_variable m_cond;
-    std::mutex m_mutex;
+    compat::Mutex m_mutex;
 };
 
 }

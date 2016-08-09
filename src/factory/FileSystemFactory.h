@@ -22,10 +22,10 @@
 
 #pragma once
 
+#include "compat/Mutex.h"
 #include "factory/IFileSystem.h"
 #include "medialibrary/Types.h"
 
-#include <mutex>
 #include <string>
 #include <unordered_map>
 
@@ -44,7 +44,7 @@ namespace factory
 
     private:
         std::unordered_map<std::string, std::shared_ptr<fs::IDirectory>> m_dirs;
-        std::mutex m_mutex;
+        compat::Mutex m_mutex;
     };
 }
 

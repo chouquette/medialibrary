@@ -57,12 +57,12 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
 
     auto vlcMedia = VLC::Media( m_instance, file->mrl(), VLC::Media::FromPath );
 
-    std::unique_lock<std::mutex> lock( m_mutex );
+    std::unique_lock<compat::Mutex> lock( m_mutex );
     VLC::Media::ParsedStatus status;
     bool done = false;
 
     auto event = vlcMedia.eventManager().onParsedChanged( [this, &status, &done](VLC::Media::ParsedStatus s ) {
-        std::lock_guard<std::mutex> lock( m_mutex );
+        std::lock_guard<compat::Mutex> lock( m_mutex );
         status = s;
         done = true;
         m_cond.notify_all();
