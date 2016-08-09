@@ -23,7 +23,7 @@
 #pragma once
 
 #include <atomic>
-#include <condition_variable>
+#include "compat/ConditionVariable.h"
 #include <memory>
 #include <queue>
 #include <string>
@@ -65,7 +65,7 @@ private:
     compat::Thread m_thread;
     std::queue<Task> m_tasks;
     compat::Mutex m_mutex;
-    std::condition_variable m_cond;
+    compat::ConditionVariable m_cond;
     std::atomic_bool m_run;
     std::vector<std::unique_ptr<IDiscoverer>> m_discoverers;
     IMediaLibraryCb* m_cb;

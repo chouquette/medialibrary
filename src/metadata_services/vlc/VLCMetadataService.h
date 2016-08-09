@@ -23,7 +23,7 @@
 #ifndef VLCMETADATASERVICE_H
 #define VLCMETADATASERVICE_H
 
-#include <condition_variable>
+#include "compat/ConditionVariable.h"
 #include <vlcpp/vlc.hpp>
 #include <mutex>
 
@@ -48,7 +48,7 @@ private:
 private:
         VLC::Instance m_instance;
         compat::Mutex m_mutex;
-        std::condition_variable m_cond;
+        compat::ConditionVariable m_cond;
 };
 
 }

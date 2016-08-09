@@ -75,7 +75,7 @@ public:
 private:
     std::atomic_bool m_done;
     std::atomic_bool m_waitingReload;
-    std::condition_variable m_cond;
+    compat::ConditionVariable m_cond;
     compat::Mutex m_mutex;
 };
 

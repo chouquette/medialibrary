@@ -23,7 +23,7 @@
 #pragma once
 
 #include <atomic>
-#include <condition_variable>
+#include "compat/ConditionVariable.h"
 #include <queue>
 
 #include "Task.h"
@@ -83,7 +83,7 @@ private:
     IParserCb* m_parserCb;
     bool m_stopParser;
     bool m_paused;
-    std::condition_variable m_cond;
+    compat::ConditionVariable m_cond;
     std::queue<std::unique_ptr<parser::Task>> m_tasks;
     std::vector<compat::Thread> m_threads;
     compat::Mutex m_lock;

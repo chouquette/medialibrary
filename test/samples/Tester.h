@@ -48,7 +48,7 @@ private:
     virtual void onDiscoveryCompleted( const std::string& ) override;
     virtual void onParsingStatsUpdated(uint32_t percent) override;
 
-    std::condition_variable m_parsingCompleteVar;
+    compat::ConditionVariable m_parsingCompleteVar;
     compat::Mutex m_parsingMutex;
     bool m_done;
     bool m_discoveryCompleted;

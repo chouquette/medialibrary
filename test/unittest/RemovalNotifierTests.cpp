@@ -55,7 +55,7 @@ public:
 
 private:
     std::mutex m_lock;
-    std::condition_variable m_cond;
+    compat::ConditionVariable m_cond;
     uint32_t m_nbMedia;
 };
 

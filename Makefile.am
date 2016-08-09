@@ -6,6 +6,9 @@ AM_CPPFLAGS = -Wall -Wsign-compare -Wextra -Wstrict-aliasing -Wstrict-overflow \
 			  -pipe
 
 MEDIALIB_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/include -I$(top_srcdir)/src
+if HAVE_WIN32
+MEDIALIB_CPPFLAGS += -D_WIN32_WINNT=0x600
+endif
 
 libmedialibrary_ladir = $(includedir)/medialibrary
 
@@ -147,6 +150,7 @@ noinst_HEADERS = \
 	src/VideoTrack.h \
 	src/compat/Thread.h \
 	src/compat/Mutex.h \
+	src/compat/ConditionVariable.h \
 	$(NULL)
 
 

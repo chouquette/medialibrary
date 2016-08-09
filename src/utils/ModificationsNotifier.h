@@ -23,7 +23,7 @@
 #pragma once
 
 #include <atomic>
-#include <condition_variable>
+#include "compat/ConditionVariable.h"
 #include <functional>
 #include <vector>
 #include <chrono>
@@ -154,7 +154,7 @@ private:
 
     // Notifier thread
     compat::Mutex m_lock;
-    std::condition_variable m_cond;
+    compat::ConditionVariable m_cond;
     compat::Thread m_notifierThread;
     std::atomic_bool m_stop;
     std::chrono::time_point<std::chrono::steady_clock> m_timeout;

@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include <condition_variable>
+#include "compat/ConditionVariable.h"
 #include "compat/Mutex.h"
 #include <atomic>
 
@@ -85,7 +85,7 @@ public:
     }
 
 private:
-    std::condition_variable m_writeDoneCond;
+    compat::ConditionVariable m_writeDoneCond;
     compat::Mutex m_lock;
     unsigned int m_nbReader;
     unsigned int m_nbReaderWaiting;

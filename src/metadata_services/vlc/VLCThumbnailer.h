@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include <condition_variable>
+#include "compat/ConditionVariable.h"
 
 #include <vlcpp/vlc.hpp>
 
@@ -58,7 +58,7 @@ private:
 private:
     VLC::Instance m_instance;
     compat::Mutex m_mutex;
-    std::condition_variable m_cond;
+    compat::ConditionVariable m_cond;
     std::unique_ptr<IImageCompressor> m_compressor;
     // Per thumbnail variables
     std::unique_ptr<uint8_t[]> m_buff;
