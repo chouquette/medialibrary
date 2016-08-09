@@ -207,7 +207,11 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
     }
     if ( m_fsFactory == nullptr )
         m_fsFactory.reset( new factory::FileSystemFactory( m_deviceLister ) );
+#ifdef _WIN32
+    if ( mkdir( thumbnailPath.c_str() ) != 0 )
+#else
     if ( mkdir( thumbnailPath.c_str(), S_IRWXU ) != 0 )
+#endif
     {
         if ( errno != EEXIST )
             throw std::runtime_error( std::string( "Failed to create thumbnail directory: " ) +
