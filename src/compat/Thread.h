@@ -173,6 +173,12 @@ public:
     // Platform agnostic methods:
 
     Thread() = default;
+    ~Thread()
+    {
+        if ( joinable() == true )
+            std::terminate();
+    }
+
     Thread( Thread&& ) = default;
     Thread& operator=( Thread&& ) = default;
     Thread( const Thread& ) = delete;
