@@ -27,14 +27,15 @@
 namespace medialibrary
 {
 
+namespace factory { class IFileSystem; }
+
 namespace fs
 {
 
 class Directory : public CommonDirectory
 {
 public:
-    Directory( const std::string& path );
-    virtual std::shared_ptr<IDevice> device() const override;
+    Directory( const std::string& path, factory::IFileSystem& fsFactory );
 
 private:
     virtual void read() const override;

@@ -191,6 +191,11 @@ struct FileSystemFactory : public factory::IFileSystem
         return ret;
     }
 
+    virtual std::shared_ptr<fs::IDevice> createDeviceFromPath( const std::string& path ) override
+    {
+        return device( path );
+    }
+
     std::vector<std::shared_ptr<Device>> devices;
 };
 
@@ -301,6 +306,11 @@ public:
     }
 
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& ) override
+    {
+        return nullptr;
+    }
+
+    virtual std::shared_ptr<fs::IDevice> createDeviceFromPath( const std::string& ) override
     {
         return nullptr;
     }

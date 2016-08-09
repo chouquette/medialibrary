@@ -24,7 +24,6 @@
 
 #include "filesystem/IDevice.h"
 #include "medialibrary/Types.h"
-#include "utils/Cache.h"
 
 #include <memory>
 #include <unordered_map>
@@ -37,33 +36,12 @@ namespace fs
 
 class Device : public IDevice
 {
-    // UUID -> Device instance map
-    using DeviceCacheMap = std::unordered_map<std::string, std::shared_ptr<IDevice>>;
-
 public:
+    Device( const std::string& uuid, const std::string& mountpoint, bool isRemovable );
     virtual const std::string& uuid() const override;
     virtual bool isRemovable() const override;
     virtual bool isPresent() const override;
     virtual const std::string& mountpoint() const override;
-
-    ///
-    /// \brief fromPath Returns the device that contains the given path
-    ///
-    static std::shared_ptr<IDevice> fromPath( const std::string& path );
-    static std::shared_ptr<IDevice> fromUuid( const std::string& uuid );
-
-    static void setDeviceLister( DeviceListerPtr lister );
-    static void refreshDeviceCache();
-
-protected:
-    Device( const std::string& uuid, const std::string& mountpoint, bool isRemovable );
-
-private:
-    static void refreshDeviceCacheLocked();
-
-private:
-    static Cache<DeviceCacheMap> DeviceCache;
-    static DeviceListerPtr DeviceLister;
 
 private:
     std::string m_uuid;

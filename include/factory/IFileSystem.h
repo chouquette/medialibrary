@@ -53,6 +53,12 @@ namespace factory
         ///
         virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) = 0;
         ///
+        /// \brief createDeviceFromPath creates a representation of a device
+        /// \param path A path.
+        /// \return A representation of the device.
+        ///
+        virtual std::shared_ptr<fs::IDevice> createDeviceFromPath( const std::string& path ) = 0;
+        ///
         /// \brief refresh Will cause any FS cache to be refreshed.
         ///
         virtual void refresh() = 0;

@@ -40,6 +40,9 @@
 # error No filesystem implementation for this architecture
 #endif
 
+#include "medialibrary/IDeviceLister.h"
+#include "compat/Mutex.h"
+
 namespace medialibrary
 {
 
@@ -47,8 +50,8 @@ namespace factory
 {
 
 FileSystemFactory::FileSystemFactory( DeviceListerPtr lister )
+    : m_deviceLister( lister )
 {
-    fs::Device::setDeviceLister( lister );
 }
 
 std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::string& path )
@@ -59,7 +62,7 @@ std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::s
         return it->second;
     try
     {
-        auto dir = std::make_shared<fs::Directory>( path );
+        auto dir = std::make_shared<fs::Directory>( path, *this );
         m_dirs[path] = dir;
         return dir;
     }
@@ -72,13 +75,47 @@ std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::s
 
 std::shared_ptr<fs::IDevice> FileSystemFactory::createDevice( const std::string& uuid )
 {
-    return fs::Device::fromUuid( uuid );
+    auto lock = m_deviceCache.lock();
+
+    auto it = m_deviceCache.get().find( uuid );
+    if ( it != end( m_deviceCache.get() ) )
+        return it->second;
+    return nullptr;
+}
+
+std::shared_ptr<fs::IDevice> FileSystemFactory::createDeviceFromPath( const std::string& path )
+{
+    auto lock = m_deviceCache.lock();
+    std::shared_ptr<fs::IDevice> res;
+    for ( const auto& p : m_deviceCache.get() )
+    {
+        if ( path.find( p.second->mountpoint() ) == 0 )
+        {
+            if ( res == nullptr || res->mountpoint().length() < p.second->mountpoint().length() )
+                res = p.second;
+        }
+    }
+    return res;
 }
 
 void FileSystemFactory::refresh()
 {
-    std::lock_guard<compat::Mutex> lock( m_mutex );
-    m_dirs.clear();
+    {
+        std::lock_guard<compat::Mutex> lock( m_mutex );
+        m_dirs.clear();
+    }
+    auto lock = m_deviceCache.lock();
+    if ( m_deviceCache.isCached() == false )
+        m_deviceCache = DeviceCacheMap{};
+    m_deviceCache.get().clear();
+    auto devices = m_deviceLister->devices();
+    for ( const auto& d : devices )
+    {
+        const auto& uuid = std::get<0>( d );
+        const auto& mountpoint = std::get<1>( d );
+        const auto removable = std::get<2>( d );
+        m_deviceCache.get().emplace( uuid, std::make_shared<fs::Device>( uuid, mountpoint, removable ) );
+    }
 }
 
 }

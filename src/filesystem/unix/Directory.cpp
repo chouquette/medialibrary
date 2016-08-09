@@ -42,17 +42,9 @@ namespace medialibrary
 namespace fs
 {
 
-Directory::Directory( const std::string& path )
-    : CommonDirectory( toAbsolute( path ) )
+Directory::Directory( const std::string& path, factory::IFileSystem& fsFactory )
+    : CommonDirectory( toAbsolute( path ), fsFactory )
 {
-}
-
-std::shared_ptr<IDevice> Directory::device() const
-{
-    auto lock = m_device.lock();
-    if ( m_device.isCached() == false )
-        m_device = Device::fromPath( m_path );
-    return m_device.get();
 }
 
 void Directory::read() const
@@ -97,7 +89,7 @@ void Directory::read() const
             if ( *dirPath.crbegin() != '/' )
                 dirPath += '/';
             //FIXME: This will use toAbsolute again in the constructor.
-            m_dirs.emplace_back( std::make_shared<Directory>( dirPath ) );
+            m_dirs.emplace_back( std::make_shared<Directory>( dirPath, m_fsFactory ) );
         }
         else
         {

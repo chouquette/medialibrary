@@ -25,6 +25,7 @@
 #include "compat/Mutex.h"
 #include "factory/IFileSystem.h"
 #include "medialibrary/Types.h"
+#include "utils/Cache.h"
 
 #include <string>
 #include <unordered_map>
@@ -36,15 +37,22 @@ namespace factory
 {
     class FileSystemFactory : public IFileSystem
     {
+        // UUID -> Device instance map
+        using DeviceCacheMap = std::unordered_map<std::string, std::shared_ptr<fs::IDevice>>;
+
     public:
         FileSystemFactory( DeviceListerPtr lister );
         virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& path ) override;
         virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override;
+        virtual std::shared_ptr<fs::IDevice> createDeviceFromPath( const std::string& path ) override;
         virtual void refresh() override;
 
     private:
         std::unordered_map<std::string, std::shared_ptr<fs::IDirectory>> m_dirs;
         compat::Mutex m_mutex;
+        DeviceListerPtr m_deviceLister;
+        Cache<DeviceCacheMap> m_deviceCache;
+
     };
 }
 

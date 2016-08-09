@@ -27,26 +27,12 @@
 #include "Device.h"
 #include "Directory.h"
 #include "logging/Logger.h"
-#include "medialibrary/IDeviceLister.h"
-
-namespace
-{
-    // Allow private ctors to be used from make_shared
-    struct DeviceBuilder : public medialibrary::fs::Device
-    {
-        template <typename... Args>
-        DeviceBuilder( Args&&... args ) : Device( std::forward<Args>( args )... ) {}
-    };
-}
 
 namespace medialibrary
 {
 
 namespace fs
 {
-
-Cache<Device::DeviceCacheMap> Device::DeviceCache;
-DeviceListerPtr Device::DeviceLister;
 
 Device::Device( const std::string& uuid, const std::string& mountpoint, bool isRemovable )
     : m_uuid( uuid )
@@ -76,59 +62,6 @@ bool Device::isPresent() const
 const std::string&Device::mountpoint() const
 {
     return m_mountpoint;
-}
-
-std::shared_ptr<IDevice> Device::fromPath( const std::string& path )
-{
-    auto lock = DeviceCache.lock();
-    std::shared_ptr<IDevice> res;
-    for ( const auto& p : DeviceCache.get() )
-    {
-        if ( path.find( p.second->mountpoint() ) == 0 )
-        {
-            if ( res == nullptr || res->mountpoint().length() < p.second->mountpoint().length() )
-                res = p.second;
-        }
-    }
-    return res;
-}
-
-std::shared_ptr<IDevice> Device::fromUuid( const std::string& uuid )
-{
-    auto lock = DeviceCache.lock();
-
-    auto it = DeviceCache.get().find( uuid );
-    if ( it != end( DeviceCache.get() ) )
-        return it->second;
-    return nullptr;
-}
-
-void Device::setDeviceLister( DeviceListerPtr lister )
-{
-    auto lock = DeviceCache.lock();
-    DeviceLister = lister;
-    refreshDeviceCacheLocked();
-}
-
-void Device::refreshDeviceCache()
-{
-    auto lock = DeviceCache.lock();
-    refreshDeviceCacheLocked();
-}
-
-void Device::refreshDeviceCacheLocked()
-{
-    if ( DeviceCache.isCached() == false )
-        DeviceCache = DeviceCacheMap{};
-    DeviceCache.get().clear();
-    auto devices = DeviceLister->devices();
-    for ( const auto& d : devices )
-    {
-        const auto& uuid = std::get<0>( d );
-        const auto& mountpoint = std::get<1>( d );
-        const auto removable = std::get<2>( d );
-        DeviceCache.get().emplace( uuid, std::make_shared<DeviceBuilder>( uuid, mountpoint, removable ) );
-    }
 }
 
 }

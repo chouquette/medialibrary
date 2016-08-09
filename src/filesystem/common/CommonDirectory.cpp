@@ -25,7 +25,7 @@
 #endif
 
 #include "CommonDirectory.h"
-
+#include "factory/IFileSystem.h"
 #include "utils/Filename.h"
 #include <dirent.h>
 #include <cerrno>
@@ -36,8 +36,10 @@ namespace medialibrary
 namespace fs
 {
 
-medialibrary::fs::CommonDirectory::CommonDirectory(const std::string& path)
+medialibrary::fs::CommonDirectory::CommonDirectory( const std::string& path,
+                                                    factory::IFileSystem& fsFactory )
     : m_path( path )
+    , m_fsFactory( fsFactory )
 {
     if ( *m_path.crbegin() != '/' )
         m_path += '/';
@@ -61,6 +63,15 @@ const std::vector<std::shared_ptr<IDirectory>>& CommonDirectory::dirs() const
         read();
     return m_dirs;
 }
+
+std::shared_ptr<IDevice> CommonDirectory::device() const
+{
+    auto lock = m_device.lock();
+    if ( m_device.isCached() == false )
+        m_device = m_fsFactory.createDeviceFromPath( m_path );
+    return m_device.get();
+}
+
 
 std::string CommonDirectory::toAbsolute( const std::string& path )
 {
