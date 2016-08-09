@@ -20,25 +20,47 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#pragma once
+#if HAVE_CONFIG_H
+# include "config.h"
+#endif
 
-#include "filesystem/common/CommonDevice.h"
-
-#include <memory>
-#include <unordered_map>
+#include "CommonDevice.h"
 
 namespace medialibrary
 {
-
 namespace fs
 {
 
-class Device : public CommonDevice
+CommonDevice::CommonDevice( const std::string& uuid, const std::string& mountpoint, bool isRemovable )
+    : m_uuid( uuid )
+    , m_mountpoint( mountpoint )
+    , m_present( true )
+    , m_removable( isRemovable )
 {
-public:
-    Device( const std::string& uuid, const std::string& mountpoint, bool isRemovable );
-};
-
+    if ( *m_mountpoint.crbegin() != '/' )
+        m_mountpoint += '/';
 }
 
+const std::string& CommonDevice::uuid() const
+{
+    return m_uuid;
+}
+
+bool CommonDevice::isRemovable() const
+{
+    return m_removable;
+}
+
+bool CommonDevice::isPresent() const
+{
+    return m_present;
+}
+
+const std::string& CommonDevice::mountpoint() const
+{
+    return m_mountpoint;
+}
+
+
+}
 }

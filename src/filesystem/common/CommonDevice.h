@@ -22,23 +22,28 @@
 
 #pragma once
 
-#include "filesystem/common/CommonDevice.h"
-
-#include <memory>
-#include <unordered_map>
+#include "filesystem/IDevice.h"
 
 namespace medialibrary
 {
-
 namespace fs
 {
 
-class Device : public CommonDevice
+class CommonDevice : public IDevice
 {
 public:
-    Device( const std::string& uuid, const std::string& mountpoint, bool isRemovable );
+    CommonDevice( const std::string& uuid, const std::string& mountpoint, bool isRemovable );
+    virtual const std::string& uuid() const override;
+    virtual bool isRemovable() const override;
+    virtual bool isPresent() const override;
+    virtual const std::string& mountpoint() const override;
+
+private:
+    std::string m_uuid;
+    std::string m_mountpoint;
+    bool m_present;
+    bool m_removable;
 };
 
 }
-
 }

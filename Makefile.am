@@ -60,6 +60,7 @@ libmedialibrary_la_SOURCES = \
 	src/discoverer/FsDiscoverer.cpp \
 	src/factory/FileSystemFactory.cpp \
 	src/factory/DeviceListerFactory.cpp \
+	src/filesystem/common/CommonDevice.cpp \
 	src/filesystem/common/CommonFile.cpp \
 	src/filesystem/common/CommonDirectory.cpp \
 	src/logging/IostreamLogger.cpp \
@@ -117,6 +118,7 @@ noinst_HEADERS = \
 	src/File.h \
 	src/filesystem/common/CommonFile.h \
 	src/filesystem/common/CommonDirectory.h \
+	src/filesystem/common/CommonDevice.h \
 	src/filesystem/unix/Device.h \
 	src/filesystem/unix/Directory.h \
 	src/filesystem/unix/File.h \
