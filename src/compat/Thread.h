@@ -39,9 +39,14 @@ namespace this_thread = std::this_thread;
 
 #include <functional>
 #include <memory>
-#include <pthread.h>
 #include <system_error>
 #include <unistd.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <pthread.h>
+#endif
 
 namespace medialibrary
 {
@@ -60,7 +65,14 @@ namespace details
 class thread_id
 {
 public:
-    constexpr thread_id() noexcept : m_id( 0 ) {}
+
+#ifdef _WIN32
+    using native_thread_id_type = HANDLE;
+#else
+    using native_thread_id_type = pthread_t;
+#endif
+
+    constexpr thread_id() noexcept : m_id{} {}
     thread_id( const thread_id& ) = default;
     thread_id& operator=( const thread_id& ) = default;
     thread_id( thread_id&& r ) : m_id( r.m_id ) { r.m_id = 0; }
@@ -74,9 +86,9 @@ public:
     bool operator>=(const thread_id& r) const noexcept { return m_id >= r.m_id; }
 
 private:
-    thread_id( pthread_t id ) : m_id( id ) {}
+    thread_id( native_thread_id_type id ) : m_id( id ) {}
 
-    pthread_t m_id;
+    native_thread_id_type m_id;
 
     friend thread_id this_thread::get_id();
     friend Thread;
@@ -95,6 +107,24 @@ class Thread
         T* inst;
     };
 
+#ifdef _WIN32
+    template <typename T>
+    static __attribute__((__stdcall__)) DWORD threadRoutine( void* opaque )
+    {
+        auto invoker = std::unique_ptr<Invoker<T>>( reinterpret_cast<Invoker<T>*>( opaque ) );
+        (invoker->inst->*(invoker->func))();
+        return 0;
+    }
+#else
+    template <typename T>
+    static void* threadRoutine( void* opaque )
+    {
+        auto invoker = std::unique_ptr<Invoker<T>>( reinterpret_cast<Invoker<T>*>( opaque ) );
+        (invoker->inst->*(invoker->func))();
+        return nullptr;
+    }
+#endif
+
 public:
     using id = details::thread_id;
 
@@ -104,18 +134,26 @@ public:
         auto i = std::unique_ptr<Invoker<T>>( new Invoker<T>{
             entryPoint, inst
         });
-        if ( pthread_create( &m_id.m_id, nullptr, []( void* opaque ) -> void* {
-            auto invoker = std::unique_ptr<Invoker<T>>( reinterpret_cast<Invoker<T>*>( opaque ) );
-            (invoker->inst->*(invoker->func))();
-            return nullptr;
-        }, i.get() ) != 0 )
+#ifdef _WIN32
+        if ( ( m_id = CreateThread( nullptr, 0, &threadRoutine<T>, i.get(), 0, nullptr ) ) == nullptr )
+#else
+        if ( pthread_create( &m_id.m_id, nullptr, &threadRoutine<T>, i.get() ) != 0 )
+#endif
             throw std::system_error{ std::make_error_code( std::errc::resource_unavailable_try_again ) };
         i.release();
     }
 
     static unsigned hardware_concurrency()
     {
+#ifdef _WIN32
+#if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP
+        return GetCurrentProcessorNumber();
+#else
+        return 0;
+#endif
+#else
         return sysconf( _SC_NPROCESSORS_ONLN );
+#endif
     }
 
     void join()
@@ -124,7 +162,12 @@ public:
             throw std::system_error{ std::make_error_code( std::errc::invalid_argument ) };
         if ( this_thread::get_id() == m_id )
             throw std::system_error{ std::make_error_code( std::errc::resource_deadlock_would_occur ) };
+#ifdef _WIN32
+        WaitForSingleObjectEx( m_id.m_id, INFINITE, TRUE );
+        CloseHandle( m_id.m_id );
+#else
         pthread_join( m_id.m_id, nullptr );
+#endif
     }
 
     // Platform agnostic methods:
@@ -153,7 +196,11 @@ namespace this_thread
 {
     inline details::thread_id get_id()
     {
+#ifdef _WIN32
+        return GetCurrentThread();
+#else
         return { pthread_self() };
+#endif
     }
 }
 
@@ -168,7 +215,7 @@ struct hash<medialibrary::compat::Thread::id>
     size_t operator()( const medialibrary::compat::Thread::id& id ) const noexcept
     {
         static_assert( sizeof( id.m_id ) <= sizeof( size_t ), "thread handle is too big" );
-        return id.m_id;
+        return reinterpret_cast<size_t>( id.m_id );
     }
 };
 }
