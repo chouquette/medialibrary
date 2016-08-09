@@ -164,6 +164,9 @@ libmedialibrary_la_SOURCES += \
 	src/filesystem/win32/File.cpp \
 	src/filesystem/win32/Device.cpp \
 	$(NULL)
+noinst_HEADERS += \
+	src/utils/Charsets.h \
+	$(NULL)
 else
 libmedialibrary_la_SOURCES += \
 	src/filesystem/unix/Directory.cpp \

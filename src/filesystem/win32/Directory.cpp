@@ -25,6 +25,9 @@
 #endif
 
 #include "Directory.h"
+#include "utils/Charsets.h"
+#include "factory/IFileSystem.h"
+#include "File.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -41,10 +44,11 @@ Directory::Directory(const std::string& path , factory::IFileSystem& fsFactory)
 {
 }
 
-void Directory::read()
+void Directory::read() const
 {
     WIN32_FIND_DATA f;
-    auto h = FindFirstFile( m_path.c_str(), &f );
+    auto wpath = charset::ToWide( m_path.c_str() );
+    auto h = FindFirstFile( wpath.get(), &f );
     if ( h == INVALID_HANDLE_VALUE )
         throw std::runtime_error( "Failed to browse through " + m_path );
     try
@@ -53,11 +57,11 @@ void Directory::read()
         {
             if ( ( f.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
             {
-                m_dirs.emplace_back( f.cFileName );
+                m_dirs.emplace_back( m_fsFactory.createDirectory( charset::FromWide( f.cFileName ).get() ) );
             }
             else
             {
-                m_dirs.emplace_back( f.cFileName );
+                m_files.emplace_back( std::make_shared<File>( charset::FromWide( f.cFileName ).get() ) );
             }
         } while ( FindNextFile( h, &f ) != 0 );
     }
@@ -69,12 +73,14 @@ void Directory::read()
 std::string Directory::toAbsolute( const std::string& path )
 {
     TCHAR buff[MAX_PATH];
-    if ( GetFullPathName( path.c_str(), MAX_PATH, buff, nullptr ) == 0 )
+    auto wpath = charset::ToWide( path.c_str() );
+    if ( GetFullPathName( wpath.get(), MAX_PATH, buff, nullptr ) == 0 )
     {
         throw std::runtime_error("Failed to convert " + path + " to absolute path (" +
                                  std::to_string( GetLastError() ) + ")" );
     }
-    return std::string( buff );
+    auto upath = charset::FromWide( buff );
+    return std::string( upath.get() );
 }
 
 }
