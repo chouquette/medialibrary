@@ -20,27 +20,60 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#pragma once
+#if HAVE_CONFIG_H
+# include "config.h"
+#endif
 
-#include "filesystem/common/CommonDirectory.h"
+#include "CommonDirectory.h"
+
+#include "utils/Filename.h"
+#include <dirent.h>
+#include <cerrno>
+#include <cstring>
 
 namespace medialibrary
 {
-
 namespace fs
 {
 
-class Directory : public CommonDirectory
+medialibrary::fs::CommonDirectory::CommonDirectory(const std::string& path)
+    : m_path( path )
 {
-public:
-    Directory( const std::string& path );
-    virtual std::shared_ptr<IDevice> device() const override;
-
-private:
-    virtual void read() const override;
-    static std::string toAbsolute( const std::string& path );
-};
-
+    if ( *m_path.crbegin() != '/' )
+        m_path += '/';
 }
 
+const std::string& CommonDirectory::path() const
+{
+    return m_path;
+}
+
+const std::vector<std::shared_ptr<IFile>>& CommonDirectory::files() const
+{
+    if ( m_dirs.size() == 0 && m_files.size() == 0 )
+        read();
+    return m_files;
+}
+
+const std::vector<std::shared_ptr<IDirectory>>& CommonDirectory::dirs() const
+{
+    if ( m_dirs.size() == 0 && m_files.size() == 0 )
+        read();
+    return m_dirs;
+}
+
+std::string CommonDirectory::toAbsolute( const std::string& path )
+{
+    char abs[PATH_MAX];
+    if ( realpath( path.c_str(), abs ) == nullptr )
+    {
+        std::string err( "Failed to convert to absolute path" );
+        err += "(" + path + "): ";
+        err += strerror(errno);
+        throw std::runtime_error( err );
+    }
+    return std::string{ abs };
+}
+
+}
 }

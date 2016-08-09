@@ -61,6 +61,7 @@ libmedialibrary_la_SOURCES = \
 	src/factory/FileSystemFactory.cpp \
 	src/factory/DeviceListerFactory.cpp \
 	src/filesystem/common/CommonFile.cpp \
+	src/filesystem/common/CommonDirectory.cpp \
 	src/logging/IostreamLogger.cpp \
 	src/logging/Logger.cpp \
 	src/metadata_services/MetadataParser.cpp \
@@ -115,6 +116,7 @@ noinst_HEADERS = \
 	src/factory/DeviceListerFactory.h \
 	src/File.h \
 	src/filesystem/common/CommonFile.h \
+	src/filesystem/common/CommonDirectory.h \
 	src/filesystem/unix/Device.h \
 	src/filesystem/unix/Directory.h \
 	src/filesystem/unix/File.h \

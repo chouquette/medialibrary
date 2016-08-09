@@ -22,25 +22,32 @@
 
 #pragma once
 
-#include "filesystem/common/CommonDirectory.h"
+#include "filesystem/IDirectory.h"
+#include "utils/Cache.h"
 
 namespace medialibrary
 {
-
 namespace fs
 {
 
-class Directory : public CommonDirectory
+class CommonDirectory : public IDirectory
 {
 public:
-    Directory( const std::string& path );
-    virtual std::shared_ptr<IDevice> device() const override;
+    CommonDirectory( const std::string& path );
+    virtual const std::string& path() const override;
+    virtual const std::vector<std::shared_ptr<IFile>>& files() const override;
+    virtual const std::vector<std::shared_ptr<IDirectory>>& dirs() const override;
 
-private:
-    virtual void read() const override;
+protected:
+    virtual void read() const = 0;
     static std::string toAbsolute( const std::string& path );
+
+protected:
+    std::string m_path;
+    mutable std::vector<std::shared_ptr<IFile>> m_files;
+    mutable std::vector<std::shared_ptr<IDirectory>> m_dirs;
+    mutable Cache<std::shared_ptr<IDevice>> m_device;
 };
 
 }
-
 }

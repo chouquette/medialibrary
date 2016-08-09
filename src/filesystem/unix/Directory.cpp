@@ -43,29 +43,8 @@ namespace fs
 {
 
 Directory::Directory( const std::string& path )
-    : m_path( toAbsolute( path ) )
+    : CommonDirectory( toAbsolute( path ) )
 {
-    if ( *m_path.crbegin() != '/' )
-        m_path += '/';
-}
-
-const std::string&Directory::path() const
-{
-    return m_path;
-}
-
-const std::vector<std::shared_ptr<IFile>>& Directory::files() const
-{
-    if ( m_dirs.size() == 0 && m_files.size() == 0 )
-        read();
-    return m_files;
-}
-
-const std::vector<std::shared_ptr<IDirectory>>& Directory::dirs() const
-{
-    if ( m_dirs.size() == 0 && m_files.size() == 0 )
-        read();
-    return m_dirs;
 }
 
 std::shared_ptr<IDevice> Directory::device() const
@@ -74,19 +53,6 @@ std::shared_ptr<IDevice> Directory::device() const
     if ( m_device.isCached() == false )
         m_device = Device::fromPath( m_path );
     return m_device.get();
-}
-
-std::string Directory::toAbsolute( const std::string& path )
-{
-    char abs[PATH_MAX];
-    if ( realpath( path.c_str(), abs ) == nullptr )
-    {
-        std::string err( "Failed to convert to absolute path" );
-        err += "(" + path + "): ";
-        err += strerror(errno);
-        throw std::runtime_error( err );
-    }
-    return std::string{ abs };
 }
 
 void Directory::read() const
@@ -140,6 +106,21 @@ void Directory::read() const
         }
     }
 }
+
+
+std::string Directory::toAbsolute( const std::string& path )
+{
+    char abs[PATH_MAX];
+    if ( realpath( path.c_str(), abs ) == nullptr )
+    {
+        std::string err( "Failed to convert to absolute path" );
+        err += "(" + path + "): ";
+        err += strerror(errno);
+        throw std::runtime_error( err );
+    }
+    return std::string{ abs };
+}
+
 
 }
 

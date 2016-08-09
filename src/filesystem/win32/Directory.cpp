@@ -47,14 +47,14 @@ const std::string& Directory::path() const
     return m_path;
 }
 
-const std::vector<std::string>& Directory::files()
+const std::vector<std::shared_ptr<IFile> >& Directory::files()
 {
     if ( m_dirs.size() == 0 && m_files.size() == 0 )
         read();
     return m_files;
 }
 
-const std::vector<std::string>&Directory::dirs()
+const std::vector<std::shared_ptr<IDirectory> >& Directory::dirs()
 {
     if ( m_dirs.size() == 0 && m_files.size() == 0 )
         read();

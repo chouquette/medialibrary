@@ -36,10 +36,9 @@ public:
     Directory( const std::string& path );
 
     virtual const std::string& path() const override;
-    virtual const std::vector<std::string>& files() override;
-    virtual const std::vector<std::string>& dirs() override;
-    virtual unsigned int lastModificationDate() const override;
-    virtual bool isRemovable() const override;
+    virtual const std::vector<std::shared_ptr<IFile>>& files() override;
+    virtual const std::vector<std::shared_ptr<IDirectory>>& dirs() override;
+    virtual std::shared_ptr<IDevice> device() const override;
 
 private:
     void read();
