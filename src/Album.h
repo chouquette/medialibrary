@@ -25,7 +25,6 @@
 
 #include <memory>
 #include <sqlite3.h>
-#include <mutex>
 
 #include "medialibrary/IMediaLibrary.h"
 
