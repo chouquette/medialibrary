@@ -36,47 +36,9 @@ namespace medialibrary
 namespace fs
 {
 
-Directory::Directory( const std::string& path )
-    : m_path( toAbsolute( path ) )
-    , m_lastModificationDate( 0 )
+Directory::Directory(const std::string& path , factory::IFileSystem& fsFactory)
+    : CommonDirectory( toAbsolute( path ), fsFactory )
 {
-}
-
-const std::string& Directory::path() const
-{
-    return m_path;
-}
-
-const std::vector<std::shared_ptr<IFile> >& Directory::files()
-{
-    if ( m_dirs.size() == 0 && m_files.size() == 0 )
-        read();
-    return m_files;
-}
-
-const std::vector<std::shared_ptr<IDirectory> >& Directory::dirs()
-{
-    if ( m_dirs.size() == 0 && m_files.size() == 0 )
-        read();
-    return m_dirs;
-}
-
-unsigned int Directory::lastModificationDate() const
-{
-    if ( m_lastModificationDate == 0 )
-    {
-        struct _stat32 s;
-        _stat32( m_path.c_str(), &s );
-        if ( ( S_IFDIR & s.st_mode ) == 0 )
-            throw std::runtime_error( "The provided path isn't a directory" );
-        m_lastModificationDate = s.st_mtime;
-    }
-    return m_lastModificationDate;
-}
-
-bool Directory::isRemovable() const
-{
-    return false;
 }
 
 void Directory::read()
@@ -103,8 +65,6 @@ void Directory::read()
 
     FindClose( h );
 }
-
-
 
 std::string Directory::toAbsolute( const std::string& path )
 {

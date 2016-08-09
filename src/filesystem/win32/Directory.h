@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "filesystem/IDirectory.h"
+#include "filesystem/common/CommonDirectory.h"
 
 namespace medialibrary
 {
@@ -30,27 +30,14 @@ namespace medialibrary
 namespace fs
 {
 
-class Directory : public IDirectory
+class Directory : public CommonDirectory
 {
 public:
-    Directory( const std::string& path );
-
-    virtual const std::string& path() const override;
-    virtual const std::vector<std::shared_ptr<IFile>>& files() override;
-    virtual const std::vector<std::shared_ptr<IDirectory>>& dirs() override;
-    virtual std::shared_ptr<IDevice> device() const override;
+    Directory( const std::string& path, factory::IFileSystem& fsFactory );
 
 private:
-    void read();
-
-private:
+    virtual void read() const override;
     static std::string toAbsolute( const std::string& path );
-
-private:
-    const std::string m_path;
-    std::vector<std::string> m_files;
-    std::vector<std::string> m_dirs;
-    mutable unsigned int m_lastModificationDate;
 };
 
 }

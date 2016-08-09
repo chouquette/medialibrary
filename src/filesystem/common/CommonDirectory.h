@@ -44,7 +44,6 @@ public:
 
 protected:
     virtual void read() const = 0;
-    static std::string toAbsolute( const std::string& path );
 
 protected:
     std::string m_path;

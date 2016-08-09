@@ -72,19 +72,5 @@ std::shared_ptr<IDevice> CommonDirectory::device() const
     return m_device.get();
 }
 
-
-std::string CommonDirectory::toAbsolute( const std::string& path )
-{
-    char abs[PATH_MAX];
-    if ( realpath( path.c_str(), abs ) == nullptr )
-    {
-        std::string err( "Failed to convert to absolute path" );
-        err += "(" + path + "): ";
-        err += strerror(errno);
-        throw std::runtime_error( err );
-    }
-    return std::string{ abs };
-}
-
 }
 }
