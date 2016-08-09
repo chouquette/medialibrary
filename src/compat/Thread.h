@@ -98,7 +98,6 @@ class Thread
 public:
     using id = details::thread_id;
 
-    Thread() = default;
     template <typename T>
     Thread( void (T::*entryPoint)(), T* inst )
     {
@@ -113,6 +112,24 @@ public:
             throw std::system_error{ std::make_error_code( std::errc::resource_unavailable_try_again ) };
         i.release();
     }
+
+    static unsigned hardware_concurrency()
+    {
+        return sysconf( _SC_NPROCESSORS_ONLN );
+    }
+
+    void join()
+    {
+        if ( !joinable() )
+            throw std::system_error{ std::make_error_code( std::errc::invalid_argument ) };
+        if ( this_thread::get_id() == m_id )
+            throw std::system_error{ std::make_error_code( std::errc::resource_deadlock_would_occur ) };
+        pthread_join( m_id.m_id, nullptr );
+    }
+
+    // Platform agnostic methods:
+
+    Thread() = default;
     Thread( Thread&& ) = default;
     Thread& operator=( Thread&& ) = default;
     Thread( const Thread& ) = delete;
@@ -123,24 +140,9 @@ public:
         return m_id != id{};
     }
 
-    void join()
-    {
-        if ( !joinable() )
-            throw std::system_error{ std::make_error_code( std::errc::invalid_argument ) };
-        if ( this_thread::get_id() == m_id )
-            throw std::system_error{ std::make_error_code( std::errc::resource_deadlock_would_occur ) };
-        pthread_join( m_id.m_id, nullptr );
-
-    }
-
     id get_id()
     {
         return m_id;
-    }
-
-    static unsigned hardware_concurrency()
-    {
-        return sysconf( _SC_NPROCESSORS_ONLN );
     }
 
 private:
