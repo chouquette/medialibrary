@@ -226,8 +226,9 @@ AC_COMPILE_IFELSE([AC_LANG_SOURCE([#include <thread>
         AC_MSG_RESULT([ok])
         AC_DEFINE(CXX11_THREADS, 1, [Defined to 1 if C++11 threads are supported])
     ],[ AC_MSG_RESULT([no])])
-AC_LANG_PUSH([C++])
+AC_LANG_POP([C++])
 
+AC_LANG_PUSH([C++])
 AC_MSG_CHECKING([c++11 thread_local support])
 AC_COMPILE_IFELSE([AC_LANG_SOURCE([thread_local int seaOtter = 0;
                    int main() {}])], [
