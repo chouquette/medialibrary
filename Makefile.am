@@ -279,6 +279,7 @@ unittest_CPPFLAGS = 		\
 	$(MEDIALIB_CPPFLAGS) 	\
 	-I$(top_srcdir)/test	\
 	-I$(top_srcdir)/googletest/include \
+	$(SQLITE_CFLAGS) 		\
 	$(NULL)
 
 unittest_LDADD = 		\
