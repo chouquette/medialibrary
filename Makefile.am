@@ -161,7 +161,9 @@ noinst_HEADERS = \
 if HAVE_WIN32
 libmedialibrary_la_SOURCES += \
 	src/filesystem/win32/Directory.cpp \
-	src/filesystem/win32/File.cpp
+	src/filesystem/win32/File.cpp \
+	src/filesystem/win32/Device.cpp \
+	$(NULL)
 else
 libmedialibrary_la_SOURCES += \
 	src/filesystem/unix/Directory.cpp \

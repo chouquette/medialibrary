@@ -36,6 +36,7 @@
 #elif defined(_WIN32)
 # include "filesystem/win32/Directory.h"
 # include "filesystem/win32/File.h"
+# include "filesystem/win32/Device.h"
 #else
 # error No filesystem implementation for this architecture
 #endif
