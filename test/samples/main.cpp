@@ -1,3 +1,8 @@
+
+#if HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include "Tester.h"
 
 static std::string TestDirectory = SRC_DIR "/test/samples/";
