@@ -301,6 +301,7 @@ samples_CPPFLAGS = 			\
 	-DSRC_DIR=\"$(top_srcdir)\"	\
 	-I$(top_srcdir)/test	\
 	-I$(top_srcdir)/googletest/include \
+	$(RAPIDJSON_CFLAGS)		\
 	$(NULL)
 
 samples_LDADD = 		\

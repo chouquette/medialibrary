@@ -292,6 +292,15 @@ AC_ARG_ENABLE(tests,AC_HELP_STRING([--disable-tests], [Disable build of automate
 AM_CONDITIONAL([HAVE_TESTS], [test "${enable_tests}" = "yes"])
 AS_IF([test "${enable_tests}" = "yes"], [
     AX_PTHREAD([have_pthread=yes],[have_pthread=no])
+    PKG_CHECK_MODULES(RAPIDJSON, RapidJSON, [], [
+        # We need the .pc for cross compilation, but we don't consider it a failure
+        # when building natively, mostly because debian doesn't package the .pc
+        if test "$host" != "$build" ; then
+            AC_MSG_ERROR(["Failed to find rapidjson"])
+        else
+            AC_MSG_WARN("Failed to find rapidjson using pkg-config. Using default location")
+        fi
+    ])
 ])
 AM_CONDITIONAL([HAVE_PTHREAD], [test "${have_pthread}" = "yes"])
 
