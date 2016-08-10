@@ -129,14 +129,16 @@ std::string DeviceLister::deviceFromDeviceMapper( const std::string& devicePath 
 {
     if ( devicePath.find( "/dev/mapper" ) != 0 )
         return {};
-    char linkPath[PATH_MAX];
-    if ( readlink( devicePath.c_str(), linkPath, PATH_MAX ) < 0 )
+    char linkPath[PATH_MAX + 1];
+    auto linkSize = readlink( devicePath.c_str(), linkPath, PATH_MAX );
+    if ( linkSize < 0 )
     {
         std::stringstream err;
         err << "Failed to resolve device -> mapper link: "
             << devicePath << " (" << strerror(errno) << ')';
         throw std::runtime_error( err.str() );
     }
+    linkPath[linkSize] = 0;
     LOG_INFO( "Resolved ", devicePath, " to ", linkPath, " device mapper" );
     const auto dmName = utils::file::fileName( linkPath );
     std::string dmSlavePath = "/sys/block/" + dmName + "/slaves";
