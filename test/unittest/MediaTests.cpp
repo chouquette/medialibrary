@@ -33,8 +33,7 @@
 #include "Album.h"
 #include "AlbumTrack.h"
 #include "mocks/FileSystem.h"
-
-#include <thread>
+#include "compat/Thread.h"
 
 class Medias : public Tests
 {
@@ -293,7 +292,7 @@ TEST_F( Medias, History )
     ASSERT_EQ( 1u, history.size() );
     ASSERT_EQ( m->id(), history[0]->id() );
 
-    std::this_thread::sleep_for( std::chrono::seconds{ 1 } );
+    compat::this_thread::sleep_for( std::chrono::seconds{ 1 } );
     auto m2 = ml->addFile( "media.mkv" );
     m2->increasePlayCount();
     m2->save();

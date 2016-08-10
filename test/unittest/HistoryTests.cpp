@@ -30,7 +30,7 @@
 #include "History.h"
 #include "Media.h"
 
-#include <thread>
+#include "compat/Thread.h"
 
 class HistoryTest : public Tests
 {
@@ -63,7 +63,7 @@ TEST_F( HistoryTest, MaxEntries )
 TEST_F( HistoryTest, Ordering )
 {
     ml->addToHistory( "first-stream" );
-    std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
+    compat::this_thread::sleep_for( std::chrono::seconds( 1 ) );
     ml->addToHistory( "second-stream" );
     auto hList = ml->lastStreamsPlayed();
     ASSERT_EQ( 2u, hList.size() );
@@ -77,7 +77,7 @@ TEST_F( HistoryTest, UpdateInsertionDate )
     auto hList = ml->lastStreamsPlayed();
     ASSERT_EQ( 1u, hList.size() );
     auto date = hList[0]->insertionDate();
-    std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
+    compat::this_thread::sleep_for( std::chrono::seconds( 1 ) );
     ml->addToHistory( "stream" );
     hList = ml->lastStreamsPlayed();
     ASSERT_EQ( 1u, hList.size() );
@@ -102,7 +102,7 @@ TEST_F( HistoryTest, ReinsertFavorited )
     auto item = hList[0];
     auto date = item->insertionDate();
     item->setFavorite( true );
-    std::this_thread::sleep_for( std::chrono::seconds{ 1 } );
+    compat::this_thread::sleep_for( std::chrono::seconds{ 1 } );
     ml->addToHistory( "stream" );
     hList = ml->lastStreamsPlayed();
     item = hList[0];

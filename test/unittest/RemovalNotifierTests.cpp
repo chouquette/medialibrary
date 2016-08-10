@@ -28,6 +28,7 @@
 #include "Media.h"
 #include "File.h"
 #include "mocks/NoopCallback.h"
+#include "compat/Mutex.h"
 
 class MockCallback : public mock::NoopCallback
 {
@@ -36,25 +37,25 @@ public:
 private:
     virtual void onMediaDeleted( std::vector<int64_t> batch ) override
     {
-        std::lock_guard<std::mutex> lock( m_lock );
+        std::lock_guard<compat::Mutex> lock( m_lock );
         m_nbMedia = batch.size();
         m_cond.notify_all();
     }
 public:
-    std::unique_lock<std::mutex> prepareWait()
+    std::unique_lock<compat::Mutex> prepareWait()
     {
         m_nbMedia = 0;
-        return std::unique_lock<std::mutex>{ m_lock };
+        return std::unique_lock<compat::Mutex>{ m_lock };
     }
 
-    unsigned int waitForNotif( std::unique_lock<std::mutex> preparedLock, std::chrono::duration<int64_t> timeout )
+    unsigned int waitForNotif( std::unique_lock<compat::Mutex> preparedLock, std::chrono::duration<int64_t> timeout )
     {
         m_cond.wait_for( preparedLock, timeout, [this]() { return m_nbMedia != 0; });
         return m_nbMedia;
     }
 
 private:
-    std::mutex m_lock;
+    compat::Mutex m_lock;
     compat::ConditionVariable m_cond;
     uint32_t m_nbMedia;
 };
