@@ -221,7 +221,7 @@ struct hash<medialibrary::compat::Thread::id>
     size_t operator()( const medialibrary::compat::Thread::id& id ) const noexcept
     {
         static_assert( sizeof( id.m_id ) <= sizeof( size_t ), "thread handle is too big" );
-        return reinterpret_cast<size_t>( id.m_id );
+        return (size_t)id.m_id;
     }
 };
 }
