@@ -56,8 +56,12 @@ void Tests::Reload( std::shared_ptr<factory::IFileSystem> fs /*= nullptr*/, IMed
             cbMock.reset( new mock::NoopCallback );
         metadataCb = cbMock.get();
     }
+    // Instantiate it here to avoid fiddling with multiple SetUp overloads
+    if ( mockDeviceLister == nullptr )
+        mockDeviceLister = std::make_shared<mock::MockDeviceLister>();
 
     ml->setFsFactory( fs );
+    ml->setDeviceLister( mockDeviceLister );
     ml->setVerbosity( LogLevel::Error );
     bool res = ml->initialize( "test.db", "/tmp", metadataCb );
     ASSERT_TRUE( res );

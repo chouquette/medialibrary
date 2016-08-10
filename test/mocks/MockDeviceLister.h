@@ -20,24 +20,19 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#include "gtest/gtest.h"
+#pragma once
 
-#include "factory/IFileSystem.h"
-#include "mocks/NoopCallback.h"
-#include "mocks/MockDeviceLister.h"
-#include "common/MediaLibraryTester.h"
-#include "filesystem/IDirectory.h"
+#include "medialibrary/IDeviceLister.h"
 
-class Tests : public testing::Test
+namespace mock
 {
-protected:
-    std::unique_ptr<MediaLibraryTester> ml;
-    std::unique_ptr<mock::NoopCallback> cbMock;
-    std::shared_ptr<factory::IFileSystem> fsFactory;
-    std::shared_ptr<mock::MockDeviceLister> mockDeviceLister;
-
-    virtual void SetUp() override;
-    virtual void InstantiateMediaLibrary();
-    void Reload( std::shared_ptr<factory::IFileSystem> fs = nullptr, IMediaLibraryCb* metadataCb = nullptr );
-    virtual void TearDown() override;
+class MockDeviceLister : public medialibrary::IDeviceLister
+{
+public:
+    virtual std::vector<std::tuple<std::string, std::string, bool>> devices() const override
+    {
+        abort();
+    }
 };
+
+}
