@@ -208,6 +208,17 @@ namespace this_thread
         return { pthread_self() };
 #endif
     }
+
+    template <typename Rep, typename Period>
+    inline void sleep_for( const std::chrono::duration<Rep, Period>& duration )
+    {
+        auto d = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
+#ifdef _WIN32
+        Sleep( d.count() );
+#else
+        usleep( d.count() * 1000 );
+#endif
+    }
 }
 
 }
