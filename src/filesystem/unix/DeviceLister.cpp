@@ -143,7 +143,11 @@ std::string DeviceLister::deviceFromDeviceMapper( const std::string& devicePath 
     std::unique_ptr<DIR, int(*)(DIR*)> dir( opendir( dmSlavePath.c_str() ), &closedir );
     std::string res;
     if ( dir == nullptr )
-        return {};
+    {
+        std::stringstream err;
+        err << "Failed to open device-mapper slaves directory (" << linkPath << ')';
+        throw std::runtime_error( err.str() );
+    }
     dirent* result;
     while ( ( result = readdir( dir.get() ) ) != nullptr )
     {
