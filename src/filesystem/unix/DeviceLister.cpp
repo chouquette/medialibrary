@@ -225,7 +225,15 @@ std::vector<std::tuple<std::string, std::string, bool>> medialibrary::fs::Device
             {
                 LOG_INFO( "Failed to find device for mountpoint ", mountpoint, ". Attempting to resolve"
                           " using device mapper" );
-                deviceName = deviceFromDeviceMapper( devicePath );
+                try
+                {
+                    deviceName = deviceFromDeviceMapper( devicePath );
+                }
+                catch( std::runtime_error& ex )
+                {
+                    LOG_WARN( "Failed to resolve using device mapper: ", ex.what() );
+                    continue;
+                }
                 it = devices.find( deviceName );
                 if ( it != end( devices ) )
                     uuid = it->second;
