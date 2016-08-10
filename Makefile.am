@@ -301,6 +301,7 @@ samples_CPPFLAGS = 			\
 	-DSRC_DIR=\"$(top_srcdir)\"	\
 	-I$(top_srcdir)/test	\
 	-I$(top_srcdir)/googletest/include \
+	$(SQLITE_CFLAGS)		\
 	$(RAPIDJSON_CFLAGS)		\
 	$(NULL)
 
