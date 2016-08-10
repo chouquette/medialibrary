@@ -155,6 +155,7 @@ case "${host_os}" in
     fi
     ;;
   *mingw32* | *cygwin* | *wince* | *mingwce*)
+    CXXFLAGS="${CXXFLAGS} -static-libgcc -static-libstdc++"
     AC_DEFINE([_UNICODE], [1], [Define to 1 for Unicode (Wide Chars) APIs.])
     AC_DEFINE([UNICODE], [1], [Define to 1 for Unicode (Wide Chars) APIs.])
     AC_DEFINE([_POSIX_C_SOURCE], [200809L], [IEEE Std 1003.1.])
