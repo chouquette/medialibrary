@@ -84,7 +84,7 @@ public:
         while ( pred() == false )
         {
             auto now = std::chrono::system_clock::now();
-            if ( SleepConditionVariableCS( &m_cond, lock.mutex()->native_handle(), timeout.count() ) != 0 )
+            if ( SleepConditionVariableCS( &m_cond, lock.mutex()->native_handle(), timeout.count() ) == 0 )
             {
                 auto res = GetLastError();
                 if ( res == ERROR_TIMEOUT )
