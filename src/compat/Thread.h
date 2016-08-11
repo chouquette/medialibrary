@@ -170,6 +170,7 @@ public:
         if ( res != 0 )
             throw std::system_error{ std::error_code( res, std::system_category() ) };
 #endif
+        m_id = id{};
     }
 
     // Platform agnostic methods:
