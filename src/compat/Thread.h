@@ -166,7 +166,9 @@ public:
         WaitForSingleObjectEx( m_id.m_id, INFINITE, TRUE );
         CloseHandle( m_id.m_id );
 #else
-        pthread_join( m_id.m_id, nullptr );
+        auto res = pthread_join( m_id.m_id, nullptr );
+        if ( res != 0 )
+            throw std::system_error{ std::error_code( res, std::system_category() ) };
 #endif
     }
 
