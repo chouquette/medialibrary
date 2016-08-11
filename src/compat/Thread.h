@@ -143,7 +143,7 @@ public:
         i.release();
     }
 
-    static unsigned hardware_concurrency()
+    static unsigned hardware_concurrency() noexcept
     {
 #ifdef _WIN32
 #if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP
