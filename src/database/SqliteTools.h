@@ -133,6 +133,8 @@ public:
         {
             m_stmt.reset( it->second.get() );
         }
+        if ( req == "COMMIT" )
+            m_isCommit = true;
     }
 
     template <typename... Args>
@@ -144,19 +146,25 @@ public:
 
     Row row()
     {
-        auto res = sqlite3_step( m_stmt.get() );
-        if ( res == SQLITE_ROW )
-            return Row( m_stmt.get() );
-        else if ( res == SQLITE_DONE )
-            return Row();
-        std::string errMsg = sqlite3_errmsg( m_dbConn );
-        switch ( res )
+        while ( true )
         {
-            case SQLITE_CONSTRAINT:
-                throw errors::ConstraintViolation( sqlite3_sql( m_stmt.get() ), errMsg );
-            default:
-                throw std::runtime_error( std::string{ sqlite3_sql( m_stmt.get() ) }
-                                          + ": " + errMsg );
+            auto res = sqlite3_step( m_stmt.get() );
+            if ( res == SQLITE_ROW )
+                return Row( m_stmt.get() );
+            else if ( res == SQLITE_DONE )
+                return Row();
+            else if ( res == SQLITE_BUSY && ( Transaction::transactionInProgress() == false ||
+                                              m_isCommit == true ) )
+                continue;
+            std::string errMsg = sqlite3_errmsg( m_dbConn );
+            switch ( res )
+            {
+                case SQLITE_CONSTRAINT:
+                    throw errors::ConstraintViolation( sqlite3_sql( m_stmt.get() ), errMsg );
+                default:
+                    throw std::runtime_error( std::string{ sqlite3_sql( m_stmt.get() ) }
+                                              + ": " + errMsg );
+            }
         }
     }
 
@@ -186,6 +194,7 @@ private:
     StatementPtr m_stmt;
     SqliteConnection::Handle m_dbConn;
     unsigned int m_bindIdx;
+    bool m_isCommit;
     static compat::Mutex StatementsCacheLock;
     static std::unordered_map<SqliteConnection::Handle,
                             std::unordered_map<std::string, CachedStmtPtr>> StatementsCache;
