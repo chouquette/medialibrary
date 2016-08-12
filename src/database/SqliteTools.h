@@ -149,17 +149,14 @@ public:
             return Row( m_stmt.get() );
         else if ( res == SQLITE_DONE )
             return Row();
-        else
+        std::string errMsg = sqlite3_errmsg( m_dbConn );
+        switch ( res )
         {
-            std::string errMsg = sqlite3_errmsg( m_dbConn );
-            switch ( res )
-            {
-                case SQLITE_CONSTRAINT:
-                    throw errors::ConstraintViolation( sqlite3_sql( m_stmt.get() ), errMsg );
-                default:
-                    throw std::runtime_error( std::string{ sqlite3_sql( m_stmt.get() ) }
-                                              + ": " + errMsg );
-            }
+            case SQLITE_CONSTRAINT:
+                throw errors::ConstraintViolation( sqlite3_sql( m_stmt.get() ), errMsg );
+            default:
+                throw std::runtime_error( std::string{ sqlite3_sql( m_stmt.get() ) }
+                                          + ": " + errMsg );
         }
     }
 
