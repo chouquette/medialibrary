@@ -80,7 +80,7 @@ public:
         std::unique_lock<compat::Mutex> lock( m_lock );
         m_writing = false;
         if ( m_nbReaderWaiting > 0 || m_nbWriterWaiting > 0 )
-            m_writeDoneCond.notify_one();
+            m_writeDoneCond.notify_all();
     }
 
 private:
