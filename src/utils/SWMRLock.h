@@ -24,7 +24,6 @@
 
 #include "compat/ConditionVariable.h"
 #include "compat/Mutex.h"
-#include <atomic>
 
 namespace medialibrary
 {
