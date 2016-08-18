@@ -45,7 +45,7 @@ MediaLibraryTester::MediaLibraryTester()
 
 std::shared_ptr<Media> MediaLibraryTester::media( int64_t id )
 {
-    return Media::fetch( this, id );
+    return std::static_pointer_cast<Media>( MediaLibrary::media( id ) );
 }
 
 MediaPtr MediaLibraryTester::media( const std::string& path )

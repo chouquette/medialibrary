@@ -249,6 +249,11 @@ void MediaLibrary::setVerbosity(LogLevel v)
     Log::setLogLevel( v );
 }
 
+MediaPtr MediaLibrary::media( int64_t mediaId ) const
+{
+    return Media::fetch( this, mediaId );
+}
+
 std::vector<MediaPtr> MediaLibrary::audioFiles( SortingCriteria sort, bool desc ) const
 {
     return Media::listAll( this, IMedia::Type::AudioType, sort, desc );
