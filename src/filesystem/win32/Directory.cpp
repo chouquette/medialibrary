@@ -47,26 +47,18 @@ Directory::Directory(const std::string& path , factory::IFileSystem& fsFactory)
 void Directory::read() const
 {
     WIN32_FIND_DATA f;
-    auto wpath = charset::ToWide( m_path.c_str() );
-    auto h = FindFirstFile( wpath.get(), &f );
+    auto pattern = m_path + '*';
+    auto wpattern = charset::ToWide( pattern.c_str() );
+    auto h = FindFirstFile( wpattern.get(), &f );
     if ( h == INVALID_HANDLE_VALUE )
         throw std::runtime_error( "Failed to browse through " + m_path );
-    try
+    do
     {
-        do
-        {
-            if ( ( f.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
-            {
-                m_dirs.emplace_back( m_fsFactory.createDirectory( charset::FromWide( f.cFileName ).get() ) );
-            }
-            else
-            {
-                m_files.emplace_back( std::make_shared<File>( charset::FromWide( f.cFileName ).get() ) );
-            }
-        } while ( FindNextFile( h, &f ) != 0 );
-    }
-    catch(...){}
-
+        if ( ( f.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
+            m_dirs.emplace_back( m_fsFactory.createDirectory( charset::FromWide( f.cFileName ).get() ) );
+        else
+            m_files.emplace_back( std::make_shared<File>( charset::FromWide( f.cFileName ).get() ) );
+    } while ( FindNextFile( h, &f ) != 0 );
     FindClose( h );
 }
 
