@@ -28,12 +28,14 @@
 #include "Media.h"
 #include "Device.h"
 #include "filesystem/unix/File.h"
+#include "logging/Logger.h"
 
 #include <cstring>
 #include <cstdlib>
 #include <dirent.h>
 #include <limits.h>
 #include <sys/stat.h>
+#include <system_error>
 #include <unistd.h>
 
 namespace medialibrary
@@ -81,33 +83,40 @@ void Directory::read() const
                 throw std::runtime_error( err );
             }
         }
-        if ( S_ISDIR( s.st_mode ) )
+        try
         {
-            auto dirPath = toAbsolute( path );
-            if ( *dirPath.crbegin() != '/' )
-                dirPath += '/';
-            //FIXME: This will use toAbsolute again in the constructor.
-            m_dirs.emplace_back( std::make_shared<Directory>( dirPath, m_fsFactory ) );
+            if ( S_ISDIR( s.st_mode ) )
+            {
+                auto dirPath = toAbsolute( path );
+                if ( *dirPath.crbegin() != '/' )
+                    dirPath += '/';
+                //FIXME: This will use toAbsolute again in the constructor.
+                m_dirs.emplace_back( std::make_shared<Directory>( dirPath, m_fsFactory ) );
+            }
+            else
+            {
+                auto filePath = toAbsolute( path );
+                m_files.emplace_back( std::make_shared<File>( filePath, s ) );
+            }
         }
-        else
+        catch ( const std::system_error& err )
         {
-            auto filePath = toAbsolute( path );
-            m_files.emplace_back( std::make_shared<File>( filePath, s ) );
+            if ( err.code() == std::errc::no_such_file_or_directory )
+            {
+                LOG_WARN( "Ignoring ", path, ": ", err.what() );
+                continue;
+            }
+            LOG_ERROR( "Fatal error while reading ", path, ": ", err.what() );
+            throw;
         }
     }
 }
-
 
 std::string Directory::toAbsolute( const std::string& path )
 {
     char abs[PATH_MAX];
     if ( realpath( path.c_str(), abs ) == nullptr )
-    {
-        std::string err( "Failed to convert to absolute path" );
-        err += "(" + path + "): ";
-        err += strerror(errno);
-        throw std::runtime_error( err );
-    }
+        throw std::system_error( errno, std::generic_category(), "Failed to convert to absolute path" );
     return std::string{ abs };
 }
 
