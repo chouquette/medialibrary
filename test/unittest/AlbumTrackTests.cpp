@@ -116,3 +116,25 @@ TEST_F( AlbumTracks, Media )
     ASSERT_NE( nullptr, media );
     ASSERT_EQ( media->id(), f->id() );
 }
+
+TEST_F( AlbumTracks, Album )
+{
+    auto album = ml->createAlbum( "album" );
+    auto f = ml->addFile( "track1.mp3" );
+    auto track = album->addTrack( f, 1, 0 );
+    f->save();
+
+    auto albumFromTrack = track->album();
+    ASSERT_EQ( album, albumFromTrack );
+
+    Reload();
+
+    track = ml->albumTrack( track->id() );
+    albumFromTrack = track->album();
+    auto a2 = ml->album( album->id() );
+    // Fetching this value twice seems to be problematic on Android.
+    // Ensure it works for other platforms at least
+    auto aft2 = track->album();
+    ASSERT_EQ( albumFromTrack, a2 );
+    ASSERT_EQ( aft2, a2 );
+}
