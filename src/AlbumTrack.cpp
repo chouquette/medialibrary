@@ -212,13 +212,14 @@ unsigned int AlbumTrack::discNumber() const
 
 std::shared_ptr<IAlbum> AlbumTrack::album()
 {
-    auto album = m_album.lock();
-    if ( album == nullptr && m_albumId != 0 )
-    {
-        album = Album::fetch( m_ml, m_albumId );
-        m_album = album;
-    }
-    return album;
+    // "Fail" early in case there's no album to fetch
+    if ( m_albumId == 0 )
+        return nullptr;
+
+    auto lock = m_album.lock();
+    if ( m_album.isCached() == false )
+        m_album = Album::fetch( m_ml, m_albumId );
+    return m_album.get().lock();
 }
 
 std::shared_ptr<IMedia> AlbumTrack::media()

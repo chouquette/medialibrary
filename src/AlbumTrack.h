@@ -85,7 +85,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         unsigned int m_discNumber;
         bool m_isPresent;
 
-        std::weak_ptr<Album> m_album;
+        mutable Cache<std::weak_ptr<Album>> m_album;
         mutable Cache<std::shared_ptr<Artist>> m_artist;
         mutable Cache<std::shared_ptr<Genre>> m_genre;
         mutable Cache<std::weak_ptr<Media>> m_media;
