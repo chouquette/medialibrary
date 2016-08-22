@@ -203,7 +203,10 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
     {
         m_deviceLister = factory::createDeviceLister();
         if ( m_deviceLister == nullptr )
+        {
+            LOG_ERROR( "No available IDeviceLister was found." );
             return false;
+        }
     }
     if ( m_fsFactory == nullptr )
         m_fsFactory.reset( new factory::FileSystemFactory( m_deviceLister ) );
