@@ -78,7 +78,7 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
     auto tracks = vlcMedia.tracks();
     if ( tracks.size() == 0 )
     {
-        LOG_ERROR( "Failed to fetch any tracks" );
+        LOG_ERROR( "Failed to fetch any tracks for ", file->mrl() );
         return parser::Task::Status::Fatal;
     }
     for ( const auto& track : tracks )
