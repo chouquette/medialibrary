@@ -163,6 +163,7 @@ libmedialibrary_la_SOURCES += \
 	src/filesystem/win32/Directory.cpp \
 	src/filesystem/win32/File.cpp \
 	src/filesystem/win32/Device.cpp \
+	src/filesystem/win32/DeviceLister.cpp \
 	$(NULL)
 noinst_HEADERS += \
 	src/utils/Charsets.h \
