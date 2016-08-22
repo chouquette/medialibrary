@@ -38,6 +38,12 @@ namespace file
     std::string firstFolder( const std::string& path );
     std::string removePath( const std::string& fullPath, const std::string& toRemove );
     std::string parentDirectory( const std::string& path );
+    /**
+     * @brief toFolder  Ensures a path is a folder path; ie. it has a terminal '/'
+     * @param path      The path to sanitize
+     */
+    std::string& toFolderPath( std::string& path );
+    std::string  toFolderPath( const std::string& path );
 }
 
 }

@@ -25,6 +25,7 @@
 #endif
 
 #include "CommonDevice.h"
+#include "utils/Filename.h"
 
 namespace medialibrary
 {
@@ -33,12 +34,10 @@ namespace fs
 
 CommonDevice::CommonDevice( const std::string& uuid, const std::string& mountpoint, bool isRemovable )
     : m_uuid( uuid )
-    , m_mountpoint( mountpoint )
+    , m_mountpoint( utils::file::toFolderPath( mountpoint ) )
     , m_present( true )
     , m_removable( isRemovable )
 {
-    if ( *m_mountpoint.crbegin() != '/' )
-        m_mountpoint += '/';
 }
 
 const std::string& CommonDevice::uuid() const

@@ -38,11 +38,9 @@ namespace fs
 
 medialibrary::fs::CommonDirectory::CommonDirectory( const std::string& path,
                                                     factory::IFileSystem& fsFactory )
-    : m_path( path )
+    : m_path( utils::file::toFolderPath( path ) )
     , m_fsFactory( fsFactory )
 {
-    if ( *m_path.crbegin() != '/' )
-        m_path += '/';
 }
 
 const std::string& CommonDirectory::path() const

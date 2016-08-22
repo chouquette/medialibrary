@@ -26,6 +26,12 @@
 
 #include "utils/Filename.h"
 
+#ifdef _WIN32
+#define DIR_SEPARATOR '\\'
+#else
+#define DIR_SEPARATOR '/'
+#endif
+
 namespace medialibrary
 {
 
@@ -88,6 +94,21 @@ std::string removePath( const std::string& fullPath, const std::string& toRemove
     if ( pos >= fullPath.length() )
         return {};
     return fullPath.substr( pos );
+}
+
+std::string& toFolderPath( std::string& path )
+{
+    if ( *path.crbegin() != DIR_SEPARATOR )
+        path += DIR_SEPARATOR;
+    return path;
+}
+
+std::string toFolderPath( const std::string& path )
+{
+    auto p = path;
+    if ( *p.crbegin() != DIR_SEPARATOR )
+        p += DIR_SEPARATOR;
+    return p;
 }
 
 }
