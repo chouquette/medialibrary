@@ -203,7 +203,7 @@ private:
 
 namespace this_thread
 {
-    inline details::thread_id get_id()
+    inline Thread::id get_id()
     {
 #ifdef _WIN32
         return GetCurrentThread();
