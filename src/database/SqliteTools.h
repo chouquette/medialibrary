@@ -123,7 +123,7 @@ public:
             int res = sqlite3_prepare_v2( dbConnection, req.c_str(), -1, &stmt, NULL );
             if ( res != SQLITE_OK )
             {
-                throw std::runtime_error( std::string( "Failed to execute request: " ) + req + " " +
+                throw std::runtime_error( std::string( "Failed to compile request: " ) + req + " " +
                             sqlite3_errmsg( dbConnection ) );
             }
             m_stmt.reset( stmt );
