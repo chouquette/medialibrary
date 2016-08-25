@@ -51,7 +51,7 @@ std::string extension( const std::string& fileName )
 
 std::string directory( const std::string& filePath )
 {
-    auto pos = filePath.find_last_of( '/' );
+    auto pos = filePath.find_last_of( DIR_SEPARATOR );
     if ( pos == std::string::npos )
         return {};
     return filePath.substr( 0, pos + 1 );
@@ -59,15 +59,15 @@ std::string directory( const std::string& filePath )
 
 std::string parentDirectory( const std::string& path )
 {
-    auto pos = path.find_last_of( '/' );
+    auto pos = path.find_last_of( DIR_SEPARATOR );
     if ( pos == path.length() - 1 )
-        pos = path.find_last_of( '/', pos - 1 );
+        pos = path.find_last_of( DIR_SEPARATOR, pos - 1 );
     return path.substr( 0, pos + 1 );
 }
 
 std::string fileName(const std::string& filePath)
 {
-    auto pos = filePath.find_last_of( '/' );
+    auto pos = filePath.find_last_of( DIR_SEPARATOR );
     if ( pos == std::string::npos )
         return filePath;
     return filePath.substr( pos + 1 );
@@ -76,9 +76,9 @@ std::string fileName(const std::string& filePath)
 std::string firstFolder( const std::string& path )
 {
     size_t offset = 0;
-    while ( path[offset] == '/' )
+    while ( path[offset] == DIR_SEPARATOR )
         offset++;
-    auto pos = path.find_first_of( '/', offset );
+    auto pos = path.find_first_of( DIR_SEPARATOR, offset );
     if ( pos == std::string::npos )
         return {};
     return path.substr( offset, pos - offset );
@@ -89,7 +89,7 @@ std::string removePath( const std::string& fullPath, const std::string& toRemove
     if ( toRemove.length() == 0 )
         return fullPath;
     auto pos = fullPath.find( toRemove ) + toRemove.length();
-    while ( fullPath[pos] == '/' )
+    while ( fullPath[pos] == DIR_SEPARATOR )
         pos++;
     if ( pos >= fullPath.length() )
         return {};
