@@ -47,8 +47,8 @@ unsigned int File::lastModificationDate() const
     if ( m_lastModificationDate == 0 )
     {
         struct _stat s;
-        if ( _stat( m_fullPath.c_str(), &s ) )
-            throw std::runtime_error( "Failed to get file stats" );
+        if ( _stat( m_fullPath.c_str(), &s ) != 0 )
+            throw std::runtime_error( "Failed to get " + m_fullPath + " file stats" );
         m_lastModificationDate = s.st_mtime;
     }
     return m_lastModificationDate;
