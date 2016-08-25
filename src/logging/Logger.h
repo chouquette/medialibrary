@@ -147,7 +147,7 @@ private:
 # define LOG_ORIGIN __FILE__, ":", __LINE__, ' ', __func__
 #endif
 
-#define LOG_ERROR( ... ) Log::Error( LOG_ORIGIN, ' ', __VA_ARGS__ )
-#define LOG_WARN( ... ) Log::Warning( LOG_ORIGIN, ' ', __VA_ARGS__ )
-#define LOG_INFO( ... ) Log::Info( LOG_ORIGIN, ' ', __VA_ARGS__ )
-#define LOG_DEBUG( ... ) Log::Debug( LOG_ORIGIN, ' ', __VA_ARGS__ )
+#define LOG_ERROR( ... ) medialibrary::Log::Error( LOG_ORIGIN, ' ', __VA_ARGS__ )
+#define LOG_WARN( ... ) medialibrary::Log::Warning( LOG_ORIGIN, ' ', __VA_ARGS__ )
+#define LOG_INFO( ... ) medialibrary::Log::Info( LOG_ORIGIN, ' ', __VA_ARGS__ )
+#define LOG_DEBUG( ... ) medialibrary::Log::Debug( LOG_ORIGIN, ' ', __VA_ARGS__ )
