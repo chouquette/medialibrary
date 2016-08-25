@@ -146,6 +146,7 @@ public:
 
     Row row()
     {
+        auto maxRetries = 10;
         while ( true )
         {
             auto res = sqlite3_step( m_stmt.get() );
@@ -154,7 +155,7 @@ public:
             else if ( res == SQLITE_DONE )
                 return Row();
             else if ( res == SQLITE_BUSY && ( Transaction::transactionInProgress() == false ||
-                                              m_isCommit == true ) )
+                                              m_isCommit == true ) && maxRetries-- > 0 )
                 continue;
             std::string errMsg = sqlite3_errmsg( m_dbConn );
             switch ( res )
