@@ -67,7 +67,7 @@ class thread_id
 public:
 
 #ifdef _WIN32
-    using native_thread_id_type = HANDLE;
+    using native_thread_id_type = DWORD;
 #else
     using native_thread_id_type = pthread_t;
 #endif
@@ -135,7 +135,7 @@ public:
             entryPoint, inst
         });
 #ifdef _WIN32
-        if ( ( m_id.m_id = CreateThread( nullptr, 0, &threadRoutine<T>, i.get(), 0, nullptr ) ) == nullptr )
+        if ( ( m_handle = CreateThread( nullptr, 0, &threadRoutine<T>, i.get(), 0, &m_id.m_id ) ) == nullptr )
 #else
         if ( pthread_create( &m_id.m_id, nullptr, &threadRoutine<T>, i.get() ) != 0 )
 #endif
@@ -163,8 +163,8 @@ public:
         if ( this_thread::get_id() == m_id )
             throw std::system_error{ std::make_error_code( std::errc::resource_deadlock_would_occur ) };
 #ifdef _WIN32
-        WaitForSingleObjectEx( m_id.m_id, INFINITE, TRUE );
-        CloseHandle( m_id.m_id );
+        WaitForSingleObjectEx( m_handle, INFINITE, TRUE );
+        CloseHandle( m_handle );
 #else
         auto res = pthread_join( m_id.m_id, nullptr );
         if ( res != 0 )
@@ -198,6 +198,9 @@ public:
     }
 
 private:
+#ifdef _WIN32
+    HANDLE m_handle;
+#endif
     id m_id;
 };
 
@@ -206,7 +209,7 @@ namespace this_thread
     inline Thread::id get_id()
     {
 #ifdef _WIN32
-        return GetCurrentThread();
+        return { GetCurrentThreadId() };
 #else
         return { pthread_self() };
 #endif
