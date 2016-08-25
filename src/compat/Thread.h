@@ -135,7 +135,7 @@ public:
             entryPoint, inst
         });
 #ifdef _WIN32
-        if ( ( m_id = CreateThread( nullptr, 0, &threadRoutine<T>, i.get(), 0, nullptr ) ) == nullptr )
+        if ( ( m_id.m_id = CreateThread( nullptr, 0, &threadRoutine<T>, i.get(), 0, nullptr ) ) == nullptr )
 #else
         if ( pthread_create( &m_id.m_id, nullptr, &threadRoutine<T>, i.get() ) != 0 )
 #endif
