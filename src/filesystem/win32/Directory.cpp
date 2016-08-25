@@ -54,10 +54,13 @@ void Directory::read() const
         throw std::runtime_error( "Failed to browse through " + m_path );
     do
     {
+        auto file = charset::FromWide( f.cFileName );
+        if ( file[0] == '.' )
+            continue;
         if ( ( f.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
-            m_dirs.emplace_back( m_fsFactory.createDirectory( charset::FromWide( f.cFileName ).get() ) );
+            m_dirs.emplace_back( m_fsFactory.createDirectory( file.get() ) );
         else
-            m_files.emplace_back( std::make_shared<File>( charset::FromWide( f.cFileName ).get() ) );
+            m_files.emplace_back( std::make_shared<File>( file.get() ) );
     } while ( FindNextFile( h, &f ) != 0 );
     FindClose( h );
 }
