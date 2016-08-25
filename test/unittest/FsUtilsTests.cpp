@@ -85,4 +85,10 @@ TEST( FsUtils, parentFolder )
     ASSERT_EQ( "/a/b/", utils::file::parentDirectory( "/a/b/c/" ) );
     ASSERT_EQ( "/a/b/", utils::file::parentDirectory( "/a/b/c" ) );
     ASSERT_EQ( "", utils::file::parentDirectory( "" ) );
+#ifdef _WIN32
+    ASSERT_EQ( "C:\\a/b/", utils::file::parentDirectory( "C:\\a/b/c" ) );
+    ASSERT_EQ( "C:/a/b/", utils::file::parentDirectory( "C:/a/b/c\\" ) );
+    ASSERT_EQ( "C:\\a\\b\\", utils::file::parentDirectory( "C:\\a\\b\\c\\" ) );
+    ASSERT_EQ( "C:\\a\\b\\", utils::file::parentDirectory( "C:\\a\\b\\c" ) );
+#endif
 }
