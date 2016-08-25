@@ -57,10 +57,11 @@ void Directory::read() const
         auto file = charset::FromWide( f.cFileName );
         if ( file[0] == '.' )
             continue;
+        auto path = m_path + file.get();
         if ( ( f.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
-            m_dirs.emplace_back( m_fsFactory.createDirectory( file.get() ) );
+            m_dirs.emplace_back( m_fsFactory.createDirectory( path ) );
         else
-            m_files.emplace_back( std::make_shared<File>( file.get() ) );
+            m_files.emplace_back( std::make_shared<File>( path ) );
     } while ( FindNextFile( h, &f ) != 0 );
     FindClose( h );
 }
