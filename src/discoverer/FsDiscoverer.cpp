@@ -196,7 +196,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
     std::vector<std::shared_ptr<fs::IFile>> filesToAdd;
     std::vector<std::shared_ptr<File>> filesToRemove;
     for ( const auto& fileFs: parentFolderFs.files() )
-    {        
+    {
         auto it = std::find_if( begin( files ), end( files ), [fileFs](const std::shared_ptr<File>& f) {
             return f->mrl() == fileFs->fullPath();
         });
