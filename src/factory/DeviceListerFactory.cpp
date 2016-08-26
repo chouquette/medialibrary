@@ -34,7 +34,7 @@
 
 medialibrary::DeviceListerPtr medialibrary::factory::createDeviceLister()
 {
-#if defined(__linux__) || defined(_WIN32)
+#if (defined(__linux__) && !defined(__ANDROID__)) || defined(_WIN32)
     return std::make_shared<fs::DeviceLister>();
 #endif
     return nullptr;

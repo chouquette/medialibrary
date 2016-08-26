@@ -174,9 +174,11 @@ libmedialibrary_la_SOURCES += \
 	src/filesystem/unix/Device.cpp \
 	$(NULL)
 if HAVE_LINUX
+if !HAVE_ANDROID
 libmedialibrary_la_SOURCES += \
 	src/filesystem/unix/DeviceLister.cpp \
 	$(NULL)
+endif
 endif
 if HAVE_DARWIN
 libmedialibrary_macos_la_OBJCXXFLAGS = $(libmedialibrary_la_CPPFLAGS)
