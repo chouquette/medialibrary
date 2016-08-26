@@ -32,7 +32,7 @@
 #include "Genre.h"
 #include "Media.h"
 #include "Show.h"
-#include "utils/ToString.h"
+#include "ToString.h"
 #include "utils/Filename.h"
 #include "utils/ModificationsNotifier.h"
 #include <cstdlib>

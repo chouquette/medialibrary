@@ -27,7 +27,7 @@
 #include "History.h"
 
 #include "database/SqliteTools.h"
-#include "utils/ToString.h"
+#include "ToString.h"
 
 namespace medialibrary
 {

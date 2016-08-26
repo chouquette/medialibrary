@@ -31,7 +31,7 @@
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
 #include "utils/VLCInstance.h"
-#include "utils/ToString.h"
+#include "ToString.h"
 
 #ifdef HAVE_JPEG
 #include "imagecompressors/JpegCompressor.h"
