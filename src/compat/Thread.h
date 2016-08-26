@@ -24,7 +24,7 @@
 
 #include "config.h"
 
-#if CXX11_THREADS && !defined(__ANDROID__)
+#if CXX11_THREADS
 #include <thread>
 namespace medialibrary
 {
