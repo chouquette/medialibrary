@@ -24,7 +24,6 @@
 
 #include <string>
 #include <exception>
-#include "ToString.h"
 
 namespace medialibrary
 {
@@ -56,8 +55,8 @@ class ColumnOutOfRange : public std::exception
 public:
     ColumnOutOfRange( unsigned int idx, unsigned int nbColumns )
     {
-        m_reason = "Attempting to extract column at index " + toString( idx ) +
-                " from a request with " + toString( nbColumns ) + " columns";
+        m_reason = "Attempting to extract column at index " + std::to_string( idx ) +
+                " from a request with " + std::to_string( nbColumns ) + " columns";
     }
 
     virtual const char* what() const noexcept override

@@ -31,7 +31,6 @@
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
 #include "utils/VLCInstance.h"
-#include "ToString.h"
 
 #ifdef HAVE_JPEG
 #include "imagecompressors/JpegCompressor.h"
@@ -232,7 +231,7 @@ parser::Task::Status VLCThumbnailer::compress( std::shared_ptr<Media> media, std
 {
     auto path = m_ml->thumbnailPath();
     path += "/";
-    path += toString( media->id() ) + "." + m_compressor->extension();
+    path += std::to_string( media->id() ) + "." + m_compressor->extension();
 
     auto hOffset = m_width > DesiredWidth ? ( m_width - DesiredWidth ) / 2 : 0;
     auto vOffset = m_height > DesiredHeight ? ( m_height - DesiredHeight ) / 2 : 0;
