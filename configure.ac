@@ -265,6 +265,12 @@ AS_IF([test "$SYS" = linux],[
 ])
 AM_CONDITIONAL(HAVE_ANDROID, test "${HAVE_ANDROID}" = "1")
 
+AS_IF([test "$SYS" = mingw32],[
+    AC_CHECK_DECL(_WIN32_WINNT,,
+        AC_DEFINE([_WIN32_WINNT], 0x600, [Enforce a specific windows SDK version])
+    )
+])
+
 PKG_CHECK_MODULES(SQLITE, sqlite3)
 PKG_CHECK_MODULES(VLC, libvlc >= 3.0)
 PKG_CHECK_MODULES(VLCPP, libvlcpp,
