@@ -103,14 +103,23 @@ public:
     virtual void onTracksDeleted( std::vector<int64_t> trackIds ) = 0;
 
     /**
-     * @brief onDiscoveryStarted This callback will be invoked each time the discoverer enters a new
-     * entrypoint. Typically, everytime it enters a new folder
+     * @brief onDiscoveryStarted This callback will be invoked when a folder queued for discovery
+     * (by calling IMediaLibrary::discover()) gets processed.
+     * @param entryPoint The entrypoint being discovered
+     * This callback will be invoked once per endpoint.
+     * It will also be invoked when the initial medialibrary reload starts, in which case, the
+     * entryPoint will be an empty string.
+     */
+    virtual void onDiscoveryStarted( const std::string& entryPoint ) = 0;
+    /**
+     * @brief onDiscoveryProgress This callback will be invoked each time the discoverer enters a new
+     * entrypoint. Typically, everytime it enters a new folder.
      * @param entryPoint The entrypoint being discovered
      * This callback can be invoked multiple times even though a single entry point was asked to be
      * discovered. ie. In the case of a file system discovery, discovering a folder would make this
      * callback being invoked for all subfolders
      */
-    virtual void onDiscoveryStarted( const std::string& entryPoint ) = 0;
+    virtual void onDiscoveryProgress( const std::string& entryPoint ) = 0;
     /**
      * @brief onDiscoveryCompleted Will be invoked when the discovery of a specified entrypoint has
      * completed.

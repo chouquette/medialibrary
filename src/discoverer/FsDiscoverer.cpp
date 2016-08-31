@@ -143,7 +143,7 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
         m_ml->deleteFolder( currentFolder );
         return;
     }
-    m_cb->onDiscoveryStarted( currentFolderFs.path() );
+    m_cb->onDiscoveryProgress( currentFolderFs.path() );
     // Load the folders we already know of:
     LOG_INFO( "Checking for modifications in ", currentFolderFs.path() );
     auto subFoldersInDB = Folder::fetchAll( m_ml, currentFolder.id() );
