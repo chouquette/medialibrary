@@ -267,7 +267,8 @@ AM_CONDITIONAL(HAVE_ANDROID, test "${HAVE_ANDROID}" = "1")
 
 AS_IF([test "$SYS" = mingw32],[
     AC_CHECK_DECL(_WIN32_WINNT,,
-        AC_DEFINE([_WIN32_WINNT], 0x600, [Enforce a specific windows SDK version])
+        AC_DEFINE([_WIN32_WINNT], 0x600, [Enforce a specific windows SDK version]),
+        [] # Don't check default includes, only CFLAGS provided macros
     )
 ])
 
