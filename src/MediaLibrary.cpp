@@ -452,8 +452,7 @@ std::vector<MediaPtr> MediaLibrary::lastMediaPlayed() const
 bool MediaLibrary::clearHistory()
 {
     auto t = getConn()->newTransaction();
-    if ( Media::clearHistory( this ) == false )
-        return false;
+    Media::clearHistory( this );
     if ( History::clearStreams( this ) == false )
         return false;
     t->commit();

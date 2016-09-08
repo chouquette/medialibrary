@@ -549,7 +549,7 @@ std::vector<MediaPtr> Media::fetchHistory( MediaLibraryPtr ml )
     return fetchAll<IMedia>( ml, req );
 }
 
-bool Media::clearHistory(MediaLibraryPtr ml)
+void Media::clearHistory( MediaLibraryPtr ml )
 {
     auto dbConn = ml->getConn();
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
@@ -558,7 +558,7 @@ bool Media::clearHistory(MediaLibraryPtr ml)
             "progress = 0";
     // Clear the entire cache since quite a few items are now containing invalid info.
     clear();
-    return sqlite::Tools::executeUpdate( dbConn, req );
+    sqlite::Tools::executeUpdate( dbConn, req );
 }
 
 }
