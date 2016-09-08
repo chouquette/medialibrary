@@ -119,6 +119,9 @@ std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& f
 
 bool Folder::blacklist( MediaLibraryPtr ml, const std::string& fullPath )
 {
+    // Ensure we delete the existing folder if any & blacklist the folder in an "atomic" way
+    auto t = ml->getConn()->newTransaction();
+
     auto f = fromPath( ml, fullPath );
     if ( f != nullptr )
     {
@@ -139,7 +142,9 @@ bool Folder::blacklist( MediaLibraryPtr ml, const std::string& fullPath )
         path = fullPath;
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
             "(path, parent_id, is_blacklisted, device_id, is_removable) VALUES(?, ?, ?, ?, ?)";
-    return sqlite::Tools::executeInsert( ml->getConn(), req, path, nullptr, true, device->id(), deviceFs->isRemovable() ) != 0;
+    auto res = sqlite::Tools::executeInsert( ml->getConn(), req, path, nullptr, true, device->id(), deviceFs->isRemovable() ) != 0;
+    t->commit();
+    return res;
 }
 
 std::shared_ptr<Folder> Folder::fromPath( MediaLibraryPtr ml, const std::string& fullPath )

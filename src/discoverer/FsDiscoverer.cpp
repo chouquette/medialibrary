@@ -67,12 +67,9 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
     // If the folder exists, we assume it will be handled by reload()
     if ( f != nullptr )
         return true;
-    auto blist = blacklist();
-    if ( isBlacklisted( *fsDir, blist ) == true )
-        return true;
     if ( hasDotNoMediaFile( *fsDir ) )
         return true;
-    return addFolder( *fsDir, nullptr, blist );
+    return addFolder( *fsDir, nullptr );
 }
 
 void FsDiscoverer::reload()
@@ -81,7 +78,6 @@ void FsDiscoverer::reload()
     // Start by checking if previously known devices have been plugged/unplugged
     checkDevices();
     auto rootFolders = Folder::fetchAll( m_ml, 0 );
-    auto blist = blacklist();
     for ( const auto& f : rootFolders )
     {
         auto folder = m_fsFactory->createDirectory( f->path() );
@@ -91,7 +87,7 @@ void FsDiscoverer::reload()
             m_ml->deleteFolder( *f );
             continue;
         }
-        checkFolder( *folder, *f, blist );
+        checkFolder( *folder, *f );
     }
 }
 
@@ -109,8 +105,7 @@ void FsDiscoverer::reload( const std::string& entryPoint )
     {
         LOG_ERROR(" Failed to create a fs::IDirectory representing ", folder->path() );
     }
-    auto blist = blacklist();
-    checkFolder( *folderFs, *folder, blist );
+    checkFolder( *folderFs, *folder );
 }
 
 void FsDiscoverer::checkDevices()
@@ -133,7 +128,7 @@ void FsDiscoverer::checkDevices()
     }
 }
 
-void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& currentFolder, const std::vector<std::shared_ptr<Folder>>& blacklist ) const
+void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& currentFolder ) const
 {
     // We already know of this folder, though it may now contain a .nomedia file.
     // In this case, simply delete the folder.
@@ -155,26 +150,36 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
         // We don't know this folder, it's a new one
         if ( it == end( subFoldersInDB ) )
         {
-            // Check if it is blacklisted
-            if ( isBlacklisted( *subFolder, blacklist ) == true )
-            {
-                LOG_INFO( "Ignoring blacklisted folder: ", subFolder->path() );
-                continue;
-            }
             if ( hasDotNoMediaFile( *subFolder ) )
             {
                 LOG_INFO( "Ignoring folder with a .nomedia file" );
                 continue;
             }
             LOG_INFO( "New folder detected: ", subFolder->path() );
-            addFolder( *subFolder, &currentFolder, blacklist );
-            continue;
+            try
+            {
+                addFolder( *subFolder, &currentFolder );
+                continue;
+            }
+            catch ( sqlite::errors::ConstraintViolation& ex )
+            {
+                // Best attempt to detect a foreign key violation, indicating the parent folders have been
+                // deleted due to blacklisting
+                if ( strstr( ex.what(), "foreign key" ) != NULL )
+                {
+                    LOG_WARN( "Creation of a folder failed because the parent is non existing: ", ex.what(),
+                              ". Assuming it was deleted due to blacklisting" );
+                    return;
+                }
+                LOG_WARN( "Creation of a duplicated folder failed: ", ex.what(), ". Assuming it was blacklisted" );
+                continue;
+            }
         }
         auto folderInDb = *it;
         // In any case, check for modifications, as a change related to a mountpoint might
         // not update the folder modification date.
         // Also, relying on the modification date probably isn't portable
-        checkFolder( *subFolder, *folderInDb, blacklist );
+        checkFolder( *subFolder, *folderInDb );
         subFoldersInDB.erase( it );
     }
     // Now all folders we had in DB but haven't seen from the FS must have been deleted.
@@ -235,33 +240,6 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
     LOG_INFO( "Done checking files in ", parentFolderFs.path() );
 }
 
-std::vector<std::shared_ptr<Folder> > FsDiscoverer::blacklist() const
-{
-    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE is_blacklisted = 1";
-    return sqlite::Tools::fetchAll<Folder, Folder>( m_ml, req );
-}
-
-bool FsDiscoverer::isBlacklisted( const fs::IDirectory& directory, const std::vector<std::shared_ptr<Folder>>& blacklist ) const
-{
-    auto deviceFs = directory.device();
-    if ( deviceFs == nullptr )
-    {
-        LOG_WARN( "Failed to fetch device containing ", directory.path() );
-        return true;
-    }
-    //FIXME: We could avoid fetching the device if the directory is non removable.
-    auto device = Device::fromUuid( m_ml, deviceFs->uuid() );
-    // When blacklisting, we would insert the device if we haven't encoutered it yet.
-    // So when reading, a missing device means a non-blacklisted device.
-    if ( device == nullptr )
-        return false;
-    auto deviceId = device->id();
-
-    return std::find_if( begin( blacklist ), end( blacklist ), [&directory, deviceId]( const std::shared_ptr<Folder>& f ) {
-        return f->path() == directory.path() && f->deviceId() == deviceId;
-    }) != end( blacklist );
-}
-
 bool FsDiscoverer::hasDotNoMediaFile( const fs::IDirectory& directory )
 {
     const auto& files = directory.files();
@@ -270,7 +248,7 @@ bool FsDiscoverer::hasDotNoMediaFile( const fs::IDirectory& directory )
     }) != end( files );
 }
 
-bool FsDiscoverer::addFolder( fs::IDirectory& folder, Folder* parentFolder, const std::vector<std::shared_ptr<Folder>>& blacklist ) const
+bool FsDiscoverer::addFolder( fs::IDirectory& folder, Folder* parentFolder ) const
 {
     auto deviceFs = folder.device();
     // We are creating a folder, there has to be a device containing it.
@@ -287,7 +265,7 @@ bool FsDiscoverer::addFolder( fs::IDirectory& folder, Folder* parentFolder, cons
                              *device, *deviceFs );
     if ( f == nullptr )
         return false;
-    checkFolder( folder, *f, blacklist );
+    checkFolder( folder, *f );
     return true;
 }
 

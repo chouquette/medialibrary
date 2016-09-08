@@ -47,12 +47,10 @@ private:
     /// \brief checkSubfolders
     /// \return true if files in this folder needs to be listed, false otherwise
     ///
-    void checkFolder( fs::IDirectory& currentFolderFs, Folder& currentFolder, const std::vector<std::shared_ptr<Folder>>& blacklist ) const;
+    void checkFolder(fs::IDirectory& currentFolderFs, Folder& currentFolder) const;
     void checkFiles(fs::IDirectory& parentFolderFs, Folder& parentFolder ) const;
-    std::vector<std::shared_ptr<Folder>> blacklist() const;
-    bool isBlacklisted( const fs::IDirectory& directory, const std::vector<std::shared_ptr<Folder>>& blacklist ) const;
     static bool hasDotNoMediaFile( const fs::IDirectory& directory );
-    bool addFolder(fs::IDirectory& folder, Folder* parentFolder, const std::vector<std::shared_ptr<Folder> >& blacklist ) const;
+    bool addFolder( fs::IDirectory& folder, Folder* parentFolder ) const;
     void checkDevices();
 
 private:
