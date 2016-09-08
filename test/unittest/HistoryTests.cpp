@@ -109,3 +109,20 @@ TEST_F( HistoryTest, ReinsertFavorited )
     ASSERT_NE( date, item->insertionDate() );
     ASSERT_TRUE( item->isFavorite() );
 }
+
+TEST_F( HistoryTest, ClearStreamHistory )
+{
+    ml->addToHistory( "f00" );
+    ml->addToHistory( "bar" );
+    auto history = ml->lastStreamsPlayed();
+    ASSERT_EQ( 2u, history.size() );
+
+    ml->clearHistory();
+    history = ml->lastStreamsPlayed();
+    ASSERT_EQ( 0u, history.size() );
+
+    Reload();
+
+    history = ml->lastStreamsPlayed();
+    ASSERT_EQ( 0u, history.size() );
+}

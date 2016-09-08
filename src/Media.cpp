@@ -549,4 +549,16 @@ std::vector<MediaPtr> Media::fetchHistory( MediaLibraryPtr ml )
     return fetchAll<IMedia>( ml, req );
 }
 
+bool Media::clearHistory(MediaLibraryPtr ml)
+{
+    auto dbConn = ml->getConn();
+    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
+            "play_count = 0,"
+            "last_played_date = NULL,"
+            "progress = 0";
+    // Clear the entire cache since quite a few items are now containing invalid info.
+    clear();
+    return sqlite::Tools::executeUpdate( dbConn, req );
+}
+
 }

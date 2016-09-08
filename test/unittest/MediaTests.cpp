@@ -303,6 +303,29 @@ TEST_F( Medias, History )
     ASSERT_EQ( m->id(), history[1]->id() );
 }
 
+TEST_F( Medias, ClearHistory )
+{
+    auto m = ml->addFile( "media.mkv" );
+
+    auto history = ml->lastMediaPlayed();
+    ASSERT_EQ( 0u, history.size() );
+
+    m->increasePlayCount();
+    m->save();
+    history = ml->lastMediaPlayed();
+    ASSERT_EQ( 1u, history.size() );
+
+    ASSERT_TRUE( ml->clearHistory() );
+
+    history = ml->lastMediaPlayed();
+    ASSERT_EQ( 0u, history.size() );
+
+    Reload();
+
+    history = ml->lastMediaPlayed();
+    ASSERT_EQ( 0u, history.size() );
+}
+
 TEST_F( Medias, SetReleaseDate )
 {
     auto m = ml->addFile( "movie.mkv" );

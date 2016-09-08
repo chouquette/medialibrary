@@ -449,6 +449,17 @@ std::vector<MediaPtr> MediaLibrary::lastMediaPlayed() const
     return Media::fetchHistory( this );
 }
 
+bool MediaLibrary::clearHistory()
+{
+    auto t = getConn()->newTransaction();
+    if ( Media::clearHistory( this ) == false )
+        return false;
+    if ( History::clearStreams( this ) == false )
+        return false;
+    t->commit();
+    return true;
+}
+
 MediaSearchAggregate MediaLibrary::searchMedia( const std::string& title ) const
 {
     if ( validateSearchPattern( title ) == false )

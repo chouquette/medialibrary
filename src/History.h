@@ -52,6 +52,7 @@ public:
     static bool createTable( DBConnection dbConnection );
     static bool insert( DBConnection dbConn, const std::string& mrl );
     static std::vector<HistoryPtr> fetch( MediaLibraryPtr ml );
+    static bool clearStreams( MediaLibraryPtr ml );
 
     virtual const std::string& mrl() const override;
     virtual unsigned int insertionDate() const override;
