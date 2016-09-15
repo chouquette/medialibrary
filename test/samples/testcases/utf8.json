@@ -1,0 +1,18 @@
+{
+    "input": [
+        "music/utf8-fólder"
+    ],
+    "expected": {
+        "nbAudios": 1,
+        "nbVideos": 0,
+        "albums": [{
+            "title": "utf8-àlbúm",
+            "artist": "ááá",
+            "tracks": [{
+                "title": "ééé",
+                "artist": "ààà",
+                "genre": "ジャンル"
+            }]
+        }]
+    }
+}

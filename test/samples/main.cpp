@@ -42,6 +42,7 @@ static const char* testCases[] = {
     "notags",
     "multi_cd",
     "no_album_artist",
+    "utf8",
 };
 
 class TestEnv : public ::testing::Environment
