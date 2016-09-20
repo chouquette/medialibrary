@@ -351,15 +351,21 @@ TEST_F( Medias, SortByAlpha )
     m2->setTitle( "Zyxw" );
     m2->save();
 
+    auto m3 = ml->addFile( "media3.mp3" );
+    m3->setTitle( "afterA-beforeZ" );
+    m3->save();
+
     auto media = ml->audioFiles( SortingCriteria::Alpha, false );
-    ASSERT_EQ( 2u, media.size() );
+    ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( m1->id(), media[0]->id() );
-    ASSERT_EQ( m2->id(), media[1]->id() );
+    ASSERT_EQ( m3->id(), media[1]->id() );
+    ASSERT_EQ( m2->id(), media[2]->id() );
 
     media = ml->audioFiles( SortingCriteria::Alpha, true );
-    ASSERT_EQ( 2u, media.size() );
+    ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( m2->id(), media[0]->id() );
-    ASSERT_EQ( m1->id(), media[1]->id() );
+    ASSERT_EQ( m3->id(), media[1]->id() );
+    ASSERT_EQ( m1->id(), media[2]->id() );
 }
 
 TEST_F( Medias, SortByLastModifDate )
