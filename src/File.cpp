@@ -167,4 +167,28 @@ std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, Type ty
     return self;
 }
 
+std::shared_ptr<File> File::fromPath( MediaLibraryPtr ml, const std::string& path )
+{
+    static const std::string req = "SELECT * FROM " + policy::FileTable::Name +  " WHERE mrl = ?";
+    auto file = fetch( ml, req, path );
+    if ( file == nullptr )
+        return nullptr;
+    // safety checks: since this only works for files on non removable devices, isPresent must be true
+    // and isRemovable must be false
+    assert( file->m_isPresent == true );
+    assert( file->m_isRemovable == false );
+    return file;
+}
+
+std::shared_ptr<File> File::fromFileName( MediaLibraryPtr ml, const std::string& fileName, int64_t folderId )
+{
+    static const std::string req = "SELECT * FROM " + policy::FileTable::Name +  " WHERE mrl = ? "
+            "AND folder_id = ?";
+    auto file = fetch( ml, req, fileName, folderId );
+    if ( file == nullptr )
+        return nullptr;
+    assert( file->m_isRemovable == true );
+    return file;
+}
+
 }

@@ -156,6 +156,7 @@ class IMediaLibrary
         virtual LabelPtr createLabel( const std::string& label ) = 0;
         virtual bool deleteLabel( LabelPtr label ) = 0;
         virtual MediaPtr media( int64_t mediaId ) const = 0;
+        virtual MediaPtr media( const std::string& mrl ) const = 0;
         virtual std::vector<MediaPtr> audioFiles( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
         virtual std::vector<MediaPtr> videoFiles( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
         virtual AlbumPtr album( int64_t id ) const = 0;

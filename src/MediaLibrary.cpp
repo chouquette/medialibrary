@@ -64,6 +64,7 @@
 // FileSystem
 #include "factory/DeviceListerFactory.h"
 #include "factory/FileSystemFactory.h"
+#include "filesystem/IDevice.h"
 
 namespace medialibrary
 {
@@ -255,6 +256,41 @@ void MediaLibrary::setVerbosity(LogLevel v)
 MediaPtr MediaLibrary::media( int64_t mediaId ) const
 {
     return Media::fetch( this, mediaId );
+}
+
+MediaPtr MediaLibrary::media( const std::string& mrl ) const
+{
+    auto device = m_fsFactory->createDeviceFromPath( mrl );
+    if ( device == nullptr )
+    {
+        LOG_WARN( "Failed to create a device associated with mrl ", mrl );
+        return nullptr;
+    }
+    std::shared_ptr<File> file;
+    if ( device->isRemovable() == false )
+        file = File::fromPath( this, mrl );
+    else
+    {
+        auto folder = Folder::fromPath( this, utils::file::directory( mrl ) );
+        if ( folder == nullptr )
+        {
+            LOG_WARN( "Failed to find folder containing ", mrl );
+            return nullptr;
+        }
+        if ( folder->isPresent() == false )
+        {
+            LOG_INFO( "Found a folder containing ", mrl, " but it is not present" );
+            return nullptr;
+        }
+        file = File::fromFileName( this, utils::file::fileName( mrl ), folder->id() );
+    }
+    if ( file == nullptr )
+    {
+        LOG_WARN( "Failed to fetch file for ", mrl, "(device ", device->uuid(), " was ",
+                  device->isRemovable() ? "NOT" : "", "removable)");
+        return nullptr;
+    }
+    return file->media();
 }
 
 std::vector<MediaPtr> MediaLibrary::audioFiles( SortingCriteria sort, bool desc ) const

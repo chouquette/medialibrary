@@ -64,6 +64,21 @@ public:
     static bool createTable( DBConnection dbConnection );
     static std::shared_ptr<File> create( MediaLibraryPtr ml, int64_t mediaId, Type type,
                                          const fs::IFile& file, int64_t folderId, bool isRemovable );
+    /**
+     * @brief fromPath  Attempts to fetch a file using its full path
+     * This will only work if the file was stored on a non removable device
+     * @param path      The full path to the wanted file
+     * @return          A pointer to the wanted file, or nullptr if it wasn't found
+     */
+    static std::shared_ptr<File> fromPath( MediaLibraryPtr ml, const std::string& path );
+    /**
+     * @brief fromFileName  Attemps to fetch a file based on its filename and folder id
+     * @param ml
+     * @param fileName
+     * @param folderId
+     * @return
+     */
+    static std::shared_ptr<File> fromFileName( MediaLibraryPtr ml, const std::string& fileName, int64_t folderId );
 
 private:
     MediaLibraryPtr m_ml;

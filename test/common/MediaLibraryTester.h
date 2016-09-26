@@ -39,8 +39,10 @@ class MediaLibraryTester : public MediaLibrary
 public:
     MediaLibraryTester();
     std::vector<MediaPtr> files();
+    // Use the filename getter
+    using MediaLibrary::media;
+    // And override the ID getter to return a Media instead of IMedia
     std::shared_ptr<Media> media( int64_t id );
-    MediaPtr media( const std::string& path );
     std::shared_ptr<Folder> folder( const std::string& path );
     std::shared_ptr<Media> addFile( const std::string& path );
     std::shared_ptr<Playlist> playlist( int64_t playlistId );

@@ -48,21 +48,6 @@ std::shared_ptr<Media> MediaLibraryTester::media( int64_t id )
     return std::static_pointer_cast<Media>( MediaLibrary::media( id ) );
 }
 
-MediaPtr MediaLibraryTester::media( const std::string& path )
-{
-    auto medias = files();
-    for ( auto& m : medias )
-    {
-        auto files = m->files();
-        for ( auto& f : files )
-        {
-            if ( f->mrl() == path )
-                return m;
-        }
-    }
-    return nullptr;
-}
-
 std::shared_ptr<Folder> MediaLibraryTester::folder( const std::string& path )
 {
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +

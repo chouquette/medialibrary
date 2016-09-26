@@ -33,6 +33,7 @@
 #include "Album.h"
 #include "AlbumTrack.h"
 #include "mocks/FileSystem.h"
+#include "mocks/DiscovererCbMock.h"
 #include "compat/Thread.h"
 
 class Medias : public Tests
@@ -387,4 +388,78 @@ TEST_F( Medias, SortByLastModifDate )
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m2->id(), media[1]->id() );
     ASSERT_EQ( m1->id(), media[0]->id() );
+}
+
+class FetchMedia : public Tests
+{
+protected:
+    static const std::string RemovableDeviceUuid;
+    static const std::string RemovableDeviceMountpoint;
+    std::shared_ptr<mock::FileSystemFactory> fsMock;
+    std::unique_ptr<mock::WaitForDiscoveryComplete> cbMock;
+
+    virtual void SetUp() override
+    {
+        unlink( "test.db" );
+        fsMock.reset( new mock::FileSystemFactory );
+        cbMock.reset( new mock::WaitForDiscoveryComplete );
+        fsMock->addFolder( "/a/mnt/" );
+        auto device = fsMock->addDevice( RemovableDeviceMountpoint, RemovableDeviceUuid );
+        device->setRemovable( true );
+        fsMock->addFile( RemovableDeviceMountpoint + "removablefile.mp3" );
+        Reload();
+    }
+
+    virtual void InstantiateMediaLibrary() override
+    {
+        ml.reset( new MediaLibraryWithoutParser );
+    }
+
+    virtual void Reload()
+    {
+        Tests::Reload( fsMock, cbMock.get() );
+    }
+};
+
+const std::string FetchMedia::RemovableDeviceUuid = "{fake-removable-device}";
+const std::string FetchMedia::RemovableDeviceMountpoint = "/a/mnt/fake-device/";
+
+TEST_F( FetchMedia, FetchNonRemovable )
+{
+    cbMock->prepareForWait();
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->wait();
+    ASSERT_TRUE( discovered );
+
+    auto m = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+    ASSERT_NE( nullptr, m );
+}
+
+TEST_F( FetchMedia, FetchRemovable )
+{
+    cbMock->prepareForWait();
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->wait();
+    ASSERT_TRUE( discovered );
+
+    auto m = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
+    ASSERT_NE( nullptr, m );
+}
+
+TEST_F( FetchMedia, FetchRemovableUnplugged )
+{
+    cbMock->prepareForWait();
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->wait();
+    ASSERT_TRUE( discovered );
+
+    fsMock->unmountDevice( RemovableDeviceUuid );
+
+    cbMock->prepareForReload();
+    Reload();
+    bool reloaded = cbMock->wait();
+    ASSERT_TRUE( reloaded );
+
+    auto m = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
+    ASSERT_EQ( nullptr, m );
 }

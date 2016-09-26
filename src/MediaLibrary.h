@@ -66,6 +66,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual void setVerbosity( LogLevel v ) override;
 
         virtual MediaPtr media( int64_t mediaId ) const override;
+        virtual MediaPtr media( const std::string& path ) const override;
         virtual std::vector<MediaPtr> audioFiles( SortingCriteria sort, bool desc) const override;
         virtual std::vector<MediaPtr> videoFiles( SortingCriteria sort, bool desc) const override;
 
