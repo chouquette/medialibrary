@@ -99,6 +99,12 @@ bool FsDiscoverer::reload()
 bool FsDiscoverer::reload( const std::string& entryPoint )
 {
     LOG_INFO( "Reloading folder ", entryPoint );
+    // Start by checking if previously known devices have been plugged/unplugged
+    if ( checkDevices() == false )
+    {
+        LOG_ERROR( "Refusing to reloading files with no storage device" );
+        return false;
+    }
     auto folder = Folder::fromPath( m_ml, entryPoint );
     if ( folder == nullptr )
     {
