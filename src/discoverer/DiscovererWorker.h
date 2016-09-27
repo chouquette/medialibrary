@@ -36,17 +36,17 @@
 namespace medialibrary
 {
 
-class DiscovererWorker : public IDiscoverer
+class DiscovererWorker
 {
 public:
     DiscovererWorker( MediaLibraryPtr ml );
-    virtual ~DiscovererWorker();
+    ~DiscovererWorker();
     void addDiscoverer( std::unique_ptr<IDiscoverer> discoverer );
     void stop();
 
-    virtual bool discover( const std::string& entryPoint ) override;
-    virtual void reload() override;
-    virtual void reload( const std::string& entryPoint ) override;
+    bool discover( const std::string& entryPoint );
+    void reload();
+    void reload( const std::string& entryPoint );
 
 private:
     void enqueue( const std::string& entryPoint, bool reload );
