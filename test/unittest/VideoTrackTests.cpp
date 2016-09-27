@@ -61,6 +61,7 @@ TEST_F( VideoTracks, FetchTracks )
     Reload();
 
     auto m = ml->media( "file.avi" );
+    ASSERT_NE( nullptr, m );
     ts = m->videoTracks();
     ASSERT_EQ( ts.size(), 2u );
     t2 = ts[0];

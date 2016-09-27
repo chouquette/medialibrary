@@ -71,6 +71,7 @@ TEST_F( Files, Media )
     Reload();
 
     auto m = ml->media( "media.mkv" );
+    ASSERT_NE( nullptr, m );
     auto files = m->files();
     ASSERT_EQ( 1u, files.size() );
     f = std::static_pointer_cast<File>( files[0] );
