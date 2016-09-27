@@ -255,9 +255,14 @@ public:
 class NoopDevice : public fs::IDevice
 {
 public:
+    NoopDevice()
+    {
+        m_uuid = "{noop-device}";
+    }
+
     virtual const std::string& uuid() const override
     {
-        abort();
+        return m_uuid;
     }
 
     virtual bool isRemovable() const override
@@ -272,8 +277,12 @@ public:
 
     virtual const std::string& mountpoint() const override
     {
-        abort();
+        return m_mountpoint;
     }
+
+private:
+    std::string m_uuid;
+    std::string m_mountpoint;
 };
 
 // We just need a valid instance of this one
@@ -315,7 +324,7 @@ public:
 
     virtual std::shared_ptr<fs::IDevice> createDeviceFromPath( const std::string& ) override
     {
-        return nullptr;
+        return std::make_shared<NoopDevice>();
     }
 
     virtual bool refreshDevices() override
