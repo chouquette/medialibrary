@@ -45,7 +45,7 @@ namespace factory
         virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& path ) override;
         virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override;
         virtual std::shared_ptr<fs::IDevice> createDeviceFromPath( const std::string& path ) override;
-        virtual void refreshDevices() override;
+        virtual bool refreshDevices() override;
 
     private:
         std::unordered_map<std::string, std::shared_ptr<fs::IDirectory>> m_dirs;

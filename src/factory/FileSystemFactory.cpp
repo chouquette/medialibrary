@@ -99,7 +99,7 @@ std::shared_ptr<fs::IDevice> FileSystemFactory::createDeviceFromPath( const std:
     return res;
 }
 
-void FileSystemFactory::refreshDevices()
+bool FileSystemFactory::refreshDevices()
 {
     {
         std::lock_guard<compat::Mutex> lock( m_mutex );
@@ -110,6 +110,11 @@ void FileSystemFactory::refreshDevices()
         m_deviceCache = DeviceCacheMap{};
     m_deviceCache.get().clear();
     auto devices = m_deviceLister->devices();
+    if ( devices.empty() == true )
+    {
+        LOG_ERROR( "Cannot continue with no devices" );
+        return false;
+    }
     for ( const auto& d : devices )
     {
         const auto& uuid = std::get<0>( d );
@@ -117,6 +122,7 @@ void FileSystemFactory::refreshDevices()
         const auto removable = std::get<2>( d );
         m_deviceCache.get().emplace( uuid, std::make_shared<fs::Device>( uuid, mountpoint, removable ) );
     }
+    return true;
 }
 
 }
