@@ -122,9 +122,12 @@ bool Folder::blacklist( MediaLibraryPtr ml, const std::string& fullPath )
     // Ensure we delete the existing folder if any & blacklist the folder in an "atomic" way
     auto t = ml->getConn()->newTransaction();
 
-    auto f = fromPath( ml, fullPath );
+    auto f = fromPath( ml, fullPath, BannedType::Any );
     if ( f != nullptr )
     {
+        // No need to blacklist a folder twice
+        if ( f->m_isBlacklisted == true )
+            return true;
         // Let the foreign key destroy everything beneath this folder
         destroy( ml, f->id() );
     }
@@ -149,15 +152,15 @@ bool Folder::blacklist( MediaLibraryPtr ml, const std::string& fullPath )
 
 std::shared_ptr<Folder> Folder::fromPath( MediaLibraryPtr ml, const std::string& fullPath )
 {
-    return fromPath( ml, fullPath, false );
+    return fromPath( ml, fullPath, BannedType::No );
 }
 
 std::shared_ptr<Folder> Folder::blacklistedFolder( MediaLibraryPtr ml, const std::string& fullPath )
 {
-    return fromPath( ml, fullPath, true );
+    return fromPath( ml, fullPath, BannedType::Yes );
 }
 
-std::shared_ptr<Folder> Folder::fromPath( MediaLibraryPtr ml, const std::string& fullPath, bool blacklisted )
+std::shared_ptr<Folder> Folder::fromPath( MediaLibraryPtr ml, const std::string& fullPath, BannedType bannedType )
 {
     auto folderFs = ml->fsFactory()->createDirectory( fullPath );
     if ( folderFs == nullptr )
@@ -170,17 +173,29 @@ std::shared_ptr<Folder> Folder::fromPath( MediaLibraryPtr ml, const std::string&
     }
     if ( deviceFs->isRemovable() == false )
     {
-        std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND is_removable = 0 AND is_blacklisted = ?";
-        return fetch( ml, req, fullPath, blacklisted );
+        std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND is_removable = 0";
+        if ( bannedType == BannedType::Any )
+            return fetch( ml, req, fullPath );
+        req += " AND is_blacklisted = ?";
+            return fetch( ml, req, fullPath, bannedType == BannedType::Yes ? true : false );
     }
-    std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND device_id = ? AND is_blacklisted = ?";
 
     auto device = Device::fromUuid( ml, deviceFs->uuid() );
     // We are trying to find a folder. If we don't know the device it's on, we don't know the folder.
     if ( device == nullptr )
         return nullptr;
     auto path = utils::file::removePath( fullPath, deviceFs->mountpoint() );
-    auto folder = fetch( ml, req, path, device->id(), blacklisted );
+    std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND device_id = ?";
+    std::shared_ptr<Folder> folder;
+    if ( bannedType == BannedType::Any )
+    {
+        folder = fetch( ml, req, path, device->id() );
+    }
+    else
+    {
+        req += " AND is_blacklisted = ?";
+        folder = fetch( ml, req, path, device->id(), bannedType == BannedType::Yes ? true : false );
+    }
     if ( folder == nullptr )
         return nullptr;
     folder->m_deviceMountpoint = deviceFs->mountpoint();

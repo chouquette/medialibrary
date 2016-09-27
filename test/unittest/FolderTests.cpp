@@ -324,7 +324,13 @@ TEST_F( FoldersNoDiscover, RemoveFromBlacklist )
     ASSERT_EQ( 3u, files.size() );
     f = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_NE( nullptr, f );
+}
 
+TEST_F( FoldersNoDiscover, BlacklistTwice )
+{
+    cbMock->prepareForWait();
+    ml->banFolder( mock::FileSystemFactory::SubFolder );
+    ml->banFolder( mock::FileSystemFactory::SubFolder );
 }
 
 TEST_F( FoldersNoDiscover, NoMediaBeforeDiscovery )

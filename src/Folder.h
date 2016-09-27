@@ -76,7 +76,14 @@ public:
     bool isPresent() const;
 
 private:
-    static std::shared_ptr<Folder> fromPath( MediaLibraryPtr ml, const std::string& fullPath, bool includeBlacklisted );
+    enum class BannedType
+    {
+        Yes,    //< Only select banned folders
+        No,     //< Only select unbanned folders
+        Any,    //< Well... any of the above.
+    };
+
+    static std::shared_ptr<Folder> fromPath( MediaLibraryPtr ml, const std::string& fullPath, BannedType bannedType );
 
 private:
     MediaLibraryPtr m_ml;
