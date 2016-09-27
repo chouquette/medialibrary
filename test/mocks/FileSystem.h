@@ -179,7 +179,7 @@ struct FileSystemFactory : public factory::IFileSystem
 
     virtual bool refreshDevices() override
     {
-        return false;
+        return true;
     }
 
     std::shared_ptr<Device> device( const std::string& path )
