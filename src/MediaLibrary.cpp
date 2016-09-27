@@ -701,10 +701,12 @@ void MediaLibrary::setLogger( ILogger* logger )
 
 void MediaLibrary::onDevicePlugged( const std::string&, const std::string& )
 {
+    m_fsFactory->refreshDevices();
 }
 
 void MediaLibrary::onDeviceUnplugged( const std::string& )
 {
+    m_fsFactory->refreshDevices();
 }
 
 }
