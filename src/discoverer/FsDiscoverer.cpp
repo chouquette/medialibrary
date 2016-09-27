@@ -110,7 +110,7 @@ void FsDiscoverer::reload( const std::string& entryPoint )
 
 void FsDiscoverer::checkDevices()
 {
-    m_fsFactory->refresh();
+    m_fsFactory->refreshDevices();
     auto devices = Device::fetchAll( m_ml );
     for ( auto& d : devices )
     {

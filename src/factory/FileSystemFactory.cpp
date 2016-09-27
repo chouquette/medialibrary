@@ -99,7 +99,7 @@ std::shared_ptr<fs::IDevice> FileSystemFactory::createDeviceFromPath( const std:
     return res;
 }
 
-void FileSystemFactory::refresh()
+void FileSystemFactory::refreshDevices()
 {
     {
         std::lock_guard<compat::Mutex> lock( m_mutex );

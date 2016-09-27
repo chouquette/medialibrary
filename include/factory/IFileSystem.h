@@ -61,7 +61,7 @@ namespace factory
         ///
         /// \brief refresh Will cause any FS cache to be refreshed.
         ///
-        virtual void refresh() = 0;
+        virtual void refreshDevices() = 0;
     };
 }
 
