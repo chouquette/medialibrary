@@ -40,8 +40,8 @@ public:
     //FIXME: This is currently false since there is no way of interrupting
     //a discoverer thread
     virtual bool discover( const std::string& entryPoint ) = 0;
-    virtual void reload() = 0;
-    virtual void reload( const std::string& entryPoint ) = 0;
+    virtual bool reload() = 0;
+    virtual bool reload( const std::string& entryPoint ) = 0;
 };
 
 }

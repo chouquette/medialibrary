@@ -72,11 +72,15 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
     return addFolder( *fsDir, nullptr );
 }
 
-void FsDiscoverer::reload()
+bool FsDiscoverer::reload()
 {
     LOG_INFO( "Reloading all folders" );
     // Start by checking if previously known devices have been plugged/unplugged
-    checkDevices();
+    if ( checkDevices() == false )
+    {
+        LOG_ERROR( "Refusing to reloading files with no storage device" );
+        return false;
+    }
     auto rootFolders = Folder::fetchAll( m_ml, 0 );
     for ( const auto& f : rootFolders )
     {
@@ -89,16 +93,17 @@ void FsDiscoverer::reload()
         }
         checkFolder( *folder, *f );
     }
+    return true;
 }
 
-void FsDiscoverer::reload( const std::string& entryPoint )
+bool FsDiscoverer::reload( const std::string& entryPoint )
 {
     LOG_INFO( "Reloading folder ", entryPoint );
     auto folder = Folder::fromPath( m_ml, entryPoint );
     if ( folder == nullptr )
     {
         LOG_ERROR( "Can't reload ", entryPoint, ": folder wasn't found in database" );
-        return;
+        return false;
     }
     auto folderFs = m_fsFactory->createDirectory( folder->path() );
     if ( folderFs == nullptr )
@@ -106,11 +111,13 @@ void FsDiscoverer::reload( const std::string& entryPoint )
         LOG_ERROR(" Failed to create a fs::IDirectory representing ", folder->path() );
     }
     checkFolder( *folderFs, *folder );
+    return true;
 }
 
-void FsDiscoverer::checkDevices()
+bool FsDiscoverer::checkDevices()
 {
-    m_fsFactory->refreshDevices();
+    if ( m_fsFactory->refreshDevices() == false )
+        return false;
     auto devices = Device::fetchAll( m_ml );
     for ( auto& d : devices )
     {
@@ -126,6 +133,7 @@ void FsDiscoverer::checkDevices()
             LOG_INFO( "Device ", d->uuid(), " unchanged" );
         }
     }
+    return true;
 }
 
 void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& currentFolder ) const
