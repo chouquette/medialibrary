@@ -333,6 +333,15 @@ TEST_F( FoldersNoDiscover, BlacklistTwice )
     ml->banFolder( mock::FileSystemFactory::SubFolder );
 }
 
+TEST_F( FoldersNoDiscover, BlacklistNonExistant )
+{
+    cbMock->prepareForWait();
+    ml->banFolder( "foo/bar/otters" );
+    ml->banFolder( "/foo/bar/otters" );
+    // Ban with an existing base
+    ml->banFolder( mock::FileSystemFactory::Root + "grouik/" );
+}
+
 TEST_F( FoldersNoDiscover, NoMediaBeforeDiscovery )
 {
     auto newFolder = mock::FileSystemFactory::Root + "newfolder/";
