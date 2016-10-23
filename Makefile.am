@@ -56,10 +56,14 @@ libmedialibrary_la_SOURCES = \
 	src/discoverer/DiscovererWorker.cpp \
 	src/discoverer/FsDiscoverer.cpp \
 	src/factory/FileSystemFactory.cpp \
+	src/factory/NetworkFileSystemFactory.cpp \
 	src/factory/DeviceListerFactory.cpp \
 	src/filesystem/common/CommonDevice.cpp \
 	src/filesystem/common/CommonFile.cpp \
 	src/filesystem/common/CommonDirectory.cpp \
+	src/filesystem/network/Directory.cpp \
+	src/filesystem/network/File.cpp \
+	src/filesystem/network/Device.cpp \
 	src/logging/IostreamLogger.cpp \
 	src/logging/Logger.cpp \
 	src/metadata_services/MetadataParser.cpp \
@@ -111,6 +115,7 @@ noinst_HEADERS = \
 	src/discoverer/DiscovererWorker.h \
 	src/discoverer/FsDiscoverer.h \
 	src/factory/FileSystemFactory.h \
+	src/factory/NetworkFileSystemFactory.h \
 	src/factory/DeviceListerFactory.h \
 	src/File.h \
 	src/filesystem/common/CommonFile.h \
@@ -119,6 +124,9 @@ noinst_HEADERS = \
 	src/filesystem/unix/Device.h \
 	src/filesystem/unix/Directory.h \
 	src/filesystem/unix/File.h \
+	src/filesystem/network/Device.h \
+	src/filesystem/network/Directory.h \
+	src/filesystem/network/File.h \
 	src/filesystem/unix/DeviceLister.h \
 	src/filesystem/win32/Directory.h \
 	src/filesystem/win32/File.h \
