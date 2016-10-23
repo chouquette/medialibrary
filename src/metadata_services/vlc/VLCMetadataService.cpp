@@ -55,7 +55,9 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
     LOG_INFO( "Parsing ", file->mrl() );
     auto chrono = std::chrono::steady_clock::now();
 
-    auto vlcMedia = VLC::Media( m_instance, file->mrl(), VLC::Media::FromPath );
+    auto fromType = file->mrl().find( "://" ) != std::string::npos ? VLC::Media::FromType::FromLocation :
+                                                                      VLC::Media::FromType::FromPath;
+    auto vlcMedia = VLC::Media( m_instance, file->mrl(), fromType );
 
     std::unique_lock<compat::Mutex> lock( m_mutex );
     VLC::Media::ParsedStatus status;
@@ -67,7 +69,7 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
         done = true;
         m_cond.notify_all();
     });
-    if ( vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local, 5000 ) == false )
+    if ( vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local | VLC::Media::ParseFlags::Network, 5000 ) == false )
         return parser::Task::Status::Fatal;
     m_cond.wait( lock, [&status, &done]() {
         return done == true;

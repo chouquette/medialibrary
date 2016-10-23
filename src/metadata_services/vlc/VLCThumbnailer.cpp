@@ -87,7 +87,9 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
 
     LOG_INFO( "Generating ", file->mrl(), " thumbnail..." );
 
-    VLC::Media vlcMedia( m_instance, file->mrl(), VLC::Media::FromPath );
+    auto fromType = file->mrl().find( "://" ) != std::string::npos ? VLC::Media::FromType::FromLocation :
+                                                                      VLC::Media::FromType::FromPath;
+    auto vlcMedia = VLC::Media( m_instance, file->mrl(), fromType );
     vlcMedia.addOption( ":no-audio" );
     VLC::MediaPlayer mp( vlcMedia );
 
