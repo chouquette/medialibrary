@@ -204,6 +204,11 @@ struct FileSystemFactory : public factory::IFileSystem
         return true;
     }
 
+    virtual bool isNetworkFileSystem() const override
+    {
+        return false;
+    }
+
     std::vector<std::shared_ptr<Device>> devices;
 };
 
@@ -340,6 +345,11 @@ public:
     virtual bool isPathSupported( const std::string& ) const override
     {
         return true;
+    }
+
+    virtual bool isNetworkFileSystem() const override
+    {
+        return false;
     }
 };
 

@@ -68,6 +68,10 @@ namespace factory
         /// \return True if supported, false otherwise
         ///
         virtual bool isPathSupported( const std::string& path ) const = 0;
+        ///
+        /// \brief isNetworkFileSystem Returns true if this FS factory handles network file systems
+        ///
+        virtual bool isNetworkFileSystem() const = 0;
     };
 }
 

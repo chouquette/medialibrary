@@ -133,6 +133,11 @@ bool FileSystemFactory::isPathSupported( const std::string& path ) const
     return path.compare( 0, 7, "file://" ) == 0;
 }
 
+bool FileSystemFactory::isNetworkFileSystem() const
+{
+    return false;
+}
+
 }
 
 }
