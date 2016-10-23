@@ -131,7 +131,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         std::shared_ptr<ModificationNotifier> getNotifier() const;
 
         virtual IDeviceListerCb* setDeviceLister( DeviceListerPtr lister ) override;
-        std::shared_ptr<factory::IFileSystem> fsFactory() const;
+        std::shared_ptr<factory::IFileSystem> fsFactoryForPath( const std::string& path ) const;
 
     public:
         static const uint32_t DbModelVersion;
@@ -156,7 +156,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
     protected:
         std::unique_ptr<SqliteConnection> m_dbConnection;
-        std::shared_ptr<factory::IFileSystem> m_fsFactory;
+        std::vector<std::shared_ptr<factory::IFileSystem>> m_fsFactories;
         std::string m_thumbnailPath;
         IMediaLibraryCb* m_callback;
         DeviceListerPtr m_deviceLister;

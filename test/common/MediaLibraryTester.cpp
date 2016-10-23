@@ -104,7 +104,7 @@ std::shared_ptr<Device> MediaLibraryTester::addDevice( const std::string& uuid, 
 
 void MediaLibraryTester::setFsFactory(std::shared_ptr<factory::IFileSystem> fsFactory)
 {
-    m_fsFactory = fsFactory;
+    m_fsFactories.push_back( fsFactory );
 }
 
 void MediaLibraryTester::deleteTrack( int64_t trackId )

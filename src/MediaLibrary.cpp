@@ -209,8 +209,10 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
             return false;
         }
     }
-    if ( m_fsFactory == nullptr )
-        m_fsFactory.reset( new factory::FileSystemFactory( m_deviceLister ) );
+    if ( m_fsFactories.empty() == true )
+    {
+        m_fsFactories.push_back( std::make_shared<factory::FileSystemFactory>( m_deviceLister ) );
+    }
 #ifdef _WIN32
     if ( mkdir( thumbnailPath.c_str() ) != 0 )
 #else
@@ -260,7 +262,10 @@ MediaPtr MediaLibrary::media( int64_t mediaId ) const
 
 MediaPtr MediaLibrary::media( const std::string& mrl ) const
 {
-    auto device = m_fsFactory->createDeviceFromPath( mrl );
+    auto fsFactory = fsFactoryForPath( mrl );
+    if ( fsFactory == nullptr )
+        return nullptr;
+    auto device = fsFactory->createDeviceFromPath( mrl );
     if ( device == nullptr )
     {
         LOG_WARN( "Failed to create a device associated with mrl ", mrl );
@@ -577,7 +582,8 @@ void MediaLibrary::startParser()
 void MediaLibrary::startDiscoverer()
 {
     m_discoverer.reset( new DiscovererWorker( this ) );
-    m_discoverer->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( m_fsFactory, this, m_callback ) ) );
+    for ( const auto& fsFactory : m_fsFactories )
+        m_discoverer->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( fsFactory, this, m_callback ) ) );
     m_discoverer->reload();
 }
 
@@ -655,9 +661,14 @@ IDeviceListerCb* MediaLibrary::setDeviceLister( DeviceListerPtr lister )
     return static_cast<IDeviceListerCb*>( this );
 }
 
-std::shared_ptr<factory::IFileSystem> MediaLibrary::fsFactory() const
+std::shared_ptr<factory::IFileSystem> MediaLibrary::fsFactoryForPath( const std::string& path ) const
 {
-    return m_fsFactory;
+    for ( const auto& f : m_fsFactories )
+    {
+        if ( f->isPathSupported( path ) )
+            return f;
+    }
+    return nullptr;
 }
 
 void MediaLibrary::discover( const std::string &entryPoint )
@@ -699,14 +710,28 @@ void MediaLibrary::setLogger( ILogger* logger )
     Log::SetLogger( logger );
 }
 
-void MediaLibrary::onDevicePlugged( const std::string&, const std::string& )
+void MediaLibrary::onDevicePlugged( const std::string&, const std::string& mountpoint )
 {
-    m_fsFactory->refreshDevices();
+    for ( const auto& fsFactory : m_fsFactories )
+    {
+        if ( fsFactory->isPathSupported( "file://" ) )
+        {
+            fsFactory->refreshDevices();
+            break;
+        }
+    }
 }
 
 void MediaLibrary::onDeviceUnplugged( const std::string& )
 {
-    m_fsFactory->refreshDevices();
+    for ( const auto& fsFactory : m_fsFactories )
+    {
+        if ( fsFactory->isPathSupported( "file://" ) )
+        {
+            fsFactory->refreshDevices();
+            break;
+        }
+    }
 }
 
 }

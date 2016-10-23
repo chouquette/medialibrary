@@ -131,7 +131,10 @@ bool Folder::blacklist( MediaLibraryPtr ml, const std::string& fullPath )
         // Let the foreign key destroy everything beneath this folder
         destroy( ml, f->id() );
     }
-    auto folderFs = ml->fsFactory()->createDirectory( fullPath );
+    auto fsFactory = ml->fsFactoryForPath( fullPath );
+    if ( fsFactory == nullptr )
+        return false;
+    auto folderFs = fsFactory->createDirectory( fullPath );
     if ( folderFs == nullptr )
         return false;
     auto deviceFs = folderFs->device();
@@ -162,7 +165,10 @@ std::shared_ptr<Folder> Folder::blacklistedFolder( MediaLibraryPtr ml, const std
 
 std::shared_ptr<Folder> Folder::fromPath( MediaLibraryPtr ml, const std::string& fullPath, BannedType bannedType )
 {
-    auto folderFs = ml->fsFactory()->createDirectory( fullPath );
+    auto fsFactory = ml->fsFactoryForPath( fullPath );
+    if ( fsFactory == nullptr )
+        return nullptr;
+    auto folderFs = fsFactory->createDirectory( fullPath );
     if ( folderFs == nullptr )
         return nullptr;
     auto deviceFs = folderFs->device();
@@ -218,7 +224,9 @@ const std::string& Folder::path() const
         return m_fullPath;
 
     auto device = Device::fetch( m_ml, m_deviceId );
-    auto deviceFs = m_ml->fsFactory()->createDevice( device->uuid() );
+    auto fsFactory = m_ml->fsFactoryForPath( m_fullPath );
+    assert( fsFactory != nullptr );
+    auto deviceFs = fsFactory->createDevice( device->uuid() );
     m_deviceMountpoint = deviceFs->mountpoint();
     m_fullPath = m_deviceMountpoint.get() + m_path;
     return m_fullPath;
