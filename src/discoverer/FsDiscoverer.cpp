@@ -53,7 +53,8 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
 {
     LOG_INFO( "Adding to discovery list: ", entryPoint );
     // Assume :// denotes a scheme that isn't a file path, and refuse to discover it.
-    if ( entryPoint.find( "://" ) != std::string::npos )
+
+    if ( m_fsFactory->isPathSupported( entryPoint ) == false )
         return false;
 
     std::shared_ptr<fs::IDirectory> fsDir = m_fsFactory->createDirectory( entryPoint );
@@ -98,6 +99,8 @@ bool FsDiscoverer::reload()
 
 bool FsDiscoverer::reload( const std::string& entryPoint )
 {
+    if ( m_fsFactory->isPathSupported( entryPoint ) == false )
+        return false;
     LOG_INFO( "Reloading folder ", entryPoint );
     // Start by checking if previously known devices have been plugged/unplugged
     if ( checkDevices() == false )

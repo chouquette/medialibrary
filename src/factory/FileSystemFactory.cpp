@@ -125,6 +125,14 @@ bool FileSystemFactory::refreshDevices()
     return true;
 }
 
+bool FileSystemFactory::isPathSupported( const std::string& path ) const
+{
+    auto it = path.find( "://" );
+    if ( it == std::string::npos )
+        return true;
+    return path.compare( 0, 7, "file://" ) == 0;
+}
+
 }
 
 }

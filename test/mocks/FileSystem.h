@@ -199,6 +199,11 @@ struct FileSystemFactory : public factory::IFileSystem
         return device( path );
     }
 
+    virtual bool isPathSupported( const std::string& ) const override
+    {
+        return true;
+    }
+
     std::vector<std::shared_ptr<Device>> devices;
 };
 
@@ -330,6 +335,11 @@ public:
     virtual bool refreshDevices() override
     {
         return false;
+    }
+
+    virtual bool isPathSupported( const std::string& ) const override
+    {
+        return true;
     }
 };
 
