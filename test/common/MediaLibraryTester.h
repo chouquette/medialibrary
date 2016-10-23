@@ -55,9 +55,11 @@ public:
     void deleteTrack( int64_t trackId );
     std::shared_ptr<AlbumTrack> albumTrack( int64_t id );
     std::shared_ptr<Media> addFile(fs::IFile& file);
+    virtual void addLocalFsFactory() override;
 
 private:
     std::unique_ptr<fs::IDirectory> dummyDirectory;
+    std::shared_ptr<factory::IFileSystem> fsFactory;
     Folder dummyFolder;
 };
 

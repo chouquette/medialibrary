@@ -114,6 +114,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual SearchAggregate search( const std::string& pattern ) const override;
 
         virtual void discover( const std::string& entryPoint ) override;
+        virtual void setDiscoverNetworkEnabled( bool enabled ) override;
         virtual bool banFolder( const std::string& path ) override;
         virtual bool unbanFolder( const std::string& path ) override;
 
@@ -148,6 +149,9 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         bool createAllTables();
         void registerEntityHooks();
         static bool validateSearchPattern( const std::string& pattern );
+
+    protected:
+        virtual void addLocalFsFactory();
 
         // Mark IDeviceListerCb callbacks as private. They must be invoked through the interface.
     private:

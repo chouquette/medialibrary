@@ -72,6 +72,19 @@ std::shared_ptr<Media> MediaLibraryTester::addFile( fs::IFile& file )
     return MediaLibrary::addFile( file, dummyFolder, *dummyDirectory );
 }
 
+void MediaLibraryTester::addLocalFsFactory()
+{
+    if ( fsFactory != nullptr )
+    {
+        m_fsFactories.clear();
+        m_fsFactories.push_back( fsFactory );
+    }
+    else
+    {
+        MediaLibrary::addLocalFsFactory();
+    }
+}
+
 std::shared_ptr<Playlist> MediaLibraryTester::playlist( int64_t playlistId )
 {
     return Playlist::fetch( this, playlistId );
@@ -102,9 +115,9 @@ std::shared_ptr<Device> MediaLibraryTester::addDevice( const std::string& uuid, 
     return Device::create( this, uuid, isRemovable );
 }
 
-void MediaLibraryTester::setFsFactory(std::shared_ptr<factory::IFileSystem> fsFactory)
+void MediaLibraryTester::setFsFactory( std::shared_ptr<factory::IFileSystem> fsf )
 {
-    m_fsFactories.push_back( fsFactory );
+    fsFactory = fsf;
 }
 
 void MediaLibraryTester::deleteTrack( int64_t trackId )

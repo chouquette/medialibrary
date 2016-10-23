@@ -64,6 +64,7 @@
 // FileSystem
 #include "factory/DeviceListerFactory.h"
 #include "factory/FileSystemFactory.h"
+#include "factory/NetworkFileSystemFactory.h"
 #include "filesystem/IDevice.h"
 
 namespace medialibrary
@@ -209,10 +210,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
             return false;
         }
     }
-    if ( m_fsFactories.empty() == true )
-    {
-        m_fsFactories.push_back( std::make_shared<factory::FileSystemFactory>( m_deviceLister ) );
-    }
+    addLocalFsFactory();
 #ifdef _WIN32
     if ( mkdir( thumbnailPath.c_str() ) != 0 )
 #else
@@ -593,6 +591,11 @@ void MediaLibrary::startDeletionNotifier()
     m_modificationNotifier->start();
 }
 
+void MediaLibrary::addLocalFsFactory()
+{
+    m_fsFactories.insert( begin( m_fsFactories ), std::make_shared<factory::FileSystemFactory>( m_deviceLister ) );
+}
+
 bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
 {
     if ( previousVersion == 1 )
@@ -675,6 +678,24 @@ void MediaLibrary::discover( const std::string &entryPoint )
 {
     if ( m_discoverer != nullptr )
         m_discoverer->discover( entryPoint );
+}
+
+void MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
+{
+    if ( enabled )
+    {
+        auto it = std::find_if( begin( m_fsFactories ), end( m_fsFactories ), []( const std::shared_ptr<factory::IFileSystem> fs ) {
+            return fs->isNetworkFileSystem();
+        });
+        if ( it == end( m_fsFactories ) )
+            m_fsFactories.push_back( std::make_shared<factory::NetworkFileSystemFactory>( "smb", "dsm-sd" ) );
+    }
+    else
+    {
+        std::remove_if( begin( m_fsFactories ), end( m_fsFactories ), []( const std::shared_ptr<factory::IFileSystem> fs ) {
+            return fs->isNetworkFileSystem();
+        });
+    }
 }
 
 bool MediaLibrary::banFolder( const std::string& path )

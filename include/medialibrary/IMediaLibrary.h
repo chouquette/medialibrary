@@ -220,6 +220,7 @@ class IMediaLibrary
          * @param entryPoint What to discover.
          */
         virtual void discover( const std::string& entryPoint ) = 0;
+        virtual void setDiscoverNetworkEnabled( bool enable ) = 0;
         /**
          * @brief banFolder will blacklist a folder for discovery
          */
