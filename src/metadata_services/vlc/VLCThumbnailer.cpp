@@ -91,6 +91,9 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
                                                                       VLC::Media::FromType::FromPath;
     auto vlcMedia = VLC::Media( m_instance, file->mrl(), fromType );
     vlcMedia.addOption( ":no-audio" );
+    vlcMedia.addOption( ":no-osd" );
+    vlcMedia.addOption( ":no-spu" );
+    vlcMedia.addOption( ":input-fast-seek" );
     VLC::MediaPlayer mp( vlcMedia );
 
     setupVout( mp );
