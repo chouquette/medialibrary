@@ -70,7 +70,15 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
         return true;
     if ( hasDotNoMediaFile( *fsDir ) )
         return true;
-    return addFolder( *fsDir, nullptr );
+    try
+    {
+        return addFolder( *fsDir, nullptr );
+    }
+    catch ( sqlite::errors::ConstraintViolation& ex )
+    {
+        LOG_WARN( entryPoint, " discovery aborted (assuming blacklisted folder): ", ex.what() );
+    }
+    return true;
 }
 
 bool FsDiscoverer::reload()

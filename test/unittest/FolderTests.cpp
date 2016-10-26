@@ -290,6 +290,18 @@ TEST_F( FoldersNoDiscover, Blacklist )
     ASSERT_EQ( nullptr, f );
 }
 
+TEST_F( FoldersNoDiscover, DiscoverBlacklisted )
+{
+    cbMock->prepareForWait();
+    ml->banFolder( mock::FileSystemFactory::Root );
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->wait();
+    ASSERT_TRUE( discovered );
+
+    auto f = ml->folder( mock::FileSystemFactory::Root );
+    ASSERT_EQ( nullptr, f );
+}
+
 TEST_F( Folders, BlacklistAfterDiscovery )
 {
     auto f = ml->folder( mock::FileSystemFactory::SubFolder );
