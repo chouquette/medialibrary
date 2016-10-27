@@ -221,7 +221,7 @@ class Tools
             auto chrono = std::chrono::steady_clock::now();
 
             std::vector<std::shared_ptr<INTF>> results;
-            auto stmt = Statement( dbConnection->getConn(), req );
+            Statement stmt( dbConnection->getConn(), req );
             stmt.execute( std::forward<Args>( args )... );
             Row sqliteRow;
             while ( ( sqliteRow = stmt.row() ) != nullptr )
@@ -244,7 +244,7 @@ class Tools
                 ctx = dbConnection->acquireReadContext();
             auto chrono = std::chrono::steady_clock::now();
 
-            auto stmt = Statement( dbConnection->getConn(), req );
+            Statement stmt( dbConnection->getConn(), req );
             stmt.execute( std::forward<Args>( args )... );
             auto row = stmt.row();
             if ( row == nullptr )
@@ -303,7 +303,7 @@ class Tools
         static bool executeRequestLocked( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
             auto chrono = std::chrono::steady_clock::now();
-            auto stmt = Statement( dbConnection->getConn(), req );
+            Statement stmt( dbConnection->getConn(), req );
             stmt.execute( std::forward<Args>( args )... );
             while ( stmt.row() != nullptr )
                 ;

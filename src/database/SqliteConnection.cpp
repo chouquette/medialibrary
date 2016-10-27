@@ -62,9 +62,9 @@ SqliteConnection::Handle SqliteConnection::getConn()
         s.execute();
         while ( s.row() != nullptr )
             ;
-        s = sqlite::Statement( dbConnection, "PRAGMA recursive_triggers = ON" );
-        s.execute();
-        while ( s.row() != nullptr )
+        sqlite::Statement s2( dbConnection, "PRAGMA recursive_triggers = ON" );
+        s2.execute();
+        while ( s2.row() != nullptr )
             ;
         m_conns.emplace( compat::this_thread::get_id(), std::move( dbConn ) );
         sqlite3_update_hook( dbConnection, &updateHook, this );
