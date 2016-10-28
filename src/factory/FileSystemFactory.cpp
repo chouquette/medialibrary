@@ -67,7 +67,7 @@ std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::s
         m_dirs[path] = dir;
         return dir;
     }
-    catch(std::exception& ex)
+    catch(const std::system_error& ex)
     {
         LOG_ERROR( "Failed to create fs::IDirectory for ", path, ": ", ex.what());
         return nullptr;
