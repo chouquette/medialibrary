@@ -51,7 +51,10 @@ void Directory::read() const
     auto wpattern = charset::ToWide( pattern.c_str() );
     auto h = FindFirstFile( wpattern.get(), &f );
     if ( h == INVALID_HANDLE_VALUE )
-        throw std::runtime_error( "Failed to browse through " + m_path );
+    {
+        LOG_ERROR( "Failed to browse ", m_path );
+        std::system_error( GetLastError(), std::generic_category(), "Failed to browse through directory" );
+    }
     do
     {
         auto file = charset::FromWide( f.cFileName );
@@ -72,8 +75,8 @@ std::string Directory::toAbsolute( const std::string& path )
     auto wpath = charset::ToWide( path.c_str() );
     if ( GetFullPathName( wpath.get(), MAX_PATH, buff, nullptr ) == 0 )
     {
-        throw std::runtime_error("Failed to convert " + path + " to absolute path (" +
-                                 std::to_string( GetLastError() ) + ")" );
+        LOG_ERROR( "Failed to convert ", path, " to absolute path" );
+        std::system_error( GetLastError(), std::generic_category(), "Failed to convert to absolute path" );
     }
     auto upath = charset::FromWide( buff );
     return std::string( upath.get() );

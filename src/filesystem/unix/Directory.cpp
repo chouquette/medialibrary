@@ -54,10 +54,8 @@ void Directory::read() const
     std::unique_ptr<DIR, int(*)(DIR*)> dir( opendir( m_path.c_str() ), closedir );
     if ( dir == nullptr )
     {
-        std::string err( "Failed to open directory " );
-        err += m_path;
-        err += strerror(errno);
-        throw std::runtime_error( err );
+        LOG_ERROR( "Failed to open directory ", m_path );
+        throw std::system_error( errno, std::generic_category(), "Failed to open directory" );
     }
 
     dirent* result = nullptr;
@@ -77,10 +75,8 @@ void Directory::read() const
             // Ignore EOVERFLOW since we are not (yet?) interested in the file size
             if ( errno != EOVERFLOW )
             {
-                std::string err( "Failed to get file info " );
-                err += path + ": ";
-                err += strerror(errno);
-                throw std::runtime_error( err );
+                LOG_ERROR( "Failed to get file ", path, " info" );
+                throw std::system_error( errno, std::generic_category(), "Failed to get file info" );
             }
         }
         try
