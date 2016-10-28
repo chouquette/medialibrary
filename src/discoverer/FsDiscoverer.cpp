@@ -126,6 +126,7 @@ bool FsDiscoverer::reload( const std::string& entryPoint )
     if ( folderFs == nullptr )
     {
         LOG_ERROR(" Failed to create a fs::IDirectory representing ", folder->path() );
+        return false;
     }
     checkFolder( *folderFs, *folder, false );
     return true;
