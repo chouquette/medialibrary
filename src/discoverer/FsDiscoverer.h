@@ -47,7 +47,7 @@ private:
     /// \brief checkSubfolders
     /// \return true if files in this folder needs to be listed, false otherwise
     ///
-    void checkFolder(fs::IDirectory& currentFolderFs, Folder& currentFolder) const;
+    void checkFolder( fs::IDirectory& currentFolderFs, Folder& currentFolder, bool newFolder ) const;
     void checkFiles(fs::IDirectory& parentFolderFs, Folder& parentFolder ) const;
     static bool hasDotNoMediaFile( const fs::IDirectory& directory );
     bool addFolder( fs::IDirectory& folder, Folder* parentFolder ) const;

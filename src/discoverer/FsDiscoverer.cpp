@@ -100,7 +100,7 @@ bool FsDiscoverer::reload()
             m_ml->deleteFolder( *f );
             continue;
         }
-        checkFolder( *folder, *f );
+        checkFolder( *folder, *f, false );
     }
     return true;
 }
@@ -127,7 +127,7 @@ bool FsDiscoverer::reload( const std::string& entryPoint )
     {
         LOG_ERROR(" Failed to create a fs::IDirectory representing ", folder->path() );
     }
-    checkFolder( *folderFs, *folder );
+    checkFolder( *folderFs, *folder, false );
     return true;
 }
 
@@ -153,7 +153,7 @@ bool FsDiscoverer::checkDevices()
     return true;
 }
 
-void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& currentFolder ) const
+void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& currentFolder, bool newFolder ) const
 {
     // We already know of this folder, though it may now contain a .nomedia file.
     // In this case, simply delete the folder.
@@ -166,7 +166,10 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
     m_cb->onDiscoveryProgress( currentFolderFs.path() );
     // Load the folders we already know of:
     LOG_INFO( "Checking for modifications in ", currentFolderFs.path() );
-    auto subFoldersInDB = Folder::fetchAll( m_ml, currentFolder.id() );
+    // Don't try to fetch any potential sub folders if the folder was freshly added
+    std::vector<std::shared_ptr<Folder>> subFoldersInDB;
+    if ( newFolder == false )
+        subFoldersInDB = Folder::fetchAll( m_ml, currentFolder.id() );
     for ( const auto& subFolder : currentFolderFs.dirs() )
     {
         auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [&subFolder](const std::shared_ptr<Folder>& f) {
@@ -204,7 +207,7 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
         // In any case, check for modifications, as a change related to a mountpoint might
         // not update the folder modification date.
         // Also, relying on the modification date probably isn't portable
-        checkFolder( *subFolder, *folderInDb );
+        checkFolder( *subFolder, *folderInDb, false );
         subFoldersInDB.erase( it );
     }
     // Now all folders we had in DB but haven't seen from the FS must have been deleted.
@@ -290,7 +293,7 @@ bool FsDiscoverer::addFolder( fs::IDirectory& folder, Folder* parentFolder ) con
                              *device, *deviceFs );
     if ( f == nullptr )
         return false;
-    checkFolder( folder, *f );
+    checkFolder( folder, *f, true );
     return true;
 }
 
