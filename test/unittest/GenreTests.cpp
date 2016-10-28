@@ -67,7 +67,7 @@ TEST_F( Genres, ListAlbumTracks )
     for ( auto i = 1u; i <= 3; i++ )
     {
         auto m = ml->addFile( "track" + std::to_string( i ) + ".mp3" );
-        auto t = a->addTrack( m, i, 1, 0 );
+        auto t = a->addTrack( m, i, 1, 0, 0 );
         if ( i != 1 )
             t->setGenre( g );
     }
@@ -90,13 +90,13 @@ TEST_F( Genres, ListArtists )
     for ( auto i = 1u; i <= 5; ++i )
     {
         auto m = ml->addFile( std::to_string( i ) + ".mp3" );
-        auto track = album->addTrack( m, i, 1, a->id() );
+        auto track = album->addTrack( m, i, 1, a->id(), 0 );
         track->setGenre( g );
     }
     for ( auto i = 1u; i <= 5; ++i )
     {
         auto m = ml->addFile( std::to_string( i ) + "_2.mp3" );
-        auto track = album2->addTrack( m, i, 1, a2->id() );
+        auto track = album2->addTrack( m, i, 1, a2->id(), 0 );
         track->setGenre( g );
     }
     artists = g->artists( SortingCriteria::Default, false );
@@ -107,12 +107,12 @@ TEST_F( Genres, ListAlbums )
 {
     auto album = ml->createAlbum( "album" );
     auto m = ml->addFile( "some track.mp3" );
-    auto t = album->addTrack( m, 10, 1, 0 );
+    auto t = album->addTrack( m, 10, 1, 0, 0 );
     t->setGenre( g );
 
     auto album2 = ml->createAlbum( "album2" );
     m = ml->addFile( "some other track.mp3" );
-    t = album2->addTrack( m, 10, 1, 0 );
+    t = album2->addTrack( m, 10, 1, 0, 0 );
     t->setGenre( g );
 
     // We have 2 albums with at least a song with genre "g" (as defined in SetUp)
@@ -120,7 +120,7 @@ TEST_F( Genres, ListAlbums )
     for ( auto i = 1u; i <= 5u; ++i )
     {
         auto m = ml->addFile( std::to_string( i ) + ".mp3" );
-        auto track = album->addTrack( m, i, 1, 0 );
+        auto track = album->addTrack( m, i, 1, 0, 0 );
         auto g = ml->createGenre( std::to_string( i ) );
         track->setGenre( g );
     }
@@ -170,7 +170,7 @@ TEST_F( Genres, SortTracks )
     for ( auto i = 1u; i <= 2; i++ )
     {
         auto m = ml->addFile( "track" + std::to_string( i ) + ".mp3" );
-        auto t = a->addTrack( m, i, 1, 0 );
+        auto t = a->addTrack( m, i, 1, 0, 0 );
         m->setDuration( i );
         m->save();
         t->setGenre( g );

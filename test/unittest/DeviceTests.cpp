@@ -260,7 +260,7 @@ TEST_F( DeviceFs, RemoveAlbum )
         auto album = std::static_pointer_cast<Album>( ml->createAlbum( "album" ) );
         auto media = ml->media( mock::FileSystemFactory::Root + "audio.mp3" );
         auto artist = ml->createArtist( "artist" );
-        album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1, artist->id() );
+        album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1, artist->id(), 0 );
         album->setAlbumArtist( artist );
     }
     // And an album that will disappear, along with its artist
@@ -269,8 +269,8 @@ TEST_F( DeviceFs, RemoveAlbum )
         auto media = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
         ml->media( RemovableDeviceMountpoint + "removablefile2.mp3" );
         auto artist = ml->createArtist( "artist 2" );
-        album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1, artist->id() );
-        album->addTrack( std::static_pointer_cast<Media>( media ), 2, 1, artist->id() );
+        album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1, artist->id(), 0 );
+        album->addTrack( std::static_pointer_cast<Media>( media ), 2, 1, artist->id(), 0 );
         album->setAlbumArtist( artist );
     }
 
@@ -304,8 +304,8 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
         auto media = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
         auto media2 = ml->media( RemovableDeviceMountpoint + "removablefile2.mp3" );
         auto newArtist = ml->createArtist( "artist" );
-        album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1, newArtist->id() );
-        album->addTrack( std::static_pointer_cast<Media>( media2 ), 2, 1, newArtist->id() );
+        album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1, newArtist->id(), 0 );
+        album->addTrack( std::static_pointer_cast<Media>( media2 ), 2, 1, newArtist->id(), 0 );
         album->setAlbumArtist( newArtist );
         newArtist->addMedia( static_cast<Media&>( *media ) );
         newArtist->addMedia( static_cast<Media&>( *media2 ) );

@@ -88,7 +88,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         /// The media will be added to the tracks cache.
         ///
         std::shared_ptr<AlbumTrack> addTrack( std::shared_ptr<Media> media, unsigned int trackNb,
-                                              unsigned int discNumber, int64_t artistId );
+                                              unsigned int discNumber, int64_t artistId, int64_t genreId );
         unsigned int nbTracks() const override;
         unsigned int duration() const override;
 

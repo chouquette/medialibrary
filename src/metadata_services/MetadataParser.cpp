@@ -121,8 +121,9 @@ bool MetadataParser::parseAudioFile( parser::Task& task ) const
     if ( task.artworkMrl.empty() == false )
         task.media->setThumbnail( task.artworkMrl );
 
+    auto genre = handleGenre( task );
     auto artists = handleArtists( task );
-    auto album = handleAlbum( task, artists.first, artists.second );
+    auto album = handleAlbum( task, artists.first, artists.second, genre.get() );
     if ( album == nullptr )
     {
         LOG_WARN( "Failed to get/create associated album" );
@@ -132,6 +133,20 @@ bool MetadataParser::parseAudioFile( parser::Task& task ) const
     auto res = link( *task.media, album, artists.first, artists.second );
     t->commit();
     return res;
+}
+
+std::shared_ptr<Genre> MetadataParser::handleGenre( parser::Task& task ) const
+{
+    if ( task.genre.length() == 0 )
+        return nullptr;
+    auto genre = Genre::fromName( m_ml, task.genre );
+    if ( genre == nullptr )
+    {
+        genre = Genre::create( m_ml, task.genre );
+        if ( genre == nullptr )
+            LOG_ERROR( "Failed to get/create Genre", task.genre );
+    }
+    return genre;
 }
 
 /* Album handling */
@@ -225,7 +240,8 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, Artist* al
     return std::static_pointer_cast<Album>( albums[0] );
 }
 
-std::shared_ptr<Album> MetadataParser::handleAlbum( parser::Task& task, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> trackArtist ) const
+std::shared_ptr<Album> MetadataParser::handleAlbum( parser::Task& task, std::shared_ptr<Artist> albumArtist,
+                                                    std::shared_ptr<Artist> trackArtist, Genre* genre ) const
 {
     std::shared_ptr<Album> album;
     std::shared_ptr<Artist> artist = albumArtist;
@@ -262,7 +278,7 @@ std::shared_ptr<Album> MetadataParser::handleAlbum( parser::Task& task, std::sha
     if ( album == nullptr )
         return nullptr;
     // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist
-    auto track = handleTrack( album, task, trackArtist ? trackArtist : artist );
+    auto track = handleTrack( album, task, trackArtist ? trackArtist : artist, genre );
     return album;
 }
 
@@ -317,7 +333,8 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::hand
 
 /* Tracks handling */
 
-std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> album, parser::Task& task, std::shared_ptr<Artist> artist ) const
+std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> album, parser::Task& task,
+                                                         std::shared_ptr<Artist> artist, Genre* genre ) const
 {
     auto title = task.title;
     if ( title.empty() == true )
@@ -332,27 +349,15 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
     if ( title.empty() == false )
         task.media->setTitle( title );
 
-    auto track = std::static_pointer_cast<AlbumTrack>( album->addTrack( task.media, task.trackNumber, task.discNumber, artist->id() ) );
+    auto track = std::static_pointer_cast<AlbumTrack>( album->addTrack( task.media, task.trackNumber,
+                                                                        task.discNumber, artist->id(),
+                                                                        genre != nullptr ? genre->id() : 0 ) );
     if ( track == nullptr )
     {
         LOG_ERROR( "Failed to create album track" );
         return nullptr;
     }
 
-    if ( task.genre.length() != 0 )
-    {
-        auto genre = Genre::fromName( m_ml, task.genre );
-        if ( genre == nullptr )
-        {
-            genre = Genre::create( m_ml, task.genre );
-            if ( genre == nullptr )
-            {
-                LOG_ERROR( "Failed to create a genre in database" );
-                return nullptr;
-            }
-        }
-        track->setGenre( genre );
-    }
     if ( task.releaseDate.empty() == false )
     {
         auto releaseYear = atoi( task.releaseDate.c_str() );
