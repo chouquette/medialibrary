@@ -251,7 +251,7 @@ TEST_F( Medias, SearchTracks )
     for ( auto i = 1u; i <= 10u; ++i )
     {
        auto m = ml->addFile( "track " + std::to_string( i ) + ".mp3" );
-       a->addTrack( m, i, 1 );
+       a->addTrack( m, i, 1, 0 );
     }
     auto tracks = ml->searchMedia( "tra" ).tracks;
     ASSERT_EQ( 10u, tracks.size() );

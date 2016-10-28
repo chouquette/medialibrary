@@ -259,8 +259,8 @@ TEST_F( DeviceFs, RemoveAlbum )
     {
         auto album = std::static_pointer_cast<Album>( ml->createAlbum( "album" ) );
         auto media = ml->media( mock::FileSystemFactory::Root + "audio.mp3" );
-        album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1 );
         auto artist = ml->createArtist( "artist" );
+        album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1, artist->id() );
         album->setAlbumArtist( artist );
     }
     // And an album that will disappear, along with its artist
@@ -268,9 +268,9 @@ TEST_F( DeviceFs, RemoveAlbum )
         auto album = std::static_pointer_cast<Album>( ml->createAlbum( "album 2" ) );
         auto media = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
         ml->media( RemovableDeviceMountpoint + "removablefile2.mp3" );
-        album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1 );
-        album->addTrack( std::static_pointer_cast<Media>( media ), 2, 1 );
         auto artist = ml->createArtist( "artist 2" );
+        album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1, artist->id() );
+        album->addTrack( std::static_pointer_cast<Media>( media ), 2, 1, artist->id() );
         album->setAlbumArtist( artist );
     }
 
@@ -303,9 +303,9 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
         auto album = ml->createAlbum( "album" );
         auto media = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
         auto media2 = ml->media( RemovableDeviceMountpoint + "removablefile2.mp3" );
-        album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1 );
-        album->addTrack( std::static_pointer_cast<Media>( media2 ), 2, 1 );
         auto newArtist = ml->createArtist( "artist" );
+        album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1, newArtist->id() );
+        album->addTrack( std::static_pointer_cast<Media>( media2 ), 2, 1, newArtist->id() );
         album->setAlbumArtist( newArtist );
         newArtist->addMedia( static_cast<Media&>( *media ) );
         newArtist->addMedia( static_cast<Media&>( *media2 ) );

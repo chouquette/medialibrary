@@ -52,11 +52,11 @@ AlbumTrack::AlbumTrack( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_isPresent;
 }
 
-AlbumTrack::AlbumTrack( MediaLibraryPtr ml, int64_t mediaId, unsigned int trackNumber, int64_t albumId, unsigned int discNumber )
+AlbumTrack::AlbumTrack( MediaLibraryPtr ml, int64_t mediaId, int64_t artistId, unsigned int trackNumber, int64_t albumId, unsigned int discNumber )
     : m_ml( ml )
     , m_id( 0 )
     , m_mediaId( mediaId )
-    , m_artistId( 0 )
+    , m_artistId( artistId )
     , m_genreId( 0 )
     , m_trackNumber( trackNumber )
     , m_albumId( albumId )
@@ -126,12 +126,12 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
 
 std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, int64_t albumId,
                                                 std::shared_ptr<Media> media, unsigned int trackNb,
-                                                unsigned int discNumber )
+                                                unsigned int discNumber, int64_t artistId )
 {
-    auto self = std::make_shared<AlbumTrack>( ml, media->id(), trackNb, albumId, discNumber );
+    auto self = std::make_shared<AlbumTrack>( ml, media->id(), artistId, trackNb, albumId, discNumber );
     static const std::string req = "INSERT INTO " + policy::AlbumTrackTable::Name
-            + "(media_id, track_number, album_id, disc_number) VALUES(?, ?, ?, ?)";
-    if ( insert( ml, self, req, media->id(), trackNb, albumId, discNumber ) == false )
+            + "(media_id, artist_id, track_number, album_id, disc_number) VALUES(?, ?, ?, ?, ?)";
+    if ( insert( ml, self, req, media->id(), sqlite::ForeignKey( artistId ), trackNb, albumId, discNumber ) == false )
         return nullptr;
     self->m_media = media;
     return self;

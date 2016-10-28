@@ -230,11 +230,11 @@ std::vector<MediaPtr> Album::cachedTracks() const
     return m_tracks.get();
 }
 
-std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsigned int trackNb, unsigned int discNumber )
+std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsigned int trackNb, unsigned int discNumber, int64_t artistId )
 {
     auto t = m_ml->getConn()->newTransaction();
 
-    auto track = AlbumTrack::create( m_ml, m_id, media, trackNb, discNumber );
+    auto track = AlbumTrack::create( m_ml, m_id, media, trackNb, discNumber, artistId );
     if ( track == nullptr )
         return nullptr;
     media->setAlbumTrack( track );
