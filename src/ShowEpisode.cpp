@@ -170,7 +170,10 @@ bool ShowEpisode::createTable( DBConnection dbConnection )
                 "FOREIGN KEY(show_id) REFERENCES " + policy::ShowTable::Name
                     + "(id_show) ON DELETE CASCADE"
             ")";
-    return sqlite::Tools::executeRequest( dbConnection, req );
+    const std::string indexReq = "CREATE INDEX IF NOT EXISTS show_episode_media_show_idx ON " +
+            policy::ShowEpisodeTable::Name + "(media_id, show_id)";
+    return sqlite::Tools::executeRequest( dbConnection, req ) &&
+            sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
 
 std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml, int64_t mediaId, const std::string& title, unsigned int episodeNumber, int64_t showId )

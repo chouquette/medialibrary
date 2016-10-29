@@ -360,9 +360,12 @@ bool Album::createTable(DBConnection dbConnection )
                 "title,"
                 "artist"
             ")";
+    static const std::string indexReq = "CREATE INDEX IF NOT EXISTS album_artist_id_idx ON " +
+            policy::AlbumTable::Name + "(artist_id)";
     return sqlite::Tools::executeRequest( dbConnection, req ) &&
             sqlite::Tools::executeRequest( dbConnection, reqRel ) &&
-            sqlite::Tools::executeRequest( dbConnection, vtableReq );
+            sqlite::Tools::executeRequest( dbConnection, vtableReq ) &&
+            sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
 
 bool Album::createTriggers(DBConnection dbConnection)

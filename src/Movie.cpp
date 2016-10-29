@@ -129,7 +129,10 @@ bool Movie::createTable( DBConnection dbConnection )
                 "FOREIGN KEY(media_id) REFERENCES " + policy::MediaTable::Name
                 + "(id_media) ON DELETE CASCADE"
             ")";
-    return sqlite::Tools::executeRequest( dbConnection, req );
+    static const std::string indexReq = "CREATE INDEX IF NOT EXISTS movie_media_idx ON " +
+            policy::MovieTable::Name + "(media_id)";
+    return sqlite::Tools::executeRequest( dbConnection, req ) &&
+            sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
 
 std::shared_ptr<Movie> Movie::create(MediaLibraryPtr ml, int64_t mediaId, const std::string& title )

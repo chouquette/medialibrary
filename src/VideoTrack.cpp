@@ -121,7 +121,10 @@ bool VideoTrack::createTable( DBConnection dbConnection )
                 "FOREIGN KEY ( media_id ) REFERENCES " + policy::MediaTable::Name +
                     "(id_media) ON DELETE CASCADE"
             ")";
-    return sqlite::Tools::executeRequest( dbConnection, req );
+    static const std::string indexReq = "CREATE INDEX IF NOT EXISTS video_track_media_idx ON " +
+            policy::VideoTrackTable::Name + "(media_id)";
+    return sqlite::Tools::executeRequest( dbConnection, req ) &&
+            sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
 
 }

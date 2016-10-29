@@ -119,9 +119,12 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
             " BEGIN"
             " UPDATE " + policy::AlbumTrackTable::Name + " SET is_present = new.is_present WHERE media_id = new.id_media;"
             " END";
+    static const std::string indexReq = "CREATE INDEX IF NOT EXISTS album_media_artist_genre_album_idx ON " +
+            policy::AlbumTrackTable::Name + "(media_id, artist_id, genre_id, album_id)";
 
     return sqlite::Tools::executeRequest( dbConnection, req ) &&
-            sqlite::Tools::executeRequest( dbConnection, triggerReq );
+            sqlite::Tools::executeRequest( dbConnection, triggerReq ) &&
+            sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
 
 std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, int64_t albumId,
