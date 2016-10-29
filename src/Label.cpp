@@ -82,17 +82,17 @@ LabelPtr Label::create( MediaLibraryPtr ml, const std::string& name )
 
 bool Label::createTable( DBConnection dbConnection )
 {
-    static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::LabelTable::Name + "("
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::LabelTable::Name + "("
                 "id_label INTEGER PRIMARY KEY AUTOINCREMENT, "
                 "name TEXT UNIQUE ON CONFLICT FAIL"
             ")";
-    static const std::string relReq = "CREATE TABLE IF NOT EXISTS LabelFileRelation("
+    const std::string relReq = "CREATE TABLE IF NOT EXISTS LabelFileRelation("
                 "label_id INTEGER,"
                 "media_id INTEGER,"
             "PRIMARY KEY (label_id, media_id),"
             "FOREIGN KEY(label_id) REFERENCES Label(id_label) ON DELETE CASCADE,"
             "FOREIGN KEY(media_id) REFERENCES Media(id_media) ON DELETE CASCADE);";
-    static const std::string ftsTrigger = "CREATE TRIGGER IF NOT EXISTS delete_label_fts "
+    const std::string ftsTrigger = "CREATE TRIGGER IF NOT EXISTS delete_label_fts "
             "BEFORE DELETE ON " + policy::LabelTable::Name +
             " BEGIN"
             " UPDATE " + policy::MediaTable::Name + "Fts SET labels = TRIM(REPLACE(labels, old.name, ''))"

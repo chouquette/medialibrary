@@ -118,7 +118,7 @@ std::vector<MediaPtr> Movie::files()
 
 bool Movie::createTable( DBConnection dbConnection )
 {
-    static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::MovieTable::Name
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::MovieTable::Name
             + "("
                 "id_movie INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "media_id UNSIGNED INTEGER NOT NULL,"
@@ -129,7 +129,7 @@ bool Movie::createTable( DBConnection dbConnection )
                 "FOREIGN KEY(media_id) REFERENCES " + policy::MediaTable::Name
                 + "(id_media) ON DELETE CASCADE"
             ")";
-    static const std::string indexReq = "CREATE INDEX IF NOT EXISTS movie_media_idx ON " +
+    const std::string indexReq = "CREATE INDEX IF NOT EXISTS movie_media_idx ON " +
             policy::MovieTable::Name + "(media_id)";
     return sqlite::Tools::executeRequest( dbConnection, req ) &&
             sqlite::Tools::executeRequest( dbConnection, indexReq );

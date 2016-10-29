@@ -191,7 +191,7 @@ bool Artist::setMusicBrainzId( const std::string& mbId )
 
 bool Artist::createTable( DBConnection dbConnection )
 {
-    static const std::string req = "CREATE TABLE IF NOT EXISTS " +
+    const std::string req = "CREATE TABLE IF NOT EXISTS " +
             policy::ArtistTable::Name +
             "("
                 "id_artist INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -202,7 +202,7 @@ bool Artist::createTable( DBConnection dbConnection )
                 "mb_id TEXT,"
                 "is_present BOOLEAN NOT NULL DEFAULT 1"
             ")";
-    static const std::string reqRel = "CREATE TABLE IF NOT EXISTS MediaArtistRelation("
+    const std::string reqRel = "CREATE TABLE IF NOT EXISTS MediaArtistRelation("
                 "media_id INTEGER NOT NULL,"
                 "artist_id INTEGER,"
                 "PRIMARY KEY (media_id, artist_id),"
@@ -211,7 +211,7 @@ bool Artist::createTable( DBConnection dbConnection )
                 "FOREIGN KEY(artist_id) REFERENCES " + policy::ArtistTable::Name + "("
                     + policy::ArtistTable::PrimaryKeyColumn + ") ON DELETE CASCADE"
             ")";
-    static const std::string reqFts = "CREATE VIRTUAL TABLE IF NOT EXISTS " +
+    const std::string reqFts = "CREATE VIRTUAL TABLE IF NOT EXISTS " +
                 policy::ArtistTable::Name + "Fts USING FTS3("
                 "name"
             ")";

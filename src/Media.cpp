@@ -451,9 +451,9 @@ bool Media::createTable( DBConnection connection )
             "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
             "is_present BOOLEAN NOT NULL DEFAULT 1"
             ")";
-    static const std::string indexReq = "CREATE INDEX IF NOT EXISTS index_last_played_date ON "
+    const std::string indexReq = "CREATE INDEX IF NOT EXISTS index_last_played_date ON "
             + policy::MediaTable::Name + "(last_played_date DESC)";
-    static const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
+    const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
                 + policy::MediaTable::Name + "Fts USING FTS3("
                 "title,"
                 "labels"

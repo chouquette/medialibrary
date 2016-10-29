@@ -95,7 +95,7 @@ std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& u
 
 bool Device::createTable(DBConnection connection)
 {
-    std::string req = "CREATE TABLE IF NOT EXISTS " + policy::DeviceTable::Name + "("
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::DeviceTable::Name + "("
                 "id_device INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "uuid TEXT UNIQUE ON CONFLICT FAIL,"
                 "is_removable BOOLEAN,"

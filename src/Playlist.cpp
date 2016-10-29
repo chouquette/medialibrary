@@ -145,12 +145,12 @@ bool Playlist::remove( int64_t mediaId )
 
 bool Playlist::createTable( DBConnection dbConn )
 {
-    static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::PlaylistTable::Name + "("
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::PlaylistTable::Name + "("
             + policy::PlaylistTable::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             "name TEXT UNIQUE,"
             "creation_date UNSIGNED INT NOT NULL"
         ")";
-    static const std::string relTableReq = "CREATE TABLE IF NOT EXISTS PlaylistMediaRelation("
+    const std::string relTableReq = "CREATE TABLE IF NOT EXISTS PlaylistMediaRelation("
             "media_id INTEGER,"
             "playlist_id INTEGER,"
             "position INTEGER,"
@@ -160,7 +160,7 @@ bool Playlist::createTable( DBConnection dbConn )
             "FOREIGN KEY(playlist_id) REFERENCES " + policy::PlaylistTable::Name + "("
                 + policy::PlaylistTable::PrimaryKeyColumn + ") ON DELETE CASCADE"
         ")";
-    static const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
+    const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
                 + policy::PlaylistTable::Name + "Fts USING FTS3("
                 "name"
             ")";

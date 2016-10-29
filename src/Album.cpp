@@ -331,7 +331,7 @@ bool Album::removeArtist(Artist* artist)
 
 bool Album::createTable(DBConnection dbConnection )
 {
-    static const std::string req = "CREATE TABLE IF NOT EXISTS " +
+    const std::string req = "CREATE TABLE IF NOT EXISTS " +
             policy::AlbumTable::Name +
             "("
                 "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -346,7 +346,7 @@ bool Album::createTable(DBConnection dbConnection )
                 "FOREIGN KEY( artist_id ) REFERENCES " + policy::ArtistTable::Name
                 + "(id_artist) ON DELETE CASCADE"
             ")";
-    static const std::string reqRel = "CREATE TABLE IF NOT EXISTS AlbumArtistRelation("
+    const std::string reqRel = "CREATE TABLE IF NOT EXISTS AlbumArtistRelation("
                 "album_id INTEGER,"
                 "artist_id INTEGER,"
                 "PRIMARY KEY (album_id, artist_id),"
@@ -355,12 +355,12 @@ bool Album::createTable(DBConnection dbConnection )
                 "FOREIGN KEY(artist_id) REFERENCES " + policy::ArtistTable::Name + "("
                     + policy::ArtistTable::PrimaryKeyColumn + ") ON DELETE CASCADE"
             ")";
-    static const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
+    const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
                 + policy::AlbumTable::Name + "Fts USING FTS3("
                 "title,"
                 "artist"
             ")";
-    static const std::string indexReq = "CREATE INDEX IF NOT EXISTS album_artist_id_idx ON " +
+    const std::string indexReq = "CREATE INDEX IF NOT EXISTS album_artist_id_idx ON " +
             policy::AlbumTable::Name + "(artist_id)";
     return sqlite::Tools::executeRequest( dbConnection, req ) &&
             sqlite::Tools::executeRequest( dbConnection, reqRel ) &&

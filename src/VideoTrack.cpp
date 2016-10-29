@@ -108,7 +108,7 @@ std::shared_ptr<VideoTrack> VideoTrack::create( MediaLibraryPtr ml, const std::s
 
 bool VideoTrack::createTable( DBConnection dbConnection )
 {
-    static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::VideoTrackTable::Name
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::VideoTrackTable::Name
             + "(" +
                 policy::VideoTrackTable::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "codec TEXT,"
@@ -121,7 +121,7 @@ bool VideoTrack::createTable( DBConnection dbConnection )
                 "FOREIGN KEY ( media_id ) REFERENCES " + policy::MediaTable::Name +
                     "(id_media) ON DELETE CASCADE"
             ")";
-    static const std::string indexReq = "CREATE INDEX IF NOT EXISTS video_track_media_idx ON " +
+    const std::string indexReq = "CREATE INDEX IF NOT EXISTS video_track_media_idx ON " +
             policy::VideoTrackTable::Name + "(media_id)";
     return sqlite::Tools::executeRequest( dbConnection, req ) &&
             sqlite::Tools::executeRequest( dbConnection, indexReq );

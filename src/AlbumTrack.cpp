@@ -97,7 +97,7 @@ bool AlbumTrack::setArtist( std::shared_ptr<Artist> artist )
 
 bool AlbumTrack::createTable( DBConnection dbConnection )
 {
-    static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AlbumTrackTable::Name + "("
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AlbumTrackTable::Name + "("
                 "id_track INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "media_id INTEGER,"
                 "artist_id UNSIGNED INTEGER,"
@@ -114,12 +114,12 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
                 "FOREIGN KEY (album_id) REFERENCES Album(id_album) "
                     " ON DELETE CASCADE"
             ")";
-    static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_track_present AFTER UPDATE OF is_present "
+    const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_track_present AFTER UPDATE OF is_present "
             "ON " + policy::MediaTable::Name +
             " BEGIN"
             " UPDATE " + policy::AlbumTrackTable::Name + " SET is_present = new.is_present WHERE media_id = new.id_media;"
             " END";
-    static const std::string indexReq = "CREATE INDEX IF NOT EXISTS album_media_artist_genre_album_idx ON " +
+    const std::string indexReq = "CREATE INDEX IF NOT EXISTS album_media_artist_genre_album_idx ON " +
             policy::AlbumTrackTable::Name + "(media_id, artist_id, genre_id, album_id)";
 
     return sqlite::Tools::executeRequest( dbConnection, req ) &&

@@ -100,7 +100,7 @@ const std::string& AudioTrack::description() const
 bool AudioTrack::createTable( DBConnection dbConnection )
 {
     //FIXME: Index on media_id ? Unless it's already implied by the foreign key
-    static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AudioTrackTable::Name
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AudioTrackTable::Name
             + "(" +
                 policy::AudioTrackTable::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "codec TEXT,"
@@ -113,7 +113,7 @@ bool AudioTrack::createTable( DBConnection dbConnection )
                 "FOREIGN KEY ( media_id ) REFERENCES " + policy::MediaTable::Name
                     + "( id_media ) ON DELETE CASCADE"
             ")";
-    static const std::string indexReq = "CREATE INDEX IF NOT EXISTS audio_track_media_idx ON " +
+    const std::string indexReq = "CREATE INDEX IF NOT EXISTS audio_track_media_idx ON " +
             policy::AudioTrackTable::Name + "(media_id)";
     return sqlite::Tools::executeRequest( dbConnection, req ) &&
             sqlite::Tools::executeRequest( dbConnection, indexReq );

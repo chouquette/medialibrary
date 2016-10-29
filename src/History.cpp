@@ -51,14 +51,14 @@ History::History( MediaLibraryPtr ml, sqlite::Row& row )
 
 bool History::createTable( DBConnection dbConnection )
 {
-    static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::HistoryTable::Name +
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::HistoryTable::Name +
             "("
                 "id_record INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "mrl TEXT UNIQUE ON CONFLICT FAIL,"
                 "insertion_date UNSIGNED INT NOT NULL DEFAULT (strftime('%s', 'now')),"
                 "favorite BOOLEAN NOT NULL DEFAULT 0"
             ")";
-    static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS limit_nb_records AFTER INSERT ON "
+    const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS limit_nb_records AFTER INSERT ON "
             + policy::HistoryTable::Name +
             " BEGIN "
             "DELETE FROM " + policy::HistoryTable::Name + " WHERE id_record in "

@@ -87,22 +87,22 @@ std::vector<AlbumPtr> Genre::albums( SortingCriteria sort, bool desc ) const
 
 bool Genre::createTable( DBConnection dbConn )
 {
-    static const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::GenreTable::Name +
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::GenreTable::Name +
         "("
             "id_genre INTEGER PRIMARY KEY AUTOINCREMENT,"
             "name TEXT UNIQUE ON CONFLICT FAIL"
         ")";
-    static const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
+    const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
                 + policy::GenreTable::Name + "Fts USING FTS3("
                 "name"
             ")";
 
-    static const std::string vtableInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_genre_fts"
+    const std::string vtableInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_genre_fts"
             " AFTER INSERT ON " + policy::GenreTable::Name +
             " BEGIN"
             " INSERT INTO " + policy::GenreTable::Name + "Fts(rowid,name) VALUES(new.id_genre, new.name);"
             " END";
-    static const std::string vtableDeleteTrigger = "CREATE TRIGGER IF NOT EXISTS delete_genre_fts"
+    const std::string vtableDeleteTrigger = "CREATE TRIGGER IF NOT EXISTS delete_genre_fts"
             " BEFORE DELETE ON " + policy::GenreTable::Name +
             " BEGIN"
             " DELETE FROM " + policy::GenreTable::Name + "Fts WHERE rowid = old.id_genre;"
