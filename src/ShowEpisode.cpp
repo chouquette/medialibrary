@@ -167,7 +167,8 @@ bool ShowEpisode::createTable( DBConnection dbConnection )
                 "show_id UNSIGNED INT,"
                 "FOREIGN KEY(media_id) REFERENCES " + policy::MediaTable::Name
                     + "(id_media) ON DELETE CASCADE,"
-                "FOREIGN KEY(show_id) REFERENCES " + policy::ShowTable::Name + "(id_show)"
+                "FOREIGN KEY(show_id) REFERENCES " + policy::ShowTable::Name
+                    + "(id_show) ON DELETE CASCADE"
             ")";
     return sqlite::Tools::executeRequest( dbConnection, req );
 }
