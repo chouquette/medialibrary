@@ -174,23 +174,23 @@ std::shared_ptr<Folder> Folder::fromPath( MediaLibraryPtr ml, const std::string&
     auto deviceFs = folderFs->device();
     if ( deviceFs == nullptr )
     {
-        LOG_ERROR( "Failed to get device containing an existing folder: ", fullPath );
+        LOG_ERROR( "Failed to get device containing an existing folder: ", folderFs->path() );
         return nullptr;
     }
     if ( deviceFs->isRemovable() == false )
     {
         std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND is_removable = 0";
         if ( bannedType == BannedType::Any )
-            return fetch( ml, req, fullPath );
+            return fetch( ml, req, folderFs->path() );
         req += " AND is_blacklisted = ?";
-            return fetch( ml, req, fullPath, bannedType == BannedType::Yes ? true : false );
+            return fetch( ml, req, folderFs->path(), bannedType == BannedType::Yes ? true : false );
     }
 
     auto device = Device::fromUuid( ml, deviceFs->uuid() );
     // We are trying to find a folder. If we don't know the device it's on, we don't know the folder.
     if ( device == nullptr )
         return nullptr;
-    auto path = utils::file::removePath( fullPath, deviceFs->mountpoint() );
+    auto path = utils::file::removePath( folderFs->path(), deviceFs->mountpoint() );
     std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND device_id = ?";
     std::shared_ptr<Folder> folder;
     if ( bannedType == BannedType::Any )
