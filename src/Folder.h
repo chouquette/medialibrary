@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "medialibrary/IFolder.h"
 #include "database/DatabaseHelpers.h"
 #include "factory/IFileSystem.h"
 #include "utils/Cache.h"
@@ -53,7 +54,7 @@ struct FolderTable
 // This doesn't publicly expose the DatabaseHelper inheritance in order to force
 // the user to go through Folder's overloads, as they take care of the device mountpoint
 // fetching & path composition
-class Folder : public DatabaseHelpers<Folder, policy::FolderTable>
+class Folder : public IFolder, public DatabaseHelpers<Folder, policy::FolderTable>
 {
 public:
     Folder( MediaLibraryPtr ml, sqlite::Row& row );
@@ -67,13 +68,13 @@ public:
     static std::shared_ptr<Folder> fromPath(MediaLibraryPtr ml, const std::string& fullPath );
     static std::shared_ptr<Folder> blacklistedFolder(MediaLibraryPtr ml, const std::string& fullPath );
 
-    int64_t id() const;
-    const std::string& path() const;
+    virtual int64_t id() const override;
+    virtual const std::string& path() const override;
     std::vector<std::shared_ptr<File>> files();
     std::vector<std::shared_ptr<Folder>> folders();
     std::shared_ptr<Folder> parent();
     int64_t deviceId() const;
-    bool isPresent() const;
+    virtual bool isPresent() const override;
 
 private:
     enum class BannedType
