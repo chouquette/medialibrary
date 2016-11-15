@@ -537,9 +537,9 @@ std::vector<MediaPtr> Media::search( MediaLibraryPtr ml, const std::string& titl
 {
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE"
             " id_media IN (SELECT rowid FROM " + policy::MediaTable::Name + "Fts"
-            " WHERE " + policy::MediaTable::Name + "Fts MATCH ?)"
+            " WHERE " + policy::MediaTable::Name + "Fts MATCH '*' || ? || '*')"
             "AND is_present = 1";
-    return Media::fetchAll<IMedia>( ml, req, title + "*" );
+    return Media::fetchAll<IMedia>( ml, req, title );
 }
 
 std::vector<MediaPtr> Media::fetchHistory( MediaLibraryPtr ml )

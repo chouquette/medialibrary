@@ -132,8 +132,8 @@ std::shared_ptr<Genre> Genre::fromName( MediaLibraryPtr ml, const std::string& n
 std::vector<GenrePtr> Genre::search( MediaLibraryPtr ml, const std::string& name )
 {
     static const std::string req = "SELECT * FROM " + policy::GenreTable::Name + " WHERE id_genre IN "
-            "(SELECT rowid FROM " + policy::GenreTable::Name + "Fts WHERE name MATCH ?)";
-    return fetchAll<IGenre>( ml, req, name + "*" );
+            "(SELECT rowid FROM " + policy::GenreTable::Name + "Fts WHERE name MATCH '*' || ? || '*')";
+    return fetchAll<IGenre>( ml, req, name );
 }
 
 std::vector<GenrePtr> Genre::listAll( MediaLibraryPtr ml, SortingCriteria, bool desc )

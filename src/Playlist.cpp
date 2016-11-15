@@ -224,8 +224,8 @@ bool Playlist::createTriggers( DBConnection dbConn )
 std::vector<PlaylistPtr> Playlist::search( MediaLibraryPtr ml, const std::string& name )
 {
     static const std::string req = "SELECT * FROM " + policy::PlaylistTable::Name + " WHERE id_playlist IN "
-            "(SELECT rowid FROM " + policy::PlaylistTable::Name + "Fts WHERE name MATCH ?)";
-    return fetchAll<IPlaylist>( ml, req, name + "*" );
+            "(SELECT rowid FROM " + policy::PlaylistTable::Name + "Fts WHERE name MATCH '*' || ? || '*')";
+    return fetchAll<IPlaylist>( ml, req, name );
 }
 
 std::vector<PlaylistPtr> Playlist::listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc )
