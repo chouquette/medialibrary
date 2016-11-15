@@ -698,6 +698,13 @@ void MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
     }
 }
 
+std::vector<FolderPtr> MediaLibrary::entryPoints() const
+{
+    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE parent_id IS NULL"
+            " AND is_blacklisted = 0";
+    return Folder::fetchAll<IFolder>( this, req );
+}
+
 bool MediaLibrary::banFolder( const std::string& path )
 {
     return Folder::blacklist( this, path );

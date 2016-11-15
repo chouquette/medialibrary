@@ -421,3 +421,15 @@ TEST_F( Folders, ReloadSubDir )
     files = ml->files();
     ASSERT_EQ( 4u, files.size() );
 }
+
+TEST_F( Folders, FetchEntryPoints )
+{
+    auto eps = ml->entryPoints();
+    ASSERT_EQ( 1u, eps.size() );
+    ASSERT_EQ( mock::FileSystemFactory::Root, eps[0]->path() );
+
+    // Check that banned folders don't appear in the results:
+    ml->banFolder( mock::FileSystemFactory::SubFolder );
+    eps = ml->entryPoints();
+    ASSERT_EQ( 1u, eps.size() );
+}

@@ -221,6 +221,7 @@ class IMediaLibrary
          */
         virtual void discover( const std::string& entryPoint ) = 0;
         virtual void setDiscoverNetworkEnabled( bool enable ) = 0;
+        virtual std::vector<FolderPtr> entryPoints() const = 0;
         /**
          * @brief banFolder will blacklist a folder for discovery
          */

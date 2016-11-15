@@ -46,6 +46,7 @@ class IPlaylist;
 class IMediaLibraryCb;
 class IDeviceLister;
 class IDeviceListerCb;
+class IFolder;
 
 using AlbumPtr = std::shared_ptr<IAlbum>;
 using AlbumTrackPtr = std::shared_ptr<IAlbumTrack>;
@@ -62,6 +63,7 @@ using ShowEpisodePtr = std::shared_ptr<IShowEpisode>;
 using ShowPtr = std::shared_ptr<IShow>;
 using VideoTrackPtr = std::shared_ptr<IVideoTrack>;
 using DeviceListerPtr = std::shared_ptr<IDeviceLister>;
+using FolderPtr = std::shared_ptr<IFolder>;
 
 }
 
