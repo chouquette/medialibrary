@@ -59,6 +59,10 @@ public:
     void notifyAlbumTrackModification( AlbumTrackPtr track );
     void notifyAlbumTrackRemoval( int64_t trackId );
 
+    void notifyPlaylistCreation( PlaylistPtr track );
+    void notifyPlaylistModification( PlaylistPtr track );
+    void notifyPlaylistRemoval( int64_t trackId );
+
 private:
     void run();
     void notify();
@@ -151,6 +155,7 @@ private:
     Queue<IArtist> m_artists;
     Queue<IAlbum> m_albums;
     Queue<IAlbumTrack> m_tracks;
+    Queue<IPlaylist> m_playlists;
 
     // Notifier thread
     compat::Mutex m_lock;

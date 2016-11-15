@@ -102,6 +102,10 @@ public:
     // Tracks are never modified after their creation, so there is no tracksModified event
     virtual void onTracksDeleted( std::vector<int64_t> trackIds ) = 0;
 
+    virtual void onPlaylistsAdded( std::vector<PlaylistPtr> playlists ) = 0;
+    virtual void onPlaylistsModified( std::vector<PlaylistPtr> playlists ) = 0;
+    virtual void onPlaylistsDeleted( std::vector<int64_t> playlistIds ) = 0;
+
     /**
      * @brief onDiscoveryStarted This callback will be invoked when a folder queued for discovery
      * (by calling IMediaLibrary::discover()) gets processed.

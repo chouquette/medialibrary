@@ -115,6 +115,21 @@ void ModificationNotifier::notifyAlbumTrackRemoval( int64_t trackId )
     notifyRemoval( trackId, m_tracks );
 }
 
+void ModificationNotifier::notifyPlaylistCreation( PlaylistPtr playlist )
+{
+    notifyCreation( std::move( playlist ), m_playlists );
+}
+
+void ModificationNotifier::notifyPlaylistModification( PlaylistPtr playlist )
+{
+    notifyModification( std::move( playlist ), m_playlists );
+}
+
+void ModificationNotifier::notifyPlaylistRemoval( int64_t playlistId )
+{
+    notifyRemoval( playlistId, m_playlists );
+}
+
 void ModificationNotifier::run()
 {
 #if !defined(_LIBCPP_STD_VER) || (_LIBCPP_STD_VER > 11 && !defined(_LIBCPP_HAS_NO_CXX14_CONSTEXPR))
@@ -130,6 +145,7 @@ void ModificationNotifier::run()
     Queue<IArtist> artists;
     Queue<IAlbum> albums;
     Queue<IAlbumTrack> tracks;
+    Queue<IPlaylist> playlists;
 
     while ( m_stop == false )
     {
@@ -146,6 +162,7 @@ void ModificationNotifier::run()
             checkQueue( m_artists, artists, nextTimeout, now );
             checkQueue( m_albums, albums, nextTimeout, now );
             checkQueue( m_tracks, tracks, nextTimeout, now );
+            checkQueue( m_playlists, playlists, nextTimeout, now );
             m_timeout = nextTimeout;
         }
         notify( std::move( media ), &IMediaLibraryCb::onMediaAdded, &IMediaLibraryCb::onMediaUpdated, &IMediaLibraryCb::onMediaDeleted );
@@ -154,6 +171,7 @@ void ModificationNotifier::run()
         // We pass the onTrackAdded callback twice, to avoid having to do some nifty templates specialization
         // for nullptr callbacks. There is no onTracksModified callback, as tracks are never modified.
         notify( std::move( tracks ), &IMediaLibraryCb::onTracksAdded, &IMediaLibraryCb::onTracksAdded, &IMediaLibraryCb::onTracksDeleted );
+        notify( std::move( playlists ), &IMediaLibraryCb::onPlaylistsAdded, &IMediaLibraryCb::onPlaylistsAdded, &IMediaLibraryCb::onPlaylistsDeleted );
     }
 }
 
