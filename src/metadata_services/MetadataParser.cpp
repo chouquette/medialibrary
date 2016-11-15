@@ -294,6 +294,7 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::hand
 {
     std::shared_ptr<Artist> albumArtist;
     std::shared_ptr<Artist> artist;
+    static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name + " WHERE name = ?";
 
     if ( task.albumArtist.empty() == true && task.artist.empty() == true )
     {
@@ -302,7 +303,7 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::hand
 
     if ( task.albumArtist.empty() == false )
     {
-        albumArtist = std::static_pointer_cast<Artist>( m_ml->artist( task.albumArtist ) );
+        albumArtist = Artist::fetch( m_ml, req, task.albumArtist);
         if ( albumArtist == nullptr )
         {
             albumArtist = m_ml->createArtist( task.albumArtist );
@@ -316,7 +317,7 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::hand
     }
     if ( task.artist.empty() == false && task.artist != task.albumArtist )
     {
-        artist = std::static_pointer_cast<Artist>( m_ml->artist( task.artist ) );
+        artist = Artist::fetch( m_ml, req, task.artist );
         if ( artist == nullptr )
         {
             artist = m_ml->createArtist( task.artist );
