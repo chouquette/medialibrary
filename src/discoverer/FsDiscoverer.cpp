@@ -90,7 +90,7 @@ bool FsDiscoverer::reload()
         LOG_ERROR( "Refusing to reloading files with no storage device" );
         return false;
     }
-    auto rootFolders = Folder::fetchAll( m_ml, 0 );
+    auto rootFolders = Folder::fetchRootFolders( m_ml );
     for ( const auto& f : rootFolders )
     {
         auto folder = m_fsFactory->createDirectory( f->path() );
@@ -170,7 +170,7 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
     // Don't try to fetch any potential sub folders if the folder was freshly added
     std::vector<std::shared_ptr<Folder>> subFoldersInDB;
     if ( newFolder == false )
-        subFoldersInDB = Folder::fetchAll( m_ml, currentFolder.id() );
+        subFoldersInDB = currentFolder.folders();
     for ( const auto& subFolder : currentFolderFs.dirs() )
     {
         auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [&subFolder](const std::shared_ptr<Folder>& f) {

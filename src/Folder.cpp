@@ -241,7 +241,9 @@ std::vector<std::shared_ptr<File>> Folder::files()
 
 std::vector<std::shared_ptr<Folder>> Folder::folders()
 {
-    return fetchAll( m_ml, m_id );
+    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
+            + " WHERE parent_id = ? AND is_blacklisted = 0 AND is_present = 1";
+    return DatabaseHelpers::fetchAll<Folder>( m_ml, req, m_id );
 }
 
 std::shared_ptr<Folder> Folder::parent()
@@ -259,20 +261,11 @@ bool Folder::isPresent() const
     return m_isPresent;
 }
 
-std::vector<std::shared_ptr<Folder>> Folder::fetchAll( MediaLibraryPtr ml, int64_t parentFolderId )
+std::vector<std::shared_ptr<Folder>> Folder::fetchRootFolders( MediaLibraryPtr ml )
 {
-    if ( parentFolderId == 0 )
-    {
-        static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
-                + " WHERE parent_id IS NULL AND is_blacklisted = 0 AND is_present = 1";
-        return DatabaseHelpers::fetchAll<Folder>( ml, req );
-    }
-    else
-    {
-        static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
-                + " WHERE parent_id = ? AND is_blacklisted = 0 AND is_present = 1";
-        return DatabaseHelpers::fetchAll<Folder>( ml, req, parentFolderId );
-    }
+    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
+            + " WHERE parent_id IS NULL AND is_blacklisted = 0 AND is_present = 1";
+    return DatabaseHelpers::fetchAll<Folder>( ml, req );
 }
 
 }
