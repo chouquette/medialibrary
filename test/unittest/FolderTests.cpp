@@ -433,3 +433,48 @@ TEST_F( Folders, FetchEntryPoints )
     eps = ml->entryPoints();
     ASSERT_EQ( 1u, eps.size() );
 }
+
+TEST_F( Folders, RemoveRootEntryPoint )
+{
+    auto media = ml->files();
+    ASSERT_NE( 0u, media.size() );
+
+    auto res = ml->removeEntryPoint( mock::FileSystemFactory::Root );
+    ASSERT_TRUE( res );
+
+    media = ml->files();
+    ASSERT_EQ( 0u, media.size() );
+
+    auto eps = ml->entryPoints();
+    ASSERT_EQ( 0u, eps.size() );
+}
+
+TEST_F( Folders, RemoveEntryPoint )
+{
+    auto media = ml->files();
+    ASSERT_NE( 0u, media.size() );
+
+    auto res = ml->removeEntryPoint( mock::FileSystemFactory::SubFolder );
+    ASSERT_TRUE( res );
+
+    media = ml->files();
+    ASSERT_NE( 0u, media.size() );
+
+    auto eps = ml->entryPoints();
+    ASSERT_EQ( 1u, eps.size() );
+
+    cbMock->prepareForReload();
+    ml->reload();
+    auto reloaded = cbMock->wait();
+    ASSERT_TRUE( reloaded );
+
+    // Ensure it wasn't re-discovered, ie. that it was properly blacklisted
+    auto media2 = ml->files();
+    ASSERT_EQ( media.size(), media2.size() );
+}
+
+TEST_F( Folders, RemoveNonExistantEntryPoint )
+{
+    auto res = ml->removeEntryPoint( "/sea/otter" );
+    ASSERT_FALSE( res );
+}

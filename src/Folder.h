@@ -75,6 +75,7 @@ public:
     std::shared_ptr<Folder> parent();
     int64_t deviceId() const;
     virtual bool isPresent() const override;
+    bool isRootFolder() const;
 
 private:
     enum class BannedType

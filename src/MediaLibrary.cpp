@@ -705,6 +705,30 @@ std::vector<FolderPtr> MediaLibrary::entryPoints() const
     return Folder::fetchAll<IFolder>( this, req );
 }
 
+bool MediaLibrary::removeEntryPoint( const std::string& entryPoint )
+{
+    auto folder = Folder::fromPath( this, entryPoint );
+    if ( folder == nullptr )
+    {
+        LOG_WARN( "Can't remove unknown entrypoint: ", entryPoint );
+        return false;
+    }
+    // The easy case is that this folder was directly discovered. In which case, we just
+    // have to delete it and it won't be discovered again.
+    // If it isn't, we also have to ban it to prevent it from reappearing. The Folder::banFolder
+    // method already handles the prior deletion
+    bool res;
+    if ( folder->isRootFolder() == false )
+        res = banFolder( entryPoint );
+    else
+        res = deleteFolder( *folder );
+    if ( res == false )
+        return false;
+    // Force a cache cleanup to avoid stalled media
+    Media::clear();
+    return true;
+}
+
 bool MediaLibrary::banFolder( const std::string& path )
 {
     return Folder::blacklist( this, path );

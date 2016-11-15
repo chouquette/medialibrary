@@ -261,6 +261,11 @@ bool Folder::isPresent() const
     return m_isPresent;
 }
 
+bool Folder::isRootFolder() const
+{
+    return m_parent == 0;
+}
+
 std::vector<std::shared_ptr<Folder>> Folder::fetchRootFolders( MediaLibraryPtr ml )
 {
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name

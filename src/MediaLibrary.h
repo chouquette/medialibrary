@@ -116,6 +116,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual void discover( const std::string& entryPoint ) override;
         virtual void setDiscoverNetworkEnabled( bool enabled ) override;
         virtual std::vector<FolderPtr> entryPoints() const override;
+        virtual bool removeEntryPoint( const std::string& entryPoint ) override;
         virtual bool banFolder( const std::string& path ) override;
         virtual bool unbanFolder( const std::string& path ) override;
 
