@@ -28,6 +28,7 @@ libmedialibrary_la_HEADERS = \
 	include/medialibrary/IVideoTrack.h \
 	include/medialibrary/Types.h \
 	include/medialibrary/IDeviceLister.h \
+	include/medialibrary/IFolder.h \
 	$(NULL)
 
 libmedialibrary_la_SOURCES = \
