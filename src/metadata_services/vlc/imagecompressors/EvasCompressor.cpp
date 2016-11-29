@@ -35,6 +35,7 @@ namespace medialibrary
 
 EvasCompressor::EvasCompressor()
     : m_canvas( nullptr, &evas_free )
+    , m_buffSize( 0 )
 {
     static int fakeBuffer;
 #ifndef TIZEN
@@ -56,7 +57,6 @@ EvasCompressor::EvasCompressor()
     einfo->info.func.new_update_region = NULL;
     einfo->info.func.free_update_region = NULL;
     evas_engine_info_set( m_canvas.get(), (Evas_Engine_Info *)einfo );
-    m_cropBuffer.reset( new uint8_t[ DesiredWidth * DesiredHeight * Bpp ] );
 }
 
 EvasCompressor::~EvasCompressor()
@@ -91,11 +91,18 @@ bool EvasCompressor::compress( const uint8_t* buffer, const std::string& output,
     if ( evas_obj == nullptr )
         return false;
 
+    auto buffSize = outputWidth * outputHeight * bpp();
+    if ( m_buffSize < buffSize )
+    {
+        m_cropBuffer.reset( new uint8_t[ buffSize ] );
+        m_buffSize = buffSize;
+    }
+
     auto p_buff = buffer;
     if ( outputWidth != inputWidth )
     {
         p_buff += vOffset * stride;
-        for ( auto y = 0u; y < DesiredHeight; ++y )
+        for ( auto y = 0u; y < outputHeight; ++y )
         {
             memcpy( m_cropBuffer.get() + y * outputWidth * 4, p_buff + (hOffset * 4),
                     outputWidth * 4 );
@@ -107,7 +114,7 @@ bool EvasCompressor::compress( const uint8_t* buffer, const std::string& output,
 
     evas_object_image_colorspace_set( evas_obj.get(), EVAS_COLORSPACE_ARGB8888 );
     evas_object_image_size_set( evas_obj.get(), outputWidth, outputHeight );
-    evas_object_image_data_set( evas_obj.get(), p_buff + vOffset * stride );
+    evas_object_image_data_set( evas_obj.get(), const_cast<uint8_t*>( p_buff + vOffset * stride ) );
     evas_object_image_save( evas_obj.get(), output.c_str(), NULL, "quality=100 compress=9");
     return true;
 }

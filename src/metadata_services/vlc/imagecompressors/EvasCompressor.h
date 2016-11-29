@@ -47,6 +47,7 @@ public:
 private:
     std::unique_ptr<Evas, void(*)(Evas*)> m_canvas;
     std::unique_ptr<uint8_t[]> m_cropBuffer;
+    size_t m_buffSize;
 };
 
 }
