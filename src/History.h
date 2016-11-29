@@ -50,11 +50,12 @@ class History : public IHistoryEntry, public DatabaseHelpers<History, policy::Hi
 public:
     History( MediaLibraryPtr ml, sqlite::Row& row );
     static bool createTable( DBConnection dbConnection );
-    static bool insert( DBConnection dbConn, const std::string& mrl );
+    static bool insert( DBConnection dbConn, const std::string& mrl, const std::string& title );
     static std::vector<HistoryPtr> fetch( MediaLibraryPtr ml );
     static bool clearStreams( MediaLibraryPtr ml );
 
     virtual const std::string& mrl() const override;
+    virtual const std::string& title() const override;
     virtual unsigned int insertionDate() const override;
     virtual bool isFavorite() const override;
     virtual bool setFavorite( bool isFavorite ) override;
@@ -66,6 +67,7 @@ private:
 
     int64_t m_id;
     std::string m_mrl;
+    std::string m_title;
     unsigned int m_date;
     bool m_favorite;
 

@@ -45,6 +45,7 @@ History::History( MediaLibraryPtr ml, sqlite::Row& row )
 {
     row >> m_id
         >> m_mrl
+        >> m_title
         >> m_date
         >> m_favorite;
 }
@@ -55,6 +56,7 @@ bool History::createTable( DBConnection dbConnection )
             "("
                 "id_record INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "mrl TEXT UNIQUE ON CONFLICT FAIL,"
+                "title TEXT,"
                 "insertion_date UNSIGNED INT NOT NULL DEFAULT (strftime('%s', 'now')),"
                 "favorite BOOLEAN NOT NULL DEFAULT 0"
             ")";
@@ -69,17 +71,17 @@ bool History::createTable( DBConnection dbConnection )
             sqlite::Tools::executeRequest( dbConnection, triggerReq );
 }
 
-bool History::insert( DBConnection dbConn, const std::string& mrl )
+bool History::insert( DBConnection dbConn, const std::string& mrl, const std::string& title )
 {
     History::clear();
     static const std::string req = "INSERT OR REPLACE INTO " + policy::HistoryTable::Name +
-            "(id_record, mrl, insertion_date, favorite)"
-            " SELECT id_record, mrl, strftime('%s', 'now'), favorite FROM " +
+            "(id_record, mrl, title, insertion_date, favorite)"
+            " SELECT id_record, mrl, ?, strftime('%s', 'now'), favorite FROM " +
             policy::HistoryTable::Name + " WHERE mrl = ?"
-            " UNION SELECT NULL, ?, NULL, NULL"
+            " UNION SELECT NULL, ?, ?, NULL, NULL"
             " ORDER BY id_record DESC"
             " LIMIT 1";
-    return sqlite::Tools::executeInsert( dbConn, req, mrl, mrl ) != 0;
+    return sqlite::Tools::executeInsert( dbConn, req, title, mrl, mrl, title ) != 0;
 }
 
 std::vector<HistoryPtr> History::fetch( MediaLibraryPtr ml )
@@ -103,6 +105,11 @@ bool History::clearStreams( MediaLibraryPtr ml )
 const std::string& History::mrl() const
 {
     return m_mrl;
+}
+
+const std::string& History::title() const
+{
+    return m_title;
 }
 
 unsigned int History::insertionDate() const

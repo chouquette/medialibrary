@@ -480,9 +480,9 @@ bool MediaLibrary::deletePlaylist( int64_t playlistId )
     return Playlist::destroy( this, playlistId );
 }
 
-bool MediaLibrary::addToHistory( const std::string& mrl )
+bool MediaLibrary::addToHistory( const std::string& mrl, const std::string& title )
 {
-    return History::insert( getConn(), mrl );
+    return History::insert( getConn(), mrl, title );
 }
 
 std::vector<HistoryPtr> MediaLibrary::lastStreamsPlayed() const
