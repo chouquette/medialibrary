@@ -28,6 +28,7 @@
 #include "utils/Charsets.h"
 #include "factory/IFileSystem.h"
 #include "File.h"
+#include "logging/Logger.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>

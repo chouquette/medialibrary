@@ -25,11 +25,15 @@
 #endif
 
 #include "File.h"
+#include "logging/Logger.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
 
 #include <stdexcept>
+#include <system_error>
+
+#include <windows.h>
 
 namespace medialibrary
 {
