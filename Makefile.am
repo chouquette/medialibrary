@@ -215,6 +215,7 @@ endif
 if HAVE_EVAS
 libmedialibrary_la_SOURCES += src/metadata_services/vlc/imagecompressors/EvasCompressor.cpp
 noinst_HEADERS += src/metadata_services/vlc/imagecompressors/EvasCompressor.h
+libmedialibrary_la_CPPFLAGS += $(EVAS_CFLAGS)
 else
 if HAVE_LIBJPEG
 libmedialibrary_la_SOURCES += src/metadata_services/vlc/imagecompressors/JpegCompressor.cpp
