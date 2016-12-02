@@ -192,7 +192,13 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, Artist* al
             continue;
         }
         const auto tracks = a->cachedTracks();
-        assert( tracks.size() > 0 );
+        // If there is no tracks to compare with, we just have to hope this will be the only valid
+        // album match
+        if ( tracks.size() == 0 )
+        {
+            ++it;
+            continue;
+        }
 
         auto multiDisc = false;
         for ( auto& t : tracks )
