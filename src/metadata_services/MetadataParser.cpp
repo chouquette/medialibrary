@@ -297,7 +297,7 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::find
 
     if ( task.albumArtist.empty() == true && task.artist.empty() == true )
     {
-        return {nullptr, nullptr};
+        return {m_unknownArtist, m_unknownArtist};
     }
 
     if ( task.albumArtist.empty() == false )
@@ -376,13 +376,8 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
 bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
                                std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist ) const
 {
-    if ( albumArtist == nullptr && artist == nullptr )
-        albumArtist = m_unknownArtist;
-    else
-    {
-        if ( albumArtist == nullptr )
-            albumArtist = artist;
-    }
+    if ( albumArtist == nullptr )
+        albumArtist = artist;
 
     // We might modify albumArtist later, hence handle thumbnails before.
     // If we have an albumArtist (meaning the track was properly tagged, we
