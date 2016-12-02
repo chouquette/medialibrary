@@ -122,7 +122,7 @@ bool MetadataParser::parseAudioFile( parser::Task& task ) const
         task.media->setThumbnail( task.artworkMrl );
 
     auto genre = handleGenre( task );
-    auto artists = handleArtists( task );
+    auto artists = findOrCreateArtist( task );
     auto album = handleAlbum( task, artists.first, artists.second, genre.get() );
     if ( album == nullptr )
     {
@@ -284,13 +284,12 @@ std::shared_ptr<Album> MetadataParser::handleAlbum( parser::Task& task, std::sha
 
 ///
 /// \brief MetadataParser::handleArtists Returns Artist's involved on a track
-/// \param media The track to analyze
-/// \param vlcMedia VLC's media
+/// \param task The current parser task
 /// \return A pair containing:
 /// The album artist as a first element
 /// The track artist as a second element, or nullptr if it is the same as album artist
 ///
-std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::handleArtists( parser::Task& task ) const
+std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::findOrCreateArtist( parser::Task& task ) const
 {
     std::shared_ptr<Artist> albumArtist;
     std::shared_ptr<Artist> artist;

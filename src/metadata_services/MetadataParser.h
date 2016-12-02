@@ -41,7 +41,7 @@ protected:
     std::shared_ptr<Album> findAlbum(parser::Task& task, Artist* albumArtist ) const;
     bool parseAudioFile(parser::Task& task) const;
     bool parseVideoFile(parser::Task& task) const;
-    std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> handleArtists( parser::Task& vlcMedia ) const;
+    std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> findOrCreateArtist( parser::Task& vlcMedia ) const;
     std::shared_ptr<AlbumTrack> handleTrack( std::shared_ptr<Album> album, parser::Task& task,
                                              std::shared_ptr<Artist> artist, Genre* genre ) const;
     bool link(Media& media, std::shared_ptr<Album> album, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist ) const;
