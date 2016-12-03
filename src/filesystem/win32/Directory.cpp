@@ -47,6 +47,7 @@ Directory::Directory(const std::string& path , factory::IFileSystem& fsFactory)
 
 void Directory::read() const
 {
+#if _WINNT_WIN32 < _WINNT_VISTA
     WIN32_FIND_DATA f;
     auto pattern = m_path + '*';
     auto wpattern = charset::ToWide( pattern.c_str() );
@@ -68,6 +69,62 @@ void Directory::read() const
             m_files.emplace_back( std::make_shared<File>( path ) );
     } while ( FindNextFile( h, &f ) != 0 );
     FindClose( h );
+#else
+    // We must remove the trailing /
+    // https://msdn.microsoft.com/en-us/library/windows/desktop/aa363858(v=vs.85).aspx
+    // «Do not use a trailing backslash (\), which indicates the root directory of a drive»
+    assert( *m_path.rbegin() == '\\' );
+    auto tmpPath = m_path.substr( 0, m_path.length() - 1 );
+    auto wpath = charset::ToWide( tmpPath.c_str() );
+    auto handle = CreateFile( wpath.get(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+                              FILE_FLAG_BACKUP_SEMANTICS, nullptr );
+    if ( handle == INVALID_HANDLE_VALUE )
+    {
+        LOG_ERROR( "Failed to open directory ", m_path );
+        throw std::system_error( GetLastError(), std::generic_category(), "Failed to open directory" );
+    }
+
+    std::unique_ptr<typename std::remove_pointer<HANDLE>::type,
+            decltype(&CloseHandle)> handlePtr( handle, &CloseHandle );
+
+    // Allocating a 32 bytes buffer to contain the file name. If more is required, we'll allocate
+    size_t buffSize = sizeof( FILE_FULL_DIR_INFO ) + 32;
+    std::unique_ptr<FILE_FULL_DIR_INFO, void(*)(FILE_FULL_DIR_INFO*)> dirInfo(
+                reinterpret_cast<FILE_FULL_DIR_INFO*>( malloc( buffSize ) ),
+                [](FILE_FULL_DIR_INFO* ptr) { free( ptr ); } );
+    if ( dirInfo == nullptr )
+        throw std::bad_alloc();
+
+    while ( true )
+    {
+        auto h = GetFileInformationByHandleEx( handle, FileFullDirectoryInfo, dirInfo.get(), buffSize );
+        if ( h == 0 )
+        {
+            auto error = GetLastError();
+            if ( error == ERROR_FILE_NOT_FOUND )
+                break;
+            else if ( error == ERROR_MORE_DATA )
+            {
+                buffSize *= 2;
+                dirInfo.reset( reinterpret_cast<FILE_FULL_DIR_INFO*>( malloc( buffSize ) ) );
+                if ( dirInfo == nullptr )
+                    throw std::bad_alloc();
+                continue;
+            }
+            LOG_ERROR( "Failed to browse ", m_path, ". GetLastError(): ", GetLastError() );
+            throw std::system_error( GetLastError(), std::generic_category(), "Failed to browse through directory" );
+        }
+
+        auto file = charset::FromWide( dirInfo->FileName );
+        if ( file[0] == '.' )
+            continue;
+        auto path = m_path + file.get();
+        if ( ( dirInfo->FileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
+            m_dirs.emplace_back( m_fsFactory.createDirectory( path ) );
+        else
+            m_files.emplace_back( std::make_shared<File>( path ) );
+    }
+#endif
 }
 
 std::string Directory::toAbsolute( const std::string& path )
