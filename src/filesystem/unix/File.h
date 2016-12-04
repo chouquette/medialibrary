@@ -38,9 +38,11 @@ public:
     explicit File( const std::string& filePath, const struct stat& s );
 
     virtual unsigned int lastModificationDate() const override;
+    virtual unsigned int size() const override;
 
 private:
     unsigned int m_lastModificationDate;
+    unsigned int m_size;
 };
 
 }

@@ -33,6 +33,7 @@ class NetworkFile : public CommonFile
 public:
     NetworkFile( const std::string& filePath );
     virtual unsigned int lastModificationDate() const override;
+    virtual unsigned int size() const override;
 };
 }
 }

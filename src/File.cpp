@@ -44,6 +44,7 @@ File::File( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_mrl
         >> m_type
         >> m_lastModificationDate
+        >> m_size
         >> m_isParsed
         >> m_folderId
         >> m_isPresent
@@ -57,6 +58,7 @@ File::File( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& fil
     , m_mrl( isRemovable == true ? file.name() : file.fullPath() )
     , m_type( type )
     , m_lastModificationDate( file.lastModificationDate() )
+    , m_size( file.size() )
     , m_isParsed( false )
     , m_folderId( folderId )
     , m_isPresent( true )
@@ -92,6 +94,11 @@ IFile::Type File::type() const
 unsigned int File::lastModificationDate() const
 {
     return m_lastModificationDate;
+}
+
+unsigned int File::size() const
+{
+    return m_size;
 }
 
 bool File::isParsed() const
@@ -132,6 +139,7 @@ bool File::createTable( DBConnection dbConnection )
             "mrl TEXT,"
             "type UNSIGNED INTEGER,"
             "last_modification_date UNSIGNED INT,"
+            "size UNSIGNED INT,"
             "parsed BOOLEAN NOT NULL DEFAULT 0,"
             "folder_id UNSIGNED INTEGER,"
             "is_present BOOLEAN NOT NULL DEFAULT 1,"
@@ -158,10 +166,10 @@ std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, Type ty
 {
     auto self = std::make_shared<File>( ml, mediaId, type, fileFs, folderId, isRemovable );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
-            "(media_id, mrl, type, folder_id, last_modification_date, is_removable) VALUES(?, ?, ?, ?, ?, ?)";
+            "(media_id, mrl, type, folder_id, last_modification_date, size, is_removable) VALUES(?, ?, ?, ?, ?, ?, ?)";
 
     if ( insert( ml, self, req, mediaId, self->m_mrl, type, sqlite::ForeignKey( folderId ),
-                         self->m_lastModificationDate, isRemovable ) == false )
+                         self->m_lastModificationDate, self->m_size, isRemovable ) == false )
         return nullptr;
     self->m_fullPath = fileFs.fullPath();
     return self;

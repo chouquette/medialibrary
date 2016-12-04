@@ -38,7 +38,8 @@ public:
     unsigned int lastModificationDate() const override;
 
 private:
-    mutable unsigned int m_lastModificationDate;
+    unsigned int m_lastModificationDate;
+    unsigned int m_size;
 };
 
 }

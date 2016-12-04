@@ -41,6 +41,7 @@ namespace fs
         virtual const std::string& fullPath() const = 0;
         virtual const std::string& extension() const = 0;
         virtual unsigned int lastModificationDate() const = 0;
+        virtual unsigned int size() const = 0;
     };
 }
 

@@ -42,6 +42,7 @@ public:
     virtual const std::string& fullPath() const override;
     virtual const std::string& extension() const override;
     virtual unsigned int lastModificationDate() const override;
+    virtual unsigned int size() const override;
     void markAsModified();
 
 private:

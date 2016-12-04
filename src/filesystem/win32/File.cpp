@@ -44,21 +44,19 @@ namespace fs
 File::File( const std::string &filePath )
     : CommonFile( filePath )
 {
+    struct _stat s;
+    if ( _stat( m_fullPath.c_str(), &s ) != 0 )
+    {
+        LOG_ERROR( "Failed to get ", m_fullPath, " stats" );
+        throw std::system_error( GetLastError(), std::generic_category(), "Failed to get stats" );
+    }
+
+    m_lastModificationDate = s.st_mtime;
+    m_size = s.st_size;
 }
 
 unsigned int File::lastModificationDate() const
 {
-    if ( m_lastModificationDate == 0 )
-    {
-        struct _stat s;
-        if ( _stat( m_fullPath.c_str(), &s ) != 0 )
-        {
-            LOG_ERROR( "Failed to get ", m_fullPath, " stats" );
-            throw std::system_error( GetLastError(), std::generic_category(), "Failed to get stats" );
-        }
-
-        m_lastModificationDate = s.st_mtime;
-    }
     return m_lastModificationDate;
 }
 

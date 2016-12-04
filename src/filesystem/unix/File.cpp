@@ -39,11 +39,17 @@ File::File( const std::string& filePath, const struct stat& s )
     : CommonFile( filePath )
 {
     m_lastModificationDate = s.st_mtime;
+    m_size = s.st_size;
 }
 
 unsigned int File::lastModificationDate() const
 {
     return m_lastModificationDate;
+}
+
+unsigned int File::size() const
+{
+    return m_size;
 }
 
 }

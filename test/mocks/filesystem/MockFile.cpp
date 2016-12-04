@@ -70,4 +70,9 @@ unsigned int File::lastModificationDate() const
     return m_lastModification;
 }
 
+unsigned int File::size() const
+{
+    return 0;
+}
+
 }

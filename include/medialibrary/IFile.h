@@ -55,6 +55,7 @@ public:
     virtual const std::string& mrl() const = 0;
     virtual Type type() const = 0;
     virtual unsigned int lastModificationDate() const = 0;
+    virtual unsigned int size() const = 0;
 };
 
 }
