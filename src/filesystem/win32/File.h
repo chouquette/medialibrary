@@ -36,6 +36,7 @@ public:
     File( const std::string& filePath );
 
     unsigned int lastModificationDate() const override;
+    unsigned int size() const override;
 
 private:
     unsigned int m_lastModificationDate;

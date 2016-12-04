@@ -60,6 +60,11 @@ unsigned int File::lastModificationDate() const
     return m_lastModificationDate;
 }
 
+unsigned int File::size() const
+{
+    return m_size;
+}
+
 }
 
 }
