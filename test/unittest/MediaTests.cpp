@@ -411,6 +411,21 @@ TEST_F( Medias, SortByFileSize )
     ASSERT_EQ( m1->id(), media[0]->id() );
 }
 
+TEST_F( Medias, SetType )
+{
+    auto m1 = ml->addFile( "media1.mp3" );
+    ASSERT_EQ( IMedia::Type::AudioType, m1->type() );
+
+    m1->setType( IMedia::Type::VideoType );
+    m1->save();
+
+    ASSERT_EQ( IMedia::Type::VideoType, m1->type() );
+
+    Reload();
+
+    auto m2 = ml->media( m1->id() );
+    ASSERT_EQ( IMedia::Type::VideoType, m2->type() );
+}
 
 class FetchMedia : public Tests
 {

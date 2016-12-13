@@ -416,7 +416,7 @@ IMedia::SubType Media::subType() const
 
 void Media::setType( Type type )
 {
-    if ( m_type != type )
+    if ( m_type == type )
         return;
     m_type = type;
     m_changed = true;
