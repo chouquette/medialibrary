@@ -77,6 +77,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
     media->setDuration( duration );
     if ( media->save() == false )
         return parser::Task::Status::Error;
+    m_notifier->notifyMediaCreation( media );
     return parser::Task::Status::Success;
 }
 

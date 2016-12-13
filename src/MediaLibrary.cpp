@@ -349,7 +349,6 @@ std::shared_ptr<Media> MediaLibrary::addFile( const fs::IFile& fileFs, Folder& p
         Media::destroy( this, mptr->id() );
         return nullptr;
     }
-    m_modificationNotifier->notifyMediaCreation( mptr );
     if ( m_parser != nullptr )
         m_parser->parse( mptr, file );
     return mptr;
