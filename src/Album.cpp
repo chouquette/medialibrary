@@ -55,12 +55,13 @@ Album::Album(MediaLibraryPtr ml, sqlite::Row& row)
         >> m_isPresent;
 }
 
-Album::Album( MediaLibraryPtr ml, const std::string& title )
+Album::Album( MediaLibraryPtr ml, const std::string& title, const std::string& artworkMrl )
     : m_ml( ml )
     , m_id( 0 )
     , m_title( title )
     , m_artistId( 0 )
     , m_releaseYear( ~0u )
+    , m_artworkMrl( artworkMrl )
     , m_nbTracks( 0 )
     , m_duration( 0 )
     , m_isPresent( true )
@@ -410,12 +411,12 @@ bool Album::createTriggers(DBConnection dbConnection)
             sqlite::Tools::executeRequest( dbConnection, vtriggerDelete );
 }
 
-std::shared_ptr<Album> Album::create( MediaLibraryPtr ml, const std::string& title )
+std::shared_ptr<Album> Album::create( MediaLibraryPtr ml, const std::string& title, const std::string& artworkMrl )
 {
-    auto album = std::make_shared<Album>( ml, title );
+    auto album = std::make_shared<Album>( ml, title, artworkMrl );
     static const std::string req = "INSERT INTO " + policy::AlbumTable::Name +
-            "(id_album, title) VALUES(NULL, ?)";
-    if ( insert( ml, album, req, title ) == false )
+            "(id_album, title, artwork_mrl) VALUES(NULL, ?, ?)";
+    if ( insert( ml, album, req, title, artworkMrl ) == false )
         return nullptr;
     return album;
 }

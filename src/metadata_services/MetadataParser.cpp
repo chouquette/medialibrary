@@ -128,11 +128,9 @@ bool MetadataParser::parseAudioFile( parser::Task& task ) const
     auto t = m_ml->getConn()->newTransaction();
     if ( album == nullptr )
     {
-        album = m_ml->createAlbum( task.albumName );
+        album = m_ml->createAlbum( task.albumName, task.artworkMrl );
         if ( album == nullptr )
             return false;
-        if ( task.artworkMrl.length() != 0 )
-            album->setArtworkMrl( task.artworkMrl );
         m_notifier->notifyAlbumCreation( album );
     }
     // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist

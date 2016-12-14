@@ -54,7 +54,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
 {
     public:
         Album( MediaLibraryPtr ml, sqlite::Row& row );
-        Album( MediaLibraryPtr ml, const std::string& title );
+        Album( MediaLibraryPtr ml, const std::string& title, const std::string& artworkMrl );
         Album( MediaLibraryPtr ml, const Artist* artist );
 
         virtual int64_t id() const override;
@@ -100,7 +100,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
 
         static bool createTable( DBConnection dbConnection );
         static bool createTriggers( DBConnection dbConnection );
-        static std::shared_ptr<Album> create( MediaLibraryPtr ml, const std::string& title );
+        static std::shared_ptr<Album> create( MediaLibraryPtr ml, const std::string& title, const std::string& artworkMrl );
         static std::shared_ptr<Album> createUnknownAlbum( MediaLibraryPtr ml, const Artist* artist );
         ///
         /// \brief search search for an album, through its albumartist or title
