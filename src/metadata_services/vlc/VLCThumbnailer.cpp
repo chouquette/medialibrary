@@ -31,6 +31,7 @@
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
 #include "utils/VLCInstance.h"
+#include "utils/ModificationsNotifier.h"
 
 #ifdef HAVE_JPEG
 #include "imagecompressors/JpegCompressor.h"
@@ -249,6 +250,7 @@ parser::Task::Status VLCThumbnailer::compress( std::shared_ptr<Media> media, std
     LOG_INFO( "Done generating ", file->mrl(), " thumbnail" );
     if ( media->save() == false )
         return parser::Task::Status::Error;
+    m_notifier->notifyMediaModification( media );
     return parser::Task::Status::Success;
 }
 

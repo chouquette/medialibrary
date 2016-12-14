@@ -31,7 +31,6 @@
 #include "medialibrary/IMediaLibrary.h"
 #include "Media.h"
 #include "File.h"
-#include "utils/ModificationsNotifier.h"
 
 namespace medialibrary
 {
@@ -141,11 +140,6 @@ void Parser::done( std::unique_ptr<parser::Task> t, parser::Task::Status status 
         return;
     }
     updateStats();
-
-    if ( status == parser::Task::Status::Success )
-    {
-        m_notifier->notifyMediaModification( t->media );
-    }
 
     if ( serviceIdx == m_services.size() )
     {
