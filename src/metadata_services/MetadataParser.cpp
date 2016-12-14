@@ -52,7 +52,8 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
     auto& media = task.media;
 
     auto t = m_ml->getConn()->newTransaction();
-    bool isAudio = task.videoTracks.empty();
+    // Some media (ogg/ts, most likely) won't have visible tracks, but shouldn't be considered audio files.
+    bool isAudio = task.videoTracks.empty() && task.audioTracks.empty() == false;
     for ( const auto& t : task.videoTracks )
     {
         media->addVideoTrack( t.fcc, t.width, t.height, t.fps, t.language, t.description );
