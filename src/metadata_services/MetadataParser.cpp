@@ -124,13 +124,21 @@ bool MetadataParser::parseAudioFile( parser::Task& task ) const
 
     auto genre = handleGenre( task );
     auto artists = findOrCreateArtist( task );
-    auto album = handleAlbum( task, artists.first, artists.second, genre.get() );
+    auto album = findAlbum( task, artists.first, artists.second );
+    auto t = m_ml->getConn()->newTransaction();
     if ( album == nullptr )
     {
-        LOG_WARN( "Failed to get/create associated album" );
-        return false;
+        album = m_ml->createAlbum( task.albumName );
+        if ( album == nullptr )
+            return false;
+        if ( task.artworkMrl.length() != 0 )
+            album->setArtworkMrl( task.artworkMrl );
+        m_notifier->notifyAlbumCreation( album );
     }
-    auto t = m_ml->getConn()->newTransaction();
+    // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist
+    auto track = handleTrack( album, task, artists.second ? artists.second :
+                            (artists.first ? artists.first : m_unknownArtist), genre.get() );
+
     auto res = link( *task.media, album, artists.first, artists.second );
     t->commit();
     return res;
@@ -151,8 +159,27 @@ std::shared_ptr<Genre> MetadataParser::handleGenre( parser::Task& task ) const
 }
 
 /* Album handling */
-std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, Artist* albumArtist ) const
+
+std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::shared_ptr<Artist> albumArtist,
+                                                    std::shared_ptr<Artist> trackArtist ) const
 {
+    std::shared_ptr<Album> album;
+    std::shared_ptr<Artist> artist = albumArtist;
+    if ( artist == nullptr )
+    {
+        if ( trackArtist != nullptr )
+            artist = trackArtist;
+        else
+        {
+            artist = m_unknownArtist;
+        }
+    }
+
+    if ( task.albumName.empty() == true )
+        return album = artist->unknownAlbum();
+
+    // Album matching depends on the difference between artist & album artist.
+    // Specificaly pass the albumArtist here.
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
             " WHERE title = ?";
     auto albums = Album::fetchAll<Album>( m_ml, req, task.albumName );
@@ -165,7 +192,7 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, Artist* al
      * For instance, if we have already inserted an album "A" by an artist "john"
      * but we are now trying to handle an album "A" by an artist "doe", not filtering
      * candidates would yield the only "A" album we know, while we should return
-     * nullptr, so handleAlbum can create a new one.
+     * nullptr, so the link() method can create a new one.
      */
     for ( auto it = begin( albums ); it != end( albums ); )
     {
@@ -245,48 +272,6 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, Artist* al
         LOG_WARN( "Multiple candidates for album ", task.albumName, ". Selecting first one out of luck" );
     }
     return std::static_pointer_cast<Album>( albums[0] );
-}
-
-std::shared_ptr<Album> MetadataParser::handleAlbum( parser::Task& task, std::shared_ptr<Artist> albumArtist,
-                                                    std::shared_ptr<Artist> trackArtist, Genre* genre ) const
-{
-    std::shared_ptr<Album> album;
-    std::shared_ptr<Artist> artist = albumArtist;
-    if ( artist == nullptr )
-    {
-        if ( trackArtist != nullptr )
-            artist = trackArtist;
-        else
-        {
-            artist = m_unknownArtist;
-        }
-    }
-
-    if ( task.albumName.length() > 0 )
-    {
-        // Album matching depends on the difference between artist & album artist.
-        // Specificaly pass the albumArtist here.
-        album = findAlbum( task, albumArtist.get() );
-
-        if ( album == nullptr )
-        {
-            album = m_ml->createAlbum( task.albumName );
-            if ( album != nullptr )
-            {
-                if ( task.artworkMrl.length() != 0 )
-                    album->setArtworkMrl( task.artworkMrl );
-            }
-            m_notifier->notifyAlbumCreation( album );
-        }
-    }
-    else
-        album = artist->unknownAlbum();
-
-    if ( album == nullptr )
-        return nullptr;
-    // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist
-    auto track = handleTrack( album, task, trackArtist ? trackArtist : artist, genre );
-    return album;
 }
 
 ///
