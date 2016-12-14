@@ -163,20 +163,15 @@ std::shared_ptr<Genre> MetadataParser::handleGenre( parser::Task& task ) const
 std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::shared_ptr<Artist> albumArtist,
                                                     std::shared_ptr<Artist> trackArtist ) const
 {
-    std::shared_ptr<Album> album;
-    std::shared_ptr<Artist> artist = albumArtist;
-    if ( artist == nullptr )
-    {
-        if ( trackArtist != nullptr )
-            artist = trackArtist;
-        else
-        {
-            artist = m_unknownArtist;
-        }
-    }
-
     if ( task.albumName.empty() == true )
-        return album = artist->unknownAlbum();
+    {
+        std::shared_ptr<Artist> artist = albumArtist;
+        if ( albumArtist != nullptr )
+            return albumArtist->unknownAlbum();
+        else if ( trackArtist != nullptr )
+            return trackArtist->unknownAlbum();
+        return m_unknownArtist->unknownAlbum();
+    }
 
     // Album matching depends on the difference between artist & album artist.
     // Specificaly pass the albumArtist here.
