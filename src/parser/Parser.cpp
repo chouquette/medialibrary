@@ -38,7 +38,6 @@ namespace medialibrary
 Parser::Parser( MediaLibrary* ml )
     : m_ml( ml )
     , m_callback( ml->getCb() )
-    , m_notifier( ml->getNotifier() )
     , m_opToDo( 0 )
     , m_opDone( 0 )
     , m_percent( 0 )
