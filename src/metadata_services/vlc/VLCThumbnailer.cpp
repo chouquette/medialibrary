@@ -119,20 +119,25 @@ parser::Task::Status VLCThumbnailer::startPlayback( VLC::MediaPlayer &mp )
     // Use a copy of the event manager to automatically unregister all events as soon
     // as we leave this method.
     auto em = mp.eventManager();
-    em.onPlaying([this]() {
-        m_cond.notify_all();
+    bool hasVideoTrack = false;
+    em.onESAdded([this, &hasVideoTrack]( libvlc_track_type_t type, int ) {
+        if ( type == libvlc_track_video )
+        {
+            m_cond.notify_all();
+            hasVideoTrack = true;
+        }
     });
     em.onEncounteredError([this]() {
         m_cond.notify_all();
     });
+
     std::unique_lock<compat::Mutex> lock( m_mutex );
     mp.play();
-    bool success = m_cond.wait_for( lock, std::chrono::seconds( 3 ), [&mp]() {
+    bool success = m_cond.wait_for( lock, std::chrono::seconds( 1 ), [&mp, &hasVideoTrack]() {
         auto s = mp.state();
-        return s == libvlc_Playing || s == libvlc_Error || s == libvlc_Ended;
+        return s == libvlc_Error || s == libvlc_Ended || hasVideoTrack == true;
     });
-    auto s = mp.state();
-    if ( success == false || s == libvlc_Error || s == libvlc_Ended )
+    if ( success == false || hasVideoTrack == false )
     {
         // In case of timeout or error, don't go any further
         return parser::Task::Status::Error;
