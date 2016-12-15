@@ -62,7 +62,7 @@ void Directory::read() const
 
     while ( ( result = readdir( dir.get() ) ) != nullptr )
     {
-        if ( result->d_name == nullptr || result->d_name[0] == '.' )
+        if ( result->d_name[0] == '.' )
             continue;
 
         std::string path = m_path + "/" + result->d_name;
