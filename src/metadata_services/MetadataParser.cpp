@@ -121,10 +121,10 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
 
     auto t = m_ml->getConn()->newTransaction();
     if ( media->save() == false )
-        return parser::Task::Status::Error;
+        return parser::Task::Status::Fatal;
     task.file->markStepCompleted( File::ParserStep::MetadataAnalysis );
     if ( task.file->saveParserStep() == false )
-        return parser::Task::Status::Error;
+        return parser::Task::Status::Fatal;
     t->commit();
     m_notifier->notifyMediaCreation( media );
     return parser::Task::Status::Success;

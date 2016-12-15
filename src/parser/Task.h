@@ -45,9 +45,6 @@ struct Task
         Unknown,
         /// All good
         Success,
-        /// Something failed, but it's not critical (For instance, no internet connection for a
-        /// module that uses an online database)
-        Error,
         /// We can't compute this file for now (for instance the file was on a network drive which
         /// isn't connected anymore)
         TemporaryUnavailable,

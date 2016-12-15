@@ -163,7 +163,7 @@ parser::Task::Status VLCThumbnailer::startPlayback( parser::Task& task, VLC::Med
         // We still return an error since we don't want to attempt the thumbnail generation for a
         // file without video tracks
     }
-    return parser::Task::Status::Error;
+    return parser::Task::Status::Fatal;
 }
 
 parser::Task::Status VLCThumbnailer::seekAhead( VLC::MediaPlayer& mp )
@@ -182,7 +182,7 @@ parser::Task::Status VLCThumbnailer::seekAhead( VLC::MediaPlayer& mp )
     // Since we're locking a mutex for each position changed, let's unregister ASAP
     event->unregister();
     if ( success == false )
-        return parser::Task::Status::Error;
+        return parser::Task::Status::Fatal;
     return parser::Task::Status::Success;
 }
 
@@ -251,7 +251,7 @@ parser::Task::Status VLCThumbnailer::takeThumbnail( std::shared_ptr<Media> media
         if ( success == false )
         {
             LOG_WARN( "Timed out while computing ", file->mrl(), " snapshot" );
-            return parser::Task::Status::Error;
+            return parser::Task::Status::Fatal;
         }
     }
     mp.stop();
@@ -275,10 +275,10 @@ parser::Task::Status VLCThumbnailer::compress( std::shared_ptr<Media> media, std
     LOG_INFO( "Done generating ", file->mrl(), " thumbnail" );
     auto t = m_ml->getConn()->newTransaction();
     if ( media->save() == false )
-        return parser::Task::Status::Error;
+        return parser::Task::Status::Fatal;
     file->markStepCompleted( File::ParserStep::Thumbnailer );
     if ( file->saveParserStep() == false )
-        return parser::Task::Status::Error;
+        return parser::Task::Status::Fatal;
     t->commit();
     m_notifier->notifyMediaModification( media );
     return parser::Task::Status::Success;
