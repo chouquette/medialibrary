@@ -77,7 +77,13 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
     // thumbnailer. Since it starts an actual playback, it will have more information.
     // Since the metadata steps won't be marked, it will run again once the thumbnailer has completed.
     if ( tracks.empty() == true )
-        return parser::Task::Status::Success;
+    {
+        // However, if the file is not unknown anymore, it means the thumbnailer has already processed it
+        if ( task.media->type() == Media::Type::UnknownType )
+            return parser::Task::Status::Success;
+        // In that case, stop trying to do something with this file.
+        return parser::Task::Status::Fatal;
+    }
 
     bool isAudio = true;
     {
