@@ -28,6 +28,7 @@
 #include <mutex>
 
 #include "parser/ParserService.h"
+#include "parser/Parser.h"
 #include "AlbumTrack.h"
 
 namespace medialibrary
@@ -42,6 +43,7 @@ private:
         virtual parser::Task::Status run( parser::Task& task ) override;
         virtual const char* name() const override;
         virtual uint8_t nbThreads() const override;
+        virtual File::ParserStep step() const override;
         void storeMeta(parser::Task& task, VLC::Media& vlcMedia );
         int toInt(VLC::Media& vlcMedia, libvlc_meta_t meta, const char* name );
 

@@ -45,7 +45,7 @@ File::File( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_type
         >> m_lastModificationDate
         >> m_size
-        >> m_isParsed
+        >> m_parserSteps
         >> m_folderId
         >> m_isPresent
         >> m_isRemovable;
@@ -59,7 +59,7 @@ File::File( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& fil
     , m_type( type )
     , m_lastModificationDate( file.lastModificationDate() )
     , m_size( file.size() )
-    , m_isParsed( false )
+    , m_parserSteps( ParserStep::None )
     , m_folderId( folderId )
     , m_isPresent( true )
     , m_isRemovable( isRemovable )
@@ -101,9 +101,23 @@ unsigned int File::size() const
     return m_size;
 }
 
-bool File::isParsed() const
+void File::markStepCompleted( ParserStep step )
 {
-    return m_isParsed;
+    m_parserSteps = static_cast<ParserStep>( static_cast<uint8_t>( m_parserSteps ) |
+                                             static_cast<uint8_t>( step ) );
+}
+
+bool File::saveParserStep()
+{
+    static const std::string req = "UPDATE " + policy::FileTable::Name + " SET parser_step = ? WHERE id_file = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_parserSteps, m_id ) == false )
+        return false;
+    return true;
+}
+
+File::ParserStep File::parserStep() const
+{
+    return m_parserSteps;
 }
 
 std::shared_ptr<Media> File::media() const
@@ -121,16 +135,6 @@ bool File::destroy()
     return DatabaseHelpers::destroy( m_ml, m_id );
 }
 
-void File::markParsed()
-{
-    if ( m_isParsed == true )
-        return;
-    static const std::string req = "UPDATE " + policy::FileTable::Name + " SET parsed = 1 WHERE id_file = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id ) == false )
-        return;
-    m_isParsed = true;
-}
-
 bool File::createTable( DBConnection dbConnection )
 {
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::FileTable::Name + "("
@@ -140,7 +144,7 @@ bool File::createTable( DBConnection dbConnection )
             "type UNSIGNED INTEGER,"
             "last_modification_date UNSIGNED INT,"
             "size UNSIGNED INT,"
-            "parsed BOOLEAN NOT NULL DEFAULT 0,"
+            "parser_step INTEGER NOT NULL DEFAULT 0,"
             "folder_id UNSIGNED INTEGER,"
             "is_present BOOLEAN NOT NULL DEFAULT 1,"
             "is_removable BOOLEAN NOT NULL,"

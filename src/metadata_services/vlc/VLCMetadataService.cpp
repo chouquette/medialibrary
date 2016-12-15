@@ -45,12 +45,6 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
 {
     auto media = task.media;
     auto file = task.file;
-    // FIXME: This is now becomming an invalid predicate
-    if ( media->duration() != -1 )
-    {
-        LOG_INFO( file->mrl(), " was already parsed" );
-        return parser::Task::Status::Success;
-    }
 
     LOG_INFO( "Parsing ", file->mrl() );
     auto chrono = std::chrono::steady_clock::now();
@@ -99,6 +93,9 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
     storeMeta( task, vlcMedia );
     auto duration = std::chrono::steady_clock::now() - chrono;
     LOG_DEBUG("VLC parsing done in ", std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
+    // Don't save the file parsing step yet, since all data are just in memory. Just mark
+    // the extraction as done.
+    task.file->markStepCompleted( File::ParserStep::MetadataExtraction );
     return parser::Task::Status::Success;
 }
 
@@ -110,6 +107,11 @@ const char* VLCMetadataService::name() const
 uint8_t VLCMetadataService::nbThreads() const
 {
     return 1;
+}
+
+File::ParserStep VLCMetadataService::step() const
+{
+    return File::ParserStep::MetadataExtraction;
 }
 
 void VLCMetadataService::storeMeta( parser::Task& task, VLC::Media& vlcMedia )

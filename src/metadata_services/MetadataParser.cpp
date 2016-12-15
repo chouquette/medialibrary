@@ -51,19 +51,21 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
 {
     auto& media = task.media;
 
-    auto t = m_ml->getConn()->newTransaction();
-    // Some media (ogg/ts, most likely) won't have visible tracks, but shouldn't be considered audio files.
     bool isAudio = task.videoTracks.empty() && task.audioTracks.empty() == false;
-    for ( const auto& t : task.videoTracks )
     {
-        media->addVideoTrack( t.fcc, t.width, t.height, t.fps, t.language, t.description );
+        auto t = m_ml->getConn()->newTransaction();
+        // Some media (ogg/ts, most likely) won't have visible tracks, but shouldn't be considered audio files.
+        for ( const auto& t : task.videoTracks )
+        {
+            media->addVideoTrack( t.fcc, t.width, t.height, t.fps, t.language, t.description );
+        }
+        for ( const auto& t : task.audioTracks )
+        {
+            media->addAudioTrack( t.fcc, t.bitrate, t.samplerate, t.nbChannels,
+                                  t.language, t.description );
+        }
+        t->commit();
     }
-    for ( const auto& t : task.audioTracks )
-    {
-        media->addAudioTrack( t.fcc, t.bitrate, t.samplerate, t.nbChannels,
-                              t.language, t.description );
-    }
-    t->commit();
     if ( isAudio == true )
     {
         if ( parseAudioFile( task ) == false )
@@ -76,8 +78,14 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
     }
     auto duration = task.duration;
     media->setDuration( duration );
+
+    auto t = m_ml->getConn()->newTransaction();
     if ( media->save() == false )
         return parser::Task::Status::Error;
+    task.file->markStepCompleted( File::ParserStep::MetadataAnalysis );
+    if ( task.file->saveParserStep() == false )
+        return parser::Task::Status::Error;
+    t->commit();
     m_notifier->notifyMediaCreation( media );
     return parser::Task::Status::Success;
 }
@@ -426,6 +434,11 @@ uint8_t MetadataParser::nbThreads() const
 //    return nbProcs;
     // Let's make this code thread-safe first :)
     return 1;
+}
+
+File::ParserStep MetadataParser::step() const
+{
+    return File::ParserStep::MetadataAnalysis;
 }
 
 }

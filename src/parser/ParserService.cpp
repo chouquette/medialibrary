@@ -143,6 +143,12 @@ void ParserService::mainloop()
             task = std::move( m_tasks.front() );
             m_tasks.pop();
         }
+        if ( ( static_cast<uint8_t>( task->file->parserStep() ) &
+               static_cast<uint8_t>( step() ) ) != 0 )
+        {
+            m_parserCb->done( std::move( task ), parser::Task::Status::Success );
+            continue;
+        }
         parser::Task::Status status;
         try
         {

@@ -102,8 +102,8 @@ void Parser::restore()
         return;
 
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
-            + " WHERE parsed = 0 AND is_present = 1";
-    auto files = File::fetchAll<File>( m_ml, req );
+            + " WHERE parser_step != ? AND is_present = 1";
+    auto files = File::fetchAll<File>( m_ml, req, File::ParserStep::Completed );
 
     for ( auto& f : files )
     {
@@ -141,11 +141,8 @@ void Parser::done( std::unique_ptr<parser::Task> t, parser::Task::Status status 
     }
     updateStats();
 
-    if ( serviceIdx == m_services.size() )
-    {
-        t->file->markParsed();
+    if ( t->file->parserStep() == File::ParserStep::Completed )
         return;
-    }
     m_services[serviceIdx]->parse( std::move( t ) );
 }
 

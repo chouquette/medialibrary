@@ -63,6 +63,11 @@ bool VLCThumbnailer::initialize()
     return true;
 }
 
+File::ParserStep VLCThumbnailer::step() const
+{
+    return File::ParserStep::Thumbnailer;
+}
+
 parser::Task::Status VLCThumbnailer::run( parser::Task& task )
 {
     auto media = task.media;
@@ -78,11 +83,8 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     else if ( media->type() != IMedia::Type::VideoType )
     {
         // There's no point in generating a thumbnail for a non-video media.
-        return parser::Task::Status::Success;
-    }
-    else if ( media->thumbnail().empty() == false )
-    {
-        LOG_INFO(media->thumbnail(), " already has a thumbnail" );
+        task.file->markStepCompleted( File::ParserStep::Thumbnailer );
+        task.file->saveParserStep();
         return parser::Task::Status::Success;
     }
 
@@ -248,8 +250,13 @@ parser::Task::Status VLCThumbnailer::compress( std::shared_ptr<Media> media, std
 
     media->setThumbnail( path );
     LOG_INFO( "Done generating ", file->mrl(), " thumbnail" );
+    auto t = m_ml->getConn()->newTransaction();
     if ( media->save() == false )
         return parser::Task::Status::Error;
+    file->markStepCompleted( File::ParserStep::Thumbnailer );
+    if ( file->saveParserStep() == false )
+        return parser::Task::Status::Error;
+    t->commit();
     m_notifier->notifyMediaModification( media );
     return parser::Task::Status::Success;
 }

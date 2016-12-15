@@ -27,6 +27,7 @@
 #include "database/SqliteConnection.h"
 #include "filesystem/IFile.h"
 #include "utils/Cache.h"
+#include "parser/Parser.h"
 
 namespace medialibrary
 {
@@ -47,6 +48,16 @@ struct FileTable
 class File : public IFile, public DatabaseHelpers<File, policy::FileTable>
 {
 public:
+    enum class ParserStep : uint8_t
+    {
+        None = 0,
+        MetadataExtraction = 1,
+        MetadataAnalysis = 2,
+        Thumbnailer = 4,
+
+        Completed = 1 | 2 | 4,
+    };
+
     File( MediaLibraryPtr ml, sqlite::Row& row );
     File( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& file, int64_t folderId, bool isRemovable );
     virtual int64_t id() const override;
@@ -54,11 +65,16 @@ public:
     virtual Type type() const override;
     virtual unsigned int lastModificationDate() const override;
     virtual unsigned int size() const override;
-    /// Explicitely mark a media as fully parsed, meaning no metadata service needs to run anymore.
-    //FIXME: This lacks granularity as we don't have a straight forward way to know which service
-    //needs to run or not.
-    void markParsed();
-    bool isParsed() const;
+    /*
+     * We need to decouple the current parser state and the saved one.
+     * For instance, metadata extraction won't save anything in DB, so while
+     * we might want to know that it's been processed and metadata have been
+     * extracted, in case we were to restart the parsing, we would need to
+     * extract the same information again
+     */
+    void markStepCompleted( ParserStep step );
+    bool saveParserStep();
+    ParserStep parserStep() const;
     std::shared_ptr<Media> media() const;
     bool destroy();
 
@@ -90,7 +106,7 @@ private:
     Type m_type;
     unsigned int m_lastModificationDate;
     unsigned int m_size;
-    bool m_isParsed;
+    ParserStep m_parserSteps;
     int64_t m_folderId;
     bool m_isPresent;
     bool m_isRemovable;
