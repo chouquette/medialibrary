@@ -31,6 +31,7 @@
 #include "medialibrary/IMediaLibrary.h"
 #include "Media.h"
 #include "File.h"
+#include "ParserService.h"
 
 namespace medialibrary
 {

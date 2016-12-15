@@ -25,12 +25,13 @@
 #include <memory>
 #include <queue>
 
-#include "ParserService.h"
-
 #include "File.h"
+#include "Task.h"
 
 namespace medialibrary
 {
+
+class ParserService;
 
 // Use an interface to expose only the "done" method
 class IParserCb
