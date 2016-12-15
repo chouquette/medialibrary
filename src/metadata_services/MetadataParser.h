@@ -50,6 +50,9 @@ protected:
     std::shared_ptr<Genre> handleGenre( parser::Task& task ) const;
 
 private:
+    static int toInt( VLC::Media& vlcMedia, libvlc_meta_t meta, const char* name );
+
+private:
     std::shared_ptr<Artist> m_unknownArtist;
 };
 

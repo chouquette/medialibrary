@@ -90,14 +90,11 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
 
     LOG_INFO( "Generating ", file->mrl(), " thumbnail..." );
 
-    auto fromType = file->mrl().find( "://" ) != std::string::npos ? VLC::Media::FromType::FromLocation :
-                                                                      VLC::Media::FromType::FromPath;
-    auto vlcMedia = VLC::Media( m_instance, file->mrl(), fromType );
-    vlcMedia.addOption( ":no-audio" );
-    vlcMedia.addOption( ":no-osd" );
-    vlcMedia.addOption( ":no-spu" );
-    vlcMedia.addOption( ":input-fast-seek" );
-    VLC::MediaPlayer mp( vlcMedia );
+    task.vlcMedia.addOption( ":no-audio" );
+    task.vlcMedia.addOption( ":no-osd" );
+    task.vlcMedia.addOption( ":no-spu" );
+    task.vlcMedia.addOption( ":input-fast-seek" );
+    VLC::MediaPlayer mp( task.vlcMedia );
 
     setupVout( mp );
 

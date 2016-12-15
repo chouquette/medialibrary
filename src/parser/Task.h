@@ -25,6 +25,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <vlcpp/vlc.hpp>
 
 namespace medialibrary
 {
@@ -58,67 +59,13 @@ struct Task
         : media( media )
         , file( file )
         , currentService( 0 )
-        , trackNumber( 0 )
-        , discNumber( 0 )
-        , discTotal( 0 )
-        , episode( 0 )
-        , duration( 0 )
     {
     }
 
-    struct VideoTrackInfo
-    {
-        VideoTrackInfo( const std::string& fcc, float fps, unsigned int width, unsigned int height,
-                        const std::string& language, const std::string& description )
-            : fcc( fcc ), fps( fps ), width( width ), height( height )
-            , language( language ), description( description )
-        {
-        }
-
-        std::string fcc;
-        float fps;
-        unsigned int width;
-        unsigned int height;
-        std::string language;
-        std::string description;
-    };
-
-    struct AudioTrackInfo
-    {
-        AudioTrackInfo( const std::string& fcc, unsigned int bitrate, unsigned int samplerate,
-                        unsigned int nbChannels, const std::string& language, const std::string& description )
-            : fcc( fcc ), bitrate( bitrate ), samplerate( samplerate ), nbChannels( nbChannels ),
-              language( language ), description( description )
-        {
-        }
-        std::string fcc;
-        unsigned int bitrate;
-        unsigned int samplerate;
-        unsigned int nbChannels;
-        std::string language;
-        std::string description;
-    };
-
     std::shared_ptr<Media>  media;
     std::shared_ptr<File>   file;
+    VLC::Media              vlcMedia;
     unsigned int            currentService;
-
-    std::vector<VideoTrackInfo> videoTracks;
-    std::vector<AudioTrackInfo> audioTracks;
-
-    std::string albumArtist;
-    std::string artist;
-    std::string albumName;
-    std::string title;
-    std::string artworkMrl;
-    std::string genre;
-    std::string releaseDate;
-    std::string showName;
-    int trackNumber;
-    int discNumber;
-    int discTotal;
-    int episode;
-    int64_t duration;
 };
 
 }

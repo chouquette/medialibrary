@@ -45,7 +45,6 @@ private:
         virtual uint8_t nbThreads() const override;
         virtual File::ParserStep step() const override;
         void storeMeta(parser::Task& task, VLC::Media& vlcMedia );
-        int toInt(VLC::Media& vlcMedia, libvlc_meta_t meta, const char* name );
 
 private:
         VLC::Instance m_instance;

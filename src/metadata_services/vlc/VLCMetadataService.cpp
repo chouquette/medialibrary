@@ -43,7 +43,6 @@ VLCMetadataService::VLCMetadataService()
 
 parser::Task::Status VLCMetadataService::run( parser::Task& task )
 {
-    auto media = task.media;
     auto file = task.file;
 
     LOG_INFO( "Parsing ", file->mrl() );
@@ -51,19 +50,19 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
 
     auto fromType = file->mrl().find( "://" ) != std::string::npos ? VLC::Media::FromType::FromLocation :
                                                                       VLC::Media::FromType::FromPath;
-    auto vlcMedia = VLC::Media( m_instance, file->mrl(), fromType );
+    task.vlcMedia = VLC::Media( m_instance, file->mrl(), fromType );
 
     std::unique_lock<compat::Mutex> lock( m_mutex );
     VLC::Media::ParsedStatus status;
     bool done = false;
 
-    auto event = vlcMedia.eventManager().onParsedChanged( [this, &status, &done](VLC::Media::ParsedStatus s ) {
+    auto event = task.vlcMedia.eventManager().onParsedChanged( [this, &status, &done](VLC::Media::ParsedStatus s ) {
         std::lock_guard<compat::Mutex> lock( m_mutex );
         status = s;
         done = true;
         m_cond.notify_all();
     });
-    if ( vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local | VLC::Media::ParseFlags::Network, 5000 ) == false )
+    if ( task.vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local | VLC::Media::ParseFlags::Network, 5000 ) == false )
         return parser::Task::Status::Fatal;
     m_cond.wait( lock, [&status, &done]() {
         return done == true;
@@ -71,26 +70,9 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
     event->unregister();
     if ( status == VLC::Media::ParsedStatus::Failed || status == VLC::Media::ParsedStatus::Timeout )
         return parser::Task::Status::Fatal;
-    auto tracks = vlcMedia.tracks();
+    auto tracks = task.vlcMedia.tracks();
     if ( tracks.size() == 0 )
         LOG_WARN( "Failed to fetch any tracks for ", file->mrl() );
-    for ( const auto& track : tracks )
-    {
-        auto codec = track.codec();
-        std::string fcc( reinterpret_cast<const char*>( &codec ), 4 );
-        if ( track.type() == VLC::MediaTrack::Video )
-        {
-            auto fps = static_cast<float>( track.fpsNum() ) / static_cast<float>( track.fpsDen() );
-            task.videoTracks.emplace_back( fcc, fps, track.width(), track.height(), track.language(),
-                                           track.description() );
-        }
-        else if ( track.type() == VLC::MediaTrack::Audio )
-        {
-            task.audioTracks.emplace_back( fcc, track.bitrate(), track.rate(), track.channels(),
-                                            track.language(), track.description() );
-        }
-    }
-    storeMeta( task, vlcMedia );
     auto duration = std::chrono::steady_clock::now() - chrono;
     LOG_DEBUG("VLC parsing done in ", std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
     // Don't save the file parsing step yet, since all data are just in memory. Just mark
@@ -112,50 +94,6 @@ uint8_t VLCMetadataService::nbThreads() const
 File::ParserStep VLCMetadataService::step() const
 {
     return File::ParserStep::MetadataExtraction;
-}
-
-void VLCMetadataService::storeMeta( parser::Task& task, VLC::Media& vlcMedia )
-{
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(3, 0, 0, 0)
-    task.albumArtist = vlcMedia.meta( libvlc_meta_AlbumArtist );
-    task.discNumber = toInt( vlcMedia, libvlc_meta_DiscNumber, "disc number" );
-    task.discTotal = toInt( vlcMedia, libvlc_meta_DiscTotal, "disc total" );
-#else
-    task.discNumber = 0;
-    task.discTotal = 0;
-#endif
-    task.artist = vlcMedia.meta( libvlc_meta_Artist );
-    task.artworkMrl = vlcMedia.meta( libvlc_meta_ArtworkURL );
-    task.title = vlcMedia.meta( libvlc_meta_Title );
-    task.genre = vlcMedia.meta( libvlc_meta_Genre );
-    task.releaseDate = vlcMedia.meta( libvlc_meta_Date );
-    task.showName = vlcMedia.meta( libvlc_meta_ShowName );
-    task.albumName = vlcMedia.meta( libvlc_meta_Album );
-    task.duration = vlcMedia.duration();
-
-    task.trackNumber = toInt( vlcMedia, libvlc_meta_TrackNumber, "track number" );
-    task.episode = toInt( vlcMedia, libvlc_meta_Episode, "episode number" );
-}
-
-int VLCMetadataService::toInt( VLC::Media& vlcMedia, libvlc_meta_t meta, const char* name )
-{
-    auto str = vlcMedia.meta( meta );
-    if ( str.empty() == false )
-    {
-#ifndef __ANDROID__
-        try
-        {
-            return std::stoi( str );
-        }
-        catch( std::logic_error& ex)
-        {
-            LOG_WARN( "Invalid ", name, " provided (", str, "): ", ex.what() );
-        }
-#else
-        return atoi( str.c_str() );
-#endif
-    }
-    return 0;
 }
 
 }

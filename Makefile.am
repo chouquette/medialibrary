@@ -289,6 +289,7 @@ unittest_CPPFLAGS = 		\
 	-I$(top_srcdir)/test	\
 	-I$(top_srcdir)/googletest/include \
 	$(SQLITE_CFLAGS) 		\
+	$(VLCPP_CFLAGS) \
 	$(NULL)
 
 unittest_LDADD = 		\
@@ -312,6 +313,7 @@ samples_CPPFLAGS = 			\
 	-I$(top_srcdir)/googletest/include \
 	$(SQLITE_CFLAGS)		\
 	$(RAPIDJSON_CFLAGS)		\
+	$(VLCPP_CFLAGS) \
 	$(NULL)
 
 samples_LDADD = 		\
