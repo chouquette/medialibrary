@@ -72,7 +72,6 @@ private:
     VLC::MediaDiscoverer m_discoverer;
     std::shared_ptr<VLC::MediaList> m_mediaList;
     const std::string m_protocol;
-    IMediaLibraryCb* m_cb;
     compat::Mutex m_devicesLock;
     compat::ConditionVariable m_deviceCond;
     std::vector<Device> m_devices;
