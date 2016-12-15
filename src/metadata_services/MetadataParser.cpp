@@ -71,12 +71,17 @@ int MetadataParser::toInt( VLC::Media& vlcMedia, libvlc_meta_t meta, const char*
 parser::Task::Status MetadataParser::run( parser::Task& task )
 {
     auto& media = task.media;
-
     const auto& tracks = task.vlcMedia.tracks();
+
+    // If we failed to extract any tracks, don't make any assumption and forward to the
+    // thumbnailer. Since it starts an actual playback, it will have more information.
+    // Since the metadata steps won't be marked, it will run again once the thumbnailer has completed.
+    if ( tracks.empty() == true )
+        return parser::Task::Status::Success;
+
     bool isAudio = true;
     {
         auto t = m_ml->getConn()->newTransaction();
-        // Some media (ogg/ts, most likely) won't have visible tracks, but shouldn't be considered audio files.
         for ( const auto& t : tracks )
         {
             auto codec = t.codec();

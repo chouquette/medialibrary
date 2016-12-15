@@ -73,14 +73,7 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     auto media = task.media;
     auto file = task.file;
 
-    if ( media->type() == IMedia::Type::UnknownType )
-    {
-        // If we don't know the media type yet, it actually looks more like a bug
-        // since this should run after media type deduction, and not run in case
-        // that step fails.
-        return parser::Task::Status::Fatal;
-    }
-    else if ( media->type() != IMedia::Type::VideoType )
+    if ( media->type() == IMedia::Type::AudioType )
     {
         // There's no point in generating a thumbnail for a non-video media.
         task.file->markStepCompleted( File::ParserStep::Thumbnailer );
@@ -98,12 +91,20 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
 
     setupVout( mp );
 
-    auto res = startPlayback( mp );
+    auto res = startPlayback( task, mp );
     if ( res != parser::Task::Status::Success )
     {
+        // If the media became an audio file, it's not an error
+        if ( task.media->type() == Media::Type::AudioType )
+        {
+            LOG_INFO( file->mrl(), " type has changed to Audio. Skipping thumbnail generation" );
+            return parser::Task::Status::Success;
+        }
+        // Otherwise, we failed to start the playback and this is an error indeed
         LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail: Can't start playback" );
         return res;
     }
+
     // Seek ahead to have a significant preview
     res = seekAhead( mp );
     if ( res != parser::Task::Status::Success )
@@ -114,35 +115,52 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     return takeThumbnail( media, file, mp );
 }
 
-parser::Task::Status VLCThumbnailer::startPlayback( VLC::MediaPlayer &mp )
+parser::Task::Status VLCThumbnailer::startPlayback( parser::Task& task, VLC::MediaPlayer &mp )
 {
     // Use a copy of the event manager to automatically unregister all events as soon
     // as we leave this method.
     auto em = mp.eventManager();
     bool hasVideoTrack = false;
+    bool failedToStart = false;
     em.onESAdded([this, &hasVideoTrack]( libvlc_track_type_t type, int ) {
         if ( type == libvlc_track_video )
         {
-            m_cond.notify_all();
+            std::lock_guard<compat::Mutex> lock( m_mutex );
             hasVideoTrack = true;
+            m_cond.notify_all();
         }
     });
-    em.onEncounteredError([this]() {
+    em.onEncounteredError([this, &failedToStart]() {
+        std::lock_guard<compat::Mutex> lock( m_mutex );
+        failedToStart = true;
         m_cond.notify_all();
     });
 
     std::unique_lock<compat::Mutex> lock( m_mutex );
     mp.play();
-    bool success = m_cond.wait_for( lock, std::chrono::seconds( 1 ), [&mp, &hasVideoTrack]() {
-        auto s = mp.state();
-        return s == libvlc_Error || s == libvlc_Ended || hasVideoTrack == true;
+    bool success = m_cond.wait_for( lock, std::chrono::seconds( 1 ), [&failedToStart, &hasVideoTrack]() {
+        return failedToStart == true || hasVideoTrack == true;
     });
-    if ( success == false || hasVideoTrack == false )
+    // If a video track was added, we can continue right away.
+    if ( hasVideoTrack == true )
     {
-        // In case of timeout or error, don't go any further
-        return parser::Task::Status::Error;
+        assert( success == true );
+        return parser::Task::Status::Success;
     }
-    return parser::Task::Status::Success;
+    // In case the playback failed, we probably won't fetch anything interesting anyway.
+    if ( failedToStart == true )
+        return parser::Task::Status::Fatal;
+    // We are now in the case of a timeout: No failure, but no video track either.
+    // The file might be an audio file we haven't detected yet:
+    if ( task.media->type() == Media::Type::UnknownType )
+    {
+        task.media->setType( Media::Type::AudioType );
+        if ( task.media->save() == false )
+            return parser::Task::Status::Fatal;
+        // We still return an error since we don't want to attempt the thumbnail generation for a
+        // file without video tracks
+    }
+    return parser::Task::Status::Error;
 }
 
 parser::Task::Status VLCThumbnailer::seekAhead( VLC::MediaPlayer& mp )

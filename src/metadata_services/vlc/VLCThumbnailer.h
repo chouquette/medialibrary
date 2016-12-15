@@ -42,7 +42,7 @@ public:
     virtual File::ParserStep step() const override;
 
 private:
-    parser::Task::Status startPlayback( VLC::MediaPlayer& mp );
+    parser::Task::Status startPlayback( parser::Task& task, VLC::MediaPlayer& mp );
     parser::Task::Status seekAhead( VLC::MediaPlayer &mp );
     void setupVout( VLC::MediaPlayer &mp );
     parser::Task::Status takeThumbnail( std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::MediaPlayer &mp );

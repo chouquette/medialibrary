@@ -322,17 +322,13 @@ std::shared_ptr<Media> MediaLibrary::addFile( const fs::IFile& fileFs, Folder& p
     };
 
     if ( std::find_if( begin( supportedVideoExtensions ), end( supportedVideoExtensions ),
-                    predicate ) != end( supportedVideoExtensions ) )
+                    predicate ) == end( supportedVideoExtensions ) &&
+         std::find_if( begin( supportedAudioExtensions ), end( supportedAudioExtensions ),
+                         predicate ) == end( supportedAudioExtensions ) )
     {
-        type = IMedia::Type::VideoType;
-    }
-    else if ( std::find_if( begin( supportedAudioExtensions ), end( supportedAudioExtensions ),
-                         predicate ) != end( supportedAudioExtensions ) )
-    {
-        type = IMedia::Type::AudioType;
-    }
-    if ( type == IMedia::Type::UnknownType )
+        LOG_INFO( "Rejecting file ", fileFs.fullPath(), " due to its extension" );
         return nullptr;
+    }
 
     LOG_INFO( "Adding ", fileFs.fullPath() );
     auto mptr = Media::create( this, type, fileFs );

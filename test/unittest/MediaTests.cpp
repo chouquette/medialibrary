@@ -346,14 +346,17 @@ TEST_F( Medias, SortByAlpha )
 {
     auto m1 = ml->addFile( "media1.mp3" );
     m1->setTitle( "Abcd" );
+    m1->setType( Media::Type::AudioType );
     m1->save();
 
     auto m2 = ml->addFile( "media2.mp3" );
     m2->setTitle( "Zyxw" );
+    m2->setType( Media::Type::AudioType );
     m2->save();
 
     auto m3 = ml->addFile( "media3.mp3" );
     m3->setTitle( "afterA-beforeZ" );
+    m3->setType( Media::Type::AudioType );
     m3->save();
 
     auto media = ml->audioFiles( SortingCriteria::Alpha, false );
@@ -374,10 +377,14 @@ TEST_F( Medias, SortByLastModifDate )
     auto file1 = std::make_shared<mock::NoopFile>( "media.mkv" );
     file1->setLastModificationDate( 666 );
     auto m1 = ml->addFile( *file1 );
+    m1->setType( Media::Type::VideoType );
+    m1->save();
 
     auto file2 = std::make_shared<mock::NoopFile>( "media2.mkv" );
     file2->setLastModificationDate( 111 );
     auto m2 = ml->addFile( *file2 );
+    m2->setType( Media::Type::VideoType );
+    m2->save();
 
     auto media = ml->videoFiles( SortingCriteria::LastModificationDate, false );
     ASSERT_EQ( 2u, media.size() );
@@ -395,10 +402,14 @@ TEST_F( Medias, SortByFileSize )
     auto file1 = std::make_shared<mock::NoopFile>( "media.mkv" );
     file1->setSize( 666 );
     auto m1 = ml->addFile( *file1 );
+    m1->setType( Media::Type::VideoType );
+    m1->save();
 
     auto file2 = std::make_shared<mock::NoopFile>( "media2.mkv" );
     file2->setSize( 111 );
     auto m2 = ml->addFile( *file2 );
+    m2->setType( Media::Type::VideoType );
+    m2->save();
 
     auto media = ml->videoFiles( SortingCriteria::FileSize, false );
     ASSERT_EQ( 2u, media.size() );
@@ -414,7 +425,7 @@ TEST_F( Medias, SortByFileSize )
 TEST_F( Medias, SetType )
 {
     auto m1 = ml->addFile( "media1.mp3" );
-    ASSERT_EQ( IMedia::Type::AudioType, m1->type() );
+    ASSERT_EQ( IMedia::Type::UnknownType, m1->type() );
 
     m1->setType( IMedia::Type::VideoType );
     m1->save();

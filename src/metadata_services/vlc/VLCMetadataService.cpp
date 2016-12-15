@@ -50,6 +50,10 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
 
     auto fromType = file->mrl().find( "://" ) != std::string::npos ? VLC::Media::FromType::FromLocation :
                                                                       VLC::Media::FromType::FromPath;
+
+    // Having a valid media means we're re-executing this parser after the thumbnailer,
+    // which isn't expected, as we always mark this task as completed.
+    assert( task.vlcMedia.isValid() == false );
     task.vlcMedia = VLC::Media( m_instance, file->mrl(), fromType );
 
     std::unique_lock<compat::Mutex> lock( m_mutex );
