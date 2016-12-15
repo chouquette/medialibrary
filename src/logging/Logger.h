@@ -60,9 +60,6 @@ private:
     template <typename... Args>
     static void log( LogLevel lvl, Args&&... args)
     {
-        if ( lvl < s_logLevel.load( std::memory_order_relaxed ) )
-            return;
-
         auto msg = createMsg( std::forward<Args>( args )... );
         auto l = s_logger.load( std::memory_order_consume );
         if ( l == nullptr )
@@ -116,18 +113,24 @@ public:
     template <typename... Args>
     static void Warning( Args&&... args )
     {
+        if ( s_logLevel.load( std::memory_order_relaxed ) > LogLevel::Warning )
+            return;
         log( LogLevel::Warning, std::forward<Args>( args )... );
     }
 
     template <typename... Args>
     static void Info( Args&&... args )
     {
+        if ( s_logLevel.load( std::memory_order_relaxed ) > LogLevel::Info )
+            return;
         log( LogLevel::Info, std::forward<Args>( args )... );
     }
 
     template <typename... Args>
     static void Debug( Args&&... args )
     {
+        if ( s_logLevel.load( std::memory_order_relaxed ) > LogLevel::Debug )
+            return;
         log( LogLevel::Debug, std::forward<Args>( args )... );
     }
 
