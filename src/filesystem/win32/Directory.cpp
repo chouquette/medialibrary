@@ -56,7 +56,7 @@ void Directory::read() const
     if ( h == INVALID_HANDLE_VALUE )
     {
         LOG_ERROR( "Failed to browse ", m_path );
-        std::system_error( GetLastError(), std::generic_category(), "Failed to browse through directory" );
+        throw std::system_error( GetLastError(), std::generic_category(), "Failed to browse through directory" );
     }
     do
     {
