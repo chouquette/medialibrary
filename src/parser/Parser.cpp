@@ -129,19 +129,14 @@ void Parser::done( std::unique_ptr<parser::Task> t, parser::Task::Status status 
     auto serviceIdx = ++t->currentService;
 
     if ( status == parser::Task::Status::TemporaryUnavailable ||
-         status == parser::Task::Status::Fatal )
+         status == parser::Task::Status::Fatal ||
+         t->file->parserStep() == File::ParserStep::Completed )
     {
         if ( serviceIdx < m_services.size() )
         {
             // We won't process the next tasks, so we need to keep the number of "todo" operations coherent:
             m_opToDo -= m_services.size() - serviceIdx;
-            updateStats();
         }
-        return;
-    }
-
-    if ( t->file->parserStep() == File::ParserStep::Completed )
-    {
         updateStats();
         return;
     }
@@ -150,8 +145,8 @@ void Parser::done( std::unique_ptr<parser::Task> t, parser::Task::Status status 
     {
         t->currentService = serviceIdx = 0;
         m_opToDo += m_services.size();
-        updateStats();
     }
+    updateStats();
     m_services[serviceIdx]->parse( std::move( t ) );
 }
 
