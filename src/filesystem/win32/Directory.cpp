@@ -77,8 +77,10 @@ void Directory::read() const
     assert( *m_path.rbegin() == '\\' );
     auto tmpPath = m_path.substr( 0, m_path.length() - 1 );
     auto wpath = charset::ToWide( tmpPath.c_str() );
-    auto handle = CreateFile( wpath.get(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
-                              FILE_FLAG_BACKUP_SEMANTICS, nullptr );
+
+    CREATEFILE2_EXTENDED_PARAMETERS params{};
+    params.dwFileFlags = FILE_FLAG_BACKUP_SEMANTICS;
+    auto handle = CreateFile2( wpath.get(), GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, &params );
     if ( handle == INVALID_HANDLE_VALUE )
     {
         LOG_ERROR( "Failed to open directory ", m_path );
