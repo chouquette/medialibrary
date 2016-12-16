@@ -48,7 +48,7 @@ File::File( const std::string &filePath )
     if ( _stat( m_fullPath.c_str(), &s ) != 0 )
     {
         LOG_ERROR( "Failed to get ", m_fullPath, " stats" );
-        throw std::system_error( GetLastError(), std::generic_category(), "Failed to get stats" );
+        throw std::system_error( errno, std::generic_category(), "Failed to get stats" );
     }
 
     m_lastModificationDate = s.st_mtime;
