@@ -266,10 +266,9 @@ AS_IF([test "$SYS" = linux],[
 AM_CONDITIONAL(HAVE_ANDROID, test "${HAVE_ANDROID}" = "1")
 
 AS_IF([test "$SYS" = mingw32],[
-    AC_CHECK_DECL(_WIN32_WINNT,,
-        AC_DEFINE([_WIN32_WINNT], 0x600, [Enforce a specific windows SDK version]),
-        [] # Don't check default includes, only CFLAGS provided macros
-    )
+    AH_TOP([#if defined(_WIN32) && !defined(_WIN32_WINNT)])
+    AH_TOP([# define _WIN32_WINNT 0x0600 ])
+    AH_TOP([#endif])
 ])
 
 PKG_CHECK_MODULES(SQLITE, sqlite3)
