@@ -28,28 +28,10 @@
 #include "logging/Logger.h"
 #include "utils/Charsets.h"
 
+#include <memory>
 #include <sstream>
 
 #include <windows.h>
-
-namespace
-{
-template <typename FUNC>
-class UniqueHandle
-{
-public:
-    UniqueHandle( HANDLE h, FUNC* f  ) noexcept : m_handle( h ), m_func( f ) {}
-    ~UniqueHandle() { m_func( m_handle ); }
-    UniqueHandle( const UniqueHandle& ) = delete;
-    UniqueHandle& operator=( const UniqueHandle& ) = delete;
-    UniqueHandle( UniqueHandle&& ) = delete;
-    UniqueHandle& operator=( UniqueHandle&& ) = delete;
-
-private:
-    HANDLE m_handle;
-    FUNC* m_func;
-};
-}
 
 namespace medialibrary
 {
@@ -66,7 +48,8 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
         ss << "Failed to list devices (error code" << GetLastError() << ')';
         throw std::runtime_error( ss.str() );
     }
-    UniqueHandle<decltype(FindVolumeClose)> uh( handle, &FindVolumeClose );
+    std::unique_ptr<typename std::remove_pointer<HANDLE>::type, decltype(&FindVolumeClose)>
+            uh( handle, &FindVolumeClose );
     std::vector<std::tuple<std::string, std::string, bool>> res;
     for ( BOOL success =  TRUE; ; success = FindNextVolume( handle, volumeName, sizeof( volumeName ) ) )
     {
