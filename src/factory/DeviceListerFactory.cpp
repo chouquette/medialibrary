@@ -27,17 +27,19 @@
 #include "DeviceListerFactory.h"
 
 #if defined(__linux__) && !defined(__ANDROID__)
-#include "filesystem/unix/DeviceLister.h"
+# include "filesystem/unix/DeviceLister.h"
+# define USE_BUILTIN_DEVICE_LISTER 1
 #elif defined(_WIN32)
-#include <winapifamily.h>
-#include "filesystem/win32/DeviceLister.h"
+# include <winapifamily.h>
+# include "filesystem/win32/DeviceLister.h"
+# if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP)
+#  define USE_BUILTIN_DEVICE_LISTER 1
+# endif
 #endif
 
 medialibrary::DeviceListerPtr medialibrary::factory::createDeviceLister()
 {
-#if (defined(__linux__) && !defined(__ANDROID__)) || \
-    (defined(_WIN32) && WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP))
-
+#ifdef USE_BUILTIN_DEVICE_LISTER
     return std::make_shared<fs::DeviceLister>();
 #endif
     return nullptr;
