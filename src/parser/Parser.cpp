@@ -141,11 +141,13 @@ void Parser::done( std::unique_ptr<parser::Task> t, parser::Task::Status status 
         updateStats();
         return;
     }
+
     // If some services declined to parse the file, start over again.
     if ( serviceIdx == m_services.size() )
     {
         t->currentService = serviceIdx = 0;
         m_opToDo += m_services.size();
+        LOG_INFO("Running parser chain again for ", t->file->mrl());
     }
     updateStats();
     m_services[serviceIdx]->parse( std::move( t ) );
