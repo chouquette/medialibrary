@@ -95,10 +95,10 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     if ( res != parser::Task::Status::Success )
     {
         // If the media became an audio file, it's not an error
-        task.file->markStepCompleted( File::ParserStep::Thumbnailer );
-        task.file->saveParserStep();
         if ( task.media->type() == Media::Type::AudioType )
         {
+            task.file->markStepCompleted( File::ParserStep::Thumbnailer );
+            task.file->saveParserStep();
             LOG_INFO( file->mrl(), " type has changed to Audio. Skipping thumbnail generation" );
             return parser::Task::Status::Success;
         }
@@ -110,12 +110,16 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     // Seek ahead to have a significant preview
     res = seekAhead( mp );
     if ( res != parser::Task::Status::Success )
+    {
         LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail: Failed to seek ahead" );
-    else
-        res = takeThumbnail( media, file, mp );
+        return res;
+    }
+    res = takeThumbnail( media, file, mp );
+    if ( res != parser::Task::Status::Success )
+        return res;
     task.file->markStepCompleted( File::ParserStep::Thumbnailer );
     task.file->saveParserStep();
-    return res;
+    return parser::Task::Status::Success;
 }
 
 parser::Task::Status VLCThumbnailer::startPlayback( parser::Task& task, VLC::MediaPlayer &mp )

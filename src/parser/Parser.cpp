@@ -117,6 +117,7 @@ void Parser::updateStats()
     auto percent = m_opToDo > 0 ? ( m_opDone * 100 / m_opToDo ) : 0;
     if ( percent != m_percent )
     {
+        LOG_ERROR( "Parser progress: ", percent, '%' );
         m_percent = percent;
         m_callback->onParsingStatsUpdated( m_percent );
     }
