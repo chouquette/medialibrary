@@ -26,9 +26,11 @@
 
 #include "File.h"
 #include "logging/Logger.h"
+#include "utils/Charsets.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <tchar.h>
 
 #include <stdexcept>
 #include <system_error>
@@ -45,7 +47,7 @@ File::File( const std::string &filePath )
     : CommonFile( filePath )
 {
     struct _stat s;
-    if ( _stat( m_fullPath.c_str(), &s ) != 0 )
+    if ( _tstat( charset::ToWide( m_fullPath.c_str() ).get(), &s ) != 0 )
     {
         LOG_ERROR( "Failed to get ", m_fullPath, " stats" );
         throw std::system_error( errno, std::generic_category(), "Failed to get stats" );
