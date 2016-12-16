@@ -29,12 +29,15 @@
 #if defined(__linux__) && !defined(__ANDROID__)
 #include "filesystem/unix/DeviceLister.h"
 #elif defined(_WIN32)
+#include <winapifamily.h>
 #include "filesystem/win32/DeviceLister.h"
 #endif
 
 medialibrary::DeviceListerPtr medialibrary::factory::createDeviceLister()
 {
-#if (defined(__linux__) && !defined(__ANDROID__)) || defined(_WIN32)
+#if (defined(__linux__) && !defined(__ANDROID__)) || \
+    (defined(_WIN32) && WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP))
+
     return std::make_shared<fs::DeviceLister>();
 #endif
     return nullptr;

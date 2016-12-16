@@ -25,6 +25,9 @@
 #endif
 
 #include "DeviceLister.h"
+
+#if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP)
+
 #include "logging/Logger.h"
 #include "utils/Charsets.h"
 
@@ -93,3 +96,4 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
 }
 }
 
+#endif

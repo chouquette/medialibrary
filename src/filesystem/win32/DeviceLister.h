@@ -22,6 +22,10 @@
 
 #pragma once
 
+#include <winapifamily.h>
+
+#if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP)
+
 #include "medialibrary/IDeviceLister.h"
 
 namespace medialibrary
@@ -37,3 +41,5 @@ public:
 
 }
 }
+
+#endif
