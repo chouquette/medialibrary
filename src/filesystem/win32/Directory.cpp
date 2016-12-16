@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <windows.h>
+#include <winapifamily.h>
 
 namespace medialibrary
 {
@@ -47,7 +48,7 @@ Directory::Directory(const std::string& path , factory::IFileSystem& fsFactory)
 
 void Directory::read() const
 {
-#if _WINNT_WIN32 < _WINNT_VISTA
+#if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP)
     WIN32_FIND_DATA f;
     auto pattern = m_path + '*';
     auto wpattern = charset::ToWide( pattern.c_str() );
