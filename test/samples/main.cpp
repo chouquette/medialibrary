@@ -27,6 +27,7 @@
 #include "Tester.h"
 
 static std::string TestDirectory = SRC_DIR "/test/samples/";
+static std::string ForcedTestDirectory;
 bool Verbose = false;
 bool ExtraVerbose = false;
 
@@ -57,7 +58,8 @@ class TestEnv : public ::testing::Environment
 
 TEST_P( Tests, Parse )
 {
-    auto casePath = TestDirectory + "testcases/" + GetParam() + ".json";
+    auto testDir = ForcedTestDirectory.empty() == false ? ForcedTestDirectory : TestDirectory;
+    auto casePath = testDir + "testcases/" + GetParam() + ".json";
     std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
     ASSERT_NE( nullptr, f );
     char buff[65536]; // That's how ugly I am!
@@ -72,7 +74,7 @@ TEST_P( Tests, Parse )
     for ( auto i = 0u; i < input.Size(); ++i )
     {
         // Quick and dirty check to ensure we're discovering something that exists
-        auto samplesDir = TestDirectory + "samples/" + input[i].GetString();
+        auto samplesDir = testDir + "samples/" + input[i].GetString();
         struct stat s;
         auto res = stat( samplesDir.c_str(), &s );
         ASSERT_EQ( 0, res );
@@ -115,12 +117,19 @@ int main(int ac, char** av)
     ::testing::InitGoogleTest(&ac, av);
     const std::string verboseArg = "-v";
     const std::string extraVerboseArg = "-vv";
+    const std::string forcedTestDir = "--testdir";
     for ( auto i = 1; i < ac; ++i )
     {
         if ( av[i] == verboseArg )
             Verbose = true;
         else if ( av[i] == extraVerboseArg )
             ExtraVerbose = true;
+        else if ( av[i] == forcedTestDir )
+        {
+            assert(i + 1 < ac);
+            ForcedTestDirectory = av[i + 1];
+            ++i;
+        }
     }
     return RUN_ALL_TESTS();
 }
