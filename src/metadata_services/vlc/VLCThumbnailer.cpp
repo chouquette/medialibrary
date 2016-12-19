@@ -83,6 +83,13 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
 
     LOG_INFO( "Generating ", file->mrl(), " thumbnail..." );
 
+    if ( task.vlcMedia.isValid() == false )
+    {
+        auto fromType = file->mrl().find( "://" ) != std::string::npos ? VLC::Media::FromType::FromLocation :
+                                                                          VLC::Media::FromType::FromPath;
+        task.vlcMedia = VLC::Media( m_instance, file->mrl(), fromType );
+    }
+
     task.vlcMedia.addOption( ":no-audio" );
     task.vlcMedia.addOption( ":no-osd" );
     task.vlcMedia.addOption( ":no-spu" );
