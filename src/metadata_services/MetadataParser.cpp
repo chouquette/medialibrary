@@ -79,7 +79,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
     if ( tracks.empty() == true )
     {
         // However, if the file is not unknown anymore, it means the thumbnailer has already processed it
-        if ( task.media->type() == Media::Type::UnknownType )
+        if ( task.media->type() == Media::Type::Unknown )
             return parser::Task::Status::Success;
         // In that case, stop trying to do something with this file.
         return parser::Task::Status::Fatal;
@@ -139,7 +139,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
 bool MetadataParser::parseVideoFile( parser::Task& task ) const
 {
     auto media = task.media.get();
-    media->setType( IMedia::Type::VideoType );
+    media->setType( IMedia::Type::Video );
     const auto& title = task.vlcMedia.meta( libvlc_meta_Title );
     if ( title.length() == 0 )
         return true;
@@ -172,7 +172,7 @@ bool MetadataParser::parseVideoFile( parser::Task& task ) const
 
 bool MetadataParser::parseAudioFile( parser::Task& task ) const
 {
-    task.media->setType( IMedia::Type::AudioType );
+    task.media->setType( IMedia::Type::Audio );
 
     const auto artworkMrl = task.vlcMedia.meta( libvlc_meta_ArtworkURL );
     if ( artworkMrl.empty() == false )

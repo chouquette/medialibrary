@@ -39,9 +39,9 @@ class IMedia
     public:
         enum class Type : uint8_t
         {
-            UnknownType,
-            VideoType,
-            AudioType,
+            Unknown,
+            Video,
+            Audio,
         };
         enum class SubType : uint8_t
         {

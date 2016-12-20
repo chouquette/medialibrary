@@ -305,17 +305,17 @@ MediaPtr MediaLibrary::media( const std::string& mrl ) const
 
 std::vector<MediaPtr> MediaLibrary::audioFiles( SortingCriteria sort, bool desc ) const
 {
-    return Media::listAll( this, IMedia::Type::AudioType, sort, desc );
+    return Media::listAll( this, IMedia::Type::Audio, sort, desc );
 }
 
 std::vector<MediaPtr> MediaLibrary::videoFiles( SortingCriteria sort, bool desc ) const
 {
-    return Media::listAll( this, IMedia::Type::VideoType, sort, desc );
+    return Media::listAll( this, IMedia::Type::Video, sort, desc );
 }
 
 std::shared_ptr<Media> MediaLibrary::addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs )
 {
-    auto type = IMedia::Type::UnknownType;
+    auto type = IMedia::Type::Unknown;
     auto ext = fileFs.extension();
     auto predicate = [ext](const std::string& v) {
         return strcasecmp(v.c_str(), ext.c_str()) == 0;

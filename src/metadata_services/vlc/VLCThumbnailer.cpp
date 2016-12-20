@@ -73,7 +73,7 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     auto media = task.media;
     auto file = task.file;
 
-    if ( media->type() == IMedia::Type::AudioType )
+    if ( media->type() == IMedia::Type::Audio )
     {
         // There's no point in generating a thumbnail for a non-video media.
         task.file->markStepCompleted( File::ParserStep::Thumbnailer );
@@ -112,7 +112,7 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     if ( res != parser::Task::Status::Success )
     {
         // If the media became an audio file, it's not an error
-        if ( task.media->type() == Media::Type::AudioType )
+        if ( task.media->type() == Media::Type::Audio )
         {
             task.file->markStepCompleted( File::ParserStep::Thumbnailer );
             task.file->saveParserStep();
@@ -179,9 +179,9 @@ parser::Task::Status VLCThumbnailer::startPlayback( parser::Task& task, VLC::Med
         return parser::Task::Status::Fatal;
     // We are now in the case of a timeout: No failure, but no video track either.
     // The file might be an audio file we haven't detected yet:
-    if ( task.media->type() == Media::Type::UnknownType )
+    if ( task.media->type() == Media::Type::Unknown )
     {
-        task.media->setType( Media::Type::AudioType );
+        task.media->setType( Media::Type::Audio );
         if ( task.media->save() == false )
             return parser::Task::Status::Fatal;
         // We still return an error since we don't want to attempt the thumbnail generation for a
