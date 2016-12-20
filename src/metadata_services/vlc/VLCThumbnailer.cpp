@@ -94,6 +94,15 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     task.vlcMedia.addOption( ":no-osd" );
     task.vlcMedia.addOption( ":no-spu" );
     task.vlcMedia.addOption( ":input-fast-seek" );
+    auto duration = task.vlcMedia.duration();
+    if ( duration > 0 )
+    {
+        std::ostringstream ss;
+        // Duration is in ms, start-time in seconds, and we're aiming at 1/4th of the media
+        ss << ":start-time=" << duration / 4000;
+        task.vlcMedia.addOption( ss.str() );
+    }
+
     VLC::MediaPlayer mp( task.vlcMedia );
 
     setupVout( mp );
@@ -114,12 +123,15 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
         return res;
     }
 
-    // Seek ahead to have a significant preview
-    res = seekAhead( mp );
-    if ( res != parser::Task::Status::Success )
+    if ( duration <= 0 )
     {
-        LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail: Failed to seek ahead" );
-        return res;
+        // Seek ahead to have a significant preview
+        res = seekAhead( mp );
+        if ( res != parser::Task::Status::Success )
+        {
+            LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail: Failed to seek ahead" );
+            return res;
+        }
     }
     res = takeThumbnail( media, file, mp );
     if ( res != parser::Task::Status::Success )
