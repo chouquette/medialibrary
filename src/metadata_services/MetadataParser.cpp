@@ -123,6 +123,10 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
     if ( media->save() == false )
         return parser::Task::Status::Fatal;
     task.file->markStepCompleted( File::ParserStep::MetadataAnalysis );
+    // Save ourselves from the useless processing of a thumbnail later if
+    // we're analyzing an audio file
+    if ( isAudio == true )
+        task.file->markStepCompleted( File::ParserStep::Thumbnailer );
     if ( task.file->saveParserStep() == false )
         return parser::Task::Status::Fatal;
     t->commit();
