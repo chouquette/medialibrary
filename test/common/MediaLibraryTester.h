@@ -57,6 +57,7 @@ public:
     std::shared_ptr<AlbumTrack> albumTrack( int64_t id );
     std::shared_ptr<Media> addFile(fs::IFile& file);
     virtual void addLocalFsFactory() override;
+    std::shared_ptr<Device> device( const std::string& uuid );
 
 private:
     std::unique_ptr<fs::IDirectory> dummyDirectory;

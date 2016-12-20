@@ -140,3 +140,8 @@ std::vector<MediaPtr> MediaLibraryTester::files()
     static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE is_present = 1";
     return Media::fetchAll<IMedia>( this, req );
 }
+
+std::shared_ptr<Device> MediaLibraryTester::device( const std::string& uuid )
+{
+    return Device::fromUuid( this, uuid );
+}
