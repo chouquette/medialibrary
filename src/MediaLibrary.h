@@ -73,7 +73,6 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         std::shared_ptr<Media> addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs );
 
         bool deleteFolder(const Folder& folder );
-        std::shared_ptr<Device> device( const std::string& uuid );
 
         virtual LabelPtr createLabel( const std::string& label ) override;
         virtual bool deleteLabel( LabelPtr label ) override;

@@ -358,11 +358,6 @@ bool MediaLibrary::deleteFolder( const Folder& folder )
     return true;
 }
 
-std::shared_ptr<Device> MediaLibrary::device( const std::string& uuid )
-{
-    return Device::fromUuid( this, uuid );
-}
-
 LabelPtr MediaLibrary::createLabel( const std::string& label )
 {
     return Label::create( this, label );
