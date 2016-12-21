@@ -80,7 +80,10 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
     {
         // However, if the file is not unknown anymore, it means the thumbnailer has already processed it
         if ( task.media->type() == Media::Type::Unknown )
+        {
+            LOG_INFO( "Skipping metadata parsing for file with unknown type: ", task.file->mrl() );
             return parser::Task::Status::Success;
+        }
         // In that case, stop trying to do something with this file.
         return parser::Task::Status::Fatal;
     }
