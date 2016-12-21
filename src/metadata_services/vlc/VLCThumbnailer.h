@@ -45,8 +45,8 @@ private:
     parser::Task::Status startPlayback( parser::Task& task, VLC::MediaPlayer& mp );
     parser::Task::Status seekAhead( VLC::MediaPlayer &mp );
     void setupVout( VLC::MediaPlayer &mp );
-    parser::Task::Status takeThumbnail( std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::MediaPlayer &mp );
-    parser::Task::Status compress( std::shared_ptr<Media> media, std::shared_ptr<File> file );
+    parser::Task::Status takeThumbnail( Media* media, File* file, VLC::MediaPlayer &mp );
+    parser::Task::Status compress( Media* media, File* file );
 
     virtual const char* name() const override;
     virtual uint8_t nbThreads() const override;

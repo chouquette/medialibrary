@@ -70,14 +70,14 @@ File::ParserStep VLCThumbnailer::step() const
 
 parser::Task::Status VLCThumbnailer::run( parser::Task& task )
 {
-    auto media = task.media;
-    auto file = task.file;
+    auto media = task.media.get();
+    auto file = task.file.get();
 
     if ( media->type() == IMedia::Type::Audio )
     {
         // There's no point in generating a thumbnail for a non-video media.
-        task.file->markStepCompleted( File::ParserStep::Thumbnailer );
-        task.file->saveParserStep();
+        file->markStepCompleted( File::ParserStep::Thumbnailer );
+        file->saveParserStep();
         return parser::Task::Status::Success;
     }
 
@@ -112,10 +112,10 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     if ( res != parser::Task::Status::Success )
     {
         // If the media became an audio file, it's not an error
-        if ( task.media->type() == Media::Type::Audio )
+        if ( media->type() == Media::Type::Audio )
         {
-            task.file->markStepCompleted( File::ParserStep::Thumbnailer );
-            task.file->saveParserStep();
+            file->markStepCompleted( File::ParserStep::Thumbnailer );
+            file->saveParserStep();
             LOG_INFO( file->mrl(), " type has changed to Audio. Skipping thumbnail generation" );
             return parser::Task::Status::Success;
         }
@@ -137,8 +137,9 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     res = takeThumbnail( media, file, mp );
     if ( res != parser::Task::Status::Success )
         return res;
-    task.file->markStepCompleted( File::ParserStep::Thumbnailer );
-    task.file->saveParserStep();
+    file->markStepCompleted( File::ParserStep::Thumbnailer );
+    file->saveParserStep();
+    m_notifier->notifyMediaModification( task.media );
     return parser::Task::Status::Success;
 }
 
@@ -261,7 +262,7 @@ void VLCThumbnailer::setupVout( VLC::MediaPlayer& mp )
     );
 }
 
-parser::Task::Status VLCThumbnailer::takeThumbnail( std::shared_ptr<Media> media, std::shared_ptr<File> file, VLC::MediaPlayer &mp )
+parser::Task::Status VLCThumbnailer::takeThumbnail( Media* media, File* file, VLC::MediaPlayer &mp )
 {
     // lock, signal that we want a thumbnail, and wait.
     {
@@ -281,7 +282,7 @@ parser::Task::Status VLCThumbnailer::takeThumbnail( std::shared_ptr<Media> media
     return compress( media, file );
 }
 
-parser::Task::Status VLCThumbnailer::compress( std::shared_ptr<Media> media, std::shared_ptr<File> file )
+parser::Task::Status VLCThumbnailer::compress( Media* media, File* file )
 {
     auto path = m_ml->thumbnailPath();
     path += "/";
@@ -303,7 +304,6 @@ parser::Task::Status VLCThumbnailer::compress( std::shared_ptr<Media> media, std
     if ( file->saveParserStep() == false )
         return parser::Task::Status::Fatal;
     t->commit();
-    m_notifier->notifyMediaModification( media );
     return parser::Task::Status::Success;
 }
 
