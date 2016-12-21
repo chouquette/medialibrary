@@ -182,8 +182,7 @@ parser::Task::Status VLCThumbnailer::startPlayback( parser::Task& task, VLC::Med
     if ( task.media->type() == Media::Type::Unknown )
     {
         task.media->setType( Media::Type::Audio );
-        if ( task.media->save() == false )
-            return parser::Task::Status::Fatal;
+        task.media->save();
         // We still return an error since we don't want to attempt the thumbnail generation for a
         // file without video tracks
     }
