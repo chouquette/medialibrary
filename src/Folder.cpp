@@ -218,6 +218,9 @@ const std::string& Folder::path() const
 {
     if ( m_isRemovable == false )
         return m_path;
+    // We can't compute the full path of a folder if it's removable and the device isn't present.
+    // When there's no device, we don't know the mountpoint, therefor we don't know the full path
+    assert( m_isPresent == true );
 
     auto lock = m_deviceMountpoint.lock();
     if ( m_deviceMountpoint.isCached() == true )
