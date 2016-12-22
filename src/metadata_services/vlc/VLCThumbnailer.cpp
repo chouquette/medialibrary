@@ -280,7 +280,7 @@ parser::Task::Status VLCThumbnailer::takeThumbnail( Media* media, File* file, VL
     {
         std::unique_lock<compat::Mutex> lock( m_mutex );
         m_thumbnailRequired = true;
-        bool success = m_cond.wait_for( lock, std::chrono::seconds( 3 ), [this]() {
+        bool success = m_cond.wait_for( lock, std::chrono::seconds( 15 ), [this]() {
             // Keep waiting if the vmem thread hasn't restored m_thumbnailRequired to false
             return m_thumbnailRequired == false;
         });
