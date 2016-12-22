@@ -147,9 +147,9 @@ parser::Task::Status VLCThumbnailer::startPlayback( parser::Task& task, VLC::Med
 {
     // Use a copy of the event manager to automatically unregister all events as soon
     // as we leave this method.
-    auto em = mp.eventManager();
     bool hasVideoTrack = false;
     bool failedToStart = false;
+    auto em = mp.eventManager();
     em.onESAdded([this, &hasVideoTrack]( libvlc_track_type_t type, int ) {
         if ( type == libvlc_track_video )
         {
