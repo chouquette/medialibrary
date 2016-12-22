@@ -138,9 +138,15 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     res = takeThumbnail( media, file, mp );
     if ( res != parser::Task::Status::Success )
         return res;
+
+    LOG_INFO( "Done generating ", file->mrl(), " thumbnail" );
     file->markStepCompleted( File::ParserStep::Thumbnailer );
-    file->saveParserStep();
     m_notifier->notifyMediaModification( task.media );
+
+    auto t = m_ml->getConn()->newTransaction();
+    if ( media->save() == false || file->saveParserStep() == false )
+        return parser::Task::Status::Fatal;
+    t->commit();
     return parser::Task::Status::Success;
 }
 
@@ -308,14 +314,6 @@ parser::Task::Status VLCThumbnailer::compress( Media* media, File* file )
         return parser::Task::Status::Fatal;
 
     media->setThumbnail( path );
-    LOG_INFO( "Done generating ", file->mrl(), " thumbnail" );
-    auto t = m_ml->getConn()->newTransaction();
-    if ( media->save() == false )
-        return parser::Task::Status::Fatal;
-    file->markStepCompleted( File::ParserStep::Thumbnailer );
-    if ( file->saveParserStep() == false )
-        return parser::Task::Status::Fatal;
-    t->commit();
     return parser::Task::Status::Success;
 }
 
