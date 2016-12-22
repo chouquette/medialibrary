@@ -147,6 +147,7 @@ void ParserService::mainloop()
         if ( ( static_cast<uint8_t>( task->file->parserStep() ) &
                static_cast<uint8_t>( step() ) ) != 0 )
         {
+            LOG_INFO( "Skipping completed task [", serviceName, "] on ", task->file->mrl() );
             m_parserCb->done( std::move( task ), parser::Task::Status::Success );
             continue;
         }
