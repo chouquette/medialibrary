@@ -44,7 +44,7 @@ private:
         virtual const char* name() const override;
         virtual uint8_t nbThreads() const override;
         virtual File::ParserStep step() const override;
-        void storeMeta(parser::Task& task, VLC::Media& vlcMedia );
+
 
 private:
         VLC::Instance m_instance;
