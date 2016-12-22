@@ -99,7 +99,8 @@ bool VLCMetadataService::isCompleted( const parser::Task& task ) const
 {
     // We always need to run this task if the metadata extraction isn't completed
     return ( static_cast<uint8_t>( task.file->parserStep() ) &
-            static_cast<uint8_t>( File::ParserStep::MetadataAnalysis ) ) != 0;
+            static_cast<uint8_t>( File::ParserStep::MetadataAnalysis ) ) != 0 &&
+            task.vlcMedia.isValid() == true;
 }
 
 }
