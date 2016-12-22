@@ -43,8 +43,7 @@ private:
         virtual parser::Task::Status run( parser::Task& task ) override;
         virtual const char* name() const override;
         virtual uint8_t nbThreads() const override;
-        virtual File::ParserStep step() const override;
-
+        virtual bool isCompleted( const parser::Task& task ) const override;
 
 private:
         VLC::Instance m_instance;

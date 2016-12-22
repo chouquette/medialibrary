@@ -480,7 +480,6 @@ bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
     return true;
 }
 
-
 const char* MetadataParser::name() const
 {
     return "Metadata";
@@ -496,9 +495,11 @@ uint8_t MetadataParser::nbThreads() const
     return 1;
 }
 
-File::ParserStep MetadataParser::step() const
+bool MetadataParser::isCompleted( const parser::Task& task ) const
 {
-    return File::ParserStep::MetadataAnalysis;
+    // We always need to run this task if the metadata extraction isn't completed
+    return ( static_cast<uint8_t>( task.file->parserStep() ) &
+            static_cast<uint8_t>( File::ParserStep::MetadataAnalysis ) ) != 0;
 }
 
 }

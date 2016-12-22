@@ -39,7 +39,7 @@ public:
     virtual ~VLCThumbnailer() = default;
     virtual parser::Task::Status run( parser::Task& task ) override;
     virtual bool initialize() override;
-    virtual File::ParserStep step() const override;
+    virtual bool isCompleted( const parser::Task& task ) const override;
 
 private:
     parser::Task::Status startPlayback( parser::Task& task, VLC::MediaPlayer& mp );

@@ -63,9 +63,10 @@ bool VLCThumbnailer::initialize()
     return true;
 }
 
-File::ParserStep VLCThumbnailer::step() const
+bool VLCThumbnailer::isCompleted( const parser::Task& task ) const
 {
-    return File::ParserStep::Thumbnailer;
+    return ( static_cast<uint8_t>( task.file->parserStep() ) &
+            static_cast<uint8_t>( File::ParserStep::Thumbnailer ) ) != 0;
 }
 
 parser::Task::Status VLCThumbnailer::run( parser::Task& task )
