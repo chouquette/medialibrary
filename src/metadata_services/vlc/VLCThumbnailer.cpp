@@ -150,14 +150,14 @@ parser::Task::Status VLCThumbnailer::startPlayback( parser::Task& task, VLC::Med
     // as we leave this method.
     bool hasVideoTrack = false;
     bool failedToStart = false;
+    bool hasAnyTrack = false;
     auto em = mp.eventManager();
-    em.onESAdded([this, &hasVideoTrack]( libvlc_track_type_t type, int ) {
+    em.onESAdded([this, &hasVideoTrack, &hasAnyTrack]( libvlc_track_type_t type, int ) {
+        std::lock_guard<compat::Mutex> lock( m_mutex );
         if ( type == libvlc_track_video )
-        {
-            std::lock_guard<compat::Mutex> lock( m_mutex );
             hasVideoTrack = true;
-            m_cond.notify_all();
-        }
+        hasAnyTrack = true;
+        m_cond.notify_all();
     });
     em.onEncounteredError([this, &failedToStart]() {
         std::lock_guard<compat::Mutex> lock( m_mutex );
@@ -167,18 +167,29 @@ parser::Task::Status VLCThumbnailer::startPlayback( parser::Task& task, VLC::Med
 
     std::unique_lock<compat::Mutex> lock( m_mutex );
     mp.play();
-    bool success = m_cond.wait_for( lock, std::chrono::seconds( 1 ), [&failedToStart, &hasVideoTrack]() {
-        return failedToStart == true || hasVideoTrack == true;
+    bool success = m_cond.wait_for( lock, std::chrono::seconds( 3 ), [&failedToStart, &hasAnyTrack]() {
+        return failedToStart == true || hasAnyTrack == true;
     });
-    // If a video track was added, we can continue right away.
-    if ( hasVideoTrack == true )
-    {
-        assert( success == true );
-        return parser::Task::Status::Success;
-    }
+
     // In case the playback failed, we probably won't fetch anything interesting anyway.
-    if ( failedToStart == true )
+    if ( failedToStart == true || success == false )
         return parser::Task::Status::Fatal;
+
+    // If we have any kind of track, but not a video track, we don't have to wait long, tracks are usually
+    // being discovered together.
+    if ( hasVideoTrack == false )
+    {
+        m_cond.wait_for( lock, std::chrono::seconds( 1 ), [&hasVideoTrack]() {
+            return hasVideoTrack == true;
+        });
+    }
+
+    // Now that we waited long enough for a potential video track, if we have one, we keep generating
+    // the thumbnail.
+    // If we don't
+    if ( hasVideoTrack == true )
+        return parser::Task::Status::Success;
+
     // We are now in the case of a timeout: No failure, but no video track either.
     // The file might be an audio file we haven't detected yet:
     if ( task.media->type() == Media::Type::Unknown )
