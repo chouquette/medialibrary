@@ -140,6 +140,7 @@ void ParserService::mainloop()
                     break;
             }
             // Otherwise it's safe to assume we have at least one element.
+            LOG_INFO('[', serviceName, "] has ", m_tasks.size(), " tasks remaining" );
             task = std::move( m_tasks.front() );
             m_tasks.pop();
         }
