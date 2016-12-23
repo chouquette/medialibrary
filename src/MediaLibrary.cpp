@@ -759,8 +759,9 @@ void MediaLibrary::setLogger( ILogger* logger )
     Log::SetLogger( logger );
 }
 
-void MediaLibrary::onDevicePlugged( const std::string&, const std::string& mountpoint )
+void MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& mountpoint )
 {
+    LOG_INFO( "Device ", uuid, " was plugged and mounted on ", mountpoint );
     for ( const auto& fsFactory : m_fsFactories )
     {
         if ( fsFactory->isPathSupported( "file://" ) )
@@ -771,8 +772,9 @@ void MediaLibrary::onDevicePlugged( const std::string&, const std::string& mount
     }
 }
 
-void MediaLibrary::onDeviceUnplugged( const std::string& )
+void MediaLibrary::onDeviceUnplugged( const std::string& uuid )
 {
+    LOG_INFO( "Device ", uuid, " was unplugged" );
     for ( const auto& fsFactory : m_fsFactories )
     {
         if ( fsFactory->isPathSupported( "file://" ) )
