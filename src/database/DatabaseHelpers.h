@@ -32,11 +32,70 @@
 namespace medialibrary
 {
 
-template <typename IMPL, typename TABLEPOLICY>
+namespace cachepolicy
+{
+
+template <typename T>
+struct Cached
+{
+private:
+    using Lock = std::unique_lock<compat::Mutex>;
+    static std::unordered_map<int64_t, std::shared_ptr<T>> Store;
+    static compat::Mutex Mutex;
+
+public:
+    static Lock lock()
+    {
+        return Lock{ Mutex };
+    }
+
+    static void insert( int64_t key, std::shared_ptr<T> value )
+    {
+        assert( Store.find( key ) == end( Store ) );
+        save( key, std::move( value ) );
+    }
+
+    static void save( int64_t key, std::shared_ptr<T> value )
+    {
+        Store[key] = std::move( value );
+    }
+
+    static void remove( int64_t key )
+    {
+        Lock l{ Mutex };
+        auto it = Store.find( key );
+        if ( it != end( Store ) )
+            Store.erase( it );
+    }
+
+    static void clear()
+    {
+        Lock l{ Mutex };
+        Store.clear();
+    }
+
+    static std::shared_ptr<T> load( int64_t key )
+    {
+        auto it = Store.find( key );
+        if ( it == Store.end() )
+            return nullptr;
+        return it->second;
+    }
+};
+
+
+template <typename T>
+std::unordered_map<int64_t, std::shared_ptr<T>>
+Cached<T>::Store;
+
+template <typename T>
+compat::Mutex Cached<T>::Mutex;
+
+}
+
+template <typename IMPL, typename TABLEPOLICY, typename CACHEPOLICY = cachepolicy::Cached<IMPL>>
 class DatabaseHelpers
 {
-    using Lock = std::lock_guard<compat::Mutex>;
-
     public:
         template <typename... Args>
         static std::shared_ptr<IMPL> fetch( MediaLibraryPtr ml, const std::string& req, Args&&... args )
@@ -69,14 +128,14 @@ class DatabaseHelpers
 
         static std::shared_ptr<IMPL> load( MediaLibraryPtr ml, sqlite::Row& row )
         {
-            Lock l{ Mutex };
+            auto l = CACHEPOLICY::lock();
 
             auto key = row.load<int64_t>( 0 );
-            auto it = Store.find( key );
-            if ( it != Store.end() )
-                return it->second;
-            auto res = std::make_shared<IMPL>( ml, row );
-            Store[key] = res;
+            auto res = CACHEPOLICY::load( key );
+            if ( res != nullptr )
+                return res;
+            res = std::make_shared<IMPL>( ml, row );
+            CACHEPOLICY::save( key, res );
             return res;
         }
 
@@ -86,22 +145,18 @@ class DatabaseHelpers
                     + TABLEPOLICY::PrimaryKeyColumn + " = ?";
             auto res = sqlite::Tools::executeDelete( ml->getConn(), req, pkValue );
             if ( res == true )
-                removeFromCache( pkValue );
+                CACHEPOLICY::remove( pkValue );
             return res;
         }
 
         static void removeFromCache( int64_t pkValue )
         {
-            Lock l{ Mutex };
-            auto it = Store.find( pkValue );
-            if ( it != end( Store ) )
-                Store.erase( it );
+            CACHEPOLICY::remove( pkValue );
         }
 
         static void clear()
         {
-            Lock l{ Mutex };
-            Store.clear();
+            CACHEPOLICY::clear();
         }
 
     protected:
@@ -114,24 +169,11 @@ class DatabaseHelpers
             int64_t pKey = sqlite::Tools::executeInsert( ml->getConn(), req, std::forward<Args>( args )... );
             if ( pKey == 0 )
                 return false;
-            Lock l{ Mutex };
             (self.get())->*TABLEPOLICY::PrimaryKey = pKey;
-            assert( Store.find( pKey ) == end( Store ) );
-            Store[pKey] = self;
+            auto l = CACHEPOLICY::lock();
+            CACHEPOLICY::insert( pKey, self );
             return true;
         }
-
-    private:
-        static std::unordered_map<int64_t, std::shared_ptr<IMPL>> Store;
-        static compat::Mutex Mutex;
 };
-
-
-template <typename IMPL, typename TABLEPOLICY>
-std::unordered_map<int64_t, std::shared_ptr<IMPL>>
-DatabaseHelpers<IMPL, TABLEPOLICY>::Store;
-
-template <typename IMPL, typename TABLEPOLICY>
-compat::Mutex DatabaseHelpers<IMPL, TABLEPOLICY>::Mutex;
 
 }
