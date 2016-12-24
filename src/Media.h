@@ -103,10 +103,6 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual std::vector<LabelPtr> labels() override;
         virtual int playCount() const  override;
         virtual bool increasePlayCount() override;
-        virtual float progress() const override;
-        virtual bool setProgress( float progress ) override;
-        virtual int rating() const override;
-        virtual bool setRating( int rating ) override;
         virtual bool isFavorite() const override;
         virtual bool setFavorite( bool favorite ) override;
         virtual const std::vector<FilePtr>& files() const override;
@@ -149,8 +145,6 @@ private:
         int64_t m_duration;
         unsigned int m_playCount;
         unsigned int m_lastPlayedDate;
-        float m_progress;
-        int m_rating;
         unsigned int m_insertionDate;
         unsigned int m_releaseDate;
         std::string m_thumbnail;

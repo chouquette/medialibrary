@@ -63,6 +63,10 @@ class IMedia
         {
             AspectRatio,
             Speed,
+            // The progress within the file, the range of value is up to the application.
+            Progress,
+            // A rating for this media, values are up to the application
+            Rating,
         };
 
         virtual ~IMedia() = default;
@@ -76,23 +80,10 @@ class IMedia
          * @brief duration Returns the media duration in ms
          */
         virtual int64_t duration() const = 0;
-        virtual ShowEpisodePtr showEpisode() const = 0;
         virtual int playCount() const = 0;
         virtual bool increasePlayCount() = 0;
+        virtual ShowEpisodePtr showEpisode() const = 0;
         virtual const std::vector<FilePtr>& files() const = 0;
-        ///
-        /// \brief progress Returns the progress, in the [0;1] range
-        ///
-        virtual float progress() const = 0;
-        virtual bool setProgress( float progress ) = 0;
-        ///
-        /// \brief rating The media rating, or -1 if unset.
-        /// It is up to the application to determine the values it wishes to use.
-        /// No value is enforced, and any positive value (less or equal to INT32_MAX)
-        /// will be accepted.
-        ///
-        virtual int rating() const = 0;
-        virtual bool setRating( int rating ) = 0;
         virtual bool isFavorite() const = 0;
         virtual bool setFavorite( bool favorite ) = 0;
         virtual bool addLabel( LabelPtr label ) = 0;

@@ -123,30 +123,27 @@ TEST_F( Medias, PlayCount )
 TEST_F( Medias, Progress )
 {
     auto f = ml->addFile( "media.avi" );
-    ASSERT_EQ( .0f, f->progress() );
-    f->setProgress( 123.0f );
-    // Check that a non-sensical value is ignored
-    ASSERT_EQ( .0f, f->progress() );
-    f->setProgress( 0.666f );
-    ASSERT_EQ( .666f, f->progress() );
+    ASSERT_EQ( 0, f->metadata( Media::MetadataType::Progress ).integer() );
+    f->setMetadata( Media::MetadataType::Progress, 123 );
+    ASSERT_EQ( 123, f->metadata( Media::MetadataType::Progress ).integer() );
 
     Reload();
 
     f = ml->media( f->id() );
-    ASSERT_EQ( .666f, f->progress() );
+    ASSERT_EQ( 123, f->metadata( Media::MetadataType::Progress ).integer() );
 }
 
 TEST_F( Medias, Rating )
 {
     auto f = ml->addFile( "media.avi" );
-    ASSERT_EQ( -1, f->rating() );
-    f->setRating( 12345 );
-    ASSERT_EQ( 12345, f->rating() );
+    ASSERT_FALSE( f->metadata( Media::MetadataType::Rating ).isSet() );
+    f->setMetadata( Media::MetadataType::Rating, 12345 );
+    ASSERT_EQ( 12345, f->metadata( Media::MetadataType::Rating ).integer() );
 
     Reload();
 
     f = ml->media( f->id() );
-    ASSERT_EQ( 12345, f->rating() );
+    ASSERT_EQ( 12345, f->metadata( Media::MetadataType::Rating ).integer() );
 }
 
 TEST_F( Medias, Search )

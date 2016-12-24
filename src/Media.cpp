@@ -67,8 +67,6 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_duration
         >> m_playCount
         >> m_lastPlayedDate
-        >> m_progress
-        >> m_rating
         >> m_insertionDate
         >> m_releaseDate
         >> m_thumbnail
@@ -86,8 +84,6 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
     , m_duration( -1 )
     , m_playCount( 0 )
     , m_lastPlayedDate( 0 )
-    , m_progress( .0f )
-    , m_rating( -1 )
     , m_insertionDate( time( nullptr ) )
     , m_releaseDate( 0 )
     , m_title( title )
@@ -183,38 +179,6 @@ bool Media::increasePlayCount()
         return false;
     m_playCount++;
     m_lastPlayedDate = lastPlayedDate;
-    return true;
-}
-
-float Media::progress() const
-{
-    return m_progress;
-}
-
-bool Media::setProgress( float progress )
-{
-    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET progress = ? WHERE id_media = ?";
-    if ( progress == m_progress || progress < 0 || progress > 1.0 )
-        return true;
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, progress, m_id ) == false )
-        return false;
-    m_progress = progress;
-    return true;
-}
-
-int Media::rating() const
-{
-    return m_rating;
-}
-
-bool Media::setRating( int rating )
-{
-    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET rating = ? WHERE id_media = ?";
-    if ( m_rating == rating )
-        return true;
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, rating, m_id ) == false )
-        return false;
-    m_rating = rating;
     return true;
 }
 
@@ -382,12 +346,12 @@ void Media::setThumbnail(const std::string& thumbnail )
 bool Media::save()
 {
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
-            "type = ?, subtype = ?, duration = ?, progress = ?, release_date = ?,"
+            "type = ?, subtype = ?, duration = ?, release_date = ?,"
             "thumbnail = ?, title = ? WHERE id_media = ?";
     if ( m_changed == false )
         return true;
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_type, m_subType, m_duration,
-                                       m_progress, m_releaseDate, m_thumbnail, m_title, m_id ) == false )
+                                       m_releaseDate, m_thumbnail, m_title, m_id ) == false )
     {
         return false;
     }
@@ -501,8 +465,6 @@ bool Media::createTable( DBConnection connection )
             "duration INTEGER DEFAULT -1,"
             "play_count UNSIGNED INTEGER,"
             "last_played_date UNSIGNED INTEGER,"
-            "progress REAL,"
-            "rating INTEGER DEFAULT -1,"
             "insertion_date UNSIGNED INTEGER,"
             "release_date UNSIGNED INTEGER,"
             "thumbnail TEXT,"
@@ -619,13 +581,17 @@ std::vector<MediaPtr> Media::fetchHistory( MediaLibraryPtr ml )
 void Media::clearHistory( MediaLibraryPtr ml )
 {
     auto dbConn = ml->getConn();
+    // There should already be an active transaction, from MediaLibrary::clearHistory
+    assert( sqlite::Transaction::transactionInProgress() == true );
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
             "play_count = 0,"
-            "last_played_date = NULL,"
-            "progress = 0";
+            "last_played_date = NULL";
+    static const std::string flushProgress = "DELETE FROM " + policy::MediaMetadataTable::Name +
+            " WHERE type = ?";
     // Clear the entire cache since quite a few items are now containing invalid info.
     clear();
     sqlite::Tools::executeUpdate( dbConn, req );
+    sqlite::Tools::executeDelete( dbConn, flushProgress, IMedia::MetadataType::Progress );
 }
 
 bool Media::MediaMetadata::isSet() const
