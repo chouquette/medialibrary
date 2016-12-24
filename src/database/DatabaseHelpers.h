@@ -83,13 +83,27 @@ public:
     }
 };
 
-
 template <typename T>
 std::unordered_map<int64_t, std::shared_ptr<T>>
 Cached<T>::Store;
 
 template <typename T>
 compat::Mutex Cached<T>::Mutex;
+
+template <typename T>
+struct Uncached
+{
+private:
+    using Lock = bool;
+
+public:
+    static Lock lock() { return true; }
+    static void insert( int64_t, std::shared_ptr<T> ) {}
+    static void save( int64_t, std::shared_ptr<T> ) {}
+    static void remove( int64_t ) {}
+    static void clear() {}
+    static std::shared_ptr<T> load( int64_t ) { return nullptr; }
+};
 
 }
 
