@@ -49,10 +49,31 @@ struct MediaTable
     static const std::string PrimaryKeyColumn;
     static int64_t Media::*const PrimaryKey;
 };
+
+struct MediaMetadataTable
+{
+    static const std::string Name;
+};
 }
 
 class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
 {
+    class MediaMetadata : public IMediaMetadata
+    {
+    public:
+        MediaMetadata(MetadataType t, std::string v) : m_type( t ), m_value( std::move( v ) ), m_isSet( true ) {}
+        MediaMetadata(MetadataType t) : m_type( t ), m_isSet( false ) {}
+        virtual bool isSet() const override;
+        virtual int64_t integer() const override;
+        virtual const std::string& str() const override;
+
+    private:
+        MetadataType m_type;
+        std::string m_value;
+        bool m_isSet;
+        friend class Media;
+    };
+
     public:
         // Those should be private, however the standard states that the expression
         // ::new (pv) T(std::forward(args)...)
@@ -100,6 +121,11 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual const std::string& thumbnail() override;
         virtual unsigned int insertionDate() const override;
         virtual unsigned int releaseDate() const override;
+
+        virtual const IMediaMetadata& metadata( MetadataType type ) const override;
+        virtual bool setMetadata( MetadataType type, const std::string& value ) override;
+        virtual bool setMetadata( MetadataType type, int64_t value ) override;
+
         void setReleaseDate( unsigned int date );
         void setThumbnail( const std::string& thumbnail );
         bool save();
@@ -140,6 +166,7 @@ private:
         mutable Cache<ShowEpisodePtr> m_showEpisode;
         mutable Cache<MoviePtr> m_movie;
         mutable Cache<std::vector<FilePtr>> m_files;
+        mutable Cache<std::vector<MediaMetadata>> m_metadata;
         bool m_changed;
 
         friend policy::MediaTable;

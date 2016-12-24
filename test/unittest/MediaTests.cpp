@@ -438,6 +438,49 @@ TEST_F( Medias, SetType )
     ASSERT_EQ( IMedia::Type::Video, m2->type() );
 }
 
+TEST_F( Medias, Metadata )
+{
+    auto m = ml->addFile( "media.mp3" );
+
+    {
+        const auto& md = m->metadata( Media::MetadataType::Speed );
+        ASSERT_FALSE( md.isSet() );
+    }
+
+    auto res = m->setMetadata( Media::MetadataType::Speed, "foo" );
+    ASSERT_TRUE( res );
+
+    {
+        const auto& md = m->metadata( Media::MetadataType::Speed );
+        ASSERT_EQ( "foo", md.str() );
+    }
+
+    Reload();
+
+    m = ml->media( m->id() );
+    const auto& md = m->metadata( Media::MetadataType::Speed );
+    ASSERT_EQ( "foo", md.str() );
+}
+
+TEST_F( Medias, MetadataOverride )
+{
+    auto m = ml->addFile( "media.mp3" );
+    auto res = m->setMetadata( Media::MetadataType::Speed, "foo" );
+    ASSERT_TRUE( res );
+
+    m->setMetadata( Media::MetadataType::Speed, "otter" );
+    {
+        const auto& md = m->metadata( Media::MetadataType::Speed );
+        ASSERT_EQ( "otter", md.str() );
+    }
+
+    Reload();
+
+    m = ml->media( m->id() );
+    const auto& md = m->metadata( Media::MetadataType::Speed );
+    ASSERT_EQ( "otter", md.str() );
+}
+
 class FetchMedia : public Tests
 {
 protected:

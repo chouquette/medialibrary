@@ -55,6 +55,8 @@ const std::string policy::MediaTable::Name = "Media";
 const std::string policy::MediaTable::PrimaryKeyColumn = "id_media";
 int64_t Media::* const policy::MediaTable::PrimaryKey = &Media::m_id;
 
+const std::string policy::MediaMetadataTable::Name = "MediaMetadata";
+
 Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
     , m_changed( false )
@@ -306,6 +308,61 @@ unsigned int Media::releaseDate() const
     return m_releaseDate;
 }
 
+const IMediaMetadata& Media::metadata( IMedia::MetadataType type ) const
+{
+    auto lock = m_metadata.lock();
+    if ( m_metadata.isCached() == false )
+    {
+        std::vector<MediaMetadata> res;
+        static const std::string req = "SELECT * FROM " + policy::MediaMetadataTable::Name +
+                " WHERE id_media = ?";
+        sqlite::Statement stmt( m_ml->getConn()->getConn(), req );
+        stmt.execute( m_id );
+        for ( sqlite::Row row = stmt.row(); row != nullptr; row = stmt.row() )
+        {
+            assert( row.load<int64_t>( 0 ) == m_id );
+            res.emplace_back( row.load<decltype(MediaMetadata::m_type)>( 1 ),
+                              row.load<decltype(MediaMetadata::m_value)>( 2 ) );
+        }
+        m_metadata = res;
+    }
+    auto it = std::find_if( begin( m_metadata.get() ), end( m_metadata.get() ), [type](const MediaMetadata& m ) {
+        return m.m_type == type;
+    });
+    if ( it == end( m_metadata.get() ) )
+    {
+        m_metadata.get().emplace_back( type );
+        return *m_metadata.get().rbegin();
+    }
+    return (*it);
+}
+
+bool Media::setMetadata( IMedia::MetadataType type, const std::string& value )
+{
+    {
+        auto lock = m_metadata.lock();
+        if ( m_metadata.isCached() == true )
+        {
+            auto it = std::find_if( begin( m_metadata.get() ), end( m_metadata.get() ), [type](const MediaMetadata& m ) {
+                return m.m_type == type;
+            });
+            if ( it != end( m_metadata.get() ) )
+                (*it).m_value = value;
+            else
+                m_metadata.get().emplace_back( type, value );
+        }
+    }
+    static const std::string req = "INSERT OR REPLACE INTO " + policy::MediaMetadataTable::Name +
+            "(id_media, type, value) VALUES(?, ?, ?)";
+    return sqlite::Tools::executeInsert( m_ml->getConn(), req, m_id, type, value );
+}
+
+bool Media::setMetadata( IMedia::MetadataType type, int64_t value )
+{
+    auto str = std::to_string( value );
+    return setMetadata( type, str );
+}
+
 void Media::setReleaseDate( unsigned int date )
 {
     if ( m_releaseDate == date )
@@ -461,9 +518,16 @@ bool Media::createTable( DBConnection connection )
                 "title,"
                 "labels"
             ")";
+    const std::string metadataReq = "CREATE TABLE IF NOT EXISTS " + policy::MediaMetadataTable::Name + "("
+            "id_media INTEGER,"
+            "type INTEGER,"
+            "value TEXT,"
+            "PRIMARY KEY (id_media, type)"
+            ")";
     return sqlite::Tools::executeRequest( connection, req ) &&
             sqlite::Tools::executeRequest( connection, indexReq ) &&
-            sqlite::Tools::executeRequest( connection, vtableReq );
+            sqlite::Tools::executeRequest( connection, vtableReq ) &&
+            sqlite::Tools::executeRequest( connection, metadataReq );
 }
 
 bool Media::createTriggers( DBConnection connection )
@@ -562,6 +626,21 @@ void Media::clearHistory( MediaLibraryPtr ml )
     // Clear the entire cache since quite a few items are now containing invalid info.
     clear();
     sqlite::Tools::executeUpdate( dbConn, req );
+}
+
+bool Media::MediaMetadata::isSet() const
+{
+    return m_isSet;
+}
+
+int64_t Media::MediaMetadata::integer() const
+{
+    return atoll( m_value.c_str() );
+}
+
+const std::string& Media::MediaMetadata::str() const
+{
+    return m_value;
 }
 
 }

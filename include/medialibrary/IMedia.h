@@ -34,6 +34,15 @@ class IAlbumTrack;
 class IShowEpisode;
 class ITrackInformation;
 
+class IMediaMetadata
+{
+public:
+    virtual ~IMediaMetadata() = default;
+    virtual bool isSet() const = 0;
+    virtual int64_t integer() const = 0;
+    virtual const std::string& str() const = 0;
+};
+
 class IMedia
 {
     public:
@@ -49,6 +58,11 @@ class IMedia
             ShowEpisode,
             Movie,
             AlbumTrack,
+        };
+        enum class MetadataType : uint8_t
+        {
+            AspectRatio,
+            Speed,
         };
 
         virtual ~IMedia() = default;
@@ -95,6 +109,19 @@ class IMedia
         virtual const std::string& thumbnail() = 0;
         virtual unsigned int insertionDate() const = 0;
         virtual unsigned int releaseDate() const = 0;
+
+        /// Metadata
+        ///
+        /// \brief metadata Fetch (or return a cached) metadata value for this media
+        /// \param type The metadata type
+        /// \return A reference to a wrapper object representing the metadata.
+        ///
+        virtual const IMediaMetadata& metadata( MetadataType type ) const = 0;
+        ///
+        /// \brief setMetadata Immediatly saves a metadata in database
+        ///
+        virtual bool setMetadata( MetadataType type, const std::string& value ) = 0;
+        virtual bool setMetadata( MetadataType type, int64_t value ) = 0;
 };
 
 }
