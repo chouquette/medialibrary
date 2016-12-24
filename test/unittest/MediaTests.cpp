@@ -61,7 +61,7 @@ TEST_F( Medias, Create )
     ASSERT_EQ( 1u, files.size() );
     auto f = files[0];
     ASSERT_FALSE( f->isExternal() );
-    ASSERT_EQ( File::Type::Entire, f->type() );
+    ASSERT_EQ( File::Type::Main, f->type() );
 }
 
 TEST_F( Medias, Fetch )

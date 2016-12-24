@@ -347,7 +347,7 @@ std::shared_ptr<Media> MediaLibrary::addFile( const fs::IFile& fileFs, Folder& p
         return nullptr;
     }
     // For now, assume all media are made of a single file
-    auto file = mptr->addFile( fileFs, parentFolder, parentFolderFs, File::Type::Entire );
+    auto file = mptr->addFile( fileFs, parentFolder, parentFolderFs, File::Type::Main );
     if ( file == nullptr )
     {
         LOG_ERROR( "Failed to add file ", fileFs.fullPath(), " to media #", mptr->id() );

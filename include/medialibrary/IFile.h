@@ -34,13 +34,7 @@ public:
     {
         /// Unknown type, so far
         Unknown,
-        /// The file is the entire media.
-        /// This implies there's only a single file for a media
-        Entire,
         /// The main file of a media.
-        /// This implies the media has other parts, for instance, the "Main"
-        /// part is the video plus some default soundtrack, and there is
-        /// another file of type "soundtrack"
         Main,
         /// A part of a media (for instance, the first half of a movie)
         Part,

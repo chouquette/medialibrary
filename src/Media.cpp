@@ -400,14 +400,14 @@ std::vector<MediaPtr> Media::listAll( MediaLibraryPtr ml, IMedia::Type type, Sor
         req = "SELECT m.* FROM " + policy::MediaTable::Name + " m INNER JOIN "
                 + policy::FileTable::Name + " f ON m.id_media = f.media_id"
                 " WHERE m.type = ?"
-                " AND ( f.type = ? OR f.type = ? )";
+                " AND f.type = ?";
         if ( sort == SortingCriteria::LastModificationDate )
             req += " ORDER BY f.last_modification_date";
         else
             req += " ORDER BY f.size";
         if ( desc == true )
             req += " DESC";
-        return fetchAll<IMedia>( ml, req, type, File::Type::Entire, File::Type::Main );
+        return fetchAll<IMedia>( ml, req, type, File::Type::Main );
     }
     req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? AND is_present = 1 ORDER BY ";
     switch ( sort )

@@ -50,7 +50,7 @@ TEST_F( Files, Create )
     ASSERT_EQ( "media.mkv", f->mrl() );
     ASSERT_NE( 0u, f->lastModificationDate() );
     ASSERT_NE( 0u, f->size() );
-    ASSERT_EQ( File::Type::Entire, f->type() );
+    ASSERT_EQ( File::Type::Main, f->type() );
 }
 
 TEST_F( Files, Remove )
