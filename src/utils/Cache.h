@@ -34,6 +34,11 @@ class Cache
 {
 public:
     Cache() : m_cached( false ) {}
+    Cache( const T& value )
+        : m_value( value )
+        , m_cached( true )
+    {
+    }
 
     bool isCached() const { return m_cached; }
 
