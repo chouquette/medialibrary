@@ -370,9 +370,9 @@ std::shared_ptr<File> Media::addFile( const fs::IFile& fileFs, Folder& parentFol
     return file;
 }
 
-std::shared_ptr<File> Media::addExternalMrl( const std::string& mrl )
+FilePtr Media::addExternalMrl( const std::string& mrl , IFile::Type type )
 {
-    auto file = File::create( m_ml, m_id, File::Type::External, mrl );
+    auto file = File::create( m_ml, m_id, type, mrl );
     if ( file == nullptr )
         return nullptr;
     auto lock = m_files.lock();

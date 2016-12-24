@@ -26,6 +26,7 @@
 #include <memory>
 
 #include "IMediaLibrary.h"
+#include "IFile.h"
 
 namespace medialibrary
 {
@@ -84,6 +85,7 @@ class IMedia
         virtual bool increasePlayCount() = 0;
         virtual ShowEpisodePtr showEpisode() const = 0;
         virtual const std::vector<FilePtr>& files() const = 0;
+        virtual FilePtr addExternalMrl( const std::string& mrl, IFile::Type type ) = 0;
         virtual bool isFavorite() const = 0;
         virtual bool setFavorite( bool favorite ) = 0;
         virtual bool addLabel( LabelPtr label ) = 0;

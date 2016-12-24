@@ -127,7 +127,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         bool save();
 
         std::shared_ptr<File> addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs , IFile::Type type);
-        std::shared_ptr<File> addExternalMrl( const std::string& mrl );
+        virtual FilePtr addExternalMrl( const std::string& mrl, IFile::Type type ) override;
         void removeFile( File& file );
 
         static std::vector<MediaPtr> listAll(MediaLibraryPtr ml, Type type , SortingCriteria sort, bool desc);
