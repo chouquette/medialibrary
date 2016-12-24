@@ -95,9 +95,9 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
 {
 }
 
-std::shared_ptr<Media> Media::create( MediaLibraryPtr ml, Type type, const fs::IFile& file )
+std::shared_ptr<Media> Media::create( MediaLibraryPtr ml, Type type, const std::string& fileName )
 {
-    auto self = std::make_shared<Media>( ml, file.name(), type );
+    auto self = std::make_shared<Media>( ml, fileName, type );
     static const std::string req = "INSERT INTO " + policy::MediaTable::Name +
             "(type, insertion_date, title, filename) VALUES(?, ?, ?, ?)";
 
