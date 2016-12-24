@@ -303,6 +303,15 @@ MediaPtr MediaLibrary::media( const std::string& mrl ) const
     return file->media();
 }
 
+MediaPtr MediaLibrary::addMedia( const std::string& mrl )
+{
+    auto media = Media::create( this, IMedia::Type::Unknown, utils::file::fileName( mrl ) );
+    if ( media == nullptr )
+        return nullptr;
+    media->addExternalMrl( mrl );
+    return media;
+}
+
 std::vector<MediaPtr> MediaLibrary::audioFiles( SortingCriteria sort, bool desc ) const
 {
     return Media::listAll( this, IMedia::Type::Audio, sort, desc );

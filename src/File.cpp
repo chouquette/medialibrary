@@ -66,6 +66,22 @@ File::File( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& fil
 {
 }
 
+File::File(MediaLibraryPtr ml, int64_t mediaId, IFile::Type type, const std::string& mrl )
+    : m_ml( ml )
+    , m_id( 0 )
+    , m_mediaId( mediaId )
+    , m_mrl( mrl )
+    , m_type( type )
+    , m_lastModificationDate( 0 )
+    , m_size( 0 )
+    , m_parserSteps( ParserStep::Completed )
+    , m_folderId( 0 )
+    , m_isPresent( true )
+    , m_isRemovable( false )
+    , m_fullPath( mrl )
+{
+}
+
 int64_t File::id() const
 {
     return m_id;
@@ -176,6 +192,17 @@ std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, Type ty
                          self->m_lastModificationDate, self->m_size, isRemovable ) == false )
         return nullptr;
     self->m_fullPath = fileFs.fullPath();
+    return self;
+}
+
+std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, IFile::Type type, const std::string& mrl )
+{
+    auto self = std::make_shared<File>( ml, mediaId, type, mrl );
+    static const std::string req = "INSERT INTO " + policy::FileTable::Name +
+            "(media_id, mrl, type, folder_id, is_removable) VALUES(?, ?, ?, NULL, 0)";
+
+    if ( insert( ml, self, req, mediaId, mrl, type ) == false )
+        return nullptr;
     return self;
 }
 

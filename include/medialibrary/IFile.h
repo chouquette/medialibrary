@@ -48,6 +48,8 @@ public:
         Soundtrack,
         /// External subtitles
         Subtitles,
+        /// External stream, unmanaged by the medialibrary
+        External,
     };
 
     virtual ~IFile() = default;

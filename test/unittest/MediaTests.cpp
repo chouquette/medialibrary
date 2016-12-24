@@ -478,6 +478,27 @@ TEST_F( Medias, MetadataOverride )
     ASSERT_EQ( "otter", md.str() );
 }
 
+TEST_F( Medias, ExternalMrl )
+{
+    auto m = ml->addMedia( "https://foo.bar/sea-otters.mkv" );
+    ASSERT_NE( nullptr, m );
+
+    ASSERT_EQ( m->title(), "sea-otters.mkv" );
+
+    // External files shouldn't appear in listings
+    auto videos = ml->videoFiles( medialibrary::SortingCriteria::Default, false );
+    ASSERT_EQ( 0u, videos.size() );
+
+    auto audios = ml->audioFiles( medialibrary::SortingCriteria::Default, false );
+    ASSERT_EQ( 0u, audios.size() );
+
+    Reload();
+
+    auto m2 = ml->media( "https://foo.bar/sea-otters.mkv" );
+    ASSERT_NE( nullptr, m2 );
+    ASSERT_EQ( m->id(), m2->id() );
+}
+
 class FetchMedia : public Tests
 {
 protected:

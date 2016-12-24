@@ -60,6 +60,7 @@ public:
 
     File( MediaLibraryPtr ml, sqlite::Row& row );
     File( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& file, int64_t folderId, bool isRemovable );
+    File( MediaLibraryPtr ml, int64_t mediaId, Type type, const std::string& mrl );
     virtual int64_t id() const override;
     virtual const std::string& mrl() const override;
     virtual Type type() const override;
@@ -81,6 +82,7 @@ public:
     static bool createTable( DBConnection dbConnection );
     static std::shared_ptr<File> create( MediaLibraryPtr ml, int64_t mediaId, Type type,
                                          const fs::IFile& file, int64_t folderId, bool isRemovable );
+    static std::shared_ptr<File> create( MediaLibraryPtr ml, int64_t mediaId, Type type, const std::string& mrl );
     /**
      * @brief fromPath  Attempts to fetch a file using its full path
      * This will only work if the file was stored on a non removable device
