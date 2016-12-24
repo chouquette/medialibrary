@@ -49,7 +49,8 @@ File::File( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_folderId
         >> m_isPresent
         >> m_isRemovable
-        >> m_isExternal;
+        >> m_isExternal
+        >> m_isActive;
 }
 
 File::File( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& file, int64_t folderId, bool isRemovable )
@@ -65,6 +66,7 @@ File::File( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& fil
     , m_isPresent( true )
     , m_isRemovable( isRemovable )
     , m_isExternal( false )
+    , m_isActive( false )
 {
 }
 
@@ -81,6 +83,7 @@ File::File(MediaLibraryPtr ml, int64_t mediaId, IFile::Type type, const std::str
     , m_isPresent( true )
     , m_isRemovable( false )
     , m_isExternal( true )
+    , m_isActive( false )
     , m_fullPath( mrl )
 {
 }
@@ -123,6 +126,42 @@ unsigned int File::size() const
 bool File::isExternal() const
 {
     return m_isExternal;
+}
+
+bool File::isActive() const
+{
+    assert( m_type == Type::Soundtrack || m_type == Type::Subtitles );
+    return m_isActive;
+}
+
+bool File::setActive( bool active )
+{
+    if ( m_isActive == active )
+        return true;
+    // If we're activating this file, we also need to mark any existing File instance as inactive.
+    // So first, let's fetch the other active track
+    auto t = m_ml->getConn()->newTransaction();
+    if ( active == true )
+    {
+        static const std::string fetchActive = "SELECT * FROM " + policy::FileTable::Name + " WHERE "
+                "media_id = ? AND type = ?";
+        auto activeTrack = fetch( m_ml, fetchActive, m_mediaId, m_type );
+        if ( activeTrack != nullptr )
+        {
+            static const std::string disableTracks = "UPDATE " + policy::FileTable::Name +
+                    " SET is_active = 0 WHERE media_id = ? AND type = ? LIMIT 1";
+            if ( sqlite::Tools::executeUpdate( m_ml->getConn(), disableTracks, m_mediaId, m_type ) == false )
+                return false;
+            activeTrack->m_isActive = false;
+        }
+    }
+    static const std::string enableTrack = "UPDATE " + policy::FileTable::Name +
+            " SET is_active = ? WHERE id_file = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), enableTrack, active, m_id ) == false )
+        return false;
+    m_isActive = active;
+    t->commit();
+    return true;
 }
 
 void File::markStepCompleted( ParserStep step )
@@ -173,6 +212,7 @@ bool File::createTable( DBConnection dbConnection )
             "is_present BOOLEAN NOT NULL DEFAULT 1,"
             "is_removable BOOLEAN NOT NULL,"
             "is_external BOOLEAN NOT NULL,"
+            "is_active BOOLEAN NOT NULL,"
             "FOREIGN KEY (media_id) REFERENCES " + policy::MediaTable::Name
             + "(id_media) ON DELETE CASCADE,"
             "FOREIGN KEY (folder_id) REFERENCES " + policy::FolderTable::Name
@@ -195,10 +235,11 @@ std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, Type ty
 {
     auto self = std::make_shared<File>( ml, mediaId, type, fileFs, folderId, isRemovable );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
-            "(media_id, mrl, type, folder_id, last_modification_date, size, is_removable, is_external) VALUES(?, ?, ?, ?, ?, ?, ?, 0)";
+            "(media_id, mrl, type, folder_id, last_modification_date, size, is_removable, is_external, is_active) "
+            "VALUES(?, ?, ?, ?, ?, ?, ?, 0, ?)";
 
     if ( insert( ml, self, req, mediaId, self->m_mrl, type, sqlite::ForeignKey( folderId ),
-                         self->m_lastModificationDate, self->m_size, isRemovable ) == false )
+                         self->m_lastModificationDate, self->m_size, isRemovable, type == Type::Main ) == false )
         return nullptr;
     self->m_fullPath = fileFs.fullPath();
     return self;
@@ -208,9 +249,9 @@ std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, IFile::
 {
     auto self = std::make_shared<File>( ml, mediaId, type, mrl );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
-            "(media_id, mrl, type, folder_id, is_removable, is_external) VALUES(?, ?, ?, NULL, 0, 1)";
+            "(media_id, mrl, type, folder_id, is_removable, is_external, is_active) VALUES(?, ?, ?, NULL, 0, 1, ?)";
 
-    if ( insert( ml, self, req, mediaId, mrl, type ) == false )
+    if ( insert( ml, self, req, mediaId, mrl, type, type == Type::Main ) == false )
         return nullptr;
     return self;
 }

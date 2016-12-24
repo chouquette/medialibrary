@@ -54,6 +54,16 @@ public:
     /// \brief isExternal returns true if this stream isn't managed by the medialibrary
     ///
     virtual bool isExternal() const = 0;
+    /// \brief isActive Returns true if this is the active file for the specified Type
+    /// This only makes sense for Soundtrack & Subtitles types
+    ///
+    virtual bool isActive() const = 0;
+    ///
+    /// \brief setActive Mark this stream as the active one for its specific type, or deactivate it
+    /// This only makes sense for Soundtrack & Subtitles types
+    /// \return false in case of error, true otherwise.
+    ///
+    virtual bool setActive( bool active ) = 0;
 };
 
 }
