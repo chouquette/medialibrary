@@ -48,8 +48,6 @@ public:
         Soundtrack,
         /// External subtitles
         Subtitles,
-        /// External stream, unmanaged by the medialibrary
-        External,
     };
 
     virtual ~IFile() = default;
@@ -58,6 +56,10 @@ public:
     virtual Type type() const = 0;
     virtual unsigned int lastModificationDate() const = 0;
     virtual unsigned int size() const = 0;
+    ///
+    /// \brief isExternal returns true if this stream isn't managed by the medialibrary
+    ///
+    virtual bool isExternal() const = 0;
 };
 
 }

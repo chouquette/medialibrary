@@ -48,7 +48,8 @@ File::File( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_parserSteps
         >> m_folderId
         >> m_isPresent
-        >> m_isRemovable;
+        >> m_isRemovable
+        >> m_isExternal;
 }
 
 File::File( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& file, int64_t folderId, bool isRemovable )
@@ -63,6 +64,7 @@ File::File( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& fil
     , m_folderId( folderId )
     , m_isPresent( true )
     , m_isRemovable( isRemovable )
+    , m_isExternal( false )
 {
 }
 
@@ -78,6 +80,7 @@ File::File(MediaLibraryPtr ml, int64_t mediaId, IFile::Type type, const std::str
     , m_folderId( 0 )
     , m_isPresent( true )
     , m_isRemovable( false )
+    , m_isExternal( true )
     , m_fullPath( mrl )
 {
 }
@@ -115,6 +118,11 @@ unsigned int File::lastModificationDate() const
 unsigned int File::size() const
 {
     return m_size;
+}
+
+bool File::isExternal() const
+{
+    return m_isExternal;
 }
 
 void File::markStepCompleted( ParserStep step )
@@ -164,6 +172,7 @@ bool File::createTable( DBConnection dbConnection )
             "folder_id UNSIGNED INTEGER,"
             "is_present BOOLEAN NOT NULL DEFAULT 1,"
             "is_removable BOOLEAN NOT NULL,"
+            "is_external BOOLEAN NOT NULL,"
             "FOREIGN KEY (media_id) REFERENCES " + policy::MediaTable::Name
             + "(id_media) ON DELETE CASCADE,"
             "FOREIGN KEY (folder_id) REFERENCES " + policy::FolderTable::Name
@@ -186,7 +195,7 @@ std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, Type ty
 {
     auto self = std::make_shared<File>( ml, mediaId, type, fileFs, folderId, isRemovable );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
-            "(media_id, mrl, type, folder_id, last_modification_date, size, is_removable) VALUES(?, ?, ?, ?, ?, ?, ?)";
+            "(media_id, mrl, type, folder_id, last_modification_date, size, is_removable, is_external) VALUES(?, ?, ?, ?, ?, ?, ?, 0)";
 
     if ( insert( ml, self, req, mediaId, self->m_mrl, type, sqlite::ForeignKey( folderId ),
                          self->m_lastModificationDate, self->m_size, isRemovable ) == false )
@@ -199,7 +208,7 @@ std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, IFile::
 {
     auto self = std::make_shared<File>( ml, mediaId, type, mrl );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
-            "(media_id, mrl, type, folder_id, is_removable) VALUES(?, ?, ?, NULL, 0)";
+            "(media_id, mrl, type, folder_id, is_removable, is_external) VALUES(?, ?, ?, NULL, 0, 1)";
 
     if ( insert( ml, self, req, mediaId, mrl, type ) == false )
         return nullptr;

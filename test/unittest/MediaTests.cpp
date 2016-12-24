@@ -56,6 +56,12 @@ TEST_F( Medias, Create )
     ASSERT_EQ( m->showEpisode(), nullptr );
     ASSERT_EQ( m->duration(), -1 );
     ASSERT_NE( 0u, m->insertionDate() );
+
+    auto files = m->files();
+    ASSERT_EQ( 1u, files.size() );
+    auto f = files[0];
+    ASSERT_FALSE( f->isExternal() );
+    ASSERT_EQ( File::Type::Entire, f->type() );
 }
 
 TEST_F( Medias, Fetch )
@@ -497,6 +503,12 @@ TEST_F( Medias, ExternalMrl )
     auto m2 = ml->media( "https://foo.bar/sea-otters.mkv" );
     ASSERT_NE( nullptr, m2 );
     ASSERT_EQ( m->id(), m2->id() );
+
+    auto files = m2->files();
+    ASSERT_EQ( 1u, files.size() );
+    auto f = files[0];
+    ASSERT_TRUE( f->isExternal() );
+    ASSERT_EQ( File::Type::Main, f->type() );
 }
 
 class FetchMedia : public Tests

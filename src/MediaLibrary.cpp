@@ -308,7 +308,7 @@ MediaPtr MediaLibrary::addMedia( const std::string& mrl )
     auto media = Media::create( this, IMedia::Type::Unknown, utils::file::fileName( mrl ) );
     if ( media == nullptr )
         return nullptr;
-    media->addExternalMrl( mrl, IFile::Type::External );
+    media->addExternalMrl( mrl, IFile::Type::Main );
     return media;
 }
 
