@@ -38,7 +38,6 @@
 #include "File.h"
 #include "Folder.h"
 #include "Genre.h"
-#include "History.h"
 #include "Media.h"
 #include "MediaLibrary.h"
 #include "Label.h"
@@ -118,7 +117,6 @@ MediaLibrary::~MediaLibrary()
     Device::clear();
     File::clear();
     Playlist::clear();
-    History::clear();
     Genre::clear();
 }
 
@@ -150,7 +148,6 @@ bool MediaLibrary::createAllTables()
         Artist::createTriggers( m_dbConnection.get() ) &&
         Media::createTriggers( m_dbConnection.get() ) &&
         Playlist::createTriggers( m_dbConnection.get() ) &&
-        History::createTable( m_dbConnection.get() ) &&
         Settings::createTable( m_dbConnection.get() );
     if ( res == false )
         return false;
@@ -479,16 +476,6 @@ bool MediaLibrary::deletePlaylist( int64_t playlistId )
     return Playlist::destroy( this, playlistId );
 }
 
-bool MediaLibrary::addToHistory( const std::string& mrl, const std::string& title )
-{
-    return History::insert( getConn(), mrl, title );
-}
-
-std::vector<HistoryPtr> MediaLibrary::lastStreamsPlayed() const
-{
-    return History::fetch( this );
-}
-
 std::vector<MediaPtr> MediaLibrary::lastMediaPlayed() const
 {
     return Media::fetchHistory( this );
@@ -496,11 +483,7 @@ std::vector<MediaPtr> MediaLibrary::lastMediaPlayed() const
 
 bool MediaLibrary::clearHistory()
 {
-    auto t = getConn()->newTransaction();
     Media::clearHistory( this );
-    if ( History::clearStreams( this ) == false )
-        return false;
-    t->commit();
     return true;
 }
 

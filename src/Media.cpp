@@ -592,8 +592,7 @@ std::vector<MediaPtr> Media::fetchHistory( MediaLibraryPtr ml )
 void Media::clearHistory( MediaLibraryPtr ml )
 {
     auto dbConn = ml->getConn();
-    // There should already be an active transaction, from MediaLibrary::clearHistory
-    assert( sqlite::Transaction::transactionInProgress() == true );
+    auto t = dbConn->newTransaction();
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
             "play_count = 0,"
             "last_played_date = NULL";
@@ -603,6 +602,7 @@ void Media::clearHistory( MediaLibraryPtr ml )
     clear();
     sqlite::Tools::executeUpdate( dbConn, req );
     sqlite::Tools::executeDelete( dbConn, flushProgress, IMedia::MetadataType::Progress );
+    t->commit();
 }
 
 bool Media::MediaMetadata::isSet() const
