@@ -52,7 +52,6 @@ int MetadataParser::toInt( VLC::Media& vlcMedia, libvlc_meta_t meta, const char*
     auto str = vlcMedia.meta( meta );
     if ( str.empty() == false )
     {
-#ifndef __ANDROID__
         try
         {
             return std::stoi( str );
@@ -61,9 +60,6 @@ int MetadataParser::toInt( VLC::Media& vlcMedia, libvlc_meta_t meta, const char*
         {
             LOG_WARN( "Invalid ", name, " provided (", str, "): ", ex.what() );
         }
-#else
-        return atoi( str.c_str() );
-#endif
     }
     return 0;
 }
