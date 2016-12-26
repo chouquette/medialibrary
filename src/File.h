@@ -102,6 +102,15 @@ public:
      */
     static std::shared_ptr<File> fromFileName( MediaLibraryPtr ml, const std::string& fileName, int64_t folderId );
 
+    /**
+     * @brief fromMrl Attempts to find an external stream (ie. it was added with MediaLibrary::addMedia,
+     * and not discovered through any IDiscoverer)
+     * This implies the folder_id is null
+     * @return
+     */
+    static std::shared_ptr<File> fromMrl( MediaLibraryPtr ml, const std::string& mrl );
+
+
 private:
     MediaLibraryPtr m_ml;
 

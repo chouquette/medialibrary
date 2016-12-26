@@ -266,7 +266,16 @@ MediaPtr MediaLibrary::media( const std::string& mrl ) const
 {
     auto fsFactory = fsFactoryForPath( mrl );
     if ( fsFactory == nullptr )
-        return nullptr;
+    {
+        // Assume this is an external media with a null folder_id
+        auto file = File::fromMrl( this, mrl );
+        if ( file == nullptr )
+        {
+            LOG_WARN( "Failed to fetch stream representation for ", mrl );
+            return nullptr;
+        }
+        return file->media();
+    }
     auto device = fsFactory->createDeviceFromPath( mrl );
     if ( device == nullptr )
     {

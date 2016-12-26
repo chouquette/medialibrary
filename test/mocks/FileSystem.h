@@ -354,9 +354,12 @@ public:
         return false;
     }
 
-    virtual bool isPathSupported( const std::string& ) const override
+    virtual bool isPathSupported( const std::string& mrl ) const override
     {
-        return true;
+        auto it = mrl.find( "://" );
+        if ( it == std::string::npos )
+            return true;
+        return mrl.compare( 0, 7, "file://" ) == 0;
     }
 
     virtual bool isNetworkFileSystem() const override

@@ -266,7 +266,7 @@ std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, IFile::
 
 std::shared_ptr<File> File::fromPath( MediaLibraryPtr ml, const std::string& path )
 {
-    static const std::string req = "SELECT * FROM " + policy::FileTable::Name +  " WHERE mrl = ?";
+    static const std::string req = "SELECT * FROM " + policy::FileTable::Name +  " WHERE mrl = ? AND folder_id IS NOT NULL";
     auto file = fetch( ml, req, path );
     if ( file == nullptr )
         return nullptr;
@@ -285,6 +285,17 @@ std::shared_ptr<File> File::fromFileName( MediaLibraryPtr ml, const std::string&
     if ( file == nullptr )
         return nullptr;
     assert( file->m_isRemovable == true );
+    return file;
+}
+
+std::shared_ptr<File> File::fromMrl( MediaLibraryPtr ml, const std::string& mrl )
+{
+    static const std::string req = "SELECT * FROM " + policy::FileTable::Name +  " WHERE mrl = ? "
+            "AND folder_id IS NULL";
+    auto file = fetch( ml, req, mrl );
+    if ( file == nullptr )
+        return nullptr;
+    assert( file->m_isExternal == true );
     return file;
 }
 
