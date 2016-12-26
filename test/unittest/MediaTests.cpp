@@ -299,7 +299,6 @@ TEST_F( Medias, History )
     compat::this_thread::sleep_for( std::chrono::seconds{ 1 } );
     auto m2 = ml->addFile( "media.mkv" );
     m2->increasePlayCount();
-    m2->save();
 
     history = ml->lastMediaPlayed();
     ASSERT_EQ( 2u, history.size() );
