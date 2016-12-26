@@ -66,12 +66,10 @@ TEST_F( Files, Remove )
 
 TEST_F( Files, Media )
 {
-    ASSERT_EQ( f->id(), f->media()->id() );
+    ASSERT_EQ( m->id(), f->media()->id() );
 
     Reload();
 
-    auto m = ml->media( "media.mkv" );
-    ASSERT_NE( nullptr, m );
     auto files = m->files();
     ASSERT_EQ( 1u, files.size() );
     f = std::static_pointer_cast<File>( files[0] );

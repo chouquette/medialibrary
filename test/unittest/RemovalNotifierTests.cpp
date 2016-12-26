@@ -84,7 +84,7 @@ protected:
 
 TEST_F( RemovalNotifierTests, DeleteOne )
 {
-    auto m = ml->addFile( "media.avi" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.avi" ) );
     auto lock = cbMock->prepareWait();
     m->removeFile( static_cast<File&>( *m->files()[0] ) );
     // This media doesn't have any associated files, and should be removed by a sqlite hook
@@ -98,7 +98,7 @@ TEST_F( RemovalNotifierTests, DeleteBatch )
     std::shared_ptr<Media> media[5];
     for ( auto i = 0u; i < 5; ++i )
     {
-        media[i] = ml->addFile( "media.avi" );
+        media[i] = std::static_pointer_cast<Media>( ml->addMedia( std::string{ "media" } + std::to_string( i ) + ".avi" ) );
     }
     auto lock = cbMock->prepareWait();
     for ( auto i = 0u; i < 5; ++i )

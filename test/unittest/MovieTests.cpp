@@ -36,7 +36,7 @@ class Movies : public Tests
 
 TEST_F( Movies, Create )
 {
-    auto media = ml->addFile( "movie.mkv" );
+    auto media = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv" ) );
     auto m = ml->createMovie( *media, "movie" );
     ASSERT_NE( m, nullptr );
     ASSERT_EQ( m->title(), "movie" );
@@ -44,7 +44,7 @@ TEST_F( Movies, Create )
 
 TEST_F( Movies, Fetch )
 {
-    auto media = ml->addFile( "movie.mkv" );
+    auto media = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv" ) );
     auto m = ml->createMovie( *media, "movie" );
     auto m2 = ml->movie( "movie" );
 
@@ -59,7 +59,7 @@ TEST_F( Movies, Fetch )
 
 TEST_F( Movies, SetShortSummary )
 {
-    auto media = ml->addFile( "movie.mkv" );
+    auto media = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv" ) );
     auto m = ml->createMovie( *media, "movie" );
 
     ASSERT_EQ( m->shortSummary().length(), 0u );
@@ -74,7 +74,7 @@ TEST_F( Movies, SetShortSummary )
 
 TEST_F( Movies, SetArtworkMrl )
 {
-    auto media = ml->addFile( "movie.mkv" );
+    auto media = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv" ) );
     auto m = ml->createMovie( *media, "movie" );
 
     ASSERT_EQ( m->artworkMrl().length(), 0u );
@@ -89,7 +89,7 @@ TEST_F( Movies, SetArtworkMrl )
 
 TEST_F( Movies, SetImdbId )
 {
-    auto media = ml->addFile( "movie.mkv" );
+    auto media = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv" ) );
     auto m = ml->createMovie( *media, "movie" );
 
     ASSERT_EQ( m->imdbId().length(), 0u );
@@ -104,7 +104,7 @@ TEST_F( Movies, SetImdbId )
 
 TEST_F( Movies, AssignToFile )
 {
-    auto f = ml->addFile( "file.avi" );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.avi" ) );
     ASSERT_EQ( f->movie(), nullptr );
 
     auto m = ml->createMovie( *f, "movie" );

@@ -35,14 +35,14 @@ class VideoTracks : public Tests
 
 TEST_F( VideoTracks, AddTrack )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addFile( "file.avi" ) );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.avi" ) );
     bool res = f->addVideoTrack( "H264", 1920, 1080, 29.97, "language", "description" );
     ASSERT_TRUE( res );
 }
 
 TEST_F( VideoTracks, FetchTracks )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addFile( "file.avi" ) );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.avi" ) );
     f->addVideoTrack( "H264", 1920, 1080, 29.97, "l1", "d1" );
     f->addVideoTrack( "VP80", 640, 480, 29.97, "l2", "d2" );
 
@@ -60,7 +60,7 @@ TEST_F( VideoTracks, FetchTracks )
     // Reload from DB
     Reload();
 
-    auto m = ml->media( "file.avi" );
+    auto m = ml->media( f->id() );
     ASSERT_NE( nullptr, m );
     ts = m->videoTracks();
     ASSERT_EQ( ts.size(), 2u );

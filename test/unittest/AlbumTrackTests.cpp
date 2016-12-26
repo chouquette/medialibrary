@@ -39,7 +39,7 @@ class AlbumTracks : public Tests
 TEST_F( AlbumTracks, Create )
 {
     auto album = ml->createAlbum( "album" );
-    auto f = ml->addFile( "track1.mp3" );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
     auto track = album->addTrack( f, 1, 10, 0, 0 );
     f->save();
     ASSERT_NE( nullptr, track );
@@ -54,7 +54,7 @@ TEST_F( AlbumTracks, Create )
 TEST_F( AlbumTracks, Artist )
 {
     auto album = ml->createAlbum( "album" );
-    auto f = ml->addFile( "track1.mp3" );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
     auto track = album->addTrack( f, 1, 0, 0, 0 );
     f->save();
 
@@ -80,7 +80,7 @@ TEST_F( AlbumTracks, Artist )
 TEST_F( AlbumTracks, SetGenre )
 {
     auto a = ml->createAlbum( "album" );
-    auto f = ml->addFile( "track.mp3" );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "track.mp3" ) );
     auto t = a->addTrack( f, 1, 0, 0, 0 );
     f->save();
     auto genre = ml->createGenre( "happy underground post progressive death metal" );
@@ -101,7 +101,7 @@ TEST_F( AlbumTracks, SetGenre )
 TEST_F( AlbumTracks, Media )
 {
     auto album = ml->createAlbum( "album" );
-    auto f = ml->addFile( "track1.mp3" );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
     auto track = album->addTrack( f, 1, 10, 0, 0 );
     f->save();
 
@@ -120,7 +120,7 @@ TEST_F( AlbumTracks, Media )
 TEST_F( AlbumTracks, Album )
 {
     auto album = ml->createAlbum( "album" );
-    auto f = ml->addFile( "track1.mp3" );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
     auto track = album->addTrack( f, 1, 0, 0, 0 );
     f->save();
 

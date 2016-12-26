@@ -122,7 +122,7 @@ TEST_F( Artists, AllSongs )
 
     for (auto i = 1; i <= 3; ++i)
     {
-        auto f = ml->addFile( "song" + std::to_string(i) + ".mp3" );
+        auto f = std::static_pointer_cast<Media>( ml->addMedia( "song" + std::to_string(i) + ".mp3" ) );
         auto res = artist->addMedia( *f );
         ASSERT_TRUE( res );
     }
@@ -226,7 +226,7 @@ TEST_F( Artists, SortMedia )
 
     for (auto i = 1; i <= 3; ++i)
     {
-        auto f = ml->addFile( "song" + std::to_string(i) + ".mp3" );
+        auto f = std::static_pointer_cast<Media>( ml->addMedia( "song" + std::to_string(i) + ".mp3" ) );
         f->setDuration( 10 - i );
         f->save();
         artist->addMedia( *f );

@@ -36,7 +36,7 @@ class Labels : public Tests
 
 TEST_F( Labels, Add )
 {
-    auto f = ml->addFile( "media.avi" );
+    auto f = ml->addMedia( "media.avi" );
     auto l1 = ml->createLabel( "sea otter" );
     auto l2 = ml->createLabel( "cony the cone" );
 
@@ -58,7 +58,7 @@ TEST_F( Labels, Add )
 
 TEST_F( Labels, Remove )
 {
-    auto m = ml->addFile( "media.avi" );
+    auto m = ml->addMedia( "media.avi" );
     auto l1 = ml->createLabel( "sea otter" );
     auto l2 = ml->createLabel( "cony the cone" );
 
@@ -101,9 +101,9 @@ TEST_F( Labels, Remove )
 
 TEST_F( Labels, Files )
 {
-    auto f = ml->addFile( "media.avi" );
-    auto f2 = ml->addFile( "file.mp3" );
-    auto f3 = ml->addFile( "otter.mkv" );
+    auto f = ml->addMedia( "media.avi" );
+    auto f2 = ml->addMedia( "file.mp3" );
+    auto f3 = ml->addMedia( "otter.mkv" );
 
     auto l1 = ml->createLabel( "label1" );
     auto l2 = ml->createLabel( "label2" );
@@ -128,7 +128,7 @@ TEST_F( Labels, Files )
 
 TEST_F( Labels, Delete )
 {
-    auto f = ml->addFile( "media.avi" );
+    auto f = ml->addMedia( "media.avi" );
     auto l1 = ml->createLabel( "sea otter" );
     auto l2 = ml->createLabel( "cony the cone" );
 

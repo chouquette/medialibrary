@@ -44,7 +44,6 @@ public:
     // And override the ID getter to return a Media instead of IMedia
     std::shared_ptr<Media> media( int64_t id );
     std::shared_ptr<Folder> folder( const std::string& path );
-    std::shared_ptr<Media> addFile( const std::string& path );
     std::shared_ptr<Playlist> playlist( int64_t playlistId );
     void deleteAlbum( int64_t albumId );
     std::shared_ptr<Album> createAlbum( const std::string& title );
@@ -55,7 +54,10 @@ public:
     void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory );
     void deleteTrack( int64_t trackId );
     std::shared_ptr<AlbumTrack> albumTrack( int64_t id );
+    // Use to run tests that fiddles with file properties (modification dates, size...)
     std::shared_ptr<Media> addFile(fs::IFile& file);
+    // Used when we need an actual file instead of an external media
+    std::shared_ptr<Media> addFile( const std::string& path );
     virtual void addLocalFsFactory() override;
     std::shared_ptr<Device> device( const std::string& uuid );
 

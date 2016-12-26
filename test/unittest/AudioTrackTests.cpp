@@ -35,14 +35,14 @@ class AudioTracks : public Tests
 
 TEST_F( AudioTracks, AddTrack )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addFile( "file.mp3" ) );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.mp3" ) );
     bool res = f->addAudioTrack( "PCM", 128, 44100, 2, "fr", "test" );
     ASSERT_TRUE( res );
 }
 
 TEST_F( AudioTracks, GetSetProperties )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addFile( "file.mp3" ) );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.mp3" ) );
     ASSERT_NE( f, nullptr );
     f->addAudioTrack( "PCM", 128, 44100, 2, "en", "test desc" );
     auto tracks = f->audioTracks();
@@ -72,7 +72,7 @@ TEST_F( AudioTracks, GetSetProperties )
 
 TEST_F( AudioTracks, FetchTracks )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addFile( "file.mp3" ) );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.mp3" ) );
     f->addAudioTrack( "PCM", 128, 44100, 2, "en", "test desc" );
     f->addAudioTrack( "WMA", 128, 48000, 2, "fr", "test desc 2" );
 

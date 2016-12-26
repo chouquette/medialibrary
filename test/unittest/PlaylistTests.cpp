@@ -108,7 +108,7 @@ TEST_F( Playlists, FetchAll )
 
 TEST_F( Playlists, Add )
 {
-    auto m = ml->addFile( "file.mkv" );
+    auto m = ml->addMedia( "file.mkv" );
     auto res = pl->append( m->id() );
     ASSERT_TRUE( res );
     auto media = pl->media();
@@ -120,7 +120,7 @@ TEST_F( Playlists, Append )
 {
     for ( auto i = 0; i < 5; ++i )
     {
-        auto m = ml->addFile( "media" + std::to_string( i ) + ".mkv" );
+        auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv" );
         ASSERT_NE( nullptr, m );
         pl->append( m->id() );
     }
@@ -137,17 +137,17 @@ TEST_F( Playlists, Insert )
 {
     for ( auto i = 1; i < 4; ++i )
     {
-        auto m = ml->addFile( "media" + std::to_string( i ) + ".mkv" );
+        auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv" );
         ASSERT_NE( nullptr, m );
         auto res = pl->append( m->id() );
         ASSERT_TRUE( res );
     }
     // [<1,1>,<2,2>,<3,3>]
-    auto firstMedia = ml->addFile( "first.mkv" );
+    auto firstMedia = ml->addMedia( "first.mkv" );
 
     pl->add( firstMedia->id(), 1 );
     // [<4,1>,<1,2>,<2,3>,<3,4>]
-    auto middleMedia = ml->addFile( "middle.mkv" );
+    auto middleMedia = ml->addMedia( "middle.mkv" );
     pl->add( middleMedia->id(), 3 );
     // [<4,1>,<1,2>,<5,3>,<2,4>,<3,5>]
     auto media = pl->media();
@@ -164,7 +164,7 @@ TEST_F( Playlists, Move )
 {
     for ( auto i = 1; i < 6; ++i )
     {
-        auto m = ml->addFile( "media" + std::to_string( i ) + ".mkv" );
+        auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv" );
         ASSERT_NE( nullptr, m );
         auto res = pl->append( m->id() );
         ASSERT_TRUE( res );
@@ -186,7 +186,7 @@ TEST_F( Playlists, Remove )
 {
     for ( auto i = 1; i < 6; ++i )
     {
-        auto m = ml->addFile( "media" + std::to_string( i ) + ".mkv" );
+        auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv" );
         ASSERT_NE( nullptr, m );
         auto res = pl->append( m->id() );
         ASSERT_TRUE( res );
@@ -211,7 +211,7 @@ TEST_F( Playlists, DeleteFile )
 {
     for ( auto i = 1; i < 6; ++i )
     {
-        auto m = ml->addFile( "media" + std::to_string( i ) + ".mkv" );
+        auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv" );
         ASSERT_NE( nullptr, m );
         auto res = pl->append( m->id() );
         ASSERT_TRUE( res );
@@ -304,7 +304,7 @@ TEST_F( Playlists, Sort )
 
 TEST_F( Playlists, AddDuplicate )
 {
-    auto m = ml->addFile( "file.mkv" );
+    auto m = ml->addMedia( "file.mkv" );
     auto res = pl->append( m->id() );
     ASSERT_TRUE( res );
     res = pl->append( m->id() );

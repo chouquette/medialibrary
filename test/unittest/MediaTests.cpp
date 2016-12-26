@@ -66,7 +66,7 @@ TEST_F( Medias, Create )
 
 TEST_F( Medias, Fetch )
 {
-    auto f = ml->addFile( "media.avi" );
+    auto f = ml->addMedia( "media.avi" );
     auto f2 = ml->media( f->id() );
     ASSERT_EQ( f->id(), f2->id() );
     ASSERT_EQ( f, f2 );
@@ -80,7 +80,7 @@ TEST_F( Medias, Fetch )
 
 TEST_F( Medias, Duration )
 {
-    auto f = ml->addFile( "media.avi" );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "media.avi" ) );
     ASSERT_EQ( f->duration(), -1 );
 
     // Use a value that checks we're using a 64bits value
@@ -98,7 +98,7 @@ TEST_F( Medias, Duration )
 
 TEST_F( Medias, Thumbnail )
 {
-    auto f = ml->addFile( "media.avi" );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "media.avi" ) );
     ASSERT_EQ( f->thumbnail(), "" );
 
     std::string newThumbnail( "/path/to/thumbnail" );
@@ -115,7 +115,7 @@ TEST_F( Medias, Thumbnail )
 
 TEST_F( Medias, PlayCount )
 {
-    auto f = ml->addFile( "media.avi" );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "media.avi" ) );
     ASSERT_EQ( 0, f->playCount() );
     f->increasePlayCount();
     ASSERT_EQ( 1, f->playCount() );
@@ -128,7 +128,7 @@ TEST_F( Medias, PlayCount )
 
 TEST_F( Medias, Progress )
 {
-    auto f = ml->addFile( "media.avi" );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "media.avi" ) );
     ASSERT_EQ( 0, f->metadata( Media::MetadataType::Progress ).integer() );
     f->setMetadata( Media::MetadataType::Progress, 123 );
     ASSERT_EQ( 123, f->metadata( Media::MetadataType::Progress ).integer() );
@@ -141,7 +141,7 @@ TEST_F( Medias, Progress )
 
 TEST_F( Medias, Rating )
 {
-    auto f = ml->addFile( "media.avi" );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "media.avi" ) );
     ASSERT_FALSE( f->metadata( Media::MetadataType::Rating ).isSet() );
     f->setMetadata( Media::MetadataType::Rating, 12345 );
     ASSERT_EQ( 12345, f->metadata( Media::MetadataType::Rating ).integer() );
@@ -156,7 +156,7 @@ TEST_F( Medias, Search )
 {
     for ( auto i = 1u; i <= 10u; ++i )
     {
-        auto m = ml->addFile( "track " + std::to_string( i ) + ".mp3" );
+        ml->addMedia( "track " + std::to_string( i ) + ".mp3" );
     }
     auto media = ml->searchMedia( "tra" ).others;
     ASSERT_EQ( 10u, media.size() );
@@ -173,7 +173,7 @@ TEST_F( Medias, Search )
 
 TEST_F( Medias, SearchAfterEdit )
 {
-    auto m = ml->addFile( "media.mp3" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
 
     auto media = ml->searchMedia( "media" ).others;
     ASSERT_EQ( 1u, media.size() );
@@ -190,7 +190,7 @@ TEST_F( Medias, SearchAfterEdit )
 
 TEST_F( Medias, SearchAfterDelete )
 {
-    auto m = ml->addFile( "media.mp3" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
 
     auto media = ml->searchMedia( "media" ).others;
     ASSERT_EQ( 1u, media.size() );
@@ -204,7 +204,7 @@ TEST_F( Medias, SearchAfterDelete )
 
 TEST_F( Medias, SearchByLabel )
 {
-    auto m = ml->addFile( "media.mkv" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
     auto media = ml->searchMedia( "otter" ).others;
     ASSERT_EQ( 0u, media.size() );
 
@@ -253,7 +253,7 @@ TEST_F( Medias, SearchTracks )
     auto a = ml->createAlbum( "album" );
     for ( auto i = 1u; i <= 10u; ++i )
     {
-       auto m = ml->addFile( "track " + std::to_string( i ) + ".mp3" );
+       auto m = std::static_pointer_cast<Media>( ml->addMedia( "track " + std::to_string( i ) + ".mp3" ) );
        a->addTrack( m, i, 1, 0, 0 );
     }
     auto tracks = ml->searchMedia( "tra" ).tracks;
@@ -271,7 +271,7 @@ TEST_F( Medias, SearchTracks )
 
 TEST_F( Medias, Favorite )
 {
-    auto m = ml->addFile( "media.mkv" );
+    auto m = ml->addMedia( "media.mkv" );
     ASSERT_FALSE( m->isFavorite() );
 
     m->setFavorite( true );
@@ -285,7 +285,7 @@ TEST_F( Medias, Favorite )
 
 TEST_F( Medias, History )
 {
-    auto m = ml->addFile( "media.mkv" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
 
     auto history = ml->lastMediaPlayed();
     ASSERT_EQ( 0u, history.size() );
@@ -297,7 +297,7 @@ TEST_F( Medias, History )
     ASSERT_EQ( m->id(), history[0]->id() );
 
     compat::this_thread::sleep_for( std::chrono::seconds{ 1 } );
-    auto m2 = ml->addFile( "media.mkv" );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mkv" ) );
     m2->increasePlayCount();
 
     history = ml->lastMediaPlayed();
@@ -308,7 +308,7 @@ TEST_F( Medias, History )
 
 TEST_F( Medias, ClearHistory )
 {
-    auto m = ml->addFile( "media.mkv" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
 
     auto history = ml->lastMediaPlayed();
     ASSERT_EQ( 0u, history.size() );
@@ -331,7 +331,7 @@ TEST_F( Medias, ClearHistory )
 
 TEST_F( Medias, SetReleaseDate )
 {
-    auto m = ml->addFile( "movie.mkv" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv" ) );
 
     ASSERT_EQ( m->releaseDate(), 0u );
     m->setReleaseDate( 1234 );
@@ -346,17 +346,17 @@ TEST_F( Medias, SetReleaseDate )
 
 TEST_F( Medias, SortByAlpha )
 {
-    auto m1 = ml->addFile( "media1.mp3" );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3" ) );
     m1->setTitle( "Abcd" );
     m1->setType( Media::Type::Audio );
     m1->save();
 
-    auto m2 = ml->addFile( "media2.mp3" );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3" ) );
     m2->setTitle( "Zyxw" );
     m2->setType( Media::Type::Audio );
     m2->save();
 
-    auto m3 = ml->addFile( "media3.mp3" );
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3" ) );
     m3->setTitle( "afterA-beforeZ" );
     m3->setType( Media::Type::Audio );
     m3->save();
@@ -426,7 +426,7 @@ TEST_F( Medias, SortByFileSize )
 
 TEST_F( Medias, SetType )
 {
-    auto m1 = ml->addFile( "media1.mp3" );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3" ) );
     ASSERT_EQ( IMedia::Type::Unknown, m1->type() );
 
     m1->setType( IMedia::Type::Video );
@@ -442,7 +442,7 @@ TEST_F( Medias, SetType )
 
 TEST_F( Medias, Metadata )
 {
-    auto m = ml->addFile( "media.mp3" );
+    auto m = ml->addMedia( "media.mp3" );
 
     {
         const auto& md = m->metadata( Media::MetadataType::Speed );
@@ -466,7 +466,7 @@ TEST_F( Medias, Metadata )
 
 TEST_F( Medias, MetadataOverride )
 {
-    auto m = ml->addFile( "media.mp3" );
+    auto m = ml->addMedia( "media.mp3" );
     auto res = m->setMetadata( Media::MetadataType::Speed, "foo" );
     ASSERT_TRUE( res );
 
