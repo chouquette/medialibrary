@@ -247,6 +247,14 @@ std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, Type ty
 
 std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, IFile::Type type, const std::string& mrl )
 {
+    // Sqlite won't ensure uniqueness for (folder_id, mrl) when folder_id is null, so we have to ensure
+    // of it ourselves
+    static const std::string existingReq = "SELECT * FROM " + policy::FileTable::Name +
+            " WHERE folder_id IS NULL AND mrl = ?";
+    auto existing = fetch( ml, existingReq, mrl );
+    if ( existing != nullptr )
+        return nullptr;
+
     auto self = std::make_shared<File>( ml, mediaId, type, mrl );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
             "(media_id, mrl, type, folder_id, is_removable, is_external, is_active) VALUES(?, ?, ?, NULL, 0, 1, ?)";

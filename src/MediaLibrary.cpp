@@ -302,10 +302,13 @@ MediaPtr MediaLibrary::media( const std::string& mrl ) const
 
 MediaPtr MediaLibrary::addMedia( const std::string& mrl )
 {
+    auto t = m_dbConnection->newTransaction();
     auto media = Media::create( this, IMedia::Type::Unknown, utils::file::fileName( mrl ) );
     if ( media == nullptr )
         return nullptr;
-    media->addExternalMrl( mrl, IFile::Type::Main );
+    if ( media->addExternalMrl( mrl, IFile::Type::Main ) == nullptr )
+        return nullptr;
+    t->commit();
     return media;
 }
 

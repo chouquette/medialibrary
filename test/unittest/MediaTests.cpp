@@ -511,6 +511,14 @@ TEST_F( Medias, ExternalMrl )
     ASSERT_EQ( File::Type::Main, f->type() );
 }
 
+TEST_F( Medias, DuplicatedExternalMrl )
+{
+    auto m = ml->addMedia( "http://foo.bar" );
+    auto m2 = ml->addMedia( "http://foo.bar" );
+    ASSERT_NE( nullptr, m );
+    ASSERT_EQ( nullptr, m2 );
+}
+
 class FetchMedia : public Tests
 {
 protected:
