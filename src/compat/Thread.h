@@ -22,8 +22,6 @@
 
 #pragma once
 
-#include "config.h"
-
 #if CXX11_THREADS
 #include <thread>
 namespace medialibrary
