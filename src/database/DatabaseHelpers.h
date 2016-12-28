@@ -94,10 +94,14 @@ template <typename T>
 struct Uncached
 {
 private:
-    using Lock = bool;
+    struct FakeLock
+    {
+        FakeLock() = default;
+        ~FakeLock() = default;
+    };
 
 public:
-    static Lock lock() { return true; }
+    static FakeLock lock() { return FakeLock{}; }
     static void insert( int64_t, std::shared_ptr<T> ) {}
     static void save( int64_t, std::shared_ptr<T> ) {}
     static void remove( int64_t ) {}
