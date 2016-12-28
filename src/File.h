@@ -67,8 +67,6 @@ public:
     virtual unsigned int lastModificationDate() const override;
     virtual unsigned int size() const override;
     virtual bool isExternal() const override;
-    virtual bool isActive() const override;
-    virtual bool setActive( bool active ) override;
     /*
      * We need to decouple the current parser state and the saved one.
      * For instance, metadata extraction won't save anything in DB, so while
@@ -125,7 +123,6 @@ private:
     bool m_isPresent;
     bool m_isRemovable;
     bool m_isExternal;
-    bool m_isActive;
 
     mutable Cache<std::string> m_fullPath;
     mutable Cache<std::weak_ptr<Media>> m_media;
