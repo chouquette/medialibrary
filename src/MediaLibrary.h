@@ -101,6 +101,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual PlaylistPtr playlist( int64_t id ) const override;
         virtual bool deletePlaylist( int64_t playlistId ) override;
 
+        virtual bool addToHistory( const std::string& mrl, const std::string& title ) override;
+        virtual std::vector<HistoryPtr> lastStreamsPlayed() const override;
         virtual std::vector<MediaPtr> lastMediaPlayed() const override;
         virtual bool clearHistory() override;
 
