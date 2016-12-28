@@ -87,13 +87,8 @@ std::vector<HistoryPtr> History::fetch( MediaLibraryPtr ml )
 
 bool History::clearStreams( MediaLibraryPtr ml )
 {
-    static const std::string req = "DROP TABLE " + policy::HistoryTable::Name;
-    auto dbConn = ml->getConn();
-    if ( sqlite::Tools::executeRequest( dbConn, req ) == false )
-        return false;
-    if ( createTable( dbConn ) == false )
-        return false;
-    return true;
+    static const std::string req = "DELETE FROM " + policy::HistoryTable::Name;
+    return sqlite::Tools::executeRequest( ml->getConn(), req );
 }
 
 MediaPtr History::media() const
