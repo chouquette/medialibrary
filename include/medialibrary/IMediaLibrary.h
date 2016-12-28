@@ -196,7 +196,7 @@ class IMediaLibrary
         /**
          * History
          */
-        virtual bool addToHistory( const std::string& mrl, const std::string& title ) = 0;
+        virtual bool addToStreamHistory( MediaPtr media ) = 0;
         virtual std::vector<HistoryPtr> lastStreamsPlayed() const = 0;
         virtual std::vector<MediaPtr> lastMediaPlayed() const = 0;
         /**

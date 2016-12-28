@@ -45,31 +45,26 @@ struct HistoryTable
 };
 }
 
-class History : public IHistoryEntry, public DatabaseHelpers<History, policy::HistoryTable>
+class History : public IHistoryEntry, public DatabaseHelpers<History, policy::HistoryTable, cachepolicy::Uncached<History>>
 {
 public:
     History( MediaLibraryPtr ml, sqlite::Row& row );
     static bool createTable( DBConnection dbConnection );
-    static bool insert( DBConnection dbConn, const std::string& mrl, const std::string& title );
+    static bool insert( DBConnection dbConn, int64_t mediaId );
     static std::vector<HistoryPtr> fetch( MediaLibraryPtr ml );
     static bool clearStreams( MediaLibraryPtr ml );
 
-    virtual const std::string& mrl() const override;
-    virtual const std::string& title() const override;
+    virtual MediaPtr media() const override;
     virtual unsigned int insertionDate() const override;
-    virtual bool isFavorite() const override;
-    virtual bool setFavorite( bool isFavorite ) override;
 
-    static constexpr unsigned int MaxEntries = 100u;
+    static constexpr unsigned int MaxEntries = 20u;
 
 private:
     MediaLibraryPtr m_ml;
 
-    int64_t m_id;
-    std::string m_mrl;
-    std::string m_title;
+    MediaPtr m_media;
+    int64_t m_mediaId;
     unsigned int m_date;
-    bool m_favorite;
 
     friend policy::HistoryTable;
 };

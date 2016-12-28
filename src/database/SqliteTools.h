@@ -76,6 +76,18 @@ public:
         return *this;
     }
 
+    unsigned int nbColumns() const
+    {
+        return m_nbColumns;
+    }
+
+    void advanceToColumn( unsigned int idx )
+    {
+        if ( idx + 1 > m_nbColumns )
+            throw errors::ColumnOutOfRange( idx, m_nbColumns );
+        m_idx = idx;
+    }
+
     /**
      * @brief Returns the value in column idx, but doesn't advance to the next column
      */
