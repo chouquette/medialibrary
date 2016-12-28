@@ -60,14 +60,34 @@ class IMedia
             Movie,
             AlbumTrack,
         };
-        enum class MetadataType : uint8_t
+        enum class MetadataType : uint32_t
         {
-            AspectRatio,
+            Rating = 1,
+
+            // Playback
+            Progress = 50,
             Speed,
-            // The progress within the file, the range of value is up to the application.
-            Progress,
-            // A rating for this media, values are up to the application
-            Rating,
+            Title,
+            Chapter,
+            Program,
+
+            // Video:
+            VideoTrack = 100,
+            AspectRatio,
+            Zoom,
+            Crop,
+            Deinterlace,
+            VideoFilter,
+
+            // Audio
+            AudioTrack = 150,
+            Gain,
+
+            // Spu
+            SubtitleTrack = 200,
+
+            // Various
+            ApplicationSpecific = 250,
         };
 
         virtual ~IMedia() = default;
