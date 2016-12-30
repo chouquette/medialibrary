@@ -518,6 +518,20 @@ TEST_F( Medias, DuplicatedExternalMrl )
     ASSERT_EQ( nullptr, m2 );
 }
 
+TEST_F( Medias, SetTitle )
+{
+    auto m = ml->addMedia( "media" );
+    ASSERT_EQ( "media", m->title() );
+    auto res = m->setTitle( "sea otters" );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( "sea otters", m->title() );
+
+    Reload();
+
+    m = ml->media( m->id() );
+    ASSERT_EQ( "sea otters", m->title() );
+}
+
 class FetchMedia : public Tests
 {
 protected:

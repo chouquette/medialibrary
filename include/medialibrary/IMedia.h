@@ -96,6 +96,7 @@ class IMedia
         virtual Type type() = 0;
         virtual SubType subType() const = 0;
         virtual const std::string& title() const = 0;
+        virtual bool setTitle( const std::string& title ) = 0;
         virtual AlbumTrackPtr albumTrack() const = 0;
         /**
          * @brief duration Returns the media duration in ms

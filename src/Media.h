@@ -91,6 +91,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual SubType subType() const override;
         void setType( Type type );
         virtual const std::string& title() const override;
+        virtual bool setTitle( const std::string& title ) override;
         ///
         /// \brief setTitleBuffered Mark the media as changed but doesn't save the change in DB
         /// Querying the title after this method will return the new title, but it won't appear in DB

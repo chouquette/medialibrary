@@ -459,6 +459,17 @@ const std::string &Media::title() const
     return m_title;
 }
 
+bool Media::setTitle( const std::string& title )
+{
+    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET title = ? WHERE id_media = ?";
+    if ( m_title == title )
+        return true;
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, title, m_id ) == false )
+        return false;
+    m_title = title;
+    return true;
+}
+
 void Media::setTitleBuffered( const std::string &title )
 {
     if ( m_title == title )
