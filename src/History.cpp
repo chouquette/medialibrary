@@ -42,8 +42,7 @@ int64_t History::* const HistoryTable::PrimaryKey = &History::m_mediaId;
 constexpr unsigned int History::MaxEntries;
 
 History::History( MediaLibraryPtr ml, sqlite::Row& row )
-    : m_ml( ml )
-    , m_media( Media::load( ml, row ) )
+    : m_media( Media::load( ml, row ) )
 {
     // In case we load the media from cache, we won't advance in columns
     row.advanceToColumn( row.nbColumns() - 1 );

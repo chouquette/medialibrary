@@ -60,8 +60,6 @@ public:
     static constexpr unsigned int MaxEntries = 20u;
 
 private:
-    MediaLibraryPtr m_ml;
-
     MediaPtr m_media;
     int64_t m_mediaId;
     unsigned int m_date;
