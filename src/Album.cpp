@@ -476,6 +476,17 @@ std::vector<AlbumPtr> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId, Sor
 
 std::vector<AlbumPtr> Album::listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc )
 {
+    if ( sort == SortingCriteria::Artist )
+    {
+        std::string req = "SELECT alb.* FROM " + policy::AlbumTable::Name + " alb "
+                "INNER JOIN " + policy::ArtistTable::Name + " art ON alb.artist_id = art.id_artist "
+                "WHERE alb.is_present = 1 "
+                "ORDER BY art.name ";
+        if ( desc == true )
+            req += "DESC ";
+        req += ", alb.title";
+        return fetchAll<IAlbum>( ml, req );
+    }
     std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
                     " WHERE is_present=1";
     req += orderBy( sort, desc );

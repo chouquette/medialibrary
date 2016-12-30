@@ -66,6 +66,7 @@ enum class SortingCriteria
     LastModificationDate,
     ReleaseDate,
     FileSize,
+    Artist,
 };
 
 class IMediaLibraryCb

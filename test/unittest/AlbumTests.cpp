@@ -409,6 +409,34 @@ TEST_F( Albums, Sort )
     ASSERT_EQ( a1->id(), albums[2]->id() );
 }
 
+TEST_F( Albums, SortByArtist )
+{
+    auto artist1 = ml->createArtist( "Artist" );
+    auto artist2 = ml->createArtist( "tsitrA" );
+
+    // Create albums with a non-alphabetical order to avoid a false positive (where sorting by pkey
+    // is the same as sorting by title)
+    auto a1 = ml->createAlbum( "C" );
+    a1->setAlbumArtist( artist1 );
+    auto a2 = ml->createAlbum( "B" );
+    a2->setAlbumArtist( artist2 );
+    auto a3 = ml->createAlbum( "A" );
+    a3->setAlbumArtist( artist1 );
+
+    auto albums = ml->albums( SortingCriteria::Artist, false );
+    ASSERT_EQ( 3u, albums.size() );
+    ASSERT_EQ( a3->id(), albums[0]->id() );
+    ASSERT_EQ( a1->id(), albums[1]->id() );
+    ASSERT_EQ( a2->id(), albums[2]->id() );
+
+    albums = ml->albums( SortingCriteria::Artist, true );
+    ASSERT_EQ( 3u, albums.size() );
+    // We expect Artist to be sorted in reverse order, but still in alphabetical order for albums
+    ASSERT_EQ( a2->id(), albums[0]->id() );
+    ASSERT_EQ( a3->id(), albums[1]->id() );
+    ASSERT_EQ( a1->id(), albums[2]->id() );
+}
+
 TEST_F( Albums, Duration )
 {
     auto a = ml->createAlbum( "album" );
