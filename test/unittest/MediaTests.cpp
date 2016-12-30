@@ -178,7 +178,7 @@ TEST_F( Medias, SearchAfterEdit )
     auto media = ml->searchMedia( "media" ).others;
     ASSERT_EQ( 1u, media.size() );
 
-    m->setTitle( "otters are awesome" );
+    m->setTitleBuffered( "otters are awesome" );
     m->save();
 
     media = ml->searchMedia( "media" ).others;
@@ -347,17 +347,17 @@ TEST_F( Medias, SetReleaseDate )
 TEST_F( Medias, SortByAlpha )
 {
     auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3" ) );
-    m1->setTitle( "Abcd" );
+    m1->setTitleBuffered( "Abcd" );
     m1->setType( Media::Type::Audio );
     m1->save();
 
     auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3" ) );
-    m2->setTitle( "Zyxw" );
+    m2->setTitleBuffered( "Zyxw" );
     m2->setType( Media::Type::Audio );
     m2->save();
 
     auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3" ) );
-    m3->setTitle( "afterA-beforeZ" );
+    m3->setTitleBuffered( "afterA-beforeZ" );
     m3->setType( Media::Type::Audio );
     m3->save();
 

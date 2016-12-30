@@ -396,7 +396,7 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
         }
     }
     if ( title.empty() == false )
-        task.media->setTitle( title );
+        task.media->setTitleBuffered( title );
 
     auto track = std::static_pointer_cast<AlbumTrack>( album->addTrack( task.media, trackNumber,
                                                                         discNumber, artist->id(),

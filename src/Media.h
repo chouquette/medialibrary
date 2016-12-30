@@ -91,7 +91,12 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual SubType subType() const override;
         void setType( Type type );
         virtual const std::string& title() const override;
-        void setTitle( const std::string& title );
+        ///
+        /// \brief setTitleBuffered Mark the media as changed but doesn't save the change in DB
+        /// Querying the title after this method will return the new title, but it won't appear in DB
+        /// until save() is called
+        ///
+        void setTitleBuffered( const std::string& title );
         virtual AlbumTrackPtr albumTrack() const override;
         void setAlbumTrack( AlbumTrackPtr albumTrack );
         virtual int64_t duration() const override;

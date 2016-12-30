@@ -459,7 +459,7 @@ const std::string &Media::title() const
     return m_title;
 }
 
-void Media::setTitle( const std::string &title )
+void Media::setTitleBuffered( const std::string &title )
 {
     if ( m_title == title )
         return;
