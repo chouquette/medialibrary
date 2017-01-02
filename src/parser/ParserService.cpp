@@ -129,12 +129,12 @@ void ParserService::mainloop()
             std::unique_lock<compat::Mutex> lock( m_lock );
             if ( m_tasks.empty() == true || m_paused == true )
             {
-                LOG_INFO( "Halting ParserService mainloop" );
+                LOG_INFO( "Halting ParserService [", serviceName, "] mainloop" );
                 m_cond.wait( lock, [this]() {
                     return ( m_tasks.empty() == false && m_paused == false )
                             || m_stopParser == true;
                 });
-                LOG_INFO( "Resuming ParserService mainloop" );
+                LOG_INFO( "Resuming ParserService [", serviceName, "] mainloop" );
                 // We might have been woken up because the parser is being destroyed
                 if ( m_stopParser  == true )
                     break;
