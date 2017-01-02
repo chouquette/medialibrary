@@ -67,6 +67,7 @@ bool DiscovererWorker::discover( const std::string& entryPoint )
 {
     if ( entryPoint.length() == 0 )
         return false;
+    LOG_INFO( "Adding ", entryPoint, " to the folder discovery list" );
     enqueue( entryPoint, false );
     return true;
 }
