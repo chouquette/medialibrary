@@ -267,17 +267,18 @@ MediaPtr MediaLibrary::media( int64_t mediaId ) const
 
 MediaPtr MediaLibrary::media( const std::string& mrl ) const
 {
+    LOG_INFO( "Fetching media from mrl: ", mrl );
+    auto file = File::fromMrl( this, mrl );
+    if ( file != nullptr )
+    {
+        LOG_INFO( "Found external media: ", mrl );
+        return file->media();
+    }
     auto fsFactory = fsFactoryForPath( mrl );
     if ( fsFactory == nullptr )
     {
-        // Assume this is an external media with a null folder_id
-        auto file = File::fromMrl( this, mrl );
-        if ( file == nullptr )
-        {
-            LOG_WARN( "Failed to fetch stream representation for ", mrl );
-            return nullptr;
-        }
-        return file->media();
+        LOG_WARN( "Failed to create FS factory for path ", mrl );
+        return nullptr;
     }
     auto device = fsFactory->createDeviceFromPath( mrl );
     if ( device == nullptr )
@@ -285,7 +286,6 @@ MediaPtr MediaLibrary::media( const std::string& mrl ) const
         LOG_WARN( "Failed to create a device associated with mrl ", mrl );
         return nullptr;
     }
-    std::shared_ptr<File> file;
     if ( device->isRemovable() == false )
         file = File::fromPath( this, mrl );
     else
