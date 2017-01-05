@@ -82,6 +82,7 @@ class IMedia
             // Audio
             AudioTrack = 150,
             Gain,
+            AudioDelay,
 
             // Spu
             SubtitleTrack = 200,
