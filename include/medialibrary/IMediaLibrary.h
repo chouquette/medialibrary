@@ -155,6 +155,9 @@ class IMediaLibrary
         ///
         /// \param dbPath       Path to the database
         /// \return true in case of success, false otherwise
+        /// If initialize returns false, this medialibrary must not be used anymore, and should be
+        /// disposed off.
+        /// If it returns true the first time, calling this method again is a no-op
         ///
         virtual bool initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* metadataCb ) = 0;
         virtual void setVerbosity( LogLevel v ) = 0;

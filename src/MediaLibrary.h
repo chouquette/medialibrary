@@ -179,6 +179,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         std::shared_ptr<ModificationNotifier> m_modificationNotifier;
         LogLevel m_verbosity;
         Settings m_settings;
+        bool m_initialized;
 };
 
 }

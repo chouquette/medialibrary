@@ -93,6 +93,7 @@ const uint32_t MediaLibrary::DbModelVersion = 2;
 MediaLibrary::MediaLibrary()
     : m_callback( nullptr )
     , m_verbosity( LogLevel::Error )
+    , m_initialized( false )
 {
     Log::setLogLevel( m_verbosity );
 }
@@ -208,6 +209,8 @@ bool MediaLibrary::validateSearchPattern( const std::string& pattern )
 
 bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* mlCallback )
 {
+    if ( m_initialized == true )
+        return true;
     if ( m_deviceLister == nullptr )
     {
         m_deviceLister = factory::createDeviceLister();
@@ -251,6 +254,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
     }
     startDiscoverer();
     startParser();
+    m_initialized = true;
     return true;
 }
 
