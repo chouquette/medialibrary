@@ -120,6 +120,7 @@ bool FileSystemFactory::refreshDevices()
         const auto& uuid = std::get<0>( d );
         const auto& mountpoint = std::get<1>( d );
         const auto removable = std::get<2>( d );
+        LOG_INFO( "Caching device ", uuid, " mounted on ", mountpoint, ". Removable: ", removable ? "true" : "false" );
         m_deviceCache.get().emplace( uuid, std::make_shared<fs::Device>( uuid, mountpoint, removable ) );
     }
     return true;
