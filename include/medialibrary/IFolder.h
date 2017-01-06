@@ -32,6 +32,13 @@ class IFolder
 public:
     virtual ~IFolder() = default;
     virtual int64_t id() const = 0;
+    /**
+     * @brief path Returns the full path for this folder.
+     * Caller is responsible for checking isPresent() beforehand, as we
+     * can't compute a path for a folder that is/was present on a removable storage
+     * that has been unplugged
+     * @return The folder's full path
+     */
     virtual const std::string& path() const = 0;
     virtual bool isPresent() const = 0;
 };
