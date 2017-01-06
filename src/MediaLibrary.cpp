@@ -714,9 +714,9 @@ void MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
     }
     else
     {
-        std::remove_if( begin( m_fsFactories ), end( m_fsFactories ), []( const std::shared_ptr<factory::IFileSystem> fs ) {
+        m_fsFactories.erase( std::remove_if( begin( m_fsFactories ), end( m_fsFactories ), []( const std::shared_ptr<factory::IFileSystem> fs ) {
             return fs->isNetworkFileSystem();
-        });
+        }) );
     }
 }
 

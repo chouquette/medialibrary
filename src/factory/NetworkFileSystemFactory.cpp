@@ -125,9 +125,9 @@ void NetworkFileSystemFactory::onDeviceRemoved( VLC::MediaPtr media )
 {
     std::lock_guard<compat::Mutex> lock( m_devicesLock );
     const auto& mrl = media->mrl();
-    std::remove_if( begin( m_devices ), end( m_devices ), [&mrl]( const Device& d ) {
+    m_devices.erase( std::remove_if( begin( m_devices ), end( m_devices ), [&mrl]( const Device& d ) {
         return d.mrl == mrl;
-    });
+    }) );
 }
 
 }
