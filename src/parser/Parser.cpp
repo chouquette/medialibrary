@@ -105,6 +105,7 @@ void Parser::restore()
             + " WHERE parser_step != ? AND is_present = 1 AND folder_id IS NOT NULL";
     auto files = File::fetchAll<File>( m_ml, req, File::ParserStep::Completed );
 
+    LOG_INFO( "Resuming parsing on ", files.size(), " mrl" );
     for ( auto& f : files )
     {
         auto m = f->media();
