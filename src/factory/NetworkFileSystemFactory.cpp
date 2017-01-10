@@ -127,7 +127,7 @@ void NetworkFileSystemFactory::onDeviceRemoved( VLC::MediaPtr media )
     const auto& mrl = media->mrl();
     m_devices.erase( std::remove_if( begin( m_devices ), end( m_devices ), [&mrl]( const Device& d ) {
         return d.mrl == mrl;
-    }) );
+    }), end( m_devices ) );
 }
 
 }
