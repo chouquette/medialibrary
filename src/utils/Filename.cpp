@@ -27,6 +27,7 @@
 #include "utils/Filename.h"
 
 #include <stdexcept>
+#include <cstdlib>
 
 #ifdef _WIN32
 #define DIR_SEPARATOR '\\'
@@ -168,8 +169,8 @@ std::string toLocalPath( const std::string& mrl )
         throw std::runtime_error( mrl + " is not representing a local path" );
     std::string res;
     res.reserve( mrl.size() - 7 );
-    auto it = cbegin( mrl ) + 7;
-    auto ite = cend( mrl );
+    auto it = mrl.cbegin() + 7;
+    auto ite = mrl.cend();
     for ( ; it != ite; ++it )
     {
         if ( *it == '%' )
