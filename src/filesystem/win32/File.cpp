@@ -67,11 +67,6 @@ unsigned int File::size() const
     return m_size;
 }
 
-const std::string& File::mrl() const
-{
-    return m_mrl;
-}
-
 }
 
 }

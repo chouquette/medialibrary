@@ -71,11 +71,11 @@ void Directory::read() const
         auto file = charset::FromWide( f.cFileName );
         if ( file[0] == '.' )
             continue;
-        auto path = path + file.get();
+        auto fullpath = path + file.get();
         if ( ( f.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
-            m_dirs.emplace_back( m_fsFactory.createDirectory( path ) );
+            m_dirs.emplace_back( m_fsFactory.createDirectory( fullpath ) );
         else
-            m_files.emplace_back( std::make_shared<File>( path ) );
+            m_files.emplace_back( std::make_shared<File>( fullpath ) );
     } while ( FindNextFile( h, &f ) != 0 );
     FindClose( h );
 #else
