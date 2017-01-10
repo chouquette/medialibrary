@@ -96,14 +96,14 @@ bool Folder::createTable( DBConnection connection)
             sqlite::Tools::executeRequest( connection, triggerReq );
 }
 
-std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& fullPath,
+std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& mrl,
                                         int64_t parentId, Device& device, fs::IDevice& deviceFs )
 {
     std::string path;
     if ( device.isRemovable() == true )
-        path = utils::file::removePath( fullPath, deviceFs.mountpoint() );
+        path = utils::file::removePath( mrl, deviceFs.mountpoint() );
     else
-        path = fullPath;
+        path = mrl;
     auto self = std::make_shared<Folder>( ml, path, parentId, device.id(), device.isRemovable() );
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
             "(path, parent_id, device_id, is_removable) VALUES(?, ?, ?, ?)";
@@ -117,12 +117,12 @@ std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& f
     return self;
 }
 
-bool Folder::blacklist( MediaLibraryPtr ml, const std::string& fullPath )
+bool Folder::blacklist( MediaLibraryPtr ml, const std::string& mrl )
 {
     // Ensure we delete the existing folder if any & blacklist the folder in an "atomic" way
     auto t = ml->getConn()->newTransaction();
 
-    auto f = fromPath( ml, fullPath, BannedType::Any );
+    auto f = fromMrl( ml, mrl, BannedType::Any );
     if ( f != nullptr )
     {
         // No need to blacklist a folder twice
@@ -131,21 +131,21 @@ bool Folder::blacklist( MediaLibraryPtr ml, const std::string& fullPath )
         // Let the foreign key destroy everything beneath this folder
         destroy( ml, f->id() );
     }
-    auto fsFactory = ml->fsFactoryForPath( fullPath );
+    auto fsFactory = ml->fsFactoryForMrl( mrl );
     if ( fsFactory == nullptr )
         return false;
-    auto folderFs = fsFactory->createDirectory( fullPath );
+    auto folderFs = fsFactory->createDirectory( mrl );
     if ( folderFs == nullptr )
         return false;
     auto deviceFs = folderFs->device();
     auto device = Device::fromUuid( ml, deviceFs->uuid() );
     if ( device == nullptr )
-        device = Device::create( ml, deviceFs->uuid(), deviceFs->isRemovable() );
+        device = Device::create( ml, deviceFs->uuid(), utils::file::scheme( mrl ), deviceFs->isRemovable() );
     std::string path;
     if ( deviceFs->isRemovable() == true )
-        path = utils::file::removePath( fullPath, deviceFs->mountpoint() );
+        path = utils::file::removePath( mrl, deviceFs->mountpoint() );
     else
-        path = fullPath;
+        path = mrl;
     static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
             "(path, parent_id, is_blacklisted, device_id, is_removable) VALUES(?, ?, ?, ?, ?)";
     auto res = sqlite::Tools::executeInsert( ml->getConn(), req, path, nullptr, true, device->id(), deviceFs->isRemovable() ) != 0;
@@ -153,44 +153,44 @@ bool Folder::blacklist( MediaLibraryPtr ml, const std::string& fullPath )
     return res;
 }
 
-std::shared_ptr<Folder> Folder::fromPath( MediaLibraryPtr ml, const std::string& fullPath )
+std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& mrl )
 {
-    return fromPath( ml, fullPath, BannedType::No );
+    return fromMrl( ml, mrl, BannedType::No );
 }
 
-std::shared_ptr<Folder> Folder::blacklistedFolder( MediaLibraryPtr ml, const std::string& fullPath )
+std::shared_ptr<Folder> Folder::blacklistedFolder( MediaLibraryPtr ml, const std::string& mrl )
 {
-    return fromPath( ml, fullPath, BannedType::Yes );
+    return fromMrl( ml, mrl, BannedType::Yes );
 }
 
-std::shared_ptr<Folder> Folder::fromPath( MediaLibraryPtr ml, const std::string& fullPath, BannedType bannedType )
+std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& mrl, BannedType bannedType )
 {
-    auto fsFactory = ml->fsFactoryForPath( fullPath );
+    auto fsFactory = ml->fsFactoryForMrl( mrl );
     if ( fsFactory == nullptr )
         return nullptr;
-    auto folderFs = fsFactory->createDirectory( fullPath );
+    auto folderFs = fsFactory->createDirectory( mrl );
     if ( folderFs == nullptr )
         return nullptr;
     auto deviceFs = folderFs->device();
     if ( deviceFs == nullptr )
     {
-        LOG_ERROR( "Failed to get device containing an existing folder: ", folderFs->path() );
+        LOG_ERROR( "Failed to get device containing an existing folder: ", folderFs->mrl() );
         return nullptr;
     }
     if ( deviceFs->isRemovable() == false )
     {
         std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND is_removable = 0";
         if ( bannedType == BannedType::Any )
-            return fetch( ml, req, folderFs->path() );
+            return fetch( ml, req, folderFs->mrl() );
         req += " AND is_blacklisted = ?";
-            return fetch( ml, req, folderFs->path(), bannedType == BannedType::Yes ? true : false );
+            return fetch( ml, req, folderFs->mrl(), bannedType == BannedType::Yes ? true : false );
     }
 
     auto device = Device::fromUuid( ml, deviceFs->uuid() );
     // We are trying to find a folder. If we don't know the device it's on, we don't know the folder.
     if ( device == nullptr )
         return nullptr;
-    auto path = utils::file::removePath( folderFs->path(), deviceFs->mountpoint() );
+    auto path = utils::file::removePath( folderFs->mrl(), deviceFs->mountpoint() );
     std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND device_id = ?";
     std::shared_ptr<Folder> folder;
     if ( bannedType == BannedType::Any )
@@ -214,7 +214,7 @@ int64_t Folder::id() const
     return m_id;
 }
 
-const std::string& Folder::path() const
+const std::string& Folder::mrl() const
 {
     if ( m_isRemovable == false )
         return m_path;
@@ -227,7 +227,7 @@ const std::string& Folder::path() const
         return m_fullPath;
 
     auto device = Device::fetch( m_ml, m_deviceId );
-    auto fsFactory = m_ml->fsFactoryForPath( m_fullPath );
+    auto fsFactory = m_ml->fsFactoryForMrl( device->scheme() );
     assert( fsFactory != nullptr );
     auto deviceFs = fsFactory->createDevice( device->uuid() );
     m_deviceMountpoint = deviceFs->mountpoint();

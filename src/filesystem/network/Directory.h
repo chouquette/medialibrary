@@ -29,10 +29,14 @@ namespace fs
 class NetworkDirectory : public CommonDirectory
 {
 public:
-    NetworkDirectory( const std::string& path, factory::IFileSystem& fsFactory );
+    NetworkDirectory(const std::string& mrl, factory::IFileSystem& fsFactory );
+    virtual const std::string& mrl() const override;
 
 private:
     virtual void read() const override;
+
+private:
+    std::string m_mrl;
 };
 }
 }

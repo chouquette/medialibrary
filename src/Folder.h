@@ -61,15 +61,15 @@ public:
     Folder(MediaLibraryPtr ml, const std::string& path, int64_t parent , int64_t deviceId , bool isRemovable );
 
     static bool createTable( DBConnection connection );
-    static std::shared_ptr<Folder> create( MediaLibraryPtr ml, const std::string& path, int64_t parentId, Device& device, fs::IDevice& deviceFs );
-    static bool blacklist( MediaLibraryPtr ml, const std::string& fullPath );
+    static std::shared_ptr<Folder> create( MediaLibraryPtr ml, const std::string& mrl, int64_t parentId, Device& device, fs::IDevice& deviceFs );
+    static bool blacklist( MediaLibraryPtr ml, const std::string& mrl );
     static std::vector<std::shared_ptr<Folder>> fetchRootFolders( MediaLibraryPtr ml );
 
-    static std::shared_ptr<Folder> fromPath(MediaLibraryPtr ml, const std::string& fullPath );
-    static std::shared_ptr<Folder> blacklistedFolder(MediaLibraryPtr ml, const std::string& fullPath );
+    static std::shared_ptr<Folder> fromMrl(MediaLibraryPtr ml, const std::string& mrl );
+    static std::shared_ptr<Folder> blacklistedFolder(MediaLibraryPtr ml, const std::string& mrl );
 
     virtual int64_t id() const override;
-    virtual const std::string& path() const override;
+    virtual const std::string& mrl() const override;
     std::vector<std::shared_ptr<File>> files();
     std::vector<std::shared_ptr<Folder>> folders();
     std::shared_ptr<Folder> parent();
@@ -85,13 +85,14 @@ private:
         Any,    //< Well... any of the above.
     };
 
-    static std::shared_ptr<Folder> fromPath( MediaLibraryPtr ml, const std::string& fullPath, BannedType bannedType );
+    static std::shared_ptr<Folder> fromMrl( MediaLibraryPtr ml, const std::string& mrl, BannedType bannedType );
 
 private:
     MediaLibraryPtr m_ml;
 
     int64_t m_id;
     // This contains the path relative to the device mountpoint (ie. excluding it)
+    // or the full path (including mrl scheme) for folders on non removable devices
     std::string m_path;
     int64_t m_parent;
     bool m_isBlacklisted;
@@ -100,7 +101,8 @@ private:
     bool m_isRemovable;
 
     mutable Cache<std::string> m_deviceMountpoint;
-    // This contains the full path, including device mountpoint.
+    // This contains the full path, including device mountpoint (and mrl scheme,
+    // as its part of the mountpoint
     mutable std::string m_fullPath;
 
     friend struct policy::FolderTable;

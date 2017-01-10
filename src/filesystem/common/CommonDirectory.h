@@ -36,8 +36,7 @@ namespace fs
 class CommonDirectory : public IDirectory
 {
 public:
-    CommonDirectory( const std::string& path, factory::IFileSystem& fsFactory );
-    virtual const std::string& path() const override;
+    CommonDirectory( factory::IFileSystem& fsFactory );
     virtual const std::vector<std::shared_ptr<IFile>>& files() const override;
     virtual const std::vector<std::shared_ptr<IDirectory>>& dirs() const override;
     virtual std::shared_ptr<IDevice> device() const override;
@@ -46,7 +45,6 @@ protected:
     virtual void read() const = 0;
 
 protected:
-    std::string m_path;
     mutable std::vector<std::shared_ptr<IFile>> m_files;
     mutable std::vector<std::shared_ptr<IDirectory>> m_dirs;
     mutable Cache<std::shared_ptr<IDevice>> m_device;

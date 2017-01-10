@@ -44,12 +44,12 @@ namespace fs
 {
 
 File::File( const std::string &filePath )
-    : CommonFile( filePath )
+    : CommonFile( "file://" + filePath )
 {
     struct _stat s;
-    if ( _tstat( charset::ToWide( m_fullPath.c_str() ).get(), &s ) != 0 )
+    if ( _tstat( charset::ToWide( filePath.c_str() ).get(), &s ) != 0 )
     {
-        LOG_ERROR( "Failed to get ", m_fullPath, " stats" );
+        LOG_ERROR( "Failed to get ", filePath, " stats" );
         throw std::system_error( errno, std::generic_category(), "Failed to get stats" );
     }
 
@@ -65,6 +65,11 @@ unsigned int File::lastModificationDate() const
 unsigned int File::size() const
 {
     return m_size;
+}
+
+const std::string& File::mrl() const
+{
+    return m_mrl;
 }
 
 }

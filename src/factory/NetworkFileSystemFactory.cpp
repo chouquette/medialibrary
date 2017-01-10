@@ -69,7 +69,7 @@ std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::createDevice( const std::
     return res;
 }
 
-std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::createDeviceFromPath( const std::string& path )
+std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::createDeviceFromMrl( const std::string& path )
 {
     std::lock_guard<compat::Mutex> lock( m_devicesLock );
     auto it = std::find_if( begin( m_devices ), end( m_devices ), [&path]( const Device& d ) {
@@ -85,7 +85,7 @@ bool NetworkFileSystemFactory::refreshDevices()
     return true;
 }
 
-bool NetworkFileSystemFactory::isPathSupported( const std::string& path ) const
+bool NetworkFileSystemFactory::isMrlSupported( const std::string& path ) const
 {
     const auto idx = m_protocol.length();
     if ( path.compare( 0, idx, m_protocol ) != 0 )

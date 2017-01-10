@@ -86,9 +86,7 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
 
     if ( task.vlcMedia.isValid() == false )
     {
-        auto fromType = file->mrl().find( "://" ) != std::string::npos ? VLC::Media::FromType::FromLocation :
-                                                                          VLC::Media::FromType::FromPath;
-        task.vlcMedia = VLC::Media( m_instance, file->mrl(), fromType );
+        task.vlcMedia = VLC::Media( m_instance, file->mrl(), VLC::Media::FromType::FromLocation );
     }
 
     task.vlcMedia.addOption( ":no-audio" );

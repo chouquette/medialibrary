@@ -27,6 +27,7 @@
 #include <memory>
 #include <algorithm>
 #include <cstdlib>
+#include <cstring>
 
 #include "filesystem/IDirectory.h"
 #include "filesystem/IFile.h"
@@ -59,13 +60,13 @@ struct FileSystemFactory : public factory::IFileSystem
         rootDevice->addFile( SubFolder + "subfile.mp4" );
     }
 
-    std::shared_ptr<Device> addDevice( const std::string& mountpoint, const std::string& uuid )
+    std::shared_ptr<Device> addDevice( const std::string& mountpointMrl, const std::string& uuid )
     {
-        auto dev = std::make_shared<Device>( mountpoint, uuid );
+        auto dev = std::make_shared<Device>( mountpointMrl, uuid );
         dev->setupRoot();
-        auto d = device( mountpoint );
+        auto d = device( mountpointMrl );
         if ( d != nullptr )
-            d->setMountpointRoot( mountpoint, dev->root() );
+            d->setMountpointRoot( mountpointMrl, dev->root() );
         devices.push_back( dev );
         return dev;
     }
@@ -123,48 +124,48 @@ struct FileSystemFactory : public factory::IFileSystem
         devices.push_back( dev );
     }
 
-    void addFile( const std::string& filePath )
+    void addFile( const std::string& mrl )
     {
-        auto d = device( filePath );
-        d->addFile( filePath );
+        auto d = device( mrl );
+        d->addFile( mrl );
     }
 
-    void addFolder( const std::string& path )
+    void addFolder( const std::string& mrl )
     {
-        auto d = device( path );
-        d->addFolder( path );
+        auto d = device( mrl );
+        d->addFolder( mrl );
     }
 
-    void removeFile( const std::string& filePath )
+    void removeFile( const std::string& mrl )
     {
-        auto d = device( filePath );
-        d->removeFile( filePath );
+        auto d = device( mrl );
+        d->removeFile( mrl );
     }
 
-    void removeFolder( const std::string& path )
+    void removeFolder( const std::string& mrl )
     {
-        auto d = device( path );
-        d->removeFolder( path );
+        auto d = device( mrl );
+        d->removeFolder( mrl );
     }
 
-    std::shared_ptr<File> file( const std::string& filePath )
+    std::shared_ptr<File> file( const std::string& mrl )
     {
-        auto d = device( filePath );
-        return d->file( filePath );
+        auto d = device( mrl );
+        return d->file( mrl );
     }
 
-    std::shared_ptr<Directory> directory( const std::string& path )
+    std::shared_ptr<Directory> directory( const std::string& mrl )
     {
-        auto d = device( path );
-        return d->directory( path );
+        auto d = device( mrl );
+        return d->directory( mrl );
     }
 
-    virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& path ) override
+    virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& mrl ) override
     {
-        auto d = device( path );
+        auto d = device( mrl );
         if ( d == nullptr )
             return nullptr;
-        return d->directory( path );
+        return d->directory( mrl );
     }
 
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override
@@ -182,26 +183,26 @@ struct FileSystemFactory : public factory::IFileSystem
         return true;
     }
 
-    std::shared_ptr<Device> device( const std::string& path )
+    std::shared_ptr<Device> device( const std::string& mrl )
     {
         std::shared_ptr<Device> ret;
         for ( auto& d : devices )
         {
-            if ( path.find( d->mountpoint() ) == 0 && d->isPresent() == true &&
+            if ( mrl.find( d->mountpoint() ) == 0 && d->isPresent() == true &&
                  ( ret == nullptr || ret->mountpoint().length() < d->mountpoint().length() ) )
                 ret = d;
         }
         return ret;
     }
 
-    virtual std::shared_ptr<fs::IDevice> createDeviceFromPath( const std::string& path ) override
+    virtual std::shared_ptr<fs::IDevice> createDeviceFromMrl( const std::string& mrl ) override
     {
-        return device( path );
+        return device( mrl );
     }
 
-    virtual bool isPathSupported( const std::string& ) const override
+    virtual bool isMrlSupported( const std::string& mrl ) const override
     {
-        return true;
+        return mrl.compare( 0, strlen( "file://" ), "file://" ) == 0;
     }
 
     virtual bool isNetworkFileSystem() const override
@@ -237,6 +238,11 @@ public:
     }
 
     virtual const std::string& path() const
+    {
+        return m_path;
+    }
+
+    virtual const std::string& mrl() const
     {
         return m_path;
     }
@@ -310,7 +316,7 @@ private:
 // We just need a valid instance of this one
 class NoopDirectory : public fs::IDirectory
 {
-    virtual const std::string& path() const override
+    virtual const std::string& mrl() const override
     {
         abort();
     }
@@ -344,7 +350,7 @@ public:
         return nullptr;
     }
 
-    virtual std::shared_ptr<fs::IDevice> createDeviceFromPath( const std::string& ) override
+    virtual std::shared_ptr<fs::IDevice> createDeviceFromMrl( const std::string& ) override
     {
         return std::make_shared<NoopDevice>();
     }
@@ -354,7 +360,7 @@ public:
         return false;
     }
 
-    virtual bool isPathSupported( const std::string& mrl ) const override
+    virtual bool isMrlSupported( const std::string& mrl ) const override
     {
         auto it = mrl.find( "://" );
         if ( it == std::string::npos )

@@ -39,7 +39,7 @@ namespace fs
     public:
         virtual ~IDirectory() = default;
         // Returns the absolute path to this directory
-        virtual const std::string& path() const = 0;
+        virtual const std::string& mrl() const = 0;
         /// Returns a list of absolute files path
         virtual const std::vector<std::shared_ptr<IFile>>& files() const = 0;
         /// Returns a list of absolute path to this folder subdirectories

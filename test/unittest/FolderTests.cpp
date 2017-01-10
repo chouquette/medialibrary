@@ -86,7 +86,7 @@ TEST_F( Folders, Add )
 TEST_F( Folders, Delete )
 {
     auto f = ml->folder( mock::FileSystemFactory::Root );
-    auto folderPath = f->path();
+    auto folderPath = f->mrl();
 
     auto files = ml->files();
     ASSERT_EQ( files.size(), 3u );
@@ -143,7 +143,7 @@ TEST_F( Folders, List )
     bool reloaded = cbMock->wait();
     ASSERT_TRUE( reloaded );
 
-    f = ml->folder( f->path() );
+    f = ml->folder( f->mrl() );
     files = f->files();
     ASSERT_EQ( files.size(), 2u );
 }
@@ -164,7 +164,7 @@ TEST_F( Folders, ListFolders )
     // Now again, without cache. No need to wait for fs discovery reload here
     Reload();
 
-    f = ml->folder( f->path() );
+    f = ml->folder( f->mrl() );
     subFolders = f->folders();
     ASSERT_EQ( 1u, subFolders.size() );
 
@@ -426,7 +426,7 @@ TEST_F( Folders, FetchEntryPoints )
 {
     auto eps = ml->entryPoints();
     ASSERT_EQ( 1u, eps.size() );
-    ASSERT_EQ( mock::FileSystemFactory::Root, eps[0]->path() );
+    ASSERT_EQ( mock::FileSystemFactory::Root, eps[0]->mrl() );
 
     // Check that banned folders don't appear in the results:
     ml->banFolder( mock::FileSystemFactory::SubFolder );

@@ -33,11 +33,10 @@ namespace medialibrary
 namespace fs
 {
 
-CommonFile::CommonFile( const std::string& filePath )
-    : m_path( utils::file::directory( filePath ) )
-    , m_name( utils::file::fileName( filePath ) )
-    , m_fullPath( filePath )
-    , m_extension( utils::file::extension( filePath ) )
+CommonFile::CommonFile( const std::string& mrl )
+    : m_name( utils::file::fileName( mrl ) )
+    , m_extension( utils::file::extension( mrl ) )
+    , m_mrl( mrl )
 {
 }
 
@@ -46,19 +45,14 @@ const std::string& CommonFile::name() const
     return m_name;
 }
 
-const std::string& CommonFile::path() const
-{
-    return m_path;
-}
-
-const std::string& CommonFile::fullPath() const
-{
-    return m_fullPath;
-}
-
 const std::string& CommonFile::extension() const
 {
     return m_extension;
+}
+
+const std::string& CommonFile::mrl() const
+{
+    return m_mrl;
 }
 
 }

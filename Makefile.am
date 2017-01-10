@@ -308,7 +308,7 @@ samples_SOURCES = 						\
 
 samples_CPPFLAGS = 			\
 	$(MEDIALIB_CPPFLAGS)	\
-	-DSRC_DIR=\"$(top_srcdir)\"	\
+	-DSRC_DIR=\"$(abs_srcdir)\"	\
 	-I$(top_srcdir)/test	\
 	-I$(top_srcdir)/googletest/include \
 	$(SQLITE_CFLAGS)		\

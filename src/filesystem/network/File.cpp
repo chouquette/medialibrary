@@ -31,10 +31,9 @@ namespace medialibrary
 namespace fs
 {
 
-NetworkFile::NetworkFile( const std::string& filePath )
-    : CommonFile( filePath )
+NetworkFile::NetworkFile( const std::string& mrl )
+    : CommonFile( mrl )
 {
-
 }
 
 unsigned int NetworkFile::lastModificationDate() const

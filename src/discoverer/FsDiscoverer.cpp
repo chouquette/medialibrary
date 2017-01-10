@@ -52,9 +52,8 @@ FsDiscoverer::FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, Med
 bool FsDiscoverer::discover( const std::string &entryPoint )
 {
     LOG_INFO( "Adding to discovery list: ", entryPoint );
-    // Assume :// denotes a scheme that isn't a file path, and refuse to discover it.
 
-    if ( m_fsFactory->isPathSupported( entryPoint ) == false )
+    if ( m_fsFactory->isMrlSupported( entryPoint ) == false )
         return false;
 
     std::shared_ptr<fs::IDirectory> fsDir = m_fsFactory->createDirectory( entryPoint );
@@ -64,7 +63,7 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
         LOG_ERROR("Failed to create an IDirectory for ", entryPoint );
         return false;
     }
-    auto f = Folder::fromPath( m_ml, fsDir->path() );
+    auto f = Folder::fromMrl( m_ml, fsDir->mrl() );
     // If the folder exists, we assume it will be handled by reload()
     if ( f != nullptr )
         return true;
@@ -93,10 +92,10 @@ bool FsDiscoverer::reload()
     auto rootFolders = Folder::fetchRootFolders( m_ml );
     for ( const auto& f : rootFolders )
     {
-        auto folder = m_fsFactory->createDirectory( f->path() );
+        auto folder = m_fsFactory->createDirectory( f->mrl() );
         if ( folder == nullptr )
         {
-            LOG_INFO( "Removing folder ", f->path() );
+            LOG_INFO( "Removing folder ", f->mrl() );
             m_ml->deleteFolder( *f );
             continue;
         }
@@ -107,7 +106,7 @@ bool FsDiscoverer::reload()
 
 bool FsDiscoverer::reload( const std::string& entryPoint )
 {
-    if ( m_fsFactory->isPathSupported( entryPoint ) == false )
+    if ( m_fsFactory->isMrlSupported( entryPoint ) == false )
         return false;
     LOG_INFO( "Reloading folder ", entryPoint );
     // Start by checking if previously known devices have been plugged/unplugged
@@ -116,16 +115,16 @@ bool FsDiscoverer::reload( const std::string& entryPoint )
         LOG_ERROR( "Refusing to reloading files with no storage device" );
         return false;
     }
-    auto folder = Folder::fromPath( m_ml, entryPoint );
+    auto folder = Folder::fromMrl( m_ml, entryPoint );
     if ( folder == nullptr )
     {
         LOG_ERROR( "Can't reload ", entryPoint, ": folder wasn't found in database" );
         return false;
     }
-    auto folderFs = m_fsFactory->createDirectory( folder->path() );
+    auto folderFs = m_fsFactory->createDirectory( folder->mrl() );
     if ( folderFs == nullptr )
     {
-        LOG_ERROR(" Failed to create a fs::IDirectory representing ", folder->path() );
+        LOG_ERROR(" Failed to create a fs::IDirectory representing ", folder->mrl() );
         return false;
     }
     checkFolder( *folderFs, *folder, false );
@@ -160,13 +159,13 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
     // In this case, simply delete the folder.
     if ( hasDotNoMediaFile( currentFolderFs ) )
     {
-        LOG_INFO( "Deleting folder ", currentFolderFs.path(), " due to a .nomedia file" );
+        LOG_INFO( "Deleting folder ", currentFolderFs.mrl(), " due to a .nomedia file" );
         m_ml->deleteFolder( currentFolder );
         return;
     }
-    m_cb->onDiscoveryProgress( currentFolderFs.path() );
+    m_cb->onDiscoveryProgress( currentFolderFs.mrl() );
     // Load the folders we already know of:
-    LOG_INFO( "Checking for modifications in ", currentFolderFs.path() );
+    LOG_INFO( "Checking for modifications in ", currentFolderFs.mrl() );
     // Don't try to fetch any potential sub folders if the folder was freshly added
     std::vector<std::shared_ptr<Folder>> subFoldersInDB;
     if ( newFolder == false )
@@ -174,7 +173,7 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
     for ( const auto& subFolder : currentFolderFs.dirs() )
     {
         auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [&subFolder](const std::shared_ptr<Folder>& f) {
-            return f->path() == subFolder->path();
+            return f->mrl() == subFolder->mrl();
         });
         // We don't know this folder, it's a new one
         if ( it == end( subFoldersInDB ) )
@@ -184,7 +183,7 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
                 LOG_INFO( "Ignoring folder with a .nomedia file" );
                 continue;
             }
-            LOG_INFO( "New folder detected: ", subFolder->path() );
+            LOG_INFO( "New folder detected: ", subFolder->mrl() );
             try
             {
                 addFolder( *subFolder, &currentFolder );
@@ -214,16 +213,16 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
     // Now all folders we had in DB but haven't seen from the FS must have been deleted.
     for ( auto f : subFoldersInDB )
     {
-        LOG_INFO( "Folder ", f->path(), " not found in FS, deleting it" );
+        LOG_INFO( "Folder ", f->mrl(), " not found in FS, deleting it" );
         m_ml->deleteFolder( *f );
     }
     checkFiles( currentFolderFs, currentFolder );
-    LOG_INFO( "Done checking subfolders in ", currentFolderFs.path() );
+    LOG_INFO( "Done checking subfolders in ", currentFolderFs.mrl() );
 }
 
 void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFolder ) const
 {
-    LOG_INFO( "Checking file in ", parentFolderFs.path() );
+    LOG_INFO( "Checking file in ", parentFolderFs.mrl() );
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
             + " WHERE folder_id = ?";
     auto files = File::fetchAll<File>( m_ml, req, parentFolder.id() );
@@ -232,7 +231,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
     for ( const auto& fileFs: parentFolderFs.files() )
     {
         auto it = std::find_if( begin( files ), end( files ), [fileFs](const std::shared_ptr<File>& f) {
-            return f->mrl() == fileFs->fullPath();
+            return f->mrl() == fileFs->mrl();
         });
         if ( it == end( files ) )
         {
@@ -246,7 +245,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
             continue;
         }
         auto& file = (*it);
-        LOG_INFO( "Forcing file refresh ", fileFs->fullPath() );
+        LOG_INFO( "Forcing file refresh ", fileFs->mrl() );
         // Pre-cache the file's media, since we need it to remove. However, better doing it
         // out of a write context, since that way, other threads can also read the database.
         file->media();
@@ -266,7 +265,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
     for ( auto& p : filesToAdd )
         m_ml->addFile( *p, parentFolder, parentFolderFs );
     t->commit();
-    LOG_INFO( "Done checking files in ", parentFolderFs.path() );
+    LOG_INFO( "Done checking files in ", parentFolderFs.mrl() );
 }
 
 bool FsDiscoverer::hasDotNoMediaFile( const fs::IDirectory& directory )
@@ -286,10 +285,11 @@ bool FsDiscoverer::addFolder( fs::IDirectory& folder, Folder* parentFolder ) con
     if ( device == nullptr )
     {
         LOG_INFO( "Creating new device in DB ", deviceFs->uuid() );
-        device = Device::create( m_ml, deviceFs->uuid(), deviceFs->isRemovable() );
+        device = Device::create( m_ml, deviceFs->uuid(), utils::file::scheme( folder.mrl() ),
+                                 deviceFs->isRemovable() );
     }
 
-    auto f = Folder::create( m_ml, folder.path(),
+    auto f = Folder::create( m_ml, folder.mrl(),
                              parentFolder != nullptr ? parentFolder->id() : 0,
                              *device, *deviceFs );
     if ( f == nullptr )

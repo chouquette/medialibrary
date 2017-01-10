@@ -44,6 +44,18 @@ namespace file
      */
     std::string& toFolderPath( std::string& path );
     std::string  toFolderPath( const std::string& path );
+    /**
+     * @brief toLocalPath Converts an MRL to a local path.
+     * This basically just strips the file:// scheme
+     * @param mrl
+     * @return
+     */
+    std::string  toLocalPath( const std::string& mrl );
+    /**
+     * @brief scheme Returns the scheme used in an MRL
+     * ie. for seaOtter://foo.bar it will return seaOtter://
+     */
+    std::string  scheme( const std::string& mrl );
 }
 
 }

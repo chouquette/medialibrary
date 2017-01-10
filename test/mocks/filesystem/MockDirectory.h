@@ -40,7 +40,7 @@ class Directory : public fs::IDirectory
 public:
     Directory( const std::string& path, std::shared_ptr<Device> device );
 
-    virtual const std::string& path() const override;
+    virtual const std::string& mrl() const override;
     virtual const std::vector<std::shared_ptr<fs::IFile>>& files() const override;
     virtual const std::vector<std::shared_ptr<fs::IDirectory>>& dirs() const override;
     virtual std::shared_ptr<fs::IDevice> device() const override;
@@ -54,7 +54,7 @@ public:
     void invalidateMountpoint( const std::string& path );
 
 private:
-    std::string m_path;
+    std::string m_mrl;
     std::unordered_map<std::string, std::shared_ptr<File>> m_files;
     std::unordered_map<std::string, std::shared_ptr<Directory>> m_dirs;
     mutable std::vector<std::shared_ptr<fs::IFile>> m_filePathes;

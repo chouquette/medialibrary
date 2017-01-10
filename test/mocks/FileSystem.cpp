@@ -28,7 +28,7 @@
 
 namespace mock
 {
-const std::string FileSystemFactory::Root =  "/a/";
-const std::string FileSystemFactory::SubFolder = "/a/folder/";
+const std::string FileSystemFactory::Root =  "file:///a/";
+const std::string FileSystemFactory::SubFolder = "file:///a/folder/";
 const std::string FileSystemFactory::RootDeviceUuid = "{fake-root-device}";
 }

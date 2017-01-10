@@ -48,14 +48,14 @@ std::shared_ptr<Media> MediaLibraryTester::media( int64_t id )
     return std::static_pointer_cast<Media>( MediaLibrary::media( id ) );
 }
 
-std::shared_ptr<Folder> MediaLibraryTester::folder( const std::string& path )
+std::shared_ptr<Folder> MediaLibraryTester::folder( const std::string& mrl )
 {
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
             " WHERE is_blacklisted = 0 AND is_present = 1";
     auto folders = Folder::DatabaseHelpers::fetchAll<Folder>( this, req );
     for ( auto &f : folders )
     {
-        if ( f->path() == path )
+        if ( f->mrl() == mrl )
             return f;
     }
     return nullptr;
@@ -117,7 +117,7 @@ void MediaLibraryTester::deleteArtist( int64_t artistId )
 
 std::shared_ptr<Device> MediaLibraryTester::addDevice( const std::string& uuid, bool isRemovable )
 {
-    return Device::create( this, uuid, isRemovable );
+    return Device::create( this, uuid, "file://", isRemovable );
 }
 
 void MediaLibraryTester::setFsFactory( std::shared_ptr<factory::IFileSystem> fsf )

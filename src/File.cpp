@@ -56,7 +56,7 @@ File::File( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& fil
     : m_ml( ml )
     , m_id( 0 )
     , m_mediaId( mediaId )
-    , m_mrl( isRemovable == true ? file.name() : file.fullPath() )
+    , m_mrl( isRemovable == true ? file.name() : file.mrl() )
     , m_type( type )
     , m_lastModificationDate( file.lastModificationDate() )
     , m_size( file.size() )
@@ -101,7 +101,7 @@ const std::string& File::mrl() const
     auto folder = Folder::fetch( m_ml, m_folderId );
     if ( folder == nullptr )
         return m_mrl;
-    m_fullPath = folder->path() + m_mrl;
+    m_fullPath = folder->mrl() + m_mrl;
     return m_fullPath;
 }
 
@@ -200,7 +200,7 @@ std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, Type ty
     if ( insert( ml, self, req, mediaId, self->m_mrl, type, sqlite::ForeignKey( folderId ),
                          self->m_lastModificationDate, self->m_size, isRemovable ) == false )
         return nullptr;
-    self->m_fullPath = fileFs.fullPath();
+    self->m_fullPath = fileFs.mrl();
     return self;
 }
 
@@ -223,10 +223,10 @@ std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, IFile::
     return self;
 }
 
-std::shared_ptr<File> File::fromPath( MediaLibraryPtr ml, const std::string& path )
+std::shared_ptr<File> File::fromMrl( MediaLibraryPtr ml, const std::string& mrl )
 {
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name +  " WHERE mrl = ? AND folder_id IS NOT NULL";
-    auto file = fetch( ml, req, path );
+    auto file = fetch( ml, req, mrl );
     if ( file == nullptr )
         return nullptr;
     // safety checks: since this only works for files on non removable devices, isPresent must be true
@@ -247,7 +247,7 @@ std::shared_ptr<File> File::fromFileName( MediaLibraryPtr ml, const std::string&
     return file;
 }
 
-std::shared_ptr<File> File::fromMrl( MediaLibraryPtr ml, const std::string& mrl )
+std::shared_ptr<File> File::fromExternalMrl( MediaLibraryPtr ml, const std::string& mrl )
 {
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name +  " WHERE mrl = ? "
             "AND folder_id IS NULL";

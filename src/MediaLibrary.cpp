@@ -272,29 +272,29 @@ MediaPtr MediaLibrary::media( int64_t mediaId ) const
 MediaPtr MediaLibrary::media( const std::string& mrl ) const
 {
     LOG_INFO( "Fetching media from mrl: ", mrl );
-    auto file = File::fromMrl( this, mrl );
+    auto file = File::fromExternalMrl( this, mrl );
     if ( file != nullptr )
     {
         LOG_INFO( "Found external media: ", mrl );
         return file->media();
     }
-    auto fsFactory = fsFactoryForPath( mrl );
+    auto fsFactory = fsFactoryForMrl( mrl );
     if ( fsFactory == nullptr )
     {
         LOG_WARN( "Failed to create FS factory for path ", mrl );
         return nullptr;
     }
-    auto device = fsFactory->createDeviceFromPath( mrl );
+    auto device = fsFactory->createDeviceFromMrl( mrl );
     if ( device == nullptr )
     {
         LOG_WARN( "Failed to create a device associated with mrl ", mrl );
         return nullptr;
     }
     if ( device->isRemovable() == false )
-        file = File::fromPath( this, mrl );
+        file = File::fromMrl( this, mrl );
     else
     {
-        auto folder = Folder::fromPath( this, utils::file::directory( mrl ) );
+        auto folder = Folder::fromMrl( this, utils::file::directory( mrl ) );
         if ( folder == nullptr )
         {
             LOG_WARN( "Failed to find folder containing ", mrl );
@@ -351,22 +351,22 @@ std::shared_ptr<Media> MediaLibrary::addFile( const fs::IFile& fileFs, Folder& p
          std::find_if( begin( supportedAudioExtensions ), end( supportedAudioExtensions ),
                          predicate ) == end( supportedAudioExtensions ) )
     {
-        LOG_INFO( "Rejecting file ", fileFs.fullPath(), " due to its extension" );
+        LOG_INFO( "Rejecting file ", fileFs.mrl(), " due to its extension" );
         return nullptr;
     }
 
-    LOG_INFO( "Adding ", fileFs.fullPath() );
+    LOG_INFO( "Adding ", fileFs.mrl() );
     auto mptr = Media::create( this, type, fileFs.name() );
     if ( mptr == nullptr )
     {
-        LOG_ERROR( "Failed to add media ", fileFs.fullPath(), " to the media library" );
+        LOG_ERROR( "Failed to add media ", fileFs.mrl(), " to the media library" );
         return nullptr;
     }
     // For now, assume all media are made of a single file
     auto file = mptr->addFile( fileFs, parentFolder, parentFolderFs, File::Type::Main );
     if ( file == nullptr )
     {
-        LOG_ERROR( "Failed to add file ", fileFs.fullPath(), " to media #", mptr->id() );
+        LOG_ERROR( "Failed to add file ", fileFs.mrl(), " to media #", mptr->id() );
         Media::destroy( this, mptr->id() );
         return nullptr;
     }
@@ -686,11 +686,11 @@ IDeviceListerCb* MediaLibrary::setDeviceLister( DeviceListerPtr lister )
     return static_cast<IDeviceListerCb*>( this );
 }
 
-std::shared_ptr<factory::IFileSystem> MediaLibrary::fsFactoryForPath( const std::string& path ) const
+std::shared_ptr<factory::IFileSystem> MediaLibrary::fsFactoryForMrl( const std::string& mrl ) const
 {
     for ( const auto& f : m_fsFactories )
     {
-        if ( f->isPathSupported( path ) )
+        if ( f->isMrlSupported( mrl ) )
             return f;
     }
     return nullptr;
@@ -729,7 +729,7 @@ std::vector<FolderPtr> MediaLibrary::entryPoints() const
 
 bool MediaLibrary::removeEntryPoint( const std::string& entryPoint )
 {
-    auto folder = Folder::fromPath( this, entryPoint );
+    auto folder = Folder::fromMrl( this, entryPoint );
     if ( folder == nullptr )
     {
         LOG_WARN( "Can't remove unknown entrypoint: ", entryPoint );
@@ -789,7 +789,7 @@ void MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& 
     LOG_INFO( "Device ", uuid, " was plugged and mounted on ", mountpoint );
     for ( const auto& fsFactory : m_fsFactories )
     {
-        if ( fsFactory->isPathSupported( "file://" ) )
+        if ( fsFactory->isMrlSupported( "file://" ) )
         {
             fsFactory->refreshDevices();
             break;
@@ -802,7 +802,7 @@ void MediaLibrary::onDeviceUnplugged( const std::string& uuid )
     LOG_INFO( "Device ", uuid, " was unplugged" );
     for ( const auto& fsFactory : m_fsFactories )
     {
-        if ( fsFactory->isPathSupported( "file://" ) )
+        if ( fsFactory->isMrlSupported( "file://" ) )
         {
             fsFactory->refreshDevices();
             break;

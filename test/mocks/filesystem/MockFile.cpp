@@ -31,28 +31,17 @@
 namespace mock
 {
 
-File::File(const std::string& filePath)
-    : m_name( utils::file::fileName( filePath ) )
-    , m_path( utils::file::directory( filePath ) )
-    , m_fullPath( filePath )
-    , m_extension( utils::file::extension( filePath ) )
+File::File(const std::string& mrl )
+    : m_name( utils::file::fileName( mrl ) )
+    , m_extension( utils::file::extension( mrl ) )
     , m_lastModification( 0 )
+    , m_mrl( mrl )
 {
 }
 
 const std::string& File::name() const
 {
     return m_name;
-}
-
-const std::string& File::path() const
-{
-    return m_path;
-}
-
-const std::string& File::fullPath() const
-{
-    return m_fullPath;
 }
 
 const std::string& File::extension() const
@@ -63,6 +52,11 @@ const std::string& File::extension() const
 void File::markAsModified()
 {
     m_lastModification++;
+}
+
+const std::string& File::mrl() const
+{
+    return m_mrl;
 }
 
 unsigned int File::lastModificationDate() const

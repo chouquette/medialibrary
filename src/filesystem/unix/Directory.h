@@ -35,11 +35,15 @@ namespace fs
 class Directory : public CommonDirectory
 {
 public:
-    Directory( const std::string& path, factory::IFileSystem& fsFactory );
+    Directory( const std::string& mrl, factory::IFileSystem& fsFactory );
+    const std::string& mrl() const override;
 
 private:
     virtual void read() const override;
     static std::string toAbsolute( const std::string& path );
+
+private:
+    std::string m_mrl;
 };
 
 }

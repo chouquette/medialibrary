@@ -43,15 +43,22 @@ struct DeviceTable
 class Device : public DatabaseHelpers<Device, policy::DeviceTable>
 {
 public:
-    Device( MediaLibraryPtr ml, const std::string& uuid, bool isRemovable );
+    Device( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme, bool isRemovable );
     Device( MediaLibraryPtr ml, sqlite::Row& row );
     int64_t id() const;
     const std::string& uuid() const;
     bool isRemovable() const;
     bool isPresent() const;
     void setPresent( bool value );
+    ///
+    /// \brief scheme returns the scheme that was used for this device when it was
+    /// originally created. This allows to use the apropriate IFileSystemFactory to find the
+    /// recreate a IDevice based on its id or UUID
+    /// \return
+    ///
+    const std::string& scheme() const;
 
-    static std::shared_ptr<Device> create( MediaLibraryPtr ml, const std::string& uuid, bool isRemovable );
+    static std::shared_ptr<Device> create( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme, bool isRemovable );
     static bool createTable( DBConnection connection );
     static std::shared_ptr<Device> fromUuid( MediaLibraryPtr ml, const std::string& uuid );
 
@@ -62,6 +69,7 @@ private:
     // This is a unique ID on the system side, in the /dev/disk/by-uuid sense.
     // It can be a name or what not, depending on the OS.
     std::string m_uuid;
+    std::string m_scheme;
     bool m_isRemovable;
     bool m_isPresent;
 

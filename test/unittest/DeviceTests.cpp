@@ -52,7 +52,7 @@ protected:
         unlink( "test.db" );
         fsMock.reset( new mock::FileSystemFactory );
         cbMock.reset( new mock::WaitForDiscoveryComplete );
-        fsMock->addFolder( "/a/mnt/" );
+        fsMock->addFolder( "file:///a/mnt/" );
         auto device = fsMock->addDevice( RemovableDeviceMountpoint, RemovableDeviceUuid );
         device->setRemovable( true );
         fsMock->addFile( RemovableDeviceMountpoint + "removablefile.mp3" );
@@ -72,7 +72,7 @@ protected:
 };
 
 const std::string DeviceFs::RemovableDeviceUuid = "{fake-removable-device}";
-const std::string DeviceFs::RemovableDeviceMountpoint = "/a/mnt/fake-device/";
+const std::string DeviceFs::RemovableDeviceMountpoint = "file:///a/mnt/fake-device/";
 
 // Database/Entity tests
 

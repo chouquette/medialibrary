@@ -28,6 +28,7 @@
 #include "filesystem/IDirectory.h"
 #include "filesystem/IFile.h"
 #include "logging/Logger.h"
+#include "utils/Filename.h"
 
 #if defined(__linux__) || defined(__APPLE__)
 # include "filesystem/unix/Directory.h"
@@ -55,21 +56,21 @@ FileSystemFactory::FileSystemFactory( DeviceListerPtr lister )
 {
 }
 
-std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::string& path )
+std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::string& mrl )
 {
     std::lock_guard<compat::Mutex> lock( m_mutex );
-    const auto it = m_dirs.find( path );
+    const auto it = m_dirs.find( mrl );
     if ( it != end( m_dirs ) )
         return it->second;
     try
     {
-        auto dir = std::make_shared<fs::Directory>( path, *this );
-        m_dirs[path] = dir;
+        auto dir = std::make_shared<fs::Directory>( mrl, *this );
+        m_dirs[mrl] = dir;
         return dir;
     }
     catch(const std::system_error& ex)
     {
-        LOG_ERROR( "Failed to create fs::IDirectory for ", path, ": ", ex.what());
+        LOG_ERROR( "Failed to create fs::IDirectory for ", mrl, ": ", ex.what());
         return nullptr;
     }
 }
@@ -84,13 +85,13 @@ std::shared_ptr<fs::IDevice> FileSystemFactory::createDevice( const std::string&
     return nullptr;
 }
 
-std::shared_ptr<fs::IDevice> FileSystemFactory::createDeviceFromPath( const std::string& path )
+std::shared_ptr<fs::IDevice> FileSystemFactory::createDeviceFromMrl( const std::string& mrl )
 {
     auto lock = m_deviceCache.lock();
     std::shared_ptr<fs::IDevice> res;
     for ( const auto& p : m_deviceCache.get() )
     {
-        if ( path.find( p.second->mountpoint() ) == 0 )
+        if ( mrl.find( p.second->mountpoint() ) == 0 )
         {
             if ( res == nullptr || res->mountpoint().length() < p.second->mountpoint().length() )
                 res = p.second;
@@ -126,11 +127,8 @@ bool FileSystemFactory::refreshDevices()
     return true;
 }
 
-bool FileSystemFactory::isPathSupported( const std::string& path ) const
+bool FileSystemFactory::isMrlSupported( const std::string& path ) const
 {
-    auto it = path.find( "://" );
-    if ( it == std::string::npos )
-        return true;
     return path.compare( 0, 7, "file://" ) == 0;
 }
 

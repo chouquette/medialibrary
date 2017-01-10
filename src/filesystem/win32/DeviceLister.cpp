@@ -76,7 +76,7 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
 
         if ( GetVolumePathNamesForVolumeName( volumeName, buffer, buffLength, &buffLength ) == 0 )
             continue;
-        std::string mountpoint = charset::FromWide( buffer ).get();
+        std::string mountpoint = "file://" + charset::FromWide( buffer ).get();
 
         // Filter out anything which isn't a removable or fixed drive. We don't care about network
         // drive here.

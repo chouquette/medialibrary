@@ -79,7 +79,7 @@ TEST_P( Tests, Parse )
         auto res = stat( samplesDir.c_str(), &s );
         ASSERT_EQ( 0, res );
 
-        m_ml->discover( samplesDir );
+        m_ml->discover( "file://" + samplesDir );
     }
     ASSERT_TRUE( m_cb->waitForParsingComplete() );
 

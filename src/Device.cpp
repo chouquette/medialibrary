@@ -38,16 +38,18 @@ Device::Device( MediaLibraryPtr ml, sqlite::Row& row )
 {
     row >> m_id
         >> m_uuid
+        >> m_scheme
         >> m_isRemovable
         >> m_isPresent;
     //FIXME: It's probably a bad idea to load "isPresent" for DB. This field should
     //only be here for sqlite triggering purposes
 }
 
-Device::Device( MediaLibraryPtr ml, const std::string& uuid, bool isRemovable )
+Device::Device( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme, bool isRemovable )
     : m_ml( ml )
     , m_id( 0 )
     , m_uuid( uuid )
+    , m_scheme( scheme )
     , m_isRemovable( isRemovable )
     // Assume we can't add an absent device
     , m_isPresent( true )
@@ -83,12 +85,17 @@ void Device::setPresent(bool value)
     m_isPresent = value;
 }
 
-std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& uuid, bool isRemovable )
+const std::string& Device::scheme() const
+{
+    return m_scheme;
+}
+
+std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme, bool isRemovable )
 {
     static const std::string req = "INSERT INTO " + policy::DeviceTable::Name
-            + "(uuid, is_removable, is_present) VALUES(?, ?, ?)";
-    auto self = std::make_shared<Device>( ml, uuid, isRemovable );
-    if ( insert( ml, self, req, uuid, isRemovable, self->isPresent() ) == false )
+            + "(uuid, scheme, is_removable, is_present) VALUES(?, ?, ?, ?)";
+    auto self = std::make_shared<Device>( ml, uuid, scheme, isRemovable );
+    if ( insert( ml, self, req, uuid, scheme, isRemovable, self->isPresent() ) == false )
         return nullptr;
     return self;
 }
@@ -98,6 +105,7 @@ bool Device::createTable(DBConnection connection)
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::DeviceTable::Name + "("
                 "id_device INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "uuid TEXT UNIQUE ON CONFLICT FAIL,"
+                "scheme TEXT,"
                 "is_removable BOOLEAN,"
                 "is_present BOOLEAN"
             ")";

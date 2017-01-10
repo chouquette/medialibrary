@@ -26,6 +26,8 @@
 
 #include "utils/Filename.h"
 
+#include <stdexcept>
+
 #ifdef _WIN32
 #define DIR_SEPARATOR '\\'
 #else
@@ -158,6 +160,21 @@ std::string toFolderPath( const std::string& path )
          )
         p += DIR_SEPARATOR;
     return p;
+}
+
+std::string toLocalPath( const std::string& mrl )
+{
+    if ( mrl.compare( 0, 7, "file://" ) != 0 )
+        throw std::runtime_error( mrl + " is not representing a local path" );
+    return mrl.substr( 7 );
+}
+
+std::string scheme( const std::string& mrl )
+{
+    auto pos = mrl.find( "://" );
+    if ( pos == std::string::npos )
+        throw std::runtime_error( "Invalid MRL provided" );
+    return mrl.substr( 0, pos + 3 );
 }
 
 }

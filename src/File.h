@@ -85,12 +85,12 @@ public:
                                          const fs::IFile& file, int64_t folderId, bool isRemovable );
     static std::shared_ptr<File> create( MediaLibraryPtr ml, int64_t mediaId, Type type, const std::string& mrl );
     /**
-     * @brief fromPath  Attempts to fetch a file using its full path
+     * @brief fromPath  Attempts to fetch a file using its mrl
      * This will only work if the file was stored on a non removable device
-     * @param path      The full path to the wanted file
+     * @param path      The wanted file mrl
      * @return          A pointer to the wanted file, or nullptr if it wasn't found
      */
-    static std::shared_ptr<File> fromPath( MediaLibraryPtr ml, const std::string& path );
+    static std::shared_ptr<File> fromMrl( MediaLibraryPtr ml, const std::string& mrl );
     /**
      * @brief fromFileName  Attemps to fetch a file based on its filename and folder id
      * @param ml
@@ -106,7 +106,7 @@ public:
      * This implies the folder_id is null
      * @return
      */
-    static std::shared_ptr<File> fromMrl( MediaLibraryPtr ml, const std::string& mrl );
+    static std::shared_ptr<File> fromExternalMrl( MediaLibraryPtr ml, const std::string& mrl );
 
 
 private:
@@ -114,6 +114,8 @@ private:
 
     int64_t m_id;
     int64_t m_mediaId;
+    // Contains the path relative to the containing folder for files contained in a removable folder
+    // or the full file MRL for non removable ones
     std::string m_mrl;
     Type m_type;
     unsigned int m_lastModificationDate;
@@ -124,6 +126,7 @@ private:
     bool m_isRemovable;
     bool m_isExternal;
 
+    // Contains the full path as a MRL
     mutable Cache<std::string> m_fullPath;
     mutable Cache<std::weak_ptr<Media>> m_media;
 

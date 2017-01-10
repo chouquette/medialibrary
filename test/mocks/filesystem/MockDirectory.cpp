@@ -35,17 +35,17 @@
 namespace mock
 {
 
-Directory::Directory(const std::string& path, std::shared_ptr<Device> device)
-    : m_path( path )
+Directory::Directory( const std::string& mrl, std::shared_ptr<Device> device)
+    : m_mrl( mrl )
     , m_device( device )
 {
-    if ( ( *m_path.crbegin() ) != '/' )
-        m_path += '/';
+    if ( ( *m_mrl.crbegin() ) != '/' )
+        m_mrl += '/';
 }
 
-const std::string&Directory::path() const
+const std::string& Directory::mrl() const
 {
-    return m_path;
+    return m_mrl;
 }
 
 const std::vector<std::shared_ptr<fs::IFile>>& Directory::files() const
@@ -74,7 +74,7 @@ void Directory::addFile(const std::string& filePath)
     auto subFolder = utils::file::firstFolder( filePath );
     if ( subFolder.empty() == true )
     {
-        m_files[filePath] = std::make_shared<File>( m_path + filePath );
+        m_files[filePath] = std::make_shared<File>( m_mrl + filePath );
     }
     else
     {
@@ -91,7 +91,7 @@ void Directory::addFolder(const std::string& folder)
     auto remainingPath = utils::file::removePath( folder, subFolder );
     if ( remainingPath.empty() == true )
     {
-        auto dir = std::make_shared<Directory>( m_path + subFolder, m_device.lock() );
+        auto dir = std::make_shared<Directory>( m_mrl + subFolder, m_device.lock() );
         m_dirs[subFolder] = dir;
     }
     else
@@ -197,7 +197,7 @@ void Directory::invalidateMountpoint(const std::string& path)
     auto remainingPath = utils::file::removePath( path, subFolder );
     if ( remainingPath.empty() == true )
     {
-        m_dirs[subFolder] = std::make_shared<Directory>( m_path + subFolder, m_device.lock() );
+        m_dirs[subFolder] = std::make_shared<Directory>( m_mrl + subFolder, m_device.lock() );
     }
     else
     {

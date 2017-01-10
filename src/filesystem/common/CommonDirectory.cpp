@@ -36,16 +36,9 @@ namespace medialibrary
 namespace fs
 {
 
-medialibrary::fs::CommonDirectory::CommonDirectory( const std::string& path,
-                                                    factory::IFileSystem& fsFactory )
-    : m_path( utils::file::toFolderPath( path ) )
-    , m_fsFactory( fsFactory )
+medialibrary::fs::CommonDirectory::CommonDirectory( factory::IFileSystem& fsFactory )
+    : m_fsFactory( fsFactory )
 {
-}
-
-const std::string& CommonDirectory::path() const
-{
-    return m_path;
 }
 
 const std::vector<std::shared_ptr<IFile>>& CommonDirectory::files() const
@@ -66,7 +59,7 @@ std::shared_ptr<IDevice> CommonDirectory::device() const
 {
     auto lock = m_device.lock();
     if ( m_device.isCached() == false )
-        m_device = m_fsFactory.createDeviceFromPath( m_path );
+        m_device = m_fsFactory.createDeviceFromMrl( mrl() );
     return m_device.get();
 }
 

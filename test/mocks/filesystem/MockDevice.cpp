@@ -72,14 +72,14 @@ std::string Device::relativePath(const std::string& path)
     return res;
 }
 
-void Device::addFile(const std::string& filePath)
+void Device::addFile(const std::string& filePath )
 {
     m_root->addFile( relativePath( filePath ) );
 }
 
-void Device::addFolder(const std::string& path)
+void Device::addFolder(const std::string& mrl)
 {
-    m_root->addFolder( relativePath( path ) );
+    m_root->addFolder( relativePath( mrl ) );
 }
 
 void Device::removeFile(const std::string& filePath)
@@ -96,7 +96,7 @@ void Device::removeFolder(const std::string& filePath)
         m_root->removeFolder( relPath );
 }
 
-std::shared_ptr<File> Device::file(const std::string& filePath)
+std::shared_ptr<File> Device::file(const std::string& filePath )
 {
     if ( m_root == nullptr || m_present == false )
         return nullptr;
@@ -113,9 +113,9 @@ std::shared_ptr<Directory> Device::directory(const std::string& path)
     return m_root->directory( relPath );
 }
 
-void Device::setMountpointRoot(const std::string& path, std::shared_ptr<Directory> root)
+void Device::setMountpointRoot(const std::string& mrl, std::shared_ptr<Directory> root)
 {
-    auto relPath = relativePath( path );
+    auto relPath = relativePath( mrl );
     // m_root is already a mountpoint, we can't add a mountpoint to it.
     assert( relPath.empty() == false );
     m_root->setMountpointRoot( relPath, root );

@@ -246,7 +246,7 @@ std::vector<std::tuple<std::string, std::string, bool>> medialibrary::fs::Device
                 }
             }
             auto removable = isRemovable( deviceName, mountpoint );
-            res.emplace_back( std::make_tuple( uuid, mountpoint, removable ) );
+            res.emplace_back( std::make_tuple( uuid, "file://" + mountpoint, removable ) );
         }
     }
     catch(std::runtime_error& ex)

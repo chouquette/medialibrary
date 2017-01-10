@@ -34,23 +34,21 @@ namespace mock
 class File : public fs::IFile
 {
 public:
-    File( const std::string& filePath );
+    File( const std::string& mrl );
     File( const File& ) = default;
 
     virtual const std::string& name() const override;
-    virtual const std::string& path() const override;
-    virtual const std::string& fullPath() const override;
     virtual const std::string& extension() const override;
     virtual unsigned int lastModificationDate() const override;
     virtual unsigned int size() const override;
     void markAsModified();
+    virtual const std::string& mrl() const override;
 
 private:
     std::string m_name;
-    std::string m_path;
-    std::string m_fullPath;
     std::string m_extension;
     unsigned int m_lastModification;
+    std::string m_mrl;
 };
 
 }

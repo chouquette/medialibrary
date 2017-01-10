@@ -36,7 +36,7 @@ namespace fs
 {
 
 File::File( const std::string& filePath, const struct stat& s )
-    : CommonFile( filePath )
+    : CommonFile( "file://" + filePath )
 {
     m_lastModificationDate = s.st_mtime;
     m_size = s.st_size;

@@ -42,12 +42,15 @@ namespace factory
 
     public:
         FileSystemFactory( DeviceListerPtr lister );
-        virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& path ) override;
+        virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& mrl ) override;
         virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override;
-        virtual std::shared_ptr<fs::IDevice> createDeviceFromPath( const std::string& path ) override;
+        virtual std::shared_ptr<fs::IDevice> createDeviceFromMrl( const std::string& mrl ) override;
         virtual bool refreshDevices() override;
-        virtual bool isPathSupported( const std::string& path ) const override;
+        virtual bool isMrlSupported( const std::string& path ) const override;
         virtual bool isNetworkFileSystem() const override;
+
+    private:
+        std::string toLocalPath( const std::string& mrl );
 
     private:
         std::unordered_map<std::string, std::shared_ptr<fs::IDirectory>> m_dirs;

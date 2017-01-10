@@ -26,6 +26,7 @@
 
 #include "Directory.h"
 #include "File.h"
+#include "utils/Filename.h"
 #include "utils/VLCInstance.h"
 
 #include "compat/ConditionVariable.h"
@@ -38,15 +39,20 @@ namespace medialibrary
 namespace fs
 {
 
-NetworkDirectory::NetworkDirectory( const std::string& path, factory::IFileSystem& fsFactory )
-    : CommonDirectory( path, fsFactory )
+NetworkDirectory::NetworkDirectory( const std::string& mrl, factory::IFileSystem& fsFactory )
+    : CommonDirectory( fsFactory )
+    , m_mrl( utils::file::toFolderPath( mrl ) )
 {
+}
 
+const std::string& NetworkDirectory::mrl() const
+{
+    return m_mrl;
 }
 
 void NetworkDirectory::read() const
 {
-    VLC::Media media( VLCInstance::get(), m_path, VLC::Media::FromLocation );
+    VLC::Media media( VLCInstance::get(), m_mrl, VLC::Media::FromLocation );
     assert( media.parsedStatus() != VLC::Media::ParsedStatus::Done );
 
     compat::Mutex mutex;

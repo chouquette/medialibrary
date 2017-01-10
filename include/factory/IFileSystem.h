@@ -57,7 +57,7 @@ namespace factory
         /// \param path A path.
         /// \return A representation of the device.
         ///
-        virtual std::shared_ptr<fs::IDevice> createDeviceFromPath( const std::string& path ) = 0;
+        virtual std::shared_ptr<fs::IDevice> createDeviceFromMrl( const std::string& path ) = 0;
         ///
         /// \brief refresh Will cause any FS cache to be refreshed.
         ///
@@ -67,7 +67,7 @@ namespace factory
         /// \param path The path to probe for support
         /// \return True if supported, false otherwise
         ///
-        virtual bool isPathSupported( const std::string& path ) const = 0;
+        virtual bool isMrlSupported( const std::string& path ) const = 0;
         ///
         /// \brief isNetworkFileSystem Returns true if this FS factory handles network file systems
         ///

@@ -26,6 +26,7 @@
 
 #include "Directory.h"
 #include "utils/Charsets.h"
+#include "utils/Filename.h"
 #include "factory/IFileSystem.h"
 #include "File.h"
 #include "logging/Logger.h"
@@ -41,21 +42,28 @@ namespace medialibrary
 namespace fs
 {
 
-Directory::Directory(const std::string& path , factory::IFileSystem& fsFactory)
-    : CommonDirectory( toAbsolute( path ), fsFactory )
+Directory::Directory( const std::string& mrl , factory::IFileSystem& fsFactory )
+    : CommonDirectory( fsFactory )
+    , m_mrl( mrl )
 {
+}
+
+const std::string& Directory::mrl() const
+{
+    return m_mrl;
 }
 
 void Directory::read() const
 {
+    const auto path = toAbsolute( utils::file::toLocalPath( m_mrl ) );
 #if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP)
     WIN32_FIND_DATA f;
-    auto pattern = m_path + '*';
+    auto pattern = path + '*';
     auto wpattern = charset::ToWide( pattern.c_str() );
     auto h = FindFirstFile( wpattern.get(), &f );
     if ( h == INVALID_HANDLE_VALUE )
     {
-        LOG_ERROR( "Failed to browse ", m_path );
+        LOG_ERROR( "Failed to browse ", path );
         throw std::system_error( GetLastError(), std::generic_category(), "Failed to browse through directory" );
     }
     do
@@ -63,7 +71,7 @@ void Directory::read() const
         auto file = charset::FromWide( f.cFileName );
         if ( file[0] == '.' )
             continue;
-        auto path = m_path + file.get();
+        auto path = path + file.get();
         if ( ( f.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
             m_dirs.emplace_back( m_fsFactory.createDirectory( path ) );
         else
@@ -74,8 +82,8 @@ void Directory::read() const
     // We must remove the trailing /
     // https://msdn.microsoft.com/en-us/library/windows/desktop/aa363858(v=vs.85).aspx
     // «Do not use a trailing backslash (\), which indicates the root directory of a drive»
-    assert( *m_path.rbegin() == '\\' );
-    auto tmpPath = m_path.substr( 0, m_path.length() - 1 );
+    assert( *path.rbegin() == '\\' );
+    auto tmpPath = path.substr( 0, path.length() - 1 );
     auto wpath = charset::ToWide( tmpPath.c_str() );
 
     CREATEFILE2_EXTENDED_PARAMETERS params{};
@@ -83,7 +91,7 @@ void Directory::read() const
     auto handle = CreateFile2( wpath.get(), GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, &params );
     if ( handle == INVALID_HANDLE_VALUE )
     {
-        LOG_ERROR( "Failed to open directory ", m_path );
+        LOG_ERROR( "Failed to open directory ", path );
         throw std::system_error( GetLastError(), std::generic_category(), "Failed to open directory" );
     }
 
@@ -114,16 +122,16 @@ void Directory::read() const
                     throw std::bad_alloc();
                 continue;
             }
-            LOG_ERROR( "Failed to browse ", m_path, ". GetLastError(): ", GetLastError() );
+            LOG_ERROR( "Failed to browse ", path, ". GetLastError(): ", GetLastError() );
             throw std::system_error( GetLastError(), std::generic_category(), "Failed to browse through directory" );
         }
 
         auto file = charset::FromWide( dirInfo->FileName );
         if ( file[0] == '.' )
             continue;
-        auto path = m_path + file.get();
+        auto path = path + file.get();
         if ( ( dirInfo->FileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
-            m_dirs.emplace_back( m_fsFactory.createDirectory( path ) );
+            m_dirs.emplace_back( m_fsFactory.createDirectory( "file://" + path ) );
         else
             m_files.emplace_back( std::make_shared<File>( path ) );
     }
