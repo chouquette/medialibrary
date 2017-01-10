@@ -166,7 +166,27 @@ std::string toLocalPath( const std::string& mrl )
 {
     if ( mrl.compare( 0, 7, "file://" ) != 0 )
         throw std::runtime_error( mrl + " is not representing a local path" );
-    return mrl.substr( 7 );
+    std::string res;
+    res.reserve( mrl.size() - 7 );
+    auto it = cbegin( mrl ) + 7;
+    auto ite = cend( mrl );
+    for ( ; it != ite; ++it )
+    {
+        if ( *it == '%' )
+        {
+            ++it;
+            char hex[3];
+            if ( ( hex[0] = *it) == 0 || ( hex[1] = *(it + 1) ) == 0 )
+                throw std::runtime_error( mrl + ": Incomplete character sequence" );
+            hex[2] = 0;
+            auto val = strtoul( hex, nullptr, 16 );
+            res.push_back( static_cast<std::string::value_type>( val ) );
+            ++it;
+        }
+        else
+            res.push_back( *it );
+    }
+    return res;
 }
 
 std::string scheme( const std::string& mrl )
@@ -174,7 +194,7 @@ std::string scheme( const std::string& mrl )
     auto pos = mrl.find( "://" );
     if ( pos == std::string::npos )
         throw std::runtime_error( "Invalid MRL provided" );
-    return mrl.substr( 0, pos + 3 );
+    return mrl.substr( 0, 7 );
 }
 
 }
