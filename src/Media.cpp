@@ -280,7 +280,9 @@ const IMediaMetadata& Media::metadata( IMedia::MetadataType type ) const
         std::vector<MediaMetadata> res;
         static const std::string req = "SELECT * FROM " + policy::MediaMetadataTable::Name +
                 " WHERE id_media = ?";
-        sqlite::Statement stmt( m_ml->getConn()->getConn(), req );
+        auto conn = m_ml->getConn();
+        auto ctx = conn->acquireReadContext();
+        sqlite::Statement stmt( conn->getConn(), req );
         stmt.execute( m_id );
         for ( sqlite::Row row = stmt.row(); row != nullptr; row = stmt.row() )
         {
