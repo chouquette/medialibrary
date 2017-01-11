@@ -274,6 +274,7 @@ unittest_SOURCES = \
 	test/unittest/FileTests.cpp \
 	test/unittest/FolderTests.cpp \
 	test/unittest/FsUtilsTests.cpp \
+	test/unittest/UrlTests.cpp \
 	test/unittest/GenreTests.cpp \
 	test/unittest/HistoryTests.cpp \
 	test/unittest/LabelTests.cpp \

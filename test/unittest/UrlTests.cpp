@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Media Library
  *****************************************************************************
- * Copyright (C) 2017 Hugo Beauzée-Luyssen, Videolabs
+ * Copyright (C) 2015 Hugo Beauzée-Luyssen, Videolabs
  *
  * Authors: Hugo Beauzée-Luyssen<hugo@beauzee.fr>
  *
@@ -20,18 +20,19 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#include <string>
+#if HAVE_CONFIG_H
+# include "config.h"
+#endif
 
-namespace medialibrary
-{
-namespace utils
-{
-namespace url
-{
+#include "gtest/gtest.h"
 
-std::string decode( const std::string& str );
-std::string encode( const std::string& str );
+#include "utils/Url.h"
 
-}
-}
+using namespace medialibrary;
+
+TEST( UrlUtils, encode )
+{
+    ASSERT_EQ( "meow", utils::url::encode( "meow" ) );
+    ASSERT_EQ( "plain%20space", utils::url::encode(  "plain space" ) );
+    ASSERT_EQ( "/%C3%A1%C3%A9%C3%BA%C3%AD%C3%B3/f00/%C3%9Far", utils::url::encode( "/áéúíó/f00/ßar" ) );
 }

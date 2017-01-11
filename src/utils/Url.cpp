@@ -61,6 +61,28 @@ std::string decode( const std::string& str )
     return res;
 }
 
+std::string encode( const std::string& str )
+{
+    std::string res;
+
+    res.reserve( str.size() );
+    for ( const unsigned char c : str )
+    {
+        if ( ( c >= 32 && c <= 126 ) && (
+                 ( c >= 'a' && c <= 'z' ) ||
+                 ( c >= 'A' && c <= 'Z' ) ||
+                 ( c >= '0' && c <= '9' ) ||
+                 c == '.' || c == '-' || c == '_' || c == '~' || c == '#' || c == '/' )
+             )
+        {
+            res.push_back( c );
+        }
+        else
+            res.append({ '%', "0123456789ABCDEF"[c >> 4], "0123456789ABCDEF"[c & 0xF] });
+    }
+    return res;
+}
+
 }
 }
 }
