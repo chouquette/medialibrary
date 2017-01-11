@@ -25,6 +25,7 @@
 #endif
 
 #include "File.h"
+#include "utils/Filename.h"
 
 #include <stdexcept>
 #include <sys/stat.h>
@@ -36,7 +37,7 @@ namespace fs
 {
 
 File::File( const std::string& filePath, const struct stat& s )
-    : CommonFile( "file://" + filePath )
+    : CommonFile( utils::file::toMrl( filePath ) )
 {
     m_lastModificationDate = s.st_mtime;
     m_size = s.st_size;

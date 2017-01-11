@@ -96,7 +96,7 @@ void Directory::read() const
                 if ( *absPath.crbegin() != '/' )
                     absPath += '/';
                 //FIXME: This will use toAbsolute again in the constructor.
-                m_dirs.emplace_back( std::make_shared<Directory>( "file://" + absPath, m_fsFactory ) );
+                m_dirs.emplace_back( std::make_shared<Directory>( utils::file::toMrl( absPath ), m_fsFactory ) );
             }
             else
                 m_files.emplace_back( std::make_shared<File>( absPath, s ) );

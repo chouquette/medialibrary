@@ -27,6 +27,7 @@
 #include "File.h"
 #include "logging/Logger.h"
 #include "utils/Charsets.h"
+#include "utils/Filename.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -44,7 +45,7 @@ namespace fs
 {
 
 File::File( const std::string &filePath )
-    : CommonFile( "file://" + filePath )
+    : CommonFile( utils::file::toMrl( filePath ) )
 {
     struct _stat s;
     if ( _tstat( charset::ToWide( filePath.c_str() ).get(), &s ) != 0 )

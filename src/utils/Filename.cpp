@@ -170,6 +170,11 @@ std::string toLocalPath( const std::string& mrl )
     return utils::url::decode( mrl.substr( 7 ) );
 }
 
+std::string toMrl( const std::string& path )
+{
+    return "file://" + utils::url::encode( path );
+}
+
 std::string scheme( const std::string& mrl )
 {
     auto pos = mrl.find( "://" );

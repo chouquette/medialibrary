@@ -56,6 +56,10 @@ namespace file
      * ie. for seaOtter://foo.bar it will return seaOtter://
      */
     std::string  scheme( const std::string& mrl );
+    /**
+     * @brief toMrl Convert a filepath to an MRL
+     */
+    std::string toMrl( const std::string& path );
 }
 
 }
