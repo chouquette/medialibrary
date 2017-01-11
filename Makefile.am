@@ -74,6 +74,7 @@ libmedialibrary_la_SOURCES = \
 	src/parser/ParserService.cpp \
 	src/utils/Filename.cpp \
 	src/utils/ModificationsNotifier.cpp \
+	src/utils/Url.cpp \
 	src/utils/VLCInstance.cpp \
 	$(NULL)
 
@@ -155,6 +156,7 @@ noinst_HEADERS = \
 	src/utils/Filename.h \
 	src/utils/ModificationsNotifier.h \
 	src/utils/SWMRLock.h \
+	src/utils/Url.h \
 	src/utils/VLCInstance.h \
 	src/VideoTrack.h \
 	src/compat/Thread.h \

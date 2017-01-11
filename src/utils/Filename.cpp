@@ -25,9 +25,9 @@
 #endif
 
 #include "utils/Filename.h"
+#include "utils/Url.h"
 
 #include <stdexcept>
-#include <cstdlib>
 
 #ifdef _WIN32
 #define DIR_SEPARATOR '\\'
@@ -167,27 +167,7 @@ std::string toLocalPath( const std::string& mrl )
 {
     if ( mrl.compare( 0, 7, "file://" ) != 0 )
         throw std::runtime_error( mrl + " is not representing a local path" );
-    std::string res;
-    res.reserve( mrl.size() - 7 );
-    auto it = mrl.cbegin() + 7;
-    auto ite = mrl.cend();
-    for ( ; it != ite; ++it )
-    {
-        if ( *it == '%' )
-        {
-            ++it;
-            char hex[3];
-            if ( ( hex[0] = *it) == 0 || ( hex[1] = *(it + 1) ) == 0 )
-                throw std::runtime_error( mrl + ": Incomplete character sequence" );
-            hex[2] = 0;
-            auto val = strtoul( hex, nullptr, 16 );
-            res.push_back( static_cast<std::string::value_type>( val ) );
-            ++it;
-        }
-        else
-            res.push_back( *it );
-    }
-    return res;
+    return utils::url::decode( mrl.substr( 7 ) );
 }
 
 std::string scheme( const std::string& mrl )
