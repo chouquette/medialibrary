@@ -75,6 +75,7 @@ public:
      * extract the same information again
      */
     void markStepCompleted( ParserStep step );
+    void markStepUncompleted( ParserStep step );
     bool saveParserStep();
     ParserStep parserStep() const;
     /**

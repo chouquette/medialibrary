@@ -133,6 +133,12 @@ void File::markStepCompleted( ParserStep step )
                                              static_cast<uint8_t>( step ) );
 }
 
+void File::markStepUncompleted(File::ParserStep step)
+{
+    m_parserSteps = static_cast<ParserStep>( static_cast<uint8_t>( m_parserSteps ) &
+                                             ( ~ static_cast<uint8_t>( step ) ) );
+}
+
 bool File::saveParserStep()
 {
     static const std::string req = "UPDATE " + policy::FileTable::Name + " SET parser_step = ?, "

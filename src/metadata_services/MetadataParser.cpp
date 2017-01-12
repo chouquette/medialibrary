@@ -77,6 +77,11 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
         // However, if the file is not unknown anymore, it means the thumbnailer has already processed it
         if ( task.media->type() == Media::Type::Unknown )
         {
+            // In case the thumbnailer ran before, but the application exited, we would skip the
+            // thumbnailer execution, coming back here, and delegating again to the thumbnailer
+            // over and over again. We need to ensure the thumbnailer will run, even partially, up to
+            // the point the playback started.
+            task.file->markStepUncompleted( File::ParserStep::Thumbnailer );
             LOG_INFO( "Skipping metadata parsing for file with unknown type: ", task.file->mrl() );
             return parser::Task::Status::Success;
         }

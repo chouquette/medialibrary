@@ -122,6 +122,18 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
         LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail: Can't start playback" );
         return res;
     }
+    // Yet another special case:
+    // We could have run the thumbnailer already as a fallback for some weird video with no
+    // preparse detected tracks. If so, we don't want to spend more time computing a thumbnail, but
+    // we do need to run the metadata extraction again.
+    if ( media->type() == Media::Type::Unknown && media->thumbnail().empty() == false )
+    {
+        file->markStepCompleted( File::ParserStep::Thumbnailer );
+        // startPlayback will return an error in case the media is an audio file
+        media->setType( IMedia::Type::Video );
+        // And now let the metadata extraction run again
+        return parser::Task::Status::Success;
+    }
 
     if ( duration <= 0 )
     {
