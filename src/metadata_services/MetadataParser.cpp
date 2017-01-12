@@ -104,6 +104,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
                                       t.language(), t.description() );
             }
         }
+        media->setDuration( task.vlcMedia.duration() );
         t->commit();
     }
     if ( isAudio == true )
@@ -116,7 +117,6 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
         if (parseVideoFile( task ) == false )
             return parser::Task::Status::Fatal;
     }
-    media->setDuration( task.vlcMedia.duration() );
 
     auto t = m_ml->getConn()->newTransaction();
     if ( media->save() == false )
