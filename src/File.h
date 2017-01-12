@@ -113,6 +113,7 @@ public:
      */
     static std::shared_ptr<File> fromExternalMrl( MediaLibraryPtr ml, const std::string& mrl );
 
+    static std::vector<std::shared_ptr<File>> fetchUnparsed( MediaLibraryPtr ml );
     static void resetRetryCount( MediaLibraryPtr ml );
 
 private:

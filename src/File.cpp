@@ -275,6 +275,13 @@ std::shared_ptr<File> File::fromExternalMrl( MediaLibraryPtr ml, const std::stri
     return file;
 }
 
+std::vector<std::shared_ptr<File>> File::fetchUnparsed( MediaLibraryPtr ml )
+{
+    static const std::string req = "SELECT * FROM " + policy::FileTable::Name
+            + " WHERE parser_step != ? AND is_present = 1 AND folder_id IS NOT NULL AND parser_retries < 3";
+    return File::fetchAll<File>( ml, req, File::ParserStep::Completed );
+}
+
 void File::resetRetryCount( MediaLibraryPtr ml )
 {
     static const std::string req = "UPDATE " + policy::FileTable::Name + " SET "
