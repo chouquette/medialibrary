@@ -39,6 +39,7 @@ int64_t File::* const policy::FileTable::PrimaryKey = &File::m_id;
 File::File( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
 {
+    bool dummyNbRetries;
     row >> m_id
         >> m_mediaId
         >> m_mrl
@@ -46,6 +47,7 @@ File::File( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_lastModificationDate
         >> m_size
         >> m_parserSteps
+        >> dummyNbRetries
         >> m_folderId
         >> m_isPresent
         >> m_isRemovable
@@ -133,7 +135,8 @@ void File::markStepCompleted( ParserStep step )
 
 bool File::saveParserStep()
 {
-    static const std::string req = "UPDATE " + policy::FileTable::Name + " SET parser_step = ? WHERE id_file = ?";
+    static const std::string req = "UPDATE " + policy::FileTable::Name + " SET parser_step = ?, "
+            "parser_retries = 0 WHERE id_file = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_parserSteps, m_id ) == false )
         return false;
     return true;
@@ -142,6 +145,13 @@ bool File::saveParserStep()
 File::ParserStep File::parserStep() const
 {
     return m_parserSteps;
+}
+
+void File::startParserStep()
+{
+    static const std::string req = "UPDATE " + policy::FileTable::Name + " SET "
+            "parser_retries = parser_retries + 1 WHERE id_file = ?";
+    sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id );
 }
 
 std::shared_ptr<Media> File::media() const
@@ -169,6 +179,7 @@ bool File::createTable( DBConnection dbConnection )
             "last_modification_date UNSIGNED INT,"
             "size UNSIGNED INT,"
             "parser_step INTEGER NOT NULL DEFAULT 0,"
+            "parser_retries INTEGER NOT NULL DEFAULT 0,"
             "folder_id UNSIGNED INTEGER,"
             "is_present BOOLEAN NOT NULL DEFAULT 1,"
             "is_removable BOOLEAN NOT NULL,"

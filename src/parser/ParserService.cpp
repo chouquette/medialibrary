@@ -154,6 +154,7 @@ void ParserService::mainloop()
         try
         {
             LOG_INFO( "Executing ", serviceName, " task on ", task->file->mrl() );
+            task->file->startParserStep();
             status = run( *task );
             LOG_INFO( "Done executing ", serviceName, " task on ", task->file->mrl() );
         }

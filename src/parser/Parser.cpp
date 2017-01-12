@@ -102,7 +102,7 @@ void Parser::restore()
         return;
 
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
-            + " WHERE parser_step != ? AND is_present = 1 AND folder_id IS NOT NULL";
+            + " WHERE parser_step != ? AND is_present = 1 AND folder_id IS NOT NULL AND parser_retries < 3";
     auto files = File::fetchAll<File>( m_ml, req, File::ParserStep::Completed );
 
     LOG_INFO( "Resuming parsing on ", files.size(), " mrl" );

@@ -77,6 +77,10 @@ public:
     void markStepCompleted( ParserStep step );
     bool saveParserStep();
     ParserStep parserStep() const;
+    /**
+     * @brief startParserStep Do some internal book keeping to avoid restarting a step too many time
+     */
+    void startParserStep();
     std::shared_ptr<Media> media() const;
     bool destroy();
 
