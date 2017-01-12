@@ -118,7 +118,6 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
             return parser::Task::Status::Fatal;
     }
 
-    auto t = m_ml->getConn()->newTransaction();
     task.file->markStepCompleted( File::ParserStep::MetadataAnalysis );
     // Save ourselves from the useless processing of a thumbnail later if
     // we're analyzing an audio file
@@ -126,7 +125,6 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
         task.file->markStepCompleted( File::ParserStep::Thumbnailer );
     if ( task.file->saveParserStep() == false )
         return parser::Task::Status::Fatal;
-    t->commit();
     m_notifier->notifyMediaCreation( media );
     return parser::Task::Status::Success;
 }
