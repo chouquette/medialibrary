@@ -727,8 +727,9 @@ std::vector<FolderPtr> MediaLibrary::entryPoints() const
     return Folder::fetchAll<IFolder>( this, req );
 }
 
-bool MediaLibrary::removeEntryPoint( const std::string& entryPoint )
+bool MediaLibrary::removeEntryPoint( const std::string& ep )
 {
+    auto entryPoint = utils::file::toFolderPath( ep );
     auto folder = Folder::fromMrl( this, entryPoint );
     if ( folder == nullptr )
     {
