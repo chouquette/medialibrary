@@ -119,8 +119,6 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
     }
 
     auto t = m_ml->getConn()->newTransaction();
-    if ( media->save() == false )
-        return parser::Task::Status::Fatal;
     task.file->markStepCompleted( File::ParserStep::MetadataAnalysis );
     // Save ourselves from the useless processing of a thumbnail later if
     // we're analyzing an audio file
@@ -146,6 +144,8 @@ bool MetadataParser::parseVideoFile( parser::Task& task ) const
     const auto& showName = task.vlcMedia.meta( libvlc_meta_ShowName );
     if ( showName.length() == 0 )
     {
+        auto t = m_ml->getConn()->newTransaction();
+
         auto show = m_ml->show( showName );
         if ( show == nullptr )
         {
@@ -159,6 +159,8 @@ bool MetadataParser::parseVideoFile( parser::Task& task ) const
             std::shared_ptr<Show> s = std::static_pointer_cast<Show>( show );
             s->addEpisode( *media, title, episode );
         }
+        task.media->save();
+        t->commit();
     }
     else
     {
