@@ -194,6 +194,7 @@ bool MetadataParser::parseAudioFile( parser::Task& task ) const
                             (artists.first ? artists.first : m_unknownArtist), genre.get() );
 
     auto res = link( *task.media, album, artists.first, artists.second );
+    task.media->save();
     t->commit();
     return res;
 }
