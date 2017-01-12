@@ -255,6 +255,11 @@ class IMediaLibrary
         virtual void resumeBackgroundOperations() = 0;
         virtual void reload() = 0;
         virtual void reload( const std::string& entryPoint ) = 0;
+        /**
+         * @brief forceParserRetry Forces a re-run of all metadata parsers and resets any
+         * unterminated file retry count to 0, granting them 3 new tries at being parsed
+         */
+        virtual void forceParserRetry() = 0;
 
         /**
          * @brief setDeviceLister Sets a device lister.

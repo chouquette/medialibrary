@@ -653,6 +653,11 @@ void MediaLibrary::reload( const std::string& entryPoint )
         m_discoverer->reload( entryPoint );
 }
 
+void MediaLibrary::forceParserRetry()
+{
+    File::resetRetryCount( this );
+}
+
 void MediaLibrary::pauseBackgroundOperations()
 {
     if ( m_parser != nullptr )

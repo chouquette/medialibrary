@@ -125,6 +125,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         //Temporarily public, move back to private as soon as we start monitoring the FS
         virtual void reload() override;
         virtual void reload( const std::string& entryPoint ) override;
+        virtual void forceParserRetry() override;
 
         virtual void pauseBackgroundOperations() override;
         virtual void resumeBackgroundOperations() override;
