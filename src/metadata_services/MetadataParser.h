@@ -39,12 +39,12 @@ protected:
     virtual uint8_t nbThreads() const override;
     bool isCompleted( const parser::Task& task ) const override;
 
-    bool parseAudioFile(parser::Task& task) const;
+    bool parseAudioFile(parser::Task& task);
     bool parseVideoFile(parser::Task& task) const;
     std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> findOrCreateArtist( parser::Task& vlcMedia ) const;
     std::shared_ptr<AlbumTrack> handleTrack( std::shared_ptr<Album> album, parser::Task& task,
                                              std::shared_ptr<Artist> artist, Genre* genre ) const;
-    bool link(Media& media, std::shared_ptr<Album> album, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist ) const;
+    bool link(Media& media, std::shared_ptr<Album> album, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist );
     std::shared_ptr<Album> findAlbum( parser::Task& task, std::shared_ptr<Artist> albumArtist,
                                         std::shared_ptr<Artist> artist ) const;
     std::shared_ptr<Genre> handleGenre( parser::Task& task ) const;
@@ -54,6 +54,7 @@ private:
 
 private:
     std::shared_ptr<Artist> m_unknownArtist;
+    std::shared_ptr<Artist> m_variousArtists;
 };
 
 }

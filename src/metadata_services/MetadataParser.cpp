@@ -174,7 +174,7 @@ bool MetadataParser::parseVideoFile( parser::Task& task ) const
 
 /* Audio files */
 
-bool MetadataParser::parseAudioFile( parser::Task& task ) const
+bool MetadataParser::parseAudioFile( parser::Task& task )
 {
     task.media->setType( IMedia::Type::Audio );
 
@@ -430,7 +430,7 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
 /* Misc */
 
 bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
-                               std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist ) const
+                               std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist )
 {
     if ( albumArtist == nullptr )
         albumArtist = artist;
@@ -467,8 +467,9 @@ bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
         if ( albumArtist->id() != currentAlbumArtist->id() )
         {
             // We have more than a single artist on this album, fallback to various artists
-            auto variousArtists = Artist::fetch( m_ml, VariousArtistID );
-            album->setAlbumArtist( variousArtists );
+            if ( m_variousArtists == nullptr )
+                m_variousArtists = Artist::fetch( m_ml, VariousArtistID );
+            album->setAlbumArtist( m_variousArtists );
             // Add those two artists as "featuring".
             album->addArtist( albumArtist );
         }
