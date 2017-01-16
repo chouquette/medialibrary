@@ -229,6 +229,14 @@ bool Artist::createTriggers(DBConnection dbConnection)
                 "(SELECT COUNT(id_album) FROM " + policy::AlbumTable::Name + " WHERE artist_id=new.artist_id AND is_present=1) "
                 "WHERE id_artist=new.artist_id;"
             " END";
+    static const std::string autoDeleteTriggerReq = "CREATE TRIGGER IF NOT EXISTS has_album_remaining"
+            " AFTER DELETE ON " + policy::AlbumTable::Name +
+            " WHEN old.artist_id IS NOT NULL"
+            " BEGIN"
+            " UPDATE " + policy::ArtistTable::Name + " SET nb_albums = nb_albums - 1 WHERE id_artist = old.artist_id;"
+            " DELETE FROM " + policy::ArtistTable::Name + " WHERE id_artist = old.artist_id AND nb_albums = 0;"
+            " END";
+
     static const std::string ftsInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_artist_fts"
             " AFTER INSERT ON " + policy::ArtistTable::Name +
             " BEGIN"
@@ -240,6 +248,7 @@ bool Artist::createTriggers(DBConnection dbConnection)
             " DELETE FROM " + policy::ArtistTable::Name + "Fts WHERE rowid=old.id_artist;"
             " END";
     return sqlite::Tools::executeRequest( dbConnection, triggerReq ) &&
+            sqlite::Tools::executeRequest( dbConnection, autoDeleteTriggerReq ) &&
             sqlite::Tools::executeRequest( dbConnection, ftsInsertTrigger ) &&
             sqlite::Tools::executeRequest( dbConnection, ftsDeleteTrigger );
 }

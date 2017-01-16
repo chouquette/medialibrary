@@ -305,3 +305,24 @@ TEST_F( Artists, Sort )
     ASSERT_EQ( a1->id(), artists[1]->id() );
     ASSERT_EQ( a2->id(), artists[0]->id() );
 }
+
+TEST_F( Artists, DeleteWhenNoAlbum )
+{
+    auto artist = ml->createArtist( "artist" );
+    auto album = ml->createAlbum( "album 1" );
+    album->setAlbumArtist( artist );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
+    auto track1 = album->addTrack( m1, 1, 1, artist->id(), 0 );
+
+    auto artists = ml->artists( medialibrary::SortingCriteria::Default, false );
+    ASSERT_EQ( 1u, artists.size() );
+
+    ml->deleteTrack( track1->id() );
+    artists = ml->artists( medialibrary::SortingCriteria::Default, false );
+    ASSERT_EQ( 0u, artists.size() );
+
+    Reload();
+
+    artists = ml->artists( medialibrary::SortingCriteria::Default, false );
+    ASSERT_EQ( 0u, artists.size() );
+}
