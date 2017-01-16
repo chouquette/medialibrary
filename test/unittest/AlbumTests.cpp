@@ -454,6 +454,11 @@ TEST_F( Albums, Duration )
     a->addTrack( m2, 1, 1, 0, 0 );
     ASSERT_EQ( 300u, a->duration() );
 
+    // Check that we don't add negative durations (default sqlite duration is -1)
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "track3.mp3" ) );
+    a->addTrack( m3, 1, 1, 0, 0 );
+    ASSERT_EQ( 300u, a->duration() );
+
     Reload();
 
     auto a2 = ml->album( a->id() );

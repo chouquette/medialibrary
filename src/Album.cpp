@@ -240,7 +240,8 @@ std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsig
     media->setAlbumTrack( track );
     // Assume the media will be saved by the caller
     m_nbTracks++;
-    m_duration += media->duration();
+    if ( media->duration() > 0 )
+        m_duration += media->duration();
     auto lock = m_tracks.lock();
     // Don't assume we have always have a valid value in m_tracks.
     // While it's ok to assume that if we are currently parsing the album, we
@@ -386,7 +387,7 @@ bool Album::createTriggers(DBConnection dbConnection)
             " AFTER INSERT ON " + policy::AlbumTrackTable::Name +
             " BEGIN"
             " UPDATE " + policy::AlbumTable::Name +
-            " SET duration = duration + (SELECT duration FROM " + policy::MediaTable::Name + " WHERE id_media=new.media_id),"
+            " SET duration = duration + max(0, (SELECT duration FROM " + policy::MediaTable::Name + " WHERE id_media=new.media_id)),"
             " nb_tracks = nb_tracks + 1"
             " WHERE id_album = new.album_id;"
             " END";
