@@ -234,7 +234,7 @@ std::vector<MediaPtr> Album::cachedTracks() const
 std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsigned int trackNb,
                                              unsigned int discNumber, int64_t artistId, int64_t genreId )
 {
-    auto track = AlbumTrack::create( m_ml, m_id, media, trackNb, discNumber, artistId, genreId );
+    auto track = AlbumTrack::create( m_ml, m_id, media, trackNb, discNumber, artistId, genreId, media->duration() );
     if ( track == nullptr )
         return nullptr;
     media->setAlbumTrack( track );
@@ -382,7 +382,7 @@ bool Album::createTriggers(DBConnection dbConnection)
             " UPDATE " + policy::AlbumTable::Name +
             " SET"
                 " nb_tracks = nb_tracks - 1,"
-                " duration = duration - max(0, (SELECT duration FROM " + policy::MediaTable::Name + " WHERE id_media=old.media_id))"
+                " duration = duration - old.duration"
                 " WHERE id_album = old.album_id;"
             " DELETE FROM " + policy::AlbumTable::Name +
                 " WHERE id_album=old.album_id AND nb_tracks = 0;"
@@ -391,7 +391,7 @@ bool Album::createTriggers(DBConnection dbConnection)
             " AFTER INSERT ON " + policy::AlbumTrackTable::Name +
             " BEGIN"
             " UPDATE " + policy::AlbumTable::Name +
-            " SET duration = duration + max(0, (SELECT duration FROM " + policy::MediaTable::Name + " WHERE id_media=new.media_id)),"
+            " SET duration = duration + new.duration,"
             " nb_tracks = nb_tracks + 1"
             " WHERE id_album = new.album_id;"
             " END";

@@ -42,8 +42,10 @@ int64_t AlbumTrack::* const policy::AlbumTrackTable::PrimaryKey = &AlbumTrack::m
 AlbumTrack::AlbumTrack( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
 {
+    int64_t dummyDuration;
     row >> m_id
         >> m_mediaId
+        >> dummyDuration
         >> m_artistId
         >> m_genreId
         >> m_trackNumber
@@ -52,7 +54,8 @@ AlbumTrack::AlbumTrack( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_isPresent;
 }
 
-AlbumTrack::AlbumTrack( MediaLibraryPtr ml, int64_t mediaId, int64_t artistId, int64_t genreId, unsigned int trackNumber, int64_t albumId, unsigned int discNumber )
+AlbumTrack::AlbumTrack( MediaLibraryPtr ml, int64_t mediaId, int64_t artistId, int64_t genreId,
+                        unsigned int trackNumber, int64_t albumId, unsigned int discNumber )
     : m_ml( ml )
     , m_id( 0 )
     , m_mediaId( mediaId )
@@ -100,6 +103,7 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AlbumTrackTable::Name + "("
                 "id_track INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "media_id INTEGER,"
+                "duration INTEGER NOT NULL,"
                 "artist_id UNSIGNED INTEGER,"
                 "genre_id INTEGER,"
                 "track_number UNSIGNED INTEGER,"
@@ -129,13 +133,14 @@ bool AlbumTrack::createTable( DBConnection dbConnection )
 
 std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, int64_t albumId,
                                                 std::shared_ptr<Media> media, unsigned int trackNb,
-                                                unsigned int discNumber, int64_t artistId, int64_t genreId )
+                                                unsigned int discNumber, int64_t artistId, int64_t genreId,
+                                                int64_t duration )
 {
     auto self = std::make_shared<AlbumTrack>( ml, media->id(), artistId, genreId, trackNb, albumId, discNumber );
     static const std::string req = "INSERT INTO " + policy::AlbumTrackTable::Name
-            + "(media_id, artist_id, genre_id, track_number, album_id, disc_number) VALUES(?, ?, ?, ?, ?, ?)";
-    if ( insert( ml, self, req, media->id(), sqlite::ForeignKey( artistId ), sqlite::ForeignKey( genreId ),
-                 trackNb, albumId, discNumber ) == false )
+            + "(media_id, duration, artist_id, genre_id, track_number, album_id, disc_number) VALUES(?, ?, ?, ?, ?, ?, ?)";
+    if ( insert( ml, self, req, media->id(), duration >= 0 ? duration : 0, sqlite::ForeignKey( artistId ),
+                 sqlite::ForeignKey( genreId ), trackNb, albumId, discNumber ) == false )
         return nullptr;
     self->m_media = media;
     return self;
