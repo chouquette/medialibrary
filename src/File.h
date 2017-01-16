@@ -84,6 +84,7 @@ public:
     void startParserStep();
     std::shared_ptr<Media> media() const;
     bool destroy();
+    int64_t folderId();
 
     static bool createTable( DBConnection dbConnection );
     static std::shared_ptr<File> create( MediaLibraryPtr ml, int64_t mediaId, Type type,

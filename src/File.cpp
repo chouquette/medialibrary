@@ -175,6 +175,11 @@ bool File::destroy()
     return DatabaseHelpers::destroy( m_ml, m_id );
 }
 
+int64_t File::folderId()
+{
+    return m_folderId;
+}
+
 bool File::createTable( DBConnection dbConnection )
 {
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::FileTable::Name + "("
