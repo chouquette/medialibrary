@@ -29,7 +29,7 @@
 #include "Album.h"
 #include "AlbumTrack.h"
 #include "Artist.h"
-#include "medialibrary/IGenre.h"
+#include "Genre.h"
 #include "Media.h"
 
 #include "database/SqliteTools.h"
@@ -232,9 +232,10 @@ std::vector<MediaPtr> Album::cachedTracks() const
 }
 
 std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsigned int trackNb,
-                                             unsigned int discNumber, int64_t artistId, int64_t genreId )
+                                             unsigned int discNumber, int64_t artistId, Genre* genre )
 {
-    auto track = AlbumTrack::create( m_ml, m_id, media, trackNb, discNumber, artistId, genreId, media->duration() );
+    auto track = AlbumTrack::create( m_ml, m_id, media, trackNb, discNumber, artistId,
+                                     genre != nullptr ? genre->id() : 0, media->duration() );
     if ( track == nullptr )
         return nullptr;
     media->setAlbumTrack( track );

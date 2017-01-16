@@ -65,7 +65,7 @@ TEST_F( Albums, AddTrack )
 {
     auto a = ml->createAlbum( "albumtag" );
     auto f = std::static_pointer_cast<Media>( ml->addMedia( "track.mp3" ) );
-    auto track = a->addTrack( f, 10, 0, 0, 0 );
+    auto track = a->addTrack( f, 10, 0, 0, nullptr );
     f->save();
     ASSERT_NE( track, nullptr );
 
@@ -86,7 +86,7 @@ TEST_F( Albums, NbTracks )
     for ( auto i = 1u; i <= 10; ++i )
     {
         auto f = std::static_pointer_cast<Media>( ml->addMedia( "track" + std::to_string(i) + ".mp3" ) );
-        auto track = a->addTrack( f, i, i, 0, 0 );
+        auto track = a->addTrack( f, i, i, 0, nullptr );
         f->save();
         ASSERT_NE( track, nullptr );
     }
@@ -108,7 +108,7 @@ TEST_F( Albums, TracksByGenre )
     for ( auto i = 1u; i <= 10; ++i )
     {
         auto f = std::static_pointer_cast<Media>( ml->addMedia( "track" + std::to_string(i) + ".mp3" ) );
-        auto track = a->addTrack( f, i, i, 0, 0 );
+        auto track = a->addTrack( f, i, i, 0, nullptr );
         f->save();
         ASSERT_NE( track, nullptr );
         if ( i <= 5 )
@@ -182,7 +182,7 @@ TEST_F( Albums, FetchAlbumFromTrack )
 {
     auto a = ml->createAlbum( "album" );
     auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.mp3" ) );
-    auto t = a->addTrack( f, 1, 0, 0, 0 );
+    auto t = a->addTrack( f, 1, 0, 0, nullptr );
     f->save();
 
     Reload();
@@ -335,7 +335,7 @@ TEST_F( Albums, AutoDelete )
 {
     auto a = ml->createAlbum( "album" );
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
-    auto t = a->addTrack( m, 1, 1, 0, 0 );
+    auto t = a->addTrack( m, 1, 1, 0, nullptr );
 
     auto album = ml->album( a->id() );
     ASSERT_NE( nullptr, album );
@@ -351,8 +351,8 @@ TEST_F( Albums, SortTracks )
     auto a = ml->createAlbum( "album" );
     auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "B-track1.mp3" ) );
     auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "A-track2.mp3" ) );
-    auto t1 = a->addTrack( m1, 1, 1, 0, 0 );
-    auto t2 = a->addTrack( m2, 2, 1, 0, 0 );
+    auto t1 = a->addTrack( m1, 1, 1, 0, nullptr );
+    auto t2 = a->addTrack( m2, 2, 1, 0, nullptr );
 
     // Default order is by disc number & track number
     auto tracks = a->tracks( SortingCriteria::Default, false );
@@ -445,18 +445,18 @@ TEST_F( Albums, Duration )
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "track.mp3" ) );
     m->setDuration( 100 );
     m->save();
-    a->addTrack( m, 1, 1, 0, 0 );
+    a->addTrack( m, 1, 1, 0, nullptr );
     ASSERT_EQ( 100u, a->duration() );
 
     auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3" ) );
     m2->setDuration( 200 );
     m2->save();
-    auto t2 = a->addTrack( m2, 1, 1, 0, 0 );
+    auto t2 = a->addTrack( m2, 1, 1, 0, nullptr );
     ASSERT_EQ( 300u, a->duration() );
 
     // Check that we don't add negative durations (default sqlite duration is -1)
     auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "track3.mp3" ) );
-    auto t3 = a->addTrack( m3, 1, 1, 0, 0 );
+    auto t3 = a->addTrack( m3, 1, 1, 0, nullptr );
     ASSERT_EQ( 300u, a->duration() );
 
     Reload();

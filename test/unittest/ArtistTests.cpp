@@ -312,7 +312,7 @@ TEST_F( Artists, DeleteWhenNoAlbum )
     auto album = ml->createAlbum( "album 1" );
     album->setAlbumArtist( artist );
     auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
-    auto track1 = album->addTrack( m1, 1, 1, artist->id(), 0 );
+    auto track1 = album->addTrack( m1, 1, 1, artist->id(), nullptr );
 
     auto artists = ml->artists( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( 1u, artists.size() );

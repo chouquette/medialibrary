@@ -419,7 +419,7 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
 
     auto track = std::static_pointer_cast<AlbumTrack>( album->addTrack( task.media, trackNumber,
                                                                         discNumber, artist->id(),
-                                                                        genre != nullptr ? genre->id() : 0 ) );
+                                                                        genre ) );
     if ( track == nullptr )
     {
         LOG_ERROR( "Failed to create album track" );
