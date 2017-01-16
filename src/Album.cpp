@@ -379,7 +379,11 @@ bool Album::createTriggers(DBConnection dbConnection)
     static const std::string deleteTriggerReq = "CREATE TRIGGER IF NOT EXISTS delete_album_track AFTER DELETE ON "
              + policy::AlbumTrackTable::Name +
             " BEGIN "
-            " UPDATE " + policy::AlbumTable::Name + " SET nb_tracks = nb_tracks - 1 WHERE id_album = old.album_id;"
+            " UPDATE " + policy::AlbumTable::Name +
+            " SET"
+                " nb_tracks = nb_tracks - 1,"
+                " duration = duration - max(0, (SELECT duration FROM " + policy::MediaTable::Name + " WHERE id_media=old.media_id))"
+                " WHERE id_album = old.album_id;"
             " DELETE FROM " + policy::AlbumTable::Name +
                 " WHERE id_album=old.album_id AND nb_tracks = 0;"
             " END";

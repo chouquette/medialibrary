@@ -451,16 +451,29 @@ TEST_F( Albums, Duration )
     auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3" ) );
     m2->setDuration( 200 );
     m2->save();
-    a->addTrack( m2, 1, 1, 0, 0 );
+    auto t2 = a->addTrack( m2, 1, 1, 0, 0 );
     ASSERT_EQ( 300u, a->duration() );
 
     // Check that we don't add negative durations (default sqlite duration is -1)
     auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "track3.mp3" ) );
-    a->addTrack( m3, 1, 1, 0, 0 );
+    auto t3 = a->addTrack( m3, 1, 1, 0, 0 );
     ASSERT_EQ( 300u, a->duration() );
 
     Reload();
 
     auto a2 = ml->album( a->id() );
     ASSERT_EQ( 300u, a2->duration() );
+
+    // Check that the duration is updated when a media/track gets removed
+    ml->deleteTrack( t2->id() );
+
+    Reload();
+    a2 = ml->album( a->id() );
+    ASSERT_EQ( 100u, a2->duration() );
+
+    // And check that we don't remove negative durations
+    ml->deleteTrack( t3->id() );
+    Reload();
+    a2 = ml->album( a->id() );
+    ASSERT_EQ( 100u, a2->duration() );
 }
