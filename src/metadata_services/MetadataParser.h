@@ -32,6 +32,9 @@ class AlbumTrack;
 
 class MetadataParser : public ParserService
 {
+public:
+    MetadataParser();
+
 protected:
     virtual bool initialize() override;
     virtual parser::Task::Status run( parser::Task& task ) override;
@@ -46,7 +49,7 @@ protected:
                                              std::shared_ptr<Artist> artist, Genre* genre ) const;
     bool link(Media& media, std::shared_ptr<Album> album, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist );
     std::shared_ptr<Album> findAlbum( parser::Task& task, std::shared_ptr<Artist> albumArtist,
-                                        std::shared_ptr<Artist> artist ) const;
+                                        std::shared_ptr<Artist> artist );
     std::shared_ptr<Genre> handleGenre( parser::Task& task ) const;
 
 private:
@@ -55,6 +58,8 @@ private:
 private:
     std::shared_ptr<Artist> m_unknownArtist;
     std::shared_ptr<Artist> m_variousArtists;
+    std::shared_ptr<Album> m_previousAlbum;
+    int64_t m_previousFolderId;
 };
 
 }

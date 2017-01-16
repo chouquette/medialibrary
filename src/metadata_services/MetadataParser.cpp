@@ -39,6 +39,11 @@
 namespace medialibrary
 {
 
+MetadataParser::MetadataParser()
+    : m_previousFolderId( 0 )
+{
+}
+
 bool MetadataParser::initialize()
 {
     m_unknownArtist = Artist::fetch( m_ml, UnknownArtistID );
@@ -222,7 +227,7 @@ std::shared_ptr<Genre> MetadataParser::handleGenre( parser::Task& task ) const
 /* Album handling */
 
 std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::shared_ptr<Artist> albumArtist,
-                                                    std::shared_ptr<Artist> trackArtist ) const
+                                                    std::shared_ptr<Artist> trackArtist )
 {
     const auto& albumName = task.vlcMedia.meta( libvlc_meta_Album );
     if ( albumName.empty() == true )
@@ -234,6 +239,12 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
             return trackArtist->unknownAlbum();
         return m_unknownArtist->unknownAlbum();
     }
+
+    if ( m_previousAlbum != nullptr && albumName == m_previousAlbum->title() &&
+         m_previousFolderId != 0 && task.file->folderId() == m_previousFolderId )
+        return m_previousAlbum;
+    m_previousAlbum.reset();
+    m_previousFolderId = 0;
 
     // Album matching depends on the difference between artist & album artist.
     // Specificaly pass the albumArtist here.
@@ -330,7 +341,9 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
     {
         LOG_WARN( "Multiple candidates for album ", albumName, ". Selecting first one out of luck" );
     }
-    return std::static_pointer_cast<Album>( albums[0] );
+    m_previousFolderId = task.file->folderId();
+    m_previousAlbum = albums[0];
+    return albums[0];
 }
 
 ///
