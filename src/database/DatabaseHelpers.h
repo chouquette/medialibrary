@@ -62,7 +62,6 @@ public:
 
     static void remove( int64_t key )
     {
-        Lock l{ Mutex };
         auto it = Store.find( key );
         if ( it != end( Store ) )
             Store.erase( it );
@@ -70,7 +69,6 @@ public:
 
     static void clear()
     {
-        Lock l{ Mutex };
         Store.clear();
     }
 
@@ -169,11 +167,15 @@ class DatabaseHelpers
          */
         static void removeFromCache( int64_t pkValue )
         {
+            auto l = CACHEPOLICY::lock();
+
             CACHEPOLICY::remove( pkValue );
         }
 
         static void clear()
         {
+            auto l = CACHEPOLICY::lock();
+
             CACHEPOLICY::clear();
         }
 
