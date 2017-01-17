@@ -161,12 +161,12 @@ class DatabaseHelpers
         {
             static const std::string req = "DELETE FROM " + TABLEPOLICY::Name + " WHERE "
                     + TABLEPOLICY::PrimaryKeyColumn + " = ?";
-            auto res = sqlite::Tools::executeDelete( ml->getConn(), req, pkValue );
-            if ( res == true )
-                CACHEPOLICY::remove( pkValue );
-            return res;
+            return sqlite::Tools::executeDelete( ml->getConn(), req, pkValue );
         }
 
+        /**
+         * @warning removeFromCache is only meant to be called from an SQLite hook
+         */
         static void removeFromCache( int64_t pkValue )
         {
             CACHEPOLICY::remove( pkValue );

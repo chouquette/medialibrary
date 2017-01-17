@@ -160,6 +160,14 @@ bool MediaLibrary::createAllTables()
     return true;
 }
 
+template <typename T>
+static void propagateDeletionToCache( SqliteConnection::HookReason reason, int64_t rowId )
+{
+    if ( reason != SqliteConnection::HookReason::Delete )
+        return;
+    T::removeFromCache( rowId );
+}
+
 void MediaLibrary::registerEntityHooks()
 {
     if ( m_modificationNotifier == nullptr )
@@ -200,6 +208,16 @@ void MediaLibrary::registerEntityHooks()
         Playlist::removeFromCache( rowId );
         m_modificationNotifier->notifyPlaylistRemoval( rowId );
     });
+    m_dbConnection->registerUpdateHook( policy::DeviceTable::Name, &propagateDeletionToCache<Device> );
+    m_dbConnection->registerUpdateHook( policy::FileTable::Name, &propagateDeletionToCache<File> );
+    m_dbConnection->registerUpdateHook( policy::FolderTable::Name, &propagateDeletionToCache<Folder> );
+    m_dbConnection->registerUpdateHook( policy::GenreTable::Name, &propagateDeletionToCache<Genre> );
+    m_dbConnection->registerUpdateHook( policy::LabelTable::Name, &propagateDeletionToCache<Label> );
+    m_dbConnection->registerUpdateHook( policy::MovieTable::Name, &propagateDeletionToCache<Movie> );
+    m_dbConnection->registerUpdateHook( policy::ShowTable::Name, &propagateDeletionToCache<Show> );
+    m_dbConnection->registerUpdateHook( policy::ShowEpisodeTable::Name, &propagateDeletionToCache<ShowEpisode> );
+    m_dbConnection->registerUpdateHook( policy::AudioTrackTable::Name, &propagateDeletionToCache<AudioTrack> );
+    m_dbConnection->registerUpdateHook( policy::VideoTrackTable::Name, &propagateDeletionToCache<VideoTrack> );
 }
 
 
