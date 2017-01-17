@@ -66,6 +66,8 @@ public:
 private:
     void enqueue( const std::string& entryPoint, Task::Type type );
     void run();
+    void runDiscover( const std::string& entryPoint );
+    void runReload( const std::string& entryPoint );
 
 private:
 

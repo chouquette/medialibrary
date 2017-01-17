@@ -119,47 +119,11 @@ void DiscovererWorker::run()
         m_cb->onDiscoveryStarted( task.entryPoint );
         if ( task.type == Task::Type::Discover )
         {
-            for ( auto& d : m_discoverers )
-            {
-                // Assume only one discoverer can handle an entrypoint.
-                try
-                {
-                    auto chrono = std::chrono::steady_clock::now();
-                    if ( d->discover( task.entryPoint ) == true )
-                    {
-                        auto duration = std::chrono::steady_clock::now() - chrono;
-                        LOG_DEBUG( "Discovered ", task.entryPoint, " in ",
-                                   std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
-                        break;
-                    }
-                }
-                catch(std::exception& ex)
-                {
-                    LOG_ERROR( "Fatal error while discovering ", task.entryPoint, ": ", ex.what() );
-                }
-
-                if ( m_run == false )
-                    break;
-            }
+            runDiscover( task.entryPoint );
         }
         else if ( task.type == Task::Type::Reload )
         {
-            for ( auto& d : m_discoverers )
-            {
-                try
-                {
-                    if ( task.entryPoint.empty() == true )
-                        d->reload();
-                    else
-                        d->reload( task.entryPoint );
-                }
-                catch(std::exception& ex)
-                {
-                    LOG_ERROR( "Fatal error while reloading: ", ex.what() );
-                }
-                if ( m_run == false )
-                    break;
-            }
+            runReload( task.entryPoint );
         }
         else
         {
@@ -168,6 +132,52 @@ void DiscovererWorker::run()
         m_cb->onDiscoveryCompleted( task.entryPoint );
     }
     LOG_INFO( "Exiting DiscovererWorker thread" );
+}
+
+void DiscovererWorker::runReload( const std::string& entryPoint )
+{
+    for ( auto& d : m_discoverers )
+    {
+        try
+        {
+            if ( entryPoint.empty() == true )
+                d->reload();
+            else
+                d->reload( entryPoint );
+        }
+        catch(std::exception& ex)
+        {
+            LOG_ERROR( "Fatal error while reloading: ", ex.what() );
+        }
+        if ( m_run == false )
+            break;
+    }
+}
+
+void DiscovererWorker::runDiscover( const std::string& entryPoint )
+{
+    for ( auto& d : m_discoverers )
+    {
+        // Assume only one discoverer can handle an entrypoint.
+        try
+        {
+            auto chrono = std::chrono::steady_clock::now();
+            if ( d->discover( entryPoint ) == true )
+            {
+                auto duration = std::chrono::steady_clock::now() - chrono;
+                LOG_DEBUG( "Discovered ", entryPoint, " in ",
+                           std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
+                break;
+            }
+        }
+        catch(std::exception& ex)
+        {
+            LOG_ERROR( "Fatal error while discovering ", entryPoint, ": ", ex.what() );
+        }
+
+        if ( m_run == false )
+            break;
+    }
 }
 
 }
