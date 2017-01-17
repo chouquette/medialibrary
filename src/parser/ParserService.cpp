@@ -154,9 +154,12 @@ void ParserService::mainloop()
         try
         {
             LOG_INFO( "Executing ", serviceName, " task on ", task->file->mrl() );
+            auto chrono = std::chrono::steady_clock::now();
             task->file->startParserStep();
             status = run( *task );
-            LOG_INFO( "Done executing ", serviceName, " task on ", task->file->mrl() );
+            auto duration = std::chrono::steady_clock::now() - chrono;
+            LOG_INFO( "Done executing ", serviceName, " task on ", task->file->mrl(), " in ",
+                      std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
         }
         catch ( const std::exception& ex )
         {

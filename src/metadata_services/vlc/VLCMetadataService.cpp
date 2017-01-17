@@ -46,7 +46,6 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
     auto file = task.file;
 
     LOG_INFO( "Parsing ", file->mrl() );
-    auto chrono = std::chrono::steady_clock::now();
 
     // Having a valid media means we're re-executing this parser after the thumbnailer,
     // which isn't expected, as we always mark this task as completed.
@@ -74,8 +73,6 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
     auto tracks = task.vlcMedia.tracks();
     if ( tracks.size() == 0 )
         LOG_WARN( "Failed to fetch any tracks for ", file->mrl() );
-    auto duration = std::chrono::steady_clock::now() - chrono;
-    LOG_DEBUG("VLC parsing done in ", std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
     // Don't save the file parsing step yet, since all data are just in memory. Just mark
     // the extraction as done.
     task.file->markStepCompleted( File::ParserStep::MetadataExtraction );
