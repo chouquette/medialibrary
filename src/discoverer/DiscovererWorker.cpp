@@ -116,7 +116,6 @@ void DiscovererWorker::run()
             task = m_tasks.front();
             m_tasks.pop();
         }
-        m_cb->onDiscoveryStarted( task.entryPoint );
         if ( task.type == Task::Type::Discover )
         {
             runDiscover( task.entryPoint );
@@ -129,13 +128,13 @@ void DiscovererWorker::run()
         {
             assert(false);
         }
-        m_cb->onDiscoveryCompleted( task.entryPoint );
     }
     LOG_INFO( "Exiting DiscovererWorker thread" );
 }
 
 void DiscovererWorker::runReload( const std::string& entryPoint )
 {
+    m_cb->onReloadStarted( entryPoint );
     for ( auto& d : m_discoverers )
     {
         try
@@ -152,10 +151,12 @@ void DiscovererWorker::runReload( const std::string& entryPoint )
         if ( m_run == false )
             break;
     }
+    m_cb->onReloadCompleted( entryPoint );
 }
 
 void DiscovererWorker::runDiscover( const std::string& entryPoint )
 {
+    m_cb->onDiscoveryStarted( entryPoint );
     for ( auto& d : m_discoverers )
     {
         // Assume only one discoverer can handle an entrypoint.
@@ -178,6 +179,7 @@ void DiscovererWorker::runDiscover( const std::string& entryPoint )
         if ( m_run == false )
             break;
     }
+    m_cb->onDiscoveryCompleted( entryPoint );
 }
 
 }

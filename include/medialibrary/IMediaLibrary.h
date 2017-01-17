@@ -113,8 +113,6 @@ public:
      * (by calling IMediaLibrary::discover()) gets processed.
      * @param entryPoint The entrypoint being discovered
      * This callback will be invoked once per endpoint.
-     * It will also be invoked when the initial medialibrary reload starts, in which case, the
-     * entryPoint will be an empty string.
      */
     virtual void onDiscoveryStarted( const std::string& entryPoint ) = 0;
     /**
@@ -135,6 +133,18 @@ public:
      * has completed.
      */
     virtual void onDiscoveryCompleted( const std::string& entryPoint ) = 0;
+    /**
+     * @brief onReloadStarted will be invoked when a reload operation begins.
+     * @param entryPoint Will be an empty string is the reload is a global reload, or the specific
+     * entry point that gets reloaded
+     */
+    virtual void onReloadStarted( const std::string& entryPoint ) = 0;
+    /**
+     * @brief onReloadCompleted will be invoked when a reload operation gets completed.
+     * @param entryPoint Will be an empty string is the reload was a global reload, or the specific
+     * entry point that has been reloaded
+     */
+    virtual void onReloadCompleted( const std::string& entryPoint ) = 0;
     /**
      * @brief onParsingStatsUpdated Called when the parser statistics are updated
      *

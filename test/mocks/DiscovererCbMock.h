@@ -41,7 +41,14 @@ public:
 
     virtual void onDiscoveryCompleted( const std::string& entryPoint ) override
     {
-        if ( entryPoint.empty() == true && m_waitingReload == false )
+        assert( entryPoint.empty() == false );
+        m_done = true;
+        m_cond.notify_all();
+    }
+
+    virtual void onReloadCompleted( const std::string& entryPoint ) override
+    {
+        if ( m_waitingReload == false )
             return;
         m_done = true;
         m_cond.notify_all();
