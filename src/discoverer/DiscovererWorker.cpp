@@ -29,6 +29,7 @@
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
 #include "utils/Filename.h"
+#include <cassert>
 
 namespace medialibrary
 {
@@ -69,25 +70,25 @@ bool DiscovererWorker::discover( const std::string& entryPoint )
     if ( entryPoint.length() == 0 )
         return false;
     LOG_INFO( "Adding ", entryPoint, " to the folder discovery list" );
-    enqueue( utils::file::toFolderPath( entryPoint ), false );
+    enqueue( utils::file::toFolderPath( entryPoint ), Task::Type::Discover );
     return true;
 }
 
 void DiscovererWorker::reload()
 {
-    enqueue( "", true );
+    enqueue( "", Task::Type::Reload );
 }
 
 void DiscovererWorker::reload( const std::string& entryPoint )
 {
-    enqueue( utils::file::toFolderPath( entryPoint ), true );
+    enqueue( utils::file::toFolderPath( entryPoint ), Task::Type::Reload );
 }
 
-void DiscovererWorker::enqueue( const std::string& entryPoint, bool reload )
+void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
 {
     std::unique_lock<compat::Mutex> lock( m_mutex );
 
-    m_tasks.emplace( entryPoint, reload );
+    m_tasks.emplace( entryPoint, type );
     if ( m_thread.get_id() == compat::Thread::id{} )
     {
         m_run = true;
@@ -116,7 +117,7 @@ void DiscovererWorker::run()
             m_tasks.pop();
         }
         m_cb->onDiscoveryStarted( task.entryPoint );
-        if ( task.reload == false )
+        if ( task.type == Task::Type::Discover )
         {
             for ( auto& d : m_discoverers )
             {
@@ -141,7 +142,7 @@ void DiscovererWorker::run()
                     break;
             }
         }
-        else
+        else if ( task.type == Task::Type::Reload )
         {
             for ( auto& d : m_discoverers )
             {
@@ -159,6 +160,10 @@ void DiscovererWorker::run()
                 if ( m_run == false )
                     break;
             }
+        }
+        else
+        {
+            assert(false);
         }
         m_cb->onDiscoveryCompleted( task.entryPoint );
     }

@@ -38,6 +38,21 @@ namespace medialibrary
 
 class DiscovererWorker
 {
+    struct Task
+    {
+        enum class Type
+        {
+            Discover,
+            Reload,
+        };
+
+        Task() = default;
+        Task( const std::string& entryPoint, Type type )
+            : entryPoint( entryPoint ), type( type ) {}
+        std::string entryPoint;
+        Type type;
+    };
+
 public:
     DiscovererWorker( MediaLibraryPtr ml );
     ~DiscovererWorker();
@@ -49,18 +64,10 @@ public:
     void reload( const std::string& entryPoint );
 
 private:
-    void enqueue( const std::string& entryPoint, bool reload );
+    void enqueue( const std::string& entryPoint, Task::Type type );
     void run();
 
 private:
-    struct Task
-    {
-        Task() = default;
-        Task( const std::string& entryPoint, bool reload )
-            : entryPoint( entryPoint ), reload( reload ) {}
-        std::string entryPoint;
-        bool reload;
-    };
 
     compat::Thread m_thread;
     std::queue<Task> m_tasks;
