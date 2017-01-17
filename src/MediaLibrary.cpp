@@ -751,52 +751,22 @@ std::vector<FolderPtr> MediaLibrary::entryPoints() const
     return Folder::fetchAll<IFolder>( this, req );
 }
 
-bool MediaLibrary::removeEntryPoint( const std::string& ep )
+void MediaLibrary::removeEntryPoint( const std::string& entryPoint )
 {
-    auto entryPoint = utils::file::toFolderPath( ep );
-    auto folder = Folder::fromMrl( this, entryPoint );
-    if ( folder == nullptr )
-    {
-        LOG_WARN( "Can't remove unknown entrypoint: ", entryPoint );
-        return false;
-    }
-    // The easy case is that this folder was directly discovered. In which case, we just
-    // have to delete it and it won't be discovered again.
-    // If it isn't, we also have to ban it to prevent it from reappearing. The Folder::banFolder
-    // method already handles the prior deletion
-    bool res;
-    if ( folder->isRootFolder() == false )
-        res = banFolder( entryPoint );
-    else
-        res = deleteFolder( *folder );
-    if ( res == false )
-        return false;
-    // Force a cache cleanup to avoid stalled media
-    Media::clear();
-    return true;
+    if ( m_discoverer != nullptr )
+        m_discoverer->remove( entryPoint );
 }
 
-bool MediaLibrary::banFolder( const std::string& path )
+void MediaLibrary::banFolder( const std::string& entryPoint )
 {
-    return Folder::blacklist( this, path );
+    if ( m_discoverer != nullptr )
+        m_discoverer->ban( entryPoint );
 }
 
-bool MediaLibrary::unbanFolder( const std::string& path )
+void MediaLibrary::unbanFolder( const std::string& entryPoint )
 {
-    auto folder = Folder::blacklistedFolder( this, path );
-    if ( folder == nullptr )
-        return false;
-    deleteFolder( *folder );
-
-    // We are about to refresh the folder we blacklisted earlier, if we don't have a discoverer, stop early
-    if ( m_discoverer == nullptr )
-        return true;
-
-    auto parentPath = utils::file::parentDirectory( path );
-    // If the parent folder was never added to the media library, the discoverer will reject it.
-    // We could check it from here, but that would mean fetching the folder twice, which would be a waste.
-    m_discoverer->reload( parentPath );
-    return true;
+    if ( m_discoverer != nullptr )
+        m_discoverer->unban( entryPoint );
 }
 
 const std::string& MediaLibrary::thumbnailPath() const

@@ -282,6 +282,7 @@ TEST_F( FoldersNoDiscover, Blacklist )
 {
     cbMock->prepareForWait();
     ml->banFolder( mock::FileSystemFactory::SubFolder );
+    cbMock->waitBanFolder();
     ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
@@ -294,6 +295,7 @@ TEST_F( FoldersNoDiscover, DiscoverBlacklisted )
 {
     cbMock->prepareForWait();
     ml->banFolder( mock::FileSystemFactory::Root );
+    cbMock->waitBanFolder();
     ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
@@ -310,6 +312,7 @@ TEST_F( Folders, BlacklistAfterDiscovery )
     ASSERT_NE( 0u, files.size() );
 
     ml->banFolder( mock::FileSystemFactory::SubFolder );
+    cbMock->waitBanFolder();
     auto f2 = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( nullptr, f2 );
 }
@@ -318,6 +321,7 @@ TEST_F( FoldersNoDiscover, RemoveFromBlacklist )
 {
     cbMock->prepareForWait();
     ml->banFolder( mock::FileSystemFactory::SubFolder );
+    cbMock->waitBanFolder();
     ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->wait();
     ASSERT_TRUE( discovered );
@@ -328,8 +332,8 @@ TEST_F( FoldersNoDiscover, RemoveFromBlacklist )
     ASSERT_EQ( nullptr, f );
 
     cbMock->prepareForReload();
-    auto res = ml->unbanFolder( mock::FileSystemFactory::SubFolder );
-    ASSERT_TRUE( res );
+    ml->unbanFolder( mock::FileSystemFactory::SubFolder );
+    cbMock->waitBanFolder();
     bool reloaded = cbMock->wait();
     ASSERT_TRUE( reloaded );
     files = ml->files();
@@ -342,16 +346,21 @@ TEST_F( FoldersNoDiscover, BlacklistTwice )
 {
     cbMock->prepareForWait();
     ml->banFolder( mock::FileSystemFactory::SubFolder );
+    cbMock->waitBanFolder();
     ml->banFolder( mock::FileSystemFactory::SubFolder );
+    cbMock->waitBanFolder();
 }
 
 TEST_F( FoldersNoDiscover, BlacklistNonExistant )
 {
     cbMock->prepareForWait();
     ml->banFolder( "foo/bar/otters" );
+    cbMock->waitBanFolder();
     ml->banFolder( "/foo/bar/otters" );
+    cbMock->waitBanFolder();
     // Ban with an existing base
     ml->banFolder( mock::FileSystemFactory::Root + "grouik/" );
+    cbMock->waitBanFolder();
 }
 
 TEST_F( FoldersNoDiscover, NoMediaBeforeDiscovery )
@@ -430,6 +439,8 @@ TEST_F( Folders, FetchEntryPoints )
 
     // Check that banned folders don't appear in the results:
     ml->banFolder( mock::FileSystemFactory::SubFolder );
+    auto res = cbMock->waitBanFolder();
+    ASSERT_TRUE( res );
     eps = ml->entryPoints();
     ASSERT_EQ( 1u, eps.size() );
 }
@@ -439,7 +450,8 @@ TEST_F( Folders, RemoveRootEntryPoint )
     auto media = ml->files();
     ASSERT_NE( 0u, media.size() );
 
-    auto res = ml->removeEntryPoint( mock::FileSystemFactory::Root );
+    ml->removeEntryPoint( mock::FileSystemFactory::Root );
+    auto res = cbMock->waitEntryPointRemoved();
     ASSERT_TRUE( res );
 
     media = ml->files();
@@ -454,7 +466,8 @@ TEST_F( Folders, RemoveEntryPoint )
     auto media = ml->files();
     ASSERT_NE( 0u, media.size() );
 
-    auto res = ml->removeEntryPoint( mock::FileSystemFactory::SubFolder );
+    ml->removeEntryPoint( mock::FileSystemFactory::SubFolder );
+    auto res = cbMock->waitEntryPointRemoved();
     ASSERT_TRUE( res );
 
     media = ml->files();
@@ -475,6 +488,7 @@ TEST_F( Folders, RemoveEntryPoint )
 
 TEST_F( Folders, RemoveNonExistantEntryPoint )
 {
-    auto res = ml->removeEntryPoint( "/sea/otter" );
-    ASSERT_FALSE( res );
+    ml->removeEntryPoint( "/sea/otter" );
+    auto res = cbMock->waitEntryPointRemoved();
+    ASSERT_TRUE( res );
 }

@@ -36,6 +36,8 @@ class WaitForDiscoveryComplete : public mock::NoopCallback
 public:
     WaitForDiscoveryComplete()
         : m_waitingReload( false )
+        , m_banFolderDone( false )
+        , m_entryPointRemoved( false )
     {
     }
 
@@ -54,12 +56,44 @@ public:
         m_cond.notify_all();
     }
 
+    virtual void onEntryPointBanned( const std::string&, bool ) override
+    {
+        m_banFolderDone = true;
+        m_cond.notify_all();
+    }
+
+    virtual void onEntryPointRemoved( const std::string&, bool ) override
+    {
+        m_entryPointRemoved = true;
+        m_cond.notify_all();
+    }
+
     bool wait()
     {
         std::unique_lock<compat::Mutex> lock( m_mutex );
         return m_cond.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
             return m_done.load();
         } );
+    }
+
+    bool waitBanFolder()
+    {
+        std::unique_lock<compat::Mutex> lock( m_mutex );
+        auto res = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
+            return m_banFolderDone.load();
+        });
+        m_banFolderDone = false;
+        return res;
+    }
+
+    bool waitEntryPointRemoved()
+    {
+        std::unique_lock<compat::Mutex> lock( m_mutex );
+        auto res =  m_cond.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
+            return m_entryPointRemoved.load();
+        });
+        m_entryPointRemoved = false;
+        return res;
     }
 
     // We don't synchronously trigger the discovery, so we can't rely on started/completed being called
@@ -82,6 +116,8 @@ public:
 private:
     std::atomic_bool m_done;
     std::atomic_bool m_waitingReload;
+    std::atomic_bool m_banFolderDone;
+    std::atomic_bool m_entryPointRemoved;
     compat::ConditionVariable m_cond;
     compat::Mutex m_mutex;
 };

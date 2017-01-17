@@ -44,6 +44,9 @@ class DiscovererWorker
         {
             Discover,
             Reload,
+            Remove,
+            Ban,
+            Unban,
         };
 
         Task() = default;
@@ -54,20 +57,26 @@ class DiscovererWorker
     };
 
 public:
-    DiscovererWorker( MediaLibraryPtr ml );
+    DiscovererWorker( MediaLibrary* ml );
     ~DiscovererWorker();
     void addDiscoverer( std::unique_ptr<IDiscoverer> discoverer );
     void stop();
 
     bool discover( const std::string& entryPoint );
+    void remove( const std::string& entryPoint );
     void reload();
     void reload( const std::string& entryPoint );
+    void ban( const std::string& entryPoint );
+    void unban( const std::string& entryPoint );
 
 private:
     void enqueue( const std::string& entryPoint, Task::Type type );
     void run();
     void runDiscover( const std::string& entryPoint );
     void runReload( const std::string& entryPoint );
+    void runRemove( const std::string& entryPoint );
+    void runBan( const std::string& entryPoint );
+    void runUnban( const std::string& entryPoint );
 
 private:
 
@@ -77,7 +86,7 @@ private:
     compat::ConditionVariable m_cond;
     std::atomic_bool m_run;
     std::vector<std::unique_ptr<IDiscoverer>> m_discoverers;
-    IMediaLibraryCb* m_cb;
+    MediaLibrary* m_ml;
 };
 
 }

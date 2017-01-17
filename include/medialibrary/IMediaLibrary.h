@@ -146,6 +146,25 @@ public:
      */
     virtual void onReloadCompleted( const std::string& entryPoint ) = 0;
     /**
+     * @brief onEntryPointRemoved will be invoked when an entrypoint removal request gets processsed
+     * by the appropriate worker thread.
+     * @param entryPoint The entry point which removal was required
+     * @param success A boolean representing the operation's success
+     */
+    virtual void onEntryPointRemoved( const std::string& entryPoint, bool success ) = 0;
+    /**
+     * @brief onEntryPointBanned will be called when an entrypoint ban request is done being processed.
+     * @param entryPoint The banned entrypoint
+     * @param success A boolean representing the operation's success
+     */
+    virtual void onEntryPointBanned( const std::string& entryPoint, bool success ) = 0;
+    /**
+     * @brief onEntryPointUnbanned will be called when an entrypoint unban request is done being processed.
+     * @param entryPoint The unbanned entrypoint
+     * @param success A boolean representing the operation's success
+     */
+    virtual void onEntryPointUnbanned( const std::string& entryPoint, bool success ) = 0;
+    /**
      * @brief onParsingStatsUpdated Called when the parser statistics are updated
      *
      * There is no waranty about how often this will be called.
@@ -244,12 +263,24 @@ class IMediaLibrary
         virtual void discover( const std::string& entryPoint ) = 0;
         virtual void setDiscoverNetworkEnabled( bool enable ) = 0;
         virtual std::vector<FolderPtr> entryPoints() const = 0;
-        virtual bool removeEntryPoint( const std::string& entryPoint ) = 0;
+        virtual void removeEntryPoint( const std::string& entryPoint ) = 0;
         /**
-         * @brief banFolder will blacklist a folder for discovery
+         * @brief banFolder will prevent an entry point folder from being discovered.
+         * If the folder was already discovered, it will be removed prior to the ban, and all
+         * associated media will be discarded.
+         * * @note This method is asynchronous and will run after all currently stacked
+         * discovery/ban/unban operations have completed.
          */
-        virtual bool banFolder( const std::string& path ) = 0;
-        virtual bool unbanFolder( const std::string& path ) = 0;
+        virtual void banFolder( const std::string& path ) = 0;
+        /**
+         * @brief unbanFolder Unban an entrypoint.
+         * In case this entry point was indeed previously banned, this will issue a reload of
+         * that entry point
+         * @param entryPoint The entry point to unban
+         * @note This method is asynchronous and will run after all currently stacked
+         * discovery/ban/unban operations have completed.
+         */
+        virtual void unbanFolder( const std::string& entryPoint ) = 0;
         virtual const std::string& thumbnailPath() const = 0;
         virtual void setLogger( ILogger* logger ) = 0;
         /**

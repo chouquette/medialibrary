@@ -27,6 +27,8 @@
 #include "DiscovererWorker.h"
 
 #include "logging/Logger.h"
+#include "Folder.h"
+#include "Media.h"
 #include "MediaLibrary.h"
 #include "utils/Filename.h"
 #include <cassert>
@@ -34,9 +36,9 @@
 namespace medialibrary
 {
 
-DiscovererWorker::DiscovererWorker( MediaLibraryPtr ml )
+DiscovererWorker::DiscovererWorker(MediaLibrary* ml )
     : m_run( false )
-    , m_cb( ml->getCb() )
+    , m_ml( ml )
 {
 }
 
@@ -74,6 +76,11 @@ bool DiscovererWorker::discover( const std::string& entryPoint )
     return true;
 }
 
+void DiscovererWorker::remove( const std::string& entryPoint )
+{
+    enqueue( entryPoint, Task::Type::Remove );
+}
+
 void DiscovererWorker::reload()
 {
     enqueue( "", Task::Type::Reload );
@@ -82,6 +89,16 @@ void DiscovererWorker::reload()
 void DiscovererWorker::reload( const std::string& entryPoint )
 {
     enqueue( utils::file::toFolderPath( entryPoint ), Task::Type::Reload );
+}
+
+void DiscovererWorker::ban( const std::string& entryPoint )
+{
+    enqueue( utils::file::toFolderPath( entryPoint ), Task::Type::Ban );
+}
+
+void DiscovererWorker::unban( const std::string& entryPoint )
+{
+    enqueue( utils::file::toFolderPath( entryPoint ), Task::Type::Unban );
 }
 
 void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
@@ -116,16 +133,24 @@ void DiscovererWorker::run()
             task = m_tasks.front();
             m_tasks.pop();
         }
-        if ( task.type == Task::Type::Discover )
+        switch ( task.type )
         {
+        case Task::Type::Discover:
             runDiscover( task.entryPoint );
-        }
-        else if ( task.type == Task::Type::Reload )
-        {
+            break;
+        case Task::Type::Reload:
             runReload( task.entryPoint );
-        }
-        else
-        {
+            break;
+        case Task::Type::Remove:
+            runRemove( task.entryPoint );
+            break;
+        case Task::Type::Ban:
+            runBan( task.entryPoint );
+            break;
+        case Task::Type::Unban:
+            runUnban( task.entryPoint );
+            break;
+        default:
             assert(false);
         }
     }
@@ -134,7 +159,7 @@ void DiscovererWorker::run()
 
 void DiscovererWorker::runReload( const std::string& entryPoint )
 {
-    m_cb->onReloadStarted( entryPoint );
+    m_ml->getCb()->onReloadStarted( entryPoint );
     for ( auto& d : m_discoverers )
     {
         try
@@ -151,12 +176,65 @@ void DiscovererWorker::runReload( const std::string& entryPoint )
         if ( m_run == false )
             break;
     }
-    m_cb->onReloadCompleted( entryPoint );
+    m_ml->getCb()->onReloadCompleted( entryPoint );
+}
+
+void DiscovererWorker::runRemove( const std::string& ep )
+{
+    auto entryPoint = utils::file::toFolderPath( ep );
+    auto folder = Folder::fromMrl( m_ml, entryPoint );
+    if ( folder == nullptr )
+    {
+        LOG_WARN( "Can't remove unknown entrypoint: ", entryPoint );
+        m_ml->getCb()->onEntryPointRemoved( ep, false );
+        return;
+    }
+    // The easy case is that this folder was directly discovered. In which case, we just
+    // have to delete it and it won't be discovered again.
+    // If it isn't, we also have to ban it to prevent it from reappearing. The Folder::banFolder
+    // method already handles the prior deletion
+    bool res;
+    if ( folder->isRootFolder() == false )
+        res = Folder::blacklist( m_ml, entryPoint );
+    else
+        res = m_ml->deleteFolder( *folder );
+    if ( res == false )
+    {
+        m_ml->getCb()->onEntryPointRemoved( ep, false );
+        return;
+    }
+    // Force a cache cleanup to avoid stalled media
+    Media::clear();
+    m_ml->getCb()->onEntryPointRemoved( ep, true );
+}
+
+void DiscovererWorker::runBan( const std::string& entryPoint )
+{
+    auto res = Folder::blacklist( m_ml, entryPoint );
+    m_ml->getCb()->onEntryPointBanned( entryPoint, res );
+}
+
+void DiscovererWorker::runUnban( const std::string& entryPoint )
+{
+    auto folder = Folder::blacklistedFolder( m_ml, entryPoint );
+    if ( folder == nullptr )
+    {
+        LOG_WARN( "Can't unban ", entryPoint, " as it wasn't banned" );
+        m_ml->getCb()->onEntryPointUnbanned( entryPoint, false );
+        return;
+    }
+    auto res = m_ml->deleteFolder( *folder );
+    m_ml->getCb()->onEntryPointUnbanned( entryPoint, res );
+
+    auto parentPath = utils::file::parentDirectory( entryPoint );
+    // If the parent folder was never added to the media library, the discoverer will reject it.
+    // We could check it from here, but that would mean fetching the folder twice, which would be a waste.
+    runReload( parentPath );
 }
 
 void DiscovererWorker::runDiscover( const std::string& entryPoint )
 {
-    m_cb->onDiscoveryStarted( entryPoint );
+    m_ml->getCb()->onDiscoveryStarted( entryPoint );
     for ( auto& d : m_discoverers )
     {
         // Assume only one discoverer can handle an entrypoint.
@@ -179,7 +257,7 @@ void DiscovererWorker::runDiscover( const std::string& entryPoint )
         if ( m_run == false )
             break;
     }
-    m_cb->onDiscoveryCompleted( entryPoint );
+    m_ml->getCb()->onDiscoveryCompleted( entryPoint );
 }
 
 }
