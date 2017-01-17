@@ -60,6 +60,8 @@ public:
     virtual void Reload()
     {
         Tests::Reload( fsMock, cbMock.get() );
+        auto res = cbMock->waitReload();
+        ASSERT_TRUE( res );
     }
 };
 
@@ -69,9 +71,8 @@ class Folders : public FoldersNoDiscover
         virtual void SetUp() override
         {
             FoldersNoDiscover::SetUp();
-            cbMock->prepareForWait();
             ml->discover( mock::FileSystemFactory::Root );
-            bool discovered = cbMock->wait();
+            bool discovered = cbMock->waitDiscovery();
             ASSERT_TRUE( discovered );
         }
 };
@@ -99,10 +100,7 @@ TEST_F( Folders, Delete )
     files = ml->files();
     ASSERT_EQ( files.size(), 0u );
 
-    cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     // Recheck folder deletion from DB:
     f = ml->folder( folderPath );
@@ -111,10 +109,7 @@ TEST_F( Folders, Delete )
 
 TEST_F( Folders, Load )
 {
-    cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     auto files = ml->files();
     ASSERT_EQ( files.size(), 3u );
@@ -122,9 +117,8 @@ TEST_F( Folders, Load )
 
 TEST_F( FoldersNoDiscover, InvalidPath )
 {
-    cbMock->prepareForWait();
     ml->discover( "/invalid/path" );
-    bool discovered = cbMock->wait();
+    bool discovered = cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
     auto files = ml->files();
@@ -138,10 +132,7 @@ TEST_F( Folders, List )
     auto files = f->files();
     ASSERT_EQ( files.size(), 2u );
 
-    cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     f = ml->folder( f->mrl() );
     files = f->files();
@@ -185,10 +176,7 @@ TEST_F( Folders, NewFolderWithFile )
     fsMock->addFile( newFolder + "newfile.avi" );
 
     // This will trigger a reload
-    cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     ASSERT_EQ( 4u, ml->files().size() );
     auto f = ml->media( newFolder + "newfile.avi" );
@@ -206,10 +194,7 @@ TEST_F( Folders, NewFileInSubFolder )
     ml.reset();
     fsMock->addFile( mock::FileSystemFactory::SubFolder + "newfile.avi" );
 
-    cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     ASSERT_EQ( 4u, ml->files().size() );
     auto media = ml->media( mock::FileSystemFactory::SubFolder + "newfile.avi" );
@@ -225,10 +210,7 @@ TEST_F( Folders, RemoveFileFromDirectory )
     ml.reset();
     fsMock->removeFile( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
 
-    cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     ASSERT_EQ( 2u, ml->files().size() );
     auto media = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
@@ -244,10 +226,7 @@ TEST_F( Folders, RemoveDirectory )
     ml.reset();
     fsMock->removeFolder( mock::FileSystemFactory::SubFolder );
 
-    cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     ASSERT_EQ( 2u, ml->files().size() );
     auto media = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
@@ -266,10 +245,7 @@ TEST_F( Folders, UpdateFile )
     ml.reset();
     fsMock->file( filePath )->markAsModified();
 
-    cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     f = ml->media( filePath );
     ASSERT_NE( nullptr, f );
@@ -280,11 +256,10 @@ TEST_F( Folders, UpdateFile )
 
 TEST_F( FoldersNoDiscover, Blacklist )
 {
-    cbMock->prepareForWait();
     ml->banFolder( mock::FileSystemFactory::SubFolder );
     cbMock->waitBanFolder();
     ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
+    bool discovered = cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
     auto f = ml->folder( mock::FileSystemFactory::SubFolder );
@@ -293,11 +268,10 @@ TEST_F( FoldersNoDiscover, Blacklist )
 
 TEST_F( FoldersNoDiscover, DiscoverBlacklisted )
 {
-    cbMock->prepareForWait();
     ml->banFolder( mock::FileSystemFactory::Root );
     cbMock->waitBanFolder();
     ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
+    bool discovered = cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
     auto f = ml->folder( mock::FileSystemFactory::Root );
@@ -319,11 +293,10 @@ TEST_F( Folders, BlacklistAfterDiscovery )
 
 TEST_F( FoldersNoDiscover, RemoveFromBlacklist )
 {
-    cbMock->prepareForWait();
     ml->banFolder( mock::FileSystemFactory::SubFolder );
     cbMock->waitBanFolder();
     ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
+    bool discovered = cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
     auto files = ml->files();
     ASSERT_EQ( 2u, files.size() );
@@ -331,11 +304,8 @@ TEST_F( FoldersNoDiscover, RemoveFromBlacklist )
     auto f = ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( nullptr, f );
 
-    cbMock->prepareForReload();
     ml->unbanFolder( mock::FileSystemFactory::SubFolder );
     cbMock->waitBanFolder();
-    bool reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
     files = ml->files();
     ASSERT_EQ( 3u, files.size() );
     f = ml->folder( mock::FileSystemFactory::SubFolder );
@@ -344,7 +314,6 @@ TEST_F( FoldersNoDiscover, RemoveFromBlacklist )
 
 TEST_F( FoldersNoDiscover, BlacklistTwice )
 {
-    cbMock->prepareForWait();
     ml->banFolder( mock::FileSystemFactory::SubFolder );
     cbMock->waitBanFolder();
     ml->banFolder( mock::FileSystemFactory::SubFolder );
@@ -353,7 +322,6 @@ TEST_F( FoldersNoDiscover, BlacklistTwice )
 
 TEST_F( FoldersNoDiscover, BlacklistNonExistant )
 {
-    cbMock->prepareForWait();
     ml->banFolder( "foo/bar/otters" );
     cbMock->waitBanFolder();
     ml->banFolder( "/foo/bar/otters" );
@@ -370,9 +338,8 @@ TEST_F( FoldersNoDiscover, NoMediaBeforeDiscovery )
     fsMock->addFile( newFolder + "newfile.avi" );
     fsMock->addFile( newFolder + ".nomedia" );
 
-    cbMock->prepareForWait();
     ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
+    bool discovered = cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
     auto files = ml->files();
@@ -386,10 +353,7 @@ TEST_F( Folders, InsertNoMedia )
     ASSERT_EQ( 3u, files.size() );
     fsMock->addFile( mock::FileSystemFactory::SubFolder + ".nomedia" );
 
-    cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     files = ml->files();
     ASSERT_EQ( 2u, files.size() );
@@ -399,10 +363,7 @@ TEST_F( Folders, InsertNoMediaInRoot )
 {
     fsMock->addFile( mock::FileSystemFactory::Root + ".nomedia" );
 
-    cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     auto files = ml->files();
     ASSERT_EQ( 0u, files.size() );
@@ -414,18 +375,16 @@ TEST_F( Folders, ReloadSubDir )
     ASSERT_EQ( 3u, files.size() );
     fsMock->addFile( mock::FileSystemFactory::Root + "newmedia.mkv" );
 
-    cbMock->prepareForReload();
     ml->reload( mock::FileSystemFactory::SubFolder );
-    bool reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
+    auto res = cbMock->waitReload();
+    ASSERT_TRUE( res );
 
     files = ml->files();
     ASSERT_EQ( 3u, files.size() );
 
-    cbMock->prepareForReload();
     ml->reload();
-    reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
+    res = cbMock->waitReload();
+    ASSERT_TRUE( res );
 
     files = ml->files();
     ASSERT_EQ( 4u, files.size() );
@@ -476,10 +435,7 @@ TEST_F( Folders, RemoveEntryPoint )
     auto eps = ml->entryPoints();
     ASSERT_EQ( 1u, eps.size() );
 
-    cbMock->prepareForReload();
     ml->reload();
-    auto reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     // Ensure it wasn't re-discovered, ie. that it was properly blacklisted
     auto media2 = ml->files();

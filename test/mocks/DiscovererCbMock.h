@@ -35,7 +35,8 @@ class WaitForDiscoveryComplete : public mock::NoopCallback
 {
 public:
     WaitForDiscoveryComplete()
-        : m_waitingReload( false )
+        : m_discoveryDone( false )
+        , m_reloadDone( false )
         , m_banFolderDone( false )
         , m_entryPointRemoved( false )
     {
@@ -44,15 +45,13 @@ public:
     virtual void onDiscoveryCompleted( const std::string& entryPoint ) override
     {
         assert( entryPoint.empty() == false );
-        m_done = true;
+        m_discoveryDone = true;
         m_cond.notify_all();
     }
 
-    virtual void onReloadCompleted( const std::string& entryPoint ) override
+    virtual void onReloadCompleted( const std::string& ) override
     {
-        if ( m_waitingReload == false )
-            return;
-        m_done = true;
+        m_reloadDone = true;
         m_cond.notify_all();
     }
 
@@ -68,12 +67,24 @@ public:
         m_cond.notify_all();
     }
 
-    bool wait()
+    bool waitDiscovery()
     {
         std::unique_lock<compat::Mutex> lock( m_mutex );
-        return m_cond.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
-            return m_done.load();
+        auto res = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
+            return m_discoveryDone.load();
         } );
+        m_discoveryDone = false;
+        return res;
+    }
+
+    bool waitReload()
+    {
+        std::unique_lock<compat::Mutex> lock( m_mutex );
+        auto res = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
+            return m_reloadDone.load();
+        } );
+        m_reloadDone = false;
+        return res;
     }
 
     bool waitBanFolder()
@@ -96,26 +107,9 @@ public:
         return res;
     }
 
-    // We don't synchronously trigger the discovery, so we can't rely on started/completed being called
-    // Instead, we manually tell this mock how much discovery we expect. This sucks, but the alternative
-    // would probably be to have an extra IMediaLibraryCb member to signal that a discovery has been queue.
-    // however, in practice, this is a callback that says "yep, you've called IMediaLibrary::discover()"
-    // which is probably lame.
-    void prepareForWait()
-    {
-        m_done = false;
-        m_waitingReload = false;
-    }
-
-    void prepareForReload()
-    {
-        m_done = false;
-        m_waitingReload = true;
-    }
-
 private:
-    std::atomic_bool m_done;
-    std::atomic_bool m_waitingReload;
+    std::atomic_bool m_discoveryDone;
+    std::atomic_bool m_reloadDone;
     std::atomic_bool m_banFolderDone;
     std::atomic_bool m_entryPointRemoved;
     compat::ConditionVariable m_cond;

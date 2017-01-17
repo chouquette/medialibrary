@@ -568,9 +568,8 @@ const std::string FetchMedia::RemovableDeviceMountpoint = "file:///a/mnt/fake-de
 
 TEST_F( FetchMedia, FetchNonRemovable )
 {
-    cbMock->prepareForWait();
     ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
+    bool discovered = cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
     auto m = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
@@ -579,9 +578,8 @@ TEST_F( FetchMedia, FetchNonRemovable )
 
 TEST_F( FetchMedia, FetchRemovable )
 {
-    cbMock->prepareForWait();
     ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
+    bool discovered = cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
     auto m = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
@@ -590,16 +588,14 @@ TEST_F( FetchMedia, FetchRemovable )
 
 TEST_F( FetchMedia, FetchRemovableUnplugged )
 {
-    cbMock->prepareForWait();
     ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
+    bool discovered = cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
     fsMock->unmountDevice( RemovableDeviceUuid );
 
-    cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->wait();
+    bool reloaded = cbMock->waitReload();
     ASSERT_TRUE( reloaded );
 
     auto m = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );

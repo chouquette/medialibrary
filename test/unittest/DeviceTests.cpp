@@ -68,6 +68,8 @@ protected:
     virtual void Reload()
     {
         Tests::Reload( fsMock, cbMock.get() );
+        auto res = cbMock->waitReload();
+        ASSERT_TRUE( res );
     }
 };
 
@@ -112,9 +114,8 @@ TEST_F( DeviceEntity, SetPresent )
 
 TEST_F( DeviceFs, RemoveDisk )
 {
-    cbMock->prepareForWait();
     ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
+    bool discovered = cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
     auto files = ml->files();
@@ -125,10 +126,7 @@ TEST_F( DeviceFs, RemoveDisk )
 
     auto device = fsMock->removeDevice( RemovableDeviceUuid );
 
-    cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     files = ml->files();
     ASSERT_EQ( 3u, files.size() );
@@ -139,9 +137,8 @@ TEST_F( DeviceFs, RemoveDisk )
 
 TEST_F( DeviceFs, UnmountDisk )
 {
-    cbMock->prepareForWait();
     ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
+    bool discovered = cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
     auto files = ml->files();
@@ -152,10 +149,7 @@ TEST_F( DeviceFs, UnmountDisk )
 
     fsMock->unmountDevice( RemovableDeviceUuid );
 
-    cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     files = ml->files();
     ASSERT_EQ( 3u, files.size() );
@@ -165,10 +159,7 @@ TEST_F( DeviceFs, UnmountDisk )
 
     fsMock->remountDevice( RemovableDeviceUuid );
 
-    cbMock->prepareForReload();
     Reload();
-    reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     files = ml->files();
     ASSERT_EQ( 5u, files.size() );
@@ -179,9 +170,8 @@ TEST_F( DeviceFs, UnmountDisk )
 
 TEST_F( DeviceFs, ReplugDisk )
 {
-    cbMock->prepareForWait();
     ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
+    bool discovered = cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
     auto files = ml->files();
@@ -192,10 +182,7 @@ TEST_F( DeviceFs, ReplugDisk )
 
     auto device = fsMock->removeDevice( RemovableDeviceUuid );
 
-    cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     files = ml->files();
     ASSERT_EQ( 3u, files.size() );
@@ -204,10 +191,7 @@ TEST_F( DeviceFs, ReplugDisk )
     ASSERT_EQ( nullptr, media );
 
     fsMock->addDevice( device );
-    cbMock->prepareForReload();
     Reload();
-    reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     files = ml->files();
     ASSERT_EQ( 5u, files.size() );
@@ -218,9 +202,8 @@ TEST_F( DeviceFs, ReplugDisk )
 
 TEST_F( DeviceFs, ReplugDiskWithExtraFiles )
 {
-    cbMock->prepareForWait();
     ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
+    bool discovered = cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
     auto files = ml->files();
@@ -228,10 +211,7 @@ TEST_F( DeviceFs, ReplugDiskWithExtraFiles )
 
     auto device = fsMock->removeDevice( RemovableDeviceUuid );
 
-    cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     files = ml->files();
     ASSERT_EQ( 3u, files.size() );
@@ -239,10 +219,7 @@ TEST_F( DeviceFs, ReplugDiskWithExtraFiles )
     fsMock->addDevice( device );
     fsMock->addFile( RemovableDeviceMountpoint + "newfile.mkv" );
 
-    cbMock->prepareForReload();
     Reload();
-    reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     files = ml->files();
     ASSERT_EQ( 6u, files.size() );
@@ -250,9 +227,8 @@ TEST_F( DeviceFs, ReplugDiskWithExtraFiles )
 
 TEST_F( DeviceFs, RemoveAlbum )
 {
-    cbMock->prepareForWait();
     ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
+    bool discovered = cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
     // Create an album on a non-removable device
@@ -281,10 +257,7 @@ TEST_F( DeviceFs, RemoveAlbum )
 
     auto device = fsMock->removeDevice( RemovableDeviceUuid );
 
-    cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     albums = ml->albums( SortingCriteria::Default, false );
     ASSERT_EQ( 1u, albums.size() );
@@ -294,9 +267,8 @@ TEST_F( DeviceFs, RemoveAlbum )
 
 TEST_F( DeviceFs, PartialAlbumRemoval )
 {
-    cbMock->prepareForWait();
     ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
+    bool discovered = cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
     {
@@ -319,10 +291,7 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
     ASSERT_EQ( 2u, artist->media( SortingCriteria::Default, false ).size() );
 
     auto device = fsMock->removeDevice( RemovableDeviceUuid );
-    cbMock->prepareForReload();
     Reload();
-    bool reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     albums = ml->albums( SortingCriteria::Default, false );
     ASSERT_EQ( 1u, albums.size() );
@@ -334,9 +303,8 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
 
 TEST_F( DeviceFs, ChangeDevice )
 {
-    cbMock->prepareForWait();
     ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->wait();
+    bool discovered = cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
     // Fetch a removable media's ID
@@ -354,10 +322,7 @@ TEST_F( DeviceFs, ChangeDevice )
     fsMock->addDevice( RemovableDeviceMountpoint, "{another-removable-device}" );
     fsMock->addFile( RemovableDeviceMountpoint + "removablefile.mp3" );
 
-    cbMock->prepareForReload();
     Reload();
-    auto reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     // Check that new files with the same name have different IDs
     // but the same "full path"
@@ -371,10 +336,7 @@ TEST_F( DeviceFs, ChangeDevice )
     auto device = fsMock->removeDevice( "{another-removable-device}" );
     fsMock->addDevice( oldRemovableDevice );
 
-    cbMock->prepareForReload();
     Reload();
-    reloaded = cbMock->wait();
-    ASSERT_TRUE( reloaded );
 
     f = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, f );
