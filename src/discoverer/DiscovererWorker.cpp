@@ -123,8 +123,14 @@ void DiscovererWorker::run()
                 // Assume only one discoverer can handle an entrypoint.
                 try
                 {
+                    auto chrono = std::chrono::steady_clock::now();
                     if ( d->discover( task.entryPoint ) == true )
+                    {
+                        auto duration = std::chrono::steady_clock::now() - chrono;
+                        LOG_DEBUG( "Discovered ", task.entryPoint, " in ",
+                                   std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
                         break;
+                    }
                 }
                 catch(std::exception& ex)
                 {

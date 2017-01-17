@@ -159,7 +159,7 @@ void ParserService::mainloop()
             status = run( *task );
             auto duration = std::chrono::steady_clock::now() - chrono;
             LOG_INFO( "Done executing ", serviceName, " task on ", task->file->mrl(), " in ",
-                      std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
+                      std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
         }
         catch ( const std::exception& ex )
         {

@@ -72,6 +72,7 @@ private:
     std::atomic_uint m_opToDo;
     std::atomic_uint m_opDone;
     std::atomic_uint m_percent;
+    std::chrono::time_point<std::chrono::steady_clock> m_chrono;
 };
 
 }

@@ -112,11 +112,20 @@ void Parser::restore()
 
 void Parser::updateStats()
 {
+    if ( m_opDone == 0 && m_opToDo > 0 && m_chrono == decltype(m_chrono){})
+        m_chrono = std::chrono::steady_clock::now();
     auto percent = m_opToDo > 0 ? ( m_opDone * 100 / m_opToDo ) : 0;
     if ( percent != m_percent )
     {
         m_percent = percent;
         m_callback->onParsingStatsUpdated( m_percent );
+        if ( m_percent == 100 )
+        {
+            auto duration = std::chrono::steady_clock::now() - m_chrono;
+            LOG_DEBUG( "Finished all parsing operations in ",
+                       std::chrono::duration_cast<std::chrono::seconds>( duration ).count(), "s" );
+            m_chrono = decltype(m_chrono){};
+        }
     }
 }
 
