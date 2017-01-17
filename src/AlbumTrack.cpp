@@ -197,15 +197,33 @@ GenrePtr AlbumTrack::genre()
 
 bool AlbumTrack::setGenre( std::shared_ptr<Genre> genre )
 {
+    // We need to fetch the old genre entity now, in case it gets deleted through
+    // the nbTracks reaching 0 trigger.
+    if ( m_genreId > 0 )
+    {
+        auto l = m_genre.lock();
+        if ( m_genre.isCached() == false )
+            m_genre = Genre::fetch( m_ml, m_genreId );
+    }
     static const std::string req = "UPDATE " + policy::AlbumTrackTable::Name
             + " SET genre_id = ? WHERE id_track = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req,
                                        sqlite::ForeignKey( genre != nullptr ? genre->id() : 0 ),
                                        m_id ) == false )
         return false;
-    auto l = m_genre.lock();
-    m_genre = genre;
-    m_genreId = genre != nullptr ? genre->id() : 0;
+    {
+        auto l = m_genre.lock();
+        if ( m_genreId > 0 )
+            m_genre.get()->updateCachedNbTracks( -1 );
+        m_genre = genre;
+    }
+    if ( genre != nullptr )
+    {
+        genre->updateCachedNbTracks( 1 );
+        m_genreId = genre->id();
+    }
+    else
+        m_genreId = 0;
     return true;
 }
 

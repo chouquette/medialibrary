@@ -200,3 +200,37 @@ TEST_F( Genres, Sort )
     ASSERT_EQ( g->id(), genres[1]->id() );
     ASSERT_EQ( g2->id(), genres[0]->id() );
 }
+
+TEST_F( Genres, NbTracks )
+{
+    ASSERT_EQ( 0u, g->nbTracks() );
+
+    auto a = ml->createAlbum( "album" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "track.mp3" ) );
+    auto t = a->addTrack( m, 1, 1, g->id(), g.get() );
+
+    ASSERT_EQ( 1u, g->nbTracks() );
+    Reload();
+    g = std::static_pointer_cast<Genre>( ml->genre( g->id() ) );
+    ASSERT_EQ( 1u, g->nbTracks() );
+
+    auto g2 = ml->createGenre( "otter metal" );
+    t = std::static_pointer_cast<AlbumTrack>( ml->albumTrack( t->id() ) );
+    t->setGenre( g2 );
+    ASSERT_EQ( 1u, g2->nbTracks() );
+    // check that the cache got updated, check for DB deletion afterward
+    ASSERT_EQ( 0u, g->nbTracks() );
+
+    Reload();
+
+    g = std::static_pointer_cast<Genre>( ml->genre( g->id() ) );
+    g2 = std::static_pointer_cast<Genre>( ml->genre( g2->id() ) );
+    ASSERT_EQ( nullptr, g );
+    ASSERT_EQ( 1u, g2->nbTracks() );
+
+    ml->deleteTrack( t->id() );
+    Reload();
+
+    g2 = std::static_pointer_cast<Genre>( ml->genre( g2->id() ) );
+    ASSERT_EQ( nullptr, g2 );
+}

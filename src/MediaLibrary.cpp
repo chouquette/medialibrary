@@ -150,6 +150,7 @@ bool MediaLibrary::createAllTables()
         Artist::createDefaultArtists( m_dbConnection.get() ) &&
         Artist::createTriggers( m_dbConnection.get() ) &&
         Media::createTriggers( m_dbConnection.get() ) &&
+        Genre::createTriggers( m_dbConnection.get() ) &&
         Playlist::createTriggers( m_dbConnection.get() ) &&
         History::createTable( m_dbConnection.get() ) &&
         Settings::createTable( m_dbConnection.get() );

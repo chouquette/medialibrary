@@ -44,13 +44,15 @@ Genre::Genre( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
 {
     row >> m_id
-        >> m_name;
+        >> m_name
+        >> m_nbTracks;
 }
 
 Genre::Genre( MediaLibraryPtr ml, const std::string& name )
     : m_ml( ml )
     , m_id( 0 )
     , m_name( name )
+    , m_nbTracks( 0 )
 {
 }
 
@@ -62,6 +64,16 @@ int64_t Genre::id() const
 const std::string& Genre::name() const
 {
     return m_name;
+}
+
+uint32_t Genre::nbTracks() const
+{
+    return m_nbTracks;
+}
+
+void Genre::updateCachedNbTracks( int increment )
+{
+    m_nbTracks += increment;
 }
 
 std::vector<ArtistPtr> Genre::artists( SortingCriteria, bool desc ) const
@@ -90,7 +102,8 @@ bool Genre::createTable( DBConnection dbConn )
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::GenreTable::Name +
         "("
             "id_genre INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "name TEXT UNIQUE ON CONFLICT FAIL"
+            "name TEXT UNIQUE ON CONFLICT FAIL,"
+            "nb_tracks INTEGER NOT NULL DEFAULT 0"
         ")";
     const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
                 + policy::GenreTable::Name + "Fts USING FTS3("
@@ -111,6 +124,34 @@ bool Genre::createTable( DBConnection dbConn )
             sqlite::Tools::executeRequest( dbConn, vtableReq ) &&
             sqlite::Tools::executeRequest( dbConn, vtableInsertTrigger ) &&
             sqlite::Tools::executeRequest( dbConn, vtableDeleteTrigger );
+}
+
+bool Genre::createTriggers( DBConnection dbConn )
+{
+    const std::string onGenreChanged = "CREATE TRIGGER IF NOT EXISTS on_track_genre_changed AFTER UPDATE OF "
+            " genre_id ON " + policy::AlbumTrackTable::Name +
+            " BEGIN"
+            " UPDATE " + policy::GenreTable::Name + " SET nb_tracks = nb_tracks + 1 WHERE id_genre = new.genre_id;"
+            " UPDATE " + policy::GenreTable::Name + " SET nb_tracks = nb_tracks - 1 WHERE id_genre = old.genre_id;"
+            " DELETE FROM " + policy::GenreTable::Name + " WHERE nb_tracks = 0;"
+            " END";
+    const std::string onTrackCreated = "CREATE TRIGGER IF NOT EXISTS update_genre_on_new_track"
+            " AFTER INSERT ON " + policy::AlbumTrackTable::Name +
+            " WHEN new.genre_id IS NOT NULL"
+            " BEGIN"
+            " UPDATE " + policy::GenreTable::Name + " SET nb_tracks = nb_tracks + 1 WHERE id_genre = new.genre_id;"
+            " END";
+    const std::string onTrackDeleted = "CREATE TRIGGER IF NOT EXISTS update_genre_on_track_deleted"
+            " AFTER DELETE ON " + policy::AlbumTrackTable::Name +
+            " WHEN old.genre_id IS NOT NULL"
+            " BEGIN"
+            " UPDATE " + policy::GenreTable::Name + " SET nb_tracks = nb_tracks - 1 WHERE id_genre = old.genre_id;"
+            " DELETE FROM " + policy::GenreTable::Name + " WHERE nb_tracks = 0;"
+            " END";
+
+    return sqlite::Tools::executeRequest( dbConn, onGenreChanged ) &&
+            sqlite::Tools::executeRequest( dbConn, onTrackCreated ) &&
+            sqlite::Tools::executeRequest( dbConn, onTrackDeleted );
 }
 
 std::shared_ptr<Genre> Genre::create( MediaLibraryPtr ml, const std::string& name )

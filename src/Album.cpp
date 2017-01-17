@@ -239,6 +239,8 @@ std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsig
     if ( track == nullptr )
         return nullptr;
     media->setAlbumTrack( track );
+    if ( genre != nullptr )
+        genre->updateCachedNbTracks( 1 );
     // Assume the media will be saved by the caller
     m_nbTracks++;
     if ( media->duration() > 0 )

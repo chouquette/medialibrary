@@ -48,11 +48,14 @@ public:
     Genre( MediaLibraryPtr ml, const std::string& name );
     virtual int64_t id() const override;
     virtual const std::string& name() const override;
+    virtual uint32_t nbTracks() const override;
+    void updateCachedNbTracks( int increment );
     virtual std::vector<ArtistPtr> artists( SortingCriteria sort, bool desc ) const override;
     virtual std::vector<MediaPtr> tracks(SortingCriteria sort, bool desc) const override;
     virtual std::vector<AlbumPtr> albums( SortingCriteria sort, bool desc ) const override;
 
     static bool createTable( DBConnection dbConn );
+    static bool createTriggers( DBConnection dbConn );
     static std::shared_ptr<Genre> create( MediaLibraryPtr ml, const std::string& name );
     static std::shared_ptr<Genre> fromName( MediaLibraryPtr ml, const std::string& name );
     static std::vector<GenrePtr> search( MediaLibraryPtr ml, const std::string& name );
@@ -63,6 +66,7 @@ private:
 
     int64_t m_id;
     std::string m_name;
+    uint32_t m_nbTracks;
 
     friend policy::GenreTable;
 };
