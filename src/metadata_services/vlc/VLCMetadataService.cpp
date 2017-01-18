@@ -62,7 +62,8 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
         done = true;
         m_cond.notify_all();
     });
-    if ( task.vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local | VLC::Media::ParseFlags::Network, 5000 ) == false )
+    if ( task.vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local | VLC::Media::ParseFlags::Network |
+                                         VLC::Media::ParseFlags::FetchLocal, 5000 ) == false )
         return parser::Task::Status::Fatal;
     m_cond.wait( lock, [&status, &done]() {
         return done == true;
