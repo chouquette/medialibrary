@@ -86,6 +86,7 @@ class IMedia
 
             // Spu
             SubtitleTrack = 200,
+            SubtitleDelay,
 
             // Various
             ApplicationSpecific = 250,
