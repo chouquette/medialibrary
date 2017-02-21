@@ -76,7 +76,8 @@ const std::vector<std::string> MediaLibrary::supportedVideoExtensions {
     "iso", "m1v", "m2v", "m2t", "m2ts", "m4v", "mkv", "mov",
     "mp2", "mp4", "mpeg", "mpeg1", "mpeg2", "mpeg4", "mpg",
     "mts", "mxf", "nsv", "nuv", "ogm", "ogv", "ogx", "ps",
-    "rec", "rm", "rmvb", "tod", "ts", "vob", "vro", "webm", "wmv"
+    "rec", "rm", "rmvb", "tod", "trp", "ts", "vob", "vro",
+    "webm", "wmv"
 };
 
 const std::vector<std::string> MediaLibrary::supportedAudioExtensions {
