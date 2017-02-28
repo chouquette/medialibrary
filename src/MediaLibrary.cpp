@@ -70,23 +70,16 @@
 namespace medialibrary
 {
 
-const std::vector<std::string> MediaLibrary::supportedVideoExtensions {
-    // Videos
-    "avi", "3gp", "amv", "asf", "divx", "dv", "flv", "gxf",
-    "iso", "m1v", "m2v", "m2t", "m2ts", "m4v", "mkv", "mov",
-    "mp2", "mp4", "mpeg", "mpeg1", "mpeg2", "mpeg4", "mpg",
-    "mts", "mxf", "nsv", "nuv", "ogm", "ogv", "ogx", "ps",
-    "rec", "rm", "rmvb", "tod", "trp", "ts", "vob", "vro",
-    "webm", "wmv"
-};
-
-const std::vector<std::string> MediaLibrary::supportedAudioExtensions {
-    // Audio
-    "a52", "aac", "ac3", "aiff", "amr", "aob", "ape",
-    "dts", "flac", "it", "m4a", "m4b", "m4p", "mid", "mka", "mlp",
-    "mod", "mp1", "mp2", "mp3", "mpc", "oga", "ogg", "oma", "opus",
-    "rmi", "s3m", "spx", "tta", "voc", "vqf", "w64", "wav",
-    "wma", "wv", "xa", "xm"
+const char* const MediaLibrary::supportedExtensions[] = {
+    "3gp", "a52", "aac", "ac3", "aiff", "amr", "amv", "aob", "ape",
+    "asf", "avi", "divx", "dts", "dv", "flac", "flv", "gxf", "iso",
+    "it", "m1v", "m2t", "m2ts", "m2v", "m4a", "m4b", "m4p", "m4v",
+    "mid", "mka", "mkv", "mlp", "mod", "mov", "mp1", "mp2", "mp2",
+    "mp3", "mp4", "mpc", "mpeg", "mpeg1", "mpeg2", "mpeg4", "mpg",
+    "mts", "mxf", "nsv", "nuv", "oga", "ogg", "ogm", "ogv", "ogx",
+    "oma", "opus", "ps", "rec", "rm", "rmi", "rmvb", "s3m", "spx",
+    "tod", "trp", "ts", "tta", "vob", "voc", "vqf", "vro", "w64",
+    "wav", "webm", "wma", "wmv", "wv", "xa", "xm"
 };
 
 const uint32_t MediaLibrary::DbModelVersion = 2;
@@ -361,15 +354,11 @@ std::vector<MediaPtr> MediaLibrary::videoFiles( SortingCriteria sort, bool desc 
 std::shared_ptr<Media> MediaLibrary::addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs )
 {
     auto type = IMedia::Type::Unknown;
-    auto ext = fileFs.extension();
-    auto predicate = [ext](const std::string& v) {
-        return strcasecmp(v.c_str(), ext.c_str()) == 0;
-    };
 
-    if ( std::find_if( begin( supportedVideoExtensions ), end( supportedVideoExtensions ),
-                    predicate ) == end( supportedVideoExtensions ) &&
-         std::find_if( begin( supportedAudioExtensions ), end( supportedAudioExtensions ),
-                         predicate ) == end( supportedAudioExtensions ) )
+    if ( std::binary_search( std::begin( supportedExtensions ), std::end( supportedExtensions ),
+                             fileFs.extension().c_str(),
+                             [](const char* l, const char* r) { return strcasecmp( l, r ) < 0; }
+                            ) == false )
     {
         LOG_INFO( "Rejecting file ", fileFs.mrl(), " due to its extension" );
         return nullptr;

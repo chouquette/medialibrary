@@ -141,8 +141,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         static const uint32_t DbModelVersion;
 
     private:
-        static const std::vector<std::string> supportedVideoExtensions;
-        static const std::vector<std::string> supportedAudioExtensions;
+        static const char* const supportedExtensions[];
 
     private:
         virtual void startParser();
