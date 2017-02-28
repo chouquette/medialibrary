@@ -166,8 +166,11 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
         // In this case, simply delete the folder.
         if ( hasDotNoMediaFile( currentFolderFs ) )
         {
-            LOG_INFO( "Deleting folder ", currentFolderFs.mrl(), " due to a .nomedia file" );
-            m_ml->deleteFolder( currentFolder );
+            if ( newFolder == false )
+            {
+                LOG_INFO( "Deleting folder ", currentFolderFs.mrl(), " due to a .nomedia file" );
+                m_ml->deleteFolder( currentFolder );
+            }
             return;
         }
     }
