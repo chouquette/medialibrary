@@ -67,12 +67,17 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
     // If the folder exists, we assume it will be handled by reload()
     if ( f != nullptr )
         return true;
-    if ( hasDotNoMediaFile( *fsDir ) )
-        return true;
     try
     {
+        if ( hasDotNoMediaFile( *fsDir ) )
+            return true;
         return addFolder( *fsDir, nullptr );
     }
+    catch ( std::system_error& ex )
+    {
+        LOG_WARN( entryPoint, " discovery aborted because of a filesystem error: ", ex.what() );
+    }
+
     catch ( sqlite::errors::ConstraintViolation& ex )
     {
         LOG_WARN( entryPoint, " discovery aborted (assuming blacklisted folder): ", ex.what() );
@@ -155,14 +160,31 @@ bool FsDiscoverer::checkDevices()
 
 void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& currentFolder, bool newFolder ) const
 {
-    // We already know of this folder, though it may now contain a .nomedia file.
-    // In this case, simply delete the folder.
-    if ( hasDotNoMediaFile( currentFolderFs ) )
+    try
     {
-        LOG_INFO( "Deleting folder ", currentFolderFs.mrl(), " due to a .nomedia file" );
-        m_ml->deleteFolder( currentFolder );
+        // We already know of this folder, though it may now contain a .nomedia file.
+        // In this case, simply delete the folder.
+        if ( hasDotNoMediaFile( currentFolderFs ) )
+        {
+            LOG_INFO( "Deleting folder ", currentFolderFs.mrl(), " due to a .nomedia file" );
+            m_ml->deleteFolder( currentFolder );
+            return;
+        }
+    }
+    // Only check once for a system_error. They are bound to happen when we list the files/folders
+    // within, and hasDotMediaFile is the first place when this is done (except in case the root
+    // entry point fails to be browsed, in which case the failure would happen before)
+    catch ( std::system_error& ex )
+    {
+        LOG_WARN( "Failed to browse ", currentFolderFs.mrl(), ": ", ex.what() );
+        if ( newFolder == false )
+        {
+            // If we ever came across this folder, its content is now unaccessible: let's remove it.
+            m_ml->deleteFolder( currentFolder );
+        }
         return;
     }
+
     m_cb->onDiscoveryProgress( currentFolderFs.mrl() );
     // Load the folders we already know of:
     LOG_INFO( "Checking for modifications in ", currentFolderFs.mrl() );
