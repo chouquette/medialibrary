@@ -83,7 +83,7 @@ const std::vector<std::string> MediaLibrary::supportedVideoExtensions {
 const std::vector<std::string> MediaLibrary::supportedAudioExtensions {
     // Audio
     "a52", "aac", "ac3", "aiff", "amr", "aob", "ape",
-    "dts", "flac", "it", "m4a", "m4p", "mid", "mka", "mlp",
+    "dts", "flac", "it", "m4a", "m4b", "m4p", "mid", "mka", "mlp",
     "mod", "mp1", "mp2", "mp3", "mpc", "oga", "ogg", "oma",
     "rmi", "s3m", "spx", "tta", "voc", "vqf", "w64", "wav",
     "wma", "wv", "xa", "xm"
