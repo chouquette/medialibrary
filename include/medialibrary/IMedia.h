@@ -70,6 +70,7 @@ class IMedia
             Title,
             Chapter,
             Program,
+            Seen,
 
             // Video:
             VideoTrack = 100,
