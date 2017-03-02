@@ -219,6 +219,11 @@ void Tests::checkAlbums( const rapidjson::Value& expectedAlbums, std::vector<Alb
                 if ( a->releaseYear() != releaseYear )
                     return false;
             }
+            if ( expectedAlbum.HasMember( "hasArtwork" ) )
+            {
+                if ( expectedAlbum["hasArtwork"].GetBool() == a->artworkMrl().empty() )
+                    return false;
+            }
             return true;
         });
         ASSERT_NE( end( albums ), it );
@@ -314,6 +319,10 @@ void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& 
         {
             if ( expectedTrack["cd"].GetUint() != albumTrack->discNumber() )
                 return;
+        }
+        if ( expectedTrack.HasMember( "hasArtwork" ) )
+        {
+            ASSERT_EQ( expectedTrack["hasArtwork"].GetBool(), track->thumbnail().empty() == false );
         }
         // Always check if the album link is correct. This isn't part of finding the proper album, so just fail hard
         // if the check fails.

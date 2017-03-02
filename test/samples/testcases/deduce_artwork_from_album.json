@@ -1,0 +1,27 @@
+{
+    "input": [
+        "music/artwork_from_album"
+    ],
+    "expected": {
+        "nbAudios": 3,
+        "nbVideos": 0,
+        "albums": [{
+            "title": "album",
+            "artist": "artist",
+            "hasArtwork": true,
+            "tracks": [
+            {
+                "title": "Track 1",
+                "hasArtwork": true
+            },
+            {
+                "title": "Track 2",
+                "hasArtwork": true
+            },
+            {
+                "title": "Track 3",
+                "hasArtwork": true
+            }]
+        }]
+    }
+}

@@ -44,6 +44,8 @@ static const char* testCases[] = {
     "multi_cd",
     "no_album_artist",
     "utf8",
+    "deduce_artwork_from_album",
+    "deduce_artwork_from_track",
 };
 
 class TestEnv : public ::testing::Environment
