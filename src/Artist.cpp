@@ -229,9 +229,15 @@ bool Artist::createTriggers(DBConnection dbConnection)
                 "(SELECT COUNT(id_album) FROM " + policy::AlbumTable::Name + " WHERE artist_id=new.artist_id AND is_present=1) "
                 "WHERE id_artist=new.artist_id;"
             " END";
+    // Automatically delete the artists that don't have any albums left, except the 2 special artists.
+    // Those are assumed to always exist, and deleting them would cause a constaint violation error
+    // when inserting an album with unknown/various artist(s).
+    // The alternative would be to always check the special artists for existence, which would be much
+    // slower when inserting an unknown artist album
     static const std::string autoDeleteTriggerReq = "CREATE TRIGGER IF NOT EXISTS has_album_remaining"
             " AFTER DELETE ON " + policy::AlbumTable::Name +
-            " WHEN old.artist_id IS NOT NULL"
+            " WHEN old.artist_id IS NOT NULL AND old.artist_id != " + std::to_string( UnknownArtistID ) +
+                " AND old.artist_id != " + std::to_string( VariousArtistID ) +
             " BEGIN"
             " UPDATE " + policy::ArtistTable::Name + " SET nb_albums = nb_albums - 1 WHERE id_artist = old.artist_id;"
             " DELETE FROM " + policy::ArtistTable::Name + " WHERE id_artist = old.artist_id AND nb_albums = 0;"
