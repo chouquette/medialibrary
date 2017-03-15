@@ -245,11 +245,13 @@ bool Artist::createTriggers(DBConnection dbConnection)
 
     static const std::string ftsInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_artist_fts"
             " AFTER INSERT ON " + policy::ArtistTable::Name +
+            " WHEN new.name IS NOT NULL"
             " BEGIN"
             " INSERT INTO " + policy::ArtistTable::Name + "Fts(rowid,name) VALUES(new.id_artist, new.name);"
             " END";
     static const std::string ftsDeleteTrigger = "CREATE TRIGGER IF NOT EXISTS delete_artist_fts"
             " BEFORE DELETE ON " + policy::ArtistTable::Name +
+            " WHEN old.name IS NOT NULL"
             " BEGIN"
             " DELETE FROM " + policy::ArtistTable::Name + "Fts WHERE rowid=old.id_artist;"
             " END";
