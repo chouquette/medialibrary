@@ -179,7 +179,6 @@ else
 libmedialibrary_la_SOURCES += \
 	src/filesystem/unix/Directory.cpp \
 	src/filesystem/unix/File.cpp \
-	src/filesystem/unix/Device.cpp \
 	$(NULL)
 if HAVE_LINUX
 if !HAVE_ANDROID
