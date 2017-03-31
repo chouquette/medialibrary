@@ -128,6 +128,9 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
             return parser::Task::Status::Fatal;
     }
 
+    if ( task.file->isDeleted() == true || task.media->isDeleted() == true )
+        return parser::Task::Status::Fatal;
+
     task.file->markStepCompleted( File::ParserStep::MetadataAnalysis );
     // Save ourselves from the useless processing of a thumbnail later if
     // we're analyzing an audio file

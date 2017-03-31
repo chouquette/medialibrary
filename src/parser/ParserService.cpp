@@ -26,6 +26,7 @@
 
 #include "ParserService.h"
 #include "Parser.h"
+#include "Media.h"
 
 namespace medialibrary
 {
@@ -155,11 +156,16 @@ void ParserService::mainloop()
         {
             LOG_INFO( "Executing ", serviceName, " task on ", task->file->mrl() );
             auto chrono = std::chrono::steady_clock::now();
-            task->file->startParserStep();
-            status = run( *task );
-            auto duration = std::chrono::steady_clock::now() - chrono;
-            LOG_INFO( "Done executing ", serviceName, " task on ", task->file->mrl(), " in ",
-                      std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
+            if ( task->file->isDeleted() || task->media->isDeleted() )
+                status = parser::Task::Status::Fatal;
+            else
+            {
+                task->file->startParserStep();
+                status = run( *task );
+                auto duration = std::chrono::steady_clock::now() - chrono;
+                LOG_INFO( "Done executing ", serviceName, " task on ", task->file->mrl(), " in ",
+                          std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
+            }
         }
         catch ( const std::exception& ex )
         {

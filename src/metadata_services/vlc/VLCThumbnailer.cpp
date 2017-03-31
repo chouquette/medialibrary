@@ -150,6 +150,9 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
         return res;
 
     LOG_INFO( "Done generating ", file->mrl(), " thumbnail" );
+    if ( task.file->isDeleted() == true || task.media->isDeleted() == true )
+        return parser::Task::Status::Fatal;
+
     file->markStepCompleted( File::ParserStep::Thumbnailer );
     m_notifier->notifyMediaModification( task.media );
 
