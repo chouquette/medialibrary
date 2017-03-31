@@ -60,7 +60,7 @@ TEST_F( Files, Remove )
     auto files = m->files();
     ASSERT_EQ( 0u, files.size() );
     auto media = ml->media( m->id() );
-    // This file should now be removed from the DB
+    // This media should now be removed from the DB
     ASSERT_EQ( nullptr, media );
 }
 
