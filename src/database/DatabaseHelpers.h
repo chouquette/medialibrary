@@ -60,11 +60,15 @@ public:
         Store[key] = std::move( value );
     }
 
-    static void remove( int64_t key )
+    static std::shared_ptr<T> remove( int64_t key )
     {
         auto it = Store.find( key );
         if ( it != end( Store ) )
+        {
             Store.erase( it );
+            return it->second;
+        }
+        return nullptr;
     }
 
     static void clear()
@@ -102,7 +106,7 @@ public:
     static FakeLock lock() { return FakeLock{}; }
     static void insert( int64_t, std::shared_ptr<T> ) {}
     static void save( int64_t, std::shared_ptr<T> ) {}
-    static void remove( int64_t ) {}
+    static std::shared_ptr<T> remove( int64_t ) { return nullptr; }
     static void clear() {}
     static std::shared_ptr<T> load( int64_t ) { return nullptr; }
 };
@@ -169,7 +173,9 @@ class DatabaseHelpers
         {
             auto l = CACHEPOLICY::lock();
 
-            CACHEPOLICY::remove( pkValue );
+            auto removed = CACHEPOLICY::remove( pkValue );
+            if ( removed != nullptr )
+                removed->markDeleted();
         }
 
         static void clear()
@@ -194,6 +200,31 @@ class DatabaseHelpers
             CACHEPOLICY::insert( pKey, self );
             return true;
         }
+
+
+    protected:
+        DatabaseHelpers() : m_deleted( false ) {}
+        /**
+         * @brief m_deleted reflects if this entity has been deleted from the DB
+         * This is not reliable, and isn't synchronized. You can only assume that if it is set to true
+         * then the entity has been deleted.
+         * This can be false, but become true the cycle after you checked it.
+         */
+        std::atomic_bool m_deleted;
+
+    public:
+        bool isDeleted() const
+        {
+            return m_deleted.load( std::memory_order_relaxed );
+        }
+
+        void markDeleted()
+        {
+            auto del = false;
+            auto res = m_deleted.compare_exchange_strong( del, true, std::memory_order_relaxed, std::memory_order_relaxed );
+            assert(res);
+        }
+
 };
 
 }
