@@ -65,8 +65,9 @@ public:
         auto it = Store.find( key );
         if ( it != end( Store ) )
         {
+            auto value = std::move( it->second );
             Store.erase( it );
-            return it->second;
+            return value;
         }
         return nullptr;
     }
