@@ -271,6 +271,12 @@ AS_IF([test "$SYS" = mingw32],[
     AH_TOP([#endif])
 ])
 
+AC_ARG_ENABLE(debug, [AC_HELP_STRING([--enable-debug], [build with run-time assertions (default enabled)])])
+AH_TEMPLATE(NDEBUG, [Define to 1 if debug code should NOT be compiled])
+AS_IF([test "${enable_debug}" = "yes"],[
+  AC_DEFINE(NDEBUG)
+])
+
 PKG_CHECK_MODULES(SQLITE, sqlite3)
 PKG_CHECK_MODULES(VLC, libvlc >= 3.0)
 PKG_CHECK_MODULES(VLCPP, libvlcpp,
