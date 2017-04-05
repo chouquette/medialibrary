@@ -222,8 +222,12 @@ bool MediaLibrary::validateSearchPattern( const std::string& pattern )
 
 bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* mlCallback )
 {
+    LOG_INFO( "Initializing medialibrary..." );
     if ( m_initialized == true )
+    {
+        LOG_INFO( "...Already initialized" );
         return true;
+    }
     if ( m_deviceLister == nullptr )
     {
         m_deviceLister = factory::createDeviceLister();
@@ -259,15 +263,22 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
         return false;
     }
     if ( m_settings.load( m_dbConnection.get() ) == false )
+    {
+        LOG_ERROR( "Failed to load settings" );
         return false;
+    }
     if ( m_settings.dbModelVersion() != DbModelVersion )
     {
         if ( updateDatabaseModel( m_settings.dbModelVersion() ) == false )
+        {
+            LOG_ERROR( "Failed to update database model" );
             return false;
+        }
     }
     startDiscoverer();
     startParser();
     m_initialized = true;
+    LOG_INFO( "Successfuly initialized" );
     return true;
 }
 
