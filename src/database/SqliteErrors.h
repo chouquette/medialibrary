@@ -24,6 +24,7 @@
 
 #include <string>
 #include <exception>
+#include <stdexcept>
 
 namespace medialibrary
 {
@@ -33,39 +34,62 @@ namespace sqlite
 namespace errors
 {
 
-class ConstraintViolation : public std::exception
+class Generic : public std::runtime_error
+{
+public:
+    Generic( const char* req, const char* msg )
+        : std::runtime_error( std::string( "Failed to compile/prepare request <" ) + req
+                                           + ">: " + msg )
+    {
+    }
+    Generic( const std::string& msg )
+        : std::runtime_error( msg )
+    {
+    }
+};
+
+class GenericExecution : public Generic
+{
+public:
+    GenericExecution( const char* req, const char* errMsg, int errCode )
+        : Generic( std::string( "Failed to run request <" ) + req + ">: " + errMsg )
+        , m_errorCode( errCode )
+    {
+    }
+
+    GenericExecution( const std::string& msg, int errCode )
+        : Generic( msg )
+        , m_errorCode( errCode )
+    {
+    }
+
+    int code() const
+    {
+        return m_errorCode;
+    }
+
+private:
+    int m_errorCode;
+};
+
+class ConstraintViolation : public Generic
 {
 public:
     ConstraintViolation( const std::string& req, const std::string& err )
+        : Generic( std::string( "Request <" ) + req + "> aborted due to "
+                    "constraint violation (" + err + ")" )
     {
-        m_reason = std::string( "Request <" ) + req + "> aborted due to "
-                "constraint violation (" + err + ")";
     }
-
-    virtual const char* what() const noexcept override
-    {
-        return m_reason.c_str();
-    }
-private:
-    std::string m_reason;
 };
 
-class ColumnOutOfRange : public std::exception
+class ColumnOutOfRange : public Generic
 {
 public:
     ColumnOutOfRange( unsigned int idx, unsigned int nbColumns )
+        : Generic( "Attempting to extract column at index " + std::to_string( idx ) +
+                   " from a request with " + std::to_string( nbColumns ) + " columns" )
     {
-        m_reason = "Attempting to extract column at index " + std::to_string( idx ) +
-                " from a request with " + std::to_string( nbColumns ) + " columns";
     }
-
-    virtual const char* what() const noexcept override
-    {
-        return m_reason.c_str();
-    }
-
-private:
-    std::string m_reason;
 };
 
 } // namespace errors

@@ -135,8 +135,7 @@ public:
             int res = sqlite3_prepare_v2( dbConnection, req.c_str(), -1, &stmt, NULL );
             if ( res != SQLITE_OK )
             {
-                throw std::runtime_error( std::string( "Failed to compile request: " ) + req + " " +
-                            sqlite3_errmsg( dbConnection ) );
+                throw errors::Generic( req.c_str(), sqlite3_errmsg( dbConnection ) );
             }
             m_stmt.reset( stmt );
             connMap.emplace( req, CachedStmtPtr( stmt, &sqlite3_finalize ) );
@@ -169,14 +168,13 @@ public:
             else if ( res == SQLITE_BUSY && ( Transaction::transactionInProgress() == false ||
                                               m_isCommit == true ) && maxRetries-- > 0 )
                 continue;
-            std::string errMsg = sqlite3_errmsg( m_dbConn );
+            auto errMsg = sqlite3_errmsg( m_dbConn );
             switch ( res )
             {
                 case SQLITE_CONSTRAINT:
                     throw errors::ConstraintViolation( sqlite3_sql( m_stmt.get() ), errMsg );
                 default:
-                    throw std::runtime_error( std::string{ sqlite3_sql( m_stmt.get() ) }
-                                              + ": " + errMsg );
+                    throw errors::GenericExecution( sqlite3_sql( m_stmt.get() ), errMsg, res );
             }
         }
     }
@@ -193,7 +191,7 @@ private:
     {
         auto res = Traits<T>::Bind( m_stmt.get(), m_bindIdx, std::forward<T>( value ) );
         if ( res != SQLITE_OK )
-            throw std::runtime_error( "Failed to bind parameter" );
+            throw errors::Generic( sqlite3_sql( m_stmt.get() ), "Failed to bind parameter" );
         m_bindIdx++;
         return true;
     }
