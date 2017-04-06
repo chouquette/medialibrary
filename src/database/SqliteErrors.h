@@ -26,6 +26,8 @@
 #include <exception>
 #include <stdexcept>
 
+#include <sqlite3.h>
+
 namespace medialibrary
 {
 
@@ -91,6 +93,18 @@ public:
     {
     }
 };
+
+static inline bool isInnocuous( const GenericExecution& ex )
+{
+    switch ( ex.code() )
+    {
+    case SQLITE_IOERR:
+    case SQLITE_NOMEM:
+        return true;
+    }
+    return false;
+}
+
 
 } // namespace errors
 } // namespace sqlite
