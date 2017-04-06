@@ -224,6 +224,7 @@ class DatabaseHelpers
             auto del = false;
             auto res = m_deleted.compare_exchange_strong( del, true, std::memory_order_relaxed, std::memory_order_relaxed );
             assert(res);
+            (void)res;
         }
 
 };
