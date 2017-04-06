@@ -121,14 +121,32 @@ class DatabaseHelpers
         template <typename... Args>
         static std::shared_ptr<IMPL> fetch( MediaLibraryPtr ml, const std::string& req, Args&&... args )
         {
-            return sqlite::Tools::fetchOne<IMPL>( ml, req, std::forward<Args>( args )... );
+            try
+            {
+                return sqlite::Tools::fetchOne<IMPL>( ml, req, std::forward<Args>( args )... );
+            }
+            catch ( const sqlite::errors::GenericExecution& ex )
+            {
+                if ( sqlite::errors::isInnocuous( ex ) == false )
+                    throw;
+            }
+            return {};
         }
 
         static std::shared_ptr<IMPL> fetch( MediaLibraryPtr ml, int64_t pkValue )
         {
             static std::string req = "SELECT * FROM " + TABLEPOLICY::Name + " WHERE " +
                     TABLEPOLICY::PrimaryKeyColumn + " = ?";
-            return sqlite::Tools::fetchOne<IMPL>( ml, req, pkValue );
+            try
+            {
+                return sqlite::Tools::fetchOne<IMPL>( ml, req, pkValue );
+            }
+            catch ( const sqlite::errors::GenericExecution& ex )
+            {
+                if ( sqlite::errors::isInnocuous( ex ) == false )
+                    throw;
+            }
+            return {};
         }
 
         /*
@@ -138,13 +156,31 @@ class DatabaseHelpers
         static std::vector<std::shared_ptr<INTF>> fetchAll( MediaLibraryPtr ml )
         {
             static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name;
-            return sqlite::Tools::fetchAll<IMPL, INTF>( ml, req );
+            try
+            {
+                return sqlite::Tools::fetchAll<IMPL, INTF>( ml, req );
+            }
+            catch ( const sqlite::errors::GenericExecution& ex )
+            {
+                if ( sqlite::errors::isInnocuous( ex ) == false )
+                    throw;
+            }
+            return {};
         }
 
         template <typename INTF, typename... Args>
         static std::vector<std::shared_ptr<INTF>> fetchAll( MediaLibraryPtr ml, const std::string &req, Args&&... args )
         {
-            return sqlite::Tools::fetchAll<IMPL, INTF>( ml, req, std::forward<Args>( args )... );
+            try
+            {
+                return sqlite::Tools::fetchAll<IMPL, INTF>( ml, req, std::forward<Args>( args )... );
+            }
+            catch ( const sqlite::errors::GenericExecution& ex )
+            {
+                if ( sqlite::errors::isInnocuous( ex ) == false )
+                    throw;
+            }
+            return {};
         }
 
         static std::shared_ptr<IMPL> load( MediaLibraryPtr ml, sqlite::Row& row )
