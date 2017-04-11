@@ -260,7 +260,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
         });
         if ( it == end( files ) )
         {
-            filesToAdd.push_back( fileFs );
+            filesToAdd.push_back( std::move( fileFs ) );
             continue;
         }
         if ( fileFs->lastModificationDate() == (*it)->lastModificationDate() )
@@ -274,8 +274,8 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
         // Pre-cache the file's media, since we need it to remove. However, better doing it
         // out of a write context, since that way, other threads can also read the database.
         file->media();
-        filesToRemove.push_back( file );
-        filesToAdd.push_back( fileFs );
+        filesToRemove.push_back( std::move( file ) );
+        filesToAdd.push_back( std::move( fileFs ) );
         files.erase( it );
     }
     auto t = m_ml->getConn()->newTransaction();
