@@ -282,7 +282,16 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
     for ( auto file : files )
     {
         LOG_INFO( "File ", file->mrl(), " not found on filesystem, deleting it" );
-        file->media()->removeFile( *file );
+        auto media = file->media();
+        if ( media != nullptr && media->isDeleted() == false )
+            media->removeFile( *file );
+        else if ( file->isDeleted() == false )
+        {
+            // This is unexpected, as the file should have been deleted when the media was
+            // removed.
+            LOG_WARN( "Deleting a file without an associated media." );
+            file->destroy();
+        }
     }
     for ( auto& f : filesToRemove )
         f->media()->removeFile( *f );
