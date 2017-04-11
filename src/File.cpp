@@ -165,8 +165,9 @@ std::shared_ptr<Media> File::media() const
     auto lock = m_media.lock();
     if ( m_media.isCached() == false )
     {
-        m_media = Media::fetch( m_ml, m_mediaId );
-        assert( isDeleted() == true || m_media.get() != nullptr );
+        auto media = Media::fetch( m_ml, m_mediaId );
+        assert( isDeleted() == true || media != nullptr );
+        m_media = media;
     }
     return m_media.get().lock();
 }
