@@ -36,8 +36,9 @@ public:
      * @brief onDevicePlugged Shall be invoked when a known device gets plugged
      * @param uuid The device UUID
      * @param mountpoint The device new mountpoint
+     * @returns true is the device was unknown. false otherwise
      */
-    virtual void onDevicePlugged( const std::string& uuid, const std::string& mountpoint ) = 0;
+    virtual bool onDevicePlugged( const std::string& uuid, const std::string& mountpoint ) = 0;
     /**
      * @brief onDeviceUnplugged Shall be invoked when a known device gets unplugged
      * @param uuid The device UUID

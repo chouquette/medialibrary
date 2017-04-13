@@ -157,7 +157,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         // Mark IDeviceListerCb callbacks as private. They must be invoked through the interface.
     private:
-        virtual void onDevicePlugged(const std::string& uuid, const std::string& mountpoint) override;
+        virtual bool onDevicePlugged( const std::string& uuid, const std::string& mountpoint ) override;
         virtual void onDeviceUnplugged(const std::string& uuid) override;
 
     protected:

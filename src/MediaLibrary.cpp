@@ -780,9 +780,11 @@ void MediaLibrary::setLogger( ILogger* logger )
     Log::SetLogger( logger );
 }
 
-void MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& mountpoint )
+bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& mountpoint )
 {
+    auto currentDevice = Device::fromUuid( this, uuid );
     LOG_INFO( "Device ", uuid, " was plugged and mounted on ", mountpoint );
+    assert( currentDevice == nullptr || currentDevice->isPresent() == false );
     for ( const auto& fsFactory : m_fsFactories )
     {
         if ( fsFactory->isMrlSupported( "file://" ) )
@@ -791,6 +793,7 @@ void MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& 
             break;
         }
     }
+    return currentDevice == nullptr;
 }
 
 void MediaLibrary::onDeviceUnplugged( const std::string& uuid )
