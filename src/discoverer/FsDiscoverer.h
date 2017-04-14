@@ -51,6 +51,7 @@ private:
     void checkFiles(fs::IDirectory& parentFolderFs, Folder& parentFolder ) const;
     static bool hasDotNoMediaFile( const fs::IDirectory& directory );
     bool addFolder( fs::IDirectory& folder, Folder* parentFolder ) const;
+    void reloadFolder( Folder& folder );
 
 private:
     MediaLibrary* m_ml;

@@ -85,21 +85,24 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
     return true;
 }
 
+void FsDiscoverer::reloadFolder( Folder& f )
+{
+    auto folder = m_fsFactory->createDirectory( f.mrl() );
+    if ( folder == nullptr )
+    {
+        LOG_INFO( "Removing folder ", f.mrl() );
+        m_ml->deleteFolder( f );
+        return;
+    }
+    checkFolder( *folder, f, false );
+}
+
 bool FsDiscoverer::reload()
 {
     LOG_INFO( "Reloading all folders" );
     auto rootFolders = Folder::fetchRootFolders( m_ml );
     for ( const auto& f : rootFolders )
-    {
-        auto folder = m_fsFactory->createDirectory( f->mrl() );
-        if ( folder == nullptr )
-        {
-            LOG_INFO( "Removing folder ", f->mrl() );
-            m_ml->deleteFolder( *f );
-            continue;
-        }
-        checkFolder( *folder, *f, false );
-    }
+        reloadFolder( *f );
     return true;
 }
 
@@ -114,13 +117,7 @@ bool FsDiscoverer::reload( const std::string& entryPoint )
         LOG_ERROR( "Can't reload ", entryPoint, ": folder wasn't found in database" );
         return false;
     }
-    auto folderFs = m_fsFactory->createDirectory( folder->mrl() );
-    if ( folderFs == nullptr )
-    {
-        LOG_ERROR(" Failed to create a fs::IDirectory representing ", folder->mrl() );
-        return false;
-    }
-    checkFolder( *folderFs, *folder, false );
+    reloadFolder( *folder );
     return true;
 }
 
