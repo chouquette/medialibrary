@@ -101,7 +101,7 @@ std::shared_ptr<fs::IDevice> FileSystemFactory::createDeviceFromMrl( const std::
     return res;
 }
 
-bool FileSystemFactory::refreshDevices()
+void FileSystemFactory::refreshDevices()
 {
     {
         std::lock_guard<compat::Mutex> lock( m_mutex );
@@ -111,11 +111,12 @@ bool FileSystemFactory::refreshDevices()
     if ( m_deviceCache.isCached() == false )
         m_deviceCache = DeviceCacheMap{};
     m_deviceCache.get().clear();
+    LOG_INFO( "Refreshing devices from IDeviceLister" );
     auto devices = m_deviceLister->devices();
     if ( devices.empty() == true )
     {
-        LOG_ERROR( "Cannot continue with no devices" );
-        return false;
+        LOG_WARN( "No device detected." );
+        return;
     }
     for ( const auto& d : devices )
     {
@@ -125,7 +126,7 @@ bool FileSystemFactory::refreshDevices()
         LOG_INFO( "Caching device ", uuid, " mounted on ", mountpoint, ". Removable: ", removable ? "true" : "false" );
         m_deviceCache.get().emplace( uuid, std::make_shared<fs::Device>( uuid, mountpoint, removable ) );
     }
-    return true;
+    return;
 }
 
 bool FileSystemFactory::isMrlSupported( const std::string& path ) const

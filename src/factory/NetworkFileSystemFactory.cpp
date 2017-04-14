@@ -80,9 +80,8 @@ std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::createDeviceFromMrl( cons
     return it->device;
 }
 
-bool NetworkFileSystemFactory::refreshDevices()
+void NetworkFileSystemFactory::refreshDevices()
 {
-    return true;
 }
 
 bool NetworkFileSystemFactory::isMrlSupported( const std::string& path ) const

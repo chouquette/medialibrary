@@ -786,8 +786,7 @@ void MediaLibrary::refreshDevices( factory::IFileSystem& fsFactory )
     // Don't refuse to process devices when none seem to be present, it might be a valid case
     // if the user only discovered removable storages, and we would still need to mark those
     // as "not present"
-    if ( fsFactory.refreshDevices() == false )
-        LOG_WARN( "No device detected." );
+    fsFactory.refreshDevices();
     auto devices = Device::fetchAll( this );
     for ( auto& d : devices )
     {

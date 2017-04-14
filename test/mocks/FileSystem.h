@@ -178,9 +178,8 @@ struct FileSystemFactory : public factory::IFileSystem
         return *it;
     }
 
-    virtual bool refreshDevices() override
+    virtual void refreshDevices() override
     {
-        return true;
     }
 
     std::shared_ptr<Device> device( const std::string& mrl )
@@ -355,9 +354,8 @@ public:
         return std::make_shared<NoopDevice>();
     }
 
-    virtual bool refreshDevices() override
+    virtual void refreshDevices() override
     {
-        return false;
     }
 
     virtual bool isMrlSupported( const std::string& mrl ) const override

@@ -61,7 +61,7 @@ namespace factory
         ///
         /// \brief refresh Will cause any FS cache to be refreshed.
         ///
-        virtual bool refreshDevices() = 0;
+        virtual void refreshDevices() = 0;
         ///
         /// \brief isPathSupported Checks for support of a path by this FS facotry
         /// \param path The path to probe for support
