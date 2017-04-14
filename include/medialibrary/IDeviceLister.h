@@ -55,7 +55,6 @@ public:
      * - The device UUID
      * - The device mountpoint
      * - A 'removable' state, being true if the device can be removed, false otherwise.
-     * @return
      */
     virtual std::vector<std::tuple<std::string, std::string, bool>> devices() const = 0;
 };
