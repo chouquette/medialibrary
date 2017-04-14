@@ -141,8 +141,7 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
         }
     }
     // Only check once for a system_error. They are bound to happen when we list the files/folders
-    // within, and hasDotMediaFile is the first place when this is done (except in case the root
-    // entry point fails to be browsed, in which case the failure would happen before)
+    // within, and hasDotMediaFile is the first place when this is done
     catch ( std::system_error& ex )
     {
         LOG_WARN( "Failed to browse ", currentFolderFs.mrl(), ": ", ex.what() );
