@@ -275,6 +275,8 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
             return false;
         }
     }
+    for ( auto& fsFactory : m_fsFactories )
+        refreshDevices( *fsFactory );
     startDiscoverer();
     startParser();
     m_initialized = true;
@@ -780,6 +782,30 @@ void MediaLibrary::setLogger( ILogger* logger )
     Log::SetLogger( logger );
 }
 
+void MediaLibrary::refreshDevices( factory::IFileSystem& fsFactory )
+{
+    // Don't refuse to process devices when none seem to be present, it might be a valid case
+    // if the user only discovered removable storages, and we would still need to mark those
+    // as "not present"
+    if ( fsFactory.refreshDevices() == false )
+        LOG_WARN( "No device detected." );
+    auto devices = Device::fetchAll( this );
+    for ( auto& d : devices )
+    {
+        auto deviceFs = fsFactory.createDevice( d->uuid() );
+        auto fsDevicePresent = deviceFs != nullptr && deviceFs->isPresent();
+        if ( d->isPresent() != fsDevicePresent )
+        {
+            LOG_INFO( "Device ", d->uuid(), " changed presence state: ", d->isPresent(), " -> ", fsDevicePresent );
+            d->setPresent( fsDevicePresent );
+        }
+        else
+        {
+            LOG_INFO( "Device ", d->uuid(), " unchanged" );
+        }
+    }
+}
+
 bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& mountpoint )
 {
     auto currentDevice = Device::fromUuid( this, uuid );
@@ -789,7 +815,7 @@ bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& 
     {
         if ( fsFactory->isMrlSupported( "file://" ) )
         {
-            fsFactory->refreshDevices();
+            refreshDevices( *fsFactory );
             break;
         }
     }
@@ -803,7 +829,7 @@ void MediaLibrary::onDeviceUnplugged( const std::string& uuid )
     {
         if ( fsFactory->isMrlSupported( "file://" ) )
         {
-            fsFactory->refreshDevices();
+            refreshDevices( *fsFactory );
             break;
         }
     }

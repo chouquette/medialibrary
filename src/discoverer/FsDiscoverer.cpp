@@ -88,12 +88,6 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
 bool FsDiscoverer::reload()
 {
     LOG_INFO( "Reloading all folders" );
-    // Start by checking if previously known devices have been plugged/unplugged
-    if ( checkDevices() == false )
-    {
-        LOG_ERROR( "Refusing to reloading files with no storage device" );
-        return false;
-    }
     auto rootFolders = Folder::fetchRootFolders( m_ml );
     for ( const auto& f : rootFolders )
     {
@@ -114,12 +108,6 @@ bool FsDiscoverer::reload( const std::string& entryPoint )
     if ( m_fsFactory->isMrlSupported( entryPoint ) == false )
         return false;
     LOG_INFO( "Reloading folder ", entryPoint );
-    // Start by checking if previously known devices have been plugged/unplugged
-    if ( checkDevices() == false )
-    {
-        LOG_ERROR( "Refusing to reloading files with no storage device" );
-        return false;
-    }
     auto folder = Folder::fromMrl( m_ml, entryPoint );
     if ( folder == nullptr )
     {
@@ -133,28 +121,6 @@ bool FsDiscoverer::reload( const std::string& entryPoint )
         return false;
     }
     checkFolder( *folderFs, *folder, false );
-    return true;
-}
-
-bool FsDiscoverer::checkDevices()
-{
-    if ( m_fsFactory->refreshDevices() == false )
-        return false;
-    auto devices = Device::fetchAll( m_ml );
-    for ( auto& d : devices )
-    {
-        auto deviceFs = m_fsFactory->createDevice( d->uuid() );
-        auto fsDevicePresent = deviceFs != nullptr && deviceFs->isPresent();
-        if ( d->isPresent() != fsDevicePresent )
-        {
-            LOG_INFO( "Device ", d->uuid(), " changed presence state: ", d->isPresent(), " -> ", fsDevicePresent );
-            d->setPresent( fsDevicePresent );
-        }
-        else
-        {
-            LOG_INFO( "Device ", d->uuid(), " unchanged" );
-        }
-    }
     return true;
 }
 

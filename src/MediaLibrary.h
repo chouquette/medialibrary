@@ -150,6 +150,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         bool updateDatabaseModel( unsigned int previousVersion );
         bool createAllTables();
         void registerEntityHooks();
+        void refreshDevices(factory::IFileSystem& fsFactory);
         static bool validateSearchPattern( const std::string& pattern );
 
     protected:
