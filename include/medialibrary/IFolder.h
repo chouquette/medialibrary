@@ -37,6 +37,7 @@ public:
      * Caller is responsible for checking isPresent() beforehand, as we
      * can't compute an for a folder that is/was present on a removable storage
      * or network share that has been unplugged
+     * If for some reasons we can't compute the MRL, an empty string wil
      * @return The folder's mrl
      */
     virtual const std::string& mrl() const = 0;

@@ -49,12 +49,13 @@ namespace policy
 Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
 {
+    bool dummy;
     row >> m_id
         >> m_path
         >> m_parent
         >> m_isBlacklisted
         >> m_deviceId
-        >> m_isPresent
+        >> dummy
         >> m_isRemovable;
 }
 
@@ -65,7 +66,6 @@ Folder::Folder(MediaLibraryPtr ml, const std::string& path, int64_t parent, int6
     , m_parent( parent )
     , m_isBlacklisted( false )
     , m_deviceId( deviceId )
-    , m_isPresent( true )
     , m_isRemovable( isRemovable )
 {
 }
@@ -218,18 +218,24 @@ const std::string& Folder::mrl() const
 {
     if ( m_isRemovable == false )
         return m_path;
-    // We can't compute the full path of a folder if it's removable and the device isn't present.
-    // When there's no device, we don't know the mountpoint, therefor we don't know the full path
-    assert( m_isPresent == true );
 
     auto lock = m_deviceMountpoint.lock();
     if ( m_deviceMountpoint.isCached() == true )
         return m_fullPath;
 
-    auto device = Device::fetch( m_ml, m_deviceId );
-    auto fsFactory = m_ml->fsFactoryForMrl( device->scheme() );
+    // We can't compute the full path of a folder if it's removable and the device isn't present.
+    // When there's no device, we don't know the mountpoint, therefor we don't know the full path
+    // Calling isPresent will ensure we have the device representation cached locally
+    if ( isPresent() == false )
+    {
+        assert( !"Device isn't present" );
+        m_fullPath = "";
+        return m_fullPath;
+    }
+
+    auto fsFactory = m_ml->fsFactoryForMrl( m_device.get()->scheme() );
     assert( fsFactory != nullptr );
-    auto deviceFs = fsFactory->createDevice( device->uuid() );
+    auto deviceFs = fsFactory->createDevice( m_device.get()->uuid() );
     m_deviceMountpoint = deviceFs->mountpoint();
     m_fullPath = m_deviceMountpoint.get() + m_path;
     return m_fullPath;
@@ -261,7 +267,11 @@ int64_t Folder::deviceId() const
 
 bool Folder::isPresent() const
 {
-    return m_isPresent;
+    auto deviceLock = m_device.lock();
+    if ( m_device.isCached() == false )
+        m_device = Device::fetch( m_ml, m_deviceId );
+    assert( m_device.get() != nullptr );
+    return m_device.get()->isPresent();
 }
 
 bool Folder::isRootFolder() const

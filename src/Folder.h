@@ -97,10 +97,10 @@ private:
     int64_t m_parent;
     bool m_isBlacklisted;
     int64_t m_deviceId;
-    bool m_isPresent;
     bool m_isRemovable;
 
     mutable Cache<std::string> m_deviceMountpoint;
+    mutable Cache<std::shared_ptr<Device>> m_device;
     // This contains the full path, including device mountpoint (and mrl scheme,
     // as its part of the mountpoint
     mutable std::string m_fullPath;
