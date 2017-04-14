@@ -214,7 +214,6 @@ void MediaLibrary::registerEntityHooks()
     m_dbConnection->registerUpdateHook( policy::VideoTrackTable::Name, &propagateDeletionToCache<VideoTrack> );
 }
 
-
 bool MediaLibrary::validateSearchPattern( const std::string& pattern )
 {
     return pattern.size() >= 3;
@@ -284,7 +283,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
     return true;
 }
 
-void MediaLibrary::setVerbosity(LogLevel v)
+void MediaLibrary::setVerbosity( LogLevel v )
 {
     m_verbosity = v;
     Log::setLogLevel( v );
@@ -435,7 +434,7 @@ std::vector<GenrePtr> MediaLibrary::genres( SortingCriteria sort, bool desc ) co
     return Genre::listAll( this, sort, desc );
 }
 
-GenrePtr MediaLibrary::genre(int64_t id) const
+GenrePtr MediaLibrary::genre( int64_t id ) const
 {
     return Genre::fetch( this, id );
 }
@@ -447,7 +446,7 @@ ShowPtr MediaLibrary::show( const std::string& name ) const
     return Show::fetch( this, req, name );
 }
 
-std::shared_ptr<Show> MediaLibrary::createShow(const std::string& name)
+std::shared_ptr<Show> MediaLibrary::createShow( const std::string& name )
 {
     return Show::create( this, name );
 }
@@ -492,7 +491,7 @@ std::shared_ptr<Artist> MediaLibrary::createArtist( const std::string& name )
     }
 }
 
-std::vector<ArtistPtr> MediaLibrary::artists(SortingCriteria sort, bool desc) const
+std::vector<ArtistPtr> MediaLibrary::artists( SortingCriteria sort, bool desc ) const
 {
     return Artist::listAll( this, sort, desc );
 }
@@ -502,7 +501,7 @@ PlaylistPtr MediaLibrary::createPlaylist( const std::string& name )
     return Playlist::create( this, name );
 }
 
-std::vector<PlaylistPtr> MediaLibrary::playlists(SortingCriteria sort, bool desc)
+std::vector<PlaylistPtr> MediaLibrary::playlists( SortingCriteria sort, bool desc )
 {
     return Playlist::listAll( this, sort, desc );
 }
