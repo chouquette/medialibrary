@@ -105,7 +105,6 @@ std::shared_ptr<fs::IDevice> FileSystemFactory::createDeviceFromMrl( const std::
 
 void FileSystemFactory::refreshDevices()
 {
-
     LOG_INFO( "Refreshing devices from IDeviceLister" );
     auto devices = m_deviceLister->devices();
 
