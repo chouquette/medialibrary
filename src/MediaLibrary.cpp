@@ -822,6 +822,9 @@ bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& 
             auto res = onDeviceChanged( *fsFactory, *currentDevice );
             // Ensure the device actually changed.
             assert( res == true );
+#ifdef NDEBUG
+            (void)res; // Silence unused variable warning
+#endif
             break;
         }
     }
@@ -843,6 +846,9 @@ void MediaLibrary::onDeviceUnplugged( const std::string& uuid )
         {
             auto res = onDeviceChanged( *fsFactory, *device );
             assert( res == true );
+#ifdef NDEBUG
+            (void)res; // Silence unused variable warning
+#endif
             break;
         }
     }
