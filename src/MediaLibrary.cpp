@@ -816,10 +816,6 @@ bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& 
     auto currentDevice = Device::fromUuid( this, uuid );
     LOG_INFO( "Device ", uuid, " was plugged and mounted on ", mountpoint );
     assert( currentDevice == nullptr || currentDevice->isPresent() == false );
-    // If we don't know the device yet, simply postpone the device creation to the first
-    // discovery/reload, and inform the caller that we didn't know this device yet.
-    if ( currentDevice == nullptr )
-        return true;
     for ( const auto& fsFactory : m_fsFactories )
     {
         if ( fsFactory->isMrlSupported( "file://" ) )
@@ -832,7 +828,7 @@ bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& 
             break;
         }
     }
-    return false;
+    return currentDevice == nullptr;
 }
 
 void MediaLibrary::onDeviceUnplugged( const std::string& uuid )
