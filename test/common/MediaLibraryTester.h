@@ -74,12 +74,12 @@ class MediaLibraryWithoutParser : public MediaLibraryTester
 
 class MediaLibraryWithoutBackground : public MediaLibraryTester
 {
-    virtual void createDiscoverers() override {}
+    virtual void startDiscoverer() override {}
     virtual void startParser() override {}
 };
 
 class MediaLibraryWithNotifier : public MediaLibraryTester
 {
-    virtual void createDiscoverers() override {}
+    virtual void startDiscoverer() override {}
     virtual void startParser() override {}
 };
