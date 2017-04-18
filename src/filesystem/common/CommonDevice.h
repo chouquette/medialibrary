@@ -36,6 +36,7 @@ public:
     virtual const std::string& uuid() const override;
     virtual bool isRemovable() const override;
     virtual bool isPresent() const override;
+    virtual void setPresent( bool present ) override;
     virtual const std::string& mountpoint() const override;
 
 private:

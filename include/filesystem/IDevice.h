@@ -36,6 +36,7 @@ public:
     virtual const std::string& uuid() const = 0;
     virtual bool isRemovable() const = 0;
     virtual bool isPresent() const = 0;
+    virtual void setPresent( bool present ) = 0;
     virtual const std::string& mountpoint() const = 0;
 };
 }

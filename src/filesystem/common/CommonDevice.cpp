@@ -55,6 +55,11 @@ bool CommonDevice::isPresent() const
     return m_present;
 }
 
+void CommonDevice::setPresent( bool present )
+{
+    m_present = present;
+}
+
 const std::string& CommonDevice::mountpoint() const
 {
     return m_mountpoint;

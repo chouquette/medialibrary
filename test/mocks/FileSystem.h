@@ -302,6 +302,10 @@ public:
         return true;
     }
 
+    virtual void setPresent( bool ) override
+    {
+    }
+
     virtual const std::string& mountpoint() const override
     {
         return m_mountpoint;
