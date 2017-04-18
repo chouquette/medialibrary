@@ -153,6 +153,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         bool createAllTables();
         void registerEntityHooks();
         static bool validateSearchPattern( const std::string& pattern );
+        // Returns true if the device actually changed
+        bool onDeviceChanged( factory::IFileSystem& fsFactory, Device& device );
 
     protected:
         virtual void addLocalFsFactory();

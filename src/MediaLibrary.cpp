@@ -781,6 +781,21 @@ void MediaLibrary::setLogger( ILogger* logger )
     Log::SetLogger( logger );
 }
 
+bool MediaLibrary::onDeviceChanged( factory::IFileSystem& fsFactory, Device& device )
+{
+    auto deviceFs = fsFactory.createDevice( device.uuid() );
+    auto fsDevicePresent = deviceFs != nullptr && deviceFs->isPresent();
+    if ( device.isPresent() != fsDevicePresent )
+    {
+        LOG_INFO( "Device ", device.uuid(), " changed presence state: ",
+                  device.isPresent(), " -> ", fsDevicePresent );
+        device.setPresent( fsDevicePresent );
+        return true;
+    }
+    LOG_INFO( "Device ", device.uuid(), " unchanged" );
+    return false;
+}
+
 void MediaLibrary::refreshDevices( factory::IFileSystem& fsFactory )
 {
     // Don't refuse to process devices when none seem to be present, it might be a valid case
@@ -789,19 +804,7 @@ void MediaLibrary::refreshDevices( factory::IFileSystem& fsFactory )
     fsFactory.refreshDevices();
     auto devices = Device::fetchAll( this );
     for ( auto& d : devices )
-    {
-        auto deviceFs = fsFactory.createDevice( d->uuid() );
-        auto fsDevicePresent = deviceFs != nullptr && deviceFs->isPresent();
-        if ( d->isPresent() != fsDevicePresent )
-        {
-            LOG_INFO( "Device ", d->uuid(), " changed presence state: ", d->isPresent(), " -> ", fsDevicePresent );
-            d->setPresent( fsDevicePresent );
-        }
-        else
-        {
-            LOG_INFO( "Device ", d->uuid(), " unchanged" );
-        }
-    }
+        onDeviceChanged( fsFactory, *d );
 }
 
 bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& mountpoint )
@@ -809,25 +812,38 @@ bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& 
     auto currentDevice = Device::fromUuid( this, uuid );
     LOG_INFO( "Device ", uuid, " was plugged and mounted on ", mountpoint );
     assert( currentDevice == nullptr || currentDevice->isPresent() == false );
+    // If we don't know the device yet, simply postpone the device creation to the first
+    // discovery/reload, and inform the caller that we didn't know this device yet.
+    if ( currentDevice == nullptr )
+        return true;
     for ( const auto& fsFactory : m_fsFactories )
     {
         if ( fsFactory->isMrlSupported( "file://" ) )
         {
-            refreshDevices( *fsFactory );
+            auto res = onDeviceChanged( *fsFactory, *currentDevice );
+            // Ensure the device actually changed.
+            assert( res == true );
             break;
         }
     }
-    return currentDevice == nullptr;
+    return false;
 }
 
 void MediaLibrary::onDeviceUnplugged( const std::string& uuid )
 {
+    auto device = Device::fromUuid( this, uuid );
+    if ( device == nullptr )
+    {
+        LOG_WARN( "Unknown device ", uuid, " was unplugged. Ignoring." );
+        return;
+    }
     LOG_INFO( "Device ", uuid, " was unplugged" );
     for ( const auto& fsFactory : m_fsFactories )
     {
         if ( fsFactory->isMrlSupported( "file://" ) )
         {
-            refreshDevices( *fsFactory );
+            auto res = onDeviceChanged( *fsFactory, *device );
+            assert( res == true );
             break;
         }
     }
