@@ -137,6 +137,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual IDeviceListerCb* setDeviceLister( DeviceListerPtr lister ) override;
         std::shared_ptr<factory::IFileSystem> fsFactoryForMrl( const std::string& path ) const;
 
+        void refreshDevices(factory::IFileSystem& fsFactory);
+
     public:
         static const uint32_t DbModelVersion;
 
@@ -150,7 +152,6 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         bool updateDatabaseModel( unsigned int previousVersion );
         bool createAllTables();
         void registerEntityHooks();
-        void refreshDevices(factory::IFileSystem& fsFactory);
         static bool validateSearchPattern( const std::string& pattern );
 
     protected:

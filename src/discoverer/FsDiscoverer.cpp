@@ -39,6 +39,20 @@
 #include "MediaLibrary.h"
 #include "utils/Filename.h"
 
+namespace
+{
+
+class DeviceRemovedException : public std::runtime_error
+{
+public:
+    DeviceRemovedException() noexcept
+        : std::runtime_error( "A device was removed during the discovery" )
+    {
+    }
+};
+
+}
+
 namespace medialibrary
 {
 
@@ -77,10 +91,14 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
     {
         LOG_WARN( entryPoint, " discovery aborted because of a filesystem error: ", ex.what() );
     }
-
     catch ( sqlite::errors::ConstraintViolation& ex )
     {
         LOG_WARN( entryPoint, " discovery aborted (assuming blacklisted folder): ", ex.what() );
+    }
+    catch ( DeviceRemovedException& )
+    {
+        // Simply ignore, the device has already been marked as removed and the DB updated accordingly
+        LOG_INFO( "Discovery of ", fsDir->mrl(), " was stopped after the device was removed" );
     }
     return true;
 }
@@ -94,7 +112,14 @@ void FsDiscoverer::reloadFolder( Folder& f )
         m_ml->deleteFolder( f );
         return;
     }
-    checkFolder( *folder, f, false );
+    try
+    {
+        checkFolder( *folder, f, false );
+    }
+    catch ( DeviceRemovedException& )
+    {
+        LOG_INFO( "Reloading of ", f.mrl(), " was stopped after the device was removed" );
+    }
 }
 
 bool FsDiscoverer::reload()
@@ -142,6 +167,26 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
     catch ( std::system_error& ex )
     {
         LOG_WARN( "Failed to browse ", currentFolderFs.mrl(), ": ", ex.what() );
+        // Even when we're discovering a new folder, we want to rule out device removal as the cause of
+        // an IO error. If this is the cause, simply abort the discovery. All the folder we have
+        // discovered so far will be marked as non-present through sqlite hooks, and we'll resume the
+        // discovery when the device gets plugged back in
+        if ( currentFolderFs.device()->isRemovable() )
+        {
+            // If the device is removable, check if it was indeed removed.
+            LOG_INFO( "The device containing ", currentFolderFs.mrl(), " is removable. Checking for device removal..." );
+            m_ml->refreshDevices( *m_fsFactory );
+            // The device presence flag will be changed in place, so simply retest it
+            if ( currentFolderFs.device()->isPresent() == false )
+                throw DeviceRemovedException();
+            LOG_INFO( "Device was not removed" );
+        }
+        // However if the device isn't removable, we want to:
+        // - ignore it when we're discovering a new folder.
+        // - delete it when it was discovered in the past. This is likely to be due to a permission change
+        //   as we would not check the folder if it wasn't present during the parent folder browsing
+        //   but it might also be that we're checking an entry point.
+        //   The error won't arise earlier, as we only perform IO when reading the folder from this function.
         if ( newFolder == false )
         {
             // If we ever came across this folder, its content is now unaccessible: let's remove it.
