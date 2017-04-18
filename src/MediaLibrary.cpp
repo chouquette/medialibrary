@@ -789,21 +789,6 @@ void MediaLibrary::setLogger( ILogger* logger )
     Log::SetLogger( logger );
 }
 
-bool MediaLibrary::onDeviceChanged( factory::IFileSystem& fsFactory, Device& device )
-{
-    auto deviceFs = fsFactory.createDevice( device.uuid() );
-    auto fsDevicePresent = deviceFs != nullptr && deviceFs->isPresent();
-    if ( device.isPresent() != fsDevicePresent )
-    {
-        LOG_INFO( "Device ", device.uuid(), " changed presence state: ",
-                  device.isPresent(), " -> ", fsDevicePresent );
-        device.setPresent( fsDevicePresent );
-        return true;
-    }
-    LOG_INFO( "Device ", device.uuid(), " unchanged" );
-    return false;
-}
-
 void MediaLibrary::refreshDevices( factory::IFileSystem& fsFactory )
 {
     // Don't refuse to process devices when none seem to be present, it might be a valid case
@@ -812,7 +797,18 @@ void MediaLibrary::refreshDevices( factory::IFileSystem& fsFactory )
     fsFactory.refreshDevices();
     auto devices = Device::fetchAll( this );
     for ( auto& d : devices )
-        onDeviceChanged( fsFactory, *d );
+    {
+        auto deviceFs = fsFactory.createDevice( d->uuid() );
+        auto fsDevicePresent = deviceFs != nullptr && deviceFs->isPresent();
+        if ( d->isPresent() != fsDevicePresent )
+        {
+            LOG_INFO( "Device ", d->uuid(), " changed presence state: ",
+                      d->isPresent(), " -> ", fsDevicePresent );
+            d->setPresent( fsDevicePresent );
+        }
+        else
+            LOG_INFO( "Device ", d->uuid(), " unchanged" );
+    }
 }
 
 bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& mountpoint )
@@ -828,12 +824,11 @@ bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& 
     {
         if ( fsFactory->isMrlSupported( "file://" ) )
         {
-            auto res = onDeviceChanged( *fsFactory, *currentDevice );
-            // Ensure the device actually changed.
-            assert( res == true );
-#ifdef NDEBUG
-            (void)res; // Silence unused variable warning
-#endif
+            auto deviceFs = fsFactory->createDevice( uuid );
+            if ( deviceFs != nullptr )
+                deviceFs->setPresent( true );
+            else
+                refreshDevices( *fsFactory );
             break;
         }
     }
@@ -853,12 +848,11 @@ void MediaLibrary::onDeviceUnplugged( const std::string& uuid )
     {
         if ( fsFactory->isMrlSupported( "file://" ) )
         {
-            auto res = onDeviceChanged( *fsFactory, *device );
-            assert( res == true );
-#ifdef NDEBUG
-            (void)res; // Silence unused variable warning
-#endif
-            break;
+            auto deviceFs = fsFactory->createDevice( uuid );
+            if ( deviceFs != nullptr )
+                deviceFs->setPresent( false );
+            else
+                refreshDevices( *fsFactory );
         }
     }
 }
