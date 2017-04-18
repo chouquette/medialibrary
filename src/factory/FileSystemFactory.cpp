@@ -45,6 +45,8 @@
 #include "medialibrary/IDeviceLister.h"
 #include "compat/Mutex.h"
 
+#include <algorithm>
+
 namespace medialibrary
 {
 
@@ -103,21 +105,32 @@ std::shared_ptr<fs::IDevice> FileSystemFactory::createDeviceFromMrl( const std::
 
 void FileSystemFactory::refreshDevices()
 {
-    {
-        std::lock_guard<compat::Mutex> lock( m_mutex );
-        m_dirs.clear();
-    }
+
+    LOG_INFO( "Refreshing devices from IDeviceLister" );
+    auto devices = m_deviceLister->devices();
+
     auto lock = m_deviceCache.lock();
     if ( m_deviceCache.isCached() == false )
         m_deviceCache = DeviceCacheMap{};
-    m_deviceCache.get().clear();
-    LOG_INFO( "Refreshing devices from IDeviceLister" );
-    auto devices = m_deviceLister->devices();
-    if ( devices.empty() == true )
+
+    for ( auto& devicePair : m_deviceCache.get() )
     {
-        LOG_WARN( "No device detected." );
-        return;
+        auto it = std::find_if( begin( devices ), end( devices ),
+                                [&devicePair]( decltype(devices)::value_type& deviceTuple ) {
+                                    return std::get<0>( deviceTuple ) == devicePair.first;
+        });
+        // If the device isn't present anymore, mark it as such, but don't remove it
+        // That way, the directories that cached the device still have an up to date information
+        if ( it == end( devices ) )
+            devicePair.second->setPresent( false );
+        else
+        {
+            // If we already know the device, ensure it's marked as present
+            devicePair.second->setPresent( true );
+            devices.erase( it );
+        }
     }
+    // And now insert all new devices, if any
     for ( const auto& d : devices )
     {
         const auto& uuid = std::get<0>( d );
@@ -126,7 +139,9 @@ void FileSystemFactory::refreshDevices()
         LOG_INFO( "Caching device ", uuid, " mounted on ", mountpoint, ". Removable: ", removable ? "true" : "false" );
         m_deviceCache.get().emplace( uuid, std::make_shared<fs::Device>( uuid, mountpoint, removable ) );
     }
-    return;
+
+    std::lock_guard<compat::Mutex> lockDirs( m_mutex );
+    m_dirs.clear();
 }
 
 bool FileSystemFactory::isMrlSupported( const std::string& path ) const
