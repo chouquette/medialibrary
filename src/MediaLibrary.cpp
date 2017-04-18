@@ -822,7 +822,12 @@ bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& 
         {
             auto deviceFs = fsFactory->createDevice( uuid );
             if ( deviceFs != nullptr )
+            {
+                LOG_INFO( "Device ", uuid, " changed presence state: 0 -> 1" );
                 deviceFs->setPresent( true );
+                if ( currentDevice != nullptr )
+                    currentDevice->setPresent( true );
+            }
             else
                 refreshDevices( *fsFactory );
             break;
@@ -846,7 +851,11 @@ void MediaLibrary::onDeviceUnplugged( const std::string& uuid )
         {
             auto deviceFs = fsFactory->createDevice( uuid );
             if ( deviceFs != nullptr )
+            {
+                LOG_INFO( "Device ", uuid, " changed presence state: 1 -> 0" );
                 deviceFs->setPresent( false );
+                device->setPresent( false );
+            }
             else
                 refreshDevices( *fsFactory );
         }
