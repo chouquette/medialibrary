@@ -180,17 +180,21 @@ class IMediaLibrary
         virtual ~IMediaLibrary() = default;
         /**
          * \brief  initialize Initializes the media library.
-         *         This will use the provided discoverer to search for new media asynchronously.
-         * In case the application uses a specific IDeviceLister, the device lister must be properly
-         * initialized and populated with all known devices before calling this method.
          *
-         * \param dbPath       Path to the database
+         * In case the application uses a specific IDeviceLister, the device lister must be properly
+         * initialized and ready to return a list of all known devices before calling this method.
+         *
+         * \param dbPath        Path to the database file
+         * \param thumbnailPath Path to a folder that will contain the thumbnails. It will be
+         *                      created if required.
+         * \param mlCallback    A pointer to an IMediaLibraryCb that will be invoked with various
+         *                      events during the medialibrary lifetime.
          * \return true in case of success, false otherwise
          * If initialize returns false, this medialibrary must not be used anymore, and should be
          * disposed off.
          * If it returns true the first time, calling this method again is a no-op
          */
-        virtual bool initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* metadataCb ) = 0;
+        virtual bool initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* mlCallback ) = 0;
         virtual void setVerbosity( LogLevel v ) = 0;
 
         virtual LabelPtr createLabel( const std::string& label ) = 0;

@@ -62,7 +62,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
     public:
         MediaLibrary();
         ~MediaLibrary();
-        virtual bool initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* metadataCb ) override;
+        virtual bool initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* mlCallback ) override;
         virtual void setVerbosity( LogLevel v ) override;
 
         virtual MediaPtr media( int64_t mediaId ) const override;
