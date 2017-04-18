@@ -274,12 +274,20 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
             return false;
         }
     }
+    m_initialized = true;
+    LOG_INFO( "Successfuly initialized" );
+    return true;
+}
+
+bool MediaLibrary::start()
+{
+    if ( m_parser != nullptr )
+        return false;
+
     for ( auto& fsFactory : m_fsFactories )
         refreshDevices( *fsFactory );
     startDiscoverer();
     startParser();
-    m_initialized = true;
-    LOG_INFO( "Successfuly initialized" );
     return true;
 }
 

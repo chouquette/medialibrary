@@ -78,6 +78,7 @@ void Tests::SetUp()
         m_ml->setVerbosity( LogLevel::Info );
 
     ASSERT_TRUE( m_ml->initialize( "test.db", "/tmp", m_cb.get() ) );
+    ASSERT_TRUE( m_ml->start() );
 }
 
 void Tests::checkVideoTracks( const rapidjson::Value& expectedTracks, const std::vector<VideoTrackPtr>& tracks )

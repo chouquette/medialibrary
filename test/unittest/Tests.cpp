@@ -65,6 +65,8 @@ void Tests::Reload( std::shared_ptr<factory::IFileSystem> fs /*= nullptr*/, IMed
     ml->setVerbosity( LogLevel::Error );
     bool res = ml->initialize( "test.db", "/tmp", metadataCb );
     ASSERT_TRUE( res );
+    res = ml->start();
+    ASSERT_TRUE( res );
 }
 
 

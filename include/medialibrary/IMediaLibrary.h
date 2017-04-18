@@ -195,6 +195,23 @@ class IMediaLibrary
          * If it returns true the first time, calling this method again is a no-op
          */
         virtual bool initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* mlCallback ) = 0;
+
+        /**
+         * @brief start Starts the background thread and reload the medialibrary content
+         * This *MUST* be called after initialize.
+         *
+         * The user is expected to populate its device lister between a call to initialize() and a
+         * call to start().
+         * Once this method has been called, the medialibrary will know all the device known to the
+         * device lister, and it become impossible to know wether a removable storage device has been
+         * inserted for the first time or not.
+         *
+         * @return true in case of success, false otherwise.
+         * * If start returns false, this medialibrary must not be used anymore, and should be
+         * disposed off.
+         * If it returns true the first time, calling this method again is a no-op
+         */
+        virtual bool start() = 0;
         virtual void setVerbosity( LogLevel v ) = 0;
 
         virtual LabelPtr createLabel( const std::string& label ) = 0;
@@ -262,6 +279,7 @@ class IMediaLibrary
          * @brief discover Launch a discovery on the provided entry point.
          * The actuall discovery will run asynchronously, meaning this method will immediatly return.
          * Depending on which discoverer modules where provided, this might or might not work
+         * \note This must be called after start()
          * @param entryPoint What to discover.
          */
         virtual void discover( const std::string& entryPoint ) = 0;
