@@ -64,6 +64,7 @@ void Tests::Reload( std::shared_ptr<factory::IFileSystem> fs /*= nullptr*/, IMed
     ml->setDeviceLister( mockDeviceLister );
     ml->setVerbosity( LogLevel::Error );
     bool res = ml->initialize( "test.db", "/tmp", metadataCb );
+    ml->reload();
     ASSERT_TRUE( res );
 }
 

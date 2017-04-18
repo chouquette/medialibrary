@@ -625,7 +625,6 @@ void MediaLibrary::startDiscoverer()
     m_discoverer.reset( new DiscovererWorker( this ) );
     for ( const auto& fsFactory : m_fsFactories )
         m_discoverer->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( fsFactory, this, m_callback ) ) );
-    m_discoverer->reload();
 }
 
 void MediaLibrary::startDeletionNotifier()
