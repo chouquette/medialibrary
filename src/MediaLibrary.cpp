@@ -276,7 +276,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
     }
     for ( auto& fsFactory : m_fsFactories )
         refreshDevices( *fsFactory );
-    startDiscoverer();
+    createDiscoverers();
     startParser();
     m_initialized = true;
     LOG_INFO( "Successfuly initialized" );
@@ -620,7 +620,7 @@ void MediaLibrary::startParser()
     m_parser->start();
 }
 
-void MediaLibrary::startDiscoverer()
+void MediaLibrary::createDiscoverers()
 {
     m_discovererWorker.reset( new DiscovererWorker( this ) );
     for ( const auto& fsFactory : m_fsFactories )

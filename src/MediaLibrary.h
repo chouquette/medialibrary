@@ -147,7 +147,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
     private:
         virtual void startParser();
-        virtual void startDiscoverer();
+        virtual void createDiscoverers();
         virtual void startDeletionNotifier();
         bool updateDatabaseModel( unsigned int previousVersion );
         bool createAllTables();
