@@ -179,7 +179,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         std::unique_ptr<Parser> m_parser;
         // Same reasoning applies here.
         //FIXME: Having to maintain a specific ordering sucks, let's use shared_ptr or something
-        std::unique_ptr<DiscovererWorker> m_discoverer;
+        std::unique_ptr<DiscovererWorker> m_discovererWorker;
         std::shared_ptr<ModificationNotifier> m_modificationNotifier;
         LogLevel m_verbosity;
         Settings m_settings;

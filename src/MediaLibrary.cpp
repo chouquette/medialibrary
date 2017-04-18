@@ -95,8 +95,8 @@ MediaLibrary::MediaLibrary()
 MediaLibrary::~MediaLibrary()
 {
     // Explicitely stop the discoverer, to avoid it writting while tearing down.
-    if ( m_discoverer != nullptr )
-        m_discoverer->stop();
+    if ( m_discovererWorker != nullptr )
+        m_discovererWorker->stop();
     if ( m_parser != nullptr )
         m_parser->stop();
     Media::clear();
@@ -622,9 +622,9 @@ void MediaLibrary::startParser()
 
 void MediaLibrary::startDiscoverer()
 {
-    m_discoverer.reset( new DiscovererWorker( this ) );
+    m_discovererWorker.reset( new DiscovererWorker( this ) );
     for ( const auto& fsFactory : m_fsFactories )
-        m_discoverer->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( fsFactory, this, m_callback ) ) );
+        m_discovererWorker->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( fsFactory, this, m_callback ) ) );
 }
 
 void MediaLibrary::startDeletionNotifier()
@@ -663,14 +663,14 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
 
 void MediaLibrary::reload()
 {
-    if ( m_discoverer != nullptr )
-        m_discoverer->reload();
+    if ( m_discovererWorker != nullptr )
+        m_discovererWorker->reload();
 }
 
 void MediaLibrary::reload( const std::string& entryPoint )
 {
-    if ( m_discoverer != nullptr )
-        m_discoverer->reload( entryPoint );
+    if ( m_discovererWorker != nullptr )
+        m_discovererWorker->reload( entryPoint );
 }
 
 void MediaLibrary::forceParserRetry()
@@ -723,8 +723,8 @@ std::shared_ptr<factory::IFileSystem> MediaLibrary::fsFactoryForMrl( const std::
 
 void MediaLibrary::discover( const std::string &entryPoint )
 {
-    if ( m_discoverer != nullptr )
-        m_discoverer->discover( entryPoint );
+    if ( m_discovererWorker != nullptr )
+        m_discovererWorker->discover( entryPoint );
 }
 
 void MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
@@ -754,20 +754,20 @@ std::vector<FolderPtr> MediaLibrary::entryPoints() const
 
 void MediaLibrary::removeEntryPoint( const std::string& entryPoint )
 {
-    if ( m_discoverer != nullptr )
-        m_discoverer->remove( entryPoint );
+    if ( m_discovererWorker != nullptr )
+        m_discovererWorker->remove( entryPoint );
 }
 
 void MediaLibrary::banFolder( const std::string& entryPoint )
 {
-    if ( m_discoverer != nullptr )
-        m_discoverer->ban( entryPoint );
+    if ( m_discovererWorker != nullptr )
+        m_discovererWorker->ban( entryPoint );
 }
 
 void MediaLibrary::unbanFolder( const std::string& entryPoint )
 {
-    if ( m_discoverer != nullptr )
-        m_discoverer->unban( entryPoint );
+    if ( m_discovererWorker != nullptr )
+        m_discovererWorker->unban( entryPoint );
 }
 
 const std::string& MediaLibrary::thumbnailPath() const
