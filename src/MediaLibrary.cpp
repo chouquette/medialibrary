@@ -815,7 +815,6 @@ bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& 
 {
     auto currentDevice = Device::fromUuid( this, uuid );
     LOG_INFO( "Device ", uuid, " was plugged and mounted on ", mountpoint );
-    assert( currentDevice == nullptr || currentDevice->isPresent() == false );
     for ( const auto& fsFactory : m_fsFactories )
     {
         if ( fsFactory->isMrlSupported( "file://" ) )
@@ -824,6 +823,7 @@ bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& 
             if ( deviceFs != nullptr )
             {
                 LOG_INFO( "Device ", uuid, " changed presence state: 0 -> 1" );
+                assert( deviceFs->isPresent() == false );
                 deviceFs->setPresent( true );
                 if ( currentDevice != nullptr )
                     currentDevice->setPresent( true );
@@ -852,6 +852,7 @@ void MediaLibrary::onDeviceUnplugged( const std::string& uuid )
             auto deviceFs = fsFactory->createDevice( uuid );
             if ( deviceFs != nullptr )
             {
+                assert( deviceFs->isPresent() == true );
                 LOG_INFO( "Device ", uuid, " changed presence state: 1 -> 0" );
                 deviceFs->setPresent( false );
                 device->setPresent( false );
