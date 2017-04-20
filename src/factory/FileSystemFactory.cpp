@@ -61,14 +61,9 @@ FileSystemFactory::FileSystemFactory( DeviceListerPtr lister )
 
 std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::string& mrl )
 {
-    std::lock_guard<compat::Mutex> lock( m_mutex );
-    const auto it = m_dirs.find( mrl );
-    if ( it != end( m_dirs ) )
-        return it->second;
     try
     {
         auto dir = std::make_shared<fs::Directory>( mrl, *this );
-        m_dirs[mrl] = dir;
         return dir;
     }
     catch(const std::system_error& ex)
@@ -138,9 +133,6 @@ void FileSystemFactory::refreshDevices()
         LOG_INFO( "Caching device ", uuid, " mounted on ", mountpoint, ". Removable: ", removable ? "true" : "false" );
         m_deviceCache.get().emplace( uuid, std::make_shared<fs::Device>( uuid, mountpoint, removable ) );
     }
-
-    std::lock_guard<compat::Mutex> lockDirs( m_mutex );
-    m_dirs.clear();
 }
 
 bool FileSystemFactory::isMrlSupported( const std::string& path ) const

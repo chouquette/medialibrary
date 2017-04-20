@@ -50,8 +50,6 @@ namespace factory
         virtual bool isNetworkFileSystem() const override;
 
     private:
-        std::unordered_map<std::string, std::shared_ptr<fs::IDirectory>> m_dirs;
-        compat::Mutex m_mutex;
         DeviceListerPtr m_deviceLister;
         Cache<DeviceCacheMap> m_deviceCache;
 
