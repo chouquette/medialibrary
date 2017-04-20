@@ -342,7 +342,7 @@ MediaPtr MediaLibrary::media( const std::string& mrl ) const
     }
     if ( file == nullptr )
     {
-        LOG_WARN( "Failed to fetch file for ", mrl, "(device ", device->uuid(), " was ",
+        LOG_WARN( "Failed to fetch file for ", mrl, " (device ", device->uuid(), " was ",
                   device->isRemovable() ? "NOT" : "", "removable)");
         return nullptr;
     }
