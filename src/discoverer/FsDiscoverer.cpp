@@ -106,12 +106,6 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
 void FsDiscoverer::reloadFolder( Folder& f )
 {
     auto folder = m_fsFactory->createDirectory( f.mrl() );
-    if ( folder == nullptr )
-    {
-        LOG_INFO( "Removing folder ", f.mrl() );
-        m_ml->deleteFolder( f );
-        return;
-    }
     try
     {
         checkFolder( *folder, f, false );

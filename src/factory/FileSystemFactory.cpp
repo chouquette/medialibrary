@@ -61,16 +61,7 @@ FileSystemFactory::FileSystemFactory( DeviceListerPtr lister )
 
 std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::string& mrl )
 {
-    try
-    {
-        auto dir = std::make_shared<fs::Directory>( mrl, *this );
-        return dir;
-    }
-    catch(const std::system_error& ex)
-    {
-        LOG_ERROR( "Failed to create fs::IDirectory for ", mrl, ": ", ex.what());
-        return nullptr;
-    }
+    return std::make_shared<fs::Directory>( mrl, *this );
 }
 
 std::shared_ptr<fs::IDevice> FileSystemFactory::createDevice( const std::string& uuid )

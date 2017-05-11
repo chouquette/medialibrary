@@ -135,8 +135,7 @@ bool Folder::blacklist( MediaLibraryPtr ml, const std::string& mrl )
     if ( fsFactory == nullptr )
         return false;
     auto folderFs = fsFactory->createDirectory( mrl );
-    if ( folderFs == nullptr )
-        return false;
+    assert( folderFs != nullptr );
     auto deviceFs = folderFs->device();
     auto device = Device::fromUuid( ml, deviceFs->uuid() );
     if ( device == nullptr )
@@ -169,8 +168,7 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
     if ( fsFactory == nullptr )
         return nullptr;
     auto folderFs = fsFactory->createDirectory( mrl );
-    if ( folderFs == nullptr )
-        return nullptr;
+    assert( folderFs != nullptr );
     auto deviceFs = folderFs->device();
     if ( deviceFs == nullptr )
     {
