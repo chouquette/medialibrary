@@ -137,6 +137,11 @@ bool Folder::blacklist( MediaLibraryPtr ml, const std::string& mrl )
     auto folderFs = fsFactory->createDirectory( mrl );
     assert( folderFs != nullptr );
     auto deviceFs = folderFs->device();
+    if ( deviceFs == nullptr )
+    {
+        LOG_ERROR( "Can't find device associated with mrl ", mrl );
+        return false;
+    }
     auto device = Device::fromUuid( ml, deviceFs->uuid() );
     if ( device == nullptr )
         device = Device::create( ml, deviceFs->uuid(), utils::file::scheme( mrl ), deviceFs->isRemovable() );
