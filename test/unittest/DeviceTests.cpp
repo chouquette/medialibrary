@@ -344,3 +344,12 @@ TEST_F( DeviceFs, ChangeDevice )
     ASSERT_NE( nullptr, f );
     ASSERT_EQ( firstRemovableFileId, f->id() );
 }
+
+TEST_F( DeviceFs, UnknownMountpoint )
+{
+    // The mock filesystem starts at /a/
+    // Simply check that we don't crash
+    ml->discover( "file:///" );
+    bool discovered = cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+}
