@@ -25,9 +25,6 @@
 #endif
 
 #include <chrono>
-#ifdef __ANDROID__
-# include <cstdlib>
-#endif
 
 #include "VLCMetadataService.h"
 #include "Media.h"
