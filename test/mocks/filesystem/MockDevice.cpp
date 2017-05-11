@@ -106,7 +106,7 @@ std::shared_ptr<File> Device::file(const std::string& filePath )
 std::shared_ptr<Directory> Device::directory(const std::string& path)
 {
     if ( m_root == nullptr || m_present == false )
-        return nullptr;
+        return std::make_shared<Directory>( "", nullptr );
     const auto relPath = relativePath( path );
     if ( relPath.empty() == true )
         return m_root;

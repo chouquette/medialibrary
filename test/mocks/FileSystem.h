@@ -164,7 +164,7 @@ struct FileSystemFactory : public factory::IFileSystem
     {
         auto d = device( mrl );
         if ( d == nullptr )
-            return nullptr;
+            return std::make_shared<Directory>( "", nullptr );
         return d->directory( mrl );
     }
 
