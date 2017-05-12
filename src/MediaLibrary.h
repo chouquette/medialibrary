@@ -130,6 +130,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         virtual void pauseBackgroundOperations() override;
         virtual void resumeBackgroundOperations() override;
+        void onDiscovererIdleChanged( bool idle );
+        void onParserIdleChanged( bool idle );
 
         DBConnection getConn() const;
         IMediaLibraryCb* getCb() const;
@@ -185,6 +187,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         LogLevel m_verbosity;
         Settings m_settings;
         bool m_initialized;
+        std::atomic_bool m_discovererIdle;
+        std::atomic_bool m_parserIdle;
 };
 
 }

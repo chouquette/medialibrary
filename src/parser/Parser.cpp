@@ -159,4 +159,24 @@ void Parser::done( std::unique_ptr<parser::Task> t, parser::Task::Status status 
     m_services[serviceIdx]->parse( std::move( t ) );
 }
 
+void Parser::onIdleChanged( bool idle )
+{
+    // If any parser service is not idle, then the global parser state is active
+    if ( idle == false )
+    {
+        m_ml->onParserIdleChanged( false );
+        return;
+    }
+    // Otherwise the parser is idle when all services are idle
+    for ( const auto& s : m_services )
+    {
+        // We're switching a service from "not idle" to "idle" here, so as far as the medialibrary
+        // is concerned the parser is still "not idle". In case a single parser service isn't
+        // idle, no need to trigger a change to the medialibrary.
+        if ( s->isIdle() == false )
+            return;
+    }
+    m_ml->onParserIdleChanged( true );
+}
+
 }

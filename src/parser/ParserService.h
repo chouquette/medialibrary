@@ -62,6 +62,7 @@ public:
     void stop();
     void parse( std::unique_ptr<parser::Task> t );
     void initialize( MediaLibrary* mediaLibrary, IParserCb* parserCb );
+    bool isIdle() const;
 
 protected:
     uint8_t nbNativeThreads() const;
@@ -75,6 +76,7 @@ protected:
 private:
     // Thread(s) entry point
     void mainloop();
+    void setIdle( bool isIdle );
 
 protected:
     MediaLibrary* m_ml;
@@ -85,6 +87,7 @@ private:
     IParserCb* m_parserCb;
     bool m_stopParser;
     bool m_paused;
+    bool m_idle;
     compat::ConditionVariable m_cond;
     std::queue<std::unique_ptr<parser::Task>> m_tasks;
     std::vector<compat::Thread> m_threads;

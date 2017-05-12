@@ -119,6 +119,7 @@ void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
 void DiscovererWorker::run()
 {
     LOG_INFO( "Entering DiscovererWorker thread" );
+    m_ml->onDiscovererIdleChanged( false );
     while ( m_run == true )
     {
         Task task;
@@ -126,9 +127,11 @@ void DiscovererWorker::run()
             std::unique_lock<compat::Mutex> lock( m_mutex );
             if ( m_tasks.size() == 0 )
             {
+                m_ml->onDiscovererIdleChanged( true );
                 m_cond.wait( lock, [this]() { return m_tasks.size() > 0 || m_run == false; } );
                 if ( m_run == false )
                     break;
+                m_ml->onDiscovererIdleChanged( false );
             }
             task = m_tasks.front();
             m_tasks.pop();
@@ -155,6 +158,7 @@ void DiscovererWorker::run()
         }
     }
     LOG_INFO( "Exiting DiscovererWorker thread" );
+    m_ml->onDiscovererIdleChanged( true );
 }
 
 void DiscovererWorker::runReload( const std::string& entryPoint )

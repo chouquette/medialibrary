@@ -39,6 +39,7 @@ class IParserCb
 public:
     virtual ~IParserCb() = default;
     virtual void done( std::unique_ptr<parser::Task> task, parser::Task::Status status ) = 0;
+    virtual void onIdleChanged( bool isIdle ) = 0;
 };
 
 class Parser : IParserCb
@@ -60,6 +61,7 @@ private:
     void restore();
     void updateStats();
     virtual void done( std::unique_ptr<parser::Task> task, parser::Task::Status status ) override;
+    virtual void onIdleChanged( bool idle ) override;
 
 private:
     typedef std::vector<ServicePtr> ServiceList;

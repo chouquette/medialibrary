@@ -88,6 +88,8 @@ MediaLibrary::MediaLibrary()
     : m_callback( nullptr )
     , m_verbosity( LogLevel::Error )
     , m_initialized( false )
+    , m_discovererIdle( true )
+    , m_parserIdle( true )
 {
     Log::setLogLevel( m_verbosity );
 }
@@ -697,6 +699,26 @@ void MediaLibrary::resumeBackgroundOperations()
 {
     if ( m_parser != nullptr )
         m_parser->resume();
+}
+
+void MediaLibrary::onDiscovererIdleChanged( bool idle )
+{
+    bool expected = !idle;
+    if ( m_discovererIdle.compare_exchange_strong( expected, idle ) == true )
+    {
+        if ( m_parserIdle == idle )
+            m_callback->onBackgroundTasksIdleChanged( idle );
+    }
+}
+
+void MediaLibrary::onParserIdleChanged( bool idle )
+{
+    bool expected = !idle;
+    if ( m_parserIdle.compare_exchange_strong( expected, idle ) == true )
+    {
+        if ( m_discovererIdle == idle )
+            m_callback->onBackgroundTasksIdleChanged( idle );
+    }
 }
 
 DBConnection MediaLibrary::getConn() const

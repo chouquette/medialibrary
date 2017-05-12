@@ -102,6 +102,11 @@ void ParserService::initialize( MediaLibrary* ml, IParserCb* parserCb )
     initialize();
 }
 
+bool ParserService::isIdle() const
+{
+    return m_idle;
+}
+
 uint8_t ParserService::nbNativeThreads() const
 {
     auto nbProcs = compat::Thread::hardware_concurrency();
@@ -122,6 +127,7 @@ void ParserService::mainloop()
     // that the underlying service has been deleted already.
     std::string serviceName = name();
     LOG_INFO("Entering ParserService [", serviceName, "] thread");
+    setIdle( false );
 
     while ( m_stopParser == false )
     {
@@ -131,6 +137,7 @@ void ParserService::mainloop()
             if ( m_tasks.empty() == true || m_paused == true )
             {
                 LOG_INFO( "Halting ParserService [", serviceName, "] mainloop" );
+                setIdle( true );
                 m_cond.wait( lock, [this]() {
                     return ( m_tasks.empty() == false && m_paused == false )
                             || m_stopParser == true;
@@ -139,6 +146,7 @@ void ParserService::mainloop()
                 // We might have been woken up because the parser is being destroyed
                 if ( m_stopParser  == true )
                     break;
+                setIdle( false );
             }
             // Otherwise it's safe to assume we have at least one element.
             LOG_INFO('[', serviceName, "] has ", m_tasks.size(), " tasks remaining" );
@@ -175,6 +183,15 @@ void ParserService::mainloop()
         m_parserCb->done( std::move( task ), status );
     }
     LOG_INFO("Exiting ParserService [", serviceName, "] thread");
+    setIdle( true );
+}
+
+void ParserService::setIdle(bool isIdle)
+{
+    // Calling the idleChanged callback will trigger a call to isIdle, so set the value before
+    // invoking it, otherwise we have an incoherent state.
+    m_idle = isIdle;
+    m_parserCb->onIdleChanged( isIdle );
 }
 
 }
