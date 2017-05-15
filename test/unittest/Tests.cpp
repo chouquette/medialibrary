@@ -67,6 +67,7 @@ void Tests::Reload( std::shared_ptr<factory::IFileSystem> fs /*= nullptr*/, IMed
     ASSERT_TRUE( res );
     res = ml->start();
     ASSERT_TRUE( res );
+    ml->reload();
 }
 
 
