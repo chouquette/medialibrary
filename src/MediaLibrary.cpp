@@ -74,7 +74,7 @@ const char* const MediaLibrary::supportedExtensions[] = {
     "3gp", "a52", "aac", "ac3", "aiff", "amr", "amv", "aob", "ape",
     "asf", "avi", "divx", "dts", "dv", "flac", "flv", "gxf", "iso",
     "it", "m1v", "m2t", "m2ts", "m2v", "m4a", "m4b", "m4p", "m4v",
-    "mid", "mka", "mkv", "mlp", "mod", "mov", "mp1", "mp2", "mp2",
+    "mid", "mka", "mkv", "mlp", "mod", "mov", "mp1", "mp2",
     "mp3", "mp4", "mpc", "mpeg", "mpeg1", "mpeg2", "mpeg4", "mpg",
     "mts", "mxf", "nsv", "nuv", "oga", "ogg", "ogm", "ogv", "ogx",
     "oma", "opus", "ps", "rec", "rm", "rmi", "rmvb", "s3m", "spx",
