@@ -125,6 +125,7 @@ public:
             })
         , m_dbConn( dbConnection )
         , m_bindIdx( 0 )
+        , m_isCommit( false )
     {
         std::lock_guard<compat::Mutex> lock( StatementsCacheLock );
         auto& connMap = StatementsCache[ dbConnection ];
