@@ -283,6 +283,7 @@ unittest_SOURCES = \
 	test/unittest/ShowTests.cpp \
 	test/unittest/Tests.cpp \
 	test/unittest/VideoTrackTests.cpp \
+	test/unittest/MiscTests.cpp \
 	$(NULL)
 
 unittest_CPPFLAGS = 		\

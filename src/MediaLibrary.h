@@ -145,8 +145,10 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
     public:
         static const uint32_t DbModelVersion;
 
-    private:
+    protected:
+        // Allow access to unit test MediaLibrary implementations
         static const char* const supportedExtensions[];
+        static const size_t NbSupportedExtensions;
 
     private:
         virtual void startParser();

@@ -82,6 +82,8 @@ const char* const MediaLibrary::supportedExtensions[] = {
     "wav", "webm", "wma", "wmv", "wv", "xa", "xm"
 };
 
+const size_t MediaLibrary::NbSupportedExtensions = sizeof(supportedExtensions) / sizeof(supportedExtensions[0]);
+
 const uint32_t MediaLibrary::DbModelVersion = 2;
 
 MediaLibrary::MediaLibrary()

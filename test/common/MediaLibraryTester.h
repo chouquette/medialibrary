@@ -60,6 +60,7 @@ public:
     std::shared_ptr<Media> addFile( const std::string& path );
     virtual void addLocalFsFactory() override;
     std::shared_ptr<Device> device( const std::string& uuid );
+    std::vector<const char*> getSupportedExtensions() const;
 
 private:
     std::unique_ptr<fs::IDirectory> dummyDirectory;
