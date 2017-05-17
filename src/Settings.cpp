@@ -89,7 +89,8 @@ void Settings::setDbModelVersion(uint32_t dbModelVersion)
 bool Settings::createTable( DBConnection dbConn )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS Settings("
-                "db_model_version UNSIGNED INTEGER NOT NULL DEFAULT 1"
+                "db_model_version UNSIGNED INTEGER NOT NULL DEFAULT " +
+                std::to_string( DbModelVersion ) +
             ")";
     return sqlite::Tools::executeRequest( dbConn, req );
 }
