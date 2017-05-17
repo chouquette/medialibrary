@@ -32,6 +32,8 @@
 namespace medialibrary
 {
 
+const uint32_t Settings::DbModelVersion = 2u;
+
 Settings::Settings()
     : m_dbConn( nullptr )
     , m_dbModelVersion( 0 )
@@ -47,9 +49,9 @@ bool Settings::load( DBConnection dbConn )
     // First launch: no settings
     if ( row == nullptr )
     {
-        if ( sqlite::Tools::executeInsert( m_dbConn, "INSERT INTO Settings VALUES(?)", MediaLibrary::DbModelVersion ) == false )
+        if ( sqlite::Tools::executeInsert( m_dbConn, "INSERT INTO Settings VALUES(?)", DbModelVersion ) == false )
             return false;
-        m_dbModelVersion = MediaLibrary::DbModelVersion;
+        m_dbModelVersion = DbModelVersion;
     }
     else
     {

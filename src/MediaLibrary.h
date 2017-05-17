@@ -142,9 +142,6 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         void refreshDevices(factory::IFileSystem& fsFactory);
 
-    public:
-        static const uint32_t DbModelVersion;
-
     protected:
         // Allow access to unit test MediaLibrary implementations
         static const char* const supportedExtensions[];

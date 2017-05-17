@@ -34,11 +34,18 @@ class Settings
 public:
     Settings();
     bool load( DBConnection dbConn );
+    /**
+     * @brief dbModelVersion returns the current database model version.
+     *
+     * This can be different from the \ref DbModelVersion when upgrading the model
+     */
     uint32_t dbModelVersion() const;
     bool save();
     void setDbModelVersion( uint32_t dbModelVersion );
 
     static bool createTable(DBConnection dbConn);
+
+    static const uint32_t DbModelVersion;
 
 private:
     DBConnection m_dbConn;

@@ -84,8 +84,6 @@ const char* const MediaLibrary::supportedExtensions[] = {
 
 const size_t MediaLibrary::NbSupportedExtensions = sizeof(supportedExtensions) / sizeof(supportedExtensions[0]);
 
-const uint32_t MediaLibrary::DbModelVersion = 2;
-
 MediaLibrary::MediaLibrary()
     : m_callback( nullptr )
     , m_verbosity( LogLevel::Error )
@@ -270,7 +268,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
         LOG_ERROR( "Failed to load settings" );
         return false;
     }
-    if ( m_settings.dbModelVersion() != DbModelVersion )
+    if ( m_settings.dbModelVersion() != Settings::DbModelVersion )
     {
         if ( updateDatabaseModel( m_settings.dbModelVersion() ) == false )
         {
@@ -667,8 +665,8 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
     // To be continued in the future!
 
     // Safety check: ensure we didn't forget a migration along the way
-    assert( previousVersion == DbModelVersion );
-    m_settings.setDbModelVersion( DbModelVersion );
+    assert( previousVersion == Settings::DbModelVersion );
+    m_settings.setDbModelVersion( Settings::DbModelVersion );
     m_settings.save();
     return true;
 }
