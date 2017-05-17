@@ -45,7 +45,6 @@ public:
     ParserService();
     virtual ~ParserService() = default;
 
-    void start();
     void pause();
     void resume();
     ///
@@ -75,6 +74,7 @@ protected:
 
 private:
     // Thread(s) entry point
+    void start();
     void mainloop();
     void setIdle( bool isIdle );
 

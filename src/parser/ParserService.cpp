@@ -87,9 +87,18 @@ void ParserService::stop()
 
 void ParserService::parse( std::unique_ptr<parser::Task> t )
 {
-    std::lock_guard<compat::Mutex> lock( m_lock );
-    m_tasks.push( std::move( t ) );
-    m_cond.notify_all();
+    if ( m_threads.size() == 0 )
+    {
+        // Since the thread isn't started, no need to lock the mutex before pushing the task
+        m_tasks.push( std::move( t ) );
+        start();
+    }
+    else
+    {
+        std::lock_guard<compat::Mutex> lock( m_lock );
+        m_tasks.push( std::move( t ) );
+        m_cond.notify_all();
+    }
 }
 
 void ParserService::initialize( MediaLibrary* ml, IParserCb* parserCb )

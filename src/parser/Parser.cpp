@@ -68,8 +68,6 @@ void Parser::parse( std::shared_ptr<Media> media, std::shared_ptr<File> file )
 void Parser::start()
 {
     restore();
-    for ( auto& s : m_services )
-        s->start();
 }
 
 void Parser::pause()
