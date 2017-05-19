@@ -707,6 +707,7 @@ void MediaLibrary::onDiscovererIdleChanged( bool idle )
     {
         // If any idle state changed to false, then we need to trigger the callback.
         // If switching to idle == true, then both background workers need to be idle before signaling.
+        LOG_INFO( "Discoverer thread went idle" );
         if ( idle == false || m_parserIdle == true )
             m_callback->onBackgroundTasksIdleChanged( idle );
     }
@@ -717,6 +718,7 @@ void MediaLibrary::onParserIdleChanged( bool idle )
     bool expected = !idle;
     if ( m_parserIdle.compare_exchange_strong( expected, idle ) == true )
     {
+        LOG_INFO( "All parser services went idle" );
         if ( idle == false || m_discovererIdle == true )
             m_callback->onBackgroundTasksIdleChanged( idle );
     }
