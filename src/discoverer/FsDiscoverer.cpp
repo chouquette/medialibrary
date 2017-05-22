@@ -295,7 +295,17 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
         }
     }
     for ( auto& f : filesToRemove )
-        f->media()->removeFile( *f );
+    {
+        auto media = f->media();
+        if ( media != nullptr )
+            media->removeFile( *f );
+        else
+        {
+            // If there is no media associated with this file, the file had to be removed through
+            // a trigger
+            assert( f->isDeleted() );
+        }
+    }
     // Insert all files at once to avoid SQL write contention
     for ( auto& p : filesToAdd )
         m_ml->addFile( *p, parentFolder, parentFolderFs );
