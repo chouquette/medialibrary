@@ -208,11 +208,14 @@ bool File::createTable( DBConnection dbConnection )
             " BEGIN"
             " UPDATE " + policy::FileTable::Name + " SET is_present = new.is_present WHERE folder_id = new.id_folder;"
             " END";
-    std::string indexReq = "CREATE INDEX IF NOT EXISTS file_media_id_index ON " +
+    std::string mediaIndexReq = "CREATE INDEX IF NOT EXISTS file_media_id_index ON " +
             policy::FileTable::Name + "(media_id)";
+    std::string folderIndexReq = "CREATE INDEX IF NOT EXISTS file_folder_id_index ON " +
+            policy::FileTable::Name + "(folder_id)";
     return sqlite::Tools::executeRequest( dbConnection, req ) &&
             sqlite::Tools::executeRequest( dbConnection, triggerReq ) &&
-            sqlite::Tools::executeRequest( dbConnection, indexReq );
+            sqlite::Tools::executeRequest( dbConnection, mediaIndexReq ) &&
+            sqlite::Tools::executeRequest( dbConnection, folderIndexReq );
 }
 
 std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& fileFs, int64_t folderId, bool isRemovable )

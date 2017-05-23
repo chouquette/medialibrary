@@ -65,6 +65,7 @@ bool History::createTable( DBConnection dbConnection )
                 "(SELECT id_media FROM " + policy::HistoryTable::Name +
                 " ORDER BY insertion_date DESC LIMIT -1 OFFSET " + std::to_string( MaxEntries ) + ");"
             " END";
+    // Don't index the id_media field, we don't want to select history records using the media_id
     return sqlite::Tools::executeRequest( dbConnection, req ) &&
             sqlite::Tools::executeRequest( dbConnection, triggerReq );
 }

@@ -92,8 +92,14 @@ bool Folder::createTable( DBConnection connection)
             " BEGIN"
             " UPDATE " + policy::FolderTable::Name + " SET is_present = new.is_present WHERE device_id = new.id_device;"
             " END";
+    std::string deviceIndexReq = "CREATE INDEX IF NOT EXISTS folder_device_id_idx ON " +
+            policy::FolderTable::Name + " (device_id)";
+    std::string parentFolderIndexReq = "CREATE INDEX IF NOT EXISTS parent_folder_id_idx ON " +
+            policy::FolderTable::Name + " (parent_id)";
     return sqlite::Tools::executeRequest( connection, req ) &&
-            sqlite::Tools::executeRequest( connection, triggerReq );
+            sqlite::Tools::executeRequest( connection, triggerReq ) &&
+            sqlite::Tools::executeRequest( connection, deviceIndexReq ) &&
+            sqlite::Tools::executeRequest( connection, parentFolderIndexReq );
 }
 
 std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& mrl,
