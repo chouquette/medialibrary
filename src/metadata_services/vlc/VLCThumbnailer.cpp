@@ -94,6 +94,7 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     task.vlcMedia.addOption( ":no-spu" );
     task.vlcMedia.addOption( ":input-fast-seek" );
     task.vlcMedia.addOption( ":avcodec-hw=none" );
+    task.vlcMedia.addOption( ":no-mkv-preload-local-dir" );
     auto duration = task.vlcMedia.duration();
     if ( duration > 0 )
     {
