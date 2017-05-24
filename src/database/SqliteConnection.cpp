@@ -57,7 +57,8 @@ SqliteConnection::Handle SqliteConnection::getConn()
         auto res = sqlite3_open( m_dbPath.c_str(), &dbConnection );
         ConnPtr dbConn( dbConnection, &sqlite3_close );
         if ( res != SQLITE_OK )
-            throw std::runtime_error( "Failed to connect to database" );
+            throw sqlite::errors::Generic( std::string( "Failed to connect to database: " )
+                                           + sqlite3_errstr( res ) );
         sqlite::Statement s( dbConnection, "PRAGMA foreign_keys = ON" );
         s.execute();
         while ( s.row() != nullptr )
