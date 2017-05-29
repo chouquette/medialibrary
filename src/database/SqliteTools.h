@@ -259,9 +259,9 @@ class Tools
             Statement stmt( dbConnection->getConn(), req );
             stmt.execute( std::forward<Args>( args )... );
             auto row = stmt.row();
-            if ( row == nullptr )
-                return nullptr;
-            auto res = T::load( ml, row );
+            std::shared_ptr<T> res;
+            if ( row != nullptr )
+                res = T::load( ml, row );
             auto duration = std::chrono::steady_clock::now() - chrono;
             LOG_DEBUG("Executed ", req, " in ",
                      std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
