@@ -161,7 +161,8 @@ public:
         auto maxRetries = 10;
         while ( true )
         {
-            auto res = sqlite3_step( m_stmt.get() );
+            auto extRes = sqlite3_step( m_stmt.get() );
+            auto res = extRes & 0xFF;
             if ( res == SQLITE_ROW )
                 return Row( m_stmt.get() );
             else if ( res == SQLITE_DONE )
@@ -175,7 +176,7 @@ public:
                 case SQLITE_CONSTRAINT:
                     throw errors::ConstraintViolation( sqlite3_sql( m_stmt.get() ), errMsg );
                 default:
-                    throw errors::GenericExecution( sqlite3_sql( m_stmt.get() ), errMsg, res );
+                    throw errors::GenericExecution( sqlite3_sql( m_stmt.get() ), errMsg, res, extRes );
             }
         }
     }

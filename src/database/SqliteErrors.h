@@ -53,9 +53,9 @@ public:
 class GenericExecution : public Generic
 {
 public:
-    GenericExecution( const char* req, const char* errMsg, int errCode )
+    GenericExecution( const char* req, const char* errMsg, int errCode, int extendedCode )
         : Generic( std::string( "Failed to run request <" ) + req + ">: " + errMsg +
-                   "(" + std::to_string( errCode ) + ")" )
+                   "(" + std::to_string( extendedCode ) + ")" )
         , m_errorCode( errCode )
     {
     }
