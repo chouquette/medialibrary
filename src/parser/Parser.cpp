@@ -121,7 +121,7 @@ void Parser::updateStats()
         {
             auto duration = std::chrono::steady_clock::now() - m_chrono;
             LOG_DEBUG( "Finished all parsing operations in ",
-                       std::chrono::duration_cast<std::chrono::seconds>( duration ).count(), "s" );
+                       std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
             m_chrono = decltype(m_chrono){};
         }
     }
