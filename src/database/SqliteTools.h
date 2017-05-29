@@ -136,7 +136,7 @@ public:
             int res = sqlite3_prepare_v2( dbConnection, req.c_str(), -1, &stmt, NULL );
             if ( res != SQLITE_OK )
             {
-                throw errors::Generic( req.c_str(), sqlite3_errmsg( dbConnection ) );
+                throw errors::Generic( req.c_str(), sqlite3_errmsg( dbConnection ), res );
             }
             m_stmt.reset( stmt );
             connMap.emplace( req, CachedStmtPtr( stmt, &sqlite3_finalize ) );
@@ -193,7 +193,7 @@ private:
     {
         auto res = Traits<T>::Bind( m_stmt.get(), m_bindIdx, std::forward<T>( value ) );
         if ( res != SQLITE_OK )
-            throw errors::Generic( sqlite3_sql( m_stmt.get() ), "Failed to bind parameter" );
+            throw errors::Generic( sqlite3_sql( m_stmt.get() ), "Failed to bind parameter", res );
         m_bindIdx++;
         return true;
     }
