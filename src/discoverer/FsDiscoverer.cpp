@@ -319,7 +319,7 @@ bool FsDiscoverer::hasDotNoMediaFile( const fs::IDirectory& directory )
 {
     const auto& files = directory.files();
     return std::find_if( begin( files ), end( files ), []( const std::shared_ptr<fs::IFile>& file ){
-        return file->name() == ".nomedia";
+        return strcasecmp( file->name().c_str(), ".nomedia" ) == 0;
     }) != end( files );
 }
 
