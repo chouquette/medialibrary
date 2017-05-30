@@ -153,6 +153,8 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
                 LOG_INFO( "Deleting folder ", currentFolderFs.mrl(), " due to a .nomedia file" );
                 m_ml->deleteFolder( currentFolder );
             }
+            else
+                LOG_INFO( "Ignoring folder ", currentFolderFs.mrl(), " due to a .nomedia file" );
             return;
         }
     }
