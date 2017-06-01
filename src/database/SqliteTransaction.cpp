@@ -70,20 +70,14 @@ bool Transaction::transactionInProgress()
 
 Transaction::~Transaction()
 {
-    try
+    if ( CurrentTransaction != nullptr )
     {
-        if ( CurrentTransaction != nullptr )
-        {
-            Statement s( m_dbConn->getConn(), "ROLLBACK" );
-            s.execute();
-            while ( s.row() != nullptr )
-                ;
-            CurrentTransaction = nullptr;
-        }
-    }
-    catch(...)
-    {
-        // Don't call std::terminate if ROLLBACK throws an exception
+        LOG_INFO( "Rolling back transaction" );
+        Statement s( m_dbConn->getConn(), "ROLLBACK" );
+        s.execute();
+        while ( s.row() != nullptr )
+            ;
+        CurrentTransaction = nullptr;
     }
 }
 
