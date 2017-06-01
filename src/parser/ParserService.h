@@ -87,7 +87,7 @@ private:
     IParserCb* m_parserCb;
     bool m_stopParser;
     bool m_paused;
-    bool m_idle;
+    std::atomic_bool m_idle;
     compat::ConditionVariable m_cond;
     std::queue<std::unique_ptr<parser::Task>> m_tasks;
     std::vector<compat::Thread> m_threads;
