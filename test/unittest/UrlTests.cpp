@@ -35,4 +35,5 @@ TEST( UrlUtils, encode )
     ASSERT_EQ( "meow", utils::url::encode( "meow" ) );
     ASSERT_EQ( "plain%20space", utils::url::encode(  "plain space" ) );
     ASSERT_EQ( "/%C3%A1%C3%A9%C3%BA%C3%AD%C3%B3/f00/%C3%9Far", utils::url::encode( "/áéúíó/f00/ßar" ) );
+    ASSERT_EQ( "/file/with%23sharp", utils::url::encode( "/file/with#sharp" ) );
 }
