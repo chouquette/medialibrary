@@ -167,8 +167,10 @@ public:
                 return Row( m_stmt.get() );
             else if ( res == SQLITE_DONE )
                 return Row();
-            else if ( res == SQLITE_BUSY && ( Transaction::transactionInProgress() == false ||
-                                              m_isCommit == true ) && maxRetries-- > 0 )
+            else if ( ( ( res == SQLITE_BUSY &&
+                          ( Transaction::transactionInProgress() == false || m_isCommit == true ) )
+                        || extRes == SQLITE_IOERR_WRITE )
+                    && maxRetries-- > 0 )
                 continue;
             auto errMsg = sqlite3_errmsg( m_dbConn );
             switch ( res )
