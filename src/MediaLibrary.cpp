@@ -650,7 +650,10 @@ void MediaLibrary::addLocalFsFactory()
 
 bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
 {
-    if ( previousVersion == 1 )
+    LOG_INFO( "Updating database model from ", previousVersion, " to ", Settings::DbModelVersion );
+    // Up until model 3, it's safer (and potentially more efficient with index changes) to drop the DB
+    // It's also way simpler to implement
+    if ( previousVersion <= 3 )
     {
         // Way too much differences, introduction of devices, and almost unused in the wild, just drop everything
         std::string req = "PRAGMA writable_schema = 1;"
@@ -660,7 +663,7 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
             return false;
         if ( createAllTables() == false )
             return false;
-        ++previousVersion;
+        previousVersion = 3;
     }
     // To be continued in the future!
 
