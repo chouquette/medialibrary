@@ -165,6 +165,7 @@ class DatabaseHelpers
             {
                 if ( sqlite::errors::isInnocuous( ex ) == false )
                     throw;
+                LOG_WARN( "Ignoring innocuous error: ", ex.what() );
             }
             return {};
         }
@@ -180,6 +181,7 @@ class DatabaseHelpers
             {
                 if ( sqlite::errors::isInnocuous( ex ) == false )
                     throw;
+                LOG_WARN( "Ignoring innocuous error: ", ex.what() );
             }
             return {};
         }
