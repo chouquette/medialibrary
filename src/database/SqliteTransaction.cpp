@@ -81,8 +81,11 @@ Transaction::~Transaction()
             CurrentTransaction = nullptr;
         }
     }
-    catch(...)
+    // Ignore a rollback failure as it is most likely innocuous (see
+    // http://www.sqlite.org/lang_transaction.html
+    catch( const std::exception& ex )
     {
+        LOG_WARN( "Failed to rollback transaction: ", ex.what() );
         // Don't call std::terminate if ROLLBACK throws an exception
     }
 }
