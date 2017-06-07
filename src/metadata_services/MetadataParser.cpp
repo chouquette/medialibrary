@@ -451,7 +451,10 @@ bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
                                std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist )
 {
     if ( albumArtist == nullptr )
+    {
+        assert( artist != nullptr );
         albumArtist = artist;
+    }
 
     // We might modify albumArtist later, hence handle thumbnails before.
     // If we have an albumArtist (meaning the track was properly tagged, we
