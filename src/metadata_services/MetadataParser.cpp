@@ -192,6 +192,8 @@ bool MetadataParser::parseAudioFile( parser::Task& task )
 
     auto genre = handleGenre( task );
     auto artists = findOrCreateArtist( task );
+    if ( artists.first == nullptr && artists.second == nullptr )
+        return false;
     auto album = findAlbum( task, artists.first, artists.second );
     auto t = m_ml->getConn()->newTransaction();
     if ( album == nullptr )
