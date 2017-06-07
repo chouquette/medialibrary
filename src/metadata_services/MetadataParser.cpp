@@ -205,8 +205,8 @@ bool MetadataParser::parseAudioFile( parser::Task& task )
         m_notifier->notifyAlbumCreation( album );
     }
     // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist
-    auto track = handleTrack( album, task, artists.second ? artists.second :
-                            (artists.first ? artists.first : m_unknownArtist), genre.get() );
+    auto track = handleTrack( album, task, artists.second ? artists.second : artists.first,
+                              genre.get() );
 
     auto res = link( *task.media, album, artists.first, artists.second );
     task.media->save();
