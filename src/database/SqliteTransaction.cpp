@@ -51,6 +51,7 @@ Transaction::Transaction(DBConnection dbConn)
 
 void Transaction::commit()
 {
+    assert( CurrentTransaction != nullptr );
     auto chrono = std::chrono::steady_clock::now();
     Statement s( m_dbConn->getConn(), "COMMIT" );
     s.execute();
