@@ -28,6 +28,7 @@
 
 #include "compat/Mutex.h"
 #include "SqliteTools.h"
+#include "SqliteTransaction.h"
 
 namespace medialibrary
 {
@@ -52,6 +53,14 @@ public:
     static void insert( int64_t key, std::shared_ptr<T> value )
     {
         assert( Store.find( key ) == end( Store ) );
+        if ( sqlite::Transaction::transactionInProgress() == true )
+        {
+            sqlite::Transaction::onCurrentTransactionFailure( [key](){
+                auto l = lock();
+                auto removed = remove( key );
+                assert( removed != nullptr );
+            });
+        }
         save( key, std::move( value ) );
     }
 

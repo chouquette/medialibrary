@@ -60,6 +60,7 @@ void Transaction::commit()
     auto duration = std::chrono::steady_clock::now() - chrono;
     LOG_DEBUG( "Flushed transaction in ",
              std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
+    m_failureHandlers.clear();
     CurrentTransaction = nullptr;
     m_ctx.unlock();
 }
@@ -67,6 +68,12 @@ void Transaction::commit()
 bool Transaction::transactionInProgress()
 {
     return CurrentTransaction != nullptr;
+}
+
+void Transaction::onCurrentTransactionFailure( std::function<void ()> f )
+{
+    assert( transactionInProgress() == true );
+    CurrentTransaction->m_failureHandlers.emplace_back( std::move( f ) );
 }
 
 Transaction::~Transaction()
@@ -79,6 +86,8 @@ Transaction::~Transaction()
             s.execute();
             while ( s.row() != nullptr )
                 ;
+            for ( const auto& f : m_failureHandlers )
+                f();
             CurrentTransaction = nullptr;
         }
     }
@@ -87,6 +96,8 @@ Transaction::~Transaction()
     catch( const std::exception& ex )
     {
         // Ensure we don't assume a transaction is still running
+        for ( const auto& f : m_failureHandlers )
+            f();
         CurrentTransaction = nullptr;
         LOG_WARN( "Failed to rollback transaction: ", ex.what() );
         // Don't call std::terminate if ROLLBACK throws an exception

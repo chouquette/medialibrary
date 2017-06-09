@@ -25,6 +25,9 @@
 #include "SqliteConnection.h"
 #include "Types.h"
 
+#include <functional>
+#include <vector>
+
 namespace medialibrary
 {
 
@@ -40,12 +43,16 @@ public:
     Transaction& operator=( const Transaction& ) = delete;
     Transaction& operator=( Transaction&& ) = delete;
     void commit();
+
     static bool transactionInProgress();
+    static void onCurrentTransactionFailure( std::function<void()> f );
     ~Transaction();
 
 private:
     DBConnection m_dbConn;
     SqliteConnection::WriteContext m_ctx;
+    std::vector<std::function<void()>> m_failureHandlers;
+
 
     static thread_local Transaction* CurrentTransaction;
 };
