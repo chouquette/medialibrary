@@ -126,41 +126,43 @@ std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& m
 bool Folder::blacklist( MediaLibraryPtr ml, const std::string& mrl )
 {
     // Ensure we delete the existing folder if any & blacklist the folder in an "atomic" way
-    auto t = ml->getConn()->newTransaction();
+    return sqlite::Tools::withRetries( 3, [ml, &mrl]() {
+        auto t = ml->getConn()->newTransaction();
 
-    auto f = fromMrl( ml, mrl, BannedType::Any );
-    if ( f != nullptr )
-    {
-        // No need to blacklist a folder twice
-        if ( f->m_isBlacklisted == true )
-            return true;
-        // Let the foreign key destroy everything beneath this folder
-        destroy( ml, f->id() );
-    }
-    auto fsFactory = ml->fsFactoryForMrl( mrl );
-    if ( fsFactory == nullptr )
-        return false;
-    auto folderFs = fsFactory->createDirectory( mrl );
-    assert( folderFs != nullptr );
-    auto deviceFs = folderFs->device();
-    if ( deviceFs == nullptr )
-    {
-        LOG_ERROR( "Can't find device associated with mrl ", mrl );
-        return false;
-    }
-    auto device = Device::fromUuid( ml, deviceFs->uuid() );
-    if ( device == nullptr )
-        device = Device::create( ml, deviceFs->uuid(), utils::file::scheme( mrl ), deviceFs->isRemovable() );
-    std::string path;
-    if ( deviceFs->isRemovable() == true )
-        path = utils::file::removePath( mrl, deviceFs->mountpoint() );
-    else
-        path = mrl;
-    static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
-            "(path, parent_id, is_blacklisted, device_id, is_removable) VALUES(?, ?, ?, ?, ?)";
-    auto res = sqlite::Tools::executeInsert( ml->getConn(), req, path, nullptr, true, device->id(), deviceFs->isRemovable() ) != 0;
-    t->commit();
-    return res;
+        auto f = fromMrl( ml, mrl, BannedType::Any );
+        if ( f != nullptr )
+        {
+            // No need to blacklist a folder twice
+            if ( f->m_isBlacklisted == true )
+                return true;
+            // Let the foreign key destroy everything beneath this folder
+            destroy( ml, f->id() );
+        }
+        auto fsFactory = ml->fsFactoryForMrl( mrl );
+        if ( fsFactory == nullptr )
+            return false;
+        auto folderFs = fsFactory->createDirectory( mrl );
+        assert( folderFs != nullptr );
+        auto deviceFs = folderFs->device();
+        if ( deviceFs == nullptr )
+        {
+            LOG_ERROR( "Can't find device associated with mrl ", mrl );
+            return false;
+        }
+        auto device = Device::fromUuid( ml, deviceFs->uuid() );
+        if ( device == nullptr )
+            device = Device::create( ml, deviceFs->uuid(), utils::file::scheme( mrl ), deviceFs->isRemovable() );
+        std::string path;
+        if ( deviceFs->isRemovable() == true )
+            path = utils::file::removePath( mrl, deviceFs->mountpoint() );
+        else
+            path = mrl;
+        static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
+                "(path, parent_id, is_blacklisted, device_id, is_removable) VALUES(?, ?, ?, ?, ?)";
+        auto res = sqlite::Tools::executeInsert( ml->getConn(), req, path, nullptr, true, device->id(), deviceFs->isRemovable() ) != 0;
+        t->commit();
+        return res;
+    });
 }
 
 std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& mrl )

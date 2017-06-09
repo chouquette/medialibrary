@@ -353,14 +353,16 @@ MediaPtr MediaLibrary::media( const std::string& mrl ) const
 
 MediaPtr MediaLibrary::addMedia( const std::string& mrl )
 {
-    auto t = m_dbConnection->newTransaction();
-    auto media = Media::create( this, IMedia::Type::Unknown, utils::file::fileName( mrl ) );
-    if ( media == nullptr )
-        return nullptr;
-    if ( media->addExternalMrl( mrl, IFile::Type::Main ) == nullptr )
-        return nullptr;
-    t->commit();
-    return media;
+    return sqlite::Tools::withRetries( 3, [this, &mrl]() -> MediaPtr {
+        auto t = m_dbConnection->newTransaction();
+        auto media = Media::create( this, IMedia::Type::Unknown, utils::file::fileName( mrl ) );
+        if ( media == nullptr )
+            return nullptr;
+        if ( media->addExternalMrl( mrl, IFile::Type::Main ) == nullptr )
+            return nullptr;
+        t->commit();
+        return media;
+    });
 }
 
 std::vector<MediaPtr> MediaLibrary::audioFiles( SortingCriteria sort, bool desc ) const
@@ -543,12 +545,14 @@ std::vector<MediaPtr> MediaLibrary::lastMediaPlayed() const
 
 bool MediaLibrary::clearHistory()
 {
-    auto t = getConn()->newTransaction();
-    Media::clearHistory( this );
-    if ( History::clearStreams( this ) == false )
-        return false;
-    t->commit();
-    return true;
+    return sqlite::Tools::withRetries( 3, [this]() {
+        auto t = getConn()->newTransaction();
+        Media::clearHistory( this );
+        if ( History::clearStreams( this ) == false )
+            return false;
+        t->commit();
+        return true;
+    });
 }
 
 MediaSearchAggregate MediaLibrary::searchMedia( const std::string& title ) const

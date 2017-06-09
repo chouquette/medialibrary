@@ -311,6 +311,32 @@ class Tools
             return sqlite3_last_insert_rowid( dbConnection->getConn() );
         }
 
+        /**
+         * \brief   Automatically retry a code block when innocuous sqlite errors occur.
+         *
+         * We can't retry individual requests as sqlite might implicitely rollback the current transaction
+         * causing previously sucessfuly inserted entities to be removed from the database.
+         */
+        template <typename T, typename... Args>
+        static auto withRetries( uint8_t nbRetries, T&& f, Args&&... args ) -> decltype( f( args... ) )
+        {
+            uint8_t i = 0;
+            while ( true )
+            {
+                try
+                {
+                    return f( std::forward<Args>( args )... );
+                }
+                catch ( const sqlite::errors::GenericExecution& ex )
+                {
+                    if ( i > nbRetries || sqlite::errors::isInnocuous( ex ) == false )
+                        throw;
+                    ++i;
+                    LOG_WARN( ex.what(), ". Retrying (", i, '/', nbRetries, ')' );
+                }
+            }
+        }
+
     private:
         template <typename... Args>
         static bool executeRequestLocked( DBConnection dbConnection, const std::string& req, Args&&... args )

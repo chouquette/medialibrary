@@ -281,38 +281,44 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
         filesToAdd.push_back( std::move( fileFs ) );
         files.erase( it );
     }
-    auto t = m_ml->getConn()->newTransaction();
-    for ( auto file : files )
-    {
-        LOG_INFO( "File ", file->mrl(), " not found on filesystem, deleting it" );
-        auto media = file->media();
-        if ( media != nullptr && media->isDeleted() == false )
-            media->removeFile( *file );
-        else if ( file->isDeleted() == false )
+    using FilesT = decltype( files );
+    using FilesToRemoveT = decltype( filesToRemove );
+    using FilesToAddT = decltype( filesToAdd );
+    sqlite::Tools::withRetries( 3, [this, &parentFolder, &parentFolderFs]
+                            ( FilesT files, FilesToAddT filesToAdd, FilesToRemoveT filesToRemove ) {
+        auto t = m_ml->getConn()->newTransaction();
+        for ( auto file : files )
         {
-            // This is unexpected, as the file should have been deleted when the media was
-            // removed.
-            LOG_WARN( "Deleting a file without an associated media." );
-            file->destroy();
+            LOG_INFO( "File ", file->mrl(), " not found on filesystem, deleting it" );
+            auto media = file->media();
+            if ( media != nullptr && media->isDeleted() == false )
+                media->removeFile( *file );
+            else if ( file->isDeleted() == false )
+            {
+                // This is unexpected, as the file should have been deleted when the media was
+                // removed.
+                LOG_WARN( "Deleting a file without an associated media." );
+                file->destroy();
+            }
         }
-    }
-    for ( auto& f : filesToRemove )
-    {
-        auto media = f->media();
-        if ( media != nullptr )
-            media->removeFile( *f );
-        else
+        for ( auto& f : filesToRemove )
         {
-            // If there is no media associated with this file, the file had to be removed through
-            // a trigger
-            assert( f->isDeleted() );
+            auto media = f->media();
+            if ( media != nullptr )
+                media->removeFile( *f );
+            else
+            {
+                // If there is no media associated with this file, the file had to be removed through
+                // a trigger
+                assert( f->isDeleted() );
+            }
         }
-    }
-    // Insert all files at once to avoid SQL write contention
-    for ( auto& p : filesToAdd )
-        m_ml->addFile( *p, parentFolder, parentFolderFs );
-    t->commit();
-    LOG_INFO( "Done checking files in ", parentFolderFs.mrl() );
+        // Insert all files at once to avoid SQL write contention
+        for ( auto& p : filesToAdd )
+            m_ml->addFile( *p, parentFolder, parentFolderFs );
+        t->commit();
+        LOG_INFO( "Done checking files in ", parentFolderFs.mrl() );
+    }, std::move( files ), std::move( filesToAdd ), std::move( filesToRemove ) );
 }
 
 bool FsDiscoverer::hasDotNoMediaFile( const fs::IDirectory& directory )

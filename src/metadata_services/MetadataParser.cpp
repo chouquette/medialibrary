@@ -71,7 +71,6 @@ int MetadataParser::toInt( VLC::Media& vlcMedia, libvlc_meta_t meta, const char*
 
 parser::Task::Status MetadataParser::run( parser::Task& task )
 {
-    auto& media = task.media;
     const auto& tracks = task.vlcMedia.tracks();
 
     // If we failed to extract any tracks, don't make any assumption and forward to the
@@ -96,26 +95,29 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
 
     bool isAudio = true;
     {
-        auto t = m_ml->getConn()->newTransaction();
-        for ( const auto& t : tracks )
-        {
-            auto codec = t.codec();
-            std::string fcc( reinterpret_cast<const char*>( &codec ), 4 );
-            if ( t.type() == VLC::MediaTrack::Type::Video )
+        using TracksT = decltype( tracks );
+        sqlite::Tools::withRetries( 3, [this, &isAudio, &task]( TracksT tracks ) {
+            auto t = m_ml->getConn()->newTransaction();
+            for ( const auto& t : tracks )
             {
-                media->addVideoTrack( fcc, t.width(), t.height(),
-                                      static_cast<float>( t.fpsNum() ) / static_cast<float>( t.fpsDen() ),
-                                      t.language(), t.description() );
-                isAudio = false;
+                auto codec = t.codec();
+                std::string fcc( reinterpret_cast<const char*>( &codec ), 4 );
+                if ( t.type() == VLC::MediaTrack::Type::Video )
+                {
+                    task.media->addVideoTrack( fcc, t.width(), t.height(),
+                                          static_cast<float>( t.fpsNum() ) / static_cast<float>( t.fpsDen() ),
+                                          t.language(), t.description() );
+                    isAudio = false;
+                }
+                else if ( t.type() == VLC::MediaTrack::Type::Audio )
+                {
+                    task.media->addAudioTrack( fcc, t.bitrate(), t.rate(), t.channels(),
+                                          t.language(), t.description() );
+                }
             }
-            else if ( t.type() == VLC::MediaTrack::Type::Audio )
-            {
-                media->addAudioTrack( fcc, t.bitrate(), t.rate(), t.channels(),
-                                      t.language(), t.description() );
-            }
-        }
-        media->setDuration( task.vlcMedia.duration() );
-        t->commit();
+            task.media->setDuration( task.vlcMedia.duration() );
+            t->commit();
+        }, std::move( tracks ) );
     }
     if ( isAudio == true )
     {
@@ -138,7 +140,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
         task.file->markStepCompleted( File::ParserStep::Thumbnailer );
     if ( task.file->saveParserStep() == false )
         return parser::Task::Status::Fatal;
-    m_notifier->notifyMediaCreation( media );
+    m_notifier->notifyMediaCreation( task.media );
     return parser::Task::Status::Success;
 }
 
@@ -155,23 +157,26 @@ bool MetadataParser::parseVideoFile( parser::Task& task ) const
     const auto& showName = task.vlcMedia.meta( libvlc_meta_ShowName );
     if ( showName.length() == 0 )
     {
-        auto t = m_ml->getConn()->newTransaction();
+        return sqlite::Tools::withRetries( 3, [this, &showName, &title, &task]() {
+            auto t = m_ml->getConn()->newTransaction();
 
-        auto show = m_ml->show( showName );
-        if ( show == nullptr )
-        {
-            show = m_ml->createShow( showName );
+            auto show = m_ml->show( showName );
             if ( show == nullptr )
-                return false;
-        }
-        auto episode = toInt( task.vlcMedia, libvlc_meta_Episode, "episode number" );
-        if ( episode != 0 )
-        {
-            std::shared_ptr<Show> s = std::static_pointer_cast<Show>( show );
-            s->addEpisode( *media, title, episode );
-        }
-        task.media->save();
-        t->commit();
+            {
+                show = m_ml->createShow( showName );
+                if ( show == nullptr )
+                    return false;
+            }
+            auto episode = toInt( task.vlcMedia, libvlc_meta_Episode, "episode number" );
+            if ( episode != 0 )
+            {
+                std::shared_ptr<Show> s = std::static_pointer_cast<Show>( show );
+                s->addEpisode( *task.media, title, episode );
+            }
+            task.media->save();
+            t->commit();
+            return true;
+        });
     }
     else
     {
@@ -186,7 +191,7 @@ bool MetadataParser::parseAudioFile( parser::Task& task )
 {
     task.media->setType( IMedia::Type::Audio );
 
-    const auto artworkMrl = task.vlcMedia.meta( libvlc_meta_ArtworkURL );
+    auto artworkMrl = task.vlcMedia.meta( libvlc_meta_ArtworkURL );
     if ( artworkMrl.empty() == false )
         task.media->setThumbnail( artworkMrl );
 
@@ -195,23 +200,26 @@ bool MetadataParser::parseAudioFile( parser::Task& task )
     if ( artists.first == nullptr && artists.second == nullptr )
         return false;
     auto album = findAlbum( task, artists.first, artists.second );
-    auto t = m_ml->getConn()->newTransaction();
-    if ( album == nullptr )
-    {
-        const auto& albumName = task.vlcMedia.meta( libvlc_meta_Album );
-        album = m_ml->createAlbum( albumName, artworkMrl );
+    return sqlite::Tools::withRetries( 3, [this, &task, &artists]( std::string artworkMrl,
+                                                  std::shared_ptr<Album> album, std::shared_ptr<Genre> genre ) {
+        auto t = m_ml->getConn()->newTransaction();
         if ( album == nullptr )
-            return false;
-        m_notifier->notifyAlbumCreation( album );
-    }
-    // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist
-    auto track = handleTrack( album, task, artists.second ? artists.second : artists.first,
-                              genre.get() );
+        {
+            const auto& albumName = task.vlcMedia.meta( libvlc_meta_Album );
+            album = m_ml->createAlbum( albumName, artworkMrl );
+            if ( album == nullptr )
+                return false;
+            m_notifier->notifyAlbumCreation( album );
+        }
+        // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist
+        auto track = handleTrack( album, task, artists.second ? artists.second : artists.first,
+                                  genre.get() );
 
-    auto res = link( *task.media, album, artists.first, artists.second );
-    task.media->save();
-    t->commit();
-    return res;
+        auto res = link( *task.media, album, artists.first, artists.second );
+        task.media->save();
+        t->commit();
+        return res;
+    }, std::move( artworkMrl ), std::move( album ), std::move( genre ) );
 }
 
 std::shared_ptr<Genre> MetadataParser::handleGenre( parser::Task& task ) const
