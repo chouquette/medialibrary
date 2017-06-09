@@ -187,7 +187,7 @@ void ParserService::mainloop()
         }
         catch ( const std::exception& ex )
         {
-            LOG_ERROR( "Caught an exception during ", task->file->mrl(), " ", serviceName, " parsing: ", ex.what() );
+            LOG_ERROR( "Caught an exception during ", task->file->mrl(), " [", serviceName, "] parsing: ", ex.what() );
             status = parser::Task::Status::Fatal;
         }
         m_parserCb->done( std::move( task ), status );
