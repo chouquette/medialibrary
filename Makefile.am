@@ -9,6 +9,14 @@ MEDIALIB_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/include -I$(top_srcdir)/src
 
 libmedialibrary_ladir = $(includedir)/medialibrary
 
+libmedialibrary_la_CPPFLAGS = \
+	$(MEDIALIB_CPPFLAGS) \
+	$(SQLITE_CFLAGS) \
+	$(VLC_CFLAGS) \
+	$(VLCPP_CFLAGS) \
+	-fvisibility=default \
+	$(NULL)
+
 libmedialibrary_la_HEADERS = \
 	include/medialibrary/IAlbum.h \
 	include/medialibrary/IAlbumTrack.h \
@@ -192,13 +200,6 @@ libmedialibrary_macos_la_SOURCES = \
 	src/filesystem/darwin/DeviceLister.mm
 endif
 endif
-
-libmedialibrary_la_CPPFLAGS = \
-	$(MEDIALIB_CPPFLAGS) \
-	$(SQLITE_CFLAGS) \
-	$(VLC_CFLAGS) \
-	$(VLCPP_CFLAGS) \
-	$(NULL)
 
 libmedialibrary_la_LIBADD = \
 	$(SQLITE_LIBS) 			\
