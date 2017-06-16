@@ -171,6 +171,7 @@ parser::Task::Status VLCThumbnailer::startPlayback( parser::Task& task, VLC::Med
     bool hasVideoTrack = false;
     bool failedToStart = false;
     bool hasAnyTrack = false;
+    bool success = false;
     auto em = mp.eventManager();
     em.onESAdded([this, &hasVideoTrack, &hasAnyTrack]( libvlc_track_type_t type, int ) {
         std::lock_guard<compat::Mutex> lock( m_mutex );
@@ -185,23 +186,25 @@ parser::Task::Status VLCThumbnailer::startPlayback( parser::Task& task, VLC::Med
         m_cond.notify_all();
     });
 
-    std::unique_lock<compat::Mutex> lock( m_mutex );
-    mp.play();
-    bool success = m_cond.wait_for( lock, std::chrono::seconds( 3 ), [&failedToStart, &hasAnyTrack]() {
-        return failedToStart == true || hasAnyTrack == true;
-    });
-
-    // In case the playback failed, we probably won't fetch anything interesting anyway.
-    if ( failedToStart == true || success == false )
-        return parser::Task::Status::Fatal;
-
-    // If we have any kind of track, but not a video track, we don't have to wait long, tracks are usually
-    // being discovered together.
-    if ( hasVideoTrack == false )
     {
-        m_cond.wait_for( lock, std::chrono::seconds( 1 ), [&hasVideoTrack]() {
-            return hasVideoTrack == true;
+        std::unique_lock<compat::Mutex> lock( m_mutex );
+        mp.play();
+        success = m_cond.wait_for( lock, std::chrono::seconds( 3 ), [&failedToStart, &hasAnyTrack]() {
+            return failedToStart == true || hasAnyTrack == true;
         });
+
+        // In case the playback failed, we probably won't fetch anything interesting anyway.
+        if ( failedToStart == true || success == false )
+            return parser::Task::Status::Fatal;
+
+        // If we have any kind of track, but not a video track, we don't have to wait long, tracks are usually
+        // being discovered together.
+        if ( hasVideoTrack == false )
+        {
+            m_cond.wait_for( lock, std::chrono::seconds( 1 ), [&hasVideoTrack]() {
+                return hasVideoTrack == true;
+            });
+        }
     }
 
     // Now that we waited long enough for a potential video track, if we have one, we keep generating
@@ -224,17 +227,20 @@ parser::Task::Status VLCThumbnailer::startPlayback( parser::Task& task, VLC::Med
 
 parser::Task::Status VLCThumbnailer::seekAhead( VLC::MediaPlayer& mp )
 {
-    std::unique_lock<compat::Mutex> lock( m_mutex );
     float pos = .0f;
     auto event = mp.eventManager().onPositionChanged([this, &pos](float p) {
         std::unique_lock<compat::Mutex> lock( m_mutex );
         pos = p;
         m_cond.notify_all();
     });
-    mp.setPosition( .4f );
-    bool success = m_cond.wait_for( lock, std::chrono::seconds( 3 ), [&pos]() {
-        return pos >= .1f;
-    });
+    auto success = false;
+    {
+        std::unique_lock<compat::Mutex> lock( m_mutex );
+        mp.setPosition( .4f );
+        success = m_cond.wait_for( lock, std::chrono::seconds( 3 ), [&pos]() {
+            return pos >= .1f;
+        });
+    }
     // Since we're locking a mutex for each position changed, let's unregister ASAP
     event->unregister();
     if ( success == false )
