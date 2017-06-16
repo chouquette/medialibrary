@@ -49,7 +49,6 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
     assert( task.vlcMedia.isValid() == false );
     task.vlcMedia = VLC::Media( m_instance, file->mrl(), VLC::Media::FromType::FromLocation );
 
-    std::unique_lock<compat::Mutex> lock( m_mutex );
     VLC::Media::ParsedStatus status;
     bool done = false;
 
@@ -59,12 +58,16 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
         done = true;
         m_cond.notify_all();
     });
-    if ( task.vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local | VLC::Media::ParseFlags::Network |
-                                         VLC::Media::ParseFlags::FetchLocal, 5000 ) == false )
-        return parser::Task::Status::Fatal;
-    m_cond.wait( lock, [&status, &done]() {
-        return done == true;
-    });
+    {
+        std::unique_lock<compat::Mutex> lock( m_mutex );
+
+        if ( task.vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local | VLC::Media::ParseFlags::Network |
+                                             VLC::Media::ParseFlags::FetchLocal, 5000 ) == false )
+            return parser::Task::Status::Fatal;
+        m_cond.wait( lock, [&status, &done]() {
+            return done == true;
+        });
+    }
     event->unregister();
     if ( status == VLC::Media::ParsedStatus::Failed || status == VLC::Media::ParsedStatus::Timeout )
         return parser::Task::Status::Fatal;
