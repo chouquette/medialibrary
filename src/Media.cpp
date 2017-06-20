@@ -318,9 +318,17 @@ bool Media::setMetadata( IMedia::MetadataType type, const std::string& value )
                 m_metadata.get().emplace_back( type, value );
         }
     }
-    static const std::string req = "INSERT OR REPLACE INTO " + policy::MediaMetadataTable::Name +
-            "(id_media, type, value) VALUES(?, ?, ?)";
-    return sqlite::Tools::executeInsert( m_ml->getConn(), req, m_id, type, value );
+    try
+    {
+        static const std::string req = "INSERT OR REPLACE INTO " + policy::MediaMetadataTable::Name +
+                "(id_media, type, value) VALUES(?, ?, ?)";
+        return sqlite::Tools::executeInsert( m_ml->getConn(), req, m_id, type, value );
+    }
+    catch ( const sqlite::errors::Generic& ex )
+    {
+        LOG_ERROR( "Failed to update media metadata: ", ex.what() );
+        return false;
+    }
 }
 
 bool Media::setMetadata( IMedia::MetadataType type, int64_t value )
@@ -374,7 +382,17 @@ std::shared_ptr<File> Media::addFile( const fs::IFile& fileFs, Folder& parentFol
 
 FilePtr Media::addExternalMrl( const std::string& mrl , IFile::Type type )
 {
-    auto file = File::create( m_ml, m_id, type, mrl );
+    FilePtr file;
+    try
+    {
+        file = File::create( m_ml, m_id, type, mrl );
+    }
+    catch ( const sqlite::errors::Generic& ex )
+    {
+        LOG_ERROR( "Failed to add media external MRL: ", ex.what() );
+        return nullptr;
+    }
+
     if ( file == nullptr )
         return nullptr;
     auto lock = m_files.lock();
@@ -466,8 +484,17 @@ bool Media::setTitle( const std::string& title )
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET title = ? WHERE id_media = ?";
     if ( m_title == title )
         return true;
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, title, m_id ) == false )
+    try
+    {
+        if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, title, m_id ) == false )
+            return false;
+    }
+    catch ( const sqlite::errors::Generic& ex )
+    {
+        LOG_ERROR( "Failed to set media title: ", ex.what() );
         return false;
+    }
+
     m_title = title;
     return true;
 }
@@ -562,12 +589,20 @@ bool Media::addLabel( LabelPtr label )
         LOG_ERROR( "Both file & label need to be inserted in database before being linked together" );
         return false;
     }
-    const char* req = "INSERT INTO LabelFileRelation VALUES(?, ?)";
-    if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, label->id(), m_id ) == 0 )
+    try
+    {
+        const char* req = "INSERT INTO LabelFileRelation VALUES(?, ?)";
+        if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, label->id(), m_id ) == 0 )
+            return false;
+        const std::string reqFts = "UPDATE " + policy::MediaTable::Name + "Fts "
+            "SET labels = labels || ' ' || ? WHERE rowid = ?";
+        return sqlite::Tools::executeUpdate( m_ml->getConn(), reqFts, label->name(), m_id );
+    }
+    catch ( const sqlite::errors::Generic& ex )
+    {
+        LOG_ERROR( "Failed to add label: ", ex.what() );
         return false;
-    const std::string reqFts = "UPDATE " + policy::MediaTable::Name + "Fts "
-        "SET labels = labels || ' ' || ? WHERE rowid = ?";
-    return sqlite::Tools::executeUpdate( m_ml->getConn(), reqFts, label->name(), m_id );
+    }
 }
 
 bool Media::removeLabel( LabelPtr label )
@@ -577,12 +612,20 @@ bool Media::removeLabel( LabelPtr label )
         LOG_ERROR( "Can't unlink a label/file not inserted in database" );
         return false;
     }
-    const char* req = "DELETE FROM LabelFileRelation WHERE label_id = ? AND media_id = ?";
-    if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, label->id(), m_id ) == false )
+    try
+    {
+        const char* req = "DELETE FROM LabelFileRelation WHERE label_id = ? AND media_id = ?";
+        if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, label->id(), m_id ) == false )
+            return false;
+        const std::string reqFts = "UPDATE " + policy::MediaTable::Name + "Fts "
+                "SET labels = TRIM(REPLACE(labels, ?, '')) WHERE rowid = ?";
+        return sqlite::Tools::executeUpdate( m_ml->getConn(), reqFts, label->name(), m_id );
+    }
+    catch ( const sqlite::errors::Generic& ex )
+    {
+        LOG_ERROR( "Failed to remove label: ", ex.what() );
         return false;
-    const std::string reqFts = "UPDATE " + policy::MediaTable::Name + "Fts "
-            "SET labels = TRIM(REPLACE(labels, ?, '')) WHERE rowid = ?";
-    return sqlite::Tools::executeUpdate( m_ml->getConn(), reqFts, label->name(), m_id );
+    }
 }
 
 
