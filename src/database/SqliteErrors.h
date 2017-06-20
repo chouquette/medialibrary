@@ -101,6 +101,8 @@ static inline bool isInnocuous( const GenericExecution& ex )
     {
     case SQLITE_IOERR:
     case SQLITE_NOMEM:
+    case SQLITE_BUSY:
+    case SQLITE_READONLY:
         return true;
     }
     return false;

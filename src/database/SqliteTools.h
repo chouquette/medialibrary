@@ -168,7 +168,8 @@ public:
             else if ( res == SQLITE_DONE )
                 return Row();
             else if ( ( Transaction::transactionInProgress() == false || m_isCommit == true ) &&
-                      ( res == SQLITE_BUSY || extRes == SQLITE_IOERR_WRITE ) &&
+                      ( res == SQLITE_BUSY || res == SQLITE_IOERR ||
+                        res == SQLITE_READONLY || res == SQLITE_NOMEM ) &&
                         maxRetries-- > 0 )
                 continue;
             auto errMsg = sqlite3_errmsg( m_dbConn );
