@@ -591,12 +591,19 @@ bool Media::addLabel( LabelPtr label )
     }
     try
     {
-        const char* req = "INSERT INTO LabelFileRelation VALUES(?, ?)";
-        if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, label->id(), m_id ) == 0 )
-            return false;
-        const std::string reqFts = "UPDATE " + policy::MediaTable::Name + "Fts "
-            "SET labels = labels || ' ' || ? WHERE rowid = ?";
-        return sqlite::Tools::executeUpdate( m_ml->getConn(), reqFts, label->name(), m_id );
+        return sqlite::Tools::withRetries( 3, [this]( LabelPtr label ) {
+            auto t = m_ml->getConn()->newTransaction();
+
+            const char* req = "INSERT INTO LabelFileRelation VALUES(?, ?)";
+            if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, label->id(), m_id ) == 0 )
+                return false;
+            const std::string reqFts = "UPDATE " + policy::MediaTable::Name + "Fts "
+                "SET labels = labels || ' ' || ? WHERE rowid = ?";
+            if ( sqlite::Tools::executeUpdate( m_ml->getConn(), reqFts, label->name(), m_id ) == false )
+                return false;
+            t->commit();
+            return true;
+        }, std::move( label ) );
     }
     catch ( const sqlite::errors::Generic& ex )
     {
@@ -614,12 +621,19 @@ bool Media::removeLabel( LabelPtr label )
     }
     try
     {
-        const char* req = "DELETE FROM LabelFileRelation WHERE label_id = ? AND media_id = ?";
-        if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, label->id(), m_id ) == false )
-            return false;
-        const std::string reqFts = "UPDATE " + policy::MediaTable::Name + "Fts "
-                "SET labels = TRIM(REPLACE(labels, ?, '')) WHERE rowid = ?";
-        return sqlite::Tools::executeUpdate( m_ml->getConn(), reqFts, label->name(), m_id );
+        return sqlite::Tools::withRetries( 3, [this]( LabelPtr label ) {
+            auto t = m_ml->getConn()->newTransaction();
+
+            const char* req = "DELETE FROM LabelFileRelation WHERE label_id = ? AND media_id = ?";
+            if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, label->id(), m_id ) == false )
+                return false;
+            const std::string reqFts = "UPDATE " + policy::MediaTable::Name + "Fts "
+                    "SET labels = TRIM(REPLACE(labels, ?, '')) WHERE rowid = ?";
+            if ( sqlite::Tools::executeUpdate( m_ml->getConn(), reqFts, label->name(), m_id ) == false )
+                return false;
+            t->commit();
+            return true;
+        }, std::move( label ) );
     }
     catch ( const sqlite::errors::Generic& ex )
     {
