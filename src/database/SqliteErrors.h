@@ -95,9 +95,9 @@ public:
     }
 };
 
-static inline bool isInnocuous( const GenericExecution& ex )
+static inline bool isInnocuous( int errCode )
 {
-    switch ( ex.code() )
+    switch ( errCode )
     {
     case SQLITE_IOERR:
     case SQLITE_NOMEM:
@@ -106,6 +106,11 @@ static inline bool isInnocuous( const GenericExecution& ex )
         return true;
     }
     return false;
+}
+
+static inline bool isInnocuous( const GenericExecution& ex )
+{
+    return isInnocuous( ex.code() );
 }
 
 
