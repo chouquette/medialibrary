@@ -327,7 +327,7 @@ class IMediaLibrary
          * @brief forceParserRetry Forces a re-run of all metadata parsers and resets any
          * unterminated file retry count to 0, granting them 3 new tries at being parsed
          */
-        virtual void forceParserRetry() = 0;
+        virtual bool forceParserRetry() = 0;
 
         /**
          * @brief setDeviceLister Sets a device lister.

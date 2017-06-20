@@ -246,8 +246,10 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
 #endif
     {
         if ( errno != EEXIST )
-            throw std::runtime_error( std::string( "Failed to create thumbnail directory: " ) +
-                                      strerror( errno ) );
+        {
+            LOG_ERROR( "Failed to create thumbnail directory: ", strerror( errno ) );
+            return false;
+        }
     }
     m_thumbnailPath = thumbnailPath;
     m_callback = mlCallback;
@@ -258,23 +260,31 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
     // Which allows us to register hooks, or not, depending on the presence of a notifier
     registerEntityHooks();
 
-    if ( createAllTables() == false )
+    try
     {
-        LOG_ERROR( "Failed to create database structure" );
-        return false;
-    }
-    if ( m_settings.load( m_dbConnection.get() ) == false )
-    {
-        LOG_ERROR( "Failed to load settings" );
-        return false;
-    }
-    if ( m_settings.dbModelVersion() != Settings::DbModelVersion )
-    {
-        if ( updateDatabaseModel( m_settings.dbModelVersion() ) == false )
+        if ( createAllTables() == false )
         {
-            LOG_ERROR( "Failed to update database model" );
+            LOG_ERROR( "Failed to create database structure" );
             return false;
         }
+        if ( m_settings.load( m_dbConnection.get() ) == false )
+        {
+            LOG_ERROR( "Failed to load settings" );
+            return false;
+        }
+        if ( m_settings.dbModelVersion() != Settings::DbModelVersion )
+        {
+            if ( updateDatabaseModel( m_settings.dbModelVersion() ) == false )
+            {
+                LOG_ERROR( "Failed to update database model" );
+                return false;
+            }
+        }
+    }
+    catch ( const sqlite::errors::Generic& ex )
+    {
+        LOG_ERROR( "Can't initialize medialibrary: ", ex.what() );
+        return false;
     }
     m_initialized = true;
     LOG_INFO( "Successfuly initialized" );
@@ -353,16 +363,24 @@ MediaPtr MediaLibrary::media( const std::string& mrl ) const
 
 MediaPtr MediaLibrary::addMedia( const std::string& mrl )
 {
-    return sqlite::Tools::withRetries( 3, [this, &mrl]() -> MediaPtr {
-        auto t = m_dbConnection->newTransaction();
-        auto media = Media::create( this, IMedia::Type::Unknown, utils::file::fileName( mrl ) );
-        if ( media == nullptr )
-            return nullptr;
-        if ( media->addExternalMrl( mrl, IFile::Type::Main ) == nullptr )
-            return nullptr;
-        t->commit();
-        return media;
-    });
+    try
+    {
+        return sqlite::Tools::withRetries( 3, [this, &mrl]() -> MediaPtr {
+            auto t = m_dbConnection->newTransaction();
+            auto media = Media::create( this, IMedia::Type::Unknown, utils::file::fileName( mrl ) );
+            if ( media == nullptr )
+                return nullptr;
+            if ( media->addExternalMrl( mrl, IFile::Type::Main ) == nullptr )
+                return nullptr;
+            t->commit();
+            return media;
+        });
+    }
+    catch ( const sqlite::errors::Generic& ex )
+    {
+        LOG_ERROR( "Failed to create external media: ", ex.what() );
+        return nullptr;
+    }
 }
 
 std::vector<MediaPtr> MediaLibrary::audioFiles( SortingCriteria sort, bool desc ) const
@@ -418,12 +436,28 @@ bool MediaLibrary::deleteFolder( const Folder& folder )
 
 LabelPtr MediaLibrary::createLabel( const std::string& label )
 {
-    return Label::create( this, label );
+    try
+    {
+        return Label::create( this, label );
+    }
+    catch ( const sqlite::errors::Generic& ex )
+    {
+        LOG_ERROR( "Failed to create a label: ", ex.what() );
+        return nullptr;
+    }
 }
 
 bool MediaLibrary::deleteLabel( LabelPtr label )
 {
-    return Label::destroy( this, label->id() );
+    try
+    {
+        return Label::destroy( this, label->id() );
+    }
+    catch ( const sqlite::errors::Generic& ex )
+    {
+        LOG_ERROR( "Failed to delete label: ", ex.what() );
+        return false;
+    }
 }
 
 AlbumPtr MediaLibrary::album( int64_t id ) const
@@ -510,7 +544,15 @@ std::vector<ArtistPtr> MediaLibrary::artists( SortingCriteria sort, bool desc ) 
 
 PlaylistPtr MediaLibrary::createPlaylist( const std::string& name )
 {
-    return Playlist::create( this, name );
+    try
+    {
+        return Playlist::create( this, name );
+    }
+    catch ( const sqlite::errors::Generic& ex )
+    {
+        LOG_ERROR( "Failed to create a playlist: ", ex.what() );
+        return nullptr;
+    }
 }
 
 std::vector<PlaylistPtr> MediaLibrary::playlists( SortingCriteria sort, bool desc )
@@ -525,12 +567,28 @@ PlaylistPtr MediaLibrary::playlist( int64_t id ) const
 
 bool MediaLibrary::deletePlaylist( int64_t playlistId )
 {
-    return Playlist::destroy( this, playlistId );
+    try
+    {
+        return Playlist::destroy( this, playlistId );
+    }
+    catch ( const sqlite::errors::Generic& ex )
+    {
+        LOG_ERROR( "Failed to delete playlist: ", ex.what() );
+        return false;
+    }
 }
 
 bool MediaLibrary::addToStreamHistory( MediaPtr media )
 {
-    return History::insert( getConn(), media->id() );
+    try
+    {
+        return History::insert( getConn(), media->id() );
+    }
+    catch ( const sqlite::errors::Generic& ex )
+    {
+        LOG_ERROR( "Failed to add stream to history: ", ex.what() );
+        return false;
+    }
 }
 
 std::vector<HistoryPtr> MediaLibrary::lastStreamsPlayed() const
@@ -545,14 +603,22 @@ std::vector<MediaPtr> MediaLibrary::lastMediaPlayed() const
 
 bool MediaLibrary::clearHistory()
 {
-    return sqlite::Tools::withRetries( 3, [this]() {
-        auto t = getConn()->newTransaction();
-        Media::clearHistory( this );
-        if ( History::clearStreams( this ) == false )
-            return false;
-        t->commit();
-        return true;
-    });
+    try
+    {
+        return sqlite::Tools::withRetries( 3, [this]() {
+            auto t = getConn()->newTransaction();
+            Media::clearHistory( this );
+            if ( History::clearStreams( this ) == false )
+                return false;
+            t->commit();
+            return true;
+        });
+    }
+    catch ( sqlite::errors::Generic& ex )
+    {
+        LOG_ERROR( "Failed to clear history: ", ex.what() );
+        return false;
+    }
 }
 
 MediaSearchAggregate MediaLibrary::searchMedia( const std::string& title ) const
@@ -690,9 +756,18 @@ void MediaLibrary::reload( const std::string& entryPoint )
         m_discovererWorker->reload( entryPoint );
 }
 
-void MediaLibrary::forceParserRetry()
+bool MediaLibrary::forceParserRetry()
 {
-    File::resetRetryCount( this );
+    try
+    {
+        File::resetRetryCount( this );
+        return true;
+    }
+    catch ( const sqlite::errors::Generic& ex )
+    {
+        LOG_ERROR( "Failed to force parser retry: ", ex.what() );
+        return false;
+    }
 }
 
 void MediaLibrary::pauseBackgroundOperations()
@@ -797,6 +872,7 @@ void MediaLibrary::removeEntryPoint( const std::string& entryPoint )
 {
     if ( m_discovererWorker != nullptr )
         m_discovererWorker->remove( entryPoint );
+    m_discovererWorker->remove( entryPoint );
 }
 
 void MediaLibrary::banFolder( const std::string& entryPoint )
