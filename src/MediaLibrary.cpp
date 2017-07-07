@@ -393,14 +393,19 @@ std::vector<MediaPtr> MediaLibrary::videoFiles( SortingCriteria sort, bool desc 
     return Media::listAll( this, IMedia::Type::Video, sort, desc );
 }
 
+bool MediaLibrary::isExtensionSupported( const char* ext )
+{
+    return std::binary_search( std::begin( supportedExtensions ),
+        std::end( supportedExtensions ), ext, [](const char* l, const char* r) {
+            return strcasecmp( l, r ) < 0;
+        });
+}
+
 std::shared_ptr<Media> MediaLibrary::addFile( std::shared_ptr<fs::IFile> fileFs,
                                               std::shared_ptr<Folder> parentFolder,
                                               std::shared_ptr<fs::IDirectory> parentFolderFs )
 {
-    if ( std::binary_search( std::begin( supportedExtensions ), std::end( supportedExtensions ),
-                             fileFs->extension().c_str(),
-                             [](const char* l, const char* r) { return strcasecmp( l, r ) < 0; }
-                            ) == false )
+    if ( isExtensionSupported( fileFs->extension().c_str() ) == false )
     {
         LOG_INFO( "Rejecting file ", fileFs->mrl(), " due to its extension" );
         return nullptr;

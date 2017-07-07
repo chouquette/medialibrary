@@ -144,6 +144,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         void refreshDevices(factory::IFileSystem& fsFactory);
 
+        static bool isExtensionSupported( const char* ext );
+
     protected:
         // Allow access to unit test MediaLibrary implementations
         static const char* const supportedExtensions[];
