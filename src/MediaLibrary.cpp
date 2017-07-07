@@ -397,8 +397,6 @@ std::shared_ptr<Media> MediaLibrary::addFile( std::shared_ptr<fs::IFile> fileFs,
                                               std::shared_ptr<Folder> parentFolder,
                                               std::shared_ptr<fs::IDirectory> parentFolderFs )
 {
-    auto type = IMedia::Type::Unknown;
-
     if ( std::binary_search( std::begin( supportedExtensions ), std::end( supportedExtensions ),
                              fileFs->extension().c_str(),
                              [](const char* l, const char* r) { return strcasecmp( l, r ) < 0; }
@@ -409,7 +407,7 @@ std::shared_ptr<Media> MediaLibrary::addFile( std::shared_ptr<fs::IFile> fileFs,
     }
 
     LOG_INFO( "Adding ", fileFs->mrl() );
-    auto mptr = Media::create( this, type, fileFs->name() );
+    auto mptr = Media::create( this, IMedia::Type::Unknown, fileFs->name() );
     if ( mptr == nullptr )
     {
         LOG_ERROR( "Failed to add media ", fileFs->mrl(), " to the media library" );
