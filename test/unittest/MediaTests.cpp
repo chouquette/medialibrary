@@ -132,6 +132,7 @@ TEST_F( Medias, Progress )
     ASSERT_EQ( 0, f->metadata( Media::MetadataType::Progress ).integer() );
     f->setMetadata( Media::MetadataType::Progress, 123 );
     ASSERT_EQ( 123, f->metadata( Media::MetadataType::Progress ).integer() );
+    ASSERT_TRUE( f->metadata( Media::MetadataType::Progress ).isSet() );
 
     Reload();
 
@@ -145,6 +146,7 @@ TEST_F( Medias, Rating )
     ASSERT_FALSE( f->metadata( Media::MetadataType::Rating ).isSet() );
     f->setMetadata( Media::MetadataType::Rating, 12345 );
     ASSERT_EQ( 12345, f->metadata( Media::MetadataType::Rating ).integer() );
+    ASSERT_TRUE( f->metadata( Media::MetadataType::Rating ).isSet() );
 
     Reload();
 

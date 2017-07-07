@@ -68,6 +68,9 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual const std::string& str() const override;
 
     private:
+        void set( const std::string& value );
+
+    private:
         MetadataType m_type;
         std::string m_value;
         bool m_isSet;

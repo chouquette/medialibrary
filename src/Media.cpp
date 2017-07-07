@@ -313,7 +313,7 @@ bool Media::setMetadata( IMedia::MetadataType type, const std::string& value )
                 return m.m_type == type;
             });
             if ( it != end( m_metadata.get() ) )
-                (*it).m_value = value;
+                (*it).set( value );
             else
                 m_metadata.get().emplace_back( type, value );
         }
@@ -688,6 +688,12 @@ int64_t Media::MediaMetadata::integer() const
 const std::string& Media::MediaMetadata::str() const
 {
     return m_value;
+}
+
+void Media::MediaMetadata::set( const std::string& value )
+{
+    m_value = value;
+    m_isSet = true;
 }
 
 }
