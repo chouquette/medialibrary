@@ -85,7 +85,7 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
     {
         if ( hasDotNoMediaFile( *fsDir ) )
             return true;
-        return addFolder( *fsDir, nullptr );
+        return addFolder( std::move( fsDir ), nullptr );
     }
     catch ( std::system_error& ex )
     {
@@ -103,16 +103,16 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
     return true;
 }
 
-void FsDiscoverer::reloadFolder( Folder& f )
+void FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
 {
-    auto folder = m_fsFactory->createDirectory( f.mrl() );
+    auto folder = m_fsFactory->createDirectory( f->mrl() );
     try
     {
-        checkFolder( *folder, f, false );
+        checkFolder( std::move( folder ), std::move( f ), false );
     }
     catch ( DeviceRemovedException& )
     {
-        LOG_INFO( "Reloading of ", f.mrl(), " was stopped after the device was removed" );
+        LOG_INFO( "Reloading of ", f->mrl(), " was stopped after the device was removed" );
     }
 }
 
@@ -120,8 +120,8 @@ bool FsDiscoverer::reload()
 {
     LOG_INFO( "Reloading all folders" );
     auto rootFolders = Folder::fetchRootFolders( m_ml );
-    for ( const auto& f : rootFolders )
-        reloadFolder( *f );
+    for ( const auto f : rootFolders )
+        reloadFolder( std::move( f ) );
     return true;
 }
 
@@ -136,25 +136,27 @@ bool FsDiscoverer::reload( const std::string& entryPoint )
         LOG_ERROR( "Can't reload ", entryPoint, ": folder wasn't found in database" );
         return false;
     }
-    reloadFolder( *folder );
+    reloadFolder( std::move( folder ) );
     return true;
 }
 
-void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& currentFolder, bool newFolder ) const
+void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
+                                std::shared_ptr<Folder> currentFolder,
+                                bool newFolder ) const
 {
     try
     {
         // We already know of this folder, though it may now contain a .nomedia file.
         // In this case, simply delete the folder.
-        if ( hasDotNoMediaFile( currentFolderFs ) )
+        if ( hasDotNoMediaFile( *currentFolderFs ) )
         {
             if ( newFolder == false )
             {
-                LOG_INFO( "Deleting folder ", currentFolderFs.mrl(), " due to a .nomedia file" );
-                m_ml->deleteFolder( currentFolder );
+                LOG_INFO( "Deleting folder ", currentFolderFs->mrl(), " due to a .nomedia file" );
+                m_ml->deleteFolder( *currentFolder );
             }
             else
-                LOG_INFO( "Ignoring folder ", currentFolderFs.mrl(), " due to a .nomedia file" );
+                LOG_INFO( "Ignoring folder ", currentFolderFs->mrl(), " due to a .nomedia file" );
             return;
         }
     }
@@ -162,18 +164,18 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
     // within, and hasDotMediaFile is the first place when this is done
     catch ( std::system_error& ex )
     {
-        LOG_WARN( "Failed to browse ", currentFolderFs.mrl(), ": ", ex.what() );
+        LOG_WARN( "Failed to browse ", currentFolderFs->mrl(), ": ", ex.what() );
         // Even when we're discovering a new folder, we want to rule out device removal as the cause of
         // an IO error. If this is the cause, simply abort the discovery. All the folder we have
         // discovered so far will be marked as non-present through sqlite hooks, and we'll resume the
         // discovery when the device gets plugged back in
-        if ( currentFolderFs.device()->isRemovable() )
+        if ( currentFolderFs->device()->isRemovable() )
         {
             // If the device is removable, check if it was indeed removed.
-            LOG_INFO( "The device containing ", currentFolderFs.mrl(), " is removable. Checking for device removal..." );
+            LOG_INFO( "The device containing ", currentFolderFs->mrl(), " is removable. Checking for device removal..." );
             m_ml->refreshDevices( *m_fsFactory );
             // The device presence flag will be changed in place, so simply retest it
-            if ( currentFolderFs.device()->isPresent() == false )
+            if ( currentFolderFs->device()->isPresent() == false )
                 throw DeviceRemovedException();
             LOG_INFO( "Device was not removed" );
         }
@@ -186,19 +188,19 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
         if ( newFolder == false )
         {
             // If we ever came across this folder, its content is now unaccessible: let's remove it.
-            m_ml->deleteFolder( currentFolder );
+            m_ml->deleteFolder( *currentFolder );
         }
         return;
     }
 
-    m_cb->onDiscoveryProgress( currentFolderFs.mrl() );
+    m_cb->onDiscoveryProgress( currentFolderFs->mrl() );
     // Load the folders we already know of:
-    LOG_INFO( "Checking for modifications in ", currentFolderFs.mrl() );
+    LOG_INFO( "Checking for modifications in ", currentFolderFs->mrl() );
     // Don't try to fetch any potential sub folders if the folder was freshly added
     std::vector<std::shared_ptr<Folder>> subFoldersInDB;
     if ( newFolder == false )
-        subFoldersInDB = currentFolder.folders();
-    for ( const auto& subFolder : currentFolderFs.dirs() )
+        subFoldersInDB = currentFolder->folders();
+    for ( const auto& subFolder : currentFolderFs->dirs() )
     {
         auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [&subFolder](const std::shared_ptr<Folder>& f) {
             return f->mrl() == subFolder->mrl();
@@ -214,7 +216,7 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
             LOG_INFO( "New folder detected: ", subFolder->mrl() );
             try
             {
-                addFolder( *subFolder, &currentFolder );
+                addFolder( subFolder, currentFolder.get() );
                 continue;
             }
             catch ( sqlite::errors::ConstraintViolation& ex )
@@ -235,7 +237,7 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
         // In any case, check for modifications, as a change related to a mountpoint might
         // not update the folder modification date.
         // Also, relying on the modification date probably isn't portable
-        checkFolder( *subFolder, *folderInDb, false );
+        checkFolder( subFolder, folderInDb, false );
         subFoldersInDB.erase( it );
     }
     // Now all folders we had in DB but haven't seen from the FS must have been deleted.
@@ -245,25 +247,26 @@ void FsDiscoverer::checkFolder( fs::IDirectory& currentFolderFs, Folder& current
         m_ml->deleteFolder( *f );
     }
     checkFiles( currentFolderFs, currentFolder );
-    LOG_INFO( "Done checking subfolders in ", currentFolderFs.mrl() );
+    LOG_INFO( "Done checking subfolders in ", currentFolderFs->mrl() );
 }
 
-void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFolder ) const
+void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
+                               std::shared_ptr<Folder> parentFolder ) const
 {
-    LOG_INFO( "Checking file in ", parentFolderFs.mrl() );
+    LOG_INFO( "Checking file in ", parentFolderFs->mrl() );
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
             + " WHERE folder_id = ?";
-    auto files = File::fetchAll<File>( m_ml, req, parentFolder.id() );
+    auto files = File::fetchAll<File>( m_ml, req, parentFolder->id() );
     std::vector<std::shared_ptr<fs::IFile>> filesToAdd;
     std::vector<std::shared_ptr<File>> filesToRemove;
-    for ( const auto& fileFs: parentFolderFs.files() )
+    for ( const auto& fileFs: parentFolderFs->files() )
     {
         auto it = std::find_if( begin( files ), end( files ), [fileFs](const std::shared_ptr<File>& f) {
             return f->mrl() == fileFs->mrl();
         });
         if ( it == end( files ) )
         {
-            filesToAdd.push_back( std::move( fileFs ) );
+            filesToAdd.push_back( fileFs );
             continue;
         }
         if ( fileFs->lastModificationDate() == (*it)->lastModificationDate() )
@@ -278,7 +281,7 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
         // out of a write context, since that way, other threads can also read the database.
         file->media();
         filesToRemove.push_back( std::move( file ) );
-        filesToAdd.push_back( std::move( fileFs ) );
+        filesToAdd.push_back( fileFs );
         files.erase( it );
     }
     using FilesT = decltype( files );
@@ -315,9 +318,9 @@ void FsDiscoverer::checkFiles( fs::IDirectory& parentFolderFs, Folder& parentFol
         }
         // Insert all files at once to avoid SQL write contention
         for ( auto& p : filesToAdd )
-            m_ml->addFile( *p, parentFolder, parentFolderFs );
+            m_ml->addFile( p, parentFolder, parentFolderFs );
         t->commit();
-        LOG_INFO( "Done checking files in ", parentFolderFs.mrl() );
+        LOG_INFO( "Done checking files in ", parentFolderFs->mrl() );
     }, std::move( files ), std::move( filesToAdd ), std::move( filesToRemove ) );
 }
 
@@ -329,25 +332,27 @@ bool FsDiscoverer::hasDotNoMediaFile( const fs::IDirectory& directory )
     }) != end( files );
 }
 
-bool FsDiscoverer::addFolder( fs::IDirectory& folder, Folder* parentFolder ) const
+bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
+                              Folder* parentFolder ) const
 {
-    auto deviceFs = folder.device();
+    auto deviceFs = folder->device();
     // We are creating a folder, there has to be a device containing it.
     assert( deviceFs != nullptr );
     auto device = Device::fromUuid( m_ml, deviceFs->uuid() );
     if ( device == nullptr )
     {
         LOG_INFO( "Creating new device in DB ", deviceFs->uuid() );
-        device = Device::create( m_ml, deviceFs->uuid(), utils::file::scheme( folder.mrl() ),
+        device = Device::create( m_ml, deviceFs->uuid(),
+                                 utils::file::scheme( folder->mrl() ),
                                  deviceFs->isRemovable() );
     }
 
-    auto f = Folder::create( m_ml, folder.mrl(),
+    auto f = Folder::create( m_ml, folder->mrl(),
                              parentFolder != nullptr ? parentFolder->id() : 0,
                              *device, *deviceFs );
     if ( f == nullptr )
         return false;
-    checkFolder( folder, *f, true );
+    checkFolder( std::move( folder ), std::move( f ), true );
     return true;
 }
 

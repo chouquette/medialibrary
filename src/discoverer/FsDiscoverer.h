@@ -47,11 +47,14 @@ private:
     /// \brief checkSubfolders
     /// \return true if files in this folder needs to be listed, false otherwise
     ///
-    void checkFolder( fs::IDirectory& currentFolderFs, Folder& currentFolder, bool newFolder ) const;
-    void checkFiles(fs::IDirectory& parentFolderFs, Folder& parentFolder ) const;
+    void checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
+                      std::shared_ptr<Folder> currentFolder, bool newFolder ) const;
+    void checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
+                     std::shared_ptr<Folder> parentFolder ) const;
     static bool hasDotNoMediaFile( const fs::IDirectory& directory );
-    bool addFolder( fs::IDirectory& folder, Folder* parentFolder ) const;
-    void reloadFolder( Folder& folder );
+    bool addFolder( std::shared_ptr<fs::IDirectory> folder,
+                    Folder* parentFolder ) const;
+    void reloadFolder( std::shared_ptr<Folder> folder );
 
 private:
     MediaLibrary* m_ml;

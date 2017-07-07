@@ -393,31 +393,33 @@ std::vector<MediaPtr> MediaLibrary::videoFiles( SortingCriteria sort, bool desc 
     return Media::listAll( this, IMedia::Type::Video, sort, desc );
 }
 
-std::shared_ptr<Media> MediaLibrary::addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs )
+std::shared_ptr<Media> MediaLibrary::addFile( std::shared_ptr<fs::IFile> fileFs,
+                                              std::shared_ptr<Folder> parentFolder,
+                                              std::shared_ptr<fs::IDirectory> parentFolderFs )
 {
     auto type = IMedia::Type::Unknown;
 
     if ( std::binary_search( std::begin( supportedExtensions ), std::end( supportedExtensions ),
-                             fileFs.extension().c_str(),
+                             fileFs->extension().c_str(),
                              [](const char* l, const char* r) { return strcasecmp( l, r ) < 0; }
                             ) == false )
     {
-        LOG_INFO( "Rejecting file ", fileFs.mrl(), " due to its extension" );
+        LOG_INFO( "Rejecting file ", fileFs->mrl(), " due to its extension" );
         return nullptr;
     }
 
-    LOG_INFO( "Adding ", fileFs.mrl() );
-    auto mptr = Media::create( this, type, fileFs.name() );
+    LOG_INFO( "Adding ", fileFs->mrl() );
+    auto mptr = Media::create( this, type, fileFs->name() );
     if ( mptr == nullptr )
     {
-        LOG_ERROR( "Failed to add media ", fileFs.mrl(), " to the media library" );
+        LOG_ERROR( "Failed to add media ", fileFs->mrl(), " to the media library" );
         return nullptr;
     }
     // For now, assume all media are made of a single file
-    auto file = mptr->addFile( fileFs, parentFolder, parentFolderFs, File::Type::Main );
+    auto file = mptr->addFile( *fileFs, *parentFolder, *parentFolderFs, File::Type::Main );
     if ( file == nullptr )
     {
-        LOG_ERROR( "Failed to add file ", fileFs.mrl(), " to media #", mptr->id() );
+        LOG_ERROR( "Failed to add file ", fileFs->mrl(), " to media #", mptr->id() );
         Media::destroy( this, mptr->id() );
         return nullptr;
     }

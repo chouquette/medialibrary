@@ -55,7 +55,7 @@ public:
     void deleteTrack( int64_t trackId );
     std::shared_ptr<AlbumTrack> albumTrack( int64_t id );
     // Use to run tests that fiddles with file properties (modification dates, size...)
-    std::shared_ptr<Media> addFile(fs::IFile& file);
+    std::shared_ptr<Media> addFile( std::shared_ptr<fs::IFile> file);
     // Used when we need an actual file instead of an external media
     std::shared_ptr<Media> addFile( const std::string& path );
     virtual void addLocalFsFactory() override;
@@ -63,9 +63,9 @@ public:
     std::vector<const char*> getSupportedExtensions() const;
 
 private:
-    std::unique_ptr<fs::IDirectory> dummyDirectory;
+    std::shared_ptr<fs::IDirectory> dummyDirectory;
     std::shared_ptr<factory::IFileSystem> fsFactory;
-    Folder dummyFolder;
+    std::shared_ptr<Folder> dummyFolder;
 };
 
 class MediaLibraryWithoutParser : public MediaLibraryTester

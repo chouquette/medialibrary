@@ -380,13 +380,13 @@ TEST_F( Medias, SortByLastModifDate )
 {
     auto file1 = std::make_shared<mock::NoopFile>( "media.mkv" );
     file1->setLastModificationDate( 666 );
-    auto m1 = ml->addFile( *file1 );
+    auto m1 = ml->addFile( file1 );
     m1->setType( Media::Type::Video );
     m1->save();
 
     auto file2 = std::make_shared<mock::NoopFile>( "media2.mkv" );
     file2->setLastModificationDate( 111 );
-    auto m2 = ml->addFile( *file2 );
+    auto m2 = ml->addFile( file2 );
     m2->setType( Media::Type::Video );
     m2->save();
 
@@ -405,13 +405,13 @@ TEST_F( Medias, SortByFileSize )
 {
     auto file1 = std::make_shared<mock::NoopFile>( "media.mkv" );
     file1->setSize( 666 );
-    auto m1 = ml->addFile( *file1 );
+    auto m1 = ml->addFile( file1 );
     m1->setType( Media::Type::Video );
     m1->save();
 
     auto file2 = std::make_shared<mock::NoopFile>( "media2.mkv" );
     file2->setSize( 111 );
-    auto m2 = ml->addFile( *file2 );
+    auto m2 = ml->addFile( file2 );
     m2->setType( Media::Type::Video );
     m2->save();
 

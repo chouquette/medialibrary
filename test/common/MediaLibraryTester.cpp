@@ -39,7 +39,7 @@
 
 MediaLibraryTester::MediaLibraryTester()
     : dummyDirectory( new mock::NoopDirectory )
-    , dummyFolder( nullptr, "./", 0, 0, false )
+    , dummyFolder( std::make_shared<Folder>( nullptr, "./", 0, 0, false ) )
 {
 }
 
@@ -63,13 +63,13 @@ std::shared_ptr<Folder> MediaLibraryTester::folder( const std::string& mrl )
 
 std::shared_ptr<Media> MediaLibraryTester::addFile( const std::string& path )
 {
-    mock::NoopFile file( path );
-    return MediaLibrary::addFile( file, dummyFolder, *dummyDirectory );
+    auto file = std::make_shared<mock::NoopFile>( path );
+    return MediaLibrary::addFile( file, dummyFolder, dummyDirectory );
 }
 
-std::shared_ptr<Media> MediaLibraryTester::addFile( fs::IFile& file )
+std::shared_ptr<Media> MediaLibraryTester::addFile( std::shared_ptr<fs::IFile> file )
 {
-    return MediaLibrary::addFile( file, dummyFolder, *dummyDirectory );
+    return MediaLibrary::addFile( std::move( file ), dummyFolder, dummyDirectory );
 }
 
 void MediaLibraryTester::addLocalFsFactory()
