@@ -405,12 +405,6 @@ std::shared_ptr<Media> MediaLibrary::addFile( std::shared_ptr<fs::IFile> fileFs,
                                               std::shared_ptr<Folder> parentFolder,
                                               std::shared_ptr<fs::IDirectory> parentFolderFs )
 {
-    if ( isExtensionSupported( fileFs->extension().c_str() ) == false )
-    {
-        LOG_INFO( "Rejecting file ", fileFs->mrl(), " due to its extension" );
-        return nullptr;
-    }
-
     LOG_INFO( "Adding ", fileFs->mrl() );
     auto mptr = Media::create( this, IMedia::Type::Unknown, fileFs->name() );
     if ( mptr == nullptr )

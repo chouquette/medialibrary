@@ -266,7 +266,8 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
         });
         if ( it == end( files ) )
         {
-            filesToAdd.push_back( fileFs );
+            if ( MediaLibrary::isExtensionSupported( fileFs->extension().c_str() ) == true )
+                filesToAdd.push_back( fileFs );
             continue;
         }
         if ( fileFs->lastModificationDate() == (*it)->lastModificationDate() )
