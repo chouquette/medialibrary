@@ -90,7 +90,7 @@ public:
     virtual void onMediaDeleted( std::vector<int64_t> ids ) = 0;
 
     virtual void onArtistsAdded( std::vector<ArtistPtr> artists ) = 0;
-    virtual void onArtistsModified( std::vector<ArtistPtr> artist ) = 0;
+    virtual void onArtistsModified( std::vector<ArtistPtr> artists ) = 0;
     virtual void onArtistsDeleted( std::vector<int64_t> ids ) = 0;
 
     virtual void onAlbumsAdded( std::vector<AlbumPtr> albums ) = 0;
