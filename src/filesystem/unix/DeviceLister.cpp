@@ -197,7 +197,7 @@ bool DeviceLister::isRemovable( const std::string& deviceName, const std::string
     return false;
 }
 
-std::vector<std::tuple<std::string, std::string, bool>> medialibrary::fs::DeviceLister::devices() const
+std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() const
 {
     std::vector<std::tuple<std::string, std::string, bool>> res;
     try
