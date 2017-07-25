@@ -45,13 +45,13 @@ public:
     /**
      * @brief tracks fetches album tracks from the database
      */
-    virtual std::vector<std::shared_ptr<IMedia>> tracks( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
+    virtual std::vector<MediaPtr> tracks( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
     /**
      * @brief tracks fetches album tracks, filtered by genre
      * @param genre A musical genre. Only tracks of this genre will be returned
      * @return
      */
-    virtual std::vector<std::shared_ptr<IMedia>> tracks( GenrePtr genre, SortingCriteria sort = SortingCriteria::Default, bool desc = false  ) const = 0;
+    virtual std::vector<MediaPtr> tracks( GenrePtr genre, SortingCriteria sort = SortingCriteria::Default, bool desc = false  ) const = 0;
     /**
      * @brief albumArtist Returns the album main artist (generally tagged as album-artist)
      */
