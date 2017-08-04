@@ -137,6 +137,7 @@ noinst_HEADERS = \
 	src/filesystem/common/CommonFile.h \
 	src/filesystem/common/CommonDirectory.h \
 	src/filesystem/common/CommonDevice.h \
+	src/filesystem/darwin/DeviceLister.h \
 	src/filesystem/unix/Device.h \
 	src/filesystem/unix/Directory.h \
 	src/filesystem/unix/File.h \
@@ -204,7 +205,8 @@ endif
 if HAVE_DARWIN
 libmedialibrary_macos_la_CPPFLAGS = $(libmedialibrary_la_CPPFLAGS)
 libmedialibrary_macos_la_SOURCES = \
-	src/filesystem/darwin/DeviceLister.mm
+	src/filesystem/darwin/DeviceLister.mm \
+	$(NULL)
 endif
 endif
 

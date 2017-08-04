@@ -1,10 +1,12 @@
+
 /*****************************************************************************
  * Media Library
  *****************************************************************************
- * Copyright (C) 2015-2016 Hugo Beauzée-Luyssen, Videolabs
+ * Copyright (C) 2015-2017 Hugo Beauzée-Luyssen, Videolabs
  *
  * Authors: Hugo Beauzée-Luyssen <hugo@beauzee.fr>
  *          Felix Paul Kühne <fkuehne@videolan.org>
+ *          Soomin Lee <thehungrybu@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -22,4 +24,34 @@
  *****************************************************************************/
 
 #import <Foundation/Foundation.h>
+#import "DeviceLister.h"
 
+#include "logging/Logger.h"
+#include <vector>
+
+std::vector<std::tuple<std::string, std::string, bool>> medialibrary::fs::DeviceLister::devices() const
+{
+    std::vector<std::tuple<std::string, std::string, bool>> res;
+    NSArray *keys = [NSArray arrayWithObjects:NSURLVolumeUUIDStringKey, NSURLVolumeIsRemovableKey, nil];
+    NSArray *mountPoints = [[NSFileManager defaultManager] mountedVolumeURLsIncludingResourceValuesForKeys:keys options:0];
+
+    if ( mountPoints.count == 0 )
+    {
+        LOG_WARN( "Failed to detect any mountpoint" );
+        return res;
+    }
+
+    for ( NSURL *url in mountPoints )
+    {
+        bool isRemovable;
+        std::string uuid;
+        NSString *tmp;
+        NSDictionary<NSURLResourceKey, id> *deviceInfo = [url resourceValuesForKeys:keys error:nil];
+
+        tmp = deviceInfo[NSURLVolumeUUIDStringKey];
+        uuid = ( tmp != nil ) ? [tmp UTF8String] : "";
+        isRemovable = ( ( NSNumber * )deviceInfo[NSURLVolumeIsRemovableKey] ).boolValue;
+        res.emplace_back( std::make_tuple( uuid, [[url absoluteString] UTF8String], isRemovable ) );
+    }
+    return res;
+}

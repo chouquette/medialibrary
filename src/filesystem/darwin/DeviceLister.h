@@ -1,9 +1,9 @@
 /*****************************************************************************
  * Media Library
  *****************************************************************************
- * Copyright (C) 2015 Hugo Beauzée-Luyssen, Videolabs
+ * Copyright (C) 2015-2017 Hugo Beauzée-Luyssen, Videolabs
  *
- * Authors: Hugo Beauzée-Luyssen<hugo@beauzee.fr>
+ * Authors: Hugo Beauzée-Luyssen <hugo@beauzee.fr>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -20,30 +20,19 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#if HAVE_CONFIG_H
-# include "config.h"
-#endif
+#include "medialibrary/IDeviceLister.h"
 
-#include "DeviceListerFactory.h"
-
-#if defined(__linux__) && !defined(__ANDROID__)
-# include "filesystem/unix/DeviceLister.h"
-# define USE_BUILTIN_DEVICE_LISTER 1
-#elif defined(_WIN32)
-# include <winapifamily.h>
-# include "filesystem/win32/DeviceLister.h"
-# if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP)
-#  define USE_BUILTIN_DEVICE_LISTER 1
-# endif
-#elif defined(__APPLE__)
-# include "filesystem/darwin/DeviceLister.h"
-# define USE_BUILTIN_DEVICE_LISTER 1
-#endif
-
-medialibrary::DeviceListerPtr medialibrary::factory::createDeviceLister()
+namespace medialibrary
 {
-#ifdef USE_BUILTIN_DEVICE_LISTER
-    return std::make_shared<fs::DeviceLister>();
-#endif
-    return nullptr;
+namespace fs
+{
+
+class DeviceLister : public IDeviceLister
+{
+
+public:
+    virtual std::vector<std::tuple<std::string, std::string, bool>> devices() const override;
+};
+
+}
 }
