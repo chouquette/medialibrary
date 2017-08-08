@@ -92,6 +92,7 @@ class IMedia
             // Various
             ApplicationSpecific = 250,
         };
+        static constexpr size_t NbMeta = 19;
 
         virtual ~IMedia() = default;
 

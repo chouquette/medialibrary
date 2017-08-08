@@ -278,6 +278,11 @@ const IMediaMetadata& Media::metadata( IMedia::MetadataType type ) const
     if ( m_metadata.isCached() == false )
     {
         std::vector<MediaMetadata> res;
+        // Reserve the space for all meta to avoid a race condition where 2 threads
+        // would cache different meta, invalidating the potential reference
+        // to another IMediaMetadata held by another thread.
+        // This guarantees the vector will not grow afterward.
+        res.reserve( IMedia::NbMeta );
         static const std::string req = "SELECT * FROM " + policy::MediaMetadataTable::Name +
                 " WHERE id_media = ?";
         auto conn = m_ml->getConn();
@@ -290,7 +295,7 @@ const IMediaMetadata& Media::metadata( IMedia::MetadataType type ) const
             res.emplace_back( row.load<decltype(MediaMetadata::m_type)>( 1 ),
                               row.load<decltype(MediaMetadata::m_value)>( 2 ) );
         }
-        m_metadata = res;
+        m_metadata = std::move( res );
     }
     auto it = std::find_if( begin( m_metadata.get() ), end( m_metadata.get() ), [type](const MediaMetadata& m ) {
         return m.m_type == type;
