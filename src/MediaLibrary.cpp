@@ -71,7 +71,7 @@ namespace medialibrary
 {
 
 const char* const MediaLibrary::supportedExtensions[] = {
-    "3gp", "a52", "aac", "ac3", "aiff", "amr", "amv", "aob", "ape",
+    "3gp", "a52", "aac", "ac3", "aiff", "alac", "amr", "amv", "aob", "ape",
     "asf", "avi", "divx", "dts", "dv", "flac", "flv", "gxf", "iso",
     "it", "m1v", "m2t", "m2ts", "m2v", "m4a", "m4b", "m4p", "m4v",
     "mid", "mka", "mkv", "mlp", "mod", "mov", "mp1", "mp2",
