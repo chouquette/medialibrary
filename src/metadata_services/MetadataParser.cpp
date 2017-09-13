@@ -269,7 +269,7 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
         return nullptr;
 
     const auto discTotal = toInt( task.vlcMedia, libvlc_meta_DiscTotal, "disc total" );
-    const auto discNumber = toInt( task.vlcMedia, libvlc_meta_DiscNumber, "dist number" );
+    const auto discNumber = toInt( task.vlcMedia, libvlc_meta_DiscNumber, "disc number" );
     /*
      * Even if we get only 1 album, we need to filter out invalid matches.
      * For instance, if we have already inserted an album "A" by an artist "john"
