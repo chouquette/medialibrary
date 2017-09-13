@@ -48,7 +48,7 @@ namespace fs
 
 DeviceLister::DeviceMap DeviceLister::listDevices() const
 {
-    static const std::vector<std::string> deviceBlacklist = { "loop", "dm-" };
+    static const std::vector<std::string> deviceBlacklist = { "loop" };
     const std::string devPath = "/dev/disk/by-uuid/";
     // Don't use fs::Directory to iterate, as it resolves the symbolic links automatically.
     // We need the link name & what it points to.
@@ -125,7 +125,8 @@ DeviceLister::MountpointMap DeviceLister::listMountpoints() const
     return res;
 }
 
-std::string DeviceLister::deviceFromDeviceMapper( const std::string& devicePath ) const
+std::pair<std::string,std::string>
+DeviceLister::deviceFromDeviceMapper( const std::string& devicePath ) const
 {
     if ( devicePath.find( "/dev/mapper" ) != 0 )
         return {};
@@ -164,7 +165,7 @@ std::string DeviceLister::deviceFromDeviceMapper( const std::string& devicePath 
             LOG_WARN( "More than one slave for device mapper ", linkPath );
     }
     LOG_INFO( "Device mapper ", dmName, " maps to ", res );
-    return res;
+    return { dmName, res };
 }
 
 bool DeviceLister::isRemovable( const std::string& deviceName, const std::string& mountpoint ) const
@@ -225,24 +226,35 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
                 uuid = it->second;
             else
             {
+                std::pair<std::string, std::string> dmPair;
                 LOG_INFO( "Failed to find device for mountpoint ", mountpoint, ". Attempting to resolve"
                           " using device mapper" );
                 try
                 {
-                    deviceName = deviceFromDeviceMapper( devicePath );
+                    // Fetch a pair containing the device-mapper device name and
+                    // the block device it points to
+                    dmPair = deviceFromDeviceMapper( devicePath );
                 }
                 catch( std::runtime_error& ex )
                 {
                     LOG_WARN( "Failed to resolve using device mapper: ", ex.what() );
                     continue;
                 }
-                it = devices.find( deviceName );
+                // First try with the block device
+                it = devices.find( dmPair.second );
                 if ( it != end( devices ) )
                     uuid = it->second;
                 else
                 {
-                    LOG_ERROR( "Failed to resolve mountpoint ", mountpoint, " to any known device" );
-                    continue;
+                    // Otherwise try with the device mapper name.
+                    it = devices.find( dmPair.first );
+                    if( it != end( devices ) )
+                        uuid = it->second;
+                    else
+                    {
+                        LOG_ERROR( "Failed to resolve mountpoint ", mountpoint, " to any known device" );
+                        continue;
+                    }
                 }
             }
             auto removable = isRemovable( deviceName, mountpoint );
