@@ -127,7 +127,7 @@ void Directory::read() const
         }
 
         auto file = charset::FromWide( dirInfo->FileName );
-        if ( file[0] == '.' )
+        if ( file[0] == '.' && strcasecmp( file.get(), ".nomedia" ) )
             continue;
         auto path = path + file.get();
         if ( ( dirInfo->FileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
