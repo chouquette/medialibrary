@@ -59,8 +59,15 @@ struct Task
     {
     }
 
+    Task( const std::string& mrl )
+            : mrl{ mrl }
+            , currentService{ 0 }
+    {
+    }
+
     std::shared_ptr<Media>  media;
     std::shared_ptr<File>   file;
+    std::string             mrl;
     VLC::Media              vlcMedia;
     unsigned int            currentService;
 };
