@@ -98,21 +98,21 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
         using TracksT = decltype( tracks );
         sqlite::Tools::withRetries( 3, [this, &isAudio, &task]( TracksT tracks ) {
             auto t = m_ml->getConn()->newTransaction();
-            for ( const auto& t : tracks )
+            for ( const auto& track : tracks )
             {
-                auto codec = t.codec();
+                auto codec = track.codec();
                 std::string fcc( reinterpret_cast<const char*>( &codec ), 4 );
-                if ( t.type() == VLC::MediaTrack::Type::Video )
+                if ( track.type() == VLC::MediaTrack::Type::Video )
                 {
-                    task.media->addVideoTrack( fcc, t.width(), t.height(),
-                                          static_cast<float>( t.fpsNum() ) / static_cast<float>( t.fpsDen() ),
-                                          t.language(), t.description() );
+                    task.media->addVideoTrack( fcc, track.width(), track.height(),
+                                          static_cast<float>( track.fpsNum() ) / static_cast<float>( track.fpsDen() ),
+                                          track.language(), track.description() );
                     isAudio = false;
                 }
-                else if ( t.type() == VLC::MediaTrack::Type::Audio )
+                else if ( track.type() == VLC::MediaTrack::Type::Audio )
                 {
-                    task.media->addAudioTrack( fcc, t.bitrate(), t.rate(), t.channels(),
-                                          t.language(), t.description() );
+                    task.media->addAudioTrack( fcc, track.bitrate(), track.rate(), track.channels(),
+                                          track.language(), track.description() );
                 }
             }
             task.media->setDuration( task.vlcMedia.duration() );
