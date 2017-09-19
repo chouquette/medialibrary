@@ -28,6 +28,7 @@
 
 #include <algorithm>
 #include <queue>
+#include <utility>
 
 #include "factory/FileSystemFactory.h"
 #include "filesystem/IDevice.h"
@@ -58,7 +59,7 @@ namespace medialibrary
 
 FsDiscoverer::FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, MediaLibrary* ml, IMediaLibraryCb* cb )
     : m_ml( ml )
-    , m_fsFactory( fsFactory )
+    , m_fsFactory( std::move( fsFactory ))
     , m_cb( cb )
 {
 }
