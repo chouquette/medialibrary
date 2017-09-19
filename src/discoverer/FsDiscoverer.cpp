@@ -241,7 +241,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
         subFoldersInDB.erase( it );
     }
     // Now all folders we had in DB but haven't seen from the FS must have been deleted.
-    for ( auto f : subFoldersInDB )
+    for ( const auto& f : subFoldersInDB )
     {
         LOG_INFO( "Folder ", f->mrl(), " not found in FS, deleting it" );
         m_ml->deleteFolder( *f );
