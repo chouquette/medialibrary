@@ -347,6 +347,8 @@ bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
         device = Device::create( m_ml, deviceFs->uuid(),
                                  utils::file::scheme( folder->mrl() ),
                                  deviceFs->isRemovable() );
+        if ( device == nullptr )
+            return false;
     }
 
     auto f = Folder::create( m_ml, folder->mrl(),
