@@ -376,7 +376,8 @@ bool Media::save()
 
 std::shared_ptr<File> Media::addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs, IFile::Type type )
 {
-    auto file = File::create( m_ml, m_id, type, fileFs, parentFolder.id(), parentFolderFs.device()->isRemovable() );
+    auto file = File::createFromMedia( m_ml, m_id, type, fileFs, parentFolder.id(),
+                                       parentFolderFs.device()->isRemovable());
     if ( file == nullptr )
         return nullptr;
     auto lock = m_files.lock();
@@ -390,7 +391,7 @@ FilePtr Media::addExternalMrl( const std::string& mrl , IFile::Type type )
     FilePtr file;
     try
     {
-        file = File::create( m_ml, m_id, type, mrl );
+        file = File::createFromMedia( m_ml, m_id, type, mrl );
     }
     catch ( const sqlite::errors::Generic& ex )
     {

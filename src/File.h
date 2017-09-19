@@ -87,9 +87,10 @@ public:
     int64_t folderId();
 
     static bool createTable( DBConnection dbConnection );
-    static std::shared_ptr<File> create( MediaLibraryPtr ml, int64_t mediaId, Type type,
-                                         const fs::IFile& file, int64_t folderId, bool isRemovable );
-    static std::shared_ptr<File> create( MediaLibraryPtr ml, int64_t mediaId, Type type, const std::string& mrl );
+    static std::shared_ptr<File> createFromMedia( MediaLibraryPtr ml, int64_t mediaId, Type type,
+                                                  const fs::IFile& file, int64_t folderId, bool isRemovable );
+    static std::shared_ptr<File> createFromMedia( MediaLibraryPtr ml, int64_t mediaId, Type type,
+                                                  const std::string& mrl );
     /**
      * @brief fromPath  Attempts to fetch a file using its mrl
      * This will only work if the file was stored on a non removable device

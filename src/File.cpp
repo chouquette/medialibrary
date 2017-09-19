@@ -218,7 +218,8 @@ bool File::createTable( DBConnection dbConnection )
             sqlite::Tools::executeRequest( dbConnection, folderIndexReq );
 }
 
-std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& fileFs, int64_t folderId, bool isRemovable )
+std::shared_ptr<File> File::createFromMedia( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& fileFs,
+                                             int64_t folderId, bool isRemovable )
 {
     auto self = std::make_shared<File>( ml, mediaId, type, fileFs, folderId, isRemovable );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
@@ -231,7 +232,8 @@ std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, Type ty
     return self;
 }
 
-std::shared_ptr<File> File::create( MediaLibraryPtr ml, int64_t mediaId, IFile::Type type, const std::string& mrl )
+std::shared_ptr<File> File::createFromMedia( MediaLibraryPtr ml, int64_t mediaId, IFile::Type type,
+                                             const std::string& mrl )
 {
     // Sqlite won't ensure uniqueness for (folder_id, mrl) when folder_id is null, so we have to ensure
     // of it ourselves
