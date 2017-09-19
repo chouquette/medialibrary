@@ -120,8 +120,8 @@ bool FsDiscoverer::reload()
 {
     LOG_INFO( "Reloading all folders" );
     auto rootFolders = Folder::fetchRootFolders( m_ml );
-    for ( const auto f : rootFolders )
-        reloadFolder( std::move( f ) );
+    for ( const auto& f : rootFolders )
+        reloadFolder( f );
     return true;
 }
 
