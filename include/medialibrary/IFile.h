@@ -42,6 +42,8 @@ public:
         Soundtrack,
         /// External subtitles
         Subtitles,
+        /// A playlist File
+        Playlist,
     };
 
     virtual ~IFile() = default;
