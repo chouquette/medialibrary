@@ -43,25 +43,37 @@ Playlist::Playlist( MediaLibraryPtr ml, sqlite::Row& row )
 {
     row >> m_id
         >> m_name
+        >> m_fileId
         >> m_creationDate;
 }
 
-Playlist::Playlist( MediaLibraryPtr ml, const std::string& name )
+Playlist::Playlist( MediaLibraryPtr ml, const std::string& name, int64_t fileId )
     : m_ml( ml )
     , m_id( 0 )
     , m_name( name )
+    , m_fileId( fileId )
     , m_creationDate( time( nullptr ) )
+{
+}
+
+Playlist::Playlist( MediaLibraryPtr ml, const std::string& name)
+    : Playlist( ml, name, 0 )
 {
 }
 
 std::shared_ptr<Playlist> Playlist::create( MediaLibraryPtr ml, const std::string& name )
 {
-    auto self = std::make_shared<Playlist>( ml, name );
+    return createFromFile( ml, name, 0 );
+}
+
+std::shared_ptr<Playlist> Playlist::createFromFile( MediaLibraryPtr ml, const std::string& name, int64_t fileId )
+{
+    auto self = std::make_shared<Playlist>( ml, name, fileId );
     static const std::string req = "INSERT INTO " + policy::PlaylistTable::Name + \
-            "(name, creation_date) VALUES(?, ?)";
+            "(name, file_id, creation_date) VALUES(?, ?, ?)";
     try
     {
-        if ( insert( ml, self, req, name, self->m_creationDate ) == false )
+        if ( insert( ml, self, req, name, sqlite::ForeignKey( fileId ), self->m_creationDate ) == false )
             return nullptr;
         return self;
     }
@@ -148,7 +160,10 @@ bool Playlist::createTable( DBConnection dbConn )
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::PlaylistTable::Name + "("
             + policy::PlaylistTable::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             "name TEXT UNIQUE,"
-            "creation_date UNSIGNED INT NOT NULL"
+            "file_id UNSIGNED INT DEFAULT NULL,"
+            "creation_date UNSIGNED INT NOT NULL,"
+            "FOREIGN KEY (file_id) REFERENCES " + policy::FileTable::Name
+            + "(id_file) ON DELETE CASCADE"
         ")";
     const std::string relTableReq = "CREATE TABLE IF NOT EXISTS PlaylistMediaRelation("
             "media_id INTEGER,"
