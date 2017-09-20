@@ -23,6 +23,7 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 #include <vector>
 #include <string>
 #include <vlcpp/vlc.hpp>
@@ -30,8 +31,15 @@
 namespace medialibrary
 {
 
+namespace fs
+{
+class IDirectory;
+class IFile;
+}
+
 class Media;
 class File;
+class Folder;
 
 namespace parser
 {
@@ -53,23 +61,30 @@ struct Task
     };
 
     Task( std::shared_ptr<Media> media, std::shared_ptr<File> file )
-        : media( media )
-        , file( file )
+        : media( std::move( media ) )
+        , file( std::move( file ) )
         , currentService( 0 )
     {
     }
 
-    Task( const std::string& mrl )
-            : mrl{ mrl }
-            , currentService{ 0 }
+    Task( std::shared_ptr<fs::IFile> fileFs,
+          std::shared_ptr<Folder> parentFolder,
+          std::shared_ptr<fs::IDirectory> parentFolderFs)
+            : fileFs( std::move( fileFs ) )
+            , parentFolder( std::move( parentFolder ) )
+            , parentFolderFs( std::move ( parentFolderFs ) )
+            , currentService( 0 )
     {
     }
 
-    std::shared_ptr<Media>  media;
-    std::shared_ptr<File>   file;
-    std::string             mrl;
-    VLC::Media              vlcMedia;
-    unsigned int            currentService;
+    std::shared_ptr<Media>          media;
+    std::shared_ptr<File>           file;
+    std::shared_ptr<fs::IFile>      fileFs;
+    std::shared_ptr<Folder>         parentFolder;
+    std::shared_ptr<fs::IDirectory> parentFolderFs;
+    std::string                     mrl;
+    VLC::Media                      vlcMedia;
+    unsigned int                    currentService;
 };
 
 }

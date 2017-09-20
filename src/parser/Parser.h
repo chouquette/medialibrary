@@ -51,6 +51,9 @@ public:
     virtual ~Parser();
     void addService( ServicePtr service );
     void parse( std::shared_ptr<Media> media, std::shared_ptr<File> file );
+    void parse( std::shared_ptr<fs::IFile> fileFs,
+                std::shared_ptr<Folder> parentFolder,
+                std::shared_ptr<fs::IDirectory> parentFolderFs );
     void start();
     void pause();
     void resume();

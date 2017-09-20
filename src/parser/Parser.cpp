@@ -65,6 +65,18 @@ void Parser::parse( std::shared_ptr<Media> media, std::shared_ptr<File> file )
     updateStats();
 }
 
+void Parser::parse( std::shared_ptr<fs::IFile> fileFs,
+                    std::shared_ptr<Folder> parentFolder,
+                    std::shared_ptr<fs::IDirectory> parentFolderFs )
+{
+    if ( m_services.size() == 0 )
+        return;
+    m_services[0]->parse( std::unique_ptr<parser::Task>( new parser::Task(
+            std::move( fileFs ), std::move( parentFolder ), std::move( parentFolderFs ) ) ) );
+    m_opToDo += m_services.size();
+    updateStats();
+}
+
 void Parser::start()
 {
     restore();
