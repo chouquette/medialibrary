@@ -32,6 +32,7 @@ namespace medialibrary
 {
 
 class Playlist;
+class File;
 
 namespace policy
 {
@@ -63,6 +64,9 @@ public:
     virtual bool add( int64_t mediaId, unsigned int position ) override;
     virtual bool move( int64_t mediaId, unsigned int position ) override;
     virtual bool remove( int64_t mediaId ) override;
+    std::shared_ptr<File> addFile( const fs::IFile& fileFs, int64_t parentFolderId,
+                                   bool isFolderFsRemovable );
+
 
     static bool createTable( DBConnection dbConn );
     static bool createTriggers( DBConnection dbConn );
