@@ -135,7 +135,8 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         void setThumbnail( const std::string& thumbnail );
         bool save();
 
-        std::shared_ptr<File> addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs , IFile::Type type);
+        std::shared_ptr<File> addFile( const fs::IFile& fileFs, const Folder& parentFolder,
+                                       const fs::IDirectory& parentFolderFs, IFile::Type type );
         virtual FilePtr addExternalMrl( const std::string& mrl, IFile::Type type ) override;
         void removeFile( File& file );
 

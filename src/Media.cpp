@@ -374,7 +374,8 @@ bool Media::save()
     return true;
 }
 
-std::shared_ptr<File> Media::addFile( const fs::IFile& fileFs, Folder& parentFolder, fs::IDirectory& parentFolderFs, IFile::Type type )
+std::shared_ptr<File> Media::addFile( const fs::IFile& fileFs, const Folder& parentFolder,
+                                      const fs::IDirectory& parentFolderFs, IFile::Type type )
 {
     auto file = File::createFromMedia( m_ml, m_id, type, fileFs, parentFolder.id(),
                                        parentFolderFs.device()->isRemovable());
