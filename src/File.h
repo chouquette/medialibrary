@@ -59,8 +59,8 @@ public:
     };
 
     File( MediaLibraryPtr ml, sqlite::Row& row );
-    File( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& file, int64_t folderId, bool isRemovable );
-    File( MediaLibraryPtr ml, int64_t mediaId, Type type, const std::string& mrl );
+    File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type, const fs::IFile& file, int64_t folderId, bool isRemovable );
+    File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type, const std::string& mrl );
     virtual int64_t id() const override;
     virtual const std::string& mrl() const override;
     virtual Type type() const override;
@@ -91,6 +91,10 @@ public:
                                                   const fs::IFile& file, int64_t folderId, bool isRemovable );
     static std::shared_ptr<File> createFromMedia( MediaLibraryPtr ml, int64_t mediaId, Type type,
                                                   const std::string& mrl );
+
+    static std::shared_ptr<File> createFromPlaylist( MediaLibraryPtr ml, int64_t playlistId, const fs::IFile& file,
+                                                     int64_t folderId, bool isRemovable );
+
     /**
      * @brief fromPath  Attempts to fetch a file using its mrl
      * This will only work if the file was stored on a non removable device
@@ -123,6 +127,7 @@ private:
 
     int64_t m_id;
     int64_t m_mediaId;
+    int64_t m_playlistId;
     // Contains the path relative to the containing folder for files contained in a removable folder
     // or the full file MRL for non removable ones
     std::string m_mrl;
