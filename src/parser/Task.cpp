@@ -27,8 +27,6 @@
 
 #include "Task.h"
 
-#include <utility>
-
 #include "filesystem/IFile.h"
 #include "File.h"
 
@@ -38,20 +36,24 @@ namespace medialibrary
 namespace parser
 {
 
-Task::Task( std::shared_ptr<Media> media, std::shared_ptr<File> file )
-        : media( std::move( media ) )
-        , file( std::move( file ) )
-        , currentService( 0 )
+Task::Task( std::shared_ptr<File> file, std::string mrl )
+    : file( std::move( file ) )
+    , mrl( std::move( mrl ) )
+    , currentService( 0 )
+    , step( this->file->parserStep() )
 {
 }
 
 Task::Task( std::shared_ptr<fs::IFile> fileFs,
             std::shared_ptr<Folder> parentFolder,
-            std::shared_ptr<fs::IDirectory> parentFolderFs)
-                : fileFs( std::move( fileFs ) )
-                , parentFolder( std::move( parentFolder ) )
-                , parentFolderFs( std::move( parentFolderFs ) )
-                , currentService( 0 )
+            std::shared_ptr<fs::IDirectory> parentFolderFs,
+            std::string mrl )
+    : fileFs( std::move( fileFs ) )
+    , parentFolder( std::move( parentFolder ) )
+    , parentFolderFs( std::move( parentFolderFs ) )
+    , mrl( std::move( mrl ) )
+    , currentService( 0 )
+    , step( ParserStep::None )
 {
 }
 

@@ -29,8 +29,12 @@
 #include "AlbumTrack.h"
 #include "Artist.h"
 #include "File.h"
+#include "filesystem/IDevice.h"
+#include "filesystem/IDirectory.h"
+#include "Folder.h"
 #include "Genre.h"
 #include "Media.h"
+#include "Playlist.h"
 #include "Show.h"
 #include "utils/Filename.h"
 #include "utils/ModificationsNotifier.h"
@@ -71,6 +75,32 @@ int MetadataParser::toInt( VLC::Media& vlcMedia, libvlc_meta_t meta, const char*
 
 parser::Task::Status MetadataParser::run( parser::Task& task )
 {
+    if ( task.file != nullptr )
+        task.media = task.file->media();
+    else // Create Media & File
+    {
+        auto t = m_ml->getConn()->newTransaction();
+        LOG_INFO( "Adding ", task.mrl );
+        task.media = Media::create( m_ml, IMedia::Type::Unknown, utils::file::fileName( task.mrl ) );
+        if ( task.media == nullptr )
+        {
+            LOG_ERROR( "Failed to add media ", task.mrl, " to the media library" );
+            return parser::Task::Status::Fatal;
+        }
+        // For now, assume all media are made of a single file
+        task.file = task.media->addFile( *task.fileFs, task.parentFolder->id(),
+                                         task.parentFolderFs->device()->isRemovable(),
+                                         File::Type::Main );
+        if ( task.file == nullptr )
+        {
+            LOG_ERROR( "Failed to add file ", task.mrl, " to media #", task.media->id() );
+            return parser::Task::Status::Fatal;
+        }
+        t->commit();
+        // Synchronize file step tracker with task
+        task.markStepCompleted( static_cast<parser::Task::ParserStep>( task.step ) );
+    }
+
     const auto& tracks = task.vlcMedia.tracks();
 
     // If we failed to extract any tracks, don't make any assumption and forward to the
@@ -530,8 +560,8 @@ uint8_t MetadataParser::nbThreads() const
 bool MetadataParser::isCompleted( const parser::Task& task ) const
 {
     // We always need to run this task if the metadata extraction isn't completed
-    return ( static_cast<uint8_t>( task.file->parserStep() ) &
-             static_cast<uint8_t>( parser::Task::ParserStep::MetadataAnalysis ) ) != 0;
+    return ( static_cast<uint8_t>( task.step ) &
+            static_cast<uint8_t>( parser::Task::ParserStep::MetadataAnalysis ) ) != 0;
 }
 
 }

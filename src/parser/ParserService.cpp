@@ -165,29 +165,31 @@ void ParserService::mainloop()
         }
         if ( isCompleted( *task ) == true )
         {
-            LOG_INFO( "Skipping completed task [", serviceName, "] on ", task->file->mrl() );
+            LOG_INFO( "Skipping completed task [", serviceName, "] on ", task->mrl );
             m_parserCb->done( std::move( task ), parser::Task::Status::Success );
             continue;
         }
         parser::Task::Status status;
         try
         {
-            LOG_INFO( "Executing ", serviceName, " task on ", task->file->mrl() );
+            LOG_INFO( "Executing ", serviceName, " task on ", task->mrl );
             auto chrono = std::chrono::steady_clock::now();
-            if ( task->file->isDeleted() || task->media->isDeleted() )
+            if ( ( task->file != nullptr && task->file->isDeleted() )
+                 || ( task->media != nullptr && task->media->isDeleted() ) )
                 status = parser::Task::Status::Fatal;
             else
             {
-                task->file->startParserStep();
+                if ( task->file != nullptr )
+                    task->file->startParserStep(); // FIXME ?
                 status = run( *task );
                 auto duration = std::chrono::steady_clock::now() - chrono;
-                LOG_INFO( "Done executing ", serviceName, " task on ", task->file->mrl(), " in ",
+                LOG_INFO( "Done executing ", serviceName, " task on ", task->mrl, " in ",
                           std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
             }
         }
         catch ( const std::exception& ex )
         {
-            LOG_ERROR( "Caught an exception during ", task->file->mrl(), " [", serviceName, "] parsing: ", ex.what() );
+            LOG_ERROR( "Caught an exception during ", task->mrl, " [", serviceName, "] parsing: ", ex.what() );
             status = parser::Task::Status::Fatal;
         }
         m_parserCb->done( std::move( task ), status );

@@ -67,7 +67,6 @@ public:
     std::shared_ptr<File> addFile( const fs::IFile& fileFs, int64_t parentFolderId,
                                    bool isFolderFsRemovable );
 
-
     static bool createTable( DBConnection dbConn );
     static bool createTriggers( DBConnection dbConn );
     static std::vector<PlaylistPtr> search( MediaLibraryPtr ml, const std::string& name );

@@ -154,3 +154,10 @@ std::vector<const char*> MediaLibraryTester::getSupportedExtensions() const
         res.push_back( supportedExtensions[i] );
     return res;
 }
+
+void MediaLibraryTester::addDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,
+                                std::shared_ptr<Folder> parentFolder,
+                                std::shared_ptr<fs::IDirectory> parentFolderFs)
+{
+    MediaLibrary::addFile( fileFs, parentFolder, parentFolderFs );
+}

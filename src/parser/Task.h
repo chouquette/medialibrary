@@ -71,10 +71,11 @@ struct Task
         Completed = 1 | 2 | 4,
     };
 
-    Task( std::shared_ptr<Media> media, std::shared_ptr<File> file );
+    Task( std::shared_ptr<File> file, std::string mrl );
     Task( std::shared_ptr<fs::IFile> fileFs,
           std::shared_ptr<Folder> parentFolder,
-          std::shared_ptr<fs::IDirectory> parentFolderFs );
+          std::shared_ptr<fs::IDirectory> parentFolderFs,
+          std::string mrl );
 
     void markStepCompleted( ParserStep stepCompleted );
     void markStepUncompleted( ParserStep stepUncompleted );

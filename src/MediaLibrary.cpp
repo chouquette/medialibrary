@@ -26,6 +26,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <utility>
 #include <sys/stat.h>
 
 #include "Album.h"
@@ -424,8 +425,16 @@ std::shared_ptr<Media> MediaLibrary::addFile( std::shared_ptr<fs::IFile> fileFs,
         return nullptr;
     }
     if ( m_parser != nullptr )
-        m_parser->parse( mptr, file );
+        m_parser->parse( file, fileFs->mrl() );
     return mptr;
+}
+
+void MediaLibrary::addDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
+                                      std::shared_ptr<Folder> parentFolder,
+                                      std::shared_ptr<fs::IDirectory> parentFolderFs )
+{
+    if ( m_parser != nullptr )
+        m_parser->parse( std::move( fileFs ), std::move( parentFolder ), std::move( parentFolderFs ) );
 }
 
 bool MediaLibrary::deleteFolder( const Folder& folder )

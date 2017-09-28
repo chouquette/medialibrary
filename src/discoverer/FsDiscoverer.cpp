@@ -302,7 +302,7 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
     sqlite::Tools::withRetries( 3, [this, &parentFolder, &parentFolderFs]
                             ( FilesT files, FilesToAddT filesToAdd, FilesToRemoveT filesToRemove ) {
         auto t = m_ml->getConn()->newTransaction();
-        for ( auto file : files )
+        for ( const auto& file : files )
         {
             LOG_INFO( "File ", file->mrl(), " not found on filesystem, deleting it" );
             auto media = file->media();
@@ -330,7 +330,7 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
         }
         // Insert all files at once to avoid SQL write contention
         for ( auto& p : filesToAdd )
-            m_ml->addFile( p, parentFolder, parentFolderFs );
+            m_ml->addDiscoveredFile( p, parentFolder, parentFolderFs );
         t->commit();
         LOG_INFO( "Done checking files in ", parentFolderFs->mrl() );
     }, std::move( files ), std::move( filesToAdd ), std::move( filesToRemove ) );

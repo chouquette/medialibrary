@@ -40,14 +40,13 @@ VLCMetadataService::VLCMetadataService()
 
 parser::Task::Status VLCMetadataService::run( parser::Task& task )
 {
-    auto file = task.file;
-
-    LOG_INFO( "Parsing ", file->mrl() );
+    auto mrl = task.mrl;
+    LOG_INFO( "Parsing ", mrl );
 
     // Having a valid media means we're re-executing this parser after the thumbnailer,
     // which isn't expected, as we always mark this task as completed.
     assert( task.vlcMedia.isValid() == false );
-    task.vlcMedia = VLC::Media( m_instance, file->mrl(), VLC::Media::FromType::FromLocation );
+    task.vlcMedia = VLC::Media( m_instance, mrl, VLC::Media::FromType::FromLocation );
 
     VLC::Media::ParsedStatus status;
     bool done = false;
@@ -73,7 +72,7 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
         return parser::Task::Status::Fatal;
     auto tracks = task.vlcMedia.tracks();
     if ( tracks.size() == 0 )
-        LOG_WARN( "Failed to fetch any tracks for ", file->mrl() );
+        LOG_WARN( "Failed to fetch any tracks for ", mrl );
     // Don't save the file parsing step yet, since all data are just in memory. Just mark
     // the extraction as done.
     task.markStepCompleted( parser::Task::ParserStep::MetadataExtraction );

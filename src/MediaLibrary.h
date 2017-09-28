@@ -75,6 +75,9 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         std::shared_ptr<Media> addFile( std::shared_ptr<fs::IFile> fileFs,
                                         std::shared_ptr<Folder> parentFolder,
                                         std::shared_ptr<fs::IDirectory> parentFolderFs );
+        virtual void addDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
+                                        std::shared_ptr<Folder> parentFolder,
+                                        std::shared_ptr<fs::IDirectory> parentFolderFs );
 
         bool deleteFolder(const Folder& folder );
 

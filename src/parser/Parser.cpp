@@ -27,6 +27,7 @@
 #include "Parser.h"
 
 #include <algorithm>
+#include <utility>
 
 #include "medialibrary/IMediaLibrary.h"
 #include "Media.h"
@@ -56,11 +57,11 @@ void Parser::addService( ServicePtr service )
     m_services.push_back( std::move( service ) );
 }
 
-void Parser::parse( std::shared_ptr<Media> media, std::shared_ptr<File> file )
+void Parser::parse( std::shared_ptr<File> file, const std::string& mrl )
 {
-    if ( m_services.size() == 0 )
+    if ( m_services.empty() == true )
         return;
-    m_services[0]->parse( std::unique_ptr<parser::Task>( new parser::Task( media, file ) ) );
+    m_services[0]->parse( std::unique_ptr<parser::Task>( new parser::Task( std::move( file ), mrl ) ) );
     m_opToDo += m_services.size();
     updateStats();
 }
@@ -69,10 +70,11 @@ void Parser::parse( std::shared_ptr<fs::IFile> fileFs,
                     std::shared_ptr<Folder> parentFolder,
                     std::shared_ptr<fs::IDirectory> parentFolderFs )
 {
-    if ( m_services.size() == 0 )
+    if ( m_services.empty() == true )
         return;
+    std::string mrl = fileFs->mrl();
     m_services[0]->parse( std::unique_ptr<parser::Task>( new parser::Task(
-            std::move( fileFs ), std::move( parentFolder ), std::move( parentFolderFs ) ) ) );
+            std::move( fileFs ), std::move( parentFolder ), std::move( parentFolderFs ), mrl ) ) );
     m_opToDo += m_services.size();
     updateStats();
 }
@@ -115,8 +117,7 @@ void Parser::restore()
     LOG_INFO( "Resuming parsing on ", files.size(), " mrl" );
     for ( auto& f : files )
     {
-        auto m = f->media();
-        parse( m, f );
+        parse( f, f->mrl() );
     }
 }
 
@@ -147,7 +148,7 @@ void Parser::done( std::unique_ptr<parser::Task> t, parser::Task::Status status 
 
     if ( status == parser::Task::Status::TemporaryUnavailable ||
          status == parser::Task::Status::Fatal ||
-         t->file->parserStep() == parser::Task::ParserStep::Completed )
+         ( t->file != nullptr && t->file->parserStep() == parser::Task::ParserStep::Completed ) )
     {
         if ( serviceIdx < m_services.size() )
         {
@@ -163,7 +164,7 @@ void Parser::done( std::unique_ptr<parser::Task> t, parser::Task::Status status 
     {
         t->currentService = serviceIdx = 0;
         m_opToDo += m_services.size();
-        LOG_INFO("Running parser chain again for ", t->file->mrl());
+        LOG_INFO("Running parser chain again for ", t->mrl);
     }
     updateStats();
     m_services[serviceIdx]->parse( std::move( t ) );
