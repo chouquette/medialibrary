@@ -155,8 +155,8 @@ private:
         SubType m_subType;
         int64_t m_duration;
         unsigned int m_playCount;
-        unsigned int m_lastPlayedDate;
-        unsigned int m_insertionDate;
+        std::time_t m_lastPlayedDate;
+        std::time_t m_insertionDate;
         unsigned int m_releaseDate;
         std::string m_thumbnail;
         std::string m_title;

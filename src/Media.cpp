@@ -264,7 +264,7 @@ const std::string &Media::thumbnail()
 
 unsigned int Media::insertionDate() const
 {
-    return m_insertionDate;
+    return static_cast<unsigned int>( m_insertionDate );
 }
 
 unsigned int Media::releaseDate() const
