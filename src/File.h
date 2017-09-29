@@ -127,7 +127,7 @@ private:
     // or the full file MRL for non removable ones
     std::string m_mrl;
     Type m_type;
-    unsigned int m_lastModificationDate;
+    std::time_t m_lastModificationDate;
     unsigned int m_size;
     ParserStep m_parserSteps;
     int64_t m_folderId;

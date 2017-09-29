@@ -114,7 +114,7 @@ IFile::Type File::type() const
 
 unsigned int File::lastModificationDate() const
 {
-    return m_lastModificationDate;
+    return static_cast<unsigned int>( m_lastModificationDate );
 }
 
 unsigned int File::size() const
