@@ -49,10 +49,14 @@ Task::Task( std::shared_ptr<File> file, std::shared_ptr<Media> media,
 Task::Task( std::shared_ptr<fs::IFile> fileFs,
             std::shared_ptr<Folder> parentFolder,
             std::shared_ptr<fs::IDirectory> parentFolderFs,
+            std::shared_ptr<Playlist> parentPlaylist,
+            unsigned int parentPlaylistIndex,
             std::string mrl )
     : fileFs( std::move( fileFs ) )
     , parentFolder( std::move( parentFolder ) )
     , parentFolderFs( std::move( parentFolderFs ) )
+    , parentPlaylist( std::move( parentPlaylist ) )
+    , parentPlaylistIndex( parentPlaylistIndex )
     , mrl( std::move( mrl ) )
     , currentService( 0 )
     , step( ParserStep::None )

@@ -63,7 +63,8 @@ public:
     std::vector<const char*> getSupportedExtensions() const;
     virtual void addDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                                     std::shared_ptr<Folder> parentFolder,
-                                    std::shared_ptr<fs::IDirectory> parentFolderFs ) override;
+                                    std::shared_ptr<fs::IDirectory> parentFolderFs,
+                                    std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist ) override;
 
 private:
     std::shared_ptr<fs::IDirectory> dummyDirectory;

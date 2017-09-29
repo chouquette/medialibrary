@@ -443,10 +443,12 @@ std::shared_ptr<Media> MediaLibrary::addFile( std::shared_ptr<fs::IFile> fileFs,
 
 void MediaLibrary::addDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                                       std::shared_ptr<Folder> parentFolder,
-                                      std::shared_ptr<fs::IDirectory> parentFolderFs )
+                                      std::shared_ptr<fs::IDirectory> parentFolderFs,
+                                      std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist )
 {
     if ( m_parser != nullptr )
-        m_parser->parse( std::move( fileFs ), std::move( parentFolder ), std::move( parentFolderFs ) );
+        m_parser->parse( std::move( fileFs ), std::move( parentFolder ),
+                         std::move( parentFolderFs ), std::move( parentPlaylist ) );
 }
 
 bool MediaLibrary::deleteFolder( const Folder& folder )

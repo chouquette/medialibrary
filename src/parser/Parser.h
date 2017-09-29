@@ -54,7 +54,8 @@ public:
                 const std::string& mrl );
     void parse( std::shared_ptr<fs::IFile> fileFs,
                 std::shared_ptr<Folder> parentFolder,
-                std::shared_ptr<fs::IDirectory> parentFolderFs );
+                std::shared_ptr<fs::IDirectory> parentFolderFs,
+                std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist );
     void start();
     void pause();
     void resume();

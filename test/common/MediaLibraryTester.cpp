@@ -157,7 +157,8 @@ std::vector<const char*> MediaLibraryTester::getSupportedExtensions() const
 
 void MediaLibraryTester::addDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,
                                 std::shared_ptr<Folder> parentFolder,
-                                std::shared_ptr<fs::IDirectory> parentFolderFs)
+                                std::shared_ptr<fs::IDirectory> parentFolderFs,
+                                std::pair<std::shared_ptr<Playlist>, unsigned int>)
 {
     MediaLibrary::addFile( fileFs, parentFolder, parentFolderFs );
 }

@@ -72,13 +72,15 @@ void Parser::parse( std::shared_ptr<File> file, std::shared_ptr<Media> media,
 
 void Parser::parse( std::shared_ptr<fs::IFile> fileFs,
                     std::shared_ptr<Folder> parentFolder,
-                    std::shared_ptr<fs::IDirectory> parentFolderFs )
+                    std::shared_ptr<fs::IDirectory> parentFolderFs,
+                    std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist )
 {
     if ( m_services.empty() == true )
         return;
     std::string mrl = fileFs->mrl();
     m_services[0]->parse( std::unique_ptr<parser::Task>( new parser::Task(
-            std::move( fileFs ), std::move( parentFolder ), std::move( parentFolderFs ), mrl ) ) );
+            std::move( fileFs ), std::move( parentFolder ), std::move( parentFolderFs ),
+            std::move( parentPlaylist.first ), parentPlaylist.second, mrl ) ) );
     m_opToDo += m_services.size();
     updateStats();
 }

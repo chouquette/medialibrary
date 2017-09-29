@@ -41,6 +41,7 @@ class IFile;
 class Media;
 class File;
 class Folder;
+class Playlist;
 
 namespace parser
 {
@@ -81,6 +82,8 @@ struct Task
     Task( std::shared_ptr<fs::IFile> fileFs,
           std::shared_ptr<Folder> parentFolder,
           std::shared_ptr<fs::IDirectory> parentFolderFs,
+          std::shared_ptr<Playlist> parentPlaylist,
+          unsigned int parentPlaylistIndex,
           std::string mrl );
 
     void markStepCompleted( ParserStep stepCompleted );
@@ -91,6 +94,8 @@ struct Task
     std::shared_ptr<fs::IFile>      fileFs;
     std::shared_ptr<Folder>         parentFolder;
     std::shared_ptr<fs::IDirectory> parentFolderFs;
+    std::shared_ptr<Playlist>       parentPlaylist;
+    unsigned int                    parentPlaylistIndex;
     std::string                     mrl;
     VLC::Media                      vlcMedia;
     unsigned int                    currentService;
