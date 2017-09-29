@@ -81,6 +81,7 @@ libmedialibrary_la_SOURCES = \
 	src/parser/Parser.cpp \
 	src/parser/ParserService.cpp \
 	src/parser/Task.cpp \
+	src/utils/Directory.cpp \
 	src/utils/Filename.cpp \
 	src/utils/ModificationsNotifier.cpp \
 	src/utils/Url.cpp \
@@ -162,6 +163,7 @@ noinst_HEADERS = \
 	src/ShowEpisode.h \
 	src/Show.h \
 	src/utils/Cache.h \
+	src/utils/Directory.h \
 	src/utils/Filename.h \
 	src/utils/ModificationsNotifier.h \
 	src/utils/SWMRLock.h \

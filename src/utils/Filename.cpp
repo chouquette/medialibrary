@@ -30,9 +30,9 @@
 #include <stdexcept>
 
 #ifdef _WIN32
-#define DIR_SEPARATOR '\\'
+# define DIR_SEPARATOR '\\'
 #else
-#define DIR_SEPARATOR '/'
+# define DIR_SEPARATOR '/'
 #endif
 
 namespace medialibrary
