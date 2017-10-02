@@ -224,7 +224,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
             {
                 // Best attempt to detect a foreign key violation, indicating the parent folders have been
                 // deleted due to blacklisting
-                if ( strstr( ex.what(), "foreign key" ) != NULL )
+                if ( strstr( ex.what(), "foreign key" ) != nullptr )
                 {
                     LOG_WARN( "Creation of a folder failed because the parent is non existing: ", ex.what(),
                               ". Assuming it was deleted due to blacklisting" );
