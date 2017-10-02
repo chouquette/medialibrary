@@ -281,7 +281,12 @@ bool Folder::isPresent() const
     auto deviceLock = m_device.lock();
     if ( m_device.isCached() == false )
         m_device = Device::fetch( m_ml, m_deviceId );
+    // There must be a device containing the folder, since we never create a folder
+    // without a device
     assert( m_device.get() != nullptr );
+    // However, handle potential sporadic errors gracefully
+    if( m_device.get() == nullptr )
+        return false;
     return m_device.get()->isPresent();
 }
 
