@@ -194,7 +194,7 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
         if ( bannedType == BannedType::Any )
             return fetch( ml, req, folderFs->mrl() );
         req += " AND is_blacklisted = ?";
-            return fetch( ml, req, folderFs->mrl(), bannedType == BannedType::Yes ? true : false );
+        return fetch( ml, req, folderFs->mrl(), bannedType == BannedType::Yes ? true : false );
     }
 
     auto device = Device::fromUuid( ml, deviceFs->uuid() );
