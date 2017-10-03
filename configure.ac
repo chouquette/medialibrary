@@ -271,7 +271,7 @@ AS_IF([test "$SYS" = mingw32],[
     AH_TOP([#endif])
 ])
 
-AC_ARG_ENABLE(debug, [AC_HELP_STRING([--enable-debug], [build with run-time assertions (default enabled)])])
+AC_ARG_ENABLE(debug, [AC_HELP_STRING([--enable-debug], [build with debug code and run-time assertions (default enabled)])])
 AH_TEMPLATE(NDEBUG, [Define to 1 if debug code should NOT be compiled])
 AS_IF([test "${enable_debug}" = "no"],[
   AC_DEFINE(NDEBUG)
