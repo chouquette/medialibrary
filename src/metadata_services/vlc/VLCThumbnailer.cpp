@@ -68,7 +68,7 @@ bool VLCThumbnailer::initialize()
 bool VLCThumbnailer::isCompleted( const parser::Task& task ) const
 {
     return ( static_cast<uint8_t>( task.file->parserStep() ) &
-            static_cast<uint8_t>( File::ParserStep::Thumbnailer ) ) != 0;
+            static_cast<uint8_t>( parser::Task::ParserStep::Thumbnailer ) ) != 0;
 }
 
 parser::Task::Status VLCThumbnailer::run( parser::Task& task )
@@ -108,7 +108,7 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
         // If the media became an audio file, it's not an error
         if ( media->type() == Media::Type::Audio )
         {
-            file->markStepCompleted( File::ParserStep::Thumbnailer );
+            task.markStepCompleted( parser::Task::ParserStep::Thumbnailer );
             file->saveParserStep();
             LOG_INFO( file->mrl(), " type has changed to Audio. Skipping thumbnail generation" );
             return parser::Task::Status::Success;
@@ -123,7 +123,7 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     // we do need to run the metadata extraction again.
     if ( media->type() == Media::Type::Unknown && media->thumbnail().empty() == false )
     {
-        file->markStepCompleted( File::ParserStep::Thumbnailer );
+        task.markStepCompleted( parser::Task::ParserStep::Thumbnailer );
         // startPlayback will return an error in case the media is an audio file
         media->setType( IMedia::Type::Video );
         // And now let the metadata extraction run again
@@ -148,7 +148,7 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     if ( task.file->isDeleted() == true || task.media->isDeleted() == true )
         return parser::Task::Status::Fatal;
 
-    file->markStepCompleted( File::ParserStep::Thumbnailer );
+    task.markStepCompleted( parser::Task::ParserStep::Thumbnailer );
     m_notifier->notifyMediaModification( task.media );
 
     auto t = m_ml->getConn()->newTransaction();

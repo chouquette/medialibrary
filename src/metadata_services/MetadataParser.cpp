@@ -85,7 +85,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
             // thumbnailer execution, coming back here, and delegating again to the thumbnailer
             // over and over again. We need to ensure the thumbnailer will run, even partially, up to
             // the point the playback started.
-            task.file->markStepUncompleted( File::ParserStep::Thumbnailer );
+            task.markStepUncompleted( parser::Task::ParserStep::Thumbnailer );
             LOG_INFO( "Skipping metadata parsing for file with unknown type: ", task.file->mrl() );
             return parser::Task::Status::Success;
         }
@@ -133,11 +133,11 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
     if ( task.file->isDeleted() == true || task.media->isDeleted() == true )
         return parser::Task::Status::Fatal;
 
-    task.file->markStepCompleted( File::ParserStep::MetadataAnalysis );
+    task.markStepCompleted( parser::Task::ParserStep::MetadataAnalysis );
     // Save ourselves from the useless processing of a thumbnail later if
     // we're analyzing an audio file
     if ( isAudio == true && utils::file::schemeIs( "attachment://", task.media->thumbnail() ) == false )
-        task.file->markStepCompleted( File::ParserStep::Thumbnailer );
+        task.markStepCompleted( parser::Task::ParserStep::Thumbnailer );
     if ( task.file->saveParserStep() == false )
         return parser::Task::Status::Fatal;
     m_notifier->notifyMediaCreation( task.media );
@@ -531,7 +531,7 @@ bool MetadataParser::isCompleted( const parser::Task& task ) const
 {
     // We always need to run this task if the metadata extraction isn't completed
     return ( static_cast<uint8_t>( task.file->parserStep() ) &
-            static_cast<uint8_t>( File::ParserStep::MetadataAnalysis ) ) != 0;
+             static_cast<uint8_t>( parser::Task::ParserStep::MetadataAnalysis ) ) != 0;
 }
 
 }

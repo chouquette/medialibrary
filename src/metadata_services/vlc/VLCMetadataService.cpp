@@ -76,7 +76,7 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
         LOG_WARN( "Failed to fetch any tracks for ", file->mrl() );
     // Don't save the file parsing step yet, since all data are just in memory. Just mark
     // the extraction as done.
-    task.file->markStepCompleted( File::ParserStep::MetadataExtraction );
+    task.markStepCompleted( parser::Task::ParserStep::MetadataExtraction );
     return parser::Task::Status::Success;
 }
 

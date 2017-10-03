@@ -4,6 +4,7 @@
  * Copyright (C) 2015 Hugo Beauzée-Luyssen, Videolabs
  *
  * Authors: Hugo Beauzée-Luyssen<hugo@beauzee.fr>
+ *          Alexandre Fernandez <nerf@boboop.fr>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -60,22 +61,23 @@ struct Task
         Fatal
     };
 
-    Task( std::shared_ptr<Media> media, std::shared_ptr<File> file )
-        : media( std::move( media ) )
-        , file( std::move( file ) )
-        , currentService( 0 )
+    enum class ParserStep : uint8_t
     {
-    }
+        None = 0,
+        MetadataExtraction = 1,
+        MetadataAnalysis = 2,
+        Thumbnailer = 4,
 
+        Completed = 1 | 2 | 4,
+    };
+
+    Task( std::shared_ptr<Media> media, std::shared_ptr<File> file );
     Task( std::shared_ptr<fs::IFile> fileFs,
           std::shared_ptr<Folder> parentFolder,
-          std::shared_ptr<fs::IDirectory> parentFolderFs)
-            : fileFs( std::move( fileFs ) )
-            , parentFolder( std::move( parentFolder ) )
-            , parentFolderFs( std::move ( parentFolderFs ) )
-            , currentService( 0 )
-    {
-    }
+          std::shared_ptr<fs::IDirectory> parentFolderFs );
+
+    void markStepCompleted( ParserStep stepCompleted );
+    void markStepUncompleted( ParserStep stepUncompleted );
 
     std::shared_ptr<Media>          media;
     std::shared_ptr<File>           file;
@@ -85,6 +87,7 @@ struct Task
     std::string                     mrl;
     VLC::Media                      vlcMedia;
     unsigned int                    currentService;
+    ParserStep                      step;
 };
 
 }

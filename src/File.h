@@ -48,15 +48,6 @@ struct FileTable
 class File : public IFile, public DatabaseHelpers<File, policy::FileTable>
 {
 public:
-    enum class ParserStep : uint8_t
-    {
-        None = 0,
-        MetadataExtraction = 1,
-        MetadataAnalysis = 2,
-        Thumbnailer = 4,
-
-        Completed = 1 | 2 | 4,
-    };
 
     File( MediaLibraryPtr ml, sqlite::Row& row );
     File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type, const fs::IFile& file, int64_t folderId, bool isRemovable );
@@ -74,10 +65,10 @@ public:
      * extracted, in case we were to restart the parsing, we would need to
      * extract the same information again
      */
-    void markStepCompleted( ParserStep step );
-    void markStepUncompleted( ParserStep step );
+    void markStepCompleted( parser::Task::ParserStep step );
+    void markStepUncompleted( parser::Task::ParserStep step );
     bool saveParserStep();
-    ParserStep parserStep() const;
+    parser::Task::ParserStep parserStep() const;
     /**
      * @brief startParserStep Do some internal book keeping to avoid restarting a step too many time
      */
@@ -134,7 +125,7 @@ private:
     Type m_type;
     std::time_t m_lastModificationDate;
     unsigned int m_size;
-    ParserStep m_parserSteps;
+    parser::Task::ParserStep m_parserSteps;
     int64_t m_folderId;
     bool m_isPresent;
     bool m_isRemovable;

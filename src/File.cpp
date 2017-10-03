@@ -65,7 +65,7 @@ File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type, 
     , m_type( type )
     , m_lastModificationDate( file.lastModificationDate() )
     , m_size( file.size() )
-    , m_parserSteps( ParserStep::None )
+    , m_parserSteps( parser::Task::ParserStep::None )
     , m_folderId( folderId )
     , m_isPresent( true )
     , m_isRemovable( isRemovable )
@@ -83,7 +83,7 @@ File::File(MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, IFile::Type 
     , m_type( type )
     , m_lastModificationDate( 0 )
     , m_size( 0 )
-    , m_parserSteps( ParserStep::Completed )
+    , m_parserSteps( parser::Task::ParserStep::Completed )
     , m_folderId( 0 )
     , m_isPresent( true )
     , m_isRemovable( false )
@@ -133,15 +133,15 @@ bool File::isExternal() const
     return m_isExternal;
 }
 
-void File::markStepCompleted( ParserStep step )
+void File::markStepCompleted( parser::Task::ParserStep step )
 {
-    m_parserSteps = static_cast<ParserStep>( static_cast<uint8_t>( m_parserSteps ) |
+    m_parserSteps = static_cast<parser::Task::ParserStep>( static_cast<uint8_t>( m_parserSteps ) |
                                              static_cast<uint8_t>( step ) );
 }
 
-void File::markStepUncompleted(File::ParserStep step)
+void File::markStepUncompleted(parser::Task::ParserStep step)
 {
-    m_parserSteps = static_cast<ParserStep>( static_cast<uint8_t>( m_parserSteps ) &
+    m_parserSteps = static_cast<parser::Task::ParserStep>( static_cast<uint8_t>( m_parserSteps ) &
                                              ( ~ static_cast<uint8_t>( step ) ) );
 }
 
@@ -154,7 +154,7 @@ bool File::saveParserStep()
     return true;
 }
 
-File::ParserStep File::parserStep() const
+parser::Task::ParserStep File::parserStep() const
 {
     return m_parserSteps;
 }
@@ -320,14 +320,14 @@ std::vector<std::shared_ptr<File>> File::fetchUnparsed( MediaLibraryPtr ml )
 {
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
             + " WHERE parser_step != ? AND is_present = 1 AND folder_id IS NOT NULL AND parser_retries < 3";
-    return File::fetchAll<File>( ml, req, File::ParserStep::Completed );
+    return File::fetchAll<File>( ml, req, parser::Task::ParserStep::Completed );
 }
 
 void File::resetRetryCount( MediaLibraryPtr ml )
 {
     static const std::string req = "UPDATE " + policy::FileTable::Name + " SET "
             "parser_retries = 0 WHERE parser_step != ? AND is_present = 1 AND folder_id IS NOT NULL";
-    sqlite::Tools::executeUpdate( ml->getConn(), req, ParserStep::Completed );
+    sqlite::Tools::executeUpdate( ml->getConn(), req, parser::Task::ParserStep::Completed );
 }
 
 }

@@ -80,6 +80,7 @@ libmedialibrary_la_SOURCES = \
 	src/metadata_services/vlc/VLCThumbnailer.cpp \
 	src/parser/Parser.cpp \
 	src/parser/ParserService.cpp \
+	src/parser/Task.cpp \
 	src/utils/Filename.cpp \
 	src/utils/ModificationsNotifier.cpp \
 	src/utils/Url.cpp \

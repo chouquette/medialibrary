@@ -25,8 +25,8 @@
 #include <memory>
 #include <queue>
 
-#include "File.h"
 #include "Task.h"
+#include "File.h"
 
 namespace medialibrary
 {

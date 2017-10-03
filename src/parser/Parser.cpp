@@ -147,7 +147,7 @@ void Parser::done( std::unique_ptr<parser::Task> t, parser::Task::Status status 
 
     if ( status == parser::Task::Status::TemporaryUnavailable ||
          status == parser::Task::Status::Fatal ||
-         t->file->parserStep() == File::ParserStep::Completed )
+         t->file->parserStep() == parser::Task::ParserStep::Completed )
     {
         if ( serviceIdx < m_services.size() )
         {
