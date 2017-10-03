@@ -20,8 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef FS_DISCOVERER_H
-# define FS_DISCOVERER_H
+#pragma once
 
 #include <memory>
 
@@ -63,5 +62,3 @@ private:
 };
 
 }
-
-#endif // FS_DISCOVERER_H
