@@ -180,7 +180,7 @@ std::string scheme( const std::string& mrl )
     auto pos = mrl.find( "://" );
     if ( pos == std::string::npos )
         throw std::runtime_error( "Invalid MRL provided" );
-    return mrl.substr( 0, 7 );
+    return mrl.substr( 0, pos + 3 );
 }
 
 bool schemeIs( const std::string& scheme, const std::string& mrl )

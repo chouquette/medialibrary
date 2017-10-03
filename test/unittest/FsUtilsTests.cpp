@@ -101,6 +101,14 @@ TEST( FsUtils, toLocalPath )
     ASSERT_EQ( "/&/#/~", utils::file::toLocalPath( "file:///%26/%23/%7E" ) );
 }
 
+TEST( FsUtils, scheme )
+{
+  ASSERT_EQ( "scheme://", utils::file::scheme( "scheme://on/them/33.spy" ) );
+  ASSERT_EQ( "file://", utils::file::scheme( "file:///l/z/4/" ) );
+  ASSERT_EQ( "miel://", utils::file::scheme( "miel://nuage.mkv" ) );
+  ASSERT_EQ( "://", utils::file::scheme( ":////\\//" ) );
+}
+
 TEST( FsUtils, schemeIs )
 {
   ASSERT_TRUE( utils::file::schemeIs( "attachment://", "attachment://" ) );
