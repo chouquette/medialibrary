@@ -64,6 +64,7 @@ libmedialibrary_la_SOURCES = \
 	src/database/SqliteTransaction.cpp \
 	src/discoverer/DiscovererWorker.cpp \
 	src/discoverer/FsDiscoverer.cpp \
+	src/discoverer/probe/PathProbe.cpp \
 	src/factory/FileSystemFactory.cpp \
 	src/factory/NetworkFileSystemFactory.cpp \
 	src/factory/DeviceListerFactory.cpp \
@@ -126,6 +127,9 @@ noinst_HEADERS = \
 	src/Device.h \
 	src/discoverer/DiscovererWorker.h \
 	src/discoverer/FsDiscoverer.h \
+	src/discoverer/probe/CrawlerProbe.h \
+	src/discoverer/probe/IProbe.h \
+	src/discoverer/probe/PathProbe.h \
 	src/factory/FileSystemFactory.h \
 	src/factory/NetworkFileSystemFactory.h \
 	src/factory/DeviceListerFactory.h \
