@@ -53,6 +53,18 @@ namespace file
      */
     std::string  toLocalPath( const std::string& mrl );
     /**
+     * @brief toPath Converts an MRL to a decoded file path
+     * @param mrl
+     */
+    std::string toPath( const std::string& mrl );
+
+    /**
+     * @brief stripScheme Remove the scheme from a MRL
+     * @param mrl
+     */
+    std::string stripScheme( const std::string& mrl );
+
+    /**
      * @brief scheme Returns the scheme used in an MRL
      * ie. for seaOtter://foo.bar it will return seaOtter://
      */

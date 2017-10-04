@@ -101,6 +101,24 @@ TEST( FsUtils, toLocalPath )
     ASSERT_EQ( "/&/#/~", utils::file::toLocalPath( "file:///%26/%23/%7E" ) );
 }
 
+TEST( FsUtils, toPath )
+{
+  ASSERT_EQ( "road/to/raw.pcm", utils::file::toPath( "https://road/to/raw.pcm" ) );
+  ASSERT_EQ( "space cowboy", utils::file::toPath( "bebop://space%20cowboy" ) );
+  ASSERT_EQ( "/colt/caßeras", utils::file::toPath( "France:///colt/ca%C3%9Feras" ) );
+  ASSERT_EQ( "", utils::file::toPath( "boom://" ) );
+  ASSERT_EQ( "/", utils::file::toPath( "boop:///" ) );
+}
+
+TEST( FsUtils, stripScheme )
+{
+  ASSERT_EQ( "space%20marine", utils::file::stripScheme( "sc2://space%20marine" ) );
+  ASSERT_EQ( "bl%40bla", utils::file::stripScheme( "bl%40bla" ) );
+  ASSERT_EQ( "", utils::file::stripScheme( "vlc://" ) );
+  ASSERT_EQ( "leaf/ern/%C3%A7a/pak.one", utils::file::stripScheme( "bteam://leaf/ern/%C3%A7a/pak.one" ) );
+  ASSERT_EQ( "/I", utils::file::stripScheme( "file:///I" ) );
+}
+
 TEST( FsUtils, scheme )
 {
   ASSERT_EQ( "scheme://", utils::file::scheme( "scheme://on/them/33.spy" ) );
