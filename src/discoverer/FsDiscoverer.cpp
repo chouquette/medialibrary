@@ -38,6 +38,7 @@
 #include "Folder.h"
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
+#include "probe/CrawlerProbe.h"
 #include "utils/Filename.h"
 
 namespace
@@ -57,10 +58,11 @@ public:
 namespace medialibrary
 {
 
-FsDiscoverer::FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, MediaLibrary* ml, IMediaLibraryCb* cb )
+FsDiscoverer::FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, MediaLibrary* ml, IMediaLibraryCb* cb, std::unique_ptr<prober::IProbe> probe )
     : m_ml( ml )
     , m_fsFactory( std::move( fsFactory ))
     , m_cb( cb )
+    , m_probe( std::move( probe ) )
 {
 }
 
@@ -72,15 +74,18 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
         return false;
 
     std::shared_ptr<fs::IDirectory> fsDir = m_fsFactory->createDirectory( entryPoint );
+    auto fsDirMrl = fsDir->mrl(); // Saving MRL now since we might need it after fsDir is moved
     auto f = Folder::fromMrl( m_ml, entryPoint );
     // If the folder exists, we assume it will be handled by reload()
     if ( f != nullptr )
         return true;
     try
     {
-        if ( hasDotNoMediaFile( *fsDir ) )
+        if ( m_probe->proceedOnDirectory( *fsDir ) == false || m_probe->isHidden( *fsDir ) == true )
             return true;
-        return addFolder( std::move( fsDir ), nullptr );
+        // Fetch files explicitly
+        fsDir->files();
+        return addFolder( std::move( fsDir ), m_probe->getFolderParent().get() );
     }
     catch ( std::system_error& ex )
     {
@@ -93,7 +98,7 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
     catch ( DeviceRemovedException& )
     {
         // Simply ignore, the device has already been marked as removed and the DB updated accordingly
-        LOG_INFO( "Discovery of ", fsDir->mrl(), " was stopped after the device was removed" );
+        LOG_INFO( "Discovery of ", fsDirMrl, " was stopped after the device was removed" );
     }
     return true;
 }
@@ -147,20 +152,17 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
     {
         // We already know of this folder, though it may now contain a .nomedia file.
         // In this case, simply delete the folder.
-        if ( hasDotNoMediaFile( *currentFolderFs ) )
+        if ( m_probe->isHidden( *currentFolderFs ) == true )
         {
             if ( newFolder == false )
-            {
-                LOG_INFO( "Deleting folder ", currentFolderFs->mrl(), " due to a .nomedia file" );
                 m_ml->deleteFolder( *currentFolder );
-            }
-            else
-                LOG_INFO( "Ignoring folder ", currentFolderFs->mrl(), " due to a .nomedia file" );
             return;
         }
+        // Ensuring that the file fetching is done in this scope, to catch errors
+        currentFolderFs->files();
     }
     // Only check once for a system_error. They are bound to happen when we list the files/folders
-    // within, and hasDotMediaFile is the first place when this is done
+    // within, and IProbe::isHidden is the first place when this is done
     catch ( std::system_error& ex )
     {
         LOG_WARN( "Failed to browse ", currentFolderFs->mrl(), ": ", ex.what() );
@@ -202,7 +204,8 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
         return;
     }
 
-    m_cb->onDiscoveryProgress( currentFolderFs->mrl() );
+    if ( m_cb != nullptr )
+        m_cb->onDiscoveryProgress( currentFolderFs->mrl() );
     // Load the folders we already know of:
     LOG_INFO( "Checking for modifications in ", currentFolderFs->mrl() );
     // Don't try to fetch any potential sub folders if the folder was freshly added
@@ -213,17 +216,18 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
     {
         if ( subFolder->device() == nullptr )
             continue;
+        if ( m_probe->stopFileDiscovery() == true )
+            break;
+        if ( m_probe->proceedOnDirectory( *subFolder ) == false )
+            continue;
         auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [&subFolder](const std::shared_ptr<Folder>& f) {
             return f->mrl() == subFolder->mrl();
         });
         // We don't know this folder, it's a new one
         if ( it == end( subFoldersInDB ) )
         {
-            if ( hasDotNoMediaFile( *subFolder ) )
-            {
-                LOG_INFO( "Ignoring folder with a .nomedia file" );
+            if ( m_probe->isHidden( *subFolder ) )
                 continue;
-            }
             LOG_INFO( "New folder detected: ", subFolder->mrl() );
             try
             {
@@ -251,11 +255,14 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
         checkFolder( subFolder, folderInDb, false );
         subFoldersInDB.erase( it );
     }
-    // Now all folders we had in DB but haven't seen from the FS must have been deleted.
-    for ( const auto& f : subFoldersInDB )
+    if ( m_probe->deleteUnseenFolders() == true )
     {
-        LOG_INFO( "Folder ", f->mrl(), " not found in FS, deleting it" );
-        m_ml->deleteFolder( *f );
+        // Now all folders we had in DB but haven't seen from the FS must have been deleted.
+        for ( const auto& f : subFoldersInDB )
+        {
+            LOG_INFO( "Folder ", f->mrl(), " not found in FS, deleting it" );
+            m_ml->deleteFolder( *f );
+        }
     }
     checkFiles( currentFolderFs, currentFolder );
     LOG_INFO( "Done checking subfolders in ", currentFolderFs->mrl() );
@@ -272,10 +279,14 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
     std::vector<std::shared_ptr<File>> filesToRemove;
     for ( const auto& fileFs: parentFolderFs->files() )
     {
+        if ( m_probe->stopFileDiscovery() == true )
+            break;
+        if ( m_probe->proceedOnFile( *fileFs ) == false )
+            continue;
         auto it = std::find_if( begin( files ), end( files ), [fileFs](const std::shared_ptr<File>& f) {
             return f->mrl() == fileFs->mrl();
         });
-        if ( it == end( files ) )
+        if ( it == end( files ) || m_probe->forceFileRefresh() == true )
         {
             if ( MediaLibrary::isExtensionSupported( fileFs->extension().c_str() ) == true )
                 filesToAdd.push_back( fileFs );
@@ -296,6 +307,8 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
         filesToAdd.push_back( fileFs );
         files.erase( it );
     }
+    if ( m_probe->deleteUnseenFiles() == false )
+        files.clear();
     using FilesT = decltype( files );
     using FilesToRemoveT = decltype( filesToRemove );
     using FilesToAddT = decltype( filesToAdd );
@@ -330,18 +343,10 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
         }
         // Insert all files at once to avoid SQL write contention
         for ( auto& p : filesToAdd )
-            m_ml->addDiscoveredFile( p, parentFolder, parentFolderFs, { nullptr, 0 } );
+            m_ml->addDiscoveredFile( p, parentFolder, parentFolderFs, m_probe->getPlaylistParent() );
         t->commit();
         LOG_INFO( "Done checking files in ", parentFolderFs->mrl() );
     }, std::move( files ), std::move( filesToAdd ), std::move( filesToRemove ) );
-}
-
-bool FsDiscoverer::hasDotNoMediaFile( const fs::IDirectory& directory )
-{
-    const auto& files = directory.files();
-    return std::find_if( begin( files ), end( files ), []( const std::shared_ptr<fs::IFile>& file ){
-        return strcasecmp( file->name().c_str(), ".nomedia" ) == 0;
-    }) != end( files );
 }
 
 bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,

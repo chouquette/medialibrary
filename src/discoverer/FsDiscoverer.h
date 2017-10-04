@@ -33,10 +33,15 @@ namespace medialibrary
 class MediaLibrary;
 class Folder;
 
+namespace prober
+{
+class IProbe;
+}
+
 class FsDiscoverer : public IDiscoverer
 {
 public:
-    FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, MediaLibrary* ml , IMediaLibraryCb* cb );
+    FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, MediaLibrary* ml , IMediaLibraryCb* cb, std::unique_ptr<prober::IProbe> probe );
     virtual bool discover(const std::string &entryPoint ) override;
     virtual bool reload() override;
     virtual bool reload( const std::string& entryPoint ) override;
@@ -50,7 +55,6 @@ private:
                       std::shared_ptr<Folder> currentFolder, bool newFolder ) const;
     void checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
                      std::shared_ptr<Folder> parentFolder ) const;
-    static bool hasDotNoMediaFile( const fs::IDirectory& directory );
     bool addFolder( std::shared_ptr<fs::IDirectory> folder,
                     Folder* parentFolder ) const;
     void reloadFolder( std::shared_ptr<Folder> folder );
@@ -59,6 +63,7 @@ private:
     MediaLibrary* m_ml;
     std::shared_ptr<factory::IFileSystem> m_fsFactory;
     IMediaLibraryCb* m_cb;
+    std::unique_ptr<prober::IProbe> m_probe;
 };
 
 }

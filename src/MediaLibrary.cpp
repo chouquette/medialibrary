@@ -35,6 +35,7 @@
 #include "Artist.h"
 #include "AudioTrack.h"
 #include "discoverer/DiscovererWorker.h"
+#include "discoverer/probe/CrawlerProbe.h"
 #include "utils/ModificationsNotifier.h"
 #include "Device.h"
 #include "File.h"
@@ -729,7 +730,11 @@ void MediaLibrary::startDiscoverer()
 {
     m_discovererWorker.reset( new DiscovererWorker( this ) );
     for ( const auto& fsFactory : m_fsFactories )
-        m_discovererWorker->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( fsFactory, this, m_callback ) ) );
+    {
+        auto probePtr = std::unique_ptr<prober::CrawlerProbe>( new prober::CrawlerProbe{} );
+        m_discovererWorker->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( fsFactory, this, m_callback,
+                                                                                           std::move ( probePtr ) ) ) );
+    }
 }
 
 void MediaLibrary::startDeletionNotifier()
