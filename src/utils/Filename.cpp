@@ -68,6 +68,21 @@ std::string directory( const std::string& filePath )
     return filePath.substr( 0, pos + 1 );
 }
 
+std::string directoryName( const std::string& directoryPath )
+{
+    auto pos = directoryPath.find_last_of( DIR_SEPARATOR );
+    if ( pos == std::string::npos )
+        return directoryPath;
+    if ( pos == 0 )
+        return directoryPath.substr( 1 );
+    if ( pos != directoryPath.size() - 1 )
+        return directoryPath.substr( pos + 1 );
+    auto res = directoryPath;
+    res.pop_back();
+    pos = res.find_last_of( DIR_SEPARATOR );
+    return res.substr( pos + 1 );
+}
+
 std::string parentDirectory( const std::string& path )
 {
     auto pos = path.find_last_of( DIR_SEPARATOR );

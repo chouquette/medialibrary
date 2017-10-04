@@ -46,6 +46,21 @@ TEST( FsUtils, directory )
     ASSERT_EQ( "", utils::file::directory( "file.test" ) );
 }
 
+TEST( FsUtils, directoryName )
+{
+    ASSERT_EQ( "dé", utils::file::directoryName( "/a/b/c/dé/" ) );
+    ASSERT_EQ( ".cache", utils::file::directoryName( "/a/b/c/.cache/" ) );
+    ASSERT_EQ( "p17", utils::file::directoryName( "/c/p/p17" ) );
+    ASSERT_EQ( ".ssh", utils::file::directoryName( "~/.ssh" ) );
+    ASSERT_EQ( "emacs.d", utils::file::directoryName( "/home/blob/emacs.d" ) );
+    ASSERT_EQ( "zef", utils::file::directoryName( "zef" ) );
+    ASSERT_EQ( "home", utils::file::directoryName( "/home" ) );
+    ASSERT_EQ( "", utils::file::directoryName( "/" ) );
+    ASSERT_EQ( "", utils::file::directoryName( "" ) );
+    ASSERT_EQ( "kill", utils::file::directoryName( "/kill/" ) );
+    ASSERT_EQ( "bill", utils::file::directoryName( "bill/" ) );
+}
+
 TEST( FsUtils, fileName )
 {
     ASSERT_EQ( "d.e", utils::file::fileName( "/a/b/c/d.e" ) );

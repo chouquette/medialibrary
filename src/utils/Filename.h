@@ -35,6 +35,12 @@ namespace file
 {
     std::string extension( const std::string& fileName );
     std::string directory( const std::string& filePath );
+
+    /**
+     * @brief directoryName  Extract the folder name from a path
+     * @param directoryPath  Path pointing to a directory
+     */
+    std::string directoryName( const std::string& directoryPath );
     std::string fileName( const std::string& filePath );
     std::string firstFolder( const std::string& path );
     std::string removePath( const std::string& fullPath, const std::string& toRemove );
