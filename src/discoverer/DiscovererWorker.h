@@ -57,7 +57,7 @@ class DiscovererWorker
     };
 
 public:
-    DiscovererWorker( MediaLibrary* ml );
+    explicit DiscovererWorker( MediaLibrary* ml );
     ~DiscovererWorker();
     void addDiscoverer( std::unique_ptr<IDiscoverer> discoverer );
     void stop();
