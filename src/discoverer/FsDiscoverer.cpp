@@ -72,7 +72,7 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
         return false;
 
     std::shared_ptr<fs::IDirectory> fsDir = m_fsFactory->createDirectory( entryPoint );
-    auto f = Folder::fromMrl( m_ml, fsDir->mrl() );
+    auto f = Folder::fromMrl( m_ml, entryPoint );
     // If the folder exists, we assume it will be handled by reload()
     if ( f != nullptr )
         return true;
