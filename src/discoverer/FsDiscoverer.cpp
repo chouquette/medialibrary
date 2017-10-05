@@ -164,13 +164,23 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
         // an IO error. If this is the cause, simply abort the discovery. All the folder we have
         // discovered so far will be marked as non-present through sqlite hooks, and we'll resume the
         // discovery when the device gets plugged back in
-        if ( currentFolderFs->device()->isRemovable() )
+        auto device = currentFolderFs->device();
+        // The device might not be present at all, and therefor we might miss a
+        // representation for it.
+        if ( device == nullptr || device->isRemovable() )
         {
-            // If the device is removable, check if it was indeed removed.
-            LOG_INFO( "The device containing ", currentFolderFs->mrl(), " is removable. Checking for device removal..." );
+            // If the device is removable/missing, check if it was indeed removed.
+            LOG_INFO( "The device containing ", currentFolderFs->mrl(), " is ",
+                      device != nullptr ? "removable" : "not found",
+                      ". Refreshing device cache..." );
+
             m_ml->refreshDevices( *m_fsFactory );
+            // If the device was missing, refresh our list of devices in case
+            // the device was plugged back and/or we missed a notification for it
+            if ( device == nullptr )
+                device = currentFolderFs->device();
             // The device presence flag will be changed in place, so simply retest it
-            if ( currentFolderFs->device()->isPresent() == false )
+            if ( device == nullptr || device->isPresent() == false )
                 throw DeviceRemovedException();
             LOG_INFO( "Device was not removed" );
         }
