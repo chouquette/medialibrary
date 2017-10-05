@@ -72,12 +72,6 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
         return false;
 
     std::shared_ptr<fs::IDirectory> fsDir = m_fsFactory->createDirectory( entryPoint );
-    // Otherwise, create a directory and check it for modifications
-    if ( fsDir == nullptr )
-    {
-        LOG_ERROR("Failed to create an IDirectory for ", entryPoint );
-        return false;
-    }
     auto f = Folder::fromMrl( m_ml, fsDir->mrl() );
     // If the folder exists, we assume it will be handled by reload()
     if ( f != nullptr )
