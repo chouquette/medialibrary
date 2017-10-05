@@ -36,7 +36,7 @@ struct Init
     Init()
     {
         const char* args[] = {
-            "-vv",
+            "--no-lua",
         };
         instance = VLC::Instance( sizeof(args) / sizeof(args[0]), args );
         // Do not take the string by reference. libvlcpp is constructing the std::string
