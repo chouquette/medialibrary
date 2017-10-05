@@ -334,6 +334,9 @@ bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
     auto deviceFs = folder->device();
     // We are creating a folder, there has to be a device containing it.
     assert( deviceFs != nullptr );
+    // But gracefully handle failure in release mode
+    if( deviceFs == nullptr )
+        return false;
     auto device = Device::fromUuid( m_ml, deviceFs->uuid() );
     if ( device == nullptr )
     {
