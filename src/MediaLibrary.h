@@ -156,6 +156,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual void startDiscoverer();
         virtual void startDeletionNotifier();
         bool updateDatabaseModel( unsigned int previousVersion );
+        bool migrateModel3to4();
         bool createAllTables();
         void registerEntityHooks();
         static bool validateSearchPattern( const std::string& pattern );

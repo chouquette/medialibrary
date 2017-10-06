@@ -737,12 +737,46 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
             return false;
         previousVersion = 3;
     }
+    if ( previousVersion == 3 )
+    {
+        if ( migrateModel3to4() == false )
+            return false;
+        previousVersion = 4;
+    }
     // To be continued in the future!
 
     // Safety check: ensure we didn't forget a migration along the way
     assert( previousVersion == Settings::DbModelVersion );
     m_settings.setDbModelVersion( Settings::DbModelVersion );
     m_settings.save();
+    return true;
+}
+
+bool MediaLibrary::migrateModel3to4()
+{
+    /*
+     * Get a special SqliteConnection with Foreign Keys deactivated
+     * to avoid cascade deletion while remodeling the database into
+     * the transaction.
+     */
+    SqliteConnection conn( getConn()->getDBPath(), false );
+    auto t = conn.newTransaction();
+    using namespace policy;
+    // As SQLite do not allow us to remove or add some constraints,
+    // we use the method described here https://www.sqlite.org/faq.html#q11
+    std::string reqs[] = {
+#               include "database/migrations/migration3-4.sql"
+    };
+
+    for ( const auto& req : reqs )
+    {
+        if ( sqlite::Tools::executeRequest( &conn, req ) == false )
+            return false;
+    }
+    // Re-create triggers removed in the process
+    Media::createTriggers( &conn );
+    Playlist::createTriggers( &conn );
+    t->commit();
     return true;
 }
 

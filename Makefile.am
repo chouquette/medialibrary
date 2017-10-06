@@ -333,4 +333,5 @@ endif
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = medialibrary.pc
-EXTRA_DIST = medialibrary.pc
+EXTRA_DIST = medialibrary.pc \
+	src/database/migrations/migration3-4.sql
