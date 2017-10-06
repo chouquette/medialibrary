@@ -26,6 +26,6 @@
 # define strcasecmp _stricmp
 #endif
 
-#ifndef HAVE_THREAD_LOCAL
+#ifndef CXX11_THREAD_LOCAL
 # define thread_local __thread
 #endif
