@@ -725,7 +725,7 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
     LOG_INFO( "Updating database model from ", previousVersion, " to ", Settings::DbModelVersion );
     // Up until model 3, it's safer (and potentially more efficient with index changes) to drop the DB
     // It's also way simpler to implement
-    if ( previousVersion <= 3 )
+    if ( previousVersion < 3 )
     {
         // Way too much differences, introduction of devices, and almost unused in the wild, just drop everything
         std::string req = "PRAGMA writable_schema = 1;"
