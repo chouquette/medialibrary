@@ -247,6 +247,14 @@ const std::string& Folder::mrl() const
     auto fsFactory = m_ml->fsFactoryForMrl( m_device.get()->scheme() );
     assert( fsFactory != nullptr );
     auto deviceFs = fsFactory->createDevice( m_device.get()->uuid() );
+    // In case the device lister hasn't been updated accordingly, we might think
+    // a device still is present while it's not.
+    if( deviceFs == nullptr )
+    {
+        assert( !"File system Device representation couldn't be found" );
+        m_fullPath = "";
+        return m_fullPath;
+    }
     m_deviceMountpoint = deviceFs->mountpoint();
     m_fullPath = m_deviceMountpoint.get() + m_path;
     return m_fullPath;
