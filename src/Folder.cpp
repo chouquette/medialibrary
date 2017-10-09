@@ -177,6 +177,8 @@ std::shared_ptr<Folder> Folder::blacklistedFolder( MediaLibraryPtr ml, const std
 
 std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& mrl, BannedType bannedType )
 {
+    if ( mrl.empty() == true )
+        return nullptr;
     auto fsFactory = ml->fsFactoryForMrl( mrl );
     if ( fsFactory == nullptr )
         return nullptr;
