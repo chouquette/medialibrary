@@ -60,6 +60,7 @@ SqliteConnection::Handle SqliteConnection::getConn()
             throw sqlite::errors::Generic( std::string( "Failed to connect to database: " )
                                            + sqlite3_errstr( res ) );
         sqlite3_extended_result_codes( dbConnection, 1 );
+        sqlite3_busy_timeout( dbConnection, 500 );
         sqlite::Statement s( dbConnection, "PRAGMA foreign_keys = ON" );
         s.execute();
         while ( s.row() != nullptr )
