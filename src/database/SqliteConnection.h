@@ -65,6 +65,7 @@ public:
     std::unique_ptr<sqlite::Transaction> newTransaction();
     ReadContext acquireReadContext();
     WriteContext acquireWriteContext();
+    std::string getDBPath();
 
     void registerUpdateHook( const std::string& table, UpdateHookCb cb );
 

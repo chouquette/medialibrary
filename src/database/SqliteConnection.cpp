@@ -98,6 +98,11 @@ SqliteConnection::WriteContext SqliteConnection::acquireWriteContext()
     return WriteContext{ m_writeLock };
 }
 
+std::string SqliteConnection::getDBPath()
+{
+    return m_dbPath;
+}
+
 void SqliteConnection::registerUpdateHook( const std::string& table, SqliteConnection::UpdateHookCb cb )
 {
     m_hooks.emplace( table, cb );
