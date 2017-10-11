@@ -115,3 +115,24 @@ TEST( FsUtils, schemeIs )
   ASSERT_TRUE( utils::file::schemeIs( "attachment://", "attachment://picture0.jpg" ) );
   ASSERT_FALSE( utils::file::schemeIs( "boboop://", "/path/to/spaces%20here" ) );
 }
+
+TEST( FsUtils, splitPath )
+{
+  std::stack<std::string> st_file;
+
+  st_file.push( "[ MACHiN ] 2001 nice movie!.mkv" );
+  st_file.push( "films & séries" );
+  st_file.push( "léà" );
+  st_file.push( "home" );
+
+  auto split = utils::file::splitPath( "/home/léà/films & séries/[ MACHiN ] 2001 nice movie!.mkv", false );
+  ASSERT_TRUE( st_file == split );
+
+  std::stack<std::string> st_folder;
+
+  st_folder.push( "Русские песни" );
+  st_folder.push( "~" );
+
+  split = utils::file::splitPath( "~/Русские песни/", true );
+  ASSERT_TRUE( st_folder == split );
+}

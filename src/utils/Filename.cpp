@@ -183,6 +183,22 @@ std::string scheme( const std::string& mrl )
     return mrl.substr( 0, pos + 3 );
 }
 
+std::stack<std::string> splitPath( const std::string& path, bool isDirectory )
+{
+    std::stack<std::string> res;
+    std::string currPath = isDirectory ? utils::file::toFolderPath( path )
+                                       : utils::file::directory( path );
+    auto firstFolder = utils::file::firstFolder( path );
+    if ( isDirectory == false )
+        res.push( utils::file::fileName( path ) );
+    do
+    {
+        res.push( utils::file::directoryName( currPath ) );
+        currPath = utils::file::parentDirectory( currPath );
+    } while ( res.top() != firstFolder );
+    return res;
+}
+
 bool schemeIs( const std::string& scheme, const std::string& mrl )
 {
     return mrl.compare( 0, scheme.size(), scheme ) == 0;

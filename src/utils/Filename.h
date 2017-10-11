@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include <stack>
 #include <string>
 
 namespace medialibrary
@@ -60,6 +61,8 @@ namespace file
      * @brief toMrl Convert a filepath to an MRL
      */
     std::string toMrl( const std::string& path );
+
+    std::stack<std::string> splitPath( const std::string& path, bool isDirectory );
 
     /**
      * @brief schemeIs Check if a mrl start with a specific scheme
