@@ -162,6 +162,8 @@ void File::startParserStep()
 
 std::shared_ptr<Media> File::media() const
 {
+    if ( m_mediaId == 0 )
+        return nullptr;
     auto lock = m_media.lock();
     if ( m_media.isCached() == false )
     {
