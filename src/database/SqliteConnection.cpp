@@ -32,9 +32,15 @@ namespace medialibrary
 {
 
 SqliteConnection::SqliteConnection( const std::string &dbPath )
+    : SqliteConnection( dbPath, true )
+{
+}
+
+SqliteConnection::SqliteConnection( const std::string &dbPath, bool enableForeignKeys )
     : m_dbPath( dbPath )
     , m_readLock( m_contextLock )
     , m_writeLock( m_contextLock )
+    , m_enableForeignKeys( enableForeignKeys )
 {
     if ( sqlite3_threadsafe() == 0 )
         throw std::runtime_error( "SQLite isn't built with threadsafe mode" );
@@ -61,7 +67,8 @@ SqliteConnection::Handle SqliteConnection::getConn()
                                            + sqlite3_errstr( res ) );
         sqlite3_extended_result_codes( dbConnection, 1 );
         sqlite3_busy_timeout( dbConnection, 500 );
-        sqlite::Statement s( dbConnection, "PRAGMA foreign_keys = ON" );
+        std::string pragmaForeignReq = "PRAGMA foreign_keys = ";
+        sqlite::Statement s( dbConnection, pragmaForeignReq + ( m_enableForeignKeys ? "ON" : "OFF" ) );
         s.execute();
         while ( s.row() != nullptr )
             ;

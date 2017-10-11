@@ -57,6 +57,7 @@ public:
     using UpdateHookCb = std::function<void(HookReason, int64_t)>;
 
     explicit SqliteConnection( const std::string& dbPath );
+    explicit SqliteConnection( const std::string& dbPath, bool enableForeignKeys );
     ~SqliteConnection();
     // Returns the current thread's connection
     // This will initiate a connection if required
@@ -80,6 +81,7 @@ private:
     utils::ReadLocker m_readLock;
     utils::WriteLocker m_writeLock;
     std::unordered_map<std::string, UpdateHookCb> m_hooks;
+    bool m_enableForeignKeys;
 };
 
 }
