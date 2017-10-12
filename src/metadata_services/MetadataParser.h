@@ -42,6 +42,9 @@ protected:
     virtual uint8_t nbThreads() const override;
     bool isCompleted( const parser::Task& task ) const override;
 
+    bool addPlaylistMedias( parser::Task& task, int nbSubitem ) const;
+    void addPlaylistElement( parser::Task& task, const std::shared_ptr<Playlist>& playlistPtr,
+                             VLC::MediaPtr subitem, unsigned int index ) const;
     bool parseAudioFile(parser::Task& task);
     bool parseVideoFile(parser::Task& task) const;
     std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> findOrCreateArtist( parser::Task& vlcMedia ) const;

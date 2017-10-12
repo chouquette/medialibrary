@@ -36,8 +36,13 @@
 #include "Media.h"
 #include "Playlist.h"
 #include "Show.h"
+#include "utils/Directory.h"
 #include "utils/Filename.h"
+#include "utils/Url.h"
 #include "utils/ModificationsNotifier.h"
+#include "discoverer/FsDiscoverer.h"
+#include "discoverer/probe/PathProbe.h"
+
 #include <cstdlib>
 
 namespace medialibrary
@@ -75,29 +80,75 @@ int MetadataParser::toInt( VLC::Media& vlcMedia, libvlc_meta_t meta, const char*
 
 parser::Task::Status MetadataParser::run( parser::Task& task )
 {
+    bool alreadyInParser = false;
+    int nbSubitem = task.vlcMedia.subitems()->count();
+    // Assume that file containing subitem(s) is a Playlist
+    if ( nbSubitem > 0 )
+    {
+        auto res = addPlaylistMedias( task, nbSubitem );
+        if ( res == false ) // playlist addition may fail due to constraint violation
+            return parser::Task::Status::Fatal;
+
+        assert( task.file != nullptr );
+        task.markStepCompleted( parser::Task::ParserStep::Completed );
+        task.file->saveParserStep();
+        return parser::Task::Status::Success;
+    }
+
     if ( task.file == nullptr )
     {
         assert( task.media == nullptr );
-        auto t = m_ml->getConn()->newTransaction();
-        LOG_INFO( "Adding ", task.mrl );
-        task.media = Media::create( m_ml, IMedia::Type::Unknown, utils::file::fileName( task.mrl ) );
-        if ( task.media == nullptr )
+        // Try to create Media & File
+        try
         {
-            LOG_ERROR( "Failed to add media ", task.mrl, " to the media library" );
-            return parser::Task::Status::Fatal;
+            auto t = m_ml->getConn()->newTransaction();
+            LOG_INFO( "Adding ", task.mrl );
+            task.media = Media::create( m_ml, IMedia::Type::Unknown, utils::file::fileName( task.mrl ) );
+            if ( task.media == nullptr )
+            {
+                LOG_ERROR( "Failed to add media ", task.mrl, " to the media library" );
+                return parser::Task::Status::Fatal;
+            }
+            // For now, assume all media are made of a single file
+            task.file = task.media->addFile( *task.fileFs, task.parentFolder->id(),
+                                             task.parentFolderFs->device()->isRemovable(),
+                                             File::Type::Main );
+            if ( task.file == nullptr )
+            {
+                LOG_ERROR( "Failed to add file ", task.mrl, " to media #", task.media->id() );
+                return parser::Task::Status::Fatal;
+            }
+            t->commit();
+            // Synchronize file step tracker with task
+            task.markStepCompleted( task.step );
         }
-        // For now, assume all media are made of a single file
-        task.file = task.media->addFile( *task.fileFs, task.parentFolder->id(),
-                                         task.parentFolderFs->device()->isRemovable(),
-                                         File::Type::Main );
-        if ( task.file == nullptr )
+        // Voluntarily trigger an exception for a valid, but less common case, to avoid database overhead
+        catch ( sqlite::errors::ConstraintViolation& ex )
         {
-            LOG_ERROR( "Failed to add file ", task.mrl, " to media #", task.media->id() );
-            return parser::Task::Status::Fatal;
+            LOG_INFO( "Creation of Media & File failed because ", ex.what(),
+                      ". Assuming this task is a duplicate" );
+            // Try to retrieve file & Media from database
+            auto fileInDB = File::fromMrl( m_ml, task.mrl );
+            if ( fileInDB == nullptr ) // The file is no longer present in DB, gracefully delete task
+            {
+                LOG_ERROR( "File ", task.mrl, " no longer present in DB, aborting");
+                return parser::Task::Status::Fatal;
+            }
+            task.file = fileInDB;
+            task.media = fileInDB->media();
+            if ( task.media == nullptr ) // Without a media, we cannot go further
+                return parser::Task::Status::Fatal;
+            alreadyInParser = true;
         }
-        t->commit();
-        // Synchronize file step tracker with task
-        task.markStepCompleted( static_cast<parser::Task::ParserStep>( task.step ) );
+    }
+
+    if ( task.parentPlaylist != nullptr )
+        task.parentPlaylist->add( task.media->id(), task.parentPlaylistIndex );
+
+    if ( alreadyInParser == true )
+    {
+        task.step = parser::Task::ParserStep::Completed; // Let the worker drop this duplicate task
+        return parser::Task::Status::Success;
     }
 
     const auto& tracks = task.vlcMedia.tracks();
@@ -171,6 +222,107 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
         return parser::Task::Status::Fatal;
     m_notifier->notifyMediaCreation( task.media );
     return parser::Task::Status::Success;
+}
+
+/* Playlist files */
+
+bool MetadataParser::addPlaylistMedias( parser::Task& task, int nbSubitem ) const
+{
+    auto t = m_ml->getConn()->newTransaction();
+    LOG_INFO( "Try to import ", task.mrl, " as a playlist" );
+    auto playlistName = task.vlcMedia.meta( libvlc_meta_Title );
+    if ( playlistName.empty() == true )
+        playlistName = utils::url::decode( utils::file::fileName( task.mrl ) );
+    auto playlistPtr = Playlist::create( m_ml, playlistName );
+    if ( playlistPtr == nullptr )
+    {
+        LOG_ERROR( "Failed to create playlist ", task.mrl, " to the media library" );
+        return false;
+    }
+    task.file = playlistPtr->addFile( *task.fileFs, task.parentFolder->id(), task.parentFolderFs->device()->isRemovable() );
+    if ( task.file == nullptr )
+    {
+        LOG_ERROR( "Failed to add playlist file ", task.mrl );
+        return false;
+    }
+    t->commit();
+    auto subitems = task.vlcMedia.subitems();
+    for ( int i = 0; i < nbSubitem; ++i ) // FIXME: Interrupt loop if paused
+        addPlaylistElement( task, playlistPtr, subitems->itemAtIndex( i ), static_cast<unsigned int>( i ) + 1 );
+
+    return true;
+}
+
+void MetadataParser::addPlaylistElement( parser::Task& task, const std::shared_ptr<Playlist>& playlistPtr,
+                                         VLC::MediaPtr subitem, unsigned int index ) const
+{
+    if ( subitem == nullptr )
+        return;
+    const auto& mrl = subitem->mrl();
+    LOG_INFO( "Try to add ", mrl, " to the playlist ", task.mrl );
+    auto media = m_ml->media( mrl );
+    if ( media != nullptr )
+    {
+        LOG_INFO( "Media for ", mrl, " already exists, adding it to the playlist ", task.mrl );
+        playlistPtr->add( media->id(), index );
+        return;
+    }
+    // Create Media, etc.
+    auto fsFactory = m_ml->fsFactoryForMrl( mrl );
+
+    if ( fsFactory == nullptr ) // Media not supported by any FsFactory, registering it as external
+    {
+        auto t2 = m_ml->getConn()->newTransaction();
+        auto externalMedia = Media::create( m_ml, IMedia::Type::Unknown, utils::url::encode(
+                subitem->meta( libvlc_meta_Title ) ) );
+        if ( externalMedia == nullptr )
+        {
+            LOG_ERROR( "Failed to create external media for ", mrl, " in the playlist ", task.mrl );
+            return;
+        }
+        // Assuming that external mrl present in playlist file is a main media resource
+        auto externalFile = externalMedia->addExternalMrl( mrl, IFile::Type::Main );
+        if ( externalFile == nullptr )
+            LOG_ERROR( "Failed to create external file for ", mrl, " in the playlist ", task.mrl );
+        playlistPtr->add( externalMedia->id(), index );
+        t2->commit();
+        return;
+    }
+    bool isDirectory;
+    try
+    {
+        isDirectory = utils::fs::isDirectory( utils::file::toLocalPath( mrl ) );
+    }
+    catch ( std::system_error& ex )
+    {
+        LOG_ERROR( ex.what() );
+        return;
+    }
+    LOG_INFO( "Importing ", isDirectory ? "folder " : "file ", mrl, " in the playlist ", task.mrl );
+    auto directoryMrl = utils::file::directory( mrl );
+    auto parentFolder = Folder::fromMrl( m_ml, directoryMrl );
+    bool parentKnown = parentFolder != nullptr;
+
+    auto entryPoint = utils::file::scheme( mrl ) + '/' + utils::file::firstFolder( utils::file::stripScheme( mrl ) );
+    if ( parentKnown == false && Folder::fromMrl( m_ml, entryPoint ) != nullptr )
+    {
+        auto probePtr = std::unique_ptr<prober::PathProbe>( new prober::PathProbe{ utils::file::stripScheme( mrl ),
+                                                                                   isDirectory, playlistPtr, parentFolder,
+                                                                                   utils::file::stripScheme( directoryMrl ), index, true } );
+        auto discoverer = FsDiscoverer( fsFactory, m_ml, nullptr, std::move( probePtr ) );
+        discoverer.reload( entryPoint );
+        return;
+    }
+    auto probePtr = std::unique_ptr<prober::PathProbe>( new prober::PathProbe{ utils::file::stripScheme( mrl ),
+                                                                               isDirectory, playlistPtr, parentFolder,
+                                                                               utils::file::stripScheme( directoryMrl ), index, false } );
+    auto discoverer = FsDiscoverer( fsFactory, m_ml, nullptr, std::move( probePtr ) );
+    if ( parentKnown == false )
+    {
+        discoverer.discover( entryPoint );
+        return;
+    }
+    discoverer.reload( directoryMrl );
 }
 
 /* Video files */
