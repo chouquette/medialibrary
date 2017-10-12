@@ -87,6 +87,12 @@ bool Folder::createTable( sqlite::Connection* connection)
             "(id_device) ON DELETE CASCADE,"
             "UNIQUE(path, device_id) ON CONFLICT FAIL"
             ")";
+    std::string exclEntryReq = "CREATE TABLE IF NOT EXISTS ExcludedEntryFolder("
+                               "folder_id UNSIGNED INTEGER NOT NULL,"
+                               "FOREIGN KEY (folder_id) REFERENCES " + policy::FolderTable::Name +
+                               "(id_folder) ON DELETE CASCADE,"
+                               "UNIQUE(folder_id) ON CONFLICT FAIL"
+                               ")";
     std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_device_present AFTER UPDATE OF is_present ON "
             + policy::DeviceTable::Name +
             " BEGIN"
@@ -97,6 +103,7 @@ bool Folder::createTable( sqlite::Connection* connection)
     std::string parentFolderIndexReq = "CREATE INDEX IF NOT EXISTS parent_folder_id_idx ON " +
             policy::FolderTable::Name + " (parent_id)";
     return sqlite::Tools::executeRequest( connection, req ) &&
+            sqlite::Tools::executeRequest( connection, exclEntryReq ) &&
             sqlite::Tools::executeRequest( connection, triggerReq ) &&
             sqlite::Tools::executeRequest( connection, deviceIndexReq ) &&
             sqlite::Tools::executeRequest( connection, parentFolderIndexReq );
@@ -121,6 +128,12 @@ std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& m
         self->m_fullPath = self->m_deviceMountpoint.get() + path;
     }
     return self;
+}
+
+void Folder::excludeEntryFolder( MediaLibraryPtr ml, int64_t folderId )
+{
+    std::string req = "INSERT INTO ExcludedEntryFolder(folder_id) VALUES(?)";
+    sqlite::Tools::executeRequest( ml->getConn(), req, folderId );
 }
 
 bool Folder::blacklist( MediaLibraryPtr ml, const std::string& mrl )
@@ -307,8 +320,11 @@ bool Folder::isRootFolder() const
 
 std::vector<std::shared_ptr<Folder>> Folder::fetchRootFolders( MediaLibraryPtr ml )
 {
-    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
-            + " WHERE parent_id IS NULL AND is_blacklisted = 0 AND is_present = 1";
+    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
+            " LEFT JOIN ExcludedEntryFolder"
+            " ON " + policy::FolderTable::Name + ".id_folder = ExcludedEntryFolder.folder_id"
+            " WHERE ExcludedEntryFolder.folder_id IS NULL AND"
+            " parent_id IS NULL AND is_blacklisted = 0 AND is_present = 1";
     return DatabaseHelpers::fetchAll<Folder>( ml, req );
 }
 

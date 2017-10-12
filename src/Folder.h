@@ -62,6 +62,7 @@ public:
 
     static bool createTable( sqlite::Connection* connection );
     static std::shared_ptr<Folder> create( MediaLibraryPtr ml, const std::string& mrl, int64_t parentId, Device& device, fs::IDevice& deviceFs );
+    static void excludeEntryFolder( MediaLibraryPtr ml, int64_t folderId );
     static bool blacklist( MediaLibraryPtr ml, const std::string& mrl );
     static std::vector<std::shared_ptr<Folder>> fetchRootFolders( MediaLibraryPtr ml );
 

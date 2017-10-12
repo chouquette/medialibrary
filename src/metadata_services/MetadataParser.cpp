@@ -320,6 +320,9 @@ void MetadataParser::addPlaylistElement( parser::Task& task, const std::shared_p
     if ( parentKnown == false )
     {
         discoverer.discover( entryPoint );
+        auto entryFolder = Folder::fromMrl( m_ml, entryPoint );
+        if ( entryFolder != nullptr )
+            Folder::excludeEntryFolder( m_ml, entryFolder->id() );
         return;
     }
     discoverer.reload( directoryMrl );
