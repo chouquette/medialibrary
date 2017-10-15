@@ -331,6 +331,11 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
         }
         for ( auto& f : filesToRemove )
         {
+            if ( f->type() == IFile::Type::Playlist )
+            {
+                f->destroy(); // Trigger cascade: delete Playlist, and playlist/media relations
+                continue;
+            }
             auto media = f->media();
             if ( media != nullptr )
                 media->removeFile( *f );
