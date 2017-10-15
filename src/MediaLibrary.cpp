@@ -454,6 +454,7 @@ void MediaLibrary::addDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
 
 bool MediaLibrary::deleteFolder( const Folder& folder )
 {
+    LOG_INFO( "deleting folder ", folder.mrl() );
     if ( Folder::destroy( this, folder.id() ) == false )
         return false;
     Media::clear();
