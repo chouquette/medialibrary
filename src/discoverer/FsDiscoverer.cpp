@@ -100,14 +100,15 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
 
 void FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
 {
-    auto folder = m_fsFactory->createDirectory( f->mrl() );
+    auto mrl = f->mrl();
+    auto folder = m_fsFactory->createDirectory( mrl );
     try
     {
         checkFolder( std::move( folder ), std::move( f ), false );
     }
     catch ( DeviceRemovedException& )
     {
-        LOG_INFO( "Reloading of ", f->mrl(), " was stopped after the device was removed" );
+        LOG_INFO( "Reloading of ", mrl, " was stopped after the device was removed" );
     }
 }
 
