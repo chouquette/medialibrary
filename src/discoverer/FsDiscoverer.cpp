@@ -102,6 +102,9 @@ void FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
 {
     auto mrl = f->mrl();
     auto folder = m_fsFactory->createDirectory( mrl );
+    assert( folder->device() != nullptr );
+    if ( folder->device() == nullptr )
+        return;
     try
     {
         checkFolder( std::move( folder ), std::move( f ), false );
@@ -208,6 +211,8 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
         subFoldersInDB = currentFolder->folders();
     for ( const auto& subFolder : currentFolderFs->dirs() )
     {
+        if ( subFolder->device() == nullptr )
+            continue;
         auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [&subFolder](const std::shared_ptr<Folder>& f) {
             return f->mrl() == subFolder->mrl();
         });
