@@ -43,6 +43,7 @@ public:
 
 private:
     parser::Task::Status startPlayback( parser::Task& task, VLC::MediaPlayer& mp );
+    void updateAudioArtwork( parser::Task& task );
     parser::Task::Status seekAhead( VLC::MediaPlayer &mp );
     void setupVout( VLC::MediaPlayer &mp );
     parser::Task::Status takeThumbnail( Media* media, File* file, VLC::MediaPlayer &mp );

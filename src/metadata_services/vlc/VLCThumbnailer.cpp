@@ -26,6 +26,8 @@
 
 #include "VLCThumbnailer.h"
 
+#include "AlbumTrack.h"
+#include "Album.h"
 #include "Media.h"
 #include "File.h"
 #include "logging/Logger.h"
@@ -74,14 +76,6 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     auto media = task.media.get();
     auto file = task.file.get();
 
-    if ( media->type() == IMedia::Type::Audio )
-    {
-        // There's no point in generating a thumbnail for a non-video media.
-        file->markStepCompleted( File::ParserStep::Thumbnailer );
-        file->saveParserStep();
-        return parser::Task::Status::Success;
-    }
-
     LOG_INFO( "Generating ", file->mrl(), " thumbnail..." );
 
     if ( task.vlcMedia.isValid() == false )
@@ -96,7 +90,7 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     task.vlcMedia.addOption( ":avcodec-hw=none" );
     task.vlcMedia.addOption( ":no-mkv-preload-local-dir" );
     auto duration = task.vlcMedia.duration();
-    if ( duration > 0 )
+    if ( duration > 0 && media->type() != IMedia::Type::Audio )
     {
         std::ostringstream ss;
         // Duration is in ms, start-time in seconds, and we're aiming at 1/4th of the media
@@ -186,6 +180,21 @@ parser::Task::Status VLCThumbnailer::startPlayback( parser::Task& task, VLC::Med
         m_cond.notify_all();
     });
 
+    bool metaArtworkChanged = false;
+    auto mem = task.vlcMedia.eventManager();
+    if ( task.media->type() == Media::Type::Audio )
+    {
+        mem.onMetaChanged([this, &metaArtworkChanged, &task]( libvlc_meta_t meta ) {
+            if ( meta != libvlc_meta_ArtworkURL
+                 || metaArtworkChanged == true
+                 || task.vlcMedia.meta( libvlc_meta_ArtworkURL ) == task.media->thumbnail() )
+                return;
+            std::lock_guard<compat::Mutex> lock( m_mutex );
+            metaArtworkChanged = true;
+            m_cond.notify_all();
+        });
+    }
+
     {
         std::unique_lock<compat::Mutex> lock( m_mutex );
         mp.play();
@@ -201,9 +210,18 @@ parser::Task::Status VLCThumbnailer::startPlayback( parser::Task& task, VLC::Med
         // being discovered together.
         if ( hasVideoTrack == false )
         {
-            m_cond.wait_for( lock, std::chrono::seconds( 1 ), [&hasVideoTrack]() {
-                return hasVideoTrack == true;
-            });
+            if ( task.media->type() == Media::Type::Audio )
+            {
+                m_cond.wait_for( lock, std::chrono::milliseconds( 500 ), [&metaArtworkChanged]() {
+                    return metaArtworkChanged == true;
+                });
+            }
+            else
+            {
+                m_cond.wait_for( lock, std::chrono::seconds( 1 ), [&hasVideoTrack]() {
+                    return hasVideoTrack == true;
+                });
+            }
         }
     }
 
@@ -212,6 +230,9 @@ parser::Task::Status VLCThumbnailer::startPlayback( parser::Task& task, VLC::Med
     // If we don't
     if ( hasVideoTrack == true )
         return parser::Task::Status::Success;
+
+    if ( task.media->type() == Media::Type::Audio )
+        updateAudioArtwork( task );
 
     // We are now in the case of a timeout: No failure, but no video track either.
     // The file might be an audio file we haven't detected yet:
@@ -223,6 +244,27 @@ parser::Task::Status VLCThumbnailer::startPlayback( parser::Task& task, VLC::Med
         // file without video tracks
     }
     return parser::Task::Status::Fatal;
+}
+
+void VLCThumbnailer::updateAudioArtwork( parser::Task& task )
+{
+    auto artwork = task.vlcMedia.meta( libvlc_meta_ArtworkURL );
+    if ( artwork.empty() == true )
+        return;
+
+    task.media->setThumbnail( artwork );
+    task.media->save();
+    auto rel = AlbumTrack::fromMedia( m_ml, task.media->id() );
+    if ( rel == nullptr )
+        return;
+
+    auto album = rel->album();
+    if ( album->artworkMrl() == artwork )
+        return;
+
+    // We no not have any other IAlbum implementation, so the downcast is safe here
+    auto a = static_cast<Album*>( album.get() );
+    a->setArtworkMrl( artwork );
 }
 
 parser::Task::Status VLCThumbnailer::seekAhead( VLC::MediaPlayer& mp )
