@@ -183,6 +183,11 @@ std::string scheme( const std::string& mrl )
     return mrl.substr( 0, 7 );
 }
 
+bool schemeIs( const std::string& scheme, const std::string& mrl )
+{
+    return mrl.compare( 0, scheme.size(), scheme ) == 0;
+}
+
 }
 
 }

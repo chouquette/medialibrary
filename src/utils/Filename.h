@@ -60,6 +60,11 @@ namespace file
      * @brief toMrl Convert a filepath to an MRL
      */
     std::string toMrl( const std::string& path );
+
+    /**
+     * @brief schemeIs Check if a mrl start with a specific scheme
+     */
+    bool schemeIs( const std::string& scheme, const std::string& mrl );
 }
 
 }
