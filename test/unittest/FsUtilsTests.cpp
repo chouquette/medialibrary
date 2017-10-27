@@ -100,3 +100,10 @@ TEST( FsUtils, toLocalPath )
     ASSERT_EQ( "/tést/ßóíú/file", utils::file::toLocalPath( "file:///t%C3%A9st/%C3%9F%C3%B3%C3%AD%C3%BA/file" ) );
     ASSERT_EQ( "/&/#/~", utils::file::toLocalPath( "file:///%26/%23/%7E" ) );
 }
+
+TEST( FsUtils, schemeIs )
+{
+  ASSERT_TRUE( utils::file::schemeIs( "attachment://", "attachment://" ) );
+  ASSERT_TRUE( utils::file::schemeIs( "attachment://", "attachment://picture0.jpg" ) );
+  ASSERT_FALSE( utils::file::schemeIs( "boboop://", "/path/to/spaces%20here" ) );
+}
