@@ -1,0 +1,21 @@
+{
+    "input": [
+        "music/xiph_embedded_artwork"
+    ],
+    "expected": {
+        "nbAudios": 1,
+        "nbVideos": 0,
+        "albums": [{
+            "title": "Géza Anda, Camerata Academica des Mozarteums Salzburg : Mozart: Piano Concertos Nos.6, 17 & 21",
+            "artist": "Geza Anda",
+            "hasArtwork": true,
+            "releaseYear": 2003,
+            "tracks": [
+            {
+                "title": "Piano Concerto No.21 in C, K.467:3. Allegro vivace assai - Cadenza: Géza Anda",
+                "releaseYear": 2003,
+                "hasArtwork": true
+            }]
+        }]
+    }
+}

@@ -46,6 +46,7 @@ static const char* testCases[] = {
     "utf8",
     "deduce_artwork_from_album",
     "deduce_artwork_from_track",
+    "xiph_embedded_artwork",
 };
 
 class TestEnv : public ::testing::Environment

@@ -222,7 +222,8 @@ void Tests::checkAlbums( const rapidjson::Value& expectedAlbums, std::vector<Alb
             }
             if ( expectedAlbum.HasMember( "hasArtwork" ) )
             {
-                if ( expectedAlbum["hasArtwork"].GetBool() == a->artworkMrl().empty() )
+                if ( expectedAlbum["hasArtwork"].GetBool() == a->artworkMrl().empty()
+                  || a->artworkMrl().compare(0, 13, "attachment://") == 0 )
                     return false;
             }
             return true;
@@ -324,6 +325,7 @@ void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& 
         if ( expectedTrack.HasMember( "hasArtwork" ) )
         {
             ASSERT_EQ( expectedTrack["hasArtwork"].GetBool(), track->thumbnail().empty() == false );
+            ASSERT_TRUE( track->thumbnail().compare(0, 13, "attachment://") != 0 );
         }
         // Always check if the album link is correct. This isn't part of finding the proper album, so just fail hard
         // if the check fails.
