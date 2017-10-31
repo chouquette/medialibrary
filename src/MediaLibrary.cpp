@@ -735,26 +735,65 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
     // Up until model 3, it's safer (and potentially more efficient with index changes) to drop the DB
     // It's also way simpler to implement
     // In case of downgrade, just recreate the database
-    if ( previousVersion < 3 ||
-         previousVersion > Settings::DbModelVersion )
+    for ( auto i = 0u; i < 3; ++i )
     {
-        if( recreateDatabase() == false )
-            return false;
-        previousVersion = Settings::DbModelVersion;
-    }
-    if ( previousVersion == 3 )
-    {
-        if ( migrateModel3to4() == false )
-            return false;
-        previousVersion = 4;
-    }
-    // To be continued in the future!
+        try
+        {
+            LOG_INFO( "Updating database model from ", previousVersion, " to ", Settings::DbModelVersion );
+            // Up until model 3, it's safer (and potentially more efficient with index changes) to drop the DB
+            // It's also way simpler to implement
+            // In case of downgrade, just recreate the database
+            if ( previousVersion < 3 ||
+                 previousVersion > Settings::DbModelVersion )
+            {
+                if( recreateDatabase() == false )
+                    throw std::runtime_error( "Failed to recreate the database" );
+                previousVersion = Settings::DbModelVersion;
+            }
+            if ( previousVersion == 3 )
+            {
+                if ( migrateModel3to4() == false )
+                    throw std::logic_error( "Failed to migrate from 3 to 4" );
+                previousVersion = 4;
+            }
+            // To be continued in the future!
 
-    // Safety check: ensure we didn't forget a migration along the way
-    assert( previousVersion == Settings::DbModelVersion );
-    m_settings.setDbModelVersion( Settings::DbModelVersion );
-    m_settings.save();
-    return true;
+            // Safety check: ensure we didn't forget a migration along the way
+            assert( previousVersion == Settings::DbModelVersion );
+            m_settings.setDbModelVersion( Settings::DbModelVersion );
+            m_settings.save();
+            return true;
+        }
+        catch( const std::exception& ex )
+        {
+            LOG_ERROR( "An error occured during the database upgrade: ",
+                       ex.what() );
+        }
+        catch( ... )
+        {
+            LOG_ERROR( "An unknown error occured during the database upgrade." );
+        }
+        LOG_WARN( "Retrying database migration, attempt ", i + 1, " / 3" );
+    }
+    LOG_ERROR( "Failed to upgrade database, recreating it" );
+    for ( auto i = 0u; i < 3; ++i )
+    {
+        try
+        {
+            if( recreateDatabase() == true )
+                return true;
+        }
+        catch( const std::exception& ex )
+        {
+            LOG_ERROR( "Failed to recreate database: ", ex.what() );
+        }
+        catch(...)
+        {
+            LOG_ERROR( "Unknown error while trying to recreate the database." );
+        }
+        LOG_WARN( "Retrying to recreate the database, attempt ", i + 1, " / 3" );
+    }
+    return false;
 }
 
 bool MediaLibrary::recreateDatabase()
