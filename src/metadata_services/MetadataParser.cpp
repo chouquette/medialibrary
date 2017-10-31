@@ -75,10 +75,9 @@ int MetadataParser::toInt( VLC::Media& vlcMedia, libvlc_meta_t meta, const char*
 
 parser::Task::Status MetadataParser::run( parser::Task& task )
 {
-    if ( task.file != nullptr )
-        task.media = task.file->media();
-    else // Create Media & File
+    if ( task.file == nullptr )
     {
+        assert( task.media == nullptr );
         auto t = m_ml->getConn()->newTransaction();
         LOG_INFO( "Adding ", task.mrl );
         task.media = Media::create( m_ml, IMedia::Type::Unknown, utils::file::fileName( task.mrl ) );
