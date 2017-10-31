@@ -738,7 +738,7 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
     {
         if( recreateDatabase() == false )
             return false;
-        previousVersion = 3;
+        previousVersion = Settings::DbModelVersion;
     }
     if ( previousVersion == 3 )
     {
