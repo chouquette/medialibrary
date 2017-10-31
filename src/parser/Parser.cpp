@@ -57,11 +57,15 @@ void Parser::addService( ServicePtr service )
     m_services.push_back( std::move( service ) );
 }
 
-void Parser::parse( std::shared_ptr<File> file, const std::string& mrl )
+void Parser::parse( std::shared_ptr<File> file, std::shared_ptr<Media> media,
+                    const std::string& mrl )
 {
     if ( m_services.empty() == true )
         return;
-    m_services[0]->parse( std::unique_ptr<parser::Task>( new parser::Task( std::move( file ), mrl ) ) );
+    m_services[0]->parse( std::unique_ptr<parser::Task>( new parser::Task(
+                                                             std::move( file ),
+                                                             std::move( media ),
+                                                             mrl ) ) );
     m_opToDo += m_services.size();
     updateStats();
 }
@@ -117,7 +121,7 @@ void Parser::restore()
     LOG_INFO( "Resuming parsing on ", files.size(), " mrl" );
     for ( auto& f : files )
     {
-        parse( f, f->mrl() );
+        parse( f, f->media(), f->mrl() );
     }
 }
 

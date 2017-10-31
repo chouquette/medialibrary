@@ -36,8 +36,10 @@ namespace medialibrary
 namespace parser
 {
 
-Task::Task( std::shared_ptr<File> file, std::string mrl )
-    : file( std::move( file ) )
+Task::Task( std::shared_ptr<File> file, std::shared_ptr<Media> media,
+            std::string mrl )
+    : media( std::move( media ) )
+    , file( std::move( file ) )
     , mrl( std::move( mrl ) )
     , currentService( 0 )
     , step( this->file->parserStep() )

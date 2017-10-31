@@ -71,7 +71,13 @@ struct Task
         Completed = 1 | 2 | 4,
     };
 
-    Task( std::shared_ptr<File> file, std::string mrl );
+    /*
+     * Constructs a task to be resumed.
+     * The Media is provided as a parameter to avoid this to implicitely query
+     * the database for the media associated to the provided file
+     */
+    Task( std::shared_ptr<File> file, std::shared_ptr<Media> media,
+          std::string mrl );
     Task( std::shared_ptr<fs::IFile> fileFs,
           std::shared_ptr<Folder> parentFolder,
           std::shared_ptr<fs::IDirectory> parentFolderFs,

@@ -50,7 +50,8 @@ public:
     Parser( MediaLibrary* ml );
     virtual ~Parser();
     void addService( ServicePtr service );
-    void parse( std::shared_ptr<File> file, const std::string& mrl );
+    void parse( std::shared_ptr<File> file, std::shared_ptr<Media> media,
+                const std::string& mrl );
     void parse( std::shared_ptr<fs::IFile> fileFs,
                 std::shared_ptr<Folder> parentFolder,
                 std::shared_ptr<fs::IDirectory> parentFolderFs );

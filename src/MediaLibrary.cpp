@@ -425,7 +425,7 @@ std::shared_ptr<Media> MediaLibrary::addFile( std::shared_ptr<fs::IFile> fileFs,
         return nullptr;
     }
     if ( m_parser != nullptr )
-        m_parser->parse( file, fileFs->mrl() );
+        m_parser->parse( file, mptr, fileFs->mrl() );
     return mptr;
 }
 
