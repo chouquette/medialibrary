@@ -736,13 +736,7 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
     // It's also way simpler to implement
     if ( previousVersion < 3 )
     {
-        // Way too much differences, introduction of devices, and almost unused in the wild, just drop everything
-        std::string req = "PRAGMA writable_schema = 1;"
-                            "delete from sqlite_master;"
-                            "PRAGMA writable_schema = 0;";
-        if ( sqlite::Tools::executeRequest( getConn(), req ) == false )
-            return false;
-        if ( createAllTables() == false )
+        if( recreateDatabase() == false )
             return false;
         previousVersion = 3;
     }
@@ -758,6 +752,19 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
     assert( previousVersion == Settings::DbModelVersion );
     m_settings.setDbModelVersion( Settings::DbModelVersion );
     m_settings.save();
+    return true;
+}
+
+bool MediaLibrary::recreateDatabase()
+{
+    // Way too much differences, introduction of devices, and almost unused in the wild, just drop everything
+    std::string req = "PRAGMA writable_schema = 1;"
+                        "delete from sqlite_master;"
+                        "PRAGMA writable_schema = 0;";
+    if ( sqlite::Tools::executeRequest( getConn(), req ) == false )
+        return false;
+    if ( createAllTables() == false )
+        return false;
     return true;
 }
 
