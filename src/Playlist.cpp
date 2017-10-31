@@ -44,7 +44,8 @@ Playlist::Playlist( MediaLibraryPtr ml, sqlite::Row& row )
     row >> m_id
         >> m_name
         >> m_fileId
-        >> m_creationDate;
+        >> m_creationDate
+        >> m_artworkMrl;
 }
 
 Playlist::Playlist( MediaLibraryPtr ml, const std::string& name, int64_t fileId )
@@ -70,10 +71,10 @@ std::shared_ptr<Playlist> Playlist::createFromFile( MediaLibraryPtr ml, const st
 {
     auto self = std::make_shared<Playlist>( ml, name, fileId );
     static const std::string req = "INSERT INTO " + policy::PlaylistTable::Name + \
-            "(name, file_id, creation_date) VALUES(?, ?, ?)";
+            "(name, file_id, creation_date, artwork_mrl) VALUES(?, ?, ?, ?)";
     try
     {
-        if ( insert( ml, self, req, name, sqlite::ForeignKey( fileId ), self->m_creationDate ) == false )
+        if ( insert( ml, self, req, name, sqlite::ForeignKey( fileId ), self->m_creationDate, self->m_artworkMrl ) == false )
             return nullptr;
         return self;
     }
@@ -108,6 +109,11 @@ bool Playlist::setName( const std::string& name )
 unsigned int Playlist::creationDate() const
 {
     return m_creationDate;
+}
+
+const std::string& Playlist::artworkMrl() const
+{
+    return m_artworkMrl;
 }
 
 std::vector<MediaPtr> Playlist::media() const
@@ -162,6 +168,7 @@ bool Playlist::createTable( DBConnection dbConn )
             "name TEXT UNIQUE,"
             "file_id UNSIGNED INT DEFAULT NULL,"
             "creation_date UNSIGNED INT NOT NULL,"
+            "artwork_mrl TEXT,"
             "FOREIGN KEY (file_id) REFERENCES " + policy::FileTable::Name
             + "(id_file) ON DELETE CASCADE"
         ")";

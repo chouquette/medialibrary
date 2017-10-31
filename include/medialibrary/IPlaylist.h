@@ -37,6 +37,7 @@ public:
     virtual const std::string& name() const = 0;
     virtual bool setName( const std::string& name ) = 0;
     virtual unsigned int creationDate() const = 0;
+    virtual const std::string& artworkMrl() const = 0;
     virtual std::vector<MediaPtr> media() const = 0;
     ///
     /// \brief append Appends a media to a playlist
