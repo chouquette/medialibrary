@@ -145,7 +145,7 @@ std::string Directory::toAbsolute( const std::string& path )
     if ( GetFullPathName( wpath.get(), MAX_PATH, buff, nullptr ) == 0 )
     {
         LOG_ERROR( "Failed to convert ", path, " to absolute path" );
-        std::system_error( GetLastError(), std::generic_category(), "Failed to convert to absolute path" );
+        throw std::system_error( GetLastError(), std::generic_category(), "Failed to convert to absolute path" );
     }
     auto upath = charset::FromWide( buff );
     return std::string( upath.get() );
