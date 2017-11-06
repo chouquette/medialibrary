@@ -67,7 +67,9 @@ struct Traits<T, typename std::enable_if<IsSameDecay<T, ForeignKey>::value>::typ
 };
 
 template <typename T>
-struct Traits<T, typename std::enable_if<IsSameDecay<T, std::string>::value>::type>
+struct Traits<T, typename std::enable_if<IsSameDecay<T, std::string>::value ||
+                                         IsSameDecay<T, const char*>::value ||
+                                         IsSameDecay<T, char*>::value>::type>
 {
     static int Bind(sqlite3_stmt* stmt, int pos, const std::string& value )
     {
