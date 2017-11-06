@@ -68,7 +68,7 @@ public:
         uint32_t dbVersion;
         row >> dbVersion;
         ASSERT_NE( dbVersion, Settings::DbModelVersion );
-        ASSERT_EQ( dbVersion, 3 );
+        ASSERT_EQ( dbVersion, 3u );
 
         Reload();
     }
