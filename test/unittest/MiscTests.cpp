@@ -24,7 +24,11 @@
 # include "config.h"
 #endif
 
+#include <fstream>
+
 #include "Tests.h"
+#include "database/SqliteTools.h"
+#include "database/SqliteConnection.h"
 
 class Misc : public Tests
 {
@@ -37,4 +41,49 @@ TEST_F( Misc, FileExtensions )
     {
         ASSERT_LT( strcmp( supportedExtensions[i], supportedExtensions[i + 1] ), 0 );
     }
+}
+
+class DbModel : public Tests
+{
+public:
+    virtual void SetUp() override
+    {
+        unlink("test.db");
+        std::ifstream file{ SRC_DIR "/test/unittest/db_v3.sql" };
+        medialibrary::SqliteConnection conn{ "test.db" };
+        // The backup file already contains a transaction
+        char buff[2048];
+        while( file.getline( buff, sizeof( buff ) ) )
+        {
+            medialibrary::sqlite::Statement stmt( conn.getConn(), buff );
+            stmt.execute();
+            while ( stmt.row() != nullptr )
+                ;
+        }
+        // Ensure we are doing a migration
+        medialibrary::sqlite::Statement stmt{ conn.getConn(),
+                    "SELECT * FROM Settings" };
+        stmt.execute();
+        auto row = stmt.row();
+        uint32_t dbVersion;
+        row >> dbVersion;
+        ASSERT_NE( dbVersion, Settings::DbModelVersion );
+        ASSERT_EQ( dbVersion, 3 );
+
+        Reload();
+    }
+};
+
+TEST_F( DbModel, Upgrade )
+{
+    // All is done during the database initialization, we only care about no
+    // exception being thrown, and MediaLibrary::initialize() returning true
+    medialibrary::SqliteConnection conn{ "test.db" };
+    medialibrary::sqlite::Statement stmt{ conn.getConn(),
+                "SELECT * FROM Settings" };
+    stmt.execute();
+    auto row = stmt.row();
+    uint32_t dbVersion;
+    row >> dbVersion;
+    ASSERT_EQ( dbVersion, Settings::DbModelVersion );
 }

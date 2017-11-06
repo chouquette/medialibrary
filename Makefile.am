@@ -232,6 +232,8 @@ if HAVE_DARWIN
 lib_LTLIBRARIES += libmedialibrary_macos.la
 endif
 
+EXTRA_DIST=
+
 if HAVE_TESTS
 
 check_PROGRAMS = unittest samples
@@ -288,8 +290,11 @@ unittest_SOURCES = \
 	test/unittest/MiscTests.cpp \
 	$(NULL)
 
+EXTRA_DIST += test/unittest/db_v3.sql
+
 unittest_CPPFLAGS = 		\
 	$(MEDIALIB_CPPFLAGS) 	\
+	-DSRC_DIR=\"$(abs_srcdir)\"	\
 	-I$(top_srcdir)/test	\
 	-I$(top_srcdir)/googletest/include \
 	$(SQLITE_CFLAGS) 		\
@@ -334,5 +339,5 @@ endif
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = medialibrary.pc
-EXTRA_DIST = medialibrary.pc \
+EXTRA_DIST += medialibrary.pc \
 	src/database/migrations/migration3-4.sql
