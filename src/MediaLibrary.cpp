@@ -91,6 +91,7 @@ const size_t MediaLibrary::NbSupportedExtensions = sizeof(supportedExtensions) /
 MediaLibrary::MediaLibrary()
     : m_callback( nullptr )
     , m_verbosity( LogLevel::Error )
+    , m_settings( this )
     , m_initialized( false )
     , m_discovererIdle( true )
     , m_parserIdle( true )
@@ -271,7 +272,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
             LOG_ERROR( "Failed to create database structure" );
             return false;
         }
-        if ( m_settings.load( m_dbConnection.get() ) == false )
+        if ( m_settings.load() == false )
         {
             LOG_ERROR( "Failed to load settings" );
             return false;

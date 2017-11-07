@@ -29,11 +29,17 @@
 namespace medialibrary
 {
 
+namespace sqlite
+{
+class Connection;
+}
+
+
 class Settings
 {
 public:
-    Settings();
-    bool load( DBConnection dbConn );
+    Settings( MediaLibrary* ml );
+    bool load();
     /**
      * @brief dbModelVersion returns the current database model version.
      *
@@ -43,12 +49,12 @@ public:
     bool save();
     void setDbModelVersion( uint32_t dbModelVersion );
 
-    static bool createTable(DBConnection dbConn);
+    static bool createTable( sqlite::Connection* dbConn );
 
     static const uint32_t DbModelVersion;
 
 private:
-    DBConnection m_dbConn;
+    MediaLibrary* m_ml;
 
     uint32_t m_dbModelVersion;
 
