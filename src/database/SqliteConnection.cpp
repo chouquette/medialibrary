@@ -140,6 +140,16 @@ void SqliteConnection::registerUpdateHook( const std::string& table, SqliteConne
     m_hooks.emplace( table, cb );
 }
 
+std::shared_ptr<SqliteConnection> SqliteConnection::connect( const std::string& dbPath )
+{
+    // Use a wrapper to allow make_shared to use the private SqliteConnection ctor
+    struct SqliteConnectionWrapper : public SqliteConnection
+    {
+        SqliteConnectionWrapper( const std::string& p ) : SqliteConnection( p ) {}
+    };
+    return std::make_shared<SqliteConnectionWrapper>( dbPath );
+}
+
 void SqliteConnection::updateHook( void* data, int reason, const char*,
                                    const char* table, sqlite_int64 rowId )
 {

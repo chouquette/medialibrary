@@ -177,7 +177,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual bool isDeviceKnown( const std::string& uuid ) const override;
 
     protected:
-        std::unique_ptr<SqliteConnection> m_dbConnection;
+        std::shared_ptr<SqliteConnection> m_dbConnection;
         std::vector<std::shared_ptr<factory::IFileSystem>> m_fsFactories;
         std::string m_thumbnailPath;
         IMediaLibraryCb* m_callback;

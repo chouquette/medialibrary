@@ -257,7 +257,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
     }
     m_thumbnailPath = thumbnailPath;
     m_callback = mlCallback;
-    m_dbConnection.reset( new SqliteConnection( dbPath ) );
+    m_dbConnection = SqliteConnection::connect( dbPath );
 
     // Give a chance to test overloads to reject the creation of a notifier
     startDeletionNotifier();

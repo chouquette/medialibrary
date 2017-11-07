@@ -68,8 +68,6 @@ public:
 
     using UpdateHookCb = std::function<void(HookReason, int64_t)>;
 
-    explicit SqliteConnection( const std::string& dbPath );
-    ~SqliteConnection();
     // Returns the current thread's connection
     // This will initiate a connection if required
     Handle getConn();
@@ -81,7 +79,18 @@ public:
 
     void registerUpdateHook( const std::string& table, UpdateHookCb cb );
 
+    static std::shared_ptr<SqliteConnection> connect( const std::string& dbPath );
+
+protected:
+    explicit SqliteConnection( const std::string& dbPath );
+    ~SqliteConnection();
+
 private:
+    SqliteConnection( const SqliteConnection& ) = delete;
+    SqliteConnection( SqliteConnection&& ) = delete;
+    SqliteConnection& operator=( const SqliteConnection& ) = delete;
+    SqliteConnection& operator=( SqliteConnection&& ) = delete;
+
     void setPragmaEnabled( Handle conn, const std::string& pragmaName, bool value );
     static void updateHook( void* data, int reason, const char* database,
                             const char* table, sqlite_int64 rowId );
