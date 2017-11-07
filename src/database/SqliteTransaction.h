@@ -50,7 +50,7 @@ public:
 
 private:
     DBConnection m_dbConn;
-    SqliteConnection::WriteContext m_ctx;
+    Connection::WriteContext m_ctx;
     std::vector<std::function<void()>> m_failureHandlers;
 
 

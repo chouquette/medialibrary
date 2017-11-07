@@ -53,7 +53,7 @@ public:
         {
             // Don't use our Sqlite wrapper to open a connection. We don't want
             // to mess with per-thread connections.
-            medialibrary::SqliteConnection::Handle conn;
+            medialibrary::sqlite::Connection::Handle conn;
             sqlite3_open( "test.db", &conn );
             std::unique_ptr<sqlite3, int(*)(sqlite3*)> dbPtr{ conn, &sqlite3_close };
             // The backup file already contains a transaction
@@ -85,7 +85,7 @@ TEST_F( DbModel, Upgrade )
 {
     // All is done during the database initialization, we only care about no
     // exception being thrown, and MediaLibrary::initialize() returning true
-    medialibrary::SqliteConnection::Handle conn;
+    medialibrary::sqlite::Connection::Handle conn;
     sqlite3_open( "test.db", &conn );
     std::unique_ptr<sqlite3, int(*)(sqlite3*)> dbPtr{ conn, &sqlite3_close };
     medialibrary::sqlite::Statement stmt{ conn,

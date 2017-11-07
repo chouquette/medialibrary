@@ -118,7 +118,7 @@ private:
 class Statement
 {
 public:
-    Statement( SqliteConnection::Handle dbConnection, const std::string& req )
+    Statement( Connection::Handle dbConnection, const std::string& req )
         : m_stmt( nullptr, [](sqlite3_stmt* stmt) {
                 sqlite3_clear_bindings( stmt );
                 sqlite3_reset( stmt );
@@ -187,7 +187,7 @@ public:
         StatementsCache.clear();
     }
 
-    static void FlushConnectionStatementCache( SqliteConnection::Handle h )
+    static void FlushConnectionStatementCache( Connection::Handle h )
     {
         std::lock_guard<compat::Mutex> lock( StatementsCacheLock );
         auto it = StatementsCache.find( h );
@@ -213,11 +213,11 @@ private:
     // basically holds the state of the currently executed request.
     using StatementPtr = std::unique_ptr<sqlite3_stmt, void(*)(sqlite3_stmt*)>;
     StatementPtr m_stmt;
-    SqliteConnection::Handle m_dbConn;
+    Connection::Handle m_dbConn;
     unsigned int m_bindIdx;
     bool m_isCommit;
     static compat::Mutex StatementsCacheLock;
-    static std::unordered_map<SqliteConnection::Handle,
+    static std::unordered_map<Connection::Handle,
                             std::unordered_map<std::string, CachedStmtPtr>> StatementsCache;
 };
 
@@ -235,7 +235,7 @@ class Tools
         static std::vector<std::shared_ptr<INTF> > fetchAll( MediaLibraryPtr ml, const std::string& req, Args&&... args )
         {
             auto dbConnection = ml->getConn();
-            SqliteConnection::ReadContext ctx;
+            Connection::ReadContext ctx;
             if (Transaction::transactionInProgress() == false)
                 ctx = dbConnection->acquireReadContext();
             auto chrono = std::chrono::steady_clock::now();
@@ -259,7 +259,7 @@ class Tools
         static std::shared_ptr<T> fetchOne( MediaLibraryPtr ml, const std::string& req, Args&&... args )
         {
             auto dbConnection = ml->getConn();
-            SqliteConnection::ReadContext ctx;
+            Connection::ReadContext ctx;
             if (Transaction::transactionInProgress() == false)
                 ctx = dbConnection->acquireReadContext();
             auto chrono = std::chrono::steady_clock::now();
@@ -279,7 +279,7 @@ class Tools
         template <typename... Args>
         static bool executeRequest( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
-            SqliteConnection::WriteContext ctx;
+            Connection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
                 ctx = dbConnection->acquireWriteContext();
             return executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
@@ -288,7 +288,7 @@ class Tools
         template <typename... Args>
         static bool executeDelete( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
-            SqliteConnection::WriteContext ctx;
+            Connection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
                 ctx = dbConnection->acquireWriteContext();
             if ( executeRequestLocked( dbConnection, req, std::forward<Args>( args )... ) == false )
@@ -310,7 +310,7 @@ class Tools
         template <typename... Args>
         static int64_t executeInsert( DBConnection dbConnection, const std::string& req, Args&&... args )
         {
-            SqliteConnection::WriteContext ctx;
+            Connection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
                 ctx = dbConnection->acquireWriteContext();
             if ( executeRequestLocked( dbConnection, req, std::forward<Args>( args )... ) == false )

@@ -38,10 +38,10 @@ namespace medialibrary
 
 namespace sqlite
 {
-    class Transaction;
-}
 
-class SqliteConnection : public std::enable_shared_from_this<SqliteConnection>
+class Transaction;
+
+class Connection : public std::enable_shared_from_this<Connection>
 {
 public:
     using ReadContext = std::unique_lock<utils::ReadLocker>;
@@ -55,14 +55,14 @@ public:
     };
     struct WeakDbContext
     {
-        WeakDbContext( SqliteConnection* conn );
+        WeakDbContext( Connection* conn );
         ~WeakDbContext();
         WeakDbContext( const WeakDbContext& ) = delete;
         WeakDbContext( WeakDbContext&& ) = delete;
         WeakDbContext& operator=( const WeakDbContext& ) = delete;
         WeakDbContext& operator=( WeakDbContext&& ) = delete;
     private:
-        SqliteConnection* m_conn;
+        Connection* m_conn;
     };
 
     using UpdateHookCb = std::function<void(HookReason, int64_t)>;
@@ -78,17 +78,17 @@ public:
 
     void registerUpdateHook( const std::string& table, UpdateHookCb cb );
 
-    static std::shared_ptr<SqliteConnection> connect( const std::string& dbPath );
+    static std::shared_ptr<Connection> connect( const std::string& dbPath );
 
 protected:
-    explicit SqliteConnection( const std::string& dbPath );
-    ~SqliteConnection();
+    explicit Connection( const std::string& dbPath );
+    ~Connection();
 
 private:
-    SqliteConnection( const SqliteConnection& ) = delete;
-    SqliteConnection( SqliteConnection&& ) = delete;
-    SqliteConnection& operator=( const SqliteConnection& ) = delete;
-    SqliteConnection& operator=( SqliteConnection&& ) = delete;
+    Connection( const Connection& ) = delete;
+    Connection( Connection&& ) = delete;
+    Connection& operator=( const Connection& ) = delete;
+    Connection& operator=( Connection&& ) = delete;
 
     void setPragmaEnabled( Handle conn, const std::string& pragmaName, bool value );
     static void updateHook( void* data, int reason, const char* database,
@@ -97,11 +97,11 @@ private:
 private:
     struct ThreadSpecificConnection
     {
-        ThreadSpecificConnection( std::shared_ptr<SqliteConnection> conn );
+        ThreadSpecificConnection( std::shared_ptr<Connection> conn );
         ~ThreadSpecificConnection();
 
     private:
-        std::shared_ptr<SqliteConnection> m_conn;
+        std::shared_ptr<Connection> m_conn;
     };
 
     using ConnPtr = std::unique_ptr<sqlite3, int(*)(sqlite3*)>;

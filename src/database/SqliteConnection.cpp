@@ -30,8 +30,10 @@
 
 namespace medialibrary
 {
+namespace sqlite
+{
 
-SqliteConnection::SqliteConnection( const std::string &dbPath )
+Connection::Connection( const std::string &dbPath )
     : m_dbPath( dbPath )
     , m_readLock( m_contextLock )
     , m_writeLock( m_contextLock )
@@ -42,12 +44,12 @@ SqliteConnection::SqliteConnection( const std::string &dbPath )
         throw std::runtime_error( "Failed to enable sqlite multithreaded mode" );
 }
 
-SqliteConnection::~SqliteConnection()
+Connection::~Connection()
 {
     sqlite::Statement::FlushStatementCache();
 }
 
-SqliteConnection::Handle SqliteConnection::getConn()
+Connection::Handle Connection::getConn()
 {
     /**
      * We need to have a single sqlite connection per thread, but we also need
@@ -67,7 +69,7 @@ SqliteConnection::Handle SqliteConnection::getConn()
      * Also note that we need to flush any potentially cached compiled statement
      * when a thread gets terminated, as it would become unusable as well.
      *
-     * \sa SqliteConnection::ThreadSpecificConnection::~ThreadSpecificConnection
+     * \sa sqlite::Connection::ThreadSpecificConnection::~ThreadSpecificConnection
      * \sa sqlite::Statement::StatementsCache
      */
     std::unique_lock<compat::Mutex> lock( m_connMutex );
@@ -95,22 +97,22 @@ SqliteConnection::Handle SqliteConnection::getConn()
     return it->second.get();
 }
 
-std::unique_ptr<sqlite::Transaction> SqliteConnection::newTransaction()
+std::unique_ptr<sqlite::Transaction> Connection::newTransaction()
 {
     return std::unique_ptr<sqlite::Transaction>{ new sqlite::Transaction( this ) };
 }
 
-SqliteConnection::ReadContext SqliteConnection::acquireReadContext()
+Connection::ReadContext Connection::acquireReadContext()
 {
     return ReadContext{ m_readLock };
 }
 
-SqliteConnection::WriteContext SqliteConnection::acquireWriteContext()
+Connection::WriteContext Connection::acquireWriteContext()
 {
     return WriteContext{ m_writeLock };
 }
 
-void SqliteConnection::setPragmaEnabled( Handle conn,
+void Connection::setPragmaEnabled( Handle conn,
                                          const std::string& pragmaName,
                                          bool value )
 {
@@ -131,7 +133,7 @@ void SqliteConnection::setPragmaEnabled( Handle conn,
         throw std::runtime_error( "PRAGMA " + pragmaName + " value mismatch" );
 }
 
-void SqliteConnection::setForeignKeyEnabled( bool value )
+void Connection::setForeignKeyEnabled( bool value )
 {
     // Ensure no transaction will be started during the pragma change
     auto ctx = acquireWriteContext();
@@ -141,7 +143,7 @@ void SqliteConnection::setForeignKeyEnabled( bool value )
     setPragmaEnabled( getConn(), "foreign_keys", value );
 }
 
-void SqliteConnection::setRecursiveTriggers( bool value )
+void Connection::setRecursiveTriggers( bool value )
 {
     // Ensure no request will run while we change this setting
     auto ctx = acquireWriteContext();
@@ -157,25 +159,25 @@ void SqliteConnection::setRecursiveTriggers( bool value )
     setPragmaEnabled( getConn(), "recursive_triggers", value );
 }
 
-void SqliteConnection::registerUpdateHook( const std::string& table, SqliteConnection::UpdateHookCb cb )
+void Connection::registerUpdateHook( const std::string& table, Connection::UpdateHookCb cb )
 {
     m_hooks.emplace( table, cb );
 }
 
-std::shared_ptr<SqliteConnection> SqliteConnection::connect( const std::string& dbPath )
+std::shared_ptr<Connection> Connection::connect( const std::string& dbPath )
 {
-    // Use a wrapper to allow make_shared to use the private SqliteConnection ctor
-    struct SqliteConnectionWrapper : public SqliteConnection
+    // Use a wrapper to allow make_shared to use the private Connection ctor
+    struct SqliteConnectionWrapper : public Connection
     {
-        SqliteConnectionWrapper( const std::string& p ) : SqliteConnection( p ) {}
+        SqliteConnectionWrapper( const std::string& p ) : Connection( p ) {}
     };
     return std::make_shared<SqliteConnectionWrapper>( dbPath );
 }
 
-void SqliteConnection::updateHook( void* data, int reason, const char*,
+void Connection::updateHook( void* data, int reason, const char*,
                                    const char* table, sqlite_int64 rowId )
 {
-    const auto self = reinterpret_cast<SqliteConnection*>( data );
+    const auto self = reinterpret_cast<Connection*>( data );
     auto it = self->m_hooks.find( table );
     if ( it == end( self->m_hooks ) )
         return;
@@ -193,26 +195,26 @@ void SqliteConnection::updateHook( void* data, int reason, const char*,
     }
 }
 
-SqliteConnection::WeakDbContext::WeakDbContext( SqliteConnection* conn )
+Connection::WeakDbContext::WeakDbContext( Connection* conn )
     : m_conn( conn )
 {
     m_conn->setForeignKeyEnabled( false );
     m_conn->setRecursiveTriggers( false );
 }
 
-SqliteConnection::WeakDbContext::~WeakDbContext()
+Connection::WeakDbContext::~WeakDbContext()
 {
     m_conn->setForeignKeyEnabled( true );
     m_conn->setRecursiveTriggers( true );
 }
 
-SqliteConnection::ThreadSpecificConnection::ThreadSpecificConnection(
-        std::shared_ptr<SqliteConnection> conn)
+Connection::ThreadSpecificConnection::ThreadSpecificConnection(
+        std::shared_ptr<Connection> conn)
     : m_conn( conn )
 {
 }
 
-SqliteConnection::ThreadSpecificConnection::~ThreadSpecificConnection()
+Connection::ThreadSpecificConnection::~ThreadSpecificConnection()
 {
     std::unique_lock<compat::Mutex> lock( m_conn->m_connMutex );
     auto it = m_conn->m_conns.find( compat::this_thread::get_id() );
@@ -225,6 +227,8 @@ SqliteConnection::ThreadSpecificConnection::~ThreadSpecificConnection()
         // ID gets used in the future.
         m_conn->m_conns.erase( it );
     }
+}
+
 }
 
 }

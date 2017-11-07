@@ -25,9 +25,13 @@
 namespace medialibrary
 {
 
-class SqliteConnection;
+namespace sqlite
+{
+class Connection;
+}
+
 class MediaLibrary;
-typedef SqliteConnection* DBConnection;
+using DBConnection = sqlite::Connection*;
 using MediaLibraryPtr = const MediaLibrary*;
 
 }

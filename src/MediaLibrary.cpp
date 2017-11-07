@@ -161,9 +161,9 @@ bool MediaLibrary::createAllTables()
 }
 
 template <typename T>
-static void propagateDeletionToCache( SqliteConnection::HookReason reason, int64_t rowId )
+static void propagateDeletionToCache( sqlite::Connection::HookReason reason, int64_t rowId )
 {
-    if ( reason != SqliteConnection::HookReason::Delete )
+    if ( reason != sqlite::Connection::HookReason::Delete )
         return;
     T::removeFromCache( rowId );
 }
@@ -174,36 +174,36 @@ void MediaLibrary::registerEntityHooks()
         return;
 
     m_dbConnection->registerUpdateHook( policy::MediaTable::Name,
-                                        [this]( SqliteConnection::HookReason reason, int64_t rowId ) {
-        if ( reason != SqliteConnection::HookReason::Delete )
+                                        [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
+        if ( reason != sqlite::Connection::HookReason::Delete )
             return;
         Media::removeFromCache( rowId );
         m_modificationNotifier->notifyMediaRemoval( rowId );
     });
     m_dbConnection->registerUpdateHook( policy::ArtistTable::Name,
-                                        [this]( SqliteConnection::HookReason reason, int64_t rowId ) {
-        if ( reason != SqliteConnection::HookReason::Delete )
+                                        [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
+        if ( reason != sqlite::Connection::HookReason::Delete )
             return;
         Artist::removeFromCache( rowId );
         m_modificationNotifier->notifyArtistRemoval( rowId );
     });
     m_dbConnection->registerUpdateHook( policy::AlbumTable::Name,
-                                        [this]( SqliteConnection::HookReason reason, int64_t rowId ) {
-        if ( reason != SqliteConnection::HookReason::Delete )
+                                        [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
+        if ( reason != sqlite::Connection::HookReason::Delete )
             return;
         Album::removeFromCache( rowId );
         m_modificationNotifier->notifyAlbumRemoval( rowId );
     });
     m_dbConnection->registerUpdateHook( policy::AlbumTrackTable::Name,
-                                        [this]( SqliteConnection::HookReason reason, int64_t rowId ) {
-        if ( reason != SqliteConnection::HookReason::Delete )
+                                        [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
+        if ( reason != sqlite::Connection::HookReason::Delete )
             return;
         AlbumTrack::removeFromCache( rowId );
         m_modificationNotifier->notifyAlbumTrackRemoval( rowId );
     });
     m_dbConnection->registerUpdateHook( policy::PlaylistTable::Name,
-                                        [this]( SqliteConnection::HookReason reason, int64_t rowId ) {
-        if ( reason != SqliteConnection::HookReason::Delete )
+                                        [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
+        if ( reason != sqlite::Connection::HookReason::Delete )
             return;
         Playlist::removeFromCache( rowId );
         m_modificationNotifier->notifyPlaylistRemoval( rowId );
@@ -257,7 +257,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
     }
     m_thumbnailPath = thumbnailPath;
     m_callback = mlCallback;
-    m_dbConnection = SqliteConnection::connect( dbPath );
+    m_dbConnection = sqlite::Connection::connect( dbPath );
 
     // Give a chance to test overloads to reject the creation of a notifier
     startDeletionNotifier();
@@ -814,7 +814,7 @@ bool MediaLibrary::migrateModel3to4()
      * Disable Foreign Keys & recursive triggers to avoid cascading deletion
      * while remodeling the database into the transaction.
      */
-    SqliteConnection::WeakDbContext weakConnCtx{ getConn() };
+    sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
     auto t = getConn()->newTransaction();
     using namespace policy;
     // As SQLite do not allow us to remove or add some constraints,
