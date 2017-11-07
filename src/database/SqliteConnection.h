@@ -42,7 +42,7 @@ namespace sqlite
     class Transaction;
 }
 
-class SqliteConnection
+class SqliteConnection : public std::enable_shared_from_this<SqliteConnection>
 {
 public:
     using ReadContext = std::unique_lock<utils::ReadLocker>;
@@ -96,6 +96,15 @@ private:
                             const char* table, sqlite_int64 rowId );
 
 private:
+    struct ThreadSpecificConnection
+    {
+        ThreadSpecificConnection( std::shared_ptr<SqliteConnection> conn );
+        ~ThreadSpecificConnection();
+
+    private:
+        std::shared_ptr<SqliteConnection> m_conn;
+    };
+
     using ConnPtr = std::unique_ptr<sqlite3, int(*)(sqlite3*)>;
     const std::string m_dbPath;
     compat::Mutex m_connMutex;

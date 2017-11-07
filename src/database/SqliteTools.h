@@ -187,6 +187,14 @@ public:
         StatementsCache.clear();
     }
 
+    static void FlushConnectionStatementCache( SqliteConnection::Handle h )
+    {
+        std::lock_guard<compat::Mutex> lock( StatementsCacheLock );
+        auto it = StatementsCache.find( h );
+        if ( it != end( StatementsCache ) )
+            StatementsCache.erase( it );
+    }
+
 private:
     template <typename T>
     bool _bind( T&& value )

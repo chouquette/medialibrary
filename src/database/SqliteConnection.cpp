@@ -49,6 +49,27 @@ SqliteConnection::~SqliteConnection()
 
 SqliteConnection::Handle SqliteConnection::getConn()
 {
+    /**
+     * We need to have a single sqlite connection per thread, but we also need
+     * to be able to destroy those when the SqliteConnection wrapper instance
+     * gets destroyed (otherwise we can't re-instantiate the media library during
+     * the application runtime. That can't work for unit test and can be quite
+     * a limitation for the application using the medialib)
+     * Being able to refer to all per-thread connection means we can't use
+     * thread local directly, however, we need to know if a thread goes away, to
+     * avoid re-using an old connection on a new thread with the same id, as this
+     * would result in a "Database is locked error"
+     * In order to solve this, we use a single map to store all connection,
+     * indexed by std::thread::id (well, compat::thread::id). Additionaly, in
+     * order to know when a thread gets terminated, we store a thread_local
+     * object to signal back when a thread returns, and to remove the now
+     * unusable connection.
+     * Also note that we need to flush any potentially cached compiled statement
+     * when a thread gets terminated, as it would become unusable as well.
+     *
+     * \sa SqliteConnection::ThreadSpecificConnection::~ThreadSpecificConnection
+     * \sa sqlite::Statement::StatementsCache
+     */
     std::unique_lock<compat::Mutex> lock( m_connMutex );
     sqlite3* dbConnection;
     auto it = m_conns.find( compat::this_thread::get_id() );
@@ -68,6 +89,7 @@ SqliteConnection::Handle SqliteConnection::getConn()
 
         m_conns.emplace( compat::this_thread::get_id(), std::move( dbConn ) );
         sqlite3_update_hook( dbConnection, &updateHook, this );
+        static thread_local ThreadSpecificConnection tsc( shared_from_this() );
         return dbConnection;
     }
     return it->second.get();
@@ -184,5 +206,25 @@ SqliteConnection::WeakDbContext::~WeakDbContext()
     m_conn->setRecursiveTriggers( true );
 }
 
+SqliteConnection::ThreadSpecificConnection::ThreadSpecificConnection(
+        std::shared_ptr<SqliteConnection> conn)
+    : m_conn( conn )
+{
+}
+
+SqliteConnection::ThreadSpecificConnection::~ThreadSpecificConnection()
+{
+    std::unique_lock<compat::Mutex> lock( m_conn->m_connMutex );
+    auto it = m_conn->m_conns.find( compat::this_thread::get_id() );
+    if ( it != end( m_conn->m_conns ) )
+    {
+        // Ensure those cached statements will not be used if another connection
+        // with the same pointer gets created
+        sqlite::Statement::FlushConnectionStatementCache( it->second.get() );
+        // And ensure we won't use the same connection if a thread with the same
+        // ID gets used in the future.
+        m_conn->m_conns.erase( it );
+    }
+}
 
 }
