@@ -49,7 +49,7 @@ Connection::~Connection()
     sqlite::Statement::FlushStatementCache();
 }
 
-Connection::Handle Connection::getConn()
+Connection::Handle Connection::handle()
 {
     /**
      * We need to have a single sqlite connection per thread, but we also need
@@ -140,7 +140,7 @@ void Connection::setForeignKeyEnabled( bool value )
     // Changing this pragma during a transaction is a no-op (silently ignored by
     // sqlite), so ensure we're doing something usefull here:
     assert( sqlite::Transaction::transactionInProgress() == false );
-    setPragmaEnabled( getConn(), "foreign_keys", value );
+    setPragmaEnabled( handle(), "foreign_keys", value );
 }
 
 void Connection::setRecursiveTriggers( bool value )
@@ -156,7 +156,7 @@ void Connection::setRecursiveTriggers( bool value )
     // https://sqlite.org/pragma.html#pragma_recursive_triggers
     sqlite::Statement::FlushStatementCache();
 
-    setPragmaEnabled( getConn(), "recursive_triggers", value );
+    setPragmaEnabled( handle(), "recursive_triggers", value );
 }
 
 void Connection::registerUpdateHook( const std::string& table, Connection::UpdateHookCb cb )

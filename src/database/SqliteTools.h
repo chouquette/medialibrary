@@ -240,7 +240,7 @@ class Tools
             auto chrono = std::chrono::steady_clock::now();
 
             std::vector<std::shared_ptr<INTF>> results;
-            Statement stmt( dbConnection->getConn(), req );
+            Statement stmt( dbConnection->handle(), req );
             stmt.execute( std::forward<Args>( args )... );
             Row sqliteRow;
             while ( ( sqliteRow = stmt.row() ) != nullptr )
@@ -263,7 +263,7 @@ class Tools
                 ctx = dbConnection->acquireReadContext();
             auto chrono = std::chrono::steady_clock::now();
 
-            Statement stmt( dbConnection->getConn(), req );
+            Statement stmt( dbConnection->handle(), req );
             stmt.execute( std::forward<Args>( args )... );
             auto row = stmt.row();
             std::shared_ptr<T> res;
@@ -292,7 +292,7 @@ class Tools
                 ctx = dbConnection->acquireWriteContext();
             if ( executeRequestLocked( dbConnection, req, std::forward<Args>( args )... ) == false )
                 return false;
-            return sqlite3_changes( dbConnection->getConn() ) > 0;
+            return sqlite3_changes( dbConnection->handle() ) > 0;
         }
 
         template <typename... Args>
@@ -314,7 +314,7 @@ class Tools
                 ctx = dbConnection->acquireWriteContext();
             if ( executeRequestLocked( dbConnection, req, std::forward<Args>( args )... ) == false )
                 return 0;
-            return sqlite3_last_insert_rowid( dbConnection->getConn() );
+            return sqlite3_last_insert_rowid( dbConnection->handle() );
         }
 
         /**
@@ -348,7 +348,7 @@ class Tools
         static bool executeRequestLocked( sqlite::Connection* dbConnection, const std::string& req, Args&&... args )
         {
             auto chrono = std::chrono::steady_clock::now();
-            Statement stmt( dbConnection->getConn(), req );
+            Statement stmt( dbConnection->handle(), req );
             stmt.execute( std::forward<Args>( args )... );
             while ( stmt.row() != nullptr )
                 ;

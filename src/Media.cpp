@@ -287,7 +287,7 @@ const IMediaMetadata& Media::metadata( IMedia::MetadataType type ) const
                 " WHERE id_media = ?";
         auto conn = m_ml->getConn();
         auto ctx = conn->acquireReadContext();
-        sqlite::Statement stmt( conn->getConn(), req );
+        sqlite::Statement stmt( conn->handle(), req );
         stmt.execute( m_id );
         for ( sqlite::Row row = stmt.row(); row != nullptr; row = stmt.row() )
         {

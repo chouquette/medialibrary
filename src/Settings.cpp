@@ -43,7 +43,7 @@ Settings::Settings( MediaLibrary* ml )
 
 bool Settings::load()
 {
-    sqlite::Statement s( m_ml->getConn()->getConn(), "SELECT * FROM Settings" );
+    sqlite::Statement s( m_ml->getConn()->handle(), "SELECT * FROM Settings" );
     auto row = s.row();
     // First launch: no settings
     if ( row == nullptr )
