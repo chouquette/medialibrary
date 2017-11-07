@@ -20,8 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef SQLITECONNECTION_H
-#define SQLITECONNECTION_H
+#pragma once
 
 #include <functional>
 #include <memory>
@@ -117,4 +116,4 @@ private:
 
 }
 
-#endif // SQLITECONNECTION_H
+}
