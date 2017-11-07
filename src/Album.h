@@ -98,8 +98,8 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         bool addArtist( std::shared_ptr<Artist> artist );
         bool removeArtist( Artist* artist );
 
-        static bool createTable( DBConnection dbConnection );
-        static bool createTriggers( DBConnection dbConnection );
+        static bool createTable( sqlite::Connection* dbConnection );
+        static bool createTriggers( sqlite::Connection* dbConnection );
         static std::shared_ptr<Album> create( MediaLibraryPtr ml, const std::string& title, const std::string& artworkMrl );
         static std::shared_ptr<Album> createUnknownAlbum( MediaLibraryPtr ml, const Artist* artist );
         ///

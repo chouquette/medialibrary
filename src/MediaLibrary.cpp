@@ -898,7 +898,7 @@ void MediaLibrary::onParserIdleChanged( bool idle )
     }
 }
 
-DBConnection MediaLibrary::getConn() const
+sqlite::Connection* MediaLibrary::getConn() const
 {
     return m_dbConnection.get();
 }

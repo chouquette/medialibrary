@@ -189,7 +189,7 @@ bool Artist::setMusicBrainzId( const std::string& mbId )
     return true;
 }
 
-bool Artist::createTable( DBConnection dbConnection )
+bool Artist::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " +
             policy::ArtistTable::Name +
@@ -220,7 +220,7 @@ bool Artist::createTable( DBConnection dbConnection )
             sqlite::Tools::executeRequest( dbConnection, reqFts );
 }
 
-bool Artist::createTriggers(DBConnection dbConnection)
+bool Artist::createTriggers( sqlite::Connection* dbConnection )
 {
     static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS has_album_present AFTER UPDATE OF "
             "is_present ON " + policy::AlbumTable::Name +
@@ -261,7 +261,7 @@ bool Artist::createTriggers(DBConnection dbConnection)
             sqlite::Tools::executeRequest( dbConnection, ftsDeleteTrigger );
 }
 
-bool Artist::createDefaultArtists( DBConnection dbConnection )
+bool Artist::createDefaultArtists( sqlite::Connection* dbConnection )
 {
     // Don't rely on Artist::create, since we want to insert or do nothing here.
     // This will skip the cache for those new entities, but they will be inserted soon enough anyway.

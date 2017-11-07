@@ -276,7 +276,7 @@ class Tools
         }
 
         template <typename... Args>
-        static bool executeRequest( DBConnection dbConnection, const std::string& req, Args&&... args )
+        static bool executeRequest( sqlite::Connection* dbConnection, const std::string& req, Args&&... args )
         {
             Connection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
@@ -285,7 +285,7 @@ class Tools
         }
 
         template <typename... Args>
-        static bool executeDelete( DBConnection dbConnection, const std::string& req, Args&&... args )
+        static bool executeDelete( sqlite::Connection* dbConnection, const std::string& req, Args&&... args )
         {
             Connection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
@@ -296,7 +296,7 @@ class Tools
         }
 
         template <typename... Args>
-        static bool executeUpdate( DBConnection dbConnection, const std::string& req, Args&&... args )
+        static bool executeUpdate( sqlite::Connection* dbConnection, const std::string& req, Args&&... args )
         {
             // The code would be exactly the same, do not freak out because it calls executeDelete :)
             return executeDelete( dbConnection, req, std::forward<Args>( args )... );
@@ -307,7 +307,7 @@ class Tools
          * Returns 0 (which is an invalid sqlite primary key) when insertion fails.
          */
         template <typename... Args>
-        static int64_t executeInsert( DBConnection dbConnection, const std::string& req, Args&&... args )
+        static int64_t executeInsert( sqlite::Connection* dbConnection, const std::string& req, Args&&... args )
         {
             Connection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
@@ -345,7 +345,7 @@ class Tools
 
     private:
         template <typename... Args>
-        static bool executeRequestLocked( DBConnection dbConnection, const std::string& req, Args&&... args )
+        static bool executeRequestLocked( sqlite::Connection* dbConnection, const std::string& req, Args&&... args )
         {
             auto chrono = std::chrono::steady_clock::now();
             Statement stmt( dbConnection->getConn(), req );

@@ -97,7 +97,7 @@ std::vector<AlbumPtr> Genre::albums( SortingCriteria sort, bool desc ) const
     return Album::fromGenre( m_ml, m_id, sort, desc );
 }
 
-bool Genre::createTable( DBConnection dbConn )
+bool Genre::createTable( sqlite::Connection* dbConn )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::GenreTable::Name +
         "("
@@ -126,7 +126,7 @@ bool Genre::createTable( DBConnection dbConn )
             sqlite::Tools::executeRequest( dbConn, vtableDeleteTrigger );
 }
 
-bool Genre::createTriggers( DBConnection dbConn )
+bool Genre::createTriggers( sqlite::Connection* dbConn )
 {
     const std::string onGenreChanged = "CREATE TRIGGER IF NOT EXISTS on_track_genre_changed AFTER UPDATE OF "
             " genre_id ON " + policy::AlbumTrackTable::Name +

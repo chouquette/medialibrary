@@ -59,7 +59,7 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy
         virtual const std::string& language() const override;
         virtual const std::string& description() const override;
 
-        static bool createTable( DBConnection dbConnection );
+        static bool createTable( sqlite::Connection* dbConnection );
         static std::shared_ptr<VideoTrack> create( MediaLibraryPtr ml, const std::string& codec,
                                     unsigned int width, unsigned int height, float fps, int64_t mediaId,
                                     const std::string& language, const std::string& description );

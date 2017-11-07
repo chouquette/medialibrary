@@ -178,7 +178,7 @@ bool Playlist::remove( int64_t mediaId )
     return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, mediaId );
 }
 
-bool Playlist::createTable( DBConnection dbConn )
+bool Playlist::createTable( sqlite::Connection* dbConn )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::PlaylistTable::Name + "("
             + policy::PlaylistTable::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -209,7 +209,7 @@ bool Playlist::createTable( DBConnection dbConn )
             sqlite::Tools::executeRequest( dbConn, vtableReq );
 }
 
-bool Playlist::createTriggers( DBConnection dbConn )
+bool Playlist::createTriggers( sqlite::Connection* dbConn )
 {
     static const std::string req = "CREATE TRIGGER IF NOT EXISTS update_playlist_order AFTER UPDATE OF position"
             " ON PlaylistMediaRelation"

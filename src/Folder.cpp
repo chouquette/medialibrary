@@ -70,7 +70,7 @@ Folder::Folder(MediaLibraryPtr ml, const std::string& path, int64_t parent, int6
 {
 }
 
-bool Folder::createTable( DBConnection connection)
+bool Folder::createTable( sqlite::Connection* connection)
 {
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::FolderTable::Name +
             "("

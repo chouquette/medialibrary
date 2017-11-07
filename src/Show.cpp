@@ -143,7 +143,7 @@ std::vector<ShowEpisodePtr> Show::episodes()
     return ShowEpisode::fetchAll<IShowEpisode>( m_ml, req, m_id );
 }
 
-bool Show::createTable( DBConnection dbConnection )
+bool Show::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::ShowTable::Name + "("
                         "id_show INTEGER PRIMARY KEY AUTOINCREMENT,"

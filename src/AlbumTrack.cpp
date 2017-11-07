@@ -98,7 +98,7 @@ bool AlbumTrack::setArtist( std::shared_ptr<Artist> artist )
     return true;
 }
 
-bool AlbumTrack::createTable( DBConnection dbConnection )
+bool AlbumTrack::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AlbumTrackTable::Name + "("
                 "id_track INTEGER PRIMARY KEY AUTOINCREMENT,"

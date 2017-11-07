@@ -54,8 +54,8 @@ public:
     virtual std::vector<MediaPtr> tracks(SortingCriteria sort, bool desc) const override;
     virtual std::vector<AlbumPtr> albums( SortingCriteria sort, bool desc ) const override;
 
-    static bool createTable( DBConnection dbConn );
-    static bool createTriggers( DBConnection dbConn );
+    static bool createTable( sqlite::Connection* dbConn );
+    static bool createTriggers( sqlite::Connection* dbConn );
     static std::shared_ptr<Genre> create( MediaLibraryPtr ml, const std::string& name );
     static std::shared_ptr<Genre> fromName( MediaLibraryPtr ml, const std::string& name );
     static std::vector<GenrePtr> search( MediaLibraryPtr ml, const std::string& name );

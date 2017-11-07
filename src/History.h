@@ -49,8 +49,8 @@ class History : public IHistoryEntry, public DatabaseHelpers<History, policy::Hi
 {
 public:
     History( MediaLibraryPtr ml, sqlite::Row& row );
-    static bool createTable( DBConnection dbConnection );
-    static bool insert( DBConnection dbConn, int64_t mediaId );
+    static bool createTable( sqlite::Connection* dbConnection );
+    static bool insert( sqlite::Connection* dbConn, int64_t mediaId );
     static std::vector<HistoryPtr> fetch( MediaLibraryPtr ml );
     static bool clearStreams( MediaLibraryPtr ml );
 

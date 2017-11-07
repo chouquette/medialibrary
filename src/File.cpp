@@ -190,7 +190,7 @@ int64_t File::folderId()
     return m_folderId;
 }
 
-bool File::createTable( DBConnection dbConnection )
+bool File::createTable( sqlite::Connection* dbConnection )
 {
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::FileTable::Name + "("
             "id_file INTEGER PRIMARY KEY AUTOINCREMENT,"

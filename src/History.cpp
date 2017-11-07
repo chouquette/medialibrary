@@ -49,7 +49,7 @@ History::History( MediaLibraryPtr ml, sqlite::Row& row )
     row >> m_date;
 }
 
-bool History::createTable( DBConnection dbConnection )
+bool History::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::HistoryTable::Name +
             "("
@@ -70,7 +70,7 @@ bool History::createTable( DBConnection dbConnection )
             sqlite::Tools::executeRequest( dbConnection, triggerReq );
 }
 
-bool History::insert( DBConnection dbConn, int64_t mediaId )
+bool History::insert( sqlite::Connection* dbConn, int64_t mediaId )
 {
     static const std::string req = "INSERT OR REPLACE INTO " + policy::HistoryTable::Name +
             "(id_media, insertion_date) VALUES(?, strftime('%s', 'now'))";

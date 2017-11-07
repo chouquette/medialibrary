@@ -57,7 +57,7 @@ class Label : public ILabel, public DatabaseHelpers<Label, policy::LabelTable>
         virtual std::vector<MediaPtr> files() override;
 
         static LabelPtr create( MediaLibraryPtr ml, const std::string& name );
-        static bool createTable( DBConnection dbConnection );
+        static bool createTable( sqlite::Connection* dbConnection );
 
     private:
         MediaLibraryPtr m_ml;

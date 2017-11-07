@@ -116,7 +116,7 @@ std::vector<MediaPtr> Movie::files()
     return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
 
-bool Movie::createTable( DBConnection dbConnection )
+bool Movie::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::MovieTable::Name
             + "("

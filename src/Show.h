@@ -65,7 +65,7 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
         std::shared_ptr<ShowEpisode> addEpisode( Media& media, const std::string& title, unsigned int episodeNumber );
         virtual std::vector<ShowEpisodePtr> episodes() override;
 
-        static bool createTable( DBConnection dbConnection );
+        static bool createTable( sqlite::Connection* dbConnection );
         static std::shared_ptr<Show> create( MediaLibraryPtr ml, const std::string& name );
 
     protected:

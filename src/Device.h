@@ -59,7 +59,7 @@ public:
     const std::string& scheme() const;
 
     static std::shared_ptr<Device> create( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme, bool isRemovable );
-    static bool createTable( DBConnection connection );
+    static bool createTable( sqlite::Connection* connection );
     static std::shared_ptr<Device> fromUuid( MediaLibraryPtr ml, const std::string& uuid );
 
 private:

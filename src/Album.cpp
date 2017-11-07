@@ -331,7 +331,7 @@ bool Album::removeArtist(Artist* artist)
     return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, artist->id() );
 }
 
-bool Album::createTable(DBConnection dbConnection )
+bool Album::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " +
             policy::AlbumTable::Name +
@@ -370,7 +370,7 @@ bool Album::createTable(DBConnection dbConnection )
             sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
 
-bool Album::createTriggers(DBConnection dbConnection)
+bool Album::createTriggers( sqlite::Connection* dbConnection )
 {
     static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_album_present AFTER UPDATE OF "
             "is_present ON " + policy::AlbumTrackTable::Name +

@@ -513,7 +513,7 @@ void Media::setTitleBuffered( const std::string &title )
     m_changed = true;
 }
 
-bool Media::createTable( DBConnection connection )
+bool Media::createTable( sqlite::Connection* connection )
 {
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::MediaTable::Name + "("
             "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -549,7 +549,7 @@ bool Media::createTable( DBConnection connection )
             sqlite::Tools::executeRequest( connection, metadataReq );
 }
 
-bool Media::createTriggers( DBConnection connection )
+bool Media::createTriggers( sqlite::Connection* connection )
 {
     static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS has_files_present AFTER UPDATE OF "
             "is_present ON " + policy::FileTable::Name +

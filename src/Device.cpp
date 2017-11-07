@@ -100,7 +100,7 @@ std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& u
     return self;
 }
 
-bool Device::createTable(DBConnection connection)
+bool Device::createTable( sqlite::Connection* connection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::DeviceTable::Name + "("
                 "id_device INTEGER PRIMARY KEY AUTOINCREMENT,"

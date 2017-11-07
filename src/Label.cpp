@@ -80,7 +80,7 @@ LabelPtr Label::create( MediaLibraryPtr ml, const std::string& name )
     return self;
 }
 
-bool Label::createTable( DBConnection dbConnection )
+bool Label::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::LabelTable::Name + "("
                 "id_label INTEGER PRIMARY KEY AUTOINCREMENT, "

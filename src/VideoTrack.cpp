@@ -106,7 +106,7 @@ std::shared_ptr<VideoTrack> VideoTrack::create( MediaLibraryPtr ml, const std::s
     return track;
 }
 
-bool VideoTrack::createTable( DBConnection dbConnection )
+bool VideoTrack::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::VideoTrackTable::Name
             + "(" +

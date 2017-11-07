@@ -36,7 +36,7 @@ namespace sqlite
 
 thread_local Transaction* Transaction::CurrentTransaction = nullptr;
 
-Transaction::Transaction(DBConnection dbConn)
+Transaction::Transaction( sqlite::Connection* dbConn)
     : m_dbConn( dbConn )
     , m_ctx( dbConn->acquireWriteContext() )
 {

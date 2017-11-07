@@ -137,7 +137,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         void onDiscovererIdleChanged( bool idle );
         void onParserIdleChanged( bool idle );
 
-        DBConnection getConn() const;
+        sqlite::Connection* getConn() const;
         IMediaLibraryCb* getCb() const;
         std::shared_ptr<ModificationNotifier> getNotifier() const;
 

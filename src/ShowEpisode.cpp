@@ -152,7 +152,7 @@ std::vector<MediaPtr> ShowEpisode::files()
     return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
 
-bool ShowEpisode::createTable( DBConnection dbConnection )
+bool ShowEpisode::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::ShowEpisodeTable::Name
             + "("

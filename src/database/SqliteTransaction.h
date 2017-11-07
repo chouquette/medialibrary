@@ -37,7 +37,7 @@ namespace sqlite
 class Transaction
 {
 public:
-    Transaction( DBConnection dbConn );
+    Transaction( sqlite::Connection* dbConn );
     Transaction( const Transaction& ) = delete;
     Transaction( Transaction&& ) = delete;
     Transaction& operator=( const Transaction& ) = delete;
@@ -49,7 +49,7 @@ public:
     ~Transaction();
 
 private:
-    DBConnection m_dbConn;
+    sqlite::Connection* m_dbConn;
     Connection::WriteContext m_ctx;
     std::vector<std::function<void()>> m_failureHandlers;
 
