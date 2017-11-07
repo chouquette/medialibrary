@@ -20,8 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef SQLITETOOLS_H
-#define SQLITETOOLS_H
+#pragma once
 
 #include <cassert>
 #include <chrono>
@@ -363,5 +362,3 @@ class Tools
 }
 
 }
-
-#endif // SQLITETOOLS_H
