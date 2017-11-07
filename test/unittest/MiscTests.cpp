@@ -51,18 +51,22 @@ public:
         unlink("test.db");
         std::ifstream file{ SRC_DIR "/test/unittest/db_v3.sql" };
         {
-            medialibrary::SqliteConnection conn{ "test.db" };
+            // Don't use our Sqlite wrapper to open a connection. We don't want
+            // to mess with per-thread connections.
+            medialibrary::SqliteConnection::Handle conn;
+            sqlite3_open( "test.db", &conn );
+            std::unique_ptr<sqlite3, int(*)(sqlite3*)> dbPtr{ conn, &sqlite3_close };
             // The backup file already contains a transaction
             char buff[2048];
             while( file.getline( buff, sizeof( buff ) ) )
             {
-                medialibrary::sqlite::Statement stmt( conn.getConn(), buff );
+                medialibrary::sqlite::Statement stmt( conn, buff );
                 stmt.execute();
                 while ( stmt.row() != nullptr )
                     ;
             }
             // Ensure we are doing a migration
-            medialibrary::sqlite::Statement stmt{ conn.getConn(),
+            medialibrary::sqlite::Statement stmt{ conn,
                         "SELECT * FROM Settings" };
             stmt.execute();
             auto row = stmt.row();
@@ -70,6 +74,8 @@ public:
             row >> dbVersion;
             ASSERT_NE( dbVersion, Settings::DbModelVersion );
             ASSERT_EQ( dbVersion, 3u );
+            // Keep address sanitizer/memleak detection happy
+            medialibrary::sqlite::Statement::FlushStatementCache();
         }
         Reload();
     }
@@ -79,12 +85,15 @@ TEST_F( DbModel, Upgrade )
 {
     // All is done during the database initialization, we only care about no
     // exception being thrown, and MediaLibrary::initialize() returning true
-    medialibrary::SqliteConnection conn{ "test.db" };
-    medialibrary::sqlite::Statement stmt{ conn.getConn(),
+    medialibrary::SqliteConnection::Handle conn;
+    sqlite3_open( "test.db", &conn );
+    std::unique_ptr<sqlite3, int(*)(sqlite3*)> dbPtr{ conn, &sqlite3_close };
+    medialibrary::sqlite::Statement stmt{ conn,
                 "SELECT * FROM Settings" };
     stmt.execute();
     auto row = stmt.row();
     uint32_t dbVersion;
     row >> dbVersion;
     ASSERT_EQ( dbVersion, Settings::DbModelVersion );
+    medialibrary::sqlite::Statement::FlushStatementCache();
 }
