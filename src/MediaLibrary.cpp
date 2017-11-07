@@ -811,12 +811,11 @@ bool MediaLibrary::recreateDatabase()
 bool MediaLibrary::migrateModel3to4()
 {
     /*
-     * Get a special SqliteConnection with Foreign Keys deactivated
-     * to avoid cascade deletion while remodeling the database into
-     * the transaction.
+     * Disable Foreign Keys & recursive triggers to avoid cascading deletion
+     * while remodeling the database into the transaction.
      */
-    SqliteConnection conn( getConn()->getDBPath(), false );
-    auto t = conn.newTransaction();
+    SqliteConnection::WeakDbContext weakConnCtx{ getConn() };
+    auto t = getConn()->newTransaction();
     using namespace policy;
     // As SQLite do not allow us to remove or add some constraints,
     // we use the method described here https://www.sqlite.org/faq.html#q11
@@ -826,12 +825,12 @@ bool MediaLibrary::migrateModel3to4()
 
     for ( const auto& req : reqs )
     {
-        if ( sqlite::Tools::executeRequest( &conn, req ) == false )
+        if ( sqlite::Tools::executeRequest( getConn(), req ) == false )
             return false;
     }
     // Re-create triggers removed in the process
-    Media::createTriggers( &conn );
-    Playlist::createTriggers( &conn );
+    Media::createTriggers( getConn() );
+    Playlist::createTriggers( getConn() );
     t->commit();
     return true;
 }

@@ -50,26 +50,27 @@ public:
     {
         unlink("test.db");
         std::ifstream file{ SRC_DIR "/test/unittest/db_v3.sql" };
-        medialibrary::SqliteConnection conn{ "test.db" };
-        // The backup file already contains a transaction
-        char buff[2048];
-        while( file.getline( buff, sizeof( buff ) ) )
         {
-            medialibrary::sqlite::Statement stmt( conn.getConn(), buff );
+            medialibrary::SqliteConnection conn{ "test.db" };
+            // The backup file already contains a transaction
+            char buff[2048];
+            while( file.getline( buff, sizeof( buff ) ) )
+            {
+                medialibrary::sqlite::Statement stmt( conn.getConn(), buff );
+                stmt.execute();
+                while ( stmt.row() != nullptr )
+                    ;
+            }
+            // Ensure we are doing a migration
+            medialibrary::sqlite::Statement stmt{ conn.getConn(),
+                        "SELECT * FROM Settings" };
             stmt.execute();
-            while ( stmt.row() != nullptr )
-                ;
+            auto row = stmt.row();
+            uint32_t dbVersion;
+            row >> dbVersion;
+            ASSERT_NE( dbVersion, Settings::DbModelVersion );
+            ASSERT_EQ( dbVersion, 3u );
         }
-        // Ensure we are doing a migration
-        medialibrary::sqlite::Statement stmt{ conn.getConn(),
-                    "SELECT * FROM Settings" };
-        stmt.execute();
-        auto row = stmt.row();
-        uint32_t dbVersion;
-        row >> dbVersion;
-        ASSERT_NE( dbVersion, Settings::DbModelVersion );
-        ASSERT_EQ( dbVersion, 3u );
-
         Reload();
     }
 };

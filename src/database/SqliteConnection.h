@@ -54,10 +54,21 @@ public:
         Delete,
         Update
     };
+    struct WeakDbContext
+    {
+        WeakDbContext( SqliteConnection* conn );
+        ~WeakDbContext();
+        WeakDbContext( const WeakDbContext& ) = delete;
+        WeakDbContext( WeakDbContext&& ) = delete;
+        WeakDbContext& operator=( const WeakDbContext& ) = delete;
+        WeakDbContext& operator=( WeakDbContext&& ) = delete;
+    private:
+        SqliteConnection* m_conn;
+    };
+
     using UpdateHookCb = std::function<void(HookReason, int64_t)>;
 
     explicit SqliteConnection( const std::string& dbPath );
-    explicit SqliteConnection( const std::string& dbPath, bool enableForeignKeys );
     ~SqliteConnection();
     // Returns the current thread's connection
     // This will initiate a connection if required
@@ -65,11 +76,13 @@ public:
     std::unique_ptr<sqlite::Transaction> newTransaction();
     ReadContext acquireReadContext();
     WriteContext acquireWriteContext();
-    std::string getDBPath();
+    void setForeignKeyEnabled( bool value );
+    void setRecursiveTriggers( bool value );
 
     void registerUpdateHook( const std::string& table, UpdateHookCb cb );
 
 private:
+    void setPragmaEnabled( Handle conn, const std::string& pragmaName, bool value );
     static void updateHook( void* data, int reason, const char* database,
                             const char* table, sqlite_int64 rowId );
 
@@ -82,7 +95,6 @@ private:
     utils::ReadLocker m_readLock;
     utils::WriteLocker m_writeLock;
     std::unordered_map<std::string, UpdateHookCb> m_hooks;
-    bool m_enableForeignKeys;
 };
 
 }

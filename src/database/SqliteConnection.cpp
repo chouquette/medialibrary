@@ -32,15 +32,9 @@ namespace medialibrary
 {
 
 SqliteConnection::SqliteConnection( const std::string &dbPath )
-    : SqliteConnection( dbPath, true )
-{
-}
-
-SqliteConnection::SqliteConnection( const std::string &dbPath, bool enableForeignKeys )
     : m_dbPath( dbPath )
     , m_readLock( m_contextLock )
     , m_writeLock( m_contextLock )
-    , m_enableForeignKeys( enableForeignKeys )
 {
     if ( sqlite3_threadsafe() == 0 )
         throw std::runtime_error( "SQLite isn't built with threadsafe mode" );
@@ -67,15 +61,11 @@ SqliteConnection::Handle SqliteConnection::getConn()
                                            + sqlite3_errstr( res ) );
         sqlite3_extended_result_codes( dbConnection, 1 );
         sqlite3_busy_timeout( dbConnection, 500 );
-        std::string pragmaForeignReq = "PRAGMA foreign_keys = ";
-        sqlite::Statement s( dbConnection, pragmaForeignReq + ( m_enableForeignKeys ? "ON" : "OFF" ) );
-        s.execute();
-        while ( s.row() != nullptr )
-            ;
-        sqlite::Statement s2( dbConnection, "PRAGMA recursive_triggers = ON" );
-        s2.execute();
-        while ( s2.row() != nullptr )
-            ;
+        // Don't use public wrapper, they need to be able to call getConn, which
+        // would result from a recursive call and a deadlock from here.
+        setPragmaEnabled( dbConnection, "foreign_keys", true );
+        setPragmaEnabled( dbConnection, "recursive_triggers", true );
+
         m_conns.emplace( compat::this_thread::get_id(), std::move( dbConn ) );
         sqlite3_update_hook( dbConnection, &updateHook, this );
         return dbConnection;
@@ -98,9 +88,51 @@ SqliteConnection::WriteContext SqliteConnection::acquireWriteContext()
     return WriteContext{ m_writeLock };
 }
 
-std::string SqliteConnection::getDBPath()
+void SqliteConnection::setPragmaEnabled( Handle conn,
+                                         const std::string& pragmaName,
+                                         bool value )
 {
-    return m_dbPath;
+    std::string reqBase = std::string{ "PRAGMA " } + pragmaName;
+    std::string reqSet = reqBase + " = " + ( value ? "ON" : "OFF" );
+
+    sqlite::Statement stmt( conn, reqSet );
+    stmt.execute();
+    if ( stmt.row() != nullptr )
+        throw std::runtime_error( "Failed to enable/disable " + pragmaName );
+
+    sqlite::Statement stmtCheck( conn, reqBase );
+    stmtCheck.execute();
+    auto resultRow = stmtCheck.row();
+    bool resultValue;
+    resultRow >> resultValue;
+    if( resultValue != value )
+        throw std::runtime_error( "PRAGMA " + pragmaName + " value mismatch" );
+}
+
+void SqliteConnection::setForeignKeyEnabled( bool value )
+{
+    // Ensure no transaction will be started during the pragma change
+    auto ctx = acquireWriteContext();
+    // Changing this pragma during a transaction is a no-op (silently ignored by
+    // sqlite), so ensure we're doing something usefull here:
+    assert( sqlite::Transaction::transactionInProgress() == false );
+    setPragmaEnabled( getConn(), "foreign_keys", value );
+}
+
+void SqliteConnection::setRecursiveTriggers( bool value )
+{
+    // Ensure no request will run while we change this setting
+    auto ctx = acquireWriteContext();
+
+    // Changing the recursive_triggers setting affects the execution of all
+    // statements prepared using the database connection, including those
+    // prepared before the setting was changed. Any existing statements prepared
+    // using the legacy sqlite3_prepare() interface may fail with an
+    // SQLITE_SCHEMA error after the recursive_triggers setting is changed.
+    // https://sqlite.org/pragma.html#pragma_recursive_triggers
+    sqlite::Statement::FlushStatementCache();
+
+    setPragmaEnabled( getConn(), "recursive_triggers", value );
 }
 
 void SqliteConnection::registerUpdateHook( const std::string& table, SqliteConnection::UpdateHookCb cb )
@@ -128,5 +160,19 @@ void SqliteConnection::updateHook( void* data, int reason, const char*,
         break;
     }
 }
+
+SqliteConnection::WeakDbContext::WeakDbContext( SqliteConnection* conn )
+    : m_conn( conn )
+{
+    m_conn->setForeignKeyEnabled( false );
+    m_conn->setRecursiveTriggers( false );
+}
+
+SqliteConnection::WeakDbContext::~WeakDbContext()
+{
+    m_conn->setForeignKeyEnabled( true );
+    m_conn->setRecursiveTriggers( true );
+}
+
 
 }
