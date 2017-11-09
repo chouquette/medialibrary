@@ -746,18 +746,29 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion,
             // Up until model 3, it's safer (and potentially more efficient with index changes) to drop the DB
             // It's also way simpler to implement
             // In case of downgrade, just recreate the database
+            // We might also have some special cases for failed upgrade (see
+            // comments below for per-version details)
             if ( previousVersion < 3 ||
-                 previousVersion > Settings::DbModelVersion )
+                 previousVersion > Settings::DbModelVersion ||
+                 previousVersion == 4 )
             {
                 if( recreateDatabase( dbPath ) == false )
                     throw std::runtime_error( "Failed to recreate the database" );
                 return true;
             }
+            /**
+             * Migration from 3 to 4 didn't happen so well and broke a few
+             * users DB. So:
+             * - Any v4 database will be dropped and recreated in v5
+             * - Any v3 database will be upgraded to v5
+             * V4 database is only used by VLC-android 2.5.6 // 2.5.8, which are
+             * beta versions.
+             */
             if ( previousVersion == 3 )
             {
-                if ( migrateModel3to4() == false )
-                    throw std::logic_error( "Failed to migrate from 3 to 4" );
-                previousVersion = 4;
+                if ( migrateModel3to5() == false )
+                    throw std::logic_error( "Failed to migrate from 3 to 5" );
+                previousVersion = 5;
             }
             // To be continued in the future!
 
@@ -814,7 +825,7 @@ bool MediaLibrary::recreateDatabase( const std::string& dbPath )
     return true;
 }
 
-bool MediaLibrary::migrateModel3to4()
+bool MediaLibrary::migrateModel3to5()
 {
     /*
      * Disable Foreign Keys & recursive triggers to avoid cascading deletion
@@ -826,7 +837,7 @@ bool MediaLibrary::migrateModel3to4()
     // As SQLite do not allow us to remove or add some constraints,
     // we use the method described here https://www.sqlite.org/faq.html#q11
     std::string reqs[] = {
-#               include "database/migrations/migration3-4.sql"
+#               include "database/migrations/migration3-5.sql"
     };
 
     for ( const auto& req : reqs )
