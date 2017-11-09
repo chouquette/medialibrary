@@ -66,14 +66,16 @@ public:
                     ;
             }
             // Ensure we are doing a migration
-            medialibrary::sqlite::Statement stmt{ conn,
+            {
+                medialibrary::sqlite::Statement stmt{ conn,
                         "SELECT * FROM Settings" };
-            stmt.execute();
-            auto row = stmt.row();
-            uint32_t dbVersion;
-            row >> dbVersion;
-            ASSERT_NE( dbVersion, Settings::DbModelVersion );
-            ASSERT_EQ( dbVersion, 3u );
+                stmt.execute();
+                auto row = stmt.row();
+                uint32_t dbVersion;
+                row >> dbVersion;
+                ASSERT_NE( dbVersion, Settings::DbModelVersion );
+                ASSERT_EQ( dbVersion, 3u );
+            }
             // Keep address sanitizer/memleak detection happy
             medialibrary::sqlite::Statement::FlushStatementCache();
         }
@@ -88,12 +90,14 @@ TEST_F( DbModel, Upgrade )
     medialibrary::sqlite::Connection::Handle conn;
     sqlite3_open( "test.db", &conn );
     std::unique_ptr<sqlite3, int(*)(sqlite3*)> dbPtr{ conn, &sqlite3_close };
-    medialibrary::sqlite::Statement stmt{ conn,
+    {
+        medialibrary::sqlite::Statement stmt{ conn,
                 "SELECT * FROM Settings" };
-    stmt.execute();
-    auto row = stmt.row();
-    uint32_t dbVersion;
-    row >> dbVersion;
-    ASSERT_EQ( dbVersion, Settings::DbModelVersion );
+        stmt.execute();
+        auto row = stmt.row();
+        uint32_t dbVersion;
+        row >> dbVersion;
+        ASSERT_EQ( dbVersion, Settings::DbModelVersion );
+    }
     medialibrary::sqlite::Statement::FlushStatementCache();
 }
