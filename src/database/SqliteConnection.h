@@ -74,7 +74,7 @@ public:
     ReadContext acquireReadContext();
     WriteContext acquireWriteContext();
     void setForeignKeyEnabled( bool value );
-    void setRecursiveTriggers( bool value );
+    void setRecursiveTriggersEnabled( bool value );
 
     void registerUpdateHook( const std::string& table, UpdateHookCb cb );
 

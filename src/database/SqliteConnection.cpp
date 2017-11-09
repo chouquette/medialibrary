@@ -143,7 +143,7 @@ void Connection::setForeignKeyEnabled( bool value )
     setPragmaEnabled( handle(), "foreign_keys", value );
 }
 
-void Connection::setRecursiveTriggers( bool value )
+void Connection::setRecursiveTriggersEnabled( bool value )
 {
     // Ensure no request will run while we change this setting
     auto ctx = acquireWriteContext();
@@ -199,13 +199,13 @@ Connection::WeakDbContext::WeakDbContext( Connection* conn )
     : m_conn( conn )
 {
     m_conn->setForeignKeyEnabled( false );
-    m_conn->setRecursiveTriggers( false );
+    m_conn->setRecursiveTriggersEnabled( false );
 }
 
 Connection::WeakDbContext::~WeakDbContext()
 {
     m_conn->setForeignKeyEnabled( true );
-    m_conn->setRecursiveTriggers( true );
+    m_conn->setRecursiveTriggersEnabled( true );
 }
 
 Connection::ThreadSpecificConnection::ThreadSpecificConnection(
