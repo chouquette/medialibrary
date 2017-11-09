@@ -298,6 +298,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
 
 bool MediaLibrary::start()
 {
+    assert( m_initialized == true );
     if ( m_parser != nullptr )
         return false;
 
