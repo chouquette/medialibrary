@@ -154,9 +154,10 @@ void Connection::setRecursiveTriggersEnabled( bool value )
     // using the legacy sqlite3_prepare() interface may fail with an
     // SQLITE_SCHEMA error after the recursive_triggers setting is changed.
     // https://sqlite.org/pragma.html#pragma_recursive_triggers
-    sqlite::Statement::FlushStatementCache();
+    auto h = handle();
+    sqlite::Statement::FlushConnectionStatementCache( h );
 
-    setPragmaEnabled( handle(), "recursive_triggers", value );
+    setPragmaEnabled( h, "recursive_triggers", value );
 }
 
 void Connection::registerUpdateHook( const std::string& table, Connection::UpdateHookCb cb )
