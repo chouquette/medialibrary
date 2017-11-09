@@ -43,13 +43,23 @@ TEST_F( Misc, FileExtensions )
     }
 }
 
-class DbModel : public Tests
+class DbModel : public testing::Test
 {
+protected:
+    std::unique_ptr<MediaLibraryTester> ml;
+    std::unique_ptr<mock::NoopCallback> cbMock;
+
 public:
     virtual void SetUp() override
     {
         unlink("test.db");
-        std::ifstream file{ SRC_DIR "/test/unittest/db_v3.sql" };
+        ml.reset( new MediaLibraryWithoutBackground );
+        cbMock.reset( new mock::NoopCallback );
+    }
+
+    void LoadFakeDB( const char* dbPath )
+    {
+        std::ifstream file{ dbPath };
         {
             // Don't use our Sqlite wrapper to open a connection. We don't want
             // to mess with per-thread connections.
@@ -74,30 +84,35 @@ public:
                 uint32_t dbVersion;
                 row >> dbVersion;
                 ASSERT_NE( dbVersion, Settings::DbModelVersion );
-                ASSERT_EQ( dbVersion, 3u );
             }
             // Keep address sanitizer/memleak detection happy
             medialibrary::sqlite::Statement::FlushStatementCache();
         }
-        Reload();
+    }
+
+    virtual void TearDown() override
+    {
+        medialibrary::sqlite::Connection::Handle conn;
+        sqlite3_open( "test.db", &conn );
+        std::unique_ptr<sqlite3, int(*)(sqlite3*)> dbPtr{ conn, &sqlite3_close };
+        {
+            medialibrary::sqlite::Statement stmt{ conn,
+                    "SELECT * FROM Settings" };
+            stmt.execute();
+            auto row = stmt.row();
+            uint32_t dbVersion;
+            row >> dbVersion;
+            ASSERT_EQ( dbVersion, Settings::DbModelVersion );
+        }
+        medialibrary::sqlite::Statement::FlushStatementCache();
     }
 };
 
 TEST_F( DbModel, Upgrade )
 {
+    LoadFakeDB( SRC_DIR "/test/unittest/db_v3.sql" );
+    auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
+    ASSERT_TRUE( res );
     // All is done during the database initialization, we only care about no
     // exception being thrown, and MediaLibrary::initialize() returning true
-    medialibrary::sqlite::Connection::Handle conn;
-    sqlite3_open( "test.db", &conn );
-    std::unique_ptr<sqlite3, int(*)(sqlite3*)> dbPtr{ conn, &sqlite3_close };
-    {
-        medialibrary::sqlite::Statement stmt{ conn,
-                "SELECT * FROM Settings" };
-        stmt.execute();
-        auto row = stmt.row();
-        uint32_t dbVersion;
-        row >> dbVersion;
-        ASSERT_EQ( dbVersion, Settings::DbModelVersion );
-    }
-    medialibrary::sqlite::Statement::FlushStatementCache();
 }
