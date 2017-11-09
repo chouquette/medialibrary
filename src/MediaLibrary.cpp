@@ -28,6 +28,7 @@
 #include <functional>
 #include <utility>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "Album.h"
 #include "AlbumTrack.h"
@@ -279,7 +280,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
         }
         if ( m_settings.dbModelVersion() != Settings::DbModelVersion )
         {
-            if ( updateDatabaseModel( m_settings.dbModelVersion() ) == false )
+            if ( updateDatabaseModel( m_settings.dbModelVersion(), dbPath ) == false )
             {
                 LOG_ERROR( "Failed to update database model" );
                 return false;
@@ -731,7 +732,8 @@ void MediaLibrary::addLocalFsFactory()
     m_fsFactories.insert( begin( m_fsFactories ), std::make_shared<factory::FileSystemFactory>( m_deviceLister ) );
 }
 
-bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
+bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion,
+                                        const std::string& dbPath )
 {
     LOG_INFO( "Updating database model from ", previousVersion, " to ", Settings::DbModelVersion );
     // Up until model 3, it's safer (and potentially more efficient with index changes) to drop the DB
@@ -747,9 +749,9 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
             if ( previousVersion < 3 ||
                  previousVersion > Settings::DbModelVersion )
             {
-                if( recreateDatabase() == false )
+                if( recreateDatabase( dbPath ) == false )
                     throw std::runtime_error( "Failed to recreate the database" );
-                previousVersion = Settings::DbModelVersion;
+                return true;
             }
             if ( previousVersion == 3 )
             {
@@ -762,7 +764,8 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
             // Safety check: ensure we didn't forget a migration along the way
             assert( previousVersion == Settings::DbModelVersion );
             m_settings.setDbModelVersion( Settings::DbModelVersion );
-            m_settings.save();
+            if ( m_settings.save() == false )
+                return false;
             return true;
         }
         catch( const std::exception& ex )
@@ -781,7 +784,7 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
     {
         try
         {
-            if( recreateDatabase() == true )
+            if( recreateDatabase( dbPath ) == true )
                 return true;
         }
         catch( const std::exception& ex )
@@ -797,15 +800,16 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
     return false;
 }
 
-bool MediaLibrary::recreateDatabase()
+bool MediaLibrary::recreateDatabase( const std::string& dbPath )
 {
-    // Way too much differences, introduction of devices, and almost unused in the wild, just drop everything
-    std::string req = "PRAGMA writable_schema = 1;"
-                        "delete from sqlite_master;"
-                        "PRAGMA writable_schema = 0;";
-    if ( sqlite::Tools::executeRequest( getConn(), req ) == false )
-        return false;
+    // Close all active connections, flushes all previously run statements.
+    m_dbConnection.reset();
+    unlink( dbPath.c_str() );
+    m_dbConnection = sqlite::Connection::connect( dbPath );
     if ( createAllTables() == false )
+        return false;
+    // We dropped the database, there is no setting to be read anymore
+    if( m_settings.load() == false )
         return false;
     return true;
 }

@@ -157,8 +157,9 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual void startParser();
         virtual void startDiscoverer();
         virtual void startDeletionNotifier();
-        bool recreateDatabase();
-        bool updateDatabaseModel( unsigned int previousVersion );
+        bool recreateDatabase( const std::string& dbPath );
+        bool updateDatabaseModel( unsigned int previousVersion,
+                                  const std::string& path );
         bool migrateModel3to4();
         bool createAllTables();
         void registerEntityHooks();
