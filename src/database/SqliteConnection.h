@@ -73,7 +73,19 @@ public:
     std::unique_ptr<sqlite::Transaction> newTransaction();
     ReadContext acquireReadContext();
     WriteContext acquireWriteContext();
+    /**
+     * @brief setForeignKeyEnabled Enables/disables foreign key for the sqlite
+     *        connection for the current thread.
+     *
+     * This will not change existing connection in other threads
+     */
     void setForeignKeyEnabled( bool value );
+    /**
+     * @brief setRecursiveTriggersEnabled Enables/disables recursive trigger for
+     *          the connection for the current thread.
+     *
+     * This will not change existing connection in other threads
+     */
     void setRecursiveTriggersEnabled( bool value );
 
     void registerUpdateHook( const std::string& table, UpdateHookCb cb );
