@@ -107,6 +107,11 @@ MediaLibrary::~MediaLibrary()
         m_discovererWorker->stop();
     if ( m_parser != nullptr )
         m_parser->stop();
+    clearCache();
+}
+
+void MediaLibrary::clearCache()
+{
     Media::clear();
     Folder::clear();
     Label::clear();
