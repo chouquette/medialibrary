@@ -312,6 +312,9 @@ bool MediaLibrary::start()
         refreshDevices( *fsFactory );
     startDiscoverer();
     startParser();
+    for( const auto& mrl : m_mrlToDiscover )
+        discover( mrl );
+    m_mrlToDiscover.clear();
     return true;
 }
 
@@ -818,6 +821,22 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion,
 
 bool MediaLibrary::recreateDatabase( const std::string& dbPath )
 {
+    // Best effort to re-scan what was scanned in the previous version of
+    // the database:
+    try
+    {
+        auto eps = entryPoints();
+        // Prefetch the MRL. We are about to nuke the database, and fetching
+        // the mrl might cause database interractions. Doing it afterward would
+        // most likely fail
+        for( auto& ep : eps )
+            m_mrlToDiscover.push_back( ep->mrl() );
+    }
+    catch( std::exception& ex )
+    {
+        LOG_ERROR( "Failed to fetch previously discovered entrypoints." );
+    }
+
     // Close all active connections, flushes all previously run statements.
     m_dbConnection.reset();
     unlink( dbPath.c_str() );
@@ -827,6 +846,7 @@ bool MediaLibrary::recreateDatabase( const std::string& dbPath )
     // We dropped the database, there is no setting to be read anymore
     if( m_settings.load() == false )
         return false;
+    clearCache();
     return true;
 }
 
