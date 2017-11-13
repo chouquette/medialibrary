@@ -198,10 +198,6 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         bool m_initialized;
         std::atomic_bool m_discovererIdle;
         std::atomic_bool m_parserIdle;
-
-        // Temporary store MRL that we will need to re-discover after a
-        // database recreation
-        std::vector<std::string> m_mrlToDiscover;
 };
 
 }
