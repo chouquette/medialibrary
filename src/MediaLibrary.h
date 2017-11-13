@@ -61,7 +61,9 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
     public:
         MediaLibrary();
         ~MediaLibrary();
-        virtual bool initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* mlCallback ) override;
+        virtual InitializeResult initialize( const std::string& dbPath,
+                                             const std::string& thumbnailPath,
+                                             IMediaLibraryCb* mlCallback ) override;
         virtual bool start() override;
         virtual void setVerbosity( LogLevel v ) override;
 
@@ -158,8 +160,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual void startDiscoverer();
         virtual void startDeletionNotifier();
         bool recreateDatabase( const std::string& dbPath );
-        bool updateDatabaseModel( unsigned int previousVersion,
-                                  const std::string& path );
+        InitializeResult updateDatabaseModel( unsigned int previousVersion,
+                                              const std::string& path );
         bool migrateModel3to5();
         bool createAllTables();
         void registerEntityHooks();

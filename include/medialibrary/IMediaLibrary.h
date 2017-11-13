@@ -69,6 +69,20 @@ enum class SortingCriteria
     Artist,
 };
 
+enum class InitializeResult
+{
+    //< Everything worked out fine
+    Success,
+    //< Should be considered the same as Success, but is an indication of
+    // unrequired subsequent calls to initialize.
+    AlreadyInitialized,
+    //< A fatal error occured, the IMediaLibrary instance should be destroyed
+    Failed,
+    //< The database was reset, the caller needs to re-configure folders to
+    // discover at the bare minimum.
+    DbReset,
+};
+
 class IMediaLibraryCb
 {
 public:
@@ -195,11 +209,13 @@ class IMediaLibrary
          * \param mlCallback    A pointer to an IMediaLibraryCb that will be invoked with various
          *                      events during the medialibrary lifetime.
          * \return true in case of success, false otherwise
-         * If initialize returns false, this medialibrary must not be used anymore, and should be
-         * disposed off.
-         * If it returns true the first time, calling this method again is a no-op
+         * If initialize returns Fail, this medialibrary must not be used
+         * anymore, and should be disposed off.
+         * If it returns Ok the first time, calling this method again is a no-op
+         * In case DbReset is returned, it is up to application to decide what
+         * to do to repopulate the database.
          */
-        virtual bool initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* mlCallback ) = 0;
+        virtual InitializeResult initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* mlCallback ) = 0;
 
         /**
          * @brief start Starts the background thread and reload the medialibrary content

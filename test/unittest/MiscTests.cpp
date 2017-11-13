@@ -112,7 +112,7 @@ TEST_F( DbModel, Upgrade3to5 )
 {
     LoadFakeDB( SRC_DIR "/test/unittest/db_v3.sql" );
     auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
-    ASSERT_TRUE( res );
+    ASSERT_EQ( InitializeResult::Success, res );
     // All is done during the database initialization, we only care about no
     // exception being thrown, and MediaLibrary::initialize() returning true
 }
@@ -121,7 +121,7 @@ TEST_F( DbModel, Upgrade4to5 )
 {
     LoadFakeDB( SRC_DIR "/test/unittest/db_v4.sql" );
     auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
-    ASSERT_TRUE( res );
+    ASSERT_EQ( InitializeResult::DbReset, res );
 
     // The culprit  with V4 was an invalid migration, leading to missing fields
     // in File and most likely Playlist tables. Simply try to create/fetch a file

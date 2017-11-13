@@ -232,13 +232,15 @@ bool MediaLibrary::validateSearchPattern( const std::string& pattern )
     return pattern.size() >= 3;
 }
 
-bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* mlCallback )
+InitializeResult MediaLibrary::initialize( const std::string& dbPath,
+                                           const std::string& thumbnailPath,
+                                           IMediaLibraryCb* mlCallback )
 {
     LOG_INFO( "Initializing medialibrary..." );
     if ( m_initialized == true )
     {
         LOG_INFO( "...Already initialized" );
-        return true;
+        return InitializeResult::AlreadyInitialized;
     }
     if ( m_deviceLister == nullptr )
     {
@@ -246,7 +248,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
         if ( m_deviceLister == nullptr )
         {
             LOG_ERROR( "No available IDeviceLister was found." );
-            return false;
+            return InitializeResult::Failed;
         }
     }
     addLocalFsFactory();
@@ -259,7 +261,7 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
         if ( errno != EEXIST )
         {
             LOG_ERROR( "Failed to create thumbnail directory: ", strerror( errno ) );
-            return false;
+            return InitializeResult::Failed;
         }
     }
     m_thumbnailPath = thumbnailPath;
@@ -271,35 +273,37 @@ bool MediaLibrary::initialize( const std::string& dbPath, const std::string& thu
     // Which allows us to register hooks, or not, depending on the presence of a notifier
     registerEntityHooks();
 
+    auto res = InitializeResult::Success;
     try
     {
         if ( createAllTables() == false )
         {
             LOG_ERROR( "Failed to create database structure" );
-            return false;
+            return InitializeResult::Failed;
         }
         if ( m_settings.load() == false )
         {
             LOG_ERROR( "Failed to load settings" );
-            return false;
+            return InitializeResult::Failed;
         }
         if ( m_settings.dbModelVersion() != Settings::DbModelVersion )
         {
-            if ( updateDatabaseModel( m_settings.dbModelVersion(), dbPath ) == false )
+            res = updateDatabaseModel( m_settings.dbModelVersion(), dbPath );
+            if ( res == InitializeResult::Failed )
             {
                 LOG_ERROR( "Failed to update database model" );
-                return false;
+                return res;
             }
         }
     }
     catch ( const sqlite::errors::Generic& ex )
     {
         LOG_ERROR( "Can't initialize medialibrary: ", ex.what() );
-        return false;
+        return InitializeResult::Failed;
     }
     m_initialized = true;
     LOG_INFO( "Successfuly initialized" );
-    return true;
+    return res;
 }
 
 bool MediaLibrary::start()
@@ -737,7 +741,7 @@ void MediaLibrary::addLocalFsFactory()
     m_fsFactories.insert( begin( m_fsFactories ), std::make_shared<factory::FileSystemFactory>( m_deviceLister ) );
 }
 
-bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion,
+InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion,
                                         const std::string& dbPath )
 {
     LOG_INFO( "Updating database model from ", previousVersion, " to ", Settings::DbModelVersion );
@@ -759,7 +763,7 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion,
             {
                 if( recreateDatabase( dbPath ) == false )
                     throw std::runtime_error( "Failed to recreate the database" );
-                return true;
+                return InitializeResult::DbReset;
             }
             /**
              * Migration from 3 to 4 didn't happen so well and broke a few
@@ -781,8 +785,8 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion,
             assert( previousVersion == Settings::DbModelVersion );
             m_settings.setDbModelVersion( Settings::DbModelVersion );
             if ( m_settings.save() == false )
-                return false;
-            return true;
+                return InitializeResult::Failed;
+            return InitializeResult::Success;
         }
         catch( const std::exception& ex )
         {
@@ -801,7 +805,7 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion,
         try
         {
             if( recreateDatabase( dbPath ) == true )
-                return true;
+                return InitializeResult::DbReset;
         }
         catch( const std::exception& ex )
         {
@@ -813,7 +817,7 @@ bool MediaLibrary::updateDatabaseModel( unsigned int previousVersion,
         }
         LOG_WARN( "Retrying to recreate the database, attempt ", i + 1, " / 3" );
     }
-    return false;
+    return InitializeResult::Failed;
 }
 
 bool MediaLibrary::recreateDatabase( const std::string& dbPath )

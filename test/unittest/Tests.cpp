@@ -63,10 +63,10 @@ void Tests::Reload( std::shared_ptr<factory::IFileSystem> fs /*= nullptr*/, IMed
     ml->setFsFactory( fs );
     ml->setDeviceLister( mockDeviceLister );
     ml->setVerbosity( LogLevel::Error );
-    bool res = ml->initialize( "test.db", "/tmp", metadataCb );
-    ASSERT_TRUE( res );
-    res = ml->start();
-    ASSERT_TRUE( res );
+    auto res = ml->initialize( "test.db", "/tmp", metadataCb );
+    ASSERT_EQ( InitializeResult::Success, res );
+    auto startRes = ml->start();
+    ASSERT_TRUE( startRes );
     ml->reload();
 }
 
