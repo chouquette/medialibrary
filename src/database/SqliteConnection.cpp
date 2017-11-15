@@ -210,8 +210,8 @@ Connection::WeakDbContext::~WeakDbContext()
 }
 
 Connection::ThreadSpecificConnection::ThreadSpecificConnection(
-        std::shared_ptr<Connection> conn)
-    : m_conn( conn )
+        std::shared_ptr<Connection> conn )
+    : m_conn( std::move( conn ) )
 {
 }
 
