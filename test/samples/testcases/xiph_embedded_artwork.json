@@ -16,6 +16,10 @@
                 "releaseYear": 2003,
                 "hasArtwork": true
             }]
+        }],
+        "artists": [{
+            "name": "Geza Anda",
+            "hasArtwork": true
         }]
     }
 }

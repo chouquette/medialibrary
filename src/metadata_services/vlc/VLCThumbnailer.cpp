@@ -28,6 +28,7 @@
 
 #include "AlbumTrack.h"
 #include "Album.h"
+#include "Artist.h"
 #include "Media.h"
 #include "File.h"
 #include "logging/Logger.h"
@@ -265,6 +266,15 @@ void VLCThumbnailer::updateAudioArtwork( parser::Task& task )
     // We no not have any other IAlbum implementation, so the downcast is safe here
     auto a = static_cast<Album*>( album.get() );
     a->setArtworkMrl( artwork );
+
+    // If no artwork was set for the AlbumArtist, use this new one
+    auto artist = album->albumArtist();
+    if ( artist->artworkMrl().empty() == true )
+    {
+        auto artistPtr = static_cast<Artist*>( artist.get() );
+        artistPtr->setArtworkMrl( artwork );
+    }
+
 }
 
 parser::Task::Status VLCThumbnailer::seekAhead( VLC::MediaPlayer& mp )
