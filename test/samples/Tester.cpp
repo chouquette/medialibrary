@@ -269,6 +269,13 @@ void Tests::checkArtists(const rapidjson::Value& expectedArtists, std::vector<Ar
                 if ( expectedArtist["nbTracks"].GetUint() != tracks.size() )
                     return false;
             }
+            if ( expectedArtist.HasMember( "hasArtwork" ) )
+            {
+                auto artwork = artist->artworkMrl();
+                if ( artwork.empty() == expectedArtist["hasArtwork"].GetBool() ||
+                     artwork.compare( 0, 13, "attachment://" ) == 0 )
+                    return false;
+            }
             return true;
         });
         ASSERT_NE( it, end( artists ) );
