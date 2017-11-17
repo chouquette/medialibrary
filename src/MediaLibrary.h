@@ -176,6 +176,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
     private:
         virtual bool onDevicePlugged( const std::string& uuid, const std::string& mountpoint ) override;
         virtual void onDeviceUnplugged(const std::string& uuid) override;
+        virtual bool isDeviceKnown( const std::string& uuid ) const override;
         void clearCache();
 
     protected:

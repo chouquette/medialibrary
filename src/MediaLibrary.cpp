@@ -1088,4 +1088,9 @@ void MediaLibrary::onDeviceUnplugged( const std::string& uuid )
     }
 }
 
+bool MediaLibrary::isDeviceKnown( const std::string& uuid ) const
+{
+    return Device::fromUuid( this, uuid ) != nullptr;
+}
+
 }
