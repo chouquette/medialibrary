@@ -940,6 +940,7 @@ std::shared_ptr<ModificationNotifier> MediaLibrary::getNotifier() const
 
 IDeviceListerCb* MediaLibrary::setDeviceLister( DeviceListerPtr lister )
 {
+    assert( m_initialized == false );
     m_deviceLister = lister;
     return static_cast<IDeviceListerCb*>( this );
 }
