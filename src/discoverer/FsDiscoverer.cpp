@@ -93,7 +93,7 @@ bool FsDiscoverer::discover( const std::string &entryPoint )
     catch ( DeviceRemovedException& )
     {
         // Simply ignore, the device has already been marked as removed and the DB updated accordingly
-        LOG_INFO( "Discovery of ", fsDir->mrl(), " was stopped after the device was removed" );
+        LOG_INFO( "Discovery of ", entryPoint, " was stopped after the device was removed" );
     }
     return true;
 }
