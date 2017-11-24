@@ -78,7 +78,7 @@ bool PathProbe::proceedOnDirectory( const fs::IDirectory& directory )
         return false;
     }
     if ( m_splitPath.empty() == true
-         || m_splitPath.top() != utils::file::directoryName( utils::file::toPath( directory.mrl() ) ) )
+         || m_splitPath.top() != utils::file::directoryName( utils::file::stripScheme( directory.mrl() ) ) )
         return false;
     m_splitPath.pop();
     return true;
