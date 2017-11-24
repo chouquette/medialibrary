@@ -71,7 +71,7 @@ void Tests::SetUp()
 {
     unlink("test.db");
     m_cb.reset( new MockCallback );
-    m_ml.reset( new MediaLibraryTester );
+    m_ml.reset( new MediaLibrary );
     if ( ExtraVerbose == true )
         m_ml->setVerbosity( LogLevel::Debug );
     else if ( Verbose == true )
@@ -127,7 +127,9 @@ void Tests::checkAudioTracks(const rapidjson::Value& expectedTracks, const std::
 void Tests::checkMedias(const rapidjson::Value& expectedMedias)
 {
     ASSERT_TRUE( expectedMedias.IsArray() );
-    auto medias = m_ml->files();
+    auto medias = m_ml->audioFiles( SortingCriteria::Default, false );
+    auto videos = m_ml->videoFiles( SortingCriteria::Default, false );
+    medias.insert( begin( medias ), begin( videos ), end( videos ) );
     for ( auto i = 0u; i < expectedMedias.Size(); ++i )
     {
         const auto& expectedMedia = expectedMedias[i];
