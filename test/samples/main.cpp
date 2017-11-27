@@ -47,6 +47,9 @@ static const char* testCases[] = {
     "deduce_artwork_from_album",
     "deduce_artwork_from_track",
     "xiph_embedded_artwork",
+    "playlist_external_media",
+    "playlist_external_folder",
+    "playlist_same_folder",
 };
 
 class TestEnv : public ::testing::Environment
@@ -108,6 +111,15 @@ TEST_P( Tests, Parse )
     {
         const auto audios = m_ml->audioFiles( SortingCriteria::Default, false );
         ASSERT_EQ( expected["nbAudios"].GetUint(), audios.size() );
+    }
+    if ( expected.HasMember( "nbPlaylists" ) == true )
+    {
+        const auto playlists = m_ml->playlists( SortingCriteria::Default, false );
+        ASSERT_EQ( expected["nbPlaylists"].GetUint(), playlists.size() );
+    }
+    if ( expected.HasMember( "playlists" ) == true )
+    {
+      checkPlaylists( expected["playlists"], m_ml->playlists( SortingCriteria::Default, false ) );
     }
     if ( expected.HasMember( "artists" ) )
     {

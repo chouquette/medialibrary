@@ -165,6 +165,47 @@ void Tests::checkMedias(const rapidjson::Value& expectedMedias)
     }
 }
 
+void Tests::checkPlaylists( const rapidjson::Value& expectedPlaylists, std::vector<PlaylistPtr> playlists )
+{
+    ASSERT_TRUE( expectedPlaylists.IsArray() );
+    for ( auto i = 0u; i < expectedPlaylists.Size(); ++i )
+    {
+        const auto& expectedPlaylist = expectedPlaylists[i];
+        ASSERT_TRUE( expectedPlaylist.HasMember( "name" ) );
+        const auto expectedName = expectedPlaylist["name"].GetString();
+        auto it = std::find_if( begin( playlists ), end( playlists ), [expectedName](const PlaylistPtr& p) {
+            return strcasecmp( expectedName, p->name().c_str() ) == 0;
+        });
+        ASSERT_NE( end( playlists ), it );
+
+        const auto& playlist = *it;
+        playlists.erase( it );
+        const auto& items = playlist->media();
+
+        if ( expectedPlaylist.HasMember( "nbItems" ) )
+        {
+            ASSERT_EQ( expectedPlaylist["nbItems"].GetUint(), items.size() );
+        }
+
+        if ( expectedPlaylist.HasMember( "items" ) )
+        {
+            ASSERT_TRUE( expectedPlaylist["items"].IsArray() );
+            ASSERT_EQ( items.size(), expectedPlaylist["items"].Size() );
+            for ( auto i = 0u; i < items.size(); ++i )
+            {
+                if ( expectedPlaylist["items"][i].HasMember( "index" ) )
+                {
+                    ASSERT_EQ( expectedPlaylist["items"][i]["index"].GetUint(), i );
+                }
+                if ( expectedPlaylist["items"][i].HasMember( "title" ) )
+                {
+                    ASSERT_EQ( expectedPlaylist["items"][i]["title"].GetString(), items[i]->title() );
+                }
+            }
+        }
+    }
+}
+
 void Tests::checkAlbums( const rapidjson::Value& expectedAlbums, std::vector<AlbumPtr> albums )
 {
     ASSERT_TRUE( expectedAlbums.IsArray() );

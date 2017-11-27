@@ -36,6 +36,7 @@
 #include "medialibrary/IAudioTrack.h"
 #include "medialibrary/IVideoTrack.h"
 #include "medialibrary/IGenre.h"
+#include "medialibrary/IPlaylist.h"
 #include "mocks/NoopCallback.h"
 
 class MockCallback : public mock::NoopCallback
@@ -65,6 +66,7 @@ protected:
     void checkVideoTracks( const rapidjson::Value& expectedTracks, const std::vector<VideoTrackPtr>& tracks );
     void checkAudioTracks(const rapidjson::Value& expectedTracks, const std::vector<AudioTrackPtr>& tracks );
     void checkMedias( const rapidjson::Value& expectedMedias );
+    void checkPlaylists( const rapidjson::Value& expectedPlaylists, std::vector<PlaylistPtr> playlists );
     void checkAlbums(const rapidjson::Value& expectedAlbums, std::vector<AlbumPtr> albums);
     void checkArtists( const rapidjson::Value& expectedArtists, std::vector<ArtistPtr> artists );
     void checkAlbumTracks(const IAlbum* album, const std::vector<MediaPtr>& tracks, const rapidjson::Value& expectedTracks , bool& found) const;
