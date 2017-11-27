@@ -1,0 +1,12 @@
+{
+    "input": [
+        "playlist/external_folder"
+    ],
+    "expected": {
+        "nbPlaylists": 1,
+        "playlists": [{
+            "name": "external_folder.m3u8",
+            "nbItems": 3
+        }]
+    }
+}

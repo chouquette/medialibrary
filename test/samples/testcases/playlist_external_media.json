@@ -1,0 +1,34 @@
+{
+    "input": [
+        "playlist/external_media"
+    ],
+    "expected": {
+        "nbPlaylists": 1,
+        "playlists": [{
+            "name": "Streams",
+            "nbItems": 5,
+            "items": [
+                {
+                    "title": "sc2_Terran_theme.ogg",
+                    "index": 0
+                },
+                {
+                    "title": "master.flac",
+                    "index": 1
+                },
+                {
+                    "title": "old.mp3",
+                    "index": 2
+                },
+                {
+                    "title": "boboop.mkv",
+                    "index": 3
+                },
+                {
+                    "title": "fast%20gold%20fast%20banshee.mp4",
+                    "index": 4
+                }
+            ]
+        }]
+    }
+}

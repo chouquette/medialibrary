@@ -1,0 +1,26 @@
+{
+    "input": [
+        "playlist/same_folder"
+    ],
+    "expected": {
+        "nbPlaylists": 1,
+        "playlists": [{
+            "name": "playlist.m3u8",
+            "nbItems": 3,
+            "items": [
+                {
+                    "title": "Track 3",
+                    "index": 0
+                },
+                {
+                    "title": "Track 1",
+                    "index": 1
+                },
+                {
+                    "title": "Track 2",
+                    "index": 2
+                }
+            ]
+        }]
+    }
+}
