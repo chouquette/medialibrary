@@ -33,7 +33,7 @@ namespace medialibrary
 namespace sqlite
 {
 
-Connection::Connection( const std::string &dbPath )
+Connection::Connection( const std::string& dbPath )
     : m_dbPath( dbPath )
     , m_readLock( m_contextLock )
     , m_writeLock( m_contextLock )

@@ -82,7 +82,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         // shall be well-formed, and private constructor would prevent that.
         // There might be a way with a user-defined allocator, but we'll see that later...
         Media( MediaLibraryPtr ml , sqlite::Row& row );
-        Media( MediaLibraryPtr ml, const std::string &title, Type type);
+        Media( MediaLibraryPtr ml, const std::string& title, Type type);
 
         static std::shared_ptr<Media> create( MediaLibraryPtr ml, Type type, const std::string& fileName );
         static bool createTable( sqlite::Connection* connection );

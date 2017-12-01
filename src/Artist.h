@@ -50,7 +50,7 @@ public:
     Artist( MediaLibraryPtr ml, const std::string& name );
 
     virtual int64_t id() const override;
-    virtual const std::string &name() const override;
+    virtual const std::string& name() const override;
     virtual const std::string& shortBio() const override;
     bool setShortBio( const std::string& shortBio );
     virtual std::vector<AlbumPtr> albums( SortingCriteria sort, bool desc ) const override;

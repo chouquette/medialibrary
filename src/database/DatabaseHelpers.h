@@ -180,7 +180,7 @@ class DatabaseHelpers
         }
 
         template <typename INTF, typename... Args>
-        static std::vector<std::shared_ptr<INTF>> fetchAll( MediaLibraryPtr ml, const std::string &req, Args&&... args )
+        static std::vector<std::shared_ptr<INTF>> fetchAll( MediaLibraryPtr ml, const std::string& req, Args&&... args )
         {
             try
             {

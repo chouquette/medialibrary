@@ -44,7 +44,7 @@ namespace medialibrary
 namespace fs
 {
 
-File::File( const std::string &filePath )
+File::File( const std::string& filePath )
     : CommonFile( utils::file::toMrl( filePath ) )
 {
     struct _stat s;
