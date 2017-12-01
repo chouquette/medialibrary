@@ -42,7 +42,7 @@ class FsDiscoverer : public IDiscoverer
 {
 public:
     FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, MediaLibrary* ml , IMediaLibraryCb* cb, std::unique_ptr<prober::IProbe> probe );
-    virtual bool discover(const std::string &entryPoint ) override;
+    virtual bool discover(const std::string& entryPoint ) override;
     virtual bool reload() override;
     virtual bool reload( const std::string& entryPoint ) override;
 

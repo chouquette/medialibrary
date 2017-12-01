@@ -257,7 +257,7 @@ std::vector<AudioTrackPtr> Media::audioTracks()
     return AudioTrack::fetchAll<IAudioTrack>( m_ml, req, m_id );
 }
 
-const std::string &Media::thumbnail()
+const std::string& Media::thumbnail()
 {
     return m_thumbnail;
 }
@@ -480,7 +480,7 @@ void Media::setType( Type type )
     m_changed = true;
 }
 
-const std::string &Media::title() const
+const std::string& Media::title() const
 {
     return m_title;
 }
@@ -505,7 +505,7 @@ bool Media::setTitle( const std::string& title )
     return true;
 }
 
-void Media::setTitleBuffered( const std::string &title )
+void Media::setTitleBuffered( const std::string& title )
 {
     if ( m_title == title )
         return;

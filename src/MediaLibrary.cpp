@@ -986,7 +986,7 @@ std::shared_ptr<factory::IFileSystem> MediaLibrary::fsFactoryForMrl( const std::
     return nullptr;
 }
 
-void MediaLibrary::discover( const std::string &entryPoint )
+void MediaLibrary::discover( const std::string& entryPoint )
 {
     if ( m_discovererWorker != nullptr )
         m_discovererWorker->discover( entryPoint );

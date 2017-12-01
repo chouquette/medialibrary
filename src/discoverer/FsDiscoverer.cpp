@@ -66,7 +66,7 @@ FsDiscoverer::FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, Med
 {
 }
 
-bool FsDiscoverer::discover( const std::string &entryPoint )
+bool FsDiscoverer::discover( const std::string& entryPoint )
 {
     LOG_INFO( "Adding to discovery list: ", entryPoint );
 

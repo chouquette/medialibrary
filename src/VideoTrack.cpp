@@ -94,7 +94,7 @@ const std::string& VideoTrack::description() const
     return m_description;
 }
 
-std::shared_ptr<VideoTrack> VideoTrack::create( MediaLibraryPtr ml, const std::string &codec, unsigned int width,
+std::shared_ptr<VideoTrack> VideoTrack::create( MediaLibraryPtr ml, const std::string& codec, unsigned int width,
                                                 unsigned int height, float fps, int64_t mediaId,
                                                 const std::string& language, const std::string& description )
 {

@@ -64,17 +64,17 @@ int64_t Artist::id() const
     return m_id;
 }
 
-const std::string &Artist::name() const
+const std::string& Artist::name() const
 {
     return m_name;
 }
 
-const std::string &Artist::shortBio() const
+const std::string& Artist::shortBio() const
 {
     return m_shortBio;
 }
 
-bool Artist::setShortBio(const std::string &shortBio)
+bool Artist::setShortBio(const std::string& shortBio)
 {
     static const std::string req = "UPDATE " + policy::ArtistTable::Name
             + " SET shortbio = ? WHERE id_artist = ?";
@@ -275,7 +275,7 @@ bool Artist::createDefaultArtists( sqlite::Connection* dbConnection )
     return true;
 }
 
-std::shared_ptr<Artist> Artist::create( MediaLibraryPtr ml, const std::string &name )
+std::shared_ptr<Artist> Artist::create( MediaLibraryPtr ml, const std::string& name )
 {
     auto artist = std::make_shared<Artist>( ml, name );
     static const std::string req = "INSERT INTO " + policy::ArtistTable::Name +
