@@ -20,8 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef FILE_H
-#define FILE_H
+#pragma once
 
 #include <sqlite3.h>
 
@@ -178,4 +177,3 @@ private:
 };
 
 }
-#endif // FILE_H
