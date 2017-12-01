@@ -1013,7 +1013,6 @@ void MediaLibrary::removeEntryPoint( const std::string& entryPoint )
 {
     if ( m_discovererWorker != nullptr )
         m_discovererWorker->remove( entryPoint );
-    m_discovererWorker->remove( entryPoint );
 }
 
 void MediaLibrary::banFolder( const std::string& entryPoint )
