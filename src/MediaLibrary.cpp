@@ -787,6 +787,12 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                     throw std::logic_error( "Failed to migrate from 3 to 5" );
                 previousVersion = 5;
             }
+            if ( previousVersion == 5 )
+            {
+                if ( migrateModel5to6() == false )
+                    throw std::logic_error( "Failed to migrate from 5 to 6" );
+                previousVersion = 6;
+            }
             // To be continued in the future!
 
             // Safety check: ensure we didn't forget a migration along the way
@@ -865,6 +871,23 @@ bool MediaLibrary::migrateModel3to5()
     // Re-create triggers removed in the process
     Media::createTriggers( getConn() );
     Playlist::createTriggers( getConn() );
+    t->commit();
+    return true;
+}
+
+bool MediaLibrary::migrateModel5to6()
+{
+    sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
+    auto t = getConn()->newTransaction();
+    using namespace policy;
+    const std::string reqs[] = {
+#       include "database/migrations/migration5-6.sql"
+    };
+    for ( const auto& req : reqs )
+    {
+        if ( sqlite::Tools::executeRequest( getConn(), req ) == false )
+            return false;
+    }
     t->commit();
     return true;
 }
