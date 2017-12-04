@@ -226,7 +226,8 @@ bool Artist::createTriggers( sqlite::Connection* dbConnection )
             "is_present ON " + policy::AlbumTable::Name +
             " BEGIN "
             " UPDATE " + policy::ArtistTable::Name + " SET is_present="
-                "(SELECT COUNT(id_album) FROM " + policy::AlbumTable::Name + " WHERE artist_id=new.artist_id AND is_present=1) "
+                "(SELECT COUNT(id_album) FROM " + policy::AlbumTable::Name +
+                    " WHERE artist_id=new.artist_id AND is_present=1 LIMIT 1) "
                 "WHERE id_artist=new.artist_id;"
             " END";
     // Automatically delete the artists that don't have any albums left, except the 2 special artists.
