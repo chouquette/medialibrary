@@ -47,6 +47,7 @@ static const char* testCases[] = {
     "deduce_artwork_from_album",
     "deduce_artwork_from_track",
     "xiph_embedded_artwork",
+    "same_album_with_subfolder",
 };
 
 class TestEnv : public ::testing::Environment
