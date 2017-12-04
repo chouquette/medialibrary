@@ -519,6 +519,25 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
             continue;
         }
 
+        // Attempt to discriminate by date
+        auto candidateDate = task.vlcMedia.meta( libvlc_meta_Date );
+        if ( candidateDate.empty() == false )
+        {
+            try
+            {
+                unsigned int year = std::stoi( candidateDate );
+                if ( year != a->releaseYear() )
+                    it = albums.erase( it );
+                else
+                    ++it;
+                continue;
+            }
+            catch (...)
+            {
+                // Date wasn't helpful, simply ignore the error and continue
+            }
+        }
+
         // Assume album files will be in the same folder.
         auto newFileFolder = utils::file::directory( task.file->mrl() );
         auto trackFiles = tracks[0]->files();

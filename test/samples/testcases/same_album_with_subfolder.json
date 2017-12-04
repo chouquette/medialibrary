@@ -1,0 +1,13 @@
+{
+    "input": [
+        "music/same_album_with_subfolder"
+    ],
+    "expected": {
+        "nbAudios": 3,
+        "albums": [{
+            "title": "Album",
+            "releaseYear": 2000,
+            "nbTracks": 3
+        }]
+    }
+}

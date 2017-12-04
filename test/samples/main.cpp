@@ -50,6 +50,7 @@ static const char* testCases[] = {
     "playlist_external_media",
     "playlist_external_folder",
     "playlist_same_folder",
+    "same_album_with_subfolder",
 };
 
 class TestEnv : public ::testing::Environment
