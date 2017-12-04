@@ -376,7 +376,8 @@ bool Album::createTriggers( sqlite::Connection* dbConnection )
             "is_present ON " + policy::AlbumTrackTable::Name +
             " BEGIN "
             " UPDATE " + policy::AlbumTable::Name + " SET is_present="
-                "(SELECT COUNT(id_track) FROM " + policy::AlbumTrackTable::Name + " WHERE album_id=new.album_id AND is_present=1) "
+                "(SELECT COUNT(id_track) FROM " + policy::AlbumTrackTable::Name +
+                    " WHERE album_id=new.album_id AND is_present=1 LIMIT 1) "
                 "WHERE id_album=new.album_id;"
             " END";
     static const std::string deleteTriggerReq = "CREATE TRIGGER IF NOT EXISTS delete_album_track AFTER DELETE ON "
