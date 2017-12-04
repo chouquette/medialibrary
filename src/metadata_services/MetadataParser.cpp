@@ -343,6 +343,7 @@ bool MetadataParser::parseVideoFile( parser::Task& task ) const
     {
         return sqlite::Tools::withRetries( 3, [this, &showName, &title, &task]() {
             auto t = m_ml->getConn()->newTransaction();
+            task.media->setTitleBuffered( title );
 
             auto show = m_ml->show( showName );
             if ( show == nullptr )
