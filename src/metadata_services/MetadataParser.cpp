@@ -184,12 +184,13 @@ bool MetadataParser::parseVideoFile( parser::Task& task ) const
         return true;
 
     const auto& showName = task.vlcMedia.meta( libvlc_meta_ShowName );
-    if ( showName.length() == 0 )
-    {
-        return sqlite::Tools::withRetries( 3, [this, &showName, &title, &task]() {
-            auto t = m_ml->getConn()->newTransaction();
-            task.media->setTitleBuffered( title );
 
+    return sqlite::Tools::withRetries( 3, [this, &showName, &title, &task]() {
+        auto t = m_ml->getConn()->newTransaction();
+        task.media->setTitleBuffered( title );
+
+        if ( showName.length() != 0 )
+        {
             auto show = m_ml->show( showName );
             if ( show == nullptr )
             {
@@ -203,15 +204,15 @@ bool MetadataParser::parseVideoFile( parser::Task& task ) const
                 std::shared_ptr<Show> s = std::static_pointer_cast<Show>( show );
                 s->addEpisode( *task.media, title, episode );
             }
-            task.media->save();
-            t->commit();
-            return true;
-        });
-    }
-    else
-    {
-        // How do we know if it's a movie or a random video?
-    }
+        }
+        else
+        {
+            // How do we know if it's a movie or a random video?
+        }
+        task.media->save();
+        t->commit();
+        return true;
+    });
     return true;
 }
 
