@@ -793,6 +793,12 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                     throw std::logic_error( "Failed to migrate from 5 to 6" );
                 previousVersion = 6;
             }
+            if ( previousVersion == 6 )
+            {
+                if ( migrateModel6to7() == false )
+                    throw std::logic_error( "Failed to migrate from 6 to 7" );
+                previousVersion = 7;
+            }
             // To be continued in the future!
 
             // Safety check: ensure we didn't forget a migration along the way
@@ -889,6 +895,17 @@ bool MediaLibrary::migrateModel5to6()
             return false;
     }
     t->commit();
+    return true;
+}
+
+bool MediaLibrary::migrateModel6to7()
+{
+    // Delete already parsed files with unknown type from Media.
+    // It will force a rescan of playlist files.
+    std::string req = "DELETE FROM " + policy::MediaTable::Name + " WHERE type = 0";
+    if ( sqlite::Tools::executeRequest( getConn(), req ) == false )
+        return false;
+
     return true;
 }
 

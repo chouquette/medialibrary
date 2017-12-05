@@ -142,3 +142,14 @@ TEST_F( DbModel, Upgrade5to6 )
     auto albums = ml->albums( SortingCriteria::Default, false );
     ASSERT_EQ( 1u, albums.size() );
 }
+
+TEST_F ( DbModel, Upgrade6to7 )
+{
+    LoadFakeDB( SRC_DIR "/test/unittest/db_v6.sql" ); // DB v6 with a file with failed status
+    auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
+    ASSERT_EQ( InitializeResult::Success, res );
+
+    // Checking that the initial file is gone, ready to be parsed again
+    auto media = ml->media( 1 );
+    ASSERT_EQ( media, nullptr );
+}
