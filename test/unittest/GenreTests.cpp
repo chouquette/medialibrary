@@ -234,3 +234,9 @@ TEST_F( Genres, NbTracks )
     g2 = std::static_pointer_cast<Genre>( ml->genre( g2->id() ) );
     ASSERT_EQ( nullptr, g2 );
 }
+
+TEST_F( Genres, CaseInsensitive )
+{
+    auto g2 = Genre::fromName( ml.get(), "GENRE" );
+    ASSERT_EQ( g->id(), g2->id() );
+}

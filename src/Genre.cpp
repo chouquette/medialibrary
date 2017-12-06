@@ -102,7 +102,7 @@ bool Genre::createTable( sqlite::Connection* dbConn )
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::GenreTable::Name +
         "("
             "id_genre INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "name TEXT UNIQUE ON CONFLICT FAIL,"
+            "name TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
             "nb_tracks INTEGER NOT NULL DEFAULT 0"
         ")";
     const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
