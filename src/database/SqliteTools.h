@@ -170,12 +170,15 @@ public:
                      errors::isInnocuous( res ) && maxRetries-- > 0 )
                 continue;
             auto errMsg = sqlite3_errmsg( m_dbConn );
+            const char* reqStr = sqlite3_sql( m_stmt.get() );
+            if ( reqStr == nullptr )
+                reqStr = "<unknown request>";
             switch ( res )
             {
                 case SQLITE_CONSTRAINT:
-                    throw errors::ConstraintViolation( sqlite3_sql( m_stmt.get() ), errMsg );
+                    throw errors::ConstraintViolation( reqStr, errMsg );
                 default:
-                    throw errors::GenericExecution( sqlite3_sql( m_stmt.get() ), errMsg, res, extRes );
+                    throw errors::GenericExecution( reqStr, errMsg, res, extRes );
             }
         }
     }
