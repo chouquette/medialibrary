@@ -331,6 +331,20 @@ TEST_F( FoldersNoDiscover, BlacklistNonExistant )
     cbMock->waitBanFolder();
 }
 
+TEST_F( FoldersNoDiscover, UnbanNonExistant )
+{
+    ml->unbanFolder( "foo/bar/otters" );
+    cbMock->waitUnbanFolder();
+    ml->unbanFolder( "/foo/bar/otters" );
+    cbMock->waitUnbanFolder();
+    // Ban with an existing base
+    ml->unbanFolder( mock::FileSystemFactory::Root + "grouik/" );
+    cbMock->waitUnbanFolder();
+    // Ban existing but unbanned folder
+    ml->unbanFolder( mock::FileSystemFactory::Root );
+    cbMock->waitUnbanFolder();
+}
+
 TEST_F( FoldersNoDiscover, NoMediaBeforeDiscovery )
 {
     auto newFolder = mock::FileSystemFactory::Root + "newfolder/";

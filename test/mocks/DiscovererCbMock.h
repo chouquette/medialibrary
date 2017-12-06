@@ -38,6 +38,7 @@ public:
         : m_discoveryDone( false )
         , m_reloadDone( false )
         , m_banFolderDone( false )
+        , m_unbanFolderDone( false )
         , m_entryPointRemoved( false )
     {
     }
@@ -58,6 +59,12 @@ public:
     virtual void onEntryPointBanned( const std::string&, bool ) override
     {
         m_banFolderDone = true;
+        m_cond.notify_all();
+    }
+
+    virtual void onEntryPointUnbanned( const std::string&, bool ) override
+    {
+        m_unbanFolderDone = true;
         m_cond.notify_all();
     }
 
@@ -97,6 +104,16 @@ public:
         return res;
     }
 
+    bool waitUnbanFolder()
+    {
+        std::unique_lock<compat::Mutex> lock( m_mutex );
+        auto res = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
+            return m_unbanFolderDone.load();
+        });
+        m_unbanFolderDone = false;
+        return res;
+    }
+
     bool waitEntryPointRemoved()
     {
         std::unique_lock<compat::Mutex> lock( m_mutex );
@@ -111,6 +128,7 @@ private:
     std::atomic_bool m_discoveryDone;
     std::atomic_bool m_reloadDone;
     std::atomic_bool m_banFolderDone;
+    std::atomic_bool m_unbanFolderDone;
     std::atomic_bool m_entryPointRemoved;
     compat::ConditionVariable m_cond;
     compat::Mutex m_mutex;
