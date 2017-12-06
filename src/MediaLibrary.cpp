@@ -866,6 +866,14 @@ bool MediaLibrary::migrateModel3to5()
 
 bool MediaLibrary::migrateModel5to6()
 {
+    // Delete already parsed files with unknown type from Media.
+    // Those are playlist which we wrongfully accepted
+    // This needs to be done outside of a weak context, as we want recursive
+    // triggers to fire
+    std::string req = "DELETE FROM " + policy::MediaTable::Name + " WHERE type = 0";
+    if ( sqlite::Tools::executeRequest( getConn(), req ) == false )
+        return false;
+
     sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
     auto t = getConn()->newTransaction();
     using namespace policy;
