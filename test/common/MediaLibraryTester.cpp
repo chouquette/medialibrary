@@ -51,7 +51,7 @@ std::shared_ptr<Media> MediaLibraryTester::media( int64_t id )
 std::shared_ptr<Folder> MediaLibraryTester::folder( const std::string& mrl )
 {
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
-            " WHERE is_blacklisted = 0 AND is_present = 1";
+            " WHERE is_blacklisted = 0 AND is_present != 0";
     auto folders = Folder::DatabaseHelpers::fetchAll<Folder>( this, req );
     for ( auto &f : folders )
     {
@@ -137,7 +137,7 @@ std::shared_ptr<AlbumTrack> MediaLibraryTester::albumTrack( int64_t id )
 
 std::vector<MediaPtr> MediaLibraryTester::files()
 {
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE is_present = 1";
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE is_present != 0";
     return Media::fetchAll<IMedia>( this, req );
 }
 

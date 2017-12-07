@@ -272,7 +272,7 @@ std::vector<std::shared_ptr<File>> Folder::files()
 std::vector<std::shared_ptr<Folder>> Folder::folders()
 {
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
-            + " WHERE parent_id = ? AND is_blacklisted = 0 AND is_present = 1";
+            + " WHERE parent_id = ? AND is_blacklisted = 0 AND is_present != 0";
     return DatabaseHelpers::fetchAll<Folder>( m_ml, req, m_id );
 }
 
@@ -308,7 +308,7 @@ bool Folder::isRootFolder() const
 std::vector<std::shared_ptr<Folder>> Folder::fetchRootFolders( MediaLibraryPtr ml )
 {
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
-            + " WHERE parent_id IS NULL AND is_blacklisted = 0 AND is_present = 1";
+            + " WHERE parent_id IS NULL AND is_blacklisted = 0 AND is_present != 0";
     return DatabaseHelpers::fetchAll<Folder>( ml, req );
 }
 

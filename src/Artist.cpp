@@ -93,7 +93,7 @@ std::vector<MediaPtr> Artist::media( SortingCriteria sort, bool desc ) const
 {
     std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
             "INNER JOIN MediaArtistRelation mar ON mar.media_id = med.id_media "
-            "WHERE mar.artist_id = ? AND med.is_present = 1 ORDER BY ";
+            "WHERE mar.artist_id = ? AND med.is_present != 0 ORDER BY ";
     switch ( sort )
     {
     case SortingCriteria::Duration:
@@ -228,7 +228,7 @@ bool Artist::createTriggers( sqlite::Connection* dbConnection )
             " UPDATE " + policy::ArtistTable::Name + " SET is_present="
                 "(SELECT EXISTS("
                     "SELECT id_album FROM " + policy::AlbumTable::Name +
-                    " WHERE artist_id=new.artist_id AND is_present=1 LIMIT 1"
+                    " WHERE artist_id=new.artist_id AND is_present != 0 LIMIT 1"
                 ") )"
                 "WHERE id_artist=new.artist_id;"
             " END";
@@ -298,7 +298,7 @@ std::vector<ArtistPtr> Artist::search( MediaLibraryPtr ml, const std::string& na
 std::vector<ArtistPtr> Artist::listAll(MediaLibraryPtr ml, SortingCriteria sort, bool desc)
 {
     std::string req = "SELECT * FROM " + policy::ArtistTable::Name +
-            " WHERE nb_albums > 0 AND is_present = 1 ORDER BY ";
+            " WHERE nb_albums > 0 AND is_present != 0 ORDER BY ";
     switch ( sort )
     {
     default:

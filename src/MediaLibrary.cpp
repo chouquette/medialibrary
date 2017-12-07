@@ -540,7 +540,7 @@ ArtistPtr MediaLibrary::artist( int64_t id ) const
 ArtistPtr MediaLibrary::artist( const std::string& name )
 {
     static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name
-            + " WHERE name = ? AND is_present = 1";
+            + " WHERE name = ? AND is_present != 0";
     return Artist::fetch( this, req, name );
 }
 
