@@ -106,7 +106,7 @@ std::shared_ptr<VideoTrack> VideoTrack::create( MediaLibraryPtr ml, const std::s
     return track;
 }
 
-bool VideoTrack::createTable( sqlite::Connection* dbConnection )
+void VideoTrack::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::VideoTrackTable::Name
             + "(" +
@@ -123,8 +123,8 @@ bool VideoTrack::createTable( sqlite::Connection* dbConnection )
             ")";
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS video_track_media_idx ON " +
             policy::VideoTrackTable::Name + "(media_id)";
-    return sqlite::Tools::executeRequest( dbConnection, req ) &&
-            sqlite::Tools::executeRequest( dbConnection, indexReq );
+    sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
 
 }

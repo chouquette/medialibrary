@@ -189,7 +189,7 @@ bool Artist::setMusicBrainzId( const std::string& mbId )
     return true;
 }
 
-bool Artist::createTable( sqlite::Connection* dbConnection )
+void Artist::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " +
             policy::ArtistTable::Name +
@@ -215,12 +215,12 @@ bool Artist::createTable( sqlite::Connection* dbConnection )
                 policy::ArtistTable::Name + "Fts USING FTS3("
                 "name"
             ")";
-    return sqlite::Tools::executeRequest( dbConnection, req ) &&
-            sqlite::Tools::executeRequest( dbConnection, reqRel ) &&
-            sqlite::Tools::executeRequest( dbConnection, reqFts );
+    sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection, reqRel );
+    sqlite::Tools::executeRequest( dbConnection, reqFts );
 }
 
-bool Artist::createTriggers( sqlite::Connection* dbConnection )
+void Artist::createTriggers( sqlite::Connection* dbConnection )
 {
     static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS has_album_present AFTER UPDATE OF "
             "is_present ON " + policy::AlbumTable::Name +
@@ -258,10 +258,10 @@ bool Artist::createTriggers( sqlite::Connection* dbConnection )
             " BEGIN"
             " DELETE FROM " + policy::ArtistTable::Name + "Fts WHERE rowid=old.id_artist;"
             " END";
-    return sqlite::Tools::executeRequest( dbConnection, triggerReq ) &&
-            sqlite::Tools::executeRequest( dbConnection, autoDeleteTriggerReq ) &&
-            sqlite::Tools::executeRequest( dbConnection, ftsInsertTrigger ) &&
-            sqlite::Tools::executeRequest( dbConnection, ftsDeleteTrigger );
+    sqlite::Tools::executeRequest( dbConnection, triggerReq );
+    sqlite::Tools::executeRequest( dbConnection, autoDeleteTriggerReq );
+    sqlite::Tools::executeRequest( dbConnection, ftsInsertTrigger );
+    sqlite::Tools::executeRequest( dbConnection, ftsDeleteTrigger );
 }
 
 bool Artist::createDefaultArtists( sqlite::Connection* dbConnection )

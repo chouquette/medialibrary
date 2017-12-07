@@ -190,7 +190,7 @@ int64_t File::folderId()
     return m_folderId;
 }
 
-bool File::createTable( sqlite::Connection* dbConnection )
+void File::createTable( sqlite::Connection* dbConnection )
 {
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::FileTable::Name + "("
             "id_file INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -223,10 +223,10 @@ bool File::createTable( sqlite::Connection* dbConnection )
             policy::FileTable::Name + "(media_id)";
     std::string folderIndexReq = "CREATE INDEX IF NOT EXISTS file_folder_id_index ON " +
             policy::FileTable::Name + "(folder_id)";
-    return sqlite::Tools::executeRequest( dbConnection, req ) &&
-            sqlite::Tools::executeRequest( dbConnection, triggerReq ) &&
-            sqlite::Tools::executeRequest( dbConnection, mediaIndexReq ) &&
-            sqlite::Tools::executeRequest( dbConnection, folderIndexReq );
+    sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection, triggerReq );
+    sqlite::Tools::executeRequest( dbConnection, mediaIndexReq );
+    sqlite::Tools::executeRequest( dbConnection, folderIndexReq );
 }
 
 std::shared_ptr<File> File::createFromMedia( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& fileFs,

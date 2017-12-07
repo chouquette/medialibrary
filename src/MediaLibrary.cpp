@@ -131,7 +131,7 @@ void MediaLibrary::clearCache()
     Genre::clear();
 }
 
-bool MediaLibrary::createAllTables()
+void MediaLibrary::createAllTables()
 {
     // We need to create the tables in order of triggers creation
     // Device is the "root of all evil". When a device is modified,
@@ -139,33 +139,30 @@ bool MediaLibrary::createAllTables()
     // an update on files, and so on.
 
     auto t = m_dbConnection->newTransaction();
-    auto res = Device::createTable( m_dbConnection.get() ) &&
-        Folder::createTable( m_dbConnection.get() ) &&
-        Media::createTable( m_dbConnection.get() ) &&
-        File::createTable( m_dbConnection.get() ) &&
-        Label::createTable( m_dbConnection.get() ) &&
-        Playlist::createTable( m_dbConnection.get() ) &&
-        Genre::createTable( m_dbConnection.get() ) &&
-        Album::createTable( m_dbConnection.get() ) &&
-        AlbumTrack::createTable( m_dbConnection.get() ) &&
-        Album::createTriggers( m_dbConnection.get() ) &&
-        Show::createTable( m_dbConnection.get() ) &&
-        ShowEpisode::createTable( m_dbConnection.get() ) &&
-        Movie::createTable( m_dbConnection.get() ) &&
-        VideoTrack::createTable( m_dbConnection.get() ) &&
-        AudioTrack::createTable( m_dbConnection.get() ) &&
-        Artist::createTable( m_dbConnection.get() ) &&
-        Artist::createDefaultArtists( m_dbConnection.get() ) &&
-        Artist::createTriggers( m_dbConnection.get() ) &&
-        Media::createTriggers( m_dbConnection.get() ) &&
-        Genre::createTriggers( m_dbConnection.get() ) &&
-        Playlist::createTriggers( m_dbConnection.get() ) &&
-        History::createTable( m_dbConnection.get() ) &&
-        Settings::createTable( m_dbConnection.get() );
-    if ( res == false )
-        return false;
+    Device::createTable( m_dbConnection.get() );
+    Folder::createTable( m_dbConnection.get() );
+    Media::createTable( m_dbConnection.get() );
+    File::createTable( m_dbConnection.get() );
+    Label::createTable( m_dbConnection.get() );
+    Playlist::createTable( m_dbConnection.get() );
+    Genre::createTable( m_dbConnection.get() );
+    Album::createTable( m_dbConnection.get() );
+    AlbumTrack::createTable( m_dbConnection.get() );
+    Album::createTriggers( m_dbConnection.get() );
+    Show::createTable( m_dbConnection.get() );
+    ShowEpisode::createTable( m_dbConnection.get() );
+    Movie::createTable( m_dbConnection.get() );
+    VideoTrack::createTable( m_dbConnection.get() );
+    AudioTrack::createTable( m_dbConnection.get() );
+    Artist::createTable( m_dbConnection.get() );
+    Artist::createDefaultArtists( m_dbConnection.get() );
+    Artist::createTriggers( m_dbConnection.get() );
+    Media::createTriggers( m_dbConnection.get() );
+    Genre::createTriggers( m_dbConnection.get() );
+    Playlist::createTriggers( m_dbConnection.get() );
+    History::createTable( m_dbConnection.get() );
+    Settings::createTable( m_dbConnection.get() );
     t->commit();
-    return true;
 }
 
 template <typename T>
@@ -277,11 +274,7 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     auto res = InitializeResult::Success;
     try
     {
-        if ( createAllTables() == false )
-        {
-            LOG_ERROR( "Failed to create database structure" );
-            return InitializeResult::Failed;
-        }
+        createAllTables();
         if ( m_settings.load() == false )
         {
             LOG_ERROR( "Failed to load settings" );
@@ -635,8 +628,7 @@ bool MediaLibrary::clearHistory()
         return sqlite::Tools::withRetries( 3, [this]() {
             auto t = getConn()->newTransaction();
             Media::clearHistory( this );
-            if ( History::clearStreams( this ) == false )
-                return false;
+            History::clearStreams( this );
             t->commit();
             return true;
         });
@@ -846,8 +838,7 @@ bool MediaLibrary::recreateDatabase( const std::string& dbPath )
     m_dbConnection.reset();
     unlink( dbPath.c_str() );
     m_dbConnection = sqlite::Connection::connect( dbPath );
-    if ( createAllTables() == false )
-        return false;
+    createAllTables();
     // We dropped the database, there is no setting to be read anymore
     if( m_settings.load() == false )
         return false;
@@ -870,10 +861,7 @@ bool MediaLibrary::migrateModel3to5()
     };
 
     for ( const auto& req : reqs )
-    {
-        if ( sqlite::Tools::executeRequest( getConn(), req ) == false )
-            return false;
-    }
+        sqlite::Tools::executeRequest( getConn(), req );
     // Re-create triggers removed in the process
     Media::createTriggers( getConn() );
     Playlist::createTriggers( getConn() );
@@ -890,10 +878,7 @@ bool MediaLibrary::migrateModel5to6()
 #       include "database/migrations/migration5-6.sql"
     };
     for ( const auto& req : reqs )
-    {
-        if ( sqlite::Tools::executeRequest( getConn(), req ) == false )
-            return false;
-    }
+        sqlite::Tools::executeRequest( getConn(), req );
     t->commit();
     return true;
 }
@@ -907,8 +892,7 @@ bool MediaLibrary::migrateModel6to7()
     // This needs to be done from outside of the weak context, as we want
     // triggers & foreign key to be enforced.
     std::string req = "DELETE FROM " + policy::MediaTable::Name + " WHERE type = 0";
-    if ( sqlite::Tools::executeRequest( conn, req ) == false )
-        return false;
+    sqlite::Tools::executeRequest( conn, req );
 
     auto oldGenres = genres( SortingCriteria::Default, false );
 
@@ -919,10 +903,7 @@ bool MediaLibrary::migrateModel6to7()
 #       include "database/migrations/migration6-7.sql"
     };
     for ( const auto& req : reqs )
-    {
-        if ( sqlite::Tools::executeRequest( conn, req ) == false )
-            return false;
-    }
+        sqlite::Tools::executeRequest( conn, req );
     // Clear the genres that were inserted in the cache when fetching oldGenres
     Genre::clear();
     // Since the ID might change, we need to keep track of newly inserted

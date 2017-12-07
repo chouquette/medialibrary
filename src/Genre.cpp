@@ -97,7 +97,7 @@ std::vector<AlbumPtr> Genre::albums( SortingCriteria sort, bool desc ) const
     return Album::fromGenre( m_ml, m_id, sort, desc );
 }
 
-bool Genre::createTable( sqlite::Connection* dbConn )
+void Genre::createTable( sqlite::Connection* dbConn )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::GenreTable::Name +
         "("
@@ -120,13 +120,13 @@ bool Genre::createTable( sqlite::Connection* dbConn )
             " BEGIN"
             " DELETE FROM " + policy::GenreTable::Name + "Fts WHERE rowid = old.id_genre;"
             " END";
-    return sqlite::Tools::executeRequest( dbConn, req ) &&
-            sqlite::Tools::executeRequest( dbConn, vtableReq ) &&
-            sqlite::Tools::executeRequest( dbConn, vtableInsertTrigger ) &&
-            sqlite::Tools::executeRequest( dbConn, vtableDeleteTrigger );
+    sqlite::Tools::executeRequest( dbConn, req );
+    sqlite::Tools::executeRequest( dbConn, vtableReq );
+    sqlite::Tools::executeRequest( dbConn, vtableInsertTrigger );
+    sqlite::Tools::executeRequest( dbConn, vtableDeleteTrigger );
 }
 
-bool Genre::createTriggers( sqlite::Connection* dbConn )
+void Genre::createTriggers( sqlite::Connection* dbConn )
 {
     const std::string onGenreChanged = "CREATE TRIGGER IF NOT EXISTS on_track_genre_changed AFTER UPDATE OF "
             " genre_id ON " + policy::AlbumTrackTable::Name +
@@ -149,9 +149,9 @@ bool Genre::createTriggers( sqlite::Connection* dbConn )
             " DELETE FROM " + policy::GenreTable::Name + " WHERE nb_tracks = 0;"
             " END";
 
-    return sqlite::Tools::executeRequest( dbConn, onGenreChanged ) &&
-            sqlite::Tools::executeRequest( dbConn, onTrackCreated ) &&
-            sqlite::Tools::executeRequest( dbConn, onTrackDeleted );
+    sqlite::Tools::executeRequest( dbConn, onGenreChanged );
+    sqlite::Tools::executeRequest( dbConn, onTrackCreated );
+    sqlite::Tools::executeRequest( dbConn, onTrackDeleted );
 }
 
 std::shared_ptr<Genre> Genre::create( MediaLibraryPtr ml, const std::string& name )

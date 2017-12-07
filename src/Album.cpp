@@ -331,7 +331,7 @@ bool Album::removeArtist(Artist* artist)
     return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, artist->id() );
 }
 
-bool Album::createTable( sqlite::Connection* dbConnection )
+void Album::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " +
             policy::AlbumTable::Name +
@@ -364,13 +364,13 @@ bool Album::createTable( sqlite::Connection* dbConnection )
             ")";
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS album_artist_id_idx ON " +
             policy::AlbumTable::Name + "(artist_id)";
-    return sqlite::Tools::executeRequest( dbConnection, req ) &&
-            sqlite::Tools::executeRequest( dbConnection, reqRel ) &&
-            sqlite::Tools::executeRequest( dbConnection, vtableReq ) &&
-            sqlite::Tools::executeRequest( dbConnection, indexReq );
+    sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection, reqRel );
+    sqlite::Tools::executeRequest( dbConnection, vtableReq );
+    sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
 
-bool Album::createTriggers( sqlite::Connection* dbConnection )
+void Album::createTriggers( sqlite::Connection* dbConnection )
 {
     static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_album_present AFTER UPDATE OF "
             "is_present ON " + policy::AlbumTrackTable::Name +
@@ -415,11 +415,11 @@ bool Album::createTriggers( sqlite::Connection* dbConnection )
             " BEGIN"
             " DELETE FROM " + policy::AlbumTable::Name + "Fts WHERE rowid = old.id_album;"
             " END";
-    return sqlite::Tools::executeRequest( dbConnection, triggerReq ) &&
-            sqlite::Tools::executeRequest( dbConnection, deleteTriggerReq ) &&
-            sqlite::Tools::executeRequest( dbConnection, updateAddTrackTriggerReq ) &&
-            sqlite::Tools::executeRequest( dbConnection, vtriggerInsert ) &&
-            sqlite::Tools::executeRequest( dbConnection, vtriggerDelete );
+    sqlite::Tools::executeRequest( dbConnection, triggerReq );
+    sqlite::Tools::executeRequest( dbConnection, deleteTriggerReq );
+    sqlite::Tools::executeRequest( dbConnection, updateAddTrackTriggerReq );
+    sqlite::Tools::executeRequest( dbConnection, vtriggerInsert );
+    sqlite::Tools::executeRequest( dbConnection, vtriggerDelete );
 }
 
 std::shared_ptr<Album> Album::create( MediaLibraryPtr ml, const std::string& title, const std::string& artworkMrl )

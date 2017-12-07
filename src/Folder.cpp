@@ -70,7 +70,7 @@ Folder::Folder(MediaLibraryPtr ml, const std::string& path, int64_t parent, int6
 {
 }
 
-bool Folder::createTable( sqlite::Connection* connection)
+void Folder::createTable( sqlite::Connection* connection)
 {
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::FolderTable::Name +
             "("
@@ -102,11 +102,11 @@ bool Folder::createTable( sqlite::Connection* connection)
             policy::FolderTable::Name + " (device_id)";
     std::string parentFolderIndexReq = "CREATE INDEX IF NOT EXISTS parent_folder_id_idx ON " +
             policy::FolderTable::Name + " (parent_id)";
-    return sqlite::Tools::executeRequest( connection, req ) &&
-            sqlite::Tools::executeRequest( connection, exclEntryReq ) &&
-            sqlite::Tools::executeRequest( connection, triggerReq ) &&
-            sqlite::Tools::executeRequest( connection, deviceIndexReq ) &&
-            sqlite::Tools::executeRequest( connection, parentFolderIndexReq );
+    sqlite::Tools::executeRequest( connection, req );
+    sqlite::Tools::executeRequest( connection, exclEntryReq );
+    sqlite::Tools::executeRequest( connection, triggerReq );
+    sqlite::Tools::executeRequest( connection, deviceIndexReq );
+    sqlite::Tools::executeRequest( connection, parentFolderIndexReq );
 }
 
 std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& mrl,

@@ -63,8 +63,8 @@ public:
     virtual const std::string& musicBrainzId() const override;
     bool setMusicBrainzId( const std::string& musicBrainzId );
 
-    static bool createTable( sqlite::Connection* dbConnection );
-    static bool createTriggers( sqlite::Connection* dbConnection );
+    static void createTable( sqlite::Connection* dbConnection );
+    static void createTriggers( sqlite::Connection* dbConnection );
     static bool createDefaultArtists( sqlite::Connection* dbConnection );
     static std::shared_ptr<Artist> create( MediaLibraryPtr ml, const std::string& name );
     static std::vector<ArtistPtr> search( MediaLibraryPtr ml, const std::string& name );

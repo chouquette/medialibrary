@@ -178,7 +178,7 @@ bool Playlist::remove( int64_t mediaId )
     return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, mediaId );
 }
 
-bool Playlist::createTable( sqlite::Connection* dbConn )
+void Playlist::createTable( sqlite::Connection* dbConn )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::PlaylistTable::Name + "("
             + policy::PlaylistTable::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -204,12 +204,12 @@ bool Playlist::createTable( sqlite::Connection* dbConn )
                 "name"
             ")";
     //FIXME Enforce (playlist_id,position) uniqueness
-    return sqlite::Tools::executeRequest( dbConn, req ) &&
-            sqlite::Tools::executeRequest( dbConn, relTableReq ) &&
-            sqlite::Tools::executeRequest( dbConn, vtableReq );
+    sqlite::Tools::executeRequest( dbConn, req );
+    sqlite::Tools::executeRequest( dbConn, relTableReq );
+    sqlite::Tools::executeRequest( dbConn, vtableReq );
 }
 
-bool Playlist::createTriggers( sqlite::Connection* dbConn )
+void Playlist::createTriggers( sqlite::Connection* dbConn )
 {
     static const std::string req = "CREATE TRIGGER IF NOT EXISTS update_playlist_order AFTER UPDATE OF position"
             " ON PlaylistMediaRelation"
@@ -252,12 +252,12 @@ bool Playlist::createTriggers( sqlite::Connection* dbConn )
             " BEGIN"
             " DELETE FROM " + policy::PlaylistTable::Name + "Fts WHERE rowid = old.id_playlist;"
             " END";
-    return sqlite::Tools::executeRequest( dbConn, req ) &&
-            sqlite::Tools::executeRequest( dbConn, autoAppendReq ) &&
-            sqlite::Tools::executeRequest( dbConn, autoShiftPosReq ) &&
-            sqlite::Tools::executeRequest( dbConn, vtriggerInsert ) &&
-            sqlite::Tools::executeRequest( dbConn, vtriggerUpdate ) &&
-            sqlite::Tools::executeRequest( dbConn, vtriggerDelete );
+    sqlite::Tools::executeRequest( dbConn, req );
+    sqlite::Tools::executeRequest( dbConn, autoAppendReq );
+    sqlite::Tools::executeRequest( dbConn, autoShiftPosReq );
+    sqlite::Tools::executeRequest( dbConn, vtriggerInsert );
+    sqlite::Tools::executeRequest( dbConn, vtriggerUpdate );
+    sqlite::Tools::executeRequest( dbConn, vtriggerDelete );
 }
 
 std::vector<PlaylistPtr> Playlist::search( MediaLibraryPtr ml, const std::string& name )

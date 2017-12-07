@@ -152,7 +152,7 @@ std::vector<MediaPtr> ShowEpisode::files()
     return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
 
-bool ShowEpisode::createTable( sqlite::Connection* dbConnection )
+void ShowEpisode::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::ShowEpisodeTable::Name
             + "("
@@ -172,8 +172,8 @@ bool ShowEpisode::createTable( sqlite::Connection* dbConnection )
             ")";
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS show_episode_media_show_idx ON " +
             policy::ShowEpisodeTable::Name + "(media_id, show_id)";
-    return sqlite::Tools::executeRequest( dbConnection, req ) &&
-            sqlite::Tools::executeRequest( dbConnection, indexReq );
+    sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
 
 std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml, int64_t mediaId, const std::string& title, unsigned int episodeNumber, int64_t showId )

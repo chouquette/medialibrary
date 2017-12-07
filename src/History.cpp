@@ -49,7 +49,7 @@ History::History( MediaLibraryPtr ml, sqlite::Row& row )
     row >> m_date;
 }
 
-bool History::createTable( sqlite::Connection* dbConnection )
+void History::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::HistoryTable::Name +
             "("
@@ -66,8 +66,8 @@ bool History::createTable( sqlite::Connection* dbConnection )
                 " ORDER BY insertion_date DESC LIMIT -1 OFFSET " + std::to_string( MaxEntries ) + ");"
             " END";
     // Don't index the id_media field, we don't want to select history records using the media_id
-    return sqlite::Tools::executeRequest( dbConnection, req ) &&
-            sqlite::Tools::executeRequest( dbConnection, triggerReq );
+    sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection, triggerReq );
 }
 
 bool History::insert( sqlite::Connection* dbConn, int64_t mediaId )
@@ -85,10 +85,10 @@ std::vector<HistoryPtr> History::fetch( MediaLibraryPtr ml )
     return fetchAll<IHistoryEntry>( ml, req );
 }
 
-bool History::clearStreams( MediaLibraryPtr ml )
+void History::clearStreams( MediaLibraryPtr ml )
 {
     static const std::string req = "DELETE FROM " + policy::HistoryTable::Name;
-    return sqlite::Tools::executeRequest( ml->getConn(), req );
+    sqlite::Tools::executeRequest( ml->getConn(), req );
 }
 
 MediaPtr History::media() const

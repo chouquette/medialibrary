@@ -77,7 +77,7 @@ public:
     bool destroy();
     int64_t folderId();
 
-    static bool createTable( sqlite::Connection* dbConnection );
+    static void createTable( sqlite::Connection* dbConnection );
     static std::shared_ptr<File> createFromMedia( MediaLibraryPtr ml, int64_t mediaId, Type type,
                                                   const fs::IFile& file, int64_t folderId, bool isRemovable );
     static std::shared_ptr<File> createFromMedia( MediaLibraryPtr ml, int64_t mediaId, Type type,

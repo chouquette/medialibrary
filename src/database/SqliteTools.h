@@ -279,12 +279,12 @@ class Tools
         }
 
         template <typename... Args>
-        static bool executeRequest( sqlite::Connection* dbConnection, const std::string& req, Args&&... args )
+        static void executeRequest( sqlite::Connection* dbConnection, const std::string& req, Args&&... args )
         {
             Connection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
                 ctx = dbConnection->acquireWriteContext();
-            return executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
+            executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
         }
 
         template <typename... Args>
@@ -293,8 +293,7 @@ class Tools
             Connection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
                 ctx = dbConnection->acquireWriteContext();
-            if ( executeRequestLocked( dbConnection, req, std::forward<Args>( args )... ) == false )
-                return false;
+            executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
             return sqlite3_changes( dbConnection->handle() ) > 0;
         }
 
@@ -315,8 +314,7 @@ class Tools
             Connection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
                 ctx = dbConnection->acquireWriteContext();
-            if ( executeRequestLocked( dbConnection, req, std::forward<Args>( args )... ) == false )
-                return 0;
+            executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
             return sqlite3_last_insert_rowid( dbConnection->handle() );
         }
 
@@ -348,7 +346,7 @@ class Tools
 
     private:
         template <typename... Args>
-        static bool executeRequestLocked( sqlite::Connection* dbConnection, const std::string& req, Args&&... args )
+        static void executeRequestLocked( sqlite::Connection* dbConnection, const std::string& req, Args&&... args )
         {
             auto chrono = std::chrono::steady_clock::now();
             Statement stmt( dbConnection->handle(), req );
@@ -358,7 +356,6 @@ class Tools
             auto duration = std::chrono::steady_clock::now() - chrono;
             LOG_DEBUG("Executed ", req, " in ",
                      std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
-            return true;
         }
 };
 

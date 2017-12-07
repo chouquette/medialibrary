@@ -60,7 +60,7 @@ public:
     Folder( MediaLibraryPtr ml, sqlite::Row& row );
     Folder(MediaLibraryPtr ml, const std::string& path, int64_t parent , int64_t deviceId , bool isRemovable );
 
-    static bool createTable( sqlite::Connection* connection );
+    static void createTable( sqlite::Connection* connection );
     static std::shared_ptr<Folder> create( MediaLibraryPtr ml, const std::string& mrl, int64_t parentId, Device& device, fs::IDevice& deviceFs );
     static void excludeEntryFolder( MediaLibraryPtr ml, int64_t folderId );
     static bool blacklist( MediaLibraryPtr ml, const std::string& mrl );

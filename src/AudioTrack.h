@@ -58,7 +58,7 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack, policy
         virtual const std::string& language() const override;
         virtual const std::string& description() const override;
 
-        static bool createTable( sqlite::Connection* dbConnection );
+        static void createTable( sqlite::Connection* dbConnection );
         static std::shared_ptr<AudioTrack> create( MediaLibraryPtr ml, const std::string& codec,
                                                    unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels,
                                                    const std::string& language, const std::string& desc, int64_t mediaId );

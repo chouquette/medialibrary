@@ -67,8 +67,8 @@ public:
     std::shared_ptr<File> addFile( const fs::IFile& fileFs, int64_t parentFolderId,
                                    bool isFolderFsRemovable );
 
-    static bool createTable( sqlite::Connection* dbConn );
-    static bool createTriggers( sqlite::Connection* dbConn );
+    static void createTable( sqlite::Connection* dbConn );
+    static void createTriggers( sqlite::Connection* dbConn );
     static std::vector<PlaylistPtr> search( MediaLibraryPtr ml, const std::string& name );
     static std::vector<PlaylistPtr> listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc );
 

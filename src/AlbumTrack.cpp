@@ -98,7 +98,7 @@ bool AlbumTrack::setArtist( std::shared_ptr<Artist> artist )
     return true;
 }
 
-bool AlbumTrack::createTable( sqlite::Connection* dbConnection )
+void AlbumTrack::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AlbumTrackTable::Name + "("
                 "id_track INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -130,9 +130,9 @@ bool AlbumTrack::createTable( sqlite::Connection* dbConnection )
             policy::AlbumTrackTable::Name +
             "(media_id, artist_id, genre_id, album_id)";
 
-    return sqlite::Tools::executeRequest( dbConnection, req ) &&
-            sqlite::Tools::executeRequest( dbConnection, triggerReq ) &&
-            sqlite::Tools::executeRequest( dbConnection, indexReq );
+    sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection, triggerReq );
+    sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
 
 std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, int64_t albumId,

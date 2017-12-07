@@ -80,7 +80,7 @@ LabelPtr Label::create( MediaLibraryPtr ml, const std::string& name )
     return self;
 }
 
-bool Label::createTable( sqlite::Connection* dbConnection )
+void Label::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::LabelTable::Name + "("
                 "id_label INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -98,9 +98,9 @@ bool Label::createTable( sqlite::Connection* dbConnection )
             " UPDATE " + policy::MediaTable::Name + "Fts SET labels = TRIM(REPLACE(labels, old.name, ''))"
             " WHERE labels MATCH old.name;"
             " END";
-    return sqlite::Tools::executeRequest( dbConnection, req ) &&
-            sqlite::Tools::executeRequest( dbConnection, relReq ) &&
-            sqlite::Tools::executeRequest( dbConnection, ftsTrigger );
+    sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection, relReq );
+    sqlite::Tools::executeRequest( dbConnection, ftsTrigger );
 }
 
 }

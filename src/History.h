@@ -49,10 +49,10 @@ class History : public IHistoryEntry, public DatabaseHelpers<History, policy::Hi
 {
 public:
     History( MediaLibraryPtr ml, sqlite::Row& row );
-    static bool createTable( sqlite::Connection* dbConnection );
+    static void createTable( sqlite::Connection* dbConnection );
     static bool insert( sqlite::Connection* dbConn, int64_t mediaId );
     static std::vector<HistoryPtr> fetch( MediaLibraryPtr ml );
-    static bool clearStreams( MediaLibraryPtr ml );
+    static void clearStreams( MediaLibraryPtr ml );
 
     virtual MediaPtr media() const override;
     virtual unsigned int insertionDate() const override;

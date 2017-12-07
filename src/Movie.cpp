@@ -116,7 +116,7 @@ std::vector<MediaPtr> Movie::files()
     return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
 
-bool Movie::createTable( sqlite::Connection* dbConnection )
+void Movie::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::MovieTable::Name
             + "("
@@ -131,8 +131,8 @@ bool Movie::createTable( sqlite::Connection* dbConnection )
             ")";
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS movie_media_idx ON " +
             policy::MovieTable::Name + "(media_id)";
-    return sqlite::Tools::executeRequest( dbConnection, req ) &&
-            sqlite::Tools::executeRequest( dbConnection, indexReq );
+    sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
 
 std::shared_ptr<Movie> Movie::create(MediaLibraryPtr ml, int64_t mediaId, const std::string& title )

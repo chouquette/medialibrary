@@ -49,7 +49,7 @@ public:
     bool save();
     void setDbModelVersion( uint32_t dbModelVersion );
 
-    static bool createTable( sqlite::Connection* dbConn );
+    static void createTable( sqlite::Connection* dbConn );
 
     static const uint32_t DbModelVersion;
 
