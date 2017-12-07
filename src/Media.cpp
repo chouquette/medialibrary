@@ -555,8 +555,10 @@ bool Media::createTriggers( sqlite::Connection* connection )
             "is_present ON " + policy::FileTable::Name +
             " BEGIN "
             " UPDATE " + policy::MediaTable::Name + " SET is_present="
-                "(SELECT COUNT(id_file) FROM " + policy::FileTable::Name +
-                    " WHERE media_id=new.media_id AND is_present=1 LIMIT 1) "
+                "(SELECT EXISTS("
+                    "SELECT id_file FROM " + policy::FileTable::Name +
+                    " WHERE media_id=new.media_id AND is_present=1 LIMIT 1"
+                ") )"
                 "WHERE id_media=new.media_id;"
             " END;";
     static const std::string triggerReq2 = "CREATE TRIGGER IF NOT EXISTS cascade_file_deletion AFTER DELETE ON "

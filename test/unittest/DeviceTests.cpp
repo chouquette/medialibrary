@@ -244,16 +244,20 @@ TEST_F( DeviceFs, RemoveAlbum )
     // And an album that will disappear, along with its artist
     {
         auto album = std::static_pointer_cast<Album>( ml->createAlbum( "album 2" ) );
+        auto album2 = std::static_pointer_cast<Album>( ml->createAlbum( "album 3" ) );
         auto media = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
         ml->media( RemovableDeviceMountpoint + "removablefile2.mp3" );
         auto artist = ml->createArtist( "artist 2" );
         album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1, artist->id(), nullptr );
         album->addTrack( std::static_pointer_cast<Media>( media ), 2, 1, artist->id(), nullptr );
+        album2->addTrack( std::static_pointer_cast<Media>( media ), 1, 1, artist->id(), nullptr );
+        album2->addTrack( std::static_pointer_cast<Media>( media ), 2, 1, artist->id(), nullptr );
         album->setAlbumArtist( artist );
+        album2->setAlbumArtist( artist );
     }
 
     auto albums = ml->albums( SortingCriteria::Default, false );
-    ASSERT_EQ( 2u, albums.size() );
+    ASSERT_EQ( 3u, albums.size() );
     auto artists = ml->artists( SortingCriteria::Default, false );
     ASSERT_EQ( 2u, artists.size() );
 
@@ -265,6 +269,17 @@ TEST_F( DeviceFs, RemoveAlbum )
     ASSERT_EQ( 1u, albums.size() );
     artists = ml->artists( SortingCriteria::Default, false );
     ASSERT_EQ( 1u, artists.size() );
+
+    // Now check that everything appears again when we plug the device back in
+
+    fsMock->addDevice( device );
+
+    Reload();
+
+    albums = ml->albums( SortingCriteria::Default, false );
+    ASSERT_EQ( 3u, albums.size() );
+    artists = ml->artists( SortingCriteria::Default, false );
+    ASSERT_EQ( 2u, artists.size() );
 }
 
 TEST_F( DeviceFs, PartialAlbumRemoval )
