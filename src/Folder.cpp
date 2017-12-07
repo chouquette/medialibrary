@@ -285,7 +285,7 @@ std::vector<std::shared_ptr<File>> Folder::files()
 std::vector<std::shared_ptr<Folder>> Folder::folders()
 {
     static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
-            + " WHERE parent_id = ? AND is_blacklisted = 0 AND is_present = 1";
+            + " WHERE parent_id = ? AND is_blacklisted = 0 AND is_present != 0";
     return DatabaseHelpers::fetchAll<Folder>( m_ml, req, m_id );
 }
 
@@ -324,7 +324,7 @@ std::vector<std::shared_ptr<Folder>> Folder::fetchRootFolders( MediaLibraryPtr m
             " LEFT JOIN ExcludedEntryFolder"
             " ON " + policy::FolderTable::Name + ".id_folder = ExcludedEntryFolder.folder_id"
             " WHERE ExcludedEntryFolder.folder_id IS NULL AND"
-            " parent_id IS NULL AND is_blacklisted = 0 AND is_present = 1";
+            " parent_id IS NULL AND is_blacklisted = 0 AND is_present != 0";
     return DatabaseHelpers::fetchAll<Folder>( ml, req );
 }
 

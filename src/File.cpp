@@ -319,14 +319,14 @@ std::shared_ptr<File> File::fromExternalMrl( MediaLibraryPtr ml, const std::stri
 std::vector<std::shared_ptr<File>> File::fetchUnparsed( MediaLibraryPtr ml )
 {
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name
-            + " WHERE parser_step != ? AND is_present = 1 AND folder_id IS NOT NULL AND parser_retries < 3";
+            + " WHERE parser_step != ? AND is_present != 0 AND folder_id IS NOT NULL AND parser_retries < 3";
     return File::fetchAll<File>( ml, req, parser::Task::ParserStep::Completed );
 }
 
 void File::resetRetryCount( MediaLibraryPtr ml )
 {
     static const std::string req = "UPDATE " + policy::FileTable::Name + " SET "
-            "parser_retries = 0 WHERE parser_step != ? AND is_present = 1 AND folder_id IS NOT NULL";
+            "parser_retries = 0 WHERE parser_step != ? AND is_present != 0 AND folder_id IS NOT NULL";
     sqlite::Tools::executeUpdate( ml->getConn(), req, parser::Task::ParserStep::Completed );
 }
 

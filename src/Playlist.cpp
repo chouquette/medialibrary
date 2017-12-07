@@ -120,7 +120,7 @@ std::vector<MediaPtr> Playlist::media() const
 {
     static const std::string req = "SELECT m.* FROM " + policy::MediaTable::Name + " m "
             "LEFT JOIN PlaylistMediaRelation pmr ON pmr.media_id = m.id_media "
-            "WHERE pmr.playlist_id = ? AND m.is_present = 1 "
+            "WHERE pmr.playlist_id = ? AND m.is_present != 0 "
             "ORDER BY pmr.position";
     return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }

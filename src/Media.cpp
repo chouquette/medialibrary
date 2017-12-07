@@ -435,7 +435,8 @@ std::vector<MediaPtr> Media::listAll( MediaLibraryPtr ml, IMedia::Type type, Sor
             req += " DESC";
         return fetchAll<IMedia>( ml, req, type, File::Type::Main );
     }
-    req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? AND is_present = 1 ORDER BY ";
+    req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? AND "
+            "is_present != 0 ORDER BY ";
     switch ( sort )
     {
     case SortingCriteria::Duration:
@@ -557,7 +558,7 @@ bool Media::createTriggers( sqlite::Connection* connection )
             " UPDATE " + policy::MediaTable::Name + " SET is_present="
                 "(SELECT EXISTS("
                     "SELECT id_file FROM " + policy::FileTable::Name +
-                    " WHERE media_id=new.media_id AND is_present=1 LIMIT 1"
+                    " WHERE media_id=new.media_id AND is_present != 0 LIMIT 1"
                 ") )"
                 "WHERE id_media=new.media_id;"
             " END;";

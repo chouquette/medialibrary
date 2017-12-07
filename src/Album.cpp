@@ -206,7 +206,7 @@ std::vector<MediaPtr> Album::tracks( SortingCriteria sort, bool desc ) const
     // counter productive, to maintain a cache that respects all orderings.
     std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
         " INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
-        " WHERE att.album_id = ? AND med.is_present = 1";
+        " WHERE att.album_id = ? AND med.is_present != 0";
     req += orderTracksBy( sort, desc );
     return Media::fetchAll<IMedia>( m_ml, req, m_id );
 }
@@ -217,7 +217,7 @@ std::vector<MediaPtr> Album::tracks( GenrePtr genre, SortingCriteria sort, bool 
         return {};
     std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
             " INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
-            " WHERE att.album_id = ? AND med.is_present = 1"
+            " WHERE att.album_id = ? AND med.is_present != 0"
             " AND genre_id = ?";
     req += orderTracksBy( sort, desc );
     return Media::fetchAll<IMedia>( m_ml, req, m_id, genre->id() );
@@ -378,7 +378,7 @@ bool Album::createTriggers( sqlite::Connection* dbConnection )
             " UPDATE " + policy::AlbumTable::Name + " SET is_present="
                 "(SELECT EXISTS("
                     "SELECT id_track FROM " + policy::AlbumTrackTable::Name +
-                    " WHERE album_id=new.album_id AND is_present=1 LIMIT 1"
+                    " WHERE album_id=new.album_id AND is_present != 0 LIMIT 1"
                 ") )"
                 "WHERE id_album=new.album_id;"
             " END";
@@ -447,14 +447,14 @@ std::vector<AlbumPtr> Album::search( MediaLibraryPtr ml, const std::string& patt
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " WHERE id_album IN "
             "(SELECT rowid FROM " + policy::AlbumTable::Name + "Fts WHERE " +
             policy::AlbumTable::Name + "Fts MATCH '*' || ? || '*')"
-            "AND is_present = 1";
+            "AND is_present != 0";
     return fetchAll<IAlbum>( ml, req, pattern );
 }
 
 std::vector<AlbumPtr> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, SortingCriteria sort, bool desc )
 {
     std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " alb "
-                    "WHERE artist_id = ? AND is_present=1 ORDER BY ";
+                    "WHERE artist_id = ? AND is_present != 0 ORDER BY ";
     switch ( sort )
     {
     case SortingCriteria::Alpha:
@@ -491,7 +491,7 @@ std::vector<AlbumPtr> Album::listAll( MediaLibraryPtr ml, SortingCriteria sort, 
     {
         std::string req = "SELECT alb.* FROM " + policy::AlbumTable::Name + " alb "
                 "INNER JOIN " + policy::ArtistTable::Name + " art ON alb.artist_id = art.id_artist "
-                "WHERE alb.is_present = 1 "
+                "WHERE alb.is_present != 0 "
                 "ORDER BY art.name ";
         if ( desc == true )
             req += "DESC ";
@@ -499,7 +499,7 @@ std::vector<AlbumPtr> Album::listAll( MediaLibraryPtr ml, SortingCriteria sort, 
         return fetchAll<IAlbum>( ml, req );
     }
     std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
-                    " WHERE is_present=1";
+                    " WHERE is_present != 0";
     req += orderBy( sort, desc );
     return fetchAll<IAlbum>( ml, req );
 }
