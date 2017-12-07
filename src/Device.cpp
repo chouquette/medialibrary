@@ -41,8 +41,6 @@ Device::Device( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_scheme
         >> m_isRemovable
         >> m_isPresent;
-    //FIXME: It's probably a bad idea to load "isPresent" for DB. This field should
-    //only be here for sqlite triggering purposes
 }
 
 Device::Device( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme, bool isRemovable )
@@ -78,6 +76,7 @@ bool Device::isPresent() const
 
 void Device::setPresent(bool value)
 {
+    assert( m_isPresent != value );
     static const std::string req = "UPDATE " + policy::DeviceTable::Name +
             " SET is_present = ? WHERE id_device = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, value, m_id ) == false )
