@@ -1092,6 +1092,7 @@ bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& 
 void MediaLibrary::onDeviceUnplugged( const std::string& uuid )
 {
     auto device = Device::fromUuid( this, uuid );
+    assert( device->isRemovable() == true );
     if ( device == nullptr )
     {
         LOG_WARN( "Unknown device ", uuid, " was unplugged. Ignoring." );
