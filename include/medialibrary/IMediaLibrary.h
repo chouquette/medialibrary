@@ -67,6 +67,7 @@ enum class SortingCriteria
     ReleaseDate,
     FileSize,
     Artist,
+    PlayCount,
 };
 
 enum class InitializeResult
