@@ -409,6 +409,72 @@ TEST_F( Albums, Sort )
     ASSERT_EQ( a1->id(), albums[2]->id() );
 }
 
+TEST_F( Albums, SortByPlayCount )
+{
+    auto a1 = ml->createAlbum( "North" );
+    auto f1 = std::static_pointer_cast<Media>( ml->addMedia( "first.opus" ) );
+    auto t1 = a1->addTrack( f1, 1, 0, 0, nullptr );
+    f1->save();
+    auto f2 = std::static_pointer_cast<Media>( ml->addMedia( "second.opus" ) );
+    auto t2 = a1->addTrack( f2, 2, 0, 0, nullptr );
+    f2->save();
+
+    ASSERT_TRUE( f1->increasePlayCount() );
+    ASSERT_TRUE( f1->increasePlayCount() );
+
+    ASSERT_TRUE( f2->increasePlayCount() );
+
+    auto a2 = ml->createAlbum( "East" );
+    auto f3 = std::static_pointer_cast<Media>( ml->addMedia( "third.opus" ) );
+    auto t3 = a2->addTrack( f3, 1, 0, 0, nullptr );
+    f3->save();
+
+    ASSERT_TRUE( f3->increasePlayCount() );
+    ASSERT_TRUE( f3->increasePlayCount() );
+    ASSERT_TRUE( f3->increasePlayCount() );
+    ASSERT_TRUE( f3->increasePlayCount() );
+
+    auto a3 = ml->createAlbum( "South" );
+    auto f4 = std::static_pointer_cast<Media>( ml->addMedia( "fourth.opus" ) );
+    auto t4 = a3->addTrack( f4, 1, 0, 0, nullptr );
+    f4->save();
+
+    ASSERT_TRUE( f4->increasePlayCount() );
+
+    auto a4 = ml->createAlbum( "West" );
+    auto f5 = std::static_pointer_cast<Media>( ml->addMedia( "fifth.opus" ) );
+    auto t5 = a4->addTrack( f5, 1, 0, 0, nullptr );
+    f5->save();
+
+    ASSERT_TRUE( f5->increasePlayCount() );
+
+    auto albums = ml->albums( SortingCriteria::PlayCount, false ); // Expect descending order
+    ASSERT_EQ( 4u, albums.size() );
+    ASSERT_EQ( a2->id(), albums[0]->id() ); // 4 plays
+    ASSERT_EQ( a1->id(), albums[1]->id() ); // 3 plays
+    // album 3 & 4 discriminated by lexicographic order of album titles
+    ASSERT_EQ( a3->id(), albums[2]->id() ); // 1 play
+    ASSERT_EQ( a4->id(), albums[3]->id() ); // 1 play
+
+    albums = ml->albums( SortingCriteria::PlayCount, true ); // Expect ascending order
+    ASSERT_EQ( 4u, albums.size() );
+    ASSERT_EQ( a3->id(), albums[0]->id() ); // 1 play
+    ASSERT_EQ( a4->id(), albums[1]->id() ); // 1 play
+    ASSERT_EQ( a1->id(), albums[2]->id() ); // 3 plays
+    ASSERT_EQ( a2->id(), albums[3]->id() ); // 4 plays
+
+    // ♪ Listening North album ♫
+    ASSERT_TRUE( f1->increasePlayCount() );
+    ASSERT_TRUE( f2->increasePlayCount() );
+
+    albums = ml->albums( SortingCriteria::PlayCount, false );
+    ASSERT_EQ( 4u, albums.size() );
+    ASSERT_EQ( a1->id(), albums[0]->id() ); // 5 plays
+    ASSERT_EQ( a2->id(), albums[1]->id() ); // 4 plays
+    ASSERT_EQ( a3->id(), albums[2]->id() ); // 1 play
+    ASSERT_EQ( a4->id(), albums[3]->id() ); // 1 play
+}
+
 TEST_F( Albums, SortByArtist )
 {
     auto artist1 = ml->createArtist( "Artist" );
