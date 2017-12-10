@@ -448,6 +448,10 @@ std::vector<MediaPtr> Media::listAll( MediaLibraryPtr ml, IMedia::Type type, Sor
     case SortingCriteria::ReleaseDate:
         req += "release_date";
         break;
+    case SortingCriteria::PlayCount:
+        req += "play_count";
+        desc = !desc; // Make decreasing order default for play count sorting
+        break;
     default:
         req += "title";
         break;
