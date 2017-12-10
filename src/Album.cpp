@@ -498,6 +498,19 @@ std::vector<AlbumPtr> Album::listAll( MediaLibraryPtr ml, SortingCriteria sort, 
         req += ", alb.title";
         return fetchAll<IAlbum>( ml, req );
     }
+    if ( sort == SortingCriteria::PlayCount )
+    {
+        std::string req = "SELECT alb.* FROM " + policy::AlbumTable::Name + " alb "
+                 "INNER JOIN " + policy::AlbumTrackTable::Name + " t ON alb.id_album = t.album_id "
+                 "INNER JOIN " + policy::MediaTable::Name + " m ON t.media_id = m.id_media "
+                 "WHERE alb.is_present != 0 "
+                 "GROUP BY id_album "
+                 "ORDER BY SUM(m.play_count) ";
+        if ( desc == false )
+            req += "DESC "; // Most played first by default
+        req += ", alb.title";
+        return fetchAll<IAlbum>( ml, req );
+    }
     std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
                     " WHERE is_present != 0";
     req += orderBy( sort, desc );
