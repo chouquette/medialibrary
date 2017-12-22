@@ -439,7 +439,7 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
     {
         if ( albumArtist != nullptr )
             return albumArtist->unknownAlbum();
-        else if ( trackArtist != nullptr )
+        if ( trackArtist != nullptr )
             return trackArtist->unknownAlbum();
         return m_unknownArtist->unknownAlbum();
     }
