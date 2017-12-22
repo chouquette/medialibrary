@@ -473,6 +473,10 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
     {
         auto a = (*it).get();
         auto candidateAlbumArtist = a->albumArtist();
+        // When we find an album, we will systematically assign an artist to it.
+        // Not having an album artist (even it it's only a temporary one in the
+        // case of a compilation album) is not expected at all.
+        assert( candidateAlbumArtist != nullptr );
         if ( albumArtist != nullptr )
         {
             // We assume that an album without album artist is a positive match.
