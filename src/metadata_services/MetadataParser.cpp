@@ -437,7 +437,6 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
     const auto& albumName = task.vlcMedia.meta( libvlc_meta_Album );
     if ( albumName.empty() == true )
     {
-        std::shared_ptr<Artist> artist = albumArtist;
         if ( albumArtist != nullptr )
             return albumArtist->unknownAlbum();
         else if ( trackArtist != nullptr )
