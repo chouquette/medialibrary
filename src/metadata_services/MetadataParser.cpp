@@ -472,11 +472,11 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
     for ( auto it = begin( albums ); it != end( albums ); )
     {
         auto a = (*it).get();
+        auto candidateAlbumArtist = a->albumArtist();
         if ( albumArtist != nullptr )
         {
             // We assume that an album without album artist is a positive match.
             // At the end of the day, without proper tags, there's only so much we can do.
-            auto candidateAlbumArtist = a->albumArtist();
             if ( candidateAlbumArtist != nullptr && candidateAlbumArtist->id() != albumArtist->id() )
             {
                 it = albums.erase( it );
@@ -520,22 +520,31 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
             continue;
         }
 
-        // Attempt to discriminate by date
-        auto candidateDate = task.vlcMedia.meta( libvlc_meta_Date );
-        if ( candidateDate.empty() == false )
+        // Attempt to discriminate by date, but only for the same artists.
+        // Not taking the artist in consideration would cause compilation to
+        // create multiple albums, especially when track are only partially
+        // tagged with a year.
+        if ( ( albumArtist != nullptr && candidateAlbumArtist != nullptr &&
+             albumArtist->id() == candidateAlbumArtist->id() ) ||
+             ( trackArtist != nullptr && candidateAlbumArtist != nullptr &&
+               trackArtist->id() == candidateAlbumArtist->id() ) )
         {
-            try
+            auto candidateDate = task.vlcMedia.meta( libvlc_meta_Date );
+            if ( candidateDate.empty() == false )
             {
-                unsigned int year = std::stoi( candidateDate );
-                if ( year != a->releaseYear() )
-                    it = albums.erase( it );
-                else
-                    ++it;
-                continue;
-            }
-            catch (...)
-            {
-                // Date wasn't helpful, simply ignore the error and continue
+                try
+                {
+                    unsigned int year = std::stoi( candidateDate );
+                    if ( year != a->releaseYear() )
+                        it = albums.erase( it );
+                    else
+                        ++it;
+                    continue;
+                }
+                catch (...)
+                {
+                    // Date wasn't helpful, simply ignore the error and continue
+                }
             }
         }
 
