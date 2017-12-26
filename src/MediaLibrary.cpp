@@ -1094,7 +1094,9 @@ void MediaLibrary::forceRescan()
         VideoTrack::deleteAll( this );
         AudioTrack::deleteAll( this );
         File::resetParsing( this );
+        Artist::createDefaultArtists( getConn() );
         clearCache();
+        t->commit();
     }
     if ( m_parser != nullptr )
     {
