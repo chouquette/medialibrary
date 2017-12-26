@@ -143,8 +143,9 @@ TEST_F( DbModel, Upgrade5to6 )
     ASSERT_EQ( 1u, albums.size() );
 }
 
-TEST_F ( DbModel, Upgrade6to7 )
+TEST_F ( DbModel, Upgrade6to8 )
 {
+    // Model 7 is forcing a re-scan, there is no db model change
     LoadFakeDB( SRC_DIR "/test/unittest/db_v6.sql" ); // DB v6 with a file with failed status
     auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
