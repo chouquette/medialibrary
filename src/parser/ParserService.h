@@ -62,6 +62,12 @@ public:
     void parse( std::unique_ptr<parser::Task> t );
     void initialize( MediaLibrary* mediaLibrary, IParserCb* parserCb );
     bool isIdle() const;
+    ///
+    /// \brief flush flush every currently scheduled tasks
+    ///
+    /// The service needs to be previously paused or unstarted
+    ///
+    void flush();
 
 protected:
     uint8_t nbNativeThreads() const;
@@ -89,6 +95,7 @@ private:
     bool m_paused;
     std::atomic_bool m_idle;
     compat::ConditionVariable m_cond;
+    compat::ConditionVariable m_idleCond;
     std::queue<std::unique_ptr<parser::Task>> m_tasks;
     std::vector<compat::Thread> m_threads;
     compat::Mutex m_lock;

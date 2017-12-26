@@ -1064,6 +1064,32 @@ void MediaLibrary::refreshDevices( factory::IFileSystem& fsFactory )
     }
 }
 
+void MediaLibrary::forceRescan()
+{
+    if ( m_parser != nullptr )
+    {
+        m_parser->pause();
+        // Flush current tasks
+    }
+    {
+        auto t = getConn()->newTransaction();
+        // The triggers will automatically albums and album tracks
+        Artist::deleteAll( this );
+        Movie::deleteAll( this );
+        // The triggers will delete the associated episodes
+        Show::deleteAll( this );
+        VideoTrack::deleteAll( this );
+        AudioTrack::deleteAll( this );
+        File::resetParsing( this );
+        clearCache();
+    }
+    if ( m_parser != nullptr )
+    {
+        m_parser->restore();
+        m_parser->resume();
+    }
+}
+
 bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& mountpoint )
 {
     auto currentDevice = Device::fromUuid( this, uuid );

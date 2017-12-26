@@ -330,4 +330,11 @@ void File::resetRetryCount( MediaLibraryPtr ml )
     sqlite::Tools::executeUpdate( ml->getConn(), req, parser::Task::ParserStep::Completed );
 }
 
+void File::resetParsing( MediaLibraryPtr ml )
+{
+    static const std::string req = "UPDATE " + policy::FileTable::Name + " SET "
+            "parser_retries = 0, parser_step = ?";
+    sqlite::Tools::executeUpdate( ml->getConn(), req, parser::Task::ParserStep::None );
+}
+
 }

@@ -112,6 +112,12 @@ void Parser::stop()
     }
 }
 
+void Parser::flush()
+{
+    for ( auto& s : m_services )
+        s->flush();
+}
+
 void Parser::restore()
 {
     if ( m_services.empty() == true )
