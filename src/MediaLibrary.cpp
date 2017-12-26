@@ -885,69 +885,10 @@ bool MediaLibrary::migrateModel5to6()
 
 bool MediaLibrary::migrateModel6to7()
 {
-    auto conn = getConn();
-
     // Delete already parsed files with unknown type from Media.
     // It will force a rescan of playlist files.
-    // This needs to be done from outside of the weak context, as we want
-    // triggers & foreign key to be enforced.
     std::string req = "DELETE FROM " + policy::MediaTable::Name + " WHERE type = 0";
-    sqlite::Tools::executeRequest( conn, req );
-
-    auto oldGenres = genres( SortingCriteria::Default, false );
-
-    sqlite::Connection::WeakDbContext weakConnCtx{ conn };
-    auto t = conn->newTransaction();
-    using namespace policy;
-    const std::string reqs[] = {
-#       include "database/migrations/migration6-7.sql"
-    };
-    for ( const auto& req : reqs )
-        sqlite::Tools::executeRequest( conn, req );
-    // Clear the genres that were inserted in the cache when fetching oldGenres
-    Genre::clear();
-    // Since the ID might change, we need to keep track of newly inserted
-    // entities for book keeping later
-    std::vector<std::shared_ptr<Genre>> newGenres;
-    for ( const auto& g : oldGenres )
-    {
-        std::shared_ptr<Genre> newGenre;
-        try
-        {
-            // Attempt to insert the old genre. If it fails, it's because an
-            // existing genre already exists with a different case.
-            newGenre = Genre::create( this, g->name() );
-            if ( newGenre != nullptr )
-                newGenres.push_back( newGenre );
-        }
-        catch( sqlite::errors::ConstraintViolation& )
-        {
-        }
-        // If we fail to recreate the genre, fetch the one that already exists
-        // with a different case
-        if ( newGenre == nullptr )
-            newGenre = Genre::fromName( this, g->name() );
-        // If we can't find a genre with the same name, all bets are off, let's pray.
-        sqlite::Tools::executeUpdate( conn, "UPDATE " + AlbumTrackTable::Name +
-                " SET genre_id = ? WHERE genre_id = ?",
-                sqlite::ForeignKey( newGenre != nullptr ? newGenre->id() : 0 ),
-                g->id() );
-    }
-    // Triggers were disabled, so we need to maintain the consistency of the
-    // per-genre track count
-    for ( const auto& g : newGenres )
-    {
-        std::string req = "UPDATE " + GenreTable::Name + " SET nb_tracks = "
-                "("
-                    "SELECT COUNT(id_track) FROM " + AlbumTrackTable::Name + " "
-                        "WHERE genre_id = ?"
-                ")"
-                "WHERE id_genre = ?";
-        sqlite::Tools::executeUpdate( conn, req, g->id(), g->id() );
-    }
-    // All nbTracks information are now invalid, so let's flush our entity cache (again)
-    Genre::clear();
-    t->commit();
+    sqlite::Tools::executeRequest( getConn(), req );
     return true;
 }
 

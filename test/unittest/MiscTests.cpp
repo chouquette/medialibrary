@@ -29,7 +29,6 @@
 #include "Tests.h"
 #include "database/SqliteTools.h"
 #include "database/SqliteConnection.h"
-#include "medialibrary/IGenre.h"
 
 class Misc : public Tests
 {
@@ -153,13 +152,4 @@ TEST_F ( DbModel, Upgrade6to7 )
     // Checking that the initial file is gone, ready to be parsed again
     auto media = ml->media( 1 );
     ASSERT_EQ( media, nullptr );
-
-    // Check that we now have only a single genre with correct values
-    auto genres = ml->genres( SortingCriteria::Alpha, false );
-    ASSERT_EQ( 2u, genres.size() );
-    auto g = genres[0];
-    ASSERT_EQ( g->nbTracks(), 2u );
-    g = genres[1];
-    ASSERT_EQ( "Test", g->name() );
-    ASSERT_EQ( g->nbTracks(), 1u );
 }

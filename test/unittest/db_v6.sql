@@ -38,13 +38,3 @@ CREATE TABLE ShowEpisode(id_episode INTEGER PRIMARY KEY AUTOINCREMENT,media_id U
 CREATE INDEX show_episode_media_show_idx ON ShowEpisode(media_id, show_id);
 CREATE TABLE VideoTrack(id_track INTEGER PRIMARY KEY AUTOINCREMENT,codec TEXT,width UNSIGNED INTEGER,height UNSIGNED INTEGER,fps FLOAT,media_id UNSIGNED INT,language TEXT,description TEXT,FOREIGN KEY ( media_id ) REFERENCES Media(id_media) ON DELETE CASCADE);
 CREATE INDEX video_track_media_idx ON VideoTrack(media_id);
-INSERT INTO Genre VALUES(1, "Genre", 0);
-INSERT INTO Genre VALUES(2, "GENRE", 0);
-INSERT INTO Genre VALUES(3, "Test", 0);
-INSERT INTO Album(id_album, title) VALUES(1, "Dummy album");
-INSERT INTO Media(id_media, type, insertion_date, title) VALUES(2, 2, 1, "dummy media");
-INSERT INTO Media(id_media, type, insertion_date, title) VALUES(3, 2, 1, "dummy media");
-INSERT INTO Media(id_media, type, insertion_date, title) VALUES(4, 2, 1, "dummy media");
-INSERT INTO AlbumTrack(media_id, duration, artist_id, genre_id, album_id) VALUES(2, 1, NULL, 1, 1);
-INSERT INTO AlbumTrack(media_id, duration, artist_id, genre_id, album_id) VALUES(3, 1, NULL, 2, 1);
-INSERT INTO AlbumTrack(media_id, duration, artist_id, genre_id, album_id) VALUES(4, 1, NULL, 3, 1);
