@@ -215,6 +215,12 @@ class DatabaseHelpers
             return sqlite::Tools::executeDelete( ml->getConn(), req, pkValue );
         }
 
+        static bool deleteAll( MediaLibraryPtr ml )
+        {
+            static const std::string req = "DELETE FROM " + TABLEPOLICY::Name;
+            return sqlite::Tools::executeDelete( ml->getConn(), req );
+        }
+
         /**
          * @warning removeFromCache is only meant to be called from an SQLite hook
          */
