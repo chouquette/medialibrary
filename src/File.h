@@ -112,6 +112,7 @@ public:
 
     static std::vector<std::shared_ptr<File>> fetchUnparsed( MediaLibraryPtr ml );
     static void resetRetryCount( MediaLibraryPtr ml );
+    static void resetParsing( MediaLibraryPtr ml );
 
 private:
     MediaLibraryPtr m_ml;

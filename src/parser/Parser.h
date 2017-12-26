@@ -60,10 +60,11 @@ public:
     void pause();
     void resume();
     void stop();
-
-private:
+    void flush();
     // Queues all unparsed files for parsing.
     void restore();
+
+private:
     void updateStats();
     virtual void done( std::unique_ptr<parser::Task> task, parser::Task::Status status ) override;
     virtual void onIdleChanged( bool idle ) override;

@@ -151,6 +151,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         void refreshDevices(factory::IFileSystem& fsFactory);
 
+        virtual void forceRescan() override;
+
         static bool isExtensionSupported( const char* ext );
 
     protected:

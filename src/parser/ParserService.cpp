@@ -117,6 +117,17 @@ bool ParserService::isIdle() const
     return m_idle;
 }
 
+void ParserService::flush()
+{
+    std::unique_lock<compat::Mutex> lock( m_lock );
+    assert( m_paused == true || m_threads.empty() == true );
+    m_idleCond.wait( lock, [this]() {
+        return m_idle == true;
+    });
+    while ( m_tasks.empty() == false )
+        m_tasks.pop();
+}
+
 uint8_t ParserService::nbNativeThreads() const
 {
     auto nbProcs = static_cast<uint8_t>( compat::Thread::hardware_concurrency() );
@@ -148,6 +159,7 @@ void ParserService::mainloop()
             {
                 LOG_INFO( "Halting ParserService [", serviceName, "] mainloop" );
                 setIdle( true );
+                m_idleCond.notify_all();
                 m_cond.wait( lock, [this]() {
                     return ( m_tasks.empty() == false && m_paused == false )
                             || m_stopParser == true;

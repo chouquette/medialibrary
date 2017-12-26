@@ -359,6 +359,15 @@ class IMediaLibrary
          * This must be called *before* initialize()
          */
         virtual IDeviceListerCb* setDeviceLister( DeviceListerPtr lister ) = 0;
+
+        /**
+         * @brief forceRescan forces all media to be rescanned.
+         *
+         * This can be called anytime after the medialibrary has been initialized.
+         * It will make all held instances outdated. Those should be considered
+         * as invalid the moment this method returns.
+         */
+        virtual void forceRescan() = 0;
 };
 
 }
