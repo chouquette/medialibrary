@@ -595,6 +595,16 @@ uint8_t MetadataParser::nbThreads() const
     return 1;
 }
 
+void MetadataParser::flush()
+{
+    ParserService::flush();
+    // Reset locally cached entities
+    initialize();
+    m_variousArtists = nullptr;
+    m_previousAlbum = nullptr;
+    m_previousFolderId = 0;
+}
+
 bool MetadataParser::isCompleted( const parser::Task& task ) const
 {
     // We always need to run this task if the metadata extraction isn't completed
