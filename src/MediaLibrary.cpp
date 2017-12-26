@@ -789,6 +789,9 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
             {
                 if ( migrateModel6to7() == false )
                     throw std::logic_error( "Failed to migrate from 6 to 7" );
+                // Force a rescan to solve metadata analysis problems.
+                // The insertion is fixed, but won't edit already inserted data.
+                forceRescan();
                 previousVersion = 7;
             }
             // To be continued in the future!
