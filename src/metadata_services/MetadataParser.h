@@ -40,6 +40,7 @@ protected:
     virtual parser::Task::Status run( parser::Task& task ) override;
     virtual const char* name() const override;
     virtual uint8_t nbThreads() const override;
+    virtual void flush() override;
     bool isCompleted( const parser::Task& task ) const override;
 
     bool addPlaylistMedias( parser::Task& task, int nbSubitem ) const;

@@ -67,7 +67,7 @@ public:
     ///
     /// The service needs to be previously paused or unstarted
     ///
-    void flush();
+    virtual void flush();
 
 protected:
     uint8_t nbNativeThreads() const;
