@@ -139,6 +139,7 @@ void Parser::updateStats()
     if ( percent != m_percent )
     {
         m_percent = percent;
+        LOG_INFO( "Updating progress: ", percent );
         m_callback->onParsingStatsUpdated( m_percent );
         if ( m_percent == 100 )
         {
