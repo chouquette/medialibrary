@@ -782,6 +782,11 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                     throw std::logic_error( "Failed to migrate from 5 to 6" );
                 previousVersion = 6;
             }
+            if ( previousVersion == 6 )
+            {
+                forceRescan();
+                previousVersion = 7;
+            }
             // To be continued in the future!
 
             // Safety check: ensure we didn't forget a migration along the way
