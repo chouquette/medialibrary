@@ -946,7 +946,11 @@ void MediaLibrary::onDiscovererIdleChanged( bool idle )
         // If switching to idle == true, then both background workers need to be idle before signaling.
         LOG_INFO( idle ? "Discoverer thread went idle" : "Discover thread was resumed" );
         if ( idle == false || m_parserIdle == true )
+        {
+            LOG_INFO( "Setting background idle state to ",
+                      idle ? "true" : "false" );
             m_callback->onBackgroundTasksIdleChanged( idle );
+        }
     }
 }
 
@@ -957,7 +961,11 @@ void MediaLibrary::onParserIdleChanged( bool idle )
     {
         LOG_INFO( idle ? "All parser services went idle" : "Parse services were resumed" );
         if ( idle == false || m_discovererIdle == true )
+        {
+            LOG_INFO( "Setting background idle state to ",
+                      idle ? "true" : "false" );
             m_callback->onBackgroundTasksIdleChanged( idle );
+        }
     }
 }
 
