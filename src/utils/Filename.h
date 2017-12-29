@@ -34,6 +34,7 @@ namespace utils
 namespace file
 {
     std::string extension( const std::string& fileName );
+    std::string stripExtension( const std::string& fileName );
     std::string directory( const std::string& filePath );
 
     /**

@@ -52,6 +52,14 @@ std::string extension( const std::string& fileName )
     return fileName.substr( pos + 1 );
 }
 
+std::string stripExtension( const std::string& fileName )
+{
+    auto pos = fileName.find_last_of( '.' );
+    if ( pos == std::string::npos )
+        return fileName;
+    return fileName.substr( 0, pos );
+}
+
 std::string directory( const std::string& filePath )
 {
     auto pos = filePath.find_last_of( DIR_SEPARATOR );

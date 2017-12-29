@@ -169,3 +169,11 @@ TEST( FsUtils, splitPath )
   split = utils::file::splitPath( "~/Русские песни/", true );
   ASSERT_TRUE( st_folder == split );
 }
+
+TEST( FsUtils, stripExtension )
+{
+    ASSERT_EQ( "seaOtter", utils::file::stripExtension( "seaOtter.mkv" ) );
+    ASSERT_EQ( "", utils::file::stripExtension( "" ) );
+    ASSERT_EQ( "dummy", utils::file::stripExtension( "dummy" ) );
+    ASSERT_EQ( "test.with.dot", utils::file::stripExtension( "test.with.dot.ext" ) );
+}
