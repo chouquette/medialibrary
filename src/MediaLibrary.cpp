@@ -1092,10 +1092,13 @@ void MediaLibrary::forceRescan()
     }
     {
         auto t = getConn()->newTransaction();
-        // The triggers will automatically albums and album tracks
+        // Let the triggers clear out the Fts tables
+        AlbumTrack::deleteAll( this );
+        Genre::deleteAll( this );
+        Album::deleteAll( this );
         Artist::deleteAll( this );
         Movie::deleteAll( this );
-        // The triggers will delete the associated episodes
+        ShowEpisode::deleteAll( this );
         Show::deleteAll( this );
         VideoTrack::deleteAll( this );
         AudioTrack::deleteAll( this );
