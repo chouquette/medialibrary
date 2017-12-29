@@ -130,15 +130,3 @@ TEST_F( DbModel, Upgrade4to5 )
     auto files = ml->files();
     ASSERT_NE( files.size(), 0u );
 }
-
-TEST_F( DbModel, Upgrade5to6 )
-{
-    LoadFakeDB( SRC_DIR "/test/unittest/db_v5.sql" );
-    auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
-    ASSERT_EQ( InitializeResult::Success, res );
-    // The dummy database contains a single album with a 'is_present' value of
-    // 1234. If the migration succeeded, this value was brought back to 1,
-    // causing the album to be listable again
-    auto albums = ml->albums( SortingCriteria::Default, false );
-    ASSERT_EQ( 1u, albums.size() );
-}
