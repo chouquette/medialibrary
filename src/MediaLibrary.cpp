@@ -881,17 +881,9 @@ bool MediaLibrary::migrateModel5to6()
         return false;
 
     sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
-    auto t = getConn()->newTransaction();
     using namespace policy;
-    const std::string reqs[] = {
-#       include "database/migrations/migration5-6.sql"
-    };
-    for ( const auto& req : reqs )
-    {
-        if ( sqlite::Tools::executeRequest( getConn(), req ) == false )
-            return false;
-    }
-    t->commit();
+    req = "UPDATE " + MediaTable::Name + " SET is_present = 1 WHERE is_present != 0";
+    sqlite::Tools::executeRequest( getConn(), req );
     return true;
 }
 
