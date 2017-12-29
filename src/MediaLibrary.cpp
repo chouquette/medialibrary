@@ -416,7 +416,8 @@ std::shared_ptr<Media> MediaLibrary::addFile( std::shared_ptr<fs::IFile> fileFs,
                                               std::shared_ptr<fs::IDirectory> parentFolderFs )
 {
     LOG_INFO( "Adding ", fileFs->mrl() );
-    auto mptr = Media::create( this, IMedia::Type::Unknown, fileFs->name() );
+    auto mptr = Media::create( this, IMedia::Type::Unknown,
+                               utils::file::stripExtension( fileFs->name() ) );
     if ( mptr == nullptr )
     {
         LOG_ERROR( "Failed to add media ", fileFs->mrl(), " to the media library" );
