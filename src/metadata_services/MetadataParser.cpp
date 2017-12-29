@@ -141,6 +141,15 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
             alreadyInParser = true;
         }
     }
+    else if ( task.media == nullptr )
+    {
+        // If we have a file but no media, this is a problem, we can analyze as
+        // much as we want, but won't be able to store anything.
+        // Keep in mind that if we are in this code path, we are not analyzing
+        // a playlist.
+        assert( false );
+        return parser::Task::Status::Fatal;
+    }
 
     if ( task.parentPlaylist != nullptr )
         task.parentPlaylist->add( task.media->id(), task.parentPlaylistIndex );
