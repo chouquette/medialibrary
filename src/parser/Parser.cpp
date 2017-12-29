@@ -127,7 +127,16 @@ void Parser::restore()
     LOG_INFO( "Resuming parsing on ", files.size(), " mrl" );
     for ( auto& f : files )
     {
-        parse( f, f->media(), f->mrl() );
+        auto media = f->media();
+        if ( media == nullptr )
+        {
+            // This is most likely a left over playlist file
+            std::string req = "DELETE FROM " + policy::FileTable::Name +
+                    " WHERE id_file = ?";
+            sqlite::Tools::executeDelete( m_ml->getConn(), req, f->id() );
+            continue;
+        }
+        parse( f, std::move( media ), f->mrl() );
     }
 }
 
