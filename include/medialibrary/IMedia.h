@@ -52,6 +52,7 @@ class IMedia
             Unknown,
             Video,
             Audio,
+            External,
         };
         enum class SubType : uint8_t
         {

@@ -429,7 +429,7 @@ TEST_F( Medias, SortByFileSize )
 TEST_F( Medias, SetType )
 {
     auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3" ) );
-    ASSERT_EQ( IMedia::Type::Unknown, m1->type() );
+    ASSERT_EQ( IMedia::Type::External, m1->type() );
 
     m1->setType( IMedia::Type::Video );
     m1->save();
