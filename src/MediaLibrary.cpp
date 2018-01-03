@@ -890,8 +890,8 @@ bool MediaLibrary::migrateModel6to7()
 {
     // Delete already parsed files with unknown type from Media.
     // It will force a rescan of playlist files.
-    std::string req = "DELETE FROM " + policy::MediaTable::Name + " WHERE type = 0";
-    sqlite::Tools::executeRequest( getConn(), req );
+    std::string req = "DELETE FROM " + policy::MediaTable::Name + " WHERE type = ?";
+    sqlite::Tools::executeRequest( getConn(), req, Media::Type::Unknown );
     return true;
 }
 
