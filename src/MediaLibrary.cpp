@@ -876,8 +876,8 @@ bool MediaLibrary::migrateModel5to6()
     // Those are playlist which we wrongfully accepted
     // This needs to be done outside of a weak context, as we want recursive
     // triggers to fire
-    std::string req = "DELETE FROM " + policy::MediaTable::Name + " WHERE type = 0";
-    if ( sqlite::Tools::executeRequest( getConn(), req ) == false )
+    std::string req = "DELETE FROM " + policy::MediaTable::Name + " WHERE type = ?";
+    if ( sqlite::Tools::executeRequest( getConn(), req, Media::Type::Unknown ) == false )
         return false;
 
     sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
