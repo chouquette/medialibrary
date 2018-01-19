@@ -130,15 +130,3 @@ TEST_F( DbModel, Upgrade4to5 )
     auto files = ml->files();
     ASSERT_NE( files.size(), 0u );
 }
-
-TEST_F ( DbModel, Upgrade6to8 )
-{
-    // Model 7 is forcing a re-scan, there is no db model change
-    LoadFakeDB( SRC_DIR "/test/unittest/db_v6.sql" ); // DB v6 with a file with failed status
-    auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
-    ASSERT_EQ( InitializeResult::Success, res );
-
-    // Checking that the initial file is gone, ready to be parsed again
-    auto media = ml->media( 1 );
-    ASSERT_EQ( media, nullptr );
-}

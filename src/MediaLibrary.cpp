@@ -793,12 +793,6 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 forceRescan();
                 previousVersion = 7;
             }
-            if ( previousVersion == 7 )
-            {
-                if ( migrateModel6to7() == false )
-                    throw std::logic_error( "Failed to migrate from 7 to 8" );
-                previousVersion = 8;
-            }
             // To be continued in the future!
 
             // Safety check: ensure we didn't forget a migration along the way
@@ -879,19 +873,14 @@ bool MediaLibrary::migrateModel3to5()
 
 bool MediaLibrary::migrateModel5to6()
 {
-    sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
-    using namespace policy;
-    const std::string req = "UPDATE " + MediaTable::Name + " SET is_present = 1 WHERE is_present != 0";
-    sqlite::Tools::executeRequest( getConn(), req );
-    return true;
-}
-
-bool MediaLibrary::migrateModel6to7()
-{
-    // Delete already parsed files with unknown type from Media.
-    // It will force a rescan of playlist files.
     std::string req = "DELETE FROM " + policy::MediaTable::Name + " WHERE type = ?";
     sqlite::Tools::executeRequest( getConn(), req, Media::Type::Unknown );
+
+    sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
+    using namespace policy;
+    req = "UPDATE " + MediaTable::Name + " SET is_present = 1 WHERE is_present != 0";
+    sqlite::Tools::executeRequest( getConn(), req );
+
     return true;
 }
 
