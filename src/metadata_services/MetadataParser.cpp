@@ -700,7 +700,11 @@ bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
     // If we have an albumArtist (meaning the track was properly tagged, we
     // can assume this artist is a correct match. We can use the thumbnail from
     // the current album for the albumArtist, if none has been set before.
-    if ( albumArtist != nullptr && albumArtist->artworkMrl().empty() == true &&
+    // Although we don't want to do this for unknown/various artists, as the
+    // thumbnail wouldn't reflect those "special" artists
+    if ( albumArtist != nullptr && albumArtist->id() != UnknownArtistID &&
+         albumArtist->id() != VariousArtistID &&
+         albumArtist->artworkMrl().empty() == true &&
          album != nullptr && album->artworkMrl().empty() == false )
         albumArtist->setArtworkMrl( album->artworkMrl() );
 
