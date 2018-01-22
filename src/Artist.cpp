@@ -239,11 +239,11 @@ void Artist::createTriggers( sqlite::Connection* dbConnection )
     // slower when inserting an unknown artist album
     static const std::string autoDeleteTriggerReq = "CREATE TRIGGER IF NOT EXISTS has_album_remaining"
             " AFTER DELETE ON " + policy::AlbumTable::Name +
-            " WHEN old.artist_id IS NOT NULL AND old.artist_id != " + std::to_string( UnknownArtistID ) +
-                " AND old.artist_id != " + std::to_string( VariousArtistID ) +
             " BEGIN"
             " UPDATE " + policy::ArtistTable::Name + " SET nb_albums = nb_albums - 1 WHERE id_artist = old.artist_id;"
-            " DELETE FROM " + policy::ArtistTable::Name + " WHERE id_artist = old.artist_id AND nb_albums = 0;"
+            " DELETE FROM " + policy::ArtistTable::Name + " WHERE id_artist = old.artist_id AND nb_albums = 0 AND"
+            " old.artist_id != " + std::to_string( UnknownArtistID ) +
+            " AND old.artist_id != " + std::to_string( VariousArtistID ) + ";"
             " END";
 
     static const std::string ftsInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_artist_fts"
