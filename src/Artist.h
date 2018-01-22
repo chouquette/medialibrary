@@ -62,6 +62,7 @@ public:
     std::shared_ptr<Album> unknownAlbum();
     virtual const std::string& musicBrainzId() const override;
     bool setMusicBrainzId( const std::string& musicBrainzId );
+    unsigned int nbTracks() const;
 
     static void createTable( sqlite::Connection* dbConnection );
     static void createTriggers( sqlite::Connection* dbConnection );
@@ -77,6 +78,7 @@ private:
     std::string m_shortBio;
     std::string m_artworkMrl;
     unsigned int m_nbAlbums;
+    unsigned int m_nbTracks;
     bool m_isPresent;
     std::string m_mbId;
 

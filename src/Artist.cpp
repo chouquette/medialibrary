@@ -46,6 +46,7 @@ Artist::Artist( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_shortBio
         >> m_artworkMrl
         >> m_nbAlbums
+        >> m_nbTracks
         >> m_mbId
         >> m_isPresent;
 }
@@ -55,6 +56,7 @@ Artist::Artist( MediaLibraryPtr ml, const std::string& name )
     , m_id( 0 )
     , m_name( name )
     , m_nbAlbums( 0 )
+    , m_nbTracks( 0 )
     , m_isPresent( true )
 {
 }
@@ -189,6 +191,11 @@ bool Artist::setMusicBrainzId( const std::string& mbId )
     return true;
 }
 
+unsigned int Artist::nbTracks() const
+{
+    return m_nbTracks;
+}
+
 void Artist::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " +
@@ -199,6 +206,7 @@ void Artist::createTable( sqlite::Connection* dbConnection )
                 "shortbio TEXT,"
                 "artwork_mrl TEXT,"
                 "nb_albums UNSIGNED INT DEFAULT 0,"
+                "nb_tracks UNSIGNED INT DEFAULT 0,"
                 "mb_id TEXT,"
                 "is_present BOOLEAN NOT NULL DEFAULT 1"
             ")";

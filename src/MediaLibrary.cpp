@@ -793,6 +793,15 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 forceRescan();
                 previousVersion = 7;
             }
+            /**
+             * V7 introduces artist.nb_tracks and an associated trigger to delete
+             * artists when it has no track/album left.
+             */
+            if ( previousVersion == 7 )
+            {
+                migrateModel7to8();
+                previousVersion = 8;
+            }
             // To be continued in the future!
 
             // Safety check: ensure we didn't forget a migration along the way
@@ -882,6 +891,22 @@ bool MediaLibrary::migrateModel5to6()
     sqlite::Tools::executeRequest( getConn(), req );
 
     return true;
+}
+
+void MediaLibrary::migrateModel7to8()
+{
+    sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
+    auto t = getConn()->newTransaction();
+    using namespace policy;
+    std::string reqs[] = {
+#               include "database/migrations/migration7-8.sql"
+    };
+
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( getConn(), req );
+    // Re-create triggers removed in the process
+    Artist::createTriggers( getConn() );
+    t->commit();
 }
 
 void MediaLibrary::reload()

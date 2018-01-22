@@ -169,6 +169,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
                                               const std::string& path );
         bool migrateModel3to5();
         bool migrateModel5to6();
+        void migrateModel7to8();
         void createAllTables();
         void registerEntityHooks();
         static bool validateSearchPattern( const std::string& pattern );
