@@ -279,12 +279,25 @@ void Artist::createTriggers( sqlite::Connection* dbConnection )
     // when inserting an album with unknown/various artist(s).
     // The alternative would be to always check the special artists for existence, which would be much
     // slower when inserting an unknown artist album
-    static const std::string autoDeleteTriggerReq = "CREATE TRIGGER IF NOT EXISTS has_album_remaining"
+    static const std::string autoDeleteAlbumTriggerReq = "CREATE TRIGGER IF NOT EXISTS has_album_remaining"
             " AFTER DELETE ON " + policy::AlbumTable::Name +
             " BEGIN"
             " UPDATE " + policy::ArtistTable::Name + " SET nb_albums = nb_albums - 1 WHERE id_artist = old.artist_id;"
-            " DELETE FROM " + policy::ArtistTable::Name + " WHERE id_artist = old.artist_id AND nb_albums = 0 AND"
-            " old.artist_id != " + std::to_string( UnknownArtistID ) +
+            " DELETE FROM " + policy::ArtistTable::Name + " WHERE id_artist = old.artist_id "
+            " AND nb_albums = 0 "
+            " AND nb_tracks = 0 "
+            " AND old.artist_id != " + std::to_string( UnknownArtistID ) +
+            " AND old.artist_id != " + std::to_string( VariousArtistID ) + ";"
+            " END";
+
+    static const std::string autoDeleteTrackTriggerReq = "CREATE TRIGGER IF NOT EXISTS has_track_remaining"
+            " AFTER DELETE ON " + policy::AlbumTrackTable::Name +
+            " BEGIN"
+            " UPDATE " + policy::ArtistTable::Name + " SET nb_tracks = nb_tracks - 1 WHERE id_artist = old.artist_id;"
+            " DELETE FROM " + policy::ArtistTable::Name + " WHERE id_artist = old.artist_id "
+            " AND nb_albums = 0 "
+            " AND nb_tracks = 0 "
+            " AND old.artist_id != " + std::to_string( UnknownArtistID ) +
             " AND old.artist_id != " + std::to_string( VariousArtistID ) + ";"
             " END";
 
@@ -301,7 +314,8 @@ void Artist::createTriggers( sqlite::Connection* dbConnection )
             " DELETE FROM " + policy::ArtistTable::Name + "Fts WHERE rowid=old.id_artist;"
             " END";
     sqlite::Tools::executeRequest( dbConnection, triggerReq );
-    sqlite::Tools::executeRequest( dbConnection, autoDeleteTriggerReq );
+    sqlite::Tools::executeRequest( dbConnection, autoDeleteAlbumTriggerReq );
+    sqlite::Tools::executeRequest( dbConnection, autoDeleteTrackTriggerReq );
     sqlite::Tools::executeRequest( dbConnection, ftsInsertTrigger );
     sqlite::Tools::executeRequest( dbConnection, ftsDeleteTrigger );
 }
@@ -340,7 +354,8 @@ std::vector<ArtistPtr> Artist::search( MediaLibraryPtr ml, const std::string& na
 std::vector<ArtistPtr> Artist::listAll(MediaLibraryPtr ml, SortingCriteria sort, bool desc)
 {
     std::string req = "SELECT * FROM " + policy::ArtistTable::Name +
-            " WHERE nb_albums > 0 AND is_present != 0 ORDER BY ";
+            " WHERE ( nb_albums > 0 OR nb_tracks > 0 )"
+            " AND is_present != 0 ORDER BY ";
     switch ( sort )
     {
     default:
