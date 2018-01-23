@@ -262,7 +262,7 @@ void Artist::createTable( sqlite::Connection* dbConnection )
     sqlite::Tools::executeRequest( dbConnection, reqFts );
 }
 
-void Artist::createTriggers( sqlite::Connection* dbConnection )
+void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion )
 {
     static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS has_album_present AFTER UPDATE OF "
             "is_present ON " + policy::AlbumTable::Name +
@@ -315,7 +315,17 @@ void Artist::createTriggers( sqlite::Connection* dbConnection )
             " END";
     sqlite::Tools::executeRequest( dbConnection, triggerReq );
     sqlite::Tools::executeRequest( dbConnection, autoDeleteAlbumTriggerReq );
-    sqlite::Tools::executeRequest( dbConnection, autoDeleteTrackTriggerReq );
+    // Don't create this trigger if the database is about to be migrated.
+    // This could make earlier migration fail, and needs to be done when
+    // migrating to v7 to v8.
+    // While the has_album_remaining trigger now also references the nb_tracks
+    // field, it was present from before version 3, so it wouldn't be recreated.
+    // As we don't support any model before 3 (or rather we just recreate
+    // everything), we don't have to bother here.
+    if ( dbModelVersion >= 8 )
+    {
+        sqlite::Tools::executeRequest( dbConnection, autoDeleteTrackTriggerReq );
+    }
     sqlite::Tools::executeRequest( dbConnection, ftsInsertTrigger );
     sqlite::Tools::executeRequest( dbConnection, ftsDeleteTrigger );
 }

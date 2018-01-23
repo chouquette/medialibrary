@@ -67,7 +67,7 @@ public:
     virtual unsigned int nbTracks() const override;
 
     static void createTable( sqlite::Connection* dbConnection );
-    static void createTriggers( sqlite::Connection* dbConnection );
+    static void createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion );
     static bool createDefaultArtists( sqlite::Connection* dbConnection );
     static std::shared_ptr<Artist> create( MediaLibraryPtr ml, const std::string& name );
     static std::vector<ArtistPtr> search( MediaLibraryPtr ml, const std::string& name );

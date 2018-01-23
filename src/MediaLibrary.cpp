@@ -160,8 +160,9 @@ void MediaLibrary::createAllTables()
 
 void MediaLibrary::createAllTriggers()
 {
+    auto dbModelVersion = m_settings.dbModelVersion();
     Album::createTriggers( m_dbConnection.get() );
-    Artist::createTriggers( m_dbConnection.get() );
+    Artist::createTriggers( m_dbConnection.get(), dbModelVersion );
     Media::createTriggers( m_dbConnection.get() );
     Genre::createTriggers( m_dbConnection.get() );
     Playlist::createTriggers( m_dbConnection.get() );
@@ -278,14 +279,14 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     {
         auto t = m_dbConnection->newTransaction();
         createAllTables();
-        createAllTriggers();
-        t->commit();
-
         if ( m_settings.load() == false )
         {
             LOG_ERROR( "Failed to load settings" );
             return InitializeResult::Failed;
         }
+        createAllTriggers();
+        t->commit();
+
         if ( m_settings.dbModelVersion() != Settings::DbModelVersion )
         {
             res = updateDatabaseModel( m_settings.dbModelVersion(), dbPath );
@@ -911,7 +912,7 @@ void MediaLibrary::migrateModel7to8()
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( getConn(), req );
     // Re-create triggers removed in the process
-    Artist::createTriggers( getConn() );
+    Artist::createTriggers( getConn(), 8u );
     t->commit();
 }
 
