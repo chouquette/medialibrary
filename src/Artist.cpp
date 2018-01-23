@@ -155,6 +155,18 @@ bool Artist::updateNbAlbum( int increment )
     return true;
 }
 
+bool Artist::updateNbTrack(int increment)
+{
+    assert( increment != 0 );
+    assert( increment > 0 || ( increment < 0 && m_nbTracks >= 1 ) );
+    static const std::string req = "UPDATE " + policy::ArtistTable::Name +
+            " SET nb_tracks = nb_tracks + ? WHERE id_artist = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, increment, m_id ) == false )
+        return false;
+    m_nbTracks += increment;
+    return true;
+}
+
 std::shared_ptr<Album> Artist::unknownAlbum()
 {
     static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +

@@ -326,3 +326,24 @@ TEST_F( Artists, DeleteWhenNoAlbum )
     artists = ml->artists( medialibrary::SortingCriteria::Default, false );
     ASSERT_EQ( 0u, artists.size() );
 }
+
+TEST_F( Artists, UpdateNbTracks )
+{
+    auto artist = ml->createArtist( "artist" );
+    ASSERT_EQ( 0u, artist->nbTracks() );
+    artist->updateNbTrack( 1 );
+    ASSERT_EQ( 1u, artist->nbTracks() );
+
+    Reload();
+
+    artist = std::static_pointer_cast<Artist>( ml->artist( artist->id() ) );
+    ASSERT_EQ( 1u, artist->nbTracks() );
+
+    artist->updateNbTrack( -1 );
+    ASSERT_EQ( 0u, artist->nbTracks() );
+
+    Reload();
+
+    artist = std::static_pointer_cast<Artist>( ml->artist( artist->id() ) );
+    ASSERT_EQ( 0u, artist->nbTracks() );
+}
