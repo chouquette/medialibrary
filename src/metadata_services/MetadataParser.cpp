@@ -708,6 +708,14 @@ bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
          album != nullptr && album->artworkMrl().empty() == false )
         albumArtist->setArtworkMrl( album->artworkMrl() );
 
+    // Until we have a better artwork extraction/assignation, simply do the same
+    // for artists
+    if ( artist != nullptr && artist->id() != UnknownArtistID &&
+         artist->id() != VariousArtistID &&
+         artist->artworkMrl().empty() == true &&
+         album != nullptr && album->artworkMrl().empty() == false )
+        artist->setArtworkMrl( album->artworkMrl() );
+
     if ( albumArtist != nullptr )
         albumArtist->addMedia( media );
     if ( artist != nullptr && ( albumArtist == nullptr || albumArtist->id() != artist->id() ) )
@@ -724,25 +732,47 @@ bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
         album->setAlbumArtist( albumArtist );
         // Always add the album artist as an artist
         album->addArtist( albumArtist );
+        // Always update the album artist number of tracks.
+        // The artist might be different, and will be handled a few lines below
+        albumArtist->updateNbTrack( 1 );
         if ( artist != nullptr )
+        {
+            // If the album artist is not the artist, we need to update the
+            // album artist track count as well.
+            if ( albumArtist->id() != artist->id() )
+                artist->updateNbTrack( 1 );
             album->addArtist( artist );
+        }
     }
     else
     {
+        // We have more than a single artist on this album, fallback to various artists
         if ( albumArtist->id() != currentAlbumArtist->id() )
         {
-            // We have more than a single artist on this album, fallback to various artists
             if ( m_variousArtists == nullptr )
                 m_variousArtists = Artist::fetch( m_ml, VariousArtistID );
-            album->setAlbumArtist( m_variousArtists );
-            // Add those two artists as "featuring".
+            // If we already switched to various artist, no need to do it again
+            if ( m_variousArtists->id() != currentAlbumArtist->id() )
+            {
+                // All tracks from this album must now also be reflected in various
+                // artist number of tracks
+                m_variousArtists->updateNbTrack( album->nbTracks() );
+                album->setAlbumArtist( m_variousArtists );
+            }
+            // However we always need to bump the various artist number of tracks
+            else
+            {
+                m_variousArtists->updateNbTrack( 1 );
+            }
+            // Add this artist as "featuring".
             album->addArtist( albumArtist );
         }
         if ( artist != nullptr && artist->id() != albumArtist->id() )
         {
-            if ( albumArtist->id() != artist->id() )
-               album->addArtist( artist );
+           album->addArtist( artist );
+           artist->updateNbTrack( 1 );
         }
+        albumArtist->updateNbTrack( 1 );
     }
 
     return true;

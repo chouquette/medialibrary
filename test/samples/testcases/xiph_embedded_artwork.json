@@ -17,9 +17,18 @@
                 "hasArtwork": true
             }]
         }],
-        "artists": [{
+        "artists": [
+        {
             "name": "Geza Anda",
-            "hasArtwork": true
-        }]
+            "hasArtwork": true,
+            "nbAlbums": 1,
+            "nbTracks": 1
+        },
+        {
+            "name": "Géza Anda, Piano - Camerata Academica des Mozarteums Salzburg, Orchestra",
+            "nbAlbums": 0,
+            "nbTracks": 1
+        }
+        ]
     }
 }
