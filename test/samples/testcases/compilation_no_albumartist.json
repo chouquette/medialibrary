@@ -27,10 +27,32 @@
                 "artist": "Artist 4"
             }]
         }],
-        "artists": [{
+        "artists": [
+        {
             "name": "",
             "id": 2,
-            "nbAlbums": 1
+            "nbAlbums": 1,
+            "nbTracks": 4
+        },
+        {
+            "name": "Artist 1",
+            "nbAlbums": 0,
+            "nbTracks": 1
+        },
+        {
+            "name": "Artist 2",
+            "nbAlbums": 0,
+            "nbTracks": 1
+        },
+        {
+            "name": "Artist 3",
+            "nbAlbums": 0,
+            "nbTracks": 1
+        },
+        {
+            "name": "Artist 4",
+            "nbAlbums": 0,
+            "nbTracks": 1
         }]
     }
 }

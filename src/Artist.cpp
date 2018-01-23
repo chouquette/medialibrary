@@ -93,9 +93,26 @@ std::vector<AlbumPtr> Artist::albums( SortingCriteria sort, bool desc ) const
 
 std::vector<MediaPtr> Artist::media( SortingCriteria sort, bool desc ) const
 {
-    std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med "
-            "INNER JOIN MediaArtistRelation mar ON mar.media_id = med.id_media "
-            "WHERE mar.artist_id = ? AND med.is_present != 0 ORDER BY ";
+    std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med ";
+
+
+    // Various artist is a special artist that doesn't have tracks per-se.
+    // Rather, it's a virtual artist for albums with many artist but no declared
+    // album artist. When listing its tracks, we need to list those by albums
+    // instead of listing all tracks by this artist, as there will be none.
+    if ( m_id != VariousArtistID )
+    {
+        req += "INNER JOIN MediaArtistRelation mar ON mar.media_id = med.id_media "
+                "WHERE mar.artist_id = ? ";
+    }
+    else
+    {
+        req += "INNER JOIN AlbumTrack atr ON atr.media_id = med.id_media "
+               "INNER JOIN Album alb ON alb.id_album = atr.album_id "
+               "WHERE alb.artist_id = ? ";
+    }
+
+    req += "AND med.is_present != 0 ORDER BY ";
     switch ( sort )
     {
     case SortingCriteria::Duration:
