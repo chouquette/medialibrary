@@ -41,6 +41,8 @@ public:
     virtual std::vector<MediaPtr> media( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
     virtual const std::string& artworkMrl() const = 0;
     virtual const std::string& musicBrainzId() const = 0;
+    virtual unsigned int nbAlbums() const = 0;
+    virtual unsigned int nbTracks() const = 0;
 };
 
 }

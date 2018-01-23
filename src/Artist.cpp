@@ -191,6 +191,11 @@ bool Artist::setMusicBrainzId( const std::string& mbId )
     return true;
 }
 
+unsigned int Artist::nbAlbums() const
+{
+    return m_nbAlbums;
+}
+
 unsigned int Artist::nbTracks() const
 {
     return m_nbTracks;
