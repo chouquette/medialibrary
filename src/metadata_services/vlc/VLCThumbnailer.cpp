@@ -237,7 +237,7 @@ parser::Task::Status VLCThumbnailer::startPlayback( parser::Task& task, VLC::Med
 
     // We are now in the case of a timeout: No failure, but no video track either.
     // The file might be an audio file we haven't detected yet:
-    if ( task.media->type() == Media::Type::Unknown )
+    else if ( task.media->type() == Media::Type::Unknown )
     {
         task.media->setType( Media::Type::Audio );
         task.media->save();
