@@ -138,7 +138,6 @@ void MediaLibrary::createAllTables()
     // we will trigger an update on folder, which will trigger
     // an update on files, and so on.
 
-    auto t = m_dbConnection->newTransaction();
     Device::createTable( m_dbConnection.get() );
     Folder::createTable( m_dbConnection.get() );
     Media::createTable( m_dbConnection.get() );
@@ -148,7 +147,6 @@ void MediaLibrary::createAllTables()
     Genre::createTable( m_dbConnection.get() );
     Album::createTable( m_dbConnection.get() );
     AlbumTrack::createTable( m_dbConnection.get() );
-    Album::createTriggers( m_dbConnection.get() );
     Show::createTable( m_dbConnection.get() );
     ShowEpisode::createTable( m_dbConnection.get() );
     Movie::createTable( m_dbConnection.get() );
@@ -156,13 +154,17 @@ void MediaLibrary::createAllTables()
     AudioTrack::createTable( m_dbConnection.get() );
     Artist::createTable( m_dbConnection.get() );
     Artist::createDefaultArtists( m_dbConnection.get() );
+    History::createTable( m_dbConnection.get() );
+    Settings::createTable( m_dbConnection.get() );
+}
+
+void MediaLibrary::createAllTriggers()
+{
+    Album::createTriggers( m_dbConnection.get() );
     Artist::createTriggers( m_dbConnection.get() );
     Media::createTriggers( m_dbConnection.get() );
     Genre::createTriggers( m_dbConnection.get() );
     Playlist::createTriggers( m_dbConnection.get() );
-    History::createTable( m_dbConnection.get() );
-    Settings::createTable( m_dbConnection.get() );
-    t->commit();
 }
 
 template <typename T>
@@ -274,7 +276,11 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     auto res = InitializeResult::Success;
     try
     {
+        auto t = m_dbConnection->newTransaction();
         createAllTables();
+        createAllTriggers();
+        t->commit();
+
         if ( m_settings.load() == false )
         {
             LOG_ERROR( "Failed to load settings" );
