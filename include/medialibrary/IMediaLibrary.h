@@ -68,6 +68,7 @@ enum class SortingCriteria
     FileSize,
     Artist,
     PlayCount,
+    Album,
 };
 
 enum class InitializeResult

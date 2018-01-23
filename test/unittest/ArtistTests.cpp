@@ -245,6 +245,41 @@ TEST_F( Artists, SortMedia )
     ASSERT_EQ( "song3.mp3", tracks[2]->title() );
 }
 
+TEST_F( Artists, SortMediaByAlbum )
+{
+    auto artist = ml->createArtist( "Russian Otters" );
+
+    std::shared_ptr<Album> albums[] = {
+        std::static_pointer_cast<Album>( ml->createAlbum( "album1" ) ),
+        std::static_pointer_cast<Album>( ml->createAlbum( "album2" ) ),
+    };
+    // Iterate by track first to interleave ids and ensure we're sorting correctly
+    for (auto iTrack = 1; iTrack <= 2; ++iTrack)
+    {
+        for ( auto iAlbum = 0; iAlbum < 2; ++iAlbum )
+        {
+            auto f = std::static_pointer_cast<Media>( ml->addMedia( "alb" +
+                            std::to_string( iAlbum ) + "_song" + std::to_string(iTrack) + ".mp3" ) );
+            artist->addMedia( *f );
+            albums[iAlbum]->addTrack( f, iTrack, 0, albums[iAlbum]->id(), nullptr );
+        }
+    }
+
+    auto tracks = artist->media( SortingCriteria::Album, false );
+    ASSERT_EQ( 4u, tracks.size() );
+    ASSERT_EQ( "alb0_song1.mp3", tracks[0]->title() );
+    ASSERT_EQ( "alb0_song2.mp3", tracks[1]->title() );
+    ASSERT_EQ( "alb1_song1.mp3", tracks[2]->title() );
+    ASSERT_EQ( "alb1_song2.mp3", tracks[3]->title() );
+
+    tracks = artist->media( SortingCriteria::Album, true );
+    ASSERT_EQ( 4u, tracks.size() );
+    ASSERT_EQ( "alb1_song2.mp3", tracks[0]->title() );
+    ASSERT_EQ( "alb1_song1.mp3", tracks[1]->title() );
+    ASSERT_EQ( "alb0_song2.mp3", tracks[2]->title() );
+    ASSERT_EQ( "alb0_song1.mp3", tracks[3]->title() );
+}
+
 TEST_F( Artists, SortAlbum )
 {
     auto artist = ml->createArtist( "Dream Seaotter" );
