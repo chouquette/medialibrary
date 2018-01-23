@@ -647,6 +647,8 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::find
 std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> album, parser::Task& task,
                                                          std::shared_ptr<Artist> artist, Genre* genre ) const
 {
+    assert( sqlite::Transaction::transactionInProgress() == true );
+
     auto title = task.vlcMedia.meta( libvlc_meta_Title );
     const auto trackNumber = toInt( task.vlcMedia, libvlc_meta_TrackNumber, "track number" );
     const auto discNumber = toInt( task.vlcMedia, libvlc_meta_DiscNumber, "disc number" );
