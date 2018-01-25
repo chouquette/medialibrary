@@ -58,6 +58,9 @@ public:
     std::shared_ptr<Media> addFile( std::shared_ptr<fs::IFile> file);
     // Used when we need an actual file instead of an external media
     std::shared_ptr<Media> addFile( const std::string& path );
+    std::shared_ptr<Media> addFile( std::shared_ptr<fs::IFile> fileFs,
+                                    std::shared_ptr<Folder> parentFolder,
+                                    std::shared_ptr<fs::IDirectory> parentFolderFs );
     virtual void addLocalFsFactory() override;
     std::shared_ptr<Device> device( const std::string& uuid );
     std::vector<const char*> getSupportedExtensions() const;

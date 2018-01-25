@@ -74,10 +74,6 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual std::vector<MediaPtr> audioFiles( SortingCriteria sort, bool desc) const override;
         virtual std::vector<MediaPtr> videoFiles( SortingCriteria sort, bool desc) const override;
 
-        std::shared_ptr<Media> addFile( std::shared_ptr<fs::IFile> fileFs,
-                                        std::shared_ptr<Folder> parentFolder,
-                                        std::shared_ptr<fs::IDirectory> parentFolderFs );
-
         virtual void addDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                                         std::shared_ptr<Folder> parentFolder,
                                         std::shared_ptr<fs::IDirectory> parentFolderFs,

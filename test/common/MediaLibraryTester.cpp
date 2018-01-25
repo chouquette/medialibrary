@@ -63,13 +63,38 @@ std::shared_ptr<Folder> MediaLibraryTester::folder( const std::string& mrl )
 
 std::shared_ptr<Media> MediaLibraryTester::addFile( const std::string& path )
 {
-    auto file = std::make_shared<mock::NoopFile>( path );
-    return MediaLibrary::addFile( file, dummyFolder, dummyDirectory );
+    return addFile( std::make_shared<mock::NoopFile>( path ),
+                    dummyFolder, dummyDirectory );
 }
 
 std::shared_ptr<Media> MediaLibraryTester::addFile( std::shared_ptr<fs::IFile> file )
 {
-    return MediaLibrary::addFile( std::move( file ), dummyFolder, dummyDirectory );
+    return addFile( std::move( file ), dummyFolder, dummyDirectory );
+}
+
+std::shared_ptr<Media> MediaLibraryTester::addFile( std::shared_ptr<fs::IFile> fileFs,
+                                              std::shared_ptr<Folder> parentFolder,
+                                              std::shared_ptr<fs::IDirectory> parentFolderFs )
+{
+    LOG_INFO( "Adding ", fileFs->mrl() );
+    auto mptr = Media::create( this, IMedia::Type::Unknown,
+                               utils::file::stripExtension( fileFs->name() ) );
+    if ( mptr == nullptr )
+    {
+        LOG_ERROR( "Failed to add media ", fileFs->mrl(), " to the media library" );
+        return nullptr;
+    }
+    // For now, assume all media are made of a single file
+    auto file = mptr->addFile( *fileFs, parentFolder->id(), parentFolderFs->device()->isRemovable(), File::Type::Main );
+    if ( file == nullptr )
+    {
+        LOG_ERROR( "Failed to add file ", fileFs->mrl(), " to media #", mptr->id() );
+        Media::destroy( this, mptr->id() );
+        return nullptr;
+    }
+    if ( m_parser != nullptr )
+        m_parser->parse( file, mptr, fileFs->mrl() );
+    return mptr;
 }
 
 void MediaLibraryTester::addLocalFsFactory()
@@ -160,5 +185,5 @@ void MediaLibraryTester::addDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,
                                 std::shared_ptr<fs::IDirectory> parentFolderFs,
                                 std::pair<std::shared_ptr<Playlist>, unsigned int>)
 {
-    MediaLibrary::addFile( fileFs, parentFolder, parentFolderFs );
+    addFile( fileFs, parentFolder, parentFolderFs );
 }

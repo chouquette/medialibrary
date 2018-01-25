@@ -418,31 +418,6 @@ bool MediaLibrary::isExtensionSupported( const char* ext )
         });
 }
 
-std::shared_ptr<Media> MediaLibrary::addFile( std::shared_ptr<fs::IFile> fileFs,
-                                              std::shared_ptr<Folder> parentFolder,
-                                              std::shared_ptr<fs::IDirectory> parentFolderFs )
-{
-    LOG_INFO( "Adding ", fileFs->mrl() );
-    auto mptr = Media::create( this, IMedia::Type::Unknown,
-                               utils::file::stripExtension( fileFs->name() ) );
-    if ( mptr == nullptr )
-    {
-        LOG_ERROR( "Failed to add media ", fileFs->mrl(), " to the media library" );
-        return nullptr;
-    }
-    // For now, assume all media are made of a single file
-    auto file = mptr->addFile( *fileFs, parentFolder->id(), parentFolderFs->device()->isRemovable(), File::Type::Main );
-    if ( file == nullptr )
-    {
-        LOG_ERROR( "Failed to add file ", fileFs->mrl(), " to media #", mptr->id() );
-        Media::destroy( this, mptr->id() );
-        return nullptr;
-    }
-    if ( m_parser != nullptr )
-        m_parser->parse( file, mptr, fileFs->mrl() );
-    return mptr;
-}
-
 void MediaLibrary::addDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                                       std::shared_ptr<Folder> parentFolder,
                                       std::shared_ptr<fs::IDirectory> parentFolderFs,
