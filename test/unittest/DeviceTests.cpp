@@ -62,7 +62,7 @@ protected:
 
     virtual void InstantiateMediaLibrary() override
     {
-        ml.reset( new MediaLibraryWithoutParser );
+        ml.reset( new MediaLibraryTester );
     }
 
     virtual void Reload()
