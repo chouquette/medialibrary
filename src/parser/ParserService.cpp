@@ -86,7 +86,7 @@ void ParserService::stop()
     }
 }
 
-void ParserService::parse( std::unique_ptr<parser::Task> t )
+void ParserService::parse( std::shared_ptr<parser::Task> t )
 {
     if ( m_threads.size() == 0 )
     {
@@ -152,7 +152,7 @@ void ParserService::mainloop()
 
     while ( m_stopParser == false )
     {
-        std::unique_ptr<parser::Task> task;
+        std::shared_ptr<parser::Task> task;
         {
             std::unique_lock<compat::Mutex> lock( m_lock );
             if ( m_tasks.empty() == true || m_paused == true )
@@ -191,8 +191,7 @@ void ParserService::mainloop()
                 status = parser::Task::Status::Fatal;
             else
             {
-                if ( task->file != nullptr )
-                    task->file->startParserStep(); // FIXME ?
+                task->startParserStep();
                 status = run( *task );
                 auto duration = std::chrono::steady_clock::now() - chrono;
                 LOG_INFO( "Done executing ", serviceName, " task on ", task->mrl, " in ",

@@ -29,6 +29,8 @@
 #include <string>
 #include <vlcpp/vlc.hpp>
 
+#include "database/DatabaseHelpers.h"
+
 namespace medialibrary
 {
 
@@ -45,8 +47,23 @@ class Playlist;
 
 namespace parser
 {
+class Task;
+}
 
-struct Task
+namespace policy
+{
+struct TaskTable
+{
+    static const std::string Name;
+    static const std::string PrimaryKeyColumn;
+    static int64_t parser::Task::*const PrimaryKey;
+};
+}
+
+namespace parser
+{
+
+struct Task : public DatabaseHelpers<Task, policy::TaskTable, cachepolicy::Uncached<Task>>
 {
     enum class Status
     {
@@ -77,17 +94,33 @@ struct Task
      * The Media is provided as a parameter to avoid this to implicitely query
      * the database for the media associated to the provided file
      */
-    Task( std::shared_ptr<File> file, std::shared_ptr<Media> media,
-          std::string mrl );
-    Task( std::shared_ptr<fs::IFile> fileFs,
+    Task( MediaLibraryPtr ml, sqlite::Row& row );
+    Task( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
           std::shared_ptr<Folder> parentFolder,
           std::shared_ptr<fs::IDirectory> parentFolderFs,
           std::shared_ptr<Playlist> parentPlaylist,
-          unsigned int parentPlaylistIndex,
-          std::string mrl );
+          unsigned int parentPlaylistIndex );
 
+    /*
+     * We need to decouple the current parser state and the saved one.
+     * For instance, metadata extraction won't save anything in DB, so while
+     * we might want to know that it's been processed and metadata have been
+     * extracted, in case we were to restart the parsing, we would need to
+     * extract the same information again
+     */
     void markStepCompleted( ParserStep stepCompleted );
     void markStepUncompleted( ParserStep stepUncompleted );
+    bool saveParserStep();
+    bool isCompleted() const;
+    bool isStepCompleted( ParserStep step ) const;
+    bool removeFromDB();
+    /**
+     * @brief startParserStep Do some internal book keeping to avoid restarting a step too many time
+     */
+    void startParserStep();
+
+    // Restore attached entities such as media/files
+    bool restoreLinkedEntities();
 
     std::shared_ptr<Media>          media;
     std::shared_ptr<File>           file;
@@ -99,7 +132,26 @@ struct Task
     std::string                     mrl;
     VLC::Media                      vlcMedia;
     unsigned int                    currentService;
-    ParserStep                      step;
+
+    static void createTable( sqlite::Connection* dbConnection );
+    static void resetRetryCount( MediaLibraryPtr ml );
+    static void resetParsing( MediaLibraryPtr ml );
+    static std::vector<std::shared_ptr<Task>> fetchUnparsed( MediaLibraryPtr ml );
+    static std::shared_ptr<Task> create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
+                                         std::shared_ptr<Folder> parentFolder,
+                                         std::shared_ptr<fs::IDirectory> parentFolderFs,
+                                         std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist );
+
+private:
+    MediaLibraryPtr m_ml;
+    int64_t     m_id;
+    ParserStep  m_step;
+    int         m_retryCount;
+    int64_t     m_fileId;
+    int64_t     m_parentFolderId;
+    int64_t     m_parentPlaylistId;
+
+    friend class policy::TaskTable;
 };
 
 }

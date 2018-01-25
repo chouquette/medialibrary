@@ -68,8 +68,7 @@ bool VLCThumbnailer::initialize()
 
 bool VLCThumbnailer::isCompleted( const parser::Task& task ) const
 {
-    return ( static_cast<uint8_t>( task.file->parserStep() ) &
-            static_cast<uint8_t>( parser::Task::ParserStep::Thumbnailer ) ) != 0;
+    return task.isStepCompleted( parser::Task::ParserStep::Thumbnailer );
 }
 
 parser::Task::Status VLCThumbnailer::run( parser::Task& task )
@@ -110,7 +109,7 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
         if ( media->type() == Media::Type::Audio )
         {
             task.markStepCompleted( parser::Task::ParserStep::Thumbnailer );
-            file->saveParserStep();
+            task.saveParserStep();
             LOG_INFO( file->mrl(), " type has changed to Audio. Skipping thumbnail generation" );
             return parser::Task::Status::Success;
         }
@@ -153,7 +152,7 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     m_notifier->notifyMediaModification( task.media );
 
     auto t = m_ml->getConn()->newTransaction();
-    if ( media->save() == false || file->saveParserStep() == false )
+    if ( media->save() == false || task.saveParserStep() == false )
         return parser::Task::Status::Fatal;
     t->commit();
     return parser::Task::Status::Success;

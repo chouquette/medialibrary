@@ -58,21 +58,7 @@ public:
     virtual unsigned int lastModificationDate() const override;
     virtual unsigned int size() const override;
     virtual bool isExternal() const override;
-    /*
-     * We need to decouple the current parser state and the saved one.
-     * For instance, metadata extraction won't save anything in DB, so while
-     * we might want to know that it's been processed and metadata have been
-     * extracted, in case we were to restart the parsing, we would need to
-     * extract the same information again
-     */
-    void markStepCompleted( parser::Task::ParserStep step );
-    void markStepUncompleted( parser::Task::ParserStep step );
-    bool saveParserStep();
-    parser::Task::ParserStep parserStep() const;
-    /**
-     * @brief startParserStep Do some internal book keeping to avoid restarting a step too many time
-     */
-    void startParserStep();
+
     std::shared_ptr<Media> media() const;
     bool destroy();
     int64_t folderId();
@@ -110,10 +96,6 @@ public:
      */
     static std::shared_ptr<File> fromExternalMrl( MediaLibraryPtr ml, const std::string& mrl );
 
-    static std::vector<std::shared_ptr<File>> fetchUnparsed( MediaLibraryPtr ml );
-    static void resetRetryCount( MediaLibraryPtr ml );
-    static void resetParsing( MediaLibraryPtr ml );
-
 private:
     MediaLibraryPtr m_ml;
 
@@ -126,7 +108,6 @@ private:
     Type m_type;
     std::time_t m_lastModificationDate;
     unsigned int m_size;
-    parser::Task::ParserStep m_parserSteps;
     int64_t m_folderId;
     bool m_isPresent;
     bool m_isRemovable;

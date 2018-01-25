@@ -156,6 +156,7 @@ void MediaLibrary::createAllTables()
     Artist::createDefaultArtists( m_dbConnection.get() );
     History::createTable( m_dbConnection.get() );
     Settings::createTable( m_dbConnection.get() );
+    parser::Task::createTable( m_dbConnection.get() );
 }
 
 void MediaLibrary::createAllTriggers()
@@ -423,9 +424,10 @@ void MediaLibrary::addDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                                       std::shared_ptr<fs::IDirectory> parentFolderFs,
                                       std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist )
 {
-    if ( m_parser != nullptr )
-        m_parser->parse( std::move( fileFs ), std::move( parentFolder ),
-                         std::move( parentFolderFs ), std::move( parentPlaylist ) );
+    auto task = parser::Task::create( this, std::move( fileFs ), std::move( parentFolder ),
+                                      std::move( parentFolderFs ), std::move( parentPlaylist ) );
+    if ( task != nullptr && m_parser != nullptr )
+        m_parser->parse( task );
 }
 
 bool MediaLibrary::deleteFolder( const Folder& folder )
@@ -907,7 +909,7 @@ bool MediaLibrary::forceParserRetry()
 {
     try
     {
-        File::resetRetryCount( this );
+        parser::Task::resetRetryCount( this );
         return true;
     }
     catch ( const sqlite::errors::Generic& ex )
@@ -1093,7 +1095,7 @@ void MediaLibrary::forceRescan()
         Show::deleteAll( this );
         VideoTrack::deleteAll( this );
         AudioTrack::deleteAll( this );
-        File::resetParsing( this );
+        parser::Task::deleteAll( this );
         clearCache();
         Artist::createDefaultArtists( getConn() );
         t->commit();

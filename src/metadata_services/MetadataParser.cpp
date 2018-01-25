@@ -91,7 +91,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
 
         assert( task.file != nullptr );
         task.markStepCompleted( parser::Task::ParserStep::Completed );
-        task.file->saveParserStep();
+        task.saveParserStep();
         return parser::Task::Status::Success;
     }
 
@@ -119,8 +119,6 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
                 return parser::Task::Status::Fatal;
             }
             t->commit();
-            // Synchronize file step tracker with task
-            task.markStepCompleted( task.step );
         }
         // Voluntarily trigger an exception for a valid, but less common case, to avoid database overhead
         catch ( sqlite::errors::ConstraintViolation& ex )
@@ -156,7 +154,8 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
 
     if ( alreadyInParser == true )
     {
-        task.step = parser::Task::ParserStep::Completed; // Let the worker drop this duplicate task
+        // Let the worker drop this duplicate task
+        task.markStepCompleted( parser::Task::ParserStep::Completed );
         return parser::Task::Status::Success;
     }
 
@@ -227,7 +226,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
     // we're analyzing an audio file
     if ( isAudio == true && utils::file::schemeIs( "attachment://", task.media->thumbnail() ) == false )
         task.markStepCompleted( parser::Task::ParserStep::Thumbnailer );
-    if ( task.file->saveParserStep() == false )
+    if ( task.saveParserStep() == false )
         return parser::Task::Status::Fatal;
     m_notifier->notifyMediaCreation( task.media );
     return parser::Task::Status::Success;
@@ -808,8 +807,7 @@ void MetadataParser::flush()
 bool MetadataParser::isCompleted( const parser::Task& task ) const
 {
     // We always need to run this task if the metadata extraction isn't completed
-    return ( static_cast<uint8_t>( task.step ) &
-            static_cast<uint8_t>( parser::Task::ParserStep::MetadataAnalysis ) ) != 0;
+    return task.isStepCompleted( parser::Task::ParserStep::MetadataAnalysis );
 }
 
 }

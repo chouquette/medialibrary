@@ -59,7 +59,7 @@ public:
     /// \brief stop Effectively wait the the underlying threads to join.
     ///
     void stop();
-    void parse( std::unique_ptr<parser::Task> t );
+    void parse( std::shared_ptr<parser::Task> t );
     void initialize( MediaLibrary* mediaLibrary, IParserCb* parserCb );
     bool isIdle() const;
     ///
@@ -96,7 +96,7 @@ private:
     std::atomic_bool m_idle;
     compat::ConditionVariable m_cond;
     compat::ConditionVariable m_idleCond;
-    std::queue<std::unique_ptr<parser::Task>> m_tasks;
+    std::queue<std::shared_ptr<parser::Task>> m_tasks;
     std::vector<compat::Thread> m_threads;
     compat::Mutex m_lock;
 };

@@ -57,30 +57,11 @@ void Parser::addService( ServicePtr service )
     m_services.push_back( std::move( service ) );
 }
 
-void Parser::parse( std::shared_ptr<File> file, std::shared_ptr<Media> media,
-                    const std::string& mrl )
+void Parser::parse( std::shared_ptr<parser::Task> task )
 {
     if ( m_services.empty() == true )
         return;
-    m_services[0]->parse( std::unique_ptr<parser::Task>( new parser::Task(
-                                                             std::move( file ),
-                                                             std::move( media ),
-                                                             mrl ) ) );
-    m_opToDo += m_services.size();
-    updateStats();
-}
-
-void Parser::parse( std::shared_ptr<fs::IFile> fileFs,
-                    std::shared_ptr<Folder> parentFolder,
-                    std::shared_ptr<fs::IDirectory> parentFolderFs,
-                    std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist )
-{
-    if ( m_services.empty() == true )
-        return;
-    std::string mrl = fileFs->mrl();
-    m_services[0]->parse( std::unique_ptr<parser::Task>( new parser::Task(
-            std::move( fileFs ), std::move( parentFolder ), std::move( parentFolderFs ),
-            std::move( parentPlaylist.first ), parentPlaylist.second, mrl ) ) );
+    m_services[0]->parse( std::move( task ) );
     m_opToDo += m_services.size();
     updateStats();
 }
@@ -125,11 +106,12 @@ void Parser::restore()
     if ( m_services.empty() == true )
         return;
 
-    auto files = File::fetchUnparsed( m_ml );
-    LOG_INFO( "Resuming parsing on ", files.size(), " mrl" );
-    for ( auto& f : files )
+    auto tasks = parser::Task::fetchUnparsed( m_ml );
+    LOG_INFO( "Resuming parsing on ", tasks.size(), " tasks" );
+    for ( auto& t : tasks )
     {
-        parse( f, f->media(), f->mrl() );
+        t->restoreLinkedEntities();
+        parse( t );
     }
 }
 
@@ -153,21 +135,23 @@ void Parser::updateStats()
     }
 }
 
-void Parser::done( std::unique_ptr<parser::Task> t, parser::Task::Status status )
+void Parser::done( std::shared_ptr<parser::Task> t, parser::Task::Status status )
 {
     ++m_opDone;
 
     auto serviceIdx = ++t->currentService;
 
     if ( status == parser::Task::Status::TemporaryUnavailable ||
-         status == parser::Task::Status::Fatal ||
-         ( t->file != nullptr && t->file->parserStep() == parser::Task::ParserStep::Completed ) )
+         status == parser::Task::Status::Fatal || t->isCompleted() )
     {
         if ( serviceIdx < m_services.size() )
         {
             // We won't process the next tasks, so we need to keep the number of "todo" operations coherent:
             m_opToDo -= m_services.size() - serviceIdx;
         }
+        // If the task is now completed, there is no need to store it in database anymore
+        if ( t->isCompleted() )
+            t->removeFromDB();
         updateStats();
         return;
     }
