@@ -156,10 +156,12 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         static const char* const supportedExtensions[];
         static const size_t NbSupportedExtensions;
 
-    private:
+    protected:
         virtual void startParser();
         virtual void startDiscoverer();
         virtual void startDeletionNotifier();
+
+    private:
         bool recreateDatabase( const std::string& dbPath );
         InitializeResult updateDatabaseModel( unsigned int previousVersion,
                                               const std::string& path );

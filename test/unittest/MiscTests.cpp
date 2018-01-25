@@ -55,7 +55,7 @@ public:
     virtual void SetUp() override
     {
         unlink("test.db");
-        ml.reset( new MediaLibraryWithoutBackground );
+        ml.reset( new MediaLibraryTester );
         cbMock.reset( new mock::NoopCallback );
     }
 

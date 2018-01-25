@@ -79,7 +79,7 @@ void Tests::SetUp()
 
 void Tests::InstantiateMediaLibrary()
 {
-    ml.reset( new MediaLibraryWithoutBackground );
+    ml.reset( new MediaLibraryTester );
 }
 
 ::testing::Environment* const env = ::testing::AddGlobalTestEnvironment(new TestEnv);

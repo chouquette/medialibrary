@@ -54,7 +54,7 @@ public:
 
     virtual void InstantiateMediaLibrary() override
     {
-        ml.reset( new MediaLibraryTester );
+        ml.reset( new MediaLibraryWithDiscoverer );
     }
 
     virtual void Reload()

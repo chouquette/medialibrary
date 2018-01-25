@@ -39,6 +39,8 @@ class MediaLibraryTester : public MediaLibrary
 public:
     MediaLibraryTester();
     virtual void startParser() override {}
+    virtual void startDiscoverer() override {}
+    virtual void startDeletionNotifier() override {}
     std::vector<MediaPtr> files();
     // Use the filename getter
     using MediaLibrary::media;
@@ -76,12 +78,20 @@ private:
     std::shared_ptr<Folder> dummyFolder;
 };
 
-class MediaLibraryWithoutBackground : public MediaLibraryTester
+class MediaLibraryWithDiscoverer : public MediaLibraryTester
 {
-    virtual void startDiscoverer() override {}
+    virtual void startDiscoverer() override
+    {
+        // Fall back to the default variant which actually starts the discoverer
+        MediaLibrary::startDiscoverer();
+    }
 };
 
 class MediaLibraryWithNotifier : public MediaLibraryTester
 {
-    virtual void startDiscoverer() override {}
+    virtual void startDeletionNotifier() override
+    {
+        // Fall back to the default variant which actually starts the notifier
+        MediaLibrary::startDeletionNotifier();
+    }
 };
