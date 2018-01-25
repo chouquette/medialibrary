@@ -92,8 +92,6 @@ std::shared_ptr<Media> MediaLibraryTester::addFile( std::shared_ptr<fs::IFile> f
         Media::destroy( this, mptr->id() );
         return nullptr;
     }
-    if ( m_parser != nullptr )
-        m_parser->parse( file, mptr, fileFs->mrl() );
     return mptr;
 }
 
