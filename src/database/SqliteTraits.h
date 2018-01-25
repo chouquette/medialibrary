@@ -32,8 +32,8 @@ namespace sqlite
 
 struct ForeignKey
 {
-    constexpr explicit ForeignKey(unsigned int v) : value(v) {}
-    unsigned int value;
+    constexpr explicit ForeignKey(int64_t v) : value(v) {}
+    int64_t value;
 };
 
 template <typename ToCheck, typename T>
