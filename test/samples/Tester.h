@@ -43,9 +43,9 @@ class MockCallback : public mock::NoopCallback
 {
 public:
     MockCallback();
-    bool waitForParsingComplete();
-
-private:
+    virtual bool waitForParsingComplete();
+    virtual bool waitForDiscoveryComplete() { return true; }
+protected:
     virtual void onDiscoveryCompleted( const std::string& ) override;
     virtual void onParsingStatsUpdated(uint32_t percent) override;
 
@@ -53,6 +53,19 @@ private:
     compat::Mutex m_parsingMutex;
     bool m_done;
     bool m_discoveryCompleted;
+};
+
+class MockResumeCallback : public MockCallback
+{
+public:
+    MockResumeCallback();
+    virtual bool waitForDiscoveryComplete() override;
+    virtual bool waitForParsingComplete() override;
+    virtual void onDiscoveryCompleted( const std::string& entryPoint ) override;
+
+private:
+    compat::ConditionVariable m_discoveryCompletedVar;
+    compat::Mutex m_discoveryMutex;
 };
 
 class Tests : public ::testing::TestWithParam<const char*>
@@ -63,6 +76,11 @@ protected:
 
     virtual void SetUp() override;
 
+    virtual void InitializeCallback();
+    virtual void InitializeMediaLibrary();
+
+    void runChecks( const rapidjson::Document& doc );
+
     void checkVideoTracks( const rapidjson::Value& expectedTracks, const std::vector<VideoTrackPtr>& tracks );
     void checkAudioTracks(const rapidjson::Value& expectedTracks, const std::vector<AudioTrackPtr>& tracks );
     void checkMedias( const rapidjson::Value& expectedMedias );
@@ -70,6 +88,21 @@ protected:
     void checkAlbums(const rapidjson::Value& expectedAlbums, std::vector<AlbumPtr> albums);
     void checkArtists( const rapidjson::Value& expectedArtists, std::vector<ArtistPtr> artists );
     void checkAlbumTracks(const IAlbum* album, const std::vector<MediaPtr>& tracks, const rapidjson::Value& expectedTracks , bool& found) const;
+};
+
+class ResumeTests : public Tests
+{
+public:
+    class MediaLibraryResumeTest : public MediaLibrary
+    {
+    public:
+        void forceParserStart();
+    protected:
+        virtual void startParser() override;
+    };
+
+    virtual void InitializeMediaLibrary() override;
+    virtual void InitializeCallback();
 };
 
 #endif // TESTER_H

@@ -90,42 +90,40 @@ TEST_P( Tests, Parse )
     }
     ASSERT_TRUE( m_cb->waitForParsingComplete() );
 
-    if ( doc.HasMember( "expected" ) == false )
-    {
-        // That's a lousy test case with no assumptions, but ok.
-        return;
-    }
-    const auto& expected = doc["expected"];
+    runChecks( doc );
+}
 
-    if ( expected.HasMember( "albums" ) == true )
+TEST_P( ResumeTests, Parse )
+{
+    auto testDir = ForcedTestDirectory.empty() == false ? ForcedTestDirectory : TestDirectory;
+    auto casePath = testDir + "testcases/" + GetParam() + ".json";
+    std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
+    ASSERT_NE( nullptr, f );
+    char buff[65536]; // That's how ugly I am!
+    auto ret = fread( buff, sizeof(buff[0]), sizeof(buff), f.get() );
+    ASSERT_NE( 0u, ret );
+    buff[ret] = 0;
+    rapidjson::Document doc;
+    doc.Parse( buff );
+
+    ASSERT_TRUE( doc.HasMember( "input" ) );
+    const auto& input = doc["input"];
+    for ( auto i = 0u; i < input.Size(); ++i )
     {
-        checkAlbums( expected["albums" ], m_ml->albums( SortingCriteria::Default, false ) );
+        // Quick and dirty check to ensure we're discovering something that exists
+        auto samplesDir = testDir + "samples/" + input[i].GetString();
+        struct stat s;
+        auto res = stat( samplesDir.c_str(), &s );
+        ASSERT_EQ( 0, res );
+
+        m_ml->discover( "file://" + samplesDir );
     }
-    if ( expected.HasMember( "media" ) == true )
-        checkMedias( expected["media"] );
-    if ( expected.HasMember( "nbVideos" ) == true )
-    {
-        const auto videos = m_ml->videoFiles( SortingCriteria::Default, false );
-        ASSERT_EQ( expected["nbVideos"].GetUint(), videos.size() );
-    }
-    if ( expected.HasMember( "nbAudios" ) == true )
-    {
-        const auto audios = m_ml->audioFiles( SortingCriteria::Default, false );
-        ASSERT_EQ( expected["nbAudios"].GetUint(), audios.size() );
-    }
-    if ( expected.HasMember( "nbPlaylists" ) == true )
-    {
-        const auto playlists = m_ml->playlists( SortingCriteria::Default, false );
-        ASSERT_EQ( expected["nbPlaylists"].GetUint(), playlists.size() );
-    }
-    if ( expected.HasMember( "playlists" ) == true )
-    {
-      checkPlaylists( expected["playlists"], m_ml->playlists( SortingCriteria::Default, false ) );
-    }
-    if ( expected.HasMember( "artists" ) )
-    {
-        checkArtists( expected["artists"], m_ml->artists( SortingCriteria::Default, false ) );
-    }
+    ASSERT_TRUE( m_cb->waitForDiscoveryComplete() );
+    auto testMl = static_cast<MediaLibraryResumeTest*>( m_ml.get() );
+    testMl->forceParserStart();
+    ASSERT_TRUE( m_cb->waitForParsingComplete() );
+
+    runChecks( doc );
 }
 
 int main(int ac, char** av)
@@ -151,6 +149,9 @@ int main(int ac, char** av)
 }
 
 INSTANTIATE_TEST_CASE_P(SamplesTests, Tests,
+                        ::testing::ValuesIn(testCases) );
+
+INSTANTIATE_TEST_CASE_P(SamplesTests, ResumeTests,
                         ::testing::ValuesIn(testCases) );
 
 ::testing::Environment* const env = ::testing::AddGlobalTestEnvironment(new TestEnv);

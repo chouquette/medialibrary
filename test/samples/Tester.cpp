@@ -25,6 +25,10 @@
 #endif
 
 #include "Tester.h"
+
+#include "parser/Parser.h"
+#include "metadata_services/vlc/VLCMetadataService.h"
+
 #include <algorithm>
 
 extern bool Verbose;
@@ -67,11 +71,50 @@ void MockCallback::onParsingStatsUpdated(uint32_t percent)
     }
 }
 
+MockResumeCallback::MockResumeCallback()
+{
+    m_discoveryMutex.lock();
+}
+
+void MockResumeCallback::onDiscoveryCompleted( const std::string& entryPoint )
+{
+    if ( entryPoint.empty() == true )
+        return;
+
+    std::lock_guard<compat::Mutex> lock( m_discoveryMutex );
+    m_discoveryCompleted = true;
+    m_discoveryCompletedVar.notify_all();
+}
+
+bool MockResumeCallback::waitForDiscoveryComplete()
+{
+    std::unique_lock<compat::Mutex> lock( m_discoveryMutex, std::adopt_lock );
+    m_discoveryCompleted = false;
+    // Wait for a while, generating snapshots can be heavy...
+    return m_discoveryCompletedVar.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
+        return m_discoveryCompleted;
+    });
+}
+
+bool MockResumeCallback::waitForParsingComplete()
+{
+    // Reimplement without checking for discovery complete. This class is meant to be used
+    // in 2 steps: waiting for discovery completed, then for parsing completed
+    assert( m_discoveryCompleted == true );
+    std::unique_lock<compat::Mutex> lock( m_parsingMutex, std::adopt_lock );
+    m_done = false;
+    // Wait for a while, generating snapshots can be heavy...
+    return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
+        return m_done;
+    });
+}
+
+
 void Tests::SetUp()
 {
     unlink("test.db");
-    m_cb.reset( new MockCallback );
-    m_ml.reset( new MediaLibrary );
+    InitializeCallback();
+    InitializeMediaLibrary();
     if ( ExtraVerbose == true )
         m_ml->setVerbosity( LogLevel::Debug );
     else if ( Verbose == true )
@@ -80,6 +123,56 @@ void Tests::SetUp()
     auto res = m_ml->initialize( "test.db", "/tmp", m_cb.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     ASSERT_TRUE( m_ml->start() );
+}
+
+void Tests::InitializeCallback()
+{
+    m_cb.reset( new MockCallback );
+}
+
+void Tests::InitializeMediaLibrary()
+{
+    m_ml.reset( new MediaLibrary );
+}
+
+void Tests::runChecks(const rapidjson::Document& doc)
+{
+    if ( doc.HasMember( "expected" ) == false )
+    {
+        // That's a lousy test case with no assumptions, but ok.
+        return;
+    }
+    const auto& expected = doc["expected"];
+
+    if ( expected.HasMember( "albums" ) == true )
+    {
+        checkAlbums( expected["albums" ], m_ml->albums( SortingCriteria::Default, false ) );
+    }
+    if ( expected.HasMember( "media" ) == true )
+        checkMedias( expected["media"] );
+    if ( expected.HasMember( "nbVideos" ) == true )
+    {
+        const auto videos = m_ml->videoFiles( SortingCriteria::Default, false );
+        ASSERT_EQ( expected["nbVideos"].GetUint(), videos.size() );
+    }
+    if ( expected.HasMember( "nbAudios" ) == true )
+    {
+        const auto audios = m_ml->audioFiles( SortingCriteria::Default, false );
+        ASSERT_EQ( expected["nbAudios"].GetUint(), audios.size() );
+    }
+    if ( expected.HasMember( "nbPlaylists" ) == true )
+    {
+        const auto playlists = m_ml->playlists( SortingCriteria::Default, false );
+        ASSERT_EQ( expected["nbPlaylists"].GetUint(), playlists.size() );
+    }
+    if ( expected.HasMember( "playlists" ) == true )
+    {
+      checkPlaylists( expected["playlists"], m_ml->playlists( SortingCriteria::Default, false ) );
+    }
+    if ( expected.HasMember( "artists" ) )
+    {
+        checkArtists( expected["artists"], m_ml->artists( SortingCriteria::Default, false ) );
+    }
 }
 
 void Tests::checkVideoTracks( const rapidjson::Value& expectedTracks, const std::vector<VideoTrackPtr>& tracks )
@@ -411,3 +504,23 @@ void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& 
     }
     found = true;
 }
+
+void ResumeTests::InitializeMediaLibrary()
+{
+    m_ml.reset( new MediaLibraryResumeTest );
+}
+
+void ResumeTests::InitializeCallback()
+{
+    m_cb.reset( new MockResumeCallback );
+}
+
+void ResumeTests::MediaLibraryResumeTest::forceParserStart()
+{
+    MediaLibrary::startParser();
+}
+
+void ResumeTests::MediaLibraryResumeTest::startParser()
+{
+}
+
