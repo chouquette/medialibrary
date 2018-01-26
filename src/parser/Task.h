@@ -63,8 +63,9 @@ struct TaskTable
 namespace parser
 {
 
-struct Task : public DatabaseHelpers<Task, policy::TaskTable, cachepolicy::Uncached<Task>>
+class Task : public DatabaseHelpers<Task, policy::TaskTable, cachepolicy::Uncached<Task>>
 {
+public:
     enum class Status
     {
         /// Default value.
