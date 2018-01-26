@@ -152,7 +152,7 @@ private:
     int64_t     m_parentFolderId;
     int64_t     m_parentPlaylistId;
 
-    friend class policy::TaskTable;
+    friend policy::TaskTable;
 };
 
 }
