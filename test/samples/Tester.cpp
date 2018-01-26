@@ -94,13 +94,21 @@ void Tests::checkVideoTracks( const rapidjson::Value& expectedTracks, const std:
         const auto& expectedTrack = expectedTracks[i];
         ASSERT_TRUE( expectedTrack.IsObject() );
         if ( expectedTrack.HasMember( "codec" ) )
+        {
             ASSERT_STRCASEEQ( expectedTrack["codec"].GetString(), track->codec().c_str() );
+        }
         if ( expectedTrack.HasMember( "width" ) )
+        {
             ASSERT_EQ( expectedTrack["width"].GetUint(), track->width() );
+        }
         if ( expectedTrack.HasMember( "height" ) )
+        {
             ASSERT_EQ( expectedTrack["height"].GetUint(), track->height() );
+        }
         if ( expectedTrack.HasMember( "fps" ) )
+        {
             ASSERT_EQ( expectedTrack["fps"].GetDouble(), track->fps() );
+        }
     }
 }
 
@@ -114,13 +122,21 @@ void Tests::checkAudioTracks(const rapidjson::Value& expectedTracks, const std::
         const auto& expectedTrack = expectedTracks[i];
         ASSERT_TRUE( expectedTrack.IsObject() );
         if ( expectedTrack.HasMember( "codec" ) )
+        {
             ASSERT_STRCASEEQ( expectedTrack["codec"].GetString(), track->codec().c_str() );
+        }
         if ( expectedTrack.HasMember( "sampleRate" ) )
+        {
             ASSERT_EQ( expectedTrack["sampleRate"].GetUint(), track->sampleRate() );
+        }
         if ( expectedTrack.HasMember( "nbChannels" ) )
+        {
             ASSERT_EQ( expectedTrack["nbChannels"].GetUint(), track->nbChannels() );
+        }
         if ( expectedTrack.HasMember( "bitrate" ) )
+        {
             ASSERT_EQ( expectedTrack["bitrate"].GetUint(), track->bitrate() );
+        }
     }
 }
 
@@ -145,15 +161,21 @@ void Tests::checkMedias(const rapidjson::Value& expectedMedias)
         {
             auto videoTracks = media->videoTracks();
             if ( expectedMedia.HasMember( "nbVideoTracks" ) )
+            {
                 ASSERT_EQ( expectedMedia[ "nbVideoTracks" ].GetUint(), videoTracks.size() );
+            }
             if ( expectedMedia.HasMember( "videoTracks" ) )
+            {
                 checkVideoTracks( expectedMedia["videoTracks"], videoTracks );
+            }
         }
         if ( expectedMedia.HasMember( "nbAudioTracks" ) || expectedMedia.HasMember( "audioTracks" ) )
         {
             auto audioTracks = media->audioTracks();
             if ( expectedMedia.HasMember( "nbAudioTracks" ) )
+            {
                 ASSERT_EQ( expectedMedia[ "nbAudioTracks" ].GetUint(), audioTracks.size() );
+            }
             if ( expectedMedia.HasMember( "audioTracks" ) )
                 checkAudioTracks( expectedMedia[ "audioTracks" ], audioTracks );
         }
