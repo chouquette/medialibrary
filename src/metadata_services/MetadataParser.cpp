@@ -118,6 +118,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
                 LOG_ERROR( "Failed to add file ", task.mrl, " to media #", task.media->id() );
                 return parser::Task::Status::Fatal;
             }
+            task.updateFileId();
             t->commit();
         }
         // Voluntarily trigger an exception for a valid, but less common case, to avoid database overhead

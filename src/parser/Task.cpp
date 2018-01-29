@@ -73,6 +73,7 @@ Task::Task( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
     , currentService( 0 )
     , m_ml( ml )
     , m_step( ParserStep::None )
+    , m_fileId( 0 )
 {
 }
 
@@ -112,6 +113,18 @@ void Task::startParserStep()
     static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET "
             "retry_count = retry_count + 1 WHERE id_task = ?";
     sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id );
+}
+
+bool Task::updateFileId()
+{
+    assert( m_fileId == 0 );
+    assert( file != nullptr && file->id() != 0 );
+    static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET "
+            "file_id = ? WHERE id_task = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, file->id(), m_id ) == false )
+        return false;
+    m_fileId = file->id();
+    return true;
 }
 
 bool Task::restoreLinkedEntities( )

@@ -119,6 +119,8 @@ public:
      */
     void startParserStep();
 
+    bool updateFileId();
+
     // Restore attached entities such as media/files
     bool restoreLinkedEntities();
 
