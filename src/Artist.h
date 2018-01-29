@@ -71,7 +71,8 @@ public:
     static bool createDefaultArtists( sqlite::Connection* dbConnection );
     static std::shared_ptr<Artist> create( MediaLibraryPtr ml, const std::string& name );
     static std::vector<ArtistPtr> search( MediaLibraryPtr ml, const std::string& name );
-    static std::vector<ArtistPtr> listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc );
+    static std::vector<ArtistPtr> listAll( MediaLibraryPtr ml, bool includeAll,
+                                           SortingCriteria sort, bool desc );
 
 private:
     MediaLibraryPtr m_ml;

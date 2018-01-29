@@ -368,11 +368,16 @@ std::vector<ArtistPtr> Artist::search( MediaLibraryPtr ml, const std::string& na
     return fetchAll<IArtist>( ml, req, name );
 }
 
-std::vector<ArtistPtr> Artist::listAll(MediaLibraryPtr ml, SortingCriteria sort, bool desc)
+std::vector<ArtistPtr> Artist::listAll( MediaLibraryPtr ml, bool includeAll,
+                                        SortingCriteria sort, bool desc)
 {
-    std::string req = "SELECT * FROM " + policy::ArtistTable::Name +
-            " WHERE ( nb_albums > 0 OR nb_tracks > 0 )"
-            " AND is_present != 0 ORDER BY ";
+    std::string req = "SELECT * FROM " + policy::ArtistTable::Name + " WHERE ";
+    if ( includeAll == true )
+        req += "( nb_albums > 0 OR nb_tracks > 0 )";
+    else
+        req += "nb_albums > 0";
+
+    req += " AND is_present != 0 ORDER BY ";
     switch ( sort )
     {
     default:

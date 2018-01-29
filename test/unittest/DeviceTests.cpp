@@ -258,7 +258,7 @@ TEST_F( DeviceFs, RemoveAlbum )
 
     auto albums = ml->albums( SortingCriteria::Default, false );
     ASSERT_EQ( 3u, albums.size() );
-    auto artists = ml->artists( SortingCriteria::Default, false );
+    auto artists = ml->artists( true, SortingCriteria::Default, false );
     ASSERT_EQ( 2u, artists.size() );
 
     auto device = fsMock->removeDevice( RemovableDeviceUuid );
@@ -267,7 +267,7 @@ TEST_F( DeviceFs, RemoveAlbum )
 
     albums = ml->albums( SortingCriteria::Default, false );
     ASSERT_EQ( 1u, albums.size() );
-    artists = ml->artists( SortingCriteria::Default, false );
+    artists = ml->artists( true, SortingCriteria::Default, false );
     ASSERT_EQ( 1u, artists.size() );
 
     // Now check that everything appears again when we plug the device back in
@@ -278,7 +278,7 @@ TEST_F( DeviceFs, RemoveAlbum )
 
     albums = ml->albums( SortingCriteria::Default, false );
     ASSERT_EQ( 3u, albums.size() );
-    artists = ml->artists( SortingCriteria::Default, false );
+    artists = ml->artists( true, SortingCriteria::Default, false );
     ASSERT_EQ( 2u, artists.size() );
 }
 
@@ -302,7 +302,7 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
 
     auto albums = ml->albums( SortingCriteria::Default, false );
     ASSERT_EQ( 1u, albums.size() );
-    auto artists = ml->artists( SortingCriteria::Default, false );
+    auto artists = ml->artists( true, SortingCriteria::Default, false );
     ASSERT_EQ( 1u, artists.size() );
     auto artist = artists[0];
     ASSERT_EQ( 2u, artist->media( SortingCriteria::Default, false ).size() );
@@ -312,7 +312,7 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
 
     albums = ml->albums( SortingCriteria::Default, false );
     ASSERT_EQ( 1u, albums.size() );
-    artists = ml->artists( SortingCriteria::Default, false );
+    artists = ml->artists( true, SortingCriteria::Default, false );
     ASSERT_EQ( 1u, artists.size() );
     ASSERT_EQ( 1u, albums[0]->tracks( SortingCriteria::Default, false ).size() );
     ASSERT_EQ( 1u, artists[0]->media( SortingCriteria::Default, false ).size() );

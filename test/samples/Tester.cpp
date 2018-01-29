@@ -171,7 +171,7 @@ void Tests::runChecks(const rapidjson::Document& doc)
     }
     if ( expected.HasMember( "artists" ) )
     {
-        checkArtists( expected["artists"], m_ml->artists( SortingCriteria::Default, false ) );
+        checkArtists( expected["artists"], m_ml->artists( true, SortingCriteria::Default, false ) );
     }
 }
 

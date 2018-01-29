@@ -100,7 +100,9 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual ArtistPtr artist( int64_t id ) const override;
         ArtistPtr artist( const std::string& name );
         std::shared_ptr<Artist> createArtist( const std::string& name );
-        virtual std::vector<ArtistPtr> artists( SortingCriteria sort, bool desc ) const override;
+        virtual std::vector<ArtistPtr> artists( bool includeAll,
+                                                SortingCriteria sort,
+                                                bool desc ) const override;
 
         virtual PlaylistPtr createPlaylist( const std::string& name ) override;
         virtual std::vector<PlaylistPtr> playlists( SortingCriteria sort, bool desc ) override;

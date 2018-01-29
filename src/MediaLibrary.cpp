@@ -542,9 +542,11 @@ std::shared_ptr<Artist> MediaLibrary::createArtist( const std::string& name )
     }
 }
 
-std::vector<ArtistPtr> MediaLibrary::artists( SortingCriteria sort, bool desc ) const
+std::vector<ArtistPtr> MediaLibrary::artists( bool includeAll,
+                                              SortingCriteria sort,
+                                              bool desc ) const
 {
-    return Artist::listAll( this, sort, desc );
+    return Artist::listAll( this, includeAll, sort, desc );
 }
 
 PlaylistPtr MediaLibrary::createPlaylist( const std::string& name )

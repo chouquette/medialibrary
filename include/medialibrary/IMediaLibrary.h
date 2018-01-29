@@ -253,10 +253,15 @@ class IMediaLibrary
          * @brief artists List all artists that have at least an album.
          * Artists that only appear on albums as guests won't be listed from here, but will be
          * returned when querying an album for all its appearing artists
+         * @param includeAll If true, all artists including those without album
+         *                   will be returned. If false, only artists which have
+         *                   an album will be returned.
          * @param sort A sorting criteria. So far, this is ignored, and artists are sorted by lexial order
          * @param desc If true, the provided sorting criteria will be reversed.
          */
-        virtual std::vector<ArtistPtr> artists( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
+        virtual std::vector<ArtistPtr> artists( bool includeAll,
+                                SortingCriteria sort = SortingCriteria::Default,
+                                bool desc = false ) const = 0;
         /**
          * @brief genres Return the list of music genres
          * @param sort A sorting criteria. So far, this is ignored, and artists are sorted by lexial order
