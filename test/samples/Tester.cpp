@@ -86,6 +86,13 @@ void MockResumeCallback::onDiscoveryCompleted( const std::string& entryPoint )
     m_discoveryCompletedVar.notify_all();
 }
 
+void MockResumeCallback::reinit()
+{
+    m_parsingMutex.lock();
+    m_discoveryCompleted = true;
+    m_done = false;
+}
+
 bool MockResumeCallback::waitForDiscoveryComplete()
 {
     std::unique_lock<compat::Mutex> lock( m_discoveryMutex, std::adopt_lock );

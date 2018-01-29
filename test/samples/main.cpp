@@ -126,6 +126,43 @@ TEST_P( ResumeTests, Parse )
     runChecks( doc );
 }
 
+TEST_P( ResumeTests, Rescan )
+{
+    auto testDir = ForcedTestDirectory.empty() == false ? ForcedTestDirectory : TestDirectory;
+    auto casePath = testDir + "testcases/" + GetParam() + ".json";
+    std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
+    ASSERT_NE( nullptr, f );
+    char buff[65536]; // That's how ugly I am!
+    auto ret = fread( buff, sizeof(buff[0]), sizeof(buff), f.get() );
+    ASSERT_NE( 0u, ret );
+    buff[ret] = 0;
+    rapidjson::Document doc;
+    doc.Parse( buff );
+
+    ASSERT_TRUE( doc.HasMember( "input" ) );
+    const auto& input = doc["input"];
+    for ( auto i = 0u; i < input.Size(); ++i )
+    {
+        // Quick and dirty check to ensure we're discovering something that exists
+        auto samplesDir = testDir + "samples/" + input[i].GetString();
+        struct stat s;
+        auto res = stat( samplesDir.c_str(), &s );
+        ASSERT_EQ( 0, res );
+
+        m_ml->discover( "file://" + samplesDir );
+    }
+    ASSERT_TRUE( m_cb->waitForDiscoveryComplete() );
+    auto testMl = static_cast<MediaLibraryResumeTest*>( m_ml.get() );
+    testMl->forceParserStart();
+    ASSERT_TRUE( m_cb->waitForParsingComplete() );
+
+    m_cb->reinit();
+    m_ml->forceRescan();
+    ASSERT_TRUE( m_cb->waitForParsingComplete() );
+
+    runChecks( doc );
+}
+
 int main(int ac, char** av)
 {
     ::testing::InitGoogleTest(&ac, av);

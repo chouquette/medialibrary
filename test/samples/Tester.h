@@ -45,6 +45,7 @@ public:
     MockCallback();
     virtual bool waitForParsingComplete();
     virtual bool waitForDiscoveryComplete() { return true; }
+    virtual void reinit() {}
 protected:
     virtual void onDiscoveryCompleted( const std::string& ) override;
     virtual void onParsingStatsUpdated(uint32_t percent) override;
@@ -62,6 +63,7 @@ public:
     virtual bool waitForDiscoveryComplete() override;
     virtual bool waitForParsingComplete() override;
     virtual void onDiscoveryCompleted( const std::string& entryPoint ) override;
+    virtual void reinit() override;
 
 private:
     compat::ConditionVariable m_discoveryCompletedVar;
