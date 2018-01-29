@@ -69,6 +69,12 @@ public:
     ///
     virtual void flush();
 
+    ///
+    /// \brief restart Prepare the parser services for a restart.
+    /// This assumes a flush was triggered before
+    ///
+    virtual void restart();
+
 protected:
     uint8_t nbNativeThreads() const;
     /// Can be overriden to run service dependent initializations

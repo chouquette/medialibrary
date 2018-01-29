@@ -796,11 +796,15 @@ uint8_t MetadataParser::nbThreads() const
 void MetadataParser::flush()
 {
     ParserService::flush();
-    // Reset locally cached entities
-    initialize();
     m_variousArtists = nullptr;
     m_previousAlbum = nullptr;
     m_previousFolderId = 0;
+}
+
+void MetadataParser::restart()
+{
+    // Reset locally cached entities
+    initialize();
 }
 
 bool MetadataParser::isCompleted( const parser::Task& task ) const

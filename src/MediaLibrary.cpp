@@ -1105,6 +1105,7 @@ void MediaLibrary::forceRescan()
     }
     if ( m_parser != nullptr )
     {
+        m_parser->restart();
         m_parser->restore();
         m_parser->resume();
     }

@@ -101,6 +101,12 @@ void Parser::flush()
         s->flush();
 }
 
+void Parser::restart()
+{
+    for ( auto& s : m_services )
+        s->restart();
+}
+
 void Parser::restore()
 {
     if ( m_services.empty() == true )

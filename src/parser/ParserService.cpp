@@ -128,6 +128,10 @@ void ParserService::flush()
         m_tasks.pop();
 }
 
+void ParserService::restart()
+{
+}
+
 uint8_t ParserService::nbNativeThreads() const
 {
     auto nbProcs = static_cast<uint8_t>( compat::Thread::hardware_concurrency() );

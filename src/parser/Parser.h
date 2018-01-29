@@ -56,6 +56,12 @@ public:
     void resume();
     void stop();
     void flush();
+    ///
+    /// \brief restart Will instruct the parser services to prepare for restarting
+    ///                after a flush operation. This is different from resume
+    ///                as it can imply initialization side effects
+    ///
+    void restart();
     // Queues all unparsed files for parsing.
     void restore();
 
