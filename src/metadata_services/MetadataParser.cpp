@@ -488,7 +488,7 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
         {
             // We assume that an album without album artist is a positive match.
             // At the end of the day, without proper tags, there's only so much we can do.
-            if ( candidateAlbumArtist != nullptr && candidateAlbumArtist->id() != albumArtist->id() )
+            if ( candidateAlbumArtist->id() != albumArtist->id() )
             {
                 it = albums.erase( it );
                 continue;
@@ -535,10 +535,8 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
         // Not taking the artist in consideration would cause compilation to
         // create multiple albums, especially when track are only partially
         // tagged with a year.
-        if ( ( albumArtist != nullptr && candidateAlbumArtist != nullptr &&
-             albumArtist->id() == candidateAlbumArtist->id() ) ||
-             ( trackArtist != nullptr && candidateAlbumArtist != nullptr &&
-               trackArtist->id() == candidateAlbumArtist->id() ) )
+        if ( ( albumArtist != nullptr && albumArtist->id() == candidateAlbumArtist->id() ) ||
+             ( trackArtist != nullptr && trackArtist->id() == candidateAlbumArtist->id() ) )
         {
             auto candidateDate = task.vlcMedia.meta( libvlc_meta_Date );
             if ( candidateDate.empty() == false )
