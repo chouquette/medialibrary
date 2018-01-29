@@ -424,10 +424,21 @@ void MediaLibrary::addDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                                       std::shared_ptr<fs::IDirectory> parentFolderFs,
                                       std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist )
 {
-    auto task = parser::Task::create( this, std::move( fileFs ), std::move( parentFolder ),
-                                      std::move( parentFolderFs ), std::move( parentPlaylist ) );
-    if ( task != nullptr && m_parser != nullptr )
-        m_parser->parse( task );
+    try
+    {
+        // Don't move the file as we might need it for error handling
+        auto task = parser::Task::create( this, fileFs, std::move( parentFolder ),
+                                          std::move( parentFolderFs ), std::move( parentPlaylist ) );
+        if ( task != nullptr && m_parser != nullptr )
+            m_parser->parse( task );
+    }
+    catch(sqlite::errors::ConstraintViolation& ex)
+    {
+        // Most likely the file is already scheduled and we restarted the
+        // discovery after a crash.
+        LOG_WARN( "Failed to insert ", fileFs->mrl(), ": ", ex.what(), ". "
+                  "Assuming the file is already scheduled for discovery" );
+    }
 }
 
 bool MediaLibrary::deleteFolder( const Folder& folder )

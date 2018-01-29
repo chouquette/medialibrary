@@ -168,6 +168,7 @@ void Task::createTable( sqlite::Connection* dbConnection )
         "parent_folder_id UNSIGNED INTEGER,"
         "parent_playlist_id INTEGER,"
         "parent_playlist_index UNSIGNED INTEGER,"
+        "UNIQUE(mrl, parent_playlist_id) ON CONFLICT FAIL,"
         "FOREIGN KEY (parent_folder_id) REFERENCES " + policy::FolderTable::Name
         + "(id_folder) ON DELETE CASCADE,"
         "FOREIGN KEY (file_id) REFERENCES " + policy::FileTable::Name
