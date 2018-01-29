@@ -107,11 +107,6 @@ bool Task::isStepCompleted( Task::ParserStep step ) const
     return ( static_cast<uint8_t>( m_step ) & static_cast<uint8_t>( step ) ) != 0;
 }
 
-bool Task::removeFromDB()
-{
-    return destroy( m_ml, m_id );
-}
-
 void Task::startParserStep()
 {
     static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET "

@@ -114,7 +114,6 @@ public:
     bool saveParserStep();
     bool isCompleted() const;
     bool isStepCompleted( ParserStep step ) const;
-    bool removeFromDB();
     /**
      * @brief startParserStep Do some internal book keeping to avoid restarting a step too many time
      */

@@ -149,9 +149,6 @@ void Parser::done( std::shared_ptr<parser::Task> t, parser::Task::Status status 
             // We won't process the next tasks, so we need to keep the number of "todo" operations coherent:
             m_opToDo -= m_services.size() - serviceIdx;
         }
-        // If the task is now completed, there is no need to store it in database anymore
-        if ( t->isCompleted() )
-            t->removeFromDB();
         updateStats();
         return;
     }
