@@ -1083,7 +1083,7 @@ void MediaLibrary::forceRescan()
     if ( m_parser != nullptr )
     {
         m_parser->pause();
-        // Flush current tasks
+        m_parser->flush();
     }
     {
         auto t = getConn()->newTransaction();
