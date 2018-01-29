@@ -261,7 +261,7 @@ TEST_F( Artists, SortMediaByAlbum )
             auto f = std::static_pointer_cast<Media>( ml->addMedia( "alb" +
                             std::to_string( iAlbum ) + "_song" + std::to_string(iTrack) + ".mp3" ) );
             artist->addMedia( *f );
-            albums[iAlbum]->addTrack( f, iTrack, 0, albums[iAlbum]->id(), nullptr );
+            albums[iAlbum]->addTrack( f, iTrack, 0, artist->id(), nullptr );
         }
     }
 
