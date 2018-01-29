@@ -72,6 +72,13 @@ public:
     static std::vector<PlaylistPtr> search( MediaLibraryPtr ml, const std::string& name );
     static std::vector<PlaylistPtr> listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc );
 
+    /**
+     * @brief deleteAllExternal Delete all external playlists, ie. all playlist
+     *                          that were parsed from playlist files.
+     * Playlist manually added by the user are untouched
+     */
+    static void deleteAllExternal( MediaLibraryPtr ml );
+
 private:
     MediaLibraryPtr m_ml;
 

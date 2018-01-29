@@ -284,4 +284,11 @@ std::vector<PlaylistPtr> Playlist::listAll( MediaLibraryPtr ml, SortingCriteria 
     return fetchAll<IPlaylist>( ml, req );
 }
 
+void Playlist::deleteAllExternal(MediaLibraryPtr ml)
+{
+    const std::string req = "DELETE FROM " + policy::PlaylistTable::Name +
+            " WHERE file_id IS NOT NULL";
+    sqlite::Tools::executeDelete( ml->getConn(), req );
+}
+
 }

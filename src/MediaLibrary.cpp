@@ -1097,6 +1097,7 @@ void MediaLibrary::forceRescan()
         Show::deleteAll( this );
         VideoTrack::deleteAll( this );
         AudioTrack::deleteAll( this );
+        Playlist::deleteAllExternal( this );
         parser::Task::resetParsing( this );
         clearCache();
         Artist::createDefaultArtists( getConn() );
