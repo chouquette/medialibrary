@@ -127,9 +127,9 @@ std::vector<MediaPtr> Artist::media( SortingCriteria sort, bool desc ) const
         break;
     case SortingCriteria::Album:
         if ( desc == true )
-            req += "atr.album_id DESC, atr.track_number";
+            req += "atr.album_id DESC, atr.disc_number DESC, atr.track_number";
         else
-            req += "atr.album_id, atr.track_number";
+            req += "atr.album_id, atr.disc_number, atr.track_number";
         break;
     default:
         req += "med.title";

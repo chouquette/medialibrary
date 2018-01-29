@@ -420,3 +420,48 @@ TEST_F( Artists, UpdateNbTracks )
     artist = std::static_pointer_cast<Artist>( ml->artist( artist->id() ) );
     ASSERT_EQ( 0u, artist->nbTracks() );
 }
+
+TEST_F( Artists, SortTracksMultiDisc )
+{
+    MediaPtr media[6];
+    auto album = ml->createAlbum( "album" );
+    auto artist = ml->createArtist( "artist" );
+    for ( auto i = 0; i < 3; ++i )
+    {
+        auto j = i * 2;
+        auto media1 = ml->addFile( "track_" + std::to_string( j ) + ".mp3" );
+        auto media2 = ml->addFile( "track_" + std::to_string( j + 1 ) + ".mp3" );
+        album->addTrack( media1, i, 1, artist->id(), nullptr );
+        album->addTrack( media2, i, 2, artist->id(), nullptr );
+        artist->addMedia( *media1 );
+        artist->addMedia( *media2 );
+        media[j] = media1;
+        media[j + 1] = media2;
+    }
+    /*
+     * media is now:
+     * [ Disc 1 - Track 1 ]
+     * [ Disc 2 - Track 1 ]
+     * [ Disc 1 - Track 2 ]
+     * [ Disc 2 - Track 2 ]
+     * [ Disc 1 - Track 3 ]
+     * [ Disc 2 - Track 3 ]
+     */
+    auto tracks = artist->media( SortingCriteria::Album, false );
+    ASSERT_EQ( 6u, tracks.size() );
+    ASSERT_EQ( media[0]->id(), tracks[0]->id() );
+    ASSERT_EQ( media[2]->id(), tracks[1]->id() );
+    ASSERT_EQ( media[4]->id(), tracks[2]->id() );
+    ASSERT_EQ( media[1]->id(), tracks[3]->id() );
+    ASSERT_EQ( media[3]->id(), tracks[4]->id() );
+    ASSERT_EQ( media[5]->id(), tracks[5]->id() );
+
+    tracks = artist->media( SortingCriteria::Album, true );
+    ASSERT_EQ( media[5]->id(), tracks[0]->id() );
+    ASSERT_EQ( media[3]->id(), tracks[1]->id() );
+    ASSERT_EQ( media[1]->id(), tracks[2]->id() );
+    ASSERT_EQ( media[4]->id(), tracks[3]->id() );
+    ASSERT_EQ( media[2]->id(), tracks[4]->id() );
+    ASSERT_EQ( media[0]->id(), tracks[5]->id() );
+}
+
