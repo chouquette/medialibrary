@@ -454,7 +454,11 @@ std::vector<AlbumPtr> Album::search( MediaLibraryPtr ml, const std::string& patt
 std::vector<AlbumPtr> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, SortingCriteria sort, bool desc )
 {
     std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " alb "
-                    "WHERE artist_id = ? AND is_present != 0 ORDER BY ";
+                    "INNER JOIN " + policy::AlbumTrackTable::Name + " att "
+                        "ON att.album_id = alb.id_album "
+                    "WHERE (att.artist_id = ? OR alb.artist_id = ?) "
+                        "AND att.is_present != 0 "
+                    "GROUP BY att.album_id ORDER BY ";
     switch ( sort )
     {
     case SortingCriteria::Alpha:
@@ -473,7 +477,7 @@ std::vector<AlbumPtr> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, S
         break;
     }
 
-    return fetchAll<IAlbum>( ml, req, artistId );
+    return fetchAll<IAlbum>( ml, req, artistId, artistId );
 }
 
 std::vector<AlbumPtr> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId, SortingCriteria sort, bool desc)

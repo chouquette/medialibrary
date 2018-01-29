@@ -410,16 +410,15 @@ void Tests::checkArtists(const rapidjson::Value& expectedArtists, std::vector<Ar
                 if ( expectedArtist["id"].GetUint() != artist->id() )
                     return false;
             }
-            if ( expectedArtist.HasMember( "nbAlbums" ) || expectedArtist.HasMember( "albums" ) )
+            if ( expectedArtist.HasMember( "nbAlbums" ) )
+            {
+                if ( artist->nbAlbums() != expectedArtist["nbAlbums"].GetUint() )
+                    return false;
+            }
+            if ( expectedArtist.HasMember( "albums" ) )
             {
                 auto albums = artist->albums( SortingCriteria::Default, false );
-                if ( expectedArtist.HasMember( "nbAlbums" ) )
-                {
-                    if ( albums.size() != expectedArtist["nbAlbums"].GetUint() )
-                        return false;
-                    if ( expectedArtist.HasMember( "albums" ) )
-                        checkAlbums( expectedArtist["albums"], albums );
-                }
+                checkAlbums( expectedArtist["albums"], albums );
             }
             if ( expectedArtist.HasMember( "nbTracks" ) )
             {

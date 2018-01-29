@@ -37,10 +37,21 @@ public:
     virtual int64_t id() const = 0;
     virtual const std::string& name() const = 0;
     virtual const std::string& shortBio() const = 0;
+    /**
+     * @brief albums List the albums this artist appears on.
+     *
+     * This will return all albums by this artist, and all album the artist
+     * appeared on, even if they are not the main artist (or AlbumArtist)
+     */
     virtual std::vector<AlbumPtr> albums( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
     virtual std::vector<MediaPtr> media( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
     virtual const std::string& artworkMrl() const = 0;
     virtual const std::string& musicBrainzId() const = 0;
+    /**
+     * @brief nbAlbums
+     * @return The number of albums *by* this artist. This doesn't include the
+     *         albums an artist appears on.
+     */
     virtual unsigned int nbAlbums() const = 0;
     virtual unsigned int nbTracks() const = 0;
 };

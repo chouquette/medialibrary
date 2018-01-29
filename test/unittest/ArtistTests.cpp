@@ -92,7 +92,39 @@ TEST_F( Artists, ArtworkMrl )
     ASSERT_EQ( a2->artworkMrl(), artwork );
 }
 
+// Test the number of albums based on the artist tracks
 TEST_F( Artists, Albums )
+{
+    auto artist = ml->createArtist( "Cannibal Otters" );
+    auto album1 = ml->createAlbum( "album1" );
+    auto album2 = ml->createAlbum( "album2" );
+
+    ASSERT_NE( artist, nullptr );
+    ASSERT_NE( album1, nullptr );
+    ASSERT_NE( album2, nullptr );
+
+    auto media1 = ml->addFile( "track1.mp3" );
+    ASSERT_NE( nullptr, media1 );
+    album1->addTrack( media1, 1, 0, artist->id(), nullptr );
+    auto media2 = ml->addFile( "track2.mp3" );
+    ASSERT_NE( nullptr, media2 );
+    album2->addTrack( media2, 1, 0, artist->id(), nullptr );
+
+    album1->setAlbumArtist( artist );
+    album2->setAlbumArtist( artist );
+
+    auto albums = artist->albums( SortingCriteria::Default, false );
+    ASSERT_EQ( albums.size(), 2u );
+
+    Reload();
+
+    auto artist2 = ml->artist( "Cannibal Otters" );
+    auto albums2 = artist2->albums( SortingCriteria::Default, false );
+    ASSERT_EQ( albums2.size(), 2u );
+}
+
+// Test the nb_album DB field (ie. we don't need to create tracks for this test)
+TEST_F( Artists, NbAlbums )
 {
     auto artist = ml->createArtist( "Cannibal Otters" );
     auto album1 = ml->createAlbum( "album1" );
@@ -105,14 +137,14 @@ TEST_F( Artists, Albums )
     album1->setAlbumArtist( artist );
     album2->setAlbumArtist( artist );
 
-    auto albums = artist->albums( SortingCriteria::Default, false );
-    ASSERT_EQ( albums.size(), 2u );
+    auto nbAlbums = artist->nbAlbums();
+    ASSERT_EQ( nbAlbums, 2u );
 
     Reload();
 
     auto artist2 = ml->artist( "Cannibal Otters" );
-    auto albums2 = artist2->albums( SortingCriteria::Default, false );
-    ASSERT_EQ( albums.size(), 2u );
+    nbAlbums = artist2->nbAlbums();
+    ASSERT_EQ( nbAlbums, 2u );
 }
 
 TEST_F( Artists, AllSongs )
@@ -284,10 +316,16 @@ TEST_F( Artists, SortAlbum )
 {
     auto artist = ml->createArtist( "Dream Seaotter" );
     auto album1 = ml->createAlbum( "album1" );
+    auto media1 = ml->addFile( "track1.mp3" );
+    album1->addTrack( media1, 1, 0, artist->id(), nullptr );
     album1->setReleaseYear( 2000, false );
     auto album2 = ml->createAlbum( "album2" );
+    auto media2 = ml->addFile( "track2.mp3" );
+    album2->addTrack( media2, 1, 0, artist->id(), nullptr );
     album2->setReleaseYear( 1000, false );
     auto album3 = ml->createAlbum( "album3" );
+    auto media3 = ml->addFile( "track2.mp3" );
+    album3->addTrack( media3, 1, 0, artist->id(), nullptr );
     album3->setReleaseYear( 2000, false );
 
     album1->setAlbumArtist( artist );
