@@ -116,7 +116,8 @@ void Parser::restore()
     LOG_INFO( "Resuming parsing on ", tasks.size(), " tasks" );
     for ( auto& t : tasks )
     {
-        t->restoreLinkedEntities();
+        if ( t->restoreLinkedEntities() == false )
+            continue;
         parse( std::move( t ) );
     }
 }
