@@ -85,19 +85,6 @@ ArtistPtr AlbumTrack::artist() const
     return m_artist.get();
 }
 
-bool AlbumTrack::setArtist( std::shared_ptr<Artist> artist )
-{
-    static const std::string req = "UPDATE " + policy::AlbumTrackTable::Name +
-            " SET artist_id = ? WHERE id_track = ?";
-    if ( artist->id() == m_artistId )
-        return true;
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, artist->id(), m_id ) == false )
-        return false;
-    m_artistId = artist->id();
-    m_artist = artist;
-    return true;
-}
-
 void AlbumTrack::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AlbumTrackTable::Name + "("

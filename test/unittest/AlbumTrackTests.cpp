@@ -51,32 +51,6 @@ TEST_F( AlbumTracks, Create )
     ASSERT_EQ( 10u, f->albumTrack()->discNumber() );
 }
 
-TEST_F( AlbumTracks, Artist )
-{
-    auto album = ml->createAlbum( "album" );
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
-    auto track = album->addTrack( f, 1, 0, 0, nullptr );
-    f->save();
-
-    auto artist = track->artist();
-    ASSERT_EQ( nullptr, artist );
-    auto newArtist = ml->createArtist( "Dream Seaotter" );
-    track->setArtist( newArtist );
-    artist = track->artist();
-    ASSERT_NE( nullptr, artist );
-    ASSERT_EQ( artist->name(), newArtist->name() );
-
-    Reload();
-
-    // Don't reuse the "track" and "f" variable, their type differ
-    auto media = ml->media( f->id() );
-    auto albumTrack = media->albumTrack();
-    artist = albumTrack->artist();
-    ASSERT_NE( nullptr, artist );
-    ASSERT_EQ( newArtist->name(), artist->name() );
-    ASSERT_EQ( newArtist->id(), artist->id() );
-}
-
 TEST_F( AlbumTracks, SetGenre )
 {
     auto a = ml->createAlbum( "album" );
