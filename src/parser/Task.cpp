@@ -140,16 +140,41 @@ bool Task::restoreLinkedEntities( )
     parentFolderFs = fsFactory->createDirectory( utils::file::directory( mrl ) );
     if ( parentFolderFs == nullptr )
         return false;
-    auto files = parentFolderFs->files();
-    auto it = std::find_if( begin( files ), end( files ), [this]( std::shared_ptr<fs::IFile> f ) {
-        return f->mrl() == mrl;
-    });
-    if ( it == end( files ) )
+
+    try
     {
-        LOG_ERROR( "Failed to restore fs::IFile associated with ", mrl );
+        auto files = parentFolderFs->files();
+        auto it = std::find_if( begin( files ), end( files ), [this]( std::shared_ptr<fs::IFile> f ) {
+            return f->mrl() == mrl;
+        });
+        if ( it == end( files ) )
+        {
+            LOG_ERROR( "Failed to restore fs::IFile associated with ", mrl );
+            return false;
+        }
+        fileFs = *it;
+    }
+    catch ( const std::system_error& ex )
+    {
+        // If we never found the file yet, we can delete the task. It will be
+        // recreated upon next discovery
+        if ( file == nullptr )
+        {
+            LOG_WARN( "Failed to restore file system instances for mrl ", mrl, "."
+                      " Removing the task until it gets detected again." );
+            destroy( m_ml, m_id );
+        }
+        else
+        {
+            // Otherwise we need to postpone it, although most likely we will
+            // detect that the file is now missing, and we won't try to restore
+            // this task until it comes back (since the task restoration request
+            // includes the file.is_present flag)
+            LOG_WARN( "Failed to restore file system instances for mrl ", mrl, "."
+                      " Postponing the task." );
+        }
         return false;
     }
-    fileFs = *it;
 
     if ( file != nullptr )
         media = file->media();
