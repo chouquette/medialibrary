@@ -133,6 +133,10 @@ bool Task::restoreLinkedEntities( )
     if ( fsFactory == nullptr )
         return false;
 
+    // First of all, we need to know if the file has been created already
+    // ie. have we run the MetadataParser service, at least partially
+    file = File::fetch( m_ml, m_fileId );
+
     parentFolderFs = fsFactory->createDirectory( utils::file::directory( mrl ) );
     if ( parentFolderFs == nullptr )
         return false;
@@ -147,9 +151,9 @@ bool Task::restoreLinkedEntities( )
     }
     fileFs = *it;
 
-    file = File::fetch( m_ml, m_fileId );
     if ( file != nullptr )
         media = file->media();
+
     parentFolder = Folder::fetch( m_ml, m_parentFolderId );
     if ( m_parentPlaylistId != 0 )
         parentPlaylist = Playlist::fetch( m_ml, m_parentPlaylistId );
