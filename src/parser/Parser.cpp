@@ -117,7 +117,7 @@ void Parser::restore()
     for ( auto& t : tasks )
     {
         t->restoreLinkedEntities();
-        parse( t );
+        parse( std::move( t ) );
     }
 }
 
