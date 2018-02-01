@@ -543,9 +543,7 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
         // Not taking the artist in consideration would cause compilation to
         // create multiple albums, especially when track are only partially
         // tagged with a year.
-        if ( ( ( albumArtist != nullptr && albumArtist->id() == candidateAlbumArtist->id() ) ||
-             ( trackArtist != nullptr && trackArtist->id() == candidateAlbumArtist->id() ) ) &&
-             multipleArtists == false )
+        if ( multipleArtists == false )
         {
             auto candidateDate = task.vlcMedia.meta( libvlc_meta_Date );
             if ( candidateDate.empty() == false )
