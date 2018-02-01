@@ -51,6 +51,7 @@ static const char* testCases[] = {
     "playlist_external_folder",
     "playlist_same_folder",
     "same_album_with_subfolder",
+    "compilation_different_years"
 };
 
 class TestEnv : public ::testing::Environment

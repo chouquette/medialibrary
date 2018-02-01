@@ -1,0 +1,47 @@
+{
+    "input": [
+        "music/compilation_different_years"
+    ],
+    "expected": {
+        "nbAudios": 3,
+        "albums": [{
+            "title": "Compilation",
+            "artist": "CommonArtist",
+            "tracks": [
+            {
+                "title": "Track 1",
+                "artist": "Artist 1"
+            },
+            {
+                "title": "Track 2",
+                "artist": "Artist 2"
+            },
+            {
+                "title": "Track 3",
+                "artist": "Artist 3"
+            }]
+        }],
+        "artists": [
+            {
+                "name": "Artist 1",
+                "nbAlbums": 0,
+                "nbTracks": 1
+            },
+            {
+                "name": "Artist 2",
+                "nbAlbums": 0,
+                "nbTracks": 1
+            },
+            {
+                "name": "Artist 3",
+                "nbAlbums": 0,
+                "nbTracks": 1
+            },
+            {
+                "name": "CommonArtist",
+                "nbAlbums": 1,
+                "nbTracks": 3
+            }
+        ]
+    }
+}

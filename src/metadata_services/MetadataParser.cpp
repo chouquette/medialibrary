@@ -516,15 +516,22 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
         }
 
         auto multiDisc = false;
+        auto multipleArtists = false;
+        int64_t previousArtistId = trackArtist != nullptr ? trackArtist->id() : 0;
         for ( auto& t : tracks )
         {
             auto at = t->albumTrack();
             assert( at != nullptr );
-            if ( at != nullptr && at->discNumber() > 1 )
-            {
+            if ( at == nullptr )
+                continue;
+            if ( at->discNumber() > 1 )
                 multiDisc = true;
+            if ( previousArtistId != 0 && previousArtistId != at->artist()->id() )
+                multipleArtists = true;
+            previousArtistId = at->artist()->id();
+            // We now know enough about the album, we can stop looking at its tracks
+            if ( multiDisc == true && multipleArtists == true )
                 break;
-            }
         }
         if ( multiDisc )
         {
@@ -536,8 +543,9 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
         // Not taking the artist in consideration would cause compilation to
         // create multiple albums, especially when track are only partially
         // tagged with a year.
-        if ( ( albumArtist != nullptr && albumArtist->id() == candidateAlbumArtist->id() ) ||
-             ( trackArtist != nullptr && trackArtist->id() == candidateAlbumArtist->id() ) )
+        if ( ( ( albumArtist != nullptr && albumArtist->id() == candidateAlbumArtist->id() ) ||
+             ( trackArtist != nullptr && trackArtist->id() == candidateAlbumArtist->id() ) ) &&
+             multipleArtists == false )
         {
             auto candidateDate = task.vlcMedia.meta( libvlc_meta_Date );
             if ( candidateDate.empty() == false )
