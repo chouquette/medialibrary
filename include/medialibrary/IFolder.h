@@ -42,6 +42,11 @@ public:
      */
     virtual const std::string& mrl() const = 0;
     virtual bool isPresent() const = 0;
+    /**
+     * @brief isBanned Will return true if the folder was explicitely banned
+     * from being discovered.
+     */
+    virtual bool isBanned() const = 0;
 };
 
 }

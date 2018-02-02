@@ -314,6 +314,11 @@ bool Folder::isPresent() const
     return m_device.get()->isPresent();
 }
 
+bool Folder::isBanned() const
+{
+    return m_isBlacklisted;
+}
+
 bool Folder::isRootFolder() const
 {
     return m_parent == 0;
