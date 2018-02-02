@@ -313,6 +313,7 @@ class IMediaLibrary
         virtual void discover( const std::string& entryPoint ) = 0;
         virtual void setDiscoverNetworkEnabled( bool enable ) = 0;
         virtual std::vector<FolderPtr> entryPoints() const = 0;
+        virtual FolderPtr folder( const std::string& mrl ) const = 0;
         virtual void removeEntryPoint( const std::string& entryPoint ) = 0;
         /**
          * @brief banFolder will prevent an entry point folder from being discovered.

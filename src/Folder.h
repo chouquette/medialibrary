@@ -79,7 +79,6 @@ public:
     virtual bool isBanned() const override;
     bool isRootFolder() const;
 
-private:
     enum class BannedType
     {
         Yes,    //< Only select banned folders

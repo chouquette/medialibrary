@@ -1039,6 +1039,11 @@ std::vector<FolderPtr> MediaLibrary::entryPoints() const
     return Folder::fetchAll<IFolder>( this, req );
 }
 
+FolderPtr MediaLibrary::folder( const std::string& mrl ) const
+{
+    return Folder::fromMrl( this, mrl, Folder::BannedType::Any );
+}
+
 void MediaLibrary::removeEntryPoint( const std::string& entryPoint )
 {
     if ( m_discovererWorker != nullptr )
