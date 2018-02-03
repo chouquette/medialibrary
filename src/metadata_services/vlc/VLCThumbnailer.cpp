@@ -252,7 +252,7 @@ void VLCThumbnailer::updateAudioArtwork( parser::Task& task )
     if ( artwork.empty() == true )
         return;
 
-    task.media->setThumbnail( artwork );
+    task.media->setThumbnailCached( artwork );
     task.media->save();
     auto rel = AlbumTrack::fromMedia( m_ml, task.media->id() );
     if ( rel == nullptr )
@@ -384,7 +384,7 @@ parser::Task::Status VLCThumbnailer::compress( Media* media, File* file )
                             hOffset, vOffset ) == false )
         return parser::Task::Status::Fatal;
 
-    media->setThumbnail( path );
+    media->setThumbnailCached( path );
     return parser::Task::Status::Success;
 }
 

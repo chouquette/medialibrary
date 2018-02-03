@@ -123,6 +123,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
                             unsigned int nbChannels, const std::string& language, const std::string& desc );
         virtual std::vector<AudioTrackPtr> audioTracks() override;
         virtual const std::string& thumbnail() override;
+        virtual bool setThumbnail( const std::string &thumbnail );
         virtual unsigned int insertionDate() const override;
         virtual unsigned int releaseDate() const override;
 
@@ -131,7 +132,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual bool setMetadata( MetadataType type, int64_t value ) override;
 
         void setReleaseDate( unsigned int date );
-        void setThumbnail( const std::string& thumbnail );
+        void setThumbnailCached( const std::string& thumbnail );
         bool save();
 
         std::shared_ptr<File> addFile( const fs::IFile& fileFs, int64_t parentFolderId,

@@ -126,6 +126,15 @@ class IMedia
         ///  The media library
         ///
         virtual const std::string& thumbnail() = 0;
+        ///
+        /// \brief setThumbnail Sets a thumbnail for the current media
+        /// \param mrl A mrl pointing the the thumbnail file.
+        /// \return true in case the thumbnail was successfully stored to database
+        ///         false otherwise
+        /// This is intended to be used by applications that have their own way
+        /// of computing thumbnails.
+        ///
+        virtual bool setThumbnail( const std::string& mrl ) = 0;
         virtual unsigned int insertionDate() const = 0;
         virtual unsigned int releaseDate() const = 0;
 

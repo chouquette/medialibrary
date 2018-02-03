@@ -350,12 +350,22 @@ void Media::setReleaseDate( unsigned int date )
     m_changed = true;
 }
 
-void Media::setThumbnail(const std::string& thumbnail )
+void Media::setThumbnailCached( const std::string& thumbnail )
 {
     if ( m_thumbnail == thumbnail )
         return;
     m_thumbnail = thumbnail;
     m_changed = true;
+}
+
+bool Media::setThumbnail(const std::string& thumbnail )
+{
+    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
+            "thumbnail = ? WHERE id_media = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, thumbnail, m_id ) == false )
+        return false;
+    m_thumbnail = thumbnail;
+    return true;
 }
 
 bool Media::save()
