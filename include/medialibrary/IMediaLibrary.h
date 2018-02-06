@@ -193,6 +193,13 @@ public:
      * @param isIdle true when all background tasks are idle, false otherwise
      */
     virtual void onBackgroundTasksIdleChanged( bool isIdle ) = 0;
+
+    /**
+     * @brief onMediaThumbnailReady Called when a thumbnail generation completed.
+     * @param media The media for which a thumbnail was generated
+     * @param success true if the thumbnail was generated, false if the generation failed
+     */
+    virtual void onMediaThumbnailReady( MediaPtr media, bool success ) = 0;
 };
 
 class IMediaLibrary
@@ -375,6 +382,15 @@ class IMediaLibrary
          * as invalid the moment this method returns.
          */
         virtual void forceRescan() = 0;
+
+        /**
+         * \brief requestThumbnail Queues a thumbnail generation request for
+         * this media, to be run asynchronously.
+         * Upon completion (successful or not) IMediaLibraryCb::onMediaThumbnailReady
+         * will be called.
+         */
+        virtual void requestThumbnail( MediaPtr media ) = 0;
+
 };
 
 }

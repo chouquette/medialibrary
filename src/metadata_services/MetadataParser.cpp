@@ -208,10 +208,6 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
         return parser::Task::Status::Fatal;
 
     task.markStepCompleted( parser::Task::ParserStep::MetadataAnalysis );
-    // Save ourselves from the useless processing of a thumbnail later if
-    // we're analyzing an audio file
-    if ( isAudio == true )
-        task.markStepCompleted( parser::Task::ParserStep::Thumbnailer );
     if ( task.saveParserStep() == false )
         return parser::Task::Status::Fatal;
     m_notifier->notifyMediaCreation( task.media );

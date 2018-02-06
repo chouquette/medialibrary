@@ -85,9 +85,8 @@ public:
         None = 0,
         MetadataExtraction = 1,
         MetadataAnalysis = 2,
-        Thumbnailer = 4,
 
-        Completed = 1 | 2 | 4,
+        Completed = 1 | 2,
     };
 
     /*

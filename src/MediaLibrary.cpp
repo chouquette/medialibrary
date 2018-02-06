@@ -325,6 +325,7 @@ bool MediaLibrary::start()
         refreshDevices( *fsFactory );
     startDiscoverer();
     startParser();
+    startThumbnailer();
     return true;
 }
 
@@ -717,10 +718,8 @@ void MediaLibrary::startParser()
 
     auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService );
     auto metadataService = std::unique_ptr<MetadataParser>( new MetadataParser );
-    auto thumbnailerService = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer );
     m_parser->addService( std::move( vlcService ) );
     m_parser->addService( std::move( metadataService ) );
-    m_parser->addService( std::move( thumbnailerService ) );
     m_parser->start();
 }
 
@@ -739,6 +738,11 @@ void MediaLibrary::startDeletionNotifier()
 {
     m_modificationNotifier.reset( new ModificationNotifier( this ) );
     m_modificationNotifier->start();
+}
+
+void MediaLibrary::startThumbnailer()
+{
+    m_thumbnailer = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer( this ) );
 }
 
 void MediaLibrary::addLocalFsFactory()
@@ -1223,6 +1227,11 @@ void MediaLibrary::forceRescan()
         m_parser->restore();
         m_parser->resume();
     }
+}
+
+void MediaLibrary::requestThumbnail( MediaPtr media )
+{
+    m_thumbnailer->requestThumbnail( media );
 }
 
 bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& mountpoint )

@@ -32,23 +32,36 @@
 namespace medialibrary
 {
 
-class VLCThumbnailer : public ParserService
+class VLCThumbnailer
 {
+    struct Task
+    {
+        Task( MediaPtr media );
+
+        compat::Mutex mutex;
+        compat::ConditionVariable cond;
+        MediaPtr media;
+        std::string mrl;
+        uint32_t width;
+        uint32_t height;
+        VLC::MediaPlayer mp;
+        std::atomic_bool thumbnailRequired;
+    };
+
 public:
-    explicit VLCThumbnailer();
-    virtual ~VLCThumbnailer() = default;
-    virtual parser::Task::Status run( parser::Task& task ) override;
-    virtual bool initialize() override;
-    virtual bool isCompleted( const parser::Task& task ) const override;
+    explicit VLCThumbnailer( MediaLibraryPtr ml );
+    virtual ~VLCThumbnailer();
+    void requestThumbnail( MediaPtr media );
 
 private:
-    parser::Task::Status seekAhead( VLC::MediaPlayer &mp );
-    void setupVout( VLC::MediaPlayer &mp );
-    parser::Task::Status takeThumbnail( Media* media, File* file, VLC::MediaPlayer &mp );
-    parser::Task::Status compress( Media* media, File* file );
+    void run();
+    void stop();
 
-    virtual const char* name() const override;
-    virtual uint8_t nbThreads() const override;
+    bool generateThumbnail( Task& task );
+    bool seekAhead( Task& task );
+    void setupVout( Task& task );
+    bool takeThumbnail( Task& task );
+    bool compress( Task& task );
 
 private:
     // Force a base width, let height be computed depending on A/R
@@ -56,15 +69,15 @@ private:
     static const uint32_t DesiredHeight = 200; // Aim for a 16:10 thumbnail
 
 private:
-    VLC::Instance m_instance;
+    MediaLibraryPtr m_ml;
     compat::Mutex m_mutex;
     compat::ConditionVariable m_cond;
+    std::queue<std::unique_ptr<Task>> m_tasks;
+    std::atomic_bool m_run;
+    compat::Thread m_thread;
+
     std::unique_ptr<IImageCompressor> m_compressor;
-    // Per thumbnail variables
     std::unique_ptr<uint8_t[]> m_buff;
-    std::atomic_bool m_thumbnailRequired;
-    uint32_t m_width;
-    uint32_t m_height;
     uint32_t m_prevSize;
 };
 

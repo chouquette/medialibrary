@@ -36,6 +36,7 @@ class ModificationNotifier;
 class DiscovererWorker;
 class Parser;
 class ParserService;
+class VLCThumbnailer;
 
 class Album;
 class Artist;
@@ -152,6 +153,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         virtual void forceRescan() override;
 
+        virtual void requestThumbnail( MediaPtr media );
+
         static bool isExtensionSupported( const char* ext );
 
     protected:
@@ -163,6 +166,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual void startParser();
         virtual void startDiscoverer();
         virtual void startDeletionNotifier();
+        virtual void startThumbnailer();
 
     private:
         bool recreateDatabase( const std::string& dbPath );
@@ -213,6 +217,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         bool m_initialized;
         std::atomic_bool m_discovererIdle;
         std::atomic_bool m_parserIdle;
+        std::unique_ptr<VLCThumbnailer> m_thumbnailer;
 };
 
 }
