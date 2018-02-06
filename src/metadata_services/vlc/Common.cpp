@@ -30,9 +30,7 @@
 namespace medialibrary
 {
 
-medialibrary::parser::Task::Status
-medialibrary::MetadataCommon::startPlayback( parser::Task& task,
-                                             VLC::MediaPlayer& mp )
+bool medialibrary::MetadataCommon::startPlayback( VLC::Media& media, VLC::MediaPlayer& mp )
 {
     // Use a copy of the event manager to automatically unregister all events as soon
     // as we leave this method.
@@ -59,14 +57,14 @@ medialibrary::MetadataCommon::startPlayback( parser::Task& task,
 
     bool metaArtworkChanged = false;
     bool watchForArtworkChange = false;
-    auto mem = task.vlcMedia.eventManager();
-    if ( utils::file::schemeIs( "attachment", task.vlcMedia.meta( libvlc_meta_ArtworkURL ) ) == true )
+    auto mem = media.eventManager();
+    if ( utils::file::schemeIs( "attachment", media.meta( libvlc_meta_ArtworkURL ) ) == true )
     {
         watchForArtworkChange = true;
-        mem.onMetaChanged([&mutex, &cond, &metaArtworkChanged, &task]( libvlc_meta_t meta ) {
+        mem.onMetaChanged([&mutex, &cond, &metaArtworkChanged, &media]( libvlc_meta_t meta ) {
             if ( meta != libvlc_meta_ArtworkURL
                  || metaArtworkChanged == true
-                 || utils::file::schemeIs( "attachment", task.vlcMedia.meta( libvlc_meta_ArtworkURL ) ) == true )
+                 || utils::file::schemeIs( "attachment", media.meta( libvlc_meta_ArtworkURL ) ) == true )
                 return;
             std::lock_guard<compat::Mutex> lock( mutex );
             metaArtworkChanged = true;
@@ -83,7 +81,7 @@ medialibrary::MetadataCommon::startPlayback( parser::Task& task,
 
         // In case the playback failed, we probably won't fetch anything interesting anyway.
         if ( failedToStart == true || success == false )
-            return parser::Task::Status::Fatal;
+            return false;
 
         // If we have any kind of track, but not a video track, we don't have to wait long, tracks are usually
         // being discovered together.
@@ -104,7 +102,7 @@ medialibrary::MetadataCommon::startPlayback( parser::Task& task,
         }
     }
 
-    return parser::Task::Status::Success;
+    return true;
 }
 
 

@@ -30,7 +30,7 @@ namespace medialibrary
 
 struct MetadataCommon
 {
-    static parser::Task::Status startPlayback( parser::Task& task, VLC::MediaPlayer& mp );
+    static bool startPlayback( VLC::Media& media, VLC::MediaPlayer& mp );
 };
 
 }
