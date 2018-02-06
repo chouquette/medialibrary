@@ -30,7 +30,7 @@
 namespace medialibrary
 {
 
-std::pair<medialibrary::parser::Task::Status, bool>
+medialibrary::parser::Task::Status
 medialibrary::MetadataCommon::startPlayback( parser::Task& task,
                                              VLC::MediaPlayer& mp )
 {
@@ -83,7 +83,7 @@ medialibrary::MetadataCommon::startPlayback( parser::Task& task,
 
         // In case the playback failed, we probably won't fetch anything interesting anyway.
         if ( failedToStart == true || success == false )
-            return { parser::Task::Status::Fatal, false };
+            return parser::Task::Status::Fatal;
 
         // If we have any kind of track, but not a video track, we don't have to wait long, tracks are usually
         // being discovered together.
@@ -104,7 +104,7 @@ medialibrary::MetadataCommon::startPlayback( parser::Task& task,
         }
     }
 
-    return { parser::Task::Status::Success, hasVideoTrack };
+    return parser::Task::Status::Success;
 }
 
 

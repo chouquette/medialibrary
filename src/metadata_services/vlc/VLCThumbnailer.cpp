@@ -105,24 +105,24 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
 
     setupVout( mp );
 
-    auto resPair = MetadataCommon::startPlayback( task, mp );
-    if ( resPair.first != parser::Task::Status::Success )
+    auto res = MetadataCommon::startPlayback( task, mp );
+    if ( res != parser::Task::Status::Success )
     {
         LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail: Can't start playback" );
-        return resPair.first;
+        return res;
     }
 
     if ( duration <= 0 )
     {
         // Seek ahead to have a significant preview
-        auto res = seekAhead( mp );
+        res = seekAhead( mp );
         if ( res != parser::Task::Status::Success )
         {
             LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail: Failed to seek ahead" );
             return res;
         }
     }
-    auto res = takeThumbnail( media, file, mp );
+    res = takeThumbnail( media, file, mp );
     if ( res != parser::Task::Status::Success )
         return res;
 

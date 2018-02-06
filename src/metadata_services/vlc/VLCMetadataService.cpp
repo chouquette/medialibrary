@@ -80,9 +80,9 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
         if ( tracks.size() == 0 && task.vlcMedia.subitems()->count() == 0 )
             LOG_WARN( "Failed to fetch any tracks for ", mrl, ". Falling back to playback" );
         VLC::MediaPlayer mp( task.vlcMedia );
-        auto resPair = MetadataCommon::startPlayback( task, mp );
-        if ( resPair.first != parser::Task::Status::Success )
-            return resPair.first;
+        auto res = MetadataCommon::startPlayback( task, mp );
+        if ( res != parser::Task::Status::Success )
+            return res;
     }
     // Don't save the file parsing step yet, since all data are just in memory. Just mark
     // the extraction as done.
