@@ -29,6 +29,7 @@
 #include "VLCMetadataService.h"
 #include "Media.h"
 #include "utils/VLCInstance.h"
+#include "metadata_services/vlc/Common.hpp"
 
 namespace medialibrary
 {
@@ -71,8 +72,14 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
     if ( status == VLC::Media::ParsedStatus::Failed || status == VLC::Media::ParsedStatus::Timeout )
         return parser::Task::Status::Fatal;
     auto tracks = task.vlcMedia.tracks();
-    if ( tracks.size() == 0 )
-        LOG_WARN( "Failed to fetch any tracks for ", mrl );
+    if ( tracks.size() == 0 && task.vlcMedia.subitems()->count() == 0 )
+    {
+        LOG_WARN( "Failed to fetch any tracks for ", mrl, ". Falling back to playback" );
+        VLC::MediaPlayer mp( task.vlcMedia );
+        auto resPair = MetadataCommon::startPlayback( task, mp );
+        if ( resPair.first != parser::Task::Status::Success )
+            return resPair.first;
+    }
     // Don't save the file parsing step yet, since all data are just in memory. Just mark
     // the extraction as done.
     task.markStepCompleted( parser::Task::ParserStep::MetadataExtraction );
