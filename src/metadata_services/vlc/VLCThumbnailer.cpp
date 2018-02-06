@@ -35,6 +35,7 @@
 #include "MediaLibrary.h"
 #include "utils/VLCInstance.h"
 #include "utils/ModificationsNotifier.h"
+#include "metadata_services/vlc/Common.hpp"
 
 #ifdef HAVE_JPEG
 #include "imagecompressors/JpegCompressor.h"
@@ -102,20 +103,27 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
 
     setupVout( mp );
 
-    auto res = startPlayback( task, mp );
-    if ( res != parser::Task::Status::Success )
+    auto resPair = MetadataCommon::startPlayback( task, mp );
+    if ( resPair.first != parser::Task::Status::Success )
     {
-        // If the media became an audio file, it's not an error
-        if ( media->type() == Media::Type::Audio )
+        LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail: Can't start playback" );
+        return resPair.first;
+    }
+    else if ( resPair.second == false )
+    {
+        if ( task.media->type() == Media::Type::Audio )
         {
+            updateAudioArtwork( task );
             task.markStepCompleted( parser::Task::ParserStep::Thumbnailer );
             task.saveParserStep();
-            LOG_INFO( file->mrl(), " type has changed to Audio. Skipping thumbnail generation" );
-            return parser::Task::Status::Success;
         }
-        // Otherwise, we failed to start the playback and this is an error indeed
-        LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail: Can't start playback" );
-        return res;
+        else if ( task.media->type() == Media::Type::Unknown )
+        {
+            task.media->setType( Media::Type::Audio );
+            task.media->save();
+            LOG_INFO( file->mrl(), " type has changed to Audio. Skipping thumbnail generation" );
+        }
+        return parser::Task::Status::Success;
     }
     // Yet another special case:
     // We could have run the thumbnailer already as a fallback for some weird video with no
@@ -133,14 +141,14 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     if ( duration <= 0 )
     {
         // Seek ahead to have a significant preview
-        res = seekAhead( mp );
+        auto res = seekAhead( mp );
         if ( res != parser::Task::Status::Success )
         {
             LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail: Failed to seek ahead" );
             return res;
         }
     }
-    res = takeThumbnail( media, file, mp );
+    auto res = takeThumbnail( media, file, mp );
     if ( res != parser::Task::Status::Success )
         return res;
 
@@ -156,94 +164,6 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
         return parser::Task::Status::Fatal;
     t->commit();
     return parser::Task::Status::Success;
-}
-
-parser::Task::Status VLCThumbnailer::startPlayback( parser::Task& task, VLC::MediaPlayer &mp )
-{
-    // Use a copy of the event manager to automatically unregister all events as soon
-    // as we leave this method.
-    bool hasVideoTrack = false;
-    bool failedToStart = false;
-    bool hasAnyTrack = false;
-    bool success = false;
-    auto em = mp.eventManager();
-    em.onESAdded([this, &hasVideoTrack, &hasAnyTrack]( libvlc_track_type_t type, int ) {
-        std::lock_guard<compat::Mutex> lock( m_mutex );
-        if ( type == libvlc_track_video )
-            hasVideoTrack = true;
-        hasAnyTrack = true;
-        m_cond.notify_all();
-    });
-    em.onEncounteredError([this, &failedToStart]() {
-        std::lock_guard<compat::Mutex> lock( m_mutex );
-        failedToStart = true;
-        m_cond.notify_all();
-    });
-
-    bool metaArtworkChanged = false;
-    auto mem = task.vlcMedia.eventManager();
-    if ( task.media->type() == Media::Type::Audio )
-    {
-        mem.onMetaChanged([this, &metaArtworkChanged, &task]( libvlc_meta_t meta ) {
-            if ( meta != libvlc_meta_ArtworkURL
-                 || metaArtworkChanged == true
-                 || task.vlcMedia.meta( libvlc_meta_ArtworkURL ) == task.media->thumbnail() )
-                return;
-            std::lock_guard<compat::Mutex> lock( m_mutex );
-            metaArtworkChanged = true;
-            m_cond.notify_all();
-        });
-    }
-
-    {
-        std::unique_lock<compat::Mutex> lock( m_mutex );
-        mp.play();
-        success = m_cond.wait_for( lock, std::chrono::seconds( 3 ), [&failedToStart, &hasAnyTrack]() {
-            return failedToStart == true || hasAnyTrack == true;
-        });
-
-        // In case the playback failed, we probably won't fetch anything interesting anyway.
-        if ( failedToStart == true || success == false )
-            return parser::Task::Status::Fatal;
-
-        // If we have any kind of track, but not a video track, we don't have to wait long, tracks are usually
-        // being discovered together.
-        if ( hasVideoTrack == false )
-        {
-            if ( task.media->type() == Media::Type::Audio )
-            {
-                m_cond.wait_for( lock, std::chrono::milliseconds( 500 ), [&metaArtworkChanged]() {
-                    return metaArtworkChanged == true;
-                });
-            }
-            else
-            {
-                m_cond.wait_for( lock, std::chrono::seconds( 1 ), [&hasVideoTrack]() {
-                    return hasVideoTrack == true;
-                });
-            }
-        }
-    }
-
-    // Now that we waited long enough for a potential video track, if we have one, we keep generating
-    // the thumbnail.
-    // If we don't
-    if ( hasVideoTrack == true )
-        return parser::Task::Status::Success;
-
-    if ( task.media->type() == Media::Type::Audio )
-        updateAudioArtwork( task );
-
-    // We are now in the case of a timeout: No failure, but no video track either.
-    // The file might be an audio file we haven't detected yet:
-    else if ( task.media->type() == Media::Type::Unknown )
-    {
-        task.media->setType( Media::Type::Audio );
-        task.media->save();
-        // We still return an error since we don't want to attempt the thumbnail generation for a
-        // file without video tracks
-    }
-    return parser::Task::Status::Fatal;
 }
 
 void VLCThumbnailer::updateAudioArtwork( parser::Task& task )

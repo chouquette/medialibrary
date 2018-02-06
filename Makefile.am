@@ -77,6 +77,7 @@ libmedialibrary_la_SOURCES = \
 	src/logging/IostreamLogger.cpp \
 	src/logging/Logger.cpp \
 	src/metadata_services/MetadataParser.cpp \
+	src/metadata_services/vlc/Common.cpp \
 	src/metadata_services/vlc/VLCMetadataService.cpp \
 	src/metadata_services/vlc/VLCThumbnailer.cpp \
 	src/parser/Parser.cpp \
