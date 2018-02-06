@@ -161,12 +161,7 @@ void Parser::done( std::shared_ptr<parser::Task> t, parser::Task::Status status 
     }
 
     // If some services declined to parse the file, start over again.
-    if ( serviceIdx == m_services.size() )
-    {
-        t->currentService = serviceIdx = 0;
-        m_opToDo += m_services.size();
-        LOG_INFO("Running parser chain again for ", t->mrl);
-    }
+    assert( serviceIdx < m_services.size() );
     updateStats();
     m_services[serviceIdx]->parse( std::move( t ) );
 }

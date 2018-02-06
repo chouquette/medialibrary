@@ -164,25 +164,8 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
 
     const auto& tracks = task.vlcMedia.tracks();
 
-    // If we failed to extract any tracks, don't make any assumption and forward to the
-    // thumbnailer. Since it starts an actual playback, it will have more information.
-    // Since the metadata steps won't be marked, it will run again once the thumbnailer has completed.
     if ( tracks.empty() == true )
-    {
-        // However, if the file is not unknown anymore, it means the thumbnailer has already processed it
-        if ( task.media->type() == Media::Type::Unknown )
-        {
-            // In case the thumbnailer ran before, but the application exited, we would skip the
-            // thumbnailer execution, coming back here, and delegating again to the thumbnailer
-            // over and over again. We need to ensure the thumbnailer will run, even partially, up to
-            // the point the playback started.
-            task.markStepUncompleted( parser::Task::ParserStep::Thumbnailer );
-            LOG_INFO( "Skipping metadata parsing for file with unknown type: ", task.file->mrl() );
-            return parser::Task::Status::Success;
-        }
-        // In that case, stop trying to do something with this file.
         return parser::Task::Status::Fatal;
-    }
 
     bool isAudio = true;
     {

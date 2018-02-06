@@ -84,12 +84,6 @@ void Task::markStepCompleted( ParserStep stepCompleted )
                                       static_cast<uint8_t>( stepCompleted ) );
 }
 
-void Task::markStepUncompleted( ParserStep stepUncompleted )
-{
-    m_step = static_cast<ParserStep>( static_cast<uint8_t>( m_step ) &
-                                      ( ~ static_cast<uint8_t>( stepUncompleted ) ) );
-}
-
 bool Task::saveParserStep()
 {
     static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET step = ?, "

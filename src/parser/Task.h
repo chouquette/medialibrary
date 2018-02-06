@@ -110,7 +110,6 @@ public:
      * extract the same information again
      */
     void markStepCompleted( ParserStep stepCompleted );
-    void markStepUncompleted( ParserStep stepUncompleted );
     bool saveParserStep();
     bool isCompleted() const;
     bool isStepCompleted( ParserStep step ) const;

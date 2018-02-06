@@ -117,24 +117,6 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
             task.markStepCompleted( parser::Task::ParserStep::Thumbnailer );
             task.saveParserStep();
         }
-        else if ( task.media->type() == Media::Type::Unknown )
-        {
-            task.media->setType( Media::Type::Audio );
-            task.media->save();
-            LOG_INFO( file->mrl(), " type has changed to Audio. Skipping thumbnail generation" );
-        }
-        return parser::Task::Status::Success;
-    }
-    // Yet another special case:
-    // We could have run the thumbnailer already as a fallback for some weird video with no
-    // preparse detected tracks. If so, we don't want to spend more time computing a thumbnail, but
-    // we do need to run the metadata extraction again.
-    if ( media->type() == Media::Type::Unknown && media->thumbnail().empty() == false )
-    {
-        task.markStepCompleted( parser::Task::ParserStep::Thumbnailer );
-        // startPlayback will return an error in case the media is an audio file
-        media->setType( IMedia::Type::Video );
-        // And now let the metadata extraction run again
         return parser::Task::Status::Success;
     }
 
