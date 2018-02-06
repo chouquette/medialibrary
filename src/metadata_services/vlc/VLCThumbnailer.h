@@ -42,7 +42,6 @@ public:
     virtual bool isCompleted( const parser::Task& task ) const override;
 
 private:
-    void updateAudioArtwork( parser::Task& task );
     parser::Task::Status seekAhead( VLC::MediaPlayer &mp );
     void setupVout( VLC::MediaPlayer &mp );
     parser::Task::Status takeThumbnail( Media* media, File* file, VLC::MediaPlayer &mp );

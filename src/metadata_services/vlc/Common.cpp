@@ -26,7 +26,7 @@
 
 #include "Common.hpp"
 #include "Media.h"
-
+#include "utils/Filename.h"
 namespace medialibrary
 {
 
@@ -58,13 +58,15 @@ medialibrary::MetadataCommon::startPlayback( parser::Task& task,
     });
 
     bool metaArtworkChanged = false;
+    bool watchForArtworkChange = false;
     auto mem = task.vlcMedia.eventManager();
-    if ( task.media->type() == Media::Type::Audio )
+    if ( utils::file::schemeIs( "attachment", task.vlcMedia.meta( libvlc_meta_ArtworkURL ) ) == true )
     {
+        watchForArtworkChange = true;
         mem.onMetaChanged([&mutex, &cond, &metaArtworkChanged, &task]( libvlc_meta_t meta ) {
             if ( meta != libvlc_meta_ArtworkURL
                  || metaArtworkChanged == true
-                 || task.vlcMedia.meta( libvlc_meta_ArtworkURL ) == task.media->thumbnail() )
+                 || utils::file::schemeIs( "attachment", task.vlcMedia.meta( libvlc_meta_ArtworkURL ) ) == true )
                 return;
             std::lock_guard<compat::Mutex> lock( mutex );
             metaArtworkChanged = true;
@@ -87,7 +89,7 @@ medialibrary::MetadataCommon::startPlayback( parser::Task& task,
         // being discovered together.
         if ( hasVideoTrack == false )
         {
-            if ( task.media->type() == Media::Type::Audio )
+            if ( watchForArtworkChange == true )
             {
                 cond.wait_for( lock, std::chrono::milliseconds( 500 ), [&metaArtworkChanged]() {
                     return metaArtworkChanged == true;

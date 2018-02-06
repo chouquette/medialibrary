@@ -74,6 +74,8 @@ bool VLCThumbnailer::isCompleted( const parser::Task& task ) const
 
 parser::Task::Status VLCThumbnailer::run( parser::Task& task )
 {
+    assert( task.media->type() != Media::Type::Audio );
+
     auto media = task.media.get();
     auto file = task.file.get();
 
@@ -91,7 +93,7 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     task.vlcMedia.addOption( ":avcodec-hw=none" );
     task.vlcMedia.addOption( ":no-mkv-preload-local-dir" );
     auto duration = task.vlcMedia.duration();
-    if ( duration > 0 && media->type() != IMedia::Type::Audio )
+    if ( duration > 0 )
     {
         std::ostringstream ss;
         // Duration is in ms, start-time in seconds, and we're aiming at 1/4th of the media
@@ -108,16 +110,6 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
     {
         LOG_WARN( "Failed to generate ", file->mrl(), " thumbnail: Can't start playback" );
         return resPair.first;
-    }
-    else if ( resPair.second == false )
-    {
-        if ( task.media->type() == Media::Type::Audio )
-        {
-            updateAudioArtwork( task );
-            task.markStepCompleted( parser::Task::ParserStep::Thumbnailer );
-            task.saveParserStep();
-        }
-        return parser::Task::Status::Success;
     }
 
     if ( duration <= 0 )
@@ -146,36 +138,6 @@ parser::Task::Status VLCThumbnailer::run( parser::Task& task )
         return parser::Task::Status::Fatal;
     t->commit();
     return parser::Task::Status::Success;
-}
-
-void VLCThumbnailer::updateAudioArtwork( parser::Task& task )
-{
-    auto artwork = task.vlcMedia.meta( libvlc_meta_ArtworkURL );
-    if ( artwork.empty() == true )
-        return;
-
-    task.media->setThumbnailCached( artwork );
-    task.media->save();
-    auto rel = AlbumTrack::fromMedia( m_ml, task.media->id() );
-    if ( rel == nullptr )
-        return;
-
-    auto album = rel->album();
-    if ( album->artworkMrl() == artwork )
-        return;
-
-    // We no not have any other IAlbum implementation, so the downcast is safe here
-    auto a = static_cast<Album*>( album.get() );
-    a->setArtworkMrl( artwork );
-
-    // If no artwork was set for the AlbumArtist, use this new one
-    auto artist = album->albumArtist();
-    if ( artist->artworkMrl().empty() == true )
-    {
-        auto artistPtr = static_cast<Artist*>( artist.get() );
-        artistPtr->setArtworkMrl( artwork );
-    }
-
 }
 
 parser::Task::Status VLCThumbnailer::seekAhead( VLC::MediaPlayer& mp )

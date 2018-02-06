@@ -30,6 +30,7 @@
 #include "Media.h"
 #include "utils/VLCInstance.h"
 #include "metadata_services/vlc/Common.hpp"
+#include "utils/Filename.h"
 
 namespace medialibrary
 {
@@ -72,9 +73,12 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
     if ( status == VLC::Media::ParsedStatus::Failed || status == VLC::Media::ParsedStatus::Timeout )
         return parser::Task::Status::Fatal;
     auto tracks = task.vlcMedia.tracks();
-    if ( tracks.size() == 0 && task.vlcMedia.subitems()->count() == 0 )
+    auto artworkMrl = task.vlcMedia.meta( libvlc_meta_ArtworkURL );
+    if ( ( tracks.size() == 0 && task.vlcMedia.subitems()->count() == 0 ) ||
+         utils::file::schemeIs( "attachment://", artworkMrl ) == true )
     {
-        LOG_WARN( "Failed to fetch any tracks for ", mrl, ". Falling back to playback" );
+        if ( tracks.size() == 0 && task.vlcMedia.subitems()->count() == 0 )
+            LOG_WARN( "Failed to fetch any tracks for ", mrl, ". Falling back to playback" );
         VLC::MediaPlayer mp( task.vlcMedia );
         auto resPair = MetadataCommon::startPlayback( task, mp );
         if ( resPair.first != parser::Task::Status::Success )
