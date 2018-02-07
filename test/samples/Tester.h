@@ -46,12 +46,20 @@ public:
     virtual bool waitForParsingComplete();
     virtual bool waitForDiscoveryComplete() { return true; }
     virtual void reinit() {}
+    void prepareWaitForThumbnail( MediaPtr media );
+    bool waitForThumbnail();
 protected:
     virtual void onDiscoveryCompleted( const std::string& ) override;
     virtual void onParsingStatsUpdated(uint32_t percent) override;
+    virtual void onMediaThumbnailReady( MediaPtr media, bool success );
 
     compat::ConditionVariable m_parsingCompleteVar;
     compat::Mutex m_parsingMutex;
+    compat::Mutex m_thumbnailMutex;
+    compat::ConditionVariable m_thumbnailCond;
+    MediaPtr m_thumbnailTarget;
+    bool m_thumbnailDone;
+    bool m_thumbnailSuccess;
     bool m_done;
     bool m_discoveryCompleted;
 };

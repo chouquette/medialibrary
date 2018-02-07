@@ -51,6 +51,25 @@ bool MockCallback::waitForParsingComplete()
     });
 }
 
+void MockCallback::prepareWaitForThumbnail( MediaPtr media )
+{
+    m_thumbnailMutex.lock();
+    m_thumbnailDone = false;
+    m_thumbnailSuccess = false;
+    m_thumbnailTarget = std::move( media );
+}
+
+bool MockCallback::waitForThumbnail()
+{
+    std::unique_lock<compat::Mutex> lock( m_thumbnailMutex, std::adopt_lock );
+    if ( m_thumbnailCond.wait_for( lock, std::chrono::seconds{ 5 }, [this]() {
+            return m_thumbnailDone;
+        }) == false )
+        return false;
+    m_thumbnailMutex.unlock();
+    return m_thumbnailSuccess;
+}
+
 void MockCallback::onDiscoveryCompleted(const std::string& entryPoint )
 {
     if ( entryPoint.empty() == true )
@@ -69,6 +88,17 @@ void MockCallback::onParsingStatsUpdated(uint32_t percent)
         m_done = true;
         m_parsingCompleteVar.notify_all();
     }
+}
+
+void MockCallback::onMediaThumbnailReady( MediaPtr media, bool success )
+{
+    std::unique_lock<compat::Mutex> lock( m_thumbnailMutex );
+
+    if ( m_thumbnailTarget == nullptr || media->id() != m_thumbnailTarget->id() )
+        return;
+    m_thumbnailDone = true;
+    m_thumbnailSuccess = success;
+    m_thumbnailCond.notify_all();
 }
 
 MockResumeCallback::MockResumeCallback()
@@ -282,6 +312,13 @@ void Tests::checkMedias(const rapidjson::Value& expectedMedias)
         if ( expectedMedia.HasMember( "snapshotExpected" ) == true )
         {
             auto snapshotExpected = expectedMedia["snapshotExpected"].GetBool();
+            if ( snapshotExpected && media->thumbnail().empty() == true )
+            {
+                m_cb->prepareWaitForThumbnail( media );
+                m_ml->requestThumbnail( media );
+                auto res = m_cb->waitForThumbnail();
+                ASSERT_TRUE( res );
+            }
             ASSERT_EQ( !snapshotExpected, media->thumbnail().empty() );
         }
     }
