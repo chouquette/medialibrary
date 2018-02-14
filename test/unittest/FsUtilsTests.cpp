@@ -94,6 +94,7 @@ TEST( FsUtils, removePath )
     ASSERT_EQ( "", utils::file::removePath( "bar/", "bar" ) );
     ASSERT_EQ( "", utils::file::removePath( "/f00/", "/f00/" ) );
     ASSERT_EQ( "/f00", utils::file::removePath( "/f00", "/path/not/found" ) );
+    ASSERT_EQ( "/f00", utils::file::removePath( "/f00", "/loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongstring/" ) );
 }
 
 TEST( FsUtils, parentFolder )

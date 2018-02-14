@@ -149,7 +149,7 @@ std::string firstFolder( const std::string& path )
 
 std::string removePath( const std::string& fullPath, const std::string& toRemove )
 {
-    if ( toRemove.length() == 0 )
+    if ( toRemove.length() == 0 || toRemove.length() > fullPath.length() )
         return fullPath;
     auto pos = fullPath.find( toRemove );
     if ( pos == std::string::npos )
