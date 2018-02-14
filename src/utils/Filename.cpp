@@ -151,7 +151,10 @@ std::string removePath( const std::string& fullPath, const std::string& toRemove
 {
     if ( toRemove.length() == 0 )
         return fullPath;
-    auto pos = fullPath.find( toRemove ) + toRemove.length();
+    auto pos = fullPath.find( toRemove );
+    if ( pos == std::string::npos )
+        return fullPath;
+    pos += toRemove.length();
     while ( fullPath[pos] == DIR_SEPARATOR
 #ifdef _WIN32
                 || fullPath[pos] == '/'
