@@ -75,7 +75,7 @@ bool FsDiscoverer::discover( const std::string& entryPoint )
 
     std::shared_ptr<fs::IDirectory> fsDir = m_fsFactory->createDirectory( entryPoint );
     auto fsDirMrl = fsDir->mrl(); // Saving MRL now since we might need it after fsDir is moved
-    auto f = Folder::fromMrl( m_ml, entryPoint );
+    auto f = Folder::fromMrl( m_ml, fsDirMrl );
     // If the folder exists, we assume it will be handled by reload()
     if ( f != nullptr )
         return true;
@@ -89,11 +89,11 @@ bool FsDiscoverer::discover( const std::string& entryPoint )
     }
     catch ( std::system_error& ex )
     {
-        LOG_WARN( entryPoint, " discovery aborted because of a filesystem error: ", ex.what() );
+        LOG_WARN( fsDirMrl, " discovery aborted because of a filesystem error: ", ex.what() );
     }
     catch ( sqlite::errors::ConstraintViolation& ex )
     {
-        LOG_WARN( entryPoint, " discovery aborted (assuming blacklisted folder): ", ex.what() );
+        LOG_WARN( fsDirMrl, " discovery aborted (assuming blacklisted folder): ", ex.what() );
     }
     catch ( DeviceRemovedException& )
     {
