@@ -27,6 +27,7 @@
 #include "Directory.h"
 #include "utils/Charsets.h"
 #include "utils/Filename.h"
+#include "utils/Url.h"
 #include "factory/IFileSystem.h"
 #include "File.h"
 #include "logging/Logger.h"
@@ -44,8 +45,10 @@ namespace fs
 
 Directory::Directory( const std::string& mrl , factory::IFileSystem& fsFactory )
     : CommonDirectory( fsFactory )
-    , m_mrl( mrl )
 {
+    m_path = utils::file::toFolderPath( toAbsolute( utils::file::toLocalPath( mrl ) ) );
+    assert( *m_path.crbegin() == '/' );
+    m_mrl = utils::file::toMrl( m_path );
 }
 
 const std::string& Directory::mrl() const
@@ -55,15 +58,14 @@ const std::string& Directory::mrl() const
 
 void Directory::read() const
 {
-    const auto path = toAbsolute( utils::file::toLocalPath( m_mrl ) );
 #if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP)
     WIN32_FIND_DATA f;
-    auto pattern = path + '*';
+    auto pattern = m_path + '*';
     auto wpattern = charset::ToWide( pattern.c_str() );
     auto h = FindFirstFile( wpattern.get(), &f );
     if ( h == INVALID_HANDLE_VALUE )
     {
-        LOG_ERROR( "Failed to browse ", path );
+        LOG_ERROR( "Failed to browse ", m_path );
         throw std::system_error( GetLastError(), std::generic_category(), "Failed to browse through directory" );
     }
     do
@@ -71,19 +73,20 @@ void Directory::read() const
         auto file = charset::FromWide( f.cFileName );
         if ( file[0] == '.' )
             continue;
-        auto fullpath = path + file.get();
         if ( ( f.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
-            m_dirs.emplace_back( m_fsFactory.createDirectory( utils::file::toMrl( fullpath ) ) );
+            m_dirs.emplace_back( m_fsFactory.createDirectory( m_path +
+                                        utils::url::encode( fullpath ) ) );
         else
-            m_files.emplace_back( std::make_shared<File>( fullpath ) );
+        {
+            m_files.emplace_back( std::make_shared<File>( m_path + file.get() ) );
+        }
     } while ( FindNextFile( h, &f ) != 0 );
     FindClose( h );
 #else
     // We must remove the trailing /
     // https://msdn.microsoft.com/en-us/library/windows/desktop/aa363858(v=vs.85).aspx
     // «Do not use a trailing backslash (\), which indicates the root directory of a drive»
-    assert( *path.rbegin() == '\\' );
-    auto tmpPath = path.substr( 0, path.length() - 1 );
+    auto tmpPath = path.substr( 0, m_path.length() - 1 );
     auto wpath = charset::ToWide( tmpPath.c_str() );
 
     CREATEFILE2_EXTENDED_PARAMETERS params{};
@@ -91,7 +94,7 @@ void Directory::read() const
     auto handle = CreateFile2( wpath.get(), GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, &params );
     if ( handle == INVALID_HANDLE_VALUE )
     {
-        LOG_ERROR( "Failed to open directory ", path );
+        LOG_ERROR( "Failed to open directory ", m_path );
         throw std::system_error( GetLastError(), std::generic_category(), "Failed to open directory" );
     }
 
@@ -122,18 +125,17 @@ void Directory::read() const
                     throw std::bad_alloc();
                 continue;
             }
-            LOG_ERROR( "Failed to browse ", path, ". GetLastError(): ", GetLastError() );
+            LOG_ERROR( "Failed to browse ", m_path, ". GetLastError(): ", GetLastError() );
             throw std::system_error( GetLastError(), std::generic_category(), "Failed to browse through directory" );
         }
 
         auto file = charset::FromWide( dirInfo->FileName );
         if ( file[0] == '.' && strcasecmp( file.get(), ".nomedia" ) )
             continue;
-        auto path = path + file.get();
         if ( ( dirInfo->FileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
-            m_dirs.emplace_back( m_fsFactory.createDirectory( utils::file::toMrl( path ) ) );
+            m_dirs.emplace_back( m_fsFactory.createDirectory( m_mrl + utils::url::encode( file.get() ) ) );
         else
-            m_files.emplace_back( std::make_shared<File>( path ) );
+            m_files.emplace_back( std::make_shared<File>( m_path + file.get()) );
     }
 #endif
 }

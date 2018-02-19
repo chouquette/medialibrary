@@ -44,6 +44,7 @@ private:
 
 private:
     std::string m_mrl;
+    std::string m_path;
 };
 
 }

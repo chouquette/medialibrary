@@ -30,6 +30,7 @@
 #include "filesystem/unix/File.h"
 #include "logging/Logger.h"
 #include "utils/Filename.h"
+#include "utils/Url.h"
 
 #include <cstring>
 #include <cstdlib>
@@ -47,8 +48,10 @@ namespace fs
 
 Directory::Directory( const std::string& mrl, factory::IFileSystem& fsFactory )
     : CommonDirectory( fsFactory )
-    , m_mrl( mrl )
 {
+    m_path = utils::file::toFolderPath( toAbsolute( utils::file::toLocalPath( mrl ) ) );
+    assert( *m_path.crbegin() == '/' );
+    m_mrl = utils::file::toMrl( m_path );
 }
 
 const std::string& Directory::mrl() const
@@ -58,11 +61,10 @@ const std::string& Directory::mrl() const
 
 void Directory::read() const
 {
-    const auto dirPath = toAbsolute( utils::file::toLocalPath( m_mrl ) );
-    std::unique_ptr<DIR, int(*)(DIR*)> dir( opendir( dirPath.c_str() ), closedir );
+    std::unique_ptr<DIR, int(*)(DIR*)> dir( opendir( m_path.c_str() ), closedir );
     if ( dir == nullptr )
     {
-        LOG_ERROR( "Failed to open directory ", dirPath );
+        LOG_ERROR( "Failed to open directory ", m_path );
         throw std::system_error( errno, std::generic_category(), "Failed to open directory" );
     }
 
@@ -73,7 +75,7 @@ void Directory::read() const
         if ( result->d_name[0] == '.' && strcasecmp( result->d_name, ".nomedia" ) != 0 )
             continue;
 
-        std::string path = dirPath + "/" + result->d_name;
+        std::string path = m_path + result->d_name;
 
         struct stat s;
         if ( lstat( path.c_str(), &s ) != 0 )
@@ -89,26 +91,20 @@ void Directory::read() const
         }
         try
         {
-            auto absPath = toAbsolute( path );
-
             if ( S_ISDIR( s.st_mode ) )
-            {
-                if ( *absPath.crbegin() != '/' )
-                    absPath += '/';
-                //FIXME: This will use toAbsolute again in the constructor.
-                m_dirs.emplace_back( std::make_shared<Directory>( utils::file::toMrl( absPath ), m_fsFactory ) );
-            }
+                m_dirs.emplace_back( std::make_shared<Directory>(
+                            m_mrl + utils::url::encode( result->d_name ), m_fsFactory ) );
             else
-                m_files.emplace_back( std::make_shared<File>( absPath, s ) );
+                m_files.emplace_back( std::make_shared<File>( path, s ) );
         }
         catch ( const std::system_error& err )
         {
             if ( err.code() == std::errc::no_such_file_or_directory )
             {
-                LOG_WARN( "Ignoring ", dirPath, ": ", err.what() );
+                LOG_WARN( "Ignoring ", path, ": ", err.what() );
                 continue;
             }
-            LOG_ERROR( "Fatal error while reading ", dirPath, ": ", err.what() );
+            LOG_ERROR( "Fatal error while reading ", path, ": ", err.what() );
             throw;
         }
     }
