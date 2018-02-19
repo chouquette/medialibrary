@@ -28,12 +28,13 @@
 
 #include <stdexcept>
 #include <cstdlib>
+#include <cstring>
 
 namespace
 {
 inline bool isSafe( char c )
 {
-    return c == '.' || c == '-' || c == '_' || c == '~' || c == '/';
+    return strchr( ".-_~/()&!$*+,;='@:", c ) != NULL;
 }
 }
 
