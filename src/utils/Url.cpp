@@ -29,6 +29,14 @@
 #include <stdexcept>
 #include <cstdlib>
 
+namespace
+{
+inline bool isSafe( char c )
+{
+    return c == '.' || c == '-' || c == '_' || c == '~' || c == '/';
+}
+}
+
 namespace medialibrary
 {
 namespace utils
@@ -72,7 +80,7 @@ std::string encode( const std::string& str )
                  ( c >= 'a' && c <= 'z' ) ||
                  ( c >= 'A' && c <= 'Z' ) ||
                  ( c >= '0' && c <= '9' ) ||
-                 c == '.' || c == '-' || c == '_' || c == '~' || c == '/' )
+                 isSafe( c ) == true )
              )
         {
             res.push_back( c );
