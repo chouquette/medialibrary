@@ -318,14 +318,14 @@ void MetadataParser::addPlaylistElement( parser::Task& task, const std::shared_p
         auto probePtr = std::unique_ptr<prober::PathProbe>( new prober::PathProbe{ utils::file::stripScheme( mrl ),
                                                                                    isDirectory, playlistPtr, parentFolder,
                                                                                    utils::file::stripScheme( directoryMrl ), index, true } );
-        auto discoverer = FsDiscoverer( fsFactory, m_ml, nullptr, std::move( probePtr ) );
+        FsDiscoverer discoverer( fsFactory, m_ml, nullptr, std::move( probePtr ) );
         discoverer.reload( entryPoint );
         return;
     }
     auto probePtr = std::unique_ptr<prober::PathProbe>( new prober::PathProbe{ utils::file::stripScheme( mrl ),
                                                                                isDirectory, playlistPtr, parentFolder,
                                                                                utils::file::stripScheme( directoryMrl ), index, false } );
-    auto discoverer = FsDiscoverer( fsFactory, m_ml, nullptr, std::move( probePtr ) );
+    FsDiscoverer discoverer( fsFactory, m_ml, nullptr, std::move( probePtr ) );
     if ( parentKnown == false )
     {
         discoverer.discover( entryPoint );
