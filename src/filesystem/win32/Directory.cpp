@@ -71,7 +71,7 @@ void Directory::read() const
     do
     {
         auto file = charset::FromWide( f.cFileName );
-        if ( file[0] == '.' )
+        if ( file[0] == '.' && strcasecmp( file.get(), ".nomedia" ) )
             continue;
         if ( ( f.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
             m_dirs.emplace_back( m_fsFactory.createDirectory( m_path +
