@@ -539,6 +539,27 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
             continue;
         }
 
+        // Assume album files will be in the same folder.
+        auto newFileFolder = utils::file::directory( task.file->mrl() );
+        auto trackFiles = tracks[0]->files();
+        bool differentFolder = false;
+        for ( auto& f : trackFiles )
+        {
+            auto candidateFolder = utils::file::directory( f->mrl() );
+            if ( candidateFolder != newFileFolder )
+            {
+                differentFolder = true;
+                break;
+            }
+        }
+        // We now have a candidate by the same artist in the same folder, assume it to be
+        // a positive match.
+        if ( differentFolder == false )
+        {
+            ++it;
+            continue;
+        }
+
         // Attempt to discriminate by date, but only for the same artists.
         // Not taking the artist in consideration would cause compilation to
         // create multiple albums, especially when track are only partially
@@ -563,26 +584,15 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
                 }
             }
         }
-
-        // Assume album files will be in the same folder.
-        auto newFileFolder = utils::file::directory( task.file->mrl() );
-        auto trackFiles = tracks[0]->files();
-        bool excluded = false;
-        for ( auto& f : trackFiles )
-        {
-            auto candidateFolder = utils::file::directory( f->mrl() );
-            if ( candidateFolder != newFileFolder )
-            {
-                excluded = true;
-                break;
-            }
-        }
-        if ( excluded == true )
-        {
-            it = albums.erase( it );
-            continue;
-        }
-        ++it;
+        // The candidate is :
+        // - in a different folder
+        // - not a multidisc album
+        // - Either:
+        //      - from the same artist & without a date to discriminate
+        //      - from the same artist & with a different date
+        //      - from different artists
+        // Assume it's a negative match.
+        it = albums.erase( it );
     }
     if ( albums.size() == 0 )
         return nullptr;
