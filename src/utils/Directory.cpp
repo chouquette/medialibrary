@@ -33,6 +33,7 @@
 
 #ifdef _WIN32
 # include <windows.h>
+#include "utils/Charsets.h"
 #else
 # include <cerrno>
 # include <sys/types.h>
