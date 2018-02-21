@@ -56,7 +56,8 @@ namespace
 bool isDirectory( const std::string& path )
 {
 #ifdef _WIN32
-    auto attr = GetFileAttributes( path.c_str() );
+    auto wpath = charset::ToWide( path.c_str() );
+    auto attr = GetFileAttributes( wpath.get() );
     if ( attr == INVALID_FILE_ATTRIBUTES )
     {
         DWORD errVal = GetLastError();
