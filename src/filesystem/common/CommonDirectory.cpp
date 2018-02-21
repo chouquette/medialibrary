@@ -61,8 +61,9 @@ std::shared_ptr<IDevice> CommonDirectory::device() const
     if ( m_device.isCached() == false )
     {
         auto d = m_fsFactory.createDeviceFromMrl( mrl() );
-        if( d != nullptr )
-            m_device = std::move( d );
+        if( d == nullptr )
+            return nullptr;
+        m_device = std::move( d );
     }
     return m_device.get();
 }
