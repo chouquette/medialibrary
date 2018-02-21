@@ -47,7 +47,7 @@ Directory::Directory( const std::string& mrl , factory::IFileSystem& fsFactory )
     : CommonDirectory( fsFactory )
 {
     m_path = utils::file::toFolderPath( toAbsolute( utils::file::toLocalPath( mrl ) ) );
-    assert( *m_path.crbegin() == '/' );
+    assert( *m_path.crbegin() == '/' || *m_path.crbegin() == '\\' );
     m_mrl = utils::file::toMrl( m_path );
 }
 
