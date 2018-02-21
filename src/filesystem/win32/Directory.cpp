@@ -73,13 +73,12 @@ void Directory::read() const
         auto file = charset::FromWide( f.cFileName );
         if ( file[0] == '.' && strcasecmp( file.get(), ".nomedia" ) )
             continue;
+        auto fullpath = m_path + file.get();
         if ( ( f.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
             m_dirs.emplace_back( m_fsFactory.createDirectory( m_path +
                                         utils::url::encode( fullpath ) ) );
         else
-        {
-            m_files.emplace_back( std::make_shared<File>( m_path + file.get() ) );
-        }
+            m_files.emplace_back( std::make_shared<File>( fullpath ) );
     } while ( FindNextFile( h, &f ) != 0 );
     FindClose( h );
 #else
