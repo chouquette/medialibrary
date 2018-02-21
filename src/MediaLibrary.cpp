@@ -799,6 +799,18 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 migrateModel7to8();
                 previousVersion = 8;
             }
+            if ( previousVersion == 8 )
+            {
+                // Multiple changes justify the rescan:
+                // - Changes in the way we chose to encode or not MRL, meaning
+                //   potentially all MRL are wrong (more precisely, will
+                //   mismatch what VLC expects, which makes playlist analysis
+                //   break.
+                // - Fix in the way we chose album candidates, meaning some
+                //   albums were likely to be wrongfully created.
+                forceRescan();
+                previousVersion = 9;
+            }
             // To be continued in the future!
 
             // Safety check: ensure we didn't forget a migration along the way

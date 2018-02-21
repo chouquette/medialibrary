@@ -138,8 +138,6 @@ TEST_F( DbModel, Upgrade7to8 )
     LoadFakeDB( SRC_DIR "/test/unittest/db_v7.sql" );
     auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    // V8 adds Artist::nb_tracks and should compute the values automatically
-    auto a = std::static_pointer_cast<Artist>( ml->artist( 3 ) );
-    ASSERT_NE( nullptr, a );
-    ASSERT_EQ( 5u, a->nbTracks() );
+    // Removed post migration tests starting with V9, since we force a re-scan,
+    // there is no content left to test
 }
