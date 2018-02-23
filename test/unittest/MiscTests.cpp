@@ -141,3 +141,13 @@ TEST_F( DbModel, Upgrade7to8 )
     // Removed post migration tests starting with V9, since we force a re-scan,
     // there is no content left to test
 }
+
+TEST_F( DbModel, Upgrade8to9 )
+{
+    LoadFakeDB( SRC_DIR "/test/unittest/db_v8.sql" );
+    auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
+    ASSERT_EQ( InitializeResult::Success, res );
+    // We expect the file-orphaned media to have been deleted
+    auto media = ml->files();
+    ASSERT_EQ( 1u, media.size() );
+}

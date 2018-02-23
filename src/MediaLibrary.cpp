@@ -806,14 +806,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
             }
             if ( previousVersion == 8 )
             {
-                // Multiple changes justify the rescan:
-                // - Changes in the way we chose to encode or not MRL, meaning
-                //   potentially all MRL are wrong (more precisely, will
-                //   mismatch what VLC expects, which makes playlist analysis
-                //   break.
-                // - Fix in the way we chose album candidates, meaning some
-                //   albums were likely to be wrongfully created.
-                forceRescan();
+                migrateModel8to9();
                 previousVersion = 9;
             }
             // To be continued in the future!
@@ -923,6 +916,32 @@ void MediaLibrary::migrateModel7to8()
     Media::createTriggers( getConn() );
     File::createTriggers( getConn() );
     t->commit();
+}
+
+void MediaLibrary::migrateModel8to9()
+{
+    // A bug in a previous migration caused our triggers to be missing for the
+    // first application run (after the migration).
+    // This could have caused media associated to deleted files not to be
+    // deleted as well, so let's do that now.
+    const std::string req = "DELETE FROM " + policy::MediaTable::Name + " "
+            "WHERE id_media IN "
+            "(SELECT id_media FROM " + policy::MediaTable::Name + " m LEFT JOIN " +
+                policy::FileTable::Name + " f ON f.media_id = m.id_media "
+                "WHERE f.media_id IS NULL)";
+
+    // Don't check for the return value, we don't mind if nothing deleted.
+    // Quite the opposite actually :)
+    sqlite::Tools::executeDelete( getConn(), req );
+
+    // Multiple changes justify the rescan:
+    // - Changes in the way we chose to encode or not MRL, meaning
+    //   potentially all MRL are wrong (more precisely, will
+    //   mismatch what VLC expects, which makes playlist analysis
+    //   break.
+    // - Fix in the way we chose album candidates, meaning some
+    //   albums were likely to be wrongfully created.
+    forceRescan();
 }
 
 void MediaLibrary::reload()
