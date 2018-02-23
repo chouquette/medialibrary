@@ -362,16 +362,16 @@ void Album::createTable( sqlite::Connection* dbConnection )
                 "title,"
                 "artist"
             ")";
-    const std::string indexReq = "CREATE INDEX IF NOT EXISTS album_artist_id_idx ON " +
-            policy::AlbumTable::Name + "(artist_id)";
+
     sqlite::Tools::executeRequest( dbConnection, req );
     sqlite::Tools::executeRequest( dbConnection, reqRel );
     sqlite::Tools::executeRequest( dbConnection, vtableReq );
-    sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
 
 void Album::createTriggers( sqlite::Connection* dbConnection )
 {
+    const std::string indexReq = "CREATE INDEX IF NOT EXISTS album_artist_id_idx ON " +
+            policy::AlbumTable::Name + "(artist_id)";
     static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_album_present AFTER UPDATE OF "
             "is_present ON " + policy::AlbumTrackTable::Name +
             " BEGIN "
@@ -415,6 +415,7 @@ void Album::createTriggers( sqlite::Connection* dbConnection )
             " BEGIN"
             " DELETE FROM " + policy::AlbumTable::Name + "Fts WHERE rowid = old.id_album;"
             " END";
+    sqlite::Tools::executeRequest( dbConnection, indexReq );
     sqlite::Tools::executeRequest( dbConnection, triggerReq );
     sqlite::Tools::executeRequest( dbConnection, deleteTriggerReq );
     sqlite::Tools::executeRequest( dbConnection, updateAddTrackTriggerReq );
