@@ -916,6 +916,8 @@ void MediaLibrary::migrateModel7to8()
         sqlite::Tools::executeRequest( getConn(), req );
     // Re-create triggers removed in the process
     Artist::createTriggers( getConn(), 8u );
+    Media::createTriggers( getConn() );
+    File::createTriggers( getConn() );
     t->commit();
 }
 
