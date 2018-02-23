@@ -93,6 +93,13 @@ void Folder::createTable( sqlite::Connection* connection)
                                "(id_folder) ON DELETE CASCADE,"
                                "UNIQUE(folder_id) ON CONFLICT FAIL"
                                ")";
+
+    sqlite::Tools::executeRequest( connection, req );
+    sqlite::Tools::executeRequest( connection, exclEntryReq );
+}
+
+void Folder::createTriggers( sqlite::Connection* connection )
+{
     std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_device_present AFTER UPDATE OF is_present ON "
             + policy::DeviceTable::Name +
             " WHEN old.is_present != new.is_present"
@@ -103,8 +110,7 @@ void Folder::createTable( sqlite::Connection* connection)
             policy::FolderTable::Name + " (device_id)";
     std::string parentFolderIndexReq = "CREATE INDEX IF NOT EXISTS parent_folder_id_idx ON " +
             policy::FolderTable::Name + " (parent_id)";
-    sqlite::Tools::executeRequest( connection, req );
-    sqlite::Tools::executeRequest( connection, exclEntryReq );
+
     sqlite::Tools::executeRequest( connection, triggerReq );
     sqlite::Tools::executeRequest( connection, deviceIndexReq );
     sqlite::Tools::executeRequest( connection, parentFolderIndexReq );

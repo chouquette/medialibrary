@@ -162,6 +162,7 @@ void MediaLibrary::createAllTables()
 void MediaLibrary::createAllTriggers()
 {
     auto dbModelVersion = m_settings.dbModelVersion();
+    Folder::createTriggers( m_dbConnection.get() );
     Album::createTriggers( m_dbConnection.get() );
     AlbumTrack::createTriggers( m_dbConnection.get() );
     Artist::createTriggers( m_dbConnection.get(), dbModelVersion );
