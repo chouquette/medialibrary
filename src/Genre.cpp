@@ -110,6 +110,12 @@ void Genre::createTable( sqlite::Connection* dbConn )
                 "name"
             ")";
 
+    sqlite::Tools::executeRequest( dbConn, req );
+    sqlite::Tools::executeRequest( dbConn, vtableReq );
+}
+
+void Genre::createTriggers( sqlite::Connection* dbConn )
+{
     const std::string vtableInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_genre_fts"
             " AFTER INSERT ON " + policy::GenreTable::Name +
             " BEGIN"
@@ -120,14 +126,6 @@ void Genre::createTable( sqlite::Connection* dbConn )
             " BEGIN"
             " DELETE FROM " + policy::GenreTable::Name + "Fts WHERE rowid = old.id_genre;"
             " END";
-    sqlite::Tools::executeRequest( dbConn, req );
-    sqlite::Tools::executeRequest( dbConn, vtableReq );
-    sqlite::Tools::executeRequest( dbConn, vtableInsertTrigger );
-    sqlite::Tools::executeRequest( dbConn, vtableDeleteTrigger );
-}
-
-void Genre::createTriggers( sqlite::Connection* dbConn )
-{
     const std::string onGenreChanged = "CREATE TRIGGER IF NOT EXISTS on_track_genre_changed AFTER UPDATE OF "
             " genre_id ON " + policy::AlbumTrackTable::Name +
             " BEGIN"
@@ -149,6 +147,8 @@ void Genre::createTriggers( sqlite::Connection* dbConn )
             " DELETE FROM " + policy::GenreTable::Name + " WHERE nb_tracks = 0;"
             " END";
 
+    sqlite::Tools::executeRequest( dbConn, vtableInsertTrigger );
+    sqlite::Tools::executeRequest( dbConn, vtableDeleteTrigger );
     sqlite::Tools::executeRequest( dbConn, onGenreChanged );
     sqlite::Tools::executeRequest( dbConn, onTrackCreated );
     sqlite::Tools::executeRequest( dbConn, onTrackDeleted );
