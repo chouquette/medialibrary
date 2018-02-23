@@ -535,8 +535,7 @@ void Media::createTable( sqlite::Connection* connection )
             "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
             "is_present BOOLEAN NOT NULL DEFAULT 1"
             ")";
-    const std::string indexReq = "CREATE INDEX IF NOT EXISTS index_last_played_date ON "
-            + policy::MediaTable::Name + "(last_played_date DESC)";
+
     const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
                 + policy::MediaTable::Name + "Fts USING FTS3("
                 "title,"
@@ -549,13 +548,14 @@ void Media::createTable( sqlite::Connection* connection )
             "PRIMARY KEY (id_media, type)"
             ")";
     sqlite::Tools::executeRequest( connection, req );
-    sqlite::Tools::executeRequest( connection, indexReq );
     sqlite::Tools::executeRequest( connection, vtableReq );
     sqlite::Tools::executeRequest( connection, metadataReq );
 }
 
 void Media::createTriggers( sqlite::Connection* connection )
 {
+    const std::string indexReq = "CREATE INDEX IF NOT EXISTS index_last_played_date ON "
+            + policy::MediaTable::Name + "(last_played_date DESC)";
     static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS has_files_present AFTER UPDATE OF "
             "is_present ON " + policy::FileTable::Name +
             " BEGIN "
@@ -589,6 +589,8 @@ void Media::createTriggers( sqlite::Connection* connection )
               " BEGIN"
               " UPDATE " + policy::MediaTable::Name + "Fts SET title = new.title WHERE rowid = new.id_media;"
               " END";
+
+    sqlite::Tools::executeRequest( connection, indexReq );
     sqlite::Tools::executeRequest( connection, triggerReq );
     sqlite::Tools::executeRequest( connection, triggerReq2 );
     sqlite::Tools::executeRequest( connection, vtableInsertTrigger );
