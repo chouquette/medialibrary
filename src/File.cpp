@@ -174,6 +174,12 @@ void File::createTable( sqlite::Connection* dbConnection )
             + "(id_folder) ON DELETE CASCADE,"
             "UNIQUE( mrl, folder_id ) ON CONFLICT FAIL"
         ")";
+
+    sqlite::Tools::executeRequest( dbConnection, req );
+}
+
+void File::createTriggers(sqlite::Connection* dbConnection)
+{
     std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_folder_present AFTER UPDATE OF is_present ON "
             + policy::FolderTable::Name +
             " BEGIN"
@@ -183,7 +189,6 @@ void File::createTable( sqlite::Connection* dbConnection )
             policy::FileTable::Name + "(media_id)";
     std::string folderIndexReq = "CREATE INDEX IF NOT EXISTS file_folder_id_index ON " +
             policy::FileTable::Name + "(folder_id)";
-    sqlite::Tools::executeRequest( dbConnection, req );
     sqlite::Tools::executeRequest( dbConnection, triggerReq );
     sqlite::Tools::executeRequest( dbConnection, mediaIndexReq );
     sqlite::Tools::executeRequest( dbConnection, folderIndexReq );

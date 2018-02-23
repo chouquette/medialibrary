@@ -165,6 +165,7 @@ void MediaLibrary::createAllTriggers()
     Album::createTriggers( m_dbConnection.get() );
     Artist::createTriggers( m_dbConnection.get(), dbModelVersion );
     Media::createTriggers( m_dbConnection.get() );
+    File::createTriggers( m_dbConnection.get() );
     Genre::createTriggers( m_dbConnection.get() );
     Playlist::createTriggers( m_dbConnection.get() );
 }
