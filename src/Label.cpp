@@ -92,14 +92,19 @@ void Label::createTable( sqlite::Connection* dbConnection )
             "PRIMARY KEY (label_id, media_id),"
             "FOREIGN KEY(label_id) REFERENCES Label(id_label) ON DELETE CASCADE,"
             "FOREIGN KEY(media_id) REFERENCES Media(id_media) ON DELETE CASCADE);";
+
+    sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection, relReq );
+}
+
+void Label::createTriggers( sqlite::Connection* dbConnection )
+{
     const std::string ftsTrigger = "CREATE TRIGGER IF NOT EXISTS delete_label_fts "
             "BEFORE DELETE ON " + policy::LabelTable::Name +
             " BEGIN"
             " UPDATE " + policy::MediaTable::Name + "Fts SET labels = TRIM(REPLACE(labels, old.name, ''))"
             " WHERE labels MATCH old.name;"
             " END";
-    sqlite::Tools::executeRequest( dbConnection, req );
-    sqlite::Tools::executeRequest( dbConnection, relReq );
     sqlite::Tools::executeRequest( dbConnection, ftsTrigger );
 }
 

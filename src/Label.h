@@ -58,6 +58,7 @@ class Label : public ILabel, public DatabaseHelpers<Label, policy::LabelTable>
 
         static LabelPtr create( MediaLibraryPtr ml, const std::string& name );
         static void createTable( sqlite::Connection* dbConnection );
+        static void createTriggers( sqlite::Connection* dbConnection );
 
     private:
         MediaLibraryPtr m_ml;
