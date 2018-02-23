@@ -68,6 +68,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         virtual std::shared_ptr<IMedia> media() override;
 
         static void createTable( sqlite::Connection* dbConnection );
+        static void createTriggers( sqlite::Connection* dbConnection );
         static std::shared_ptr<AlbumTrack> create(MediaLibraryPtr ml, int64_t albumId,
                                     std::shared_ptr<Media> media, unsigned int trackNb,
                                     unsigned int discNumber, int64_t artistId, int64_t genreId,

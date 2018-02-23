@@ -105,6 +105,12 @@ void AlbumTrack::createTable( sqlite::Connection* dbConnection )
                 "FOREIGN KEY (album_id) REFERENCES Album(id_album) "
                     " ON DELETE CASCADE"
             ")";
+
+    sqlite::Tools::executeRequest( dbConnection, req );
+}
+
+void AlbumTrack::createTriggers(sqlite::Connection* dbConnection)
+{
     const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_track_present"
             "AFTER UPDATE OF is_present "
             "ON " + policy::MediaTable::Name + " "
@@ -116,8 +122,6 @@ void AlbumTrack::createTable( sqlite::Connection* dbConnection )
             "album_media_artist_genre_album_idx ON " +
             policy::AlbumTrackTable::Name +
             "(media_id, artist_id, genre_id, album_id)";
-
-    sqlite::Tools::executeRequest( dbConnection, req );
     sqlite::Tools::executeRequest( dbConnection, triggerReq );
     sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
