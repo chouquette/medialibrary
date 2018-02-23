@@ -58,6 +58,12 @@ void History::createTable( sqlite::Connection* dbConnection )
                 "FOREIGN KEY (id_media) REFERENCES " + policy::MediaTable::Name +
                 "(id_media) ON DELETE CASCADE"
             ")";
+    // Don't index the id_media field, we don't want to select history records using the media_id
+    sqlite::Tools::executeRequest( dbConnection, req );
+}
+
+void History::createTriggers(sqlite::Connection* dbConnection)
+{
     const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS limit_nb_records AFTER INSERT ON "
             + policy::HistoryTable::Name +
             " BEGIN "
@@ -65,8 +71,6 @@ void History::createTable( sqlite::Connection* dbConnection )
                 "(SELECT id_media FROM " + policy::HistoryTable::Name +
                 " ORDER BY insertion_date DESC LIMIT -1 OFFSET " + std::to_string( MaxEntries ) + ");"
             " END";
-    // Don't index the id_media field, we don't want to select history records using the media_id
-    sqlite::Tools::executeRequest( dbConnection, req );
     sqlite::Tools::executeRequest( dbConnection, triggerReq );
 }
 

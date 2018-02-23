@@ -170,6 +170,7 @@ void MediaLibrary::createAllTriggers()
     File::createTriggers( m_dbConnection.get() );
     Genre::createTriggers( m_dbConnection.get() );
     Playlist::createTriggers( m_dbConnection.get() );
+    History::createTriggers( m_dbConnection.get() );
 }
 
 template <typename T>
