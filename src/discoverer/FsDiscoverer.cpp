@@ -73,7 +73,16 @@ bool FsDiscoverer::discover( const std::string& entryPoint )
     if ( m_fsFactory->isMrlSupported( entryPoint ) == false )
         return false;
 
-    std::shared_ptr<fs::IDirectory> fsDir = m_fsFactory->createDirectory( entryPoint );
+    std::shared_ptr<fs::IDirectory> fsDir;
+    try
+    {
+        fsDir = m_fsFactory->createDirectory( entryPoint );
+    }
+    catch ( std::system_error& ex )
+    {
+        LOG_WARN( entryPoint, " discovery aborted because of a filesystem error: ", ex.what() );
+        return true;
+    }
     auto fsDirMrl = fsDir->mrl(); // Saving MRL now since we might need it after fsDir is moved
     auto f = Folder::fromMrl( m_ml, fsDirMrl );
     // If the folder exists, we assume it will be handled by reload()
@@ -86,10 +95,6 @@ bool FsDiscoverer::discover( const std::string& entryPoint )
         // Fetch files explicitly
         fsDir->files();
         return addFolder( std::move( fsDir ), m_probe->getFolderParent().get() );
-    }
-    catch ( std::system_error& ex )
-    {
-        LOG_WARN( fsDirMrl, " discovery aborted because of a filesystem error: ", ex.what() );
     }
     catch ( sqlite::errors::ConstraintViolation& ex )
     {
@@ -106,17 +111,23 @@ bool FsDiscoverer::discover( const std::string& entryPoint )
 void FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
 {
     auto mrl = f->mrl();
-    auto folder = m_fsFactory->createDirectory( mrl );
-    assert( folder->device() != nullptr );
-    if ( folder->device() == nullptr )
-        return;
+
     try
     {
+        auto folder = m_fsFactory->createDirectory( mrl );
+        assert( folder->device() != nullptr );
+        if ( folder->device() == nullptr )
+            return;
         checkFolder( std::move( folder ), std::move( f ), false );
     }
     catch ( DeviceRemovedException& )
     {
         LOG_INFO( "Reloading of ", mrl, " was stopped after the device was removed" );
+    }
+    catch ( const std::system_error& ex )
+    {
+        LOG_INFO( "Failed to instanciate a directory for ", mrl, ": ", ex.what(),
+                  ". Can't reload the folder." );
     }
 }
 

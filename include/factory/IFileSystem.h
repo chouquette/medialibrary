@@ -43,9 +43,9 @@ namespace factory
         virtual ~IFileSystem() = default;
         ///
         /// \brief createDirectory creates a representation of a directory
-        /// \note This method can't fail. The representation of a directory will be created
-        ///       but subsequent calls to IDirectory methods may fail if the directory
-        ///       doesn't exist, or any other I/O issue occurs
+        /// \note This method can fail by throwing an exception if the
+        ///       directory doesn't exist, or any other I/O issue occurs.
+        ///       Once created, the path of this IDirectory will be sanitized.
         /// \param path An absolute path to a directory
         ///
         virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& path ) = 0;

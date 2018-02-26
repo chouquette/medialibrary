@@ -161,8 +161,16 @@ bool Folder::blacklist( MediaLibraryPtr ml, const std::string& mrl )
         auto fsFactory = ml->fsFactoryForMrl( mrl );
         if ( fsFactory == nullptr )
             return false;
-        auto folderFs = fsFactory->createDirectory( mrl );
-        assert( folderFs != nullptr );
+        std::shared_ptr<fs::IDirectory> folderFs;
+        try
+        {
+            folderFs = fsFactory->createDirectory( mrl );
+        }
+        catch ( std::system_error& ex )
+        {
+            LOG_ERROR( "Failed to instantiate a directory to ban folder: ", ex.what() );
+            return false;
+        }
         auto deviceFs = folderFs->device();
         if ( deviceFs == nullptr )
         {
@@ -202,8 +210,17 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
     auto fsFactory = ml->fsFactoryForMrl( mrl );
     if ( fsFactory == nullptr )
         return nullptr;
-    auto folderFs = fsFactory->createDirectory( mrl );
-    assert( folderFs != nullptr );
+    std::shared_ptr<fs::IDirectory> folderFs;
+    try
+    {
+        folderFs = fsFactory->createDirectory( mrl );
+    }
+    catch ( const std::system_error& ex )
+    {
+        LOG_ERROR( "Failed to instanciate a folder for mrl: ", mrl, ": ", ex.what() );
+        return nullptr;
+    }
+
     auto deviceFs = folderFs->device();
     if ( deviceFs == nullptr )
     {

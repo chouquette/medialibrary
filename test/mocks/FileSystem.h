@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <system_error>
 
 #include "filesystem/IDirectory.h"
 #include "filesystem/IFile.h"
@@ -165,7 +166,10 @@ struct FileSystemFactory : public factory::IFileSystem
         auto d = device( mrl );
         if ( d == nullptr )
             return std::make_shared<Directory>( "", nullptr );
-        return d->directory( mrl );
+        auto dir = d->directory( mrl );
+        if ( dir == nullptr )
+            throw std::system_error{ ENOENT, std::generic_category(), "Mock directory" };
+        return dir;
     }
 
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override
@@ -345,7 +349,7 @@ class NoopFsFactory : public factory::IFileSystem
 public:
     virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& ) override
     {
-        return nullptr;
+        throw std::system_error{ ENOENT, std::generic_category(), "Mock directory" };
     }
 
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& ) override

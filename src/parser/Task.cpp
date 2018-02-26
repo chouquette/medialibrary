@@ -34,6 +34,7 @@
 #include "Playlist.h"
 #include "parser/Task.h"
 #include "utils/Filename.h"
+#include "utils/Url.h"
 
 namespace medialibrary
 {
@@ -137,9 +138,15 @@ bool Task::restoreLinkedEntities( )
     // ie. have we run the MetadataParser service, at least partially
     file = File::fetch( m_ml, m_fileId );
 
-    parentFolderFs = fsFactory->createDirectory( utils::file::directory( mrl ) );
-    if ( parentFolderFs == nullptr )
+    try
+    {
+        parentFolderFs = fsFactory->createDirectory( utils::file::directory( mrl ) );
+    }
+    catch ( const std::system_error& ex )
+    {
+        LOG_ERROR( "Failed to restore task: ", ex.what() );
         return false;
+    }
 
     try
     {
