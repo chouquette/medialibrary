@@ -958,8 +958,10 @@ void MediaLibrary::migrateModel9to10()
     auto t = getConn()->newTransaction();
     for ( const auto& f : files )
     {
-        auto newMrl = utils::url::encode( utils::url::decode( f->mrl() ) );
-        LOG_INFO( "Converting ", f->mrl(), " to ", newMrl );
+        // We must not call mrl() from here. We might not have all devices yet,
+        // and calling mrl would crash for files stored on removable devices.
+        auto newMrl = utils::url::encode( utils::url::decode( f->rawMrl() ) );
+        LOG_INFO( "Converting ", f->rawMrl(), " to ", newMrl );
         f->setMrl( newMrl );
     }
     t->commit();

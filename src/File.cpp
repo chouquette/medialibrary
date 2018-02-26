@@ -108,6 +108,11 @@ const std::string& File::mrl() const
     return m_fullPath;
 }
 
+const std::string& File::rawMrl() const
+{
+    return m_mrl;
+}
+
 void File::setMrl( const std::string& mrl )
 {
     if ( m_mrl == mrl )
