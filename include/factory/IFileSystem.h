@@ -46,9 +46,9 @@ namespace factory
         /// \note This method can fail by throwing an exception if the
         ///       directory doesn't exist, or any other I/O issue occurs.
         ///       Once created, the path of this IDirectory will be sanitized.
-        /// \param path An absolute path to a directory
+        /// \param mrl An MRL describing the desired directory
         ///
-        virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& path ) = 0;
+        virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& mrl ) = 0;
         ///
         /// \brief createDevice creates a representation of a device
         /// \param uuid The device UUID
