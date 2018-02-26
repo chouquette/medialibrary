@@ -54,6 +54,7 @@
 #include "database/SqliteTools.h"
 #include "database/SqliteConnection.h"
 #include "utils/Filename.h"
+#include "utils/Url.h"
 #include "VideoTrack.h"
 
 // Discoverers:
@@ -809,6 +810,11 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 migrateModel8to9();
                 previousVersion = 9;
             }
+            if ( previousVersion == 9 )
+            {
+                migrateModel9to10();
+                previousVersion = 10;
+            }
             // To be continued in the future!
 
             // Safety check: ensure we didn't forget a migration along the way
@@ -941,6 +947,22 @@ void MediaLibrary::migrateModel8to9()
     //   break.
     // - Fix in the way we chose album candidates, meaning some
     //   albums were likely to be wrongfully created.
+    forceRescan();
+}
+
+void MediaLibrary::migrateModel9to10()
+{
+    const std::string req = "SELECT * FROM " + policy::FileTable::Name +
+            " WHERE mrl LIKE '%#%%' ESCAPE '#'";
+    auto files = File::fetchAll<File>( this, req );
+    auto t = getConn()->newTransaction();
+    for ( const auto& f : files )
+    {
+        auto newMrl = utils::url::encode( utils::url::decode( f->mrl() ) );
+        LOG_INFO( "Converting ", f->mrl(), " to ", newMrl );
+        f->setMrl( newMrl );
+    }
+    t->commit();
     forceRescan();
 }
 
