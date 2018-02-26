@@ -108,6 +108,17 @@ const std::string& File::mrl() const
     return m_fullPath;
 }
 
+void File::setMrl( const std::string& mrl )
+{
+    if ( m_mrl == mrl )
+        return;
+    const static std::string req = "UPDATE " + policy::FileTable::Name + " SET "
+            "mrl = ? WHERE id_file = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, mrl, m_id ) == false )
+        return;
+    m_mrl = mrl;
+}
+
 IFile::Type File::type() const
 {
     return m_type;

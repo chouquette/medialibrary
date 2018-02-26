@@ -75,3 +75,18 @@ TEST_F( Files, Media )
     f = std::static_pointer_cast<File>( files[0] );
     ASSERT_EQ( m->id(), f->media()->id() );
 }
+
+TEST_F( Files, SetMrl )
+{
+    const std::string newMrl = "/sea/otters/rules.mkv";
+    f->setMrl( newMrl );
+    ASSERT_EQ( newMrl, f->mrl() );
+
+    Reload();
+
+    auto files = m->files();
+    ASSERT_EQ( 1u, files.size() );
+    f = std::static_pointer_cast<File>( files[0] );
+    ASSERT_EQ( f->mrl(), newMrl );
+
+}

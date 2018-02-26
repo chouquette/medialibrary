@@ -54,6 +54,7 @@ public:
     File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type, const std::string& mrl );
     virtual int64_t id() const override;
     virtual const std::string& mrl() const override;
+    void setMrl( const std::string& mrl );
     virtual Type type() const override;
     virtual unsigned int lastModificationDate() const override;
     virtual unsigned int size() const override;
