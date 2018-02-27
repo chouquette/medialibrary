@@ -314,7 +314,14 @@ void MetadataParser::addPlaylistElement( parser::Task& task, const std::shared_p
     auto parentFolder = Folder::fromMrl( m_ml, directoryMrl );
     bool parentKnown = parentFolder != nullptr;
 
-    auto entryPoint = utils::file::scheme( mrl ) + '/' + utils::file::firstFolder( utils::file::stripScheme( mrl ) );
+    // The minimal entrypoint must be a device mountpoint
+    auto device = fsFactory->createDeviceFromMrl( mrl );
+    if ( device == nullptr )
+    {
+        LOG_ERROR( "Can't add a local folder with unknown storage device. ");
+        return;
+    }
+    auto entryPoint = device->mountpoint();
     if ( parentKnown == false && Folder::fromMrl( m_ml, entryPoint ) != nullptr )
     {
         auto probePtr = std::unique_ptr<prober::PathProbe>( new prober::PathProbe{ utils::file::stripScheme( mrl ),
