@@ -757,6 +757,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
     {
         try
         {
+            bool needRescan = false;
             // Up until model 3, it's safer (and potentially more efficient with index changes) to drop the DB
             // It's also way simpler to implement
             // In case of downgrade, just recreate the database
@@ -806,20 +807,34 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
             }
             if ( previousVersion == 8 )
             {
+
+                // Multiple changes justify the rescan:
+                // - Changes in the way we chose to encode or not MRL, meaning
+                //   potentially all MRL are wrong (more precisely, will
+                //   mismatch what VLC expects, which makes playlist analysis
+                //   break.
+                // - Fix in the way we chose album candidates, meaning some
+                //   albums were likely to be wrongfully created.
+                needRescan = true;
                 migrateModel8to9();
                 previousVersion = 9;
             }
             if ( previousVersion == 9 )
             {
+                needRescan = true;
                 migrateModel9to10();
                 previousVersion = 10;
             }
             if ( previousVersion == 10 )
             {
+                needRescan = true;
                 migrateModel10to11();
                 previousVersion = 11;
             }
             // To be continued in the future!
+
+            if ( needRescan == true )
+                forceRescan();
 
             // Safety check: ensure we didn't forget a migration along the way
             assert( previousVersion == Settings::DbModelVersion );
@@ -940,15 +955,6 @@ void MediaLibrary::migrateModel8to9()
     // Don't check for the return value, we don't mind if nothing deleted.
     // Quite the opposite actually :)
     sqlite::Tools::executeDelete( getConn(), req );
-
-    // Multiple changes justify the rescan:
-    // - Changes in the way we chose to encode or not MRL, meaning
-    //   potentially all MRL are wrong (more precisely, will
-    //   mismatch what VLC expects, which makes playlist analysis
-    //   break.
-    // - Fix in the way we chose album candidates, meaning some
-    //   albums were likely to be wrongfully created.
-    forceRescan();
 }
 
 void MediaLibrary::migrateModel9to10()
@@ -966,7 +972,6 @@ void MediaLibrary::migrateModel9to10()
         f->setMrl( newMrl );
     }
     t->commit();
-    forceRescan();
 }
 
 // Guess who forgot to migrate a table in version 10?
