@@ -105,6 +105,8 @@ void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
 {
     std::unique_lock<compat::Mutex> lock( m_mutex );
 
+    LOG_INFO( "Queuing entrypoint ", entryPoint, " of type ",
+              static_cast<typename std::underlying_type<Task::Type>::type>( type ) );
     m_tasks.emplace( entryPoint, type );
     if ( m_thread.get_id() == compat::Thread::id{} )
     {
