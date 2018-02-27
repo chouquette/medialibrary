@@ -123,6 +123,7 @@ public:
 
     // Restore attached entities such as media/files
     bool restoreLinkedEntities();
+    void setMrl( std::string mrl );
 
     std::shared_ptr<Media>          media;
     std::shared_ptr<File>           file;

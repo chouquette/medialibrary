@@ -193,6 +193,17 @@ bool Task::restoreLinkedEntities( )
     return true;
 }
 
+void Task::setMrl( std::string newMrl )
+{
+    if ( mrl == newMrl )
+        return;
+    static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET "
+            "mrl = ? WHERE id_task = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, newMrl, m_id ) == false )
+        return;
+    mrl = std::move( newMrl );
+}
+
 void Task::createTable( sqlite::Connection* dbConnection )
 {
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::TaskTable::Name + "("

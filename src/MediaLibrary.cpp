@@ -53,6 +53,7 @@
 #include "ShowEpisode.h"
 #include "database/SqliteTools.h"
 #include "database/SqliteConnection.h"
+#include "parser/Task.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
 #include "VideoTrack.h"
@@ -815,6 +816,11 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 migrateModel9to10();
                 previousVersion = 10;
             }
+            if ( previousVersion == 10 )
+            {
+                migrateModel10to11();
+                previousVersion = 11;
+            }
             // To be continued in the future!
 
             // Safety check: ensure we didn't forget a migration along the way
@@ -966,6 +972,24 @@ void MediaLibrary::migrateModel9to10()
     }
     t->commit();
     forceRescan();
+}
+
+// Guess who forgot to migrate a table in version 10?
+void MediaLibrary::migrateModel10to11()
+{
+    const std::string req = "SELECT * FROM " + policy::TaskTable::Name +
+            " WHERE mrl LIKE '%#%%' ESCAPE '#'";
+    auto tasks = parser::Task::fetchAll<parser::Task>( this, req );
+    auto t = getConn()->newTransaction();
+    for ( const auto& t : tasks )
+    {
+        // We must not call mrl() from here. We might not have all devices yet,
+        // and calling mrl would crash for files stored on removable devices.
+        auto newMrl = utils::url::encode( utils::url::decode( t->mrl ) );
+        LOG_INFO( "Converting task mrl: ", t->mrl, " to ", newMrl );
+        t->setMrl( std::move( newMrl ) );
+    }
+    t->commit();
 }
 
 void MediaLibrary::reload()

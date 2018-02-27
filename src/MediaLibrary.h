@@ -173,6 +173,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         void migrateModel7to8();
         void migrateModel8to9();
         void migrateModel9to10();
+        void migrateModel10to11();
         void createAllTables();
         void createAllTriggers();
         void registerEntityHooks();
