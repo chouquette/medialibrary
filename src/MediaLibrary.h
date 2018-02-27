@@ -168,8 +168,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         bool recreateDatabase( const std::string& dbPath );
         InitializeResult updateDatabaseModel( unsigned int previousVersion,
                                               const std::string& path );
-        bool migrateModel3to5();
-        bool migrateModel5to6();
+        void migrateModel3to5();
+        void migrateModel5to6();
         void migrateModel7to8();
         void migrateModel8to9();
         void migrateModel9to10();

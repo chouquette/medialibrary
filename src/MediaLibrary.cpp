@@ -780,14 +780,12 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
              */
             if ( previousVersion == 3 )
             {
-                if ( migrateModel3to5() == false )
-                    throw std::logic_error( "Failed to migrate from 3 to 5" );
+                migrateModel3to5();
                 previousVersion = 5;
             }
             if ( previousVersion == 5 )
             {
-                if ( migrateModel5to6() == false )
-                    throw std::logic_error( "Failed to migrate from 5 to 6" );
+                migrateModel5to6();
                 previousVersion = 6;
             }
             if ( previousVersion == 6 )
@@ -875,7 +873,7 @@ bool MediaLibrary::recreateDatabase( const std::string& dbPath )
     return true;
 }
 
-bool MediaLibrary::migrateModel3to5()
+void MediaLibrary::migrateModel3to5()
 {
     /*
      * Disable Foreign Keys & recursive triggers to avoid cascading deletion
@@ -896,10 +894,9 @@ bool MediaLibrary::migrateModel3to5()
     Media::createTriggers( getConn() );
     Playlist::createTriggers( getConn() );
     t->commit();
-    return true;
 }
 
-bool MediaLibrary::migrateModel5to6()
+void MediaLibrary::migrateModel5to6()
 {
     std::string req = "DELETE FROM " + policy::MediaTable::Name + " WHERE type = ?";
     sqlite::Tools::executeRequest( getConn(), req, Media::Type::Unknown );
@@ -908,8 +905,6 @@ bool MediaLibrary::migrateModel5to6()
     using namespace policy;
     req = "UPDATE " + MediaTable::Name + " SET is_present = 1 WHERE is_present != 0";
     sqlite::Tools::executeRequest( getConn(), req );
-
-    return true;
 }
 
 void MediaLibrary::migrateModel7to8()
