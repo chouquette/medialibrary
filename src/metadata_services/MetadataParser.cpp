@@ -157,6 +157,8 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
     {
         // Let the worker drop this duplicate task
         task.markStepCompleted( parser::Task::ParserStep::Completed );
+        // And remove it from DB
+        task.destroy( m_ml, task.id() );
         return parser::Task::Status::Success;
     }
 

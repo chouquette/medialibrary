@@ -128,6 +128,11 @@ bool Task::updateFileId()
     return true;
 }
 
+int64_t Task::id() const
+{
+    return m_id;
+}
+
 bool Task::restoreLinkedEntities( )
 {
     auto fsFactory = m_ml->fsFactoryForMrl( mrl );

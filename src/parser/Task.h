@@ -120,6 +120,7 @@ public:
     void startParserStep();
 
     bool updateFileId();
+    int64_t id() const;
 
     // Restore attached entities such as media/files
     bool restoreLinkedEntities();
