@@ -299,6 +299,26 @@ const std::string& Folder::mrl() const
     return m_fullPath;
 }
 
+const std::string& Folder::rawMrl() const
+{
+    return m_path;
+}
+
+void Folder::setMrl( std::string mrl )
+{
+    if ( m_path == mrl )
+        return;
+    static const std::string req = "UPDATE " + policy::FolderTable::Name + " SET "
+            "path = ? WHERE id_folder = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, mrl, m_id ) == false )
+        return;
+    // We shouldn't use this if any full path/mrl has been cached.
+    // This is meant for migration only, so there is no need to have cached this
+    // information so far.
+    assert( m_isRemovable == false || m_fullPath.empty() == true );
+    m_path = std::move( mrl );
+}
+
 std::vector<std::shared_ptr<File>> Folder::files()
 {
     static const std::string req = "SELECT * FROM " + policy::FileTable::Name +

@@ -72,6 +72,8 @@ public:
 
     virtual int64_t id() const override;
     virtual const std::string& mrl() const override;
+    const std::string& rawMrl() const;
+    void setMrl( std::string mrl );
     std::vector<std::shared_ptr<File>> files();
     std::vector<std::shared_ptr<Folder>> folders();
     std::shared_ptr<Folder> parent();

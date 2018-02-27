@@ -974,20 +974,27 @@ void MediaLibrary::migrateModel9to10()
     t->commit();
 }
 
-// Guess who forgot to migrate a table in version 10?
 void MediaLibrary::migrateModel10to11()
 {
     const std::string req = "SELECT * FROM " + policy::TaskTable::Name +
             " WHERE mrl LIKE '%#%%' ESCAPE '#'";
+    const std::string folderReq = "SELECT * FROM " + policy::FolderTable::Name +
+            " WHERE path LIKE '%#%%' ESCAPE '#'";
     auto tasks = parser::Task::fetchAll<parser::Task>( this, req );
+    auto folders = Folder::fetchAll<Folder>( this, folderReq );
     auto t = getConn()->newTransaction();
     for ( const auto& t : tasks )
     {
-        // We must not call mrl() from here. We might not have all devices yet,
-        // and calling mrl would crash for files stored on removable devices.
         auto newMrl = utils::url::encode( utils::url::decode( t->mrl ) );
         LOG_INFO( "Converting task mrl: ", t->mrl, " to ", newMrl );
         t->setMrl( std::move( newMrl ) );
+    }
+    for ( const auto &f : folders )
+    {
+        // We must not call mrl() from here. We might not have all devices yet,
+        // and calling mrl would crash for files stored on removable devices.
+        auto newMrl = utils::url::encode( utils::url::decode( f->rawMrl() ) );
+        f->setMrl( std::move( newMrl ) );
     }
     t->commit();
 }
