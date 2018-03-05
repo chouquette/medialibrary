@@ -41,6 +41,9 @@
     "artist_id = " + ArtistTable::Name + ".id_artist"
 ")",
 
+"INSERT INTO " + TaskTable::Name + " (step, retry_count, file_id, parent_folder_id) "
+"SELECT parser_step, parser_retries, id_file, folder_id FROM " + FileTable::Name,
+
 "CREATE TEMPORARY TABLE " + FileTable::Name + "_backup("
   "id_file INTEGER PRIMARY KEY AUTOINCREMENT,"
   "media_id INT NOT NULL,"
