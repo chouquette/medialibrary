@@ -263,7 +263,7 @@ void Task::createTable( sqlite::Connection* dbConnection )
 void Task::resetRetryCount( MediaLibraryPtr ml )
 {
     static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET "
-            "retry_count = 0 WHERE step != ? AND is_present != 0";
+            "retry_count = 0 WHERE step != ?";
     sqlite::Tools::executeUpdate( ml->getConn(), req, parser::Task::ParserStep::Completed );
 }
 
