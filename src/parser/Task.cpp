@@ -133,15 +133,44 @@ int64_t Task::id() const
     return m_id;
 }
 
-bool Task::restoreLinkedEntities( )
+bool Task::restoreLinkedEntities()
 {
-    auto fsFactory = m_ml->fsFactoryForMrl( mrl );
-    if ( fsFactory == nullptr )
-        return false;
-
     // First of all, we need to know if the file has been created already
     // ie. have we run the MetadataParser service, at least partially
     file = File::fetch( m_ml, m_fileId );
+
+    // We might re-create tasks without mrl to ease the handling of files on
+    // external storage.
+    if ( mrl.empty() == true )
+    {
+        // but we expect those to be created from an existing file after a
+        // partial/failed migration. If we don't have a file nor an mrl, we
+        // can't really process it.
+        if ( file == nullptr )
+        {
+            assert( !"Can't process a file without a file nor an mrl" );
+            return false;
+        }
+        auto folder = Folder::fetch( m_ml, file->folderId() );
+        if ( folder == nullptr )
+        {
+            assert( !"Can't file the folder associated with a file" );
+            // If the folder can't be found in db while the file can, it looks
+            // a lot like a sporadic failure, since file are deleted through
+            // triggers when its parent folder gets deleted. Just postpone this.
+            return false;
+        }
+        if ( folder->isPresent() == false )
+        {
+            LOG_WARN( "Postponing rescan of removable file ", file->rawMrl(),
+                      " until the device containing it is present again" );
+            return false;
+        }
+        setMrl( file->mrl() );
+    }
+    auto fsFactory = m_ml->fsFactoryForMrl( mrl );
+    if ( fsFactory == nullptr )
+        return false;
 
     try
     {
