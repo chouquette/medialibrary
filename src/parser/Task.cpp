@@ -301,6 +301,16 @@ Task::create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
     return self;
 }
 
+void Task::recoverUnscannedFiles( MediaLibraryPtr ml )
+{
+    static const std::string req = "INSERT INTO " + policy::TaskTable::Name +
+            "(file_id, parent_folder_id)"
+            " SELECT id_file, folder_id FROM " + policy::FileTable::Name +
+            " f LEFT JOIN " + policy::TaskTable::Name + " t"
+            " ON t.file_id = f.id_file WHERE t.file_id IS NULL";
+    sqlite::Tools::executeInsert( ml->getConn(), req );
+}
+
 }
 
 }

@@ -831,6 +831,11 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 migrateModel10to11();
                 previousVersion = 11;
             }
+            if ( previousVersion == 11 )
+            {
+                parser::Task::recoverUnscannedFiles( this );
+                previousVersion = 12;
+            }
             // To be continued in the future!
 
             if ( needRescan == true )

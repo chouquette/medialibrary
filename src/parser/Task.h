@@ -145,6 +145,7 @@ public:
                                          std::shared_ptr<Folder> parentFolder,
                                          std::shared_ptr<fs::IDirectory> parentFolderFs,
                                          std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist );
+    static void recoverUnscannedFiles( MediaLibraryPtr ml );
 
 private:
     MediaLibraryPtr m_ml;
