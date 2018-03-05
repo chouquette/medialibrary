@@ -245,7 +245,7 @@ void Task::resetParsing( MediaLibraryPtr ml )
     sqlite::Tools::executeUpdate( ml->getConn(), req, parser::Task::ParserStep::None );
 }
 
-std::vector<std::shared_ptr<Task>> Task::fetchUnparsed( MediaLibraryPtr ml )
+std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
 {
     static const std::string req = "SELECT * FROM " + policy::TaskTable::Name + " t"
         " LEFT JOIN " + policy::FileTable::Name + " f ON f.id_file = t.file_id"

@@ -140,7 +140,7 @@ public:
     static void createTable( sqlite::Connection* dbConnection );
     static void resetRetryCount( MediaLibraryPtr ml );
     static void resetParsing( MediaLibraryPtr ml );
-    static std::vector<std::shared_ptr<Task>> fetchUnparsed( MediaLibraryPtr ml );
+    static std::vector<std::shared_ptr<Task>> fetchUncompleted( MediaLibraryPtr ml );
     static std::shared_ptr<Task> create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
                                          std::shared_ptr<Folder> parentFolder,
                                          std::shared_ptr<fs::IDirectory> parentFolderFs,

@@ -112,7 +112,7 @@ void Parser::restore()
     if ( m_services.empty() == true )
         return;
 
-    auto tasks = parser::Task::fetchUnparsed( m_ml );
+    auto tasks = parser::Task::fetchUncompleted( m_ml );
     LOG_INFO( "Resuming parsing on ", tasks.size(), " tasks" );
     for ( auto& t : tasks )
     {
