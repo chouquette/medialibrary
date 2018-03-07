@@ -146,7 +146,8 @@ bool Task::restoreLinkedEntities()
     }
     // First of all, we need to know if the file has been created already
     // ie. have we run the MetadataParser service, at least partially
-    file = File::fetch( m_ml, m_fileId );
+    if ( m_fileId != 0 )
+        file = File::fetch( m_ml, m_fileId );
 
     // We might re-create tasks without mrl to ease the handling of files on
     // external storage.
