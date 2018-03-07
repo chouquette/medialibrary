@@ -135,6 +135,12 @@ int64_t Task::id() const
 
 bool Task::restoreLinkedEntities()
 {
+    if ( m_fileId == 0 && mrl.empty() == true )
+    {
+        LOG_WARN( "Aborting & removing external file task (#", m_id, ')' );
+        destroy( m_ml, m_id );
+        return false;
+    }
     // First of all, we need to know if the file has been created already
     // ie. have we run the MetadataParser service, at least partially
     file = File::fetch( m_ml, m_fileId );
