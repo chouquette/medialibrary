@@ -307,7 +307,8 @@ void Task::recoverUnscannedFiles( MediaLibraryPtr ml )
             "(file_id, parent_folder_id)"
             " SELECT id_file, folder_id FROM " + policy::FileTable::Name +
             " f LEFT JOIN " + policy::TaskTable::Name + " t"
-            " ON t.file_id = f.id_file WHERE t.file_id IS NULL";
+            " ON t.file_id = f.id_file WHERE t.file_id IS NULL"
+            " AND f.folder_id IS NOT NULL";
     sqlite::Tools::executeInsert( ml->getConn(), req );
 }
 
