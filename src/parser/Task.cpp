@@ -135,6 +135,7 @@ int64_t Task::id() const
 
 bool Task::restoreLinkedEntities()
 {
+    LOG_INFO("Restoring linked entities of task ", m_id);
     if ( m_fileId == 0 && mrl.empty() == true )
     {
         LOG_WARN( "Aborting & removing external file task (#", m_id, ')' );
