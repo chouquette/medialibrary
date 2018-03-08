@@ -82,6 +82,14 @@ void Directory::read() const
         {
             if ( errno == EACCES )
                 continue;
+            // some Android devices will list folder content, but will yield
+            // ENOENT when accessing those.
+            // See https://trac.videolan.org/vlc/ticket/19909
+            if ( errno == ENOENT )
+            {
+                LOG_WARN( "Ignoring unexpected ENOENT while listing folder content." );
+                continue;
+            }
             // Ignore EOVERFLOW since we are not (yet?) interested in the file size
             if ( errno != EOVERFLOW )
             {
