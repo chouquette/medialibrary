@@ -659,7 +659,7 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::find
                 LOG_ERROR( "Failed to create new artist ", artistStr );
                 return {nullptr, nullptr};
             }
-            m_notifier->notifyArtistCreation( albumArtist );
+            m_notifier->notifyArtistCreation( artist );
         }
     }
     return {albumArtist, artist};
