@@ -157,6 +157,7 @@ noinst_HEADERS = \
 	src/Media.h \
 	src/MediaLibrary.h \
 	src/metadata_services/MetadataParser.h \
+	src/metadata_services/vlc/Common.hpp \
 	src/metadata_services/vlc/VLCMetadataService.h \
 	src/metadata_services/vlc/VLCThumbnailer.h \
 	src/metadata_services/vlc/imagecompressors/IImageCompressor.h \
