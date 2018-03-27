@@ -57,6 +57,7 @@ libmedialibrary_la_SOURCES = \
 	src/Playlist.cpp \
 	src/Settings.cpp \
 	src/Show.cpp \
+	src/Thumbnail.cpp \
 	src/ShowEpisode.cpp \
 	src/VideoTrack.cpp \
 	src/database/SqliteConnection.cpp \
@@ -169,6 +170,7 @@ noinst_HEADERS = \
 	src/Settings.h \
 	src/ShowEpisode.h \
 	src/Show.h \
+	src/Thumbnail.h \
 	src/utils/Cache.h \
 	src/utils/Directory.h \
 	src/utils/Filename.h \
@@ -298,6 +300,7 @@ unittest_SOURCES = \
 	test/unittest/Tests.cpp \
 	test/unittest/VideoTrackTests.cpp \
 	test/unittest/MiscTests.cpp \
+	test/unittest/ThumbnailTests.cpp \
 	$(NULL)
 
 EXTRA_DIST += test/unittest/db_v3.sql
