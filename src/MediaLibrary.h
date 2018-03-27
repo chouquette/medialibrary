@@ -153,7 +153,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         virtual void forceRescan() override;
 
-        virtual void requestThumbnail( MediaPtr media );
+        virtual void requestThumbnail( MediaPtr media ) override;
 
         static bool isExtensionSupported( const char* ext );
 
