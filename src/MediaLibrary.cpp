@@ -836,6 +836,11 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 parser::Task::recoverUnscannedFiles( this );
                 previousVersion = 12;
             }
+            if ( previousVersion == 12 )
+            {
+                migrateModel12to13();
+                previousVersion = 13;
+            }
             // To be continued in the future!
 
             if ( needRescan == true )
@@ -1001,6 +1006,21 @@ void MediaLibrary::migrateModel10to11()
         auto newMrl = utils::url::encode( utils::url::decode( f->rawMrl() ) );
         f->setMrl( std::move( newMrl ) );
     }
+    t->commit();
+}
+
+void MediaLibrary::migrateModel12to13()
+{
+    auto t = getConn()->newTransaction();
+    const std::string req = "DROP TRIGGER IF EXISTS is_track_presentAFTER";
+    sqlite::Tools::executeDelete( getConn(), req );
+    AlbumTrack::createTriggers( getConn() );
+    // Leave the weak context as we now need to update is_present fields, which
+    // are propagated through recursive triggers
+    const std::string migrateData = "UPDATE " + policy::AlbumTrackTable::Name +
+            " SET is_present = (SELECT is_present FROM " + policy::MediaTable::Name +
+            " WHERE id_media = media_id)";
+    sqlite::Tools::executeUpdate( getConn(), migrateData );
     t->commit();
 }
 

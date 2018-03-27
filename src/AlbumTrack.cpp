@@ -111,7 +111,7 @@ void AlbumTrack::createTable( sqlite::Connection* dbConnection )
 
 void AlbumTrack::createTriggers(sqlite::Connection* dbConnection)
 {
-    const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_track_present"
+    const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_track_present "
             "AFTER UPDATE OF is_present "
             "ON " + policy::MediaTable::Name + " "
             "BEGIN "
