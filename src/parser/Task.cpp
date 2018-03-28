@@ -95,7 +95,10 @@ bool Task::saveParserStep()
 
 bool Task::isCompleted() const
 {
-    return m_step == ParserStep::Completed;
+    using StepType = typename std::underlying_type<ParserStep>::type;
+    return ( static_cast<StepType>( m_step ) &
+             static_cast<StepType>( ParserStep::Completed ) ) ==
+             static_cast<StepType>( ParserStep::Completed );
 }
 
 bool Task::isStepCompleted( Task::ParserStep step ) const
@@ -267,8 +270,9 @@ void Task::createTable( sqlite::Connection* dbConnection )
 void Task::resetRetryCount( MediaLibraryPtr ml )
 {
     static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET "
-            "retry_count = 0 WHERE step != ?";
-    sqlite::Tools::executeUpdate( ml->getConn(), req, parser::Task::ParserStep::Completed );
+            "retry_count = 0 WHERE step & ? != ?";
+    sqlite::Tools::executeUpdate( ml->getConn(), req, parser::Task::ParserStep::Completed,
+                                  parser::Task::ParserStep::Completed);
 }
 
 void Task::resetParsing( MediaLibraryPtr ml )
@@ -282,9 +286,10 @@ std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
 {
     static const std::string req = "SELECT * FROM " + policy::TaskTable::Name + " t"
         " LEFT JOIN " + policy::FileTable::Name + " f ON f.id_file = t.file_id"
-        " WHERE step != ? AND retry_count < 3 AND (f.is_present != 0 OR "
+        " WHERE step & ? != ? AND retry_count < 3 AND (f.is_present != 0 OR "
         " t.file_id IS NULL)";
-    return Task::fetchAll<Task>( ml, req, parser::Task::ParserStep::Completed );
+    return Task::fetchAll<Task>( ml, req, parser::Task::ParserStep::Completed,
+                                 parser::Task::ParserStep::Completed );
 }
 
 std::shared_ptr<Task>
