@@ -848,6 +848,11 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 migrateModel12to13();
                 previousVersion = 13;
             }
+            if ( previousVersion == 13 )
+            {
+                migrateModel13to14();
+                previousVersion = 14;
+            }
             // To be continued in the future!
 
             if ( needRescan == true )
@@ -1018,28 +1023,39 @@ void MediaLibrary::migrateModel10to11()
 
 void MediaLibrary::migrateModel12to13()
 {
-    {
+    auto t = getConn()->newTransaction();
+    const std::string req = "DROP TRIGGER IF EXISTS is_track_presentAFTER";
+    sqlite::Tools::executeDelete( getConn(), req );
+    AlbumTrack::createTriggers( getConn() );
+    // Leave the weak context as we now need to update is_present fields, which
+    // are propagated through recursive triggers
+    const std::string migrateData = "UPDATE " + policy::AlbumTrackTable::Name +
+            " SET is_present = (SELECT is_present FROM " + policy::MediaTable::Name +
+            " WHERE id_media = media_id)";
+    sqlite::Tools::executeUpdate( getConn(), migrateData );
+    t->commit();
+}
+
+/*
+ * - Remove the Media.thumbnail
+ * - Add Media.thumbnail_id
+ * - Add Media.thumbnail_generated
+ */
+void MediaLibrary::migrateModel13to14()
+{
     sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
     auto t = getConn()->newTransaction();
     using namespace policy;
     std::string reqs[] = {
-#               include "database/migrations/migration12-13.sql"
+#               include "database/migrations/migration13-14.sql"
     };
 
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( getConn(), req );
     // Re-create triggers removed in the process
     Media::createTriggers( getConn() );
-    // Also fix a trigger that was wrongly created & deleted during this migration
     AlbumTrack::createTriggers( getConn() );
     t->commit();
-    }
-    // Leave the weak context as we now need to update is_present fields, which
-    // are propagated through recursive triggers
-    const std::string req = "UPDATE " + policy::AlbumTrackTable::Name +
-            " SET is_present = (SELECT is_present FROM " + policy::MediaTable::Name +
-            " WHERE id_media = media_id)";
-    sqlite::Tools::executeUpdate( getConn(), req );
 }
 
 void MediaLibrary::reload()
