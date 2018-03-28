@@ -370,19 +370,9 @@ void Media::setReleaseDate( unsigned int date )
 bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin origin )
 {
     if ( m_thumbnailId != 0 )
-    {
-        auto lock = m_thumbnail.lock();
-        if ( m_thumbnail.isCached() == false )
-        {
-            m_thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
-            if ( m_thumbnail.get() == nullptr )
-            {
-                LOG_WARN( "Failed to fetch thumbnail entity #", m_thumbnailId );
-                return false;
-            }
-        }
-        return m_thumbnail.get()->setMrl( thumbnailMrl );
-    }
+        return Thumbnail::setMrlFromPrimaryKey( m_ml, m_thumbnail, m_thumbnailId,
+                                                thumbnailMrl );
+
     std::unique_ptr<sqlite::Transaction> t;
     if ( sqlite::Transaction::transactionInProgress() == false )
         t = m_ml->getConn()->newTransaction();

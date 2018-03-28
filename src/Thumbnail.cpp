@@ -25,6 +25,7 @@
 #endif
 
 #include "Thumbnail.h"
+#include "utils/Cache.h"
 
 namespace medialibrary
 {
@@ -76,6 +77,23 @@ bool Thumbnail::setMrl( std::string mrl )
 Thumbnail::Origin Thumbnail::origin() const
 {
     return m_origin;
+}
+
+bool Thumbnail::setMrlFromPrimaryKey( MediaLibraryPtr ml,
+                                      Cache<std::shared_ptr<Thumbnail>>& thumbnail,
+                                      int64_t thumbnailId, std::string mrl )
+{
+    auto lock = thumbnail.lock();
+    if ( thumbnail.isCached() == false )
+    {
+        thumbnail = Thumbnail::fetch( ml, thumbnailId );
+        if ( thumbnail.get() == nullptr )
+        {
+            LOG_WARN( "Failed to fetch thumbnail entity #", thumbnailId );
+            return false;
+        }
+    }
+    return thumbnail.get()->setMrl( std::move( mrl ) );
 }
 
 void Thumbnail::createTable( sqlite::Connection* dbConnection )

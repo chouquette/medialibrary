@@ -29,6 +29,9 @@ namespace medialibrary
 
 class Thumbnail;
 
+template <typename T>
+class Cache;
+
 namespace policy
 {
 struct ThumbnailTable
@@ -58,6 +61,17 @@ public:
     const std::string& mrl() const;
     bool setMrl( std::string mrl );
     Origin origin() const;
+
+    /**
+     * @brief setMrlFromPrimaryKey Helper to set the thumbnail mrl based on a
+     * thumbnail ID.
+     * @param thumbnail The cached thumbnail entity. The value can be uncached
+     * in which case it will be fetched and cached.
+     * @param thumbnailId The thumbnail primary key
+     */
+    static bool setMrlFromPrimaryKey( MediaLibraryPtr ml,
+                                      Cache<std::shared_ptr<Thumbnail>>& thumbnail,
+                                      int64_t thumbnailId, std::string mrl );
 
     static void createTable( sqlite::Connection* dbConnection );
     static std::shared_ptr<Thumbnail> create( MediaLibraryPtr ml, std::string mrl,
