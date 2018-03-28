@@ -270,7 +270,12 @@ const std::string& Media::thumbnail()
     }
     auto lock = m_thumbnail.lock();
     if ( m_thumbnail.isCached() == false )
-        m_thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
+    {
+        auto thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
+        if ( thumbnail == nullptr )
+            return Thumbnail::EmptyMrl;
+        m_thumbnail = std::move( thumbnail );
+    }
     return m_thumbnail.get()->mrl();
 }
 
@@ -377,15 +382,17 @@ bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin ori
     if ( sqlite::Transaction::transactionInProgress() == false )
         t = m_ml->getConn()->newTransaction();
     auto lock = m_thumbnail.lock();
-    m_thumbnail = Thumbnail::create( m_ml, thumbnailMrl, origin );
-    if ( m_thumbnail.get() == nullptr )
+    auto thumbnail = Thumbnail::create( m_ml, thumbnailMrl, origin );
+    if ( thumbnail == nullptr )
         return false;
+
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
             "thumbnail_id = ?, thumbnail_generated = 1 WHERE id_media = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_thumbnail.get()->id(), m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, thumbnail->id(), m_id ) == false )
         return false;
-    m_thumbnailId = m_thumbnail.get()->id();
+    m_thumbnailId = thumbnail->id();
     m_thumbnailGenerated = true;
+    m_thumbnail = std::move( thumbnail );
     if ( t != nullptr )
         t->commit();
     return true;
