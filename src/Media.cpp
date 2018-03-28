@@ -264,10 +264,8 @@ std::vector<AudioTrackPtr> Media::audioTracks()
 const std::string& Media::thumbnail()
 {
     if ( m_thumbnailId == 0 || m_thumbnailGenerated == false )
-    {
-        static const std::string empty;
-        return empty;
-    }
+        return Thumbnail::EmptyMrl;
+
     auto lock = m_thumbnail.lock();
     if ( m_thumbnail.isCached() == false )
     {

@@ -37,6 +37,8 @@ const std::string ThumbnailTable::PrimaryKeyColumn = "id_thumbnail";
 int64_t Thumbnail::*const ThumbnailTable::PrimaryKey = &Thumbnail::m_id;
 }
 
+const std::string Thumbnail::EmptyMrl;
+
 Thumbnail::Thumbnail(MediaLibraryPtr ml, sqlite::Row& row)
 {
     row >> m_id

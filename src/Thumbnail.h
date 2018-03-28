@@ -76,6 +76,9 @@ public:
     static void createTable( sqlite::Connection* dbConnection );
     static std::shared_ptr<Thumbnail> create( MediaLibraryPtr ml, std::string mrl,
                                               Origin origin );
+
+    static const std::string EmptyMrl;
+
 private:
     MediaLibraryPtr m_ml;
     int64_t m_id;
