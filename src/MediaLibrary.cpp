@@ -1018,6 +1018,7 @@ void MediaLibrary::migrateModel10to11()
 
 void MediaLibrary::migrateModel12to13()
 {
+    {
     sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
     auto t = getConn()->newTransaction();
     using namespace policy;
@@ -1032,6 +1033,13 @@ void MediaLibrary::migrateModel12to13()
     // Also fix a trigger that was wrongly created & deleted during this migration
     AlbumTrack::createTriggers( getConn() );
     t->commit();
+    }
+    // Leave the weak context as we now need to update is_present fields, which
+    // are propagated through recursive triggers
+    const std::string req = "UPDATE " + policy::AlbumTrackTable::Name +
+            " SET is_present = (SELECT is_present FROM " + policy::MediaTable::Name +
+            " WHERE id_media = media_id)";
+    sqlite::Tools::executeUpdate( getConn(), req );
 }
 
 void MediaLibrary::reload()

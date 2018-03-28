@@ -167,4 +167,8 @@ TEST_F( DbModel, Upgrade12to13 )
     m = media[1];
     ASSERT_EQ( m->thumbnail(), "" );
     ASSERT_FALSE( m->isThumbnailGenerated() );
+
+    // Check that we also recovered from the invalid album track trigger
+    auto albums = ml->albums( SortingCriteria::Default, false );
+    ASSERT_EQ( 1u, albums.size() );
 }
