@@ -354,4 +354,5 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = medialibrary.pc
 EXTRA_DIST += medialibrary.pc \
 	src/database/migrations/migration3-5.sql \
-	src/database/migrations/migration7-8.sql
+	src/database/migrations/migration7-8.sql \
+	src/database/migrations/migration13-14.sql
