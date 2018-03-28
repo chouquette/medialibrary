@@ -377,7 +377,7 @@ bool MetadataParser::parseAudioFile( parser::Task& task )
     auto artworkMrl = task.vlcMedia.meta( libvlc_meta_ArtworkURL );
     if ( artworkMrl.empty() == false )
     {
-        task.media->setThumbnailCached( artworkMrl );
+        task.media->setThumbnail( artworkMrl, Thumbnail::Origin::Media );
         // Don't use an attachment as default artwork for album/artists
         if ( utils::file::schemeIs( "attachment", artworkMrl ) )
             artworkMrl.clear();

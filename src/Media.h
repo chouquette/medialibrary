@@ -27,6 +27,7 @@
 #include "medialibrary/IMedia.h"
 #include "factory/IFileSystem.h"
 #include "File.h"
+#include "Thumbnail.h"
 #include "database/DatabaseHelpers.h"
 #include "utils/Cache.h"
 
@@ -123,7 +124,9 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
                             unsigned int nbChannels, const std::string& language, const std::string& desc );
         virtual std::vector<AudioTrackPtr> audioTracks() override;
         virtual const std::string& thumbnail() override;
+        virtual bool isThumbnailGenerated() const override;
         virtual bool setThumbnail( const std::string &thumbnail );
+        bool setThumbnail( const std::string& thumbnail, Thumbnail::Origin origin );
         virtual unsigned int insertionDate() const override;
         virtual unsigned int releaseDate() const override;
 
@@ -132,7 +135,6 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual bool setMetadata( MetadataType type, int64_t value ) override;
 
         void setReleaseDate( unsigned int date );
-        void setThumbnailCached( const std::string& thumbnail );
         bool save();
 
         std::shared_ptr<File> addFile( const fs::IFile& fileFs, int64_t parentFolderId,
@@ -158,7 +160,8 @@ private:
         std::time_t m_lastPlayedDate;
         std::time_t m_insertionDate;
         unsigned int m_releaseDate;
-        std::string m_thumbnail;
+        int64_t m_thumbnailId;
+        unsigned int m_thumbnailGenerated;
         std::string m_title;
         // We store the filename as a shortcut when sorting. The filename (*not* the title
         // might be used as a fallback
@@ -172,6 +175,7 @@ private:
         mutable Cache<MoviePtr> m_movie;
         mutable Cache<std::vector<FilePtr>> m_files;
         mutable Cache<std::vector<MediaMetadata>> m_metadata;
+        mutable Cache<std::shared_ptr<Thumbnail>> m_thumbnail;
         bool m_changed;
 
         friend policy::MediaTable;

@@ -843,6 +843,11 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 parser::Task::recoverUnscannedFiles( this );
                 previousVersion = 12;
             }
+            if ( previousVersion == 12 )
+            {
+                migrateModel12to13();
+                previousVersion = 13;
+            }
             // To be continued in the future!
 
             if ( needRescan == true )
@@ -1008,6 +1013,24 @@ void MediaLibrary::migrateModel10to11()
         auto newMrl = utils::url::encode( utils::url::decode( f->rawMrl() ) );
         f->setMrl( std::move( newMrl ) );
     }
+    t->commit();
+}
+
+void MediaLibrary::migrateModel12to13()
+{
+    sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
+    auto t = getConn()->newTransaction();
+    using namespace policy;
+    std::string reqs[] = {
+#               include "database/migrations/migration12-13.sql"
+    };
+
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( getConn(), req );
+    // Re-create triggers removed in the process
+    Media::createTriggers( getConn() );
+    // Also fix a trigger that was wrongly created & deleted during this migration
+    AlbumTrack::createTriggers( getConn() );
     t->commit();
 }
 

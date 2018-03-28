@@ -31,6 +31,7 @@
 #include "database/SqliteConnection.h"
 
 #include "Artist.h"
+#include "Media.h"
 
 class Misc : public Tests
 {
@@ -150,4 +151,20 @@ TEST_F( DbModel, Upgrade8to9 )
     // We expect the file-orphaned media to have been deleted
     auto media = ml->files();
     ASSERT_EQ( 1u, media.size() );
+}
+
+TEST_F( DbModel, Upgrade12to13 )
+{
+    LoadFakeDB( SRC_DIR "/test/unittest/db_v12.sql" );
+    auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
+    ASSERT_EQ( InitializeResult::Success, res );
+    auto media = ml->files();
+    ASSERT_EQ( 2u, media.size() );
+    auto m = media[0];
+    ASSERT_EQ( m->thumbnail(), "/path/to/thumbnail" );
+    ASSERT_TRUE( m->isThumbnailGenerated() );
+
+    m = media[1];
+    ASSERT_EQ( m->thumbnail(), "" );
+    ASSERT_FALSE( m->isThumbnailGenerated() );
 }

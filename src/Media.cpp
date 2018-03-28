@@ -41,6 +41,7 @@
 #include "logging/Logger.h"
 #include "Movie.h"
 #include "ShowEpisode.h"
+
 #include "database/SqliteTools.h"
 #include "VideoTrack.h"
 #include "filesystem/IFile.h"
@@ -69,7 +70,8 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_lastPlayedDate
         >> m_insertionDate
         >> m_releaseDate
-        >> m_thumbnail
+        >> m_thumbnailId
+        >> m_thumbnailGenerated
         >> m_title
         >> m_filename
         >> m_isFavorite
@@ -86,6 +88,8 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
     , m_lastPlayedDate( 0 )
     , m_insertionDate( time( nullptr ) )
     , m_releaseDate( 0 )
+    , m_thumbnailId( 0 )
+    , m_thumbnailGenerated( false )
     , m_title( title )
     // When creating a Media, meta aren't parsed, and therefor, is the filename
     , m_filename( title )
@@ -259,7 +263,20 @@ std::vector<AudioTrackPtr> Media::audioTracks()
 
 const std::string& Media::thumbnail()
 {
-    return m_thumbnail;
+    if ( m_thumbnailId == 0 || m_thumbnailGenerated == false )
+    {
+        static const std::string empty;
+        return empty;
+    }
+    auto lock = m_thumbnail.lock();
+    if ( m_thumbnail.isCached() == false )
+        m_thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
+    return m_thumbnail.get()->mrl();
+}
+
+bool Media::isThumbnailGenerated() const
+{
+    return m_thumbnailGenerated;
 }
 
 unsigned int Media::insertionDate() const
@@ -350,33 +367,54 @@ void Media::setReleaseDate( unsigned int date )
     m_changed = true;
 }
 
-void Media::setThumbnailCached( const std::string& thumbnail )
+bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin origin )
 {
-    if ( m_thumbnail == thumbnail )
-        return;
-    m_thumbnail = thumbnail;
-    m_changed = true;
+    if ( m_thumbnailId != 0 )
+    {
+        auto lock = m_thumbnail.lock();
+        if ( m_thumbnail.isCached() == false )
+        {
+            m_thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
+            if ( m_thumbnail.get() == nullptr )
+            {
+                LOG_WARN( "Failed to fetch thumbnail entity #", m_thumbnailId );
+                return false;
+            }
+        }
+        return m_thumbnail.get()->setMrl( thumbnailMrl );
+    }
+    std::unique_ptr<sqlite::Transaction> t;
+    if ( sqlite::Transaction::transactionInProgress() == false )
+        t = m_ml->getConn()->newTransaction();
+    auto lock = m_thumbnail.lock();
+    m_thumbnail = Thumbnail::create( m_ml, thumbnailMrl, origin );
+    if ( m_thumbnail.get() == nullptr )
+        return false;
+    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
+            "thumbnail_id = ?, thumbnail_generated = 1 WHERE id_media = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_thumbnail.get()->id(), m_id ) == false )
+        return false;
+    m_thumbnailId = m_thumbnail.get()->id();
+    m_thumbnailGenerated = true;
+    if ( t != nullptr )
+        t->commit();
+    return true;
 }
 
-bool Media::setThumbnail(const std::string& thumbnail )
+bool Media::setThumbnail( const std::string& thumbnailMrl )
 {
-    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
-            "thumbnail = ? WHERE id_media = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, thumbnail, m_id ) == false )
-        return false;
-    m_thumbnail = thumbnail;
-    return true;
+    return setThumbnail( thumbnailMrl, Thumbnail::Origin::UserProvided );
 }
 
 bool Media::save()
 {
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
             "type = ?, subtype = ?, duration = ?, release_date = ?,"
-            "thumbnail = ?, title = ? WHERE id_media = ?";
+            "title = ? WHERE id_media = ?";
     if ( m_changed == false )
         return true;
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_type, m_subType, m_duration,
-                                       m_releaseDate, m_thumbnail, m_title, m_id ) == false )
+                                       m_releaseDate, m_title, m_id ) == false )
     {
         return false;
     }
@@ -539,11 +577,14 @@ void Media::createTable( sqlite::Connection* connection )
             "last_played_date UNSIGNED INTEGER,"
             "insertion_date UNSIGNED INTEGER,"
             "release_date UNSIGNED INTEGER,"
-            "thumbnail TEXT,"
+            "thumbnail_id INTEGER,"
+            "thumbnail_generated BOOLEAN NOT NULL DEFAULT 0,"
             "title TEXT COLLATE NOCASE,"
             "filename TEXT,"
             "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
-            "is_present BOOLEAN NOT NULL DEFAULT 1"
+            "is_present BOOLEAN NOT NULL DEFAULT 1,"
+            "FOREIGN KEY(thumbnail_id) REFERENCES " + policy::ThumbnailTable::Name
+            + "(id_thumbnail)"
             ")";
 
     const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "

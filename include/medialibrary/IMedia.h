@@ -127,6 +127,16 @@ class IMedia
         ///
         virtual const std::string& thumbnail() = 0;
         ///
+        /// \brief isThumbnailGenerated Returns true if a thumbnail generation was
+        ///                             attempted.
+        /// In case the thumbnail generation failed, this will still be true, but
+        /// the thumbnail returned by \sa{thumbnail} will be empty.
+        /// This is intended as a helper for the client application, so it doesn't
+        /// attempt ask for a new thumbmail generation.
+        /// \return
+        ///
+        virtual bool isThumbnailGenerated() const = 0;
+        ///
         /// \brief setThumbnail Sets a thumbnail for the current media
         /// \param mrl A mrl pointing the the thumbnail file.
         /// \return true in case the thumbnail was successfully stored to database
