@@ -185,3 +185,8 @@ void MediaLibraryTester::addDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,
 {
     addFile( fileFs, parentFolder, parentFolderFs );
 }
+
+sqlite::Connection* MediaLibraryTester::getDbConn()
+{
+    return m_dbConnection.get();
+}
