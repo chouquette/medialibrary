@@ -57,3 +57,6 @@
 
 "DROP TABLE " + AlbumTable::Name,
 "DELETE FROM " + AlbumTable::Name + "Fts",
+"DROP TABLE " + ArtistTable::Name,
+"DELETE FROM " + ArtistTable::Name + "Fts",
+"DELETE FROM MediaArtistRelation",

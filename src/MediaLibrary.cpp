@@ -1059,6 +1059,7 @@ void MediaLibrary::migrateModel13to14()
     // Re-create tables that we just removed
     // We will run a re-scan, so we don't care about keeping their content
     Album::createTable( getConn() );
+    Artist::createTable( getConn() );
     // Re-create triggers removed in the process
     Media::createTriggers( getConn() );
     AlbumTrack::createTriggers( getConn() );

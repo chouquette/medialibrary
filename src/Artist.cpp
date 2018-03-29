@@ -44,7 +44,7 @@ Artist::Artist( MediaLibraryPtr ml, sqlite::Row& row )
     row >> m_id
         >> m_name
         >> m_shortBio
-        >> m_artworkMrl
+        >> m_thumbnailId
         >> m_nbAlbums
         >> m_nbTracks
         >> m_mbId
@@ -55,6 +55,7 @@ Artist::Artist( MediaLibraryPtr ml, const std::string& name )
     : m_ml( ml )
     , m_id( 0 )
     , m_name( name )
+    , m_thumbnailId( 0 )
     , m_nbAlbums( 0 )
     , m_nbTracks( 0 )
     , m_isPresent( true )
@@ -151,18 +152,40 @@ bool Artist::addMedia( Media& media )
 
 const std::string& Artist::artworkMrl() const
 {
-    return m_artworkMrl;
+    if ( m_thumbnailId == 0 )
+        return Thumbnail::EmptyMrl;
+
+    auto lock = m_thumbnail.lock();
+    if ( m_thumbnail.isCached() == false )
+    {
+        auto thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
+        if ( thumbnail == nullptr )
+            return Thumbnail::EmptyMrl;
+        m_thumbnail = std::move( thumbnail );
+    }
+    return m_thumbnail.get()->mrl();
 }
 
 bool Artist::setArtworkMrl( const std::string& artworkMrl )
 {
-    if ( m_artworkMrl == artworkMrl )
-        return true;
-    static const std::string req = "UPDATE " + policy::ArtistTable::Name +
-            " SET artwork_mrl = ? WHERE id_artist = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, artworkMrl, m_id ) == false )
+    if ( m_thumbnailId != 0 )
+        return Thumbnail::setMrlFromPrimaryKey( m_ml, m_thumbnail, m_thumbnailId,
+                                                artworkMrl );
+
+    std::unique_ptr<sqlite::Transaction> t;
+    if ( sqlite::Transaction::transactionInProgress() == false )
+        t = m_ml->getConn()->newTransaction();
+    auto lock = m_thumbnail.lock();
+    m_thumbnail = Thumbnail::create( m_ml, artworkMrl, Thumbnail::Origin::Artist );
+    if ( m_thumbnail.get() == nullptr )
         return false;
-    m_artworkMrl = artworkMrl;
+    static const std::string req = "UPDATE " + policy::ArtistTable::Name +
+            " SET thumbnail_id = ? WHERE id_artist = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_thumbnail.get()->id(), m_id ) == false )
+        return false;
+    m_thumbnailId = m_thumbnail.get()->id();
+    if ( t != nullptr )
+        t->commit();
     return true;
 }
 
@@ -245,11 +268,13 @@ void Artist::createTable( sqlite::Connection* dbConnection )
                 "id_artist INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "name TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
                 "shortbio TEXT,"
-                "artwork_mrl TEXT,"
+                "thumbnail_id TEXT,"
                 "nb_albums UNSIGNED INT DEFAULT 0,"
                 "nb_tracks UNSIGNED INT DEFAULT 0,"
                 "mb_id TEXT,"
-                "is_present BOOLEAN NOT NULL DEFAULT 1"
+                "is_present BOOLEAN NOT NULL DEFAULT 1,"
+                "FOREIGN KEY(thumbnail_id) REFERENCES " + policy::ThumbnailTable::Name
+                + "(id_thumbnail)"
             ")";
     const std::string reqRel = "CREATE TABLE IF NOT EXISTS MediaArtistRelation("
                 "media_id INTEGER NOT NULL,"

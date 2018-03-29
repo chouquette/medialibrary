@@ -25,6 +25,7 @@
 #include "database/DatabaseHelpers.h"
 #include "medialibrary/IArtist.h"
 #include "medialibrary/IMediaLibrary.h"
+#include "utils/Cache.h"
 
 namespace medialibrary
 {
@@ -32,6 +33,7 @@ namespace medialibrary
 class Artist;
 class Album;
 class Media;
+class Thumbnail;
 
 namespace policy
 {
@@ -79,11 +81,13 @@ private:
     int64_t m_id;
     std::string m_name;
     std::string m_shortBio;
-    std::string m_artworkMrl;
+    int64_t m_thumbnailId;
     unsigned int m_nbAlbums;
     unsigned int m_nbTracks;
     bool m_isPresent;
     std::string m_mbId;
+
+    mutable Cache<std::shared_ptr<Thumbnail>> m_thumbnail;
 
     friend struct policy::ArtistTable;
 };
