@@ -144,6 +144,7 @@ void MediaLibrary::createAllTables()
 
     Device::createTable( m_dbConnection.get() );
     Folder::createTable( m_dbConnection.get() );
+    Thumbnail::createTable( m_dbConnection.get() );
     Media::createTable( m_dbConnection.get() );
     File::createTable( m_dbConnection.get() );
     Label::createTable( m_dbConnection.get() );
@@ -161,7 +162,6 @@ void MediaLibrary::createAllTables()
     History::createTable( m_dbConnection.get() );
     Settings::createTable( m_dbConnection.get() );
     parser::Task::createTable( m_dbConnection.get() );
-    Thumbnail::createTable( m_dbConnection.get() );
 }
 
 void MediaLibrary::createAllTriggers()
