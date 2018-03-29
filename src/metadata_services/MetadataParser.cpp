@@ -707,6 +707,7 @@ bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
         assert( artist != nullptr );
         albumArtist = artist;
     }
+    assert( album != nullptr );
 
     // We might modify albumArtist later, hence handle thumbnails before.
     // If we have an albumArtist (meaning the track was properly tagged, we
@@ -717,7 +718,7 @@ bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
     if ( albumArtist != nullptr && albumArtist->id() != UnknownArtistID &&
          albumArtist->id() != VariousArtistID &&
          albumArtist->artworkMrl().empty() == true &&
-         album != nullptr && album->artworkMrl().empty() == false )
+         album->artworkMrl().empty() == false )
         albumArtist->setArtworkMrl( album->artworkMrl(), Thumbnail::Origin::Album );
 
     // Until we have a better artwork extraction/assignation, simply do the same
@@ -725,7 +726,7 @@ bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
     if ( artist != nullptr && artist->id() != UnknownArtistID &&
          artist->id() != VariousArtistID &&
          artist->artworkMrl().empty() == true &&
-         album != nullptr && album->artworkMrl().empty() == false )
+         album->artworkMrl().empty() == false )
         artist->setArtworkMrl( album->artworkMrl(), Thumbnail::Origin::Album );
 
     if ( albumArtist != nullptr )
