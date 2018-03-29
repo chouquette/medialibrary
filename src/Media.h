@@ -125,7 +125,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual std::vector<AudioTrackPtr> audioTracks() override;
         virtual const std::string& thumbnail() override;
         virtual bool isThumbnailGenerated() const override;
-        virtual bool setThumbnail( const std::string &thumbnail );
+        virtual bool setThumbnail( const std::string &thumbnail ) override;
         bool setThumbnail( const std::string& thumbnail, Thumbnail::Origin origin );
         virtual unsigned int insertionDate() const override;
         virtual unsigned int releaseDate() const override;
