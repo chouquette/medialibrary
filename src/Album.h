@@ -31,6 +31,7 @@
 #include "database/DatabaseHelpers.h"
 #include "medialibrary/IAlbum.h"
 #include "utils/Cache.h"
+#include "Thumbnail.h"
 
 namespace medialibrary
 {
@@ -39,7 +40,6 @@ class Album;
 class AlbumTrack;
 class Artist;
 class Media;
-class Thumbnail;
 
 namespace policy
 {
@@ -74,7 +74,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         virtual const std::string& shortSummary() const override;
         bool setShortSummary( const std::string& summary );
         virtual const std::string& artworkMrl() const override;
-        bool setArtworkMrl( const std::string& artworkMrl );
+        bool setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin );
         virtual std::vector<MediaPtr> tracks( SortingCriteria sort, bool desc ) const override;
         virtual std::vector<MediaPtr> tracks( GenrePtr genre, SortingCriteria sort, bool desc ) const override;
         ///

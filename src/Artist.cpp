@@ -166,11 +166,11 @@ const std::string& Artist::artworkMrl() const
     return m_thumbnail.get()->mrl();
 }
 
-bool Artist::setArtworkMrl( const std::string& artworkMrl )
+bool Artist::setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin )
 {
     if ( m_thumbnailId != 0 )
         return Thumbnail::setMrlFromPrimaryKey( m_ml, m_thumbnail, m_thumbnailId,
-                                                artworkMrl );
+                                                artworkMrl, origin );
 
     std::unique_ptr<sqlite::Transaction> t;
     if ( sqlite::Transaction::transactionInProgress() == false )

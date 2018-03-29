@@ -64,14 +64,28 @@ TEST_F( Thumbnails, Update )
     std::string mrl = "/path/to/thumbnail.png";
     auto t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::UserProvided );
     ASSERT_EQ( t->mrl(), mrl );
+    ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
 
     mrl = "/better/thumbnail.gif";
-    auto res = t->update( mrl );
+    auto res = t->update( mrl, Thumbnail::Origin::UserProvided );
     ASSERT_TRUE( res );
     ASSERT_EQ( t->mrl(), mrl );
+    ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
 
     Reload();
 
     t = Thumbnail::fetch( ml.get(), t->id() );
     ASSERT_EQ( t->mrl(), mrl );
+    ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
+
+    res = t->update( mrl, Thumbnail::Origin::AlbumArtist );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( t->mrl(), mrl );
+    ASSERT_EQ( t->origin(), Thumbnail::Origin::AlbumArtist );
+
+    Reload();
+
+    t = Thumbnail::fetch( ml.get(), t->id() );
+    ASSERT_EQ( t->mrl(), mrl );
+    ASSERT_EQ( t->origin(), Thumbnail::Origin::AlbumArtist );
 }

@@ -82,7 +82,7 @@ TEST_F( Artists, ArtworkMrl )
     ASSERT_EQ( a->artworkMrl(), "" );
 
     std::string artwork("/tmp/otter.png");
-    a->setArtworkMrl( artwork );
+    a->setArtworkMrl( artwork, Thumbnail::Origin::UserProvided );
     ASSERT_EQ( a->artworkMrl(), artwork );
 
     Reload();

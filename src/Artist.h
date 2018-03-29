@@ -26,6 +26,7 @@
 #include "medialibrary/IArtist.h"
 #include "medialibrary/IMediaLibrary.h"
 #include "utils/Cache.h"
+#include "Thumbnail.h"
 
 namespace medialibrary
 {
@@ -33,7 +34,6 @@ namespace medialibrary
 class Artist;
 class Album;
 class Media;
-class Thumbnail;
 
 namespace policy
 {
@@ -59,7 +59,7 @@ public:
     virtual std::vector<MediaPtr> media(SortingCriteria sort, bool desc) const override;
     bool addMedia( Media& media );
     virtual const std::string& artworkMrl() const override;
-    bool setArtworkMrl( const std::string& artworkMrl );
+    bool setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin );
     bool updateNbAlbum( int increment );
     bool updateNbTrack( int increment );
     std::shared_ptr<Album> unknownAlbum();

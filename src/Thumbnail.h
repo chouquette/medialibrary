@@ -59,7 +59,7 @@ public:
 
     int64_t id() const;
     const std::string& mrl() const;
-    bool update( std::string mrl );
+    bool update( std::string mrl, Origin origin );
     Origin origin() const;
 
     /**
@@ -71,7 +71,8 @@ public:
      */
     static bool setMrlFromPrimaryKey( MediaLibraryPtr ml,
                                       Cache<std::shared_ptr<Thumbnail>>& thumbnail,
-                                      int64_t thumbnailId, std::string mrl );
+                                      int64_t thumbnailId, std::string mrl,
+                                      Origin origin );
 
     static void createTable( sqlite::Connection* dbConnection );
     static std::shared_ptr<Thumbnail> create( MediaLibraryPtr ml, std::string mrl,

@@ -39,7 +39,8 @@ int64_t Thumbnail::*const ThumbnailTable::PrimaryKey = &Thumbnail::m_id;
 
 const std::string Thumbnail::EmptyMrl;
 
-Thumbnail::Thumbnail(MediaLibraryPtr ml, sqlite::Row& row)
+Thumbnail::Thumbnail( MediaLibraryPtr ml, sqlite::Row& row )
+    : m_ml( ml )
 {
     row >> m_id
         >> m_mrl
@@ -64,15 +65,16 @@ const std::string& Thumbnail::mrl() const
     return m_mrl;
 }
 
-bool Thumbnail::update( std::string mrl )
+bool Thumbnail::update( std::string mrl, Origin origin )
 {
-    if ( m_mrl == mrl )
+    if ( m_mrl == mrl && m_origin == origin )
         return true;
     static const std::string req = "UPDATE " + policy::ThumbnailTable::Name +
-            " SET mrl = ? WHERE id_thumbnail = ?";
-    if( sqlite::Tools::executeUpdate( m_ml->getConn(), req, mrl, m_id ) == false )
+            " SET mrl = ?, origin = ? WHERE id_thumbnail = ?";
+    if( sqlite::Tools::executeUpdate( m_ml->getConn(), req, mrl, origin, m_id ) == false )
         return false;
     m_mrl = std::move( mrl );
+    m_origin = origin;
     return true;
 }
 
@@ -83,7 +85,8 @@ Thumbnail::Origin Thumbnail::origin() const
 
 bool Thumbnail::setMrlFromPrimaryKey( MediaLibraryPtr ml,
                                       Cache<std::shared_ptr<Thumbnail>>& thumbnail,
-                                      int64_t thumbnailId, std::string mrl )
+                                      int64_t thumbnailId, std::string mrl,
+                                      Origin origin )
 {
     auto lock = thumbnail.lock();
     if ( thumbnail.isCached() == false )
@@ -95,7 +98,7 @@ bool Thumbnail::setMrlFromPrimaryKey( MediaLibraryPtr ml,
             return false;
         }
     }
-    return thumbnail.get()->update( std::move( mrl ) );
+    return thumbnail.get()->update( std::move( mrl ), origin );
 }
 
 void Thumbnail::createTable( sqlite::Connection* dbConnection )

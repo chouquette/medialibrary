@@ -718,7 +718,7 @@ bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
          albumArtist->id() != VariousArtistID &&
          albumArtist->artworkMrl().empty() == true &&
          album != nullptr && album->artworkMrl().empty() == false )
-        albumArtist->setArtworkMrl( album->artworkMrl() );
+        albumArtist->setArtworkMrl( album->artworkMrl(), Thumbnail::Origin::Album );
 
     // Until we have a better artwork extraction/assignation, simply do the same
     // for artists
@@ -726,7 +726,7 @@ bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
          artist->id() != VariousArtistID &&
          artist->artworkMrl().empty() == true &&
          album != nullptr && album->artworkMrl().empty() == false )
-        artist->setArtworkMrl( album->artworkMrl() );
+        artist->setArtworkMrl( album->artworkMrl(), Thumbnail::Origin::Album );
 
     if ( albumArtist != nullptr )
         albumArtist->addMedia( media );

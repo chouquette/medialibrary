@@ -169,7 +169,7 @@ TEST_F( Albums, SetArtworkMrl )
 {
     auto a = ml->createAlbum( "album" );
 
-    a->setArtworkMrl( "artwork" );
+    a->setArtworkMrl( "artwork", Thumbnail::Origin::UserProvided );
     ASSERT_EQ( a->artworkMrl(), "artwork" );
 
     Reload();
