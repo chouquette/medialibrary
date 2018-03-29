@@ -151,6 +151,21 @@ const std::string& Album::artworkMrl() const
     return m_thumbnail.get()->mrl();
 }
 
+std::shared_ptr<Thumbnail> Album::thumbnail()
+{
+    if ( m_thumbnailId == 0 )
+        return nullptr;
+    auto lock = m_thumbnail.lock();
+    if ( m_thumbnail.isCached() == false )
+    {
+        auto thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
+        if ( thumbnail == nullptr )
+            return nullptr;
+        m_thumbnail = std::move( thumbnail );
+    }
+    return m_thumbnail.get();
+}
+
 bool Album::setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin )
 {
     if ( m_thumbnailId != 0 )

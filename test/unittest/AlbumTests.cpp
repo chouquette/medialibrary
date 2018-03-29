@@ -178,6 +178,28 @@ TEST_F( Albums, SetArtworkMrl )
     ASSERT_EQ( a->artworkMrl(), a2->artworkMrl() );
 }
 
+TEST_F( Albums, Thumbnail )
+{
+    auto a = ml->createAlbum( "album" );
+    auto t = a->thumbnail();
+    ASSERT_EQ( nullptr, t );
+
+    std::string mrl = "/path/to/sea/otter/artwork.png";
+    auto res = a->setArtworkMrl( mrl, Thumbnail::Origin::UserProvided );
+    ASSERT_TRUE( res );
+
+    t = a->thumbnail();
+    ASSERT_NE( nullptr, t );
+    ASSERT_EQ( mrl, t->mrl() );
+
+    Reload();
+
+    a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
+    t = a->thumbnail();
+    ASSERT_NE( nullptr, t );
+    ASSERT_EQ( mrl, t->mrl() );
+}
+
 TEST_F( Albums, FetchAlbumFromTrack )
 {
     auto a = ml->createAlbum( "album" );

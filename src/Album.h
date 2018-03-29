@@ -74,6 +74,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         virtual const std::string& shortSummary() const override;
         bool setShortSummary( const std::string& summary );
         virtual const std::string& artworkMrl() const override;
+        std::shared_ptr<Thumbnail> thumbnail();
         bool setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin );
         virtual std::vector<MediaPtr> tracks( SortingCriteria sort, bool desc ) const override;
         virtual std::vector<MediaPtr> tracks( GenrePtr genre, SortingCriteria sort, bool desc ) const override;
