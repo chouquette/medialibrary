@@ -59,7 +59,7 @@ public:
 
     int64_t id() const;
     const std::string& mrl() const;
-    bool setMrl( std::string mrl );
+    bool update( std::string mrl );
     Origin origin() const;
 
     /**

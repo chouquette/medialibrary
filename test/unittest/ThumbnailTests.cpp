@@ -59,14 +59,14 @@ TEST_F( Thumbnails, MediaSetThumbnail )
     ASSERT_TRUE( m->isThumbnailGenerated() );
 }
 
-TEST_F( Thumbnails, SetMrl )
+TEST_F( Thumbnails, Update )
 {
     std::string mrl = "/path/to/thumbnail.png";
     auto t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::UserProvided );
     ASSERT_EQ( t->mrl(), mrl );
 
     mrl = "/better/thumbnail.gif";
-    auto res = t->setMrl( mrl );
+    auto res = t->update( mrl );
     ASSERT_TRUE( res );
     ASSERT_EQ( t->mrl(), mrl );
 

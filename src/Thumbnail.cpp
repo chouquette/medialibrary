@@ -64,7 +64,7 @@ const std::string& Thumbnail::mrl() const
     return m_mrl;
 }
 
-bool Thumbnail::setMrl( std::string mrl )
+bool Thumbnail::update( std::string mrl )
 {
     if ( m_mrl == mrl )
         return true;
@@ -95,7 +95,7 @@ bool Thumbnail::setMrlFromPrimaryKey( MediaLibraryPtr ml,
             return false;
         }
     }
-    return thumbnail.get()->setMrl( std::move( mrl ) );
+    return thumbnail.get()->update( std::move( mrl ) );
 }
 
 void Thumbnail::createTable( sqlite::Connection* dbConnection )
