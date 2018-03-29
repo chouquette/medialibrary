@@ -709,6 +709,8 @@ bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
     }
     assert( album != nullptr );
 
+    auto albumThumbnail = album->thumbnail();
+
     // We might modify albumArtist later, hence handle thumbnails before.
     // If we have an albumArtist (meaning the track was properly tagged, we
     // can assume this artist is a correct match. We can use the thumbnail from
@@ -717,17 +719,29 @@ bool MetadataParser::link( Media& media, std::shared_ptr<Album> album,
     // thumbnail wouldn't reflect those "special" artists
     if ( albumArtist != nullptr && albumArtist->id() != UnknownArtistID &&
          albumArtist->id() != VariousArtistID &&
-         albumArtist->artworkMrl().empty() == true &&
-         album->artworkMrl().empty() == false )
-        albumArtist->setArtworkMrl( album->artworkMrl(), Thumbnail::Origin::Album );
+         albumThumbnail != nullptr )
+    {
+        auto albumArtistThumbnail = albumArtist->thumbnail();
+        // If the album artist has no thumbnail, let's assign it
+        if ( albumArtistThumbnail == nullptr )
+        {
+            albumArtist->setArtworkMrl( albumThumbnail->mrl(), Thumbnail::Origin::AlbumArtist );
+        }
+        else if ( albumArtistThumbnail->origin() == Thumbnail::Origin::Artist )
+        {
+            // We only want to change the thumbnail if it was assigned from an
+            // album this artist was only featuring on
+        }
+    }
 
     // Until we have a better artwork extraction/assignation, simply do the same
     // for artists
     if ( artist != nullptr && artist->id() != UnknownArtistID &&
          artist->id() != VariousArtistID &&
-         artist->artworkMrl().empty() == true &&
-         album->artworkMrl().empty() == false )
-        artist->setArtworkMrl( album->artworkMrl(), Thumbnail::Origin::Album );
+         albumThumbnail != nullptr && artist->thumbnail() == nullptr )
+    {
+        artist->setArtworkMrl( album->artworkMrl(), Thumbnail::Origin::Artist );
+    }
 
     if ( albumArtist != nullptr )
         albumArtist->addMedia( media );
