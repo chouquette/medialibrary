@@ -395,7 +395,15 @@ bool MetadataParser::parseAudioFile( parser::Task& task )
         if ( album == nullptr )
         {
             const auto& albumName = task.vlcMedia.meta( libvlc_meta_Album );
-            album = m_ml->createAlbum( albumName, artworkMrl );
+            int64_t thumbnailId = 0;
+            if ( artworkMrl.empty() == false )
+            {
+                auto thumbnail = Thumbnail::create( m_ml, artworkMrl,
+                                                    Thumbnail::Origin::Album );
+                if ( thumbnail != nullptr )
+                    thumbnailId = thumbnail->id();
+            }
+            album = m_ml->createAlbum( albumName, thumbnailId );
             if ( album == nullptr )
                 return false;
             m_notifier->notifyAlbumCreation( album );

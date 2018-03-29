@@ -1,3 +1,4 @@
+/******************* Migrate Media table **************************************/
 "CREATE TEMPORARY TABLE " + MediaTable::Name + "_backup("
     "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
     "type INTEGER,"
@@ -18,8 +19,7 @@
 
 "INSERT INTO " + ThumbnailTable::Name + "(id_thumbnail, mrl, origin) "
     "SELECT id_media, thumbnail, " +
-    std::to_string( static_cast<typename std::underlying_type<Thumbnail::Origin>::type>(
-    Thumbnail::Origin::UserProvided ) ) +
+    std::to_string( static_cast<ThumbnailType>( Thumbnail::Origin::UserProvided ) ) +
     " FROM " + MediaTable::Name + " WHERE thumbnail IS NOT NULL AND thumbnail != ''",
 
 "DROP TABLE " + MediaTable::Name,
@@ -53,3 +53,7 @@
     "CASE thumbnail WHEN NULL THEN 0 WHEN '' THEN 0 ELSE 1 END,"
     "title, filename, is_favorite, is_present FROM " + MediaTable::Name + "_backup",
 
+/******************* Delete other tables **************************************/
+
+"DROP TABLE " + AlbumTable::Name,
+"DELETE FROM " + AlbumTable::Name + "Fts",

@@ -31,6 +31,7 @@
 #include "Artist.h"
 #include "Genre.h"
 #include "Media.h"
+#include "Thumbnail.h"
 
 #include "database/SqliteTools.h"
 
@@ -49,19 +50,19 @@ Album::Album(MediaLibraryPtr ml, sqlite::Row& row)
         >> m_artistId
         >> m_releaseYear
         >> m_shortSummary
-        >> m_artworkMrl
+        >> m_thumbnailId
         >> m_nbTracks
         >> m_duration
         >> m_isPresent;
 }
 
-Album::Album( MediaLibraryPtr ml, const std::string& title, const std::string& artworkMrl )
+Album::Album( MediaLibraryPtr ml, const std::string& title, int64_t thumbnailId )
     : m_ml( ml )
     , m_id( 0 )
     , m_title( title )
     , m_artistId( 0 )
     , m_releaseYear( ~0u )
-    , m_artworkMrl( artworkMrl )
+    , m_thumbnailId( thumbnailId )
     , m_nbTracks( 0 )
     , m_duration( 0 )
     , m_isPresent( true )
@@ -73,6 +74,7 @@ Album::Album( MediaLibraryPtr ml, const Artist* artist )
     , m_id( 0 )
     , m_artistId( artist->id() )
     , m_releaseYear( ~0u )
+    , m_thumbnailId( 0 )
     , m_nbTracks( 0 )
     , m_duration( 0 )
     , m_isPresent( true )
@@ -135,16 +137,40 @@ bool Album::setShortSummary( const std::string& summary )
 
 const std::string& Album::artworkMrl() const
 {
-    return m_artworkMrl;
+    if ( m_thumbnailId == 0 )
+        return Thumbnail::EmptyMrl;
+
+    auto lock = m_thumbnail.lock();
+    if ( m_thumbnail.isCached() == false )
+    {
+        auto thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
+        if ( thumbnail == nullptr )
+            return Thumbnail::EmptyMrl;
+        m_thumbnail = std::move( thumbnail );
+    }
+    return m_thumbnail.get()->mrl();
 }
 
 bool Album::setArtworkMrl( const std::string& artworkMrl )
 {
-    static const std::string req = "UPDATE " + policy::AlbumTable::Name
-            + " SET artwork_mrl = ? WHERE id_album = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, artworkMrl, m_id ) == false )
+    if ( m_thumbnailId != 0 )
+        return Thumbnail::setMrlFromPrimaryKey( m_ml, m_thumbnail, m_thumbnailId,
+                                                artworkMrl );
+
+    std::unique_ptr<sqlite::Transaction> t;
+    if ( sqlite::Transaction::transactionInProgress() == false )
+        t = m_ml->getConn()->newTransaction();
+    auto lock = m_thumbnail.lock();
+    m_thumbnail = Thumbnail::create( m_ml, artworkMrl, Thumbnail::Origin::Album );
+    if ( m_thumbnail.get() == nullptr )
         return false;
-    m_artworkMrl = artworkMrl;
+    static const std::string req = "UPDATE " + policy::AlbumTable::Name
+            + " SET thumbnail_id = ? WHERE id_album = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_thumbnail.get()->id(), m_id ) == false )
+        return false;
+    m_thumbnailId = m_thumbnail.get()->id();
+    if ( t != nullptr )
+        t->commit();
     return true;
 }
 
@@ -341,12 +367,14 @@ void Album::createTable( sqlite::Connection* dbConnection )
                 "artist_id UNSIGNED INTEGER,"
                 "release_year UNSIGNED INTEGER,"
                 "short_summary TEXT,"
-                "artwork_mrl TEXT,"
+                "thumbnail_id UNSIGNED INT,"
                 "nb_tracks UNSIGNED INTEGER DEFAULT 0,"
                 "duration UNSIGNED INTEGER NOT NULL DEFAULT 0,"
                 "is_present BOOLEAN NOT NULL DEFAULT 1,"
                 "FOREIGN KEY( artist_id ) REFERENCES " + policy::ArtistTable::Name
-                + "(id_artist) ON DELETE CASCADE"
+                + "(id_artist) ON DELETE CASCADE,"
+                "FOREIGN KEY(thumbnail_id) REFERENCES " + policy::ThumbnailTable::Name
+                + "(id_thumbnail)"
             ")";
     const std::string reqRel = "CREATE TABLE IF NOT EXISTS AlbumArtistRelation("
                 "album_id INTEGER,"
@@ -423,12 +451,12 @@ void Album::createTriggers( sqlite::Connection* dbConnection )
     sqlite::Tools::executeRequest( dbConnection, vtriggerDelete );
 }
 
-std::shared_ptr<Album> Album::create( MediaLibraryPtr ml, const std::string& title, const std::string& artworkMrl )
+std::shared_ptr<Album> Album::create( MediaLibraryPtr ml, const std::string& title, int64_t thumbnailId )
 {
-    auto album = std::make_shared<Album>( ml, title, artworkMrl );
+    auto album = std::make_shared<Album>( ml, title, thumbnailId );
     static const std::string req = "INSERT INTO " + policy::AlbumTable::Name +
-            "(id_album, title, artwork_mrl) VALUES(NULL, ?, ?)";
-    if ( insert( ml, album, req, title, artworkMrl ) == false )
+            "(id_album, title, thumbnail_id) VALUES(NULL, ?, ?)";
+    if ( insert( ml, album, req, title, sqlite::ForeignKey( thumbnailId ) ) == false )
         return nullptr;
     return album;
 }

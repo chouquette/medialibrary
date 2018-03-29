@@ -39,6 +39,7 @@ class Album;
 class AlbumTrack;
 class Artist;
 class Media;
+class Thumbnail;
 
 namespace policy
 {
@@ -54,7 +55,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
 {
     public:
         Album( MediaLibraryPtr ml, sqlite::Row& row );
-        Album( MediaLibraryPtr ml, const std::string& title, const std::string& artworkMrl );
+        Album( MediaLibraryPtr ml, const std::string& title, int64_t thumbnailId );
         Album( MediaLibraryPtr ml, const Artist* artist );
 
         virtual int64_t id() const override;
@@ -100,7 +101,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
 
         static void createTable( sqlite::Connection* dbConnection );
         static void createTriggers( sqlite::Connection* dbConnection );
-        static std::shared_ptr<Album> create( MediaLibraryPtr ml, const std::string& title, const std::string& artworkMrl );
+        static std::shared_ptr<Album> create( MediaLibraryPtr ml, const std::string& title, int64_t thumbnailId );
         static std::shared_ptr<Album> createUnknownAlbum( MediaLibraryPtr ml, const Artist* artist );
         ///
         /// \brief search search for an album, through its albumartist or title
@@ -122,13 +123,14 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         int64_t m_artistId;
         unsigned int m_releaseYear;
         std::string m_shortSummary;
-        std::string m_artworkMrl;
+        int64_t m_thumbnailId;
         unsigned int m_nbTracks;
         unsigned int m_duration;
         bool m_isPresent;
 
         mutable Cache<std::vector<MediaPtr>> m_tracks;
         mutable Cache<std::shared_ptr<Artist>> m_albumArtist;
+        mutable Cache<std::shared_ptr<Thumbnail>> m_thumbnail;
 
         friend struct policy::AlbumTable;
 };

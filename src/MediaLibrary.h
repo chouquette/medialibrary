@@ -86,7 +86,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual bool deleteLabel( LabelPtr label ) override;
 
         virtual AlbumPtr album( int64_t id ) const override;
-        std::shared_ptr<Album> createAlbum( const std::string& title, const std::string& artworkMrl );
+        std::shared_ptr<Album> createAlbum( const std::string& title, int64_t thumbnailId );
         virtual std::vector<AlbumPtr> albums(SortingCriteria sort, bool desc) const override;
 
         virtual std::vector<GenrePtr> genres( SortingCriteria sort, bool desc ) const override;

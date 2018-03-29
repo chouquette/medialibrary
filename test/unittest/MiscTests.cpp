@@ -169,9 +169,8 @@ TEST_F( DbModel, Upgrade12to13 )
     LoadFakeDB( SRC_DIR "/test/unittest/db_v12.sql" );
     auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    // Check that we also recovered from the invalid album track trigger
-    auto albums = ml->albums( SortingCriteria::Default, false );
-    ASSERT_EQ( 1u, albums.size() );
+    // We can't check for the number of albums anymore since they are deleted
+    // as part of 13 -> 14 migration
 }
 
 TEST_F( DbModel, Upgrade13to14 )

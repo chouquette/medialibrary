@@ -492,9 +492,9 @@ AlbumPtr MediaLibrary::album( int64_t id ) const
     return Album::fetch( this, id );
 }
 
-std::shared_ptr<Album> MediaLibrary::createAlbum( const std::string& title, const std::string& artworkMrl )
+std::shared_ptr<Album> MediaLibrary::createAlbum( const std::string& title, int64_t thumbnailId )
 {
-    return Album::create( this, title, artworkMrl );
+    return Album::create( this, title, thumbnailId );
 }
 
 std::vector<AlbumPtr> MediaLibrary::albums( SortingCriteria sort, bool desc ) const
@@ -850,6 +850,9 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
             }
             if ( previousVersion == 13 )
             {
+                // We need to recreate many thumbnail records, and hopefully
+                // generate better ones
+                needRescan = true;
                 migrateModel13to14();
                 previousVersion = 14;
             }
@@ -1046,15 +1049,21 @@ void MediaLibrary::migrateModel13to14()
     sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
     auto t = getConn()->newTransaction();
     using namespace policy;
+    using ThumbnailType = typename std::underlying_type<Thumbnail::Origin>::type;
     std::string reqs[] = {
 #               include "database/migrations/migration13-14.sql"
     };
 
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( getConn(), req );
+    // Re-create tables that we just removed
+    // We will run a re-scan, so we don't care about keeping their content
+    Album::createTable( getConn() );
     // Re-create triggers removed in the process
     Media::createTriggers( getConn() );
     AlbumTrack::createTriggers( getConn() );
+    Album::createTriggers( getConn() );
+    Artist::createTriggers( getConn(), 14 );
     t->commit();
 }
 
