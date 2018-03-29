@@ -93,6 +93,17 @@ public:
         }
     }
 
+    void CheckNbTriggers( uint32_t expected )
+    {
+        medialibrary::sqlite::Statement stmt{ ml->getDbConn()->handle(),
+                "SELECT COUNT(*) FROM sqlite_master WHERE type='trigger'" };
+        stmt.execute();
+        auto row = stmt.row();
+        uint32_t nbTriggers;
+        row >> nbTriggers;
+        ASSERT_EQ( nbTriggers, expected );
+    }
+
     virtual void TearDown() override
     {
         medialibrary::sqlite::Connection::Handle conn;
@@ -177,4 +188,6 @@ TEST_F( DbModel, Upgrade13to14 )
     m = media[1];
     ASSERT_EQ( m->thumbnail(), "" );
     ASSERT_FALSE( m->isThumbnailGenerated() );
+
+    CheckNbTriggers( 31 );
 }
