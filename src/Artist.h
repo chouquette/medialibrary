@@ -59,6 +59,7 @@ public:
     virtual std::vector<MediaPtr> media(SortingCriteria sort, bool desc) const override;
     bool addMedia( Media& media );
     virtual const std::string& artworkMrl() const override;
+    std::shared_ptr<Thumbnail> thumbnail();
     bool setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin );
     bool updateNbAlbum( int increment );
     bool updateNbTrack( int increment );

@@ -92,6 +92,28 @@ TEST_F( Artists, ArtworkMrl )
     ASSERT_EQ( a2->artworkMrl(), artwork );
 }
 
+TEST_F( Artists, Thumbnail )
+{
+    auto a = ml->createArtist( "artist" );
+    auto t = a->thumbnail();
+    ASSERT_EQ( nullptr, t );
+
+    std::string mrl = "/path/to/sea/otter/artwork.png";
+    auto res = a->setArtworkMrl( mrl, Thumbnail::Origin::UserProvided );
+    ASSERT_TRUE( res );
+
+    t = a->thumbnail();
+    ASSERT_NE( nullptr, t );
+    ASSERT_EQ( mrl, t->mrl() );
+
+    Reload();
+
+    a = std::static_pointer_cast<Artist>( ml->artist( a->id() ) );
+    t = a->thumbnail();
+    ASSERT_NE( nullptr, t );
+    ASSERT_EQ( mrl, t->mrl() );
+}
+
 // Test the number of albums based on the artist tracks
 TEST_F( Artists, Albums )
 {
