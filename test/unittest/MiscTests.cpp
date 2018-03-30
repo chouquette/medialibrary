@@ -171,6 +171,8 @@ TEST_F( DbModel, Upgrade12to13 )
     ASSERT_EQ( InitializeResult::Success, res );
     // We can't check for the number of albums anymore since they are deleted
     // as part of 13 -> 14 migration
+
+    CheckNbTriggers( 31 );
 }
 
 TEST_F( DbModel, Upgrade13to14 )

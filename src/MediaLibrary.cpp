@@ -1024,12 +1024,33 @@ void MediaLibrary::migrateModel10to11()
     t->commit();
 }
 
+/*
+ * - Some is_present related triggers were fixed in model 6 to 7 migration, but
+ *   they were not recreated if already existing. The has_file_present trigger
+ *   was recreated as part of model 7 to 8 migration, but we need to ensure
+ *   has_album_present (Artist) & is_album_present (Album) triggers are
+ *   recreated to behave as expected
+ * - Due to a typo, is_track_present was named is_track_presentAFTER, and was
+ *   executed BEFORE the update took place, thus using the wrong is_present value.
+ *   The trigger will be recreated as part of this migration, and the values
+ *   will be enforced, causing the entire update chain to be triggered, and
+ *   restoring correct is_present values for all AlbumTrack/Album/Artist entries
+ */
 void MediaLibrary::migrateModel12to13()
 {
     auto t = getConn()->newTransaction();
-    const std::string req = "DROP TRIGGER IF EXISTS is_track_presentAFTER";
-    sqlite::Tools::executeDelete( getConn(), req );
+    const std::string reqs[] = {
+        "DROP TRIGGER IF EXISTS is_track_presentAFTER",
+        "DROP TRIGGER has_album_present",
+        "DROP TRIGGER is_album_present",
+    };
+
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeDelete( getConn(), req );
+
     AlbumTrack::createTriggers( getConn() );
+    Album::createTriggers( getConn() );
+    Artist::createTriggers( getConn(), 13 );
     // Leave the weak context as we now need to update is_present fields, which
     // are propagated through recursive triggers
     const std::string migrateData = "UPDATE " + policy::AlbumTrackTable::Name +
