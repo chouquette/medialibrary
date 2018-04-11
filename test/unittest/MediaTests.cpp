@@ -426,6 +426,29 @@ TEST_F( Medias, SortByFileSize )
     ASSERT_EQ( m1->id(), media[0]->id() );
 }
 
+TEST_F( Medias, SortByFilename )
+{
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "zzzzz.mp3" ) );
+    m1->setType( Media::Type::Video );
+    m1->setTitle( "aaaaa" );
+    m1->save();
+
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "aaaaa.mp3" ) );
+    m2->setType( Media::Type::Video );
+    m2->setTitle( "zzzzz" );
+    m2->save();
+
+    auto media = ml->videoFiles( SortingCriteria::Filename, false );
+    ASSERT_EQ( 2u, media.size() );
+    ASSERT_EQ( m2->id(), media[0]->id() );
+    ASSERT_EQ( m1->id(), media[1]->id() );
+
+    media = ml->videoFiles( SortingCriteria::LastModificationDate, true );
+    ASSERT_EQ( 2u, media.size() );
+    ASSERT_EQ( m2->id(), media[1]->id() );
+    ASSERT_EQ( m1->id(), media[0]->id() );
+}
+
 TEST_F( Medias, SetType )
 {
     auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3" ) );

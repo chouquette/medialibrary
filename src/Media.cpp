@@ -495,6 +495,9 @@ std::vector<MediaPtr> Media::listAll( MediaLibraryPtr ml, IMedia::Type type, Sor
         req += "play_count";
         desc = !desc; // Make decreasing order default for play count sorting
         break;
+    case SortingCriteria::Filename:
+        req += "filename";
+        break;
     default:
         req += "title";
         break;
