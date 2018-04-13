@@ -147,6 +147,8 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         static std::vector<MediaPtr> fetchHistory( MediaLibraryPtr ml );
         static void clearHistory( MediaLibraryPtr ml );
 
+private:
+        static std::string sortRequest( SortingCriteria sort, bool desc );
 
 private:
         MediaLibraryPtr m_ml;

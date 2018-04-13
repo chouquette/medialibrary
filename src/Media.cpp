@@ -461,14 +461,10 @@ void Media::removeFile( File& file )
     }));
 }
 
-std::vector<MediaPtr> Media::listAll( MediaLibraryPtr ml, IMedia::Type type, SortingCriteria sort, bool desc )
+
+std::string Media::sortRequest( SortingCriteria sort, bool desc )
 {
-    std::string req = "SELECT m.* FROM " + policy::MediaTable::Name + " m INNER JOIN "
-            + policy::FileTable::Name + " f ON m.id_media = f.media_id"
-            " WHERE m.type = ?"
-            " AND f.type = ?"
-            " AND f.is_present != 0"
-            " ORDER BY ";
+    std::string req = " ORDER BY ";
     switch ( sort )
     {
     case SortingCriteria::Duration:
@@ -499,7 +495,18 @@ std::vector<MediaPtr> Media::listAll( MediaLibraryPtr ml, IMedia::Type type, Sor
     }
     if ( desc == true )
         req += " DESC";
+    return req;
+}
 
+std::vector<MediaPtr> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
+                                      SortingCriteria sort, bool desc )
+{
+    std::string req = "SELECT m.* FROM " + policy::MediaTable::Name + " m INNER JOIN "
+            + policy::FileTable::Name + " f ON m.id_media = f.media_id"
+            " WHERE m.type = ?"
+            " AND f.type = ?"
+            " AND f.is_present != 0";
+    req += sortRequest( sort, desc );
     return fetchAll<IMedia>( ml, req, type, File::Type::Main );
 }
 
