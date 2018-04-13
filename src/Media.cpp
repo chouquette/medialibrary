@@ -463,50 +463,44 @@ void Media::removeFile( File& file )
 
 std::vector<MediaPtr> Media::listAll( MediaLibraryPtr ml, IMedia::Type type, SortingCriteria sort, bool desc )
 {
-    std::string req;
-    if ( sort == SortingCriteria::LastModificationDate || sort == SortingCriteria::FileSize )
-    {
-        req = "SELECT m.* FROM " + policy::MediaTable::Name + " m INNER JOIN "
-                + policy::FileTable::Name + " f ON m.id_media = f.media_id"
-                " WHERE m.type = ?"
-                " AND f.type = ?"
-                " AND f.is_present != 0";
-        if ( sort == SortingCriteria::LastModificationDate )
-            req += " ORDER BY f.last_modification_date";
-        else
-            req += " ORDER BY f.size";
-        if ( desc == true )
-            req += " DESC";
-        return fetchAll<IMedia>( ml, req, type, File::Type::Main );
-    }
-    req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE type = ? AND "
-            "is_present != 0 ORDER BY ";
+    std::string req = "SELECT m.* FROM " + policy::MediaTable::Name + " m INNER JOIN "
+            + policy::FileTable::Name + " f ON m.id_media = f.media_id"
+            " WHERE m.type = ?"
+            " AND f.type = ?"
+            " AND f.is_present != 0"
+            " ORDER BY ";
     switch ( sort )
     {
     case SortingCriteria::Duration:
-        req += "duration";
+        req += "m.duration";
         break;
     case SortingCriteria::InsertionDate:
-        req += "insertion_date";
+        req += "m.insertion_date";
         break;
     case SortingCriteria::ReleaseDate:
-        req += "release_date";
+        req += "m.release_date";
         break;
     case SortingCriteria::PlayCount:
-        req += "play_count";
+        req += "m.play_count";
         desc = !desc; // Make decreasing order default for play count sorting
         break;
     case SortingCriteria::Filename:
-        req += "filename";
+        req += "m.filename";
+        break;
+    case SortingCriteria::LastModificationDate:
+        req += "f.last_modification_date";
+        break;
+    case SortingCriteria::FileSize:
+        req += "f.size";
         break;
     default:
-        req += "title";
+        req += "m.title";
         break;
     }
     if ( desc == true )
         req += " DESC";
 
-    return fetchAll<IMedia>( ml, req, type );
+    return fetchAll<IMedia>( ml, req, type, File::Type::Main );
 }
 
 int64_t Media::id() const
