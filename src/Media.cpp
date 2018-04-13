@@ -709,14 +709,16 @@ bool Media::removeLabel( LabelPtr label )
     }
 }
 
-
 std::vector<MediaPtr> Media::search( MediaLibraryPtr ml, const std::string& title )
 {
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE"
-            " id_media IN (SELECT rowid FROM " + policy::MediaTable::Name + "Fts"
+    static const std::string req = "SELECT m.* FROM " + policy::MediaTable::Name + " m "
+            " INNER JOIN " + policy::FileTable::Name + " f ON m.id_media = f.media_id"
+            " WHERE"
+            " m.id_media IN (SELECT rowid FROM " + policy::MediaTable::Name + "Fts"
             " WHERE " + policy::MediaTable::Name + "Fts MATCH '*' || ? || '*')"
-            "AND is_present = 1";
-    return Media::fetchAll<IMedia>( ml, req, title );
+            " AND f.is_present = 1"
+            " AND f.type = ?";
+    return Media::fetchAll<IMedia>( ml, req, title, File::Type::Main );
 }
 
 std::vector<MediaPtr> Media::fetchHistory( MediaLibraryPtr ml )
