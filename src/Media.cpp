@@ -469,7 +469,8 @@ std::vector<MediaPtr> Media::listAll( MediaLibraryPtr ml, IMedia::Type type, Sor
         req = "SELECT m.* FROM " + policy::MediaTable::Name + " m INNER JOIN "
                 + policy::FileTable::Name + " f ON m.id_media = f.media_id"
                 " WHERE m.type = ?"
-                " AND f.type = ?";
+                " AND f.type = ?"
+                " AND f.is_present != 0";
         if ( sort == SortingCriteria::LastModificationDate )
             req += " ORDER BY f.last_modification_date";
         else
