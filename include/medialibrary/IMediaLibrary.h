@@ -376,7 +376,8 @@ class IMediaLibrary
         virtual IDeviceListerCb* setDeviceLister( DeviceListerPtr lister ) = 0;
 
         /**
-         * @brief forceRescan forces all media to be rescanned.
+         * @brief forceRescan Deletes all entities except Media and Playlist, and
+         *                    forces all media to be rescanned.
          *
          * This can be called anytime after the medialibrary has been initialized.
          * It will make all held instances outdated. Those should be considered
