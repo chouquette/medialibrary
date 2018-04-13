@@ -78,6 +78,9 @@ public:
                                            SortingCriteria sort, bool desc );
 
 private:
+    static std::string sortRequest( SortingCriteria sort, bool desc );
+
+private:
     MediaLibraryPtr m_ml;
     int64_t m_id;
     std::string m_name;

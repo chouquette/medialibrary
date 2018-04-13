@@ -417,7 +417,14 @@ std::vector<ArtistPtr> Artist::listAll( MediaLibraryPtr ml, bool includeAll,
     else
         req += "nb_albums > 0";
 
-    req += " AND is_present != 0 ORDER BY ";
+    req += " AND is_present != 0";
+    req += sortRequest( sort, desc );
+    return fetchAll<IArtist>( ml, req );
+}
+
+std::string Artist::sortRequest( SortingCriteria sort, bool desc )
+{
+    std::string req = " ORDER BY ";
     switch ( sort )
     {
     default:
@@ -425,7 +432,7 @@ std::vector<ArtistPtr> Artist::listAll( MediaLibraryPtr ml, bool includeAll,
     }
     if ( desc == true )
         req +=  " DESC";
-    return fetchAll<IArtist>( ml, req );
+    return req;
 }
 
 }
