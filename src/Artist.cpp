@@ -400,11 +400,13 @@ std::shared_ptr<Artist> Artist::create( MediaLibraryPtr ml, const std::string& n
     return artist;
 }
 
-std::vector<ArtistPtr> Artist::search( MediaLibraryPtr ml, const std::string& name )
+std::vector<ArtistPtr> Artist::search( MediaLibraryPtr ml, const std::string& name,
+                                       SortingCriteria sort, bool desc )
 {
-    static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name + " WHERE id_artist IN "
+    std::string req = "SELECT * FROM " + policy::ArtistTable::Name + " WHERE id_artist IN "
             "(SELECT rowid FROM " + policy::ArtistTable::Name + "Fts WHERE name MATCH '*' || ? || '*')"
             "AND is_present != 0";
+    req += sortRequest( sort, desc );
     return fetchAll<IArtist>( ml, req, name );
 }
 

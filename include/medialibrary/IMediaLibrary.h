@@ -308,7 +308,9 @@ class IMediaLibrary
         virtual std::vector<PlaylistPtr> searchPlaylists( const std::string& name ) const = 0;
         virtual std::vector<AlbumPtr> searchAlbums( const std::string& pattern ) const = 0;
         virtual std::vector<GenrePtr> searchGenre( const std::string& genre ) const = 0;
-        virtual std::vector<ArtistPtr> searchArtists( const std::string& name ) const = 0;
+        virtual std::vector<ArtistPtr> searchArtists( const std::string& name,
+                                                      SortingCriteria sort = SortingCriteria::Default,
+                                                      bool desc = false ) const = 0;
         virtual SearchAggregate search( const std::string& pattern ) const = 0;
 
         /**

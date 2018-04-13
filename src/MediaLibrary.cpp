@@ -697,18 +697,20 @@ std::vector<GenrePtr> MediaLibrary::searchGenre( const std::string& genre ) cons
     return Genre::search( this, genre );
 }
 
-std::vector<ArtistPtr> MediaLibrary::searchArtists(const std::string& name ) const
+std::vector<ArtistPtr> MediaLibrary::searchArtists( const std::string& name,
+                                                    SortingCriteria sort,
+                                                    bool desc ) const
 {
     if ( validateSearchPattern( name ) == false )
         return {};
-    return Artist::search( this, name );
+    return Artist::search( this, name, sort, desc );
 }
 
 SearchAggregate MediaLibrary::search( const std::string& pattern ) const
 {
     SearchAggregate res;
     res.albums = searchAlbums( pattern );
-    res.artists = searchArtists( pattern );
+    res.artists = searchArtists( pattern, SortingCriteria::Default, false );
     res.genres = searchGenre( pattern );
     res.media = searchMedia( pattern );
     res.playlists = searchPlaylists( pattern );

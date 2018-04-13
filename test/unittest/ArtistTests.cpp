@@ -274,12 +274,19 @@ TEST_F( Artists, MusicBrainzId )
 
 TEST_F( Artists, Search )
 {
-    ml->createArtist( "artist 1" );
-    ml->createArtist( "artist 2" );
+    auto a1 = ml->createArtist( "artist 1" );
+    auto a2 = ml->createArtist( "artist 2" );
     ml->createArtist( "dream seaotter" );
 
-    auto artists = ml->searchArtists( "artist" );
+    auto artists = ml->searchArtists( "artist", SortingCriteria::Default, false );
     ASSERT_EQ( 2u, artists.size() );
+    ASSERT_EQ( artists[0]->id(), a1->id() );
+    ASSERT_EQ( artists[1]->id(), a2->id() );
+
+    artists = ml->searchArtists( "artist", SortingCriteria::Default, true );
+    ASSERT_EQ( 2u, artists.size() );
+    ASSERT_EQ( artists[0]->id(), a2->id() );
+    ASSERT_EQ( artists[1]->id(), a1->id() );
 }
 
 TEST_F( Artists, SearchAfterDelete )
@@ -288,12 +295,12 @@ TEST_F( Artists, SearchAfterDelete )
     ml->createArtist( "artist 2" );
     ml->createArtist( "dream seaotter" );
 
-    auto artists = ml->searchArtists( "artist" );
+    auto artists = ml->searchArtists( "artist", SortingCriteria::Default, false );
     ASSERT_EQ( 2u, artists.size() );
 
     ml->deleteArtist( a->id() );
 
-    artists = ml->searchArtists( "artist" );
+    artists = ml->searchArtists( "artist", SortingCriteria::Default, false );
     ASSERT_EQ( 1u, artists.size() );
 }
 
