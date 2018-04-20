@@ -304,7 +304,9 @@ class IMediaLibrary
         /**
          * Search
          */
-        virtual MediaSearchAggregate searchMedia( const std::string& pattern ) const = 0;
+        virtual MediaSearchAggregate searchMedia( const std::string& pattern,
+                                                  SortingCriteria sort = SortingCriteria::Default,
+                                                  bool desc = false ) const = 0;
         virtual std::vector<PlaylistPtr> searchPlaylists( const std::string& name ) const = 0;
         virtual std::vector<AlbumPtr> searchAlbums( const std::string& pattern ) const = 0;
         virtual std::vector<GenrePtr> searchGenre( const std::string& genre ) const = 0;

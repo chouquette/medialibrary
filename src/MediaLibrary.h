@@ -115,7 +115,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual std::vector<MediaPtr> lastMediaPlayed() const override;
         virtual bool clearHistory() override;
 
-        virtual MediaSearchAggregate searchMedia( const std::string& title ) const override;
+        virtual MediaSearchAggregate searchMedia( const std::string& title,
+                                                  SortingCriteria sort, bool desc ) const override;
         virtual std::vector<PlaylistPtr> searchPlaylists( const std::string& name ) const override;
         virtual std::vector<AlbumPtr> searchAlbums( const std::string& pattern ) const override;
         virtual std::vector<GenrePtr> searchGenre( const std::string& genre ) const override;

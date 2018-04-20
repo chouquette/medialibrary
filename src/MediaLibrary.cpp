@@ -649,11 +649,12 @@ bool MediaLibrary::clearHistory()
     }
 }
 
-MediaSearchAggregate MediaLibrary::searchMedia( const std::string& title ) const
+MediaSearchAggregate MediaLibrary::searchMedia( const std::string& title,
+                                                SortingCriteria sort, bool desc ) const
 {
     if ( validateSearchPattern( title ) == false )
         return {};
-    auto tmp = Media::search( this, title );
+    auto tmp = Media::search( this, title, sort, desc );
     MediaSearchAggregate res;
     for ( auto& m : tmp )
     {
@@ -712,7 +713,7 @@ SearchAggregate MediaLibrary::search( const std::string& pattern ) const
     res.albums = searchAlbums( pattern );
     res.artists = searchArtists( pattern, SortingCriteria::Default, false );
     res.genres = searchGenre( pattern );
-    res.media = searchMedia( pattern );
+    res.media = searchMedia( pattern, SortingCriteria::Default, false );
     res.playlists = searchPlaylists( pattern );
     return res;
 }

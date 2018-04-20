@@ -160,33 +160,57 @@ TEST_F( Medias, Search )
     {
         ml->addMedia( "track " + std::to_string( i ) + ".mp3" );
     }
-    auto media = ml->searchMedia( "tra" ).others;
+    auto media = ml->searchMedia( "tra", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 10u, media.size() );
 
-    media = ml->searchMedia( "track 1" ).others;
+    media = ml->searchMedia( "track 1", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 2u, media.size() );
 
-    media = ml->searchMedia( "grouik" ).others;
+    media = ml->searchMedia( "grouik", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 0u, media.size() );
 
-    media = ml->searchMedia( "rack" ).others;
+    media = ml->searchMedia( "rack", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 0u, media.size() );
+}
+
+TEST_F( Medias, SearchAndSort )
+{
+    for ( auto i = 1u; i <= 3u; ++i )
+    {
+        auto m = std::static_pointer_cast<Media>(
+                    ml->addMedia( "track " + std::to_string( i ) + ".mp3" ) );
+        m->setDuration( 3 - i );
+        m->save();
+    }
+    ml->addMedia( "this pattern doesn't match.mp3" );
+
+    auto media = ml->searchMedia( "tra", SortingCriteria::Default, false ).others;
+    ASSERT_EQ( 3u, media.size() );
+    ASSERT_EQ( media[0]->title(), "track 1.mp3" );
+    ASSERT_EQ( media[1]->title(), "track 2.mp3" );
+    ASSERT_EQ( media[2]->title(), "track 3.mp3" );
+
+    media = ml->searchMedia( "tra", SortingCriteria::Duration, false ).others;
+    ASSERT_EQ( 3u, media.size() );
+    ASSERT_EQ( media[0]->title(), "track 3.mp3" );
+    ASSERT_EQ( media[1]->title(), "track 2.mp3" );
+    ASSERT_EQ( media[2]->title(), "track 1.mp3" );
 }
 
 TEST_F( Medias, SearchAfterEdit )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
 
-    auto media = ml->searchMedia( "media" ).others;
+    auto media = ml->searchMedia( "media", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 1u, media.size() );
 
     m->setTitleBuffered( "otters are awesome" );
     m->save();
 
-    media = ml->searchMedia( "media" ).others;
+    media = ml->searchMedia( "media", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 0u, media.size() );
 
-    media = ml->searchMedia( "otters" ).others;
+    media = ml->searchMedia( "otters", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 1u, media.size() );
 }
 
@@ -194,59 +218,59 @@ TEST_F( Medias, SearchAfterDelete )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
 
-    auto media = ml->searchMedia( "media" ).others;
+    auto media = ml->searchMedia( "media", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 1u, media.size() );
 
     auto f = m->files()[0];
     m->removeFile( static_cast<File&>( *f ) );
 
-    media = ml->searchMedia( "media" ).others;
+    media = ml->searchMedia( "media", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 0u, media.size() );
 }
 
 TEST_F( Medias, SearchByLabel )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
-    auto media = ml->searchMedia( "otter" ).others;
+    auto media = ml->searchMedia( "otter", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 0u, media.size() );
 
     auto l = ml->createLabel( "otter" );
     m->addLabel( l );
 
-    media = ml->searchMedia( "otter" ).others;
+    media = ml->searchMedia( "otter", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 1u, media.size() );
 
     auto l2 = ml->createLabel( "pangolins" );
     m->addLabel( l2 );
 
-    media = ml->searchMedia( "otter" ).others;
+    media = ml->searchMedia( "otter", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 1u, media.size() );
 
-    media = ml->searchMedia( "pangolin" ).others;
+    media = ml->searchMedia( "pangolin", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 1u, media.size() );
 
     m->removeLabel( l );
 
-    media = ml->searchMedia( "otter" ).others;
+    media = ml->searchMedia( "otter", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 0u, media.size() );
 
-    media = ml->searchMedia( "pangolin" ).others;
+    media = ml->searchMedia( "pangolin", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 1u, media.size() );
 
     m->addLabel( l );
 
-    media = ml->searchMedia( "otter" ).others;
+    media = ml->searchMedia( "otter", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 1u, media.size() );
 
-    media = ml->searchMedia( "pangolin" ).others;
+    media = ml->searchMedia( "pangolin", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 1u, media.size() );
 
     ml->deleteLabel( l );
 
-    media = ml->searchMedia( "otter" ).others;
+    media = ml->searchMedia( "otter", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 0u, media.size() );
 
-    media = ml->searchMedia( "pangolin" ).others;
+    media = ml->searchMedia( "pangolin", SortingCriteria::Default, false ).others;
     ASSERT_EQ( 1u, media.size() );
 }
 
@@ -258,16 +282,16 @@ TEST_F( Medias, SearchTracks )
        auto m = std::static_pointer_cast<Media>( ml->addMedia( "track " + std::to_string( i ) + ".mp3" ) );
        a->addTrack( m, i, 1, 0, 0 );
     }
-    auto tracks = ml->searchMedia( "tra" ).tracks;
+    auto tracks = ml->searchMedia( "tra", SortingCriteria::Default, false ).tracks;
     ASSERT_EQ( 10u, tracks.size() );
 
-    tracks = ml->searchMedia( "track 1" ).tracks;
+    tracks = ml->searchMedia( "track 1", SortingCriteria::Default, false ).tracks;
     ASSERT_EQ( 2u, tracks.size() );
 
-    tracks = ml->searchMedia( "grouik" ).tracks;
+    tracks = ml->searchMedia( "grouik", SortingCriteria::Default, false ).tracks;
     ASSERT_EQ( 0u, tracks.size() );
 
-    tracks = ml->searchMedia( "rack" ).tracks;
+    tracks = ml->searchMedia( "rack", SortingCriteria::Default, false ).tracks;
     ASSERT_EQ( 0u, tracks.size() );
 }
 
