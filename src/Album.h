@@ -109,7 +109,8 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         /// \param pattern A pattern representing the title, or the name of the main artist
         /// \return
         ///
-        static std::vector<AlbumPtr> search( MediaLibraryPtr ml, const std::string& pattern );
+        static std::vector<AlbumPtr> search( MediaLibraryPtr ml, const std::string& pattern,
+                                             SortingCriteria sort, bool desc );
         static std::vector<AlbumPtr> fromArtist( MediaLibraryPtr ml, int64_t artistId, SortingCriteria sort, bool desc );
         static std::vector<AlbumPtr> fromGenre( MediaLibraryPtr ml, int64_t genreId, SortingCriteria sort, bool desc );
         static std::vector<AlbumPtr> listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc );

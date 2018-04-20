@@ -491,13 +491,15 @@ std::shared_ptr<Album> Album::createUnknownAlbum( MediaLibraryPtr ml, const Arti
     return album;
 }
 
-std::vector<AlbumPtr> Album::search( MediaLibraryPtr ml, const std::string& pattern )
+std::vector<AlbumPtr> Album::search( MediaLibraryPtr ml, const std::string& pattern,
+                                     SortingCriteria sort, bool desc )
 {
-    static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " alb "
+    std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " alb "
             "WHERE id_album IN "
             "(SELECT rowid FROM " + policy::AlbumTable::Name + "Fts WHERE " +
             policy::AlbumTable::Name + "Fts MATCH '*' || ? || '*')"
             "AND is_present != 0";
+    req += orderBy( sort, desc );
     return fetchAll<IAlbum>( ml, req, pattern );
 }
 

@@ -284,7 +284,7 @@ TEST_F( Albums, SearchByTitle )
     ml->createAlbum( "sea otters" );
     ml->createAlbum( "pangolins of fire" );
 
-    auto albums = ml->searchAlbums( "otte" );
+    auto albums = ml->searchAlbums( "otte", SortingCriteria::Default, false );
     ASSERT_EQ( 1u, albums.size() );
 }
 
@@ -294,7 +294,7 @@ TEST_F( Albums, SearchByArtist )
     auto artist = ml->createArtist( "pangolins" );
     a->setAlbumArtist( artist );
 
-    auto albums = ml->searchAlbums( "pangol" );
+    auto albums = ml->searchAlbums( "pangol", SortingCriteria::Default, false );
     ASSERT_EQ( 1u, albums.size() );
 }
 
@@ -304,7 +304,7 @@ TEST_F( Albums, SearchNoDuplicate )
     auto artist = ml->createArtist( "otters" );
     a->setAlbumArtist( artist );
 
-    auto albums = ml->searchAlbums( "otters" );
+    auto albums = ml->searchAlbums( "otters", SortingCriteria::Default, false );
     ASSERT_EQ( 1u, albums.size() );
 }
 
@@ -314,7 +314,7 @@ TEST_F( Albums, SearchNoUnknownAlbum )
     auto album = artist->unknownAlbum();
     ASSERT_NE( nullptr, album );
 
-    auto albums = ml->searchAlbums( "otters" );
+    auto albums = ml->searchAlbums( "otters", SortingCriteria::Default, false );
     ASSERT_EQ( 0u, albums.size() );
     // Can't search by name since there is no name set for unknown albums
 }
@@ -322,12 +322,12 @@ TEST_F( Albums, SearchNoUnknownAlbum )
 TEST_F( Albums, SearchAfterDeletion )
 {
     auto a = ml->createAlbum( "sea otters" );
-    auto albums = ml->searchAlbums( "sea" );
+    auto albums = ml->searchAlbums( "sea", SortingCriteria::Default, false );
     ASSERT_EQ( 1u, albums.size() );
 
     ml->deleteAlbum( a->id() );
 
-    albums = ml->searchAlbums( "sea" );
+    albums = ml->searchAlbums( "sea", SortingCriteria::Default, false );
     ASSERT_EQ( 0u, albums.size() );
 }
 
@@ -338,18 +338,18 @@ TEST_F( Albums, SearchAfterArtistUpdate )
     auto artist2 = ml->createArtist( "pangolin of ice" );
     a->setAlbumArtist( artist );
 
-    auto albums = ml->searchAlbums( "fire" );
+    auto albums = ml->searchAlbums( "fire", SortingCriteria::Default, false );
     ASSERT_EQ( 1u, albums.size() );
 
-    albums = ml->searchAlbums( "ice" );
+    albums = ml->searchAlbums( "ice", SortingCriteria::Default, false );
     ASSERT_EQ( 0u, albums.size() );
 
     a->setAlbumArtist( artist2 );
 
-    albums = ml->searchAlbums( "fire" );
+    albums = ml->searchAlbums( "fire", SortingCriteria::Default, false );
     ASSERT_EQ( 0u, albums.size() );
 
-    albums = ml->searchAlbums( "ice" );
+    albums = ml->searchAlbums( "ice", SortingCriteria::Default, false );
     ASSERT_EQ( 1u, albums.size() );
 }
 
@@ -564,4 +564,28 @@ TEST_F( Albums, Duration )
     Reload();
     a2 = ml->album( a->id() );
     ASSERT_EQ( 100u, a2->duration() );
+}
+
+TEST_F( Albums, SearchAndSort )
+{
+    auto alb1 = ml->createAlbum( "Z album" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
+    alb1->addTrack( m, 1, 0, 0, nullptr );
+
+    auto alb2 = ml->createAlbum( "A album" );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3" ) );
+    alb2->addTrack( m2, 1, 0, 0, nullptr );
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "track3.mp3" ) );
+    alb2->addTrack( m3, 2, 0, 0, nullptr );
+
+    auto albs = ml->searchAlbums( "album", SortingCriteria::Alpha, false );
+    ASSERT_EQ( 2u, albs.size() );
+    ASSERT_EQ( albs[0]->id(), alb2->id() );
+    ASSERT_EQ( albs[1]->id(), alb1->id() );
+
+    // Sorting by tracknumber is descending by default, so we expect album 2 first
+    albs = ml->searchAlbums( "album", SortingCriteria::TrackNumber, false );
+    ASSERT_EQ( 2u, albs.size() );
+    ASSERT_EQ( albs[0]->id(), alb2->id() );
+    ASSERT_EQ( albs[1]->id(), alb1->id() );
 }
