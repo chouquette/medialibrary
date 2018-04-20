@@ -232,6 +232,11 @@ std::string Album::orderBy( SortingCriteria sort, bool desc )
         if ( desc == true )
             req += " DESC";
         break;
+    case SortingCriteria::TrackNumber:
+        req += "nb_tracks";
+        if ( desc == false )
+            req += " DESC";
+        break;
     default:
         req += "title";
         if ( desc == true )
