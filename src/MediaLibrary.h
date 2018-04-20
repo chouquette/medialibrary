@@ -127,7 +127,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual std::vector<ArtistPtr> searchArtists( const std::string& name,
                                                       SortingCriteria sort,
                                                       bool desc ) const override;
-        virtual SearchAggregate search( const std::string& pattern ) const override;
+        virtual SearchAggregate search( const std::string& pattern,
+                                        SortingCriteria sort, bool desc ) const override;
 
         virtual void discover( const std::string& entryPoint ) override;
         virtual void setDiscoverNetworkEnabled( bool enabled ) override;

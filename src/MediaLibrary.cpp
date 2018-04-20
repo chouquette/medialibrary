@@ -710,14 +710,15 @@ std::vector<ArtistPtr> MediaLibrary::searchArtists( const std::string& name,
     return Artist::search( this, name, sort, desc );
 }
 
-SearchAggregate MediaLibrary::search( const std::string& pattern ) const
+SearchAggregate MediaLibrary::search( const std::string& pattern,
+                                      SortingCriteria sort, bool desc ) const
 {
     SearchAggregate res;
-    res.albums = searchAlbums( pattern, SortingCriteria::Default, false );
-    res.artists = searchArtists( pattern, SortingCriteria::Default, false );
+    res.albums = searchAlbums( pattern, sort, desc );
+    res.artists = searchArtists( pattern, sort, desc );
     res.genres = searchGenre( pattern );
-    res.media = searchMedia( pattern, SortingCriteria::Default, false );
-    res.playlists = searchPlaylists( pattern, SortingCriteria::Default, false );
+    res.media = searchMedia( pattern, sort, desc );
+    res.playlists = searchPlaylists( pattern, sort, desc );
     return res;
 }
 
