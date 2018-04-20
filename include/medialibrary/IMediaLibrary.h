@@ -319,7 +319,8 @@ class IMediaLibrary
                                                       SortingCriteria sort = SortingCriteria::Default,
                                                       bool desc = false ) const = 0;
         virtual SearchAggregate search( const std::string& pattern,
-                                        SortingCriteria sort, bool desc  ) const = 0;
+                                        SortingCriteria sort = SortingCriteria::Default,
+                                        bool desc = false ) const = 0;
 
         /**
          * @brief discover Launch a discovery on the provided entry point.
