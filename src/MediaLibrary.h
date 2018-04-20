@@ -117,7 +117,9 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         virtual MediaSearchAggregate searchMedia( const std::string& title,
                                                   SortingCriteria sort, bool desc ) const override;
-        virtual std::vector<PlaylistPtr> searchPlaylists( const std::string& name ) const override;
+        virtual std::vector<PlaylistPtr> searchPlaylists( const std::string& name,
+                                                          SortingCriteria sort,
+                                                          bool desc ) const override;
         virtual std::vector<AlbumPtr> searchAlbums( const std::string& pattern,
                                                     SortingCriteria sort,
                                                     bool desc ) const override;

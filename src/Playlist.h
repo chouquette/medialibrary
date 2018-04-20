@@ -69,7 +69,8 @@ public:
 
     static void createTable( sqlite::Connection* dbConn );
     static void createTriggers( sqlite::Connection* dbConn );
-    static std::vector<PlaylistPtr> search( MediaLibraryPtr ml, const std::string& name );
+    static std::vector<PlaylistPtr> search( MediaLibraryPtr ml, const std::string& name,
+                                            SortingCriteria sort, bool desc );
     static std::vector<PlaylistPtr> listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc );
 
     /**

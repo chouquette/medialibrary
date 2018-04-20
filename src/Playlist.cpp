@@ -260,10 +260,12 @@ void Playlist::createTriggers( sqlite::Connection* dbConn )
     sqlite::Tools::executeRequest( dbConn, vtriggerDelete );
 }
 
-std::vector<PlaylistPtr> Playlist::search( MediaLibraryPtr ml, const std::string& name )
+std::vector<PlaylistPtr> Playlist::search( MediaLibraryPtr ml, const std::string& name,
+                                           SortingCriteria sort, bool desc )
 {
-    static const std::string req = "SELECT * FROM " + policy::PlaylistTable::Name + " WHERE id_playlist IN "
+    std::string req = "SELECT * FROM " + policy::PlaylistTable::Name + " WHERE id_playlist IN "
             "(SELECT rowid FROM " + policy::PlaylistTable::Name + "Fts WHERE name MATCH '*' || ? || '*')";
+    req += sortRequest( sort, desc );
     return fetchAll<IPlaylist>( ml, req, name );
 }
 
