@@ -80,6 +80,9 @@ public:
     static void deleteAllExternal( MediaLibraryPtr ml );
 
 private:
+    static std::string sortRequest( SortingCriteria sort, bool desc );
+
+private:
     MediaLibraryPtr m_ml;
 
     int64_t m_id;

@@ -269,7 +269,21 @@ std::vector<PlaylistPtr> Playlist::search( MediaLibraryPtr ml, const std::string
 
 std::vector<PlaylistPtr> Playlist::listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc )
 {
-    std::string req = "SELECT * FROM " + policy::PlaylistTable::Name + " ORDER BY ";
+    std::string req = "SELECT * FROM " + policy::PlaylistTable::Name;
+    req += sortRequest( sort, desc );
+    return fetchAll<IPlaylist>( ml, req );
+}
+
+void Playlist::deleteAllExternal(MediaLibraryPtr ml)
+{
+    const std::string req = "DELETE FROM " + policy::PlaylistTable::Name +
+            " WHERE file_id IS NOT NULL";
+    sqlite::Tools::executeDelete( ml->getConn(), req );
+}
+
+std::string Playlist::sortRequest( SortingCriteria sort, bool desc )
+{
+    std::string req = " ORDER BY ";
     switch ( sort )
     {
     case SortingCriteria::InsertionDate:
@@ -281,14 +295,7 @@ std::vector<PlaylistPtr> Playlist::listAll( MediaLibraryPtr ml, SortingCriteria 
     }
     if ( desc == true )
         req += " DESC";
-    return fetchAll<IPlaylist>( ml, req );
-}
-
-void Playlist::deleteAllExternal(MediaLibraryPtr ml)
-{
-    const std::string req = "DELETE FROM " + policy::PlaylistTable::Name +
-            " WHERE file_id IS NOT NULL";
-    sqlite::Tools::executeDelete( ml->getConn(), req );
+    return req;
 }
 
 }
