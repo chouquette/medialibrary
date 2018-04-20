@@ -488,7 +488,8 @@ std::shared_ptr<Album> Album::createUnknownAlbum( MediaLibraryPtr ml, const Arti
 
 std::vector<AlbumPtr> Album::search( MediaLibraryPtr ml, const std::string& pattern )
 {
-    static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " WHERE id_album IN "
+    static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " alb "
+            "WHERE id_album IN "
             "(SELECT rowid FROM " + policy::AlbumTable::Name + "Fts WHERE " +
             policy::AlbumTable::Name + "Fts MATCH '*' || ? || '*')"
             "AND is_present != 0";
@@ -526,8 +527,8 @@ std::vector<AlbumPtr> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, S
 
 std::vector<AlbumPtr> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId, SortingCriteria sort, bool desc)
 {
-    std::string req = "SELECT a.* FROM " + policy::AlbumTable::Name + " a "
-            "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.album_id = a.id_album "
+    std::string req = "SELECT alb.* FROM " + policy::AlbumTable::Name + " alb "
+            "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.album_id = alb.id_album "
             "WHERE att.genre_id = ? GROUP BY att.album_id";
     req += orderBy( sort, desc );
     return fetchAll<IAlbum>( ml, req, genreId );
@@ -559,7 +560,7 @@ std::vector<AlbumPtr> Album::listAll( MediaLibraryPtr ml, SortingCriteria sort, 
         req += ", alb.title";
         return fetchAll<IAlbum>( ml, req );
     }
-    std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
+    std::string req = "SELECT * FROM " + policy::AlbumTable::Name + " alb "
                     " WHERE is_present != 0";
     req += orderBy( sort, desc );
     return fetchAll<IAlbum>( ml, req );
