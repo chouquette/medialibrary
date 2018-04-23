@@ -124,6 +124,7 @@ noinst_HEADERS = \
 	src/database/DatabaseHelpers.h \
 	src/database/SqliteConnection.h \
 	src/database/SqliteErrors.h \
+	src/database/SqliteQuery.h \
 	src/database/SqliteTools.h \
 	src/database/SqliteTraits.h \
 	src/database/SqliteTransaction.h \
