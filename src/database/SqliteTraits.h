@@ -23,6 +23,7 @@
 #pragma once
 
 #include <sqlite3.h>
+#include <tuple>
 
 namespace medialibrary
 {
@@ -132,6 +133,94 @@ struct Traits<T, typename std::enable_if<IsSameDecay<T, int64_t>::value>::type>
 
     static constexpr sqlite_int64
     (*Load)(sqlite3_stmt *, int) = &sqlite3_column_int64;
+};
+
+template <typename Gen, template <typename...> class Inst>
+struct is_instanciation_of : std::false_type {};
+
+template <template <typename...> class T, typename... Args>
+struct is_instanciation_of<T<Args...>, T> : std::true_type
+{
+};
+
+static_assert( is_instanciation_of<std::tuple<int, float, double>, std::tuple>::value,
+               "Invalid is_instanciation_of helper implementation" );
+
+template <size_t... Ns>
+struct IndexSequence
+{
+    using type = IndexSequence<Ns..., sizeof...(Ns)>;
+};
+
+template <size_t N>
+struct MakeIndexSequence
+{
+    // This will recurse down to IndexSequence<> which yields type = IndexSequence<0>
+    // Then, from Seq<0>::type, up to Seq<N-1>::type, which ends
+    // up generating Seq<0, 1, ... N - 1>
+    using type = typename MakeIndexSequence<N - 1>::type::type;
+};
+
+template <>
+struct MakeIndexSequence<0>
+{
+    using type = IndexSequence<>;
+};
+
+template <typename T>
+struct Traits<T, typename std::enable_if<
+        is_instanciation_of<typename std::decay<T>::type, std::tuple>::value &&
+        (std::tuple_size<typename std::decay<T>::type>::value > 0)
+    >::type>
+{
+private:
+    template <typename Value>
+    static bool bind_inner( sqlite3_stmt* stmt, int& pos, Value&& value )
+    {
+        int res = Traits<Value>::Bind( stmt, pos, std::forward<Value>( value ) );
+        if ( res != SQLITE_OK )
+            throw errors::Generic( sqlite3_sql( stmt ), "Failed to bind parameter", res );
+        ++pos;
+        return true;
+    }
+
+    template <typename Tuple, size_t... Indices>
+    static void for_each_bind_tuple( sqlite3_stmt* stmt, int& pos, Tuple&& t, IndexSequence<Indices...> )
+    {
+        (void)std::initializer_list<bool> {
+            bind_inner( stmt, pos, std::get<Indices>( std::forward<Tuple>( t ) ) )...
+        };
+    }
+
+public:
+    template <typename Tuple>
+    static int Bind(sqlite3_stmt* stmt, int& pos, Tuple&& values )
+    {
+        static_assert(std::is_same<typename std::decay<Tuple>::type,
+                                   typename std::decay<T>::type>
+                      ::value, "Incompatible types");
+        constexpr auto TupleSize = std::tuple_size<typename std::decay<T>::type>::value;
+        for_each_bind_tuple( stmt, pos, std::forward<Tuple>( values ),
+                             typename MakeIndexSequence<TupleSize>::type{} );
+        // Decrement the position since the original SqliteTools::_bind call will
+        // increment the position for each parameter.
+        assert(pos >= 1);
+        --pos;
+        return SQLITE_OK;
+    }
+};
+
+
+// Provide a specialization for empty tuples
+template <typename T>
+struct Traits<T, typename std::enable_if<
+        std::is_same<typename std::decay<T>::type, std::tuple<>>::value>::type
+    >
+{
+    static int Bind(sqlite3_stmt*, int, std::tuple<> )
+    {
+        return SQLITE_OK;
+    }
 };
 
 } // namespace sqlite
