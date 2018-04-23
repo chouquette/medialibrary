@@ -37,6 +37,7 @@ libmedialibrary_la_HEADERS = \
 	include/medialibrary/Types.h \
 	include/medialibrary/IDeviceLister.h \
 	include/medialibrary/IFolder.h \
+	include/medialibrary/IQuery.h \
 	$(NULL)
 
 libmedialibrary_la_SOURCES = \
