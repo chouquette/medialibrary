@@ -216,7 +216,7 @@ private:
     using StatementPtr = std::unique_ptr<sqlite3_stmt, void(*)(sqlite3_stmt*)>;
     StatementPtr m_stmt;
     Connection::Handle m_dbConn;
-    unsigned int m_bindIdx;
+    int m_bindIdx;
     bool m_isCommit;
     static compat::Mutex StatementsCacheLock;
     static std::unordered_map<Connection::Handle,
