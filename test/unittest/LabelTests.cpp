@@ -112,8 +112,8 @@ TEST_F( Labels, Files )
     f2->addLabel( l2 );
     f3->addLabel( l1 );
 
-    auto label1Files = l1->files()->all();
-    auto label2Files = l2->files()->all();
+    auto label1Files = l1->media()->all();
+    auto label2Files = l2->media()->all();
 
     ASSERT_EQ( label1Files.size(), 2u );
     ASSERT_EQ( label2Files.size(), 1u );

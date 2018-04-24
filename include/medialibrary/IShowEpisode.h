@@ -41,7 +41,7 @@ class IShowEpisode
         virtual const std::string& shortSummary() const = 0;
         virtual const std::string& tvdbId() const = 0;
         virtual std::shared_ptr<IShow> show() = 0;
-        virtual Query<IMedia> files() = 0;
+        virtual Query<IMedia> media() = 0;
 };
 
 }

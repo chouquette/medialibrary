@@ -110,7 +110,7 @@ bool Movie::setImdbId( const std::string& imdbId )
     return true;
 }
 
-Query<IMedia> Movie::files()
+Query<IMedia> Movie::media()
 {
     static const std::string req = "FROM " + policy::MediaTable::Name
             + " WHERE movie_id = ?";

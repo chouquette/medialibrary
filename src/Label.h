@@ -54,7 +54,7 @@ class Label : public ILabel, public DatabaseHelpers<Label, policy::LabelTable>
     public:
         virtual int64_t id() const override;
         virtual const std::string& name() const override;
-        virtual Query<IMedia> files() override;
+        virtual Query<IMedia> media() override;
 
         static LabelPtr create( MediaLibraryPtr ml, const std::string& name );
         static void createTable( sqlite::Connection* dbConnection );

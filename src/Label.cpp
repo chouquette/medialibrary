@@ -64,7 +64,7 @@ const std::string& Label::name() const
     return m_name;
 }
 
-Query<IMedia> Label::files()
+Query<IMedia> Label::media()
 {
     static const std::string req = "FROM " + policy::MediaTable::Name + " f "
             "INNER JOIN LabelFileRelation lfr ON lfr.media_id = f.id_media "

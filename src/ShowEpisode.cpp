@@ -146,7 +146,7 @@ std::shared_ptr<IShow> ShowEpisode::show()
     return m_show;
 }
 
-Query<IMedia> ShowEpisode::files()
+Query<IMedia> ShowEpisode::media()
 {
     static const std::string req = "FROM " + policy::MediaTable::Name
             + " WHERE show_episode_id = ?";

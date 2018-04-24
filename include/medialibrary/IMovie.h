@@ -37,7 +37,7 @@ class IMovie
         virtual const std::string& shortSummary() const = 0;
         virtual const std::string& artworkMrl() const = 0;
         virtual const std::string& imdbId() const = 0;
-        virtual Query<IMedia> files() = 0;
+        virtual Query<IMedia> media() = 0;
 };
 
 }
