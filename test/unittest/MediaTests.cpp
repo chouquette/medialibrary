@@ -281,6 +281,7 @@ TEST_F( Medias, SearchTracks )
     {
        auto m = std::static_pointer_cast<Media>( ml->addMedia( "track " + std::to_string( i ) + ".mp3" ) );
        a->addTrack( m, i, 1, 0, 0 );
+       m->save();
     }
     auto tracks = ml->searchMedia( "tra", SortingCriteria::Default, false ).tracks;
     ASSERT_EQ( 10u, tracks.size() );
