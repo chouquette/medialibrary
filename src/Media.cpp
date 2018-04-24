@@ -571,7 +571,9 @@ void Media::createTable( sqlite::Connection* connection )
     std::string req = "CREATE TABLE IF NOT EXISTS " + policy::MediaTable::Name + "("
             "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
             "type INTEGER,"
-            "subtype INTEGER,"
+            "subtype INTEGER NOT NULL DEFAULT " +
+                std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
+                                    IMedia::SubType::Unknown ) ) + ","
             "duration INTEGER DEFAULT -1,"
             "play_count UNSIGNED INTEGER,"
             "last_played_date UNSIGNED INTEGER,"
