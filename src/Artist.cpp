@@ -30,6 +30,7 @@
 #include "Media.h"
 
 #include "database/SqliteTools.h"
+#include "database/SqliteQuery.h"
 
 namespace medialibrary
 {
@@ -87,14 +88,14 @@ bool Artist::setShortBio(const std::string& shortBio)
     return true;
 }
 
-std::vector<AlbumPtr> Artist::albums( SortingCriteria sort, bool desc ) const
+Query<IAlbum> Artist::albums( SortingCriteria sort, bool desc ) const
 {
     return Album::fromArtist( m_ml, m_id, sort, desc );
 }
 
-std::vector<MediaPtr> Artist::media( SortingCriteria sort, bool desc ) const
+Query<IMedia> Artist::media( SortingCriteria sort, bool desc ) const
 {
-    std::string req = "SELECT med.* FROM " + policy::MediaTable::Name + " med ";
+    std::string req = "FROM " + policy::MediaTable::Name + " med ";
 
     // Various artist is a special artist that doesn't have tracks per-se.
     // Rather, it's a virtual artist for albums with many artist but no declared
@@ -139,7 +140,7 @@ std::vector<MediaPtr> Artist::media( SortingCriteria sort, bool desc ) const
 
     if ( desc == true )
         req += " DESC";
-    return Media::fetchAll<IMedia>( m_ml, req, m_id );
+    return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ), m_id );
 }
 
 bool Artist::addMedia( Media& media )
@@ -400,20 +401,20 @@ std::shared_ptr<Artist> Artist::create( MediaLibraryPtr ml, const std::string& n
     return artist;
 }
 
-std::vector<ArtistPtr> Artist::search( MediaLibraryPtr ml, const std::string& name,
+Query<IArtist> Artist::search( MediaLibraryPtr ml, const std::string& name,
                                        SortingCriteria sort, bool desc )
 {
-    std::string req = "SELECT * FROM " + policy::ArtistTable::Name + " WHERE id_artist IN "
+    std::string req = "FROM " + policy::ArtistTable::Name + " WHERE id_artist IN "
             "(SELECT rowid FROM " + policy::ArtistTable::Name + "Fts WHERE name MATCH '*' || ? || '*')"
             "AND is_present != 0";
     req += sortRequest( sort, desc );
-    return fetchAll<IArtist>( ml, req, name );
+    return make_query<Artist, IArtist>( ml, "*", std::move( req ), name );
 }
 
-std::vector<ArtistPtr> Artist::listAll( MediaLibraryPtr ml, bool includeAll,
+Query<IArtist> Artist::listAll( MediaLibraryPtr ml, bool includeAll,
                                         SortingCriteria sort, bool desc)
 {
-    std::string req = "SELECT * FROM " + policy::ArtistTable::Name + " WHERE ";
+    std::string req = "FROM " + policy::ArtistTable::Name + " WHERE ";
     if ( includeAll == true )
         req += "( nb_albums > 0 OR nb_tracks > 0 )";
     else
@@ -421,7 +422,7 @@ std::vector<ArtistPtr> Artist::listAll( MediaLibraryPtr ml, bool includeAll,
 
     req += " AND is_present != 0";
     req += sortRequest( sort, desc );
-    return fetchAll<IArtist>( ml, req );
+    return make_query<Artist, IArtist>( ml, "*", std::move( req ) );
 }
 
 std::string Artist::sortRequest( SortingCriteria sort, bool desc )

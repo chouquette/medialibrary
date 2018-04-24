@@ -109,7 +109,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         void setShowEpisode( ShowEpisodePtr episode );
         virtual bool addLabel( LabelPtr label ) override;
         virtual bool removeLabel( LabelPtr label ) override;
-        virtual std::vector<LabelPtr> labels() override;
+        virtual Query<ILabel> labels() override;
         virtual int playCount() const  override;
         virtual bool increasePlayCount() override;
         virtual bool isFavorite() const override;
@@ -119,10 +119,10 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         void setMovie( MoviePtr movie );
         bool addVideoTrack( const std::string& codec, unsigned int width, unsigned int height,
                             float fps, const std::string& language, const std::string& description );
-        virtual std::vector<VideoTrackPtr> videoTracks() override;
+        virtual Query<IVideoTrack> videoTracks() override;
         bool addAudioTrack( const std::string& codec, unsigned int bitrate, unsigned int sampleRate,
                             unsigned int nbChannels, const std::string& language, const std::string& desc );
-        virtual std::vector<AudioTrackPtr> audioTracks() override;
+        virtual Query<IAudioTrack> audioTracks() override;
         virtual const std::string& thumbnail() override;
         virtual bool isThumbnailGenerated() const override;
         virtual bool setThumbnail( const std::string &thumbnail ) override;
@@ -142,11 +142,13 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual FilePtr addExternalMrl( const std::string& mrl, IFile::Type type ) override;
         void removeFile( File& file );
 
-        static std::vector<MediaPtr> listAll(MediaLibraryPtr ml, Type type , SortingCriteria sort, bool desc);
-        static std::vector<MediaPtr> search( MediaLibraryPtr ml, const std::string& title,
-                                             Media::SubType subType, SortingCriteria sort,
-                                             bool desc );
-        static std::vector<MediaPtr> fetchHistory( MediaLibraryPtr ml );
+        static Query<IMedia> listAll(MediaLibraryPtr ml, Type type, SortingCriteria sort, bool desc);
+
+        static Query<IMedia> search( MediaLibraryPtr ml, const std::string& title,
+                                         Media::SubType subType, SortingCriteria sort,
+                                         bool desc );
+        static Query<IMedia> fetchHistory( MediaLibraryPtr ml );
+
         static void clearHistory( MediaLibraryPtr ml );
 
 private:

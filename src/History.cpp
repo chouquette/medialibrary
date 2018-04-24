@@ -28,6 +28,7 @@
 #include "Media.h"
 
 #include "database/SqliteTools.h"
+#include "database/SqliteQuery.h"
 
 namespace medialibrary
 {
@@ -81,12 +82,12 @@ bool History::insert( sqlite::Connection* dbConn, int64_t mediaId )
     return sqlite::Tools::executeInsert( dbConn, req, mediaId ) != 0;
 }
 
-std::vector<HistoryPtr> History::fetch( MediaLibraryPtr ml )
+Query<IHistoryEntry> History::fetch( MediaLibraryPtr ml )
 {
-    static const std::string req = "SELECT f.*, h.insertion_date FROM " + policy::MediaTable::Name + " f "
+    static const std::string req = "FROM " + policy::MediaTable::Name + " f "
             "INNER JOIN " + policy::HistoryTable::Name + " h ON h.id_media = f.id_media "
             "ORDER BY h.insertion_date DESC";
-    return fetchAll<IHistoryEntry>( ml, req );
+    return make_query<History, IHistoryEntry>( ml, "f.*, h.insertion_date", req );
 }
 
 void History::clearStreams( MediaLibraryPtr ml )

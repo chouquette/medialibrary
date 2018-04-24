@@ -41,7 +41,7 @@ TEST_F( HistoryTest, InsertMrl )
 {
     auto m = ml->addMedia( "upnp://stream" );
     ml->addToStreamHistory( m );
-    auto hList = ml->lastStreamsPlayed();
+    auto hList = ml->lastStreamsPlayed()->all();
     ASSERT_EQ( 1u, hList.size() );
     auto h = hList[0];
     ASSERT_EQ( h->media()->files()[0]->mrl(), "upnp://stream" );
@@ -55,11 +55,11 @@ TEST_F( HistoryTest, MaxEntries )
         auto m = ml->addMedia( "http://media" + std::to_string( i ) );
         ml->addToStreamHistory( m );
     }
-    auto hList = ml->lastStreamsPlayed();
+    auto hList = ml->lastStreamsPlayed()->all();
     ASSERT_EQ( History::MaxEntries, hList.size() );
     auto m = ml->addMedia("smb://new-media" );
     ml->addToStreamHistory( m );
-    hList = ml->lastStreamsPlayed();
+    hList = ml->lastStreamsPlayed()->all();
     ASSERT_EQ( History::MaxEntries, hList.size() );
 }
 
@@ -70,7 +70,7 @@ TEST_F( HistoryTest, Ordering )
     compat::this_thread::sleep_for( std::chrono::seconds( 1 ) );
     auto m2 = ml->addMedia( "second-stream" );
     ml->addToStreamHistory( m2 );
-    auto hList = ml->lastStreamsPlayed();
+    auto hList = ml->lastStreamsPlayed()->all();
     ASSERT_EQ( 2u, hList.size() );
     ASSERT_EQ( hList[0]->media()->id(), m2->id() );
     ASSERT_EQ( hList[1]->media()->id(), m->id() );
@@ -80,12 +80,12 @@ TEST_F( HistoryTest, UpdateInsertionDate )
 {
     auto m = ml->addMedia( "stream" );
     ml->addToStreamHistory( m );
-    auto hList = ml->lastStreamsPlayed();
+    auto hList = ml->lastStreamsPlayed()->all();
     ASSERT_EQ( 1u, hList.size() );
     auto date = hList[0]->insertionDate();
     compat::this_thread::sleep_for( std::chrono::seconds( 1 ) );
     ml->addToStreamHistory( m );
-    hList = ml->lastStreamsPlayed();
+    hList = ml->lastStreamsPlayed()->all();
     ASSERT_EQ( 1u, hList.size() );
     ASSERT_NE( date, hList[0]->insertionDate() );
 }
@@ -96,15 +96,15 @@ TEST_F( HistoryTest, ClearStreamHistory )
     ml->addToStreamHistory( m );
     auto m2 = ml->addMedia( "bar" );
     ml->addToStreamHistory( m2 );
-    auto history = ml->lastStreamsPlayed();
+    auto history = ml->lastStreamsPlayed()->all();
     ASSERT_EQ( 2u, history.size() );
 
     ml->clearHistory();
-    history = ml->lastStreamsPlayed();
+    history = ml->lastStreamsPlayed()->all();
     ASSERT_EQ( 0u, history.size() );
 
     Reload();
 
-    history = ml->lastStreamsPlayed();
+    history = ml->lastStreamsPlayed()->all();
     ASSERT_EQ( 0u, history.size() );
 }

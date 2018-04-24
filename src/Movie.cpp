@@ -27,6 +27,7 @@
 #include "Movie.h"
 #include "Media.h"
 #include "database/SqliteTools.h"
+#include "database/SqliteQuery.h"
 
 namespace medialibrary
 {
@@ -109,11 +110,11 @@ bool Movie::setImdbId( const std::string& imdbId )
     return true;
 }
 
-std::vector<MediaPtr> Movie::files()
+Query<IMedia> Movie::files()
 {
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
+    static const std::string req = "FROM " + policy::MediaTable::Name
             + " WHERE movie_id = ?";
-    return Media::fetchAll<IMedia>( m_ml, req, m_id );
+    return make_query<Media, IMedia>( m_ml, "*", req, m_id );
 }
 
 void Movie::createTable( sqlite::Connection* dbConnection )

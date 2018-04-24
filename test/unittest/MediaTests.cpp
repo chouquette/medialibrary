@@ -160,16 +160,16 @@ TEST_F( Medias, Search )
     {
         ml->addMedia( "track " + std::to_string( i ) + ".mp3" );
     }
-    auto media = ml->searchMedia( "tra", SortingCriteria::Default, false ).others;
+    auto media = ml->searchMedia( "tra", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 10u, media.size() );
 
-    media = ml->searchMedia( "track 1", SortingCriteria::Default, false ).others;
+    media = ml->searchMedia( "track 1", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 2u, media.size() );
 
-    media = ml->searchMedia( "grouik", SortingCriteria::Default, false ).others;
+    media = ml->searchMedia( "grouik", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 0u, media.size() );
 
-    media = ml->searchMedia( "rack", SortingCriteria::Default, false ).others;
+    media = ml->searchMedia( "rack", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 0u, media.size() );
 }
 
@@ -184,13 +184,13 @@ TEST_F( Medias, SearchAndSort )
     }
     ml->addMedia( "this pattern doesn't match.mp3" );
 
-    auto media = ml->searchMedia( "tra", SortingCriteria::Default, false ).others;
+    auto media = ml->searchMedia( "tra", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( media[0]->title(), "track 1.mp3" );
     ASSERT_EQ( media[1]->title(), "track 2.mp3" );
     ASSERT_EQ( media[2]->title(), "track 3.mp3" );
 
-    media = ml->searchMedia( "tra", SortingCriteria::Duration, false ).others;
+    media = ml->searchMedia( "tra", SortingCriteria::Duration, false ).others->all();
     ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( media[0]->title(), "track 3.mp3" );
     ASSERT_EQ( media[1]->title(), "track 2.mp3" );
@@ -201,16 +201,16 @@ TEST_F( Medias, SearchAfterEdit )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
 
-    auto media = ml->searchMedia( "media", SortingCriteria::Default, false ).others;
+    auto media = ml->searchMedia( "media", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 1u, media.size() );
 
     m->setTitleBuffered( "otters are awesome" );
     m->save();
 
-    media = ml->searchMedia( "media", SortingCriteria::Default, false ).others;
+    media = ml->searchMedia( "media", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 0u, media.size() );
 
-    media = ml->searchMedia( "otters", SortingCriteria::Default, false ).others;
+    media = ml->searchMedia( "otters", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 1u, media.size() );
 }
 
@@ -218,59 +218,59 @@ TEST_F( Medias, SearchAfterDelete )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
 
-    auto media = ml->searchMedia( "media", SortingCriteria::Default, false ).others;
+    auto media = ml->searchMedia( "media", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 1u, media.size() );
 
     auto f = m->files()[0];
     m->removeFile( static_cast<File&>( *f ) );
 
-    media = ml->searchMedia( "media", SortingCriteria::Default, false ).others;
+    media = ml->searchMedia( "media", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 0u, media.size() );
 }
 
 TEST_F( Medias, SearchByLabel )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
-    auto media = ml->searchMedia( "otter", SortingCriteria::Default, false ).others;
+    auto media = ml->searchMedia( "otter", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 0u, media.size() );
 
     auto l = ml->createLabel( "otter" );
     m->addLabel( l );
 
-    media = ml->searchMedia( "otter", SortingCriteria::Default, false ).others;
+    media = ml->searchMedia( "otter", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 1u, media.size() );
 
     auto l2 = ml->createLabel( "pangolins" );
     m->addLabel( l2 );
 
-    media = ml->searchMedia( "otter", SortingCriteria::Default, false ).others;
+    media = ml->searchMedia( "otter", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 1u, media.size() );
 
-    media = ml->searchMedia( "pangolin", SortingCriteria::Default, false ).others;
+    media = ml->searchMedia( "pangolin", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 1u, media.size() );
 
     m->removeLabel( l );
 
-    media = ml->searchMedia( "otter", SortingCriteria::Default, false ).others;
+    media = ml->searchMedia( "otter", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 0u, media.size() );
 
-    media = ml->searchMedia( "pangolin", SortingCriteria::Default, false ).others;
+    media = ml->searchMedia( "pangolin", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 1u, media.size() );
 
     m->addLabel( l );
 
-    media = ml->searchMedia( "otter", SortingCriteria::Default, false ).others;
+    media = ml->searchMedia( "otter", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 1u, media.size() );
 
-    media = ml->searchMedia( "pangolin", SortingCriteria::Default, false ).others;
+    media = ml->searchMedia( "pangolin", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 1u, media.size() );
 
     ml->deleteLabel( l );
 
-    media = ml->searchMedia( "otter", SortingCriteria::Default, false ).others;
+    media = ml->searchMedia( "otter", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 0u, media.size() );
 
-    media = ml->searchMedia( "pangolin", SortingCriteria::Default, false ).others;
+    media = ml->searchMedia( "pangolin", SortingCriteria::Default, false ).others->all();
     ASSERT_EQ( 1u, media.size() );
 }
 
@@ -283,16 +283,16 @@ TEST_F( Medias, SearchTracks )
        a->addTrack( m, i, 1, 0, 0 );
        m->save();
     }
-    auto tracks = ml->searchMedia( "tra", SortingCriteria::Default, false ).tracks;
+    auto tracks = ml->searchMedia( "tra", SortingCriteria::Default, false ).tracks->all();
     ASSERT_EQ( 10u, tracks.size() );
 
-    tracks = ml->searchMedia( "track 1", SortingCriteria::Default, false ).tracks;
+    tracks = ml->searchMedia( "track 1", SortingCriteria::Default, false ).tracks->all();
     ASSERT_EQ( 2u, tracks.size() );
 
-    tracks = ml->searchMedia( "grouik", SortingCriteria::Default, false ).tracks;
+    tracks = ml->searchMedia( "grouik", SortingCriteria::Default, false ).tracks->all();
     ASSERT_EQ( 0u, tracks.size() );
 
-    tracks = ml->searchMedia( "rack", SortingCriteria::Default, false ).tracks;
+    tracks = ml->searchMedia( "rack", SortingCriteria::Default, false ).tracks->all();
     ASSERT_EQ( 0u, tracks.size() );
 }
 
@@ -314,12 +314,12 @@ TEST_F( Medias, History )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
 
-    auto history = ml->lastMediaPlayed();
+    auto history = ml->lastMediaPlayed()->all();
     ASSERT_EQ( 0u, history.size() );
 
     m->increasePlayCount();
     m->save();
-    history = ml->lastMediaPlayed();
+    history = ml->lastMediaPlayed()->all();
     ASSERT_EQ( 1u, history.size() );
     ASSERT_EQ( m->id(), history[0]->id() );
 
@@ -327,7 +327,7 @@ TEST_F( Medias, History )
     auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mkv" ) );
     m2->increasePlayCount();
 
-    history = ml->lastMediaPlayed();
+    history = ml->lastMediaPlayed()->all();
     ASSERT_EQ( 2u, history.size() );
     ASSERT_EQ( m2->id(), history[0]->id() );
     ASSERT_EQ( m->id(), history[1]->id() );
@@ -337,22 +337,22 @@ TEST_F( Medias, ClearHistory )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
 
-    auto history = ml->lastMediaPlayed();
+    auto history = ml->lastMediaPlayed()->all();
     ASSERT_EQ( 0u, history.size() );
 
     m->increasePlayCount();
     m->save();
-    history = ml->lastMediaPlayed();
+    history = ml->lastMediaPlayed()->all();
     ASSERT_EQ( 1u, history.size() );
 
     ASSERT_TRUE( ml->clearHistory() );
 
-    history = ml->lastMediaPlayed();
+    history = ml->lastMediaPlayed()->all();
     ASSERT_EQ( 0u, history.size() );
 
     Reload();
 
-    history = ml->lastMediaPlayed();
+    history = ml->lastMediaPlayed()->all();
     ASSERT_EQ( 0u, history.size() );
 }
 
@@ -388,13 +388,13 @@ TEST_F( Medias, SortByAlpha )
     m3->setType( Media::Type::Audio );
     m3->save();
 
-    auto media = ml->audioFiles( SortingCriteria::Alpha, false );
+    auto media = ml->audioFiles( SortingCriteria::Alpha, false )->all();
     ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( m1->id(), media[0]->id() );
     ASSERT_EQ( m3->id(), media[1]->id() );
     ASSERT_EQ( m2->id(), media[2]->id() );
 
-    media = ml->audioFiles( SortingCriteria::Alpha, true );
+    media = ml->audioFiles( SortingCriteria::Alpha, true )->all();
     ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( m2->id(), media[0]->id() );
     ASSERT_EQ( m3->id(), media[1]->id() );
@@ -415,12 +415,12 @@ TEST_F( Medias, SortByLastModifDate )
     m2->setType( Media::Type::Video );
     m2->save();
 
-    auto media = ml->videoFiles( SortingCriteria::LastModificationDate, false );
+    auto media = ml->videoFiles( SortingCriteria::LastModificationDate, false )->all();
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m2->id(), media[0]->id() );
     ASSERT_EQ( m1->id(), media[1]->id() );
 
-    media = ml->videoFiles( SortingCriteria::LastModificationDate, true );
+    media = ml->videoFiles( SortingCriteria::LastModificationDate, true )->all();
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m2->id(), media[1]->id() );
     ASSERT_EQ( m1->id(), media[0]->id() );
@@ -440,12 +440,12 @@ TEST_F( Medias, SortByFileSize )
     m2->setType( Media::Type::Video );
     m2->save();
 
-    auto media = ml->videoFiles( SortingCriteria::FileSize, false );
+    auto media = ml->videoFiles( SortingCriteria::FileSize, false )->all();
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m2->id(), media[0]->id() );
     ASSERT_EQ( m1->id(), media[1]->id() );
 
-    media = ml->videoFiles( SortingCriteria::FileSize, true );
+    media = ml->videoFiles( SortingCriteria::FileSize, true )->all();
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m2->id(), media[1]->id() );
     ASSERT_EQ( m1->id(), media[0]->id() );
@@ -463,12 +463,12 @@ TEST_F( Medias, SortByFilename )
     m2->setTitle( "zzzzz" );
     m2->save();
 
-    auto media = ml->videoFiles( SortingCriteria::Filename, false );
+    auto media = ml->videoFiles( SortingCriteria::Filename, false )->all();
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m2->id(), media[0]->id() );
     ASSERT_EQ( m1->id(), media[1]->id() );
 
-    media = ml->videoFiles( SortingCriteria::LastModificationDate, true );
+    media = ml->videoFiles( SortingCriteria::LastModificationDate, true )->all();
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m2->id(), media[1]->id() );
     ASSERT_EQ( m1->id(), media[0]->id() );
@@ -541,10 +541,10 @@ TEST_F( Medias, ExternalMrl )
     ASSERT_EQ( m->title(), "sea-otters.mkv" );
 
     // External files shouldn't appear in listings
-    auto videos = ml->videoFiles( medialibrary::SortingCriteria::Default, false );
+    auto videos = ml->videoFiles( medialibrary::SortingCriteria::Default, false )->all();
     ASSERT_EQ( 0u, videos.size() );
 
-    auto audios = ml->audioFiles( medialibrary::SortingCriteria::Default, false );
+    auto audios = ml->audioFiles( medialibrary::SortingCriteria::Default, false )->all();
     ASSERT_EQ( 0u, audios.size() );
 
     Reload();
@@ -580,6 +580,31 @@ TEST_F( Medias, SetTitle )
 
     m = ml->media( m->id() );
     ASSERT_EQ( "sea otters", m->title() );
+}
+
+TEST_F( Medias, Pagination )
+{
+    for ( auto i = 1u; i <= 9u; ++i )
+    {
+       auto m = std::static_pointer_cast<Media>( ml->addMedia( "track " + std::to_string( i ) + ".mp3" ) );
+       m->setType( IMedia::Type::Video );
+       m->save();
+    }
+
+    auto allMedia = ml->videoFiles( SortingCriteria::Default, false )->all();
+    ASSERT_EQ( 9u, allMedia.size() );
+
+    auto paginator = ml->videoFiles( SortingCriteria::Default, false );
+    auto media = paginator->items( 1, 0 );
+    int i = 0u;
+    while( media.size() > 0 )
+    {
+        // Offset starts from 0; ids from 1
+        ASSERT_EQ( 1u, media.size() );
+        ASSERT_EQ( i + 1, media[0]->id() );
+        ++i;
+        media = paginator->items( 1, i );
+    }
 }
 
 class FetchMedia : public Tests

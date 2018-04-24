@@ -22,7 +22,6 @@
 
 #pragma once
 
-#include <vector>
 #include <string>
 
 #include "IMediaLibrary.h"
@@ -45,23 +44,24 @@ public:
     /**
      * @brief tracks fetches album tracks from the database
      */
-    virtual std::vector<MediaPtr> tracks( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
+    virtual Query<IMedia> tracks( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
     /**
      * @brief tracks fetches album tracks, filtered by genre
      * @param genre A musical genre. Only tracks of this genre will be returned
      * @return
      */
-    virtual std::vector<MediaPtr> tracks( GenrePtr genre, SortingCriteria sort = SortingCriteria::Default, bool desc = false  ) const = 0;
+    virtual Query<IMedia> tracks( GenrePtr genre, SortingCriteria sort = SortingCriteria::Default, bool desc = false  ) const = 0;
     /**
      * @brief albumArtist Returns the album main artist (generally tagged as album-artist)
      */
     virtual ArtistPtr albumArtist() const = 0;
     /**
-     * @brief artists Returns a vector of all additional artists appearing on the album.
+     * @brief artists Returns a Query object representing all additional
+     *                artists appearing on the album.
      * Artists are sorted by name.
      * @param desc
      */
-    virtual std::vector<ArtistPtr> artists( bool desc ) const = 0;
+    virtual Query<IArtist> artists( bool desc ) const = 0;
     /**
      * @brief nbTracks Returns the amount of track in this album.
      * The value is cached, and doesn't require fetching anything.

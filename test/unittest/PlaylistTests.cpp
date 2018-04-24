@@ -62,7 +62,7 @@ TEST_F( Playlists, Fetch )
     ASSERT_NE( nullptr, pl2 );
     ASSERT_EQ( pl->id(), pl2->id() );
 
-    auto playlists = ml->playlists( SortingCriteria::Default, false );
+    auto playlists = ml->playlists( SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, playlists.size() );
     ASSERT_EQ( pl->id(), playlists[0]->id() );
 }
@@ -72,7 +72,7 @@ TEST_F( Playlists, DeletePlaylist )
 {
     auto res = ml->deletePlaylist( pl->id() );
     ASSERT_TRUE( res );
-    auto playlists = ml->playlists( SortingCriteria::Default, false );
+    auto playlists = ml->playlists( SortingCriteria::Default, false )->all();
     ASSERT_EQ( 0u, playlists.size() );
 }
 
@@ -97,7 +97,7 @@ TEST_F( Playlists, FetchAll )
     ml->createPlaylist( "pl 3" );
     ml->createPlaylist( "pl 4" );
 
-    auto playlists = ml->playlists( SortingCriteria::Default, false );
+    auto playlists = ml->playlists( SortingCriteria::Default, false )->all();
     ASSERT_EQ( 4u, playlists.size() );
     for ( auto& p : playlists )
     {
@@ -111,7 +111,7 @@ TEST_F( Playlists, Add )
     auto m = ml->addMedia( "file.mkv" );
     auto res = pl->append( m->id() );
     ASSERT_TRUE( res );
-    auto media = pl->media();
+    auto media = pl->media()->all();
     ASSERT_EQ( 1u, media.size() );
     ASSERT_EQ( m->id(), media[0]->id() );
 }
@@ -124,7 +124,7 @@ TEST_F( Playlists, Append )
         ASSERT_NE( nullptr, m );
         pl->append( m->id() );
     }
-    auto media = pl->media();
+    auto media = pl->media()->all();
     ASSERT_EQ( 5u, media.size() );
     for ( auto i = 0u; i < media.size(); ++i )
     {
@@ -150,7 +150,7 @@ TEST_F( Playlists, Insert )
     auto middleMedia = ml->addMedia( "middle.mkv" );
     pl->add( middleMedia->id(), 3 );
     // [<4,1>,<1,2>,<5,3>,<2,4>,<3,5>]
-    auto media = pl->media();
+    auto media = pl->media()->all();
     ASSERT_EQ( 5u, media.size() );
 
     ASSERT_EQ( 4u, media[0]->id() );
@@ -172,7 +172,7 @@ TEST_F( Playlists, Move )
     // [<1,1>,<2,2>,<3,3>,<4,4>,<5,5>]
     pl->move( 5, 1 );
     // [<5,1>,<1,2>,<2,3>,<3,4>,<4,5>]
-    auto media = pl->media();
+    auto media = pl->media()->all();
     ASSERT_EQ( 5u, media.size() );
 
     ASSERT_EQ( 5u, media[0]->id() );
@@ -192,13 +192,13 @@ TEST_F( Playlists, Remove )
         ASSERT_TRUE( res );
     }
     // [<1,1>,<2,2>,<3,3>,<4,4>,<5,5>]
-    auto media = pl->media();
+    auto media = pl->media()->all();
     ASSERT_EQ( 5u, media.size() );
 
     pl->remove( 3 );
     // [<1,1>,<2,2>,<4,4>,<5,5>]
 
-    media = pl->media();
+    media = pl->media()->all();
     ASSERT_EQ( 4u, media.size() );
 
     ASSERT_EQ( 1u, media[0]->id() );
@@ -217,7 +217,7 @@ TEST_F( Playlists, DeleteFile )
         ASSERT_TRUE( res );
     }
     // [<1,1>,<2,2>,<3,3>,<4,4>,<5,5>]
-    auto media = pl->media();
+    auto media = pl->media()->all();
     ASSERT_EQ( 5u, media.size() );
     auto m = std::static_pointer_cast<Media>( media[2] );
     auto fs = m->files();
@@ -228,7 +228,7 @@ TEST_F( Playlists, DeleteFile )
     // So we should now have
     // [<1,1>,<2,2>,<4,4>,<5,5>]
 
-    media = pl->media();
+    media = pl->media()->all();
     ASSERT_EQ( 4u, media.size() );
 
     ASSERT_EQ( 1u, media[0]->id() );
@@ -245,7 +245,7 @@ TEST_F( Playlists, DeleteFile )
         ASSERT_EQ( 1u, fs.size() );
         m->removeFile( static_cast<File&>( *fs[0] ) );
     }
-    media = pl->media();
+    media = pl->media()->all();
     ASSERT_EQ( 0u, media.size() );
     pl = ml->playlist( pl->id() );
     ASSERT_NE( nullptr, pl );
@@ -256,7 +256,7 @@ TEST_F( Playlists, Search )
     ml->createPlaylist( "playlist 2" );
     ml->createPlaylist( "laylist 3" );
 
-    auto playlists = ml->searchPlaylists( "play", SortingCriteria::Default, false );
+    auto playlists = ml->searchPlaylists( "play", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 2u, playlists.size() );
 }
 
@@ -264,12 +264,12 @@ TEST_F( Playlists, SearchAndSort )
 {
     auto pl2 = ml->createPlaylist( "playlist 2" );
 
-    auto playlists = ml->searchPlaylists( "play", SortingCriteria::Default, false );
+    auto playlists = ml->searchPlaylists( "play", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 2u, playlists.size() );
     ASSERT_EQ( pl2->id(), playlists[0]->id() );
     ASSERT_EQ( pl->id(), playlists[1]->id() );
 
-    playlists = ml->searchPlaylists( "play", SortingCriteria::Default, true );
+    playlists = ml->searchPlaylists( "play", SortingCriteria::Default, true )->all();
     ASSERT_EQ( 2u, playlists.size() );
     ASSERT_EQ( pl->id(), playlists[0]->id() );
     ASSERT_EQ( pl2->id(), playlists[1]->id() );
@@ -278,27 +278,27 @@ TEST_F( Playlists, SearchAndSort )
 TEST_F( Playlists, SearchAfterDelete )
 {
     auto pl = ml->createPlaylist( "sea otters greatest hits" );
-    auto pls = ml->searchPlaylists( "sea otters", SortingCriteria::Default, false );
+    auto pls = ml->searchPlaylists( "sea otters", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, pls.size() );
 
     ml->deletePlaylist( pl->id() );
 
-    pls = ml->searchPlaylists( "sea otters", SortingCriteria::Default, false );
+    pls = ml->searchPlaylists( "sea otters", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 0u, pls.size() );
 }
 
 TEST_F( Playlists, SearchAfterUpdate )
 {
     auto pl = ml->createPlaylist( "sea otters greatest hits" );
-    auto pls = ml->searchPlaylists( "sea otters", SortingCriteria::Default, false );
+    auto pls = ml->searchPlaylists( "sea otters", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, pls.size() );
 
     pl->setName( "pangolins are cool too" );
 
-    pls = ml->searchPlaylists( "sea otters", SortingCriteria::Default, false );
+    pls = ml->searchPlaylists( "sea otters", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 0u, pls.size() );
 
-    pls = ml->searchPlaylists( "pangolins", SortingCriteria::Default, false );
+    pls = ml->searchPlaylists( "pangolins", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, pls.size() );
 }
 
@@ -306,12 +306,12 @@ TEST_F( Playlists, Sort )
 {
     auto pl2 = ml->createPlaylist( "A playlist" );
 
-    auto pls = ml->playlists( SortingCriteria::Default, false );
+    auto pls = ml->playlists( SortingCriteria::Default, false )->all();
     ASSERT_EQ( 2u, pls.size() );
     ASSERT_EQ( pl2->id(), pls[0]->id() );
     ASSERT_EQ( pl->id(), pls[1]->id() );
 
-    pls = ml->playlists( SortingCriteria::Default, true );
+    pls = ml->playlists( SortingCriteria::Default, true )->all();
     ASSERT_EQ( 2u, pls.size() );
     ASSERT_EQ( pl2->id(), pls[1]->id() );
     ASSERT_EQ( pl->id(), pls[0]->id() );

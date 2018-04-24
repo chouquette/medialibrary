@@ -45,7 +45,7 @@ TEST_F( AudioTracks, GetSetProperties )
     auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.mp3" ) );
     ASSERT_NE( f, nullptr );
     f->addAudioTrack( "PCM", 128, 44100, 2, "en", "test desc" );
-    auto tracks = f->audioTracks();
+    auto tracks = f->audioTracks()->all();
     ASSERT_EQ( tracks.size(), 1u );
     auto t = tracks[0];
     ASSERT_NE( t, nullptr );
@@ -59,7 +59,7 @@ TEST_F( AudioTracks, GetSetProperties )
     Reload();
 
     auto f2 = ml->media( f->id() );
-    tracks = f2->audioTracks();
+    tracks = f2->audioTracks()->all();
     ASSERT_EQ( tracks.size(), 1u );
     t = tracks[0];
     ASSERT_EQ( t->codec(), "PCM" );
@@ -76,6 +76,6 @@ TEST_F( AudioTracks, FetchTracks )
     f->addAudioTrack( "PCM", 128, 44100, 2, "en", "test desc" );
     f->addAudioTrack( "WMA", 128, 48000, 2, "fr", "test desc 2" );
 
-    auto ts = f->audioTracks();
+    auto ts = f->audioTracks()->all();
     ASSERT_EQ( ts.size(), 2u );
 }

@@ -26,6 +26,7 @@
 
 #include "ShowEpisode.h"
 #include "database/SqliteTools.h"
+#include "database/SqliteQuery.h"
 #include "Show.h"
 #include "Media.h"
 
@@ -145,11 +146,11 @@ std::shared_ptr<IShow> ShowEpisode::show()
     return m_show;
 }
 
-std::vector<MediaPtr> ShowEpisode::files()
+Query<IMedia> ShowEpisode::files()
 {
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
+    static const std::string req = "FROM " + policy::MediaTable::Name
             + " WHERE show_episode_id = ?";
-    return Media::fetchAll<IMedia>( m_ml, req, m_id );
+    return make_query<Media, IMedia>( m_ml, "*", req, m_id );
 }
 
 void ShowEpisode::createTable( sqlite::Connection* dbConnection )

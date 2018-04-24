@@ -72,8 +72,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual MediaPtr media( int64_t mediaId ) const override;
         virtual MediaPtr media( const std::string& path ) const override;
         virtual MediaPtr addMedia( const std::string& mrl ) override;
-        virtual std::vector<MediaPtr> audioFiles( SortingCriteria sort, bool desc) const override;
-        virtual std::vector<MediaPtr> videoFiles( SortingCriteria sort, bool desc) const override;
+        virtual Query<IMedia> audioFiles( SortingCriteria sort, bool desc) const override;
+        virtual Query<IMedia> videoFiles( SortingCriteria sort, bool desc) const override;
 
         virtual void addDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                                         std::shared_ptr<Folder> parentFolder,
@@ -87,9 +87,9 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         virtual AlbumPtr album( int64_t id ) const override;
         std::shared_ptr<Album> createAlbum( const std::string& title, int64_t thumbnailId );
-        virtual std::vector<AlbumPtr> albums(SortingCriteria sort, bool desc) const override;
+        virtual Query<IAlbum> albums(SortingCriteria sort, bool desc) const override;
 
-        virtual std::vector<GenrePtr> genres( SortingCriteria sort, bool desc ) const override;
+        virtual Query<IGenre> genres( SortingCriteria sort, bool desc ) const override;
         virtual GenrePtr genre( int64_t id ) const override;
 
         virtual ShowPtr show( const std::string& name ) const override;
@@ -101,30 +101,30 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual ArtistPtr artist( int64_t id ) const override;
         ArtistPtr artist( const std::string& name );
         std::shared_ptr<Artist> createArtist( const std::string& name );
-        virtual std::vector<ArtistPtr> artists( bool includeAll,
+        virtual Query<IArtist> artists( bool includeAll,
                                                 SortingCriteria sort,
                                                 bool desc ) const override;
 
         virtual PlaylistPtr createPlaylist( const std::string& name ) override;
-        virtual std::vector<PlaylistPtr> playlists( SortingCriteria sort, bool desc ) override;
+        virtual Query<IPlaylist> playlists( SortingCriteria sort, bool desc ) override;
         virtual PlaylistPtr playlist( int64_t id ) const override;
         virtual bool deletePlaylist( int64_t playlistId ) override;
 
         virtual bool addToStreamHistory( MediaPtr media ) override;
-        virtual std::vector<HistoryPtr> lastStreamsPlayed() const override;
-        virtual std::vector<MediaPtr> lastMediaPlayed() const override;
+        virtual Query<IHistoryEntry> lastStreamsPlayed() const override;
+        virtual Query<IMedia> lastMediaPlayed() const override;
         virtual bool clearHistory() override;
 
         virtual MediaSearchAggregate searchMedia( const std::string& title,
                                                   SortingCriteria sort, bool desc ) const override;
-        virtual std::vector<PlaylistPtr> searchPlaylists( const std::string& name,
+        virtual Query<IPlaylist> searchPlaylists( const std::string& name,
                                                           SortingCriteria sort,
                                                           bool desc ) const override;
-        virtual std::vector<AlbumPtr> searchAlbums( const std::string& pattern,
+        virtual Query<IAlbum> searchAlbums( const std::string& pattern,
                                                     SortingCriteria sort,
                                                     bool desc ) const override;
-        virtual std::vector<GenrePtr> searchGenre( const std::string& genre ) const override;
-        virtual std::vector<ArtistPtr> searchArtists( const std::string& name,
+        virtual Query<IGenre> searchGenre( const std::string& genre ) const override;
+        virtual Query<IArtist> searchArtists( const std::string& name,
                                                       SortingCriteria sort,
                                                       bool desc ) const override;
         virtual SearchAggregate search( const std::string& pattern,
@@ -132,7 +132,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         virtual void discover( const std::string& entryPoint ) override;
         virtual void setDiscoverNetworkEnabled( bool enabled ) override;
-        virtual std::vector<FolderPtr> entryPoints() const override;
+        virtual Query<IFolder> entryPoints() const override;
         virtual FolderPtr folder( const std::string& mrl ) const override;
         virtual void removeEntryPoint( const std::string& entryPoint ) override;
         virtual void banFolder( const std::string& path ) override;

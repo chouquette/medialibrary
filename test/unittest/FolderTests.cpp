@@ -406,7 +406,7 @@ TEST_F( Folders, ReloadSubDir )
 
 TEST_F( Folders, FetchEntryPoints )
 {
-    auto eps = ml->entryPoints();
+    auto eps = ml->entryPoints()->all();
     ASSERT_EQ( 1u, eps.size() );
     ASSERT_EQ( mock::FileSystemFactory::Root, eps[0]->mrl() );
 
@@ -414,7 +414,7 @@ TEST_F( Folders, FetchEntryPoints )
     ml->banFolder( mock::FileSystemFactory::SubFolder );
     auto res = cbMock->waitBanFolder();
     ASSERT_TRUE( res );
-    eps = ml->entryPoints();
+    eps = ml->entryPoints()->all();
     ASSERT_EQ( 1u, eps.size() );
 }
 
@@ -430,7 +430,7 @@ TEST_F( Folders, RemoveRootEntryPoint )
     media = ml->files();
     ASSERT_EQ( 0u, media.size() );
 
-    auto eps = ml->entryPoints();
+    auto eps = ml->entryPoints()->all();
     ASSERT_EQ( 0u, eps.size() );
 }
 
@@ -446,7 +446,7 @@ TEST_F( Folders, RemoveEntryPoint )
     media = ml->files();
     ASSERT_NE( 0u, media.size() );
 
-    auto eps = ml->entryPoints();
+    auto eps = ml->entryPoints()->all();
     ASSERT_EQ( 1u, eps.size() );
 
     ml->reload();

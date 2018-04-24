@@ -31,6 +31,7 @@
 #include "MediaLibrary.h"
 
 #include "database/SqliteTools.h"
+#include "database/SqliteQuery.h"
 
 namespace medialibrary
 {
@@ -136,11 +137,11 @@ std::shared_ptr<ShowEpisode> Show::addEpisode( Media& media, const std::string& 
     return episode;
 }
 
-std::vector<ShowEpisodePtr> Show::episodes()
+Query<IShowEpisode> Show::episodes()
 {
-    static const std::string req = "SELECT * FROM " + policy::ShowEpisodeTable::Name
+    static const std::string req = "FROM " + policy::ShowEpisodeTable::Name
             + " WHERE show_id = ?";
-    return ShowEpisode::fetchAll<IShowEpisode>( m_ml, req, m_id );
+    return make_query<ShowEpisode, IShowEpisode>( m_ml, "*", req, m_id );
 }
 
 void Show::createTable( sqlite::Connection* dbConnection )

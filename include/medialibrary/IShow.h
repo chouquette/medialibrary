@@ -38,7 +38,7 @@ class IShow
         virtual const std::string& shortSummary() const = 0;
         virtual const std::string& artworkMrl() const = 0;
         virtual const std::string& tvdbId() = 0;
-        virtual std::vector<ShowEpisodePtr> episodes() = 0;
+        virtual Query<IShowEpisode> episodes() = 0;
 };
 
 }

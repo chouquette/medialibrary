@@ -52,7 +52,7 @@ public:
     static void createTable( sqlite::Connection* dbConnection );
     static void createTriggers( sqlite::Connection* dbConnection );
     static bool insert( sqlite::Connection* dbConn, int64_t mediaId );
-    static std::vector<HistoryPtr> fetch( MediaLibraryPtr ml );
+    static Query<IHistoryEntry> fetch( MediaLibraryPtr ml );
     static void clearStreams( MediaLibraryPtr ml );
 
     virtual MediaPtr media() const override;

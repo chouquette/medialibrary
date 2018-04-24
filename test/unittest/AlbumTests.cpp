@@ -69,13 +69,13 @@ TEST_F( Albums, AddTrack )
     f->save();
     ASSERT_NE( track, nullptr );
 
-    auto tracks = a->tracks( SortingCriteria::Default, false );
+    auto tracks = a->tracks( SortingCriteria::Default, false )->all();
     ASSERT_EQ( tracks.size(), 1u );
 
     Reload();
 
     a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
-    tracks = a->tracks( SortingCriteria::Default, false );
+    tracks = a->tracks( SortingCriteria::Default, false )->all();
     ASSERT_EQ( tracks.size(), 1u );
     ASSERT_EQ( tracks[0]->albumTrack()->trackNumber(), track->trackNumber() );
 }
@@ -90,13 +90,13 @@ TEST_F( Albums, NbTracks )
         f->save();
         ASSERT_NE( track, nullptr );
     }
-    auto tracks = a->tracks( SortingCriteria::Default, false );
+    auto tracks = a->tracks( SortingCriteria::Default, false )->all();
     ASSERT_EQ( tracks.size(), a->nbTracks() );
 
     Reload();
 
     a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
-    tracks = a->tracks( SortingCriteria::Default, false );
+    tracks = a->tracks( SortingCriteria::Default, false )->all();
     ASSERT_EQ( tracks.size(), a->nbTracks() );
 }
 
@@ -114,13 +114,13 @@ TEST_F( Albums, TracksByGenre )
         if ( i <= 5 )
             track->setGenre( g );
     }
-    auto tracks = a->tracks( g, SortingCriteria::Default, false );
+    auto tracks = a->tracks( g, SortingCriteria::Default, false )->all();
     ASSERT_EQ( 5u, tracks.size() );
 
     Reload();
 
     a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
-    tracks = a->tracks( g, SortingCriteria::Default, false );
+    tracks = a->tracks( g, SortingCriteria::Default, false )->all();
     ASSERT_NE( tracks.size(), a->nbTracks() );
     ASSERT_EQ( 5u, tracks.size() );
 }
@@ -232,13 +232,13 @@ TEST_F( Albums, Artists )
     res = album->addArtist( artist2 );
     ASSERT_EQ( res, true );
 
-    auto artists = album->artists( false );
+    auto artists = album->artists( false )->all();
     ASSERT_EQ( artists.size(), 2u );
 
     Reload();
 
     album = std::static_pointer_cast<Album>( ml->album( album->id() ) );
-    artists = album->artists( false );
+    artists = album->artists( false )->all();
     ASSERT_EQ( album->albumArtist(), nullptr );
     ASSERT_EQ( artists.size(), 2u );
 }
@@ -252,12 +252,12 @@ TEST_F( Albums, SortArtists )
     album->addArtist( artist1 );
     album->addArtist( artist2 );
 
-    auto artists = album->artists( false );
+    auto artists = album->artists( false )->all();
     ASSERT_EQ( artists.size(), 2u );
     ASSERT_EQ( artist1->id(), artists[1]->id() );
     ASSERT_EQ( artist2->id(), artists[0]->id() );
 
-    artists = album->artists( true );
+    artists = album->artists( true )->all();
     ASSERT_EQ( artists.size(), 2u );
     ASSERT_EQ( artist1->id(), artists[0]->id() );
     ASSERT_EQ( artist2->id(), artists[1]->id() );
@@ -284,7 +284,7 @@ TEST_F( Albums, SearchByTitle )
     ml->createAlbum( "sea otters" );
     ml->createAlbum( "pangolins of fire" );
 
-    auto albums = ml->searchAlbums( "otte", SortingCriteria::Default, false );
+    auto albums = ml->searchAlbums( "otte", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, albums.size() );
 }
 
@@ -294,7 +294,7 @@ TEST_F( Albums, SearchByArtist )
     auto artist = ml->createArtist( "pangolins" );
     a->setAlbumArtist( artist );
 
-    auto albums = ml->searchAlbums( "pangol", SortingCriteria::Default, false );
+    auto albums = ml->searchAlbums( "pangol", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, albums.size() );
 }
 
@@ -304,7 +304,7 @@ TEST_F( Albums, SearchNoDuplicate )
     auto artist = ml->createArtist( "otters" );
     a->setAlbumArtist( artist );
 
-    auto albums = ml->searchAlbums( "otters", SortingCriteria::Default, false );
+    auto albums = ml->searchAlbums( "otters", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, albums.size() );
 }
 
@@ -314,7 +314,7 @@ TEST_F( Albums, SearchNoUnknownAlbum )
     auto album = artist->unknownAlbum();
     ASSERT_NE( nullptr, album );
 
-    auto albums = ml->searchAlbums( "otters", SortingCriteria::Default, false );
+    auto albums = ml->searchAlbums( "otters", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 0u, albums.size() );
     // Can't search by name since there is no name set for unknown albums
 }
@@ -322,12 +322,12 @@ TEST_F( Albums, SearchNoUnknownAlbum )
 TEST_F( Albums, SearchAfterDeletion )
 {
     auto a = ml->createAlbum( "sea otters" );
-    auto albums = ml->searchAlbums( "sea", SortingCriteria::Default, false );
+    auto albums = ml->searchAlbums( "sea", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, albums.size() );
 
     ml->deleteAlbum( a->id() );
 
-    albums = ml->searchAlbums( "sea", SortingCriteria::Default, false );
+    albums = ml->searchAlbums( "sea", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 0u, albums.size() );
 }
 
@@ -338,18 +338,18 @@ TEST_F( Albums, SearchAfterArtistUpdate )
     auto artist2 = ml->createArtist( "pangolin of ice" );
     a->setAlbumArtist( artist );
 
-    auto albums = ml->searchAlbums( "fire", SortingCriteria::Default, false );
+    auto albums = ml->searchAlbums( "fire", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, albums.size() );
 
-    albums = ml->searchAlbums( "ice", SortingCriteria::Default, false );
+    albums = ml->searchAlbums( "ice", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 0u, albums.size() );
 
     a->setAlbumArtist( artist2 );
 
-    albums = ml->searchAlbums( "fire", SortingCriteria::Default, false );
+    albums = ml->searchAlbums( "fire", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 0u, albums.size() );
 
-    albums = ml->searchAlbums( "ice", SortingCriteria::Default, false );
+    albums = ml->searchAlbums( "ice", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, albums.size() );
 }
 
@@ -377,19 +377,19 @@ TEST_F( Albums, SortTracks )
     auto t2 = a->addTrack( m2, 2, 1, 0, nullptr );
 
     // Default order is by disc number & track number
-    auto tracks = a->tracks( SortingCriteria::Default, false );
+    auto tracks = a->tracks( SortingCriteria::Default, false )->all();
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( t1->id(), tracks[0]->id() );
     ASSERT_EQ( t2->id(), tracks[1]->id() );
 
     // Reverse order
-    tracks = a->tracks( SortingCriteria::Default, true );
+    tracks = a->tracks( SortingCriteria::Default, true )->all();
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( t1->id(), tracks[1]->id() );
     ASSERT_EQ( t2->id(), tracks[0]->id() );
 
     // Try a media based criteria
-    tracks = a->tracks( SortingCriteria::Alpha, false );
+    tracks = a->tracks( SortingCriteria::Alpha, false )->all();
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( t1->id(), tracks[1]->id() ); // B-track -> first
     ASSERT_EQ( t2->id(), tracks[0]->id() ); // A-track -> second
@@ -404,13 +404,13 @@ TEST_F( Albums, Sort )
     auto a3 = ml->createAlbum( "C" );
     a3->setReleaseYear( 1000, false );
 
-    auto albums = ml->albums( SortingCriteria::ReleaseDate, false );
+    auto albums = ml->albums( SortingCriteria::ReleaseDate, false )->all();
     ASSERT_EQ( 3u, albums.size() );
     ASSERT_EQ( a1->id(), albums[0]->id() );
     ASSERT_EQ( a3->id(), albums[1]->id() );
     ASSERT_EQ( a2->id(), albums[2]->id() );
 
-    albums = ml->albums( SortingCriteria::ReleaseDate, true );
+    albums = ml->albums( SortingCriteria::ReleaseDate, true )->all();
     // We do not invert the lexical order when sorting by DESC release date:
     ASSERT_EQ( 3u, albums.size() );
     ASSERT_EQ( a2->id(), albums[0]->id() );
@@ -418,13 +418,13 @@ TEST_F( Albums, Sort )
     ASSERT_EQ( a3->id(), albums[2]->id() );
 
     // When listing all albums, default order is lexical order
-    albums = ml->albums( SortingCriteria::Default, false );
+    albums = ml->albums( SortingCriteria::Default, false )->all();
     ASSERT_EQ( 3u, albums.size() );
     ASSERT_EQ( a1->id(), albums[0]->id() );
     ASSERT_EQ( a2->id(), albums[1]->id() );
     ASSERT_EQ( a3->id(), albums[2]->id() );
 
-    albums = ml->albums( SortingCriteria::Default, true );
+    albums = ml->albums( SortingCriteria::Default, true )->all();
     ASSERT_EQ( 3u, albums.size() );
     ASSERT_EQ( a3->id(), albums[0]->id() );
     ASSERT_EQ( a2->id(), albums[1]->id() );
@@ -470,7 +470,7 @@ TEST_F( Albums, SortByPlayCount )
 
     ASSERT_TRUE( f5->increasePlayCount() );
 
-    auto albums = ml->albums( SortingCriteria::PlayCount, false ); // Expect descending order
+    auto albums = ml->albums( SortingCriteria::PlayCount, false )->all(); // Expect descending order
     ASSERT_EQ( 4u, albums.size() );
     ASSERT_EQ( a2->id(), albums[0]->id() ); // 4 plays
     ASSERT_EQ( a1->id(), albums[1]->id() ); // 3 plays
@@ -478,7 +478,7 @@ TEST_F( Albums, SortByPlayCount )
     ASSERT_EQ( a3->id(), albums[2]->id() ); // 1 play
     ASSERT_EQ( a4->id(), albums[3]->id() ); // 1 play
 
-    albums = ml->albums( SortingCriteria::PlayCount, true ); // Expect ascending order
+    albums = ml->albums( SortingCriteria::PlayCount, true )->all(); // Expect ascending order
     ASSERT_EQ( 4u, albums.size() );
     ASSERT_EQ( a3->id(), albums[0]->id() ); // 1 play
     ASSERT_EQ( a4->id(), albums[1]->id() ); // 1 play
@@ -489,7 +489,7 @@ TEST_F( Albums, SortByPlayCount )
     ASSERT_TRUE( f1->increasePlayCount() );
     ASSERT_TRUE( f2->increasePlayCount() );
 
-    albums = ml->albums( SortingCriteria::PlayCount, false );
+    albums = ml->albums( SortingCriteria::PlayCount, false )->all();
     ASSERT_EQ( 4u, albums.size() );
     ASSERT_EQ( a1->id(), albums[0]->id() ); // 5 plays
     ASSERT_EQ( a2->id(), albums[1]->id() ); // 4 plays
@@ -511,13 +511,13 @@ TEST_F( Albums, SortByArtist )
     auto a3 = ml->createAlbum( "A" );
     a3->setAlbumArtist( artist1 );
 
-    auto albums = ml->albums( SortingCriteria::Artist, false );
+    auto albums = ml->albums( SortingCriteria::Artist, false )->all();
     ASSERT_EQ( 3u, albums.size() );
     ASSERT_EQ( a3->id(), albums[0]->id() );
     ASSERT_EQ( a1->id(), albums[1]->id() );
     ASSERT_EQ( a2->id(), albums[2]->id() );
 
-    albums = ml->albums( SortingCriteria::Artist, true );
+    albums = ml->albums( SortingCriteria::Artist, true )->all();
     ASSERT_EQ( 3u, albums.size() );
     // We expect Artist to be sorted in reverse order, but still in alphabetical order for albums
     ASSERT_EQ( a2->id(), albums[0]->id() );
@@ -578,13 +578,13 @@ TEST_F( Albums, SearchAndSort )
     auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "track3.mp3" ) );
     alb2->addTrack( m3, 2, 0, 0, nullptr );
 
-    auto albs = ml->searchAlbums( "album", SortingCriteria::Alpha, false );
+    auto albs = ml->searchAlbums( "album", SortingCriteria::Alpha, false )->all();
     ASSERT_EQ( 2u, albs.size() );
     ASSERT_EQ( albs[0]->id(), alb2->id() );
     ASSERT_EQ( albs[1]->id(), alb1->id() );
 
     // Sorting by tracknumber is descending by default, so we expect album 2 first
-    albs = ml->searchAlbums( "album", SortingCriteria::TrackNumber, false );
+    albs = ml->searchAlbums( "album", SortingCriteria::TrackNumber, false )->all();
     ASSERT_EQ( 2u, albs.size() );
     ASSERT_EQ( albs[0]->id(), alb2->id() );
     ASSERT_EQ( albs[1]->id(), alb1->id() );

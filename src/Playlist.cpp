@@ -28,6 +28,8 @@
 
 #include "Media.h"
 
+#include "database/SqliteQuery.h"
+
 namespace medialibrary
 {
 
@@ -116,13 +118,13 @@ const std::string& Playlist::artworkMrl() const
     return m_artworkMrl;
 }
 
-std::vector<MediaPtr> Playlist::media() const
+Query<IMedia> Playlist::media() const
 {
-    static const std::string req = "SELECT m.* FROM " + policy::MediaTable::Name + " m "
+    static const std::string req = "FROM " + policy::MediaTable::Name + " m "
             "LEFT JOIN PlaylistMediaRelation pmr ON pmr.media_id = m.id_media "
             "WHERE pmr.playlist_id = ? AND m.is_present != 0 "
             "ORDER BY pmr.position";
-    return Media::fetchAll<IMedia>( m_ml, req, m_id );
+    return make_query<Media, IMedia>( m_ml, "m.*", req, m_id );
 }
 
 bool Playlist::append( int64_t mediaId )
@@ -260,20 +262,20 @@ void Playlist::createTriggers( sqlite::Connection* dbConn )
     sqlite::Tools::executeRequest( dbConn, vtriggerDelete );
 }
 
-std::vector<PlaylistPtr> Playlist::search( MediaLibraryPtr ml, const std::string& name,
+Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,
                                            SortingCriteria sort, bool desc )
 {
-    std::string req = "SELECT * FROM " + policy::PlaylistTable::Name + " WHERE id_playlist IN "
+    std::string req = "FROM " + policy::PlaylistTable::Name + " WHERE id_playlist IN "
             "(SELECT rowid FROM " + policy::PlaylistTable::Name + "Fts WHERE name MATCH '*' || ? || '*')";
     req += sortRequest( sort, desc );
-    return fetchAll<IPlaylist>( ml, req, name );
+    return make_query<Playlist, IPlaylist>( ml, "*", req, name );
 }
 
-std::vector<PlaylistPtr> Playlist::listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc )
+Query<IPlaylist> Playlist::listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc )
 {
-    std::string req = "SELECT * FROM " + policy::PlaylistTable::Name;
+    std::string req = "FROM " + policy::PlaylistTable::Name;
     req += sortRequest( sort, desc );
-    return fetchAll<IPlaylist>( ml, req );
+    return make_query<Playlist, IPlaylist>( ml, "*", req );
 }
 
 void Playlist::deleteAllExternal(MediaLibraryPtr ml)

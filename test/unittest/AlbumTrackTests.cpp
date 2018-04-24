@@ -66,7 +66,7 @@ TEST_F( AlbumTracks, SetGenre )
     Reload();
 
     a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
-    auto tracks = a->tracks( SortingCriteria::Default, false );
+    auto tracks = a->tracks( SortingCriteria::Default, false )->all();
     ASSERT_EQ( tracks.size(), 1u );
     auto t2 = tracks[0];
     ASSERT_EQ( t->genre()->id(), t2->albumTrack()->genre()->id() );

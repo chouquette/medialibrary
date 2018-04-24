@@ -135,13 +135,13 @@ TEST_F( Artists, Albums )
     album1->setAlbumArtist( artist );
     album2->setAlbumArtist( artist );
 
-    auto albums = artist->albums( SortingCriteria::Default, false );
+    auto albums = artist->albums( SortingCriteria::Default, false )->all();
     ASSERT_EQ( albums.size(), 2u );
 
     Reload();
 
     auto artist2 = ml->artist( "Cannibal Otters" );
-    auto albums2 = artist2->albums( SortingCriteria::Default, false );
+    auto albums2 = artist2->albums( SortingCriteria::Default, false )->all();
     ASSERT_EQ( albums2.size(), 2u );
 }
 
@@ -181,19 +181,19 @@ TEST_F( Artists, AllSongs )
         ASSERT_TRUE( res );
     }
 
-    auto songs = artist->media( SortingCriteria::Default, false );
+    auto songs = artist->media( SortingCriteria::Default, false )->all();
     ASSERT_EQ( songs.size(), 3u );
 
     Reload();
 
     auto artist2 = ml->artist( "Cannibal Otters" );
-    songs = artist2->media( SortingCriteria::Default, false );
+    songs = artist2->media( SortingCriteria::Default, false )->all();
     ASSERT_EQ( songs.size(), 3u );
 }
 
 TEST_F( Artists, GetAll )
 {
-    auto artists = ml->artists( true, SortingCriteria::Default, false );
+    auto artists = ml->artists( true, SortingCriteria::Default, false )->all();
     // Ensure we don't include Unknown Artist // Various Artists
     ASSERT_EQ( artists.size(), 0u );
 
@@ -205,18 +205,18 @@ TEST_F( Artists, GetAll )
         alb->setAlbumArtist( a );
         ASSERT_NE( a, nullptr );
     }
-    artists = ml->artists( true, SortingCriteria::Default, false );
+    artists = ml->artists( true, SortingCriteria::Default, false )->all();
     ASSERT_EQ( artists.size(), 5u );
 
     Reload();
 
-    auto artists2 = ml->artists( true, SortingCriteria::Default, false );
+    auto artists2 = ml->artists( true, SortingCriteria::Default, false )->all();
     ASSERT_EQ( artists2.size(), 5u );
 }
 
 TEST_F( Artists, GetAllNoAlbum )
 {
-    auto artists = ml->artists( true, SortingCriteria::Default, false );
+    auto artists = ml->artists( true, SortingCriteria::Default, false )->all();
     // Ensure we don't include Unknown Artist // Various Artists
     ASSERT_EQ( artists.size(), 0u );
 
@@ -225,15 +225,15 @@ TEST_F( Artists, GetAllNoAlbum )
         auto a = ml->createArtist( std::to_string( i ) );
         a->updateNbTrack( 1 );
     }
-    artists = ml->artists( false, SortingCriteria::Default, false );
+    artists = ml->artists( false, SortingCriteria::Default, false )->all();
     ASSERT_EQ( artists.size(), 0u );
 
     Reload();
 
-    artists = ml->artists( false, SortingCriteria::Default, false );
+    artists = ml->artists( false, SortingCriteria::Default, false )->all();
     ASSERT_EQ( artists.size(), 0u );
 
-    artists = ml->artists( true, SortingCriteria::Default, false );
+    artists = ml->artists( true, SortingCriteria::Default, false )->all();
     ASSERT_EQ( artists.size(), 3u );
 }
 
@@ -278,12 +278,12 @@ TEST_F( Artists, Search )
     auto a2 = ml->createArtist( "artist 2" );
     ml->createArtist( "dream seaotter" );
 
-    auto artists = ml->searchArtists( "artist", SortingCriteria::Default, false );
+    auto artists = ml->searchArtists( "artist", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 2u, artists.size() );
     ASSERT_EQ( artists[0]->id(), a1->id() );
     ASSERT_EQ( artists[1]->id(), a2->id() );
 
-    artists = ml->searchArtists( "artist", SortingCriteria::Default, true );
+    artists = ml->searchArtists( "artist", SortingCriteria::Default, true )->all();
     ASSERT_EQ( 2u, artists.size() );
     ASSERT_EQ( artists[0]->id(), a2->id() );
     ASSERT_EQ( artists[1]->id(), a1->id() );
@@ -295,12 +295,12 @@ TEST_F( Artists, SearchAfterDelete )
     ml->createArtist( "artist 2" );
     ml->createArtist( "dream seaotter" );
 
-    auto artists = ml->searchArtists( "artist", SortingCriteria::Default, false );
+    auto artists = ml->searchArtists( "artist", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 2u, artists.size() );
 
     ml->deleteArtist( a->id() );
 
-    artists = ml->searchArtists( "artist", SortingCriteria::Default, false );
+    artists = ml->searchArtists( "artist", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, artists.size() );
 }
 
@@ -316,13 +316,13 @@ TEST_F( Artists, SortMedia )
         artist->addMedia( *f );
     }
 
-    auto tracks = artist->media( SortingCriteria::Duration, false );
+    auto tracks = artist->media( SortingCriteria::Duration, false )->all();
     ASSERT_EQ( 3u, tracks.size() );
     ASSERT_EQ( "song3.mp3", tracks[0]->title() ); // Duration: 8
     ASSERT_EQ( "song2.mp3", tracks[1]->title() ); // Duration: 9
     ASSERT_EQ( "song1.mp3", tracks[2]->title() ); // Duration: 10
 
-    tracks = artist->media( SortingCriteria::Duration, true );
+    tracks = artist->media( SortingCriteria::Duration, true )->all();
     ASSERT_EQ( 3u, tracks.size() );
     ASSERT_EQ( "song1.mp3", tracks[0]->title() );
     ASSERT_EQ( "song2.mp3", tracks[1]->title() );
@@ -349,14 +349,14 @@ TEST_F( Artists, SortMediaByAlbum )
         }
     }
 
-    auto tracks = artist->media( SortingCriteria::Album, false );
+    auto tracks = artist->media( SortingCriteria::Album, false )->all();
     ASSERT_EQ( 4u, tracks.size() );
     ASSERT_EQ( "alb0_song1.mp3", tracks[0]->title() );
     ASSERT_EQ( "alb0_song2.mp3", tracks[1]->title() );
     ASSERT_EQ( "alb1_song1.mp3", tracks[2]->title() );
     ASSERT_EQ( "alb1_song2.mp3", tracks[3]->title() );
 
-    tracks = artist->media( SortingCriteria::Album, true );
+    tracks = artist->media( SortingCriteria::Album, true )->all();
     ASSERT_EQ( 4u, tracks.size() );
     ASSERT_EQ( "alb1_song2.mp3", tracks[0]->title() );
     ASSERT_EQ( "alb1_song1.mp3", tracks[1]->title() );
@@ -385,25 +385,25 @@ TEST_F( Artists, SortAlbum )
     album3->setAlbumArtist( artist );
 
     // Default order is by descending year, discriminated by lexical order
-    auto albums = artist->albums( SortingCriteria::Default, false );
+    auto albums = artist->albums( SortingCriteria::Default, false )->all();
     ASSERT_EQ( 3u, albums.size() );
     ASSERT_EQ( album1->id(), albums[0]->id() );
     ASSERT_EQ( album3->id(), albums[1]->id() );
     ASSERT_EQ( album2->id(), albums[2]->id() );
 
-    albums = artist->albums( SortingCriteria::Default, true );
+    albums = artist->albums( SortingCriteria::Default, true )->all();
     ASSERT_EQ( 3u, albums.size() );
     ASSERT_EQ( album2->id(), albums[0]->id() );
     ASSERT_EQ( album1->id(), albums[1]->id() );
     ASSERT_EQ( album3->id(), albums[2]->id() );
 
-    albums = artist->albums( SortingCriteria::Alpha, false );
+    albums = artist->albums( SortingCriteria::Alpha, false )->all();
     ASSERT_EQ( 3u, albums.size() );
     ASSERT_EQ( album1->id(), albums[0]->id() );
     ASSERT_EQ( album2->id(), albums[1]->id() );
     ASSERT_EQ( album3->id(), albums[2]->id() );
 
-    albums = artist->albums( SortingCriteria::Alpha, true );
+    albums = artist->albums( SortingCriteria::Alpha, true )->all();
     ASSERT_EQ( 3u, albums.size() );
     ASSERT_EQ( album3->id(), albums[0]->id() );
     ASSERT_EQ( album2->id(), albums[1]->id() );
@@ -420,12 +420,12 @@ TEST_F( Artists, Sort )
     auto alb2 = ml->createAlbum( "albumB" );
     alb2->setAlbumArtist( a2 );
 
-    auto artists = ml->artists( true, SortingCriteria::Alpha, false );
+    auto artists = ml->artists( true, SortingCriteria::Alpha, false )->all();
     ASSERT_EQ( 2u, artists.size() );
     ASSERT_EQ( a1->id(), artists[0]->id() );
     ASSERT_EQ( a2->id(), artists[1]->id() );
 
-    artists = ml->artists( true, SortingCriteria::Alpha, true );
+    artists = ml->artists( true, SortingCriteria::Alpha, true )->all();
     ASSERT_EQ( 2u, artists.size() );
     ASSERT_EQ( a1->id(), artists[1]->id() );
     ASSERT_EQ( a2->id(), artists[0]->id() );
@@ -439,16 +439,16 @@ TEST_F( Artists, DeleteWhenNoAlbum )
     auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
     auto track1 = album->addTrack( m1, 1, 1, artist->id(), nullptr );
 
-    auto artists = ml->artists( true, medialibrary::SortingCriteria::Default, false );
+    auto artists = ml->artists( true, medialibrary::SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, artists.size() );
 
     ml->deleteTrack( track1->id() );
-    artists = ml->artists( true, medialibrary::SortingCriteria::Default, false );
+    artists = ml->artists( true, medialibrary::SortingCriteria::Default, false )->all();
     ASSERT_EQ( 0u, artists.size() );
 
     Reload();
 
-    artists = ml->artists( true, medialibrary::SortingCriteria::Default, false );
+    artists = ml->artists( true, medialibrary::SortingCriteria::Default, false )->all();
     ASSERT_EQ( 0u, artists.size() );
 }
 
@@ -499,7 +499,7 @@ TEST_F( Artists, SortTracksMultiDisc )
      * [ Disc 1 - Track 3 ]
      * [ Disc 2 - Track 3 ]
      */
-    auto tracks = artist->media( SortingCriteria::Album, false );
+    auto tracks = artist->media( SortingCriteria::Album, false )->all();
     ASSERT_EQ( 6u, tracks.size() );
     ASSERT_EQ( media[0]->id(), tracks[0]->id() );
     ASSERT_EQ( media[2]->id(), tracks[1]->id() );
@@ -508,7 +508,7 @@ TEST_F( Artists, SortTracksMultiDisc )
     ASSERT_EQ( media[3]->id(), tracks[4]->id() );
     ASSERT_EQ( media[5]->id(), tracks[5]->id() );
 
-    tracks = artist->media( SortingCriteria::Album, true );
+    tracks = artist->media( SortingCriteria::Album, true )->all();
     ASSERT_EQ( media[5]->id(), tracks[0]->id() );
     ASSERT_EQ( media[3]->id(), tracks[1]->id() );
     ASSERT_EQ( media[1]->id(), tracks[2]->id() );

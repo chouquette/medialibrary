@@ -256,18 +256,18 @@ TEST_F( DeviceFs, RemoveAlbum )
         album2->setAlbumArtist( artist );
     }
 
-    auto albums = ml->albums( SortingCriteria::Default, false );
+    auto albums = ml->albums( SortingCriteria::Default, false )->all();
     ASSERT_EQ( 3u, albums.size() );
-    auto artists = ml->artists( true, SortingCriteria::Default, false );
+    auto artists = ml->artists( true, SortingCriteria::Default, false )->all();
     ASSERT_EQ( 2u, artists.size() );
 
     auto device = fsMock->removeDevice( RemovableDeviceUuid );
 
     Reload();
 
-    albums = ml->albums( SortingCriteria::Default, false );
+    albums = ml->albums( SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, albums.size() );
-    artists = ml->artists( true, SortingCriteria::Default, false );
+    artists = ml->artists( true, SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, artists.size() );
 
     // Now check that everything appears again when we plug the device back in
@@ -276,9 +276,9 @@ TEST_F( DeviceFs, RemoveAlbum )
 
     Reload();
 
-    albums = ml->albums( SortingCriteria::Default, false );
+    albums = ml->albums( SortingCriteria::Default, false )->all();
     ASSERT_EQ( 3u, albums.size() );
-    artists = ml->artists( true, SortingCriteria::Default, false );
+    artists = ml->artists( true, SortingCriteria::Default, false )->all();
     ASSERT_EQ( 2u, artists.size() );
 }
 
@@ -300,22 +300,22 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
         newArtist->addMedia( static_cast<Media&>( *media2 ) );
     }
 
-    auto albums = ml->albums( SortingCriteria::Default, false );
+    auto albums = ml->albums( SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, albums.size() );
-    auto artists = ml->artists( true, SortingCriteria::Default, false );
+    auto artists = ml->artists( true, SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, artists.size() );
     auto artist = artists[0];
-    ASSERT_EQ( 2u, artist->media( SortingCriteria::Default, false ).size() );
+    ASSERT_EQ( 2u, artist->media( SortingCriteria::Default, false )->count() );
 
     auto device = fsMock->removeDevice( RemovableDeviceUuid );
     Reload();
 
-    albums = ml->albums( SortingCriteria::Default, false );
+    albums = ml->albums( SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, albums.size() );
-    artists = ml->artists( true, SortingCriteria::Default, false );
+    artists = ml->artists( true, SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, artists.size() );
-    ASSERT_EQ( 1u, albums[0]->tracks( SortingCriteria::Default, false ).size() );
-    ASSERT_EQ( 1u, artists[0]->media( SortingCriteria::Default, false ).size() );
+    ASSERT_EQ( 1u, albums[0]->tracks( SortingCriteria::Default, false )->count() );
+    ASSERT_EQ( 1u, artists[0]->media( SortingCriteria::Default, false )->count() );
 }
 
 TEST_F( DeviceFs, ChangeDevice )

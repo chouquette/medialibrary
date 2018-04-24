@@ -28,6 +28,7 @@
 
 #include "medialibrary/ILogger.h"
 #include "Types.h"
+#include "IQuery.h"
 
 namespace medialibrary
 {
@@ -37,19 +38,19 @@ static constexpr auto VariousArtistID = 2u;
 
 struct MediaSearchAggregate
 {
-    std::vector<MediaPtr> episodes;
-    std::vector<MediaPtr> movies;
-    std::vector<MediaPtr> others;
-    std::vector<MediaPtr> tracks;
+    Query<IMedia> episodes;
+    Query<IMedia> movies;
+    Query<IMedia> others;
+    Query<IMedia> tracks;
 };
 
 struct SearchAggregate
 {
-    std::vector<AlbumPtr> albums;
-    std::vector<ArtistPtr> artists;
-    std::vector<GenrePtr> genres;
+    Query<IAlbum> albums;
+    Query<IArtist> artists;
+    Query<IGenre> genres;
     MediaSearchAggregate media;
-    std::vector<PlaylistPtr> playlists;
+    Query<IPlaylist> playlists;
 };
 
 enum class SortingCriteria
@@ -251,10 +252,10 @@ class IMediaLibrary
         virtual MediaPtr media( int64_t mediaId ) const = 0;
         virtual MediaPtr media( const std::string& mrl ) const = 0;
         virtual MediaPtr addMedia( const std::string& mrl ) = 0;
-        virtual std::vector<MediaPtr> audioFiles( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
-        virtual std::vector<MediaPtr> videoFiles( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
+        virtual Query<IMedia> audioFiles( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
+        virtual Query<IMedia> videoFiles( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
         virtual AlbumPtr album( int64_t id ) const = 0;
-        virtual std::vector<AlbumPtr> albums( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
+        virtual Query<IAlbum> albums( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
         virtual ShowPtr show( const std::string& name ) const = 0;
         virtual MoviePtr movie( const std::string& title ) const = 0;
         virtual ArtistPtr artist( int64_t id ) const = 0;
@@ -268,7 +269,7 @@ class IMediaLibrary
          * @param sort A sorting criteria. So far, this is ignored, and artists are sorted by lexial order
          * @param desc If true, the provided sorting criteria will be reversed.
          */
-        virtual std::vector<ArtistPtr> artists( bool includeAll,
+        virtual Query<IArtist> artists( bool includeAll,
                                 SortingCriteria sort = SortingCriteria::Default,
                                 bool desc = false ) const = 0;
         /**
@@ -276,13 +277,13 @@ class IMediaLibrary
          * @param sort A sorting criteria. So far, this is ignored, and artists are sorted by lexial order
          * @param desc If true, the provided sorting criteria will be reversed.
          */
-        virtual std::vector<GenrePtr> genres( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
+        virtual Query<IGenre> genres( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
         virtual GenrePtr genre( int64_t id ) const = 0;
         /***
          *  Playlists
          */
         virtual PlaylistPtr createPlaylist( const std::string& name ) = 0;
-        virtual std::vector<PlaylistPtr> playlists( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) = 0;
+        virtual Query<IPlaylist> playlists( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) = 0;
         virtual PlaylistPtr playlist( int64_t id ) const = 0;
         virtual bool deletePlaylist( int64_t playlistId ) = 0;
 
@@ -290,8 +291,8 @@ class IMediaLibrary
          * History
          */
         virtual bool addToStreamHistory( MediaPtr media ) = 0;
-        virtual std::vector<HistoryPtr> lastStreamsPlayed() const = 0;
-        virtual std::vector<MediaPtr> lastMediaPlayed() const = 0;
+        virtual Query<IHistoryEntry> lastStreamsPlayed() const = 0;
+        virtual Query<IMedia> lastMediaPlayed() const = 0;
         /**
          * @brief clearHistory will clear both streams history & media history.
          * @return true in case of success, false otherwise. The database will stay untouched in case
@@ -308,14 +309,14 @@ class IMediaLibrary
         virtual MediaSearchAggregate searchMedia( const std::string& pattern,
                                                   SortingCriteria sort = SortingCriteria::Default,
                                                   bool desc = false ) const = 0;
-        virtual std::vector<PlaylistPtr> searchPlaylists( const std::string& name,
+        virtual Query<IPlaylist> searchPlaylists( const std::string& name,
                                                           SortingCriteria sort = SortingCriteria::Default,
                                                           bool desc = false ) const = 0;
-        virtual std::vector<AlbumPtr> searchAlbums( const std::string& pattern,
+        virtual Query<IAlbum> searchAlbums( const std::string& pattern,
                                                     SortingCriteria sort = SortingCriteria::Default,
                                                     bool desc = false ) const = 0;
-        virtual std::vector<GenrePtr> searchGenre( const std::string& genre ) const = 0;
-        virtual std::vector<ArtistPtr> searchArtists( const std::string& name,
+        virtual Query<IGenre> searchGenre( const std::string& genre ) const = 0;
+        virtual Query<IArtist> searchArtists( const std::string& name,
                                                       SortingCriteria sort = SortingCriteria::Default,
                                                       bool desc = false ) const = 0;
         virtual SearchAggregate search( const std::string& pattern,
@@ -331,7 +332,7 @@ class IMediaLibrary
          */
         virtual void discover( const std::string& entryPoint ) = 0;
         virtual void setDiscoverNetworkEnabled( bool enable ) = 0;
-        virtual std::vector<FolderPtr> entryPoints() const = 0;
+        virtual Query<IFolder> entryPoints() const = 0;
         virtual FolderPtr folder( const std::string& mrl ) const = 0;
         virtual void removeEntryPoint( const std::string& entryPoint ) = 0;
         /**

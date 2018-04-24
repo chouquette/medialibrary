@@ -56,7 +56,7 @@ class Movie : public IMovie, public DatabaseHelpers<Movie, policy::MovieTable>
         bool setArtworkMrl(const std::string& artworkMrl);
         virtual const std::string& imdbId() const override;
         bool setImdbId(const std::string& imdbId);
-        virtual std::vector<MediaPtr> files() override;
+        virtual Query<IMedia> files() override;
 
         static void createTable( sqlite::Connection* dbConnection );
         static std::shared_ptr<Movie> create( MediaLibraryPtr ml, int64_t mediaId, const std::string& title );

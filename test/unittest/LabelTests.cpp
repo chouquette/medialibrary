@@ -43,13 +43,13 @@ TEST_F( Labels, Add )
     ASSERT_NE( l1, nullptr);
     ASSERT_NE( l2, nullptr);
 
-    auto labels = f->labels();
+    auto labels = f->labels()->all();
     ASSERT_EQ( labels.size(), 0u );
 
     f->addLabel( l1 );
     f->addLabel( l2 );
 
-    labels = f->labels();
+    labels = f->labels()->all();
 
     ASSERT_EQ( labels.size(), 2u );
     ASSERT_EQ( labels[0]->name(), "sea otter" );
@@ -65,20 +65,20 @@ TEST_F( Labels, Remove )
     m->addLabel( l1 );
     m->addLabel( l2 );
 
-    auto labels = m->labels();
+    auto labels = m->labels()->all();
     ASSERT_EQ( labels.size(), 2u );
 
     bool res = m->removeLabel( l1 );
     ASSERT_TRUE( res );
 
     // Check for existing media first
-    labels = m->labels();
+    labels = m->labels()->all();
     ASSERT_EQ( labels.size(), 1u );
     ASSERT_EQ( labels[0]->name(), "cony the cone" );
 
     // And now clean fetch another instance of the media & check again for DB replication
     auto media = ml->media( m->id() );
-    labels = media->labels();
+    labels = media->labels()->all();
     ASSERT_EQ( labels.size(), 1u );
     ASSERT_EQ( labels[0]->name(), "cony the cone" );
 
@@ -90,12 +90,12 @@ TEST_F( Labels, Remove )
     res = m->removeLabel( l2 );
     ASSERT_TRUE( res );
 
-    labels = m->labels();
+    labels = m->labels()->all();
     ASSERT_EQ( labels.size(), 0u );
 
     // Check again for DB replication
     media = ml->media( m->id() );
-    labels = media->labels();
+    labels = media->labels()->all();
     ASSERT_EQ( labels.size(), 0u );
 }
 
@@ -112,8 +112,8 @@ TEST_F( Labels, Files )
     f2->addLabel( l2 );
     f3->addLabel( l1 );
 
-    auto label1Files = l1->files();
-    auto label2Files = l2->files();
+    auto label1Files = l1->files()->all();
+    auto label2Files = l2->files()->all();
 
     ASSERT_EQ( label1Files.size(), 2u );
     ASSERT_EQ( label2Files.size(), 1u );
@@ -135,15 +135,15 @@ TEST_F( Labels, Delete )
     f->addLabel( l1 );
     f->addLabel( l2 );
 
-    auto labels = f->labels();
+    auto labels = f->labels()->all();
     ASSERT_EQ( labels.size(), 2u );
 
     ml->deleteLabel( l1 );
-    labels = f->labels();
+    labels = f->labels()->all();
     ASSERT_EQ( labels.size(), 1u );
 
     ml->deleteLabel( l2 );
-    labels = f->labels();
+    labels = f->labels()->all();
     ASSERT_EQ( labels.size(), 0u );
 
     // Nothing to delete anymore, this should fail gracefuly

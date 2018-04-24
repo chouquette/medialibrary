@@ -43,6 +43,7 @@
 #include "ShowEpisode.h"
 
 #include "database/SqliteTools.h"
+#include "database/SqliteQuery.h"
 #include "VideoTrack.h"
 #include "filesystem/IFile.h"
 #include "filesystem/IDirectory.h"
@@ -161,12 +162,12 @@ void Media::setShowEpisode( ShowEpisodePtr episode )
     m_changed = true;
 }
 
-std::vector<LabelPtr> Media::labels()
+Query<ILabel> Media::labels()
 {
-    static const std::string req = "SELECT l.* FROM " + policy::LabelTable::Name + " l "
+    static const std::string req = "FROM " + policy::LabelTable::Name + " l "
             "INNER JOIN LabelFileRelation lfr ON lfr.label_id = l.id_label "
             "WHERE lfr.media_id = ?";
-    return Label::fetchAll<ILabel>( m_ml, req, m_id );
+    return make_query<Label, ILabel>( m_ml, "l.*", req, m_id );
 }
 
 int Media::playCount() const
@@ -240,11 +241,11 @@ bool Media::addVideoTrack(const std::string& codec, unsigned int width, unsigned
     return VideoTrack::create( m_ml, codec, width, height, fps, m_id, language, description ) != nullptr;
 }
 
-std::vector<VideoTrackPtr> Media::videoTracks()
+Query<IVideoTrack> Media::videoTracks()
 {
-    static const std::string req = "SELECT * FROM " + policy::VideoTrackTable::Name +
+    static const std::string req = "FROM " + policy::VideoTrackTable::Name +
             " WHERE media_id = ?";
-    return VideoTrack::fetchAll<IVideoTrack>( m_ml, req, m_id );
+    return make_query<VideoTrack, IVideoTrack>( m_ml, "*", req, m_id );
 }
 
 bool Media::addAudioTrack( const std::string& codec, unsigned int bitrate,
@@ -254,11 +255,11 @@ bool Media::addAudioTrack( const std::string& codec, unsigned int bitrate,
     return AudioTrack::create( m_ml, codec, bitrate, sampleRate, nbChannels, language, desc, m_id ) != nullptr;
 }
 
-std::vector<AudioTrackPtr> Media::audioTracks()
+Query<IAudioTrack> Media::audioTracks()
 {
-    static const std::string req = "SELECT * FROM " + policy::AudioTrackTable::Name +
+    static const std::string req = "FROM " + policy::AudioTrackTable::Name +
             " WHERE media_id = ?";
-    return AudioTrack::fetchAll<IAudioTrack>( m_ml, req, m_id );
+    return make_query<AudioTrack, IAudioTrack>( m_ml, "*", req, m_id );
 }
 
 const std::string& Media::thumbnail()
@@ -461,10 +462,10 @@ void Media::removeFile( File& file )
     }));
 }
 
-
 std::string Media::sortRequest( SortingCriteria sort, bool desc )
 {
     std::string req = " ORDER BY ";
+
     switch ( sort )
     {
     case SortingCriteria::Duration:
@@ -498,16 +499,18 @@ std::string Media::sortRequest( SortingCriteria sort, bool desc )
     return req;
 }
 
-std::vector<MediaPtr> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
+Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
                                       SortingCriteria sort, bool desc )
 {
-    std::string req = "SELECT m.* FROM " + policy::MediaTable::Name + " m INNER JOIN "
+    std::string req = "FROM " + policy::MediaTable::Name + " m INNER JOIN "
             + policy::FileTable::Name + " f ON m.id_media = f.media_id"
             " WHERE m.type = ?"
             " AND f.type = ?"
             " AND f.is_present != 0";
+
     req += sortRequest( sort, desc );
-    return fetchAll<IMedia>( ml, req, type, File::Type::Main );
+    return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
+                                      type, IFile::Type::Main );
 }
 
 int64_t Media::id() const
@@ -711,11 +714,10 @@ bool Media::removeLabel( LabelPtr label )
     }
 }
 
-std::vector<MediaPtr> Media::search( MediaLibraryPtr ml, const std::string& title,
-                                     Media::SubType subType, SortingCriteria sort,
-                                     bool desc )
+Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
+                             Media::SubType subType, SortingCriteria sort, bool desc )
 {
-    std::string req = "SELECT m.* FROM " + policy::MediaTable::Name + " m "
+    std::string req = "FROM " + policy::MediaTable::Name + " m "
             " INNER JOIN " + policy::FileTable::Name + " f ON m.id_media = f.media_id"
             " WHERE"
             " m.id_media IN (SELECT rowid FROM " + policy::MediaTable::Name + "Fts"
@@ -724,14 +726,14 @@ std::vector<MediaPtr> Media::search( MediaLibraryPtr ml, const std::string& titl
             " AND f.type = ?"
             " AND m.subtype = ?";
     req += sortRequest( sort, desc );
-    return Media::fetchAll<IMedia>( ml, req, title, File::Type::Main, subType );
+    return make_query<Media, IMedia>( ml, "m.*", req, title, File::Type::Main, subType );
 }
 
-std::vector<MediaPtr> Media::fetchHistory( MediaLibraryPtr ml )
+Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml )
 {
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE last_played_date IS NOT NULL"
+    static const std::string req = "FROM " + policy::MediaTable::Name + " WHERE last_played_date IS NOT NULL"
             " ORDER BY last_played_date DESC LIMIT 100";
-    return fetchAll<IMedia>( ml, req );
+    return make_query<Media, IMedia>( ml, "*", req );
 }
 
 void Media::clearHistory( MediaLibraryPtr ml )

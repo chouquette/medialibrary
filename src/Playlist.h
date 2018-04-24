@@ -59,7 +59,7 @@ public:
     virtual bool setName( const std::string& name ) override;
     virtual unsigned int creationDate() const override;
     virtual const std::string& artworkMrl() const override;
-    virtual std::vector<MediaPtr> media() const override;
+    virtual Query<IMedia> media() const override;
     virtual bool append( int64_t mediaId ) override;
     virtual bool add( int64_t mediaId, unsigned int position ) override;
     virtual bool move( int64_t mediaId, unsigned int position ) override;
@@ -69,9 +69,9 @@ public:
 
     static void createTable( sqlite::Connection* dbConn );
     static void createTriggers( sqlite::Connection* dbConn );
-    static std::vector<PlaylistPtr> search( MediaLibraryPtr ml, const std::string& name,
+    static Query<IPlaylist> search( MediaLibraryPtr ml, const std::string& name,
                                             SortingCriteria sort, bool desc );
-    static std::vector<PlaylistPtr> listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc );
+    static Query<IPlaylist> listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc );
 
     /**
      * @brief deleteAllExternal Delete all external playlists, ie. all playlist

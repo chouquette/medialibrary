@@ -31,6 +31,7 @@
 #include "Label.h"
 #include "Media.h"
 #include "database/SqliteTools.h"
+#include "database/SqliteQuery.h"
 
 namespace medialibrary
 {
@@ -63,12 +64,12 @@ const std::string& Label::name() const
     return m_name;
 }
 
-std::vector<MediaPtr> Label::files()
+Query<IMedia> Label::files()
 {
-    static const std::string req = "SELECT f.* FROM " + policy::MediaTable::Name + " f "
+    static const std::string req = "FROM " + policy::MediaTable::Name + " f "
             "INNER JOIN LabelFileRelation lfr ON lfr.media_id = f.id_media "
             "WHERE lfr.label_id = ?";
-    return Media::fetchAll<IMedia>( m_ml, req, m_id );
+    return make_query<Media, IMedia>( m_ml, "f.*", req, m_id );
 }
 
 LabelPtr Label::create( MediaLibraryPtr ml, const std::string& name )

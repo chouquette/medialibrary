@@ -47,7 +47,7 @@ TEST_F( VideoTracks, FetchTracks )
     f->addVideoTrack( "VP80", 640, 480, 29.97, "l2", "d2" );
 
     // Testing fetch from initially created instance:
-    auto ts = f->videoTracks();
+    auto ts = f->videoTracks()->all();
     ASSERT_EQ( ts.size(), 2u );
     auto t2 = ts[0];
     ASSERT_EQ( t2->codec(), "H264" );
@@ -62,7 +62,7 @@ TEST_F( VideoTracks, FetchTracks )
 
     auto m = ml->media( f->id() );
     ASSERT_NE( nullptr, m );
-    ts = m->videoTracks();
+    ts = m->videoTracks()->all();
     ASSERT_EQ( ts.size(), 2u );
     t2 = ts[0];
     ASSERT_EQ( t2->codec(), "H264" );

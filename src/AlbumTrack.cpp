@@ -30,6 +30,7 @@
 #include "Media.h"
 #include "Genre.h"
 #include "database/SqliteTools.h"
+#include "database/SqliteQuery.h"
 #include "logging/Logger.h"
 
 namespace medialibrary
@@ -148,9 +149,9 @@ AlbumTrackPtr AlbumTrack::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
     return fetch( ml, req, mediaId );
 }
 
-std::vector<MediaPtr> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId, SortingCriteria sort, bool desc )
+Query<IMedia> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId, SortingCriteria sort, bool desc )
 {
-    std::string req = "SELECT m.* FROM " + policy::MediaTable::Name + " m"
+    std::string req = "FROM " + policy::MediaTable::Name + " m"
             " INNER JOIN " + policy::AlbumTrackTable::Name + " t ON m.id_media = t.media_id"
             " WHERE t.genre_id = ? AND m.is_present = 1 ORDER BY ";
     switch ( sort )
@@ -177,7 +178,7 @@ std::vector<MediaPtr> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId
 
     if ( desc == true )
         req += " DESC";
-    return Media::fetchAll<IMedia>( ml, req, genreId );
+    return make_query<Media, IMedia>( ml, "m.*", std::move( req ), genreId );
 }
 
 GenrePtr AlbumTrack::genre()

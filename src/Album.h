@@ -76,8 +76,8 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         virtual const std::string& artworkMrl() const override;
         std::shared_ptr<Thumbnail> thumbnail();
         bool setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin );
-        virtual std::vector<MediaPtr> tracks( SortingCriteria sort, bool desc ) const override;
-        virtual std::vector<MediaPtr> tracks( GenrePtr genre, SortingCriteria sort, bool desc ) const override;
+        virtual Query<IMedia> tracks( SortingCriteria sort, bool desc ) const override;
+        virtual Query<IMedia> tracks( GenrePtr genre, SortingCriteria sort, bool desc ) const override;
         ///
         /// \brief cachedTracks Returns a cached list of tracks
         /// This has no warranty of ordering, validity, or anything else.
@@ -96,7 +96,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
 
         virtual ArtistPtr albumArtist() const override;
         bool setAlbumArtist( std::shared_ptr<Artist> artist );
-        virtual std::vector<ArtistPtr> artists(bool desc) const override;
+        virtual Query<IArtist> artists(bool desc) const override;
         bool addArtist( std::shared_ptr<Artist> artist );
         bool removeArtist( Artist* artist );
 
@@ -109,11 +109,11 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         /// \param pattern A pattern representing the title, or the name of the main artist
         /// \return
         ///
-        static std::vector<AlbumPtr> search( MediaLibraryPtr ml, const std::string& pattern,
+        static Query<IAlbum> search( MediaLibraryPtr ml, const std::string& pattern,
                                              SortingCriteria sort, bool desc );
-        static std::vector<AlbumPtr> fromArtist( MediaLibraryPtr ml, int64_t artistId, SortingCriteria sort, bool desc );
-        static std::vector<AlbumPtr> fromGenre( MediaLibraryPtr ml, int64_t genreId, SortingCriteria sort, bool desc );
-        static std::vector<AlbumPtr> listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc );
+        static Query<IAlbum> fromArtist( MediaLibraryPtr ml, int64_t artistId, SortingCriteria sort, bool desc );
+        static Query<IAlbum> fromGenre( MediaLibraryPtr ml, int64_t genreId, SortingCriteria sort, bool desc );
+        static Query<IAlbum> listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc );
 
     private:
         static std::string orderTracksBy( SortingCriteria sort, bool desc );

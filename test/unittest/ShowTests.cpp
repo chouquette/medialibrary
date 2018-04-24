@@ -126,7 +126,7 @@ TEST_F( Shows, AddEpisode )
     ASSERT_EQ( e->show(), show );
     ASSERT_EQ( e->name(), "episode 1" );
 
-    auto episodes = show->episodes();
+    auto episodes = show->episodes()->all();
     ASSERT_EQ( episodes.size(), 1u );
     ASSERT_EQ( episodes[0], e );
 }
@@ -164,7 +164,7 @@ TEST_F( Shows, SetEpisodeArtwork )
     Reload();
 
     show = std::static_pointer_cast<Show>( ml->show( "show" ) );
-    auto episodes = show->episodes();
+    auto episodes = show->episodes()->all();
     ASSERT_EQ( episodes[0]->artworkMrl(), e->artworkMrl() );
 }
 
@@ -180,7 +180,7 @@ TEST_F( Shows, SetEpisodeSeasonNumber )
     Reload();
 
     show = std::static_pointer_cast<Show>( ml->show( "show" ) );
-    auto episodes = show->episodes();
+    auto episodes = show->episodes()->all();
     ASSERT_EQ( episodes[0]->seasonNumber(), e->seasonNumber() );
 }
 
@@ -196,7 +196,7 @@ TEST_F( Shows, SetEpisodeSummary )
     Reload();
 
     show = std::static_pointer_cast<Show>( ml->show( "show" ) );
-    auto episodes = show->episodes();
+    auto episodes = show->episodes()->all();
     ASSERT_EQ( episodes[0]->shortSummary(), e->shortSummary() );
 }
 
@@ -212,7 +212,7 @@ TEST_F( Shows, SetEpisodeTvdbId )
     Reload();
 
     show = std::static_pointer_cast<Show>( ml->show( "show" ) );
-    auto episodes = show->episodes();
+    auto episodes = show->episodes()->all();
     ASSERT_EQ( episodes[0]->tvdbId(), e->tvdbId() );
 }
 

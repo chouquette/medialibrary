@@ -54,6 +54,7 @@
 #include "Thumbnail.h"
 #include "database/SqliteTools.h"
 #include "database/SqliteConnection.h"
+#include "database/SqliteQuery.h"
 #include "parser/Task.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
@@ -412,12 +413,12 @@ MediaPtr MediaLibrary::addMedia( const std::string& mrl )
     }
 }
 
-std::vector<MediaPtr> MediaLibrary::audioFiles( SortingCriteria sort, bool desc ) const
+Query<IMedia> MediaLibrary::audioFiles( SortingCriteria sort, bool desc ) const
 {
     return Media::listAll( this, IMedia::Type::Audio, sort, desc );
 }
 
-std::vector<MediaPtr> MediaLibrary::videoFiles( SortingCriteria sort, bool desc ) const
+Query<IMedia> MediaLibrary::videoFiles( SortingCriteria sort, bool desc ) const
 {
     return Media::listAll( this, IMedia::Type::Video, sort, desc );
 }
@@ -497,12 +498,12 @@ std::shared_ptr<Album> MediaLibrary::createAlbum( const std::string& title, int6
     return Album::create( this, title, thumbnailId );
 }
 
-std::vector<AlbumPtr> MediaLibrary::albums( SortingCriteria sort, bool desc ) const
+Query<IAlbum> MediaLibrary::albums( SortingCriteria sort, bool desc ) const
 {
     return Album::listAll( this, sort, desc );
 }
 
-std::vector<GenrePtr> MediaLibrary::genres( SortingCriteria sort, bool desc ) const
+Query<IGenre> MediaLibrary::genres( SortingCriteria sort, bool desc ) const
 {
     return Genre::listAll( this, sort, desc );
 }
@@ -564,9 +565,8 @@ std::shared_ptr<Artist> MediaLibrary::createArtist( const std::string& name )
     }
 }
 
-std::vector<ArtistPtr> MediaLibrary::artists( bool includeAll,
-                                              SortingCriteria sort,
-                                              bool desc ) const
+Query<IArtist> MediaLibrary::artists( bool includeAll, SortingCriteria sort,
+                                      bool desc ) const
 {
     return Artist::listAll( this, includeAll, sort, desc );
 }
@@ -584,7 +584,7 @@ PlaylistPtr MediaLibrary::createPlaylist( const std::string& name )
     }
 }
 
-std::vector<PlaylistPtr> MediaLibrary::playlists( SortingCriteria sort, bool desc )
+Query<IPlaylist> MediaLibrary::playlists( SortingCriteria sort, bool desc )
 {
     return Playlist::listAll( this, sort, desc );
 }
@@ -620,12 +620,12 @@ bool MediaLibrary::addToStreamHistory( MediaPtr media )
     }
 }
 
-std::vector<HistoryPtr> MediaLibrary::lastStreamsPlayed() const
+Query<IHistoryEntry> MediaLibrary::lastStreamsPlayed() const
 {
     return History::fetch( this );
 }
 
-std::vector<MediaPtr> MediaLibrary::lastMediaPlayed() const
+Query<IMedia> MediaLibrary::lastMediaPlayed() const
 {
     return Media::fetchHistory( this );
 }
@@ -666,7 +666,7 @@ MediaSearchAggregate MediaLibrary::searchMedia( const std::string& title,
     return res;
 }
 
-std::vector<PlaylistPtr> MediaLibrary::searchPlaylists( const std::string& name,
+Query<IPlaylist> MediaLibrary::searchPlaylists( const std::string& name,
                                                         SortingCriteria sort,
                                                         bool desc ) const
 {
@@ -675,7 +675,7 @@ std::vector<PlaylistPtr> MediaLibrary::searchPlaylists( const std::string& name,
     return Playlist::search( this, name, sort, desc );
 }
 
-std::vector<AlbumPtr> MediaLibrary::searchAlbums( const std::string& pattern,
+Query<IAlbum> MediaLibrary::searchAlbums( const std::string& pattern,
                                                   SortingCriteria sort, bool desc ) const
 {
     if ( validateSearchPattern( pattern ) == false )
@@ -683,14 +683,14 @@ std::vector<AlbumPtr> MediaLibrary::searchAlbums( const std::string& pattern,
     return Album::search( this, pattern, sort, desc );
 }
 
-std::vector<GenrePtr> MediaLibrary::searchGenre( const std::string& genre ) const
+Query<IGenre> MediaLibrary::searchGenre( const std::string& genre ) const
 {
     if ( validateSearchPattern( genre ) == false )
         return {};
     return Genre::search( this, genre );
 }
 
-std::vector<ArtistPtr> MediaLibrary::searchArtists( const std::string& name,
+Query<IArtist> MediaLibrary::searchArtists( const std::string& name,
                                                     SortingCriteria sort,
                                                     bool desc ) const
 {
@@ -1211,11 +1211,11 @@ void MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
     }
 }
 
-std::vector<FolderPtr> MediaLibrary::entryPoints() const
+Query<IFolder> MediaLibrary::entryPoints() const
 {
-    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE parent_id IS NULL"
+    static const std::string req = "FROM " + policy::FolderTable::Name + " WHERE parent_id IS NULL"
             " AND is_blacklisted = 0";
-    return Folder::fetchAll<IFolder>( this, req );
+    return make_query<Folder, IFolder>( this, "*", req );
 }
 
 FolderPtr MediaLibrary::folder( const std::string& mrl ) const
