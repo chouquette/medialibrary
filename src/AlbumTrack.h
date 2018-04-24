@@ -75,7 +75,6 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
                                     int64_t duration );
         static AlbumTrackPtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
         static std::vector<MediaPtr> fromGenre( MediaLibraryPtr ml, int64_t genreId, SortingCriteria sort, bool desc );
-        static std::vector<MediaPtr> search( sqlite::Connection* dbConn, const std::string& title );
 
     private:
         MediaLibraryPtr m_ml;
