@@ -654,26 +654,15 @@ MediaSearchAggregate MediaLibrary::searchMedia( const std::string& title,
 {
     if ( validateSearchPattern( title ) == false )
         return {};
-    auto tmp = Media::search( this, title, sort, desc );
     MediaSearchAggregate res;
-    for ( auto& m : tmp )
-    {
-        switch ( m->subType() )
-        {
-        case IMedia::SubType::AlbumTrack:
-            res.tracks.emplace_back( std::move( m ) );
-            break;
-        case IMedia::SubType::Movie:
-            res.movies.emplace_back( std::move( m ) );
-            break;
-        case IMedia::SubType::ShowEpisode:
-            res.episodes.emplace_back( std::move( m ) );
-            break;
-        default:
-            res.others.emplace_back( std::move( m ) );
-            break;
-        }
-    }
+    res.episodes = Media::search( this, title, IMedia::SubType::ShowEpisode,
+                                sort, desc );
+    res.movies = Media::search( this, title, IMedia::SubType::Movie,
+                                sort, desc );
+    res.others = Media::search( this, title, IMedia::SubType::Unknown,
+                                sort, desc );
+    res.tracks = Media::search( this, title, IMedia::SubType::AlbumTrack,
+                                sort, desc );
     return res;
 }
 
