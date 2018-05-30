@@ -77,7 +77,6 @@ public:
     virtual void restart();
 
 protected:
-    uint8_t nbNativeThreads() const;
     /// Can be overriden to run service dependent initializations
     virtual bool initialize() override;
 

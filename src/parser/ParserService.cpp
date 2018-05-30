@@ -132,14 +132,6 @@ void ParserService::restart()
 {
 }
 
-uint8_t ParserService::nbNativeThreads() const
-{
-    auto nbProcs = static_cast<uint8_t>( compat::Thread::hardware_concurrency() );
-    if ( nbProcs == 0 )
-        return 1;
-    return nbProcs;
-}
-
 bool ParserService::initialize()
 {
     return true;
