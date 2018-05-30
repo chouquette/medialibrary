@@ -36,13 +36,13 @@ public:
     MetadataParser();
 
 protected:
-    bool initialize();
+    bool cacheUnknownArtist();
     virtual bool initialize( MediaLibrary* ml ) override;
     virtual parser::Task::Status run( parser::Task& task ) override;
     virtual const char* name() const override;
     virtual uint8_t nbThreads() const override;
-    virtual void flush() override;
-    virtual void restart() override;
+    virtual void onFlushing() override;
+    virtual void onRestarted() override;
     bool isCompleted( const parser::Task& task ) const override;
 
     bool addPlaylistMedias( parser::Task& task, int nbSubitem ) const;

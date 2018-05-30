@@ -54,7 +54,7 @@ MetadataParser::MetadataParser()
 {
 }
 
-bool MetadataParser::initialize()
+bool MetadataParser::cacheUnknownArtist()
 {
     m_unknownArtist = Artist::fetch( m_ml, UnknownArtistID );
     if ( m_unknownArtist == nullptr )
@@ -66,7 +66,7 @@ bool MetadataParser::initialize( MediaLibrary* ml)
 {
     m_ml = ml;
     m_notifier = ml->getNotifier();
-    return initialize();
+    return cacheUnknownArtist();
 }
 
 int MetadataParser::toInt( VLC::Media& vlcMedia, libvlc_meta_t meta, const char* name )
@@ -832,18 +832,17 @@ uint8_t MetadataParser::nbThreads() const
     return 1;
 }
 
-void MetadataParser::flush()
+void MetadataParser::onFlushing()
 {
-    ParserService::flush();
     m_variousArtists = nullptr;
     m_previousAlbum = nullptr;
     m_previousFolderId = 0;
 }
 
-void MetadataParser::restart()
+void MetadataParser::onRestarted()
 {
     // Reset locally cached entities
-    initialize();
+    cacheUnknownArtist();
 }
 
 bool MetadataParser::isCompleted( const parser::Task& task ) const

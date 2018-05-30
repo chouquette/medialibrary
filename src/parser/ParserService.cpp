@@ -119,10 +119,12 @@ void ParserService::flush()
     });
     while ( m_tasks.empty() == false )
         m_tasks.pop();
+    onFlushing();
 }
 
 void ParserService::restart()
 {
+    onRestarted();
 }
 
 void ParserService::mainloop()

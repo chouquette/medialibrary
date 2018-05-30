@@ -113,4 +113,12 @@ bool VLCMetadataService::isCompleted( const parser::Task& task ) const
     return task.vlcMedia.isValid() == true;
 }
 
+void VLCMetadataService::onFlushing()
+{
+}
+
+void VLCMetadataService::onRestarted()
+{
+}
+
 }

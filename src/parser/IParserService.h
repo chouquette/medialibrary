@@ -69,6 +69,25 @@ public:
      * If false is returned, the service will be released and won't be used.
      */
     virtual bool initialize( MediaLibrary* ml ) = 0;
+
+    /**
+     * @brief onFlushing will be invoked prior to restarting/flushing the service
+     *
+     * A service must release any database entity it might hold.
+     * The service will be paused or unstarted when this method gets called.
+     */
+    virtual void onFlushing() = 0;
+
+    /**
+     * @brief onRestarted will be invoked prior to a service restart.
+     *
+     * A restart will always occur after a flush. Once this function gets called,
+     * the service is free to cache some database entities, or interact with the
+     * medialibrary again.
+     * The thread(s) running the service itself won't have been restarted when this
+     * function gets called.
+     */
+    virtual void onRestarted() = 0;
 };
 
 }
