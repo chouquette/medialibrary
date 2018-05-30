@@ -99,23 +99,6 @@ noinst_HEADERS = \
 	include/filesystem/IDirectory.h \
 	include/filesystem/IFile.h \
 	include/Fixup.h \
-	include/medialibrary/IAlbum.h \
-	include/medialibrary/IAlbumTrack.h \
-	include/medialibrary/IArtist.h \
-	include/medialibrary/IAudioTrack.h \
-	include/medialibrary/IFile.h \
-	include/medialibrary/IGenre.h \
-	include/medialibrary/IHistoryEntry.h \
-	include/medialibrary/ILabel.h \
-	include/medialibrary/ILogger.h \
-	include/medialibrary/IMedia.h \
-	include/medialibrary/IMediaLibrary.h \
-	include/medialibrary/IMovie.h \
-	include/medialibrary/IPlaylist.h \
-	include/medialibrary/IShowEpisode.h \
-	include/medialibrary/IShow.h \
-	include/medialibrary/IVideoTrack.h \
-	include/medialibrary/Types.h \
 	include/Types.h \
 	src/Album.h \
 	src/AlbumTrack.h \
