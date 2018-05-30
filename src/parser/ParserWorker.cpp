@@ -98,12 +98,12 @@ void ParserWorker::parse( std::shared_ptr<parser::Task> t )
     }
 }
 
-void ParserWorker::initialize( MediaLibrary* ml, IParserCb* parserCb, std::unique_ptr<IParserService> service )
+bool ParserWorker::initialize( MediaLibrary* ml, IParserCb* parserCb, std::unique_ptr<IParserService> service )
 {
     m_service = std::move( service );
     m_parserCb = parserCb;
     // Run the service specific initializer
-    m_service->initialize( ml );
+    return m_service->initialize( ml );
 }
 
 bool ParserWorker::isIdle() const
