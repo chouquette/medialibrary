@@ -83,7 +83,7 @@ libmedialibrary_la_SOURCES = \
 	src/metadata_services/vlc/VLCMetadataService.cpp \
 	src/metadata_services/vlc/VLCThumbnailer.cpp \
 	src/parser/Parser.cpp \
-	src/parser/ParserService.cpp \
+	src/parser/ParserWorker.cpp \
 	src/parser/Task.cpp \
 	src/utils/Directory.cpp \
 	src/utils/Filename.cpp \
@@ -150,7 +150,7 @@ noinst_HEADERS = \
 	src/Movie.h \
 	src/parser/IParserService.h \
 	src/parser/Parser.h \
-	src/parser/ParserService.h \
+	src/parser/ParserWorker.h \
 	src/parser/Task.h \
 	src/Playlist.h \
 	src/Settings.h \

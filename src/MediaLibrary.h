@@ -35,7 +35,7 @@ namespace medialibrary
 class ModificationNotifier;
 class DiscovererWorker;
 class Parser;
-class ParserService;
+class ParserWorker;
 class VLCThumbnailer;
 
 class Album;

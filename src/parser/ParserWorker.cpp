@@ -24,14 +24,14 @@
 # include "config.h"
 #endif
 
-#include "ParserService.h"
+#include "ParserWorker.h"
 #include "Parser.h"
 #include "Media.h"
 
 namespace medialibrary
 {
 
-ParserService::ParserService()
+ParserWorker::ParserWorker()
     : m_parserCb( nullptr )
     , m_stopParser( false )
     , m_paused( false )
@@ -39,28 +39,28 @@ ParserService::ParserService()
 {
 }
 
-void ParserService::start()
+void ParserWorker::start()
 {
     // Ensure we don't start multiple times.
     assert( m_threads.size() == 0 );
     for ( auto i = 0u; i < m_service->nbThreads(); ++i )
-        m_threads.emplace_back( &ParserService::mainloop, this );
+        m_threads.emplace_back( &ParserWorker::mainloop, this );
 }
 
-void ParserService::pause()
+void ParserWorker::pause()
 {
     std::lock_guard<compat::Mutex> lock( m_lock );
     m_paused = true;
 }
 
-void ParserService::resume()
+void ParserWorker::resume()
 {
     std::lock_guard<compat::Mutex> lock( m_lock );
     m_paused = false;
     m_cond.notify_all();
 }
 
-void ParserService::signalStop()
+void ParserWorker::signalStop()
 {
     for ( auto& t : m_threads )
     {
@@ -73,7 +73,7 @@ void ParserService::signalStop()
     }
 }
 
-void ParserService::stop()
+void ParserWorker::stop()
 {
     for ( auto& t : m_threads )
     {
@@ -82,7 +82,7 @@ void ParserService::stop()
     }
 }
 
-void ParserService::parse( std::shared_ptr<parser::Task> t )
+void ParserWorker::parse( std::shared_ptr<parser::Task> t )
 {
     if ( m_threads.size() == 0 )
     {
@@ -98,7 +98,7 @@ void ParserService::parse( std::shared_ptr<parser::Task> t )
     }
 }
 
-void ParserService::initialize( MediaLibrary* ml, IParserCb* parserCb, std::unique_ptr<IParserService> service )
+void ParserWorker::initialize( MediaLibrary* ml, IParserCb* parserCb, std::unique_ptr<IParserService> service )
 {
     m_service = std::move( service );
     m_parserCb = parserCb;
@@ -106,12 +106,12 @@ void ParserService::initialize( MediaLibrary* ml, IParserCb* parserCb, std::uniq
     m_service->initialize( ml );
 }
 
-bool ParserService::isIdle() const
+bool ParserWorker::isIdle() const
 {
     return m_idle;
 }
 
-void ParserService::flush()
+void ParserWorker::flush()
 {
     std::unique_lock<compat::Mutex> lock( m_lock );
     assert( m_paused == true || m_threads.empty() == true );
@@ -123,12 +123,12 @@ void ParserService::flush()
     m_service->onFlushing();
 }
 
-void ParserService::restart()
+void ParserWorker::restart()
 {
     m_service->onRestarted();
 }
 
-void ParserService::mainloop()
+void ParserWorker::mainloop()
 {
     // It would be unsafe to call name() at the end of this function, since
     // we might stop the thread during ParserService destruction. This implies
@@ -196,7 +196,7 @@ void ParserService::mainloop()
     setIdle( true );
 }
 
-void ParserService::setIdle(bool isIdle)
+void ParserWorker::setIdle(bool isIdle)
 {
     // Calling the idleChanged callback will trigger a call to isIdle, so set the value before
     // invoking it, otherwise we have an incoherent state.

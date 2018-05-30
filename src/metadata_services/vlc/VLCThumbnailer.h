@@ -27,7 +27,7 @@
 #include <vlcpp/vlc.hpp>
 
 #include "imagecompressors/IImageCompressor.h"
-#include "parser/ParserService.h"
+#include "parser/ParserWorker.h"
 
 namespace medialibrary
 {

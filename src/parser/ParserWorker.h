@@ -40,10 +40,10 @@ class IParserCb;
 class ModificationNotifier;
 class MediaLibrary;
 
-class ParserService
+class ParserWorker
 {
 public:
-    ParserService();
+    ParserWorker();
 
     void pause();
     void resume();

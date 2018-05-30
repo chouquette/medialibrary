@@ -32,7 +32,7 @@
 #include "medialibrary/IMediaLibrary.h"
 #include "Media.h"
 #include "File.h"
-#include "ParserService.h"
+#include "ParserWorker.h"
 
 namespace medialibrary
 {
@@ -53,7 +53,7 @@ Parser::~Parser()
 
 void Parser::addService( ServicePtr service )
 {
-    auto worker = std::make_unique<ParserService>();
+    auto worker = std::make_unique<ParserWorker>();
     worker->initialize( m_ml, this, std::move( service ) );
     m_services.push_back( std::move( worker ) );
 }
