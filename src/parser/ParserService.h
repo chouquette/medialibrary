@@ -40,11 +40,10 @@ class IParserCb;
 class ModificationNotifier;
 class MediaLibrary;
 
-class ParserService : public IParserService
+class ParserService
 {
 public:
     ParserService();
-    virtual ~ParserService() = default;
 
     void pause();
     void resume();
@@ -61,21 +60,20 @@ public:
     ///
     void stop();
     void parse( std::shared_ptr<parser::Task> t );
-    // temporary name to avoid shadowing IParserService::initialize
-    void initialize2( MediaLibrary* ml, IParserCb* parserCb );
+    void initialize( MediaLibrary* ml, IParserCb* parserCb, std::unique_ptr<IParserService> service );
     bool isIdle() const;
     ///
     /// \brief flush flush every currently scheduled tasks
     ///
     /// The service needs to be previously paused or unstarted
     ///
-    virtual void flush();
+    void flush();
 
     ///
     /// \brief restart Prepare the parser services for a restart.
     /// This assumes a flush was triggered before
     ///
-    virtual void restart();
+    void restart();
 
 private:
     // Thread(s) entry point
@@ -84,6 +82,7 @@ private:
     void setIdle( bool isIdle );
 
 private:
+    std::unique_ptr<IParserService> m_service;
     IParserCb* m_parserCb;
     bool m_stopParser;
     bool m_paused;

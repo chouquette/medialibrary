@@ -53,8 +53,9 @@ Parser::~Parser()
 
 void Parser::addService( ServicePtr service )
 {
-    service->initialize2( m_ml, this );
-    m_services.push_back( std::move( service ) );
+    auto worker = std::make_unique<ParserService>();
+    worker->initialize( m_ml, this, std::move( service ) );
+    m_services.push_back( std::move( worker ) );
 }
 
 void Parser::parse( std::shared_ptr<parser::Task> task )

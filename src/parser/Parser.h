@@ -31,6 +31,7 @@
 namespace medialibrary
 {
 
+class IParserService;
 class ParserService;
 
 // Use an interface to expose only the "done" method
@@ -45,7 +46,7 @@ public:
 class Parser : IParserCb
 {
 public:
-    using ServicePtr = std::unique_ptr<ParserService>;
+    using ServicePtr = std::unique_ptr<IParserService>;
 
     Parser( MediaLibrary* ml );
     virtual ~Parser();
@@ -72,7 +73,7 @@ private:
     virtual void onIdleChanged( bool idle ) override;
 
 private:
-    typedef std::vector<ServicePtr> ServiceList;
+    typedef std::vector<std::unique_ptr<ParserService>> ServiceList;
 
 private:
     ServiceList m_services;

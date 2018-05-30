@@ -43,7 +43,7 @@ void ParserService::start()
 {
     // Ensure we don't start multiple times.
     assert( m_threads.size() == 0 );
-    for ( auto i = 0u; i < nbThreads(); ++i )
+    for ( auto i = 0u; i < m_service->nbThreads(); ++i )
         m_threads.emplace_back( &ParserService::mainloop, this );
 }
 
@@ -98,11 +98,12 @@ void ParserService::parse( std::shared_ptr<parser::Task> t )
     }
 }
 
-void ParserService::initialize2( MediaLibrary* ml, IParserCb* parserCb )
+void ParserService::initialize( MediaLibrary* ml, IParserCb* parserCb, std::unique_ptr<IParserService> service )
 {
+    m_service = std::move( service );
     m_parserCb = parserCb;
     // Run the service specific initializer
-    initialize( ml );
+    m_service->initialize( ml );
 }
 
 bool ParserService::isIdle() const
@@ -119,12 +120,12 @@ void ParserService::flush()
     });
     while ( m_tasks.empty() == false )
         m_tasks.pop();
-    onFlushing();
+    m_service->onFlushing();
 }
 
 void ParserService::restart()
 {
-    onRestarted();
+    m_service->onRestarted();
 }
 
 void ParserService::mainloop()
@@ -132,7 +133,7 @@ void ParserService::mainloop()
     // It would be unsafe to call name() at the end of this function, since
     // we might stop the thread during ParserService destruction. This implies
     // that the underlying service has been deleted already.
-    std::string serviceName = name();
+    std::string serviceName = m_service->name();
     LOG_INFO("Entering ParserService [", serviceName, "] thread");
     setIdle( false );
 
@@ -161,7 +162,7 @@ void ParserService::mainloop()
             task = std::move( m_tasks.front() );
             m_tasks.pop();
         }
-        if ( isCompleted( *task ) == true )
+        if ( m_service->isCompleted( *task ) == true )
         {
             LOG_INFO( "Skipping completed task [", serviceName, "] on ", task->mrl );
             m_parserCb->done( std::move( task ), parser::Task::Status::Success );
@@ -178,7 +179,7 @@ void ParserService::mainloop()
             else
             {
                 task->startParserStep();
-                status = run( *task );
+                status = m_service->run( *task );
                 auto duration = std::chrono::steady_clock::now() - chrono;
                 LOG_INFO( "Done executing ", serviceName, " task on ", task->mrl, " in ",
                           std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );

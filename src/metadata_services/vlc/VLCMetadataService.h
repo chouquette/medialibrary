@@ -27,7 +27,7 @@
 #include <vlcpp/vlc.hpp>
 #include <mutex>
 
-#include "parser/ParserService.h"
+#include "parser/IParserService.h"
 #include "parser/Parser.h"
 #include "AlbumTrack.h"
 
@@ -36,7 +36,7 @@ namespace medialibrary
 
 class IParserCb;
 
-class VLCMetadataService : public ParserService
+class VLCMetadataService : public IParserService
 {
     public:
         explicit VLCMetadataService();
