@@ -336,10 +336,14 @@ bool MetadataParser::parseVideoFile( parser::Task& task ) const
         return true;
 
     const auto& showName = task.vlcMedia.meta( libvlc_meta_ShowName );
+    const auto& artworkMrl = task.vlcMedia.meta( libvlc_meta_ArtworkURL );
 
-    return sqlite::Tools::withRetries( 3, [this, &showName, &title, &task]() {
+    return sqlite::Tools::withRetries( 3, [this, &showName, &title, &task, &artworkMrl]() {
         auto t = m_ml->getConn()->newTransaction();
         task.media->setTitleBuffered( title );
+
+        if ( artworkMrl.empty() == false )
+            task.media->setThumbnail( artworkMrl, Thumbnail::Origin::Media );
 
         if ( showName.length() != 0 )
         {
