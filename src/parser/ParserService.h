@@ -27,6 +27,7 @@
 #include <queue>
 
 #include "Task.h"
+#include "IParserService.h"
 #include "medialibrary/Types.h"
 #include "compat/Mutex.h"
 #include "compat/Thread.h"
@@ -39,7 +40,7 @@ class IParserCb;
 class ModificationNotifier;
 class MediaLibrary;
 
-class ParserService
+class ParserService : public IParserService
 {
 public:
     ParserService();
@@ -78,11 +79,7 @@ public:
 protected:
     uint8_t nbNativeThreads() const;
     /// Can be overriden to run service dependent initializations
-    virtual bool initialize();
-    virtual parser::Task::Status run( parser::Task& task ) = 0;
-    virtual const char* name() const = 0;
-    virtual uint8_t nbThreads() const = 0;
-    virtual bool isCompleted( const parser::Task& task ) const = 0;
+    virtual bool initialize() override;
 
 private:
     // Thread(s) entry point

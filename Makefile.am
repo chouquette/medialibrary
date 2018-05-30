@@ -165,6 +165,7 @@ noinst_HEADERS = \
 	src/metadata_services/vlc/VLCThumbnailer.h \
 	src/metadata_services/vlc/imagecompressors/IImageCompressor.h \
 	src/Movie.h \
+	src/parser/IParserService.h \
 	src/parser/Parser.h \
 	src/parser/ParserService.h \
 	src/parser/Task.h \
