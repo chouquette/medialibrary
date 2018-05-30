@@ -66,11 +66,9 @@ void ParserService::signalStop()
     {
         if ( t.joinable() )
         {
-            {
-                std::lock_guard<compat::Mutex> lock( m_lock );
-                m_cond.notify_all();
-                m_stopParser = true;
-            }
+            std::lock_guard<compat::Mutex> lock( m_lock );
+            m_cond.notify_all();
+            m_stopParser = true;
         }
     }
 }
