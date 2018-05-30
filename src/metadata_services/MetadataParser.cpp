@@ -49,7 +49,8 @@ namespace medialibrary
 {
 
 MetadataParser::MetadataParser()
-    : m_previousFolderId( 0 )
+    : m_ml( nullptr )
+    , m_previousFolderId( 0 )
 {
 }
 
@@ -59,6 +60,13 @@ bool MetadataParser::initialize()
     if ( m_unknownArtist == nullptr )
         LOG_ERROR( "Failed to cache unknown artist" );
     return m_unknownArtist != nullptr;
+}
+
+bool MetadataParser::initialize( MediaLibrary* ml)
+{
+    m_ml = ml;
+    m_notifier = ml->getNotifier();
+    return initialize();
 }
 
 int MetadataParser::toInt( VLC::Media& vlcMedia, libvlc_meta_t meta, const char* name )

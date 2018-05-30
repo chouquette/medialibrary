@@ -36,8 +36,15 @@ namespace medialibrary
 {
 
 VLCMetadataService::VLCMetadataService()
-    : m_instance( VLCInstance::get() )
+    : m_ml( nullptr )
+    , m_instance( VLCInstance::get() )
 {
+}
+
+bool VLCMetadataService::initialize( MediaLibrary* ml )
+{
+    m_ml = ml;
+    return true;
 }
 
 parser::Task::Status VLCMetadataService::run( parser::Task& task )

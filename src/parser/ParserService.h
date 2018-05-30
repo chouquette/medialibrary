@@ -61,7 +61,8 @@ public:
     ///
     void stop();
     void parse( std::shared_ptr<parser::Task> t );
-    void initialize( MediaLibrary* mediaLibrary, IParserCb* parserCb );
+    // temporary name to avoid shadowing IParserService::initialize
+    void initialize2( MediaLibrary* ml, IParserCb* parserCb );
     bool isIdle() const;
     ///
     /// \brief flush flush every currently scheduled tasks
@@ -76,20 +77,11 @@ public:
     ///
     virtual void restart();
 
-protected:
-    /// Can be overriden to run service dependent initializations
-    virtual bool initialize() override;
-
 private:
     // Thread(s) entry point
     void start();
     void mainloop();
     void setIdle( bool isIdle );
-
-protected:
-    MediaLibrary* m_ml;
-    IMediaLibraryCb* m_cb;
-    std::shared_ptr<ModificationNotifier> m_notifier;
 
 private:
     IParserCb* m_parserCb;

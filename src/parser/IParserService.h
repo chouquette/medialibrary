@@ -63,10 +63,12 @@ public:
      *
      * By the time this function is called, the database is fully initialized and
      * can be used.
+     * A pointer the the medialibrary is provided to allow the service to
+     * create/fetch entities.
      *
      * If false is returned, the service will be released and won't be used.
      */
-    virtual bool initialize() = 0;
+    virtual bool initialize( MediaLibrary* ml ) = 0;
 };
 
 }

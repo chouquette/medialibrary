@@ -36,7 +36,8 @@ public:
     MetadataParser();
 
 protected:
-    virtual bool initialize() override;
+    bool initialize();
+    virtual bool initialize( MediaLibrary* ml ) override;
     virtual parser::Task::Status run( parser::Task& task ) override;
     virtual const char* name() const override;
     virtual uint8_t nbThreads() const override;
@@ -61,6 +62,9 @@ private:
     static int toInt( VLC::Media& vlcMedia, libvlc_meta_t meta, const char* name );
 
 private:
+    MediaLibrary* m_ml;
+    std::shared_ptr<ModificationNotifier> m_notifier;
+
     std::shared_ptr<Artist> m_unknownArtist;
     std::shared_ptr<Artist> m_variousArtists;
     std::shared_ptr<Album> m_previousAlbum;

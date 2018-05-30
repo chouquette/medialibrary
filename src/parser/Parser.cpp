@@ -53,7 +53,7 @@ Parser::~Parser()
 
 void Parser::addService( ServicePtr service )
 {
-    service->initialize( m_ml, this );
+    service->initialize2( m_ml, this );
     m_services.push_back( std::move( service ) );
 }
 

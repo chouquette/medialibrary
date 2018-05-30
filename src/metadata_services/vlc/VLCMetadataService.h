@@ -34,18 +34,23 @@
 namespace medialibrary
 {
 
+class IParserCb;
+
 class VLCMetadataService : public ParserService
 {
     public:
         explicit VLCMetadataService();
 
 private:
+        virtual bool initialize( MediaLibrary* ml ) override;
         virtual parser::Task::Status run( parser::Task& task ) override;
         virtual const char* name() const override;
         virtual uint8_t nbThreads() const override;
         virtual bool isCompleted( const parser::Task& task ) const override;
 
 private:
+        MediaLibrary* m_ml;
+
         VLC::Instance m_instance;
         compat::Mutex m_mutex;
         compat::ConditionVariable m_cond;

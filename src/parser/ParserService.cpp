@@ -32,9 +32,7 @@ namespace medialibrary
 {
 
 ParserService::ParserService()
-    : m_ml( nullptr )
-    , m_cb( nullptr )
-    , m_parserCb( nullptr )
+    : m_parserCb( nullptr )
     , m_stopParser( false )
     , m_paused( false )
     , m_idle( true )
@@ -102,14 +100,11 @@ void ParserService::parse( std::shared_ptr<parser::Task> t )
     }
 }
 
-void ParserService::initialize( MediaLibrary* ml, IParserCb* parserCb )
+void ParserService::initialize2( MediaLibrary* ml, IParserCb* parserCb )
 {
-    m_ml = ml;
-    m_cb = ml->getCb();
-    m_notifier = ml->getNotifier();
     m_parserCb = parserCb;
     // Run the service specific initializer
-    initialize();
+    initialize( ml );
 }
 
 bool ParserService::isIdle() const
@@ -130,11 +125,6 @@ void ParserService::flush()
 
 void ParserService::restart()
 {
-}
-
-bool ParserService::initialize()
-{
-    return true;
 }
 
 void ParserService::mainloop()
