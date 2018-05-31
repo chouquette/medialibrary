@@ -49,7 +49,7 @@ bool VLCMetadataService::initialize( MediaLibrary* ml )
 
 parser::Task::Status VLCMetadataService::run( parser::Task& task )
 {
-    auto mrl = task.mrl;
+    auto mrl = task.item().mrl();
     LOG_INFO( "Parsing ", mrl );
 
     // Having a valid media means we're re-executing this parser after the thumbnailer,

@@ -109,14 +109,15 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
     {
         assert( task.media == nullptr );
         // Try to create Media & File
+        auto mrl = task.item().mrl();
         try
         {
             auto t = m_ml->getConn()->newTransaction();
-            LOG_INFO( "Adding ", task.mrl );
-            task.media = Media::create( m_ml, IMedia::Type::Unknown, utils::file::fileName( task.mrl ) );
+            LOG_INFO( "Adding ", mrl );
+            task.media = Media::create( m_ml, IMedia::Type::Unknown, utils::file::fileName( mrl ) );
             if ( task.media == nullptr )
             {
-                LOG_ERROR( "Failed to add media ", task.mrl, " to the media library" );
+                LOG_ERROR( "Failed to add media ", mrl, " to the media library" );
                 return parser::Task::Status::Fatal;
             }
             // For now, assume all media are made of a single file
@@ -125,7 +126,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
                                              File::Type::Main );
             if ( task.file == nullptr )
             {
-                LOG_ERROR( "Failed to add file ", task.mrl, " to media #", task.media->id() );
+                LOG_ERROR( "Failed to add file ", mrl, " to media #", task.media->id() );
                 return parser::Task::Status::Fatal;
             }
             task.updateFileId();
@@ -137,10 +138,10 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
             LOG_INFO( "Creation of Media & File failed because ", ex.what(),
                       ". Assuming this task is a duplicate" );
             // Try to retrieve file & Media from database
-            auto fileInDB = File::fromMrl( m_ml, task.mrl );
+            auto fileInDB = File::fromMrl( m_ml, mrl );
             if ( fileInDB == nullptr ) // The file is no longer present in DB, gracefully delete task
             {
-                LOG_ERROR( "File ", task.mrl, " no longer present in DB, aborting");
+                LOG_ERROR( "File ", mrl, " no longer present in DB, aborting");
                 return parser::Task::Status::Fatal;
             }
             task.file = fileInDB;
@@ -229,20 +230,21 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
 bool MetadataParser::addPlaylistMedias( parser::Task& task, int nbSubitem ) const
 {
     auto t = m_ml->getConn()->newTransaction();
-    LOG_INFO( "Try to import ", task.mrl, " as a playlist" );
+    const auto& mrl = task.item().mrl();
+    LOG_INFO( "Try to import ", mrl, " as a playlist" );
     auto playlistName = task.item().meta( parser::Task::Item::Metadata::Title );
     if ( playlistName.empty() == true )
-        playlistName = utils::url::decode( utils::file::fileName( task.mrl ) );
+        playlistName = utils::url::decode( utils::file::fileName( mrl ) );
     auto playlistPtr = Playlist::create( m_ml, playlistName );
     if ( playlistPtr == nullptr )
     {
-        LOG_ERROR( "Failed to create playlist ", task.mrl, " to the media library" );
+        LOG_ERROR( "Failed to create playlist ", mrl, " to the media library" );
         return false;
     }
     task.file = playlistPtr->addFile( *task.fileFs, task.parentFolder->id(), task.parentFolderFs->device()->isRemovable() );
     if ( task.file == nullptr )
     {
-        LOG_ERROR( "Failed to add playlist file ", task.mrl );
+        LOG_ERROR( "Failed to add playlist file ", mrl );
         return false;
     }
     t->commit();
@@ -259,11 +261,11 @@ void MetadataParser::addPlaylistElement( parser::Task& task, const std::shared_p
     if ( subitem == nullptr )
         return;
     const auto& mrl = subitem->mrl();
-    LOG_INFO( "Try to add ", mrl, " to the playlist ", task.mrl );
+    LOG_INFO( "Try to add ", mrl, " to the playlist ", mrl );
     auto media = m_ml->media( mrl );
     if ( media != nullptr )
     {
-        LOG_INFO( "Media for ", mrl, " already exists, adding it to the playlist ", task.mrl );
+        LOG_INFO( "Media for ", mrl, " already exists, adding it to the playlist ", mrl );
         playlistPtr->add( media->id(), index );
         return;
     }
@@ -277,13 +279,13 @@ void MetadataParser::addPlaylistElement( parser::Task& task, const std::shared_p
                 subitem->meta( libvlc_meta_Title ) ) );
         if ( externalMedia == nullptr )
         {
-            LOG_ERROR( "Failed to create external media for ", mrl, " in the playlist ", task.mrl );
+            LOG_ERROR( "Failed to create external media for ", subitem->mrl(), " in the playlist ", mrl );
             return;
         }
         // Assuming that external mrl present in playlist file is a main media resource
         auto externalFile = externalMedia->addExternalMrl( mrl, IFile::Type::Main );
         if ( externalFile == nullptr )
-            LOG_ERROR( "Failed to create external file for ", mrl, " in the playlist ", task.mrl );
+            LOG_ERROR( "Failed to create external file for ", subitem->mrl(), " in the playlist ", mrl );
         playlistPtr->add( externalMedia->id(), index );
         t2->commit();
         return;
@@ -298,7 +300,7 @@ void MetadataParser::addPlaylistElement( parser::Task& task, const std::shared_p
         LOG_ERROR( ex.what() );
         return;
     }
-    LOG_INFO( "Importing ", isDirectory ? "folder " : "file ", mrl, " in the playlist ", task.mrl );
+    LOG_INFO( "Importing ", isDirectory ? "folder " : "file ", subitem->mrl(), " in the playlist ", mrl );
     auto directoryMrl = utils::file::directory( mrl );
     auto parentFolder = Folder::fromMrl( m_ml, directoryMrl );
     bool parentKnown = parentFolder != nullptr;

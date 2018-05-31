@@ -92,6 +92,8 @@ public:
     class Item
     {
     public:
+        Item() = default;
+        Item( std::string mrl );
         enum class Metadata : uint8_t
         {
             Title,
@@ -110,7 +112,10 @@ public:
         std::string meta( Metadata type ) const;
         void setMeta( Metadata type, std::string value );
 
+        const std::string& mrl() const;
+
     private:
+        std::string m_mrl;
         std::unordered_map<Metadata, std::string> m_metadata;
     };
 
@@ -159,7 +164,6 @@ public:
     std::shared_ptr<fs::IDirectory> parentFolderFs;
     std::shared_ptr<Playlist>       parentPlaylist;
     unsigned int                    parentPlaylistIndex;
-    std::string                     mrl;
     VLC::Media                      vlcMedia;
     unsigned int                    currentService;
 

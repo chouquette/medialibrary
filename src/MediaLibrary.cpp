@@ -1006,8 +1006,8 @@ void MediaLibrary::migrateModel10to11()
     auto t = getConn()->newTransaction();
     for ( const auto& t : tasks )
     {
-        auto newMrl = utils::url::encode( utils::url::decode( t->mrl ) );
-        LOG_INFO( "Converting task mrl: ", t->mrl, " to ", newMrl );
+        auto newMrl = utils::url::encode( utils::url::decode( t->item().mrl() ) );
+        LOG_INFO( "Converting task mrl: ", t->item().mrl(), " to ", newMrl );
         t->setMrl( std::move( newMrl ) );
     }
     for ( const auto &f : folders )

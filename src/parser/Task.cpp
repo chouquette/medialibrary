@@ -50,6 +50,7 @@ Task::Task( MediaLibraryPtr ml, sqlite::Row& row )
     : currentService( 0 )
     , m_ml( ml )
 {
+    std::string mrl;
     row >> m_id
         >> m_step
         >> m_retryCount
@@ -58,6 +59,7 @@ Task::Task( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_parentFolderId
         >> m_parentPlaylistId
         >> parentPlaylistIndex;
+    m_item = Item{ std::move( mrl ) };
 }
 
 Task::Task( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
@@ -70,11 +72,11 @@ Task::Task( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
     , parentFolderFs( std::move( parentFolderFs ) )
     , parentPlaylist( std::move( parentPlaylist ) )
     , parentPlaylistIndex( parentPlaylistIndex )
-    , mrl( this->fileFs->mrl() )
     , currentService( 0 )
     , m_ml( ml )
     , m_step( ParserStep::None )
     , m_fileId( 0 )
+    , m_item( this->fileFs->mrl() )
 {
 }
 
@@ -135,6 +137,11 @@ Task::Item& Task::item()
     return m_item;
 }
 
+Task::Item::Item( std::string mrl )
+    : m_mrl( std::move( mrl ) )
+{
+}
+
 std::string Task::Item::meta( Task::Item::Metadata type ) const
 {
     auto it = m_metadata.find( type );
@@ -148,12 +155,17 @@ void Task::Item::setMeta( Task::Item::Metadata type, std::string value )
     m_metadata[type] = std::move( value );
 }
 
+const std::string& Task::Item::mrl() const
+{
+    return m_mrl;
+}
+
 bool Task::restoreLinkedEntities()
 {
     LOG_INFO("Restoring linked entities of task ", m_id);
     // MRL will be empty if the task has been resumed from unparsed files
     // parentFolderId == 0 indicates an external file
-    if ( mrl.empty() == true && m_parentFolderId == 0 )
+    if ( m_item.mrl().empty() == true && m_parentFolderId == 0 )
     {
         LOG_WARN( "Aborting & removing external file task (#", m_id, ')' );
         destroy( m_ml, m_id );
@@ -166,7 +178,7 @@ bool Task::restoreLinkedEntities()
 
     // We might re-create tasks without mrl to ease the handling of files on
     // external storage.
-    if ( mrl.empty() == true )
+    if ( m_item.mrl().empty() == true )
     {
         // but we expect those to be created from an existing file after a
         // partial/failed migration. If we don't have a file nor an mrl, we
@@ -193,13 +205,13 @@ bool Task::restoreLinkedEntities()
         }
         setMrl( file->mrl() );
     }
-    auto fsFactory = m_ml->fsFactoryForMrl( mrl );
+    auto fsFactory = m_ml->fsFactoryForMrl( m_item.mrl() );
     if ( fsFactory == nullptr )
         return false;
 
     try
     {
-        parentFolderFs = fsFactory->createDirectory( utils::file::directory( mrl ) );
+        parentFolderFs = fsFactory->createDirectory( utils::file::directory( m_item.mrl() ) );
     }
     catch ( const std::system_error& ex )
     {
@@ -211,11 +223,11 @@ bool Task::restoreLinkedEntities()
     {
         auto files = parentFolderFs->files();
         auto it = std::find_if( begin( files ), end( files ), [this]( std::shared_ptr<fs::IFile> f ) {
-            return f->mrl() == mrl;
+            return f->mrl() == m_item.mrl();
         });
         if ( it == end( files ) )
         {
-            LOG_ERROR( "Failed to restore fs::IFile associated with ", mrl );
+            LOG_ERROR( "Failed to restore fs::IFile associated with ", m_item.mrl() );
             return false;
         }
         fileFs = *it;
@@ -226,7 +238,7 @@ bool Task::restoreLinkedEntities()
         // recreated upon next discovery
         if ( file == nullptr )
         {
-            LOG_WARN( "Failed to restore file system instances for mrl ", mrl, "."
+            LOG_WARN( "Failed to restore file system instances for mrl ", m_item.mrl(), "."
                       " Removing the task until it gets detected again." );
             destroy( m_ml, m_id );
         }
@@ -236,7 +248,7 @@ bool Task::restoreLinkedEntities()
             // detect that the file is now missing, and we won't try to restore
             // this task until it comes back (since the task restoration request
             // includes the file.is_present flag)
-            LOG_WARN( "Failed to restore file system instances for mrl ", mrl, "."
+            LOG_WARN( "Failed to restore file system instances for mrl ", m_item.mrl(), "."
                       " Postponing the task." );
         }
         return false;
@@ -254,13 +266,13 @@ bool Task::restoreLinkedEntities()
 
 void Task::setMrl( std::string newMrl )
 {
-    if ( mrl == newMrl )
+    if ( m_item.mrl() == newMrl )
         return;
     static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET "
             "mrl = ? WHERE id_task = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, newMrl, m_id ) == false )
         return;
-    mrl = std::move( newMrl );
+    m_item = Item{ std::move( newMrl ) };
 }
 
 void Task::createTable( sqlite::Connection* dbConnection )
@@ -321,7 +333,7 @@ Task::create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
     const std::string req = "INSERT INTO " + policy::TaskTable::Name +
         "(mrl, parent_folder_id, parent_playlist_id, parent_playlist_index) "
         "VALUES(?, ?, ?, ?)";
-    if ( insert( ml, self, req, self->mrl, self->parentFolder->id(), sqlite::ForeignKey(
+    if ( insert( ml, self, req, self->m_item.mrl(), self->parentFolder->id(), sqlite::ForeignKey(
                  self->parentPlaylist ? self->parentPlaylist->id() : 0 ),
                  self->parentPlaylistIndex ) == false )
         return nullptr;
