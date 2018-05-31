@@ -89,21 +89,31 @@ public:
         Completed = 1 | 2,
     };
 
-    enum class Metadata : uint8_t
+    class Item
     {
-        Title,
-        ArtworkUrl,
-        ShowName,
-        Episode,
-        Album,
-        Genre,
-        Date,
-        AlbumArtist,
-        Artist,
-        TrackNumber,
-        DiscNumber,
-        DiscTotal,
+    public:
+        enum class Metadata : uint8_t
+        {
+            Title,
+            ArtworkUrl,
+            ShowName,
+            Episode,
+            Album,
+            Genre,
+            Date,
+            AlbumArtist,
+            Artist,
+            TrackNumber,
+            DiscNumber,
+            DiscTotal,
+        };
+        std::string meta( Metadata type ) const;
+        void setMeta( Metadata type, std::string value );
+
+    private:
+        std::unordered_map<Metadata, std::string> m_metadata;
     };
+
 
     /*
      * Constructs a task to be resumed.
@@ -136,8 +146,7 @@ public:
     bool updateFileId();
     int64_t id() const;
 
-    std::string meta( Metadata type ) const;
-    void setMeta( Metadata type, std::string value );
+    Item& item();
 
     // Restore attached entities such as media/files
     bool restoreLinkedEntities();
@@ -172,8 +181,7 @@ private:
     int64_t     m_fileId;
     int64_t     m_parentFolderId;
     int64_t     m_parentPlaylistId;
-    std::unordered_map<Metadata, std::string> m_metadata;
-
+    Item        m_item;
 
     friend policy::TaskTable;
 };

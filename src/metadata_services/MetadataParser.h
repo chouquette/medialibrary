@@ -59,7 +59,7 @@ protected:
     std::shared_ptr<Genre> handleGenre( parser::Task& task ) const;
 
 private:
-    static int toInt( parser::Task& task, parser::Task::Metadata meta );
+    static int toInt( parser::Task& task, parser::Task::Item::Metadata meta );
 
 private:
     MediaLibrary* m_ml;

@@ -130,7 +130,12 @@ int64_t Task::id() const
     return m_id;
 }
 
-std::string Task::meta( Task::Metadata type ) const
+Task::Item& Task::item()
+{
+    return m_item;
+}
+
+std::string Task::Item::meta( Task::Item::Metadata type ) const
 {
     auto it = m_metadata.find( type );
     if ( it == end( m_metadata ) )
@@ -138,7 +143,7 @@ std::string Task::meta( Task::Metadata type ) const
     return it->second;
 }
 
-void Task::setMeta( Task::Metadata type, std::string value )
+void Task::Item::setMeta( Task::Item::Metadata type, std::string value )
 {
     m_metadata[type] = std::move( value );
 }
