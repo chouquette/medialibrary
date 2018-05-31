@@ -53,7 +53,7 @@ Parser::~Parser()
 
 void Parser::addService( ServicePtr service )
 {
-    auto worker = std::make_unique<ParserWorker>();
+    auto worker = std::unique_ptr<ParserWorker>( new ParserWorker );
     if ( worker->initialize( m_ml, this, std::move( service ) ) == false )
         return;
     m_services.push_back( std::move( worker ) );
