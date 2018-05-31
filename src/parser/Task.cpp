@@ -180,6 +180,16 @@ void Task::Item::setDuration( int64_t duration )
     m_duration = duration;
 }
 
+const std::vector<Task::Item::Track>& Task::Item::tracks() const
+{
+    return m_tracks;
+}
+
+void Task::Item::addTrack(Task::Item::Track t)
+{
+    m_tracks.emplace_back( std::move( t ) );
+}
+
 bool Task::restoreLinkedEntities()
 {
     LOG_INFO("Restoring linked entities of task ", m_id);

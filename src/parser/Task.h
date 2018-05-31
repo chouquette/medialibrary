@@ -109,6 +109,41 @@ public:
             DiscNumber,
             DiscTotal,
         };
+
+        struct Track
+        {
+            enum class Type : uint8_t
+            {
+                Video,
+                Audio,
+            };
+
+            std::string codec;
+            Type type;
+            uint32_t bitrate;
+            std::string language;
+            std::string description;
+            // Audio
+            union
+            {
+                struct
+                {
+                    uint32_t nbChannels;
+                    uint32_t rate;
+                } a;
+                struct
+                {
+                    // Video
+                    uint32_t height;
+                    uint32_t width;
+                    uint32_t sarNum;
+                    uint32_t sarDen;
+                    uint32_t fpsNum;
+                    uint32_t fpsDen;
+                } v;
+            };
+        };
+
         std::string meta( Metadata type ) const;
         void setMeta( Metadata type, std::string value );
 
@@ -120,10 +155,14 @@ public:
         int64_t duration() const;
         void setDuration( int64_t duration );
 
+        const std::vector<Track>& tracks() const;
+        void addTrack( Track t );
+
     private:
         std::string m_mrl;
         std::unordered_map<Metadata, std::string> m_metadata;
         std::vector<Item> m_subItems;
+        std::vector<Track> m_tracks;
         int64_t m_duration;
     };
 

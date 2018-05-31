@@ -173,7 +173,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
         return parser::Task::Status::Success;
     }
 
-    const auto& tracks = task.vlcMedia.tracks();
+    const auto& tracks = task.item().tracks();
 
     if ( tracks.empty() == true )
         return parser::Task::Status::Fatal;
@@ -185,19 +185,20 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
             auto t = m_ml->getConn()->newTransaction();
             for ( const auto& track : tracks )
             {
-                auto codec = track.codec();
-                std::string fcc( reinterpret_cast<const char*>( &codec ), 4 );
-                if ( track.type() == VLC::MediaTrack::Type::Video )
+                if ( track.type == parser::Task::Item::Track::Type::Video )
                 {
-                    task.media->addVideoTrack( fcc, track.width(), track.height(),
-                                          static_cast<float>( track.fpsNum() ) / static_cast<float>( track.fpsDen() ),
-                                          track.language(), track.description() );
+                    task.media->addVideoTrack( track.codec, track.v.width, track.v.height,
+                                          static_cast<float>( track.v.fpsNum ) /
+                                              static_cast<float>( track.v.fpsDen ),
+                                          track.language, track.description );
                     isAudio = false;
                 }
-                else if ( track.type() == VLC::MediaTrack::Type::Audio )
+                else
                 {
-                    task.media->addAudioTrack( fcc, track.bitrate(), track.rate(), track.channels(),
-                                          track.language(), track.description() );
+                    assert( track.type == parser::Task::Item::Track::Type::Audio );
+                    task.media->addAudioTrack( track.codec, track.bitrate,
+                                               track.a.rate, track.a.nbChannels,
+                                               track.language, track.description );
                 }
             }
             task.media->setDuration( task.item().duration() );

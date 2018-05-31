@@ -150,6 +150,40 @@ void VLCMetadataService::mediaToItem( VLC::Media& media, parser::Task::Item& ite
                   media.meta( libvlc_meta_DiscTotal ) );
     item.setDuration( media.duration() );
 
+    auto tracks = media.tracks();
+    for ( const auto& track : tracks )
+    {
+        parser::Task::Item::Track t;
+
+        if ( track.type() == VLC::MediaTrack::Type::Audio )
+        {
+            t.type = parser::Task::Item::Track::Type::Audio;
+            t.a.nbChannels = track.channels();
+            t.a.rate = track.rate();
+        }
+        else if ( track.type() == VLC::MediaTrack::Type::Video )
+        {
+            t.type = parser::Task::Item::Track::Type::Video;
+            t.v.fpsNum = track.fpsNum();
+            t.v.fpsDen = track.fpsDen();
+            t.v.width = track.width();
+            t.v.height = track.height();
+            t.v.sarNum = track.sarNum();
+            t.v.sarDen = track.sarDen();
+        }
+        else
+            continue;
+        auto codec = track.codec();
+        std::string fcc( reinterpret_cast<const char*>( &codec ), 4 );
+        t.codec = std::move( fcc );
+
+        t.bitrate = track.bitrate();
+        t.language = track.language();
+        t.description = track.description();
+
+        item.addTrack( std::move( t ) );
+    }
+
     auto subItems = media.subitems();
     if ( subItems != nullptr )
     {
