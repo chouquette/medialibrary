@@ -157,12 +157,16 @@ public:
         const std::vector<Track>& tracks() const;
         void addTrack( Track t );
 
+        std::shared_ptr<Media> media();
+        void setMedia( std::shared_ptr<Media> media );
+
     private:
         std::string m_mrl;
         std::unordered_map<Metadata, std::string> m_metadata;
         std::vector<Item> m_subItems;
         std::vector<Track> m_tracks;
         int64_t m_duration;
+        std::shared_ptr<Media> m_media;
     };
 
     static_assert( std::is_move_assignable<Item>::value, "Item must be move assignable" );
@@ -205,7 +209,6 @@ public:
     bool restoreLinkedEntities();
     void setMrl( std::string mrl );
 
-    std::shared_ptr<Media>          media;
     std::shared_ptr<File>           file;
     std::shared_ptr<fs::IFile>      fileFs;
     std::shared_ptr<Folder>         parentFolder;

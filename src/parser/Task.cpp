@@ -192,6 +192,16 @@ void Task::Item::addTrack(Task::Item::Track t)
     m_tracks.emplace_back( std::move( t ) );
 }
 
+std::shared_ptr<Media> Task::Item::media()
+{
+    return m_media;
+}
+
+void Task::Item::setMedia( std::shared_ptr<Media> media )
+{
+    m_media = std::move( media );
+}
+
 bool Task::restoreLinkedEntities()
 {
     LOG_INFO("Restoring linked entities of task ", m_id);
@@ -287,7 +297,7 @@ bool Task::restoreLinkedEntities()
     }
 
     if ( file != nullptr )
-        media = file->media();
+        m_item.setMedia( file->media() );
 
     parentFolder = Folder::fetch( m_ml, m_parentFolderId );
     if ( m_parentPlaylistId != 0 )
