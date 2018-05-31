@@ -160,6 +160,16 @@ const std::string& Task::Item::mrl() const
     return m_mrl;
 }
 
+const std::vector<Task::Item>& Task::Item::subItems() const
+{
+    return m_subItems;
+}
+
+void Task::Item::addSubItem( Task::Item item )
+{
+    m_subItems.emplace_back( std::move( item ) );
+}
+
 bool Task::restoreLinkedEntities()
 {
     LOG_INFO("Restoring linked entities of task ", m_id);

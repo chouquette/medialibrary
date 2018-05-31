@@ -50,6 +50,8 @@ private:
         virtual void onFlushing() override;
         virtual void onRestarted() override;
 
+        void mediaToItem( VLC::Media& media, parser::Task::Item& item );
+
 private:
         MediaLibrary* m_ml;
 

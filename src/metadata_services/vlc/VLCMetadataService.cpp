@@ -91,30 +91,7 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
         if ( res == false )
             return parser::Task::Status::Fatal;
     }
-    task.item().setMeta( parser::Task::Item::Metadata::Title,
-                  task.vlcMedia.meta( libvlc_meta_Title ) );
-    task.item().setMeta( parser::Task::Item::Metadata::ArtworkUrl,
-                  task.vlcMedia.meta( libvlc_meta_ArtworkURL ) );
-    task.item().setMeta( parser::Task::Item::Metadata::ShowName,
-                  task.vlcMedia.meta( libvlc_meta_ShowName ) );
-    task.item().setMeta( parser::Task::Item::Metadata::Episode,
-                  task.vlcMedia.meta( libvlc_meta_Episode ) );
-    task.item().setMeta( parser::Task::Item::Metadata::Album,
-                  task.vlcMedia.meta( libvlc_meta_Album ) );
-    task.item().setMeta( parser::Task::Item::Metadata::Genre,
-                  task.vlcMedia.meta( libvlc_meta_Genre ) );
-    task.item().setMeta( parser::Task::Item::Metadata::Date,
-                  task.vlcMedia.meta( libvlc_meta_Date ) );
-    task.item().setMeta( parser::Task::Item::Metadata::AlbumArtist,
-                  task.vlcMedia.meta( libvlc_meta_AlbumArtist ) );
-    task.item().setMeta( parser::Task::Item::Metadata::Artist,
-                  task.vlcMedia.meta( libvlc_meta_Artist ) );
-    task.item().setMeta( parser::Task::Item::Metadata::TrackNumber,
-                  task.vlcMedia.meta( libvlc_meta_TrackNumber ) );
-    task.item().setMeta( parser::Task::Item::Metadata::DiscNumber,
-                  task.vlcMedia.meta( libvlc_meta_DiscNumber ) );
-    task.item().setMeta( parser::Task::Item::Metadata::DiscTotal,
-                  task.vlcMedia.meta( libvlc_meta_DiscTotal ) );
+    mediaToItem( task.vlcMedia, task.item() );
     // Don't save the file parsing step yet, since all data are just in memory. Just mark
     // the extraction as done.
     task.markStepCompleted( parser::Task::ParserStep::MetadataExtraction );
@@ -143,6 +120,47 @@ void VLCMetadataService::onFlushing()
 
 void VLCMetadataService::onRestarted()
 {
+}
+
+void VLCMetadataService::mediaToItem( VLC::Media& media, parser::Task::Item& item )
+{
+    item.setMeta( parser::Task::Item::Metadata::Title,
+                  media.meta( libvlc_meta_Title ) );
+    item.setMeta( parser::Task::Item::Metadata::ArtworkUrl,
+                  media.meta( libvlc_meta_ArtworkURL ) );
+    item.setMeta( parser::Task::Item::Metadata::ShowName,
+                  media.meta( libvlc_meta_ShowName ) );
+    item.setMeta( parser::Task::Item::Metadata::Episode,
+                  media.meta( libvlc_meta_Episode ) );
+    item.setMeta( parser::Task::Item::Metadata::Album,
+                  media.meta( libvlc_meta_Album ) );
+    item.setMeta( parser::Task::Item::Metadata::Genre,
+                  media.meta( libvlc_meta_Genre ) );
+    item.setMeta( parser::Task::Item::Metadata::Date,
+                  media.meta( libvlc_meta_Date ) );
+    item.setMeta( parser::Task::Item::Metadata::AlbumArtist,
+                  media.meta( libvlc_meta_AlbumArtist ) );
+    item.setMeta( parser::Task::Item::Metadata::Artist,
+                  media.meta( libvlc_meta_Artist ) );
+    item.setMeta( parser::Task::Item::Metadata::TrackNumber,
+                  media.meta( libvlc_meta_TrackNumber ) );
+    item.setMeta( parser::Task::Item::Metadata::DiscNumber,
+                  media.meta( libvlc_meta_DiscNumber ) );
+    item.setMeta( parser::Task::Item::Metadata::DiscTotal,
+                  media.meta( libvlc_meta_DiscTotal ) );
+
+    auto subItems = media.subitems();
+    if ( subItems != nullptr )
+    {
+        for ( auto i = 0; i < subItems->count(); ++i )
+        {
+            auto vlcMedia = subItems->itemAtIndex( i );
+            assert( vlcMedia != nullptr );
+            parser::Task::Item subItem{ vlcMedia->mrl() };
+            mediaToItem( *vlcMedia, subItem );
+            item.addSubItem( std::move( subItem ) );
+        }
+    }
 }
 
 }

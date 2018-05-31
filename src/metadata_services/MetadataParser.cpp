@@ -91,11 +91,11 @@ int MetadataParser::toInt( parser::Task& task, parser::Task::Item::Metadata meta
 parser::Task::Status MetadataParser::run( parser::Task& task )
 {
     bool alreadyInParser = false;
-    int nbSubitem = task.vlcMedia.subitems()->count();
+    int nbSubitem = task.item().subItems().size();
     // Assume that file containing subitem(s) is a Playlist
     if ( nbSubitem > 0 )
     {
-        auto res = addPlaylistMedias( task, nbSubitem );
+        auto res = addPlaylistMedias( task );
         if ( res == false ) // playlist addition may fail due to constraint violation
             return parser::Task::Status::Fatal;
 
@@ -227,7 +227,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
 
 /* Playlist files */
 
-bool MetadataParser::addPlaylistMedias( parser::Task& task, int nbSubitem ) const
+bool MetadataParser::addPlaylistMedias( parser::Task& task ) const
 {
     auto t = m_ml->getConn()->newTransaction();
     const auto& mrl = task.item().mrl();
@@ -248,19 +248,17 @@ bool MetadataParser::addPlaylistMedias( parser::Task& task, int nbSubitem ) cons
         return false;
     }
     t->commit();
-    auto subitems = task.vlcMedia.subitems();
-    for ( int i = 0; i < nbSubitem; ++i ) // FIXME: Interrupt loop if paused
-        addPlaylistElement( task, playlistPtr, subitems->itemAtIndex( i ), static_cast<unsigned int>( i ) + 1 );
+    auto subitems = task.item().subItems();
+    for ( auto i = 0u; i < subitems.size(); ++i ) // FIXME: Interrupt loop if paused
+        addPlaylistElement( task, playlistPtr, subitems[i], static_cast<unsigned int>( i ) + 1 );
 
     return true;
 }
 
 void MetadataParser::addPlaylistElement( parser::Task& task, const std::shared_ptr<Playlist>& playlistPtr,
-                                         VLC::MediaPtr subitem, unsigned int index ) const
+                                         parser::Task::Item& subitem, unsigned int index ) const
 {
-    if ( subitem == nullptr )
-        return;
-    const auto& mrl = subitem->mrl();
+    const auto& mrl = subitem.mrl();
     LOG_INFO( "Try to add ", mrl, " to the playlist ", mrl );
     auto media = m_ml->media( mrl );
     if ( media != nullptr )
@@ -276,16 +274,16 @@ void MetadataParser::addPlaylistElement( parser::Task& task, const std::shared_p
     {
         auto t2 = m_ml->getConn()->newTransaction();
         auto externalMedia = Media::create( m_ml, IMedia::Type::Unknown, utils::url::encode(
-                subitem->meta( libvlc_meta_Title ) ) );
+                subitem.meta( parser::Task::Item::Metadata::Title ) ) );
         if ( externalMedia == nullptr )
         {
-            LOG_ERROR( "Failed to create external media for ", subitem->mrl(), " in the playlist ", mrl );
+            LOG_ERROR( "Failed to create external media for ", mrl, " in the playlist ", task.item().mrl() );
             return;
         }
         // Assuming that external mrl present in playlist file is a main media resource
         auto externalFile = externalMedia->addExternalMrl( mrl, IFile::Type::Main );
         if ( externalFile == nullptr )
-            LOG_ERROR( "Failed to create external file for ", subitem->mrl(), " in the playlist ", mrl );
+            LOG_ERROR( "Failed to create external file for ", mrl, " in the playlist ", task.item().mrl() );
         playlistPtr->add( externalMedia->id(), index );
         t2->commit();
         return;
@@ -300,7 +298,7 @@ void MetadataParser::addPlaylistElement( parser::Task& task, const std::shared_p
         LOG_ERROR( ex.what() );
         return;
     }
-    LOG_INFO( "Importing ", isDirectory ? "folder " : "file ", subitem->mrl(), " in the playlist ", mrl );
+    LOG_INFO( "Importing ", isDirectory ? "folder " : "file ", mrl, " in the playlist ", task.item().mrl() );
     auto directoryMrl = utils::file::directory( mrl );
     auto parentFolder = Folder::fromMrl( m_ml, directoryMrl );
     bool parentKnown = parentFolder != nullptr;
