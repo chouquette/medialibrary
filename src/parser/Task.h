@@ -27,7 +27,6 @@
 #include <utility>
 #include <vector>
 #include <string>
-#include <vlcpp/vlc.hpp>
 
 #include "database/DatabaseHelpers.h"
 
@@ -213,7 +212,6 @@ public:
     std::shared_ptr<fs::IDirectory> parentFolderFs;
     std::shared_ptr<Playlist>       parentPlaylist;
     unsigned int                    parentPlaylistIndex;
-    VLC::Media                      vlcMedia;
     unsigned int                    currentService;
 
     static void createTable( sqlite::Connection* dbConnection );
