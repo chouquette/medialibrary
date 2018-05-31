@@ -130,6 +130,19 @@ int64_t Task::id() const
     return m_id;
 }
 
+std::string Task::meta( Task::Metadata type ) const
+{
+    auto it = m_metadata.find( type );
+    if ( it == end( m_metadata ) )
+        return std::string{};
+    return it->second;
+}
+
+void Task::setMeta( Task::Metadata type, std::string value )
+{
+    m_metadata[type] = std::move( value );
+}
+
 bool Task::restoreLinkedEntities()
 {
     LOG_INFO("Restoring linked entities of task ", m_id);

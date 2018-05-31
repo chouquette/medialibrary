@@ -89,6 +89,22 @@ public:
         Completed = 1 | 2,
     };
 
+    enum class Metadata : uint8_t
+    {
+        Title,
+        ArtworkUrl,
+        ShowName,
+        Episode,
+        Album,
+        Genre,
+        Date,
+        AlbumArtist,
+        Artist,
+        TrackNumber,
+        DiscNumber,
+        DiscTotal,
+    };
+
     /*
      * Constructs a task to be resumed.
      * The Media is provided as a parameter to avoid this to implicitely query
@@ -119,6 +135,9 @@ public:
 
     bool updateFileId();
     int64_t id() const;
+
+    std::string meta( Metadata type ) const;
+    void setMeta( Metadata type, std::string value );
 
     // Restore attached entities such as media/files
     bool restoreLinkedEntities();
@@ -153,6 +172,8 @@ private:
     int64_t     m_fileId;
     int64_t     m_parentFolderId;
     int64_t     m_parentPlaylistId;
+    std::unordered_map<Metadata, std::string> m_metadata;
+
 
     friend policy::TaskTable;
 };

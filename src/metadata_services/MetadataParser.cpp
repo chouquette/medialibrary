@@ -69,9 +69,9 @@ bool MetadataParser::initialize( MediaLibrary* ml)
     return cacheUnknownArtist();
 }
 
-int MetadataParser::toInt( VLC::Media& vlcMedia, libvlc_meta_t meta, const char* name )
+int MetadataParser::toInt( parser::Task& task, parser::Task::Metadata meta )
 {
-    auto str = vlcMedia.meta( meta );
+    auto str = task.meta( meta );
     if ( str.empty() == false )
     {
         try
@@ -80,7 +80,9 @@ int MetadataParser::toInt( VLC::Media& vlcMedia, libvlc_meta_t meta, const char*
         }
         catch( std::logic_error& ex)
         {
-            LOG_WARN( "Invalid ", name, " provided (", str, "): ", ex.what() );
+            LOG_WARN( "Invalid meta #",
+                      static_cast<typename std::underlying_type<parser::Task::Metadata>::type>( meta ),
+                      " provided (", str, "): ", ex.what() );
         }
     }
     return 0;
@@ -228,7 +230,7 @@ bool MetadataParser::addPlaylistMedias( parser::Task& task, int nbSubitem ) cons
 {
     auto t = m_ml->getConn()->newTransaction();
     LOG_INFO( "Try to import ", task.mrl, " as a playlist" );
-    auto playlistName = task.vlcMedia.meta( libvlc_meta_Title );
+    auto playlistName = task.meta( parser::Task::Metadata::Title );
     if ( playlistName.empty() == true )
         playlistName = utils::url::decode( utils::file::fileName( task.mrl ) );
     auto playlistPtr = Playlist::create( m_ml, playlistName );
@@ -339,12 +341,12 @@ bool MetadataParser::parseVideoFile( parser::Task& task ) const
 {
     auto media = task.media.get();
     media->setType( IMedia::Type::Video );
-    const auto& title = task.vlcMedia.meta( libvlc_meta_Title );
+    const auto& title = task.meta( parser::Task::Metadata::Title );
     if ( title.length() == 0 )
         return true;
 
-    const auto& showName = task.vlcMedia.meta( libvlc_meta_ShowName );
-    const auto& artworkMrl = task.vlcMedia.meta( libvlc_meta_ArtworkURL );
+    const auto& showName = task.meta( parser::Task::Metadata::ShowName );
+    const auto& artworkMrl = task.meta( parser::Task::Metadata::ArtworkUrl );
 
     return sqlite::Tools::withRetries( 3, [this, &showName, &title, &task, &artworkMrl]() {
         auto t = m_ml->getConn()->newTransaction();
@@ -362,7 +364,7 @@ bool MetadataParser::parseVideoFile( parser::Task& task ) const
                 if ( show == nullptr )
                     return false;
             }
-            auto episode = toInt( task.vlcMedia, libvlc_meta_Episode, "episode number" );
+            auto episode = toInt( task, parser::Task::Metadata::Episode );
             if ( episode != 0 )
             {
                 std::shared_ptr<Show> s = std::static_pointer_cast<Show>( show );
@@ -386,7 +388,7 @@ bool MetadataParser::parseAudioFile( parser::Task& task )
 {
     task.media->setType( IMedia::Type::Audio );
 
-    auto artworkMrl = task.vlcMedia.meta( libvlc_meta_ArtworkURL );
+    auto artworkMrl = task.meta( parser::Task::Metadata::ArtworkUrl );
     if ( artworkMrl.empty() == false )
     {
         task.media->setThumbnail( artworkMrl, Thumbnail::Origin::Media );
@@ -406,7 +408,7 @@ bool MetadataParser::parseAudioFile( parser::Task& task )
         auto t = m_ml->getConn()->newTransaction();
         if ( album == nullptr )
         {
-            const auto& albumName = task.vlcMedia.meta( libvlc_meta_Album );
+            const auto& albumName = task.meta( parser::Task::Metadata::Album );
             int64_t thumbnailId = 0;
             if ( artworkMrl.empty() == false )
             {
@@ -433,7 +435,7 @@ bool MetadataParser::parseAudioFile( parser::Task& task )
 
 std::shared_ptr<Genre> MetadataParser::handleGenre( parser::Task& task ) const
 {
-    const auto& genreStr = task.vlcMedia.meta( libvlc_meta_Genre );
+    const auto& genreStr = task.meta( parser::Task::Metadata::Genre );
     if ( genreStr.length() == 0 )
         return nullptr;
     auto genre = Genre::fromName( m_ml, genreStr );
@@ -451,7 +453,7 @@ std::shared_ptr<Genre> MetadataParser::handleGenre( parser::Task& task ) const
 std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::shared_ptr<Artist> albumArtist,
                                                     std::shared_ptr<Artist> trackArtist )
 {
-    const auto& albumName = task.vlcMedia.meta( libvlc_meta_Album );
+    const auto& albumName = task.meta( parser::Task::Metadata::Album );
     if ( albumName.empty() == true )
     {
         if ( albumArtist != nullptr )
@@ -476,8 +478,8 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
     if ( albums.size() == 0 )
         return nullptr;
 
-    const auto discTotal = toInt( task.vlcMedia, libvlc_meta_DiscTotal, "disc total" );
-    const auto discNumber = toInt( task.vlcMedia, libvlc_meta_DiscNumber, "disc number" );
+    const auto discTotal = toInt( task, parser::Task::Metadata::DiscTotal );
+    const auto discNumber = toInt( task, parser::Task::Metadata::DiscNumber );
     /*
      * Even if we get only 1 album, we need to filter out invalid matches.
      * For instance, if we have already inserted an album "A" by an artist "john"
@@ -574,7 +576,7 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
         // tagged with a year.
         if ( multipleArtists == false )
         {
-            auto candidateDate = task.vlcMedia.meta( libvlc_meta_Date );
+            auto candidateDate = task.meta( parser::Task::Metadata::Date );
             if ( candidateDate.empty() == false )
             {
                 try
@@ -626,8 +628,8 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::find
     std::shared_ptr<Artist> artist;
     static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name + " WHERE name = ?";
 
-    const auto& albumArtistStr = task.vlcMedia.meta( libvlc_meta_AlbumArtist );
-    const auto& artistStr = task.vlcMedia.meta( libvlc_meta_Artist );
+    const auto& albumArtistStr = task.meta( parser::Task::Metadata::AlbumArtist );
+    const auto& artistStr = task.meta( parser::Task::Metadata::Artist );
     if ( albumArtistStr.empty() == true && artistStr.empty() == true )
     {
         return {m_unknownArtist, m_unknownArtist};
@@ -671,9 +673,9 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
 {
     assert( sqlite::Transaction::transactionInProgress() == true );
 
-    auto title = task.vlcMedia.meta( libvlc_meta_Title );
-    const auto trackNumber = toInt( task.vlcMedia, libvlc_meta_TrackNumber, "track number" );
-    const auto discNumber = toInt( task.vlcMedia, libvlc_meta_DiscNumber, "disc number" );
+    auto title = task.meta( parser::Task::Metadata::Title );
+    const auto trackNumber = toInt( task, parser::Task::Metadata::TrackNumber );
+    const auto discNumber = toInt( task, parser::Task::Metadata::DiscNumber );
     if ( title.empty() == true )
     {
         LOG_WARN( "Failed to get track title" );
@@ -695,7 +697,7 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
         return nullptr;
     }
 
-    const auto& releaseDate = task.vlcMedia.meta( libvlc_meta_Date );
+    const auto& releaseDate = task.meta( parser::Task::Metadata::Date );
     if ( releaseDate.empty() == false )
     {
         auto releaseYear = atoi( releaseDate.c_str() );

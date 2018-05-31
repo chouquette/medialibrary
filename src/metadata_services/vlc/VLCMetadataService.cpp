@@ -91,6 +91,30 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
         if ( res == false )
             return parser::Task::Status::Fatal;
     }
+    task.setMeta( parser::Task::Metadata::Title,
+                  task.vlcMedia.meta( libvlc_meta_Title ) );
+    task.setMeta( parser::Task::Metadata::ArtworkUrl,
+                  task.vlcMedia.meta( libvlc_meta_ArtworkURL ) );
+    task.setMeta( parser::Task::Metadata::ShowName,
+                  task.vlcMedia.meta( libvlc_meta_ShowName ) );
+    task.setMeta( parser::Task::Metadata::Episode,
+                  task.vlcMedia.meta( libvlc_meta_Episode ) );
+    task.setMeta( parser::Task::Metadata::Album,
+                  task.vlcMedia.meta( libvlc_meta_Album ) );
+    task.setMeta( parser::Task::Metadata::Genre,
+                  task.vlcMedia.meta( libvlc_meta_Genre ) );
+    task.setMeta( parser::Task::Metadata::Date,
+                  task.vlcMedia.meta( libvlc_meta_Date ) );
+    task.setMeta( parser::Task::Metadata::AlbumArtist,
+                  task.vlcMedia.meta( libvlc_meta_AlbumArtist ) );
+    task.setMeta( parser::Task::Metadata::Artist,
+                  task.vlcMedia.meta( libvlc_meta_Artist ) );
+    task.setMeta( parser::Task::Metadata::TrackNumber,
+                  task.vlcMedia.meta( libvlc_meta_TrackNumber ) );
+    task.setMeta( parser::Task::Metadata::DiscNumber,
+                  task.vlcMedia.meta( libvlc_meta_DiscNumber ) );
+    task.setMeta( parser::Task::Metadata::DiscTotal,
+                  task.vlcMedia.meta( libvlc_meta_DiscTotal ) );
     // Don't save the file parsing step yet, since all data are just in memory. Just mark
     // the extraction as done.
     task.markStepCompleted( parser::Task::ParserStep::MetadataExtraction );

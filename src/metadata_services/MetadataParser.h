@@ -59,7 +59,7 @@ protected:
     std::shared_ptr<Genre> handleGenre( parser::Task& task ) const;
 
 private:
-    static int toInt( VLC::Media& vlcMedia, libvlc_meta_t meta, const char* name );
+    static int toInt( parser::Task& task, parser::Task::Metadata meta );
 
 private:
     MediaLibrary* m_ml;
