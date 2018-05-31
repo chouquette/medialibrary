@@ -162,6 +162,11 @@ const std::string& Task::Item::mrl() const
     return m_mrl;
 }
 
+void Task::Item::setMrl( std::string mrl )
+{
+    m_mrl = std::move( mrl );
+}
+
 const std::vector<Task::Item>& Task::Item::subItems() const
 {
     return m_subItems;
@@ -314,7 +319,7 @@ void Task::setMrl( std::string newMrl )
             "mrl = ? WHERE id_task = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, newMrl, m_id ) == false )
         return;
-    m_item = Item{ std::move( newMrl ) };
+    m_item.setMrl( std::move( newMrl ) );
 }
 
 void Task::createTable( sqlite::Connection* dbConnection )

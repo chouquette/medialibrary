@@ -148,6 +148,7 @@ public:
         void setMeta( Metadata type, std::string value );
 
         const std::string& mrl() const;
+        void setMrl( std::string mrl );
 
         const std::vector<Item>& subItems() const;
         void addSubItem( Item mrl );
