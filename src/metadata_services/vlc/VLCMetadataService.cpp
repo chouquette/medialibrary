@@ -54,13 +54,12 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
 
     // Having a valid media means we're re-executing this parser after the thumbnailer,
     // which isn't expected, as we always mark this task as completed.
-    assert( task.vlcMedia.isValid() == false );
-    task.vlcMedia = VLC::Media( m_instance, mrl, VLC::Media::FromType::FromLocation );
+    VLC::Media vlcMedia{ m_instance, mrl, VLC::Media::FromType::FromLocation };
 
     VLC::Media::ParsedStatus status;
     bool done = false;
 
-    auto event = task.vlcMedia.eventManager().onParsedChanged( [this, &status, &done](VLC::Media::ParsedStatus s ) {
+    auto event = vlcMedia.eventManager().onParsedChanged( [this, &status, &done](VLC::Media::ParsedStatus s ) {
         std::lock_guard<compat::Mutex> lock( m_mutex );
         status = s;
         done = true;
@@ -69,7 +68,7 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
     {
         std::unique_lock<compat::Mutex> lock( m_mutex );
 
-        if ( task.vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local | VLC::Media::ParseFlags::Network |
+        if ( vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local | VLC::Media::ParseFlags::Network |
                                              VLC::Media::ParseFlags::FetchLocal, 5000 ) == false )
             return parser::Task::Status::Fatal;
         m_cond.wait( lock, [&status, &done]() {
@@ -79,19 +78,19 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
     event->unregister();
     if ( status == VLC::Media::ParsedStatus::Failed || status == VLC::Media::ParsedStatus::Timeout )
         return parser::Task::Status::Fatal;
-    auto tracks = task.vlcMedia.tracks();
-    auto artworkMrl = task.vlcMedia.meta( libvlc_meta_ArtworkURL );
-    if ( ( tracks.size() == 0 && task.vlcMedia.subitems()->count() == 0 ) ||
+    auto tracks = vlcMedia.tracks();
+    auto artworkMrl = vlcMedia.meta( libvlc_meta_ArtworkURL );
+    if ( ( tracks.size() == 0 && vlcMedia.subitems()->count() == 0 ) ||
          utils::file::schemeIs( "attachment://", artworkMrl ) == true )
     {
-        if ( tracks.size() == 0 && task.vlcMedia.subitems()->count() == 0 )
+        if ( tracks.size() == 0 && vlcMedia.subitems()->count() == 0 )
             LOG_WARN( "Failed to fetch any tracks for ", mrl, ". Falling back to playback" );
-        VLC::MediaPlayer mp( task.vlcMedia );
-        auto res = MetadataCommon::startPlayback( task.vlcMedia, mp );
+        VLC::MediaPlayer mp( vlcMedia );
+        auto res = MetadataCommon::startPlayback( vlcMedia, mp );
         if ( res == false )
             return parser::Task::Status::Fatal;
     }
-    mediaToItem( task.vlcMedia, task.item() );
+    mediaToItem( vlcMedia, task.item() );
     // Don't save the file parsing step yet, since all data are just in memory. Just mark
     // the extraction as done.
     task.markStepCompleted( parser::Task::ParserStep::MetadataExtraction );
@@ -108,10 +107,10 @@ uint8_t VLCMetadataService::nbThreads() const
     return 1;
 }
 
-bool VLCMetadataService::isCompleted( const parser::Task& task ) const
+bool VLCMetadataService::isCompleted( const parser::Task& ) const
 {
     // We always need to run this task if the metadata extraction isn't completed
-    return task.vlcMedia.isValid() == true;
+    return false;
 }
 
 void VLCMetadataService::onFlushing()
