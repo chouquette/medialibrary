@@ -170,6 +170,16 @@ void Task::Item::addSubItem( Task::Item item )
     m_subItems.emplace_back( std::move( item ) );
 }
 
+int64_t Task::Item::duration() const
+{
+    return m_duration;
+}
+
+void Task::Item::setDuration( int64_t duration )
+{
+    m_duration = duration;
+}
+
 bool Task::restoreLinkedEntities()
 {
     LOG_INFO("Restoring linked entities of task ", m_id);

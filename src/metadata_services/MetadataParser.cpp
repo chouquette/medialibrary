@@ -200,7 +200,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
                                           track.language(), track.description() );
                 }
             }
-            task.media->setDuration( task.vlcMedia.duration() );
+            task.media->setDuration( task.item().duration() );
             t->commit();
         }, std::move( tracks ) );
     }

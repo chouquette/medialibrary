@@ -117,10 +117,14 @@ public:
         const std::vector<Item>& subItems() const;
         void addSubItem( Item mrl );
 
+        int64_t duration() const;
+        void setDuration( int64_t duration );
+
     private:
         std::string m_mrl;
         std::unordered_map<Metadata, std::string> m_metadata;
         std::vector<Item> m_subItems;
+        int64_t m_duration;
     };
 
     static_assert( std::is_move_assignable<Item>::value, "Item must be move assignable" );

@@ -148,6 +148,7 @@ void VLCMetadataService::mediaToItem( VLC::Media& media, parser::Task::Item& ite
                   media.meta( libvlc_meta_DiscNumber ) );
     item.setMeta( parser::Task::Item::Metadata::DiscTotal,
                   media.meta( libvlc_meta_DiscTotal ) );
+    item.setDuration( media.duration() );
 
     auto subItems = media.subitems();
     if ( subItems != nullptr )
