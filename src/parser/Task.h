@@ -27,6 +27,7 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 #include "database/DatabaseHelpers.h"
 
