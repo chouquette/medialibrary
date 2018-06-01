@@ -114,22 +114,24 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
         {
             auto t = m_ml->getConn()->newTransaction();
             LOG_INFO( "Adding ", mrl );
-            task.item().setMedia( Media::create( m_ml, IMedia::Type::Unknown, utils::file::fileName( mrl ) ) );
-            if ( task.item().media() == nullptr )
+            auto m = Media::create( m_ml, IMedia::Type::Unknown, utils::file::fileName( mrl ) );
+            if ( m == nullptr )
             {
                 LOG_ERROR( "Failed to add media ", mrl, " to the media library" );
                 return parser::Task::Status::Fatal;
             }
             // For now, assume all media are made of a single file
-            task.item().setFile( task.item().media()->addFile( *task.item().fileFs(),
-                                                               task.item().parentFolder()->id(),
-                                             task.item().parentFolderFs()->device()->isRemovable(),
-                                             File::Type::Main ) );
-            if ( task.item().file() == nullptr )
+            auto file = m->addFile( *task.item().fileFs(),
+                                    task.item().parentFolder()->id(),
+                                    task.item().parentFolderFs()->device()->isRemovable(),
+                                    File::Type::Main );
+            if ( file == nullptr )
             {
-                LOG_ERROR( "Failed to add file ", mrl, " to media #", task.item().media()->id() );
+                LOG_ERROR( "Failed to add file ", mrl, " to media #", m->id() );
                 return parser::Task::Status::Fatal;
             }
+            task.item().setMedia( std::move( m ) );
+            task.item().setFile( std::move( file ) );
             task.updateFileId();
             t->commit();
         }
@@ -145,10 +147,12 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
                 LOG_ERROR( "File ", mrl, " no longer present in DB, aborting");
                 return parser::Task::Status::Fatal;
             }
-            task.item().setFile( fileInDB );
-            task.item().setMedia( fileInDB->media() );
-            if ( task.item().media() == nullptr ) // Without a media, we cannot go further
+            auto media = fileInDB->media();
+            if ( media == nullptr ) // Without a media, we cannot go further
                 return parser::Task::Status::Fatal;
+            task.item().setFile( std::move( fileInDB ) );
+            task.item().setMedia( std::move( media ) );
+
             alreadyInParser = true;
         }
     }
@@ -243,14 +247,15 @@ bool MetadataParser::addPlaylistMedias( parser::Task& task ) const
         LOG_ERROR( "Failed to create playlist ", mrl, " to the media library" );
         return false;
     }
-    task.item().setFile( playlistPtr->addFile( *task.item().fileFs(),
-                                               task.item().parentFolder()->id(),
-                                               task.item().parentFolderFs()->device()->isRemovable() ) );
-    if ( task.item().file() == nullptr )
+    auto file = playlistPtr->addFile( *task.item().fileFs(),
+                                      task.item().parentFolder()->id(),
+                                      task.item().parentFolderFs()->device()->isRemovable() );
+    if ( file == nullptr )
     {
         LOG_ERROR( "Failed to add playlist file ", mrl );
         return false;
     }
+    task.item().setFile( std::move( file ) );
     t->commit();
     auto subitems = task.item().subItems();
     for ( auto i = 0u; i < subitems.size(); ++i ) // FIXME: Interrupt loop if paused
