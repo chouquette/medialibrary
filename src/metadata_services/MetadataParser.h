@@ -46,7 +46,7 @@ protected:
     virtual bool isCompleted( const parser::Task& task ) const override;
 
     bool addPlaylistMedias( parser::Task& task ) const;
-    void addPlaylistElement( parser::Task& task, const std::shared_ptr<Playlist>& playlistPtr,
+    void addPlaylistElement( parser::Task& task, std::shared_ptr<Playlist> playlistPtr,
                              const parser::Task::Item& subitem ) const;
     bool parseAudioFile(parser::Task& task);
     bool parseVideoFile(parser::Task& task) const;
