@@ -52,7 +52,6 @@ public:
     Playlist( MediaLibraryPtr ml, const std::string& name );
 
     static std::shared_ptr<Playlist> create( MediaLibraryPtr ml, const std::string& name );
-    static std::shared_ptr<Playlist> createFromFile( MediaLibraryPtr ml, const std::string& name, int64_t fileId );
 
     virtual int64_t id() const override;
     virtual const std::string& name() const override;

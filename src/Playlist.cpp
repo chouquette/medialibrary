@@ -66,17 +66,12 @@ Playlist::Playlist( MediaLibraryPtr ml, const std::string& name)
 
 std::shared_ptr<Playlist> Playlist::create( MediaLibraryPtr ml, const std::string& name )
 {
-    return createFromFile( ml, name, 0 );
-}
-
-std::shared_ptr<Playlist> Playlist::createFromFile( MediaLibraryPtr ml, const std::string& name, int64_t fileId )
-{
-    auto self = std::make_shared<Playlist>( ml, name, fileId );
+    auto self = std::make_shared<Playlist>( ml, name );
     static const std::string req = "INSERT INTO " + policy::PlaylistTable::Name + \
             "(name, file_id, creation_date, artwork_mrl) VALUES(?, ?, ?, ?)";
     try
     {
-        if ( insert( ml, self, req, name, sqlite::ForeignKey( fileId ), self->m_creationDate, self->m_artworkMrl ) == false )
+        if ( insert( ml, self, req, name, nullptr, self->m_creationDate, self->m_artworkMrl ) == false )
             return nullptr;
         return self;
     }
