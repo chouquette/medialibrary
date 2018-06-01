@@ -176,16 +176,12 @@ public:
         void setFile( std::shared_ptr<File> file );
 
         std::shared_ptr<Folder> parentFolder();
-        void setParentFolder(std::shared_ptr<Folder> parentFolder );
 
         std::shared_ptr<fs::IFile> fileFs();
-        void setFileFs( std::shared_ptr<fs::IFile> fileFs );
 
         std::shared_ptr<fs::IDirectory> parentFolderFs();
-        void setParentFolderFs( std::shared_ptr<fs::IDirectory> parentFolderFs );
 
         std::shared_ptr<Playlist> parentPlaylist();
-        void setParentPlaylist( std::shared_ptr<Playlist> parentPlaylist );
 
         unsigned int parentPlaylistIndex() const;
 

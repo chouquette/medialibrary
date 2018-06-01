@@ -235,19 +235,9 @@ std::shared_ptr<Folder> Task::Item::parentFolder()
     return m_parentFolder;
 }
 
-void Task::Item::setParentFolder( std::shared_ptr<Folder> parentFolder )
-{
-    m_parentFolder = std::move( parentFolder );
-}
-
 std::shared_ptr<fs::IFile> Task::Item::fileFs()
 {
     return m_fileFs;
-}
-
-void Task::Item::setFileFs( std::shared_ptr<fs::IFile> fileFs )
-{
-    m_fileFs = std::move( fileFs );
 }
 
 std::shared_ptr<fs::IDirectory> Task::Item::parentFolderFs()
@@ -255,19 +245,9 @@ std::shared_ptr<fs::IDirectory> Task::Item::parentFolderFs()
     return m_parentFolderFs;
 }
 
-void Task::Item::setParentFolderFs( std::shared_ptr<fs::IDirectory> parentDirectoryFs )
-{
-    m_parentFolderFs = std::move( parentDirectoryFs );
-}
-
 std::shared_ptr<Playlist> Task::Item::parentPlaylist()
 {
     return m_parentPlaylist;
-}
-
-void Task::Item::setParentPlaylist( std::shared_ptr<Playlist> parentPlaylist )
-{
-    m_parentPlaylist = std::move( parentPlaylist );
 }
 
 unsigned int Task::Item::parentPlaylistIndex() const
