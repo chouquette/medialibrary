@@ -53,6 +53,7 @@ Task::Task( MediaLibraryPtr ml, sqlite::Row& row )
     , m_ml( ml )
 {
     std::string mrl;
+    unsigned int parentPlaylistIndex;
     row >> m_id
         >> m_step
         >> m_retryCount
@@ -62,6 +63,7 @@ Task::Task( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_parentPlaylistId
         >> parentPlaylistIndex;
     m_item = Item{ std::move( mrl ) };
+    m_item.setParentPlaylistIndex( parentPlaylistIndex );
 }
 
 Task::Task( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
@@ -69,16 +71,12 @@ Task::Task( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
             std::shared_ptr<fs::IDirectory> parentFolderFs,
             std::shared_ptr<Playlist> parentPlaylist,
             unsigned int parentPlaylistIndex )
-    : fileFs( std::move( fileFs ) )
-    , parentFolder( std::move( parentFolder ) )
-    , parentFolderFs( std::move( parentFolderFs ) )
-    , parentPlaylist( std::move( parentPlaylist ) )
-    , parentPlaylistIndex( parentPlaylistIndex )
-    , currentService( 0 )
+    : currentService( 0 )
     , m_ml( ml )
     , m_step( ParserStep::None )
     , m_fileId( 0 )
-    , m_item( this->fileFs->mrl() )
+    , m_item( std::move( fileFs ), std::move( parentFolder ),
+              std::move( parentFolderFs ), std::move( parentPlaylist ), parentPlaylistIndex )
 {
 }
 
@@ -120,12 +118,12 @@ void Task::startParserStep()
 bool Task::updateFileId()
 {
     assert( m_fileId == 0 );
-    assert( file != nullptr && file->id() != 0 );
+    assert( m_item.file() != nullptr && m_item.file()->id() != 0 );
     static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET "
             "file_id = ? WHERE id_task = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, file->id(), m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_item.file()->id(), m_id ) == false )
         return false;
-    m_fileId = file->id();
+    m_fileId = m_item.file()->id();
     return true;
 }
 
@@ -141,6 +139,22 @@ Task::Item& Task::item()
 
 Task::Item::Item( std::string mrl )
     : m_mrl( std::move( mrl ) )
+    , m_duration( 0 )
+    , m_parentPlaylistIndex( 0 )
+{
+}
+
+Task::Item::Item( std::shared_ptr<fs::IFile> fileFs,
+                  std::shared_ptr<Folder> parentFolder,
+                  std::shared_ptr<fs::IDirectory> parentFolderFs,
+                  std::shared_ptr<Playlist> parentPlaylist, unsigned int parentPlaylistIndex  )
+    : m_mrl( fileFs->mrl() )
+    , m_duration( 0 )
+    , m_fileFs( std::move( fileFs ) )
+    , m_parentFolder( std::move( parentFolder ) )
+    , m_parentFolderFs( std::move( parentFolderFs ) )
+    , m_parentPlaylist( std::move( parentPlaylist ) )
+    , m_parentPlaylistIndex( parentPlaylistIndex )
 {
 }
 
@@ -207,6 +221,66 @@ void Task::Item::setMedia( std::shared_ptr<Media> media )
     m_media = std::move( media );
 }
 
+std::shared_ptr<File> Task::Item::file()
+{
+    return m_file;
+}
+
+void Task::Item::setFile(std::shared_ptr<File> file)
+{
+    m_file = std::move( file );
+}
+
+std::shared_ptr<Folder> Task::Item::parentFolder()
+{
+    return m_parentFolder;
+}
+
+void Task::Item::setParentFolder( std::shared_ptr<Folder> parentFolder )
+{
+    m_parentFolder = std::move( parentFolder );
+}
+
+std::shared_ptr<fs::IFile> Task::Item::fileFs()
+{
+    return m_fileFs;
+}
+
+void Task::Item::setFileFs( std::shared_ptr<fs::IFile> fileFs )
+{
+    m_fileFs = std::move( fileFs );
+}
+
+std::shared_ptr<fs::IDirectory> Task::Item::parentFolderFs()
+{
+    return m_parentFolderFs;
+}
+
+void Task::Item::setParentFolderFs( std::shared_ptr<fs::IDirectory> parentDirectoryFs )
+{
+    m_parentFolderFs = std::move( parentDirectoryFs );
+}
+
+std::shared_ptr<Playlist> Task::Item::parentPlaylist()
+{
+    return m_parentPlaylist;
+}
+
+void Task::Item::setParentPlaylist( std::shared_ptr<Playlist> parentPlaylist )
+{
+    m_parentPlaylist = std::move( parentPlaylist );
+}
+
+unsigned int Task::Item::parentPlaylistIndex() const
+{
+    return m_parentPlaylistIndex;
+}
+
+void Task::Item::setParentPlaylistIndex( unsigned int parentPlaylistIndex )
+{
+    m_parentPlaylistIndex = parentPlaylistIndex;
+}
+
 bool Task::restoreLinkedEntities()
 {
     LOG_INFO("Restoring linked entities of task ", m_id);
@@ -221,7 +295,7 @@ bool Task::restoreLinkedEntities()
     // First of all, we need to know if the file has been created already
     // ie. have we run the MetadataParser service, at least partially
     if ( m_fileId != 0 )
-        file = File::fetch( m_ml, m_fileId );
+        m_item.setFile( File::fetch( m_ml, m_fileId ) );
 
     // We might re-create tasks without mrl to ease the handling of files on
     // external storage.
@@ -230,12 +304,12 @@ bool Task::restoreLinkedEntities()
         // but we expect those to be created from an existing file after a
         // partial/failed migration. If we don't have a file nor an mrl, we
         // can't really process it.
-        if ( file == nullptr )
+        if ( m_item.file() == nullptr )
         {
             assert( !"Can't process a file without a file nor an mrl" );
             return false;
         }
-        auto folder = Folder::fetch( m_ml, file->folderId() );
+        auto folder = Folder::fetch( m_ml, m_item.file()->folderId() );
         if ( folder == nullptr )
         {
             assert( !"Can't file the folder associated with a file" );
@@ -246,11 +320,11 @@ bool Task::restoreLinkedEntities()
         }
         if ( folder->isPresent() == false )
         {
-            LOG_WARN( "Postponing rescan of removable file ", file->rawMrl(),
+            LOG_WARN( "Postponing rescan of removable file ", m_item.file()->rawMrl(),
                       " until the device containing it is present again" );
             return false;
         }
-        setMrl( file->mrl() );
+        setMrl( m_item.file()->mrl() );
     }
     auto fsFactory = m_ml->fsFactoryForMrl( m_item.mrl() );
     if ( fsFactory == nullptr )
@@ -258,7 +332,7 @@ bool Task::restoreLinkedEntities()
 
     try
     {
-        parentFolderFs = fsFactory->createDirectory( utils::file::directory( m_item.mrl() ) );
+        m_item.setParentFolderFs( fsFactory->createDirectory( utils::file::directory( m_item.mrl() ) ) );
     }
     catch ( const std::system_error& ex )
     {
@@ -268,7 +342,7 @@ bool Task::restoreLinkedEntities()
 
     try
     {
-        auto files = parentFolderFs->files();
+        auto files = m_item.parentFolderFs()->files();
         auto it = std::find_if( begin( files ), end( files ), [this]( std::shared_ptr<fs::IFile> f ) {
             return f->mrl() == m_item.mrl();
         });
@@ -277,13 +351,13 @@ bool Task::restoreLinkedEntities()
             LOG_ERROR( "Failed to restore fs::IFile associated with ", m_item.mrl() );
             return false;
         }
-        fileFs = *it;
+        m_item.setFileFs( *it );
     }
     catch ( const std::system_error& ex )
     {
         // If we never found the file yet, we can delete the task. It will be
         // recreated upon next discovery
-        if ( file == nullptr )
+        if ( m_item.file() == nullptr )
         {
             LOG_WARN( "Failed to restore file system instances for mrl ", m_item.mrl(), "."
                       " Removing the task until it gets detected again." );
@@ -301,12 +375,12 @@ bool Task::restoreLinkedEntities()
         return false;
     }
 
-    if ( file != nullptr )
-        m_item.setMedia( file->media() );
+    if ( m_item.file() != nullptr )
+        m_item.setMedia( m_item.file()->media() );
 
-    parentFolder = Folder::fetch( m_ml, m_parentFolderId );
+    m_item.setParentFolder( Folder::fetch( m_ml, m_parentFolderId ) );
     if ( m_parentPlaylistId != 0 )
-        parentPlaylist = Playlist::fetch( m_ml, m_parentPlaylistId );
+        m_item.setParentPlaylist( Playlist::fetch( m_ml, m_parentPlaylistId ) );
 
     return true;
 }
@@ -374,15 +448,19 @@ Task::create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
               std::shared_ptr<Folder> parentFolder, std::shared_ptr<fs::IDirectory> parentFolderFs,
               std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist )
 {
+    auto parentFolderId = parentFolder->id();
+    auto parentPlaylistId = parentPlaylist.first != nullptr ? parentPlaylist.first->id() : 0;
+    auto parentPlaylistIndex = parentPlaylist.second;
+
     std::shared_ptr<Task> self = std::make_shared<Task>( ml, std::move( fileFs ),
         std::move( parentFolder ), std::move( parentFolderFs ),
         std::move( parentPlaylist.first ), parentPlaylist.second );
     const std::string req = "INSERT INTO " + policy::TaskTable::Name +
         "(mrl, parent_folder_id, parent_playlist_id, parent_playlist_index) "
         "VALUES(?, ?, ?, ?)";
-    if ( insert( ml, self, req, self->m_item.mrl(), self->parentFolder->id(), sqlite::ForeignKey(
-                 self->parentPlaylist ? self->parentPlaylist->id() : 0 ),
-                 self->parentPlaylistIndex ) == false )
+    if ( insert( ml, self, req, self->m_item.mrl(), parentFolderId,
+                 sqlite::ForeignKey( parentPlaylistId ),
+                 parentPlaylistIndex ) == false )
         return nullptr;
     return self;
 }

@@ -94,6 +94,9 @@ public:
     public:
         Item() = default;
         Item( std::string mrl );
+        Item( std::shared_ptr<fs::IFile> fileFs,
+              std::shared_ptr<Folder> folder, std::shared_ptr<fs::IDirectory> folderFs,
+              std::shared_ptr<Playlist> parentPlaylist, unsigned int parentPlaylistIndex );
         enum class Metadata : uint8_t
         {
             Title,
@@ -162,6 +165,24 @@ public:
         std::shared_ptr<Media> media();
         void setMedia( std::shared_ptr<Media> media );
 
+        std::shared_ptr<File> file();
+        void setFile( std::shared_ptr<File> file );
+
+        std::shared_ptr<Folder> parentFolder();
+        void setParentFolder(std::shared_ptr<Folder> parentFolder );
+
+        std::shared_ptr<fs::IFile> fileFs();
+        void setFileFs( std::shared_ptr<fs::IFile> fileFs );
+
+        std::shared_ptr<fs::IDirectory> parentFolderFs();
+        void setParentFolderFs( std::shared_ptr<fs::IDirectory> parentFolderFs );
+
+        std::shared_ptr<Playlist> parentPlaylist();
+        void setParentPlaylist( std::shared_ptr<Playlist> parentPlaylist );
+
+        unsigned int parentPlaylistIndex() const;
+        void setParentPlaylistIndex( unsigned int parentPlaylistIndex );
+
     private:
         std::string m_mrl;
         std::unordered_map<Metadata, std::string> m_metadata;
@@ -169,6 +190,12 @@ public:
         std::vector<Track> m_tracks;
         int64_t m_duration;
         std::shared_ptr<Media> m_media;
+        std::shared_ptr<File> m_file;
+        std::shared_ptr<fs::IFile> m_fileFs;
+        std::shared_ptr<Folder> m_parentFolder;
+        std::shared_ptr<fs::IDirectory> m_parentFolderFs;
+        std::shared_ptr<Playlist> m_parentPlaylist;
+        unsigned int m_parentPlaylistIndex;
     };
 
     static_assert( std::is_move_assignable<Item>::value, "Item must be move assignable" );
@@ -211,12 +238,6 @@ public:
     bool restoreLinkedEntities();
     void setMrl( std::string mrl );
 
-    std::shared_ptr<File>           file;
-    std::shared_ptr<fs::IFile>      fileFs;
-    std::shared_ptr<Folder>         parentFolder;
-    std::shared_ptr<fs::IDirectory> parentFolderFs;
-    std::shared_ptr<Playlist>       parentPlaylist;
-    unsigned int                    parentPlaylistIndex;
     unsigned int                    currentService;
 
     static void createTable( sqlite::Connection* dbConnection );

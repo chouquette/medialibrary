@@ -99,13 +99,13 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
         if ( res == false ) // playlist addition may fail due to constraint violation
             return parser::Task::Status::Fatal;
 
-        assert( task.file != nullptr );
+        assert( task.item().file() != nullptr );
         task.markStepCompleted( parser::Task::ParserStep::Completed );
         task.saveParserStep();
         return parser::Task::Status::Success;
     }
 
-    if ( task.file == nullptr )
+    if ( task.item().file() == nullptr )
     {
         assert( task.item().media() == nullptr );
         // Try to create Media & File
@@ -121,10 +121,11 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
                 return parser::Task::Status::Fatal;
             }
             // For now, assume all media are made of a single file
-            task.file = task.item().media()->addFile( *task.fileFs, task.parentFolder->id(),
-                                             task.parentFolderFs->device()->isRemovable(),
-                                             File::Type::Main );
-            if ( task.file == nullptr )
+            task.item().setFile( task.item().media()->addFile( *task.item().fileFs(),
+                                                               task.item().parentFolder()->id(),
+                                             task.item().parentFolderFs()->device()->isRemovable(),
+                                             File::Type::Main ) );
+            if ( task.item().file() == nullptr )
             {
                 LOG_ERROR( "Failed to add file ", mrl, " to media #", task.item().media()->id() );
                 return parser::Task::Status::Fatal;
@@ -144,7 +145,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
                 LOG_ERROR( "File ", mrl, " no longer present in DB, aborting");
                 return parser::Task::Status::Fatal;
             }
-            task.file = fileInDB;
+            task.item().setFile( fileInDB );
             task.item().setMedia( fileInDB->media() );
             if ( task.item().media() == nullptr ) // Without a media, we cannot go further
                 return parser::Task::Status::Fatal;
@@ -161,8 +162,8 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
         return parser::Task::Status::Fatal;
     }
 
-    if ( task.parentPlaylist != nullptr )
-        task.parentPlaylist->add( task.item().media()->id(), task.parentPlaylistIndex );
+    if ( task.item().parentPlaylist() != nullptr )
+        task.item().parentPlaylist()->add( task.item().media()->id(), task.item().parentPlaylistIndex() );
 
     if ( alreadyInParser == true )
     {
@@ -216,7 +217,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
             return parser::Task::Status::Fatal;
     }
 
-    if ( task.file->isDeleted() == true || task.item().media()->isDeleted() == true )
+    if ( task.item().file()->isDeleted() == true || task.item().media()->isDeleted() == true )
         return parser::Task::Status::Fatal;
 
     task.markStepCompleted( parser::Task::ParserStep::MetadataAnalysis );
@@ -242,8 +243,10 @@ bool MetadataParser::addPlaylistMedias( parser::Task& task ) const
         LOG_ERROR( "Failed to create playlist ", mrl, " to the media library" );
         return false;
     }
-    task.file = playlistPtr->addFile( *task.fileFs, task.parentFolder->id(), task.parentFolderFs->device()->isRemovable() );
-    if ( task.file == nullptr )
+    task.item().setFile( playlistPtr->addFile( *task.item().fileFs(),
+                                               task.item().parentFolder()->id(),
+                                               task.item().parentFolderFs()->device()->isRemovable() ) );
+    if ( task.item().file() == nullptr )
     {
         LOG_ERROR( "Failed to add playlist file ", mrl );
         return false;
@@ -465,7 +468,7 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
     }
 
     if ( m_previousAlbum != nullptr && albumName == m_previousAlbum->title() &&
-         m_previousFolderId != 0 && task.file->folderId() == m_previousFolderId )
+         m_previousFolderId != 0 && task.item().file()->folderId() == m_previousFolderId )
         return m_previousAlbum;
     m_previousAlbum.reset();
     m_previousFolderId = 0;
@@ -551,7 +554,7 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
         }
 
         // Assume album files will be in the same folder.
-        auto newFileFolder = utils::file::directory( task.file->mrl() );
+        auto newFileFolder = utils::file::directory( task.item().file()->mrl() );
         auto trackFiles = tracks[0]->files();
         bool differentFolder = false;
         for ( auto& f : trackFiles )
@@ -611,7 +614,7 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task& task, std::share
     {
         LOG_WARN( "Multiple candidates for album ", albumName, ". Selecting first one out of luck" );
     }
-    m_previousFolderId = task.file->folderId();
+    m_previousFolderId = task.item().file()->folderId();
     m_previousAlbum = albums[0];
     return albums[0];
 }
