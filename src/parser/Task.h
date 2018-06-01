@@ -127,6 +127,14 @@ public:
             DiscTotal,
         };
 
+        struct MetadataHash
+        {
+            size_t operator()(Metadata m) const
+            {
+                return static_cast<size_t>( m );
+            }
+        };
+
         struct Track
         {
             enum class Type : uint8_t
@@ -196,7 +204,7 @@ public:
         ITaskCb* m_taskCb;
 
         std::string m_mrl;
-        std::unordered_map<Metadata, std::string> m_metadata;
+        std::unordered_map<Metadata, std::string, MetadataHash> m_metadata;
         std::vector<Item> m_subItems;
         std::vector<Track> m_tracks;
         int64_t m_duration;
