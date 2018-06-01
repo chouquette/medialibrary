@@ -63,7 +63,14 @@ struct TaskTable
 namespace parser
 {
 
-class Task : public DatabaseHelpers<Task, policy::TaskTable, cachepolicy::Uncached<Task>>
+class ITaskCb
+{
+public:
+    virtual ~ITaskCb() = default;
+    virtual bool updateFileId( int64_t fileId ) = 0;
+};
+
+class Task : public DatabaseHelpers<Task, policy::TaskTable, cachepolicy::Uncached<Task>>, private ITaskCb
 {
 public:
     enum class Status
@@ -100,8 +107,8 @@ public:
          *
          * The position is used to keep subitems ordering for playlists
          */
-        Item( std::string mrl, unsigned int subitemIndex );
-        Item( std::shared_ptr<fs::IFile> fileFs,
+        Item( ITaskCb* taskCb, std::string mrl, unsigned int subitemIndex );
+        Item( ITaskCb* taskCb, std::shared_ptr<fs::IFile> fileFs,
               std::shared_ptr<Folder> folder, std::shared_ptr<fs::IDirectory> folderFs,
               std::shared_ptr<Playlist> parentPlaylist, unsigned int parentPlaylistIndex );
         enum class Metadata : uint8_t
@@ -173,7 +180,7 @@ public:
         void setMedia( std::shared_ptr<Media> media );
 
         std::shared_ptr<File> file();
-        void setFile( std::shared_ptr<File> file );
+        bool setFile( std::shared_ptr<File> file );
 
         std::shared_ptr<Folder> parentFolder();
 
@@ -186,6 +193,8 @@ public:
         unsigned int parentPlaylistIndex() const;
 
     private:
+        ITaskCb* m_taskCb;
+
         std::string m_mrl;
         std::unordered_map<Metadata, std::string> m_metadata;
         std::vector<Item> m_subItems;
@@ -231,7 +240,7 @@ public:
      */
     void startParserStep();
 
-    bool updateFileId();
+    virtual bool updateFileId( int64_t fileId ) override;
     int64_t id() const;
 
     Item& item();

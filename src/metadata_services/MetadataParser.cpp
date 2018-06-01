@@ -131,8 +131,9 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
                 return parser::Task::Status::Fatal;
             }
             task.item().setMedia( std::move( m ) );
+            // Will invoke ITaskCb::updateFileId to upadte m_fileId & its
+            // representation in DB
             task.item().setFile( std::move( file ) );
-            task.updateFileId();
             t->commit();
         }
         // Voluntarily trigger an exception for a valid, but less common case, to avoid database overhead
@@ -275,6 +276,8 @@ bool MetadataParser::addPlaylistMedias( parser::Task& task ) const
             LOG_ERROR( "Failed to add playlist file ", mrl );
             return false;
         }
+        // Will invoke ITaskCb::updateFileId to upadte m_fileId & its
+        // representation in DB
         task.item().setFile( std::move( file ) );
         t->commit();
     }
