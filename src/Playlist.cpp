@@ -278,10 +278,15 @@ Query<IPlaylist> Playlist::listAll( MediaLibraryPtr ml, SortingCriteria sort, bo
     return make_query<Playlist, IPlaylist>( ml, "*", req );
 }
 
-void Playlist::deleteAllExternal(MediaLibraryPtr ml)
+void Playlist::clearExternalPlaylistContent(MediaLibraryPtr ml)
 {
-    const std::string req = "DELETE FROM " + policy::PlaylistTable::Name +
-            " WHERE file_id IS NOT NULL";
+    // We can't delete all external playlist as such, since this would cause the
+    // deletion of the associated task through the Task.playlist_id Playlist.id_playlist
+    // foreign key, and therefor they wouldn't be rescanned.
+    // Instead, flush the playlist content.
+    const std::string req = "DELETE FROM PlaylistMediaRelation WHERE playlist_id IN ("
+            "SELECT id_playlist FROM " + policy::PlaylistTable::Name + " WHERE "
+            "file_id IS NOT NULL)";
     sqlite::Tools::executeDelete( ml->getConn(), req );
 }
 

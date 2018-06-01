@@ -235,28 +235,54 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
 
 bool MetadataParser::addPlaylistMedias( parser::Task& task ) const
 {
-    auto t = m_ml->getConn()->newTransaction();
     const auto& mrl = task.item().mrl();
     LOG_INFO( "Try to import ", mrl, " as a playlist" );
-    auto playlistName = task.item().meta( parser::Task::Item::Metadata::Title );
-    if ( playlistName.empty() == true )
-        playlistName = utils::url::decode( utils::file::fileName( mrl ) );
-    auto playlistPtr = Playlist::create( m_ml, playlistName );
-    if ( playlistPtr == nullptr )
+    std::shared_ptr<Playlist> playlistPtr;
+    if ( task.item().file() != nullptr )
     {
-        LOG_ERROR( "Failed to create playlist ", mrl, " to the media library" );
-        return false;
+        // We are most likely re-scanning a file representing a playlist.
+        // If a task has a file, it means the playlist & the associated file have
+        // been created.
+        std::string req = "SELECT * FROM " + policy::PlaylistTable::Name +
+                " WHERE file_id = ?";
+        playlistPtr = Playlist::fetch( m_ml, req, task.item().file()->id() );
+        if ( playlistPtr == nullptr )
+        {
+            // The playlist had to be created, something is very wrong, give up
+            // FIXME: Check that the task will be deleted.
+            assert( false );
+            return false;
+        }
     }
-    auto file = playlistPtr->addFile( *task.item().fileFs(),
-                                      task.item().parentFolder()->id(),
-                                      task.item().parentFolderFs()->device()->isRemovable() );
-    if ( file == nullptr )
+    else
     {
-        LOG_ERROR( "Failed to add playlist file ", mrl );
-        return false;
+        auto playlistName = task.item().meta( parser::Task::Item::Metadata::Title );
+        if ( playlistName.empty() == true )
+            playlistName = utils::url::decode( utils::file::fileName( mrl ) );
+        auto t = m_ml->getConn()->newTransaction();
+        playlistPtr = Playlist::create( m_ml, playlistName );
+        if ( playlistPtr == nullptr )
+        {
+            LOG_ERROR( "Failed to create playlist ", mrl, " to the media library" );
+            return false;
+        }
+
+        auto file = playlistPtr->addFile( *task.item().fileFs(),
+                                          task.item().parentFolder()->id(),
+                                          task.item().parentFolderFs()->device()->isRemovable() );
+        if ( file == nullptr )
+        {
+            LOG_ERROR( "Failed to add playlist file ", mrl );
+            return false;
+        }
+        task.item().setFile( std::move( file ) );
+        t->commit();
     }
-    task.item().setFile( std::move( file ) );
-    t->commit();
+    // Now regardless of if the playlist is re-scanned or discovered from the
+    // first time, just schedule all members for insertion. media & files will
+    // be recreated if need be, and appropriate entries in PlaylistMediaRelation
+    // table will be recreated to link things together.
+
     auto subitems = task.item().subItems();
     for ( const auto& subItem : subitems ) // FIXME: Interrupt loop if paused
         addPlaylistElement( task, playlistPtr, subItem );

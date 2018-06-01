@@ -78,7 +78,7 @@ public:
      *                          that were parsed from playlist files.
      * Playlist manually added by the user are untouched
      */
-    static void deleteAllExternal( MediaLibraryPtr ml );
+    static void clearExternalPlaylistContent( MediaLibraryPtr ml );
 
 private:
     static std::string sortRequest( SortingCriteria sort, bool desc );
