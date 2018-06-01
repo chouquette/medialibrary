@@ -62,7 +62,7 @@ Playlist::Playlist( MediaLibraryPtr ml, const std::string& name )
 std::shared_ptr<Playlist> Playlist::create( MediaLibraryPtr ml, const std::string& name )
 {
     auto self = std::make_shared<Playlist>( ml, name );
-    static const std::string req = "INSERT INTO " + policy::PlaylistTable::Name + \
+    static const std::string req = "INSERT INTO " + policy::PlaylistTable::Name +
             "(name, file_id, creation_date, artwork_mrl) VALUES(?, ?, ?, ?)";
     try
     {
