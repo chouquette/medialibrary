@@ -280,7 +280,8 @@ bool Task::restoreLinkedEntities()
     LOG_INFO("Restoring linked entities of task ", m_id);
     // MRL will be empty if the task has been resumed from unparsed files
     // parentFolderId == 0 indicates an external file
-    if ( m_item.mrl().empty() == true && m_parentFolderId == 0 )
+    auto mrl = m_item.mrl();
+    if ( mrl.empty() == true && m_parentFolderId == 0 )
     {
         LOG_WARN( "Aborting & removing external file task (#", m_id, ')' );
         destroy( m_ml, m_id );
@@ -288,22 +289,23 @@ bool Task::restoreLinkedEntities()
     }
     // First of all, we need to know if the file has been created already
     // ie. have we run the MetadataParser service, at least partially
+    std::shared_ptr<File> file;
     if ( m_fileId != 0 )
-        m_item.setFile( File::fetch( m_ml, m_fileId ) );
+        file = File::fetch( m_ml, m_fileId );
 
     // We might re-create tasks without mrl to ease the handling of files on
     // external storage.
-    if ( m_item.mrl().empty() == true )
+    if ( mrl.empty() == true )
     {
         // but we expect those to be created from an existing file after a
         // partial/failed migration. If we don't have a file nor an mrl, we
         // can't really process it.
-        if ( m_item.file() == nullptr )
+        if ( file == nullptr )
         {
             assert( !"Can't process a file without a file nor an mrl" );
             return false;
         }
-        auto folder = Folder::fetch( m_ml, m_item.file()->folderId() );
+        auto folder = Folder::fetch( m_ml, file->folderId() );
         if ( folder == nullptr )
         {
             assert( !"Can't file the folder associated with a file" );
@@ -314,19 +316,20 @@ bool Task::restoreLinkedEntities()
         }
         if ( folder->isPresent() == false )
         {
-            LOG_WARN( "Postponing rescan of removable file ", m_item.file()->rawMrl(),
+            LOG_WARN( "Postponing rescan of removable file ", file->rawMrl(),
                       " until the device containing it is present again" );
             return false;
         }
-        setMrl( m_item.file()->mrl() );
+        setMrl( file->mrl() );
     }
-    auto fsFactory = m_ml->fsFactoryForMrl( m_item.mrl() );
+    auto fsFactory = m_ml->fsFactoryForMrl( mrl );
     if ( fsFactory == nullptr )
         return false;
 
+    std::shared_ptr<fs::IDirectory> parentFolderFs;
     try
     {
-        m_item.setParentFolderFs( fsFactory->createDirectory( utils::file::directory( m_item.mrl() ) ) );
+        parentFolderFs = fsFactory->createDirectory( utils::file::directory( mrl ) );
     }
     catch ( const std::system_error& ex )
     {
@@ -334,26 +337,27 @@ bool Task::restoreLinkedEntities()
         return false;
     }
 
+    std::shared_ptr<fs::IFile> fileFs;
     try
     {
-        auto files = m_item.parentFolderFs()->files();
-        auto it = std::find_if( begin( files ), end( files ), [this]( std::shared_ptr<fs::IFile> f ) {
-            return f->mrl() == m_item.mrl();
+        auto files = parentFolderFs->files();
+        auto it = std::find_if( begin( files ), end( files ), [&mrl]( std::shared_ptr<fs::IFile> f ) {
+            return f->mrl() == mrl;
         });
         if ( it == end( files ) )
         {
-            LOG_ERROR( "Failed to restore fs::IFile associated with ", m_item.mrl() );
+            LOG_ERROR( "Failed to restore fs::IFile associated with ", mrl );
             return false;
         }
-        m_item.setFileFs( *it );
+        fileFs = std::move( *it );
     }
     catch ( const std::system_error& ex )
     {
         // If we never found the file yet, we can delete the task. It will be
         // recreated upon next discovery
-        if ( m_item.file() == nullptr )
+        if ( file == nullptr )
         {
-            LOG_WARN( "Failed to restore file system instances for mrl ", m_item.mrl(), "."
+            LOG_WARN( "Failed to restore file system instances for mrl ", mrl, "."
                       " Removing the task until it gets detected again." );
             destroy( m_ml, m_id );
         }
@@ -363,19 +367,37 @@ bool Task::restoreLinkedEntities()
             // detect that the file is now missing, and we won't try to restore
             // this task until it comes back (since the task restoration request
             // includes the file.is_present flag)
-            LOG_WARN( "Failed to restore file system instances for mrl ", m_item.mrl(), "."
+            LOG_WARN( "Failed to restore file system instances for mrl ", mrl, "."
                       " Postponing the task." );
         }
         return false;
     }
 
-    if ( m_item.file() != nullptr )
-        m_item.setMedia( m_item.file()->media() );
-
-    m_item.setParentFolder( Folder::fetch( m_ml, m_parentFolderId ) );
+    std::shared_ptr<Folder> parentFolder = Folder::fetch( m_ml, m_parentFolderId );
+    if ( parentFolder == nullptr )
+    {
+        LOG_ERROR( "Failed to restore parent folder #", m_parentFolderId );
+        return false;
+    }
+    std::shared_ptr<Playlist> parentPlaylist;
     if ( m_parentPlaylistId != 0 )
-        m_item.setParentPlaylist( Playlist::fetch( m_ml, m_parentPlaylistId ) );
+    {
+        parentPlaylist = Playlist::fetch( m_ml, m_parentPlaylistId );
+        if ( parentPlaylist == nullptr )
+        {
+            LOG_ERROR( "Failed to restore parent playlist #", m_parentPlaylistId );
+            return false;
+        }
+    }
 
+    m_item = Item{ std::move( fileFs ), std::move( parentFolder ),
+                   std::move( parentFolderFs ), std::move( parentPlaylist ),
+                   m_item.parentPlaylistIndex() };
+    if ( file != nullptr )
+    {
+        m_item.setMedia( file->media() );
+        m_item.setFile( std::move( file ) );
+    }
     return true;
 }
 
