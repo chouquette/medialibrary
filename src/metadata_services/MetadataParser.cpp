@@ -322,16 +322,18 @@ void MetadataParser::addPlaylistElement( parser::Task& task, std::shared_ptr<Pla
     auto entryPoint = device->mountpoint();
     if ( parentKnown == false && Folder::fromMrl( m_ml, entryPoint ) != nullptr )
     {
-        auto probePtr = std::unique_ptr<prober::PathProbe>( new prober::PathProbe{ utils::file::stripScheme( mrl ),
-                                                                                   isDirectory, std::move( playlistPtr ), parentFolder,
-                                                                                   utils::file::stripScheme( directoryMrl ), subitem.parentPlaylistIndex(), true } );
+        auto probePtr = std::unique_ptr<prober::PathProbe>(
+                    new prober::PathProbe{ utils::file::stripScheme( mrl ),
+                       isDirectory, std::move( playlistPtr ), parentFolder,
+                       utils::file::stripScheme( directoryMrl ), subitem.parentPlaylistIndex(), true } );
         FsDiscoverer discoverer( fsFactory, m_ml, nullptr, std::move( probePtr ) );
         discoverer.reload( entryPoint );
         return;
     }
-    auto probePtr = std::unique_ptr<prober::PathProbe>( new prober::PathProbe{ utils::file::stripScheme( mrl ),
-                                                                               isDirectory, std::move( playlistPtr ), parentFolder,
-                                                                               utils::file::stripScheme( directoryMrl ), subitem.parentPlaylistIndex(), false } );
+    auto probePtr = std::unique_ptr<prober::PathProbe>(
+                new prober::PathProbe{ utils::file::stripScheme( mrl ),
+                   isDirectory, std::move( playlistPtr ), parentFolder,
+                   utils::file::stripScheme( directoryMrl ), subitem.parentPlaylistIndex(), false } );
     FsDiscoverer discoverer( fsFactory, m_ml, nullptr, std::move( probePtr ) );
     if ( parentKnown == false )
     {
