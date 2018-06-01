@@ -192,9 +192,8 @@ void VLCMetadataService::mediaToItem( VLC::Media& media, parser::Task::Item& ite
             assert( vlcMedia != nullptr );
             // Always add 1 to the playlist/subitem index, as 0 is an invalid index
             // in this context
-            parser::Task::Item subItem{ vlcMedia->mrl(), i + 1u };
+            parser::Task::Item& subItem = item.createSubItem( vlcMedia->mrl(), i + 1u );
             mediaToItem( *vlcMedia, subItem );
-            item.addSubItem( std::move( subItem ) );
         }
     }
 }

@@ -161,7 +161,7 @@ public:
         void setMrl( std::string mrl );
 
         const std::vector<Item>& subItems() const;
-        void addSubItem( Item mrl );
+        Item& createSubItem( std::string mrl, unsigned int playlistIndex );
 
         int64_t duration() const;
         void setDuration( int64_t duration );

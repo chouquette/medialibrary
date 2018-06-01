@@ -185,9 +185,10 @@ const std::vector<Task::Item>& Task::Item::subItems() const
     return m_subItems;
 }
 
-void Task::Item::addSubItem( Task::Item item )
+Task::Item& Task::Item::createSubItem( std::string mrl, unsigned int playlistIndex )
 {
-    m_subItems.emplace_back( std::move( item ) );
+    m_subItems.emplace_back( std::move( mrl ), playlistIndex );
+    return m_subItems.back();
 }
 
 int64_t Task::Item::duration() const
