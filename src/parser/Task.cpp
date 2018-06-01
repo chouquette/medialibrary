@@ -62,8 +62,7 @@ Task::Task( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_parentFolderId
         >> m_parentPlaylistId
         >> parentPlaylistIndex;
-    m_item = Item{ std::move( mrl ) };
-    m_item.setParentPlaylistIndex( parentPlaylistIndex );
+    m_item = Item{ std::move( mrl ), parentPlaylistIndex };
 }
 
 Task::Task( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
@@ -137,10 +136,10 @@ Task::Item& Task::item()
     return m_item;
 }
 
-Task::Item::Item( std::string mrl )
+Task::Item::Item( std::string mrl, unsigned int subitemPosition )
     : m_mrl( std::move( mrl ) )
     , m_duration( 0 )
-    , m_parentPlaylistIndex( 0 )
+    , m_parentPlaylistIndex( subitemPosition )
 {
 }
 
@@ -274,11 +273,6 @@ void Task::Item::setParentPlaylist( std::shared_ptr<Playlist> parentPlaylist )
 unsigned int Task::Item::parentPlaylistIndex() const
 {
     return m_parentPlaylistIndex;
-}
-
-void Task::Item::setParentPlaylistIndex( unsigned int parentPlaylistIndex )
-{
-    m_parentPlaylistIndex = parentPlaylistIndex;
 }
 
 bool Task::restoreLinkedEntities()

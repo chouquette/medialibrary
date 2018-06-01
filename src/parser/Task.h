@@ -93,7 +93,14 @@ public:
     {
     public:
         Item() = default;
-        Item( std::string mrl );
+        /**
+         * @brief Item Construct a parser item with a given mrl and subitem index
+         * @param mrl The item's mrl
+         * @param subitemPosition A potential subitem index, if any, or 0 if none.
+         *
+         * The position is used to keep subitems ordering for playlists
+         */
+        Item( std::string mrl, unsigned int subitemIndex );
         Item( std::shared_ptr<fs::IFile> fileFs,
               std::shared_ptr<Folder> folder, std::shared_ptr<fs::IDirectory> folderFs,
               std::shared_ptr<Playlist> parentPlaylist, unsigned int parentPlaylistIndex );
@@ -181,7 +188,6 @@ public:
         void setParentPlaylist( std::shared_ptr<Playlist> parentPlaylist );
 
         unsigned int parentPlaylistIndex() const;
-        void setParentPlaylistIndex( unsigned int parentPlaylistIndex );
 
     private:
         std::string m_mrl;

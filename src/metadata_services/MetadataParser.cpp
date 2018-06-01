@@ -258,14 +258,14 @@ bool MetadataParser::addPlaylistMedias( parser::Task& task ) const
     task.item().setFile( std::move( file ) );
     t->commit();
     auto subitems = task.item().subItems();
-    for ( auto i = 0u; i < subitems.size(); ++i ) // FIXME: Interrupt loop if paused
-        addPlaylistElement( task, playlistPtr, subitems[i], static_cast<unsigned int>( i ) + 1 );
+    for ( const auto& subItem : subitems ) // FIXME: Interrupt loop if paused
+        addPlaylistElement( task, playlistPtr, subItem );
 
     return true;
 }
 
 void MetadataParser::addPlaylistElement( parser::Task& task, const std::shared_ptr<Playlist>& playlistPtr,
-                                         parser::Task::Item& subitem, unsigned int index ) const
+                                         const parser::Task::Item& subitem ) const
 {
     const auto& mrl = subitem.mrl();
     LOG_INFO( "Try to add ", mrl, " to the playlist ", mrl );
@@ -273,7 +273,7 @@ void MetadataParser::addPlaylistElement( parser::Task& task, const std::shared_p
     if ( media != nullptr )
     {
         LOG_INFO( "Media for ", mrl, " already exists, adding it to the playlist ", mrl );
-        playlistPtr->add( media->id(), index );
+        playlistPtr->add( media->id(), subitem.parentPlaylistIndex() );
         return;
     }
     // Create Media, etc.
@@ -293,7 +293,7 @@ void MetadataParser::addPlaylistElement( parser::Task& task, const std::shared_p
         auto externalFile = externalMedia->addExternalMrl( mrl, IFile::Type::Main );
         if ( externalFile == nullptr )
             LOG_ERROR( "Failed to create external file for ", mrl, " in the playlist ", task.item().mrl() );
-        playlistPtr->add( externalMedia->id(), index );
+        playlistPtr->add( externalMedia->id(), subitem.parentPlaylistIndex() );
         t2->commit();
         return;
     }
@@ -324,14 +324,14 @@ void MetadataParser::addPlaylistElement( parser::Task& task, const std::shared_p
     {
         auto probePtr = std::unique_ptr<prober::PathProbe>( new prober::PathProbe{ utils::file::stripScheme( mrl ),
                                                                                    isDirectory, playlistPtr, parentFolder,
-                                                                                   utils::file::stripScheme( directoryMrl ), index, true } );
+                                                                                   utils::file::stripScheme( directoryMrl ), subitem.parentPlaylistIndex(), true } );
         FsDiscoverer discoverer( fsFactory, m_ml, nullptr, std::move( probePtr ) );
         discoverer.reload( entryPoint );
         return;
     }
     auto probePtr = std::unique_ptr<prober::PathProbe>( new prober::PathProbe{ utils::file::stripScheme( mrl ),
                                                                                isDirectory, playlistPtr, parentFolder,
-                                                                               utils::file::stripScheme( directoryMrl ), index, false } );
+                                                                               utils::file::stripScheme( directoryMrl ), subitem.parentPlaylistIndex(), false } );
     FsDiscoverer discoverer( fsFactory, m_ml, nullptr, std::move( probePtr ) );
     if ( parentKnown == false )
     {
