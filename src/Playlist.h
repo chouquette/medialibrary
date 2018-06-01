@@ -48,7 +48,6 @@ class Playlist : public IPlaylist, public DatabaseHelpers<Playlist, policy::Play
 {
 public:
     Playlist( MediaLibraryPtr ml, sqlite::Row& row );
-    Playlist( MediaLibraryPtr ml, const std::string& name, int64_t fileId );
     Playlist( MediaLibraryPtr ml, const std::string& name );
 
     static std::shared_ptr<Playlist> create( MediaLibraryPtr ml, const std::string& name );

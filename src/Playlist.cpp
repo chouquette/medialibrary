@@ -50,17 +50,12 @@ Playlist::Playlist( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_artworkMrl;
 }
 
-Playlist::Playlist( MediaLibraryPtr ml, const std::string& name, int64_t fileId )
+Playlist::Playlist( MediaLibraryPtr ml, const std::string& name )
     : m_ml( ml )
     , m_id( 0 )
     , m_name( name )
-    , m_fileId( fileId )
+    , m_fileId( 0 )
     , m_creationDate( time( nullptr ) )
-{
-}
-
-Playlist::Playlist( MediaLibraryPtr ml, const std::string& name)
-    : Playlist( ml, name, 0 )
 {
 }
 
