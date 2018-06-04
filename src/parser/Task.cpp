@@ -73,16 +73,16 @@ Task::Task( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
             unsigned int parentPlaylistIndex )
     : currentService( 0 )
     , m_ml( ml )
-    , m_step( parser::Step::None )
+    , m_step( Step::None )
     , m_fileId( 0 )
     , m_item( this, std::move( fileFs ), std::move( parentFolder ),
               std::move( parentFolderFs ), std::move( parentPlaylist ), parentPlaylistIndex )
 {
 }
 
-void Task::markStepCompleted( parser::Step stepCompleted )
+void Task::markStepCompleted( Step stepCompleted )
 {
-    m_step = static_cast<parser::Step>( static_cast<uint8_t>( m_step ) |
+    m_step = static_cast<Step>( static_cast<uint8_t>( m_step ) |
                                       static_cast<uint8_t>( stepCompleted ) );
 }
 
@@ -97,13 +97,13 @@ bool Task::saveParserStep()
 
 bool Task::isCompleted() const
 {
-    using StepType = typename std::underlying_type<parser::Step>::type;
+    using StepType = typename std::underlying_type<Step>::type;
     return ( static_cast<StepType>( m_step ) &
-             static_cast<StepType>( parser::Step::Completed ) ) ==
-             static_cast<StepType>( parser::Step::Completed );
+             static_cast<StepType>( Step::Completed ) ) ==
+             static_cast<StepType>( Step::Completed );
 }
 
-bool Task::isStepCompleted( parser::Step step ) const
+bool Task::isStepCompleted( Step step ) const
 {
     return ( static_cast<uint8_t>( m_step ) & static_cast<uint8_t>( step ) ) != 0;
 }
@@ -194,12 +194,12 @@ size_t Task::Item::nbSubItems() const
     return m_subItems.size();
 }
 
-const parser::IItem& Task::Item::subItem( unsigned int index ) const
+const IItem& Task::Item::subItem( unsigned int index ) const
 {
     return m_subItems[index];
 }
 
-parser::IItem& Task::Item::createSubItem( std::string mrl, unsigned int playlistIndex )
+IItem& Task::Item::createSubItem( std::string mrl, unsigned int playlistIndex )
 {
     m_subItems.emplace_back( nullptr, std::move( mrl ), playlistIndex );
     return m_subItems.back();
@@ -435,15 +435,15 @@ void Task::resetRetryCount( MediaLibraryPtr ml )
 {
     static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET "
             "retry_count = 0 WHERE step & ? != ?";
-    sqlite::Tools::executeUpdate( ml->getConn(), req, parser::Step::Completed,
-                                  parser::Step::Completed);
+    sqlite::Tools::executeUpdate( ml->getConn(), req, Step::Completed,
+                                  Step::Completed);
 }
 
 void Task::resetParsing( MediaLibraryPtr ml )
 {
     static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET "
             "retry_count = 0, step = ?";
-    sqlite::Tools::executeUpdate( ml->getConn(), req, parser::Step::None );
+    sqlite::Tools::executeUpdate( ml->getConn(), req, Step::None );
 }
 
 std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
@@ -452,8 +452,8 @@ std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
         " LEFT JOIN " + policy::FileTable::Name + " f ON f.id_file = t.file_id"
         " WHERE step & ? != ? AND retry_count < 3 AND (f.is_present != 0 OR "
         " t.file_id IS NULL)";
-    return Task::fetchAll<Task>( ml, req, parser::Step::Completed,
-                                 parser::Step::Completed );
+    return Task::fetchAll<Task>( ml, req, Step::Completed,
+                                 Step::Completed );
 }
 
 std::shared_ptr<Task>

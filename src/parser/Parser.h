@@ -50,8 +50,8 @@ public:
 class Parser : IParserCb
 {
 public:
-    using ServicePtr = std::unique_ptr<parser::IParserService>;
-    using WorkerPtr = std::unique_ptr<parser::Worker>;
+    using ServicePtr = std::unique_ptr<IParserService>;
+    using WorkerPtr = std::unique_ptr<Worker>;
 
     Parser( MediaLibrary* ml );
     virtual ~Parser();
@@ -73,7 +73,7 @@ public:
 
 private:
     void updateStats();
-    virtual void done( std::shared_ptr<parser::Task> task,
+    virtual void done( std::shared_ptr<Task> task,
                        Status status ) override;
     virtual void onIdleChanged( bool idle ) override;
 
