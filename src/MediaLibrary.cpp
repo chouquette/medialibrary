@@ -715,7 +715,7 @@ void MediaLibrary::startParser()
     m_parser.reset( new parser::Parser( this ) );
 
     std::unique_ptr<parser::VLCMetadataService> vlcService( new parser::VLCMetadataService );
-    auto metadataService = std::unique_ptr<MetadataParser>( new MetadataParser );
+    std::unique_ptr<parser::MetadataAnalyzer> metadataService( new parser::MetadataAnalyzer );
     m_parser->addService( std::move( vlcService ) );
     m_parser->addService( std::move( metadataService ) );
     m_parser->start();

@@ -30,36 +30,39 @@ namespace medialibrary
 
 class AlbumTrack;
 
-class MetadataParser : public parser::IParserService
+namespace parser
+{
+
+class MetadataAnalyzer : public IParserService
 {
 public:
-    MetadataParser();
+    MetadataAnalyzer();
 
 protected:
     bool cacheUnknownArtist();
     virtual bool initialize( IMediaLibrary* ml ) override;
-    virtual parser::Status run( parser::IItem& item ) override;
+    virtual Status run( IItem& item ) override;
     virtual const char* name() const override;
     virtual uint8_t nbThreads() const override;
     virtual void onFlushing() override;
     virtual void onRestarted() override;
-    virtual parser::Step targetedStep() const override;
+    virtual Step targetedStep() const override;
 
-    bool addPlaylistMedias( parser::IItem& item ) const;
-    void addPlaylistElement( parser::IItem& item, std::shared_ptr<Playlist> playlistPtr,
-                             const parser::IItem& subitem ) const;
-    bool parseAudioFile( parser::IItem& task );
-    bool parseVideoFile( parser::IItem& task ) const;
-    std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> findOrCreateArtist( parser::IItem& item ) const;
-    std::shared_ptr<AlbumTrack> handleTrack( std::shared_ptr<Album> album, parser::IItem& item,
+    bool addPlaylistMedias( IItem& item ) const;
+    void addPlaylistElement( IItem& item, std::shared_ptr<Playlist> playlistPtr,
+                             const IItem& subitem ) const;
+    bool parseAudioFile( IItem& task );
+    bool parseVideoFile( IItem& task ) const;
+    std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> findOrCreateArtist( IItem& item ) const;
+    std::shared_ptr<AlbumTrack> handleTrack( std::shared_ptr<Album> album, IItem& item,
                                              std::shared_ptr<Artist> artist, Genre* genre ) const;
     bool link(Media& media, std::shared_ptr<Album> album, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist );
-    std::shared_ptr<Album> findAlbum( parser::IItem& item, std::shared_ptr<Artist> albumArtist,
+    std::shared_ptr<Album> findAlbum( IItem& item, std::shared_ptr<Artist> albumArtist,
                                         std::shared_ptr<Artist> artist );
-    std::shared_ptr<Genre> handleGenre( parser::IItem& item ) const;
+    std::shared_ptr<Genre> handleGenre( IItem& item ) const;
 
 private:
-    static int toInt( parser::IItem& item, parser::IItem::Metadata meta );
+    static int toInt( IItem& item, IItem::Metadata meta );
 
 private:
     MediaLibrary* m_ml;
@@ -71,4 +74,5 @@ private:
     int64_t m_previousFolderId;
 };
 
+}
 }
