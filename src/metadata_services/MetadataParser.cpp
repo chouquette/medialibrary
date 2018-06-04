@@ -876,12 +876,6 @@ void MetadataParser::onRestarted()
     cacheUnknownArtist();
 }
 
-bool MetadataParser::isCompleted( const parser::Task& task ) const
-{
-    // We always need to run this task if the metadata extraction isn't completed
-    return task.isStepCompleted( parser::Task::ParserStep::MetadataAnalysis );
-}
-
 parser::Task::ParserStep MetadataParser::targetedStep() const
 {
     return parser::Task::ParserStep::MetadataAnalysis;

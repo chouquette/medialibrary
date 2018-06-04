@@ -163,7 +163,7 @@ void ParserWorker::mainloop()
             task = std::move( m_tasks.front() );
             m_tasks.pop();
         }
-        if ( m_service->isCompleted( *task ) == true )
+        if ( task->isStepCompleted( m_service->targetedStep() ) == true )
         {
             LOG_INFO( "Skipping completed task [", serviceName, "] on ", task->item().mrl() );
             m_parserCb->done( std::move( task ), parser::Task::Status::Success );

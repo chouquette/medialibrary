@@ -51,12 +51,6 @@ public:
      * responsibility.
      */
     virtual uint8_t nbThreads() const = 0;
-    /**
-     * @brief isCompleted Probes a task for completion with regard to this service.
-     * @param task The task probed for completion
-     * @return true if the task is completed, false otherwise.
-     */
-    virtual bool isCompleted( const parser::Task& task ) const = 0;
 
     /**
      * @brief targetedStep Returns the ParserStep targeted by this service.

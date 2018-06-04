@@ -102,12 +102,6 @@ uint8_t VLCMetadataService::nbThreads() const
     return 1;
 }
 
-bool VLCMetadataService::isCompleted( const parser::Task& ) const
-{
-    // We always need to run this task if the metadata extraction isn't completed
-    return false;
-}
-
 void VLCMetadataService::onFlushing()
 {
 }

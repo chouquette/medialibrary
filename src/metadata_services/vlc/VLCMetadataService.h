@@ -46,7 +46,6 @@ private:
         virtual parser::Task::Status run( parser::Task::Item& item ) override;
         virtual const char* name() const override;
         virtual uint8_t nbThreads() const override;
-        virtual bool isCompleted( const parser::Task& task ) const override;
         virtual void onFlushing() override;
         virtual void onRestarted() override;
         virtual parser::Task::ParserStep targetedStep() const override;

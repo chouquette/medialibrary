@@ -43,7 +43,6 @@ protected:
     virtual uint8_t nbThreads() const override;
     virtual void onFlushing() override;
     virtual void onRestarted() override;
-    virtual bool isCompleted( const parser::Task& task ) const override;
     virtual parser::Task::ParserStep targetedStep() const override;
 
     bool addPlaylistMedias( parser::Task::Item& item ) const;
