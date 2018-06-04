@@ -40,7 +40,7 @@ VLCMetadataService::VLCMetadataService()
 {
 }
 
-bool VLCMetadataService::initialize( MediaLibrary* )
+bool VLCMetadataService::initialize( IMediaLibrary* )
 {
     return true;
 }

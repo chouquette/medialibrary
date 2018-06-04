@@ -62,10 +62,10 @@ bool MetadataParser::cacheUnknownArtist()
     return m_unknownArtist != nullptr;
 }
 
-bool MetadataParser::initialize( MediaLibrary* ml)
+bool MetadataParser::initialize( IMediaLibrary* ml )
 {
-    m_ml = ml;
-    m_notifier = ml->getNotifier();
+    m_ml = static_cast<MediaLibrary*>( ml );
+    m_notifier = m_ml->getNotifier();
     return cacheUnknownArtist();
 }
 

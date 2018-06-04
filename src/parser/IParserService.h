@@ -29,7 +29,7 @@
 namespace medialibrary
 {
 
-class MediaLibrary;
+class IMediaLibrary;
 
 class IParserService
 {
@@ -71,7 +71,7 @@ public:
      *
      * If false is returned, the service will be released and won't be used.
      */
-    virtual bool initialize( MediaLibrary* ml ) = 0;
+    virtual bool initialize( IMediaLibrary* ml ) = 0;
 
     /**
      * @brief onFlushing will be invoked prior to restarting/flushing the service
