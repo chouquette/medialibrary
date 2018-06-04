@@ -31,6 +31,7 @@
 
 #include "database/DatabaseHelpers.h"
 #include "parser/IItem.h"
+#include "medialibrary/Parser.h"
 
 namespace medialibrary
 {
@@ -74,15 +75,6 @@ public:
 class Task : public DatabaseHelpers<Task, policy::TaskTable, cachepolicy::Uncached<Task>>, private ITaskCb
 {
 public:
-    enum class ParserStep : uint8_t
-    {
-        None = 0,
-        MetadataExtraction = 1,
-        MetadataAnalysis = 2,
-
-        Completed = 1 | 2,
-    };
-
     class Item : public IItem
     {
     public:
@@ -179,10 +171,10 @@ public:
      * extracted, in case we were to restart the parsing, we would need to
      * extract the same information again
      */
-    void markStepCompleted( ParserStep stepCompleted );
+    void markStepCompleted( parser::Step stepCompleted );
     bool saveParserStep();
     bool isCompleted() const;
-    bool isStepCompleted( ParserStep step ) const;
+    bool isStepCompleted( parser::Step step ) const;
     /**
      * @brief startParserStep Do some internal book keeping to avoid restarting a step too many time
      */
@@ -212,7 +204,7 @@ public:
 private:
     MediaLibraryPtr m_ml;
     int64_t     m_id;
-    ParserStep  m_step;
+    parser::Step  m_step;
     int         m_retryCount;
     int64_t     m_fileId;
     int64_t     m_parentFolderId;

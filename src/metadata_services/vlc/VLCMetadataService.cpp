@@ -110,9 +110,9 @@ void VLCMetadataService::onRestarted()
 {
 }
 
-parser::Task::ParserStep VLCMetadataService::targetedStep() const
+parser::Step VLCMetadataService::targetedStep() const
 {
-    return parser::Task::ParserStep::MetadataExtraction;
+    return parser::Step::MetadataExtraction;
 }
 
 void VLCMetadataService::mediaToItem( VLC::Media& media, parser::IItem& item )

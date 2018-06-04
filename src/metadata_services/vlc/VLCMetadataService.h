@@ -48,7 +48,7 @@ private:
         virtual uint8_t nbThreads() const override;
         virtual void onFlushing() override;
         virtual void onRestarted() override;
-        virtual parser::Task::ParserStep targetedStep() const override;
+        virtual parser::Step targetedStep() const override;
 
         void mediaToItem( VLC::Media& media, parser::IItem& item );
 

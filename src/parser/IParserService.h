@@ -22,11 +22,14 @@
 
 #pragma once
 
-#include "Task.h"
 #include "medialibrary/Parser.h"
+
+#include "parser/IItem.h"
 
 namespace medialibrary
 {
+
+class MediaLibrary;
 
 class IParserService
 {
@@ -56,7 +59,7 @@ public:
     /**
      * @brief targetedStep Returns the ParserStep targeted by this service.
      */
-    virtual parser::Task::ParserStep targetedStep() const = 0;
+    virtual parser::Step targetedStep() const = 0;
 
     /**
      * @brief initialize Run service specific initialization.

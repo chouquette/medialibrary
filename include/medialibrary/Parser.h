@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace medialibrary
 {
 namespace parser
@@ -46,6 +48,15 @@ enum class Status
     /// This is likely to be used when trying to parse playlist items,
     /// as they already could have been queued before.
     Discarded,
+};
+
+enum class Step : uint8_t
+{
+    None = 0,
+    MetadataExtraction = 1,
+    MetadataAnalysis = 2,
+
+    Completed = 1 | 2,
 };
 
 }

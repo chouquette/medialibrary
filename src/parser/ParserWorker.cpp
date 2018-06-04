@@ -215,13 +215,13 @@ bool ParserWorker::handleServiceResult( parser::Task& task, parser::Status statu
         // We don't want to save the extraction step in database, as restarting a
         // task with extraction completed but analysis uncompleted wouldn't run
         // the extraction again, causing the analysis to run with no info.
-        if ( m_service->targetedStep() != parser::Task::ParserStep::MetadataExtraction )
+        if ( m_service->targetedStep() != parser::Step::MetadataExtraction )
             return task.saveParserStep();
         return true;
     }
     else if ( status == parser::Status::Completed )
     {
-        task.markStepCompleted( parser::Task::ParserStep::Completed );
+        task.markStepCompleted( parser::Step::Completed );
         return task.saveParserStep();
     }
     else if ( status == parser::Status::Discarded )

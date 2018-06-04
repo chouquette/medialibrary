@@ -876,9 +876,9 @@ void MetadataParser::onRestarted()
     cacheUnknownArtist();
 }
 
-parser::Task::ParserStep MetadataParser::targetedStep() const
+parser::Step MetadataParser::targetedStep() const
 {
-    return parser::Task::ParserStep::MetadataAnalysis;
+    return parser::Step::MetadataAnalysis;
 }
 
 }
