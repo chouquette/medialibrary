@@ -91,9 +91,6 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
             return parser::Task::Status::Fatal;
     }
     mediaToItem( vlcMedia, task.item() );
-    // Don't save the file parsing step yet, since all data are just in memory. Just mark
-    // the extraction as done.
-    task.markStepCompleted( parser::Task::ParserStep::MetadataExtraction );
     return parser::Task::Status::Success;
 }
 

@@ -217,9 +217,6 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
     if ( task.item().file()->isDeleted() == true || task.item().media()->isDeleted() == true )
         return parser::Task::Status::Fatal;
 
-    task.markStepCompleted( parser::Task::ParserStep::MetadataAnalysis );
-    if ( task.saveParserStep() == false )
-        return parser::Task::Status::Fatal;
     m_notifier->notifyMediaCreation( task.item().media() );
     return parser::Task::Status::Success;
 }
