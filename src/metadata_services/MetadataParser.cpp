@@ -91,7 +91,7 @@ int MetadataParser::toInt( parser::Task::Item& item, parser::Task::Item::Metadat
 parser::Task::Status MetadataParser::run( parser::Task::Item& item )
 {
     bool alreadyInParser = false;
-    int nbSubitem = item.subItems().size();
+    int nbSubitem = item.nbSubItems();
     // Assume that file containing subitem(s) is a Playlist
     if ( nbSubitem > 0 )
     {
@@ -275,9 +275,8 @@ bool MetadataParser::addPlaylistMedias( parser::Task::Item& item ) const
     // be recreated if need be, and appropriate entries in PlaylistMediaRelation
     // table will be recreated to link things together.
 
-    auto subitems = item.subItems();
-    for ( const auto& subItem : subitems ) // FIXME: Interrupt loop if paused
-        addPlaylistElement( item, playlistPtr, subItem );
+    for ( auto i = 0u; i < item.nbSubItems(); ++i ) // FIXME: Interrupt loop if paused
+        addPlaylistElement( item, playlistPtr, item.subItem( i ) );
 
     return true;
 }

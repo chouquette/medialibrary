@@ -188,9 +188,14 @@ void Task::Item::setMrl( std::string mrl )
     m_mrl = std::move( mrl );
 }
 
-const std::vector<Task::Item>& Task::Item::subItems() const
+size_t Task::Item::nbSubItems() const
 {
-    return m_subItems;
+    return m_subItems.size();
+}
+
+const Task::Item& Task::Item::subItem( unsigned int index ) const
+{
+    return m_subItems[index];
 }
 
 Task::Item& Task::Item::createSubItem( std::string mrl, unsigned int playlistIndex )
