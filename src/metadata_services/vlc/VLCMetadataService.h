@@ -54,8 +54,6 @@ private:
         void mediaToItem( VLC::Media& media, parser::Task::Item& item );
 
 private:
-        MediaLibrary* m_ml;
-
         VLC::Instance m_instance;
         compat::Mutex m_mutex;
         compat::ConditionVariable m_cond;

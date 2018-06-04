@@ -36,14 +36,12 @@ namespace medialibrary
 {
 
 VLCMetadataService::VLCMetadataService()
-    : m_ml( nullptr )
-    , m_instance( VLCInstance::get() )
+    : m_instance( VLCInstance::get() )
 {
 }
 
-bool VLCMetadataService::initialize( MediaLibrary* ml )
+bool VLCMetadataService::initialize( MediaLibrary* )
 {
-    m_ml = ml;
     return true;
 }
 
