@@ -164,9 +164,10 @@ parser::Status MetadataParser::run( parser::IItem& item )
         assert( false );
         return parser::Status::Fatal;
     }
+    auto media = std::static_pointer_cast<Media>( item.media() );
 
     if ( item.parentPlaylist() != nullptr )
-        item.parentPlaylist()->add( item.media()->id(), item.parentPlaylistIndex() );
+        item.parentPlaylist()->add( media->id(), item.parentPlaylistIndex() );
 
     if ( alreadyInParser == true )
         return parser::Status::Discarded;
@@ -179,13 +180,13 @@ parser::Status MetadataParser::run( parser::IItem& item )
     bool isAudio = true;
     {
         using TracksT = decltype( tracks );
-        sqlite::Tools::withRetries( 3, [this, &isAudio, &item]( TracksT tracks ) {
+        sqlite::Tools::withRetries( 3, [this, &isAudio, &item, &media]( TracksT tracks ) {
             auto t = m_ml->getConn()->newTransaction();
             for ( const auto& track : tracks )
             {
                 if ( track.type == parser::IItem::Track::Type::Video )
                 {
-                    item.media()->addVideoTrack( track.codec, track.v.width, track.v.height,
+                    media->addVideoTrack( track.codec, track.v.width, track.v.height,
                                           static_cast<float>( track.v.fpsNum ) /
                                               static_cast<float>( track.v.fpsDen ),
                                           track.language, track.description );
@@ -194,12 +195,12 @@ parser::Status MetadataParser::run( parser::IItem& item )
                 else
                 {
                     assert( track.type == parser::IItem::Track::Type::Audio );
-                    item.media()->addAudioTrack( track.codec, track.bitrate,
+                    media->addAudioTrack( track.codec, track.bitrate,
                                                track.a.rate, track.a.nbChannels,
                                                track.language, track.description );
                 }
             }
-            item.media()->setDuration( item.duration() );
+            media->setDuration( item.duration() );
             t->commit();
         }, std::move( tracks ) );
     }
@@ -214,10 +215,11 @@ parser::Status MetadataParser::run( parser::IItem& item )
             return parser::Status::Fatal;
     }
 
-    if ( item.file()->isDeleted() == true || item.media()->isDeleted() == true )
+    if ( std::static_pointer_cast<File>( item.file() )->isDeleted() == true ||
+         std::static_pointer_cast<Media>( media )->isDeleted() == true )
         return parser::Status::Fatal;
 
-    m_notifier->notifyMediaCreation( item.media() );
+    m_notifier->notifyMediaCreation( media );
     return parser::Status::Success;
 }
 
@@ -368,7 +370,7 @@ void MetadataParser::addPlaylistElement( parser::IItem& item,
 
 bool MetadataParser::parseVideoFile( parser::IItem& item ) const
 {
-    auto media = item.media().get();
+    auto media = static_cast<Media*>( item.media().get() );
     media->setType( IMedia::Type::Video );
     const auto& title = item.meta( parser::IItem::Metadata::Title );
     if ( title.length() == 0 )
@@ -377,12 +379,12 @@ bool MetadataParser::parseVideoFile( parser::IItem& item ) const
     const auto& showName = item.meta( parser::IItem::Metadata::ShowName );
     const auto& artworkMrl = item.meta( parser::IItem::Metadata::ArtworkUrl );
 
-    return sqlite::Tools::withRetries( 3, [this, &showName, &title, &item, &artworkMrl]() {
+    return sqlite::Tools::withRetries( 3, [this, &showName, &title, media, &item, &artworkMrl]() {
         auto t = m_ml->getConn()->newTransaction();
-        item.media()->setTitleBuffered( title );
+        media->setTitleBuffered( title );
 
         if ( artworkMrl.empty() == false )
-            item.media()->setThumbnail( artworkMrl, Thumbnail::Origin::Media );
+            media->setThumbnail( artworkMrl, Thumbnail::Origin::Media );
 
         if ( showName.length() != 0 )
         {
@@ -397,14 +399,14 @@ bool MetadataParser::parseVideoFile( parser::IItem& item ) const
             if ( episode != 0 )
             {
                 std::shared_ptr<Show> s = std::static_pointer_cast<Show>( show );
-                s->addEpisode( *item.media(), title, episode );
+                s->addEpisode( *media, title, episode );
             }
         }
         else
         {
             // How do we know if it's a movie or a random video?
         }
-        item.media()->save();
+        media->save();
         t->commit();
         return true;
     });
@@ -415,12 +417,13 @@ bool MetadataParser::parseVideoFile( parser::IItem& item ) const
 
 bool MetadataParser::parseAudioFile( parser::IItem& item )
 {
-    item.media()->setType( IMedia::Type::Audio );
+    auto media = static_cast<Media*>( item.media().get() );
+    media->setType( IMedia::Type::Audio );
 
     auto artworkMrl = item.meta( parser::IItem::Metadata::ArtworkUrl );
     if ( artworkMrl.empty() == false )
     {
-        item.media()->setThumbnail( artworkMrl, Thumbnail::Origin::Media );
+        media->setThumbnail( artworkMrl, Thumbnail::Origin::Media );
         // Don't use an attachment as default artwork for album/artists
         if ( utils::file::schemeIs( "attachment", artworkMrl ) )
             artworkMrl.clear();
@@ -432,7 +435,7 @@ bool MetadataParser::parseAudioFile( parser::IItem& item )
     if ( artists.first == nullptr && artists.second == nullptr )
         return false;
     auto album = findAlbum( item, artists.first, artists.second );
-    return sqlite::Tools::withRetries( 3, [this, &item, &artists]( std::string artworkMrl,
+    return sqlite::Tools::withRetries( 3, [this, &item, &artists, media]( std::string artworkMrl,
                                                   std::shared_ptr<Album> album, std::shared_ptr<Genre> genre ) {
         auto t = m_ml->getConn()->newTransaction();
         if ( album == nullptr )
@@ -455,8 +458,8 @@ bool MetadataParser::parseAudioFile( parser::IItem& item )
         auto track = handleTrack( album, item, artists.second ? artists.second : artists.first,
                                   genre.get() );
 
-        auto res = link( *item.media(), album, artists.first, artists.second );
-        item.media()->save();
+        auto res = link( *media, album, artists.first, artists.second );
+        media->save();
         t->commit();
         return res;
     }, std::move( artworkMrl ), std::move( album ), std::move( genre ) );
@@ -492,8 +495,9 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::IItem& item, std::shar
         return m_unknownArtist->unknownAlbum();
     }
 
+    auto file = static_cast<File*>( item.file().get() );
     if ( m_previousAlbum != nullptr && albumName == m_previousAlbum->title() &&
-         m_previousFolderId != 0 && item.file()->folderId() == m_previousFolderId )
+         m_previousFolderId != 0 && file->folderId() == m_previousFolderId )
         return m_previousAlbum;
     m_previousAlbum.reset();
     m_previousFolderId = 0;
@@ -579,7 +583,7 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::IItem& item, std::shar
         }
 
         // Assume album files will be in the same folder.
-        auto newFileFolder = utils::file::directory( item.file()->mrl() );
+        auto newFileFolder = utils::file::directory( file->mrl() );
         auto trackFiles = tracks[0]->files();
         bool differentFolder = false;
         for ( auto& f : trackFiles )
@@ -639,7 +643,7 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::IItem& item, std::shar
     {
         LOG_WARN( "Multiple candidates for album ", albumName, ". Selecting first one out of luck" );
     }
-    m_previousFolderId = item.file()->folderId();
+    m_previousFolderId = file->folderId();
     m_previousAlbum = albums[0];
     return albums[0];
 }
@@ -705,6 +709,7 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
     auto title = item.meta( parser::IItem::Metadata::Title );
     const auto trackNumber = toInt( item, parser::IItem::Metadata::TrackNumber );
     const auto discNumber = toInt( item, parser::IItem::Metadata::DiscNumber );
+    auto media = std::static_pointer_cast<Media>( item.media() );
     if ( title.empty() == true )
     {
         LOG_WARN( "Failed to get track title" );
@@ -715,9 +720,9 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
         }
     }
     if ( title.empty() == false )
-        item.media()->setTitleBuffered( title );
+        media->setTitleBuffered( title );
 
-    auto track = std::static_pointer_cast<AlbumTrack>( album->addTrack( item.media(), trackNumber,
+    auto track = std::static_pointer_cast<AlbumTrack>( album->addTrack( media, trackNumber,
                                                                         discNumber, artist->id(),
                                                                         genre ) );
     if ( track == nullptr )
@@ -730,7 +735,7 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
     if ( releaseDate.empty() == false )
     {
         auto releaseYear = atoi( releaseDate.c_str() );
-        item.media()->setReleaseDate( releaseYear );
+        media->setReleaseDate( releaseYear );
         // Let the album handle multiple dates. In order to do this properly, we need
         // to know if the date has been changed before, which can be known only by
         // using Album class internals.

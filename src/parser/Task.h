@@ -116,19 +116,19 @@ public:
         virtual const std::vector<Track>& tracks() const override;
         virtual void addTrack( Track t ) override;
 
-        virtual std::shared_ptr<Media> media() override;
-        virtual void setMedia( std::shared_ptr<Media> media ) override;
+        virtual MediaPtr media() override;
+        virtual void setMedia( MediaPtr media ) override;
 
-        virtual std::shared_ptr<File> file() override;
-        virtual bool setFile( std::shared_ptr<File> file ) override;
+        virtual FilePtr file() override;
+        virtual bool setFile( FilePtr file ) override;
 
-        virtual std::shared_ptr<Folder> parentFolder() override;
+        virtual FolderPtr parentFolder() override;
 
         virtual std::shared_ptr<fs::IFile> fileFs() override;
 
         virtual std::shared_ptr<fs::IDirectory> parentFolderFs() override;
 
-        virtual std::shared_ptr<Playlist> parentPlaylist() override;
+        virtual PlaylistPtr parentPlaylist() override;
 
         virtual unsigned int parentPlaylistIndex() const override;
 
@@ -140,12 +140,12 @@ public:
         std::vector<Item> m_subItems;
         std::vector<Track> m_tracks;
         int64_t m_duration;
-        std::shared_ptr<Media> m_media;
-        std::shared_ptr<File> m_file;
+        MediaPtr m_media;
+        FilePtr m_file;
         std::shared_ptr<fs::IFile> m_fileFs;
-        std::shared_ptr<Folder> m_parentFolder;
+        FolderPtr m_parentFolder;
         std::shared_ptr<fs::IDirectory> m_parentFolderFs;
-        std::shared_ptr<Playlist> m_parentPlaylist;
+        PlaylistPtr m_parentPlaylist;
         unsigned int m_parentPlaylistIndex;
     };
 

@@ -28,14 +28,10 @@
 
 #include "filesystem/IFile.h"
 #include "filesystem/IDirectory.h"
+#include "medialibrary/Types.h"
 
 namespace medialibrary
 {
-
-class Folder;
-class File;
-class Media;
-class Playlist;
 
 namespace parser
 {
@@ -162,21 +158,21 @@ public:
      * @brief media Returns the media associated with this item, if any.
      * @return nullptr if the item isn't associated with a Media yet.
      */
-    virtual std::shared_ptr<Media> media() = 0;
+    virtual MediaPtr media() = 0;
     /**
      * @brief setMedia Assigns a Media to this item
      */
-    virtual void setMedia( std::shared_ptr<Media> media ) = 0;
+    virtual void setMedia( MediaPtr media ) = 0;
 
     /**
      * @brief file Returns the File (as in, the database entity) associated with
      *             this item, if any. It returns nullptr otherwise
      */
-    virtual std::shared_ptr<File> file() = 0;
+    virtual FilePtr file() = 0;
     /**
      * @brief setFile Assigns a File to the item
      */
-    virtual bool setFile( std::shared_ptr<File> file ) = 0;
+    virtual bool setFile( FilePtr file ) = 0;
 
     /**
      * @brief parentFolder Returns the Folder (as in the database entity)
@@ -186,7 +182,7 @@ public:
      *         if it was added through its complete MRL, instead of being
      *         discovered through its parent folder.
      */
-    virtual std::shared_ptr<Folder> parentFolder() = 0;
+    virtual FolderPtr parentFolder() = 0;
 
     /**
      * @brief fileFs returns an fs::IFile representing the item
@@ -210,7 +206,7 @@ public:
      * playlist entity might have not been created, depending on the analysis progress.
      * Usually the playlists are created after the MetadataAnalysis step.
      */
-    virtual std::shared_ptr<Playlist> parentPlaylist() = 0;
+    virtual PlaylistPtr parentPlaylist() = 0;
 
     /**
      * @brief parentPlaylistIndex Returns this item's index in a playlist, if any.

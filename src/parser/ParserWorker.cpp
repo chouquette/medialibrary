@@ -174,8 +174,10 @@ void ParserWorker::mainloop()
         {
             LOG_INFO( "Executing ", serviceName, " task on ", task->item().mrl() );
             auto chrono = std::chrono::steady_clock::now();
-            if ( ( task->item().file() != nullptr && task->item().file()->isDeleted() )
-                 || ( task->item().media() != nullptr && task->item().media()->isDeleted() ) )
+            auto file = std::static_pointer_cast<File>( task->item().file() );
+            auto media = std::static_pointer_cast<Media>( task->item().media() );
+            if ( ( file != nullptr && file->isDeleted() )
+                 || ( media != nullptr && media->isDeleted() ) )
                 status = parser::Status::Fatal;
             else
             {

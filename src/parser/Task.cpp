@@ -32,6 +32,7 @@
 #include "File.h"
 #include "Folder.h"
 #include "Playlist.h"
+#include "Media.h"
 #include "parser/Task.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
@@ -224,29 +225,29 @@ void Task::Item::addTrack(Task::Item::Track t)
     m_tracks.emplace_back( std::move( t ) );
 }
 
-std::shared_ptr<Media> Task::Item::media()
+MediaPtr Task::Item::media()
 {
     return m_media;
 }
 
-void Task::Item::setMedia( std::shared_ptr<Media> media )
+void Task::Item::setMedia( MediaPtr media )
 {
     m_media = std::move( media );
 }
 
-std::shared_ptr<File> Task::Item::file()
+FilePtr Task::Item::file()
 {
     return m_file;
 }
 
-bool Task::Item::setFile(std::shared_ptr<File> file)
+bool Task::Item::setFile( FilePtr file)
 {
     m_file = std::move( file );
     assert( m_taskCb != nullptr );
     return m_taskCb->updateFileId( m_file->id() );
 }
 
-std::shared_ptr<Folder> Task::Item::parentFolder()
+FolderPtr Task::Item::parentFolder()
 {
     return m_parentFolder;
 }
@@ -261,7 +262,7 @@ std::shared_ptr<fs::IDirectory> Task::Item::parentFolderFs()
     return m_parentFolderFs;
 }
 
-std::shared_ptr<Playlist> Task::Item::parentPlaylist()
+PlaylistPtr Task::Item::parentPlaylist()
 {
     return m_parentPlaylist;
 }
