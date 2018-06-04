@@ -31,7 +31,7 @@
 
 #include "database/DatabaseHelpers.h"
 #include "medialibrary/parser/IItem.h"
-#include "medialibrary/Parser.h"
+#include "medialibrary/parser/Parser.h"
 
 namespace medialibrary
 {

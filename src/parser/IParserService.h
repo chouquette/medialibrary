@@ -22,8 +22,7 @@
 
 #pragma once
 
-#include "medialibrary/Parser.h"
-
+#include "medialibrary/parser/Parser.h"
 #include "medialibrary/parser/IItem.h"
 
 namespace medialibrary

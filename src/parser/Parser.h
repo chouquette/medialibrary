@@ -28,7 +28,7 @@
 #include "Task.h"
 #include "File.h"
 
-#include "medialibrary/Parser.h"
+#include "medialibrary/parser/Parser.h"
 
 namespace medialibrary
 {
