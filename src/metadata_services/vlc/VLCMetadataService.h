@@ -33,10 +33,10 @@
 
 namespace medialibrary
 {
+namespace parser
+{
 
-class IParserCb;
-
-class VLCMetadataService : public parser::IParserService
+class VLCMetadataService : public IParserService
 {
     public:
         explicit VLCMetadataService();
@@ -58,6 +58,7 @@ private:
         compat::ConditionVariable m_cond;
 };
 
+}
 }
 
 #endif // VLCMETADATASERVICE_H

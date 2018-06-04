@@ -34,6 +34,8 @@
 
 namespace medialibrary
 {
+namespace parser
+{
 
 VLCMetadataService::VLCMetadataService()
     : m_instance( VLCInstance::get() )
@@ -45,7 +47,7 @@ bool VLCMetadataService::initialize( IMediaLibrary* )
     return true;
 }
 
-parser::Status VLCMetadataService::run( parser::IItem& item )
+Status VLCMetadataService::run( IItem& item )
 {
     auto mrl = item.mrl();
     LOG_INFO( "Parsing ", mrl );
@@ -68,14 +70,14 @@ parser::Status VLCMetadataService::run( parser::IItem& item )
 
         if ( vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local | VLC::Media::ParseFlags::Network |
                                              VLC::Media::ParseFlags::FetchLocal, 5000 ) == false )
-            return parser::Status::Fatal;
+            return Status::Fatal;
         m_cond.wait( lock, [&status, &done]() {
             return done == true;
         });
     }
     event->unregister();
     if ( status == VLC::Media::ParsedStatus::Failed || status == VLC::Media::ParsedStatus::Timeout )
-        return parser::Status::Fatal;
+        return Status::Fatal;
     auto tracks = vlcMedia.tracks();
     auto artworkMrl = vlcMedia.meta( libvlc_meta_ArtworkURL );
     if ( ( tracks.size() == 0 && vlcMedia.subitems()->count() == 0 ) ||
@@ -86,10 +88,10 @@ parser::Status VLCMetadataService::run( parser::IItem& item )
         VLC::MediaPlayer mp( vlcMedia );
         auto res = MetadataCommon::startPlayback( vlcMedia, mp );
         if ( res == false )
-            return parser::Status::Fatal;
+            return Status::Fatal;
     }
     mediaToItem( vlcMedia, item );
-    return parser::Status::Success;
+    return Status::Success;
 }
 
 const char* VLCMetadataService::name() const
@@ -110,53 +112,53 @@ void VLCMetadataService::onRestarted()
 {
 }
 
-parser::Step VLCMetadataService::targetedStep() const
+Step VLCMetadataService::targetedStep() const
 {
-    return parser::Step::MetadataExtraction;
+    return Step::MetadataExtraction;
 }
 
-void VLCMetadataService::mediaToItem( VLC::Media& media, parser::IItem& item )
+void VLCMetadataService::mediaToItem( VLC::Media& media, IItem& item )
 {
-    item.setMeta( parser::IItem::Metadata::Title,
+    item.setMeta( IItem::Metadata::Title,
                   media.meta( libvlc_meta_Title ) );
-    item.setMeta( parser::IItem::Metadata::ArtworkUrl,
+    item.setMeta( IItem::Metadata::ArtworkUrl,
                   media.meta( libvlc_meta_ArtworkURL ) );
-    item.setMeta( parser::IItem::Metadata::ShowName,
+    item.setMeta( IItem::Metadata::ShowName,
                   media.meta( libvlc_meta_ShowName ) );
-    item.setMeta( parser::IItem::Metadata::Episode,
+    item.setMeta( IItem::Metadata::Episode,
                   media.meta( libvlc_meta_Episode ) );
-    item.setMeta( parser::IItem::Metadata::Album,
+    item.setMeta( IItem::Metadata::Album,
                   media.meta( libvlc_meta_Album ) );
-    item.setMeta( parser::IItem::Metadata::Genre,
+    item.setMeta( IItem::Metadata::Genre,
                   media.meta( libvlc_meta_Genre ) );
-    item.setMeta( parser::IItem::Metadata::Date,
+    item.setMeta( IItem::Metadata::Date,
                   media.meta( libvlc_meta_Date ) );
-    item.setMeta( parser::IItem::Metadata::AlbumArtist,
+    item.setMeta( IItem::Metadata::AlbumArtist,
                   media.meta( libvlc_meta_AlbumArtist ) );
-    item.setMeta( parser::IItem::Metadata::Artist,
+    item.setMeta( IItem::Metadata::Artist,
                   media.meta( libvlc_meta_Artist ) );
-    item.setMeta( parser::IItem::Metadata::TrackNumber,
+    item.setMeta( IItem::Metadata::TrackNumber,
                   media.meta( libvlc_meta_TrackNumber ) );
-    item.setMeta( parser::IItem::Metadata::DiscNumber,
+    item.setMeta( IItem::Metadata::DiscNumber,
                   media.meta( libvlc_meta_DiscNumber ) );
-    item.setMeta( parser::IItem::Metadata::DiscTotal,
+    item.setMeta( IItem::Metadata::DiscTotal,
                   media.meta( libvlc_meta_DiscTotal ) );
     item.setDuration( media.duration() );
 
     auto tracks = media.tracks();
     for ( const auto& track : tracks )
     {
-        parser::IItem::Track t;
+        IItem::Track t;
 
         if ( track.type() == VLC::MediaTrack::Type::Audio )
         {
-            t.type = parser::IItem::Track::Type::Audio;
+            t.type = IItem::Track::Type::Audio;
             t.a.nbChannels = track.channels();
             t.a.rate = track.rate();
         }
         else if ( track.type() == VLC::MediaTrack::Type::Video )
         {
-            t.type = parser::IItem::Track::Type::Video;
+            t.type = IItem::Track::Type::Video;
             t.v.fpsNum = track.fpsNum();
             t.v.fpsDen = track.fpsDen();
             t.v.width = track.width();
@@ -186,10 +188,11 @@ void VLCMetadataService::mediaToItem( VLC::Media& media, parser::IItem& item )
             assert( vlcMedia != nullptr );
             // Always add 1 to the playlist/subitem index, as 0 is an invalid index
             // in this context
-            parser::IItem& subItem = item.createSubItem( vlcMedia->mrl(), i + 1u );
+            IItem& subItem = item.createSubItem( vlcMedia->mrl(), i + 1u );
             mediaToItem( *vlcMedia, subItem );
         }
     }
 }
 
+}
 }
