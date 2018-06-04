@@ -24,7 +24,7 @@
 
 #include "medialibrary/Parser.h"
 
-#include "parser/IItem.h"
+#include "medialibrary/parser/IItem.h"
 
 namespace medialibrary
 {

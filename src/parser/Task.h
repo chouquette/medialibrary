@@ -30,7 +30,7 @@
 #include <unordered_map>
 
 #include "database/DatabaseHelpers.h"
-#include "parser/IItem.h"
+#include "medialibrary/parser/IItem.h"
 #include "medialibrary/Parser.h"
 
 namespace medialibrary

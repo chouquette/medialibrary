@@ -48,6 +48,11 @@ libmedialibraryfs_HEADERS = \
 	include/medialibrary/filesystem/IFile.h \
 	$(NULL)
 
+libmedialibraryparserdir = $(includedir)/parser
+libmedialibraryparser_HEADERS = \
+	include/medialibrary/parser/IItem.h \
+	$(NULL)
+
 libmedialibrary_la_SOURCES = \
 	src/Album.cpp \
 	src/AlbumTrack.cpp \
@@ -154,7 +159,6 @@ noinst_HEADERS = \
 	src/metadata_services/vlc/imagecompressors/IImageCompressor.h \
 	src/Movie.h \
 	src/parser/IParserService.h \
-	src/parser/IItem.h \
 	src/parser/Parser.h \
 	src/parser/ParserWorker.h \
 	src/parser/Task.h \
