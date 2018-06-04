@@ -51,6 +51,7 @@ libmedialibraryparserdir = $(includedir)/parser
 libmedialibraryparser_HEADERS = \
 	include/medialibrary/parser/IItem.h \
 	include/medialibrary/parser/Parser.h \
+	include/medialibrary/parser/IParserService.h \
 	$(NULL)
 
 libmedialibrary_la_SOURCES = \
@@ -158,7 +159,6 @@ noinst_HEADERS = \
 	src/metadata_services/vlc/VLCThumbnailer.h \
 	src/metadata_services/vlc/imagecompressors/IImageCompressor.h \
 	src/Movie.h \
-	src/parser/IParserService.h \
 	src/parser/Parser.h \
 	src/parser/ParserWorker.h \
 	src/parser/Task.h \

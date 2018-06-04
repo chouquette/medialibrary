@@ -23,7 +23,7 @@
 #pragma once
 
 #include "MediaLibrary.h"
-#include "parser/ParserWorker.h"
+#include "medialibrary/parser/IParserService.h"
 
 namespace medialibrary
 {

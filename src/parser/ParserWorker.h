@@ -27,7 +27,7 @@
 #include <queue>
 
 #include "Task.h"
-#include "IParserService.h"
+#include "medialibrary/parser/IParserService.h"
 #include "medialibrary/Types.h"
 #include "compat/Mutex.h"
 #include "compat/Thread.h"

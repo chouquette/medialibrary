@@ -27,7 +27,7 @@
 #include <vlcpp/vlc.hpp>
 #include <mutex>
 
-#include "parser/IParserService.h"
+#include "medialibrary/parser/IParserService.h"
 #include "parser/Parser.h"
 #include "AlbumTrack.h"
 

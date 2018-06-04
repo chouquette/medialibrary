@@ -55,7 +55,6 @@
 #include "database/SqliteTools.h"
 #include "database/SqliteConnection.h"
 #include "database/SqliteQuery.h"
-#include "parser/Task.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
 #include "VideoTrack.h"

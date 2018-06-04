@@ -25,10 +25,10 @@
 #include <memory>
 #include <queue>
 
-#include "Task.h"
 #include "File.h"
 
 #include "medialibrary/parser/Parser.h"
+#include "parser/Task.h"
 
 namespace medialibrary
 {
