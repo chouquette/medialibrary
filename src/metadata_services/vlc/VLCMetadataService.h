@@ -36,7 +36,7 @@ namespace medialibrary
 
 class IParserCb;
 
-class VLCMetadataService : public IParserService
+class VLCMetadataService : public parser::IParserService
 {
     public:
         explicit VLCMetadataService();

@@ -30,6 +30,9 @@ namespace medialibrary
 
 class IMediaLibrary;
 
+namespace parser
+{
+
 class IParserService
 {
 public:
@@ -92,4 +95,5 @@ public:
     virtual void onRestarted() = 0;
 };
 
+}
 }

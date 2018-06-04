@@ -30,7 +30,7 @@ namespace medialibrary
 
 class AlbumTrack;
 
-class MetadataParser : public IParserService
+class MetadataParser : public parser::IParserService
 {
 public:
     MetadataParser();
