@@ -180,7 +180,7 @@ void ParserWorker::mainloop()
             else
             {
                 task->startParserStep();
-                status = m_service->run( *task );
+                status = m_service->run( task->item() );
                 auto duration = std::chrono::steady_clock::now() - chrono;
                 LOG_INFO( "Done executing ", serviceName, " task on ", task->item().mrl(), " in ",
                           std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );

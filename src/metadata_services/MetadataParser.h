@@ -38,7 +38,7 @@ public:
 protected:
     bool cacheUnknownArtist();
     virtual bool initialize( MediaLibrary* ml ) override;
-    virtual parser::Task::Status run( parser::Task& task ) override;
+    virtual parser::Task::Status run( parser::Task::Item& item ) override;
     virtual const char* name() const override;
     virtual uint8_t nbThreads() const override;
     virtual void onFlushing() override;
@@ -46,21 +46,21 @@ protected:
     virtual bool isCompleted( const parser::Task& task ) const override;
     virtual parser::Task::ParserStep targetedStep() const override;
 
-    bool addPlaylistMedias( parser::Task& task ) const;
-    void addPlaylistElement( parser::Task& task, std::shared_ptr<Playlist> playlistPtr,
+    bool addPlaylistMedias( parser::Task::Item& item ) const;
+    void addPlaylistElement( parser::Task::Item& item, std::shared_ptr<Playlist> playlistPtr,
                              const parser::Task::Item& subitem ) const;
-    bool parseAudioFile(parser::Task& task);
-    bool parseVideoFile(parser::Task& task) const;
-    std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> findOrCreateArtist( parser::Task& vlcMedia ) const;
-    std::shared_ptr<AlbumTrack> handleTrack( std::shared_ptr<Album> album, parser::Task& task,
+    bool parseAudioFile( parser::Task::Item& task );
+    bool parseVideoFile( parser::Task::Item& task ) const;
+    std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> findOrCreateArtist( parser::Task::Item& item ) const;
+    std::shared_ptr<AlbumTrack> handleTrack( std::shared_ptr<Album> album, parser::Task::Item& item,
                                              std::shared_ptr<Artist> artist, Genre* genre ) const;
     bool link(Media& media, std::shared_ptr<Album> album, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist );
-    std::shared_ptr<Album> findAlbum( parser::Task& task, std::shared_ptr<Artist> albumArtist,
+    std::shared_ptr<Album> findAlbum( parser::Task::Item& item, std::shared_ptr<Artist> albumArtist,
                                         std::shared_ptr<Artist> artist );
-    std::shared_ptr<Genre> handleGenre( parser::Task& task ) const;
+    std::shared_ptr<Genre> handleGenre( parser::Task::Item& item ) const;
 
 private:
-    static int toInt( parser::Task& task, parser::Task::Item::Metadata meta );
+    static int toInt( parser::Task::Item& item, parser::Task::Item::Metadata meta );
 
 private:
     MediaLibrary* m_ml;

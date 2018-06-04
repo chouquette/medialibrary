@@ -47,9 +47,9 @@ bool VLCMetadataService::initialize( MediaLibrary* ml )
     return true;
 }
 
-parser::Task::Status VLCMetadataService::run( parser::Task& task )
+parser::Task::Status VLCMetadataService::run( parser::Task::Item& item )
 {
-    auto mrl = task.item().mrl();
+    auto mrl = item.mrl();
     LOG_INFO( "Parsing ", mrl );
 
     // Having a valid media means we're re-executing this parser after the thumbnailer,
@@ -90,7 +90,7 @@ parser::Task::Status VLCMetadataService::run( parser::Task& task )
         if ( res == false )
             return parser::Task::Status::Fatal;
     }
-    mediaToItem( vlcMedia, task.item() );
+    mediaToItem( vlcMedia, item );
     return parser::Task::Status::Success;
 }
 
