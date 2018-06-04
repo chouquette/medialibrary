@@ -44,6 +44,7 @@ protected:
     virtual void onFlushing() override;
     virtual void onRestarted() override;
     virtual bool isCompleted( const parser::Task& task ) const override;
+    virtual parser::Task::ParserStep targetedStep() const override;
 
     bool addPlaylistMedias( parser::Task& task ) const;
     void addPlaylistElement( parser::Task& task, std::shared_ptr<Playlist> playlistPtr,

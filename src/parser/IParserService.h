@@ -59,6 +59,11 @@ public:
     virtual bool isCompleted( const parser::Task& task ) const = 0;
 
     /**
+     * @brief targetedStep Returns the ParserStep targeted by this service.
+     */
+    virtual parser::Task::ParserStep targetedStep() const = 0;
+
+    /**
      * @brief initialize Run service specific initialization.
      *
      * By the time this function is called, the database is fully initialized and

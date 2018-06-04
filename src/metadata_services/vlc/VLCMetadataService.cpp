@@ -121,6 +121,11 @@ void VLCMetadataService::onRestarted()
 {
 }
 
+parser::Task::ParserStep VLCMetadataService::targetedStep() const
+{
+    return parser::Task::ParserStep::MetadataExtraction;
+}
+
 void VLCMetadataService::mediaToItem( VLC::Media& media, parser::Task::Item& item )
 {
     item.setMeta( parser::Task::Item::Metadata::Title,

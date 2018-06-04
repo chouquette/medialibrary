@@ -49,6 +49,7 @@ private:
         virtual bool isCompleted( const parser::Task& task ) const override;
         virtual void onFlushing() override;
         virtual void onRestarted() override;
+        virtual parser::Task::ParserStep targetedStep() const override;
 
         void mediaToItem( VLC::Media& media, parser::Task::Item& item );
 

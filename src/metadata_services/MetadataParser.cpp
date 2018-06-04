@@ -885,4 +885,9 @@ bool MetadataParser::isCompleted( const parser::Task& task ) const
     return task.isStepCompleted( parser::Task::ParserStep::MetadataAnalysis );
 }
 
+parser::Task::ParserStep MetadataParser::targetedStep() const
+{
+    return parser::Task::ParserStep::MetadataAnalysis;
+}
+
 }
