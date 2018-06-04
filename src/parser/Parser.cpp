@@ -150,15 +150,6 @@ void Parser::done( std::shared_ptr<parser::Task> t, parser::Task::Status status 
 
     auto serviceIdx = ++t->currentService;
 
-    if ( status == parser::Task::Status::Completed )
-    {
-        t->markStepCompleted( parser::Task::ParserStep::Completed );
-        t->saveParserStep();
-    }
-    else if ( status == parser::Task::Status::Discarded )
-    {
-        parser::Task::destroy( m_ml, t->id() );
-    }
     if ( status == parser::Task::Status::TemporaryUnavailable ||
          status == parser::Task::Status::Fatal ||
          status == parser::Task::Status::Discarded ||

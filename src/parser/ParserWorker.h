@@ -80,8 +80,10 @@ private:
     void start();
     void mainloop();
     void setIdle( bool isIdle );
+    bool handleServiceResult( parser::Task& task, parser::Task::Status status );
 
 private:
+    MediaLibrary* m_ml;
     std::unique_ptr<IParserService> m_service;
     IParserCb* m_parserCb;
     bool m_stopParser;

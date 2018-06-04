@@ -100,6 +100,7 @@ void ParserWorker::parse( std::shared_ptr<parser::Task> t )
 
 bool ParserWorker::initialize( MediaLibrary* ml, IParserCb* parserCb, std::unique_ptr<IParserService> service )
 {
+    m_ml = ml;
     m_service = std::move( service );
     m_parserCb = parserCb;
     // Run the service specific initializer
@@ -190,6 +191,8 @@ void ParserWorker::mainloop()
             LOG_ERROR( "Caught an exception during ", task->item().mrl(), " [", serviceName, "] parsing: ", ex.what() );
             status = parser::Task::Status::Fatal;
         }
+        if ( handleServiceResult( *task, status ) == false )
+            status = parser::Task::Status::Fatal;
         m_parserCb->done( std::move( task ), status );
     }
     LOG_INFO("Exiting ParserService [", serviceName, "] thread");
@@ -202,6 +205,20 @@ void ParserWorker::setIdle(bool isIdle)
     // invoking it, otherwise we have an incoherent state.
     m_idle = isIdle;
     m_parserCb->onIdleChanged( isIdle );
+}
+
+bool ParserWorker::handleServiceResult( parser::Task& task, parser::Task::Status status )
+{
+    if ( status == parser::Task::Status::Completed )
+    {
+        task.markStepCompleted( parser::Task::ParserStep::Completed );
+        return task.saveParserStep();
+    }
+    else if ( status == parser::Task::Status::Discarded )
+    {
+        return parser::Task::destroy( m_ml, task.id() );
+    }
+    return true;
 }
 
 }
