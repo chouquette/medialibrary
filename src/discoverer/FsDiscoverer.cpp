@@ -31,7 +31,7 @@
 #include <utility>
 
 #include "factory/FileSystemFactory.h"
-#include "filesystem/IDevice.h"
+#include "medialibrary/filesystem/IDevice.h"
 #include "Media.h"
 #include "File.h"
 #include "Device.h"

@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "filesystem/IDirectory.h"
+#include "medialibrary/filesystem/IDirectory.h"
 #include "utils/Cache.h"
 
 namespace medialibrary

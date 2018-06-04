@@ -25,7 +25,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "filesystem/IDirectory.h"
+#include "medialibrary/filesystem/IDirectory.h"
 
 using namespace medialibrary;
 

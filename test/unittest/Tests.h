@@ -26,7 +26,7 @@
 #include "mocks/NoopCallback.h"
 #include "mocks/MockDeviceLister.h"
 #include "common/MediaLibraryTester.h"
-#include "filesystem/IDirectory.h"
+#include "medialibrary/filesystem/IDirectory.h"
 
 class Tests : public testing::Test
 {

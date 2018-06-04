@@ -26,8 +26,8 @@
 #include <vector>
 #include <memory>
 
-#include "filesystem/IFile.h"
-#include "filesystem/IDirectory.h"
+#include "medialibrary/filesystem/IFile.h"
+#include "medialibrary/filesystem/IDirectory.h"
 #include "medialibrary/Types.h"
 
 namespace medialibrary

@@ -45,9 +45,9 @@
 #include "database/SqliteTools.h"
 #include "database/SqliteQuery.h"
 #include "VideoTrack.h"
-#include "filesystem/IFile.h"
-#include "filesystem/IDirectory.h"
-#include "filesystem/IDevice.h"
+#include "medialibrary/filesystem/IFile.h"
+#include "medialibrary/filesystem/IDirectory.h"
+#include "medialibrary/filesystem/IDevice.h"
 #include "utils/Filename.h"
 
 namespace medialibrary

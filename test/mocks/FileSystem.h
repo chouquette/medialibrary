@@ -30,9 +30,9 @@
 #include <cstring>
 #include <system_error>
 
-#include "filesystem/IDirectory.h"
-#include "filesystem/IFile.h"
-#include "filesystem/IDevice.h"
+#include "medialibrary/filesystem/IDirectory.h"
+#include "medialibrary/filesystem/IFile.h"
+#include "medialibrary/filesystem/IDevice.h"
 #include "factory/IFileSystem.h"
 #include "utils/Filename.h"
 

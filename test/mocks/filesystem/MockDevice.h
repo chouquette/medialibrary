@@ -25,7 +25,7 @@
 #include <string>
 #include <memory>
 
-#include "filesystem/IDevice.h"
+#include "medialibrary/filesystem/IDevice.h"
 
 using namespace medialibrary;
 

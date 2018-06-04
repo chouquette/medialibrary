@@ -23,9 +23,9 @@
 #pragma once
 
 #include "medialibrary/IFile.h"
+#include "medialibrary/filesystem/IFile.h"
 #include "database/DatabaseHelpers.h"
 #include "database/SqliteConnection.h"
-#include "filesystem/IFile.h"
 #include "utils/Cache.h"
 #include "parser/Parser.h"
 

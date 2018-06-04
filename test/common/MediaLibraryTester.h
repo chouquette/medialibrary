@@ -24,7 +24,7 @@
 
 #include "MediaLibrary.h"
 #include "Folder.h"
-#include "filesystem/IDirectory.h"
+#include "medialibrary/filesystem/IDirectory.h"
 
 using namespace medialibrary;
 

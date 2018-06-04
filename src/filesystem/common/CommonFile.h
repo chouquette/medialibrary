@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "filesystem/IFile.h"
+#include "medialibrary/filesystem/IFile.h"
 
 namespace medialibrary
 {

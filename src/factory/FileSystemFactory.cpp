@@ -25,8 +25,8 @@
 #endif
 
 #include "factory/FileSystemFactory.h"
-#include "filesystem/IDirectory.h"
-#include "filesystem/IFile.h"
+#include "medialibrary/filesystem/IDirectory.h"
+#include "medialibrary/filesystem/IFile.h"
 #include "logging/Logger.h"
 #include "utils/Filename.h"
 

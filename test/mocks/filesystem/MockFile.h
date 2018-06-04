@@ -24,7 +24,7 @@
 
 #include <string>
 
-#include "filesystem/IFile.h"
+#include "medialibrary/filesystem/IFile.h"
 
 using namespace medialibrary;
 

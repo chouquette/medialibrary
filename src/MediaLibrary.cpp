@@ -72,7 +72,7 @@
 #include "factory/DeviceListerFactory.h"
 #include "factory/FileSystemFactory.h"
 #include "factory/NetworkFileSystemFactory.h"
-#include "filesystem/IDevice.h"
+#include "medialibrary/filesystem/IDevice.h"
 
 namespace medialibrary
 {

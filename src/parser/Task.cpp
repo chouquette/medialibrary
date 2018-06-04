@@ -27,8 +27,8 @@
 
 #include "Task.h"
 
-#include "filesystem/IFile.h"
-#include "filesystem/IDirectory.h"
+#include "medialibrary/filesystem/IFile.h"
+#include "medialibrary/filesystem/IDirectory.h"
 #include "File.h"
 #include "Folder.h"
 #include "Playlist.h"

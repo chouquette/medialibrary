@@ -41,6 +41,13 @@ libmedialibrary_la_HEADERS = \
 	include/medialibrary/Parser.h \
 	$(NULL)
 
+libmedialibraryfsdir = $(includedir)/filesystem
+libmedialibraryfs_HEADERS = \
+	include/medialibrary/filesystem/IDevice.h \
+	include/medialibrary/filesystem/IDirectory.h \
+	include/medialibrary/filesystem/IFile.h \
+	$(NULL)
+
 libmedialibrary_la_SOURCES = \
 	src/Album.cpp \
 	src/AlbumTrack.cpp \
@@ -96,9 +103,6 @@ libmedialibrary_la_SOURCES = \
 noinst_HEADERS = \
 	include/discoverer/IDiscoverer.h \
 	include/factory/IFileSystem.h \
-	include/filesystem/IDevice.h \
-	include/filesystem/IDirectory.h \
-	include/filesystem/IFile.h \
 	include/Fixup.h \
 	include/Types.h \
 	src/Album.h \
@@ -150,6 +154,7 @@ noinst_HEADERS = \
 	src/metadata_services/vlc/imagecompressors/IImageCompressor.h \
 	src/Movie.h \
 	src/parser/IParserService.h \
+	src/parser/IItem.h \
 	src/parser/Parser.h \
 	src/parser/ParserWorker.h \
 	src/parser/Task.h \
