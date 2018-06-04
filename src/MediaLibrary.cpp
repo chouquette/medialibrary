@@ -713,7 +713,7 @@ SearchAggregate MediaLibrary::search( const std::string& pattern,
 
 void MediaLibrary::startParser()
 {
-    m_parser.reset( new Parser( this ) );
+    m_parser.reset( new parser::Parser( this ) );
 
     auto vlcService = std::unique_ptr<VLCMetadataService>( new VLCMetadataService );
     auto metadataService = std::unique_ptr<MetadataParser>( new MetadataParser );

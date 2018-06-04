@@ -98,7 +98,8 @@ void ParserWorker::parse( std::shared_ptr<parser::Task> t )
     }
 }
 
-bool ParserWorker::initialize( MediaLibrary* ml, IParserCb* parserCb, std::unique_ptr<IParserService> service )
+bool ParserWorker::initialize( MediaLibrary* ml, parser::IParserCb* parserCb,
+                               std::unique_ptr<IParserService> service )
 {
     m_ml = ml;
     m_service = std::move( service );

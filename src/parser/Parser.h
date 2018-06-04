@@ -33,15 +33,18 @@
 namespace medialibrary
 {
 
-class IParserService;
 class ParserWorker;
+class IParserService;
+
+namespace parser
+{
 
 // Use an interface to expose only the "done" method
 class IParserCb
 {
 public:
     virtual ~IParserCb() = default;
-    virtual void done( std::shared_ptr<parser::Task> task, parser::Status status ) = 0;
+    virtual void done( std::shared_ptr<Task> task, Status status ) = 0;
     virtual void onIdleChanged( bool isIdle ) = 0;
 };
 
@@ -54,7 +57,7 @@ public:
     Parser( MediaLibrary* ml );
     virtual ~Parser();
     void addService( ServicePtr service );
-    void parse( std::shared_ptr<parser::Task> task );
+    void parse( std::shared_ptr<Task> task );
     void start();
     void pause();
     void resume();
@@ -72,7 +75,7 @@ public:
 private:
     void updateStats();
     virtual void done( std::shared_ptr<parser::Task> task,
-                       parser::Status status ) override;
+                       Status status ) override;
     virtual void onIdleChanged( bool idle ) override;
 
 private:
@@ -88,5 +91,7 @@ private:
     std::atomic_uint m_percent;
     std::chrono::time_point<std::chrono::steady_clock> m_chrono;
 };
+
+}
 
 }

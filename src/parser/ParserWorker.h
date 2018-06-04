@@ -36,7 +36,11 @@
 namespace medialibrary
 {
 
+namespace parser
+{
 class IParserCb;
+}
+
 class ModificationNotifier;
 class MediaLibrary;
 
@@ -60,7 +64,7 @@ public:
     ///
     void stop();
     void parse( std::shared_ptr<parser::Task> t );
-    bool initialize( MediaLibrary* ml, IParserCb* parserCb, std::unique_ptr<IParserService> service );
+    bool initialize( MediaLibrary* ml, parser::IParserCb* parserCb, std::unique_ptr<IParserService> service );
     bool isIdle() const;
     ///
     /// \brief flush flush every currently scheduled tasks
@@ -85,7 +89,7 @@ private:
 private:
     MediaLibrary* m_ml;
     std::unique_ptr<IParserService> m_service;
-    IParserCb* m_parserCb;
+    parser::IParserCb* m_parserCb;
     bool m_stopParser;
     bool m_paused;
     std::atomic_bool m_idle;

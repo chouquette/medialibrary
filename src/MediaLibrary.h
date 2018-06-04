@@ -34,7 +34,6 @@ namespace medialibrary
 
 class ModificationNotifier;
 class DiscovererWorker;
-class Parser;
 class ParserWorker;
 class VLCThumbnailer;
 
@@ -52,10 +51,16 @@ namespace factory
 {
 class IFileSystem;
 }
+
 namespace fs
 {
 class IFile;
 class IDirectory;
+}
+
+namespace parser
+{
+class Parser;
 }
 
 class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
@@ -217,7 +222,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         // it might still finish a few operations before exiting the parser thread. Those operations are
         // likely to require a valid MediaLibrary, which would be compromised if some fields have already been
         // deleted/destroyed.
-        std::unique_ptr<Parser> m_parser;
+        std::unique_ptr<parser::Parser> m_parser;
         // Same reasoning applies here.
         //FIXME: Having to maintain a specific ordering sucks, let's use shared_ptr or something
         std::unique_ptr<DiscovererWorker> m_discovererWorker;

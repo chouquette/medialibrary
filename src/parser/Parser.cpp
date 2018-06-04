@@ -36,6 +36,8 @@
 
 namespace medialibrary
 {
+namespace parser
+{
 
 Parser::Parser( MediaLibrary* ml )
     : m_ml( ml )
@@ -59,7 +61,7 @@ void Parser::addService( ServicePtr service )
     m_services.push_back( std::move( worker ) );
 }
 
-void Parser::parse( std::shared_ptr<parser::Task> task )
+void Parser::parse( std::shared_ptr<Task> task )
 {
     if ( m_services.empty() == true )
         return;
@@ -114,7 +116,7 @@ void Parser::restore()
     if ( m_services.empty() == true )
         return;
 
-    auto tasks = parser::Task::fetchUncompleted( m_ml );
+    auto tasks = Task::fetchUncompleted( m_ml );
     LOG_INFO( "Resuming parsing on ", tasks.size(), " tasks" );
     for ( auto& t : tasks )
     {
@@ -144,15 +146,15 @@ void Parser::updateStats()
     }
 }
 
-void Parser::done( std::shared_ptr<parser::Task> t, parser::Status status )
+void Parser::done( std::shared_ptr<Task> t, Status status )
 {
     ++m_opDone;
 
     auto serviceIdx = ++t->currentService;
 
-    if ( status == parser::Status::TemporaryUnavailable ||
-         status == parser::Status::Fatal ||
-         status == parser::Status::Discarded ||
+    if ( status == Status::TemporaryUnavailable ||
+         status == Status::Fatal ||
+         status == Status::Discarded ||
          t->isCompleted() )
     {
         if ( serviceIdx < m_services.size() )
@@ -190,4 +192,5 @@ void Parser::onIdleChanged( bool idle )
     m_ml->onParserIdleChanged( true );
 }
 
+}
 }
