@@ -37,7 +37,7 @@ public:
      * @param task The task to be processed
      * @return A status code
      */
-    virtual parser::Task::Status run( parser::Task::Item& item ) = 0;
+    virtual parser::Task::Status run( parser::IItem& item ) = 0;
     /**
      * @brief name returns the name of this service.
      *

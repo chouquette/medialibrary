@@ -69,7 +69,7 @@ bool MetadataParser::initialize( MediaLibrary* ml)
     return cacheUnknownArtist();
 }
 
-int MetadataParser::toInt( parser::Task::Item& item, parser::Task::Item::Metadata meta )
+int MetadataParser::toInt( parser::IItem& item, parser::IItem::Metadata meta )
 {
     auto str = item.meta( meta );
     if ( str.empty() == false )
@@ -81,14 +81,14 @@ int MetadataParser::toInt( parser::Task::Item& item, parser::Task::Item::Metadat
         catch( std::logic_error& ex)
         {
             LOG_WARN( "Invalid meta #",
-                      static_cast<typename std::underlying_type<parser::Task::Item::Metadata>::type>( meta ),
+                      static_cast<typename std::underlying_type<parser::IItem::Metadata>::type>( meta ),
                       " provided (", str, "): ", ex.what() );
         }
     }
     return 0;
 }
 
-parser::Task::Status MetadataParser::run( parser::Task::Item& item )
+parser::Task::Status MetadataParser::run( parser::IItem& item )
 {
     bool alreadyInParser = false;
     int nbSubitem = item.nbSubItems();
@@ -183,7 +183,7 @@ parser::Task::Status MetadataParser::run( parser::Task::Item& item )
             auto t = m_ml->getConn()->newTransaction();
             for ( const auto& track : tracks )
             {
-                if ( track.type == parser::Task::Item::Track::Type::Video )
+                if ( track.type == parser::IItem::Track::Type::Video )
                 {
                     item.media()->addVideoTrack( track.codec, track.v.width, track.v.height,
                                           static_cast<float>( track.v.fpsNum ) /
@@ -193,7 +193,7 @@ parser::Task::Status MetadataParser::run( parser::Task::Item& item )
                 }
                 else
                 {
-                    assert( track.type == parser::Task::Item::Track::Type::Audio );
+                    assert( track.type == parser::IItem::Track::Type::Audio );
                     item.media()->addAudioTrack( track.codec, track.bitrate,
                                                track.a.rate, track.a.nbChannels,
                                                track.language, track.description );
@@ -223,7 +223,7 @@ parser::Task::Status MetadataParser::run( parser::Task::Item& item )
 
 /* Playlist files */
 
-bool MetadataParser::addPlaylistMedias( parser::Task::Item& item ) const
+bool MetadataParser::addPlaylistMedias( parser::IItem& item ) const
 {
     const auto& mrl = item.mrl();
     LOG_INFO( "Try to import ", mrl, " as a playlist" );
@@ -246,7 +246,7 @@ bool MetadataParser::addPlaylistMedias( parser::Task::Item& item ) const
     }
     else
     {
-        auto playlistName = item.meta( parser::Task::Item::Metadata::Title );
+        auto playlistName = item.meta( parser::IItem::Metadata::Title );
         if ( playlistName.empty() == true )
             playlistName = utils::url::decode( utils::file::fileName( mrl ) );
         auto t = m_ml->getConn()->newTransaction();
@@ -281,7 +281,7 @@ bool MetadataParser::addPlaylistMedias( parser::Task::Item& item ) const
     return true;
 }
 
-void MetadataParser::addPlaylistElement( parser::Task::Item& item,
+void MetadataParser::addPlaylistElement( parser::IItem& item,
                                          std::shared_ptr<Playlist> playlistPtr,
                                          const parser::IItem& subitem ) const
 {
@@ -301,7 +301,7 @@ void MetadataParser::addPlaylistElement( parser::Task::Item& item,
     {
         auto t2 = m_ml->getConn()->newTransaction();
         auto externalMedia = Media::create( m_ml, IMedia::Type::Unknown, utils::url::encode(
-                subitem.meta( parser::Task::Item::Metadata::Title ) ) );
+                subitem.meta( parser::IItem::Metadata::Title ) ) );
         if ( externalMedia == nullptr )
         {
             LOG_ERROR( "Failed to create external media for ", mrl, " in the playlist ", item.mrl() );
@@ -366,16 +366,16 @@ void MetadataParser::addPlaylistElement( parser::Task::Item& item,
 
 /* Video files */
 
-bool MetadataParser::parseVideoFile( parser::Task::Item& item ) const
+bool MetadataParser::parseVideoFile( parser::IItem& item ) const
 {
     auto media = item.media().get();
     media->setType( IMedia::Type::Video );
-    const auto& title = item.meta( parser::Task::Item::Metadata::Title );
+    const auto& title = item.meta( parser::IItem::Metadata::Title );
     if ( title.length() == 0 )
         return true;
 
-    const auto& showName = item.meta( parser::Task::Item::Metadata::ShowName );
-    const auto& artworkMrl = item.meta( parser::Task::Item::Metadata::ArtworkUrl );
+    const auto& showName = item.meta( parser::IItem::Metadata::ShowName );
+    const auto& artworkMrl = item.meta( parser::IItem::Metadata::ArtworkUrl );
 
     return sqlite::Tools::withRetries( 3, [this, &showName, &title, &item, &artworkMrl]() {
         auto t = m_ml->getConn()->newTransaction();
@@ -393,7 +393,7 @@ bool MetadataParser::parseVideoFile( parser::Task::Item& item ) const
                 if ( show == nullptr )
                     return false;
             }
-            auto episode = toInt( item, parser::Task::Item::Metadata::Episode );
+            auto episode = toInt( item, parser::IItem::Metadata::Episode );
             if ( episode != 0 )
             {
                 std::shared_ptr<Show> s = std::static_pointer_cast<Show>( show );
@@ -413,11 +413,11 @@ bool MetadataParser::parseVideoFile( parser::Task::Item& item ) const
 
 /* Audio files */
 
-bool MetadataParser::parseAudioFile( parser::Task::Item& item )
+bool MetadataParser::parseAudioFile( parser::IItem& item )
 {
     item.media()->setType( IMedia::Type::Audio );
 
-    auto artworkMrl = item.meta( parser::Task::Item::Metadata::ArtworkUrl );
+    auto artworkMrl = item.meta( parser::IItem::Metadata::ArtworkUrl );
     if ( artworkMrl.empty() == false )
     {
         item.media()->setThumbnail( artworkMrl, Thumbnail::Origin::Media );
@@ -437,7 +437,7 @@ bool MetadataParser::parseAudioFile( parser::Task::Item& item )
         auto t = m_ml->getConn()->newTransaction();
         if ( album == nullptr )
         {
-            const auto& albumName = item.meta( parser::Task::Item::Metadata::Album );
+            const auto& albumName = item.meta( parser::IItem::Metadata::Album );
             int64_t thumbnailId = 0;
             if ( artworkMrl.empty() == false )
             {
@@ -462,9 +462,9 @@ bool MetadataParser::parseAudioFile( parser::Task::Item& item )
     }, std::move( artworkMrl ), std::move( album ), std::move( genre ) );
 }
 
-std::shared_ptr<Genre> MetadataParser::handleGenre( parser::Task::Item& item ) const
+std::shared_ptr<Genre> MetadataParser::handleGenre( parser::IItem& item ) const
 {
-    const auto& genreStr = item.meta( parser::Task::Item::Metadata::Genre );
+    const auto& genreStr = item.meta( parser::IItem::Metadata::Genre );
     if ( genreStr.length() == 0 )
         return nullptr;
     auto genre = Genre::fromName( m_ml, genreStr );
@@ -479,10 +479,10 @@ std::shared_ptr<Genre> MetadataParser::handleGenre( parser::Task::Item& item ) c
 
 /* Album handling */
 
-std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task::Item& item, std::shared_ptr<Artist> albumArtist,
+std::shared_ptr<Album> MetadataParser::findAlbum( parser::IItem& item, std::shared_ptr<Artist> albumArtist,
                                                     std::shared_ptr<Artist> trackArtist )
 {
-    const auto& albumName = item.meta( parser::Task::Item::Metadata::Album );
+    const auto& albumName = item.meta( parser::IItem::Metadata::Album );
     if ( albumName.empty() == true )
     {
         if ( albumArtist != nullptr )
@@ -507,8 +507,8 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task::Item& item, std:
     if ( albums.size() == 0 )
         return nullptr;
 
-    const auto discTotal = toInt( item, parser::Task::Item::Metadata::DiscTotal );
-    const auto discNumber = toInt( item, parser::Task::Item::Metadata::DiscNumber );
+    const auto discTotal = toInt( item, parser::IItem::Metadata::DiscTotal );
+    const auto discNumber = toInt( item, parser::IItem::Metadata::DiscNumber );
     /*
      * Even if we get only 1 album, we need to filter out invalid matches.
      * For instance, if we have already inserted an album "A" by an artist "john"
@@ -605,7 +605,7 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task::Item& item, std:
         // tagged with a year.
         if ( multipleArtists == false )
         {
-            auto candidateDate = item.meta( parser::Task::Item::Metadata::Date );
+            auto candidateDate = item.meta( parser::IItem::Metadata::Date );
             if ( candidateDate.empty() == false )
             {
                 try
@@ -651,14 +651,14 @@ std::shared_ptr<Album> MetadataParser::findAlbum( parser::Task::Item& item, std:
 /// The album artist as a first element
 /// The track artist as a second element, or nullptr if it is the same as album artist
 ///
-std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::findOrCreateArtist( parser::Task::Item& item ) const
+std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::findOrCreateArtist( parser::IItem& item ) const
 {
     std::shared_ptr<Artist> albumArtist;
     std::shared_ptr<Artist> artist;
     static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name + " WHERE name = ?";
 
-    const auto& albumArtistStr = item.meta( parser::Task::Item::Metadata::AlbumArtist );
-    const auto& artistStr = item.meta( parser::Task::Item::Metadata::Artist );
+    const auto& albumArtistStr = item.meta( parser::IItem::Metadata::AlbumArtist );
+    const auto& artistStr = item.meta( parser::IItem::Metadata::Artist );
     if ( albumArtistStr.empty() == true && artistStr.empty() == true )
     {
         return {m_unknownArtist, m_unknownArtist};
@@ -697,14 +697,14 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataParser::find
 
 /* Tracks handling */
 
-std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> album, parser::Task::Item& item,
+std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> album, parser::IItem& item,
                                                          std::shared_ptr<Artist> artist, Genre* genre ) const
 {
     assert( sqlite::Transaction::transactionInProgress() == true );
 
-    auto title = item.meta( parser::Task::Item::Metadata::Title );
-    const auto trackNumber = toInt( item, parser::Task::Item::Metadata::TrackNumber );
-    const auto discNumber = toInt( item, parser::Task::Item::Metadata::DiscNumber );
+    auto title = item.meta( parser::IItem::Metadata::Title );
+    const auto trackNumber = toInt( item, parser::IItem::Metadata::TrackNumber );
+    const auto discNumber = toInt( item, parser::IItem::Metadata::DiscNumber );
     if ( title.empty() == true )
     {
         LOG_WARN( "Failed to get track title" );
@@ -726,7 +726,7 @@ std::shared_ptr<AlbumTrack> MetadataParser::handleTrack( std::shared_ptr<Album> 
         return nullptr;
     }
 
-    const auto& releaseDate = item.meta( parser::Task::Item::Metadata::Date );
+    const auto& releaseDate = item.meta( parser::IItem::Metadata::Date );
     if ( releaseDate.empty() == false )
     {
         auto releaseYear = atoi( releaseDate.c_str() );

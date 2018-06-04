@@ -43,7 +43,7 @@ class VLCMetadataService : public IParserService
 
 private:
         virtual bool initialize( MediaLibrary* ml ) override;
-        virtual parser::Task::Status run( parser::Task::Item& item ) override;
+        virtual parser::Task::Status run( parser::IItem& item ) override;
         virtual const char* name() const override;
         virtual uint8_t nbThreads() const override;
         virtual void onFlushing() override;

@@ -45,7 +45,7 @@ bool VLCMetadataService::initialize( MediaLibrary* )
     return true;
 }
 
-parser::Task::Status VLCMetadataService::run( parser::Task::Item& item )
+parser::Task::Status VLCMetadataService::run( parser::IItem& item )
 {
     auto mrl = item.mrl();
     LOG_INFO( "Parsing ", mrl );
@@ -117,46 +117,46 @@ parser::Task::ParserStep VLCMetadataService::targetedStep() const
 
 void VLCMetadataService::mediaToItem( VLC::Media& media, parser::IItem& item )
 {
-    item.setMeta( parser::Task::Item::Metadata::Title,
+    item.setMeta( parser::IItem::Metadata::Title,
                   media.meta( libvlc_meta_Title ) );
-    item.setMeta( parser::Task::Item::Metadata::ArtworkUrl,
+    item.setMeta( parser::IItem::Metadata::ArtworkUrl,
                   media.meta( libvlc_meta_ArtworkURL ) );
-    item.setMeta( parser::Task::Item::Metadata::ShowName,
+    item.setMeta( parser::IItem::Metadata::ShowName,
                   media.meta( libvlc_meta_ShowName ) );
-    item.setMeta( parser::Task::Item::Metadata::Episode,
+    item.setMeta( parser::IItem::Metadata::Episode,
                   media.meta( libvlc_meta_Episode ) );
-    item.setMeta( parser::Task::Item::Metadata::Album,
+    item.setMeta( parser::IItem::Metadata::Album,
                   media.meta( libvlc_meta_Album ) );
-    item.setMeta( parser::Task::Item::Metadata::Genre,
+    item.setMeta( parser::IItem::Metadata::Genre,
                   media.meta( libvlc_meta_Genre ) );
-    item.setMeta( parser::Task::Item::Metadata::Date,
+    item.setMeta( parser::IItem::Metadata::Date,
                   media.meta( libvlc_meta_Date ) );
-    item.setMeta( parser::Task::Item::Metadata::AlbumArtist,
+    item.setMeta( parser::IItem::Metadata::AlbumArtist,
                   media.meta( libvlc_meta_AlbumArtist ) );
-    item.setMeta( parser::Task::Item::Metadata::Artist,
+    item.setMeta( parser::IItem::Metadata::Artist,
                   media.meta( libvlc_meta_Artist ) );
-    item.setMeta( parser::Task::Item::Metadata::TrackNumber,
+    item.setMeta( parser::IItem::Metadata::TrackNumber,
                   media.meta( libvlc_meta_TrackNumber ) );
-    item.setMeta( parser::Task::Item::Metadata::DiscNumber,
+    item.setMeta( parser::IItem::Metadata::DiscNumber,
                   media.meta( libvlc_meta_DiscNumber ) );
-    item.setMeta( parser::Task::Item::Metadata::DiscTotal,
+    item.setMeta( parser::IItem::Metadata::DiscTotal,
                   media.meta( libvlc_meta_DiscTotal ) );
     item.setDuration( media.duration() );
 
     auto tracks = media.tracks();
     for ( const auto& track : tracks )
     {
-        parser::Task::Item::Track t;
+        parser::IItem::Track t;
 
         if ( track.type() == VLC::MediaTrack::Type::Audio )
         {
-            t.type = parser::Task::Item::Track::Type::Audio;
+            t.type = parser::IItem::Track::Type::Audio;
             t.a.nbChannels = track.channels();
             t.a.rate = track.rate();
         }
         else if ( track.type() == VLC::MediaTrack::Type::Video )
         {
-            t.type = parser::Task::Item::Track::Type::Video;
+            t.type = parser::IItem::Track::Type::Video;
             t.v.fpsNum = track.fpsNum();
             t.v.fpsDen = track.fpsDen();
             t.v.width = track.width();
