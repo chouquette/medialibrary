@@ -36,18 +36,17 @@
 namespace medialibrary
 {
 
-namespace parser
-{
-class IParserCb;
-}
-
 class ModificationNotifier;
 class MediaLibrary;
 
-class ParserWorker
+namespace parser
+{
+class IParserCb;
+
+class Worker
 {
 public:
-    ParserWorker();
+    Worker();
 
     void pause();
     void resume();
@@ -63,8 +62,8 @@ public:
     /// \brief stop Effectively wait the the underlying threads to join.
     ///
     void stop();
-    void parse( std::shared_ptr<parser::Task> t );
-    bool initialize( MediaLibrary* ml, parser::IParserCb* parserCb, std::unique_ptr<IParserService> service );
+    void parse( std::shared_ptr<Task> t );
+    bool initialize( MediaLibrary* ml, IParserCb* parserCb, std::unique_ptr<IParserService> service );
     bool isIdle() const;
     ///
     /// \brief flush flush every currently scheduled tasks
@@ -84,20 +83,21 @@ private:
     void start();
     void mainloop();
     void setIdle( bool isIdle );
-    bool handleServiceResult( parser::Task& task, parser::Status status );
+    bool handleServiceResult( Task& task, Status status );
 
 private:
     MediaLibrary* m_ml;
     std::unique_ptr<IParserService> m_service;
-    parser::IParserCb* m_parserCb;
+    IParserCb* m_parserCb;
     bool m_stopParser;
     bool m_paused;
     std::atomic_bool m_idle;
     compat::ConditionVariable m_cond;
     compat::ConditionVariable m_idleCond;
-    std::queue<std::shared_ptr<parser::Task>> m_tasks;
+    std::queue<std::shared_ptr<Task>> m_tasks;
     std::vector<compat::Thread> m_threads;
     compat::Mutex m_lock;
 };
 
+}
 }

@@ -30,8 +30,10 @@
 
 namespace medialibrary
 {
+namespace parser
+{
 
-ParserWorker::ParserWorker()
+Worker::Worker()
     : m_parserCb( nullptr )
     , m_stopParser( false )
     , m_paused( false )
@@ -39,28 +41,28 @@ ParserWorker::ParserWorker()
 {
 }
 
-void ParserWorker::start()
+void Worker::start()
 {
     // Ensure we don't start multiple times.
     assert( m_threads.size() == 0 );
     for ( auto i = 0u; i < m_service->nbThreads(); ++i )
-        m_threads.emplace_back( &ParserWorker::mainloop, this );
+        m_threads.emplace_back( &Worker::mainloop, this );
 }
 
-void ParserWorker::pause()
+void Worker::pause()
 {
     std::lock_guard<compat::Mutex> lock( m_lock );
     m_paused = true;
 }
 
-void ParserWorker::resume()
+void Worker::resume()
 {
     std::lock_guard<compat::Mutex> lock( m_lock );
     m_paused = false;
     m_cond.notify_all();
 }
 
-void ParserWorker::signalStop()
+void Worker::signalStop()
 {
     for ( auto& t : m_threads )
     {
@@ -73,7 +75,7 @@ void ParserWorker::signalStop()
     }
 }
 
-void ParserWorker::stop()
+void Worker::stop()
 {
     for ( auto& t : m_threads )
     {
@@ -82,7 +84,7 @@ void ParserWorker::stop()
     }
 }
 
-void ParserWorker::parse( std::shared_ptr<parser::Task> t )
+void Worker::parse( std::shared_ptr<Task> t )
 {
     if ( m_threads.size() == 0 )
     {
@@ -98,7 +100,7 @@ void ParserWorker::parse( std::shared_ptr<parser::Task> t )
     }
 }
 
-bool ParserWorker::initialize( MediaLibrary* ml, parser::IParserCb* parserCb,
+bool Worker::initialize( MediaLibrary* ml, IParserCb* parserCb,
                                std::unique_ptr<IParserService> service )
 {
     m_ml = ml;
@@ -108,12 +110,12 @@ bool ParserWorker::initialize( MediaLibrary* ml, parser::IParserCb* parserCb,
     return m_service->initialize( ml );
 }
 
-bool ParserWorker::isIdle() const
+bool Worker::isIdle() const
 {
     return m_idle;
 }
 
-void ParserWorker::flush()
+void Worker::flush()
 {
     std::unique_lock<compat::Mutex> lock( m_lock );
     assert( m_paused == true || m_threads.empty() == true );
@@ -125,12 +127,12 @@ void ParserWorker::flush()
     m_service->onFlushing();
 }
 
-void ParserWorker::restart()
+void Worker::restart()
 {
     m_service->onRestarted();
 }
 
-void ParserWorker::mainloop()
+void Worker::mainloop()
 {
     // It would be unsafe to call name() at the end of this function, since
     // we might stop the thread during ParserService destruction. This implies
@@ -141,7 +143,7 @@ void ParserWorker::mainloop()
 
     while ( m_stopParser == false )
     {
-        std::shared_ptr<parser::Task> task;
+        std::shared_ptr<Task> task;
         {
             std::unique_lock<compat::Mutex> lock( m_lock );
             if ( m_tasks.empty() == true || m_paused == true )
@@ -167,10 +169,10 @@ void ParserWorker::mainloop()
         if ( task->isStepCompleted( m_service->targetedStep() ) == true )
         {
             LOG_INFO( "Skipping completed task [", serviceName, "] on ", task->item().mrl() );
-            m_parserCb->done( std::move( task ), parser::Status::Success );
+            m_parserCb->done( std::move( task ), Status::Success );
             continue;
         }
-        parser::Status status;
+        Status status;
         try
         {
             LOG_INFO( "Executing ", serviceName, " task on ", task->item().mrl() );
@@ -179,7 +181,7 @@ void ParserWorker::mainloop()
             auto media = std::static_pointer_cast<Media>( task->item().media() );
             if ( ( file != nullptr && file->isDeleted() )
                  || ( media != nullptr && media->isDeleted() ) )
-                status = parser::Status::Fatal;
+                status = Status::Fatal;
             else
             {
                 task->startParserStep();
@@ -192,17 +194,17 @@ void ParserWorker::mainloop()
         catch ( const std::exception& ex )
         {
             LOG_ERROR( "Caught an exception during ", task->item().mrl(), " [", serviceName, "] parsing: ", ex.what() );
-            status = parser::Status::Fatal;
+            status = Status::Fatal;
         }
         if ( handleServiceResult( *task, status ) == false )
-            status = parser::Status::Fatal;
+            status = Status::Fatal;
         m_parserCb->done( std::move( task ), status );
     }
     LOG_INFO("Exiting ParserService [", serviceName, "] thread");
     setIdle( true );
 }
 
-void ParserWorker::setIdle(bool isIdle)
+void Worker::setIdle(bool isIdle)
 {
     // Calling the idleChanged callback will trigger a call to isIdle, so set the value before
     // invoking it, otherwise we have an incoherent state.
@@ -210,28 +212,29 @@ void ParserWorker::setIdle(bool isIdle)
     m_parserCb->onIdleChanged( isIdle );
 }
 
-bool ParserWorker::handleServiceResult( parser::Task& task, parser::Status status )
+bool Worker::handleServiceResult( Task& task, Status status )
 {
-    if ( status == parser::Status::Success )
+    if ( status == Status::Success )
     {
         task.markStepCompleted( m_service->targetedStep() );
         // We don't want to save the extraction step in database, as restarting a
         // task with extraction completed but analysis uncompleted wouldn't run
         // the extraction again, causing the analysis to run with no info.
-        if ( m_service->targetedStep() != parser::Step::MetadataExtraction )
+        if ( m_service->targetedStep() != Step::MetadataExtraction )
             return task.saveParserStep();
         return true;
     }
-    else if ( status == parser::Status::Completed )
+    else if ( status == Status::Completed )
     {
-        task.markStepCompleted( parser::Step::Completed );
+        task.markStepCompleted( Step::Completed );
         return task.saveParserStep();
     }
-    else if ( status == parser::Status::Discarded )
+    else if ( status == Status::Discarded )
     {
-        return parser::Task::destroy( m_ml, task.id() );
+        return Task::destroy( m_ml, task.id() );
     }
     return true;
 }
 
+}
 }

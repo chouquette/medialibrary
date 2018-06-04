@@ -34,7 +34,6 @@ namespace medialibrary
 
 class ModificationNotifier;
 class DiscovererWorker;
-class ParserWorker;
 class VLCThumbnailer;
 
 class Album;
@@ -61,6 +60,7 @@ class IDirectory;
 namespace parser
 {
 class Parser;
+class Worker;
 }
 
 class MediaLibrary : public IMediaLibrary, public IDeviceListerCb

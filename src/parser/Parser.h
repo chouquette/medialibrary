@@ -33,11 +33,11 @@
 namespace medialibrary
 {
 
-class ParserWorker;
 class IParserService;
 
 namespace parser
 {
+class Worker;
 
 // Use an interface to expose only the "done" method
 class IParserCb
@@ -52,7 +52,7 @@ class Parser : IParserCb
 {
 public:
     using ServicePtr = std::unique_ptr<IParserService>;
-    using WorkerPtr = std::unique_ptr<ParserWorker>;
+    using WorkerPtr = std::unique_ptr<parser::Worker>;
 
     Parser( MediaLibrary* ml );
     virtual ~Parser();
