@@ -51,7 +51,7 @@ private:
         virtual void onRestarted() override;
         virtual parser::Task::ParserStep targetedStep() const override;
 
-        void mediaToItem( VLC::Media& media, parser::Task::Item& item );
+        void mediaToItem( VLC::Media& media, parser::IItem& item );
 
 private:
         VLC::Instance m_instance;

@@ -48,7 +48,7 @@ protected:
 
     bool addPlaylistMedias( parser::Task::Item& item ) const;
     void addPlaylistElement( parser::Task::Item& item, std::shared_ptr<Playlist> playlistPtr,
-                             const parser::Task::Item& subitem ) const;
+                             const parser::IItem& subitem ) const;
     bool parseAudioFile( parser::Task::Item& task );
     bool parseVideoFile( parser::Task::Item& task ) const;
     std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> findOrCreateArtist( parser::Task::Item& item ) const;

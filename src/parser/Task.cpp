@@ -193,12 +193,12 @@ size_t Task::Item::nbSubItems() const
     return m_subItems.size();
 }
 
-const Task::Item& Task::Item::subItem( unsigned int index ) const
+const parser::IItem& Task::Item::subItem( unsigned int index ) const
 {
     return m_subItems[index];
 }
 
-Task::Item& Task::Item::createSubItem( std::string mrl, unsigned int playlistIndex )
+parser::IItem& Task::Item::createSubItem( std::string mrl, unsigned int playlistIndex )
 {
     m_subItems.emplace_back( nullptr, std::move( mrl ), playlistIndex );
     return m_subItems.back();

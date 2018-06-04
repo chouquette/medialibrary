@@ -30,6 +30,7 @@
 #include <unordered_map>
 
 #include "database/DatabaseHelpers.h"
+#include "parser/IItem.h"
 
 namespace medialibrary
 {
@@ -103,9 +104,17 @@ public:
         Completed = 1 | 2,
     };
 
-    class Item
+    class Item : public IItem
     {
     public:
+        struct MetadataHash
+        {
+            size_t operator()(IItem::Metadata m) const
+            {
+                return static_cast<size_t>( m );
+            }
+        };
+
         Item() = default;
         /**
          * @brief Item Construct a parser item with a given mrl and subitem index
@@ -118,95 +127,39 @@ public:
         Item( ITaskCb* taskCb, std::shared_ptr<fs::IFile> fileFs,
               std::shared_ptr<Folder> folder, std::shared_ptr<fs::IDirectory> folderFs,
               std::shared_ptr<Playlist> parentPlaylist, unsigned int parentPlaylistIndex );
-        enum class Metadata : uint8_t
-        {
-            Title,
-            ArtworkUrl,
-            ShowName,
-            Episode,
-            Album,
-            Genre,
-            Date,
-            AlbumArtist,
-            Artist,
-            TrackNumber,
-            DiscNumber,
-            DiscTotal,
-        };
 
-        struct MetadataHash
-        {
-            size_t operator()(Metadata m) const
-            {
-                return static_cast<size_t>( m );
-            }
-        };
 
-        struct Track
-        {
-            enum class Type : uint8_t
-            {
-                Video,
-                Audio,
-            };
+        virtual std::string meta( Metadata type ) const override;
+        virtual void setMeta( Metadata type, std::string value ) override;
 
-            std::string codec;
-            Type type;
-            uint32_t bitrate;
-            std::string language;
-            std::string description;
-            // Audio
-            union
-            {
-                struct
-                {
-                    uint32_t nbChannels;
-                    uint32_t rate;
-                } a;
-                struct
-                {
-                    // Video
-                    uint32_t height;
-                    uint32_t width;
-                    uint32_t sarNum;
-                    uint32_t sarDen;
-                    uint32_t fpsNum;
-                    uint32_t fpsDen;
-                } v;
-            };
-        };
-
-        std::string meta( Metadata type ) const;
-        void setMeta( Metadata type, std::string value );
-
-        const std::string& mrl() const;
+        virtual const std::string& mrl() const override;
         void setMrl( std::string mrl );
 
-        size_t nbSubItems() const;
-        const Item& subItem( unsigned int index ) const;
-        Item& createSubItem( std::string mrl, unsigned int playlistIndex );
+        virtual size_t nbSubItems() const override;
+        virtual const IItem& subItem( unsigned int index ) const override;
+        virtual IItem& createSubItem( std::string mrl, unsigned int playlistIndex ) override;
 
-        int64_t duration() const;
-        void setDuration( int64_t duration );
+        virtual int64_t duration() const override;
+        virtual void setDuration( int64_t duration ) override;
 
-        const std::vector<Track>& tracks() const;
-        void addTrack( Track t );
+        virtual const std::vector<Track>& tracks() const override;
+        virtual void addTrack( Track t ) override;
 
-        std::shared_ptr<Media> media();
-        void setMedia( std::shared_ptr<Media> media );
+        virtual std::shared_ptr<Media> media() override;
+        virtual void setMedia( std::shared_ptr<Media> media ) override;
 
-        std::shared_ptr<File> file();
-        bool setFile( std::shared_ptr<File> file );
+        virtual std::shared_ptr<File> file() override;
+        virtual bool setFile( std::shared_ptr<File> file ) override;
 
-        std::shared_ptr<Folder> parentFolder();
+        virtual std::shared_ptr<Folder> parentFolder() override;
 
-        std::shared_ptr<fs::IFile> fileFs();
+        virtual std::shared_ptr<fs::IFile> fileFs() override;
 
-        std::shared_ptr<fs::IDirectory> parentFolderFs();
+        virtual std::shared_ptr<fs::IDirectory> parentFolderFs() override;
 
-        std::shared_ptr<Playlist> parentPlaylist();
+        virtual std::shared_ptr<Playlist> parentPlaylist() override;
 
-        unsigned int parentPlaylistIndex() const;
+        virtual unsigned int parentPlaylistIndex() const override;
 
     private:
         ITaskCb* m_taskCb;

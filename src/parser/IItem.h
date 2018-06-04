@@ -1,0 +1,225 @@
+/*****************************************************************************
+ * Media Library
+ *****************************************************************************
+ * Copyright (C) 2015-2018 Hugo Beauzée-Luyssen, Videolabs, VideoLAN
+ *
+ * Authors: Hugo Beauzée-Luyssen <hugo@beauzee.fr>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
+ *****************************************************************************/
+
+#pragma once
+
+#include <string>
+#include <vector>
+#include <memory>
+
+#include "filesystem/IFile.h"
+#include "filesystem/IDirectory.h"
+
+namespace medialibrary
+{
+
+class Folder;
+class File;
+class Media;
+class Playlist;
+
+namespace parser
+{
+
+class IItem
+{
+public:
+    enum class Metadata : uint8_t
+    {
+        Title,
+        ArtworkUrl,
+        ShowName,
+        Episode,
+        Album,
+        Genre,
+        Date,
+        AlbumArtist,
+        Artist,
+        TrackNumber,
+        DiscNumber,
+        DiscTotal,
+    };
+
+    struct Track
+    {
+        enum class Type : uint8_t
+        {
+            Video,
+            Audio,
+        };
+
+        std::string codec;
+        Type type;
+        uint32_t bitrate;
+        std::string language;
+        std::string description;
+        // Audio
+        union
+        {
+            struct
+            {
+                uint32_t nbChannels;
+                uint32_t rate;
+            } a;
+            struct
+            {
+                // Video
+                uint32_t height;
+                uint32_t width;
+                uint32_t sarNum;
+                uint32_t sarDen;
+                uint32_t fpsNum;
+                uint32_t fpsDen;
+            } v;
+        };
+    };
+
+public:
+    virtual ~IItem() = default;
+
+    /**
+     * @brief meta Returns a stored meta for this item.
+     * @param type The type of meta
+     * @return A copy of the meta. It can be safely moved to another std::string
+     * if required.
+     * A default constructed string if the meta isn't known for this item
+     */
+    virtual std::string meta( Metadata type ) const = 0;
+    /**
+     * @brief setMeta Store a meta for the item
+     * @param type The metadata type
+     * @param value The metadata value
+     */
+    virtual void setMeta( Metadata type, std::string value ) = 0;
+
+    /**
+     * @return The MRL representing this item.
+     */
+    virtual const std::string& mrl() const = 0;
+
+    /**
+     * @return The number of subitems for this item.
+     */
+    virtual size_t nbSubItems() const = 0;
+    /**
+     * @return The subitem at the given index.
+     * The subitems are owned by their parent items. No bound checking is
+     * performed.
+     */
+    virtual const IItem& subItem( unsigned int index ) const = 0;
+    /**
+     * @brief createSubItem Create a subitem in place.
+     * @param mrl The subitem's MRL
+     * @param playlistIndex If the parent item is a playlist, this will hold its
+     *                      position. Otherwise, this must be 0.
+     * @return A *reference* to the created item, so the item can be populated
+     *         after its creation.
+     */
+    virtual IItem& createSubItem( std::string mrl, unsigned int playlistIndex ) = 0;
+
+    /**
+     * @brief duration Returns the item duration in milliseconds
+     */
+    virtual int64_t duration() const = 0;
+    /**
+     * @brief setDuration Sets the item duration
+     * @param duration A duration in milliseconds
+     */
+    virtual void setDuration( int64_t duration ) = 0;
+
+    /**
+     * @brief tracks List all the item tracks
+     *
+     * This only contains the Audio & Video tracks
+     */
+    virtual const std::vector<Track>& tracks() const = 0;
+    /**
+     * @brief addTrack Add a track to this item.
+     * @param t The track to add.
+     */
+    virtual void addTrack( Track t ) = 0;
+
+    /**
+     * @brief media Returns the media associated with this item, if any.
+     * @return nullptr if the item isn't associated with a Media yet.
+     */
+    virtual std::shared_ptr<Media> media() = 0;
+    /**
+     * @brief setMedia Assigns a Media to this item
+     */
+    virtual void setMedia( std::shared_ptr<Media> media ) = 0;
+
+    /**
+     * @brief file Returns the File (as in, the database entity) associated with
+     *             this item, if any. It returns nullptr otherwise
+     */
+    virtual std::shared_ptr<File> file() = 0;
+    /**
+     * @brief setFile Assigns a File to the item
+     */
+    virtual bool setFile( std::shared_ptr<File> file ) = 0;
+
+    /**
+     * @brief parentFolder Returns the Folder (as in the database entity)
+     *                     containing this item.
+     *
+     * @return This can be nullptr if the item refers to an "external" media, ie.
+     *         if it was added through its complete MRL, instead of being
+     *         discovered through its parent folder.
+     */
+    virtual std::shared_ptr<Folder> parentFolder() = 0;
+
+    /**
+     * @brief fileFs returns an fs::IFile representing the item
+     *
+     * This will return nullptr for external media.
+     */
+    virtual std::shared_ptr<fs::IFile> fileFs() = 0;
+
+    /**
+     * @brief parentFolderFs Returns an fs::IDirectory representing the parent
+     *                       folder
+     *
+     * This will return nullptr for external media
+     */
+    virtual std::shared_ptr<fs::IDirectory> parentFolderFs() = 0;
+
+    /**
+     * @brief parentPlaylist Returns the playlist containing this item, if any
+     *
+     * Even if the item being processed does belong in a playlist, its associated
+     * playlist entity might have not been created, depending on the analysis progress.
+     * Usually the playlists are created after the MetadataAnalysis step.
+     */
+    virtual std::shared_ptr<Playlist> parentPlaylist() = 0;
+
+    /**
+     * @brief parentPlaylistIndex Returns this item's index in a playlist, if any.
+     *
+     * If this item belong in a playlist, this will return a non 0 value. If 0
+     * is returned, this item doesn't belong in any playlist.
+     */
+    virtual unsigned int parentPlaylistIndex() const = 0;
+};
+
+}
+}

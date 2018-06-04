@@ -283,7 +283,7 @@ bool MetadataParser::addPlaylistMedias( parser::Task::Item& item ) const
 
 void MetadataParser::addPlaylistElement( parser::Task::Item& item,
                                          std::shared_ptr<Playlist> playlistPtr,
-                                         const parser::Task::Item& subitem ) const
+                                         const parser::IItem& subitem ) const
 {
     const auto& mrl = subitem.mrl();
     LOG_INFO( "Try to add ", mrl, " to the playlist ", mrl );

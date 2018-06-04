@@ -121,7 +121,7 @@ parser::Task::ParserStep VLCMetadataService::targetedStep() const
     return parser::Task::ParserStep::MetadataExtraction;
 }
 
-void VLCMetadataService::mediaToItem( VLC::Media& media, parser::Task::Item& item )
+void VLCMetadataService::mediaToItem( VLC::Media& media, parser::IItem& item )
 {
     item.setMeta( parser::Task::Item::Metadata::Title,
                   media.meta( libvlc_meta_Title ) );
@@ -192,7 +192,7 @@ void VLCMetadataService::mediaToItem( VLC::Media& media, parser::Task::Item& ite
             assert( vlcMedia != nullptr );
             // Always add 1 to the playlist/subitem index, as 0 is an invalid index
             // in this context
-            parser::Task::Item& subItem = item.createSubItem( vlcMedia->mrl(), i + 1u );
+            parser::IItem& subItem = item.createSubItem( vlcMedia->mrl(), i + 1u );
             mediaToItem( *vlcMedia, subItem );
         }
     }
