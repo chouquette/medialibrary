@@ -100,9 +100,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
             return parser::Task::Status::Fatal;
 
         assert( task.item().file() != nullptr );
-        task.markStepCompleted( parser::Task::ParserStep::Completed );
-        task.saveParserStep();
-        return parser::Task::Status::Success;
+        return parser::Task::Status::Completed;
     }
 
     if ( task.item().file() == nullptr )
@@ -171,13 +169,7 @@ parser::Task::Status MetadataParser::run( parser::Task& task )
         task.item().parentPlaylist()->add( task.item().media()->id(), task.item().parentPlaylistIndex() );
 
     if ( alreadyInParser == true )
-    {
-        // Let the worker drop this duplicate task
-        task.markStepCompleted( parser::Task::ParserStep::Completed );
-        // And remove it from DB
-        parser::Task::destroy( m_ml, task.id() );
-        return parser::Task::Status::Success;
-    }
+        return parser::Task::Status::Discarded;
 
     const auto& tracks = task.item().tracks();
 

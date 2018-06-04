@@ -84,7 +84,14 @@ public:
         /// isn't connected anymore)
         TemporaryUnavailable,
         /// Something failed and we won't continue
-        Fatal
+        Fatal,
+        /// The task must now be considered completed, regardless of the
+        /// current step.
+        Completed,
+        /// The task should be discarded, regardless of its status
+        /// This is likely to be used when trying to parse playlist items,
+        /// as they already could have been queued before.
+        Discarded,
     };
 
     enum class ParserStep : uint8_t
