@@ -45,7 +45,7 @@ bool VLCMetadataService::initialize( MediaLibrary* )
     return true;
 }
 
-parser::Task::Status VLCMetadataService::run( parser::IItem& item )
+parser::Status VLCMetadataService::run( parser::IItem& item )
 {
     auto mrl = item.mrl();
     LOG_INFO( "Parsing ", mrl );
@@ -68,14 +68,14 @@ parser::Task::Status VLCMetadataService::run( parser::IItem& item )
 
         if ( vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local | VLC::Media::ParseFlags::Network |
                                              VLC::Media::ParseFlags::FetchLocal, 5000 ) == false )
-            return parser::Task::Status::Fatal;
+            return parser::Status::Fatal;
         m_cond.wait( lock, [&status, &done]() {
             return done == true;
         });
     }
     event->unregister();
     if ( status == VLC::Media::ParsedStatus::Failed || status == VLC::Media::ParsedStatus::Timeout )
-        return parser::Task::Status::Fatal;
+        return parser::Status::Fatal;
     auto tracks = vlcMedia.tracks();
     auto artworkMrl = vlcMedia.meta( libvlc_meta_ArtworkURL );
     if ( ( tracks.size() == 0 && vlcMedia.subitems()->count() == 0 ) ||
@@ -86,10 +86,10 @@ parser::Task::Status VLCMetadataService::run( parser::IItem& item )
         VLC::MediaPlayer mp( vlcMedia );
         auto res = MetadataCommon::startPlayback( vlcMedia, mp );
         if ( res == false )
-            return parser::Task::Status::Fatal;
+            return parser::Status::Fatal;
     }
     mediaToItem( vlcMedia, item );
-    return parser::Task::Status::Success;
+    return parser::Status::Success;
 }
 
 const char* VLCMetadataService::name() const

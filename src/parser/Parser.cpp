@@ -144,15 +144,15 @@ void Parser::updateStats()
     }
 }
 
-void Parser::done( std::shared_ptr<parser::Task> t, parser::Task::Status status )
+void Parser::done( std::shared_ptr<parser::Task> t, parser::Status status )
 {
     ++m_opDone;
 
     auto serviceIdx = ++t->currentService;
 
-    if ( status == parser::Task::Status::TemporaryUnavailable ||
-         status == parser::Task::Status::Fatal ||
-         status == parser::Task::Status::Discarded ||
+    if ( status == parser::Status::TemporaryUnavailable ||
+         status == parser::Status::Fatal ||
+         status == parser::Status::Discarded ||
          t->isCompleted() )
     {
         if ( serviceIdx < m_services.size() )

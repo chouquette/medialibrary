@@ -80,7 +80,7 @@ private:
     void start();
     void mainloop();
     void setIdle( bool isIdle );
-    bool handleServiceResult( parser::Task& task, parser::Task::Status status );
+    bool handleServiceResult( parser::Task& task, parser::Status status );
 
 private:
     MediaLibrary* m_ml;

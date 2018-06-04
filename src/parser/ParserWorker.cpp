@@ -166,17 +166,17 @@ void ParserWorker::mainloop()
         if ( task->isStepCompleted( m_service->targetedStep() ) == true )
         {
             LOG_INFO( "Skipping completed task [", serviceName, "] on ", task->item().mrl() );
-            m_parserCb->done( std::move( task ), parser::Task::Status::Success );
+            m_parserCb->done( std::move( task ), parser::Status::Success );
             continue;
         }
-        parser::Task::Status status;
+        parser::Status status;
         try
         {
             LOG_INFO( "Executing ", serviceName, " task on ", task->item().mrl() );
             auto chrono = std::chrono::steady_clock::now();
             if ( ( task->item().file() != nullptr && task->item().file()->isDeleted() )
                  || ( task->item().media() != nullptr && task->item().media()->isDeleted() ) )
-                status = parser::Task::Status::Fatal;
+                status = parser::Status::Fatal;
             else
             {
                 task->startParserStep();
@@ -189,10 +189,10 @@ void ParserWorker::mainloop()
         catch ( const std::exception& ex )
         {
             LOG_ERROR( "Caught an exception during ", task->item().mrl(), " [", serviceName, "] parsing: ", ex.what() );
-            status = parser::Task::Status::Fatal;
+            status = parser::Status::Fatal;
         }
         if ( handleServiceResult( *task, status ) == false )
-            status = parser::Task::Status::Fatal;
+            status = parser::Status::Fatal;
         m_parserCb->done( std::move( task ), status );
     }
     LOG_INFO("Exiting ParserService [", serviceName, "] thread");
@@ -207,9 +207,9 @@ void ParserWorker::setIdle(bool isIdle)
     m_parserCb->onIdleChanged( isIdle );
 }
 
-bool ParserWorker::handleServiceResult( parser::Task& task, parser::Task::Status status )
+bool ParserWorker::handleServiceResult( parser::Task& task, parser::Status status )
 {
-    if ( status == parser::Task::Status::Success )
+    if ( status == parser::Status::Success )
     {
         task.markStepCompleted( m_service->targetedStep() );
         // We don't want to save the extraction step in database, as restarting a
@@ -219,12 +219,12 @@ bool ParserWorker::handleServiceResult( parser::Task& task, parser::Task::Status
             return task.saveParserStep();
         return true;
     }
-    else if ( status == parser::Task::Status::Completed )
+    else if ( status == parser::Status::Completed )
     {
         task.markStepCompleted( parser::Task::ParserStep::Completed );
         return task.saveParserStep();
     }
-    else if ( status == parser::Task::Status::Discarded )
+    else if ( status == parser::Status::Discarded )
     {
         return parser::Task::destroy( m_ml, task.id() );
     }

@@ -38,7 +38,7 @@ public:
 protected:
     bool cacheUnknownArtist();
     virtual bool initialize( MediaLibrary* ml ) override;
-    virtual parser::Task::Status run( parser::IItem& item ) override;
+    virtual parser::Status run( parser::IItem& item ) override;
     virtual const char* name() const override;
     virtual uint8_t nbThreads() const override;
     virtual void onFlushing() override;

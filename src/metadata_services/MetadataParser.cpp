@@ -88,7 +88,7 @@ int MetadataParser::toInt( parser::IItem& item, parser::IItem::Metadata meta )
     return 0;
 }
 
-parser::Task::Status MetadataParser::run( parser::IItem& item )
+parser::Status MetadataParser::run( parser::IItem& item )
 {
     bool alreadyInParser = false;
     int nbSubitem = item.nbSubItems();
@@ -97,10 +97,10 @@ parser::Task::Status MetadataParser::run( parser::IItem& item )
     {
         auto res = addPlaylistMedias( item );
         if ( res == false ) // playlist addition may fail due to constraint violation
-            return parser::Task::Status::Fatal;
+            return parser::Status::Fatal;
 
         assert( item.file() != nullptr );
-        return parser::Task::Status::Completed;
+        return parser::Status::Completed;
     }
 
     if ( item.file() == nullptr )
@@ -116,7 +116,7 @@ parser::Task::Status MetadataParser::run( parser::IItem& item )
             if ( m == nullptr )
             {
                 LOG_ERROR( "Failed to add media ", mrl, " to the media library" );
-                return parser::Task::Status::Fatal;
+                return parser::Status::Fatal;
             }
             // For now, assume all media are made of a single file
             auto file = m->addFile( *item.fileFs(),
@@ -126,7 +126,7 @@ parser::Task::Status MetadataParser::run( parser::IItem& item )
             if ( file == nullptr )
             {
                 LOG_ERROR( "Failed to add file ", mrl, " to media #", m->id() );
-                return parser::Task::Status::Fatal;
+                return parser::Status::Fatal;
             }
             item.setMedia( std::move( m ) );
             // Will invoke ITaskCb::updateFileId to upadte m_fileId & its
@@ -144,11 +144,11 @@ parser::Task::Status MetadataParser::run( parser::IItem& item )
             if ( fileInDB == nullptr ) // The file is no longer present in DB, gracefully delete task
             {
                 LOG_ERROR( "File ", mrl, " no longer present in DB, aborting");
-                return parser::Task::Status::Fatal;
+                return parser::Status::Fatal;
             }
             auto media = fileInDB->media();
             if ( media == nullptr ) // Without a media, we cannot go further
-                return parser::Task::Status::Fatal;
+                return parser::Status::Fatal;
             item.setFile( std::move( fileInDB ) );
             item.setMedia( std::move( media ) );
 
@@ -162,19 +162,19 @@ parser::Task::Status MetadataParser::run( parser::IItem& item )
         // Keep in mind that if we are in this code path, we are not analyzing
         // a playlist.
         assert( false );
-        return parser::Task::Status::Fatal;
+        return parser::Status::Fatal;
     }
 
     if ( item.parentPlaylist() != nullptr )
         item.parentPlaylist()->add( item.media()->id(), item.parentPlaylistIndex() );
 
     if ( alreadyInParser == true )
-        return parser::Task::Status::Discarded;
+        return parser::Status::Discarded;
 
     const auto& tracks = item.tracks();
 
     if ( tracks.empty() == true )
-        return parser::Task::Status::Fatal;
+        return parser::Status::Fatal;
 
     bool isAudio = true;
     {
@@ -206,19 +206,19 @@ parser::Task::Status MetadataParser::run( parser::IItem& item )
     if ( isAudio == true )
     {
         if ( parseAudioFile( item ) == false )
-            return parser::Task::Status::Fatal;
+            return parser::Status::Fatal;
     }
     else
     {
         if (parseVideoFile( item ) == false )
-            return parser::Task::Status::Fatal;
+            return parser::Status::Fatal;
     }
 
     if ( item.file()->isDeleted() == true || item.media()->isDeleted() == true )
-        return parser::Task::Status::Fatal;
+        return parser::Status::Fatal;
 
     m_notifier->notifyMediaCreation( item.media() );
-    return parser::Task::Status::Success;
+    return parser::Status::Success;
 }
 
 /* Playlist files */

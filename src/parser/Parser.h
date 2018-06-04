@@ -28,6 +28,8 @@
 #include "Task.h"
 #include "File.h"
 
+#include "medialibrary/Parser.h"
+
 namespace medialibrary
 {
 
@@ -39,7 +41,7 @@ class IParserCb
 {
 public:
     virtual ~IParserCb() = default;
-    virtual void done( std::shared_ptr<parser::Task> task, parser::Task::Status status ) = 0;
+    virtual void done( std::shared_ptr<parser::Task> task, parser::Status status ) = 0;
     virtual void onIdleChanged( bool isIdle ) = 0;
 };
 
@@ -70,7 +72,7 @@ public:
 private:
     void updateStats();
     virtual void done( std::shared_ptr<parser::Task> task,
-                       parser::Task::Status status ) override;
+                       parser::Status status ) override;
     virtual void onIdleChanged( bool idle ) override;
 
 private:
