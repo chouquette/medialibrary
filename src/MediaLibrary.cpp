@@ -1202,7 +1202,7 @@ void MediaLibrary::discover( const std::string& entryPoint )
         m_discovererWorker->discover( entryPoint );
 }
 
-void MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
+bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
 {
     if ( enabled )
     {
@@ -1218,6 +1218,7 @@ void MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
             return fs->isNetworkFileSystem();
         }), end( m_fsFactories ) );
     }
+    return true;
 }
 
 Query<IFolder> MediaLibrary::entryPoints() const

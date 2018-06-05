@@ -136,7 +136,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
                                         SortingCriteria sort, bool desc ) const override;
 
         virtual void discover( const std::string& entryPoint ) override;
-        virtual void setDiscoverNetworkEnabled( bool enabled ) override;
+        virtual bool setDiscoverNetworkEnabled( bool enabled ) override;
         virtual Query<IFolder> entryPoints() const override;
         virtual FolderPtr folder( const std::string& mrl ) const override;
         virtual void removeEntryPoint( const std::string& entryPoint ) override;
