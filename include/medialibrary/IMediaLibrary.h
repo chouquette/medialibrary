@@ -391,8 +391,7 @@ class IMediaLibrary
          * @brief forceRescan Deletes all entities except Media and Playlist, and
          *                    forces all media to be rescanned.
          *
-         * This can be called anytime after the medialibrary has been initialized.
-         * It will make all held instances outdated. Those should be considered
+         * This can be called anytime after the medialibrary has been initialized. * It will make all held instances outdated. Those should be considered
          * as invalid the moment this method returns.
          */
         virtual void forceRescan() = 0;
@@ -404,6 +403,8 @@ class IMediaLibrary
          * will be called.
          */
         virtual void requestThumbnail( MediaPtr media ) = 0;
+
+        virtual void addParserService( std::shared_ptr<parser::IParserService> service ) = 0;
 
 };
 

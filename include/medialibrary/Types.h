@@ -48,6 +48,11 @@ class IDeviceLister;
 class IDeviceListerCb;
 class IFolder;
 
+namespace parser
+{
+class IParserService;
+}
+
 using AlbumPtr = std::shared_ptr<IAlbum>;
 using AlbumTrackPtr = std::shared_ptr<IAlbumTrack>;
 using ArtistPtr = std::shared_ptr<IArtist>;

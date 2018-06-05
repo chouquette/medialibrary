@@ -168,6 +168,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         virtual void requestThumbnail( MediaPtr media ) override;
 
+        virtual void addParserService( std::shared_ptr<parser::IParserService> service ) override;
+
         static bool isExtensionSupported( const char* ext );
 
     protected:
@@ -217,6 +219,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         IMediaLibraryCb* m_callback;
         DeviceListerPtr m_deviceLister;
 
+        // User provided parser services
+        std::vector<std::shared_ptr<parser::IParserService>> m_services;
         // Keep the parser as last field.
         // The parser holds a (raw) pointer to the media library. When MediaLibrary's destructor gets called
         // it might still finish a few operations before exiting the parser thread. Those operations are

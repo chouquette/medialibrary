@@ -714,10 +714,16 @@ void MediaLibrary::startParser()
 {
     m_parser.reset( new parser::Parser( this ) );
 
-    auto vlcService = std::make_shared<parser::VLCMetadataService>();
-    auto metadataService = std::make_shared<parser::MetadataAnalyzer>();
-    m_parser->addService( std::move( vlcService ) );
-    m_parser->addService( std::move( metadataService ) );
+    if ( m_services.size() == 0 )
+    {
+        m_parser->addService( std::make_shared<parser::VLCMetadataService>() );
+    }
+    else
+    {
+        assert( m_services[0]->targetedStep() == parser::Step::MetadataExtraction );
+        m_parser->addService( m_services[0] );
+    }
+    m_parser->addService( std::make_shared<parser::MetadataAnalyzer>() );
     m_parser->start();
 }
 
@@ -1308,6 +1314,16 @@ void MediaLibrary::forceRescan()
 void MediaLibrary::requestThumbnail( MediaPtr media )
 {
     m_thumbnailer->requestThumbnail( media );
+}
+
+void MediaLibrary::addParserService( std::shared_ptr<parser::IParserService> service )
+{
+    // For now we only support 1 external service of type MetadataExtraction
+    if ( service->targetedStep() != parser::Step::MetadataExtraction )
+        return;
+    if ( m_services.size() != 0 )
+        return;
+    m_services.emplace_back( std::move( service ) );
 }
 
 bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& mountpoint )
