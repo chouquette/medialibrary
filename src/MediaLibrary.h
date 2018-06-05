@@ -166,7 +166,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         virtual void forceRescan() override;
 
-        virtual void requestThumbnail( MediaPtr media ) override;
+        virtual bool requestThumbnail( MediaPtr media ) override;
 
         virtual void addParserService( std::shared_ptr<parser::IParserService> service ) override;
 

@@ -1316,9 +1316,10 @@ void MediaLibrary::forceRescan()
     }
 }
 
-void MediaLibrary::requestThumbnail( MediaPtr media )
+bool MediaLibrary::requestThumbnail( MediaPtr media )
 {
     m_thumbnailer->requestThumbnail( media );
+    return true;
 }
 
 void MediaLibrary::addParserService( std::shared_ptr<parser::IParserService> service )

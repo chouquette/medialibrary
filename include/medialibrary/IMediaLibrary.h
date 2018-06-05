@@ -402,7 +402,7 @@ class IMediaLibrary
          * Upon completion (successful or not) IMediaLibraryCb::onMediaThumbnailReady
          * will be called.
          */
-        virtual void requestThumbnail( MediaPtr media ) = 0;
+        virtual bool requestThumbnail( MediaPtr media ) = 0;
 
         virtual void addParserService( std::shared_ptr<parser::IParserService> service ) = 0;
 
