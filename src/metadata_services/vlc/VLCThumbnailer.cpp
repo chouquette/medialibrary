@@ -39,8 +39,6 @@
 
 #ifdef HAVE_JPEG
 #include "imagecompressors/JpegCompressor.h"
-#elif defined(HAVE_EVAS)
-#include "imagecompressors/EvasCompressor.h"
 #else
 #error No image compressor available
 #endif
@@ -55,8 +53,6 @@ VLCThumbnailer::VLCThumbnailer( MediaLibraryPtr ml )
 {
 #ifdef HAVE_JPEG
     m_compressor.reset( new JpegCompressor );
-#elif defined(HAVE_EVAS)
-    m_compressor.reset( new EvasCompressor );
 #endif
 }
 

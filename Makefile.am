@@ -226,17 +226,11 @@ libmedialibrary_la_LDFLAGS += -Wl,-undefined,dynamic_lookup,-framework,Foundatio
 endif
 
 
-if HAVE_EVAS
-libmedialibrary_la_SOURCES += src/metadata_services/vlc/imagecompressors/EvasCompressor.cpp
-noinst_HEADERS += src/metadata_services/vlc/imagecompressors/EvasCompressor.h
-libmedialibrary_la_CPPFLAGS += $(EVAS_CFLAGS)
-else
 if HAVE_LIBJPEG
 libmedialibrary_la_SOURCES += src/metadata_services/vlc/imagecompressors/JpegCompressor.cpp
 noinst_HEADERS += src/metadata_services/vlc/imagecompressors/JpegCompressor.h
 libmedialibrary_la_CPPFLAGS += $(LIBJPEG_CFLAGS)
 libmedialibrary_la_LIBADD += $(LIBJPEG_LIBS)
-endif
 endif
 
 lib_LTLIBRARIES = libmedialibrary.la
