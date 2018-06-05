@@ -50,7 +50,7 @@ public:
 class Parser : IParserCb
 {
 public:
-    using ServicePtr = std::unique_ptr<IParserService>;
+    using ServicePtr = std::shared_ptr<IParserService>;
     using WorkerPtr = std::unique_ptr<Worker>;
 
     Parser( MediaLibrary* ml );

@@ -63,7 +63,7 @@ public:
     ///
     void stop();
     void parse( std::shared_ptr<Task> t );
-    bool initialize( MediaLibrary* ml, IParserCb* parserCb, std::unique_ptr<IParserService> service );
+    bool initialize( MediaLibrary* ml, IParserCb* parserCb, std::shared_ptr<IParserService> service );
     bool isIdle() const;
     ///
     /// \brief flush flush every currently scheduled tasks
@@ -87,7 +87,7 @@ private:
 
 private:
     MediaLibrary* m_ml;
-    std::unique_ptr<IParserService> m_service;
+    std::shared_ptr<IParserService> m_service;
     IParserCb* m_parserCb;
     bool m_stopParser;
     bool m_paused;
