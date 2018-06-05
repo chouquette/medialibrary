@@ -27,7 +27,6 @@
 #include "Tester.h"
 
 #include "parser/Parser.h"
-#include "metadata_services/vlc/VLCMetadataService.h"
 
 #include <algorithm>
 
