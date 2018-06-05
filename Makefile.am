@@ -17,8 +17,6 @@ libmedialibrary_la_CXXFLAGS = \
 libmedialibrary_la_CPPFLAGS = \
 	$(MEDIALIB_CPPFLAGS) \
 	$(SQLITE_CFLAGS) \
-	$(VLC_CFLAGS) \
-	$(VLCPP_CFLAGS) \
 	$(NULL)
 
 libmedialibrary_la_HEADERS = \
@@ -86,20 +84,13 @@ libmedialibrary_la_SOURCES = \
 	src/discoverer/FsDiscoverer.cpp \
 	src/discoverer/probe/PathProbe.cpp \
 	src/factory/FileSystemFactory.cpp \
-	src/factory/NetworkFileSystemFactory.cpp \
 	src/factory/DeviceListerFactory.cpp \
 	src/filesystem/common/CommonDevice.cpp \
 	src/filesystem/common/CommonFile.cpp \
 	src/filesystem/common/CommonDirectory.cpp \
-	src/filesystem/network/Directory.cpp \
-	src/filesystem/network/File.cpp \
-	src/filesystem/network/Device.cpp \
 	src/logging/IostreamLogger.cpp \
 	src/logging/Logger.cpp \
 	src/metadata_services/MetadataParser.cpp \
-	src/metadata_services/vlc/Common.cpp \
-	src/metadata_services/vlc/VLCMetadataService.cpp \
-	src/metadata_services/vlc/VLCThumbnailer.cpp \
 	src/parser/Parser.cpp \
 	src/parser/ParserWorker.cpp \
 	src/parser/Task.cpp \
@@ -107,8 +98,8 @@ libmedialibrary_la_SOURCES = \
 	src/utils/Filename.cpp \
 	src/utils/ModificationsNotifier.cpp \
 	src/utils/Url.cpp \
-	src/utils/VLCInstance.cpp \
 	$(NULL)
+
 
 noinst_HEADERS = \
 	include/discoverer/IDiscoverer.h \
@@ -133,7 +124,6 @@ noinst_HEADERS = \
 	src/discoverer/probe/IProbe.h \
 	src/discoverer/probe/PathProbe.h \
 	src/factory/FileSystemFactory.h \
-	src/factory/NetworkFileSystemFactory.h \
 	src/factory/DeviceListerFactory.h \
 	src/File.h \
 	src/filesystem/common/CommonFile.h \
@@ -143,9 +133,6 @@ noinst_HEADERS = \
 	src/filesystem/unix/Device.h \
 	src/filesystem/unix/Directory.h \
 	src/filesystem/unix/File.h \
-	src/filesystem/network/Device.h \
-	src/filesystem/network/Directory.h \
-	src/filesystem/network/File.h \
 	src/filesystem/unix/DeviceLister.h \
 	src/filesystem/win32/Directory.h \
 	src/filesystem/win32/File.h \
@@ -158,10 +145,6 @@ noinst_HEADERS = \
 	src/Media.h \
 	src/MediaLibrary.h \
 	src/metadata_services/MetadataParser.h \
-	src/metadata_services/vlc/Common.hpp \
-	src/metadata_services/vlc/VLCMetadataService.h \
-	src/metadata_services/vlc/VLCThumbnailer.h \
-	src/metadata_services/vlc/imagecompressors/IImageCompressor.h \
 	src/Movie.h \
 	src/parser/Parser.h \
 	src/parser/ParserWorker.h \
@@ -177,7 +160,6 @@ noinst_HEADERS = \
 	src/utils/ModificationsNotifier.h \
 	src/utils/SWMRLock.h \
 	src/utils/Url.h \
-	src/utils/VLCInstance.h \
 	src/VideoTrack.h \
 	src/compat/Thread.h \
 	src/compat/Mutex.h \
@@ -216,7 +198,6 @@ endif
 
 libmedialibrary_la_LIBADD = \
 	$(SQLITE_LIBS) 			\
-	$(VLC_LIBS) 			\
 	$(NULL)
 
 libmedialibrary_la_LDFLAGS = -no-undefined -export-symbols-regex 'NewMediaLibrary'
@@ -237,6 +218,40 @@ lib_LTLIBRARIES = libmedialibrary.la
 if HAVE_DARWIN
 lib_LTLIBRARIES += libmedialibrary_macos.la
 endif
+
+if HAVE_LIBVLC
+libmedialibrary_la_SOURCES += \
+	src/metadata_services/vlc/VLCMetadataService.cpp \
+	src/metadata_services/vlc/VLCThumbnailer.cpp \
+	src/metadata_services/vlc/Common.cpp \
+	src/utils/VLCInstance.cpp \
+	src/factory/NetworkFileSystemFactory.cpp \
+	src/filesystem/network/Directory.cpp \
+	src/filesystem/network/File.cpp \
+	src/filesystem/network/Device.cpp \
+	$(NULL)
+
+noinst_HEADERS += \
+	src/utils/VLCInstance.h \
+    src/metadata_services/vlc/Common.hpp \
+	src/metadata_services/vlc/VLCMetadataService.h \
+	src/metadata_services/vlc/VLCThumbnailer.h \
+	src/metadata_services/vlc/imagecompressors/IImageCompressor.h \
+	src/factory/NetworkFileSystemFactory.h \
+	src/filesystem/network/Device.h \
+	src/filesystem/network/Directory.h \
+	src/filesystem/network/File.h \
+	$(NULL)
+
+libmedialibrary_la_CPPFLAGS += \
+	$(VLC_CFLAGS) \
+	$(VLCPP_CFLAGS) \
+	$(NULL)
+
+libmedialibrary_la_LIBADD += $(VLC_LIBS)
+
+endif
+
 
 EXTRA_DIST=
 

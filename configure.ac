@@ -277,17 +277,24 @@ AS_IF([test "${enable_debug}" = "no"],[
   AC_DEFINE(NDEBUG)
 ])
 
+AC_ARG_WITH(libvlc, [AC_HELP_STRING([--with-libvlc], [build with libvlc integration (default enabled)])],, [with_libvlc=yes])
+AH_TEMPLATE(HAVE_LIBVLC, [Define to 1 if libvlc integration is enabled])
+AS_IF([test "${with_libvlc}" != "no"], [
+    AC_DEFINE(HAVE_LIBVLC)
+    PKG_CHECK_MODULES(VLC, libvlc >= 3.0)
+    PKG_CHECK_MODULES(VLCPP, libvlcpp,
+        [AC_MSG_RESULT([Found libvlcpp.pc])],
+        [
+            # Checking for files doesn't work when cross compiling. Simply assume
+            # The file is there
+            AC_MSG_RESULT([Falling back to submodule])
+            AC_SUBST([VLCPP_CFLAGS],[-I${srcdir}/libvlcpp])
+        ]
+    )
+])
+AM_CONDITIONAL(HAVE_LIBVLC, [test "${with_libvlc}" != "no"])
+
 PKG_CHECK_MODULES(SQLITE, sqlite3)
-PKG_CHECK_MODULES(VLC, libvlc >= 3.0)
-PKG_CHECK_MODULES(VLCPP, libvlcpp,
-    [AC_MSG_RESULT([Found libvlcpp.pc])],
-    [
-        # Checking for files doesn't work when cross compiling. Simply assume
-        # The file is there
-        AC_MSG_RESULT([Falling back to submodule])
-        AC_SUBST([VLCPP_CFLAGS],[-I${srcdir}/libvlcpp])
-    ]
-)
 
 PKG_CHECK_MODULES(LIBJPEG, libjpeg, [
      have_libjpeg="yes"

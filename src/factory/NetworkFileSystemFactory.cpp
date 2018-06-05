@@ -24,6 +24,10 @@
 #include "config.h"
 #endif
 
+#ifndef HAVE_LIBVLC
+# error This file requires libvlc
+#endif
+
 #include "NetworkFileSystemFactory.h"
 #include "filesystem/network/Directory.h"
 #include "utils/VLCInstance.h"

@@ -24,6 +24,10 @@
 #include "config.h"
 #endif
 
+#ifndef HAVE_LIBVLC
+# error This file requires libvlc
+#endif
+
 #include "Common.hpp"
 #include "Media.h"
 #include "utils/Filename.h"

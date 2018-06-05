@@ -24,6 +24,10 @@
 # include "config.h"
 #endif
 
+#ifndef HAVE_LIBVLC
+# error This file requires libvlc
+#endif
+
 #include <chrono>
 
 #include "VLCMetadataService.h"

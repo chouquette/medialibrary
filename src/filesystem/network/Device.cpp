@@ -24,6 +24,10 @@
 # include "config.h"
 #endif
 
+#ifndef HAVE_LIBVLC
+# error This file requires libvlc
+#endif
+
 #include "Device.h"
 
 namespace medialibrary

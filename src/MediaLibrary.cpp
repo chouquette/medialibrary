@@ -63,14 +63,20 @@
 #include "discoverer/FsDiscoverer.h"
 
 // Metadata services:
+#ifdef HAVE_LIBVLC
 #include "metadata_services/vlc/VLCMetadataService.h"
 #include "metadata_services/vlc/VLCThumbnailer.h"
+#endif
 #include "metadata_services/MetadataParser.h"
 
 // FileSystem
 #include "factory/DeviceListerFactory.h"
 #include "factory/FileSystemFactory.h"
+
+#ifdef HAVE_LIBVLC
 #include "factory/NetworkFileSystemFactory.h"
+#endif
+
 #include "medialibrary/filesystem/IDevice.h"
 
 namespace medialibrary
@@ -718,7 +724,11 @@ bool MediaLibrary::startParser()
 
     if ( m_services.size() == 0 )
     {
+#ifdef HAVE_LIBVLC
         m_parser->addService( std::make_shared<parser::VLCMetadataService>() );
+#else
+        return false;
+#endif
     }
     else
     {
@@ -749,8 +759,12 @@ void MediaLibrary::startDeletionNotifier()
 
 bool MediaLibrary::startThumbnailer()
 {
+#ifdef HAVE_LIBVLC
     m_thumbnailer = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer( this ) );
     return true;
+#else
+    return false;
+#endif
 }
 
 void MediaLibrary::addLocalFsFactory()
@@ -1204,6 +1218,7 @@ void MediaLibrary::discover( const std::string& entryPoint )
 
 bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
 {
+#ifdef HAVE_LIBVLC
     if ( enabled )
     {
         auto it = std::find_if( begin( m_fsFactories ), end( m_fsFactories ), []( const std::shared_ptr<factory::IFileSystem> fs ) {
@@ -1219,6 +1234,9 @@ bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
         }), end( m_fsFactories ) );
     }
     return true;
+#else
+    return false;
+#endif
 }
 
 Query<IFolder> MediaLibrary::entryPoints() const
@@ -1318,8 +1336,12 @@ void MediaLibrary::forceRescan()
 
 bool MediaLibrary::requestThumbnail( MediaPtr media )
 {
+#ifdef HAVE_LIBVLC
     m_thumbnailer->requestThumbnail( media );
     return true;
+#else
+    return false;
+#endif
 }
 
 void MediaLibrary::addParserService( std::shared_ptr<parser::IParserService> service )

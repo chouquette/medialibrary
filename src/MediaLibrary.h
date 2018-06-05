@@ -236,7 +236,9 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         bool m_initialized;
         std::atomic_bool m_discovererIdle;
         std::atomic_bool m_parserIdle;
+#ifdef HAVE_LIBVLC
         std::unique_ptr<VLCThumbnailer> m_thumbnailer;
+#endif
 };
 
 }
