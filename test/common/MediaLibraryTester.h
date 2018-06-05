@@ -72,6 +72,7 @@ public:
                                     std::shared_ptr<fs::IDirectory> parentFolderFs,
                                     std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist ) override;
     sqlite::Connection* getDbConn();
+    virtual bool startThumbnailer();
 
 private:
     std::shared_ptr<fs::IDirectory> dummyDirectory;

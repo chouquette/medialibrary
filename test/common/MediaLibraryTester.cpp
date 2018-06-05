@@ -190,3 +190,8 @@ sqlite::Connection* MediaLibraryTester::getDbConn()
 {
     return m_dbConnection.get();
 }
+
+bool MediaLibraryTester::startThumbnailer()
+{
+    return true;
+}
