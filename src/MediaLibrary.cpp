@@ -329,7 +329,8 @@ bool MediaLibrary::start()
     startDiscoverer();
     if ( startParser() == false )
         return false;
-    startThumbnailer();
+    if ( startThumbnailer() == false )
+        return false;
     return true;
 }
 
@@ -746,9 +747,10 @@ void MediaLibrary::startDeletionNotifier()
     m_modificationNotifier->start();
 }
 
-void MediaLibrary::startThumbnailer()
+bool MediaLibrary::startThumbnailer()
 {
     m_thumbnailer = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer( this ) );
+    return true;
 }
 
 void MediaLibrary::addLocalFsFactory()

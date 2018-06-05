@@ -181,7 +181,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual bool startParser();
         virtual void startDiscoverer();
         virtual void startDeletionNotifier();
-        virtual void startThumbnailer();
+        virtual bool startThumbnailer();
 
     private:
         bool recreateDatabase( const std::string& dbPath );
