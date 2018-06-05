@@ -108,7 +108,7 @@ public:
     public:
         void forceParserStart();
     protected:
-        virtual void startParser() override;
+        virtual bool startParser() override;
     };
 
     virtual void InitializeMediaLibrary() override;

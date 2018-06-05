@@ -178,7 +178,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         static const size_t NbSupportedExtensions;
 
     protected:
-        virtual void startParser();
+        virtual bool startParser();
         virtual void startDiscoverer();
         virtual void startDeletionNotifier();
         virtual void startThumbnailer();

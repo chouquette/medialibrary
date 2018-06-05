@@ -327,7 +327,8 @@ bool MediaLibrary::start()
     for ( auto& fsFactory : m_fsFactories )
         refreshDevices( *fsFactory );
     startDiscoverer();
-    startParser();
+    if ( startParser() == false )
+        return false;
     startThumbnailer();
     return true;
 }
@@ -710,7 +711,7 @@ SearchAggregate MediaLibrary::search( const std::string& pattern,
     return res;
 }
 
-void MediaLibrary::startParser()
+bool MediaLibrary::startParser()
 {
     m_parser.reset( new parser::Parser( this ) );
 
@@ -725,6 +726,7 @@ void MediaLibrary::startParser()
     }
     m_parser->addService( std::make_shared<parser::MetadataAnalyzer>() );
     m_parser->start();
+    return true;
 }
 
 void MediaLibrary::startDiscoverer()

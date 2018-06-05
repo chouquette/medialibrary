@@ -563,7 +563,8 @@ void ResumeTests::MediaLibraryResumeTest::forceParserStart()
     MediaLibrary::startParser();
 }
 
-void ResumeTests::MediaLibraryResumeTest::startParser()
+bool ResumeTests::MediaLibraryResumeTest::startParser()
 {
+    return true;
 }
 

@@ -38,7 +38,7 @@ class MediaLibraryTester : public MediaLibrary
 {
 public:
     MediaLibraryTester();
-    virtual void startParser() override {}
+    virtual bool startParser() override { return true; }
     virtual void startDiscoverer() override {}
     virtual void startDeletionNotifier() override {}
     std::vector<MediaPtr> files();
