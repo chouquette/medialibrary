@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-AM_CPPFLAGS = -Wall -Wsign-compare -Wextra -Wstrict-aliasing -Wstrict-overflow \
+AM_CXXFLAGS = -Wall -Wsign-compare -Wextra -Wstrict-aliasing -Wstrict-overflow \
 			  -Wformat=2 -Wno-unused-parameter -Wcast-align -Wpointer-arith \
 			  -Wwrite-strings \
 			  -pipe
@@ -10,6 +10,7 @@ MEDIALIB_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/include -I$(top_srcdir)/src
 libmedialibrary_ladir = $(includedir)/medialibrary
 
 libmedialibrary_la_CXXFLAGS = \
+	$(AM_CXXFLAGS) \
 	-fvisibility=default \
 	$(NULL)
 
