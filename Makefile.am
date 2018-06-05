@@ -9,12 +9,15 @@ MEDIALIB_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/include -I$(top_srcdir)/src
 
 libmedialibrary_ladir = $(includedir)/medialibrary
 
+libmedialibrary_la_CXXFLAGS = \
+	-fvisibility=default \
+	$(NULL)
+
 libmedialibrary_la_CPPFLAGS = \
 	$(MEDIALIB_CPPFLAGS) \
 	$(SQLITE_CFLAGS) \
 	$(VLC_CFLAGS) \
 	$(VLCPP_CFLAGS) \
-	-fvisibility=default \
 	$(NULL)
 
 libmedialibrary_la_HEADERS = \
