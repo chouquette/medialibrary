@@ -309,9 +309,7 @@ unittest_CPPFLAGS = 		\
 	-DSRC_DIR=\"$(abs_srcdir)\"	\
 	-I$(top_srcdir)/test	\
 	-I$(top_srcdir)/googletest/include \
-	$(SQLITE_CFLAGS) 		\
-	$(VLCPP_CFLAGS) \
-	$(VLC_CFLAGS) \
+	$(libmedialibrary_la_CPPFLAGS) \
 	$(NULL)
 
 unittest_LDADD = 		\
@@ -333,10 +331,8 @@ samples_CPPFLAGS = 			\
 	-DSRC_DIR=\"$(abs_srcdir)\"	\
 	-I$(top_srcdir)/test	\
 	-I$(top_srcdir)/googletest/include \
-	$(SQLITE_CFLAGS)		\
 	$(RAPIDJSON_CFLAGS)		\
-	$(VLCPP_CFLAGS) \
-	$(VLC_CFLAGS) \
+	$(libmedialibrary_la_CPPFLAGS) \
 	$(NULL)
 
 samples_LDADD = 		\
