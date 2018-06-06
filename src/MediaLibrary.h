@@ -166,6 +166,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         virtual void addParserService( std::shared_ptr<parser::IParserService> service ) override;
 
+        virtual void addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory ) override;
+
         static bool isExtensionSupported( const char* ext );
 
     protected:

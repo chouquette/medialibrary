@@ -1224,6 +1224,11 @@ void MediaLibrary::discover( const std::string& entryPoint )
         m_discovererWorker->discover( entryPoint );
 }
 
+void MediaLibrary::addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory )
+{
+    m_fsFactories.emplace_back( std::move( fsFactory ) );
+}
+
 bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
 {
     if ( enabled )

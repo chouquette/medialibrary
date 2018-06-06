@@ -53,6 +53,11 @@ namespace parser
 class IParserService;
 }
 
+namespace fs
+{
+class IFileSystemFactory;
+}
+
 using AlbumPtr = std::shared_ptr<IAlbum>;
 using AlbumTrackPtr = std::shared_ptr<IAlbumTrack>;
 using ArtistPtr = std::shared_ptr<IArtist>;

@@ -406,6 +406,14 @@ class IMediaLibrary
 
         virtual void addParserService( std::shared_ptr<parser::IParserService> service ) = 0;
 
+        /**
+         * @brief addNetworkFileSystemFactory Provides a network filesystem factory implementation
+         *
+         * This must be called between initialize() and start().
+         * A network file system factory must be inserted before enabling network
+         * file systems discovery.
+         */
+        virtual void addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory ) = 0;
 };
 
 }
