@@ -22,7 +22,7 @@
 
 #include "gtest/gtest.h"
 
-#include "factory/IFileSystem.h"
+#include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "mocks/NoopCallback.h"
 #include "mocks/MockDeviceLister.h"
 #include "common/MediaLibraryTester.h"

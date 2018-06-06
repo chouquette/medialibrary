@@ -23,8 +23,8 @@
 #pragma once
 
 #include "medialibrary/IFolder.h"
+#include "medialibrary/filesystem/IDevice.h"
 #include "database/DatabaseHelpers.h"
-#include "factory/IFileSystem.h"
 #include "utils/Cache.h"
 
 #include <sqlite3.h>

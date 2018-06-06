@@ -47,6 +47,7 @@ libmedialibraryfs_HEADERS = \
 	include/medialibrary/filesystem/IDevice.h \
 	include/medialibrary/filesystem/IDirectory.h \
 	include/medialibrary/filesystem/IFile.h \
+	include/medialibrary/filesystem/IFileSystemFactory.h \
 	$(NULL)
 
 libmedialibraryparserdir = $(includedir)/parser
@@ -103,7 +104,6 @@ libmedialibrary_la_SOURCES = \
 
 noinst_HEADERS = \
 	include/discoverer/IDiscoverer.h \
-	include/factory/IFileSystem.h \
 	include/Fixup.h \
 	include/Types.h \
 	src/Album.h \

@@ -25,7 +25,7 @@
 #include <sqlite3.h>
 
 #include "medialibrary/IMedia.h"
-#include "factory/IFileSystem.h"
+#include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "File.h"
 #include "Thumbnail.h"
 #include "database/DatabaseHelpers.h"

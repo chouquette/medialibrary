@@ -32,6 +32,7 @@
 #include "database/SqliteTools.h"
 #include "medialibrary/filesystem/IDirectory.h"
 #include "medialibrary/filesystem/IDevice.h"
+#include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "utils/Filename.h"
 
 #include <unordered_map>

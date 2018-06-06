@@ -25,7 +25,7 @@
 #include <memory>
 
 #include "discoverer/IDiscoverer.h"
-#include "factory/IFileSystem.h"
+#include "medialibrary/filesystem/IFileSystemFactory.h"
 
 namespace medialibrary
 {

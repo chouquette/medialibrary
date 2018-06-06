@@ -23,7 +23,7 @@
 #pragma once
 
 #include "compat/Mutex.h"
-#include "factory/IFileSystem.h"
+#include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "medialibrary/Types.h"
 #include "utils/Cache.h"
 

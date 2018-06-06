@@ -33,7 +33,7 @@
 #include "medialibrary/filesystem/IDirectory.h"
 #include "medialibrary/filesystem/IFile.h"
 #include "medialibrary/filesystem/IDevice.h"
-#include "factory/IFileSystem.h"
+#include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "utils/Filename.h"
 
 #include "mocks/filesystem/MockDevice.h"
