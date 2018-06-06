@@ -41,7 +41,7 @@ class IProbe;
 class FsDiscoverer : public IDiscoverer
 {
 public:
-    FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, MediaLibrary* ml , IMediaLibraryCb* cb, std::unique_ptr<prober::IProbe> probe );
+    FsDiscoverer( std::shared_ptr<fs::IFileSystemFactory> fsFactory, MediaLibrary* ml , IMediaLibraryCb* cb, std::unique_ptr<prober::IProbe> probe );
     virtual bool discover(const std::string& entryPoint ) override;
     virtual bool reload() override;
     virtual bool reload( const std::string& entryPoint ) override;
@@ -61,7 +61,7 @@ private:
 
 private:
     MediaLibrary* m_ml;
-    std::shared_ptr<factory::IFileSystem> m_fsFactory;
+    std::shared_ptr<fs::IFileSystemFactory> m_fsFactory;
     IMediaLibraryCb* m_cb;
     std::unique_ptr<prober::IProbe> m_probe;
 };

@@ -1200,7 +1200,7 @@ IDeviceListerCb* MediaLibrary::setDeviceLister( DeviceListerPtr lister )
     return static_cast<IDeviceListerCb*>( this );
 }
 
-std::shared_ptr<factory::IFileSystem> MediaLibrary::fsFactoryForMrl( const std::string& mrl ) const
+std::shared_ptr<fs::IFileSystemFactory> MediaLibrary::fsFactoryForMrl( const std::string& mrl ) const
 {
     for ( const auto& f : m_fsFactories )
     {
@@ -1221,7 +1221,7 @@ bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
 #ifdef HAVE_LIBVLC
     if ( enabled )
     {
-        auto it = std::find_if( begin( m_fsFactories ), end( m_fsFactories ), []( const std::shared_ptr<factory::IFileSystem> fs ) {
+        auto it = std::find_if( begin( m_fsFactories ), end( m_fsFactories ), []( const std::shared_ptr<fs::IFileSystemFactory> fs ) {
             return fs->isNetworkFileSystem();
         });
         if ( it == end( m_fsFactories ) )
@@ -1229,7 +1229,7 @@ bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
     }
     else
     {
-        m_fsFactories.erase( std::remove_if( begin( m_fsFactories ), end( m_fsFactories ), []( const std::shared_ptr<factory::IFileSystem> fs ) {
+        m_fsFactories.erase( std::remove_if( begin( m_fsFactories ), end( m_fsFactories ), []( const std::shared_ptr<fs::IFileSystemFactory> fs ) {
             return fs->isNetworkFileSystem();
         }), end( m_fsFactories ) );
     }
@@ -1279,7 +1279,7 @@ void MediaLibrary::setLogger( ILogger* logger )
     Log::SetLogger( logger );
 }
 
-void MediaLibrary::refreshDevices( factory::IFileSystem& fsFactory )
+void MediaLibrary::refreshDevices( fs::IFileSystemFactory& fsFactory )
 {
     // Don't refuse to process devices when none seem to be present, it might be a valid case
     // if the user only discovered removable storages, and we would still need to mark those

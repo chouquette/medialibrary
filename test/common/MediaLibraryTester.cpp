@@ -143,7 +143,7 @@ std::shared_ptr<Device> MediaLibraryTester::addDevice( const std::string& uuid, 
     return Device::create( this, uuid, "file://", isRemovable );
 }
 
-void MediaLibraryTester::setFsFactory( std::shared_ptr<factory::IFileSystem> fsf )
+void MediaLibraryTester::setFsFactory( std::shared_ptr<fs::IFileSystemFactory> fsf )
 {
     fsFactory = fsf;
 }

@@ -35,7 +35,7 @@ namespace medialibrary
 
 namespace factory
 {
-    class FileSystemFactory : public IFileSystem
+    class FileSystemFactory : public fs::IFileSystemFactory
     {
         // UUID -> Device instance map
         using DeviceCacheMap = std::unordered_map<std::string, std::shared_ptr<fs::IDevice>>;

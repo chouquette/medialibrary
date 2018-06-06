@@ -35,7 +35,7 @@ class IMediaLibraryCb;
 
 namespace factory
 {
-class NetworkFileSystemFactory : public factory::IFileSystem
+class NetworkFileSystemFactory : public fs::IFileSystemFactory
 {
 public:
     /**

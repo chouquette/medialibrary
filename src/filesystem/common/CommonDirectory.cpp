@@ -36,7 +36,7 @@ namespace medialibrary
 namespace fs
 {
 
-medialibrary::fs::CommonDirectory::CommonDirectory( factory::IFileSystem& fsFactory )
+medialibrary::fs::CommonDirectory::CommonDirectory( fs::IFileSystemFactory& fsFactory )
     : m_fsFactory( fsFactory )
 {
 }

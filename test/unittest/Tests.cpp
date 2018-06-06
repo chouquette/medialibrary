@@ -43,12 +43,12 @@ void Tests::TearDown()
     ml.reset();
 }
 
-void Tests::Reload( std::shared_ptr<factory::IFileSystem> fs /*= nullptr*/, IMediaLibraryCb* metadataCb /*= nullptr*/ )
+void Tests::Reload( std::shared_ptr<fs::IFileSystemFactory> fs /*= nullptr*/, IMediaLibraryCb* metadataCb /*= nullptr*/ )
 {
     InstantiateMediaLibrary();
     if ( fs == nullptr )
     {
-        fs = std::shared_ptr<factory::IFileSystem>( new mock::NoopFsFactory );
+        fs = std::shared_ptr<fs::IFileSystemFactory>( new mock::NoopFsFactory );
     }
     if ( metadataCb == nullptr )
     {

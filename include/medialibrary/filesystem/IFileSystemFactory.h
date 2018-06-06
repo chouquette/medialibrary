@@ -33,14 +33,11 @@ namespace fs
     class IDirectory;
     class IFile;
     class IDevice;
-}
 
-namespace factory
-{
-    class IFileSystem
+    class IFileSystemFactory
     {
     public:
-        virtual ~IFileSystem() = default;
+        virtual ~IFileSystemFactory() = default;
         ///
         /// \brief createDirectory creates a representation of a directory
         /// \note This method can fail by throwing an exception if the

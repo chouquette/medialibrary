@@ -28,15 +28,15 @@
 namespace medialibrary
 {
 
-namespace factory { class IFileSystem; }
-
 namespace fs
 {
+
+class IFileSystemFactory;
 
 class CommonDirectory : public IDirectory
 {
 public:
-    explicit CommonDirectory( factory::IFileSystem& fsFactory );
+    explicit CommonDirectory( fs::IFileSystemFactory& fsFactory );
     virtual const std::vector<std::shared_ptr<IFile>>& files() const override;
     virtual const std::vector<std::shared_ptr<IDirectory>>& dirs() const override;
     virtual std::shared_ptr<IDevice> device() const override;
@@ -48,7 +48,7 @@ protected:
     mutable std::vector<std::shared_ptr<IFile>> m_files;
     mutable std::vector<std::shared_ptr<IDirectory>> m_dirs;
     mutable Cache<std::shared_ptr<IDevice>> m_device;
-    factory::IFileSystem& m_fsFactory;
+    fs::IFileSystemFactory& m_fsFactory;
 };
 
 }

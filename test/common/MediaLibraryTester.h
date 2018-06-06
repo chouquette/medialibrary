@@ -54,7 +54,7 @@ public:
     void deleteGenre( int64_t genreId );
     void deleteArtist( int64_t artistId );
     std::shared_ptr<Device> addDevice( const std::string& uuid, bool isRemovable );
-    void setFsFactory( std::shared_ptr<factory::IFileSystem> fsFactory );
+    void setFsFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory );
     void deleteTrack( int64_t trackId );
     std::shared_ptr<AlbumTrack> albumTrack( int64_t id );
     // Use to run tests that fiddles with file properties (modification dates, size...)
@@ -76,7 +76,7 @@ public:
 
 private:
     std::shared_ptr<fs::IDirectory> dummyDirectory;
-    std::shared_ptr<factory::IFileSystem> fsFactory;
+    std::shared_ptr<fs::IFileSystemFactory> fsFactory;
     std::shared_ptr<Folder> dummyFolder;
 };
 

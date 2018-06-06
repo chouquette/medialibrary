@@ -43,7 +43,7 @@
 namespace mock
 {
 
-struct FileSystemFactory : public factory::IFileSystem
+struct FileSystemFactory : public fs::IFileSystemFactory
 {
     static const std::string Root;
     static const std::string SubFolder;
@@ -344,7 +344,7 @@ class NoopDirectory : public fs::IDirectory
     }
 };
 
-class NoopFsFactory : public factory::IFileSystem
+class NoopFsFactory : public fs::IFileSystemFactory
 {
 public:
     virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& ) override

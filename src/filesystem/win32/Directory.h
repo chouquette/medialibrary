@@ -33,7 +33,7 @@ namespace fs
 class Directory : public CommonDirectory
 {
 public:
-    Directory( const std::string& mrl, factory::IFileSystem& fsFactory );
+    Directory( const std::string& mrl, fs::IFileSystemFactory& fsFactory );
     const std::string& mrl() const override;
 
 private:

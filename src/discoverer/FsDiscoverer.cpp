@@ -58,7 +58,7 @@ public:
 namespace medialibrary
 {
 
-FsDiscoverer::FsDiscoverer( std::shared_ptr<factory::IFileSystem> fsFactory, MediaLibrary* ml, IMediaLibraryCb* cb, std::unique_ptr<prober::IProbe> probe )
+FsDiscoverer::FsDiscoverer( std::shared_ptr<fs::IFileSystemFactory> fsFactory, MediaLibrary* ml, IMediaLibraryCb* cb, std::unique_ptr<prober::IProbe> probe )
     : m_ml( ml )
     , m_fsFactory( std::move( fsFactory ))
     , m_cb( cb )

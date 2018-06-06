@@ -43,7 +43,7 @@ namespace medialibrary
 namespace fs
 {
 
-NetworkDirectory::NetworkDirectory( const std::string& mrl, factory::IFileSystem& fsFactory )
+NetworkDirectory::NetworkDirectory( const std::string& mrl, fs::IFileSystemFactory& fsFactory )
     : CommonDirectory( fsFactory )
     , m_mrl( utils::file::toFolderPath( mrl ) )
 {

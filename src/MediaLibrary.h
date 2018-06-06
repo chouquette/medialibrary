@@ -46,15 +46,11 @@ class Folder;
 class Genre;
 class Playlist;
 
-namespace factory
-{
-class IFileSystem;
-}
-
 namespace fs
 {
 class IFile;
 class IDirectory;
+class IFileSystemFactory;
 }
 
 namespace parser
@@ -160,9 +156,9 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         std::shared_ptr<ModificationNotifier> getNotifier() const;
 
         virtual IDeviceListerCb* setDeviceLister( DeviceListerPtr lister ) override;
-        std::shared_ptr<factory::IFileSystem> fsFactoryForMrl( const std::string& path ) const;
+        std::shared_ptr<fs::IFileSystemFactory> fsFactoryForMrl( const std::string& path ) const;
 
-        void refreshDevices(factory::IFileSystem& fsFactory);
+        void refreshDevices(fs::IFileSystemFactory& fsFactory);
 
         virtual void forceRescan() override;
 
@@ -200,7 +196,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         void registerEntityHooks();
         static bool validateSearchPattern( const std::string& pattern );
         // Returns true if the device actually changed
-        bool onDeviceChanged( factory::IFileSystem& fsFactory, Device& device );
+        bool onDeviceChanged( fs::IFileSystemFactory& fsFactory, Device& device );
 
     protected:
         virtual void addLocalFsFactory();
@@ -214,7 +210,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
     protected:
         std::shared_ptr<sqlite::Connection> m_dbConnection;
-        std::vector<std::shared_ptr<factory::IFileSystem>> m_fsFactories;
+        std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_fsFactories;
         std::string m_thumbnailPath;
         IMediaLibraryCb* m_callback;
         DeviceListerPtr m_deviceLister;
