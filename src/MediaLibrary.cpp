@@ -330,6 +330,7 @@ bool MediaLibrary::start()
     if ( m_parser != nullptr )
         return false;
 
+    populateFsFactories();
     for ( auto& fsFactory : m_fsFactories )
         refreshDevices( *fsFactory );
     startDiscoverer();
@@ -764,6 +765,13 @@ bool MediaLibrary::startThumbnailer()
     return true;
 #else
     return false;
+#endif
+}
+
+void MediaLibrary::populateFsFactories()
+{
+#ifdef HAVE_LIBVLC
+    m_externalFsFactories.emplace_back( std::make_shared<factory::NetworkFileSystemFactory>( "smb", "dsm-sd" ) );
 #endif
 }
 
@@ -1218,25 +1226,20 @@ void MediaLibrary::discover( const std::string& entryPoint )
 
 bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
 {
-#ifdef HAVE_LIBVLC
     if ( enabled )
     {
-        auto it = std::find_if( begin( m_fsFactories ), end( m_fsFactories ), []( const std::shared_ptr<fs::IFileSystemFactory> fs ) {
-            return fs->isNetworkFileSystem();
-        });
-        if ( it == end( m_fsFactories ) )
-            m_fsFactories.push_back( std::make_shared<factory::NetworkFileSystemFactory>( "smb", "dsm-sd" ) );
+        auto previousSize = m_fsFactories.size();
+        std::copy_if( begin( m_externalFsFactories ), end( m_externalFsFactories ),
+            std::back_inserter( m_fsFactories ), []( const std::shared_ptr<fs::IFileSystemFactory> fs ) {
+                return fs->isNetworkFileSystem();
+            });
+        return m_fsFactories.size() == previousSize;
     }
-    else
-    {
-        m_fsFactories.erase( std::remove_if( begin( m_fsFactories ), end( m_fsFactories ), []( const std::shared_ptr<fs::IFileSystemFactory> fs ) {
-            return fs->isNetworkFileSystem();
-        }), end( m_fsFactories ) );
-    }
+
+    m_fsFactories.erase( std::remove_if( begin( m_fsFactories ), end( m_fsFactories ), []( const std::shared_ptr<fs::IFileSystemFactory> fs ) {
+        return fs->isNetworkFileSystem();
+    }), end( m_fsFactories ) );
     return true;
-#else
-    return false;
-#endif
 }
 
 Query<IFolder> MediaLibrary::entryPoints() const

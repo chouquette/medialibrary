@@ -178,6 +178,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual void startDiscoverer();
         virtual void startDeletionNotifier();
         virtual bool startThumbnailer();
+        virtual void populateFsFactories();
 
     private:
         bool recreateDatabase( const std::string& dbPath );
@@ -211,6 +212,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
     protected:
         std::shared_ptr<sqlite::Connection> m_dbConnection;
         std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_fsFactories;
+        std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_externalFsFactories;
         std::string m_thumbnailPath;
         IMediaLibraryCb* m_callback;
         DeviceListerPtr m_deviceLister;

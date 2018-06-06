@@ -195,3 +195,7 @@ bool MediaLibraryTester::startThumbnailer()
 {
     return true;
 }
+
+void MediaLibraryTester::populateFsFactories()
+{
+}
