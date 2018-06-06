@@ -777,7 +777,7 @@ void MediaLibrary::populateFsFactories()
 
 void MediaLibrary::addLocalFsFactory()
 {
-    m_fsFactories.insert( begin( m_fsFactories ), std::make_shared<factory::FileSystemFactory>( m_deviceLister ) );
+    m_fsFactories.emplace( begin( m_fsFactories ), std::make_shared<factory::FileSystemFactory>( m_deviceLister ) );
 }
 
 InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion,
