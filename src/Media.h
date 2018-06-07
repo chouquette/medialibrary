@@ -115,6 +115,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual bool isFavorite() const override;
         virtual bool setFavorite( bool favorite ) override;
         virtual const std::vector<FilePtr>& files() const override;
+        virtual const std::string& fileName() const override;
         virtual MoviePtr movie() const override;
         void setMovie( MoviePtr movie );
         bool addVideoTrack( const std::string& codec, unsigned int width, unsigned int height,

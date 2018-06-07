@@ -215,6 +215,11 @@ const std::vector<FilePtr>& Media::files() const
     return m_files;
 }
 
+const std::string& Media::fileName() const
+{
+    return m_filename;
+}
+
 MoviePtr Media::movie() const
 {
     if ( m_subType != SubType::Movie )
