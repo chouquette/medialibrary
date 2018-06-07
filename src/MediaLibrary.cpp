@@ -278,7 +278,8 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     {
         if ( errno != EEXIST )
         {
-            LOG_ERROR( "Failed to create thumbnail directory: ", strerror( errno ) );
+            LOG_ERROR( "Failed to create thumbnail directory (", thumbnailPath,
+                        ": ", strerror( errno ) );
             return InitializeResult::Failed;
         }
     }
