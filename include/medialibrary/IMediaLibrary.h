@@ -315,7 +315,7 @@ class IMediaLibrary
         virtual Query<IAlbum> searchAlbums( const std::string& pattern,
                                                     SortingCriteria sort = SortingCriteria::Default,
                                                     bool desc = false ) const = 0;
-        virtual Query<IGenre> searchGenre( const std::string& genre ) const = 0;
+        virtual Query<IGenre> searchGenre( const std::string& genre, SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
         virtual Query<IArtist> searchArtists( const std::string& name,
                                                       SortingCriteria sort = SortingCriteria::Default,
                                                       bool desc = false ) const = 0;

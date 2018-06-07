@@ -124,7 +124,9 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual Query<IAlbum> searchAlbums( const std::string& pattern,
                                                     SortingCriteria sort,
                                                     bool desc ) const override;
-        virtual Query<IGenre> searchGenre( const std::string& genre ) const override;
+        virtual Query<IGenre> searchGenre( const std::string& genre,
+                                                    SortingCriteria sort,
+                                                    bool desc ) const override;
         virtual Query<IArtist> searchArtists( const std::string& name,
                                                       SortingCriteria sort,
                                                       bool desc ) const override;

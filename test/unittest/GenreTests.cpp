@@ -148,18 +148,18 @@ TEST_F( Genres, Search )
     ml->createGenre( "something" );
     ml->createGenre( "blork" );
 
-    auto genres = ml->searchGenre( "genr" )->all();
+    auto genres = ml->searchGenre( "genr", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, genres.size() );
 }
 
 TEST_F( Genres, SearchAfterDelete )
 {
-    auto genres = ml->searchGenre( "genre" )->all();
+    auto genres = ml->searchGenre( "genre", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 1u, genres.size() );
 
     ml->deleteGenre( g->id() );
 
-    genres = ml->searchGenre( "genre" )->all();
+    genres = ml->searchGenre( "genre", SortingCriteria::Default, false )->all();
     ASSERT_EQ( 0u, genres.size() );
 }
 

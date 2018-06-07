@@ -58,7 +58,7 @@ public:
     static void createTriggers( sqlite::Connection* dbConn );
     static std::shared_ptr<Genre> create( MediaLibraryPtr ml, const std::string& name );
     static std::shared_ptr<Genre> fromName( MediaLibraryPtr ml, const std::string& name );
-    static Query<IGenre> search( MediaLibraryPtr ml, const std::string& name );
+    static Query<IGenre> search( MediaLibraryPtr ml, const std::string& name, SortingCriteria sort, bool desc );
     static Query<IGenre> listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc );
 
 private:

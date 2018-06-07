@@ -691,11 +691,11 @@ Query<IAlbum> MediaLibrary::searchAlbums( const std::string& pattern,
     return Album::search( this, pattern, sort, desc );
 }
 
-Query<IGenre> MediaLibrary::searchGenre( const std::string& genre ) const
+Query<IGenre> MediaLibrary::searchGenre( const std::string& genre, SortingCriteria sort, bool desc ) const
 {
     if ( validateSearchPattern( genre ) == false )
         return {};
-    return Genre::search( this, genre );
+    return Genre::search( this, genre, sort, desc );
 }
 
 Query<IArtist> MediaLibrary::searchArtists( const std::string& name,
@@ -713,7 +713,7 @@ SearchAggregate MediaLibrary::search( const std::string& pattern,
     SearchAggregate res;
     res.albums = searchAlbums( pattern, sort, desc );
     res.artists = searchArtists( pattern, sort, desc );
-    res.genres = searchGenre( pattern );
+    res.genres = searchGenre( pattern, sort, desc );
     res.media = searchMedia( pattern, sort, desc );
     res.playlists = searchPlaylists( pattern, sort, desc );
     return res;
