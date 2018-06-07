@@ -202,6 +202,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         static bool validateSearchPattern( const std::string& pattern );
         // Returns true if the device actually changed
         bool onDeviceChanged( fs::IFileSystemFactory& fsFactory, Device& device );
+        bool createThumbnailFolder( const std::string& thumbnailPath ) const;
 
     protected:
         virtual void addLocalFsFactory();
