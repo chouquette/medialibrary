@@ -38,7 +38,7 @@ private:
     template <typename T>
     static void createMsg( std::stringstream& s, T&& t )
     {
-        s << t;
+        s << std::forward<T>( t );
     }
 
     template <typename T, typename... Args>
