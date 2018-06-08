@@ -42,7 +42,7 @@ libmedialibrary_la_HEADERS = \
 	include/medialibrary/IQuery.h \
 	$(NULL)
 
-libmedialibraryfsdir = $(includedir)/filesystem
+libmedialibraryfsdir = $(libmedialibrary_ladir)/filesystem
 libmedialibraryfs_HEADERS = \
 	include/medialibrary/filesystem/IDevice.h \
 	include/medialibrary/filesystem/IDirectory.h \
@@ -50,7 +50,7 @@ libmedialibraryfs_HEADERS = \
 	include/medialibrary/filesystem/IFileSystemFactory.h \
 	$(NULL)
 
-libmedialibraryparserdir = $(includedir)/parser
+libmedialibraryparserdir = $(libmedialibrary_ladir)/parser
 libmedialibraryparser_HEADERS = \
 	include/medialibrary/parser/IItem.h \
 	include/medialibrary/parser/Parser.h \
