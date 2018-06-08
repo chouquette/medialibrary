@@ -470,8 +470,22 @@ void MediaLibrary::addDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
 {
     try
     {
+        std::shared_ptr<parser::Task> task;
+        if ( parentPlaylist.first == nullptr )
+        {
+            // Sqlite won't ensure uniqueness for Task with the same (mrl, parent_playlist_id)
+            // when parent_playlist_id is null, so we have to ensure of it ourselves
+            const std::string req = "SELECT * FROM " + policy::TaskTable::Name + " "
+                    "WHERE mrl = ? AND parent_playlist_id IS NULL";
+            task = parser::Task::fetch( this, req, fileFs->mrl() );
+            if ( task != nullptr )
+            {
+                LOG_INFO( "Not creating duplicated task for mrl: ", fileFs->mrl() );
+                return;
+            }
+        }
         // Don't move the file as we might need it for error handling
-        auto task = parser::Task::create( this, fileFs, std::move( parentFolder ),
+        task = parser::Task::create( this, fileFs, std::move( parentFolder ),
                                           std::move( parentFolderFs ), std::move( parentPlaylist ) );
         if ( task != nullptr && m_parser != nullptr )
             m_parser->parse( task );
