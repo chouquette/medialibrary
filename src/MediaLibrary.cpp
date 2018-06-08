@@ -262,7 +262,6 @@ bool MediaLibrary::createThumbnailFolder( const std::string& thumbnailPath ) con
     {
         fullPath += paths.top();
 
-        LOG_ERROR( "Creating path: ", fullPath );
 #ifdef _WIN32
         if ( mkdir( fullPath.c_str() ) != 0 )
 #else
