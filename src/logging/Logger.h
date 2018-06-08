@@ -53,7 +53,6 @@ private:
     {
         std::stringstream stream;
         createMsg( stream, std::forward<Args>( args )... );
-        stream << "\n";
         return stream.str();
     }
 
