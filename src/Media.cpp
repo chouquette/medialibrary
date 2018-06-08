@@ -523,7 +523,7 @@ int64_t Media::id() const
     return m_id;
 }
 
-IMedia::Type Media::type()
+IMedia::Type Media::type() const
 {
     return m_type;
 }

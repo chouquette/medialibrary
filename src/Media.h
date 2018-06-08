@@ -90,7 +90,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         static void createTriggers( sqlite::Connection* connection );
 
         virtual int64_t id() const override;
-        virtual Type type() override;
+        virtual Type type() const override;
         virtual SubType subType() const override;
         void setType( Type type );
         virtual const std::string& title() const override;
