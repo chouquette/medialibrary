@@ -362,8 +362,7 @@ bool MediaLibrary::start()
     startDiscoverer();
     if ( startParser() == false )
         return false;
-    if ( startThumbnailer() == false )
-        return false;
+    startThumbnailer();
     return true;
 }
 
@@ -784,13 +783,10 @@ void MediaLibrary::startDeletionNotifier()
     m_modificationNotifier->start();
 }
 
-bool MediaLibrary::startThumbnailer()
+void MediaLibrary::startThumbnailer()
 {
 #ifdef HAVE_LIBVLC
     m_thumbnailer = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer( this ) );
-    return true;
-#else
-    return false;
 #endif
 }
 

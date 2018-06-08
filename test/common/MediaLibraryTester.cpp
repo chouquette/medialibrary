@@ -191,9 +191,8 @@ sqlite::Connection* MediaLibraryTester::getDbConn()
     return m_dbConnection.get();
 }
 
-bool MediaLibraryTester::startThumbnailer()
+void MediaLibraryTester::startThumbnailer()
 {
-    return true;
 }
 
 void MediaLibraryTester::populateFsFactories()

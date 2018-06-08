@@ -181,7 +181,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual bool startParser();
         virtual void startDiscoverer();
         virtual void startDeletionNotifier();
-        virtual bool startThumbnailer();
+        virtual void startThumbnailer();
         virtual void populateFsFactories();
 
     private:
