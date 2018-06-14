@@ -77,25 +77,25 @@ void Genre::updateCachedNbTracks( int increment )
     m_nbTracks += increment;
 }
 
-Query<IArtist> Genre::artists( SortingCriteria, bool desc ) const
+Query<IArtist> Genre::artists( const QueryParameters* params ) const
 {
     std::string req = "FROM " + policy::ArtistTable::Name + " a "
             "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.artist_id = a.id_artist "
             "WHERE att.genre_id = ? GROUP BY att.artist_id"
             " ORDER BY a.name";
-    if ( desc == true )
+    if ( params != nullptr && params->desc == true )
         req += " DESC";
     return make_query<Artist, IArtist>( m_ml, "a.*", std::move( req ), m_id );
 }
 
-Query<IMedia> Genre::tracks( SortingCriteria sort, bool desc ) const
+Query<IMedia> Genre::tracks( const QueryParameters* params ) const
 {
-    return AlbumTrack::fromGenre( m_ml, m_id, sort, desc );
+    return AlbumTrack::fromGenre( m_ml, m_id, params );
 }
 
-Query<IAlbum> Genre::albums( SortingCriteria sort, bool desc ) const
+Query<IAlbum> Genre::albums( const QueryParameters* params ) const
 {
-    return Album::fromGenre( m_ml, m_id, sort, desc );
+    return Album::fromGenre( m_ml, m_id, params );
 }
 
 void Genre::createTable( sqlite::Connection* dbConn )
@@ -171,19 +171,20 @@ std::shared_ptr<Genre> Genre::fromName( MediaLibraryPtr ml, const std::string& n
     return fetch( ml, req, name );
 }
 
-Query<IGenre> Genre::search( MediaLibraryPtr ml, const std::string& name, SortingCriteria sort, bool desc )
+Query<IGenre> Genre::search( MediaLibraryPtr ml, const std::string& name,
+                             const QueryParameters* params )
 {
     std::string req = "FROM " + policy::GenreTable::Name + " WHERE id_genre IN "
             "(SELECT rowid FROM " + policy::GenreTable::Name + "Fts WHERE name MATCH '*' || ? || '*') ORDER BY name";
-    if ( desc == true )
+    if ( params != nullptr && params->desc == true )
         req += " DESC";
     return make_query<Genre, IGenre>( ml, "*", req, name );
 }
 
-Query<IGenre> Genre::listAll( MediaLibraryPtr ml, SortingCriteria, bool desc )
+Query<IGenre> Genre::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
     std::string req = "FROM " + policy::GenreTable::Name + " ORDER BY name";
-    if ( desc == true )
+    if ( params != nullptr && params->desc == true )
         req += " DESC";
     return make_query<Genre, IGenre>( ml, "*", std::move( req ) );
 }

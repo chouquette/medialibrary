@@ -182,32 +182,32 @@ void Tests::runChecks(const rapidjson::Document& doc)
 
     if ( expected.HasMember( "albums" ) == true )
     {
-        checkAlbums( expected["albums" ], m_ml->albums( SortingCriteria::Default, false )->all() );
+        checkAlbums( expected["albums" ], m_ml->albums( nullptr )->all() );
     }
     if ( expected.HasMember( "media" ) == true )
         checkMedias( expected["media"] );
     if ( expected.HasMember( "nbVideos" ) == true )
     {
-        const auto videos = m_ml->videoFiles( SortingCriteria::Default, false )->all();
+        const auto videos = m_ml->videoFiles( nullptr )->all();
         ASSERT_EQ( expected["nbVideos"].GetUint(), videos.size() );
     }
     if ( expected.HasMember( "nbAudios" ) == true )
     {
-        const auto audios = m_ml->audioFiles( SortingCriteria::Default, false )->all();
+        const auto audios = m_ml->audioFiles( nullptr )->all();
         ASSERT_EQ( expected["nbAudios"].GetUint(), audios.size() );
     }
     if ( expected.HasMember( "nbPlaylists" ) == true )
     {
-        const auto playlists = m_ml->playlists( SortingCriteria::Default, false )->all();
+        const auto playlists = m_ml->playlists( nullptr )->all();
         ASSERT_EQ( expected["nbPlaylists"].GetUint(), playlists.size() );
     }
     if ( expected.HasMember( "playlists" ) == true )
     {
-      checkPlaylists( expected["playlists"], m_ml->playlists( SortingCriteria::Default, false )->all() );
+      checkPlaylists( expected["playlists"], m_ml->playlists( nullptr )->all() );
     }
     if ( expected.HasMember( "artists" ) )
     {
-        checkArtists( expected["artists"], m_ml->artists( true, SortingCriteria::Default, false )->all() );
+        checkArtists( expected["artists"], m_ml->artists( true, nullptr )->all() );
     }
 }
 
@@ -272,8 +272,8 @@ void Tests::checkAudioTracks(const rapidjson::Value& expectedTracks, const std::
 void Tests::checkMedias(const rapidjson::Value& expectedMedias)
 {
     ASSERT_TRUE( expectedMedias.IsArray() );
-    auto medias = m_ml->audioFiles( SortingCriteria::Default, false )->all();
-    auto videos = m_ml->videoFiles( SortingCriteria::Default, false )->all();
+    auto medias = m_ml->audioFiles( nullptr )->all();
+    auto videos = m_ml->videoFiles( nullptr )->all();
     medias.insert( begin( medias ), begin( videos ), end( videos ) );
     for ( auto i = 0u; i < expectedMedias.Size(); ++i )
     {
@@ -402,7 +402,7 @@ void Tests::checkAlbums( const rapidjson::Value& expectedAlbums, std::vector<Alb
             }
             if ( expectedAlbum.HasMember( "nbTracks" ) || expectedAlbum.HasMember( "tracks" ) )
             {
-                const auto tracks = a->tracks( SortingCriteria::Default, false )->all();
+                const auto tracks = a->tracks( nullptr )->all();
                 if ( expectedAlbum.HasMember( "nbTracks" ) )
                 {
                     if ( expectedAlbum["nbTracks"].GetUint() != tracks.size() )
@@ -460,13 +460,13 @@ void Tests::checkArtists(const rapidjson::Value& expectedArtists, std::vector<Ar
             }
             if ( expectedArtist.HasMember( "albums" ) )
             {
-                auto albums = artist->albums( SortingCriteria::Default, false )->all();
+                auto albums = artist->albums( nullptr )->all();
                 checkAlbums( expectedArtist["albums"], albums );
             }
             if ( expectedArtist.HasMember( "nbTracks" ) )
             {
                 auto expectedNbTracks = expectedArtist["nbTracks"].GetUint();
-                auto tracks = artist->media( SortingCriteria::Default, false )->all();
+                auto tracks = artist->media( nullptr )->all();
                 if ( expectedNbTracks != tracks.size() )
                     return false;
                 if ( expectedNbTracks != artist->nbTracks() )

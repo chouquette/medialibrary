@@ -143,17 +143,16 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual FilePtr addExternalMrl( const std::string& mrl, IFile::Type type ) override;
         void removeFile( File& file );
 
-        static Query<IMedia> listAll(MediaLibraryPtr ml, Type type, SortingCriteria sort, bool desc);
+        static Query<IMedia> listAll(MediaLibraryPtr ml, Type type, const QueryParameters* params );
 
         static Query<IMedia> search( MediaLibraryPtr ml, const std::string& title,
-                                         Media::SubType subType, SortingCriteria sort,
-                                         bool desc );
+                                     Media::SubType subType, const QueryParameters* params );
         static Query<IMedia> fetchHistory( MediaLibraryPtr ml );
 
         static void clearHistory( MediaLibraryPtr ml );
 
 private:
-        static std::string sortRequest( SortingCriteria sort, bool desc );
+        static std::string sortRequest( const QueryParameters* params );
 
 private:
         MediaLibraryPtr m_ml;

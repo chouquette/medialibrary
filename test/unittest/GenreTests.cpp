@@ -48,7 +48,7 @@ TEST_F( Genres, Create )
 {
     ASSERT_NE( nullptr, g );
     ASSERT_EQ( "genre", g->name() );
-    auto tracks = g->tracks( SortingCriteria::Default, false )->all();
+    auto tracks = g->tracks( nullptr )->all();
     ASSERT_EQ( 0u, tracks.size() );
 }
 
@@ -56,7 +56,7 @@ TEST_F( Genres, List )
 {
     auto g2 = ml->createGenre( "genre 2" );
     ASSERT_NE( nullptr, g2 );
-    auto genres = ml->genres( SortingCriteria::Default, false )->all();
+    auto genres = ml->genres( nullptr )->all();
     ASSERT_EQ( 2u, genres.size() );
 }
 
@@ -71,13 +71,13 @@ TEST_F( Genres, ListAlbumTracks )
         if ( i != 1 )
             t->setGenre( g );
     }
-    auto tracks = g->tracks( SortingCriteria::Default, false )->all();
+    auto tracks = g->tracks( nullptr )->all();
     ASSERT_EQ( 2u, tracks.size() );
 }
 
 TEST_F( Genres, ListArtists )
 {
-    auto artists = g->artists( SortingCriteria::Default, false )->all();
+    auto artists = g->artists( nullptr )->all();
     ASSERT_EQ( 0u, artists.size() );
 
     auto a = ml->createArtist( "artist" );
@@ -99,7 +99,7 @@ TEST_F( Genres, ListArtists )
         auto track = album2->addTrack( m, i, 1, a2->id(), nullptr );
         track->setGenre( g );
     }
-    artists = g->artists( SortingCriteria::Default, false )->all();
+    artists = g->artists( nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
 }
 
@@ -125,10 +125,10 @@ TEST_F( Genres, ListAlbums )
         track->setGenre( g );
     }
 
-    auto genres = ml->genres( SortingCriteria::Default, false )->all();
+    auto genres = ml->genres( nullptr )->all();
     for ( auto& genre : genres )
     {
-        auto albums = genre->albums( SortingCriteria::Default, false )->all();
+        auto albums = genre->albums( nullptr )->all();
 
         if ( genre->id() == g->id() )
         {
@@ -148,18 +148,18 @@ TEST_F( Genres, Search )
     ml->createGenre( "something" );
     ml->createGenre( "blork" );
 
-    auto genres = ml->searchGenre( "genr", SortingCriteria::Default, false )->all();
+    auto genres = ml->searchGenre( "genr", nullptr )->all();
     ASSERT_EQ( 1u, genres.size() );
 }
 
 TEST_F( Genres, SearchAfterDelete )
 {
-    auto genres = ml->searchGenre( "genre", SortingCriteria::Default, false )->all();
+    auto genres = ml->searchGenre( "genre", nullptr )->all();
     ASSERT_EQ( 1u, genres.size() );
 
     ml->deleteGenre( g->id() );
 
-    genres = ml->searchGenre( "genre", SortingCriteria::Default, false )->all();
+    genres = ml->searchGenre( "genre", nullptr )->all();
     ASSERT_EQ( 0u, genres.size() );
 }
 
@@ -175,12 +175,14 @@ TEST_F( Genres, SortTracks )
         m->save();
         t->setGenre( g );
     }
-    auto tracks = g->tracks( SortingCriteria::Duration, false )->all();
+    QueryParameters params { SortingCriteria::Duration, false };
+    auto tracks = g->tracks( &params )->all();
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( 1u, tracks[0]->albumTrack()->trackNumber() );
     ASSERT_EQ( 2u, tracks[1]->albumTrack()->trackNumber() );
 
-    tracks = g->tracks( SortingCriteria::Duration, true )->all();
+    params.desc = true;
+    tracks = g->tracks( &params )->all();
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( 1u, tracks[1]->albumTrack()->trackNumber() );
     ASSERT_EQ( 2u, tracks[0]->albumTrack()->trackNumber() );
@@ -190,12 +192,13 @@ TEST_F( Genres, Sort )
 {
     auto g2 = ml->createGenre( "metal" );
 
-    auto genres = ml->genres( SortingCriteria::Default, false )->all();
+    auto genres = ml->genres( nullptr )->all();
     ASSERT_EQ( 2u, genres.size() );
     ASSERT_EQ( g->id(), genres[0]->id() );
     ASSERT_EQ( g2->id(), genres[1]->id() );
 
-    genres = ml->genres( SortingCriteria::Default, true )->all();
+    QueryParameters params { SortingCriteria::Default, true };
+    genres = ml->genres( &params )->all();
     ASSERT_EQ( 2u, genres.size() );
     ASSERT_EQ( g->id(), genres[1]->id() );
     ASSERT_EQ( g2->id(), genres[0]->id() );

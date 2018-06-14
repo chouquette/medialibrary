@@ -42,8 +42,8 @@ public:
      * This will return all albums by this artist, and all album the artist
      * appeared on, even if they are not the main artist (or AlbumArtist)
      */
-    virtual Query<IAlbum> albums( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
-    virtual Query<IMedia> media( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
+    virtual Query<IAlbum> albums( const QueryParameters* params = nullptr ) const = 0;
+    virtual Query<IMedia> media( const QueryParameters* params = nullptr ) const = 0;
     virtual const std::string& artworkMrl() const = 0;
     virtual const std::string& musicBrainzId() const = 0;
     /**

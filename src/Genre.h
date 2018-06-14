@@ -50,16 +50,16 @@ public:
     virtual const std::string& name() const override;
     virtual uint32_t nbTracks() const override;
     void updateCachedNbTracks( int increment );
-    virtual Query<IArtist> artists( SortingCriteria sort, bool desc ) const override;
-    virtual Query<IMedia> tracks(SortingCriteria sort, bool desc) const override;
-    virtual Query<IAlbum> albums( SortingCriteria sort, bool desc ) const override;
+    virtual Query<IArtist> artists( const QueryParameters* params ) const override;
+    virtual Query<IMedia> tracks( const QueryParameters* params ) const override;
+    virtual Query<IAlbum> albums( const QueryParameters* params ) const override;
 
     static void createTable( sqlite::Connection* dbConn );
     static void createTriggers( sqlite::Connection* dbConn );
     static std::shared_ptr<Genre> create( MediaLibraryPtr ml, const std::string& name );
     static std::shared_ptr<Genre> fromName( MediaLibraryPtr ml, const std::string& name );
-    static Query<IGenre> search( MediaLibraryPtr ml, const std::string& name, SortingCriteria sort, bool desc );
-    static Query<IGenre> listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc );
+    static Query<IGenre> search( MediaLibraryPtr ml, const std::string& name, const QueryParameters* params );
+    static Query<IGenre> listAll( MediaLibraryPtr ml, const QueryParameters* params );
 
 private:
     MediaLibraryPtr m_ml;

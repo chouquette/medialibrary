@@ -55,8 +55,8 @@ public:
     virtual const std::string& name() const override;
     virtual const std::string& shortBio() const override;
     bool setShortBio( const std::string& shortBio );
-    virtual Query<IAlbum> albums( SortingCriteria sort, bool desc ) const override;
-    virtual Query<IMedia> media(SortingCriteria sort, bool desc) const override;
+    virtual Query<IAlbum> albums( const QueryParameters* params ) const override;
+    virtual Query<IMedia> media( const QueryParameters* params ) const override;
     bool addMedia( Media& media );
     virtual const std::string& artworkMrl() const override;
     std::shared_ptr<Thumbnail> thumbnail();
@@ -74,12 +74,12 @@ public:
     static bool createDefaultArtists( sqlite::Connection* dbConnection );
     static std::shared_ptr<Artist> create( MediaLibraryPtr ml, const std::string& name );
     static Query<IArtist> search( MediaLibraryPtr ml, const std::string& name,
-                                          SortingCriteria sort, bool desc );
+                                           const QueryParameters* params );
     static Query<IArtist> listAll( MediaLibraryPtr ml, bool includeAll,
-                                           SortingCriteria sort, bool desc );
+                                   const QueryParameters* params );
 
 private:
-    static std::string sortRequest( SortingCriteria sort, bool desc );
+    static std::string sortRequest( const QueryParameters* params );
 
 private:
     MediaLibraryPtr m_ml;

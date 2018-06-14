@@ -68,8 +68,8 @@ public:
     static void createTable( sqlite::Connection* dbConn );
     static void createTriggers( sqlite::Connection* dbConn );
     static Query<IPlaylist> search( MediaLibraryPtr ml, const std::string& name,
-                                            SortingCriteria sort, bool desc );
-    static Query<IPlaylist> listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc );
+                                    const QueryParameters* params );
+    static Query<IPlaylist> listAll( MediaLibraryPtr ml, const QueryParameters* params );
 
     /**
      * @brief deleteAllExternal Delete all external playlists, ie. all playlist
@@ -79,7 +79,7 @@ public:
     static void clearExternalPlaylistContent( MediaLibraryPtr ml );
 
 private:
-    static std::string sortRequest( SortingCriteria sort, bool desc );
+    static std::string sortRequest( const QueryParameters* params );
 
 private:
     MediaLibraryPtr m_ml;

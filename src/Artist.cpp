@@ -88,15 +88,17 @@ bool Artist::setShortBio(const std::string& shortBio)
     return true;
 }
 
-Query<IAlbum> Artist::albums( SortingCriteria sort, bool desc ) const
+Query<IAlbum> Artist::albums( const QueryParameters* params ) const
 {
-    return Album::fromArtist( m_ml, m_id, sort, desc );
+    return Album::fromArtist( m_ml, m_id, params );
 }
 
-Query<IMedia> Artist::media( SortingCriteria sort, bool desc ) const
+Query<IMedia> Artist::media( const QueryParameters* params ) const
 {
     std::string req = "FROM " + policy::MediaTable::Name + " med ";
 
+    SortingCriteria sort = params != nullptr ? params->sort : SortingCriteria::Default;
+    bool desc = params != nullptr ? params->desc : false;
     // Various artist is a special artist that doesn't have tracks per-se.
     // Rather, it's a virtual artist for albums with many artist but no declared
     // album artist. When listing its tracks, we need to list those by albums
@@ -402,17 +404,17 @@ std::shared_ptr<Artist> Artist::create( MediaLibraryPtr ml, const std::string& n
 }
 
 Query<IArtist> Artist::search( MediaLibraryPtr ml, const std::string& name,
-                                       SortingCriteria sort, bool desc )
+                               const QueryParameters* params )
 {
     std::string req = "FROM " + policy::ArtistTable::Name + " WHERE id_artist IN "
             "(SELECT rowid FROM " + policy::ArtistTable::Name + "Fts WHERE name MATCH '*' || ? || '*')"
             "AND is_present != 0";
-    req += sortRequest( sort, desc );
+    req += sortRequest( params );
     return make_query<Artist, IArtist>( ml, "*", std::move( req ), name );
 }
 
 Query<IArtist> Artist::listAll( MediaLibraryPtr ml, bool includeAll,
-                                        SortingCriteria sort, bool desc)
+                                const QueryParameters* params )
 {
     std::string req = "FROM " + policy::ArtistTable::Name + " WHERE ";
     if ( includeAll == true )
@@ -421,19 +423,14 @@ Query<IArtist> Artist::listAll( MediaLibraryPtr ml, bool includeAll,
         req += "nb_albums > 0";
 
     req += " AND is_present != 0";
-    req += sortRequest( sort, desc );
+    req += sortRequest( params );
     return make_query<Artist, IArtist>( ml, "*", std::move( req ) );
 }
 
-std::string Artist::sortRequest( SortingCriteria sort, bool desc )
+std::string Artist::sortRequest( const QueryParameters* params )
 {
-    std::string req = " ORDER BY ";
-    switch ( sort )
-    {
-    default:
-        req += "name";
-    }
-    if ( desc == true )
+    std::string req = " ORDER BY name";
+    if ( params != nullptr && params->desc == true )
         req +=  " DESC";
     return req;
 }

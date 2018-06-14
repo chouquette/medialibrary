@@ -76,8 +76,8 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         virtual const std::string& artworkMrl() const override;
         std::shared_ptr<Thumbnail> thumbnail();
         bool setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin );
-        virtual Query<IMedia> tracks( SortingCriteria sort, bool desc ) const override;
-        virtual Query<IMedia> tracks( GenrePtr genre, SortingCriteria sort, bool desc ) const override;
+        virtual Query<IMedia> tracks( const QueryParameters* params ) const override;
+        virtual Query<IMedia> tracks( GenrePtr genre, const QueryParameters* params ) const override;
         ///
         /// \brief cachedTracks Returns a cached list of tracks
         /// This has no warranty of ordering, validity, or anything else.
@@ -110,14 +110,14 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         /// \return
         ///
         static Query<IAlbum> search( MediaLibraryPtr ml, const std::string& pattern,
-                                             SortingCriteria sort, bool desc );
-        static Query<IAlbum> fromArtist( MediaLibraryPtr ml, int64_t artistId, SortingCriteria sort, bool desc );
-        static Query<IAlbum> fromGenre( MediaLibraryPtr ml, int64_t genreId, SortingCriteria sort, bool desc );
-        static Query<IAlbum> listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc );
+                                     const QueryParameters* params );
+        static Query<IAlbum> fromArtist( MediaLibraryPtr ml, int64_t artistId, const QueryParameters* params );
+        static Query<IAlbum> fromGenre( MediaLibraryPtr ml, int64_t genreId, const QueryParameters* params );
+        static Query<IAlbum> listAll( MediaLibraryPtr ml, const QueryParameters* params );
 
     private:
-        static std::string orderTracksBy( SortingCriteria sort, bool desc );
-        static std::string orderBy( SortingCriteria sort, bool desc );
+        static std::string orderTracksBy( const QueryParameters* params );
+        static std::string orderBy( const QueryParameters* params );
     protected:
         MediaLibraryPtr m_ml;
         int64_t m_id;

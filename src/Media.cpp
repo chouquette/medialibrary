@@ -467,10 +467,12 @@ void Media::removeFile( File& file )
     }));
 }
 
-std::string Media::sortRequest( SortingCriteria sort, bool desc )
+std::string Media::sortRequest( const QueryParameters* params )
 {
     std::string req = " ORDER BY ";
 
+    auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
+    auto desc = params != nullptr ? params->desc : false;
     switch ( sort )
     {
     case SortingCriteria::Duration:
@@ -505,7 +507,7 @@ std::string Media::sortRequest( SortingCriteria sort, bool desc )
 }
 
 Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
-                                      SortingCriteria sort, bool desc )
+                              const QueryParameters* params )
 {
     std::string req = "FROM " + policy::MediaTable::Name + " m INNER JOIN "
             + policy::FileTable::Name + " f ON m.id_media = f.media_id"
@@ -513,7 +515,7 @@ Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
             " AND f.type = ?"
             " AND f.is_present != 0";
 
-    req += sortRequest( sort, desc );
+    req += sortRequest( params );
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       type, IFile::Type::Main );
 }
@@ -720,7 +722,7 @@ bool Media::removeLabel( LabelPtr label )
 }
 
 Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
-                             Media::SubType subType, SortingCriteria sort, bool desc )
+                             Media::SubType subType, const QueryParameters* params )
 {
     std::string req = "FROM " + policy::MediaTable::Name + " m "
             " INNER JOIN " + policy::FileTable::Name + " f ON m.id_media = f.media_id"
@@ -730,7 +732,7 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
             " AND f.is_present = 1"
             " AND f.type = ?"
             " AND m.subtype = ?";
-    req += sortRequest( sort, desc );
+    req += sortRequest( params );
     return make_query<Media, IMedia>( ml, "m.*", req, title, File::Type::Main, subType );
 }
 

@@ -253,18 +253,18 @@ void Playlist::createTriggers( sqlite::Connection* dbConn )
 }
 
 Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,
-                                           SortingCriteria sort, bool desc )
+                                   const QueryParameters* params )
 {
     std::string req = "FROM " + policy::PlaylistTable::Name + " WHERE id_playlist IN "
             "(SELECT rowid FROM " + policy::PlaylistTable::Name + "Fts WHERE name MATCH '*' || ? || '*')";
-    req += sortRequest( sort, desc );
+    req += sortRequest( params );
     return make_query<Playlist, IPlaylist>( ml, "*", req, name );
 }
 
-Query<IPlaylist> Playlist::listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc )
+Query<IPlaylist> Playlist::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
     std::string req = "FROM " + policy::PlaylistTable::Name;
-    req += sortRequest( sort, desc );
+    req += sortRequest( params );
     return make_query<Playlist, IPlaylist>( ml, "*", req );
 }
 
@@ -280,9 +280,10 @@ void Playlist::clearExternalPlaylistContent(MediaLibraryPtr ml)
     sqlite::Tools::executeDelete( ml->getConn(), req );
 }
 
-std::string Playlist::sortRequest( SortingCriteria sort, bool desc )
+std::string Playlist::sortRequest( const QueryParameters* params )
 {
     std::string req = " ORDER BY ";
+    SortingCriteria sort = params != nullptr ? params->sort : SortingCriteria::Default;
     switch ( sort )
     {
     case SortingCriteria::InsertionDate:
@@ -292,7 +293,7 @@ std::string Playlist::sortRequest( SortingCriteria sort, bool desc )
         req += "name";
         break;
     }
-    if ( desc == true )
+    if ( params != nullptr && params->desc == true )
         req += " DESC";
     return req;
 }

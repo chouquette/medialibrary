@@ -74,6 +74,13 @@ enum class SortingCriteria
     TrackNumber,
 };
 
+
+struct QueryParameters
+{
+    SortingCriteria sort;
+    bool desc;
+};
+
 enum class InitializeResult
 {
     //< Everything worked out fine
@@ -252,10 +259,10 @@ class IMediaLibrary
         virtual MediaPtr media( int64_t mediaId ) const = 0;
         virtual MediaPtr media( const std::string& mrl ) const = 0;
         virtual MediaPtr addMedia( const std::string& mrl ) = 0;
-        virtual Query<IMedia> audioFiles( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
-        virtual Query<IMedia> videoFiles( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
+        virtual Query<IMedia> audioFiles( const QueryParameters* params = nullptr ) const = 0;
+        virtual Query<IMedia> videoFiles( const QueryParameters* params = nullptr ) const = 0;
         virtual AlbumPtr album( int64_t id ) const = 0;
-        virtual Query<IAlbum> albums( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
+        virtual Query<IAlbum> albums( const QueryParameters* params = nullptr ) const = 0;
         virtual ShowPtr show( const std::string& name ) const = 0;
         virtual MoviePtr movie( const std::string& title ) const = 0;
         virtual ArtistPtr artist( int64_t id ) const = 0;
@@ -270,20 +277,19 @@ class IMediaLibrary
          * @param desc If true, the provided sorting criteria will be reversed.
          */
         virtual Query<IArtist> artists( bool includeAll,
-                                SortingCriteria sort = SortingCriteria::Default,
-                                bool desc = false ) const = 0;
+                                        const QueryParameters* params = nullptr ) const = 0;
         /**
          * @brief genres Return the list of music genres
          * @param sort A sorting criteria. So far, this is ignored, and artists are sorted by lexial order
          * @param desc If true, the provided sorting criteria will be reversed.
          */
-        virtual Query<IGenre> genres( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
+        virtual Query<IGenre> genres( const QueryParameters* params = nullptr ) const = 0;
         virtual GenrePtr genre( int64_t id ) const = 0;
         /***
          *  Playlists
          */
         virtual PlaylistPtr createPlaylist( const std::string& name ) = 0;
-        virtual Query<IPlaylist> playlists( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) = 0;
+        virtual Query<IPlaylist> playlists( const QueryParameters* params = nullptr ) = 0;
         virtual PlaylistPtr playlist( int64_t id ) const = 0;
         virtual bool deletePlaylist( int64_t playlistId ) = 0;
 
@@ -307,21 +313,17 @@ class IMediaLibrary
          * Search
          */
         virtual MediaSearchAggregate searchMedia( const std::string& pattern,
-                                                  SortingCriteria sort = SortingCriteria::Default,
-                                                  bool desc = false ) const = 0;
+                                                   const QueryParameters* params = nullptr ) const = 0;
         virtual Query<IPlaylist> searchPlaylists( const std::string& name,
-                                                          SortingCriteria sort = SortingCriteria::Default,
-                                                          bool desc = false ) const = 0;
+                                                  const QueryParameters* params = nullptr ) const = 0;
         virtual Query<IAlbum> searchAlbums( const std::string& pattern,
-                                                    SortingCriteria sort = SortingCriteria::Default,
-                                                    bool desc = false ) const = 0;
-        virtual Query<IGenre> searchGenre( const std::string& genre, SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
+                                            const QueryParameters* params = nullptr ) const = 0;
+        virtual Query<IGenre> searchGenre( const std::string& genre,
+                                           const QueryParameters* params = nullptr ) const = 0;
         virtual Query<IArtist> searchArtists( const std::string& name,
-                                                      SortingCriteria sort = SortingCriteria::Default,
-                                                      bool desc = false ) const = 0;
+                                              const QueryParameters* params = nullptr  ) const = 0;
         virtual SearchAggregate search( const std::string& pattern,
-                                        SortingCriteria sort = SortingCriteria::Default,
-                                        bool desc = false ) const = 0;
+                                        const QueryParameters* params = nullptr ) const = 0;
 
         /**
          * @brief discover Launch a discovery on the provided entry point.

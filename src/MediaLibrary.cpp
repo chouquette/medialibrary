@@ -445,14 +445,14 @@ MediaPtr MediaLibrary::addMedia( const std::string& mrl )
     }
 }
 
-Query<IMedia> MediaLibrary::audioFiles( SortingCriteria sort, bool desc ) const
+Query<IMedia> MediaLibrary::audioFiles( const QueryParameters* params ) const
 {
-    return Media::listAll( this, IMedia::Type::Audio, sort, desc );
+    return Media::listAll( this, IMedia::Type::Audio, params );
 }
 
-Query<IMedia> MediaLibrary::videoFiles( SortingCriteria sort, bool desc ) const
+Query<IMedia> MediaLibrary::videoFiles( const QueryParameters* params ) const
 {
-    return Media::listAll( this, IMedia::Type::Video, sort, desc );
+    return Media::listAll( this, IMedia::Type::Video, params );
 }
 
 bool MediaLibrary::isExtensionSupported( const char* ext )
@@ -544,14 +544,14 @@ std::shared_ptr<Album> MediaLibrary::createAlbum( const std::string& title, int6
     return Album::create( this, title, thumbnailId );
 }
 
-Query<IAlbum> MediaLibrary::albums( SortingCriteria sort, bool desc ) const
+Query<IAlbum> MediaLibrary::albums( const QueryParameters* params ) const
 {
-    return Album::listAll( this, sort, desc );
+    return Album::listAll( this, params );
 }
 
-Query<IGenre> MediaLibrary::genres( SortingCriteria sort, bool desc ) const
+Query<IGenre> MediaLibrary::genres( const QueryParameters* params ) const
 {
-    return Genre::listAll( this, sort, desc );
+    return Genre::listAll( this, params );
 }
 
 GenrePtr MediaLibrary::genre( int64_t id ) const
@@ -611,10 +611,9 @@ std::shared_ptr<Artist> MediaLibrary::createArtist( const std::string& name )
     }
 }
 
-Query<IArtist> MediaLibrary::artists( bool includeAll, SortingCriteria sort,
-                                      bool desc ) const
+Query<IArtist> MediaLibrary::artists( bool includeAll, const QueryParameters* params ) const
 {
-    return Artist::listAll( this, includeAll, sort, desc );
+    return Artist::listAll( this, includeAll, params );
 }
 
 PlaylistPtr MediaLibrary::createPlaylist( const std::string& name )
@@ -630,9 +629,9 @@ PlaylistPtr MediaLibrary::createPlaylist( const std::string& name )
     }
 }
 
-Query<IPlaylist> MediaLibrary::playlists( SortingCriteria sort, bool desc )
+Query<IPlaylist> MediaLibrary::playlists( const QueryParameters* params )
 {
-    return Playlist::listAll( this, sort, desc );
+    return Playlist::listAll( this, params );
 }
 
 PlaylistPtr MediaLibrary::playlist( int64_t id ) const
@@ -696,64 +695,63 @@ bool MediaLibrary::clearHistory()
 }
 
 MediaSearchAggregate MediaLibrary::searchMedia( const std::string& title,
-                                                SortingCriteria sort, bool desc ) const
+                                                const QueryParameters* params ) const
 {
     if ( validateSearchPattern( title ) == false )
         return {};
     MediaSearchAggregate res;
     res.episodes = Media::search( this, title, IMedia::SubType::ShowEpisode,
-                                sort, desc );
+                                params );
     res.movies = Media::search( this, title, IMedia::SubType::Movie,
-                                sort, desc );
+                                params );
     res.others = Media::search( this, title, IMedia::SubType::Unknown,
-                                sort, desc );
+                                params );
     res.tracks = Media::search( this, title, IMedia::SubType::AlbumTrack,
-                                sort, desc );
+                                params );
     return res;
 }
 
 Query<IPlaylist> MediaLibrary::searchPlaylists( const std::string& name,
-                                                        SortingCriteria sort,
-                                                        bool desc ) const
+                                                const QueryParameters* params ) const
 {
     if ( validateSearchPattern( name ) == false )
         return {};
-    return Playlist::search( this, name, sort, desc );
+    return Playlist::search( this, name, params );
 }
 
 Query<IAlbum> MediaLibrary::searchAlbums( const std::string& pattern,
-                                                  SortingCriteria sort, bool desc ) const
+                                          const QueryParameters* params ) const
 {
     if ( validateSearchPattern( pattern ) == false )
         return {};
-    return Album::search( this, pattern, sort, desc );
+    return Album::search( this, pattern, params );
 }
 
-Query<IGenre> MediaLibrary::searchGenre( const std::string& genre, SortingCriteria sort, bool desc ) const
+Query<IGenre> MediaLibrary::searchGenre( const std::string& genre,
+                                         const QueryParameters* params ) const
 {
     if ( validateSearchPattern( genre ) == false )
         return {};
-    return Genre::search( this, genre, sort, desc );
+    return Genre::search( this, genre, params );
 }
 
 Query<IArtist> MediaLibrary::searchArtists( const std::string& name,
-                                                    SortingCriteria sort,
-                                                    bool desc ) const
+                                            const QueryParameters* params ) const
 {
     if ( validateSearchPattern( name ) == false )
         return {};
-    return Artist::search( this, name, sort, desc );
+    return Artist::search( this, name, params );
 }
 
 SearchAggregate MediaLibrary::search( const std::string& pattern,
-                                      SortingCriteria sort, bool desc ) const
+                                      const QueryParameters* params ) const
 {
     SearchAggregate res;
-    res.albums = searchAlbums( pattern, sort, desc );
-    res.artists = searchArtists( pattern, sort, desc );
-    res.genres = searchGenre( pattern, sort, desc );
-    res.media = searchMedia( pattern, sort, desc );
-    res.playlists = searchPlaylists( pattern, sort, desc );
+    res.albums = searchAlbums( pattern, params );
+    res.artists = searchArtists( pattern, params );
+    res.genres = searchGenre( pattern, params );
+    res.media = searchMedia( pattern, params );
+    res.playlists = searchPlaylists( pattern, params );
     return res;
 }
 

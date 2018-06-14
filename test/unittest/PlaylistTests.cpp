@@ -62,7 +62,7 @@ TEST_F( Playlists, Fetch )
     ASSERT_NE( nullptr, pl2 );
     ASSERT_EQ( pl->id(), pl2->id() );
 
-    auto playlists = ml->playlists( SortingCriteria::Default, false )->all();
+    auto playlists = ml->playlists( nullptr )->all();
     ASSERT_EQ( 1u, playlists.size() );
     ASSERT_EQ( pl->id(), playlists[0]->id() );
 }
@@ -72,7 +72,7 @@ TEST_F( Playlists, DeletePlaylist )
 {
     auto res = ml->deletePlaylist( pl->id() );
     ASSERT_TRUE( res );
-    auto playlists = ml->playlists( SortingCriteria::Default, false )->all();
+    auto playlists = ml->playlists( nullptr )->all();
     ASSERT_EQ( 0u, playlists.size() );
 }
 
@@ -97,7 +97,7 @@ TEST_F( Playlists, FetchAll )
     ml->createPlaylist( "pl 3" );
     ml->createPlaylist( "pl 4" );
 
-    auto playlists = ml->playlists( SortingCriteria::Default, false )->all();
+    auto playlists = ml->playlists( nullptr )->all();
     ASSERT_EQ( 4u, playlists.size() );
     for ( auto& p : playlists )
     {
@@ -256,7 +256,7 @@ TEST_F( Playlists, Search )
     ml->createPlaylist( "playlist 2" );
     ml->createPlaylist( "laylist 3" );
 
-    auto playlists = ml->searchPlaylists( "play", SortingCriteria::Default, false )->all();
+    auto playlists = ml->searchPlaylists( "play", nullptr )->all();
     ASSERT_EQ( 2u, playlists.size() );
 }
 
@@ -264,12 +264,13 @@ TEST_F( Playlists, SearchAndSort )
 {
     auto pl2 = ml->createPlaylist( "playlist 2" );
 
-    auto playlists = ml->searchPlaylists( "play", SortingCriteria::Default, false )->all();
+    auto playlists = ml->searchPlaylists( "play", nullptr )->all();
     ASSERT_EQ( 2u, playlists.size() );
     ASSERT_EQ( pl2->id(), playlists[0]->id() );
     ASSERT_EQ( pl->id(), playlists[1]->id() );
 
-    playlists = ml->searchPlaylists( "play", SortingCriteria::Default, true )->all();
+    QueryParameters params = { SortingCriteria::Default, true };
+    playlists = ml->searchPlaylists( "play", &params )->all();
     ASSERT_EQ( 2u, playlists.size() );
     ASSERT_EQ( pl->id(), playlists[0]->id() );
     ASSERT_EQ( pl2->id(), playlists[1]->id() );
@@ -278,27 +279,27 @@ TEST_F( Playlists, SearchAndSort )
 TEST_F( Playlists, SearchAfterDelete )
 {
     auto pl = ml->createPlaylist( "sea otters greatest hits" );
-    auto pls = ml->searchPlaylists( "sea otters", SortingCriteria::Default, false )->all();
+    auto pls = ml->searchPlaylists( "sea otters", nullptr )->all();
     ASSERT_EQ( 1u, pls.size() );
 
     ml->deletePlaylist( pl->id() );
 
-    pls = ml->searchPlaylists( "sea otters", SortingCriteria::Default, false )->all();
+    pls = ml->searchPlaylists( "sea otters", nullptr )->all();
     ASSERT_EQ( 0u, pls.size() );
 }
 
 TEST_F( Playlists, SearchAfterUpdate )
 {
     auto pl = ml->createPlaylist( "sea otters greatest hits" );
-    auto pls = ml->searchPlaylists( "sea otters", SortingCriteria::Default, false )->all();
+    auto pls = ml->searchPlaylists( "sea otters", nullptr )->all();
     ASSERT_EQ( 1u, pls.size() );
 
     pl->setName( "pangolins are cool too" );
 
-    pls = ml->searchPlaylists( "sea otters", SortingCriteria::Default, false )->all();
+    pls = ml->searchPlaylists( "sea otters", nullptr )->all();
     ASSERT_EQ( 0u, pls.size() );
 
-    pls = ml->searchPlaylists( "pangolins", SortingCriteria::Default, false )->all();
+    pls = ml->searchPlaylists( "pangolins", nullptr )->all();
     ASSERT_EQ( 1u, pls.size() );
 }
 
@@ -306,12 +307,13 @@ TEST_F( Playlists, Sort )
 {
     auto pl2 = ml->createPlaylist( "A playlist" );
 
-    auto pls = ml->playlists( SortingCriteria::Default, false )->all();
+    auto pls = ml->playlists( nullptr )->all();
     ASSERT_EQ( 2u, pls.size() );
     ASSERT_EQ( pl2->id(), pls[0]->id() );
     ASSERT_EQ( pl->id(), pls[1]->id() );
 
-    pls = ml->playlists( SortingCriteria::Default, true )->all();
+    QueryParameters params { SortingCriteria::Default, true };
+    pls = ml->playlists( &params )->all();
     ASSERT_EQ( 2u, pls.size() );
     ASSERT_EQ( pl2->id(), pls[1]->id() );
     ASSERT_EQ( pl->id(), pls[0]->id() );

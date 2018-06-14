@@ -190,9 +190,11 @@ bool Album::setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin orig
     return true;
 }
 
-std::string Album::orderTracksBy( SortingCriteria sort, bool desc )
+std::string Album::orderTracksBy( const QueryParameters* params = nullptr )
 {
     std::string req = " ORDER BY ";
+    auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
+    auto desc = params != nullptr ? params->desc : false;
     switch ( sort )
     {
     case SortingCriteria::Alpha:
@@ -217,9 +219,11 @@ std::string Album::orderTracksBy( SortingCriteria sort, bool desc )
     return req;
 }
 
-std::string Album::orderBy( SortingCriteria sort, bool desc )
+std::string Album::orderBy( const QueryParameters* params )
 {
     std::string req = " ORDER BY ";
+    auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
+    auto desc = params != nullptr ? params->desc : false;
     switch ( sort )
     {
     case SortingCriteria::ReleaseDate:
@@ -247,18 +251,18 @@ std::string Album::orderBy( SortingCriteria sort, bool desc )
     return req;
 }
 
-Query<IMedia> Album::tracks( SortingCriteria sort, bool desc ) const
+Query<IMedia> Album::tracks( const QueryParameters* params ) const
 {
     // This doesn't return the cached version, because it would be fairly complicated, if not impossible or
     // counter productive, to maintain a cache that respects all orderings.
     std::string req = "FROM " + policy::MediaTable::Name + " med "
         " INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
         " WHERE att.album_id = ? AND med.is_present != 0";
-    req += orderTracksBy( sort, desc );
+    req += orderTracksBy( params );
     return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ), m_id );
 }
 
-Query<IMedia> Album::tracks( GenrePtr genre, SortingCriteria sort, bool desc ) const
+Query<IMedia> Album::tracks( GenrePtr genre, const QueryParameters* params ) const
 {
     if ( genre == nullptr )
         return {};
@@ -266,7 +270,7 @@ Query<IMedia> Album::tracks( GenrePtr genre, SortingCriteria sort, bool desc ) c
             " INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
             " WHERE att.album_id = ? AND med.is_present != 0"
             " AND genre_id = ?";
-    req += orderTracksBy( sort, desc );
+    req += orderTracksBy( params );
     return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ), m_id, genre->id() );
 }
 
@@ -274,7 +278,7 @@ std::vector<MediaPtr> Album::cachedTracks() const
 {
     auto lock = m_tracks.lock();
     if ( m_tracks.isCached() == false )
-        m_tracks = tracks( SortingCriteria::Default, false )->all();
+        m_tracks = tracks( nullptr )->all();
     return m_tracks.get();
 }
 
@@ -493,18 +497,18 @@ std::shared_ptr<Album> Album::createUnknownAlbum( MediaLibraryPtr ml, const Arti
 }
 
 Query<IAlbum> Album::search( MediaLibraryPtr ml, const std::string& pattern,
-                                     SortingCriteria sort, bool desc )
+                             const QueryParameters* params )
 {
     std::string req = "FROM " + policy::AlbumTable::Name + " alb "
             "WHERE id_album IN "
             "(SELECT rowid FROM " + policy::AlbumTable::Name + "Fts WHERE " +
             policy::AlbumTable::Name + "Fts MATCH '*' || ? || '*')"
             "AND is_present != 0";
-    req += orderBy( sort, desc );
+    req += orderBy( params );
     return make_query<Album, IAlbum>( ml, "*", std::move( req ), pattern );
 }
 
-Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, SortingCriteria sort, bool desc )
+Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, const QueryParameters* params )
 {
     std::string req = "FROM " + policy::AlbumTable::Name + " alb "
                     "INNER JOIN " + policy::AlbumTrackTable::Name + " att "
@@ -512,6 +516,8 @@ Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, SortingCr
                     "WHERE (att.artist_id = ? OR alb.artist_id = ?) "
                         "AND att.is_present != 0 "
                     "GROUP BY att.album_id ORDER BY ";
+    auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
+    auto desc = params != nullptr ? params->desc : false;
     switch ( sort )
     {
     case SortingCriteria::Alpha:
@@ -533,17 +539,19 @@ Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, SortingCr
     return make_query<Album, IAlbum>( ml, "*", req, artistId, artistId );
 }
 
-Query<IAlbum> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId, SortingCriteria sort, bool desc)
+Query<IAlbum> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId, const QueryParameters* params )
 {
     std::string req = "FROM " + policy::AlbumTable::Name + " alb "
             "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.album_id = alb.id_album "
             "WHERE att.genre_id = ? GROUP BY att.album_id";
-    req += orderBy( sort, desc );
+    req += orderBy( params );
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ), genreId );
 }
 
-Query<IAlbum> Album::listAll( MediaLibraryPtr ml, SortingCriteria sort, bool desc )
+Query<IAlbum> Album::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
+    auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
+    auto desc = params != nullptr ? params->desc : false;
     if ( sort == SortingCriteria::Artist )
     {
         std::string req = "FROM " + policy::AlbumTable::Name + " alb "
@@ -570,7 +578,7 @@ Query<IAlbum> Album::listAll( MediaLibraryPtr ml, SortingCriteria sort, bool des
     }
     std::string req = "FROM " + policy::AlbumTable::Name + " alb "
                     " WHERE is_present != 0";
-    req += orderBy( sort, desc );
+    req += orderBy( params );
     return make_query<Album, IAlbum>( ml, "*", std::move( req ) );
 }
 

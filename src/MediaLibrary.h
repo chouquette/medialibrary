@@ -73,8 +73,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual MediaPtr media( int64_t mediaId ) const override;
         virtual MediaPtr media( const std::string& path ) const override;
         virtual MediaPtr addMedia( const std::string& mrl ) override;
-        virtual Query<IMedia> audioFiles( SortingCriteria sort, bool desc) const override;
-        virtual Query<IMedia> videoFiles( SortingCriteria sort, bool desc) const override;
+        virtual Query<IMedia> audioFiles( const QueryParameters* params ) const override;
+        virtual Query<IMedia> videoFiles( const QueryParameters* params ) const override;
 
         virtual void addDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                                         std::shared_ptr<Folder> parentFolder,
@@ -88,9 +88,9 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         virtual AlbumPtr album( int64_t id ) const override;
         std::shared_ptr<Album> createAlbum( const std::string& title, int64_t thumbnailId );
-        virtual Query<IAlbum> albums(SortingCriteria sort, bool desc) const override;
+        virtual Query<IAlbum> albums( const QueryParameters* params ) const override;
 
-        virtual Query<IGenre> genres( SortingCriteria sort, bool desc ) const override;
+        virtual Query<IGenre> genres( const QueryParameters* params ) const override;
         virtual GenrePtr genre( int64_t id ) const override;
 
         virtual ShowPtr show( const std::string& name ) const override;
@@ -103,11 +103,10 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         ArtistPtr artist( const std::string& name );
         std::shared_ptr<Artist> createArtist( const std::string& name );
         virtual Query<IArtist> artists( bool includeAll,
-                                                SortingCriteria sort,
-                                                bool desc ) const override;
+                                        const QueryParameters* params ) const override;
 
         virtual PlaylistPtr createPlaylist( const std::string& name ) override;
-        virtual Query<IPlaylist> playlists( SortingCriteria sort, bool desc ) override;
+        virtual Query<IPlaylist> playlists( const QueryParameters* params ) override;
         virtual PlaylistPtr playlist( int64_t id ) const override;
         virtual bool deletePlaylist( int64_t playlistId ) override;
 
@@ -117,21 +116,17 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual bool clearHistory() override;
 
         virtual MediaSearchAggregate searchMedia( const std::string& title,
-                                                  SortingCriteria sort, bool desc ) const override;
+                                                  const QueryParameters* params ) const override;
         virtual Query<IPlaylist> searchPlaylists( const std::string& name,
-                                                          SortingCriteria sort,
-                                                          bool desc ) const override;
+                                                  const QueryParameters* params ) const override;
         virtual Query<IAlbum> searchAlbums( const std::string& pattern,
-                                                    SortingCriteria sort,
-                                                    bool desc ) const override;
+                                            const QueryParameters* params ) const override;
         virtual Query<IGenre> searchGenre( const std::string& genre,
-                                                    SortingCriteria sort,
-                                                    bool desc ) const override;
+                                           const QueryParameters* params ) const override;
         virtual Query<IArtist> searchArtists( const std::string& name,
-                                                      SortingCriteria sort,
-                                                      bool desc ) const override;
+                                              const QueryParameters* params ) const override;
         virtual SearchAggregate search( const std::string& pattern,
-                                        SortingCriteria sort, bool desc ) const override;
+                                        const QueryParameters* params ) const override;
 
         virtual void discover( const std::string& entryPoint ) override;
         virtual bool setDiscoverNetworkEnabled( bool enabled ) override;

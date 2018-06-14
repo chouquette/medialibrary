@@ -44,13 +44,13 @@ public:
     /**
      * @brief tracks fetches album tracks from the database
      */
-    virtual Query<IMedia> tracks( SortingCriteria sort = SortingCriteria::Default, bool desc = false ) const = 0;
+    virtual Query<IMedia> tracks( const QueryParameters* params = nullptr ) const = 0;
     /**
      * @brief tracks fetches album tracks, filtered by genre
      * @param genre A musical genre. Only tracks of this genre will be returned
      * @return
      */
-    virtual Query<IMedia> tracks( GenrePtr genre, SortingCriteria sort = SortingCriteria::Default, bool desc = false  ) const = 0;
+    virtual Query<IMedia> tracks( GenrePtr genre, const QueryParameters* params = nullptr ) const = 0;
     /**
      * @brief albumArtist Returns the album main artist (generally tagged as album-artist)
      */

@@ -149,11 +149,13 @@ AlbumTrackPtr AlbumTrack::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
     return fetch( ml, req, mediaId );
 }
 
-Query<IMedia> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId, SortingCriteria sort, bool desc )
+Query<IMedia> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId, const QueryParameters* params )
 {
     std::string req = "FROM " + policy::MediaTable::Name + " m"
             " INNER JOIN " + policy::AlbumTrackTable::Name + " t ON m.id_media = t.media_id"
             " WHERE t.genre_id = ? AND m.is_present = 1 ORDER BY ";
+    auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
+    auto desc = params != nullptr ? params->desc : false;
     switch ( sort )
     {
     case SortingCriteria::Duration:

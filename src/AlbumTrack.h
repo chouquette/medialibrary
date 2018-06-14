@@ -74,7 +74,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
                                     unsigned int discNumber, int64_t artistId, int64_t genreId,
                                     int64_t duration );
         static AlbumTrackPtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
-        static Query<IMedia> fromGenre( MediaLibraryPtr ml, int64_t genreId, SortingCriteria sort, bool desc );
+        static Query<IMedia> fromGenre( MediaLibraryPtr ml, int64_t genreId, const QueryParameters* params );
 
     private:
         MediaLibraryPtr m_ml;
