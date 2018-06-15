@@ -235,7 +235,7 @@ bool AlbumTrack::setGenre( std::shared_ptr<Genre> genre )
     return true;
 }
 
-unsigned int AlbumTrack::trackNumber()
+unsigned int AlbumTrack::trackNumber() const
 {
     return m_trackNumber;
 }

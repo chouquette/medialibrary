@@ -64,7 +64,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         virtual GenrePtr genre() override;
         virtual int64_t genreId() const override;
         bool setGenre( std::shared_ptr<Genre> genre );
-        virtual unsigned int trackNumber() override;
+        virtual unsigned int trackNumber() const override;
         virtual unsigned int discNumber() const override;
         virtual std::shared_ptr<IAlbum> album() override;
         virtual int64_t albumId() const override;

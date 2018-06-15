@@ -46,7 +46,7 @@ class IAlbumTrack
         virtual int64_t artistId() const = 0;
         virtual GenrePtr genre() = 0;
         virtual int64_t genreId() const = 0;
-        virtual unsigned int trackNumber() = 0;
+        virtual unsigned int trackNumber() const = 0;
         virtual AlbumPtr album() = 0;
         virtual int64_t albumId() const = 0;
         virtual MediaPtr media() = 0;
