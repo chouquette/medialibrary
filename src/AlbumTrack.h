@@ -60,11 +60,14 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
 
         virtual int64_t id() const override;
         virtual ArtistPtr artist() const override;
+        virtual int64_t artistId() const override;
         virtual GenrePtr genre() override;
+        virtual int64_t genreId() const override;
         bool setGenre( std::shared_ptr<Genre> genre );
         virtual unsigned int trackNumber() override;
         virtual unsigned int discNumber() const override;
         virtual std::shared_ptr<IAlbum> album() override;
+        virtual int64_t albumId() const override;
         virtual std::shared_ptr<IMedia> media() override;
 
         static void createTable( sqlite::Connection* dbConnection );

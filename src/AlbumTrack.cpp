@@ -86,6 +86,11 @@ ArtistPtr AlbumTrack::artist() const
     return m_artist.get();
 }
 
+int64_t AlbumTrack::artistId() const
+{
+    return m_artistId;
+}
+
 void AlbumTrack::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AlbumTrackTable::Name + "("
@@ -193,6 +198,11 @@ GenrePtr AlbumTrack::genre()
     return m_genre.get();
 }
 
+int64_t AlbumTrack::genreId() const
+{
+    return m_genreId;
+}
+
 bool AlbumTrack::setGenre( std::shared_ptr<Genre> genre )
 {
     // We need to fetch the old genre entity now, in case it gets deleted through
@@ -245,6 +255,11 @@ std::shared_ptr<IAlbum> AlbumTrack::album()
     if ( m_album.isCached() == false )
         m_album = Album::fetch( m_ml, m_albumId );
     return m_album.get().lock();
+}
+
+int64_t AlbumTrack::albumId() const
+{
+    return m_albumId;
 }
 
 std::shared_ptr<IMedia> AlbumTrack::media()
