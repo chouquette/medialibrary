@@ -129,7 +129,7 @@ class IMedia
         /// \return A path, relative to the thumbnailPath configured when initializing
         ///  The media library
         ///
-        virtual const std::string& thumbnail() = 0;
+        virtual const std::string& thumbnail() const = 0;
         ///
         /// \brief isThumbnailGenerated Returns true if a thumbnail generation was
         ///                             attempted.

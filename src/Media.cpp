@@ -267,7 +267,7 @@ Query<IAudioTrack> Media::audioTracks()
     return make_query<AudioTrack, IAudioTrack>( m_ml, "*", req, m_id );
 }
 
-const std::string& Media::thumbnail()
+const std::string& Media::thumbnail() const
 {
     if ( m_thumbnailId == 0 || m_thumbnailGenerated == false )
         return Thumbnail::EmptyMrl;

@@ -124,7 +124,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         bool addAudioTrack( const std::string& codec, unsigned int bitrate, unsigned int sampleRate,
                             unsigned int nbChannels, const std::string& language, const std::string& desc );
         virtual Query<IAudioTrack> audioTracks() override;
-        virtual const std::string& thumbnail() override;
+        virtual const std::string& thumbnail() const override;
         virtual bool isThumbnailGenerated() const override;
         virtual bool setThumbnail( const std::string &thumbnail ) override;
         bool setThumbnail( const std::string& thumbnail, Thumbnail::Origin origin );
