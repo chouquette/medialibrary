@@ -144,6 +144,16 @@ Query<IShowEpisode> Show::episodes()
     return make_query<ShowEpisode, IShowEpisode>( m_ml, "*", req, m_id );
 }
 
+uint32_t Show::nbSeasons() const
+{
+    return 0;
+}
+
+uint32_t Show::nbEpisodes() const
+{
+    return 0;
+}
+
 void Show::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::ShowTable::Name + "("
