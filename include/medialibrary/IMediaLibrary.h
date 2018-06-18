@@ -263,7 +263,9 @@ class IMediaLibrary
         virtual Query<IMedia> videoFiles( const QueryParameters* params = nullptr ) const = 0;
         virtual AlbumPtr album( int64_t id ) const = 0;
         virtual Query<IAlbum> albums( const QueryParameters* params = nullptr ) const = 0;
+        virtual ShowPtr show( int64_t id ) const = 0;
         virtual ShowPtr show( const std::string& name ) const = 0;
+        virtual MoviePtr movie( int64_t id ) const = 0;
         virtual MoviePtr movie( const std::string& title ) const = 0;
         virtual ArtistPtr artist( int64_t id ) const = 0;
         /**

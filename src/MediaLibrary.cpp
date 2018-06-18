@@ -559,6 +559,11 @@ GenrePtr MediaLibrary::genre( int64_t id ) const
     return Genre::fetch( this, id );
 }
 
+ShowPtr MediaLibrary::show( int64_t id ) const
+{
+    return Show::fetch( this, id );
+}
+
 ShowPtr MediaLibrary::show( const std::string& name ) const
 {
     static const std::string req = "SELECT * FROM " + policy::ShowTable::Name
@@ -569,6 +574,11 @@ ShowPtr MediaLibrary::show( const std::string& name ) const
 std::shared_ptr<Show> MediaLibrary::createShow( const std::string& name )
 {
     return Show::create( this, name );
+}
+
+MoviePtr MediaLibrary::movie( int64_t id ) const
+{
+    return Movie::fetch( this, id );
 }
 
 MoviePtr MediaLibrary::movie( const std::string& title ) const
