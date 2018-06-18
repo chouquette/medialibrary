@@ -114,7 +114,7 @@ bool Show::setArtworkMrl( const std::string& artworkMrl )
     return true;
 }
 
-const std::string& Show::tvdbId()
+const std::string& Show::tvdbId() const
 {
     return m_tvdbId;
 }
@@ -137,7 +137,7 @@ std::shared_ptr<ShowEpisode> Show::addEpisode( Media& media, const std::string& 
     return episode;
 }
 
-Query<IShowEpisode> Show::episodes()
+Query<IShowEpisode> Show::episodes() const
 {
     static const std::string req = "FROM " + policy::ShowEpisodeTable::Name
             + " WHERE show_id = ?";
