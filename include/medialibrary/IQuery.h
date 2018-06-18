@@ -35,7 +35,23 @@ public:
     using Result = std::vector<std::shared_ptr<T>>;
 
     virtual ~IQuery() = default;
+    /**
+     * @brief count returns the total number of items that would be returned by all()
+     *
+     * There is no temporal guarantee, meaning that if an item gets added between
+     * a call to count() and all(), the call to all() will return count() + 1 items.
+     */
     virtual size_t count() = 0;
+    /**
+     * @brief items returns a subset of a query result
+     * @param nbItems The number of item requested
+     * @param offset The number of elements to omit from the begining of the result
+     * @return A vector of shared pointer for the requested type.
+     *
+     * If nbItems & offset are both 0, then this method returns all results.
+     * nbItems & offset are directly mapped to the LIMIT OFFSET parameters of
+     * the SQL query that will be generated to compute the result.
+     */
     virtual Result items( uint32_t nbItems,  uint32_t offset ) = 0;
     virtual Result all() = 0;
 };

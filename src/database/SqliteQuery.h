@@ -70,6 +70,8 @@ public:
 
     virtual Result items( uint32_t nbItems, uint32_t offset ) override
     {
+        if ( nbItems == 0 && offset == 0 )
+            return all();
         const std::string req = "SELECT " + m_field + " " + m_base + " LIMIT ? OFFSET ?";
         return Impl::template fetchAll<Intf>( m_ml, req, m_params, nbItems, offset );
     }
