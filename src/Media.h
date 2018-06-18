@@ -109,7 +109,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         void setShowEpisode( ShowEpisodePtr episode );
         virtual bool addLabel( LabelPtr label ) override;
         virtual bool removeLabel( LabelPtr label ) override;
-        virtual Query<ILabel> labels() override;
+        virtual Query<ILabel> labels() const override;
         virtual int playCount() const  override;
         virtual bool increasePlayCount() override;
         virtual bool isFavorite() const override;

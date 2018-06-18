@@ -121,7 +121,7 @@ class IMedia
         virtual bool addLabel( LabelPtr label ) = 0;
         virtual bool removeLabel( LabelPtr label ) = 0;
         virtual MoviePtr movie() const = 0;
-        virtual Query<ILabel> labels() = 0;
+        virtual Query<ILabel> labels() const = 0;
         virtual Query<IVideoTrack> videoTracks() = 0;
         virtual Query<IAudioTrack> audioTracks() = 0;
         ///

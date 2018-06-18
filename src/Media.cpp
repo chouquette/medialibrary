@@ -162,7 +162,7 @@ void Media::setShowEpisode( ShowEpisodePtr episode )
     m_changed = true;
 }
 
-Query<ILabel> Media::labels()
+Query<ILabel> Media::labels() const
 {
     static const std::string req = "FROM " + policy::LabelTable::Name + " l "
             "INNER JOIN LabelFileRelation lfr ON lfr.label_id = l.id_label "
