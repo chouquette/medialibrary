@@ -45,6 +45,7 @@ case "${host_os}" in
     ;;
   linux*)
     SYS=linux
+    CXXFLAGS="${CXXFLAGS} -pthread"
     ;;
   bsdi*)
     SYS=bsdi
@@ -305,7 +306,6 @@ AM_CONDITIONAL([HAVE_LIBJPEG], [test "${have_libjpeg}" = "yes"])
 AC_ARG_ENABLE(tests,AC_HELP_STRING([--disable-tests], [Disable build of automated tests suites]))
 AM_CONDITIONAL([HAVE_TESTS], [test "${enable_tests}" = "yes"])
 AS_IF([test "${enable_tests}" = "yes"], [
-    AX_PTHREAD([have_pthread=yes],[have_pthread=no])
     PKG_CHECK_MODULES(RAPIDJSON, RapidJSON, [], [
         # We need the .pc for cross compilation, but we don't consider it a failure
         # when building natively, mostly because debian doesn't package the .pc
@@ -316,7 +316,6 @@ AS_IF([test "${enable_tests}" = "yes"], [
         fi
     ])
 ])
-AM_CONDITIONAL([HAVE_PTHREAD], [test "${have_pthread}" = "yes"])
 
 AH_BOTTOM([#include "Fixup.h"])
 

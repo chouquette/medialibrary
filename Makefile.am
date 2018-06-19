@@ -268,20 +268,11 @@ libgtestmain_la_SOURCES = \
 	googletest/src/gtest_main.cc
 
 libgtest_la_CPPFLAGS = \
+	$(AM_CPPFLAGS) \
 	-I$(top_srcdir)/googletest \
 	-I$(top_srcdir)/googletest/include
 
-if HAVE_PTHREAD
-	libgtest_la_CPPFLAGS += -DGTEST_HAS_PTHREAD=1
-	libgtest_la_CXXFLAGS = $(PTHREAD_CFLAGS)
-	libgtest_la_LIDADD = $(PTHREAD_LIBS)
-else
-	libgtest_la_CPPFLAGS += -DGTEST_HAS_PTHREAD=0
-endif
-
-libgtestmain_la_CPPFLAGS = $(libgtest_la_CPPFLAGS)
-libgtestmain_la_CXXFLAGS = $(libgtest_la_CXXFLAGS)
-libgtestmain_la_LIBADD   = $(libgtest_la_LIBADD)
+libgtestmain_la_CPPFLAGS = $(AM_CPPFLAGS) $(libgtest_la_CPPFLAGS)
 
 unittest_SOURCES = \
 	test/common/MediaLibraryTester.cpp \
@@ -326,7 +317,6 @@ unittest_LDADD = 		\
 	libmedialibrary.la 	\
 	libgtest.la			\
 	libgtestmain.la		\
-	$(PTHREAD_LIBS) 	\
 	$(SQLITE_LIBS)		\
 	$(NULL)
 
@@ -349,7 +339,6 @@ samples_LDADD = 		\
 	libmedialibrary.la	\
 	libgtest.la			\
 	libgtestmain.la		\
-	$(PTHREAD_LIBS) 	\
 	$(SQLITE_LIBS)		\
 	$(NULL)
 
