@@ -34,15 +34,7 @@ namespace medialibrary
 class IAlbumTrack;
 class IShowEpisode;
 class ITrackInformation;
-
-class IMediaMetadata
-{
-public:
-    virtual ~IMediaMetadata() = default;
-    virtual bool isSet() const = 0;
-    virtual int64_t integer() const = 0;
-    virtual const std::string& str() const = 0;
-};
+class IMediaMetadata;
 
 class IMedia
 {

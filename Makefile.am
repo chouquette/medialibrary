@@ -40,6 +40,7 @@ libmedialibrary_la_HEADERS = \
 	include/medialibrary/IDeviceLister.h \
 	include/medialibrary/IFolder.h \
 	include/medialibrary/IQuery.h \
+	include/medialibrary/IMetadata.h \
 	$(NULL)
 
 libmedialibraryfsdir = $(libmedialibrary_ladir)/filesystem

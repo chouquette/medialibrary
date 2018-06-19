@@ -30,6 +30,7 @@
 #include "Thumbnail.h"
 #include "database/DatabaseHelpers.h"
 #include "utils/Cache.h"
+#include "medialibrary/IMetadata.h"
 
 namespace medialibrary
 {
