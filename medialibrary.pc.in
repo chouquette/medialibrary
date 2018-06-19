@@ -8,4 +8,4 @@ Description: cross platform medialibrary
 Version: @PACKAGE_VERSION@
 Cflags: -I${includedir}
 Libs: -L${libdir} -lmedialibrary
-Libs.private: -lsqlite3 @LIBJPEG_LIBS@
+Libs.private: -lsqlite3 @LIBJPEG_LIBS@ @THREAD_LIBS@

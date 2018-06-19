@@ -46,6 +46,8 @@ case "${host_os}" in
   linux*)
     SYS=linux
     CXXFLAGS="${CXXFLAGS} -pthread"
+dnl Specify -lpthread as part of Libs.private, in case of a static build
+    THREAD_LIBS="-lpthread"
     ;;
   bsdi*)
     SYS=bsdi
@@ -325,5 +327,7 @@ AC_CONFIG_FILES([
 Makefile
 medialibrary.pc
 ])
+
+AC_SUBST(THREAD_LIBS)
 
 AC_OUTPUT
