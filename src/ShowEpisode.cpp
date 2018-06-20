@@ -42,7 +42,6 @@ ShowEpisode::ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row )
 {
     row >> m_id
         >> m_mediaId
-        >> m_artworkMrl
         >> m_episodeNumber
         >> m_name
         >> m_seasonNumber
@@ -65,21 +64,6 @@ ShowEpisode::ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, const std::string
 int64_t ShowEpisode::id() const
 {
     return m_id;
-}
-
-const std::string& ShowEpisode::artworkMrl() const
-{
-    return m_artworkMrl;
-}
-
-bool ShowEpisode::setArtworkMrl( const std::string& artworkMrl )
-{
-    static const std::string req = "UPDATE " + policy::ShowEpisodeTable::Name
-            + " SET artwork_mrl = ? WHERE id_episode = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, artworkMrl, m_id ) == false )
-        return false;
-    m_artworkMrl = artworkMrl;
-    return true;
 }
 
 unsigned int ShowEpisode::episodeNumber() const
@@ -159,7 +143,6 @@ void ShowEpisode::createTable( sqlite::Connection* dbConnection )
             + "("
                 "id_episode INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "media_id UNSIGNED INTEGER NOT NULL,"
-                "artwork_mrl TEXT,"
                 "episode_number UNSIGNED INT,"
                 "title TEXT,"
                 "season_number UNSIGNED INT,"

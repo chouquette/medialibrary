@@ -152,22 +152,6 @@ TEST_F( Shows, FetchShowFromEpisode )
     ASSERT_EQ( s->name(), s2->name() );
 }
 
-TEST_F( Shows, SetEpisodeArtwork )
-{
-    auto show = ml->createShow( "show" );
-    auto media = std::static_pointer_cast<Media>( ml->addMedia( "episode.mkv" ) );
-    auto e = show->addEpisode( *media, "episode 1", 1 );
-    bool res = e->setArtworkMrl( "path-to-art" );
-    ASSERT_TRUE( res );
-    ASSERT_EQ( e->artworkMrl(), "path-to-art" );
-
-    Reload();
-
-    show = std::static_pointer_cast<Show>( ml->show( "show" ) );
-    auto episodes = show->episodes()->all();
-    ASSERT_EQ( episodes[0]->artworkMrl(), e->artworkMrl() );
-}
-
 TEST_F( Shows, SetEpisodeSeasonNumber )
 {
     auto show = ml->createShow( "show" );

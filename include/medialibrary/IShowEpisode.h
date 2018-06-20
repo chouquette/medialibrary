@@ -34,7 +34,6 @@ class IShowEpisode
         virtual ~IShowEpisode(){}
 
         virtual int64_t id() const = 0;
-        virtual const std::string& artworkMrl() const = 0;
         virtual unsigned int episodeNumber() const = 0;
         virtual const std::string& name() const = 0;
         virtual unsigned int seasonNumber() const = 0;

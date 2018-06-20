@@ -53,8 +53,6 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, pol
         ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, const std::string& name, unsigned int episodeNumber, int64_t showId );
 
         virtual int64_t id() const override;
-        virtual const std::string& artworkMrl() const override;
-        bool setArtworkMrl( const std::string& artworkMrl );
         virtual unsigned int episodeNumber() const override;
         virtual const std::string& name() const override;
         unsigned int seasonNumber() const override;
@@ -74,7 +72,6 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, pol
         MediaLibraryPtr m_ml;
         int64_t m_id;
         int64_t m_mediaId;
-        std::string m_artworkMrl;
         unsigned int m_episodeNumber;
         std::string m_name;
         unsigned int m_seasonNumber;
