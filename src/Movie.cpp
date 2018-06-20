@@ -43,7 +43,6 @@ Movie::Movie(MediaLibraryPtr ml, sqlite::Row& row )
         >> m_mediaId
         >> m_title
         >> m_summary
-        >> m_artworkMrl
         >> m_imdbId;
 }
 
@@ -80,21 +79,6 @@ bool Movie::setShortSummary( const std::string& summary )
     return true;
 }
 
-const std::string&Movie::artworkMrl() const
-{
-    return m_artworkMrl;
-}
-
-bool Movie::setArtworkMrl( const std::string& artworkMrl )
-{
-    static const std::string req = "UPDATE " + policy::MovieTable::Name
-            + " SET artwork_mrl = ? WHERE id_movie = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, artworkMrl, m_id ) == false )
-        return false;
-    m_artworkMrl = artworkMrl;
-    return true;
-}
-
 const std::string& Movie::imdbId() const
 {
     return m_imdbId;
@@ -125,7 +109,6 @@ void Movie::createTable( sqlite::Connection* dbConnection )
                 "media_id UNSIGNED INTEGER NOT NULL,"
                 "title TEXT UNIQUE ON CONFLICT FAIL,"
                 "summary TEXT,"
-                "artwork_mrl TEXT,"
                 "imdb_id TEXT,"
                 "FOREIGN KEY(media_id) REFERENCES " + policy::MediaTable::Name
                 + "(id_media) ON DELETE CASCADE"

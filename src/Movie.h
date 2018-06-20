@@ -52,8 +52,6 @@ class Movie : public IMovie, public DatabaseHelpers<Movie, policy::MovieTable>
         virtual const std::string& title() const override;
         virtual const std::string& shortSummary() const override;
         bool setShortSummary(const std::string& summary);
-        virtual const std::string& artworkMrl() const override;
-        bool setArtworkMrl(const std::string& artworkMrl);
         virtual const std::string& imdbId() const override;
         bool setImdbId(const std::string& imdbId);
         virtual Query<IMedia> media() override;
@@ -68,7 +66,6 @@ class Movie : public IMovie, public DatabaseHelpers<Movie, policy::MovieTable>
         int64_t m_mediaId;
         std::string m_title;
         std::string m_summary;
-        std::string m_artworkMrl;
         std::string m_imdbId;
 
         friend struct policy::MovieTable;

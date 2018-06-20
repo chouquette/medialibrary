@@ -72,21 +72,6 @@ TEST_F( Movies, SetShortSummary )
     ASSERT_EQ( m2->shortSummary(), "great movie" );
 }
 
-TEST_F( Movies, SetArtworkMrl )
-{
-    auto media = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv" ) );
-    auto m = ml->createMovie( *media, "movie" );
-
-    ASSERT_EQ( m->artworkMrl().length(), 0u );
-    m->setArtworkMrl( "artwork" );
-    ASSERT_EQ( m->artworkMrl(), "artwork" );
-
-    Reload();
-
-    auto m2 = ml->movie( "movie" );
-    ASSERT_EQ( m2->artworkMrl(), "artwork" );
-}
-
 TEST_F( Movies, SetImdbId )
 {
     auto media = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv" ) );
