@@ -27,10 +27,14 @@
 namespace medialibrary
 {
 
-class IMediaMetadata
+class IMetadata
 {
 public:
-    virtual ~IMediaMetadata() = default;
+    enum class EntityType : uint8_t
+    {
+        Media = 1,
+    };
+    virtual ~IMetadata() = default;
     virtual bool isSet() const = 0;
     virtual int64_t integer() const = 0;
     virtual const std::string& str() const = 0;

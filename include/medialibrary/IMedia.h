@@ -34,7 +34,7 @@ namespace medialibrary
 class IAlbumTrack;
 class IShowEpisode;
 class ITrackInformation;
-class IMediaMetadata;
+class IMetadata;
 
 class IMedia
 {
@@ -150,7 +150,7 @@ class IMedia
         /// \param type The metadata type
         /// \return A reference to a wrapper object representing the metadata.
         ///
-        virtual const IMediaMetadata& metadata( MetadataType type ) const = 0;
+        virtual const IMetadata& metadata( MetadataType type ) const = 0;
         ///
         /// \brief setMetadata Immediatly saves a metadata in database
         ///

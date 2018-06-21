@@ -59,7 +59,7 @@ int64_t Media::* const policy::MediaTable::PrimaryKey = &Media::m_id;
 
 Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
-    , m_metadata( m_ml )
+    , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
     row >> m_id
@@ -95,7 +95,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
     , m_filename( title )
     , m_isFavorite( false )
     , m_isPresent( true )
-    , m_metadata( m_ml )
+    , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
 }
@@ -298,25 +298,28 @@ unsigned int Media::releaseDate() const
     return m_releaseDate;
 }
 
-const IMediaMetadata& Media::metadata( IMedia::MetadataType type ) const
+const IMetadata& Media::metadata( IMedia::MetadataType type ) const
 {
+    using MDType = typename std::underlying_type<IMedia::MetadataType>::type;
     if ( m_metadata.isReady() == false )
         m_metadata.init( m_id, IMedia::NbMeta );
-    return m_metadata.get( type );
+    return m_metadata.get( static_cast<MDType>( type ) );
 }
 
 bool Media::setMetadata( IMedia::MetadataType type, const std::string& value )
 {
+    using MDType = typename std::underlying_type<IMedia::MetadataType>::type;
     if ( m_metadata.isReady() == false )
         m_metadata.init( m_id, IMedia::NbMeta );
-    return m_metadata.set( type, value );
+    return m_metadata.set( static_cast<MDType>( type ), value );
 }
 
 bool Media::setMetadata( IMedia::MetadataType type, int64_t value )
 {
+    using MDType = typename std::underlying_type<IMedia::MetadataType>::type;
     if ( m_metadata.isReady() == false )
         m_metadata.init( m_id, IMedia::NbMeta );
-    return m_metadata.set( type, value );
+    return m_metadata.set( static_cast<MDType>( type ), value );
 }
 
 void Media::setReleaseDate( unsigned int date )
@@ -695,12 +698,14 @@ void Media::clearHistory( MediaLibraryPtr ml )
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
             "play_count = 0,"
             "last_played_date = NULL";
-    static const std::string flushProgress = "DELETE FROM " + policy::MediaMetadataTable::Name +
-            " WHERE type = ?";
     // Clear the entire cache since quite a few items are now containing invalid info.
     clear();
+
+    using MDType = typename std::underlying_type<IMedia::MetadataType>::type;
+    Metadata::unset( dbConn, IMetadata::EntityType::Media,
+                     static_cast<MDType>( IMedia::MetadataType::Progress ) );
+
     sqlite::Tools::executeUpdate( dbConn, req );
-    sqlite::Tools::executeDelete( dbConn, flushProgress, IMedia::MetadataType::Progress );
 }
 
 }

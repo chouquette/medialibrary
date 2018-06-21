@@ -110,7 +110,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual unsigned int insertionDate() const override;
         virtual unsigned int releaseDate() const override;
 
-        virtual const IMediaMetadata& metadata( MetadataType type ) const override;
+        virtual const IMetadata& metadata( MetadataType type ) const override;
         virtual bool setMetadata( MetadataType type, const std::string& value ) override;
         virtual bool setMetadata( MetadataType type, int64_t value ) override;
 
@@ -159,7 +159,7 @@ private:
         mutable Cache<ShowEpisodePtr> m_showEpisode;
         mutable Cache<MoviePtr> m_movie;
         mutable Cache<std::vector<FilePtr>> m_files;
-        mutable MediaMetadata m_metadata;
+        mutable Metadata m_metadata;
         mutable Cache<std::shared_ptr<Thumbnail>> m_thumbnail;
         bool m_changed;
 

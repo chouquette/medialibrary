@@ -36,16 +36,16 @@ class Connection;
 
 namespace policy
 {
-struct MediaMetadataTable
+struct MetadataTable
 {
     static const std::string Name;
 };
 }
 
-class MediaMetadata
+class Metadata
 {
 public:
-    MediaMetadata( MediaLibraryPtr ml );
+    Metadata( MediaLibraryPtr ml, IMetadata::EntityType entityType );
 
     // We have to "lazy init" this object since during containing object creation,
     // we might not know the ID yet (for instance. when instantiating the
@@ -53,34 +53,37 @@ public:
     void init( int64_t entityId, uint32_t nbMeta );
     bool isReady() const;
 
-    IMediaMetadata& get( IMedia::MetadataType type ) const;
-    bool set( IMedia::MetadataType type, const std::string& value );
-    bool set( IMedia::MetadataType type, int64_t value );
+    IMetadata& get( uint32_t type ) const;
+    bool set( uint32_t type, const std::string& value );
+    bool set( uint32_t type, int64_t value );
+
+    static void unset( sqlite::Connection* dbConn, IMetadata::EntityType entityType, uint32_t type );
 
     static void createTable( sqlite::Connection* connection );
 
 private:
-    class Record : public IMediaMetadata
+    class Record : public IMetadata
     {
     public:
         virtual ~Record() = default;
-        Record( IMedia::MetadataType t, std::string v );
-        Record( IMedia::MetadataType t );
+        Record( uint32_t t, std::string v );
+        Record( uint32_t t );
         virtual bool isSet() const override;
         virtual int64_t integer() const override;
         virtual const std::string& str() const override;
         void set( const std::string& value );
 
     private:
-        IMedia::MetadataType m_type;
+        uint32_t m_type;
         std::string m_value;
         bool m_isSet;
 
-        friend MediaMetadata;
+        friend Metadata;
     };
 
 private:
     MediaLibraryPtr m_ml;
+    IMetadata::EntityType m_entityType;
     uint32_t m_nbMeta;
     int64_t m_entityId;
     mutable std::vector<Record> m_records;

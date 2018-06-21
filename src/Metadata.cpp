@@ -33,44 +33,45 @@
 namespace medialibrary
 {
 
-const std::string policy::MediaMetadataTable::Name = "MediaMetadata";
+const std::string policy::MetadataTable::Name = "MediaMetadata";
 
-MediaMetadata::Record::Record( IMedia::MetadataType t, std::string v )
+Metadata::Record::Record( uint32_t t, std::string v )
     : m_type( t )
     , m_value( std::move( v ) )
     , m_isSet( true )
 {
 }
 
-MediaMetadata::Record::Record( IMedia::MetadataType t )
+Metadata::Record::Record( uint32_t t )
     : m_type( t )
     , m_isSet( false )
 {
 }
 
-bool MediaMetadata::Record::isSet() const
+bool Metadata::Record::isSet() const
 {
     return m_isSet;
 }
 
-int64_t MediaMetadata::Record::integer() const
+int64_t Metadata::Record::integer() const
 {
     return atoll( m_value.c_str() );
 }
 
-const std::string& MediaMetadata::Record::str() const
+const std::string& Metadata::Record::str() const
 {
     return m_value;
 }
 
-MediaMetadata::MediaMetadata( MediaLibraryPtr ml )
+Metadata::Metadata(MediaLibraryPtr ml , IMetadata::EntityType entityType)
     : m_ml( ml )
+    , m_entityType( entityType )
     , m_nbMeta( 0 )
     , m_entityId( 0 )
 {
 }
 
-void MediaMetadata::init( int64_t entityId, uint32_t nbMeta )
+void Metadata::init( int64_t entityId, uint32_t nbMeta )
 {
     if ( isReady() == true )
         return;
@@ -82,26 +83,27 @@ void MediaMetadata::init( int64_t entityId, uint32_t nbMeta )
     // to another IMediaMetadata held by another thread.
     // This guarantees the vector will not grow afterward.
     m_records.reserve( m_nbMeta );
-    static const std::string req = "SELECT * FROM " + policy::MediaMetadataTable::Name +
-            " WHERE id_media = ?";
+    static const std::string req = "SELECT * FROM " + policy::MetadataTable::Name +
+            " WHERE id_media = ? AND entity_type = ?";
     auto conn = m_ml->getConn();
     auto ctx = conn->acquireReadContext();
     sqlite::Statement stmt( conn->handle(), req );
-    stmt.execute( m_entityId );
+    stmt.execute( m_entityId, m_entityType );
     for ( sqlite::Row row = stmt.row(); row != nullptr; row = stmt.row() )
     {
         assert( row.load<int64_t>( 0 ) == m_entityId );
-        m_records.emplace_back( row.load<decltype(Record::m_type)>( 1 ),
-                          row.load<decltype(Record::m_value)>( 2 ) );
+        assert( row.load<IMetadata::EntityType>( 1 ) == m_entityType );
+        m_records.emplace_back( row.load<decltype(Record::m_type)>( 2 ),
+                          row.load<decltype(Record::m_value)>( 3 ) );
     }
 }
 
-bool MediaMetadata::isReady() const
+bool Metadata::isReady() const
 {
     return m_nbMeta != 0;
 }
 
-IMediaMetadata&MediaMetadata::get( IMedia::MetadataType type ) const
+IMetadata& Metadata::get( uint32_t type ) const
 {
     assert( isReady() == true );
 
@@ -118,7 +120,7 @@ IMediaMetadata&MediaMetadata::get( IMedia::MetadataType type ) const
     return *it;
 }
 
-bool MediaMetadata::set( IMedia::MetadataType type, const std::string& value )
+bool Metadata::set( uint32_t type, const std::string& value )
 {
     assert( isReady() == true );
 
@@ -131,9 +133,10 @@ bool MediaMetadata::set( IMedia::MetadataType type, const std::string& value )
         m_records.emplace_back( type, value );
     try
     {
-        static const std::string req = "INSERT OR REPLACE INTO " + policy::MediaMetadataTable::Name +
-                "(id_media, type, value) VALUES(?, ?, ?)";
-        return sqlite::Tools::executeInsert( m_ml->getConn(), req, m_entityId, type, value );
+        static const std::string req = "INSERT OR REPLACE INTO " + policy::MetadataTable::Name +
+                "(id_media, entity_type, type, value) VALUES(?, ?, ?, ?)";
+        return sqlite::Tools::executeInsert( m_ml->getConn(), req, m_entityId, m_entityType,
+                                             type, value );
     }
     catch ( const sqlite::errors::Generic& ex )
     {
@@ -142,16 +145,24 @@ bool MediaMetadata::set( IMedia::MetadataType type, const std::string& value )
     }
 }
 
-bool MediaMetadata::set( IMedia::MetadataType type, int64_t value )
+bool Metadata::set( uint32_t type, int64_t value )
 {
     auto str = std::to_string( value );
     return set( type, str );
 }
 
-void MediaMetadata::createTable(sqlite::Connection* connection)
+void Metadata::unset( sqlite::Connection* dbConn, IMetadata::EntityType entityType, uint32_t type )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::MediaMetadataTable::Name + "("
+    static const std::string req = "DELETE FROM " + policy::MetadataTable::Name +
+            " WHERE entity_type = ? AND type = ? ";
+    sqlite::Tools::executeDelete( dbConn, req, entityType, type );
+}
+
+void Metadata::createTable(sqlite::Connection* connection)
+{
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::MetadataTable::Name + "("
             "id_media INTEGER,"
+            "entity_type INTEGER,"
             "type INTEGER,"
             "value TEXT,"
             "PRIMARY KEY (id_media, type)"
@@ -159,7 +170,7 @@ void MediaMetadata::createTable(sqlite::Connection* connection)
     sqlite::Tools::executeRequest( connection, req );
 }
 
-void MediaMetadata::Record::set( const std::string& value )
+void Metadata::Record::set( const std::string& value )
 {
     m_value = value;
     m_isSet = true;
