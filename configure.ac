@@ -1,5 +1,5 @@
 m4_define([MEDIALIB_MAJOR], [0])
-m4_define([MEDIALIB_MINOR], [2])
+m4_define([MEDIALIB_MINOR], [4])
 m4_define([MEDIALIB_MICRO], [0])
 
 AC_COPYRIGHT([Copyright 2014-2017 Hugo Beauzée-Luyssen - VideoLabs - VideoLAN])
