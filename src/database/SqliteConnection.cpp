@@ -88,6 +88,11 @@ Connection::Handle Connection::handle()
         // would result from a recursive call and a deadlock from here.
         setPragma( dbConnection, "foreign_keys", "1" );
         setPragma( dbConnection, "recursive_triggers", "1" );
+#ifdef __ANDROID__
+        // https://github.com/mozilla/mentat/issues/505
+        // Should solve `Failed to run request <DELETE FROM File WHERE id_file = ?>: disk I/O error(6410)`
+        setPragma( dbConnection, "temp_store", "2" );
+#endif
 
         m_conns.emplace( compat::this_thread::get_id(), std::move( dbConn ) );
         sqlite3_update_hook( dbConnection, &updateHook, this );
