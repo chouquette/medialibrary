@@ -41,27 +41,20 @@ Movie::Movie(MediaLibraryPtr ml, sqlite::Row& row )
 {
     row >> m_id
         >> m_mediaId
-        >> m_title
         >> m_summary
         >> m_imdbId;
 }
 
-Movie::Movie( MediaLibraryPtr ml, int64_t mediaId, const std::string& title )
+Movie::Movie( MediaLibraryPtr ml, int64_t mediaId )
     : m_ml( ml )
     , m_id( 0 )
     , m_mediaId( mediaId )
-    , m_title( title )
 {
 }
 
 int64_t Movie::id() const
 {
     return m_id;
-}
-
-const std::string&Movie::title() const
-{
-    return m_title;
 }
 
 const std::string& Movie::shortSummary() const
@@ -107,7 +100,6 @@ void Movie::createTable( sqlite::Connection* dbConnection )
             + "("
                 "id_movie INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "media_id UNSIGNED INTEGER NOT NULL,"
-                "title TEXT UNIQUE ON CONFLICT FAIL,"
                 "summary TEXT,"
                 "imdb_id TEXT,"
                 "FOREIGN KEY(media_id) REFERENCES " + policy::MediaTable::Name
@@ -119,12 +111,12 @@ void Movie::createTable( sqlite::Connection* dbConnection )
     sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
 
-std::shared_ptr<Movie> Movie::create(MediaLibraryPtr ml, int64_t mediaId, const std::string& title )
+std::shared_ptr<Movie> Movie::create(MediaLibraryPtr ml, int64_t mediaId )
 {
-    auto movie = std::make_shared<Movie>( ml, mediaId, title );
+    auto movie = std::make_shared<Movie>( ml, mediaId );
     static const std::string req = "INSERT INTO " + policy::MovieTable::Name
-            + "(media_id, title) VALUES(?, ?)";
-    if ( insert( ml, movie, req, mediaId, title ) == false )
+            + "(media_id) VALUES(?)";
+    if ( insert( ml, movie, req, mediaId ) == false )
         return nullptr;
     return movie;
 }

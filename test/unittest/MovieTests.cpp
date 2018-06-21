@@ -37,15 +37,16 @@ class Movies : public Tests
 TEST_F( Movies, Create )
 {
     auto media = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv" ) );
-    auto m = ml->createMovie( *media, "movie" );
+    auto m = ml->createMovie( *media );
     ASSERT_NE( m, nullptr );
-    ASSERT_EQ( m->title(), "movie" );
 }
 
 TEST_F( Movies, Fetch )
 {
     auto media = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv" ) );
-    auto m = ml->createMovie( *media, "movie" );
+    media->setTitle( "movie" );
+    // Setting the movie during ml::createMovie will save the media, thus saving the title.
+    auto m = ml->createMovie( *media );
     auto m2 = ml->movie( "movie" );
 
     ASSERT_EQ( m, m2 );
@@ -54,13 +55,13 @@ TEST_F( Movies, Fetch )
 
     m2 = ml->movie( "movie" );
     ASSERT_NE( m2, nullptr );
-    ASSERT_EQ( m2->title(), "movie" );
 }
 
 TEST_F( Movies, SetShortSummary )
 {
     auto media = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv" ) );
-    auto m = ml->createMovie( *media, "movie" );
+    media->setTitle( "movie" );
+    auto m = ml->createMovie( *media );
 
     ASSERT_EQ( m->shortSummary().length(), 0u );
     m->setShortSummary( "great movie" );
@@ -75,7 +76,8 @@ TEST_F( Movies, SetShortSummary )
 TEST_F( Movies, SetImdbId )
 {
     auto media = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv" ) );
-    auto m = ml->createMovie( *media, "movie" );
+    media->setTitle( "movie" );
+    auto m = ml->createMovie( *media );
 
     ASSERT_EQ( m->imdbId().length(), 0u );
     m->setImdbId( "id" );
@@ -92,7 +94,7 @@ TEST_F( Movies, AssignToFile )
     auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.avi" ) );
     ASSERT_EQ( f->movie(), nullptr );
 
-    auto m = ml->createMovie( *f, "movie" );
+    auto m = ml->createMovie( *f );
 
     ASSERT_EQ( f->movie(), m );
 
@@ -101,5 +103,4 @@ TEST_F( Movies, AssignToFile )
     auto f2 = ml->media( f->id() );
     auto m2 = f2->movie();
     ASSERT_NE( m2, nullptr );
-    ASSERT_EQ( m2->title(), "movie" );
 }

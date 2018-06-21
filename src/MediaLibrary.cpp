@@ -583,14 +583,17 @@ MoviePtr MediaLibrary::movie( int64_t id ) const
 
 MoviePtr MediaLibrary::movie( const std::string& title ) const
 {
-    static const std::string req = "SELECT * FROM " + policy::MovieTable::Name
+    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
             + " WHERE title = ?";
-    return Movie::fetch( this, req, title );
+    auto media = Media::fetch( this, req, title );
+    if ( media == nullptr || media->subType() != IMedia::SubType::Movie )
+        return nullptr;
+    return media->movie();
 }
 
-std::shared_ptr<Movie> MediaLibrary::createMovie( Media& media, const std::string& title )
+std::shared_ptr<Movie> MediaLibrary::createMovie( Media& media )
 {
-    auto movie = Movie::create( this, media.id(), title );
+    auto movie = Movie::create( this, media.id() );
     media.setMovie( movie );
     media.save();
     return movie;

@@ -99,7 +99,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         virtual MoviePtr movie( int64_t id ) const override;
         virtual MoviePtr movie( const std::string& title ) const override;
-        std::shared_ptr<Movie> createMovie( Media& media, const std::string& title );
+        std::shared_ptr<Movie> createMovie( Media& media );
 
         virtual ArtistPtr artist( int64_t id ) const override;
         ArtistPtr artist( const std::string& name );

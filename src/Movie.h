@@ -46,10 +46,9 @@ class Movie : public IMovie, public DatabaseHelpers<Movie, policy::MovieTable>
 {
     public:
         Movie( MediaLibraryPtr ml, sqlite::Row& row );
-        Movie( MediaLibraryPtr ml, int64_t mediaId, const std::string& title );
+        Movie( MediaLibraryPtr ml, int64_t mediaId );
 
         virtual int64_t id() const override;
-        virtual const std::string& title() const override;
         virtual const std::string& shortSummary() const override;
         bool setShortSummary(const std::string& summary);
         virtual const std::string& imdbId() const override;
@@ -57,14 +56,13 @@ class Movie : public IMovie, public DatabaseHelpers<Movie, policy::MovieTable>
         virtual Query<IMedia> media() override;
 
         static void createTable( sqlite::Connection* dbConnection );
-        static std::shared_ptr<Movie> create( MediaLibraryPtr ml, int64_t mediaId, const std::string& title );
+        static std::shared_ptr<Movie> create( MediaLibraryPtr ml, int64_t mediaId );
         static MoviePtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
 
     private:
         MediaLibraryPtr m_ml;
         int64_t m_id;
         int64_t m_mediaId;
-        std::string m_title;
         std::string m_summary;
         std::string m_imdbId;
 
