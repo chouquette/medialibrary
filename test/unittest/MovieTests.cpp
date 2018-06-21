@@ -47,13 +47,13 @@ TEST_F( Movies, Fetch )
     media->setTitle( "movie" );
     // Setting the movie during ml::createMovie will save the media, thus saving the title.
     auto m = ml->createMovie( *media );
-    auto m2 = ml->movie( "movie" );
+    auto m2 = ml->movie( m->id() );
 
     ASSERT_EQ( m, m2 );
 
     Reload();
 
-    m2 = ml->movie( "movie" );
+    m2 = ml->movie( m->id() );
     ASSERT_NE( m2, nullptr );
 }
 
@@ -69,7 +69,7 @@ TEST_F( Movies, SetShortSummary )
 
     Reload();
 
-    auto m2 = ml->movie( "movie" );
+    auto m2 = ml->movie( m->id() );
     ASSERT_EQ( m2->shortSummary(), "great movie" );
 }
 
@@ -85,7 +85,7 @@ TEST_F( Movies, SetImdbId )
 
     Reload();
 
-    auto m2 = ml->movie( "movie" );
+    auto m2 = ml->movie( m->id() );
     ASSERT_EQ( m2->imdbId(), "id" );
 }
 

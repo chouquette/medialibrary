@@ -390,12 +390,22 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
 
         if ( showName.length() != 0 )
         {
-            auto show = m_ml->show( showName );
-            if ( show == nullptr )
+            const std::string req = "SELECT * FROM " + policy::ShowTable::Name +
+                    " WHERE name = ?";
+
+            auto shows = Show::fetchAll<Show>( m_ml, req, showName );
+            std::shared_ptr<Show> show;
+            if ( shows.empty() == true )
             {
                 show = m_ml->createShow( showName );
                 if ( show == nullptr )
                     return false;
+            }
+            else
+            {
+                //FIXME: Discriminate amongst shows
+                LOG_WARN( "Defaulting to first matching show" );
+                show = shows[0];
             }
             auto episode = toInt( item, IItem::Metadata::Episode );
             if ( episode != 0 )

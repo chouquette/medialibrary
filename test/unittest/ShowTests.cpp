@@ -40,7 +40,7 @@ TEST_F( Shows, Create )
     auto s = ml->createShow( "show" );
     ASSERT_NE( s, nullptr );
 
-    auto s2 = ml->show( "show" );
+    auto s2 = ml->show( s->id() );
     ASSERT_EQ( s, s2 );
 }
 
@@ -51,7 +51,7 @@ TEST_F( Shows, Fetch )
     // Clear the cache
     Reload();
 
-    auto s2 = ml->show( "show" );
+    auto s2 = ml->show( s->id() );
     // The shared pointers are expected to point to different instances
     ASSERT_NE( s, s2 );
 
@@ -67,7 +67,7 @@ TEST_F( Shows, SetReleaseDate )
 
     Reload();
 
-    auto s2 = ml->show( "show" );
+    auto s2 = ml->show( s->id() );
     ASSERT_EQ( s->releaseDate(), s2->releaseDate() );
 }
 
@@ -81,7 +81,7 @@ TEST_F( Shows, SetShortSummary )
 
     Reload();
 
-    auto s2 = ml->show( "show" );
+    auto s2 = ml->show( s->id() );
     ASSERT_EQ( s->shortSummary(), s2->shortSummary() );
 }
 
@@ -94,7 +94,7 @@ TEST_F( Shows, SetArtworkMrl )
 
     Reload();
 
-    auto s2 = ml->show( "show" );
+    auto s2 = ml->show( s->id() );
     ASSERT_EQ( s->artworkMrl(), s2->artworkMrl() );
 }
 
@@ -107,7 +107,7 @@ TEST_F( Shows, SetTvdbId )
 
     Reload();
 
-    auto s2 = ml->show( "show" );
+    auto s2 = ml->show( s->id() );
     ASSERT_EQ( s->tvdbId(), s2->tvdbId() );
 }
 
@@ -162,7 +162,7 @@ TEST_F( Shows, SetEpisodeSeasonNumber )
 
     Reload();
 
-    show = std::static_pointer_cast<Show>( ml->show( "show" ) );
+    show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
     auto episodes = show->episodes()->all();
     ASSERT_EQ( episodes[0]->seasonNumber(), e->seasonNumber() );
 }
@@ -178,7 +178,7 @@ TEST_F( Shows, SetEpisodeSummary )
 
     Reload();
 
-    show = std::static_pointer_cast<Show>( ml->show( "show" ) );
+    show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
     auto episodes = show->episodes()->all();
     ASSERT_EQ( episodes[0]->shortSummary(), e->shortSummary() );
 }
@@ -194,7 +194,7 @@ TEST_F( Shows, SetEpisodeTvdbId )
 
     Reload();
 
-    show = std::static_pointer_cast<Show>( ml->show( "show" ) );
+    show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
     auto episodes = show->episodes()->all();
     ASSERT_EQ( episodes[0]->tvdbId(), e->tvdbId() );
 }

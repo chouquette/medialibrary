@@ -71,7 +71,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual void setVerbosity( LogLevel v ) override;
 
         virtual MediaPtr media( int64_t mediaId ) const override;
-        virtual MediaPtr media( const std::string& path ) const override;
+        virtual MediaPtr media( const std::string& mrl ) const override;
         virtual MediaPtr addMedia( const std::string& mrl ) override;
         virtual Query<IMedia> audioFiles( const QueryParameters* params ) const override;
         virtual Query<IMedia> videoFiles( const QueryParameters* params ) const override;
@@ -94,11 +94,9 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual GenrePtr genre( int64_t id ) const override;
 
         virtual ShowPtr show( int64_t id ) const override;
-        virtual ShowPtr show( const std::string& name ) const override;
         std::shared_ptr<Show> createShow( const std::string& name );
 
         virtual MoviePtr movie( int64_t id ) const override;
-        virtual MoviePtr movie( const std::string& title ) const override;
         std::shared_ptr<Movie> createMovie( Media& media );
 
         virtual ArtistPtr artist( int64_t id ) const override;

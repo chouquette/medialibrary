@@ -564,13 +564,6 @@ ShowPtr MediaLibrary::show( int64_t id ) const
     return Show::fetch( this, id );
 }
 
-ShowPtr MediaLibrary::show( const std::string& name ) const
-{
-    static const std::string req = "SELECT * FROM " + policy::ShowTable::Name
-            + " WHERE name = ?";
-    return Show::fetch( this, req, name );
-}
-
 std::shared_ptr<Show> MediaLibrary::createShow( const std::string& name )
 {
     return Show::create( this, name );
@@ -579,16 +572,6 @@ std::shared_ptr<Show> MediaLibrary::createShow( const std::string& name )
 MoviePtr MediaLibrary::movie( int64_t id ) const
 {
     return Movie::fetch( this, id );
-}
-
-MoviePtr MediaLibrary::movie( const std::string& title ) const
-{
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name
-            + " WHERE title = ?";
-    auto media = Media::fetch( this, req, title );
-    if ( media == nullptr || media->subType() != IMedia::SubType::Movie )
-        return nullptr;
-    return media->movie();
 }
 
 std::shared_ptr<Movie> MediaLibrary::createMovie( Media& media )
