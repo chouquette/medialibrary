@@ -86,8 +86,8 @@ Connection::Handle Connection::handle()
         sqlite3_busy_timeout( dbConnection, 500 );
         // Don't use public wrapper, they need to be able to call getConn, which
         // would result from a recursive call and a deadlock from here.
-        setPragmaEnabled( dbConnection, "foreign_keys", true );
-        setPragmaEnabled( dbConnection, "recursive_triggers", true );
+        setPragma( dbConnection, "foreign_keys", "1" );
+        setPragma( dbConnection, "recursive_triggers", "1" );
 
         m_conns.emplace( compat::this_thread::get_id(), std::move( dbConn ) );
         sqlite3_update_hook( dbConnection, &updateHook, this );
@@ -112,12 +112,12 @@ Connection::WriteContext Connection::acquireWriteContext()
     return WriteContext{ m_writeLock };
 }
 
-void Connection::setPragmaEnabled( Handle conn,
-                                         const std::string& pragmaName,
-                                         bool value )
+void Connection::setPragma( Connection::Handle conn, const std::string& pragmaName,
+                            const std::string& value )
+
 {
     std::string reqBase = std::string{ "PRAGMA " } + pragmaName;
-    std::string reqSet = reqBase + " = " + ( value ? "ON" : "OFF" );
+    std::string reqSet = reqBase + " = " + value;
 
     sqlite::Statement stmt( conn, reqSet );
     stmt.execute();
@@ -127,7 +127,7 @@ void Connection::setPragmaEnabled( Handle conn,
     sqlite::Statement stmtCheck( conn, reqBase );
     stmtCheck.execute();
     auto resultRow = stmtCheck.row();
-    bool resultValue;
+    std::string resultValue;
     resultRow >> resultValue;
     if( resultValue != value )
         throw std::runtime_error( "PRAGMA " + pragmaName + " value mismatch" );
@@ -140,7 +140,7 @@ void Connection::setForeignKeyEnabled( bool value )
     // Changing this pragma during a transaction is a no-op (silently ignored by
     // sqlite), so ensure we're doing something usefull here:
     assert( sqlite::Transaction::transactionInProgress() == false );
-    setPragmaEnabled( handle(), "foreign_keys", value );
+    setPragma( handle(), "foreign_keys", value ? "1" : "0" );
 }
 
 void Connection::setRecursiveTriggersEnabled( bool value )
@@ -157,7 +157,7 @@ void Connection::setRecursiveTriggersEnabled( bool value )
     auto h = handle();
     sqlite::Statement::FlushConnectionStatementCache( h );
 
-    setPragmaEnabled( h, "recursive_triggers", value );
+    setPragma( h, "recursive_triggers", value == true ? "1" : "0" );
 }
 
 void Connection::registerUpdateHook( const std::string& table, Connection::UpdateHookCb cb )

@@ -102,7 +102,8 @@ private:
     Connection& operator=( const Connection& ) = delete;
     Connection& operator=( Connection&& ) = delete;
 
-    void setPragmaEnabled( Handle conn, const std::string& pragmaName, bool value );
+    void setPragma( Handle conn, const std::string& pragmaName,
+                    const std::string& value );
     static void updateHook( void* data, int reason, const char* database,
                             const char* table, sqlite_int64 rowId );
 
