@@ -31,6 +31,7 @@
 #include "database/DatabaseHelpers.h"
 #include "utils/Cache.h"
 #include "medialibrary/IMetadata.h"
+#include "Metadata.h"
 
 namespace medialibrary
 {
@@ -51,33 +52,10 @@ struct MediaTable
     static int64_t Media::*const PrimaryKey;
 };
 
-struct MediaMetadataTable
-{
-    static const std::string Name;
-};
 }
 
 class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
 {
-    class MediaMetadata : public IMediaMetadata
-    {
-    public:
-        MediaMetadata(MetadataType t, std::string v) : m_type( t ), m_value( std::move( v ) ), m_isSet( true ) {}
-        MediaMetadata(MetadataType t) : m_type( t ), m_isSet( false ) {}
-        virtual bool isSet() const override;
-        virtual int64_t integer() const override;
-        virtual const std::string& str() const override;
-
-    private:
-        void set( const std::string& value );
-
-    private:
-        MetadataType m_type;
-        std::string m_value;
-        bool m_isSet;
-        friend class Media;
-    };
-
     public:
         // Those should be private, however the standard states that the expression
         // ::new (pv) T(std::forward(args)...)
@@ -181,7 +159,7 @@ private:
         mutable Cache<ShowEpisodePtr> m_showEpisode;
         mutable Cache<MoviePtr> m_movie;
         mutable Cache<std::vector<FilePtr>> m_files;
-        mutable Cache<std::vector<MediaMetadata>> m_metadata;
+        mutable MediaMetadata m_metadata;
         mutable Cache<std::shared_ptr<Thumbnail>> m_thumbnail;
         bool m_changed;
 

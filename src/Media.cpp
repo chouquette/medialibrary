@@ -57,10 +57,9 @@ const std::string policy::MediaTable::Name = "Media";
 const std::string policy::MediaTable::PrimaryKeyColumn = "id_media";
 int64_t Media::* const policy::MediaTable::PrimaryKey = &Media::m_id;
 
-const std::string policy::MediaMetadataTable::Name = "MediaMetadata";
-
 Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
+    , m_metadata( m_ml )
     , m_changed( false )
 {
     row >> m_id
@@ -96,6 +95,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
     , m_filename( title )
     , m_isFavorite( false )
     , m_isPresent( true )
+    , m_metadata( m_ml )
     , m_changed( false )
 {
 }
@@ -300,72 +300,23 @@ unsigned int Media::releaseDate() const
 
 const IMediaMetadata& Media::metadata( IMedia::MetadataType type ) const
 {
-    auto lock = m_metadata.lock();
-    if ( m_metadata.isCached() == false )
-    {
-        std::vector<MediaMetadata> res;
-        // Reserve the space for all meta to avoid a race condition where 2 threads
-        // would cache different meta, invalidating the potential reference
-        // to another IMediaMetadata held by another thread.
-        // This guarantees the vector will not grow afterward.
-        res.reserve( IMedia::NbMeta );
-        static const std::string req = "SELECT * FROM " + policy::MediaMetadataTable::Name +
-                " WHERE id_media = ?";
-        auto conn = m_ml->getConn();
-        auto ctx = conn->acquireReadContext();
-        sqlite::Statement stmt( conn->handle(), req );
-        stmt.execute( m_id );
-        for ( sqlite::Row row = stmt.row(); row != nullptr; row = stmt.row() )
-        {
-            assert( row.load<int64_t>( 0 ) == m_id );
-            res.emplace_back( row.load<decltype(MediaMetadata::m_type)>( 1 ),
-                              row.load<decltype(MediaMetadata::m_value)>( 2 ) );
-        }
-        m_metadata = std::move( res );
-    }
-    auto it = std::find_if( begin( m_metadata.get() ), end( m_metadata.get() ), [type](const MediaMetadata& m ) {
-        return m.m_type == type;
-    });
-    if ( it == end( m_metadata.get() ) )
-    {
-        m_metadata.get().emplace_back( type );
-        return *m_metadata.get().rbegin();
-    }
-    return (*it);
+    if ( m_metadata.isReady() == false )
+        m_metadata.init( m_id, IMedia::NbMeta );
+    return m_metadata.get( type );
 }
 
 bool Media::setMetadata( IMedia::MetadataType type, const std::string& value )
 {
-    {
-        auto lock = m_metadata.lock();
-        if ( m_metadata.isCached() == true )
-        {
-            auto it = std::find_if( begin( m_metadata.get() ), end( m_metadata.get() ), [type](const MediaMetadata& m ) {
-                return m.m_type == type;
-            });
-            if ( it != end( m_metadata.get() ) )
-                (*it).set( value );
-            else
-                m_metadata.get().emplace_back( type, value );
-        }
-    }
-    try
-    {
-        static const std::string req = "INSERT OR REPLACE INTO " + policy::MediaMetadataTable::Name +
-                "(id_media, type, value) VALUES(?, ?, ?)";
-        return sqlite::Tools::executeInsert( m_ml->getConn(), req, m_id, type, value );
-    }
-    catch ( const sqlite::errors::Generic& ex )
-    {
-        LOG_ERROR( "Failed to update media metadata: ", ex.what() );
-        return false;
-    }
+    if ( m_metadata.isReady() == false )
+        m_metadata.init( m_id, IMedia::NbMeta );
+    return m_metadata.set( type, value );
 }
 
 bool Media::setMetadata( IMedia::MetadataType type, int64_t value )
 {
-    auto str = std::to_string( value );
-    return setMetadata( type, str );
+    if ( m_metadata.isReady() == false )
+        m_metadata.init( m_id, IMedia::NbMeta );
+    return m_metadata.set( type, value );
 }
 
 void Media::setReleaseDate( unsigned int date )
@@ -604,15 +555,8 @@ void Media::createTable( sqlite::Connection* connection )
                 "title,"
                 "labels"
             ")";
-    const std::string metadataReq = "CREATE TABLE IF NOT EXISTS " + policy::MediaMetadataTable::Name + "("
-            "id_media INTEGER,"
-            "type INTEGER,"
-            "value TEXT,"
-            "PRIMARY KEY (id_media, type)"
-            ")";
     sqlite::Tools::executeRequest( connection, req );
     sqlite::Tools::executeRequest( connection, vtableReq );
-    sqlite::Tools::executeRequest( connection, metadataReq );
 }
 
 void Media::createTriggers( sqlite::Connection* connection )
@@ -757,27 +701,6 @@ void Media::clearHistory( MediaLibraryPtr ml )
     clear();
     sqlite::Tools::executeUpdate( dbConn, req );
     sqlite::Tools::executeDelete( dbConn, flushProgress, IMedia::MetadataType::Progress );
-}
-
-bool Media::MediaMetadata::isSet() const
-{
-    return m_isSet;
-}
-
-int64_t Media::MediaMetadata::integer() const
-{
-    return atoll( m_value.c_str() );
-}
-
-const std::string& Media::MediaMetadata::str() const
-{
-    return m_value;
-}
-
-void Media::MediaMetadata::set( const std::string& value )
-{
-    m_value = value;
-    m_isSet = true;
 }
 
 }

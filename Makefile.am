@@ -79,6 +79,7 @@ libmedialibrary_la_SOURCES = \
 	src/Thumbnail.cpp \
 	src/ShowEpisode.cpp \
 	src/VideoTrack.cpp \
+	src/Metadata.cpp \
 	src/database/SqliteConnection.cpp \
 	src/database/SqliteTools.cpp \
 	src/database/SqliteTransaction.cpp \
@@ -162,6 +163,7 @@ noinst_HEADERS = \
 	src/utils/SWMRLock.h \
 	src/utils/Url.h \
 	src/VideoTrack.h \
+	src/Metadata.h \
 	src/compat/Thread.h \
 	src/compat/Mutex.h \
 	src/compat/ConditionVariable.h \

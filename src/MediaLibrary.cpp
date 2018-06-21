@@ -58,6 +58,7 @@
 #include "utils/Filename.h"
 #include "utils/Url.h"
 #include "VideoTrack.h"
+#include "Metadata.h"
 
 // Discoverers:
 #include "discoverer/FsDiscoverer.h"
@@ -168,6 +169,7 @@ void MediaLibrary::createAllTables()
     History::createTable( m_dbConnection.get() );
     Settings::createTable( m_dbConnection.get() );
     parser::Task::createTable( m_dbConnection.get() );
+    MediaMetadata::createTable( m_dbConnection.get() );
 }
 
 void MediaLibrary::createAllTriggers()
