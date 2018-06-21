@@ -62,7 +62,7 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
         bool setArtworkMrl( const std::string& artworkMrl );
         virtual const std::string& tvdbId() const override;
         bool setTvdbId( const std::string& summary );
-        std::shared_ptr<ShowEpisode> addEpisode( Media& media, const std::string& title, unsigned int episodeNumber );
+        std::shared_ptr<ShowEpisode> addEpisode( Media& media, unsigned int episodeNumber );
         virtual Query<IShowEpisode> episodes() const override;
         virtual uint32_t nbSeasons() const override;
         virtual uint32_t nbEpisodes() const override;

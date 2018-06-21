@@ -129,9 +129,9 @@ bool Show::setTvdbId( const std::string& tvdbId )
     return true;
 }
 
-std::shared_ptr<ShowEpisode> Show::addEpisode( Media& media, const std::string& title, unsigned int episodeNumber)
+std::shared_ptr<ShowEpisode> Show::addEpisode( Media& media, unsigned int episodeNumber)
 {
-    auto episode = ShowEpisode::create( m_ml, media.id(), title, episodeNumber, m_id );
+    auto episode = ShowEpisode::create( m_ml, media.id(), episodeNumber, m_id );
     media.setShowEpisode( episode );
     media.save();
     return episode;

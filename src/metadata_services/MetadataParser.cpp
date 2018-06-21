@@ -401,7 +401,7 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
             if ( episode != 0 )
             {
                 std::shared_ptr<Show> s = std::static_pointer_cast<Show>( show );
-                s->addEpisode( *media, title, episode );
+                s->addEpisode( *media, episode );
             }
         }
         else

@@ -43,19 +43,18 @@ ShowEpisode::ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row )
     row >> m_id
         >> m_mediaId
         >> m_episodeNumber
-        >> m_name
         >> m_seasonNumber
         >> m_shortSummary
         >> m_tvdbId
         >> m_showId;
 }
 
-ShowEpisode::ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, const std::string& name, unsigned int episodeNumber, int64_t showId )
+ShowEpisode::ShowEpisode( MediaLibraryPtr ml, int64_t mediaId,
+                          unsigned int episodeNumber, int64_t showId )
     : m_ml( ml )
     , m_id( 0 )
     , m_mediaId( mediaId )
     , m_episodeNumber( episodeNumber )
-    , m_name( name )
     , m_seasonNumber( 0 )
     , m_showId( showId )
 {
@@ -69,11 +68,6 @@ int64_t ShowEpisode::id() const
 unsigned int ShowEpisode::episodeNumber() const
 {
     return m_episodeNumber;
-}
-
-const std::string& ShowEpisode::name() const
-{
-    return m_name;
 }
 
 unsigned int ShowEpisode::seasonNumber() const
@@ -144,7 +138,6 @@ void ShowEpisode::createTable( sqlite::Connection* dbConnection )
                 "id_episode INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "media_id UNSIGNED INTEGER NOT NULL,"
                 "episode_number UNSIGNED INT,"
-                "title TEXT,"
                 "season_number UNSIGNED INT,"
                 "episode_summary TEXT,"
                 "tvdb_id TEXT,"
@@ -160,12 +153,13 @@ void ShowEpisode::createTable( sqlite::Connection* dbConnection )
     sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
 
-std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml, int64_t mediaId, const std::string& title, unsigned int episodeNumber, int64_t showId )
+std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml, int64_t mediaId,
+                                                  unsigned int episodeNumber, int64_t showId )
 {
-    auto episode = std::make_shared<ShowEpisode>( ml, mediaId, title, episodeNumber, showId );
+    auto episode = std::make_shared<ShowEpisode>( ml, mediaId, episodeNumber, showId );
     static const std::string req = "INSERT INTO " + policy::ShowEpisodeTable::Name
-            + "(media_id, episode_number, title, show_id) VALUES(?, ? , ?, ?)";
-    if ( insert( ml, episode, req, mediaId, episodeNumber, title, showId ) == false )
+            + "(media_id, episode_number, show_id) VALUES(?, ?, ?)";
+    if ( insert( ml, episode, req, mediaId, episodeNumber, showId ) == false )
         return nullptr;
     return episode;
 }

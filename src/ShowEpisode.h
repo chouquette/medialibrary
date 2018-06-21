@@ -50,11 +50,10 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, pol
 {
     public:
         ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row );
-        ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, const std::string& name, unsigned int episodeNumber, int64_t showId );
+        ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, unsigned int episodeNumber, int64_t showId );
 
         virtual int64_t id() const override;
         virtual unsigned int episodeNumber() const override;
-        virtual const std::string& name() const override;
         unsigned int seasonNumber() const override;
         bool setSeasonNumber(unsigned int seasonNumber);
         virtual const std::string& shortSummary() const override;
@@ -65,7 +64,7 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, pol
         virtual Query<IMedia> media() override;
 
         static void createTable( sqlite::Connection* dbConnection );
-        static std::shared_ptr<ShowEpisode> create( MediaLibraryPtr ml, int64_t mediaId, const std::string& title, unsigned int episodeNumber, int64_t showId );
+        static std::shared_ptr<ShowEpisode> create( MediaLibraryPtr ml, int64_t mediaId, unsigned int episodeNumber, int64_t showId );
         static ShowEpisodePtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
 
     private:
@@ -73,7 +72,6 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, pol
         int64_t m_id;
         int64_t m_mediaId;
         unsigned int m_episodeNumber;
-        std::string m_name;
         unsigned int m_seasonNumber;
         std::string m_shortSummary;
         std::string m_tvdbId;

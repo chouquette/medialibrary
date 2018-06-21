@@ -119,12 +119,11 @@ TEST_F( Shows, AddEpisode )
 {
     auto show = ml->createShow( "show" );
     auto media = std::static_pointer_cast<Media>( ml->addMedia( "episode.avi" ) );
-    auto e = show->addEpisode( *media, "episode 1", 1 );
+    auto e = show->addEpisode( *media, 1 );
     ASSERT_NE( e, nullptr );
 
     ASSERT_EQ( e->episodeNumber(), 1u );
     ASSERT_EQ( e->show(), show );
-    ASSERT_EQ( e->name(), "episode 1" );
 
     auto episodes = show->episodes()->all();
     ASSERT_EQ( episodes.size(), 1u );
@@ -135,7 +134,7 @@ TEST_F( Shows, FetchShowFromEpisode )
 {
     auto s = ml->createShow( "show" );
     auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.avi" ) );
-    auto e = s->addEpisode( *f, "episode 1", 1 );
+    auto e = s->addEpisode( *f, 1 );
     f->save();
 
     auto e2 = f->showEpisode();
@@ -156,7 +155,7 @@ TEST_F( Shows, SetEpisodeSeasonNumber )
 {
     auto show = ml->createShow( "show" );
     auto media = std::static_pointer_cast<Media>( ml->addMedia( "episode.mkv" ) );
-    auto e = show->addEpisode( *media, "episode 1", 1 );
+    auto e = show->addEpisode( *media, 1 );
     bool res = e->setSeasonNumber( 42 );
     ASSERT_TRUE( res );
     ASSERT_EQ( e->seasonNumber(), 42u );
@@ -172,7 +171,7 @@ TEST_F( Shows, SetEpisodeSummary )
 {
     auto show = ml->createShow( "show" );
     auto media = std::static_pointer_cast<Media>( ml->addMedia( "episode.mkv" ) );
-    auto e = show->addEpisode( *media, "episode 1", 1 );
+    auto e = show->addEpisode( *media, 1 );
     bool res = e->setShortSummary( "Insert spoilers here" );
     ASSERT_TRUE( res );
     ASSERT_EQ( e->shortSummary(), "Insert spoilers here" );
@@ -188,7 +187,7 @@ TEST_F( Shows, SetEpisodeTvdbId )
 {
     auto show = ml->createShow( "show" );
     auto media = std::static_pointer_cast<Media>( ml->addMedia( "episode.mkv" ) );
-    auto e = show->addEpisode( *media, "episode 1", 1 );
+    auto e = show->addEpisode( *media, 1 );
     bool res = e->setTvdbId( "TVDBID" );
     ASSERT_TRUE( res );
     ASSERT_EQ( e->tvdbId(), "TVDBID" );
@@ -210,7 +209,7 @@ TEST_F( Shows, FileSetShowEpisode )
     auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.avi" ) );
     ASSERT_EQ( f->showEpisode(), nullptr );
 
-    auto e = show->addEpisode( *f, "episode 1", 1 );
+    auto e = show->addEpisode( *f, 1 );
 
     ASSERT_EQ( f->showEpisode(), e );
 
@@ -219,6 +218,5 @@ TEST_F( Shows, FileSetShowEpisode )
     f = ml->media( f->id() );
     auto e2 = f->showEpisode();
     ASSERT_NE( e2, nullptr );
-    ASSERT_EQ( e2->name(), "episode 1" );
 }
 
