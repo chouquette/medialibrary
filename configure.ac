@@ -302,6 +302,12 @@ PKG_CHECK_MODULES(SQLITE, sqlite3)
 PKG_CHECK_MODULES(LIBJPEG, libjpeg, [
      have_libjpeg="yes"
      AC_DEFINE(HAVE_JPEG, 1, [Define to 1 if libjpeg is available])
+ ], [
+dnl Falling back to libjpeg.h based detection
+    AC_CHECK_HEADERS(jpeglib.h, [
+        have_libjpeg="yes"
+        AC_SUBST(LIBJPEG_LIBS, "-ljpeg")
+    ])
  ])
 AM_CONDITIONAL([HAVE_LIBJPEG], [test "${have_libjpeg}" = "yes"])
 
