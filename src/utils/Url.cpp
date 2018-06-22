@@ -34,7 +34,11 @@ namespace
 {
 inline bool isSafe( char c )
 {
-    return strchr( ".-_~/()&!$*+,;='@:", c ) != NULL;
+    return strchr( ".-_~/()&!$*+,;='@:"
+#ifdef _WIN32
+                    "\\"
+#endif
+                   , c ) != NULL;
 }
 }
 
