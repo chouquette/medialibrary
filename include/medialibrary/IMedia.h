@@ -156,6 +156,7 @@ class IMedia
         ///
         virtual bool setMetadata( MetadataType type, const std::string& value ) = 0;
         virtual bool setMetadata( MetadataType type, int64_t value ) = 0;
+        virtual bool unsetMetadata( MetadataType type ) = 0;
 };
 
 }

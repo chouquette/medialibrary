@@ -322,6 +322,14 @@ bool Media::setMetadata( IMedia::MetadataType type, int64_t value )
     return m_metadata.set( static_cast<MDType>( type ), value );
 }
 
+bool Media::unsetMetadata(IMedia::MetadataType type)
+{
+    using MDType = typename std::underlying_type<IMedia::MetadataType>::type;
+    if ( m_metadata.isReady() == false )
+        m_metadata.init( m_id, IMedia::NbMeta );
+    return m_metadata.unset( static_cast<MDType>( type ) );
+}
+
 void Media::setReleaseDate( unsigned int date )
 {
     if ( m_releaseDate == date )

@@ -113,6 +113,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual const IMetadata& metadata( MetadataType type ) const override;
         virtual bool setMetadata( MetadataType type, const std::string& value ) override;
         virtual bool setMetadata( MetadataType type, int64_t value ) override;
+        virtual bool unsetMetadata( MetadataType type ) override;
 
         void setReleaseDate( unsigned int date );
         bool save();

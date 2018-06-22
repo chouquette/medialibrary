@@ -542,6 +542,31 @@ TEST_F( Medias, MetadataOverride )
     ASSERT_EQ( "otter", md.str() );
 }
 
+TEST_F( Medias, MetadataUnset )
+{
+    auto m = ml->addMedia( "media.mp3" );
+    auto res = m->unsetMetadata( Media::MetadataType::ApplicationSpecific );
+    ASSERT_TRUE( res );
+
+    res = m->setMetadata( Media::MetadataType::ApplicationSpecific, "otters" );
+    ASSERT_TRUE( res );
+
+    auto& md = m->metadata( Media::MetadataType::ApplicationSpecific );
+    ASSERT_TRUE( md.isSet() );
+    ASSERT_EQ( "otters", md.str() );
+
+    res = m->unsetMetadata( Media::MetadataType::ApplicationSpecific );
+    ASSERT_TRUE( res );
+
+    ASSERT_FALSE( md.isSet() );
+
+    Reload();
+
+    m = ml->media( m->id() );
+    auto& md2 = m->metadata( Media::MetadataType::ApplicationSpecific );
+    ASSERT_FALSE( md2.isSet() );
+}
+
 TEST_F( Medias, ExternalMrl )
 {
     auto m = ml->addMedia( "https://foo.bar/sea-otters.mkv" );
