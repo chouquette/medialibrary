@@ -188,7 +188,7 @@ void Metadata::createTable(sqlite::Connection* connection)
             "entity_type INTEGER,"
             "type INTEGER,"
             "value TEXT,"
-            "PRIMARY KEY (id_media, type)"
+            "PRIMARY KEY (id_media, entity_type, type)"
             ")";
     sqlite::Tools::executeRequest( connection, req );
 }
