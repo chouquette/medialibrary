@@ -63,6 +63,12 @@ const std::string& Metadata::Record::str() const
     return m_value;
 }
 
+void Metadata::Record::unset()
+{
+    m_isSet = false;
+    m_value.clear();
+}
+
 Metadata::Metadata(MediaLibraryPtr ml , IMetadata::EntityType entityType)
     : m_ml( ml )
     , m_entityType( entityType )
@@ -149,6 +155,23 @@ bool Metadata::set( uint32_t type, int64_t value )
 {
     auto str = std::to_string( value );
     return set( type, str );
+}
+
+bool Metadata::unset( uint32_t type )
+{
+    assert( isReady() == true );
+    auto it = std::find_if( begin( m_records ), end( m_records ), [type]( const Record& r ) {
+        return r.m_type == type;
+    });
+    if ( it != end( m_records ) )
+    {
+        static const std::string req = "DELETE FROM " + policy::MetadataTable::Name +
+                " WHERE id_media = ? AND entity_type = ? AND type = ?";
+        (*it).unset();
+        return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_entityId,
+                                             m_entityType, type );
+    }
+    return true;
 }
 
 void Metadata::unset( sqlite::Connection* dbConn, IMetadata::EntityType entityType, uint32_t type )

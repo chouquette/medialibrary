@@ -56,6 +56,7 @@ public:
     IMetadata& get( uint32_t type ) const;
     bool set( uint32_t type, const std::string& value );
     bool set( uint32_t type, int64_t value );
+    bool unset( uint32_t type );
 
     static void unset( sqlite::Connection* dbConn, IMetadata::EntityType entityType, uint32_t type );
 
@@ -71,6 +72,7 @@ private:
         virtual bool isSet() const override;
         virtual int64_t integer() const override;
         virtual const std::string& str() const override;
+        void unset();
         void set( const std::string& value );
 
     private:
