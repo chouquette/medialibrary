@@ -75,8 +75,8 @@ void Directory::read() const
             continue;
         auto fullpath = m_path + file.get();
         if ( ( f.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
-            m_dirs.emplace_back( m_fsFactory.createDirectory( m_path +
-                                        utils::url::encode( fullpath ) ) );
+            m_dirs.emplace_back( m_fsFactory.createDirectory(
+                                     m_mrl + utils::url::encode( file.get() ) ) );
         else
             m_files.emplace_back( std::make_shared<File>( fullpath ) );
     } while ( FindNextFile( h, &f ) != 0 );
