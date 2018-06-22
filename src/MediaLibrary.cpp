@@ -59,6 +59,7 @@
 #include "utils/Url.h"
 #include "VideoTrack.h"
 #include "Metadata.h"
+#include "utils/Charsets.h"
 
 // Discoverers:
 #include "discoverer/FsDiscoverer.h"
@@ -265,7 +266,15 @@ bool MediaLibrary::createThumbnailFolder( const std::string& thumbnailPath ) con
         fullPath += paths.top();
 
 #ifdef _WIN32
-        if ( mkdir( fullPath.c_str() ) != 0 )
+        // Don't try to create C: or various other drives
+        if ( isalpha( fullPath[0] ) && fullPath[1] == ':' && fullPath.length() == 2 )
+        {
+            fullPath += "\\";
+            paths.pop();
+            continue;
+        }
+        auto wFullPath = charset::ToWide( fullPath.c_str() );
+        if ( _wmkdir( wFullPath.get() ) != 0 )
 #else
         if ( mkdir( fullPath.c_str(), S_IRWXU ) != 0 )
 #endif
