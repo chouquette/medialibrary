@@ -28,7 +28,7 @@
 #include "utils/Charsets.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
-#include "factory/IFileSystem.h"
+#include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "File.h"
 #include "logging/Logger.h"
 
