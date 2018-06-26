@@ -530,3 +530,20 @@ TEST_F( Artists, SortTracksMultiDisc )
     ASSERT_EQ( media[0]->id(), tracks[5]->id() );
 }
 
+TEST_F( Artists, Query )
+{
+    auto artist1 = ml->createArtist( "artist1" );
+    artist1->updateNbTrack( 1 );
+    auto artist2 = ml->createArtist( "artist2" );
+    artist2->updateNbTrack( 1 );
+
+    auto query = ml->artists( true, nullptr );
+    auto artists = query->items( 1, 0 );
+    ASSERT_EQ( 1u, artists.size() );
+    ASSERT_EQ( artist1->id(), artists[0]->id() );
+    artists = query->items( 1, 1 );
+    ASSERT_EQ( 1u, artists.size() );
+    ASSERT_EQ( artist2->id(), artists[0]->id() );
+    artists = query->all();
+    ASSERT_EQ( 2u, artists.size() );
+}
