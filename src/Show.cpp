@@ -137,10 +137,28 @@ std::shared_ptr<ShowEpisode> Show::addEpisode( Media& media, unsigned int episod
     return episode;
 }
 
-Query<IShowEpisode> Show::episodes() const
+Query<IShowEpisode> Show::episodes( const QueryParameters* params ) const
 {
-    static const std::string req = "FROM " + policy::ShowEpisodeTable::Name
-            + " WHERE show_id = ?";
+    std::string req = "FROM " + policy::ShowEpisodeTable::Name + " ep "
+            " INNER JOIN " + policy::MediaTable::Name + " med ON ep.media_id = med.id_media "
+            + " WHERE ep.show_id = ? ORDER BY ";
+    auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
+    auto desc = params != nullptr ? params->desc : false;
+    switch ( sort )
+    {
+        case SortingCriteria::Alpha:
+            req += "med.name";
+            if ( desc == true )
+                req += " DESC";
+            break;
+        default:
+            if ( desc == true )
+                req += "ep.season_number DESC, ep.episode_number DESC";
+            else
+                req += "ep.season_number, ep.episode_number";
+            break;
+
+    }
     return make_query<ShowEpisode, IShowEpisode>( m_ml, "*", req, m_id );
 }
 

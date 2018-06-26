@@ -125,7 +125,7 @@ TEST_F( Shows, AddEpisode )
     ASSERT_EQ( e->episodeNumber(), 1u );
     ASSERT_EQ( e->show(), show );
 
-    auto episodes = show->episodes()->all();
+    auto episodes = show->episodes( nullptr )->all();
     ASSERT_EQ( episodes.size(), 1u );
     ASSERT_EQ( episodes[0], e );
 }
@@ -163,7 +163,7 @@ TEST_F( Shows, SetEpisodeSeasonNumber )
     Reload();
 
     show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
-    auto episodes = show->episodes()->all();
+    auto episodes = show->episodes( nullptr )->all();
     ASSERT_EQ( episodes[0]->seasonNumber(), e->seasonNumber() );
 }
 
@@ -179,7 +179,7 @@ TEST_F( Shows, SetEpisodeSummary )
     Reload();
 
     show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
-    auto episodes = show->episodes()->all();
+    auto episodes = show->episodes( nullptr )->all();
     ASSERT_EQ( episodes[0]->shortSummary(), e->shortSummary() );
 }
 
@@ -195,7 +195,7 @@ TEST_F( Shows, SetEpisodeTvdbId )
     Reload();
 
     show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
-    auto episodes = show->episodes()->all();
+    auto episodes = show->episodes( nullptr )->all();
     ASSERT_EQ( episodes[0]->tvdbId(), e->tvdbId() );
 }
 
@@ -217,6 +217,35 @@ TEST_F( Shows, ListAll )
     ASSERT_EQ( show2->id(), shows[0]->id() );
     ASSERT_EQ( show3->id(), shows[1]->id() );
     ASSERT_EQ( show1->id(), shows[2]->id() );
+}
+
+TEST_F( Shows, ListEpisodes )
+{
+    auto show = ml->createShow( "show" );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "episode1.avi" ) );
+    auto s02e01 = show->addEpisode( *m1, 1 );
+    s02e01->setSeasonNumber( 2 );
+
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "episode2.avi" ) );
+    auto s01e01 = show->addEpisode( *m2, 1 );
+    s01e01->setSeasonNumber( 1 );
+
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "episode3.avi" ) );
+    auto s01e02 = show->addEpisode( *m3, 2 );
+    s01e02->setSeasonNumber( 1 );
+
+    auto episodes = show->episodes( nullptr )->all();
+    ASSERT_EQ( 3u, episodes.size() );
+    ASSERT_EQ( s01e01->id(), episodes[0]->id() );
+    ASSERT_EQ( s01e02->id(), episodes[1]->id() );
+    ASSERT_EQ( s02e01->id(), episodes[2]->id() );
+
+    QueryParameters params { SortingCriteria::Default, true };
+    episodes = show->episodes( &params )->all();
+    ASSERT_EQ( 3u, episodes.size() );
+    ASSERT_EQ( s02e01->id(), episodes[0]->id() );
+    ASSERT_EQ( s01e02->id(), episodes[1]->id() );
+    ASSERT_EQ( s01e01->id(), episodes[2]->id() );
 }
 
 ////////////////////////////////////////////////////
