@@ -127,7 +127,7 @@ TEST_F( Shows, AddEpisode )
 
     auto episodes = show->episodes( nullptr )->all();
     ASSERT_EQ( episodes.size(), 1u );
-    ASSERT_EQ( episodes[0], e );
+    ASSERT_EQ( episodes[0]->showEpisode(), e );
 }
 
 TEST_F( Shows, FetchShowFromEpisode )
@@ -164,7 +164,7 @@ TEST_F( Shows, SetEpisodeSeasonNumber )
 
     show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
     auto episodes = show->episodes( nullptr )->all();
-    ASSERT_EQ( episodes[0]->seasonNumber(), e->seasonNumber() );
+    ASSERT_EQ( episodes[0]->showEpisode()->seasonNumber(), e->seasonNumber() );
 }
 
 TEST_F( Shows, SetEpisodeSummary )
@@ -180,7 +180,7 @@ TEST_F( Shows, SetEpisodeSummary )
 
     show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
     auto episodes = show->episodes( nullptr )->all();
-    ASSERT_EQ( episodes[0]->shortSummary(), e->shortSummary() );
+    ASSERT_EQ( episodes[0]->showEpisode()->shortSummary(), e->shortSummary() );
 }
 
 TEST_F( Shows, SetEpisodeTvdbId )
@@ -196,7 +196,7 @@ TEST_F( Shows, SetEpisodeTvdbId )
 
     show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
     auto episodes = show->episodes( nullptr )->all();
-    ASSERT_EQ( episodes[0]->tvdbId(), e->tvdbId() );
+    ASSERT_EQ( episodes[0]->showEpisode()->tvdbId(), e->tvdbId() );
 }
 
 TEST_F( Shows, ListAll )
