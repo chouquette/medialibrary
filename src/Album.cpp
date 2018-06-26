@@ -354,12 +354,12 @@ bool Album::setAlbumArtist( std::shared_ptr<Artist> artist )
     return true;
 }
 
-Query<IArtist> Album::artists( bool desc ) const
+Query<IArtist> Album::artists( const QueryParameters* params ) const
 {
     std::string req = "FROM " + policy::ArtistTable::Name + " art "
             "INNER JOIN AlbumArtistRelation aar ON aar.artist_id = art.id_artist "
             "WHERE aar.album_id = ? ORDER BY art.name";
-    if ( desc == true )
+    if ( params != nullptr && params->desc == true )
         req += " DESC";
     return make_query<Artist, IArtist>( m_ml, "art.*", std::move( req ), m_id );
 }

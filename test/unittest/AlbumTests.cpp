@@ -232,13 +232,13 @@ TEST_F( Albums, Artists )
     res = album->addArtist( artist2 );
     ASSERT_EQ( res, true );
 
-    auto artists = album->artists( false )->all();
+    auto artists = album->artists( nullptr )->all();
     ASSERT_EQ( artists.size(), 2u );
 
     Reload();
 
     album = std::static_pointer_cast<Album>( ml->album( album->id() ) );
-    artists = album->artists( false )->all();
+    artists = album->artists( nullptr )->all();
     ASSERT_EQ( album->albumArtist(), nullptr );
     ASSERT_EQ( artists.size(), 2u );
 }
@@ -252,12 +252,14 @@ TEST_F( Albums, SortArtists )
     album->addArtist( artist1 );
     album->addArtist( artist2 );
 
-    auto artists = album->artists( false )->all();
+    QueryParameters params { SortingCriteria::Default, false };
+    auto artists = album->artists( &params )->all();
     ASSERT_EQ( artists.size(), 2u );
     ASSERT_EQ( artist1->id(), artists[1]->id() );
     ASSERT_EQ( artist2->id(), artists[0]->id() );
 
-    artists = album->artists( true )->all();
+    params.desc = true;
+    artists = album->artists( &params )->all();
     ASSERT_EQ( artists.size(), 2u );
     ASSERT_EQ( artist1->id(), artists[0]->id() );
     ASSERT_EQ( artist2->id(), artists[1]->id() );

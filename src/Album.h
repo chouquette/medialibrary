@@ -96,7 +96,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
 
         virtual ArtistPtr albumArtist() const override;
         bool setAlbumArtist( std::shared_ptr<Artist> artist );
-        virtual Query<IArtist> artists(bool desc) const override;
+        virtual Query<IArtist> artists( const QueryParameters* params ) const override;
         bool addArtist( std::shared_ptr<Artist> artist );
         bool removeArtist( Artist* artist );
 

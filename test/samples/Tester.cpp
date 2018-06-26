@@ -387,7 +387,7 @@ void Tests::checkAlbums( const rapidjson::Value& expectedAlbums, std::vector<Alb
             if ( expectedAlbum.HasMember( "artists" ) )
             {
                 const auto& expectedArtists = expectedAlbum["artists"];
-                auto artists = a->artists( false )->all();
+                auto artists = a->artists( nullptr )->all();
                 if ( expectedArtists.Size() != artists.size() )
                     return false;
                 for ( auto i = 0u; i < expectedArtists.Size(); ++i )

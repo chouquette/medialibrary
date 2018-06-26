@@ -61,7 +61,7 @@ public:
      * Artists are sorted by name.
      * @param desc
      */
-    virtual Query<IArtist> artists( bool desc ) const = 0;
+    virtual Query<IArtist> artists( const QueryParameters* params = nullptr ) const = 0;
     /**
      * @brief nbTracks Returns the amount of track in this album.
      * The value is cached, and doesn't require fetching anything.
