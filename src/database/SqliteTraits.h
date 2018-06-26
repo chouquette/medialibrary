@@ -217,8 +217,12 @@ struct Traits<T, typename std::enable_if<
         std::is_same<typename std::decay<T>::type, std::tuple<>>::value>::type
     >
 {
-    static int Bind(sqlite3_stmt*, int, std::tuple<> )
+    static int Bind(sqlite3_stmt*, int& pos, std::tuple<> )
     {
+        // Decrement the position since the original SqliteTools::_bind call will
+        // increment the position for each parameter.
+        assert(pos >= 1);
+        --pos;
         return SQLITE_OK;
     }
 };
