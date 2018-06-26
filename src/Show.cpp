@@ -177,4 +177,25 @@ std::shared_ptr<Show> Show::create( MediaLibraryPtr ml, const std::string& name 
     return show;
 }
 
+Query<IShow> Show::listAll( MediaLibraryPtr ml, const QueryParameters* params )
+{
+    std::string req = "FROM " + policy::ShowTable::Name + " ORDER BY ";
+    SortingCriteria sort = params != nullptr ? params->sort : SortingCriteria::Default;
+    switch ( sort )
+    {
+        case SortingCriteria::ReleaseDate:
+            req += "release_date";
+            break;
+        case SortingCriteria::Default:
+        case SortingCriteria::Alpha:
+        default:
+            req += "name";
+            break;
+
+    }
+    if ( params != nullptr && params->desc == true )
+        req += " DESC";
+    return make_query<Show, IShow>( ml, "*", req );
+}
+
 }

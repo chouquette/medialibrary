@@ -95,6 +95,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         virtual ShowPtr show( int64_t id ) const override;
         std::shared_ptr<Show> createShow( const std::string& name );
+        virtual Query<IShow> shows( const QueryParameters* params = nullptr ) const override;
 
         virtual MoviePtr movie( int64_t id ) const override;
         std::shared_ptr<Movie> createMovie( Media& media );

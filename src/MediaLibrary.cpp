@@ -580,6 +580,11 @@ std::shared_ptr<Show> MediaLibrary::createShow( const std::string& name )
     return Show::create( this, name );
 }
 
+Query<IShow> MediaLibrary::shows(const QueryParameters* params) const
+{
+    return Show::listAll( this, params );
+}
+
 MoviePtr MediaLibrary::movie( int64_t id ) const
 {
     return Movie::fetch( this, id );

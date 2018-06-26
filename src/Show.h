@@ -70,6 +70,8 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
         static void createTable( sqlite::Connection* dbConnection );
         static std::shared_ptr<Show> create( MediaLibraryPtr ml, const std::string& name );
 
+        static Query<IShow> listAll( MediaLibraryPtr ml, const QueryParameters* params );
+
     protected:
         MediaLibraryPtr m_ml;
 

@@ -266,6 +266,7 @@ class IMediaLibrary
         virtual ShowPtr show( int64_t id ) const = 0;
         virtual MoviePtr movie( int64_t id ) const = 0;
         virtual ArtistPtr artist( int64_t id ) const = 0;
+        virtual Query<IShow> shows( const QueryParameters* params = nullptr ) const = 0;
         /**
          * @brief artists List all artists that have at least an album.
          * Artists that only appear on albums as guests won't be listed from here, but will be

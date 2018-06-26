@@ -199,6 +199,26 @@ TEST_F( Shows, SetEpisodeTvdbId )
     ASSERT_EQ( episodes[0]->tvdbId(), e->tvdbId() );
 }
 
+TEST_F( Shows, ListAll )
+{
+    auto show1 = ml->createShow( "aaaa" );
+    auto show2 = ml->createShow( "zzzz" );
+    auto show3 = ml->createShow( "pppp" );
+
+    auto shows = ml->shows( nullptr )->all();
+    ASSERT_EQ( 3u, shows.size() );
+    ASSERT_EQ( show1->id(), shows[0]->id() );
+    ASSERT_EQ( show3->id(), shows[1]->id() );
+    ASSERT_EQ( show2->id(), shows[2]->id() );
+
+    medialibrary::QueryParameters params { SortingCriteria::Alpha, true };
+    shows = ml->shows( &params )->all();
+    ASSERT_EQ( 3u, shows.size() );
+    ASSERT_EQ( show2->id(), shows[0]->id() );
+    ASSERT_EQ( show3->id(), shows[1]->id() );
+    ASSERT_EQ( show1->id(), shows[2]->id() );
+}
+
 ////////////////////////////////////////////////////
 // Files links:
 ////////////////////////////////////////////////////
