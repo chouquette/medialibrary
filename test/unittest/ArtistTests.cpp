@@ -547,3 +547,18 @@ TEST_F( Artists, Query )
     artists = query->all();
     ASSERT_EQ( 2u, artists.size() );
 }
+
+TEST_F( Artists, SearchAlbums )
+{
+    auto artist = ml->createArtist( "artist" );
+    auto alb1 = ml->createAlbum( "album" );
+    alb1->setAlbumArtist( artist );
+    auto alb2 = ml->createAlbum( "other album" );
+
+    auto allAlbums = ml->searchAlbums( "album", nullptr )->all();
+    ASSERT_EQ( 2u, allAlbums.size() );
+
+    auto artistAlbums = artist->searchAlbums( "album", nullptr )->all();
+    ASSERT_EQ( 1u, artistAlbums.size() );
+    ASSERT_EQ( alb1->id(), artistAlbums[0]->id() );
+}

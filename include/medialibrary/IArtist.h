@@ -43,6 +43,8 @@ public:
      * appeared on, even if they are not the main artist (or AlbumArtist)
      */
     virtual Query<IAlbum> albums( const QueryParameters* params = nullptr ) const = 0;
+    virtual Query<IAlbum> searchAlbums( const std::string& pattern,
+                                        const QueryParameters* params = nullptr ) const = 0;
     virtual Query<IMedia> media( const QueryParameters* params = nullptr ) const = 0;
     virtual const std::string& artworkMrl() const = 0;
     virtual const std::string& musicBrainzId() const = 0;

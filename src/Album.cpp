@@ -514,6 +514,19 @@ Query<IAlbum> Album::search( MediaLibraryPtr ml, const std::string& pattern,
     return make_query<Album, IAlbum>( ml, "*", std::move( req ), pattern );
 }
 
+Query<IAlbum> Album::searchFromArtist( MediaLibraryPtr ml, const std::string& pattern,
+                                       int64_t artistId, const QueryParameters* params )
+{
+    std::string req = "FROM " + policy::AlbumTable::Name + " alb "
+            "WHERE id_album IN "
+            "(SELECT rowid FROM " + policy::AlbumTable::Name + "Fts WHERE " +
+            policy::AlbumTable::Name + "Fts MATCH '*' || ? || '*')"
+            "AND is_present != 0 "
+            "AND artist_id = ?";
+    req += orderBy( params );
+    return make_query<Album, IAlbum>( ml, "*", std::move( req ), pattern, artistId );
+}
+
 Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, const QueryParameters* params )
 {
     std::string req = "FROM " + policy::AlbumTable::Name + " alb "

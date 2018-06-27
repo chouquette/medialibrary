@@ -56,6 +56,8 @@ public:
     virtual const std::string& shortBio() const override;
     bool setShortBio( const std::string& shortBio );
     virtual Query<IAlbum> albums( const QueryParameters* params ) const override;
+    virtual Query<IAlbum> searchAlbums( const std::string& pattern,
+                                        const QueryParameters* params = nullptr ) const override;
     virtual Query<IMedia> media( const QueryParameters* params ) const override;
     bool addMedia( Media& media );
     virtual const std::string& artworkMrl() const override;

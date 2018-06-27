@@ -114,6 +114,8 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         ///
         static Query<IAlbum> search( MediaLibraryPtr ml, const std::string& pattern,
                                      const QueryParameters* params );
+        static Query<IAlbum> searchFromArtist( MediaLibraryPtr ml, const std::string& pattern,
+                                               int64_t artistId, const QueryParameters* params );
         static Query<IAlbum> fromArtist( MediaLibraryPtr ml, int64_t artistId, const QueryParameters* params );
         static Query<IAlbum> fromGenre( MediaLibraryPtr ml, int64_t genreId, const QueryParameters* params );
         static Query<IAlbum> listAll( MediaLibraryPtr ml, const QueryParameters* params );
