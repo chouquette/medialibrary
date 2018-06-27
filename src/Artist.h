@@ -59,6 +59,8 @@ public:
     virtual Query<IAlbum> searchAlbums( const std::string& pattern,
                                         const QueryParameters* params = nullptr ) const override;
     virtual Query<IMedia> tracks( const QueryParameters* params ) const override;
+    virtual Query<IMedia> searchTracks( const std::string& pattern,
+                                        const QueryParameters* params = nullptr ) const override;
     bool addMedia( Media& tracks );
     virtual const std::string& artworkMrl() const override;
     std::shared_ptr<Thumbnail> thumbnail();

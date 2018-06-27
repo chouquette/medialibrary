@@ -562,3 +562,29 @@ TEST_F( Artists, SearchAlbums )
     ASSERT_EQ( 1u, artistAlbums.size() );
     ASSERT_EQ( alb1->id(), artistAlbums[0]->id() );
 }
+
+TEST_F( Artists, SearchTracks )
+{
+    auto artist1 = ml->createArtist( "artist" );
+    auto album1 = ml->createAlbum( "album" );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
+    m1->setTitleBuffered( "sea otter" );
+    m1->setType( Media::Type::Audio );
+    auto track1 = album1->addTrack( m1, 1, 0, artist1->id(), nullptr );
+    m1->save();
+
+    auto artist2 = ml->createArtist( "artist2" );
+    auto album2 = ml->createAlbum( "album2" );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3" ) );
+    m2->setTitleBuffered( "sea cucumber" );
+    m2->setType( IMedia::Type::Audio );
+    album2->addTrack( m2, 1, 0, artist2->id(), nullptr );
+    m2->save();
+
+    auto allTracks = ml->searchAudio( "sea" )->all();
+    ASSERT_EQ( 2u, allTracks.size() );
+
+    auto artistTracks = artist1->searchTracks( "sea", nullptr )->all();
+    ASSERT_EQ( 1u, artistTracks.size() );
+    ASSERT_EQ( track1->id(), artistTracks[0]->id() );
+}
