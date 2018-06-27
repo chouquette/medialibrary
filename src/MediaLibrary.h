@@ -116,7 +116,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual Query<IMedia> lastMediaPlayed() const override;
         virtual bool clearHistory() override;
 
-        virtual MediaSearchAggregate searchMedia( const std::string& title,
+        virtual Query<IMedia> searchMedia( const std::string& title,
                                                   const QueryParameters* params ) const override;
         virtual Query<IMedia> searchAudio( const std::string& pattern,
                                            const QueryParameters* params = nullptr ) const override;

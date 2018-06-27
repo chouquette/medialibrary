@@ -677,7 +677,7 @@ bool Media::removeLabel( LabelPtr label )
 }
 
 Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
-                             Media::SubType subType, const QueryParameters* params )
+                             const QueryParameters* params )
 {
     std::string req = "FROM " + policy::MediaTable::Name + " m "
             " INNER JOIN " + policy::FileTable::Name + " f ON m.id_media = f.media_id"
@@ -685,10 +685,9 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
             " m.id_media IN (SELECT rowid FROM " + policy::MediaTable::Name + "Fts"
             " WHERE " + policy::MediaTable::Name + "Fts MATCH '*' || ? || '*')"
             " AND f.is_present = 1"
-            " AND f.type = ?"
-            " AND m.subtype = ?";
+            " AND f.type = ?";
     req += sortRequest( params );
-    return make_query<Media, IMedia>( ml, "m.*", req, title, File::Type::Main, subType );
+    return make_query<Media, IMedia>( ml, "m.*", req, title, File::Type::Main );
 }
 
 Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,

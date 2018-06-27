@@ -706,21 +706,12 @@ bool MediaLibrary::clearHistory()
     }
 }
 
-MediaSearchAggregate MediaLibrary::searchMedia( const std::string& title,
+Query<IMedia> MediaLibrary::searchMedia( const std::string& title,
                                                 const QueryParameters* params ) const
 {
     if ( validateSearchPattern( title ) == false )
         return {};
-    MediaSearchAggregate res;
-    res.episodes = Media::search( this, title, IMedia::SubType::ShowEpisode,
-                                params );
-    res.movies = Media::search( this, title, IMedia::SubType::Movie,
-                                params );
-    res.others = Media::search( this, title, IMedia::SubType::Unknown,
-                                params );
-    res.tracks = Media::search( this, title, IMedia::SubType::AlbumTrack,
-                                params );
-    return res;
+    return Media::search( this, title, params );
 }
 
 Query<IMedia> MediaLibrary::searchAudio( const std::string& pattern, const QueryParameters* params ) const

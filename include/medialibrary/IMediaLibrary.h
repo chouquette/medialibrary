@@ -36,20 +36,12 @@ namespace medialibrary
 static constexpr auto UnknownArtistID = 1u;
 static constexpr auto VariousArtistID = 2u;
 
-struct MediaSearchAggregate
-{
-    Query<IMedia> episodes;
-    Query<IMedia> movies;
-    Query<IMedia> others;
-    Query<IMedia> tracks;
-};
-
 struct SearchAggregate
 {
     Query<IAlbum> albums;
     Query<IArtist> artists;
     Query<IGenre> genres;
-    MediaSearchAggregate media;
+    Query<IMedia> media;
     Query<IPlaylist> playlists;
 };
 
@@ -330,7 +322,7 @@ class IMediaLibrary
          *              Passing nullptr will default to default ascending sort
          * @return
          */
-        virtual MediaSearchAggregate searchMedia( const std::string& pattern,
+        virtual Query<IMedia> searchMedia( const std::string& pattern,
                                                    const QueryParameters* params = nullptr ) const = 0;
         virtual Query<IMedia> searchAudio( const std::string& pattern, const QueryParameters* params = nullptr ) const = 0;
         virtual Query<IMedia> searchVideo( const std::string& pattern, const QueryParameters* params = nullptr ) const = 0;
