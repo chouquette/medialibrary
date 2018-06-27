@@ -685,9 +685,11 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
             " m.id_media IN (SELECT rowid FROM " + policy::MediaTable::Name + "Fts"
             " WHERE " + policy::MediaTable::Name + "Fts MATCH '*' || ? || '*')"
             " AND f.is_present = 1"
-            " AND f.type = ?";
+            " AND f.type = ?"
+            " AND m.type != ?";
     req += sortRequest( params );
-    return make_query<Media, IMedia>( ml, "m.*", req, title, File::Type::Main );
+    return make_query<Media, IMedia>( ml, "m.*", req, title, File::Type::Main,
+                                      Media::Type::External );
 }
 
 Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,

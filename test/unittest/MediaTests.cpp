@@ -158,7 +158,10 @@ TEST_F( Medias, Search )
 {
     for ( auto i = 1u; i <= 10u; ++i )
     {
-        ml->addMedia( "track " + std::to_string( i ) + ".mp3" );
+        auto m = std::static_pointer_cast<Media>(
+                    ml->addMedia( "track " + std::to_string( i ) + ".mp3" ) );
+        m->setType( IMedia::Type::Video );
+        m->save();
     }
     auto media = ml->searchMedia( "tra", nullptr )->all();
     ASSERT_EQ( 10u, media.size() );
@@ -179,10 +182,13 @@ TEST_F( Medias, SearchAndSort )
     {
         auto m = std::static_pointer_cast<Media>(
                     ml->addMedia( "track " + std::to_string( i ) + ".mp3" ) );
+        m->setType( IMedia::Type::Audio );
         m->setDuration( 3 - i );
         m->save();
     }
-    ml->addMedia( "this pattern doesn't match.mp3" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "this pattern doesn't match.mp3" ) );
+    m->setType( IMedia::Type::Audio );
+    m->save();
 
     auto media = ml->searchMedia( "tra", nullptr )->all();
     ASSERT_EQ( 3u, media.size() );
@@ -201,6 +207,8 @@ TEST_F( Medias, SearchAndSort )
 TEST_F( Medias, SearchAfterEdit )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
+    m->setType( IMedia::Type::Audio );
+    m->save();
 
     auto media = ml->searchMedia( "media", nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
@@ -218,6 +226,8 @@ TEST_F( Medias, SearchAfterEdit )
 TEST_F( Medias, SearchAfterDelete )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
+    m->setType( IMedia::Type::Audio );
+    m->save();
 
     auto media = ml->searchMedia( "media", nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
@@ -232,6 +242,8 @@ TEST_F( Medias, SearchAfterDelete )
 TEST_F( Medias, SearchByLabel )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
+    m->setType( IMedia::Type::Video );
+    m->save();
     auto media = ml->searchMedia( "otter", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
 
@@ -282,6 +294,7 @@ TEST_F( Medias, SearchTracks )
     {
        auto m = std::static_pointer_cast<Media>( ml->addMedia( "track " + std::to_string( i ) + ".mp3" ) );
        a->addTrack( m, i, 1, 0, 0 );
+       m->setType( IMedia::Type::Audio );
        m->save();
     }
     auto tracks = ml->searchMedia( "tra", nullptr )->all();
@@ -299,7 +312,9 @@ TEST_F( Medias, SearchTracks )
 
 TEST_F( Medias, Favorite )
 {
-    auto m = ml->addMedia( "media.mkv" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
+    m->setType( IMedia::Type::Video );
+    m->save();
     ASSERT_FALSE( m->isFavorite() );
 
     m->setFavorite( true );

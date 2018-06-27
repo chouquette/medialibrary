@@ -320,7 +320,10 @@ class IMediaLibrary
          *               - FileSize
          *              Default sorting parameter uses the media's title.
          *              Passing nullptr will default to default ascending sort
-         * @return
+         *
+         * Only media that were discovered by the medialibrary will be included.
+         * For instance, media that are added explicitely, playlist items that
+         * point to remote content, will *not* be included
          */
         virtual Query<IMedia> searchMedia( const std::string& pattern,
                                                    const QueryParameters* params = nullptr ) const = 0;
