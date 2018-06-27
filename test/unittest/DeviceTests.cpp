@@ -305,7 +305,7 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
     auto artists = ml->artists( true, nullptr )->all();
     ASSERT_EQ( 1u, artists.size() );
     auto artist = artists[0];
-    ASSERT_EQ( 2u, artist->media( nullptr )->count() );
+    ASSERT_EQ( 2u, artist->tracks( nullptr )->count() );
 
     auto device = fsMock->removeDevice( RemovableDeviceUuid );
     Reload();
@@ -315,7 +315,7 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
     artists = ml->artists( true, nullptr )->all();
     ASSERT_EQ( 1u, artists.size() );
     ASSERT_EQ( 1u, albums[0]->tracks( nullptr )->count() );
-    ASSERT_EQ( 1u, artists[0]->media( nullptr )->count() );
+    ASSERT_EQ( 1u, artists[0]->tracks( nullptr )->count() );
 }
 
 TEST_F( DeviceFs, ChangeDevice )

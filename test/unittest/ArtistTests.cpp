@@ -181,13 +181,13 @@ TEST_F( Artists, AllSongs )
         ASSERT_TRUE( res );
     }
 
-    auto songs = artist->media( nullptr )->all();
+    auto songs = artist->tracks( nullptr )->all();
     ASSERT_EQ( songs.size(), 3u );
 
     Reload();
 
     auto artist2 = ml->artist( "Cannibal Otters" );
-    songs = artist2->media( nullptr )->all();
+    songs = artist2->tracks( nullptr )->all();
     ASSERT_EQ( songs.size(), 3u );
 }
 
@@ -318,14 +318,14 @@ TEST_F( Artists, SortMedia )
     }
 
     QueryParameters params { SortingCriteria::Duration, false };
-    auto tracks = artist->media( &params )->all();
+    auto tracks = artist->tracks( &params )->all();
     ASSERT_EQ( 3u, tracks.size() );
     ASSERT_EQ( "song3.mp3", tracks[0]->title() ); // Duration: 8
     ASSERT_EQ( "song2.mp3", tracks[1]->title() ); // Duration: 9
     ASSERT_EQ( "song1.mp3", tracks[2]->title() ); // Duration: 10
 
     params.desc = true;
-    tracks = artist->media( &params )->all();
+    tracks = artist->tracks( &params )->all();
     ASSERT_EQ( 3u, tracks.size() );
     ASSERT_EQ( "song1.mp3", tracks[0]->title() );
     ASSERT_EQ( "song2.mp3", tracks[1]->title() );
@@ -353,7 +353,7 @@ TEST_F( Artists, SortMediaByAlbum )
     }
 
     QueryParameters params { SortingCriteria::Album, false };
-    auto tracks = artist->media( &params )->all();
+    auto tracks = artist->tracks( &params )->all();
     ASSERT_EQ( 4u, tracks.size() );
     ASSERT_EQ( "alb0_song1.mp3", tracks[0]->title() );
     ASSERT_EQ( "alb0_song2.mp3", tracks[1]->title() );
@@ -361,7 +361,7 @@ TEST_F( Artists, SortMediaByAlbum )
     ASSERT_EQ( "alb1_song2.mp3", tracks[3]->title() );
 
     params.desc = true;
-    tracks = artist->media( &params )->all();
+    tracks = artist->tracks( &params )->all();
     ASSERT_EQ( 4u, tracks.size() );
     ASSERT_EQ( "alb1_song2.mp3", tracks[0]->title() );
     ASSERT_EQ( "alb1_song1.mp3", tracks[1]->title() );
@@ -511,7 +511,7 @@ TEST_F( Artists, SortTracksMultiDisc )
      * [ Disc 2 - Track 3 ]
      */
     QueryParameters params { SortingCriteria::Album, false };
-    auto tracks = artist->media( &params )->all();
+    auto tracks = artist->tracks( &params )->all();
     ASSERT_EQ( 6u, tracks.size() );
     ASSERT_EQ( media[0]->id(), tracks[0]->id() );
     ASSERT_EQ( media[2]->id(), tracks[1]->id() );
@@ -521,7 +521,7 @@ TEST_F( Artists, SortTracksMultiDisc )
     ASSERT_EQ( media[5]->id(), tracks[5]->id() );
 
     params.desc = true;
-    tracks = artist->media( &params )->all();
+    tracks = artist->tracks( &params )->all();
     ASSERT_EQ( media[5]->id(), tracks[0]->id() );
     ASSERT_EQ( media[3]->id(), tracks[1]->id() );
     ASSERT_EQ( media[1]->id(), tracks[2]->id() );

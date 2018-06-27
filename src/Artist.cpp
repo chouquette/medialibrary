@@ -99,7 +99,7 @@ Query<IAlbum> Artist::searchAlbums( const std::string& pattern,
     return Album::searchFromArtist( m_ml, pattern, m_id, params );
 }
 
-Query<IMedia> Artist::media( const QueryParameters* params ) const
+Query<IMedia> Artist::tracks( const QueryParameters* params ) const
 {
     std::string req = "FROM " + policy::MediaTable::Name + " med ";
 

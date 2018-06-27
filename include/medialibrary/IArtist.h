@@ -45,7 +45,7 @@ public:
     virtual Query<IAlbum> albums( const QueryParameters* params = nullptr ) const = 0;
     virtual Query<IAlbum> searchAlbums( const std::string& pattern,
                                         const QueryParameters* params = nullptr ) const = 0;
-    virtual Query<IMedia> media( const QueryParameters* params = nullptr ) const = 0;
+    virtual Query<IMedia> tracks( const QueryParameters* params = nullptr ) const = 0;
     virtual const std::string& artworkMrl() const = 0;
     virtual const std::string& musicBrainzId() const = 0;
     /**
