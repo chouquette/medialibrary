@@ -68,6 +68,9 @@ public:
      */
     virtual uint32_t nbTracks() const = 0;
     virtual unsigned int duration() const = 0;
+
+    virtual Query<IMedia> searchTracks( const std::string& pattern,
+                                        const QueryParameters* params = nullptr ) const = 0;
 };
 
 }

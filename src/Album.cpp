@@ -282,6 +282,12 @@ std::vector<MediaPtr> Album::cachedTracks() const
     return m_tracks.get();
 }
 
+Query<IMedia> Album::searchTracks( const std::string& pattern,
+                                   const QueryParameters* params ) const
+{
+    return Media::searchAlbumTracks( m_ml, pattern, m_id, params );
+}
+
 std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsigned int trackNb,
                                              unsigned int discNumber, int64_t artistId, Genre* genre )
 {

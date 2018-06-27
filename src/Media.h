@@ -129,6 +129,8 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
                                      const QueryParameters* params );
         static Query<IMedia> search(MediaLibraryPtr ml, const std::string& title,
                                     Media::Type subType, const QueryParameters* params );
+        static Query<IMedia> searchAlbumTracks( MediaLibraryPtr ml, const std::string& pattern,
+                                                int64_t albumId, const QueryParameters* params );
         static Query<IMedia> fetchHistory( MediaLibraryPtr ml );
 
         static void clearHistory( MediaLibraryPtr ml );

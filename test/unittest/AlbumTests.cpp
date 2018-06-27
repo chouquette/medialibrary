@@ -604,3 +604,31 @@ TEST_F( Albums, SearchAndSort )
     ASSERT_EQ( albs[0]->id(), alb2->id() );
     ASSERT_EQ( albs[1]->id(), alb1->id() );
 }
+
+TEST_F( Albums, SearchTracks )
+{
+    auto alb = ml->createAlbum( "Mustelidae" );
+
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
+    m1->setTitleBuffered( "otter otter run run" );
+    m1->setType( IMedia::Type::Audio );
+    alb->addTrack( m1, 1, 1, 0, nullptr );
+    m1->save();
+
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3" ) );
+    m2->setTitleBuffered( "weasel weasel" );
+    m2->setType( IMedia::Type::Audio );
+    alb->addTrack( m2, 1, 1, 0, nullptr );
+    m2->save();
+
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "random media.aac" ) );
+    m3->setTitleBuffered( "otters are cute but not on this album" );
+    m3->setType( IMedia::Type::Audio );
+    m3->save();
+
+    auto allMedia = ml->searchMedia( "otter", nullptr )->all();
+    ASSERT_EQ( 2u, allMedia.size() );
+
+    auto albumTracksSearch = alb->searchTracks( "otter", nullptr )->all();
+    ASSERT_EQ( 1u, albumTracksSearch.size() );
+}

@@ -707,6 +707,23 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
     return make_query<Media, IMedia>( ml, "m.*", req, title, File::Type::Main, type );
 }
 
+Query<IMedia> Media::searchAlbumTracks(MediaLibraryPtr ml, const std::string& pattern, int64_t albumId, const QueryParameters* params)
+{
+    std::string req = "FROM " + policy::MediaTable::Name + " m "
+            " INNER JOIN " + policy::FileTable::Name + " f ON m.id_media = f.media_id"
+            " INNER JOIN " + policy::AlbumTrackTable::Name + " tra ON tra.media_id = m.id_media "
+            " WHERE"
+            " m.id_media IN (SELECT rowid FROM " + policy::MediaTable::Name + "Fts"
+            " WHERE " + policy::MediaTable::Name + "Fts MATCH '*' || ? || '*')"
+            " AND tra.album_id = ?"
+            " AND f.is_present = 1"
+            " AND f.type = ?"
+            " AND m.subtype = ?";
+    req += sortRequest( params );
+    return make_query<Media, IMedia>( ml, "m.*", req, pattern, albumId,
+                                      File::Type::Main, Media::SubType::AlbumTrack );
+}
+
 Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml )
 {
     static const std::string req = "FROM " + policy::MediaTable::Name + " WHERE last_played_date IS NOT NULL"

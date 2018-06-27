@@ -100,6 +100,9 @@ class Album : public IAlbum, public DatabaseHelpers<Album, policy::AlbumTable>
         bool addArtist( std::shared_ptr<Artist> artist );
         bool removeArtist( Artist* artist );
 
+        virtual Query<IMedia> searchTracks( const std::string& pattern,
+                                            const QueryParameters* params = nullptr ) const override;
+
         static void createTable( sqlite::Connection* dbConnection );
         static void createTriggers( sqlite::Connection* dbConnection );
         static std::shared_ptr<Album> create( MediaLibraryPtr ml, const std::string& title, int64_t thumbnailId );
