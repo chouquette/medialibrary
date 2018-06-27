@@ -723,6 +723,20 @@ MediaSearchAggregate MediaLibrary::searchMedia( const std::string& title,
     return res;
 }
 
+Query<IMedia> MediaLibrary::searchAudio( const std::string& pattern, const QueryParameters* params ) const
+{
+    if ( validateSearchPattern( pattern ) == false )
+        return {};
+    return Media::search( this, pattern, IMedia::Type::Audio, params );
+}
+
+Query<IMedia> MediaLibrary::searchVideo( const std::string& pattern, const QueryParameters* params ) const
+{
+    if ( validateSearchPattern( pattern ) == false )
+        return {};
+    return Media::search( this, pattern, IMedia::Type::Audio, params );
+}
+
 Query<IPlaylist> MediaLibrary::searchPlaylists( const std::string& name,
                                                 const QueryParameters* params ) const
 {

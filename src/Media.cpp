@@ -691,6 +691,21 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
     return make_query<Media, IMedia>( ml, "m.*", req, title, File::Type::Main, subType );
 }
 
+Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
+                             Media::Type type, const QueryParameters* params )
+{
+    std::string req = "FROM " + policy::MediaTable::Name + " m "
+            " INNER JOIN " + policy::FileTable::Name + " f ON m.id_media = f.media_id"
+            " WHERE"
+            " m.id_media IN (SELECT rowid FROM " + policy::MediaTable::Name + "Fts"
+            " WHERE " + policy::MediaTable::Name + "Fts MATCH '*' || ? || '*')"
+            " AND f.is_present = 1"
+            " AND f.type = ?"
+            " AND m.type = ?";
+    req += sortRequest( params );
+    return make_query<Media, IMedia>( ml, "m.*", req, title, File::Type::Main, type );
+}
+
 Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml )
 {
     static const std::string req = "FROM " + policy::MediaTable::Name + " WHERE last_played_date IS NOT NULL"

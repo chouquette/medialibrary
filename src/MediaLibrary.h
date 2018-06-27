@@ -118,6 +118,10 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         virtual MediaSearchAggregate searchMedia( const std::string& title,
                                                   const QueryParameters* params ) const override;
+        virtual Query<IMedia> searchAudio( const std::string& pattern,
+                                           const QueryParameters* params = nullptr ) const override;
+        virtual Query<IMedia> searchVideo( const std::string& pattern,
+                                           const QueryParameters* params = nullptr ) const override;
         virtual Query<IPlaylist> searchPlaylists( const std::string& name,
                                                   const QueryParameters* params ) const override;
         virtual Query<IAlbum> searchAlbums( const std::string& pattern,

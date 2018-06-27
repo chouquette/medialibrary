@@ -313,8 +313,28 @@ class IMediaLibrary
         /**
          * Search
          */
+
+        /**
+         * @brief searchMedia, searchAudio, and searchVideo search for some media, based on a pattern.
+         * @param pattern A 3 character or more pattern that will be matched against the media's title
+         *                or filename if no title was set for this media.
+         * @param params Some query parameters. Valid sorting criteria are:
+         *               - Duration
+         *               - InsertionDate
+         *               - ReleaseDate
+         *               - PlayCount
+         *               - Filename
+         *               - LastModificationDate
+         *               - FileSize
+         *              Default sorting parameter uses the media's title.
+         *              Passing nullptr will default to default ascending sort
+         * @return
+         */
         virtual MediaSearchAggregate searchMedia( const std::string& pattern,
                                                    const QueryParameters* params = nullptr ) const = 0;
+        virtual Query<IMedia> searchAudio( const std::string& pattern, const QueryParameters* params = nullptr ) const = 0;
+        virtual Query<IMedia> searchVideo( const std::string& pattern, const QueryParameters* params = nullptr ) const = 0;
+
         virtual Query<IPlaylist> searchPlaylists( const std::string& name,
                                                   const QueryParameters* params = nullptr ) const = 0;
         virtual Query<IAlbum> searchAlbums( const std::string& pattern,
