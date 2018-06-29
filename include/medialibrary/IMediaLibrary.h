@@ -346,7 +346,7 @@ class IMediaLibrary
          * The actuall discovery will run asynchronously, meaning this method will immediatly return.
          * Depending on which discoverer modules where provided, this might or might not work
          * \note This must be called after start()
-         * @param entryPoint What to discover.
+         * @param entryPoint The MRL of the entrypoint to discover.
          */
         virtual void discover( const std::string& entryPoint ) = 0;
         virtual bool setDiscoverNetworkEnabled( bool enable ) = 0;
