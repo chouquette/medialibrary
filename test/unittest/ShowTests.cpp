@@ -269,3 +269,25 @@ TEST_F( Shows, FileSetShowEpisode )
     ASSERT_NE( e2, nullptr );
 }
 
+TEST_F( Shows, SearchEpisodes )
+{
+    auto show1 = ml->createShow( "Show1" );
+    auto show2 = ml->createShow( "show2" );
+
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "episode.mkv" ) );
+    m1->setTitleBuffered( "cute otters" );
+    m1->setType( IMedia::Type::Video );
+    auto ep1 = show1->addEpisode( *m1, 1 );
+
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "other episode.mkv" ) );
+    m2->setTitleBuffered( "fluffy otters" );
+    m2->setType( IMedia::Type::Video );
+    auto ep2 = show2->addEpisode( *m2, 1 );
+
+    auto episodes = ml->searchVideo( "otters", nullptr )->all();
+    ASSERT_EQ( 2u, episodes.size() );
+
+    episodes = show1->searchEpisodes( "otters", nullptr )->all();
+    ASSERT_EQ( 1u, episodes.size() );
+    ASSERT_EQ( m1->id(), episodes[0]->id() );
+}

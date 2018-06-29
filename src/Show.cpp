@@ -162,6 +162,12 @@ Query<IMedia> Show::episodes( const QueryParameters* params ) const
     return make_query<Media, IMedia>( m_ml, "*", req, m_id );
 }
 
+Query<IMedia> Show::searchEpisodes( const std::string& pattern,
+                                    const QueryParameters* params ) const
+{
+    return Media::searchShowEpisodes( m_ml, pattern, m_id, params );
+}
+
 uint32_t Show::nbSeasons() const
 {
     return 0;

@@ -64,6 +64,8 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
         bool setTvdbId( const std::string& summary );
         std::shared_ptr<ShowEpisode> addEpisode( Media& media, unsigned int episodeNumber );
         virtual Query<IMedia> episodes( const QueryParameters* params ) const override;
+        virtual Query<IMedia> searchEpisodes( const std::string& pattern,
+                                              const QueryParameters* params = nullptr ) const override;
         virtual uint32_t nbSeasons() const override;
         virtual uint32_t nbEpisodes() const override;
 
