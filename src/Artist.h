@@ -81,6 +81,8 @@ public:
                                            const QueryParameters* params );
     static Query<IArtist> listAll( MediaLibraryPtr ml, bool includeAll,
                                    const QueryParameters* params );
+    static Query<IArtist> searchByGenre( MediaLibraryPtr ml, const std::string& pattern,
+                                         const QueryParameters* params, int64_t genreId );
 
 private:
     static std::string sortRequest( const QueryParameters* params );

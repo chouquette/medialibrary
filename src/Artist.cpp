@@ -438,6 +438,21 @@ Query<IArtist> Artist::listAll( MediaLibraryPtr ml, bool includeAll,
     return make_query<Artist, IArtist>( ml, "*", std::move( req ) );
 }
 
+Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pattern,
+                                      const QueryParameters* params, int64_t genreId )
+{
+    std::string req = "FROM " + policy::ArtistTable::Name + " a "
+                "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.artist_id = a.id_artist "
+                "WHERE id_artist IN "
+                    "(SELECT rowid FROM " + policy::ArtistTable::Name + "Fts WHERE name MATCH '*' || ? || '*')"
+                "AND att.genre_id = ? "
+                "GROUP BY att.artist_id "
+                "ORDER BY a.name";
+    if ( params != nullptr && params->desc == true )
+        req += " DESC";
+    return make_query<Artist, IArtist>( ml, "*", std::move( req ), pattern, genreId );
+}
+
 std::string Artist::sortRequest( const QueryParameters* params )
 {
     std::string req = " ORDER BY name";

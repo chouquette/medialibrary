@@ -243,3 +243,32 @@ TEST_F( Genres, CaseInsensitive )
     auto g2 = Genre::fromName( ml.get(), "GENRE" );
     ASSERT_EQ( g->id(), g2->id() );
 }
+
+TEST_F( Genres, SearchArtists )
+{
+    auto artists = g->artists( nullptr )->all();
+    ASSERT_EQ( 0u, artists.size() );
+
+    auto a = ml->createArtist( "loutre 1" );
+    auto a2 = ml->createArtist( "loutre 2" );
+    auto album = ml->createAlbum( "album" );
+    auto album2 = ml->createAlbum( "album2" );
+
+    for ( auto i = 1u; i <= 5; ++i )
+    {
+        auto m = std::static_pointer_cast<Media>( ml->addMedia( std::to_string( i ) + ".mp3" ) );
+        auto track = album->addTrack( m, i, 1, a->id(), nullptr );
+        track->setGenre( g );
+    }
+    for ( auto i = 1u; i <= 5; ++i )
+    {
+        auto m = std::static_pointer_cast<Media>( ml->addMedia( std::to_string( i ) + "_2.mp3" ) );
+        auto track = album2->addTrack( m, i, 1, a2->id(), nullptr );
+    }
+    artists = ml->searchArtists( "loutre", nullptr )->all();
+    ASSERT_EQ( 2u, artists.size() );
+
+    artists = g->searchArtist( "loutre" )->all();
+    ASSERT_EQ( 1u, artists.size() );
+    ASSERT_EQ( a->id(), artists[0]->id() );
+}
