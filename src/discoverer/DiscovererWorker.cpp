@@ -241,6 +241,7 @@ void DiscovererWorker::runUnban( const std::string& entryPoint )
 void DiscovererWorker::runDiscover( const std::string& entryPoint )
 {
     m_ml->getCb()->onDiscoveryStarted( entryPoint );
+    auto discovered = false;
     for ( auto& d : m_discoverers )
     {
         // Assume only one discoverer can handle an entrypoint.
@@ -252,6 +253,7 @@ void DiscovererWorker::runDiscover( const std::string& entryPoint )
                 auto duration = std::chrono::steady_clock::now() - chrono;
                 LOG_DEBUG( "Discovered ", entryPoint, " in ",
                            std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
+                discovered = true;
                 break;
             }
         }
@@ -263,6 +265,8 @@ void DiscovererWorker::runDiscover( const std::string& entryPoint )
         if ( m_run == false )
             break;
     }
+    if ( discovered == false )
+        LOG_WARN( "No IDiscoverer found to discover ", entryPoint );
     m_ml->getCb()->onDiscoveryCompleted( entryPoint );
 }
 
