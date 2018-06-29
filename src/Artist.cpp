@@ -450,7 +450,7 @@ Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pat
                 "ORDER BY a.name";
     if ( params != nullptr && params->desc == true )
         req += " DESC";
-    return make_query<Artist, IArtist>( ml, "*", std::move( req ), pattern, genreId );
+    return make_query<Artist, IArtist>( ml, "a.*", std::move( req ), pattern, genreId );
 }
 
 std::string Artist::sortRequest( const QueryParameters* params )
