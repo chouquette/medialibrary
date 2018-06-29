@@ -258,7 +258,7 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
                 }
             }
             auto removable = isRemovable( deviceName, mountpoint );
-            res.emplace_back( std::make_tuple( uuid, "file://" + mountpoint, removable ) );
+            res.emplace_back( std::make_tuple( uuid, utils::file::toMrl( mountpoint ), removable ) );
         }
     }
     catch(std::runtime_error& ex)
