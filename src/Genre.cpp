@@ -29,6 +29,7 @@
 #include "Album.h"
 #include "AlbumTrack.h"
 #include "Artist.h"
+#include "Media.h"
 #include "database/SqliteQuery.h"
 
 namespace medialibrary
@@ -97,6 +98,11 @@ Query<IArtist> Genre::searchArtist( const std::string& pattern,
 Query<IMedia> Genre::tracks( const QueryParameters* params ) const
 {
     return AlbumTrack::fromGenre( m_ml, m_id, params );
+}
+
+Query<IMedia> Genre::searchTracks( const std::string& pattern, const QueryParameters* params ) const
+{
+    return Media::searchGenreTracks( m_ml, pattern, m_id, params );
 }
 
 Query<IAlbum> Genre::albums( const QueryParameters* params ) const
