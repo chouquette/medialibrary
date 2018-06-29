@@ -294,3 +294,26 @@ TEST_F( Genres, SearchTracks )
     ASSERT_EQ( 1u, tracks.size() );
     ASSERT_EQ( m->id(), tracks[0]->id() );
 }
+
+TEST_F( Genres, SearchAlbums )
+{
+    auto a1 = ml->createAlbum( "an album" );
+
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
+    m->setType( IMedia::Type::Audio );
+    auto t = a1->addTrack( m, 1, 1, 0, g.get() );
+    m->save();
+
+    auto a2 = ml->createAlbum( "another album" );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "Different genre Hell's Kitchen.mp3" ) );
+    m2->setType( IMedia::Type::Audio );
+    auto t2 = a2->addTrack( m2, 1, 1, 0, nullptr );
+    m2->save();
+
+    auto albums = ml->searchAlbums( "album", nullptr)->all();
+    ASSERT_EQ( 2u, albums.size() );
+
+    albums = g->searchAlbums( "album", nullptr )->all();
+    ASSERT_EQ( 1u, albums.size() );
+    ASSERT_EQ( a1->id(), albums[0]->id() );
+}

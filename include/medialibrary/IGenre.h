@@ -41,6 +41,8 @@ public:
     virtual Query<IMedia> searchTracks( const std::string& pattern,
                                   const QueryParameters* params = nullptr ) const = 0;
     virtual Query<IAlbum> albums( const QueryParameters* params = nullptr ) const = 0;
+    virtual Query<IAlbum> searchAlbums( const std::string& pattern,
+                                        const QueryParameters* params = nullptr ) const = 0;
 };
 
 }

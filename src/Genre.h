@@ -57,6 +57,8 @@ public:
     virtual Query<IMedia> searchTracks( const std::string& pattern,
                                   const QueryParameters* params = nullptr ) const override;
     virtual Query<IAlbum> albums( const QueryParameters* params ) const override;
+    virtual Query<IAlbum> searchAlbums( const std::string& pattern,
+                                        const QueryParameters* params = nullptr ) const override;
 
     static void createTable( sqlite::Connection* dbConn );
     static void createTriggers( sqlite::Connection* dbConn );

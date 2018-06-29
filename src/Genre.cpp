@@ -110,6 +110,12 @@ Query<IAlbum> Genre::albums( const QueryParameters* params ) const
     return Album::fromGenre( m_ml, m_id, params );
 }
 
+Query<IAlbum> Genre::searchAlbums( const std::string& pattern,
+                                   const QueryParameters* params ) const
+{
+    return Album::searchFromGenre( m_ml, pattern, m_id, params );
+}
+
 void Genre::createTable( sqlite::Connection* dbConn )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::GenreTable::Name +
