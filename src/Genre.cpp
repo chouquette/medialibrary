@@ -89,7 +89,7 @@ Query<IArtist> Genre::artists( const QueryParameters* params ) const
     return make_query<Artist, IArtist>( m_ml, "a.*", std::move( req ), m_id );
 }
 
-Query<IArtist> Genre::searchArtist( const std::string& pattern,
+Query<IArtist> Genre::searchArtists( const std::string& pattern,
                                     const QueryParameters* params ) const
 {
     return Artist::searchByGenre( m_ml, pattern, params, m_id );

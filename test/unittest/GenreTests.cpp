@@ -268,7 +268,7 @@ TEST_F( Genres, SearchArtists )
     artists = ml->searchArtists( "loutre", nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
 
-    artists = g->searchArtist( "loutre" )->all();
+    artists = g->searchArtists( "loutre" )->all();
     ASSERT_EQ( 1u, artists.size() );
     ASSERT_EQ( a->id(), artists[0]->id() );
 }

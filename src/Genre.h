@@ -51,7 +51,7 @@ public:
     virtual uint32_t nbTracks() const override;
     void updateCachedNbTracks( int increment );
     virtual Query<IArtist> artists( const QueryParameters* params ) const override;
-    virtual Query<IArtist> searchArtist( const std::string& pattern,
+    virtual Query<IArtist> searchArtists( const std::string& pattern,
                                          const QueryParameters* params = nullptr ) const override;
     virtual Query<IMedia> tracks( const QueryParameters* params ) const override;
     virtual Query<IMedia> searchTracks( const std::string& pattern,
