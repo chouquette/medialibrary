@@ -725,7 +725,7 @@ Query<IMedia> MediaLibrary::searchVideo( const std::string& pattern, const Query
 {
     if ( validateSearchPattern( pattern ) == false )
         return {};
-    return Media::search( this, pattern, IMedia::Type::Audio, params );
+    return Media::search( this, pattern, IMedia::Type::Video, params );
 }
 
 Query<IPlaylist> MediaLibrary::searchPlaylists( const std::string& name,
