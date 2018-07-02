@@ -25,6 +25,7 @@
 #endif
 
 #include <cassert>
+#include <system_error>
 
 #include "MockDevice.h"
 #include "MockDirectory.h"
@@ -106,7 +107,7 @@ std::shared_ptr<File> Device::file(const std::string& filePath )
 std::shared_ptr<Directory> Device::directory(const std::string& path)
 {
     if ( m_root == nullptr || m_present == false )
-        return std::make_shared<Directory>( "", nullptr );
+        throw std::system_error{ ENOENT, std::generic_category(), "Mock directory" };
     const auto relPath = relativePath( path );
     if ( relPath.empty() == true )
         return m_root;

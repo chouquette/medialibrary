@@ -165,7 +165,7 @@ struct FileSystemFactory : public fs::IFileSystemFactory
     {
         auto d = device( mrl );
         if ( d == nullptr )
-            return std::make_shared<Directory>( "", nullptr );
+            throw std::system_error{ ENOENT, std::generic_category(), "Mock directory" };
         auto dir = d->directory( mrl );
         if ( dir == nullptr )
             throw std::system_error{ ENOENT, std::generic_category(), "Mock directory" };

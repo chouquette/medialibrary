@@ -152,7 +152,7 @@ std::shared_ptr<Directory> Directory::directory(const std::string& path)
     {
         auto it = m_dirs.find( subFolder );
         if ( it == end( m_dirs ) )
-            return std::make_shared<Directory>( "", nullptr );
+            throw std::system_error{ ENOENT, std::generic_category(), "Mock directory" };
         return it->second;
     }
     else
