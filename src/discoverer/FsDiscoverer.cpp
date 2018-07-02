@@ -113,23 +113,29 @@ void FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
     assert( f->isPresent() );
     auto mrl = f->mrl();
 
+    std::shared_ptr<fs::IDirectory> folder;
     try
     {
-        auto folder = m_fsFactory->createDirectory( mrl );
+        folder = m_fsFactory->createDirectory( mrl );
         assert( folder->device() != nullptr );
         if ( folder->device() == nullptr )
             return;
+    }
+    catch ( const std::system_error& ex )
+    {
+        LOG_INFO( "Failed to instanciate a directory for ", mrl, ": ", ex.what(),
+                  ". Can't reload the folder." );
+        return;
+    }
+    try
+    {
         checkFolder( std::move( folder ), std::move( f ), false );
     }
     catch ( DeviceRemovedException& )
     {
         LOG_INFO( "Reloading of ", mrl, " was stopped after the device was removed" );
     }
-    catch ( const std::system_error& ex )
-    {
-        LOG_INFO( "Failed to instanciate a directory for ", mrl, ": ", ex.what(),
-                  ". Can't reload the folder." );
-    }
+
 }
 
 bool FsDiscoverer::reload()
