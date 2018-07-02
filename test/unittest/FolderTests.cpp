@@ -462,3 +462,15 @@ TEST_F( Folders, RemoveNonExistantEntryPoint )
     auto res = cbMock->waitEntryPointRemoved();
     ASSERT_TRUE( res );
 }
+
+TEST_F( Folders, RemoveRootFolder )
+{
+    ASSERT_EQ( 3u, ml->files().size() );
+    // Do not watch for live changes
+    ml.reset();
+    fsMock->removeFolder( mock::FileSystemFactory::Root );
+
+    Reload();
+
+    ASSERT_EQ( 0u, ml->files().size() );
+}

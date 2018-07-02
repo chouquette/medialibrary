@@ -125,7 +125,17 @@ void FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
     {
         LOG_INFO( "Failed to instanciate a directory for ", mrl, ": ", ex.what(),
                   ". Can't reload the folder." );
-        return;
+    }
+    if ( directory == nullptr )
+    {
+        auto device = m_fsFactory->createDeviceFromMrl( mrl );
+        if ( device == nullptr || device->isRemovable() == false )
+        {
+            LOG_INFO( "Failed to find folder matching entrypoint ", mrl, ". "
+                      "Removing that folder" );
+            m_ml->deleteFolder( *f );
+            return;
+        }
     }
     try
     {
