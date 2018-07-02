@@ -117,6 +117,12 @@ Query<IMedia> Playlist::media() const
     return make_query<Media, IMedia>( m_ml, "m.*", req, m_id );
 }
 
+Query<IMedia> Playlist::searchMedia( const std::string& pattern,
+                                     const QueryParameters* params ) const
+{
+    return Media::searchInPlaylist( m_ml, pattern, m_id, params );
+}
+
 bool Playlist::append( int64_t mediaId )
 {
     return add( mediaId, 0 );

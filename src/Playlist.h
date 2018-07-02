@@ -58,6 +58,8 @@ public:
     virtual unsigned int creationDate() const override;
     virtual const std::string& artworkMrl() const override;
     virtual Query<IMedia> media() const override;
+    virtual Query<IMedia> searchMedia( const std::string& pattern,
+                                       const QueryParameters* params ) const override;
     virtual bool append( int64_t mediaId ) override;
     virtual bool add( int64_t mediaId, unsigned int position ) override;
     virtual bool move( int64_t mediaId, unsigned int position ) override;

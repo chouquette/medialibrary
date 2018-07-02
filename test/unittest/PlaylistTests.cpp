@@ -327,3 +327,32 @@ TEST_F( Playlists, AddDuplicate )
     res = pl->append( m->id() );
     ASSERT_FALSE( res );
 }
+
+TEST_F( Playlists, SearchMedia )
+{
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "m1.mp3" ) );
+    m1->setTitleBuffered( "otter" );
+    m1->setType( IMedia::Type::Audio );
+    m1->save();
+
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "m2.mp3" ) );
+    // Won't match since it's not on the beginning of a word
+    m2->setTitleBuffered( "ENOOTTER" );
+    m2->setType( IMedia::Type::Audio );
+    m2->save();
+
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "m3.mp3" ) );
+    m3->setTitleBuffered( "otter otter otter" );
+    m3->setType( IMedia::Type::Audio );
+    m3->save();
+
+    pl->append( m1->id() );
+    pl->append( m2->id() );
+
+    auto media = ml->searchMedia( "otter", nullptr )->all();
+    ASSERT_EQ( 2u, media.size() );
+
+    media = pl->searchMedia( "otter", nullptr )->all();
+    ASSERT_EQ( 1u, media.size() );
+    ASSERT_EQ( m1->id(), media[0]->id() );
+}

@@ -776,6 +776,19 @@ Query<IMedia> Media::searchShowEpisodes(MediaLibraryPtr ml, const std::string& p
                                       File::Type::Main, Media::SubType::ShowEpisode );
 }
 
+Query<IMedia> Media::searchInPlaylist( MediaLibraryPtr ml, const std::string& pattern,
+                                       int64_t playlistId, const QueryParameters* params )
+{
+    std::string req = "FROM " + policy::MediaTable::Name + " m "
+           "INNER JOIN " + policy::FileTable::Name + " f ON m.id_media = f.media_id "
+           "LEFT JOIN PlaylistMediaRelation pmr ON pmr.media_id = m.id_media "
+           "WHERE pmr.playlist_id = ? AND m.is_present != 0 AND "
+           "m.id_media IN (SELECT rowid FROM " + policy::MediaTable::Name + "Fts "
+           "WHERE " + policy::MediaTable::Name + "Fts MATCH '*' || ? || '*')";
+    req += sortRequest( params );
+    return make_query<Media, IMedia>( ml, "m.*", std::move( req ), playlistId, pattern );
+}
+
 Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml )
 {
     static const std::string req = "FROM " + policy::MediaTable::Name + " WHERE last_played_date IS NOT NULL"
