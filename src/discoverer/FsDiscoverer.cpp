@@ -156,6 +156,12 @@ bool FsDiscoverer::reload( const std::string& entryPoint )
         LOG_ERROR( "Can't reload ", entryPoint, ": folder wasn't found in database" );
         return false;
     }
+    if ( folder->isPresent() == false )
+    {
+        LOG_INFO( "Folder ", entryPoint, " isn't present, and therefore won't "
+                  "be reloaded" );
+        return false;
+    }
     reloadFolder( std::move( folder ) );
     return true;
 }
