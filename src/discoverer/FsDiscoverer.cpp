@@ -113,12 +113,12 @@ void FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
     assert( f->isPresent() );
     auto mrl = f->mrl();
 
-    std::shared_ptr<fs::IDirectory> folder;
+    std::shared_ptr<fs::IDirectory> directory;
     try
     {
-        folder = m_fsFactory->createDirectory( mrl );
-        assert( folder->device() != nullptr );
-        if ( folder->device() == nullptr )
+        directory = m_fsFactory->createDirectory( mrl );
+        assert( directory->device() != nullptr );
+        if ( directory->device() == nullptr )
             return;
     }
     catch ( const std::system_error& ex )
@@ -129,7 +129,7 @@ void FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
     }
     try
     {
-        checkFolder( std::move( folder ), std::move( f ), false );
+        checkFolder( std::move( directory ), std::move( f ), false );
     }
     catch ( DeviceRemovedException& )
     {
