@@ -110,6 +110,7 @@ bool FsDiscoverer::discover( const std::string& entryPoint )
 
 void FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
 {
+    assert( f->isPresent() );
     auto mrl = f->mrl();
 
     try
@@ -136,7 +137,11 @@ bool FsDiscoverer::reload()
     LOG_INFO( "Reloading all folders" );
     auto rootFolders = Folder::fetchRootFolders( m_ml );
     for ( const auto& f : rootFolders )
+    {
+        // fetchRootFolders only returns present folders
+        assert( f->isPresent() == true );
         reloadFolder( f );
+    }
     return true;
 }
 
