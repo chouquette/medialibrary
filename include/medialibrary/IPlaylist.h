@@ -28,7 +28,7 @@
 namespace medialibrary
 {
 
-class QueryParameters;
+struct QueryParameters;
 
 class IPlaylist
 {
