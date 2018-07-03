@@ -61,7 +61,6 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, pol
         virtual const std::string& tvdbId() const override;
         bool setTvdbId( const std::string& tvdbId );
         virtual ShowPtr show() override;
-        virtual Query<IMedia> media() override;
 
         static void createTable( sqlite::Connection* dbConnection );
         static std::shared_ptr<ShowEpisode> create( MediaLibraryPtr ml, int64_t mediaId, unsigned int episodeNumber, int64_t showId );

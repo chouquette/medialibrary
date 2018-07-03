@@ -124,13 +124,6 @@ std::shared_ptr<IShow> ShowEpisode::show()
     return m_show;
 }
 
-Query<IMedia> ShowEpisode::media()
-{
-    static const std::string req = "FROM " + policy::MediaTable::Name
-            + " WHERE show_episode_id = ?";
-    return make_query<Media, IMedia>( m_ml, "*", req, m_id );
-}
-
 void ShowEpisode::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::ShowEpisodeTable::Name
