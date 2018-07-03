@@ -42,6 +42,7 @@ struct SearchAggregate
     Query<IArtist> artists;
     Query<IGenre> genres;
     Query<IMedia> media;
+    Query<IShow> shows;
     Query<IPlaylist> playlists;
 };
 

@@ -776,6 +776,7 @@ SearchAggregate MediaLibrary::search( const std::string& pattern,
     res.genres = searchGenre( pattern, params );
     res.media = searchMedia( pattern, params );
     res.playlists = searchPlaylists( pattern, params );
+    res.shows = searchShows( pattern, params );
     return res;
 }
 
