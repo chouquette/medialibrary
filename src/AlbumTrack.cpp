@@ -143,7 +143,6 @@ std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, int64_t albu
     if ( insert( ml, self, req, media->id(), duration >= 0 ? duration : 0, sqlite::ForeignKey( artistId ),
                  sqlite::ForeignKey( genreId ), trackNb, albumId, discNumber ) == false )
         return nullptr;
-    self->m_media = media;
     return self;
 }
 
@@ -260,16 +259,6 @@ std::shared_ptr<IAlbum> AlbumTrack::album()
 int64_t AlbumTrack::albumId() const
 {
     return m_albumId;
-}
-
-std::shared_ptr<IMedia> AlbumTrack::media()
-{
-    auto lock = m_media.lock();
-    if ( m_media.isCached() == false )
-    {
-        m_media = Media::fetch( m_ml, m_mediaId );
-    }
-    return m_media.get().lock();
 }
 
 }

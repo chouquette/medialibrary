@@ -72,25 +72,6 @@ TEST_F( AlbumTracks, SetGenre )
     ASSERT_EQ( t->genre()->id(), t2->albumTrack()->genre()->id() );
 }
 
-TEST_F( AlbumTracks, Media )
-{
-    auto album = ml->createAlbum( "album" );
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
-    auto track = album->addTrack( f, 1, 10, 0, nullptr );
-    f->save();
-
-    auto media = track->media();
-    ASSERT_NE( nullptr, media );
-    ASSERT_EQ( media->id(), f->id() );
-
-    Reload();
-
-    track = ml->albumTrack( track->id() );
-    media = track->media();
-    ASSERT_NE( nullptr, media );
-    ASSERT_EQ( media->id(), f->id() );
-}
-
 TEST_F( AlbumTracks, Album )
 {
     auto album = ml->createAlbum( "album" );
