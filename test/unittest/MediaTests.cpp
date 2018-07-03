@@ -656,6 +656,35 @@ TEST_F( Medias, Pagination )
     }
 }
 
+TEST_F( Medias, SortFilename )
+{
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "AAAAB.mp3" ) );
+    m1->setType( IMedia::Type::Audio );
+    m1->save();
+
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "aaaaa.mp3" ) );
+    m2->setType( IMedia::Type::Audio );
+    m2->save();
+
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "BbBbB.mp3" ) );
+    m3->setType( IMedia::Type::Audio );
+    m3->save();
+
+    QueryParameters params { SortingCriteria::Filename, false };
+    auto media = ml->audioFiles( &params )->all();
+    ASSERT_EQ( 3u, media.size() );
+    ASSERT_EQ( m2->id(), media[0]->id() );
+    ASSERT_EQ( m1->id(), media[1]->id() );
+    ASSERT_EQ( m3->id(), media[2]->id() );
+
+    params.desc = true;
+    media = ml->audioFiles( &params )->all();
+    ASSERT_EQ( 3u, media.size() );
+    ASSERT_EQ( m2->id(), media[2]->id() );
+    ASSERT_EQ( m1->id(), media[1]->id() );
+    ASSERT_EQ( m3->id(), media[0]->id() );
+}
+
 class FetchMedia : public Tests
 {
 protected:

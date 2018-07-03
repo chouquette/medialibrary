@@ -451,7 +451,7 @@ std::string Media::sortRequest( const QueryParameters* params )
         desc = !desc; // Make decreasing order default for play count sorting
         break;
     case SortingCriteria::Filename:
-        req += "m.filename";
+        req += "m.filename COLLATE NOCASE";
         break;
     case SortingCriteria::LastModificationDate:
         req += "f.last_modification_date";
