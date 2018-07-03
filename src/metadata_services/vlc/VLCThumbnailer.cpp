@@ -246,7 +246,7 @@ void VLCThumbnailer::setupVout( Task& task )
         nullptr,
 
         //display
-        [this, &task](void*) {
+        [&task](void*) {
             bool expected = true;
             if ( task.thumbnailRequired.compare_exchange_strong( expected, false ) )
             {

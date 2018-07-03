@@ -75,7 +75,7 @@ Status VLCMetadataService::run( IItem& item )
         if ( vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local | VLC::Media::ParseFlags::Network |
                                              VLC::Media::ParseFlags::FetchLocal, 5000 ) == false )
             return Status::Fatal;
-        m_cond.wait( lock, [&status, &done]() {
+        m_cond.wait( lock, [&done]() {
             return done == true;
         });
     }
