@@ -70,9 +70,12 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
         virtual uint32_t nbEpisodes() const override;
 
         static void createTable( sqlite::Connection* dbConnection );
+        static void createTriggers( sqlite::Connection* dbConnection );
         static std::shared_ptr<Show> create( MediaLibraryPtr ml, const std::string& title );
 
         static Query<IShow> listAll( MediaLibraryPtr ml, const QueryParameters* params );
+        static Query<IShow> search( MediaLibraryPtr ml, const std::string& pattern,
+                                    const QueryParameters* params );
 
     private:
         static std::string orderBy( const QueryParameters* params );

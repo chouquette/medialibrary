@@ -53,6 +53,7 @@ public:
     std::shared_ptr<Genre> createGenre( const std::string& name );
     void deleteGenre( int64_t genreId );
     void deleteArtist( int64_t artistId );
+    void deleteShow( int64_t showId );
     std::shared_ptr<Device> addDevice( const std::string& uuid, bool isRemovable );
     void setFsFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory );
     void deleteTrack( int64_t trackId );

@@ -188,7 +188,29 @@ void Show::createTable( sqlite::Connection* dbConnection )
                         "artwork_mrl TEXT,"
                         "tvdb_id TEXT"
                     ")";
+    const std::string reqFts = "CREATE VIRTUAL TABLE IF NOT EXISTS " +
+                policy::ShowTable::Name + "Fts USING FTS3"
+            "("
+                "title"
+            ")";
     sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection, reqFts );
+}
+
+void Show::createTriggers( sqlite::Connection* dbConnection )
+{
+    const std::string insertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_show_fts"
+            " AFTER INSERT ON " + policy::ShowTable::Name +
+            " BEGIN"
+            " INSERT INTO " + policy::ShowTable::Name + "Fts(rowid,title) VALUES(new.id_show, new.title);"
+            " END";
+    const std::string deleteTrigger = "CREATE TRIGGER IF NOT EXISTS delete_show_fts"
+            " BEFORE DELETE ON " + policy::ShowTable::Name +
+            " BEGIN"
+            " DELETE FROM " + policy::ShowTable::Name + "Fts WHERE rowid = old.id_show;"
+            " END";
+    sqlite::Tools::executeRequest( dbConnection, insertTrigger );
+    sqlite::Tools::executeRequest( dbConnection, deleteTrigger );
 }
 
 std::shared_ptr<Show> Show::create( MediaLibraryPtr ml, const std::string& name )
@@ -227,6 +249,16 @@ std::string Show::orderBy( const QueryParameters* params )
     if ( params != nullptr && params->desc == true )
         req += " DESC";
     return req;
+}
+
+Query<IShow> Show::search( MediaLibraryPtr ml, const std::string& pattern,
+                           const QueryParameters* params )
+{
+    std::string req = "FROM " + policy::ShowTable::Name + " WHERE id_show IN"
+            "(SELECT rowid FROM " + policy::ShowTable::Name + "Fts WHERE " +
+            policy::ShowTable::Name + "Fts MATCH '*' || ? || '*')";
+    req += orderBy( params );
+    return make_query<Show, IShow>( ml, "*", req, pattern );
 }
 
 }

@@ -34,6 +34,7 @@
 #include "Genre.h"
 #include "Media.h"
 #include "Folder.h"
+#include "Show.h"
 #include "mocks/FileSystem.h"
 
 
@@ -136,6 +137,11 @@ void MediaLibraryTester::deleteGenre( int64_t genreId )
 void MediaLibraryTester::deleteArtist( int64_t artistId )
 {
     Artist::destroy( this, artistId );
+}
+
+void MediaLibraryTester::deleteShow( int64_t showId )
+{
+    Show::destroy( this, showId );
 }
 
 std::shared_ptr<Device> MediaLibraryTester::addDevice( const std::string& uuid, bool isRemovable )

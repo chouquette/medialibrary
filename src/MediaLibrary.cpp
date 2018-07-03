@@ -186,6 +186,7 @@ void MediaLibrary::createAllTriggers()
     Playlist::createTriggers( m_dbConnection.get() );
     History::createTriggers( m_dbConnection.get() );
     Label::createTriggers( m_dbConnection.get() );
+    Show::createTriggers( m_dbConnection.get() );
 }
 
 template <typename T>
@@ -758,6 +759,12 @@ Query<IArtist> MediaLibrary::searchArtists( const std::string& name,
     if ( validateSearchPattern( name ) == false )
         return {};
     return Artist::search( this, name, params );
+}
+
+Query<IShow> MediaLibrary::searchShows( const std::string& pattern,
+                                        const QueryParameters* params ) const
+{
+    return Show::search( this, pattern, params );
 }
 
 SearchAggregate MediaLibrary::search( const std::string& pattern,

@@ -259,6 +259,37 @@ TEST_F( Shows, ListEpisodes )
     ASSERT_EQ( s01e01->id(), episodes[2]->id() );
 }
 
+TEST_F( Shows, Search )
+{
+    auto show1 = ml->createShow( "Cute fluffy sea otters" );
+    show1->setReleaseDate( 10 );
+    auto show2 = ml->createShow( "Less cute less fluffy naked mole rats" );
+    show2->setReleaseDate( 100 );
+
+    auto shows = ml->searchShows( "otters" )->all();
+    ASSERT_EQ( 1u, shows.size() );
+    ASSERT_EQ( show1->id(), shows[0]->id() );
+
+    QueryParameters params = { SortingCriteria::ReleaseDate, true };
+    shows = ml->searchShows( "fluffy", &params )->all();
+    ASSERT_EQ( 2u, shows.size() );
+    ASSERT_EQ( show2->id(), shows[0]->id() );
+    ASSERT_EQ( show1->id(), shows[1]->id() );
+}
+
+TEST_F( Shows, RemoveFromFts )
+{
+    auto show1 = ml->createShow( "The otters show" );
+
+    auto shows = ml->searchShows( "otters" )->all();
+    ASSERT_EQ( 1u, shows.size() );
+
+    ml->deleteShow( show1->id() );
+
+    shows = ml->searchShows( "otters" )->all();
+    ASSERT_EQ( 0u, shows.size() );
+}
+
 ////////////////////////////////////////////////////
 // Files links:
 ////////////////////////////////////////////////////
