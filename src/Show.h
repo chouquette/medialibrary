@@ -74,6 +74,9 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
 
         static Query<IShow> listAll( MediaLibraryPtr ml, const QueryParameters* params );
 
+    private:
+        static std::string orderBy( const QueryParameters* params );
+
     protected:
         MediaLibraryPtr m_ml;
 

@@ -202,8 +202,11 @@ TEST_F( Shows, SetEpisodeTvdbId )
 TEST_F( Shows, ListAll )
 {
     auto show1 = ml->createShow( "aaaa" );
+    show1->setReleaseDate( 5 );
     auto show2 = ml->createShow( "zzzz" );
+    show2->setReleaseDate( 1 );
     auto show3 = ml->createShow( "pppp" );
+    show3->setReleaseDate( 10 );
 
     auto shows = ml->shows( nullptr )->all();
     ASSERT_EQ( 3u, shows.size() );
@@ -217,6 +220,14 @@ TEST_F( Shows, ListAll )
     ASSERT_EQ( show2->id(), shows[0]->id() );
     ASSERT_EQ( show3->id(), shows[1]->id() );
     ASSERT_EQ( show1->id(), shows[2]->id() );
+
+    params.sort = SortingCriteria::ReleaseDate;
+    params.desc = false;
+    shows = ml->shows( &params )->all();
+    ASSERT_EQ( 3u, shows.size() );
+    ASSERT_EQ( show2->id(), shows[0]->id() );
+    ASSERT_EQ( show1->id(), shows[1]->id() );
+    ASSERT_EQ( show3->id(), shows[2]->id() );
 }
 
 TEST_F( Shows, ListEpisodes )

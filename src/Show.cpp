@@ -203,7 +203,14 @@ std::shared_ptr<Show> Show::create( MediaLibraryPtr ml, const std::string& name 
 
 Query<IShow> Show::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::ShowTable::Name + " ORDER BY ";
+    std::string req = "FROM " + policy::ShowTable::Name;
+    req += orderBy( params );
+    return make_query<Show, IShow>( ml, "*", std::move( req ) );
+}
+
+std::string Show::orderBy( const QueryParameters* params )
+{
+    std::string req = " ORDER BY ";
     SortingCriteria sort = params != nullptr ? params->sort : SortingCriteria::Default;
     switch ( sort )
     {
@@ -219,7 +226,7 @@ Query<IShow> Show::listAll( MediaLibraryPtr ml, const QueryParameters* params )
     }
     if ( params != nullptr && params->desc == true )
         req += " DESC";
-    return make_query<Show, IShow>( ml, "*", req );
+    return req;
 }
 
 }
