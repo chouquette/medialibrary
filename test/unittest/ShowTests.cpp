@@ -148,7 +148,7 @@ TEST_F( Shows, FetchShowFromEpisode )
     ASSERT_NE( nullptr, f->showEpisode() );
     s2 = f->showEpisode()->show();
     ASSERT_NE( s2, nullptr );
-    ASSERT_EQ( s->name(), s2->name() );
+    ASSERT_EQ( s->title(), s2->title() );
 }
 
 TEST_F( Shows, SetEpisodeSeasonNumber )

@@ -50,10 +50,10 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
 {
     public:
         Show( MediaLibraryPtr ml, sqlite::Row& row );
-        Show( MediaLibraryPtr ml, const std::string& name );
+        Show( MediaLibraryPtr ml, const std::string& title );
 
         virtual int64_t id() const override;
-        virtual const std::string& name() const override;
+        virtual const std::string& title() const override;
         virtual time_t releaseDate() const override;
         bool setReleaseDate( time_t date );
         virtual const std::string& shortSummary() const override;
@@ -70,7 +70,7 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
         virtual uint32_t nbEpisodes() const override;
 
         static void createTable( sqlite::Connection* dbConnection );
-        static std::shared_ptr<Show> create( MediaLibraryPtr ml, const std::string& name );
+        static std::shared_ptr<Show> create( MediaLibraryPtr ml, const std::string& title );
 
         static Query<IShow> listAll( MediaLibraryPtr ml, const QueryParameters* params );
 
@@ -78,7 +78,7 @@ class Show : public IShow, public DatabaseHelpers<Show, policy::ShowTable>
         MediaLibraryPtr m_ml;
 
         int64_t m_id;
-        std::string m_name;
+        std::string m_title;
         time_t m_releaseDate;
         std::string m_shortSummary;
         std::string m_artworkMrl;

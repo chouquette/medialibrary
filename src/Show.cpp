@@ -44,7 +44,7 @@ Show::Show( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
 {
     row >> m_id
-        >> m_name
+        >> m_title
         >> m_releaseDate
         >> m_shortSummary
         >> m_artworkMrl
@@ -54,7 +54,7 @@ Show::Show( MediaLibraryPtr ml, sqlite::Row& row )
 Show::Show( MediaLibraryPtr ml, const std::string& name )
     : m_ml( ml )
     , m_id( 0 )
-    , m_name( name )
+    , m_title( name )
     , m_releaseDate( 0 )
 {
 }
@@ -64,9 +64,9 @@ int64_t Show::id() const
     return m_id;
 }
 
-const std::string& Show::name() const
+const std::string& Show::title() const
 {
-    return m_name;
+    return m_title;
 }
 
 time_t Show::releaseDate() const
@@ -182,7 +182,7 @@ void Show::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::ShowTable::Name + "("
                         "id_show INTEGER PRIMARY KEY AUTOINCREMENT,"
-                        "name TEXT, "
+                        "title TEXT, "
                         "release_date UNSIGNED INTEGER,"
                         "short_summary TEXT,"
                         "artwork_mrl TEXT,"
@@ -195,7 +195,7 @@ std::shared_ptr<Show> Show::create( MediaLibraryPtr ml, const std::string& name 
 {
     auto show = std::make_shared<Show>( ml, name );
     static const std::string req = "INSERT INTO " + policy::ShowTable::Name
-            + "(name) VALUES(?)";
+            + "(title) VALUES(?)";
     if ( insert( ml, show, req, name ) == false )
         return nullptr;
     return show;
@@ -213,7 +213,7 @@ Query<IShow> Show::listAll( MediaLibraryPtr ml, const QueryParameters* params )
         case SortingCriteria::Default:
         case SortingCriteria::Alpha:
         default:
-            req += "name";
+            req += "title";
             break;
 
     }
