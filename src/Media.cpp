@@ -540,80 +540,21 @@ void Media::setTitleBuffered( const std::string& title )
 
 void Media::createTable( sqlite::Connection* connection )
 {
-    std::string req = "CREATE TABLE IF NOT EXISTS " + policy::MediaTable::Name + "("
-            "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "type INTEGER,"
-            "subtype INTEGER NOT NULL DEFAULT " +
-                std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
-                                    IMedia::SubType::Unknown ) ) + ","
-            "duration INTEGER DEFAULT -1,"
-            "play_count UNSIGNED INTEGER,"
-            "last_played_date UNSIGNED INTEGER,"
-            "insertion_date UNSIGNED INTEGER,"
-            "release_date UNSIGNED INTEGER,"
-            "thumbnail_id INTEGER,"
-            "thumbnail_generated BOOLEAN NOT NULL DEFAULT 0,"
-            "title TEXT COLLATE NOCASE,"
-            "filename TEXT,"
-            "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
-            "is_present BOOLEAN NOT NULL DEFAULT 1,"
-            "FOREIGN KEY(thumbnail_id) REFERENCES " + policy::ThumbnailTable::Name
-            + "(id_thumbnail)"
-            ")";
-
-    const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
-                + policy::MediaTable::Name + "Fts USING FTS3("
-                "title,"
-                "labels"
-            ")";
-    sqlite::Tools::executeRequest( connection, req );
-    sqlite::Tools::executeRequest( connection, vtableReq );
+    std::string reqs[] = {
+        #include "database/tables/Media_v14.sql"
+    };
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( connection, req );
 }
 
 void Media::createTriggers( sqlite::Connection* connection )
 {
-    const std::string indexReq = "CREATE INDEX IF NOT EXISTS index_last_played_date ON "
-            + policy::MediaTable::Name + "(last_played_date DESC)";
-    static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS has_files_present AFTER UPDATE OF "
-            "is_present ON " + policy::FileTable::Name +
-            " BEGIN "
-            " UPDATE " + policy::MediaTable::Name + " SET is_present="
-                "(SELECT EXISTS("
-                    "SELECT id_file FROM " + policy::FileTable::Name +
-                    " WHERE media_id=new.media_id AND is_present != 0 LIMIT 1"
-                ") )"
-                "WHERE id_media=new.media_id;"
-            " END;";
-    static const std::string triggerReq2 = "CREATE TRIGGER IF NOT EXISTS cascade_file_deletion AFTER DELETE ON "
-            + policy::FileTable::Name +
-            " BEGIN "
-            " DELETE FROM " + policy::MediaTable::Name + " WHERE "
-                "(SELECT COUNT(id_file) FROM " + policy::FileTable::Name + " WHERE media_id=old.media_id) = 0"
-                " AND id_media=old.media_id;"
-            " END;";
+    const std::string reqs[] = {
+        #include "database/tables/Media_triggers_v14.sql"
+    };
 
-    static const std::string vtableInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_media_fts"
-            " AFTER INSERT ON " + policy::MediaTable::Name +
-            " BEGIN"
-            " INSERT INTO " + policy::MediaTable::Name + "Fts(rowid,title,labels) VALUES(new.id_media, new.title, '');"
-            " END";
-    static const std::string vtableDeleteTrigger = "CREATE TRIGGER IF NOT EXISTS delete_media_fts"
-            " BEFORE DELETE ON " + policy::MediaTable::Name +
-            " BEGIN"
-            " DELETE FROM " + policy::MediaTable::Name + "Fts WHERE rowid = old.id_media;"
-            " END";
-    static const std::string vtableUpdateTitleTrigger2 = "CREATE TRIGGER IF NOT EXISTS update_media_title_fts"
-              " AFTER UPDATE OF title ON " + policy::MediaTable::Name +
-              " BEGIN"
-              " UPDATE " + policy::MediaTable::Name + "Fts SET title = new.title WHERE rowid = new.id_media;"
-              " END";
-
-    sqlite::Tools::executeRequest( connection, indexReq );
-    sqlite::Tools::executeRequest( connection, triggerReq );
-    sqlite::Tools::executeRequest( connection, triggerReq2 );
-    sqlite::Tools::executeRequest( connection, vtableInsertTrigger );
-    sqlite::Tools::executeRequest( connection, vtableDeleteTrigger );
-    sqlite::Tools::executeRequest( connection, vtableUpdateTitleTrigger2 );
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( connection, req );
 }
 
 bool Media::addLabel( LabelPtr label )

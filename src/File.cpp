@@ -170,44 +170,19 @@ int64_t File::folderId()
 
 void File::createTable( sqlite::Connection* dbConnection )
 {
-    std::string req = "CREATE TABLE IF NOT EXISTS " + policy::FileTable::Name + "("
-            "id_file INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "media_id UNSIGNED INT DEFAULT NULL,"
-            "playlist_id UNSIGNED INT DEFAULT NULL,"
-            "mrl TEXT,"
-            "type UNSIGNED INTEGER,"
-            "last_modification_date UNSIGNED INT,"
-            "size UNSIGNED INT,"
-            "folder_id UNSIGNED INTEGER,"
-            "is_present BOOLEAN NOT NULL DEFAULT 1,"
-            "is_removable BOOLEAN NOT NULL,"
-            "is_external BOOLEAN NOT NULL,"
-            "FOREIGN KEY (media_id) REFERENCES " + policy::MediaTable::Name
-            + "(id_media) ON DELETE CASCADE,"
-            "FOREIGN KEY (playlist_id) REFERENCES " + policy::PlaylistTable::Name
-            + "(id_playlist) ON DELETE CASCADE,"
-            "FOREIGN KEY (folder_id) REFERENCES " + policy::FolderTable::Name
-            + "(id_folder) ON DELETE CASCADE,"
-            "UNIQUE( mrl, folder_id ) ON CONFLICT FAIL"
-        ")";
-
+    std::string req {
+        #include "database/tables/File_v14.sql"
+    };
     sqlite::Tools::executeRequest( dbConnection, req );
 }
 
 void File::createTriggers(sqlite::Connection* dbConnection)
 {
-    std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_folder_present AFTER UPDATE OF is_present ON "
-            + policy::FolderTable::Name +
-            " BEGIN"
-            " UPDATE " + policy::FileTable::Name + " SET is_present = new.is_present WHERE folder_id = new.id_folder;"
-            " END";
-    std::string mediaIndexReq = "CREATE INDEX IF NOT EXISTS file_media_id_index ON " +
-            policy::FileTable::Name + "(media_id)";
-    std::string folderIndexReq = "CREATE INDEX IF NOT EXISTS file_folder_id_index ON " +
-            policy::FileTable::Name + "(folder_id)";
-    sqlite::Tools::executeRequest( dbConnection, triggerReq );
-    sqlite::Tools::executeRequest( dbConnection, mediaIndexReq );
-    sqlite::Tools::executeRequest( dbConnection, folderIndexReq );
+    const std::string reqs[] = {
+        #include "database/tables/File_triggers_v14.sql"
+    };
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConnection, req );
 }
 
 std::shared_ptr<File> File::createFromMedia( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& fileFs,

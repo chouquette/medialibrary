@@ -73,48 +73,20 @@ Folder::Folder(MediaLibraryPtr ml, const std::string& path, int64_t parent, int6
 
 void Folder::createTable( sqlite::Connection* connection)
 {
-    std::string req = "CREATE TABLE IF NOT EXISTS " + policy::FolderTable::Name +
-            "("
-            "id_folder INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "path TEXT,"
-            "parent_id UNSIGNED INTEGER,"
-            "is_blacklisted BOOLEAN NOT NULL DEFAULT 0,"
-            "device_id UNSIGNED INTEGER,"
-            "is_present BOOLEAN NOT NULL DEFAULT 1,"
-            "is_removable BOOLEAN NOT NULL,"
-            "FOREIGN KEY (parent_id) REFERENCES " + policy::FolderTable::Name +
-            "(id_folder) ON DELETE CASCADE,"
-            "FOREIGN KEY (device_id) REFERENCES " + policy::DeviceTable::Name +
-            "(id_device) ON DELETE CASCADE,"
-            "UNIQUE(path, device_id) ON CONFLICT FAIL"
-            ")";
-    std::string exclEntryReq = "CREATE TABLE IF NOT EXISTS ExcludedEntryFolder("
-                               "folder_id UNSIGNED INTEGER NOT NULL,"
-                               "FOREIGN KEY (folder_id) REFERENCES " + policy::FolderTable::Name +
-                               "(id_folder) ON DELETE CASCADE,"
-                               "UNIQUE(folder_id) ON CONFLICT FAIL"
-                               ")";
-
-    sqlite::Tools::executeRequest( connection, req );
-    sqlite::Tools::executeRequest( connection, exclEntryReq );
+    const std::string reqs[] = {
+        #include "database/tables/Folder_v14.sql"
+    };
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( connection, req );
 }
 
 void Folder::createTriggers( sqlite::Connection* connection )
 {
-    std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_device_present AFTER UPDATE OF is_present ON "
-            + policy::DeviceTable::Name +
-            " WHEN old.is_present != new.is_present"
-            " BEGIN"
-            " UPDATE " + policy::FolderTable::Name + " SET is_present = new.is_present WHERE device_id = new.id_device;"
-            " END";
-    std::string deviceIndexReq = "CREATE INDEX IF NOT EXISTS folder_device_id_idx ON " +
-            policy::FolderTable::Name + " (device_id)";
-    std::string parentFolderIndexReq = "CREATE INDEX IF NOT EXISTS parent_folder_id_idx ON " +
-            policy::FolderTable::Name + " (parent_id)";
-
-    sqlite::Tools::executeRequest( connection, triggerReq );
-    sqlite::Tools::executeRequest( connection, deviceIndexReq );
-    sqlite::Tools::executeRequest( connection, parentFolderIndexReq );
+    const std::string reqs[] = {
+        #include "database/tables/Folder_triggers_v14.sql"
+    };
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( connection, req );
 }
 
 std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& mrl,
