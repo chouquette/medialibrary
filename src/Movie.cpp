@@ -87,13 +87,6 @@ bool Movie::setImdbId( const std::string& imdbId )
     return true;
 }
 
-Query<IMedia> Movie::media()
-{
-    static const std::string req = "FROM " + policy::MediaTable::Name
-            + " WHERE movie_id = ?";
-    return make_query<Media, IMedia>( m_ml, "*", req, m_id );
-}
-
 void Movie::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::MovieTable::Name
