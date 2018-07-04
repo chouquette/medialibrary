@@ -41,9 +41,28 @@ class IMedia
     public:
         enum class Type : uint8_t
         {
+            /**
+             * Unknown media type. Type is used to avoid 0 being a valid value
+             * Media that are discovered by the medialibrary will not be
+             * added to the collection when their type can't be determined
+             */
             Unknown,
+            /**
+             * Video media
+             */
             Video,
+            /**
+             * Audio media
+             */
             Audio,
+            /**
+             * External media, ie. media that were not discovered by the media
+             * library, but that were added manually by the user.
+             * These media are not analyzed, so their subtype, tracks, or other
+             * details are not known.
+             * They can, however, be used to store meta or be included in the
+             * playback history.
+             */
             External,
         };
         enum class SubType : uint8_t
