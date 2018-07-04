@@ -125,10 +125,10 @@ TEST_F( Artists, Albums )
     ASSERT_NE( album1, nullptr );
     ASSERT_NE( album2, nullptr );
 
-    auto media1 = ml->addFile( "track1.mp3" );
+    auto media1 = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
     ASSERT_NE( nullptr, media1 );
     album1->addTrack( media1, 1, 0, artist->id(), nullptr );
-    auto media2 = ml->addFile( "track2.mp3" );
+    auto media2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3" ) );
     ASSERT_NE( nullptr, media2 );
     album2->addTrack( media2, 1, 0, artist->id(), nullptr );
 
@@ -373,15 +373,15 @@ TEST_F( Artists, SortAlbum )
 {
     auto artist = ml->createArtist( "Dream Seaotter" );
     auto album1 = ml->createAlbum( "album1" );
-    auto media1 = ml->addFile( "track1.mp3" );
+    auto media1 = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
     album1->addTrack( media1, 1, 0, artist->id(), nullptr );
     album1->setReleaseYear( 2000, false );
     auto album2 = ml->createAlbum( "album2" );
-    auto media2 = ml->addFile( "track2.mp3" );
+    auto media2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3" ) );
     album2->addTrack( media2, 1, 0, artist->id(), nullptr );
     album2->setReleaseYear( 1000, false );
     auto album3 = ml->createAlbum( "album3" );
-    auto media3 = ml->addFile( "track2.mp3" );
+    auto media3 = std::static_pointer_cast<Media>( ml->addMedia( "track3.mp3" ) );
     album3->addTrack( media3, 1, 0, artist->id(), nullptr );
     album3->setReleaseYear( 2000, false );
 
@@ -492,8 +492,8 @@ TEST_F( Artists, SortTracksMultiDisc )
     for ( auto i = 0; i < 3; ++i )
     {
         auto j = i * 2;
-        auto media1 = ml->addFile( "track_" + std::to_string( j ) + ".mp3" );
-        auto media2 = ml->addFile( "track_" + std::to_string( j + 1 ) + ".mp3" );
+        auto media1 = std::static_pointer_cast<Media>( ml->addMedia( "track_" + std::to_string( j ) + ".mp3" ) );
+        auto media2 = std::static_pointer_cast<Media>( ml->addMedia( "track_" + std::to_string( j + 1 ) + ".mp3" ) );
         album->addTrack( media1, i, 1, artist->id(), nullptr );
         album->addTrack( media2, i, 2, artist->id(), nullptr );
         artist->addMedia( *media1 );

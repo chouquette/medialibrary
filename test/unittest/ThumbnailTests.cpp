@@ -45,7 +45,7 @@ TEST_F( Thumbnails, Create )
 TEST_F( Thumbnails, MediaSetThumbnail )
 {
     std::string mrl = "/path/to/thumbnail.png";
-    auto m = ml->addFile( "/path/to/media.mp3" );
+    auto m = ml->addMedia( "/path/to/media.mp3" );
     ASSERT_FALSE( m->isThumbnailGenerated() );
     auto res = m->setThumbnail( mrl );
     ASSERT_TRUE( res );
