@@ -187,6 +187,11 @@ bool Media::increasePlayCount()
     return true;
 }
 
+time_t Media::lastPlayedDate() const
+{
+    return m_lastPlayedDate;
+}
+
 bool Media::isFavorite() const
 {
     return m_isFavorite;

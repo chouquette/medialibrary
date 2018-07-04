@@ -126,6 +126,7 @@ class IMedia
         virtual int64_t duration() const = 0;
         virtual int playCount() const = 0;
         virtual bool increasePlayCount() = 0;
+        virtual time_t lastPlayedDate() const = 0;
         virtual ShowEpisodePtr showEpisode() const = 0;
         virtual const std::vector<FilePtr>& files() const = 0;
         /**

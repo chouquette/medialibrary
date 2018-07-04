@@ -91,6 +91,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual Query<ILabel> labels() const override;
         virtual int playCount() const  override;
         virtual bool increasePlayCount() override;
+        virtual time_t lastPlayedDate() const override;
         virtual bool isFavorite() const override;
         virtual bool setFavorite( bool favorite ) override;
         virtual const std::vector<FilePtr>& files() const override;
