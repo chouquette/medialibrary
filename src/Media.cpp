@@ -735,7 +735,7 @@ Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml )
     static const std::string req = "FROM " + policy::MediaTable::Name +
             " WHERE last_played_date IS NOT NULL"
             " AND type != ?"
-            " ORDER BY last_played_date DESC LIMIT 100";
+            " ORDER BY last_played_date DESC";
     return make_query<Media, IMedia>( ml, "*", req, IMedia::Type::Stream );
 }
 
@@ -744,7 +744,7 @@ Query<IMedia> Media::fetchStreamHistory(MediaLibraryPtr ml)
     static const std::string req = "FROM " + policy::MediaTable::Name +
             " WHERE last_played_date IS NOT NULL"
             " AND type = ?"
-            " ORDER BY last_played_date DESC LIMIT 100";
+            " ORDER BY last_played_date DESC";
     return make_query<Media, IMedia>( ml, "*", req, IMedia::Type::Stream );
 }
 
