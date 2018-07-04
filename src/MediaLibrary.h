@@ -28,6 +28,7 @@
 #include "Settings.h"
 
 #include "medialibrary/IDeviceLister.h"
+#include "medialibrary/IMedia.h"
 
 namespace medialibrary
 {
@@ -73,6 +74,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual MediaPtr media( int64_t mediaId ) const override;
         virtual MediaPtr media( const std::string& mrl ) const override;
         virtual MediaPtr addExternalMedia( const std::string& mrl ) override;
+        virtual MediaPtr addStream( const std::string& mrl ) override;
         virtual Query<IMedia> audioFiles( const QueryParameters* params ) const override;
         virtual Query<IMedia> videoFiles( const QueryParameters* params ) const override;
 
@@ -205,6 +207,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         // Returns true if the device actually changed
         bool onDeviceChanged( fs::IFileSystemFactory& fsFactory, Device& device );
         bool createThumbnailFolder( const std::string& thumbnailPath ) const;
+
+        MediaPtr addExternalMedia( const std::string& mrl, IMedia::Type type );
 
     protected:
         virtual void addLocalFsFactory();

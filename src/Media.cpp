@@ -627,10 +627,10 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
             " WHERE " + policy::MediaTable::Name + "Fts MATCH '*' || ? || '*')"
             " AND f.is_present = 1"
             " AND f.type = ?"
-            " AND m.type != ?";
+            " AND m.type != ? AND m.type != ?";
     req += sortRequest( params );
     return make_query<Media, IMedia>( ml, "m.*", req, title, File::Type::Main,
-                                      Media::Type::External );
+                                      Media::Type::External, Media::Type::Stream );
 }
 
 Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,

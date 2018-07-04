@@ -435,13 +435,13 @@ MediaPtr MediaLibrary::media( const std::string& mrl ) const
     return file->media();
 }
 
-MediaPtr MediaLibrary::addExternalMedia( const std::string& mrl )
+MediaPtr MediaLibrary::addExternalMedia( const std::string& mrl, IMedia::Type type )
 {
     try
     {
-        return sqlite::Tools::withRetries( 3, [this, &mrl]() -> MediaPtr {
+        return sqlite::Tools::withRetries( 3, [this, &mrl, type]() -> MediaPtr {
             auto t = m_dbConnection->newTransaction();
-            auto media = Media::create( this, IMedia::Type::External, utils::file::fileName( mrl ) );
+            auto media = Media::create( this, type, utils::file::fileName( mrl ) );
             if ( media == nullptr )
                 return nullptr;
             if ( media->addExternalMrl( mrl, IFile::Type::Main ) == nullptr )
@@ -455,6 +455,16 @@ MediaPtr MediaLibrary::addExternalMedia( const std::string& mrl )
         LOG_ERROR( "Failed to create external media: ", ex.what() );
         return nullptr;
     }
+}
+
+MediaPtr MediaLibrary::addExternalMedia( const std::string& mrl )
+{
+    return addExternalMedia( mrl, IMedia::Type::External );
+}
+
+MediaPtr MediaLibrary::addStream( const std::string& mrl )
+{
+    return addExternalMedia( mrl, IMedia::Type::Stream );
 }
 
 Query<IMedia> MediaLibrary::audioFiles( const QueryParameters* params ) const

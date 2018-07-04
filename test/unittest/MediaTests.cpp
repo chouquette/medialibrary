@@ -685,6 +685,31 @@ TEST_F( Medias, SortFilename )
     ASSERT_EQ( m3->id(), media[0]->id() );
 }
 
+TEST_F( Medias, CreateStream )
+{
+    auto m1 = ml->addStream( "http://foo.bar/media.mkv" );
+    ASSERT_EQ( IMedia::Type::Stream, m1->type() );
+}
+
+TEST_F( Medias, SearchExternal )
+{
+    auto m1 = std::static_pointer_cast<Media>( ml->addExternalMedia( "localfile.mkv" ) );
+    m1->setTitle( "local otter" );
+    auto m2 = std::static_pointer_cast<Media>( ml->addStream( "http://remote.file/media.asf" ) );
+    m2->setTitle( "remote otter" );
+
+    auto media = ml->searchMedia( "otter", nullptr )->all();
+    ASSERT_EQ( 0u, media.size() );
+
+    m1->setType( IMedia::Type::Video );
+    m1->save();
+    m2->setType( IMedia::Type::Video );
+    m2->save();
+
+    media = ml->searchMedia( "otter", nullptr )->all();
+    ASSERT_EQ( 2u, media.size() );
+}
+
 class FetchMedia : public Tests
 {
 protected:

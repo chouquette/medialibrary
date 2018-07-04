@@ -64,6 +64,12 @@ class IMedia
              * playback history.
              */
             External,
+            /**
+             * Represent a stream, which is a specific kind of External media.
+             * This type of media is also intended to be inserted manually by
+             * the user.
+             */
+            Stream,
         };
         enum class SubType : uint8_t
         {

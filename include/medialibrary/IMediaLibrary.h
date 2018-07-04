@@ -264,6 +264,13 @@ class IMediaLibrary
          * The media can be fetched using media( std::string ) afterward.
          */
         virtual MediaPtr addExternalMedia( const std::string& mrl ) = 0;
+        /**
+         * @brief addStream Create an external media of type IMedia::Type::Stream
+         *
+         * This is equivalent to addExternalMedia, except for the resulting
+         * new media's type
+         */
+        virtual MediaPtr addStream( const std::string& mrl ) = 0;
         virtual Query<IMedia> audioFiles( const QueryParameters* params = nullptr ) const = 0;
         virtual Query<IMedia> videoFiles( const QueryParameters* params = nullptr ) const = 0;
         virtual AlbumPtr album( int64_t id ) const = 0;
