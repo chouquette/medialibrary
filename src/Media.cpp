@@ -732,16 +732,26 @@ Query<IMedia> Media::searchInPlaylist( MediaLibraryPtr ml, const std::string& pa
 
 Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml )
 {
-    static const std::string req = "FROM " + policy::MediaTable::Name + " WHERE last_played_date IS NOT NULL"
+    static const std::string req = "FROM " + policy::MediaTable::Name +
+            " WHERE last_played_date IS NOT NULL"
+            " AND type != ?"
             " ORDER BY last_played_date DESC LIMIT 100";
-    return make_query<Media, IMedia>( ml, "*", req );
+    return make_query<Media, IMedia>( ml, "*", req, IMedia::Type::Stream );
+}
+
+Query<IMedia> Media::fetchStreamHistory(MediaLibraryPtr ml)
+{
+    static const std::string req = "FROM " + policy::MediaTable::Name +
+            " WHERE last_played_date IS NOT NULL"
+            " AND type = ?"
+            " ORDER BY last_played_date DESC LIMIT 100";
+    return make_query<Media, IMedia>( ml, "*", req, IMedia::Type::Stream );
 }
 
 void Media::clearHistory( MediaLibraryPtr ml )
 {
     auto dbConn = ml->getConn();
-    // There should already be an active transaction, from MediaLibrary::clearHistory
-    assert( sqlite::Transaction::transactionInProgress() == true );
+    auto t = dbConn->newTransaction();
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
             "play_count = 0,"
             "last_played_date = NULL";
@@ -753,6 +763,7 @@ void Media::clearHistory( MediaLibraryPtr ml )
                      static_cast<MDType>( IMedia::MetadataType::Progress ) );
 
     sqlite::Tools::executeUpdate( dbConn, req );
+    t->commit();
 }
 
 }

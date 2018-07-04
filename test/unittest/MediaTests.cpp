@@ -330,12 +330,12 @@ TEST_F( Medias, History )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
 
-    auto history = ml->lastMediaPlayed()->all();
+    auto history = ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
 
     m->increasePlayCount();
     m->save();
-    history = ml->lastMediaPlayed()->all();
+    history = ml->history()->all();
     ASSERT_EQ( 1u, history.size() );
     ASSERT_EQ( m->id(), history[0]->id() );
 
@@ -343,32 +343,49 @@ TEST_F( Medias, History )
     auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mkv" ) );
     m2->increasePlayCount();
 
-    history = ml->lastMediaPlayed()->all();
+    history = ml->history()->all();
     ASSERT_EQ( 2u, history.size() );
     ASSERT_EQ( m2->id(), history[0]->id() );
     ASSERT_EQ( m->id(), history[1]->id() );
+}
+
+TEST_F( Medias, StreamHistory )
+{
+    auto m1 = std::static_pointer_cast<Media>( ml->addStream( "http://media.org/sample.mkv" ) );
+    auto m2 = std::static_pointer_cast<Media>( ml->addStream( "http://media.org/sample2.mkv" ) );
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "localfile.mkv" ) );
+
+    m1->increasePlayCount();
+    m2->increasePlayCount();
+    m3->increasePlayCount();
+
+    auto history = ml->streamHistory()->all();
+    ASSERT_EQ( 2u, history.size() );
+
+    history = ml->history()->all();
+    ASSERT_EQ( 1u, history.size() );
 }
 
 TEST_F( Medias, ClearHistory )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
 
-    auto history = ml->lastMediaPlayed()->all();
+    auto history = ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
 
     m->increasePlayCount();
     m->save();
-    history = ml->lastMediaPlayed()->all();
+    history = ml->history()->all();
     ASSERT_EQ( 1u, history.size() );
 
     ASSERT_TRUE( ml->clearHistory() );
 
-    history = ml->lastMediaPlayed()->all();
+    history = ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
 
     Reload();
 
-    history = ml->lastMediaPlayed()->all();
+    history = ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
 }
 

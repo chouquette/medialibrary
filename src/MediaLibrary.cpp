@@ -41,7 +41,6 @@
 #include "File.h"
 #include "Folder.h"
 #include "Genre.h"
-#include "History.h"
 #include "Media.h"
 #include "MediaLibrary.h"
 #include "Label.h"
@@ -138,7 +137,6 @@ void MediaLibrary::clearCache()
     Device::clear();
     File::clear();
     Playlist::clear();
-    History::clear();
     Genre::clear();
     Thumbnail::clear();
 }
@@ -167,7 +165,6 @@ void MediaLibrary::createAllTables()
     AudioTrack::createTable( m_dbConnection.get() );
     Artist::createTable( m_dbConnection.get() );
     Artist::createDefaultArtists( m_dbConnection.get() );
-    History::createTable( m_dbConnection.get() );
     Settings::createTable( m_dbConnection.get() );
     parser::Task::createTable( m_dbConnection.get() );
     Metadata::createTable( m_dbConnection.get() );
@@ -184,7 +181,6 @@ void MediaLibrary::createAllTriggers()
     File::createTriggers( m_dbConnection.get() );
     Genre::createTriggers( m_dbConnection.get() );
     Playlist::createTriggers( m_dbConnection.get() );
-    History::createTriggers( m_dbConnection.get() );
     Label::createTriggers( m_dbConnection.get() );
     Show::createTriggers( m_dbConnection.get() );
 }
@@ -675,27 +671,14 @@ bool MediaLibrary::deletePlaylist( int64_t playlistId )
     }
 }
 
-bool MediaLibrary::addToStreamHistory( MediaPtr media )
-{
-    try
-    {
-        return History::insert( getConn(), media->id() );
-    }
-    catch ( const sqlite::errors::Generic& ex )
-    {
-        LOG_ERROR( "Failed to add stream to history: ", ex.what() );
-        return false;
-    }
-}
-
-Query<IHistoryEntry> MediaLibrary::lastStreamsPlayed() const
-{
-    return History::fetch( this );
-}
-
-Query<IMedia> MediaLibrary::lastMediaPlayed() const
+Query<IMedia> MediaLibrary::history() const
 {
     return Media::fetchHistory( this );
+}
+
+Query<IMedia> MediaLibrary::streamHistory() const
+{
+    return Media::fetchStreamHistory( this );
 }
 
 bool MediaLibrary::clearHistory()
@@ -703,10 +686,7 @@ bool MediaLibrary::clearHistory()
     try
     {
         return sqlite::Tools::withRetries( 3, [this]() {
-            auto t = getConn()->newTransaction();
             Media::clearHistory( this );
-            History::clearStreams( this );
-            t->commit();
             return true;
         });
     }

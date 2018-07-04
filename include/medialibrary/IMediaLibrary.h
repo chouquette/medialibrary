@@ -311,9 +311,8 @@ class IMediaLibrary
         /**
          * History
          */
-        virtual bool addToStreamHistory( MediaPtr media ) = 0;
-        virtual Query<IHistoryEntry> lastStreamsPlayed() const = 0;
-        virtual Query<IMedia> lastMediaPlayed() const = 0;
+        virtual Query<IMedia> history() const = 0;
+        virtual Query<IMedia> streamHistory() const = 0;
         /**
          * @brief clearHistory will clear both streams history & media history.
          * @return true in case of success, false otherwise. The database will stay untouched in case

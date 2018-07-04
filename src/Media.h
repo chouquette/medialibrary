@@ -140,6 +140,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         static Query<IMedia> searchInPlaylist( MediaLibraryPtr ml, const std::string& pattern,
                                                  int64_t playlistId, const QueryParameters* params );
         static Query<IMedia> fetchHistory( MediaLibraryPtr ml );
+        static Query<IMedia> fetchStreamHistory( MediaLibraryPtr ml );
 
         static void clearHistory( MediaLibraryPtr ml );
 

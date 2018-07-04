@@ -26,7 +26,6 @@ libmedialibrary_la_HEADERS = \
 	include/medialibrary/IAudioTrack.h \
 	include/medialibrary/IFile.h \
 	include/medialibrary/IGenre.h \
-	include/medialibrary/IHistoryEntry.h \
 	include/medialibrary/ILabel.h \
 	include/medialibrary/ILogger.h \
 	include/medialibrary/IMedia.h \
@@ -68,7 +67,6 @@ libmedialibrary_la_SOURCES = \
 	src/File.cpp \
 	src/Folder.cpp \
 	src/Genre.cpp \
-	src/History.cpp \
 	src/Label.cpp \
 	src/Media.cpp \
 	src/MediaLibrary.cpp \
@@ -140,7 +138,6 @@ noinst_HEADERS = \
 	src/filesystem/win32/File.h \
 	src/Folder.h \
 	src/Genre.h \
-	src/History.h \
 	src/Label.h \
 	src/logging/IostreamLogger.h \
 	src/logging/Logger.h \
@@ -293,7 +290,6 @@ unittest_SOURCES = \
 	test/unittest/FsUtilsTests.cpp \
 	test/unittest/UrlTests.cpp \
 	test/unittest/GenreTests.cpp \
-	test/unittest/HistoryTests.cpp \
 	test/unittest/LabelTests.cpp \
 	test/unittest/MediaTests.cpp \
 	test/unittest/MovieTests.cpp \
