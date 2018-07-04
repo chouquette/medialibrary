@@ -204,3 +204,8 @@ void MediaLibraryTester::startThumbnailer()
 void MediaLibraryTester::populateFsFactories()
 {
 }
+
+MediaPtr MediaLibraryTester::addMedia( const std::string& mrl )
+{
+    return addExternalMedia( mrl );
+}

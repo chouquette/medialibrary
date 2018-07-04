@@ -584,7 +584,7 @@ TEST_F( Medias, MetadataUnset )
 
 TEST_F( Medias, ExternalMrl )
 {
-    auto m = ml->addMedia( "https://foo.bar/sea-otters.mkv" );
+    auto m = ml->addExternalMedia( "https://foo.bar/sea-otters.mkv" );
     ASSERT_NE( nullptr, m );
 
     ASSERT_EQ( m->title(), "sea-otters.mkv" );
@@ -611,8 +611,8 @@ TEST_F( Medias, ExternalMrl )
 
 TEST_F( Medias, DuplicatedExternalMrl )
 {
-    auto m = ml->addMedia( "http://foo.bar" );
-    auto m2 = ml->addMedia( "http://foo.bar" );
+    auto m = ml->addExternalMedia( "http://foo.bar" );
+    auto m2 = ml->addExternalMedia( "http://foo.bar" );
     ASSERT_NE( nullptr, m );
     ASSERT_EQ( nullptr, m2 );
 }

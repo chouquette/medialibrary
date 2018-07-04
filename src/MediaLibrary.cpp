@@ -435,7 +435,7 @@ MediaPtr MediaLibrary::media( const std::string& mrl ) const
     return file->media();
 }
 
-MediaPtr MediaLibrary::addMedia( const std::string& mrl )
+MediaPtr MediaLibrary::addExternalMedia( const std::string& mrl )
 {
     try
     {

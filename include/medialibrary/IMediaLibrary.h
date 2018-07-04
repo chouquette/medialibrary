@@ -251,7 +251,19 @@ class IMediaLibrary
         virtual bool deleteLabel( LabelPtr label ) = 0;
         virtual MediaPtr media( int64_t mediaId ) const = 0;
         virtual MediaPtr media( const std::string& mrl ) const = 0;
-        virtual MediaPtr addMedia( const std::string& mrl ) = 0;
+        /**
+         * @brief addExternalMedia Adds an external media to the list of known media
+         * @param mrl This media MRL
+         *
+         * Once created, this media can be used just like any other media, except
+         * it won't have a subType, and won't be analyzed to extract tracks and
+         * won't be inserted to any collection (ie. album/show/...)
+         * If the mrl is already known to the medialibrary, this function will
+         * return nullptr.
+         *
+         * The media can be fetched using media( std::string ) afterward.
+         */
+        virtual MediaPtr addExternalMedia( const std::string& mrl ) = 0;
         virtual Query<IMedia> audioFiles( const QueryParameters* params = nullptr ) const = 0;
         virtual Query<IMedia> videoFiles( const QueryParameters* params = nullptr ) const = 0;
         virtual AlbumPtr album( int64_t id ) const = 0;

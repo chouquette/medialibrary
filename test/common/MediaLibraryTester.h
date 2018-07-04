@@ -75,6 +75,7 @@ public:
     sqlite::Connection* getDbConn();
     virtual void startThumbnailer();
     virtual void populateFsFactories();
+    MediaPtr addMedia( const std::string& mrl );
 
 private:
     std::shared_ptr<fs::IDirectory> dummyDirectory;
