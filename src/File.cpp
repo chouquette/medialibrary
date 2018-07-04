@@ -53,7 +53,8 @@ File::File( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_isExternal;
 }
 
-File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type, const fs::IFile& file, int64_t folderId, bool isRemovable )
+File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type,
+            const fs::IFile& file, int64_t folderId, bool isRemovable )
     : m_ml( ml )
     , m_id( 0 )
     , m_mediaId( mediaId )
@@ -70,7 +71,8 @@ File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type, 
     assert( ( mediaId == 0 && playlistId != 0 ) || ( mediaId != 0 && playlistId == 0 ) );
 }
 
-File::File(MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, IFile::Type type, const std::string& mrl )
+File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, IFile::Type type,
+            const std::string& mrl )
     : m_ml( ml )
     , m_id( 0 )
     , m_mediaId( mediaId )
@@ -176,7 +178,7 @@ void File::createTable( sqlite::Connection* dbConnection )
     sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-void File::createTriggers(sqlite::Connection* dbConnection)
+void File::createTriggers( sqlite::Connection* dbConnection )
 {
     const std::string reqs[] = {
         #include "database/tables/File_triggers_v14.sql"
@@ -185,13 +187,15 @@ void File::createTriggers(sqlite::Connection* dbConnection)
         sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-std::shared_ptr<File> File::createFromMedia( MediaLibraryPtr ml, int64_t mediaId, Type type, const fs::IFile& fileFs,
+std::shared_ptr<File> File::createFromMedia( MediaLibraryPtr ml, int64_t mediaId,
+                                             Type type, const fs::IFile& fileFs,
                                              int64_t folderId, bool isRemovable )
 {
     assert( mediaId > 0 );
     auto self = std::make_shared<File>( ml, mediaId, 0, type, fileFs, folderId, isRemovable );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
-            "(media_id, mrl, type, folder_id, last_modification_date, size, is_removable, is_external) VALUES(?, ?, ?, ?, ?, ?, ?, 0)";
+            "(media_id, mrl, type, folder_id, last_modification_date, size, "
+            "is_removable, is_external) VALUES(?, ?, ?, ?, ?, ?, ?, 0)";
 
     if ( insert( ml, self, req, mediaId, self->m_mrl, type, sqlite::ForeignKey( folderId ),
                          self->m_lastModificationDate, self->m_size, isRemovable ) == false )
@@ -200,8 +204,8 @@ std::shared_ptr<File> File::createFromMedia( MediaLibraryPtr ml, int64_t mediaId
     return self;
 }
 
-std::shared_ptr<File> File::createFromMedia( MediaLibraryPtr ml, int64_t mediaId, IFile::Type type,
-                                             const std::string& mrl )
+std::shared_ptr<File> File::createFromMedia( MediaLibraryPtr ml, int64_t mediaId,
+                                             IFile::Type type, const std::string& mrl )
 {
     assert( mediaId > 0 );
     // Sqlite won't ensure uniqueness for (folder_id, mrl) when folder_id is null, so we have to ensure
@@ -214,21 +218,24 @@ std::shared_ptr<File> File::createFromMedia( MediaLibraryPtr ml, int64_t mediaId
 
     auto self = std::make_shared<File>( ml, mediaId, 0, type, mrl );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
-            "(media_id, mrl, type, folder_id, is_removable, is_external) VALUES(?, ?, ?, NULL, 0, 1)";
+            "(media_id, mrl, type, folder_id, is_removable, is_external) "
+            "VALUES(?, ?, ?, NULL, 0, 1)";
 
     if ( insert( ml, self, req, mediaId, mrl, type ) == false )
         return nullptr;
     return self;
 }
 
-std::shared_ptr<File> File::createFromPlaylist( MediaLibraryPtr ml, int64_t playlistId, const fs::IFile& fileFs,
+std::shared_ptr<File> File::createFromPlaylist( MediaLibraryPtr ml, int64_t playlistId,
+                                                const fs::IFile& fileFs,
                                                 int64_t folderId, bool isRemovable )
 {
     assert( playlistId > 0 );
     const auto type = IFile::Type::Playlist;
     auto self = std::make_shared<File>( ml, 0, playlistId, type , fileFs, folderId, isRemovable );
     static const std::string req = "INSERT INTO " + policy::FileTable::Name +
-            "(playlist_id, mrl, type, folder_id, last_modification_date, size, is_removable, is_external) VALUES(?, ?, ?, ?, ?, ?, ?, 0)";
+            "(playlist_id, mrl, type, folder_id, last_modification_date, size, "
+            "is_removable, is_external) VALUES(?, ?, ?, ?, ?, ?, ?, 0)";
 
     if ( insert( ml, self, req, playlistId, self->m_mrl, type, sqlite::ForeignKey( folderId ),
                  self->m_lastModificationDate, self->m_size, isRemovable ) == false )
@@ -239,7 +246,8 @@ std::shared_ptr<File> File::createFromPlaylist( MediaLibraryPtr ml, int64_t play
 
 std::shared_ptr<File> File::fromMrl( MediaLibraryPtr ml, const std::string& mrl )
 {
-    static const std::string req = "SELECT * FROM " + policy::FileTable::Name +  " WHERE mrl = ? AND folder_id IS NOT NULL";
+    static const std::string req = "SELECT * FROM " + policy::FileTable::Name +
+            " WHERE mrl = ? AND folder_id IS NOT NULL";
     auto file = fetch( ml, req, mrl );
     if ( file == nullptr )
         return nullptr;
@@ -250,10 +258,11 @@ std::shared_ptr<File> File::fromMrl( MediaLibraryPtr ml, const std::string& mrl 
     return file;
 }
 
-std::shared_ptr<File> File::fromFileName( MediaLibraryPtr ml, const std::string& fileName, int64_t folderId )
+std::shared_ptr<File> File::fromFileName( MediaLibraryPtr ml, const std::string& fileName,
+                                          int64_t folderId )
 {
-    static const std::string req = "SELECT * FROM " + policy::FileTable::Name +  " WHERE mrl = ? "
-            "AND folder_id = ?";
+    static const std::string req = "SELECT * FROM " + policy::FileTable::Name +
+            " WHERE mrl = ? AND folder_id = ?";
     auto file = fetch( ml, req, fileName, folderId );
     if ( file == nullptr )
         return nullptr;
