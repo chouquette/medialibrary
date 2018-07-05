@@ -65,3 +65,6 @@
 "DROP TABLE " + ArtistTable::Name,
 "DELETE FROM " + ArtistTable::Name + "Fts",
 "DELETE FROM MediaArtistRelation",
+
+// History table & its triggers were removed for good:
+"DROP TABLE History",
