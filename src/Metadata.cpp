@@ -183,14 +183,11 @@ void Metadata::unset( sqlite::Connection* dbConn, IMetadata::EntityType entityTy
 
 void Metadata::createTable(sqlite::Connection* connection)
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::MetadataTable::Name + "("
-            "id_media INTEGER,"
-            "entity_type INTEGER,"
-            "type INTEGER,"
-            "value TEXT,"
-            "PRIMARY KEY (id_media, entity_type, type)"
-            ")";
-    sqlite::Tools::executeRequest( connection, req );
+    const std::string reqs[] = {
+        #include "database/tables/Metadata_v14.sql"
+    };
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( connection, req );
 }
 
 void Metadata::Record::set( const std::string& value )
