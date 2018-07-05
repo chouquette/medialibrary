@@ -58,6 +58,11 @@ public:
     /// \return true on success, false on failure
     ///
     virtual bool add( const IMedia& media, unsigned int position ) = 0;
+
+    /// Convenience wrappers
+    virtual bool append( int64_t mediaId ) = 0;
+    virtual bool add( const int64_t mediaId, unsigned int position ) = 0;
+
     ///
     /// \brief move Change the position of a media
     /// \param mediaId The media to move reorder

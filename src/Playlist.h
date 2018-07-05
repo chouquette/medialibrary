@@ -62,6 +62,8 @@ public:
                                        const QueryParameters* params ) const override;
     virtual bool append( const IMedia& media ) override;
     virtual bool add( const IMedia& media, unsigned int position ) override;
+    virtual bool append( int64_t mediaId ) override;
+    virtual bool add( const int64_t mediaId, unsigned int position ) override;
     virtual bool move( int64_t mediaId, unsigned int position ) override;
     virtual bool remove( int64_t mediaId ) override;
     std::shared_ptr<File> addFile( const fs::IFile& fileFs, int64_t parentFolderId,

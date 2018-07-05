@@ -203,6 +203,22 @@ bool Playlist::add( const IMedia& media, unsigned int position )
     }
 }
 
+bool Playlist::append( int64_t mediaId )
+{
+    auto media = m_ml->media( mediaId );
+    if ( media == nullptr )
+        return false;
+    return append( *media );
+}
+
+bool Playlist::add(const int64_t mediaId, unsigned int position)
+{
+    auto media = m_ml->media( mediaId );
+    if ( media == nullptr )
+        return false;
+    return add( *media, position );
+}
+
 // Attach file object to Playlist
 std::shared_ptr<File> Playlist::addFile( const fs::IFile& fileFs, int64_t parentFolderId,
                                          bool isFolderFsRemovable )
