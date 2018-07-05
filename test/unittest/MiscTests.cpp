@@ -32,6 +32,7 @@
 
 #include "Artist.h"
 #include "Media.h"
+#include "Metadata.h"
 
 class Misc : public Tests
 {
@@ -189,6 +190,11 @@ TEST_F( DbModel, Upgrade13to14 )
     m = media[1];
     ASSERT_EQ( m->thumbnail(), "" );
     ASSERT_FALSE( m->isThumbnailGenerated() );
+
+    // Ensure we're probing the correct fake media
+    ASSERT_EQ( m->id(), 2 );
+    auto& meta = m->metadata( IMedia::MetadataType::Progress );
+    ASSERT_EQ( "fake progress", meta.str() );
 
     CheckNbTriggers( 32 );
 }

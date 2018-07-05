@@ -58,6 +58,29 @@
     "CASE thumbnail WHEN NULL THEN 0 WHEN '' THEN 0 ELSE 1 END,"
     "title, filename, is_favorite, is_present FROM " + MediaTable::Name + "_backup",
 
+/******************* Migrate metadata table ***********************************/
+"CREATE TEMPORARY TABLE " + MetadataTable::Name + "_backup"
+"("
+    "id_media INTEGER,"
+    "type INTEGER,"
+    "value TEXT"
+")",
+
+"INSERT INTO " + MetadataTable::Name + "_backup SELECT * FROM " + MetadataTable::Name,
+
+"DROP TABLE " + MetadataTable::Name,
+
+// Recreate the new table
+#include "database/tables/Metadata_v14.sql"
+
+"INSERT INTO " + MetadataTable::Name + " "
+"SELECT "
+    "id_media, " + std::to_string(
+        static_cast<typename std::underlying_type<IMetadata::EntityType>::type>(
+            IMetadata::EntityType::Media ) ) +
+    ", type, value "
+"FROM " + MetadataTable::Name + "_backup",
+
 /******************* Delete other tables **************************************/
 
 "DROP TABLE " + AlbumTable::Name,
