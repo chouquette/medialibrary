@@ -245,10 +245,12 @@ void Media::setMovie(MoviePtr movie)
     m_changed = true;
 }
 
-bool Media::addVideoTrack(const std::string& codec, unsigned int width, unsigned int height, float fps,
-                          const std::string& language, const std::string& description )
+bool Media::addVideoTrack( const std::string& codec, unsigned int width, unsigned int height,
+                           uint32_t fpsNum, uint32_t fpsDen, const std::string& language,
+                           const std::string& description )
 {
-    return VideoTrack::create( m_ml, codec, width, height, fps, m_id, language, description ) != nullptr;
+    return VideoTrack::create( m_ml, codec, width, height, fpsNum, fpsDen, m_id,
+                               language, description ) != nullptr;
 }
 
 Query<IVideoTrack> Media::videoTracks() const

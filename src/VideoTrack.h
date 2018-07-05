@@ -48,28 +48,33 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy
     public:
         VideoTrack( MediaLibraryPtr, sqlite::Row& row );
         VideoTrack( MediaLibraryPtr, const std::string& codec,
-                    unsigned int width, unsigned int height, float fps, int64_t mediaId,
-                    const std::string& language, const std::string& description );
+                    unsigned int width, unsigned int height, uint32_t fpsNum,
+                    uint32_t fpsDen, int64_t mediaId, const std::string& language,
+                    const std::string& description );
 
         virtual int64_t id() const override;
         virtual const std::string& codec() const override;
         virtual unsigned int width() const override;
         virtual unsigned int height() const override;
         virtual float fps() const override;
+        virtual uint32_t fpsNum() const override;
+        virtual uint32_t fpsDen() const override;
         virtual const std::string& language() const override;
         virtual const std::string& description() const override;
 
         static void createTable( sqlite::Connection* dbConnection );
         static std::shared_ptr<VideoTrack> create( MediaLibraryPtr ml, const std::string& codec,
-                                    unsigned int width, unsigned int height, float fps, int64_t mediaId,
-                                    const std::string& language, const std::string& description );
+                                    unsigned int width, unsigned int height, uint32_t fpsNum,
+                                    uint32_t fpsDen, int64_t mediaId, const std::string& language,
+                                    const std::string& description );
 
     private:
         int64_t m_id;
         std::string m_codec;
         unsigned int m_width;
         unsigned int m_height;
-        float m_fps;
+        uint32_t m_fpsNum;
+        uint32_t m_fpsDen;
         int64_t m_mediaId;
         std::string m_language;
         std::string m_description;

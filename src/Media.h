@@ -98,8 +98,10 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         virtual const std::string& fileName() const override;
         virtual MoviePtr movie() const override;
         void setMovie( MoviePtr movie );
-        bool addVideoTrack( const std::string& codec, unsigned int width, unsigned int height,
-                            float fps, const std::string& language, const std::string& description );
+        bool addVideoTrack( const std::string& codec, unsigned int width,
+                            unsigned int height, uint32_t fpsNum,
+                            uint32_t fpsDen, const std::string& language,
+                            const std::string& description );
         virtual Query<IVideoTrack> videoTracks() const override;
         bool addAudioTrack( const std::string& codec, unsigned int bitrate, unsigned int sampleRate,
                             unsigned int nbChannels, const std::string& language, const std::string& desc );

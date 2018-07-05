@@ -189,8 +189,7 @@ Status MetadataAnalyzer::run( IItem& item )
                 if ( track.type == IItem::Track::Type::Video )
                 {
                     media->addVideoTrack( track.codec, track.v.width, track.v.height,
-                                          static_cast<float>( track.v.fpsNum ) /
-                                              static_cast<float>( track.v.fpsDen ),
+                                          track.v.fpsNum, track.v.fpsDen,
                                           track.language, track.description );
                     isAudio = false;
                 }
