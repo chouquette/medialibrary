@@ -191,12 +191,14 @@ void Playlist::createTable( sqlite::Connection* dbConn )
             "media_id INTEGER,"
             "playlist_id INTEGER,"
             "position INTEGER,"
-            "PRIMARY KEY(media_id, playlist_id),"
             "FOREIGN KEY(media_id) REFERENCES " + policy::MediaTable::Name + "("
                 + policy::MediaTable::PrimaryKeyColumn + ") ON DELETE CASCADE,"
             "FOREIGN KEY(playlist_id) REFERENCES " + policy::PlaylistTable::Name + "("
                 + policy::PlaylistTable::PrimaryKeyColumn + ") ON DELETE CASCADE"
         ")";
+    const std::string indexReq = "CREATE INDEX IF NOT EXISTS playlist_media_pl_id_index "
+            "ON PlaylistMediaRelation(media_id, playlist_id)";
+
     const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
                 + policy::PlaylistTable::Name + "Fts USING FTS3("
                 "name"
@@ -204,6 +206,7 @@ void Playlist::createTable( sqlite::Connection* dbConn )
     //FIXME Enforce (playlist_id,position) uniqueness
     sqlite::Tools::executeRequest( dbConn, req );
     sqlite::Tools::executeRequest( dbConn, relTableReq );
+    sqlite::Tools::executeRequest( dbConn, indexReq );
     sqlite::Tools::executeRequest( dbConn, vtableReq );
 }
 

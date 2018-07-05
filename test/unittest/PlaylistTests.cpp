@@ -325,7 +325,11 @@ TEST_F( Playlists, AddDuplicate )
     auto res = pl->append( m->id() );
     ASSERT_TRUE( res );
     res = pl->append( m->id() );
-    ASSERT_FALSE( res );
+    ASSERT_TRUE( res );
+    auto media = pl->media()->all();
+    ASSERT_EQ( 2u, media.size() );
+    ASSERT_EQ( m->id(), media[0]->id() );
+    ASSERT_EQ( m->id(), media[1]->id() );
 }
 
 TEST_F( Playlists, SearchMedia )
