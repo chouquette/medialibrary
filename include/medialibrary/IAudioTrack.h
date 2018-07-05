@@ -20,8 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef IAUDIOTRACK_H
-#define IAUDIOTRACK_H
+#pragma once
 
 #include "IMediaLibrary.h"
 
@@ -30,20 +29,18 @@ namespace medialibrary
 
 class IAudioTrack
 {
-    public:
-        virtual ~IAudioTrack() {}
-        virtual int64_t id() const = 0;
-        virtual const std::string& codec() const = 0;
-        /**
-         * @return The bitrate in bits per second
-         */
-        virtual unsigned int bitrate() const = 0;
-        virtual unsigned int sampleRate() const = 0;
-        virtual unsigned int nbChannels() const = 0;
-        virtual const std::string& language() const = 0;
-        virtual const std::string& description() const = 0;
+public:
+    virtual ~IAudioTrack() = default;
+    virtual int64_t id() const = 0;
+    virtual const std::string& codec() const = 0;
+    /**
+     * @return The bitrate in bits per second
+     */
+    virtual unsigned int bitrate() const = 0;
+    virtual unsigned int sampleRate() const = 0;
+    virtual unsigned int nbChannels() const = 0;
+    virtual const std::string& language() const = 0;
+    virtual const std::string& description() const = 0;
 };
 
 }
-
-#endif // IAUDIOTRACK_H

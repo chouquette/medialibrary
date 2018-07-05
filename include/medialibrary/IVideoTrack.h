@@ -20,8 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef IVIDEOTRACK_H
-#define IVIDEOTRACK_H
+#pragma once
 
 #include "IMediaLibrary.h"
 
@@ -30,17 +29,15 @@ namespace medialibrary
 
 class IVideoTrack
 {
-    public:
-        virtual ~IVideoTrack() {}
-        virtual int64_t id() const = 0;
-        virtual const std::string& codec() const = 0;
-        virtual unsigned int width() const = 0;
-        virtual unsigned int height() const = 0;
-        virtual float fps() const = 0;
-        virtual const std::string& description() const = 0;
-        virtual const std::string& language() const = 0;
+public:
+    virtual ~IVideoTrack() = default;
+    virtual int64_t id() const = 0;
+    virtual const std::string& codec() const = 0;
+    virtual unsigned int width() const = 0;
+    virtual unsigned int height() const = 0;
+    virtual float fps() const = 0;
+    virtual const std::string& description() const = 0;
+    virtual const std::string& language() const = 0;
 };
 
 }
-
-#endif // IVIDEOTRACK_H
