@@ -33,7 +33,7 @@
 namespace medialibrary
 {
 
-const std::string policy::MetadataTable::Name = "MediaMetadata";
+const std::string policy::MetadataTable::Name = "Metadata";
 
 Metadata::Record::Record( uint32_t t, std::string v )
     : m_type( t )

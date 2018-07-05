@@ -66,9 +66,9 @@
     "value TEXT"
 ")",
 
-"INSERT INTO " + MetadataTable::Name + "_backup SELECT * FROM " + MetadataTable::Name,
+"INSERT INTO " + MetadataTable::Name + "_backup SELECT * FROM MediaMetadata",
 
-"DROP TABLE " + MetadataTable::Name,
+"DROP TABLE MediaMetadata",
 
 // Recreate the new table
 #include "database/tables/Metadata_v14.sql"
