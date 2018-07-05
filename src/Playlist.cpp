@@ -237,88 +237,20 @@ bool Playlist::remove( int64_t mediaId )
 
 void Playlist::createTable( sqlite::Connection* dbConn )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::PlaylistTable::Name + "("
-            + policy::PlaylistTable::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "name TEXT,"
-            "file_id UNSIGNED INT DEFAULT NULL,"
-            "creation_date UNSIGNED INT NOT NULL,"
-            "artwork_mrl TEXT,"
-            "FOREIGN KEY (file_id) REFERENCES " + policy::FileTable::Name
-            + "(id_file) ON DELETE CASCADE"
-        ")";
-    const std::string relTableReq = "CREATE TABLE IF NOT EXISTS PlaylistMediaRelation("
-            "media_id INTEGER,"
-            "mrl STRING NOT NULL,"
-            "playlist_id INTEGER,"
-            "position INTEGER,"
-            "FOREIGN KEY(media_id) REFERENCES " + policy::MediaTable::Name + "("
-                + policy::MediaTable::PrimaryKeyColumn + ") ON DELETE SET NULL,"
-            "FOREIGN KEY(playlist_id) REFERENCES " + policy::PlaylistTable::Name + "("
-                + policy::PlaylistTable::PrimaryKeyColumn + ") ON DELETE CASCADE"
-        ")";
-    const std::string indexReq = "CREATE INDEX IF NOT EXISTS playlist_media_pl_id_index "
-            "ON PlaylistMediaRelation(media_id, playlist_id)";
-
-    const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
-                + policy::PlaylistTable::Name + "Fts USING FTS3("
-                "name"
-            ")";
-    //FIXME Enforce (playlist_id,position) uniqueness
-    sqlite::Tools::executeRequest( dbConn, req );
-    sqlite::Tools::executeRequest( dbConn, relTableReq );
-    sqlite::Tools::executeRequest( dbConn, indexReq );
-    sqlite::Tools::executeRequest( dbConn, vtableReq );
+    std::string reqs[] = {
+        #include "database/tables/Playlist_v14.sql"
+    };
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConn, req );
 }
 
 void Playlist::createTriggers( sqlite::Connection* dbConn )
 {
-    static const std::string req = "CREATE TRIGGER IF NOT EXISTS update_playlist_order AFTER UPDATE OF position"
-            " ON PlaylistMediaRelation"
-            " BEGIN "
-                "UPDATE PlaylistMediaRelation SET position = position + 1"
-                " WHERE playlist_id = new.playlist_id"
-                " AND position = new.position"
-                // We don't to trigger a self-update when the insert trigger fires.
-                " AND media_id != new.media_id;"
-            " END";
-    static const std::string autoAppendReq = "CREATE TRIGGER IF NOT EXISTS append_new_playlist_record AFTER INSERT"
-            " ON PlaylistMediaRelation"
-            " WHEN new.position IS NULL"
-            " BEGIN "
-                " UPDATE PlaylistMediaRelation SET position = ("
-                    "SELECT COUNT(media_id) FROM PlaylistMediaRelation WHERE playlist_id = new.playlist_id"
-                ") WHERE playlist_id=new.playlist_id AND media_id = new.media_id;"
-            " END";
-    static const std::string autoShiftPosReq = "CREATE TRIGGER IF NOT EXISTS update_playlist_order_on_insert AFTER INSERT"
-            " ON PlaylistMediaRelation"
-            " WHEN new.position IS NOT NULL"
-            " BEGIN "
-                "UPDATE PlaylistMediaRelation SET position = position + 1"
-                " WHERE playlist_id = new.playlist_id"
-                " AND position = new.position"
-                " AND media_id != new.media_id;"
-            " END";
-    static const std::string vtriggerInsert = "CREATE TRIGGER IF NOT EXISTS insert_playlist_fts AFTER INSERT ON "
-            + policy::PlaylistTable::Name +
-            " BEGIN"
-            " INSERT INTO " + policy::PlaylistTable::Name + "Fts(rowid, name) VALUES(new.id_playlist, new.name);"
-            " END";
-    static const std::string vtriggerUpdate = "CREATE TRIGGER IF NOT EXISTS update_playlist_fts AFTER UPDATE OF name"
-            " ON " + policy::PlaylistTable::Name +
-            " BEGIN"
-            " UPDATE " + policy::PlaylistTable::Name + "Fts SET name = new.name WHERE rowid = new.id_playlist;"
-            " END";
-    static const std::string vtriggerDelete = "CREATE TRIGGER IF NOT EXISTS delete_playlist_fts BEFORE DELETE ON "
-            + policy::PlaylistTable::Name +
-            " BEGIN"
-            " DELETE FROM " + policy::PlaylistTable::Name + "Fts WHERE rowid = old.id_playlist;"
-            " END";
-    sqlite::Tools::executeRequest( dbConn, req );
-    sqlite::Tools::executeRequest( dbConn, autoAppendReq );
-    sqlite::Tools::executeRequest( dbConn, autoShiftPosReq );
-    sqlite::Tools::executeRequest( dbConn, vtriggerInsert );
-    sqlite::Tools::executeRequest( dbConn, vtriggerUpdate );
-    sqlite::Tools::executeRequest( dbConn, vtriggerDelete );
+    std::string reqs[] = {
+        #include "database/tables/Playlist_triggers_v14.sql"
+    };
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConn, req );
 }
 
 Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,
