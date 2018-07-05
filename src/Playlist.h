@@ -82,6 +82,7 @@ public:
 
 private:
     static std::string sortRequest( const QueryParameters* params );
+    void curateNullMediaID() const;
 
 private:
     MediaLibraryPtr m_ml;

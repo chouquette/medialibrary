@@ -209,3 +209,8 @@ MediaPtr MediaLibraryTester::addMedia( const std::string& mrl )
 {
     return addExternalMedia( mrl );
 }
+
+void MediaLibraryTester::deleteMedia( int64_t mediaId )
+{
+    Media::destroy( this, mediaId );
+}

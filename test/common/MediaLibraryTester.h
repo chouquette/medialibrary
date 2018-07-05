@@ -76,6 +76,7 @@ public:
     virtual void startThumbnailer();
     virtual void populateFsFactories();
     MediaPtr addMedia( const std::string& mrl );
+    void deleteMedia( int64_t mediaId );
 
 private:
     std::shared_ptr<fs::IDirectory> dummyDirectory;

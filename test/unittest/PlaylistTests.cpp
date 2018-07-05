@@ -360,3 +360,67 @@ TEST_F( Playlists, SearchMedia )
     ASSERT_EQ( 1u, media.size() );
     ASSERT_EQ( m1->id(), media[0]->id() );
 }
+
+TEST_F( Playlists, ReinsertMedia )
+{
+    auto m1 = ml->addMedia( "http://sea.otters/fluffy.mkv" );
+    auto m2 = ml->addMedia( "file:///cute_otters_holding_hands.mp4" );
+    auto m3 = ml->addMedia( "media.mp3" );
+    pl->append( *m1 );
+    pl->append( *m2 );
+    pl->append( *m3 );
+
+    auto media = pl->media()->all();
+    ASSERT_EQ( 3u, media.size() );
+    ASSERT_EQ( m1->id(), media[0]->id() );
+    ASSERT_EQ( m2->id(), media[1]->id() );
+    ASSERT_EQ( m3->id(), media[2]->id() );
+
+    // Ensure the media we fetch are recreated by checking their ids before/after
+    auto m1Id = m1->id();
+    auto m2Id = m2->id();
+
+    ml->deleteMedia( m1->id() );
+    ml->deleteMedia( m2->id() );
+
+    Reload();
+    pl = ml->playlist( pl->id() );
+
+    m1 = ml->addMedia( "http://sea.otters/fluffy.mkv" );
+    m2 = ml->addMedia( "file:///cute_otters_holding_hands.mp4" );
+
+    media = pl->media()->all();
+    ASSERT_EQ( 3u, media.size() );
+    ASSERT_EQ( m1->id(), media[0]->id() );
+    ASSERT_EQ( m2->id(), media[1]->id() );
+    ASSERT_EQ( m3->id(), media[2]->id() );
+    ASSERT_NE( m1->id(), m1Id );
+    ASSERT_NE( m2->id(), m2Id );
+}
+
+TEST_F( Playlists, RemoveMedia )
+{
+    auto m1 = ml->addMedia( "http://sea.otters/fluffy.mkv" );
+    auto m2 = ml->addMedia( "file:///cute_otters_holding_hands.mp4" );
+    auto m3 = ml->addMedia( "media.mp3" );
+    pl->append( *m1 );
+    pl->append( *m2 );
+    pl->append( *m3 );
+
+    auto media = pl->media()->all();
+    ASSERT_EQ( 3u, media.size() );
+    ASSERT_EQ( m1->id(), media[0]->id() );
+    ASSERT_EQ( m2->id(), media[1]->id() );
+    ASSERT_EQ( m3->id(), media[2]->id() );
+
+    ml->deleteMedia( m1->id() );
+    ml->deleteMedia( m2->id() );
+
+    Reload();
+
+    pl = ml->playlist( pl->id() );
+
+    media = pl->media()->all();
+    ASSERT_EQ( 1u, media.size() );
+    ASSERT_EQ( m3->id(), media[0]->id() );
+}

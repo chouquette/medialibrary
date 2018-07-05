@@ -30,6 +30,8 @@
 
 #include "database/SqliteQuery.h"
 
+#include <algorithm>
+
 namespace medialibrary
 {
 
@@ -114,13 +116,56 @@ Query<IMedia> Playlist::media() const
             "LEFT JOIN PlaylistMediaRelation pmr ON pmr.media_id = m.id_media "
             "WHERE pmr.playlist_id = ? AND m.is_present != 0 "
             "ORDER BY pmr.position";
+    curateNullMediaID();
     return make_query<Media, IMedia>( m_ml, "m.*", req, m_id );
 }
 
 Query<IMedia> Playlist::searchMedia( const std::string& pattern,
                                      const QueryParameters* params ) const
 {
+    curateNullMediaID();
     return Media::searchInPlaylist( m_ml, pattern, m_id, params );
+}
+
+void Playlist::curateNullMediaID() const
+{
+    auto dbConn = m_ml->getConn();
+    auto t = dbConn->newTransaction();
+    std::string req = "SELECT rowid, mrl FROM PlaylistMediaRelation "
+            "WHERE media_id IS NULL "
+            "AND playlist_id = ?";
+    sqlite::Statement stmt{ dbConn->handle(), req };
+    stmt.execute( m_id );
+    std::string updateReq = "UPDATE PlaylistMediaRelation SET media_id = ? WHERE rowid = ?";
+    auto mediaNotFound = false;
+
+    for ( sqlite::Row row = stmt.row(); row != nullptr; row = stmt.row() )
+    {
+        int64_t rowId;
+        std::string mrl;
+        row >> rowId >> mrl;
+        auto media = m_ml->media( mrl );
+        if ( media != nullptr )
+        {
+            LOG_INFO( "Updating playlist item mediaId (playlist: ", m_id,
+                      "; mrl: ", mrl, ')' );
+            sqlite::Tools::executeUpdate( dbConn, updateReq, media->id(), rowId );
+        }
+        else
+        {
+            LOG_INFO( "Can't restore media association for media ", mrl,
+                      " in playlist ", m_id, ". Media will be removed from the playlist" );
+            mediaNotFound = true;
+        }
+    }
+    if ( mediaNotFound )
+    {
+        // Batch all deletion at once instead of doing it during the loop
+        std::string deleteReq = "DELETE FROM PlaylistMediaRelation "
+                "WHERE playlist_id = ? AND media_id IS NULL";
+        sqlite::Tools::executeDelete( dbConn, deleteReq, m_id );
+    }
+    t->commit();
 }
 
 bool Playlist::append( const IMedia& media )
@@ -130,12 +175,26 @@ bool Playlist::append( const IMedia& media )
 
 bool Playlist::add( const IMedia& media, unsigned int position )
 {
-    static const std::string req = "INSERT INTO PlaylistMediaRelation(media_id, playlist_id, position) VALUES(?, ?, ?)";
-    // position isn't a foreign key, but we want it to be passed as NULL if it equals to 0
-    // When the position is NULL, the insertion triggers takes care of counting the number of records to auto append.
+    static const std::string req = "INSERT INTO PlaylistMediaRelation"
+            "(media_id, mrl, playlist_id, position) VALUES(?, ?, ?, ?)";
     try
     {
-        return sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(), m_id, sqlite::ForeignKey{ position } );
+        // position isn't a foreign key, but we want it to be passed as NULL if it equals to 0
+        // When the position is NULL, the insertion triggers takes care of
+        // counting the number of records to auto append.
+        auto files = media.files();
+        assert( files.size() > 0 );
+        auto mainFile = std::find_if( begin( files ), end( files ), []( const FilePtr& f) {
+            return f->type() == IFile::Type::Main;
+        });
+        if ( mainFile == end( files ) )
+        {
+            LOG_ERROR( "Can't add a media without any files to a playlist" );
+            return false;
+        }
+        return sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
+                                             (*mainFile)->mrl(), m_id,
+                                             sqlite::ForeignKey{ position } );
     }
     catch (const sqlite::errors::ConstraintViolation& ex)
     {
@@ -189,10 +248,11 @@ void Playlist::createTable( sqlite::Connection* dbConn )
         ")";
     const std::string relTableReq = "CREATE TABLE IF NOT EXISTS PlaylistMediaRelation("
             "media_id INTEGER,"
+            "mrl STRING NOT NULL,"
             "playlist_id INTEGER,"
             "position INTEGER,"
             "FOREIGN KEY(media_id) REFERENCES " + policy::MediaTable::Name + "("
-                + policy::MediaTable::PrimaryKeyColumn + ") ON DELETE CASCADE,"
+                + policy::MediaTable::PrimaryKeyColumn + ") ON DELETE SET NULL,"
             "FOREIGN KEY(playlist_id) REFERENCES " + policy::PlaylistTable::Name + "("
                 + policy::PlaylistTable::PrimaryKeyColumn + ") ON DELETE CASCADE"
         ")";
