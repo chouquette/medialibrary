@@ -1156,11 +1156,14 @@ void MediaLibrary::migrateModel13to14()
     // We will run a re-scan, so we don't care about keeping their content
     Album::createTable( getConn() );
     Artist::createTable( getConn() );
+    Movie::createTable( getConn() );
+    Show::createTable( getConn() );
     // Re-create triggers removed in the process
     Media::createTriggers( getConn() );
     AlbumTrack::createTriggers( getConn() );
     Album::createTriggers( getConn() );
     Artist::createTriggers( getConn(), 14 );
+    Show::createTriggers( getConn() );
     t->commit();
 }
 
