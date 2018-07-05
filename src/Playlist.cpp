@@ -123,19 +123,19 @@ Query<IMedia> Playlist::searchMedia( const std::string& pattern,
     return Media::searchInPlaylist( m_ml, pattern, m_id, params );
 }
 
-bool Playlist::append( int64_t mediaId )
+bool Playlist::append( const IMedia& media )
 {
-    return add( mediaId, 0 );
+    return add( media, 0 );
 }
 
-bool Playlist::add( int64_t mediaId, unsigned int position )
+bool Playlist::add( const IMedia& media, unsigned int position )
 {
     static const std::string req = "INSERT INTO PlaylistMediaRelation(media_id, playlist_id, position) VALUES(?, ?, ?)";
     // position isn't a foreign key, but we want it to be passed as NULL if it equals to 0
     // When the position is NULL, the insertion triggers takes care of counting the number of records to auto append.
     try
     {
-        return sqlite::Tools::executeInsert( m_ml->getConn(), req, mediaId, m_id, sqlite::ForeignKey{ position } );
+        return sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(), m_id, sqlite::ForeignKey{ position } );
     }
     catch (const sqlite::errors::ConstraintViolation& ex)
     {

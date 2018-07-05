@@ -49,7 +49,7 @@ public:
     /// \param media The media to add
     /// \return true on success, false on failure.
     ///
-    virtual bool append( int64_t mediaId ) = 0;
+    virtual bool append( const IMedia& media ) = 0;
     ///
     /// \brief add Add a media to the playlist at the given position.
     /// Valid positions start at 1. 0 means appending.
@@ -57,7 +57,7 @@ public:
     /// \param position The position of this new media
     /// \return true on success, false on failure
     ///
-    virtual bool add( int64_t mediaId, unsigned int position ) = 0;
+    virtual bool add( const IMedia& media, unsigned int position ) = 0;
     ///
     /// \brief move Change the position of a media
     /// \param mediaId The media to move reorder

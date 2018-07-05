@@ -169,7 +169,7 @@ Status MetadataAnalyzer::run( IItem& item )
     auto media = std::static_pointer_cast<Media>( item.media() );
 
     if ( item.parentPlaylist() != nullptr )
-        item.parentPlaylist()->add( media->id(), item.parentPlaylistIndex() );
+        item.parentPlaylist()->add( *media, item.parentPlaylistIndex() );
 
     if ( alreadyInParser == true )
         return Status::Discarded;
@@ -295,7 +295,7 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
     if ( media != nullptr )
     {
         LOG_INFO( "Media for ", mrl, " already exists, adding it to the playlist ", mrl );
-        playlistPtr->add( media->id(), subitem.parentPlaylistIndex() );
+        playlistPtr->add( *media, subitem.parentPlaylistIndex() );
         return;
     }
     // Create Media, etc.
@@ -315,7 +315,7 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
         auto externalFile = externalMedia->addExternalMrl( mrl, IFile::Type::Main );
         if ( externalFile == nullptr )
             LOG_ERROR( "Failed to create external file for ", mrl, " in the playlist ", item.mrl() );
-        playlistPtr->add( externalMedia->id(), subitem.parentPlaylistIndex() );
+        playlistPtr->add( *externalMedia, subitem.parentPlaylistIndex() );
         t2->commit();
         return;
     }

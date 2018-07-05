@@ -109,7 +109,7 @@ TEST_F( Playlists, FetchAll )
 TEST_F( Playlists, Add )
 {
     auto m = ml->addMedia( "file.mkv" );
-    auto res = pl->append( m->id() );
+    auto res = pl->append( *m );
     ASSERT_TRUE( res );
     auto media = pl->media()->all();
     ASSERT_EQ( 1u, media.size() );
@@ -122,7 +122,7 @@ TEST_F( Playlists, Append )
     {
         auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv" );
         ASSERT_NE( nullptr, m );
-        pl->append( m->id() );
+        pl->append( *m );
     }
     auto media = pl->media()->all();
     ASSERT_EQ( 5u, media.size() );
@@ -139,16 +139,16 @@ TEST_F( Playlists, Insert )
     {
         auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv" );
         ASSERT_NE( nullptr, m );
-        auto res = pl->append( m->id() );
+        auto res = pl->append( *m );
         ASSERT_TRUE( res );
     }
     // [<1,1>,<2,2>,<3,3>]
     auto firstMedia = ml->addMedia( "first.mkv" );
 
-    pl->add( firstMedia->id(), 1 );
+    pl->add( *firstMedia, 1 );
     // [<4,1>,<1,2>,<2,3>,<3,4>]
     auto middleMedia = ml->addMedia( "middle.mkv" );
-    pl->add( middleMedia->id(), 3 );
+    pl->add( *middleMedia, 3 );
     // [<4,1>,<1,2>,<5,3>,<2,4>,<3,5>]
     auto media = pl->media()->all();
     ASSERT_EQ( 5u, media.size() );
@@ -166,7 +166,7 @@ TEST_F( Playlists, Move )
     {
         auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv" );
         ASSERT_NE( nullptr, m );
-        auto res = pl->append( m->id() );
+        auto res = pl->append( *m );
         ASSERT_TRUE( res );
     }
     // [<1,1>,<2,2>,<3,3>,<4,4>,<5,5>]
@@ -188,7 +188,7 @@ TEST_F( Playlists, Remove )
     {
         auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv" );
         ASSERT_NE( nullptr, m );
-        auto res = pl->append( m->id() );
+        auto res = pl->append( *m );
         ASSERT_TRUE( res );
     }
     // [<1,1>,<2,2>,<3,3>,<4,4>,<5,5>]
@@ -213,7 +213,7 @@ TEST_F( Playlists, DeleteFile )
     {
         auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv" );
         ASSERT_NE( nullptr, m );
-        auto res = pl->append( m->id() );
+        auto res = pl->append( *m );
         ASSERT_TRUE( res );
     }
     // [<1,1>,<2,2>,<3,3>,<4,4>,<5,5>]
@@ -322,9 +322,9 @@ TEST_F( Playlists, Sort )
 TEST_F( Playlists, AddDuplicate )
 {
     auto m = ml->addMedia( "file.mkv" );
-    auto res = pl->append( m->id() );
+    auto res = pl->append( *m );
     ASSERT_TRUE( res );
-    res = pl->append( m->id() );
+    res = pl->append( *m );
     ASSERT_TRUE( res );
     auto media = pl->media()->all();
     ASSERT_EQ( 2u, media.size() );
@@ -350,8 +350,8 @@ TEST_F( Playlists, SearchMedia )
     m3->setType( IMedia::Type::Audio );
     m3->save();
 
-    pl->append( m1->id() );
-    pl->append( m2->id() );
+    pl->append( *m1 );
+    pl->append( *m2 );
 
     auto media = ml->searchMedia( "otter", nullptr )->all();
     ASSERT_EQ( 2u, media.size() );
