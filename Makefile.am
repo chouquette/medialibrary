@@ -357,6 +357,7 @@ EXTRA_DIST += medialibrary.pc \
 	src/database/tables/Folder_triggers_v14.sql \
 	src/database/tables/Playlist_v14.sql \
 	src/database/tables/Playlist_triggers_v14.sql \
+	src/database/tables/Metadata_v14.sql \
 	$(NULL)
 	
 
