@@ -239,7 +239,7 @@ void Playlist::createTable( sqlite::Connection* dbConn )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::PlaylistTable::Name + "("
             + policy::PlaylistTable::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "name TEXT UNIQUE,"
+            "name TEXT,"
             "file_id UNSIGNED INT DEFAULT NULL,"
             "creation_date UNSIGNED INT NOT NULL,"
             "artwork_mrl TEXT,"

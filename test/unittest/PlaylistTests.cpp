@@ -53,7 +53,8 @@ TEST_F( Playlists, Create )
 TEST_F( Playlists, CreateDuplicate )
 {
     auto p = ml->createPlaylist(pl->name());
-    ASSERT_EQ( nullptr, p );
+    ASSERT_NE( nullptr, p );
+    ASSERT_NE( p->id(), pl->id() );
 }
 
 TEST_F( Playlists, Fetch )
