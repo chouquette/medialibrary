@@ -251,7 +251,7 @@ bool Media::addVideoTrack(const std::string& codec, unsigned int width, unsigned
     return VideoTrack::create( m_ml, codec, width, height, fps, m_id, language, description ) != nullptr;
 }
 
-Query<IVideoTrack> Media::videoTracks()
+Query<IVideoTrack> Media::videoTracks() const
 {
     static const std::string req = "FROM " + policy::VideoTrackTable::Name +
             " WHERE media_id = ?";
@@ -265,7 +265,7 @@ bool Media::addAudioTrack( const std::string& codec, unsigned int bitrate,
     return AudioTrack::create( m_ml, codec, bitrate, sampleRate, nbChannels, language, desc, m_id ) != nullptr;
 }
 
-Query<IAudioTrack> Media::audioTracks()
+Query<IAudioTrack> Media::audioTracks() const
 {
     static const std::string req = "FROM " + policy::AudioTrackTable::Name +
             " WHERE media_id = ?";

@@ -140,8 +140,8 @@ class IMedia
         virtual bool removeLabel( LabelPtr label ) = 0;
         virtual MoviePtr movie() const = 0;
         virtual Query<ILabel> labels() const = 0;
-        virtual Query<IVideoTrack> videoTracks() = 0;
-        virtual Query<IAudioTrack> audioTracks() = 0;
+        virtual Query<IVideoTrack> videoTracks() const = 0;
+        virtual Query<IAudioTrack> audioTracks() const = 0;
         ///
         /// \brief thumbnail Returns the path of a thumbnail for this media
         /// \return A path, relative to the thumbnailPath configured when initializing

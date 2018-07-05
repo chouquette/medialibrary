@@ -100,10 +100,10 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         void setMovie( MoviePtr movie );
         bool addVideoTrack( const std::string& codec, unsigned int width, unsigned int height,
                             float fps, const std::string& language, const std::string& description );
-        virtual Query<IVideoTrack> videoTracks() override;
+        virtual Query<IVideoTrack> videoTracks() const override;
         bool addAudioTrack( const std::string& codec, unsigned int bitrate, unsigned int sampleRate,
                             unsigned int nbChannels, const std::string& language, const std::string& desc );
-        virtual Query<IAudioTrack> audioTracks() override;
+        virtual Query<IAudioTrack> audioTracks() const override;
         virtual const std::string& thumbnail() const override;
         virtual bool isThumbnailGenerated() const override;
         virtual bool setThumbnail( const std::string &thumbnail ) override;
