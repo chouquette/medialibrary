@@ -111,8 +111,10 @@ void AlbumTrack::createTable( sqlite::Connection* dbConnection )
                 "FOREIGN KEY (album_id) REFERENCES Album(id_album) "
                     " ON DELETE CASCADE"
             ")";
-
+    const std::string indexAlbumIdReq = "CREATE INDEX IF NOT EXISTS album_track_album_genre_artist_ids "
+            "ON " + policy::AlbumTrackTable::Name + "(album_id, genre_id, artist_id)";
     sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection, indexAlbumIdReq );
 }
 
 void AlbumTrack::createTriggers(sqlite::Connection* dbConnection)
