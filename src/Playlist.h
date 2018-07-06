@@ -69,7 +69,7 @@ public:
     std::shared_ptr<File> addFile( const fs::IFile& fileFs, int64_t parentFolderId,
                                    bool isFolderFsRemovable );
 
-    static void createTable( sqlite::Connection* dbConn );
+    static void createTable( sqlite::Connection* dbConn , uint32_t dbModel );
     static void createTriggers( sqlite::Connection* dbConn );
     static Query<IPlaylist> search( MediaLibraryPtr ml, const std::string& name,
                                     const QueryParameters* params );

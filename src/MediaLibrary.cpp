@@ -143,6 +143,7 @@ void MediaLibrary::clearCache()
 
 void MediaLibrary::createAllTables()
 {
+    auto dbModelVersion = m_settings.dbModelVersion();
     // We need to create the tables in order of triggers creation
     // Device is the "root of all evil". When a device is modified,
     // we will trigger an update on folder, which will trigger
@@ -154,7 +155,7 @@ void MediaLibrary::createAllTables()
     Media::createTable( m_dbConnection.get() );
     File::createTable( m_dbConnection.get() );
     Label::createTable( m_dbConnection.get() );
-    Playlist::createTable( m_dbConnection.get() );
+    Playlist::createTable( m_dbConnection.get(), dbModelVersion );
     Genre::createTable( m_dbConnection.get() );
     Album::createTable( m_dbConnection.get() );
     AlbumTrack::createTable( m_dbConnection.get() );

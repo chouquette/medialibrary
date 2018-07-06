@@ -251,13 +251,20 @@ bool Playlist::remove( int64_t mediaId )
     return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, mediaId );
 }
 
-void Playlist::createTable( sqlite::Connection* dbConn )
+void Playlist::createTable( sqlite::Connection* dbConn, uint32_t dbModel )
 {
     std::string reqs[] = {
         #include "database/tables/Playlist_v14.sql"
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
+    // Playlist doesn't have an mrl field before version 14, so we must not
+    // create the trigger before migrating to that version
+    if ( dbModel >= 14 )
+    {
+        sqlite::Tools::executeRequest( dbConn, "CREATE INDEX IF NOT EXISTS "
+            "playlist_file_id ON " + policy::PlaylistTable::Name + "(file_id)" );
+    }
 }
 
 void Playlist::createTriggers( sqlite::Connection* dbConn )
