@@ -47,9 +47,9 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy
 {
     public:
         VideoTrack( MediaLibraryPtr, sqlite::Row& row );
-        VideoTrack( MediaLibraryPtr, const std::string& codec,
+        VideoTrack(MediaLibraryPtr, const std::string& codec,
                     unsigned int width, unsigned int height, uint32_t fpsNum,
-                    uint32_t fpsDen, int64_t mediaId, const std::string& language,
+                    uint32_t fpsDen, uint32_t bitrate, int64_t mediaId, const std::string& language,
                     const std::string& description );
 
         virtual int64_t id() const override;
@@ -59,13 +59,14 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy
         virtual float fps() const override;
         virtual uint32_t fpsNum() const override;
         virtual uint32_t fpsDen() const override;
+        virtual uint32_t bitrate() const override;
         virtual const std::string& language() const override;
         virtual const std::string& description() const override;
 
         static void createTable( sqlite::Connection* dbConnection );
-        static std::shared_ptr<VideoTrack> create( MediaLibraryPtr ml, const std::string& codec,
+        static std::shared_ptr<VideoTrack> create(MediaLibraryPtr ml, const std::string& codec,
                                     unsigned int width, unsigned int height, uint32_t fpsNum,
-                                    uint32_t fpsDen, int64_t mediaId, const std::string& language,
+                                    uint32_t fpsDen, uint32_t bitrate, int64_t mediaId, const std::string& language,
                                     const std::string& description );
 
     private:
@@ -75,6 +76,7 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy
         unsigned int m_height;
         uint32_t m_fpsNum;
         uint32_t m_fpsDen;
+        uint32_t m_bitrate;
         int64_t m_mediaId;
         std::string m_language;
         std::string m_description;
