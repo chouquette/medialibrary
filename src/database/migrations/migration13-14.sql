@@ -92,6 +92,8 @@
 "DROP TABLE " + ShowTable::Name,
 // No need to delete the ShowFts table since... it didn't exist
 "DROP TABLE " + VideoTrackTable::Name,
+// Flush the audio track table to recreate all tracks
+"DELETE FROM " + AudioTrackTable::Name,
 
 // History table & its triggers were removed for good:
 "DROP TABLE History",
