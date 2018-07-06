@@ -20,6 +20,9 @@
     + "(id_thumbnail)"
 ")",
 
+"CREATE INDEX IF NOT EXISTS media_types_idx ON " + policy::MediaTable::Name +
+    "(type, subtype)",
+
 "CREATE VIRTUAL TABLE IF NOT EXISTS "
     + policy::MediaTable::Name + "Fts USING FTS3("
     "title,"
