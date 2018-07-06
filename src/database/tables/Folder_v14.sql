@@ -17,6 +17,9 @@
     "UNIQUE(path, device_id) ON CONFLICT FAIL"
 ")",
 
+"CREATE INDEX IF NOT EXISTS folder_device_id ON " + policy::FolderTable::Name +
+    "(device_id)",
+
 "CREATE TABLE IF NOT EXISTS ExcludedEntryFolder"
 "("
     "folder_id UNSIGNED INTEGER NOT NULL,"
