@@ -95,7 +95,7 @@ void AlbumTrack::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AlbumTrackTable::Name + "("
                 "id_track INTEGER PRIMARY KEY AUTOINCREMENT,"
-                "media_id INTEGER,"
+                "media_id INTEGER UNIQUE,"
                 "duration INTEGER NOT NULL,"
                 "artist_id UNSIGNED INTEGER,"
                 "genre_id INTEGER,"
