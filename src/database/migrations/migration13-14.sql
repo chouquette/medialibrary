@@ -91,6 +91,7 @@
 "DROP TABLE " + MovieTable::Name,
 "DROP TABLE " + ShowTable::Name,
 // No need to delete the ShowFts table since... it didn't exist
+"DROP TABLE " + VideoTrackTable::Name,
 
 // History table & its triggers were removed for good:
 "DROP TABLE History",

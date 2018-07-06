@@ -1158,6 +1158,7 @@ void MediaLibrary::migrateModel13to14()
     Artist::createTable( getConn() );
     Movie::createTable( getConn() );
     Show::createTable( getConn() );
+    VideoTrack::createTable( getConn() );
     // Re-create triggers removed in the process
     Media::createTriggers( getConn() );
     AlbumTrack::createTriggers( getConn() );
