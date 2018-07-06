@@ -246,7 +246,6 @@ TEST_F( DeviceFs, RemoveAlbum )
         auto album = std::static_pointer_cast<Album>( ml->createAlbum( "album 2" ) );
         auto album2 = std::static_pointer_cast<Album>( ml->createAlbum( "album 3" ) );
         auto media = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
-        ml->media( RemovableDeviceMountpoint + "removablefile2.mp3" );
         auto artist = ml->createArtist( "artist 2" );
         album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1, artist->id(), nullptr );
         album->addTrack( std::static_pointer_cast<Media>( media ), 2, 1, artist->id(), nullptr );
