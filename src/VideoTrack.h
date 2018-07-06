@@ -47,10 +47,10 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy
 {
     public:
         VideoTrack( MediaLibraryPtr, sqlite::Row& row );
-        VideoTrack(MediaLibraryPtr, const std::string& codec,
+        VideoTrack( MediaLibraryPtr, const std::string& codec,
                     unsigned int width, unsigned int height, uint32_t fpsNum,
-                    uint32_t fpsDen, uint32_t bitrate, int64_t mediaId, const std::string& language,
-                    const std::string& description );
+                    uint32_t fpsDen, uint32_t bitrate, uint32_t sarNum, uint32_t sarDen,
+                    int64_t mediaId, const std::string& language, const std::string& description );
 
         virtual int64_t id() const override;
         virtual const std::string& codec() const override;
@@ -60,13 +60,16 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy
         virtual uint32_t fpsNum() const override;
         virtual uint32_t fpsDen() const override;
         virtual uint32_t bitrate() const override;
+        virtual uint32_t sarNum() const override;
+        virtual uint32_t sarDen() const override;
         virtual const std::string& language() const override;
         virtual const std::string& description() const override;
 
         static void createTable( sqlite::Connection* dbConnection );
-        static std::shared_ptr<VideoTrack> create(MediaLibraryPtr ml, const std::string& codec,
+        static std::shared_ptr<VideoTrack> create( MediaLibraryPtr ml, const std::string& codec,
                                     unsigned int width, unsigned int height, uint32_t fpsNum,
-                                    uint32_t fpsDen, uint32_t bitrate, int64_t mediaId, const std::string& language,
+                                    uint32_t fpsDen, uint32_t bitrate, uint32_t sarNum,
+                                    uint32_t sarDen, int64_t mediaId, const std::string& language,
                                     const std::string& description );
 
     private:
@@ -77,6 +80,8 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy
         uint32_t m_fpsNum;
         uint32_t m_fpsDen;
         uint32_t m_bitrate;
+        uint32_t m_sarNum;
+        uint32_t m_sarDen;
         int64_t m_mediaId;
         std::string m_language;
         std::string m_description;

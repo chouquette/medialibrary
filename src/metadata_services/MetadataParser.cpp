@@ -190,6 +190,7 @@ Status MetadataAnalyzer::run( IItem& item )
                 {
                     media->addVideoTrack( track.codec, track.v.width, track.v.height,
                                           track.v.fpsNum, track.v.fpsDen, track.bitrate,
+                                          track.v.sarNum, track.v.sarDen,
                                           track.language, track.description );
                     isAudio = false;
                 }

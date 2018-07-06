@@ -43,15 +43,17 @@ VideoTrack::VideoTrack( MediaLibraryPtr, sqlite::Row& row )
         >> m_fpsNum
         >> m_fpsDen
         >> m_bitrate
+        >> m_sarNum
+        >> m_sarDen
         >> m_mediaId
         >> m_language
         >> m_description;
 }
 
-VideoTrack::VideoTrack(MediaLibraryPtr, const std::string& codec, unsigned int width,
-                       unsigned int height, uint32_t fpsNum, uint32_t fpsDen,
-                       uint32_t bitrate, int64_t mediaId, const std::string& language,
-                       const std::string& description )
+VideoTrack::VideoTrack( MediaLibraryPtr, const std::string& codec, unsigned int width,
+                        unsigned int height, uint32_t fpsNum, uint32_t fpsDen,
+                        uint32_t bitrate, uint32_t sarNum, uint32_t sarDen, int64_t mediaId,
+                        const std::string& language, const std::string& description )
     : m_id( 0 )
     , m_codec( codec )
     , m_width( width )
@@ -59,6 +61,8 @@ VideoTrack::VideoTrack(MediaLibraryPtr, const std::string& codec, unsigned int w
     , m_fpsNum( fpsNum )
     , m_fpsDen( fpsDen )
     , m_bitrate( bitrate )
+    , m_sarNum( sarNum )
+    , m_sarDen( sarDen )
     , m_mediaId( mediaId )
     , m_language( language )
     , m_description( description )
@@ -105,6 +109,16 @@ uint32_t VideoTrack::bitrate() const
     return m_bitrate;
 }
 
+uint32_t VideoTrack::sarNum() const
+{
+    return m_sarNum;
+}
+
+uint32_t VideoTrack::sarDen() const
+{
+    return m_sarDen;
+}
+
 const std::string& VideoTrack::language() const
 {
     return m_language;
@@ -117,16 +131,18 @@ const std::string& VideoTrack::description() const
 
 std::shared_ptr<VideoTrack> VideoTrack::create( MediaLibraryPtr ml, const std::string& codec, unsigned int width,
                                                 unsigned int height, uint32_t fpsNum, uint32_t fpsDen,
-                                                uint32_t bitrate, int64_t mediaId,
-                                                const std::string& language, const std::string& description )
+                                                uint32_t bitrate, uint32_t sarNum, uint32_t sarDen,
+                                                int64_t mediaId, const std::string& language,
+                                                const std::string& description )
 {
     static const std::string req  = "INSERT INTO " + policy::VideoTrackTable::Name
-            + "(codec, width, height, fps_num, fps_den, bitrate, media_id, language,"
-              " description) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            + "(codec, width, height, fps_num, fps_den, bitrate, sar_num, sar_den,"
+               "media_id, language, description) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     auto track = std::make_shared<VideoTrack>( ml, codec, width, height, fpsNum,
-                                               fpsDen, bitrate, mediaId, language, description );
+                                               fpsDen, bitrate, sarNum, sarDen,
+                                               mediaId, language, description );
     if ( insert( ml, track, req, codec, width, height, fpsNum, fpsDen, bitrate,
-                 mediaId, language, description ) == false )
+                 sarNum, sarDen, mediaId, language, description ) == false )
         return nullptr;
     return track;
 }
@@ -142,6 +158,8 @@ void VideoTrack::createTable( sqlite::Connection* dbConnection )
                 "fps_num UNSIGNED INTEGER,"
                 "fps_den UNSIGNED INTEGER,"
                 "bitrate UNSIGNED INTEGER,"
+                "sar_num UNSIGNED INTEGER,"
+                "sar_den UNSIGNED INTEGER,"
                 "media_id UNSIGNED INT,"
                 "language TEXT,"
                 "description TEXT,"

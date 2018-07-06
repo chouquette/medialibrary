@@ -36,15 +36,16 @@ class VideoTracks : public Tests
 TEST_F( VideoTracks, AddTrack )
 {
     auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.avi" ) );
-    bool res = f->addVideoTrack( "H264", 1920, 1080, 3000, 1001, 1234, "language", "description" );
+    bool res = f->addVideoTrack( "H264", 1920, 1080, 3000, 1001, 1234,
+                                 16, 9, "language", "description" );
     ASSERT_TRUE( res );
 }
 
 TEST_F( VideoTracks, FetchTracks )
 {
     auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.avi" ) );
-    f->addVideoTrack( "H264", 1920, 1080, 3000, 100, 5678, "l1", "d1" );
-    f->addVideoTrack( "VP80", 640, 480, 3000, 100, 9876, "l2", "d2" );
+    f->addVideoTrack( "H264", 1920, 1080, 3000, 100, 5678, 16, 10, "l1", "d1" );
+    f->addVideoTrack( "VP80", 640, 480, 3000, 100, 9876, 16, 9, "l2", "d2" );
 
     // Testing fetch from initially created instance:
     auto ts = f->videoTracks()->all();
@@ -57,6 +58,8 @@ TEST_F( VideoTracks, FetchTracks )
     ASSERT_EQ( t2->fpsNum(), 3000u );
     ASSERT_EQ( t2->fpsDen(), 100u );
     ASSERT_EQ( t2->bitrate(), 5678u );
+    ASSERT_EQ( t2->sarNum(), 16u );
+    ASSERT_EQ( t2->sarDen(), 10u );
     ASSERT_EQ( t2->language(), "l1" );
     ASSERT_EQ( t2->description(), "d1" );
 
