@@ -78,4 +78,7 @@ INSERT INTO `File` (id_file,media_id,playlist_id,mrl,type,last_modification_date
 INSERT INTO `Media` (id_media,type,subtype,duration,play_count,last_played_date,insertion_date,release_date,thumbnail,title,filename,is_favorite,is_present) VALUES (2,3,NULL,-1,NULL,NULL,1522231538,NULL,'','media2.avi','media2.avi',0,1);
 INSERT INTO `File` (id_file,media_id,playlist_id,mrl,type,last_modification_date,size,folder_id,is_present,is_removable,is_external) VALUES (2,2,NULL,'media2.avi',1,NULL,NULL,NULL,1,0,1);
 INSERT INTO `MediaMetadata` VALUES(2, 50, "fake progress");
+INSERT INTO `Playlist` (id_playlist,name,file_id,creation_date,artwork_mrl) VALUES (1,'test playlist',NULL,1530864508,'');
+INSERT INTO `PlaylistMediaRelation` (media_id,playlist_id,position) VALUES (1,1,1);
+INSERT INTO `PlaylistMediaRelation` (media_id,playlist_id,position) VALUES (2,1,2);
 COMMIT;

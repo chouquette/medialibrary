@@ -82,6 +82,11 @@ public:
      */
     static void clearExternalPlaylistContent( MediaLibraryPtr ml );
 
+    /**
+     * Fetches all PlaylistMediaRelation items without an MRL and assign it
+     */
+    static void insertMrlFromMediaId( MediaLibraryPtr ml );
+
 private:
     static std::string sortRequest( const QueryParameters* params );
     void curateNullMediaID() const;

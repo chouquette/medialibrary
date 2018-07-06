@@ -81,6 +81,35 @@
     ", type, value "
 "FROM " + MetadataTable::Name + "_backup",
 
+/******************* Migrate the playlist table *******************************/
+"CREATE TEMPORARY TABLE " + PlaylistTable::Name + "_backup"
+"("
+    + PlaylistTable::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "name TEXT,"
+    "file_id UNSIGNED INT DEFAULT NULL,"
+    "creation_date UNSIGNED INT NOT NULL,"
+    "artwork_mrl TEXT"
+")",
+
+"CREATE TEMPORARY TABLE PlaylistMediaRelation_backup"
+"("
+    "media_id INTEGER,"
+    "playlist_id INTEGER,"
+    "position INTEGER"
+")",
+
+"INSERT INTO " + PlaylistTable::Name + "_backup SELECT * FROM " + PlaylistTable::Name,
+"INSERT INTO PlaylistMediaRelation_backup SELECT * FROM PlaylistMediaRelation",
+
+"DROP TABLE " + PlaylistTable::Name,
+"DROP TABLE PlaylistMediaRelation",
+
+#include "database/tables/Playlist_v14.sql"
+
+"INSERT INTO " + PlaylistTable::Name + " SELECT * FROM " + PlaylistTable::Name + "_backup",
+"INSERT INTO PlaylistMediaRelation SELECT media_id, NULL, playlist_id, position "
+    "FROM PlaylistMediaRelation_backup",
+
 /******************* Delete other tables **************************************/
 
 "DROP TABLE " + AlbumTable::Name,

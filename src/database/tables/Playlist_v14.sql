@@ -11,7 +11,7 @@
 "CREATE TABLE IF NOT EXISTS PlaylistMediaRelation"
 "("
     "media_id INTEGER,"
-    "mrl STRING NOT NULL,"
+    "mrl STRING,"
     "playlist_id INTEGER,"
     "position INTEGER,"
     "FOREIGN KEY(media_id) REFERENCES " + policy::MediaTable::Name + "("

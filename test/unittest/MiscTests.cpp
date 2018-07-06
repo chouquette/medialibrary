@@ -33,6 +33,7 @@
 #include "Artist.h"
 #include "Media.h"
 #include "Metadata.h"
+#include "Playlist.h"
 
 class Misc : public Tests
 {
@@ -195,6 +196,13 @@ TEST_F( DbModel, Upgrade13to14 )
     ASSERT_EQ( m->id(), 2 );
     auto& meta = m->metadata( IMedia::MetadataType::Progress );
     ASSERT_EQ( "fake progress", meta.str() );
+
+    auto playlists = ml->playlists( nullptr )->all();
+    ASSERT_EQ( 1u, playlists.size() );
+    auto playlistMedia = playlists[0]->media()->all();
+    ASSERT_EQ( 2u, playlistMedia.size() );
+    ASSERT_EQ( media[0]->id(), playlistMedia[0]->id() );
+    ASSERT_EQ( media[1]->id(), playlistMedia[1]->id() );
 
     CheckNbTriggers( 32 );
 }

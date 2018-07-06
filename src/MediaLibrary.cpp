@@ -1165,6 +1165,8 @@ void MediaLibrary::migrateModel13to14()
     Album::createTriggers( getConn() );
     Artist::createTriggers( getConn(), 14 );
     Show::createTriggers( getConn() );
+    Playlist::createTriggers( getConn() );
+
     t->commit();
 }
 
