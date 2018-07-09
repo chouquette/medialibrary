@@ -28,5 +28,13 @@
 
 extern "C" medialibrary::IMediaLibrary* NewMediaLibrary()
 {
-    return new medialibrary::MediaLibrary();
+    try
+    {
+        return new medialibrary::MediaLibrary();
+    }
+    catch ( const std::exception& ex )
+    {
+        LOG_ERROR( "Failed to instantiate medialibrary: ", ex.what() );
+    }
+    return nullptr;
 }
