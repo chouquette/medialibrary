@@ -287,7 +287,11 @@ parser::Task::Status VLCThumbnailer::seekAhead( VLC::MediaPlayer& mp )
     auto success = false;
     {
         std::unique_lock<compat::Mutex> lock( m_mutex );
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+        mp.setPosition( .4f, true );
+#else
         mp.setPosition( .4f );
+#endif
         success = m_cond.wait_for( lock, std::chrono::seconds( 3 ), [&pos]() {
             return pos >= .1f;
         });
