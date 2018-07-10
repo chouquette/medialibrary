@@ -1147,8 +1147,9 @@ void MediaLibrary::migrateModel12to13()
  */
 void MediaLibrary::migrateModel13to14()
 {
-    sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
-    auto t = getConn()->newTransaction();
+    auto dbConn = getConn();
+    sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
+    auto t = dbConn->newTransaction();
     using namespace policy;
     using ThumbnailType = typename std::underlying_type<Thumbnail::Origin>::type;
     std::string reqs[] = {
@@ -1156,22 +1157,22 @@ void MediaLibrary::migrateModel13to14()
     };
 
     for ( const auto& req : reqs )
-        sqlite::Tools::executeRequest( getConn(), req );
+        sqlite::Tools::executeRequest( dbConn, req );
     // Re-create tables that we just removed
     // We will run a re-scan, so we don't care about keeping their content
-    Album::createTable( getConn() );
-    Artist::createTable( getConn() );
-    Movie::createTable( getConn() );
-    Show::createTable( getConn() );
-    VideoTrack::createTable( getConn() );
+    Album::createTable( dbConn );
+    Artist::createTable( dbConn );
+    Movie::createTable( dbConn );
+    Show::createTable( dbConn );
+    VideoTrack::createTable( dbConn );
     // Re-create triggers removed in the process
-    Media::createTriggers( getConn() );
-    AlbumTrack::createTriggers( getConn() );
-    Album::createTriggers( getConn() );
-    Artist::createTriggers( getConn(), 14 );
-    Show::createTriggers( getConn() );
-    Playlist::createTriggers( getConn() );
-    Folder::createTriggers( getConn() );
+    Media::createTriggers( dbConn );
+    AlbumTrack::createTriggers( dbConn );
+    Album::createTriggers( dbConn );
+    Artist::createTriggers( dbConn, 14 );
+    Show::createTriggers( dbConn );
+    Playlist::createTriggers( dbConn );
+    Folder::createTriggers( dbConn );
 
     t->commit();
 }
