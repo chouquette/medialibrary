@@ -58,6 +58,8 @@
     "CASE thumbnail WHEN NULL THEN 0 WHEN '' THEN 0 ELSE 1 END,"
     "title, filename, is_favorite, is_present FROM " + MediaTable::Name + "_backup",
 
+"DROP TABLE " + MediaTable::Name + "_backup",
+
 /******************* Migrate metadata table ***********************************/
 "CREATE TEMPORARY TABLE " + MetadataTable::Name + "_backup"
 "("
@@ -80,6 +82,8 @@
             IMetadata::EntityType::Media ) ) +
     ", type, value "
 "FROM " + MetadataTable::Name + "_backup",
+
+"DROP TABLE " + MetadataTable::Name + "_backup",
 
 /******************* Migrate the playlist table *******************************/
 "CREATE TEMPORARY TABLE " + PlaylistTable::Name + "_backup"
@@ -110,6 +114,9 @@
 "INSERT INTO PlaylistMediaRelation SELECT media_id, NULL, playlist_id, position "
     "FROM PlaylistMediaRelation_backup",
 
+"DROP TABLE " + PlaylistTable::Name + "_backup",
+"DROP TABLE PlaylistMediaRelation_backup",
+
 /******************* Migrate Device table *************************************/
 
 "CREATE TEMPORARY TABLE " + policy::DeviceTable::Name + "_backup"
@@ -129,6 +136,8 @@
 
 "INSERT INTO " + DeviceTable::Name + " SELECT id_device, uuid, scheme, is_removable, is_present,"
     "strftime('%s', 'now') FROM " + DeviceTable::Name,
+
+"DROP TABLE " + DeviceTable::Name + "_backup",
 
 /******************* Delete other tables **************************************/
 
