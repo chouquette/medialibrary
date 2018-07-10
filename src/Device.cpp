@@ -101,14 +101,11 @@ std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& u
 
 void Device::createTable( sqlite::Connection* connection )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::DeviceTable::Name + "("
-                "id_device INTEGER PRIMARY KEY AUTOINCREMENT,"
-                "uuid TEXT UNIQUE ON CONFLICT FAIL,"
-                "scheme TEXT,"
-                "is_removable BOOLEAN,"
-                "is_present BOOLEAN"
-            ")";
-    sqlite::Tools::executeRequest( connection, req );
+    const std::string reqs[] = {
+        #include "database/tables/Device_v14.sql"
+    };
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( connection, req );
 }
 
 std::shared_ptr<Device> Device::fromUuid( MediaLibraryPtr ml, const std::string& uuid )
