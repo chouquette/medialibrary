@@ -4,5 +4,6 @@
     "uuid TEXT UNIQUE ON CONFLICT FAIL,"
     "scheme TEXT,"
     "is_removable BOOLEAN,"
-    "is_present BOOLEAN"
+    "is_present BOOLEAN,"
+    "last_seen UNSIGNED INTEGER"
 ")",

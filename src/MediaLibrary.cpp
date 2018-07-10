@@ -367,6 +367,10 @@ bool MediaLibrary::start()
     populateFsFactories();
     for ( auto& fsFactory : m_fsFactories )
         refreshDevices( *fsFactory );
+    // Now that we know which devices are plugged, check for outdated devices
+    // Approximate 6 months for old device precision.
+    Device::removeOldDevices( this, std::chrono::seconds{ 3600 * 24 * 30 * 6 } );
+
     startDiscoverer();
     if ( startParser() == false )
         return false;
@@ -1167,6 +1171,7 @@ void MediaLibrary::migrateModel13to14()
     Artist::createTriggers( getConn(), 14 );
     Show::createTriggers( getConn() );
     Playlist::createTriggers( getConn() );
+    Folder::createTriggers( getConn() );
 
     t->commit();
 }
@@ -1361,6 +1366,9 @@ void MediaLibrary::refreshDevices( fs::IFileSystemFactory& fsFactory )
         }
         else
             LOG_INFO( "Device ", d->uuid(), " unchanged" );
+
+        if ( d->isPresent() == true )
+            d->updateLastSeen();
     }
 }
 

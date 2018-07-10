@@ -110,6 +110,26 @@
 "INSERT INTO PlaylistMediaRelation SELECT media_id, NULL, playlist_id, position "
     "FROM PlaylistMediaRelation_backup",
 
+/******************* Migrate Device table *************************************/
+
+"CREATE TEMPORARY TABLE " + policy::DeviceTable::Name + "_backup"
+"("
+    "id_device INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "uuid TEXT UNIQUE ON CONFLICT FAIL,"
+    "scheme TEXT,"
+    "is_removable BOOLEAN,"
+    "is_present BOOLEAN"
+")",
+
+"INSERT INTO " + DeviceTable::Name + "_backup SELECT * FROM " + DeviceTable::Name,
+
+"DROP TABLE " + DeviceTable::Name,
+
+#include "database/tables/Device_v14.sql"
+
+"INSERT INTO " + DeviceTable::Name + " SELECT id_device, uuid, scheme, is_removable, is_present,"
+    "strftime('%s', 'now') FROM " + DeviceTable::Name,
+
 /******************* Delete other tables **************************************/
 
 "DROP TABLE " + AlbumTable::Name,

@@ -372,3 +372,20 @@ TEST_F( DeviceFs, UnknownMountpoint )
     bool discovered = cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 }
+
+TEST_F( DeviceFs, OutdatedDevices )
+{
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    ASSERT_EQ( 7u, ml->files().size() );
+    auto oldMediaCount = ml->files().size();
+
+    ml->outdateAllDevices();
+    fsMock->removeDevice( RemovableDeviceUuid );
+
+    Reload();
+
+    ASSERT_NE( oldMediaCount, ml->files().size() );
+}

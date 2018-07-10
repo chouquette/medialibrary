@@ -40,10 +40,12 @@ Device::Device( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_uuid
         >> m_scheme
         >> m_isRemovable
-        >> m_isPresent;
+        >> m_isPresent
+        >> m_lastSeen;
 }
 
-Device::Device( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme, bool isRemovable )
+Device::Device( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme,
+                bool isRemovable, time_t lastSeen )
     : m_ml( ml )
     , m_id( 0 )
     , m_uuid( uuid )
@@ -51,6 +53,7 @@ Device::Device( MediaLibraryPtr ml, const std::string& uuid, const std::string& 
     , m_isRemovable( isRemovable )
     // Assume we can't add an absent device
     , m_isPresent( true )
+    , m_lastSeen( lastSeen )
 {
 }
 
@@ -89,12 +92,30 @@ const std::string& Device::scheme() const
     return m_scheme;
 }
 
+time_t Device::lastSeen() const
+{
+    return m_lastSeen;
+}
+
+void Device::updateLastSeen()
+{
+    const std::string req = "UPDATE " + policy::DeviceTable::Name + " SET "
+            "last_seen = ? WHERE id_device = ?";
+    auto lastSeen = std::chrono::duration_cast<std::chrono::seconds>(
+        std::chrono::system_clock::now().time_since_epoch()
+    ).count();
+    sqlite::Tools::executeUpdate( m_ml->getConn(), req, lastSeen, m_id );
+}
+
 std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme, bool isRemovable )
 {
     static const std::string req = "INSERT INTO " + policy::DeviceTable::Name
-            + "(uuid, scheme, is_removable, is_present) VALUES(?, ?, ?, ?)";
-    auto self = std::make_shared<Device>( ml, uuid, scheme, isRemovable );
-    if ( insert( ml, self, req, uuid, scheme, isRemovable, self->isPresent() ) == false )
+            + "(uuid, scheme, is_removable, is_present, last_seen) VALUES(?, ?, ?, ?, ?)";
+    auto lastSeen = std::chrono::duration_cast<std::chrono::seconds>(
+        std::chrono::system_clock::now().time_since_epoch()
+    ).count();
+    auto self = std::make_shared<Device>( ml, uuid, scheme, isRemovable, lastSeen );
+    if ( insert( ml, self, req, uuid, scheme, isRemovable, self->isPresent(), lastSeen ) == false )
         return nullptr;
     return self;
 }
@@ -113,6 +134,15 @@ std::shared_ptr<Device> Device::fromUuid( MediaLibraryPtr ml, const std::string&
     static const std::string req = "SELECT * FROM " + policy::DeviceTable::Name +
             " WHERE uuid = ?";
     return fetch( ml, req, uuid );
+}
+
+void Device::removeOldDevices( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime )
+{
+    static const std::string req = "DELETE FROM " + policy::DeviceTable::Name + " "
+            "WHERE last_seen < ?";
+    auto deadline = std::chrono::duration_cast<std::chrono::seconds>(
+                (std::chrono::system_clock::now() - maxLifeTime).time_since_epoch() );
+    sqlite::Tools::executeDelete( ml->getConn(), req, deadline.count() );
 }
 
 }

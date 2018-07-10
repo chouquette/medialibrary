@@ -77,6 +77,7 @@ public:
     virtual void populateFsFactories();
     MediaPtr addMedia( const std::string& mrl );
     void deleteMedia( int64_t mediaId );
+    void outdateAllDevices();
 
 private:
     std::shared_ptr<fs::IDirectory> dummyDirectory;

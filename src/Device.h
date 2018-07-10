@@ -24,6 +24,7 @@
 
 #include "Types.h"
 #include "database/DatabaseHelpers.h"
+#include <chrono>
 
 namespace medialibrary
 {
@@ -43,7 +44,8 @@ struct DeviceTable
 class Device : public DatabaseHelpers<Device, policy::DeviceTable>
 {
 public:
-    Device( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme, bool isRemovable );
+    Device( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme,
+            bool isRemovable, time_t insertionDate );
     Device( MediaLibraryPtr ml, sqlite::Row& row );
     int64_t id() const;
     const std::string& uuid() const;
@@ -57,10 +59,13 @@ public:
     /// \return
     ///
     const std::string& scheme() const;
+    time_t lastSeen() const;
+    void updateLastSeen();
 
     static std::shared_ptr<Device> create( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme, bool isRemovable );
     static void createTable( sqlite::Connection* connection );
     static std::shared_ptr<Device> fromUuid( MediaLibraryPtr ml, const std::string& uuid );
+    static void removeOldDevices( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime );
 
 private:
     MediaLibraryPtr m_ml;
@@ -72,6 +77,7 @@ private:
     std::string m_scheme;
     bool m_isRemovable;
     bool m_isPresent;
+    time_t m_lastSeen;
 
     friend struct policy::DeviceTable;
 };

@@ -214,3 +214,9 @@ void MediaLibraryTester::deleteMedia( int64_t mediaId )
 {
     Media::destroy( this, mediaId );
 }
+
+void MediaLibraryTester::outdateAllDevices()
+{
+    std::string req = "UPDATE " + policy::DeviceTable::Name + " SET last_seen = 1";
+    sqlite::Tools::executeUpdate( getConn(), req );
+}
