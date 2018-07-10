@@ -193,7 +193,11 @@ bool VLCThumbnailer::seekAhead( Task& task )
     auto success = false;
     {
         std::unique_lock<compat::Mutex> lock( task.mutex );
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+        task.mp.setPosition( .4f, true );
+#else
         task.mp.setPosition( .4f );
+#endif
         success = task.cond.wait_for( lock, std::chrono::seconds( 3 ), [&pos]() {
             return pos >= .1f;
         });
