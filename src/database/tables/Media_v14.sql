@@ -27,4 +27,4 @@
     + policy::MediaTable::Name + "Fts USING FTS3("
     "title,"
     "labels"
-")"
+")",
