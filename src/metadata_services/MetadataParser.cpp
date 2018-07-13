@@ -304,7 +304,7 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
     if ( fsFactory == nullptr ) // Media not supported by any FsFactory, registering it as external
     {
         auto t2 = m_ml->getConn()->newTransaction();
-        auto externalMedia = Media::create( m_ml, IMedia::Type::Unknown, utils::url::encode(
+        auto externalMedia = Media::create( m_ml, IMedia::Type::External, utils::url::encode(
                 subitem.meta( IItem::Metadata::Title ) ) );
         if ( externalMedia == nullptr )
         {

@@ -41,6 +41,15 @@
 
 "DROP TABLE " + MediaTable::Name + "_backup",
 
+/************ Playlist external media were stored as Unknown ******************/
+
+"UPDATE " + policy::MediaTable::Name + " SET type = " +
+std::to_string( static_cast<typename std::underlying_type<IMedia::Type>::type>(
+            IMedia::Type::External ) ) + " "
+"WHERE id_media IN (SELECT media_id FROM PlaylistMediaRelation) AND "
+"type = " + std::to_string( static_cast<typename std::underlying_type<IMedia::Type>::type>(
+IMedia::Type::Unknown ) ),
+
 /******************* Migrate metadata table ***********************************/
 "CREATE TEMPORARY TABLE " + MetadataTable::Name + "_backup"
 "("

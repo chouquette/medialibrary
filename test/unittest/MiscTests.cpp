@@ -183,7 +183,7 @@ TEST_F( DbModel, Upgrade13to14 )
     auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     auto media = ml->files();
-    ASSERT_EQ( 2u, media.size() );
+    ASSERT_EQ( 4u, media.size() );
     auto m = media[0];
     ASSERT_EQ( m->thumbnail(), "/path/to/thumbnail" );
     ASSERT_TRUE( m->isThumbnailGenerated() );
@@ -200,9 +200,16 @@ TEST_F( DbModel, Upgrade13to14 )
     auto playlists = ml->playlists( nullptr )->all();
     ASSERT_EQ( 1u, playlists.size() );
     auto playlistMedia = playlists[0]->media()->all();
-    ASSERT_EQ( 2u, playlistMedia.size() );
+    ASSERT_EQ( 3u, playlistMedia.size() );
     ASSERT_EQ( media[0]->id(), playlistMedia[0]->id() );
     ASSERT_EQ( media[1]->id(), playlistMedia[1]->id() );
+    ASSERT_EQ( media[2]->id(), playlistMedia[2]->id() );
+
+    ASSERT_EQ( IMedia::Type::External, media[2]->type() );
+
+    auto externalMedia = ml->media( 99 );
+    ASSERT_NE( nullptr, externalMedia );
+    ASSERT_EQ( IMedia::Type::Unknown, externalMedia->type() );
 
     CheckNbTriggers( 32 );
 }
