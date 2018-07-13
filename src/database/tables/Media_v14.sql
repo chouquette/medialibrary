@@ -7,6 +7,7 @@
     "duration INTEGER DEFAULT -1,"
     "play_count UNSIGNED INTEGER,"
     "last_played_date UNSIGNED INTEGER,"
+    "real_last_played_date UNSIGNED INTEGER,"
     "insertion_date UNSIGNED INTEGER,"
     "release_date UNSIGNED INTEGER,"
     "thumbnail_id INTEGER,"

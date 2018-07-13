@@ -62,12 +62,14 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
+    time_t dummy;
     row >> m_id
         >> m_type
         >> m_subType
         >> m_duration
         >> m_playCount
         >> m_lastPlayedDate
+        >> dummy
         >> m_insertionDate
         >> m_releaseDate
         >> m_thumbnailId
@@ -178,9 +180,11 @@ int Media::playCount() const
 bool Media::increasePlayCount()
 {
     static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
-            "play_count = ?, last_played_date = ? WHERE id_media = ?";
+            "play_count = ?, last_played_date = ?, real_last_played_date = ? "
+            "WHERE id_media = ?";
     auto lastPlayedDate = time( nullptr );
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_playCount + 1, lastPlayedDate, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_playCount + 1,
+                                       lastPlayedDate, lastPlayedDate, m_id ) == false )
         return false;
     m_playCount++;
     m_lastPlayedDate = lastPlayedDate;
