@@ -33,6 +33,8 @@
 #include "medialibrary/IMetadata.h"
 #include "Metadata.h"
 
+#include <atomic>
+
 namespace medialibrary
 {
 
@@ -174,7 +176,7 @@ private:
         std::string m_filename;
         bool m_isFavorite;
         bool m_isPresent;
-        mutable std::atomic_uint32_t m_nbPlaylists;
+        mutable std::atomic_uint m_nbPlaylists;
 
         // Auto fetched related properties
         mutable Cache<AlbumTrackPtr> m_albumTrack;
