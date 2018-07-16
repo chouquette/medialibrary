@@ -177,7 +177,10 @@ Status MetadataAnalyzer::run( IItem& item )
     const auto& tracks = item.tracks();
 
     if ( tracks.empty() == true )
+    {
+        LOG_WARN( "Failed to analyze ", item.mrl(), ": no tracks found" );
         return Status::Fatal;
+    }
 
     bool isAudio = true;
     {
