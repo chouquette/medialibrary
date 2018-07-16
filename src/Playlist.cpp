@@ -247,8 +247,17 @@ bool Playlist::move( int64_t mediaId, unsigned int position )
 
 bool Playlist::remove( int64_t mediaId )
 {
-    static const std::string req = "DELETE FROM PlaylistMediaRelation WHERE playlist_id = ? AND media_id = ?";
-    return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, mediaId );
+    const auto media = m_ml->media( mediaId );
+    if ( media == nullptr )
+        return false;
+    return remove( *media );
+}
+
+bool Playlist::remove( const IMedia& media )
+{
+    static const std::string req = "DELETE FROM PlaylistMediaRelation WHERE "
+            "playlist_id = ? AND media_id = ?";
+    return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, media.id() );
 }
 
 void Playlist::createTable( sqlite::Connection* dbConn, uint32_t dbModel )

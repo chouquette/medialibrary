@@ -66,6 +66,7 @@ public:
     virtual bool add( const int64_t mediaId, unsigned int position ) override;
     virtual bool move( int64_t mediaId, unsigned int position ) override;
     virtual bool remove( int64_t mediaId ) override;
+    virtual bool remove( const IMedia& media ) override;
     std::shared_ptr<File> addFile( const fs::IFile& fileFs, int64_t parentFolderId,
                                    bool isFolderFsRemovable );
 

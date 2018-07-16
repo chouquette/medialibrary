@@ -83,6 +83,7 @@ public:
     /// \return true on success, false on failure
     ///
     virtual bool remove( int64_t mediaId ) = 0;
+    virtual bool remove( const IMedia& media ) = 0;
 };
 
 }
