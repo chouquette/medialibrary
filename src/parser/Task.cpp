@@ -90,9 +90,7 @@ bool Task::saveParserStep()
 {
     static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET step = ?, "
             "retry_count = 0 WHERE id_task = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_step, m_id ) == false )
-        return false;
-    return true;
+    return sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_step, m_id );
 }
 
 bool Task::resetRetryCountOnSuccess()
