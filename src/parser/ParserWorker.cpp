@@ -222,7 +222,7 @@ bool Worker::handleServiceResult( Task& task, Status status )
         // the extraction again, causing the analysis to run with no info.
         if ( m_service->targetedStep() != Step::MetadataExtraction )
             return task.saveParserStep();
-        return true;
+        return task.resetRetryCountOnSuccess();
     }
     else if ( status == Status::Completed )
     {

@@ -95,6 +95,13 @@ bool Task::saveParserStep()
     return true;
 }
 
+bool Task::resetRetryCountOnSuccess()
+{
+    static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET "
+            "retry_count = 0 WHERE id_task = ?";
+    return sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id );
+}
+
 bool Task::isCompleted() const
 {
     using StepType = typename std::underlying_type<Step>::type;

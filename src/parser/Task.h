@@ -173,6 +173,11 @@ public:
      */
     void markStepCompleted( parser::Step stepCompleted );
     bool saveParserStep();
+    // Reset the retry count to 0 but doesn't advance the step.
+    // This is intended to be used when a step requires its completion not to be
+    // saved in database, but to avoid having a retry_count being incremented again
+    // when starting next step.
+    bool resetRetryCountOnSuccess();
     bool isCompleted() const;
     bool isStepCompleted( parser::Step step ) const;
     /**
