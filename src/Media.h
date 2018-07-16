@@ -66,7 +66,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
 
         static std::shared_ptr<Media> create( MediaLibraryPtr ml, Type type, const std::string& fileName );
         static void createTable( sqlite::Connection* connection );
-        static void createTriggers( sqlite::Connection* connection );
+        static void createTriggers( sqlite::Connection* connection, uint32_t modelVersion );
 
         virtual int64_t id() const override;
         virtual Type type() const override;
@@ -113,6 +113,8 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         bool setThumbnail( const std::string& thumbnail, Thumbnail::Origin origin );
         virtual unsigned int insertionDate() const override;
         virtual unsigned int releaseDate() const override;
+        uint32_t nbPlaylists() const;
+        void udpateNbPlaylist( int32_t increment ) const;
 
         virtual const IMetadata& metadata( MetadataType type ) const override;
         virtual bool setMetadata( MetadataType type, const std::string& value ) override;
@@ -172,6 +174,7 @@ private:
         std::string m_filename;
         bool m_isFavorite;
         bool m_isPresent;
+        mutable std::atomic_uint32_t m_nbPlaylists;
 
         // Auto fetched related properties
         mutable Cache<AlbumTrackPtr> m_albumTrack;

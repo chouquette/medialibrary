@@ -192,9 +192,12 @@ bool Playlist::add( const IMedia& media, unsigned int position )
             LOG_ERROR( "Can't add a media without any files to a playlist" );
             return false;
         }
-        return sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
+        if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
                                              (*mainFile)->mrl(), m_id,
-                                             sqlite::ForeignKey{ position } );
+                                             sqlite::ForeignKey{ position } ) == false )
+            return false;
+        static_cast<const Media&>( media ).udpateNbPlaylist( 1 );
+        return true;
     }
     catch (const sqlite::errors::ConstraintViolation& ex)
     {
@@ -257,7 +260,10 @@ bool Playlist::remove( const IMedia& media )
 {
     static const std::string req = "DELETE FROM PlaylistMediaRelation WHERE "
             "playlist_id = ? AND media_id = ?";
-    return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, media.id() );
+    if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, media.id() ) == false )
+        return false;
+    static_cast<const Media&>( media ).udpateNbPlaylist( -1 );
+    return true;
 }
 
 void Playlist::createTable( sqlite::Connection* dbConn, uint32_t dbModel )

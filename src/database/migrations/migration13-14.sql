@@ -51,6 +51,12 @@ std::to_string( static_cast<typename std::underlying_type<IMedia::Type>::type>(
 "type = " + std::to_string( static_cast<typename std::underlying_type<IMedia::Type>::type>(
 IMedia::Type::Unknown ) ),
 
+/******************* Populate new media.nb_playlists **************************/
+
+"UPDATE " + MediaTable::Name + " SET nb_playlists = "
+"(SELECT COUNT(media_id) FROM PlaylistMediaRelation WHERE media_id = id_media )"
+"WHERE id_media IN (SELECT media_id FROM PlaylistMediaRelation)",
+
 /******************* Migrate metadata table ***********************************/
 "CREATE TEMPORARY TABLE " + MetadataTable::Name + "_backup"
 "("

@@ -77,7 +77,8 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
         >> m_title
         >> m_filename
         >> m_isFavorite
-        >> m_isPresent;
+        >> m_isPresent
+        >> m_nbPlaylists;
 }
 
 Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
@@ -97,6 +98,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
     , m_filename( title )
     , m_isFavorite( false )
     , m_isPresent( true )
+    , m_nbPlaylists( 0 )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
@@ -308,6 +310,17 @@ unsigned int Media::insertionDate() const
 unsigned int Media::releaseDate() const
 {
     return m_releaseDate;
+}
+
+uint32_t Media::nbPlaylists() const
+{
+    return m_nbPlaylists.load( std::memory_order_relaxed );
+}
+
+void Media::udpateNbPlaylist(int32_t increment) const
+{
+    // Only update the cached representation, let the triggers handle the DB values
+    m_nbPlaylists.fetch_add( increment, std::memory_order_relaxed );
 }
 
 const IMetadata& Media::metadata( IMedia::MetadataType type ) const
@@ -559,7 +572,7 @@ void Media::createTable( sqlite::Connection* connection )
         sqlite::Tools::executeRequest( connection, req );
 }
 
-void Media::createTriggers( sqlite::Connection* connection )
+void Media::createTriggers( sqlite::Connection* connection, uint32_t modelVersion )
 {
     const std::string reqs[] = {
         #include "database/tables/Media_triggers_v14.sql"
@@ -567,6 +580,27 @@ void Media::createTriggers( sqlite::Connection* connection )
 
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( connection, req );
+
+    if ( modelVersion >= 14 )
+    {
+        sqlite::Tools::executeRequest( connection,
+            "CREATE TRIGGER IF NOT EXISTS increment_media_nb_playlist AFTER INSERT ON "
+            " PlaylistMediaRelation "
+            " BEGIN "
+                " UPDATE " + policy::MediaTable::Name + " SET nb_playlists = nb_playlists + 1 "
+                    " WHERE id_media = new.media_id;"
+            " END;"
+        );
+
+        sqlite::Tools::executeRequest( connection,
+            "CREATE TRIGGER IF NOT EXISTS decrement_media_nb_playlist AFTER DELETE ON "
+            " PlaylistMediaRelation "
+            " BEGIN "
+                " UPDATE " + policy::MediaTable::Name + " SET nb_playlists = nb_playlists - 1 "
+                    " WHERE id_media = old.media_id;"
+            " END;"
+        );
+    }
 }
 
 bool Media::addLabel( LabelPtr label )

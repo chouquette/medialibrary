@@ -16,6 +16,7 @@
     "filename TEXT,"
     "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
     "is_present BOOLEAN NOT NULL DEFAULT 1,"
+    "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
 
     "FOREIGN KEY(thumbnail_id) REFERENCES " + policy::ThumbnailTable::Name
     + "(id_thumbnail)"

@@ -750,6 +750,46 @@ TEST_F( Medias, VacuumOldExternal )
     ASSERT_EQ( nullptr, s1 );
 }
 
+TEST_F( Medias, NbPlaylists )
+{
+    auto m = std::static_pointer_cast<Media>( ml->addExternalMedia( "media.mkv" ) );
+    ASSERT_EQ( 0u, m->nbPlaylists() );
+
+    auto playlist = ml->createPlaylist( "playlisẗ" );
+    auto res = playlist->append( *m );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 1u, m->nbPlaylists() );
+
+    Reload();
+
+    m = ml->media( m->id() );
+    ASSERT_EQ( 1u, m->nbPlaylists() );
+
+    playlist = ml->playlist( playlist->id() );
+    playlist->remove( m->id() );
+    ASSERT_EQ( 0u, m->nbPlaylists() );
+
+    Reload();
+
+    m = ml->media( m->id() );
+    ASSERT_EQ( 0u, m->nbPlaylists() );
+
+    playlist = ml->playlist( playlist->id() );
+    playlist->append( *m );
+    ASSERT_EQ( 1u, m->nbPlaylists() );
+
+    Reload();
+
+    m = ml->media( m->id() );
+    ASSERT_EQ( 1u, m->nbPlaylists() );
+
+    ml->deletePlaylist( playlist->id() );
+
+    Reload();
+    m = ml->media( m->id() );
+    ASSERT_EQ( 0u, m->nbPlaylists() );
+}
+
 class FetchMedia : public Tests
 {
 protected:

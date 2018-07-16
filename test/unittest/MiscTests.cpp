@@ -174,7 +174,7 @@ TEST_F( DbModel, Upgrade12to13 )
     // We can't check for the number of albums anymore since they are deleted
     // as part of 13 -> 14 migration
 
-    CheckNbTriggers( 32 );
+    CheckNbTriggers( 34 );
 }
 
 TEST_F( DbModel, Upgrade13to14 )
@@ -202,14 +202,19 @@ TEST_F( DbModel, Upgrade13to14 )
     auto playlistMedia = playlists[0]->media()->all();
     ASSERT_EQ( 3u, playlistMedia.size() );
     ASSERT_EQ( media[0]->id(), playlistMedia[0]->id() );
+    ASSERT_EQ( 1u, std::static_pointer_cast<Media>( playlistMedia[0] )->nbPlaylists() );
     ASSERT_EQ( media[1]->id(), playlistMedia[1]->id() );
+    ASSERT_EQ( 1u, std::static_pointer_cast<Media>( playlistMedia[1] )->nbPlaylists() );
     ASSERT_EQ( media[2]->id(), playlistMedia[2]->id() );
+    ASSERT_EQ( 1u, std::static_pointer_cast<Media>( playlistMedia[2] )->nbPlaylists() );
 
     ASSERT_EQ( IMedia::Type::External, media[2]->type() );
 
     auto externalMedia = ml->media( 99 );
     ASSERT_NE( nullptr, externalMedia );
     ASSERT_EQ( IMedia::Type::Unknown, externalMedia->type() );
+    ASSERT_EQ( 0u, std::static_pointer_cast<Media>( externalMedia )->nbPlaylists() );
 
-    CheckNbTriggers( 32 );
+
+    CheckNbTriggers( 34 );
 }

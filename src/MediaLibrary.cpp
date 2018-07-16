@@ -178,7 +178,7 @@ void MediaLibrary::createAllTriggers()
     Album::createTriggers( m_dbConnection.get() );
     AlbumTrack::createTriggers( m_dbConnection.get() );
     Artist::createTriggers( m_dbConnection.get(), dbModelVersion );
-    Media::createTriggers( m_dbConnection.get() );
+    Media::createTriggers( m_dbConnection.get(), dbModelVersion );
     File::createTriggers( m_dbConnection.get() );
     Genre::createTriggers( m_dbConnection.get() );
     Playlist::createTriggers( m_dbConnection.get() );
@@ -1012,7 +1012,7 @@ void MediaLibrary::migrateModel3to5()
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( getConn(), req );
     // Re-create triggers removed in the process
-    Media::createTriggers( getConn() );
+    Media::createTriggers( getConn(), 5 );
     Playlist::createTriggers( getConn() );
     t->commit();
 }
@@ -1041,7 +1041,7 @@ void MediaLibrary::migrateModel7to8()
         sqlite::Tools::executeRequest( getConn(), req );
     // Re-create triggers removed in the process
     Artist::createTriggers( getConn(), 8u );
-    Media::createTriggers( getConn() );
+    Media::createTriggers( getConn(), 5 );
     File::createTriggers( getConn() );
     t->commit();
 }
@@ -1167,7 +1167,7 @@ void MediaLibrary::migrateModel13to14()
     Show::createTable( dbConn );
     VideoTrack::createTable( dbConn );
     // Re-create triggers removed in the process
-    Media::createTriggers( dbConn );
+    Media::createTriggers( dbConn, 14 );
     AlbumTrack::createTriggers( dbConn );
     Album::createTriggers( dbConn );
     Artist::createTriggers( dbConn, 14 );
