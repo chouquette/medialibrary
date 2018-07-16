@@ -778,4 +778,15 @@ void Media::clearHistory( MediaLibraryPtr ml )
     t->commit();
 }
 
+void Media::removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime )
+{
+    const std::string req = "DELETE FROM " + policy::MediaTable::Name + " "
+            "WHERE real_last_played_date < ? AND ( type = ? OR type = ? ) "
+            "AND id_media NOT IN (SELECT media_id FROM PlaylistMediaRelation)";
+    auto deadline = std::chrono::duration_cast<std::chrono::seconds>(
+                (std::chrono::system_clock::now() - maxLifeTime).time_since_epoch() );
+    sqlite::Tools::executeDelete( ml->getConn(), req, deadline.count(),
+                                  IMedia::Type::External, IMedia::Type::Stream );
+}
+
 }

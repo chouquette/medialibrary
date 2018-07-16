@@ -147,6 +147,7 @@ class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
         static Query<IMedia> fetchStreamHistory( MediaLibraryPtr ml );
 
         static void clearHistory( MediaLibraryPtr ml );
+        static void removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime );
 
 private:
         static std::string sortRequest( const QueryParameters* params );

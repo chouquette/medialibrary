@@ -78,6 +78,7 @@ public:
     MediaPtr addMedia( const std::string& mrl );
     void deleteMedia( int64_t mediaId );
     void outdateAllDevices();
+    void outdateAllExternalMedia();
 
 private:
     std::shared_ptr<fs::IDirectory> dummyDirectory;

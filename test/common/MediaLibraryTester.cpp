@@ -220,3 +220,10 @@ void MediaLibraryTester::outdateAllDevices()
     std::string req = "UPDATE " + policy::DeviceTable::Name + " SET last_seen = 1";
     sqlite::Tools::executeUpdate( getConn(), req );
 }
+
+void MediaLibraryTester::outdateAllExternalMedia()
+{
+    std::string req = "UPDATE " + policy::MediaTable::Name + " SET real_last_played_date = 1 "
+            "WHERE type = ? OR type = ?";
+    sqlite::Tools::executeUpdate( getConn(), req, IMedia::Type::External, IMedia::Type::Stream );
+}

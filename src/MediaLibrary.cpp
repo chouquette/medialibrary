@@ -370,6 +370,7 @@ bool MediaLibrary::start()
     // Now that we know which devices are plugged, check for outdated devices
     // Approximate 6 months for old device precision.
     Device::removeOldDevices( this, std::chrono::seconds{ 3600 * 24 * 30 * 6 } );
+    Media::removeOldMedia( this, std::chrono::seconds{ 3600 * 24 * 30 * 6 } );
 
     startDiscoverer();
     if ( startParser() == false )
