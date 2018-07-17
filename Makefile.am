@@ -206,6 +206,12 @@ libmedialibrary_la_LIBADD += libmedialibrary_macos.la
 libmedialibrary_la_LDFLAGS += -Wl,-undefined,dynamic_lookup,-framework,Foundation
 endif
 
+lib_LTLIBRARIES = libmedialibrary.la
+if HAVE_DARWIN
+lib_LTLIBRARIES += libmedialibrary_macos.la
+endif
+
+if HAVE_LIBVLC
 
 if HAVE_LIBJPEG
 libmedialibrary_la_SOURCES += src/metadata_services/vlc/imagecompressors/JpegCompressor.cpp
@@ -214,12 +220,6 @@ libmedialibrary_la_CPPFLAGS += $(LIBJPEG_CFLAGS)
 libmedialibrary_la_LIBADD += $(LIBJPEG_LIBS)
 endif
 
-lib_LTLIBRARIES = libmedialibrary.la
-if HAVE_DARWIN
-lib_LTLIBRARIES += libmedialibrary_macos.la
-endif
-
-if HAVE_LIBVLC
 libmedialibrary_la_SOURCES += \
 	src/metadata_services/vlc/VLCMetadataService.cpp \
 	src/metadata_services/vlc/VLCThumbnailer.cpp \

@@ -294,22 +294,21 @@ AS_IF([test "${with_libvlc}" != "no"], [
             AC_SUBST([VLCPP_CFLAGS],[-I${srcdir}/libvlcpp])
         ]
     )
+    PKG_CHECK_MODULES(LIBJPEG, libjpeg, [
+         have_libjpeg="yes"
+         AC_DEFINE(HAVE_JPEG, 1, [Define to 1 if libjpeg is available])
+     ], [
+        dnl Falling back to libjpeg.h based detection
+        AC_CHECK_HEADERS(jpeglib.h, [
+            have_libjpeg="yes"
+            AC_SUBST(LIBJPEG_LIBS, "-ljpeg")
+        ])
+     ])
 ])
 AM_CONDITIONAL(HAVE_LIBVLC, [test "${with_libvlc}" != "no"])
+AM_CONDITIONAL([HAVE_LIBJPEG], [test "${have_libjpeg}" = "yes"])
 
 PKG_CHECK_MODULES(SQLITE, sqlite3)
-
-PKG_CHECK_MODULES(LIBJPEG, libjpeg, [
-     have_libjpeg="yes"
-     AC_DEFINE(HAVE_JPEG, 1, [Define to 1 if libjpeg is available])
- ], [
-dnl Falling back to libjpeg.h based detection
-    AC_CHECK_HEADERS(jpeglib.h, [
-        have_libjpeg="yes"
-        AC_SUBST(LIBJPEG_LIBS, "-ljpeg")
-    ])
- ])
-AM_CONDITIONAL([HAVE_LIBJPEG], [test "${have_libjpeg}" = "yes"])
 
 AC_ARG_ENABLE(tests,AC_HELP_STRING([--disable-tests], [Disable build of automated tests suites]))
 AM_CONDITIONAL([HAVE_TESTS], [test "${enable_tests}" = "yes"])
