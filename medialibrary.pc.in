@@ -7,5 +7,5 @@ Name: medialibrary
 Description: cross platform medialibrary
 Version: @PACKAGE_VERSION@
 Cflags: -I${includedir}
-Libs: -L${libdir} -lmedialibrary
-Libs.private: @SQLITE_LIBS@ @LIBJPEG_LIBS@ @THREAD_LIBS@
+Libs: -L${libdir} -lmedialibrary @ML_EXTRA_LIBS@
+Libs.private: @SQLITE_LIBS@ @LIBJPEG_LIBS@ @THREAD_LIBS@ @ML_EXTRA_PRIVATE_LIBS@
