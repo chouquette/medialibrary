@@ -176,28 +176,6 @@ dnl Specify -lpthread as part of Libs.private, in case of a static build
     if test "${SYS}" = "mingw32"; then
         # DEP, ASLR, NO SEH
         LDFLAGS="${LDFLAGS} -Wl,--nxcompat -Wl,--no-seh -Wl,--dynamicbase"
-
-        AC_CHECK_PROGS(U2D, [unix2dos todos], unix2dos)
-        ac_default_prefix="`pwd`/_win32"
-        DESTDIR="`pwd`/_win32/"
-
-        dnl
-        dnl NSIS/MSI Installer prefix and WIN64
-        dnl
-        case "${host}" in
-            amd64*|x86_64*)
-                HAVE_WIN64="1"
-                WINDOWS_ARCH="x64"
-                PROGRAMFILES="PROGRAMFILES64"
-            ;;
-            *)
-                WINDOWS_ARCH="x86"
-                PROGRAMFILES="PROGRAMFILES"
-            ;;
-        esac
-        AC_SUBST([WINDOWS_ARCH])
-        AC_SUBST([PROGRAMFILES])
-
     fi
     ;;
   *nto*)
