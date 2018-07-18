@@ -16,9 +16,9 @@ AC_CANONICAL_HOST
 MEDIALIBRARY_MAJOR=MEDIALIB_MAJOR
 MEDIALIBRARY_MINOR=MEDIALIB_MINOR
 MEDIALIBRARY_MICRO=MEDIALIB_MICRO
-AC_SUBST(MEDIALIBRARY_MAJOR)
-AC_SUBST(MEDIALIBRARY_MINOR)
-AC_SUBST(MEDIALIBRARY_MICRO)
+AC_SUBST([MEDIALIBRARY_MAJOR])
+AC_SUBST([MEDIALIBRARY_MINOR])
+AC_SUBST([MEDIALIBRARY_MICRO])
 
 AC_USE_SYSTEM_EXTENSIONS
 
@@ -195,8 +195,8 @@ dnl Specify -lpthread as part of Libs.private, in case of a static build
                 PROGRAMFILES="PROGRAMFILES"
             ;;
         esac
-        AC_SUBST(WINDOWS_ARCH)
-        AC_SUBST(PROGRAMFILES)
+        AC_SUBST([WINDOWS_ARCH])
+        AC_SUBST([PROGRAMFILES])
 
     fi
     ;;
@@ -301,7 +301,7 @@ AS_IF([test "${with_libvlc}" != "no"], [
         dnl Falling back to libjpeg.h based detection
         AC_CHECK_HEADERS(jpeglib.h, [
             have_libjpeg="yes"
-            AC_SUBST(LIBJPEG_LIBS, "-ljpeg")
+            AC_SUBST([LIBJPEG_LIBS], "-ljpeg")
         ])
      ])
 ])
@@ -333,6 +333,6 @@ Makefile
 medialibrary.pc
 ])
 
-AC_SUBST(THREAD_LIBS)
+AC_SUBST([THREAD_LIBS])
 
 AC_OUTPUT
