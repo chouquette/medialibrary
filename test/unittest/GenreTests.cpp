@@ -99,7 +99,9 @@ TEST_F( Genres, ListArtists )
         auto track = album2->addTrack( m, i, 1, a2->id(), nullptr );
         track->setGenre( g );
     }
-    artists = g->artists( nullptr )->all();
+    auto query = g->artists( nullptr );
+    ASSERT_EQ( 2u, query->count() );
+    artists = query->all();
     ASSERT_EQ( 2u, artists.size() );
 }
 
@@ -128,15 +130,18 @@ TEST_F( Genres, ListAlbums )
     auto genres = ml->genres( nullptr )->all();
     for ( auto& genre : genres )
     {
-        auto albums = genre->albums( nullptr )->all();
+        auto query = genre->albums( nullptr );
+        auto albums = query->all();
 
         if ( genre->id() == g->id() )
         {
             // Initial genre with 2 albums:
+            ASSERT_EQ( 2u, query->count() );
             ASSERT_EQ( 2u, albums.size() );
         }
         else
         {
+            ASSERT_EQ( 1u, query->count() );
             ASSERT_EQ( 1u, albums.size() );
             ASSERT_EQ( album->id(), albums[0]->id() );
         }
@@ -310,19 +315,20 @@ TEST_F( Genres, SearchAlbums )
     auto t2 = a2->addTrack( m2, 1, 1, 0, nullptr );
     m2->save();
 
+    auto a3 = ml->createAlbum( "another album" );
     auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "track3.mp3" ) );
     m3->setType( IMedia::Type::Audio );
-    auto t3 = a1->addTrack( m3, 2, 1, 0, g.get() );
+    auto t3 = a3->addTrack( m3, 1, 1, 0, g.get() );
     m3->save();
 
     auto query = ml->searchAlbums( "album", nullptr);
-    ASSERT_EQ( 2u, query->count() );
+    ASSERT_EQ( 3u, query->count() );
     auto albums = query->all();
-    ASSERT_EQ( 2u, albums.size() );
+    ASSERT_EQ( 3u, albums.size() );
 
     query = g->searchAlbums( "album", nullptr );
-    ASSERT_EQ( 1u, query->count() );
+    ASSERT_EQ( 2u, query->count() );
     albums = query->all();
-    ASSERT_EQ( 1u, albums.size() );
+    ASSERT_EQ( 2u, albums.size() );
     ASSERT_EQ( a1->id(), albums[0]->id() );
 }

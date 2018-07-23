@@ -566,9 +566,10 @@ Query<IAlbum> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId, const Query
 {
     std::string req = "FROM " + Table::Name + " alb "
             "INNER JOIN " + AlbumTrack::Table::Name + " att ON att.album_id = alb.id_album "
-            "WHERE att.genre_id = ? GROUP BY att.album_id";
+            "WHERE att.genre_id = ?";
+    std::string groupAndOrderBy = "GROUP BY att.album_id" + orderBy( params );
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
-                                      orderBy( params ), genreId );
+                                      std::move( groupAndOrderBy ), genreId );
 }
 
 Query<IAlbum> Album::searchFromGenre( MediaLibraryPtr ml, const std::string& pattern,
@@ -579,9 +580,11 @@ Query<IAlbum> Album::searchFromGenre( MediaLibraryPtr ml, const std::string& pat
             "WHERE id_album IN "
             "(SELECT rowid FROM " + Table::Name + "Fts WHERE " +
             Table::Name + "Fts MATCH '*' || ? || '*')"
-            "AND att.genre_id = ? GROUP BY att.album_id";
+            "AND att.genre_id = ?";
+    std::string groupAndOrderBy = "GROUP BY att.album_id" + orderBy( params );
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
-                                      orderBy( params ), pattern, genreId );
+                                      std::move( groupAndOrderBy ), pattern,
+                                      genreId );
 }
 
 Query<IAlbum> Album::listAll( MediaLibraryPtr ml, const QueryParameters* params )

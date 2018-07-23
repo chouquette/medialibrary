@@ -79,12 +79,12 @@ Query<IArtist> Genre::artists( const QueryParameters* params ) const
 {
     std::string req = "FROM " + Artist::Table::Name + " a "
             "INNER JOIN " + AlbumTrack::Table::Name + " att ON att.artist_id = a.id_artist "
-            "WHERE att.genre_id = ? GROUP BY att.artist_id";
-    std::string orderBy = "ORDER BY a.name";
+            "WHERE att.genre_id = ?";
+    std::string groupAndOrderBy = "GROUP BY att.artist_id ORDER BY a.name";
     if ( params != nullptr && params->desc == true )
-        orderBy += " DESC";
+        groupAndOrderBy += " DESC";
     return make_query<Artist, IArtist>( m_ml, "a.*", std::move( req ),
-                                        std::move( orderBy ), m_id );
+                                        std::move( groupAndOrderBy ), m_id );
 }
 
 Query<IArtist> Genre::searchArtists( const std::string& pattern,
