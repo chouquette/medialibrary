@@ -67,7 +67,7 @@ public:
                  std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
         auto row = stmt.row();
         row >> m_count;
-        assert(stmt.row() == nullptr );
+        assert( stmt.row() == nullptr );
         m_hasCount = true;
         return m_count;
     }
