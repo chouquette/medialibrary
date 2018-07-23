@@ -673,8 +673,9 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
             " AND f.is_present = 1"
             " AND f.type = ?"
             " AND m.type != ? AND m.type != ?";
-    return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
-                                      title, File::Type::Main,
+    return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
+                                      sortRequest( params ), title,
+                                      File::Type::Main,
                                       Media::Type::External, Media::Type::Stream );
 }
 
@@ -689,8 +690,9 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
             " AND f.is_present = 1"
             " AND f.type = ?"
             " AND m.type = ?";
-    return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
-                                      title, File::Type::Main, type );
+    return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
+                                      sortRequest( params ), title,
+                                      File::Type::Main, type );
 }
 
 Query<IMedia> Media::searchAlbumTracks(MediaLibraryPtr ml, const std::string& pattern, int64_t albumId, const QueryParameters* params)
@@ -705,8 +707,8 @@ Query<IMedia> Media::searchAlbumTracks(MediaLibraryPtr ml, const std::string& pa
             " AND f.is_present = 1"
             " AND f.type = ?"
             " AND m.subtype = ?";
-    return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
-                                      pattern, albumId,
+    return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
+                                      sortRequest( params ), pattern, albumId,
                                       File::Type::Main, Media::SubType::AlbumTrack );
 }
 
@@ -722,8 +724,8 @@ Query<IMedia> Media::searchArtistTracks(MediaLibraryPtr ml, const std::string& p
             " AND f.is_present = 1"
             " AND f.type = ?"
             " AND m.subtype = ?";
-    return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
-                                      pattern, artistId,
+    return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
+                                      sortRequest( params ), pattern, artistId,
                                       File::Type::Main, Media::SubType::AlbumTrack );
 }
 
@@ -739,8 +741,8 @@ Query<IMedia> Media::searchGenreTracks(MediaLibraryPtr ml, const std::string& pa
             " AND f.is_present = 1"
             " AND f.type = ?"
             " AND m.subtype = ?";
-    return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
-                                      pattern, genreId,
+    return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
+                                      sortRequest( params ), pattern, genreId,
                                       File::Type::Main, Media::SubType::AlbumTrack );
 }
 
@@ -757,8 +759,8 @@ Query<IMedia> Media::searchShowEpisodes(MediaLibraryPtr ml, const std::string& p
             " AND f.is_present = 1"
             " AND f.type = ?"
             " AND m.subtype = ?";
-    return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
-                                      pattern, showId,
+    return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
+                                      sortRequest( params ), pattern, showId,
                                       File::Type::Main, Media::SubType::ShowEpisode );
 }
 

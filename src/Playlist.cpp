@@ -296,14 +296,15 @@ Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,
 {
     std::string req = "FROM " + policy::PlaylistTable::Name + " WHERE id_playlist IN "
             "(SELECT rowid FROM " + policy::PlaylistTable::Name + "Fts WHERE name MATCH '*' || ? || '*')";
-    return make_query<Playlist, IPlaylist>( ml, "*", req, sortRequest( params ),
-                                            name );
+    return make_query<Playlist, IPlaylist>( ml, "*", std::move( req ),
+                                            sortRequest( params ), name );
 }
 
 Query<IPlaylist> Playlist::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
     std::string req = "FROM " + policy::PlaylistTable::Name;
-    return make_query<Playlist, IPlaylist>( ml, "*", req, sortRequest( params ) );
+    return make_query<Playlist, IPlaylist>( ml, "*", std::move( req ),
+                                            sortRequest( params ) );
 }
 
 void Playlist::clearExternalPlaylistContent(MediaLibraryPtr ml)

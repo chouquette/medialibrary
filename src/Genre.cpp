@@ -199,7 +199,8 @@ Query<IGenre> Genre::search( MediaLibraryPtr ml, const std::string& name,
     std::string orderBy = "ORDER BY name";
     if ( params != nullptr && params->desc == true )
         orderBy += " DESC";
-    return make_query<Genre, IGenre>( ml, "*", req, std::move( orderBy ), name );
+    return make_query<Genre, IGenre>( ml, "*", std::move( req ),
+                                      std::move( orderBy ), name );
 }
 
 Query<IGenre> Genre::listAll( MediaLibraryPtr ml, const QueryParameters* params )

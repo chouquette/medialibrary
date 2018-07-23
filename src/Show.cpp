@@ -160,7 +160,8 @@ Query<IMedia> Show::episodes( const QueryParameters* params ) const
             break;
 
     }
-    return make_query<Media, IMedia>( m_ml, "*", req, std::move( orderBy), m_id );
+    return make_query<Media, IMedia>( m_ml, "*", std::move( req ),
+                                      std::move( orderBy), m_id );
 }
 
 Query<IMedia> Show::searchEpisodes( const std::string& pattern,
@@ -257,7 +258,8 @@ Query<IShow> Show::search( MediaLibraryPtr ml, const std::string& pattern,
     std::string req = "FROM " + policy::ShowTable::Name + " WHERE id_show IN"
             "(SELECT rowid FROM " + policy::ShowTable::Name + "Fts WHERE " +
             policy::ShowTable::Name + "Fts MATCH '*' || ? || '*')";
-    return make_query<Show, IShow>( ml, "*", req, orderBy( params ), pattern );
+    return make_query<Show, IShow>( ml, "*", std::move( req ),
+                                    orderBy( params ), pattern );
 }
 
 }
