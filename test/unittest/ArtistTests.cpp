@@ -132,10 +132,20 @@ TEST_F( Artists, Albums )
     ASSERT_NE( nullptr, media2 );
     album2->addTrack( media2, 1, 0, artist->id(), nullptr );
 
+    auto media3 = std::static_pointer_cast<Media>( ml->addMedia( "track3.mp3" ) );
+    ASSERT_NE( nullptr, media3 );
+    album2->addTrack( media3, 2, 0, artist->id(), nullptr );
+
+    auto media4 = std::static_pointer_cast<Media>( ml->addMedia( "track4.mp3" ) );
+    ASSERT_NE( nullptr, media4 );
+    album2->addTrack( media4, 3, 0, artist->id(), nullptr );
+
     album1->setAlbumArtist( artist );
     album2->setAlbumArtist( artist );
 
-    auto albums = artist->albums( nullptr )->all();
+    auto query = artist->albums( nullptr );
+    ASSERT_EQ( 2u, query->count() );
+    auto albums = query->all();
     ASSERT_EQ( albums.size(), 2u );
 
     Reload();

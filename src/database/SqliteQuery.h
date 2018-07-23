@@ -57,7 +57,8 @@ public:
         if ( m_hasCount == true )
             return m_count;
 
-        std::string req = "SELECT COUNT() " + m_base;
+        std::string req = "SELECT COUNT(DISTINCT " + Impl::Table::PrimaryKeyColumn +
+                " ) " + m_base;
         auto dbConn = m_ml->getConn();
         auto ctx = dbConn->acquireReadContext();
         auto chrono = std::chrono::steady_clock::now();

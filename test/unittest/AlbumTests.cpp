@@ -479,7 +479,9 @@ TEST_F( Albums, SortByPlayCount )
     ASSERT_TRUE( f5->increasePlayCount() );
 
     QueryParameters params { SortingCriteria::PlayCount, false };
-    auto albums = ml->albums( &params )->all(); // Expect descending order
+    auto query = ml->albums( &params );
+    ASSERT_EQ( 4u, query->count() );
+    auto albums = query->all(); // Expect descending order
     ASSERT_EQ( 4u, albums.size() );
     ASSERT_EQ( a2->id(), albums[0]->id() ); // 4 plays
     ASSERT_EQ( a1->id(), albums[1]->id() ); // 3 plays

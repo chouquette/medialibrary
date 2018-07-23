@@ -310,10 +310,19 @@ TEST_F( Genres, SearchAlbums )
     auto t2 = a2->addTrack( m2, 1, 1, 0, nullptr );
     m2->save();
 
-    auto albums = ml->searchAlbums( "album", nullptr)->all();
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "track3.mp3" ) );
+    m3->setType( IMedia::Type::Audio );
+    auto t3 = a1->addTrack( m3, 2, 1, 0, g.get() );
+    m3->save();
+
+    auto query = ml->searchAlbums( "album", nullptr);
+    ASSERT_EQ( 2u, query->count() );
+    auto albums = query->all();
     ASSERT_EQ( 2u, albums.size() );
 
-    albums = g->searchAlbums( "album", nullptr )->all();
+    query = g->searchAlbums( "album", nullptr );
+    ASSERT_EQ( 1u, query->count() );
+    albums = query->all();
     ASSERT_EQ( 1u, albums.size() );
     ASSERT_EQ( a1->id(), albums[0]->id() );
 }
