@@ -69,7 +69,7 @@ Query<IMedia> Label::media()
     static const std::string req = "FROM " + policy::MediaTable::Name + " f "
             "INNER JOIN LabelFileRelation lfr ON lfr.media_id = f.id_media "
             "WHERE lfr.label_id = ?";
-    return make_query<Media, IMedia>( m_ml, "f.*", req, m_id );
+    return make_query<Media, IMedia>( m_ml, "f.*", req, "", m_id );
 }
 
 LabelPtr Label::create( MediaLibraryPtr ml, const std::string& name )

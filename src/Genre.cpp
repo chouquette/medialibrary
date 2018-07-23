@@ -82,11 +82,12 @@ Query<IArtist> Genre::artists( const QueryParameters* params ) const
 {
     std::string req = "FROM " + policy::ArtistTable::Name + " a "
             "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.artist_id = a.id_artist "
-            "WHERE att.genre_id = ? GROUP BY att.artist_id"
-            " ORDER BY a.name";
+            "WHERE att.genre_id = ? GROUP BY att.artist_id";
+    std::string orderBy = "ORDER BY a.name";
     if ( params != nullptr && params->desc == true )
-        req += " DESC";
-    return make_query<Artist, IArtist>( m_ml, "a.*", std::move( req ), m_id );
+        orderBy += " DESC";
+    return make_query<Artist, IArtist>( m_ml, "a.*", std::move( req ),
+                                        std::move( orderBy ), m_id );
 }
 
 Query<IArtist> Genre::searchArtists( const std::string& pattern,
@@ -193,18 +194,22 @@ Query<IGenre> Genre::search( MediaLibraryPtr ml, const std::string& name,
                              const QueryParameters* params )
 {
     std::string req = "FROM " + policy::GenreTable::Name + " WHERE id_genre IN "
-            "(SELECT rowid FROM " + policy::GenreTable::Name + "Fts WHERE name MATCH '*' || ? || '*') ORDER BY name";
+            "(SELECT rowid FROM " + policy::GenreTable::Name + "Fts "
+            "WHERE name MATCH '*' || ? || '*')";
+    std::string orderBy = "ORDER BY name";
     if ( params != nullptr && params->desc == true )
-        req += " DESC";
-    return make_query<Genre, IGenre>( ml, "*", req, name );
+        orderBy += " DESC";
+    return make_query<Genre, IGenre>( ml, "*", req, std::move( orderBy ), name );
 }
 
 Query<IGenre> Genre::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::GenreTable::Name + " ORDER BY name";
+    std::string req = "FROM " + policy::GenreTable::Name;
+    std::string orderBy = " ORDER BY name";
     if ( params != nullptr && params->desc == true )
-        req += " DESC";
-    return make_query<Genre, IGenre>( ml, "*", std::move( req ) );
+        orderBy += " DESC";
+    return make_query<Genre, IGenre>( ml, "*", std::move( req ),
+                                      std::move( orderBy ) );
 }
 
 }

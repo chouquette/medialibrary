@@ -114,10 +114,10 @@ Query<IMedia> Playlist::media() const
 {
     static const std::string req = "FROM " + policy::MediaTable::Name + " m "
             "LEFT JOIN PlaylistMediaRelation pmr ON pmr.media_id = m.id_media "
-            "WHERE pmr.playlist_id = ? AND m.is_present != 0 "
-            "ORDER BY pmr.position";
+            "WHERE pmr.playlist_id = ? AND m.is_present != 0 ";
     curateNullMediaID();
-    return make_query<Media, IMedia>( m_ml, "m.*", req, m_id );
+    return make_query<Media, IMedia>( m_ml, "m.*", req, "ORDER BY pmr.position",
+                                      m_id );
 }
 
 Query<IMedia> Playlist::searchMedia( const std::string& pattern,
@@ -296,15 +296,14 @@ Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,
 {
     std::string req = "FROM " + policy::PlaylistTable::Name + " WHERE id_playlist IN "
             "(SELECT rowid FROM " + policy::PlaylistTable::Name + "Fts WHERE name MATCH '*' || ? || '*')";
-    req += sortRequest( params );
-    return make_query<Playlist, IPlaylist>( ml, "*", req, name );
+    return make_query<Playlist, IPlaylist>( ml, "*", req, sortRequest( params ),
+                                            name );
 }
 
 Query<IPlaylist> Playlist::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
     std::string req = "FROM " + policy::PlaylistTable::Name;
-    req += sortRequest( params );
-    return make_query<Playlist, IPlaylist>( ml, "*", req );
+    return make_query<Playlist, IPlaylist>( ml, "*", req, sortRequest( params ) );
 }
 
 void Playlist::clearExternalPlaylistContent(MediaLibraryPtr ml)

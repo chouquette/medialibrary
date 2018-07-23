@@ -141,25 +141,26 @@ Query<IMedia> Show::episodes( const QueryParameters* params ) const
 {
     std::string req = "FROM " + policy::MediaTable::Name + " med "
             " INNER JOIN " + policy::ShowEpisodeTable::Name + " ep ON ep.media_id = med.id_media "
-            + " WHERE ep.show_id = ? ORDER BY ";
+            + " WHERE ep.show_id = ?";
+    std::string orderBy = " ORDER BY ";
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
     auto desc = params != nullptr ? params->desc : false;
     switch ( sort )
     {
         case SortingCriteria::Alpha:
-            req += "med.name";
+            orderBy += "med.name";
             if ( desc == true )
-                req += " DESC";
+                orderBy += " DESC";
             break;
         default:
             if ( desc == true )
-                req += "ep.season_number DESC, ep.episode_number DESC";
+                orderBy += "ep.season_number DESC, ep.episode_number DESC";
             else
-                req += "ep.season_number, ep.episode_number";
+                orderBy += "ep.season_number, ep.episode_number";
             break;
 
     }
-    return make_query<Media, IMedia>( m_ml, "*", req, m_id );
+    return make_query<Media, IMedia>( m_ml, "*", req, std::move( orderBy), m_id );
 }
 
 Query<IMedia> Show::searchEpisodes( const std::string& pattern,
@@ -226,8 +227,7 @@ std::shared_ptr<Show> Show::create( MediaLibraryPtr ml, const std::string& name 
 Query<IShow> Show::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
     std::string req = "FROM " + policy::ShowTable::Name;
-    req += orderBy( params );
-    return make_query<Show, IShow>( ml, "*", std::move( req ) );
+    return make_query<Show, IShow>( ml, "*", std::move( req ), orderBy( params ) );
 }
 
 std::string Show::orderBy( const QueryParameters* params )
@@ -257,8 +257,7 @@ Query<IShow> Show::search( MediaLibraryPtr ml, const std::string& pattern,
     std::string req = "FROM " + policy::ShowTable::Name + " WHERE id_show IN"
             "(SELECT rowid FROM " + policy::ShowTable::Name + "Fts WHERE " +
             policy::ShowTable::Name + "Fts MATCH '*' || ? || '*')";
-    req += orderBy( params );
-    return make_query<Show, IShow>( ml, "*", req, pattern );
+    return make_query<Show, IShow>( ml, "*", req, orderBy( params ), pattern );
 }
 
 }

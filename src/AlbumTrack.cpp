@@ -159,34 +159,36 @@ Query<IMedia> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId, const 
 {
     std::string req = "FROM " + policy::MediaTable::Name + " m"
             " INNER JOIN " + policy::AlbumTrackTable::Name + " t ON m.id_media = t.media_id"
-            " WHERE t.genre_id = ? AND m.is_present = 1 ORDER BY ";
+            " WHERE t.genre_id = ? AND m.is_present = 1";
+    std::string orderBy = "ORDER BY ";
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
     auto desc = params != nullptr ? params->desc : false;
     switch ( sort )
     {
     case SortingCriteria::Duration:
-        req += "m.duration";
+        orderBy += "m.duration";
         break;
     case SortingCriteria::InsertionDate:
-        req += "m.insertion_date";
+        orderBy += "m.insertion_date";
         break;
     case SortingCriteria::ReleaseDate:
-        req += "m.release_date";
+        orderBy += "m.release_date";
         break;
     case SortingCriteria::Alpha:
-        req += "m.title";
+        orderBy += "m.title";
         break;
     default:
         if ( desc == true )
-            req += "t.artist_id DESC, t.album_id DESC, t.disc_number DESC, t.track_number DESC, m.filename";
+            orderBy += "t.artist_id DESC, t.album_id DESC, t.disc_number DESC, t.track_number DESC, m.filename";
         else
-            req += "t.artist_id, t.album_id, t.disc_number, t.track_number, m.filename";
+            orderBy += "t.artist_id, t.album_id, t.disc_number, t.track_number, m.filename";
         break;
     }
 
     if ( desc == true )
-        req += " DESC";
-    return make_query<Media, IMedia>( ml, "m.*", std::move( req ), genreId );
+        orderBy += " DESC";
+    return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
+                                      std::move( orderBy ), genreId );
 }
 
 GenrePtr AlbumTrack::genre()

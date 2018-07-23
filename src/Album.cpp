@@ -258,8 +258,8 @@ Query<IMedia> Album::tracks( const QueryParameters* params ) const
     std::string req = "FROM " + policy::MediaTable::Name + " med "
         " INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
         " WHERE att.album_id = ? AND med.is_present != 0";
-    req += orderTracksBy( params );
-    return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ), m_id );
+    return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
+                                      orderTracksBy( params ), m_id );
 }
 
 Query<IMedia> Album::tracks( GenrePtr genre, const QueryParameters* params ) const
@@ -270,8 +270,8 @@ Query<IMedia> Album::tracks( GenrePtr genre, const QueryParameters* params ) con
             " INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
             " WHERE att.album_id = ? AND med.is_present != 0"
             " AND genre_id = ?";
-    req += orderTracksBy( params );
-    return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ), m_id, genre->id() );
+    return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
+                                      orderTracksBy( params ), m_id, genre->id() );
 }
 
 std::vector<MediaPtr> Album::cachedTracks() const
@@ -364,10 +364,12 @@ Query<IArtist> Album::artists( const QueryParameters* params ) const
 {
     std::string req = "FROM " + policy::ArtistTable::Name + " art "
             "INNER JOIN AlbumArtistRelation aar ON aar.artist_id = art.id_artist "
-            "WHERE aar.album_id = ? ORDER BY art.name";
+            "WHERE aar.album_id = ?";
+    std::string orderBy = "ORDER BY art.name";
     if ( params != nullptr && params->desc == true )
-        req += " DESC";
-    return make_query<Artist, IArtist>( m_ml, "art.*", std::move( req ), m_id );
+        orderBy += " DESC";
+    return make_query<Artist, IArtist>( m_ml, "art.*", std::move( req ),
+                                        std::move( orderBy ), m_id );
 }
 
 bool Album::addArtist( std::shared_ptr<Artist> artist )
@@ -510,8 +512,8 @@ Query<IAlbum> Album::search( MediaLibraryPtr ml, const std::string& pattern,
             "(SELECT rowid FROM " + policy::AlbumTable::Name + "Fts WHERE " +
             policy::AlbumTable::Name + "Fts MATCH '*' || ? || '*')"
             "AND is_present != 0";
-    req += orderBy( params );
-    return make_query<Album, IAlbum>( ml, "*", std::move( req ), pattern );
+    return make_query<Album, IAlbum>( ml, "*", std::move( req ),
+                                      orderBy( params ), pattern );
 }
 
 Query<IAlbum> Album::searchFromArtist( MediaLibraryPtr ml, const std::string& pattern,
@@ -523,8 +525,8 @@ Query<IAlbum> Album::searchFromArtist( MediaLibraryPtr ml, const std::string& pa
             policy::AlbumTable::Name + "Fts MATCH '*' || ? || '*')"
             "AND is_present != 0 "
             "AND artist_id = ?";
-    req += orderBy( params );
-    return make_query<Album, IAlbum>( ml, "*", std::move( req ), pattern, artistId );
+    return make_query<Album, IAlbum>( ml, "*", std::move( req ),
+                                      orderBy( params ), pattern, artistId );
 }
 
 Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, const QueryParameters* params )
@@ -533,29 +535,30 @@ Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, const Que
                     "INNER JOIN " + policy::AlbumTrackTable::Name + " att "
                         "ON att.album_id = alb.id_album "
                     "WHERE (att.artist_id = ? OR alb.artist_id = ?) "
-                        "AND att.is_present != 0 "
-                    "GROUP BY att.album_id ORDER BY ";
+                        "AND att.is_present != 0 ";
+    std::string groupAndOrder = "GROUP BY att.album_id ORDER BY ";
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
     auto desc = params != nullptr ? params->desc : false;
     switch ( sort )
     {
     case SortingCriteria::Alpha:
-        req += "title";
+        groupAndOrder += "title";
         if ( desc == true )
-            req += " DESC";
+            groupAndOrder += " DESC";
         break;
     default:
         // When listing albums of an artist, default order is by descending year (with album title
         // discrimination in case 2+ albums went out the same year)
         // This leads to DESC being used for "non-desc" case
         if ( desc == true )
-            req += "release_year, title";
+            groupAndOrder += "release_year, title";
         else
-            req += "release_year DESC, title";
+            groupAndOrder += "release_year DESC, title";
         break;
     }
 
-    return make_query<Album, IAlbum>( ml, "*", req, artistId, artistId );
+    return make_query<Album, IAlbum>( ml, "*", req, std::move( groupAndOrder ),
+                                      artistId, artistId );
 }
 
 Query<IAlbum> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId, const QueryParameters* params )
@@ -563,8 +566,8 @@ Query<IAlbum> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId, const Query
     std::string req = "FROM " + policy::AlbumTable::Name + " alb "
             "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.album_id = alb.id_album "
             "WHERE att.genre_id = ? GROUP BY att.album_id";
-    req += orderBy( params );
-    return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ), genreId );
+    return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
+                                      orderBy( params ), genreId );
 }
 
 Query<IAlbum> Album::searchFromGenre( MediaLibraryPtr ml, const std::string& pattern,
@@ -576,8 +579,8 @@ Query<IAlbum> Album::searchFromGenre( MediaLibraryPtr ml, const std::string& pat
             "(SELECT rowid FROM " + policy::AlbumTable::Name + "Fts WHERE " +
             policy::AlbumTable::Name + "Fts MATCH '*' || ? || '*')"
             "AND att.genre_id = ? GROUP BY att.album_id";
-    req += orderBy( params );
-    return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ), pattern, genreId );
+    return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
+                                      orderBy( params ), pattern, genreId );
 }
 
 Query<IAlbum> Album::listAll( MediaLibraryPtr ml, const QueryParameters* params )
@@ -588,30 +591,32 @@ Query<IAlbum> Album::listAll( MediaLibraryPtr ml, const QueryParameters* params 
     {
         std::string req = "FROM " + policy::AlbumTable::Name + " alb "
                 "INNER JOIN " + policy::ArtistTable::Name + " art ON alb.artist_id = art.id_artist "
-                "WHERE alb.is_present != 0 "
-                "ORDER BY art.name ";
+                "WHERE alb.is_present != 0 ";
+        std::string orderBy = "ORDER BY art.name ";
         if ( desc == true )
-            req += "DESC ";
-        req += ", alb.title";
-        return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ) );
+            orderBy += "DESC ";
+        orderBy += ", alb.title";
+        return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
+                                          std::move( orderBy ) );
     }
     if ( sort == SortingCriteria::PlayCount )
     {
         std::string req = "FROM " + policy::AlbumTable::Name + " alb "
                  "INNER JOIN " + policy::AlbumTrackTable::Name + " t ON alb.id_album = t.album_id "
                  "INNER JOIN " + policy::MediaTable::Name + " m ON t.media_id = m.id_media "
-                 "WHERE alb.is_present != 0 "
-                 "GROUP BY id_album "
+                 "WHERE alb.is_present != 0 ";
+        std::string groupBy = "GROUP BY id_album "
                  "ORDER BY SUM(m.play_count) ";
         if ( desc == false )
-            req += "DESC "; // Most played first by default
-        req += ", alb.title";
-        return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ) );
+            groupBy += "DESC "; // Most played first by default
+        groupBy += ", alb.title";
+        return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
+                                          std::move( groupBy ) );
     }
     std::string req = "FROM " + policy::AlbumTable::Name + " alb "
                     " WHERE is_present != 0";
-    req += orderBy( params );
-    return make_query<Album, IAlbum>( ml, "*", std::move( req ) );
+    return make_query<Album, IAlbum>( ml, "*", std::move( req ),
+                                      orderBy( params ) );
 }
 
 }

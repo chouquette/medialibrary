@@ -1313,7 +1313,7 @@ Query<IFolder> MediaLibrary::entryPoints() const
 {
     static const std::string req = "FROM " + policy::FolderTable::Name + " WHERE parent_id IS NULL"
             " AND is_blacklisted = 0";
-    return make_query<Folder, IFolder>( this, "*", req );
+    return make_query<Folder, IFolder>( this, "*", req, "" );
 }
 
 FolderPtr MediaLibrary::folder( const std::string& mrl ) const

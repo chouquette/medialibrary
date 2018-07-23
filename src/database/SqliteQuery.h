@@ -41,10 +41,11 @@ public:
 
     template <typename... Params>
     SqliteQuery( MediaLibraryPtr ml, std::string field, std::string base,
-                     Params&&... params )
+                 std::string groupAndOrderBy, Params&&... params )
         : m_ml( ml )
         , m_field( std::move( field ) )
         , m_base( std::move( base ) )
+        , m_groupAndOrderBy( std::move( groupAndOrderBy ) )
         , m_params( std::forward<Params>( params )... )
         , m_count( 0 )
         , m_hasCount( false )
@@ -76,13 +77,15 @@ public:
     {
         if ( nbItems == 0 && offset == 0 )
             return all();
-        const std::string req = "SELECT " + m_field + " " + m_base + " LIMIT ? OFFSET ?";
+        const std::string req = "SELECT " + m_field + " " + m_base + " " +
+                m_groupAndOrderBy + " LIMIT ? OFFSET ?";
         return Impl::template fetchAll<Intf>( m_ml, req, m_params, nbItems, offset );
     }
 
     virtual Result all() override
     {
-        const std::string req = "SELECT " + m_field + " " + m_base;
+        const std::string req = "SELECT " + m_field + " " + m_base + " " +
+                m_groupAndOrderBy;
         return Impl::template fetchAll<Intf>( m_ml, req, m_params );
     }
 
@@ -90,6 +93,7 @@ private:
     MediaLibraryPtr m_ml;
     std::string m_field;
     std::string m_base;
+    std::string m_groupAndOrderBy;
     std::tuple<typename std::decay<RequestParams>::type...> m_params;
 
     size_t m_count;
@@ -98,11 +102,12 @@ private:
 
 template <typename Impl, typename Intf = Impl, typename... Args>
 Query<Intf> make_query( MediaLibraryPtr ml, std::string field, std::string base,
-                            Args&&... args )
+                        std::string orderAndGroupBy, Args&&... args )
 {
     return std::unique_ptr<IQuery<Intf>>(
         new SqliteQuery<Impl, Intf, Args...>( ml, std::move( field ),
                                             std::move( base ),
+                                            std::move( orderAndGroupBy ),
                                             std::forward<Args>( args )... )
     );
 }
