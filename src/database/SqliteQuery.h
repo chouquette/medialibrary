@@ -43,8 +43,8 @@ public:
     SqliteQuery( MediaLibraryPtr ml, std::string field, std::string base,
                      Params&&... params )
         : m_ml( ml )
-        , m_field( field )
-        , m_base( base )
+        , m_field( std::move( field ) )
+        , m_base( std::move( base ) )
         , m_params( std::forward<Params>( params )... )
         , m_count( 0 )
         , m_hasCount( false )
