@@ -240,7 +240,7 @@ bool MetadataAnalyzer::addPlaylistMedias( IItem& item ) const
         // We are most likely re-scanning a file representing a playlist.
         // If a task has a file, it means the playlist & the associated file have
         // been created.
-        std::string req = "SELECT * FROM " + policy::PlaylistTable::Name +
+        std::string req = "SELECT * FROM " + Playlist::Table::Name +
                 " WHERE file_id = ?";
         playlistPtr = Playlist::fetch( m_ml, req, item.file()->id() );
         if ( playlistPtr == nullptr )
@@ -393,7 +393,7 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
 
         if ( showName.length() != 0 )
         {
-            const std::string req = "SELECT * FROM " + policy::ShowTable::Name +
+            const std::string req = "SELECT * FROM " + Show::Table::Name +
                     " WHERE name = ?";
 
             auto shows = Show::fetchAll<Show>( m_ml, req, showName );
@@ -519,7 +519,7 @@ std::shared_ptr<Album> MetadataAnalyzer::findAlbum( IItem& item, std::shared_ptr
 
     // Album matching depends on the difference between artist & album artist.
     // Specificaly pass the albumArtist here.
-    static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
+    static const std::string req = "SELECT * FROM " + Album::Table::Name +
             " WHERE title = ?";
     auto albums = Album::fetchAll<Album>( m_ml, req, albumName );
 
@@ -674,7 +674,7 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataAnalyzer::fi
 {
     std::shared_ptr<Artist> albumArtist;
     std::shared_ptr<Artist> artist;
-    static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name + " WHERE name = ?";
+    static const std::string req = "SELECT * FROM " + Artist::Table::Name + " WHERE name = ?";
 
     const auto& albumArtistStr = item.meta( IItem::Metadata::AlbumArtist );
     const auto& artistStr = item.meta( IItem::Metadata::Artist );

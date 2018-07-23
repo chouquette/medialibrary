@@ -34,19 +34,15 @@ namespace medialibrary
 class Playlist;
 class File;
 
-namespace policy
-{
-struct PlaylistTable
-{
-    static const std::string Name;
-    static const std::string PrimaryKeyColumn;
-    static int64_t Playlist::*const PrimaryKey;
-};
-}
-
-class Playlist : public IPlaylist, public DatabaseHelpers<Playlist, policy::PlaylistTable>
+class Playlist : public IPlaylist, public DatabaseHelpers<Playlist>
 {
 public:
+    struct Table
+    {
+        static const std::string Name;
+        static const std::string PrimaryKeyColumn;
+        static int64_t Playlist::*const PrimaryKey;
+    };
     Playlist( MediaLibraryPtr ml, sqlite::Row& row );
     Playlist( MediaLibraryPtr ml, const std::string& name );
 
@@ -101,7 +97,7 @@ private:
     unsigned int m_creationDate;
     std::string m_artworkMrl;
 
-    friend policy::PlaylistTable;
+    friend Playlist::Table;
 };
 
 }

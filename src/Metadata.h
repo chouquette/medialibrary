@@ -34,17 +34,13 @@ namespace sqlite
 class Connection;
 }
 
-namespace policy
-{
-struct MetadataTable
-{
-    static const std::string Name;
-};
-}
-
 class Metadata
 {
 public:
+    struct Table
+    {
+        static const std::string Name;
+    };
     Metadata( MediaLibraryPtr ml, IMetadata::EntityType entityType );
 
     // We have to "lazy init" this object since during containing object creation,

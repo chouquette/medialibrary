@@ -30,9 +30,9 @@
 namespace medialibrary
 {
 
-const std::string policy::VideoTrackTable::Name = "VideoTrack";
-const std::string policy::VideoTrackTable::PrimaryKeyColumn = "id_track";
-int64_t VideoTrack::* const policy::VideoTrackTable::PrimaryKey = &VideoTrack::m_id;
+const std::string VideoTrack::Table::Name = "VideoTrack";
+const std::string VideoTrack::Table::PrimaryKeyColumn = "id_track";
+int64_t VideoTrack::* const VideoTrack::Table::PrimaryKey = &VideoTrack::m_id;
 
 VideoTrack::VideoTrack( MediaLibraryPtr, sqlite::Row& row )
 {
@@ -135,7 +135,7 @@ std::shared_ptr<VideoTrack> VideoTrack::create( MediaLibraryPtr ml, const std::s
                                                 int64_t mediaId, const std::string& language,
                                                 const std::string& description )
 {
-    static const std::string req  = "INSERT INTO " + policy::VideoTrackTable::Name
+    static const std::string req  = "INSERT INTO " + VideoTrack::Table::Name
             + "(codec, width, height, fps_num, fps_den, bitrate, sar_num, sar_den,"
                "media_id, language, description) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     auto track = std::make_shared<VideoTrack>( ml, codec, width, height, fpsNum,
@@ -149,9 +149,9 @@ std::shared_ptr<VideoTrack> VideoTrack::create( MediaLibraryPtr ml, const std::s
 
 void VideoTrack::createTable( sqlite::Connection* dbConnection )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::VideoTrackTable::Name
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + VideoTrack::Table::Name
             + "(" +
-                policy::VideoTrackTable::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                VideoTrack::Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "codec TEXT,"
                 "width UNSIGNED INTEGER,"
                 "height UNSIGNED INTEGER,"
@@ -163,11 +163,11 @@ void VideoTrack::createTable( sqlite::Connection* dbConnection )
                 "media_id UNSIGNED INT,"
                 "language TEXT,"
                 "description TEXT,"
-                "FOREIGN KEY ( media_id ) REFERENCES " + policy::MediaTable::Name +
+                "FOREIGN KEY ( media_id ) REFERENCES " + Media::Table::Name +
                     "(id_media) ON DELETE CASCADE"
             ")";
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS video_track_media_idx ON " +
-            policy::VideoTrackTable::Name + "(media_id)";
+            VideoTrack::Table::Name + "(media_id)";
     sqlite::Tools::executeRequest( dbConnection, req );
     sqlite::Tools::executeRequest( dbConnection, indexReq );
 }

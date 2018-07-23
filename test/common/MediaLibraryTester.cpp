@@ -51,7 +51,7 @@ std::shared_ptr<Media> MediaLibraryTester::media( int64_t id )
 
 std::shared_ptr<Folder> MediaLibraryTester::folder( const std::string& mrl )
 {
-    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
+    static const std::string req = "SELECT * FROM " + Folder::Table::Name +
             " WHERE is_blacklisted = 0 AND is_present != 0";
     auto folders = Folder::DatabaseHelpers::fetchAll<Folder>( this, req );
     for ( auto &f : folders )
@@ -166,7 +166,7 @@ std::shared_ptr<AlbumTrack> MediaLibraryTester::albumTrack( int64_t id )
 
 std::vector<MediaPtr> MediaLibraryTester::files()
 {
-    static const std::string req = "SELECT * FROM " + policy::MediaTable::Name + " WHERE is_present != 0";
+    static const std::string req = "SELECT * FROM " + Media::Table::Name + " WHERE is_present != 0";
     return Media::fetchAll<IMedia>( this, req );
 }
 
@@ -217,13 +217,13 @@ void MediaLibraryTester::deleteMedia( int64_t mediaId )
 
 void MediaLibraryTester::outdateAllDevices()
 {
-    std::string req = "UPDATE " + policy::DeviceTable::Name + " SET last_seen = 1";
+    std::string req = "UPDATE " + Device::Table::Name + " SET last_seen = 1";
     sqlite::Tools::executeUpdate( getConn(), req );
 }
 
 void MediaLibraryTester::outdateAllExternalMedia()
 {
-    std::string req = "UPDATE " + policy::MediaTable::Name + " SET real_last_played_date = 1 "
+    std::string req = "UPDATE " + Media::Table::Name + " SET real_last_played_date = 1 "
             "WHERE type = ? OR type = ?";
     sqlite::Tools::executeUpdate( getConn(), req, IMedia::Type::External, IMedia::Type::Stream );
 }

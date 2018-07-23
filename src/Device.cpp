@@ -29,9 +29,9 @@
 namespace medialibrary
 {
 
-const std::string policy::DeviceTable::Name = "Device";
-const std::string policy::DeviceTable::PrimaryKeyColumn = "id_device";
-int64_t Device::* const policy::DeviceTable::PrimaryKey = &Device::m_id;
+const std::string Device::Table::Name = "Device";
+const std::string Device::Table::PrimaryKeyColumn = "id_device";
+int64_t Device::* const Device::Table::PrimaryKey = &Device::m_id;
 
 Device::Device( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -80,7 +80,7 @@ bool Device::isPresent() const
 void Device::setPresent(bool value)
 {
     assert( m_isPresent != value );
-    static const std::string req = "UPDATE " + policy::DeviceTable::Name +
+    static const std::string req = "UPDATE " + Device::Table::Name +
             " SET is_present = ? WHERE id_device = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, value, m_id ) == false )
         return;
@@ -99,7 +99,7 @@ time_t Device::lastSeen() const
 
 void Device::updateLastSeen()
 {
-    const std::string req = "UPDATE " + policy::DeviceTable::Name + " SET "
+    const std::string req = "UPDATE " + Device::Table::Name + " SET "
             "last_seen = ? WHERE id_device = ?";
     auto lastSeen = std::chrono::duration_cast<std::chrono::seconds>(
         std::chrono::system_clock::now().time_since_epoch()
@@ -109,7 +109,7 @@ void Device::updateLastSeen()
 
 std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme, bool isRemovable )
 {
-    static const std::string req = "INSERT INTO " + policy::DeviceTable::Name
+    static const std::string req = "INSERT INTO " + Device::Table::Name
             + "(uuid, scheme, is_removable, is_present, last_seen) VALUES(?, ?, ?, ?, ?)";
     auto lastSeen = std::chrono::duration_cast<std::chrono::seconds>(
         std::chrono::system_clock::now().time_since_epoch()
@@ -131,14 +131,14 @@ void Device::createTable( sqlite::Connection* connection )
 
 std::shared_ptr<Device> Device::fromUuid( MediaLibraryPtr ml, const std::string& uuid )
 {
-    static const std::string req = "SELECT * FROM " + policy::DeviceTable::Name +
+    static const std::string req = "SELECT * FROM " + Device::Table::Name +
             " WHERE uuid = ?";
     return fetch( ml, req, uuid );
 }
 
 void Device::removeOldDevices( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime )
 {
-    static const std::string req = "DELETE FROM " + policy::DeviceTable::Name + " "
+    static const std::string req = "DELETE FROM " + Device::Table::Name + " "
             "WHERE last_seen < ?";
     auto deadline = std::chrono::duration_cast<std::chrono::seconds>(
                 (std::chrono::system_clock::now() - maxLifeTime).time_since_epoch() );

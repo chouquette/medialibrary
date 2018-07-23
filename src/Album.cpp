@@ -39,9 +39,9 @@
 namespace medialibrary
 {
 
-const std::string policy::AlbumTable::Name = "Album";
-const std::string policy::AlbumTable::PrimaryKeyColumn = "id_album";
-int64_t Album::* const policy::AlbumTable::PrimaryKey = &Album::m_id;
+const std::string Album::Table::Name = "Album";
+const std::string Album::Table::PrimaryKeyColumn = "id_album";
+int64_t Album::* const Album::Table::PrimaryKey = &Album::m_id;
 
 Album::Album(MediaLibraryPtr ml, sqlite::Row& row)
     : m_ml( ml )
@@ -113,7 +113,7 @@ bool Album::setReleaseYear( unsigned int date, bool force )
             date = 0;
         }
     }
-    static const std::string req = "UPDATE " + policy::AlbumTable::Name
+    static const std::string req = "UPDATE " + Album::Table::Name
             + " SET release_year = ? WHERE id_album = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, date, m_id ) == false )
         return false;
@@ -128,7 +128,7 @@ const std::string& Album::shortSummary() const
 
 bool Album::setShortSummary( const std::string& summary )
 {
-    static const std::string req = "UPDATE " + policy::AlbumTable::Name
+    static const std::string req = "UPDATE " + Album::Table::Name
             + " SET short_summary = ? WHERE id_album = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, summary, m_id ) == false )
         return false;
@@ -180,7 +180,7 @@ bool Album::setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin orig
     m_thumbnail = Thumbnail::create( m_ml, artworkMrl, Thumbnail::Origin::Album );
     if ( m_thumbnail.get() == nullptr )
         return false;
-    static const std::string req = "UPDATE " + policy::AlbumTable::Name
+    static const std::string req = "UPDATE " + Album::Table::Name
             + " SET thumbnail_id = ? WHERE id_album = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_thumbnail.get()->id(), m_id ) == false )
         return false;
@@ -255,8 +255,8 @@ Query<IMedia> Album::tracks( const QueryParameters* params ) const
 {
     // This doesn't return the cached version, because it would be fairly complicated, if not impossible or
     // counter productive, to maintain a cache that respects all orderings.
-    std::string req = "FROM " + policy::MediaTable::Name + " med "
-        " INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
+    std::string req = "FROM " + Media::Table::Name + " med "
+        " INNER JOIN " + AlbumTrack::Table::Name + " att ON att.media_id = med.id_media "
         " WHERE att.album_id = ? AND med.is_present != 0";
     return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
                                       orderTracksBy( params ), m_id );
@@ -266,8 +266,8 @@ Query<IMedia> Album::tracks( GenrePtr genre, const QueryParameters* params ) con
 {
     if ( genre == nullptr )
         return {};
-    std::string req = "FROM " + policy::MediaTable::Name + " med "
-            " INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.media_id = med.id_media "
+    std::string req = "FROM " + Media::Table::Name + " med "
+            " INNER JOIN " + AlbumTrack::Table::Name + " att ON att.media_id = med.id_media "
             " WHERE att.album_id = ? AND med.is_present != 0"
             " AND genre_id = ?";
     return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
@@ -341,7 +341,7 @@ bool Album::setAlbumArtist( std::shared_ptr<Artist> artist )
         return true;
     if ( artist->id() == 0 )
         return false;
-    static const std::string req = "UPDATE " + policy::AlbumTable::Name + " SET "
+    static const std::string req = "UPDATE " + Table::Name + " SET "
             "artist_id = ? WHERE id_album = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, artist->id(), m_id ) == false )
         return false;
@@ -354,7 +354,7 @@ bool Album::setAlbumArtist( std::shared_ptr<Artist> artist )
     m_artistId = artist->id();
     m_albumArtist = artist;
     artist->updateNbAlbum( 1 );
-    static const std::string ftsReq = "UPDATE " + policy::AlbumTable::Name + "Fts SET "
+    static const std::string ftsReq = "UPDATE " + Table::Name + "Fts SET "
             " artist = ? WHERE rowid = ?";
     sqlite::Tools::executeUpdate( m_ml->getConn(), ftsReq, artist->name(), m_id );
     return true;
@@ -362,7 +362,7 @@ bool Album::setAlbumArtist( std::shared_ptr<Artist> artist )
 
 Query<IArtist> Album::artists( const QueryParameters* params ) const
 {
-    std::string req = "FROM " + policy::ArtistTable::Name + " art "
+    std::string req = "FROM " + Artist::Table::Name + " art "
             "INNER JOIN AlbumArtistRelation aar ON aar.artist_id = art.id_artist "
             "WHERE aar.album_id = ?";
     std::string orderBy = "ORDER BY art.name";
@@ -393,7 +393,7 @@ bool Album::removeArtist(Artist* artist)
 void Album::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " +
-            policy::AlbumTable::Name +
+            Table::Name +
             "("
                 "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "title TEXT COLLATE NOCASE,"
@@ -404,22 +404,22 @@ void Album::createTable( sqlite::Connection* dbConnection )
                 "nb_tracks UNSIGNED INTEGER DEFAULT 0,"
                 "duration UNSIGNED INTEGER NOT NULL DEFAULT 0,"
                 "is_present BOOLEAN NOT NULL DEFAULT 1,"
-                "FOREIGN KEY( artist_id ) REFERENCES " + policy::ArtistTable::Name
+                "FOREIGN KEY( artist_id ) REFERENCES " + Artist::Table::Name
                 + "(id_artist) ON DELETE CASCADE,"
-                "FOREIGN KEY(thumbnail_id) REFERENCES " + policy::ThumbnailTable::Name
+                "FOREIGN KEY(thumbnail_id) REFERENCES " + Thumbnail::Table::Name
                 + "(id_thumbnail)"
             ")";
     const std::string reqRel = "CREATE TABLE IF NOT EXISTS AlbumArtistRelation("
                 "album_id INTEGER,"
                 "artist_id INTEGER,"
                 "PRIMARY KEY (album_id, artist_id),"
-                "FOREIGN KEY(album_id) REFERENCES " + policy::AlbumTable::Name + "("
-                    + policy::AlbumTable::PrimaryKeyColumn + ") ON DELETE CASCADE,"
-                "FOREIGN KEY(artist_id) REFERENCES " + policy::ArtistTable::Name + "("
-                    + policy::ArtistTable::PrimaryKeyColumn + ") ON DELETE CASCADE"
+                "FOREIGN KEY(album_id) REFERENCES " + Table::Name + "("
+                    + Table::PrimaryKeyColumn + ") ON DELETE CASCADE,"
+                "FOREIGN KEY(artist_id) REFERENCES " + Artist::Table::Name + "("
+                    + Artist::Table::PrimaryKeyColumn + ") ON DELETE CASCADE"
             ")";
     const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
-                + policy::AlbumTable::Name + "Fts USING FTS3("
+                + Table::Name + "Fts USING FTS3("
                 "title,"
                 "artist"
             ")";
@@ -432,49 +432,49 @@ void Album::createTable( sqlite::Connection* dbConnection )
 void Album::createTriggers( sqlite::Connection* dbConnection )
 {
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS album_artist_id_idx ON " +
-            policy::AlbumTable::Name + "(artist_id)";
+            Table::Name + "(artist_id)";
     static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_album_present AFTER UPDATE OF "
-            "is_present ON " + policy::AlbumTrackTable::Name +
+            "is_present ON " + AlbumTrack::Table::Name +
             " BEGIN "
-            " UPDATE " + policy::AlbumTable::Name + " SET is_present="
+            " UPDATE " + Table::Name + " SET is_present="
                 "(SELECT EXISTS("
-                    "SELECT id_track FROM " + policy::AlbumTrackTable::Name +
+                    "SELECT id_track FROM " + AlbumTrack::Table::Name +
                     " WHERE album_id=new.album_id AND is_present != 0 LIMIT 1"
                 ") )"
                 "WHERE id_album=new.album_id;"
             " END";
     static const std::string deleteTriggerReq = "CREATE TRIGGER IF NOT EXISTS delete_album_track AFTER DELETE ON "
-             + policy::AlbumTrackTable::Name +
+             + AlbumTrack::Table::Name +
             " BEGIN "
-            " UPDATE " + policy::AlbumTable::Name +
+            " UPDATE " + Table::Name +
             " SET"
                 " nb_tracks = nb_tracks - 1,"
                 " duration = duration - old.duration"
                 " WHERE id_album = old.album_id;"
-            " DELETE FROM " + policy::AlbumTable::Name +
+            " DELETE FROM " + Table::Name +
                 " WHERE id_album=old.album_id AND nb_tracks = 0;"
             " END";
     static const std::string updateAddTrackTriggerReq = "CREATE TRIGGER IF NOT EXISTS add_album_track"
-            " AFTER INSERT ON " + policy::AlbumTrackTable::Name +
+            " AFTER INSERT ON " + AlbumTrack::Table::Name +
             " BEGIN"
-            " UPDATE " + policy::AlbumTable::Name +
+            " UPDATE " + Table::Name +
             " SET duration = duration + new.duration,"
             " nb_tracks = nb_tracks + 1"
             " WHERE id_album = new.album_id;"
             " END";
     static const std::string vtriggerInsert = "CREATE TRIGGER IF NOT EXISTS insert_album_fts AFTER INSERT ON "
-            + policy::AlbumTable::Name +
+            + Table::Name +
             // Skip unknown albums
             " WHEN new.title IS NOT NULL"
             " BEGIN"
-            " INSERT INTO " + policy::AlbumTable::Name + "Fts(rowid, title) VALUES(new.id_album, new.title);"
+            " INSERT INTO " + Table::Name + "Fts(rowid, title) VALUES(new.id_album, new.title);"
             " END";
     static const std::string vtriggerDelete = "CREATE TRIGGER IF NOT EXISTS delete_album_fts BEFORE DELETE ON "
-            + policy::AlbumTable::Name +
+            + Table::Name +
             // Unknown album probably won't be deleted, but better safe than sorry
             " WHEN old.title IS NOT NULL"
             " BEGIN"
-            " DELETE FROM " + policy::AlbumTable::Name + "Fts WHERE rowid = old.id_album;"
+            " DELETE FROM " + Table::Name + "Fts WHERE rowid = old.id_album;"
             " END";
     sqlite::Tools::executeRequest( dbConnection, indexReq );
     sqlite::Tools::executeRequest( dbConnection, triggerReq );
@@ -487,7 +487,7 @@ void Album::createTriggers( sqlite::Connection* dbConnection )
 std::shared_ptr<Album> Album::create( MediaLibraryPtr ml, const std::string& title, int64_t thumbnailId )
 {
     auto album = std::make_shared<Album>( ml, title, thumbnailId );
-    static const std::string req = "INSERT INTO " + policy::AlbumTable::Name +
+    static const std::string req = "INSERT INTO " + Table::Name +
             "(id_album, title, thumbnail_id) VALUES(NULL, ?, ?)";
     if ( insert( ml, album, req, title, sqlite::ForeignKey( thumbnailId ) ) == false )
         return nullptr;
@@ -497,7 +497,7 @@ std::shared_ptr<Album> Album::create( MediaLibraryPtr ml, const std::string& tit
 std::shared_ptr<Album> Album::createUnknownAlbum( MediaLibraryPtr ml, const Artist* artist )
 {
     auto album = std::make_shared<Album>( ml, artist );
-    static const std::string req = "INSERT INTO " + policy::AlbumTable::Name +
+    static const std::string req = "INSERT INTO " + Table::Name +
             "(id_album, artist_id) VALUES(NULL, ?)";
     if ( insert( ml, album, req, artist->id() ) == false )
         return nullptr;
@@ -507,10 +507,10 @@ std::shared_ptr<Album> Album::createUnknownAlbum( MediaLibraryPtr ml, const Arti
 Query<IAlbum> Album::search( MediaLibraryPtr ml, const std::string& pattern,
                              const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::AlbumTable::Name + " alb "
+    std::string req = "FROM " + Table::Name + " alb "
             "WHERE id_album IN "
-            "(SELECT rowid FROM " + policy::AlbumTable::Name + "Fts WHERE " +
-            policy::AlbumTable::Name + "Fts MATCH '*' || ? || '*')"
+            "(SELECT rowid FROM " + Table::Name + "Fts WHERE " +
+            Table::Name + "Fts MATCH '*' || ? || '*')"
             "AND is_present != 0";
     return make_query<Album, IAlbum>( ml, "*", std::move( req ),
                                       orderBy( params ), pattern );
@@ -519,10 +519,10 @@ Query<IAlbum> Album::search( MediaLibraryPtr ml, const std::string& pattern,
 Query<IAlbum> Album::searchFromArtist( MediaLibraryPtr ml, const std::string& pattern,
                                        int64_t artistId, const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::AlbumTable::Name + " alb "
+    std::string req = "FROM " + Table::Name + " alb "
             "WHERE id_album IN "
-            "(SELECT rowid FROM " + policy::AlbumTable::Name + "Fts WHERE " +
-            policy::AlbumTable::Name + "Fts MATCH '*' || ? || '*')"
+            "(SELECT rowid FROM " + Table::Name + "Fts WHERE " +
+            Table::Name + "Fts MATCH '*' || ? || '*')"
             "AND is_present != 0 "
             "AND artist_id = ?";
     return make_query<Album, IAlbum>( ml, "*", std::move( req ),
@@ -531,8 +531,8 @@ Query<IAlbum> Album::searchFromArtist( MediaLibraryPtr ml, const std::string& pa
 
 Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::AlbumTable::Name + " alb "
-                    "INNER JOIN " + policy::AlbumTrackTable::Name + " att "
+    std::string req = "FROM " + Table::Name + " alb "
+                    "INNER JOIN " + AlbumTrack::Table::Name + " att "
                         "ON att.album_id = alb.id_album "
                     "WHERE (att.artist_id = ? OR alb.artist_id = ?) "
                         "AND att.is_present != 0 ";
@@ -564,8 +564,8 @@ Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, const Que
 
 Query<IAlbum> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId, const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::AlbumTable::Name + " alb "
-            "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.album_id = alb.id_album "
+    std::string req = "FROM " + Table::Name + " alb "
+            "INNER JOIN " + AlbumTrack::Table::Name + " att ON att.album_id = alb.id_album "
             "WHERE att.genre_id = ? GROUP BY att.album_id";
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       orderBy( params ), genreId );
@@ -574,11 +574,11 @@ Query<IAlbum> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId, const Query
 Query<IAlbum> Album::searchFromGenre( MediaLibraryPtr ml, const std::string& pattern,
                                       int64_t genreId, const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::AlbumTable::Name + " alb "
-            "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.album_id = alb.id_album "
+    std::string req = "FROM " + Table::Name + " alb "
+            "INNER JOIN " + AlbumTrack::Table::Name + " att ON att.album_id = alb.id_album "
             "WHERE id_album IN "
-            "(SELECT rowid FROM " + policy::AlbumTable::Name + "Fts WHERE " +
-            policy::AlbumTable::Name + "Fts MATCH '*' || ? || '*')"
+            "(SELECT rowid FROM " + Table::Name + "Fts WHERE " +
+            Table::Name + "Fts MATCH '*' || ? || '*')"
             "AND att.genre_id = ? GROUP BY att.album_id";
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       orderBy( params ), pattern, genreId );
@@ -590,8 +590,8 @@ Query<IAlbum> Album::listAll( MediaLibraryPtr ml, const QueryParameters* params 
     auto desc = params != nullptr ? params->desc : false;
     if ( sort == SortingCriteria::Artist )
     {
-        std::string req = "FROM " + policy::AlbumTable::Name + " alb "
-                "INNER JOIN " + policy::ArtistTable::Name + " art ON alb.artist_id = art.id_artist "
+        std::string req = "FROM " + Table::Name + " alb "
+                "INNER JOIN " + Artist::Table::Name + " art ON alb.artist_id = art.id_artist "
                 "WHERE alb.is_present != 0 ";
         std::string orderBy = "ORDER BY art.name ";
         if ( desc == true )
@@ -602,9 +602,9 @@ Query<IAlbum> Album::listAll( MediaLibraryPtr ml, const QueryParameters* params 
     }
     if ( sort == SortingCriteria::PlayCount )
     {
-        std::string req = "FROM " + policy::AlbumTable::Name + " alb "
-                 "INNER JOIN " + policy::AlbumTrackTable::Name + " t ON alb.id_album = t.album_id "
-                 "INNER JOIN " + policy::MediaTable::Name + " m ON t.media_id = m.id_media "
+        std::string req = "FROM " + Table::Name + " alb "
+                 "INNER JOIN " + AlbumTrack::Table::Name + " t ON alb.id_album = t.album_id "
+                 "INNER JOIN " + Media::Table::Name + " m ON t.media_id = m.id_media "
                  "WHERE alb.is_present != 0 ";
         std::string groupBy = "GROUP BY id_album "
                  "ORDER BY SUM(m.play_count) ";
@@ -614,7 +614,7 @@ Query<IAlbum> Album::listAll( MediaLibraryPtr ml, const QueryParameters* params 
         return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                           std::move( groupBy ) );
     }
-    std::string req = "FROM " + policy::AlbumTable::Name + " alb "
+    std::string req = "FROM " + Table::Name + " alb "
                     " WHERE is_present != 0";
     return make_query<Album, IAlbum>( ml, "*", std::move( req ),
                                       orderBy( params ) );

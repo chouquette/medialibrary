@@ -31,19 +31,16 @@ namespace medialibrary
 
 class Genre;
 
-namespace policy
-{
-struct GenreTable
-{
-    static const std::string Name;
-    static const std::string PrimaryKeyColumn;
-    static int64_t Genre::*const PrimaryKey;
-};
-}
-
-class Genre : public IGenre, public DatabaseHelpers<Genre, policy::GenreTable>
+class Genre : public IGenre, public DatabaseHelpers<Genre>
 {
 public:
+    struct Table
+    {
+        static const std::string Name;
+        static const std::string PrimaryKeyColumn;
+        static int64_t Genre::*const PrimaryKey;
+    };
+
     Genre( MediaLibraryPtr ml, sqlite::Row& row );
     Genre( MediaLibraryPtr ml, const std::string& name );
     virtual int64_t id() const override;
@@ -74,7 +71,7 @@ private:
     std::string m_name;
     uint32_t m_nbTracks;
 
-    friend policy::GenreTable;
+    friend Genre::Table;
 };
 
 }

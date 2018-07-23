@@ -30,12 +30,9 @@
 namespace medialibrary
 {
 
-namespace policy
-{
-const std::string ThumbnailTable::Name = "Thumbnail";
-const std::string ThumbnailTable::PrimaryKeyColumn = "id_thumbnail";
-int64_t Thumbnail::*const ThumbnailTable::PrimaryKey = &Thumbnail::m_id;
-}
+const std::string Thumbnail::Table::Name = "Thumbnail";
+const std::string Thumbnail::Table::PrimaryKeyColumn = "id_thumbnail";
+int64_t Thumbnail::*const Thumbnail::Table::PrimaryKey = &Thumbnail::m_id;
 
 const std::string Thumbnail::EmptyMrl;
 
@@ -69,7 +66,7 @@ bool Thumbnail::update( std::string mrl, Origin origin )
 {
     if ( m_mrl == mrl && m_origin == origin )
         return true;
-    static const std::string req = "UPDATE " + policy::ThumbnailTable::Name +
+    static const std::string req = "UPDATE " + Thumbnail::Table::Name +
             " SET mrl = ?, origin = ? WHERE id_thumbnail = ?";
     if( sqlite::Tools::executeUpdate( m_ml->getConn(), req, mrl, origin, m_id ) == false )
         return false;
@@ -103,7 +100,7 @@ bool Thumbnail::setMrlFromPrimaryKey( MediaLibraryPtr ml,
 
 void Thumbnail::createTable( sqlite::Connection* dbConnection )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::ThumbnailTable::Name +
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + Thumbnail::Table::Name +
             "("
                 "id_thumbnail INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "mrl TEXT NOT NULL,"
@@ -115,7 +112,7 @@ void Thumbnail::createTable( sqlite::Connection* dbConnection )
 std::shared_ptr<Thumbnail> Thumbnail::create( MediaLibraryPtr ml, std::string mrl,
                                               Thumbnail::Origin origin )
 {
-    static const std::string req = "INSERT INTO " + policy::ThumbnailTable::Name +
+    static const std::string req = "INSERT INTO " + Thumbnail::Table::Name +
             "(mrl, origin) VALUES(?,?)";
     auto self = std::make_shared<Thumbnail>( ml, std::move( mrl ), origin );
     if ( insert( ml, self, req, self->mrl(), origin ) == false )

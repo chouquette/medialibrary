@@ -32,19 +32,15 @@ namespace medialibrary
 
 class AudioTrack;
 
-namespace policy
-{
-struct AudioTrackTable
-{
-    static const std::string Name;
-    static const std::string PrimaryKeyColumn;
-    static int64_t AudioTrack::* const PrimaryKey;
-};
-}
-
-class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack, policy::AudioTrackTable>
+class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack>
 {
     public:
+        struct Table
+        {
+            static const std::string Name;
+            static const std::string PrimaryKeyColumn;
+            static int64_t AudioTrack::* const PrimaryKey;
+        };
         AudioTrack(MediaLibraryPtr ml, sqlite::Row& row );
         AudioTrack( MediaLibraryPtr ml, const std::string& codec, unsigned int bitrate,
                     unsigned int sampleRate, unsigned int nbChannels, const std::string& language,
@@ -74,7 +70,7 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack, policy
         int64_t m_mediaId;
 
     private:
-        friend struct policy::AudioTrackTable;
+        friend struct AudioTrack::Table;
 };
 
 }

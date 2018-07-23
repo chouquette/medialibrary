@@ -40,12 +40,9 @@
 namespace medialibrary
 {
 
-namespace policy
-{
-    const std::string FolderTable::Name = "Folder";
-    const std::string FolderTable::PrimaryKeyColumn = "id_folder";
-    int64_t Folder::* const FolderTable::PrimaryKey = &Folder::m_id;
-}
+const std::string Folder::Table::Name = "Folder";
+const std::string Folder::Table::PrimaryKeyColumn = "id_folder";
+int64_t Folder::* const Folder::Table::PrimaryKey = &Folder::m_id;
 
 Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -98,7 +95,7 @@ std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& m
     else
         path = mrl;
     auto self = std::make_shared<Folder>( ml, path, parentId, device.id(), device.isRemovable() );
-    static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
+    static const std::string req = "INSERT INTO " + Folder::Table::Name +
             "(path, parent_id, device_id, is_removable) VALUES(?, ?, ?, ?)";
     if ( insert( ml, self, req, path, sqlite::ForeignKey( parentId ), device.id(), device.isRemovable() ) == false )
         return nullptr;
@@ -158,7 +155,7 @@ bool Folder::blacklist( MediaLibraryPtr ml, const std::string& mrl )
             path = utils::file::removePath( mrl, deviceFs->mountpoint() );
         else
             path = mrl;
-        static const std::string req = "INSERT INTO " + policy::FolderTable::Name +
+        static const std::string req = "INSERT INTO " + Folder::Table::Name +
                 "(path, parent_id, is_blacklisted, device_id, is_removable) VALUES(?, ?, ?, ?, ?)";
         auto res = sqlite::Tools::executeInsert( ml->getConn(), req, path, nullptr, true, device->id(), deviceFs->isRemovable() ) != 0;
         t->commit();
@@ -202,7 +199,7 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
     }
     if ( deviceFs->isRemovable() == false )
     {
-        std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND is_removable = 0";
+        std::string req = "SELECT * FROM " + Folder::Table::Name + " WHERE path = ? AND is_removable = 0";
         if ( bannedType == BannedType::Any )
             return fetch( ml, req, folderFs->mrl() );
         req += " AND is_blacklisted = ?";
@@ -214,7 +211,7 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
     if ( device == nullptr )
         return nullptr;
     auto path = utils::file::removePath( folderFs->mrl(), deviceFs->mountpoint() );
-    std::string req = "SELECT * FROM " + policy::FolderTable::Name + " WHERE path = ? AND device_id = ?";
+    std::string req = "SELECT * FROM " + Folder::Table::Name + " WHERE path = ? AND device_id = ?";
     std::shared_ptr<Folder> folder;
     if ( bannedType == BannedType::Any )
     {
@@ -281,7 +278,7 @@ void Folder::setMrl( std::string mrl )
 {
     if ( m_path == mrl )
         return;
-    static const std::string req = "UPDATE " + policy::FolderTable::Name + " SET "
+    static const std::string req = "UPDATE " + Folder::Table::Name + " SET "
             "path = ? WHERE id_folder = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, mrl, m_id ) == false )
         return;
@@ -294,14 +291,14 @@ void Folder::setMrl( std::string mrl )
 
 std::vector<std::shared_ptr<File>> Folder::files()
 {
-    static const std::string req = "SELECT * FROM " + policy::FileTable::Name +
+    static const std::string req = "SELECT * FROM " + File::Table::Name +
         " WHERE folder_id = ?";
     return File::fetchAll<File>( m_ml, req, m_id );
 }
 
 std::vector<std::shared_ptr<Folder>> Folder::folders()
 {
-    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name
+    static const std::string req = "SELECT * FROM " + Folder::Table::Name
             + " WHERE parent_id = ? AND is_blacklisted = 0 AND is_present != 0";
     return DatabaseHelpers::fetchAll<Folder>( m_ml, req, m_id );
 }
@@ -342,9 +339,9 @@ bool Folder::isRootFolder() const
 
 std::vector<std::shared_ptr<Folder>> Folder::fetchRootFolders( MediaLibraryPtr ml )
 {
-    static const std::string req = "SELECT * FROM " + policy::FolderTable::Name +
+    static const std::string req = "SELECT * FROM " + Folder::Table::Name +
             " LEFT JOIN ExcludedEntryFolder"
-            " ON " + policy::FolderTable::Name + ".id_folder = ExcludedEntryFolder.folder_id"
+            " ON " + Folder::Table::Name + ".id_folder = ExcludedEntryFolder.folder_id"
             " WHERE ExcludedEntryFolder.folder_id IS NULL AND"
             " parent_id IS NULL AND is_blacklisted = 0 AND is_present != 0";
     return DatabaseHelpers::fetchAll<Folder>( ml, req );

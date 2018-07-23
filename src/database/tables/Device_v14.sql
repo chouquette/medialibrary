@@ -1,4 +1,4 @@
-"CREATE TABLE IF NOT EXISTS " + policy::DeviceTable::Name +
+"CREATE TABLE IF NOT EXISTS " + Device::Table::Name +
 "("
     "id_device INTEGER PRIMARY KEY AUTOINCREMENT,"
     "uuid TEXT UNIQUE ON CONFLICT FAIL,"

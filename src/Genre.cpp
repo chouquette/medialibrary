@@ -35,12 +35,9 @@
 namespace medialibrary
 {
 
-namespace policy
-{
-const std::string GenreTable::Name = "Genre";
-const std::string GenreTable::PrimaryKeyColumn = "id_genre";
-int64_t Genre::* const GenreTable::PrimaryKey = &Genre::m_id;
-}
+const std::string Genre::Table::Name = "Genre";
+const std::string Genre::Table::PrimaryKeyColumn = "id_genre";
+int64_t Genre::* const Genre::Table::PrimaryKey = &Genre::m_id;
 
 Genre::Genre( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -80,8 +77,8 @@ void Genre::updateCachedNbTracks( int increment )
 
 Query<IArtist> Genre::artists( const QueryParameters* params ) const
 {
-    std::string req = "FROM " + policy::ArtistTable::Name + " a "
-            "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.artist_id = a.id_artist "
+    std::string req = "FROM " + Artist::Table::Name + " a "
+            "INNER JOIN " + AlbumTrack::Table::Name + " att ON att.artist_id = a.id_artist "
             "WHERE att.genre_id = ? GROUP BY att.artist_id";
     std::string orderBy = "ORDER BY a.name";
     if ( params != nullptr && params->desc == true )
@@ -119,14 +116,14 @@ Query<IAlbum> Genre::searchAlbums( const std::string& pattern,
 
 void Genre::createTable( sqlite::Connection* dbConn )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::GenreTable::Name +
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + Genre::Table::Name +
         "("
             "id_genre INTEGER PRIMARY KEY AUTOINCREMENT,"
             "name TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
             "nb_tracks INTEGER NOT NULL DEFAULT 0"
         ")";
     const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
-                + policy::GenreTable::Name + "Fts USING FTS3("
+                + Genre::Table::Name + "Fts USING FTS3("
                 "name"
             ")";
 
@@ -137,34 +134,34 @@ void Genre::createTable( sqlite::Connection* dbConn )
 void Genre::createTriggers( sqlite::Connection* dbConn )
 {
     const std::string vtableInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_genre_fts"
-            " AFTER INSERT ON " + policy::GenreTable::Name +
+            " AFTER INSERT ON " + Genre::Table::Name +
             " BEGIN"
-            " INSERT INTO " + policy::GenreTable::Name + "Fts(rowid,name) VALUES(new.id_genre, new.name);"
+            " INSERT INTO " + Genre::Table::Name + "Fts(rowid,name) VALUES(new.id_genre, new.name);"
             " END";
     const std::string vtableDeleteTrigger = "CREATE TRIGGER IF NOT EXISTS delete_genre_fts"
-            " BEFORE DELETE ON " + policy::GenreTable::Name +
+            " BEFORE DELETE ON " + Genre::Table::Name +
             " BEGIN"
-            " DELETE FROM " + policy::GenreTable::Name + "Fts WHERE rowid = old.id_genre;"
+            " DELETE FROM " + Genre::Table::Name + "Fts WHERE rowid = old.id_genre;"
             " END";
     const std::string onGenreChanged = "CREATE TRIGGER IF NOT EXISTS on_track_genre_changed AFTER UPDATE OF "
-            " genre_id ON " + policy::AlbumTrackTable::Name +
+            " genre_id ON " + AlbumTrack::Table::Name +
             " BEGIN"
-            " UPDATE " + policy::GenreTable::Name + " SET nb_tracks = nb_tracks + 1 WHERE id_genre = new.genre_id;"
-            " UPDATE " + policy::GenreTable::Name + " SET nb_tracks = nb_tracks - 1 WHERE id_genre = old.genre_id;"
-            " DELETE FROM " + policy::GenreTable::Name + " WHERE nb_tracks = 0;"
+            " UPDATE " + Genre::Table::Name + " SET nb_tracks = nb_tracks + 1 WHERE id_genre = new.genre_id;"
+            " UPDATE " + Genre::Table::Name + " SET nb_tracks = nb_tracks - 1 WHERE id_genre = old.genre_id;"
+            " DELETE FROM " + Genre::Table::Name + " WHERE nb_tracks = 0;"
             " END";
     const std::string onTrackCreated = "CREATE TRIGGER IF NOT EXISTS update_genre_on_new_track"
-            " AFTER INSERT ON " + policy::AlbumTrackTable::Name +
+            " AFTER INSERT ON " + AlbumTrack::Table::Name +
             " WHEN new.genre_id IS NOT NULL"
             " BEGIN"
-            " UPDATE " + policy::GenreTable::Name + " SET nb_tracks = nb_tracks + 1 WHERE id_genre = new.genre_id;"
+            " UPDATE " + Genre::Table::Name + " SET nb_tracks = nb_tracks + 1 WHERE id_genre = new.genre_id;"
             " END";
     const std::string onTrackDeleted = "CREATE TRIGGER IF NOT EXISTS update_genre_on_track_deleted"
-            " AFTER DELETE ON " + policy::AlbumTrackTable::Name +
+            " AFTER DELETE ON " + AlbumTrack::Table::Name +
             " WHEN old.genre_id IS NOT NULL"
             " BEGIN"
-            " UPDATE " + policy::GenreTable::Name + " SET nb_tracks = nb_tracks - 1 WHERE id_genre = old.genre_id;"
-            " DELETE FROM " + policy::GenreTable::Name + " WHERE nb_tracks = 0;"
+            " UPDATE " + Genre::Table::Name + " SET nb_tracks = nb_tracks - 1 WHERE id_genre = old.genre_id;"
+            " DELETE FROM " + Genre::Table::Name + " WHERE nb_tracks = 0;"
             " END";
 
     sqlite::Tools::executeRequest( dbConn, vtableInsertTrigger );
@@ -176,7 +173,7 @@ void Genre::createTriggers( sqlite::Connection* dbConn )
 
 std::shared_ptr<Genre> Genre::create( MediaLibraryPtr ml, const std::string& name )
 {
-    static const std::string req = "INSERT INTO " + policy::GenreTable::Name + "(name)"
+    static const std::string req = "INSERT INTO " + Genre::Table::Name + "(name)"
             "VALUES(?)";
     auto self = std::make_shared<Genre>( ml, name );
     if ( insert( ml, self, req, name ) == false )
@@ -186,15 +183,15 @@ std::shared_ptr<Genre> Genre::create( MediaLibraryPtr ml, const std::string& nam
 
 std::shared_ptr<Genre> Genre::fromName( MediaLibraryPtr ml, const std::string& name )
 {
-    static const std::string req = "SELECT * FROM " + policy::GenreTable::Name + " WHERE name = ?";
+    static const std::string req = "SELECT * FROM " + Genre::Table::Name + " WHERE name = ?";
     return fetch( ml, req, name );
 }
 
 Query<IGenre> Genre::search( MediaLibraryPtr ml, const std::string& name,
                              const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::GenreTable::Name + " WHERE id_genre IN "
-            "(SELECT rowid FROM " + policy::GenreTable::Name + "Fts "
+    std::string req = "FROM " + Genre::Table::Name + " WHERE id_genre IN "
+            "(SELECT rowid FROM " + Genre::Table::Name + "Fts "
             "WHERE name MATCH '*' || ? || '*')";
     std::string orderBy = "ORDER BY name";
     if ( params != nullptr && params->desc == true )
@@ -205,7 +202,7 @@ Query<IGenre> Genre::search( MediaLibraryPtr ml, const std::string& name,
 
 Query<IGenre> Genre::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::GenreTable::Name;
+    std::string req = "FROM " + Genre::Table::Name;
     std::string orderBy = " ORDER BY name";
     if ( params != nullptr && params->desc == true )
         orderBy += " DESC";

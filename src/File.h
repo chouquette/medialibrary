@@ -35,20 +35,15 @@ namespace medialibrary
 class File;
 class Media;
 
-namespace policy
-{
-struct FileTable
-{
-    static const std::string Name;
-    static const std::string PrimaryKeyColumn;
-    static int64_t File::*const PrimaryKey;
-};
-}
-
-class File : public IFile, public DatabaseHelpers<File, policy::FileTable>
+class File : public IFile, public DatabaseHelpers<File>
 {
 public:
-
+    struct Table
+    {
+        static const std::string Name;
+        static const std::string PrimaryKeyColumn;
+        static int64_t File::*const PrimaryKey;
+    };
     File( MediaLibraryPtr ml, sqlite::Row& row );
     File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type, const fs::IFile& file, int64_t folderId, bool isRemovable );
     File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type, const std::string& mrl );
@@ -126,7 +121,7 @@ private:
     mutable Cache<std::string> m_fullPath;
     mutable Cache<std::weak_ptr<Media>> m_media;
 
-    friend policy::FileTable;
+    friend File::Table;
 };
 
 }

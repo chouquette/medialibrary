@@ -32,9 +32,9 @@
 namespace medialibrary
 {
 
-const std::string policy::MovieTable::Name = "Movie";
-const std::string policy::MovieTable::PrimaryKeyColumn = "id_movie";
-int64_t Movie::* const policy::MovieTable::PrimaryKey = &Movie::m_id;
+const std::string Movie::Table::Name = "Movie";
+const std::string Movie::Table::PrimaryKeyColumn = "id_movie";
+int64_t Movie::* const Movie::Table::PrimaryKey = &Movie::m_id;
 
 Movie::Movie(MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -64,7 +64,7 @@ const std::string& Movie::shortSummary() const
 
 bool Movie::setShortSummary( const std::string& summary )
 {
-    static const std::string req = "UPDATE " + policy::MovieTable::Name
+    static const std::string req = "UPDATE " + Movie::Table::Name
             + " SET summary = ? WHERE id_movie = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, summary, m_id ) == false )
         return false;
@@ -79,7 +79,7 @@ const std::string& Movie::imdbId() const
 
 bool Movie::setImdbId( const std::string& imdbId )
 {
-    static const std::string req = "UPDATE " + policy::MovieTable::Name
+    static const std::string req = "UPDATE " + Movie::Table::Name
             + " SET imdb_id = ? WHERE id_movie = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, imdbId, m_id ) == false )
         return false;
@@ -89,17 +89,17 @@ bool Movie::setImdbId( const std::string& imdbId )
 
 void Movie::createTable( sqlite::Connection* dbConnection )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::MovieTable::Name
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + Movie::Table::Name
             + "("
                 "id_movie INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "media_id UNSIGNED INTEGER NOT NULL,"
                 "summary TEXT,"
                 "imdb_id TEXT,"
-                "FOREIGN KEY(media_id) REFERENCES " + policy::MediaTable::Name
+                "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
                 + "(id_media) ON DELETE CASCADE"
             ")";
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS movie_media_idx ON " +
-            policy::MovieTable::Name + "(media_id)";
+            Movie::Table::Name + "(media_id)";
     sqlite::Tools::executeRequest( dbConnection, req );
     sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
@@ -107,7 +107,7 @@ void Movie::createTable( sqlite::Connection* dbConnection )
 std::shared_ptr<Movie> Movie::create(MediaLibraryPtr ml, int64_t mediaId )
 {
     auto movie = std::make_shared<Movie>( ml, mediaId );
-    static const std::string req = "INSERT INTO " + policy::MovieTable::Name
+    static const std::string req = "INSERT INTO " + Movie::Table::Name
             + "(media_id) VALUES(?)";
     if ( insert( ml, movie, req, mediaId ) == false )
         return nullptr;
@@ -116,7 +116,7 @@ std::shared_ptr<Movie> Movie::create(MediaLibraryPtr ml, int64_t mediaId )
 
 MoviePtr Movie::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
 {
-    static const std::string req = "SELECT * FROM " + policy::MovieTable::Name + " WHERE media_id = ?";
+    static const std::string req = "SELECT * FROM " + Movie::Table::Name + " WHERE media_id = ?";
     return fetch( ml, req, mediaId );
 }
 

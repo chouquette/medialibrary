@@ -199,51 +199,51 @@ void MediaLibrary::registerEntityHooks()
     if ( m_modificationNotifier == nullptr )
         return;
 
-    m_dbConnection->registerUpdateHook( policy::MediaTable::Name,
+    m_dbConnection->registerUpdateHook( Media::Table::Name,
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
         if ( reason != sqlite::Connection::HookReason::Delete )
             return;
         Media::removeFromCache( rowId );
         m_modificationNotifier->notifyMediaRemoval( rowId );
     });
-    m_dbConnection->registerUpdateHook( policy::ArtistTable::Name,
+    m_dbConnection->registerUpdateHook( Artist::Table::Name,
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
         if ( reason != sqlite::Connection::HookReason::Delete )
             return;
         Artist::removeFromCache( rowId );
         m_modificationNotifier->notifyArtistRemoval( rowId );
     });
-    m_dbConnection->registerUpdateHook( policy::AlbumTable::Name,
+    m_dbConnection->registerUpdateHook( Album::Table::Name,
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
         if ( reason != sqlite::Connection::HookReason::Delete )
             return;
         Album::removeFromCache( rowId );
         m_modificationNotifier->notifyAlbumRemoval( rowId );
     });
-    m_dbConnection->registerUpdateHook( policy::AlbumTrackTable::Name,
+    m_dbConnection->registerUpdateHook( AlbumTrack::Table::Name,
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
         if ( reason != sqlite::Connection::HookReason::Delete )
             return;
         AlbumTrack::removeFromCache( rowId );
         m_modificationNotifier->notifyAlbumTrackRemoval( rowId );
     });
-    m_dbConnection->registerUpdateHook( policy::PlaylistTable::Name,
+    m_dbConnection->registerUpdateHook( Playlist::Table::Name,
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
         if ( reason != sqlite::Connection::HookReason::Delete )
             return;
         Playlist::removeFromCache( rowId );
         m_modificationNotifier->notifyPlaylistRemoval( rowId );
     });
-    m_dbConnection->registerUpdateHook( policy::DeviceTable::Name, &propagateDeletionToCache<Device> );
-    m_dbConnection->registerUpdateHook( policy::FileTable::Name, &propagateDeletionToCache<File> );
-    m_dbConnection->registerUpdateHook( policy::FolderTable::Name, &propagateDeletionToCache<Folder> );
-    m_dbConnection->registerUpdateHook( policy::GenreTable::Name, &propagateDeletionToCache<Genre> );
-    m_dbConnection->registerUpdateHook( policy::LabelTable::Name, &propagateDeletionToCache<Label> );
-    m_dbConnection->registerUpdateHook( policy::MovieTable::Name, &propagateDeletionToCache<Movie> );
-    m_dbConnection->registerUpdateHook( policy::ShowTable::Name, &propagateDeletionToCache<Show> );
-    m_dbConnection->registerUpdateHook( policy::ShowEpisodeTable::Name, &propagateDeletionToCache<ShowEpisode> );
-    m_dbConnection->registerUpdateHook( policy::AudioTrackTable::Name, &propagateDeletionToCache<AudioTrack> );
-    m_dbConnection->registerUpdateHook( policy::VideoTrackTable::Name, &propagateDeletionToCache<VideoTrack> );
+    m_dbConnection->registerUpdateHook( Device::Table::Name, &propagateDeletionToCache<Device> );
+    m_dbConnection->registerUpdateHook( File::Table::Name, &propagateDeletionToCache<File> );
+    m_dbConnection->registerUpdateHook( Folder::Table::Name, &propagateDeletionToCache<Folder> );
+    m_dbConnection->registerUpdateHook( Genre::Table::Name, &propagateDeletionToCache<Genre> );
+    m_dbConnection->registerUpdateHook( Label::Table::Name, &propagateDeletionToCache<Label> );
+    m_dbConnection->registerUpdateHook( Movie::Table::Name, &propagateDeletionToCache<Movie> );
+    m_dbConnection->registerUpdateHook( Show::Table::Name, &propagateDeletionToCache<Show> );
+    m_dbConnection->registerUpdateHook( ShowEpisode::Table::Name, &propagateDeletionToCache<ShowEpisode> );
+    m_dbConnection->registerUpdateHook( AudioTrack::Table::Name, &propagateDeletionToCache<AudioTrack> );
+    m_dbConnection->registerUpdateHook( VideoTrack::Table::Name, &propagateDeletionToCache<VideoTrack> );
 }
 
 bool MediaLibrary::validateSearchPattern( const std::string& pattern )
@@ -499,7 +499,7 @@ void MediaLibrary::addDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
         {
             // Sqlite won't ensure uniqueness for Task with the same (mrl, parent_playlist_id)
             // when parent_playlist_id is null, so we have to ensure of it ourselves
-            const std::string req = "SELECT * FROM " + policy::TaskTable::Name + " "
+            const std::string req = "SELECT * FROM " + parser::Task::Table::Name + " "
                     "WHERE mrl = ? AND parent_playlist_id IS NULL";
             task = parser::Task::fetch( this, req, fileFs->mrl() );
             if ( task != nullptr )
@@ -618,7 +618,7 @@ ArtistPtr MediaLibrary::artist( int64_t id ) const
 
 ArtistPtr MediaLibrary::artist( const std::string& name )
 {
-    static const std::string req = "SELECT * FROM " + policy::ArtistTable::Name
+    static const std::string req = "SELECT * FROM " + Artist::Table::Name
             + " WHERE name = ? AND is_present != 0";
     return Artist::fetch( this, req, name );
 }
@@ -1002,7 +1002,6 @@ void MediaLibrary::migrateModel3to5()
      */
     sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
     auto t = getConn()->newTransaction();
-    using namespace policy;
     // As SQLite do not allow us to remove or add some constraints,
     // we use the method described here https://www.sqlite.org/faq.html#q11
     std::string reqs[] = {
@@ -1019,12 +1018,11 @@ void MediaLibrary::migrateModel3to5()
 
 void MediaLibrary::migrateModel5to6()
 {
-    std::string req = "DELETE FROM " + policy::MediaTable::Name + " WHERE type = ?";
+    std::string req = "DELETE FROM " + Media::Table::Name + " WHERE type = ?";
     sqlite::Tools::executeRequest( getConn(), req, Media::Type::Unknown );
 
     sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
-    using namespace policy;
-    req = "UPDATE " + MediaTable::Name + " SET is_present = 1 WHERE is_present != 0";
+    req = "UPDATE " + Media::Table::Name + " SET is_present = 1 WHERE is_present != 0";
     sqlite::Tools::executeRequest( getConn(), req );
 }
 
@@ -1032,7 +1030,6 @@ void MediaLibrary::migrateModel7to8()
 {
     sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
     auto t = getConn()->newTransaction();
-    using namespace policy;
     std::string reqs[] = {
 #               include "database/migrations/migration7-8.sql"
     };
@@ -1052,10 +1049,10 @@ void MediaLibrary::migrateModel8to9()
     // first application run (after the migration).
     // This could have caused media associated to deleted files not to be
     // deleted as well, so let's do that now.
-    const std::string req = "DELETE FROM " + policy::MediaTable::Name + " "
+    const std::string req = "DELETE FROM " + Media::Table::Name + " "
             "WHERE id_media IN "
-            "(SELECT id_media FROM " + policy::MediaTable::Name + " m LEFT JOIN " +
-                policy::FileTable::Name + " f ON f.media_id = m.id_media "
+            "(SELECT id_media FROM " + Media::Table::Name + " m LEFT JOIN " +
+                File::Table::Name + " f ON f.media_id = m.id_media "
                 "WHERE f.media_id IS NULL)";
 
     // Don't check for the return value, we don't mind if nothing deleted.
@@ -1065,7 +1062,7 @@ void MediaLibrary::migrateModel8to9()
 
 void MediaLibrary::migrateModel9to10()
 {
-    const std::string req = "SELECT * FROM " + policy::FileTable::Name +
+    const std::string req = "SELECT * FROM " + File::Table::Name +
             " WHERE mrl LIKE '%#%%' ESCAPE '#'";
     auto files = File::fetchAll<File>( this, req );
     auto t = getConn()->newTransaction();
@@ -1082,9 +1079,9 @@ void MediaLibrary::migrateModel9to10()
 
 void MediaLibrary::migrateModel10to11()
 {
-    const std::string req = "SELECT * FROM " + policy::TaskTable::Name +
+    const std::string req = "SELECT * FROM " + parser::Task::Table::Name +
             " WHERE mrl LIKE '%#%%' ESCAPE '#'";
-    const std::string folderReq = "SELECT * FROM " + policy::FolderTable::Name +
+    const std::string folderReq = "SELECT * FROM " + Folder::Table::Name +
             " WHERE path LIKE '%#%%' ESCAPE '#'";
     auto tasks = parser::Task::fetchAll<parser::Task>( this, req );
     auto folders = Folder::fetchAll<Folder>( this, folderReq );
@@ -1134,8 +1131,8 @@ void MediaLibrary::migrateModel12to13()
     Artist::createTriggers( getConn(), 13 );
     // Leave the weak context as we now need to update is_present fields, which
     // are propagated through recursive triggers
-    const std::string migrateData = "UPDATE " + policy::AlbumTrackTable::Name +
-            " SET is_present = (SELECT is_present FROM " + policy::MediaTable::Name +
+    const std::string migrateData = "UPDATE " + AlbumTrack::Table::Name +
+            " SET is_present = (SELECT is_present FROM " + Media::Table::Name +
             " WHERE id_media = media_id)";
     sqlite::Tools::executeUpdate( getConn(), migrateData );
     t->commit();
@@ -1151,7 +1148,6 @@ void MediaLibrary::migrateModel13to14()
     auto dbConn = getConn();
     sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
     auto t = dbConn->newTransaction();
-    using namespace policy;
     using ThumbnailType = typename std::underlying_type<Thumbnail::Origin>::type;
     std::string reqs[] = {
 #               include "database/migrations/migration13-14.sql"
@@ -1311,7 +1307,7 @@ bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
 
 Query<IFolder> MediaLibrary::entryPoints() const
 {
-    static const std::string req = "FROM " + policy::FolderTable::Name + " WHERE parent_id IS NULL"
+    static const std::string req = "FROM " + Folder::Table::Name + " WHERE parent_id IS NULL"
             " AND is_blacklisted = 0";
     return make_query<Folder, IFolder>( this, "*", req, "" );
 }

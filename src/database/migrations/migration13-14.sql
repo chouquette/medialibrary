@@ -1,5 +1,5 @@
 /******************* Migrate Media table **************************************/
-"CREATE TEMPORARY TABLE " + MediaTable::Name + "_backup("
+"CREATE TEMPORARY TABLE " + Media::Table::Name + "_backup("
     "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
     "type INTEGER,"
     "subtype INTEGER,"
@@ -15,18 +15,18 @@
     "is_present BOOLEAN NOT NULL DEFAULT 1"
 ")",
 
-"INSERT INTO " + MediaTable::Name + "_backup SELECT * FROM " + MediaTable::Name,
+"INSERT INTO " + Media::Table::Name + "_backup SELECT * FROM " + Media::Table::Name,
 
-"INSERT INTO " + ThumbnailTable::Name + "(id_thumbnail, mrl, origin) "
+"INSERT INTO " + Thumbnail::Table::Name + "(id_thumbnail, mrl, origin) "
     "SELECT id_media, thumbnail, " +
     std::to_string( static_cast<ThumbnailType>( Thumbnail::Origin::UserProvided ) ) +
-    " FROM " + MediaTable::Name + " WHERE thumbnail IS NOT NULL AND thumbnail != ''",
+    " FROM " + Media::Table::Name + " WHERE thumbnail IS NOT NULL AND thumbnail != ''",
 
-"DROP TABLE " + MediaTable::Name,
+"DROP TABLE " + Media::Table::Name,
 
 #include "database/tables/Media_v14.sql"
 
-"INSERT INTO " + MediaTable::Name + "("
+"INSERT INTO " + Media::Table::Name + "("
     "id_media, type, subtype, duration, play_count, last_played_date, real_last_played_date, insertion_date,"
     "release_date, thumbnail_id, thumbnail_generated, title, filename, is_favorite,"
     "is_present) "
@@ -38,19 +38,19 @@
     "insertion_date, release_date, "
     "CASE thumbnail WHEN NULL THEN 0 WHEN '' THEN 0 ELSE id_media END,"
     "CASE thumbnail WHEN NULL THEN 0 WHEN '' THEN 0 ELSE 1 END,"
-    "title, filename, is_favorite, is_present FROM " + MediaTable::Name + "_backup",
+    "title, filename, is_favorite, is_present FROM " + Media::Table::Name + "_backup",
 
-"DROP TABLE " + MediaTable::Name + "_backup",
+"DROP TABLE " + Media::Table::Name + "_backup",
 
 /******************* Populate new media.nb_playlists **************************/
 
-"UPDATE " + MediaTable::Name + " SET nb_playlists = "
+"UPDATE " + Media::Table::Name + " SET nb_playlists = "
 "(SELECT COUNT(media_id) FROM PlaylistMediaRelation WHERE media_id = id_media )"
 "WHERE id_media IN (SELECT media_id FROM PlaylistMediaRelation)",
 
 /************ Playlist external media were stored as Unknown ******************/
 
-"UPDATE " + policy::MediaTable::Name + " SET type = " +
+"UPDATE " + Media::Table::Name + " SET type = " +
 std::to_string( static_cast<typename std::underlying_type<IMedia::Type>::type>(
             IMedia::Type::External ) ) + " "
 "WHERE nb_playlists > 0 AND "
@@ -58,34 +58,34 @@ std::to_string( static_cast<typename std::underlying_type<IMedia::Type>::type>(
 IMedia::Type::Unknown ) ),
 
 /******************* Migrate metadata table ***********************************/
-"CREATE TEMPORARY TABLE " + MetadataTable::Name + "_backup"
+"CREATE TEMPORARY TABLE " + Metadata::Table::Name + "_backup"
 "("
     "id_media INTEGER,"
     "type INTEGER,"
     "value TEXT"
 ")",
 
-"INSERT INTO " + MetadataTable::Name + "_backup SELECT * FROM MediaMetadata",
+"INSERT INTO " + Metadata::Table::Name + "_backup SELECT * FROM MediaMetadata",
 
 "DROP TABLE MediaMetadata",
 
 // Recreate the new table
 #include "database/tables/Metadata_v14.sql"
 
-"INSERT INTO " + MetadataTable::Name + " "
+"INSERT INTO " + Metadata::Table::Name + " "
 "SELECT "
     "id_media, " + std::to_string(
         static_cast<typename std::underlying_type<IMetadata::EntityType>::type>(
             IMetadata::EntityType::Media ) ) +
     ", type, value "
-"FROM " + MetadataTable::Name + "_backup",
+"FROM " + Metadata::Table::Name + "_backup",
 
-"DROP TABLE " + MetadataTable::Name + "_backup",
+"DROP TABLE " + Metadata::Table::Name + "_backup",
 
 /******************* Migrate the playlist table *******************************/
-"CREATE TEMPORARY TABLE " + PlaylistTable::Name + "_backup"
+"CREATE TEMPORARY TABLE " + Playlist::Table::Name + "_backup"
 "("
-    + PlaylistTable::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+    + Playlist::Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
     "name TEXT,"
     "file_id UNSIGNED INT DEFAULT NULL,"
     "creation_date UNSIGNED INT NOT NULL,"
@@ -99,24 +99,24 @@ IMedia::Type::Unknown ) ),
     "position INTEGER"
 ")",
 
-"INSERT INTO " + PlaylistTable::Name + "_backup SELECT * FROM " + PlaylistTable::Name,
+"INSERT INTO " + Playlist::Table::Name + "_backup SELECT * FROM " + Playlist::Table::Name,
 "INSERT INTO PlaylistMediaRelation_backup SELECT * FROM PlaylistMediaRelation",
 
-"DROP TABLE " + PlaylistTable::Name,
+"DROP TABLE " + Playlist::Table::Name,
 "DROP TABLE PlaylistMediaRelation",
 
 #include "database/tables/Playlist_v14.sql"
 
-"INSERT INTO " + PlaylistTable::Name + " SELECT * FROM " + PlaylistTable::Name + "_backup",
+"INSERT INTO " + Playlist::Table::Name + " SELECT * FROM " + Playlist::Table::Name + "_backup",
 "INSERT INTO PlaylistMediaRelation SELECT media_id, NULL, playlist_id, position "
     "FROM PlaylistMediaRelation_backup",
 
-"DROP TABLE " + PlaylistTable::Name + "_backup",
+"DROP TABLE " + Playlist::Table::Name + "_backup",
 "DROP TABLE PlaylistMediaRelation_backup",
 
 /******************* Migrate Device table *************************************/
 
-"CREATE TEMPORARY TABLE " + policy::DeviceTable::Name + "_backup"
+"CREATE TEMPORARY TABLE " + Device::Table::Name + "_backup"
 "("
     "id_device INTEGER PRIMARY KEY AUTOINCREMENT,"
     "uuid TEXT UNIQUE ON CONFLICT FAIL,"
@@ -125,30 +125,30 @@ IMedia::Type::Unknown ) ),
     "is_present BOOLEAN"
 ")",
 
-"INSERT INTO " + DeviceTable::Name + "_backup SELECT * FROM " + DeviceTable::Name,
+"INSERT INTO " + Device::Table::Name + "_backup SELECT * FROM " + Device::Table::Name,
 
-"DROP TABLE " + DeviceTable::Name,
+"DROP TABLE " + Device::Table::Name,
 
 #include "database/tables/Device_v14.sql"
 
-"INSERT INTO " + DeviceTable::Name + " SELECT id_device, uuid, scheme, is_removable, is_present,"
-    "strftime('%s', 'now') FROM " + DeviceTable::Name,
+"INSERT INTO " + Device::Table::Name + " SELECT id_device, uuid, scheme, is_removable, is_present,"
+    "strftime('%s', 'now') FROM " + Device::Table::Name,
 
-"DROP TABLE " + DeviceTable::Name + "_backup",
+"DROP TABLE " + Device::Table::Name + "_backup",
 
 /******************* Delete other tables **************************************/
 
-"DROP TABLE " + AlbumTable::Name,
-"DELETE FROM " + AlbumTable::Name + "Fts",
-"DROP TABLE " + ArtistTable::Name,
-"DELETE FROM " + ArtistTable::Name + "Fts",
+"DROP TABLE " + Album::Table::Name,
+"DELETE FROM " + Album::Table::Name + "Fts",
+"DROP TABLE " + Artist::Table::Name,
+"DELETE FROM " + Artist::Table::Name + "Fts",
 "DELETE FROM MediaArtistRelation",
-"DROP TABLE " + MovieTable::Name,
-"DROP TABLE " + ShowTable::Name,
+"DROP TABLE " + Movie::Table::Name,
+"DROP TABLE " + Show::Table::Name,
 // No need to delete the ShowFts table since... it didn't exist
-"DROP TABLE " + VideoTrackTable::Name,
+"DROP TABLE " + VideoTrack::Table::Name,
 // Flush the audio track table to recreate all tracks
-"DELETE FROM " + AudioTrackTable::Name,
+"DELETE FROM " + AudioTrack::Table::Name,
 
 // History table & its triggers were removed for good:
 "DROP TABLE History",

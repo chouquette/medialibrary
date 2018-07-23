@@ -1,4 +1,4 @@
-"CREATE TEMPORARY TABLE " + ArtistTable::Name + "_backup("
+"CREATE TEMPORARY TABLE " + Artist::Table::Name + "_backup("
     "id_artist INTEGER PRIMARY KEY AUTOINCREMENT,"
     "name TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
     "shortbio TEXT,"
@@ -8,11 +8,11 @@
     "is_present BOOLEAN NOT NULL DEFAULT 1"
 ")",
 
-"INSERT INTO " + ArtistTable::Name + "_backup SELECT * FROM " + ArtistTable::Name + ";",
+"INSERT INTO " + Artist::Table::Name + "_backup SELECT * FROM " + Artist::Table::Name + ";",
 
-"DROP TABLE " + ArtistTable::Name + ";",
+"DROP TABLE " + Artist::Table::Name + ";",
 
-"CREATE TABLE " + ArtistTable::Name + "("
+"CREATE TABLE " + Artist::Table::Name + "("
     "id_artist INTEGER PRIMARY KEY AUTOINCREMENT,"
     "name TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
     "shortbio TEXT,"
@@ -23,7 +23,7 @@
     "is_present BOOLEAN NOT NULL DEFAULT 1"
 ")",
 
-"INSERT INTO " + ArtistTable::Name + "("
+"INSERT INTO " + Artist::Table::Name + "("
     "id_artist,"
     "name,"
     "shortbio,"
@@ -32,19 +32,19 @@
     "mb_id,"
     "is_present"
 ")"
-" SELECT * FROM " + ArtistTable::Name + "_backup;",
+" SELECT * FROM " + Artist::Table::Name + "_backup;",
 
-"DROP TABLE " + ArtistTable::Name + "_backup;",
+"DROP TABLE " + Artist::Table::Name + "_backup;",
 
-"UPDATE " + ArtistTable::Name + " SET nb_tracks = ("
-    "SELECT COUNT(id_track) FROM " + AlbumTrackTable::Name + " WHERE "
-    "artist_id = " + ArtistTable::Name + ".id_artist"
+"UPDATE " + Artist::Table::Name + " SET nb_tracks = ("
+    "SELECT COUNT(id_track) FROM " + AlbumTrack::Table::Name + " WHERE "
+    "artist_id = " + Artist::Table::Name + ".id_artist"
 ")",
 
-"INSERT INTO " + TaskTable::Name + " (step, retry_count, file_id, parent_folder_id) "
-"SELECT parser_step, parser_retries, id_file, folder_id FROM " + FileTable::Name,
+"INSERT INTO " + parser::Task::Table::Name + " (step, retry_count, file_id, parent_folder_id) "
+"SELECT parser_step, parser_retries, id_file, folder_id FROM " + File::Table::Name,
 
-"CREATE TEMPORARY TABLE " + FileTable::Name + "_backup("
+"CREATE TEMPORARY TABLE " + File::Table::Name + "_backup("
   "id_file INTEGER PRIMARY KEY AUTOINCREMENT,"
   "media_id INT NOT NULL,"
   "playlist_id UNSIGNED INT DEFAULT NULL,"
@@ -58,16 +58,16 @@
   "is_present BOOLEAN NOT NULL DEFAULT 1,"
   "is_removable BOOLEAN NOT NULL,"
   "is_external BOOLEAN NOT NULL,"
-  "FOREIGN KEY (media_id) REFERENCES " + MediaTable::Name + "(id_media) ON DELETE CASCADE,"
-  "FOREIGN KEY (playlist_id) REFERENCES " + PlaylistTable::Name + "(id_playlist) ON DELETE CASCADE,"
-  "FOREIGN KEY (folder_id) REFERENCES " + FolderTable::Name + "(id_folder) ON DELETE CASCADE,"
+  "FOREIGN KEY (media_id) REFERENCES " + Media::Table::Name + "(id_media) ON DELETE CASCADE,"
+  "FOREIGN KEY (playlist_id) REFERENCES " + Playlist::Table::Name + "(id_playlist) ON DELETE CASCADE,"
+  "FOREIGN KEY (folder_id) REFERENCES " + Folder::Table::Name + "(id_folder) ON DELETE CASCADE,"
   "UNIQUE( mrl, folder_id ) ON CONFLICT FAIL);",
 
-"INSERT INTO " + FileTable::Name + "_backup SELECT * FROM " + FileTable::Name + ";",
+"INSERT INTO " + File::Table::Name + "_backup SELECT * FROM " + File::Table::Name + ";",
 
-"DROP TABLE " + FileTable::Name + ";",
+"DROP TABLE " + File::Table::Name + ";",
 
-"CREATE TABLE " + FileTable::Name + "(id_file INTEGER PRIMARY KEY AUTOINCREMENT,"
+"CREATE TABLE " + File::Table::Name + "(id_file INTEGER PRIMARY KEY AUTOINCREMENT,"
                   "media_id UNSIGNED INT DEFAULT NULL,"
                   "playlist_id UNSIGNED INT DEFAULT NULL,"
                   "mrl TEXT,"
@@ -79,17 +79,17 @@
                   "is_present BOOLEAN NOT NULL DEFAULT 1,"
                   "is_removable BOOLEAN NOT NULL,"
                   "is_external BOOLEAN NOT NULL,"
-  "FOREIGN KEY (media_id) REFERENCES " + MediaTable::Name + "(id_media) ON DELETE CASCADE,"
-  "FOREIGN KEY (playlist_id) REFERENCES " + PlaylistTable::Name + "(id_playlist) ON DELETE CASCADE,"
-  "FOREIGN KEY (folder_id) REFERENCES " + FolderTable::Name + "(id_folder) ON DELETE CASCADE,"
+  "FOREIGN KEY (media_id) REFERENCES " + Media::Table::Name + "(id_media) ON DELETE CASCADE,"
+  "FOREIGN KEY (playlist_id) REFERENCES " + Playlist::Table::Name + "(id_playlist) ON DELETE CASCADE,"
+  "FOREIGN KEY (folder_id) REFERENCES " + Folder::Table::Name + "(id_folder) ON DELETE CASCADE,"
   "UNIQUE( mrl, folder_id ) ON CONFLICT FAIL);",
 
-"INSERT INTO " + FileTable::Name + "("
+"INSERT INTO " + File::Table::Name + "("
     "id_file, media_id, playlist_id, mrl, type, last_modification_date, size, folder_id,"
     "is_present, is_removable, is_external)"
  " SELECT "
     "id_file, media_id, playlist_id, mrl, type, last_modification_date, size, folder_id,"
     "is_present, is_removable, is_external"
- " FROM " + FileTable::Name + "_backup;",
+ " FROM " + File::Table::Name + "_backup;",
 
-"DROP TABLE " + FileTable::Name + "_backup;",
+"DROP TABLE " + File::Table::Name + "_backup;",

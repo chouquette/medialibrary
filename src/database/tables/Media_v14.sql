@@ -1,4 +1,4 @@
-"CREATE TABLE IF NOT EXISTS " + policy::MediaTable::Name + "("
+"CREATE TABLE IF NOT EXISTS " + Media::Table::Name + "("
     "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
     "type INTEGER,"
     "subtype INTEGER NOT NULL DEFAULT " +
@@ -18,15 +18,15 @@
     "is_present BOOLEAN NOT NULL DEFAULT 1,"
     "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
 
-    "FOREIGN KEY(thumbnail_id) REFERENCES " + policy::ThumbnailTable::Name
+    "FOREIGN KEY(thumbnail_id) REFERENCES " + Thumbnail::Table::Name
     + "(id_thumbnail)"
 ")",
 
-"CREATE INDEX IF NOT EXISTS media_types_idx ON " + policy::MediaTable::Name +
+"CREATE INDEX IF NOT EXISTS media_types_idx ON " + Media::Table::Name +
     "(type, subtype)",
 
 "CREATE VIRTUAL TABLE IF NOT EXISTS "
-    + policy::MediaTable::Name + "Fts USING FTS3("
+    + Media::Table::Name + "Fts USING FTS3("
     "title,"
     "labels"
 ")",

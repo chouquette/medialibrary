@@ -1,4 +1,4 @@
-"CREATE TABLE IF NOT EXISTS " + policy::FolderTable::Name +
+"CREATE TABLE IF NOT EXISTS " + Folder::Table::Name +
 "("
     "id_folder INTEGER PRIMARY KEY AUTOINCREMENT,"
     "path TEXT,"
@@ -8,23 +8,23 @@
     "is_present BOOLEAN NOT NULL DEFAULT 1,"
     "is_removable BOOLEAN NOT NULL,"
 
-    "FOREIGN KEY (parent_id) REFERENCES " + policy::FolderTable::Name +
+    "FOREIGN KEY (parent_id) REFERENCES " + Folder::Table::Name +
     "(id_folder) ON DELETE CASCADE,"
 
-    "FOREIGN KEY (device_id) REFERENCES " + policy::DeviceTable::Name +
+    "FOREIGN KEY (device_id) REFERENCES " + Device::Table::Name +
     "(id_device) ON DELETE CASCADE,"
 
     "UNIQUE(path, device_id) ON CONFLICT FAIL"
 ")",
 
-"CREATE INDEX IF NOT EXISTS folder_device_id ON " + policy::FolderTable::Name +
+"CREATE INDEX IF NOT EXISTS folder_device_id ON " + Folder::Table::Name +
     "(device_id)",
 
 "CREATE TABLE IF NOT EXISTS ExcludedEntryFolder"
 "("
     "folder_id UNSIGNED INTEGER NOT NULL,"
 
-    "FOREIGN KEY (folder_id) REFERENCES " + policy::FolderTable::Name +
+    "FOREIGN KEY (folder_id) REFERENCES " + Folder::Table::Name +
     "(id_folder) ON DELETE CASCADE,"
 
     "UNIQUE(folder_id) ON CONFLICT FAIL"

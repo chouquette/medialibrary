@@ -123,7 +123,7 @@ public:
 
 }
 
-template <typename IMPL, typename TABLEPOLICY, typename CACHEPOLICY = cachepolicy::Cached<IMPL>>
+template <typename IMPL, typename CACHEPOLICY = cachepolicy::Cached<IMPL>>
 class DatabaseHelpers
 {
     public:
@@ -145,8 +145,8 @@ class DatabaseHelpers
 
         static std::shared_ptr<IMPL> fetch( MediaLibraryPtr ml, int64_t pkValue )
         {
-            static std::string req = "SELECT * FROM " + TABLEPOLICY::Name + " WHERE " +
-                    TABLEPOLICY::PrimaryKeyColumn + " = ?";
+            static std::string req = "SELECT * FROM " + IMPL::Table::Name + " WHERE " +
+                    IMPL::Table::PrimaryKeyColumn + " = ?";
             try
             {
                 return sqlite::Tools::fetchOne<IMPL>( ml, req, pkValue );
@@ -165,7 +165,7 @@ class DatabaseHelpers
         template <typename INTF = IMPL>
         static std::vector<std::shared_ptr<INTF>> fetchAll( MediaLibraryPtr ml )
         {
-            static const std::string req = "SELECT * FROM " + TABLEPOLICY::Name;
+            static const std::string req = "SELECT * FROM " + IMPL::Table::Name;
             try
             {
                 return sqlite::Tools::fetchAll<IMPL, INTF>( ml, req );
@@ -210,14 +210,14 @@ class DatabaseHelpers
 
         static bool destroy( MediaLibraryPtr ml, int64_t pkValue )
         {
-            static const std::string req = "DELETE FROM " + TABLEPOLICY::Name + " WHERE "
-                    + TABLEPOLICY::PrimaryKeyColumn + " = ?";
+            static const std::string req = "DELETE FROM " + IMPL::Table::Name + " WHERE "
+                    + IMPL::Table::PrimaryKeyColumn + " = ?";
             return sqlite::Tools::executeDelete( ml->getConn(), req, pkValue );
         }
 
         static bool deleteAll( MediaLibraryPtr ml )
         {
-            static const std::string req = "DELETE FROM " + TABLEPOLICY::Name;
+            static const std::string req = "DELETE FROM " + IMPL::Table::Name;
             return sqlite::Tools::executeDelete( ml->getConn(), req );
         }
 
@@ -250,7 +250,7 @@ class DatabaseHelpers
             int64_t pKey = sqlite::Tools::executeInsert( ml->getConn(), req, std::forward<Args>( args )... );
             if ( pKey == 0 )
                 return false;
-            (self.get())->*TABLEPOLICY::PrimaryKey = pKey;
+            (self.get())->*IMPL::Table::PrimaryKey = pKey;
             auto l = CACHEPOLICY::lock();
             CACHEPOLICY::insert( pKey, self );
             return true;

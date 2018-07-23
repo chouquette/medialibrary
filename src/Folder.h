@@ -41,22 +41,18 @@ namespace fs
     class IDirectory;
 }
 
-namespace policy
-{
-struct FolderTable
-{
-    static const std::string Name;
-    static const std::string PrimaryKeyColumn;
-    static int64_t Folder::*const PrimaryKey;
-};
-}
-
 // This doesn't publicly expose the DatabaseHelper inheritance in order to force
 // the user to go through Folder's overloads, as they take care of the device mountpoint
 // fetching & path composition
-class Folder : public IFolder, public DatabaseHelpers<Folder, policy::FolderTable>
+class Folder : public IFolder, public DatabaseHelpers<Folder>
 {
 public:
+    struct Table
+    {
+        static const std::string Name;
+        static const std::string PrimaryKeyColumn;
+        static int64_t Folder::*const PrimaryKey;
+    };
     Folder( MediaLibraryPtr ml, sqlite::Row& row );
     Folder(MediaLibraryPtr ml, const std::string& path, int64_t parent , int64_t deviceId , bool isRemovable );
 
@@ -109,7 +105,7 @@ private:
     // as its part of the mountpoint
     mutable std::string m_fullPath;
 
-    friend struct policy::FolderTable;
+    friend struct Folder::Table;
 };
 
 }

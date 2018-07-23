@@ -32,9 +32,9 @@
 namespace medialibrary
 {
 
-const std::string policy::AudioTrackTable::Name = "AudioTrack";
-const std::string policy::AudioTrackTable::PrimaryKeyColumn  = "id_track";
-int64_t AudioTrack::* const policy::AudioTrackTable::PrimaryKey = &AudioTrack::m_id;
+const std::string AudioTrack::Table::Name = "AudioTrack";
+const std::string AudioTrack::Table::PrimaryKeyColumn  = "id_track";
+int64_t AudioTrack::* const AudioTrack::Table::PrimaryKey = &AudioTrack::m_id;
 
 AudioTrack::AudioTrack( MediaLibraryPtr, sqlite::Row& row )
 {
@@ -100,9 +100,9 @@ const std::string& AudioTrack::description() const
 void AudioTrack::createTable( sqlite::Connection* dbConnection )
 {
     //FIXME: Index on media_id ? Unless it's already implied by the foreign key
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AudioTrackTable::Name
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + AudioTrack::Table::Name
             + "(" +
-                policy::AudioTrackTable::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                AudioTrack::Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "codec TEXT,"
                 "bitrate UNSIGNED INTEGER,"
                 "samplerate UNSIGNED INTEGER,"
@@ -110,11 +110,11 @@ void AudioTrack::createTable( sqlite::Connection* dbConnection )
                 "language TEXT,"
                 "description TEXT,"
                 "media_id UNSIGNED INT,"
-                "FOREIGN KEY ( media_id ) REFERENCES " + policy::MediaTable::Name
+                "FOREIGN KEY ( media_id ) REFERENCES " + Media::Table::Name
                     + "( id_media ) ON DELETE CASCADE"
             ")";
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS audio_track_media_idx ON " +
-            policy::AudioTrackTable::Name + "(media_id)";
+            AudioTrack::Table::Name + "(media_id)";
     sqlite::Tools::executeRequest( dbConnection, req );
     sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
@@ -123,7 +123,7 @@ std::shared_ptr<AudioTrack> AudioTrack::create( MediaLibraryPtr ml, const std::s
                                                 unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels,
                                                 const std::string& language, const std::string& desc, int64_t mediaId )
 {
-    static const std::string req = "INSERT INTO " + policy::AudioTrackTable::Name
+    static const std::string req = "INSERT INTO " + AudioTrack::Table::Name
             + "(codec, bitrate, samplerate, nb_channels, language, description, media_id) VALUES(?, ?, ?, ?, ?, ?, ?)";
     auto track = std::make_shared<AudioTrack>( ml, codec, bitrate, sampleRate, nbChannels, language, desc, mediaId );
     if ( insert( ml, track, req, codec, bitrate, sampleRate, nbChannels, language, desc, mediaId ) == false )

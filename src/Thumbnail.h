@@ -32,19 +32,16 @@ class Thumbnail;
 template <typename T>
 class Cache;
 
-namespace policy
-{
-struct ThumbnailTable
-{
-    static const std::string Name;
-    static const std::string PrimaryKeyColumn;
-    static int64_t Thumbnail::*const PrimaryKey;
-};
-}
-
-class Thumbnail : public DatabaseHelpers<Thumbnail, policy::ThumbnailTable>
+class Thumbnail : public DatabaseHelpers<Thumbnail>
 {
 public:
+    struct Table
+    {
+        static const std::string Name;
+        static const std::string PrimaryKeyColumn;
+        static int64_t Thumbnail::*const PrimaryKey;
+    };
+
     enum class Origin : uint8_t
     {
         Artist,
@@ -86,7 +83,7 @@ private:
     std::string m_mrl;
     Origin m_origin;
 
-    friend policy::ThumbnailTable;
+    friend Thumbnail::Table;
 };
 
 }

@@ -35,19 +35,15 @@ namespace medialibrary
 class Media;
 class Label;
 
-namespace policy
-{
-struct LabelTable
-{
-    static const std::string Name;
-    static const std::string PrimaryKeyColumn;
-    static int64_t Label::*const PrimaryKey;
-};
-}
-
-class Label : public ILabel, public DatabaseHelpers<Label, policy::LabelTable>
+class Label : public ILabel, public DatabaseHelpers<Label>
 {
     public:
+        struct Table
+        {
+            static const std::string Name;
+            static const std::string PrimaryKeyColumn;
+            static int64_t Label::*const PrimaryKey;
+        };
         Label( MediaLibraryPtr ml, sqlite::Row& row );
         Label( MediaLibraryPtr ml, const std::string& name );
 
@@ -65,7 +61,7 @@ class Label : public ILabel, public DatabaseHelpers<Label, policy::LabelTable>
         int64_t m_id;
         std::string m_name;
 
-        friend struct policy::LabelTable;
+        friend struct Label::Table;
 };
 
 }

@@ -28,19 +28,19 @@
 " END",
 
 "CREATE TRIGGER IF NOT EXISTS insert_playlist_fts AFTER INSERT ON "
-+ policy::PlaylistTable::Name +
++ Playlist::Table::Name +
 " BEGIN"
-    " INSERT INTO " + policy::PlaylistTable::Name + "Fts(rowid, name) VALUES(new.id_playlist, new.name);"
+    " INSERT INTO " + Playlist::Table::Name + "Fts(rowid, name) VALUES(new.id_playlist, new.name);"
 " END",
 
 "CREATE TRIGGER IF NOT EXISTS update_playlist_fts AFTER UPDATE OF name"
-" ON " + policy::PlaylistTable::Name +
+" ON " + Playlist::Table::Name +
 " BEGIN"
-    " UPDATE " + policy::PlaylistTable::Name + "Fts SET name = new.name WHERE rowid = new.id_playlist;"
+    " UPDATE " + Playlist::Table::Name + "Fts SET name = new.name WHERE rowid = new.id_playlist;"
 " END",
 
 "CREATE TRIGGER IF NOT EXISTS delete_playlist_fts BEFORE DELETE ON "
-+ policy::PlaylistTable::Name +
++ Playlist::Table::Name +
 " BEGIN"
-" DELETE FROM " + policy::PlaylistTable::Name + "Fts WHERE rowid = old.id_playlist;"
+" DELETE FROM " + Playlist::Table::Name + "Fts WHERE rowid = old.id_playlist;"
 " END",

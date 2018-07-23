@@ -36,9 +36,9 @@
 namespace medialibrary
 {
 
-const std::string policy::LabelTable::Name = "Label";
-const std::string policy::LabelTable::PrimaryKeyColumn = "id_label";
-int64_t Label::* const policy::LabelTable::PrimaryKey = &Label::m_id;
+const std::string Label::Table::Name = "Label";
+const std::string Label::Table::PrimaryKeyColumn = "id_label";
+int64_t Label::* const Label::Table::PrimaryKey = &Label::m_id;
 
 Label::Label(MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -66,7 +66,7 @@ const std::string& Label::name() const
 
 Query<IMedia> Label::media()
 {
-    static const std::string req = "FROM " + policy::MediaTable::Name + " f "
+    static const std::string req = "FROM " + Media::Table::Name + " f "
             "INNER JOIN LabelFileRelation lfr ON lfr.media_id = f.id_media "
             "WHERE lfr.label_id = ?";
     return make_query<Media, IMedia>( m_ml, "f.*", req, "", m_id );
@@ -83,7 +83,7 @@ LabelPtr Label::create( MediaLibraryPtr ml, const std::string& name )
 
 void Label::createTable( sqlite::Connection* dbConnection )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::LabelTable::Name + "("
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + Label::Table::Name + "("
                 "id_label INTEGER PRIMARY KEY AUTOINCREMENT, "
                 "name TEXT UNIQUE ON CONFLICT FAIL"
             ")";
@@ -101,9 +101,9 @@ void Label::createTable( sqlite::Connection* dbConnection )
 void Label::createTriggers( sqlite::Connection* dbConnection )
 {
     const std::string ftsTrigger = "CREATE TRIGGER IF NOT EXISTS delete_label_fts "
-            "BEFORE DELETE ON " + policy::LabelTable::Name +
+            "BEFORE DELETE ON " + Label::Table::Name +
             " BEGIN"
-            " UPDATE " + policy::MediaTable::Name + "Fts SET labels = TRIM(REPLACE(labels, old.name, ''))"
+            " UPDATE " + Media::Table::Name + "Fts SET labels = TRIM(REPLACE(labels, old.name, ''))"
             " WHERE labels MATCH old.name;"
             " END";
     sqlite::Tools::executeRequest( dbConnection, ftsTrigger );

@@ -35,9 +35,9 @@
 namespace medialibrary
 {
 
-const std::string policy::ArtistTable::Name = "Artist";
-const std::string policy::ArtistTable::PrimaryKeyColumn = "id_artist";
-int64_t Artist::*const policy::ArtistTable::PrimaryKey = &Artist::m_id;
+const std::string Artist::Table::Name = "Artist";
+const std::string Artist::Table::PrimaryKeyColumn = "id_artist";
+int64_t Artist::*const Artist::Table::PrimaryKey = &Artist::m_id;
 
 Artist::Artist( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -80,7 +80,7 @@ const std::string& Artist::shortBio() const
 
 bool Artist::setShortBio(const std::string& shortBio)
 {
-    static const std::string req = "UPDATE " + policy::ArtistTable::Name
+    static const std::string req = "UPDATE " + Artist::Table::Name
             + " SET shortbio = ? WHERE id_artist = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, shortBio, m_id ) == false )
         return false;
@@ -101,7 +101,7 @@ Query<IAlbum> Artist::searchAlbums( const std::string& pattern,
 
 Query<IMedia> Artist::tracks( const QueryParameters* params ) const
 {
-    std::string req = "FROM " + policy::MediaTable::Name + " med ";
+    std::string req = "FROM " + Media::Table::Name + " med ";
 
     SortingCriteria sort = params != nullptr ? params->sort : SortingCriteria::Default;
     bool desc = params != nullptr ? params->desc : false;
@@ -210,7 +210,7 @@ bool Artist::setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin ori
     m_thumbnail = Thumbnail::create( m_ml, artworkMrl, Thumbnail::Origin::Artist );
     if ( m_thumbnail.get() == nullptr )
         return false;
-    static const std::string req = "UPDATE " + policy::ArtistTable::Name +
+    static const std::string req = "UPDATE " + Artist::Table::Name +
             " SET thumbnail_id = ? WHERE id_artist = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_thumbnail.get()->id(), m_id ) == false )
         return false;
@@ -225,7 +225,7 @@ bool Artist::updateNbAlbum( int increment )
     assert( increment != 0 );
     assert( increment > 0 || ( increment < 0 && m_nbAlbums >= 1 ) );
 
-    static const std::string req = "UPDATE " + policy::ArtistTable::Name +
+    static const std::string req = "UPDATE " + Artist::Table::Name +
             " SET nb_albums = nb_albums + ? WHERE id_artist = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, increment, m_id ) == false )
         return false;
@@ -237,7 +237,7 @@ bool Artist::updateNbTrack(int increment)
 {
     assert( increment != 0 );
     assert( increment > 0 || ( increment < 0 && m_nbTracks >= 1 ) );
-    static const std::string req = "UPDATE " + policy::ArtistTable::Name +
+    static const std::string req = "UPDATE " + Artist::Table::Name +
             " SET nb_tracks = nb_tracks + ? WHERE id_artist = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, increment, m_id ) == false )
         return false;
@@ -247,7 +247,7 @@ bool Artist::updateNbTrack(int increment)
 
 std::shared_ptr<Album> Artist::unknownAlbum()
 {
-    static const std::string req = "SELECT * FROM " + policy::AlbumTable::Name +
+    static const std::string req = "SELECT * FROM " + Album::Table::Name +
                         " WHERE artist_id = ? AND title IS NULL";
     auto album = Album::fetch( m_ml, req, m_id );
     if ( album == nullptr )
@@ -271,7 +271,7 @@ const std::string& Artist::musicBrainzId() const
 
 bool Artist::setMusicBrainzId( const std::string& mbId )
 {
-    static const std::string req = "UPDATE " + policy::ArtistTable::Name
+    static const std::string req = "UPDATE " + Artist::Table::Name
             + " SET mb_id = ? WHERE id_artist = ?";
     if ( mbId == m_mbId )
         return true;
@@ -294,7 +294,7 @@ unsigned int Artist::nbTracks() const
 void Artist::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " +
-            policy::ArtistTable::Name +
+            Artist::Table::Name +
             "("
                 "id_artist INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "name TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
@@ -304,20 +304,20 @@ void Artist::createTable( sqlite::Connection* dbConnection )
                 "nb_tracks UNSIGNED INT DEFAULT 0,"
                 "mb_id TEXT,"
                 "is_present BOOLEAN NOT NULL DEFAULT 1,"
-                "FOREIGN KEY(thumbnail_id) REFERENCES " + policy::ThumbnailTable::Name
+                "FOREIGN KEY(thumbnail_id) REFERENCES " + Thumbnail::Table::Name
                 + "(id_thumbnail)"
             ")";
     const std::string reqRel = "CREATE TABLE IF NOT EXISTS MediaArtistRelation("
                 "media_id INTEGER NOT NULL,"
                 "artist_id INTEGER,"
                 "PRIMARY KEY (media_id, artist_id),"
-                "FOREIGN KEY(media_id) REFERENCES " + policy::MediaTable::Name +
+                "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name +
                 "(id_media) ON DELETE CASCADE,"
-                "FOREIGN KEY(artist_id) REFERENCES " + policy::ArtistTable::Name + "("
-                    + policy::ArtistTable::PrimaryKeyColumn + ") ON DELETE CASCADE"
+                "FOREIGN KEY(artist_id) REFERENCES " + Artist::Table::Name + "("
+                    + Artist::Table::PrimaryKeyColumn + ") ON DELETE CASCADE"
             ")";
     const std::string reqFts = "CREATE VIRTUAL TABLE IF NOT EXISTS " +
-                policy::ArtistTable::Name + "Fts USING FTS3("
+                Artist::Table::Name + "Fts USING FTS3("
                 "name"
             ")";
     sqlite::Tools::executeRequest( dbConnection, req );
@@ -328,11 +328,11 @@ void Artist::createTable( sqlite::Connection* dbConnection )
 void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion )
 {
     static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS has_album_present AFTER UPDATE OF "
-            "is_present ON " + policy::AlbumTable::Name +
+            "is_present ON " + Album::Table::Name +
             " BEGIN "
-            " UPDATE " + policy::ArtistTable::Name + " SET is_present="
+            " UPDATE " + Artist::Table::Name + " SET is_present="
                 "(SELECT EXISTS("
-                    "SELECT id_album FROM " + policy::AlbumTable::Name +
+                    "SELECT id_album FROM " + Album::Table::Name +
                     " WHERE artist_id=new.artist_id AND is_present != 0 LIMIT 1"
                 ") )"
                 "WHERE id_artist=new.artist_id;"
@@ -343,10 +343,10 @@ void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelV
     // The alternative would be to always check the special artists for existence, which would be much
     // slower when inserting an unknown artist album
     static const std::string autoDeleteAlbumTriggerReq = "CREATE TRIGGER IF NOT EXISTS has_album_remaining"
-            " AFTER DELETE ON " + policy::AlbumTable::Name +
+            " AFTER DELETE ON " + Album::Table::Name +
             " BEGIN"
-            " UPDATE " + policy::ArtistTable::Name + " SET nb_albums = nb_albums - 1 WHERE id_artist = old.artist_id;"
-            " DELETE FROM " + policy::ArtistTable::Name + " WHERE id_artist = old.artist_id "
+            " UPDATE " + Artist::Table::Name + " SET nb_albums = nb_albums - 1 WHERE id_artist = old.artist_id;"
+            " DELETE FROM " + Artist::Table::Name + " WHERE id_artist = old.artist_id "
             " AND nb_albums = 0 "
             " AND nb_tracks = 0 "
             " AND old.artist_id != " + std::to_string( UnknownArtistID ) +
@@ -354,10 +354,10 @@ void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelV
             " END";
 
     static const std::string autoDeleteTrackTriggerReq = "CREATE TRIGGER IF NOT EXISTS has_track_remaining"
-            " AFTER DELETE ON " + policy::AlbumTrackTable::Name +
+            " AFTER DELETE ON " + AlbumTrack::Table::Name +
             " BEGIN"
-            " UPDATE " + policy::ArtistTable::Name + " SET nb_tracks = nb_tracks - 1 WHERE id_artist = old.artist_id;"
-            " DELETE FROM " + policy::ArtistTable::Name + " WHERE id_artist = old.artist_id "
+            " UPDATE " + Artist::Table::Name + " SET nb_tracks = nb_tracks - 1 WHERE id_artist = old.artist_id;"
+            " DELETE FROM " + Artist::Table::Name + " WHERE id_artist = old.artist_id "
             " AND nb_albums = 0 "
             " AND nb_tracks = 0 "
             " AND old.artist_id != " + std::to_string( UnknownArtistID ) +
@@ -365,16 +365,16 @@ void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelV
             " END";
 
     static const std::string ftsInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_artist_fts"
-            " AFTER INSERT ON " + policy::ArtistTable::Name +
+            " AFTER INSERT ON " + Artist::Table::Name +
             " WHEN new.name IS NOT NULL"
             " BEGIN"
-            " INSERT INTO " + policy::ArtistTable::Name + "Fts(rowid,name) VALUES(new.id_artist, new.name);"
+            " INSERT INTO " + Artist::Table::Name + "Fts(rowid,name) VALUES(new.id_artist, new.name);"
             " END";
     static const std::string ftsDeleteTrigger = "CREATE TRIGGER IF NOT EXISTS delete_artist_fts"
-            " BEFORE DELETE ON " + policy::ArtistTable::Name +
+            " BEFORE DELETE ON " + Artist::Table::Name +
             " WHEN old.name IS NOT NULL"
             " BEGIN"
-            " DELETE FROM " + policy::ArtistTable::Name + "Fts WHERE rowid=old.id_artist;"
+            " DELETE FROM " + Artist::Table::Name + "Fts WHERE rowid=old.id_artist;"
             " END";
     sqlite::Tools::executeRequest( dbConnection, triggerReq );
     sqlite::Tools::executeRequest( dbConnection, autoDeleteAlbumTriggerReq );
@@ -397,7 +397,7 @@ bool Artist::createDefaultArtists( sqlite::Connection* dbConnection )
 {
     // Don't rely on Artist::create, since we want to insert or do nothing here.
     // This will skip the cache for those new entities, but they will be inserted soon enough anyway.
-    static const std::string req = "INSERT OR IGNORE INTO " + policy::ArtistTable::Name +
+    static const std::string req = "INSERT OR IGNORE INTO " + Artist::Table::Name +
             "(id_artist) VALUES(?),(?)";
     sqlite::Tools::executeInsert( dbConnection, req, UnknownArtistID,
                                           VariousArtistID );
@@ -409,7 +409,7 @@ bool Artist::createDefaultArtists( sqlite::Connection* dbConnection )
 std::shared_ptr<Artist> Artist::create( MediaLibraryPtr ml, const std::string& name )
 {
     auto artist = std::make_shared<Artist>( ml, name );
-    static const std::string req = "INSERT INTO " + policy::ArtistTable::Name +
+    static const std::string req = "INSERT INTO " + Artist::Table::Name +
             "(id_artist, name) VALUES(NULL, ?)";
     if ( insert( ml, artist, req, name ) == false )
         return nullptr;
@@ -419,8 +419,8 @@ std::shared_ptr<Artist> Artist::create( MediaLibraryPtr ml, const std::string& n
 Query<IArtist> Artist::search( MediaLibraryPtr ml, const std::string& name,
                                const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::ArtistTable::Name + " WHERE id_artist IN "
-            "(SELECT rowid FROM " + policy::ArtistTable::Name + "Fts WHERE name MATCH '*' || ? || '*')"
+    std::string req = "FROM " + Artist::Table::Name + " WHERE id_artist IN "
+            "(SELECT rowid FROM " + Artist::Table::Name + "Fts WHERE name MATCH '*' || ? || '*')"
             "AND is_present != 0";
     return make_query<Artist, IArtist>( ml, "*", std::move( req ),
                                         sortRequest( params ), name );
@@ -429,7 +429,7 @@ Query<IArtist> Artist::search( MediaLibraryPtr ml, const std::string& name,
 Query<IArtist> Artist::listAll( MediaLibraryPtr ml, bool includeAll,
                                 const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::ArtistTable::Name + " WHERE ";
+    std::string req = "FROM " + Artist::Table::Name + " WHERE ";
     if ( includeAll == true )
         req += "( nb_albums > 0 OR nb_tracks > 0 )";
     else
@@ -443,10 +443,10 @@ Query<IArtist> Artist::listAll( MediaLibraryPtr ml, bool includeAll,
 Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pattern,
                                       const QueryParameters* params, int64_t genreId )
 {
-    std::string req = "FROM " + policy::ArtistTable::Name + " a "
-                "INNER JOIN " + policy::AlbumTrackTable::Name + " att ON att.artist_id = a.id_artist "
+    std::string req = "FROM " + Artist::Table::Name + " a "
+                "INNER JOIN " + AlbumTrack::Table::Name + " att ON att.artist_id = a.id_artist "
                 "WHERE id_artist IN "
-                    "(SELECT rowid FROM " + policy::ArtistTable::Name + "Fts WHERE name MATCH '*' || ? || '*')"
+                    "(SELECT rowid FROM " + Artist::Table::Name + "Fts WHERE name MATCH '*' || ? || '*')"
                 "AND att.genre_id = ? ";
 
     std::string groupBy = "GROUP BY att.artist_id "

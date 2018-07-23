@@ -42,12 +42,12 @@
 namespace medialibrary
 {
 
-const std::string policy::TaskTable::Name = "Task";
-const std::string policy::TaskTable::PrimaryKeyColumn = "id_task";
-int64_t parser::Task::* const policy::TaskTable::PrimaryKey = &parser::Task::m_id;
-
 namespace parser
 {
+
+const std::string Task::Table::Name = "Task";
+const std::string Task::Table::PrimaryKeyColumn = "id_task";
+int64_t parser::Task::* const Task::Table::PrimaryKey = &parser::Task::m_id;
 
 Task::Task( MediaLibraryPtr ml, sqlite::Row& row )
     : currentService( 0 )
@@ -88,14 +88,14 @@ void Task::markStepCompleted( Step stepCompleted )
 
 bool Task::saveParserStep()
 {
-    static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET step = ?, "
+    static const std::string req = "UPDATE " + Task::Table::Name + " SET step = ?, "
             "retry_count = 0 WHERE id_task = ?";
     return sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_step, m_id );
 }
 
 bool Task::resetRetryCountOnSuccess()
 {
-    static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET "
+    static const std::string req = "UPDATE " + Task::Table::Name + " SET "
             "retry_count = 0 WHERE id_task = ?";
     return sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id );
 }
@@ -115,7 +115,7 @@ bool Task::isStepCompleted( Step step ) const
 
 void Task::startParserStep()
 {
-    static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET "
+    static const std::string req = "UPDATE " + Task::Table::Name + " SET "
             "retry_count = retry_count + 1 WHERE id_task = ?";
     sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id );
 }
@@ -130,7 +130,7 @@ bool Task::updateFileId( int64_t fileId )
         return true ;
     assert( m_fileId == 0 );
     assert( fileId != 0 );
-    static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET "
+    static const std::string req = "UPDATE " + Task::Table::Name + " SET "
             "file_id = ? WHERE id_task = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, fileId, m_id ) == false )
         return false;
@@ -407,7 +407,7 @@ void Task::setMrl( std::string newMrl )
 {
     if ( m_item.mrl() == newMrl )
         return;
-    static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET "
+    static const std::string req = "UPDATE " + Task::Table::Name + " SET "
             "mrl = ? WHERE id_task = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, newMrl, m_id ) == false )
         return;
@@ -416,7 +416,7 @@ void Task::setMrl( std::string newMrl )
 
 void Task::createTable( sqlite::Connection* dbConnection )
 {
-    std::string req = "CREATE TABLE IF NOT EXISTS " + policy::TaskTable::Name + "("
+    std::string req = "CREATE TABLE IF NOT EXISTS " + Task::Table::Name + "("
         "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
         "step INTEGER NOT NULL DEFAULT 0,"
         "retry_count INTEGER NOT NULL DEFAULT 0,"
@@ -426,11 +426,11 @@ void Task::createTable( sqlite::Connection* dbConnection )
         "parent_playlist_id INTEGER,"
         "parent_playlist_index UNSIGNED INTEGER,"
         "UNIQUE(mrl, parent_playlist_id) ON CONFLICT FAIL,"
-        "FOREIGN KEY (parent_folder_id) REFERENCES " + policy::FolderTable::Name
+        "FOREIGN KEY (parent_folder_id) REFERENCES " + Folder::Table::Name
         + "(id_folder) ON DELETE CASCADE,"
-        "FOREIGN KEY (file_id) REFERENCES " + policy::FileTable::Name
+        "FOREIGN KEY (file_id) REFERENCES " + File::Table::Name
         + "(id_file) ON DELETE CASCADE,"
-        "FOREIGN KEY (parent_playlist_id) REFERENCES " + policy::PlaylistTable::Name
+        "FOREIGN KEY (parent_playlist_id) REFERENCES " + Playlist::Table::Name
         + "(id_playlist) ON DELETE CASCADE"
     ")";
     sqlite::Tools::executeRequest( dbConnection, req );
@@ -438,7 +438,7 @@ void Task::createTable( sqlite::Connection* dbConnection )
 
 void Task::resetRetryCount( MediaLibraryPtr ml )
 {
-    static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET "
+    static const std::string req = "UPDATE " + Task::Table::Name + " SET "
             "retry_count = 0 WHERE step & ? != ?";
     sqlite::Tools::executeUpdate( ml->getConn(), req, Step::Completed,
                                   Step::Completed);
@@ -446,15 +446,15 @@ void Task::resetRetryCount( MediaLibraryPtr ml )
 
 void Task::resetParsing( MediaLibraryPtr ml )
 {
-    static const std::string req = "UPDATE " + policy::TaskTable::Name + " SET "
+    static const std::string req = "UPDATE " + Task::Table::Name + " SET "
             "retry_count = 0, step = ?";
     sqlite::Tools::executeUpdate( ml->getConn(), req, Step::None );
 }
 
 std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
 {
-    static const std::string req = "SELECT * FROM " + policy::TaskTable::Name + " t"
-        " LEFT JOIN " + policy::FileTable::Name + " f ON f.id_file = t.file_id"
+    static const std::string req = "SELECT * FROM " + Task::Table::Name + " t"
+        " LEFT JOIN " + File::Table::Name + " f ON f.id_file = t.file_id"
         " WHERE step & ? != ? AND retry_count < 3 AND (f.is_present != 0 OR "
         " t.file_id IS NULL)";
     return Task::fetchAll<Task>( ml, req, Step::Completed,
@@ -473,7 +473,7 @@ Task::create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
     std::shared_ptr<Task> self = std::make_shared<Task>( ml, std::move( fileFs ),
         std::move( parentFolder ), std::move( parentFolderFs ),
         std::move( parentPlaylist.first ), parentPlaylist.second );
-    const std::string req = "INSERT INTO " + policy::TaskTable::Name +
+    const std::string req = "INSERT INTO " + Task::Table::Name +
         "(mrl, parent_folder_id, parent_playlist_id, parent_playlist_index) "
         "VALUES(?, ?, ?, ?)";
     if ( insert( ml, self, req, self->m_item.mrl(), parentFolderId,
@@ -485,10 +485,10 @@ Task::create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
 
 void Task::recoverUnscannedFiles( MediaLibraryPtr ml )
 {
-    static const std::string req = "INSERT INTO " + policy::TaskTable::Name +
+    static const std::string req = "INSERT INTO " + Task::Table::Name +
             "(file_id, parent_folder_id)"
-            " SELECT id_file, folder_id FROM " + policy::FileTable::Name +
-            " f LEFT JOIN " + policy::TaskTable::Name + " t"
+            " SELECT id_file, folder_id FROM " + File::Table::Name +
+            " f LEFT JOIN " + Task::Table::Name + " t"
             " ON t.file_id = f.id_file WHERE t.file_id IS NULL"
             " AND f.folder_id IS NOT NULL";
     sqlite::Tools::executeInsert( ml->getConn(), req );

@@ -35,12 +35,9 @@
 namespace medialibrary
 {
 
-namespace policy
-{
-const std::string PlaylistTable::Name = "Playlist";
-const std::string PlaylistTable::PrimaryKeyColumn = "id_playlist";
-int64_t Playlist::* const PlaylistTable::PrimaryKey = &Playlist::m_id;
-}
+const std::string Playlist::Table::Name = "Playlist";
+const std::string Playlist::Table::PrimaryKeyColumn = "id_playlist";
+int64_t Playlist::* const Playlist::Table::PrimaryKey = &Playlist::m_id;
 
 Playlist::Playlist( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -64,7 +61,7 @@ Playlist::Playlist( MediaLibraryPtr ml, const std::string& name )
 std::shared_ptr<Playlist> Playlist::create( MediaLibraryPtr ml, const std::string& name )
 {
     auto self = std::make_shared<Playlist>( ml, name );
-    static const std::string req = "INSERT INTO " + policy::PlaylistTable::Name +
+    static const std::string req = "INSERT INTO " + Playlist::Table::Name +
             "(name, file_id, creation_date, artwork_mrl) VALUES(?, ?, ?, ?)";
     try
     {
@@ -93,7 +90,7 @@ bool Playlist::setName( const std::string& name )
 {
     if ( name == m_name )
         return true;
-    static const std::string req = "UPDATE " + policy::PlaylistTable::Name + " SET name = ? WHERE id_playlist = ?";
+    static const std::string req = "UPDATE " + Playlist::Table::Name + " SET name = ? WHERE id_playlist = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, name, m_id ) == false )
         return false;
     m_name = name;
@@ -112,7 +109,7 @@ const std::string& Playlist::artworkMrl() const
 
 Query<IMedia> Playlist::media() const
 {
-    static const std::string req = "FROM " + policy::MediaTable::Name + " m "
+    static const std::string req = "FROM " + Media::Table::Name + " m "
             "LEFT JOIN PlaylistMediaRelation pmr ON pmr.media_id = m.id_media "
             "WHERE pmr.playlist_id = ? AND m.is_present != 0 ";
     curateNullMediaID();
@@ -232,7 +229,7 @@ std::shared_ptr<File> Playlist::addFile( const fs::IFile& fileFs, int64_t parent
     auto file = File::createFromPlaylist( m_ml, m_id, fileFs, parentFolderId, isFolderFsRemovable);
     if ( file == nullptr )
         return nullptr;
-    static const std::string req = "UPDATE " + policy::PlaylistTable::Name + " SET file_id = ? WHERE id_playlist = ?";
+    static const std::string req = "UPDATE " + Playlist::Table::Name + " SET file_id = ? WHERE id_playlist = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, file->id(), m_id ) == false )
         return nullptr;
     m_fileId = file->id();
@@ -278,7 +275,7 @@ void Playlist::createTable( sqlite::Connection* dbConn, uint32_t dbModel )
     if ( dbModel >= 14 )
     {
         sqlite::Tools::executeRequest( dbConn, "CREATE INDEX IF NOT EXISTS "
-            "playlist_file_id ON " + policy::PlaylistTable::Name + "(file_id)" );
+            "playlist_file_id ON " + Playlist::Table::Name + "(file_id)" );
     }
 }
 
@@ -294,15 +291,15 @@ void Playlist::createTriggers( sqlite::Connection* dbConn )
 Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,
                                    const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::PlaylistTable::Name + " WHERE id_playlist IN "
-            "(SELECT rowid FROM " + policy::PlaylistTable::Name + "Fts WHERE name MATCH '*' || ? || '*')";
+    std::string req = "FROM " + Playlist::Table::Name + " WHERE id_playlist IN "
+            "(SELECT rowid FROM " + Playlist::Table::Name + "Fts WHERE name MATCH '*' || ? || '*')";
     return make_query<Playlist, IPlaylist>( ml, "*", std::move( req ),
                                             sortRequest( params ), name );
 }
 
 Query<IPlaylist> Playlist::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::PlaylistTable::Name;
+    std::string req = "FROM " + Playlist::Table::Name;
     return make_query<Playlist, IPlaylist>( ml, "*", std::move( req ),
                                             sortRequest( params ) );
 }
@@ -314,7 +311,7 @@ void Playlist::clearExternalPlaylistContent(MediaLibraryPtr ml)
     // foreign key, and therefor they wouldn't be rescanned.
     // Instead, flush the playlist content.
     const std::string req = "DELETE FROM PlaylistMediaRelation WHERE playlist_id IN ("
-            "SELECT id_playlist FROM " + policy::PlaylistTable::Name + " WHERE "
+            "SELECT id_playlist FROM " + Playlist::Table::Name + " WHERE "
             "file_id IS NOT NULL)";
     sqlite::Tools::executeDelete( ml->getConn(), req );
 }

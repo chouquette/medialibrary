@@ -53,9 +53,9 @@
 namespace medialibrary
 {
 
-const std::string policy::MediaTable::Name = "Media";
-const std::string policy::MediaTable::PrimaryKeyColumn = "id_media";
-int64_t Media::* const policy::MediaTable::PrimaryKey = &Media::m_id;
+const std::string Media::Table::Name = "Media";
+const std::string Media::Table::PrimaryKeyColumn = "id_media";
+int64_t Media::* const Media::Table::PrimaryKey = &Media::m_id;
 
 Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -107,7 +107,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
 std::shared_ptr<Media> Media::create( MediaLibraryPtr ml, Type type, const std::string& fileName )
 {
     auto self = std::make_shared<Media>( ml, fileName, type );
-    static const std::string req = "INSERT INTO " + policy::MediaTable::Name +
+    static const std::string req = "INSERT INTO " + Media::Table::Name +
             "(type, insertion_date, title, filename) VALUES(?, ?, ?, ?)";
 
     if ( insert( ml, self, req, type, self->m_insertionDate, self->m_title, self->m_filename ) == false )
@@ -168,7 +168,7 @@ void Media::setShowEpisode( ShowEpisodePtr episode )
 
 Query<ILabel> Media::labels() const
 {
-    static const std::string req = "FROM " + policy::LabelTable::Name + " l "
+    static const std::string req = "FROM " + Label::Table::Name + " l "
             "INNER JOIN LabelFileRelation lfr ON lfr.label_id = l.id_label "
             "WHERE lfr.media_id = ?";
     return make_query<Label, ILabel>( m_ml, "l.*", req, "", m_id );
@@ -181,7 +181,7 @@ int Media::playCount() const
 
 bool Media::increasePlayCount()
 {
-    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
+    static const std::string req = "UPDATE " + Media::Table::Name + " SET "
             "play_count = ?, last_played_date = ?, real_last_played_date = ? "
             "WHERE id_media = ?";
     auto lastPlayedDate = time( nullptr );
@@ -205,7 +205,7 @@ bool Media::isFavorite() const
 
 bool Media::setFavorite( bool favorite )
 {
-    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET is_favorite = ? WHERE id_media = ?";
+    static const std::string req = "UPDATE " + Media::Table::Name + " SET is_favorite = ? WHERE id_media = ?";
     if ( m_isFavorite == favorite )
         return true;
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, favorite, m_id ) == false )
@@ -219,7 +219,7 @@ const std::vector<FilePtr>& Media::files() const
     auto lock = m_files.lock();
     if ( m_files.isCached() == false )
     {
-        static const std::string req = "SELECT * FROM " + policy::FileTable::Name
+        static const std::string req = "SELECT * FROM " + File::Table::Name
                 + " WHERE media_id = ?";
         m_files = File::fetchAll<IFile>( m_ml, req, m_id );
     }
@@ -262,7 +262,7 @@ bool Media::addVideoTrack( const std::string& codec, unsigned int width, unsigne
 
 Query<IVideoTrack> Media::videoTracks() const
 {
-    static const std::string req = "FROM " + policy::VideoTrackTable::Name +
+    static const std::string req = "FROM " + VideoTrack::Table::Name +
             " WHERE media_id = ?";
     return make_query<VideoTrack, IVideoTrack>( m_ml, "*", req, "", m_id );
 }
@@ -276,7 +276,7 @@ bool Media::addAudioTrack( const std::string& codec, unsigned int bitrate,
 
 Query<IAudioTrack> Media::audioTracks() const
 {
-    static const std::string req = "FROM " + policy::AudioTrackTable::Name +
+    static const std::string req = "FROM " + AudioTrack::Table::Name +
             " WHERE media_id = ?";
     return make_query<AudioTrack, IAudioTrack>( m_ml, "*", req, "", m_id );
 }
@@ -377,7 +377,7 @@ bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin ori
     if ( thumbnail == nullptr )
         return false;
 
-    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
+    static const std::string req = "UPDATE " + Media::Table::Name + " SET "
             "thumbnail_id = ?, thumbnail_generated = 1 WHERE id_media = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, thumbnail->id(), m_id ) == false )
         return false;
@@ -396,7 +396,7 @@ bool Media::setThumbnail( const std::string& thumbnailMrl )
 
 bool Media::save()
 {
-    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
+    static const std::string req = "UPDATE " + Media::Table::Name + " SET "
             "type = ?, subtype = ?, duration = ?, release_date = ?,"
             "title = ? WHERE id_media = ?";
     if ( m_changed == false )
@@ -496,8 +496,8 @@ std::string Media::sortRequest( const QueryParameters* params )
 Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
                               const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::MediaTable::Name + " m INNER JOIN "
-            + policy::FileTable::Name + " f ON m.id_media = f.media_id"
+    std::string req = "FROM " + Media::Table::Name + " m INNER JOIN "
+            + File::Table::Name + " f ON m.id_media = f.media_id"
             " WHERE m.type = ?"
             " AND f.type = ?"
             " AND f.is_present != 0";
@@ -536,7 +536,7 @@ const std::string& Media::title() const
 
 bool Media::setTitle( const std::string& title )
 {
-    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET title = ? WHERE id_media = ?";
+    static const std::string req = "UPDATE " + Media::Table::Name + " SET title = ? WHERE id_media = ?";
     if ( m_title == title )
         return true;
     try
@@ -586,7 +586,7 @@ void Media::createTriggers( sqlite::Connection* connection, uint32_t modelVersio
             "CREATE TRIGGER IF NOT EXISTS increment_media_nb_playlist AFTER INSERT ON "
             " PlaylistMediaRelation "
             " BEGIN "
-                " UPDATE " + policy::MediaTable::Name + " SET nb_playlists = nb_playlists + 1 "
+                " UPDATE " + Media::Table::Name + " SET nb_playlists = nb_playlists + 1 "
                     " WHERE id_media = new.media_id;"
             " END;"
         );
@@ -595,7 +595,7 @@ void Media::createTriggers( sqlite::Connection* connection, uint32_t modelVersio
             "CREATE TRIGGER IF NOT EXISTS decrement_media_nb_playlist AFTER DELETE ON "
             " PlaylistMediaRelation "
             " BEGIN "
-                " UPDATE " + policy::MediaTable::Name + " SET nb_playlists = nb_playlists - 1 "
+                " UPDATE " + Media::Table::Name + " SET nb_playlists = nb_playlists - 1 "
                     " WHERE id_media = old.media_id;"
             " END;"
         );
@@ -617,7 +617,7 @@ bool Media::addLabel( LabelPtr label )
             const char* req = "INSERT INTO LabelFileRelation VALUES(?, ?)";
             if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, label->id(), m_id ) == 0 )
                 return false;
-            const std::string reqFts = "UPDATE " + policy::MediaTable::Name + "Fts "
+            const std::string reqFts = "UPDATE " + Media::Table::Name + "Fts "
                 "SET labels = labels || ' ' || ? WHERE rowid = ?";
             if ( sqlite::Tools::executeUpdate( m_ml->getConn(), reqFts, label->name(), m_id ) == false )
                 return false;
@@ -647,7 +647,7 @@ bool Media::removeLabel( LabelPtr label )
             const char* req = "DELETE FROM LabelFileRelation WHERE label_id = ? AND media_id = ?";
             if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, label->id(), m_id ) == false )
                 return false;
-            const std::string reqFts = "UPDATE " + policy::MediaTable::Name + "Fts "
+            const std::string reqFts = "UPDATE " + Media::Table::Name + "Fts "
                     "SET labels = TRIM(REPLACE(labels, ?, '')) WHERE rowid = ?";
             if ( sqlite::Tools::executeUpdate( m_ml->getConn(), reqFts, label->name(), m_id ) == false )
                 return false;
@@ -665,11 +665,11 @@ bool Media::removeLabel( LabelPtr label )
 Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
                              const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::MediaTable::Name + " m "
-            " INNER JOIN " + policy::FileTable::Name + " f ON m.id_media = f.media_id"
+    std::string req = "FROM " + Media::Table::Name + " m "
+            " INNER JOIN " + File::Table::Name + " f ON m.id_media = f.media_id"
             " WHERE"
-            " m.id_media IN (SELECT rowid FROM " + policy::MediaTable::Name + "Fts"
-            " WHERE " + policy::MediaTable::Name + "Fts MATCH '*' || ? || '*')"
+            " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
+            " WHERE " + Media::Table::Name + "Fts MATCH '*' || ? || '*')"
             " AND f.is_present = 1"
             " AND f.type = ?"
             " AND m.type != ? AND m.type != ?";
@@ -682,11 +682,11 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
 Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
                              Media::Type type, const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::MediaTable::Name + " m "
-            " INNER JOIN " + policy::FileTable::Name + " f ON m.id_media = f.media_id"
+    std::string req = "FROM " + Media::Table::Name + " m "
+            " INNER JOIN " + File::Table::Name + " f ON m.id_media = f.media_id"
             " WHERE"
-            " m.id_media IN (SELECT rowid FROM " + policy::MediaTable::Name + "Fts"
-            " WHERE " + policy::MediaTable::Name + "Fts MATCH '*' || ? || '*')"
+            " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
+            " WHERE " + Media::Table::Name + "Fts MATCH '*' || ? || '*')"
             " AND f.is_present = 1"
             " AND f.type = ?"
             " AND m.type = ?";
@@ -697,12 +697,12 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
 
 Query<IMedia> Media::searchAlbumTracks(MediaLibraryPtr ml, const std::string& pattern, int64_t albumId, const QueryParameters* params)
 {
-    std::string req = "FROM " + policy::MediaTable::Name + " m "
-            " INNER JOIN " + policy::FileTable::Name + " f ON m.id_media = f.media_id"
-            " INNER JOIN " + policy::AlbumTrackTable::Name + " tra ON tra.media_id = m.id_media "
+    std::string req = "FROM " + Media::Table::Name + " m "
+            " INNER JOIN " + File::Table::Name + " f ON m.id_media = f.media_id"
+            " INNER JOIN " + AlbumTrack::Table::Name + " tra ON tra.media_id = m.id_media "
             " WHERE"
-            " m.id_media IN (SELECT rowid FROM " + policy::MediaTable::Name + "Fts"
-            " WHERE " + policy::MediaTable::Name + "Fts MATCH '*' || ? || '*')"
+            " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
+            " WHERE " + Media::Table::Name + "Fts MATCH '*' || ? || '*')"
             " AND tra.album_id = ?"
             " AND f.is_present = 1"
             " AND f.type = ?"
@@ -714,12 +714,12 @@ Query<IMedia> Media::searchAlbumTracks(MediaLibraryPtr ml, const std::string& pa
 
 Query<IMedia> Media::searchArtistTracks(MediaLibraryPtr ml, const std::string& pattern, int64_t artistId, const QueryParameters* params)
 {
-    std::string req = "FROM " + policy::MediaTable::Name + " m "
-            " INNER JOIN " + policy::FileTable::Name + " f ON m.id_media = f.media_id"
-            " INNER JOIN " + policy::AlbumTrackTable::Name + " tra ON tra.media_id = m.id_media "
+    std::string req = "FROM " + Media::Table::Name + " m "
+            " INNER JOIN " + File::Table::Name + " f ON m.id_media = f.media_id"
+            " INNER JOIN " + AlbumTrack::Table::Name + " tra ON tra.media_id = m.id_media "
             " WHERE"
-            " m.id_media IN (SELECT rowid FROM " + policy::MediaTable::Name + "Fts"
-            " WHERE " + policy::MediaTable::Name + "Fts MATCH '*' || ? || '*')"
+            " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
+            " WHERE " + Media::Table::Name + "Fts MATCH '*' || ? || '*')"
             " AND tra.artist_id = ?"
             " AND f.is_present = 1"
             " AND f.type = ?"
@@ -731,12 +731,12 @@ Query<IMedia> Media::searchArtistTracks(MediaLibraryPtr ml, const std::string& p
 
 Query<IMedia> Media::searchGenreTracks(MediaLibraryPtr ml, const std::string& pattern, int64_t genreId, const QueryParameters* params)
 {
-    std::string req = "FROM " + policy::MediaTable::Name + " m "
-            " INNER JOIN " + policy::FileTable::Name + " f ON m.id_media = f.media_id"
-            " INNER JOIN " + policy::AlbumTrackTable::Name + " tra ON tra.media_id = m.id_media "
+    std::string req = "FROM " + Media::Table::Name + " m "
+            " INNER JOIN " + File::Table::Name + " f ON m.id_media = f.media_id"
+            " INNER JOIN " + AlbumTrack::Table::Name + " tra ON tra.media_id = m.id_media "
             " WHERE"
-            " m.id_media IN (SELECT rowid FROM " + policy::MediaTable::Name + "Fts"
-            " WHERE " + policy::MediaTable::Name + "Fts MATCH '*' || ? || '*')"
+            " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
+            " WHERE " + Media::Table::Name + "Fts MATCH '*' || ? || '*')"
             " AND tra.genre_id = ?"
             " AND f.is_present = 1"
             " AND f.type = ?"
@@ -749,12 +749,12 @@ Query<IMedia> Media::searchGenreTracks(MediaLibraryPtr ml, const std::string& pa
 Query<IMedia> Media::searchShowEpisodes(MediaLibraryPtr ml, const std::string& pattern,
                                         int64_t showId, const QueryParameters* params)
 {
-    std::string req = "FROM " + policy::MediaTable::Name + " m "
-            " INNER JOIN " + policy::FileTable::Name + " f ON m.id_media = f.media_id"
-            " INNER JOIN " + policy::ShowEpisodeTable::Name + " ep ON ep.media_id = m.id_media "
+    std::string req = "FROM " + Media::Table::Name + " m "
+            " INNER JOIN " + File::Table::Name + " f ON m.id_media = f.media_id"
+            " INNER JOIN " + ShowEpisode::Table::Name + " ep ON ep.media_id = m.id_media "
             " WHERE"
-            " m.id_media IN (SELECT rowid FROM " + policy::MediaTable::Name + "Fts"
-            " WHERE " + policy::MediaTable::Name + "Fts MATCH '*' || ? || '*')"
+            " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
+            " WHERE " + Media::Table::Name + "Fts MATCH '*' || ? || '*')"
             " AND ep.show_id = ?"
             " AND f.is_present = 1"
             " AND f.type = ?"
@@ -767,19 +767,19 @@ Query<IMedia> Media::searchShowEpisodes(MediaLibraryPtr ml, const std::string& p
 Query<IMedia> Media::searchInPlaylist( MediaLibraryPtr ml, const std::string& pattern,
                                        int64_t playlistId, const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::MediaTable::Name + " m "
-           "INNER JOIN " + policy::FileTable::Name + " f ON m.id_media = f.media_id "
+    std::string req = "FROM " + Media::Table::Name + " m "
+           "INNER JOIN " + File::Table::Name + " f ON m.id_media = f.media_id "
            "LEFT JOIN PlaylistMediaRelation pmr ON pmr.media_id = m.id_media "
            "WHERE pmr.playlist_id = ? AND m.is_present != 0 AND "
-           "m.id_media IN (SELECT rowid FROM " + policy::MediaTable::Name + "Fts "
-           "WHERE " + policy::MediaTable::Name + "Fts MATCH '*' || ? || '*')";
+           "m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts "
+           "WHERE " + Media::Table::Name + "Fts MATCH '*' || ? || '*')";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ), playlistId, pattern );
 }
 
 Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml )
 {
-    static const std::string req = "FROM " + policy::MediaTable::Name +
+    static const std::string req = "FROM " + Media::Table::Name +
             " WHERE last_played_date IS NOT NULL"
             " AND type != ?";
     return make_query<Media, IMedia>( ml, "*", req,
@@ -789,7 +789,7 @@ Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml )
 
 Query<IMedia> Media::fetchStreamHistory(MediaLibraryPtr ml)
 {
-    static const std::string req = "FROM " + policy::MediaTable::Name +
+    static const std::string req = "FROM " + Media::Table::Name +
             " WHERE last_played_date IS NOT NULL"
             " AND type = ?";
     return make_query<Media, IMedia>( ml, "*", req,
@@ -801,7 +801,7 @@ void Media::clearHistory( MediaLibraryPtr ml )
 {
     auto dbConn = ml->getConn();
     auto t = dbConn->newTransaction();
-    static const std::string req = "UPDATE " + policy::MediaTable::Name + " SET "
+    static const std::string req = "UPDATE " + Media::Table::Name + " SET "
             "play_count = 0,"
             "last_played_date = NULL";
     // Clear the entire cache since quite a few items are now containing invalid info.
@@ -817,7 +817,7 @@ void Media::clearHistory( MediaLibraryPtr ml )
 
 void Media::removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime )
 {
-    const std::string req = "DELETE FROM " + policy::MediaTable::Name + " "
+    const std::string req = "DELETE FROM " + Media::Table::Name + " "
             "WHERE real_last_played_date < ? AND ( type = ? OR type = ? ) "
             "AND nb_playlists = 0";
     auto deadline = std::chrono::duration_cast<std::chrono::seconds>(

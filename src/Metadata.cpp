@@ -33,7 +33,7 @@
 namespace medialibrary
 {
 
-const std::string policy::MetadataTable::Name = "Metadata";
+const std::string Metadata::Table::Name = "Metadata";
 
 Metadata::Record::Record( uint32_t t, std::string v )
     : m_type( t )
@@ -89,7 +89,7 @@ void Metadata::init( int64_t entityId, uint32_t nbMeta )
     // to another IMediaMetadata held by another thread.
     // This guarantees the vector will not grow afterward.
     m_records.reserve( m_nbMeta );
-    static const std::string req = "SELECT * FROM " + policy::MetadataTable::Name +
+    static const std::string req = "SELECT * FROM " + Metadata::Table::Name +
             " WHERE id_media = ? AND entity_type = ?";
     auto conn = m_ml->getConn();
     auto ctx = conn->acquireReadContext();
@@ -139,7 +139,7 @@ bool Metadata::set( uint32_t type, const std::string& value )
         m_records.emplace_back( type, value );
     try
     {
-        static const std::string req = "INSERT OR REPLACE INTO " + policy::MetadataTable::Name +
+        static const std::string req = "INSERT OR REPLACE INTO " + Metadata::Table::Name +
                 "(id_media, entity_type, type, value) VALUES(?, ?, ?, ?)";
         return sqlite::Tools::executeInsert( m_ml->getConn(), req, m_entityId, m_entityType,
                                              type, value );
@@ -165,7 +165,7 @@ bool Metadata::unset( uint32_t type )
     });
     if ( it != end( m_records ) )
     {
-        static const std::string req = "DELETE FROM " + policy::MetadataTable::Name +
+        static const std::string req = "DELETE FROM " + Metadata::Table::Name +
                 " WHERE id_media = ? AND entity_type = ? AND type = ?";
         (*it).unset();
         return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_entityId,
@@ -176,7 +176,7 @@ bool Metadata::unset( uint32_t type )
 
 void Metadata::unset( sqlite::Connection* dbConn, IMetadata::EntityType entityType, uint32_t type )
 {
-    static const std::string req = "DELETE FROM " + policy::MetadataTable::Name +
+    static const std::string req = "DELETE FROM " + Metadata::Table::Name +
             " WHERE entity_type = ? AND type = ? ";
     sqlite::Tools::executeDelete( dbConn, req, entityType, type );
 }

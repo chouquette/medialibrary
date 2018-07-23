@@ -41,19 +41,15 @@ class Artist;
 class Media;
 class Genre;
 
-namespace policy
-{
-struct AlbumTrackTable
-{
-    static const std::string Name;
-    static const std::string PrimaryKeyColumn;
-    static int64_t AlbumTrack::*const PrimaryKey;
-};
-}
-
-class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy::AlbumTrackTable>
+class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack>
 {
     public:
+        struct Table
+        {
+            static const std::string Name;
+            static const std::string PrimaryKeyColumn;
+            static int64_t AlbumTrack::*const PrimaryKey;
+        };
         AlbumTrack( MediaLibraryPtr ml, sqlite::Row& row );
         AlbumTrack( MediaLibraryPtr ml, int64_t mediaId, int64_t artistId, int64_t genreId,
                     unsigned int trackNumber, int64_t albumId, unsigned int discNumber );
@@ -93,7 +89,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack, policy
         mutable Cache<std::shared_ptr<Artist>> m_artist;
         mutable Cache<std::shared_ptr<Genre>> m_genre;
 
-        friend struct policy::AlbumTrackTable;
+        friend struct AlbumTrack::Table;
 };
 
 }

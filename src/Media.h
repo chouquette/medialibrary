@@ -45,20 +45,15 @@ class AlbumTrack;
 
 class Media;
 
-namespace policy
-{
-struct MediaTable
-{
-    static const std::string Name;
-    static const std::string PrimaryKeyColumn;
-    static int64_t Media::*const PrimaryKey;
-};
-
-}
-
-class Media : public IMedia, public DatabaseHelpers<Media, policy::MediaTable>
+class Media : public IMedia, public DatabaseHelpers<Media>
 {
     public:
+        struct Table
+        {
+            static const std::string Name;
+            static const std::string PrimaryKeyColumn;
+            static int64_t Media::*const PrimaryKey;
+        };
         // Those should be private, however the standard states that the expression
         // ::new (pv) T(std::forward(args)...)
         // shall be well-formed, and private constructor would prevent that.
@@ -187,7 +182,7 @@ private:
         mutable Cache<std::shared_ptr<Thumbnail>> m_thumbnail;
         bool m_changed;
 
-        friend policy::MediaTable;
+        friend Media::Table;
 };
 
 }

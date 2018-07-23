@@ -52,16 +52,6 @@ namespace parser
 class Task;
 }
 
-namespace policy
-{
-struct TaskTable
-{
-    static const std::string Name;
-    static const std::string PrimaryKeyColumn;
-    static int64_t parser::Task::*const PrimaryKey;
-};
-}
-
 namespace parser
 {
 
@@ -72,9 +62,15 @@ public:
     virtual bool updateFileId( int64_t fileId ) = 0;
 };
 
-class Task : public DatabaseHelpers<Task, policy::TaskTable, cachepolicy::Uncached<Task>>, private ITaskCb
+class Task : public DatabaseHelpers<Task, cachepolicy::Uncached<Task>>, private ITaskCb
 {
 public:
+    struct Table
+    {
+        static const std::string Name;
+        static const std::string PrimaryKeyColumn;
+        static int64_t parser::Task::*const PrimaryKey;
+    };
     class Item : public IItem
     {
     public:
@@ -216,7 +212,7 @@ private:
     int64_t     m_parentPlaylistId;
     Item        m_item;
 
-    friend policy::TaskTable;
+    friend Task::Table;
 };
 
 }

@@ -32,19 +32,15 @@ namespace medialibrary
 
 class Movie;
 
-namespace policy
-{
-struct MovieTable
-{
-    static const std::string Name;
-    static const std::string PrimaryKeyColumn;
-    static int64_t Movie::*const PrimaryKey;
-};
-}
-
-class Movie : public IMovie, public DatabaseHelpers<Movie, policy::MovieTable>
+class Movie : public IMovie, public DatabaseHelpers<Movie>
 {
     public:
+        struct Table
+        {
+            static const std::string Name;
+            static const std::string PrimaryKeyColumn;
+            static int64_t Movie::*const PrimaryKey;
+        };
         Movie( MediaLibraryPtr ml, sqlite::Row& row );
         Movie( MediaLibraryPtr ml, int64_t mediaId );
 
@@ -65,7 +61,7 @@ class Movie : public IMovie, public DatabaseHelpers<Movie, policy::MovieTable>
         std::string m_summary;
         std::string m_imdbId;
 
-        friend struct policy::MovieTable;
+        friend struct Movie::Table;
 };
 
 }

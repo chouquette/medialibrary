@@ -33,9 +33,9 @@
 namespace medialibrary
 {
 
-const std::string policy::ShowEpisodeTable::Name = "ShowEpisode";
-const std::string policy::ShowEpisodeTable::PrimaryKeyColumn = "show_id";
-int64_t ShowEpisode::* const policy::ShowEpisodeTable::PrimaryKey = &ShowEpisode::m_id;
+const std::string ShowEpisode::Table::Name = "ShowEpisode";
+const std::string ShowEpisode::Table::PrimaryKeyColumn = "show_id";
+int64_t ShowEpisode::* const ShowEpisode::Table::PrimaryKey = &ShowEpisode::m_id;
 
 ShowEpisode::ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -77,7 +77,7 @@ unsigned int ShowEpisode::seasonNumber() const
 
 bool ShowEpisode::setSeasonNumber( unsigned int seasonNumber )
 {
-    static const std::string req = "UPDATE " + policy::ShowEpisodeTable::Name
+    static const std::string req = "UPDATE " + ShowEpisode::Table::Name
             + " SET season_number = ? WHERE id_episode = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, seasonNumber, m_id ) == false )
         return false;
@@ -92,7 +92,7 @@ const std::string& ShowEpisode::shortSummary() const
 
 bool ShowEpisode::setShortSummary( const std::string& summary )
 {
-    static const std::string req = "UPDATE " + policy::ShowEpisodeTable::Name
+    static const std::string req = "UPDATE " + ShowEpisode::Table::Name
             + " SET episode_summary = ? WHERE id_episode = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, summary, m_id ) == false )
         return false;
@@ -107,7 +107,7 @@ const std::string& ShowEpisode::tvdbId() const
 
 bool ShowEpisode::setTvdbId( const std::string& tvdbId )
 {
-    static const std::string req = "UPDATE " + policy::ShowEpisodeTable::Name
+    static const std::string req = "UPDATE " + ShowEpisode::Table::Name
             + " SET tvdb_id = ? WHERE id_episode = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, tvdbId, m_id ) == false )
         return false;
@@ -126,7 +126,7 @@ std::shared_ptr<IShow> ShowEpisode::show()
 
 void ShowEpisode::createTable( sqlite::Connection* dbConnection )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::ShowEpisodeTable::Name
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + ShowEpisode::Table::Name
             + "("
                 "id_episode INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "media_id UNSIGNED INTEGER NOT NULL,"
@@ -135,13 +135,13 @@ void ShowEpisode::createTable( sqlite::Connection* dbConnection )
                 "episode_summary TEXT,"
                 "tvdb_id TEXT,"
                 "show_id UNSIGNED INT,"
-                "FOREIGN KEY(media_id) REFERENCES " + policy::MediaTable::Name
+                "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
                     + "(id_media) ON DELETE CASCADE,"
-                "FOREIGN KEY(show_id) REFERENCES " + policy::ShowTable::Name
+                "FOREIGN KEY(show_id) REFERENCES " + Show::Table::Name
                     + "(id_show) ON DELETE CASCADE"
             ")";
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS show_episode_media_show_idx ON " +
-            policy::ShowEpisodeTable::Name + "(media_id, show_id)";
+            ShowEpisode::Table::Name + "(media_id, show_id)";
     sqlite::Tools::executeRequest( dbConnection, req );
     sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
@@ -150,7 +150,7 @@ std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml, int64_t me
                                                   unsigned int episodeNumber, int64_t showId )
 {
     auto episode = std::make_shared<ShowEpisode>( ml, mediaId, episodeNumber, showId );
-    static const std::string req = "INSERT INTO " + policy::ShowEpisodeTable::Name
+    static const std::string req = "INSERT INTO " + ShowEpisode::Table::Name
             + "(media_id, episode_number, show_id) VALUES(?, ?, ?)";
     if ( insert( ml, episode, req, mediaId, episodeNumber, showId ) == false )
         return nullptr;
@@ -159,7 +159,7 @@ std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml, int64_t me
 
 ShowEpisodePtr ShowEpisode::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
 {
-    static const std::string req = "SELECT * FROM " + policy::ShowEpisodeTable::Name + " WHERE media_id = ?";
+    static const std::string req = "SELECT * FROM " + ShowEpisode::Table::Name + " WHERE media_id = ?";
     return fetch( ml, req, mediaId );
 }
 

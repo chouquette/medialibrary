@@ -1,40 +1,40 @@
 "CREATE INDEX IF NOT EXISTS index_last_played_date ON "
-            + policy::MediaTable::Name + "(last_played_date DESC)",
+            + Media::Table::Name + "(last_played_date DESC)",
 
 "CREATE TRIGGER IF NOT EXISTS has_files_present AFTER UPDATE OF "
-"is_present ON " + policy::FileTable::Name + " "
+"is_present ON " + File::Table::Name + " "
 "BEGIN "
-"UPDATE " + policy::MediaTable::Name + " SET is_present="
+"UPDATE " + Media::Table::Name + " SET is_present="
     "(SELECT EXISTS("
-        "SELECT id_file FROM " + policy::FileTable::Name +
+        "SELECT id_file FROM " + File::Table::Name +
         " WHERE media_id=new.media_id AND is_present != 0 LIMIT 1"
     ") )"
     "WHERE id_media=new.media_id;"
 "END;",
 
 "CREATE TRIGGER IF NOT EXISTS cascade_file_deletion AFTER DELETE ON "
-+ policy::FileTable::Name +
++ File::Table::Name +
 " BEGIN "
-" DELETE FROM " + policy::MediaTable::Name + " WHERE "
-    "(SELECT COUNT(id_file) FROM " + policy::FileTable::Name +
+" DELETE FROM " + Media::Table::Name + " WHERE "
+    "(SELECT COUNT(id_file) FROM " + File::Table::Name +
         " WHERE media_id=old.media_id) = 0"
         " AND id_media=old.media_id;"
 " END;",
 
 "CREATE TRIGGER IF NOT EXISTS insert_media_fts"
-" AFTER INSERT ON " + policy::MediaTable::Name +
+" AFTER INSERT ON " + Media::Table::Name +
 " BEGIN"
-    " INSERT INTO " + policy::MediaTable::Name + "Fts(rowid,title,labels) VALUES(new.id_media, new.title, '');"
+    " INSERT INTO " + Media::Table::Name + "Fts(rowid,title,labels) VALUES(new.id_media, new.title, '');"
 " END",
 
 "CREATE TRIGGER IF NOT EXISTS delete_media_fts"
-" BEFORE DELETE ON " + policy::MediaTable::Name +
+" BEFORE DELETE ON " + Media::Table::Name +
 " BEGIN"
-    " DELETE FROM " + policy::MediaTable::Name + "Fts WHERE rowid = old.id_media;"
+    " DELETE FROM " + Media::Table::Name + "Fts WHERE rowid = old.id_media;"
 " END",
 
 "CREATE TRIGGER IF NOT EXISTS update_media_title_fts"
-" AFTER UPDATE OF title ON " + policy::MediaTable::Name +
+" AFTER UPDATE OF title ON " + Media::Table::Name +
 " BEGIN"
-    " UPDATE " + policy::MediaTable::Name + "Fts SET title = new.title WHERE rowid = new.id_media;"
+    " UPDATE " + Media::Table::Name + "Fts SET title = new.title WHERE rowid = new.id_media;"
 " END",

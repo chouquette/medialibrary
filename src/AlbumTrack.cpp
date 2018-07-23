@@ -36,9 +36,9 @@
 namespace medialibrary
 {
 
-const std::string policy::AlbumTrackTable::Name = "AlbumTrack";
-const std::string policy::AlbumTrackTable::PrimaryKeyColumn = "id_track";
-int64_t AlbumTrack::* const policy::AlbumTrackTable::PrimaryKey = &AlbumTrack::m_id;
+const std::string AlbumTrack::Table::Name = "AlbumTrack";
+const std::string AlbumTrack::Table::PrimaryKeyColumn = "id_track";
+int64_t AlbumTrack::* const AlbumTrack::Table::PrimaryKey = &AlbumTrack::m_id;
 
 AlbumTrack::AlbumTrack( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -93,7 +93,7 @@ int64_t AlbumTrack::artistId() const
 
 void AlbumTrack::createTable( sqlite::Connection* dbConnection )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::AlbumTrackTable::Name + "("
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + AlbumTrack::Table::Name + "("
                 "id_track INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "media_id INTEGER UNIQUE,"
                 "duration INTEGER NOT NULL,"
@@ -103,16 +103,16 @@ void AlbumTrack::createTable( sqlite::Connection* dbConnection )
                 "album_id UNSIGNED INTEGER NOT NULL,"
                 "disc_number UNSIGNED INTEGER,"
                 "is_present BOOLEAN NOT NULL DEFAULT 1,"
-                "FOREIGN KEY (media_id) REFERENCES " + policy::MediaTable::Name + "(id_media)"
+                "FOREIGN KEY (media_id) REFERENCES " + Media::Table::Name + "(id_media)"
                     " ON DELETE CASCADE,"
-                "FOREIGN KEY (artist_id) REFERENCES " + policy::ArtistTable::Name + "(id_artist)"
+                "FOREIGN KEY (artist_id) REFERENCES " + Artist::Table::Name + "(id_artist)"
                     " ON DELETE CASCADE,"
-                "FOREIGN KEY (genre_id) REFERENCES " + policy::GenreTable::Name + "(id_genre),"
+                "FOREIGN KEY (genre_id) REFERENCES " + Genre::Table::Name + "(id_genre),"
                 "FOREIGN KEY (album_id) REFERENCES Album(id_album) "
                     " ON DELETE CASCADE"
             ")";
     const std::string indexAlbumIdReq = "CREATE INDEX IF NOT EXISTS album_track_album_genre_artist_ids "
-            "ON " + policy::AlbumTrackTable::Name + "(album_id, genre_id, artist_id)";
+            "ON " + AlbumTrack::Table::Name + "(album_id, genre_id, artist_id)";
     sqlite::Tools::executeRequest( dbConnection, req );
     sqlite::Tools::executeRequest( dbConnection, indexAlbumIdReq );
 }
@@ -121,14 +121,14 @@ void AlbumTrack::createTriggers(sqlite::Connection* dbConnection)
 {
     const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_track_present "
             "AFTER UPDATE OF is_present "
-            "ON " + policy::MediaTable::Name + " "
+            "ON " + Media::Table::Name + " "
             "BEGIN "
-            "UPDATE " + policy::AlbumTrackTable::Name + " "
+            "UPDATE " + AlbumTrack::Table::Name + " "
                 "SET is_present = new.is_present WHERE media_id = new.id_media;"
             "END";
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS "
             "album_media_artist_genre_album_idx ON " +
-            policy::AlbumTrackTable::Name +
+            AlbumTrack::Table::Name +
             "(media_id, artist_id, genre_id, album_id)";
     sqlite::Tools::executeRequest( dbConnection, triggerReq );
     sqlite::Tools::executeRequest( dbConnection, indexReq );
@@ -140,7 +140,7 @@ std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, int64_t albu
                                                 int64_t duration )
 {
     auto self = std::make_shared<AlbumTrack>( ml, media->id(), artistId, genreId, trackNb, albumId, discNumber );
-    static const std::string req = "INSERT INTO " + policy::AlbumTrackTable::Name
+    static const std::string req = "INSERT INTO " + AlbumTrack::Table::Name
             + "(media_id, duration, artist_id, genre_id, track_number, album_id, disc_number) VALUES(?, ?, ?, ?, ?, ?, ?)";
     if ( insert( ml, self, req, media->id(), duration >= 0 ? duration : 0, sqlite::ForeignKey( artistId ),
                  sqlite::ForeignKey( genreId ), trackNb, albumId, discNumber ) == false )
@@ -150,15 +150,15 @@ std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, int64_t albu
 
 AlbumTrackPtr AlbumTrack::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
 {
-    static const std::string req = "SELECT * FROM " + policy::AlbumTrackTable::Name +
+    static const std::string req = "SELECT * FROM " + AlbumTrack::Table::Name +
             " WHERE media_id = ?";
     return fetch( ml, req, mediaId );
 }
 
 Query<IMedia> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId, const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::MediaTable::Name + " m"
-            " INNER JOIN " + policy::AlbumTrackTable::Name + " t ON m.id_media = t.media_id"
+    std::string req = "FROM " + Media::Table::Name + " m"
+            " INNER JOIN " + AlbumTrack::Table::Name + " t ON m.id_media = t.media_id"
             " WHERE t.genre_id = ? AND m.is_present = 1";
     std::string orderBy = "ORDER BY ";
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
@@ -216,7 +216,7 @@ bool AlbumTrack::setGenre( std::shared_ptr<Genre> genre )
         if ( m_genre.isCached() == false )
             m_genre = Genre::fetch( m_ml, m_genreId );
     }
-    static const std::string req = "UPDATE " + policy::AlbumTrackTable::Name
+    static const std::string req = "UPDATE " + AlbumTrack::Table::Name
             + " SET genre_id = ? WHERE id_track = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req,
                                        sqlite::ForeignKey( genre != nullptr ? genre->id() : 0 ),

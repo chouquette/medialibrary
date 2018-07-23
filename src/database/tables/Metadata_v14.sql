@@ -1,4 +1,4 @@
-"CREATE TABLE IF NOT EXISTS " + policy::MetadataTable::Name +
+"CREATE TABLE IF NOT EXISTS " + Metadata::Table::Name +
 "("
     "id_media INTEGER,"
     "entity_type INTEGER,"

@@ -33,9 +33,9 @@
 namespace medialibrary
 {
 
-const std::string policy::FileTable::Name = "File";
-const std::string policy::FileTable::PrimaryKeyColumn = "id_file";
-int64_t File::* const policy::FileTable::PrimaryKey = &File::m_id;
+const std::string File::Table::Name = "File";
+const std::string File::Table::PrimaryKeyColumn = "id_file";
+int64_t File::* const File::Table::PrimaryKey = &File::m_id;
 
 File::File( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -119,7 +119,7 @@ void File::setMrl( const std::string& mrl )
 {
     if ( m_mrl == mrl )
         return;
-    const static std::string req = "UPDATE " + policy::FileTable::Name + " SET "
+    const static std::string req = "UPDATE " + File::Table::Name + " SET "
             "mrl = ? WHERE id_file = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, mrl, m_id ) == false )
         return;
@@ -193,7 +193,7 @@ std::shared_ptr<File> File::createFromMedia( MediaLibraryPtr ml, int64_t mediaId
 {
     assert( mediaId > 0 );
     auto self = std::make_shared<File>( ml, mediaId, 0, type, fileFs, folderId, isRemovable );
-    static const std::string req = "INSERT INTO " + policy::FileTable::Name +
+    static const std::string req = "INSERT INTO " + File::Table::Name +
             "(media_id, mrl, type, folder_id, last_modification_date, size, "
             "is_removable, is_external) VALUES(?, ?, ?, ?, ?, ?, ?, 0)";
 
@@ -210,14 +210,14 @@ std::shared_ptr<File> File::createFromMedia( MediaLibraryPtr ml, int64_t mediaId
     assert( mediaId > 0 );
     // Sqlite won't ensure uniqueness for (folder_id, mrl) when folder_id is null, so we have to ensure
     // of it ourselves
-    static const std::string existingReq = "SELECT * FROM " + policy::FileTable::Name +
+    static const std::string existingReq = "SELECT * FROM " + File::Table::Name +
             " WHERE folder_id IS NULL AND mrl = ?";
     auto existing = fetch( ml, existingReq, mrl );
     if ( existing != nullptr )
         return nullptr;
 
     auto self = std::make_shared<File>( ml, mediaId, 0, type, mrl );
-    static const std::string req = "INSERT INTO " + policy::FileTable::Name +
+    static const std::string req = "INSERT INTO " + File::Table::Name +
             "(media_id, mrl, type, folder_id, is_removable, is_external) "
             "VALUES(?, ?, ?, NULL, 0, 1)";
 
@@ -233,7 +233,7 @@ std::shared_ptr<File> File::createFromPlaylist( MediaLibraryPtr ml, int64_t play
     assert( playlistId > 0 );
     const auto type = IFile::Type::Playlist;
     auto self = std::make_shared<File>( ml, 0, playlistId, type , fileFs, folderId, isRemovable );
-    static const std::string req = "INSERT INTO " + policy::FileTable::Name +
+    static const std::string req = "INSERT INTO " + File::Table::Name +
             "(playlist_id, mrl, type, folder_id, last_modification_date, size, "
             "is_removable, is_external) VALUES(?, ?, ?, ?, ?, ?, ?, 0)";
 
@@ -246,7 +246,7 @@ std::shared_ptr<File> File::createFromPlaylist( MediaLibraryPtr ml, int64_t play
 
 std::shared_ptr<File> File::fromMrl( MediaLibraryPtr ml, const std::string& mrl )
 {
-    static const std::string req = "SELECT * FROM " + policy::FileTable::Name +
+    static const std::string req = "SELECT * FROM " + File::Table::Name +
             " WHERE mrl = ? AND folder_id IS NOT NULL";
     auto file = fetch( ml, req, mrl );
     if ( file == nullptr )
@@ -261,7 +261,7 @@ std::shared_ptr<File> File::fromMrl( MediaLibraryPtr ml, const std::string& mrl 
 std::shared_ptr<File> File::fromFileName( MediaLibraryPtr ml, const std::string& fileName,
                                           int64_t folderId )
 {
-    static const std::string req = "SELECT * FROM " + policy::FileTable::Name +
+    static const std::string req = "SELECT * FROM " + File::Table::Name +
             " WHERE mrl = ? AND folder_id = ?";
     auto file = fetch( ml, req, fileName, folderId );
     if ( file == nullptr )
@@ -272,7 +272,7 @@ std::shared_ptr<File> File::fromFileName( MediaLibraryPtr ml, const std::string&
 
 std::shared_ptr<File> File::fromExternalMrl( MediaLibraryPtr ml, const std::string& mrl )
 {
-    static const std::string req = "SELECT * FROM " + policy::FileTable::Name +  " WHERE mrl = ? "
+    static const std::string req = "SELECT * FROM " + File::Table::Name +  " WHERE mrl = ? "
             "AND folder_id IS NULL";
     auto file = fetch( ml, req, mrl );
     if ( file == nullptr )

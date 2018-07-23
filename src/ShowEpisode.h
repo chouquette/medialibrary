@@ -36,19 +36,15 @@ namespace medialibrary
 class Show;
 class ShowEpisode;
 
-namespace policy
-{
-struct ShowEpisodeTable
-{
-    static const std::string Name;
-    static const std::string PrimaryKeyColumn;
-    static int64_t ShowEpisode::*const PrimaryKey;
-};
-}
-
-class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, policy::ShowEpisodeTable>
+class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode>
 {
     public:
+        struct Table
+        {
+            static const std::string Name;
+            static const std::string PrimaryKeyColumn;
+            static int64_t ShowEpisode::*const PrimaryKey;
+        };
         ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row );
         ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, unsigned int episodeNumber, int64_t showId );
 
@@ -77,7 +73,7 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode, pol
         int64_t m_showId;
         ShowPtr m_show;
 
-        friend struct policy::ShowEpisodeTable;
+        friend struct ShowEpisode::Table;
 };
 
 }

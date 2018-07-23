@@ -36,9 +36,9 @@
 namespace medialibrary
 {
 
-const std::string policy::ShowTable::Name = "Show";
-const std::string policy::ShowTable::PrimaryKeyColumn = "id_show";
-int64_t Show::* const policy::ShowTable::PrimaryKey = &Show::m_id;
+const std::string Show::Table::Name = "Show";
+const std::string Show::Table::PrimaryKeyColumn = "id_show";
+int64_t Show::* const Show::Table::PrimaryKey = &Show::m_id;
 
 Show::Show( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -76,7 +76,7 @@ time_t Show::releaseDate() const
 
 bool Show::setReleaseDate( time_t date )
 {
-    static const std::string req = "UPDATE " + policy::ShowTable::Name
+    static const std::string req = "UPDATE " + Show::Table::Name
             + " SET release_date = ? WHERE id_show = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, date, m_id ) == false )
         return false;
@@ -91,7 +91,7 @@ const std::string& Show::shortSummary() const
 
 bool Show::setShortSummary( const std::string& summary )
 {
-    static const std::string req = "UPDATE " + policy::ShowTable::Name
+    static const std::string req = "UPDATE " + Show::Table::Name
             + " SET short_summary = ? WHERE id_show = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, summary, m_id ) == false )
         return false;
@@ -106,7 +106,7 @@ const std::string& Show::artworkMrl() const
 
 bool Show::setArtworkMrl( const std::string& artworkMrl )
 {
-    static const std::string req = "UPDATE " + policy::ShowTable::Name
+    static const std::string req = "UPDATE " + Show::Table::Name
             + " SET artwork_mrl = ? WHERE id_show = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, artworkMrl, m_id ) == false )
         return false;
@@ -121,7 +121,7 @@ const std::string& Show::tvdbId() const
 
 bool Show::setTvdbId( const std::string& tvdbId )
 {
-    static const std::string req = "UPDATE " + policy::ShowTable::Name
+    static const std::string req = "UPDATE " + Show::Table::Name
             + " SET tvdb_id = ? WHERE id_show = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, tvdbId, m_id ) == false )
         return false;
@@ -139,8 +139,8 @@ std::shared_ptr<ShowEpisode> Show::addEpisode( Media& media, unsigned int episod
 
 Query<IMedia> Show::episodes( const QueryParameters* params ) const
 {
-    std::string req = "FROM " + policy::MediaTable::Name + " med "
-            " INNER JOIN " + policy::ShowEpisodeTable::Name + " ep ON ep.media_id = med.id_media "
+    std::string req = "FROM " + Media::Table::Name + " med "
+            " INNER JOIN " + ShowEpisode::Table::Name + " ep ON ep.media_id = med.id_media "
             + " WHERE ep.show_id = ?";
     std::string orderBy = " ORDER BY ";
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
@@ -182,7 +182,7 @@ uint32_t Show::nbEpisodes() const
 
 void Show::createTable( sqlite::Connection* dbConnection )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + policy::ShowTable::Name + "("
+    const std::string req = "CREATE TABLE IF NOT EXISTS " + Show::Table::Name + "("
                         "id_show INTEGER PRIMARY KEY AUTOINCREMENT,"
                         "title TEXT, "
                         "release_date UNSIGNED INTEGER,"
@@ -191,7 +191,7 @@ void Show::createTable( sqlite::Connection* dbConnection )
                         "tvdb_id TEXT"
                     ")";
     const std::string reqFts = "CREATE VIRTUAL TABLE IF NOT EXISTS " +
-                policy::ShowTable::Name + "Fts USING FTS3"
+                Show::Table::Name + "Fts USING FTS3"
             "("
                 "title"
             ")";
@@ -202,14 +202,14 @@ void Show::createTable( sqlite::Connection* dbConnection )
 void Show::createTriggers( sqlite::Connection* dbConnection )
 {
     const std::string insertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_show_fts"
-            " AFTER INSERT ON " + policy::ShowTable::Name +
+            " AFTER INSERT ON " + Show::Table::Name +
             " BEGIN"
-            " INSERT INTO " + policy::ShowTable::Name + "Fts(rowid,title) VALUES(new.id_show, new.title);"
+            " INSERT INTO " + Show::Table::Name + "Fts(rowid,title) VALUES(new.id_show, new.title);"
             " END";
     const std::string deleteTrigger = "CREATE TRIGGER IF NOT EXISTS delete_show_fts"
-            " BEFORE DELETE ON " + policy::ShowTable::Name +
+            " BEFORE DELETE ON " + Show::Table::Name +
             " BEGIN"
-            " DELETE FROM " + policy::ShowTable::Name + "Fts WHERE rowid = old.id_show;"
+            " DELETE FROM " + Show::Table::Name + "Fts WHERE rowid = old.id_show;"
             " END";
     sqlite::Tools::executeRequest( dbConnection, insertTrigger );
     sqlite::Tools::executeRequest( dbConnection, deleteTrigger );
@@ -218,7 +218,7 @@ void Show::createTriggers( sqlite::Connection* dbConnection )
 std::shared_ptr<Show> Show::create( MediaLibraryPtr ml, const std::string& name )
 {
     auto show = std::make_shared<Show>( ml, name );
-    static const std::string req = "INSERT INTO " + policy::ShowTable::Name
+    static const std::string req = "INSERT INTO " + Show::Table::Name
             + "(title) VALUES(?)";
     if ( insert( ml, show, req, name ) == false )
         return nullptr;
@@ -227,7 +227,7 @@ std::shared_ptr<Show> Show::create( MediaLibraryPtr ml, const std::string& name 
 
 Query<IShow> Show::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::ShowTable::Name;
+    std::string req = "FROM " + Show::Table::Name;
     return make_query<Show, IShow>( ml, "*", std::move( req ), orderBy( params ) );
 }
 
@@ -255,9 +255,9 @@ std::string Show::orderBy( const QueryParameters* params )
 Query<IShow> Show::search( MediaLibraryPtr ml, const std::string& pattern,
                            const QueryParameters* params )
 {
-    std::string req = "FROM " + policy::ShowTable::Name + " WHERE id_show IN"
-            "(SELECT rowid FROM " + policy::ShowTable::Name + "Fts WHERE " +
-            policy::ShowTable::Name + "Fts MATCH '*' || ? || '*')";
+    std::string req = "FROM " + Show::Table::Name + " WHERE id_show IN"
+            "(SELECT rowid FROM " + Show::Table::Name + "Fts WHERE " +
+            Show::Table::Name + "Fts MATCH '*' || ? || '*')";
     return make_query<Show, IShow>( ml, "*", std::move( req ),
                                     orderBy( params ), pattern );
 }

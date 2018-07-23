@@ -31,19 +31,15 @@ namespace medialibrary
 
 class Device;
 
-namespace policy
-{
-struct DeviceTable
-{
-    static const std::string Name;
-    static const std::string PrimaryKeyColumn;
-    static int64_t Device::*const PrimaryKey;
-};
-}
-
-class Device : public DatabaseHelpers<Device, policy::DeviceTable>
+class Device : public DatabaseHelpers<Device>
 {
 public:
+    struct Table
+    {
+        static const std::string Name;
+        static const std::string PrimaryKeyColumn;
+        static int64_t Device::*const PrimaryKey;
+    };
     Device( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme,
             bool isRemovable, time_t insertionDate );
     Device( MediaLibraryPtr ml, sqlite::Row& row );
@@ -79,7 +75,7 @@ private:
     bool m_isPresent;
     time_t m_lastSeen;
 
-    friend struct policy::DeviceTable;
+    friend struct Device::Table;
 };
 
 }

@@ -33,19 +33,15 @@ namespace medialibrary
 
 class VideoTrack;
 
-namespace policy
-{
-struct VideoTrackTable
-{
-    static const std::string Name;
-    static const std::string PrimaryKeyColumn;
-    static int64_t VideoTrack::* const PrimaryKey;
-};
-}
-
-class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy::VideoTrackTable>
+class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack>
 {
     public:
+        struct Table
+        {
+            static const std::string Name;
+            static const std::string PrimaryKeyColumn;
+            static int64_t VideoTrack::* const PrimaryKey;
+        };
         VideoTrack( MediaLibraryPtr, sqlite::Row& row );
         VideoTrack( MediaLibraryPtr, const std::string& codec,
                     unsigned int width, unsigned int height, uint32_t fpsNum,
@@ -87,7 +83,7 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack, policy
         std::string m_description;
 
     private:
-        friend struct policy::VideoTrackTable;
+        friend struct VideoTrack::Table;
 };
 
 }

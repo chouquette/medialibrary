@@ -35,19 +35,15 @@ class Artist;
 class Album;
 class Media;
 
-namespace policy
-{
-struct ArtistTable
-{
-    static const std::string Name;
-    static const std::string PrimaryKeyColumn;
-    static int64_t Artist::*const PrimaryKey;
-};
-}
-
-class Artist : public IArtist, public DatabaseHelpers<Artist, policy::ArtistTable>
+class Artist : public IArtist, public DatabaseHelpers<Artist>
 {
 public:
+    struct Table
+    {
+        static const std::string Name;
+        static const std::string PrimaryKeyColumn;
+        static int64_t Artist::*const PrimaryKey;
+    };
     Artist( MediaLibraryPtr ml, sqlite::Row& row );
     Artist( MediaLibraryPtr ml, const std::string& name );
 
@@ -100,7 +96,7 @@ private:
 
     mutable Cache<std::shared_ptr<Thumbnail>> m_thumbnail;
 
-    friend struct policy::ArtistTable;
+    friend struct Artist::Table;
 };
 
 }
