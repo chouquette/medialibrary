@@ -132,7 +132,7 @@ IMedia::Type::Unknown ) ),
 #include "database/tables/Device_v14.sql"
 
 "INSERT INTO " + Device::Table::Name + " SELECT id_device, uuid, scheme, is_removable, is_present,"
-    "strftime('%s', 'now') FROM " + Device::Table::Name,
+    "strftime('%s', 'now') FROM " + Device::Table::Name + "_backup",
 
 "DROP TABLE " + Device::Table::Name + "_backup",
 
