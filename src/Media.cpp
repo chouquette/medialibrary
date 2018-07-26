@@ -817,12 +817,18 @@ void Media::clearHistory( MediaLibraryPtr ml )
 
 void Media::removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime )
 {
+    // Media that were never played have a real_last_played_date = NULL, so they
+    // won't match for real_last_played_date < X
+    // However we need to take care about media that were inserted but never played
     const std::string req = "DELETE FROM " + Media::Table::Name + " "
-            "WHERE real_last_played_date < ? AND ( type = ? OR type = ? ) "
+            "WHERE ( real_last_played_date < ? OR "
+                "( real_last_played_date IS NULL AND insertion_date < ? ) )"
+            "AND ( type = ? OR type = ? ) "
             "AND nb_playlists = 0";
     auto deadline = std::chrono::duration_cast<std::chrono::seconds>(
                 (std::chrono::system_clock::now() - maxLifeTime).time_since_epoch() );
     sqlite::Tools::executeDelete( ml->getConn(), req, deadline.count(),
+                                  deadline.count(),
                                   IMedia::Type::External, IMedia::Type::Stream );
 }
 

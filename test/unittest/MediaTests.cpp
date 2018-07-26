@@ -734,6 +734,22 @@ TEST_F( Medias, VacuumOldExternal )
     auto m2 = ml->addExternalMedia( "bar.mp3" );
     auto s1 = ml->addStream( "http://baz.mkv" );
 
+    ASSERT_NE( nullptr, m1 );
+    ASSERT_NE( nullptr, m2 );
+    ASSERT_NE( nullptr, s1 );
+
+    // Check that they will not be vacuumed even if they haven't been played yet.
+
+    Reload();
+
+    m1 = ml->media( m1->id() );
+    m2 = ml->media( m2->id() );
+    s1 = ml->media( s1->id() );
+
+    ASSERT_NE( nullptr, m1 );
+    ASSERT_NE( nullptr, m2 );
+    ASSERT_NE( nullptr, s1 );
+
     auto playlist = ml->createPlaylist( "playlist" );
     playlist->append( *m1 );
 
@@ -748,6 +764,29 @@ TEST_F( Medias, VacuumOldExternal )
     ASSERT_NE( nullptr, m1 );
     ASSERT_EQ( nullptr, m2 );
     ASSERT_EQ( nullptr, s1 );
+}
+
+TEST_F( Medias, VacuumNeverPlayedMedia )
+{
+    auto m1 = ml->addExternalMedia( "foo.avi" );
+    auto m2 = ml->addExternalMedia( "bar.mp3" );
+    auto s1 = ml->addStream( "http://baz.mkv" );
+
+    ASSERT_NE( nullptr, m1 );
+    ASSERT_NE( nullptr, m2 );
+    ASSERT_NE( nullptr, s1 );
+
+    ml->setMediaInsertionDate( m1->id(), 1 );
+
+    Reload();
+
+    m1 = ml->media( m1->id() );
+    m2 = ml->media( m2->id() );
+    s1 = ml->media( s1->id() );
+
+    ASSERT_EQ( nullptr, m1 );
+    ASSERT_NE( nullptr, m2 );
+    ASSERT_NE( nullptr, s1 );
 }
 
 TEST_F( Medias, NbPlaylists )

@@ -78,6 +78,7 @@ public:
     MediaPtr addMedia( const std::string& mrl );
     void deleteMedia( int64_t mediaId );
     void outdateAllDevices();
+    void setMediaInsertionDate( int64_t mediaId, time_t t );
     void outdateAllExternalMedia();
 
 private:

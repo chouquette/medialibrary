@@ -221,6 +221,13 @@ void MediaLibraryTester::outdateAllDevices()
     sqlite::Tools::executeUpdate( getConn(), req );
 }
 
+void MediaLibraryTester::setMediaInsertionDate( int64_t mediaId, time_t t )
+{
+    std::string req = "UPDATE " + Media::Table::Name + " SET insertion_date = ? "
+            "WHERE id_media = ?";
+    sqlite::Tools::executeUpdate( getConn(), req, mediaId, t );
+}
+
 void MediaLibraryTester::outdateAllExternalMedia()
 {
     std::string req = "UPDATE " + Media::Table::Name + " SET real_last_played_date = 1 "
