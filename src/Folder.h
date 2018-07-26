@@ -94,10 +94,10 @@ private:
     // This contains the path relative to the device mountpoint (ie. excluding it)
     // or the full path (including mrl scheme) for folders on non removable devices
     std::string m_path;
-    int64_t m_parent;
-    bool m_isBlacklisted;
-    int64_t m_deviceId;
-    bool m_isRemovable;
+    const int64_t m_parent;
+    const bool m_isBlacklisted;
+    const int64_t m_deviceId;
+    const bool m_isRemovable;
 
     mutable Cache<std::string> m_deviceMountpoint;
     mutable Cache<std::shared_ptr<Device>> m_device;

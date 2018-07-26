@@ -46,15 +46,14 @@ int64_t Folder::* const Folder::Table::PrimaryKey = &Folder::m_id;
 
 Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
+    , m_id( row.load<decltype(m_id)>( 0 ) )
+    , m_path( row.load<decltype(m_path)>( 1 ) )
+    , m_parent( row.load<decltype(m_parent)>( 2 ) )
+    , m_isBlacklisted( row.load<decltype(m_isBlacklisted)>( 3 ) )
+    , m_deviceId( row.load<decltype(m_deviceId)>( 4 ) )
+    // Skip is_present
+    , m_isRemovable( row.load<decltype(m_isRemovable)>( 6 ) )
 {
-    bool dummy;
-    row >> m_id
-        >> m_path
-        >> m_parent
-        >> m_isBlacklisted
-        >> m_deviceId
-        >> dummy
-        >> m_isRemovable;
 }
 
 Folder::Folder(MediaLibraryPtr ml, const std::string& path, int64_t parent, int64_t deviceId, bool isRemovable )
