@@ -35,19 +35,19 @@ const std::string VideoTrack::Table::PrimaryKeyColumn = "id_track";
 int64_t VideoTrack::* const VideoTrack::Table::PrimaryKey = &VideoTrack::m_id;
 
 VideoTrack::VideoTrack( MediaLibraryPtr, sqlite::Row& row )
+    : m_id( row.extract<decltype(m_id)>() )
+    , m_codec( row.extract<decltype(m_codec)>() )
+    , m_width( row.extract<decltype(m_width)>() )
+    , m_height( row.extract<decltype(m_height)>() )
+    , m_fpsNum( row.extract<decltype(m_fpsNum)>() )
+    , m_fpsDen( row.extract<decltype(m_fpsDen)>() )
+    , m_bitrate( row.extract<decltype(m_bitrate)>() )
+    , m_sarNum( row.extract<decltype(m_sarNum)>() )
+    , m_sarDen( row.extract<decltype(m_sarDen)>() )
+    , m_mediaId( row.extract<decltype(m_mediaId)>() )
+    , m_language( row.extract<decltype(m_language)>() )
+    , m_description( row.extract<decltype(m_description)>() )
 {
-    row >> m_id
-        >> m_codec
-        >> m_width
-        >> m_height
-        >> m_fpsNum
-        >> m_fpsDen
-        >> m_bitrate
-        >> m_sarNum
-        >> m_sarDen
-        >> m_mediaId
-        >> m_language
-        >> m_description;
 }
 
 VideoTrack::VideoTrack( MediaLibraryPtr, const std::string& codec, unsigned int width,

@@ -70,17 +70,17 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack>
 
     private:
         int64_t m_id;
-        std::string m_codec;
-        unsigned int m_width;
-        unsigned int m_height;
-        uint32_t m_fpsNum;
-        uint32_t m_fpsDen;
-        uint32_t m_bitrate;
-        uint32_t m_sarNum;
-        uint32_t m_sarDen;
-        int64_t m_mediaId;
-        std::string m_language;
-        std::string m_description;
+        const std::string m_codec;
+        const unsigned int m_width;
+        const unsigned int m_height;
+        const uint32_t m_fpsNum;
+        const uint32_t m_fpsDen;
+        const uint32_t m_bitrate;
+        const uint32_t m_sarNum;
+        const uint32_t m_sarDen;
+        const int64_t m_mediaId;
+        const std::string m_language;
+        const std::string m_description;
 
     private:
         friend struct VideoTrack::Table;
