@@ -41,10 +41,10 @@ int64_t Genre::* const Genre::Table::PrimaryKey = &Genre::m_id;
 
 Genre::Genre( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
+    , m_id( row.extract<decltype(m_id)>() )
+    , m_name( row.extract<decltype(m_name)>() )
+    , m_nbTracks( row.extract<decltype(m_nbTracks)>() )
 {
-    row >> m_id
-        >> m_name
-        >> m_nbTracks;
 }
 
 Genre::Genre( MediaLibraryPtr ml, const std::string& name )

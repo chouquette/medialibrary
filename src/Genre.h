@@ -68,7 +68,7 @@ private:
     MediaLibraryPtr m_ml;
 
     int64_t m_id;
-    std::string m_name;
+    const std::string m_name;
     uint32_t m_nbTracks;
 
     friend Genre::Table;
