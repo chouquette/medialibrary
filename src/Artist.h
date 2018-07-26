@@ -86,13 +86,13 @@ private:
 private:
     MediaLibraryPtr m_ml;
     int64_t m_id;
-    std::string m_name;
+    const std::string m_name;
     std::string m_shortBio;
     int64_t m_thumbnailId;
     unsigned int m_nbAlbums;
     unsigned int m_nbTracks;
-    bool m_isPresent;
     std::string m_mbId;
+    bool m_isPresent;
 
     mutable Cache<std::shared_ptr<Thumbnail>> m_thumbnail;
 

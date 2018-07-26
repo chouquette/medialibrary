@@ -41,15 +41,15 @@ int64_t Artist::*const Artist::Table::PrimaryKey = &Artist::m_id;
 
 Artist::Artist( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
+    , m_id( row.extract<decltype(m_id)>() )
+    , m_name( row.extract<decltype(m_name)>() )
+    , m_shortBio( row.extract<decltype(m_shortBio)>() )
+    , m_thumbnailId( row.extract<decltype(m_thumbnailId)>() )
+    , m_nbAlbums( row.extract<decltype(m_nbAlbums)>() )
+    , m_nbTracks( row.extract<decltype(m_nbTracks)>() )
+    , m_mbId( row.extract<decltype(m_mbId)>() )
+    , m_isPresent( row.extract<decltype(m_isPresent)>() )
 {
-    row >> m_id
-        >> m_name
-        >> m_shortBio
-        >> m_thumbnailId
-        >> m_nbAlbums
-        >> m_nbTracks
-        >> m_mbId
-        >> m_isPresent;
 }
 
 Artist::Artist( MediaLibraryPtr ml, const std::string& name )
