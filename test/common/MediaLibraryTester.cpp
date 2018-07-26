@@ -241,3 +241,10 @@ void MediaLibraryTester::setMediaType(int64_t mediaId, IMedia::Type type)
     std::string req = "UPDATE " + Media::Table::Name + " SET type = ? WHERE id_media = ?";
     sqlite::Tools::executeUpdate( getConn(), req, type, mediaId );
 }
+
+void MediaLibraryTester::setAlbumTrackGenre( int64_t albumTrackId, int64_t genreId )
+{
+    static const std::string req = "UPDATE " + AlbumTrack::Table::Name
+            + " SET genre_id = ? WHERE id_track = ?";
+    sqlite::Tools::executeUpdate( getConn(), req, genreId, albumTrackId );
+}

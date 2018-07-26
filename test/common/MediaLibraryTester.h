@@ -82,6 +82,7 @@ public:
     void setMediaInsertionDate( int64_t mediaId, time_t t );
     void outdateAllExternalMedia();
     void setMediaType( int64_t mediaId, IMedia::Type type );
+    void setAlbumTrackGenre( int64_t albumTrackId, int64_t genreId );
 
 private:
     std::shared_ptr<fs::IDirectory> dummyDirectory;

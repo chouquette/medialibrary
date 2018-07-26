@@ -108,11 +108,9 @@ TEST_F( Albums, TracksByGenre )
     for ( auto i = 1u; i <= 10; ++i )
     {
         auto f = std::static_pointer_cast<Media>( ml->addMedia( "track" + std::to_string(i) + ".mp3" ) );
-        auto track = a->addTrack( f, i, i, 0, nullptr );
+        auto track = a->addTrack( f, i, i, 0, i <= 5 ? g.get() : nullptr );
         f->save();
         ASSERT_NE( track, nullptr );
-        if ( i <= 5 )
-            track->setGenre( g );
     }
     auto tracks = a->tracks( g, nullptr )->all();
     ASSERT_EQ( 5u, tracks.size() );
