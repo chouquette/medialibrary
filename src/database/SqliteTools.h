@@ -63,11 +63,26 @@ public:
     }
 
     /**
+     * @brief extract Returns the next value and advances to the next column
+     */
+    template <typename T>
+    T extract()
+    {
+        if ( m_idx + 1 > m_nbColumns )
+            throw errors::ColumnOutOfRange( m_idx, m_nbColumns );
+        auto t = sqlite::Traits<T>::Load( m_stmt, m_idx );
+        m_idx++;
+        return t;
+    }
+
+    /**
      * @brief operator >> Extracts the next column from this result row.
      */
     template <typename T>
-    Row& operator>>(T& t)
+    Row& operator>>( T& t )
     {
+        // Do not use extract as T might not be Copyable. Traits class however
+        // always return a type that can be use to construct a T
         if ( m_idx + 1 > m_nbColumns )
             throw errors::ColumnOutOfRange( m_idx, m_nbColumns );
         t = sqlite::Traits<T>::Load( m_stmt, m_idx );
