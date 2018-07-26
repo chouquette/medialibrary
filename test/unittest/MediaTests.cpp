@@ -490,22 +490,6 @@ TEST_F( Medias, SortByFilename )
     ASSERT_EQ( m1->id(), media[0]->id() );
 }
 
-TEST_F( Medias, SetType )
-{
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3" ) );
-    ASSERT_EQ( IMedia::Type::External, m1->type() );
-
-    m1->setType( IMedia::Type::Video );
-    m1->save();
-
-    ASSERT_EQ( IMedia::Type::Video, m1->type() );
-
-    Reload();
-
-    auto m2 = ml->media( m1->id() );
-    ASSERT_EQ( IMedia::Type::Video, m2->type() );
-}
-
 TEST_F( Medias, Metadata )
 {
     auto m = ml->addMedia( "media.mp3" );

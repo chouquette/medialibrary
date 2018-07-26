@@ -44,6 +44,7 @@
 #include "discoverer/probe/PathProbe.h"
 
 #include <cstdlib>
+#include <algorithm>
 
 namespace medialibrary
 {
@@ -105,6 +106,16 @@ Status MetadataAnalyzer::run( IItem& item )
         return Status::Completed;
     }
 
+    const auto& tracks = item.tracks();
+
+    if ( tracks.empty() == true )
+    {
+        LOG_WARN( "Failed to analyze ", item.mrl(), ": no tracks found" );
+        return Status::Fatal;
+    }
+
+    bool isAudio;
+
     if ( item.file() == nullptr )
     {
         assert( item.media() == nullptr );
@@ -112,9 +123,13 @@ Status MetadataAnalyzer::run( IItem& item )
         auto mrl = item.mrl();
         try
         {
+            isAudio = std::find_if( begin( tracks ), end( tracks ), [](const Task::Item::Track& t) {
+                return t.type == Task::Item::Track::Type::Video;
+            }) == end( tracks );
             auto t = m_ml->getConn()->newTransaction();
             LOG_INFO( "Adding ", mrl );
-            auto m = Media::create( m_ml, IMedia::Type::Unknown, utils::file::fileName( mrl ) );
+            auto m = Media::create( m_ml, isAudio ? IMedia::Type::Audio : IMedia::Type::Video,
+                                    utils::file::fileName( mrl ) );
             if ( m == nullptr )
             {
                 LOG_ERROR( "Failed to add media ", mrl, " to the media library" );
@@ -166,6 +181,8 @@ Status MetadataAnalyzer::run( IItem& item )
         assert( false );
         return Status::Fatal;
     }
+    else
+        isAudio = item.media()->type() == IMedia::Type::Audio;
     auto media = std::static_pointer_cast<Media>( item.media() );
 
     if ( item.parentPlaylist() != nullptr )
@@ -174,15 +191,6 @@ Status MetadataAnalyzer::run( IItem& item )
     if ( alreadyInParser == true )
         return Status::Discarded;
 
-    const auto& tracks = item.tracks();
-
-    if ( tracks.empty() == true )
-    {
-        LOG_WARN( "Failed to analyze ", item.mrl(), ": no tracks found" );
-        return Status::Fatal;
-    }
-
-    bool isAudio = true;
     {
         using TracksT = decltype( tracks );
         sqlite::Tools::withRetries( 3, [this, &isAudio, &item, &media]( TracksT tracks ) {
@@ -376,7 +384,6 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
 bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
 {
     auto media = static_cast<Media*>( item.media().get() );
-    media->setType( IMedia::Type::Video );
     const auto& title = item.meta( IItem::Metadata::Title );
     if ( title.length() == 0 )
         return true;
@@ -433,7 +440,6 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
 bool MetadataAnalyzer::parseAudioFile( IItem& item )
 {
     auto media = static_cast<Media*>( item.media().get() );
-    media->setType( IMedia::Type::Audio );
 
     auto artworkMrl = item.meta( IItem::Metadata::ArtworkUrl );
     if ( artworkMrl.empty() == false )
