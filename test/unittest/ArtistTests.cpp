@@ -577,17 +577,15 @@ TEST_F( Artists, SearchTracks )
 {
     auto artist1 = ml->createArtist( "artist" );
     auto album1 = ml->createAlbum( "album" );
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3", Media::Type::Audio ) );
     m1->setTitleBuffered( "sea otter" );
-    m1->setType( Media::Type::Audio );
     auto track1 = album1->addTrack( m1, 1, 0, artist1->id(), nullptr );
     m1->save();
 
     auto artist2 = ml->createArtist( "artist2" );
     auto album2 = ml->createAlbum( "album2" );
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3" ) );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
     m2->setTitleBuffered( "sea cucumber" );
-    m2->setType( IMedia::Type::Audio );
     album2->addTrack( m2, 1, 0, artist2->id(), nullptr );
     m2->save();
 

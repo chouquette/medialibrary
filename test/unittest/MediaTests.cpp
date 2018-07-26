@@ -49,7 +49,7 @@ TEST_F( Medias, Init )
 
 TEST_F( Medias, Create )
 {
-    auto m = ml->addFile( "media.avi" );
+    auto m = ml->addFile( "media.avi", IMedia::Type::Video );
     ASSERT_NE( m, nullptr );
 
     ASSERT_EQ( m->playCount(), 0 );
@@ -160,8 +160,7 @@ TEST_F( Medias, Search )
     for ( auto i = 1u; i <= 10u; ++i )
     {
         auto m = std::static_pointer_cast<Media>(
-                    ml->addMedia( "track " + std::to_string( i ) + ".mp3" ) );
-        m->setType( IMedia::Type::Video );
+                    ml->addMedia( "track " + std::to_string( i ) + ".mp3", IMedia::Type::Video ) );
         m->save();
     }
     auto media = ml->searchMedia( "tra", nullptr )->all();
@@ -182,14 +181,12 @@ TEST_F( Medias, SearchAndSort )
     for ( auto i = 1u; i <= 3u; ++i )
     {
         auto m = std::static_pointer_cast<Media>(
-                    ml->addMedia( "track " + std::to_string( i ) + ".mp3" ) );
-        m->setType( IMedia::Type::Audio );
+                    ml->addMedia( "track " + std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
         m->setDuration( 3 - i );
         m->save();
     }
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "this pattern doesn't match.mp3" ) );
-    m->setType( IMedia::Type::Audio );
-    m->save();
+    auto m = std::static_pointer_cast<Media>( ml->addMedia(
+                    "this pattern doesn't match.mp3", IMedia::Type::Audio ) );
 
     auto media = ml->searchMedia( "tra", nullptr )->all();
     ASSERT_EQ( 3u, media.size() );
@@ -207,9 +204,7 @@ TEST_F( Medias, SearchAndSort )
 
 TEST_F( Medias, SearchAfterEdit )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
-    m->setType( IMedia::Type::Audio );
-    m->save();
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
 
     auto media = ml->searchMedia( "media", nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
@@ -226,9 +221,7 @@ TEST_F( Medias, SearchAfterEdit )
 
 TEST_F( Medias, SearchAfterDelete )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
-    m->setType( IMedia::Type::Audio );
-    m->save();
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
 
     auto media = ml->searchMedia( "media", nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
@@ -242,9 +235,7 @@ TEST_F( Medias, SearchAfterDelete )
 
 TEST_F( Medias, SearchByLabel )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
-    m->setType( IMedia::Type::Video );
-    m->save();
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     auto media = ml->searchMedia( "otter", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
 
@@ -293,9 +284,9 @@ TEST_F( Medias, SearchTracks )
     auto a = ml->createAlbum( "album" );
     for ( auto i = 1u; i <= 10u; ++i )
     {
-       auto m = std::static_pointer_cast<Media>( ml->addMedia( "track " + std::to_string( i ) + ".mp3" ) );
+       auto m = std::static_pointer_cast<Media>( ml->addMedia( "track " +
+                        std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
        a->addTrack( m, i, 1, 0, 0 );
-       m->setType( IMedia::Type::Audio );
        m->save();
     }
     auto tracks = ml->searchMedia( "tra", nullptr )->all();
@@ -313,9 +304,7 @@ TEST_F( Medias, SearchTracks )
 
 TEST_F( Medias, Favorite )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
-    m->setType( IMedia::Type::Video );
-    m->save();
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     ASSERT_FALSE( m->isFavorite() );
 
     m->setFavorite( true );
@@ -407,19 +396,16 @@ TEST_F( Medias, SetReleaseDate )
 
 TEST_F( Medias, SortByAlpha )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3" ) );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3", Media::Type::Audio ) );
     m1->setTitleBuffered( "Abcd" );
-    m1->setType( Media::Type::Audio );
     m1->save();
 
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3" ) );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3", Media::Type::Audio ) );
     m2->setTitleBuffered( "Zyxw" );
-    m2->setType( Media::Type::Audio );
     m2->save();
 
-    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3" ) );
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3", Media::Type::Audio) );
     m3->setTitleBuffered( "afterA-beforeZ" );
-    m3->setType( Media::Type::Audio );
     m3->save();
 
     QueryParameters params { SortingCriteria::Alpha, false };
@@ -441,15 +427,11 @@ TEST_F( Medias, SortByLastModifDate )
 {
     auto file1 = std::make_shared<mock::NoopFile>( "media.mkv" );
     file1->setLastModificationDate( 666 );
-    auto m1 = ml->addFile( file1 );
-    m1->setType( Media::Type::Video );
-    m1->save();
+    auto m1 = ml->addFile( file1, Media::Type::Video );
 
     auto file2 = std::make_shared<mock::NoopFile>( "media2.mkv" );
     file2->setLastModificationDate( 111 );
-    auto m2 = ml->addFile( file2 );
-    m2->setType( Media::Type::Video );
-    m2->save();
+    auto m2 = ml->addFile( file2, Media::Type::Video );
 
     QueryParameters params { SortingCriteria::LastModificationDate, false };
     auto media = ml->videoFiles( &params )->all();
@@ -468,15 +450,11 @@ TEST_F( Medias, SortByFileSize )
 {
     auto file1 = std::make_shared<mock::NoopFile>( "media.mkv" );
     file1->setSize( 666 );
-    auto m1 = ml->addFile( file1 );
-    m1->setType( Media::Type::Video );
-    m1->save();
+    auto m1 = ml->addFile( file1, Media::Type::Video );
 
     auto file2 = std::make_shared<mock::NoopFile>( "media2.mkv" );
     file2->setSize( 111 );
-    auto m2 = ml->addFile( file2 );
-    m2->setType( Media::Type::Video );
-    m2->save();
+    auto m2 = ml->addFile( file2, Media::Type::Video );
 
     QueryParameters params { SortingCriteria::FileSize, false };
     auto media = ml->videoFiles( &params )->all();
@@ -493,15 +471,11 @@ TEST_F( Medias, SortByFileSize )
 
 TEST_F( Medias, SortByFilename )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "zzzzz.mp3" ) );
-    m1->setType( Media::Type::Video );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "zzzzz.mp3", Media::Type::Video ) );
     m1->setTitle( "aaaaa" );
-    m1->save();
 
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "aaaaa.mp3" ) );
-    m2->setType( Media::Type::Video );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "aaaaa.mp3", Media::Type::Video ) );
     m2->setTitle( "zzzzz" );
-    m2->save();
 
     QueryParameters params { SortingCriteria::Filename, false };
     auto media = ml->videoFiles( &params )->all();
@@ -653,9 +627,8 @@ TEST_F( Medias, Pagination )
 {
     for ( auto i = 1u; i <= 9u; ++i )
     {
-       auto m = std::static_pointer_cast<Media>( ml->addMedia( "track " + std::to_string( i ) + ".mp3" ) );
-       m->setType( IMedia::Type::Video );
-       m->save();
+       auto m = std::static_pointer_cast<Media>( ml->addMedia( "track " +
+                        std::to_string( i ) + ".mp3", IMedia::Type::Video ) );
     }
 
     auto allMedia = ml->videoFiles( nullptr )->all();
@@ -676,17 +649,9 @@ TEST_F( Medias, Pagination )
 
 TEST_F( Medias, SortFilename )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "AAAAB.mp3" ) );
-    m1->setType( IMedia::Type::Audio );
-    m1->save();
-
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "aaaaa.mp3" ) );
-    m2->setType( IMedia::Type::Audio );
-    m2->save();
-
-    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "BbBbB.mp3" ) );
-    m3->setType( IMedia::Type::Audio );
-    m3->save();
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "AAAAB.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "aaaaa.mp3", IMedia::Type::Audio ) );
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "BbBbB.mp3", IMedia::Type::Audio ) );
 
     QueryParameters params { SortingCriteria::Filename, false };
     auto media = ml->audioFiles( &params )->all();
@@ -719,10 +684,8 @@ TEST_F( Medias, SearchExternal )
     auto media = ml->searchMedia( "otter", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
 
-    m1->setType( IMedia::Type::Video );
-    m1->save();
-    m2->setType( IMedia::Type::Video );
-    m2->save();
+    ml->setMediaType( m1->id(), IMedia::Type::Video );
+    ml->setMediaType( m2->id(), IMedia::Type::Video );
 
     media = ml->searchMedia( "otter", nullptr )->all();
     ASSERT_EQ( 2u, media.size() );

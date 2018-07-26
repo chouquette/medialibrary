@@ -59,12 +59,13 @@ public:
     void deleteTrack( int64_t trackId );
     std::shared_ptr<AlbumTrack> albumTrack( int64_t id );
     // Use to run tests that fiddles with file properties (modification dates, size...)
-    std::shared_ptr<Media> addFile( std::shared_ptr<fs::IFile> file);
+    std::shared_ptr<Media> addFile(std::shared_ptr<fs::IFile> file, IMedia::Type type);
     // Used when we need an actual file instead of an external media
-    std::shared_ptr<Media> addFile( const std::string& path );
+    std::shared_ptr<Media> addFile(const std::string& path , IMedia::Type type);
     std::shared_ptr<Media> addFile( std::shared_ptr<fs::IFile> fileFs,
                                     std::shared_ptr<Folder> parentFolder,
-                                    std::shared_ptr<fs::IDirectory> parentFolderFs );
+                                    std::shared_ptr<fs::IDirectory> parentFolderFs,
+                                    IMedia::Type type );
     virtual void addLocalFsFactory() override;
     std::shared_ptr<Device> device( const std::string& uuid );
     std::vector<const char*> getSupportedExtensions() const;
@@ -75,11 +76,12 @@ public:
     sqlite::Connection* getDbConn();
     virtual void startThumbnailer();
     virtual void populateFsFactories();
-    MediaPtr addMedia( const std::string& mrl );
+    MediaPtr addMedia( const std::string& mrl, IMedia::Type type = IMedia::Type::External );
     void deleteMedia( int64_t mediaId );
     void outdateAllDevices();
     void setMediaInsertionDate( int64_t mediaId, time_t t );
     void outdateAllExternalMedia();
+    void setMediaType( int64_t mediaId, IMedia::Type type );
 
 private:
     std::shared_ptr<fs::IDirectory> dummyDirectory;

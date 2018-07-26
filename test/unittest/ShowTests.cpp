@@ -316,14 +316,13 @@ TEST_F( Shows, SearchEpisodes )
     auto show1 = ml->createShow( "Show1" );
     auto show2 = ml->createShow( "show2" );
 
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "episode.mkv" ) );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "episode.mkv", IMedia::Type::Video ) );
     m1->setTitleBuffered( "cute otters" );
-    m1->setType( IMedia::Type::Video );
+    // will save the media in db
     auto ep1 = show1->addEpisode( *m1, 1 );
 
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "other episode.mkv" ) );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "other episode.mkv", IMedia::Type::Video ) );
     m2->setTitleBuffered( "fluffy otters" );
-    m2->setType( IMedia::Type::Video );
     auto ep2 = show2->addEpisode( *m2, 1 );
 
     auto episodes = ml->searchVideo( "otters", nullptr )->all();

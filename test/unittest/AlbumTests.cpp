@@ -64,7 +64,7 @@ TEST_F( Albums, Fetch )
 TEST_F( Albums, AddTrack )
 {
     auto a = ml->createAlbum( "albumtag" );
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "track.mp3" ) );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "track.mp3", IMedia::Type::Audio ) );
     auto track = a->addTrack( f, 10, 0, 0, nullptr );
     f->save();
     ASSERT_NE( track, nullptr );
@@ -611,21 +611,18 @@ TEST_F( Albums, SearchTracks )
 {
     auto alb = ml->createAlbum( "Mustelidae" );
 
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
     m1->setTitleBuffered( "otter otter run run" );
-    m1->setType( IMedia::Type::Audio );
     alb->addTrack( m1, 1, 1, 0, nullptr );
     m1->save();
 
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3" ) );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
     m2->setTitleBuffered( "weasel weasel" );
-    m2->setType( IMedia::Type::Audio );
     alb->addTrack( m2, 1, 1, 0, nullptr );
     m2->save();
 
-    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "random media.aac" ) );
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "random media.aac", IMedia::Type::Audio ) );
     m3->setTitleBuffered( "otters are cute but not on this album" );
-    m3->setType( IMedia::Type::Audio );
     m3->save();
 
     auto allMedia = ml->searchMedia( "otter", nullptr )->all();

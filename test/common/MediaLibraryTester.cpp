@@ -62,23 +62,24 @@ std::shared_ptr<Folder> MediaLibraryTester::folder( const std::string& mrl )
     return nullptr;
 }
 
-std::shared_ptr<Media> MediaLibraryTester::addFile( const std::string& path )
+std::shared_ptr<Media> MediaLibraryTester::addFile( const std::string& path, IMedia::Type type )
 {
     return addFile( std::make_shared<mock::NoopFile>( path ),
-                    dummyFolder, dummyDirectory );
+                    dummyFolder, dummyDirectory, type );
 }
 
-std::shared_ptr<Media> MediaLibraryTester::addFile( std::shared_ptr<fs::IFile> file )
+std::shared_ptr<Media> MediaLibraryTester::addFile( std::shared_ptr<fs::IFile> file, IMedia::Type type )
 {
-    return addFile( std::move( file ), dummyFolder, dummyDirectory );
+    return addFile( std::move( file ), dummyFolder, dummyDirectory, type );
 }
 
 std::shared_ptr<Media> MediaLibraryTester::addFile( std::shared_ptr<fs::IFile> fileFs,
                                               std::shared_ptr<Folder> parentFolder,
-                                              std::shared_ptr<fs::IDirectory> parentFolderFs )
+                                              std::shared_ptr<fs::IDirectory> parentFolderFs,
+                                              IMedia::Type type )
 {
     LOG_INFO( "Adding ", fileFs->mrl() );
-    auto mptr = Media::create( this, IMedia::Type::Unknown,
+    auto mptr = Media::create( this, type,
                                utils::file::stripExtension( fileFs->name() ) );
     if ( mptr == nullptr )
     {
@@ -189,7 +190,7 @@ void MediaLibraryTester::addDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,
                                 std::shared_ptr<fs::IDirectory> parentFolderFs,
                                 std::pair<std::shared_ptr<Playlist>, unsigned int>)
 {
-    addFile( fileFs, parentFolder, parentFolderFs );
+    addFile( fileFs, parentFolder, parentFolderFs, IMedia::Type::Unknown );
 }
 
 sqlite::Connection* MediaLibraryTester::getDbConn()
@@ -205,9 +206,9 @@ void MediaLibraryTester::populateFsFactories()
 {
 }
 
-MediaPtr MediaLibraryTester::addMedia( const std::string& mrl )
+MediaPtr MediaLibraryTester::addMedia( const std::string& mrl, IMedia::Type type )
 {
-    return addExternalMedia( mrl );
+    return addExternalMedia( mrl, type );
 }
 
 void MediaLibraryTester::deleteMedia( int64_t mediaId )
@@ -233,4 +234,10 @@ void MediaLibraryTester::outdateAllExternalMedia()
     std::string req = "UPDATE " + Media::Table::Name + " SET real_last_played_date = 1 "
             "WHERE type = ? OR type = ?";
     sqlite::Tools::executeUpdate( getConn(), req, IMedia::Type::External, IMedia::Type::Stream );
+}
+
+void MediaLibraryTester::setMediaType(int64_t mediaId, IMedia::Type type)
+{
+    std::string req = "UPDATE " + Media::Table::Name + " SET type = ? WHERE id_media = ?";
+    sqlite::Tools::executeUpdate( getConn(), req, type, mediaId );
 }

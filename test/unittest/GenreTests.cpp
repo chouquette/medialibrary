@@ -282,13 +282,11 @@ TEST_F( Genres, SearchTracks )
 {
     auto a = ml->createAlbum( "album" );
 
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "Hell's Kitchen.mp3" ) );
-    m->setType( IMedia::Type::Audio );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "Hell's Kitchen.mp3", IMedia::Type::Audio ) );
     auto t = a->addTrack( m, 1, 1, 0, g.get() );
     m->save();
 
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "Different genre Hell's Kitchen.mp3" ) );
-    m2->setType( IMedia::Type::Audio );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "Different genre Hell's Kitchen.mp3", IMedia::Type::Audio ) );
     auto t2 = a->addTrack( m2, 1, 1, 0, nullptr );
     m2->save();
 
@@ -304,20 +302,17 @@ TEST_F( Genres, SearchAlbums )
 {
     auto a1 = ml->createAlbum( "an album" );
 
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
-    m->setType( IMedia::Type::Audio );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
     auto t = a1->addTrack( m, 1, 1, 0, g.get() );
     m->save();
 
     auto a2 = ml->createAlbum( "another album" );
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "Different genre Hell's Kitchen.mp3" ) );
-    m2->setType( IMedia::Type::Audio );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "Different genre Hell's Kitchen.mp3", IMedia::Type::Audio ) );
     auto t2 = a2->addTrack( m2, 1, 1, 0, nullptr );
     m2->save();
 
     auto a3 = ml->createAlbum( "another album" );
-    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "track3.mp3" ) );
-    m3->setType( IMedia::Type::Audio );
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "track3.mp3", IMedia::Type::Audio ) );
     auto t3 = a3->addTrack( m3, 1, 1, 0, g.get() );
     m3->save();
 

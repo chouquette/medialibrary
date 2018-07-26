@@ -207,10 +207,9 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         bool onDeviceChanged( fs::IFileSystemFactory& fsFactory, Device& device );
         bool createThumbnailFolder( const std::string& thumbnailPath ) const;
 
-        MediaPtr addExternalMedia( const std::string& mrl, IMedia::Type type );
-
     protected:
         virtual void addLocalFsFactory();
+        MediaPtr addExternalMedia( const std::string& mrl, IMedia::Type type );
 
         // Mark IDeviceListerCb callbacks as private. They must be invoked through the interface.
     private:

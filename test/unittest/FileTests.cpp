@@ -37,7 +37,7 @@ protected:
     virtual void SetUp() override
     {
         Tests::SetUp();
-        m = ml->addFile( "media.mkv" );
+        m = ml->addFile( "media.mkv", IMedia::Type::Unknown );
         auto files = m->files();
         ASSERT_EQ( 1u, files.size() );
         f = std::static_pointer_cast<File>( files[0] );
