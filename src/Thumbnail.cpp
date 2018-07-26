@@ -38,10 +38,10 @@ const std::string Thumbnail::EmptyMrl;
 
 Thumbnail::Thumbnail( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
+    , m_id( row.extract<decltype(m_id)>() )
+    , m_mrl( row.extract<decltype(m_mrl)>() )
+    , m_origin( row.extract<decltype(m_origin)>() )
 {
-    row >> m_id
-        >> m_mrl
-        >> m_origin;
 }
 
 Thumbnail::Thumbnail( MediaLibraryPtr ml, std::string mrl, Thumbnail::Origin origin )
