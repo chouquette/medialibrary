@@ -161,14 +161,14 @@ private:
         int64_t m_duration;
         unsigned int m_playCount;
         std::time_t m_lastPlayedDate;
-        std::time_t m_insertionDate;
+        const std::time_t m_insertionDate;
         unsigned int m_releaseDate;
         int64_t m_thumbnailId;
         unsigned int m_thumbnailGenerated;
         std::string m_title;
         // We store the filename as a shortcut when sorting. The filename (*not* the title
         // might be used as a fallback
-        std::string m_filename;
+        const std::string m_filename;
         bool m_isFavorite;
         bool m_isPresent;
         mutable std::atomic_uint m_nbPlaylists;

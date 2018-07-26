@@ -59,26 +59,27 @@ int64_t Media::* const Media::Table::PrimaryKey = &Media::m_id;
 
 Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
+    // DB field extraction:
+    , m_id( row.load<decltype(m_id)>( 0 ) )
+    , m_type( row.load<decltype(m_type)>( 1 ) )
+    , m_subType( row.load<decltype(m_subType)>( 2 ) )
+    , m_duration( row.load<decltype(m_duration)>( 3 ) )
+    , m_playCount( row.load<decltype(m_playCount)>( 4 ) )
+    , m_lastPlayedDate( row.load<decltype(m_lastPlayedDate)>( 5 ) )
+    // skip real_last_played_date as we don't need it in memory
+    , m_insertionDate( row.load<decltype(m_insertionDate)>( 7 ) )
+    , m_releaseDate( row.load<decltype(m_releaseDate)>( 8 ) )
+    , m_thumbnailId( row.load<decltype(m_thumbnailId)>( 9 ) )
+    , m_thumbnailGenerated( row.load<decltype(m_thumbnailGenerated)>( 10 ) )
+    , m_title( row.load<decltype(m_title)>( 11 ) )
+    , m_filename( row.load<decltype(m_filename)>( 12 ) )
+    , m_isFavorite( row.load<decltype(m_isFavorite)>( 13 ) )
+    , m_isPresent( row.load<decltype(m_isPresent)>( 14 ) )
+    , m_nbPlaylists( row.load<unsigned int>( 15 ) )
+    // End of DB fields extraction
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
-    time_t dummy;
-    row >> m_id
-        >> m_type
-        >> m_subType
-        >> m_duration
-        >> m_playCount
-        >> m_lastPlayedDate
-        >> dummy
-        >> m_insertionDate
-        >> m_releaseDate
-        >> m_thumbnailId
-        >> m_thumbnailGenerated
-        >> m_title
-        >> m_filename
-        >> m_isFavorite
-        >> m_isPresent
-        >> m_nbPlaylists;
 }
 
 Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
