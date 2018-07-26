@@ -80,7 +80,7 @@ class Show : public IShow, public DatabaseHelpers<Show>
         MediaLibraryPtr m_ml;
 
         int64_t m_id;
-        std::string m_title;
+        const std::string m_title;
         time_t m_releaseDate;
         std::string m_shortSummary;
         std::string m_artworkMrl;

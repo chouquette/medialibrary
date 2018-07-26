@@ -42,13 +42,13 @@ int64_t Show::* const Show::Table::PrimaryKey = &Show::m_id;
 
 Show::Show( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
+    , m_id( row.extract<decltype(m_id)>() )
+    , m_title( row.extract<decltype(m_title)>() )
+    , m_releaseDate( row.extract<decltype(m_releaseDate)>() )
+    , m_shortSummary( row.extract<decltype(m_shortSummary)>() )
+    , m_artworkMrl( row.extract<decltype(m_artworkMrl)>() )
+    , m_tvdbId( row.extract<decltype(m_tvdbId)>() )
 {
-    row >> m_id
-        >> m_title
-        >> m_releaseDate
-        >> m_shortSummary
-        >> m_artworkMrl
-        >> m_tvdbId;
 }
 
 Show::Show( MediaLibraryPtr ml, const std::string& name )
