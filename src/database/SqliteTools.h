@@ -68,7 +68,7 @@ public:
     template <typename T>
     T extract()
     {
-        if ( m_idx + 1 > m_nbColumns )
+        if ( m_idx >= m_nbColumns )
             throw errors::ColumnOutOfRange( m_idx, m_nbColumns );
         auto t = sqlite::Traits<T>::Load( m_stmt, m_idx );
         m_idx++;
@@ -83,7 +83,7 @@ public:
     {
         // Do not use extract as T might not be Copyable. Traits class however
         // always return a type that can be use to construct a T
-        if ( m_idx + 1 > m_nbColumns )
+        if ( m_idx >= m_nbColumns )
             throw errors::ColumnOutOfRange( m_idx, m_nbColumns );
         t = sqlite::Traits<T>::Load( m_stmt, m_idx );
         m_idx++;
@@ -97,7 +97,7 @@ public:
 
     void advanceToColumn( unsigned int idx )
     {
-        if ( idx + 1 > m_nbColumns )
+        if ( idx >= m_nbColumns )
             throw errors::ColumnOutOfRange( idx, m_nbColumns );
         m_idx = idx;
     }
@@ -108,7 +108,7 @@ public:
     template <typename T>
     T load(unsigned int idx) const
     {
-        if ( m_idx + 1 > m_nbColumns )
+        if ( idx >= m_nbColumns )
             throw errors::ColumnOutOfRange( m_idx, m_nbColumns );
         return sqlite::Traits<T>::Load( m_stmt, idx );
     }
