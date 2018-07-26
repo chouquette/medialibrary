@@ -214,23 +214,12 @@ TEST_F( Genres, NbTracks )
     g = std::static_pointer_cast<Genre>( ml->genre( g->id() ) );
     ASSERT_EQ( 1u, g->nbTracks() );
 
-    auto g2 = ml->createGenre( "otter metal" );
-    t = std::static_pointer_cast<AlbumTrack>( ml->albumTrack( t->id() ) );
-    ml->setAlbumTrackGenre( t->id(), g2->id() );
+    ml->deleteTrack( t->id() );
 
     Reload();
 
     g = std::static_pointer_cast<Genre>( ml->genre( g->id() ) );
-    g2 = std::static_pointer_cast<Genre>( ml->genre( g2->id() ) );
-
     ASSERT_EQ( nullptr, g );
-    ASSERT_EQ( 1u, g2->nbTracks() );
-
-    ml->deleteTrack( t->id() );
-    Reload();
-
-    g2 = std::static_pointer_cast<Genre>( ml->genre( g2->id() ) );
-    ASSERT_EQ( nullptr, g2 );
 }
 
 TEST_F( Genres, CaseInsensitive )
