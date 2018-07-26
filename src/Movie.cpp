@@ -38,11 +38,11 @@ int64_t Movie::* const Movie::Table::PrimaryKey = &Movie::m_id;
 
 Movie::Movie(MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
+    , m_id( row.extract<decltype(m_id)>() )
+    , m_mediaId( row.extract<decltype(m_mediaId)>() )
+    , m_summary( row.extract<decltype(m_summary)>() )
+    , m_imdbId( row.extract<decltype(m_imdbId)>() )
 {
-    row >> m_id
-        >> m_mediaId
-        >> m_summary
-        >> m_imdbId;
 }
 
 Movie::Movie( MediaLibraryPtr ml, int64_t mediaId )

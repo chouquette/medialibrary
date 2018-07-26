@@ -57,7 +57,7 @@ class Movie : public IMovie, public DatabaseHelpers<Movie>
     private:
         MediaLibraryPtr m_ml;
         int64_t m_id;
-        int64_t m_mediaId;
+        const int64_t m_mediaId;
         std::string m_summary;
         std::string m_imdbId;
 
