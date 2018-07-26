@@ -136,6 +136,10 @@ IMedia::Type::Unknown ) ),
 
 "DROP TABLE " + Device::Table::Name + "_backup",
 
+/******************* Delete removed triggers **********************************/
+
+"DROP TRIGGER on_track_genre_changed",
+
 /******************* Delete other tables **************************************/
 
 "DROP TABLE " + Album::Table::Name,

@@ -143,13 +143,6 @@ void Genre::createTriggers( sqlite::Connection* dbConn )
             " BEGIN"
             " DELETE FROM " + Genre::Table::Name + "Fts WHERE rowid = old.id_genre;"
             " END";
-    const std::string onGenreChanged = "CREATE TRIGGER IF NOT EXISTS on_track_genre_changed AFTER UPDATE OF "
-            " genre_id ON " + AlbumTrack::Table::Name +
-            " BEGIN"
-            " UPDATE " + Genre::Table::Name + " SET nb_tracks = nb_tracks + 1 WHERE id_genre = new.genre_id;"
-            " UPDATE " + Genre::Table::Name + " SET nb_tracks = nb_tracks - 1 WHERE id_genre = old.genre_id;"
-            " DELETE FROM " + Genre::Table::Name + " WHERE nb_tracks = 0;"
-            " END";
     const std::string onTrackCreated = "CREATE TRIGGER IF NOT EXISTS update_genre_on_new_track"
             " AFTER INSERT ON " + AlbumTrack::Table::Name +
             " WHEN new.genre_id IS NOT NULL"
@@ -166,7 +159,6 @@ void Genre::createTriggers( sqlite::Connection* dbConn )
 
     sqlite::Tools::executeRequest( dbConn, vtableInsertTrigger );
     sqlite::Tools::executeRequest( dbConn, vtableDeleteTrigger );
-    sqlite::Tools::executeRequest( dbConn, onGenreChanged );
     sqlite::Tools::executeRequest( dbConn, onTrackCreated );
     sqlite::Tools::executeRequest( dbConn, onTrackDeleted );
 }
