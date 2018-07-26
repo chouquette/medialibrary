@@ -39,18 +39,18 @@ int64_t File::* const File::Table::PrimaryKey = &File::m_id;
 
 File::File( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
+    , m_id( row.extract<decltype(m_id)>() )
+    , m_mediaId( row.extract<decltype(m_mediaId)>() )
+    , m_playlistId( row.extract<decltype(m_playlistId)>() )
+    , m_mrl( row.extract<decltype(m_mrl)>() )
+    , m_type( row.extract<decltype(m_type)>() )
+    , m_lastModificationDate( row.extract<decltype(m_lastModificationDate)>() )
+    , m_size( row.extract<decltype(m_size)>() )
+    , m_folderId( row.extract<decltype(m_folderId)>() )
+    , m_isPresent( row.extract<decltype(m_isPresent)>() )
+    , m_isRemovable( row.extract<decltype(m_isRemovable)>() )
+    , m_isExternal( row.extract<decltype(m_isExternal)>() )
 {
-    row >> m_id
-        >> m_mediaId
-        >> m_playlistId
-        >> m_mrl
-        >> m_type
-        >> m_lastModificationDate
-        >> m_size
-        >> m_folderId
-        >> m_isPresent
-        >> m_isRemovable
-        >> m_isExternal;
 }
 
 File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type,

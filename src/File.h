@@ -104,18 +104,18 @@ private:
     MediaLibraryPtr m_ml;
 
     int64_t m_id;
-    int64_t m_mediaId;
-    int64_t m_playlistId;
+    const int64_t m_mediaId;
+    const int64_t m_playlistId;
     // Contains the path relative to the containing folder for files contained in a removable folder
     // or the full file MRL for non removable ones
     std::string m_mrl;
-    Type m_type;
-    std::time_t m_lastModificationDate;
-    unsigned int m_size;
-    int64_t m_folderId;
-    bool m_isPresent;
-    bool m_isRemovable;
-    bool m_isExternal;
+    const Type m_type;
+    const std::time_t m_lastModificationDate;
+    const unsigned int m_size;
+    const int64_t m_folderId;
+    const bool m_isPresent;
+    const bool m_isRemovable;
+    const bool m_isExternal;
 
     // Contains the full path as a MRL
     mutable Cache<std::string> m_fullPath;
