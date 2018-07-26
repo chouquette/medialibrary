@@ -45,16 +45,16 @@ int64_t Album::* const Album::Table::PrimaryKey = &Album::m_id;
 
 Album::Album(MediaLibraryPtr ml, sqlite::Row& row)
     : m_ml( ml )
+    , m_id( row.load<decltype(m_id)>( 0 ) )
+    , m_title( row.load<decltype(m_title)>( 1 ) )
+    , m_artistId( row.load<decltype(m_artistId)>( 2 ) )
+    , m_releaseYear( row.load<decltype(m_releaseYear)>( 3 ) )
+    , m_shortSummary( row.load<decltype(m_shortSummary)>( 4 ) )
+    , m_thumbnailId( row.load<decltype(m_thumbnailId)>( 5 ) )
+    , m_nbTracks( row.load<decltype(m_nbTracks)>( 6 ) )
+    , m_duration( row.load<decltype(m_duration)>( 7 ) )
+    , m_isPresent( row.load<decltype(m_isPresent)>( 8 ) )
 {
-    row >> m_id
-        >> m_title
-        >> m_artistId
-        >> m_releaseYear
-        >> m_shortSummary
-        >> m_thumbnailId
-        >> m_nbTracks
-        >> m_duration
-        >> m_isPresent;
 }
 
 Album::Album( MediaLibraryPtr ml, const std::string& title, int64_t thumbnailId )

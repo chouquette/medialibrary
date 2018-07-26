@@ -124,7 +124,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
     protected:
         MediaLibraryPtr m_ml;
         int64_t m_id;
-        std::string m_title;
+        const std::string m_title;
         int64_t m_artistId;
         unsigned int m_releaseYear;
         std::string m_shortSummary;
