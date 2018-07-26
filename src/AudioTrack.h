@@ -61,13 +61,13 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack>
 
     private:
         int64_t m_id;
-        std::string m_codec;
-        unsigned int m_bitrate;
-        unsigned int m_sampleRate;
-        unsigned int m_nbChannels;
-        std::string m_language;
-        std::string m_description;
-        int64_t m_mediaId;
+        const std::string m_codec;
+        const unsigned int m_bitrate;
+        const unsigned int m_sampleRate;
+        const unsigned int m_nbChannels;
+        const std::string m_language;
+        const std::string m_description;
+        const int64_t m_mediaId;
 
     private:
         friend struct AudioTrack::Table;

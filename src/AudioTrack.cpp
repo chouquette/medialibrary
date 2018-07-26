@@ -37,15 +37,15 @@ const std::string AudioTrack::Table::PrimaryKeyColumn  = "id_track";
 int64_t AudioTrack::* const AudioTrack::Table::PrimaryKey = &AudioTrack::m_id;
 
 AudioTrack::AudioTrack( MediaLibraryPtr, sqlite::Row& row )
+    : m_id( row.extract<decltype(m_id)>() )
+    , m_codec( row.extract<decltype(m_codec)>() )
+    , m_bitrate( row.extract<decltype(m_bitrate)>() )
+    , m_sampleRate( row.extract<decltype(m_sampleRate)>() )
+    , m_nbChannels( row.extract<decltype(m_nbChannels)>() )
+    , m_language( row.extract<decltype(m_language)>() )
+    , m_description( row.extract<decltype(m_description)>() )
+    , m_mediaId( row.extract<decltype(m_mediaId)>() )
 {
-    row >> m_id
-        >> m_codec
-        >> m_bitrate
-        >> m_sampleRate
-        >> m_nbChannels
-        >> m_language
-        >> m_description
-        >> m_mediaId;
 }
 
 AudioTrack::AudioTrack( MediaLibraryPtr, const std::string& codec, unsigned int bitrate, unsigned int sampleRate,
