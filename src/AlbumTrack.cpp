@@ -42,17 +42,16 @@ int64_t AlbumTrack::* const AlbumTrack::Table::PrimaryKey = &AlbumTrack::m_id;
 
 AlbumTrack::AlbumTrack( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
+    , m_id( row.load<decltype(m_id)>( 0 ) )
+    , m_mediaId( row.load<decltype(m_mediaId)>( 1 ) )
+    // Skip duration
+    , m_artistId( row.load<decltype(m_artistId)>( 3 ) )
+    , m_genreId( row.load<decltype(m_genreId)>( 4 ) )
+    , m_trackNumber( row.load<decltype(m_trackNumber)>( 5 ) )
+    , m_albumId( row.load<decltype(m_albumId)>( 6 ) )
+    , m_discNumber( row.load<decltype(m_discNumber)>( 7 ) )
+    , m_isPresent( row.load<decltype(m_isPresent)>( 8 ) )
 {
-    int64_t dummyDuration;
-    row >> m_id
-        >> m_mediaId
-        >> dummyDuration
-        >> m_artistId
-        >> m_genreId
-        >> m_trackNumber
-        >> m_albumId
-        >> m_discNumber
-        >> m_isPresent;
 }
 
 AlbumTrack::AlbumTrack( MediaLibraryPtr ml, int64_t mediaId, int64_t artistId, int64_t genreId,

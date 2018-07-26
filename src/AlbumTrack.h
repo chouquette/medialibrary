@@ -77,12 +77,12 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack>
     private:
         MediaLibraryPtr m_ml;
         int64_t m_id;
-        int64_t m_mediaId;
-        int64_t m_artistId;
+        const int64_t m_mediaId;
+        const int64_t m_artistId;
         int64_t m_genreId;
-        unsigned int m_trackNumber;
-        int64_t m_albumId;
-        unsigned int m_discNumber;
+        const unsigned int m_trackNumber;
+        const int64_t m_albumId;
+        const unsigned int m_discNumber;
         bool m_isPresent;
 
         mutable Cache<std::weak_ptr<Album>> m_album;
