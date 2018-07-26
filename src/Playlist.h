@@ -94,7 +94,7 @@ private:
     int64_t m_id;
     std::string m_name;
     int64_t m_fileId;
-    unsigned int m_creationDate;
+    const unsigned int m_creationDate;
     std::string m_artworkMrl;
 
     friend Playlist::Table;

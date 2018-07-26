@@ -41,12 +41,12 @@ int64_t Playlist::* const Playlist::Table::PrimaryKey = &Playlist::m_id;
 
 Playlist::Playlist( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
+    , m_id( row.extract<decltype(m_id)>() )
+    , m_name( row.extract<decltype(m_name)>() )
+    , m_fileId( row.extract<decltype(m_fileId)>() )
+    , m_creationDate( row.extract<decltype(m_creationDate)>() )
+    , m_artworkMrl( row.extract<decltype(m_artworkMrl)>() )
 {
-    row >> m_id
-        >> m_name
-        >> m_fileId
-        >> m_creationDate
-        >> m_artworkMrl;
 }
 
 Playlist::Playlist( MediaLibraryPtr ml, const std::string& name )
