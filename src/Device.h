@@ -69,9 +69,9 @@ private:
     int64_t m_id;
     // This is a unique ID on the system side, in the /dev/disk/by-uuid sense.
     // It can be a name or what not, depending on the OS.
-    std::string m_uuid;
-    std::string m_scheme;
-    bool m_isRemovable;
+    const std::string m_uuid;
+    const std::string m_scheme;
+    const bool m_isRemovable;
     bool m_isPresent;
     time_t m_lastSeen;
 

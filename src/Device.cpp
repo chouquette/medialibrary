@@ -35,13 +35,13 @@ int64_t Device::* const Device::Table::PrimaryKey = &Device::m_id;
 
 Device::Device( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
+    , m_id( row.extract<decltype(m_id)>() )
+    , m_uuid( row.extract<decltype(m_uuid)>() )
+    , m_scheme( row.extract<decltype(m_scheme)>() )
+    , m_isRemovable( row.extract<decltype(m_isRemovable)>() )
+    , m_isPresent( row.extract<decltype(m_isPresent)>() )
+    , m_lastSeen( row.extract<decltype(m_lastSeen)>() )
 {
-    row >> m_id
-        >> m_uuid
-        >> m_scheme
-        >> m_isRemovable
-        >> m_isPresent
-        >> m_lastSeen;
 }
 
 Device::Device( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme,
