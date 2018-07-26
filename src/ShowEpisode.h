@@ -65,12 +65,12 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode>
     private:
         MediaLibraryPtr m_ml;
         int64_t m_id;
-        int64_t m_mediaId;
-        unsigned int m_episodeNumber;
+        const int64_t m_mediaId;
+        const unsigned int m_episodeNumber;
         unsigned int m_seasonNumber;
         std::string m_shortSummary;
         std::string m_tvdbId;
-        int64_t m_showId;
+        const int64_t m_showId;
         ShowPtr m_show;
 
         friend struct ShowEpisode::Table;

@@ -39,14 +39,14 @@ int64_t ShowEpisode::* const ShowEpisode::Table::PrimaryKey = &ShowEpisode::m_id
 
 ShowEpisode::ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
+    , m_id( row.extract<decltype(m_id)>() )
+    , m_mediaId( row.extract<decltype(m_mediaId)>() )
+    , m_episodeNumber( row.extract<decltype(m_episodeNumber)>() )
+    , m_seasonNumber( row.extract<decltype(m_seasonNumber)>() )
+    , m_shortSummary( row.extract<decltype(m_shortSummary)>() )
+    , m_tvdbId( row.extract<decltype(m_tvdbId)>() )
+    , m_showId( row.extract<decltype(m_showId)>() )
 {
-    row >> m_id
-        >> m_mediaId
-        >> m_episodeNumber
-        >> m_seasonNumber
-        >> m_shortSummary
-        >> m_tvdbId
-        >> m_showId;
 }
 
 ShowEpisode::ShowEpisode( MediaLibraryPtr ml, int64_t mediaId,
