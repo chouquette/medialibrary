@@ -72,7 +72,7 @@ private:
         void set( const std::string& value );
 
     private:
-        uint32_t m_type;
+        const uint32_t m_type;
         std::string m_value;
         bool m_isSet;
 
