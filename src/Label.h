@@ -59,7 +59,7 @@ class Label : public ILabel, public DatabaseHelpers<Label>
     private:
         MediaLibraryPtr m_ml;
         int64_t m_id;
-        std::string m_name;
+        const std::string m_name;
 
         friend struct Label::Table;
 };

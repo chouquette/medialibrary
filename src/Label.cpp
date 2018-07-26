@@ -42,9 +42,9 @@ int64_t Label::* const Label::Table::PrimaryKey = &Label::m_id;
 
 Label::Label(MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
+    , m_id( row.extract<decltype(m_id)>() )
+    , m_name( row.extract<decltype (m_name)>() )
 {
-    row >> m_id
-        >> m_name;
 }
 
 Label::Label( MediaLibraryPtr ml, const std::string& name )
