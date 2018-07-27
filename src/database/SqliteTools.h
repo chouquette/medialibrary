@@ -263,7 +263,7 @@ class Tools
             Row sqliteRow;
             while ( ( sqliteRow = stmt.row() ) != nullptr )
             {
-                auto row = IMPL::load( ml, sqliteRow );
+                auto row = std::make_shared<IMPL>( ml, sqliteRow );
                 results.push_back( row );
             }
             auto duration = std::chrono::steady_clock::now() - chrono;
@@ -286,7 +286,7 @@ class Tools
             auto row = stmt.row();
             std::shared_ptr<T> res;
             if ( row != nullptr )
-                res = T::load( ml, row );
+                res = std::make_shared<T>( ml, row );
             auto duration = std::chrono::steady_clock::now() - chrono;
             LOG_DEBUG("Executed ", req, " in ",
                      std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );

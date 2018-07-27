@@ -214,8 +214,6 @@ void DiscovererWorker::runRemove( const std::string& ep )
         m_ml->getCb()->onEntryPointRemoved( ep, false );
         return;
     }
-    // Force a cache cleanup to avoid stalled media
-    Media::clear();
     m_ml->getCb()->onEntryPointRemoved( ep, true );
 }
 

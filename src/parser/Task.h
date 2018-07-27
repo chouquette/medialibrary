@@ -62,7 +62,7 @@ public:
     virtual bool updateFileId( int64_t fileId ) = 0;
 };
 
-class Task : public DatabaseHelpers<Task, cachepolicy::Uncached<Task>>, private ITaskCb
+class Task : public DatabaseHelpers<Task>, private ITaskCb
 {
 public:
     struct Table

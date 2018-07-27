@@ -121,28 +121,6 @@ MediaLibrary::~MediaLibrary()
         m_discovererWorker->stop();
     if ( m_parser != nullptr )
         m_parser->stop();
-    clearCache();
-}
-
-void MediaLibrary::clearCache()
-{
-    Media::clear();
-    Folder::clear();
-    Label::clear();
-    Album::clear();
-    AlbumTrack::clear();
-    Show::clear();
-    ShowEpisode::clear();
-    Movie::clear();
-    VideoTrack::clear();
-    AudioTrack::clear();
-    Artist::clear();
-    Device::clear();
-    File::clear();
-    Playlist::clear();
-    Genre::clear();
-    Thumbnail::clear();
-    SubtitleTrack::clear();
 }
 
 void MediaLibrary::createAllTables()
@@ -191,14 +169,6 @@ void MediaLibrary::createAllTriggers()
     Show::createTriggers( m_dbConnection.get() );
 }
 
-template <typename T>
-static void propagateDeletionToCache( sqlite::Connection::HookReason reason, int64_t rowId )
-{
-    if ( reason != sqlite::Connection::HookReason::Delete )
-        return;
-    T::removeFromCache( rowId );
-}
-
 void MediaLibrary::registerEntityHooks()
 {
     if ( m_modificationNotifier == nullptr )
@@ -208,46 +178,32 @@ void MediaLibrary::registerEntityHooks()
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
         if ( reason != sqlite::Connection::HookReason::Delete )
             return;
-        Media::removeFromCache( rowId );
         m_modificationNotifier->notifyMediaRemoval( rowId );
     });
     m_dbConnection->registerUpdateHook( Artist::Table::Name,
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
         if ( reason != sqlite::Connection::HookReason::Delete )
             return;
-        Artist::removeFromCache( rowId );
         m_modificationNotifier->notifyArtistRemoval( rowId );
     });
     m_dbConnection->registerUpdateHook( Album::Table::Name,
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
         if ( reason != sqlite::Connection::HookReason::Delete )
             return;
-        Album::removeFromCache( rowId );
         m_modificationNotifier->notifyAlbumRemoval( rowId );
     });
     m_dbConnection->registerUpdateHook( Playlist::Table::Name,
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
         if ( reason != sqlite::Connection::HookReason::Delete )
             return;
-        Playlist::removeFromCache( rowId );
         m_modificationNotifier->notifyPlaylistRemoval( rowId );
     });
     m_dbConnection->registerUpdateHook( Genre::Table::Name,
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
         if ( reason != sqlite::Connection::HookReason::Delete )
             return;
-        Genre::removeFromCache( rowId );
         m_modificationNotifier->notifyGenreRemoval( rowId );
     });
-    m_dbConnection->registerUpdateHook( Device::Table::Name, &propagateDeletionToCache<Device> );
-    m_dbConnection->registerUpdateHook( File::Table::Name, &propagateDeletionToCache<File> );
-    m_dbConnection->registerUpdateHook( Folder::Table::Name, &propagateDeletionToCache<Folder> );
-    m_dbConnection->registerUpdateHook( Label::Table::Name, &propagateDeletionToCache<Label> );
-    m_dbConnection->registerUpdateHook( Movie::Table::Name, &propagateDeletionToCache<Movie> );
-    m_dbConnection->registerUpdateHook( Show::Table::Name, &propagateDeletionToCache<Show> );
-    m_dbConnection->registerUpdateHook( ShowEpisode::Table::Name, &propagateDeletionToCache<ShowEpisode> );
-    m_dbConnection->registerUpdateHook( AudioTrack::Table::Name, &propagateDeletionToCache<AudioTrack> );
-    m_dbConnection->registerUpdateHook( VideoTrack::Table::Name, &propagateDeletionToCache<VideoTrack> );
 }
 
 bool MediaLibrary::validateSearchPattern( const std::string& pattern )
@@ -553,7 +509,6 @@ bool MediaLibrary::deleteFolder( const Folder& folder )
     LOG_INFO( "deleting folder ", folder.mrl() );
     if ( Folder::destroy( this, folder.id() ) == false )
         return false;
-    Media::clear();
     return true;
 }
 
@@ -1498,7 +1453,6 @@ void MediaLibrary::forceRescan()
         AudioTrack::deleteAll( this );
         Playlist::clearExternalPlaylistContent( this );
         parser::Task::resetParsing( this );
-        clearCache();
         Artist::createDefaultArtists( getConn() );
         t->commit();
     }

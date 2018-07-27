@@ -457,7 +457,7 @@ void Media::removeFile( File& file )
         return f->id() == file.id();
     });
     if ( it != end( m_files ) )
-    m_files.erase( it );
+        m_files.erase( it );
 }
 
 std::string Media::addRequestJoin( const QueryParameters* params, bool forceFile,
@@ -924,8 +924,6 @@ void Media::clearHistory( MediaLibraryPtr ml )
     static const std::string req = "UPDATE " + Media::Table::Name + " SET "
             "play_count = 0,"
             "last_played_date = NULL";
-    // Clear the entire cache since quite a few items are now containing invalid info.
-    clear();
 
     using MDType = typename std::underlying_type<IMedia::MetadataType>::type;
     Metadata::unset( dbConn, IMetadata::EntityType::Media,

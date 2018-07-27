@@ -33,97 +33,7 @@
 namespace medialibrary
 {
 
-namespace cachepolicy
-{
-
-template <typename T>
-struct Cached
-{
-private:
-    using Lock = std::unique_lock<compat::Mutex>;
-    static std::unordered_map<int64_t, std::shared_ptr<T>> Store;
-    static compat::Mutex Mutex;
-
-public:
-    static Lock lock()
-    {
-        return Lock{ Mutex };
-    }
-
-    static void insert( int64_t key, std::shared_ptr<T> value )
-    {
-        assert( Store.find( key ) == end( Store ) );
-        if ( sqlite::Transaction::transactionInProgress() == true )
-        {
-            sqlite::Transaction::onCurrentTransactionFailure( [key](){
-                auto l = lock();
-                auto removed = remove( key );
-                assert( removed != nullptr );
-            });
-        }
-        save( key, std::move( value ) );
-    }
-
-    static void save( int64_t key, std::shared_ptr<T> value )
-    {
-        Store[key] = std::move( value );
-    }
-
-    static std::shared_ptr<T> remove( int64_t key )
-    {
-        auto it = Store.find( key );
-        if ( it != end( Store ) )
-        {
-            auto value = std::move( it->second );
-            Store.erase( it );
-            return value;
-        }
-        return nullptr;
-    }
-
-    static void clear()
-    {
-        Store.clear();
-    }
-
-    static std::shared_ptr<T> load( int64_t key )
-    {
-        auto it = Store.find( key );
-        if ( it == Store.end() )
-            return nullptr;
-        return it->second;
-    }
-};
-
-template <typename T>
-std::unordered_map<int64_t, std::shared_ptr<T>>
-Cached<T>::Store;
-
-template <typename T>
-compat::Mutex Cached<T>::Mutex;
-
-template <typename T>
-struct Uncached
-{
-private:
-    struct FakeLock
-    {
-        FakeLock() = default;
-        ~FakeLock() = default;
-    };
-
-public:
-    static FakeLock lock() { return FakeLock{}; }
-    static void insert( int64_t, std::shared_ptr<T> ) {}
-    static void save( int64_t, std::shared_ptr<T> ) {}
-    static std::shared_ptr<T> remove( int64_t ) { return nullptr; }
-    static void clear() {}
-    static std::shared_ptr<T> load( int64_t ) { return nullptr; }
-};
-
-}
-
-template <typename IMPL, typename CACHEPOLICY = cachepolicy::Cached<IMPL>>
+template <typename IMPL>
 class DatabaseHelpers
 {
     public:
@@ -195,19 +105,6 @@ class DatabaseHelpers
             return {};
         }
 
-        static std::shared_ptr<IMPL> load( MediaLibraryPtr ml, sqlite::Row& row )
-        {
-            auto l = CACHEPOLICY::lock();
-
-            auto key = row.load<int64_t>( 0 );
-            auto res = CACHEPOLICY::load( key );
-            if ( res != nullptr )
-                return res;
-            res = std::make_shared<IMPL>( ml, row );
-            CACHEPOLICY::save( key, res );
-            return res;
-        }
-
         static bool destroy( MediaLibraryPtr ml, int64_t pkValue )
         {
             static const std::string req = "DELETE FROM " + IMPL::Table::Name + " WHERE "
@@ -221,25 +118,6 @@ class DatabaseHelpers
             return sqlite::Tools::executeDelete( ml->getConn(), req );
         }
 
-        /**
-         * @warning removeFromCache is only meant to be called from an SQLite hook
-         */
-        static void removeFromCache( int64_t pkValue )
-        {
-            auto l = CACHEPOLICY::lock();
-
-            auto removed = CACHEPOLICY::remove( pkValue );
-            if ( removed != nullptr )
-                removed->markDeleted();
-        }
-
-        static void clear()
-        {
-            auto l = CACHEPOLICY::lock();
-
-            CACHEPOLICY::clear();
-        }
-
     protected:
         /*
          * Create a new instance of the cache class.
@@ -251,8 +129,6 @@ class DatabaseHelpers
             if ( pKey == 0 )
                 return false;
             (self.get())->*IMPL::Table::PrimaryKey = pKey;
-            auto l = CACHEPOLICY::lock();
-            CACHEPOLICY::insert( pKey, self );
             return true;
         }
 
