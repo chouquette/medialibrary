@@ -100,7 +100,7 @@ std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& m
     if ( device.isRemovable() == true )
     {
         self->m_deviceMountpoint = deviceFs.mountpoint();
-        self->m_fullPath = self->m_deviceMountpoint.get() + path;
+        self->m_fullPath = self->m_deviceMountpoint + path;
     }
     return self;
 }
@@ -223,7 +223,7 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
     if ( folder == nullptr )
         return nullptr;
     folder->m_deviceMountpoint = deviceFs->mountpoint();
-    folder->m_fullPath = folder->m_deviceMountpoint.get() + path;
+    folder->m_fullPath = folder->m_deviceMountpoint + path;
     return folder;
 }
 
@@ -237,8 +237,7 @@ const std::string& Folder::mrl() const
     if ( m_isRemovable == false )
         return m_path;
 
-    auto lock = m_deviceMountpoint.lock();
-    if ( m_deviceMountpoint.isCached() == true )
+    if ( m_fullPath.empty() == false )
         return m_fullPath;
 
     // We can't compute the full path of a folder if it's removable and the device isn't present.
@@ -251,9 +250,9 @@ const std::string& Folder::mrl() const
         return m_fullPath;
     }
 
-    auto fsFactory = m_ml->fsFactoryForMrl( m_device.get()->scheme() );
+    auto fsFactory = m_ml->fsFactoryForMrl( m_device->scheme() );
     assert( fsFactory != nullptr );
-    auto deviceFs = fsFactory->createDevice( m_device.get()->uuid() );
+    auto deviceFs = fsFactory->createDevice( m_device->uuid() );
     // In case the device lister hasn't been updated accordingly, we might think
     // a device still is present while it's not.
     if( deviceFs == nullptr )
@@ -263,7 +262,7 @@ const std::string& Folder::mrl() const
         return m_fullPath;
     }
     m_deviceMountpoint = deviceFs->mountpoint();
-    m_fullPath = m_deviceMountpoint.get() + m_path;
+    m_fullPath = m_deviceMountpoint + m_path;
     return m_fullPath;
 }
 
@@ -314,16 +313,15 @@ int64_t Folder::deviceId() const
 
 bool Folder::isPresent() const
 {
-    auto deviceLock = m_device.lock();
-    if ( m_device.isCached() == false )
+    if ( m_device == nullptr )
         m_device = Device::fetch( m_ml, m_deviceId );
     // There must be a device containing the folder, since we never create a folder
     // without a device
-    assert( m_device.get() != nullptr );
+    assert( m_device != nullptr );
     // However, handle potential sporadic errors gracefully
-    if( m_device.get() == nullptr )
+    if( m_device == nullptr )
         return false;
-    return m_device.get()->isPresent();
+    return m_device->isPresent();
 }
 
 bool Folder::isBanned() const

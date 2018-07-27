@@ -26,7 +26,6 @@
 
 #include "database/SqliteTools.h"
 #include "database/DatabaseHelpers.h"
-#include "utils/Cache.h"
 
 namespace medialibrary
 {

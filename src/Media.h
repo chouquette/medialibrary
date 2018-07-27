@@ -29,7 +29,6 @@
 #include "File.h"
 #include "Thumbnail.h"
 #include "database/DatabaseHelpers.h"
-#include "utils/Cache.h"
 #include "medialibrary/IMetadata.h"
 #include "Metadata.h"
 
@@ -185,12 +184,12 @@ private:
         mutable std::atomic_uint m_nbPlaylists;
 
         // Auto fetched related properties
-        mutable Cache<AlbumTrackPtr> m_albumTrack;
-        mutable Cache<ShowEpisodePtr> m_showEpisode;
-        mutable Cache<MoviePtr> m_movie;
-        mutable Cache<std::vector<FilePtr>> m_files;
+        mutable AlbumTrackPtr m_albumTrack;
+        mutable ShowEpisodePtr m_showEpisode;
+        mutable MoviePtr m_movie;
+        mutable std::vector<FilePtr> m_files;
         mutable Metadata m_metadata;
-        mutable Cache<std::shared_ptr<Thumbnail>> m_thumbnail;
+        mutable std::shared_ptr<Thumbnail> m_thumbnail;
         bool m_changed;
 
         friend Media::Table;

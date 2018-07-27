@@ -97,8 +97,7 @@ const std::string& File::mrl() const
     if ( m_isRemovable == false )
         return m_mrl;
 
-    auto lock = m_fullPath.lock();
-    if ( m_fullPath.isCached() )
+    if ( m_fullPath.empty() == false )
         return m_fullPath;
     auto folder = Folder::fetch( m_ml, m_folderId );
     if ( folder == nullptr )
@@ -163,14 +162,14 @@ std::shared_ptr<Media> File::media() const
 {
     if ( m_mediaId == 0 )
         return nullptr;
-    auto lock = m_media.lock();
-    if ( m_media.isCached() == false )
+    auto media = m_media.lock();
+    if ( media == nullptr )
     {
-        auto media = Media::fetch( m_ml, m_mediaId );
+        media = Media::fetch( m_ml, m_mediaId );
         assert( isDeleted() == true || media != nullptr );
         m_media = media;
     }
-    return m_media.get().lock();
+    return media;
 }
 
 bool File::destroy()

@@ -141,30 +141,28 @@ const std::string& Album::artworkMrl() const
     if ( m_thumbnailId == 0 )
         return Thumbnail::EmptyMrl;
 
-    auto lock = m_thumbnail.lock();
-    if ( m_thumbnail.isCached() == false )
+    if ( m_thumbnail == nullptr )
     {
         auto thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
         if ( thumbnail == nullptr )
             return Thumbnail::EmptyMrl;
         m_thumbnail = std::move( thumbnail );
     }
-    return m_thumbnail.get()->mrl();
+    return m_thumbnail->mrl();
 }
 
 std::shared_ptr<Thumbnail> Album::thumbnail()
 {
     if ( m_thumbnailId == 0 )
         return nullptr;
-    auto lock = m_thumbnail.lock();
-    if ( m_thumbnail.isCached() == false )
+    if ( m_thumbnail == nullptr )
     {
         auto thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
         if ( thumbnail == nullptr )
             return nullptr;
         m_thumbnail = std::move( thumbnail );
     }
-    return m_thumbnail.get();
+    return m_thumbnail;
 }
 
 bool Album::setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin,
@@ -177,15 +175,14 @@ bool Album::setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin orig
     std::unique_ptr<sqlite::Transaction> t;
     if ( sqlite::Transaction::transactionInProgress() == false )
         t = m_ml->getConn()->newTransaction();
-    auto lock = m_thumbnail.lock();
     m_thumbnail = Thumbnail::create( m_ml, artworkMrl, Thumbnail::Origin::Album, isGenerated );
-    if ( m_thumbnail.get() == nullptr )
+    if ( m_thumbnail == nullptr )
         return false;
     static const std::string req = "UPDATE " + Album::Table::Name
             + " SET thumbnail_id = ? WHERE id_album = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_thumbnail.get()->id(), m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_thumbnail->id(), m_id ) == false )
         return false;
-    m_thumbnailId = m_thumbnail.get()->id();
+    m_thumbnailId = m_thumbnail->id();
     if ( t != nullptr )
         t->commit();
     return true;
@@ -284,10 +281,9 @@ Query<IMedia> Album::tracks( GenrePtr genre, const QueryParameters* params ) con
 
 std::vector<MediaPtr> Album::cachedTracks() const
 {
-    auto lock = m_tracks.lock();
-    if ( m_tracks.isCached() == false )
+    if ( m_tracks.size() == 0 )
         m_tracks = tracks( nullptr )->all();
-    return m_tracks.get();
+    return m_tracks;
 }
 
 Query<IMedia> Album::searchTracks( const std::string& pattern,
@@ -310,16 +306,14 @@ std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsig
     m_nbTracks++;
     if ( media->duration() > 0 )
         m_duration += media->duration();
-    auto lock = m_tracks.lock();
     // Don't assume we have always have a valid value in m_tracks.
     // While it's ok to assume that if we are currently parsing the album, we
     // have a valid cache tracks, this isn't true when restarting an interrupted parsing.
     // The nbTracks value will be correct however. If it's equal to one, it means we're inserting
     // the first track in this album
-    if ( m_tracks.isCached() == false && m_nbTracks == 1 )
-        m_tracks.markCached();
-    if ( m_tracks.isCached() == true )
-        m_tracks.get().push_back( media );
+    if ( ( m_tracks.empty() == true && m_nbTracks == 1 ) ||
+         ( m_tracks.empty() == false && m_nbTracks > 1 ) )
+        m_tracks.push_back( media );
     return track;
 }
 
@@ -330,15 +324,11 @@ bool Album::removeTrack( Media& media, AlbumTrack& track )
     auto genre = std::static_pointer_cast<Genre>( track.genre() );
     if ( genre != nullptr )
         genre->updateCachedNbTracks( -1 );
-    auto lock = m_tracks.lock();
-    if ( m_tracks.isCached() == true )
-    {
-        auto it = std::find_if( begin( m_tracks.get() ), end( m_tracks.get() ), [&media]( MediaPtr m ) {
-            return m->id() == media.id();
-        });
-        if ( it != end( m_tracks.get() ) )
-            m_tracks.get().erase( it );
-    }
+    auto it = std::find_if( begin( m_tracks ), end( m_tracks ), [&media]( MediaPtr m ) {
+        return m->id() == media.id();
+    });
+    if ( it != end( m_tracks ) )
+        m_tracks.erase( it );
 
     return true;
 }
@@ -357,10 +347,9 @@ ArtistPtr Album::albumArtist() const
 {
     if ( m_artistId == 0 )
         return nullptr;
-    auto lock = m_albumArtist.lock();
-    if ( m_albumArtist.isCached() == false )
+    if ( m_albumArtist == nullptr )
         m_albumArtist = Artist::fetch( m_ml, m_artistId );
-    return m_albumArtist.get();
+    return m_albumArtist;
 }
 
 bool Album::setAlbumArtist( std::shared_ptr<Artist> artist )
@@ -375,9 +364,9 @@ bool Album::setAlbumArtist( std::shared_ptr<Artist> artist )
         return false;
     if ( m_artistId != 0 )
     {
-        if ( m_albumArtist.isCached() == false )
+        if ( m_albumArtist == nullptr )
             albumArtist();
-        m_albumArtist.get()->updateNbAlbum( -1 );
+        m_albumArtist->updateNbAlbum( -1 );
     }
     m_artistId = artist->id();
     m_albumArtist = artist;

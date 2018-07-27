@@ -29,9 +29,6 @@ namespace medialibrary
 
 class Thumbnail;
 
-template <typename T>
-class Cache;
-
 class Thumbnail : public DatabaseHelpers<Thumbnail>
 {
 public:
@@ -67,7 +64,7 @@ public:
      * @param thumbnailId The thumbnail primary key
      */
     static bool setMrlFromPrimaryKey( MediaLibraryPtr ml,
-                                      Cache<std::shared_ptr<Thumbnail>>& thumbnail,
+                                      std::shared_ptr<Thumbnail>& thumbnail,
                                       int64_t thumbnailId, std::string mrl,
                                       Origin origin );
 

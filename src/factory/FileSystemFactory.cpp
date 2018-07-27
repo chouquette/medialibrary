@@ -67,17 +67,14 @@ std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::s
 
 std::shared_ptr<fs::IDevice> FileSystemFactory::createDevice( const std::string& uuid )
 {
-    auto lock = m_deviceCache.lock();
-
-    auto it = m_deviceCache.get().find( uuid );
-    if ( it != end( m_deviceCache.get() ) )
+    auto it = m_deviceCache.find( uuid );
+    if ( it != end( m_deviceCache ) )
         return it->second;
     return nullptr;
 }
 
 std::shared_ptr<fs::IDevice> FileSystemFactory::createDeviceFromMrl( const std::string& mrl )
 {
-    auto lock = m_deviceCache.lock();
     std::string canonicalMountpoint;
     try
     {
@@ -91,7 +88,7 @@ std::shared_ptr<fs::IDevice> FileSystemFactory::createDeviceFromMrl( const std::
         return nullptr;
     }
     std::shared_ptr<fs::IDevice> res;
-    for ( const auto& p : m_deviceCache.get() )
+    for ( const auto& p : m_deviceCache )
     {
         if ( canonicalMountpoint.find( p.second->mountpoint() ) == 0 )
         {
@@ -107,11 +104,7 @@ void FileSystemFactory::refreshDevices()
     LOG_INFO( "Refreshing devices from IDeviceLister" );
     auto devices = m_deviceLister->devices();
 
-    auto lock = m_deviceCache.lock();
-    if ( m_deviceCache.isCached() == false )
-        m_deviceCache = DeviceCacheMap{};
-
-    for ( auto& devicePair : m_deviceCache.get() )
+    for ( auto& devicePair : m_deviceCache )
     {
         auto it = std::find_if( begin( devices ), end( devices ),
                                 [&devicePair]( decltype(devices)::value_type& deviceTuple ) {
@@ -135,7 +128,7 @@ void FileSystemFactory::refreshDevices()
         const auto& mountpoint = std::get<1>( d );
         const auto removable = std::get<2>( d );
         LOG_INFO( "Caching device ", uuid, " mounted on ", mountpoint, ". Removable: ", removable ? "true" : "false" );
-        m_deviceCache.get().emplace( uuid, std::make_shared<fs::Device>( uuid, mountpoint, removable ) );
+        m_deviceCache.emplace( uuid, std::make_shared<fs::Device>( uuid, mountpoint, removable ) );
     }
 }
 

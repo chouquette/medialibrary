@@ -26,7 +26,6 @@
 #include "medialibrary/filesystem/IFile.h"
 #include "database/DatabaseHelpers.h"
 #include "database/SqliteConnection.h"
-#include "utils/Cache.h"
 #include "parser/Parser.h"
 
 namespace medialibrary
@@ -118,8 +117,8 @@ private:
     const bool m_isExternal;
 
     // Contains the full path as a MRL
-    mutable Cache<std::string> m_fullPath;
-    mutable Cache<std::weak_ptr<Media>> m_media;
+    mutable std::string m_fullPath;
+    mutable std::weak_ptr<Media> m_media;
 
     friend File::Table;
 };

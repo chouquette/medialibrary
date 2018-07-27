@@ -30,7 +30,6 @@
 #include "medialibrary/IAlbumTrack.h"
 #include "medialibrary/IMediaLibrary.h"
 #include "database/DatabaseHelpers.h"
-#include "utils/Cache.h"
 
 namespace medialibrary
 {
@@ -83,9 +82,9 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack>
         const int64_t m_albumId;
         const unsigned int m_discNumber;
 
-        mutable Cache<std::weak_ptr<Album>> m_album;
-        mutable Cache<std::shared_ptr<Artist>> m_artist;
-        mutable Cache<std::shared_ptr<Genre>> m_genre;
+        mutable std::weak_ptr<Album> m_album;
+        mutable std::shared_ptr<Artist> m_artist;
+        mutable std::shared_ptr<Genre> m_genre;
 
         friend struct AlbumTrack::Table;
 };

@@ -25,7 +25,6 @@
 #include "medialibrary/IFolder.h"
 #include "medialibrary/filesystem/IDevice.h"
 #include "database/DatabaseHelpers.h"
-#include "utils/Cache.h"
 
 #include <sqlite3.h>
 
@@ -99,8 +98,8 @@ private:
     const int64_t m_deviceId;
     const bool m_isRemovable;
 
-    mutable Cache<std::string> m_deviceMountpoint;
-    mutable Cache<std::shared_ptr<Device>> m_device;
+    mutable std::string m_deviceMountpoint;
+    mutable std::shared_ptr<Device> m_device;
     // This contains the full path, including device mountpoint (and mrl scheme,
     // as its part of the mountpoint
     mutable std::string m_fullPath;

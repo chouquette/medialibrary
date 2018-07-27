@@ -30,7 +30,6 @@
 
 #include "database/DatabaseHelpers.h"
 #include "medialibrary/IAlbum.h"
-#include "utils/Cache.h"
 #include "Thumbnail.h"
 
 namespace medialibrary
@@ -133,9 +132,9 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         unsigned int m_duration;
         bool m_isPresent;
 
-        mutable Cache<std::vector<MediaPtr>> m_tracks;
-        mutable Cache<std::shared_ptr<Artist>> m_albumArtist;
-        mutable Cache<std::shared_ptr<Thumbnail>> m_thumbnail;
+        mutable std::vector<MediaPtr> m_tracks;
+        mutable std::shared_ptr<Artist> m_albumArtist;
+        mutable std::shared_ptr<Thumbnail> m_thumbnail;
 };
 
 }

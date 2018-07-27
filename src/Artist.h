@@ -25,7 +25,6 @@
 #include "database/DatabaseHelpers.h"
 #include "medialibrary/IArtist.h"
 #include "medialibrary/IMediaLibrary.h"
-#include "utils/Cache.h"
 #include "Thumbnail.h"
 
 namespace medialibrary
@@ -95,7 +94,7 @@ private:
     std::string m_mbId;
     bool m_isPresent;
 
-    mutable Cache<std::shared_ptr<Thumbnail>> m_thumbnail;
+    mutable std::shared_ptr<Thumbnail> m_thumbnail;
 
     friend struct Artist::Table;
 };

@@ -125,16 +125,13 @@ AlbumTrackPtr Media::albumTrack() const
 {
     if ( m_subType != SubType::AlbumTrack )
         return nullptr;
-    auto lock = m_albumTrack.lock();
-
-    if ( m_albumTrack.isCached() == false )
+    if ( m_albumTrack == nullptr )
         m_albumTrack = AlbumTrack::fromMedia( m_ml, m_id );
-    return m_albumTrack.get();
+    return m_albumTrack;
 }
 
 void Media::setAlbumTrack( AlbumTrackPtr albumTrack )
 {
-    auto lock = m_albumTrack.lock();
     m_albumTrack = albumTrack;
     m_subType = SubType::AlbumTrack;
     m_changed = true;
@@ -158,15 +155,13 @@ ShowEpisodePtr Media::showEpisode() const
     if ( m_subType != SubType::ShowEpisode )
         return nullptr;
 
-    auto lock = m_showEpisode.lock();
-    if ( m_showEpisode.isCached() == false )
+    if ( m_showEpisode == nullptr )
         m_showEpisode = ShowEpisode::fromMedia( m_ml, m_id );
-    return m_showEpisode.get();
+    return m_showEpisode;
 }
 
 void Media::setShowEpisode( ShowEpisodePtr episode )
 {
-    auto lock = m_showEpisode.lock();
     m_showEpisode = episode;
     m_subType = SubType::ShowEpisode;
     m_changed = true;
@@ -232,8 +227,7 @@ bool Media::setFavorite( bool favorite )
 
 const std::vector<FilePtr>& Media::files() const
 {
-    auto lock = m_files.lock();
-    if ( m_files.isCached() == false )
+    if ( m_files.empty() == true )
     {
         static const std::string req = "SELECT * FROM " + File::Table::Name
                 + " WHERE media_id = ?";
@@ -252,16 +246,13 @@ MoviePtr Media::movie() const
     if ( m_subType != SubType::Movie )
         return nullptr;
 
-    auto lock = m_movie.lock();
-
-    if ( m_movie.isCached() == false )
+    if ( m_movie == nullptr )
         m_movie = Movie::fromMedia( m_ml, m_id );
-    return m_movie.get();
+    return m_movie;
 }
 
 void Media::setMovie(MoviePtr movie)
 {
-    auto lock = m_movie.lock();
     m_movie = movie;
     m_subType = SubType::Movie;
     m_changed = true;
@@ -317,15 +308,14 @@ const std::string& Media::thumbnail() const
     if ( m_thumbnailId == 0 || m_thumbnailGenerated == false )
         return Thumbnail::EmptyMrl;
 
-    auto lock = m_thumbnail.lock();
-    if ( m_thumbnail.isCached() == false )
+    if ( m_thumbnail == nullptr )
     {
         auto thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
         if ( thumbnail == nullptr )
             return Thumbnail::EmptyMrl;
         m_thumbnail = std::move( thumbnail );
     }
-    return m_thumbnail.get()->mrl();
+    return m_thumbnail->mrl();
 }
 
 bool Media::isThumbnailGenerated() const
@@ -404,7 +394,6 @@ bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin ori
     std::unique_ptr<sqlite::Transaction> t;
     if ( sqlite::Transaction::transactionInProgress() == false )
         t = m_ml->getConn()->newTransaction();
-    auto lock = m_thumbnail.lock();
     auto thumbnail = Thumbnail::create( m_ml, thumbnailMrl, origin, isGenerated );
     if ( thumbnail == nullptr )
         return false;
@@ -445,45 +434,30 @@ bool Media::save()
 std::shared_ptr<File> Media::addFile( const fs::IFile& fileFs, int64_t parentFolderId,
                                       bool isFolderFsRemovable, IFile::Type type )
 {
-    auto file = File::createFromMedia( m_ml, m_id, type, fileFs, parentFolderId, isFolderFsRemovable);
-    if ( file == nullptr )
-        return nullptr;
-    auto lock = m_files.lock();
-    if ( m_files.isCached() )
-        m_files.get().push_back( file );
-    return file;
+    return File::createFromMedia( m_ml, m_id, type, fileFs, parentFolderId, isFolderFsRemovable);
 }
 
 FilePtr Media::addExternalMrl( const std::string& mrl , IFile::Type type )
 {
-    FilePtr file;
     try
     {
-        file = File::createFromMedia( m_ml, m_id, type, mrl );
+        return File::createFromMedia( m_ml, m_id, type, mrl );
     }
     catch ( const sqlite::errors::Generic& ex )
     {
         LOG_ERROR( "Failed to add media external MRL: ", ex.what() );
         return nullptr;
     }
-
-    if ( file == nullptr )
-        return nullptr;
-    auto lock = m_files.lock();
-    if ( m_files.isCached() )
-        m_files.get().push_back( file );
-    return file;
 }
 
 void Media::removeFile( File& file )
 {
     file.destroy();
-    auto lock = m_files.lock();
-    if ( m_files.isCached() == false )
-        return;
-    m_files.get().erase( std::remove_if( begin( m_files.get() ), end( m_files.get() ), [&file]( const FilePtr& f ) {
+    auto it = std::remove_if( begin( m_files ), end( m_files ), [&file]( const FilePtr& f ) {
         return f->id() == file.id();
-    }));
+    });
+    if ( it != end( m_files ) )
+    m_files.erase( it );
 }
 
 std::string Media::addRequestJoin( const QueryParameters* params, bool forceFile,

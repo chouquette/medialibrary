@@ -178,30 +178,28 @@ const std::string& Artist::artworkMrl() const
     if ( m_thumbnailId == 0 )
         return Thumbnail::EmptyMrl;
 
-    auto lock = m_thumbnail.lock();
-    if ( m_thumbnail.isCached() == false )
+    if ( m_thumbnail == nullptr )
     {
         auto thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
         if ( thumbnail == nullptr )
             return Thumbnail::EmptyMrl;
         m_thumbnail = std::move( thumbnail );
     }
-    return m_thumbnail.get()->mrl();
+    return m_thumbnail->mrl();
 }
 
 std::shared_ptr<Thumbnail> Artist::thumbnail()
 {
     if ( m_thumbnailId == 0 )
         return nullptr;
-    auto lock = m_thumbnail.lock();
-    if ( m_thumbnail.isCached() == false )
+    if ( m_thumbnail == nullptr )
     {
         auto thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
         if ( thumbnail == nullptr )
             return nullptr;
         m_thumbnail = std::move( thumbnail );
     }
-    return m_thumbnail.get();
+    return m_thumbnail;
 }
 
 bool Artist::setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin,
@@ -214,15 +212,14 @@ bool Artist::setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin ori
     std::unique_ptr<sqlite::Transaction> t;
     if ( sqlite::Transaction::transactionInProgress() == false )
         t = m_ml->getConn()->newTransaction();
-    auto lock = m_thumbnail.lock();
     m_thumbnail = Thumbnail::create( m_ml, artworkMrl, Thumbnail::Origin::Artist, isGenerated );
-    if ( m_thumbnail.get() == nullptr )
+    if ( m_thumbnail == nullptr )
         return false;
     static const std::string req = "UPDATE " + Artist::Table::Name +
             " SET thumbnail_id = ? WHERE id_artist = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_thumbnail.get()->id(), m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_thumbnail->id(), m_id ) == false )
         return false;
-    m_thumbnailId = m_thumbnail.get()->id();
+    m_thumbnailId = m_thumbnail->id();
     if ( t != nullptr )
         t->commit();
     return true;

@@ -23,7 +23,6 @@
 #pragma once
 
 #include "medialibrary/filesystem/IDirectory.h"
-#include "utils/Cache.h"
 
 namespace medialibrary
 {
@@ -47,7 +46,7 @@ protected:
 protected:
     mutable std::vector<std::shared_ptr<IFile>> m_files;
     mutable std::vector<std::shared_ptr<IDirectory>> m_dirs;
-    mutable Cache<std::shared_ptr<IDevice>> m_device;
+    mutable std::shared_ptr<IDevice> m_device;
     fs::IFileSystemFactory& m_fsFactory;
 };
 

@@ -155,7 +155,6 @@ noinst_HEADERS = \
 	src/ShowEpisode.h \
 	src/Show.h \
 	src/Thumbnail.h \
-	src/utils/Cache.h \
 	src/utils/Directory.h \
 	src/utils/Filename.h \
 	src/utils/ModificationsNotifier.h \

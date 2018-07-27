@@ -25,7 +25,6 @@
 #include "compat/Mutex.h"
 #include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "medialibrary/Types.h"
-#include "utils/Cache.h"
 
 #include <string>
 #include <unordered_map>
@@ -54,7 +53,7 @@ namespace factory
 
     private:
         DeviceListerPtr m_deviceLister;
-        Cache<DeviceCacheMap> m_deviceCache;
+        DeviceCacheMap m_deviceCache;
 
     };
 }

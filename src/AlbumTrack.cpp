@@ -75,12 +75,9 @@ ArtistPtr AlbumTrack::artist() const
 {
     if ( m_artistId == 0 )
         return nullptr;
-    auto lock = m_artist.lock();
-    if ( m_artist.isCached() == false )
-    {
+    if ( m_artist == nullptr )
         m_artist = Artist::fetch( m_ml, m_artistId );
-    }
-    return m_artist.get();
+    return m_artist;
 }
 
 int64_t AlbumTrack::artistId() const
@@ -184,12 +181,9 @@ Query<IMedia> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId, const 
 
 GenrePtr AlbumTrack::genre()
 {
-    auto l = m_genre.lock();
-    if ( m_genre.isCached() == false )
-    {
+    if ( m_genre == nullptr )
         m_genre = Genre::fetch( m_ml, m_genreId );
-    }
-    return m_genre.get();
+    return m_genre;
 }
 
 int64_t AlbumTrack::genreId() const
@@ -213,10 +207,13 @@ std::shared_ptr<IAlbum> AlbumTrack::album()
     if ( m_albumId == 0 )
         return nullptr;
 
-    auto lock = m_album.lock();
-    if ( m_album.isCached() == false )
-        m_album = Album::fetch( m_ml, m_albumId );
-    return m_album.get().lock();
+    auto album = m_album.lock();
+    if ( album == nullptr )
+    {
+        album = Album::fetch( m_ml, m_albumId );
+        m_album = album;
+    }
+    return album;
 }
 
 int64_t AlbumTrack::albumId() const

@@ -57,15 +57,9 @@ const std::vector<std::shared_ptr<IDirectory>>& CommonDirectory::dirs() const
 
 std::shared_ptr<IDevice> CommonDirectory::device() const
 {
-    auto lock = m_device.lock();
-    if ( m_device.isCached() == false )
-    {
-        auto d = m_fsFactory.createDeviceFromMrl( mrl() );
-        if( d == nullptr )
-            return nullptr;
-        m_device = std::move( d );
-    }
-    return m_device.get();
+    if ( m_device == nullptr )
+        m_device = m_fsFactory.createDeviceFromMrl( mrl() );
+    return m_device;
 }
 
 }
