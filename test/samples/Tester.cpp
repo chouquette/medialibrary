@@ -305,7 +305,7 @@ void Tests::checkMedias(const rapidjson::Value& expectedMedias)
             return strcasecmp( expectedTitle, m->title().c_str() ) == 0;
         });
         ASSERT_NE( end( medias ), it );
-        const auto& media = *it;
+        const auto media = *it;
         medias.erase( it );
         if ( expectedMedia.HasMember( "nbVideoTracks" ) || expectedMedia.HasMember( "videoTracks" ) )
         {
@@ -357,7 +357,7 @@ void Tests::checkPlaylists( const rapidjson::Value& expectedPlaylists, std::vect
         });
         ASSERT_NE( end( playlists ), it );
 
-        const auto& playlist = *it;
+        const auto playlist = *it;
         playlists.erase( it );
         const auto& items = playlist->media()->all();
 
