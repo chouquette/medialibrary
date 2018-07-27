@@ -41,7 +41,7 @@ TEST_F( Shows, Create )
     ASSERT_NE( s, nullptr );
 
     auto s2 = ml->show( s->id() );
-    ASSERT_EQ( s, s2 );
+    ASSERT_NE( nullptr, s2 );
 }
 
 TEST_F( Shows, Fetch )
@@ -123,11 +123,11 @@ TEST_F( Shows, AddEpisode )
     ASSERT_NE( e, nullptr );
 
     ASSERT_EQ( e->episodeNumber(), 1u );
-    ASSERT_EQ( e->show(), show );
+    ASSERT_EQ( e->show()->id(), show->id() );
 
     auto episodes = show->episodes( nullptr )->all();
     ASSERT_EQ( episodes.size(), 1u );
-    ASSERT_EQ( episodes[0]->showEpisode(), e );
+    ASSERT_EQ( episodes[0]->showEpisode()->id(), e->id() );
 }
 
 TEST_F( Shows, FetchShowFromEpisode )
@@ -140,7 +140,7 @@ TEST_F( Shows, FetchShowFromEpisode )
     auto e2 = f->showEpisode();
     auto s2 = e2->show();
     ASSERT_NE( s2, nullptr );
-    ASSERT_EQ( s, s2 );
+    ASSERT_EQ( s->id(), s2->id() );
 
     Reload();
 

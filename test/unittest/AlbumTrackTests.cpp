@@ -59,7 +59,7 @@ TEST_F( AlbumTracks, Album )
     f->save();
 
     auto albumFromTrack = track->album();
-    ASSERT_EQ( album, albumFromTrack );
+    ASSERT_EQ( album->id(), albumFromTrack->id() );
 
     Reload();
 
@@ -69,6 +69,6 @@ TEST_F( AlbumTracks, Album )
     // Fetching this value twice seems to be problematic on Android.
     // Ensure it works for other platforms at least
     auto aft2 = track->album();
-    ASSERT_EQ( albumFromTrack, a2 );
-    ASSERT_EQ( aft2, a2 );
+    ASSERT_EQ( albumFromTrack->id(), a2->id() );
+    ASSERT_EQ( aft2->id(), a2->id() );
 }

@@ -70,6 +70,7 @@ TEST_F( Files, Media )
 
     Reload();
 
+    m = ml->media( m->id() );
     auto files = m->files();
     ASSERT_EQ( 1u, files.size() );
     f = std::static_pointer_cast<File>( files[0] );

@@ -49,7 +49,8 @@ TEST_F( Movies, Fetch )
     auto m = ml->createMovie( *media );
     auto m2 = ml->movie( m->id() );
 
-    ASSERT_EQ( m, m2 );
+    ASSERT_NE( nullptr, m2 );
+    ASSERT_EQ( m->id(), m2->id() );
 
     Reload();
 

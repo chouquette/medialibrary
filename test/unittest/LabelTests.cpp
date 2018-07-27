@@ -118,11 +118,12 @@ TEST_F( Labels, Files )
     ASSERT_EQ( label1Files.size(), 2u );
     ASSERT_EQ( label2Files.size(), 1u );
 
-    ASSERT_EQ( label2Files[0], f2 );
+    ASSERT_EQ( label2Files[0]->id(), f2->id() );
 
     for (auto labelFile : label1Files )
     {
-        ASSERT_TRUE( labelFile == f || labelFile == f3 );
+        ASSERT_TRUE( labelFile->id() == f->id() ||
+                     labelFile->id() == f3->id() );
     }
 }
 

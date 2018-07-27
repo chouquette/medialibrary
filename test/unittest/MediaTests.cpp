@@ -70,7 +70,6 @@ TEST_F( Medias, Fetch )
     auto f = ml->addMedia( "media.avi" );
     auto f2 = ml->media( f->id() );
     ASSERT_EQ( f->id(), f2->id() );
-    ASSERT_EQ( f, f2 );
 
     // Flush cache and fetch from DB
     Reload();
@@ -785,7 +784,6 @@ TEST_F( Medias, NbPlaylists )
 
     playlist = ml->playlist( playlist->id() );
     playlist->remove( m->id() );
-    ASSERT_EQ( 0u, m->nbPlaylists() );
 
     Reload();
 

@@ -43,7 +43,6 @@ TEST_F( Albums, Create )
     ASSERT_NE( a, nullptr );
 
     auto a2 = ml->album( a->id() );
-    ASSERT_EQ( a, a2 );
     ASSERT_EQ( a2->title(), "album" );
 }
 
