@@ -99,7 +99,7 @@ dnl Specify -lpthread as part of Libs.private, in case of a static build
     OBJCXX="${OBJCXX} -stdlib=libc++ -std=c++11"
     OBJCXXFLAGS="${OBJCXXFLAGS} -D_INTL_REDIRECT_MACROS ${ARCH_flag}"
     LDFLAGS="${LDFLAGS} -Wl,-headerpad_max_install_names ${ARCH_flag}"
-    ML_EXTRA_LIBS="-Wl,-framework,Foundation"
+    ML_EXTRA_LIBS="-Wl,-framework,Foundation -lmedialibrary_macos"
 
     AC_EGREP_CPP(yes,
             [#import <TargetConditionals.h>
