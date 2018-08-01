@@ -146,6 +146,10 @@ Query<IMedia> Artist::tracks( const QueryParameters* params ) const
             orderBy += "alb.title, atr.disc_number, atr.track_number";
         break;
     default:
+        LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default (Alpha)" );
+        /* fall-through */
+    case SortingCriteria::Default:
+    case SortingCriteria::Alpha:
         orderBy += "med.title";
         break;
     }
@@ -454,8 +458,13 @@ Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pat
 
     std::string groupBy = "GROUP BY att.artist_id "
                           "ORDER BY a.name";
-    if ( params != nullptr && params->desc == true )
-        groupBy += " DESC";
+    if ( params != nullptr )
+    {
+        if ( params->sort != SortingCriteria::Default && params->sort != SortingCriteria::Alpha )
+            LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Alpha" );
+        if ( params->desc == true )
+            groupBy += " DESC";
+    }
     return make_query<Artist, IArtist>( ml, "a.*", std::move( req ),
                                         std::move( groupBy ), pattern, genreId );
 }
@@ -463,8 +472,13 @@ Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pat
 std::string Artist::sortRequest( const QueryParameters* params )
 {
     std::string req = " ORDER BY name";
-    if ( params != nullptr && params->desc == true )
-        req +=  " DESC";
+    if ( params != nullptr )
+    {
+        if ( params->sort != SortingCriteria::Default && params->sort != SortingCriteria::Alpha )
+            LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Alpha" );
+        if ( params->desc == true )
+            req +=  " DESC";
+    }
     return req;
 }
 

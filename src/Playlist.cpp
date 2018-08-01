@@ -350,6 +350,10 @@ std::string Playlist::sortRequest( const QueryParameters* params )
         req += "creation_date";
         break;
     default:
+        LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default (Alpha)" );
+        /* fall-through */
+    case SortingCriteria::Default:
+    case SortingCriteria::Alpha:
         req += "name";
         break;
     }

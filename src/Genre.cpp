@@ -81,8 +81,13 @@ Query<IArtist> Genre::artists( const QueryParameters* params ) const
             "INNER JOIN " + AlbumTrack::Table::Name + " att ON att.artist_id = a.id_artist "
             "WHERE att.genre_id = ?";
     std::string groupAndOrderBy = "GROUP BY att.artist_id ORDER BY a.name";
-    if ( params != nullptr && params->desc == true )
-        groupAndOrderBy += " DESC";
+    if ( params != nullptr )
+    {
+        if ( params->sort != SortingCriteria::Default && params->sort != SortingCriteria::Alpha )
+            LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Alpha" );
+        if ( params->desc == true )
+            groupAndOrderBy += " DESC";
+    }
     return make_query<Artist, IArtist>( m_ml, "a.*", std::move( req ),
                                         std::move( groupAndOrderBy ), m_id );
 }
@@ -186,8 +191,13 @@ Query<IGenre> Genre::search( MediaLibraryPtr ml, const std::string& name,
             "(SELECT rowid FROM " + Genre::Table::Name + "Fts "
             "WHERE name MATCH '*' || ? || '*')";
     std::string orderBy = "ORDER BY name";
-    if ( params != nullptr && params->desc == true )
-        orderBy += " DESC";
+    if ( params != nullptr )
+    {
+        if ( params->sort != SortingCriteria::Default && params->sort != SortingCriteria::Alpha )
+            LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Alpha" );
+        if ( params->desc == true )
+            orderBy += " DESC";
+    }
     return make_query<Genre, IGenre>( ml, "*", std::move( req ),
                                       std::move( orderBy ), name );
 }
@@ -196,8 +206,13 @@ Query<IGenre> Genre::listAll( MediaLibraryPtr ml, const QueryParameters* params 
 {
     std::string req = "FROM " + Genre::Table::Name;
     std::string orderBy = " ORDER BY name";
-    if ( params != nullptr && params->desc == true )
-        orderBy += " DESC";
+    if ( params != nullptr )
+    {
+        if ( params->sort != SortingCriteria::Default && params->sort != SortingCriteria::Alpha )
+            LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Alpha" );
+        if ( params->desc == true )
+            orderBy += " DESC";
+    }
     return make_query<Genre, IGenre>( ml, "*", std::move( req ),
                                       std::move( orderBy ) );
 }

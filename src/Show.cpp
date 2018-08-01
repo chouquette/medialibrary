@@ -153,6 +153,9 @@ Query<IMedia> Show::episodes( const QueryParameters* params ) const
                 orderBy += " DESC";
             break;
         default:
+            LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default" );
+            /* fall-through */
+        case SortingCriteria::Default:
             if ( desc == true )
                 orderBy += "ep.season_number DESC, ep.episode_number DESC";
             else

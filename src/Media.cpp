@@ -498,6 +498,10 @@ std::string Media::sortRequest( const QueryParameters* params, bool hasAlbTrackT
             req += "tra.album_id, tra.track_number";
         break;
     default:
+        LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default (Alpha)" );
+        /* fall-through */
+    case SortingCriteria::Default:
+    case SortingCriteria::Alpha:
         req += "m.title";
         break;
     }

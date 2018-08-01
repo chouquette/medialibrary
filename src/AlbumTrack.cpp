@@ -177,6 +177,9 @@ Query<IMedia> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId, const 
         orderBy += "m.title";
         break;
     default:
+        LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default" );
+        /* fall-through */
+    case SortingCriteria::Default:
         if ( desc == true )
             orderBy += "t.artist_id DESC, t.album_id DESC, t.disc_number DESC, t.track_number DESC, m.filename";
         else

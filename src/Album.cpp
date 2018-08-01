@@ -207,6 +207,9 @@ std::string Album::orderTracksBy( const QueryParameters* params = nullptr )
         req += "med.release_date";
         break;
     default:
+        LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default" );
+        /* fall-through */
+    case SortingCriteria::Default:
         if ( desc == true )
             req += "att.disc_number DESC, att.track_number DESC, med.filename";
         else
@@ -243,6 +246,10 @@ std::string Album::orderBy( const QueryParameters* params )
             req += " DESC";
         break;
     default:
+        LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default (Alpha)" );
+        /* fall-through */
+    case SortingCriteria::Default:
+    case SortingCriteria::Alpha:
         req += "title";
         if ( desc == true )
             req += " DESC";
@@ -366,6 +373,9 @@ Query<IArtist> Album::artists( const QueryParameters* params ) const
             "INNER JOIN AlbumArtistRelation aar ON aar.artist_id = art.id_artist "
             "WHERE aar.album_id = ?";
     std::string orderBy = "ORDER BY art.name";
+    if ( params != nullptr && ( params->sort != SortingCriteria::Alpha &&
+                                params->sort != SortingCriteria::Default ) )
+         LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Alpha" );
     if ( params != nullptr && params->desc == true )
         orderBy += " DESC";
     return make_query<Artist, IArtist>( m_ml, "art.*", std::move( req ),
@@ -546,7 +556,12 @@ Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, const Que
         if ( desc == true )
             groupAndOrder += " DESC";
         break;
+
     default:
+        LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default (ReleaseDate)" );
+        /* fall-through */
+    case SortingCriteria::Default:
+    case SortingCriteria::ReleaseDate:
         // When listing albums of an artist, default order is by descending year (with album title
         // discrimination in case 2+ albums went out the same year)
         // This leads to DESC being used for "non-desc" case
