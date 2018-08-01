@@ -138,7 +138,7 @@ Query<IMedia> Artist::tracks( const QueryParameters* params ) const
         break;
     case SortingCriteria::Album:
         if ( desc == true )
-            orderBy += "atr.album_id DESC, atr.disc_number DESC, atr.track_number";
+            orderBy += "atr.album_id DESC, atr.disc_number, atr.track_number";
         else
             orderBy += "atr.album_id, atr.disc_number, atr.track_number";
         break;
@@ -147,7 +147,7 @@ Query<IMedia> Artist::tracks( const QueryParameters* params ) const
         break;
     }
 
-    if ( desc == true )
+    if ( desc == true && sort != SortingCriteria::Album )
         orderBy += " DESC";
     return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
                                       std::move( orderBy ), m_id );
