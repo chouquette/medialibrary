@@ -36,15 +36,15 @@ namespace medialibrary
 
 bool medialibrary::MetadataCommon::startPlayback( VLC::Media& media, VLC::MediaPlayer& mp )
 {
-    // Use a copy of the event manager to automatically unregister all events as soon
-    // as we leave this method.
     bool hasVideoTrack = false;
     bool failedToStart = false;
     bool hasAnyTrack = false;
     bool success = false;
-    auto em = mp.eventManager();
     compat::Mutex mutex;
     compat::ConditionVariable cond;
+    // Use a copy of the event manager to automatically unregister all events as soon
+    // as we leave this method.
+    auto em = mp.eventManager();
 
     em.onESAdded([&mutex, &cond, &hasVideoTrack, &hasAnyTrack]( libvlc_track_type_t type, int ) {
         std::lock_guard<compat::Mutex> lock( mutex );
