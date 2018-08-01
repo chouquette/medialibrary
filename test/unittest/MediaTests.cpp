@@ -776,6 +776,36 @@ TEST_F( Medias, NbPlaylists )
     ASSERT_EQ( 0u, m->nbPlaylists() );
 }
 
+TEST_F( Medias, SortByAlbum )
+{
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3", IMedia::Type::Audio ) );
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3", IMedia::Type::Audio ) );
+
+    auto album1 = ml->createAlbum( "album" );
+    auto album2 = ml->createAlbum( "zalbum ");
+
+    album1->addTrack( m3, 1, 0, 0, nullptr );
+    album2->addTrack( m2, 1, 0, 0, nullptr );
+    album2->addTrack( m1, 2, 0, 0, nullptr );
+
+    auto queryParams = QueryParameters{};
+    queryParams.desc = false;
+    queryParams.sort = SortingCriteria::Album;
+    auto tracks = ml->audioFiles( &queryParams )->all();
+    ASSERT_EQ( 3u, tracks.size() );
+    ASSERT_EQ( m3->id(), tracks[0]->id() );
+    ASSERT_EQ( m2->id(), tracks[1]->id() );
+    ASSERT_EQ( m1->id(), tracks[2]->id() );
+
+    queryParams.desc = true;
+    tracks = ml->audioFiles( &queryParams )->all();
+    ASSERT_EQ( 3u, tracks.size() );
+    ASSERT_EQ( m2->id(), tracks[0]->id() );
+    ASSERT_EQ( m1->id(), tracks[1]->id() );
+    ASSERT_EQ( m3->id(), tracks[2]->id() );
+}
+
 class FetchMedia : public Tests
 {
 protected:

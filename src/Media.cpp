@@ -455,12 +455,17 @@ void Media::removeFile( File& file )
     }));
 }
 
-std::string Media::sortRequest( const QueryParameters* params )
+std::string Media::sortRequest( const QueryParameters* params, bool hasAlbTrackTable )
 {
     std::string req = " ORDER BY ";
 
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
     auto desc = params != nullptr ? params->desc : false;
+    if ( sort == SortingCriteria::Album && hasAlbTrackTable == false )
+    {
+        LOG_WARN( "Sorting by album is not supported for this request" );
+        sort = SortingCriteria::Default;
+    }
     switch ( sort )
     {
     case SortingCriteria::Duration:
@@ -485,11 +490,18 @@ std::string Media::sortRequest( const QueryParameters* params )
     case SortingCriteria::FileSize:
         req += "f.size";
         break;
+    case SortingCriteria::Album:
+        assert( hasAlbTrackTable == true );
+        if ( desc == true )
+            req += "tra.album_id DESC, tra.track_number";
+        else
+            req += "tra.album_id, tra.track_number";
+        break;
     default:
         req += "m.title";
         break;
     }
-    if ( desc == true )
+    if ( desc == true && sort != SortingCriteria::Album )
         req += " DESC";
     return req;
 }
@@ -498,13 +510,20 @@ Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
                               const QueryParameters* params )
 {
     std::string req = "FROM " + Media::Table::Name + " m INNER JOIN "
-            + File::Table::Name + " f ON m.id_media = f.media_id"
-            " WHERE m.type = ?"
+            + File::Table::Name + " f ON m.id_media = f.media_id";
+    if ( type == IMedia::Type::Audio )
+    {
+        req += " LEFT JOIN " + AlbumTrack::Table::Name + " tra ON"
+               " m.id_media = tra.media_id";
+    }
+
+    req +=  " WHERE m.type = ?"
             " AND f.type = ?"
             " AND f.is_present != 0";
 
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
-                                      sortRequest( params ), type, IFile::Type::Main );
+                                      sortRequest( params, type == IMedia::Type::Audio ),
+                                      type, IFile::Type::Main );
 }
 
 int64_t Media::id() const
@@ -667,7 +686,7 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
             " AND f.type = ?"
             " AND m.type != ? AND m.type != ?";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
-                                      sortRequest( params ), title,
+                                      sortRequest( params, false ), title,
                                       File::Type::Main,
                                       Media::Type::External, Media::Type::Stream );
 }
@@ -684,7 +703,7 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
             " AND f.type = ?"
             " AND m.type = ?";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
-                                      sortRequest( params ), title,
+                                      sortRequest( params, false ), title,
                                       File::Type::Main, type );
 }
 
@@ -701,7 +720,7 @@ Query<IMedia> Media::searchAlbumTracks(MediaLibraryPtr ml, const std::string& pa
             " AND f.type = ?"
             " AND m.subtype = ?";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
-                                      sortRequest( params ), pattern, albumId,
+                                      sortRequest( params, true ), pattern, albumId,
                                       File::Type::Main, Media::SubType::AlbumTrack );
 }
 
@@ -718,7 +737,7 @@ Query<IMedia> Media::searchArtistTracks(MediaLibraryPtr ml, const std::string& p
             " AND f.type = ?"
             " AND m.subtype = ?";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
-                                      sortRequest( params ), pattern, artistId,
+                                      sortRequest( params, true ), pattern, artistId,
                                       File::Type::Main, Media::SubType::AlbumTrack );
 }
 
@@ -735,7 +754,7 @@ Query<IMedia> Media::searchGenreTracks(MediaLibraryPtr ml, const std::string& pa
             " AND f.type = ?"
             " AND m.subtype = ?";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
-                                      sortRequest( params ), pattern, genreId,
+                                      sortRequest( params, true ), pattern, genreId,
                                       File::Type::Main, Media::SubType::AlbumTrack );
 }
 
@@ -753,7 +772,7 @@ Query<IMedia> Media::searchShowEpisodes(MediaLibraryPtr ml, const std::string& p
             " AND f.type = ?"
             " AND m.subtype = ?";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
-                                      sortRequest( params ), pattern, showId,
+                                      sortRequest( params, true ), pattern, showId,
                                       File::Type::Main, Media::SubType::ShowEpisode );
 }
 
@@ -767,7 +786,7 @@ Query<IMedia> Media::searchInPlaylist( MediaLibraryPtr ml, const std::string& pa
            "m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts "
            "WHERE " + Media::Table::Name + "Fts MATCH '*' || ? || '*')";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
-                                      sortRequest( params ), playlistId, pattern );
+                                      sortRequest( params, false ), playlistId, pattern );
 }
 
 Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml )

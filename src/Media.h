@@ -148,7 +148,7 @@ class Media : public IMedia, public DatabaseHelpers<Media>
         static void removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime );
 
 private:
-        static std::string sortRequest( const QueryParameters* params );
+        static std::string sortRequest( const QueryParameters* params, bool hasAlbTrackTable );
 
 private:
         MediaLibraryPtr m_ml;
