@@ -95,7 +95,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
     , m_thumbnailId( 0 )
     , m_thumbnailGenerated( false )
     , m_title( title )
-    // When creating a Media, meta aren't parsed, and therefor, is the filename
+    // When creating a Media, meta aren't parsed, and therefor, the title is the filename
     , m_filename( title )
     , m_isFavorite( false )
     , m_isPresent( true )
