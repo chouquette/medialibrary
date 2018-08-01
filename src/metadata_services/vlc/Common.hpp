@@ -22,7 +22,6 @@
 
 #pragma once
 
-#include "parser/Parser.h"
 #include <vlcpp/vlc.hpp>
 
 namespace medialibrary
