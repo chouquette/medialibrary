@@ -113,7 +113,10 @@ Query<IMedia> Artist::tracks( const QueryParameters* params ) const
     {
         req += "INNER JOIN MediaArtistRelation mar ON mar.media_id = med.id_media ";
         if ( sort == SortingCriteria::Album )
-            req += "INNER JOIN AlbumTrack atr ON atr.media_id = med.id_media ";
+        {
+            req += "INNER JOIN Album alb ON alb.id_album = atr.album_id "
+                   "INNER JOIN AlbumTrack atr ON atr.media_id = med.id_media ";
+        }
         req += "WHERE mar.artist_id = ? ";
     }
     else
@@ -138,9 +141,9 @@ Query<IMedia> Artist::tracks( const QueryParameters* params ) const
         break;
     case SortingCriteria::Album:
         if ( desc == true )
-            orderBy += "atr.album_id DESC, atr.disc_number, atr.track_number";
+            orderBy += "alb.title DESC, atr.disc_number, atr.track_number";
         else
-            orderBy += "atr.album_id, atr.disc_number, atr.track_number";
+            orderBy += "alb.title, atr.disc_number, atr.track_number";
         break;
     default:
         orderBy += "med.title";
