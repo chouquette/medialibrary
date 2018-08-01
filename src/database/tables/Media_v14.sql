@@ -13,7 +13,7 @@
     "thumbnail_id INTEGER,"
     "thumbnail_generated BOOLEAN NOT NULL DEFAULT 0,"
     "title TEXT COLLATE NOCASE,"
-    "filename TEXT,"
+    "filename TEXT COLLATE NOCASE,"
     "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
     "is_present BOOLEAN NOT NULL DEFAULT 1,"
     "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
