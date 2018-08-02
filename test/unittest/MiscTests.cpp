@@ -187,6 +187,7 @@ TEST_F( DbModel, Upgrade13to14 )
     auto m = media[0];
     ASSERT_EQ( m->thumbnail(), "/path/to/thumbnail" );
     ASSERT_TRUE( m->isThumbnailGenerated() );
+    ASSERT_EQ( m->fileName(), "file with space.avi" );
 
     m = media[1];
     ASSERT_EQ( m->thumbnail(), "" );

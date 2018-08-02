@@ -73,7 +73,7 @@ CREATE TRIGGER add_album_track AFTER INSERT ON AlbumTrack BEGIN UPDATE Album SET
 INSERT INTO `Settings` (db_model_version) VALUES (12);
 INSERT INTO `Artist` (id_artist,name,shortbio,artwork_mrl,nb_albums,nb_tracks,mb_id,is_present) VALUES (1,NULL,NULL,NULL,0,0,NULL,1);
 INSERT INTO `Artist` (id_artist,name,shortbio,artwork_mrl,nb_albums,nb_tracks,mb_id,is_present) VALUES (2,NULL,NULL,NULL,0,0,NULL,1);
-INSERT INTO `Media` (id_media,type,subtype,duration,play_count,last_played_date,insertion_date,release_date,thumbnail,title,filename,is_favorite,is_present) VALUES (1,3,NULL,-1,NULL,NULL,1522231538,NULL,'/path/to/thumbnail','media.avi','media.avi',0,1);
+INSERT INTO `Media` (id_media,type,subtype,duration,play_count,last_played_date,insertion_date,release_date,thumbnail,title,filename,is_favorite,is_present) VALUES (1,3,NULL,-1,NULL,NULL,1522231538,NULL,'/path/to/thumbnail','Cool media','file%20with%20space.avi',0,1);
 INSERT INTO `File` (id_file,media_id,playlist_id,mrl,type,last_modification_date,size,folder_id,is_present,is_removable,is_external) VALUES (1,1,NULL,'media.avi',1,NULL,NULL,NULL,1,0,1);
 INSERT INTO `Media` (id_media,type,subtype,duration,play_count,last_played_date,insertion_date,release_date,thumbnail,title,filename,is_favorite,is_present) VALUES (2,3,NULL,-1,NULL,NULL,1522231538,NULL,'','media2.avi','media2.avi',0,1);
 INSERT INTO `File` (id_file,media_id,playlist_id,mrl,type,last_modification_date,size,folder_id,is_present,is_removable,is_external) VALUES (2,2,NULL,'media2.avi',1,NULL,NULL,NULL,1,0,1);

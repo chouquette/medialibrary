@@ -129,7 +129,7 @@ Status MetadataAnalyzer::run( IItem& item )
             auto t = m_ml->getConn()->newTransaction();
             LOG_INFO( "Adding ", mrl );
             auto m = Media::create( m_ml, isAudio ? IMedia::Type::Audio : IMedia::Type::Video,
-                                    utils::file::fileName( mrl ) );
+                                    utils::url::decode( utils::file::fileName( mrl ) ) );
             if ( m == nullptr )
             {
                 LOG_ERROR( "Failed to add media ", mrl, " to the media library" );
@@ -315,8 +315,8 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
     if ( fsFactory == nullptr ) // Media not supported by any FsFactory, registering it as external
     {
         auto t2 = m_ml->getConn()->newTransaction();
-        auto externalMedia = Media::create( m_ml, IMedia::Type::External, utils::url::encode(
-                subitem.meta( IItem::Metadata::Title ) ) );
+        auto externalMedia = Media::create( m_ml, IMedia::Type::External,
+                                            subitem.meta( IItem::Metadata::Title ) );
         if ( externalMedia == nullptr )
         {
             LOG_ERROR( "Failed to create external media for ", mrl, " in the playlist ", item.mrl() );

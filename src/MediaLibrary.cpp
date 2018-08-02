@@ -443,7 +443,8 @@ MediaPtr MediaLibrary::addExternalMedia( const std::string& mrl, IMedia::Type ty
     {
         return sqlite::Tools::withRetries( 3, [this, &mrl, type]() -> MediaPtr {
             auto t = m_dbConnection->newTransaction();
-            auto media = Media::create( this, type, utils::file::fileName( mrl ) );
+            auto fileName = utils::file::fileName( mrl );
+            auto media = Media::create( this, type, utils::url::decode( fileName ) );
             if ( media == nullptr )
                 return nullptr;
             if ( media->addExternalMrl( mrl, IFile::Type::Main ) == nullptr )
@@ -1170,6 +1171,17 @@ void MediaLibrary::migrateModel13to14()
     Show::createTriggers( dbConn );
     Playlist::createTriggers( dbConn );
     Folder::createTriggers( dbConn );
+    const std::string req = "SELECT * FROM " + Media::Table::Name +
+            " WHERE filename LIKE '%#%%' ESCAPE '#'";
+    auto media = Media::fetchAll<Media>( this, req );
+    for ( const auto& m : media )
+    {
+        // We must not call mrl() from here. We might not have all devices yet,
+        // and calling mrl would crash for files stored on removable devices.
+        auto newFileName = utils::url::decode( m->fileName() );
+        LOG_INFO( "Converting ", m->fileName(), " to ", newFileName );
+        m->setFileName( std::move( newFileName ) );
+    }
 
     t->commit();
 }
