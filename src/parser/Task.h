@@ -173,7 +173,7 @@ public:
     // This is intended to be used when a step requires its completion not to be
     // saved in database, but to avoid having a retry_count being incremented again
     // when starting next step.
-    bool resetRetryCountOnSuccess();
+    bool decrementRetryCount();
     bool isCompleted() const;
     bool isStepCompleted( parser::Step step ) const;
     /**

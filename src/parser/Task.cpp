@@ -93,10 +93,10 @@ bool Task::saveParserStep()
     return sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_step, m_id );
 }
 
-bool Task::resetRetryCountOnSuccess()
+bool Task::decrementRetryCount()
 {
     static const std::string req = "UPDATE " + Task::Table::Name + " SET "
-            "retry_count = 0 WHERE id_task = ?";
+            "retry_count = retry_count - 1 WHERE id_task = ?";
     return sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id );
 }
 

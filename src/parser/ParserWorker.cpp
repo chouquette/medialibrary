@@ -222,7 +222,19 @@ bool Worker::handleServiceResult( Task& task, Status status )
         // the extraction again, causing the analysis to run with no info.
         if ( m_service->targetedStep() != Step::MetadataExtraction )
             return task.saveParserStep();
-        return task.resetRetryCountOnSuccess();
+        // We don't want to reset the entire retry count, as we would be stuck in
+        // a "loop" in case the metadata analysis fails (we'd always reset the retry
+        // count to zero, then fail, then run the extraction again, reset the retry,
+        // fail the analysis, and so on.
+        // We can't not increment the retry count for metadata extraction, since
+        // in case a file makes (lib)VLC crash, we would always try again, and
+        // therefor we would keep on crashing.
+        // However we don't want to just increment the retry count, since it
+        // would reach the maximum value too quickly (extraction would set retry
+        // count to 1, analysis to 2, and in case of failure, next run would set
+        // it over 3, while we only tried 2 times. Instead we just decrement it
+        // when the extraction step succeeds
+        return task.decrementRetryCount();
     }
     else if ( status == Status::Completed )
     {
