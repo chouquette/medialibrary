@@ -578,6 +578,15 @@ void Media::setTitleBuffered( const std::string& title )
     m_changed = true;
 }
 
+void Media::setFileName( std::string fileName )
+{
+    if ( fileName == m_filename )
+        return;
+    static const std::string req = "UPDATE " + Media::Table::Name + " SET filename = ? WHERE id_media = ?";
+    sqlite::Tools::executeUpdate( m_ml->getConn(), req, fileName, m_id );
+    m_filename = std::move( fileName );
+}
+
 void Media::createTable( sqlite::Connection* connection )
 {
     std::string reqs[] = {

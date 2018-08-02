@@ -76,6 +76,8 @@ class Media : public IMedia, public DatabaseHelpers<Media>
         /// until save() is called
         ///
         void setTitleBuffered( const std::string& title );
+        // Should only be used by 13->14 migration
+        void setFileName( std::string fileName );
         virtual AlbumTrackPtr albumTrack() const override;
         void setAlbumTrack( AlbumTrackPtr albumTrack );
         virtual int64_t duration() const override;
@@ -167,7 +169,7 @@ private:
         std::string m_title;
         // We store the filename as a shortcut when sorting. The filename (*not* the title
         // might be used as a fallback
-        const std::string m_filename;
+        std::string m_filename;
         bool m_isFavorite;
         bool m_isPresent;
         mutable std::atomic_uint m_nbPlaylists;

@@ -806,6 +806,20 @@ TEST_F( Medias, SortByAlbum )
     ASSERT_EQ( m3->id(), tracks[2]->id() );
 }
 
+TEST_F( Medias, SetFilename )
+{
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
+    ASSERT_EQ( "media.mkv", m->fileName() );
+
+    m->setFileName( "sea_otter.asf" );
+    ASSERT_EQ( "sea_otter.asf", m->fileName() );
+
+    Reload();
+
+    m = ml->media( m->id() );
+    ASSERT_EQ( "sea_otter.asf", m->fileName() );
+}
+
 class FetchMedia : public Tests
 {
 protected:
