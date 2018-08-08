@@ -58,6 +58,7 @@
 #include "utils/Url.h"
 #include "VideoTrack.h"
 #include "Metadata.h"
+#include "parser/Task.h"
 #include "utils/Charsets.h"
 
 // Discoverers:
@@ -511,7 +512,8 @@ void MediaLibrary::addDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
         }
         // Don't move the file as we might need it for error handling
         task = parser::Task::create( this, fileFs, std::move( parentFolder ),
-                                          std::move( parentFolderFs ), std::move( parentPlaylist ) );
+                                     std::move( parentFolderFs ),
+                                     std::move( parentPlaylist ) );
         if ( task != nullptr && m_parser != nullptr )
             m_parser->parse( task );
     }
@@ -839,6 +841,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                                         const std::string& dbPath )
 {
     LOG_INFO( "Updating database model from ", previousVersion, " to ", Settings::DbModelVersion );
+    auto originalPreviousVersion = previousVersion;
     // Up until model 3, it's safer (and potentially more efficient with index changes) to drop the DB
     // It's also way simpler to implement
     // In case of downgrade, just recreate the database
@@ -935,7 +938,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 // We need to recreate many thumbnail records, and hopefully
                 // generate better ones
                 needRescan = true;
-                migrateModel13to14();
+                migrateModel13to14( originalPreviousVersion );
                 previousVersion = 14;
             }
             // To be continued in the future!
@@ -1144,7 +1147,7 @@ void MediaLibrary::migrateModel12to13()
  * - Add Media.thumbnail_id
  * - Add Media.thumbnail_generated
  */
-void MediaLibrary::migrateModel13to14()
+void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
 {
     auto dbConn = getConn();
     sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
@@ -1156,6 +1159,39 @@ void MediaLibrary::migrateModel13to14()
 
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
+    // Task table was introduced in model 8, so if the user is migrating from a
+    // version earlier than this one, the Task table will be properly created and
+    // doesn't need a migration
+    if ( originalPreviousVersion >= 8 )
+    {
+        const std::string migrateTaskReqs[] = {
+            "CREATE TEMPORARY TABLE " + parser::Task::Table::Name + "_backup"
+            "("
+                "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
+                "step INTEGER NOT NULL DEFAULT 0,"
+                "retry_count INTEGER NOT NULL DEFAULT 0,"
+                "mrl TEXT,"
+                "file_id UNSIGNED INTEGER,"
+                "parent_folder_id UNSIGNED INTEGER,"
+                "parent_playlist_id INTEGER,"
+                "parent_playlist_index UNSIGNED INTEGER"
+            ")",
+
+            "INSERT INTO " + parser::Task::Table::Name + "_backup SELECT * FROM " + parser::Task::Table::Name,
+
+            "DROP TABLE " + parser::Task::Table::Name,
+
+            #include "database/tables/Task_v14.sql"
+
+            "INSERT INTO " + parser::Task::Table::Name + " SELECT "
+            "id_task, step, retry_count, mrl, file_id, parent_folder_id, parent_playlist_id,"
+            "parent_playlist_index, 0 FROM " + parser::Task::Table::Name + "_backup",
+
+            "DROP TABLE " + parser::Task::Table::Name + "_backup",
+        };
+        for ( const auto& req : migrateTaskReqs )
+            sqlite::Tools::executeRequest( dbConn, req );
+    }
     // Re-create tables that we just removed
     // We will run a re-scan, so we don't care about keeping their content
     Album::createTable( dbConn );

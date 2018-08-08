@@ -90,7 +90,7 @@ public:
          *
          * The position is used to keep subitems ordering for playlists
          */
-        Item( ITaskCb* taskCb, std::string mrl, unsigned int subitemIndex );
+        Item( ITaskCb* taskCb, std::string mrl, unsigned int subitemIndex, bool isRefresh );
         Item( ITaskCb* taskCb, std::shared_ptr<fs::IFile> fileFs,
               std::shared_ptr<Folder> folder, std::shared_ptr<fs::IDirectory> folderFs,
               std::shared_ptr<Playlist> parentPlaylist, unsigned int parentPlaylistIndex );
@@ -128,6 +128,8 @@ public:
 
         virtual unsigned int parentPlaylistIndex() const override;
 
+        virtual bool isRefresh() const override;
+
     private:
         ITaskCb* m_taskCb;
 
@@ -143,6 +145,7 @@ public:
         std::shared_ptr<fs::IDirectory> m_parentFolderFs;
         PlaylistPtr m_parentPlaylist;
         unsigned int m_parentPlaylistIndex;
+        bool m_isRefresh;
     };
 
     static_assert( std::is_move_assignable<Item>::value, "Item must be move assignable" );
@@ -199,7 +202,8 @@ public:
     static std::shared_ptr<Task> create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
                                          std::shared_ptr<Folder> parentFolder,
                                          std::shared_ptr<fs::IDirectory> parentFolderFs,
-                                         std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist );
+                                         std::pair<std::shared_ptr<Playlist>,
+                                         unsigned int> parentPlaylist );
     static void recoverUnscannedFiles( MediaLibraryPtr ml );
 
 private:

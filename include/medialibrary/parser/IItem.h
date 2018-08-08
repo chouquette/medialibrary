@@ -215,6 +215,11 @@ public:
      * is returned, this item doesn't belong in any playlist.
      */
     virtual unsigned int parentPlaylistIndex() const = 0;
+
+    /**
+     * @brief isRefresh Returns true if this item is a refresh of an existing media
+     */
+    virtual bool isRefresh() const = 0;
 };
 
 }

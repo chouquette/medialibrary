@@ -86,4 +86,5 @@ INSERT INTO `Playlist` (id_playlist,name,file_id,creation_date,artwork_mrl) VALU
 INSERT INTO `PlaylistMediaRelation` (media_id,playlist_id,position) VALUES (1,1,1);
 INSERT INTO `PlaylistMediaRelation` (media_id,playlist_id,position) VALUES (2,1,2);
 INSERT INTO `PlaylistMediaRelation` (media_id,playlist_id,position) VALUES (3,1,3);
+INSERT INTO `Task` (mrl, file_id, parent_folder_id, parent_playlist_id) VALUES("other_external.avi", 99, NULL, NULL);
 COMMIT;

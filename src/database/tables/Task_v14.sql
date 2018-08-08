@@ -1,4 +1,4 @@
-"CREATE TABLE IF NOT EXISTS " + Task::Table::Name +
+"CREATE TABLE IF NOT EXISTS " + parser::Task::Table::Name +
 "("
     "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
     "step INTEGER NOT NULL DEFAULT 0,"
@@ -8,7 +8,8 @@
     "parent_folder_id UNSIGNED INTEGER,"
     "parent_playlist_id INTEGER,"
     "parent_playlist_index UNSIGNED INTEGER,"
-    "UNIQUE(mrl, parent_playlist_id) ON CONFLICT FAIL,"
+    "is_refresh BOOLEAN NOT NULL DEFAULT 0,"
+    "UNIQUE(mrl, parent_playlist_id, is_refresh) ON CONFLICT FAIL,"
     "FOREIGN KEY (parent_folder_id) REFERENCES " + Folder::Table::Name
     + "(id_folder) ON DELETE CASCADE,"
     "FOREIGN KEY (file_id) REFERENCES " + File::Table::Name
