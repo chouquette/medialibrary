@@ -78,7 +78,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual Query<IMedia> audioFiles( const QueryParameters* params ) const override;
         virtual Query<IMedia> videoFiles( const QueryParameters* params ) const override;
 
-        virtual void addDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
+        virtual void onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                                         std::shared_ptr<Folder> parentFolder,
                                         std::shared_ptr<fs::IDirectory> parentFolderFs,
                                         std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist );

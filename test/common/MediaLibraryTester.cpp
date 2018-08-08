@@ -185,7 +185,7 @@ std::vector<const char*> MediaLibraryTester::getSupportedExtensions() const
     return res;
 }
 
-void MediaLibraryTester::addDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,
+void MediaLibraryTester::onDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,
                                 std::shared_ptr<Folder> parentFolder,
                                 std::shared_ptr<fs::IDirectory> parentFolderFs,
                                 std::pair<std::shared_ptr<Playlist>, unsigned int>)

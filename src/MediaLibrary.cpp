@@ -489,7 +489,7 @@ bool MediaLibrary::isExtensionSupported( const char* ext )
         });
 }
 
-void MediaLibrary::addDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
+void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                                       std::shared_ptr<Folder> parentFolder,
                                       std::shared_ptr<fs::IDirectory> parentFolderFs,
                                       std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist )
