@@ -171,7 +171,7 @@ void ModificationNotifier::run()
         // We pass the onTrackAdded callback twice, to avoid having to do some nifty templates specialization
         // for nullptr callbacks. There is no onTracksModified callback, as tracks are never modified.
         notify( std::move( tracks ), &IMediaLibraryCb::onTracksAdded, &IMediaLibraryCb::onTracksAdded, &IMediaLibraryCb::onTracksDeleted );
-        notify( std::move( playlists ), &IMediaLibraryCb::onPlaylistsAdded, &IMediaLibraryCb::onPlaylistsAdded, &IMediaLibraryCb::onPlaylistsDeleted );
+        notify( std::move( playlists ), &IMediaLibraryCb::onPlaylistsAdded, &IMediaLibraryCb::onPlaylistsModified, &IMediaLibraryCb::onPlaylistsDeleted );
     }
 }
 
