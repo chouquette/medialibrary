@@ -494,6 +494,7 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                                       std::shared_ptr<fs::IDirectory> parentFolderFs,
                                       std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist )
 {
+    auto mrl = fileFs->mrl();
     try
     {
         std::shared_ptr<parser::Task> task;
@@ -503,15 +504,14 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
             // when parent_playlist_id is null, so we have to ensure of it ourselves
             const std::string req = "SELECT * FROM " + parser::Task::Table::Name + " "
                     "WHERE mrl = ? AND parent_playlist_id IS NULL";
-            task = parser::Task::fetch( this, req, fileFs->mrl() );
+            task = parser::Task::fetch( this, req, mrl );
             if ( task != nullptr )
             {
-                LOG_INFO( "Not creating duplicated task for mrl: ", fileFs->mrl() );
+                LOG_INFO( "Not creating duplicated task for mrl: ", mrl );
                 return;
             }
         }
-        // Don't move the file as we might need it for error handling
-        task = parser::Task::create( this, fileFs, std::move( parentFolder ),
+        task = parser::Task::create( this, std::move( fileFs ), std::move( parentFolder ),
                                      std::move( parentFolderFs ),
                                      std::move( parentPlaylist ) );
         if ( task != nullptr && m_parser != nullptr )
@@ -521,7 +521,7 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
     {
         // Most likely the file is already scheduled and we restarted the
         // discovery after a crash.
-        LOG_WARN( "Failed to insert ", fileFs->mrl(), ": ", ex.what(), ". "
+        LOG_WARN( "Failed to insert ", mrl, ": ", ex.what(), ". "
                   "Assuming the file is already scheduled for discovery" );
     }
 }
