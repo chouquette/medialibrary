@@ -59,9 +59,9 @@ public:
     void notifyAlbumTrackModification( AlbumTrackPtr track );
     void notifyAlbumTrackRemoval( int64_t trackId );
 
-    void notifyPlaylistCreation( PlaylistPtr track );
-    void notifyPlaylistModification( PlaylistPtr track );
-    void notifyPlaylistRemoval( int64_t trackId );
+    void notifyPlaylistCreation( PlaylistPtr playlist );
+    void notifyPlaylistModification( PlaylistPtr playlist );
+    void notifyPlaylistRemoval( int64_t playlistId );
 
 private:
     void run();
