@@ -261,6 +261,7 @@ bool MetadataAnalyzer::addPlaylistMedias( IItem& item ) const
             LOG_ERROR( "Failed to create playlist ", mrl, " to the media library" );
             return false;
         }
+        m_notifier->notifyPlaylistCreation( playlistPtr );
 
         auto file = playlistPtr->addFile( *item.fileFs(),
                                           item.parentFolder()->id(),

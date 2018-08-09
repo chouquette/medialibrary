@@ -648,7 +648,10 @@ PlaylistPtr MediaLibrary::createPlaylist( const std::string& name )
 {
     try
     {
-        return Playlist::create( this, name );
+        auto pl = Playlist::create( this, name );
+        if ( pl != nullptr && m_modificationNotifier != nullptr )
+            m_modificationNotifier->notifyPlaylistCreation( pl );
+        return pl;
     }
     catch ( const sqlite::errors::Generic& ex )
     {
