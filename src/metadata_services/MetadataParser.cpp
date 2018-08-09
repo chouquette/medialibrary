@@ -93,7 +93,6 @@ int MetadataAnalyzer::toInt( IItem& item, IItem::Metadata meta )
 
 Status MetadataAnalyzer::run( IItem& item )
 {
-    bool alreadyInParser = false;
     int nbSubitem = item.nbSubItems();
     // Assume that file containing subitem(s) is a Playlist
     if ( nbSubitem > 0 )
@@ -163,13 +162,7 @@ Status MetadataAnalyzer::run( IItem& item )
                 LOG_ERROR( "File ", mrl, " no longer present in DB, aborting");
                 return Status::Fatal;
             }
-            auto media = fileInDB->media();
-            if ( media == nullptr ) // Without a media, we cannot go further
-                return Status::Fatal;
-            item.setFile( std::move( fileInDB ) );
-            item.setMedia( std::move( media ) );
-
-            alreadyInParser = true;
+            return Status::Discarded;
         }
     }
     else if ( item.media() == nullptr )
@@ -187,9 +180,6 @@ Status MetadataAnalyzer::run( IItem& item )
 
     if ( item.parentPlaylist() != nullptr )
         item.parentPlaylist()->add( *media, item.parentPlaylistIndex() );
-
-    if ( alreadyInParser == true )
-        return Status::Discarded;
 
     {
         using TracksT = decltype( tracks );
