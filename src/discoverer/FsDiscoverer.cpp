@@ -314,7 +314,7 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
             + " WHERE folder_id = ?";
     auto files = File::fetchAll<File>( m_ml, req, parentFolder->id() );
     std::vector<std::shared_ptr<fs::IFile>> filesToAdd;
-    std::vector<std::shared_ptr<File>> filesToRemove;
+    std::vector<std::pair<std::shared_ptr<File>, std::shared_ptr<fs::IFile>>> filesToRefresh;
     for ( const auto& fileFs: parentFolderFs->files() )
     {
         if ( m_probe->stopFileDiscovery() == true )
@@ -330,28 +330,20 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
                 filesToAdd.push_back( fileFs );
             continue;
         }
-        if ( fileFs->lastModificationDate() == (*it)->lastModificationDate() )
+        if ( fileFs->lastModificationDate() != (*it)->lastModificationDate() )
         {
-            // Unchanged file
-            files.erase( it );
-            continue;
+            LOG_INFO( "Forcing file refresh ", fileFs->mrl() );
+            filesToRefresh.emplace_back( std::move( *it ), fileFs );
         }
-        auto& file = (*it);
-        LOG_INFO( "Forcing file refresh ", fileFs->mrl() );
-        // Pre-cache the file's media, since we need it to remove. However, better doing it
-        // out of a write context, since that way, other threads can also read the database.
-        file->media();
-        filesToRemove.push_back( std::move( file ) );
-        filesToAdd.push_back( fileFs );
         files.erase( it );
     }
     if ( m_probe->deleteUnseenFiles() == false )
         files.clear();
     using FilesT = decltype( files );
-    using FilesToRemoveT = decltype( filesToRemove );
+    using FilesToRefreshT = decltype( filesToRefresh );
     using FilesToAddT = decltype( filesToAdd );
     sqlite::Tools::withRetries( 3, [this, &parentFolder, &parentFolderFs]
-                            ( FilesT files, FilesToAddT filesToAdd, FilesToRemoveT filesToRemove ) {
+                            ( FilesT files, FilesToAddT filesToAdd, FilesToRefreshT filesToRefresh ) {
         auto t = m_ml->getConn()->newTransaction();
         for ( const auto& file : files )
         {
@@ -367,29 +359,14 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
                 file->destroy();
             }
         }
-        for ( auto& f : filesToRemove )
-        {
-            if ( f->type() == IFile::Type::Playlist )
-            {
-                f->destroy(); // Trigger cascade: delete Playlist, and playlist/media relations
-                continue;
-            }
-            auto media = f->media();
-            if ( media != nullptr )
-                media->removeFile( *f );
-            else
-            {
-                // If there is no media associated with this file, the file had to be removed through
-                // a trigger
-                assert( f->isDeleted() );
-            }
-        }
+        for ( auto& p: filesToRefresh )
+            m_ml->onUpdatedFile( std::move( p.first ), std::move( p.second ) );
         // Insert all files at once to avoid SQL write contention
         for ( auto& p : filesToAdd )
             m_ml->onDiscoveredFile( p, parentFolder, parentFolderFs, m_probe->getPlaylistParent() );
         t->commit();
         LOG_INFO( "Done checking files in ", parentFolderFs->mrl() );
-    }, std::move( files ), std::move( filesToAdd ), std::move( filesToRemove ) );
+    }, std::move( files ), std::move( filesToAdd ), std::move( filesToRefresh ) );
 }
 
 bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,

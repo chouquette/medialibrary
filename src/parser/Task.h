@@ -93,7 +93,9 @@ public:
         Item( ITaskCb* taskCb, std::string mrl, unsigned int subitemIndex, bool isRefresh );
         Item( ITaskCb* taskCb, std::shared_ptr<fs::IFile> fileFs,
               std::shared_ptr<Folder> folder, std::shared_ptr<fs::IDirectory> folderFs,
-              std::shared_ptr<Playlist> parentPlaylist, unsigned int parentPlaylistIndex );
+              std::shared_ptr<Playlist> parentPlaylist, unsigned int parentPlaylistIndex,
+              bool isRefresh );
+        Item( ITaskCb* taskCb, std::shared_ptr<File> file, std::shared_ptr<fs::IFile> fileFs );
 
 
         virtual std::string meta( Metadata type ) const override;
@@ -162,6 +164,8 @@ public:
           std::shared_ptr<fs::IDirectory> parentFolderFs,
           std::shared_ptr<Playlist> parentPlaylist,
           unsigned int parentPlaylistIndex );
+    Task( MediaLibraryPtr ml, std::shared_ptr<File> file,
+          std::shared_ptr<fs::IFile> fileFs );
 
     /*
      * We need to decouple the current parser state and the saved one.
@@ -204,6 +208,8 @@ public:
                                          std::shared_ptr<fs::IDirectory> parentFolderFs,
                                          std::pair<std::shared_ptr<Playlist>,
                                          unsigned int> parentPlaylist );
+    static std::shared_ptr<Task> create( MediaLibraryPtr ml, std::shared_ptr<File> file,
+                                         std::shared_ptr<fs::IFile> fsFile );
     static void recoverUnscannedFiles( MediaLibraryPtr ml );
 
 private:

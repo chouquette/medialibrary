@@ -322,6 +322,26 @@ std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsig
     return track;
 }
 
+bool Album::removeTrack( Media& media, AlbumTrack& track )
+{
+    m_duration -= media.duration();
+    m_nbTracks--;
+    auto genre = std::static_pointer_cast<Genre>( track.genre() );
+    if ( genre != nullptr )
+        genre->updateCachedNbTracks( -1 );
+    auto lock = m_tracks.lock();
+    if ( m_tracks.isCached() == true )
+    {
+        auto it = std::find_if( begin( m_tracks.get() ), end( m_tracks.get() ), [&media]( MediaPtr m ) {
+            return m->id() == media.id();
+        });
+        if ( it != end( m_tracks.get() ) )
+            m_tracks.get().erase( it );
+    }
+
+    return true;
+}
+
 unsigned int Album::nbTracks() const
 {
     return m_nbTracks;

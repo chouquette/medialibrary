@@ -87,6 +87,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         ///
         std::shared_ptr<AlbumTrack> addTrack( std::shared_ptr<Media> media, unsigned int trackNb,
                                               unsigned int discNumber, int64_t artistId, Genre* genre );
+        bool removeTrack( Media& media, AlbumTrack& albumTrack );
         unsigned int nbTracks() const override;
         unsigned int duration() const override;
 

@@ -36,6 +36,8 @@
 #include "Media.h"
 #include "Playlist.h"
 #include "Show.h"
+#include "ShowEpisode.h"
+#include "Movie.h"
 #include "utils/Directory.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
@@ -93,6 +95,16 @@ int MetadataAnalyzer::toInt( IItem& item, IItem::Metadata meta )
 
 Status MetadataAnalyzer::run( IItem& item )
 {
+    if ( item.isRefresh() )
+    {
+        bool success;
+        bool needRescan;
+        std::tie( success, needRescan ) = refreshFile( item );
+        if ( success == false )
+            return Status::Fatal;
+        if ( needRescan == false )
+            return Status::Success;
+    }
     int nbSubitem = item.nbSubItems();
     // Assume that file containing subitem(s) is a Playlist
     if ( nbSubitem > 0 )
@@ -449,6 +461,96 @@ void MetadataAnalyzer::createTracks( Media& m, const std::vector<IItem::Track>& 
                                        track.language, track.description );
         }
     }
+}
+
+std::tuple<bool, bool> MetadataAnalyzer::refreshFile( IItem& item ) const
+{
+    assert( item.media() == nullptr );
+    assert( item.file() != nullptr );
+    auto file = std::static_pointer_cast<File>( item.file() );
+
+    auto media = file->media();
+
+    file->updateFsInfo( item.fileFs()->lastModificationDate(), item.fileFs()->size() );
+
+    if ( media->duration() != item.duration() )
+        media->setDuration( item.duration() );
+
+    auto newTitle = item.meta( IItem::Metadata::Title );
+    if ( media->title() != newTitle )
+        media->setTitleBuffered( newTitle );
+
+    auto tracks = item.tracks();
+    auto isAudio = std::find_if( begin( tracks ), end( tracks ), [](const Task::Item::Track& t) {
+        return t.type == Task::Item::Track::Type::Video;
+    }) == end( tracks );
+
+    if ( isAudio == true && media->type() == IMedia::Type::Video )
+        media->setType( IMedia::Type::Audio );
+    else if ( isAudio == false && media->type() == IMedia::Type::Audio )
+        media->setType( IMedia::Type::Video );
+
+    bool needRescan = false;
+    if ( media->subType() != IMedia::SubType::Unknown )
+    {
+        needRescan = true;
+        switch( media->subType() )
+        {
+            case IMedia::SubType::AlbumTrack:
+            {
+                auto albumTrack = std::static_pointer_cast<AlbumTrack>( media->albumTrack() );
+                if ( albumTrack == nullptr )
+                {
+                    assert( false );
+                    LOG_ERROR( "Can't fetch album track associated with media ", media->id() );
+                    break;
+                }
+                auto album = std::static_pointer_cast<Album>( albumTrack->album() );
+                if ( album == nullptr )
+                {
+                    assert( false );
+                    LOG_ERROR( "Can't fetch album associated to album track ",
+                               albumTrack->id(), "(media ", media->id(), ")" );
+                }
+                album->removeTrack( *media, *albumTrack );
+                AlbumTrack::destroy( m_ml, albumTrack->id() );
+                break;
+            }
+            case IMedia::SubType::Movie:
+            {
+                auto movie = media->movie();
+                if ( movie == nullptr )
+                {
+                    assert( false );
+                    LOG_ERROR( "Failed to fetch movie associated with media ", media->id() );
+                    break;
+                }
+                Movie::destroy( m_ml, movie->id() );
+                break;
+            }
+            case IMedia::SubType::ShowEpisode:
+            {
+                auto episode = std::static_pointer_cast<ShowEpisode>( media->showEpisode() );
+                if ( episode == nullptr )
+                {
+                    assert( false );
+                    LOG_ERROR( "Failed to fetch show episode associated with media ", media->id() );
+                    break;
+                }
+                ShowEpisode::destroy( m_ml, episode->id() );
+                break;
+            }
+            case IMedia::SubType::Unknown:
+                assert( !"Unreachable" );
+                break;
+        }
+        media->setSubType( IMedia::SubType::Unknown );
+    }
+
+    if ( media->save() == false )
+        return std::make_tuple( false, false );
+    item.setMedia( std::move( media ) );
+    return std::make_tuple( true, needRescan );
 }
 
 /* Audio files */

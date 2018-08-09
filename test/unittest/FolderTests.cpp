@@ -249,9 +249,9 @@ TEST_F( Folders, UpdateFile )
 
     f = ml->media( filePath );
     ASSERT_NE( nullptr, f );
-    // The file is expected to be deleted and re-added since it changed, so the
-    // id should have changed
-    ASSERT_NE( id, f->id() );
+    // File won't be refreshed since unittests don't have parsers (and the file
+    // doesn't actually exist) but let's check it's not deleted/re-added anymore
+    ASSERT_EQ( id, f->id() );
 }
 
 TEST_F( FoldersNoDiscover, Blacklist )

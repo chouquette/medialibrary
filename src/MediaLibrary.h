@@ -46,6 +46,7 @@ class Device;
 class Folder;
 class Genre;
 class Playlist;
+class File;
 
 namespace fs
 {
@@ -82,6 +83,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
                                         std::shared_ptr<Folder> parentFolder,
                                         std::shared_ptr<fs::IDirectory> parentFolderFs,
                                         std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist );
+        void onUpdatedFile( std::shared_ptr<File> file,
+                            std::shared_ptr<fs::IFile> fileFs );
 
         bool deleteFolder(const Folder& folder );
 

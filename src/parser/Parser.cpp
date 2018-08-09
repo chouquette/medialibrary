@@ -163,6 +163,8 @@ void Parser::done( std::shared_ptr<Task> t, Status status )
             m_opToDo -= m_services.size() - serviceIdx;
         }
         updateStats();
+        if ( t->item().isRefresh() == true )
+            Task::destroy( m_ml, t->id() );
         return;
     }
 

@@ -526,6 +526,25 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
     }
 }
 
+void MediaLibrary::onUpdatedFile( std::shared_ptr<File> file,
+                                  std::shared_ptr<fs::IFile> fileFs )
+{
+    auto mrl = fileFs->mrl();
+    try
+    {
+        auto task = parser::Task::create( this, std::move( file ), std::move( fileFs ) );
+        if ( task != nullptr && m_parser != nullptr )
+            m_parser->parse( std::move( task ) );
+    }
+    catch( const sqlite::errors::ConstraintViolation& ex )
+    {
+        // Most likely the file is already scheduled and we restarted the
+        // discovery after a crash.
+        LOG_WARN( "Failed to insert ", mrl, ": ", ex.what(), ". "
+                  "Assuming the file is already scheduled for discovery" );
+    }
+}
+
 bool MediaLibrary::deleteFolder( const Folder& folder )
 {
     LOG_INFO( "deleting folder ", folder.mrl() );
