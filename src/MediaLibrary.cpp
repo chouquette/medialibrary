@@ -153,7 +153,7 @@ void MediaLibrary::createAllTables()
     Device::createTable( m_dbConnection.get() );
     Folder::createTable( m_dbConnection.get() );
     Thumbnail::createTable( m_dbConnection.get() );
-    Media::createTable( m_dbConnection.get() );
+    Media::createTable( m_dbConnection.get(), dbModelVersion );
     File::createTable( m_dbConnection.get() );
     Label::createTable( m_dbConnection.get() );
     Playlist::createTable( m_dbConnection.get(), dbModelVersion );

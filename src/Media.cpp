@@ -587,13 +587,21 @@ void Media::setFileName( std::string fileName )
     m_filename = std::move( fileName );
 }
 
-void Media::createTable( sqlite::Connection* connection )
+void Media::createTable( sqlite::Connection* connection, uint32_t modelVersion )
 {
     std::string reqs[] = {
         #include "database/tables/Media_v14.sql"
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( connection, req );
+    if ( modelVersion >= 14 )
+    {
+        // Don't create this index before model 14, as the real_last_played_date
+        // was introduced in model version 14
+        const auto req = "CREATE INDEX IF NOT EXISTS media_last_usage_dates_idx ON " + Media::Table::Name +
+                "(last_played_date, real_last_played_date, insertion_date)";
+        sqlite::Tools::executeRequest( connection, req );
+    }
 }
 
 void Media::createTriggers( sqlite::Connection* connection, uint32_t modelVersion )

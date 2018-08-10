@@ -62,7 +62,7 @@ class Media : public IMedia, public DatabaseHelpers<Media>
         Media( MediaLibraryPtr ml, const std::string& title, Type type);
 
         static std::shared_ptr<Media> create( MediaLibraryPtr ml, Type type, const std::string& fileName );
-        static void createTable( sqlite::Connection* connection );
+        static void createTable( sqlite::Connection* connection, uint32_t modelVersion );
         static void createTriggers( sqlite::Connection* connection, uint32_t modelVersion );
 
         virtual int64_t id() const override;
