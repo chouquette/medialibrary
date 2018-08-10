@@ -146,6 +146,22 @@ bool File::isExternal() const
     return m_isExternal;
 }
 
+bool File::updateFsInfo( uint32_t newLastModificationDate, uint32_t newSize )
+{
+    if ( m_lastModificationDate == newLastModificationDate && m_size == newSize )
+        return true;
+    const std::string req = "UPDATE " + File::Table::Name +
+            " SET last_modification_date = ?, size = ? WHERE id_file = ?";
+    auto res = sqlite::Tools::executeUpdate( m_ml->getConn(), req,
+            newLastModificationDate, newSize, m_id );
+    if ( res == true )
+    {
+        m_lastModificationDate = newLastModificationDate;
+        m_size = newSize;
+    }
+    return res;
+}
+
 std::shared_ptr<Media> File::media() const
 {
     if ( m_mediaId == 0 )

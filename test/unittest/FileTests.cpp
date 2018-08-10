@@ -88,5 +88,22 @@ TEST_F( Files, SetMrl )
     ASSERT_EQ( 1u, files.size() );
     f = std::static_pointer_cast<File>( files[0] );
     ASSERT_EQ( f->mrl(), newMrl );
+}
 
+TEST_F( Files, UpdateFsInfo )
+{
+    auto res = f->updateFsInfo( 0, 0 );
+    ASSERT_TRUE( res );
+
+    f->updateFsInfo( 123, 456 );
+    ASSERT_EQ( 123u, f->lastModificationDate() );
+    ASSERT_EQ( 456u, f->size() );
+
+    Reload();
+
+    auto files = m->files();
+    ASSERT_EQ( 1u, files.size() );
+    f = std::static_pointer_cast<File>( files[0] );
+    ASSERT_EQ( 123u, f->lastModificationDate() );
+    ASSERT_EQ( 456u, f->size() );
 }

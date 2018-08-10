@@ -61,6 +61,7 @@ public:
     virtual unsigned int lastModificationDate() const override;
     virtual unsigned int size() const override;
     virtual bool isExternal() const override;
+    bool updateFsInfo( uint32_t newLastModificationDate, uint32_t newSize );
 
     std::shared_ptr<Media> media() const;
     bool destroy();
@@ -110,8 +111,8 @@ private:
     // or the full file MRL for non removable ones
     std::string m_mrl;
     const Type m_type;
-    const std::time_t m_lastModificationDate;
-    const unsigned int m_size;
+    std::time_t m_lastModificationDate;
+    unsigned int m_size;
     const int64_t m_folderId;
     const bool m_isPresent;
     const bool m_isRemovable;
