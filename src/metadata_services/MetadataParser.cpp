@@ -105,64 +105,17 @@ Status MetadataAnalyzer::run( IItem& item )
         return Status::Completed;
     }
 
-    const auto& tracks = item.tracks();
-
-    if ( tracks.empty() == true )
-    {
-        LOG_WARN( "Failed to analyze ", item.mrl(), ": no tracks found" );
-        return Status::Fatal;
-    }
-
     bool isAudio;
 
     if ( item.file() == nullptr )
     {
-        assert( item.media() == nullptr );
-        // Try to create Media & File
-        auto mrl = item.mrl();
-        try
+        Status status;
+
+        std::tie(status, isAudio) = createFileAndMedia( item );
+        if ( status != Status::Success )
         {
-            isAudio = std::find_if( begin( tracks ), end( tracks ), [](const Task::Item::Track& t) {
-                return t.type == Task::Item::Track::Type::Video;
-            }) == end( tracks );
-            auto t = m_ml->getConn()->newTransaction();
-            LOG_INFO( "Adding ", mrl );
-            auto m = Media::create( m_ml, isAudio ? IMedia::Type::Audio : IMedia::Type::Video,
-                                    utils::url::decode( utils::file::fileName( mrl ) ) );
-            if ( m == nullptr )
-            {
-                LOG_ERROR( "Failed to add media ", mrl, " to the media library" );
-                return Status::Fatal;
-            }
-            // For now, assume all media are made of a single file
-            auto file = m->addFile( *item.fileFs(),
-                                    item.parentFolder()->id(),
-                                    item.parentFolderFs()->device()->isRemovable(),
-                                    File::Type::Main );
-            if ( file == nullptr )
-            {
-                LOG_ERROR( "Failed to add file ", mrl, " to media #", m->id() );
-                return Status::Fatal;
-            }
-            item.setMedia( std::move( m ) );
-            // Will invoke ITaskCb::updateFileId to upadte m_fileId & its
-            // representation in DB
-            item.setFile( std::move( file ) );
-            t->commit();
-        }
-        // Voluntarily trigger an exception for a valid, but less common case, to avoid database overhead
-        catch ( sqlite::errors::ConstraintViolation& ex )
-        {
-            LOG_INFO( "Creation of Media & File failed because ", ex.what(),
-                      ". Assuming this task is a duplicate" );
-            // Try to retrieve file & Media from database
-            auto fileInDB = File::fromMrl( m_ml, mrl );
-            if ( fileInDB == nullptr ) // The file is no longer present in DB, gracefully delete task
-            {
-                LOG_ERROR( "File ", mrl, " no longer present in DB, aborting");
-                return Status::Fatal;
-            }
-            return Status::Discarded;
+            LOG_ERROR( "Failure" );
+            return status;
         }
     }
     else if ( item.media() == nullptr )
@@ -175,38 +128,24 @@ Status MetadataAnalyzer::run( IItem& item )
         return Status::Fatal;
     }
     else
+    {
+        // If we re-parsing this media, there should not be any tracks known for now
+        // However in case we crashed or got interrupted in the middle of parsing,
+        // we don't want to recreate tracks
+        if ( item.media()->audioTracks()->count() == 0 &&
+             item.media()->videoTracks()->count() == 0 )
+        {
+            auto t = m_ml->getConn()->newTransaction();
+            createTracks( static_cast<Media&>( *item.media() ), item.tracks() );
+            t->commit();
+        }
         isAudio = item.media()->type() == IMedia::Type::Audio;
+    }
     auto media = std::static_pointer_cast<Media>( item.media() );
 
     if ( item.parentPlaylist() != nullptr )
         item.parentPlaylist()->add( *media, item.parentPlaylistIndex() );
 
-    {
-        using TracksT = decltype( tracks );
-        sqlite::Tools::withRetries( 3, [this, &isAudio, &item, &media]( TracksT tracks ) {
-            auto t = m_ml->getConn()->newTransaction();
-            for ( const auto& track : tracks )
-            {
-                if ( track.type == IItem::Track::Type::Video )
-                {
-                    media->addVideoTrack( track.codec, track.v.width, track.v.height,
-                                          track.v.fpsNum, track.v.fpsDen, track.bitrate,
-                                          track.v.sarNum, track.v.sarDen,
-                                          track.language, track.description );
-                    isAudio = false;
-                }
-                else
-                {
-                    assert( track.type == IItem::Track::Type::Audio );
-                    media->addAudioTrack( track.codec, track.bitrate,
-                                               track.a.rate, track.a.nbChannels,
-                                               track.language, track.description );
-                }
-            }
-            media->setDuration( item.duration() );
-            t->commit();
-        }, std::move( tracks ) );
-    }
     if ( isAudio == true )
     {
         if ( parseAudioFile( item ) == false )
@@ -424,6 +363,92 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
         return true;
     });
     return true;
+}
+
+std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) const
+{
+    assert( item.media() == nullptr );
+    // Try to create Media & File
+    auto mrl = item.mrl();
+    const auto& tracks = item.tracks();
+    bool isAudio;
+
+    if ( tracks.empty() == true )
+    {
+        LOG_WARN( "Failed to analyze ", item.mrl(), ": no tracks found" );
+        return std::make_tuple( Status::Fatal, false );
+    }
+    try
+    {
+        isAudio = std::find_if( begin( tracks ), end( tracks ), [](const Task::Item::Track& t) {
+            return t.type == Task::Item::Track::Type::Video;
+        }) == end( tracks );
+        auto t = m_ml->getConn()->newTransaction();
+        LOG_INFO( "Adding ", mrl );
+        auto m = Media::create( m_ml, isAudio ? IMedia::Type::Audio : IMedia::Type::Video,
+                                utils::url::decode( utils::file::fileName( mrl ) ) );
+        if ( m == nullptr )
+        {
+            LOG_ERROR( "Failed to add media ", mrl, " to the media library" );
+            return std::make_tuple( Status::Fatal, false );
+        }
+        // For now, assume all media are made of a single file
+        auto file = m->addFile( *item.fileFs(),
+                                item.parentFolder()->id(),
+                                item.parentFolderFs()->device()->isRemovable(),
+                                File::Type::Main );
+        if ( file == nullptr )
+        {
+            LOG_ERROR( "Failed to add file ", mrl, " to media #", m->id() );
+            return std::make_tuple( Status::Fatal, false );
+        }
+        createTracks( *m, tracks );
+        m->setDuration( item.duration() );
+
+        item.setMedia( std::move( m ) );
+        // Will invoke ITaskCb::updateFileId to upadte m_fileId & its
+        // representation in DB
+        item.setFile( std::move( file ) );
+
+        t->commit();
+    }
+    // Voluntarily trigger an exception for a valid, but less common case, to avoid database overhead
+    catch ( sqlite::errors::ConstraintViolation& ex )
+    {
+        LOG_INFO( "Creation of Media & File failed because ", ex.what(),
+                  ". Assuming this task is a duplicate" );
+        // Try to retrieve file & Media from database
+        auto fileInDB = File::fromMrl( m_ml, mrl );
+        if ( fileInDB == nullptr ) // The file is no longer present in DB, gracefully delete task
+        {
+            LOG_ERROR( "File ", mrl, " no longer present in DB, aborting");
+            return std::make_tuple( Status::Fatal, false );
+        }
+        return std::make_tuple( Status::Discarded, false );
+    }
+    return std::make_tuple( Status::Success, isAudio );
+}
+
+void MetadataAnalyzer::createTracks( Media& m, const std::vector<IItem::Track>& tracks ) const
+{
+    assert( sqlite::Transaction::transactionInProgress() == true );
+    for ( const auto& track : tracks )
+    {
+        if ( track.type == IItem::Track::Type::Video )
+        {
+            m.addVideoTrack( track.codec, track.v.width, track.v.height,
+                                  track.v.fpsNum, track.v.fpsDen, track.bitrate,
+                                  track.v.sarNum, track.v.sarDen,
+                                  track.language, track.description );
+        }
+        else
+        {
+            assert( track.type == IItem::Track::Type::Audio );
+            m.addAudioTrack( track.codec, track.bitrate,
+                                       track.a.rate, track.a.nbChannels,
+                                       track.language, track.description );
+        }
+    }
 }
 
 /* Audio files */
