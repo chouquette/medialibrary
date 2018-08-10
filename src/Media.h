@@ -69,6 +69,8 @@ class Media : public IMedia, public DatabaseHelpers<Media>
         virtual Type type() const override;
         void setType(Type type);
         virtual SubType subType() const override;
+        void setSubType( SubType subType );
+
         virtual const std::string& title() const override;
         virtual bool setTitle( const std::string& title ) override;
         ///

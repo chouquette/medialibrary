@@ -545,6 +545,14 @@ IMedia::SubType Media::subType() const
     return m_subType;
 }
 
+void Media::setSubType( IMedia::SubType subType )
+{
+    if ( subType == m_subType )
+        return;
+    m_subType = subType;
+    m_changed = true;
+}
+
 void Media::setType( Type type )
 {
     if ( m_type == type )

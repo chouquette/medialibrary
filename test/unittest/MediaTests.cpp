@@ -506,6 +506,22 @@ TEST_F( Medias, SetType )
     ASSERT_EQ( IMedia::Type::Video, m2->type() );
 }
 
+TEST_F( Medias, SetSubType )
+{
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3" ) );
+    ASSERT_EQ( IMedia::SubType::Unknown, m1->subType() );
+
+    m1->setSubType( IMedia::SubType::Movie );
+    m1->save();
+
+    ASSERT_EQ( IMedia::SubType::Movie, m1->subType() );
+
+    Reload();
+
+    auto m2 = ml->media( m1->id() );
+    ASSERT_EQ( IMedia::SubType::Movie, m1->subType() );
+}
+
 TEST_F( Medias, Metadata )
 {
     auto m = ml->addMedia( "media.mp3" );
