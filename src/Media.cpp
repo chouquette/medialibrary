@@ -398,11 +398,11 @@ bool Media::setThumbnail( const std::string& thumbnailMrl )
 bool Media::save()
 {
     static const std::string req = "UPDATE " + Media::Table::Name + " SET "
-            "subtype = ?, duration = ?, release_date = ?,"
+            "type = ?, subtype = ?, duration = ?, release_date = ?,"
             "title = ? WHERE id_media = ?";
     if ( m_changed == false )
         return true;
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_subType, m_duration,
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_type, m_subType, m_duration,
                                        m_releaseDate, m_title, m_id ) == false )
     {
         return false;
@@ -543,6 +543,14 @@ IMedia::Type Media::type() const
 IMedia::SubType Media::subType() const
 {
     return m_subType;
+}
+
+void Media::setType( Type type )
+{
+    if ( m_type == type )
+        return;
+    m_type = type;
+    m_changed = true;
 }
 
 const std::string& Media::title() const

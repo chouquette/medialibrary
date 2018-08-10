@@ -67,6 +67,7 @@ class Media : public IMedia, public DatabaseHelpers<Media>
 
         virtual int64_t id() const override;
         virtual Type type() const override;
+        void setType(Type type);
         virtual SubType subType() const override;
         virtual const std::string& title() const override;
         virtual bool setTitle( const std::string& title ) override;
@@ -157,7 +158,7 @@ private:
 
         // DB fields:
         int64_t m_id;
-        const Type m_type;
+        Type m_type;
         SubType m_subType;
         int64_t m_duration;
         unsigned int m_playCount;
