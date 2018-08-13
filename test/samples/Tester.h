@@ -51,7 +51,7 @@ public:
 protected:
     virtual void onDiscoveryCompleted( const std::string&, bool ) override;
     virtual void onParsingStatsUpdated(uint32_t percent) override;
-    virtual void onMediaThumbnailReady( MediaPtr media, bool success );
+    virtual void onMediaThumbnailReady( MediaPtr media, bool success ) override;
 
     compat::ConditionVariable m_parsingCompleteVar;
     compat::Mutex m_parsingMutex;
@@ -112,7 +112,7 @@ public:
     };
 
     virtual void InitializeMediaLibrary() override;
-    virtual void InitializeCallback();
+    virtual void InitializeCallback() override;
 };
 
 #endif // TESTER_H

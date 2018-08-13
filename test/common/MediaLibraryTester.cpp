@@ -49,17 +49,9 @@ std::shared_ptr<Media> MediaLibraryTester::media( int64_t id )
     return std::static_pointer_cast<Media>( MediaLibrary::media( id ) );
 }
 
-std::shared_ptr<Folder> MediaLibraryTester::folder( const std::string& mrl )
+FolderPtr MediaLibraryTester::folder( const std::string& mrl ) const
 {
-    static const std::string req = "SELECT * FROM " + Folder::Table::Name +
-            " WHERE is_blacklisted = 0 AND is_present != 0";
-    auto folders = Folder::DatabaseHelpers::fetchAll<Folder>( this, req );
-    for ( auto &f : folders )
-    {
-        if ( f->mrl() == mrl )
-            return f;
-    }
-    return nullptr;
+    return Folder::fromMrl( this, mrl, Folder::BannedType::No );
 }
 
 std::shared_ptr<Media> MediaLibraryTester::addFile( const std::string& path, IMedia::Type type )
@@ -108,11 +100,6 @@ void MediaLibraryTester::addLocalFsFactory()
     {
         MediaLibrary::addLocalFsFactory();
     }
-}
-
-std::shared_ptr<Playlist> MediaLibraryTester::playlist( int64_t playlistId )
-{
-    return Playlist::fetch( this, playlistId );
 }
 
 void MediaLibraryTester::deleteAlbum( int64_t albumId )

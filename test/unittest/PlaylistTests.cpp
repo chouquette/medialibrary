@@ -87,7 +87,7 @@ TEST_F( Playlists, SetName )
 
     Reload();
 
-    pl = ml->playlist( pl->id() );
+    pl = std::static_pointer_cast<Playlist>( ml->playlist( pl->id() ) );
     ASSERT_EQ( newName, pl->name() );
 }
 
@@ -248,8 +248,8 @@ TEST_F( Playlists, DeleteFile )
     }
     media = pl->media()->all();
     ASSERT_EQ( 0u, media.size() );
-    pl = ml->playlist( pl->id() );
-    ASSERT_NE( nullptr, pl );
+    auto pl2 = ml->playlist( pl->id() );
+    ASSERT_NE( nullptr, pl2 );
 }
 
 TEST_F( Playlists, Search )
@@ -382,7 +382,7 @@ TEST_F( Playlists, ReinsertMedia )
     ml->deleteMedia( m2->id() );
 
     Reload();
-    pl = ml->playlist( pl->id() );
+    pl = std::static_pointer_cast<Playlist>( ml->playlist( pl->id() ) );
 
     m1 = ml->addMedia( "http://sea.otters/fluffy.mkv" );
     m2 = ml->addMedia( "file:///cute_otters_holding_hands.mp4" );
@@ -416,7 +416,7 @@ TEST_F( Playlists, RemoveMedia )
 
     Reload();
 
-    pl = ml->playlist( pl->id() );
+    pl = std::static_pointer_cast<Playlist>( ml->playlist( pl->id() ) );
 
     media = pl->media()->all();
     ASSERT_EQ( 1u, media.size() );

@@ -53,7 +53,7 @@ public:
     virtual const std::string& mountpoint() const override;
 
     void setRemovable( bool value );
-    void setPresent( bool value );
+    virtual void setPresent( bool value ) override;
 
     std::string relativePath( const std::string& path );
     void addFile( const std::string& filePath );

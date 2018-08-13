@@ -104,21 +104,21 @@ TEST_F( FoldersNoDiscover, InvalidPath )
 
 TEST_F( Folders, List )
 {
-    auto f = ml->folder( mock::FileSystemFactory::Root );
+    auto f = std::static_pointer_cast<Folder>( ml->folder( mock::FileSystemFactory::Root ) );
     ASSERT_NE( f, nullptr );
     auto files = f->files();
     ASSERT_EQ( files.size(), 2u );
 
     Reload();
 
-    f = ml->folder( f->mrl() );
+    f = std::static_pointer_cast<Folder>( ml->folder( f->mrl() ) );
     files = f->files();
     ASSERT_EQ( files.size(), 2u );
 }
 
 TEST_F( Folders, ListFolders )
 {
-    auto f = ml->folder( mock::FileSystemFactory::Root );
+    auto f = std::static_pointer_cast<Folder>( ml->folder( mock::FileSystemFactory::Root ) );
     ASSERT_NE( f, nullptr );
     auto subFolders = f->folders();
     ASSERT_EQ( 1u, subFolders.size() );
@@ -132,7 +132,7 @@ TEST_F( Folders, ListFolders )
     // Now again, without cache. No need to wait for fs discovery reload here
     Reload();
 
-    f = ml->folder( f->mrl() );
+    f = std::static_pointer_cast<Folder>( ml->folder( f->mrl() ) );
     subFolders = f->folders();
     ASSERT_EQ( 1u, subFolders.size() );
 
@@ -163,10 +163,10 @@ TEST_F( Folders, NewFolderWithFile )
 // This is expected to fail until we fix the file system modifications detection
 TEST_F( Folders, NewFileInSubFolder )
 {
-    auto f = ml->folder( mock::FileSystemFactory::Root );
+    auto f = std::static_pointer_cast<Folder>( ml->folder( mock::FileSystemFactory::Root ) );
     ASSERT_EQ( 3u, ml->files().size() );
 
-    f = ml->folder( mock::FileSystemFactory::SubFolder );
+    f = std::static_pointer_cast<Folder>( ml->folder( mock::FileSystemFactory::SubFolder ) );
     // Do not watch for live changes
     ml.reset();
     fsMock->addFile( mock::FileSystemFactory::SubFolder + "newfile.avi" );
@@ -175,7 +175,7 @@ TEST_F( Folders, NewFileInSubFolder )
 
     ASSERT_EQ( 4u, ml->files().size() );
     auto media = ml->media( mock::FileSystemFactory::SubFolder + "newfile.avi" );
-    f = ml->folder( mock::FileSystemFactory::SubFolder );
+    f = std::static_pointer_cast<Folder>( ml->folder( mock::FileSystemFactory::SubFolder ) );
     ASSERT_EQ( 2u, f->files().size() );
     ASSERT_NE( nullptr, media );
 }
@@ -191,7 +191,7 @@ TEST_F( Folders, RemoveFileFromDirectory )
 
     ASSERT_EQ( 2u, ml->files().size() );
     auto media = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
-    auto f = ml->folder( mock::FileSystemFactory::SubFolder );
+    auto f = std::static_pointer_cast<Folder>( ml->folder( mock::FileSystemFactory::SubFolder ) );
     ASSERT_EQ( 0u, f->files().size() );
     ASSERT_EQ( nullptr, media );
 }
@@ -257,7 +257,7 @@ TEST_F( FoldersNoDiscover, DiscoverBlacklisted )
 
 TEST_F( Folders, BlacklistAfterDiscovery )
 {
-    auto f = ml->folder( mock::FileSystemFactory::SubFolder );
+    auto f = std::static_pointer_cast<Folder>( ml->folder( mock::FileSystemFactory::SubFolder ) );
     ASSERT_NE( nullptr, f );
     auto files = f->files();
     ASSERT_NE( 0u, files.size() );

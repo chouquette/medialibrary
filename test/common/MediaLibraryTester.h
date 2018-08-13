@@ -46,8 +46,7 @@ public:
     using MediaLibrary::media;
     // And override the ID getter to return a Media instead of IMedia
     std::shared_ptr<Media> media( int64_t id );
-    std::shared_ptr<Folder> folder( const std::string& path );
-    std::shared_ptr<Playlist> playlist( int64_t playlistId );
+    FolderPtr folder( const std::string& path ) const override;
     void deleteAlbum( int64_t albumId );
     std::shared_ptr<Album> createAlbum( const std::string& title );
     std::shared_ptr<Genre> createGenre( const std::string& name );
@@ -74,8 +73,8 @@ public:
                                     std::shared_ptr<fs::IDirectory> parentFolderFs,
                                     std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist ) override;
     sqlite::Connection* getDbConn();
-    virtual void startThumbnailer();
-    virtual void populateFsFactories();
+    virtual void startThumbnailer() override;
+    virtual void populateFsFactories() override;
     MediaPtr addMedia( const std::string& mrl, IMedia::Type type = IMedia::Type::External );
     void deleteMedia( int64_t mediaId );
     void outdateAllDevices();
