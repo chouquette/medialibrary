@@ -49,7 +49,7 @@ public:
     void prepareWaitForThumbnail( MediaPtr media );
     bool waitForThumbnail();
 protected:
-    virtual void onDiscoveryCompleted( const std::string& ) override;
+    virtual void onDiscoveryCompleted( const std::string&, bool ) override;
     virtual void onParsingStatsUpdated(uint32_t percent) override;
     virtual void onMediaThumbnailReady( MediaPtr media, bool success );
 
@@ -70,7 +70,7 @@ public:
     MockResumeCallback();
     virtual bool waitForDiscoveryComplete() override;
     virtual bool waitForParsingComplete() override;
-    virtual void onDiscoveryCompleted( const std::string& entryPoint ) override;
+    virtual void onDiscoveryCompleted( const std::string& entryPoint, bool ) override;
     virtual void reinit() override;
 
 private:

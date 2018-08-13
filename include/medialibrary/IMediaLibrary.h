@@ -151,7 +151,7 @@ public:
      * This will also be invoked with an empty entryPoint when the initial reload of the medialibrary
      * has completed.
      */
-    virtual void onDiscoveryCompleted( const std::string& entryPoint ) = 0;
+    virtual void onDiscoveryCompleted( const std::string& entryPoint, bool sucess ) = 0;
     /**
      * @brief onReloadStarted will be invoked when a reload operation begins.
      * @param entryPoint Will be an empty string is the reload is a global reload, or the specific

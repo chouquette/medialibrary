@@ -267,7 +267,7 @@ void DiscovererWorker::runDiscover( const std::string& entryPoint )
     }
     if ( discovered == false )
         LOG_WARN( "No IDiscoverer found to discover ", entryPoint );
-    m_ml->getCb()->onDiscoveryCompleted( entryPoint );
+    m_ml->getCb()->onDiscoveryCompleted( entryPoint, discovered );
 }
 
 }

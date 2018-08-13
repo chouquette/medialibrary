@@ -69,7 +69,7 @@ bool MockCallback::waitForThumbnail()
     return m_thumbnailSuccess;
 }
 
-void MockCallback::onDiscoveryCompleted(const std::string& entryPoint )
+void MockCallback::onDiscoveryCompleted(const std::string& entryPoint, bool )
 {
     if ( entryPoint.empty() == true )
         return;
@@ -105,7 +105,7 @@ MockResumeCallback::MockResumeCallback()
     m_discoveryMutex.lock();
 }
 
-void MockResumeCallback::onDiscoveryCompleted( const std::string& entryPoint )
+void MockResumeCallback::onDiscoveryCompleted( const std::string& entryPoint, bool )
 {
     if ( entryPoint.empty() == true )
         return;
