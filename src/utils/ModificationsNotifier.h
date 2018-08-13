@@ -55,10 +55,6 @@ public:
     void notifyAlbumModification( AlbumPtr album );
     void notifyAlbumRemoval( int64_t albumId );
 
-    void notifyAlbumTrackCreation( AlbumTrackPtr track );
-    void notifyAlbumTrackModification( AlbumTrackPtr track );
-    void notifyAlbumTrackRemoval( int64_t trackId );
-
     void notifyPlaylistCreation( PlaylistPtr playlist );
     void notifyPlaylistModification( PlaylistPtr playlist );
     void notifyPlaylistRemoval( int64_t playlistId );
@@ -154,7 +150,6 @@ private:
     Queue<IMedia> m_media;
     Queue<IArtist> m_artists;
     Queue<IAlbum> m_albums;
-    Queue<IAlbumTrack> m_tracks;
     Queue<IPlaylist> m_playlists;
 
     // Notifier thread

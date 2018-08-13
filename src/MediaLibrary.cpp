@@ -221,13 +221,6 @@ void MediaLibrary::registerEntityHooks()
         Album::removeFromCache( rowId );
         m_modificationNotifier->notifyAlbumRemoval( rowId );
     });
-    m_dbConnection->registerUpdateHook( AlbumTrack::Table::Name,
-                                        [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
-        if ( reason != sqlite::Connection::HookReason::Delete )
-            return;
-        AlbumTrack::removeFromCache( rowId );
-        m_modificationNotifier->notifyAlbumTrackRemoval( rowId );
-    });
     m_dbConnection->registerUpdateHook( Playlist::Table::Name,
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
         if ( reason != sqlite::Connection::HookReason::Delete )

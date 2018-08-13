@@ -100,21 +100,6 @@ void ModificationNotifier::notifyAlbumRemoval( int64_t albumId )
     notifyRemoval( albumId, m_albums );
 }
 
-void ModificationNotifier::notifyAlbumTrackCreation( AlbumTrackPtr track )
-{
-    notifyCreation( std::move( track ), m_tracks );
-}
-
-void ModificationNotifier::notifyAlbumTrackModification( AlbumTrackPtr track )
-{
-    notifyModification( std::move( track ), m_tracks );
-}
-
-void ModificationNotifier::notifyAlbumTrackRemoval( int64_t trackId )
-{
-    notifyRemoval( trackId, m_tracks );
-}
-
 void ModificationNotifier::notifyPlaylistCreation( PlaylistPtr playlist )
 {
     notifyCreation( std::move( playlist ), m_playlists );
@@ -144,7 +129,6 @@ void ModificationNotifier::run()
     Queue<IMedia> media;
     Queue<IArtist> artists;
     Queue<IAlbum> albums;
-    Queue<IAlbumTrack> tracks;
     Queue<IPlaylist> playlists;
 
     while ( m_stop == false )
@@ -161,16 +145,12 @@ void ModificationNotifier::run()
             checkQueue( m_media, media, nextTimeout, now );
             checkQueue( m_artists, artists, nextTimeout, now );
             checkQueue( m_albums, albums, nextTimeout, now );
-            checkQueue( m_tracks, tracks, nextTimeout, now );
             checkQueue( m_playlists, playlists, nextTimeout, now );
             m_timeout = nextTimeout;
         }
         notify( std::move( media ), &IMediaLibraryCb::onMediaAdded, &IMediaLibraryCb::onMediaUpdated, &IMediaLibraryCb::onMediaDeleted );
         notify( std::move( artists ), &IMediaLibraryCb::onArtistsAdded, &IMediaLibraryCb::onArtistsModified, &IMediaLibraryCb::onArtistsDeleted );
         notify( std::move( albums ), &IMediaLibraryCb::onAlbumsAdded, &IMediaLibraryCb::onAlbumsModified, &IMediaLibraryCb::onAlbumsDeleted );
-        // We pass the onTrackAdded callback twice, to avoid having to do some nifty templates specialization
-        // for nullptr callbacks. There is no onTracksModified callback, as tracks are never modified.
-        notify( std::move( tracks ), &IMediaLibraryCb::onTracksAdded, &IMediaLibraryCb::onTracksAdded, &IMediaLibraryCb::onTracksDeleted );
         notify( std::move( playlists ), &IMediaLibraryCb::onPlaylistsAdded, &IMediaLibraryCb::onPlaylistsModified, &IMediaLibraryCb::onPlaylistsDeleted );
     }
 }

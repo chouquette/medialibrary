@@ -115,13 +115,6 @@ public:
     virtual void onAlbumsAdded( std::vector<AlbumPtr> albums ) = 0;
     virtual void onAlbumsModified( std::vector<AlbumPtr> albums ) = 0;
     virtual void onAlbumsDeleted( std::vector<int64_t> albumsIds ) = 0;
-    /**
-     * @brief onTrackAdded Called when a media gets detected as an album track
-     * and after it has been added to the album representation
-     */
-    virtual void onTracksAdded( std::vector<AlbumTrackPtr> tracks ) = 0;
-    // Tracks are never modified after their creation, so there is no tracksModified event
-    virtual void onTracksDeleted( std::vector<int64_t> trackIds ) = 0;
 
     virtual void onPlaylistsAdded( std::vector<PlaylistPtr> playlists ) = 0;
     virtual void onPlaylistsModified( std::vector<PlaylistPtr> playlists ) = 0;

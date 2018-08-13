@@ -880,7 +880,6 @@ std::shared_ptr<AlbumTrack> MetadataAnalyzer::handleTrack( std::shared_ptr<Album
         // using Album class internals.
         album->setReleaseYear( releaseYear, false );
     }
-    m_notifier->notifyAlbumTrackCreation( track );
     return track;
 }
 
