@@ -108,7 +108,7 @@ bool FsDiscoverer::discover( const std::string& entryPoint )
     return true;
 }
 
-void FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
+bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
 {
     assert( f->isPresent() );
     auto mrl = f->mrl();
@@ -119,7 +119,7 @@ void FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
         directory = m_fsFactory->createDirectory( mrl );
         assert( directory->device() != nullptr );
         if ( directory->device() == nullptr )
-            return;
+            return false;
     }
     catch ( const std::system_error& ex )
     {
@@ -134,7 +134,7 @@ void FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
             LOG_INFO( "Failed to find folder matching entrypoint ", mrl, ". "
                       "Removing that folder" );
             m_ml->deleteFolder( *f );
-            return;
+            return false;
         }
     }
     try
@@ -144,8 +144,9 @@ void FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
     catch ( DeviceRemovedException& )
     {
         LOG_INFO( "Reloading of ", mrl, " was stopped after the device was removed" );
+        return false;
     }
-
+    return true;
 }
 
 bool FsDiscoverer::reload()
@@ -156,7 +157,10 @@ bool FsDiscoverer::reload()
     {
         // fetchRootFolders only returns present folders
         assert( f->isPresent() == true );
-        reloadFolder( f );
+        auto mrl = f->mrl();
+        m_cb->onReloadStarted( mrl );
+        auto res = reloadFolder( f );
+        m_cb->onReloadCompleted( mrl, res );
     }
     return true;
 }

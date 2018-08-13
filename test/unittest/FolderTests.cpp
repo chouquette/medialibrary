@@ -84,29 +84,6 @@ TEST_F( Folders, Add )
     ASSERT_EQ( files.size(), 3u );
 }
 
-TEST_F( Folders, Delete )
-{
-    auto f = ml->folder( mock::FileSystemFactory::Root );
-    auto folderPath = f->mrl();
-
-    auto files = ml->files();
-    ASSERT_EQ( files.size(), 3u );
-
-    ml->deleteFolder( *f );
-
-    f = ml->folder( folderPath );
-    ASSERT_EQ( nullptr, f );
-
-    files = ml->files();
-    ASSERT_EQ( files.size(), 0u );
-
-    Reload();
-
-    // Recheck folder deletion from DB:
-    f = ml->folder( folderPath );
-    ASSERT_EQ( nullptr, f );
-}
-
 TEST_F( Folders, Load )
 {
     Reload();

@@ -57,7 +57,7 @@ private:
                      std::shared_ptr<Folder> parentFolder ) const;
     bool addFolder( std::shared_ptr<fs::IDirectory> folder,
                     Folder* parentFolder ) const;
-    void reloadFolder( std::shared_ptr<Folder> folder );
+    bool reloadFolder( std::shared_ptr<Folder> folder );
 
 private:
     MediaLibrary* m_ml;

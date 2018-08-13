@@ -165,15 +165,21 @@ void DiscovererWorker::run()
 
 void DiscovererWorker::runReload( const std::string& entryPoint )
 {
-    m_ml->getCb()->onReloadStarted( entryPoint );
     for ( auto& d : m_discoverers )
     {
         try
         {
             if ( entryPoint.empty() == true )
+            {
+                // Let the discoverer invoke the callbacks for all its known folders
                 d->reload();
+            }
             else
-                d->reload( entryPoint );
+            {
+                m_ml->getCb()->onReloadStarted( entryPoint );
+                auto res = d->reload( entryPoint );
+                m_ml->getCb()->onReloadCompleted( entryPoint, res );
+            }
         }
         catch(std::exception& ex)
         {
@@ -182,7 +188,6 @@ void DiscovererWorker::runReload( const std::string& entryPoint )
         if ( m_run == false )
             break;
     }
-    m_ml->getCb()->onReloadCompleted( entryPoint );
 }
 
 void DiscovererWorker::runRemove( const std::string& ep )

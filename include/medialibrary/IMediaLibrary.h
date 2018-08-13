@@ -163,7 +163,7 @@ public:
      * @param entryPoint Will be an empty string is the reload was a global reload, or the specific
      * entry point that has been reloaded
      */
-    virtual void onReloadCompleted( const std::string& entryPoint ) = 0;
+    virtual void onReloadCompleted( const std::string& entryPoint, bool success ) = 0;
     /**
      * @brief onEntryPointRemoved will be invoked when an entrypoint removal request gets processsed
      * by the appropriate worker thread.

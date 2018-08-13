@@ -36,6 +36,7 @@ class WaitForDiscoveryComplete : public mock::NoopCallback
 public:
     WaitForDiscoveryComplete()
         : m_discoveryDone( false )
+        , m_initialDiscoveryDone( false )
         , m_reloadDone( false )
         , m_banFolderDone( false )
         , m_unbanFolderDone( false )
@@ -50,7 +51,7 @@ public:
         m_cond.notify_all();
     }
 
-    virtual void onReloadCompleted( const std::string& ) override
+    virtual void onReloadCompleted( const std::string&, bool ) override
     {
         m_reloadDone = true;
         m_cond.notify_all();
@@ -81,11 +82,16 @@ public:
             return m_discoveryDone.load();
         } );
         m_discoveryDone = false;
+        m_initialDiscoveryDone = true;
         return res;
     }
 
     bool waitReload()
     {
+        // A reload() request when no discovery has run will never reload anything
+        // and therefor won't invoke any callback
+        if ( m_initialDiscoveryDone == false )
+            return true;
         std::unique_lock<compat::Mutex> lock( m_mutex );
         auto res = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
             return m_reloadDone.load();
@@ -126,6 +132,7 @@ public:
 
 private:
     std::atomic_bool m_discoveryDone;
+    std::atomic_bool m_initialDiscoveryDone;
     std::atomic_bool m_reloadDone;
     std::atomic_bool m_banFolderDone;
     std::atomic_bool m_unbanFolderDone;
