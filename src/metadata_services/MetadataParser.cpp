@@ -600,8 +600,13 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
         auto res = link( *media, album, artists.first, artists.second );
         media->save();
         t->commit();
+        m_notifier->notifyAlbumModification( album );
         if ( genre != nullptr )
             m_notifier->notifyGenreModification( genre );
+        if ( artists.first != nullptr )
+            m_notifier->notifyArtistModification( artists.first );
+        if ( artists.second != nullptr )
+            m_notifier->notifyArtistModification( artists.second );
         return res;
     }, std::move( artworkMrl ), std::move( album ), std::move( genre ) );
 }
