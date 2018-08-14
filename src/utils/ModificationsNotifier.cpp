@@ -117,11 +117,12 @@ void ModificationNotifier::notifyPlaylistRemoval( int64_t playlistId )
 
 void ModificationNotifier::flush()
 {
-    {
-        std::unique_lock<compat::Mutex> lock( m_lock );
-        m_timeout = std::chrono::steady_clock::now();
-    }
+    std::unique_lock<compat::Mutex> lock( m_lock );
+    m_timeout = std::chrono::steady_clock::now();
     m_cond.notify_all();
+    m_flushedCond.wait( lock, [this](){
+        return m_timeout == std::chrono::time_point<std::chrono::steady_clock>{};
+    });
 }
 
 void ModificationNotifier::run()
@@ -156,6 +157,7 @@ void ModificationNotifier::run()
             checkQueue( m_albums, albums, nextTimeout, now );
             checkQueue( m_playlists, playlists, nextTimeout, now );
             m_timeout = nextTimeout;
+            m_flushedCond.notify_all();
         }
         notify( std::move( media ), &IMediaLibraryCb::onMediaAdded, &IMediaLibraryCb::onMediaUpdated, &IMediaLibraryCb::onMediaDeleted );
         notify( std::move( artists ), &IMediaLibraryCb::onArtistsAdded, &IMediaLibraryCb::onArtistsModified, &IMediaLibraryCb::onArtistsDeleted );

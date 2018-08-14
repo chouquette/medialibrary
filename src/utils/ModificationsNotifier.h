@@ -64,6 +64,8 @@ public:
      *
      * This will cause all modifications to be sent to the listeners, regardless
      * of timeouts.
+     * The function will return once all queues are flushed and notifications
+     * are sent.
      */
     void flush();
 
@@ -162,6 +164,7 @@ private:
     // Notifier thread
     compat::Mutex m_lock;
     compat::ConditionVariable m_cond;
+    compat::ConditionVariable m_flushedCond;
     compat::Thread m_notifierThread;
     std::atomic_bool m_stop;
     std::chrono::time_point<std::chrono::steady_clock> m_timeout;
