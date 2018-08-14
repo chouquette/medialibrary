@@ -27,7 +27,7 @@
 #include "Playlist.h"
 
 #include "Media.h"
-
+#include "utils/ModificationsNotifier.h"
 #include "database/SqliteQuery.h"
 
 #include <algorithm>
@@ -194,6 +194,9 @@ bool Playlist::add( const IMedia& media, unsigned int position )
                                              sqlite::ForeignKey{ position } ) == false )
             return false;
         static_cast<const Media&>( media ).udpateNbPlaylist( 1 );
+        auto notifier = m_ml->getNotifier();
+        if ( notifier != nullptr )
+            notifier->notifyPlaylistModification( shared_from_this() );
         return true;
     }
     catch (const sqlite::errors::ConstraintViolation& ex)
@@ -242,7 +245,14 @@ bool Playlist::move( int64_t mediaId, unsigned int position )
         return false;
     static const std::string req = "UPDATE PlaylistMediaRelation SET position = ? WHERE "
             "playlist_id = ? AND media_id = ?";
-    return sqlite::Tools::executeUpdate( m_ml->getConn(), req, position, m_id, mediaId );
+    auto res = sqlite::Tools::executeUpdate( m_ml->getConn(), req, position, m_id, mediaId );
+    if ( res == true )
+    {
+        auto notifier = m_ml->getNotifier();
+        if ( notifier != nullptr )
+            notifier->notifyPlaylistModification( shared_from_this() );
+    }
+    return res;
 }
 
 bool Playlist::remove( int64_t mediaId )
@@ -260,6 +270,9 @@ bool Playlist::remove( const IMedia& media )
     if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, media.id() ) == false )
         return false;
     static_cast<const Media&>( media ).udpateNbPlaylist( -1 );
+    auto notifier = m_ml->getNotifier();
+    if ( notifier != nullptr )
+        notifier->notifyPlaylistModification( shared_from_this() );
     return true;
 }
 

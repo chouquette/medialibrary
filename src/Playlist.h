@@ -34,7 +34,7 @@ namespace medialibrary
 class Playlist;
 class File;
 
-class Playlist : public IPlaylist, public DatabaseHelpers<Playlist>
+class Playlist : public IPlaylist, public DatabaseHelpers<Playlist>, public std::enable_shared_from_this<Playlist>
 {
 public:
     struct Table
