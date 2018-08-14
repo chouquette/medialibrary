@@ -186,6 +186,9 @@ public:
     virtual void onParsingStatsUpdated( uint32_t percent) = 0;
     /**
      * @brief onBackgroundTasksIdleChanged Called when background tasks idle state change
+     *
+     * When all parser tasks are idle, it is guaranteed that no entity modification
+     * callbacks will be invoked.
      * @param isIdle true when all background tasks are idle, false otherwise
      */
     virtual void onBackgroundTasksIdleChanged( bool isIdle ) = 0;

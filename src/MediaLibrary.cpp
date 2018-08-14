@@ -1285,6 +1285,15 @@ void MediaLibrary::onDiscovererIdleChanged( bool idle )
         LOG_INFO( idle ? "Discoverer thread went idle" : "Discover thread was resumed" );
         if ( idle == false || m_parserIdle == true )
         {
+            if ( idle == true && m_modificationNotifier != nullptr )
+            {
+                // Now that all discovery / parsing operations are completed,
+                // force the modification notifier to signal changes before
+                // signaling that we're done.
+                // This allows one to flush all modifications when the medialib
+                // goes back to idle
+                m_modificationNotifier->flush();
+            }
             LOG_INFO( "Setting background idle state to ",
                       idle ? "true" : "false" );
             m_callback->onBackgroundTasksIdleChanged( idle );
@@ -1300,6 +1309,11 @@ void MediaLibrary::onParserIdleChanged( bool idle )
         LOG_INFO( idle ? "All parser services went idle" : "Parse services were resumed" );
         if ( idle == false || m_discovererIdle == true )
         {
+            if ( idle == true && m_modificationNotifier != nullptr )
+            {
+                // See comments above
+                m_modificationNotifier->flush();
+            }
             LOG_INFO( "Setting background idle state to ",
                       idle ? "true" : "false" );
             m_callback->onBackgroundTasksIdleChanged( idle );
