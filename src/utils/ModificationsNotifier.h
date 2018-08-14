@@ -59,6 +59,14 @@ public:
     void notifyPlaylistModification( PlaylistPtr playlist );
     void notifyPlaylistRemoval( int64_t playlistId );
 
+    /**
+     * @brief flush Flushes the notifications queues
+     *
+     * This will cause all modifications to be sent to the listeners, regardless
+     * of timeouts.
+     */
+    void flush();
+
 private:
     void run();
     void notify();

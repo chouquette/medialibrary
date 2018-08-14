@@ -115,6 +115,15 @@ void ModificationNotifier::notifyPlaylistRemoval( int64_t playlistId )
     notifyRemoval( playlistId, m_playlists );
 }
 
+void ModificationNotifier::flush()
+{
+    {
+        std::unique_lock<compat::Mutex> lock( m_lock );
+        m_timeout = std::chrono::steady_clock::now();
+    }
+    m_cond.notify_all();
+}
+
 void ModificationNotifier::run()
 {
 #if !defined(_LIBCPP_STD_VER) || (_LIBCPP_STD_VER > 11 && !defined(_LIBCPP_HAS_NO_CXX14_CONSTEXPR))
