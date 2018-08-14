@@ -140,7 +140,7 @@ void ModificationNotifier::run()
             m_cond.wait_until( lock, m_timeout, [this]() { return m_stop == true; });
             if ( m_stop == true )
                 break;
-            auto now = std::chrono::steady_clock::now();
+            const auto now = std::chrono::steady_clock::now();
             auto nextTimeout = ZeroTimeout;
             checkQueue( m_media, media, nextTimeout, now );
             checkQueue( m_artists, artists, nextTimeout, now );
