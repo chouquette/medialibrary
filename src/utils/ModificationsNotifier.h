@@ -59,6 +59,10 @@ public:
     void notifyPlaylistModification( PlaylistPtr playlist );
     void notifyPlaylistRemoval( int64_t playlistId );
 
+    void notifyGenreCreation( GenrePtr genre );
+    void notifyGenreModification( GenrePtr genre );
+    void notifyGenreRemoval( int64_t genreId );
+
     /**
      * @brief flush Flushes the notifications queues
      *
@@ -160,6 +164,7 @@ private:
     Queue<IArtist> m_artists;
     Queue<IAlbum> m_albums;
     Queue<IPlaylist> m_playlists;
+    Queue<IGenre> m_genres;
 
     // Notifier thread
     compat::Mutex m_lock;

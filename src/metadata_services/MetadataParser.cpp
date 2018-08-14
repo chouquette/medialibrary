@@ -600,6 +600,8 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
         auto res = link( *media, album, artists.first, artists.second );
         media->save();
         t->commit();
+        if ( genre != nullptr )
+            m_notifier->notifyGenreModification( genre );
         return res;
     }, std::move( artworkMrl ), std::move( album ), std::move( genre ) );
 }
@@ -615,6 +617,7 @@ std::shared_ptr<Genre> MetadataAnalyzer::handleGenre( IItem& item ) const
         genre = Genre::create( m_ml, genreStr );
         if ( genre == nullptr )
             LOG_ERROR( "Failed to get/create Genre", genreStr );
+        m_notifier->notifyGenreCreation( genre );
     }
     return genre;
 }

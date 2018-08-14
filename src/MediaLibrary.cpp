@@ -228,10 +228,16 @@ void MediaLibrary::registerEntityHooks()
         Playlist::removeFromCache( rowId );
         m_modificationNotifier->notifyPlaylistRemoval( rowId );
     });
+    m_dbConnection->registerUpdateHook( Genre::Table::Name,
+                                        [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
+        if ( reason != sqlite::Connection::HookReason::Delete )
+            return;
+        Genre::removeFromCache( rowId );
+        m_modificationNotifier->notifyGenreRemoval( rowId );
+    });
     m_dbConnection->registerUpdateHook( Device::Table::Name, &propagateDeletionToCache<Device> );
     m_dbConnection->registerUpdateHook( File::Table::Name, &propagateDeletionToCache<File> );
     m_dbConnection->registerUpdateHook( Folder::Table::Name, &propagateDeletionToCache<Folder> );
-    m_dbConnection->registerUpdateHook( Genre::Table::Name, &propagateDeletionToCache<Genre> );
     m_dbConnection->registerUpdateHook( Label::Table::Name, &propagateDeletionToCache<Label> );
     m_dbConnection->registerUpdateHook( Movie::Table::Name, &propagateDeletionToCache<Movie> );
     m_dbConnection->registerUpdateHook( Show::Table::Name, &propagateDeletionToCache<Show> );

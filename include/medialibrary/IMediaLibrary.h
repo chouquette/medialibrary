@@ -120,6 +120,10 @@ public:
     virtual void onPlaylistsModified( std::vector<PlaylistPtr> playlists ) = 0;
     virtual void onPlaylistsDeleted( std::vector<int64_t> playlistIds ) = 0;
 
+    virtual void onGenresAdded( std::vector<GenrePtr> genres ) = 0;
+    virtual void onGenresModified( std::vector<GenrePtr> genres ) = 0;
+    virtual void onGenresDeleted( std::vector<int64_t> genreIds ) = 0;
+
     /**
      * @brief onDiscoveryStarted This callback will be invoked when a folder queued for discovery
      * (by calling IMediaLibrary::discover()) gets processed.

@@ -47,6 +47,9 @@ class NoopCallback : public IMediaLibraryCb
     virtual void onPlaylistsAdded( std::vector<PlaylistPtr> ) override {}
     virtual void onPlaylistsModified( std::vector<PlaylistPtr> ) override {}
     virtual void onPlaylistsDeleted( std::vector<int64_t> ) override {}
+    virtual void onGenresAdded( std::vector<GenrePtr> ) override {}
+    virtual void onGenresModified( std::vector<GenrePtr> ) override {}
+    virtual void onGenresDeleted( std::vector<int64_t> ) override {}
     virtual void onReloadStarted( const std::string& ) override {}
     virtual void onReloadCompleted( const std::string&, bool ) override {}
     virtual void onEntryPointRemoved( const std::string&, bool ) override {}

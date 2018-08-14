@@ -115,6 +115,21 @@ void ModificationNotifier::notifyPlaylistRemoval( int64_t playlistId )
     notifyRemoval( playlistId, m_playlists );
 }
 
+void ModificationNotifier::notifyGenreCreation( GenrePtr genre )
+{
+    notifyCreation( std::move( genre ), m_genres );
+}
+
+void ModificationNotifier::notifyGenreModification( GenrePtr genre )
+{
+    notifyModification( std::move( genre ), m_genres );
+}
+
+void ModificationNotifier::notifyGenreRemoval( int64_t genreId )
+{
+    notifyRemoval( genreId, m_genres );
+}
+
 void ModificationNotifier::flush()
 {
     std::unique_lock<compat::Mutex> lock( m_lock );
@@ -140,6 +155,7 @@ void ModificationNotifier::run()
     Queue<IArtist> artists;
     Queue<IAlbum> albums;
     Queue<IPlaylist> playlists;
+    Queue<IGenre> genres;
 
     while ( m_stop == false )
     {
@@ -156,6 +172,7 @@ void ModificationNotifier::run()
             checkQueue( m_artists, artists, nextTimeout, now );
             checkQueue( m_albums, albums, nextTimeout, now );
             checkQueue( m_playlists, playlists, nextTimeout, now );
+            checkQueue( m_genres, genres, nextTimeout, now );
             m_timeout = nextTimeout;
             m_flushedCond.notify_all();
         }
@@ -163,6 +180,7 @@ void ModificationNotifier::run()
         notify( std::move( artists ), &IMediaLibraryCb::onArtistsAdded, &IMediaLibraryCb::onArtistsModified, &IMediaLibraryCb::onArtistsDeleted );
         notify( std::move( albums ), &IMediaLibraryCb::onAlbumsAdded, &IMediaLibraryCb::onAlbumsModified, &IMediaLibraryCb::onAlbumsDeleted );
         notify( std::move( playlists ), &IMediaLibraryCb::onPlaylistsAdded, &IMediaLibraryCb::onPlaylistsModified, &IMediaLibraryCb::onPlaylistsDeleted );
+        notify( std::move( genres ), &IMediaLibraryCb::onGenresAdded, &IMediaLibraryCb::onGenresModified, &IMediaLibraryCb::onGenresDeleted );
     }
 }
 
