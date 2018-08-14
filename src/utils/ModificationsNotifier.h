@@ -137,7 +137,6 @@ private:
 #else
         const auto ZeroTimeout = std::chrono::time_point<std::chrono::steady_clock>{};
 #endif
-        //    LOG_ERROR( "Input timeout: ", input.timeout.time_since_epoch(), " - Now: ", now.time_since_epoch() );
         if ( input.timeout <= now )
         {
             using std::swap;
