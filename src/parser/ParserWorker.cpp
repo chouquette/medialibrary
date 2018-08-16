@@ -86,6 +86,16 @@ void Worker::stop()
 
 void Worker::parse( std::shared_ptr<Task> t )
 {
+    // Avoid flickering from idle/not idle when not many tasks are running.
+    // The thread calling parse for the next parser step might not have
+    // something left to do and would turn idle, potentially causing all
+    // services to be idle for a very short time, until this parser
+    // thread awakes/starts, causing the global parser idle state to be
+    // restored back to false.
+    // Since we are queuing a task, we already know that this thread is
+    // not idle
+    setIdle( false );
+
     if ( m_threads.size() == 0 )
     {
         // Since the thread isn't started, no need to lock the mutex before pushing the task
@@ -210,8 +220,11 @@ void Worker::setIdle(bool isIdle)
 {
     // Calling the idleChanged callback will trigger a call to isIdle, so set the value before
     // invoking it, otherwise we have an incoherent state.
-    m_idle = isIdle;
-    m_parserCb->onIdleChanged( isIdle );
+    if ( m_idle != isIdle )
+    {
+        m_idle = isIdle;
+        m_parserCb->onIdleChanged( isIdle );
+    }
 }
 
 bool Worker::handleServiceResult( Task& task, Status status )
