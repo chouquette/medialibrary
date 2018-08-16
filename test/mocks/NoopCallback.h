@@ -32,7 +32,7 @@ namespace mock
 class NoopCallback : public IMediaLibraryCb
 {
     virtual void onMediaAdded( std::vector<MediaPtr> ) override {}
-    virtual void onMediaUpdated( std::vector<MediaPtr> ) override {}
+    virtual void onMediaModified( std::vector<MediaPtr> ) override {}
     virtual void onMediaDeleted( std::vector<int64_t> ) override {}
     virtual void onDiscoveryStarted(const std::string&) override {}
     virtual void onDiscoveryProgress(const std::string&) override {}

@@ -104,7 +104,7 @@ public:
     /**
      * @brief onFileUpdated Will be called when a file metadata gets updated.
      */
-    virtual void onMediaUpdated( std::vector<MediaPtr> media ) = 0;
+    virtual void onMediaModified( std::vector<MediaPtr> media ) = 0;
 
     virtual void onMediaDeleted( std::vector<int64_t> mediaIds ) = 0;
 

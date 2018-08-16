@@ -176,7 +176,7 @@ void ModificationNotifier::run()
             m_timeout = nextTimeout;
             m_flushedCond.notify_all();
         }
-        notify( std::move( media ), &IMediaLibraryCb::onMediaAdded, &IMediaLibraryCb::onMediaUpdated, &IMediaLibraryCb::onMediaDeleted );
+        notify( std::move( media ), &IMediaLibraryCb::onMediaAdded, &IMediaLibraryCb::onMediaModified, &IMediaLibraryCb::onMediaDeleted );
         notify( std::move( artists ), &IMediaLibraryCb::onArtistsAdded, &IMediaLibraryCb::onArtistsModified, &IMediaLibraryCb::onArtistsDeleted );
         notify( std::move( albums ), &IMediaLibraryCb::onAlbumsAdded, &IMediaLibraryCb::onAlbumsModified, &IMediaLibraryCb::onAlbumsDeleted );
         notify( std::move( playlists ), &IMediaLibraryCb::onPlaylistsAdded, &IMediaLibraryCb::onPlaylistsModified, &IMediaLibraryCb::onPlaylistsDeleted );
