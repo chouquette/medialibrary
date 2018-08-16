@@ -25,6 +25,7 @@
 #endif
 
 #include "MediaLibrary.h"
+#include "logging/Logger.h"
 
 extern "C" medialibrary::IMediaLibrary* NewMediaLibrary()
 {

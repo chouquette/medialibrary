@@ -24,11 +24,12 @@
 #define MEDIALIBRARY_H
 
 #include "medialibrary/IMediaLibrary.h"
-#include "logging/Logger.h"
 #include "Settings.h"
 
 #include "medialibrary/IDeviceLister.h"
 #include "medialibrary/IMedia.h"
+
+#include <atomic>
 
 namespace medialibrary
 {
@@ -47,6 +48,7 @@ class Folder;
 class Genre;
 class Playlist;
 class File;
+class ILogger;
 
 namespace fs
 {
