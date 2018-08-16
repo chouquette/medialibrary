@@ -143,7 +143,7 @@ private:
 #else
         const auto ZeroTimeout = std::chrono::time_point<std::chrono::steady_clock>{};
 #endif
-        if ( input.timeout <= now )
+        if ( input.timeout <= now || m_flushing == true )
         {
             using std::swap;
             swap( input, output );
@@ -173,6 +173,7 @@ private:
     compat::Thread m_notifierThread;
     std::atomic_bool m_stop;
     std::chrono::time_point<std::chrono::steady_clock> m_timeout;
+    bool m_flushing;
 };
 
 }

@@ -36,6 +36,7 @@ ModificationNotifier::ModificationNotifier( MediaLibraryPtr ml )
     : m_ml( ml )
     , m_cb( ml->getCb() )
     , m_stop( false )
+    , m_flushing( false )
 {
 }
 
@@ -134,9 +135,10 @@ void ModificationNotifier::flush()
 {
     std::unique_lock<compat::Mutex> lock( m_lock );
     m_timeout = std::chrono::steady_clock::now();
+    m_flushing = true;
     m_cond.notify_all();
     m_flushedCond.wait( lock, [this](){
-        return m_timeout == std::chrono::time_point<std::chrono::steady_clock>{};
+        return m_flushing == false;
     });
 }
 
@@ -161,9 +163,14 @@ void ModificationNotifier::run()
     {
         {
             std::unique_lock<compat::Mutex> lock( m_lock );
+            if ( m_flushing == true )
+            {
+                m_flushedCond.notify_all();
+                m_flushing = false;
+            }
             if ( m_timeout == ZeroTimeout )
                 m_cond.wait( lock, [this, ZeroTimeout](){ return m_timeout != ZeroTimeout || m_stop == true; } );
-            m_cond.wait_until( lock, m_timeout, [this]() { return m_stop == true; });
+            m_cond.wait_until( lock, m_timeout, [this]() { return m_stop == true || m_flushing == true; });
             if ( m_stop == true )
                 break;
             const auto now = std::chrono::steady_clock::now();
@@ -174,7 +181,6 @@ void ModificationNotifier::run()
             checkQueue( m_playlists, playlists, nextTimeout, now );
             checkQueue( m_genres, genres, nextTimeout, now );
             m_timeout = nextTimeout;
-            m_flushedCond.notify_all();
         }
         notify( std::move( media ), &IMediaLibraryCb::onMediaAdded, &IMediaLibraryCb::onMediaModified, &IMediaLibraryCb::onMediaDeleted );
         notify( std::move( artists ), &IMediaLibraryCb::onArtistsAdded, &IMediaLibraryCb::onArtistsModified, &IMediaLibraryCb::onArtistsDeleted );
