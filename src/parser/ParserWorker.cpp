@@ -94,8 +94,10 @@ void Worker::parse( std::shared_ptr<Task> t )
     }
     else
     {
-        std::lock_guard<compat::Mutex> lock( m_lock );
-        m_tasks.push( std::move( t ) );
+        {
+            std::lock_guard<compat::Mutex> lock( m_lock );
+            m_tasks.push( std::move( t ) );
+        }
         m_cond.notify_all();
     }
 }
