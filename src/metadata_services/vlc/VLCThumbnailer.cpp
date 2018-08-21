@@ -77,6 +77,8 @@ void VLCThumbnailer::requestThumbnail( MediaPtr media )
         m_run = true;
         m_thread = compat::Thread( &VLCThumbnailer::run, this );
     }
+    else
+        m_cond.notify_all();
 }
 
 void VLCThumbnailer::run()
