@@ -100,29 +100,29 @@ public:
      * available yet.
      * The number of media is undefined, but is guaranteed to be at least 1.
      */
-    virtual void onMediaAdded( const std::vector<MediaPtr>& media ) = 0;
+    virtual void onMediaAdded( std::vector<MediaPtr> media ) = 0;
     /**
      * @brief onFileUpdated Will be called when a file metadata gets updated.
      */
-    virtual void onMediaModified( const std::vector<MediaPtr>& media ) = 0;
+    virtual void onMediaModified( std::vector<MediaPtr> media ) = 0;
 
-    virtual void onMediaDeleted( const std::vector<int64_t>& mediaIds ) = 0;
+    virtual void onMediaDeleted( std::vector<int64_t> mediaIds ) = 0;
 
-    virtual void onArtistsAdded( const std::vector<ArtistPtr>& artists ) = 0;
-    virtual void onArtistsModified( const std::vector<ArtistPtr>& artists ) = 0;
-    virtual void onArtistsDeleted( const std::vector<int64_t>& artistsIds ) = 0;
+    virtual void onArtistsAdded( std::vector<ArtistPtr> artists ) = 0;
+    virtual void onArtistsModified( std::vector<ArtistPtr> artists ) = 0;
+    virtual void onArtistsDeleted( std::vector<int64_t> artistsIds ) = 0;
 
-    virtual void onAlbumsAdded( const std::vector<AlbumPtr>& albums ) = 0;
-    virtual void onAlbumsModified( const std::vector<AlbumPtr>& albums ) = 0;
-    virtual void onAlbumsDeleted( const std::vector<int64_t>& albumsIds ) = 0;
+    virtual void onAlbumsAdded( std::vector<AlbumPtr> albums ) = 0;
+    virtual void onAlbumsModified( std::vector<AlbumPtr> albums ) = 0;
+    virtual void onAlbumsDeleted( std::vector<int64_t> albumsIds ) = 0;
 
-    virtual void onPlaylistsAdded( const std::vector<PlaylistPtr>& playlists ) = 0;
-    virtual void onPlaylistsModified( const std::vector<PlaylistPtr>& playlists ) = 0;
-    virtual void onPlaylistsDeleted( const std::vector<int64_t>& playlistIds ) = 0;
+    virtual void onPlaylistsAdded( std::vector<PlaylistPtr> playlists ) = 0;
+    virtual void onPlaylistsModified( std::vector<PlaylistPtr> playlists ) = 0;
+    virtual void onPlaylistsDeleted( std::vector<int64_t> playlistIds ) = 0;
 
-    virtual void onGenresAdded( const std::vector<GenrePtr>& genres ) = 0;
-    virtual void onGenresModified( const std::vector<GenrePtr>& genres ) = 0;
-    virtual void onGenresDeleted( const std::vector<int64_t>& genreIds ) = 0;
+    virtual void onGenresAdded( std::vector<GenrePtr> genres ) = 0;
+    virtual void onGenresModified( std::vector<GenrePtr> genres ) = 0;
+    virtual void onGenresDeleted( std::vector<int64_t> genreIds ) = 0;
 
     /**
      * @brief onDiscoveryStarted This callback will be invoked when a folder queued for discovery
