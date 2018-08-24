@@ -66,6 +66,7 @@ void NetworkDirectory::read() const
     media.eventManager().onParsedChanged([&mutex, &cond, &res]( VLC::Media::ParsedStatus status) {
         std::lock_guard<compat::Mutex> lock( mutex );
         res = status;
+        cond.notify_all();
     });
 
     std::unique_lock<compat::Mutex> lock( mutex );
