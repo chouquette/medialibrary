@@ -129,6 +129,7 @@ Status MetadataAnalyzer::run( IItem& item )
             LOG_ERROR( "Failure" );
             return status;
         }
+        m_notifier->notifyMediaCreation( item.media() );
     }
     else if ( item.media() == nullptr )
     {
@@ -173,7 +174,7 @@ Status MetadataAnalyzer::run( IItem& item )
          std::static_pointer_cast<Media>( media )->isDeleted() == true )
         return Status::Fatal;
 
-    m_notifier->notifyMediaCreation( media );
+    m_notifier->notifyMediaModification( media );
     return Status::Success;
 }
 
