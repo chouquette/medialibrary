@@ -74,7 +74,7 @@ public:
     void wait( std::unique_lock<Mutex>& lock, Pred pred )
     {
         while ( pred() == false )
-            SleepConditionVariableCS( &m_cond, lock.mutex()->native_handle(), INFINITE );
+            wait( lock );
     }
 
     template <typename Rep, typename Period, typename Pred>
