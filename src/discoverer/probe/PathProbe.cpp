@@ -70,7 +70,7 @@ bool PathProbe::proceedOnDirectory( const fs::IDirectory& directory )
 {
     if ( m_isDirectory && m_splitPath.empty() == true )
     {
-        auto directoryPath = utils::file::toPath( directory.mrl() );
+        auto directoryPath = utils::file::toLocalPath( directory.mrl() );
         auto comp = std::mismatch( m_path.begin(), m_path.end(), directoryPath.begin());
         if ( comp.first == m_path.end() )
             return true;
