@@ -852,6 +852,20 @@ TEST_F( Medias, SetFilename )
     ASSERT_EQ( "sea_otter.asf", m->fileName() );
 }
 
+TEST_F( Medias, SetPlayCount )
+{
+    auto m = ml->addMedia( "media.avi" );
+    ASSERT_EQ( 0, m->playCount() );
+    auto res = m->setPlayCount( 123 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 123, m->playCount() );
+
+    Reload();
+
+    m = ml->media( m->id() );
+    ASSERT_EQ( 123, m->playCount() );
+}
+
 class FetchMedia : public Tests
 {
 protected:

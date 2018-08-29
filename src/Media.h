@@ -92,6 +92,7 @@ class Media : public IMedia, public DatabaseHelpers<Media>
         virtual Query<ILabel> labels() const override;
         virtual int playCount() const  override;
         virtual bool increasePlayCount() override;
+        virtual bool setPlayCount( uint32_t playCount ) override;
         virtual time_t lastPlayedDate() const override;
         virtual bool isFavorite() const override;
         virtual bool setFavorite( bool favorite ) override;

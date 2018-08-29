@@ -125,7 +125,21 @@ class IMedia
          */
         virtual int64_t duration() const = 0;
         virtual int playCount() const = 0;
+        /**
+         * @brief increasePlayCount Increment this media play count by 1.
+         *
+         * This also bumps the last played date to "now", causing the media
+         * to be the recent when fetching the history.
+         */
         virtual bool increasePlayCount() = 0;
+        /**
+         * @brief setPlayCount Set a specific value to this media's play count
+         *
+         * This is mostly intended for migrations where single step increment
+         * would not be the most efficient way.
+         * This method will not bump the media in the history
+         */
+        virtual bool setPlayCount( uint32_t playCount ) = 0;
         virtual time_t lastPlayedDate() const = 0;
         virtual ShowEpisodePtr showEpisode() const = 0;
         virtual const std::vector<FilePtr>& files() const = 0;

@@ -194,6 +194,16 @@ bool Media::increasePlayCount()
     return true;
 }
 
+bool Media::setPlayCount( uint32_t playCount )
+{
+    static const std::string req = "UPDATE " + Media::Table::Name + " SET "
+            "play_count = ? WHERE id_media = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, playCount, m_id ) == false )
+        return false;
+    m_playCount = playCount;
+    return true;
+}
+
 time_t Media::lastPlayedDate() const
 {
     return m_lastPlayedDate;
