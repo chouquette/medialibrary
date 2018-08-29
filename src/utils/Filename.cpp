@@ -155,22 +155,10 @@ std::string toFolderPath( const std::string& path )
     return p;
 }
 
-std::string toLocalPath( const std::string& mrl )
-{
-    if ( mrl.compare( 0, 7, "file://" ) != 0 )
-        throw std::runtime_error( mrl + " is not representing a local path" );
-    return utils::url::decode( mrl.substr( 7 ) );
-}
-
 std::string stripScheme( const std::string& mrl )
 {
     auto pos = mrl.find( "://" );
     return pos == std::string::npos ? mrl : mrl.substr( pos + 3 );
-}
-
-std::string toMrl( const std::string& path )
-{
-    return "file://" + utils::url::encode( path );
 }
 
 std::string scheme( const std::string& mrl )
@@ -179,6 +167,18 @@ std::string scheme( const std::string& mrl )
     if ( pos == std::string::npos )
         throw std::runtime_error( "Invalid MRL provided" );
     return mrl.substr( 0, pos + 3 );
+}
+
+std::string toLocalPath( const std::string& mrl )
+{
+    if ( mrl.compare( 0, 7, "file://" ) != 0 )
+        throw std::runtime_error( mrl + " is not representing a local path" );
+    return utils::url::decode( mrl.substr( 7 ) );
+}
+
+std::string toMrl( const std::string& path )
+{
+    return "file://" + utils::url::encode( path );
 }
 
 std::stack<std::string> splitPath( const std::string& path, bool isDirectory )
