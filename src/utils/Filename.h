@@ -54,9 +54,7 @@ namespace file
     std::string  toFolderPath( const std::string& path );
     /**
      * @brief toLocalPath Converts an MRL to a local path.
-     * This basically just strips the file:// scheme
-     * @param mrl
-     * @return
+     * This will strip the file:// scheme and URL decode the MRL
      */
     std::string  toLocalPath( const std::string& mrl );
 
