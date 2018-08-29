@@ -30,6 +30,7 @@
 
 #include "logging/Logger.h"
 #include "utils/Charsets.h"
+#include "utils/Filename.h"
 
 #include <memory>
 #include <sstream>
@@ -76,7 +77,7 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
 
         if ( GetVolumePathNamesForVolumeName( volumeName, buffer, buffLength, &buffLength ) == 0 )
             continue;
-        std::string mountpoint = std::string{ "file://" } + charset::FromWide( buffer ).get();
+        std::string mountpoint = charset::FromWide( buffer ).get();
 
         // Filter out anything which isn't a removable or fixed drive. We don't care about network
         // drive here.
@@ -88,7 +89,8 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
 
         LOG_INFO( "Discovered device ", uuid, "; mounted on ", mountpoint, "; removable: ",
                   type == DRIVE_REMOVABLE ? "yes" : "no" );
-        res.emplace_back( std::make_tuple( uuid, mountpoint, type == DRIVE_REMOVABLE ) );
+        res.emplace_back( std::make_tuple( uuid, utils::file::toMrl( mountpoint ),
+                                           type == DRIVE_REMOVABLE ) );
     }
     return res;
 }
