@@ -79,7 +79,7 @@ bool PathProbe::proceedOnDirectory( const fs::IDirectory& directory )
     }
     if ( m_splitPath.empty() == true )
         return true;
-    auto directoryPath = utils::file::stripScheme( directory.mrl() );
+    auto directoryPath = utils::file::toLocalPath( directory.mrl() );
 #ifndef _WIN32
     // In case we are discovering from "/", the root folder isn't part of the
     // splitted path stack, which would cause the prober to reject it.
@@ -94,15 +94,16 @@ bool PathProbe::proceedOnDirectory( const fs::IDirectory& directory )
 
 bool PathProbe::proceedOnFile( const fs::IFile& file )
 {
+    auto path = utils::file::toLocalPath( file.mrl() );
     if ( m_isDirectory == true && m_isDiscoveryEnded == false && m_splitPath.empty() == true )
     {
-        if ( utils::file::stripScheme( file.mrl() ) != m_path )
+        if ( path != m_path )
             return true;
         m_isDiscoveryEnded = true;
         return false;
     }
 
-    if ( m_path == utils::file::stripScheme( file.mrl() ) )
+    if ( m_path == path )
     {
         assert( m_splitPath.size() == 1 && file.name() == m_splitPath.top() );
         m_splitPath.pop();

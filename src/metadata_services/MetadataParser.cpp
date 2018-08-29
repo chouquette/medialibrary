@@ -299,17 +299,17 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
     if ( parentKnown == false && Folder::fromMrl( m_ml, entryPoint ) != nullptr )
     {
         auto probePtr = std::unique_ptr<prober::PathProbe>(
-                    new prober::PathProbe{ utils::file::stripScheme( mrl ),
+                    new prober::PathProbe{ utils::file::toLocalPath( mrl ),
                        isDirectory, std::move( playlistPtr ), parentFolder,
-                       utils::file::stripScheme( directoryMrl ), subitem.parentPlaylistIndex(), true } );
+                       utils::file::toLocalPath( directoryMrl ), subitem.parentPlaylistIndex(), true } );
         FsDiscoverer discoverer( fsFactory, m_ml, nullptr, std::move( probePtr ) );
         discoverer.reload( entryPoint );
         return;
     }
     auto probePtr = std::unique_ptr<prober::PathProbe>(
-                new prober::PathProbe{ utils::file::stripScheme( mrl ),
+                new prober::PathProbe{ utils::file::toLocalPath( mrl ),
                    isDirectory, std::move( playlistPtr ), parentFolder,
-                   utils::file::stripScheme( directoryMrl ), subitem.parentPlaylistIndex(), false } );
+                   utils::file::toLocalPath( directoryMrl ), subitem.parentPlaylistIndex(), false } );
     FsDiscoverer discoverer( fsFactory, m_ml, nullptr, std::move( probePtr ) );
     if ( parentKnown == false )
     {
