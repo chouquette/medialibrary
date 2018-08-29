@@ -264,7 +264,8 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
     catch(std::runtime_error& ex)
     {
         LOG_WARN( "Failed to list devices: ", ex.what(), ". Falling back to a dummy device containing '/'");
-        res.emplace_back( std::make_tuple( "{dummy-device}", "file:///", false ) );
+        res.emplace_back( std::make_tuple( "{dummy-device}", utils::file::toMrl( "/" ),
+                                           false ) );
     }
 
     return res;
