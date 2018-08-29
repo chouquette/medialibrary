@@ -175,7 +175,7 @@ Query<ILabel> Media::labels() const
     return make_query<Label, ILabel>( m_ml, "l.*", req, "", m_id );
 }
 
-int Media::playCount() const
+uint32_t Media::playCount() const
 {
     return m_playCount;
 }

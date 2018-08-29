@@ -52,7 +52,7 @@ TEST_F( Medias, Create )
     auto m = ml->addFile( "media.avi", IMedia::Type::Video );
     ASSERT_NE( m, nullptr );
 
-    ASSERT_EQ( m->playCount(), 0 );
+    ASSERT_EQ( 0u, m->playCount() );
     ASSERT_EQ( m->albumTrack(), nullptr );
     ASSERT_EQ( m->showEpisode(), nullptr );
     ASSERT_EQ( m->duration(), -1 );
@@ -117,14 +117,14 @@ TEST_F( Medias, Thumbnail )
 TEST_F( Medias, PlayCount )
 {
     auto f = std::static_pointer_cast<Media>( ml->addMedia( "media.avi" ) );
-    ASSERT_EQ( 0, f->playCount() );
+    ASSERT_EQ( 0u, f->playCount() );
     f->increasePlayCount();
-    ASSERT_EQ( 1, f->playCount() );
+    ASSERT_EQ( 1u, f->playCount() );
 
     Reload();
 
     f = std::static_pointer_cast<Media>( ml->media( f->id() ) );
-    ASSERT_EQ( 1, f->playCount() );
+    ASSERT_EQ( 1u, f->playCount() );
 }
 
 TEST_F( Medias, Progress )
@@ -855,15 +855,15 @@ TEST_F( Medias, SetFilename )
 TEST_F( Medias, SetPlayCount )
 {
     auto m = ml->addMedia( "media.avi" );
-    ASSERT_EQ( 0, m->playCount() );
+    ASSERT_EQ( 0u, m->playCount() );
     auto res = m->setPlayCount( 123 );
     ASSERT_TRUE( res );
-    ASSERT_EQ( 123, m->playCount() );
+    ASSERT_EQ( 123u, m->playCount() );
 
     Reload();
 
     m = ml->media( m->id() );
-    ASSERT_EQ( 123, m->playCount() );
+    ASSERT_EQ( 123u, m->playCount() );
 }
 
 class FetchMedia : public Tests

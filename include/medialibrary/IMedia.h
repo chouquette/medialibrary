@@ -124,7 +124,7 @@ class IMedia
          * @brief duration Returns the media duration in ms
          */
         virtual int64_t duration() const = 0;
-        virtual int playCount() const = 0;
+        virtual uint32_t playCount() const = 0;
         /**
          * @brief increasePlayCount Increment this media play count by 1.
          *

@@ -90,7 +90,7 @@ class Media : public IMedia, public DatabaseHelpers<Media>
         virtual bool addLabel( LabelPtr label ) override;
         virtual bool removeLabel( LabelPtr label ) override;
         virtual Query<ILabel> labels() const override;
-        virtual int playCount() const  override;
+        virtual uint32_t playCount() const override;
         virtual bool increasePlayCount() override;
         virtual bool setPlayCount( uint32_t playCount ) override;
         virtual time_t lastPlayedDate() const override;
