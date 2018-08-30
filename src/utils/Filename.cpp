@@ -169,6 +169,8 @@ std::string scheme( const std::string& mrl )
     return mrl.substr( 0, pos + 3 );
 }
 
+#ifndef _WIN32
+
 std::string toLocalPath( const std::string& mrl )
 {
     if ( mrl.compare( 0, 7, "file://" ) != 0 )
@@ -180,6 +182,33 @@ std::string toMrl( const std::string& path )
 {
     return "file://" + utils::url::encode( path );
 }
+
+#else
+
+std::string toLocalPath( const std::string& mrl )
+{
+    if ( mrl.compare( 0, 7, "file://" ) != 0 )
+        throw std::runtime_error( mrl + " is not representing a local path" );
+    auto path = mrl.substr( 7 );
+    // If the path is a local path (ie. X:\path\to and not \\path\to) stip the
+    // initial backslash, as it is only part of our representation, and not
+    // understood by the win32 API functions
+    // Note that the initial '/' (after the 2 forward slashes from the scheme)
+    // is not a backslash, as it is not a patch separator, so do not use
+    // DIR_SEPARATOR_CHAR here.
+    if ( path[0] == '/' )
+        path.erase( 0, 1 );
+    return utils::url::decode( path );
+}
+
+std::string toMrl( const std::string& path )
+{
+    return std::string{ "file://" } +
+            ( isalpha( path[0] ) ? "/" : "" ) +
+            utils::url::encode( path );
+}
+
+#endif
 
 std::stack<std::string> splitPath( const std::string& path, bool isDirectory )
 {
