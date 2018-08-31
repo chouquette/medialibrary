@@ -1,6 +1,9 @@
 "CREATE INDEX IF NOT EXISTS index_last_played_date ON "
             + Media::Table::Name + "(last_played_date DESC)",
 
+"CREATE INDEX IF NOT EXISTS index_media_presence ON "
+            + Media::Table::Name + "(is_present)",
+
 "CREATE TRIGGER IF NOT EXISTS is_media_device_present AFTER UPDATE OF "
 "is_present ON " + Device::Table::Name + " "
 "BEGIN "
