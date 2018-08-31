@@ -1,15 +1,12 @@
 "CREATE INDEX IF NOT EXISTS index_last_played_date ON "
             + Media::Table::Name + "(last_played_date DESC)",
 
-"CREATE TRIGGER IF NOT EXISTS has_files_present AFTER UPDATE OF "
-"is_present ON " + File::Table::Name + " "
+"CREATE TRIGGER IF NOT EXISTS is_media_device_present AFTER UPDATE OF "
+"is_present ON " + Device::Table::Name + " "
 "BEGIN "
-"UPDATE " + Media::Table::Name + " SET is_present="
-    "(SELECT EXISTS("
-        "SELECT id_file FROM " + File::Table::Name +
-        " WHERE media_id=new.media_id AND is_present != 0 LIMIT 1"
-    ") )"
-    "WHERE id_media=new.media_id;"
+"UPDATE " + Media::Table::Name + " "
+    "SET is_present=new.is_present "
+    "WHERE device_id=new.id_device;"
 "END;",
 
 "CREATE TRIGGER IF NOT EXISTS cascade_file_deletion AFTER DELETE ON "

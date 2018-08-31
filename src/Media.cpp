@@ -34,6 +34,7 @@
 #include "AlbumTrack.h"
 #include "Artist.h"
 #include "AudioTrack.h"
+#include "Device.h"
 #include "Media.h"
 #include "File.h"
 #include "Folder.h"
@@ -74,8 +75,9 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     , m_title( row.load<decltype(m_title)>( 11 ) )
     , m_filename( row.load<decltype(m_filename)>( 12 ) )
     , m_isFavorite( row.load<decltype(m_isFavorite)>( 13 ) )
-    , m_isPresent( row.load<decltype(m_isPresent)>( 14 ) )
-    , m_nbPlaylists( row.load<unsigned int>( 15 ) )
+    // Skip is_present
+    // Skip device_id
+    , m_nbPlaylists( row.load<unsigned int>( 16 ) )
     // End of DB fields extraction
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
@@ -98,20 +100,22 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
     // When creating a Media, meta aren't parsed, and therefor, the title is the filename
     , m_filename( title )
     , m_isFavorite( false )
-    , m_isPresent( true )
     , m_nbPlaylists( 0 )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
 }
 
-std::shared_ptr<Media> Media::create( MediaLibraryPtr ml, Type type, const std::string& fileName )
+std::shared_ptr<Media> Media::create( MediaLibraryPtr ml, Type type,
+                                      int64_t deviceId, const std::string& fileName )
 {
     auto self = std::make_shared<Media>( ml, fileName, type );
     static const std::string req = "INSERT INTO " + Media::Table::Name +
-            "(type, insertion_date, title, filename) VALUES(?, ?, ?, ?)";
+            "(type, insertion_date, title, filename, device_id) "
+            "VALUES(?, ?, ?, ?, ?)";
 
-    if ( insert( ml, self, req, type, self->m_insertionDate, self->m_title, self->m_filename ) == false )
+    if ( insert( ml, self, req, type, self->m_insertionDate, self->m_title,
+                 self->m_filename, sqlite::ForeignKey{ deviceId } ) == false )
         return nullptr;
     return self;
 }
@@ -533,7 +537,7 @@ Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
 
     req +=  " WHERE m.type = ?"
             " AND f.type = ?"
-            " AND f.is_present != 0";
+            " AND m.is_present != 0";
 
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params, type == IMedia::Type::Audio ),
@@ -729,7 +733,7 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
             " WHERE"
             " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
             " WHERE " + Media::Table::Name + "Fts MATCH '*' || ? || '*')"
-            " AND f.is_present = 1"
+            " AND m.is_present = 1"
             " AND f.type = ?"
             " AND m.type != ? AND m.type != ?";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
@@ -746,7 +750,7 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
             " WHERE"
             " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
             " WHERE " + Media::Table::Name + "Fts MATCH '*' || ? || '*')"
-            " AND f.is_present = 1"
+            " AND m.is_present = 1"
             " AND f.type = ?"
             " AND m.type = ?";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
@@ -763,7 +767,7 @@ Query<IMedia> Media::searchAlbumTracks(MediaLibraryPtr ml, const std::string& pa
             " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
             " WHERE " + Media::Table::Name + "Fts MATCH '*' || ? || '*')"
             " AND tra.album_id = ?"
-            " AND f.is_present = 1"
+            " AND m.is_present = 1"
             " AND f.type = ?"
             " AND m.subtype = ?";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
@@ -780,7 +784,7 @@ Query<IMedia> Media::searchArtistTracks(MediaLibraryPtr ml, const std::string& p
             " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
             " WHERE " + Media::Table::Name + "Fts MATCH '*' || ? || '*')"
             " AND tra.artist_id = ?"
-            " AND f.is_present = 1"
+            " AND m.is_present = 1"
             " AND f.type = ?"
             " AND m.subtype = ?";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
@@ -797,7 +801,7 @@ Query<IMedia> Media::searchGenreTracks(MediaLibraryPtr ml, const std::string& pa
             " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
             " WHERE " + Media::Table::Name + "Fts MATCH '*' || ? || '*')"
             " AND tra.genre_id = ?"
-            " AND f.is_present = 1"
+            " AND m.is_present = 1"
             " AND f.type = ?"
             " AND m.subtype = ?";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
@@ -815,7 +819,7 @@ Query<IMedia> Media::searchShowEpisodes(MediaLibraryPtr ml, const std::string& p
             " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
             " WHERE " + Media::Table::Name + "Fts MATCH '*' || ? || '*')"
             " AND ep.show_id = ?"
-            " AND f.is_present = 1"
+            " AND m.is_present = 1"
             " AND f.type = ?"
             " AND m.subtype = ?";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),

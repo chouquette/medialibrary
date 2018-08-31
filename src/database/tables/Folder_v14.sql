@@ -5,7 +5,6 @@
     "parent_id UNSIGNED INTEGER,"
     "is_blacklisted BOOLEAN NOT NULL DEFAULT 0,"
     "device_id UNSIGNED INTEGER,"
-    "is_present BOOLEAN NOT NULL DEFAULT 1,"
     "is_removable BOOLEAN NOT NULL,"
 
     "FOREIGN KEY (parent_id) REFERENCES " + Folder::Table::Name +
@@ -28,4 +27,4 @@
     "(id_folder) ON DELETE CASCADE,"
 
     "UNIQUE(folder_id) ON CONFLICT FAIL"
-")"
+")",

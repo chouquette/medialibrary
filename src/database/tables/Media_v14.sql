@@ -16,6 +16,7 @@
     "filename TEXT COLLATE NOCASE,"
     "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
     "is_present BOOLEAN NOT NULL DEFAULT 1,"
+    "device_id INTEGER,"
     "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
 
     "FOREIGN KEY(thumbnail_id) REFERENCES " + Thumbnail::Table::Name

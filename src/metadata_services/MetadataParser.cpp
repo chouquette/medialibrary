@@ -259,7 +259,7 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
     {
         auto t2 = m_ml->getConn()->newTransaction();
         auto externalMedia = Media::create( m_ml, IMedia::Type::External,
-                                            subitem.meta( IItem::Metadata::Title ) );
+                                            0, subitem.meta( IItem::Metadata::Title ) );
         if ( externalMedia == nullptr )
         {
             LOG_ERROR( "Failed to create external media for ", mrl, " in the playlist ", item.mrl() );
@@ -398,8 +398,9 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
         }) == end( tracks );
         auto t = m_ml->getConn()->newTransaction();
         LOG_INFO( "Adding ", mrl );
+        auto folder = static_cast<Folder*>( item.parentFolder().get() );
         auto m = Media::create( m_ml, isAudio ? IMedia::Type::Audio : IMedia::Type::Video,
-                                utils::url::decode( utils::file::fileName( mrl ) ) );
+                                folder->deviceId(), utils::url::decode( utils::file::fileName( mrl ) ) );
         if ( m == nullptr )
         {
             LOG_ERROR( "Failed to add media ", mrl, " to the media library" );

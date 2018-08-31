@@ -51,8 +51,7 @@ Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
     , m_parent( row.load<decltype(m_parent)>( 2 ) )
     , m_isBlacklisted( row.load<decltype(m_isBlacklisted)>( 3 ) )
     , m_deviceId( row.load<decltype(m_deviceId)>( 4 ) )
-    // Skip is_present
-    , m_isRemovable( row.load<decltype(m_isRemovable)>( 6 ) )
+    , m_isRemovable( row.load<decltype(m_isRemovable)>( 5 ) )
 {
 }
 
@@ -297,8 +296,9 @@ std::vector<std::shared_ptr<File>> Folder::files()
 
 std::vector<std::shared_ptr<Folder>> Folder::folders()
 {
-    static const std::string req = "SELECT * FROM " + Folder::Table::Name
-            + " WHERE parent_id = ? AND is_blacklisted = 0 AND is_present != 0";
+    static const std::string req = "SELECT * FROM " + Folder::Table::Name + " f "
+            " LEFT JOIN " + Device::Table::Name + " d ON d.id_device = f.device_id"
+            " WHERE parent_id = ? AND is_blacklisted = 0 AND d.is_present != 0";
     return DatabaseHelpers::fetchAll<Folder>( m_ml, req, m_id );
 }
 
@@ -338,11 +338,12 @@ bool Folder::isRootFolder() const
 
 std::vector<std::shared_ptr<Folder>> Folder::fetchRootFolders( MediaLibraryPtr ml )
 {
-    static const std::string req = "SELECT * FROM " + Folder::Table::Name +
+    static const std::string req = "SELECT * FROM " + Folder::Table::Name + " f "
             " LEFT JOIN ExcludedEntryFolder"
-            " ON " + Folder::Table::Name + ".id_folder = ExcludedEntryFolder.folder_id"
+            " ON f.id_folder = ExcludedEntryFolder.folder_id"
+            " LEFT JOIN " + Device::Table::Name + " d ON d.id_device = f.device_id"
             " WHERE ExcludedEntryFolder.folder_id IS NULL AND"
-            " parent_id IS NULL AND is_blacklisted = 0 AND is_present != 0";
+            " parent_id IS NULL AND is_blacklisted = 0 AND d.is_present != 0";
     return DatabaseHelpers::fetchAll<Folder>( ml, req );
 }
 

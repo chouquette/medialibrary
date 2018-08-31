@@ -48,6 +48,18 @@
 "(SELECT COUNT(media_id) FROM PlaylistMediaRelation WHERE media_id = id_media )"
 "WHERE id_media IN (SELECT media_id FROM PlaylistMediaRelation)",
 
+/********************* Populate new media.device_id ***************************/
+
+"UPDATE " + Media::Table::Name + " SET device_id = "
+"(SELECT d.id_device FROM " + Device::Table::Name + " d "
+"INNER JOIN " + Folder::Table::Name + " f ON d.id_device = f.device_id "
+"INNER JOIN " + File::Table::Name + " fi ON fi.folder_id = f.id_folder "
+"WHERE fi.type = " +
+    std::to_string( static_cast<typename std::underlying_type<IFile::Type>::type>(
+        IFile::Type::Main) ) + " "
+"AND fi.media_id = " + Media::Table::Name + ".id_media"
+")",
+
 /************ Playlist external media were stored as Unknown ******************/
 
 "UPDATE " + Media::Table::Name + " SET type = " +
@@ -136,9 +148,75 @@ IMedia::Type::Unknown ) ),
 
 "DROP TABLE " + Device::Table::Name + "_backup",
 
+/******************* Migrate Folder table *************************************/
+
+"CREATE TEMPORARY TABLE " + Folder::Table::Name + "_backup"
+"("
+    "id_folder INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "path TEXT,"
+    "parent_id UNSIGNED INTEGER,"
+    "is_blacklisted BOOLEAN NOT NULL DEFAULT 0,"
+    "device_id UNSIGNED INTEGER,"
+    "is_present BOOLEAN NOT NULL DEFAULT 1,"
+    "is_removable BOOLEAN NOT NULL"
+")",
+
+"INSERT INTO " + Folder::Table::Name + "_backup SELECT * FROM " + Folder::Table::Name,
+
+"DROP TABLE " + Folder::Table::Name,
+
+#include "database/tables/Folder_v14.sql"
+
+"INSERT INTO " + Folder::Table::Name + "("
+    "id_folder, path, parent_id, is_blacklisted, device_id, is_removable"
+") "
+"SELECT id_folder, path, parent_id, is_blacklisted, device_id, is_removable "
+"FROM " + Folder::Table::Name + "_backup",
+
+"DROP TABLE " + Folder::Table::Name + "_backup",
+
+/******************* Migrate File table *************************************/
+
+"CREATE TEMPORARY TABLE " + File::Table::Name + "_backup"
+"("
+    "id_file INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "media_id UNSIGNED INT DEFAULT NULL,"
+    "playlist_id UNSIGNED INT DEFAULT NULL,"
+    "mrl TEXT,"
+    "type UNSIGNED INTEGER,"
+    "last_modification_date UNSIGNED INT,"
+    "size UNSIGNED INT,"
+    "folder_id UNSIGNED INTEGER,"
+    "is_present BOOLEAN NOT NULL DEFAULT 1,"
+    "is_removable BOOLEAN NOT NULL,"
+    "is_external BOOLEAN NOT NULL"
+")",
+
+"INSERT INTO " + File::Table::Name + "_backup SELECT * FROM " + File::Table::Name,
+
+"DROP TABLE " + File::Table::Name,
+
+#include "database/tables/File_v14.sql"
+
+"INSERT INTO " + File::Table::Name + "("
+"id_file, media_id, playlist_id, mrl, type, last_modification_date, size,"
+"folder_id, is_removable, is_external) "
+"SELECT id_file, media_id, playlist_id, mrl, type, last_modification_date, size,"
+"folder_id, is_removable, is_external FROM " + File::Table::Name + "_backup",
+
+"DROP TABLE " + File::Table::Name + "_backup",
+
 /******************* Delete removed triggers **********************************/
 
 "DROP TRIGGER on_track_genre_changed",
+// Old Folder -> File is_present trigger
+// is_folder_present has been implicitely removed by dropping the File table
+
+// Old File -> Media is_present trigger
+// has_files_present has been implicitely removed by dropping the Folder table
+
+// Old Device -> Folder is_present trigger
+// is_device_present has been implicitely removed by dropping the Device table
 
 /******************* Delete other tables **************************************/
 

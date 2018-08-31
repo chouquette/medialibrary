@@ -8,7 +8,6 @@
     "last_modification_date UNSIGNED INT,"
     "size UNSIGNED INT,"
     "folder_id UNSIGNED INTEGER,"
-    "is_present BOOLEAN NOT NULL DEFAULT 1,"
     "is_removable BOOLEAN NOT NULL,"
     "is_external BOOLEAN NOT NULL,"
 
@@ -22,4 +21,4 @@
     + "(id_folder) ON DELETE CASCADE,"
 
     "UNIQUE( mrl, folder_id ) ON CONFLICT FAIL"
-")"
+")",

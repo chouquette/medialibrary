@@ -282,7 +282,9 @@ TEST_F( Albums, AlbumArtist )
 TEST_F( Albums, SearchByTitle )
 {
     ml->createAlbum( "sea otters" );
-    ml->createAlbum( "pangolins of fire" );
+    auto a = ml->createAlbum( "pangolins of fire" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
+    a->addTrack( m, 1, 0, 0, nullptr );
 
     auto albums = ml->searchAlbums( "otte", nullptr )->all();
     ASSERT_EQ( 1u, albums.size() );

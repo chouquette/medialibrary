@@ -29,6 +29,7 @@
 
 #include "medialibrary/filesystem/IFile.h"
 #include "medialibrary/filesystem/IDirectory.h"
+#include "Device.h"
 #include "File.h"
 #include "Folder.h"
 #include "Playlist.h"
@@ -474,7 +475,9 @@ std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
 {
     static const std::string req = "SELECT * FROM " + Task::Table::Name + " t"
         " LEFT JOIN " + File::Table::Name + " f ON f.id_file = t.file_id"
-        " WHERE step & ? != ? AND retry_count < 3 AND (f.is_present != 0 OR "
+        " LEFT JOIN " + Folder::Table::Name + " fol ON f.folder_id = fol.id_folder"
+        " LEFT JOIN " + Device::Table::Name + " d ON d.id_device = fol.device_id"
+        " WHERE step & ? != ? AND retry_count < 3 AND (d.is_present != 0 OR "
         " t.file_id IS NULL)";
     return Task::fetchAll<Task>( ml, req, Step::Completed,
                                  Step::Completed );

@@ -47,7 +47,6 @@ File::File( MediaLibraryPtr ml, sqlite::Row& row )
     , m_lastModificationDate( row.extract<decltype(m_lastModificationDate)>() )
     , m_size( row.extract<decltype(m_size)>() )
     , m_folderId( row.extract<decltype(m_folderId)>() )
-    , m_isPresent( row.extract<decltype(m_isPresent)>() )
     , m_isRemovable( row.extract<decltype(m_isRemovable)>() )
     , m_isExternal( row.extract<decltype(m_isExternal)>() )
 {
@@ -64,7 +63,6 @@ File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type,
     , m_lastModificationDate( file.lastModificationDate() )
     , m_size( file.size() )
     , m_folderId( folderId )
-    , m_isPresent( true )
     , m_isRemovable( isRemovable )
     , m_isExternal( false )
 {
@@ -82,7 +80,6 @@ File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, IFile::Type
     , m_lastModificationDate( 0 )
     , m_size( 0 )
     , m_folderId( 0 )
-    , m_isPresent( true )
     , m_isRemovable( false )
     , m_isExternal( true )
     , m_fullPath( mrl )
@@ -267,9 +264,8 @@ std::shared_ptr<File> File::fromMrl( MediaLibraryPtr ml, const std::string& mrl 
     auto file = fetch( ml, req, mrl );
     if ( file == nullptr )
         return nullptr;
-    // safety checks: since this only works for files on non removable devices, isPresent must be true
-    // and isRemovable must be false
-    assert( file->m_isPresent == true );
+    // safety checks: since this only works for files on non removable devices
+    // isRemovable must be false
     assert( file->m_isRemovable == false );
     return file;
 }

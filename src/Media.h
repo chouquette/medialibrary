@@ -61,7 +61,9 @@ class Media : public IMedia, public DatabaseHelpers<Media>
         Media( MediaLibraryPtr ml , sqlite::Row& row );
         Media( MediaLibraryPtr ml, const std::string& title, Type type);
 
-        static std::shared_ptr<Media> create( MediaLibraryPtr ml, Type type, const std::string& fileName );
+        static std::shared_ptr<Media> create( MediaLibraryPtr ml, Type type,
+                                              int64_t deviceId,
+                                              const std::string& fileName );
         static void createTable( sqlite::Connection* connection, uint32_t modelVersion );
         static void createTriggers( sqlite::Connection* connection, uint32_t modelVersion );
 
@@ -175,7 +177,6 @@ private:
         // might be used as a fallback
         std::string m_filename;
         bool m_isFavorite;
-        bool m_isPresent;
         mutable std::atomic_uint m_nbPlaylists;
 
         // Auto fetched related properties

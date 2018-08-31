@@ -114,7 +114,6 @@ private:
     std::time_t m_lastModificationDate;
     unsigned int m_size;
     const int64_t m_folderId;
-    const bool m_isPresent;
     const bool m_isRemovable;
     const bool m_isExternal;
 
