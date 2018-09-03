@@ -564,7 +564,13 @@ TEST_F( Artists, SearchAlbums )
     auto artist = ml->createArtist( "artist" );
     auto alb1 = ml->createAlbum( "album" );
     alb1->setAlbumArtist( artist );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3" ) );
+    alb1->addTrack( m1, 1, 0, 0, nullptr );
+    m1->save();
     auto alb2 = ml->createAlbum( "other album" );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3" ) );
+    alb2->addTrack( m2, 1, 0, 0, nullptr );
+    m2->save();
 
     auto allAlbums = ml->searchAlbums( "album", nullptr )->all();
     ASSERT_EQ( 2u, allAlbums.size() );

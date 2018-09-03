@@ -247,10 +247,10 @@ TEST_F( DeviceFs, RemoveAlbum )
     {
         auto album = std::static_pointer_cast<Album>( ml->createAlbum( "album 2" ) );
         auto album2 = std::static_pointer_cast<Album>( ml->createAlbum( "album 3" ) );
-        auto media1 = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
-        auto media2 = ml->media( RemovableDeviceMountpoint + "removablefile2.mp3" );
-        auto media3 = ml->media( RemovableDeviceMountpoint + "removablefile3.mp3" );
-        auto media4 = ml->media( RemovableDeviceMountpoint + "removablefile4.mp3" );
+        auto media1 = std::static_pointer_cast<Media>( ml->media( RemovableDeviceMountpoint + "removablefile.mp3" ) );
+        auto media2 = std::static_pointer_cast<Media>( ml->media( RemovableDeviceMountpoint + "removablefile2.mp3" ) );
+        auto media3 = std::static_pointer_cast<Media>( ml->media( RemovableDeviceMountpoint + "removablefile3.mp3" ) );
+        auto media4 = std::static_pointer_cast<Media>( ml->media( RemovableDeviceMountpoint + "removablefile4.mp3" ) );
         auto artist = ml->createArtist( "artist 2" );
         album->addTrack( std::static_pointer_cast<Media>( media1 ), 1, 1, artist->id(), nullptr );
         album->addTrack( std::static_pointer_cast<Media>( media2 ), 2, 1, artist->id(), nullptr );
@@ -258,6 +258,10 @@ TEST_F( DeviceFs, RemoveAlbum )
         album2->addTrack( std::static_pointer_cast<Media>( media4 ), 2, 1, artist->id(), nullptr );
         album->setAlbumArtist( artist );
         album2->setAlbumArtist( artist );
+        media1->save();
+        media2->save();
+        media3->save();
+        media4->save();
     }
 
     auto albums = ml->albums( nullptr )->all();

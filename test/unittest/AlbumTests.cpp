@@ -281,10 +281,14 @@ TEST_F( Albums, AlbumArtist )
 
 TEST_F( Albums, SearchByTitle )
 {
-    ml->createAlbum( "sea otters" );
-    auto a = ml->createAlbum( "pangolins of fire" );
+    auto a1 = ml->createAlbum( "sea otters" );
+    auto a2 = ml->createAlbum( "pangolins of fire" );
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
-    a->addTrack( m, 1, 0, 0, nullptr );
+    a1->addTrack( m, 1, 0, 0, nullptr );
+    m->save();
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3" ) );
+    a2->addTrack( m2, 1, 0, 0, nullptr );
+    m2->save();
 
     auto albums = ml->searchAlbums( "otte", nullptr )->all();
     ASSERT_EQ( 1u, albums.size() );
@@ -293,6 +297,9 @@ TEST_F( Albums, SearchByTitle )
 TEST_F( Albums, SearchByArtist )
 {
     auto a = ml->createAlbum( "sea otters" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
+    a->addTrack( m, 1, 0, 0, nullptr );
+    m->save();
     auto artist = ml->createArtist( "pangolins" );
     a->setAlbumArtist( artist );
 
@@ -303,6 +310,9 @@ TEST_F( Albums, SearchByArtist )
 TEST_F( Albums, SearchNoDuplicate )
 {
     auto a = ml->createAlbum( "sea otters" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
+    a->addTrack( m, 1, 0, 0, nullptr );
+    m->save();
     auto artist = ml->createArtist( "otters" );
     a->setAlbumArtist( artist );
 
@@ -314,6 +324,9 @@ TEST_F( Albums, SearchNoUnknownAlbum )
 {
     auto artist = ml->createArtist( "otters" );
     auto album = artist->unknownAlbum();
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
+    album->addTrack( m, 1, 0, 0, nullptr );
+    m->save();
     ASSERT_NE( nullptr, album );
 
     auto albums = ml->searchAlbums( "otters", nullptr )->all();
@@ -324,6 +337,9 @@ TEST_F( Albums, SearchNoUnknownAlbum )
 TEST_F( Albums, SearchAfterDeletion )
 {
     auto a = ml->createAlbum( "sea otters" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
+    a->addTrack( m, 1, 0, 0, nullptr );
+    m->save();
     auto albums = ml->searchAlbums( "sea", nullptr )->all();
     ASSERT_EQ( 1u, albums.size() );
 
@@ -336,6 +352,9 @@ TEST_F( Albums, SearchAfterDeletion )
 TEST_F( Albums, SearchAfterArtistUpdate )
 {
     auto a = ml->createAlbum( "sea otters" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
+    a->addTrack( m, 1, 0, 0, nullptr );
+    m->save();
     auto artist = ml->createArtist( "pangolin of fire" );
     auto artist2 = ml->createArtist( "pangolin of ice" );
     a->setAlbumArtist( artist );
@@ -377,6 +396,8 @@ TEST_F( Albums, SortTracks )
     auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "A-track2.mp3" ) );
     auto t1 = a->addTrack( m1, 1, 1, 0, nullptr );
     auto t2 = a->addTrack( m2, 2, 1, 0, nullptr );
+    m1->save();
+    m2->save();
 
     // Default order is by disc number & track number
     auto tracks = a->tracks( nullptr )->all();
@@ -402,10 +423,19 @@ TEST_F( Albums, SortTracks )
 TEST_F( Albums, Sort )
 {
     auto a1 = ml->createAlbum( "A" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
+    a1->addTrack( m, 1, 0, 0, nullptr );
+    m->save();
     a1->setReleaseYear( 1000, false );
     auto a2 = ml->createAlbum( "B" );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3" ) );
+    a2->addTrack( m2, 1, 0, 0, nullptr );
+    m2->save();
     a2->setReleaseYear( 2000, false );
     auto a3 = ml->createAlbum( "C" );
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3" ) );
+    a3->addTrack( m3, 1, 0, 0, nullptr );
+    m3->save();
     a3->setReleaseYear( 1000, false );
 
     QueryParameters params { SortingCriteria::ReleaseDate, false };
@@ -518,10 +548,19 @@ TEST_F( Albums, SortByArtist )
     // Create albums with a non-alphabetical order to avoid a false positive (where sorting by pkey
     // is the same as sorting by title)
     auto a1 = ml->createAlbum( "C" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
+    a1->addTrack( m, 1, 0, 0, nullptr );
+    m->save();
     a1->setAlbumArtist( artist1 );
     auto a2 = ml->createAlbum( "B" );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3" ) );
+    a2->addTrack( m2, 1, 0, 0, nullptr );
+    m2->save();
     a2->setAlbumArtist( artist2 );
     auto a3 = ml->createAlbum( "A" );
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3" ) );
+    a3->addTrack( m3, 1, 0, 0, nullptr );
+    m3->save();
     a3->setAlbumArtist( artist1 );
 
     QueryParameters params { SortingCriteria::Artist, false };
