@@ -814,12 +814,21 @@ TEST_F( Medias, SortByAlbum )
     auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3", IMedia::Type::Audio ) );
     auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3", IMedia::Type::Audio ) );
 
-    auto album1 = ml->createAlbum( "album" );
-    auto album2 = ml->createAlbum( "zalbum ");
+    // Create the albums in reversed alphabetical order to ensure id & alpha orders
+    // are different
+    auto album1 = ml->createAlbum( "Ziltoid ");
+    auto album2 = ml->createAlbum( "Addicted" );
 
-    album1->addTrack( m3, 1, 0, 0, nullptr );
-    album2->addTrack( m2, 1, 0, 0, nullptr );
-    album2->addTrack( m1, 2, 0, 0, nullptr );
+    album1->addTrack( m2, 1, 0, 0, nullptr );
+    album1->addTrack( m1, 2, 0, 0, nullptr );
+    album2->addTrack( m3, 1, 0, 0, nullptr );
+
+    // Album1: [m2; m1]
+    // Album2: [m3]
+
+    m1->save();
+    m2->save();
+    m3->save();
 
     auto queryParams = QueryParameters{};
     queryParams.desc = false;

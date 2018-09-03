@@ -156,7 +156,8 @@ class Media : public IMedia, public DatabaseHelpers<Media>
         static void removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime );
 
 private:
-        static std::string sortRequest( const QueryParameters* params, bool hasAlbTrackTable );
+        static std::string addRequestJoin(const QueryParameters* params, bool forceFile , bool forceAlbumTrack);
+        static std::string sortRequest( const QueryParameters* params );
 
 private:
         MediaLibraryPtr m_ml;
