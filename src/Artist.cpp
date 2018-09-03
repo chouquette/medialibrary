@@ -424,11 +424,16 @@ std::shared_ptr<Artist> Artist::create( MediaLibraryPtr ml, const std::string& n
 }
 
 Query<IArtist> Artist::search( MediaLibraryPtr ml, const std::string& name,
-                               const QueryParameters* params )
+                               bool includeAll, const QueryParameters* params )
 {
     std::string req = "FROM " + Artist::Table::Name + " WHERE id_artist IN "
             "(SELECT rowid FROM " + Artist::Table::Name + "Fts WHERE name MATCH '*' || ? || '*')"
             "AND is_present != 0";
+    // We are searching based on the name, so we're ignoring unknown/various artist
+    // This means all artist we find has at least one track associated with it, so
+    // we can simply filter out based on the number of associated albums
+    if ( includeAll == false )
+        req += " AND nb_albums > 0";
     return make_query<Artist, IArtist>( ml, "*", std::move( req ),
                                         sortRequest( params ), name );
 }

@@ -357,7 +357,7 @@ class IMediaLibrary
                                             const QueryParameters* params = nullptr ) const = 0;
         virtual Query<IGenre> searchGenre( const std::string& genre,
                                            const QueryParameters* params = nullptr ) const = 0;
-        virtual Query<IArtist> searchArtists( const std::string& name,
+        virtual Query<IArtist> searchArtists( const std::string& name, bool includeAll,
                                               const QueryParameters* params = nullptr  ) const = 0;
         virtual SearchAggregate search( const std::string& pattern,
                                         const QueryParameters* params = nullptr ) const = 0;

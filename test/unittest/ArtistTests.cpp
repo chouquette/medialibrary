@@ -288,13 +288,13 @@ TEST_F( Artists, Search )
     auto a2 = ml->createArtist( "artist 2" );
     ml->createArtist( "dream seaotter" );
 
-    auto artists = ml->searchArtists( "artist", nullptr )->all();
+    auto artists = ml->searchArtists( "artist", true, nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
     ASSERT_EQ( artists[0]->id(), a1->id() );
     ASSERT_EQ( artists[1]->id(), a2->id() );
 
     QueryParameters params { SortingCriteria::Default, true };
-    artists = ml->searchArtists( "artist", &params )->all();
+    artists = ml->searchArtists( "artist", true, &params )->all();
     ASSERT_EQ( 2u, artists.size() );
     ASSERT_EQ( artists[0]->id(), a2->id() );
     ASSERT_EQ( artists[1]->id(), a1->id() );
@@ -306,12 +306,12 @@ TEST_F( Artists, SearchAfterDelete )
     ml->createArtist( "artist 2" );
     ml->createArtist( "dream seaotter" );
 
-    auto artists = ml->searchArtists( "artist", nullptr )->all();
+    auto artists = ml->searchArtists( "artist", true, nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
 
     ml->deleteArtist( a->id() );
 
-    artists = ml->searchArtists( "artist", nullptr )->all();
+    artists = ml->searchArtists( "artist", true, nullptr )->all();
     ASSERT_EQ( 1u, artists.size() );
 }
 
@@ -602,4 +602,31 @@ TEST_F( Artists, SearchTracks )
     auto artistTracks = artist1->searchTracks( "sea", nullptr )->all();
     ASSERT_EQ( 1u, artistTracks.size() );
     ASSERT_EQ( track1->id(), artistTracks[0]->id() );
+}
+
+TEST_F( Artists, SearchAll )
+{
+    auto artist1 = ml->createArtist( "artist 1" );
+    auto artist2 = ml->createArtist( "artist 2" );
+
+    auto album1 = ml->createAlbum( "album1" );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3" ) );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3" ) );
+    album1->addTrack( m1, 1, 0, artist1->id(), nullptr );
+    album1->addTrack( m2, 2, 0, artist1->id(), nullptr );
+    m1->save();
+    m2->save();
+    // Artist 1 now has 0 album but 2 tracks
+
+    auto album2 = ml->createAlbum( "album2" );
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3" ) );
+    album2->addTrack( m3, 1, 0, artist2->id(), nullptr );
+    album2->setAlbumArtist( artist2 );
+    m3->save();
+
+    auto artists = ml->searchArtists( "artist", false, nullptr )->all();
+    ASSERT_EQ( 1u, artists.size() );
+
+    artists = ml->searchArtists( "artist", true, nullptr )->all();
+    ASSERT_EQ( 2u, artists.size() );
 }

@@ -134,7 +134,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
                                             const QueryParameters* params ) const override;
         virtual Query<IGenre> searchGenre( const std::string& genre,
                                            const QueryParameters* params ) const override;
-        virtual Query<IArtist> searchArtists( const std::string& name,
+        virtual Query<IArtist> searchArtists( const std::string& name, bool includeAll,
                                               const QueryParameters* params ) const override;
         virtual Query<IShow> searchShows( const std::string& pattern,
                                           const QueryParameters* params = nullptr ) const override;

@@ -73,7 +73,7 @@ public:
     static void createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion );
     static bool createDefaultArtists( sqlite::Connection* dbConnection );
     static std::shared_ptr<Artist> create( MediaLibraryPtr ml, const std::string& name );
-    static Query<IArtist> search( MediaLibraryPtr ml, const std::string& name,
+    static Query<IArtist> search(MediaLibraryPtr ml, const std::string& name, bool includeAll,
                                            const QueryParameters* params );
     static Query<IArtist> listAll( MediaLibraryPtr ml, bool includeAll,
                                    const QueryParameters* params );

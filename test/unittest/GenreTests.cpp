@@ -248,7 +248,7 @@ TEST_F( Genres, SearchArtists )
         auto m = std::static_pointer_cast<Media>( ml->addMedia( std::to_string( i ) + "_2.mp3" ) );
         auto track = album2->addTrack( m, i, 1, a2->id(), nullptr );
     }
-    artists = ml->searchArtists( "loutre", nullptr )->all();
+    artists = ml->searchArtists( "loutre", true, nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
 
     artists = g->searchArtists( "loutre" )->all();

@@ -773,12 +773,12 @@ Query<IGenre> MediaLibrary::searchGenre( const std::string& genre,
     return Genre::search( this, genre, params );
 }
 
-Query<IArtist> MediaLibrary::searchArtists( const std::string& name,
+Query<IArtist> MediaLibrary::searchArtists( const std::string& name, bool includeAll,
                                             const QueryParameters* params ) const
 {
     if ( validateSearchPattern( name ) == false )
         return {};
-    return Artist::search( this, name, params );
+    return Artist::search( this, name, includeAll, params );
 }
 
 Query<IShow> MediaLibrary::searchShows( const std::string& pattern,
@@ -792,7 +792,7 @@ SearchAggregate MediaLibrary::search( const std::string& pattern,
 {
     SearchAggregate res;
     res.albums = searchAlbums( pattern, params );
-    res.artists = searchArtists( pattern, params );
+    res.artists = searchArtists( pattern, true, params );
     res.genres = searchGenre( pattern, params );
     res.media = searchMedia( pattern, params );
     res.playlists = searchPlaylists( pattern, params );
