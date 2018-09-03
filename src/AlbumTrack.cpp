@@ -50,7 +50,6 @@ AlbumTrack::AlbumTrack( MediaLibraryPtr ml, sqlite::Row& row )
     , m_trackNumber( row.load<decltype(m_trackNumber)>( 5 ) )
     , m_albumId( row.load<decltype(m_albumId)>( 6 ) )
     , m_discNumber( row.load<decltype(m_discNumber)>( 7 ) )
-    , m_isPresent( row.load<decltype(m_isPresent)>( 8 ) )
 {
 }
 
@@ -64,7 +63,6 @@ AlbumTrack::AlbumTrack( MediaLibraryPtr ml, int64_t mediaId, int64_t artistId, i
     , m_trackNumber( trackNumber )
     , m_albumId( albumId )
     , m_discNumber( discNumber )
-    , m_isPresent( true )
 {
 }
 
@@ -101,7 +99,6 @@ void AlbumTrack::createTable( sqlite::Connection* dbConnection )
                 "track_number UNSIGNED INTEGER,"
                 "album_id UNSIGNED INTEGER NOT NULL,"
                 "disc_number UNSIGNED INTEGER,"
-                "is_present BOOLEAN NOT NULL DEFAULT 1,"
                 "FOREIGN KEY (media_id) REFERENCES " + Media::Table::Name + "(id_media)"
                     " ON DELETE CASCADE,"
                 "FOREIGN KEY (artist_id) REFERENCES " + Artist::Table::Name + "(id_artist)"
@@ -118,18 +115,10 @@ void AlbumTrack::createTable( sqlite::Connection* dbConnection )
 
 void AlbumTrack::createTriggers(sqlite::Connection* dbConnection)
 {
-    const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_track_present "
-            "AFTER UPDATE OF is_present "
-            "ON " + Media::Table::Name + " "
-            "BEGIN "
-            "UPDATE " + AlbumTrack::Table::Name + " "
-                "SET is_present = new.is_present WHERE media_id = new.id_media;"
-            "END";
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS "
             "album_media_artist_genre_album_idx ON " +
             AlbumTrack::Table::Name +
             "(media_id, artist_id, genre_id, album_id)";
-    sqlite::Tools::executeRequest( dbConnection, triggerReq );
     sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
 

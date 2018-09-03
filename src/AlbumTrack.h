@@ -82,7 +82,6 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack>
         const unsigned int m_trackNumber;
         const int64_t m_albumId;
         const unsigned int m_discNumber;
-        bool m_isPresent;
 
         mutable Cache<std::weak_ptr<Album>> m_album;
         mutable Cache<std::shared_ptr<Artist>> m_artist;

@@ -209,6 +209,17 @@ IMedia::Type::Unknown ) ),
 /******************* Delete removed triggers **********************************/
 
 "DROP TRIGGER on_track_genre_changed",
+
+// This trigger has changed and needs to be recreated
+// However if migrating from a model below version 13, migration 12->13 will have
+// already dropped it
+"DROP TRIGGER IF EXISTS is_album_present",
+
+// Other outdated triggers that we want to regenerate, however those we are sure
+// to find and be able to delete (hence no `IF EXISTS` in the request)
+"DROP TRIGGER add_album_track",
+"DROP TRIGGER delete_album_track",
+
 // Old Folder -> File is_present trigger
 // is_folder_present has been implicitely removed by dropping the File table
 

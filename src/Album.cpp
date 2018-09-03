@@ -433,7 +433,7 @@ void Album::createTable( sqlite::Connection* dbConnection )
                 "thumbnail_id UNSIGNED INT,"
                 "nb_tracks UNSIGNED INTEGER DEFAULT 0,"
                 "duration UNSIGNED INTEGER NOT NULL DEFAULT 0,"
-                "is_present BOOLEAN NOT NULL DEFAULT 1,"
+                "is_present BOOLEAN NOT NULL DEFAULT 0,"
                 "FOREIGN KEY( artist_id ) REFERENCES " + Artist::Table::Name
                 + "(id_artist) ON DELETE CASCADE,"
                 "FOREIGN KEY(thumbnail_id) REFERENCES " + Thumbnail::Table::Name
@@ -464,14 +464,16 @@ void Album::createTriggers( sqlite::Connection* dbConnection )
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS album_artist_id_idx ON " +
             Table::Name + "(artist_id)";
     static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_album_present AFTER UPDATE OF "
-            "is_present ON " + AlbumTrack::Table::Name +
+            "is_present ON " + Media::Table::Name +
+            " WHEN new.subtype = " +
+                std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
+                                    IMedia::SubType::AlbumTrack ) ) +
             " BEGIN "
-            " UPDATE " + Table::Name + " SET is_present="
-                "(SELECT EXISTS("
-                    "SELECT id_track FROM " + AlbumTrack::Table::Name +
-                    " WHERE album_id=new.album_id AND is_present != 0 LIMIT 1"
-                ") )"
-                "WHERE id_album=new.album_id;"
+            " UPDATE " + Table::Name + " SET is_present=is_present + "
+                "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
+                "WHERE id_album = (SELECT album_id FROM " + AlbumTrack::Table::Name + " "
+                    "WHERE media_id = new.id_media"
+                ");"
             " END";
     static const std::string deleteTriggerReq = "CREATE TRIGGER IF NOT EXISTS delete_album_track AFTER DELETE ON "
              + AlbumTrack::Table::Name +
@@ -479,6 +481,7 @@ void Album::createTriggers( sqlite::Connection* dbConnection )
             " UPDATE " + Table::Name +
             " SET"
                 " nb_tracks = nb_tracks - 1,"
+                " is_present = is_present - 1,"
                 " duration = duration - old.duration"
                 " WHERE id_album = old.album_id;"
             " DELETE FROM " + Table::Name +
@@ -489,7 +492,8 @@ void Album::createTriggers( sqlite::Connection* dbConnection )
             " BEGIN"
             " UPDATE " + Table::Name +
             " SET duration = duration + new.duration,"
-            " nb_tracks = nb_tracks + 1"
+            " nb_tracks = nb_tracks + 1,"
+            " is_present = is_present + 1"
             " WHERE id_album = new.album_id;"
             " END";
     static const std::string vtriggerInsert = "CREATE TRIGGER IF NOT EXISTS insert_album_fts AFTER INSERT ON "
@@ -564,8 +568,10 @@ Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, const Que
     std::string req = "FROM " + Table::Name + " alb "
                     "INNER JOIN " + AlbumTrack::Table::Name + " att "
                         "ON att.album_id = alb.id_album "
+                    "INNER JOIN " + Media::Table::Name + " m "
+                        "ON att.media_id = m.id_media "
                     "WHERE (att.artist_id = ? OR alb.artist_id = ?) "
-                        "AND att.is_present != 0 ";
+                        "AND m.is_present != 0 ";
     std::string groupAndOrder = "GROUP BY att.album_id ORDER BY ";
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
     auto desc = params != nullptr ? params->desc : false;
