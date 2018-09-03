@@ -41,9 +41,9 @@ namespace factory
 {
 
 NetworkFileSystemFactory::NetworkFileSystemFactory( const std::string& protocol, const std::string& name )
-    : m_discoverer( VLCInstance::get(), name )
+    : m_protocol( protocol )
+    , m_discoverer( VLCInstance::get(), name )
     , m_mediaList( m_discoverer.mediaList() )
-    , m_protocol( protocol )
 {
     auto& em = m_mediaList->eventManager();
     em.onItemAdded( [this]( VLC::MediaPtr m, int ) { onDeviceAdded( m ); } );

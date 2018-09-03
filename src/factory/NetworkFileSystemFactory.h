@@ -69,12 +69,12 @@ private:
         std::shared_ptr<fs::NetworkDevice> device;
     };
 
-    VLC::MediaDiscoverer m_discoverer;
-    std::shared_ptr<VLC::MediaList> m_mediaList;
     const std::string m_protocol;
     compat::Mutex m_devicesLock;
     compat::ConditionVariable m_deviceCond;
     std::vector<Device> m_devices;
+    VLC::MediaDiscoverer m_discoverer;
+    std::shared_ptr<VLC::MediaList> m_mediaList;
 };
 
 }
