@@ -70,7 +70,7 @@ CREATE TRIGGER delete_album_fts BEFORE DELETE ON Album WHEN old.title IS NOT NUL
 CREATE TRIGGER cascade_file_deletion AFTER DELETE ON File BEGIN  DELETE FROM Media WHERE (SELECT COUNT(id_file) FROM File WHERE media_id=old.media_id) = 0 AND id_media=old.media_id; END;
 CREATE TRIGGER append_new_playlist_record AFTER INSERT ON PlaylistMediaRelation WHEN new.position IS NULL BEGIN  UPDATE PlaylistMediaRelation SET position = (SELECT COUNT(media_id) FROM PlaylistMediaRelation WHERE playlist_id = new.playlist_id) WHERE playlist_id=new.playlist_id AND media_id = new.media_id; END;
 CREATE TRIGGER add_album_track AFTER INSERT ON AlbumTrack BEGIN UPDATE Album SET duration = duration + new.duration, nb_tracks = nb_tracks + 1 WHERE id_album = new.album_id; END;
-INSERT INTO `Settings` (db_model_version) VALUES (12);
+INSERT INTO `Settings` (db_model_version) VALUES (13);
 INSERT INTO `Artist` (id_artist,name,shortbio,artwork_mrl,nb_albums,nb_tracks,mb_id,is_present) VALUES (1,NULL,NULL,NULL,0,0,NULL,1);
 INSERT INTO `Artist` (id_artist,name,shortbio,artwork_mrl,nb_albums,nb_tracks,mb_id,is_present) VALUES (2,NULL,NULL,NULL,0,0,NULL,1);
 INSERT INTO `Media` (id_media,type,subtype,duration,play_count,last_played_date,insertion_date,release_date,thumbnail,title,filename,is_favorite,is_present) VALUES (1,3,NULL,-1,NULL,NULL,1522231538,NULL,'/path/to/thumbnail','Cool media','file%20with%20space.avi',0,1);
