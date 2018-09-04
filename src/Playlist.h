@@ -65,6 +65,7 @@ public:
     virtual bool remove( const IMedia& media ) override;
     std::shared_ptr<File> addFile( const fs::IFile& fileFs, int64_t parentFolderId,
                                    bool isFolderFsRemovable );
+    bool contains( int64_t mediaId, unsigned int position );
 
     static void createTable( sqlite::Connection* dbConn , uint32_t dbModel );
     static void createTriggers( sqlite::Connection* dbConn );

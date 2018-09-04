@@ -239,6 +239,26 @@ std::shared_ptr<File> Playlist::addFile( const fs::IFile& fileFs, int64_t parent
     return file;
 }
 
+bool Playlist::contains( int64_t mediaId, unsigned int position )
+{
+    static const std::string req = "SELECT COUNT(media_id) FROM PlaylistMediaRelation "
+            "WHERE media_id = ? AND playlist_id = ? AND position = ?";
+    uint32_t count;
+    auto dbConn = m_ml->getConn();
+    {
+        auto ctx = dbConn->acquireReadContext();
+        auto chrono = std::chrono::steady_clock::now();
+        sqlite::Statement stmt( dbConn->handle(), req );
+        stmt.execute( mediaId, m_id, position );
+        auto duration = std::chrono::steady_clock::now() - chrono;
+        LOG_DEBUG("Executed ", req, " in ",
+                 std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
+        auto row = stmt.row();
+        row >> count;
+    }
+    return count != 0;
+}
+
 bool Playlist::move( int64_t mediaId, unsigned int position )
 {
     if ( position == 0 )
