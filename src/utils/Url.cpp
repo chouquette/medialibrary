@@ -38,7 +38,7 @@ inline bool isSafe( char c )
 #ifdef _WIN32
                     "\\"
 #endif
-                   , c ) != NULL;
+                   , c ) != nullptr;
 }
 }
 
