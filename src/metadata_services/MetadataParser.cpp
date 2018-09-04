@@ -428,22 +428,44 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
 
         t->commit();
         m_notifier->notifyMediaCreation( item.media() );
+        return std::make_tuple( Status::Success, isAudio );
     }
     // Voluntarily trigger an exception for a valid, but less common case, to avoid database overhead
     catch ( sqlite::errors::ConstraintViolation& ex )
     {
         LOG_INFO( "Creation of Media & File failed because ", ex.what(),
                   ". Assuming this task is a duplicate" );
-        // Try to retrieve file & Media from database
-        auto fileInDB = File::fromMrl( m_ml, mrl );
-        if ( fileInDB == nullptr ) // The file is no longer present in DB, gracefully delete task
-        {
-            LOG_ERROR( "File ", mrl, " no longer present in DB, aborting");
-            return std::make_tuple( Status::Fatal, false );
-        }
-        return std::make_tuple( Status::Discarded, false );
+        // continue out of the exception handler
     }
-    return std::make_tuple( Status::Success, isAudio );
+    // Try to retrieve file & Media from database
+    auto fileInDB = File::fromMrl( m_ml, mrl );
+    if ( fileInDB == nullptr ) // The file is no longer present in DB, gracefully delete task
+    {
+        LOG_ERROR( "File ", mrl, " no longer present in DB, aborting");
+        return std::make_tuple( Status::Fatal, false );
+    }
+    // Now that we ran some basic sanity check, if this was not a playlist
+    // insertion, there's nothing much left to do anyway
+    if ( item.parentPlaylist() == nullptr )
+        return std::make_tuple( Status::Discarded, false );
+    auto media = fileInDB->media();
+    if ( media == nullptr )
+    {
+        LOG_ERROR( "File ", mrl, " doesn't have an associated media: aborting" );
+        return std::make_tuple( Status::Fatal, false );
+    }
+    // The media was already inserted but this task still exists, with a playlist
+    // index, so we need to ensure the media was already inserted into the playlist
+    auto playlist = static_cast<Playlist*>( item.parentPlaylist().get() );
+    if ( playlist->contains( media->id(), item.parentPlaylistIndex() ) == false )
+    {
+        auto success = item.parentPlaylist()->add( *media, item.parentPlaylistIndex() );
+        if ( success == false )
+            return std::make_tuple( Status::Discarded, false );
+    }
+    // In any case, there is nothing else to do for this task, return Completed to avoid
+    // the task itself being deleted & to prevent the analysis to continue.
+    return std::make_tuple( Status::Completed, isAudio );
 }
 
 void MetadataAnalyzer::createTracks( Media& m, const std::vector<IItem::Track>& tracks ) const
