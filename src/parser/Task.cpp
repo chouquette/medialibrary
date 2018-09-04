@@ -392,8 +392,8 @@ bool Task::restoreLinkedEntities()
         // recreated upon next discovery
         if ( file == nullptr )
         {
-            LOG_WARN( "Failed to restore file system instances for mrl ", mrl, "."
-                      " Removing the task until it gets detected again." );
+            LOG_WARN( "Failed to restore file system instances for mrl ", mrl, "(",
+                      ex.what(), ").", " Removing the task until it gets detected again." );
             destroy( m_ml, m_id );
         }
         else
