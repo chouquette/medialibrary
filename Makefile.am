@@ -341,6 +341,12 @@ samples_LDADD = 		\
 	$(SQLITE_LIBS)		\
 	$(NULL)
 
+EXTRA_PROGRAMS = test_discoverer
+
+test_discoverer_SOURCES = test/discoverer/main.cpp
+test_discoverer_CXXFLAGS = $(MEDIALIB_CPPFLAGS)
+test_discoverer_LDADD = libmedialibrary.la $(SQLITE_LIBS)
+
 endif
 
 pkgconfigdir = $(libdir)/pkgconfig
