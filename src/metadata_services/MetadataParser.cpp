@@ -105,7 +105,7 @@ Status MetadataAnalyzer::run( IItem& item )
         if ( needRescan == false )
             return Status::Success;
     }
-    int nbSubitem = item.nbSubItems();
+    auto nbSubitem = item.nbSubItems();
     // Assume that file containing subitem(s) is a Playlist
     if ( nbSubitem > 0 )
     {
