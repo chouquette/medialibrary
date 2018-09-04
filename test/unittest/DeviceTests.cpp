@@ -229,7 +229,7 @@ TEST_F( DeviceFs, ReplugDiskWithExtraFiles )
     ASSERT_EQ( 8u, files.size() );
 }
 
-TEST_F( DeviceFs, RemoveAlbum )
+TEST_F( DeviceFs, RemoveAlbumAndArtist )
 {
     ml->discover( mock::FileSystemFactory::Root );
     bool discovered = cbMock->waitDiscovery();
@@ -291,6 +291,71 @@ TEST_F( DeviceFs, RemoveAlbum )
     artists = ml->artists( true, nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
 }
+
+TEST_F( DeviceFs, RemoveArtist )
+{
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    // Check that an artist with a track remaining but album is still present
+    // Album artist disappearance is already tested by RemoveAlbumAndArtist test
+    auto artist = ml->createArtist( "removable artist" );
+
+    auto album = std::static_pointer_cast<Album>( ml->createAlbum( "removable album" ) );
+    auto media1 = std::static_pointer_cast<Media>( ml->media( RemovableDeviceMountpoint + "removablefile.mp3" ) );
+    auto media2 = std::static_pointer_cast<Media>( ml->media( RemovableDeviceMountpoint + "removablefile2.mp3" ) );
+    auto media3 = std::static_pointer_cast<Media>( ml->media( mock::FileSystemFactory::Root + "audio.mp3" ) );
+
+    album->addTrack( std::static_pointer_cast<Media>( media1 ), 1, 1, artist->id(), 0 );
+    album->addTrack( std::static_pointer_cast<Media>( media2 ), 2, 1, artist->id(), 0 );
+    album->addTrack( std::static_pointer_cast<Media>( media3 ), 3, 1, artist->id(), 0 );
+    artist->addMedia( *media1 );
+    artist->addMedia( *media2 );
+    artist->addMedia( *media3 );
+    // This would be done by the metadata parser, but there's none during unittests
+    artist->updateNbTrack( 3 );
+
+    auto albums = ml->albums( nullptr )->all();
+    ASSERT_EQ( 1u, albums.size() );
+    auto artists = ml->artists( true, nullptr )->all();
+
+    ASSERT_EQ( 1u, artists.size() );
+
+    auto tracks = artist->tracks( nullptr )->all();
+    ASSERT_EQ( 3u, tracks.size() );
+
+    auto device = fsMock->removeDevice( RemovableDeviceUuid );
+
+    Reload();
+
+    // nothing should have changed as far as the artist count goes
+
+    albums = ml->albums( nullptr )->all();
+    ASSERT_EQ( 1u, albums.size() );
+    artists = ml->artists( true, nullptr )->all();
+    ASSERT_EQ( 1u, artists.size() );
+
+    // But we expect the tracks count to be down
+    artist = std::static_pointer_cast<Artist>( ml->artist( artist->id() ) );
+    tracks = artist->tracks( nullptr )->all();
+    ASSERT_EQ( 1u, tracks.size() );
+
+    // Now check that everything appears again when we plug the device back in
+
+    fsMock->addDevice( device );
+
+    Reload();
+
+    albums = ml->albums( nullptr )->all();
+    ASSERT_EQ( 1u, albums.size() );
+    artists = ml->artists( true, nullptr )->all();
+    ASSERT_EQ( 1u, artists.size() );
+    artist = std::static_pointer_cast<Artist>( ml->artist( artist->id() ) );
+    tracks = artist->tracks( nullptr )->all();
+    ASSERT_EQ( 3u, tracks.size() );
+}
+
 
 TEST_F( DeviceFs, PartialAlbumRemoval )
 {

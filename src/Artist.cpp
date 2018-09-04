@@ -245,8 +245,10 @@ bool Artist::updateNbTrack(int increment)
     assert( increment != 0 );
     assert( increment > 0 || ( increment < 0 && m_nbTracks >= 1 ) );
     static const std::string req = "UPDATE " + Artist::Table::Name +
-            " SET nb_tracks = nb_tracks + ? WHERE id_artist = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, increment, m_id ) == false )
+            " SET nb_tracks = nb_tracks + ?, is_present = is_present + ?"
+            " WHERE id_artist = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, increment,
+                                       increment, m_id ) == false )
         return false;
     m_nbTracks += increment;
     return true;
@@ -310,7 +312,7 @@ void Artist::createTable( sqlite::Connection* dbConnection )
                 "nb_albums UNSIGNED INT DEFAULT 0,"
                 "nb_tracks UNSIGNED INT DEFAULT 0,"
                 "mb_id TEXT,"
-                "is_present BOOLEAN NOT NULL DEFAULT 1,"
+                "is_present UNSIGNED INTEGER NOT NULL DEFAULT 0,"
                 "FOREIGN KEY(thumbnail_id) REFERENCES " + Thumbnail::Table::Name
                 + "(id_thumbnail)"
             ")";
@@ -334,15 +336,17 @@ void Artist::createTable( sqlite::Connection* dbConnection )
 
 void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion )
 {
-    static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS has_album_present AFTER UPDATE OF "
-            "is_present ON " + Album::Table::Name +
+    static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS has_tracks_present AFTER UPDATE OF "
+            "is_present ON " + Media::Table::Name +
+            " WHEN new.subtype = " +
+                std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
+                                    IMedia::SubType::AlbumTrack ) ) +
             " BEGIN "
-            " UPDATE " + Artist::Table::Name + " SET is_present="
-                "(SELECT EXISTS("
-                    "SELECT id_album FROM " + Album::Table::Name +
-                    " WHERE artist_id=new.artist_id AND is_present != 0 LIMIT 1"
-                ") )"
-                "WHERE id_artist=new.artist_id;"
+            " UPDATE " + Table::Name + " SET is_present=is_present + "
+                "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
+                "WHERE id_artist = (SELECT artist_id FROM " + AlbumTrack::Table::Name + " "
+                    " WHERE media_id = new.id_media "
+                ");"
             " END";
     // Automatically delete the artists that don't have any albums left, except the 2 special artists.
     // Those are assumed to always exist, and deleting them would cause a constaint violation error
@@ -365,7 +369,10 @@ void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelV
             " WHEN old.artist_id != " + std::to_string( UnknownArtistID ) +
             " AND  old.artist_id != " + std::to_string( VariousArtistID ) +
             " BEGIN"
-            " UPDATE " + Artist::Table::Name + " SET nb_tracks = nb_tracks - 1 WHERE id_artist = old.artist_id;"
+            " UPDATE " + Artist::Table::Name + " SET"
+                " nb_tracks = nb_tracks - 1,"
+                " is_present = is_present - 1"
+                " WHERE id_artist = old.artist_id;"
             " DELETE FROM " + Artist::Table::Name + " WHERE id_artist = old.artist_id "
             " AND nb_albums = 0 "
             " AND nb_tracks = 0;"
