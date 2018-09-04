@@ -433,7 +433,7 @@ void Album::createTable( sqlite::Connection* dbConnection )
                 "thumbnail_id UNSIGNED INT,"
                 "nb_tracks UNSIGNED INTEGER DEFAULT 0,"
                 "duration UNSIGNED INTEGER NOT NULL DEFAULT 0,"
-                "is_present BOOLEAN NOT NULL DEFAULT 0,"
+                "is_present UNSIGNED INTEGER NOT NULL DEFAULT 0,"
                 "FOREIGN KEY( artist_id ) REFERENCES " + Artist::Table::Name
                 + "(id_artist) ON DELETE CASCADE,"
                 "FOREIGN KEY(thumbnail_id) REFERENCES " + Thumbnail::Table::Name
