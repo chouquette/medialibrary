@@ -38,7 +38,7 @@ namespace prober
 class PathProbe : public IProbe
 {
 public:
-    explicit PathProbe( const std::string& path,                  // The path we target
+    explicit PathProbe( std::string path,                         // The path we target
                         bool isDirectory,                         // The PathProbe behave differently between files & folders
                         std::shared_ptr<Playlist> parentPlaylist, // Playlist to be attach to the file addition task
                         std::shared_ptr<Folder> parentFolder,     // known parent folder to start from, if any
