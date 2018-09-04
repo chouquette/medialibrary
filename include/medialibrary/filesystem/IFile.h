@@ -33,7 +33,7 @@ namespace fs
     {
     public:
         virtual ~IFile() = default;
-        /// Returns the filename, including extension
+        /// Returns the URL encoded filename, including the extension
         virtual const std::string& name() const = 0;
         /// Returns the mrl of this file
         virtual const std::string& mrl() const = 0;
