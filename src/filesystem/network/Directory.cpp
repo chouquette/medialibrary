@@ -72,7 +72,7 @@ void NetworkDirectory::read() const
     std::unique_lock<compat::Mutex> lock( mutex );
     media.parseWithOptions( VLC::Media::ParseFlags::Network |
                             VLC::Media::ParseFlags::Local, -1 );
-    bool timeout = cond.wait_for( lock, std::chrono::seconds{ 5 }, [res]() {
+    bool timeout = cond.wait_for( lock, std::chrono::seconds{ 5 }, [&res]() {
         return res != VLC::Media::ParsedStatus::Skipped;
     });
     if ( timeout == true )
