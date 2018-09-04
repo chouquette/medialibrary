@@ -244,11 +244,12 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
                                          const IItem& subitem ) const
 {
     const auto& mrl = subitem.mrl();
-    LOG_INFO( "Try to add ", mrl, " to the playlist ", mrl );
+    const auto& playlistMrl = item.mrl();
+    LOG_INFO( "Try to add ", mrl, " to the playlist ", playlistMrl );
     auto media = m_ml->media( mrl );
     if ( media != nullptr )
     {
-        LOG_INFO( "Media for ", mrl, " already exists, adding it to the playlist ", mrl );
+        LOG_INFO( "Media for ", mrl, " already exists, adding it to the playlist ", playlistMrl );
         playlistPtr->add( *media, subitem.parentPlaylistIndex() );
         return;
     }
@@ -262,13 +263,13 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
                                             0, subitem.meta( IItem::Metadata::Title ) );
         if ( externalMedia == nullptr )
         {
-            LOG_ERROR( "Failed to create external media for ", mrl, " in the playlist ", item.mrl() );
+            LOG_ERROR( "Failed to create external media for ", mrl, " in the playlist ", playlistMrl );
             return;
         }
         // Assuming that external mrl present in playlist file is a main media resource
         auto externalFile = externalMedia->addExternalMrl( mrl, IFile::Type::Main );
         if ( externalFile == nullptr )
-            LOG_ERROR( "Failed to create external file for ", mrl, " in the playlist ", item.mrl() );
+            LOG_ERROR( "Failed to create external file for ", mrl, " in the playlist ", playlistMrl );
         playlistPtr->add( *externalMedia, subitem.parentPlaylistIndex() );
         t2->commit();
         return;
@@ -283,7 +284,7 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
         LOG_ERROR( ex.what() );
         return;
     }
-    LOG_INFO( "Importing ", isDirectory ? "folder " : "file ", mrl, " in the playlist ", item.mrl() );
+    LOG_INFO( "Importing ", isDirectory ? "folder " : "file ", mrl, " in the playlist ", playlistMrl );
     auto directoryMrl = utils::file::directory( mrl );
     auto parentFolder = Folder::fromMrl( m_ml, directoryMrl );
     bool parentKnown = parentFolder != nullptr;
