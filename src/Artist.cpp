@@ -351,24 +351,24 @@ void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelV
     // slower when inserting an unknown artist album
     static const std::string autoDeleteAlbumTriggerReq = "CREATE TRIGGER IF NOT EXISTS has_album_remaining"
             " AFTER DELETE ON " + Album::Table::Name +
+            " WHEN old.artist_id != " + std::to_string( UnknownArtistID ) +
+            " AND  old.artist_id != " + std::to_string( VariousArtistID ) +
             " BEGIN"
             " UPDATE " + Artist::Table::Name + " SET nb_albums = nb_albums - 1 WHERE id_artist = old.artist_id;"
             " DELETE FROM " + Artist::Table::Name + " WHERE id_artist = old.artist_id "
             " AND nb_albums = 0 "
-            " AND nb_tracks = 0 "
-            " AND old.artist_id != " + std::to_string( UnknownArtistID ) +
-            " AND old.artist_id != " + std::to_string( VariousArtistID ) + ";"
+            " AND nb_tracks = 0;"
             " END";
 
     static const std::string autoDeleteTrackTriggerReq = "CREATE TRIGGER IF NOT EXISTS has_track_remaining"
             " AFTER DELETE ON " + AlbumTrack::Table::Name +
+            " WHEN old.artist_id != " + std::to_string( UnknownArtistID ) +
+            " AND  old.artist_id != " + std::to_string( VariousArtistID ) +
             " BEGIN"
             " UPDATE " + Artist::Table::Name + " SET nb_tracks = nb_tracks - 1 WHERE id_artist = old.artist_id;"
             " DELETE FROM " + Artist::Table::Name + " WHERE id_artist = old.artist_id "
             " AND nb_albums = 0 "
-            " AND nb_tracks = 0 "
-            " AND old.artist_id != " + std::to_string( UnknownArtistID ) +
-            " AND old.artist_id != " + std::to_string( VariousArtistID ) + ";"
+            " AND nb_tracks = 0;"
             " END";
 
     static const std::string ftsInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_artist_fts"
