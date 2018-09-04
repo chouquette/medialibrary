@@ -242,6 +242,7 @@ TEST_F( DeviceFs, RemoveAlbum )
         auto artist = ml->createArtist( "artist" );
         album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1, artist->id(), 0 );
         album->setAlbumArtist( artist );
+        artist->updateNbTrack( 1 );
     }
     // And an album that will disappear, along with its artist
     {
@@ -258,6 +259,7 @@ TEST_F( DeviceFs, RemoveAlbum )
         album2->addTrack( std::static_pointer_cast<Media>( media4 ), 2, 1, artist->id(), nullptr );
         album->setAlbumArtist( artist );
         album2->setAlbumArtist( artist );
+        artist->updateNbTrack( 4 );
         media1->save();
         media2->save();
         media3->save();
@@ -304,6 +306,7 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
         album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1, newArtist->id(), nullptr );
         album->addTrack( std::static_pointer_cast<Media>( media2 ), 2, 1, newArtist->id(), nullptr );
         album->setAlbumArtist( newArtist );
+        newArtist->updateNbTrack( 2 );
         newArtist->addMedia( static_cast<Media&>( *media ) );
         newArtist->addMedia( static_cast<Media&>( *media2 ) );
     }
