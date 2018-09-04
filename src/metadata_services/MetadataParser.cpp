@@ -386,7 +386,6 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
     // Try to create Media & File
     auto mrl = item.mrl();
     const auto& tracks = item.tracks();
-    bool isAudio;
 
     if ( tracks.empty() == true )
     {
@@ -395,7 +394,7 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
     }
     try
     {
-        isAudio = std::find_if( begin( tracks ), end( tracks ), [](const Task::Item::Track& t) {
+        auto isAudio = std::find_if( begin( tracks ), end( tracks ), [](const Task::Item::Track& t) {
             return t.type == Task::Item::Track::Type::Video;
         }) == end( tracks );
         auto t = m_ml->getConn()->newTransaction();
@@ -465,7 +464,8 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
     }
     // In any case, there is nothing else to do for this task, return Completed to avoid
     // the task itself being deleted & to prevent the analysis to continue.
-    return std::make_tuple( Status::Completed, isAudio );
+    // In this case, isAudio will be ignored
+    return std::make_tuple( Status::Completed, false );
 }
 
 void MetadataAnalyzer::createTracks( Media& m, const std::vector<IItem::Track>& tracks ) const
