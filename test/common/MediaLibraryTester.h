@@ -74,7 +74,7 @@ public:
                                     std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist ) override;
     sqlite::Connection* getDbConn();
     virtual void startThumbnailer() override;
-    virtual void populateFsFactories() override;
+    virtual void populateNetworkFsFactories() override;
     MediaPtr addMedia( const std::string& mrl, IMedia::Type type = IMedia::Type::External );
     void deleteMedia( int64_t mediaId );
     void outdateAllDevices();

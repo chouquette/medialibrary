@@ -189,7 +189,7 @@ void MediaLibraryTester::startThumbnailer()
 {
 }
 
-void MediaLibraryTester::populateFsFactories()
+void MediaLibraryTester::populateNetworkFsFactories()
 {
 }
 

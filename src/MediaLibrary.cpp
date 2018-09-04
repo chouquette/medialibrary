@@ -310,6 +310,7 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
         }
     }
     addLocalFsFactory();
+    populateNetworkFsFactories();
     if ( createThumbnailFolder( thumbnailPath ) == false )
     {
         LOG_ERROR( "Failed to create thumbnail directory (", thumbnailPath,
@@ -364,7 +365,6 @@ bool MediaLibrary::start()
     if ( m_parser != nullptr )
         return false;
 
-    populateFsFactories();
     for ( auto& fsFactory : m_fsFactories )
         refreshDevices( *fsFactory );
     // Now that we know which devices are plugged, check for outdated devices
@@ -831,10 +831,10 @@ void MediaLibrary::startThumbnailer()
 #endif
 }
 
-void MediaLibrary::populateFsFactories()
+void MediaLibrary::populateNetworkFsFactories()
 {
 #ifdef HAVE_LIBVLC
-    m_externalFsFactories.emplace_back( std::make_shared<factory::NetworkFileSystemFactory>( "smb", "dsm-sd" ) );
+    m_externalNetworkFsFactories.emplace_back( std::make_shared<factory::NetworkFileSystemFactory>( "smb", "dsm-sd" ) );
 #endif
 }
 
@@ -1352,24 +1352,36 @@ void MediaLibrary::discover( const std::string& entryPoint )
 
 void MediaLibrary::addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory )
 {
-    m_fsFactories.emplace_back( std::move( fsFactory ) );
+    m_externalNetworkFsFactories.emplace_back( std::move( fsFactory ) );
 }
 
 bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
 {
     if ( enabled )
     {
+        auto it = std::find_if( begin( m_fsFactories ),
+                                end( m_fsFactories ),
+                                []( const std::shared_ptr<fs::IFileSystemFactory> fs ) {
+                                    return fs->isNetworkFileSystem();
+                                });
+        if ( it != end( m_fsFactories ) )
+            return true;
         auto previousSize = m_fsFactories.size();
-        std::copy_if( begin( m_externalFsFactories ), end( m_externalFsFactories ),
-            std::back_inserter( m_fsFactories ), []( const std::shared_ptr<fs::IFileSystemFactory> fs ) {
-                return fs->isNetworkFileSystem();
-            });
-        return m_fsFactories.size() == previousSize;
+        std::copy( begin( m_externalNetworkFsFactories ), end( m_externalNetworkFsFactories ),
+                   std::back_inserter( m_fsFactories ) );
+        return m_fsFactories.size() != previousSize;
     }
 
-    m_fsFactories.erase( std::remove_if( begin( m_fsFactories ), end( m_fsFactories ), []( const std::shared_ptr<fs::IFileSystemFactory> fs ) {
+    auto it = std::remove_if( begin( m_fsFactories ), end( m_fsFactories ), []( const std::shared_ptr<fs::IFileSystemFactory> fs ) {
         return fs->isNetworkFileSystem();
-    }), end( m_fsFactories ) );
+    });
+    for ( const auto& fsFactory : m_fsFactories )
+    {
+        //FIXME: Mark devices as missing.
+        // Any currently running discovery will be interrupted since the device
+        // will be detected as removed
+    }
+    m_fsFactories.erase( it, end( m_fsFactories ) );
     return true;
 }
 

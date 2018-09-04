@@ -370,6 +370,21 @@ class IMediaLibrary
          * @param entryPoint The MRL of the entrypoint to discover.
          */
         virtual void discover( const std::string& entryPoint ) = 0;
+        /**
+         * @brief setDiscoverNetworkEnabled Enable discovery of network shares
+         * @return true if some IFileSystemFactory able of handling network
+         *         discovery were installed prior to calling this.
+         *
+         * This can be called at any time, but won't have any effect before
+         * initialize() has been called.
+         * When disabling network discovery, all contnet that was discovered on
+         * the network will be marked as non-present, meaning they won't be
+         * returned until network discovery gets enabled again.
+         * As far as the user is concerned, this is equivalent to (un)plugging
+         * a USB drive, in the sense that the medialibrary will still store
+         * information about network content and won't have to discover/parse it
+         * again.
+         */
         virtual bool setDiscoverNetworkEnabled( bool enable ) = 0;
         virtual Query<IFolder> entryPoints() const = 0;
         virtual FolderPtr folder( const std::string& mrl ) const = 0;
