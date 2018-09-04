@@ -249,7 +249,9 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
     if ( media != nullptr )
     {
         LOG_INFO( "Media for ", mrl, " already exists, adding it to the playlist ", playlistMrl );
-        playlistPtr->add( *media, subitem.parentPlaylistIndex() );
+        auto res = playlistPtr->add( *media, subitem.parentPlaylistIndex() );
+        if ( res == false )
+            LOG_ERROR( "Failed to insert ", mrl, " in playlist ", playlistMrl );
         return;
     }
     // Create Media, etc.
