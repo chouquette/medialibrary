@@ -27,6 +27,7 @@
 #include "discoverer/probe/PathProbe.h"
 
 #include "utils/Filename.h"
+#include "utils/Url.h"
 #include "medialibrary/filesystem/IDirectory.h"
 #include "medialibrary/filesystem/IFile.h"
 
@@ -105,7 +106,8 @@ bool PathProbe::proceedOnFile( const fs::IFile& file )
 
     if ( m_path == path )
     {
-        assert( m_splitPath.size() == 1 && file.name() == m_splitPath.top() );
+        assert( m_splitPath.size() == 1 &&
+                utils::url::decode( file.name() ) == m_splitPath.top() );
         m_splitPath.pop();
         m_isDiscoveryEnded = true;
         return true;
