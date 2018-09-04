@@ -125,10 +125,7 @@ Status MetadataAnalyzer::run( IItem& item )
 
         std::tie(status, isAudio) = createFileAndMedia( item );
         if ( status != Status::Success )
-        {
-            LOG_ERROR( "Failure" );
             return status;
-        }
     }
     else if ( item.media() == nullptr )
     {
