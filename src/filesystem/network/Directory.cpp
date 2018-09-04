@@ -76,9 +76,11 @@ void NetworkDirectory::read() const
         return res != VLC::Media::ParsedStatus::Skipped;
     });
     if ( timeout == true )
-        throw std::runtime_error( "Failed to browse network directory: Network is too slow" );
+        throw std::system_error( ETIMEDOUT, std::generic_category(),
+                                 "Failed to browse network directory: Network is too slow" );
     if ( res == VLC::Media::ParsedStatus::Failed )
-        throw std::runtime_error( "Failed to browse network directory: Unknown error" );
+        throw std::system_error( EIO, std::generic_category(),
+                                 "Failed to browse network directory: Unknown error" );
     auto subItems = media.subitems();
     for ( auto i = 0; i < subItems->count(); ++i )
     {
