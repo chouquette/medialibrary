@@ -108,7 +108,6 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         std::shared_ptr<Movie> createMovie( Media& media );
 
         virtual ArtistPtr artist( int64_t id ) const override;
-        ArtistPtr artist( const std::string& name );
         std::shared_ptr<Artist> createArtist( const std::string& name );
         virtual Query<IArtist> artists( bool includeAll,
                                         const QueryParameters* params ) const override;

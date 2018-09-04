@@ -43,7 +43,7 @@ TEST_F( Artists, Create )
 
     Reload();
 
-    auto a2 = ml->artist( "Flying Otters" );
+    auto a2 = ml->artist( a->id() );
     ASSERT_NE( a2, nullptr );
     ASSERT_EQ( a2->name(), "Flying Otters" );
 }
@@ -70,7 +70,7 @@ TEST_F( Artists, ShortBio )
 
     Reload();
 
-    auto a2 = ml->artist( "Raging Otters" );
+    auto a2 = ml->artist( a->id() );
     ASSERT_NE( a2, nullptr );
     ASSERT_EQ( a2->shortBio(), bio );
 }
@@ -87,7 +87,7 @@ TEST_F( Artists, ArtworkMrl )
 
     Reload();
 
-    auto a2 = ml->artist( "Dream seaotter" );
+    auto a2 = ml->artist( a->id() );
     ASSERT_NE( a2, nullptr );
     ASSERT_EQ( a2->artworkMrl(), artwork );
 }
@@ -150,7 +150,7 @@ TEST_F( Artists, Albums )
 
     Reload();
 
-    auto artist2 = ml->artist( "Cannibal Otters" );
+    auto artist2 = ml->artist( artist->id() );
     auto albums2 = artist2->albums( nullptr )->all();
     ASSERT_EQ( albums2.size(), 2u );
 }
@@ -174,7 +174,7 @@ TEST_F( Artists, NbAlbums )
 
     Reload();
 
-    auto artist2 = ml->artist( "Cannibal Otters" );
+    auto artist2 = ml->artist( artist->id() );
     nbAlbums = artist2->nbAlbums();
     ASSERT_EQ( nbAlbums, 2u );
 }
@@ -196,7 +196,7 @@ TEST_F( Artists, AllSongs )
 
     Reload();
 
-    auto artist2 = ml->artist( "Cannibal Otters" );
+    auto artist2 = ml->artist( artist->id() );
     songs = artist2->tracks( nullptr )->all();
     ASSERT_EQ( songs.size(), 3u );
 }
@@ -259,7 +259,7 @@ TEST_F( Artists, UnknownAlbum )
 
     Reload();
 
-    a = std::static_pointer_cast<Artist>( ml->artist( a->name() ) );
+    a = std::static_pointer_cast<Artist>( ml->artist( a->id() ) );
     album2 = a->unknownAlbum();
     ASSERT_NE( nullptr, album2 );
     ASSERT_EQ( album2->id(), album->id() );
@@ -277,7 +277,7 @@ TEST_F( Artists, MusicBrainzId )
 
     Reload();
 
-    auto a2 = ml->artist( "Otters Never Say Die" );
+    auto a2 = ml->artist( a->id() );
     ASSERT_NE( a2, nullptr );
     ASSERT_EQ( a2->musicBrainzId(), mbId );
 }

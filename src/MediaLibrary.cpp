@@ -637,24 +637,9 @@ ArtistPtr MediaLibrary::artist( int64_t id ) const
     return Artist::fetch( this, id );
 }
 
-ArtistPtr MediaLibrary::artist( const std::string& name )
-{
-    static const std::string req = "SELECT * FROM " + Artist::Table::Name
-            + " WHERE name = ? AND is_present != 0";
-    return Artist::fetch( this, req, name );
-}
-
 std::shared_ptr<Artist> MediaLibrary::createArtist( const std::string& name )
 {
-    try
-    {
-        return Artist::create( this, name );
-    }
-    catch( sqlite::errors::ConstraintViolation &ex )
-    {
-        LOG_WARN( "ContraintViolation while creating an artist (", ex.what(), ") attempting to fetch it instead" );
-        return std::static_pointer_cast<Artist>( artist( name ) );
-    }
+    return Artist::create( this, name );
 }
 
 Query<IArtist> MediaLibrary::artists( bool includeAll, const QueryParameters* params ) const
