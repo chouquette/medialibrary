@@ -129,7 +129,6 @@ Status MetadataAnalyzer::run( IItem& item )
             LOG_ERROR( "Failure" );
             return status;
         }
-        m_notifier->notifyMediaCreation( item.media() );
     }
     else if ( item.media() == nullptr )
     {
@@ -426,6 +425,7 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
         item.setFile( std::move( file ) );
 
         t->commit();
+        m_notifier->notifyMediaCreation( item.media() );
     }
     // Voluntarily trigger an exception for a valid, but less common case, to avoid database overhead
     catch ( sqlite::errors::ConstraintViolation& ex )
