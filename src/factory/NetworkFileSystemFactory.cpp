@@ -35,6 +35,8 @@
 
 #include <algorithm>
 
+#include "logging/Logger.h"
+
 namespace medialibrary
 {
 namespace factory
@@ -120,6 +122,7 @@ void NetworkFileSystemFactory::onDeviceAdded( VLC::MediaPtr media )
 
     auto name = mrl.substr( idx + 3 );
 
+    LOG_INFO( "Adding new network device: name: ", name, " - mrl: ", mrl );
     m_devices.emplace_back( name, mrl, *media );
     m_deviceCond.notify_one();
 }
