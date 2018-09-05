@@ -46,8 +46,8 @@ NetworkFileSystemFactory::NetworkFileSystemFactory( const std::string& protocol,
     , m_mediaList( m_discoverer.mediaList() )
 {
     auto& em = m_mediaList->eventManager();
-    em.onItemAdded( [this]( VLC::MediaPtr m, int ) { onDeviceAdded( m ); } );
-    em.onItemDeleted( [this]( VLC::MediaPtr m, int ) { onDeviceRemoved( m ); } );
+    em.onItemAdded( [this]( VLC::MediaPtr m, int ) { onDeviceAdded( std::move( m ) ); } );
+    em.onItemDeleted( [this]( VLC::MediaPtr m, int ) { onDeviceRemoved( std::move( m ) ); } );
     m_discoverer.start();
 }
 
