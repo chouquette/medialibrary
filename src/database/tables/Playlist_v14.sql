@@ -1,6 +1,6 @@
 "CREATE TABLE IF NOT EXISTS " + Playlist::Table::Name + "("
     + Playlist::Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-    "name TEXT,"
+    "name TEXT COLLATE NOCASE,"
     "file_id UNSIGNED INT DEFAULT NULL,"
     "creation_date UNSIGNED INT NOT NULL,"
     "artwork_mrl TEXT,"
