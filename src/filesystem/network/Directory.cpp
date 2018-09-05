@@ -63,11 +63,12 @@ void NetworkDirectory::read() const
     compat::ConditionVariable cond;
     VLC::Media::ParsedStatus res = VLC::Media::ParsedStatus::Skipped;
 
-    media.eventManager().onParsedChanged([&mutex, &cond, &res]( VLC::Media::ParsedStatus status) {
-        std::lock_guard<compat::Mutex> lock( mutex );
-        res = status;
-        cond.notify_all();
-    });
+    auto eventHandler = media.eventManager().onParsedChanged(
+        [&mutex, &cond, &res]( VLC::Media::ParsedStatus status) {
+            std::lock_guard<compat::Mutex> lock( mutex );
+            res = status;
+            cond.notify_all();
+        });
 
     std::unique_lock<compat::Mutex> lock( mutex );
     media.parseWithOptions( VLC::Media::ParseFlags::Network |
@@ -75,6 +76,7 @@ void NetworkDirectory::read() const
     bool timeout = cond.wait_for( lock, std::chrono::seconds{ 5 }, [&res]() {
         return res != VLC::Media::ParsedStatus::Skipped;
     });
+    eventHandler->unregister();
     if ( timeout == true )
         throw std::system_error( ETIMEDOUT, std::generic_category(),
                                  "Failed to browse network directory: Network is too slow" );
