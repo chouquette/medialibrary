@@ -65,7 +65,7 @@ std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::createDevice( const std::
 
     m_deviceCond.wait_for( lock, std::chrono::seconds{ 5 }, [this, &res, &mrl]() {
         auto it = std::find_if( begin( m_devices ), end( m_devices ), [&mrl]( const Device& d ) {
-            return d.mrl == mrl;
+            return strcasecmp( d.mrl.c_str(), mrl.c_str() ) == 0;
         });
         if ( it == end( m_devices ) )
             return false;
@@ -79,7 +79,7 @@ std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::createDeviceFromMrl( cons
 {
     std::lock_guard<compat::Mutex> lock( m_devicesLock );
     auto it = std::find_if( begin( m_devices ), end( m_devices ), [&path]( const Device& d ) {
-        return path.compare( 0, d.mrl.length(), d.mrl );
+        return strncasecmp( path.c_str(), d.mrl.c_str(), d.mrl.length() ) == 0;
     });
     if ( it == end( m_devices ) )
         return nullptr;
