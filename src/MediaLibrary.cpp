@@ -1529,8 +1529,6 @@ bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& 
                 if ( currentDevice != nullptr )
                     currentDevice->setPresent( true );
             }
-            else
-                refreshDevices( *fsFactory );
             break;
         }
     }
@@ -1559,8 +1557,6 @@ void MediaLibrary::onDeviceUnplugged( const std::string& uuid )
                 deviceFs->setPresent( false );
                 device->setPresent( false );
             }
-            else
-                refreshDevices( *fsFactory );
         }
     }
 }
