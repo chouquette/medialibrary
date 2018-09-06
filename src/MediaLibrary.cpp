@@ -1372,7 +1372,8 @@ bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
         return m_fsFactories.size() != previousSize;
     }
 
-    auto it = std::remove_if( begin( m_fsFactories ), end( m_fsFactories ), []( const std::shared_ptr<fs::IFileSystemFactory> fs ) {
+    auto it = std::remove_if( begin( m_fsFactories ), end( m_fsFactories ),
+                              []( const std::shared_ptr<fs::IFileSystemFactory>& fs ) {
         return fs->isNetworkFileSystem();
     });
     std::for_each( it, end( m_fsFactories ), [this]( const std::shared_ptr<fs::IFileSystemFactory>& fsFactory )
