@@ -31,7 +31,6 @@
 namespace medialibrary
 {
 
-class IMediaLibraryCb;
 
 namespace factory
 {
