@@ -48,6 +48,7 @@ namespace factory
         virtual void refreshDevices() override;
         virtual bool isMrlSupported( const std::string& path ) const override;
         virtual bool isNetworkFileSystem() const override;
+        virtual const std::string& scheme() const override;
 
     private:
         DeviceListerPtr m_deviceLister;

@@ -101,6 +101,11 @@ bool NetworkFileSystemFactory::isNetworkFileSystem() const
     return true;
 }
 
+const std::string& NetworkFileSystemFactory::scheme() const
+{
+    return m_protocol;
+}
+
 void NetworkFileSystemFactory::onDeviceAdded( VLC::MediaPtr media )
 {
     const auto& mrl = media->mrl();

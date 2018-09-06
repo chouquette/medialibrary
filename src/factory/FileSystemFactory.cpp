@@ -136,6 +136,12 @@ bool FileSystemFactory::isNetworkFileSystem() const
     return false;
 }
 
+const std::string&FileSystemFactory::scheme() const
+{
+    static const std::string s = "file://";
+    return s;
+}
+
 }
 
 }

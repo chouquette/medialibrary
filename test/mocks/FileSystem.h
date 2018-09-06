@@ -213,6 +213,12 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         return false;
     }
 
+    virtual const std::string& scheme() const override
+    {
+        static const std::string s = "file://";
+        return s;
+    }
+
     std::vector<std::shared_ptr<Device>> devices;
 };
 
@@ -372,6 +378,12 @@ public:
         if ( it == std::string::npos )
             return true;
         return mrl.compare( 0, 7, "file://" ) == 0;
+    }
+
+    virtual const std::string& scheme() const override
+    {
+        static const std::string s = "file://";
+        return s;
     }
 
     virtual bool isNetworkFileSystem() const override

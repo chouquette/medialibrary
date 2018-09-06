@@ -72,6 +72,10 @@ namespace fs
         /// \brief isNetworkFileSystem Returns true if this FS factory handles network file systems
         ///
         virtual bool isNetworkFileSystem() const = 0;
+        ///
+        /// \brief scheme Returns the mrl scheme handled by this file system factory
+        ///
+        virtual const std::string& scheme() const = 0;
     };
 }
 
