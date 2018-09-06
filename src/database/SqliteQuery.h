@@ -124,6 +124,49 @@ private:
     std::string m_groupAndOrderBy;
 };
 
+/**
+ * Alternate query implementation, with 2 full blown requests for counting & listing
+ * This can be more efficient if the listing query needs to join with multiple tables
+ * while counting can be achieved by a simple SELECT COUNT(*) FROM Table;
+ */
+template <typename Impl, typename Intf = Impl, typename... RequestParams>
+class SqliteQueryWithCount : public SqliteQueryBase<Impl, Intf, RequestParams...>
+{
+public:
+    using Base = SqliteQueryBase<Impl, Intf, RequestParams...>;
+    using Result = typename Base::Result;
+
+    template <typename... Args>
+    SqliteQueryWithCount( MediaLibraryPtr ml, std::string countReq,
+                          std::string req, Args&&... args )
+        : SqliteQueryBase<Impl, Intf, Args...>( ml, std::forward<Args>( args )... )
+        , m_countReq( std::move( countReq ) )
+        , m_req ( std::move( req ) )
+    {
+    }
+
+    virtual size_t count() override
+    {
+        return Base::count( m_countReq );
+    }
+
+    virtual Result items( uint32_t nbItems, uint32_t offset ) override
+    {
+        if ( nbItems == 0 && offset == 0 )
+            return all();
+        return Base::items( m_req + " LIMIT ? OFFSET ?", nbItems, offset );
+    }
+
+    virtual Result all() override
+    {
+        return Base::all( m_req );
+    }
+
+private:
+    std::string m_countReq;
+    std::string m_req;
+};
+
 template <typename Impl, typename Intf = Impl, typename... Args>
 Query<Intf> make_query( MediaLibraryPtr ml, std::string field, std::string base,
                         std::string orderAndGroupBy, Args&&... args )
@@ -135,5 +178,19 @@ Query<Intf> make_query( MediaLibraryPtr ml, std::string field, std::string base,
                                             std::forward<Args>( args )... )
     );
 }
+
+template <typename Impl, typename Intf = Impl, typename... Args>
+Query<Intf> make_query_with_count( MediaLibraryPtr ml, std::string countReq,
+                                   std::string req, Args&&... args )
+{
+    return std::unique_ptr<IQuery<Intf>>(
+        new SqliteQueryWithCount<Impl, Intf, Args...>(
+                    ml, std::move( countReq ), std::move( req ),
+                    std::forward<Args>( args )... )
+    );
+}
+
+
+
 
 }
