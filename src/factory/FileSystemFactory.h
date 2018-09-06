@@ -49,6 +49,8 @@ namespace factory
         virtual bool isMrlSupported( const std::string& path ) const override;
         virtual bool isNetworkFileSystem() const override;
         virtual const std::string& scheme() const override;
+        virtual void start() override;
+        virtual void stop() override;
 
     private:
         DeviceListerPtr m_deviceLister;

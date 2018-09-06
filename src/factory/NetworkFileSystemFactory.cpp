@@ -51,7 +51,6 @@ NetworkFileSystemFactory::NetworkFileSystemFactory( const std::string& protocol,
     auto& em = m_mediaList->eventManager();
     em.onItemAdded( [this]( VLC::MediaPtr m, int ) { onDeviceAdded( std::move( m ) ); } );
     em.onItemDeleted( [this]( VLC::MediaPtr m, int ) { onDeviceRemoved( std::move( m ) ); } );
-    m_discoverer.start();
 }
 
 std::shared_ptr<fs::IDirectory> NetworkFileSystemFactory::createDirectory( const std::string& path )
@@ -104,6 +103,16 @@ bool NetworkFileSystemFactory::isNetworkFileSystem() const
 const std::string& NetworkFileSystemFactory::scheme() const
 {
     return m_protocol;
+}
+
+void NetworkFileSystemFactory::start()
+{
+    m_discoverer.start();
+}
+
+void NetworkFileSystemFactory::stop()
+{
+    m_discoverer.stop();
 }
 
 void NetworkFileSystemFactory::onDeviceAdded( VLC::MediaPtr media )

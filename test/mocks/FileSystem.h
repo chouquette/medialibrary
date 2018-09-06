@@ -219,6 +219,9 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         return s;
     }
 
+    virtual void start() override {}
+    virtual void stop() override {}
+
     std::vector<std::shared_ptr<Device>> devices;
 };
 
@@ -390,6 +393,8 @@ public:
     {
         return false;
     }
+    virtual void start() override {}
+    virtual void stop() override {}
 };
 
 }

@@ -76,6 +76,16 @@ namespace fs
         /// \brief scheme Returns the mrl scheme handled by this file system factory
         ///
         virtual const std::string& scheme() const = 0;
+        ///
+        /// \brief start Starts any potential background operation that would be
+        /// required by this factory.
+        ///
+        virtual void start() = 0;
+        ///
+        /// \brief stop stops any potential background operation that would be
+        /// required by this factory.
+        ///
+        virtual void stop() = 0;
     };
 }
 
