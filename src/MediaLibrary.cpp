@@ -1375,12 +1375,14 @@ bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
     auto it = std::remove_if( begin( m_fsFactories ), end( m_fsFactories ), []( const std::shared_ptr<fs::IFileSystemFactory> fs ) {
         return fs->isNetworkFileSystem();
     });
-    for ( const auto& fsFactory : m_fsFactories )
+    std::for_each( it, end( m_fsFactories ), [this]( const std::shared_ptr<fs::IFileSystemFactory>& fsFactory )
     {
-        //FIXME: Mark devices as missing.
-        // Any currently running discovery will be interrupted since the device
-        // will be detected as removed
-    }
+        auto t = m_dbConnection->newTransaction();
+        auto devices = Device::fetchByScheme( this, fsFactory->scheme() );
+        for ( const auto& d : devices )
+            d->setPresent( false );
+        t->commit();
+    });
     m_fsFactories.erase( it, end( m_fsFactories ) );
     return true;
 }
