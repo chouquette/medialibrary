@@ -1511,7 +1511,7 @@ bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& 
     LOG_INFO( "Device ", uuid, " was plugged and mounted on ", mountpoint );
     for ( const auto& fsFactory : m_fsFactories )
     {
-        if ( fsFactory->isMrlSupported( "file://" ) )
+        if ( fsFactory->isMrlSupported( mountpoint ) )
         {
             auto deviceFs = fsFactory->createDevice( uuid );
             if ( deviceFs != nullptr )
@@ -1542,7 +1542,7 @@ void MediaLibrary::onDeviceUnplugged( const std::string& uuid )
     LOG_INFO( "Device ", uuid, " was unplugged" );
     for ( const auto& fsFactory : m_fsFactories )
     {
-        if ( fsFactory->isMrlSupported( "file://" ) )
+        if ( fsFactory->scheme() == device->scheme() )
         {
             auto deviceFs = fsFactory->createDevice( uuid );
             if ( deviceFs != nullptr )
