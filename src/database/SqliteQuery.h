@@ -34,26 +34,20 @@ namespace medialibrary
 {
 
 template <typename Impl, typename Intf, typename... RequestParams>
-class SqliteQuery : public IQuery<Intf>
+class SqliteQueryBase : public IQuery<Intf>
 {
-public:
+protected:
     using Result = typename IQuery<Intf>::Result;
 
     template <typename... Params>
-    SqliteQuery( MediaLibraryPtr ml, std::string field, std::string base,
-                 std::string groupAndOrderBy, Params&&... params )
+    SqliteQueryBase( MediaLibraryPtr ml, Params&&... params )
         : m_ml( ml )
-        , m_field( std::move( field ) )
-        , m_base( std::move( base ) )
-        , m_groupAndOrderBy( std::move( groupAndOrderBy ) )
         , m_params( std::forward<Params>( params )... )
     {
     }
 
-    virtual size_t count() override
+    size_t count( const std::string& req )
     {
-        std::string req = "SELECT COUNT(DISTINCT " + Impl::Table::PrimaryKeyColumn +
-                " ) " + m_base;
         auto dbConn = m_ml->getConn();
         auto ctx = dbConn->acquireReadContext();
         auto chrono = std::chrono::steady_clock::now();
@@ -69,28 +63,65 @@ public:
         return count;
     }
 
+    Result items( const std::string& req, uint32_t nbItems, uint32_t offset )
+    {
+        return Impl::template fetchAll<Intf>( m_ml, req, m_params, nbItems, offset );
+    }
+
+    Result all( const std::string& req )
+    {
+        return Impl::template fetchAll<Intf>( m_ml, req, m_params );
+    }
+
+private:
+    MediaLibraryPtr m_ml;
+    std::tuple<typename std::decay<RequestParams>::type...> m_params;
+};
+
+template <typename Impl, typename Intf, typename... Args>
+class SqliteQuery : public SqliteQueryBase<Impl, Intf, Args...>
+{
+public:
+    using Base = SqliteQueryBase<Impl, Intf, Args...>;
+    using Result = typename Base::Result;
+
+    template <typename... Params>
+    SqliteQuery( MediaLibraryPtr ml, std::string field, std::string base,
+                 std::string groupAndOrderBy, Params&&... params )
+        : SqliteQueryBase<Impl, Intf, Args...>( ml, std::forward<Params>( params )... )
+        , m_field( std::move( field ) )
+        , m_base( std::move( base ) )
+        , m_groupAndOrderBy( std::move( groupAndOrderBy ) )
+    {
+    }
+
+    virtual size_t count() override
+    {
+        std::string req = "SELECT COUNT(DISTINCT " + Impl::Table::PrimaryKeyColumn +
+                " ) " + m_base;
+        return Base::count( req );
+    }
+
     virtual Result items( uint32_t nbItems, uint32_t offset ) override
     {
         if ( nbItems == 0 && offset == 0 )
             return all();
         const std::string req = "SELECT " + m_field + " " + m_base + " " +
                 m_groupAndOrderBy + " LIMIT ? OFFSET ?";
-        return Impl::template fetchAll<Intf>( m_ml, req, m_params, nbItems, offset );
+        return Base::items( req, nbItems, offset );
     }
 
     virtual Result all() override
     {
         const std::string req = "SELECT " + m_field + " " + m_base + " " +
                 m_groupAndOrderBy;
-        return Impl::template fetchAll<Intf>( m_ml, req, m_params );
+        return Base::all( req );
     }
 
 private:
-    MediaLibraryPtr m_ml;
     std::string m_field;
     std::string m_base;
     std::string m_groupAndOrderBy;
-    std::tuple<typename std::decay<RequestParams>::type...> m_params;
 };
 
 template <typename Impl, typename Intf = Impl, typename... Args>
