@@ -632,36 +632,36 @@ Query<IAlbum> Album::listAll( MediaLibraryPtr ml, const QueryParameters* params 
 {
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
     auto desc = params != nullptr ? params->desc : false;
+    std::string countReq = "SELECT COUNT(*) FROM " + Table::Name + " WHERE "
+            "is_present != 0";
+    std::string req = "SELECT alb.* FROM " + Table::Name + " alb ";
     if ( sort == SortingCriteria::Artist )
     {
-        std::string req = "FROM " + Table::Name + " alb "
-                "INNER JOIN " + Artist::Table::Name + " art ON alb.artist_id = art.id_artist "
-                "WHERE alb.is_present != 0 ";
-        std::string orderBy = "ORDER BY art.name ";
+        req += "INNER JOIN " + Artist::Table::Name + " art ON alb.artist_id = art.id_artist "
+               "WHERE alb.is_present != 0 ";
+        req += "ORDER BY art.name ";
         if ( desc == true )
-            orderBy += "DESC ";
-        orderBy += ", alb.title";
-        return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
-                                          std::move( orderBy ) );
+            req += "DESC ";
+        req += ", alb.title";
     }
-    if ( sort == SortingCriteria::PlayCount )
+    else if ( sort == SortingCriteria::PlayCount )
     {
-        std::string req = "FROM " + Table::Name + " alb "
-                 "INNER JOIN " + AlbumTrack::Table::Name + " t ON alb.id_album = t.album_id "
-                 "INNER JOIN " + Media::Table::Name + " m ON t.media_id = m.id_media "
-                 "WHERE alb.is_present != 0 ";
-        std::string groupBy = "GROUP BY id_album "
-                 "ORDER BY SUM(m.play_count) ";
+        req += "INNER JOIN " + AlbumTrack::Table::Name + " t ON alb.id_album = t.album_id "
+               "INNER JOIN " + Media::Table::Name + " m ON t.media_id = m.id_media "
+               "WHERE alb.is_present != 0 ";
+        req += "GROUP BY id_album "
+               "ORDER BY SUM(m.play_count) ";
         if ( desc == false )
-            groupBy += "DESC "; // Most played first by default
-        groupBy += ", alb.title";
-        return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
-                                          std::move( groupBy ) );
+            req += "DESC "; // Most played first by default
+        req += ", alb.title";
     }
-    std::string req = "FROM " + Table::Name + " alb "
-                    " WHERE is_present != 0";
-    return make_query<Album, IAlbum>( ml, "*", std::move( req ),
-                                      orderBy( params ) );
+    else
+    {
+        req += " WHERE is_present != 0";
+        req += orderBy( params );
+    }
+    return make_query_with_count<Album, IAlbum>( ml, std::move( countReq ),
+                                                 std::move( req ) );
 }
 
 }
