@@ -145,4 +145,11 @@ void Device::removeOldDevices( MediaLibraryPtr ml, std::chrono::seconds maxLifeT
     sqlite::Tools::executeDelete( ml->getConn(), req, deadline.count() );
 }
 
+std::vector<std::shared_ptr<Device>> Device::fetchByScheme( MediaLibraryPtr ml,
+                                                            const std::string& scheme )
+{
+    static const std::string req = "SELECT * FROM " + Table::Name + " WHERE scheme = ?";
+    return fetchAll<Device>( ml, req, scheme );
+}
+
 }

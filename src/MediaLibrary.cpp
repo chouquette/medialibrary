@@ -1431,7 +1431,7 @@ void MediaLibrary::refreshDevices( fs::IFileSystemFactory& fsFactory )
     // if the user only discovered removable storages, and we would still need to mark those
     // as "not present"
     fsFactory.refreshDevices();
-    auto devices = Device::fetchAll( this );
+    auto devices = Device::fetchByScheme( this, fsFactory.scheme() );
     for ( auto& d : devices )
     {
         auto deviceFs = fsFactory.createDevice( d->uuid() );
