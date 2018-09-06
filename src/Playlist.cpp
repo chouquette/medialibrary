@@ -109,12 +109,13 @@ const std::string& Playlist::artworkMrl() const
 
 Query<IMedia> Playlist::media() const
 {
-    static const std::string req = "FROM " + Media::Table::Name + " m "
-            "LEFT JOIN PlaylistMediaRelation pmr ON pmr.media_id = m.id_media "
-            "WHERE pmr.playlist_id = ? AND m.is_present != 0 ";
+    static const std::string base = "FROM " + Media::Table::Name + " m "
+        "LEFT JOIN PlaylistMediaRelation pmr ON pmr.media_id = m.id_media "
+        "WHERE pmr.playlist_id = ? AND m.is_present != 0";
+    static const std::string req = "SELECT m.* " + base + " ORDER BY pmr.position";
+    static const std::string countReq = "SELECT COUNT(*) " + base;
     curateNullMediaID();
-    return make_query<Media, IMedia>( m_ml, "m.*", req, "ORDER BY pmr.position",
-                                      m_id );
+    return make_query_with_count<Media, IMedia>( m_ml, countReq, req, m_id );
 }
 
 Query<IMedia> Playlist::searchMedia( const std::string& pattern,

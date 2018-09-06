@@ -331,6 +331,9 @@ TEST_F( Playlists, AddDuplicate )
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m->id(), media[0]->id() );
     ASSERT_EQ( m->id(), media[1]->id() );
+
+    auto count = pl->media()->count();
+    ASSERT_EQ( count, media.size() );
 }
 
 TEST_F( Playlists, SearchMedia )
