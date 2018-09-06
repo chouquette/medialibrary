@@ -56,7 +56,6 @@ namespace factory
 FileSystemFactory::FileSystemFactory( DeviceListerPtr lister )
     : m_deviceLister( lister )
 {
-    refreshDevices();
 }
 
 std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::string& mrl )
