@@ -834,7 +834,7 @@ void MediaLibrary::startThumbnailer()
 void MediaLibrary::populateNetworkFsFactories()
 {
 #ifdef HAVE_LIBVLC
-    m_externalNetworkFsFactories.emplace_back( std::make_shared<factory::NetworkFileSystemFactory>( "smb", "dsm-sd" ) );
+    m_externalNetworkFsFactories.emplace_back( std::make_shared<factory::NetworkFileSystemFactory>( "smb://", "dsm-sd" ) );
 #endif
 }
 

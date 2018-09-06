@@ -31,6 +31,7 @@
 #include "NetworkFileSystemFactory.h"
 #include "filesystem/network/Directory.h"
 #include "utils/VLCInstance.h"
+#include "utils/Filename.h"
 #include "MediaLibrary.h"
 
 #include <algorithm>
@@ -92,11 +93,7 @@ void NetworkFileSystemFactory::refreshDevices()
 
 bool NetworkFileSystemFactory::isMrlSupported( const std::string& path ) const
 {
-    const auto idx = m_protocol.length();
-    if ( path.compare( 0, idx, m_protocol ) != 0 )
-        return false;
-    return path[idx] == ':' && path[idx + 1] == '/' && path[idx + 2] == '/';
-
+    return m_protocol.compare( 0, m_protocol.length(), path );
 }
 
 bool NetworkFileSystemFactory::isNetworkFileSystem() const
@@ -107,7 +104,8 @@ bool NetworkFileSystemFactory::isNetworkFileSystem() const
 void NetworkFileSystemFactory::onDeviceAdded( VLC::MediaPtr media )
 {
     const auto& mrl = media->mrl();
-    if ( mrl.compare( 0, m_protocol.length(), m_protocol ) != 0 )
+    //FIXME: Shouldn't this be an assert?
+    if ( isMrlSupported( mrl ) == false )
         return;
 
     std::lock_guard<compat::Mutex> lock( m_devicesLock );
@@ -116,11 +114,8 @@ void NetworkFileSystemFactory::onDeviceAdded( VLC::MediaPtr media )
     });
     if ( it != end( m_devices ) )
         return;
-    const auto idx = m_protocol.length();
-    if ( mrl[idx] != ':' || mrl[idx + 1] != '/' || mrl[idx + 2] != '/' )
-        return;
 
-    auto name = mrl.substr( idx + 3 );
+    auto name = utils::file::stripScheme( mrl );
 
     LOG_INFO( "Adding new network device: name: ", name, " - mrl: ", mrl );
     m_devices.emplace_back( name, mrl, *media );
