@@ -47,16 +47,11 @@ public:
         , m_base( std::move( base ) )
         , m_groupAndOrderBy( std::move( groupAndOrderBy ) )
         , m_params( std::forward<Params>( params )... )
-        , m_count( 0 )
-        , m_hasCount( false )
     {
     }
 
     virtual size_t count() override
     {
-        if ( m_hasCount == true )
-            return m_count;
-
         std::string req = "SELECT COUNT(DISTINCT " + Impl::Table::PrimaryKeyColumn +
                 " ) " + m_base;
         auto dbConn = m_ml->getConn();
@@ -68,10 +63,10 @@ public:
         LOG_DEBUG("Executed ", req, " in ",
                  std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
         auto row = stmt.row();
-        row >> m_count;
+        size_t count;
+        row >> count;
         assert( stmt.row() == nullptr );
-        m_hasCount = true;
-        return m_count;
+        return count;
     }
 
     virtual Result items( uint32_t nbItems, uint32_t offset ) override
@@ -96,9 +91,6 @@ private:
     std::string m_base;
     std::string m_groupAndOrderBy;
     std::tuple<typename std::decay<RequestParams>::type...> m_params;
-
-    size_t m_count;
-    bool m_hasCount;
 };
 
 template <typename Impl, typename Intf = Impl, typename... Args>
