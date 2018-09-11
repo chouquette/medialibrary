@@ -77,13 +77,18 @@ std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::createDevice( const std::
 
 std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::createDeviceFromMrl( const std::string& path )
 {
-    std::lock_guard<compat::Mutex> lock( m_devicesLock );
-    auto it = std::find_if( begin( m_devices ), end( m_devices ), [&path]( const Device& d ) {
-        return strncasecmp( path.c_str(), d.mrl.c_str(), d.mrl.length() ) == 0;
+    std::shared_ptr<fs::IDevice> res;
+    std::unique_lock<compat::Mutex> lock( m_devicesLock );
+    m_deviceCond.wait_for( lock, std::chrono::seconds{ 5 }, [this, &res, &path]() {
+        auto it = std::find_if( begin( m_devices ), end( m_devices ), [&path]( const Device& d ) {
+            return strncasecmp( path.c_str(), d.mrl.c_str(), d.mrl.length() ) == 0;
+        });
+        if ( it == end( m_devices ) )
+            return false;
+        res = it->device;
+        return true;
     });
-    if ( it == end( m_devices ) )
-        return nullptr;
-    return it->device;
+    return res;
 }
 
 void NetworkFileSystemFactory::refreshDevices()
