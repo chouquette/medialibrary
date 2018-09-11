@@ -43,10 +43,13 @@ namespace medialibrary
 namespace factory
 {
 
-NetworkFileSystemFactory::NetworkFileSystemFactory( const std::string& protocol, const std::string& name )
+NetworkFileSystemFactory::NetworkFileSystemFactory( IDeviceListerCb* cb,
+                                                    const std::string& protocol,
+                                                    const std::string& name )
     : m_protocol( protocol )
     , m_discoverer( VLCInstance::get(), name )
     , m_mediaList( m_discoverer.mediaList() )
+    , m_cb( cb )
 {
     auto& em = m_mediaList->eventManager();
     em.onItemAdded( [this]( VLC::MediaPtr m, int ) { onDeviceAdded( std::move( m ) ); } );
@@ -127,27 +130,37 @@ void NetworkFileSystemFactory::onDeviceAdded( VLC::MediaPtr media )
     if ( isMrlSupported( mrl ) == false )
         return;
 
-    std::lock_guard<compat::Mutex> lock( m_devicesLock );
-    auto it = std::find_if( begin( m_devices ), end( m_devices ), [&mrl]( const Device& d ) {
-        return d.mrl== mrl;
-    });
-    if ( it != end( m_devices ) )
-        return;
-
     auto name = utils::file::stripScheme( mrl );
 
-    LOG_INFO( "Adding new network device: name: ", name, " - mrl: ", mrl );
-    m_devices.emplace_back( name, mrl, *media );
+    {
+        std::lock_guard<compat::Mutex> lock( m_devicesLock );
+        auto it = std::find_if( begin( m_devices ), end( m_devices ), [&mrl]( const Device& d ) {
+            return d.mrl== mrl;
+        });
+        if ( it != end( m_devices ) )
+            return;
+
+        m_devices.emplace_back( name, mrl, *media );
+    }
     m_deviceCond.notify_one();
+    LOG_INFO( "Adding new network device: name: ", name, " - mrl: ", mrl );
+    m_cb->onDevicePlugged( name, mrl );
 }
 
 void NetworkFileSystemFactory::onDeviceRemoved( VLC::MediaPtr media )
 {
-    std::lock_guard<compat::Mutex> lock( m_devicesLock );
     const auto& mrl = media->mrl();
-    m_devices.erase( std::remove_if( begin( m_devices ), end( m_devices ), [&mrl]( const Device& d ) {
-        return d.mrl == mrl;
-    }), end( m_devices ) );
+
+    {
+        std::lock_guard<compat::Mutex> lock( m_devicesLock );
+        m_devices.erase( std::remove_if( begin( m_devices ), end( m_devices ), [&mrl]( const Device& d ) {
+            return d.mrl == mrl;
+        }), end( m_devices ) );
+    }
+
+    const auto name = utils::file::stripScheme( mrl );
+    LOG_INFO( "Device ", mrl, " was removed" );
+    m_cb->onDeviceUnplugged( name );
 }
 
 }

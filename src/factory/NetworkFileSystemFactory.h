@@ -31,6 +31,7 @@
 namespace medialibrary
 {
 
+class IDeviceListerCb;
 
 namespace factory
 {
@@ -41,7 +42,8 @@ public:
      * @brief NetworkFileSystemFactory Constructs a network protocol specific filesystem factory
      * @param protocol The protocol name
      */
-    NetworkFileSystemFactory( const std::string& protocol, const std::string& name );
+    NetworkFileSystemFactory( IDeviceListerCb* cb,
+                              const std::string& protocol, const std::string& name );
     virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& path ) override;
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override;
     virtual std::shared_ptr<fs::IDevice> createDeviceFromMrl( const std::string& path ) override;
@@ -77,6 +79,7 @@ private:
     std::vector<Device> m_devices;
     VLC::MediaDiscoverer m_discoverer;
     std::shared_ptr<VLC::MediaList> m_mediaList;
+    IDeviceListerCb* m_cb;
 };
 
 }
