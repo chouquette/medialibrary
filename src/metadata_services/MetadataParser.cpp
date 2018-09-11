@@ -621,7 +621,7 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
         auto track = handleTrack( album, item, artists.second ? artists.second : artists.first,
                                   genre.get() );
 
-        auto res = link( *media, album, artists.first, artists.second );
+        auto res = link( *media, *album, artists.first, artists.second );
         media->save();
         t->commit();
         m_notifier->notifyAlbumModification( album );
@@ -917,7 +917,7 @@ std::shared_ptr<AlbumTrack> MetadataAnalyzer::handleTrack( std::shared_ptr<Album
 
 /* Misc */
 
-bool MetadataAnalyzer::link( Media& media, std::shared_ptr<Album> album,
+bool MetadataAnalyzer::link( Media& media, Album& album,
                                std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist )
 {
     if ( albumArtist == nullptr )
@@ -926,9 +926,8 @@ bool MetadataAnalyzer::link( Media& media, std::shared_ptr<Album> album,
         albumArtist = artist;
     }
     assert( albumArtist != nullptr );
-    assert( album != nullptr );
 
-    auto albumThumbnail = album->thumbnail();
+    auto albumThumbnail = album.thumbnail();
 
     // We might modify albumArtist later, hence handle thumbnails before.
     // If we have an albumArtist (meaning the track was properly tagged, we
@@ -959,14 +958,14 @@ bool MetadataAnalyzer::link( Media& media, std::shared_ptr<Album> album,
          artist->id() != VariousArtistID &&
          albumThumbnail != nullptr && artist->thumbnail() == nullptr )
     {
-        artist->setArtworkMrl( album->artworkMrl(), Thumbnail::Origin::Artist );
+        artist->setArtworkMrl( album.artworkMrl(), Thumbnail::Origin::Artist );
     }
 
     albumArtist->addMedia( media );
     if ( artist != nullptr && albumArtist->id() != artist->id() )
         artist->addMedia( media );
 
-    auto currentAlbumArtist = album->albumArtist();
+    auto currentAlbumArtist = album.albumArtist();
 
     // If we have no main artist yet, that's easy, we need to assign one.
     if ( currentAlbumArtist == nullptr )
@@ -974,7 +973,7 @@ bool MetadataAnalyzer::link( Media& media, std::shared_ptr<Album> album,
         // We don't know if the artist was tagged as artist or albumartist, however, we simply add it
         // as the albumartist until proven we were wrong (ie. until one of the next tracks
         // has a different artist)
-        album->setAlbumArtist( albumArtist );
+        album.setAlbumArtist( albumArtist );
         // Always add the album artist as an artist
         // Always update the album artist number of tracks.
         // The artist might be different, and will be handled a few lines below
@@ -999,8 +998,8 @@ bool MetadataAnalyzer::link( Media& media, std::shared_ptr<Album> album,
             {
                 // All tracks from this album must now also be reflected in various
                 // artist number of tracks
-                m_variousArtists->updateNbTrack( album->nbTracks() );
-                album->setAlbumArtist( m_variousArtists );
+                m_variousArtists->updateNbTrack( album.nbTracks() );
+                album.setAlbumArtist( m_variousArtists );
             }
             // However we always need to bump the various artist number of tracks
             else
