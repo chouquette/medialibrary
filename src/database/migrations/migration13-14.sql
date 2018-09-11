@@ -232,6 +232,7 @@ IMedia::Type::Unknown ) ),
 /******************* Delete other tables **************************************/
 
 "DROP TABLE " + Album::Table::Name,
+"DROP TABLE AlbumArtistRelation",
 "DELETE FROM " + Album::Table::Name + "Fts",
 "DROP TABLE " + Artist::Table::Name,
 "DELETE FROM " + Artist::Table::Name + "Fts",

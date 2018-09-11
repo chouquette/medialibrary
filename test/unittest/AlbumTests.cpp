@@ -224,40 +224,29 @@ TEST_F( Albums, Artists )
     ASSERT_NE( artist1, nullptr );
     ASSERT_NE( artist2, nullptr );
 
-    auto res = album->addArtist( artist1 );
-    ASSERT_EQ( res, true );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3" ) );
+    album->addTrack( m1, 1, 0, artist1->id(), nullptr );
+    m1->save();
 
-    res = album->addArtist( artist2 );
-    ASSERT_EQ( res, true );
-
-    auto artists = album->artists( nullptr )->all();
-    ASSERT_EQ( artists.size(), 2u );
-
-    Reload();
-
-    album = std::static_pointer_cast<Album>( ml->album( album->id() ) );
-    artists = album->artists( nullptr )->all();
-    ASSERT_EQ( album->albumArtist(), nullptr );
-    ASSERT_EQ( artists.size(), 2u );
-}
-
-TEST_F( Albums, SortArtists )
-{
-    auto album = ml->createAlbum( "album" );
-    auto artist1 = ml->createArtist( "john" );
-    auto artist2 = ml->createArtist( "doe" );
-
-    album->addArtist( artist1 );
-    album->addArtist( artist2 );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3" ) );
+    album->addTrack( m2, 2, 0, artist2->id(), nullptr );
+    m2->save();
 
     QueryParameters params { SortingCriteria::Default, false };
-    auto artists = album->artists( &params )->all();
+    auto query = album->artists( &params );
+    ASSERT_EQ( 2u, query->count() );
+    auto artists = query->all();
     ASSERT_EQ( artists.size(), 2u );
     ASSERT_EQ( artist1->id(), artists[1]->id() );
     ASSERT_EQ( artist2->id(), artists[0]->id() );
 
+    Reload();
+
     params.desc = true;
-    artists = album->artists( &params )->all();
+    album = std::static_pointer_cast<Album>( ml->album( album->id() ) );
+    query = album->artists( &params );
+    ASSERT_EQ( 2u, query->count() );
+    artists = query->all();
     ASSERT_EQ( artists.size(), 2u );
     ASSERT_EQ( artist1->id(), artists[0]->id() );
     ASSERT_EQ( artist2->id(), artists[1]->id() );

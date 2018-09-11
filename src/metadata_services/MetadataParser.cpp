@@ -976,7 +976,6 @@ bool MetadataAnalyzer::link( Media& media, std::shared_ptr<Album> album,
         // has a different artist)
         album->setAlbumArtist( albumArtist );
         // Always add the album artist as an artist
-        album->addArtist( albumArtist );
         // Always update the album artist number of tracks.
         // The artist might be different, and will be handled a few lines below
         albumArtist->updateNbTrack( 1 );
@@ -986,7 +985,6 @@ bool MetadataAnalyzer::link( Media& media, std::shared_ptr<Album> album,
             // album artist track count as well.
             if ( albumArtist->id() != artist->id() )
                 artist->updateNbTrack( 1 );
-            album->addArtist( artist );
         }
     }
     else
@@ -1009,14 +1007,9 @@ bool MetadataAnalyzer::link( Media& media, std::shared_ptr<Album> album,
             {
                 m_variousArtists->updateNbTrack( 1 );
             }
-            // Add this artist as "featuring".
-            album->addArtist( albumArtist );
         }
         if ( artist != nullptr && artist->id() != albumArtist->id() )
-        {
-           album->addArtist( artist );
            artist->updateNbTrack( 1 );
-        }
         albumArtist->updateNbTrack( 1 );
     }
 

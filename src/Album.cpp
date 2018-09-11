@@ -390,34 +390,17 @@ bool Album::setAlbumArtist( std::shared_ptr<Artist> artist )
 Query<IArtist> Album::artists( const QueryParameters* params ) const
 {
     std::string req = "FROM " + Artist::Table::Name + " art "
-            "INNER JOIN AlbumArtistRelation aar ON aar.artist_id = art.id_artist "
-            "WHERE aar.album_id = ?";
-    std::string orderBy = "ORDER BY art.name";
+            "INNER JOIN " + AlbumTrack::Table::Name + " att "
+                "ON att.artist_id = art.id_artist "
+            "WHERE att.album_id = ?";
     if ( params != nullptr && ( params->sort != SortingCriteria::Alpha &&
                                 params->sort != SortingCriteria::Default ) )
-         LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Alpha" );
+        LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Alpha" );
+    std::string orderBy = "GROUP BY art.id_artist ORDER BY art.name";
     if ( params != nullptr && params->desc == true )
         orderBy += " DESC";
     return make_query<Artist, IArtist>( m_ml, "art.*", std::move( req ),
                                         std::move( orderBy ), m_id );
-}
-
-bool Album::addArtist( std::shared_ptr<Artist> artist )
-{
-    static const std::string req = "INSERT OR IGNORE INTO AlbumArtistRelation VALUES(?, ?)";
-    if ( m_id == 0 || artist->id() == 0 )
-    {
-        LOG_ERROR("Both artist & album need to be inserted in database before being linked together" );
-        return false;
-    }
-    return sqlite::Tools::executeInsert( m_ml->getConn(), req, m_id, artist->id() ) != 0;
-}
-
-bool Album::removeArtist(Artist* artist)
-{
-    static const std::string req = "DELETE FROM AlbumArtistRelation WHERE album_id = ? "
-            "AND id_artist = ?";
-    return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, artist->id() );
 }
 
 void Album::createTable( sqlite::Connection* dbConnection )
@@ -439,15 +422,6 @@ void Album::createTable( sqlite::Connection* dbConnection )
                 "FOREIGN KEY(thumbnail_id) REFERENCES " + Thumbnail::Table::Name
                 + "(id_thumbnail)"
             ")";
-    const std::string reqRel = "CREATE TABLE IF NOT EXISTS AlbumArtistRelation("
-                "album_id INTEGER,"
-                "artist_id INTEGER,"
-                "PRIMARY KEY (album_id, artist_id),"
-                "FOREIGN KEY(album_id) REFERENCES " + Table::Name + "("
-                    + Table::PrimaryKeyColumn + ") ON DELETE CASCADE,"
-                "FOREIGN KEY(artist_id) REFERENCES " + Artist::Table::Name + "("
-                    + Artist::Table::PrimaryKeyColumn + ") ON DELETE CASCADE"
-            ")";
     const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
                 + Table::Name + "Fts USING FTS3("
                 "title,"
@@ -455,7 +429,6 @@ void Album::createTable( sqlite::Connection* dbConnection )
             ")";
 
     sqlite::Tools::executeRequest( dbConnection, req );
-    sqlite::Tools::executeRequest( dbConnection, reqRel );
     sqlite::Tools::executeRequest( dbConnection, vtableReq );
 }
 

@@ -53,11 +53,13 @@ public:
     virtual Query<IMedia> tracks( GenrePtr genre, const QueryParameters* params = nullptr ) const = 0;
     /**
      * @brief albumArtist Returns the album main artist (generally tagged as album-artist)
+     * This can be an artist that doesn't appear on the album, and is solely dependent
+     * on the most present AlbumArtist tag for all of this album's tracks
      */
     virtual ArtistPtr albumArtist() const = 0;
     /**
-     * @brief artists Returns a Query object representing all additional
-     *                artists appearing on the album.
+     * @brief artists Returns a Query object representing all artists appearing
+     *                on at least one track for this album.
      * Artists are sorted by name.
      * @param desc
      */
