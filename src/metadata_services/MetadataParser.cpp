@@ -925,6 +925,7 @@ bool MetadataAnalyzer::link( Media& media, std::shared_ptr<Album> album,
         assert( artist != nullptr );
         albumArtist = artist;
     }
+    assert( albumArtist != nullptr );
     assert( album != nullptr );
 
     auto albumThumbnail = album->thumbnail();
@@ -935,7 +936,7 @@ bool MetadataAnalyzer::link( Media& media, std::shared_ptr<Album> album,
     // the current album for the albumArtist, if none has been set before.
     // Although we don't want to do this for unknown/various artists, as the
     // thumbnail wouldn't reflect those "special" artists
-    if ( albumArtist != nullptr && albumArtist->id() != UnknownArtistID &&
+    if ( albumArtist->id() != UnknownArtistID &&
          albumArtist->id() != VariousArtistID &&
          albumThumbnail != nullptr )
     {
@@ -961,9 +962,8 @@ bool MetadataAnalyzer::link( Media& media, std::shared_ptr<Album> album,
         artist->setArtworkMrl( album->artworkMrl(), Thumbnail::Origin::Artist );
     }
 
-    if ( albumArtist != nullptr )
-        albumArtist->addMedia( media );
-    if ( artist != nullptr && ( albumArtist == nullptr || albumArtist->id() != artist->id() ) )
+    albumArtist->addMedia( media );
+    if ( artist != nullptr && albumArtist->id() != artist->id() )
         artist->addMedia( media );
 
     auto currentAlbumArtist = album->albumArtist();
