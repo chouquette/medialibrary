@@ -406,7 +406,6 @@ class IMediaLibrary
          * discovery/ban/unban operations have completed.
          */
         virtual void unbanFolder( const std::string& entryPoint ) = 0;
-        virtual const std::string& thumbnailPath() const = 0;
         virtual void setLogger( ILogger* logger ) = 0;
         /**
          * @brief pauseBackgroundOperations Will stop potentially CPU intensive background

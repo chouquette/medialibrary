@@ -148,7 +148,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual void banFolder( const std::string& path ) override;
         virtual void unbanFolder( const std::string& path ) override;
 
-        virtual const std::string& thumbnailPath() const override;
+        const std::string& thumbnailPath() const;
         virtual void setLogger( ILogger* logger ) override;
         //Temporarily public, move back to private as soon as we start monitoring the FS
         virtual void reload() override;
