@@ -206,7 +206,7 @@ void DiscovererWorker::runRemove( const std::string& ep )
     // method already handles the prior deletion
     bool res;
     if ( folder->isRootFolder() == false )
-        res = Folder::blacklist( m_ml, entryPoint );
+        res = Folder::ban( m_ml, entryPoint );
     else
         res = m_ml->deleteFolder( *folder );
     if ( res == false )
@@ -221,13 +221,13 @@ void DiscovererWorker::runRemove( const std::string& ep )
 
 void DiscovererWorker::runBan( const std::string& entryPoint )
 {
-    auto res = Folder::blacklist( m_ml, entryPoint );
+    auto res = Folder::ban( m_ml, entryPoint );
     m_ml->getCb()->onEntryPointBanned( entryPoint, res );
 }
 
 void DiscovererWorker::runUnban( const std::string& entryPoint )
 {
-    auto folder = Folder::blacklistedFolder( m_ml, entryPoint );
+    auto folder = Folder::bannedFolder( m_ml, entryPoint );
     if ( folder == nullptr )
     {
         LOG_WARN( "Can't unban ", entryPoint, " as it wasn't banned" );

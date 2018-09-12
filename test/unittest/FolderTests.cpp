@@ -231,7 +231,7 @@ TEST_F( Folders, UpdateFile )
     ASSERT_EQ( id, f->id() );
 }
 
-TEST_F( FoldersNoDiscover, Blacklist )
+TEST_F( FoldersNoDiscover, Ban )
 {
     ml->banFolder( mock::FileSystemFactory::SubFolder );
     cbMock->waitBanFolder();
@@ -243,7 +243,7 @@ TEST_F( FoldersNoDiscover, Blacklist )
     ASSERT_EQ( nullptr, f );
 }
 
-TEST_F( FoldersNoDiscover, DiscoverBlacklisted )
+TEST_F( FoldersNoDiscover, DiscoverBanned )
 {
     ml->banFolder( mock::FileSystemFactory::Root );
     cbMock->waitBanFolder();
@@ -255,7 +255,7 @@ TEST_F( FoldersNoDiscover, DiscoverBlacklisted )
     ASSERT_EQ( nullptr, f );
 }
 
-TEST_F( Folders, BlacklistAfterDiscovery )
+TEST_F( Folders, BanAfterDiscovery )
 {
     auto f = std::static_pointer_cast<Folder>( ml->folder( mock::FileSystemFactory::SubFolder ) );
     ASSERT_NE( nullptr, f );
@@ -268,7 +268,7 @@ TEST_F( Folders, BlacklistAfterDiscovery )
     ASSERT_EQ( nullptr, f2 );
 }
 
-TEST_F( FoldersNoDiscover, RemoveFromBlacklist )
+TEST_F( FoldersNoDiscover, RemoveFromBannedList )
 {
     ml->banFolder( mock::FileSystemFactory::SubFolder );
     cbMock->waitBanFolder();
@@ -289,7 +289,7 @@ TEST_F( FoldersNoDiscover, RemoveFromBlacklist )
     ASSERT_NE( nullptr, f );
 }
 
-TEST_F( FoldersNoDiscover, BlacklistTwice )
+TEST_F( FoldersNoDiscover, BanTwice )
 {
     ml->banFolder( mock::FileSystemFactory::SubFolder );
     cbMock->waitBanFolder();
@@ -297,7 +297,7 @@ TEST_F( FoldersNoDiscover, BlacklistTwice )
     cbMock->waitBanFolder();
 }
 
-TEST_F( FoldersNoDiscover, BlacklistNonExistant )
+TEST_F( FoldersNoDiscover, BanNonExistant )
 {
     ml->banFolder( "foo/bar/otters" );
     cbMock->waitBanFolder();
@@ -428,7 +428,7 @@ TEST_F( Folders, RemoveEntryPoint )
 
     ml->reload();
 
-    // Ensure it wasn't re-discovered, ie. that it was properly blacklisted
+    // Ensure it wasn't re-discovered, ie. that it was properly banned
     auto media2 = ml->files();
     ASSERT_EQ( media.size(), media2.size() );
 }

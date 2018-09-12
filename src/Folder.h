@@ -60,11 +60,11 @@ public:
     static void createTriggers( sqlite::Connection* connection );
     static std::shared_ptr<Folder> create( MediaLibraryPtr ml, const std::string& mrl, int64_t parentId, Device& device, fs::IDevice& deviceFs );
     static void excludeEntryFolder( MediaLibraryPtr ml, int64_t folderId );
-    static bool blacklist( MediaLibraryPtr ml, const std::string& mrl );
+    static bool ban( MediaLibraryPtr ml, const std::string& mrl );
     static std::vector<std::shared_ptr<Folder>> fetchRootFolders( MediaLibraryPtr ml );
 
     static std::shared_ptr<Folder> fromMrl(MediaLibraryPtr ml, const std::string& mrl );
-    static std::shared_ptr<Folder> blacklistedFolder(MediaLibraryPtr ml, const std::string& mrl );
+    static std::shared_ptr<Folder> bannedFolder(MediaLibraryPtr ml, const std::string& mrl );
 
     virtual int64_t id() const override;
     virtual const std::string& mrl() const override;
@@ -95,7 +95,7 @@ private:
     // or the full path (including mrl scheme) for folders on non removable devices
     std::string m_path;
     const int64_t m_parent;
-    const bool m_isBlacklisted;
+    const bool m_isBanned;
     const int64_t m_deviceId;
     const bool m_isRemovable;
 

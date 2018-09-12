@@ -98,7 +98,7 @@ bool FsDiscoverer::discover( const std::string& entryPoint )
     }
     catch ( sqlite::errors::ConstraintViolation& ex )
     {
-        LOG_WARN( fsDirMrl, " discovery aborted (assuming blacklisted folder): ", ex.what() );
+        LOG_WARN( fsDirMrl, " discovery aborted (assuming banned folder): ", ex.what() );
     }
     catch ( DeviceRemovedException& )
     {
@@ -278,15 +278,15 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
             }
             catch ( sqlite::errors::ConstraintViolation& ex )
             {
-                // Best attempt to detect a foreign key violation, indicating the parent folders have been
-                // deleted due to blacklisting
+                // Best attempt to detect a foreign key violation, indicating the
+                // parent folders have been deleted due to being banned
                 if ( strstr( ex.what(), "foreign key" ) != nullptr )
                 {
                     LOG_WARN( "Creation of a folder failed because the parent is non existing: ", ex.what(),
-                              ". Assuming it was deleted due to blacklisting" );
+                              ". Assuming it was deleted due to being banned" );
                     return;
                 }
-                LOG_WARN( "Creation of a duplicated folder failed: ", ex.what(), ". Assuming it was blacklisted" );
+                LOG_WARN( "Creation of a duplicated folder failed: ", ex.what(), ". Assuming it was banned" );
                 continue;
             }
         }

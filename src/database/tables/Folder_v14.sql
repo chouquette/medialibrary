@@ -3,7 +3,7 @@
     "id_folder INTEGER PRIMARY KEY AUTOINCREMENT,"
     "path TEXT,"
     "parent_id UNSIGNED INTEGER,"
-    "is_blacklisted BOOLEAN NOT NULL DEFAULT 0,"
+    "is_banned BOOLEAN NOT NULL DEFAULT 0,"
     "device_id UNSIGNED INTEGER,"
     "is_removable BOOLEAN NOT NULL,"
 

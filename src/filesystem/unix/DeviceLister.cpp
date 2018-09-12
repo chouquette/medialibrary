@@ -48,7 +48,7 @@ namespace fs
 
 DeviceLister::DeviceMap DeviceLister::listDevices() const
 {
-    static const std::vector<std::string> deviceBlacklist = { "loop" };
+    static const std::vector<std::string> bannedDevice = { "loop" };
     const std::string devPath = "/dev/disk/by-uuid/";
     // Don't use fs::Directory to iterate, as it resolves the symbolic links automatically.
     // We need the link name & what it points to.
@@ -79,9 +79,9 @@ DeviceLister::DeviceMap DeviceLister::listDevices() const
             throw std::runtime_error( err.str() );
         }
         auto deviceName = utils::file::fileName( linkPath );
-        if ( std::find_if( begin( deviceBlacklist ), end( deviceBlacklist ), [&deviceName]( const std::string& pattern ) {
+        if ( std::find_if( begin( bannedDevice ), end( bannedDevice ), [&deviceName]( const std::string& pattern ) {
                 return deviceName.length() >= pattern.length() && deviceName.find( pattern ) == 0;
-            }) != end( deviceBlacklist ) )
+            }) != end( bannedDevice ) )
             continue;
         auto uuid = result->d_name;
         LOG_INFO( "Discovered device ", deviceName, " -> {", uuid, '}' );

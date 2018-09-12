@@ -168,7 +168,7 @@ IMedia::Type::Unknown ) ),
 #include "database/tables/Folder_v14.sql"
 
 "INSERT INTO " + Folder::Table::Name + "("
-    "id_folder, path, parent_id, is_blacklisted, device_id, is_removable"
+    "id_folder, path, parent_id, is_banned, device_id, is_removable"
 ") "
 "SELECT id_folder, path, parent_id, is_blacklisted, device_id, is_removable "
 "FROM " + Folder::Table::Name + "_backup",

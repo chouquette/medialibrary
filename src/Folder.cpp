@@ -49,7 +49,7 @@ Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
     , m_id( row.load<decltype(m_id)>( 0 ) )
     , m_path( row.load<decltype(m_path)>( 1 ) )
     , m_parent( row.load<decltype(m_parent)>( 2 ) )
-    , m_isBlacklisted( row.load<decltype(m_isBlacklisted)>( 3 ) )
+    , m_isBanned( row.load<decltype(m_isBanned)>( 3 ) )
     , m_deviceId( row.load<decltype(m_deviceId)>( 4 ) )
     , m_isRemovable( row.load<decltype(m_isRemovable)>( 5 ) )
 {
@@ -60,7 +60,7 @@ Folder::Folder(MediaLibraryPtr ml, const std::string& path, int64_t parent, int6
     , m_id( 0 )
     , m_path( path )
     , m_parent( parent )
-    , m_isBlacklisted( false )
+    , m_isBanned( false )
     , m_deviceId( deviceId )
     , m_isRemovable( isRemovable )
 {
@@ -111,17 +111,17 @@ void Folder::excludeEntryFolder( MediaLibraryPtr ml, int64_t folderId )
     sqlite::Tools::executeRequest( ml->getConn(), req, folderId );
 }
 
-bool Folder::blacklist( MediaLibraryPtr ml, const std::string& mrl )
+bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl )
 {
-    // Ensure we delete the existing folder if any & blacklist the folder in an "atomic" way
+    // Ensure we delete the existing folder if any & ban the folder in an "atomic" way
     return sqlite::Tools::withRetries( 3, [ml, &mrl]() {
         auto t = ml->getConn()->newTransaction();
 
         auto f = fromMrl( ml, mrl, BannedType::Any );
         if ( f != nullptr )
         {
-            // No need to blacklist a folder twice
-            if ( f->m_isBlacklisted == true )
+            // No need to ban a folder twice
+            if ( f->m_isBanned == true )
                 return true;
             // Let the foreign key destroy everything beneath this folder
             destroy( ml, f->id() );
@@ -154,7 +154,7 @@ bool Folder::blacklist( MediaLibraryPtr ml, const std::string& mrl )
         else
             path = mrl;
         static const std::string req = "INSERT INTO " + Folder::Table::Name +
-                "(path, parent_id, is_blacklisted, device_id, is_removable) VALUES(?, ?, ?, ?, ?)";
+                "(path, parent_id, is_banned, device_id, is_removable) VALUES(?, ?, ?, ?, ?)";
         auto res = sqlite::Tools::executeInsert( ml->getConn(), req, path, nullptr, true, device->id(), deviceFs->isRemovable() ) != 0;
         t->commit();
         return res;
@@ -166,7 +166,7 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
     return fromMrl( ml, mrl, BannedType::No );
 }
 
-std::shared_ptr<Folder> Folder::blacklistedFolder( MediaLibraryPtr ml, const std::string& mrl )
+std::shared_ptr<Folder> Folder::bannedFolder( MediaLibraryPtr ml, const std::string& mrl )
 {
     return fromMrl( ml, mrl, BannedType::Yes );
 }
@@ -200,7 +200,7 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
         std::string req = "SELECT * FROM " + Folder::Table::Name + " WHERE path = ? AND is_removable = 0";
         if ( bannedType == BannedType::Any )
             return fetch( ml, req, folderFs->mrl() );
-        req += " AND is_blacklisted = ?";
+        req += " AND is_banned = ?";
         return fetch( ml, req, folderFs->mrl(), bannedType == BannedType::Yes ? true : false );
     }
 
@@ -217,7 +217,7 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
     }
     else
     {
-        req += " AND is_blacklisted = ?";
+        req += " AND is_banned = ?";
         folder = fetch( ml, req, path, device->id(), bannedType == BannedType::Yes ? true : false );
     }
     if ( folder == nullptr )
@@ -298,7 +298,7 @@ std::vector<std::shared_ptr<Folder>> Folder::folders()
 {
     static const std::string req = "SELECT * FROM " + Folder::Table::Name + " f "
             " LEFT JOIN " + Device::Table::Name + " d ON d.id_device = f.device_id"
-            " WHERE parent_id = ? AND is_blacklisted = 0 AND d.is_present != 0";
+            " WHERE parent_id = ? AND is_banned = 0 AND d.is_present != 0";
     return DatabaseHelpers::fetchAll<Folder>( m_ml, req, m_id );
 }
 
@@ -328,7 +328,7 @@ bool Folder::isPresent() const
 
 bool Folder::isBanned() const
 {
-    return m_isBlacklisted;
+    return m_isBanned;
 }
 
 bool Folder::isRootFolder() const
@@ -343,7 +343,7 @@ std::vector<std::shared_ptr<Folder>> Folder::fetchRootFolders( MediaLibraryPtr m
             " ON f.id_folder = ExcludedEntryFolder.folder_id"
             " LEFT JOIN " + Device::Table::Name + " d ON d.id_device = f.device_id"
             " WHERE ExcludedEntryFolder.folder_id IS NULL AND"
-            " parent_id IS NULL AND is_blacklisted = 0 AND d.is_present != 0";
+            " parent_id IS NULL AND is_banned = 0 AND d.is_present != 0";
     return DatabaseHelpers::fetchAll<Folder>( ml, req );
 }
 
