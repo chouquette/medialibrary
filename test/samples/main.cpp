@@ -54,16 +54,6 @@ static const char* testCases[] = {
     "compilation_different_years"
 };
 
-class TestEnv : public ::testing::Environment
-{
-    public:
-        virtual void SetUp()
-        {
-            // Always clean the DB in case a previous test crashed
-            unlink("test.db");
-        }
-};
-
 TEST_P( Tests, Parse )
 {
     auto testDir = ForcedTestDirectory.empty() == false ? ForcedTestDirectory : TestDirectory;
@@ -192,4 +182,3 @@ INSTANTIATE_TEST_CASE_P(SamplesTests, Tests,
 INSTANTIATE_TEST_CASE_P(SamplesTests, ResumeTests,
                         ::testing::ValuesIn(testCases) );
 
-::testing::Environment* const env = ::testing::AddGlobalTestEnvironment(new TestEnv);

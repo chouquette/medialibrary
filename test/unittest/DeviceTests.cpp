@@ -49,7 +49,6 @@ protected:
 protected:
     virtual void SetUp() override
     {
-        unlink( "test.db" );
         fsMock.reset( new mock::FileSystemFactory );
         cbMock.reset( new mock::WaitForDiscoveryComplete );
         fsMock->addFolder( "file:///a/mnt/" );
@@ -59,7 +58,9 @@ protected:
         fsMock->addFile( RemovableDeviceMountpoint + "removablefile2.mp3" );
         fsMock->addFile( RemovableDeviceMountpoint + "removablefile3.mp3" );
         fsMock->addFile( RemovableDeviceMountpoint + "removablefile4.mp3" );
-        Reload();
+        fsFactory = fsMock;
+        mlCb = cbMock.get();
+        Tests::SetUp();
     }
 
     virtual void InstantiateMediaLibrary() override
@@ -67,9 +68,9 @@ protected:
         ml.reset( new MediaLibraryWithDiscoverer );
     }
 
-    virtual void Reload()
+    virtual void Reload() override
     {
-        Tests::Reload( fsMock, cbMock.get() );
+        Tests::Reload();
         auto res = cbMock->waitReload();
         ASSERT_TRUE( res );
     }

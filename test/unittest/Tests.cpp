@@ -28,42 +28,32 @@
 
 #include "mocks/FileSystem.h"
 
-class TestEnv : public ::testing::Environment
-{
-    public:
-        virtual void SetUp()
-        {
-            // Always clean the DB in case a previous test crashed
-            unlink("test.db");
-        }
-};
-
 void Tests::TearDown()
 {
     ml.reset();
 }
 
-void Tests::Reload( std::shared_ptr<fs::IFileSystemFactory> fs /*= nullptr*/, IMediaLibraryCb* metadataCb /*= nullptr*/ )
+void Tests::Reload()
 {
     InstantiateMediaLibrary();
-    if ( fs == nullptr )
+    if ( fsFactory == nullptr )
     {
-        fs = std::shared_ptr<fs::IFileSystemFactory>( new mock::NoopFsFactory );
+        fsFactory = std::shared_ptr<fs::IFileSystemFactory>( new mock::NoopFsFactory );
     }
-    if ( metadataCb == nullptr )
+    if ( mlCb == nullptr )
     {
         if ( cbMock == nullptr )
             cbMock.reset( new mock::NoopCallback );
-        metadataCb = cbMock.get();
+        mlCb = cbMock.get();
     }
     // Instantiate it here to avoid fiddling with multiple SetUp overloads
     if ( mockDeviceLister == nullptr )
         mockDeviceLister = std::make_shared<mock::MockDeviceLister>();
 
-    ml->setFsFactory( fs );
+    ml->setFsFactory( fsFactory );
     ml->setDeviceLister( mockDeviceLister );
     ml->setVerbosity( LogLevel::Error );
-    auto res = ml->initialize( "test.db", "/tmp", metadataCb );
+    auto res = ml->initialize( "test.db", "/tmp", mlCb );
     ASSERT_EQ( InitializeResult::Success, res );
     auto startRes = ml->start();
     ASSERT_TRUE( startRes );
@@ -81,6 +71,3 @@ void Tests::InstantiateMediaLibrary()
 {
     ml.reset( new MediaLibraryTester );
 }
-
-::testing::Environment* const env = ::testing::AddGlobalTestEnvironment(new TestEnv);
-

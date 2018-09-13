@@ -33,11 +33,12 @@ class Tests : public testing::Test
 protected:
     std::unique_ptr<MediaLibraryTester> ml;
     std::unique_ptr<mock::NoopCallback> cbMock;
+    IMediaLibraryCb* mlCb;
     std::shared_ptr<fs::IFileSystemFactory> fsFactory;
     std::shared_ptr<mock::MockDeviceLister> mockDeviceLister;
 
     virtual void SetUp() override;
     virtual void InstantiateMediaLibrary();
-    void Reload( std::shared_ptr<fs::IFileSystemFactory> fs = nullptr, IMediaLibraryCb* metadataCb = nullptr );
+    virtual void Reload();
     virtual void TearDown() override;
 };

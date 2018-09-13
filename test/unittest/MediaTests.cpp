@@ -885,24 +885,20 @@ protected:
 
     virtual void SetUp() override
     {
-        unlink( "test.db" );
         fsMock.reset( new mock::FileSystemFactory );
         cbMock.reset( new mock::WaitForDiscoveryComplete );
         fsMock->addFolder( "file:///a/mnt/" );
         auto device = fsMock->addDevice( RemovableDeviceMountpoint, RemovableDeviceUuid );
         device->setRemovable( true );
         fsMock->addFile( RemovableDeviceMountpoint + "removablefile.mp3" );
-        Reload();
+        fsFactory = fsMock;
+        mlCb = cbMock.get();
+        Tests::SetUp();
     }
 
     virtual void InstantiateMediaLibrary() override
     {
         ml.reset( new MediaLibraryWithDiscoverer );
-    }
-
-    virtual void Reload()
-    {
-        Tests::Reload( fsMock, cbMock.get() );
     }
 };
 

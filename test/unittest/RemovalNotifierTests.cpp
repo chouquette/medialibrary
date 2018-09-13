@@ -66,19 +66,14 @@ protected:
     std::unique_ptr<MockCallback> cbMock;
     virtual void SetUp() override
     {
-        unlink( "test.db" );
         cbMock.reset( new MockCallback );
-        Reload();
+        mlCb = cbMock.get();
+        Tests::SetUp();
     }
 
     virtual void InstantiateMediaLibrary() override
     {
         ml.reset( new MediaLibraryWithNotifier );
-    }
-
-    virtual void Reload()
-    {
-        Tests::Reload( nullptr, cbMock.get() );
     }
 };
 
