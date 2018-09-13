@@ -85,18 +85,19 @@ namespace medialibrary
 {
 
 const char* const MediaLibrary::supportedExtensions[] = {
-    "3g2", "3gp", "a52", "aac", "ac3", "aif", "aifc", "aiff", "alac", "amr",
-    "amv", "aob", "ape", "asf", "asx", "avi", "b4s", "conf", /*"cue",*/
-    "divx", "dts", "dv", "flac", "flv", "gxf", "ifo", "iso",
-    "it", "itml",  "m1v", "m2t", "m2ts", "m2v", "m3u", "m3u8",
-    "m4a", "m4b", "m4p", "m4v", "mid", "mka", "mkv", "mlp",
-    "mod", "mov", "mp1", "mp2", "mp3", "mp4", "mpc", "mpeg",
-    "mpeg1", "mpeg2", "mpeg4", "mpg", "mts", "mxf", "nsv",
-    "nuv", "oga", "ogg", "ogm", "ogv", "ogx", "oma", "opus",
-    "pls", "ps", "qtl", "ram", "rec", "rm", "rmi", "rmvb",
-    "s3m", "sdp", "spx", "tod", "trp", "ts", "tta", "vlc",
-    "vob", "voc", "vqf", "vro", "w64", "wav", "wax", "webm",
-    "wma", "wmv", "wmx", "wpl", "wv", "wvx", "xa", "xm", "xspf"
+    "3g2", "3gp", "a52", "aac", "ac3", "adx", "aif", "aifc",
+    "aiff", "alac", "amr", "amv", "aob", "ape", "asf", "asx",
+    "avi", "b4s", "conf", /*"cue",*/ "divx", "dts", "dv",
+    "flac", "flv", "gxf", "ifo", "iso", "it", "itml",
+    "m1v", "m2t", "m2ts", "m2v", "m3u", "m3u8", "m4a", "m4b",
+    "m4p", "m4v", "mid", "mka", "mkv", "mlp", "mod", "mov",
+    "mp1", "mp2", "mp3", "mp4", "mpc", "mpeg", "mpeg1", "mpeg2",
+    "mpeg4", "mpg", "mts", "mxf", "nsv", "nuv", "oga", "ogg",
+    "ogm", "ogv", "ogx", "oma", "opus", "pls", "ps", "qtl",
+    "ram", "rec", "rm", "rmi", "rmvb", "s3m", "sdp", "spx",
+    "tod", "trp", "ts", "tta", "vlc", "vob", "voc", "vqf",
+    "vro", "w64", "wav", "wax", "webm", "wma", "wmv", "wmx",
+    "wpl", "wv", "wvx", "xa", "xm", "xspf"
 };
 
 const size_t MediaLibrary::NbSupportedExtensions = sizeof(supportedExtensions) / sizeof(supportedExtensions[0]);
