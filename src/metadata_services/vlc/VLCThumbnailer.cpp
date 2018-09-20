@@ -295,7 +295,8 @@ bool VLCThumbnailer::compress( Task& task )
                                  DesiredWidth, DesiredHeight, hOffset, vOffset ) == false )
         return false;
 
-    task.media->setThumbnail( path );
+    auto media = static_cast<Media*>( task.media.get() );
+    media->setThumbnail( path, Thumbnail::Origin::Media, true );
     return true;
 }
 
