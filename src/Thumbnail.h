@@ -52,7 +52,7 @@ public:
     };
 
     Thumbnail( MediaLibraryPtr ml, sqlite::Row& row );
-    Thumbnail( MediaLibraryPtr ml, std::string mrl, Origin origin );
+    Thumbnail( MediaLibraryPtr ml, std::string mrl, Origin origin, bool isGenerated );
 
     int64_t id() const;
     const std::string& mrl() const;
@@ -73,7 +73,7 @@ public:
 
     static void createTable( sqlite::Connection* dbConnection );
     static std::shared_ptr<Thumbnail> create( MediaLibraryPtr ml, std::string mrl,
-                                              Origin origin );
+                                              Origin origin, bool isGenerated );
 
     static const std::string EmptyMrl;
 
@@ -82,6 +82,7 @@ private:
     int64_t m_id;
     std::string m_mrl;
     Origin m_origin;
+    bool m_isGenerated;
 
     friend Thumbnail::Table;
 };

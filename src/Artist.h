@@ -60,7 +60,8 @@ public:
     bool addMedia( Media& tracks );
     virtual const std::string& artworkMrl() const override;
     std::shared_ptr<Thumbnail> thumbnail();
-    bool setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin );
+    bool setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin,
+                        bool isGenerated );
     bool updateNbAlbum( int increment );
     bool updateNbTrack( int increment );
     std::shared_ptr<Album> unknownAlbum();

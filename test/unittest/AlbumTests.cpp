@@ -167,7 +167,7 @@ TEST_F( Albums, SetArtworkMrl )
 {
     auto a = ml->createAlbum( "album" );
 
-    a->setArtworkMrl( "artwork", Thumbnail::Origin::UserProvided );
+    a->setArtworkMrl( "artwork", Thumbnail::Origin::UserProvided, false);
     ASSERT_EQ( a->artworkMrl(), "artwork" );
 
     Reload();
@@ -183,7 +183,7 @@ TEST_F( Albums, Thumbnail )
     ASSERT_EQ( nullptr, t );
 
     std::string mrl = "/path/to/sea/otter/artwork.png";
-    auto res = a->setArtworkMrl( mrl, Thumbnail::Origin::UserProvided );
+    auto res = a->setArtworkMrl( mrl, Thumbnail::Origin::UserProvided, false );
     ASSERT_TRUE( res );
 
     t = a->thumbnail();

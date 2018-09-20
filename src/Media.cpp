@@ -378,7 +378,8 @@ void Media::setReleaseDate( unsigned int date )
     m_changed = true;
 }
 
-bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin origin )
+bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin origin,
+                          bool isGenerated )
 {
     if ( m_thumbnailId != 0 )
         return Thumbnail::setMrlFromPrimaryKey( m_ml, m_thumbnail, m_thumbnailId,
@@ -388,7 +389,7 @@ bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin ori
     if ( sqlite::Transaction::transactionInProgress() == false )
         t = m_ml->getConn()->newTransaction();
     auto lock = m_thumbnail.lock();
-    auto thumbnail = Thumbnail::create( m_ml, thumbnailMrl, origin );
+    auto thumbnail = Thumbnail::create( m_ml, thumbnailMrl, origin, isGenerated );
     if ( thumbnail == nullptr )
         return false;
 
@@ -406,7 +407,7 @@ bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin ori
 
 bool Media::setThumbnail( const std::string& thumbnailMrl )
 {
-    return setThumbnail( thumbnailMrl, Thumbnail::Origin::UserProvided );
+    return setThumbnail( thumbnailMrl, Thumbnail::Origin::UserProvided, false );
 }
 
 bool Media::save()

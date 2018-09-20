@@ -17,9 +17,9 @@
 
 "INSERT INTO " + Media::Table::Name + "_backup SELECT * FROM " + Media::Table::Name,
 
-"INSERT INTO " + Thumbnail::Table::Name + "(id_thumbnail, mrl, origin) "
+"INSERT INTO " + Thumbnail::Table::Name + "(id_thumbnail, mrl, origin, is_generated) "
     "SELECT id_media, thumbnail, " +
-    std::to_string( static_cast<ThumbnailType>( Thumbnail::Origin::UserProvided ) ) +
+    std::to_string( static_cast<ThumbnailType>( Thumbnail::Origin::UserProvided ) ) + ", 1"
     " FROM " + Media::Table::Name + " WHERE thumbnail IS NOT NULL AND thumbnail != ''",
 
 "DROP TABLE " + Media::Table::Name,

@@ -41,14 +41,17 @@ Thumbnail::Thumbnail( MediaLibraryPtr ml, sqlite::Row& row )
     , m_id( row.extract<decltype(m_id)>() )
     , m_mrl( row.extract<decltype(m_mrl)>() )
     , m_origin( row.extract<decltype(m_origin)>() )
+    , m_isGenerated( row.extract<decltype(m_isGenerated)>() )
 {
 }
 
-Thumbnail::Thumbnail( MediaLibraryPtr ml, std::string mrl, Thumbnail::Origin origin )
+Thumbnail::Thumbnail( MediaLibraryPtr ml, std::string mrl,
+                      Thumbnail::Origin origin, bool isGenerated )
     : m_ml( ml )
     , m_id( 0 )
     , m_mrl( std::move( mrl ) )
     , m_origin( origin )
+    , m_isGenerated( isGenerated )
 {
 }
 
@@ -104,18 +107,19 @@ void Thumbnail::createTable( sqlite::Connection* dbConnection )
             "("
                 "id_thumbnail INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "mrl TEXT NOT NULL,"
-                "origin INTEGER NOT NULL"
+                "origin INTEGER NOT NULL,"
+                "is_generated BOOLEAN NOT NULL"
             ")";
     sqlite::Tools::executeRequest( dbConnection, req );
 }
 
 std::shared_ptr<Thumbnail> Thumbnail::create( MediaLibraryPtr ml, std::string mrl,
-                                              Thumbnail::Origin origin )
+                                              Thumbnail::Origin origin, bool isGenerated )
 {
     static const std::string req = "INSERT INTO " + Thumbnail::Table::Name +
-            "(mrl, origin) VALUES(?,?)";
-    auto self = std::make_shared<Thumbnail>( ml, std::move( mrl ), origin );
-    if ( insert( ml, self, req, self->mrl(), origin ) == false )
+            "(mrl, origin, is_generated) VALUES(?,?,?)";
+    auto self = std::make_shared<Thumbnail>( ml, std::move( mrl ), origin, isGenerated );
+    if ( insert( ml, self, req, self->mrl(), origin, isGenerated ) == false )
         return nullptr;
     return self;
 }

@@ -167,7 +167,8 @@ std::shared_ptr<Thumbnail> Album::thumbnail()
     return m_thumbnail.get();
 }
 
-bool Album::setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin )
+bool Album::setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin,
+                           bool isGenerated )
 {
     if ( m_thumbnailId != 0 )
         return Thumbnail::setMrlFromPrimaryKey( m_ml, m_thumbnail, m_thumbnailId,
@@ -177,7 +178,7 @@ bool Album::setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin orig
     if ( sqlite::Transaction::transactionInProgress() == false )
         t = m_ml->getConn()->newTransaction();
     auto lock = m_thumbnail.lock();
-    m_thumbnail = Thumbnail::create( m_ml, artworkMrl, Thumbnail::Origin::Album );
+    m_thumbnail = Thumbnail::create( m_ml, artworkMrl, Thumbnail::Origin::Album, isGenerated );
     if ( m_thumbnail.get() == nullptr )
         return false;
     static const std::string req = "UPDATE " + Album::Table::Name

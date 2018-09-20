@@ -36,7 +36,7 @@ class Thumbnails : public Tests
 TEST_F( Thumbnails, Create )
 {
     std::string mrl = "/path/to/thumbnail.png";
-    auto t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::UserProvided );
+    auto t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::UserProvided, false );
     ASSERT_NE( t, nullptr );
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
@@ -62,7 +62,7 @@ TEST_F( Thumbnails, MediaSetThumbnail )
 TEST_F( Thumbnails, Update )
 {
     std::string mrl = "/path/to/thumbnail.png";
-    auto t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::UserProvided );
+    auto t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::UserProvided, false );
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
 

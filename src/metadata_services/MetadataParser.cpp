@@ -338,7 +338,7 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
         media->setTitleBuffered( title );
 
         if ( artworkMrl.empty() == false )
-            media->setThumbnail( artworkMrl, Thumbnail::Origin::Media );
+            media->setThumbnail( artworkMrl, Thumbnail::Origin::Media, false );
 
         if ( showName.length() != 0 )
         {
@@ -586,7 +586,7 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
     auto artworkMrl = item.meta( IItem::Metadata::ArtworkUrl );
     if ( artworkMrl.empty() == false )
     {
-        media->setThumbnail( artworkMrl, Thumbnail::Origin::Media );
+        media->setThumbnail( artworkMrl, Thumbnail::Origin::Media, false );
         // Don't use an attachment as default artwork for album/artists
         if ( utils::file::schemeIs( "attachment", artworkMrl ) )
             artworkMrl.clear();
@@ -608,7 +608,7 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
             if ( artworkMrl.empty() == false )
             {
                 auto thumbnail = Thumbnail::create( m_ml, artworkMrl,
-                                                    Thumbnail::Origin::Album );
+                                                    Thumbnail::Origin::Album, false );
                 if ( thumbnail != nullptr )
                     thumbnailId = thumbnail->id();
             }
@@ -943,7 +943,8 @@ bool MetadataAnalyzer::link( Media& media, Album& album,
         // If the album artist has no thumbnail, let's assign it
         if ( albumArtistThumbnail == nullptr )
         {
-            albumArtist->setArtworkMrl( albumThumbnail->mrl(), Thumbnail::Origin::AlbumArtist );
+            albumArtist->setArtworkMrl( albumThumbnail->mrl(),
+                                        Thumbnail::Origin::AlbumArtist, false );
         }
         else if ( albumArtistThumbnail->origin() == Thumbnail::Origin::Artist )
         {
@@ -958,7 +959,7 @@ bool MetadataAnalyzer::link( Media& media, Album& album,
          artist->id() != VariousArtistID &&
          albumThumbnail != nullptr && artist->thumbnail() == nullptr )
     {
-        artist->setArtworkMrl( album.artworkMrl(), Thumbnail::Origin::Artist );
+        artist->setArtworkMrl( album.artworkMrl(), Thumbnail::Origin::Artist, false );
     }
 
     albumArtist->addMedia( media );
