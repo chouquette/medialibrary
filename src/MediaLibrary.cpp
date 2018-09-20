@@ -1200,6 +1200,11 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
         for ( const auto& req : migrateTaskReqs )
             sqlite::Tools::executeRequest( dbConn, req );
     }
+    // Migrate path to thumbnails out of the sql file, as we need to bind the
+    // the mrl
+    const std::string updateThumbnailReq = "UPDATE " + Thumbnail::Table::Name +
+            " SET mrl = replace(mrl, ?, '')";
+    sqlite::Tools::executeUpdate( dbConn, updateThumbnailReq, m_thumbnailPath );
     // Re-create tables that we just removed
     // We will run a re-scan, so we don't care about keeping their content
     Album::createTable( dbConn );

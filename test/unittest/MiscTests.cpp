@@ -185,7 +185,7 @@ TEST_F( DbModel, Upgrade13to14 )
     auto media = ml->files();
     ASSERT_EQ( 4u, media.size() );
     auto m = media[0];
-    ASSERT_EQ( m->thumbnail(), "/path/to/thumbnail" );
+    ASSERT_EQ( m->thumbnail(), ml->thumbnailPath() + "/path/to/thumbnail" );
     ASSERT_TRUE( m->isThumbnailGenerated() );
     ASSERT_EQ( m->fileName(), "file with space.avi" );
 

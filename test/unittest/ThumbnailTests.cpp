@@ -89,3 +89,17 @@ TEST_F( Thumbnails, Update )
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::AlbumArtist );
 }
+
+TEST_F( Thumbnails, GeneratedPath )
+{
+    auto mrl = "relative_path.jpg";
+    auto t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::UserProvided, true );
+    ASSERT_NE( mrl, t->mrl() );
+    auto expectedMrl = ml->thumbnailPath() + mrl;
+    ASSERT_EQ( expectedMrl, t->mrl() );
+
+    Reload();
+
+    t = Thumbnail::fetch( ml.get(), t->id() );
+    ASSERT_EQ( expectedMrl, t->mrl() );
+}
