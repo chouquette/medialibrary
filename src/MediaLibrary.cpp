@@ -311,13 +311,13 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     }
     addLocalFsFactory();
     populateNetworkFsFactories();
-    if ( createThumbnailFolder( thumbnailPath ) == false )
+    m_thumbnailPath = utils::file::toFolderPath( thumbnailPath );
+    if ( createThumbnailFolder( m_thumbnailPath ) == false )
     {
-        LOG_ERROR( "Failed to create thumbnail directory (", thumbnailPath,
+        LOG_ERROR( "Failed to create thumbnail directory (", m_thumbnailPath,
                     ": ", strerror( errno ) );
         return InitializeResult::Failed;
     }
-    m_thumbnailPath = thumbnailPath;
     m_callback = mlCallback;
     m_dbConnection = sqlite::Connection::connect( dbPath );
 
