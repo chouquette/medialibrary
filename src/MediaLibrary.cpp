@@ -50,6 +50,7 @@
 #include "Playlist.h"
 #include "Show.h"
 #include "ShowEpisode.h"
+#include "SubtitleTrack.h"
 #include "Thumbnail.h"
 #include "database/SqliteTools.h"
 #include "database/SqliteConnection.h"
@@ -141,6 +142,7 @@ void MediaLibrary::clearCache()
     Playlist::clear();
     Genre::clear();
     Thumbnail::clear();
+    SubtitleTrack::clear();
 }
 
 void MediaLibrary::createAllTables()
@@ -171,6 +173,7 @@ void MediaLibrary::createAllTables()
     Settings::createTable( m_dbConnection.get() );
     parser::Task::createTable( m_dbConnection.get() );
     Metadata::createTable( m_dbConnection.get() );
+    SubtitleTrack::createTable( m_dbConnection.get() );
 }
 
 void MediaLibrary::createAllTriggers()

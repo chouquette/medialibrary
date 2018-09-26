@@ -40,6 +40,7 @@ libmedialibrary_la_HEADERS = \
 	include/medialibrary/IFolder.h \
 	include/medialibrary/IQuery.h \
 	include/medialibrary/IMetadata.h \
+	include/medialibrary/ISubtitleTrack.h \
 	$(NULL)
 
 libmedialibraryfsdir = $(libmedialibrary_ladir)/filesystem
@@ -78,6 +79,7 @@ libmedialibrary_la_SOURCES = \
 	src/ShowEpisode.cpp \
 	src/VideoTrack.cpp \
 	src/Metadata.cpp \
+	src/SubtitleTrack.cpp \
 	src/database/SqliteConnection.cpp \
 	src/database/SqliteTools.cpp \
 	src/database/SqliteTransaction.cpp \
@@ -164,6 +166,7 @@ noinst_HEADERS = \
 	src/compat/Thread.h \
 	src/compat/Mutex.h \
 	src/compat/ConditionVariable.h \
+	src/SubtitleTrack.h \
 	$(NULL)
 
 
@@ -300,6 +303,7 @@ unittest_SOURCES = \
 	test/unittest/VideoTrackTests.cpp \
 	test/unittest/MiscTests.cpp \
 	test/unittest/ThumbnailTests.cpp \
+	test/unittest/SubtitleTrackTests.cpp \
 	$(NULL)
 
 EXTRA_DIST += test/unittest/db_v3.sql

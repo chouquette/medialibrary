@@ -110,7 +110,10 @@ class Media : public IMedia, public DatabaseHelpers<Media>
         virtual Query<IVideoTrack> videoTracks() const override;
         bool addAudioTrack( const std::string& codec, unsigned int bitrate, unsigned int sampleRate,
                             unsigned int nbChannels, const std::string& language, const std::string& desc );
+        bool addSubtitleTrack( std::string codec, std::string language,
+                               std::string description, std::string encoding );
         virtual Query<IAudioTrack> audioTracks() const override;
+        virtual Query<ISubtitleTrack> subtitleTracks() const override;
         virtual const std::string& thumbnail() const override;
         virtual bool isThumbnailGenerated() const override;
         virtual bool setThumbnail( const std::string &thumbnail ) override;

@@ -156,6 +156,7 @@ class IMedia
         virtual Query<ILabel> labels() const = 0;
         virtual Query<IVideoTrack> videoTracks() const = 0;
         virtual Query<IAudioTrack> audioTracks() const = 0;
+        virtual Query<ISubtitleTrack> subtitleTracks() const = 0;
         ///
         /// \brief thumbnail Returns the path of a thumbnail for this media
         /// \return A path, relative to the thumbnailPath configured when initializing

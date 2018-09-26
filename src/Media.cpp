@@ -42,6 +42,7 @@
 #include "logging/Logger.h"
 #include "Movie.h"
 #include "ShowEpisode.h"
+#include "SubtitleTrack.h"
 
 #include "database/SqliteTools.h"
 #include "database/SqliteQuery.h"
@@ -289,11 +290,26 @@ bool Media::addAudioTrack( const std::string& codec, unsigned int bitrate,
     return AudioTrack::create( m_ml, codec, bitrate, sampleRate, nbChannels, language, desc, m_id ) != nullptr;
 }
 
+bool Media::addSubtitleTrack( std::string codec, std::string language,
+                              std::string description, std::string encoding )
+{
+    return SubtitleTrack::create( m_ml, std::move( codec ), std::move( language ),
+                                  std::move( description ), std::move( encoding ),
+                                  m_id ) != nullptr;
+}
+
 Query<IAudioTrack> Media::audioTracks() const
 {
     static const std::string req = "FROM " + AudioTrack::Table::Name +
             " WHERE media_id = ?";
     return make_query<AudioTrack, IAudioTrack>( m_ml, "*", req, "", m_id );
+}
+
+Query<ISubtitleTrack> Media::subtitleTracks() const
+{
+    static const std::string req = "FROM " + SubtitleTrack::Table::Name +
+            " WHERE media_id = ?";
+    return make_query<SubtitleTrack, ISubtitleTrack>( m_ml, "*", req, "", m_id );
 }
 
 const std::string& Media::thumbnail() const

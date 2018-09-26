@@ -46,6 +46,7 @@ class IMediaLibraryCb;
 class IDeviceLister;
 class IDeviceListerCb;
 class IFolder;
+class ISubtitleTrack;
 
 namespace parser
 {
@@ -72,6 +73,7 @@ using ShowPtr = std::shared_ptr<IShow>;
 using VideoTrackPtr = std::shared_ptr<IVideoTrack>;
 using DeviceListerPtr = std::shared_ptr<IDeviceLister>;
 using FolderPtr = std::shared_ptr<IFolder>;
+using SubtitleTrackPtr = std::shared_ptr<ISubtitleTrack>;
 
 }
 
