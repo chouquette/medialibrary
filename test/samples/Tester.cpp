@@ -269,6 +269,27 @@ void Tests::checkAudioTracks(const rapidjson::Value& expectedTracks, const std::
     }
 }
 
+void Tests::checkSubtitleTracks( const rapidjson::Value& expectedTracks,
+                                 const std::vector<SubtitleTrackPtr>& tracks )
+{
+    ASSERT_TRUE( expectedTracks.IsArray() );
+    ASSERT_EQ( expectedTracks.Size(), tracks.size() );
+    for ( auto i = 0u; i < expectedTracks.Size(); ++i )
+    {
+        const auto& track = tracks[i];
+        const auto& expectedTrack = expectedTracks[i];
+        ASSERT_TRUE( expectedTrack.IsObject() );
+        if ( expectedTrack.HasMember( "codec" ) )
+        {
+            ASSERT_STRCASEEQ( expectedTrack["codec"].GetString(), track->codec().c_str() );
+        }
+        if ( expectedTrack.HasMember( "encoding" ) )
+        {
+            ASSERT_STRCASEEQ( expectedTrack["encoding"].GetString(), track->encoding().c_str() );
+        }
+    }
+}
+
 void Tests::checkMedias(const rapidjson::Value& expectedMedias)
 {
     ASSERT_TRUE( expectedMedias.IsArray() );
