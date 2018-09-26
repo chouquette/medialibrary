@@ -6,7 +6,7 @@
         "nbVideos": 1,
         "nbAudios": 0,
         "media": [{
-            "title": "mrmssmith.mp4",
+            "title": "mrmssmith.mkv",
             "nbVideoTracks": 1,
             "nbAudioTracks": 1,
             "snapshotExpected": true,
@@ -20,6 +20,10 @@
                 "codec": "mp4a",
                 "sampleRate": 44100,
                 "nbChannels": 2
+            }],
+            "subtitleTracks": [{
+                "codec": "text",
+                "encoding": "UTF-8"
             }]
         }]
     }

@@ -57,10 +57,13 @@ public:
 
     struct Track
     {
+        Track() = default;
+
         enum class Type : uint8_t
         {
             Video,
             Audio,
+            Subtitle,
         };
 
         std::string codec;
@@ -86,6 +89,10 @@ public:
                 uint32_t fpsNum;
                 uint32_t fpsDen;
             } v;
+            struct
+            {
+                char encoding[sizeof(v)];
+            } s;
         };
     };
 

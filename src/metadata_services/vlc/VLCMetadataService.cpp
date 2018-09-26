@@ -170,6 +170,15 @@ void VLCMetadataService::mediaToItem( VLC::Media& media, IItem& item )
             t.v.sarNum = track.sarNum();
             t.v.sarDen = track.sarDen();
         }
+        else if ( track.type() == VLC::MediaTrack::Type::Subtitle )
+        {
+            t.type = IItem::Track::Type::Subtitle;
+            t.codec = track.codec();
+            t.language = track.language();
+            t.description = track.description();
+            const auto& enc = track.encoding();
+            strncpy( t.s.encoding, enc.c_str(), sizeof(t.s.encoding) - 1 );
+        }
         else
             continue;
         auto codec = track.codec();

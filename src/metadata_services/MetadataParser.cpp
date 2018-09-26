@@ -477,12 +477,17 @@ void MetadataAnalyzer::createTracks( Media& m, const std::vector<IItem::Track>& 
                                   track.v.sarNum, track.v.sarDen,
                                   track.language, track.description );
         }
-        else
+        else if ( track.type == IItem::Track::Type::Audio )
         {
-            assert( track.type == IItem::Track::Type::Audio );
             m.addAudioTrack( track.codec, track.bitrate,
                                        track.a.rate, track.a.nbChannels,
                                        track.language, track.description );
+        }
+        else
+        {
+            assert( track.type == IItem::Track::Type::Subtitle );
+            m.addSubtitleTrack( track.codec, track.language, track.description,
+                                track.s.encoding );
         }
     }
 }
