@@ -26,6 +26,7 @@
 
 #include "Thumbnail.h"
 #include "utils/Cache.h"
+#include "utils/Filename.h"
 
 namespace medialibrary
 {
@@ -124,6 +125,8 @@ std::shared_ptr<Thumbnail> Thumbnail::create( MediaLibraryPtr ml, std::string mr
 {
     static const std::string req = "INSERT INTO " + Thumbnail::Table::Name +
             "(mrl, origin, is_generated) VALUES(?,?,?)";
+    if ( isGenerated == true )
+        mrl = utils::file::removePath( mrl, ml->thumbnailPath() );
     auto self = std::make_shared<Thumbnail>( ml, mrl, origin, isGenerated );
     if ( insert( ml, self, req, mrl, origin, isGenerated ) == false )
         return nullptr;
