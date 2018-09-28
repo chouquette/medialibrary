@@ -216,22 +216,25 @@ Connection::WeakDbContext::~WeakDbContext()
 
 Connection::ThreadSpecificConnection::ThreadSpecificConnection(
         std::shared_ptr<Connection> conn )
-    : m_conn( std::move( conn ) )
+    : m_weakConnection( std::move( conn ) )
 {
 }
 
 Connection::ThreadSpecificConnection::~ThreadSpecificConnection()
 {
-    std::unique_lock<compat::Mutex> lock( m_conn->m_connMutex );
-    auto it = m_conn->m_conns.find( compat::this_thread::get_id() );
-    if ( it != end( m_conn->m_conns ) )
+    auto conn =  m_weakConnection.lock();
+    if ( conn == nullptr )
+        return;
+    std::unique_lock<compat::Mutex> lock( conn->m_connMutex );
+    auto it = conn->m_conns.find( compat::this_thread::get_id() );
+    if ( it != end( conn->m_conns ) )
     {
         // Ensure those cached statements will not be used if another connection
         // with the same pointer gets created
         sqlite::Statement::FlushConnectionStatementCache( it->second.get() );
         // And ensure we won't use the same connection if a thread with the same
         // ID gets used in the future.
-        m_conn->m_conns.erase( it );
+        conn->m_conns.erase( it );
     }
 }
 

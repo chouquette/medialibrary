@@ -114,7 +114,7 @@ private:
         ~ThreadSpecificConnection();
 
     private:
-        std::shared_ptr<Connection> m_conn;
+        std::weak_ptr<Connection> m_weakConnection;
     };
 
     using ConnPtr = std::unique_ptr<sqlite3, int(*)(sqlite3*)>;
