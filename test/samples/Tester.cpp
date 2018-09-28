@@ -148,7 +148,8 @@ bool MockResumeCallback::waitForParsingComplete()
 
 void Tests::SetUp()
 {
-    unlink("test.db");
+    auto res = unlink("test.db");
+    ASSERT_EQ( 0, res );
     InitializeCallback();
     InitializeMediaLibrary();
     if ( ExtraVerbose == true )
@@ -156,8 +157,8 @@ void Tests::SetUp()
     else if ( Verbose == true )
         m_ml->setVerbosity( LogLevel::Info );
 
-    auto res = m_ml->initialize( "test.db", "/tmp", m_cb.get() );
-    ASSERT_EQ( InitializeResult::Success, res );
+    auto initRes = m_ml->initialize( "test.db", "/tmp", m_cb.get() );
+    ASSERT_EQ( InitializeResult::Success, initRes );
     ASSERT_TRUE( m_ml->start() );
 }
 

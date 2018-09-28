@@ -63,7 +63,8 @@ void Tests::Reload()
 
 void Tests::SetUp()
 {
-    unlink("test.db");
+    auto res = unlink("test.db");
+    ASSERT_EQ( 0, res );
     Reload();
 }
 
