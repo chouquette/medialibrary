@@ -57,8 +57,7 @@ protected:
 public:
     virtual void SetUp() override
     {
-        auto res = unlink("test.db");
-        ASSERT_EQ( 0, res );
+        unlink("test.db");
         ml.reset( new MediaLibraryTester );
         cbMock.reset( new mock::NoopCallback );
     }
