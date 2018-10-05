@@ -38,6 +38,8 @@
 # include <cerrno>
 # include <sys/types.h>
 # include <sys/stat.h>
+# include <limits.h>
+# include <cstdlib>
 #endif
 
 namespace medialibrary
@@ -71,6 +73,26 @@ bool isDirectory( const std::string& path )
     if ( lstat( path.c_str(), &s ) != 0 )
         throw std::system_error( errno, std::system_category(), ERR_FS_OBJECT_ACCESS + path );
     return S_ISDIR( s.st_mode );
+#endif
+}
+
+std::string toAbsolute( const std::string& path )
+{
+#ifndef _WIN32
+    char abs[PATH_MAX];
+    if ( realpath( path.c_str(), abs ) == nullptr )
+        throw std::system_error( errno, std::generic_category(), "Failed to convert to absolute path" );
+    return std::string{ abs };
+#else
+    TCHAR buff[MAX_PATH];
+    auto wpath = charset::ToWide( path.c_str() );
+    if ( GetFullPathName( wpath.get(), MAX_PATH, buff, nullptr ) == 0 )
+    {
+        LOG_ERROR( "Failed to convert ", path, " to absolute path" );
+        throw std::system_error( GetLastError(), std::generic_category(), "Failed to convert to absolute path" );
+    }
+    auto upath = charset::FromWide( buff );
+    return std::string( upath.get() );
 #endif
 }
 

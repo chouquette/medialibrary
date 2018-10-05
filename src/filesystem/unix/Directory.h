@@ -40,7 +40,6 @@ public:
 
 private:
     virtual void read() const override;
-    static std::string toAbsolute( const std::string& path );
 
 private:
     std::string m_mrl;

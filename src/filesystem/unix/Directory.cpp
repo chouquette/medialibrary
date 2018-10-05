@@ -30,12 +30,11 @@
 #include "filesystem/unix/File.h"
 #include "logging/Logger.h"
 #include "utils/Filename.h"
+#include "utils/Directory.h"
 #include "utils/Url.h"
 
 #include <cstring>
-#include <cstdlib>
 #include <dirent.h>
-#include <limits.h>
 #include <sys/stat.h>
 #include <system_error>
 #include <unistd.h>
@@ -49,7 +48,8 @@ namespace fs
 Directory::Directory( const std::string& mrl, fs::IFileSystemFactory& fsFactory )
     : CommonDirectory( fsFactory )
 {
-    m_path = utils::file::toFolderPath( toAbsolute( utils::file::toLocalPath( mrl ) ) );
+    m_path = utils::file::toFolderPath(
+                utils::fs::toAbsolute( utils::file::toLocalPath( mrl ) ) );
     assert( *m_path.crbegin() == '/' );
     m_mrl = utils::file::toMrl( m_path );
 }
@@ -117,15 +117,6 @@ void Directory::read() const
         }
     }
 }
-
-std::string Directory::toAbsolute( const std::string& path )
-{
-    char abs[PATH_MAX];
-    if ( realpath( path.c_str(), abs ) == nullptr )
-        throw std::system_error( errno, std::generic_category(), "Failed to convert to absolute path" );
-    return std::string{ abs };
-}
-
 
 }
 

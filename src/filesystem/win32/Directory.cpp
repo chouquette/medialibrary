@@ -28,6 +28,7 @@
 #include "utils/Charsets.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
+#include "utils/Directory.h"
 #include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "File.h"
 #include "logging/Logger.h"
@@ -46,7 +47,8 @@ namespace fs
 Directory::Directory( const std::string& mrl , fs::IFileSystemFactory& fsFactory )
     : CommonDirectory( fsFactory )
 {
-    m_path = utils::file::toFolderPath( toAbsolute( utils::file::toLocalPath( mrl ) ) );
+    m_path = utils::file::toFolderPath(
+                utils::fs::toAbsolute( utils::file::toLocalPath( mrl ) ) );
     assert( *m_path.crbegin() == '/' || *m_path.crbegin() == '\\' );
     m_mrl = utils::file::toMrl( m_path );
 }
@@ -137,19 +139,6 @@ void Directory::read() const
             m_files.emplace_back( std::make_shared<File>( m_path + file.get()) );
     }
 #endif
-}
-
-std::string Directory::toAbsolute( const std::string& path )
-{
-    TCHAR buff[MAX_PATH];
-    auto wpath = charset::ToWide( path.c_str() );
-    if ( GetFullPathName( wpath.get(), MAX_PATH, buff, nullptr ) == 0 )
-    {
-        LOG_ERROR( "Failed to convert ", path, " to absolute path" );
-        throw std::system_error( GetLastError(), std::generic_category(), "Failed to convert to absolute path" );
-    }
-    auto upath = charset::FromWide( buff );
-    return std::string( upath.get() );
 }
 
 }
