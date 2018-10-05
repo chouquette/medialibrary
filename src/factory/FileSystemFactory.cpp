@@ -29,6 +29,8 @@
 #include "medialibrary/filesystem/IFile.h"
 #include "logging/Logger.h"
 #include "utils/Filename.h"
+#include "utils/Directory.h"
+#include "utils/Url.h"
 
 #if defined(__linux__) || defined(__APPLE__)
 # include "filesystem/unix/Directory.h"
@@ -76,10 +78,22 @@ std::shared_ptr<fs::IDevice> FileSystemFactory::createDevice( const std::string&
 std::shared_ptr<fs::IDevice> FileSystemFactory::createDeviceFromMrl( const std::string& mrl )
 {
     auto lock = m_deviceCache.lock();
+    std::string canonicalMountpoint;
+    try
+    {
+        canonicalMountpoint = utils::fs::toAbsolute(
+                    utils::url::decode( utils::file::stripScheme( mrl ) ) );
+        canonicalMountpoint = scheme() + canonicalMountpoint;
+    }
+    catch ( const std::system_error& ex )
+    {
+        LOG_WARN( "Failed to canonicalize mountpoint ", mrl, ": ", ex.what() );
+        return nullptr;
+    }
     std::shared_ptr<fs::IDevice> res;
     for ( const auto& p : m_deviceCache.get() )
     {
-        if ( mrl.find( p.second->mountpoint() ) == 0 )
+        if ( canonicalMountpoint.find( p.second->mountpoint() ) == 0 )
         {
             if ( res == nullptr || res->mountpoint().length() < p.second->mountpoint().length() )
                 res = p.second;
