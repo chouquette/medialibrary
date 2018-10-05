@@ -30,6 +30,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <system_error>
+#include "utils/Filename.h"
 
 #ifdef _WIN32
 # include <windows.h>
@@ -82,7 +83,7 @@ std::string toAbsolute( const std::string& path )
     char abs[PATH_MAX];
     if ( realpath( path.c_str(), abs ) == nullptr )
         throw std::system_error( errno, std::generic_category(), "Failed to convert to absolute path" );
-    return std::string{ abs };
+    return file::toFolderPath( abs );
 #else
     TCHAR buff[MAX_PATH];
     auto wpath = charset::ToWide( path.c_str() );
@@ -92,7 +93,7 @@ std::string toAbsolute( const std::string& path )
         throw std::system_error( GetLastError(), std::generic_category(), "Failed to convert to absolute path" );
     }
     auto upath = charset::FromWide( buff );
-    return std::string( upath.get() );
+    return file::toFolderPath( upath.get() );
 #endif
 }
 
