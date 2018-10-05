@@ -46,7 +46,7 @@ protected:
     {
     }
 
-    size_t count( const std::string& req )
+    size_t executeCount( const std::string& req )
     {
         auto dbConn = m_ml->getConn();
         auto ctx = dbConn->acquireReadContext();
@@ -63,12 +63,12 @@ protected:
         return count;
     }
 
-    Result items( const std::string& req, uint32_t nbItems, uint32_t offset )
+    Result executeFetchItems( const std::string& req, uint32_t nbItems, uint32_t offset )
     {
         return Impl::template fetchAll<Intf>( m_ml, req, m_params, nbItems, offset );
     }
 
-    Result all( const std::string& req )
+    Result executeFetchAll( const std::string& req )
     {
         return Impl::template fetchAll<Intf>( m_ml, req, m_params );
     }
@@ -99,7 +99,7 @@ public:
     {
         std::string req = "SELECT COUNT(DISTINCT " + Impl::Table::PrimaryKeyColumn +
                 " ) " + m_base;
-        return Base::count( req );
+        return Base::executeCount( req );
     }
 
     virtual Result items( uint32_t nbItems, uint32_t offset ) override
@@ -108,14 +108,14 @@ public:
             return all();
         const std::string req = "SELECT " + m_field + " " + m_base + " " +
                 m_groupAndOrderBy + " LIMIT ? OFFSET ?";
-        return Base::items( req, nbItems, offset );
+        return Base::executeFetchItems( req, nbItems, offset );
     }
 
     virtual Result all() override
     {
         const std::string req = "SELECT " + m_field + " " + m_base + " " +
                 m_groupAndOrderBy;
-        return Base::all( req );
+        return Base::executeFetchAll( req );
     }
 
 private:
@@ -147,19 +147,19 @@ public:
 
     virtual size_t count() override
     {
-        return Base::count( m_countReq );
+        return Base::executeCount( m_countReq );
     }
 
     virtual Result items( uint32_t nbItems, uint32_t offset ) override
     {
         if ( nbItems == 0 && offset == 0 )
             return all();
-        return Base::items( m_req + " LIMIT ? OFFSET ?", nbItems, offset );
+        return Base::executeFetchItems( m_req + " LIMIT ? OFFSET ?", nbItems, offset );
     }
 
     virtual Result all() override
     {
-        return Base::all( m_req );
+        return Base::executeFetchAll( m_req );
     }
 
 private:
