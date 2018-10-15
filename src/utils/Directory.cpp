@@ -31,6 +31,7 @@
 #include <stdexcept>
 #include <system_error>
 #include "utils/Filename.h"
+#include "logging/Logger.h"
 
 #ifdef _WIN32
 # include <windows.h>
