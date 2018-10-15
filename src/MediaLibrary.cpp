@@ -1268,12 +1268,20 @@ void MediaLibrary::pauseBackgroundOperations()
 {
     if ( m_parser != nullptr )
         m_parser->pause();
+#ifdef HAVE_LIBVLC
+    if ( m_thumbnailer != nullptr )
+        m_thumbnailer->pause();
+#endif
 }
 
 void MediaLibrary::resumeBackgroundOperations()
 {
     if ( m_parser != nullptr )
         m_parser->resume();
+#ifdef HAVE_LIBVLC
+    if ( m_thumbnailer != nullptr )
+        m_thumbnailer->resume();
+#endif
 }
 
 void MediaLibrary::onDiscovererIdleChanged( bool idle )

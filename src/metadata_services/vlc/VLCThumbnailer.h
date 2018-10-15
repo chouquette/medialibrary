@@ -52,6 +52,8 @@ public:
     explicit VLCThumbnailer( MediaLibraryPtr ml );
     virtual ~VLCThumbnailer();
     void requestThumbnail( MediaPtr media );
+    void pause();
+    void resume();
 
 private:
     void run();
@@ -75,6 +77,7 @@ private:
     std::queue<std::unique_ptr<Task>> m_tasks;
     std::atomic_bool m_run;
     compat::Thread m_thread;
+    bool m_paused;
 
     std::unique_ptr<IImageCompressor> m_compressor;
     std::unique_ptr<uint8_t[]> m_buff;

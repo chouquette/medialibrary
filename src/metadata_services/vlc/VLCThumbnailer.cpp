@@ -53,6 +53,7 @@ namespace medialibrary
 VLCThumbnailer::VLCThumbnailer( MediaLibraryPtr ml )
     : m_ml( ml )
     , m_run( false )
+    , m_paused( false )
     , m_prevSize( 0 )
 {
 #ifdef HAVE_JPEG
@@ -81,6 +82,21 @@ void VLCThumbnailer::requestThumbnail( MediaPtr media )
         m_cond.notify_all();
 }
 
+void VLCThumbnailer::pause()
+{
+    std::lock_guard<compat::Mutex> lock( m_mutex );
+    m_paused = true;
+}
+
+void VLCThumbnailer::resume()
+{
+    std::lock_guard<compat::Mutex> lock( m_mutex );
+    if ( m_paused == false )
+        return;
+    m_paused = false;
+    m_cond.notify_all();
+}
+
 void VLCThumbnailer::run()
 {
     LOG_INFO( "Starting thumbnailer thread" );
@@ -89,9 +105,12 @@ void VLCThumbnailer::run()
         std::unique_ptr<Task> task;
         {
             std::unique_lock<compat::Mutex> lock( m_mutex );
-            if ( m_tasks.size() == 0 )
+            if ( m_tasks.size() == 0 || m_paused == true )
             {
-                m_cond.wait( lock, [this]() { return m_tasks.size() > 0 || m_run == false; } );
+                m_cond.wait( lock, [this]() {
+                    return ( m_tasks.size() > 0 && m_paused == false ) ||
+                            m_run == false;
+                });
                 if ( m_run == false )
                     break;
             }
