@@ -83,7 +83,10 @@ std::string toAbsolute( const std::string& path )
 #ifndef _WIN32
     char abs[PATH_MAX];
     if ( realpath( path.c_str(), abs ) == nullptr )
+    {
+        LOG_ERROR( "Failed to convert ", path, " to absolute path" );
         throw std::system_error( errno, std::generic_category(), "Failed to convert to absolute path" );
+    }
     return file::toFolderPath( abs );
 #else
     TCHAR buff[MAX_PATH];
