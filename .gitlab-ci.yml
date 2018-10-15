@@ -1,0 +1,77 @@
+stages:
+    - build
+    - unit-tests
+    - functional-tests
+
+variables:
+  GIT_SUBMODULE_STRATEGY: normal
+
+build-linux:
+    image: registry.videolan.org:5000/medialibrary:20180201163201
+    tags:
+      - debian
+      - amd64
+    stage: build
+    script:
+      - ./bootstrap
+      - ./configure --enable-tests
+      - make -j4
+      - make -j4 check
+    artifacts:
+        paths:
+          - unittest
+          - samples
+          - .libs/
+
+unit-tests-linux:
+    image: registry.videolan.org:5000/medialibrary:20180201163201
+    tags:
+      - debian
+      - amd64
+    stage: unit-tests
+    script:
+        - ./unittest
+
+functional-tests-linux:
+    image: registry.videolan.org:5000/medialibrary:20180201163201
+    tags:
+      - debian
+      - amd64
+    stage: functional-tests
+    script:
+        - ./samples -v
+
+build-win32:
+    image: registry.videolan.org:5000/medialibrary-win32:20181005122304
+    tags:
+      - win32
+    stage: build
+    script:
+      - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/prefix/lib/pkgconfig"
+      - ./bootstrap
+      - ./configure --enable-tests --host=i686-w64-mingw32 --disable-shared
+      - make -j4
+      - make -j4 check
+    artifacts:
+        paths:
+          - unittest.exe
+          - samples.exe
+          - .libs/
+
+build-win64:
+    image: registry.videolan.org:5000/medialibrary-win64:20181005125659
+    tags:
+      - win64
+    stage: build
+    script:
+      - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/prefix/lib/pkgconfig"
+      - ./bootstrap
+      - ./configure --enable-tests --host=x86_64-w64-mingw32 --disable-shared
+      - make -j4
+      - make -j4 check
+    artifacts:
+        paths:
+          - unittest.exe
+          - samples.exe
+          - .libs/
+
