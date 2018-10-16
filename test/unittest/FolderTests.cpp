@@ -460,8 +460,8 @@ TEST_F( Folders, NbMedia )
     auto subFolder = ml->folder( 2 );
     ASSERT_EQ( "file:///a/", root->mrl() );
     ASSERT_EQ( "file:///a/folder/", subFolder->mrl() );
-    ASSERT_EQ( 2u, root->nbMedia() );
-    ASSERT_EQ( 1u, subFolder->nbMedia() );
+    ASSERT_EQ( 2u, root->media( IMedia::Type::Unknown, nullptr )->count() );
+    ASSERT_EQ( 1u, subFolder->media( IMedia::Type::Unknown, nullptr )->count() );
     // Do not watch for live changes
     ml.reset();
     fsMock->removeFile( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
@@ -471,8 +471,94 @@ TEST_F( Folders, NbMedia )
     root = ml->folder( 1 );
     subFolder = ml->folder( 2 );
 
-    ASSERT_EQ( 2u, root->nbMedia() );
-    ASSERT_EQ( 0u, subFolder->nbMedia() );
+    ASSERT_EQ( 2u, root->media( IMedia::Type::Unknown, nullptr )->count() );
+    ASSERT_EQ( 0u, subFolder->media( IMedia::Type::Unknown, nullptr )->count() );
+}
+
+TEST_F( FoldersNoDiscover, ListWithMedia )
+{
+    auto newFolder = mock::FileSystemFactory::Root + "empty/";
+    fsMock->addFolder( newFolder );
+
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    QueryParameters params{};
+    params.sort = SortingCriteria::NbMedia;
+    auto folders = ml->folders( &params )->all();
+    ASSERT_EQ( 2u, folders.size() );
+    ASSERT_EQ( folders[0]->mrl(), mock::FileSystemFactory::Root );
+    ASSERT_EQ( 2u, folders[0]->media( IMedia::Type::Unknown, nullptr )->count() );
+    ASSERT_EQ( folders[1]->mrl(), mock::FileSystemFactory::SubFolder );
+    ASSERT_EQ( 1u, folders[1]->media( IMedia::Type::Unknown, nullptr )->count() );
+
+    params.desc = true;
+    folders = ml->folders( &params )->all();
+    ASSERT_EQ( 2u, folders.size() );
+    ASSERT_EQ( folders[1]->mrl(), mock::FileSystemFactory::Root );
+    ASSERT_EQ( 2u, folders[1]->media( IMedia::Type::Unknown, nullptr )->count() );
+    ASSERT_EQ( folders[0]->mrl(), mock::FileSystemFactory::SubFolder );
+    ASSERT_EQ( 1u, folders[0]->media( IMedia::Type::Unknown, nullptr )->count() );
+}
+
+TEST_F( FoldersNoDiscover, ListSubFolders )
+{
+    auto newFolder = mock::FileSystemFactory::Root + "empty/";
+    fsMock->addFolder( newFolder );
+
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    auto entryPoints = ml->entryPoints()->all();
+    ASSERT_EQ( 1u, entryPoints.size() );
+
+    auto root = entryPoints[0];
+    QueryParameters params{};
+    params.sort = SortingCriteria::NbMedia;
+    auto rootSubFolders = root->subfolders( &params )->all();
+    ASSERT_EQ( 2u, rootSubFolders.size() );
+    ASSERT_EQ( mock::FileSystemFactory::SubFolder, rootSubFolders[0]->mrl() );
+    auto sfMedia = rootSubFolders[0]->media( IMedia::Type::Unknown, nullptr )->all();
+    ASSERT_EQ( 1u, sfMedia.size() );
+    ASSERT_EQ( newFolder, rootSubFolders[1]->mrl() );
+    ASSERT_EQ( 0u, rootSubFolders[1]->media( IMedia::Type::Unknown, nullptr )->count() );
+
+    auto media = std::static_pointer_cast<Media>( sfMedia[0] );
+    media->setType( IMedia::Type::Video );
+    media->save();
+
+    // Check fetching by type now
+    ASSERT_EQ( 0u, rootSubFolders[0]->media( IMedia::Type::Audio, nullptr )->count() );
+    ASSERT_EQ( 1u, rootSubFolders[0]->media( IMedia::Type::Video, nullptr )->count() );
+    // Double check with a fetch all instead of counting
+    auto allMedia = rootSubFolders[0]->media( IMedia::Type::Video, nullptr )->all();
+    ASSERT_EQ( 1u, allMedia.size() );
+    ASSERT_EQ( media->id(), allMedia[0]->id() );
+}
+
+TEST_F( FoldersNoDiscover, SearchFolders )
+{
+    // Add an empty folder matching the search pattern
+    auto newFolder = mock::FileSystemFactory::Root + "empty/folder/";
+    fsMock->addFolder( newFolder );
+    // Add a non empty sub folder also matching the pattern
+    auto newSubFolder = mock::FileSystemFactory::Root + "empty/folder/fold/";
+    fsMock->addFolder( newSubFolder );
+    fsMock->addFile( newSubFolder + "some file.avi" );
+    fsMock->addFile( newSubFolder + "some other file.avi" );
+
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    QueryParameters params{};
+    params.sort = SortingCriteria::NbMedia;
+    auto folders = ml->searchFolders( "fold", &params )->all();
+    ASSERT_EQ( 2u, folders.size() );
+    ASSERT_EQ( newSubFolder, folders[0]->mrl() );
+    ASSERT_EQ( mock::FileSystemFactory::SubFolder, folders[1]->mrl() );
 }
 
 TEST_F( FoldersNoDiscover, Name )

@@ -30,6 +30,7 @@
 #include "Media.h"
 
 #include "database/SqliteTools.h"
+#include "database/SqliteQuery.h"
 #include "medialibrary/filesystem/IDirectory.h"
 #include "medialibrary/filesystem/IDevice.h"
 #include "medialibrary/filesystem/IFileSystemFactory.h"
@@ -54,7 +55,7 @@ Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
     , m_isBanned( row.load<decltype(m_isBanned)>( 4 ) )
     , m_deviceId( row.load<decltype(m_deviceId)>( 5 ) )
     , m_isRemovable( row.load<decltype(m_isRemovable)>( 6 ) )
-    , m_nbMedia( row.load<decltype(m_nbMedia)>( 7 ) )
+    // Skip nbMedia
 {
 }
 
@@ -254,6 +255,45 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
     return folder;
 }
 
+std::string Folder::sortRequest( const QueryParameters* params )
+{
+    auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
+    auto desc = params != nullptr ? params->desc : false;
+    std::string req = "ORDER BY ";
+    switch ( sort )
+    {
+        case SortingCriteria::NbMedia:
+            req += "nb_media";
+            desc = !desc;
+            break;
+        default:
+            LOG_WARN( "Unsupported sorting criteria, falling back to Default (alpha)" );
+            /* fall-through */
+        case SortingCriteria::Default:
+        case SortingCriteria::Alpha:
+            req += "name";
+    }
+    if ( desc == true )
+        req += " DESC";
+    return req;
+}
+
+Query<IFolder> Folder::withMedia(MediaLibraryPtr ml , const QueryParameters* params)
+{
+    static std::string req = "FROM " + Table::Name + " WHERE nb_media > 0";
+    return make_query<Folder, IFolder>( ml, "*", req, sortRequest( params ) );
+}
+
+Query<IFolder> Folder::searchWithMedia( MediaLibraryPtr ml, const std::string& pattern,
+                                        const QueryParameters* params )
+{
+    std::string req = "FROM " + Table::Name + " f WHERE f.id_folder IN "
+            "(SELECT rowid FROM " + Table::Name + "Fts WHERE " +
+            Table::Name + "Fts MATCH '*' || ? || '*') "
+            "AND nb_media > 0";
+    return make_query<Folder, IFolder>( ml, "*", req, sortRequest( params ), pattern );
+}
+
 int64_t Folder::id() const
 {
     return m_id;
@@ -380,9 +420,15 @@ bool Folder::isRootFolder() const
     return m_parent == 0;
 }
 
-uint32_t Folder::nbMedia() const
+Query<IMedia> Folder::media( IMedia::Type type, const QueryParameters* params ) const
 {
-    return m_nbMedia;
+    return Media::fromFolderId( m_ml, type, m_id, params );
+}
+
+Query<IFolder> Folder::subfolders( const QueryParameters* params ) const
+{
+    static const std::string req = "FROM " + Table::Name + " WHERE parent_id = ?";
+    return make_query<Folder, IFolder>( m_ml, "*", req, sortRequest( params ), m_id );
 }
 
 std::vector<std::shared_ptr<Folder>> Folder::fetchRootFolders( MediaLibraryPtr ml )

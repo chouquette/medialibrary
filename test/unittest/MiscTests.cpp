@@ -218,7 +218,7 @@ TEST_F( DbModel, Upgrade13to14 )
 
     auto folder = ml->folder( 1 );
     ASSERT_NE( nullptr, folder );
-    ASSERT_EQ( 2u, folder->nbMedia() );
+    ASSERT_EQ( 2u, folder->media( IMedia::Type::Unknown, nullptr )->count() );
     ASSERT_EQ( "folder", folder->name() );
 
     CheckNbTriggers( 34 );

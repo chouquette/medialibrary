@@ -23,6 +23,9 @@
 #pragma once
 
 #include <string>
+#include "IQuery.h"
+#include "IMedia.h"
+#include "IMediaLibrary.h"
 
 namespace medialibrary
 {
@@ -48,7 +51,49 @@ public:
      * from being discovered.
      */
     virtual bool isBanned() const = 0;
-    virtual uint32_t nbMedia() const = 0;
+    /**
+     * @brief media Returns the media contained by this folder.
+     * @param type The media type, or IMedia::Type::Unknown for all types
+     * @param params A query parameter instance, or nullptr for the default
+     * @return A Query object to be used to fetch the results
+     *
+     * This function will only return the media contained in the folder, not
+     * the media contained in subfolders.
+     * A media is considered to be in a directory when the main file representing
+     * it is part of the directory.
+     * For instance, in this file hierarchy:
+     * .
+     * ├── a
+     * │   ├── c
+     * │   │   └── NakedMoleRat.asf
+     * │   └── seaotter_themovie.srt
+     * └── b
+     *     └── seaotter_themovie.mkv
+     * Media of 'a' would be empty (since the only file is a subtitle file and
+     *                              not the actual media, and NakedMoleRat.asf
+     *                              is in a subfolder)
+     * Media of 'c' would contain NakedMoleRat.asf
+     * Media of 'b' would contain seaotter_themovie.mkv
+     */
+    virtual Query<IMedia> media( IMedia::Type type,
+                                  const QueryParameters* params ) const = 0;
+    /**
+     * @brief subfolders Returns the subfolders contained folder
+     * @return A query object to be used to fetch the results
+     *
+     * all of the folder subfolders, regardless of the folder content.
+     * For instance, in this hierarchy:
+     * ├── a
+     * │   └── w
+     * │       └── x
+     * a->subfolders() would return w; w->subfolders would return x, even though
+     * x is empty.
+     * This is done for optimization purposes, as keeping track of the entire
+     * folder hierarchy would be quite heavy.
+     * As an alternative, it is possible to use IMediaLibrary::folders to return
+     * a flattened list of all folders that contain media.
+     */
+    virtual Query<IFolder> subfolders( const QueryParameters* params ) const = 0;
 };
 
 }

@@ -154,6 +154,9 @@ class Media : public IMedia, public DatabaseHelpers<Media>
                                                  int64_t playlistId, const QueryParameters* params );
         static Query<IMedia> fetchHistory( MediaLibraryPtr ml );
         static Query<IMedia> fetchStreamHistory( MediaLibraryPtr ml );
+        static Query<IMedia> fromFolderId( MediaLibraryPtr ml, Type type,
+                                           int64_t folderId,
+                                           const QueryParameters* params );
 
         static void clearHistory( MediaLibraryPtr ml );
         static void removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime );

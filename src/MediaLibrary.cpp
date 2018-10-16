@@ -1380,6 +1380,19 @@ Query<IFolder> MediaLibrary::entryPoints() const
     return make_query<Folder, IFolder>( this, "*", req, "" );
 }
 
+Query<IFolder> MediaLibrary::folders( const QueryParameters* params ) const
+{
+    return Folder::withMedia( this, params );
+}
+
+Query<IFolder> MediaLibrary::searchFolders( const std::string& pattern,
+                                            const QueryParameters* params ) const
+{
+    if ( validateSearchPattern( pattern ) == false )
+        return {};
+    return Folder::searchWithMedia( this, pattern, params );
+}
+
 FolderPtr MediaLibrary::folder( const std::string& mrl ) const
 {
     return Folder::fromMrl( this, mrl, Folder::BannedType::Any );

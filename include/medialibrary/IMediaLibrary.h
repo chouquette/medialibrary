@@ -65,6 +65,8 @@ enum class SortingCriteria
     Album,
     Filename,
     TrackNumber,
+    // Valid for folders only. Default order is descending
+    NbMedia,
 };
 
 
@@ -387,6 +389,29 @@ class IMediaLibrary
          */
         virtual bool setDiscoverNetworkEnabled( bool enable ) = 0;
         virtual Query<IFolder> entryPoints() const = 0;
+        /**
+         * @brief folders Returns a flattened list of all folders containing at least a media
+         * @param params A query parameters object
+         * @return A query object to be used to fetch the results
+         *
+         * This is flattened, ie.
+         * ├── a
+         * │   └── w
+         * │       └── x
+         * │           └── y
+         * │               └── z
+         * │                   └── DogMeme.avi
+         * ├── c
+         * │   └── NakedMoleRat.asf
+         *
+         * would return a query containing 'z' and 'c' as the other folders are
+         * not containing any media.
+         * In case a non flattened list is desired, the
+         * entryPoints() & IFolder::subFolders() function should be used.
+         */
+        virtual Query<IFolder> folders( const QueryParameters* params = nullptr ) const = 0;
+        virtual Query<IFolder> searchFolders( const std::string& pattern,
+                                              const QueryParameters* params ) const = 0;
         virtual FolderPtr folder( const std::string& mrl ) const = 0;
         virtual void removeEntryPoint( const std::string& entryPoint ) = 0;
         /**

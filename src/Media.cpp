@@ -500,6 +500,9 @@ std::string Media::addRequestJoin( const QueryParameters* params, bool forceFile
         case SortingCriteria::TrackNumber:
             albumTrack = true;
             break;
+        case SortingCriteria::NbMedia:
+            // Unrelated to media requests
+            break;
     }
     std::string req;
     // Use "LEFT JOIN to allow for ordering different media type
@@ -919,6 +922,26 @@ Query<IMedia> Media::fetchStreamHistory(MediaLibraryPtr ml)
     return make_query<Media, IMedia>( ml, "*", req,
                                       "ORDER BY last_played_date DESC",
                                       IMedia::Type::Stream );
+}
+
+Query<IMedia> Media::fromFolderId( MediaLibraryPtr ml, IMedia::Type type,
+                                   int64_t folderId, const QueryParameters* params )
+{
+    // This assumes the folder is present, as folders are not expected to be
+    // manipulated when the device is not present
+    std::string req = "FROM " + Table::Name +  " m WHERE folder_id = ?";
+    if ( type != Type::Unknown )
+    {
+        req += " AND type = ?";
+        req += addRequestJoin( params, false, false );
+        return make_query<Media, IMedia>( ml, "*", req, sortRequest( params ),
+                                          folderId, type );
+    }
+    // Don't explicitely filter by type since only video/audio media have a
+    // non NULL folder_id
+    req += addRequestJoin( params, false, false );
+    return make_query<Media, IMedia>( ml, "*", req, sortRequest( params ),
+                                      folderId );
 }
 
 void Media::clearHistory( MediaLibraryPtr ml )

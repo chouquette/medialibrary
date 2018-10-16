@@ -64,6 +64,9 @@ public:
 
     static std::shared_ptr<Folder> fromMrl(MediaLibraryPtr ml, const std::string& mrl );
     static std::shared_ptr<Folder> bannedFolder(MediaLibraryPtr ml, const std::string& mrl );
+    static Query<IFolder> withMedia( MediaLibraryPtr ml, const QueryParameters* params );
+    static Query<IFolder> searchWithMedia( MediaLibraryPtr ml, const std::string& pattern,
+                                           const QueryParameters* params );
 
     virtual int64_t id() const override;
     virtual const std::string& mrl() const override;
@@ -79,7 +82,9 @@ public:
     virtual bool isPresent() const override;
     virtual bool isBanned() const override;
     bool isRootFolder() const;
-    virtual uint32_t nbMedia() const override;
+    virtual Query<IMedia> media( IMedia::Type type,
+                                 const QueryParameters* params ) const override;
+    virtual Query<IFolder> subfolders( const QueryParameters* params ) const override;
 
     enum class BannedType
     {
@@ -89,6 +94,9 @@ public:
     };
 
     static std::shared_ptr<Folder> fromMrl( MediaLibraryPtr ml, const std::string& mrl, BannedType bannedType );
+
+private:
+    static std::string sortRequest( const QueryParameters* params );
 
 private:
     MediaLibraryPtr m_ml;
@@ -102,7 +110,6 @@ private:
     const bool m_isBanned;
     const int64_t m_deviceId;
     const bool m_isRemovable;
-    uint32_t m_nbMedia;
 
     mutable std::string m_deviceMountpoint;
     mutable std::shared_ptr<Device> m_device;
