@@ -33,3 +33,8 @@
 
     "UNIQUE(folder_id) ON CONFLICT FAIL"
 ")",
+
+"CREATE VIRTUAL TABLE IF NOT EXISTS " + Folder::Table::Name + "Fts USING FTS3"
+"("
+    "name"
+")",

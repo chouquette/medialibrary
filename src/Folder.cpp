@@ -303,8 +303,12 @@ void Folder::setName( std::string name )
     assert( m_name.empty() == true );
     static const std::string req = "UPDATE " + Table::Name +
             " SET name = ? WHERE id_folder = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, name, m_id ) == false )
+    auto dbConn = m_ml->getConn();
+    if ( sqlite::Tools::executeUpdate( dbConn, req, name, m_id ) == false )
         return;
+    static const std::string reqFts = "INSERT INTO " + Table::Name + "Fts "
+            "(rowid, name) VALUES(?, ?)";
+    sqlite::Tools::executeInsert( dbConn, reqFts, m_id, name );
     m_name = std::move( name );
 }
 

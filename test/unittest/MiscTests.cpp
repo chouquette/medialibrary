@@ -174,7 +174,7 @@ TEST_F( DbModel, Upgrade12to13 )
     // We can't check for the number of albums anymore since they are deleted
     // as part of 13 -> 14 migration
 
-    CheckNbTriggers( 32 );
+    CheckNbTriggers( 34 );
 }
 
 TEST_F( DbModel, Upgrade13to14 )
@@ -221,5 +221,5 @@ TEST_F( DbModel, Upgrade13to14 )
     ASSERT_EQ( 2u, folder->nbMedia() );
     ASSERT_EQ( "folder", folder->name() );
 
-    CheckNbTriggers( 32 );
+    CheckNbTriggers( 34 );
 }
