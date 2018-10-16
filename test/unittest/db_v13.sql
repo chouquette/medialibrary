@@ -71,12 +71,14 @@ CREATE TRIGGER cascade_file_deletion AFTER DELETE ON File BEGIN  DELETE FROM Med
 CREATE TRIGGER append_new_playlist_record AFTER INSERT ON PlaylistMediaRelation WHEN new.position IS NULL BEGIN  UPDATE PlaylistMediaRelation SET position = (SELECT COUNT(media_id) FROM PlaylistMediaRelation WHERE playlist_id = new.playlist_id) WHERE playlist_id=new.playlist_id AND media_id = new.media_id; END;
 CREATE TRIGGER add_album_track AFTER INSERT ON AlbumTrack BEGIN UPDATE Album SET duration = duration + new.duration, nb_tracks = nb_tracks + 1 WHERE id_album = new.album_id; END;
 INSERT INTO `Settings` (db_model_version) VALUES (13);
+INSERT INTO `Device` (id_device, uuid, scheme, is_removable) VALUES(1, '{fake-uuid}', 'file://', 0);
+INSERT INTO `Folder` (id_folder, path, parent_id, device_id, is_removable) VALUES(1, 'file:///mock/folder/', NULL, 1, 0);
 INSERT INTO `Artist` (id_artist,name,shortbio,artwork_mrl,nb_albums,nb_tracks,mb_id,is_present) VALUES (1,NULL,NULL,NULL,0,0,NULL,1);
 INSERT INTO `Artist` (id_artist,name,shortbio,artwork_mrl,nb_albums,nb_tracks,mb_id,is_present) VALUES (2,NULL,NULL,NULL,0,0,NULL,1);
-INSERT INTO `Media` (id_media,type,subtype,duration,play_count,last_played_date,insertion_date,release_date,thumbnail,title,filename,is_favorite,is_present) VALUES (1,3,NULL,-1,NULL,NULL,1522231538,NULL,'/path/to/thumbnail','Cool media','file%20with%20space.avi',0,1);
-INSERT INTO `File` (id_file,media_id,playlist_id,mrl,type,last_modification_date,size,folder_id,is_present,is_removable,is_external) VALUES (1,1,NULL,'media.avi',1,NULL,NULL,NULL,1,0,1);
-INSERT INTO `Media` (id_media,type,subtype,duration,play_count,last_played_date,insertion_date,release_date,thumbnail,title,filename,is_favorite,is_present) VALUES (2,3,NULL,-1,NULL,NULL,1522231538,NULL,'','media2.avi','media2.avi',0,1);
-INSERT INTO `File` (id_file,media_id,playlist_id,mrl,type,last_modification_date,size,folder_id,is_present,is_removable,is_external) VALUES (2,2,NULL,'media2.avi',1,NULL,NULL,NULL,1,0,1);
+INSERT INTO `Media` (id_media,type,subtype,duration,play_count,last_played_date,insertion_date,release_date,thumbnail,title,filename,is_favorite,is_present) VALUES (1,1,NULL,-1,NULL,NULL,1522231538,NULL,'/path/to/thumbnail','Cool media','file%20with%20space.avi',0,1);
+INSERT INTO `File` (id_file,media_id,playlist_id,mrl,type,last_modification_date,size,folder_id,is_present,is_removable,is_external) VALUES (1,1,NULL,'media.avi',1,NULL,NULL,1,1,0,0);
+INSERT INTO `Media` (id_media,type,subtype,duration,play_count,last_played_date,insertion_date,release_date,thumbnail,title,filename,is_favorite,is_present) VALUES (2,1,NULL,-1,NULL,NULL,1522231538,NULL,'','media2.avi','media2.avi',0,1);
+INSERT INTO `File` (id_file,media_id,playlist_id,mrl,type,last_modification_date,size,folder_id,is_present,is_removable,is_external) VALUES (2,2,NULL,'media2.avi',1,NULL,NULL,1,1,0,0);
 INSERT INTO `Media` (id_media,type,subtype,duration,play_count,last_played_date,insertion_date,release_date,thumbnail,title,filename,is_favorite,is_present) VALUES (3,0,NULL,-1,NULL,NULL,1522231538,NULL,'','external.avi','external.avi',0,1);
 INSERT INTO `File` (id_file,media_id,playlist_id,mrl,type,last_modification_date,size,folder_id,is_present,is_removable,is_external) VALUES (3,3,NULL,'external.avi',1,NULL,NULL,NULL,1,0,1);
 INSERT INTO `Media` (id_media,type,subtype,duration,play_count,last_played_date,insertion_date,release_date,thumbnail,title,filename,is_favorite,is_present) VALUES (99,0,NULL,-1,NULL,NULL,1522231538,NULL,'','other_external.avi','other_external.avi',0,1);
