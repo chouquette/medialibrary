@@ -31,6 +31,7 @@
 #include "Folder.h"
 #include "medialibrary/IMediaLibrary.h"
 #include "utils/Filename.h"
+#include "utils/Url.h"
 #include "mocks/FileSystem.h"
 #include "mocks/DiscovererCbMock.h"
 
@@ -472,4 +473,22 @@ TEST_F( Folders, NbMedia )
 
     ASSERT_EQ( 2u, root->nbMedia() );
     ASSERT_EQ( 0u, subFolder->nbMedia() );
+}
+
+TEST_F( FoldersNoDiscover, Name )
+{
+    auto newFolder = mock::FileSystemFactory::SubFolder + "folder%20with%20spaces/";
+    fsMock->addFolder( newFolder );
+
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    auto root = ml->folder( 1 );
+    auto subFolder = ml->folder( 2 );
+    auto spacesFolder = ml->folder( 3 );
+    ASSERT_EQ( "a", root->name() );
+    ASSERT_EQ( "folder", subFolder->name() );
+    ASSERT_EQ( "folder with spaces", spacesFolder->name() );
+    ASSERT_EQ( newFolder, spacesFolder->mrl() );
 }

@@ -1190,6 +1190,11 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
         LOG_INFO( "Converting ", m->fileName(), " to ", newFileName );
         m->setFileName( std::move( newFileName ) );
     }
+    auto folders = Folder::fetchAll<Folder>( this );
+    for ( const auto& f : folders )
+    {
+        f->setName( utils::file::directoryName( f->rawMrl() ) );
+    }
 
     t->commit();
 }

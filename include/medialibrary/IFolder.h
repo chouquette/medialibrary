@@ -41,6 +41,7 @@ public:
      * @return The folder's mrl
      */
     virtual const std::string& mrl() const = 0;
+    virtual const std::string& name() const = 0;
     virtual bool isPresent() const = 0;
     /**
      * @brief isBanned Will return true if the folder was explicitely banned

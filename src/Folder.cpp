@@ -34,6 +34,7 @@
 #include "medialibrary/filesystem/IDevice.h"
 #include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "utils/Filename.h"
+#include "utils/Url.h"
 
 #include <unordered_map>
 
@@ -48,18 +49,21 @@ Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
     , m_id( row.load<decltype(m_id)>( 0 ) )
     , m_path( row.load<decltype(m_path)>( 1 ) )
-    , m_parent( row.load<decltype(m_parent)>( 2 ) )
-    , m_isBanned( row.load<decltype(m_isBanned)>( 3 ) )
-    , m_deviceId( row.load<decltype(m_deviceId)>( 4 ) )
-    , m_isRemovable( row.load<decltype(m_isRemovable)>( 5 ) )
-    , m_nbMedia( row.load<decltype(m_nbMedia)>( 6 ) )
+    , m_name( row.load<decltype(m_name)>( 2 ) )
+    , m_parent( row.load<decltype(m_parent)>( 3 ) )
+    , m_isBanned( row.load<decltype(m_isBanned)>( 4 ) )
+    , m_deviceId( row.load<decltype(m_deviceId)>( 5 ) )
+    , m_isRemovable( row.load<decltype(m_isRemovable)>( 6 ) )
+    , m_nbMedia( row.load<decltype(m_nbMedia)>( 7 ) )
 {
 }
 
-Folder::Folder(MediaLibraryPtr ml, const std::string& path, int64_t parent, int64_t deviceId, bool isRemovable )
+Folder::Folder(MediaLibraryPtr ml, const std::string& path,
+               int64_t parent, int64_t deviceId, bool isRemovable )
     : m_ml( ml )
     , m_id( 0 )
     , m_path( path )
+    , m_name( utils::url::decode( utils::file::directoryName( path ) ) )
     , m_parent( parent )
     , m_isBanned( false )
     , m_deviceId( deviceId )
@@ -117,8 +121,8 @@ std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& m
         path = mrl;
     auto self = std::make_shared<Folder>( ml, path, parentId, device.id(), device.isRemovable() );
     static const std::string req = "INSERT INTO " + Folder::Table::Name +
-            "(path, parent_id, device_id, is_removable) VALUES(?, ?, ?, ?)";
-    if ( insert( ml, self, req, path, sqlite::ForeignKey( parentId ), device.id(), device.isRemovable() ) == false )
+            "(path, name, parent_id, device_id, is_removable) VALUES(?, ?, ?, ?, ?)";
+    if ( insert( ml, self, req, path, self->m_name, sqlite::ForeignKey( parentId ), device.id(), device.isRemovable() ) == false )
         return nullptr;
     if ( device.isRemovable() == true )
     {
@@ -287,6 +291,21 @@ const std::string& Folder::mrl() const
     m_deviceMountpoint = deviceFs->mountpoint();
     m_fullPath = m_deviceMountpoint + m_path;
     return m_fullPath;
+}
+
+const std::string&Folder::name() const
+{
+    return m_name;
+}
+
+void Folder::setName( std::string name )
+{
+    assert( m_name.empty() == true );
+    static const std::string req = "UPDATE " + Table::Name +
+            " SET name = ? WHERE id_folder = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, name, m_id ) == false )
+        return;
+    m_name = std::move( name );
 }
 
 const std::string& Folder::rawMrl() const

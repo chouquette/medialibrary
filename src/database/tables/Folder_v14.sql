@@ -2,6 +2,7 @@
 "("
     "id_folder INTEGER PRIMARY KEY AUTOINCREMENT,"
     "path TEXT,"
+    "name TEXT,"
     "parent_id UNSIGNED INTEGER,"
     "is_banned BOOLEAN NOT NULL DEFAULT 0,"
     "device_id UNSIGNED INTEGER,"
