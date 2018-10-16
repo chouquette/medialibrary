@@ -103,8 +103,15 @@ void Directory::addFolder(const std::string& folder)
     else
     {
         auto it = m_dirs.find( subFolder );
-        assert( it != end( m_dirs ) );
-        it->second->addFolder( remainingPath );
+        std::shared_ptr<Directory> dir;
+        if ( it == end( m_dirs ) )
+        {
+            dir = std::make_shared<Directory>( m_mrl + subFolder, m_device.lock() );
+            m_dirs[subFolder] = dir;
+        }
+        else
+            dir = it->second;
+        dir->addFolder( remainingPath );
     }
 }
 
