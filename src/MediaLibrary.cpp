@@ -404,7 +404,8 @@ MediaPtr MediaLibrary::addExternalMedia( const std::string& mrl, IMedia::Type ty
         return sqlite::Tools::withRetries( 3, [this, &mrl, type]() -> MediaPtr {
             auto t = m_dbConnection->newTransaction();
             auto fileName = utils::file::fileName( mrl );
-            auto media = Media::create( this, type, 0, utils::url::decode( fileName ) );
+            auto media = Media::create( this, type, 0, 0,
+                                        utils::url::decode( fileName ) );
             if ( media == nullptr )
                 return nullptr;
             if ( media->addExternalMrl( mrl, IFile::Type::Main ) == nullptr )

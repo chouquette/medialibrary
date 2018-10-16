@@ -18,9 +18,12 @@
     "is_present BOOLEAN NOT NULL DEFAULT 1,"
     "device_id INTEGER,"
     "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+    "folder_id UNSIGNED INTEGER,"
 
     "FOREIGN KEY(thumbnail_id) REFERENCES " + Thumbnail::Table::Name
-    + "(id_thumbnail)"
+    + "(id_thumbnail),"
+    "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
+    + "(id_folder)"
 ")",
 
 "CREATE INDEX IF NOT EXISTS media_types_idx ON " + Media::Table::Name +

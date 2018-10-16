@@ -48,10 +48,10 @@
 "(SELECT COUNT(media_id) FROM PlaylistMediaRelation WHERE media_id = id_media )"
 "WHERE id_media IN (SELECT media_id FROM PlaylistMediaRelation)",
 
-/********************* Populate new media.device_id ***************************/
+/*************** Populate new media.device_id & folder_id *********************/
 
-"UPDATE " + Media::Table::Name + " SET device_id = "
-"(SELECT d.id_device FROM " + Device::Table::Name + " d "
+"UPDATE " + Media::Table::Name + " SET (device_id, folder_id) = "
+"(SELECT d.id_device, f.id_folder FROM " + Device::Table::Name + " d "
 "INNER JOIN " + Folder::Table::Name + " f ON d.id_device = f.device_id "
 "INNER JOIN " + File::Table::Name + " fi ON fi.folder_id = f.id_folder "
 "WHERE fi.type = " +

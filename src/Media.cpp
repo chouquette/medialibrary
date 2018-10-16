@@ -79,6 +79,8 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     // Skip is_present
     // Skip device_id
     , m_nbPlaylists( row.load<unsigned int>( 16 ) )
+    // Skip folder_id if any field gets added afterward
+
     // End of DB fields extraction
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
@@ -108,15 +110,17 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
 }
 
 std::shared_ptr<Media> Media::create( MediaLibraryPtr ml, Type type,
-                                      int64_t deviceId, const std::string& fileName )
+                                      int64_t deviceId, int64_t folderId,
+                                      const std::string& fileName )
 {
     auto self = std::make_shared<Media>( ml, fileName, type );
     static const std::string req = "INSERT INTO " + Media::Table::Name +
-            "(type, insertion_date, title, filename, device_id) "
-            "VALUES(?, ?, ?, ?, ?)";
+            "(type, insertion_date, title, filename, device_id, folder_id) "
+            "VALUES(?, ?, ?, ?, ?, ?)";
 
     if ( insert( ml, self, req, type, self->m_insertionDate, self->m_title,
-                 self->m_filename, sqlite::ForeignKey{ deviceId } ) == false )
+                 self->m_filename, sqlite::ForeignKey{ deviceId },
+                 sqlite::ForeignKey{ folderId } ) == false )
         return nullptr;
     return self;
 }
