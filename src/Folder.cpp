@@ -52,6 +52,7 @@ Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
     , m_isBanned( row.load<decltype(m_isBanned)>( 3 ) )
     , m_deviceId( row.load<decltype(m_deviceId)>( 4 ) )
     , m_isRemovable( row.load<decltype(m_isRemovable)>( 5 ) )
+    , m_nbMedia( row.load<decltype(m_nbMedia)>( 6 ) )
 {
 }
 
@@ -75,13 +76,35 @@ void Folder::createTable( sqlite::Connection* connection)
         sqlite::Tools::executeRequest( connection, req );
 }
 
-void Folder::createTriggers( sqlite::Connection* connection )
+void Folder::createTriggers( sqlite::Connection* connection, uint32_t modelVersion )
 {
     const std::string reqs[] = {
         #include "database/tables/Folder_triggers_v14.sql"
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( connection, req );
+    if ( modelVersion >= 14 )
+    {
+        const std::string v14Reqs[] = {
+            "CREATE TRIGGER IF NOT EXISTS update_folder_nb_media_on_insert "
+                "AFTER INSERT ON " + Media::Table::Name + " "
+                "WHEN new.folder_id IS NOT NULL "
+            "BEGIN "
+                "UPDATE " + Folder::Table::Name + " SET nb_media = nb_media + 1 "
+                    "WHERE id_folder = new.folder_id;"
+            "END",
+
+            "CREATE TRIGGER IF NOT EXISTS update_folder_nb_media_on_delete "
+                "AFTER DELETE ON " + Media::Table::Name + " "
+                "WHEN old.folder_id IS NOT NULL "
+            "BEGIN "
+                "UPDATE " + Folder::Table::Name + " SET nb_media = nb_media - 1 "
+                    "WHERE id_folder = old.folder_id;"
+            "END",
+        };
+        for ( const auto& req : v14Reqs )
+            sqlite::Tools::executeRequest( connection, req );
+    }
 }
 
 std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& mrl,
@@ -332,6 +355,11 @@ bool Folder::isBanned() const
 bool Folder::isRootFolder() const
 {
     return m_parent == 0;
+}
+
+uint32_t Folder::nbMedia() const
+{
+    return m_nbMedia;
 }
 
 std::vector<std::shared_ptr<Folder>> Folder::fetchRootFolders( MediaLibraryPtr ml )

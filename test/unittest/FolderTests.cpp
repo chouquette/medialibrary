@@ -452,3 +452,24 @@ TEST_F( Folders, RemoveRootFolder )
 
     ASSERT_EQ( 0u, ml->files().size() );
 }
+
+TEST_F( Folders, NbMedia )
+{
+    auto root = ml->folder( 1 );
+    auto subFolder = ml->folder( 2 );
+    ASSERT_EQ( "file:///a/", root->mrl() );
+    ASSERT_EQ( "file:///a/folder/", subFolder->mrl() );
+    ASSERT_EQ( 2u, root->nbMedia() );
+    ASSERT_EQ( 1u, subFolder->nbMedia() );
+    // Do not watch for live changes
+    ml.reset();
+    fsMock->removeFile( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+
+    Reload();
+
+    root = ml->folder( 1 );
+    subFolder = ml->folder( 2 );
+
+    ASSERT_EQ( 2u, root->nbMedia() );
+    ASSERT_EQ( 0u, subFolder->nbMedia() );
+}

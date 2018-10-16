@@ -173,6 +173,9 @@ IMedia::Type::Unknown ) ),
 "SELECT id_folder, path, parent_id, is_blacklisted, device_id, is_removable "
 "FROM " + Folder::Table::Name + "_backup",
 
+"UPDATE " + Folder::Table::Name + " SET nb_media = "
+    "(SELECT COUNT() FROM " + Media::Table::Name + " m WHERE m.folder_id = id_folder )",
+
 "DROP TABLE " + Folder::Table::Name + "_backup",
 
 /******************* Migrate File table *************************************/

@@ -6,6 +6,7 @@
     "is_banned BOOLEAN NOT NULL DEFAULT 0,"
     "device_id UNSIGNED INTEGER,"
     "is_removable BOOLEAN NOT NULL,"
+    "nb_media UNSIGNED INTEGER NOT NULL DEFAULT 0,"
 
     "FOREIGN KEY (parent_id) REFERENCES " + Folder::Table::Name +
     "(id_folder) ON DELETE CASCADE,"

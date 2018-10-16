@@ -157,7 +157,7 @@ void MediaLibrary::createAllTables()
 void MediaLibrary::createAllTriggers()
 {
     auto dbModelVersion = m_settings.dbModelVersion();
-    Folder::createTriggers( m_dbConnection.get() );
+    Folder::createTriggers( m_dbConnection.get(), dbModelVersion );
     Album::createTriggers( m_dbConnection.get() );
     AlbumTrack::createTriggers( m_dbConnection.get() );
     Artist::createTriggers( m_dbConnection.get(), dbModelVersion );
@@ -1178,7 +1178,7 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     Artist::createTriggers( dbConn, 14 );
     Show::createTriggers( dbConn );
     Playlist::createTriggers( dbConn );
-    Folder::createTriggers( dbConn );
+    Folder::createTriggers( dbConn, 14 );
     const std::string req = "SELECT * FROM " + Media::Table::Name +
             " WHERE filename LIKE '%#%%' ESCAPE '#'";
     auto media = Media::fetchAll<Media>( this, req );

@@ -174,7 +174,7 @@ TEST_F( DbModel, Upgrade12to13 )
     // We can't check for the number of albums anymore since they are deleted
     // as part of 13 -> 14 migration
 
-    CheckNbTriggers( 30 );
+    CheckNbTriggers( 32 );
 }
 
 TEST_F( DbModel, Upgrade13to14 )
@@ -216,6 +216,9 @@ TEST_F( DbModel, Upgrade13to14 )
     ASSERT_EQ( IMedia::Type::Unknown, externalMedia->type() );
     ASSERT_EQ( 0u, std::static_pointer_cast<Media>( externalMedia )->nbPlaylists() );
 
+    auto folder = ml->folder( 1 );
+    ASSERT_NE( nullptr, folder );
+    ASSERT_EQ( 2u, folder->nbMedia() );
 
-    CheckNbTriggers( 30 );
+    CheckNbTriggers( 32 );
 }

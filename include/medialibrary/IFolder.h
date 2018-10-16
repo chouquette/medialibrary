@@ -47,6 +47,7 @@ public:
      * from being discovered.
      */
     virtual bool isBanned() const = 0;
+    virtual uint32_t nbMedia() const = 0;
 };
 
 }

@@ -56,7 +56,7 @@ public:
     Folder(MediaLibraryPtr ml, const std::string& path, int64_t parent , int64_t deviceId , bool isRemovable );
 
     static void createTable( sqlite::Connection* connection );
-    static void createTriggers( sqlite::Connection* connection );
+    static void createTriggers( sqlite::Connection* connection, uint32_t modelVersion );
     static std::shared_ptr<Folder> create( MediaLibraryPtr ml, const std::string& mrl, int64_t parentId, Device& device, fs::IDevice& deviceFs );
     static void excludeEntryFolder( MediaLibraryPtr ml, int64_t folderId );
     static bool ban( MediaLibraryPtr ml, const std::string& mrl );
@@ -76,6 +76,7 @@ public:
     virtual bool isPresent() const override;
     virtual bool isBanned() const override;
     bool isRootFolder() const;
+    virtual uint32_t nbMedia() const override;
 
     enum class BannedType
     {
@@ -97,6 +98,7 @@ private:
     const bool m_isBanned;
     const int64_t m_deviceId;
     const bool m_isRemovable;
+    uint32_t m_nbMedia;
 
     mutable std::string m_deviceMountpoint;
     mutable std::shared_ptr<Device> m_device;

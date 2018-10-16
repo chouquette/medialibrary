@@ -54,6 +54,11 @@ FolderPtr MediaLibraryTester::folder( const std::string& mrl ) const
     return Folder::fromMrl( this, mrl, Folder::BannedType::No );
 }
 
+FolderPtr MediaLibraryTester::folder(int64_t id) const
+{
+    return Folder::fetch( this, id );
+}
+
 std::shared_ptr<Media> MediaLibraryTester::addFile( const std::string& path, IMedia::Type type )
 {
     return addFile( std::make_shared<mock::NoopFile>( path ),

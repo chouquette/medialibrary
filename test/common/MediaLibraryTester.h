@@ -47,6 +47,7 @@ public:
     // And override the ID getter to return a Media instead of IMedia
     std::shared_ptr<Media> media( int64_t id );
     FolderPtr folder( const std::string& path ) const override;
+    FolderPtr folder( int64_t id ) const;
     void deleteAlbum( int64_t albumId );
     std::shared_ptr<Album> createAlbum( const std::string& title );
     std::shared_ptr<Genre> createGenre( const std::string& name );
