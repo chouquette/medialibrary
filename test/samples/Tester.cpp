@@ -65,7 +65,6 @@ bool MockCallback::waitForThumbnail()
             return m_thumbnailDone;
         }) == false )
         return false;
-    m_thumbnailMutex.unlock();
     return m_thumbnailSuccess;
 }
 
