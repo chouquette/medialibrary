@@ -273,6 +273,13 @@ class IMediaLibrary
          * new media's type
          */
         virtual MediaPtr addStream( const std::string& mrl ) = 0;
+
+        /**
+         * @brief removeExternalMedia Remove an external media or a stream
+         * @return false if the media was not external/stream, or in case of DB failure
+         */
+        virtual bool removeExternalMedia( MediaPtr media ) = 0;
+
         virtual Query<IMedia> audioFiles( const QueryParameters* params = nullptr ) const = 0;
         virtual Query<IMedia> videoFiles( const QueryParameters* params = nullptr ) const = 0;
         virtual AlbumPtr album( int64_t id ) const = 0;

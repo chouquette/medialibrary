@@ -431,6 +431,17 @@ MediaPtr MediaLibrary::addStream( const std::string& mrl )
     return addExternalMedia( mrl, IMedia::Type::Stream );
 }
 
+bool MediaLibrary::removeExternalMedia(MediaPtr media)
+{
+    if ( media->type() != Media::Type::External &&
+         media->type() != Media::Type::Stream )
+    {
+        assert( !"Invalid media provided" );
+        return false;
+    }
+    return Media::destroy( this, media->id() );
+}
+
 Query<IMedia> MediaLibrary::audioFiles( const QueryParameters* params ) const
 {
     return Media::listAll( this, IMedia::Type::Audio, params );

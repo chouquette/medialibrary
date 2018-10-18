@@ -78,6 +78,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual MediaPtr media( const std::string& mrl ) const override;
         virtual MediaPtr addExternalMedia( const std::string& mrl ) override;
         virtual MediaPtr addStream( const std::string& mrl ) override;
+        virtual bool removeExternalMedia( MediaPtr media ) override;
         virtual Query<IMedia> audioFiles( const QueryParameters* params ) const override;
         virtual Query<IMedia> videoFiles( const QueryParameters* params ) const override;
 

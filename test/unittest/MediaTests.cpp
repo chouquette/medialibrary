@@ -767,6 +767,20 @@ TEST_F( Medias, VacuumNeverPlayedMedia )
     ASSERT_NE( nullptr, s1 );
 }
 
+TEST_F( Medias, RemoveExternal )
+{
+    auto m = ml->addExternalMedia( "http://extern.al/media.mkv" );
+    ASSERT_NE( nullptr, m );
+
+    auto res = ml->removeExternalMedia( m );
+    ASSERT_TRUE( res );
+
+    m = ml->media( m->id() );
+    ASSERT_EQ( nullptr, m );
+    m = ml->media( "http://extern.al/media.mkv" );
+    ASSERT_EQ( nullptr, m );
+}
+
 TEST_F( Medias, NbPlaylists )
 {
     auto m = std::static_pointer_cast<Media>( ml->addExternalMedia( "media.mkv" ) );
