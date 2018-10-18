@@ -263,7 +263,9 @@ AC_ARG_WITH(libvlc, [AC_HELP_STRING([--with-libvlc], [build with libvlc integrat
 AH_TEMPLATE(HAVE_LIBVLC, [Define to 1 if libvlc integration is enabled])
 AS_IF([test "${with_libvlc}" != "no"], [
     AC_DEFINE(HAVE_LIBVLC)
-    PKG_CHECK_MODULES(VLC, libvlc >= 3.0)
+    PKG_CHECK_MODULES(VLC, libvlc >= 4.0, [have_libvlc4="yes"], [
+        PKG_CHECK_MODULES(VLC, libvlc >= 3.0)
+    ])
     PKG_CHECK_MODULES(VLCPP, libvlcpp,
         [AC_MSG_RESULT([Found libvlcpp.pc])],
         [
@@ -285,6 +287,7 @@ AS_IF([test "${with_libvlc}" != "no"], [
      ])
 ])
 AM_CONDITIONAL(HAVE_LIBVLC, [test "${with_libvlc}" != "no"])
+AM_CONDITIONAL(HAVE_LIBVLC4, [test "${have_libvlc4}" = "yes" ])
 AM_CONDITIONAL([HAVE_LIBJPEG], [test "${have_libjpeg}" = "yes"])
 
 PKG_CHECK_MODULES(SQLITE, sqlite3)

@@ -30,21 +30,19 @@
 
 #include "VLCThumbnailer.h"
 
-#include "AlbumTrack.h"
-#include "Album.h"
-#include "Artist.h"
 #include "Media.h"
 #include "File.h"
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
 #include "utils/VLCInstance.h"
 #include "utils/ModificationsNotifier.h"
-#include "metadata_services/vlc/Common.hpp"
 
-#ifdef HAVE_JPEG
-#include "imagecompressors/JpegCompressor.h"
+#include <vlcpp/vlc.hpp>
+
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+#include "CoreThumbnailer.h"
 #else
-#error No image compressor available
+#include "VmemThumbnailer.h"
 #endif
 
 namespace medialibrary
@@ -54,10 +52,11 @@ VLCThumbnailer::VLCThumbnailer( MediaLibraryPtr ml )
     : m_ml( ml )
     , m_run( false )
     , m_paused( false )
-    , m_prevSize( 0 )
 {
-#ifdef HAVE_JPEG
-    m_compressor.reset( new JpegCompressor );
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+    m_generator.reset( new CoreThumbnailer( m_ml ) );
+#else
+    m_generator.reset( new VmemThumbnailer( m_ml ) );
 #endif
 }
 
@@ -70,8 +69,7 @@ void VLCThumbnailer::requestThumbnail( MediaPtr media )
 {
     {
         std::unique_lock<compat::Mutex> lock( m_mutex );
-        auto task = std::unique_ptr<Task>( new Task( std::move( media ) ) );
-        m_tasks.push( std::move( task ) );
+        m_tasks.push( std::move( media ) );
     }
     if ( m_thread.get_id() == compat::Thread::id{} )
     {
@@ -102,7 +100,7 @@ void VLCThumbnailer::run()
     LOG_INFO( "Starting thumbnailer thread" );
     while ( m_run == true )
     {
-        std::unique_ptr<Task> task;
+        MediaPtr media;
         {
             std::unique_lock<compat::Mutex> lock( m_mutex );
             if ( m_tasks.size() == 0 || m_paused == true )
@@ -114,11 +112,11 @@ void VLCThumbnailer::run()
                 if ( m_run == false )
                     break;
             }
-            task = std::move( m_tasks.front() );
+            media = std::move( m_tasks.front() );
             m_tasks.pop();
         }
-        bool res = generateThumbnail( *task );
-        m_ml->getCb()->onMediaThumbnailReady( task->media, res );
+        bool res = generateThumbnail( media );
+        m_ml->getCb()->onMediaThumbnailReady( media, res );
     }
     LOG_INFO( "Exiting thumbnailer thread" );
 }
@@ -138,193 +136,25 @@ void VLCThumbnailer::stop()
     }
 }
 
-bool VLCThumbnailer::generateThumbnail( Task& task )
+bool VLCThumbnailer::generateThumbnail( MediaPtr media )
 {
-    assert( task.media->type() != Media::Type::Audio );
+    assert( media->type() != Media::Type::Audio );
 
-    auto files = task.media->files();
+    auto files = media->files();
     if ( files.empty() == true )
     {
         LOG_WARN( "Can't generate thumbnail for a media without associated files (",
-                  task.media->title() );
+                  media->title() );
         return false;
     }
-    task.mrl = files[0]->mrl();
+    auto mrl = files[0]->mrl();
 
-    LOG_INFO( "Generating ", task.mrl, " thumbnail..." );
-
-    VLC::Media vlcMedia = VLC::Media( VLCInstance::get(), task.mrl,
-                                      VLC::Media::FromType::FromLocation );
-
-    vlcMedia.addOption( ":no-audio" );
-    vlcMedia.addOption( ":no-osd" );
-    vlcMedia.addOption( ":no-spu" );
-    vlcMedia.addOption( ":input-fast-seek" );
-    vlcMedia.addOption( ":avcodec-hw=none" );
-    vlcMedia.addOption( ":no-mkv-preload-local-dir" );
-    auto duration = vlcMedia.duration();
-    if ( duration > 0 )
-    {
-        std::ostringstream ss;
-        // Duration is in ms, start-time in seconds, and we're aiming at 1/4th of the media
-        ss << ":start-time=" << duration / 4000;
-        vlcMedia.addOption( ss.str() );
-    }
-
-    task.mp = VLC::MediaPlayer( vlcMedia );
-
-    setupVout( task );
-
-    auto res = MetadataCommon::startPlayback( vlcMedia, task.mp );
-    if ( res == false )
-    {
-        LOG_WARN( "Failed to generate ", task.mrl, " thumbnail: Can't start playback" );
-        return false;
-    }
-
-    if ( duration <= 0 )
-    {
-        // Seek ahead to have a significant preview
-        res = seekAhead( task );
-        if ( res == false )
-        {
-            LOG_WARN( "Failed to generate ", task.mrl, " thumbnail: Failed to seek ahead" );
-            return false;
-        }
-    }
-    res = takeThumbnail( task );
-    if ( res == false )
+    LOG_INFO( "Generating ", mrl, " thumbnail..." );
+    if ( m_generator->generate( media, mrl ) == false )
         return false;
 
-    LOG_INFO( "Done generating ", task.mrl, " thumbnail" );
-
-    m_ml->getNotifier()->notifyMediaModification( task.media );
-
+    m_ml->getNotifier()->notifyMediaModification( media );
     return true;
-}
-
-bool VLCThumbnailer::seekAhead( Task& task )
-{
-    float pos = .0f;
-    auto event = task.mp.eventManager().onPositionChanged([&task, &pos](float p) {
-        std::unique_lock<compat::Mutex> lock( task.mutex );
-        pos = p;
-        task.cond.notify_all();
-    });
-    auto success = false;
-    {
-        std::unique_lock<compat::Mutex> lock( task.mutex );
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
-        task.mp.setPosition( .4f, true );
-#else
-        task.mp.setPosition( .4f );
-#endif
-        success = task.cond.wait_for( lock, std::chrono::seconds( 3 ), [&pos]() {
-            return pos >= .1f;
-        });
-    }
-    // Since we're locking a mutex for each position changed, let's unregister ASAP
-    event->unregister();
-    return success;
-}
-
-void VLCThumbnailer::setupVout( Task& task )
-{
-    task.mp.setVideoFormatCallbacks(
-        // Setup
-        [this, &task](char* chroma, unsigned int* width, unsigned int *height,
-                    unsigned int *pitches, unsigned int *lines) {
-            strcpy( chroma, m_compressor->fourCC() );
-
-            const float inputAR = (float)*width / *height;
-
-            task.width = DesiredWidth;
-            task.height = (float)task.width / inputAR + 1;
-            if ( task.height < DesiredHeight )
-            {
-                // Avoid downscaling too much for really wide pictures
-                task.width = inputAR * DesiredHeight;
-                task.height = DesiredHeight;
-            }
-            auto size = task.width * task.height * m_compressor->bpp();
-            // If our buffer isn't enough anymore, reallocate a new one.
-            if ( size > m_prevSize )
-            {
-                m_buff.reset( new uint8_t[size] );
-                m_prevSize = size;
-            }
-            *width = task.width;
-            *height = task.height;
-            *pitches = task.width * m_compressor->bpp();
-            *lines = task.height;
-            return 1;
-        },
-        // Cleanup
-        nullptr);
-    task.mp.setVideoCallbacks(
-        // Lock
-        [this](void** pp_buff) {
-            *pp_buff = m_buff.get();
-            return nullptr;
-        },
-        //unlock
-        nullptr,
-
-        //display
-        [&task](void*) {
-            bool expected = true;
-            if ( task.thumbnailRequired.compare_exchange_strong( expected, false ) )
-            {
-                task.cond.notify_all();
-            }
-        }
-    );
-}
-
-bool VLCThumbnailer::takeThumbnail( Task& task )
-{
-    // lock, signal that we want a thumbnail, and wait.
-    {
-        std::unique_lock<compat::Mutex> lock( task.mutex );
-        task.thumbnailRequired = true;
-        bool success = task.cond.wait_for( lock, std::chrono::seconds( 15 ), [&task]() {
-            // Keep waiting if the vmem thread hasn't restored m_thumbnailRequired to false
-            return task.thumbnailRequired == false;
-        });
-        if ( success == false )
-        {
-            LOG_WARN( "Timed out while computing ", task.mrl, " snapshot" );
-            return false;
-        }
-    }
-    task.mp.stop();
-    return compress( task );
-}
-
-bool VLCThumbnailer::compress( Task& task )
-{
-    auto path = m_ml->thumbnailPath();
-    path += "/";
-    path += std::to_string( task.media->id() ) + "." + m_compressor->extension();
-
-    auto hOffset = task.width > DesiredWidth ? ( task.width - DesiredWidth ) / 2 : 0;
-    auto vOffset = task.height > DesiredHeight ? ( task.height - DesiredHeight ) / 2 : 0;
-
-    if ( m_compressor->compress( m_buff.get(), path, task.width, task.height,
-                                 DesiredWidth, DesiredHeight, hOffset, vOffset ) == false )
-        return false;
-
-    auto media = static_cast<Media*>( task.media.get() );
-    media->setThumbnail( path, Thumbnail::Origin::Media, true );
-    return true;
-}
-
-VLCThumbnailer::Task::Task( MediaPtr m )
-    : media( std::move( m ) )
-    , width( 0 )
-    , height( 0 )
-    , thumbnailRequired( false )
-{
 }
 
 }

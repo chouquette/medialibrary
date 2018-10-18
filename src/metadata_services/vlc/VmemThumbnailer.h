@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Media Library
  *****************************************************************************
- * Copyright (C) 2015 Hugo Beauzée-Luyssen, Videolabs
+ * Copyright (C) 2015-2018 Hugo Beauzée-Luyssen, Videolabs, VideoLAN
  *
  * Authors: Hugo Beauzée-Luyssen<hugo@beauzee.fr>
  *
@@ -22,51 +22,51 @@
 
 #pragma once
 
-#include "compat/ConditionVariable.h"
-#include "compat/Thread.h"
-#include "medialibrary/Types.h"
-#include "Types.h"
+#include "VLCThumbnailer.h"
 
-#include <queue>
-#include <atomic>
+#include "imagecompressors/IImageCompressor.h"
+#include "compat/ConditionVariable.h"
+#include "medialibrary/Types.h"
+
+#include <vlcpp/vlc.hpp>
 
 namespace medialibrary
 {
 
-class VLCThumbnailer
+class VmemThumbnailer : public VLCThumbnailer::Generator
 {
-public:
-    class Generator
+    struct Task
     {
-    public:
-        virtual ~Generator() = default;
-        virtual bool generate( MediaPtr media, const std::string& mrl ) = 0;
+        Task( MediaPtr media, std::string mrl );
+
+        compat::Mutex mutex;
+        compat::ConditionVariable cond;
+        MediaPtr media;
+        std::string mrl;
+        uint32_t width;
+        uint32_t height;
+        VLC::MediaPlayer mp;
+        std::atomic_bool thumbnailRequired;
     };
 
-    explicit VLCThumbnailer( MediaLibraryPtr ml );
-    virtual ~VLCThumbnailer();
-    void requestThumbnail( MediaPtr media );
-    void pause();
-    void resume();
+public:
+    VmemThumbnailer( MediaLibraryPtr ml );
+    virtual bool generate( MediaPtr media, const std::string& mrl ) override;
+    bool seekAhead( Task& task );
+    void setupVout( Task& task );
+    bool takeThumbnail( Task& task );
+    bool compress( Task& task );
 
 private:
-    void run();
-    void stop();
-
-    bool generateThumbnail( MediaPtr task );
-
-private:
-
+    // Force a base width, let height be computed depending on A/R
+    static const uint32_t DesiredWidth = 320;
+    static const uint32_t DesiredHeight = 200; // Aim for a 16:10 thumbnail
 
 private:
     MediaLibraryPtr m_ml;
-    compat::Mutex m_mutex;
-    compat::ConditionVariable m_cond;
-    std::queue<MediaPtr> m_tasks;
-    std::atomic_bool m_run;
-    std::unique_ptr<Generator> m_generator;
-    compat::Thread m_thread;
-    bool m_paused;
+    std::unique_ptr<uint8_t[]> m_buff;
+    uint32_t m_prevSize;
+    std::unique_ptr<IImageCompressor> m_compressor;
 };
 
 }

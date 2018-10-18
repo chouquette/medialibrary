@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Media Library
  *****************************************************************************
- * Copyright (C) 2015 Hugo Beauzée-Luyssen, Videolabs
+ * Copyright (C) 2015-2018 Hugo Beauzée-Luyssen, Videolabs, VideoLAN
  *
  * Authors: Hugo Beauzée-Luyssen<hugo@beauzee.fr>
  *
@@ -22,51 +22,19 @@
 
 #pragma once
 
-#include "compat/ConditionVariable.h"
-#include "compat/Thread.h"
-#include "medialibrary/Types.h"
-#include "Types.h"
-
-#include <queue>
-#include <atomic>
+#include "VLCThumbnailer.h"
 
 namespace medialibrary
 {
 
-class VLCThumbnailer
+class CoreThumbnailer : public VLCThumbnailer::Generator
 {
 public:
-    class Generator
-    {
-    public:
-        virtual ~Generator() = default;
-        virtual bool generate( MediaPtr media, const std::string& mrl ) = 0;
-    };
+    CoreThumbnailer( MediaLibraryPtr ml );
 
-    explicit VLCThumbnailer( MediaLibraryPtr ml );
-    virtual ~VLCThumbnailer();
-    void requestThumbnail( MediaPtr media );
-    void pause();
-    void resume();
-
-private:
-    void run();
-    void stop();
-
-    bool generateThumbnail( MediaPtr task );
-
-private:
-
-
+    virtual bool generate( MediaPtr media, const std::string& mrl ) override;
 private:
     MediaLibraryPtr m_ml;
-    compat::Mutex m_mutex;
-    compat::ConditionVariable m_cond;
-    std::queue<MediaPtr> m_tasks;
-    std::atomic_bool m_run;
-    std::unique_ptr<Generator> m_generator;
-    compat::Thread m_thread;
-    bool m_paused;
 };
 
 }
