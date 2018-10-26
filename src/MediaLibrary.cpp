@@ -68,9 +68,9 @@
 // Metadata services:
 #ifdef HAVE_LIBVLC
 #include "metadata_services/vlc/VLCMetadataService.h"
-#include "metadata_services/ThumbnailerWorker.h"
 #endif
 #include "metadata_services/MetadataParser.h"
+#include "metadata_services/ThumbnailerWorker.h"
 
 // FileSystem
 #include "factory/DeviceListerFactory.h"
@@ -78,6 +78,15 @@
 
 #ifdef HAVE_LIBVLC
 #include "factory/NetworkFileSystemFactory.h"
+
+#include <vlcpp/vlc.hpp>
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+#include "metadata_services/vlc/CoreThumbnailer.h"
+using ThumbnailerType = medialibrary::CoreThumbnailer;
+#else
+#include "metadata_services/vlc/VmemThumbnailer.h"
+using ThumbnailerType = medialibrary::VmemThumbnailer;
+#endif
 #endif
 
 #include "medialibrary/filesystem/IDevice.h"
@@ -798,8 +807,17 @@ void MediaLibrary::startDeletionNotifier()
 void MediaLibrary::startThumbnailer()
 {
 #ifdef HAVE_LIBVLC
-    m_thumbnailer = std::unique_ptr<ThumbnailerWorker>( new ThumbnailerWorker( this ) );
+    if ( m_thumbnailers.empty() == true )
+        m_thumbnailers.push_back( std::make_shared<ThumbnailerType>( this ) );
 #endif
+    for ( const auto& thumbnailer : m_thumbnailers )
+    {
+        // For now this make little sense (as we are instantiating the same
+        // object in a loop, but at some point we will have multiple thumbnailer,
+        // or the thumbnailer worker will handle multiple IThumbnailer implementations
+        m_thumbnailer = std::unique_ptr<ThumbnailerWorker>(
+                    new ThumbnailerWorker( this, thumbnailer ) );
+    }
 }
 
 void MediaLibrary::populateNetworkFsFactories()
@@ -1501,12 +1519,10 @@ void MediaLibrary::forceRescan()
 
 bool MediaLibrary::requestThumbnail( MediaPtr media )
 {
-#ifdef HAVE_LIBVLC
+    if ( m_thumbnailer == nullptr )
+        return false;
     m_thumbnailer->requestThumbnail( media );
     return true;
-#else
-    return false;
-#endif
 }
 
 void MediaLibrary::addParserService( std::shared_ptr<parser::IParserService> service )
@@ -1517,6 +1533,17 @@ void MediaLibrary::addParserService( std::shared_ptr<parser::IParserService> ser
     if ( m_services.size() != 0 )
         return;
     m_services.emplace_back( std::move( service ) );
+}
+
+void MediaLibrary::addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer )
+{
+    if ( m_thumbnailers.size() != 0 )
+    {
+        // We only support a single thumbnailer for videos for now.
+        LOG_WARN( "Discarding thumbnailer since one has already been provided" );
+        return;
+    }
+    m_thumbnailers.push_back( std::move( thumbnailer ) );
 }
 
 bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& mountpoint )

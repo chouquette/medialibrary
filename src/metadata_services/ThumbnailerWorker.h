@@ -37,7 +37,8 @@ namespace medialibrary
 class ThumbnailerWorker
 {
 public:
-    explicit ThumbnailerWorker( MediaLibraryPtr ml );
+    explicit ThumbnailerWorker( MediaLibraryPtr ml,
+                                std::shared_ptr<IThumbnailer> thumbnailer );
     virtual ~ThumbnailerWorker();
     void requestThumbnail( MediaPtr media );
     void pause();
@@ -58,7 +59,7 @@ private:
     compat::ConditionVariable m_cond;
     std::queue<MediaPtr> m_tasks;
     std::atomic_bool m_run;
-    std::unique_ptr<IThumbnailer> m_generator;
+    std::shared_ptr<IThumbnailer> m_generator;
     compat::Thread m_thread;
     bool m_paused;
 };

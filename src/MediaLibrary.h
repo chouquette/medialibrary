@@ -180,6 +180,8 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         virtual void addParserService( std::shared_ptr<parser::IParserService> service ) override;
 
+        virtual void addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer ) override;
+
         virtual void addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory ) override;
 
         static bool isExtensionSupported( const char* ext );
@@ -236,6 +238,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
 
         // User provided parser services
         std::vector<std::shared_ptr<parser::IParserService>> m_services;
+        std::vector<std::shared_ptr<IThumbnailer>> m_thumbnailers;
         // Keep the parser as last field.
         // The parser holds a (raw) pointer to the media library. When MediaLibrary's destructor gets called
         // it might still finish a few operations before exiting the parser thread. Those operations are
@@ -251,9 +254,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         bool m_initialized;
         std::atomic_bool m_discovererIdle;
         std::atomic_bool m_parserIdle;
-#ifdef HAVE_LIBVLC
         std::unique_ptr<ThumbnailerWorker> m_thumbnailer;
-#endif
 };
 
 }

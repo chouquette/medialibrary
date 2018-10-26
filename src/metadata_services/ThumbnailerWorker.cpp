@@ -32,26 +32,16 @@
 #include "MediaLibrary.h"
 #include "utils/ModificationsNotifier.h"
 
-#include <vlcpp/vlc.hpp>
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
-#include "vlc/CoreThumbnailer.h"
-#else
-#include "vlc/VmemThumbnailer.h"
-#endif
-
 namespace medialibrary
 {
 
-ThumbnailerWorker::ThumbnailerWorker( MediaLibraryPtr ml )
+ThumbnailerWorker::ThumbnailerWorker( MediaLibraryPtr ml,
+                                      std::shared_ptr<IThumbnailer> thumbnailer )
     : m_ml( ml )
     , m_run( false )
+    , m_generator( std::move( thumbnailer ) )
     , m_paused( false )
 {
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
-    m_generator.reset( new CoreThumbnailer( m_ml ) );
-#else
-    m_generator.reset( new VmemThumbnailer( m_ml ) );
-#endif
 }
 
 ThumbnailerWorker::~ThumbnailerWorker()

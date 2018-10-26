@@ -47,6 +47,7 @@ class IDeviceLister;
 class IDeviceListerCb;
 class IFolder;
 class ISubtitleTrack;
+class IThumbnailer;
 
 namespace parser
 {
