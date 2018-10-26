@@ -23,11 +23,12 @@
 #pragma once
 
 #include "VLCThumbnailer.h"
+#include "medialibrary/IThumbnailer.h"
 
 namespace medialibrary
 {
 
-class CoreThumbnailer : public VLCThumbnailer::Generator
+class CoreThumbnailer : public IThumbnailer
 {
 public:
     CoreThumbnailer( MediaLibraryPtr ml );

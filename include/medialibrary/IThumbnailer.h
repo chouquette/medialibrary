@@ -22,45 +22,25 @@
 
 #pragma once
 
-#include "compat/ConditionVariable.h"
-#include "compat/Thread.h"
 #include "medialibrary/Types.h"
-#include "medialibrary/IThumbnailer.h"
-#include "Types.h"
-
-#include <queue>
-#include <atomic>
 
 namespace medialibrary
 {
 
-class VLCThumbnailer
+class IThumbnailer
 {
 public:
-    explicit VLCThumbnailer( MediaLibraryPtr ml );
-    virtual ~VLCThumbnailer();
-    void requestThumbnail( MediaPtr media );
-    void pause();
-    void resume();
-
-private:
-    void run();
-    void stop();
-
-    bool generateThumbnail( MediaPtr task );
-
-private:
-
-
-private:
-    MediaLibraryPtr m_ml;
-    compat::Mutex m_mutex;
-    compat::ConditionVariable m_cond;
-    std::queue<MediaPtr> m_tasks;
-    std::atomic_bool m_run;
-    std::unique_ptr<IThumbnailer> m_generator;
-    compat::Thread m_thread;
-    bool m_paused;
+    virtual ~IThumbnailer() = default;
+    /**
+     * @brief request Generate a thumbnail for the provided media
+     * @param media The media to generate a thumbnail for
+     * @param mrl The mrl to the main file for this media
+     *
+     * This method is expected to be blocking until the generation is successful
+     * If successful, the implementation must call IMedia::setThumbnail and pass
+     * the mrl to the generated thumbnail.
+     */
+    virtual bool generate( MediaPtr media, const std::string& mrl ) = 0;
 };
 
 }

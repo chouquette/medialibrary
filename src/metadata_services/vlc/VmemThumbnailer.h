@@ -27,13 +27,14 @@
 #include "imagecompressors/IImageCompressor.h"
 #include "compat/ConditionVariable.h"
 #include "medialibrary/Types.h"
+#include "medialibrary/IThumbnailer.h"
 
 #include <vlcpp/vlc.hpp>
 
 namespace medialibrary
 {
 
-class VmemThumbnailer : public VLCThumbnailer::Generator
+class VmemThumbnailer : public IThumbnailer
 {
     struct Task
     {
