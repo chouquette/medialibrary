@@ -68,7 +68,7 @@
 // Metadata services:
 #ifdef HAVE_LIBVLC
 #include "metadata_services/vlc/VLCMetadataService.h"
-#include "metadata_services/vlc/VLCThumbnailer.h"
+#include "metadata_services/ThumbnailerWorker.h"
 #endif
 #include "metadata_services/MetadataParser.h"
 
@@ -798,7 +798,7 @@ void MediaLibrary::startDeletionNotifier()
 void MediaLibrary::startThumbnailer()
 {
 #ifdef HAVE_LIBVLC
-    m_thumbnailer = std::unique_ptr<VLCThumbnailer>( new VLCThumbnailer( this ) );
+    m_thumbnailer = std::unique_ptr<ThumbnailerWorker>( new ThumbnailerWorker( this ) );
 #endif
 }
 

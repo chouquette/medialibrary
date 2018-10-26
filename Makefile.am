@@ -237,7 +237,7 @@ endif
 
 libmedialibrary_la_SOURCES += \
 	src/metadata_services/vlc/VLCMetadataService.cpp \
-	src/metadata_services/vlc/VLCThumbnailer.cpp \
+	src/metadata_services/ThumbnailerWorker.cpp \
 	src/metadata_services/vlc/Common.cpp \
 	src/utils/VLCInstance.cpp \
 	src/factory/NetworkFileSystemFactory.cpp \
@@ -250,7 +250,7 @@ noinst_HEADERS += \
 	src/utils/VLCInstance.h \
     src/metadata_services/vlc/Common.hpp \
 	src/metadata_services/vlc/VLCMetadataService.h \
-	src/metadata_services/vlc/VLCThumbnailer.h \
+	src/metadata_services/ThumbnailerWorker.h \
 	src/metadata_services/vlc/imagecompressors/IImageCompressor.h \
 	src/factory/NetworkFileSystemFactory.h \
 	src/filesystem/network/Device.h \

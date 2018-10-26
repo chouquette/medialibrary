@@ -34,11 +34,11 @@
 namespace medialibrary
 {
 
-class VLCThumbnailer
+class ThumbnailerWorker
 {
 public:
-    explicit VLCThumbnailer( MediaLibraryPtr ml );
-    virtual ~VLCThumbnailer();
+    explicit ThumbnailerWorker( MediaLibraryPtr ml );
+    virtual ~ThumbnailerWorker();
     void requestThumbnail( MediaPtr media );
     void pause();
     void resume();

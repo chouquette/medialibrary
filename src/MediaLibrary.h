@@ -36,7 +36,7 @@ namespace medialibrary
 
 class ModificationNotifier;
 class DiscovererWorker;
-class VLCThumbnailer;
+class ThumbnailerWorker;
 
 class Album;
 class Artist;
@@ -252,7 +252,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         std::atomic_bool m_discovererIdle;
         std::atomic_bool m_parserIdle;
 #ifdef HAVE_LIBVLC
-        std::unique_ptr<VLCThumbnailer> m_thumbnailer;
+        std::unique_ptr<ThumbnailerWorker> m_thumbnailer;
 #endif
 };
 

@@ -24,31 +24,25 @@
 #include "config.h"
 #endif
 
-#ifndef HAVE_LIBVLC
-# error This file requires libvlc
-#endif
-
-#include "VLCThumbnailer.h"
+#include "ThumbnailerWorker.h"
 
 #include "Media.h"
 #include "File.h"
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
-#include "utils/VLCInstance.h"
 #include "utils/ModificationsNotifier.h"
 
 #include <vlcpp/vlc.hpp>
-
 #if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
-#include "CoreThumbnailer.h"
+#include "vlc/CoreThumbnailer.h"
 #else
-#include "VmemThumbnailer.h"
+#include "vlc/VmemThumbnailer.h"
 #endif
 
 namespace medialibrary
 {
 
-VLCThumbnailer::VLCThumbnailer( MediaLibraryPtr ml )
+ThumbnailerWorker::ThumbnailerWorker( MediaLibraryPtr ml )
     : m_ml( ml )
     , m_run( false )
     , m_paused( false )
@@ -60,12 +54,12 @@ VLCThumbnailer::VLCThumbnailer( MediaLibraryPtr ml )
 #endif
 }
 
-VLCThumbnailer::~VLCThumbnailer()
+ThumbnailerWorker::~ThumbnailerWorker()
 {
     stop();
 }
 
-void VLCThumbnailer::requestThumbnail( MediaPtr media )
+void ThumbnailerWorker::requestThumbnail( MediaPtr media )
 {
     {
         std::unique_lock<compat::Mutex> lock( m_mutex );
@@ -74,19 +68,19 @@ void VLCThumbnailer::requestThumbnail( MediaPtr media )
     if ( m_thread.get_id() == compat::Thread::id{} )
     {
         m_run = true;
-        m_thread = compat::Thread( &VLCThumbnailer::run, this );
+        m_thread = compat::Thread( &ThumbnailerWorker::run, this );
     }
     else
         m_cond.notify_all();
 }
 
-void VLCThumbnailer::pause()
+void ThumbnailerWorker::pause()
 {
     std::lock_guard<compat::Mutex> lock( m_mutex );
     m_paused = true;
 }
 
-void VLCThumbnailer::resume()
+void ThumbnailerWorker::resume()
 {
     std::lock_guard<compat::Mutex> lock( m_mutex );
     if ( m_paused == false )
@@ -95,7 +89,7 @@ void VLCThumbnailer::resume()
     m_cond.notify_all();
 }
 
-void VLCThumbnailer::run()
+void ThumbnailerWorker::run()
 {
     LOG_INFO( "Starting thumbnailer thread" );
     while ( m_run == true )
@@ -121,7 +115,7 @@ void VLCThumbnailer::run()
     LOG_INFO( "Exiting thumbnailer thread" );
 }
 
-void VLCThumbnailer::stop()
+void ThumbnailerWorker::stop()
 {
     bool running = true;
     if ( m_run.compare_exchange_strong( running, false ) )
@@ -136,7 +130,7 @@ void VLCThumbnailer::stop()
     }
 }
 
-bool VLCThumbnailer::generateThumbnail( MediaPtr media )
+bool ThumbnailerWorker::generateThumbnail( MediaPtr media )
 {
     assert( media->type() != Media::Type::Audio );
 
