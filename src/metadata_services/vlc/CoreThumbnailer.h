@@ -22,7 +22,8 @@
 
 #pragma once
 
-#include "VLCThumbnailer.h"
+#include "medialibrary/Types.h"
+#include "Types.h"
 #include "medialibrary/IThumbnailer.h"
 
 namespace medialibrary

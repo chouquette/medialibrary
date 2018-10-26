@@ -22,14 +22,15 @@
 
 #pragma once
 
-#include "VLCThumbnailer.h"
-
 #include "imagecompressors/IImageCompressor.h"
 #include "compat/ConditionVariable.h"
 #include "medialibrary/Types.h"
 #include "medialibrary/IThumbnailer.h"
+#include "Types.h"
 
 #include <vlcpp/vlc.hpp>
+
+#include <atomic>
 
 namespace medialibrary
 {
