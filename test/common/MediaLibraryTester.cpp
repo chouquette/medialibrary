@@ -54,9 +54,9 @@ FolderPtr MediaLibraryTester::folder( const std::string& mrl ) const
     return Folder::fromMrl( this, mrl, Folder::BannedType::No );
 }
 
-FolderPtr MediaLibraryTester::folder(int64_t id) const
+FolderPtr MediaLibraryTester::folder( int64_t id ) const
 {
-    return Folder::fetch( this, id );
+    return MediaLibrary::folder( id );
 }
 
 std::shared_ptr<Media> MediaLibraryTester::addFile( const std::string& path, IMedia::Type type )

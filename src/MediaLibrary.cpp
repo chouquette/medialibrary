@@ -1404,6 +1404,11 @@ Query<IFolder> MediaLibrary::searchFolders( const std::string& pattern,
     return Folder::searchWithMedia( this, pattern, params );
 }
 
+FolderPtr MediaLibrary::folder( int64_t id ) const
+{
+    return Folder::fetch( this, id );
+}
+
 FolderPtr MediaLibrary::folder( const std::string& mrl ) const
 {
     return Folder::fromMrl( this, mrl, Folder::BannedType::Any );

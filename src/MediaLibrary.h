@@ -147,6 +147,7 @@ class MediaLibrary : public IMediaLibrary, public IDeviceListerCb
         virtual Query<IFolder> folders( const QueryParameters* params = nullptr ) const override;
         virtual Query<IFolder> searchFolders( const std::string& pattern,
                                               const QueryParameters* params ) const override;
+        virtual FolderPtr folder( int64_t id ) const override;
         virtual FolderPtr folder( const std::string& mrl ) const override;
         virtual void removeEntryPoint( const std::string& entryPoint ) override;
         virtual void banFolder( const std::string& path ) override;
