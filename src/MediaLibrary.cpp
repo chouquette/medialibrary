@@ -1382,17 +1382,19 @@ bool MediaLibrary::isIndexed( const std::string& mrl ) const
     return folder != nullptr;
 }
 
-Query<IFolder> MediaLibrary::folders( const QueryParameters* params ) const
+Query<IFolder> MediaLibrary::folders( IMedia::Type type,
+                                      const QueryParameters* params ) const
 {
-    return Folder::withMedia( this, params );
+    return Folder::withMedia( this, type, params );
 }
 
 Query<IFolder> MediaLibrary::searchFolders( const std::string& pattern,
+                                            IMedia::Type type,
                                             const QueryParameters* params ) const
 {
     if ( validateSearchPattern( pattern ) == false )
         return {};
-    return Folder::searchWithMedia( this, pattern, params );
+    return Folder::searchWithMedia( this, pattern, type, params );
 }
 
 FolderPtr MediaLibrary::folder( int64_t id ) const

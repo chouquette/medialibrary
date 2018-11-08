@@ -173,8 +173,15 @@ IMedia::Type::Unknown ) ),
 "SELECT id_folder, path, parent_id, is_blacklisted, device_id, is_removable "
 "FROM " + Folder::Table::Name + "_backup",
 
-"UPDATE " + Folder::Table::Name + " SET nb_media = "
-    "(SELECT COUNT() FROM " + Media::Table::Name + " m WHERE m.folder_id = id_folder )",
+"UPDATE " + Folder::Table::Name + " SET "
+    "nb_audio = (SELECT COUNT() FROM " + Media::Table::Name +
+        " m WHERE m.folder_id = id_folder AND m.type = "
+                + std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                    IMedia::Type::Audio ) ) + "),"
+    "nb_video = (SELECT COUNT() FROM " + Media::Table::Name +
+        " m WHERE m.folder_id = id_folder AND m.type = "
+            + std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                IMedia::Type::Video ) ) + ")",
 
 "DROP TABLE " + Folder::Table::Name + "_backup",
 

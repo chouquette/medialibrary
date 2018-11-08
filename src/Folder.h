@@ -23,6 +23,7 @@
 #pragma once
 
 #include "medialibrary/IFolder.h"
+#include "medialibrary/IMedia.h"
 #include "medialibrary/filesystem/IDevice.h"
 #include "database/DatabaseHelpers.h"
 
@@ -64,8 +65,11 @@ public:
 
     static std::shared_ptr<Folder> fromMrl(MediaLibraryPtr ml, const std::string& mrl );
     static std::shared_ptr<Folder> bannedFolder(MediaLibraryPtr ml, const std::string& mrl );
-    static Query<IFolder> withMedia( MediaLibraryPtr ml, const QueryParameters* params );
-    static Query<IFolder> searchWithMedia( MediaLibraryPtr ml, const std::string& pattern,
+    static Query<IFolder> withMedia( MediaLibraryPtr ml, IMedia::Type type,
+                                     const QueryParameters* params );
+    static Query<IFolder> searchWithMedia( MediaLibraryPtr ml,
+                                           const std::string& pattern,
+                                           IMedia::Type type,
                                            const QueryParameters* params );
     static Query<IFolder> entryPoints( MediaLibraryPtr ml, int64_t deviceId );
 
@@ -99,6 +103,7 @@ public:
 
 private:
     static std::string sortRequest( const QueryParameters* params );
+    static std::string filterByMediaType( IMedia::Type type );
 
 private:
     MediaLibraryPtr m_ml;

@@ -29,6 +29,7 @@
 #include "medialibrary/ILogger.h"
 #include "Types.h"
 #include "IQuery.h"
+#include "IMedia.h"
 
 namespace medialibrary
 {
@@ -66,6 +67,8 @@ enum class SortingCriteria
     Filename,
     TrackNumber,
     // Valid for folders only. Default order is descending
+    NbVideo,
+    NbAudio,
     NbMedia,
 };
 
@@ -404,7 +407,8 @@ class IMediaLibrary
          */
         virtual bool isIndexed( const std::string& mrl ) const = 0;
         /**
-         * @brief folders Returns a flattened list of all folders containing at least a media
+         * @brief folders Returns a flattened list of all folders containing at least a media of a given type
+         * @param type A required type of media, or IMedia::Type::Unknown if any media type is fine.
          * @param params A query parameters object
          * @return A query object to be used to fetch the results
          *
@@ -423,8 +427,10 @@ class IMediaLibrary
          * In case a non flattened list is desired, the
          * entryPoints() & IFolder::subFolders() functions should be used.
          */
-        virtual Query<IFolder> folders( const QueryParameters* params = nullptr ) const = 0;
+        virtual Query<IFolder> folders( IMedia::Type type,
+                                        const QueryParameters* params = nullptr ) const = 0;
         virtual Query<IFolder> searchFolders( const std::string& pattern,
+                                              IMedia::Type type,
                                               const QueryParameters* params = nullptr ) const = 0;
         virtual FolderPtr folder( int64_t folderId ) const = 0;
         virtual FolderPtr folder( const std::string& mrl ) const = 0;

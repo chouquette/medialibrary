@@ -55,7 +55,7 @@ Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
     , m_isBanned( row.load<decltype(m_isBanned)>( 4 ) )
     , m_deviceId( row.load<decltype(m_deviceId)>( 5 ) )
     , m_isRemovable( row.load<decltype(m_isRemovable)>( 6 ) )
-    // Skip nbMedia
+    // Skip nb_audio/nb_video
 {
 }
 
@@ -95,7 +95,57 @@ void Folder::createTriggers( sqlite::Connection* connection, uint32_t modelVersi
                 "AFTER INSERT ON " + Media::Table::Name + " "
                 "WHEN new.folder_id IS NOT NULL "
             "BEGIN "
-                "UPDATE " + Folder::Table::Name + " SET nb_media = nb_media + 1 "
+                "UPDATE " + Folder::Table::Name + " SET "
+                    "nb_audio = nb_audio + "
+                        "(CASE new.type "
+                            "WHEN " +
+                                std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                    IMedia::Type::Audio ) ) + " THEN 1 "
+                            "ELSE 0 "
+                        "END),"
+                    "nb_video = nb_video + "
+                        "(CASE new.type WHEN " +
+                            std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                                IMedia::Type::Video ) ) + " THEN 1 "
+                            "ELSE 0 "
+                        "END) "
+                    "WHERE id_folder = new.folder_id;"
+            "END",
+
+            "CREATE TRIGGER IF NOT EXISTS update_folder_nb_media_on_update "
+                "AFTER UPDATE ON " + Media::Table::Name + " "
+                "WHEN new.folder_id IS NOT NULL AND old.type != new.type "
+            "BEGIN "
+                "UPDATE " + Folder::Table::Name + " SET "
+                    "nb_audio = nb_audio + "
+                        "(CASE old.type "
+                            "WHEN " +
+                                std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                                IMedia::Type::Audio ) ) + " THEN -1 "
+                            "ELSE 0 "
+                        "END)"
+                        "+"
+                        "(CASE new.type "
+                            "WHEN " +
+                                std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                                IMedia::Type::Audio ) ) + " THEN 1 "
+                            "ELSE 0 "
+                        "END)"
+                    ","
+                    "nb_video = nb_video + "
+                        "(CASE old.type "
+                            "WHEN " +
+                                std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                                    IMedia::Type::Video ) ) + " THEN -1 "
+                            "ELSE 0 "
+                        "END)"
+                        "+"
+                        "(CASE new.type "
+                            "WHEN " +
+                                std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                                    IMedia::Type::Video ) ) + " THEN 1 "
+                            "ELSE 0 "
+                        "END)"
                     "WHERE id_folder = new.folder_id;"
             "END",
 
@@ -103,7 +153,21 @@ void Folder::createTriggers( sqlite::Connection* connection, uint32_t modelVersi
                 "AFTER DELETE ON " + Media::Table::Name + " "
                 "WHEN old.folder_id IS NOT NULL "
             "BEGIN "
-                "UPDATE " + Folder::Table::Name + " SET nb_media = nb_media - 1 "
+                "UPDATE " + Folder::Table::Name + " SET "
+                    "nb_audio = nb_audio + "
+                        "(CASE old.type "
+                            "WHEN " +
+                                std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                                    IMedia::Type::Audio ) ) + " THEN -1 "
+                            "ELSE 0 "
+                        "END),"
+                    "nb_video = nb_video + "
+                        "(CASE old.type "
+                            "WHEN " +
+                                std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                                    IMedia::Type::Video ) ) + " THEN -1 "
+                            "ELSE 0 "
+                        "END) "
                     "WHERE id_folder = old.folder_id;"
             "END",
         };
@@ -258,8 +322,16 @@ std::string Folder::sortRequest( const QueryParameters* params )
     std::string req = "ORDER BY ";
     switch ( sort )
     {
+        case SortingCriteria::NbVideo:
+            req += "nb_video";
+            desc = !desc;
+            break;
+        case SortingCriteria::NbAudio:
+            req += "nb_audio";
+            desc = !desc;
+            break;
         case SortingCriteria::NbMedia:
-            req += "nb_media";
+            req += "(nb_audio + nb_video)";
             desc = !desc;
             break;
         default:
@@ -274,19 +346,38 @@ std::string Folder::sortRequest( const QueryParameters* params )
     return req;
 }
 
-Query<IFolder> Folder::withMedia(MediaLibraryPtr ml , const QueryParameters* params)
+std::string Folder::filterByMediaType( IMedia::Type type )
 {
-    static std::string req = "FROM " + Table::Name + " WHERE nb_media > 0";
+    switch ( type )
+    {
+        case IMedia::Type::Audio:
+            return " nb_audio > 0";
+        case IMedia::Type::Video:
+            return " nb_video > 0";
+        default:
+            assert( !"Only Audio/Video/Unknown types are supported when listing folders" );
+            /* Fall-through */
+        case IMedia::Type::Unknown:
+            return " (nb_audio > 0 OR nb_video > 0)";
+    }
+}
+
+Query<IFolder> Folder::withMedia( MediaLibraryPtr ml, IMedia::Type type,
+                                  const QueryParameters* params )
+{
+    std::string req = "FROM " + Table::Name +
+                      " WHERE " + filterByMediaType( type );
     return make_query<Folder, IFolder>( ml, "*", req, sortRequest( params ) );
 }
 
 Query<IFolder> Folder::searchWithMedia( MediaLibraryPtr ml, const std::string& pattern,
-                                        const QueryParameters* params )
+                                        IMedia::Type type, const QueryParameters* params )
 {
     std::string req = "FROM " + Table::Name + " f WHERE f.id_folder IN "
             "(SELECT rowid FROM " + Table::Name + "Fts WHERE " +
             Table::Name + "Fts MATCH '*' || ? || '*') "
-            "AND nb_media > 0";
+            "AND";
+    req += filterByMediaType( type );
     return make_query<Folder, IFolder>( ml, "*", req, sortRequest( params ), pattern );
 }
 
