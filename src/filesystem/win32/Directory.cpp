@@ -35,6 +35,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <cassert>
 #include <windows.h>
 #include <winapifamily.h>
 
