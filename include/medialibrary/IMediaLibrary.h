@@ -386,7 +386,7 @@ class IMediaLibrary
          *
          * This can be called at any time, but won't have any effect before
          * initialize() has been called.
-         * When disabling network discovery, all contnet that was discovered on
+         * When disabling network discovery, all content that was discovered on
          * the network will be marked as non-present, meaning they won't be
          * returned until network discovery gets enabled again.
          * As far as the user is concerned, this is equivalent to (un)plugging
