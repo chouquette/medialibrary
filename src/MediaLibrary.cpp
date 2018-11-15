@@ -114,6 +114,7 @@ const size_t MediaLibrary::NbSupportedExtensions = sizeof(supportedExtensions) /
 
 MediaLibrary::MediaLibrary()
     : m_callback( nullptr )
+    , m_deviceListerCbImpl( this )
     , m_verbosity( LogLevel::Error )
     , m_settings( this )
     , m_initialized( false )
@@ -824,7 +825,7 @@ void MediaLibrary::populateNetworkFsFactories()
 {
 #ifdef HAVE_LIBVLC
     m_externalNetworkFsFactories.emplace_back( std::make_shared<factory::NetworkFileSystemFactory>(
-                                                   this, "smb://", "dsm-sd" ) );
+                                                   &m_deviceListerCbImpl, "smb://", "dsm-sd" ) );
 #endif
 }
 
@@ -1339,7 +1340,7 @@ IDeviceListerCb* MediaLibrary::setDeviceLister( DeviceListerPtr lister )
 {
     assert( m_initialized == false );
     m_deviceLister = lister;
-    return static_cast<IDeviceListerCb*>( this );
+    return static_cast<IDeviceListerCb*>( &m_deviceListerCbImpl );
 }
 
 std::shared_ptr<fs::IFileSystemFactory> MediaLibrary::fsFactoryForMrl( const std::string& mrl ) const
@@ -1546,11 +1547,11 @@ void MediaLibrary::addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer )
     m_thumbnailers.push_back( std::move( thumbnailer ) );
 }
 
-bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& mountpoint )
+bool MediaLibrary::DeviceListerCb::onDevicePlugged( const std::string& uuid, const std::string& mountpoint )
 {
-    auto currentDevice = Device::fromUuid( this, uuid );
+    auto currentDevice = Device::fromUuid( m_ml, uuid );
     LOG_INFO( "Device ", uuid, " was plugged and mounted on ", mountpoint );
-    for ( const auto& fsFactory : m_fsFactories )
+    for ( const auto& fsFactory : m_ml->m_fsFactories )
     {
         if ( fsFactory->isMrlSupported( mountpoint ) )
         {
@@ -1569,9 +1570,9 @@ bool MediaLibrary::onDevicePlugged( const std::string& uuid, const std::string& 
     return currentDevice == nullptr;
 }
 
-void MediaLibrary::onDeviceUnplugged( const std::string& uuid )
+void MediaLibrary::DeviceListerCb::onDeviceUnplugged( const std::string& uuid )
 {
-    auto device = Device::fromUuid( this, uuid );
+    auto device = Device::fromUuid( m_ml, uuid );
     assert( device->isRemovable() == true );
     if ( device == nullptr )
     {
@@ -1579,7 +1580,7 @@ void MediaLibrary::onDeviceUnplugged( const std::string& uuid )
         return;
     }
     LOG_INFO( "Device ", uuid, " was unplugged" );
-    for ( const auto& fsFactory : m_fsFactories )
+    for ( const auto& fsFactory : m_ml->m_fsFactories )
     {
         if ( fsFactory->scheme() == device->scheme() )
         {
@@ -1595,9 +1596,14 @@ void MediaLibrary::onDeviceUnplugged( const std::string& uuid )
     }
 }
 
-bool MediaLibrary::isDeviceKnown( const std::string& uuid ) const
+bool MediaLibrary::DeviceListerCb::isDeviceKnown( const std::string& uuid ) const
 {
-    return Device::fromUuid( this, uuid ) != nullptr;
+    return Device::fromUuid( m_ml, uuid ) != nullptr;
+}
+
+MediaLibrary::DeviceListerCb::DeviceListerCb( MediaLibrary* ml )
+    : m_ml( ml )
+{
 }
 
 }

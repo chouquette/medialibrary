@@ -28,6 +28,13 @@
 namespace medialibrary
 {
 
+/**
+ * @brief IDeviceListerCb is intended for external device listers to signal device modifications
+ *
+ * An external device lister shall only be used when the medialibrary can't list
+ * the devices itself.
+ * The device/folder/file management will still be the medialibrary's responsability
+ */
 class IDeviceListerCb
 {
 public:
