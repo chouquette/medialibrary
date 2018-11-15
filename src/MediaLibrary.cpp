@@ -1625,6 +1625,8 @@ void MediaLibrary::FsFactoryCb::onDeviceUnplugged( const std::string& uuid )
 void MediaLibrary::FsFactoryCb::onDeviceChanged( const std::string& uuid, bool isPresent )
 {
     auto device = Device::fromUuid( m_ml, uuid );
+    if ( device == nullptr )
+        return;
     assert( device->isRemovable() == true );
     if ( device->isPresent() == isPresent )
         return;
