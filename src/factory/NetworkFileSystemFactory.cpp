@@ -43,13 +43,12 @@ namespace medialibrary
 namespace factory
 {
 
-NetworkFileSystemFactory::NetworkFileSystemFactory( IDeviceListerCb* cb,
-                                                    const std::string& protocol,
+NetworkFileSystemFactory::NetworkFileSystemFactory(const std::string& protocol,
                                                     const std::string& name )
     : m_protocol( protocol )
     , m_discoverer( VLCInstance::get(), name )
     , m_mediaList( m_discoverer.mediaList() )
-    , m_cb( cb )
+    , m_cb( nullptr )
 {
     auto& em = m_mediaList->eventManager();
     em.onItemAdded( [this]( VLC::MediaPtr m, int ) { onDeviceAdded( std::move( m ) ); } );
@@ -113,8 +112,9 @@ const std::string& NetworkFileSystemFactory::scheme() const
     return m_protocol;
 }
 
-void NetworkFileSystemFactory::start()
+void NetworkFileSystemFactory::start( fs::IFileSystemFactoryCb* cb )
 {
+    m_cb = cb;
     m_discoverer.start();
 }
 
@@ -144,7 +144,7 @@ void NetworkFileSystemFactory::onDeviceAdded( VLC::MediaPtr media )
     }
     m_deviceCond.notify_one();
     LOG_INFO( "Adding new network device: name: ", name, " - mrl: ", mrl );
-    m_cb->onDevicePlugged( name, mrl );
+    m_cb->onDevicePlugged( name );
 }
 
 void NetworkFileSystemFactory::onDeviceRemoved( VLC::MediaPtr media )

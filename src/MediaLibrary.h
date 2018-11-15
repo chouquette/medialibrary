@@ -27,6 +27,7 @@
 #include "Settings.h"
 
 #include "medialibrary/IDeviceLister.h"
+#include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "medialibrary/IMedia.h"
 
 #include <atomic>
@@ -54,7 +55,6 @@ namespace fs
 {
 class IFile;
 class IDirectory;
-class IFileSystemFactory;
 }
 
 namespace parser
@@ -237,12 +237,25 @@ class MediaLibrary : public IMediaLibrary
             MediaLibrary* m_ml;
         };
 
+        class FsFactoryCb : public fs::IFileSystemFactoryCb
+        {
+        public:
+            FsFactoryCb( MediaLibrary* ml );
+        private:
+            virtual void onDevicePlugged( const std::string& uuid ) override;
+            virtual void onDeviceUnplugged( const std::string& uuid ) override;
+            void onDeviceChanged( const std::string& uuid, bool isPresent );
+        private:
+            MediaLibrary* m_ml;
+        };
+
     protected:
         std::shared_ptr<sqlite::Connection> m_dbConnection;
         std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_fsFactories;
         std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_externalNetworkFsFactories;
         std::string m_thumbnailPath;
         IMediaLibraryCb* m_callback;
+        FsFactoryCb m_fsFactoryCb;
         // Private IDeviceListerCb implementation
         DeviceListerCb m_deviceListerCbImpl;
         // External device lister

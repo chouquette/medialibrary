@@ -34,6 +34,31 @@ namespace fs
     class IFile;
     class IDevice;
 
+    /**
+     * @brief IFileSystemFactoryCb is for external file system factories to signal device changes
+     */
+    class IFileSystemFactoryCb
+    {
+    public:
+        virtual ~IFileSystemFactoryCb() = default;
+        /**
+         * @brief onDevicePlugged Shall be invoked when a device gets plugged
+         * @param uuid The device UUID
+         *
+         * When this callback returns, the medialibrary will assume that the
+         * corresponding fs::IDevice::isPresent method will return true.
+         */
+        virtual void onDevicePlugged( const std::string& uuid ) = 0;
+        /**
+         * @brief onDeviceUnplugged Shall be invoked when a device gets unplugged
+         * @param uuid The device UUID
+         *
+         * When this callback returns, the medialibrary will assume that the
+         * corresponding fs::IDevice::isPresent method will return false.
+         */
+        virtual void onDeviceUnplugged( const std::string& uuid ) = 0;
+    };
+
     class IFileSystemFactory
     {
     public:
@@ -79,8 +104,11 @@ namespace fs
         ///
         /// \brief start Starts any potential background operation that would be
         /// required by this factory.
+        /// \param cb An instance of IFileSystemFactoryCb to be used to signal device changes
+        ///           This instance is owned by the medialibrary, and must not
+        ///           be released
         ///
-        virtual void start() = 0;
+        virtual void start( IFileSystemFactoryCb* cb ) = 0;
         ///
         /// \brief stop stops any potential background operation that would be
         /// required by this factory.

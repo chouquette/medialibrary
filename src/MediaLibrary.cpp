@@ -114,6 +114,7 @@ const size_t MediaLibrary::NbSupportedExtensions = sizeof(supportedExtensions) /
 
 MediaLibrary::MediaLibrary()
     : m_callback( nullptr )
+    , m_fsFactoryCb( this )
     , m_deviceListerCbImpl( this )
     , m_verbosity( LogLevel::Error )
     , m_settings( this )
@@ -824,8 +825,8 @@ void MediaLibrary::startThumbnailer()
 void MediaLibrary::populateNetworkFsFactories()
 {
 #ifdef HAVE_LIBVLC
-    m_externalNetworkFsFactories.emplace_back( std::make_shared<factory::NetworkFileSystemFactory>(
-                                                   &m_deviceListerCbImpl, "smb://", "dsm-sd" ) );
+    m_externalNetworkFsFactories.emplace_back(
+        std::make_shared<factory::NetworkFileSystemFactory>( "smb://", "dsm-sd" ) );
 #endif
 }
 
@@ -1378,7 +1379,7 @@ bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
         auto previousSize = m_fsFactories.size();
         for ( auto fsFactory : m_externalNetworkFsFactories )
         {
-            fsFactory->start();
+            fsFactory->start( &m_fsFactoryCb );
             m_fsFactories.push_back( std::move( fsFactory ) );
         }
         std::copy( begin( m_externalNetworkFsFactories ), end( m_externalNetworkFsFactories ),
@@ -1604,6 +1605,30 @@ bool MediaLibrary::DeviceListerCb::isDeviceKnown( const std::string& uuid ) cons
 MediaLibrary::DeviceListerCb::DeviceListerCb( MediaLibrary* ml )
     : m_ml( ml )
 {
+}
+
+MediaLibrary::FsFactoryCb::FsFactoryCb(MediaLibrary* ml)
+    : m_ml( ml )
+{
+}
+
+void MediaLibrary::FsFactoryCb::onDevicePlugged( const std::string& uuid )
+{
+    onDeviceChanged( uuid, true );
+}
+
+void MediaLibrary::FsFactoryCb::onDeviceUnplugged( const std::string& uuid )
+{
+    onDeviceChanged( uuid, false );
+}
+
+void MediaLibrary::FsFactoryCb::onDeviceChanged( const std::string& uuid, bool isPresent )
+{
+    auto device = Device::fromUuid( m_ml, uuid );
+    assert( device->isRemovable() == true );
+    if ( device->isPresent() == isPresent )
+        return;
+    device->setPresent( isPresent );
 }
 
 }
