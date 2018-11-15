@@ -68,8 +68,6 @@ FsDiscoverer::FsDiscoverer( std::shared_ptr<fs::IFileSystemFactory> fsFactory, M
 
 bool FsDiscoverer::discover( const std::string& entryPoint )
 {
-    LOG_INFO( "Running discover on: ", entryPoint );
-
     if ( m_fsFactory->isMrlSupported( entryPoint ) == false )
         return false;
 

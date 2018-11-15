@@ -245,6 +245,7 @@ void DiscovererWorker::runDiscover( const std::string& entryPoint )
 {
     m_ml->getCb()->onDiscoveryStarted( entryPoint );
     auto discovered = false;
+    LOG_INFO( "Running discover on: ", entryPoint );
     for ( auto& d : m_discoverers )
     {
         // Assume only one discoverer can handle an entrypoint.
