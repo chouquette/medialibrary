@@ -156,6 +156,8 @@ bool FsDiscoverer::reload()
         // fetchRootFolders only returns present folders
         assert( f->isPresent() == true );
         auto mrl = f->mrl();
+        if ( m_fsFactory->isMrlSupported( mrl ) == false )
+            continue;
         m_cb->onReloadStarted( mrl );
         auto res = reloadFolder( f );
         m_cb->onReloadCompleted( mrl, res );
