@@ -658,3 +658,18 @@ TEST_F( Albums, SearchTracks )
     auto albumTracksSearch = alb->searchTracks( "otter", nullptr )->all();
     ASSERT_EQ( 1u, albumTracksSearch.size() );
 }
+
+TEST_F( Albums, NbDiscs )
+{
+    auto alb = ml->createAlbum( "disc" );
+    ASSERT_EQ( 1u, alb->nbDiscs() );
+
+    auto res = alb->setNbDiscs( 123 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 123u, alb->nbDiscs() );
+
+    Reload();
+
+    alb = std::static_pointer_cast<Album>( ml->album( alb->id() ) );
+    ASSERT_EQ( 123u, alb->nbDiscs() );
+}

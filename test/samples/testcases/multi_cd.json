@@ -8,6 +8,7 @@
         "albums": [{
             "title": "Album",
             "nbTracks": 3,
+            "nbDiscs": 3,
             "tracks": [{
                 "title": "Track 1",
                 "cd": 1

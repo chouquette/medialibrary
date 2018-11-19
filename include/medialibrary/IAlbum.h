@@ -69,6 +69,11 @@ public:
      * The value is cached, and doesn't require fetching anything.
      */
     virtual uint32_t nbTracks() const = 0;
+    /**
+     * @brief nbDiscs Returns the total number of discs for this album.
+     * Defaults to 1
+     */
+    virtual uint32_t nbDiscs() const = 0;
     virtual unsigned int duration() const = 0;
 
     virtual Query<IMedia> searchTracks( const std::string& pattern,

@@ -53,7 +53,8 @@ Album::Album(MediaLibraryPtr ml, sqlite::Row& row)
     , m_thumbnailId( row.load<decltype(m_thumbnailId)>( 5 ) )
     , m_nbTracks( row.load<decltype(m_nbTracks)>( 6 ) )
     , m_duration( row.load<decltype(m_duration)>( 7 ) )
-    , m_isPresent( row.load<decltype(m_isPresent)>( 8 ) )
+    , m_nbDiscs( row.load<decltype(m_nbDiscs)>( 8 ) )
+    , m_isPresent( row.load<decltype(m_isPresent)>( 9 ) )
 {
 }
 
@@ -66,6 +67,7 @@ Album::Album( MediaLibraryPtr ml, const std::string& title, int64_t thumbnailId 
     , m_thumbnailId( thumbnailId )
     , m_nbTracks( 0 )
     , m_duration( 0 )
+    , m_nbDiscs( 1 )
     , m_isPresent( true )
 {
 }
@@ -78,6 +80,7 @@ Album::Album( MediaLibraryPtr ml, const Artist* artist )
     , m_thumbnailId( 0 )
     , m_nbTracks( 0 )
     , m_duration( 0 )
+    , m_nbDiscs( 1 )
     , m_isPresent( true )
 {
 }
@@ -338,6 +341,21 @@ unsigned int Album::nbTracks() const
     return m_nbTracks;
 }
 
+uint32_t Album::nbDiscs() const
+{
+    return m_nbDiscs;
+}
+
+bool Album::setNbDiscs( uint32_t nbDiscs )
+{
+    static const std::string req = "UPDATE " + Album::Table::Name
+            + " SET nb_discs = ? WHERE id_album = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, nbDiscs, m_id ) == false )
+        return false;
+    m_nbDiscs = nbDiscs;
+    return true;
+}
+
 unsigned int Album::duration() const
 {
     return m_duration;
@@ -406,6 +424,7 @@ void Album::createTable( sqlite::Connection* dbConnection )
                 "thumbnail_id UNSIGNED INT,"
                 "nb_tracks UNSIGNED INTEGER DEFAULT 0,"
                 "duration UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+                "nb_discs UNSIGNED INTEGER NOT NULL DEFAULT 1,"
                 "is_present UNSIGNED INTEGER NOT NULL DEFAULT 0,"
                 "FOREIGN KEY( artist_id ) REFERENCES " + Artist::Table::Name
                 + "(id_artist) ON DELETE CASCADE,"

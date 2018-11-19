@@ -627,7 +627,7 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
         auto track = handleTrack( album, item, artists.second ? artists.second : artists.first,
                                   genre.get() );
 
-        auto res = link( *media, *album, artists.first, artists.second );
+        auto res = link( item, *album, artists.first, artists.second );
         media->save();
         t->commit();
         m_notifier->notifyAlbumModification( album );
@@ -923,9 +923,11 @@ std::shared_ptr<AlbumTrack> MetadataAnalyzer::handleTrack( std::shared_ptr<Album
 
 /* Misc */
 
-bool MetadataAnalyzer::link( Media& media, Album& album,
+bool MetadataAnalyzer::link( IItem& item, Album& album,
                                std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist )
 {
+    Media& media = static_cast<Media&>( *item.media() );
+
     if ( albumArtist == nullptr )
     {
         assert( artist != nullptr );
@@ -1017,6 +1019,16 @@ bool MetadataAnalyzer::link( Media& media, Album& album,
         if ( artist != nullptr && artist->id() != albumArtist->id() )
            artist->updateNbTrack( 1 );
         albumArtist->updateNbTrack( 1 );
+    }
+
+    const auto discTotal = toInt( item, IItem::Metadata::DiscTotal );
+    const auto discNumber = toInt( item, IItem::Metadata::DiscNumber );
+    if ( ( discTotal != 0 && discTotal > 0 &&
+           static_cast<uint32_t>( discTotal ) > album.nbDiscs() ) ||
+         ( discNumber != 0 && discNumber > 0 &&
+           static_cast<uint32_t>( discNumber ) > album.nbDiscs() ) )
+    {
+        album.setNbDiscs( std::max( discTotal, discNumber ) );
     }
 
     return true;

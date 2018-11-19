@@ -448,6 +448,12 @@ void Tests::checkAlbums( const rapidjson::Value& expectedAlbums, std::vector<Alb
                   || a->artworkMrl().compare(0, 13, "attachment://") == 0 )
                     return false;
             }
+            if ( expectedAlbum.HasMember( "nbDiscs" ) )
+            {
+                const auto nbDiscs = expectedAlbum["nbDiscs"].GetUint();
+                if ( a->nbDiscs() != nbDiscs )
+                    return false;
+            }
             return true;
         });
         ASSERT_NE( end( albums ), it );

@@ -89,6 +89,8 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
                                               unsigned int discNumber, int64_t artistId, Genre* genre );
         bool removeTrack( Media& media, AlbumTrack& albumTrack );
         unsigned int nbTracks() const override;
+        virtual uint32_t nbDiscs() const override;
+        bool setNbDiscs( uint32_t nbDiscs );
         unsigned int duration() const override;
 
         virtual ArtistPtr albumArtist() const override;
@@ -130,6 +132,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         int64_t m_thumbnailId;
         unsigned int m_nbTracks;
         unsigned int m_duration;
+        uint32_t m_nbDiscs;
         bool m_isPresent;
 
         mutable std::vector<MediaPtr> m_tracks;
