@@ -79,10 +79,13 @@ namespace fs
         virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) = 0;
         ///
         /// \brief createDeviceFromPath creates a representation of a device
-        /// \param path A path.
+        /// \param path An MRL.
         /// \return A representation of the device.
         ///
-        virtual std::shared_ptr<fs::IDevice> createDeviceFromMrl( const std::string& path ) = 0;
+        /// The provided path can and most often will refer to a file in that
+        /// device, and will not simply be the path to the device mountpoint
+        ///
+        virtual std::shared_ptr<fs::IDevice> createDeviceFromMrl( const std::string& mrl ) = 0;
         ///
         /// \brief refresh Will cause any FS cache to be refreshed.
         ///

@@ -55,9 +55,9 @@ NetworkFileSystemFactory::NetworkFileSystemFactory(const std::string& protocol,
     em.onItemDeleted( [this]( VLC::MediaPtr m, int ) { onDeviceRemoved( std::move( m ) ); } );
 }
 
-std::shared_ptr<fs::IDirectory> NetworkFileSystemFactory::createDirectory( const std::string& path )
+std::shared_ptr<fs::IDirectory> NetworkFileSystemFactory::createDirectory( const std::string& mrl )
 {
-    return std::make_shared<fs::NetworkDirectory>( path, *this );
+    return std::make_shared<fs::NetworkDirectory>( mrl, *this );
 }
 
 std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::createDevice( const std::string& mrl )
@@ -77,13 +77,13 @@ std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::createDevice( const std::
     return res;
 }
 
-std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::createDeviceFromMrl( const std::string& path )
+std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::createDeviceFromMrl( const std::string& mrl )
 {
     std::shared_ptr<fs::IDevice> res;
     std::unique_lock<compat::Mutex> lock( m_devicesLock );
-    m_deviceCond.wait_for( lock, std::chrono::seconds{ 5 }, [this, &res, &path]() {
-        auto it = std::find_if( begin( m_devices ), end( m_devices ), [&path]( const Device& d ) {
-            return strncasecmp( path.c_str(), d.mrl.c_str(), d.mrl.length() ) == 0;
+    m_deviceCond.wait_for( lock, std::chrono::seconds{ 5 }, [this, &res, &mrl]() {
+        auto it = std::find_if( begin( m_devices ), end( m_devices ), [&mrl]( const Device& d ) {
+            return strncasecmp( mrl.c_str(), d.mrl.c_str(), d.mrl.length() ) == 0;
         });
         if ( it == end( m_devices ) )
             return false;
