@@ -112,10 +112,10 @@ const std::string& NetworkFileSystemFactory::scheme() const
     return m_protocol;
 }
 
-void NetworkFileSystemFactory::start( fs::IFileSystemFactoryCb* cb )
+bool NetworkFileSystemFactory::start( fs::IFileSystemFactoryCb* cb )
 {
     m_cb = cb;
-    m_discoverer.start();
+    return m_discoverer.start();
 }
 
 void NetworkFileSystemFactory::stop()

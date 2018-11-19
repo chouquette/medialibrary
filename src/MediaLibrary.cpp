@@ -1379,8 +1379,8 @@ bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
         auto previousSize = m_fsFactories.size();
         for ( auto fsFactory : m_externalNetworkFsFactories )
         {
-            fsFactory->start( &m_fsFactoryCb );
-            m_fsFactories.push_back( std::move( fsFactory ) );
+            if ( fsFactory->start( &m_fsFactoryCb ) == true )
+                m_fsFactories.push_back( std::move( fsFactory ) );
         }
         std::copy( begin( m_externalNetworkFsFactories ), end( m_externalNetworkFsFactories ),
                    std::back_inserter( m_fsFactories ) );

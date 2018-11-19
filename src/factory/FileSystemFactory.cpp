@@ -148,8 +148,9 @@ const std::string&FileSystemFactory::scheme() const
     return s;
 }
 
-void FileSystemFactory::start( fs::IFileSystemFactoryCb* )
+bool FileSystemFactory::start( fs::IFileSystemFactoryCb* )
 {
+    return true;
 }
 
 void FileSystemFactory::stop()

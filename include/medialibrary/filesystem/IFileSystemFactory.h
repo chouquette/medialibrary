@@ -107,11 +107,12 @@ namespace fs
         ///
         /// \brief start Starts any potential background operation that would be
         /// required by this factory.
+        /// \return False in case of an error.
         /// \param cb An instance of IFileSystemFactoryCb to be used to signal device changes
         ///           This instance is owned by the medialibrary, and must not
         ///           be released
         ///
-        virtual void start( IFileSystemFactoryCb* cb ) = 0;
+        virtual bool start( IFileSystemFactoryCb* cb ) = 0;
         ///
         /// \brief stop stops any potential background operation that would be
         /// required by this factory.
