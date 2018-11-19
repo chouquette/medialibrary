@@ -318,7 +318,12 @@ const std::string& Folder::mrl() const
     }
 
     auto fsFactory = m_ml->fsFactoryForMrl( m_device->scheme() );
-    assert( fsFactory != nullptr );
+    if ( fsFactory == nullptr )
+    {
+        assert( !"Failed to find a FileSystemFactory for a known folder" );
+        m_fullPath = "";
+        return m_fullPath;
+    }
     auto deviceFs = fsFactory->createDevice( m_device->uuid() );
     // In case the device lister hasn't been updated accordingly, we might think
     // a device still is present while it's not.
