@@ -425,7 +425,7 @@ class IMediaLibrary
          */
         virtual Query<IFolder> folders( const QueryParameters* params = nullptr ) const = 0;
         virtual Query<IFolder> searchFolders( const std::string& pattern,
-                                              const QueryParameters* params ) const = 0;
+                                              const QueryParameters* params = nullptr ) const = 0;
         virtual FolderPtr folder( int64_t folderId ) const = 0;
         virtual FolderPtr folder( const std::string& mrl ) const = 0;
         virtual void removeEntryPoint( const std::string& entryPoint ) = 0;
