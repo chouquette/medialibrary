@@ -230,8 +230,8 @@ class MediaLibrary : public IMediaLibrary
         public:
             DeviceListerCb( MediaLibrary* ml );
         private:
-            virtual bool onDevicePlugged( const std::string& uuid, const std::string& mountpoint ) override;
-            virtual void onDeviceUnplugged(const std::string& uuid, const std::string& mountpoint) override;
+            virtual bool onDeviceMounted( const std::string& uuid, const std::string& mountpoint ) override;
+            virtual void onDeviceUnmounted(const std::string& uuid, const std::string& mountpoint) override;
             virtual bool isDeviceKnown( const std::string& uuid ) const override;
 
         private:

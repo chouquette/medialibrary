@@ -1553,7 +1553,7 @@ void MediaLibrary::addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer )
     m_thumbnailers.push_back( std::move( thumbnailer ) );
 }
 
-bool MediaLibrary::DeviceListerCb::onDevicePlugged( const std::string& uuid, const std::string& mountpoint )
+bool MediaLibrary::DeviceListerCb::onDeviceMounted( const std::string& uuid, const std::string& mountpoint )
 {
     auto currentDevice = Device::fromUuid( m_ml, uuid );
     LOG_INFO( "Device ", uuid, " was plugged and mounted on ", mountpoint );
@@ -1579,7 +1579,7 @@ bool MediaLibrary::DeviceListerCb::onDevicePlugged( const std::string& uuid, con
     return currentDevice == nullptr;
 }
 
-void MediaLibrary::DeviceListerCb::onDeviceUnplugged( const std::string& uuid,
+void MediaLibrary::DeviceListerCb::onDeviceUnmounted( const std::string& uuid,
                                                       const std::string& mountpoint )
 {
     auto device = Device::fromUuid( m_ml, uuid );

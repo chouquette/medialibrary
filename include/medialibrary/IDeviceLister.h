@@ -40,18 +40,18 @@ class IDeviceListerCb
 public:
     virtual ~IDeviceListerCb() = default;
     /**
-     * @brief onDevicePlugged Shall be invoked when a known device gets plugged
+     * @brief onDeviceMounted Shall be invoked when a known device gets mounted
      * @param uuid The device UUID
      * @param mountpoint The device new mountpoint
      * @returns true is the device was unknown. false otherwise
      */
-    virtual bool onDevicePlugged( const std::string& uuid, const std::string& mountpoint ) = 0;
+    virtual bool onDeviceMounted( const std::string& uuid, const std::string& mountpoint ) = 0;
     /**
-     * @brief onDeviceUnplugged Shall be invoked when a known device gets unplugged
+     * @brief onDeviceUnmounted Shall be invoked when a known device gets unmounted
      * @param uuid The device UUID
      * @param mountpoint The mountpoint the device was mounted on
      */
-    virtual void onDeviceUnplugged( const std::string& uuid, const std::string& mountpoint ) = 0;
+    virtual void onDeviceUnmounted( const std::string& uuid, const std::string& mountpoint ) = 0;
     /**
      * @brief isDeviceKnown Returns true is the provided device is already known to the media library
      *
