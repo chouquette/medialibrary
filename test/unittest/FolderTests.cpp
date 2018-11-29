@@ -476,6 +476,53 @@ TEST_F( Folders, NbMedia )
     ASSERT_EQ( 0u, subFolder->media( IMedia::Type::Unknown, nullptr )->count() );
 }
 
+TEST_F( Folders, IsIndexed )
+{
+    // Check with a couple of indexed folders
+    auto res = ml->isIndexed( mock::FileSystemFactory::Root );
+    ASSERT_TRUE( res );
+    res = ml->isIndexed( mock::FileSystemFactory::SubFolder );
+    ASSERT_TRUE( res );
+    // Check with a random non-indexed folder
+    res = ml->isIndexed( "file:///path/to/another/folder" );
+    ASSERT_FALSE( res );
+    // Check with a file
+    res = ml->isIndexed( mock::FileSystemFactory::Root + "video.avi" );
+    ASSERT_TRUE( res );
+}
+
+TEST_F( FoldersNoDiscover, IsIndexed )
+{
+    // The previous test checks for a non-existing folder. This time, try with
+    // an existing folder that wasn't indexed
+    ml->discover( mock::FileSystemFactory::SubFolder );
+    bool discovered = cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+    auto res = ml->isIndexed( mock::FileSystemFactory::Root );
+    ASSERT_FALSE( res );
+    res = ml->isIndexed( mock::FileSystemFactory::SubFolder );
+    ASSERT_TRUE( res );
+}
+
+TEST_F( FoldersNoDiscover, IsBannedFolderIndexed )
+{
+    ml->banFolder( mock::FileSystemFactory::SubFolder );
+    cbMock->waitBanFolder();
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+    auto res = ml->isIndexed( mock::FileSystemFactory::Root );
+    ASSERT_TRUE( res );
+    res = ml->isIndexed( mock::FileSystemFactory::SubFolder );
+    ASSERT_FALSE( res );
+
+    ml->unbanFolder( mock::FileSystemFactory::SubFolder );
+    cbMock->waitUnbanFolder();
+    cbMock->waitReload();
+    res = ml->isIndexed( mock::FileSystemFactory::SubFolder );
+    ASSERT_TRUE( res );
+}
+
 TEST_F( FoldersNoDiscover, ListWithMedia )
 {
     auto newFolder = mock::FileSystemFactory::Root + "empty/";

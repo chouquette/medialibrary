@@ -1409,6 +1409,13 @@ Query<IFolder> MediaLibrary::entryPoints() const
     return make_query<Folder, IFolder>( this, "*", req, "" );
 }
 
+bool MediaLibrary::isIndexed( const std::string& mrl ) const
+{
+    auto folderMrl = utils::file::directory( mrl );
+    auto folder = Folder::fromMrl( this, folderMrl );
+    return folder != nullptr;
+}
+
 Query<IFolder> MediaLibrary::folders( const QueryParameters* params ) const
 {
     return Folder::withMedia( this, params );

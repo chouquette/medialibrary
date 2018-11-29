@@ -397,6 +397,13 @@ class IMediaLibrary
         virtual bool setDiscoverNetworkEnabled( bool enable ) = 0;
         virtual Query<IFolder> entryPoints() const = 0;
         /**
+         * @brief isIndexed Returns true if the mrl point to a file of folder in an
+         *                  indexed entrypoint
+         * @param mrl The MRL to probe
+         * @return true if the mrl is indexed, false otherwise
+         */
+        virtual bool isIndexed( const std::string& mrl ) const = 0;
+        /**
          * @brief folders Returns a flattened list of all folders containing at least a media
          * @param params A query parameters object
          * @return A query object to be used to fetch the results

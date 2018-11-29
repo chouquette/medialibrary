@@ -144,6 +144,7 @@ class MediaLibrary : public IMediaLibrary
         virtual void discover( const std::string& entryPoint ) override;
         virtual bool setDiscoverNetworkEnabled( bool enabled ) override;
         virtual Query<IFolder> entryPoints() const override;
+        virtual bool isIndexed( const std::string& mrl ) const override;
         virtual Query<IFolder> folders( const QueryParameters* params = nullptr ) const override;
         virtual Query<IFolder> searchFolders( const std::string& pattern,
                                               const QueryParameters* params ) const override;
