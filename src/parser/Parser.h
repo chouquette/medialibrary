@@ -43,6 +43,7 @@ class IParserCb
 {
 public:
     virtual ~IParserCb() = default;
+    virtual void parse( std::shared_ptr<Task> task ) = 0;
     virtual void done( std::shared_ptr<Task> task, Status status ) = 0;
     virtual void onIdleChanged( bool isIdle ) = 0;
 };
@@ -56,7 +57,7 @@ public:
     Parser( MediaLibrary* ml );
     virtual ~Parser();
     void addService( ServicePtr service );
-    void parse( std::shared_ptr<Task> task );
+    virtual void parse( std::shared_ptr<Task> task ) override;
     void start();
     void pause();
     void resume();

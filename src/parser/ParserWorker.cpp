@@ -178,6 +178,12 @@ void Worker::mainloop()
             task = std::move( m_tasks.front() );
             m_tasks.pop();
         }
+        // Special case to restore uncompleted tasks from a parser thread
+        if ( task == nullptr )
+        {
+            restoreTasks();
+            continue;
+        }
         if ( task->isStepCompleted( m_service->targetedStep() ) == true )
         {
             LOG_INFO( "Skipping completed task [", serviceName, "] on ", task->item().mrl() );
@@ -261,6 +267,18 @@ bool Worker::handleServiceResult( Task& task, Status status )
         return Task::destroy( m_ml, task.id() );
     }
     return true;
+}
+
+void Worker::restoreTasks()
+{
+    auto tasks = Task::fetchUncompleted( m_ml );
+    LOG_INFO( "Resuming parsing on ", tasks.size(), " tasks" );
+    for ( auto& t : tasks )
+    {
+        if ( t->restoreLinkedEntities() == false )
+            continue;
+        m_parserCb->parse( std::move( t ) );
+    }
 }
 
 }

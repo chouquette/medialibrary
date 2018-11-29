@@ -65,9 +65,13 @@ void Parser::parse( std::shared_ptr<Task> task )
 {
     if ( m_services.empty() == true )
         return;
+    auto isRestoreTask = task == nullptr;
     m_services[0]->parse( std::move( task ) );
-    m_opToDo += m_services.size();
-    updateStats();
+    if ( isRestoreTask == false )
+    {
+        m_opToDo += m_services.size();
+        updateStats();
+    }
 }
 
 void Parser::start()
@@ -115,15 +119,7 @@ void Parser::restore()
 {
     if ( m_services.empty() == true )
         return;
-
-    auto tasks = Task::fetchUncompleted( m_ml );
-    LOG_INFO( "Resuming parsing on ", tasks.size(), " tasks" );
-    for ( auto& t : tasks )
-    {
-        if ( t->restoreLinkedEntities() == false )
-            continue;
-        parse( std::move( t ) );
-    }
+    parse( nullptr );
 }
 
 void Parser::updateStats()

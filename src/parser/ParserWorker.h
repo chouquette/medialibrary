@@ -84,6 +84,7 @@ private:
     void mainloop();
     void setIdle( bool isIdle );
     bool handleServiceResult( Task& task, Status status );
+    void restoreTasks();
 
 private:
     MediaLibrary* m_ml;
