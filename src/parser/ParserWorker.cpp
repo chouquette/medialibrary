@@ -275,6 +275,12 @@ void Worker::restoreTasks()
     LOG_INFO( "Resuming parsing on ", tasks.size(), " tasks" );
     for ( auto& t : tasks )
     {
+        {
+            std::lock_guard<compat::Mutex> lock( m_lock );
+            if ( m_stopParser == true )
+                break;
+        }
+
         if ( t->restoreLinkedEntities() == false )
             continue;
         m_parserCb->parse( std::move( t ) );
