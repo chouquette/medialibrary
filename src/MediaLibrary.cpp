@@ -370,41 +370,9 @@ MediaPtr MediaLibrary::media( const std::string& mrl ) const
         LOG_INFO( "Found external media: ", mrl );
         return file->media();
     }
-    auto fsFactory = fsFactoryForMrl( mrl );
-    if ( fsFactory == nullptr )
-    {
-        LOG_WARN( "Failed to create FS factory for path ", mrl );
-        return nullptr;
-    }
-    auto device = fsFactory->createDeviceFromMrl( mrl );
-    if ( device == nullptr )
-    {
-        LOG_WARN( "Failed to create a device associated with mrl ", mrl );
-        return nullptr;
-    }
-    if ( device->isRemovable() == false )
-        file = File::fromMrl( this, mrl );
-    else
-    {
-        auto folder = Folder::fromMrl( this, utils::file::directory( mrl ) );
-        if ( folder == nullptr )
-        {
-            LOG_WARN( "Failed to find folder containing ", mrl );
-            return nullptr;
-        }
-        if ( folder->isPresent() == false )
-        {
-            LOG_INFO( "Found a folder containing ", mrl, " but it is not present" );
-            return nullptr;
-        }
-        file = File::fromFileName( this, utils::file::fileName( mrl ), folder->id() );
-    }
+    file = File::fromMrl( this, mrl );
     if ( file == nullptr )
-    {
-        LOG_WARN( "Failed to fetch file for ", mrl, " (device ", device->uuid(), " was ",
-                  device->isRemovable() ? "" : "NOT ", "removable)");
         return nullptr;
-    }
     return file->media();
 }
 

@@ -29,6 +29,7 @@
 #include "Media.h"
 #include "Folder.h"
 #include "Playlist.h"
+#include "utils/Filename.h"
 
 namespace medialibrary
 {
@@ -258,14 +259,47 @@ std::shared_ptr<File> File::createFromPlaylist( MediaLibraryPtr ml, int64_t play
 
 std::shared_ptr<File> File::fromMrl( MediaLibraryPtr ml, const std::string& mrl )
 {
-    static const std::string req = "SELECT * FROM " + File::Table::Name +
-            " WHERE mrl = ? AND folder_id IS NOT NULL";
-    auto file = fetch( ml, req, mrl );
-    if ( file == nullptr )
+    auto fsFactory = ml->fsFactoryForMrl( mrl );
+    if ( fsFactory == nullptr )
+    {
+        LOG_WARN( "Failed to create FS factory for path ", mrl );
         return nullptr;
-    // safety checks: since this only works for files on non removable devices
-    // isRemovable must be false
-    assert( file->m_isRemovable == false );
+    }
+    auto device = fsFactory->createDeviceFromMrl( mrl );
+    if ( device == nullptr )
+    {
+        LOG_WARN( "Failed to create a device associated with mrl ", mrl );
+        return nullptr;
+    }
+    if ( device->isRemovable() == false )
+    {
+        static const std::string req = "SELECT * FROM " + File::Table::Name +
+                " WHERE mrl = ? AND folder_id IS NOT NULL";
+        auto file = fetch( ml, req, mrl );
+        if ( file == nullptr )
+            return nullptr;
+        // safety checks: since this only works for files on non removable devices
+        // isRemovable must be false
+        assert( file->m_isRemovable == false );
+        return file;
+    }
+    auto folder = Folder::fromMrl( ml, utils::file::directory( mrl ) );
+    if ( folder == nullptr )
+    {
+        LOG_WARN( "Failed to find folder containing ", mrl );
+        return nullptr;
+    }
+    if ( folder->isPresent() == false )
+    {
+        LOG_INFO( "Found a folder containing ", mrl, " but it is not present" );
+        return nullptr;
+    }
+    auto file = fromFileName( ml, utils::file::fileName( mrl ), folder->id() );
+    if ( file == nullptr )
+    {
+        LOG_WARN( "Failed to fetch file for ", mrl, " (device ", device->uuid(), " was ",
+                  device->isRemovable() ? "" : "NOT ", "removable)");
+    }
     return file;
 }
 
