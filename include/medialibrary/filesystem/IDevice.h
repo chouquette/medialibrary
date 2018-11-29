@@ -37,7 +37,6 @@ public:
     virtual const std::string& uuid() const = 0;
     virtual bool isRemovable() const = 0;
     virtual bool isPresent() const = 0;
-    virtual void setPresent( bool present ) = 0;
     /**
      * @brief mountpoint Returns a mountpoint of this device.
      *
@@ -46,6 +45,7 @@ public:
     virtual const std::string& mountpoint() const = 0;
 
     virtual void addMountpoint( std::string mountpoint ) = 0;
+    virtual void removeMountpoint( const std::string& mountpoint ) = 0;
     /**
      * @brief matchesMountpoint checks if the provided mrl matches this device
      * @param mrl The mrl to probe

@@ -49,8 +49,9 @@ public:
     /**
      * @brief onDeviceUnplugged Shall be invoked when a known device gets unplugged
      * @param uuid The device UUID
+     * @param mountpoint The mountpoint the device was mounted on
      */
-    virtual void onDeviceUnplugged( const std::string& uuid ) = 0;
+    virtual void onDeviceUnplugged( const std::string& uuid, const std::string& mountpoint ) = 0;
     /**
      * @brief isDeviceKnown Returns true is the provided device is already known to the media library
      *

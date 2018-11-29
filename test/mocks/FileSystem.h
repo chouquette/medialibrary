@@ -316,16 +316,17 @@ public:
         return true;
     }
 
-    virtual void setPresent( bool ) override
-    {
-    }
-
     virtual const std::string& mountpoint() const override
     {
         return m_mountpoint;
     }
 
     virtual void addMountpoint( std::string ) override
+    {
+        assert( false );
+    }
+
+    virtual void removeMountpoint( const std::string& ) override
     {
         assert( false );
     }

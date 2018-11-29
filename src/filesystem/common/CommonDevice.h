@@ -37,9 +37,9 @@ public:
     virtual const std::string& uuid() const override;
     virtual bool isRemovable() const override;
     virtual bool isPresent() const override;
-    virtual void setPresent( bool present ) override;
     virtual const std::string& mountpoint() const override;
     virtual void addMountpoint( std::string mountpoint ) override;
+    virtual void removeMountpoint( const std::string& mountpoint ) override;
     virtual std::tuple<bool, std::string>
     matchesMountpoint( const std::string& mrl ) const override;
     virtual std::string relativeMrl( const std::string& absoluteMrl ) const override;
@@ -48,7 +48,6 @@ public:
 private:
     std::string m_uuid;
     std::vector<std::string> m_mountpoints;
-    bool m_present;
     bool m_removable;
 };
 

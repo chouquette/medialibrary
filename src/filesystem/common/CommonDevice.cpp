@@ -27,6 +27,7 @@
 #include "CommonDevice.h"
 #include "utils/Filename.h"
 
+#include <algorithm>
 #include <cassert>
 
 namespace medialibrary
@@ -37,7 +38,6 @@ namespace fs
 CommonDevice::CommonDevice( const std::string& uuid, const std::string& mountpoint, bool isRemovable )
     : m_uuid( uuid )
     , m_mountpoints( { utils::file::toFolderPath( mountpoint ) } )
-    , m_present( true )
     , m_removable( isRemovable )
 {
 }
@@ -54,12 +54,7 @@ bool CommonDevice::isRemovable() const
 
 bool CommonDevice::isPresent() const
 {
-    return m_present;
-}
-
-void CommonDevice::setPresent( bool present )
-{
-    m_present = present;
+    return m_mountpoints.empty() == false;
 }
 
 const std::string& CommonDevice::mountpoint() const
@@ -71,6 +66,13 @@ const std::string& CommonDevice::mountpoint() const
 void CommonDevice::addMountpoint( std::string mountpoint )
 {
     m_mountpoints.push_back( std::move( mountpoint ) );
+}
+
+void CommonDevice::removeMountpoint( const std::string& mountpoint )
+{
+    auto it = std::find( begin( m_mountpoints ), end( m_mountpoints ), mountpoint );
+    if ( it != end( m_mountpoints ) )
+        m_mountpoints.erase( it );
 }
 
 std::tuple<bool, std::string>

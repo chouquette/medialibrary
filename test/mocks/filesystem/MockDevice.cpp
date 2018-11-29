@@ -67,6 +67,11 @@ void Device::addMountpoint( std::string )
     assert( false );
 }
 
+void Device::removeMountpoint( const std::string& )
+{
+    assert( false );
+}
+
 std::tuple<bool, std::string> Device::matchesMountpoint( const std::string& mrl ) const
 {
     if ( mrl.find( m_mountpoint ) != 0 )

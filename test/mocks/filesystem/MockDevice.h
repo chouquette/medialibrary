@@ -52,10 +52,11 @@ public:
     virtual bool isPresent() const override;
     virtual const std::string& mountpoint() const override;
     virtual void addMountpoint( std::string mountpoint ) override;
+    virtual void removeMountpoint( const std::string& mountpoint ) override;
     virtual std::tuple<bool, std::string> matchesMountpoint( const std::string& mrl ) const override;
 
     void setRemovable( bool value );
-    virtual void setPresent( bool value ) override;
+    void setPresent( bool value );
 
     virtual std::string relativeMrl( const std::string& mrl ) const override;
     virtual std::string absoluteMrl( const std::string& mrl ) const override;

@@ -116,16 +116,8 @@ void FileSystemFactory::refreshDevices()
                                 [&devicePair]( decltype(devices)::value_type& deviceTuple ) {
                                     return std::get<0>( deviceTuple ) == devicePair.first;
         });
-        // If the device isn't present anymore, mark it as such, but don't remove it
-        // That way, the directories that cached the device still have an up to date information
-        if ( it == end( devices ) )
-            devicePair.second->setPresent( false );
-        else
-        {
-            // If we already know the device, ensure it's marked as present
-            devicePair.second->setPresent( true );
+        if ( it != end( devices ) )
             devices.erase( it );
-        }
     }
     // And now insert all new devices, if any
     for ( const auto& d : devices )

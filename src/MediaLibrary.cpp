@@ -1564,11 +1564,14 @@ bool MediaLibrary::DeviceListerCb::onDevicePlugged( const std::string& uuid, con
             auto deviceFs = fsFactory->createDevice( uuid );
             if ( deviceFs != nullptr )
             {
-                LOG_INFO( "Device ", uuid, " changed presence state: 0 -> 1" );
-                assert( deviceFs->isPresent() == false );
-                deviceFs->setPresent( true );
-                if ( currentDevice != nullptr )
-                    currentDevice->setPresent( true );
+                auto previousPresence = deviceFs->isPresent();
+                deviceFs->addMountpoint( mountpoint );
+                if ( previousPresence == false )
+                {
+                    LOG_INFO( "Device ", uuid, " changed presence state: 0 -> 1" );
+                    if ( currentDevice != nullptr )
+                        currentDevice->setPresent( true );
+                }
             }
             break;
         }
@@ -1576,7 +1579,8 @@ bool MediaLibrary::DeviceListerCb::onDevicePlugged( const std::string& uuid, con
     return currentDevice == nullptr;
 }
 
-void MediaLibrary::DeviceListerCb::onDeviceUnplugged( const std::string& uuid )
+void MediaLibrary::DeviceListerCb::onDeviceUnplugged( const std::string& uuid,
+                                                      const std::string& mountpoint )
 {
     auto device = Device::fromUuid( m_ml, uuid );
     assert( device->isRemovable() == true );
@@ -1594,9 +1598,12 @@ void MediaLibrary::DeviceListerCb::onDeviceUnplugged( const std::string& uuid )
             if ( deviceFs != nullptr )
             {
                 assert( deviceFs->isPresent() == true );
-                LOG_INFO( "Device ", uuid, " changed presence state: 1 -> 0" );
-                deviceFs->setPresent( false );
-                device->setPresent( false );
+                deviceFs->removeMountpoint( mountpoint );
+                if ( deviceFs->isPresent() == false )
+                {
+                    LOG_INFO( "Device ", uuid, " changed presence state: 1 -> 0" );
+                    device->setPresent( false );
+                }
             }
         }
     }
