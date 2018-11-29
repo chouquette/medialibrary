@@ -75,12 +75,12 @@ std::shared_ptr<fs::IDevice> FileSystemFactory::createDevice( const std::string&
 
 std::shared_ptr<fs::IDevice> FileSystemFactory::createDeviceFromMrl( const std::string& mrl )
 {
-    std::string canonicalMountpoint;
+    std::string canonicalMrl;
     try
     {
-        canonicalMountpoint = utils::fs::toAbsolute(
+        canonicalMrl = utils::fs::toAbsolute(
                     utils::url::decode( utils::file::stripScheme( mrl ) ) );
-        canonicalMountpoint = scheme() + canonicalMountpoint;
+        canonicalMrl = scheme() + canonicalMrl;
     }
     catch ( const std::system_error& ex )
     {
@@ -88,12 +88,18 @@ std::shared_ptr<fs::IDevice> FileSystemFactory::createDeviceFromMrl( const std::
         return nullptr;
     }
     std::shared_ptr<fs::IDevice> res;
+    std::string mountpoint;
     for ( const auto& p : m_deviceCache )
     {
-        if ( canonicalMountpoint.find( p.second->mountpoint() ) == 0 )
+        auto match = p.second->matchesMountpoint( canonicalMrl );
+        if ( std::get<0>( match ) == true )
         {
-            if ( res == nullptr || res->mountpoint().length() < p.second->mountpoint().length() )
+            const auto& newMountpoint = std::get<1>( match );
+            if ( res == nullptr || mountpoint.length() < newMountpoint.length() )
+            {
                 res = p.second;
+                mountpoint = newMountpoint;
+            }
         }
     }
     return res;

@@ -27,6 +27,8 @@
 #include "CommonDevice.h"
 #include "utils/Filename.h"
 
+#include <cassert>
+
 namespace medialibrary
 {
 namespace fs
@@ -34,7 +36,7 @@ namespace fs
 
 CommonDevice::CommonDevice( const std::string& uuid, const std::string& mountpoint, bool isRemovable )
     : m_uuid( uuid )
-    , m_mountpoint( utils::file::toFolderPath( mountpoint ) )
+    , m_mountpoints( { utils::file::toFolderPath( mountpoint ) } )
     , m_present( true )
     , m_removable( isRemovable )
 {
@@ -62,9 +64,37 @@ void CommonDevice::setPresent( bool present )
 
 const std::string& CommonDevice::mountpoint() const
 {
-    return m_mountpoint;
+    assert( m_mountpoints.empty() == false );
+    return m_mountpoints[0];
 }
 
+void CommonDevice::addMountpoint( std::string mountpoint )
+{
+    m_mountpoints.push_back( std::move( mountpoint ) );
+}
+
+std::tuple<bool, std::string>
+CommonDevice::matchesMountpoint( const std::string& mrl ) const
+{
+    for ( const auto& m : m_mountpoints )
+    {
+        if ( mrl.find( m ) == 0 )
+            return { true, m };
+    }
+    return { false, "" };
+}
+
+std::string CommonDevice::relativeMrl( const std::string& absoluteMrl ) const
+{
+    assert( m_mountpoints.empty() == false );
+    return utils::file::removePath( absoluteMrl, m_mountpoints[0] );
+}
+
+std::string CommonDevice::absoluteMrl( const std::string& relativeMrl ) const
+{
+    assert( m_mountpoints.empty() == false );
+    return m_mountpoints[0] + relativeMrl;
+}
 
 }
 }

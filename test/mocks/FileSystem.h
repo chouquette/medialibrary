@@ -26,6 +26,7 @@
 #include <string>
 #include <memory>
 #include <algorithm>
+#include <cassert>
 #include <cstdlib>
 #include <cstring>
 #include <system_error>
@@ -322,6 +323,26 @@ public:
     virtual const std::string& mountpoint() const override
     {
         return m_mountpoint;
+    }
+
+    virtual void addMountpoint( std::string ) override
+    {
+        assert( false );
+    }
+
+    virtual std::string relativeMrl( const std::string& mrl ) const override
+    {
+        return mrl;
+    }
+
+    virtual std::string absoluteMrl( const std::string& mrl ) const override
+    {
+        return mrl;
+    }
+
+    std::tuple<bool, std::string> matchesMountpoint( const std::string& ) const override
+    {
+        return { false, "" };
     }
 
 private:

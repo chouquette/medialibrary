@@ -51,11 +51,14 @@ public:
     virtual bool isRemovable() const override;
     virtual bool isPresent() const override;
     virtual const std::string& mountpoint() const override;
+    virtual void addMountpoint( std::string mountpoint ) override;
+    virtual std::tuple<bool, std::string> matchesMountpoint( const std::string& mrl ) const override;
 
     void setRemovable( bool value );
     virtual void setPresent( bool value ) override;
 
-    std::string relativePath( const std::string& path );
+    virtual std::string relativeMrl( const std::string& mrl ) const override;
+    virtual std::string absoluteMrl( const std::string& mrl ) const override;
     void addFile( const std::string& filePath );
     void addFolder( const std::string& path );
     void removeFile( const std::string& filePath );

@@ -23,6 +23,7 @@
 #pragma once
 
 #include <string>
+#include <tuple>
 
 namespace medialibrary
 {
@@ -37,7 +38,42 @@ public:
     virtual bool isRemovable() const = 0;
     virtual bool isPresent() const = 0;
     virtual void setPresent( bool present ) = 0;
+    /**
+     * @brief mountpoint Returns a mountpoint of this device.
+     *
+     * If the device has multiple mountpoints, the result is undetermined
+     */
     virtual const std::string& mountpoint() const = 0;
+
+    virtual void addMountpoint( std::string mountpoint ) = 0;
+    /**
+     * @brief matchesMountpoint checks if the provided mrl matches this device
+     * @param mrl The mrl to probe
+     * @return A tuple containing:
+     *  - a bool, that reflects the match status (ie. true if the device matches the mrl)
+     *  - a string, containing the mountpoint that matched, or an empty string
+     *    if the device did not match
+     */
+    virtual std::tuple<bool, std::string>
+    matchesMountpoint( const std::string& mrl ) const = 0;
+    /**
+     * @brief relativeMrl Returns an mrl relative to the device mountpoint
+     * @param absoluteMrl The absolute MRL pointing to a file or folder, including
+     *                    the scheme
+     * @return An scheme-less MRL
+     */
+    virtual std::string relativeMrl( const std::string& absoluteMrl ) const = 0;
+    /**
+     * @brief absoluteMrl Returns an absolute mrl to the provided file or folder
+     * @param relativeMrl A relative MRL pointing to a file or folder, *not*
+     *                    including the scheme
+     * @return An absolute MRL, including the scheme
+     *
+     * If the device has multiple mountpoints, the resulting mrl is undetermined
+     * but guaranteed to yield the same device back when using
+     * IFileSystemFactory::createDeviceFromMrl
+     */
+    virtual std::string absoluteMrl( const std::string& relativeMrl ) const = 0;
 };
 }
 

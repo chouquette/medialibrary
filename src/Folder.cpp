@@ -117,7 +117,7 @@ std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& m
 {
     std::string path;
     if ( device.isRemovable() == true )
-        path = utils::file::removePath( mrl, deviceFs.mountpoint() );
+        path = deviceFs.relativeMrl( mrl );
     else
         path = mrl;
     auto self = std::make_shared<Folder>( ml, path, parentId, device.id(), device.isRemovable() );
@@ -126,10 +126,7 @@ std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& m
     if ( insert( ml, self, req, path, self->m_name, sqlite::ForeignKey( parentId ), device.id(), device.isRemovable() ) == false )
         return nullptr;
     if ( device.isRemovable() == true )
-    {
-        self->m_deviceMountpoint = deviceFs.mountpoint();
-        self->m_fullPath = self->m_deviceMountpoint + path;
-    }
+        self->m_fullPath = deviceFs.absoluteMrl( path );
     return self;
 }
 
@@ -178,7 +175,7 @@ bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl )
             device = Device::create( ml, deviceFs->uuid(), utils::file::scheme( mrl ), deviceFs->isRemovable() );
         std::string path;
         if ( deviceFs->isRemovable() == true )
-            path = utils::file::removePath( mrl, deviceFs->mountpoint() );
+            path = deviceFs->relativeMrl( mrl );
         else
             path = mrl;
         static const std::string req = "INSERT INTO " + Folder::Table::Name +
@@ -236,7 +233,7 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
     // We are trying to find a folder. If we don't know the device it's on, we don't know the folder.
     if ( device == nullptr )
         return nullptr;
-    auto path = utils::file::removePath( folderFs->mrl(), deviceFs->mountpoint() );
+    auto path = deviceFs->relativeMrl( folderFs->mrl() );
     std::string req = "SELECT * FROM " + Folder::Table::Name + " WHERE path = ? AND device_id = ?";
     std::shared_ptr<Folder> folder;
     if ( bannedType == BannedType::Any )
@@ -250,8 +247,7 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
     }
     if ( folder == nullptr )
         return nullptr;
-    folder->m_deviceMountpoint = deviceFs->mountpoint();
-    folder->m_fullPath = folder->m_deviceMountpoint + path;
+    folder->m_fullPath = deviceFs->absoluteMrl( path );
     return folder;
 }
 
@@ -333,8 +329,7 @@ const std::string& Folder::mrl() const
         m_fullPath = "";
         return m_fullPath;
     }
-    m_deviceMountpoint = deviceFs->mountpoint();
-    m_fullPath = m_deviceMountpoint + m_path;
+    m_fullPath = deviceFs->absoluteMrl( m_path );
     return m_fullPath;
 }
 

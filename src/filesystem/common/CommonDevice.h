@@ -23,6 +23,7 @@
 #pragma once
 
 #include "medialibrary/filesystem/IDevice.h"
+#include <vector>
 
 namespace medialibrary
 {
@@ -38,10 +39,15 @@ public:
     virtual bool isPresent() const override;
     virtual void setPresent( bool present ) override;
     virtual const std::string& mountpoint() const override;
+    virtual void addMountpoint( std::string mountpoint ) override;
+    virtual std::tuple<bool, std::string>
+    matchesMountpoint( const std::string& mrl ) const override;
+    virtual std::string relativeMrl( const std::string& absoluteMrl ) const override;
+    virtual std::string absoluteMrl( const std::string& relativeMrl ) const override;
 
 private:
     std::string m_uuid;
-    std::string m_mountpoint;
+    std::vector<std::string> m_mountpoints;
     bool m_present;
     bool m_removable;
 };

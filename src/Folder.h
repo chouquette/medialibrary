@@ -111,7 +111,6 @@ private:
     const int64_t m_deviceId;
     const bool m_isRemovable;
 
-    mutable std::string m_deviceMountpoint;
     mutable std::shared_ptr<Device> m_device;
     // This contains the full path, including device mountpoint (and mrl scheme,
     // as its part of the mountpoint
