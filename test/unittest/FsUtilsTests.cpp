@@ -42,6 +42,8 @@ TEST( FsUtils, extension )
 TEST( FsUtils, directory )
 {
     ASSERT_EQ( "/a/b/c/", utils::file::directory( "/a/b/c/d.e" ) );
+    ASSERT_EQ( "/a/b/c/", utils::file::directory( "/a/b/c/" ) );
+    ASSERT_EQ( "/a/b/", utils::file::directory( "/a/b/c" ) );
     ASSERT_EQ( "", utils::file::directory( "" ) );
     ASSERT_EQ( "", utils::file::directory( "file.test" ) );
 }

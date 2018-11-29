@@ -35,7 +35,12 @@ namespace file
 {
     std::string extension( const std::string& fileName );
     std::string stripExtension( const std::string& fileName );
-    std::string directory( const std::string& filePath );
+    /**
+     * @brief directory Returns the mrl of the folder containing the provided file
+     * @param fileMrl An mrl pointing to a file
+     * If the mrl points to a directory, this function will return the same mrl.
+     */
+    std::string directory( const std::string& fileMrl );
 
     /**
      * @brief directoryName  Extract the folder name from a path
