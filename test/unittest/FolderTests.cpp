@@ -284,7 +284,8 @@ TEST_F( FoldersNoDiscover, RemoveFromBannedList )
     ASSERT_EQ( nullptr, f );
 
     ml->unbanFolder( mock::FileSystemFactory::SubFolder );
-    cbMock->waitBanFolder();
+    cbMock->waitUnbanFolder();
+    cbMock->waitReload();
     files = ml->files();
     ASSERT_EQ( 3u, files.size() );
     f = ml->folder( mock::FileSystemFactory::SubFolder );
