@@ -397,6 +397,11 @@ int64_t Folder::deviceId() const
     return m_deviceId;
 }
 
+bool Folder::isRemovable() const
+{
+    return m_isRemovable;
+}
+
 bool Folder::isPresent() const
 {
     if ( m_device == nullptr )

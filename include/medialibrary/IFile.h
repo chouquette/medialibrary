@@ -52,6 +52,7 @@ public:
     virtual Type type() const = 0;
     virtual unsigned int lastModificationDate() const = 0;
     virtual unsigned int size() const = 0;
+    virtual bool isRemovable() const = 0;
     ///
     /// \brief isExternal returns true if this stream isn't managed by the medialibrary
     ///

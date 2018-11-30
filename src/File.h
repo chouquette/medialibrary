@@ -61,7 +61,7 @@ public:
     virtual unsigned int size() const override;
     virtual bool isExternal() const override;
     bool updateFsInfo( uint32_t newLastModificationDate, uint32_t newSize );
-    bool isRemovable() const;
+    virtual bool isRemovable() const override;
 
     std::shared_ptr<Media> media() const;
     bool destroy();
