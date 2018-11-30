@@ -28,6 +28,7 @@
 
 #include "Media.h"
 #include "File.h"
+#include "Folder.h"
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
 #include "utils/ModificationsNotifier.h"
@@ -138,7 +139,26 @@ bool ThumbnailerWorker::generateThumbnail( MediaPtr media )
                                         return f->type() == IFile::Type::Main;
                                    });
     assert( mainFileIt != cend( files ) );
-    auto mrl = (*mainFileIt)->mrl();
+    auto file = std::static_pointer_cast<File>( *mainFileIt );
+    std::string mrl;
+    // If the file is removable, we need to check if the device is still present
+    if ( file->isRemovable() == true )
+    {
+        auto folder = Folder::fetch( m_ml, file->folderId() );
+        if ( folder == nullptr )
+        {
+            assert( !"Failed to get folder associated with file" );
+            return false;
+        }
+        if ( folder->isPresent() == false )
+        {
+            LOG_INFO( "Device containing ", media->fileName(), " is missing" );
+            return false;
+        }
+        mrl = file->mrl();
+    }
+    else
+        mrl = file->mrl();
 
     LOG_INFO( "Generating ", mrl, " thumbnail..." );
     if ( m_generator->generate( media, mrl ) == false )
