@@ -27,6 +27,7 @@
 #include "ParserWorker.h"
 #include "Parser.h"
 #include "Media.h"
+#include "Folder.h"
 
 namespace medialibrary
 {
@@ -198,6 +199,17 @@ void Worker::mainloop()
             auto file = std::static_pointer_cast<File>( task->item().file() );
             auto media = std::static_pointer_cast<Media>( task->item().media() );
 
+            if ( file != nullptr && file->isRemovable() )
+            {
+                auto folder = Folder::fetch( m_ml, file->folderId() );
+                if ( folder->isPresent() == false )
+                {
+                    LOG_INFO( "Postponing parsing of ", file->rawMrl(),
+                              " until the device containing it gets mounted back" );
+                    m_parserCb->done( std::move( task ), Status::TemporaryUnavailable );
+                    continue;
+                }
+            }
             task->startParserStep();
             status = m_service->run( task->item() );
             auto duration = std::chrono::steady_clock::now() - chrono;
