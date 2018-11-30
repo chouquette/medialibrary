@@ -32,6 +32,8 @@
 #include "MediaLibrary.h"
 #include "utils/ModificationsNotifier.h"
 
+#include <algorithm>
+
 namespace medialibrary
 {
 
@@ -124,14 +126,19 @@ bool ThumbnailerWorker::generateThumbnail( MediaPtr media )
 {
     assert( media->type() != Media::Type::Audio );
 
-    auto files = media->files();
+    const auto files = media->files();
     if ( files.empty() == true )
     {
         LOG_WARN( "Can't generate thumbnail for a media without associated files (",
                   media->title() );
         return false;
     }
-    auto mrl = files[0]->mrl();
+    auto mainFileIt = std::find_if( cbegin( files ), cend( files ),
+                                    [](FilePtr f) {
+                                        return f->type() == IFile::Type::Main;
+                                   });
+    assert( mainFileIt != cend( files ) );
+    auto mrl = (*mainFileIt)->mrl();
 
     LOG_INFO( "Generating ", mrl, " thumbnail..." );
     if ( m_generator->generate( media, mrl ) == false )
