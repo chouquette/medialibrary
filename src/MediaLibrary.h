@@ -243,9 +243,11 @@ class MediaLibrary : public IMediaLibrary
         public:
             FsFactoryCb( MediaLibrary* ml );
         private:
-            virtual void onDevicePlugged( const std::string& uuid ) override;
-            virtual void onDeviceUnplugged( const std::string& uuid ) override;
-            void onDeviceChanged( const std::string& uuid, bool isPresent );
+            virtual void onDeviceMounted( const fs::IDevice& deviceFs,
+                                          const std::string& newMountpoint ) override;
+            virtual void onDeviceUnmounted( const fs::IDevice& deviceFs,
+                                            const std::string& removedMountpoint ) override;
+            void onDeviceChanged( const fs::IDevice& deviceFs ) const;
         private:
             MediaLibrary* m_ml;
         };

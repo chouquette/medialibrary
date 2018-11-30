@@ -144,23 +144,32 @@ void NetworkFileSystemFactory::onDeviceAdded( VLC::MediaPtr media )
     }
     m_deviceCond.notify_one();
     LOG_INFO( "Adding new network device: name: ", name, " - mrl: ", mrl );
-    m_cb->onDevicePlugged( name );
+    m_cb->onDeviceMounted( *(*m_devices.rbegin()).device, mrl );
 }
 
 void NetworkFileSystemFactory::onDeviceRemoved( VLC::MediaPtr media )
 {
     const auto& mrl = media->mrl();
-
+    std::shared_ptr<fs::NetworkDevice> device;
     {
         std::lock_guard<compat::Mutex> lock( m_devicesLock );
-        m_devices.erase( std::remove_if( begin( m_devices ), end( m_devices ), [&mrl]( const Device& d ) {
+        auto it = std::find_if( begin( m_devices ), end( m_devices ), [&mrl]( const Device& d ) {
             return d.mrl == mrl;
-        }), end( m_devices ) );
+        });
+        if ( it != end( m_devices ) )
+        {
+            device =(*it).device;
+            m_devices.erase( it );
+        }
     }
-
+    if ( device == nullptr )
+    {
+        assert( !"Unknown network device was removed" );
+        return;
+    }
     const auto name = utils::file::stripScheme( mrl );
     LOG_INFO( "Device ", mrl, " was removed" );
-    m_cb->onDeviceUnplugged( name );
+    m_cb->onDeviceUnmounted( *device, mrl );
 }
 
 }

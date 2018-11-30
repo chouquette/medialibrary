@@ -43,20 +43,24 @@ namespace fs
         virtual ~IFileSystemFactoryCb() = default;
         /**
          * @brief onDevicePlugged Shall be invoked when a device gets plugged
-         * @param uuid The device UUID
+         * @param device The mounted device
+         * @param newMountpoint The device mountpoint that was just mounted
          *
          * When this callback returns, the medialibrary will assume that the
          * corresponding fs::IDevice::isPresent method will return true.
          */
-        virtual void onDevicePlugged( const std::string& uuid ) = 0;
+        virtual void onDeviceMounted( const fs::IDevice& device,
+                                      const std::string& newMountpoint ) = 0;
         /**
          * @brief onDeviceUnplugged Shall be invoked when a device gets unplugged
-         * @param uuid The device UUID
+         * @param device The unmounted device
+         * @param unmountedMountpoint The device mountpoint that was just unmounted
          *
          * When this callback returns, the medialibrary will assume that the
          * corresponding fs::IDevice::isPresent method will return false.
          */
-        virtual void onDeviceUnplugged( const std::string& uuid ) = 0;
+        virtual void onDeviceUnmounted( const fs::IDevice& device,
+                                        const std::string& unmountedMountpoint ) = 0;
     };
 
     class IFileSystemFactory

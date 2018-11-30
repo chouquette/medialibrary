@@ -1592,25 +1592,37 @@ MediaLibrary::FsFactoryCb::FsFactoryCb(MediaLibrary* ml)
 {
 }
 
-void MediaLibrary::FsFactoryCb::onDevicePlugged( const std::string& uuid )
+void MediaLibrary::FsFactoryCb::onDeviceChanged( const fs::IDevice& deviceFs ) const
 {
-    onDeviceChanged( uuid, true );
-}
-
-void MediaLibrary::FsFactoryCb::onDeviceUnplugged( const std::string& uuid )
-{
-    onDeviceChanged( uuid, false );
-}
-
-void MediaLibrary::FsFactoryCb::onDeviceChanged( const std::string& uuid, bool isPresent )
-{
-    auto device = Device::fromUuid( m_ml, uuid );
+    auto device = Device::fromUuid( m_ml, deviceFs.uuid() );
+    // The device might be new and unused so far, we will create it when we need to
     if ( device == nullptr )
         return;
     assert( device->isRemovable() == true );
-    if ( device->isPresent() == isPresent )
-        return;
-    device->setPresent( isPresent );
+    if ( device->isPresent() != deviceFs.isPresent() )
+    {
+        LOG_INFO( "Device ", deviceFs.uuid(), " changed presence state: ",
+                  device->isPresent() ? "1" : "0", " -> ",
+                  deviceFs.isPresent() ? "1" : "0" );
+        device->setPresent( deviceFs.isPresent() );
+    }
 }
+
+void MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs,
+                                                 const std::string& newMountpoint )
+{
+    LOG_INFO( "Device ", deviceFs.uuid(), " mountpoint ", newMountpoint,
+              " was mounted" );
+    onDeviceChanged( deviceFs );
+}
+
+void MediaLibrary::FsFactoryCb::onDeviceUnmounted( const fs::IDevice& deviceFs,
+                                                   const std::string& unmountedMountpoint )
+{
+    LOG_INFO( "Device ", deviceFs.uuid(), " mountpoint ", unmountedMountpoint,
+              " was unmounted" );
+    onDeviceChanged( deviceFs );
+}
+
 
 }
