@@ -506,7 +506,7 @@ Task::create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
 }
 
 std::shared_ptr<Task>
-Task::create( MediaLibraryPtr ml, std::shared_ptr<File> file,
+Task::createRefreshTask( MediaLibraryPtr ml, std::shared_ptr<File> file,
               std::shared_ptr<fs::IFile> fileFs )
 {
     auto self = std::make_shared<Task>( ml, std::move( file ), std::move( fileFs ) );

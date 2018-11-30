@@ -208,7 +208,7 @@ public:
                                          std::shared_ptr<fs::IDirectory> parentFolderFs,
                                          std::pair<std::shared_ptr<Playlist>,
                                          unsigned int> parentPlaylist );
-    static std::shared_ptr<Task> create( MediaLibraryPtr ml, std::shared_ptr<File> file,
+    static std::shared_ptr<Task> createRefreshTask( MediaLibraryPtr ml, std::shared_ptr<File> file,
                                          std::shared_ptr<fs::IFile> fsFile );
     static void recoverUnscannedFiles( MediaLibraryPtr ml );
 

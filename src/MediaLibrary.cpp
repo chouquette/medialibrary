@@ -482,7 +482,7 @@ void MediaLibrary::onUpdatedFile( std::shared_ptr<File> file,
     auto mrl = fileFs->mrl();
     try
     {
-        auto task = parser::Task::create( this, std::move( file ), std::move( fileFs ) );
+        auto task = parser::Task::createRefreshTask( this, std::move( file ), std::move( fileFs ) );
         if ( task != nullptr && m_parser != nullptr )
             m_parser->parse( std::move( task ) );
     }
