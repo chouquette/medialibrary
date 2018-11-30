@@ -1453,7 +1453,7 @@ void MediaLibrary::refreshDevices( fs::IFileSystemFactory& fsFactory )
             d->setPresent( fsDevicePresent );
         }
         else
-            LOG_INFO( "Device ", d->uuid(), " unchanged" );
+            LOG_INFO( "Device ", d->uuid(), " presence is unchanged" );
 
         if ( d->isPresent() == true )
             d->updateLastSeen();
