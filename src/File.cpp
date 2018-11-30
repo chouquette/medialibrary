@@ -159,6 +159,11 @@ bool File::updateFsInfo( uint32_t newLastModificationDate, uint32_t newSize )
     return res;
 }
 
+bool File::isRemovable() const
+{
+    return m_isRemovable;
+}
+
 std::shared_ptr<Media> File::media() const
 {
     if ( m_mediaId == 0 )
