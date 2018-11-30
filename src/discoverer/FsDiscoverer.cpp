@@ -41,20 +41,6 @@
 #include "probe/CrawlerProbe.h"
 #include "utils/Filename.h"
 
-namespace
-{
-
-class DeviceRemovedException : public std::runtime_error
-{
-public:
-    DeviceRemovedException() noexcept
-        : std::runtime_error( "A device was removed during the discovery" )
-    {
-    }
-};
-
-}
-
 namespace medialibrary
 {
 
@@ -98,7 +84,7 @@ bool FsDiscoverer::discover( const std::string& entryPoint )
     {
         LOG_WARN( fsDirMrl, " discovery aborted (assuming banned folder): ", ex.what() );
     }
-    catch ( DeviceRemovedException& )
+    catch ( fs::DeviceRemovedException& )
     {
         // Simply ignore, the device has already been marked as removed and the DB updated accordingly
         LOG_INFO( "Discovery of ", fsDirMrl, " was stopped after the device was removed" );
@@ -139,7 +125,7 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
     {
         checkFolder( std::move( directory ), std::move( f ), false );
     }
-    catch ( DeviceRemovedException& )
+    catch ( fs::DeviceRemovedException& )
     {
         LOG_INFO( "Reloading of ", mrl, " was stopped after the device was removed" );
         return false;
@@ -229,7 +215,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                 device = currentFolderFs->device();
             // The device presence flag will be changed in place, so simply retest it
             if ( device == nullptr || device->isPresent() == false )
-                throw DeviceRemovedException();
+                throw fs::DeviceRemovedException();
             LOG_INFO( "Device was not removed" );
         }
         // However if the device isn't removable, we want to:
