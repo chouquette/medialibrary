@@ -141,24 +141,16 @@ bool ThumbnailerWorker::generateThumbnail( MediaPtr media )
     assert( mainFileIt != cend( files ) );
     auto file = std::static_pointer_cast<File>( *mainFileIt );
     std::string mrl;
-    // If the file is removable, we need to check if the device is still present
-    if ( file->isRemovable() == true )
+    try
     {
-        auto folder = Folder::fetch( m_ml, file->folderId() );
-        if ( folder == nullptr )
-        {
-            assert( !"Failed to get folder associated with file" );
-            return false;
-        }
-        if ( folder->isPresent() == false )
-        {
-            LOG_INFO( "Device containing ", media->fileName(), " is missing" );
-            return false;
-        }
         mrl = file->mrl();
     }
-    else
-        mrl = file->mrl();
+    catch ( const fs::DeviceRemovedException& )
+    {
+        LOG_WARN( "Aborting file ", file->rawMrl(), " generation due to its "
+                  "containing device being missing" );
+        return false;
+    }
 
     LOG_INFO( "Generating ", mrl, " thumbnail..." );
     if ( m_generator->generate( media, mrl ) == false )

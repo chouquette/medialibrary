@@ -59,7 +59,8 @@ bool CommonDevice::isPresent() const
 
 const std::string& CommonDevice::mountpoint() const
 {
-    assert( m_mountpoints.empty() == false );
+    if ( m_mountpoints.empty() == true )
+        throw fs::DeviceRemovedException();
     return m_mountpoints[0];
 }
 
@@ -88,13 +89,15 @@ CommonDevice::matchesMountpoint( const std::string& mrl ) const
 
 std::string CommonDevice::relativeMrl( const std::string& absoluteMrl ) const
 {
-    assert( m_mountpoints.empty() == false );
+    if ( m_mountpoints.empty() == true )
+        throw fs::DeviceRemovedException();
     return utils::file::removePath( absoluteMrl, m_mountpoints[0] );
 }
 
 std::string CommonDevice::absoluteMrl( const std::string& relativeMrl ) const
 {
-    assert( m_mountpoints.empty() == false );
+    if ( m_mountpoints.empty() == true )
+        throw fs::DeviceRemovedException();
     return m_mountpoints[0] + relativeMrl;
 }
 

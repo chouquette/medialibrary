@@ -216,6 +216,12 @@ void Worker::mainloop()
             LOG_INFO( "Done executing ", serviceName, " task on ", task->item().mrl(), " in ",
                       std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
         }
+        catch ( const fs::DeviceRemovedException& )
+        {
+            LOG_ERROR( "Parsing of ", task->item().mrl(), " was interrupted "
+                       "due to its containing device being unmounted" );
+            status = Status::TemporaryUnavailable;
+        }
         catch ( const std::exception& ex )
         {
             LOG_ERROR( "Caught an exception during ", task->item().mrl(), " [", serviceName, "] parsing: ", ex.what() );

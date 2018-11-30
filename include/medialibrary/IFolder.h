@@ -37,10 +37,16 @@ public:
     virtual int64_t id() const = 0;
     /**
      * @brief mrl Returns the full mrl for this folder.
-     * Caller is responsible for checking isPresent() beforehand, as we
-     * can't compute an for a folder that is/was present on a removable storage
-     * or network share that has been unplugged
-     * If for some reasons we can't compute the MRL, an empty string wil
+     * Since we can't compute an mrl for a folder that is/was present on a
+     * removable storage or network share that is not mounted, a
+     * fs::DeviceRemovedException will be thrown when trying to get the mrl of
+     * a non present folder.
+     * Calling isPresent can prevent this to be called with a known  missing
+     * device, but there is always a window between a call to isPresent and mrl()
+     * in which the device could be removed.
+     * When calling this function on a removable device, you should check
+     * for fs::DeviceRemovedException in any case.
+     * If for some reasons we can't compute the MRL, an empty string will be returned
      * @return The folder's mrl
      */
     virtual const std::string& mrl() const = 0;

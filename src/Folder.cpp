@@ -307,11 +307,7 @@ const std::string& Folder::mrl() const
     // When there's no device, we don't know the mountpoint, therefor we don't know the full path
     // Calling isPresent will ensure we have the device representation cached locally
     if ( isPresent() == false )
-    {
-        assert( !"Device isn't present" );
-        m_fullPath = "";
-        return m_fullPath;
-    }
+        throw fs::DeviceRemovedException();
 
     auto fsFactory = m_ml->fsFactoryForMrl( m_device->scheme() );
     if ( fsFactory == nullptr )

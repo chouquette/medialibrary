@@ -48,6 +48,16 @@ public:
 
     virtual ~IFile() = default;
     virtual int64_t id() const = 0;
+    /**
+     * @brief mrl Returns the full mrl for this file.
+     * Since we can't compute an mrl for a file or folder that is/was present on
+     * a removable storage or network share that is not mounted, a
+     * fs::DeviceRemovedException will be thrown when trying to get the mrl of
+     * a non present file.
+     * You should always account for this exception is isRemovable returns true.
+     * If for some reasons we can't compute the MRL, an empty string will be returned
+     * @return The folder's mrl
+     */
     virtual const std::string& mrl() const = 0;
     virtual Type type() const = 0;
     virtual unsigned int lastModificationDate() const = 0;
