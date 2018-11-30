@@ -353,9 +353,9 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
         {
             LOG_INFO( "File ", file->mrl(), " not found on filesystem, deleting it" );
             auto media = file->media();
-            if ( media != nullptr && media->isDeleted() == false )
+            if ( media != nullptr )
                 media->removeFile( *file );
-            else if ( file->isDeleted() == false )
+            else
             {
                 // This is unexpected, as the file should have been deleted when the media was
                 // removed.

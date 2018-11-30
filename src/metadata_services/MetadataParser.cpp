@@ -166,10 +166,6 @@ Status MetadataAnalyzer::run( IItem& item )
             return Status::Fatal;
     }
 
-    if ( std::static_pointer_cast<File>( item.file() )->isDeleted() == true ||
-         std::static_pointer_cast<Media>( media )->isDeleted() == true )
-        return Status::Fatal;
-
     m_notifier->notifyMediaModification( media );
     return Status::Success;
 }

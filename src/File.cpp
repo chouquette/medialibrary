@@ -172,7 +172,6 @@ std::shared_ptr<Media> File::media() const
     if ( media == nullptr )
     {
         media = Media::fetch( m_ml, m_mediaId );
-        assert( isDeleted() == true || media != nullptr );
         m_media = media;
     }
     return media;

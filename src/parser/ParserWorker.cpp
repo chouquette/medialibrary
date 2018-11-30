@@ -197,17 +197,12 @@ void Worker::mainloop()
             auto chrono = std::chrono::steady_clock::now();
             auto file = std::static_pointer_cast<File>( task->item().file() );
             auto media = std::static_pointer_cast<Media>( task->item().media() );
-            if ( ( file != nullptr && file->isDeleted() )
-                 || ( media != nullptr && media->isDeleted() ) )
-                status = Status::Fatal;
-            else
-            {
-                task->startParserStep();
-                status = m_service->run( task->item() );
-                auto duration = std::chrono::steady_clock::now() - chrono;
-                LOG_INFO( "Done executing ", serviceName, " task on ", task->item().mrl(), " in ",
-                          std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
-            }
+
+            task->startParserStep();
+            status = m_service->run( task->item() );
+            auto duration = std::chrono::steady_clock::now() - chrono;
+            LOG_INFO( "Done executing ", serviceName, " task on ", task->item().mrl(), " in ",
+                      std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
         }
         catch ( const std::exception& ex )
         {

@@ -131,32 +131,6 @@ class DatabaseHelpers
             (self.get())->*IMPL::Table::PrimaryKey = pKey;
             return true;
         }
-
-
-    protected:
-        DatabaseHelpers() : m_deleted( false ) {}
-        /**
-         * @brief m_deleted reflects if this entity has been deleted from the DB
-         * This is not reliable, and isn't synchronized. You can only assume that if it is set to true
-         * then the entity has been deleted.
-         * This can be false, but become true the cycle after you checked it.
-         */
-        std::atomic_bool m_deleted;
-
-    public:
-        bool isDeleted() const
-        {
-            return m_deleted.load( std::memory_order_relaxed );
-        }
-
-        void markDeleted()
-        {
-            auto del = false;
-            auto res = m_deleted.compare_exchange_strong( del, true, std::memory_order_relaxed, std::memory_order_relaxed );
-            assert(res);
-            (void)res;
-        }
-
 };
 
 }
