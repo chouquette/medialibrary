@@ -40,8 +40,8 @@ class Generic : public std::runtime_error
 {
 public:
     Generic( const char* req, const char* msg, int extendedCode )
-        : std::runtime_error( std::string( "Failed to compile/prepare request <" ) + req
-                                           + ">: " + msg + "(" + std::to_string( extendedCode ) + ")" )
+        : std::runtime_error( std::string( "Failed to compile/prepare request [" ) + req
+                                           + "]: " + msg + "(" + std::to_string( extendedCode ) + ")" )
     {
     }
     Generic( const std::string& msg )
@@ -54,7 +54,7 @@ class GenericExecution : public Generic
 {
 public:
     GenericExecution( const char* req, const char* errMsg, int errCode, int extendedCode )
-        : Generic( std::string( "Failed to run request <" ) + req + ">: " + errMsg +
+        : Generic( std::string( "Failed to run request [" ) + req + "]: " + errMsg +
                    "(" + std::to_string( extendedCode ) + ")" )
         , m_errorCode( errCode )
     {
@@ -79,7 +79,7 @@ class ConstraintViolation : public Generic
 {
 public:
     ConstraintViolation( const std::string& req, const std::string& err )
-        : Generic( std::string( "Request <" ) + req + "> aborted due to "
+        : Generic( std::string( "Request [" ) + req + "] aborted due to "
                     "constraint violation (" + err + ")" )
     {
     }
