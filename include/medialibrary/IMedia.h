@@ -25,8 +25,9 @@
 #include <vector>
 #include <memory>
 
-#include "IMediaLibrary.h"
 #include "IFile.h"
+#include "Types.h"
+#include "IQuery.h"
 
 namespace medialibrary
 {
