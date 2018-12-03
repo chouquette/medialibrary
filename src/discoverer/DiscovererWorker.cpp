@@ -108,6 +108,11 @@ void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
     LOG_INFO( "Queuing entrypoint ", entryPoint, " of type ",
               static_cast<typename std::underlying_type<Task::Type>::type>( type ) );
     m_tasks.emplace( entryPoint, type );
+    notify();
+}
+
+void DiscovererWorker::notify()
+{
     if ( m_thread.get_id() == compat::Thread::id{} )
     {
         m_run = true;
