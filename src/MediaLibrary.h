@@ -247,7 +247,9 @@ class MediaLibrary : public IMediaLibrary
                                           const std::string& newMountpoint ) override;
             virtual void onDeviceUnmounted( const fs::IDevice& deviceFs,
                                             const std::string& removedMountpoint ) override;
-            void onDeviceChanged( const fs::IDevice& deviceFs ) const;
+            /// When a device overall presence state is changed, that device is
+            /// returned
+            std::shared_ptr<Device> onDeviceChanged( const fs::IDevice& deviceFs ) const;
         private:
             MediaLibrary* m_ml;
         };

@@ -1590,20 +1590,21 @@ MediaLibrary::FsFactoryCb::FsFactoryCb(MediaLibrary* ml)
 {
 }
 
-void MediaLibrary::FsFactoryCb::onDeviceChanged( const fs::IDevice& deviceFs ) const
+std::shared_ptr<Device>
+MediaLibrary::FsFactoryCb::onDeviceChanged( const fs::IDevice& deviceFs ) const
 {
     auto device = Device::fromUuid( m_ml, deviceFs.uuid() );
     // The device might be new and unused so far, we will create it when we need to
     if ( device == nullptr )
-        return;
+        return nullptr;
     assert( device->isRemovable() == true );
-    if ( device->isPresent() != deviceFs.isPresent() )
-    {
-        LOG_INFO( "Device ", deviceFs.uuid(), " changed presence state: ",
-                  device->isPresent() ? "1" : "0", " -> ",
-                  deviceFs.isPresent() ? "1" : "0" );
-        device->setPresent( deviceFs.isPresent() );
-    }
+    if ( device->isPresent() == deviceFs.isPresent() )
+        return nullptr;
+    LOG_INFO( "Device ", deviceFs.uuid(), " changed presence state: ",
+              device->isPresent() ? "1" : "0", " -> ",
+              deviceFs.isPresent() ? "1" : "0" );
+    device->setPresent( deviceFs.isPresent() );
+    return device;
 }
 
 void MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs,
@@ -1611,7 +1612,16 @@ void MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs,
 {
     LOG_INFO( "Device ", deviceFs.uuid(), " mountpoint ", newMountpoint,
               " was mounted" );
-    onDeviceChanged( deviceFs );
+    auto device = onDeviceChanged( deviceFs );
+    if ( device != nullptr )
+    {
+        // We need to reload the entrypoint in case a previous discovery was
+        // interrupted before its end (causing the tasks that were spawned
+        // to be deleted when the device go away, requiring a new discovery)
+        // Also, there might be new content on the device since it was last
+        // scanned.
+        m_ml->m_discovererWorker->reloadDevice( device->id() );
+    }
 }
 
 void MediaLibrary::FsFactoryCb::onDeviceUnmounted( const fs::IDevice& deviceFs,
