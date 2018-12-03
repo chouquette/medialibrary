@@ -290,6 +290,16 @@ Query<IFolder> Folder::searchWithMedia( MediaLibraryPtr ml, const std::string& p
     return make_query<Folder, IFolder>( ml, "*", req, sortRequest( params ), pattern );
 }
 
+Query<IFolder> Folder::entryPoints( MediaLibraryPtr ml, int64_t deviceId )
+{
+    std::string req = "FROM " + Folder::Table::Name + " WHERE parent_id IS NULL"
+            " AND is_banned = 0";
+    if ( deviceId == 0 )
+        return make_query<Folder, IFolder>( ml, "*", req, "" );
+    req += " AND device_id = ?";
+    return make_query<Folder, IFolder>( ml, "*", req, "", sqlite::ForeignKey{ deviceId } );
+}
+
 int64_t Folder::id() const
 {
     return m_id;

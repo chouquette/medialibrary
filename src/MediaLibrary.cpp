@@ -1372,9 +1372,7 @@ bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
 
 Query<IFolder> MediaLibrary::entryPoints() const
 {
-    static const std::string req = "FROM " + Folder::Table::Name + " WHERE parent_id IS NULL"
-            " AND is_banned = 0";
-    return make_query<Folder, IFolder>( this, "*", req, "" );
+    return Folder::entryPoints( this, 0 );
 }
 
 bool MediaLibrary::isIndexed( const std::string& mrl ) const

@@ -67,6 +67,7 @@ public:
     static Query<IFolder> withMedia( MediaLibraryPtr ml, const QueryParameters* params );
     static Query<IFolder> searchWithMedia( MediaLibraryPtr ml, const std::string& pattern,
                                            const QueryParameters* params );
+    static Query<IFolder> entryPoints( MediaLibraryPtr ml, int64_t deviceId );
 
     virtual int64_t id() const override;
     virtual const std::string& mrl() const override;
