@@ -134,11 +134,11 @@ bool ThumbnailerWorker::generateThumbnail( MediaPtr media )
                   media->title() );
         return false;
     }
-    auto mainFileIt = std::find_if( cbegin( files ), cend( files ),
+    auto mainFileIt = std::find_if( files.cbegin(), files.cend(),
                                     [](FilePtr f) {
                                         return f->type() == IFile::Type::Main;
                                    });
-    assert( mainFileIt != cend( files ) );
+    assert( mainFileIt != files.cend() );
     auto file = std::static_pointer_cast<File>( *mainFileIt );
     std::string mrl;
     try
