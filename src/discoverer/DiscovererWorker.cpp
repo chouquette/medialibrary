@@ -30,6 +30,7 @@
 #include "Folder.h"
 #include "Media.h"
 #include "MediaLibrary.h"
+#include "Device.h"
 #include "utils/Filename.h"
 #include <cassert>
 
@@ -101,6 +102,11 @@ void DiscovererWorker::unban( const std::string& entryPoint )
     enqueue( utils::file::toFolderPath( entryPoint ), Task::Type::Unban );
 }
 
+void DiscovererWorker::reloadDevice(int64_t deviceId)
+{
+    enqueue( deviceId, Task::Type::ReloadDevice );
+}
+
 void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
 {
     std::unique_lock<compat::Mutex> lock( m_mutex );
@@ -108,6 +114,16 @@ void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
     LOG_INFO( "Queuing entrypoint ", entryPoint, " of type ",
               static_cast<typename std::underlying_type<Task::Type>::type>( type ) );
     m_tasks.emplace( entryPoint, type );
+    notify();
+}
+
+void DiscovererWorker::enqueue( int64_t entityId, Task::Type type )
+{
+    std::unique_lock<compat::Mutex> lock( m_mutex );
+
+    LOG_INFO( "Queuing entity ", entityId, " of type ",
+              static_cast<typename std::underlying_type<Task::Type>::type>( type ) );
+    m_tasks.emplace( entityId, type );
     notify();
 }
 
@@ -159,6 +175,9 @@ void DiscovererWorker::run()
             break;
         case Task::Type::Unban:
             runUnban( task.entryPoint );
+            break;
+        case Task::Type::ReloadDevice:
+            runReloadDevice( task.entityId );
             break;
         default:
             assert(false);
@@ -244,6 +263,32 @@ void DiscovererWorker::runUnban( const std::string& entryPoint )
     // If the parent folder was never added to the media library, the discoverer will reject it.
     // We could check it from here, but that would mean fetching the folder twice, which would be a waste.
     runReload( parentPath );
+}
+
+void DiscovererWorker::runReloadDevice( int64_t deviceId )
+{
+    auto device = Device::fetch( m_ml, deviceId );
+    if ( device == nullptr )
+    {
+        LOG_ERROR( "Can't fetch device ", deviceId, " to reload it" );
+        return;
+    }
+    auto entryPoints = Folder::entryPoints( m_ml, device->id() );
+    if ( entryPoints == nullptr )
+        return;
+    for ( const auto& ep : entryPoints->all() )
+    {
+        try
+        {
+            auto mrl = ep->mrl();
+            LOG_INFO( "Reloading entrypoint on mounted device: ", mrl );
+            runReload( mrl );
+        }
+        catch ( const fs::DeviceRemovedException& )
+        {
+            LOG_INFO( "Can't reload device ", device->uuid(), " as it was removed" );
+        }
+    }
 }
 
 void DiscovererWorker::runDiscover( const std::string& entryPoint )

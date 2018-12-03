@@ -47,12 +47,16 @@ class DiscovererWorker
             Remove,
             Ban,
             Unban,
+            ReloadDevice,
         };
 
         Task() = default;
         Task( const std::string& entryPoint, Type type )
             : entryPoint( entryPoint ), type( type ) {}
+        Task( int64_t entityId, Type type )
+            : entityId( entityId ), type( type ) {}
         std::string entryPoint;
+        int64_t entityId;
         Type type;
     };
 
@@ -68,9 +72,11 @@ public:
     void reload( const std::string& entryPoint );
     void ban( const std::string& entryPoint );
     void unban( const std::string& entryPoint );
+    void reloadDevice( int64_t deviceId );
 
 private:
     void enqueue( const std::string& entryPoint, Task::Type type );
+    void enqueue( int64_t entityId, Task::Type type );
     void notify();
     void run();
     void runDiscover( const std::string& entryPoint );
@@ -78,6 +84,7 @@ private:
     void runRemove( const std::string& entryPoint );
     void runBan( const std::string& entryPoint );
     void runUnban( const std::string& entryPoint );
+    void runReloadDevice( int64_t deviceId );
 
 private:
 
