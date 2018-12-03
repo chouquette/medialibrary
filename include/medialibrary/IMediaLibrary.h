@@ -421,7 +421,7 @@ class IMediaLibrary
          * would return a query containing 'z' and 'c' as the other folders are
          * not containing any media.
          * In case a non flattened list is desired, the
-         * entryPoints() & IFolder::subFolders() function should be used.
+         * entryPoints() & IFolder::subFolders() functions should be used.
          */
         virtual Query<IFolder> folders( const QueryParameters* params = nullptr ) const = 0;
         virtual Query<IFolder> searchFolders( const std::string& pattern,
