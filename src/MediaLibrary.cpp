@@ -1541,6 +1541,8 @@ bool MediaLibrary::DeviceListerCb::onDeviceMounted( const std::string& uuid, con
                         currentDevice->setPresent( true );
                 }
             }
+            else
+                m_ml->refreshDevices( *fsFactory );
             break;
         }
     }
@@ -1573,6 +1575,8 @@ void MediaLibrary::DeviceListerCb::onDeviceUnmounted( const std::string& uuid,
                     device->setPresent( false );
                 }
             }
+            else
+                m_ml->refreshDevices( *fsFactory );
         }
     }
 }
