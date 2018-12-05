@@ -136,7 +136,7 @@ bool ThumbnailerWorker::generateThumbnail( MediaPtr media )
     }
     auto mainFileIt = std::find_if( files.cbegin(), files.cend(),
                                     [](FilePtr f) {
-                                        return f->type() == IFile::Type::Main;
+                                        return f->isMain();
                                    });
     assert( mainFileIt != files.cend() );
     auto file = std::static_pointer_cast<File>( *mainFileIt );

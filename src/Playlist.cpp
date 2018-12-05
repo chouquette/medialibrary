@@ -183,7 +183,7 @@ bool Playlist::add( const IMedia& media, unsigned int position )
         auto files = media.files();
         assert( files.size() > 0 );
         auto mainFile = std::find_if( begin( files ), end( files ), []( const FilePtr& f) {
-            return f->type() == IFile::Type::Main;
+            return f->isMain();
         });
         if ( mainFile == end( files ) )
         {
@@ -367,7 +367,7 @@ void Playlist::insertMrlFromMediaId( MediaLibraryPtr ml )
         auto files = media->files();
         assert( files.size() > 0 );
         auto mainFile = std::find_if( begin( files ), end( files ), []( const FilePtr& f) {
-            return f->type() == IFile::Type::Main;
+            return f->isMain();
         });
         sqlite::Tools::executeUpdate( ml->getConn(), updateReq, (*mainFile)->mrl(), mediaId );
     }
