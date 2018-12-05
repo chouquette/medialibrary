@@ -41,8 +41,10 @@
     "artist_id = " + Artist::Table::Name + ".id_artist"
 ")",
 
-"INSERT INTO " + parser::Task::Table::Name + " (step, retry_count, file_id, parent_folder_id) "
-"SELECT parser_step, parser_retries, id_file, folder_id FROM " + File::Table::Name,
+"INSERT INTO " + parser::Task::Table::Name + " (file_type, step, retry_count, file_id, parent_folder_id) "
+"SELECT " + std::to_string( static_cast<std::underlying_type<IFile::Type>::type>(
+    IFile::Type::Main ) ) + ","
+"parser_step, parser_retries, id_file, folder_id FROM " + File::Table::Name,
 
 "CREATE TEMPORARY TABLE " + File::Table::Name + "_backup("
   "id_file INTEGER PRIMARY KEY AUTOINCREMENT,"

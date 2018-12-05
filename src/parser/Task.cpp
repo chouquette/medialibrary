@@ -56,22 +56,25 @@ Task::Task( MediaLibraryPtr ml, sqlite::Row& row )
 {
     std::string mrl;
     unsigned int parentPlaylistIndex;
+    IFile::Type fileType;
     bool isRefresh;
     row >> m_id
         >> m_step
         >> m_retryCount
         >> mrl
+        >> fileType
         >> m_fileId
         >> m_parentFolderId
         >> m_parentPlaylistId
         >> parentPlaylistIndex
         >> isRefresh;
-    m_item = Item{ this, std::move( mrl ), parentPlaylistIndex, isRefresh };
+    m_item = Item{ this, std::move( mrl ), fileType, parentPlaylistIndex, isRefresh };
 }
 
 Task::Task( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
             std::shared_ptr<Folder> parentFolder,
             std::shared_ptr<fs::IDirectory> parentFolderFs,
+            IFile::Type fileType,
             std::shared_ptr<Playlist> parentPlaylist,
             unsigned int parentPlaylistIndex )
     : currentService( 0 )
@@ -79,8 +82,8 @@ Task::Task( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
     , m_step( Step::None )
     , m_fileId( 0 )
     , m_item( this, std::move( fileFs ), std::move( parentFolder ),
-              std::move( parentFolderFs ), std::move( parentPlaylist ),
-              parentPlaylistIndex, false )
+              std::move( parentFolderFs ), fileType,
+              std::move( parentPlaylist ), parentPlaylistIndex, false )
 {
 }
 
@@ -162,23 +165,25 @@ Task::Item& Task::item()
     return m_item;
 }
 
-Task::Item::Item( ITaskCb* taskCb, std::string mrl, unsigned int subitemPosition,
-                  bool isRefresh )
+Task::Item::Item( ITaskCb* taskCb, std::string mrl, IFile::Type fileType,
+                  unsigned int subitemPosition, bool isRefresh )
     : m_taskCb( taskCb )
     , m_mrl( std::move( mrl ) )
+    , m_fileType( fileType )
     , m_duration( 0 )
     , m_parentPlaylistIndex( subitemPosition )
     , m_isRefresh( isRefresh )
 {
 }
 
-Task::Item::Item( ITaskCb* taskCb, std::shared_ptr<fs::IFile> fileFs,
+Task::Item::Item(ITaskCb* taskCb, std::shared_ptr<fs::IFile> fileFs,
                   std::shared_ptr<Folder> parentFolder,
-                  std::shared_ptr<fs::IDirectory> parentFolderFs,
+                  std::shared_ptr<fs::IDirectory> parentFolderFs, IFile::Type fileType,
                   std::shared_ptr<Playlist> parentPlaylist, unsigned int parentPlaylistIndex,
                   bool isRefresh )
     : m_taskCb( taskCb )
     , m_mrl( fileFs->mrl() )
+    , m_fileType( fileType )
     , m_duration( 0 )
     , m_fileFs( std::move( fileFs ) )
     , m_parentFolder( std::move( parentFolder ) )
@@ -189,9 +194,11 @@ Task::Item::Item( ITaskCb* taskCb, std::shared_ptr<fs::IFile> fileFs,
 {
 }
 
-Task::Item::Item( ITaskCb* taskCb, std::shared_ptr<File> file, std::shared_ptr<fs::IFile> fileFs )
+Task::Item::Item( ITaskCb* taskCb, std::shared_ptr<File> file,
+                  std::shared_ptr<fs::IFile> fileFs )
     : m_taskCb( taskCb )
     , m_mrl( fileFs->mrl() )
+    , m_fileType( file->type() )
     , m_duration( 0 )
     , m_file( std::move( file ) )
     , m_fileFs( std::move( fileFs ) )
@@ -222,6 +229,11 @@ void Task::Item::setMrl( std::string mrl )
     m_mrl = std::move( mrl );
 }
 
+IFile::Type Task::Item::fileType() const
+{
+    return m_fileType;
+}
+
 size_t Task::Item::nbSubItems() const
 {
     return m_subItems.size();
@@ -234,7 +246,8 @@ const IItem& Task::Item::subItem( unsigned int index ) const
 
 IItem& Task::Item::createSubItem( std::string mrl, unsigned int playlistIndex )
 {
-    m_subItems.emplace_back( nullptr, std::move( mrl ), playlistIndex, false );
+    m_subItems.emplace_back( nullptr, std::move( mrl ), IFile::Type::Main,
+                             playlistIndex, false );
     return m_subItems.back();
 }
 
@@ -426,8 +439,9 @@ bool Task::restoreLinkedEntities()
     }
 
     m_item = Item{ this, std::move( fileFs ), std::move( parentFolder ),
-                   std::move( parentFolderFs ), std::move( parentPlaylist ),
-                   m_item.parentPlaylistIndex(), m_item.isRefresh() };
+                   std::move( parentFolderFs ), m_item.fileType(),
+                   std::move( parentPlaylist ), m_item.parentPlaylistIndex(),
+                   m_item.isRefresh() };
     if ( file != nullptr )
     {
         m_item.setMedia( file->media() );
@@ -486,6 +500,7 @@ std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
 std::shared_ptr<Task>
 Task::create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
               std::shared_ptr<Folder> parentFolder, std::shared_ptr<fs::IDirectory> parentFolderFs,
+              IFile::Type fileType,
               std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist )
 {
     auto parentFolderId = parentFolder->id();
@@ -493,12 +508,13 @@ Task::create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
     auto parentPlaylistIndex = parentPlaylist.second;
 
     std::shared_ptr<Task> self = std::make_shared<Task>( ml, std::move( fileFs ),
-        std::move( parentFolder ), std::move( parentFolderFs ),
+        std::move( parentFolder ), std::move( parentFolderFs ), fileType,
         std::move( parentPlaylist.first ), parentPlaylist.second );
     const std::string req = "INSERT INTO " + Task::Table::Name +
-        "(mrl, parent_folder_id, parent_playlist_id, parent_playlist_index, is_refresh) "
-        "VALUES(?, ?, ?, ?, ?)";
-    if ( insert( ml, self, req, self->m_item.mrl(), parentFolderId,
+        "(mrl, file_type, parent_folder_id, parent_playlist_id, "
+        "parent_playlist_index, is_refresh) "
+        "VALUES(?, ?, ?, ?, ?, ?)";
+    if ( insert( ml, self, req, self->m_item.mrl(), fileType, parentFolderId,
                  sqlite::ForeignKey( parentPlaylistId ),
                  parentPlaylistIndex, false ) == false )
         return nullptr;

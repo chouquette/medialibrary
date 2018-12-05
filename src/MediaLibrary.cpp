@@ -463,6 +463,7 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
         }
         task = parser::Task::create( this, std::move( fileFs ), std::move( parentFolder ),
                                      std::move( parentFolderFs ),
+                                     IFile::Type::Main,
                                      std::move( parentPlaylist ) );
         if ( task != nullptr && m_parser != nullptr )
             m_parser->parse( task );
@@ -1150,7 +1151,10 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
             #include "database/tables/Task_v14.sql"
 
             "INSERT INTO " + parser::Task::Table::Name + " SELECT "
-            "id_task, step, retry_count, mrl, file_id, parent_folder_id, parent_playlist_id,"
+            "id_task, step, retry_count, mrl, " +
+            std::to_string( static_cast<std::underlying_type<IFile::Type>::type>(
+                                IFile::Type::Main ) ) + ","
+            "file_id, parent_folder_id, parent_playlist_id,"
             "parent_playlist_index, 0 FROM " + parser::Task::Table::Name + "_backup",
 
             "DROP TABLE " + parser::Task::Table::Name + "_backup",

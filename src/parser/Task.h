@@ -90,9 +90,11 @@ public:
          *
          * The position is used to keep subitems ordering for playlists
          */
-        Item( ITaskCb* taskCb, std::string mrl, unsigned int subitemIndex, bool isRefresh );
+        Item( ITaskCb* taskCb, std::string mrl, IFile::Type fileType,
+              unsigned int subitemIndex, bool isRefresh );
         Item( ITaskCb* taskCb, std::shared_ptr<fs::IFile> fileFs,
               std::shared_ptr<Folder> folder, std::shared_ptr<fs::IDirectory> folderFs,
+              IFile::Type fileType,
               std::shared_ptr<Playlist> parentPlaylist, unsigned int parentPlaylistIndex,
               bool isRefresh );
         Item( ITaskCb* taskCb, std::shared_ptr<File> file, std::shared_ptr<fs::IFile> fileFs );
@@ -103,6 +105,8 @@ public:
 
         virtual const std::string& mrl() const override;
         void setMrl( std::string mrl );
+
+        virtual IFile::Type fileType() const override;
 
         virtual size_t nbSubItems() const override;
         virtual const IItem& subItem( unsigned int index ) const override;
@@ -136,6 +140,7 @@ public:
         ITaskCb* m_taskCb;
 
         std::string m_mrl;
+        IFile::Type m_fileType;
         std::unordered_map<Metadata, std::string, MetadataHash> m_metadata;
         std::vector<Item> m_subItems;
         std::vector<Track> m_tracks;
@@ -153,17 +158,29 @@ public:
     static_assert( std::is_move_assignable<Item>::value, "Item must be move assignable" );
 
 
-    /*
-     * Constructs a task to be resumed.
-     * The Media is provided as a parameter to avoid this to implicitely query
-     * the database for the media associated to the provided file
-     */
     Task( MediaLibraryPtr ml, sqlite::Row& row );
+    /**
+     * @brief Task Construct a task for a newly detected file
+     * @param ml A pointer to the medialibrary instance
+     * @param fileFs The file, as seen on the filesystem
+     * @param parentFolder The parent folder, in DB
+     * @param parentFolderFs The parent folder, as seen on the filesystem
+     * @param fileType The newly detected file type
+     * @param parentPlaylist A parent playlist, if any
+     * @param parentPlaylistIndex The index in the playlist
+     */
     Task( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
           std::shared_ptr<Folder> parentFolder,
           std::shared_ptr<fs::IDirectory> parentFolderFs,
+          IFile::Type fileType,
           std::shared_ptr<Playlist> parentPlaylist,
           unsigned int parentPlaylistIndex );
+    /**
+     * @brief Task Constructor for refresh tasks
+     * @param ml A medialibrary instance pointer
+     * @param file The known file, to be refreshed
+     * @param fileFs The updated file, on the filesystem
+     */
     Task( MediaLibraryPtr ml, std::shared_ptr<File> file,
           std::shared_ptr<fs::IFile> fileFs );
 
@@ -206,6 +223,7 @@ public:
     static std::shared_ptr<Task> create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
                                          std::shared_ptr<Folder> parentFolder,
                                          std::shared_ptr<fs::IDirectory> parentFolderFs,
+                                         IFile::Type fileType,
                                          std::pair<std::shared_ptr<Playlist>,
                                          unsigned int> parentPlaylist );
     static std::shared_ptr<Task> createRefreshTask( MediaLibraryPtr ml, std::shared_ptr<File> file,

@@ -4,6 +4,7 @@
     "step INTEGER NOT NULL DEFAULT 0,"
     "retry_count INTEGER NOT NULL DEFAULT 0,"
     "mrl TEXT,"
+    "file_type INTEGER NOT NULL,"
     "file_id UNSIGNED INTEGER,"
     "parent_folder_id UNSIGNED INTEGER,"
     "parent_playlist_id INTEGER,"

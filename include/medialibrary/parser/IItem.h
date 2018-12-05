@@ -29,6 +29,7 @@
 #include "medialibrary/filesystem/IFile.h"
 #include "medialibrary/filesystem/IDirectory.h"
 #include "medialibrary/Types.h"
+#include "medialibrary/IFile.h"
 
 namespace medialibrary
 {
@@ -118,6 +119,11 @@ public:
      * @return The MRL representing this item.
      */
     virtual const std::string& mrl() const = 0;
+
+    /**
+     * @brief fileType Returns the analyzed file type
+     */
+    virtual IFile::Type fileType() const = 0;
 
     /**
      * @return The number of subitems for this item.
