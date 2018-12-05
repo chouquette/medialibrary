@@ -215,7 +215,7 @@ public:
 private:
     MediaLibraryPtr m_ml;
     int64_t     m_id;
-    Step  m_step;
+    Step        m_step;
     int         m_retryCount;
     int64_t     m_fileId;
     int64_t     m_parentFolderId;
