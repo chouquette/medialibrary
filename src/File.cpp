@@ -172,6 +172,11 @@ bool File::isNetwork() const
     return m_isNetwork;
 }
 
+bool File::isMain() const
+{
+    return m_type == Type::Main;
+}
+
 std::shared_ptr<Media> File::media() const
 {
     if ( m_mediaId == 0 )

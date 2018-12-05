@@ -73,6 +73,12 @@ public:
      * If the file is external, this is a best guess effort.
      */
     virtual bool isNetwork() const = 0;
+    /**
+     * @brief isMain Returns true if this file is the main file of a media
+     *
+     * This can be used to have a Disc file considered as the main file
+     */
+    virtual bool isMain() const = 0;
 };
 
 }

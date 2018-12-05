@@ -63,6 +63,7 @@ public:
     bool updateFsInfo( uint32_t newLastModificationDate, uint32_t newSize );
     virtual bool isRemovable() const override;
     virtual bool isNetwork() const override;
+    virtual bool isMain() const override;
 
     std::shared_ptr<Media> media() const;
     bool destroy();
