@@ -30,6 +30,12 @@ namespace medialibrary
 class IFile
 {
 public:
+    /**
+     * @brief Describes the type of a file
+     * @warning These values are stored in DB. As such, any new value must be
+     *          appended, as modifying the existing values would invalidate any
+     *          existing db record.
+     */
     enum class Type
     {
         /// Unknown type, so far
