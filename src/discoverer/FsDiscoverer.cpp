@@ -300,9 +300,8 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
                                std::shared_ptr<Folder> parentFolder ) const
 {
     LOG_INFO( "Checking file in ", parentFolderFs->mrl() );
-    static const std::string req = "SELECT * FROM " + File::Table::Name
-            + " WHERE folder_id = ?";
-    auto files = File::fetchAll<File>( m_ml, req, parentFolder->id() );
+
+    auto files = File::fromParentFolder( m_ml, parentFolder->id() );
     std::vector<std::shared_ptr<fs::IFile>> filesToAdd;
     std::vector<std::pair<std::shared_ptr<File>, std::shared_ptr<fs::IFile>>> filesToRefresh;
     for ( const auto& fileFs: parentFolderFs->files() )

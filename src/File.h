@@ -103,6 +103,14 @@ public:
      */
     static std::shared_ptr<File> fromExternalMrl( MediaLibraryPtr ml, const std::string& mrl );
 
+    /**
+     * @brief fromParentFolder Returns a vector of the known file in a given folder
+     * @param ml The medialibrary instance pointer
+     * @param parentFolderId The parent folder ID
+     */
+    static std::vector<std::shared_ptr<File>> fromParentFolder( MediaLibraryPtr ml,
+                                                                int64_t parentFolderId );
+
 private:
     MediaLibraryPtr m_ml;
 

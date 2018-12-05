@@ -345,5 +345,13 @@ std::shared_ptr<File> File::fromExternalMrl( MediaLibraryPtr ml, const std::stri
     return file;
 }
 
+std::vector<std::shared_ptr<File>> File::fromParentFolder( MediaLibraryPtr ml,
+                                                           int64_t parentFolderId )
+{
+    static const std::string req = "SELECT * FROM " + File::Table::Name
+            + " WHERE folder_id = ?";
+    return File::fetchAll<File>( ml, req, parentFolderId );
+}
+
 
 }
