@@ -352,7 +352,8 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
             m_ml->onUpdatedFile( std::move( p.first ), std::move( p.second ) );
         // Insert all files at once to avoid SQL write contention
         for ( auto& p : filesToAdd )
-            m_ml->onDiscoveredFile( p, parentFolder, parentFolderFs, m_probe->getPlaylistParent() );
+            m_ml->onDiscoveredFile( p, parentFolder, parentFolderFs,
+                                    IFile::Type::Main, m_probe->getPlaylistParent() );
         t->commit();
         LOG_INFO( "Done checking files in ", parentFolderFs->mrl() );
     }, std::move( files ), std::move( filesToAdd ), std::move( filesToRefresh ) );

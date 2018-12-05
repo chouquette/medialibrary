@@ -440,9 +440,10 @@ bool MediaLibrary::isExtensionSupported( const char* ext )
 }
 
 void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
-                                      std::shared_ptr<Folder> parentFolder,
-                                      std::shared_ptr<fs::IDirectory> parentFolderFs,
-                                      std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist )
+                                     std::shared_ptr<Folder> parentFolder,
+                                     std::shared_ptr<fs::IDirectory> parentFolderFs,
+                                     IFile::Type fileType,
+                                     std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist )
 {
     auto mrl = fileFs->mrl();
     try
@@ -462,8 +463,7 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
             }
         }
         task = parser::Task::create( this, std::move( fileFs ), std::move( parentFolder ),
-                                     std::move( parentFolderFs ),
-                                     IFile::Type::Main,
+                                     std::move( parentFolderFs ), fileType,
                                      std::move( parentPlaylist ) );
         if ( task != nullptr && m_parser != nullptr )
             m_parser->parse( task );

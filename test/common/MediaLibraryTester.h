@@ -64,15 +64,16 @@ public:
     std::shared_ptr<Media> addFile(const std::string& path , IMedia::Type type);
     std::shared_ptr<Media> addFile( std::shared_ptr<fs::IFile> fileFs,
                                     std::shared_ptr<Folder> parentFolder,
-                                    std::shared_ptr<fs::IDirectory> parentFolderFs,
+                                    std::shared_ptr<fs::IDirectory> parentFolderFs, IFile::Type fileType,
                                     IMedia::Type type );
     virtual void addLocalFsFactory() override;
     std::shared_ptr<Device> device( const std::string& uuid );
     std::vector<const char*> getSupportedExtensions() const;
     virtual void onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
-                                    std::shared_ptr<Folder> parentFolder,
-                                    std::shared_ptr<fs::IDirectory> parentFolderFs,
-                                    std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist ) override;
+                                   std::shared_ptr<Folder> parentFolder,
+                                   std::shared_ptr<fs::IDirectory> parentFolderFs,
+                                   IFile::Type fileType,
+                                   std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist ) override;
     sqlite::Connection* getDbConn();
     virtual void startThumbnailer() override;
     virtual void populateNetworkFsFactories() override;

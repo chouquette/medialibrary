@@ -62,17 +62,19 @@ FolderPtr MediaLibraryTester::folder( int64_t id ) const
 std::shared_ptr<Media> MediaLibraryTester::addFile( const std::string& path, IMedia::Type type )
 {
     return addFile( std::make_shared<mock::NoopFile>( path ),
-                    dummyFolder, dummyDirectory, type );
+                    dummyFolder, dummyDirectory, IFile::Type::Main, type );
 }
 
 std::shared_ptr<Media> MediaLibraryTester::addFile( std::shared_ptr<fs::IFile> file, IMedia::Type type )
 {
-    return addFile( std::move( file ), dummyFolder, dummyDirectory, type );
+    return addFile( std::move( file ), dummyFolder, dummyDirectory,
+                    IFile::Type::Main, type );
 }
 
 std::shared_ptr<Media> MediaLibraryTester::addFile( std::shared_ptr<fs::IFile> fileFs,
                                               std::shared_ptr<Folder> parentFolder,
                                               std::shared_ptr<fs::IDirectory> parentFolderFs,
+                                              IFile::Type fileType,
                                               IMedia::Type type )
 {
     LOG_INFO( "Adding ", fileFs->mrl() );
@@ -84,7 +86,8 @@ std::shared_ptr<Media> MediaLibraryTester::addFile( std::shared_ptr<fs::IFile> f
         return nullptr;
     }
     // For now, assume all media are made of a single file
-    auto file = mptr->addFile( *fileFs, parentFolder->id(), parentFolderFs->device()->isRemovable(), File::Type::Main );
+    auto file = mptr->addFile( *fileFs, parentFolder->id(),
+                               parentFolderFs->device()->isRemovable(), fileType );
     if ( file == nullptr )
     {
         LOG_ERROR( "Failed to add file ", fileFs->mrl(), " to media #", mptr->id() );
@@ -180,9 +183,10 @@ std::vector<const char*> MediaLibraryTester::getSupportedExtensions() const
 void MediaLibraryTester::onDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,
                                 std::shared_ptr<Folder> parentFolder,
                                 std::shared_ptr<fs::IDirectory> parentFolderFs,
+                                IFile::Type fileType,
                                 std::pair<std::shared_ptr<Playlist>, unsigned int>)
 {
-    addFile( fileFs, parentFolder, parentFolderFs, IMedia::Type::Unknown );
+    addFile( fileFs, parentFolder, parentFolderFs, fileType, IMedia::Type::Unknown );
 }
 
 sqlite::Connection* MediaLibraryTester::getDbConn()

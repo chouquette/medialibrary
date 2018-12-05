@@ -85,6 +85,7 @@ public:
     virtual void onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                                    std::shared_ptr<Folder> parentFolder,
                                    std::shared_ptr<fs::IDirectory> parentFolderFs,
+                                   IFile::Type fileType,
                                    std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist );
     void onUpdatedFile( std::shared_ptr<File> file,
                         std::shared_ptr<fs::IFile> fileFs );
