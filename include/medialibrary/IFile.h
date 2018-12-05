@@ -50,6 +50,8 @@ public:
         Subtitles,
         /// A playlist File
         Playlist,
+        /// A disc file. Also considered to be a "main" file
+        Disc,
     };
 
     virtual ~IFile() = default;
