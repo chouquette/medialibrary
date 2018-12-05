@@ -67,6 +67,12 @@ public:
     /// \brief isExternal returns true if this stream isn't managed by the medialibrary
     ///
     virtual bool isExternal() const = 0;
+    /**
+     * @brief isNetwork returns true if this file is on a network location
+     *
+     * If the file is external, this is a best guess effort.
+     */
+    virtual bool isNetwork() const = 0;
 };
 
 }

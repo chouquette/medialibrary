@@ -62,6 +62,7 @@ public:
     virtual bool isExternal() const override;
     bool updateFsInfo( uint32_t newLastModificationDate, uint32_t newSize );
     virtual bool isRemovable() const override;
+    virtual bool isNetwork() const override;
 
     std::shared_ptr<Media> media() const;
     bool destroy();
@@ -116,6 +117,7 @@ private:
     const int64_t m_folderId;
     const bool m_isRemovable;
     const bool m_isExternal;
+    const bool m_isNetwork;
 
     // Contains the full path as a MRL
     mutable std::string m_fullPath;

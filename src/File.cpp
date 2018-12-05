@@ -50,6 +50,7 @@ File::File( MediaLibraryPtr ml, sqlite::Row& row )
     , m_folderId( row.extract<decltype(m_folderId)>() )
     , m_isRemovable( row.extract<decltype(m_isRemovable)>() )
     , m_isExternal( row.extract<decltype(m_isExternal)>() )
+    , m_isNetwork( row.extract<decltype(m_isNetwork)>() )
 {
 }
 
@@ -66,6 +67,7 @@ File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type,
     , m_folderId( folderId )
     , m_isRemovable( isRemovable )
     , m_isExternal( false )
+    , m_isNetwork( file.isNetwork() )
 {
     assert( ( mediaId == 0 && playlistId != 0 ) || ( mediaId != 0 && playlistId == 0 ) );
 }
@@ -83,6 +85,7 @@ File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, IFile::Type
     , m_folderId( 0 )
     , m_isRemovable( false )
     , m_isExternal( true )
+    , m_isNetwork( utils::file::schemeIs( "file://", mrl ) )
     , m_fullPath( mrl )
 {
     assert( ( mediaId == 0 && playlistId != 0 ) || ( mediaId != 0 && playlistId == 0 ) );
@@ -164,6 +167,11 @@ bool File::isRemovable() const
     return m_isRemovable;
 }
 
+bool File::isNetwork() const
+{
+    return m_isNetwork;
+}
+
 std::shared_ptr<Media> File::media() const
 {
     if ( m_mediaId == 0 )
@@ -212,10 +220,11 @@ std::shared_ptr<File> File::createFromMedia( MediaLibraryPtr ml, int64_t mediaId
     auto self = std::make_shared<File>( ml, mediaId, 0, type, fileFs, folderId, isRemovable );
     static const std::string req = "INSERT INTO " + File::Table::Name +
             "(media_id, mrl, type, folder_id, last_modification_date, size, "
-            "is_removable, is_external) VALUES(?, ?, ?, ?, ?, ?, ?, 0)";
+            "is_removable, is_external, is_network) VALUES(?, ?, ?, ?, ?, ?, ?, 0, ?)";
 
     if ( insert( ml, self, req, mediaId, self->m_mrl, type, sqlite::ForeignKey( folderId ),
-                         self->m_lastModificationDate, self->m_size, isRemovable ) == false )
+                         self->m_lastModificationDate, self->m_size, isRemovable,
+                         self->m_isNetwork ) == false )
         return nullptr;
     self->m_fullPath = fileFs.mrl();
     return self;
@@ -235,10 +244,10 @@ std::shared_ptr<File> File::createFromMedia( MediaLibraryPtr ml, int64_t mediaId
 
     auto self = std::make_shared<File>( ml, mediaId, 0, type, mrl );
     static const std::string req = "INSERT INTO " + File::Table::Name +
-            "(media_id, mrl, type, folder_id, is_removable, is_external) "
-            "VALUES(?, ?, ?, NULL, 0, 1)";
+            "(media_id, mrl, type, folder_id, is_removable, is_external, is_network) "
+            "VALUES(?, ?, ?, NULL, 0, 1, ?)";
 
-    if ( insert( ml, self, req, mediaId, mrl, type ) == false )
+    if ( insert( ml, self, req, mediaId, mrl, type, self->m_isNetwork ) == false )
         return nullptr;
     return self;
 }
@@ -252,10 +261,11 @@ std::shared_ptr<File> File::createFromPlaylist( MediaLibraryPtr ml, int64_t play
     auto self = std::make_shared<File>( ml, 0, playlistId, type , fileFs, folderId, isRemovable );
     static const std::string req = "INSERT INTO " + File::Table::Name +
             "(playlist_id, mrl, type, folder_id, last_modification_date, size, "
-            "is_removable, is_external) VALUES(?, ?, ?, ?, ?, ?, ?, 0)";
+            "is_removable, is_external, is_network) VALUES(?, ?, ?, ?, ?, ?, ?, 0, ?)";
 
     if ( insert( ml, self, req, playlistId, self->m_mrl, type, sqlite::ForeignKey( folderId ),
-                 self->m_lastModificationDate, self->m_size, isRemovable ) == false )
+                 self->m_lastModificationDate, self->m_size, isRemovable,
+                 self->m_isNetwork ) == false )
         return nullptr;
     self->m_fullPath = fileFs.mrl();
     return self;

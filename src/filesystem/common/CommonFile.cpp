@@ -55,6 +55,11 @@ const std::string& CommonFile::mrl() const
     return m_mrl;
 }
 
+bool CommonFile::isNetwork() const
+{
+    return false;
+}
+
 }
 
 }

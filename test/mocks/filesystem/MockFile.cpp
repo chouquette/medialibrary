@@ -59,6 +59,11 @@ const std::string& File::mrl() const
     return m_mrl;
 }
 
+bool File::isNetwork() const
+{
+    return false;
+}
+
 unsigned int File::lastModificationDate() const
 {
     return m_lastModification;

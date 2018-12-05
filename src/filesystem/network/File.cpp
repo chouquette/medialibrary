@@ -50,5 +50,10 @@ unsigned int NetworkFile::size() const
     return 0;
 }
 
+bool NetworkFile::isNetwork() const
+{
+    return true;
+}
+
 }
 }

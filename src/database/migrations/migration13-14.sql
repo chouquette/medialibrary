@@ -210,9 +210,9 @@ IMedia::Type::Unknown ) ),
 
 "INSERT INTO " + File::Table::Name + "("
 "id_file, media_id, playlist_id, mrl, type, last_modification_date, size,"
-"folder_id, is_removable, is_external) "
+"folder_id, is_removable, is_external, is_network) "
 "SELECT id_file, media_id, playlist_id, mrl, type, last_modification_date, size,"
-"folder_id, is_removable, is_external FROM " + File::Table::Name + "_backup",
+"folder_id, is_removable, is_external, 0 FROM " + File::Table::Name + "_backup",
 
 "DROP TABLE " + File::Table::Name + "_backup",
 

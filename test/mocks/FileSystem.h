@@ -277,6 +277,11 @@ public:
         return m_lastModifDate;
     }
 
+    virtual bool isNetwork() const
+    {
+        return false;
+    }
+
     virtual unsigned int size() const
     {
         return m_size;

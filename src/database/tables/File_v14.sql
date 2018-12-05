@@ -10,6 +10,7 @@
     "folder_id UNSIGNED INTEGER,"
     "is_removable BOOLEAN NOT NULL,"
     "is_external BOOLEAN NOT NULL,"
+    "is_network BOOLEAN NOT NULL,"
 
     "FOREIGN KEY (media_id) REFERENCES " + Media::Table::Name
     + "(id_media) ON DELETE CASCADE,"

@@ -43,6 +43,7 @@ public:
     virtual unsigned int size() const override;
     void markAsModified();
     virtual const std::string& mrl() const override;
+    virtual bool isNetwork() const override;
 
 private:
     std::string m_name;
