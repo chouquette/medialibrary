@@ -593,12 +593,12 @@ Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
 
     req += addRequestJoin( params, true, false );
     req +=  " WHERE m.type = ?"
-            " AND f.type = ?"
+            " AND (f.type = ? OR f.type = ?)"
             " AND m.is_present != 0";
 
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
-                                      sortRequest( params ),
-                                      type, IFile::Type::Main );
+                                      sortRequest( params ), type,
+                                      IFile::Type::Main, IFile::Type::Disc );
 }
 
 int64_t Media::id() const
@@ -793,11 +793,11 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
             " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
             " WHERE " + Media::Table::Name + "Fts MATCH '*' || ? || '*')"
             " AND m.is_present = 1"
-            " AND f.type = ?"
+            " AND (f.type = ? OR f.type = ?)"
             " AND m.type != ? AND m.type != ?";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ), title,
-                                      File::Type::Main,
+                                      File::Type::Main, File::Type::Disc,
                                       Media::Type::External, Media::Type::Stream );
 }
 
@@ -811,11 +811,12 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
             " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
             " WHERE " + Media::Table::Name + "Fts MATCH '*' || ? || '*')"
             " AND m.is_present = 1"
-            " AND f.type = ?"
+            " AND (f.type = ? OR f.type = ?)"
             " AND m.type = ?";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ), title,
-                                      File::Type::Main, type );
+                                      File::Type::Main, File::Type::Disc,
+                                      type );
 }
 
 Query<IMedia> Media::searchAlbumTracks(MediaLibraryPtr ml, const std::string& pattern, int64_t albumId, const QueryParameters* params)
