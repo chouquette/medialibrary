@@ -75,6 +75,10 @@ public:
      */
     virtual uint32_t nbDiscs() const = 0;
     virtual unsigned int duration() const = 0;
+    /**
+     * @brief isUnknownAlbum returns true is this is an unknown album
+     */
+    virtual bool isUnknownAlbum() const = 0;
 
     virtual Query<IMedia> searchTracks( const std::string& pattern,
                                         const QueryParameters* params = nullptr ) const = 0;

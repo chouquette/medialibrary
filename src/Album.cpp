@@ -361,6 +361,11 @@ unsigned int Album::duration() const
     return m_duration;
 }
 
+bool Album::isUnknownAlbum() const
+{
+    return m_title.empty();
+}
+
 ArtistPtr Album::albumArtist() const
 {
     if ( m_artistId == 0 )

@@ -92,6 +92,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         virtual uint32_t nbDiscs() const override;
         bool setNbDiscs( uint32_t nbDiscs );
         unsigned int duration() const override;
+        virtual bool isUnknownAlbum() const override;
 
         virtual ArtistPtr albumArtist() const override;
         bool setAlbumArtist( std::shared_ptr<Artist> artist );
