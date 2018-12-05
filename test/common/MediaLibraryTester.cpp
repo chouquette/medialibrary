@@ -79,7 +79,7 @@ std::shared_ptr<Media> MediaLibraryTester::addFile( std::shared_ptr<fs::IFile> f
 {
     LOG_INFO( "Adding ", fileFs->mrl() );
     auto mptr = Media::create( this, type, parentFolder->deviceId(), parentFolder->id(),
-                               utils::file::stripExtension( fileFs->name() ) );
+                               fileFs->name() );
     if ( mptr == nullptr )
     {
         LOG_ERROR( "Failed to add media ", fileFs->mrl(), " to the media library" );
