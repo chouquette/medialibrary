@@ -1521,9 +1521,11 @@ void MediaLibrary::addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer )
     m_thumbnailers.push_back( std::move( thumbnailer ) );
 }
 
-bool MediaLibrary::DeviceListerCb::onDeviceMounted( const std::string& uuid, const std::string& mountpoint )
+bool MediaLibrary::DeviceListerCb::onDeviceMounted( const std::string& uuid,
+                                                    const std::string& mountedMountpoint )
 {
     auto currentDevice = Device::fromUuid( m_ml, uuid );
+    auto mountpoint = utils::file::toFolderPath( mountedMountpoint );
     LOG_INFO( "Device ", uuid, " was plugged and mounted on ", mountpoint );
     for ( const auto& fsFactory : m_ml->m_fsFactories )
     {
@@ -1550,7 +1552,7 @@ bool MediaLibrary::DeviceListerCb::onDeviceMounted( const std::string& uuid, con
 }
 
 void MediaLibrary::DeviceListerCb::onDeviceUnmounted( const std::string& uuid,
-                                                      const std::string& mountpoint )
+                                                      const std::string& unmountedMountpoint )
 {
     auto device = Device::fromUuid( m_ml, uuid );
     assert( device->isRemovable() == true );
@@ -1559,7 +1561,8 @@ void MediaLibrary::DeviceListerCb::onDeviceUnmounted( const std::string& uuid,
         LOG_WARN( "Unknown device ", uuid, " was unplugged. Ignoring." );
         return;
     }
-    LOG_INFO( "Device ", uuid, " was unplugged" );
+    auto mountpoint = utils::file::toFolderPath( unmountedMountpoint );
+    LOG_INFO( "Device ", uuid, " was unplugged. Mountpoint was ", mountpoint );
     for ( const auto& fsFactory : m_ml->m_fsFactories )
     {
         if ( fsFactory->scheme() == device->scheme() )
