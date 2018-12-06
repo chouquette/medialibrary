@@ -92,7 +92,7 @@ public:
          */
         Item( ITaskCb* taskCb, std::string mrl, IFile::Type fileType,
               unsigned int subitemIndex, bool isRefresh );
-        Item( ITaskCb* taskCb, std::shared_ptr<fs::IFile> fileFs,
+        Item( ITaskCb* taskCb, std::string mrl, std::shared_ptr<fs::IFile> fileFs,
               std::shared_ptr<Folder> folder, std::shared_ptr<fs::IDirectory> folderFs,
               IFile::Type fileType,
               std::shared_ptr<Playlist> parentPlaylist, unsigned int parentPlaylistIndex,
@@ -169,7 +169,7 @@ public:
      * @param parentPlaylist A parent playlist, if any
      * @param parentPlaylistIndex The index in the playlist
      */
-    Task( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
+    Task( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> fileFs,
           std::shared_ptr<Folder> parentFolder,
           std::shared_ptr<fs::IDirectory> parentFolderFs,
           IFile::Type fileType,
@@ -220,7 +220,7 @@ public:
     static void resetRetryCount( MediaLibraryPtr ml );
     static void resetParsing( MediaLibraryPtr ml );
     static std::vector<std::shared_ptr<Task>> fetchUncompleted( MediaLibraryPtr ml );
-    static std::shared_ptr<Task> create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
+    static std::shared_ptr<Task> create( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> fileFs,
                                          std::shared_ptr<Folder> parentFolder,
                                          std::shared_ptr<fs::IDirectory> parentFolderFs,
                                          IFile::Type fileType,

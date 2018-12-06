@@ -71,7 +71,7 @@ Task::Task( MediaLibraryPtr ml, sqlite::Row& row )
     m_item = Item{ this, std::move( mrl ), fileType, parentPlaylistIndex, isRefresh };
 }
 
-Task::Task( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
+Task::Task( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> fileFs,
             std::shared_ptr<Folder> parentFolder,
             std::shared_ptr<fs::IDirectory> parentFolderFs,
             IFile::Type fileType,
@@ -81,7 +81,7 @@ Task::Task( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
     , m_ml( ml )
     , m_step( Step::None )
     , m_fileId( 0 )
-    , m_item( this, std::move( fileFs ), std::move( parentFolder ),
+    , m_item( this, std::move( mrl ), std::move( fileFs ), std::move( parentFolder ),
               std::move( parentFolderFs ), fileType,
               std::move( parentPlaylist ), parentPlaylistIndex, false )
 {
@@ -176,13 +176,13 @@ Task::Item::Item( ITaskCb* taskCb, std::string mrl, IFile::Type fileType,
 {
 }
 
-Task::Item::Item(ITaskCb* taskCb, std::shared_ptr<fs::IFile> fileFs,
+Task::Item::Item(ITaskCb* taskCb, std::string mrl, std::shared_ptr<fs::IFile> fileFs,
                   std::shared_ptr<Folder> parentFolder,
                   std::shared_ptr<fs::IDirectory> parentFolderFs, IFile::Type fileType,
                   std::shared_ptr<Playlist> parentPlaylist, unsigned int parentPlaylistIndex,
                   bool isRefresh )
     : m_taskCb( taskCb )
-    , m_mrl( fileFs->mrl() )
+    , m_mrl( std::move( mrl ) )
     , m_fileType( fileType )
     , m_duration( 0 )
     , m_fileFs( std::move( fileFs ) )
@@ -438,7 +438,7 @@ bool Task::restoreLinkedEntities()
         }
     }
 
-    m_item = Item{ this, std::move( fileFs ), std::move( parentFolder ),
+    m_item = Item{ this, m_item.mrl(), std::move( fileFs ), std::move( parentFolder ),
                    std::move( parentFolderFs ), m_item.fileType(),
                    std::move( parentPlaylist ), m_item.parentPlaylistIndex(),
                    m_item.isRefresh() };
@@ -498,7 +498,7 @@ std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
 }
 
 std::shared_ptr<Task>
-Task::create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
+Task::create( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> fileFs,
               std::shared_ptr<Folder> parentFolder, std::shared_ptr<fs::IDirectory> parentFolderFs,
               IFile::Type fileType,
               std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist )
@@ -507,7 +507,7 @@ Task::create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
     auto parentPlaylistId = parentPlaylist.first != nullptr ? parentPlaylist.first->id() : 0;
     auto parentPlaylistIndex = parentPlaylist.second;
 
-    std::shared_ptr<Task> self = std::make_shared<Task>( ml, std::move( fileFs ),
+    std::shared_ptr<Task> self = std::make_shared<Task>( ml, std::move( mrl ), std::move( fileFs ),
         std::move( parentFolder ), std::move( parentFolderFs ), fileType,
         std::move( parentPlaylist.first ), parentPlaylist.second );
     const std::string req = "INSERT INTO " + Task::Table::Name +

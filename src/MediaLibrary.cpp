@@ -462,7 +462,7 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                 return;
             }
         }
-        task = parser::Task::create( this, std::move( fileFs ), std::move( parentFolder ),
+        task = parser::Task::create( this, mrl, std::move( fileFs ), std::move( parentFolder ),
                                      std::move( parentFolderFs ), fileType,
                                      std::move( parentPlaylist ) );
         if ( task != nullptr && m_parser != nullptr )
