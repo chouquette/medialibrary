@@ -281,7 +281,7 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
     auto deviceFs = folderFs->device();
     if ( deviceFs == nullptr )
     {
-        LOG_ERROR( "Failed to get device containing an existing folder: ", folderFs->mrl() );
+        LOG_WARN( "Failed to get device containing an existing folder: ", folderFs->mrl() );
         return nullptr;
     }
     if ( deviceFs->isRemovable() == false )
