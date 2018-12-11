@@ -56,6 +56,7 @@ protected:
     std::tuple<Status, bool> createFileAndMedia( IItem& item ) const;
     void createTracks( Media& m, const std::vector<IItem::Track>& tracks ) const;
     std::tuple<bool, bool> refreshFile( IItem& item ) const;
+    std::tuple<bool, bool> refreshMedia( IItem& item ) const;
     std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> findOrCreateArtist( IItem& item ) const;
     std::shared_ptr<AlbumTrack> handleTrack( std::shared_ptr<Album> album, IItem& item,
                                              std::shared_ptr<Artist> artist, Genre* genre ) const;

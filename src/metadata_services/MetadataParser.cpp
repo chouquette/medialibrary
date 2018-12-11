@@ -498,11 +498,34 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshFile( IItem& item ) const
 {
     assert( item.media() == nullptr );
     assert( item.file() != nullptr );
+
     auto file = std::static_pointer_cast<File>( item.file() );
 
-    auto media = file->media();
-
     file->updateFsInfo( item.fileFs()->lastModificationDate(), item.fileFs()->size() );
+
+    switch ( file->type() )
+    {
+        case IFile::Type::Main:
+            return refreshMedia( item );
+        case IFile::Type::Part:
+        case IFile::Type::Soundtrack:
+        case IFile::Type::Subtitles:
+        case IFile::Type::Playlist:
+        case IFile::Type::Disc:
+        case IFile::Type::Unknown:
+            break;
+    }
+    LOG_WARN( "Refreshing of file type ",
+              static_cast<std::underlying_type<IFile::Type>::type>( file->type() ),
+              " is unsupported" );
+    return { false, false };
+}
+
+std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
+{
+    auto file = std::static_pointer_cast<File>( item.file() );
+    auto media = file->media();
+    assert( media != nullptr );
 
     if ( media->duration() != item.duration() )
         media->setDuration( item.duration() );
