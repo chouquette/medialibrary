@@ -30,6 +30,7 @@ namespace medialibrary
 class IAlbum;
 class IAlbumTrack;
 class IAudioTrack;
+class IChapter;
 class IFile;
 class IGenre;
 class IMedia;

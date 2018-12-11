@@ -24,6 +24,7 @@ libmedialibrary_la_HEADERS = \
 	include/medialibrary/IAlbumTrack.h \
 	include/medialibrary/IArtist.h \
 	include/medialibrary/IAudioTrack.h \
+	include/medialibrary/IChapter.h \
 	include/medialibrary/IFile.h \
 	include/medialibrary/IGenre.h \
 	include/medialibrary/ILabel.h \
@@ -67,6 +68,7 @@ libmedialibrary_la_SOURCES = \
 	src/Device.cpp \
 	src/Factory.cpp \
 	src/File.cpp \
+	src/Chapter.cpp \
 	src/Folder.cpp \
 	src/Genre.cpp \
 	src/Label.cpp \
@@ -141,6 +143,7 @@ noinst_HEADERS = \
 	src/filesystem/unix/DeviceLister.h \
 	src/filesystem/win32/Directory.h \
 	src/filesystem/win32/File.h \
+	src/Chapter.h \
 	src/Folder.h \
 	src/Genre.h \
 	src/Label.h \
@@ -301,6 +304,7 @@ unittest_SOURCES = \
 	test/unittest/AlbumTrackTests.cpp \
 	test/unittest/ArtistTests.cpp \
 	test/unittest/AudioTrackTests.cpp \
+	test/unittest/ChapterTests.cpp \
 	test/unittest/DeviceTests.cpp \
 	test/unittest/FileTests.cpp \
 	test/unittest/FolderTests.cpp \

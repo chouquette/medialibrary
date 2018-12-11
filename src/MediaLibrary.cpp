@@ -37,6 +37,7 @@
 #include "discoverer/DiscovererWorker.h"
 #include "discoverer/probe/CrawlerProbe.h"
 #include "utils/ModificationsNotifier.h"
+#include "Chapter.h"
 #include "Device.h"
 #include "File.h"
 #include "Folder.h"
@@ -163,6 +164,7 @@ void MediaLibrary::createAllTables()
     parser::Task::createTable( m_dbConnection.get() );
     Metadata::createTable( m_dbConnection.get() );
     SubtitleTrack::createTable( m_dbConnection.get() );
+    Chapter::createTable( m_dbConnection.get() );
 }
 
 void MediaLibrary::createAllTriggers()

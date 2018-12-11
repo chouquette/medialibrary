@@ -36,6 +36,7 @@ class IAlbumTrack;
 class IShowEpisode;
 class ITrackInformation;
 class IMetadata;
+struct QueryParameters;
 
 class IMedia
 {
@@ -158,6 +159,16 @@ class IMedia
         virtual Query<IVideoTrack> videoTracks() const = 0;
         virtual Query<IAudioTrack> audioTracks() const = 0;
         virtual Query<ISubtitleTrack> subtitleTracks() const = 0;
+        ///
+        /// \brief chapters Returns the chapters for this media, if any
+        ///
+        /// For this query, the default sorting parameter is by chapter offset.
+        /// Supported criteria are: Alpha, Duration, Default.
+        /// Any other criteria will fallback to default.
+        /// Default order for duration is from longer to shorter.
+        /// Passing desc = true will invert this default.
+        ///
+        virtual Query<IChapter> chapters( const QueryParameters* params ) const = 0;
         ///
         /// \brief thumbnail Returns the path of a thumbnail for this media
         /// \return A path, relative to the thumbnailPath configured when initializing

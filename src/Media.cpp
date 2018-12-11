@@ -34,6 +34,7 @@
 #include "AlbumTrack.h"
 #include "Artist.h"
 #include "AudioTrack.h"
+#include "Chapter.h"
 #include "Device.h"
 #include "Media.h"
 #include "File.h"
@@ -303,6 +304,17 @@ Query<ISubtitleTrack> Media::subtitleTracks() const
     static const std::string req = "FROM " + SubtitleTrack::Table::Name +
             " WHERE media_id = ?";
     return make_query<SubtitleTrack, ISubtitleTrack>( m_ml, "*", req, "", m_id );
+}
+
+Query<IChapter> Media::chapters( const QueryParameters* params ) const
+{
+    return Chapter::fromMedia( m_ml, m_id, params );
+}
+
+bool Media::addChapter(int64_t offset, int64_t duration, std::string name)
+{
+    return Chapter::create( m_ml, offset, duration, std::move( name ),
+                            m_id ) != nullptr;
 }
 
 const std::string& Media::thumbnail() const
