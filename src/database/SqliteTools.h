@@ -147,7 +147,7 @@ public:
         if ( it == end( connMap ) )
         {
             sqlite3_stmt* stmt;
-            int res = sqlite3_prepare_v2( dbConnection, req.c_str(), -1, &stmt, NULL );
+            int res = sqlite3_prepare_v2( dbConnection, req.c_str(), -1, &stmt, nullptr );
             if ( res != SQLITE_OK )
             {
                 throw errors::Generic( req.c_str(), sqlite3_errmsg( dbConnection ), res );
