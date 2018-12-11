@@ -399,6 +399,11 @@ bool Task::restoreLinkedEntities()
         }
         fileFs = std::move( *it );
     }
+    catch ( const fs::DeviceRemovedException& )
+    {
+        LOG_WARN( "Failed to restore file on an unmounted device: ", mrl );
+        return false;
+    }
     catch ( const std::system_error& ex )
     {
         // If we never found the file yet, we can delete the task. It will be
