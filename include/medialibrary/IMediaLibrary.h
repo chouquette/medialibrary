@@ -98,7 +98,7 @@ class IMediaLibraryCb
 public:
     virtual ~IMediaLibraryCb() = default;
     /**
-     * @brief onFileAdded Will be called when some media get added.
+     * @brief onMediaAdded Will be called when some media get added.
      * Depending if the media is being restored or was just discovered,
      * the media type might be a best effort guess. If the media was freshly
      * discovered, it is extremely likely that no metadata will be
@@ -107,7 +107,7 @@ public:
      */
     virtual void onMediaAdded( std::vector<MediaPtr> media ) = 0;
     /**
-     * @brief onFileUpdated Will be called when a file metadata gets updated.
+     * @brief onMediaUpdated Will be called when a file metadata gets updated.
      */
     virtual void onMediaModified( std::vector<MediaPtr> media ) = 0;
 
