@@ -84,6 +84,8 @@ public:
      */
     static void insertMrlFromMediaId( MediaLibraryPtr ml );
 
+    static std::shared_ptr<Playlist> fromFile( MediaLibraryPtr ml, int64_t fileId );
+
 private:
     static std::string sortRequest( const QueryParameters* params );
     void curateNullMediaID() const;

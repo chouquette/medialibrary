@@ -374,6 +374,13 @@ void Playlist::insertMrlFromMediaId( MediaLibraryPtr ml )
     sqlite::Tools::executeDelete( ml->getConn(), "DELETE FROM PlaylistMediaRelation WHERE mrl IS NULL" );
 }
 
+std::shared_ptr<Playlist> Playlist::fromFile( MediaLibraryPtr ml, int64_t fileId )
+{
+    static const std::string req = "SELECT * FROM " + Table::Name +
+            " WHERE file_id = ?";
+    return fetch( ml, req, fileId );
+}
+
 std::string Playlist::sortRequest( const QueryParameters* params )
 {
     std::string req = " ORDER BY ";
