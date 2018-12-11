@@ -507,10 +507,22 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshFile( IItem& item ) const
     {
         case IFile::Type::Main:
             return refreshMedia( item );
+        case IFile::Type::Playlist:
+        {
+            auto playlist = Playlist::fromFile( m_ml, file->id() );
+            if ( playlist == nullptr )
+            {
+                LOG_WARN( "Failed to find playlist associated to modified playlist file ",
+                          item.mrl() );
+                return { false, false };
+            }
+            LOG_INFO( "Reloading playlist ", playlist->name(), " on ", item.mrl() );
+            Playlist::destroy( m_ml, playlist->id() );
+            return { true, true };
+        }
         case IFile::Type::Part:
         case IFile::Type::Soundtrack:
         case IFile::Type::Subtitles:
-        case IFile::Type::Playlist:
         case IFile::Type::Disc:
         case IFile::Type::Unknown:
             break;
