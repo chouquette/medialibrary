@@ -72,13 +72,12 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     , m_insertionDate( row.load<decltype(m_insertionDate)>( 7 ) )
     , m_releaseDate( row.load<decltype(m_releaseDate)>( 8 ) )
     , m_thumbnailId( row.load<decltype(m_thumbnailId)>( 9 ) )
-    , m_thumbnailGenerated( row.load<decltype(m_thumbnailGenerated)>( 10 ) )
-    , m_title( row.load<decltype(m_title)>( 11 ) )
-    , m_filename( row.load<decltype(m_filename)>( 12 ) )
-    , m_isFavorite( row.load<decltype(m_isFavorite)>( 13 ) )
+    , m_title( row.load<decltype(m_title)>( 10 ) )
+    , m_filename( row.load<decltype(m_filename)>( 11 ) )
+    , m_isFavorite( row.load<decltype(m_isFavorite)>( 12 ) )
     // Skip is_present
     // Skip device_id
-    , m_nbPlaylists( row.load<unsigned int>( 16 ) )
+    , m_nbPlaylists( row.load<unsigned int>( 15 ) )
     // Skip folder_id if any field gets added afterward
 
     // End of DB fields extraction
@@ -98,7 +97,6 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
     , m_insertionDate( time( nullptr ) )
     , m_releaseDate( 0 )
     , m_thumbnailId( 0 )
-    , m_thumbnailGenerated( false )
     , m_title( title )
     // When creating a Media, meta aren't parsed, and therefor, the title is the filename
     , m_filename( title )
@@ -309,7 +307,7 @@ Query<ISubtitleTrack> Media::subtitleTracks() const
 
 const std::string& Media::thumbnail() const
 {
-    if ( m_thumbnailId == 0 || m_thumbnailGenerated == false )
+    if ( isThumbnailGenerated() == false )
         return Thumbnail::EmptyMrl;
 
     if ( m_thumbnail == nullptr )
@@ -326,7 +324,7 @@ const std::string& Media::thumbnail() const
 
 bool Media::isThumbnailGenerated() const
 {
-    return m_thumbnailGenerated;
+    return m_thumbnailId != 0;
 }
 
 unsigned int Media::insertionDate() const
@@ -413,11 +411,10 @@ bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin ori
         return false;
 
     static const std::string req = "UPDATE " + Media::Table::Name + " SET "
-            "thumbnail_id = ?, thumbnail_generated = 1 WHERE id_media = ?";
+            "thumbnail_id = ? WHERE id_media = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, thumbnail->id(), m_id ) == false )
         return false;
     m_thumbnailId = thumbnail->id();
-    m_thumbnailGenerated = true;
     m_thumbnail = std::move( thumbnail );
     if ( t != nullptr )
         t->commit();

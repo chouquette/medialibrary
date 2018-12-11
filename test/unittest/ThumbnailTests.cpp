@@ -103,3 +103,18 @@ TEST_F( Thumbnails, GeneratedPath )
     t = Thumbnail::fetch( ml.get(), t->id() );
     ASSERT_EQ( expectedMrl, t->mrl() );
 }
+
+TEST_F( Thumbnails, MarkFailure )
+{
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
+    ASSERT_FALSE( m->isThumbnailGenerated() );
+    auto res = m->setThumbnail( "", Thumbnail::Origin::Media, true );
+    ASSERT_TRUE( res );
+
+    ASSERT_TRUE( m->isThumbnailGenerated() );
+
+    Reload();
+
+    m = std::static_pointer_cast<Media>( ml->media( m->id() ) );
+    ASSERT_TRUE( m->isThumbnailGenerated() );
+}

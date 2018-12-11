@@ -11,7 +11,6 @@
     "insertion_date UNSIGNED INTEGER,"
     "release_date UNSIGNED INTEGER,"
     "thumbnail_id INTEGER,"
-    "thumbnail_generated BOOLEAN NOT NULL DEFAULT 0,"
     "title TEXT COLLATE NOCASE,"
     "filename TEXT COLLATE NOCASE,"
     "is_favorite BOOLEAN NOT NULL DEFAULT 0,"

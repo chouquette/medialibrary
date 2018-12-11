@@ -28,7 +28,7 @@
 
 "INSERT INTO " + Media::Table::Name + "("
     "id_media, type, subtype, duration, play_count, last_played_date, real_last_played_date, insertion_date,"
-    "release_date, thumbnail_id, thumbnail_generated, title, filename, is_favorite,"
+    "release_date, thumbnail_id, title, filename, is_favorite,"
     "is_present) "
 "SELECT id_media, type, ifnull(subtype, " +
         std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
@@ -37,7 +37,6 @@
     "strftime('%s', 'now'),"
     "insertion_date, release_date, "
     "CASE thumbnail WHEN NULL THEN 0 WHEN '' THEN 0 ELSE id_media END,"
-    "CASE thumbnail WHEN NULL THEN 0 WHEN '' THEN 0 ELSE 1 END,"
     "title, filename, is_favorite, is_present FROM " + Media::Table::Name + "_backup",
 
 "DROP TABLE " + Media::Table::Name + "_backup",
