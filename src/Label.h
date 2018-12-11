@@ -20,10 +20,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef LABEL_H
-#define LABEL_H
+#pragma once
 
-#include <sqlite3.h>
 #include <string>
 
 #include "medialibrary/ILabel.h"
@@ -65,5 +63,3 @@ class Label : public ILabel, public DatabaseHelpers<Label>
 };
 
 }
-
-#endif // LABEL_H
