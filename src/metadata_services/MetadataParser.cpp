@@ -1062,9 +1062,9 @@ bool MetadataAnalyzer::link( IItem& item, Album& album,
 
     const auto discTotal = toInt( item, IItem::Metadata::DiscTotal );
     const auto discNumber = toInt( item, IItem::Metadata::DiscNumber );
-    if ( ( discTotal != 0 && discTotal > 0 &&
+    if ( ( discTotal > 0 &&
            static_cast<uint32_t>( discTotal ) > album.nbDiscs() ) ||
-         ( discNumber != 0 && discNumber > 0 &&
+         ( discNumber > 0 &&
            static_cast<uint32_t>( discNumber ) > album.nbDiscs() ) )
     {
         album.setNbDiscs( std::max( discTotal, discNumber ) );
