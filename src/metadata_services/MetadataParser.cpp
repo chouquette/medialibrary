@@ -207,9 +207,12 @@ bool MetadataAnalyzer::addPlaylistMedias( IItem& item ) const
         }
         m_notifier->notifyPlaylistCreation( playlistPtr );
 
+        auto deviceFs = item.parentFolderFs()->device();
+        if ( deviceFs == nullptr )
+            throw fs::DeviceRemovedException{};
         auto file = playlistPtr->addFile( *item.fileFs(),
                                           item.parentFolder()->id(),
-                                          item.parentFolderFs()->device()->isRemovable() );
+                                          deviceFs->isRemovable() );
         if ( file == nullptr )
         {
             LOG_ERROR( "Failed to add playlist file ", mrl );
@@ -400,10 +403,13 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
             LOG_ERROR( "Failed to add media ", mrl, " to the media library" );
             return std::make_tuple( Status::Fatal, false );
         }
+        auto deviceFs = item.parentFolderFs()->device();
+        if ( deviceFs == nullptr )
+            throw fs::DeviceRemovedException{};
         // For now, assume all media are made of a single file
         auto file = m->addFile( *item.fileFs(),
                                 item.parentFolder()->id(),
-                                item.parentFolderFs()->device()->isRemovable(),
+                                deviceFs->isRemovable(),
                                 File::Type::Main );
         if ( file == nullptr )
         {
