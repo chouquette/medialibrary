@@ -103,6 +103,11 @@ void ThumbnailerWorker::run()
             m_tasks.pop();
         }
         bool res = generateThumbnail( media );
+        if ( res == false )
+        {
+            auto m = static_cast<Media*>( media.get() );
+            m->setThumbnail( "", Thumbnail::Origin::Media, true );
+        }
         m_ml->getCb()->onMediaThumbnailReady( media, res );
     }
     LOG_INFO( "Exiting thumbnailer thread" );
