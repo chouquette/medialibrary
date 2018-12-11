@@ -20,21 +20,22 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef ILABEL_H
-#define ILABEL_H
+#pragma once
 
 #include <memory>
 #include <vector>
 
-#include "IMediaLibrary.h"
+#include "IQuery.h"
 
 namespace medialibrary
 {
 
+class IMedia;
+
 class ILabel
 {
     public:
-        virtual ~ILabel() {}
+        virtual ~ILabel() = default;
 
         virtual int64_t id() const = 0;
         virtual const std::string& name() const = 0;
@@ -42,5 +43,3 @@ class ILabel
 };
 
 }
-
-#endif // ILABEL_H
