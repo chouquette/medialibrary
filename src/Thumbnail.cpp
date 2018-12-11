@@ -61,6 +61,14 @@ Thumbnail::Thumbnail( MediaLibraryPtr ml, std::string mrl,
         m_mrl = m_ml->thumbnailPath() + m_mrl;
 }
 
+Thumbnail::Thumbnail( MediaLibraryPtr ml )
+    : m_ml( ml )
+    , m_id( 0 )
+    , m_origin( Origin::Media )
+    , m_isGenerated( true )
+{
+}
+
 int64_t Thumbnail::id() const
 {
     return m_id;
@@ -68,6 +76,7 @@ int64_t Thumbnail::id() const
 
 const std::string& Thumbnail::mrl() const
 {
+    assert( isValid() == true );
     return m_mrl;
 }
 
@@ -82,6 +91,11 @@ bool Thumbnail::update( std::string mrl, Origin origin )
     m_mrl = std::move( mrl );
     m_origin = origin;
     return true;
+}
+
+bool Thumbnail::isValid() const
+{
+    return m_mrl.empty() == false;
 }
 
 Thumbnail::Origin Thumbnail::origin() const
@@ -111,7 +125,7 @@ void Thumbnail::createTable( sqlite::Connection* dbConnection )
     const std::string req = "CREATE TABLE IF NOT EXISTS " + Thumbnail::Table::Name +
             "("
                 "id_thumbnail INTEGER PRIMARY KEY AUTOINCREMENT,"
-                "mrl TEXT NOT NULL,"
+                "mrl TEXT,"
                 "origin INTEGER NOT NULL,"
                 "is_generated BOOLEAN NOT NULL"
             ")";
@@ -127,6 +141,16 @@ std::shared_ptr<Thumbnail> Thumbnail::create( MediaLibraryPtr ml, std::string mr
         mrl = utils::file::removePath( mrl, ml->thumbnailPath() );
     auto self = std::make_shared<Thumbnail>( ml, mrl, origin, isGenerated );
     if ( insert( ml, self, req, mrl, origin, isGenerated ) == false )
+        return nullptr;
+    return self;
+}
+
+std::shared_ptr<Thumbnail> Thumbnail::createForFailure( MediaLibraryPtr ml )
+{
+    static const std::string req = "INSERT INTO " + Thumbnail::Table::Name +
+            "(mrl, origin, is_generated) VALUES(?,?,?)";
+    auto self = std::make_shared<Thumbnail>( ml );
+    if ( insert( ml, self, req, nullptr, Origin::Media, true ) == false )
         return nullptr;
     return self;
 }

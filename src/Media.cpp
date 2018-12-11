@@ -319,6 +319,8 @@ const std::string& Media::thumbnail() const
             return Thumbnail::EmptyMrl;
         m_thumbnail = std::move( thumbnail );
     }
+    if ( m_thumbnail->isValid() == false )
+        return Thumbnail::EmptyMrl;
     return m_thumbnail->mrl();
 }
 
@@ -398,7 +400,15 @@ bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin ori
     std::unique_ptr<sqlite::Transaction> t;
     if ( sqlite::Transaction::transactionInProgress() == false )
         t = m_ml->getConn()->newTransaction();
-    auto thumbnail = Thumbnail::create( m_ml, thumbnailMrl, origin, isGenerated );
+    std::shared_ptr<Thumbnail> thumbnail;
+    if ( thumbnailMrl.empty() )
+    {
+        assert( origin == Thumbnail::Origin::Media );
+        assert( isGenerated == true );
+        thumbnail = Thumbnail::createForFailure( m_ml );
+    }
+    else
+        thumbnail = Thumbnail::create( m_ml, thumbnailMrl, origin, isGenerated );
     if ( thumbnail == nullptr )
         return false;
 
