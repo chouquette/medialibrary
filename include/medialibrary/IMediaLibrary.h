@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Media Library
  *****************************************************************************
- * Copyright (C) 2015 Hugo Beauzée-Luyssen, Videolabs
+ * Copyright (C) 2015-2018 Hugo Beauzée-Luyssen, Videolabs
  *
  * Authors: Hugo Beauzée-Luyssen<hugo@beauzee.fr>
  *
@@ -212,319 +212,319 @@ public:
 
 class IMediaLibrary
 {
-    public:
-        virtual ~IMediaLibrary() = default;
-        /**
-         * \brief  initialize Initializes the media library.
-         *
-         * In case the application uses a specific IDeviceLister, the device lister must be properly
-         * initialized and ready to return a list of all known devices before calling this method.
-         *
-         * \param dbPath        Path to the database file
-         * \param thumbnailPath Path to a folder that will contain the thumbnails. It will be
-         *                      created if required.
-         * \param mlCallback    A pointer to an IMediaLibraryCb that will be invoked with various
-         *                      events during the medialibrary lifetime.
-         * \return true in case of success, false otherwise
-         * If initialize returns Fail, this medialibrary must not be used
-         * anymore, and should be disposed off.
-         * If it returns Ok the first time, calling this method again is a no-op
-         * In case DbReset is returned, it is up to application to decide what
-         * to do to repopulate the database.
-         */
-        virtual InitializeResult initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* mlCallback ) = 0;
+public:
+    virtual ~IMediaLibrary() = default;
+    /**
+     * \brief  initialize Initializes the media library.
+     *
+     * In case the application uses a specific IDeviceLister, the device lister must be properly
+     * initialized and ready to return a list of all known devices before calling this method.
+     *
+     * \param dbPath        Path to the database file
+     * \param thumbnailPath Path to a folder that will contain the thumbnails. It will be
+     *                      created if required.
+     * \param mlCallback    A pointer to an IMediaLibraryCb that will be invoked with various
+     *                      events during the medialibrary lifetime.
+     * \return true in case of success, false otherwise
+     * If initialize returns Fail, this medialibrary must not be used
+     * anymore, and should be disposed off.
+     * If it returns Ok the first time, calling this method again is a no-op
+     * In case DbReset is returned, it is up to application to decide what
+     * to do to repopulate the database.
+     */
+    virtual InitializeResult initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* mlCallback ) = 0;
 
-        /**
-         * @brief start Starts the background thread and reload the medialibrary content
-         * This *MUST* be called after initialize.
-         *
-         * The user is expected to populate its device lister between a call to initialize() and a
-         * call to start().
-         * Once this method has been called, the medialibrary will know all the device known to the
-         * device lister, and it become impossible to know wether a removable storage device has been
-         * inserted for the first time or not.
-         *
-         * @return true in case of success, false otherwise.
-         * * If start returns false, this medialibrary must not be used anymore, and should be
-         * disposed off.
-         * If it returns true the first time, calling this method again is a no-op
-         */
-        virtual bool start() = 0;
-        virtual void setVerbosity( LogLevel v ) = 0;
+    /**
+     * @brief start Starts the background thread and reload the medialibrary content
+     * This *MUST* be called after initialize.
+     *
+     * The user is expected to populate its device lister between a call to initialize() and a
+     * call to start().
+     * Once this method has been called, the medialibrary will know all the device known to the
+     * device lister, and it become impossible to know wether a removable storage device has been
+     * inserted for the first time or not.
+     *
+     * @return true in case of success, false otherwise.
+     * * If start returns false, this medialibrary must not be used anymore, and should be
+     * disposed off.
+     * If it returns true the first time, calling this method again is a no-op
+     */
+    virtual bool start() = 0;
+    virtual void setVerbosity( LogLevel v ) = 0;
 
-        virtual LabelPtr createLabel( const std::string& label ) = 0;
-        virtual bool deleteLabel( LabelPtr label ) = 0;
-        virtual MediaPtr media( int64_t mediaId ) const = 0;
-        virtual MediaPtr media( const std::string& mrl ) const = 0;
-        /**
-         * @brief addExternalMedia Adds an external media to the list of known media
-         * @param mrl This media MRL
-         *
-         * Once created, this media can be used just like any other media, except
-         * it won't have a subType, and won't be analyzed to extract tracks and
-         * won't be inserted to any collection (ie. album/show/...)
-         * If the mrl is already known to the medialibrary, this function will
-         * return nullptr.
-         *
-         * The media can be fetched using media( std::string ) afterward.
-         */
-        virtual MediaPtr addExternalMedia( const std::string& mrl ) = 0;
-        /**
-         * @brief addStream Create an external media of type IMedia::Type::Stream
-         *
-         * This is equivalent to addExternalMedia, except for the resulting
-         * new media's type
-         */
-        virtual MediaPtr addStream( const std::string& mrl ) = 0;
+    virtual LabelPtr createLabel( const std::string& label ) = 0;
+    virtual bool deleteLabel( LabelPtr label ) = 0;
+    virtual MediaPtr media( int64_t mediaId ) const = 0;
+    virtual MediaPtr media( const std::string& mrl ) const = 0;
+    /**
+     * @brief addExternalMedia Adds an external media to the list of known media
+     * @param mrl This media MRL
+     *
+     * Once created, this media can be used just like any other media, except
+     * it won't have a subType, and won't be analyzed to extract tracks and
+     * won't be inserted to any collection (ie. album/show/...)
+     * If the mrl is already known to the medialibrary, this function will
+     * return nullptr.
+     *
+     * The media can be fetched using media( std::string ) afterward.
+     */
+    virtual MediaPtr addExternalMedia( const std::string& mrl ) = 0;
+    /**
+     * @brief addStream Create an external media of type IMedia::Type::Stream
+     *
+     * This is equivalent to addExternalMedia, except for the resulting
+     * new media's type
+     */
+    virtual MediaPtr addStream( const std::string& mrl ) = 0;
 
-        /**
-         * @brief removeExternalMedia Remove an external media or a stream
-         * @return false if the media was not external/stream, or in case of DB failure
-         */
-        virtual bool removeExternalMedia( MediaPtr media ) = 0;
+    /**
+     * @brief removeExternalMedia Remove an external media or a stream
+     * @return false if the media was not external/stream, or in case of DB failure
+     */
+    virtual bool removeExternalMedia( MediaPtr media ) = 0;
 
-        virtual Query<IMedia> audioFiles( const QueryParameters* params = nullptr ) const = 0;
-        virtual Query<IMedia> videoFiles( const QueryParameters* params = nullptr ) const = 0;
-        virtual AlbumPtr album( int64_t id ) const = 0;
-        virtual Query<IAlbum> albums( const QueryParameters* params = nullptr ) const = 0;
-        virtual ShowPtr show( int64_t id ) const = 0;
-        virtual MoviePtr movie( int64_t id ) const = 0;
-        virtual ArtistPtr artist( int64_t id ) const = 0;
-        virtual Query<IShow> shows( const QueryParameters* params = nullptr ) const = 0;
-        virtual Query<IShow> searchShows( const std::string& pattern,
-                                          const QueryParameters* params = nullptr ) const = 0;
-        /**
-         * @brief artists List all artists that have at least an album.
-         * Artists that only appear on albums as guests won't be listed from here, but will be
-         * returned when querying an album for all its appearing artists
-         * @param includeAll If true, all artists including those without album
-         *                   will be returned. If false, only artists which have
-         *                   an album will be returned.
-         * @param sort A sorting criteria. So far, this is ignored, and artists are sorted by lexial order
-         * @param desc If true, the provided sorting criteria will be reversed.
-         */
-        virtual Query<IArtist> artists( bool includeAll,
-                                        const QueryParameters* params = nullptr ) const = 0;
-        /**
-         * @brief genres Return the list of music genres
-         * @param sort A sorting criteria. So far, this is ignored, and artists are sorted by lexial order
-         * @param desc If true, the provided sorting criteria will be reversed.
-         */
-        virtual Query<IGenre> genres( const QueryParameters* params = nullptr ) const = 0;
-        virtual GenrePtr genre( int64_t id ) const = 0;
-        /***
-         *  Playlists
-         */
-        virtual PlaylistPtr createPlaylist( const std::string& name ) = 0;
-        virtual Query<IPlaylist> playlists( const QueryParameters* params = nullptr ) = 0;
-        virtual PlaylistPtr playlist( int64_t id ) const = 0;
-        virtual bool deletePlaylist( int64_t playlistId ) = 0;
+    virtual Query<IMedia> audioFiles( const QueryParameters* params = nullptr ) const = 0;
+    virtual Query<IMedia> videoFiles( const QueryParameters* params = nullptr ) const = 0;
+    virtual AlbumPtr album( int64_t id ) const = 0;
+    virtual Query<IAlbum> albums( const QueryParameters* params = nullptr ) const = 0;
+    virtual ShowPtr show( int64_t id ) const = 0;
+    virtual MoviePtr movie( int64_t id ) const = 0;
+    virtual ArtistPtr artist( int64_t id ) const = 0;
+    virtual Query<IShow> shows( const QueryParameters* params = nullptr ) const = 0;
+    virtual Query<IShow> searchShows( const std::string& pattern,
+                                      const QueryParameters* params = nullptr ) const = 0;
+    /**
+     * @brief artists List all artists that have at least an album.
+     * Artists that only appear on albums as guests won't be listed from here, but will be
+     * returned when querying an album for all its appearing artists
+     * @param includeAll If true, all artists including those without album
+     *                   will be returned. If false, only artists which have
+     *                   an album will be returned.
+     * @param sort A sorting criteria. So far, this is ignored, and artists are sorted by lexial order
+     * @param desc If true, the provided sorting criteria will be reversed.
+     */
+    virtual Query<IArtist> artists( bool includeAll,
+                                    const QueryParameters* params = nullptr ) const = 0;
+    /**
+     * @brief genres Return the list of music genres
+     * @param sort A sorting criteria. So far, this is ignored, and artists are sorted by lexial order
+     * @param desc If true, the provided sorting criteria will be reversed.
+     */
+    virtual Query<IGenre> genres( const QueryParameters* params = nullptr ) const = 0;
+    virtual GenrePtr genre( int64_t id ) const = 0;
+    /***
+     *  Playlists
+     */
+    virtual PlaylistPtr createPlaylist( const std::string& name ) = 0;
+    virtual Query<IPlaylist> playlists( const QueryParameters* params = nullptr ) = 0;
+    virtual PlaylistPtr playlist( int64_t id ) const = 0;
+    virtual bool deletePlaylist( int64_t playlistId ) = 0;
 
-        /**
-         * History
-         */
-        virtual Query<IMedia> history() const = 0;
-        virtual Query<IMedia> streamHistory() const = 0;
-        /**
-         * @brief clearHistory will clear both streams history & media history.
-         * @return true in case of success, false otherwise. The database will stay untouched in case
-         *              of failure.
-         *
-         * This will flush the entity cache, but will not edit any existing instance of a media entity,
-         * meaning any instance of media you're holding will outdated fields.
-         */
-        virtual bool clearHistory() = 0;
+    /**
+     * History
+     */
+    virtual Query<IMedia> history() const = 0;
+    virtual Query<IMedia> streamHistory() const = 0;
+    /**
+     * @brief clearHistory will clear both streams history & media history.
+     * @return true in case of success, false otherwise. The database will stay untouched in case
+     *              of failure.
+     *
+     * This will flush the entity cache, but will not edit any existing instance of a media entity,
+     * meaning any instance of media you're holding will outdated fields.
+     */
+    virtual bool clearHistory() = 0;
 
-        /**
-         * Search
-         */
+    /**
+     * Search
+     */
 
-        /**
-         * @brief searchMedia, searchAudio, and searchVideo search for some media, based on a pattern.
-         * @param pattern A 3 character or more pattern that will be matched against the media's title
-         *                or filename if no title was set for this media.
-         * @param params Some query parameters. Valid sorting criteria are:
-         *               - Duration
-         *               - InsertionDate
-         *               - ReleaseDate
-         *               - PlayCount
-         *               - Filename
-         *               - LastModificationDate
-         *               - FileSize
-         *              Default sorting parameter uses the media's title.
-         *              Passing nullptr will default to default ascending sort
-         *
-         * Only media that were discovered by the medialibrary will be included.
-         * For instance, media that are added explicitely, playlist items that
-         * point to remote content, will *not* be included
-         */
-        virtual Query<IMedia> searchMedia( const std::string& pattern,
-                                                   const QueryParameters* params = nullptr ) const = 0;
-        virtual Query<IMedia> searchAudio( const std::string& pattern, const QueryParameters* params = nullptr ) const = 0;
-        virtual Query<IMedia> searchVideo( const std::string& pattern, const QueryParameters* params = nullptr ) const = 0;
+    /**
+     * @brief searchMedia, searchAudio, and searchVideo search for some media, based on a pattern.
+     * @param pattern A 3 character or more pattern that will be matched against the media's title
+     *                or filename if no title was set for this media.
+     * @param params Some query parameters. Valid sorting criteria are:
+     *               - Duration
+     *               - InsertionDate
+     *               - ReleaseDate
+     *               - PlayCount
+     *               - Filename
+     *               - LastModificationDate
+     *               - FileSize
+     *              Default sorting parameter uses the media's title.
+     *              Passing nullptr will default to default ascending sort
+     *
+     * Only media that were discovered by the medialibrary will be included.
+     * For instance, media that are added explicitely, playlist items that
+     * point to remote content, will *not* be included
+     */
+    virtual Query<IMedia> searchMedia( const std::string& pattern,
+                                               const QueryParameters* params = nullptr ) const = 0;
+    virtual Query<IMedia> searchAudio( const std::string& pattern, const QueryParameters* params = nullptr ) const = 0;
+    virtual Query<IMedia> searchVideo( const std::string& pattern, const QueryParameters* params = nullptr ) const = 0;
 
-        virtual Query<IPlaylist> searchPlaylists( const std::string& name,
-                                                  const QueryParameters* params = nullptr ) const = 0;
-        virtual Query<IAlbum> searchAlbums( const std::string& pattern,
-                                            const QueryParameters* params = nullptr ) const = 0;
-        virtual Query<IGenre> searchGenre( const std::string& genre,
-                                           const QueryParameters* params = nullptr ) const = 0;
-        virtual Query<IArtist> searchArtists( const std::string& name, bool includeAll,
-                                              const QueryParameters* params = nullptr  ) const = 0;
-        virtual SearchAggregate search( const std::string& pattern,
-                                        const QueryParameters* params = nullptr ) const = 0;
-
-        /**
-         * @brief discover Launch a discovery on the provided entry point.
-         * The actuall discovery will run asynchronously, meaning this method will immediatly return.
-         * Depending on which discoverer modules where provided, this might or might not work
-         * \note This must be called after start()
-         * @param entryPoint The MRL of the entrypoint to discover.
-         */
-        virtual void discover( const std::string& entryPoint ) = 0;
-        /**
-         * @brief setDiscoverNetworkEnabled Enable discovery of network shares
-         * @return true if some IFileSystemFactory able of handling network
-         *         discovery were installed prior to calling this.
-         *
-         * This can be called at any time, but won't have any effect before
-         * initialize() has been called.
-         * When disabling network discovery, all content that was discovered on
-         * the network will be marked as non-present, meaning they won't be
-         * returned until network discovery gets enabled again.
-         * As far as the user is concerned, this is equivalent to (un)plugging
-         * a USB drive, in the sense that the medialibrary will still store
-         * information about network content and won't have to discover/parse it
-         * again.
-         */
-        virtual bool setDiscoverNetworkEnabled( bool enable ) = 0;
-        virtual Query<IFolder> entryPoints() const = 0;
-        /**
-         * @brief isIndexed Returns true if the mrl point to a file of folder in an
-         *                  indexed entrypoint
-         * @param mrl The MRL to probe
-         * @return true if the mrl is indexed, false otherwise
-         */
-        virtual bool isIndexed( const std::string& mrl ) const = 0;
-        /**
-         * @brief folders Returns a flattened list of all folders containing at least a media of a given type
-         * @param type A required type of media, or IMedia::Type::Unknown if any media type is fine.
-         * @param params A query parameters object
-         * @return A query object to be used to fetch the results
-         *
-         * This is flattened, ie.
-         * ├── a
-         * │   └── w
-         * │       └── x
-         * │           └── y
-         * │               └── z
-         * │                   └── DogMeme.avi
-         * ├── c
-         * │   └── NakedMoleRat.asf
-         *
-         * would return a query containing 'z' and 'c' as the other folders are
-         * not containing any media.
-         * In case a non flattened list is desired, the
-         * entryPoints() & IFolder::subFolders() functions should be used.
-         */
-        virtual Query<IFolder> folders( IMedia::Type type,
-                                        const QueryParameters* params = nullptr ) const = 0;
-        virtual Query<IFolder> searchFolders( const std::string& pattern,
-                                              IMedia::Type type,
+    virtual Query<IPlaylist> searchPlaylists( const std::string& name,
                                               const QueryParameters* params = nullptr ) const = 0;
-        virtual FolderPtr folder( int64_t folderId ) const = 0;
-        virtual FolderPtr folder( const std::string& mrl ) const = 0;
-        virtual void removeEntryPoint( const std::string& entryPoint ) = 0;
-        /**
-         * @brief banFolder will prevent an entry point folder from being discovered.
-         * If the folder was already discovered, it will be removed prior to the ban, and all
-         * associated media will be discarded.
-         * * @note This method is asynchronous and will run after all currently stacked
-         * discovery/ban/unban operations have completed.
-         */
-        virtual void banFolder( const std::string& path ) = 0;
-        /**
-         * @brief unbanFolder Unban an entrypoint.
-         * In case this entry point was indeed previously banned, this will issue a reload of
-         * that entry point
-         * @param entryPoint The entry point to unban
-         * @note This method is asynchronous and will run after all currently stacked
-         * discovery/ban/unban operations have completed.
-         */
-        virtual void unbanFolder( const std::string& entryPoint ) = 0;
-        virtual void setLogger( ILogger* logger ) = 0;
-        /**
-         * @brief pauseBackgroundOperations Will stop potentially CPU intensive background
-         * operations, until resumeBackgroundOperations() is called.
-         * If an operation is currently running, it will finish before pausing.
-         */
-        virtual void pauseBackgroundOperations() = 0;
-        /**
-         * @brief resumeBackgroundOperations Resumes background tasks, previously
-         * interrupted by pauseBackgroundOperations().
-         */
-        virtual void resumeBackgroundOperations() = 0;
-        virtual void reload() = 0;
-        virtual void reload( const std::string& entryPoint ) = 0;
-        /**
-         * @brief forceParserRetry Forces a re-run of all metadata parsers and resets any
-         * unterminated file retry count to 0, granting them 3 new tries at being parsed
-         */
-        virtual bool forceParserRetry() = 0;
+    virtual Query<IAlbum> searchAlbums( const std::string& pattern,
+                                        const QueryParameters* params = nullptr ) const = 0;
+    virtual Query<IGenre> searchGenre( const std::string& genre,
+                                       const QueryParameters* params = nullptr ) const = 0;
+    virtual Query<IArtist> searchArtists( const std::string& name, bool includeAll,
+                                          const QueryParameters* params = nullptr  ) const = 0;
+    virtual SearchAggregate search( const std::string& pattern,
+                                    const QueryParameters* params = nullptr ) const = 0;
 
-        /**
-         * @brief setDeviceLister Sets a device lister.
-         * This is meant for OSes with complicated/impossible to achieve device listing (due to
-         * missing APIs, permissions problems...)
-         * @param lister A device lister
-         * @return In case of successfull registration, this will return a IDeviceListerCb, which
-         * can be used to signal changes related to the devices available. This callback is owned by
-         * the medialibrary, and must *NOT* be released by the application.
-         * In case of failure, nullptr will be returned.
-         *
-         * This must be called *before* initialize()
-         */
-        virtual IDeviceListerCb* setDeviceLister( DeviceListerPtr lister ) = 0;
+    /**
+     * @brief discover Launch a discovery on the provided entry point.
+     * The actuall discovery will run asynchronously, meaning this method will immediatly return.
+     * Depending on which discoverer modules where provided, this might or might not work
+     * \note This must be called after start()
+     * @param entryPoint The MRL of the entrypoint to discover.
+     */
+    virtual void discover( const std::string& entryPoint ) = 0;
+    /**
+     * @brief setDiscoverNetworkEnabled Enable discovery of network shares
+     * @return true if some IFileSystemFactory able of handling network
+     *         discovery were installed prior to calling this.
+     *
+     * This can be called at any time, but won't have any effect before
+     * initialize() has been called.
+     * When disabling network discovery, all content that was discovered on
+     * the network will be marked as non-present, meaning they won't be
+     * returned until network discovery gets enabled again.
+     * As far as the user is concerned, this is equivalent to (un)plugging
+     * a USB drive, in the sense that the medialibrary will still store
+     * information about network content and won't have to discover/parse it
+     * again.
+     */
+    virtual bool setDiscoverNetworkEnabled( bool enable ) = 0;
+    virtual Query<IFolder> entryPoints() const = 0;
+    /**
+     * @brief isIndexed Returns true if the mrl point to a file of folder in an
+     *                  indexed entrypoint
+     * @param mrl The MRL to probe
+     * @return true if the mrl is indexed, false otherwise
+     */
+    virtual bool isIndexed( const std::string& mrl ) const = 0;
+    /**
+     * @brief folders Returns a flattened list of all folders containing at least a media of a given type
+     * @param type A required type of media, or IMedia::Type::Unknown if any media type is fine.
+     * @param params A query parameters object
+     * @return A query object to be used to fetch the results
+     *
+     * This is flattened, ie.
+     * ├── a
+     * │   └── w
+     * │       └── x
+     * │           └── y
+     * │               └── z
+     * │                   └── DogMeme.avi
+     * ├── c
+     * │   └── NakedMoleRat.asf
+     *
+     * would return a query containing 'z' and 'c' as the other folders are
+     * not containing any media.
+     * In case a non flattened list is desired, the
+     * entryPoints() & IFolder::subFolders() functions should be used.
+     */
+    virtual Query<IFolder> folders( IMedia::Type type,
+                                    const QueryParameters* params = nullptr ) const = 0;
+    virtual Query<IFolder> searchFolders( const std::string& pattern,
+                                          IMedia::Type type,
+                                          const QueryParameters* params = nullptr ) const = 0;
+    virtual FolderPtr folder( int64_t folderId ) const = 0;
+    virtual FolderPtr folder( const std::string& mrl ) const = 0;
+    virtual void removeEntryPoint( const std::string& entryPoint ) = 0;
+    /**
+     * @brief banFolder will prevent an entry point folder from being discovered.
+     * If the folder was already discovered, it will be removed prior to the ban, and all
+     * associated media will be discarded.
+     * * @note This method is asynchronous and will run after all currently stacked
+     * discovery/ban/unban operations have completed.
+     */
+    virtual void banFolder( const std::string& path ) = 0;
+    /**
+     * @brief unbanFolder Unban an entrypoint.
+     * In case this entry point was indeed previously banned, this will issue a reload of
+     * that entry point
+     * @param entryPoint The entry point to unban
+     * @note This method is asynchronous and will run after all currently stacked
+     * discovery/ban/unban operations have completed.
+     */
+    virtual void unbanFolder( const std::string& entryPoint ) = 0;
+    virtual void setLogger( ILogger* logger ) = 0;
+    /**
+     * @brief pauseBackgroundOperations Will stop potentially CPU intensive background
+     * operations, until resumeBackgroundOperations() is called.
+     * If an operation is currently running, it will finish before pausing.
+     */
+    virtual void pauseBackgroundOperations() = 0;
+    /**
+     * @brief resumeBackgroundOperations Resumes background tasks, previously
+     * interrupted by pauseBackgroundOperations().
+     */
+    virtual void resumeBackgroundOperations() = 0;
+    virtual void reload() = 0;
+    virtual void reload( const std::string& entryPoint ) = 0;
+    /**
+     * @brief forceParserRetry Forces a re-run of all metadata parsers and resets any
+     * unterminated file retry count to 0, granting them 3 new tries at being parsed
+     */
+    virtual bool forceParserRetry() = 0;
 
-        /**
-         * @brief forceRescan Deletes all entities except Media and Playlist, and
-         *                    forces all media to be rescanned.
-         *
-         * This can be called anytime after the medialibrary has been initialized. * It will make all held instances outdated. Those should be considered
-         * as invalid the moment this method returns.
-         */
-        virtual void forceRescan() = 0;
+    /**
+     * @brief setDeviceLister Sets a device lister.
+     * This is meant for OSes with complicated/impossible to achieve device listing (due to
+     * missing APIs, permissions problems...)
+     * @param lister A device lister
+     * @return In case of successfull registration, this will return a IDeviceListerCb, which
+     * can be used to signal changes related to the devices available. This callback is owned by
+     * the medialibrary, and must *NOT* be released by the application.
+     * In case of failure, nullptr will be returned.
+     *
+     * This must be called *before* initialize()
+     */
+    virtual IDeviceListerCb* setDeviceLister( DeviceListerPtr lister ) = 0;
 
-        /**
-         * @brief enableFailedThumbnailRegeneration Allow failed thumbnail attempt to be retried
-         *
-         * This will not attempt to regenerate the thumbnail immediatly, requestThumbnail
-         * still has to be called afterward.
-         */
-        virtual void enableFailedThumbnailRegeneration() = 0;
+    /**
+     * @brief forceRescan Deletes all entities except Media and Playlist, and
+     *                    forces all media to be rescanned.
+     *
+     * This can be called anytime after the medialibrary has been initialized. * It will make all held instances outdated. Those should be considered
+     * as invalid the moment this method returns.
+     */
+    virtual void forceRescan() = 0;
 
-        /**
-         * \brief requestThumbnail Queues a thumbnail generation request for
-         * this media, to be run asynchronously.
-         * Upon completion (successful or not) IMediaLibraryCb::onMediaThumbnailReady
-         * will be called.
-         * In case a thumbnail was already generated for the media, false will be returned.
-         * If so, no callback will be invoked
-         */
-        virtual bool requestThumbnail( MediaPtr media ) = 0;
+    /**
+     * @brief enableFailedThumbnailRegeneration Allow failed thumbnail attempt to be retried
+     *
+     * This will not attempt to regenerate the thumbnail immediatly, requestThumbnail
+     * still has to be called afterward.
+     */
+    virtual void enableFailedThumbnailRegeneration() = 0;
 
-        virtual void addParserService( std::shared_ptr<parser::IParserService> service ) = 0;
+    /**
+     * \brief requestThumbnail Queues a thumbnail generation request for
+     * this media, to be run asynchronously.
+     * Upon completion (successful or not) IMediaLibraryCb::onMediaThumbnailReady
+     * will be called.
+     * In case a thumbnail was already generated for the media, false will be returned.
+     * If so, no callback will be invoked
+     */
+    virtual bool requestThumbnail( MediaPtr media ) = 0;
 
-        virtual void addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer ) = 0;
+    virtual void addParserService( std::shared_ptr<parser::IParserService> service ) = 0;
 
-        /**
-         * @brief addNetworkFileSystemFactory Provides a network filesystem factory implementation
-         *
-         * This must be called between initialize() and start().
-         * A network file system factory must be inserted before enabling network
-         * file systems discovery.
-         */
-        virtual void addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory ) = 0;
+    virtual void addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer ) = 0;
+
+    /**
+     * @brief addNetworkFileSystemFactory Provides a network filesystem factory implementation
+     *
+     * This must be called between initialize() and start().
+     * A network file system factory must be inserted before enabling network
+     * file systems discovery.
+     */
+    virtual void addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory ) = 0;
 };
 
 }
