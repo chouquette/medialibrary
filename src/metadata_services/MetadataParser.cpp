@@ -281,7 +281,7 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
     }
     catch ( std::system_error& ex )
     {
-        LOG_ERROR( ex.what() );
+        LOG_ERROR( "Failed to check if ", mrl, " was a directory: ", ex.what() );
         return;
     }
     LOG_INFO( "Importing ", isDirectory ? "folder " : "file ", mrl, " in the playlist ", playlistMrl );
