@@ -180,6 +180,8 @@ public:
 
     virtual void forceRescan() override;
 
+    virtual void enableFailedThumbnailRegeneration() override;
+
     virtual bool requestThumbnail( MediaPtr media ) override;
 
     virtual void addParserService( std::shared_ptr<parser::IParserService> service ) override;

@@ -1496,6 +1496,11 @@ void MediaLibrary::forceRescan()
     }
 }
 
+void MediaLibrary::enableFailedThumbnailRegeneration()
+{
+    Thumbnail::deleteFailureRecords( this );
+}
+
 bool MediaLibrary::requestThumbnail( MediaPtr media )
 {
     if ( m_thumbnailer == nullptr )

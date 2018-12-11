@@ -496,6 +496,14 @@ class IMediaLibrary
         virtual void forceRescan() = 0;
 
         /**
+         * @brief enableFailedThumbnailRegeneration Allow failed thumbnail attempt to be retried
+         *
+         * This will not attempt to regenerate the thumbnail immediatly, requestThumbnail
+         * still has to be called afterward.
+         */
+        virtual void enableFailedThumbnailRegeneration() = 0;
+
+        /**
          * \brief requestThumbnail Queues a thumbnail generation request for
          * this media, to be run asynchronously.
          * Upon completion (successful or not) IMediaLibraryCb::onMediaThumbnailReady
