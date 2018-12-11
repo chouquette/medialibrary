@@ -1500,6 +1500,8 @@ bool MediaLibrary::requestThumbnail( MediaPtr media )
 {
     if ( m_thumbnailer == nullptr )
         return false;
+    if ( media->isThumbnailGenerated() == true )
+        return false;
     m_thumbnailer->requestThumbnail( media );
     return true;
 }

@@ -500,6 +500,8 @@ class IMediaLibrary
          * this media, to be run asynchronously.
          * Upon completion (successful or not) IMediaLibraryCb::onMediaThumbnailReady
          * will be called.
+         * In case a thumbnail was already generated for the media, false will be returned.
+         * If so, no callback will be invoked
          */
         virtual bool requestThumbnail( MediaPtr media ) = 0;
 
