@@ -56,7 +56,7 @@ namespace factory
 {
 
 FileSystemFactory::FileSystemFactory( DeviceListerPtr lister )
-    : m_deviceLister( lister )
+    : m_deviceLister( std::move( lister ) )
 {
 }
 
