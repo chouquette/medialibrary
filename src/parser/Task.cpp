@@ -36,6 +36,7 @@
 #include "Media.h"
 #include "parser/Task.h"
 #include "utils/Filename.h"
+#include "utils/Strings.h"
 #include "utils/Url.h"
 
 #include <algorithm>
@@ -216,6 +217,7 @@ std::string Task::Item::meta( Task::Item::Metadata type ) const
 
 void Task::Item::setMeta( Task::Item::Metadata type, std::string value )
 {
+    utils::str::trim( value );
     m_metadata[type] = std::move( value );
 }
 
