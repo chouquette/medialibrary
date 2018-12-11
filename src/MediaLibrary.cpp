@@ -1106,9 +1106,46 @@ void MediaLibrary::migrateModel12to13()
 }
 
 /*
- * - Remove the Media.thumbnail
- * - Add Media.thumbnail_id
- * - Add Media.thumbnail_generated
+ * Movel v13 to v14 migration:
+ * - Media:
+ *      - Remove
+ *          .thumbnail
+ *          .
+ *      - Add
+ *          .nb_playlists
+ *          .real_last_played_date
+ *          .device_id
+ *          .folder_id
+ *      - Fix filename being url encoded
+ *      - Fix playlist external media type being Unknown
+ *  - Playlist:
+ *      - Add .file_id
+ *  - PlaylistMediaRelation:
+ *      - Add .mrl
+ *  - Add a playlist FTS table
+ *  - Add Thumbnail table
+ *  - Task:
+ *      - Add .is_refresh
+ *  - Device:
+ *      - Add last_seen
+ *  - Folder:
+ *      - Add:
+ *          .nb_audio
+ *          .nb_video
+ *      - Remove .is_present
+ *      - Rename is_blacklisted to is_banned
+ *  - File:
+ *      - Add .is_network
+ *      - Remove .is_present
+ *  - Add SubtitleTrack table
+ *  - Removed History table
+ *  - Removed on_track_genre_changed trigger
+ *  - Removed is_folder_present trigger
+ *  - Removed has_files_present trigger
+ *  - Removed is_device_present trigger
+ *  - Update is_album_present trigger
+ *  - Update add_album_track trigger
+ *  - Update delete_album_track trigger
  */
 void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
 {
