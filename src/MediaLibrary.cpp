@@ -499,9 +499,7 @@ void MediaLibrary::onUpdatedFile( std::shared_ptr<File> file,
 bool MediaLibrary::deleteFolder( const Folder& folder )
 {
     LOG_INFO( "deleting folder ", folder.mrl() );
-    if ( Folder::destroy( this, folder.id() ) == false )
-        return false;
-    return true;
+    return Folder::destroy( this, folder.id() );
 }
 
 LabelPtr MediaLibrary::createLabel( const std::string& label )
@@ -740,7 +738,7 @@ bool MediaLibrary::startParser()
 {
     m_parser.reset( new parser::Parser( this ) );
 
-    if ( m_services.size() == 0 )
+    if ( m_services.empty() == true )
     {
 #ifdef HAVE_LIBVLC
         m_parser->addService( std::make_shared<parser::VLCMetadataService>() );
@@ -960,9 +958,7 @@ bool MediaLibrary::recreateDatabase( const std::string& dbPath )
     m_dbConnection = sqlite::Connection::connect( dbPath );
     createAllTables();
     // We dropped the database, there is no setting to be read anymore
-    if( m_settings.load() == false )
-        return false;
-    return true;
+    return m_settings.load();
 }
 
 void MediaLibrary::migrateModel3to5()
@@ -1516,14 +1512,14 @@ void MediaLibrary::addParserService( std::shared_ptr<parser::IParserService> ser
     // For now we only support 1 external service of type MetadataExtraction
     if ( service->targetedStep() != parser::Step::MetadataExtraction )
         return;
-    if ( m_services.size() != 0 )
+    if ( m_services.empty() == false )
         return;
     m_services.emplace_back( std::move( service ) );
 }
 
 void MediaLibrary::addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer )
 {
-    if ( m_thumbnailers.size() != 0 )
+    if ( m_thumbnailers.empty() == false )
     {
         // We only support a single thumbnailer for videos for now.
         LOG_WARN( "Discarding thumbnailer since one has already been provided" );
