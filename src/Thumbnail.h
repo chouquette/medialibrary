@@ -91,6 +91,13 @@ public:
      */
     static std::shared_ptr<Thumbnail> createForFailure( MediaLibraryPtr ml );
 
+    /**
+     * @brief deleteFailureRecords Allow the thumbnail to retry any previously failed attempt
+     *
+     * This will delete all failure records
+     */
+    static bool deleteFailureRecords( MediaLibraryPtr ml );
+
     static const std::string EmptyMrl;
 
 private:

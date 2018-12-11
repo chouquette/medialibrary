@@ -155,5 +155,12 @@ std::shared_ptr<Thumbnail> Thumbnail::createForFailure( MediaLibraryPtr ml )
     return self;
 }
 
+bool Thumbnail::deleteFailureRecords(MediaLibraryPtr ml)
+{
+    static const std::string req = "DELETE FROM " + Table::Name +
+                                   " WHERE mrl IS NULL";
+    return sqlite::Tools::executeDelete( ml->getConn(), req );
+}
+
 
 }
