@@ -102,6 +102,7 @@ libmedialibrary_la_SOURCES = \
 	src/utils/Directory.cpp \
 	src/utils/Filename.cpp \
 	src/utils/ModificationsNotifier.cpp \
+	src/utils/Strings.cpp \
 	src/utils/Url.cpp \
 	$(NULL)
 
@@ -161,6 +162,7 @@ noinst_HEADERS = \
 	src/utils/Directory.h \
 	src/utils/Filename.h \
 	src/utils/ModificationsNotifier.h \
+	src/utils/Strings.h \
 	src/utils/SWMRLock.h \
 	src/utils/Url.h \
 	src/VideoTrack.h \

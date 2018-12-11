@@ -29,6 +29,7 @@
 #include "Tests.h"
 #include "database/SqliteTools.h"
 #include "database/SqliteConnection.h"
+#include "utils/Strings.h"
 
 #include "Artist.h"
 #include "Media.h"
@@ -46,6 +47,15 @@ TEST_F( Misc, FileExtensions )
     {
         ASSERT_LT( strcmp( supportedExtensions[i], supportedExtensions[i + 1] ), 0 );
     }
+}
+
+TEST_F( Misc, TrimString )
+{
+    ASSERT_EQ( utils::str::trim( "hello world" ), "hello world" );
+    ASSERT_EQ( utils::str::trim( "  spaaaaaace   " ), "spaaaaaace" );
+    ASSERT_EQ( utils::str::trim( "\tfluffy\notters  \t\n" ), "fluffy\notters" );
+    ASSERT_EQ( utils::str::trim( "    " ), "" );
+    ASSERT_EQ( utils::str::trim( "" ), "" );
 }
 
 class DbModel : public testing::Test
