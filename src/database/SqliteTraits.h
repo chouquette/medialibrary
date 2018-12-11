@@ -81,7 +81,7 @@ struct Traits<T, typename std::enable_if<IsSameDecay<T, std::string>::value ||
 
     static std::string Load( sqlite3_stmt* stmt, int pos )
     {
-        auto tmp = (const char*)sqlite3_column_text( stmt, pos );
+        auto tmp = reinterpret_cast<const char*>( sqlite3_column_text( stmt, pos ) );
         if ( tmp != nullptr )
             return std::string( tmp );
         return std::string();
