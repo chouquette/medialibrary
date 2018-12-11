@@ -266,7 +266,10 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
         // Assuming that external mrl present in playlist file is a main media resource
         auto externalFile = externalMedia->addExternalMrl( mrl, IFile::Type::Main );
         if ( externalFile == nullptr )
+        {
             LOG_ERROR( "Failed to create external file for ", mrl, " in the playlist ", playlistMrl );
+            return;
+        }
         playlistPtr->add( *externalMedia, subitem.parentPlaylistIndex() );
         t2->commit();
         return;
