@@ -370,7 +370,6 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
         t->commit();
         return true;
     });
-    return true;
 }
 
 std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) const
