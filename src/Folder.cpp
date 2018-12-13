@@ -75,7 +75,7 @@ Folder::Folder(MediaLibraryPtr ml, const std::string& path,
 void Folder::createTable( sqlite::Connection* connection)
 {
     const std::string reqs[] = {
-        #include "database/tables/Folder_v14.sql"
+        #include "database/tables/Folder_v15.sql"
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( connection, req );
@@ -84,7 +84,7 @@ void Folder::createTable( sqlite::Connection* connection)
 void Folder::createTriggers( sqlite::Connection* connection, uint32_t modelVersion )
 {
     const std::string reqs[] = {
-        #include "database/tables/Folder_triggers_v14.sql"
+        #include "database/tables/Folder_triggers_v15.sql"
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( connection, req );
