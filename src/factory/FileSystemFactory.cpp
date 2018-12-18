@@ -78,9 +78,8 @@ std::shared_ptr<fs::IDevice> FileSystemFactory::createDeviceFromMrl( const std::
     std::string canonicalMrl;
     try
     {
-        canonicalMrl = utils::fs::toAbsolute(
-                    utils::url::decode( utils::file::stripScheme( mrl ) ) );
-        canonicalMrl = scheme() + canonicalMrl;
+        auto canonicalPath = utils::fs::toAbsolute( utils::file::toLocalPath( mrl ) );
+        canonicalMrl = utils::file::toMrl( canonicalPath );
     }
     catch ( const std::system_error& ex )
     {
