@@ -196,7 +196,7 @@ std::string toLocalPath( const std::string& mrl )
     // Note that the initial '/' (after the 2 forward slashes from the scheme)
     // is not a backslash, as it is not a path separator, so do not use
     // DIR_SEPARATOR_CHAR here.
-    if ( path[0] == '/' )
+    if ( path[0] == '/' && isalpha( path[1] ) )
         path.erase( 0, 1 );
     return utils::url::decode( path );
 }
