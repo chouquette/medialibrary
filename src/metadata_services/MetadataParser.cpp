@@ -517,11 +517,11 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshFile( IItem& item ) const
             {
                 LOG_WARN( "Failed to find playlist associated to modified playlist file ",
                           item.mrl() );
-                return { false, false };
+                return std::make_tuple( false, false );
             }
             LOG_INFO( "Reloading playlist ", playlist->name(), " on ", item.mrl() );
             Playlist::destroy( m_ml, playlist->id() );
-            return { true, true };
+            return std::make_tuple( true, true );
         }
         case IFile::Type::Part:
         case IFile::Type::Soundtrack:
@@ -533,7 +533,7 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshFile( IItem& item ) const
     LOG_WARN( "Refreshing of file type ",
               static_cast<std::underlying_type<IFile::Type>::type>( file->type() ),
               " is unsupported" );
-    return { false, false };
+    return std::make_tuple( false, false );
 }
 
 std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
