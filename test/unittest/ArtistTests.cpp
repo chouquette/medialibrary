@@ -364,27 +364,37 @@ TEST_F( Artists, SortMediaByAlbum )
         for ( auto iAlbum = 0; iAlbum < 2; ++iAlbum )
         {
             auto f = std::static_pointer_cast<Media>( ml->addMedia( "alb" +
-                            std::to_string( iAlbum ) + "_song" + std::to_string(iTrack) + ".mp3" ) );
+                            std::to_string( 9 - iAlbum ) + "_song" +
+                            std::to_string( 10 - iTrack) + ".mp3" ) );
             artist->addMedia( *f );
             albums[iAlbum]->addTrack( f, iTrack, 0, artist->id(), nullptr );
+            f->save();
         }
     }
 
     QueryParameters params { SortingCriteria::Album, false };
     auto tracks = artist->tracks( &params )->all();
     ASSERT_EQ( 4u, tracks.size() );
-    ASSERT_EQ( "alb0_song1.mp3", tracks[0]->title() );
-    ASSERT_EQ( "alb0_song2.mp3", tracks[1]->title() );
-    ASSERT_EQ( "alb1_song1.mp3", tracks[2]->title() );
-    ASSERT_EQ( "alb1_song2.mp3", tracks[3]->title() );
+    ASSERT_EQ( "alb9_song9.mp3", tracks[0]->title() );
+    ASSERT_EQ( 1u, tracks[0]->albumTrack()->trackNumber() );
+    ASSERT_EQ( "alb9_song8.mp3", tracks[1]->title() );
+    ASSERT_EQ( 2u, tracks[1]->albumTrack()->trackNumber() );
+    ASSERT_EQ( "alb8_song9.mp3", tracks[2]->title() );
+    ASSERT_EQ( 1u, tracks[2]->albumTrack()->trackNumber() );
+    ASSERT_EQ( "alb8_song8.mp3", tracks[3]->title() );
+    ASSERT_EQ( 2u, tracks[3]->albumTrack()->trackNumber() );
 
     params.desc = true;
     tracks = artist->tracks( &params )->all();
     ASSERT_EQ( 4u, tracks.size() );
-    ASSERT_EQ( "alb1_song1.mp3", tracks[0]->title() );
-    ASSERT_EQ( "alb1_song2.mp3", tracks[1]->title() );
-    ASSERT_EQ( "alb0_song1.mp3", tracks[2]->title() );
-    ASSERT_EQ( "alb0_song2.mp3", tracks[3]->title() );
+    ASSERT_EQ( "alb8_song9.mp3", tracks[0]->title() );
+    ASSERT_EQ( 1u, tracks[0]->albumTrack()->trackNumber() );
+    ASSERT_EQ( "alb8_song8.mp3", tracks[1]->title() );
+    ASSERT_EQ( 2u, tracks[1]->albumTrack()->trackNumber() );
+    ASSERT_EQ( "alb9_song9.mp3", tracks[2]->title() );
+    ASSERT_EQ( 1u, tracks[2]->albumTrack()->trackNumber() );
+    ASSERT_EQ( "alb9_song8.mp3", tracks[3]->title() );
+    ASSERT_EQ( 2u, tracks[3]->albumTrack()->trackNumber() );
 }
 
 TEST_F( Artists, SortAlbum )
