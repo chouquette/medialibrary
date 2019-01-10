@@ -1108,7 +1108,7 @@ void MediaLibrary::migrateModel12to13()
 }
 
 /*
- * Movel v13 to v14 migration:
+ * Model v13 to v14 migration:
  * - Media:
  *      - Remove
  *          .thumbnail
