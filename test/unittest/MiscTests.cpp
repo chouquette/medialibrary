@@ -233,3 +233,11 @@ TEST_F( DbModel, Upgrade13to14 )
 
     CheckNbTriggers( 35 );
 }
+
+TEST_F( DbModel, Upgrade14to15 )
+{
+    LoadFakeDB( SRC_DIR "/test/unittest/db_v14.sql" );
+    auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
+    ASSERT_EQ( InitializeResult::Success, res );
+    CheckNbTriggers( 35 );
+}

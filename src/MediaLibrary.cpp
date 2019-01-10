@@ -908,6 +908,11 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 migrateModel13to14( originalPreviousVersion );
                 previousVersion = 14;
             }
+            if ( previousVersion == 14 )
+            {
+                migrateModel14to15();
+                previousVersion = 15;
+            }
             // To be continued in the future!
 
             if ( needRescan == true )
@@ -1234,6 +1239,26 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
         f->setName( utils::file::directoryName( f->rawMrl() ) );
     }
 
+    t->commit();
+}
+
+/**
+ * Model 14 to 15 migration:
+ * - Folder.name is now case insensitive
+ * - New chapters table
+ */
+void MediaLibrary::migrateModel14to15()
+{
+    auto dbConn = getConn();
+    sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
+    auto t = dbConn->newTransaction();
+    std::string reqs[] = {
+#               include "database/migrations/migration14-15.sql"
+    };
+
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConn, req );
+    Folder::createTriggers( dbConn, 15 );
     t->commit();
 }
 
