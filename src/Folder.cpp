@@ -351,33 +351,37 @@ std::string Folder::filterByMediaType( IMedia::Type type )
     switch ( type )
     {
         case IMedia::Type::Audio:
-            return " nb_audio > 0";
+            return " f.nb_audio > 0";
         case IMedia::Type::Video:
-            return " nb_video > 0";
+            return " f.nb_video > 0";
         default:
             assert( !"Only Audio/Video/Unknown types are supported when listing folders" );
             /* Fall-through */
         case IMedia::Type::Unknown:
-            return " (nb_audio > 0 OR nb_video > 0)";
+            return " (f.nb_audio > 0 OR f.nb_video > 0)";
     }
 }
 
 Query<IFolder> Folder::withMedia( MediaLibraryPtr ml, IMedia::Type type,
                                   const QueryParameters* params )
 {
-    std::string req = "FROM " + Table::Name +
-                      " WHERE " + filterByMediaType( type );
+    std::string req = "FROM " + Table::Name + " f "
+                      " LEFT JOIN " + Device::Table::Name +
+                            " d ON d.id_device = f.device_id "
+                      " WHERE " + filterByMediaType( type ) +
+                            " AND d.is_present != 0";
     return make_query<Folder, IFolder>( ml, "*", req, sortRequest( params ) );
 }
 
 Query<IFolder> Folder::searchWithMedia( MediaLibraryPtr ml, const std::string& pattern,
                                         IMedia::Type type, const QueryParameters* params )
 {
-    std::string req = "FROM " + Table::Name + " f WHERE f.id_folder IN "
-            "(SELECT rowid FROM " + Table::Name + "Fts WHERE " +
-            Table::Name + "Fts MATCH '*' || ? || '*') "
-            "AND";
-    req += filterByMediaType( type );
+    std::string req = "FROM " + Table::Name + " f "
+            " LEFT JOIN " + Device::Table::Name +
+                " d ON d.id_device = f.device_id "
+            "WHERE f.id_folder IN (SELECT rowid FROM " + Table::Name + "Fts WHERE " +
+                Table::Name + "Fts MATCH '*' || ? || '*') "
+            "AND d.is_present != 0 AND " + filterByMediaType( type );
     return make_query<Folder, IFolder>( ml, "*", req, sortRequest( params ), pattern );
 }
 
