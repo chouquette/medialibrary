@@ -135,7 +135,7 @@ void Directory::read() const
         if ( file[0] == '.' && strcasecmp( file.get(), ".nomedia" ) )
             continue;
         if ( ( dirInfo->FileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
-            m_dirs.emplace_back( m_fsFactory.createDirectory( m_mrl + utils::url::encode( file.get() ) ) );
+            m_dirs.emplace_back( m_fsFactory.createDirectory( m_path + utils::url::encode( file.get() ) ) );
         else
             m_files.emplace_back( std::make_shared<File>( m_path + file.get()) );
     }
