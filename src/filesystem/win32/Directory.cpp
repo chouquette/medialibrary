@@ -77,11 +77,19 @@ void Directory::read() const
         if ( file[0] == '.' && strcasecmp( file.get(), ".nomedia" ) )
             continue;
         auto fullpath = m_path + file.get();
-        if ( ( f.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
-            m_dirs.emplace_back( m_fsFactory.createDirectory(
-                                     m_mrl + utils::url::encode( file.get() ) ) );
-        else
-            m_files.emplace_back( std::make_shared<File>( fullpath ) );
+        try
+        {
+            if ( ( f.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
+                m_dirs.emplace_back( m_fsFactory.createDirectory(
+                                         m_mrl + utils::url::encode( file.get() ) ) );
+            else
+                m_files.emplace_back( std::make_shared<File>( fullpath ) );
+        }
+        catch ( const std::system_error& ex )
+        {
+            LOG_WARN( "Failed to access a listed file/dir: ", ex.what() ,
+                      ". Ignoring this entry." );
+        }
     } while ( FindNextFile( h, &f ) != 0 );
     FindClose( h );
 #else
@@ -134,10 +142,18 @@ void Directory::read() const
         auto file = charset::FromWide( dirInfo->FileName );
         if ( file[0] == '.' && strcasecmp( file.get(), ".nomedia" ) )
             continue;
-        if ( ( dirInfo->FileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
-            m_dirs.emplace_back( m_fsFactory.createDirectory( m_path + utils::url::encode( file.get() ) ) );
-        else
-            m_files.emplace_back( std::make_shared<File>( m_path + file.get()) );
+        try
+        {
+            if ( ( dirInfo->FileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
+                m_dirs.emplace_back( m_fsFactory.createDirectory( m_path + utils::url::encode( file.get() ) ) );
+            else
+                m_files.emplace_back( std::make_shared<File>( m_path + file.get()) );
+        }
+        catch ( const std::system_error& ex )
+        {
+            LOG_WARN( "Failed to access a listed file/dir: ", ex.what() ,
+                      ". Ignoring this entry." );
+        }
     }
 #endif
 }
