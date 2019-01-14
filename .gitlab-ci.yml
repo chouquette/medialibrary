@@ -6,8 +6,8 @@ stages:
 variables:
   GIT_SUBMODULE_STRATEGY: normal
 
-build-linux:
-    image: registry.videolan.org:5000/medialibrary:20181112164001
+build:linux:
+    image: registry.videolan.org:5000/medialibrary:20190121111050
     tags:
       - debian
       - amd64
@@ -23,26 +23,30 @@ build-linux:
           - samples
           - .libs/
 
-unit-tests-linux:
-    image: registry.videolan.org:5000/medialibrary:20181112164001
+unit-tests:linux:
+    image: registry.videolan.org:5000/medialibrary:20190121111050
     tags:
       - debian
       - amd64
     stage: unit-tests
+    dependencies:
+        - build:linux
     script:
         - ./unittest
 
-functional-tests-linux:
-    image: registry.videolan.org:5000/medialibrary:20181112164001
+functional-tests:linux:
+    image: registry.videolan.org:5000/medialibrary:20190121111050
     tags:
       - debian
       - amd64
     stage: functional-tests
+    dependencies:
+        - build:linux
     script:
         - ./samples -v
 
-build-win32:
-    image: registry.videolan.org:5000/medialibrary-win32:20181113011518
+build:win32:
+    image: registry.videolan.org:5000/medialibrary-win32:20190121122230
     tags:
       - win32
     stage: build
@@ -58,8 +62,36 @@ build-win32:
           - samples.exe
           - .libs/
 
-build-win64:
-    image: registry.videolan.org:5000/medialibrary-win64:20181113014943
+unit-tests:win32:
+    image: registry.videolan.org:5000/medialibrary-win32:20190121122230
+    tags:
+      - win32
+    stage: unit-tests
+    dependencies:
+        - build:win32
+    script:
+        - cp /prefix/dll/libvlc.dll .
+        - cp /prefix/dll/libvlccore.dll .
+        - ln -s /prefix/lib/vlc/plugins/ .
+        - file libvlc.dll
+        - file unittest.exe
+        - wine unittest.exe
+
+functional-tests:win32:
+    image: registry.videolan.org:5000/medialibrary-win32:20190121122230
+    tags:
+      - win32
+    stage: functional-tests
+    dependencies:
+        - build:win32
+    script:
+        - cp /prefix/dll/libvlc.dll .
+        - cp /prefix/dll/libvlccore.dll .
+        - ln -s /prefix/lib/vlc/plugins/ .
+        - wine samples.exe -v
+
+build:win64:
+    image: registry.videolan.org:5000/medialibrary-win64:20190121124804
     tags:
       - win64
     stage: build
@@ -75,3 +107,28 @@ build-win64:
           - samples.exe
           - .libs/
 
+unit-tests:win64:
+    image: registry.videolan.org:5000/medialibrary-win64:20190121124804
+    tags:
+      - win64
+    stage: unit-tests
+    dependencies:
+        - build:win64
+    script:
+        - cp /prefix/dll/libvlc.dll .
+        - cp /prefix/dll/libvlccore.dll .
+        - ln -s /prefix/lib/vlc/plugins/ .
+        - wine unittest.exe
+
+functional-tests:win64:
+    image: registry.videolan.org:5000/medialibrary-win64:20190121124804
+    tags:
+      - win64
+    stage: functional-tests
+    dependencies:
+        - build:win64
+    script:
+        - cp /prefix/dll/libvlc.dll .
+        - cp /prefix/dll/libvlccore.dll .
+        - ln -s /prefix/lib/vlc/plugins/ .
+        - wine samples.exe -v
