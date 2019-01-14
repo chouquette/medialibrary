@@ -25,6 +25,8 @@
 #endif
 
 #include "Tester.h"
+#include "utils/Filename.h"
+#include "utils/Directory.h"
 
 static std::string TestDirectory = SRC_DIR "/test/samples/";
 static std::string ForcedTestDirectory;
@@ -73,11 +75,10 @@ TEST_P( Tests, Parse )
     {
         // Quick and dirty check to ensure we're discovering something that exists
         auto samplesDir = testDir + "samples/" + input[i].GetString();
-        struct stat s;
-        auto res = stat( samplesDir.c_str(), &s );
-        ASSERT_EQ( 0, res );
+        ASSERT_TRUE( utils::fs::isDirectory( samplesDir ) );
+        samplesDir = utils::fs::toAbsolute( samplesDir );
 
-        m_ml->discover( "file://" + samplesDir );
+        m_ml->discover( utils::file::toMrl( samplesDir ) );
     }
     ASSERT_TRUE( m_cb->waitForParsingComplete() );
 
@@ -103,11 +104,10 @@ TEST_P( ResumeTests, Parse )
     {
         // Quick and dirty check to ensure we're discovering something that exists
         auto samplesDir = testDir + "samples/" + input[i].GetString();
-        struct stat s;
-        auto res = stat( samplesDir.c_str(), &s );
-        ASSERT_EQ( 0, res );
+        ASSERT_TRUE( utils::fs::isDirectory( samplesDir ) );
+        samplesDir = utils::fs::toAbsolute( samplesDir );
 
-        m_ml->discover( "file://" + samplesDir );
+        m_ml->discover( utils::file::toMrl( samplesDir ) );
     }
     ASSERT_TRUE( m_cb->waitForDiscoveryComplete() );
     auto testMl = static_cast<MediaLibraryResumeTest*>( m_ml.get() );
@@ -136,11 +136,10 @@ TEST_P( ResumeTests, Rescan )
     {
         // Quick and dirty check to ensure we're discovering something that exists
         auto samplesDir = testDir + "samples/" + input[i].GetString();
-        struct stat s;
-        auto res = stat( samplesDir.c_str(), &s );
-        ASSERT_EQ( 0, res );
+        ASSERT_TRUE( utils::fs::isDirectory( samplesDir ) );
+        samplesDir = utils::fs::toAbsolute( samplesDir );
 
-        m_ml->discover( "file://" + samplesDir );
+        m_ml->discover( utils::file::toMrl( samplesDir ) );
     }
     ASSERT_TRUE( m_cb->waitForDiscoveryComplete() );
     auto testMl = static_cast<MediaLibraryResumeTest*>( m_ml.get() );
