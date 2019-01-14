@@ -129,6 +129,17 @@ TEST( FsUtils, toLocalPath )
 #endif
 }
 
+TEST( FsUtils, toMrl )
+{
+#ifndef _WIN32
+    ASSERT_EQ( "/yea /sp ace", utils::file::toLocalPath( "file:///yea%20/sp%20ace" ) );
+    ASSERT_EQ( "/c/foo/bar.mkv", utils::file::toLocalPath( "file:///c/foo/bar.mkv" ) );
+#else
+    ASSERT_EQ( "c\\foo\\bar.mkv", utils::file::toLocalPath( "file:///c/foo/bar.mkv" ) );
+    ASSERT_EQ( "x\\yea \\sp ace", utils::file::toLocalPath( "file:///x/yea%20/sp%20ace" ) );
+#endif
+}
+
 TEST( FsUtils, stripScheme )
 {
   ASSERT_EQ( "space%20marine", utils::file::stripScheme( "sc2://space%20marine" ) );
