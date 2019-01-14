@@ -122,10 +122,10 @@ TEST( FsUtils, toLocalPath )
     ASSERT_EQ( "/tést/ßóíú/file", utils::file::toLocalPath( "file:///t%C3%A9st/%C3%9F%C3%B3%C3%AD%C3%BA/file" ) );
     ASSERT_EQ( "/&/#/~", utils::file::toLocalPath( "file:///%26/%23/%7E" ) );
 #else
-    ASSERT_EQ( "a/b/c/movie.avi", utils::file::toLocalPath( "file:///a/b/c/movie.avi" ) );
-    ASSERT_EQ( "x/yea /sp ace", utils::file::toLocalPath( "file:///x/yea%20/sp%20ace" ) );
-    ASSERT_EQ( "d/tést/ßóíú/file", utils::file::toLocalPath( "file:///d/t%C3%A9st/%C3%9F%C3%B3%C3%AD%C3%BA/file" ) );
-    ASSERT_EQ( "c/&/#/~", utils::file::toLocalPath( "file:///c/%26/%23/%7E" ) );
+    ASSERT_EQ( "a\\b\\c\\movie.avi", utils::file::toLocalPath( "file:///a/b/c/movie.avi" ) );
+    ASSERT_EQ( "x\\yea \\sp ace", utils::file::toLocalPath( "file:///x/yea%20/sp%20ace" ) );
+    ASSERT_EQ( "d\\tést\\ßóíú\\file", utils::file::toLocalPath( "file:///d/t%C3%A9st/%C3%9F%C3%B3%C3%AD%C3%BA/file" ) );
+    ASSERT_EQ( "c\\&\\#\\~", utils::file::toLocalPath( "file:///c/%26/%23/%7E" ) );
 #endif
 }
 

@@ -198,14 +198,17 @@ std::string toLocalPath( const std::string& mrl )
     // DIR_SEPARATOR_CHAR here.
     if ( path[0] == '/' && isalpha( path[1] ) )
         path.erase( 0, 1 );
+    std::replace( begin( path ), end( path ), '/', '\\' );
     return utils::url::decode( path );
 }
 
 std::string toMrl( const std::string& path )
 {
+    auto normalized = path;
+    std::replace( begin( normalized ), end( normalized ), '\\', '/' );
     return std::string{ "file://" } +
-            ( isalpha( path[0] ) ? "/" : "" ) +
-            utils::url::encode( path );
+            ( isalpha( normalized[0] ) ? "/" : "" ) +
+            utils::url::encode( normalized );
 }
 
 #endif
