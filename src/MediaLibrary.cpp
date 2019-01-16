@@ -1626,12 +1626,12 @@ void MediaLibrary::DeviceListerCb::onDeviceUnmounted( const std::string& uuid,
                                                       const std::string& unmountedMountpoint )
 {
     auto device = Device::fromUuid( m_ml, uuid );
-    assert( device->isRemovable() == true );
     if ( device == nullptr )
     {
         LOG_WARN( "Unknown device ", uuid, " was unplugged. Ignoring." );
         return;
     }
+    assert( device->isRemovable() == true );
     auto mountpoint = utils::file::toFolderPath( unmountedMountpoint );
     LOG_INFO( "Device ", uuid, " was unplugged. Mountpoint was ", mountpoint );
     for ( const auto& fsFactory : m_ml->m_fsFactories )
