@@ -622,11 +622,28 @@ TEST_F( FoldersNoDiscover, ListWithMedia )
     ASSERT_EQ( 1u, folders[0]->media( IMedia::Type::Unknown, nullptr )->count() );
 
     // List folders with audio media only
-    folders = ml->folders( IMedia::Type::Audio, &params )->all();
+    auto query = ml->folders( IMedia::Type::Audio, &params );
+    folders = query->all();
+    ASSERT_EQ( 1u, query->count() );
     ASSERT_EQ( 1u, folders.size() );
     ASSERT_EQ( folders[0]->mrl(), mock::FileSystemFactory::Root );
+
+    // Check the fetching of those media
+    // For each query, test with count() and all()
+    auto mediaQuery = folders[0]->media( IMedia::Type::Audio, &params );
+    ASSERT_EQ( 1u, mediaQuery->count() );
+    ASSERT_EQ( 1u, mediaQuery->all().size() );
+
+    // Try again with a different sort, which triggers a more complex request
+    params.sort = SortingCriteria::Artist;
+    mediaQuery = folders[0]->media( IMedia::Type::Audio, &params );
+    ASSERT_EQ( 1u, mediaQuery->count() );
+    ASSERT_EQ( 1u, mediaQuery->all().size() );
+
     // But check that we still have all the media when we filter with 'Unknown'
-    ASSERT_EQ( 2u, folders[0]->media( IMedia::Type::Unknown, nullptr )->count() );
+    mediaQuery = folders[0]->media( IMedia::Type::Unknown, nullptr );
+    ASSERT_EQ( 2u, mediaQuery->count() );
+    ASSERT_EQ( 2u, mediaQuery->all().size() );
 }
 
 TEST_F( FoldersNoDiscover, ListSubFolders )
