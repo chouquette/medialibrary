@@ -302,9 +302,11 @@ TEST_F( FoldersNoDiscover, BanTwice )
 
 TEST_F( FoldersNoDiscover, BanNonExistant )
 {
-    ml->banFolder( "foo/bar/otters" );
+    // Unhandled scheme
+    ml->banFolder( "foo://bar/otters" );
     cbMock->waitBanFolder();
-    ml->banFolder( "/foo/bar/otters" );
+    // valid scheme, unknown root folder
+    ml->banFolder( "file:///foo/bar/otters" );
     cbMock->waitBanFolder();
     // Ban with an existing base
     ml->banFolder( mock::FileSystemFactory::Root + "grouik/" );
