@@ -99,6 +99,7 @@ time_t Device::lastSeen() const
 
 void Device::updateLastSeen()
 {
+    assert( m_isRemovable == true );
     const std::string req = "UPDATE " + Device::Table::Name + " SET "
             "last_seen = ? WHERE id_device = ?";
     auto lastSeen = std::chrono::duration_cast<std::chrono::seconds>(
@@ -111,9 +112,9 @@ std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& u
 {
     static const std::string req = "INSERT INTO " + Device::Table::Name
             + "(uuid, scheme, is_removable, is_present, last_seen) VALUES(?, ?, ?, ?, ?)";
-    auto lastSeen = std::chrono::duration_cast<std::chrono::seconds>(
+    auto lastSeen = isRemovable ? std::chrono::duration_cast<std::chrono::seconds>(
         std::chrono::system_clock::now().time_since_epoch()
-    ).count();
+    ).count() : 0;
     auto self = std::make_shared<Device>( ml, uuid, scheme, isRemovable, lastSeen );
     if ( insert( ml, self, req, uuid, scheme, isRemovable, self->isPresent(), lastSeen ) == false )
         return nullptr;
@@ -139,7 +140,7 @@ std::shared_ptr<Device> Device::fromUuid( MediaLibraryPtr ml, const std::string&
 void Device::removeOldDevices( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime )
 {
     static const std::string req = "DELETE FROM " + Device::Table::Name + " "
-            "WHERE last_seen < ?";
+            "WHERE last_seen < ? AND is_removable != 0";
     auto deadline = std::chrono::duration_cast<std::chrono::seconds>(
                 (std::chrono::system_clock::now() - maxLifeTime).time_since_epoch() );
     sqlite::Tools::executeDelete( ml->getConn(), req, deadline.count() );

@@ -1519,7 +1519,7 @@ void MediaLibrary::refreshDevices( fs::IFileSystemFactory& fsFactory )
         else
             LOG_INFO( "Device ", d->uuid(), " presence is unchanged" );
 
-        if ( d->isPresent() == true )
+        if ( d->isRemovable() == true && d->isPresent() == true )
             d->updateLastSeen();
     }
 }
