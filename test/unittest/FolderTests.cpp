@@ -646,6 +646,16 @@ TEST_F( FoldersNoDiscover, ListWithMedia )
     mediaQuery = folders[0]->media( IMedia::Type::Unknown, nullptr );
     ASSERT_EQ( 2u, mediaQuery->count() );
     ASSERT_EQ( 2u, mediaQuery->all().size() );
+
+    // Now try sorting by last modified date, which was causing a crash
+    params.sort = SortingCriteria::LastModificationDate;
+    mediaQuery = folders[0]->media( IMedia::Type::Unknown, &params );
+    ASSERT_EQ( 2u, mediaQuery->count() );
+    ASSERT_EQ( 2u, mediaQuery->all().size() );
+
+    mediaQuery = folders[0]->media( IMedia::Type::Audio, &params );
+    ASSERT_EQ( 1u, mediaQuery->count() );
+    ASSERT_EQ( 1u, mediaQuery->all().size() );
 }
 
 TEST_F( FoldersNoDiscover, ListSubFolders )
