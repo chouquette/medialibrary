@@ -953,10 +953,10 @@ Query<IMedia> Media::fromFolderId( MediaLibraryPtr ml, IMedia::Type type,
     // manipulated when the device is not present
     std::string req = "FROM " + Table::Name +  " m ";
     req += addRequestJoin( params, false, false );
-    req += " WHERE folder_id = ?";
+    req += " WHERE m.folder_id = ?";
     if ( type != Type::Unknown )
     {
-        req += " AND type = ?";
+        req += " AND m.type = ?";
         return make_query<Media, IMedia>( ml, "*", req, sortRequest( params ),
                                           folderId, type );
     }
