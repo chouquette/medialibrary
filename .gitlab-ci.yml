@@ -11,6 +11,8 @@ build:linux:
     tags:
       - debian
       - amd64
+    except:
+        - schedules
     stage: build
     script:
       - ./bootstrap
@@ -28,6 +30,8 @@ unit-tests:linux:
     tags:
       - debian
       - amd64
+    except:
+        - schedules
     stage: unit-tests
     dependencies:
         - build:linux
@@ -39,6 +43,8 @@ functional-tests:linux:
     tags:
       - debian
       - amd64
+    except:
+        - schedules
     stage: functional-tests
     dependencies:
         - build:linux
@@ -49,6 +55,8 @@ build:win32:
     image: registry.videolan.org:5000/medialibrary-win32:20190121122230
     tags:
       - win32
+    except:
+        - schedules
     stage: build
     script:
       - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/prefix/lib/pkgconfig"
@@ -66,6 +74,8 @@ unit-tests:win32:
     image: registry.videolan.org:5000/medialibrary-win32:20190121122230
     tags:
       - win32
+    except:
+        - schedules
     stage: unit-tests
     dependencies:
         - build:win32
@@ -81,6 +91,8 @@ functional-tests:win32:
     image: registry.videolan.org:5000/medialibrary-win32:20190121122230
     tags:
       - win32
+    except:
+        - schedules
     stage: functional-tests
     dependencies:
         - build:win32
@@ -95,6 +107,8 @@ build:win64:
     tags:
       - win64
     stage: build
+    except:
+        - schedules
     script:
       - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/prefix/lib/pkgconfig"
       - ./bootstrap
@@ -111,6 +125,8 @@ unit-tests:win64:
     image: registry.videolan.org:5000/medialibrary-win64:20190121124804
     tags:
       - win64
+    except:
+        - schedules
     stage: unit-tests
     dependencies:
         - build:win64
@@ -124,6 +140,8 @@ functional-tests:win64:
     image: registry.videolan.org:5000/medialibrary-win64:20190121124804
     tags:
       - win64
+    except:
+        - schedules
     stage: functional-tests
     dependencies:
         - build:win64
@@ -132,3 +150,29 @@ functional-tests:win64:
         - cp /prefix/dll/libvlccore.dll .
         - ln -s /prefix/lib/vlc/plugins/ .
         - wine samples.exe -v
+
+build-and-coverage:
+    image: registry.videolan.org:5000/medialibrary:20190121111050
+    tags:
+      - debian
+      - amd64
+    only:
+        - schedules
+    stage: build
+    script:
+        - ./bootstrap
+        - CXXFLAGS='--coverage -g -O0' LDFLAGS='--coverage -g -O0' ./configure --enable-tests
+        - make -j4 check
+        - ./unittest && ./samples
+        - lcov --capture --directory . -o coverage.info
+        - lcov --remove coverage.info "/usr/*" -o coverage.info
+        - lcov --remove coverage.info "/prefix/*" -o coverage.info
+        - lcov --remove coverage.info "$CI_PROJECT_DIR/test/*" -o coverage.info
+        - lcov --remove coverage.info "$CI_PROJECT_DIR/googletest/*" -o coverage.info
+        - lcov --summary coverage.info
+        - genhtml coverage.info --output-directory html/
+    artifacts:
+        name: "coverage-medialibrary-$CI_COMMIT_SHORT_SHA"
+        paths:
+            - html/
+
