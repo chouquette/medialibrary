@@ -28,6 +28,7 @@
 #include "utils/Url.h"
 
 #include <stdexcept>
+#include <algorithm>
 
 #ifdef _WIN32
 # define DIR_SEPARATOR "\\/"
