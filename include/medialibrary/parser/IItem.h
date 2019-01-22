@@ -165,7 +165,7 @@ public:
      * @brief addTrack Add a track to this item.
      * @param t The track to add.
      */
-    virtual void addTrack( Track t ) = 0;
+    virtual void addTrack( Track&& t ) = 0;
 
     /**
      * @brief media Returns the media associated with this item, if any.

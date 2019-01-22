@@ -116,7 +116,7 @@ public:
         virtual void setDuration( int64_t duration ) override;
 
         virtual const std::vector<Track>& tracks() const override;
-        virtual void addTrack( Track t ) override;
+        virtual void addTrack( Track&& t ) override;
 
         virtual MediaPtr media() override;
         virtual void setMedia( MediaPtr media ) override;

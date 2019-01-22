@@ -268,7 +268,7 @@ const std::vector<Task::Item::Track>& Task::Item::tracks() const
     return m_tracks;
 }
 
-void Task::Item::addTrack(Task::Item::Track t)
+void Task::Item::addTrack( Task::Item::Track&& t )
 {
     m_tracks.emplace_back( std::move( t ) );
 }
