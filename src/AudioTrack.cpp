@@ -99,7 +99,6 @@ const std::string& AudioTrack::description() const
 
 void AudioTrack::createTable( sqlite::Connection* dbConnection )
 {
-    //FIXME: Index on media_id ? Unless it's already implied by the foreign key
     const std::string req = "CREATE TABLE IF NOT EXISTS " + AudioTrack::Table::Name
             + "(" +
                 AudioTrack::Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
