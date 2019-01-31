@@ -102,6 +102,11 @@ Status MetadataAnalyzer::run( IItem& item )
         std::tie( success, needRescan ) = refreshFile( item );
         if ( success == false )
             return Status::Fatal;
+        auto file = std::static_pointer_cast<File>( item.file() );
+        // Now that the refresh request was processed, we can update the last
+        // modification date in database
+        file->updateFsInfo( item.fileFs()->lastModificationDate(),
+                            item.fileFs()->size() );
         if ( needRescan == false )
             return Status::Success;
     }
@@ -502,9 +507,7 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshFile( IItem& item ) const
     assert( item.media() == nullptr );
     assert( item.file() != nullptr );
 
-    auto file = std::static_pointer_cast<File>( item.file() );
-
-    file->updateFsInfo( item.fileFs()->lastModificationDate(), item.fileFs()->size() );
+    auto file = item.file();
 
     switch ( file->type() )
     {
