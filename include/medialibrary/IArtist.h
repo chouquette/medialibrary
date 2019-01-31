@@ -48,6 +48,13 @@ public:
     virtual Query<IMedia> tracks( const QueryParameters* params = nullptr ) const = 0;
     virtual Query<IMedia> searchTracks( const std::string& pattern,
                                         const QueryParameters* params = nullptr ) const = 0;
+    /**
+     * @brief isThumbnailGenerated Returns true is a thumbnail generation was attempted.
+     *
+     * If the thumbnail generation failed, this will still return true, and the
+     * associated thumbnail mrl will be empty.
+     */
+    virtual bool isThumbnailGenerated() const = 0;
     virtual const std::string& artworkMrl() const = 0;
     virtual const std::string& musicBrainzId() const = 0;
     /**

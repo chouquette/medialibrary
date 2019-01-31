@@ -173,6 +173,11 @@ bool Artist::addMedia( Media& media )
     return sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(), artistForeignKey ) != 0;
 }
 
+bool Artist::isThumbnailGenerated() const
+{
+    return m_thumbnailId != 0;
+}
+
 const std::string& Artist::artworkMrl() const
 {
     if ( m_thumbnailId == 0 )

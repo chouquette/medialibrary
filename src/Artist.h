@@ -57,6 +57,7 @@ public:
     virtual Query<IMedia> searchTracks( const std::string& pattern,
                                         const QueryParameters* params = nullptr ) const override;
     bool addMedia( Media& tracks );
+    virtual bool isThumbnailGenerated() const override;
     virtual const std::string& artworkMrl() const override;
     std::shared_ptr<Thumbnail> thumbnail();
     bool setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin,
