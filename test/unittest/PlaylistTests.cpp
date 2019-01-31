@@ -425,3 +425,21 @@ TEST_F( Playlists, RemoveMedia )
     ASSERT_EQ( 1u, media.size() );
     ASSERT_EQ( m3->id(), media[0]->id() );
 }
+
+TEST_F( Playlists, ClearContent )
+{
+    auto m1 = ml->addMedia( "seaotter.mkv" );
+    auto m2 = ml->addMedia( "fluffyfurball.mp4" );
+    auto pl2 = ml->createPlaylist( "playlist 2" );
+
+    pl->append( *m1 );
+    pl2->append( *m2 );
+
+    ASSERT_EQ( 1u, pl->media()->count() );
+    ASSERT_EQ( 1u, pl2->media()->count() );
+
+    pl->clearContent();
+
+    ASSERT_EQ( 0u, pl->media()->count() );
+    ASSERT_EQ( 1u, pl2->media()->count() );
+}

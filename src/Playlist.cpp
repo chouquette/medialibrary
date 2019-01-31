@@ -350,6 +350,12 @@ void Playlist::clearExternalPlaylistContent(MediaLibraryPtr ml)
     sqlite::Tools::executeDelete( ml->getConn(), req );
 }
 
+void Playlist::clearContent()
+{
+    const std::string req = "DELETE FROM PlaylistMediaRelation WHERE playlist_id = ?";
+    sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id );
+}
+
 void Playlist::insertMrlFromMediaId( MediaLibraryPtr ml )
 {
     sqlite::Statement stmt{ ml->getConn()->handle(),
