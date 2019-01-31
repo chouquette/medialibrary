@@ -139,6 +139,11 @@ bool Album::setShortSummary( const std::string& summary )
     return true;
 }
 
+bool Album::isThumbnailGenerated() const
+{
+    return m_thumbnailId != 0;
+}
+
 const std::string& Album::artworkMrl() const
 {
     if ( m_thumbnailId == 0 )

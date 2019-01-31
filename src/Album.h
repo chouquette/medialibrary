@@ -68,6 +68,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         bool setReleaseYear( unsigned int date, bool force );
         virtual const std::string& shortSummary() const override;
         bool setShortSummary( const std::string& summary );
+        virtual bool isThumbnailGenerated() const override;
         virtual const std::string& artworkMrl() const override;
         std::shared_ptr<Thumbnail> thumbnail();
         bool setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin,
