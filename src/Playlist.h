@@ -80,6 +80,11 @@ public:
     static void clearExternalPlaylistContent( MediaLibraryPtr ml );
 
     /**
+     * @brief clearContent Removes all media from this playlist.
+     */
+    void clearContent();
+
+    /**
      * Fetches all PlaylistMediaRelation items without an MRL and assign it
      */
     static void insertMrlFromMediaId( MediaLibraryPtr ml );
