@@ -55,7 +55,7 @@ public:
      * associated thumbnail mrl will be empty.
      */
     virtual bool isThumbnailGenerated() const = 0;
-    virtual const std::string& artworkMrl() const = 0;
+    virtual const std::string& thumbnailMrl() const = 0;
     virtual const std::string& musicBrainzId() const = 0;
     /**
      * @brief nbAlbums

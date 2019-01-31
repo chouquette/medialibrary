@@ -58,9 +58,9 @@ public:
                                         const QueryParameters* params = nullptr ) const override;
     bool addMedia( Media& tracks );
     virtual bool isThumbnailGenerated() const override;
-    virtual const std::string& artworkMrl() const override;
+    virtual const std::string& thumbnailMrl() const override;
     std::shared_ptr<Thumbnail> thumbnail();
-    bool setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin,
+    bool setArtworkMrl( const std::string& thumbnailMrl, Thumbnail::Origin origin,
                         bool isGenerated );
     bool updateNbAlbum( int increment );
     bool updateNbTrack( int increment );

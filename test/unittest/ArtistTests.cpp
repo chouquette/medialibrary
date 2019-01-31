@@ -79,19 +79,19 @@ TEST_F( Artists, ArtworkMrl )
 {
     auto a = ml->createArtist( "Dream seaotter" );
     ASSERT_NE( a, nullptr );
-    ASSERT_EQ( a->artworkMrl(), "" );
+    ASSERT_EQ( a->thumbnailMrl(), "" );
     ASSERT_FALSE( a->isThumbnailGenerated() );
 
     std::string artwork("/tmp/otter.png");
     a->setArtworkMrl( artwork, Thumbnail::Origin::UserProvided, false );
-    ASSERT_EQ( a->artworkMrl(), artwork );
+    ASSERT_EQ( a->thumbnailMrl(), artwork );
     ASSERT_TRUE( a->isThumbnailGenerated() );
 
     Reload();
 
     auto a2 = ml->artist( a->id() );
     ASSERT_NE( a2, nullptr );
-    ASSERT_EQ( a2->artworkMrl(), artwork );
+    ASSERT_EQ( a2->thumbnailMrl(), artwork );
     ASSERT_TRUE( a->isThumbnailGenerated() );
 }
 

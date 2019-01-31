@@ -500,7 +500,7 @@ void Tests::checkArtists(const rapidjson::Value& expectedArtists, std::vector<Ar
             }
             if ( expectedArtist.HasMember( "hasArtwork" ) )
             {
-                auto artwork = artist->artworkMrl();
+                auto artwork = artist->thumbnailMrl();
                 if ( artwork.empty() == expectedArtist["hasArtwork"].GetBool() ||
                      artwork.compare( 0, 13, "attachment://" ) == 0 )
                     return false;
