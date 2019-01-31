@@ -144,7 +144,7 @@ bool Album::isThumbnailGenerated() const
     return m_thumbnailId != 0;
 }
 
-const std::string& Album::artworkMrl() const
+const std::string& Album::thumbnailMrl() const
 {
     if ( m_thumbnailId == 0 )
         return Thumbnail::EmptyMrl;

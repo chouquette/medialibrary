@@ -444,8 +444,8 @@ void Tests::checkAlbums( const rapidjson::Value& expectedAlbums, std::vector<Alb
             }
             if ( expectedAlbum.HasMember( "hasArtwork" ) )
             {
-                if ( expectedAlbum["hasArtwork"].GetBool() == a->artworkMrl().empty()
-                  || a->artworkMrl().compare(0, 13, "attachment://") == 0 )
+                if ( expectedAlbum["hasArtwork"].GetBool() == a->thumbnailMrl().empty()
+                  || a->thumbnailMrl().compare(0, 13, "attachment://") == 0 )
                     return false;
             }
             if ( expectedAlbum.HasMember( "nbDiscs" ) )

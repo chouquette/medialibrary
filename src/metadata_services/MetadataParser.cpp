@@ -1009,7 +1009,7 @@ bool MetadataAnalyzer::link( IItem& item, Album& album,
          artist->id() != VariousArtistID &&
          albumThumbnail != nullptr && artist->thumbnail() == nullptr )
     {
-        artist->setArtworkMrl( album.artworkMrl(), Thumbnail::Origin::Artist, false );
+        artist->setArtworkMrl( album.thumbnailMrl(), Thumbnail::Origin::Artist, false );
     }
 
     albumArtist->addMedia( media );

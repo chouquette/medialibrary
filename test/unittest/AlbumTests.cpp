@@ -167,12 +167,12 @@ TEST_F( Albums, SetArtworkMrl )
     auto a = ml->createAlbum( "album" );
 
     a->setArtworkMrl( "artwork", Thumbnail::Origin::UserProvided, false);
-    ASSERT_EQ( a->artworkMrl(), "artwork" );
+    ASSERT_EQ( a->thumbnailMrl(), "artwork" );
 
     Reload();
 
     auto a2 = ml->album( a->id() );
-    ASSERT_EQ( a->artworkMrl(), a2->artworkMrl() );
+    ASSERT_EQ( a->thumbnailMrl(), a2->thumbnailMrl() );
 }
 
 TEST_F( Albums, Thumbnail )

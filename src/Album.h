@@ -69,9 +69,9 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         virtual const std::string& shortSummary() const override;
         bool setShortSummary( const std::string& summary );
         virtual bool isThumbnailGenerated() const override;
-        virtual const std::string& artworkMrl() const override;
+        virtual const std::string& thumbnailMrl() const override;
         std::shared_ptr<Thumbnail> thumbnail();
-        bool setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin,
+        bool setArtworkMrl( const std::string& thumbnailMrl, Thumbnail::Origin origin,
                             bool isGenerated);
         virtual Query<IMedia> tracks( const QueryParameters* params ) const override;
         virtual Query<IMedia> tracks( GenrePtr genre, const QueryParameters* params ) const override;
