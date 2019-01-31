@@ -48,7 +48,7 @@ protected:
     virtual void onRestarted() override;
     virtual Step targetedStep() const override;
 
-    bool addPlaylistMedias( IItem& item ) const;
+    Status addPlaylistMedias( IItem& item ) const;
     void addPlaylistElement( IItem& item, std::shared_ptr<Playlist> playlistPtr,
                              const IItem& subitem ) const;
     bool parseAudioFile( IItem& task );

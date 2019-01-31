@@ -89,6 +89,8 @@ Status VLCMetadataService::run( IItem& item )
     {
         if ( tracks.size() == 0 && vlcMedia.subitems()->count() == 0 )
             LOG_WARN( "Failed to fetch any tracks for ", mrl, ". Falling back to playback" );
+        else
+            LOG_WARN( "Artwork for ", mrl, " is an attachment. Falling back to playback" );
         VLC::MediaPlayer mp( vlcMedia );
         auto res = MetadataCommon::startPlayback( vlcMedia, mp );
         if ( res == false )

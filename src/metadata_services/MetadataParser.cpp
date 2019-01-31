@@ -115,8 +115,8 @@ Status MetadataAnalyzer::run( IItem& item )
     if ( nbSubitem > 0 )
     {
         auto res = addPlaylistMedias( item );
-        if ( res == false ) // playlist addition may fail due to constraint violation
-            return Status::Fatal;
+        if ( res != Status::Success ) // playlist addition may fail due to constraint violation
+            return res;
 
         assert( item.file() != nullptr );
         return Status::Completed;
@@ -177,7 +177,7 @@ Status MetadataAnalyzer::run( IItem& item )
 
 /* Playlist files */
 
-bool MetadataAnalyzer::addPlaylistMedias( IItem& item ) const
+Status MetadataAnalyzer::addPlaylistMedias( IItem& item ) const
 {
     const auto& mrl = item.mrl();
     LOG_INFO( "Try to import ", mrl, " as a playlist" );
@@ -193,9 +193,8 @@ bool MetadataAnalyzer::addPlaylistMedias( IItem& item ) const
         if ( playlistPtr == nullptr )
         {
             // The playlist had to be created, something is very wrong, give up
-            // FIXME: Check that the task will be deleted.
             assert( false );
-            return false;
+            return Status::Discarded;
         }
     }
     else
@@ -208,7 +207,7 @@ bool MetadataAnalyzer::addPlaylistMedias( IItem& item ) const
         if ( playlistPtr == nullptr )
         {
             LOG_ERROR( "Failed to create playlist ", mrl, " to the media library" );
-            return false;
+            return Status::Fatal;
         }
         m_notifier->notifyPlaylistCreation( playlistPtr );
 
@@ -221,7 +220,7 @@ bool MetadataAnalyzer::addPlaylistMedias( IItem& item ) const
         if ( file == nullptr )
         {
             LOG_ERROR( "Failed to add playlist file ", mrl );
-            return false;
+            return Status::Fatal;
         }
         // Will invoke ITaskCb::updateFileId to upadte m_fileId & its
         // representation in DB
@@ -236,7 +235,7 @@ bool MetadataAnalyzer::addPlaylistMedias( IItem& item ) const
     for ( auto i = 0u; i < item.nbSubItems(); ++i ) // FIXME: Interrupt loop if paused
         addPlaylistElement( item, playlistPtr, item.subItem( i ) );
 
-    return true;
+    return Status::Success;
 }
 
 void MetadataAnalyzer::addPlaylistElement( IItem& item,
