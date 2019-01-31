@@ -520,7 +520,7 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshFile( IItem& item ) const
                 return std::make_tuple( false, false );
             }
             LOG_INFO( "Reloading playlist ", playlist->name(), " on ", item.mrl() );
-            Playlist::destroy( m_ml, playlist->id() );
+            playlist->clearContent();
             return std::make_tuple( true, true );
         }
         case IFile::Type::Part:
