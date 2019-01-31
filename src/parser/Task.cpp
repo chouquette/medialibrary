@@ -534,9 +534,9 @@ Task::createRefreshTask( MediaLibraryPtr ml, std::shared_ptr<File> file,
 {
     auto self = std::make_shared<Task>( ml, std::move( file ), std::move( fileFs ) );
     const std::string req = "INSERT INTO " + Task::Table::Name +
-            "(mrl, file_id, is_refresh) VALUES(?, ?, ?)";
-    if ( insert( ml, self, req, self->m_item.mrl(), self->m_item.file()->id(),
-                 true ) == false )
+            "(mrl, file_type, file_id, is_refresh) VALUES(?, ?, ?, ?)";
+    if ( insert( ml, self, req, self->m_item.mrl(), self->m_item.file()->type(),
+                 self->m_item.file()->id(), true ) == false )
         return nullptr;
     return self;
 }
