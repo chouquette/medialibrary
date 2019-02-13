@@ -443,3 +443,50 @@ TEST_F( Playlists, ClearContent )
     ASSERT_EQ( 0u, pl->media()->count() );
     ASSERT_EQ( 1u, pl2->media()->count() );
 }
+
+TEST_F( Playlists, RemoveReAddMedia )
+{
+    auto m1 = ml->addMedia( "one.mp3" );
+    auto m2 = ml->addMedia( "second soufle.mp3" );
+    auto m3 = ml->addMedia( "third quarter storm.mp3" );
+    pl->append( *m1 );
+    pl->append( *m2 );
+    pl->append( *m3 );
+
+    auto media = pl->media()->all();
+    ASSERT_EQ( 3u, media.size() );
+    ASSERT_EQ( m1->id(), media[0]->id() );
+    ASSERT_EQ( m2->id(), media[1]->id() );
+    ASSERT_EQ( m3->id(), media[2]->id() );
+
+    // Remove the middle element
+    pl->remove( m2->id() );
+
+    media = pl->media()->all();
+    ASSERT_EQ( 2u, media.size() );
+    ASSERT_EQ( m1->id(), media[0]->id() );
+    ASSERT_EQ( m3->id(), media[1]->id() );
+
+    pl->add( *m2, 2 );
+
+    media = pl->media()->all();
+    ASSERT_EQ( 3u, media.size() );
+    ASSERT_EQ( m1->id(), media[0]->id() );
+    ASSERT_EQ( m2->id(), media[1]->id() );
+    ASSERT_EQ( m3->id(), media[2]->id() );
+
+    pl->remove( m1->id() );
+
+    media = pl->media()->all();
+    ASSERT_EQ( 2u, media.size() );
+    ASSERT_EQ( m2->id(), media[0]->id() );
+    ASSERT_EQ( m3->id(), media[1]->id() );
+
+    pl->add( *m1, 1 );
+
+    media = pl->media()->all();
+    ASSERT_EQ( 3u, media.size() );
+    ASSERT_EQ( m1->id(), media[0]->id() );
+    ASSERT_EQ( m2->id(), media[1]->id() );
+    ASSERT_EQ( m3->id(), media[2]->id() );
+}
