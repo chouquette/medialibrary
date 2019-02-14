@@ -4,7 +4,7 @@
     "UPDATE PlaylistMediaRelation SET position = position + 1"
     " WHERE playlist_id = new.playlist_id"
     " AND position = new.position"
-    // We don't to trigger a self-update when the insert trigger fires.
+    // We don't want to trigger a self-update when the insert trigger fires.
     " AND media_id != new.media_id;"
 " END",
 
