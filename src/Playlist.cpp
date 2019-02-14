@@ -171,7 +171,7 @@ bool Playlist::append( const IMedia& media )
     return add( media, 0 );
 }
 
-bool Playlist::add( const IMedia& media, unsigned int position )
+bool Playlist::add( const IMedia& media, uint32_t position )
 {
     static const std::string req = "INSERT INTO PlaylistMediaRelation"
             "(media_id, mrl, playlist_id, position) VALUES(?, ?, ?, ?)";
@@ -206,7 +206,7 @@ bool Playlist::append( int64_t mediaId )
     return append( *media );
 }
 
-bool Playlist::add(const int64_t mediaId, unsigned int position)
+bool Playlist::add(const int64_t mediaId, uint32_t position )
 {
     auto media = m_ml->media( mediaId );
     if ( media == nullptr )
@@ -231,7 +231,7 @@ std::shared_ptr<File> Playlist::addFile( const fs::IFile& fileFs, int64_t parent
     return file;
 }
 
-bool Playlist::contains( int64_t mediaId, unsigned int position )
+bool Playlist::contains( int64_t mediaId, uint32_t position )
 {
     static const std::string req = "SELECT COUNT(media_id) FROM PlaylistMediaRelation "
             "WHERE media_id = ? AND playlist_id = ? AND position = ?";
@@ -251,7 +251,7 @@ bool Playlist::contains( int64_t mediaId, unsigned int position )
     return count != 0;
 }
 
-bool Playlist::move( int64_t mediaId, unsigned int position )
+bool Playlist::move( int64_t mediaId, uint32_t position )
 {
     if ( position == 0 )
         return false;

@@ -57,11 +57,11 @@ public:
     /// \param position The position of this new media
     /// \return true on success, false on failure
     ///
-    virtual bool add( const IMedia& media, unsigned int position ) = 0;
+    virtual bool add( const IMedia& media, uint32_t position ) = 0;
 
     /// Convenience wrappers
     virtual bool append( int64_t mediaId ) = 0;
-    virtual bool add( const int64_t mediaId, unsigned int position ) = 0;
+    virtual bool add( const int64_t mediaId, uint32_t position ) = 0;
 
     ///
     /// \brief move Change the position of a media
@@ -76,7 +76,7 @@ public:
     /// [<1,2>, <2,3>, <3,4>]
     /// \return true on success, false on failure
     ///
-    virtual bool move( int64_t mediaId, unsigned int position ) = 0;
+    virtual bool move( int64_t mediaId, uint32_t position ) = 0;
     ///
     /// \brief remove Removes a media from the playlist
     /// \param mediaId The media to remove.
