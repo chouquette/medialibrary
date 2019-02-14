@@ -61,7 +61,7 @@ public:
 
     /// Convenience wrappers
     virtual bool append( int64_t mediaId ) = 0;
-    virtual bool add( const int64_t mediaId, uint32_t position ) = 0;
+    virtual bool add( int64_t mediaId, uint32_t position ) = 0;
 
     ///
     /// \brief move Change the position of a media

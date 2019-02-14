@@ -58,7 +58,7 @@ public:
     virtual bool append( const IMedia& media ) override;
     virtual bool add( const IMedia& media, uint32_t position ) override;
     virtual bool append( int64_t mediaId ) override;
-    virtual bool add( const int64_t mediaId, uint32_t position ) override;
+    virtual bool add( int64_t mediaId, uint32_t position ) override;
     virtual bool move( int64_t mediaId, uint32_t position ) override;
     virtual bool remove( int64_t mediaId ) override;
     virtual bool remove( const IMedia& media ) override;

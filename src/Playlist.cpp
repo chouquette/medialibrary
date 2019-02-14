@@ -206,7 +206,7 @@ bool Playlist::append( int64_t mediaId )
     return append( *media );
 }
 
-bool Playlist::add(const int64_t mediaId, uint32_t position )
+bool Playlist::add( int64_t mediaId, uint32_t position )
 {
     auto media = m_ml->media( mediaId );
     if ( media == nullptr )
