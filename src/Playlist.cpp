@@ -175,35 +175,27 @@ bool Playlist::add( const IMedia& media, unsigned int position )
 {
     static const std::string req = "INSERT INTO PlaylistMediaRelation"
             "(media_id, mrl, playlist_id, position) VALUES(?, ?, ?, ?)";
-    try
+    // position isn't a foreign key, but we want it to be passed as NULL if it equals to 0
+    // When the position is NULL, the insertion triggers takes care of
+    // counting the number of records to auto append.
+    auto files = media.files();
+    assert( files.size() > 0 );
+    auto mainFile = std::find_if( begin( files ), end( files ), []( const FilePtr& f) {
+        return f->isMain();
+    });
+    if ( mainFile == end( files ) )
     {
-        // position isn't a foreign key, but we want it to be passed as NULL if it equals to 0
-        // When the position is NULL, the insertion triggers takes care of
-        // counting the number of records to auto append.
-        auto files = media.files();
-        assert( files.size() > 0 );
-        auto mainFile = std::find_if( begin( files ), end( files ), []( const FilePtr& f) {
-            return f->isMain();
-        });
-        if ( mainFile == end( files ) )
-        {
-            LOG_ERROR( "Can't add a media without any files to a playlist" );
-            return false;
-        }
-        if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
-                                             (*mainFile)->mrl(), m_id,
-                                             sqlite::ForeignKey{ position } ) == false )
-            return false;
-        auto notifier = m_ml->getNotifier();
-        if ( notifier != nullptr )
-            notifier->notifyPlaylistModification( shared_from_this() );
-        return true;
-    }
-    catch (const sqlite::errors::ConstraintViolation& ex)
-    {
-        LOG_WARN( "Rejected playlist insertion: ", ex.what() );
+        LOG_ERROR( "Can't add a media without any files to a playlist" );
         return false;
     }
+    if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
+                                         (*mainFile)->mrl(), m_id,
+                                         sqlite::ForeignKey{ position } ) == false )
+        return false;
+    auto notifier = m_ml->getNotifier();
+    if ( notifier != nullptr )
+        notifier->notifyPlaylistModification( shared_from_this() );
+    return true;
 }
 
 bool Playlist::append( int64_t mediaId )
