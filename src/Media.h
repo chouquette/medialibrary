@@ -123,7 +123,6 @@ class Media : public IMedia, public DatabaseHelpers<Media>
         virtual unsigned int insertionDate() const override;
         virtual unsigned int releaseDate() const override;
         uint32_t nbPlaylists() const;
-        void udpateNbPlaylist( int32_t increment ) const;
 
         virtual const IMetadata& metadata( MetadataType type ) const override;
         virtual bool setMetadata( MetadataType type, const std::string& value ) override;
@@ -185,7 +184,7 @@ private:
         // might be used as a fallback
         std::string m_filename;
         bool m_isFavorite;
-        mutable std::atomic_uint m_nbPlaylists;
+        uint32_t m_nbPlaylists;
 
         // Auto fetched related properties
         mutable AlbumTrackPtr m_albumTrack;

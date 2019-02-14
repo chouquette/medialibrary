@@ -789,7 +789,6 @@ TEST_F( Medias, NbPlaylists )
     auto playlist = ml->createPlaylist( "playlisẗ" );
     auto res = playlist->append( *m );
     ASSERT_TRUE( res );
-    ASSERT_EQ( 1u, m->nbPlaylists() );
 
     Reload();
 
@@ -806,12 +805,21 @@ TEST_F( Medias, NbPlaylists )
 
     playlist = ml->playlist( playlist->id() );
     playlist->append( *m );
-    ASSERT_EQ( 1u, m->nbPlaylists() );
+    playlist->append( *m );
 
     Reload();
 
     m = ml->media( m->id() );
-    ASSERT_EQ( 1u, m->nbPlaylists() );
+    playlist = ml->playlist( playlist->id() );
+
+    ASSERT_EQ( 2u, m->nbPlaylists() );
+
+    playlist->remove( m->id() );
+
+    Reload();
+
+    m = ml->media( m->id() );
+    ASSERT_EQ( 0u, m->nbPlaylists() );
 
     ml->deletePlaylist( playlist->id() );
 

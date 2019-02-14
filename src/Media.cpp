@@ -351,13 +351,7 @@ unsigned int Media::releaseDate() const
 
 uint32_t Media::nbPlaylists() const
 {
-    return m_nbPlaylists.load( std::memory_order_relaxed );
-}
-
-void Media::udpateNbPlaylist(int32_t increment) const
-{
-    // Only update the cached representation, let the triggers handle the DB values
-    m_nbPlaylists.fetch_add( increment, std::memory_order_relaxed );
+    return m_nbPlaylists;
 }
 
 const IMetadata& Media::metadata( IMedia::MetadataType type ) const

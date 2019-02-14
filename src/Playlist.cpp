@@ -194,7 +194,6 @@ bool Playlist::add( const IMedia& media, unsigned int position )
                                              (*mainFile)->mrl(), m_id,
                                              sqlite::ForeignKey{ position } ) == false )
             return false;
-        static_cast<const Media&>( media ).udpateNbPlaylist( 1 );
         auto notifier = m_ml->getNotifier();
         if ( notifier != nullptr )
             notifier->notifyPlaylistModification( shared_from_this() );
@@ -290,7 +289,6 @@ bool Playlist::remove( const IMedia& media )
             "playlist_id = ? AND media_id = ?";
     if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, media.id() ) == false )
         return false;
-    static_cast<const Media&>( media ).udpateNbPlaylist( -1 );
     auto notifier = m_ml->getNotifier();
     if ( notifier != nullptr )
         notifier->notifyPlaylistModification( shared_from_this() );
