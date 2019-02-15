@@ -121,6 +121,8 @@ Query<IMedia> Playlist::media() const
 Query<IMedia> Playlist::searchMedia( const std::string& pattern,
                                      const QueryParameters* params ) const
 {
+    if ( pattern.size() < 3 )
+        return {};
     curateNullMediaID();
     return Media::searchInPlaylist( m_ml, pattern, m_id, params );
 }
