@@ -1,15 +1,3 @@
-"CREATE TRIGGER IF NOT EXISTS append_new_playlist_record AFTER INSERT"
-" ON PlaylistMediaRelation"
-" WHEN new.position IS NULL"
-" BEGIN "
-    // The record is already inserted when the trigger runs, so the count will always
-    // be at least 1, hence the - 1 operation afterward. We want the first item
-    // at position 0
-    " UPDATE PlaylistMediaRelation SET position = ("
-        "SELECT COUNT(media_id) FROM PlaylistMediaRelation WHERE playlist_id = new.playlist_id"
-    ") - 1 WHERE playlist_id=new.playlist_id AND media_id = new.media_id;"
-" END",
-
 "CREATE TRIGGER IF NOT EXISTS update_playlist_order_on_insert AFTER INSERT"
 " ON PlaylistMediaRelation"
 " WHEN new.position IS NOT NULL"

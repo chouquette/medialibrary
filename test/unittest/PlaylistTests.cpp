@@ -207,6 +207,19 @@ TEST_F( Playlists, Move )
     ASSERT_EQ( 1u, media[3]->id() );
     ASSERT_EQ( 2u, media[4]->id() );
 
+    // But check that this didn't create a gap in the items (if we move an item
+    // to position 9, it should still be the last element in the playlist
+    pl->move( 1, 9 );
+    // [<5,0>,<4,1>,<1,2>,<2,3>,<3,9/4>]
+    media = pl->media()->all();
+    ASSERT_EQ( 5u, media.size() );
+
+    ASSERT_EQ( 5u, media[0]->id() );
+    ASSERT_EQ( 4u, media[1]->id() );
+    ASSERT_EQ( 1u, media[2]->id() );
+    ASSERT_EQ( 2u, media[3]->id() );
+    ASSERT_EQ( 3u, media[4]->id() );
+
     // Try to remove a dummy element and check that it's handled properly
     res = pl->move( 123, 2 );
     ASSERT_FALSE( res );

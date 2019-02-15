@@ -173,11 +173,6 @@ bool Playlist::append( const IMedia& media )
 
 bool Playlist::add( const IMedia& media, uint32_t position )
 {
-    static const std::string req = "INSERT INTO PlaylistMediaRelation"
-            "(media_id, mrl, playlist_id, position) VALUES(?, ?, ?, ?)";
-    // position isn't a foreign key, but we want it to be passed as NULL if it equals to 0
-    // When the position is NULL, the insertion triggers takes care of
-    // counting the number of records to auto append.
     auto files = media.files();
     assert( files.size() > 0 );
     auto mainFile = std::find_if( begin( files ), end( files ), []( const FilePtr& f) {
@@ -190,12 +185,18 @@ bool Playlist::add( const IMedia& media, uint32_t position )
     }
     if ( position == UINT32_MAX )
     {
+        static const std::string req = "INSERT INTO PlaylistMediaRelation"
+                "(media_id, mrl, playlist_id, position) VALUES(?1, ?2, ?3,"
+                "(SELECT COUNT(media_id) FROM PlaylistMediaRelation WHERE playlist_id = ?3))";
         if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
-                                           (*mainFile)->mrl(), m_id, nullptr ) == false )
+                                           (*mainFile)->mrl(), m_id ) == false )
             return false;
     }
     else
     {
+        static const std::string req = "INSERT INTO PlaylistMediaRelation"
+                "(media_id, mrl, playlist_id, position) VALUES(?1, ?2, ?3,"
+                "min(?4, (SELECT COUNT(media_id) FROM PlaylistMediaRelation WHERE playlist_id = ?3)))";
         if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
                                            (*mainFile)->mrl(), m_id, position ) == false )
             return false;

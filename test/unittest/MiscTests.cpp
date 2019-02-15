@@ -195,7 +195,7 @@ TEST_F( DbModel, Upgrade12to13 )
     // We can't check for the number of albums anymore since they are deleted
     // as part of 13 -> 14 migration
 
-    CheckNbTriggers( 35 );
+    CheckNbTriggers( 34 );
 }
 
 TEST_F( DbModel, Upgrade13to14 )
@@ -242,7 +242,7 @@ TEST_F( DbModel, Upgrade13to14 )
     ASSERT_EQ( 2u, folder->media( IMedia::Type::Unknown, nullptr )->count() );
     ASSERT_EQ( "folder", folder->name() );
 
-    CheckNbTriggers( 35 );
+    CheckNbTriggers( 34 );
 }
 
 TEST_F( DbModel, Upgrade14to15 )
@@ -250,7 +250,7 @@ TEST_F( DbModel, Upgrade14to15 )
     LoadFakeDB( SRC_DIR "/test/unittest/db_v14.sql" );
     auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    CheckNbTriggers( 35 );
+    CheckNbTriggers( 34 );
     CheckNbIndexes( 37 );
 }
 
@@ -259,6 +259,6 @@ TEST_F( DbModel, Upgrade15to16 )
     LoadFakeDB( SRC_DIR "/test/unittest/db_v15.sql" );
     auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    CheckNbTriggers( 35 );
+    CheckNbTriggers( 34 );
     CheckNbIndexes( 37 );
 }

@@ -122,6 +122,13 @@ class Media : public IMedia, public DatabaseHelpers<Media>
                            bool isGenerated);
         virtual unsigned int insertionDate() const override;
         virtual unsigned int releaseDate() const override;
+        /**
+         * @brief nbPlaylists Returns the number of occurence of this media in playlists
+         *
+         * If the media is inserted twice in a playlist, this method will return 2.
+         * This is solely meant for unit testing, and the value that matters is
+         * the one in database, which is used to filter out some results
+         */
         uint32_t nbPlaylists() const;
 
         virtual const IMetadata& metadata( MetadataType type ) const override;
