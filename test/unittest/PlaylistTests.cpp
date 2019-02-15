@@ -171,7 +171,8 @@ TEST_F( Playlists, Move )
         ASSERT_TRUE( res );
     }
     // [<1,0>,<2,1>,<3,2>,<4,3>,<5,4>]
-    pl->move( 5, 0 );
+    auto res = pl->move( 4, 0 );
+    ASSERT_TRUE( res );
     // [<5,0>,<1,1>,<2,2>,<3,3>,<4,4>]
     auto media = pl->media()->all();
     ASSERT_EQ( 5u, media.size() );
@@ -181,6 +182,34 @@ TEST_F( Playlists, Move )
     ASSERT_EQ( 2u, media[2]->id() );
     ASSERT_EQ( 3u, media[3]->id() );
     ASSERT_EQ( 4u, media[4]->id() );
+
+    // Now move some item forward
+    pl->move( 1, 4 );
+    // [<5,0>,<2,1>,<3,2>,<4,3>,<1,4>]
+    media = pl->media()->all();
+    ASSERT_EQ( 5u, media.size() );
+
+    ASSERT_EQ( 5u, media[0]->id() );
+    ASSERT_EQ( 2u, media[1]->id() );
+    ASSERT_EQ( 3u, media[2]->id() );
+    ASSERT_EQ( 4u, media[3]->id() );
+    ASSERT_EQ( 1u, media[4]->id() );
+
+    // Move an item past the theorical last element
+    pl->move( 1, 10 );
+    // [<5,0>,<3,1>,<4,2>,<1,3>,<2,10/4>]
+    media = pl->media()->all();
+    ASSERT_EQ( 5u, media.size() );
+
+    ASSERT_EQ( 5u, media[0]->id() );
+    ASSERT_EQ( 3u, media[1]->id() );
+    ASSERT_EQ( 4u, media[2]->id() );
+    ASSERT_EQ( 1u, media[3]->id() );
+    ASSERT_EQ( 2u, media[4]->id() );
+
+    // Try to remove a dummy element and check that it's handled properly
+    res = pl->move( 123, 2 );
+    ASSERT_FALSE( res );
 }
 
 TEST_F( Playlists, Remove )
@@ -192,12 +221,12 @@ TEST_F( Playlists, Remove )
         auto res = pl->append( *m );
         ASSERT_TRUE( res );
     }
-    // [<1,1>,<2,2>,<3,3>,<4,4>,<5,5>]
+    // [<1,0>,<2,1>,<3,2>,<4,3>,<5,4>]
     auto media = pl->media()->all();
     ASSERT_EQ( 5u, media.size() );
 
-    pl->remove( 3 );
-    // [<1,1>,<2,2>,<4,4>,<5,5>]
+    pl->remove( 2 );
+    // [<1,0>,<2,1>,<4,2>,<5,3>]
 
     media = pl->media()->all();
     ASSERT_EQ( 4u, media.size() );
@@ -460,7 +489,7 @@ TEST_F( Playlists, RemoveReAddMedia )
     ASSERT_EQ( m3->id(), media[2]->id() );
 
     // Remove the middle element
-    pl->remove( m2->id() );
+    pl->remove( 1 );
 
     media = pl->media()->all();
     ASSERT_EQ( 2u, media.size() );
@@ -475,7 +504,7 @@ TEST_F( Playlists, RemoveReAddMedia )
     ASSERT_EQ( m2->id(), media[1]->id() );
     ASSERT_EQ( m3->id(), media[2]->id() );
 
-    pl->remove( m1->id() );
+    pl->remove( 0 );
 
     media = pl->media()->all();
     ASSERT_EQ( 2u, media.size() );

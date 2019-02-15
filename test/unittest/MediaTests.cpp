@@ -796,7 +796,7 @@ TEST_F( Medias, NbPlaylists )
     ASSERT_EQ( 1u, m->nbPlaylists() );
 
     playlist = ml->playlist( playlist->id() );
-    playlist->remove( m->id() );
+    playlist->remove( 0 );
 
     Reload();
 
@@ -814,12 +814,14 @@ TEST_F( Medias, NbPlaylists )
 
     ASSERT_EQ( 2u, m->nbPlaylists() );
 
-    playlist->remove( m->id() );
+    playlist->remove( 0 );
 
     Reload();
 
     m = ml->media( m->id() );
-    ASSERT_EQ( 0u, m->nbPlaylists() );
+    // The media was inserted twice in the playlist and should therefor still have
+    // one entry there, causing the number of playlist to be 1
+    ASSERT_EQ( 1u, m->nbPlaylists() );
 
     ml->deletePlaylist( playlist->id() );
 

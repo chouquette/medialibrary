@@ -63,9 +63,9 @@ public:
 
     ///
     /// \brief move Change the position of a media
-    /// \param mediaId The media to move reorder
-    /// \param position The new position within the playlist.
-    /// In case there is already a media at the given position, it will be placed after
+    /// \param from The position of the item being moved
+    /// \param to The moved item target position
+    /// In case there is already an item at the given position, it will be placed before
     /// the media being moved. This will cascade to any media placed afterward.
     /// For instance, a playlist with <media,position> like
     /// [<1,0>, <2,1>, <3,2>] on which move(1, 1) is called will result in the playlist
@@ -73,14 +73,13 @@ public:
     /// [<2,0>, <1,1>, <3,2>]
     /// \return true on success, false on failure
     ///
-    virtual bool move( int64_t mediaId, uint32_t position ) = 0;
+    virtual bool move( uint32_t from, uint32_t to ) = 0;
     ///
-    /// \brief remove Removes a media from the playlist
-    /// \param mediaId The media to remove.
+    /// \brief remove Removes an item from the playlist
+    /// \param mediaId The position of the item to remove.
     /// \return true on success, false on failure
     ///
-    virtual bool remove( int64_t mediaId ) = 0;
-    virtual bool remove( const IMedia& media ) = 0;
+    virtual bool remove( uint32_t position ) = 0;
 };
 
 }

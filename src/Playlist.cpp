@@ -259,41 +259,55 @@ bool Playlist::contains( int64_t mediaId, uint32_t position )
     return count != 0;
 }
 
-bool Playlist::move( int64_t mediaId, uint32_t position )
+bool Playlist::move( uint32_t from, uint32_t position )
 {
-    auto t = m_ml->getConn()->newTransaction();
-    if ( remove( mediaId ) == false )
+    auto dbConn = m_ml->getConn();
+
+    /*
+     * We can't have triggers that update position during insertion and trigger
+     * that update after modifying the position, as they would fire and wreck
+     * the expected results.
+     * To work around this, we delete the previous record, and insert it again.
+     * However to do so, we need to fetch the media ID at the previous location.
+     */
+    auto t = dbConn->newTransaction();
+    const std::string fetchReq = "SELECT media_id FROM PlaylistMediaRelation WHERE"
+            " playlist_id = ? AND position = ?";
+    sqlite::Statement stmt( dbConn->handle(), fetchReq );
+    int64_t mediaId;
+    stmt.execute( m_id, from );
     {
-        LOG_ERROR( "Failed to move playlist ", m_name, " item: item wasn't present "
-                   "in the playlist" );
+        auto row = stmt.row();
+        if ( row == nullptr )
+        {
+            LOG_ERROR( "Failed to find an item at position ", from, " in playlist" );
+            return false;
+        }
+        row >> mediaId;
+    }
+    if ( remove( from ) == false )
+    {
+        LOG_ERROR( "Failed to remove element ", from, " from playlist" );
         return false;
     }
     if ( add( mediaId, position ) == false )
     {
-        LOG_ERROR( "Failed to move playlist ", m_name, " item: insertion of "
-                   "the new position failed. Aborting the move operation");
+        LOG_ERROR( "Failed to re-add element in playlist" );
         return false;
     }
     t->commit();
+
     auto notifier = m_ml->getNotifier();
     if ( notifier != nullptr )
         notifier->notifyPlaylistModification( shared_from_this() );
     return true;
 }
 
-bool Playlist::remove( int64_t mediaId )
-{
-    const auto media = m_ml->media( mediaId );
-    if ( media == nullptr )
-        return false;
-    return remove( *media );
-}
-
-bool Playlist::remove( const IMedia& media )
+bool Playlist::remove( uint32_t position )
 {
     static const std::string req = "DELETE FROM PlaylistMediaRelation WHERE "
-            "playlist_id = ? AND media_id = ?";
-    if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, media.id() ) == false )
+            "playlist_id = ? AND position = ?";
+    if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, position ) == false )
         return false;
     auto notifier = m_ml->getNotifier();
     if ( notifier != nullptr )
