@@ -34,12 +34,44 @@ class IPlaylist
 {
 public:
     virtual ~IPlaylist() = default;
+    ///
+    /// \brief id Returns the playlist id
+    ///
     virtual int64_t id() const = 0;
+    ///
+    /// \brief name Returns the playlist name
+    ///
     virtual const std::string& name() const = 0;
+    ///
+    /// \brief setName Updates the playlist name
+    ///
     virtual bool setName( const std::string& name ) = 0;
+    ///
+    /// \brief creationDate Returns the playlist creation date.
+    ///
+    /// For playlist that were analyzed based on a playlist file (as opposed to
+    /// created by the application) this will be the date when the playlist was
+    /// first discovered, not the playlist *file* creation/last modification date
+    ///
     virtual unsigned int creationDate() const = 0;
+    ///
+    /// \brief artworkMrl An artwork for this playlist, if any.
+    /// \return An artwork, or an empty string if none is available.
+    ///
     virtual const std::string& artworkMrl() const = 0;
+    ///
+    /// \brief media Returns the media contained in this playlist
+    /// \return A query object representing the media in this playlist
+    ///
+    /// The media will always be sorted by their ascending position in the playlist.
+    ///
     virtual Query<IMedia> media() const = 0;
+    ///
+    /// \brief searchMedia Search some media in a playlist
+    /// \param pattern The search pattern. Minimal length is 3 characters
+    /// \param params Some query parameters. \see{IMediaLibrary::searchMedia}
+    /// \return A query object, or nullptr in case of error or if the pattern is too short
+    ///
     virtual Query<IMedia> searchMedia( const std::string& pattern,
                                        const QueryParameters* params ) const = 0;
     ///
@@ -52,8 +84,14 @@ public:
     ///
     /// \brief add Add a media to the playlist at the given position.
     /// \param media The media to add
-    /// \param position The position of this new media
+    /// \param position The position of this new media, in the [0;size-1] range
     /// \return true on success, false on failure
+    ///
+    /// If the position is greater than the playlist size, it will be interpreted
+    /// as a regular append operation, and the item position will be set to
+    /// <playlist size>
+    /// For instance, on the playlist [<B,0>, <A,1>, <C,2>], if add(D, 999)
+    /// gets called, the resulting playlist will be [<A,0>, <C,1>, <B,2>, <D,3>]
     ///
     virtual bool add( const IMedia& media, uint32_t position ) = 0;
 
@@ -65,13 +103,19 @@ public:
     /// \brief move Change the position of a media
     /// \param from The position of the item being moved
     /// \param to The moved item target position
+    ///
+    /// \return true on success, false on failure
+    ///
     /// In case there is already an item at the given position, it will be placed before
     /// the media being moved. This will cascade to any media placed afterward.
     /// For instance, a playlist with <media,position> like
-    /// [<1,0>, <2,1>, <3,2>] on which move(1, 1) is called will result in the playlist
-    /// being changed to
-    /// [<2,0>, <1,1>, <3,2>]
-    /// \return true on success, false on failure
+    /// [<A,0>, <B,1>, <C,2>] on which move(0, 1) is called will result in the
+    /// playlist being changed to
+    /// [<B,0>, <A,1>, <C,2>]
+    /// If the target position is out of range (ie greater than the playlist size)
+    /// the target position will be interpreted as the playlist size (prior to insertion).
+    /// For instance, on the playlist [<B,0>, <A,1>, <C,2>], if move(0, 999)
+    /// gets called, the resulting playlist will be [<A,0>, <C,1>, <B,2>]
     ///
     virtual bool move( uint32_t from, uint32_t to ) = 0;
     ///
