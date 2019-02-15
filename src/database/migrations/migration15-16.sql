@@ -7,4 +7,6 @@
 /* This trigger however was always recreated until now, and must be present */
 "DROP TRIGGER update_playlist_order_on_insert",
 
+"DROP INDEX IF EXISTS playlist_media_pl_id_index",
+
 #include "database/tables/Playlist_triggers_v16.sql"

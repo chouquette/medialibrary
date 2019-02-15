@@ -319,7 +319,7 @@ bool Playlist::remove( uint32_t position )
 void Playlist::createTable( sqlite::Connection* dbConn, uint32_t dbModel )
 {
     std::string reqs[] = {
-        #include "database/tables/Playlist_v14.sql"
+        #include "database/tables/Playlist_v16.sql"
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
