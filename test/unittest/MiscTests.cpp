@@ -116,6 +116,17 @@ public:
         ASSERT_EQ( nbTriggers, expected );
     }
 
+    void CheckNbIndexes( uint32_t expected )
+    {
+        medialibrary::sqlite::Statement stmt{ ml->getDbConn()->handle(),
+                "SELECT COUNT(*) FROM sqlite_master WHERE type='index'" };
+        stmt.execute();
+        auto row = stmt.row();
+        uint32_t nbIndexes;
+        row >> nbIndexes;
+        ASSERT_EQ( nbIndexes, expected );
+    }
+
     virtual void TearDown() override
     {
         medialibrary::sqlite::Connection::Handle conn;
@@ -240,4 +251,5 @@ TEST_F( DbModel, Upgrade14to15 )
     auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     CheckNbTriggers( 35 );
+    CheckNbIndexes( 37 );
 }
