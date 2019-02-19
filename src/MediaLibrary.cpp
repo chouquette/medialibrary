@@ -918,9 +918,8 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
 
             // Safety check: ensure we didn't forget a migration along the way
             assert( previousVersion == Settings::DbModelVersion );
-            m_settings.setDbModelVersion( Settings::DbModelVersion );
-            if ( m_settings.save() == false )
-                return InitializeResult::Failed;
+            assert( previousVersion == m_settings.dbModelVersion() );
+
             return InitializeResult::Success;
         }
         catch( const std::exception& ex )
@@ -985,17 +984,23 @@ void MediaLibrary::migrateModel3to5()
     // Re-create triggers removed in the process
     Media::createTriggers( getConn(), 5 );
     Playlist::createTriggers( getConn() );
+    m_settings.setDbModelVersion( 5 );
+    m_settings.save();
     t->commit();
 }
 
 void MediaLibrary::migrateModel5to6()
 {
+    // We can't create a transaction here since it would make the weak context
+    // creation fail.
     std::string req = "DELETE FROM " + Media::Table::Name + " WHERE type = ?";
     sqlite::Tools::executeRequest( getConn(), req, Media::Type::Unknown );
 
     sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
     req = "UPDATE " + Media::Table::Name + " SET is_present = 1 WHERE is_present != 0";
     sqlite::Tools::executeRequest( getConn(), req );
+    m_settings.setDbModelVersion( 6 );
+    m_settings.save();
 }
 
 void MediaLibrary::migrateModel7to8()
@@ -1012,6 +1017,8 @@ void MediaLibrary::migrateModel7to8()
     Artist::createTriggers( getConn(), 8u );
     Media::createTriggers( getConn(), 5 );
     File::createTriggers( getConn() );
+    m_settings.setDbModelVersion( 8 );
+    m_settings.save();
     t->commit();
 }
 
@@ -1021,6 +1028,7 @@ void MediaLibrary::migrateModel8to9()
     // first application run (after the migration).
     // This could have caused media associated to deleted files not to be
     // deleted as well, so let's do that now.
+    auto t = getConn()->newTransaction();
     const std::string req = "DELETE FROM " + Media::Table::Name + " "
             "WHERE id_media IN "
             "(SELECT id_media FROM " + Media::Table::Name + " m LEFT JOIN " +
@@ -1030,6 +1038,9 @@ void MediaLibrary::migrateModel8to9()
     // Don't check for the return value, we don't mind if nothing deleted.
     // Quite the opposite actually :)
     sqlite::Tools::executeDelete( getConn(), req );
+    m_settings.setDbModelVersion( 9 );
+    m_settings.save();
+    t->commit();
 }
 
 void MediaLibrary::migrateModel9to10()
@@ -1046,6 +1057,8 @@ void MediaLibrary::migrateModel9to10()
         LOG_INFO( "Converting ", f->rawMrl(), " to ", newMrl );
         f->setMrl( newMrl );
     }
+    m_settings.setDbModelVersion( 10 );
+    m_settings.save();
     t->commit();
 }
 
@@ -1071,6 +1084,8 @@ void MediaLibrary::migrateModel10to11()
         auto newMrl = utils::url::encode( utils::url::decode( f->rawMrl() ) );
         f->setMrl( std::move( newMrl ) );
     }
+    m_settings.setDbModelVersion( 11 );
+    m_settings.save();
     t->commit();
 }
 
@@ -1107,6 +1122,8 @@ void MediaLibrary::migrateModel12to13()
             " SET is_present = (SELECT is_present FROM " + Media::Table::Name +
             " WHERE id_media = media_id)";
     sqlite::Tools::executeUpdate( getConn(), migrateData );
+    m_settings.setDbModelVersion( 13 );
+    m_settings.save();
     t->commit();
 }
 
@@ -1236,6 +1253,8 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     {
         f->setName( utils::file::directoryName( f->rawMrl() ) );
     }
+    m_settings.setDbModelVersion( 14 );
+    m_settings.save();
 
     t->commit();
 }
@@ -1257,6 +1276,8 @@ void MediaLibrary::migrateModel14to15()
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
     Folder::createTriggers( dbConn, 15 );
+    m_settings.setDbModelVersion( 15 );
+    m_settings.save();
     t->commit();
 }
 
