@@ -1,12 +1,26 @@
-/**
- * If migrating from an older version, these triggers might already be removed
- * due to a migration on the playlist table, and updated Playlist_trigger file.
- */
-"DROP TRIGGER IF EXISTS update_playlist_order",
-"DROP TRIGGER IF EXISTS append_new_playlist_record",
-/* This trigger however was always recreated until now, and must be present */
-"DROP TRIGGER update_playlist_order_on_insert",
+/* Migrate to contiguous playlist position index */
 
-"DROP INDEX IF EXISTS playlist_media_pl_id_index",
+"CREATE TEMPORARY TABLE PlaylistMediaRelation_backup"
+"("
+    "media_id INTEGER,"
+    "mrl STRING,"
+    "playlist_id INTEGER,"
+    "position INTEGER"
+")",
+
+"INSERT INTO PlaylistMediaRelation_backup"
+    "(media_id, mrl, playlist_id, position) "
+    "SELECT media_id, mrl, playlist_id, ROW_NUMBER() OVER ("
+        "PARTITION BY playlist_id "
+        "ORDER BY position"
+    ") - 1 "
+"FROM PlaylistMediaRelation",
+
+"DROP TABLE PlaylistMediaRelation",
+
+#include "database/tables/Playlist_v16.sql"
+
+"INSERT INTO PlaylistMediaRelation SELECT * FROM PlaylistMediaRelation_backup",
+"DROP TABLE PlaylistMediaRelation_backup",
 
 #include "database/tables/Playlist_triggers_v16.sql"

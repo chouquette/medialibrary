@@ -1293,6 +1293,7 @@ void MediaLibrary::migrateModel14to15()
  * - Remove update_playlist_order trigger
  * - Add update_playlist_order_on_delete
  * - Update trigger update_playlist_order_on_insert
+ * - Enforce contiguous position indexes on PlaylistMediaRelation
  */
 void MediaLibrary::migrateModel15to16()
 {
@@ -1304,7 +1305,7 @@ void MediaLibrary::migrateModel15to16()
 
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( getConn(), req );
-
+    Media::createTriggers( dbConn, 15 );
     m_settings.setDbModelVersion( 16 );
     m_settings.save();
     t->commit();
