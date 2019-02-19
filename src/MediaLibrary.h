@@ -217,6 +217,7 @@ private:
     void migrateModel12to13();
     void migrateModel13to14( uint32_t originalPreviousVersion );
     void migrateModel14to15();
+    void migrateModel15to16();
     void createAllTables();
     void createAllTriggers();
     void registerEntityHooks();

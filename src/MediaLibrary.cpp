@@ -913,6 +913,11 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 migrateModel14to15();
                 previousVersion = 15;
             }
+            if ( previousVersion == 15 )
+            {
+                migrateModel15to16();
+                previousVersion = 16;
+            }
             // To be continued in the future!
 
             if ( needRescan == true )
@@ -1279,6 +1284,15 @@ void MediaLibrary::migrateModel14to15()
         sqlite::Tools::executeRequest( dbConn, req );
     Folder::createTriggers( dbConn, 15 );
     m_settings.setDbModelVersion( 15 );
+    m_settings.save();
+    t->commit();
+}
+
+void MediaLibrary::migrateModel15to16()
+{
+    auto dbConn = getConn();
+    auto t = dbConn->newTransaction();
+    m_settings.setDbModelVersion( 16 );
     m_settings.save();
     t->commit();
 }

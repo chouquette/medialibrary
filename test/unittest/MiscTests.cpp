@@ -253,3 +253,12 @@ TEST_F( DbModel, Upgrade14to15 )
     CheckNbTriggers( 35 );
     CheckNbIndexes( 37 );
 }
+
+TEST_F( DbModel, Upgrade15to16 )
+{
+    LoadFakeDB( SRC_DIR "/test/unittest/db_v15.sql" );
+    auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
+    ASSERT_EQ( InitializeResult::Success, res );
+    CheckNbTriggers( 35 );
+    CheckNbIndexes( 37 );
+}
