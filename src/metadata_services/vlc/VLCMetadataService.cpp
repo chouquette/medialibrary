@@ -201,9 +201,7 @@ void VLCMetadataService::mediaToItem( VLC::Media& media, IItem& item )
         {
             auto vlcMedia = subItems->itemAtIndex( i );
             assert( vlcMedia != nullptr );
-            // Always add 1 to the playlist/subitem index, as 0 is an invalid index
-            // in this context
-            IItem& subItem = item.createSubItem( vlcMedia->mrl(), i + 1u );
+            IItem& subItem = item.createSubItem( vlcMedia->mrl(), i );
             mediaToItem( *vlcMedia, subItem );
         }
     }

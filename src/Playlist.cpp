@@ -168,7 +168,7 @@ void Playlist::curateNullMediaID() const
 
 bool Playlist::append( const IMedia& media )
 {
-    return add( media, 0 );
+    return add( media, UINT32_MAX );
 }
 
 bool Playlist::add( const IMedia& media, uint32_t position )
@@ -188,10 +188,18 @@ bool Playlist::add( const IMedia& media, uint32_t position )
         LOG_ERROR( "Can't add a media without any files to a playlist" );
         return false;
     }
-    if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
-                                         (*mainFile)->mrl(), m_id,
-                                         sqlite::ForeignKey{ position } ) == false )
-        return false;
+    if ( position == UINT32_MAX )
+    {
+        if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
+                                           (*mainFile)->mrl(), m_id, nullptr ) == false )
+            return false;
+    }
+    else
+    {
+        if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
+                                           (*mainFile)->mrl(), m_id, position ) == false )
+            return false;
+    }
     auto notifier = m_ml->getNotifier();
     if ( notifier != nullptr )
         notifier->notifyPlaylistModification( shared_from_this() );
@@ -253,8 +261,6 @@ bool Playlist::contains( int64_t mediaId, uint32_t position )
 
 bool Playlist::move( int64_t mediaId, uint32_t position )
 {
-    if ( position == 0 )
-        return false;
     static const std::string req = "UPDATE PlaylistMediaRelation SET position = ? WHERE "
             "playlist_id = ? AND media_id = ?";
     auto res = sqlite::Tools::executeUpdate( m_ml->getConn(), req, position, m_id, mediaId );
@@ -306,7 +312,7 @@ void Playlist::createTable( sqlite::Connection* dbConn, uint32_t dbModel )
 void Playlist::createTriggers( sqlite::Connection* dbConn )
 {
     std::string reqs[] = {
-        #include "database/tables/Playlist_triggers_v14.sql"
+        #include "database/tables/Playlist_triggers_v16.sql"
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );

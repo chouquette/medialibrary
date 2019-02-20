@@ -143,14 +143,14 @@ TEST_F( Playlists, Insert )
         auto res = pl->append( *m );
         ASSERT_TRUE( res );
     }
-    // [<1,1>,<2,2>,<3,3>]
+    // [<1,0>,<2,1>,<3,2>]
     auto firstMedia = ml->addMedia( "first.mkv" );
 
-    pl->add( *firstMedia, 1 );
-    // [<4,1>,<1,2>,<2,3>,<3,4>]
+    pl->add( *firstMedia, 0 );
+    // [<4,0>,<1,1>,<2,2>,<3,3>]
     auto middleMedia = ml->addMedia( "middle.mkv" );
-    pl->add( *middleMedia, 3 );
-    // [<4,1>,<1,2>,<5,3>,<2,4>,<3,5>]
+    pl->add( *middleMedia, 2 );
+    // [<4,0>,<1,1>,<5,2>,<2,3>,<3,4>]
     auto media = pl->media()->all();
     ASSERT_EQ( 5u, media.size() );
 
@@ -170,9 +170,9 @@ TEST_F( Playlists, Move )
         auto res = pl->append( *m );
         ASSERT_TRUE( res );
     }
-    // [<1,1>,<2,2>,<3,3>,<4,4>,<5,5>]
-    pl->move( 5, 1 );
-    // [<5,1>,<1,2>,<2,3>,<3,4>,<4,5>]
+    // [<1,0>,<2,1>,<3,2>,<4,3>,<5,4>]
+    pl->move( 5, 0 );
+    // [<5,0>,<1,1>,<2,2>,<3,3>,<4,4>]
     auto media = pl->media()->all();
     ASSERT_EQ( 5u, media.size() );
 
@@ -467,7 +467,7 @@ TEST_F( Playlists, RemoveReAddMedia )
     ASSERT_EQ( m1->id(), media[0]->id() );
     ASSERT_EQ( m3->id(), media[1]->id() );
 
-    pl->add( *m2, 2 );
+    pl->add( *m2, 1 );
 
     media = pl->media()->all();
     ASSERT_EQ( 3u, media.size() );
@@ -482,7 +482,7 @@ TEST_F( Playlists, RemoveReAddMedia )
     ASSERT_EQ( m2->id(), media[0]->id() );
     ASSERT_EQ( m3->id(), media[1]->id() );
 
-    pl->add( *m1, 1 );
+    pl->add( *m1, 0 );
 
     media = pl->media()->all();
     ASSERT_EQ( 3u, media.size() );
