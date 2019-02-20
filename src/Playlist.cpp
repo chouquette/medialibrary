@@ -261,16 +261,24 @@ bool Playlist::contains( int64_t mediaId, uint32_t position )
 
 bool Playlist::move( int64_t mediaId, uint32_t position )
 {
-    static const std::string req = "UPDATE PlaylistMediaRelation SET position = ? WHERE "
-            "playlist_id = ? AND media_id = ?";
-    auto res = sqlite::Tools::executeUpdate( m_ml->getConn(), req, position, m_id, mediaId );
-    if ( res == true )
+    auto t = m_ml->getConn()->newTransaction();
+    if ( remove( mediaId ) == false )
     {
-        auto notifier = m_ml->getNotifier();
-        if ( notifier != nullptr )
-            notifier->notifyPlaylistModification( shared_from_this() );
+        LOG_ERROR( "Failed to move playlist ", m_name, " item: item wasn't present "
+                   "in the playlist" );
+        return false;
     }
-    return res;
+    if ( add( mediaId, position ) == false )
+    {
+        LOG_ERROR( "Failed to move playlist ", m_name, " item: insertion of "
+                   "the new position failed. Aborting the move operation");
+        return false;
+    }
+    t->commit();
+    auto notifier = m_ml->getNotifier();
+    if ( notifier != nullptr )
+        notifier->notifyPlaylistModification( shared_from_this() );
+    return true;
 }
 
 bool Playlist::remove( int64_t mediaId )

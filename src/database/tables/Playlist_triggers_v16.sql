@@ -1,13 +1,3 @@
-"CREATE TRIGGER IF NOT EXISTS update_playlist_order AFTER UPDATE OF position"
-" ON PlaylistMediaRelation"
-" BEGIN "
-    "UPDATE PlaylistMediaRelation SET position = position + 1"
-    " WHERE playlist_id = new.playlist_id"
-    " AND position = new.position"
-    // We don't want to trigger a self-update when the insert trigger fires.
-    " AND media_id != new.media_id;"
-" END",
-
 "CREATE TRIGGER IF NOT EXISTS append_new_playlist_record AFTER INSERT"
 " ON PlaylistMediaRelation"
 " WHEN new.position IS NULL"
@@ -26,8 +16,17 @@
 " BEGIN "
     "UPDATE PlaylistMediaRelation SET position = position + 1"
     " WHERE playlist_id = new.playlist_id"
-    " AND position = new.position"
+    " AND position >= new.position"
     " AND media_id != new.media_id;"
+" END",
+
+"CREATE TRIGGER IF NOT EXISTS update_playlist_order_on_delete AFTER DELETE"
+" ON PlaylistMediaRelation"
+" BEGIN "
+    "UPDATE PlaylistMediaRelation SET position = position - 1"
+    " WHERE playlist_id = old.playlist_id"
+    " AND position > old.position"
+    " AND media_id != old.media_id;"
 " END",
 
 "CREATE TRIGGER IF NOT EXISTS insert_playlist_fts AFTER INSERT ON "

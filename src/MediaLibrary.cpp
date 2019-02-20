@@ -1288,10 +1288,23 @@ void MediaLibrary::migrateModel14to15()
     t->commit();
 }
 
+/**
+ * Model 15 to 16 migration:
+ * - Remove update_playlist_order trigger
+ * - Add update_playlist_order_on_delete
+ * - Update trigger update_playlist_order_on_insert
+ */
 void MediaLibrary::migrateModel15to16()
 {
     auto dbConn = getConn();
     auto t = dbConn->newTransaction();
+    std::string reqs[] = {
+#               include "database/migrations/migration15-16.sql"
+    };
+
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( getConn(), req );
+
     m_settings.setDbModelVersion( 16 );
     m_settings.save();
     t->commit();
