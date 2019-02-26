@@ -1664,7 +1664,11 @@ bool MediaLibrary::DeviceListerCb::onDeviceMounted( const std::string& uuid,
                 }
             }
             else
+            {
                 m_ml->refreshDevices( *fsFactory );
+                if ( Device::create( m_ml, uuid, "file://", true ) == nullptr )
+                    return false;
+            }
             break;
         }
     }
