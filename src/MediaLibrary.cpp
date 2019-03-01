@@ -1672,7 +1672,8 @@ bool MediaLibrary::DeviceListerCb::onDeviceMounted( const std::string& uuid,
                 {
                     try
                     {
-                        if ( Device::create( m_ml, uuid, "file://", true ) == nullptr )
+                        if ( Device::create( m_ml, uuid, fsFactory->scheme(),
+                                             true ) == nullptr )
                             return false;
                     }
                     // And be conservative and assume another thread might have
