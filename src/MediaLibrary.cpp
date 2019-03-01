@@ -334,6 +334,7 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
 
 bool MediaLibrary::start()
 {
+    LOG_INFO( "Starting medialibrary..." );
     assert( m_initialized == true );
     if ( m_parser != nullptr )
         return false;
