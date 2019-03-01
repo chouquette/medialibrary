@@ -126,7 +126,7 @@ bool MockResumeCallback::waitForDiscoveryComplete()
     std::unique_lock<compat::Mutex> lock( m_discoveryMutex, std::adopt_lock );
     m_discoveryCompleted = false;
     // Wait for a while, generating snapshots can be heavy...
-    return m_discoveryCompletedVar.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
+    return m_discoveryCompletedVar.wait_for( lock, std::chrono::seconds{ 10 }, [this]() {
         return m_discoveryCompleted;
     });
 }
@@ -139,7 +139,7 @@ bool MockResumeCallback::waitForParsingComplete()
     std::unique_lock<compat::Mutex> lock( m_parsingMutex, std::adopt_lock );
     m_done = false;
     // Wait for a while, generating snapshots can be heavy...
-    return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
+    return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 10 }, [this]() {
         return m_done;
     });
 }
