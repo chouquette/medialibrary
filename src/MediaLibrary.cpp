@@ -1636,8 +1636,21 @@ bool MediaLibrary::DeviceListerCb::onDeviceMounted( const std::string& uuid,
             else
             {
                 m_ml->refreshDevices( *fsFactory );
-                if ( Device::create( m_ml, uuid, "file://", true ) == nullptr )
-                    return false;
+                // Don't try to insert the device if we already know it
+                if ( currentDevice == nullptr )
+                {
+                    try
+                    {
+                        if ( Device::create( m_ml, uuid, "file://", true ) == nullptr )
+                            return false;
+                    }
+                    // And be conservative and assume another thread might have
+                    // inserted the device between our previous check and now
+                    catch ( const sqlite::errors::ConstraintViolation& )
+                    {
+                        return false;
+                    }
+                }
             }
             break;
         }
