@@ -96,7 +96,7 @@ void Directory::read() const
     // We must remove the trailing /
     // https://msdn.microsoft.com/en-us/library/windows/desktop/aa363858(v=vs.85).aspx
     // «Do not use a trailing backslash (\), which indicates the root directory of a drive»
-    auto tmpPath = path.substr( 0, m_path.length() - 1 );
+    auto tmpPath = m_path.substr( 0, m_path.length() - 1 );
     auto wpath = charset::ToWide( tmpPath.c_str() );
 
     CREATEFILE2_EXTENDED_PARAMETERS params{};
