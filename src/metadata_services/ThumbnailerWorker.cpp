@@ -54,10 +54,9 @@ ThumbnailerWorker::~ThumbnailerWorker()
 
 void ThumbnailerWorker::requestThumbnail( MediaPtr media )
 {
-    {
-        std::unique_lock<compat::Mutex> lock( m_mutex );
-        m_tasks.push( std::move( media ) );
-    }
+    std::unique_lock<compat::Mutex> lock( m_mutex );
+
+    m_tasks.push( std::move( media ) );
     if ( m_thread.get_id() == compat::Thread::id{} )
     {
         m_run = true;

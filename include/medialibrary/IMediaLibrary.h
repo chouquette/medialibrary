@@ -515,6 +515,8 @@ public:
      * will be called.
      * In case a thumbnail was already generated for the media, false will be returned.
      * If so, no callback will be invoked
+     *
+     * This function is thread-safe
      */
     virtual bool requestThumbnail( MediaPtr media ) = 0;
 
