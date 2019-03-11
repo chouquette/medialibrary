@@ -462,3 +462,14 @@ TEST_F( DeviceFs, OutdatedDevices )
 
     ASSERT_NE( oldMediaCount, ml->files().size() );
 }
+
+TEST_F( DeviceFs, RemovableMountPointName )
+{
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    auto f = ml->folder( RemovableDeviceMountpoint );
+    ASSERT_NE( nullptr, f );
+    ASSERT_NE( 0u, f->name().size() );
+}

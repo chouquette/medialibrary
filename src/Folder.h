@@ -112,7 +112,7 @@ private:
     // This contains the path relative to the device mountpoint (ie. excluding it)
     // or the full path (including mrl scheme) for folders on non removable devices
     std::string m_path;
-    std::string m_name;
+    mutable std::string m_name;
     const int64_t m_parent;
     const bool m_isBanned;
     const int64_t m_deviceId;
