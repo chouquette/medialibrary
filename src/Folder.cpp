@@ -436,6 +436,14 @@ const std::string& Folder::mrl() const
 
 const std::string&Folder::name() const
 {
+    if ( m_isRemovable == true && m_name.empty() == true )
+    {
+        // In case this is the root folder of an external device, we don't have
+        // any information before knowing the actual mountpoint, so we have to do
+        // this at runtime
+        auto fullPath = mrl();
+        m_name = utils::url::decode( utils::file::directoryName( fullPath ) );
+    }
     return m_name;
 }
 
