@@ -5,7 +5,7 @@
     "UPDATE PlaylistMediaRelation SET position = position + 1"
     " WHERE playlist_id = new.playlist_id"
     " AND position >= new.position"
-    " AND media_id != new.media_id;"
+    " AND rowid != new.rowid;"
 " END",
 
 "CREATE TRIGGER IF NOT EXISTS update_playlist_order_on_delete AFTER DELETE"
@@ -13,8 +13,7 @@
 " BEGIN "
     "UPDATE PlaylistMediaRelation SET position = position - 1"
     " WHERE playlist_id = old.playlist_id"
-    " AND position > old.position"
-    " AND media_id != old.media_id;"
+    " AND position > old.position;"
 " END",
 
 "CREATE TRIGGER IF NOT EXISTS insert_playlist_fts AFTER INSERT ON "
