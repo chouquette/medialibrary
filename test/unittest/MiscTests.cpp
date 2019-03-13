@@ -261,4 +261,28 @@ TEST_F( DbModel, Upgrade15to16 )
     ASSERT_EQ( InitializeResult::Success, res );
     CheckNbTriggers( 34 );
     CheckNbIndexes( 37 );
+
+    // Check that playlists were properly migrated
+    medialibrary::sqlite::Statement stmt{
+        ml->getDbConn()->handle(),
+        "SELECT playlist_id, position FROM PlaylistMediaRelation "
+            "ORDER BY playlist_id, position"
+    };
+    stmt.execute();
+    auto expected = 0u;
+    auto playlistId = 0uLL;
+    sqlite::Row row;
+    while ( ( row = stmt.row() ) != nullptr )
+    {
+        uint32_t pos;
+        uint64_t pId;
+        row >> pId >> pos;
+        if ( pId != playlistId )
+        {
+            expected = 0;
+            playlistId = pId;
+        }
+        ASSERT_EQ( pos, expected );
+        ++expected;
+    }
 }

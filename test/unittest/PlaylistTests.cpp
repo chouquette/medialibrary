@@ -40,6 +40,25 @@ protected:
         Tests::SetUp();
         pl = std::static_pointer_cast<Playlist>( ml->createPlaylist( "test playlist" ) );
     }
+
+    void CheckContiguity()
+    {
+        medialibrary::sqlite::Statement stmt{
+            ml->getDbConn()->handle(),
+            "SELECT position FROM PlaylistMediaRelation "
+                "WHERE playlist_id=? ORDER BY position"
+        };
+        stmt.execute( pl->id() );
+        auto expected = 0u;
+        sqlite::Row row;
+        while ( ( row = stmt.row() ) != nullptr )
+        {
+            uint32_t pos;
+            row >> pos;
+            ASSERT_EQ( pos, expected );
+            ++expected;
+        }
+    }
 };
 
 TEST_F( Playlists, Create )
@@ -111,6 +130,9 @@ TEST_F( Playlists, Add )
 {
     auto m = ml->addMedia( "file.mkv" );
     auto res = pl->append( *m );
+
+    CheckContiguity();
+
     ASSERT_TRUE( res );
     auto media = pl->media()->all();
     ASSERT_EQ( 1u, media.size() );
@@ -132,6 +154,7 @@ TEST_F( Playlists, Append )
         auto name = "media" + std::to_string( i ) + ".mkv";
         ASSERT_EQ( media[i]->title(), name );
     }
+    CheckContiguity();
 }
 
 TEST_F( Playlists, Insert )
@@ -147,9 +170,12 @@ TEST_F( Playlists, Insert )
     auto firstMedia = ml->addMedia( "first.mkv" );
 
     pl->add( *firstMedia, 0 );
+    CheckContiguity();
+
     // [<4,0>,<1,1>,<2,2>,<3,3>]
     auto middleMedia = ml->addMedia( "middle.mkv" );
     pl->add( *middleMedia, 2 );
+    CheckContiguity();
     // [<4,0>,<1,1>,<5,2>,<2,3>,<3,4>]
     auto media = pl->media()->all();
     ASSERT_EQ( 5u, media.size() );
@@ -170,9 +196,12 @@ TEST_F( Playlists, Move )
         auto res = pl->append( *m );
         ASSERT_TRUE( res );
     }
+    CheckContiguity();
+
     // [<1,0>,<2,1>,<3,2>,<4,3>,<5,4>]
     auto res = pl->move( 4, 0 );
     ASSERT_TRUE( res );
+    CheckContiguity();
     // [<5,0>,<1,1>,<2,2>,<3,3>,<4,4>]
     auto media = pl->media()->all();
     ASSERT_EQ( 5u, media.size() );
@@ -194,6 +223,7 @@ TEST_F( Playlists, Move )
     ASSERT_EQ( 3u, media[2]->id() );
     ASSERT_EQ( 4u, media[3]->id() );
     ASSERT_EQ( 1u, media[4]->id() );
+    CheckContiguity();
 
     // Move an item past the theorical last element
     pl->move( 1, 10 );
@@ -206,6 +236,7 @@ TEST_F( Playlists, Move )
     ASSERT_EQ( 4u, media[2]->id() );
     ASSERT_EQ( 1u, media[3]->id() );
     ASSERT_EQ( 2u, media[4]->id() );
+    CheckContiguity();
 
     // But check that this didn't create a gap in the items (if we move an item
     // to position 9, it should still be the last element in the playlist
@@ -237,6 +268,7 @@ TEST_F( Playlists, Remove )
     // [<1,0>,<2,1>,<3,2>,<4,3>,<5,4>]
     auto media = pl->media()->all();
     ASSERT_EQ( 5u, media.size() );
+    CheckContiguity();
 
     pl->remove( 2 );
     // [<1,0>,<2,1>,<4,2>,<5,3>]
@@ -248,6 +280,7 @@ TEST_F( Playlists, Remove )
     ASSERT_EQ( 2u, media[1]->id() );
     ASSERT_EQ( 4u, media[2]->id() );
     ASSERT_EQ( 5u, media[3]->id() );
+    CheckContiguity();
 }
 
 TEST_F( Playlists, DeleteFile )
@@ -278,6 +311,7 @@ TEST_F( Playlists, DeleteFile )
     ASSERT_EQ( 2u, media[1]->id() );
     ASSERT_EQ( 4u, media[2]->id() );
     ASSERT_EQ( 5u, media[3]->id() );
+    CheckContiguity();
 
     // Ensure we don't delete an empty playlist:
     auto ms = ml->files();
@@ -373,6 +407,7 @@ TEST_F( Playlists, AddDuplicate )
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m->id(), media[0]->id() );
     ASSERT_EQ( m->id(), media[1]->id() );
+    CheckContiguity();
 
     auto count = pl->media()->count();
     ASSERT_EQ( count, media.size() );
@@ -418,6 +453,7 @@ TEST_F( Playlists, ReinsertMedia )
     ASSERT_EQ( m1->id(), media[0]->id() );
     ASSERT_EQ( m2->id(), media[1]->id() );
     ASSERT_EQ( m3->id(), media[2]->id() );
+    CheckContiguity();
 
     // Ensure the media we fetch are recreated by checking their ids before/after
     auto m1Id = m1->id();
@@ -425,6 +461,7 @@ TEST_F( Playlists, ReinsertMedia )
 
     ml->deleteMedia( m1->id() );
     ml->deleteMedia( m2->id() );
+    CheckContiguity();
 
     Reload();
     pl = std::static_pointer_cast<Playlist>( ml->playlist( pl->id() ) );
@@ -439,6 +476,7 @@ TEST_F( Playlists, ReinsertMedia )
     ASSERT_EQ( m3->id(), media[2]->id() );
     ASSERT_NE( m1->id(), m1Id );
     ASSERT_NE( m2->id(), m2Id );
+    CheckContiguity();
 }
 
 TEST_F( Playlists, RemoveMedia )
@@ -455,6 +493,7 @@ TEST_F( Playlists, RemoveMedia )
     ASSERT_EQ( m1->id(), media[0]->id() );
     ASSERT_EQ( m2->id(), media[1]->id() );
     ASSERT_EQ( m3->id(), media[2]->id() );
+    CheckContiguity();
 
     ml->deleteMedia( m1->id() );
     ml->deleteMedia( m2->id() );
@@ -466,6 +505,7 @@ TEST_F( Playlists, RemoveMedia )
     media = pl->media()->all();
     ASSERT_EQ( 1u, media.size() );
     ASSERT_EQ( m3->id(), media[0]->id() );
+    CheckContiguity();
 }
 
 TEST_F( Playlists, ClearContent )
@@ -500,6 +540,7 @@ TEST_F( Playlists, RemoveReAddMedia )
     ASSERT_EQ( m1->id(), media[0]->id() );
     ASSERT_EQ( m2->id(), media[1]->id() );
     ASSERT_EQ( m3->id(), media[2]->id() );
+    CheckContiguity();
 
     // Remove the middle element
     pl->remove( 1 );
@@ -508,6 +549,7 @@ TEST_F( Playlists, RemoveReAddMedia )
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m1->id(), media[0]->id() );
     ASSERT_EQ( m3->id(), media[1]->id() );
+    CheckContiguity();
 
     pl->add( *m2, 1 );
 
@@ -516,6 +558,7 @@ TEST_F( Playlists, RemoveReAddMedia )
     ASSERT_EQ( m1->id(), media[0]->id() );
     ASSERT_EQ( m2->id(), media[1]->id() );
     ASSERT_EQ( m3->id(), media[2]->id() );
+    CheckContiguity();
 
     pl->remove( 0 );
 
@@ -523,6 +566,7 @@ TEST_F( Playlists, RemoveReAddMedia )
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m2->id(), media[0]->id() );
     ASSERT_EQ( m3->id(), media[1]->id() );
+    CheckContiguity();
 
     pl->add( *m1, 0 );
 
@@ -531,4 +575,39 @@ TEST_F( Playlists, RemoveReAddMedia )
     ASSERT_EQ( m1->id(), media[0]->id() );
     ASSERT_EQ( m2->id(), media[1]->id() );
     ASSERT_EQ( m3->id(), media[2]->id() );
+    CheckContiguity();
+}
+
+TEST_F( Playlists, InsertRemoveDuplicateMedia )
+{
+    MediaPtr m;
+    for ( auto i = 0u; i < 5; ++i )
+    {
+        m = ml->addMedia( std::to_string( i + 1 ) + ".mp3" );
+        pl->append( *m );
+    }
+    pl->append( *m );
+
+    auto items = pl->media()->all();
+    ASSERT_EQ( 6u, items.size() );
+    ASSERT_EQ( 1u, items[0]->id() );
+    ASSERT_EQ( 2u, items[1]->id() );
+    ASSERT_EQ( 3u, items[2]->id() );
+    ASSERT_EQ( 4u, items[3]->id() );
+    ASSERT_EQ( 5u, items[4]->id() );
+    ASSERT_EQ( 5u, items[5]->id() );
+    CheckContiguity();
+
+    auto res = pl->remove( 4 );
+
+    ASSERT_TRUE( res );
+    items = pl->media()->all();
+
+    ASSERT_EQ( 5u, items.size() );
+    ASSERT_EQ( 1u, items[0]->id() );
+    ASSERT_EQ( 2u, items[1]->id() );
+    ASSERT_EQ( 3u, items[2]->id() );
+    ASSERT_EQ( 4u, items[3]->id() );
+    ASSERT_EQ( 5u, items[4]->id() );
+    CheckContiguity();
 }
