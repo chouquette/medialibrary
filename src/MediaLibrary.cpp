@@ -1672,8 +1672,14 @@ bool MediaLibrary::DeviceListerCb::onDeviceMounted( const std::string& uuid,
                 {
                     try
                     {
+                        deviceFs = fsFactory->createDevice( uuid );
+                        if ( deviceFs == nullptr )
+                        {
+                            assert( !"The device must be available after a refresh" );
+                            return false;
+                        }
                         if ( Device::create( m_ml, uuid, fsFactory->scheme(),
-                                             true ) == nullptr )
+                                             deviceFs->isRemovable() ) == nullptr )
                             return false;
                     }
                     // And be conservative and assume another thread might have
