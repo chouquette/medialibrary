@@ -1667,21 +1667,39 @@ bool MediaLibrary::DeviceListerCb::onDeviceMounted( const std::string& uuid,
                     if ( currentDevice != nullptr )
                         currentDevice->setPresent( true );
                 }
+                else if ( currentDevice != nullptr && currentDevice->isRemovable() == true &&
+                          deviceFs->isRemovable() == false )
+                {
+                    /// During Android 3.1.0-rc phase, the main storage device was
+                    /// created as a removable device, while it isn't.
+                    /// We need to fix the DB state:
+                    auto res = currentDevice->forceNonRemovable();
+                    if ( res == true )
+                    {
+                        LOG_INFO( "Recovered from an invalid database state. "
+                                  "Device ", uuid, " was marked back as non-removable" );
+                    }
+                    else
+                    {
+                        LOG_WARN( "The database is left in an invalid state, "
+                                  "you might want to force a complete rescan" );
+                    }
+                }
             }
             else
             {
                 m_ml->refreshDevices( *fsFactory );
+                deviceFs = fsFactory->createDevice( uuid );
+                if ( deviceFs == nullptr )
+                {
+                    assert( !"The device must be available after a refresh" );
+                    return false;
+                }
                 // Don't try to insert the device if we already know it
                 if ( currentDevice == nullptr )
                 {
                     try
                     {
-                        deviceFs = fsFactory->createDevice( uuid );
-                        if ( deviceFs == nullptr )
-                        {
-                            assert( !"The device must be available after a refresh" );
-                            return false;
-                        }
                         if ( Device::create( m_ml, uuid, fsFactory->scheme(),
                                              deviceFs->isRemovable() ) == nullptr )
                             return false;
@@ -1691,6 +1709,28 @@ bool MediaLibrary::DeviceListerCb::onDeviceMounted( const std::string& uuid,
                     catch ( const sqlite::errors::ConstraintViolation& )
                     {
                         return false;
+                    }
+                }
+                else
+                {
+                    // We already knew the device, we need to check for a broken
+                    // removable state:
+                    if ( currentDevice->isRemovable() == true && deviceFs->isRemovable() == false )
+                    {
+                        /// During Android 3.1.0-rc phase, the main storage device was
+                        /// created as a removable device, while it isn't.
+                        /// We need to fix the DB state:
+                        auto res = currentDevice->forceNonRemovable();
+                        if ( res == true )
+                        {
+                            LOG_INFO( "Recovered from an invalid database state. "
+                                      "Device ", uuid, " was marked back as non-removable" );
+                        }
+                        else
+                        {
+                            LOG_WARN( "The database is left in an invalid state, "
+                                      "you might want to force a complete rescan" );
+                        }
                     }
                 }
             }

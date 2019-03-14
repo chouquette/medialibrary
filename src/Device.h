@@ -46,6 +46,11 @@ public:
     int64_t id() const;
     const std::string& uuid() const;
     bool isRemovable() const;
+    ///
+    /// \brief forceNonRemovable This is used only to fix an invalid DB state
+    /// \return
+    ///
+    bool forceNonRemovable();
     bool isPresent() const;
     void setPresent( bool value );
     ///
@@ -72,7 +77,9 @@ private:
     // It can be a name or what not, depending on the OS.
     const std::string m_uuid;
     const std::string m_scheme;
-    const bool m_isRemovable;
+    // Can't be const anymore, but should be if we ever get to remove the
+    // removable->non removable device fixup (introduced after vlc-android 3.1.0 rc3)
+    bool m_isRemovable;
     bool m_isPresent;
     time_t m_lastSeen;
 

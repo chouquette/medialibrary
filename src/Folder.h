@@ -85,6 +85,7 @@ public:
     std::shared_ptr<Folder> parent();
     int64_t deviceId() const;
     virtual bool isRemovable() const override;
+    bool forceNonRemovable( const std::string& fullMrl );
     virtual bool isPresent() const override;
     virtual bool isBanned() const override;
     bool isRootFolder() const;
@@ -116,7 +117,9 @@ private:
     const int64_t m_parent;
     const bool m_isBanned;
     const int64_t m_deviceId;
-    const bool m_isRemovable;
+    // Can't be const anymore, but should be if we ever get to remove the
+    // removable->non removable device fixup (introduced after vlc-android 3.1.0 rc3)
+    bool m_isRemovable;
 
     mutable std::shared_ptr<Device> m_device;
     // This contains the full path, including device mountpoint (and mrl scheme,
