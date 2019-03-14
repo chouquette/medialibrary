@@ -511,6 +511,37 @@ bool Folder::isRemovable() const
     return m_isRemovable;
 }
 
+bool Folder::forceNonRemovable( const std::string& fullMrl )
+{
+    assert( sqlite::Transaction::transactionInProgress() == true );
+    LOG_INFO( "Fixin up: mrl:", m_path, " -> ", fullMrl );
+
+    const std::string req = "UPDATE " + Table::Name +
+            " SET path = ?, is_removable = ? WHERE id_folder = ?";
+    auto removeFolder = false;
+    try
+    {
+        // Don't check the return value as some updates might fail, because we
+        // removed the parents folder before firing the update itself
+        sqlite::Tools::executeUpdate( m_ml->getConn(), req, fullMrl, false, m_id );
+    }
+    catch ( sqlite::errors::ConstraintViolation& )
+    {
+        // Assume this was a banned folder which we erroneously added.
+        removeFolder = true;
+    }
+    // Don't run the deletion from an exception handler
+    if ( removeFolder == true )
+    {
+        destroy( m_ml, m_id );
+        return true;
+    }
+    m_fullPath = fullMrl;
+    m_path = fullMrl;
+    m_isRemovable = false;
+    return true;
+}
+
 bool Folder::isPresent() const
 {
     if ( m_device == nullptr )

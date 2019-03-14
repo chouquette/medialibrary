@@ -25,6 +25,7 @@
 #endif
 
 #include "Device.h"
+#include "Folder.h"
 
 namespace medialibrary
 {
@@ -70,6 +71,37 @@ const std::string&Device::uuid() const
 bool Device::isRemovable() const
 {
     return m_isRemovable;
+}
+
+bool Device::forceNonRemovable()
+{
+    LOG_INFO( "Fixing up device ", m_uuid, " removable state..." );
+    auto dbConn = m_ml->getConn();
+    auto t = dbConn->newTransaction();
+    // The folders were also create based on the removable state, so we need to
+    // update their mrl.
+    // Files were not impacted by the issue.
+    const std::string foldersReq = "SELECT * FROM " + Folder::Table::Name +
+            " WHERE device_id = ?";
+    auto folders = Folder::fetchAll<Folder>( m_ml, foldersReq, m_id );
+    for ( auto& f : folders )
+    {
+        if ( f->isRemovable() == false )
+            continue;
+        auto fullMrl = f->mrl();
+        if ( f->forceNonRemovable( fullMrl ) == false )
+            return false;
+    }
+    // Update the device after updating the folders, to avoid any potential
+    // screwup where the device would be deemed non-removable, and the MRL would
+    // be only the relative part.
+    const std::string req = "UPDATE " + Table::Name + " SET is_removable = ? "
+            " WHERE id_device = ?";
+    if ( sqlite::Tools::executeUpdate( dbConn, req, false, m_id ) == false )
+        return false;
+    m_isRemovable = false;
+    t->commit();
+    return true;
 }
 
 bool Device::isPresent() const
