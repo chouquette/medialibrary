@@ -45,8 +45,8 @@ Device::Device( MediaLibraryPtr ml, sqlite::Row& row )
 {
 }
 
-Device::Device( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme,
-                bool isRemovable, time_t lastSeen )
+Device::Device( MediaLibraryPtr ml, const std::string& uuid,
+                const std::string& scheme, bool isRemovable, time_t lastSeen )
     : m_ml( ml )
     , m_id( 0 )
     , m_uuid( uuid )
@@ -140,15 +140,18 @@ void Device::updateLastSeen()
     sqlite::Tools::executeUpdate( m_ml->getConn(), req, lastSeen, m_id );
 }
 
-std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme, bool isRemovable )
+std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& uuid,
+                                        const std::string& scheme, bool isRemovable )
 {
     static const std::string req = "INSERT INTO " + Device::Table::Name
-            + "(uuid, scheme, is_removable, is_present, last_seen) VALUES(?, ?, ?, ?, ?)";
+            + "(uuid, scheme, is_removable, is_present, last_seen) "
+            "VALUES(?, ?, ?, ?, ?)";
     auto lastSeen = isRemovable ? std::chrono::duration_cast<std::chrono::seconds>(
         std::chrono::system_clock::now().time_since_epoch()
     ).count() : 0;
     auto self = std::make_shared<Device>( ml, uuid, scheme, isRemovable, lastSeen );
-    if ( insert( ml, self, req, uuid, scheme, isRemovable, self->isPresent(), lastSeen ) == false )
+    if ( insert( ml, self, req, uuid, scheme, isRemovable, self->isPresent(),
+                 lastSeen ) == false )
         return nullptr;
     return self;
 }
