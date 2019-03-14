@@ -1614,6 +1614,10 @@ void MediaLibrary::addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer )
 bool MediaLibrary::DeviceListerCb::onDeviceMounted( const std::string& uuid,
                                                     const std::string& mountedMountpoint )
 {
+    /**
+     * This is also used to refresh the state of non-removable storages.
+     * deviceFs->isRemovable() must not be assumed to be true.
+     */
     auto currentDevice = Device::fromUuid( m_ml, uuid );
     auto mountpoint = utils::file::toFolderPath( mountedMountpoint );
     LOG_INFO( "Device ", uuid, " was plugged and mounted on ", mountpoint );
