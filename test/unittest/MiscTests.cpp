@@ -251,7 +251,7 @@ TEST_F( DbModel, Upgrade14to15 )
     auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     CheckNbTriggers( 34 );
-    CheckNbIndexes( 37 );
+    CheckNbIndexes( 35 );
 }
 
 TEST_F( DbModel, Upgrade15to16 )
@@ -260,7 +260,7 @@ TEST_F( DbModel, Upgrade15to16 )
     auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     CheckNbTriggers( 34 );
-    CheckNbIndexes( 37 );
+    CheckNbIndexes( 35 );
 
     // Check that playlists were properly migrated
     medialibrary::sqlite::Statement stmt{

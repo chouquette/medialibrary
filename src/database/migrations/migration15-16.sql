@@ -24,3 +24,6 @@
 "DROP TABLE PlaylistMediaRelation_backup",
 
 #include "database/tables/Playlist_triggers_v16.sql"
+
+"DROP INDEX IF EXISTS folder_device_id",
+"DROP INDEX IF EXISTS folder_parent_id",
