@@ -1572,6 +1572,7 @@ void MediaLibrary::refreshDevices( fs::IFileSystemFactory& fsFactory )
         if ( d->isRemovable() == true && d->isPresent() == true )
             d->updateLastSeen();
     }
+    LOG_INFO( "Done refreshing devices in database." );
 }
 
 void MediaLibrary::forceRescan()
