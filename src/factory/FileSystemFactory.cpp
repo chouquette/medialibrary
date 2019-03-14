@@ -127,6 +127,7 @@ void FileSystemFactory::refreshDevices()
         LOG_INFO( "Caching device ", uuid, " mounted on ", mountpoint, ". Removable: ", removable ? "true" : "false" );
         m_deviceCache.emplace( uuid, std::make_shared<fs::Device>( uuid, mountpoint, removable ) );
     }
+    LOG_INFO( "Done refreshing devices from IDeviceLister" );
 }
 
 bool FileSystemFactory::isMrlSupported( const std::string& path ) const
