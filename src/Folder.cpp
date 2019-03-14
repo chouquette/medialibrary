@@ -177,17 +177,20 @@ void Folder::createTriggers( sqlite::Connection* connection, uint32_t modelVersi
 }
 
 std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& mrl,
-                                        int64_t parentId, Device& device, fs::IDevice& deviceFs )
+                                        int64_t parentId, Device& device,
+                                        fs::IDevice& deviceFs )
 {
     std::string path;
     if ( device.isRemovable() == true )
         path = deviceFs.relativeMrl( mrl );
     else
         path = mrl;
-    auto self = std::make_shared<Folder>( ml, path, parentId, device.id(), device.isRemovable() );
+    auto self = std::make_shared<Folder>( ml, path, parentId, device.id(),
+                                          device.isRemovable() );
     static const std::string req = "INSERT INTO " + Folder::Table::Name +
             "(path, name, parent_id, device_id, is_removable) VALUES(?, ?, ?, ?, ?)";
-    if ( insert( ml, self, req, path, self->m_name, sqlite::ForeignKey( parentId ), device.id(), device.isRemovable() ) == false )
+    if ( insert( ml, self, req, path, self->m_name, sqlite::ForeignKey( parentId ),
+                 device.id(), device.isRemovable() ) == false )
         return nullptr;
     if ( device.isRemovable() == true )
         self->m_fullPath = deviceFs.absoluteMrl( path );
@@ -236,15 +239,20 @@ bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl )
         }
         auto device = Device::fromUuid( ml, deviceFs->uuid() );
         if ( device == nullptr )
-            device = Device::create( ml, deviceFs->uuid(), utils::file::scheme( mrl ), deviceFs->isRemovable() );
+            device = Device::create( ml, deviceFs->uuid(),
+                                     utils::file::scheme( mrl ),
+                                     deviceFs->isRemovable() );
         std::string path;
         if ( deviceFs->isRemovable() == true )
             path = deviceFs->relativeMrl( mrl );
         else
             path = mrl;
         static const std::string req = "INSERT INTO " + Folder::Table::Name +
-                "(path, parent_id, is_banned, device_id, is_removable) VALUES(?, ?, ?, ?, ?)";
-        auto res = sqlite::Tools::executeInsert( ml->getConn(), req, path, nullptr, true, device->id(), deviceFs->isRemovable() ) != 0;
+                "(path, parent_id, is_banned, device_id, is_removable) "
+                "VALUES(?, ?, ?, ?, ?)";
+        auto res = sqlite::Tools::executeInsert( ml->getConn(), req, path,
+                                                 nullptr, true, device->id(),
+                                                 deviceFs->isRemovable() ) != 0;
         t->commit();
         return res;
     });
@@ -274,23 +282,27 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
     }
     catch ( const std::system_error& ex )
     {
-        LOG_ERROR( "Failed to instanciate a folder for mrl: ", mrl, ": ", ex.what() );
+        LOG_ERROR( "Failed to instanciate a folder for mrl: ", mrl, ": ",
+                   ex.what() );
         return nullptr;
     }
 
     auto deviceFs = folderFs->device();
     if ( deviceFs == nullptr )
     {
-        LOG_WARN( "Failed to get device containing an existing folder: ", folderFs->mrl() );
+        LOG_WARN( "Failed to get device containing an existing folder: ",
+                  folderFs->mrl() );
         return nullptr;
     }
     if ( deviceFs->isRemovable() == false )
     {
-        std::string req = "SELECT * FROM " + Folder::Table::Name + " WHERE path = ? AND is_removable = 0";
+        std::string req = "SELECT * FROM " + Folder::Table::Name +
+                          " WHERE path = ? AND is_removable = 0";
         if ( bannedType == BannedType::Any )
             return fetch( ml, req, folderFs->mrl() );
         req += " AND is_banned = ?";
-        return fetch( ml, req, folderFs->mrl(), bannedType == BannedType::Yes ? true : false );
+        return fetch( ml, req, folderFs->mrl(),
+                      bannedType == BannedType::Yes ? true : false );
     }
 
     auto device = Device::fromUuid( ml, deviceFs->uuid() );
@@ -298,7 +310,8 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
     if ( device == nullptr )
         return nullptr;
     auto path = deviceFs->relativeMrl( folderFs->mrl() );
-    std::string req = "SELECT * FROM " + Folder::Table::Name + " WHERE path = ? AND device_id = ?";
+    std::string req = "SELECT * FROM " + Folder::Table::Name +
+                      " WHERE path = ? AND device_id = ?";
     std::shared_ptr<Folder> folder;
     if ( bannedType == BannedType::Any )
     {
@@ -307,7 +320,8 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
     else
     {
         req += " AND is_banned = ?";
-        folder = fetch( ml, req, path, device->id(), bannedType == BannedType::Yes ? true : false );
+        folder = fetch( ml, req, path, device->id(),
+                        bannedType == BannedType::Yes ? true : false );
     }
     if ( folder == nullptr )
         return nullptr;
@@ -373,8 +387,10 @@ Query<IFolder> Folder::withMedia( MediaLibraryPtr ml, IMedia::Type type,
     return make_query<Folder, IFolder>( ml, "*", req, sortRequest( params ) );
 }
 
-Query<IFolder> Folder::searchWithMedia( MediaLibraryPtr ml, const std::string& pattern,
-                                        IMedia::Type type, const QueryParameters* params )
+Query<IFolder> Folder::searchWithMedia( MediaLibraryPtr ml,
+                                        const std::string& pattern,
+                                        IMedia::Type type,
+                                        const QueryParameters* params )
 {
     std::string req = "FROM " + Table::Name + " f "
             " LEFT JOIN " + Device::Table::Name +
@@ -392,7 +408,8 @@ Query<IFolder> Folder::entryPoints( MediaLibraryPtr ml, int64_t deviceId )
     if ( deviceId == 0 )
         return make_query<Folder, IFolder>( ml, "*", req, "" );
     req += " AND device_id = ?";
-    return make_query<Folder, IFolder>( ml, "*", req, "", sqlite::ForeignKey{ deviceId } );
+    return make_query<Folder, IFolder>( ml, "*", req, "",
+                                        sqlite::ForeignKey{ deviceId } );
 }
 
 int64_t Folder::id() const
@@ -408,9 +425,10 @@ const std::string& Folder::mrl() const
     if ( m_fullPath.empty() == false )
         return m_fullPath;
 
-    // We can't compute the full path of a folder if it's removable and the device isn't present.
-    // When there's no device, we don't know the mountpoint, therefor we don't know the full path
-    // Calling isPresent will ensure we have the device representation cached locally
+    // We can't compute the full path of a folder if it's removable and the
+    // device isn't present. When there's no device, we don't know the
+    // mountpoint, therefor we don't know the full path. Calling isPresent will
+    // ensure we have the device representation cached locally
     if ( isPresent() == false )
         throw fs::DeviceRemovedException();
 
