@@ -1063,7 +1063,7 @@ void MediaLibrary::migrateModel9to10()
         // and calling mrl would crash for files stored on removable devices.
         auto newMrl = utils::url::encode( utils::url::decode( f->rawMrl() ) );
         LOG_INFO( "Converting ", f->rawMrl(), " to ", newMrl );
-        f->setMrl( newMrl );
+        f->setMrl( std::move( newMrl ) );
     }
     m_settings.setDbModelVersion( 10 );
     m_settings.save();
@@ -1315,7 +1315,7 @@ void MediaLibrary::migrateModel15to16()
         for ( auto& f : files )
         {
             auto newMrl = utils::url::encode( utils::url::decode( f->rawMrl() ) );
-            f->setMrl( newMrl );
+            f->setMrl( std::move( newMrl ) );
         }
     }
 

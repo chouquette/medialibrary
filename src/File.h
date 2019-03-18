@@ -55,7 +55,7 @@ public:
      * during a migration, but shouldn't be used otherwise, as it would be unusable
      */
     const std::string& rawMrl() const;
-    void setMrl( const std::string& mrl );
+    void setMrl( std::string mrl );
     virtual Type type() const override;
     virtual unsigned int lastModificationDate() const override;
     virtual unsigned int size() const override;

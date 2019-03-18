@@ -115,7 +115,7 @@ const std::string& File::rawMrl() const
     return m_mrl;
 }
 
-void File::setMrl( const std::string& mrl )
+void File::setMrl( std::string mrl )
 {
     if ( m_mrl == mrl )
         return;
@@ -123,7 +123,7 @@ void File::setMrl( const std::string& mrl )
             "mrl = ? WHERE id_file = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, mrl, m_id ) == false )
         return;
-    m_mrl = mrl;
+    m_mrl = std::move( mrl );
 }
 
 IFile::Type File::type() const
