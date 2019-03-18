@@ -1295,6 +1295,7 @@ void MediaLibrary::migrateModel14to15()
  * - Add update_playlist_order_on_delete
  * - Update trigger update_playlist_order_on_insert
  * - Enforce contiguous position indexes on PlaylistMediaRelation
+ * - Changes in MRL encoding
  */
 void MediaLibrary::migrateModel15to16()
 {
@@ -1307,6 +1308,37 @@ void MediaLibrary::migrateModel15to16()
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( getConn(), req );
     Media::createTriggers( dbConn, 15 );
+
+    // Migrate files mrl encoding
+    {
+        auto files = File::fetchAll<File>( this );
+        for ( auto& f : files )
+        {
+            auto newMrl = utils::url::encode( utils::url::decode( f->rawMrl() ) );
+            f->setMrl( newMrl );
+        }
+    }
+
+    // Migrate folders
+    {
+        auto folders = Folder::fetchAll<Folder>( this );
+        for ( auto& f : folders )
+        {
+            auto newMrl = utils::url::encode( utils::url::decode( f->rawMrl() ) );
+            f->setMrl( std::move( newMrl ) );
+        }
+    }
+
+    // Migrate tasks
+    {
+        auto tasks = parser::Task::fetchAll<parser::Task>( this );
+        for ( auto& t : tasks )
+        {
+            auto newMrl = utils::url::encode( utils::url::decode( t->item().mrl() ) );
+            t->setMrl( std::move( newMrl ) );
+        }
+    }
+
     m_settings.setDbModelVersion( 16 );
     m_settings.save();
     t->commit();

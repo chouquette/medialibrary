@@ -85,7 +85,7 @@ CREATE TRIGGER cascade_file_deletion AFTER DELETE ON File BEGIN  DELETE FROM Med
 CREATE TRIGGER append_new_playlist_record AFTER INSERT ON PlaylistMediaRelation WHEN new.position IS NULL BEGIN  UPDATE PlaylistMediaRelation SET position = (SELECT COUNT(media_id) FROM PlaylistMediaRelation WHERE playlist_id = new.playlist_id) WHERE playlist_id=new.playlist_id AND media_id = new.media_id; END;
 CREATE TRIGGER add_album_track AFTER INSERT ON AlbumTrack BEGIN UPDATE Album SET duration = duration + new.duration, nb_tracks = nb_tracks + 1, is_present = is_present + 1 WHERE id_album = new.album_id; END;
 INSERT INTO `Device` (id_device,uuid,scheme,is_removable,is_present,last_seen) VALUES (1,NULL,NULL,NULL,NULL,NULL);
-INSERT INTO `Folder` (id_folder,path,name,parent_id,is_banned,device_id,is_removable,nb_audio,nb_video) VALUES (1,'foo/','TestFolder',NULL,0,1,0,0,0);
+INSERT INTO `Folder` (id_folder,path,name,parent_id,is_banned,device_id,is_removable,nb_audio,nb_video) VALUES (1,'foo path/','TestFolder',NULL,0,1,0,0,0);
 INSERT INTO `Media` (id_media,type,subtype,duration,play_count,last_played_date,insertion_date,release_date,title,filename,is_favorite,is_present) VALUES (1,1,3,-1,NULL,NULL,1522231538,NULL,'Cool media','file%20with%20space.avi',0,1);
 INSERT INTO `Media` (id_media,type,subtype,duration,play_count,last_played_date,insertion_date,release_date,title,filename,is_favorite,is_present) VALUES (2,1,3,-1,NULL,NULL,1522231538,NULL,'media2.avi','media2.avi',0,1);
 INSERT INTO `Media` (id_media,type,subtype,duration,play_count,last_played_date,insertion_date,release_date,title,filename,is_favorite,is_present) VALUES (3,0,3,-1,NULL,NULL,1522231538,NULL,'external.avi','external.avi',0,1);
