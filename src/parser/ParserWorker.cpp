@@ -215,6 +215,8 @@ void Worker::mainloop()
             auto duration = std::chrono::steady_clock::now() - chrono;
             LOG_INFO( "Done executing ", serviceName, " task on ", task->item().mrl(), " in ",
                       std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
+            if ( handleServiceResult( *task, status ) == false )
+                status = Status::Fatal;
         }
         catch ( const fs::DeviceRemovedException& )
         {
@@ -227,8 +229,6 @@ void Worker::mainloop()
             LOG_ERROR( "Caught an exception during ", task->item().mrl(), " [", serviceName, "] parsing: ", ex.what() );
             status = Status::Fatal;
         }
-        if ( handleServiceResult( *task, status ) == false )
-            status = Status::Fatal;
         m_parserCb->done( std::move( task ), status );
     }
     LOG_INFO("Exiting ParserService [", serviceName, "] thread");
