@@ -31,7 +31,6 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <tchar.h>
 
 #include <stdexcept>
 #include <system_error>
@@ -48,7 +47,7 @@ File::File( const std::string& filePath )
     : CommonFile( utils::file::toMrl( filePath ) )
 {
     struct _stat s;
-    if ( _tstat( charset::ToWide( filePath.c_str() ).get(), &s ) != 0 )
+    if ( _wstat( charset::ToWide( filePath.c_str() ).get(), &s ) != 0 )
     {
         LOG_ERROR( "Failed to get ", filePath, " stats" );
         throw std::system_error( errno, std::generic_category(), "Failed to get stats" );

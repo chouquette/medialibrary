@@ -160,7 +160,6 @@ dnl Specify -lpthread as part of Libs.private, in case of a static build
     ;;
   *mingw32* | *cygwin* | *wince* | *mingwce*)
     CXXFLAGS="${CXXFLAGS} -static-libgcc -static-libstdc++"
-    AC_DEFINE([_UNICODE], [1], [Define to 1 for Unicode (Wide Chars) APIs.])
     AC_DEFINE([UNICODE], [1], [Define to 1 for Unicode (Wide Chars) APIs.])
     AC_DEFINE([_POSIX_C_SOURCE], [200809L], [IEEE Std 1003.1.])
     AC_DEFINE([_BSD_SOURCE], [1], [ISO C, POSIX, and 4.3BSD things.])

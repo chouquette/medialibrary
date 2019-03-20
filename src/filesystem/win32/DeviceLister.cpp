@@ -44,8 +44,8 @@ namespace fs
 
 std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() const
 {
-    TCHAR volumeName[MAX_PATH];
-    auto handle = FindFirstVolume( volumeName, sizeof(volumeName) );
+    wchar_t volumeName[MAX_PATH];
+    auto handle = FindFirstVolume( volumeName, sizeof(volumeName)/sizeof(volumeName[0]) );
     if ( handle == INVALID_HANDLE_VALUE )
     {
         std::stringstream ss;
@@ -55,7 +55,7 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
     std::unique_ptr<typename std::remove_pointer<HANDLE>::type, decltype(&FindVolumeClose)>
             uh( handle, &FindVolumeClose );
     std::vector<std::tuple<std::string, std::string, bool>> res;
-    for ( BOOL success =  TRUE; ; success = FindNextVolume( handle, volumeName, sizeof( volumeName ) ) )
+    for ( BOOL success =  TRUE; ; success = FindNextVolume( handle, volumeName, sizeof( volumeName )/sizeof(volumeName[0]) ) )
     {
         if ( success == FALSE )
         {
@@ -72,8 +72,8 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
              volumeName[3] != L'\\' || volumeName[lastChar] != L'\\' )
             continue;
 
-        TCHAR buffer[MAX_PATH + 1];
-        DWORD buffLength = sizeof( buffer );
+        wchar_t buffer[MAX_PATH + 1];
+        DWORD buffLength = sizeof( buffer ) / sizeof( wchar_t );
 
         if ( GetVolumePathNamesForVolumeName( volumeName, buffer, buffLength, &buffLength ) == 0 )
             continue;

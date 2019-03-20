@@ -89,7 +89,7 @@ std::string toAbsolute( const std::string& path )
     }
     return file::toFolderPath( abs );
 #else
-    TCHAR buff[MAX_PATH];
+    wchar_t buff[MAX_PATH];
     auto wpath = charset::ToWide( path.c_str() );
     if ( GetFullPathName( wpath.get(), MAX_PATH, buff, nullptr ) == 0 )
     {
