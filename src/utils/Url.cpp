@@ -79,8 +79,18 @@ std::string encode( const std::string& str )
     std::string res;
 
     res.reserve( str.size() );
-    for ( const unsigned char c : str )
+    auto schemePos = str.find( "://" );
+    auto i = 0u;
+    if ( schemePos != std::string::npos )
     {
+        i = schemePos + 3;
+        std::copy( str.cbegin(), str.cbegin() + i, std::back_inserter( res ) );
+    }
+    for ( ; i < str.size(); ++i )
+    {
+        // This must be an unsigned char for the bits operations below to work.
+        // auto will yield a signed char here.
+        const unsigned char c = str[i];
         if ( ( c >= 32 && c <= 126 ) && (
                  ( c >= 'a' && c <= 'z' ) ||
                  ( c >= 'A' && c <= 'Z' ) ||
