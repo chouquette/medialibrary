@@ -804,10 +804,10 @@ std::shared_ptr<Album> MetadataAnalyzer::findAlbum( IItem& item, std::shared_ptr
         auto newFileFolder = utils::file::directory( file->mrl() );
         auto trackFiles = tracks[0]->files();
         bool differentFolder = false;
-        for ( const auto& existingTrackFile : trackFiles )
+        for ( const auto& existingTrackIFile : trackFiles )
         {
-            auto candidateFolder = utils::file::directory( existingTrackFile->mrl() );
-            if ( candidateFolder != newFileFolder )
+            const auto existingTrackFile = static_cast<File*>( existingTrackIFile.get() );
+            if ( existingTrackFile->folderId() != file->folderId() )
             {
                 differentFolder = true;
                 break;
