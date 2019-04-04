@@ -165,6 +165,10 @@ class Media : public IMedia, public DatabaseHelpers<Media>
         static Query<IMedia> fromFolderId( MediaLibraryPtr ml, Type type,
                                            int64_t folderId,
                                            const QueryParameters* params );
+        static Query<IMedia> searchFromFolderId( MediaLibraryPtr ml,
+                                                 const std::string& pattern,
+                                                 Type type, int64_t folderId,
+                                                 const QueryParameters* params );
 
         static void clearHistory( MediaLibraryPtr ml );
         static void removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime );

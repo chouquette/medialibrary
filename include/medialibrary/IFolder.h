@@ -84,6 +84,20 @@ public:
      */
     virtual Query<IMedia> media( IMedia::Type type,
                                   const QueryParameters* params ) const = 0;
+
+    /**
+     * @brief searchMedia Search the media of a given folder
+     * @param pattern The pattern to search for
+     * @param type The media type, or IMedia::Type::Unknown for all types
+     * @param params A query parameter instance, or nullptr for the default
+     * @return A Query object to be used to fetch the results
+     *
+     * This only search for the folder in a specific folder, not including the
+     * media in its subfolders.
+     */
+    virtual Query<IMedia> searchMedia( const std::string& pattern,
+                                       IMedia::Type type,
+                                       const QueryParameters* params = nullptr ) const = 0;
     /**
      * @brief subfolders Returns the subfolders contained folder
      * @return A query object to be used to fetch the results

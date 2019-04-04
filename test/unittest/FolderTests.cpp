@@ -658,6 +658,39 @@ TEST_F( FoldersNoDiscover, ListWithMedia )
     ASSERT_EQ( 1u, mediaQuery->all().size() );
 }
 
+TEST_F( FoldersNoDiscover, SearchMedia )
+{
+    auto newFolder = mock::FileSystemFactory::Root + "empty/";
+    fsMock->addFolder( newFolder );
+
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    enforceFakeMediaTypes( ml.get() );
+
+    auto folder = ml->folder( mock::FileSystemFactory::Root );
+    ASSERT_NE( nullptr, folder );
+
+    auto videosQuery = folder->searchMedia( "video", IMedia::Type::Video, nullptr );
+    ASSERT_EQ( 1u, videosQuery->count() );
+    auto videos = videosQuery->all();
+    ASSERT_EQ( 1u, videos.size() );
+
+    auto audioQuery = folder->searchMedia( "audio", IMedia::Type::Audio, nullptr );
+    ASSERT_EQ( 1u, audioQuery->count() );
+    auto audios = audioQuery->all();
+    ASSERT_EQ( 1u, audios.size() );
+
+    QueryParameters params;
+    params.sort = SortingCriteria::Alpha;
+    params.desc = true;
+    auto allTypeQuery = folder->searchMedia( "video", IMedia::Type::Unknown, &params );
+    ASSERT_EQ( 1u, allTypeQuery->count() );
+    auto all = allTypeQuery->all();
+    ASSERT_EQ( 1u, all.size() );
+}
+
 TEST_F( FoldersNoDiscover, ListSubFolders )
 {
     auto newFolder = mock::FileSystemFactory::Root + "empty/";

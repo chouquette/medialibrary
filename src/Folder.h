@@ -91,6 +91,9 @@ public:
     bool isRootFolder() const;
     virtual Query<IMedia> media( IMedia::Type type,
                                  const QueryParameters* params ) const override;
+    virtual Query<IMedia> searchMedia( const std::string& pattern,
+                                       IMedia::Type type,
+                                       const QueryParameters* params = nullptr ) const override;
     virtual Query<IFolder> subfolders( const QueryParameters* params ) const override;
 
     enum class BannedType

@@ -960,6 +960,28 @@ Query<IMedia> Media::fromFolderId( MediaLibraryPtr ml, IMedia::Type type,
                                       folderId );
 }
 
+Query<IMedia> Media::searchFromFolderId( MediaLibraryPtr ml,
+                                         const std::string& pattern,
+                                         IMedia::Type type, int64_t folderId,
+                                         const QueryParameters* params )
+{
+    std::string req = "FROM " + Table::Name +  " m ";
+    req += addRequestJoin( params, false, false );
+    req += " WHERE m.folder_id = ?";
+    req += " AND m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
+    " WHERE " + Media::Table::Name + "Fts MATCH '*' || ? || '*')";
+    if ( type != Type::Unknown )
+    {
+        req += " AND m.type = ?";
+        return make_query<Media, IMedia>( ml, "*", req, sortRequest( params ),
+                                          folderId, pattern, type );
+    }
+    // Don't explicitely filter by type since only video/audio media have a
+    // non NULL folder_id
+    return make_query<Media, IMedia>( ml, "*", req, sortRequest( params ),
+                                      folderId, pattern );
+}
+
 void Media::clearHistory( MediaLibraryPtr ml )
 {
     auto dbConn = ml->getConn();

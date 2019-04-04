@@ -588,6 +588,14 @@ Query<IMedia> Folder::media( IMedia::Type type, const QueryParameters* params ) 
     return Media::fromFolderId( m_ml, type, m_id, params );
 }
 
+Query<IMedia> Folder::searchMedia( const std::string& pattern, IMedia::Type type,
+                                   const QueryParameters* params ) const
+{
+    if ( pattern.size() < 3 )
+        return {};
+    return Media::searchFromFolderId( m_ml, pattern, type, m_id, params );
+}
+
 Query<IFolder> Folder::subfolders( const QueryParameters* params ) const
 {
     static const std::string req = "FROM " + Table::Name + " WHERE parent_id = ?";
