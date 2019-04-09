@@ -7,7 +7,7 @@ variables:
   GIT_SUBMODULE_STRATEGY: normal
 
 build:linux:
-    image: registry.videolan.org:5000/medialibrary:20190121111050
+    image: registry.videolan.org/medialibrary:20190121111050
     tags:
       - debian
       - amd64
@@ -26,7 +26,7 @@ build:linux:
           - .libs/
 
 unit-tests:linux:
-    image: registry.videolan.org:5000/medialibrary:20190121111050
+    image: registry.videolan.org/medialibrary:20190121111050
     tags:
       - debian
       - amd64
@@ -39,7 +39,7 @@ unit-tests:linux:
         - ./unittest
 
 functional-tests:linux:
-    image: registry.videolan.org:5000/medialibrary:20190121111050
+    image: registry.videolan.org/medialibrary:20190121111050
     tags:
       - debian
       - amd64
@@ -52,7 +52,7 @@ functional-tests:linux:
         - ./samples -v
 
 build:win32:
-    image: registry.videolan.org:5000/medialibrary-win32:20190121122230
+    image: registry.videolan.org/medialibrary-win32:20190121122230
     tags:
       - win32
     except:
@@ -71,7 +71,7 @@ build:win32:
           - .libs/
 
 unit-tests:win32:
-    image: registry.videolan.org:5000/medialibrary-win32:20190121122230
+    image: registry.videolan.org/medialibrary-win32:20190121122230
     tags:
       - win32
     except:
@@ -88,7 +88,7 @@ unit-tests:win32:
         - wine unittest.exe
 
 functional-tests:win32:
-    image: registry.videolan.org:5000/medialibrary-win32:20190121122230
+    image: registry.videolan.org/medialibrary-win32:20190121122230
     tags:
       - win32
     except:
@@ -103,7 +103,7 @@ functional-tests:win32:
         - wine samples.exe -v
 
 build:win64:
-    image: registry.videolan.org:5000/medialibrary-win64:20190121124804
+    image: registry.videolan.org/medialibrary-win64:20190121124804
     tags:
       - win64
     stage: build
@@ -122,7 +122,7 @@ build:win64:
           - .libs/
 
 unit-tests:win64:
-    image: registry.videolan.org:5000/medialibrary-win64:20190121124804
+    image: registry.videolan.org/medialibrary-win64:20190121124804
     tags:
       - win64
     except:
@@ -137,7 +137,7 @@ unit-tests:win64:
         - wine unittest.exe
 
 functional-tests:win64:
-    image: registry.videolan.org:5000/medialibrary-win64:20190121124804
+    image: registry.videolan.org/medialibrary-win64:20190121124804
     tags:
       - win64
     except:
@@ -152,7 +152,7 @@ functional-tests:win64:
         - wine samples.exe -v
 
 build-and-coverage:
-    image: registry.videolan.org:5000/medialibrary:20190121111050
+    image: registry.videolan.org/medialibrary:20190121111050
     tags:
       - debian
       - amd64
