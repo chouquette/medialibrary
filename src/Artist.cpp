@@ -112,7 +112,10 @@ Query<IMedia> Artist::tracks( const QueryParameters* params ) const
     if ( m_id != VariousArtistID )
     {
         req += "INNER JOIN MediaArtistRelation mar ON mar.media_id = med.id_media ";
-        if ( sort == SortingCriteria::Album )
+        if ( sort != SortingCriteria::Duration &&
+             sort != SortingCriteria::InsertionDate &&
+             sort != SortingCriteria::ReleaseDate &&
+             sort != SortingCriteria::Alpha )
         {
             req += "INNER JOIN Album alb ON alb.id_album = atr.album_id "
                    "INNER JOIN AlbumTrack atr ON atr.media_id = med.id_media ";
@@ -139,18 +142,18 @@ Query<IMedia> Artist::tracks( const QueryParameters* params ) const
     case SortingCriteria::ReleaseDate:
         orderBy += "med.release_date";
         break;
-    case SortingCriteria::Album:
-        if ( desc == true )
-            orderBy += "alb.title DESC, atr.disc_number, atr.track_number";
-        else
-            orderBy += "alb.title, atr.disc_number, atr.track_number";
+    case SortingCriteria::Alpha:
+        orderBy += "med.title";
         break;
     default:
         LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default (Alpha)" );
         /* fall-through */
+    case SortingCriteria::Album:
     case SortingCriteria::Default:
-    case SortingCriteria::Alpha:
-        orderBy += "med.title";
+        if ( desc == true )
+            orderBy += "alb.title DESC, atr.disc_number, atr.track_number";
+        else
+            orderBy += "alb.title, atr.disc_number, atr.track_number";
         break;
     }
 

@@ -323,7 +323,10 @@ TEST_F( DeviceFs, RemoveArtist )
 
     ASSERT_EQ( 1u, artists.size() );
 
-    auto tracks = artist->tracks( nullptr )->all();
+    QueryParameters params;
+    params.sort = SortingCriteria::Alpha;
+    params.desc = false;
+    auto tracks = artist->tracks( &params )->all();
     ASSERT_EQ( 3u, tracks.size() );
 
     auto device = fsMock->removeDevice( RemovableDeviceUuid );
@@ -339,7 +342,7 @@ TEST_F( DeviceFs, RemoveArtist )
 
     // But we expect the tracks count to be down
     artist = std::static_pointer_cast<Artist>( ml->artist( artist->id() ) );
-    tracks = artist->tracks( nullptr )->all();
+    tracks = artist->tracks( &params )->all();
     ASSERT_EQ( 1u, tracks.size() );
 
     // Now check that everything appears again when we plug the device back in

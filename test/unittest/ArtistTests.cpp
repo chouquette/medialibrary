@@ -194,13 +194,16 @@ TEST_F( Artists, AllSongs )
         ASSERT_TRUE( res );
     }
 
-    auto songs = artist->tracks( nullptr )->all();
+    QueryParameters params;
+    params.sort = SortingCriteria::Alpha;
+    params.desc = false;
+    auto songs = artist->tracks( &params )->all();
     ASSERT_EQ( songs.size(), 3u );
 
     Reload();
 
     auto artist2 = ml->artist( artist->id() );
-    songs = artist2->tracks( nullptr )->all();
+    songs = artist2->tracks( &params )->all();
     ASSERT_EQ( songs.size(), 3u );
 }
 
