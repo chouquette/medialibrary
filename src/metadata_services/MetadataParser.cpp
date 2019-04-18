@@ -180,7 +180,7 @@ Status MetadataAnalyzer::run( IItem& item )
 Status MetadataAnalyzer::addPlaylistMedias( IItem& item ) const
 {
     const auto& mrl = item.mrl();
-    LOG_INFO( "Try to import ", mrl, " as a playlist" );
+    LOG_DEBUG( "Try to import ", mrl, " as a playlist" );
     std::shared_ptr<Playlist> playlistPtr;
     if ( item.file() != nullptr )
     {
@@ -244,11 +244,11 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
 {
     const auto& mrl = subitem.mrl();
     const auto& playlistMrl = item.mrl();
-    LOG_INFO( "Try to add ", mrl, " to the playlist ", playlistMrl );
+    LOG_DEBUG( "Try to add ", mrl, " to the playlist ", playlistMrl );
     auto media = m_ml->media( mrl );
     if ( media != nullptr )
     {
-        LOG_INFO( "Media for ", mrl, " already exists, adding it to the playlist ", playlistMrl );
+        LOG_DEBUG( "Media for ", mrl, " already exists, adding it to the playlist ", playlistMrl );
         auto res = playlistPtr->add( *media, subitem.parentPlaylistIndex() );
         if ( res == false )
             LOG_ERROR( "Failed to insert ", mrl, " in playlist ", playlistMrl );
@@ -288,7 +288,7 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
         LOG_ERROR( "Failed to check if ", mrl, " was a directory: ", ex.what() );
         return;
     }
-    LOG_INFO( "Importing ", isDirectory ? "folder " : "file ", mrl, " in the playlist ", playlistMrl );
+    LOG_DEBUG( "Importing ", isDirectory ? "folder " : "file ", mrl, " in the playlist ", playlistMrl );
     auto directoryMrl = utils::file::directory( mrl );
     auto parentFolder = Folder::fromMrl( m_ml, directoryMrl );
     bool parentKnown = parentFolder != nullptr;
@@ -400,7 +400,7 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
             return t.type == Task::Item::Track::Type::Video;
         }) == end( tracks );
         auto t = m_ml->getConn()->newTransaction();
-        LOG_INFO( "Adding ", mrl );
+        LOG_DEBUG( "Adding ", mrl );
         auto folder = static_cast<Folder*>( item.parentFolder().get() );
         auto m = Media::create( m_ml, isAudio ? IMedia::Type::Audio : IMedia::Type::Video,
                                 folder->deviceId(), folder->id(),
@@ -438,7 +438,7 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
     // Voluntarily trigger an exception for a valid, but less common case, to avoid database overhead
     catch ( sqlite::errors::ConstraintViolation& ex )
     {
-        LOG_INFO( "Creation of Media & File failed because ", ex.what(),
+        LOG_WARN( "Creation of Media & File failed because ", ex.what(),
                   ". Assuming this task is a duplicate" );
         // continue out of the exception handler
     }
@@ -521,7 +521,7 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshFile( IItem& item ) const
                           item.mrl() );
                 return std::make_tuple( false, false );
             }
-            LOG_INFO( "Reloading playlist ", playlist->name(), " on ", item.mrl() );
+            LOG_DEBUG( "Reloading playlist ", playlist->name(), " on ", item.mrl() );
             playlist->clearContent();
             return std::make_tuple( true, true );
         }

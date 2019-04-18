@@ -161,21 +161,21 @@ void Worker::mainloop()
             std::unique_lock<compat::Mutex> lock( m_lock );
             if ( m_tasks.empty() == true || m_paused == true )
             {
-                LOG_INFO( "Halting ParserService [", serviceName, "] mainloop" );
+                LOG_DEBUG( "Halting ParserService [", serviceName, "] mainloop" );
                 setIdle( true );
                 m_idleCond.notify_all();
                 m_cond.wait( lock, [this]() {
                     return ( m_tasks.empty() == false && m_paused == false )
                             || m_stopParser == true;
                 });
-                LOG_INFO( "Resuming ParserService [", serviceName, "] mainloop" );
+                LOG_DEBUG( "Resuming ParserService [", serviceName, "] mainloop" );
                 // We might have been woken up because the parser is being destroyed
                 if ( m_stopParser  == true )
                     break;
                 setIdle( false );
             }
             // Otherwise it's safe to assume we have at least one element.
-            LOG_INFO('[', serviceName, "] has ", m_tasks.size(), " tasks remaining" );
+            LOG_DEBUG('[', serviceName, "] has ", m_tasks.size(), " tasks remaining" );
             task = std::move( m_tasks.front() );
             m_tasks.pop();
         }
@@ -187,14 +187,14 @@ void Worker::mainloop()
         }
         if ( task->isStepCompleted( m_service->targetedStep() ) == true )
         {
-            LOG_INFO( "Skipping completed task [", serviceName, "] on ", task->item().mrl() );
+            LOG_DEBUG( "Skipping completed task [", serviceName, "] on ", task->item().mrl() );
             m_parserCb->done( std::move( task ), Status::Success );
             continue;
         }
         Status status;
         try
         {
-            LOG_INFO( "Executing ", serviceName, " task on ", task->item().mrl() );
+            LOG_DEBUG( "Executing ", serviceName, " task on ", task->item().mrl() );
             auto chrono = std::chrono::steady_clock::now();
             auto file = std::static_pointer_cast<File>( task->item().file() );
             auto media = std::static_pointer_cast<Media>( task->item().media() );
@@ -204,7 +204,7 @@ void Worker::mainloop()
                 auto folder = Folder::fetch( m_ml, file->folderId() );
                 if ( folder->isPresent() == false )
                 {
-                    LOG_INFO( "Postponing parsing of ", file->rawMrl(),
+                    LOG_DEBUG( "Postponing parsing of ", file->rawMrl(),
                               " until the device containing it gets mounted back" );
                     m_parserCb->done( std::move( task ), Status::TemporaryUnavailable );
                     continue;
@@ -213,7 +213,7 @@ void Worker::mainloop()
             task->startParserStep();
             status = m_service->run( task->item() );
             auto duration = std::chrono::steady_clock::now() - chrono;
-            LOG_INFO( "Done executing ", serviceName, " task on ", task->item().mrl(), " in ",
+            LOG_DEBUG( "Done executing ", serviceName, " task on ", task->item().mrl(), " in ",
                       std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
         }
         catch ( const fs::DeviceRemovedException& )
@@ -285,7 +285,10 @@ bool Worker::handleServiceResult( Task& task, Status status )
 void Worker::restoreTasks()
 {
     auto tasks = Task::fetchUncompleted( m_ml );
-    LOG_INFO( "Resuming parsing on ", tasks.size(), " tasks" );
+    if ( tasks.size() > 0 )
+        LOG_INFO( "Resuming parsing on ", tasks.size(), " tasks" );
+    else
+        LOG_DEBUG( "No task to resume." );
     for ( auto& t : tasks )
     {
         {

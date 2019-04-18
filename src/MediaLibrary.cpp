@@ -366,11 +366,11 @@ MediaPtr MediaLibrary::media( int64_t mediaId ) const
 
 MediaPtr MediaLibrary::media( const std::string& mrl ) const
 {
-    LOG_INFO( "Fetching media from mrl: ", mrl );
+    LOG_DEBUG( "Fetching media from mrl: ", mrl );
     auto file = File::fromExternalMrl( this, mrl );
     if ( file != nullptr )
     {
-        LOG_INFO( "Found external media: ", mrl );
+        LOG_DEBUG( "Found external media: ", mrl );
         return file->media();
     }
     file = File::fromMrl( this, mrl );
@@ -501,7 +501,7 @@ void MediaLibrary::onUpdatedFile( std::shared_ptr<File> file,
 
 bool MediaLibrary::deleteFolder( const Folder& folder )
 {
-    LOG_INFO( "deleting folder ", folder.mrl() );
+    LOG_DEBUG( "deleting folder ", folder.mrl() );
     return Folder::destroy( this, folder.id() );
 }
 
@@ -1062,7 +1062,7 @@ void MediaLibrary::migrateModel9to10()
         // We must not call mrl() from here. We might not have all devices yet,
         // and calling mrl would crash for files stored on removable devices.
         auto newMrl = utils::url::encode( utils::url::decode( f->rawMrl() ) );
-        LOG_INFO( "Converting ", f->rawMrl(), " to ", newMrl );
+        LOG_DEBUG( "Converting ", f->rawMrl(), " to ", newMrl );
         f->setMrl( std::move( newMrl ) );
     }
     m_settings.setDbModelVersion( 10 );
@@ -1082,7 +1082,7 @@ void MediaLibrary::migrateModel10to11()
     for ( const auto& t : tasks )
     {
         auto newMrl = utils::url::encode( utils::url::decode( t->item().mrl() ) );
-        LOG_INFO( "Converting task mrl: ", t->item().mrl(), " to ", newMrl );
+        LOG_DEBUG( "Converting task mrl: ", t->item().mrl(), " to ", newMrl );
         t->setMrl( std::move( newMrl ) );
     }
     for ( const auto &f : folders )
@@ -1253,7 +1253,7 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
         // We must not call mrl() from here. We might not have all devices yet,
         // and calling mrl would crash for files stored on removable devices.
         auto newFileName = utils::url::decode( m->fileName() );
-        LOG_INFO( "Converting ", m->fileName(), " to ", newFileName );
+        LOG_DEBUG( "Converting ", m->fileName(), " to ", newFileName );
         m->setFileName( std::move( newFileName ) );
     }
     auto folders = Folder::fetchAll<Folder>( this );
@@ -1397,7 +1397,7 @@ void MediaLibrary::onDiscovererIdleChanged( bool idle )
     {
         // If any idle state changed to false, then we need to trigger the callback.
         // If switching to idle == true, then both background workers need to be idle before signaling.
-        LOG_INFO( idle ? "Discoverer thread went idle" : "Discover thread was resumed" );
+        LOG_DEBUG( idle ? "Discoverer thread went idle" : "Discover thread was resumed" );
         if ( idle == false || m_parserIdle == true )
         {
             if ( idle == true && m_modificationNotifier != nullptr )
@@ -1409,7 +1409,7 @@ void MediaLibrary::onDiscovererIdleChanged( bool idle )
                 // goes back to idle
                 m_modificationNotifier->flush();
             }
-            LOG_INFO( "Setting background idle state to ",
+            LOG_DEBUG( "Setting background idle state to ",
                       idle ? "true" : "false" );
             m_callback->onBackgroundTasksIdleChanged( idle );
         }
@@ -1421,7 +1421,7 @@ void MediaLibrary::onParserIdleChanged( bool idle )
     bool expected = !idle;
     if ( m_parserIdle.compare_exchange_strong( expected, idle ) == true )
     {
-        LOG_INFO( idle ? "All parser services went idle" : "Parse services were resumed" );
+        LOG_DEBUG( idle ? "All parser services went idle" : "Parse services were resumed" );
         if ( idle == false || m_discovererIdle == true )
         {
             if ( idle == true && m_modificationNotifier != nullptr )
@@ -1429,7 +1429,7 @@ void MediaLibrary::onParserIdleChanged( bool idle )
                 // See comments above
                 m_modificationNotifier->flush();
             }
-            LOG_INFO( "Setting background idle state to ",
+            LOG_DEBUG( "Setting background idle state to ",
                       idle ? "true" : "false" );
             m_callback->onBackgroundTasksIdleChanged( idle );
         }
@@ -1604,7 +1604,7 @@ void MediaLibrary::refreshDevices( fs::IFileSystemFactory& fsFactory )
         if ( d->isRemovable() == true && d->isPresent() == true )
             d->updateLastSeen();
     }
-    LOG_INFO( "Done refreshing devices in database." );
+    LOG_DEBUG( "Done refreshing devices in database." );
 }
 
 void MediaLibrary::forceRescan()

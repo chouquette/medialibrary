@@ -82,12 +82,12 @@ bool FsDiscoverer::discover( const std::string& entryPoint )
     }
     catch ( sqlite::errors::ConstraintViolation& ex )
     {
-        LOG_WARN( fsDirMrl, " discovery aborted (assuming banned folder): ", ex.what() );
+        LOG_DEBUG( fsDirMrl, " discovery aborted (assuming banned folder): ", ex.what() );
     }
     catch ( fs::DeviceRemovedException& )
     {
         // Simply ignore, the device has already been marked as removed and the DB updated accordingly
-        LOG_INFO( "Discovery of ", fsDirMrl, " was stopped after the device was removed" );
+        LOG_DEBUG( "Discovery of ", fsDirMrl, " was stopped after the device was removed" );
     }
     return true;
 }
@@ -115,7 +115,7 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
         auto device = m_fsFactory->createDeviceFromMrl( mrl );
         if ( device == nullptr || device->isRemovable() == false )
         {
-            LOG_INFO( "Failed to find folder matching entrypoint ", mrl, ". "
+            LOG_DEBUG( "Failed to find folder matching entrypoint ", mrl, ". "
                       "Removing that folder" );
             m_ml->deleteFolder( *f );
             return false;
@@ -155,7 +155,6 @@ bool FsDiscoverer::reload( const std::string& entryPoint )
 {
     if ( m_fsFactory->isMrlSupported( entryPoint ) == false )
         return false;
-    LOG_INFO( "Reloading folder ", entryPoint );
     auto folder = Folder::fromMrl( m_ml, entryPoint );
     if ( folder == nullptr )
     {
@@ -235,7 +234,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
     if ( m_cb != nullptr )
         m_cb->onDiscoveryProgress( currentFolderFs->mrl() );
     // Load the folders we already know of:
-    LOG_INFO( "Checking for modifications in ", currentFolderFs->mrl() );
+    LOG_DEBUG( "Checking for modifications in ", currentFolderFs->mrl() );
     // Don't try to fetch any potential sub folders if the folder was freshly added
     std::vector<std::shared_ptr<Folder>> subFoldersInDB;
     if ( newFolder == false )
@@ -256,7 +255,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
         {
             if ( m_probe->isHidden( *subFolder ) )
                 continue;
-            LOG_INFO( "New folder detected: ", subFolder->mrl() );
+            LOG_DEBUG( "New folder detected: ", subFolder->mrl() );
             try
             {
                 addFolder( subFolder, currentFolder.get() );
@@ -288,18 +287,18 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
         // Now all folders we had in DB but haven't seen from the FS must have been deleted.
         for ( const auto& f : subFoldersInDB )
         {
-            LOG_INFO( "Folder ", f->mrl(), " not found in FS, deleting it" );
+            LOG_DEBUG( "Folder ", f->mrl(), " not found in FS, deleting it" );
             m_ml->deleteFolder( *f );
         }
     }
     checkFiles( currentFolderFs, currentFolder );
-    LOG_INFO( "Done checking subfolders in ", currentFolderFs->mrl() );
+    LOG_DEBUG( "Done checking subfolders in ", currentFolderFs->mrl() );
 }
 
 void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
                                std::shared_ptr<Folder> parentFolder ) const
 {
-    LOG_INFO( "Checking file in ", parentFolderFs->mrl() );
+    LOG_DEBUG( "Checking file in ", parentFolderFs->mrl() );
 
     auto files = File::fromParentFolder( m_ml, parentFolder->id() );
     std::vector<std::shared_ptr<fs::IFile>> filesToAdd;
@@ -321,7 +320,7 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
         }
         if ( fileFs->lastModificationDate() != (*it)->lastModificationDate() )
         {
-            LOG_INFO( "Forcing file refresh ", fileFs->mrl() );
+            LOG_DEBUG( "Forcing file refresh ", fileFs->mrl() );
             filesToRefresh.emplace_back( std::move( *it ), fileFs );
         }
         files.erase( it );
@@ -336,7 +335,7 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
         auto t = m_ml->getConn()->newTransaction();
         for ( const auto& file : files )
         {
-            LOG_INFO( "File ", file->mrl(), " not found on filesystem, deleting it" );
+            LOG_DEBUG( "File ", file->mrl(), " not found on filesystem, deleting it" );
             auto media = file->media();
             if ( media != nullptr )
                 media->removeFile( *file );
@@ -355,7 +354,7 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
             m_ml->onDiscoveredFile( p, parentFolder, parentFolderFs,
                                     IFile::Type::Main, m_probe->getPlaylistParent() );
         t->commit();
-        LOG_INFO( "Done checking files in ", parentFolderFs->mrl() );
+        LOG_DEBUG( "Done checking files in ", parentFolderFs->mrl() );
     }, std::move( files ), std::move( filesToAdd ), std::move( filesToRefresh ) );
 }
 

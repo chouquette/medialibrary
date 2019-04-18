@@ -201,6 +201,7 @@ void DiscovererWorker::runReload( const std::string& entryPoint )
             else
             {
                 m_ml->getCb()->onReloadStarted( entryPoint );
+                LOG_INFO( "Reloading folder ", entryPoint );
                 auto res = d->reload( entryPoint );
                 m_ml->getCb()->onReloadCompleted( entryPoint, res );
             }
