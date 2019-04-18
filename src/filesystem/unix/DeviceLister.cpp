@@ -177,10 +177,8 @@ DeviceLister::deviceFromDeviceMapper( const std::string& devicePath ) const
     return { dmName, res };
 }
 
-bool DeviceLister::isRemovable( const std::string& deviceName, const std::string& mountpoint ) const
+bool DeviceLister::isRemovable( const std::string& deviceName ) const
 {
-#ifndef TIZEN
-    (void)mountpoint;
     std::stringstream removableFilePath;
     removableFilePath << "/sys/block/" << deviceName << "/removable";
     std::unique_ptr<FILE, int(*)(FILE*)> removableFile( fopen( removableFilePath.str().c_str(), "r" ), &fclose );
@@ -192,18 +190,6 @@ bool DeviceLister::isRemovable( const std::string& deviceName, const std::string
             return buff == '1';
         return false;
     }
-#else
-    (void)deviceName;
-    static const std::vector<std::string> SDMountpoints = { "/opt/storage/sdcard" };
-    auto it = std::find_if( begin( SDMountpoints ), end( SDMountpoints ), [mountpoint]( const std::string& pattern ) {
-        return mountpoint.length() >= pattern.length() && mountpoint.find( pattern ) == 0;
-    });
-    if ( it != end( SDMountpoints ) )
-    {
-        LOG_INFO( "Considering mountpoint ", mountpoint, " a removable SDCard" );
-        return true;
-    }
-#endif
     return false;
 }
 
@@ -267,7 +253,7 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
                     }
                 }
             }
-            auto removable = isRemovable( deviceName, mountpoint );
+            auto removable = isRemovable( deviceName );
             res.emplace_back( std::make_tuple( uuid, utils::file::toMrl( mountpoint ),
                                                removable ) );
         }
