@@ -1,9 +1,9 @@
 /*****************************************************************************
  * Media Library
  *****************************************************************************
- * Copyright (C) 2015 Hugo Beauzée-Luyssen, Videolabs
+ * Copyright (C) 2015-2019 Hugo Beauzée-Luyssen, Videolabs, VideoLAN
  *
- * Authors: Hugo Beauzée-Luyssen<hugo@beauzee.fr>
+ * Authors: Hugo Beauzée-Luyssen <hugo@beauzee.fr>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -52,7 +52,8 @@ DeviceLister::DeviceMap DeviceLister::listDevices() const
     const std::string devPath = "/dev/disk/by-uuid/";
     // Don't use fs::Directory to iterate, as it resolves the symbolic links automatically.
     // We need the link name & what it points to.
-    std::unique_ptr<DIR, int(*)(DIR*)> dir( opendir( devPath.c_str() ), &closedir );
+    std::unique_ptr<DIR, int(*)(DIR*)> dir( opendir( devPath.c_str() ),
+                                            &closedir );
     if ( dir == nullptr )
     {
         std::stringstream err;
@@ -79,9 +80,11 @@ DeviceLister::DeviceMap DeviceLister::listDevices() const
             throw std::runtime_error( err.str() );
         }
         auto deviceName = utils::file::fileName( linkPath );
-        if ( std::find_if( begin( bannedDevice ), end( bannedDevice ), [&deviceName]( const std::string& pattern ) {
-                return deviceName.length() >= pattern.length() && deviceName.find( pattern ) == 0;
-            }) != end( bannedDevice ) )
+        if ( std::find_if( begin( bannedDevice ), end( bannedDevice ),
+                        [&deviceName]( const std::string& pattern ) {
+                            return deviceName.length() >= pattern.length() &&
+                                   deviceName.find( pattern ) == 0;
+                            }) != end( bannedDevice ) )
             continue;
         auto uuid = result->d_name;
         LOG_INFO( "Discovered device ", deviceName, " -> {", uuid, '}' );
@@ -92,8 +95,10 @@ DeviceLister::DeviceMap DeviceLister::listDevices() const
 
 DeviceLister::MountpointMap DeviceLister::listMountpoints() const
 {
-    static const std::vector<std::string> allowedFsType = { "vfat", "exfat", "sdcardfs", "fuse",
-                                                            "ntfs", "fat32", "ext3", "ext4", "esdfs" };
+    static const std::vector<std::string> allowedFsType = {
+        "vfat", "exfat", "sdcardfs", "fuse", "ntfs", "fat32", "ext3",
+        "ext4", "esdfs"
+    };
     MountpointMap res;
     errno = 0;
     mntent* s;
@@ -106,12 +111,14 @@ DeviceLister::MountpointMap DeviceLister::listMountpoints() const
     while ( getmntent_r( f, &smnt, buff, sizeof(buff) ) != nullptr )
     {
         s = &smnt;
-        if ( std::find( begin( allowedFsType ), end( allowedFsType ), s->mnt_type ) == end( allowedFsType ) )
+        if ( std::find( begin( allowedFsType ), end( allowedFsType ),
+                        s->mnt_type ) == end( allowedFsType ) )
             continue;
         auto deviceName = s->mnt_fsname;
         if ( res.count( deviceName ) == 0 )
         {
-            LOG_INFO( "Discovered mountpoint ", deviceName, " mounted on ", s->mnt_dir, " (", s->mnt_type, ')' );
+            LOG_INFO( "Discovered mountpoint ", deviceName, " mounted on ",
+                      s->mnt_dir, " (", s->mnt_type, ')' );
             res[deviceName] = s->mnt_dir;
         }
         else
@@ -143,12 +150,14 @@ DeviceLister::deviceFromDeviceMapper( const std::string& devicePath ) const
     LOG_INFO( "Resolved ", devicePath, " to ", linkPath, " device mapper" );
     const auto dmName = utils::file::fileName( linkPath );
     std::string dmSlavePath = "/sys/block/" + dmName + "/slaves";
-    std::unique_ptr<DIR, int(*)(DIR*)> dir( opendir( dmSlavePath.c_str() ), &closedir );
+    std::unique_ptr<DIR, int(*)(DIR*)> dir( opendir( dmSlavePath.c_str() ),
+                                            &closedir );
     std::string res;
     if ( dir == nullptr )
     {
         std::stringstream err;
-        err << "Failed to open device-mapper slaves directory (" << linkPath << ')';
+        err << "Failed to open device-mapper slaves directory (" <<
+               linkPath << ')';
         throw std::runtime_error( err.str() );
     }
     dirent* result;
@@ -227,8 +236,8 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
             else
             {
                 std::pair<std::string, std::string> dmPair;
-                LOG_INFO( "Failed to find device for mountpoint ", mountpoint, ". Attempting to resolve"
-                          " using device mapper" );
+                LOG_INFO( "Failed to find device for mountpoint ", mountpoint,
+                          ". Attempting to resolve using device mapper" );
                 try
                 {
                     // Fetch a pair containing the device-mapper device name and
@@ -252,18 +261,21 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
                         uuid = it->second;
                     else
                     {
-                        LOG_ERROR( "Failed to resolve mountpoint ", mountpoint, " to any known device" );
+                        LOG_ERROR( "Failed to resolve mountpoint ", mountpoint,
+                                   " to any known device" );
                         continue;
                     }
                 }
             }
             auto removable = isRemovable( deviceName, mountpoint );
-            res.emplace_back( std::make_tuple( uuid, utils::file::toMrl( mountpoint ), removable ) );
+            res.emplace_back( std::make_tuple( uuid, utils::file::toMrl( mountpoint ),
+                                               removable ) );
         }
     }
     catch(std::runtime_error& ex)
     {
-        LOG_WARN( "Failed to list devices: ", ex.what(), ". Falling back to a dummy device containing '/'");
+        LOG_WARN( "Failed to list devices: ", ex.what(),
+                  ". Falling back to a dummy device containing '/'" );
         res.emplace_back( std::make_tuple( "{dummy-device}", utils::file::toMrl( "/" ),
                                            false ) );
     }
