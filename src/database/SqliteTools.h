@@ -267,7 +267,7 @@ class Tools
                 results.push_back( row );
             }
             auto duration = std::chrono::steady_clock::now() - chrono;
-            LOG_DEBUG("Executed ", req, " in ",
+            LOG_VERBOSE("Executed ", req, " in ",
                      std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
             return results;
         }
@@ -288,7 +288,7 @@ class Tools
             if ( row != nullptr )
                 res = std::make_shared<T>( ml, row );
             auto duration = std::chrono::steady_clock::now() - chrono;
-            LOG_DEBUG("Executed ", req, " in ",
+            LOG_VERBOSE("Executed ", req, " in ",
                      std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
             return res;
         }
@@ -370,7 +370,7 @@ class Tools
             while ( stmt.row() != nullptr )
                 ;
             auto duration = std::chrono::steady_clock::now() - chrono;
-            LOG_DEBUG("Executed ", req, " in ",
+            LOG_VERBOSE("Executed ", req, " in ",
                      std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
         }
 };

@@ -135,7 +135,7 @@ void Parser::updateStats()
         if ( m_percent == 100 )
         {
             auto duration = std::chrono::steady_clock::now() - m_chrono;
-            LOG_DEBUG( "Finished all parsing operations in ",
+            LOG_VERBOSE( "Finished all parsing operations in ",
                        std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
             m_chrono = decltype(m_chrono){};
         }

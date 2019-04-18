@@ -305,7 +305,7 @@ void DiscovererWorker::runDiscover( const std::string& entryPoint )
             if ( d->discover( entryPoint ) == true )
             {
                 auto duration = std::chrono::steady_clock::now() - chrono;
-                LOG_DEBUG( "Discovered ", entryPoint, " in ",
+                LOG_VERBOSE( "Discovered ", entryPoint, " in ",
                            std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
                 discovered = true;
                 break;

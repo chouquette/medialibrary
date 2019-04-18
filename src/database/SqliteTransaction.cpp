@@ -41,7 +41,7 @@ Transaction::Transaction( sqlite::Connection* dbConn)
     , m_ctx( dbConn->acquireWriteContext() )
 {
     assert( CurrentTransaction == nullptr );
-    LOG_DEBUG( "Starting SQLite transaction" );
+    LOG_VERBOSE( "Starting SQLite transaction" );
     Statement s( dbConn->handle(), "BEGIN" );
     s.execute();
     while ( s.row() != nullptr )
@@ -58,7 +58,7 @@ void Transaction::commit()
     while ( s.row() != nullptr )
         ;
     auto duration = std::chrono::steady_clock::now() - chrono;
-    LOG_DEBUG( "Flushed transaction in ",
+    LOG_VERBOSE( "Flushed transaction in ",
              std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
     m_failureHandlers.clear();
     CurrentTransaction = nullptr;
