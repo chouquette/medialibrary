@@ -50,6 +50,11 @@ public:
     {
         std::cout << "Debug: " << msg << '\n';
     }
+
+    virtual void Verbose(const std::string& msg) override
+    {
+        std::cout << "Verbose: " << msg << '\n';
+    }
 };
 
 }

@@ -80,9 +80,11 @@ private:
         case LogLevel::Info:
             l->Info( msg );
             break;
-        case LogLevel::Verbose:
         case LogLevel::Debug:
             l->Debug( msg );
+            break;
+        case LogLevel::Verbose:
+            l->Verbose( msg );
             break;
         }
     }
@@ -133,6 +135,14 @@ public:
         log( LogLevel::Debug, std::forward<Args>( args )... );
     }
 
+    template <typename... Args>
+    static void Verbose( Args&&... args )
+    {
+        if ( s_logLevel.load( std::memory_order_relaxed ) > LogLevel::Verbose )
+            return;
+        log( LogLevel::Verbose, std::forward<Args>( args )... );
+    }
+
 private:
 
 private:
@@ -153,3 +163,4 @@ private:
 #define LOG_WARN( ... ) medialibrary::Log::Warning( LOG_ORIGIN, ' ', __VA_ARGS__ )
 #define LOG_INFO( ... ) medialibrary::Log::Info( LOG_ORIGIN, ' ', __VA_ARGS__ )
 #define LOG_DEBUG( ... ) medialibrary::Log::Debug( LOG_ORIGIN, ' ', __VA_ARGS__ )
+#define LOG_VERBOSE( ... ) medialibrary::Log::Verbose( LOG_ORIGIN, ' ', __VA_ARGS__ )
