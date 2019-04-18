@@ -97,7 +97,7 @@ DeviceLister::MountpointMap DeviceLister::listMountpoints() const
 {
     static const std::vector<std::string> allowedFsType = {
         "vfat", "exfat", "sdcardfs", "fuse", "ntfs", "fat32", "ext3",
-        "ext4", "esdfs"
+        "ext4", "esdfs", "xfs"
     };
     MountpointMap res;
     errno = 0;
