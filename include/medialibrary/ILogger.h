@@ -29,8 +29,6 @@ namespace medialibrary
 
 enum class LogLevel
 {
-    /// Verbose: Extra logs (currently used by to enable third parties logs
-    /// such as VLC)
     Verbose,
     Debug,
     Info,

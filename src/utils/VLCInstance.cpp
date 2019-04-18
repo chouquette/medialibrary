@@ -43,11 +43,10 @@ struct Init
             "--no-lua",
         };
         instance = VLC::Instance( sizeof(args) / sizeof(args[0]), args );
+#if 0
         // Do not take the string by reference. libvlcpp is constructing the std::string
         // as it calls the log callback, so the string we receive will be move constructed
         instance.logSet([](int lvl, const libvlc_log_t*, std::string msg) {
-            if ( medialibrary::Log::logLevel() != medialibrary::LogLevel::Verbose )
-                return;
             if ( lvl == LIBVLC_ERROR )
                 medialibrary::Log::Error( msg );
             else if ( lvl == LIBVLC_WARNING )
@@ -55,6 +54,7 @@ struct Init
             else
                 medialibrary::Log::Info( msg );
         });
+#endif
     }
 
     VLC::Instance instance;
