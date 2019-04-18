@@ -41,6 +41,12 @@ public:
     virtual bool startParser() override { return true; }
     virtual void startDiscoverer() override {}
     virtual void startDeletionNotifier() override {}
+    virtual void removeEntryPoint( const std::string& entryPoint ) override;
+    virtual void reload() override;
+    virtual void reload( const std::string& entryPoint ) override;
+    virtual void banFolder( const std::string& path ) override;
+    virtual void unbanFolder( const std::string& path ) override;
+    virtual void discover( const std::string& entryPoint ) override;
     std::vector<MediaPtr> files();
     // Use the filename getter
     using MediaLibrary::media;

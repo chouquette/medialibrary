@@ -1346,14 +1346,14 @@ void MediaLibrary::migrateModel15to16()
 
 void MediaLibrary::reload()
 {
-    if ( m_discovererWorker != nullptr )
-        m_discovererWorker->reload();
+    assert( m_discovererWorker != nullptr );
+    m_discovererWorker->reload();
 }
 
 void MediaLibrary::reload( const std::string& entryPoint )
 {
-    if ( m_discovererWorker != nullptr )
-        m_discovererWorker->reload( entryPoint );
+    assert( m_discovererWorker != nullptr );
+    m_discovererWorker->reload( entryPoint );
 }
 
 bool MediaLibrary::forceParserRetry()
@@ -1470,8 +1470,8 @@ std::shared_ptr<fs::IFileSystemFactory> MediaLibrary::fsFactoryForMrl( const std
 
 void MediaLibrary::discover( const std::string& entryPoint )
 {
-    if ( m_discovererWorker != nullptr )
-        m_discovererWorker->discover( entryPoint );
+    assert( m_discovererWorker != nullptr );
+    m_discovererWorker->discover( entryPoint );
 }
 
 void MediaLibrary::addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory )
@@ -1555,20 +1555,20 @@ FolderPtr MediaLibrary::folder( const std::string& mrl ) const
 
 void MediaLibrary::removeEntryPoint( const std::string& entryPoint )
 {
-    if ( m_discovererWorker != nullptr )
-        m_discovererWorker->remove( entryPoint );
+    assert( m_discovererWorker != nullptr );
+    m_discovererWorker->remove( entryPoint );
 }
 
 void MediaLibrary::banFolder( const std::string& entryPoint )
 {
-    if ( m_discovererWorker != nullptr )
-        m_discovererWorker->ban( entryPoint );
+    assert( m_discovererWorker != nullptr );
+    m_discovererWorker->ban( entryPoint );
 }
 
 void MediaLibrary::unbanFolder( const std::string& entryPoint )
 {
-    if ( m_discovererWorker != nullptr )
-        m_discovererWorker->unban( entryPoint );
+    assert( m_discovererWorker != nullptr );
+    m_discovererWorker->unban( entryPoint );
 }
 
 const std::string& MediaLibrary::thumbnailPath() const
