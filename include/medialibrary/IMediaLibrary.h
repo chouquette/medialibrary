@@ -469,6 +469,11 @@ public:
      * interrupted by pauseBackgroundOperations().
      */
     virtual void resumeBackgroundOperations() = 0;
+    /**
+     * @brief reload Reload all known entry points
+     *
+     * This must be called after start()
+     */
     virtual void reload() = 0;
     virtual void reload( const std::string& entryPoint ) = 0;
     /**
