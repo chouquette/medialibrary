@@ -1,9 +1,9 @@
 /*****************************************************************************
  * Media Library
  *****************************************************************************
- * Copyright (C) 2015 Hugo Beauzée-Luyssen, Videolabs
+ * Copyright (C) 2015-2019 Hugo Beauzée-Luyssen, Videolabs, VideoLAN
  *
- * Authors: Hugo Beauzée-Luyssen<hugo@beauzee.fr>
+ * Authors: Hugo Beauzée-Luyssen <hugo@beauzee.fr>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -34,28 +34,30 @@ namespace medialibrary
 
 namespace factory
 {
-    class FileSystemFactory : public fs::IFileSystemFactory
-    {
-        // UUID -> Device instance map
-        using DeviceCacheMap = std::unordered_map<std::string, std::shared_ptr<fs::IDevice>>;
 
-    public:
-        FileSystemFactory( DeviceListerPtr lister );
-        virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& mrl ) override;
-        virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override;
-        virtual std::shared_ptr<fs::IDevice> createDeviceFromMrl( const std::string& mrl ) override;
-        virtual void refreshDevices() override;
-        virtual bool isMrlSupported( const std::string& path ) const override;
-        virtual bool isNetworkFileSystem() const override;
-        virtual const std::string& scheme() const override;
-        virtual bool start( fs::IFileSystemFactoryCb* cb ) override;
-        virtual void stop() override;
+class FileSystemFactory : public fs::IFileSystemFactory
+{
+    // UUID -> Device instance map
+    using DeviceCacheMap = std::unordered_map<std::string, std::shared_ptr<fs::IDevice>>;
 
-    private:
-        DeviceListerPtr m_deviceLister;
-        DeviceCacheMap m_deviceCache;
+public:
+    FileSystemFactory( DeviceListerPtr lister );
+    virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& mrl ) override;
+    virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override;
+    virtual std::shared_ptr<fs::IDevice> createDeviceFromMrl( const std::string& mrl ) override;
+    virtual void refreshDevices() override;
+    virtual bool isMrlSupported( const std::string& path ) const override;
+    virtual bool isNetworkFileSystem() const override;
+    virtual const std::string& scheme() const override;
+    virtual bool start( fs::IFileSystemFactoryCb* cb ) override;
+    virtual void stop() override;
 
-    };
+private:
+    DeviceListerPtr m_deviceLister;
+    DeviceCacheMap m_deviceCache;
+
+};
+
 }
 
 }

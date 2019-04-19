@@ -1,9 +1,9 @@
 /*****************************************************************************
  * Media Library
  *****************************************************************************
- * Copyright (C) 2015 Hugo Beauzée-Luyssen, Videolabs
+ * Copyright (C) 2015-2019 Hugo Beauzée-Luyssen, Videolabs, VideoLAN
  *
- * Authors: Hugo Beauzée-Luyssen<hugo@beauzee.fr>
+ * Authors: Hugo Beauzée-Luyssen <hugo@beauzee.fr>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -124,8 +124,11 @@ void FileSystemFactory::refreshDevices()
         const auto& uuid = std::get<0>( d );
         const auto& mountpoint = std::get<1>( d );
         const auto removable = std::get<2>( d );
-        LOG_INFO( "Caching device ", uuid, " mounted on ", mountpoint, ". Removable: ", removable ? "true" : "false" );
-        m_deviceCache.emplace( uuid, std::make_shared<fs::Device>( uuid, mountpoint, removable ) );
+        LOG_INFO( "Caching device ", uuid, " mounted on ", mountpoint,
+                  ". Removable: ", removable ? "true" : "false" );
+        m_deviceCache.emplace( uuid,
+                               std::make_shared<fs::Device>( uuid, mountpoint,
+                                                             removable ) );
     }
     LOG_INFO( "Done refreshing devices from IDeviceLister" );
 }
@@ -140,7 +143,7 @@ bool FileSystemFactory::isNetworkFileSystem() const
     return false;
 }
 
-const std::string&FileSystemFactory::scheme() const
+const std::string& FileSystemFactory::scheme() const
 {
     static const std::string s = "file://";
     return s;
