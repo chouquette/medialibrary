@@ -44,7 +44,6 @@ private:
     std::pair<std::string, std::string> deviceFromDeviceMapper( const std::string& devicePath ) const;
     bool isRemovable( const std::string& deviceName ) const;
 
-public:
     virtual std::vector<std::tuple<std::string, std::string, bool>> devices() const override;
 };
 
