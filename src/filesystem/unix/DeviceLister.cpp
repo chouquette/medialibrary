@@ -198,7 +198,7 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
     std::vector<std::tuple<std::string, std::string, bool>> res;
     try
     {
-        DeviceMap mountpoints = listMountpoints();
+        MountpointMap mountpoints = listMountpoints();
         if ( mountpoints.empty() == true )
         {
             LOG_WARN( "Failed to detect any mountpoint" );
