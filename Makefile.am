@@ -97,7 +97,7 @@ libmedialibrary_la_SOURCES = \
 	src/logging/IostreamLogger.cpp \
 	src/logging/Logger.cpp \
 	src/metadata_services/MetadataParser.cpp \
-	src/metadata_services/ThumbnailerWorker.cpp \
+	src/thumbnails/ThumbnailerWorker.cpp \
 	src/parser/Parser.cpp \
 	src/parser/ParserWorker.cpp \
 	src/parser/Task.cpp \
@@ -152,7 +152,7 @@ noinst_HEADERS = \
 	src/Media.h \
 	src/MediaLibrary.h \
 	src/metadata_services/MetadataParser.h \
-	src/metadata_services/ThumbnailerWorker.h \
+	src/thumbnails/ThumbnailerWorker.h \
 	src/Movie.h \
 	src/parser/Parser.h \
 	src/parser/ParserWorker.h \
@@ -225,17 +225,17 @@ if HAVE_LIBVLC
 
 if HAVE_LIBVLC4
 libmedialibrary_la_SOURCES += \
-	src/metadata_services/vlc/CoreThumbnailer.cpp \
-	src/metadata_services/vlc/CoreThumbnailer.h
+	src/thumbnails/CoreThumbnailer.cpp \
+	src/thumbnails/CoreThumbnailer.h
 
 else
 libmedialibrary_la_SOURCES += \
-	src/metadata_services/vlc/VmemThumbnailer.cpp \
-	src/metadata_services/vlc/VmemThumbnailer.h
+	src/thumbnails/VmemThumbnailer.cpp \
+	src/thumbnails/VmemThumbnailer.h
 
 if HAVE_LIBJPEG
-libmedialibrary_la_SOURCES += src/metadata_services/vlc/imagecompressors/JpegCompressor.cpp
-noinst_HEADERS += src/metadata_services/vlc/imagecompressors/JpegCompressor.h
+libmedialibrary_la_SOURCES += src/thumbnails/imagecompressors/JpegCompressor.cpp
+noinst_HEADERS += src/thumbnails/imagecompressors/JpegCompressor.h
 libmedialibrary_la_CPPFLAGS += $(LIBJPEG_CFLAGS)
 libmedialibrary_la_LIBADD += $(LIBJPEG_LIBS)
 endif
@@ -256,7 +256,7 @@ noinst_HEADERS += \
 	src/utils/VLCInstance.h \
     src/metadata_services/vlc/Common.hpp \
 	src/metadata_services/vlc/VLCMetadataService.h \
-	src/metadata_services/vlc/imagecompressors/IImageCompressor.h \
+	src/thumbnails/imagecompressors/IImageCompressor.h \
 	src/factory/NetworkFileSystemFactory.h \
 	src/filesystem/network/Device.h \
 	src/filesystem/network/Directory.h \

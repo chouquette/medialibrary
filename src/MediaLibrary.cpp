@@ -71,7 +71,7 @@
 #include "metadata_services/vlc/VLCMetadataService.h"
 #endif
 #include "metadata_services/MetadataParser.h"
-#include "metadata_services/ThumbnailerWorker.h"
+#include "thumbnails/ThumbnailerWorker.h"
 
 // FileSystem
 #include "factory/DeviceListerFactory.h"
@@ -82,10 +82,10 @@
 
 #include <vlcpp/vlc.hpp>
 #if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
-#include "metadata_services/vlc/CoreThumbnailer.h"
+#include "thumbnails/CoreThumbnailer.h"
 using ThumbnailerType = medialibrary::CoreThumbnailer;
 #else
-#include "metadata_services/vlc/VmemThumbnailer.h"
+#include "thumbnails/VmemThumbnailer.h"
 using ThumbnailerType = medialibrary::VmemThumbnailer;
 #endif
 #endif
