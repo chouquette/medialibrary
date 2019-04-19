@@ -124,11 +124,21 @@ void FileSystemFactory::refreshDevices()
         const auto& uuid = std::get<0>( d );
         const auto& mountpoint = std::get<1>( d );
         const auto removable = std::get<2>( d );
-        LOG_INFO( "Caching device ", uuid, " mounted on ", mountpoint,
-                  ". Removable: ", removable ? "true" : "false" );
-        m_deviceCache.emplace( uuid,
-                               std::make_shared<fs::Device>( uuid, mountpoint,
-                                                             removable ) );
+
+        auto it = m_deviceCache.find( uuid );
+        if ( it == end( m_deviceCache ) )
+        {
+            LOG_INFO( "Caching device ", uuid, " mounted on ", mountpoint,
+                      ". Removable: ", removable ? "true" : "false" );
+            m_deviceCache.emplace( uuid,
+                                   std::make_shared<fs::Device>( uuid, mountpoint,
+                                                                removable ) );
+        }
+        else
+        {
+            LOG_INFO( "Adding mountpoint to device ", uuid, ": ", mountpoint );
+            it->second->addMountpoint( mountpoint );
+        }
     }
     LOG_INFO( "Done refreshing devices from IDeviceLister" );
 }
