@@ -37,7 +37,8 @@ private:
     // Device name / UUID map
     using DeviceMap = std::unordered_map<std::string, std::string>;
     // Device path / Mountpoints map
-    using MountpointMap = std::unordered_map<std::string, std::string>;
+    using MountpointMap = std::unordered_map<std::string,
+                                             std::vector<std::string>>;
 
     DeviceMap listDevices() const;
     MountpointMap listMountpoints() const;

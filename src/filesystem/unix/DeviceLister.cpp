@@ -115,14 +115,10 @@ DeviceLister::MountpointMap DeviceLister::listMountpoints() const
                         s->mnt_type ) == end( allowedFsType ) )
             continue;
         auto deviceName = s->mnt_fsname;
-        if ( res.count( deviceName ) == 0 )
-        {
-            LOG_INFO( "Discovered mountpoint ", deviceName, " mounted on ",
-                      s->mnt_dir, " (", s->mnt_type, ')' );
-            res[deviceName] = s->mnt_dir;
-        }
-        else
-            LOG_INFO( "Ignoring duplicated mountpoint (", s->mnt_dir, ") for device ", deviceName );
+        auto& mountpoints = res[deviceName];
+        LOG_INFO( "Discovered mountpoint ", deviceName, " mounted on ",
+                  s->mnt_dir, " (", s->mnt_type, ')' );
+        mountpoints.emplace_back( s->mnt_dir );
         errno = 0;
     }
     if ( errno != 0 )
@@ -147,7 +143,7 @@ DeviceLister::deviceFromDeviceMapper( const std::string& devicePath ) const
         throw std::runtime_error( err.str() );
     }
     linkPath[linkSize] = 0;
-    LOG_INFO( "Resolved ", devicePath, " to ", linkPath, " device mapper" );
+    LOG_DEBUG( "Resolved ", devicePath, " to ", linkPath, " device mapper" );
     const auto dmName = utils::file::fileName( linkPath );
     std::string dmSlavePath = "/sys/block/" + dmName + "/slaves";
     std::unique_ptr<DIR, int(*)(DIR*)> dir( opendir( dmSlavePath.c_str() ),
@@ -214,7 +210,6 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
         {
             const auto& devicePath = p.first;
             auto deviceName = utils::file::fileName( devicePath );
-            const auto& mountpoint = p.second;
             auto it = devices.find( deviceName );
             std::string uuid;
             if ( it != end( devices ) )
@@ -222,7 +217,7 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
             else
             {
                 std::pair<std::string, std::string> dmPair;
-                LOG_INFO( "Failed to find device for mountpoint ", mountpoint,
+                LOG_INFO( "Failed to find known device with name ", deviceName,
                           ". Attempting to resolve using device mapper" );
                 try
                 {
@@ -247,15 +242,22 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
                         uuid = it->second;
                     else
                     {
-                        LOG_ERROR( "Failed to resolve mountpoint ", mountpoint,
+                        LOG_ERROR( "Failed to resolve device ", deviceName,
                                    " to any known device" );
                         continue;
                     }
                 }
             }
             auto removable = isRemovable( deviceName );
-            res.emplace_back( std::make_tuple( uuid, utils::file::toMrl( mountpoint ),
-                                               removable ) );
+            for ( const auto& mountpoint : p.second )
+            {
+                LOG_DEBUG( "Adding device ", deviceName, " uuid: ", uuid,
+                           " mounted on: ", mountpoint, " removable: ",
+                           removable ? "yes" : "no" );
+                res.emplace_back( std::make_tuple( uuid,
+                                                   utils::file::toMrl( mountpoint ),
+                                                   removable ) );
+            }
         }
     }
     catch(std::runtime_error& ex)
