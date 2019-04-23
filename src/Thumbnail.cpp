@@ -105,6 +105,11 @@ Thumbnail::Origin Thumbnail::origin() const
     return m_origin;
 }
 
+bool Thumbnail::isGenerated() const
+{
+    return m_isGenerated;
+}
+
 void Thumbnail::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + Thumbnail::Table::Name +
