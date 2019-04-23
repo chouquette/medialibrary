@@ -29,6 +29,7 @@ namespace medialibrary
 {
 
 class AlbumTrack;
+class Thumbnail;
 
 namespace parser
 {
@@ -64,6 +65,7 @@ protected:
     std::shared_ptr<Album> findAlbum( IItem& item, std::shared_ptr<Artist> albumArtist,
                                         std::shared_ptr<Artist> artist );
     std::shared_ptr<Genre> handleGenre( IItem& item ) const;
+    std::shared_ptr<Thumbnail> findAlbumArtwork( IItem& item );
 
 private:
     static int toInt( IItem& item, IItem::Metadata meta );
