@@ -648,6 +648,7 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
     return sqlite::Tools::withRetries( 3, [this, &item, &artists, media]( std::string artworkMrl,
                                                   std::shared_ptr<Album> album, std::shared_ptr<Genre> genre ) {
         auto t = m_ml->getConn()->newTransaction();
+        bool newAlbum = album == nullptr;
         if ( album == nullptr )
         {
             const auto& albumName = item.meta( IItem::Metadata::Album );
@@ -662,7 +663,6 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
             album = m_ml->createAlbum( albumName, thumbnailId );
             if ( album == nullptr )
                 return false;
-            m_notifier->notifyAlbumCreation( album );
         }
         // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist
         auto track = handleTrack( album, item, artists.second ? artists.second : artists.first,
@@ -671,6 +671,8 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
         auto res = link( item, *album, artists.first, artists.second );
         media->save();
         t->commit();
+        if ( newAlbum == true )
+            m_notifier->notifyAlbumCreation( album );
         m_notifier->notifyAlbumModification( album );
         if ( genre != nullptr )
             m_notifier->notifyGenreModification( genre );
