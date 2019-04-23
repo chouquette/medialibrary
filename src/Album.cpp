@@ -173,29 +173,6 @@ std::shared_ptr<Thumbnail> Album::thumbnail()
     return m_thumbnail;
 }
 
-bool Album::setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin,
-                           bool isGenerated )
-{
-    if ( m_thumbnailId != 0 )
-        return Thumbnail::setMrlFromPrimaryKey( m_ml, m_thumbnail, m_thumbnailId,
-                                                artworkMrl, origin );
-
-    std::unique_ptr<sqlite::Transaction> t;
-    if ( sqlite::Transaction::transactionInProgress() == false )
-        t = m_ml->getConn()->newTransaction();
-    m_thumbnail = Thumbnail::create( m_ml, artworkMrl, Thumbnail::Origin::Album, isGenerated );
-    if ( m_thumbnail == nullptr )
-        return false;
-    static const std::string req = "UPDATE " + Album::Table::Name
-            + " SET thumbnail_id = ? WHERE id_album = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_thumbnail->id(), m_id ) == false )
-        return false;
-    m_thumbnailId = m_thumbnail->id();
-    if ( t != nullptr )
-        t->commit();
-    return true;
-}
-
 std::string Album::orderTracksBy( const QueryParameters* params = nullptr )
 {
     std::string req = " ORDER BY ";

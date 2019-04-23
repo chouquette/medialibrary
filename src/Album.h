@@ -71,8 +71,6 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         virtual bool isThumbnailGenerated() const override;
         virtual const std::string& thumbnailMrl() const override;
         std::shared_ptr<Thumbnail> thumbnail();
-        bool setArtworkMrl( const std::string& thumbnailMrl, Thumbnail::Origin origin,
-                            bool isGenerated);
         virtual Query<IMedia> tracks( const QueryParameters* params ) const override;
         virtual Query<IMedia> tracks( GenrePtr genre, const QueryParameters* params ) const override;
         ///

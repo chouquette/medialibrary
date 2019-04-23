@@ -162,19 +162,6 @@ TEST_F( Albums, SetShortSummary )
     ASSERT_EQ( a->shortSummary(), a2->shortSummary() );
 }
 
-TEST_F( Albums, SetArtworkMrl )
-{
-    auto a = ml->createAlbum( "album" );
-
-    a->setArtworkMrl( "artwork", Thumbnail::Origin::UserProvided, false);
-    ASSERT_EQ( a->thumbnailMrl(), "artwork" );
-
-    Reload();
-
-    auto a2 = ml->album( a->id() );
-    ASSERT_EQ( a->thumbnailMrl(), a2->thumbnailMrl() );
-}
-
 TEST_F( Albums, Thumbnail )
 {
     auto a = ml->createAlbum( "album" );
@@ -183,8 +170,9 @@ TEST_F( Albums, Thumbnail )
     ASSERT_FALSE( a->isThumbnailGenerated() );
 
     std::string mrl = "/path/to/sea/otter/artwork.png";
-    auto res = a->setArtworkMrl( mrl, Thumbnail::Origin::UserProvided, false );
-    ASSERT_TRUE( res );
+    t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::UserProvided, false );
+    ASSERT_NE( nullptr, t );
+    a = ml->MediaLibrary::createAlbum( "album 2", t->id() );
 
     t = a->thumbnail();
     ASSERT_NE( nullptr, t );
