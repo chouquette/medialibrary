@@ -33,6 +33,10 @@ namespace utils
 
 namespace file
 {
+    /**
+     * @brief extension Returns the file's extension, without the leading '.'
+     * @param fileName A filename
+     */
     std::string extension( const std::string& fileName );
     std::string stripExtension( const std::string& fileName );
     /**
