@@ -43,9 +43,15 @@ public:
     {
         Artist,
         AlbumArtist,
+        /// Taken from the album this media belongs to
         Album,
+        /// An artwork that was attached to the media, or a generated video
+        /// thumbnail
         Media,
+        /// A thumbnail provided by the application
         UserProvided,
+        /// An image (jpg or png) that was located in the album folder
+        CoverFile
     };
 
     Thumbnail( MediaLibraryPtr ml, sqlite::Row& row );
