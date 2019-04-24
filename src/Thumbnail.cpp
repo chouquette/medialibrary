@@ -140,9 +140,23 @@ std::shared_ptr<Thumbnail> Thumbnail::create( MediaLibraryPtr ml, std::string mr
     if ( isGenerated == true )
         mrl = utils::file::removePath( mrl, ml->thumbnailPath() );
     auto self = std::make_shared<Thumbnail>( ml, mrl, origin, isGenerated );
-    if ( insert( ml, self, req, mrl, origin, isGenerated ) == false )
+    if ( DatabaseHelpers<Thumbnail>::insert( ml, self, req, mrl, origin,
+                                             isGenerated ) == false )
         return nullptr;
     return self;
+}
+
+int64_t Thumbnail::insert()
+{
+    assert( m_id == 0 );
+    static const std::string req = "INSERT INTO " + Thumbnail::Table::Name +
+            "(mrl, origin, is_generated) VALUES(?,?,?)";
+    auto pKey = sqlite::Tools::executeInsert( m_ml->getConn(), req, m_mrl, m_origin,
+                                         m_isGenerated );
+    if ( pKey == 0 )
+        return 0;
+    m_id = pKey;
+    return m_id;
 }
 
 std::shared_ptr<Thumbnail> Thumbnail::createForFailure( MediaLibraryPtr ml )
@@ -150,7 +164,8 @@ std::shared_ptr<Thumbnail> Thumbnail::createForFailure( MediaLibraryPtr ml )
     static const std::string req = "INSERT INTO " + Thumbnail::Table::Name +
             "(mrl, origin, is_generated) VALUES(?,?,?)";
     auto self = std::make_shared<Thumbnail>( ml );
-    if ( insert( ml, self, req, nullptr, Origin::Media, true ) == false )
+    if ( DatabaseHelpers<Thumbnail>::insert( ml, self, req, nullptr,
+                                             Origin::Media, true ) == false )
         return nullptr;
     return self;
 }
