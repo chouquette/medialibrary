@@ -215,7 +215,7 @@ bool Artist::setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin ori
 {
     if ( m_thumbnailId != 0 )
         return Thumbnail::setMrlFromPrimaryKey( m_ml, m_thumbnail, m_thumbnailId,
-                                                artworkMrl, origin );
+                                                artworkMrl, origin, isGenerated );
 
     std::unique_ptr<sqlite::Transaction> t;
     if ( sqlite::Transaction::transactionInProgress() == false )

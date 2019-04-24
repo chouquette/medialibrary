@@ -67,7 +67,7 @@ TEST_F( Thumbnails, Update )
     ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
 
     mrl = "/better/thumbnail.gif";
-    auto res = t->update( mrl, Thumbnail::Origin::UserProvided );
+    auto res = t->update( mrl, Thumbnail::Origin::UserProvided, false );
     ASSERT_TRUE( res );
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
@@ -78,7 +78,7 @@ TEST_F( Thumbnails, Update )
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
 
-    res = t->update( mrl, Thumbnail::Origin::AlbumArtist );
+    res = t->update( mrl, Thumbnail::Origin::AlbumArtist, false );
     ASSERT_TRUE( res );
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::AlbumArtist );
@@ -117,4 +117,23 @@ TEST_F( Thumbnails, MarkFailure )
 
     m = std::static_pointer_cast<Media>( ml->media( m->id() ) );
     ASSERT_TRUE( m->isThumbnailGenerated() );
+}
+
+TEST_F( Thumbnails, UpdateIsGenerated )
+{
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
+    auto mrl = std::string{ "file://path/to/a/thumbnail.jpg" };
+    auto res = m->setThumbnail( mrl, Thumbnail::Origin::Media, false );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( mrl, m->thumbnail() );
+
+    auto newMrl = ml->thumbnailPath() + "thumb.jpg";
+    res = m->setThumbnail( newMrl, Thumbnail::Origin::Media, true );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( m->thumbnail(), newMrl );
+
+    Reload();
+
+    m = ml->media( m->id() );
+    ASSERT_EQ( newMrl, m->thumbnail() );
 }

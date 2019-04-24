@@ -399,7 +399,7 @@ bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin ori
 {
     if ( m_thumbnailId != 0 )
         return Thumbnail::setMrlFromPrimaryKey( m_ml, m_thumbnail, m_thumbnailId,
-                                                thumbnailMrl, origin );
+                                                thumbnailMrl, origin, isGenerated );
 
     std::unique_ptr<sqlite::Transaction> t;
     if ( sqlite::Transaction::transactionInProgress() == false )

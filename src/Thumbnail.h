@@ -63,7 +63,7 @@ public:
 
     int64_t id() const;
     const std::string& mrl() const;
-    bool update( std::string mrl, Origin origin );
+    bool update( std::string mrl, Origin origin , bool isGenerated );
     /**
      * @brief insert Insert the thumbnail in database
      * @return The new entity primary key, or 0 in case of failure
@@ -87,7 +87,7 @@ public:
     static bool setMrlFromPrimaryKey( MediaLibraryPtr ml,
                                       std::shared_ptr<Thumbnail>& thumbnail,
                                       int64_t thumbnailId, std::string mrl,
-                                      Origin origin );
+                                      Origin origin, bool isGenerated );
 
     static void createTable( sqlite::Connection* dbConnection );
     static std::shared_ptr<Thumbnail> create( MediaLibraryPtr ml, std::string mrl,
