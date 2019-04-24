@@ -645,10 +645,10 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
     if ( artists.first == nullptr && artists.second == nullptr )
         return false;
     auto album = findAlbum( item, artists.first, artists.second );
-    return sqlite::Tools::withRetries( 3, [this, &item, &artists, media]( std::string artworkMrl,
-                                                  std::shared_ptr<Album> album, std::shared_ptr<Genre> genre ) {
+    bool newAlbum = album == nullptr;
+    auto res = sqlite::Tools::withRetries( 3,
+            [this, &item, &artists, media, &artworkMrl, &album, &genre]() {
         auto t = m_ml->getConn()->newTransaction();
-        bool newAlbum = album == nullptr;
         if ( album == nullptr )
         {
             const auto& albumName = item.meta( IItem::Metadata::Album );
@@ -671,17 +671,20 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
         auto res = link( item, *album, artists.first, artists.second );
         media->save();
         t->commit();
-        if ( newAlbum == true )
-            m_notifier->notifyAlbumCreation( album );
-        m_notifier->notifyAlbumModification( album );
-        if ( genre != nullptr )
-            m_notifier->notifyGenreModification( genre );
-        if ( artists.first != nullptr )
-            m_notifier->notifyArtistModification( artists.first );
-        if ( artists.second != nullptr )
-            m_notifier->notifyArtistModification( artists.second );
         return res;
-    }, std::move( artworkMrl ), std::move( album ), std::move( genre ) );
+    });
+    if ( res == false )
+        return false;
+    if ( newAlbum == true )
+        m_notifier->notifyAlbumCreation( album );
+    m_notifier->notifyAlbumModification( album );
+    if ( genre != nullptr )
+        m_notifier->notifyGenreModification( genre );
+    if ( artists.first != nullptr )
+        m_notifier->notifyArtistModification( artists.first );
+    if ( artists.second != nullptr )
+        m_notifier->notifyArtistModification( artists.second );
+    return true;
 }
 
 std::shared_ptr<Genre> MetadataAnalyzer::handleGenre( IItem& item ) const
