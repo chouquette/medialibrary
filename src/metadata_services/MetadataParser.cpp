@@ -697,7 +697,29 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
         return false;
 
     if ( newAlbum == true )
+    {
+        // If we created an album, check if a thumbnail was found, and if it is
+        // as a cover file. If so, move it to our own thumbnails folder
+        if ( thumbnail != nullptr &&
+             thumbnail->origin() == Thumbnail::Origin::CoverFile )
+        {
+            auto originalMrl = thumbnail->mrl();
+            auto destPath = m_ml->thumbnailPath() + "album_" +
+                            std::to_string( album->id() ) + "." +
+                            utils::file::extension( originalMrl );
+            if ( utils::fs::copy( utils::file::toLocalPath( originalMrl ),
+                                  destPath ) == true )
+            {
+                auto destMrl = utils::file::toMrl( destPath );
+                res = sqlite::Tools::withRetries( 3, [&thumbnail, &destMrl]() {
+                    return thumbnail->update( destMrl, thumbnail->origin(), true );
+                });
+                if ( res == false )
+                    utils::fs::remove( destPath );
+            }
+        }
         m_notifier->notifyAlbumCreation( album );
+    }
     m_notifier->notifyAlbumModification( album );
     if ( genre != nullptr )
         m_notifier->notifyGenreModification( genre );
