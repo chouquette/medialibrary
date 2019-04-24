@@ -214,9 +214,12 @@ bool Artist::setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin ori
                             bool isGenerated )
 {
     if ( m_thumbnailId != 0 )
-        return Thumbnail::setMrlFromPrimaryKey( m_ml, m_thumbnail, m_thumbnailId,
-                                                artworkMrl, origin, isGenerated );
-
+    {
+        auto thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
+        if ( thumbnail == nullptr )
+            return false;
+        return thumbnail->update( artworkMrl, origin, isGenerated );
+    }
     std::unique_ptr<sqlite::Transaction> t;
     if ( sqlite::Transaction::transactionInProgress() == false )
         t = m_ml->getConn()->newTransaction();

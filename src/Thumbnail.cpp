@@ -105,23 +105,6 @@ Thumbnail::Origin Thumbnail::origin() const
     return m_origin;
 }
 
-bool Thumbnail::setMrlFromPrimaryKey( MediaLibraryPtr ml,
-                                      std::shared_ptr<Thumbnail>& thumbnail,
-                                      int64_t thumbnailId, std::string mrl,
-                                      Origin origin, bool isGenerated )
-{
-    if ( thumbnail == nullptr )
-    {
-        thumbnail = Thumbnail::fetch( ml, thumbnailId );
-        if ( thumbnail == nullptr )
-        {
-            LOG_WARN( "Failed to fetch thumbnail entity #", thumbnailId );
-            return false;
-        }
-    }
-    return thumbnail->update( std::move( mrl ), origin, isGenerated );
-}
-
 void Thumbnail::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + Thumbnail::Table::Name +
