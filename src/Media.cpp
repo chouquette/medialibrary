@@ -420,14 +420,24 @@ bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin ori
     if ( thumbnail == nullptr )
         return false;
 
+    if ( setThumbnail( std::move( thumbnail ) ) == false )
+        return false;
+    if ( t != nullptr )
+        t->commit();
+    return true;
+}
+
+bool Media::setThumbnail( std::shared_ptr<Thumbnail> thumbnail )
+{
+    assert( thumbnail != nullptr );
+    if ( thumbnail->id() == m_thumbnailId )
+        return true;
     static const std::string req = "UPDATE " + Media::Table::Name + " SET "
             "thumbnail_id = ? WHERE id_media = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, thumbnail->id(), m_id ) == false )
         return false;
     m_thumbnailId = thumbnail->id();
     m_thumbnail = std::move( thumbnail );
-    if ( t != nullptr )
-        t->commit();
     return true;
 }
 

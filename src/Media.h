@@ -120,6 +120,7 @@ class Media : public IMedia, public DatabaseHelpers<Media>
         virtual bool setThumbnail( const std::string &thumbnail ) override;
         bool setThumbnail( const std::string& thumbnail, Thumbnail::Origin origin,
                            bool isGenerated);
+        bool setThumbnail( std::shared_ptr<Thumbnail> thumbnail );
         virtual unsigned int insertionDate() const override;
         virtual unsigned int releaseDate() const override;
         /**
