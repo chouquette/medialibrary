@@ -395,51 +395,67 @@ void Media::setReleaseDate( unsigned int date )
     m_changed = true;
 }
 
-bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin origin,
-                          bool isGenerated )
+bool Media::setThumbnail( std::shared_ptr<Thumbnail> thumbnail )
 {
+    assert( thumbnail != nullptr );
     if ( m_thumbnailId != 0 )
     {
-        auto thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
-        if ( thumbnail == nullptr )
-            return false;
-        return thumbnail->update( thumbnailMrl, origin, isGenerated );
+        if ( m_thumbnail == nullptr )
+        {
+            m_thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
+            if ( m_thumbnail == nullptr )
+                return false;
+        }
+        // Now we need to figure out if we need to update the current thumbnail,
+        // or generate a new one
+        switch ( m_thumbnail->origin() )
+        {
+            case Thumbnail::Origin::Artist:         // unused for now
+            case Thumbnail::Origin::AlbumArtist:    // unused for now
+            case Thumbnail::Origin::Media:          // media specific
+            case Thumbnail::Origin::UserProvided:   // Already per-media
+                // In all these cases, the thumbnail should be per-media, and can
+                // be safely overriden.
+                return m_thumbnail->update( thumbnail->mrl(),
+                                            thumbnail->origin(),
+                                            thumbnail->isGenerated() );
+            case Thumbnail::Origin::Album:
+            case Thumbnail::Origin::CoverFile:
+                // We need a new thumbnail, otherwise we'd override the mrl for
+                // another user of the same thumbnail
+                break;
+        }
     }
 
     std::unique_ptr<sqlite::Transaction> t;
     if ( sqlite::Transaction::transactionInProgress() == false )
         t = m_ml->getConn()->newTransaction();
-    std::shared_ptr<Thumbnail> thumbnail;
-    if ( thumbnailMrl.empty() )
-    {
-        assert( origin == Thumbnail::Origin::Media );
-        assert( isGenerated == true );
+    if ( thumbnail->mrl().empty() == true )
         thumbnail = Thumbnail::createForFailure( m_ml );
+    else if ( thumbnail->id() == 0 )
+    {
+        if ( thumbnail->insert() == 0 )
+            return false;
     }
-    else
-        thumbnail = Thumbnail::create( m_ml, thumbnailMrl, origin, isGenerated );
-    if ( thumbnail == nullptr )
-        return false;
 
-    if ( setThumbnail( std::move( thumbnail ) ) == false )
-        return false;
-    if ( t != nullptr )
-        t->commit();
-    return true;
-}
-
-bool Media::setThumbnail( std::shared_ptr<Thumbnail> thumbnail )
-{
-    assert( thumbnail != nullptr );
-    if ( thumbnail->id() == m_thumbnailId )
-        return true;
     static const std::string req = "UPDATE " + Media::Table::Name + " SET "
             "thumbnail_id = ? WHERE id_media = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, thumbnail->id(), m_id ) == false )
         return false;
+    if ( t != nullptr )
+        t->commit();
     m_thumbnailId = thumbnail->id();
     m_thumbnail = std::move( thumbnail );
     return true;
+}
+
+bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin origin,
+                          bool isGenerated )
+{
+    assert( thumbnailMrl.empty() == false ||
+            ( origin == Thumbnail::Origin::Media && isGenerated == true ) );
+    return setThumbnail( std::make_shared<Thumbnail>( m_ml, thumbnailMrl,
+                                                      origin, isGenerated ) );
 }
 
 bool Media::setThumbnail( const std::string& thumbnailMrl )
