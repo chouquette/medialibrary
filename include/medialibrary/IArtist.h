@@ -56,6 +56,16 @@ public:
      */
     virtual bool isThumbnailGenerated() const = 0;
     virtual const std::string& thumbnailMrl() const = 0;
+    /**
+     * @brief setThumbnail Assign a thumbnail to the artist
+     * @param thumbnailMrl An mrl pointing to the thumbnail
+     * @return true in case of success, false otherwise
+     *
+     * @note The medialibrary does not take ownership of the thumbnail. It is
+     * application responsibility to ensure that it will always be available
+     * or that a later call will invalidate the thumbnail if it gets (re)moved
+     */
+    virtual bool setThumbnail( const std::string& thumbnailMrl ) = 0;
     virtual const std::string& musicBrainzId() const = 0;
     /**
      * @brief nbAlbums

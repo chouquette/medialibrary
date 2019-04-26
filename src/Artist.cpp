@@ -255,6 +255,11 @@ bool Artist::setArtworkMrl( const std::string& thumbnailMrl,
                                                       origin, isGenerated ) );
 }
 
+bool Artist::setThumbnail( const std::string& thumbnailMrl )
+{
+    return setArtworkMrl( thumbnailMrl, Thumbnail::Origin::UserProvided, false );
+}
+
 bool Artist::updateNbAlbum( int increment )
 {
     assert( increment != 0 );
