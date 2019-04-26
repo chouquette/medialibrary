@@ -56,10 +56,6 @@ public:
 
     Thumbnail( MediaLibraryPtr ml, sqlite::Row& row );
     Thumbnail( MediaLibraryPtr ml, std::string mrl, Origin origin, bool isGenerated );
-    /**
-     * @brief Thumbnail Constructor for a failure record
-     */
-    Thumbnail( MediaLibraryPtr ml );
 
     int64_t id() const;
     const std::string& mrl() const;
@@ -81,15 +77,6 @@ public:
     static void createTable( sqlite::Connection* dbConnection );
     static std::shared_ptr<Thumbnail> create( MediaLibraryPtr ml, std::string mrl,
                                               Origin origin, bool isGenerated );
-    /**
-     * @brief createForFailure Creates a thumbnail record that denotes a failure
-     * @param ml A medialibrary instance pointer
-     *
-     * This creates a record in the thumbnail table that denotes that a thumbnail
-     * generation failed. A valid thumbnail will be generated, and can be updated
-     * if required, or the record can be removed at a later time to force the regeneration
-     */
-    static std::shared_ptr<Thumbnail> createForFailure( MediaLibraryPtr ml );
 
     /**
      * @brief deleteFailureRecords Allow the thumbnail to retry any previously failed attempt

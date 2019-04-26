@@ -430,9 +430,7 @@ bool Media::setThumbnail( std::shared_ptr<Thumbnail> thumbnail )
     std::unique_ptr<sqlite::Transaction> t;
     if ( sqlite::Transaction::transactionInProgress() == false )
         t = m_ml->getConn()->newTransaction();
-    if ( thumbnail->mrl().empty() == true )
-        thumbnail = Thumbnail::createForFailure( m_ml );
-    else if ( thumbnail->id() == 0 )
+    if ( thumbnail->id() == 0 )
     {
         if ( thumbnail->insert() == 0 )
             return false;
