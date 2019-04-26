@@ -50,12 +50,12 @@ TEST_F( Thumbnails, MediaSetThumbnail )
     auto res = m->setThumbnail( mrl );
     ASSERT_TRUE( res );
     ASSERT_TRUE( m->isThumbnailGenerated() );
-    ASSERT_EQ( m->thumbnail(), mrl );
+    ASSERT_EQ( m->thumbnailMrl(), mrl );
 
     Reload();
 
     m = ml->media( m->id() );
-    ASSERT_EQ( m->thumbnail(), mrl );
+    ASSERT_EQ( m->thumbnailMrl(), mrl );
     ASSERT_TRUE( m->isThumbnailGenerated() );
 }
 
@@ -125,15 +125,15 @@ TEST_F( Thumbnails, UpdateIsGenerated )
     auto mrl = std::string{ "file://path/to/a/thumbnail.jpg" };
     auto res = m->setThumbnail( mrl, Thumbnail::Origin::Media, false );
     ASSERT_TRUE( res );
-    ASSERT_EQ( mrl, m->thumbnail() );
+    ASSERT_EQ( mrl, m->thumbnailMrl() );
 
     auto newMrl = ml->thumbnailPath() + "thumb.jpg";
     res = m->setThumbnail( newMrl, Thumbnail::Origin::Media, true );
     ASSERT_TRUE( res );
-    ASSERT_EQ( m->thumbnail(), newMrl );
+    ASSERT_EQ( m->thumbnailMrl(), newMrl );
 
     Reload();
 
     m = ml->media( m->id() );
-    ASSERT_EQ( newMrl, m->thumbnail() );
+    ASSERT_EQ( newMrl, m->thumbnailMrl() );
 }

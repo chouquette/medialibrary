@@ -206,12 +206,12 @@ TEST_F( DbModel, Upgrade13to14 )
     auto media = ml->files();
     ASSERT_EQ( 4u, media.size() );
     auto m = media[0];
-    ASSERT_EQ( m->thumbnail(), ml->thumbnailPath() + "/path/to/thumbnail" );
+    ASSERT_EQ( m->thumbnailMrl(), ml->thumbnailPath() + "/path/to/thumbnail" );
     ASSERT_TRUE( m->isThumbnailGenerated() );
     ASSERT_EQ( m->fileName(), "file with space.avi" );
 
     m = media[1];
-    ASSERT_EQ( m->thumbnail(), "" );
+    ASSERT_EQ( m->thumbnailMrl(), "" );
     ASSERT_FALSE( m->isThumbnailGenerated() );
 
     // Ensure we're probing the correct fake media

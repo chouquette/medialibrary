@@ -104,7 +104,7 @@ void ThumbnailerWorker::run()
         if ( media->isThumbnailGenerated() == true )
         {
             LOG_INFO( "Skipping thumbnail generation of a media with a thumbnail ", media->fileName() );
-            m_ml->getCb()->onMediaThumbnailReady( media, media->thumbnail().empty() == false );
+            m_ml->getCb()->onMediaThumbnailReady( media, media->thumbnailMrl().empty() == false );
             continue;
         }
         bool res = generateThumbnail( media );

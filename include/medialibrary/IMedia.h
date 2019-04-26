@@ -170,16 +170,18 @@ class IMedia
         ///
         virtual Query<IChapter> chapters( const QueryParameters* params ) const = 0;
         ///
-        /// \brief thumbnail Returns the path of a thumbnail for this media
-        /// \return A path, relative to the thumbnailPath configured when initializing
-        ///  The media library
+        /// \brief thumbnail Returns the mrl of a thumbnail for this media
+        /// \return An mrl, representing the absolute path to the media thumbnail
+        ///         or an empty string, if the thumbnail generation failed
         ///
-        virtual const std::string& thumbnail() const = 0;
+        /// \sa{isThumbnailGenerated}
+        ///
+        virtual const std::string& thumbnailMrl() const = 0;
         ///
         /// \brief isThumbnailGenerated Returns true if a thumbnail generation was
         ///                             attempted.
         /// In case the thumbnail generation failed, this will still be true, but
-        /// the thumbnail returned by \sa{thumbnail} will be empty.
+        /// the mrl returned by \sa{thumbnailMrl} will be empty.
         /// This is intended as a helper for the client application, so it doesn't
         /// attempt ask for a new thumbmail generation.
         /// \return

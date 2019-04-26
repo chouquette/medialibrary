@@ -331,14 +331,14 @@ void Tests::checkMedias(const rapidjson::Value& expectedMedias)
         if ( expectedMedia.HasMember( "snapshotExpected" ) == true )
         {
             auto snapshotExpected = expectedMedia["snapshotExpected"].GetBool();
-            if ( snapshotExpected && media->thumbnail().empty() == true )
+            if ( snapshotExpected && media->thumbnailMrl().empty() == true )
             {
                 m_cb->prepareWaitForThumbnail( media );
                 m_ml->requestThumbnail( media );
                 auto res = m_cb->waitForThumbnail();
                 ASSERT_TRUE( res );
             }
-            ASSERT_EQ( !snapshotExpected, media->thumbnail().empty() );
+            ASSERT_EQ( !snapshotExpected, media->thumbnailMrl().empty() );
         }
     }
 }
@@ -561,8 +561,8 @@ void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& 
         }
         if ( expectedTrack.HasMember( "hasArtwork" ) )
         {
-            ASSERT_EQ( expectedTrack["hasArtwork"].GetBool(), track->thumbnail().empty() == false );
-            ASSERT_TRUE( track->thumbnail().compare(0, 13, "attachment://") != 0 );
+            ASSERT_EQ( expectedTrack["hasArtwork"].GetBool(), track->thumbnailMrl().empty() == false );
+            ASSERT_TRUE( track->thumbnailMrl().compare(0, 13, "attachment://") != 0 );
         }
         // Always check if the album link is correct. This isn't part of finding the proper album, so just fail hard
         // if the check fails.

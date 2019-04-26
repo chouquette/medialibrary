@@ -317,7 +317,7 @@ bool Media::addChapter(int64_t offset, int64_t duration, std::string name)
                             m_id ) != nullptr;
 }
 
-const std::string& Media::thumbnail() const
+const std::string& Media::thumbnailMrl() const
 {
     if ( isThumbnailGenerated() == false )
         return Thumbnail::EmptyMrl;
