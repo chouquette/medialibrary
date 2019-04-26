@@ -694,7 +694,7 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
         auto track = handleTrack( album, item, artists.second ? artists.second : artists.first,
                                   genre.get() );
 
-        auto res = link( item, *album, artists.first, artists.second );
+        auto res = link( item, *album, artists.first, artists.second, thumbnail );
         media->save();
         t->commit();
         return res;
@@ -1041,7 +1041,9 @@ std::shared_ptr<AlbumTrack> MetadataAnalyzer::handleTrack( std::shared_ptr<Album
 /* Misc */
 
 bool MetadataAnalyzer::link( IItem& item, Album& album,
-                               std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist )
+                             std::shared_ptr<Artist> albumArtist,
+                             std::shared_ptr<Artist> artist,
+                             std::shared_ptr<Thumbnail> thumbnail )
 {
     Media& media = static_cast<Media&>( *item.media() );
 
@@ -1068,8 +1070,7 @@ bool MetadataAnalyzer::link( IItem& item, Album& album,
         // If the album artist has no thumbnail, let's assign it
         if ( albumArtistThumbnail == nullptr )
         {
-            albumArtist->setArtworkMrl( albumThumbnail->mrl(),
-                                        Thumbnail::Origin::AlbumArtist, false );
+            albumArtist->setThumbnail( thumbnail );
         }
         else if ( albumArtistThumbnail->origin() == Thumbnail::Origin::Artist )
         {
@@ -1084,7 +1085,7 @@ bool MetadataAnalyzer::link( IItem& item, Album& album,
          artist->id() != VariousArtistID &&
          albumThumbnail != nullptr && artist->thumbnail() == nullptr )
     {
-        artist->setArtworkMrl( album.thumbnailMrl(), Thumbnail::Origin::Artist, false );
+        artist->setThumbnail( thumbnail );
     }
 
     albumArtist->addMedia( media );

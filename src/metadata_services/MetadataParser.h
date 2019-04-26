@@ -61,7 +61,8 @@ protected:
     std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> findOrCreateArtist( IItem& item ) const;
     std::shared_ptr<AlbumTrack> handleTrack( std::shared_ptr<Album> album, IItem& item,
                                              std::shared_ptr<Artist> artist, Genre* genre ) const;
-    bool link(IItem& item, Album& album, std::shared_ptr<Artist> albumArtist, std::shared_ptr<Artist> artist );
+    bool link( IItem& item, Album& album, std::shared_ptr<Artist> albumArtist,
+               std::shared_ptr<Artist> artist, std::shared_ptr<Thumbnail> thumbnail );
     std::shared_ptr<Album> findAlbum( IItem& item, std::shared_ptr<Artist> albumArtist,
                                         std::shared_ptr<Artist> artist );
     std::shared_ptr<Genre> handleGenre( IItem& item ) const;

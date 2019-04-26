@@ -210,30 +210,49 @@ std::shared_ptr<Thumbnail> Artist::thumbnail()
     return m_thumbnail;
 }
 
-bool Artist::setArtworkMrl( const std::string& artworkMrl, Thumbnail::Origin origin,
-                            bool isGenerated )
+bool Artist::setThumbnail( std::shared_ptr<Thumbnail> thumbnail )
 {
+    assert( thumbnail != nullptr );
+
     if ( m_thumbnailId != 0 )
     {
-        auto thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
-        if ( thumbnail == nullptr )
-            return false;
-        return thumbnail->update( artworkMrl, origin, isGenerated );
+        if ( m_thumbnail == nullptr )
+        {
+            auto m_thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
+            if ( m_thumbnail == nullptr )
+                return false;
+        }
+        if ( m_thumbnail->origin() == Thumbnail::Origin::Artist ||
+             m_thumbnail->origin() == Thumbnail::Origin::UserProvided )
+            return m_thumbnail->update( thumbnail->mrl(),
+                                        thumbnail->origin(),
+                                        thumbnail->isGenerated() );
     }
     std::unique_ptr<sqlite::Transaction> t;
     if ( sqlite::Transaction::transactionInProgress() == false )
         t = m_ml->getConn()->newTransaction();
-    m_thumbnail = Thumbnail::create( m_ml, artworkMrl, Thumbnail::Origin::Artist, isGenerated );
-    if ( m_thumbnail == nullptr )
-        return false;
+    if ( thumbnail->id() == 0 )
+    {
+        if ( thumbnail->insert() == 0 )
+            return false;
+    }
     static const std::string req = "UPDATE " + Artist::Table::Name +
             " SET thumbnail_id = ? WHERE id_artist = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_thumbnail->id(), m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, thumbnail->id(),
+                                       m_id ) == false )
         return false;
-    m_thumbnailId = m_thumbnail->id();
     if ( t != nullptr )
         t->commit();
+    m_thumbnailId = thumbnail->id();
+    m_thumbnail = std::move( thumbnail );
     return true;
+}
+
+bool Artist::setArtworkMrl( const std::string& thumbnailMrl,
+                            Thumbnail::Origin origin, bool isGenerated )
+{
+    return setThumbnail( std::make_shared<Thumbnail>( m_ml, thumbnailMrl,
+                                                      origin, isGenerated ) );
 }
 
 bool Artist::updateNbAlbum( int increment )
