@@ -317,21 +317,22 @@ bool Media::addChapter(int64_t offset, int64_t duration, std::string name)
                             m_id ) != nullptr;
 }
 
-const std::string& Media::thumbnailMrl() const
+std::shared_ptr<const Thumbnail> Media::thumbnail() const
 {
     if ( isThumbnailGenerated() == false )
-        return Thumbnail::EmptyMrl;
-
+        return nullptr;
     if ( m_thumbnail == nullptr )
-    {
-        auto thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
-        if ( thumbnail == nullptr )
-            return Thumbnail::EmptyMrl;
-        m_thumbnail = std::move( thumbnail );
-    }
-    if ( m_thumbnail->isValid() == false )
+        m_thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
+    return m_thumbnail;
+}
+
+const std::string& Media::thumbnailMrl() const
+{
+    auto t = thumbnail();
+    if ( t == nullptr || t->isValid() == false )
         return Thumbnail::EmptyMrl;
-    return m_thumbnail->mrl();
+    assert( t == m_thumbnail );
+    return t->mrl();
 }
 
 bool Media::isThumbnailGenerated() const
