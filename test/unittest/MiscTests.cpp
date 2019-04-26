@@ -286,3 +286,12 @@ TEST_F( DbModel, Upgrade15to16 )
         ++expected;
     }
 }
+
+TEST_F( DbModel, Upgrade16to17 )
+{
+    LoadFakeDB( SRC_DIR "/test/unittest/db_v16.sql" );
+    auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
+    ASSERT_EQ( InitializeResult::Success, res );
+    CheckNbTriggers( 34 );
+    CheckNbIndexes( 35 );
+}

@@ -719,7 +719,7 @@ void Media::setFileName( std::string fileName )
 void Media::createTable( sqlite::Connection* connection, uint32_t modelVersion )
 {
     std::string reqs[] = {
-        #include "database/tables/Media_v14.sql"
+        #include "database/tables/Media_v17.sql"
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( connection, req );

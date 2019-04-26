@@ -919,6 +919,11 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 migrateModel15to16();
                 previousVersion = 16;
             }
+            if ( previousVersion == 16 )
+            {
+                migrateModel16to17();
+                previousVersion = 17;
+            }
             // To be continued in the future!
 
             if ( needRescan == true )
@@ -1340,6 +1345,28 @@ void MediaLibrary::migrateModel15to16()
     }
 
     m_settings.setDbModelVersion( 16 );
+    m_settings.save();
+    t->commit();
+}
+
+void MediaLibrary::migrateModel16to17()
+{
+    auto dbConn = getConn();
+    sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
+    auto t = dbConn->newTransaction();
+    std::string reqs[] = {
+#               include "database/migrations/migration16-17.sql"
+    };
+
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConn, req );
+
+    Media::createTriggers( dbConn, 17 );
+    Album::createTriggers( dbConn );
+    Artist::createTriggers( dbConn, 17 );
+    Folder::createTriggers( dbConn, 17 );
+
+    m_settings.setDbModelVersion( 17 );
     m_settings.save();
     t->commit();
 }
