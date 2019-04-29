@@ -923,6 +923,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
             {
                 migrateModel16to17();
                 previousVersion = 17;
+                needRescan = true;
             }
             // To be continued in the future!
 
