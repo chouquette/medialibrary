@@ -42,7 +42,8 @@ CoreThumbnailer::CoreThumbnailer( MediaLibraryPtr ml )
 {
 }
 
-bool CoreThumbnailer::generate( medialibrary::MediaPtr media, const std::string& mrl )
+bool CoreThumbnailer::generate( medialibrary::MediaPtr media,
+                                const std::string& mrl, const std::string& dest )
 {
     VLC::Media vlcMedia{ VLCInstance::get(), mrl, VLC::Media::FromType::FromLocation };
     auto em = vlcMedia.eventManager();
@@ -71,11 +72,8 @@ bool CoreThumbnailer::generate( medialibrary::MediaPtr media, const std::string&
     }
     if ( thumbnail.isValid() == false )
         return false;
-    auto path = m_ml->thumbnailPath() + "/" + std::to_string( media->id() ) + ".jpg";
-    if ( thumbnail.save( path ) == false )
-        return false;
-    auto m = static_cast<Media*>( media.get() );
-    return m->setThumbnail( path, Thumbnail::Origin::Media, true );
+
+    return thumbnail.save( dest );
 }
 
 }

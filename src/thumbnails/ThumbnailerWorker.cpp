@@ -163,7 +163,10 @@ bool ThumbnailerWorker::generateThumbnail( MediaPtr media )
     }
 
     LOG_INFO( "Generating ", mrl, " thumbnail..." );
-    if ( m_generator->generate( media, mrl ) == false )
+    auto dest = m_ml->thumbnailPath() + "/" + std::to_string( media->id() ) + ".jpg";
+    auto m = static_cast<Media*>( media.get() );
+    if ( m_generator->generate( media, mrl, dest ) == false ||
+         m->setThumbnail( dest, Thumbnail::Origin::Media, true ) == false )
         return false;
 
     m_ml->getNotifier()->notifyMediaModification( media );

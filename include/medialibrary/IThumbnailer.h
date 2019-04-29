@@ -35,12 +35,14 @@ public:
      * @brief request Generate a thumbnail for the provided media
      * @param media The media to generate a thumbnail for
      * @param mrl The mrl to the main file for this media
+     * @param destination The path in which to save the thumbnail
      *
-     * This method is expected to be blocking until the generation is successful
-     * If successful, the implementation must call IMedia::setThumbnail and pass
-     * the mrl to the generated thumbnail.
+     * This method is expected to be blocking until the generation is successful.
+     * Upon successful return, the <destination> path must contain the generated
+     * thumbnail
      */
-    virtual bool generate( MediaPtr media, const std::string& mrl ) = 0;
+    virtual bool generate( MediaPtr media, const std::string& mrl,
+                           const std::string& destination ) = 0;
 };
 
 }

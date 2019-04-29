@@ -53,11 +53,12 @@ class VmemThumbnailer : public IThumbnailer
 
 public:
     VmemThumbnailer( MediaLibraryPtr ml );
-    virtual bool generate( MediaPtr media, const std::string& mrl ) override;
+    virtual bool generate( MediaPtr media, const std::string& mrl,
+                           const std::string& dest ) override;
     bool seekAhead( Task& task );
     void setupVout( Task& task );
-    bool takeThumbnail( Task& task );
-    bool compress( Task& task );
+    bool takeThumbnail( Task& task, const std::string& dest );
+    bool compress( Task& task, const std::string& dest );
 
 private:
     // Force a base width, let height be computed depending on A/R

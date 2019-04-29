@@ -34,7 +34,8 @@ class CoreThumbnailer : public IThumbnailer
 public:
     CoreThumbnailer( MediaLibraryPtr ml );
 
-    virtual bool generate( MediaPtr media, const std::string& mrl ) override;
+    virtual bool generate( MediaPtr media, const std::string& mrl,
+                           const std::string& dest) override;
 private:
     MediaLibraryPtr m_ml;
 };

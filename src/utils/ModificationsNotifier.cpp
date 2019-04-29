@@ -200,10 +200,6 @@ void ModificationNotifier::run()
 
 void ModificationNotifier::removeMediaThumbnail( int64_t mediaId )
 {
-    // FIXME: This is making an unwarranted assumption about the thumbnail naming
-    // scheme. We need to enforce this naming internally, and provide the output
-    // path to the various thumbnailers.
-    // See https://code.videolan.org/videolan/medialibrary/issues/83
     auto path = m_ml->thumbnailPath() + std::to_string( mediaId ) + ".jpg";
     utils::fs::remove( path );
 }

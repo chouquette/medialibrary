@@ -48,7 +48,8 @@ VmemThumbnailer::VmemThumbnailer( MediaLibraryPtr ml )
 #endif
 }
 
-bool VmemThumbnailer::generate( MediaPtr media, const std::string& mrl )
+bool VmemThumbnailer::generate( MediaPtr media, const std::string& mrl,
+                                const std::string& dest )
 {
     VLC::Media vlcMedia = VLC::Media( VLCInstance::get(), mrl,
                                       VLC::Media::FromType::FromLocation );
@@ -90,7 +91,7 @@ bool VmemThumbnailer::generate( MediaPtr media, const std::string& mrl )
             return false;
         }
     }
-    return takeThumbnail( task );
+    return takeThumbnail( task, dest );
 }
 
 bool VmemThumbnailer::seekAhead( Task& task )
@@ -167,7 +168,7 @@ void VmemThumbnailer::setupVout( Task& task )
     );
 }
 
-bool VmemThumbnailer::takeThumbnail( Task& task )
+bool VmemThumbnailer::takeThumbnail( Task& task, const std::string& dest )
 {
     // lock, signal that we want a thumbnail, and wait.
     {
@@ -184,25 +185,16 @@ bool VmemThumbnailer::takeThumbnail( Task& task )
         }
     }
     task.mp.stop();
-    return compress( task );
+    return compress( task, dest );
 }
 
-bool VmemThumbnailer::compress( Task& task )
+bool VmemThumbnailer::compress( Task& task, const std::string& dest )
 {
-    auto path = m_ml->thumbnailPath();
-    path += "/";
-    path += std::to_string( task.media->id() ) + "." + m_compressor->extension();
-
     auto hOffset = task.width > DesiredWidth ? ( task.width - DesiredWidth ) / 2 : 0;
     auto vOffset = task.height > DesiredHeight ? ( task.height - DesiredHeight ) / 2 : 0;
 
-    if ( m_compressor->compress( m_buff.get(), path, task.width, task.height,
-                                 DesiredWidth, DesiredHeight, hOffset, vOffset ) == false )
-        return false;
-
-    auto media = static_cast<Media*>( task.media.get() );
-    media->setThumbnail( path, Thumbnail::Origin::Media, true );
-    return true;
+    return m_compressor->compress( m_buff.get(), dest, task.width, task.height,
+                                   DesiredWidth, DesiredHeight, hOffset, vOffset );
 }
 
 VmemThumbnailer::Task::Task( MediaPtr m, std::string mrl )
