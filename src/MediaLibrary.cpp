@@ -58,6 +58,7 @@
 #include "database/SqliteQuery.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
+#include "utils/File.h"
 #include "VideoTrack.h"
 #include "Metadata.h"
 #include "parser/Task.h"
@@ -261,6 +262,31 @@ bool MediaLibrary::createThumbnailFolder( const std::string& thumbnailPath ) con
 #endif
     }
     return true;
+}
+
+void MediaLibrary::removeThumbnails()
+{
+    auto thumbnailsFolderMrl = utils::file::toMrl( m_thumbnailPath );
+    auto fsFactory = fsFactoryForMrl( thumbnailsFolderMrl );
+    if ( fsFactory == nullptr )
+    {
+        LOG_ERROR( "Failed to create an fs factory to flush the thumbnails" );
+        return;
+    }
+    try
+    {
+        auto dir = fsFactory->createDirectory( thumbnailsFolderMrl );
+        auto files = dir->files();
+        for ( const auto& f : files )
+        {
+            auto path = utils::file::toLocalPath( f->mrl() );
+            utils::fs::remove( path );
+        }
+    }
+    catch ( const std::exception& ex )
+    {
+        LOG_ERROR( "Failed to remove thumbnail files: ", ex.what() );
+    }
 }
 
 InitializeResult MediaLibrary::initialize( const std::string& dbPath,
@@ -1660,6 +1686,7 @@ void MediaLibrary::forceRescan()
         Thumbnail::deleteAll( this );
         t->commit();
     }
+    removeThumbnails();
     if ( m_parser != nullptr )
     {
         m_parser->restart();
