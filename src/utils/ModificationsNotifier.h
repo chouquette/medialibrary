@@ -76,6 +76,8 @@ public:
 private:
     void run();
     void notify();
+    void removeMediaThumbnail( int64_t mediaId );
+    void removeAlbumThumbnail( int64_t albumId );
 
 private:
     template <typename T>

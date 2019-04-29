@@ -28,6 +28,7 @@
 
 #include "ModificationsNotifier.h"
 #include "MediaLibrary.h"
+#include "utils/File.h"
 
 namespace medialibrary
 {
@@ -182,12 +183,36 @@ void ModificationNotifier::run()
             checkQueue( m_genres, genres, nextTimeout, now );
             m_timeout = nextTimeout;
         }
+        // Best attempt at automatically removing the thumbnail upon media
+        // deletion. This is probably not the best place for doing so, but any
+        // other would probably require an extra thread
+        for ( auto mediaId : media.removed )
+            removeMediaThumbnail( mediaId );
         notify( std::move( media ), &IMediaLibraryCb::onMediaAdded, &IMediaLibraryCb::onMediaModified, &IMediaLibraryCb::onMediaDeleted );
         notify( std::move( artists ), &IMediaLibraryCb::onArtistsAdded, &IMediaLibraryCb::onArtistsModified, &IMediaLibraryCb::onArtistsDeleted );
+        for ( auto albumId : albums.removed )
+            removeAlbumThumbnail( albumId );
         notify( std::move( albums ), &IMediaLibraryCb::onAlbumsAdded, &IMediaLibraryCb::onAlbumsModified, &IMediaLibraryCb::onAlbumsDeleted );
         notify( std::move( playlists ), &IMediaLibraryCb::onPlaylistsAdded, &IMediaLibraryCb::onPlaylistsModified, &IMediaLibraryCb::onPlaylistsDeleted );
         notify( std::move( genres ), &IMediaLibraryCb::onGenresAdded, &IMediaLibraryCb::onGenresModified, &IMediaLibraryCb::onGenresDeleted );
     }
+}
+
+void ModificationNotifier::removeMediaThumbnail( int64_t mediaId )
+{
+    // FIXME: This is making an unwarranted assumption about the thumbnail naming
+    // scheme. We need to enforce this naming internally, and provide the output
+    // path to the various thumbnailers.
+    // See https://code.videolan.org/videolan/medialibrary/issues/83
+    auto path = m_ml->thumbnailPath() + std::to_string( mediaId ) + ".jpg";
+    utils::fs::remove( path );
+}
+
+void ModificationNotifier::removeAlbumThumbnail( int64_t albumId )
+{
+    auto path = m_ml->thumbnailPath() + "album_" +
+            std::to_string( albumId ) + ".jpg";
+    utils::fs::remove( path );
 }
 
 }
