@@ -72,3 +72,16 @@ coverage:
         paths:
             - html/
 
+asan-ubsan:
+    image: registry.videolan.org/medialibrary:20190121111050
+    tags:
+      - debian
+      - amd64
+    script:
+      - export LSAN_OPTIONS=exitcode=0
+      - ./bootstrap
+      - ./configure --enable-tests CXXFLAGS="-g -O1 -fsanitize=address,undefined"
+      - make -j4
+      - make -j4 check
+      - ./unittest
+      - ./samples -v
