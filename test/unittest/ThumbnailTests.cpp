@@ -29,6 +29,7 @@
 #include "Thumbnail.h"
 #include "Media.h"
 #include "Artist.h"
+#include "utils/Filename.h"
 
 class Thumbnails : public Tests
 {
@@ -96,7 +97,7 @@ TEST_F( Thumbnails, GeneratedPath )
     auto mrl = "relative_path.jpg";
     auto t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::UserProvided, true );
     ASSERT_NE( mrl, t->mrl() );
-    auto expectedMrl = ml->thumbnailPath() + mrl;
+    auto expectedMrl = utils::file::toMrl( ml->thumbnailPath() + mrl );
     ASSERT_EQ( expectedMrl, t->mrl() );
 
     Reload();

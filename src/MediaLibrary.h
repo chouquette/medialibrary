@@ -224,6 +224,7 @@ private:
     void registerEntityHooks();
     static bool validateSearchPattern( const std::string& pattern );
     bool createThumbnailFolder( const std::string& thumbnailPath ) const;
+    void flushThumbnails();
 
 protected:
     virtual void addLocalFsFactory();
