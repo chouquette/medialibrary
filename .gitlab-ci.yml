@@ -1,163 +1,59 @@
-stages:
-    - build
-    - unit-tests
-    - functional-tests
-
 variables:
   GIT_SUBMODULE_STRATEGY: normal
 
-build:linux:
+linux:
     image: registry.videolan.org/medialibrary:20190121111050
     tags:
       - debian
       - amd64
-    except:
-        - schedules
-    stage: build
     script:
       - ./bootstrap
       - ./configure --enable-tests
       - make -j4
       - make -j4 check
-    artifacts:
-        paths:
-          - unittest
-          - samples
-          - .libs/
+      - ./unittest
+      - ./samples -v
 
-unit-tests:linux:
-    image: registry.videolan.org/medialibrary:20190121111050
-    tags:
-      - debian
-      - amd64
-    except:
-        - schedules
-    stage: unit-tests
-    dependencies:
-        - build:linux
-    script:
-        - ./unittest
-
-functional-tests:linux:
-    image: registry.videolan.org/medialibrary:20190121111050
-    tags:
-      - debian
-      - amd64
-    except:
-        - schedules
-    stage: functional-tests
-    dependencies:
-        - build:linux
-    script:
-        - ./samples -v
-
-build:win32:
+win32:
     image: registry.videolan.org/medialibrary-win32:20190121122230
     tags:
       - win32
-    except:
-        - schedules
-    stage: build
     script:
       - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/prefix/lib/pkgconfig"
       - ./bootstrap
       - ./configure --enable-tests --host=i686-w64-mingw32 --disable-shared
       - make -j4
       - make -j4 check
-    artifacts:
-        paths:
-          - unittest.exe
-          - samples.exe
-          - .libs/
+      - cp /prefix/dll/libvlc.dll .
+      - cp /prefix/dll/libvlccore.dll .
+      - ln -s /prefix/lib/vlc/plugins/ .
+      - wine unittest.exe
+      - wine samples.exe -v
 
-unit-tests:win32:
-    image: registry.videolan.org/medialibrary-win32:20190121122230
-    tags:
-      - win32
-    except:
-        - schedules
-    stage: unit-tests
-    dependencies:
-        - build:win32
-    script:
-        - cp /prefix/dll/libvlc.dll .
-        - cp /prefix/dll/libvlccore.dll .
-        - ln -s /prefix/lib/vlc/plugins/ .
-        - file libvlc.dll
-        - file unittest.exe
-        - wine unittest.exe
-
-functional-tests:win32:
-    image: registry.videolan.org/medialibrary-win32:20190121122230
-    tags:
-      - win32
-    except:
-        - schedules
-    stage: functional-tests
-    dependencies:
-        - build:win32
-    script:
-        - cp /prefix/dll/libvlc.dll .
-        - cp /prefix/dll/libvlccore.dll .
-        - ln -s /prefix/lib/vlc/plugins/ .
-        - wine samples.exe -v
-
-build:win64:
+win64:
     image: registry.videolan.org/medialibrary-win64:20190121124804
     tags:
       - win64
-    stage: build
-    except:
-        - schedules
     script:
       - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/prefix/lib/pkgconfig"
       - ./bootstrap
       - ./configure --enable-tests --host=x86_64-w64-mingw32 --disable-shared
       - make -j4
       - make -j4 check
-    artifacts:
-        paths:
-          - unittest.exe
-          - samples.exe
-          - .libs/
+      - cp /prefix/dll/libvlc.dll .
+      - cp /prefix/dll/libvlccore.dll .
+      - ln -s /prefix/lib/vlc/plugins/ .
+      - wine unittest.exe
+      - wine samples.exe -v
 
-unit-tests:win64:
-    image: registry.videolan.org/medialibrary-win64:20190121124804
-    tags:
-      - win64
-    except:
-        - schedules
-    stage: unit-tests
-    dependencies:
-        - build:win64
-    script:
-        - cp /prefix/dll/libvlc.dll .
-        - cp /prefix/dll/libvlccore.dll .
-        - ln -s /prefix/lib/vlc/plugins/ .
-        - wine unittest.exe
-
-functional-tests:win64:
-    image: registry.videolan.org/medialibrary-win64:20190121124804
-    tags:
-      - win64
-    except:
-        - schedules
-    stage: functional-tests
-    dependencies:
-        - build:win64
-    script:
-        - cp /prefix/dll/libvlc.dll .
-        - cp /prefix/dll/libvlccore.dll .
-        - ln -s /prefix/lib/vlc/plugins/ .
-        - wine samples.exe -v
-
-build-and-coverage:
+coverage:
     image: registry.videolan.org/medialibrary:20190121111050
     tags:
       - debian
       - amd64
     only:
-        - schedules
+      refs:
+        - master
     stage: build
     script:
         - ./bootstrap
