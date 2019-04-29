@@ -29,6 +29,7 @@
 #include "ModificationsNotifier.h"
 #include "MediaLibrary.h"
 #include "utils/File.h"
+#include "Thumbnail.h"
 
 namespace medialibrary
 {
@@ -200,14 +201,13 @@ void ModificationNotifier::run()
 
 void ModificationNotifier::removeMediaThumbnail( int64_t mediaId )
 {
-    auto path = m_ml->thumbnailPath() + std::to_string( mediaId ) + ".jpg";
+    auto path = Thumbnail::pathForMedia( m_ml, mediaId );
     utils::fs::remove( path );
 }
 
 void ModificationNotifier::removeAlbumThumbnail( int64_t albumId )
 {
-    auto path = m_ml->thumbnailPath() + "album_" +
-            std::to_string( albumId ) + ".jpg";
+    auto path = Thumbnail::pathForAlbum( m_ml, albumId );
     utils::fs::remove( path );
 }
 

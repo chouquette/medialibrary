@@ -156,5 +156,15 @@ bool Thumbnail::deleteFailureRecords(MediaLibraryPtr ml)
     return sqlite::Tools::executeDelete( ml->getConn(), req );
 }
 
+std::string Thumbnail::pathForMedia( MediaLibraryPtr ml, int64_t mediaId )
+{
+    return ml->thumbnailPath() + std::to_string( mediaId ) + ".jpg";
+}
+
+std::string Thumbnail::pathForAlbum( MediaLibraryPtr ml, int64_t albumId )
+{
+    return ml->thumbnailPath() + "album_" + std::to_string( albumId ) + ".jpg";
+}
+
 
 }
