@@ -226,11 +226,16 @@ public:
      * \param mlCallback    A pointer to an IMediaLibraryCb that will be invoked with various
      *                      events during the medialibrary lifetime.
      * \return true in case of success, false otherwise
+     *
      * If initialize returns Fail, this medialibrary must not be used
      * anymore, and should be disposed off.
      * If it returns Ok the first time, calling this method again is a no-op
      * In case DbReset is returned, it is up to application to decide what
      * to do to repopulate the database.
+     *
+     * The thumbnail path is assumed to be a folder dedicated to store the
+     * media library thumbnails. It might be emptied if the media library needs
+     * to regenerate the thumbnails.
      */
     virtual InitializeResult initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* mlCallback ) = 0;
 

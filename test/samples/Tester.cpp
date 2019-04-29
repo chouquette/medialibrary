@@ -156,7 +156,14 @@ void Tests::SetUp()
     else if ( Verbose == true )
         m_ml->setVerbosity( LogLevel::Info );
 
-    auto res = m_ml->initialize( "test.db", "/tmp", m_cb.get() );
+#ifndef _WIN32
+    auto thumbnailDir = "/tmp/ml_thumbnails/";
+#else
+    // This assumes wine for now
+    auto thumbnailDir = "Z:\\tmp\\ml_thumbnails\\";
+#endif
+
+    auto res = m_ml->initialize( "test.db", thumbnailDir, m_cb.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     ASSERT_TRUE( m_ml->start() );
 }

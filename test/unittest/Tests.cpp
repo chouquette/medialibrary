@@ -53,7 +53,7 @@ void Tests::Reload()
     ml->setFsFactory( fsFactory );
     ml->setDeviceLister( mockDeviceLister );
     ml->setVerbosity( LogLevel::Error );
-    auto res = ml->initialize( "test.db", "/tmp", mlCb );
+    auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", mlCb );
     ASSERT_EQ( InitializeResult::Success, res );
     auto startRes = ml->start();
     ASSERT_TRUE( startRes );
