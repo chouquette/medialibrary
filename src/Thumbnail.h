@@ -55,11 +55,11 @@ public:
     };
 
     Thumbnail( MediaLibraryPtr ml, sqlite::Row& row );
-    Thumbnail( MediaLibraryPtr ml, std::string mrl, Origin origin, bool isGenerated );
+    Thumbnail( MediaLibraryPtr ml, std::string mrl, Origin origin, bool isOwned );
 
     int64_t id() const;
     const std::string& mrl() const;
-    bool update( std::string mrl, Origin origin , bool isGenerated );
+    bool update( std::string mrl, Origin origin , bool isOwned );
     /**
      * @brief insert Insert the thumbnail in database
      * @return The new entity primary key, or 0 in case of failure
@@ -72,11 +72,17 @@ public:
      */
     bool isValid() const;
     Origin origin() const;
-    bool isGenerated() const;
+    /**
+     * @brief isOwned Returns true if the medialibrary owns this thumbnail.
+     *
+     * A thumbnail is owned if it's been (re)located into the medialib's thumbnail
+     * folder.
+     */
+    bool isOwned() const;
 
     static void createTable( sqlite::Connection* dbConnection );
     static std::shared_ptr<Thumbnail> create( MediaLibraryPtr ml, std::string mrl,
-                                              Origin origin, bool isGenerated );
+                                              Origin origin, bool isOwned );
 
     /**
      * @brief deleteFailureRecords Allow the thumbnail to retry any previously failed attempt
@@ -92,7 +98,7 @@ private:
     int64_t m_id;
     std::string m_mrl;
     Origin m_origin;
-    bool m_isGenerated;
+    bool m_isOwned;
 
     friend Thumbnail::Table;
 };

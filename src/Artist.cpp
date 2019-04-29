@@ -226,7 +226,7 @@ bool Artist::setThumbnail( std::shared_ptr<Thumbnail> thumbnail )
              m_thumbnail->origin() == Thumbnail::Origin::UserProvided )
             return m_thumbnail->update( thumbnail->mrl(),
                                         thumbnail->origin(),
-                                        thumbnail->isGenerated() );
+                                        thumbnail->isOwned() );
     }
     std::unique_ptr<sqlite::Transaction> t;
     if ( sqlite::Transaction::transactionInProgress() == false )
@@ -249,10 +249,10 @@ bool Artist::setThumbnail( std::shared_ptr<Thumbnail> thumbnail )
 }
 
 bool Artist::setArtworkMrl( const std::string& thumbnailMrl,
-                            Thumbnail::Origin origin, bool isGenerated )
+                            Thumbnail::Origin origin, bool isOwned )
 {
     return setThumbnail( std::make_shared<Thumbnail>( m_ml, thumbnailMrl,
-                                                      origin, isGenerated ) );
+                                                      origin, isOwned ) );
 }
 
 bool Artist::setThumbnail( const std::string& thumbnailMrl )

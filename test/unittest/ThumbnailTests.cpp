@@ -229,7 +229,7 @@ TEST_F( Thumbnails, UnshareArtist )
     ASSERT_EQ( newMrl, newArtistThumbnail->mrl() );
 }
 
-TEST_F( Thumbnails, UpdateIsGenerated )
+TEST_F( Thumbnails, UpdateIsOwned )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
     auto mrl = std::string{ "file://path/to/a/thumbnail.jpg" };

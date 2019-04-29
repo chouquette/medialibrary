@@ -61,7 +61,7 @@ public:
     virtual const std::string& thumbnailMrl() const override;
     std::shared_ptr<Thumbnail> thumbnail();
     bool setArtworkMrl( const std::string& thumbnailMrl, Thumbnail::Origin origin,
-                        bool isGenerated );
+                        bool isOwned );
     bool setThumbnail( std::shared_ptr<Thumbnail> thumbnail );
     virtual bool setThumbnail( const std::string& thumbnailMrl ) override;
     bool updateNbAlbum( int increment );

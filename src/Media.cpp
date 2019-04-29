@@ -418,7 +418,7 @@ bool Media::setThumbnail( std::shared_ptr<Thumbnail> thumbnail )
                 // be safely overriden.
                 return m_thumbnail->update( thumbnail->mrl(),
                                             thumbnail->origin(),
-                                            thumbnail->isGenerated() );
+                                            thumbnail->isOwned() );
             case Thumbnail::Origin::Album:
             case Thumbnail::Origin::CoverFile:
                 // We need a new thumbnail, otherwise we'd override the mrl for
@@ -448,12 +448,12 @@ bool Media::setThumbnail( std::shared_ptr<Thumbnail> thumbnail )
 }
 
 bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin origin,
-                          bool isGenerated )
+                          bool isOwned )
 {
     assert( thumbnailMrl.empty() == false ||
-            ( origin == Thumbnail::Origin::Media && isGenerated == true ) );
+            ( origin == Thumbnail::Origin::Media && isOwned == true ) );
     return setThumbnail( std::make_shared<Thumbnail>( m_ml, thumbnailMrl,
-                                                      origin, isGenerated ) );
+                                                      origin, isOwned ) );
 }
 
 bool Media::setThumbnail( const std::string& thumbnailMrl )
