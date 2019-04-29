@@ -1,134 +1,74 @@
-stages:
-    - build
-    - unit-tests
-    - functional-tests
-
 variables:
   GIT_SUBMODULE_STRATEGY: normal
 
-build:linux:
-    image: registry.videolan.org:5000/medialibrary:20190121111050
+linux:
+    image: registry.videolan.org/medialibrary:20190121111050
     tags:
       - debian
       - amd64
-    stage: build
     script:
       - ./bootstrap
       - ./configure --enable-tests
       - make -j4
       - make -j4 check
-    artifacts:
-        paths:
-          - unittest
-          - samples
-          - .libs/
+      - ./unittest
+      - ./samples -v
 
-unit-tests:linux:
-    image: registry.videolan.org:5000/medialibrary:20190121111050
-    tags:
-      - debian
-      - amd64
-    stage: unit-tests
-    dependencies:
-        - build:linux
-    script:
-        - ./unittest
-
-functional-tests:linux:
-    image: registry.videolan.org:5000/medialibrary:20190121111050
-    tags:
-      - debian
-      - amd64
-    stage: functional-tests
-    dependencies:
-        - build:linux
-    script:
-        - ./samples -v
-
-build:win32:
-    image: registry.videolan.org:5000/medialibrary-win32:20190121122230
+win32:
+    image: registry.videolan.org/medialibrary-win32:20190121122230
     tags:
       - win32
-    stage: build
     script:
       - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/prefix/lib/pkgconfig"
       - ./bootstrap
       - ./configure --enable-tests --host=i686-w64-mingw32 --disable-shared
       - make -j4
       - make -j4 check
-    artifacts:
-        paths:
-          - unittest.exe
-          - samples.exe
-          - .libs/
+      - cp /prefix/dll/libvlc.dll .
+      - cp /prefix/dll/libvlccore.dll .
+      - ln -s /prefix/lib/vlc/plugins/ .
+      - wine unittest.exe
+      - wine samples.exe -v
 
-unit-tests:win32:
-    image: registry.videolan.org:5000/medialibrary-win32:20190121122230
-    tags:
-      - win32
-    stage: unit-tests
-    dependencies:
-        - build:win32
-    script:
-        - cp /prefix/dll/libvlc.dll .
-        - cp /prefix/dll/libvlccore.dll .
-        - ln -s /prefix/lib/vlc/plugins/ .
-        - file libvlc.dll
-        - file unittest.exe
-        - wine unittest.exe
-
-functional-tests:win32:
-    image: registry.videolan.org:5000/medialibrary-win32:20190121122230
-    tags:
-      - win32
-    stage: functional-tests
-    dependencies:
-        - build:win32
-    script:
-        - cp /prefix/dll/libvlc.dll .
-        - cp /prefix/dll/libvlccore.dll .
-        - ln -s /prefix/lib/vlc/plugins/ .
-        - wine samples.exe -v
-
-build:win64:
-    image: registry.videolan.org:5000/medialibrary-win64:20190121124804
+win64:
+    image: registry.videolan.org/medialibrary-win64:20190121124804
     tags:
       - win64
-    stage: build
     script:
       - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/prefix/lib/pkgconfig"
       - ./bootstrap
       - ./configure --enable-tests --host=x86_64-w64-mingw32 --disable-shared
       - make -j4
       - make -j4 check
+      - cp /prefix/dll/libvlc.dll .
+      - cp /prefix/dll/libvlccore.dll .
+      - ln -s /prefix/lib/vlc/plugins/ .
+      - wine unittest.exe
+      - wine samples.exe -v
+
+coverage:
+    image: registry.videolan.org/medialibrary:20190121111050
+    tags:
+      - debian
+      - amd64
+    only:
+      refs:
+        - master
+    stage: build
+    script:
+        - ./bootstrap
+        - CXXFLAGS='--coverage -g -O0' LDFLAGS='--coverage -g -O0' ./configure --enable-tests
+        - make -j4 check
+        - ./unittest && ./samples
+        - lcov --capture --directory . -o coverage.info
+        - lcov --remove coverage.info "/usr/*" -o coverage.info
+        - lcov --remove coverage.info "/prefix/*" -o coverage.info
+        - lcov --remove coverage.info "$CI_PROJECT_DIR/test/*" -o coverage.info
+        - lcov --remove coverage.info "$CI_PROJECT_DIR/googletest/*" -o coverage.info
+        - lcov --summary coverage.info
+        - genhtml coverage.info --output-directory html/
     artifacts:
+        name: "coverage-medialibrary-$CI_COMMIT_SHORT_SHA"
         paths:
-          - unittest.exe
-          - samples.exe
-          - .libs/
+            - html/
 
-unit-tests:win64:
-    image: registry.videolan.org:5000/medialibrary-win64:20190121124804
-    tags:
-      - win64
-    stage: unit-tests
-    dependencies:
-        - build:win64
-    script:
-        - cp /prefix/dll/libvlc.dll .
-        - cp /prefix/dll/libvlccore.dll .
-        - ln -s /prefix/lib/vlc/plugins/ .
-        - wine unittest.exe
-
-functional-tests:win64:
-    image: registry.videolan.org:5000/medialibrary-win64:20190121124804
-    tags:
-      - win64
-    stage: functional-tests
-    dependencies:
-        - build:win64
-    script:
-        - cp /prefix/dll/libvlc.dll .
-        - cp /prefix/dll/libvlccore.dll .
-        - ln -s /prefix/lib/vlc/plugins/ .
-        - wine samples.exe -v
