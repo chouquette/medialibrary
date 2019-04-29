@@ -27,6 +27,7 @@
 #include "Tester.h"
 
 #include "parser/Parser.h"
+#include "Thumbnail.h"
 
 #include <algorithm>
 
@@ -207,6 +208,11 @@ void Tests::runChecks(const rapidjson::Document& doc)
     if ( expected.HasMember( "artists" ) )
     {
         checkArtists( expected["artists"], m_ml->artists( true, nullptr )->all() );
+    }
+    if ( expected.HasMember( "nbThumbnails" ) )
+    {
+        const auto thumbnails = Thumbnail::fetchAll( m_ml.get() );
+        ASSERT_EQ( expected["nbThumbnails"].GetUint(), thumbnails.size() );
     }
 }
 

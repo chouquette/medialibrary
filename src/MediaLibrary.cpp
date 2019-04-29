@@ -1656,6 +1656,7 @@ void MediaLibrary::forceRescan()
         Playlist::clearExternalPlaylistContent( this );
         parser::Task::resetParsing( this );
         Artist::createDefaultArtists( getConn() );
+        Thumbnail::deleteAll( this );
         t->commit();
     }
     if ( m_parser != nullptr )

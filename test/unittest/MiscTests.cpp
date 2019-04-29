@@ -206,8 +206,11 @@ TEST_F( DbModel, Upgrade13to14 )
     auto media = ml->files();
     ASSERT_EQ( 4u, media.size() );
     auto m = media[0];
+#if 0
+    // Since 16 to 17 migration, we flush the thumbnails, so this will fail
     ASSERT_EQ( m->thumbnailMrl(), ml->thumbnailPath() + "/path/to/thumbnail" );
     ASSERT_TRUE( m->isThumbnailGenerated() );
+#endif
     ASSERT_EQ( m->fileName(), "file with space.avi" );
 
     m = media[1];
