@@ -29,6 +29,7 @@
 #include <memory>
 #include <cstdio>
 #include <unistd.h>
+#include <errno.h>
 
 namespace medialibrary
 {
@@ -41,6 +42,25 @@ namespace fs
 
 bool copy( const std::string& from, const std::string& to )
 {
+#ifdef HAVE_LINK
+    if ( link( from.c_str(), to.c_str() ) == 0 )
+        return true;
+    if ( errno == EEXIST )
+    {
+        remove( to );
+        if ( link( from.c_str(), to.c_str() ) == 0 )
+            return true;
+    }
+    switch ( errno )
+    {
+        case EXDEV: // No cross device link, too bad then, let's copy
+        case EPERM: // In case the user isn't allowed to create links, or the
+                    // filesystem doesn't support it, let's try with a deep copy.
+            break;
+        default:
+            return false;
+    }
+#endif
     std::unique_ptr<FILE, decltype(&fclose)> input{
         fopen( from.c_str(), "rb" ), &fclose
     };

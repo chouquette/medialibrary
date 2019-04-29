@@ -204,6 +204,9 @@ AM_CONDITIONAL(HAVE_OSX,     test "${HAVE_OSX}" = "1")
 AM_CONDITIONAL(HAVE_TVOS,    test "${HAVE_TVOS}" = "1")
 
 AC_LANG_PUSH([C++])
+
+AC_CHECK_FUNCS([link])
+
 AC_MSG_CHECKING([c++11 thread support])
 AC_COMPILE_IFELSE([AC_LANG_SOURCE([#include <thread>
                    int main() { std::thread t; }])], [

@@ -33,6 +33,13 @@ namespace utils
 namespace fs
 {
 
+/**
+ * @brief copy Copy the file from <to> to <dest>
+ *
+ * If possible, this function will create a hard link rather than deep copying
+ * the file.
+ * If the destination exists, if will be overwriten.
+ */
 bool copy( const std::string& from, const std::string& to );
 bool remove( const std::string& path );
 
