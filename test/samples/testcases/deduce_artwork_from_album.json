@@ -5,7 +5,7 @@
     "expected": {
         "nbAudios": 3,
         "nbVideos": 0,
-        "nbThumbnails": 1,
+        "nbThumbnails": 3,
         "albums": [{
             "title": "album",
             "artist": "artist",

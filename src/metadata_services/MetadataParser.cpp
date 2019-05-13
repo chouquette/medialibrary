@@ -636,31 +636,23 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
     if ( artists.first == nullptr && artists.second == nullptr )
         return false;
     auto album = findAlbum( item, artists.first, artists.second );
-    bool newAlbum = album == nullptr;
 
     /*
      * Check for a cover file out of the transaction/retry scope
      * We only check for album artwork when the album is about to be created
      */
     std::shared_ptr<Thumbnail> thumbnail;
-    if ( album == nullptr )
-        thumbnail = findAlbumArtwork( item );
-    else
-        thumbnail = album->thumbnail();
 
-    if ( thumbnail == nullptr )
+    auto artworkMrl = item.meta( IItem::Metadata::ArtworkUrl );
+
+    if ( artworkMrl.empty() == false )
     {
-        auto artworkMrl = item.meta( IItem::Metadata::ArtworkUrl );
-
-        if ( artworkMrl.empty() == false )
-        {
-            // Here we expect the thumbnail mrl to be an attachment. Any xxx.jpg
-            // should have been found by findAlbumArtwork
-            // We don't insert the thumbnail in DB yet, to process everything
-            // as part of the transaction
-            thumbnail = std::make_shared<Thumbnail>( m_ml, artworkMrl,
-                                                     Thumbnail::Origin::Media, false );
-        }
+        // Here we expect the thumbnail mrl to be an attachment. Any xxx.jpg
+        // should have been found by findAlbumArtwork
+        // We don't insert the thumbnail in DB yet, to process everything
+        // as part of the transaction
+        thumbnail = std::make_shared<Thumbnail>( m_ml, artworkMrl,
+                                                 Thumbnail::Origin::Media, false );
     }
 
     auto res = sqlite::Tools::withRetries( 3,
@@ -701,16 +693,12 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
     if ( res == false )
         return false;
 
-    if ( newAlbum == true )
+    if ( thumbnail != nullptr )
     {
-        // If we created an album, check if a thumbnail was found, and if it is
-        // as a cover file. If so, move it to our own thumbnails folder
-        if ( thumbnail != nullptr &&
-             thumbnail->origin() == Thumbnail::Origin::CoverFile )
         {
             auto originalMrl = thumbnail->mrl();
-            auto destPath = m_ml->thumbnailPath() + "album_" +
-                            std::to_string( album->id() ) + "." +
+            auto destPath = m_ml->thumbnailPath() +
+                            std::to_string( media->id() ) + "." +
                             utils::file::extension( originalMrl );
             if ( utils::fs::copy( utils::file::toLocalPath( originalMrl ),
                                   destPath ) == true )
