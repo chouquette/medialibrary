@@ -101,11 +101,17 @@ const std::string& File::mrl() const
     if ( m_isRemovable == false )
         return m_mrl;
 
+    // If the file is removable, then it needs to have a parent folder
+    assert( m_folderId != 0 );
+
     if ( m_fullPath.empty() == false )
         return m_fullPath;
     auto folder = Folder::fetch( m_ml, m_folderId );
     if ( folder == nullptr )
+    {
+        assert( !"Can't find the folder for an existing file" );
         return m_mrl;
+    }
     m_fullPath = folder->mrl() + m_mrl;
     return m_fullPath;
 }
