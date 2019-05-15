@@ -329,11 +329,11 @@ bool Task::restoreLinkedEntities()
 {
     LOG_INFO("Restoring linked entities of task ", m_id);
     // MRL will be empty if the task has been resumed from unparsed files
-    // parentFolderId == 0 indicates an external file
+    // (during 11 -> 12 migration)
     auto mrl = m_item.mrl();
-    if ( mrl.empty() == true && m_parentFolderId == 0 )
+    if ( mrl.empty() == true && m_fileId == 0 )
     {
-        LOG_WARN( "Aborting & removing external file task (#", m_id, ')' );
+        LOG_WARN( "Aborting & removing file task without mrl nor file id (#", m_id, ')' );
         destroy( m_ml, m_id );
         return false;
     }
