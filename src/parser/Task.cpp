@@ -341,7 +341,20 @@ bool Task::restoreLinkedEntities()
     // ie. have we run the MetadataParser service, at least partially
     std::shared_ptr<File> file;
     if ( m_fileId != 0 )
-        file = File::fetch( m_ml, m_fileId );
+    {
+        // Should there be a sporadic failure, let's retry a few times before
+        // giving up on this file.
+        file = sqlite::Tools::withRetries( 3, []( MediaLibraryPtr ml, int64_t fileId ) {
+            return File::fetch( ml, fileId );
+        }, m_ml, m_fileId );
+        if ( file == nullptr )
+        {
+            LOG_WARN( "Failed to restore file associated to the task. Task will "
+                      "be dropped" );
+            destroy( m_ml, m_id );
+            return false;
+        }
+    }
 
     // We might re-create tasks without mrl to ease the handling of files on
     // external storage.
