@@ -409,8 +409,11 @@ bool Task::restoreLinkedEntities()
     try
     {
         auto files = parentFolderFs->files();
-        auto it = std::find_if( begin( files ), end( files ), [&mrl]( std::shared_ptr<fs::IFile> f ) {
-            return f->mrl() == mrl;
+        // Don't compare entire mrls, this might yield false negative when a
+        // device has multiple mountpoints.
+        auto fileName = utils::file::fileName( mrl );
+        auto it = std::find_if( begin( files ), end( files ), [&fileName]( std::shared_ptr<fs::IFile> f ) {
+            return f->name() == fileName;
         });
         if ( it == end( files ) )
         {
