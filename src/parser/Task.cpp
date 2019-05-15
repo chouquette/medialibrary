@@ -356,18 +356,16 @@ bool Task::restoreLinkedEntities()
         }
     }
 
+    // Now we either have a task with an existing file, and we managed to fetch
+    // it, or the task was not processed yet, and we don't have a fileId (and
+    // therefor no file instance)
+    assert( m_fileId == 0 || file != nullptr );
+
     // We might re-create tasks without mrl to ease the handling of files on
     // external storage.
     if ( mrl.empty() == true )
     {
-        // but we expect those to be created from an existing file after a
-        // partial/failed migration. If we don't have a file nor an mrl, we
-        // can't really process it.
-        if ( file == nullptr )
-        {
-            assert( !"Can't process a file without a file nor an mrl" );
-            return false;
-        }
+        assert( m_fileId != 0 && file != nullptr );
         try
         {
             mrl = file->mrl();
