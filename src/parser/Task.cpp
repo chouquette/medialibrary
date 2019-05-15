@@ -361,11 +361,10 @@ bool Task::restoreLinkedEntities()
     // therefor no file instance)
     assert( m_fileId == 0 || file != nullptr );
 
-    // We might re-create tasks without mrl to ease the handling of files on
-    // external storage.
-    if ( mrl.empty() == true )
+    // Regardless of the stored mrl, always fetch the file from DB and query its
+    // mrl. If might have changed in case we're dealing with a removable storage
+    if ( file != nullptr )
     {
-        assert( m_fileId != 0 && file != nullptr );
         try
         {
             mrl = file->mrl();
@@ -376,8 +375,18 @@ bool Task::restoreLinkedEntities()
                       " until the device containing it is present again" );
             return false;
         }
-        setMrl( mrl );
+        assert( mrl.empty() == false );
+        // If we are migrating a task without an mrl, store the mrl for future use
+        // In case the mrl changed, update it as well, as the later points of the
+        // parsing process will depend on the mrl stored in the item, not the
+        // one we now have here.
+        if ( m_item.mrl().empty() == true || m_item.mrl() != mrl )
+            setMrl( mrl );
     }
+
+    // Now we always have a valid MRL, but we might not have a fileId
+    // In any case, we need to fetch the corresponding FS entities
+
     auto fsFactory = m_ml->fsFactoryForMrl( mrl );
     if ( fsFactory == nullptr )
         return false;
@@ -451,7 +460,7 @@ bool Task::restoreLinkedEntities()
         }
     }
 
-    m_item = Item{ this, m_item.mrl(), std::move( fileFs ), std::move( parentFolder ),
+    m_item = Item{ this, std::move( mrl ), std::move( fileFs ), std::move( parentFolder ),
                    std::move( parentFolderFs ), m_item.fileType(),
                    std::move( parentPlaylist ), m_item.parentPlaylistIndex(),
                    m_item.isRefresh() };
