@@ -355,22 +355,17 @@ bool Task::restoreLinkedEntities()
             assert( !"Can't process a file without a file nor an mrl" );
             return false;
         }
-        auto folder = Folder::fetch( m_ml, file->folderId() );
-        if ( folder == nullptr )
+        try
         {
-            assert( !"Can't file the folder associated with a file" );
-            // If the folder can't be found in db while the file can, it looks
-            // a lot like a sporadic failure, since file are deleted through
-            // triggers when its parent folder gets deleted. Just postpone this.
-            return false;
+            mrl = file->mrl();
         }
-        if ( folder->isPresent() == false )
+        catch ( const fs::DeviceRemovedException& )
         {
             LOG_WARN( "Postponing rescan of removable file ", file->rawMrl(),
                       " until the device containing it is present again" );
             return false;
         }
-        setMrl( file->mrl() );
+        setMrl( mrl );
     }
     auto fsFactory = m_ml->fsFactoryForMrl( mrl );
     if ( fsFactory == nullptr )
