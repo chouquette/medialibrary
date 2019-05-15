@@ -327,7 +327,7 @@ bool Task::Item::isRefresh() const
 
 bool Task::restoreLinkedEntities()
 {
-    LOG_INFO("Restoring linked entities of task ", m_id);
+    LOG_DEBUG("Restoring linked entities of task ", m_id);
     // MRL will be empty if the task has been resumed from unparsed files
     // (during 11 -> 12 migration)
     auto mrl = m_item.mrl();
