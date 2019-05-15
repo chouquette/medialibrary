@@ -389,7 +389,10 @@ bool Task::restoreLinkedEntities()
 
     auto fsFactory = m_ml->fsFactoryForMrl( mrl );
     if ( fsFactory == nullptr )
+    {
+        LOG_WARN( "No fs factory matched the task mrl (", mrl, "). Postponing" );
         return false;
+    }
 
     std::shared_ptr<fs::IDirectory> parentFolderFs;
     try
