@@ -163,8 +163,8 @@ bool ThumbnailerWorker::generateThumbnail( MediaPtr media )
         return false;
     }
 
-    LOG_INFO( "Generating ", mrl, " thumbnail..." );
     auto dest = Thumbnail::pathForMedia( m_ml, media->id() );
+    LOG_DEBUG( "Generating ", mrl, " thumbnail in ", dest );
     auto m = static_cast<Media*>( media.get() );
     if ( m_generator->generate( media, mrl, dest ) == false )
         return false;
