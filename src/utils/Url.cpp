@@ -86,6 +86,16 @@ std::string encode( const std::string& str )
         i = schemePos + 3;
         std::copy( str.cbegin(), str.cbegin() + i, std::back_inserter( res ) );
     }
+#ifdef _WIN32
+    if ( str[i] == '/' && isalpha( str[i + 1] ) && str[i + 2] == ':' )
+    {
+        // Don't encode the ':' after the drive letter.
+        // All other ':' need to be encoded, there are not allowed in a file path
+        // on windows, but they might appear in urls
+        std::copy( str.cbegin() + i, str.cbegin() + i + 3, std::back_inserter( res ) );
+        i += 3;
+    }
+#endif
     for ( ; i < str.size(); ++i )
     {
         // This must be an unsigned char for the bits operations below to work.

@@ -38,4 +38,8 @@ TEST( UrlUtils, encode )
     ASSERT_EQ( "/file/with%23sharp", utils::url::encode( "/file/with#sharp" ) );
     ASSERT_EQ( "file:///file%20with%20spaces/test.mp4",
                utils::url::encode( "file:///file with spaces/test.mp4" ) );
+#ifdef _WIN32
+    ASSERT_EQ( "file:///C:/file%3Atest.mkv", utils::url::encode( "file:///C:/file:test.mkv" ) );
+    ASSERT_EQ( "file://", utils::url::encode( "file://" ) );
+#endif
 }
