@@ -214,7 +214,9 @@ void Worker::mainloop()
             status = m_service->run( task->item() );
             auto duration = std::chrono::steady_clock::now() - chrono;
             LOG_DEBUG( "Done executing ", serviceName, " task on ", task->item().mrl(), " in ",
-                      std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
+                       std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(),
+                       "ms. Result: ",
+                       static_cast<std::underlying_type_t<parser::Status>>( status ) );
         }
         catch ( const fs::DeviceRemovedException& )
         {
