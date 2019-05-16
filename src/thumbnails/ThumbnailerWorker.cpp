@@ -32,6 +32,7 @@
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
 #include "utils/ModificationsNotifier.h"
+#include "utils/Filename.h"
 
 #include <algorithm>
 
@@ -165,8 +166,11 @@ bool ThumbnailerWorker::generateThumbnail( MediaPtr media )
     LOG_INFO( "Generating ", mrl, " thumbnail..." );
     auto dest = Thumbnail::pathForMedia( m_ml, media->id() );
     auto m = static_cast<Media*>( media.get() );
-    if ( m_generator->generate( media, mrl, dest ) == false ||
-         m->setThumbnail( dest, Thumbnail::Origin::Media, true ) == false )
+    if ( m_generator->generate( media, mrl, dest ) == false )
+        return false;
+
+    auto destMrl = utils::file::toMrl( dest );
+    if ( m->setThumbnail( destMrl, Thumbnail::Origin::Media, true ) == false )
         return false;
 
     m_ml->getNotifier()->notifyMediaModification( media );

@@ -55,6 +55,17 @@ public:
     };
 
     Thumbnail( MediaLibraryPtr ml, sqlite::Row& row );
+    /**
+     * @brief Thumbnail Builds a temporary thumbnail in memory
+     *
+     * @param ml A pointer to the media library instance
+     * @param mrl The absolute mrl to the thumbnail
+     * @param origin The thumbnail's origin
+     * @param isOwned true if the thumbnail is owned by the media library
+     *
+     * A thumbnail created with this constructor can be inserted in database
+     * at a later time using \sa{Thumbnail::insert()}
+     */
     Thumbnail( MediaLibraryPtr ml, std::string mrl, Origin origin, bool isOwned );
 
     int64_t id() const;

@@ -82,7 +82,7 @@ TEST_F( Artists, ArtworkMrl )
     ASSERT_EQ( a->thumbnailMrl(), "" );
     ASSERT_FALSE( a->isThumbnailGenerated() );
 
-    std::string artwork("/tmp/otter.png");
+    std::string artwork("file:///tmp/otter.png");
     a->setArtworkMrl( artwork, Thumbnail::Origin::UserProvided, false );
     ASSERT_EQ( a->thumbnailMrl(), artwork );
     ASSERT_TRUE( a->isThumbnailGenerated() );
@@ -101,7 +101,7 @@ TEST_F( Artists, Thumbnail )
     auto t = a->thumbnail();
     ASSERT_EQ( nullptr, t );
 
-    std::string mrl = "/path/to/sea/otter/artwork.png";
+    std::string mrl = "file:///path/to/sea/otter/artwork.png";
     auto res = a->setArtworkMrl( mrl, Thumbnail::Origin::UserProvided, false );
     ASSERT_TRUE( res );
 

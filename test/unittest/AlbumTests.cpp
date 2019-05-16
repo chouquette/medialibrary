@@ -169,7 +169,7 @@ TEST_F( Albums, Thumbnail )
     ASSERT_EQ( nullptr, t );
     ASSERT_FALSE( a->isThumbnailGenerated() );
 
-    std::string mrl = "/path/to/sea/otter/artwork.png";
+    std::string mrl = "file:///path/to/sea/otter/artwork.png";
     t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::UserProvided, false );
     ASSERT_NE( nullptr, t );
     a = ml->MediaLibrary::createAlbum( "album 2", t->id() );

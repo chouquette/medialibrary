@@ -37,7 +37,7 @@ class Thumbnails : public Tests
 
 TEST_F( Thumbnails, Create )
 {
-    std::string mrl = "/path/to/thumbnail.png";
+    std::string mrl = "file:///path/to/thumbnail.png";
     auto t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::UserProvided, false );
     ASSERT_NE( t, nullptr );
     ASSERT_EQ( t->mrl(), mrl );
@@ -46,7 +46,7 @@ TEST_F( Thumbnails, Create )
 
 TEST_F( Thumbnails, MediaSetThumbnail )
 {
-    std::string mrl = "/path/to/thumbnail.png";
+    std::string mrl = "file:///path/to/thumbnail.png";
     auto m = ml->addMedia( "/path/to/media.mp3" );
     ASSERT_FALSE( m->isThumbnailGenerated() );
     auto res = m->setThumbnail( mrl );
@@ -63,12 +63,12 @@ TEST_F( Thumbnails, MediaSetThumbnail )
 
 TEST_F( Thumbnails, Update )
 {
-    std::string mrl = "/path/to/thumbnail.png";
+    std::string mrl = "file:///path/to/thumbnail.png";
     auto t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::UserProvided, false );
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
 
-    mrl = "/better/thumbnail.gif";
+    mrl = "file:///better/thumbnail.gif";
     auto res = t->update( mrl, Thumbnail::Origin::UserProvided, false );
     ASSERT_TRUE( res );
     ASSERT_EQ( t->mrl(), mrl );
@@ -90,20 +90,6 @@ TEST_F( Thumbnails, Update )
     t = Thumbnail::fetch( ml.get(), t->id() );
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::AlbumArtist );
-}
-
-TEST_F( Thumbnails, GeneratedPath )
-{
-    auto mrl = "relative_path.jpg";
-    auto t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::UserProvided, true );
-    ASSERT_NE( mrl, t->mrl() );
-    auto expectedMrl = utils::file::toMrl( ml->thumbnailPath() + mrl );
-    ASSERT_EQ( expectedMrl, t->mrl() );
-
-    Reload();
-
-    t = Thumbnail::fetch( ml.get(), t->id() );
-    ASSERT_EQ( expectedMrl, t->mrl() );
 }
 
 TEST_F( Thumbnails, MarkFailure )
@@ -237,7 +223,7 @@ TEST_F( Thumbnails, UpdateIsOwned )
     ASSERT_TRUE( res );
     ASSERT_EQ( mrl, m->thumbnailMrl() );
 
-    auto newMrl = ml->thumbnailPath() + "thumb.jpg";
+    auto newMrl = utils::file::toMrl( ml->thumbnailPath() + "thumb.jpg" );
     res = m->setThumbnail( newMrl, Thumbnail::Origin::Media, true );
     ASSERT_TRUE( res );
     ASSERT_EQ( m->thumbnailMrl(), newMrl );

@@ -101,7 +101,7 @@ TEST_F( Medias, Thumbnail )
     auto f = std::static_pointer_cast<Media>( ml->addMedia( "media.avi" ) );
     ASSERT_EQ( f->thumbnailMrl(), "" );
 
-    std::string newThumbnail( "/path/to/thumbnail" );
+    std::string newThumbnail( "file:///path/to/thumbnail" );
 
     f->setThumbnail( newThumbnail );
     f->save();
