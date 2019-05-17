@@ -584,8 +584,10 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
                     LOG_ERROR( "Can't fetch album associated to album track ",
                                albumTrack->id(), "(media ", media->id(), ")" );
                 }
+
                 album->removeTrack( *media, *albumTrack );
                 AlbumTrack::destroy( m_ml, albumTrack->id() );
+                Artist::dropMediaArtistRelation( m_ml, media->id() );
                 break;
             }
             case IMedia::SubType::Movie:
