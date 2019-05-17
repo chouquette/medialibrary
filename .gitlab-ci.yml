@@ -54,7 +54,6 @@ coverage:
     only:
       refs:
         - master
-    stage: build
     script:
         - ./bootstrap
         - CXXFLAGS='--coverage -g -O0' LDFLAGS='--coverage -g -O0' ./configure --enable-tests
