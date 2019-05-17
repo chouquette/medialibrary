@@ -450,10 +450,10 @@ bool Media::setThumbnail( std::shared_ptr<Thumbnail> thumbnail )
 bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin origin,
                           bool isOwned )
 {
-    assert( thumbnailMrl.empty() == false ||
-            ( origin == Thumbnail::Origin::Media && isOwned == true ) );
-    return setThumbnail( std::make_shared<Thumbnail>( m_ml, thumbnailMrl,
-                                                      origin, isOwned ) );
+    auto thumbnail = std::make_shared<Thumbnail>( m_ml, thumbnailMrl, origin,
+                                                  isOwned );
+    assert( thumbnail->isValid() == true || thumbnail->isFailureRecord() == true );
+    return setThumbnail( std::move( thumbnail ) );
 }
 
 bool Media::setThumbnail( const std::string& thumbnailMrl )

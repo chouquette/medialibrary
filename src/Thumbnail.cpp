@@ -123,6 +123,13 @@ bool Thumbnail::isOwned() const
     return m_isOwned;
 }
 
+bool Thumbnail::isFailureRecord() const
+{
+    return m_mrl.empty() == true &&
+           m_origin == Origin::Media &&
+           m_isOwned == true;
+}
+
 void Thumbnail::createTable( sqlite::Connection* dbConnection )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS " + Thumbnail::Table::Name +
@@ -140,8 +147,8 @@ std::shared_ptr<Thumbnail> Thumbnail::create( MediaLibraryPtr ml, std::string mr
 {
     static const std::string req = "INSERT INTO " + Thumbnail::Table::Name +
             "(mrl, origin, is_generated) VALUES(?,?,?)";
-    assert( mrl.empty() == false || ( origin == Origin::Media && isOwned == false ) );
     auto self = std::make_shared<Thumbnail>( ml, mrl, origin, isOwned );
+    assert( self->isValid() == true || self->isFailureRecord() == true );
     if ( DatabaseHelpers<Thumbnail>::insert( ml, self, req,
                                              sqlite::NullableString{ mrl },
                                              origin, isOwned ) == false )

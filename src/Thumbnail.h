@@ -90,6 +90,11 @@ public:
      * folder.
      */
     bool isOwned() const;
+    /**
+     * @brief isFailureRecord returns true if this thumbnail is representing a
+     *                        previous failed request
+     */
+    bool isFailureRecord() const;
 
     static void createTable( sqlite::Connection* dbConnection );
     static std::shared_ptr<Thumbnail> create( MediaLibraryPtr ml, std::string mrl,
