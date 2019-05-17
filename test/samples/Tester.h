@@ -117,4 +117,11 @@ public:
     virtual void InitializeCallback() override;
 };
 
+class RefreshTests : public Tests
+{
+public:
+    void forceRefresh();
+    virtual void InitializeCallback() override;
+};
+
 #endif // TESTER_H
