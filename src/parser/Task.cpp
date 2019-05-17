@@ -551,13 +551,15 @@ Task::create( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> fi
 
 std::shared_ptr<Task>
 Task::createRefreshTask( MediaLibraryPtr ml, std::shared_ptr<File> file,
-              std::shared_ptr<fs::IFile> fileFs )
+                         std::shared_ptr<fs::IFile> fileFs )
 {
+    auto parentFolderId = file->folderId();
     auto self = std::make_shared<Task>( ml, std::move( file ), std::move( fileFs ) );
     const std::string req = "INSERT INTO " + Task::Table::Name +
-            "(mrl, file_type, file_id, is_refresh) VALUES(?, ?, ?, ?)";
+            "(mrl, file_type, file_id, parent_folder_id, is_refresh) "
+            "VALUES(?, ?, ?, ?, ?)";
     if ( insert( ml, self, req, self->m_item.mrl(), self->m_item.file()->type(),
-                 self->m_item.file()->id(), true ) == false )
+                 self->m_item.file()->id(), parentFolderId, true ) == false )
         return nullptr;
     return self;
 }
