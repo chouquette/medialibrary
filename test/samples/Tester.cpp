@@ -27,6 +27,9 @@
 #include "Tester.h"
 
 #include "parser/Parser.h"
+#include "Thumbnail.h"
+#include "File.h"
+#include "utils/Filename.h"
 
 #include <algorithm>
 
@@ -143,7 +146,6 @@ bool MockResumeCallback::waitForParsingComplete()
         return m_done;
     });
 }
-
 
 void Tests::SetUp()
 {
@@ -593,3 +595,28 @@ bool ResumeTests::MediaLibraryResumeTest::startParser()
     return true;
 }
 
+
+void RefreshTests::forceRefresh()
+{
+    auto files = medialibrary::File::fetchAll( m_ml.get() );
+    for ( const auto& f : files )
+    {
+        auto mrl = f->mrl();
+        auto fsFactory = m_ml->fsFactoryForMrl( mrl );
+        auto folderMrl = utils::file::directory( mrl );
+        auto fileName = utils::file::fileName( mrl );
+        auto folderFs = fsFactory->createDirectory( folderMrl );
+        auto filesFs = folderFs->files();
+        auto fileFsIt = std::find_if( cbegin( filesFs ), cend( filesFs ),
+            [&fileName]( const std::shared_ptr<fs::IFile> f ) {
+                return f->name() == fileName;
+            });
+        assert( fileFsIt != cend( filesFs ) );
+        m_ml->onUpdatedFile( f, *fileFsIt );
+    }
+}
+
+void RefreshTests::InitializeCallback()
+{
+    m_cb.reset( new MockResumeCallback );
+}

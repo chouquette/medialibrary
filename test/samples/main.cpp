@@ -153,6 +153,44 @@ TEST_P( ResumeTests, Rescan )
     runChecks( doc );
 }
 
+TEST_P( RefreshTests, Refresh )
+{
+    auto testDir = ForcedTestDirectory.empty() == false ? ForcedTestDirectory : TestDirectory;
+    auto casePath = testDir + "testcases/" + GetParam() + ".json";
+    std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
+    ASSERT_NE( nullptr, f );
+    char buff[65536]; // That's how ugly I am!
+    auto ret = fread( buff, sizeof(buff[0]), sizeof(buff), f.get() );
+    ASSERT_NE( 0u, ret );
+    buff[ret] = 0;
+    rapidjson::Document doc;
+    doc.Parse( buff );
+
+    ASSERT_TRUE( doc.HasMember( "input" ) );
+    const auto& input = doc["input"];
+    for ( auto i = 0u; i < input.Size(); ++i )
+    {
+        // Quick and dirty check to ensure we're discovering something that exists
+        auto samplesDir = testDir + "samples/" + input[i].GetString();
+        ASSERT_TRUE( utils::fs::isDirectory( samplesDir ) );
+        samplesDir = utils::fs::toAbsolute( samplesDir );
+
+        m_ml->discover( utils::file::toMrl( samplesDir ) );
+    }
+    ASSERT_TRUE( m_cb->waitForDiscoveryComplete() );
+    ASSERT_TRUE( m_cb->waitForParsingComplete() );
+
+    runChecks( doc );
+
+    return;
+    m_cb->reinit();
+    forceRefresh();
+
+    ASSERT_TRUE( m_cb->waitForParsingComplete() );
+
+    runChecks( doc );
+}
+
 int main(int ac, char** av)
 {
     ::testing::InitGoogleTest(&ac, av);
@@ -179,5 +217,8 @@ INSTANTIATE_TEST_CASE_P(SamplesTests, Tests,
                         ::testing::ValuesIn(testCases) );
 
 INSTANTIATE_TEST_CASE_P(SamplesTests, ResumeTests,
+                        ::testing::ValuesIn(testCases) );
+
+INSTANTIATE_TEST_CASE_P(SamplesTests, RefreshTests,
                         ::testing::ValuesIn(testCases) );
 
