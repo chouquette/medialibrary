@@ -82,6 +82,19 @@ public:
                                    const QueryParameters* params );
     static Query<IArtist> searchByGenre( MediaLibraryPtr ml, const std::string& pattern,
                                          const QueryParameters* params, int64_t genreId );
+    /**
+     * @brief dropMediaArtistRelation Drops any relation between a media and N artists
+     * @param ml A media library instance
+     * @param mediaId The media to drop the relation with
+     *
+     * This is intended to remove any link between media & artist(s) when none
+     * of them is deleted. When any of those 2 entities is deleted, any relation
+     * will automatically get dropped.
+     * Effectively, this is meant to be used when refreshing a media, since we
+     * can't delete it, at the risk of dropping it from any playlist, and we
+     * won't delete an artist when a media gets updated.
+     */
+    static void dropMediaArtistRelation( MediaLibraryPtr ml, int64_t mediaId );
 
 private:
     static std::string sortRequest( const QueryParameters* params );
