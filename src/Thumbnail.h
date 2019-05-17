@@ -113,6 +113,13 @@ public:
     static const std::string EmptyMrl;
 
 private:
+    /**
+     * @brief toRelativeMrl Convert the provided absolute mrl to a mrl relative to
+     *                      the user provided thumbnail directory.
+     */
+    std::string toRelativeMrl( const std::string& absoluteMrl );
+
+private:
     MediaLibraryPtr m_ml;
     int64_t m_id;
     std::string m_mrl;

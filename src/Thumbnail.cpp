@@ -87,14 +87,7 @@ bool Thumbnail::update( std::string mrl, Origin origin, bool isOwned )
         return true;
     std::string storedMrl;
     if ( isOwned )
-    {
-        // Ensure the thumbnail mrl is an absolute mrl and contained in the
-        // thumbnail directory.
-        assert( utils::file::schemeIs( "file://", mrl ) == true );
-        auto thumbnailDirMrl = utils::file::toMrl( m_ml->thumbnailPath() );
-        assert( mrl.find( thumbnailDirMrl ) == 0 );
-        storedMrl = utils::file::removePath( mrl, thumbnailDirMrl );
-    }
+        storedMrl = toRelativeMrl( mrl );
     else
         storedMrl = mrl;
     static const std::string req = "UPDATE " + Thumbnail::Table::Name +
@@ -161,8 +154,9 @@ int64_t Thumbnail::insert()
     assert( m_id == 0 );
     static const std::string req = "INSERT INTO " + Thumbnail::Table::Name +
             "(mrl, origin, is_generated) VALUES(?,?,?)";
-    auto pKey = sqlite::Tools::executeInsert( m_ml->getConn(), req, m_mrl, m_origin,
-                                         m_isOwned );
+    auto pKey = sqlite::Tools::executeInsert( m_ml->getConn(), req,
+                            m_isOwned == true ? toRelativeMrl( m_mrl ) : m_mrl,
+                            m_origin, m_isOwned );
     if ( pKey == 0 )
         return 0;
     m_id = pKey;
@@ -184,6 +178,22 @@ std::string Thumbnail::pathForMedia( MediaLibraryPtr ml, int64_t mediaId )
 std::string Thumbnail::pathForAlbum( MediaLibraryPtr ml, int64_t albumId )
 {
     return ml->thumbnailPath() + "album_" + std::to_string( albumId ) + ".jpg";
+}
+
+std::string Thumbnail::toRelativeMrl( const std::string& absoluteMrl )
+{
+    // We can still
+    if ( absoluteMrl.empty() == true )
+    {
+        assert( isFailureRecord() == true );
+        return absoluteMrl;
+    }
+    // Ensure the thumbnail mrl is an absolute mrl and contained in the
+    // thumbnail directory.
+    assert( utils::file::schemeIs( "file://", absoluteMrl ) == true );
+    auto thumbnailDirMrl = utils::file::toMrl( m_ml->thumbnailPath() );
+    assert( absoluteMrl.find( thumbnailDirMrl ) == 0 );
+    return utils::file::removePath( absoluteMrl, thumbnailDirMrl );
 }
 
 
