@@ -361,6 +361,14 @@ bool Task::restoreLinkedEntities()
     // therefor no file instance)
     assert( m_fileId == 0 || file != nullptr );
 
+    // In case we have a refresh task, old versions didn't provide the parent
+    // id. That is:
+    // 0.4.x branch before vlc-android 3.1.5 (excluded)
+    // 0.5.x branch before 2019 May 17 (unshipped in releases)
+    // However we must have either a file ID (mandatory for a refresh task) or a
+    // parent folder ID (mandatory when discovering a file)
+    assert( m_fileId != 0 || m_parentFolderId != 0 );
+
     // Regardless of the stored mrl, always fetch the file from DB and query its
     // mrl. If might have changed in case we're dealing with a removable storage
     if ( file != nullptr )
@@ -449,6 +457,12 @@ bool Task::restoreLinkedEntities()
         return false;
     }
 
+    // Handle old refresh tasks without a parent folder id
+    if ( m_parentFolderId == 0 )
+    {
+        assert( m_fileId != 0 && file != nullptr );
+        m_parentFolderId = file->folderId();
+    }
     std::shared_ptr<Folder> parentFolder = Folder::fetch( m_ml, m_parentFolderId );
     if ( parentFolder == nullptr )
     {
