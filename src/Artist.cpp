@@ -479,6 +479,12 @@ Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pat
                                         std::move( groupBy ), pattern, genreId );
 }
 
+void Artist::dropMediaArtistRelation( MediaLibraryPtr ml, int64_t mediaId )
+{
+    const std::string req = "DELETE FROM MediaArtistRelation WHERE media_id = ?";
+    sqlite::Tools::executeDelete( ml->getConn(), req, mediaId );
+}
+
 std::string Artist::sortRequest( const QueryParameters* params )
 {
     std::string req = " ORDER BY name";
