@@ -97,20 +97,19 @@ void Worker::parse( std::shared_ptr<Task> t )
     // not idle
     setIdle( false );
 
-    if ( m_threads.size() == 0 )
+    // Even if no threads appear to be started, we need to lock this in case
+    // we're currently doing a stop/start
     {
-        // Since the thread isn't started, no need to lock the mutex before pushing the task
-        m_tasks.push( std::move( t ) );
-        start();
-    }
-    else
-    {
+        std::lock_guard<compat::Mutex> lock( m_lock );
+        if ( m_threads.size() == 0 )
         {
-            std::lock_guard<compat::Mutex> lock( m_lock );
             m_tasks.push( std::move( t ) );
+            start();
+            return;
         }
-        m_cond.notify_all();
+        m_tasks.push( std::move( t ) );
     }
+    m_cond.notify_all();
 }
 
 bool Worker::initialize( MediaLibrary* ml, IParserCb* parserCb,
