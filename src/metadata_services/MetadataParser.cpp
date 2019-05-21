@@ -584,6 +584,28 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
                     LOG_ERROR( "Can't fetch album associated to album track ",
                                albumTrack->id(), "(media ", media->id(), ")" );
                 }
+                // No need to decrement the number of tracks for the artist
+                // Removing the AlbumTrack will cause the 'delete_album_track'
+                // trigger to fire, which will update nb_tracks/duration/presence
+                // Additionally, it might delete the album if no more songs are
+                // contained in it
+                // However, that trigger isn't run for unknown/various artists
+                // FIXME: Run the trigger for unknown/various artists, but do
+                // not delete the artist when they reach 0 tracks themselves.
+                if ( albumTrack->artistId() == UnknownArtistID ||
+                     albumTrack->artistId() == VariousArtistID )
+                {
+                    auto artist = std::static_pointer_cast<Artist>( albumTrack->artist() );
+                    artist->updateNbTrack( -1 );
+                }
+
+                // The album artist however will not be affected by this trigger
+                // so we need to decrement its tracks count manually
+                // FIXME: Add a trigger to react upon MediaArtistRelation
+                // deletion & insertion.
+                auto albumArtist = std::static_pointer_cast<Artist>( album->albumArtist() );
+                if ( albumArtist && albumArtist->id() != albumTrack->artistId() )
+                    albumArtist->updateNbTrack( -1 );
 
                 album->removeTrack( *media, *albumTrack );
                 AlbumTrack::destroy( m_ml, albumTrack->id() );
