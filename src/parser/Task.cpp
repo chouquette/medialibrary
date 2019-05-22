@@ -342,11 +342,7 @@ bool Task::restoreLinkedEntities()
     std::shared_ptr<File> file;
     if ( m_fileId != 0 )
     {
-        // Should there be a sporadic failure, let's retry a few times before
-        // giving up on this file.
-        file = sqlite::Tools::withRetries( 3, []( MediaLibraryPtr ml, int64_t fileId ) {
-            return File::fetch( ml, fileId );
-        }, m_ml, m_fileId );
+        file = File::fetch( m_ml, m_fileId );
         if ( file == nullptr )
         {
             LOG_WARN( "Failed to restore file associated to the task. Task will "
