@@ -223,7 +223,8 @@ bool Artist::setThumbnail( std::shared_ptr<Thumbnail> thumbnail )
                 return false;
         }
         if ( m_thumbnail->origin() == Thumbnail::Origin::Artist ||
-             m_thumbnail->origin() == Thumbnail::Origin::UserProvided )
+             m_thumbnail->origin() == Thumbnail::Origin::UserProvided ||
+             m_thumbnail->origin() == Thumbnail::Origin::Empty )
             return m_thumbnail->update( thumbnail->mrl(),
                                         thumbnail->origin(),
                                         thumbnail->isOwned() );

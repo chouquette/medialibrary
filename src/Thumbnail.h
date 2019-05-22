@@ -51,7 +51,9 @@ public:
         /// A thumbnail provided by the application
         UserProvided,
         /// An image (jpg or png) that was located in the album folder
-        CoverFile
+        CoverFile,
+        /// A temporarily empty thumbnail, when reloading a media
+        Empty = 0xFF,
     };
 
     Thumbnail( MediaLibraryPtr ml, sqlite::Row& row );
