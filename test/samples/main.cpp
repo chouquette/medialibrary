@@ -182,7 +182,6 @@ TEST_P( RefreshTests, Refresh )
 
     runChecks( doc );
 
-    return;
     m_cb->reinit();
     forceRefresh();
 
