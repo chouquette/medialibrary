@@ -562,6 +562,7 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
     else if ( isAudio == false && media->type() == IMedia::Type::Audio )
         media->setType( IMedia::Type::Video );
 
+    auto t = m_ml->getConn()->newTransaction();
     bool needRescan = false;
     if ( media->subType() != IMedia::SubType::Unknown )
     {
@@ -663,6 +664,7 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
 
     if ( media->save() == false )
         return std::make_tuple( false, false );
+    t->commit();
     item.setMedia( std::move( media ) );
     return std::make_tuple( true, needRescan );
 }
