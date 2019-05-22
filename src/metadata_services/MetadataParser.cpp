@@ -340,7 +340,7 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
     const auto& showName = item.meta( IItem::Metadata::ShowName );
     const auto& artworkMrl = item.meta( IItem::Metadata::ArtworkUrl );
 
-    return sqlite::Tools::withRetries( 3, [this, &showName, &title, media, &item, &artworkMrl]() {
+    auto res = sqlite::Tools::withRetries( 3, [this, &showName, &title, media, &item, &artworkMrl]() {
         auto t = m_ml->getConn()->newTransaction();
         media->setTitleBuffered( title );
 
@@ -381,6 +381,12 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
         t->commit();
         return true;
     });
+    if ( res == false )
+        return false;
+    auto thumbnail = media->thumbnail();
+    if ( thumbnail != nullptr )
+        relocateThumbnail( *thumbnail, media->id() );
+    return true;
 }
 
 std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) const
