@@ -229,6 +229,13 @@ public:
     static std::shared_ptr<Task> createRefreshTask( MediaLibraryPtr ml,
                                                     std::shared_ptr<File> file,
                                                     std::shared_ptr<fs::IFile> fsFile );
+    /**
+     * @brief removePlaylistContentTasks Removes existing task associated with
+     *                                   the given playlist
+     *
+     * Only completed tasks will be removed.
+     */
+    static void removePlaylistContentTasks( MediaLibraryPtr ml, int64_t playlistId );
     static void recoverUnscannedFiles( MediaLibraryPtr ml );
 
 private:
