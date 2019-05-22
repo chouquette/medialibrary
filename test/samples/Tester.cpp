@@ -613,6 +613,8 @@ void RefreshTests::forceRefresh()
     auto files = medialibrary::File::fetchAll( m_ml.get() );
     for ( const auto& f : files )
     {
+        if ( f->isExternal() == true )
+            continue;
         auto mrl = f->mrl();
         auto fsFactory = m_ml->fsFactoryForMrl( mrl );
         auto folderMrl = utils::file::directory( mrl );
