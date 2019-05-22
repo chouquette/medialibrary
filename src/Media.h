@@ -115,7 +115,7 @@ class Media : public IMedia, public DatabaseHelpers<Media>
         virtual Query<ISubtitleTrack> subtitleTracks() const override;
         virtual Query<IChapter> chapters( const QueryParameters* params ) const override;
         bool addChapter( int64_t offset, int64_t duration, std::string name );
-        std::shared_ptr<const Thumbnail> thumbnail() const;
+        std::shared_ptr<Thumbnail> thumbnail() const;
         virtual const std::string& thumbnailMrl() const override;
         virtual bool isThumbnailGenerated() const override;
         virtual bool setThumbnail( const std::string &thumbnail ) override;

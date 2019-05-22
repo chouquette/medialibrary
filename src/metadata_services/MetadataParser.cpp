@@ -607,6 +607,24 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
                 if ( albumArtist && albumArtist->id() != albumTrack->artistId() )
                     albumArtist->updateNbTrack( -1 );
 
+                auto thumbnail = media->thumbnail();
+                if ( thumbnail != nullptr )
+                {
+                    // In case we don't have a thumbnail for the updated media
+                    // but had a thumbnail in the past, we don't want to lose it.
+                    // In case the file changed completely but has the same mrl
+                    // this will lead to a wrong thumbnail being used, but this
+                    // case is deemed unlikely enough to care.
+                    if ( item.meta( IItem::Metadata::ArtworkUrl ).empty() == false )
+                    {
+                        // We can't delete the thumbnail in case more entities
+                        // depend on it. Even more, should we find a better thumbnail
+                        // after reloading, we want that new thumbnail to be
+                        // shared by all entities that were using the previous one.
+                        thumbnail->update( "", Thumbnail::Origin::Empty, false );
+                    }
+                }
+
                 album->removeTrack( *media, *albumTrack );
                 AlbumTrack::destroy( m_ml, albumTrack->id() );
                 Artist::dropMediaArtistRelation( m_ml, media->id() );
@@ -675,8 +693,19 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
         // should have been found by findAlbumArtwork
         // We don't insert the thumbnail in DB yet, to process everything
         // as part of the transaction
-        thumbnail = std::make_shared<Thumbnail>( m_ml, artworkMrl,
-                                                 Thumbnail::Origin::Media, false );
+
+        // Fetch any potentially existing media thumbnail first, to update
+        // it in case it already exist and we're reloading a media
+        thumbnail = media->thumbnail();
+        if ( thumbnail != nullptr )
+        {
+            assert( item.isRefresh() == true );
+            thumbnail->update( artworkMrl, Thumbnail::Origin::Media, false );
+        }
+        else
+            thumbnail = std::make_shared<Thumbnail>( m_ml, artworkMrl,
+                                                     Thumbnail::Origin::Media,
+                                                     false );
     }
 
     auto res = sqlite::Tools::withRetries( 3,

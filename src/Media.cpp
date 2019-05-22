@@ -317,7 +317,7 @@ bool Media::addChapter(int64_t offset, int64_t duration, std::string name)
                             m_id ) != nullptr;
 }
 
-std::shared_ptr<const Thumbnail> Media::thumbnail() const
+std::shared_ptr<Thumbnail> Media::thumbnail() const
 {
     if ( isThumbnailGenerated() == false )
         return nullptr;
