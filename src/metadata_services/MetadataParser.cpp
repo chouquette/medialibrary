@@ -765,22 +765,7 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
 
     if ( thumbnail != nullptr )
     {
-        {
-            auto originalMrl = thumbnail->mrl();
-            auto destPath = m_ml->thumbnailPath() +
-                            std::to_string( media->id() ) + "." +
-                            utils::file::extension( originalMrl );
-            if ( utils::fs::copy( utils::file::toLocalPath( originalMrl ),
-                                  destPath ) == true )
-            {
-                auto destMrl = utils::file::toMrl( destPath );
-                res = sqlite::Tools::withRetries( 3, [&thumbnail, &destMrl]() {
-                    return thumbnail->update( destMrl, thumbnail->origin(), true );
-                });
-                if ( res == false )
-                    utils::fs::remove( destPath );
-            }
-        }
+        relocateThumbnail( *thumbnail, media->id() );
         m_notifier->notifyAlbumCreation( album );
     }
     m_notifier->notifyAlbumModification( album );
@@ -828,6 +813,23 @@ std::shared_ptr<Thumbnail> MetadataAnalyzer::findAlbumArtwork( IItem& item )
     auto fileFs = files[0];
     return std::make_shared<Thumbnail>( m_ml, fileFs->mrl(),
                                         Thumbnail::Origin::CoverFile, false );
+}
+
+void MetadataAnalyzer::relocateThumbnail( Thumbnail& thumbnail, int64_t mediaId ) const
+{
+    auto originalMrl = thumbnail.mrl();
+    auto destPath = m_ml->thumbnailPath() +
+                    std::to_string( mediaId ) + "." +
+                    utils::file::extension( originalMrl );
+    if ( utils::fs::copy( utils::file::toLocalPath( originalMrl ),
+                          destPath ) == true )
+    {
+        auto destMrl = utils::file::toMrl( destPath );
+        if ( sqlite::Tools::withRetries( 3, [&thumbnail, &destMrl]() {
+            return thumbnail.update( destMrl, thumbnail.origin(), true );
+        } ) == false )
+            utils::fs::remove( destPath );
+    }
 }
 
 /* Album handling */

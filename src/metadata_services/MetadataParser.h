@@ -67,6 +67,7 @@ protected:
                                         std::shared_ptr<Artist> artist );
     std::shared_ptr<Genre> handleGenre( IItem& item ) const;
     std::shared_ptr<Thumbnail> findAlbumArtwork( IItem& item );
+    void relocateThumbnail( Thumbnail& thumbnail, int64_t mediaId ) const;
 
 private:
     static int toInt( IItem& item, IItem::Metadata meta );
