@@ -574,6 +574,14 @@ Task::createRefreshTask( MediaLibraryPtr ml, std::shared_ptr<File> file,
     return self;
 }
 
+void Task::removePlaylistContentTasks( MediaLibraryPtr ml, int64_t playlistId )
+{
+    const std::string req = "DELETE FROM " + Task::Table::Name + " "
+            "WHERE parent_playlist_id = ? AND step & ? = ?";
+    sqlite::Tools::executeDelete( ml->getConn(), req, playlistId,
+                                  Step::Completed, Step::Completed );
+}
+
 void Task::recoverUnscannedFiles( MediaLibraryPtr ml )
 {
     static const std::string req = "INSERT INTO " + Task::Table::Name +
