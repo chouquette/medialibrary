@@ -607,6 +607,8 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
                 if ( albumArtist && albumArtist->id() != albumTrack->artistId() )
                     albumArtist->updateNbTrack( -1 );
 
+                if ( media->isThumbnailGenerated() == true )
+                    media->removeThumbnail();
                 album->removeTrack( *media, *albumTrack );
                 AlbumTrack::destroy( m_ml, albumTrack->id() );
                 Artist::dropMediaArtistRelation( m_ml, media->id() );

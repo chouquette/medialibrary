@@ -421,6 +421,19 @@ bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin ori
     return true;
 }
 
+void Media::removeThumbnail()
+{
+    if ( m_thumbnailId == 0 )
+        return;
+    static const std::string req = "UPDATE " + Media::Table::Name + " SET "
+            "thumbnail_id = ? WHERE id_media = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, nullptr, m_id ) == false )
+        return;
+    Thumbnail::destroy( m_ml, m_thumbnailId );
+    m_thumbnailId = 0;
+    m_thumbnail = nullptr;
+}
+
 bool Media::setThumbnail( const std::string& thumbnailMrl )
 {
     return setThumbnail( thumbnailMrl, Thumbnail::Origin::UserProvided, false );

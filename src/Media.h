@@ -118,6 +118,7 @@ class Media : public IMedia, public DatabaseHelpers<Media>
         virtual bool setThumbnail( const std::string &thumbnail ) override;
         bool setThumbnail( const std::string& thumbnail, Thumbnail::Origin origin,
                            bool isGenerated);
+        void removeThumbnail();
         virtual unsigned int insertionDate() const override;
         virtual unsigned int releaseDate() const override;
         uint32_t nbPlaylists() const;
