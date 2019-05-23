@@ -44,7 +44,9 @@ class AlbumTrack;
 
 class Media;
 
-class Media : public IMedia, public DatabaseHelpers<Media>
+class Media : public IMedia,
+              public DatabaseHelpers<Media>,
+              public std::enable_shared_from_this<Media>
 {
     public:
         struct Table
