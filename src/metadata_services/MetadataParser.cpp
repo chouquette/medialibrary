@@ -701,6 +701,7 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
     if ( artists.first == nullptr && artists.second == nullptr )
         return false;
     auto album = findAlbum( item, artists.first, artists.second );
+    auto newAlbum = album == nullptr;
 
     /*
      * Check for a cover file out of the transaction/retry scope
@@ -770,11 +771,11 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
         return false;
 
     if ( thumbnail != nullptr )
-    {
         relocateThumbnail( *thumbnail, media->id() );
+    if ( newAlbum == true )
         m_notifier->notifyAlbumCreation( album );
-    }
-    m_notifier->notifyAlbumModification( album );
+    else
+        m_notifier->notifyAlbumModification( album );
     if ( genre != nullptr )
         m_notifier->notifyGenreModification( genre );
     if ( artists.first != nullptr )
