@@ -967,14 +967,24 @@ Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml )
                                       IMedia::Type::Stream );
 }
 
-Query<IMedia> Media::fetchStreamHistory(MediaLibraryPtr ml)
+Query<IMedia> Media::fetchHistoryByType( MediaLibraryPtr ml, IMedia::Type type )
 {
     static const std::string req = "FROM " + Media::Table::Name +
             " WHERE last_played_date IS NOT NULL"
             " AND type = ?";
     return make_query<Media, IMedia>( ml, "*", req,
-                                      "ORDER BY last_played_date DESC",
-                                      IMedia::Type::Stream );
+                                      "ORDER BY last_played_date DESC", type );
+}
+
+Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml, IMedia::Type type )
+{
+    assert( type == IMedia::Type::Audio || type == IMedia::Type::Video );
+    return fetchHistoryByType( ml, type );
+}
+
+Query<IMedia> Media::fetchStreamHistory(MediaLibraryPtr ml)
+{
+    return fetchHistoryByType( ml, IMedia::Type::Stream );
 }
 
 Query<IMedia> Media::fromFolderId( MediaLibraryPtr ml, IMedia::Type type,

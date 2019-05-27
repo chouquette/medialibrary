@@ -120,6 +120,7 @@ public:
     virtual bool deletePlaylist( int64_t playlistId ) override;
 
     virtual Query<IMedia> history() const override;
+    virtual Query<IMedia> history( IMedia::Type type ) const override;
     virtual Query<IMedia> streamHistory() const override;
     virtual bool clearHistory() override;
 

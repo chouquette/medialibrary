@@ -355,6 +355,28 @@ TEST_F( Medias, StreamHistory )
     ASSERT_EQ( 1u, history.size() );
 }
 
+TEST_F( Medias, HistoryByType )
+{
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "video.mkv" ) );
+    m1->setType( IMedia::Type::Video );
+    m1->increasePlayCount();
+    m1->save();
+
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "audio.mp3" ) );
+    m2->setType( IMedia::Type::Audio);
+    m2->save();
+    m2->increasePlayCount();
+
+    auto h = ml->history( IMedia::Type::Audio )->all();
+    ASSERT_EQ( 1u, h.size() );
+
+    h = ml->history( IMedia::Type::Video)->all();
+    ASSERT_EQ( 1u, h.size() );
+
+    h = ml->history()->all();
+    ASSERT_EQ( 2u, h.size() );
+}
+
 TEST_F( Medias, ClearHistory )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );

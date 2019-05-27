@@ -329,6 +329,11 @@ public:
      * History
      */
     virtual Query<IMedia> history() const = 0;
+    /**
+     * @brief history Returns the history for media of the provided type
+     * @param type Can be either Audio or Video. Other types are not supported
+     */
+    virtual Query<IMedia> history( IMedia::Type type ) const = 0;
     virtual Query<IMedia> streamHistory() const = 0;
     /**
      * @brief clearHistory will clear both streams history & media history.

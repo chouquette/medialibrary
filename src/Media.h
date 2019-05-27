@@ -165,6 +165,7 @@ class Media : public IMedia,
         static Query<IMedia> searchInPlaylist( MediaLibraryPtr ml, const std::string& pattern,
                                                  int64_t playlistId, const QueryParameters* params );
         static Query<IMedia> fetchHistory( MediaLibraryPtr ml );
+        static Query<IMedia> fetchHistory( MediaLibraryPtr ml, IMedia::Type type );
         static Query<IMedia> fetchStreamHistory( MediaLibraryPtr ml );
         static Query<IMedia> fromFolderId( MediaLibraryPtr ml, Type type,
                                            int64_t folderId,
@@ -180,6 +181,7 @@ class Media : public IMedia,
 private:
         static std::string addRequestJoin(const QueryParameters* params, bool forceFile , bool forceAlbumTrack);
         static std::string sortRequest( const QueryParameters* params );
+        static Query<IMedia> fetchHistoryByType( MediaLibraryPtr ml, IMedia::Type type );
 
 private:
         MediaLibraryPtr m_ml;

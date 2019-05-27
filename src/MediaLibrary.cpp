@@ -669,6 +669,11 @@ Query<IMedia> MediaLibrary::history() const
     return Media::fetchHistory( this );
 }
 
+Query<IMedia> MediaLibrary::history( IMedia::Type type ) const
+{
+    return Media::fetchHistory( this, type );
+}
+
 Query<IMedia> MediaLibrary::streamHistory() const
 {
     return Media::fetchStreamHistory( this );
