@@ -145,6 +145,14 @@ public:
     }
 };
 
+TEST_F( DbModel, NbTriggers )
+{
+    // Test the expected number of triggers on a freshly created database
+    auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
+    ASSERT_EQ( InitializeResult::Success, res );
+    CheckNbTriggers( 34 );
+}
+
 TEST_F( DbModel, Upgrade3to5 )
 {
     LoadFakeDB( SRC_DIR "/test/unittest/db_v3.sql" );
