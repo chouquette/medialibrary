@@ -638,4 +638,22 @@ Query<IAlbum> Album::listAll( MediaLibraryPtr ml, const QueryParameters* params 
                                                  std::move( req ) );
 }
 
+bool Album::checkDBConsistency( MediaLibraryPtr ml )
+{
+    sqlite::Statement stmt{ ml->getConn()->handle(),
+                "SELECT nb_tracks, is_present FROM " +
+                    Album::Table::Name
+    };
+    stmt.execute();
+    sqlite::Row row;
+    while ( ( row = stmt.row() ) != nullptr )
+    {
+        auto nbTracks = row.extract<uint32_t>();
+        auto isPresent = row.extract<uint32_t>();
+        if ( nbTracks != isPresent )
+            return false;
+    }
+    return true;
+}
+
 }

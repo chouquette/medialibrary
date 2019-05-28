@@ -267,6 +267,11 @@ TEST_F( DeviceFs, RemoveAlbumAndArtist )
         media4->save();
     }
 
+    auto res = Artist::checkDBConsistency( ml.get() );
+    ASSERT_TRUE( res );
+    res = Album::checkDBConsistency( ml.get() );
+    ASSERT_TRUE( res );
+
     auto albums = ml->albums( nullptr )->all();
     ASSERT_EQ( 3u, albums.size() );
     auto artists = ml->artists( true, nullptr )->all();
@@ -291,6 +296,11 @@ TEST_F( DeviceFs, RemoveAlbumAndArtist )
     ASSERT_EQ( 3u, albums.size() );
     artists = ml->artists( true, nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
+
+    res = Artist::checkDBConsistency( ml.get() );
+    ASSERT_TRUE( res );
+    res = Album::checkDBConsistency( ml.get() );
+    ASSERT_TRUE( res );
 }
 
 TEST_F( DeviceFs, RemoveArtist )
@@ -316,6 +326,11 @@ TEST_F( DeviceFs, RemoveArtist )
     artist->addMedia( *media3 );
     // This would be done by the metadata parser, but there's none during unittests
     artist->updateNbTrack( 3 );
+
+    auto res = Artist::checkDBConsistency( ml.get() );
+    ASSERT_TRUE( res );
+    res = Album::checkDBConsistency( ml.get() );
+    ASSERT_TRUE( res );
 
     auto albums = ml->albums( nullptr )->all();
     ASSERT_EQ( 1u, albums.size() );
@@ -358,6 +373,11 @@ TEST_F( DeviceFs, RemoveArtist )
     artist = std::static_pointer_cast<Artist>( ml->artist( artist->id() ) );
     tracks = artist->tracks( nullptr )->all();
     ASSERT_EQ( 3u, tracks.size() );
+
+    res = Artist::checkDBConsistency( ml.get() );
+    ASSERT_TRUE( res );
+    res = Album::checkDBConsistency( ml.get() );
+    ASSERT_TRUE( res );
 }
 
 
@@ -380,6 +400,11 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
         newArtist->addMedia( static_cast<Media&>( *media2 ) );
     }
 
+    auto res = Artist::checkDBConsistency( ml.get() );
+    ASSERT_TRUE( res );
+    res = Album::checkDBConsistency( ml.get() );
+    ASSERT_TRUE( res );
+
     auto albums = ml->albums( nullptr )->all();
     ASSERT_EQ( 1u, albums.size() );
     auto artists = ml->artists( true, nullptr )->all();
@@ -396,6 +421,15 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
     ASSERT_EQ( 1u, artists.size() );
     ASSERT_EQ( 1u, albums[0]->tracks( nullptr )->count() );
     ASSERT_EQ( 1u, artists[0]->tracks( nullptr )->count() );
+
+    fsMock->addDevice( device );
+
+    Reload();
+
+    res = Artist::checkDBConsistency( ml.get() );
+    ASSERT_TRUE( res );
+    res = Album::checkDBConsistency( ml.get() );
+    ASSERT_TRUE( res );
 }
 
 TEST_F( DeviceFs, ChangeDevice )

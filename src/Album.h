@@ -118,6 +118,14 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         static Query<IAlbum> searchFromGenre( MediaLibraryPtr ml, const std::string& pattern,
                                               int64_t genreId, const QueryParameters* params );
         static Query<IAlbum> listAll( MediaLibraryPtr ml, const QueryParameters* params );
+        /**
+         * @brief checkDBConsistency Checks the consistency of all artists records
+         * @return false in case of an inconsistency
+         *
+         * This is meant for testing only, and expected all devices to be back to
+         * present once this is called
+         */
+        static bool checkDBConsistency( MediaLibraryPtr ml );
 
     private:
         static std::string orderTracksBy( const QueryParameters* params );

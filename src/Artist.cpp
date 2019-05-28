@@ -544,4 +544,22 @@ std::string Artist::sortRequest( const QueryParameters* params )
     return req;
 }
 
+bool Artist::checkDBConsistency( MediaLibraryPtr ml )
+{
+    sqlite::Statement stmt{ ml->getConn()->handle(),
+                "SELECT nb_tracks, is_present FROM " +
+                    Artist::Table::Name
+    };
+    stmt.execute();
+    sqlite::Row row;
+    while ( ( row = stmt.row() ) != nullptr )
+    {
+        auto nbTracks = row.extract<uint32_t>();
+        auto isPresent = row.extract<uint32_t>();
+        if ( nbTracks != isPresent )
+            return false;
+    }
+    return true;
+}
+
 }
