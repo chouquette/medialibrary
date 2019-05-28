@@ -39,6 +39,16 @@
 namespace
 {
     auto constexpr NbTriggers = 35u;
+
+    bool checkAlphaOrderedVector( const std::vector<const char*> in )
+    {
+        for ( auto i = 0u; i < in.size() - 1; i++ )
+        {
+            if ( strcmp( in[i], in[i + 1] ) >= 0 )
+                return false;
+        }
+        return true;
+    }
 }
 
 class Misc : public Tests
@@ -48,10 +58,8 @@ class Misc : public Tests
 TEST_F( Misc, FileExtensions )
 {
     const auto supportedExtensions = ml->getSupportedExtensions();
-    for ( auto i = 0u; i < supportedExtensions.size() - 1; i++ )
-    {
-        ASSERT_LT( strcmp( supportedExtensions[i], supportedExtensions[i + 1] ), 0 );
-    }
+    auto res = checkAlphaOrderedVector( supportedExtensions );
+    ASSERT_TRUE( res );
 }
 
 TEST_F( Misc, TrimString )
