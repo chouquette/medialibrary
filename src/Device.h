@@ -60,7 +60,6 @@ public:
     /// \return
     ///
     const std::string& scheme() const;
-    time_t lastSeen() const;
     void updateLastSeen();
 
     static std::shared_ptr<Device> create( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme, bool isRemovable );

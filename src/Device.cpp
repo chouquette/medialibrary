@@ -124,11 +124,6 @@ const std::string& Device::scheme() const
     return m_scheme;
 }
 
-time_t Device::lastSeen() const
-{
-    return m_lastSeen;
-}
-
 void Device::updateLastSeen()
 {
     assert( m_isRemovable == true );
