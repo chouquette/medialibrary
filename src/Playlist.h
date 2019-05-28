@@ -83,11 +83,6 @@ public:
      */
     void clearContent();
 
-    /**
-     * Fetches all PlaylistMediaRelation items without an MRL and assign it
-     */
-    static void insertMrlFromMediaId( MediaLibraryPtr ml );
-
     static std::shared_ptr<Playlist> fromFile( MediaLibraryPtr ml, int64_t fileId );
 
 private:

@@ -377,30 +377,6 @@ void Playlist::clearContent()
     sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id );
 }
 
-void Playlist::insertMrlFromMediaId( MediaLibraryPtr ml )
-{
-    sqlite::Statement stmt{ ml->getConn()->handle(),
-                "SELECT * FROM PlaylistMediaRelation WHERE mrl IS NULL GROUP BY media_id" };
-    stmt.execute();
-    sqlite::Row row;
-    const std::string updateReq = "UPDATE PlaylistMediaRelation SET mrl = ? WHERE media_id = ?";
-    while ( ( row = stmt.row() ) != nullptr )
-    {
-        int64_t mediaId;
-        row >> mediaId;
-        auto media = ml->media( mediaId );
-        if ( media == nullptr )
-            continue;
-        auto files = media->files();
-        assert( files.size() > 0 );
-        auto mainFile = std::find_if( begin( files ), end( files ), []( const FilePtr& f) {
-            return f->isMain();
-        });
-        sqlite::Tools::executeUpdate( ml->getConn(), updateReq, (*mainFile)->mrl(), mediaId );
-    }
-    sqlite::Tools::executeDelete( ml->getConn(), "DELETE FROM PlaylistMediaRelation WHERE mrl IS NULL" );
-}
-
 std::shared_ptr<Playlist> Playlist::fromFile( MediaLibraryPtr ml, int64_t fileId )
 {
     static const std::string req = "SELECT * FROM " + Table::Name +
