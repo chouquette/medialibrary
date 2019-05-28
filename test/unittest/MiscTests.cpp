@@ -39,6 +39,21 @@
 namespace
 {
     auto constexpr NbTriggers = 34u;
+    const std::vector<const char*> expectedTriggers{
+        "add_album_track", "cascade_file_deletion", "decrement_media_nb_playlist",
+        "delete_album_fts", "delete_album_track", "delete_artist_fts",
+        "delete_folder_fts", "delete_genre_fts", "delete_label_fts",
+        "delete_media_fts", "delete_playlist_fts", "delete_show_fts",
+        "has_album_remaining", "has_track_remaining", "has_tracks_present",
+        "increment_media_nb_playlist", "insert_album_fts", "insert_artist_fts",
+        "insert_folder_fts", "insert_genre_fts", "insert_media_fts",
+        "insert_playlist_fts", "insert_show_fts", "is_album_present",
+        "is_media_device_present", "update_folder_nb_media_on_delete",
+        "update_folder_nb_media_on_insert", "update_folder_nb_media_on_update",
+        "update_genre_on_new_track", "update_genre_on_track_deleted",
+        "update_media_title_fts", "update_playlist_fts",
+        "update_playlist_order_on_delete", "update_playlist_order_on_insert"
+    };
 
     bool checkAlphaOrderedVector( const std::vector<const char*> in )
     {
@@ -129,6 +144,25 @@ public:
         ASSERT_EQ( nbTriggers, expected );
     }
 
+    void CheckTriggers( std::vector<const char*> expected )
+    {
+        medialibrary::sqlite::Statement stmt{ ml->getDbConn()->handle(),
+                "SELECT name FROM sqlite_master WHERE type='trigger' "
+                    "ORDER BY name;"
+        };
+        stmt.execute();
+        auto res = checkAlphaOrderedVector( expected );
+        ASSERT_TRUE( res );
+        for ( const auto& expectedName : expected )
+        {
+            auto row = stmt.row();
+            ASSERT_EQ( 1u, row.nbColumns() );
+            auto name = row.extract<std::string>();
+            ASSERT_EQ( expectedName, name );
+        }
+        ASSERT_EQ( stmt.row(), nullptr );
+    }
+
     void CheckNbIndexes( uint32_t expected )
     {
         medialibrary::sqlite::Statement stmt{ ml->getDbConn()->handle(),
@@ -164,6 +198,7 @@ TEST_F( DbModel, NbTriggers )
     auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     CheckNbTriggers( NbTriggers );
+    CheckTriggers( expectedTriggers );
 }
 
 TEST_F( DbModel, Upgrade3to5 )
@@ -267,6 +302,7 @@ TEST_F( DbModel, Upgrade13to14 )
     ASSERT_EQ( "folder", folder->name() );
 
     CheckNbTriggers( NbTriggers );
+    CheckTriggers( expectedTriggers );
 }
 
 TEST_F( DbModel, Upgrade14to15 )
@@ -276,6 +312,7 @@ TEST_F( DbModel, Upgrade14to15 )
     ASSERT_EQ( InitializeResult::Success, res );
     CheckNbTriggers( NbTriggers );
     CheckNbIndexes( 35 );
+    CheckTriggers( expectedTriggers );
 }
 
 TEST_F( DbModel, Upgrade15to16 )
@@ -285,6 +322,7 @@ TEST_F( DbModel, Upgrade15to16 )
     ASSERT_EQ( InitializeResult::Success, res );
     CheckNbTriggers( NbTriggers );
     CheckNbIndexes( 35 );
+    CheckTriggers( expectedTriggers );
 
     // Check that playlists were properly migrated
     medialibrary::sqlite::Statement stmt{
@@ -318,4 +356,5 @@ TEST_F( DbModel, Upgrade16to17 )
     ASSERT_EQ( InitializeResult::Success, res );
     CheckNbTriggers( NbTriggers );
     CheckNbIndexes( 35 );
+    CheckTriggers( expectedTriggers );
 }
