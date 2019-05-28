@@ -36,6 +36,11 @@
 #include "Metadata.h"
 #include "Playlist.h"
 
+namespace
+{
+    auto constexpr NbTriggers = 35u;
+}
+
 class Misc : public Tests
 {
 };
@@ -139,7 +144,7 @@ TEST_F( DbModel, NbTriggers )
     // Test the expected number of triggers on a freshly created database
     auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    CheckNbTriggers( 34 );
+    CheckNbTriggers( NbTriggers );
 }
 
 TEST_F( DbModel, Upgrade3to5 )
@@ -192,7 +197,7 @@ TEST_F( DbModel, Upgrade12to13 )
     // We can't check for the number of albums anymore since they are deleted
     // as part of 13 -> 14 migration
 
-    CheckNbTriggers( 35 );
+    CheckNbTriggers( NbTriggers );
 }
 
 TEST_F( DbModel, Upgrade13to14 )
@@ -239,7 +244,7 @@ TEST_F( DbModel, Upgrade13to14 )
     ASSERT_EQ( 2u, folder->media( IMedia::Type::Unknown, nullptr )->count() );
     ASSERT_EQ( "folder", folder->name() );
 
-    CheckNbTriggers( 35 );
+    CheckNbTriggers( NbTriggers );
 }
 
 TEST_F( DbModel, Upgrade14to15 )
@@ -247,5 +252,5 @@ TEST_F( DbModel, Upgrade14to15 )
     LoadFakeDB( SRC_DIR "/test/unittest/db_v14.sql" );
     auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    CheckNbTriggers( 35 );
+    CheckNbTriggers( NbTriggers );
 }
