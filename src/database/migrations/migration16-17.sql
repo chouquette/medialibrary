@@ -29,3 +29,8 @@
 
 "INSERT INTO " + Media::Table::Name + " SELECT * FROM " + Media::Table::Name + "_backup",
 "DROP TABLE " + Media::Table::Name + "_backup",
+
+// This trigger was incorrectly recreated during the 13 -> 14 migration, so
+// ensure it's the correct one now.
+// Artists triggers are all recreated as part of the 16 -> 17 migration
+"DROP TRIGGER has_track_remaining",
