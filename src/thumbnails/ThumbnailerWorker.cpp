@@ -109,11 +109,6 @@ void ThumbnailerWorker::run()
             continue;
         }
         bool res = generateThumbnail( media );
-        if ( res == false )
-        {
-            auto m = static_cast<Media*>( media.get() );
-            m->setThumbnail( "", Thumbnail::Origin::Media, true );
-        }
         m_ml->getCb()->onMediaThumbnailReady( media, res );
     }
     LOG_INFO( "Exiting thumbnailer thread" );
@@ -166,6 +161,15 @@ bool ThumbnailerWorker::generateThumbnail( MediaPtr media )
     auto dest = Thumbnail::pathForMedia( m_ml, media->id() );
     LOG_DEBUG( "Generating ", mrl, " thumbnail in ", dest );
     auto m = static_cast<Media*>( media.get() );
+    /*
+     * Insert a failure record before computing the thumbnail.
+     * If the thumbnailer crashes, we don't want to re-run it. If it succeeds,
+     * the thumbnail will be updated right after
+     * This is done here instead of from the mainloop as we don't want to prevent
+     * the thumbnail generation of a file that has been removed.
+     */
+    m->setThumbnail( "", Thumbnail::Origin::Media, true );
+
     if ( m_generator->generate( media, mrl, dest ) == false )
         return false;
 
