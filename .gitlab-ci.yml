@@ -2,7 +2,7 @@ variables:
   GIT_SUBMODULE_STRATEGY: normal
 
 linux:
-    image: registry.videolan.org/medialibrary:20190531143456
+    image: registry.videolan.org/medialibrary:20190531150343
     tags:
       - debian
       - amd64
@@ -47,7 +47,7 @@ win64:
       - wine samples.exe -vv
 
 coverage:
-    image: registry.videolan.org/medialibrary:20190531143456
+    image: registry.videolan.org/medialibrary:20190531150343
     tags:
       - debian
       - amd64
@@ -73,7 +73,7 @@ coverage:
             - html/
 
 asan-ubsan:
-    image: registry.videolan.org/medialibrary:20190531143456
+    image: registry.videolan.org/medialibrary:20190531150343
     tags:
       - debian
       - amd64
