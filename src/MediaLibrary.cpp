@@ -413,7 +413,7 @@ MediaPtr MediaLibrary::addExternalMedia( const std::string& mrl, IMedia::Type ty
             auto t = m_dbConnection->newTransaction();
             auto fileName = utils::file::fileName( mrl );
             auto media = Media::create( this, type, 0, 0,
-                                        utils::url::decode( fileName ) );
+                                        utils::url::decode( fileName ), -1 );
             if ( media == nullptr )
                 return nullptr;
             if ( media->addExternalMrl( mrl, IFile::Type::Main ) == nullptr )

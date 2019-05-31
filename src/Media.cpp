@@ -88,12 +88,13 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
 {
 }
 
-Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
+Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
+              int64_t duration )
     : m_ml( ml )
     , m_id( 0 )
     , m_type( type )
     , m_subType( SubType::Unknown )
-    , m_duration( -1 )
+    , m_duration( duration )
     , m_playCount( 0 )
     , m_lastPlayedDate( 0 )
     , m_insertionDate( time( nullptr ) )
@@ -111,15 +112,16 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type )
 
 std::shared_ptr<Media> Media::create( MediaLibraryPtr ml, Type type,
                                       int64_t deviceId, int64_t folderId,
-                                      const std::string& fileName )
+                                      const std::string& fileName,
+                                      int64_t duration )
 {
-    auto self = std::make_shared<Media>( ml, fileName, type );
+    auto self = std::make_shared<Media>( ml, fileName, type, duration );
     static const std::string req = "INSERT INTO " + Media::Table::Name +
-            "(type, insertion_date, title, filename, device_id, folder_id) "
-            "VALUES(?, ?, ?, ?, ?, ?)";
+            "(type, duration, insertion_date, title, filename, device_id, folder_id) "
+            "VALUES(?, ?, ?, ?, ?, ?, ?)";
 
-    if ( insert( ml, self, req, type, self->m_insertionDate, self->m_title,
-                 self->m_filename, sqlite::ForeignKey{ deviceId },
+    if ( insert( ml, self, req, type, self->m_duration, self->m_insertionDate,
+                 self->m_title, self->m_filename, sqlite::ForeignKey{ deviceId },
                  sqlite::ForeignKey{ folderId } ) == false )
         return nullptr;
     return self;

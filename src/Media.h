@@ -60,11 +60,13 @@ class Media : public IMedia,
         // shall be well-formed, and private constructor would prevent that.
         // There might be a way with a user-defined allocator, but we'll see that later...
         Media( MediaLibraryPtr ml , sqlite::Row& row );
-        Media( MediaLibraryPtr ml, const std::string& title, Type type);
+        Media( MediaLibraryPtr ml, const std::string& title, Type type,
+               int64_t duration );
 
         static std::shared_ptr<Media> create( MediaLibraryPtr ml, Type type,
                                               int64_t deviceId, int64_t folderId,
-                                              const std::string& fileName );
+                                              const std::string& fileName,
+                                              int64_t duration );
         static void createTable( sqlite::Connection* connection, uint32_t modelVersion );
         static void createTriggers( sqlite::Connection* connection, uint32_t modelVersion );
 
