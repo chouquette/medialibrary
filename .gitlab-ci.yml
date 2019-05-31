@@ -77,8 +77,9 @@ asan-ubsan:
     tags:
       - debian
       - amd64
+    variables:
+      LSAN_OPTIONS: 'detect_leaks=0'
     script:
-      - export LSAN_OPTIONS=exitcode=0
       - ./bootstrap
       - ./configure --enable-tests CXXFLAGS="-g -O1 -fsanitize=address,undefined"
       - make -j4
