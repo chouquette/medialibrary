@@ -39,7 +39,7 @@ class VmemThumbnailer : public IThumbnailer
 {
     struct Task
     {
-        Task( std::string mrl );
+        Task( std::string mrl, uint32_t desiredWidth, uint32_t desiredHeight );
 
         compat::Mutex mutex;
         compat::ConditionVariable cond;
@@ -48,6 +48,8 @@ class VmemThumbnailer : public IThumbnailer
         uint32_t height;
         VLC::MediaPlayer mp;
         std::atomic_bool thumbnailRequired;
+        const uint32_t desiredWidth;
+        const uint32_t desiredHeight;
     };
 
 public:
@@ -58,11 +60,6 @@ public:
     void setupVout( Task& task );
     bool takeThumbnail( Task& task, const std::string& dest );
     bool compress( Task& task, const std::string& dest );
-
-private:
-    // Force a base width, let height be computed depending on A/R
-    static const uint32_t DesiredWidth = 320;
-    static const uint32_t DesiredHeight = 200; // Aim for a 16:10 thumbnail
 
 private:
     MediaLibraryPtr m_ml;

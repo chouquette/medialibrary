@@ -68,7 +68,7 @@ bool VmemThumbnailer::generate( const std::string& mrl,
         vlcMedia.addOption( ss.str() );
     }
 
-    Task task{ mrl };
+    Task task{ mrl, 320, 200 };
 
     task.mp = VLC::MediaPlayer( vlcMedia );
 
@@ -125,13 +125,13 @@ void VmemThumbnailer::setupVout( Task& task )
 
             const float inputAR = (float)*width / *height;
 
-            task.width = DesiredWidth;
+            task.width = task.desiredWidth;
             task.height = (float)task.width / inputAR + 1;
-            if ( task.height < DesiredHeight )
+            if ( task.height < task.desiredHeight )
             {
                 // Avoid downscaling too much for really wide pictures
-                task.width = inputAR * DesiredHeight;
-                task.height = DesiredHeight;
+                task.width = inputAR * task.desiredHeight;
+                task.height = task.desiredHeight;
             }
             auto size = task.width * task.height * m_compressor->bpp();
             // If our buffer isn't enough anymore, reallocate a new one.
@@ -190,18 +190,22 @@ bool VmemThumbnailer::takeThumbnail( Task& task, const std::string& dest )
 
 bool VmemThumbnailer::compress( Task& task, const std::string& dest )
 {
-    auto hOffset = task.width > DesiredWidth ? ( task.width - DesiredWidth ) / 2 : 0;
-    auto vOffset = task.height > DesiredHeight ? ( task.height - DesiredHeight ) / 2 : 0;
+    auto hOffset = task.width > task.desiredWidth ? ( task.width - task.desiredWidth ) / 2 : 0;
+    auto vOffset = task.height > task.desiredHeight ? ( task.height - task.desiredHeight ) / 2 : 0;
 
     return m_compressor->compress( m_buff.get(), dest, task.width, task.height,
-                                   DesiredWidth, DesiredHeight, hOffset, vOffset );
+                                   task.desiredWidth, task.desiredHeight,
+                                   hOffset, vOffset );
 }
 
-VmemThumbnailer::Task::Task( std::string mrl )
+VmemThumbnailer::Task::Task( std::string mrl, uint32_t desiredWidth,
+                             uint32_t desiredHeight )
     : mrl( std::move( mrl ) )
     , width( 0 )
     , height( 0 )
     , thumbnailRequired( false )
+    , desiredWidth( desiredWidth )
+    , desiredHeight( desiredHeight )
 {
 }
 
