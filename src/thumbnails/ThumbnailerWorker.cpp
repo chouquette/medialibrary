@@ -173,7 +173,7 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
      */
     m->setThumbnail( "", Thumbnail::Origin::Media, true );
 
-    if ( m_generator->generate( task.media, mrl, dest ) == false )
+    if ( m_generator->generate( mrl, dest ) == false )
         return false;
 
     auto destMrl = utils::file::toMrl( dest );

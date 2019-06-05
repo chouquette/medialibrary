@@ -33,7 +33,6 @@ public:
     virtual ~IThumbnailer() = default;
     /**
      * @brief request Generate a thumbnail for the provided media
-     * @param media The media to generate a thumbnail for
      * @param mrl The mrl to the main file for this media
      * @param destination The path in which to save the thumbnail
      *
@@ -41,7 +40,7 @@ public:
      * Upon successful return, the <destination> path must contain the generated
      * thumbnail
      */
-    virtual bool generate( MediaPtr media, const std::string& mrl,
+    virtual bool generate( const std::string& mrl,
                            const std::string& destination ) = 0;
 };
 

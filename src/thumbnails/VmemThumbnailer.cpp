@@ -48,7 +48,7 @@ VmemThumbnailer::VmemThumbnailer( MediaLibraryPtr ml )
 #endif
 }
 
-bool VmemThumbnailer::generate( MediaPtr media, const std::string& mrl,
+bool VmemThumbnailer::generate( const std::string& mrl,
                                 const std::string& dest )
 {
     VLC::Media vlcMedia = VLC::Media( VLCInstance::get(), mrl,

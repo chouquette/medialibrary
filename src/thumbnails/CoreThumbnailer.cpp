@@ -42,8 +42,7 @@ CoreThumbnailer::CoreThumbnailer( MediaLibraryPtr ml )
 {
 }
 
-bool CoreThumbnailer::generate( medialibrary::MediaPtr media,
-                                const std::string& mrl, const std::string& dest )
+bool CoreThumbnailer::generate( const std::string& mrl, const std::string& dest )
 {
     VLC::Media vlcMedia{ VLCInstance::get(), mrl, VLC::Media::FromType::FromLocation };
     auto em = vlcMedia.eventManager();
