@@ -99,6 +99,7 @@ class Media : public IMedia,
         virtual bool increasePlayCount() override;
         virtual bool setPlayCount( uint32_t playCount ) override;
         virtual time_t lastPlayedDate() const override;
+        virtual void removeFromHistory() override;
         virtual bool isFavorite() const override;
         virtual bool setFavorite( bool favorite ) override;
         virtual const std::vector<FilePtr>& files() const override;

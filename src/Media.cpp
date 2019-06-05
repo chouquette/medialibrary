@@ -215,6 +215,21 @@ time_t Media::lastPlayedDate() const
     return m_lastPlayedDate;
 }
 
+void Media::removeFromHistory()
+{
+    static const std::string req = "UPDATE " + Media::Table::Name + " SET "
+            "play_count = ?, last_played_date = ? WHERE id_media = ?";
+    auto dbConn = m_ml->getConn();
+    auto t = dbConn->newTransaction();
+
+    sqlite::Tools::executeUpdate( dbConn, req, 0, nullptr, m_id );
+    unsetMetadata( MetadataType::Progress );
+
+    t->commit();
+    m_lastPlayedDate = 0;
+    m_playCount = 0;
+}
+
 bool Media::isFavorite() const
 {
     return m_isFavorite;

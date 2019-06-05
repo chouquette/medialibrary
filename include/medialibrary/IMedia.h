@@ -212,6 +212,19 @@ class IMedia
         virtual bool setMetadata( MetadataType type, const std::string& value ) = 0;
         virtual bool setMetadata( MetadataType type, int64_t value ) = 0;
         virtual bool unsetMetadata( MetadataType type ) = 0;
+
+        ///
+        /// \brief removeFromHistory Removes a media from the history.
+        /// \return true in case of success, false otherwise
+        ///
+        /// This can be used for all type of media, including streams & network.
+        /// If this call succeeds, the media will have a play count of 0, and
+        /// won't appear in the history anymore. Any potential progress will
+        /// also be lost.
+        /// After calling this method, the observable state is as if the media
+        /// was never played.
+        ///
+        virtual void removeFromHistory() = 0;
 };
 
 }

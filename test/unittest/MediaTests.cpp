@@ -400,6 +400,31 @@ TEST_F( Medias, ClearHistory )
     ASSERT_EQ( 0u, history.size() );
 }
 
+TEST_F( Medias, RemoveFromHistory )
+{
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
+
+    auto history = ml->history()->all();
+    ASSERT_EQ( 0u, history.size() );
+
+    m->increasePlayCount();
+    m->save();
+    m->setMetadata( IMedia::MetadataType::Progress, "50" );
+    history = ml->history()->all();
+    ASSERT_EQ( 1u, history.size() );
+    ASSERT_EQ( m->id(), history[0]->id() );
+    ASSERT_EQ( 1u, m->playCount() );
+    ASSERT_TRUE( m->metadata( IMedia::MetadataType::Progress ).isSet() );
+    ASSERT_EQ( m->metadata( IMedia::MetadataType::Progress ).str(), "50" );
+
+    m->removeFromHistory();
+
+    history = ml->history()->all();
+    ASSERT_EQ( 0u, history.size() );
+    ASSERT_EQ( 0u, m->playCount() );
+    ASSERT_FALSE( m->metadata( IMedia::MetadataType::Progress ).isSet() );
+}
+
 TEST_F( Medias, SetReleaseDate )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv" ) );
