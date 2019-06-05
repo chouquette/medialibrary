@@ -39,11 +39,10 @@ class VmemThumbnailer : public IThumbnailer
 {
     struct Task
     {
-        Task( MediaPtr media, std::string mrl );
+        Task( std::string mrl );
 
         compat::Mutex mutex;
         compat::ConditionVariable cond;
-        MediaPtr media;
         std::string mrl;
         uint32_t width;
         uint32_t height;

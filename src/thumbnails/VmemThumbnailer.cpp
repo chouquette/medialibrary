@@ -68,7 +68,7 @@ bool VmemThumbnailer::generate( MediaPtr media, const std::string& mrl,
         vlcMedia.addOption( ss.str() );
     }
 
-    Task task{ media, mrl };
+    Task task{ mrl };
 
     task.mp = VLC::MediaPlayer( vlcMedia );
 
@@ -197,9 +197,8 @@ bool VmemThumbnailer::compress( Task& task, const std::string& dest )
                                    DesiredWidth, DesiredHeight, hOffset, vOffset );
 }
 
-VmemThumbnailer::Task::Task( MediaPtr m, std::string mrl )
-    : media( std::move( m ) )
-    , mrl( std::move( mrl ) )
+VmemThumbnailer::Task::Task( std::string mrl )
+    : mrl( std::move( mrl ) )
     , width( 0 )
     , height( 0 )
     , thumbnailRequired( false )
