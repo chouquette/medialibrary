@@ -45,19 +45,22 @@ public:
     void resume();
 
 private:
+    struct Task
+    {
+        MediaPtr media;
+    };
+
+private:
     void run();
     void stop();
 
-    bool generateThumbnail( MediaPtr task );
-
-private:
-
+    bool generateThumbnail( Task task );
 
 private:
     MediaLibraryPtr m_ml;
     compat::Mutex m_mutex;
     compat::ConditionVariable m_cond;
-    std::queue<MediaPtr> m_tasks;
+    std::queue<Task> m_tasks;
     std::atomic_bool m_run;
     std::shared_ptr<IThumbnailer> m_generator;
     compat::Thread m_thread;

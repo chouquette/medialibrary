@@ -57,7 +57,8 @@ void ThumbnailerWorker::requestThumbnail( MediaPtr media )
 {
     std::unique_lock<compat::Mutex> lock( m_mutex );
 
-    m_tasks.push( std::move( media ) );
+    Task t{ std::move( media ) };
+    m_tasks.push( std::move( t ) );
     if ( m_thread.get_id() == compat::Thread::id{} )
     {
         m_run = true;
@@ -87,7 +88,7 @@ void ThumbnailerWorker::run()
     LOG_INFO( "Starting thumbnailer thread" );
     while ( m_run == true )
     {
-        MediaPtr media;
+        Task t;
         {
             std::unique_lock<compat::Mutex> lock( m_mutex );
             if ( m_tasks.size() == 0 || m_paused == true )
@@ -99,17 +100,19 @@ void ThumbnailerWorker::run()
                 if ( m_run == false )
                     break;
             }
-            media = std::move( m_tasks.front() );
+            t = std::move( m_tasks.front() );
             m_tasks.pop();
         }
-        if ( media->isThumbnailGenerated() == true )
+        if ( t.media->isThumbnailGenerated() == true )
         {
-            LOG_INFO( "Skipping thumbnail generation of a media with a thumbnail ", media->fileName() );
-            m_ml->getCb()->onMediaThumbnailReady( media, media->thumbnailMrl().empty() == false );
+            LOG_INFO( "Skipping thumbnail generation of a media with a thumbnail ",
+                      t.media->fileName() );
+            m_ml->getCb()->onMediaThumbnailReady( t.media,
+                                                  t.media->thumbnailMrl().empty() == false );
             continue;
         }
-        bool res = generateThumbnail( media );
-        m_ml->getCb()->onMediaThumbnailReady( media, res );
+        bool res = generateThumbnail( t );
+        m_ml->getCb()->onMediaThumbnailReady( t.media, res );
     }
     LOG_INFO( "Exiting thumbnailer thread" );
 }
@@ -129,15 +132,15 @@ void ThumbnailerWorker::stop()
     }
 }
 
-bool ThumbnailerWorker::generateThumbnail( MediaPtr media )
+bool ThumbnailerWorker::generateThumbnail( Task task )
 {
-    assert( media->type() != Media::Type::Audio );
+    assert( task.media->type() != Media::Type::Audio );
 
-    const auto files = media->files();
+    const auto files = task.media->files();
     if ( files.empty() == true )
     {
         LOG_WARN( "Can't generate thumbnail for a media without associated files (",
-                  media->title() );
+                  task.media->title() );
         return false;
     }
     auto mainFileIt = std::find_if( files.cbegin(), files.cend(),
@@ -158,9 +161,9 @@ bool ThumbnailerWorker::generateThumbnail( MediaPtr media )
         return false;
     }
 
-    auto dest = Thumbnail::pathForMedia( m_ml, media->id() );
+    auto dest = Thumbnail::pathForMedia( m_ml, task.media->id() );
     LOG_DEBUG( "Generating ", mrl, " thumbnail in ", dest );
-    auto m = static_cast<Media*>( media.get() );
+    auto m = static_cast<Media*>( task.media.get() );
     /*
      * Insert a failure record before computing the thumbnail.
      * If the thumbnailer crashes, we don't want to re-run it. If it succeeds,
@@ -170,14 +173,14 @@ bool ThumbnailerWorker::generateThumbnail( MediaPtr media )
      */
     m->setThumbnail( "", Thumbnail::Origin::Media, true );
 
-    if ( m_generator->generate( media, mrl, dest ) == false )
+    if ( m_generator->generate( task.media, mrl, dest ) == false )
         return false;
 
     auto destMrl = utils::file::toMrl( dest );
     if ( m->setThumbnail( destMrl, Thumbnail::Origin::Media, true ) == false )
         return false;
 
-    m_ml->getNotifier()->notifyMediaModification( media );
+    m_ml->getNotifier()->notifyMediaModification( task.media );
     return true;
 }
 
