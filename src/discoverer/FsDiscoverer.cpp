@@ -72,6 +72,7 @@ bool FsDiscoverer::discover( const std::string& entryPoint )
     // If the folder exists, we assume it will be handled by reload()
     if ( f != nullptr )
         return true;
+    m_ml->getCb()->onEntryPointAdded( entryPoint );
     try
     {
         if ( m_probe->proceedOnDirectory( *fsDir ) == false || m_probe->isHidden( *fsDir ) == true )

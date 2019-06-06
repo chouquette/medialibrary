@@ -166,6 +166,20 @@ public:
      * entry point that has been reloaded
      */
     virtual void onReloadCompleted( const std::string& entryPoint, bool success ) = 0;
+
+    /**
+     * @brief onEntryPointAdded will be invoked when an entrypoint gets added
+     * @param entryPoint The entry point which was scheduled for discovery
+     *
+     * This callback will only be emitted the first time the entry point gets
+     * processed, after it has been inserted to the database.
+     * Later processing of that entry point will still cause \sa{onDiscoveryStarted}
+     * \sa{onDiscoveryProgress} and \sa{onDiscoveryCompleted} events to be fired
+     * \warning This event will be fired after \sa{onDiscoveryStarted} since we
+     * don't know if an entry point is known before starting it's processing
+     */
+    virtual void onEntryPointAdded( const std::string& entryPoint ) = 0;
+
     /**
      * @brief onEntryPointRemoved will be invoked when an entrypoint removal request gets processsed
      * by the appropriate worker thread.
