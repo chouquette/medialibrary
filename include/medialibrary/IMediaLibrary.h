@@ -170,15 +170,18 @@ public:
     /**
      * @brief onEntryPointAdded will be invoked when an entrypoint gets added
      * @param entryPoint The entry point which was scheduled for discovery
+     * @param success A boolean to represent the operation's success
      *
      * This callback will only be emitted the first time the entry point gets
      * processed, after it has been inserted to the database.
+     * In case of failure, it might be emited every time the request is sent, since
+     * the provided entry point would most likely be invalid, and couldn't be inserted.
      * Later processing of that entry point will still cause \sa{onDiscoveryStarted}
      * \sa{onDiscoveryProgress} and \sa{onDiscoveryCompleted} events to be fired
      * \warning This event will be fired after \sa{onDiscoveryStarted} since we
      * don't know if an entry point is known before starting it's processing
      */
-    virtual void onEntryPointAdded( const std::string& entryPoint ) = 0;
+    virtual void onEntryPointAdded( const std::string& entryPoint, bool success ) = 0;
 
     /**
      * @brief onEntryPointRemoved will be invoked when an entrypoint removal request gets processsed

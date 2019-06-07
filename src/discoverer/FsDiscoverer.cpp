@@ -72,14 +72,15 @@ bool FsDiscoverer::discover( const std::string& entryPoint )
     // If the folder exists, we assume it will be handled by reload()
     if ( f != nullptr )
         return true;
-    m_ml->getCb()->onEntryPointAdded( entryPoint );
     try
     {
         if ( m_probe->proceedOnDirectory( *fsDir ) == false || m_probe->isHidden( *fsDir ) == true )
             return true;
         // Fetch files explicitly
         fsDir->files();
-        return addFolder( std::move( fsDir ), m_probe->getFolderParent().get() );
+        auto res = addFolder( std::move( fsDir ), m_probe->getFolderParent().get() );
+        m_ml->getCb()->onEntryPointAdded( entryPoint, res );
+        return res;
     }
     catch ( sqlite::errors::ConstraintViolation& ex )
     {

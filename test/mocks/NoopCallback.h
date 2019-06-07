@@ -52,7 +52,7 @@ class NoopCallback : public IMediaLibraryCb
     virtual void onGenresDeleted( std::vector<int64_t> ) override {}
     virtual void onReloadStarted( const std::string& ) override {}
     virtual void onReloadCompleted( const std::string&, bool ) override {}
-    virtual void onEntryPointAdded( const std::string& ) override {}
+    virtual void onEntryPointAdded( const std::string&, bool ) override {}
     virtual void onEntryPointRemoved( const std::string&, bool ) override {}
     virtual void onEntryPointBanned( const std::string&, bool ) override {}
     virtual void onEntryPointUnbanned( const std::string&, bool ) override {}
