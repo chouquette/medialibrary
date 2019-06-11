@@ -126,14 +126,11 @@ bool Thumbnail::isFailureRecord() const
 
 void Thumbnail::createTable( sqlite::Connection* dbConnection )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + Thumbnail::Table::Name +
-            "("
-                "id_thumbnail INTEGER PRIMARY KEY AUTOINCREMENT,"
-                "mrl TEXT,"
-                "origin INTEGER NOT NULL,"
-                "is_generated BOOLEAN NOT NULL"
-            ")";
-    sqlite::Tools::executeRequest( dbConnection, req );
+    const std::string reqs[] = {
+        #include "database/tables/Thumbnail_v17.sql"
+    };
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConnection, req );
 }
 
 std::shared_ptr<Thumbnail> Thumbnail::create( MediaLibraryPtr ml, std::string mrl,
