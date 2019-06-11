@@ -17,11 +17,6 @@
 
 "INSERT INTO " + Media::Table::Name + "_backup SELECT * FROM " + Media::Table::Name,
 
-"INSERT INTO " + Thumbnail::Table::Name + "(id_thumbnail, mrl, origin, is_generated) "
-    "SELECT id_media, thumbnail, " +
-    std::to_string( static_cast<ThumbnailType>( Thumbnail::Origin::UserProvided ) ) + ", 1"
-    " FROM " + Media::Table::Name + " WHERE thumbnail IS NOT NULL AND thumbnail != ''",
-
 "DROP TABLE " + Media::Table::Name,
 
 #include "database/tables/Media_v14.sql"
@@ -35,8 +30,7 @@
                     IMedia::SubType::Unknown ) )
     + "), duration, play_count, last_played_date,"
     "strftime('%s', 'now'),"
-    "insertion_date, release_date, "
-    "CASE thumbnail WHEN NULL THEN 0 WHEN '' THEN 0 ELSE id_media END,"
+    "insertion_date, release_date, 0,"
     "title, filename, is_favorite, is_present FROM " + Media::Table::Name + "_backup",
 
 "DROP TABLE " + Media::Table::Name + "_backup",
