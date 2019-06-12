@@ -99,18 +99,18 @@ TEST_F( Medias, Duration )
 TEST_F( Medias, Thumbnail )
 {
     auto f = std::static_pointer_cast<Media>( ml->addMedia( "media.avi" ) );
-    ASSERT_EQ( f->thumbnailMrl(), "" );
+    ASSERT_EQ( f->thumbnailMrl( ThumbnailSizeType::Thumbnail ), "" );
 
     std::string newThumbnail( "file:///path/to/thumbnail" );
 
-    f->setThumbnail( newThumbnail );
+    f->setThumbnail( newThumbnail, ThumbnailSizeType::Thumbnail );
     f->save();
-    ASSERT_EQ( f->thumbnailMrl(), newThumbnail );
+    ASSERT_EQ( f->thumbnailMrl( ThumbnailSizeType::Thumbnail ), newThumbnail );
 
     Reload();
 
     auto f2 = ml->media( f->id() );
-    ASSERT_EQ( f2->thumbnailMrl(), newThumbnail );
+    ASSERT_EQ( f2->thumbnailMrl( ThumbnailSizeType::Thumbnail ), newThumbnail );
 }
 
 TEST_F( Medias, PlayCount )

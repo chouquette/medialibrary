@@ -44,7 +44,6 @@ Artist::Artist( MediaLibraryPtr ml, sqlite::Row& row )
     , m_id( row.extract<decltype(m_id)>() )
     , m_name( row.extract<decltype(m_name)>() )
     , m_shortBio( row.extract<decltype(m_shortBio)>() )
-    , m_thumbnailId( row.extract<decltype(m_thumbnailId)>() )
     , m_nbAlbums( row.extract<decltype(m_nbAlbums)>() )
     , m_nbTracks( row.extract<decltype(m_nbTracks)>() )
     , m_mbId( row.extract<decltype(m_mbId)>() )
@@ -57,7 +56,6 @@ Artist::Artist( MediaLibraryPtr ml, const std::string& name )
     : m_ml( ml )
     , m_id( 0 )
     , m_name( name )
-    , m_thumbnailId( 0 )
     , m_nbAlbums( 0 )
     , m_nbTracks( 0 )
     , m_isPresent( true )
@@ -177,58 +175,70 @@ bool Artist::addMedia( Media& media )
     return sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(), artistForeignKey ) != 0;
 }
 
-bool Artist::isThumbnailGenerated() const
+bool Artist::isThumbnailGenerated( ThumbnailSizeType sizeType ) const
 {
-    return m_thumbnailId != 0;
+    if ( m_thumbnails[Thumbnail::SizeToInt( sizeType )] != nullptr )
+        return true;
+    return thumbnail( sizeType ) != nullptr;
 }
 
-const std::string& Artist::thumbnailMrl() const
+const std::string& Artist::thumbnailMrl( ThumbnailSizeType sizeType ) const
 {
-    if ( m_thumbnailId == 0 )
+    const auto t = thumbnail( sizeType );
+    if ( t == nullptr )
         return Thumbnail::EmptyMrl;
-
-    if ( m_thumbnail == nullptr )
-    {
-        auto thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
-        if ( thumbnail == nullptr )
-            return Thumbnail::EmptyMrl;
-        m_thumbnail = std::move( thumbnail );
-    }
-    return m_thumbnail->mrl();
+    return t->mrl();
 }
 
-std::shared_ptr<Thumbnail> Artist::thumbnail()
+std::shared_ptr<Thumbnail> Artist::thumbnail( ThumbnailSizeType sizeType ) const
 {
-    if ( m_thumbnailId == 0 )
-        return nullptr;
-    if ( m_thumbnail == nullptr )
+    auto idx = Thumbnail::SizeToInt( sizeType );
+    if ( m_thumbnails[idx] == nullptr )
     {
-        auto thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
+        auto thumbnail = Thumbnail::fetch( m_ml, Thumbnail::EntityType::Artist,
+                                           m_id, sizeType );
         if ( thumbnail == nullptr )
             return nullptr;
-        m_thumbnail = std::move( thumbnail );
+        m_thumbnails[idx] = std::move( thumbnail );
     }
-    return m_thumbnail;
+    return m_thumbnails[idx];
 }
 
 bool Artist::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
 {
     assert( newThumbnail != nullptr );
 
-    if ( m_thumbnailId != 0 )
+    auto thumbnailIdx = Thumbnail::SizeToInt( newThumbnail->sizeType() );
+    auto currentThumbnail = thumbnail( newThumbnail->sizeType() );
+    if ( currentThumbnail != nullptr )
     {
-        if ( m_thumbnail == nullptr )
+        if ( currentThumbnail->origin() == Thumbnail::Origin::Artist ||
+             currentThumbnail->origin() == Thumbnail::Origin::UserProvided ||
+             currentThumbnail->origin() == Thumbnail::Origin::Empty )
         {
-            auto m_thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
-            if ( m_thumbnail == nullptr )
-                return false;
+            std::unique_ptr<sqlite::Transaction> t;
+            if ( sqlite::Transaction::transactionInProgress() == false )
+                t = m_ml->getConn()->newTransaction();
+            auto replace = newThumbnail->id() != 0;
+            if ( replace == true )
+                currentThumbnail = newThumbnail;
+            else
+            {
+                if ( currentThumbnail->update( newThumbnail->mrl(),
+                                               newThumbnail->isOwned() ) == false )
+                    return false;
+            }
+            if ( replace || currentThumbnail->origin() != newThumbnail->origin() )
+            {
+                if ( currentThumbnail->updateLinkRecord( m_id,
+                                                         Thumbnail::EntityType::Artist,
+                                                         newThumbnail->origin() ) == false )
+                    return false;
+            }
+            if ( t != nullptr )
+                t->commit();
+            return true;
         }
-        if ( m_thumbnail->origin() == Thumbnail::Origin::Artist ||
-             m_thumbnail->origin() == Thumbnail::Origin::UserProvided ||
-             m_thumbnail->origin() == Thumbnail::Origin::Empty )
-            return m_thumbnail->update( newThumbnail->mrl(),
-                                        newThumbnail->origin(),
-                                        newThumbnail->isOwned() );
     }
     std::unique_ptr<sqlite::Transaction> t;
     if ( sqlite::Transaction::transactionInProgress() == false )
@@ -238,28 +248,34 @@ bool Artist::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
         if ( newThumbnail->insert() == 0 )
             return false;
     }
-    static const std::string req = "UPDATE " + Artist::Table::Name +
-            " SET thumbnail_id = ? WHERE id_artist = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, newThumbnail->id(),
-                                       m_id ) == false )
-        return false;
+    if ( currentThumbnail == nullptr )
+    {
+        newThumbnail->insertLinkRecord( m_id, Thumbnail::EntityType::Artist,
+                                        newThumbnail->origin() );
+    }
+    else
+    {
+        newThumbnail->updateLinkRecord( m_id, Thumbnail::EntityType::Artist,
+                                        newThumbnail->origin() );
+    }
+
     if ( t != nullptr )
         t->commit();
-    m_thumbnailId = newThumbnail->id();
-    m_thumbnail = std::move( newThumbnail );
+    m_thumbnails[thumbnailIdx] = std::move( newThumbnail );
     return true;
 }
 
 bool Artist::setArtworkMrl( const std::string& thumbnailMrl,
-                            Thumbnail::Origin origin, bool isOwned )
+                            Thumbnail::Origin origin, ThumbnailSizeType sizeType,
+                            bool isOwned )
 {
     return setThumbnail( std::make_shared<Thumbnail>( m_ml, thumbnailMrl,
-                                                      origin, isOwned ) );
+                                                      origin, sizeType, isOwned ) );
 }
 
-bool Artist::setThumbnail( const std::string& thumbnailMrl )
+bool Artist::setThumbnail( const std::string& thumbnailMrl, ThumbnailSizeType sizeType )
 {
-    return setArtworkMrl( thumbnailMrl, Thumbnail::Origin::UserProvided, false );
+    return setArtworkMrl( thumbnailMrl, Thumbnail::Origin::UserProvided, sizeType, false );
 }
 
 bool Artist::updateNbAlbum( int increment )
@@ -338,7 +354,7 @@ unsigned int Artist::nbTracks() const
 void Artist::createTable( sqlite::Connection* dbConnection )
 {
     const std::string reqs[] = {
-        #include "database/tables/Artist_v16.sql"
+        #include "database/tables/Artist_v17.sql"
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConnection, req );

@@ -151,11 +151,6 @@ void MediaLibraryTester::deleteAlbum( int64_t albumId )
     Album::destroy( this, albumId );
 }
 
-std::shared_ptr<Album> MediaLibraryTester::createAlbum( const std::string& title )
-{
-    return MediaLibrary::createAlbum( title, 0 );
-}
-
 std::shared_ptr<Genre> MediaLibraryTester::createGenre( const std::string& name )
 {
     return Genre::create( this, name );

@@ -10,7 +10,6 @@
     "real_last_played_date UNSIGNED INTEGER,"
     "insertion_date UNSIGNED INTEGER,"
     "release_date UNSIGNED INTEGER,"
-    "thumbnail_id INTEGER,"
     "title TEXT COLLATE NOCASE,"
     "filename TEXT COLLATE NOCASE,"
     "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
@@ -19,8 +18,6 @@
     "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
     "folder_id UNSIGNED INTEGER,"
 
-    "FOREIGN KEY(thumbnail_id) REFERENCES " + Thumbnail::Table::Name
-    + "(id_thumbnail) ON DELETE SET NULL,"
     "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
     + "(id_folder)"
 ")",

@@ -401,7 +401,9 @@ EXTRA_DIST += medialibrary.pc \
 	src/database/tables/Task_v14.sql \
 	src/database/tables/Thumbnail_v17.sql \
 	src/database/tables/Artist_v16.sql \
+	src/database/tables/Artist_v17.sql \
 	src/database/tables/Album_v16.sql \
+	src/database/tables/Album_v17.sql \
 	$(NULL)
 	
 

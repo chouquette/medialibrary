@@ -73,20 +73,19 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     // skip real_last_played_date as we don't need it in memory
     , m_insertionDate( row.load<decltype(m_insertionDate)>( 7 ) )
     , m_releaseDate( row.load<decltype(m_releaseDate)>( 8 ) )
-    , m_thumbnailId( row.load<decltype(m_thumbnailId)>( 9 ) )
-    , m_title( row.load<decltype(m_title)>( 10 ) )
-    , m_filename( row.load<decltype(m_filename)>( 11 ) )
-    , m_isFavorite( row.load<decltype(m_isFavorite)>( 12 ) )
+    , m_title( row.load<decltype(m_title)>( 9 ) )
+    , m_filename( row.load<decltype(m_filename)>( 10 ) )
+    , m_isFavorite( row.load<decltype(m_isFavorite)>( 11 ) )
     // Skip is_present
     // Skip device_id
-    , m_nbPlaylists( row.load<unsigned int>( 15 ) )
+    , m_nbPlaylists( row.load<unsigned int>( 14 ) )
     // Skip folder_id if any field gets added afterward
 
     // End of DB fields extraction
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
-    assert( row.nbColumns() == 17 );
+    assert( row.nbColumns() == 16 );
 }
 
 Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
@@ -100,7 +99,6 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
     , m_lastPlayedDate( 0 )
     , m_insertionDate( time( nullptr ) )
     , m_releaseDate( 0 )
-    , m_thumbnailId( 0 )
     , m_title( title )
     // When creating a Media, meta aren't parsed, and therefor, the title is the filename
     , m_filename( title )
@@ -336,27 +334,29 @@ bool Media::addChapter(int64_t offset, int64_t duration, std::string name)
                             m_id ) != nullptr;
 }
 
-std::shared_ptr<Thumbnail> Media::thumbnail() const
+std::shared_ptr<Thumbnail> Media::thumbnail( ThumbnailSizeType sizeType ) const
 {
-    if ( isThumbnailGenerated() == false )
-        return nullptr;
-    if ( m_thumbnail == nullptr )
-        m_thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
-    return m_thumbnail;
+    auto idx = Thumbnail::SizeToInt(sizeType);
+    if ( m_thumbnails[idx] == nullptr )
+        m_thumbnails[idx] = Thumbnail::fetch( m_ml, Thumbnail::EntityType::Media,
+                                              m_id, sizeType );
+    return m_thumbnails[idx];
 }
 
-const std::string& Media::thumbnailMrl() const
+const std::string& Media::thumbnailMrl( ThumbnailSizeType sizeType ) const
 {
-    auto t = thumbnail();
+    auto t = thumbnail( sizeType );
     if ( t == nullptr || t->isValid() == false )
         return Thumbnail::EmptyMrl;
-    assert( t == m_thumbnail );
+    assert( t == m_thumbnails[Thumbnail::SizeToInt( sizeType )] );
     return t->mrl();
 }
 
-bool Media::isThumbnailGenerated() const
+bool Media::isThumbnailGenerated( ThumbnailSizeType sizeType ) const
 {
-    return m_thumbnailId != 0;
+    if ( m_thumbnails[Thumbnail::SizeToInt( sizeType )] != nullptr )
+        return true;
+    return thumbnail( sizeType ) != nullptr;
 }
 
 unsigned int Media::insertionDate() const
@@ -420,31 +420,54 @@ void Media::setReleaseDate( unsigned int date )
     m_changed = true;
 }
 
-bool Media::setThumbnail( std::shared_ptr<Thumbnail> thumbnail )
+bool Media::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
 {
-    assert( thumbnail != nullptr );
-    if ( m_thumbnailId != 0 )
+    assert( newThumbnail != nullptr );
+    auto thumbnailIdx = Thumbnail::SizeToInt( newThumbnail->sizeType() );
+    auto currentThumbnail = thumbnail( newThumbnail->sizeType() );
+    // If we already have a thumbnail, we need to update it or insert a new one
+    if ( currentThumbnail != nullptr )
     {
-        if ( m_thumbnail == nullptr )
-        {
-            m_thumbnail = Thumbnail::fetch( m_ml, m_thumbnailId );
-            if ( m_thumbnail == nullptr )
-                return false;
-        }
         // Now we need to figure out if we need to update the current thumbnail,
         // or generate a new one
-        switch ( m_thumbnail->origin() )
+        switch ( currentThumbnail->origin() )
         {
             case Thumbnail::Origin::Artist:         // unused for now
             case Thumbnail::Origin::AlbumArtist:    // unused for now
             case Thumbnail::Origin::Media:          // media specific
             case Thumbnail::Origin::UserProvided:   // Already per-media
             case Thumbnail::Origin::Empty:          // The thumbnail was reset to be reloaded, update it
+            {
                 // In all these cases, the thumbnail should be per-media, and can
                 // be safely overriden.
-                return m_thumbnail->update( thumbnail->mrl(),
-                                            thumbnail->origin(),
-                                            thumbnail->isOwned() );
+                std::unique_ptr<sqlite::Transaction> t;
+                if ( sqlite::Transaction::transactionInProgress() == false )
+                    t = m_ml->getConn()->newTransaction();
+                // If the thumbnail is already inserted, we can simply share it
+                // and remove the previous one
+                auto replace = newThumbnail->id() != 0;
+                if ( replace == true )
+                    currentThumbnail = newThumbnail;
+                else
+                {
+                    if ( currentThumbnail->update( newThumbnail->mrl(),
+                                                   newThumbnail->isOwned() ) == false )
+                        return false;
+                }
+
+                if ( replace || currentThumbnail->origin() != newThumbnail->origin() )
+                {
+                    if ( currentThumbnail->updateLinkRecord( m_id,
+                                                             Thumbnail::EntityType::Media,
+                                                             newThumbnail->origin() ) == false )
+                        return false;
+                }
+
+                if ( t != nullptr )
+                    t->commit();
+                m_thumbnails[thumbnailIdx] = currentThumbnail;
+                return true;
+            }
             case Thumbnail::Origin::Album:
             case Thumbnail::Origin::CoverFile:
                 // We need a new thumbnail, otherwise we'd override the mrl for
@@ -456,35 +479,51 @@ bool Media::setThumbnail( std::shared_ptr<Thumbnail> thumbnail )
     std::unique_ptr<sqlite::Transaction> t;
     if ( sqlite::Transaction::transactionInProgress() == false )
         t = m_ml->getConn()->newTransaction();
-    if ( thumbnail->id() == 0 )
+    if ( newThumbnail->id() == 0 )
     {
-        if ( thumbnail->insert() == 0 )
+        if ( newThumbnail->insert() == 0 )
             return false;
     }
+    // If we already had a thumbnail, we need to update the linking entity
+    // Otherwise, we need to insert it
+    if ( currentThumbnail == nullptr )
+    {
+        newThumbnail->insertLinkRecord( m_id, Thumbnail::EntityType::Media,
+                                        newThumbnail->origin() );
+    }
+    else
+    {
+        newThumbnail->updateLinkRecord( m_id, Thumbnail::EntityType::Media,
+                                        newThumbnail->origin() );
+    }
 
-    static const std::string req = "UPDATE " + Media::Table::Name + " SET "
-            "thumbnail_id = ? WHERE id_media = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, thumbnail->id(), m_id ) == false )
-        return false;
     if ( t != nullptr )
         t->commit();
-    m_thumbnailId = thumbnail->id();
-    m_thumbnail = std::move( thumbnail );
+    m_thumbnails[thumbnailIdx] = std::move( newThumbnail );
     return true;
 }
 
+void Media::removeThumbnail( ThumbnailSizeType sizeType )
+{
+    auto t = thumbnail( sizeType );
+    if ( t == nullptr )
+        return;
+    t->unlinkThumbnail( m_id, Thumbnail::EntityType::Media );
+    m_thumbnails[Thumbnail::SizeToInt( sizeType )] = nullptr;
+}
+
 bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin origin,
-                          bool isOwned )
+                          ThumbnailSizeType sizeType, bool isOwned )
 {
     auto thumbnail = std::make_shared<Thumbnail>( m_ml, thumbnailMrl, origin,
-                                                  isOwned );
+                                                  sizeType, isOwned );
     assert( thumbnail->isValid() == true || thumbnail->isFailureRecord() == true );
     return setThumbnail( std::move( thumbnail ) );
 }
 
-bool Media::setThumbnail( const std::string& thumbnailMrl )
+bool Media::setThumbnail( const std::string& thumbnailMrl, ThumbnailSizeType sizeType )
 {
-    return setThumbnail( thumbnailMrl, Thumbnail::Origin::UserProvided, false );
+    return setThumbnail( thumbnailMrl, Thumbnail::Origin::UserProvided, sizeType, false );
 }
 
 bool Media::save()

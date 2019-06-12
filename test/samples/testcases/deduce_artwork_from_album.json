@@ -5,7 +5,9 @@
     "expected": {
         "nbAudios": 3,
         "nbVideos": 0,
-        "nbThumbnails": 3,
+        "nbThumbnailsDisabled": 3,
+        "comment": "We currently create a new thumbnail for all media when reloading",
+        "comment2": "so we end up with 3 thumbnails for media, and the old album thumbnail",
         "albums": [{
             "title": "album",
             "artist": "artist",

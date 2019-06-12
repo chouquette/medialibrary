@@ -96,7 +96,7 @@ public:
     virtual bool deleteLabel( LabelPtr label ) override;
 
     virtual AlbumPtr album( int64_t id ) const override;
-    std::shared_ptr<Album> createAlbum( const std::string& title, int64_t thumbnailId );
+    std::shared_ptr<Album> createAlbum( const std::string& title );
     virtual Query<IAlbum> albums( const QueryParameters* params ) const override;
 
     virtual Query<IGenre> genres( const QueryParameters* params ) const override;
@@ -183,7 +183,7 @@ public:
 
     virtual void enableFailedThumbnailRegeneration() override;
 
-    virtual bool requestThumbnail( MediaPtr media ) override;
+    virtual bool requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType ) override;
 
     virtual void addParserService( std::shared_ptr<parser::IParserService> service ) override;
 
@@ -219,7 +219,7 @@ private:
     void migrateModel13to14( uint32_t originalPreviousVersion );
     void migrateModel14to15();
     void migrateModel15to16();
-    void migrateModel16to17();
+    void migrateModel16to17( uint32_t originalPreviousVersion );
     void createAllTables();
     void createAllTriggers();
     void registerEntityHooks();

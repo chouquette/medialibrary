@@ -57,13 +57,14 @@ public:
     virtual Query<IMedia> searchTracks( const std::string& pattern,
                                         const QueryParameters* params = nullptr ) const override;
     bool addMedia( Media& tracks );
-    virtual bool isThumbnailGenerated() const override;
-    virtual const std::string& thumbnailMrl() const override;
-    std::shared_ptr<Thumbnail> thumbnail();
+    virtual bool isThumbnailGenerated( ThumbnailSizeType sizeType ) const override;
+    virtual const std::string& thumbnailMrl( ThumbnailSizeType sizeType ) const override;
+    std::shared_ptr<Thumbnail> thumbnail( ThumbnailSizeType sizeType ) const;
     bool setArtworkMrl( const std::string& thumbnailMrl, Thumbnail::Origin origin,
-                        bool isOwned );
+                        ThumbnailSizeType sizeType, bool isOwned );
     bool setThumbnail( std::shared_ptr<Thumbnail> newThumbnail );
-    virtual bool setThumbnail( const std::string& thumbnailMrl ) override;
+    virtual bool setThumbnail( const std::string& thumbnailMrl,
+                               ThumbnailSizeType sizeType  ) override;
     bool updateNbAlbum( int increment );
     bool updateNbTrack( int increment );
     std::shared_ptr<Album> unknownAlbum();
@@ -113,13 +114,12 @@ private:
     int64_t m_id;
     const std::string m_name;
     std::string m_shortBio;
-    int64_t m_thumbnailId;
     unsigned int m_nbAlbums;
     unsigned int m_nbTracks;
     std::string m_mbId;
     bool m_isPresent;
 
-    mutable std::shared_ptr<Thumbnail> m_thumbnail;
+    mutable std::shared_ptr<Thumbnail> m_thumbnails[Thumbnail::SizeToInt( ThumbnailSizeType::Count )];
 
     friend struct Artist::Table;
 };

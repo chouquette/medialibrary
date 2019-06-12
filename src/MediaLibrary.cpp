@@ -562,9 +562,9 @@ AlbumPtr MediaLibrary::album( int64_t id ) const
     return Album::fetch( this, id );
 }
 
-std::shared_ptr<Album> MediaLibrary::createAlbum( const std::string& title, int64_t thumbnailId )
+std::shared_ptr<Album> MediaLibrary::createAlbum( const std::string& title )
 {
-    return Album::create( this, title, thumbnailId );
+    return Album::create( this, title );
 }
 
 Query<IAlbum> MediaLibrary::albums( const QueryParameters* params ) const
@@ -952,7 +952,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
             }
             if ( previousVersion == 16 )
             {
-                migrateModel16to17();
+                migrateModel16to17( originalPreviousVersion );
                 previousVersion = 17;
                 needRescan = true;
             }
@@ -1276,17 +1276,6 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     Show::createTriggers( dbConn );
     Playlist::createTriggers( dbConn );
     Folder::createTriggers( dbConn, 14 );
-    const std::string req = "SELECT * FROM " + Media::Table::Name +
-            " WHERE filename LIKE '%#%%' ESCAPE '#'";
-    auto media = Media::fetchAll<Media>( this, req );
-    for ( const auto& m : media )
-    {
-        // We must not call mrl() from here. We might not have all devices yet,
-        // and calling mrl would crash for files stored on removable devices.
-        auto newFileName = utils::url::decode( m->fileName() );
-        LOG_DEBUG( "Converting ", m->fileName(), " to ", newFileName );
-        m->setFileName( std::move( newFileName ) );
-    }
     auto folders = Folder::fetchAll<Folder>( this );
     for ( const auto& f : folders )
     {
@@ -1375,7 +1364,15 @@ void MediaLibrary::migrateModel15to16()
     t->commit();
 }
 
-void MediaLibrary::migrateModel16to17()
+/**
+ * Model 16 to 17 migration:
+ * - Remove Media.thumbnail_id
+ * - Remove Album.thumbnail_id
+ * - Remove Artist.thumbnail_id
+ * - Add MediaThumbnail, AlbumThumbnail & ArtistThumbnail tables
+ * - Move thumbnail origin to the thumbnail linking tables
+ */
+void MediaLibrary::migrateModel16to17( uint32_t originalPreviousVersion )
 {
     auto dbConn = getConn();
     sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
@@ -1391,6 +1388,29 @@ void MediaLibrary::migrateModel16to17()
     Album::createTriggers( dbConn );
     Artist::createTriggers( dbConn, 17 );
     Folder::createTriggers( dbConn, 17 );
+
+    // Since we just changed the media model, the code that was used to migrate
+    // model 13 to 14 isn't valid anymore (as is any code that relies on the C++
+    // side of things instead of plain SQL requests). The filename would be loaded
+    // in the previous member variable, and the migration wouldn't behave as expected.
+    // We move it here, since this is only a problem when migrating from
+    // 13 or before to 17. Should a user perform a migration from 13 to 17, they
+    // wouldn't have the issue, as the new v17 model will not be implemented in
+    // their version.
+    if ( originalPreviousVersion <= 13 )
+    {
+        const std::string req = "SELECT * FROM " + Media::Table::Name +
+                " WHERE filename LIKE '%#%%' ESCAPE '#'";
+        auto media = Media::fetchAll<Media>( this, req );
+        for ( const auto& m : media )
+        {
+            // We must not call mrl() from here. We might not have all devices yet,
+            // and calling mrl would crash for files stored on removable devices.
+            auto newFileName = utils::url::decode( m->fileName() );
+            LOG_DEBUG( "Converting ", m->fileName(), " to ", newFileName );
+            m->setFileName( std::move( newFileName ) );
+        }
+    }
 
     m_settings.setDbModelVersion( 17 );
     m_settings.save();
@@ -1699,13 +1719,13 @@ void MediaLibrary::enableFailedThumbnailRegeneration()
     Thumbnail::deleteFailureRecords( this );
 }
 
-bool MediaLibrary::requestThumbnail( MediaPtr media )
+bool MediaLibrary::requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType )
 {
     if ( m_thumbnailer == nullptr )
         return false;
-    if ( media->isThumbnailGenerated() == true )
+    if ( media->isThumbnailGenerated( sizeType ) == true )
         return false;
-    m_thumbnailer->requestThumbnail( media );
+    m_thumbnailer->requestThumbnail( media, sizeType );
     return true;
 }
 

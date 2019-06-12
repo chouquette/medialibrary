@@ -165,27 +165,29 @@ TEST_F( Albums, SetShortSummary )
 TEST_F( Albums, Thumbnail )
 {
     auto a = ml->createAlbum( "album" );
-    auto t = a->thumbnail();
+    auto t = a->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_EQ( nullptr, t );
-    ASSERT_FALSE( a->isThumbnailGenerated() );
+    ASSERT_FALSE( a->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
 
     std::string mrl = "file:///path/to/sea/otter/artwork.png";
-    t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::UserProvided, false );
+    t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::UserProvided,
+                           ThumbnailSizeType::Thumbnail, false );
     ASSERT_NE( nullptr, t );
-    a = ml->MediaLibrary::createAlbum( "album 2", t->id() );
+    a = ml->MediaLibrary::createAlbum( "album 2" );
+    a->setThumbnail( t );
 
-    t = a->thumbnail();
+    t = a->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_NE( nullptr, t );
     ASSERT_EQ( mrl, t->mrl() );
-    ASSERT_TRUE( a->isThumbnailGenerated() );
+    ASSERT_TRUE( a->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
 
     Reload();
 
     a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
-    t = a->thumbnail();
+    t = a->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_NE( nullptr, t );
     ASSERT_EQ( mrl, t->mrl() );
-    ASSERT_TRUE( a->isThumbnailGenerated() );
+    ASSERT_TRUE( a->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
 }
 
 TEST_F( Albums, FetchAlbumFromTrack )

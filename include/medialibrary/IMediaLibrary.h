@@ -93,6 +93,17 @@ enum class InitializeResult
     DbReset,
 };
 
+enum class ThumbnailSizeType : uint8_t
+{
+    /// A small sized thumbnail. Considered to be the default value before model 17
+    Thumbnail,
+    /// A banner type thumbnail. The exact size is application dependent.
+    Banner,
+
+    /// The number of different size type
+    Count,
+};
+
 class IMediaLibraryCb
 {
 public:
@@ -550,7 +561,7 @@ public:
      *
      * This function is thread-safe
      */
-    virtual bool requestThumbnail( MediaPtr media ) = 0;
+    virtual bool requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType ) = 0;
 
     virtual void addParserService( std::shared_ptr<parser::IParserService> service ) = 0;
 

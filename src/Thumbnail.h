@@ -38,6 +38,10 @@ public:
         static const std::string PrimaryKeyColumn;
         static int64_t Thumbnail::*const PrimaryKey;
     };
+    struct LinkingTable
+    {
+        static const std::string Name;
+    };
 
     enum class Origin : uint8_t
     {
@@ -55,6 +59,12 @@ public:
         /// A temporarily empty thumbnail, when reloading a media
         Empty = 0xFF,
     };
+    enum class EntityType
+    {
+        Media,
+        Album,
+        Artist,
+    };
 
     Thumbnail( MediaLibraryPtr ml, sqlite::Row& row );
     /**
@@ -63,21 +73,54 @@ public:
      * @param ml A pointer to the media library instance
      * @param mrl The absolute mrl to the thumbnail
      * @param origin The thumbnail's origin
+     * @param sizeType The thumbnail's size type
      * @param isOwned true if the thumbnail is owned by the media library
      *
      * A thumbnail created with this constructor can be inserted in database
      * at a later time using \sa{Thumbnail::insert()}
      */
-    Thumbnail( MediaLibraryPtr ml, std::string mrl, Origin origin, bool isOwned );
+    Thumbnail( MediaLibraryPtr ml, std::string mrl, Origin origin,
+               ThumbnailSizeType sizeType, bool isOwned );
 
     int64_t id() const;
     const std::string& mrl() const;
-    bool update( std::string mrl, Origin origin , bool isOwned );
+    bool update( std::string mrl, bool isOwned );
+    /**
+     * @brief updateLinkEntity Updates the record linking an entity and a thumbnail
+     * @param entityId The target entity ID
+     * @param type The type of entity for this linking record
+     * @param sizeType The thumbnail size type
+     * @return true in case of success, false otherwise
+     *
+     * @warning This must be run in a transaction, as the associated thumbnail
+     * gets inserted.
+     * This is expected to be called when a new thumbnail had to be inserted, and
+     * the linking entity needs updating.
+     */
+    bool updateLinkRecord( int64_t entityId, EntityType type, Origin origin );
     /**
      * @brief insert Insert the thumbnail in database
      * @return The new entity primary key, or 0 in case of failure
      */
     int64_t insert();
+
+    /**
+     * @brief insertLinkRecord Insert a new record to link an entity and a thumbnail
+     * @param entityId The target entity id
+     * @param type The type of entity to insert a linking record for
+     * @param origin The thumbnail origin
+     *
+     * This is expected to be called when a new thumbnail gets inserted, or
+     * when it can be shared with another entity.
+     */
+    void insertLinkRecord( int64_t entityId, EntityType type, Origin origin );
+
+    /**
+     * @brief unlinkThumbnail Removes the link between an entity and a thumbnail
+     * @param entityId The ID of the entity to unlink
+     * @param type The type of entity of the linking record to remove
+     */
+    void unlinkThumbnail( int64_t entityId, EntityType entityType );
     /**
      * @brief isValid Returns true if the thumbnail was correctly generated
      *
@@ -92,6 +135,9 @@ public:
      * folder.
      */
     bool isOwned() const;
+
+    ThumbnailSizeType sizeType() const;
+
     /**
      * @brief isFailureRecord returns true if this thumbnail is representing a
      *                        previous failed request
@@ -100,7 +146,15 @@ public:
 
     static void createTable( sqlite::Connection* dbConnection );
     static std::shared_ptr<Thumbnail> create( MediaLibraryPtr ml, std::string mrl,
-                                              Origin origin, bool isOwned );
+                                              Origin origin, ThumbnailSizeType sizeType,
+                                              bool isOwned );
+    // This also hides the database helper variant, as we can't just select from
+    // the thumbnail table. We need to get data from both the thumbnail & linking
+    // tables.
+    static std::shared_ptr<Thumbnail> fetch( MediaLibraryPtr ml,
+                                             EntityType type,
+                                             int64_t entityId,
+                                             ThumbnailSizeType sizeType );
 
     /**
      * @brief deleteFailureRecords Allow the thumbnail to retry any previously failed attempt
@@ -114,6 +168,12 @@ public:
 
     static const std::string EmptyMrl;
 
+    static constexpr std::underlying_type_t<ThumbnailSizeType>
+    SizeToInt( ThumbnailSizeType sizeType )
+    {
+        return static_cast<std::underlying_type_t<ThumbnailSizeType>>( sizeType );
+    }
+
 private:
     /**
      * @brief toRelativeMrl Convert the provided absolute mrl to a mrl relative to
@@ -126,6 +186,7 @@ private:
     int64_t m_id;
     std::string m_mrl;
     Origin m_origin;
+    ThumbnailSizeType m_sizeType;
     bool m_isOwned;
 
     friend Thumbnail::Table;

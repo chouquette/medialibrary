@@ -53,11 +53,11 @@ ThumbnailerWorker::~ThumbnailerWorker()
     stop();
 }
 
-void ThumbnailerWorker::requestThumbnail( MediaPtr media )
+void ThumbnailerWorker::requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType )
 {
     std::unique_lock<compat::Mutex> lock( m_mutex );
 
-    Task t{ std::move( media ) };
+    Task t{ std::move( media ), sizeType };
     m_tasks.push( std::move( t ) );
     if ( m_thread.get_id() == compat::Thread::id{} )
     {
@@ -103,12 +103,12 @@ void ThumbnailerWorker::run()
             t = std::move( m_tasks.front() );
             m_tasks.pop();
         }
-        if ( t.media->isThumbnailGenerated() == true )
+        if ( t.media->isThumbnailGenerated( t.sizeType ) == true )
         {
             LOG_INFO( "Skipping thumbnail generation of a media with a thumbnail ",
                       t.media->fileName() );
             m_ml->getCb()->onMediaThumbnailReady( t.media,
-                                                  t.media->thumbnailMrl().empty() == false );
+                                                  t.media->thumbnailMrl( t.sizeType ).empty() == false );
             continue;
         }
         bool res = generateThumbnail( t );
@@ -171,13 +171,14 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
      * This is done here instead of from the mainloop as we don't want to prevent
      * the thumbnail generation of a file that has been removed.
      */
-    m->setThumbnail( "", Thumbnail::Origin::Media, false );
+    m->setThumbnail( "", Thumbnail::Origin::Media, task.sizeType, false );
 
     if ( m_generator->generate( mrl, dest ) == false )
         return false;
 
     auto destMrl = utils::file::toMrl( dest );
-    if ( m->setThumbnail( destMrl, Thumbnail::Origin::Media, true ) == false )
+    if ( m->setThumbnail( destMrl, Thumbnail::Origin::Media, task.sizeType,
+                          true ) == false )
         return false;
 
     m_ml->getNotifier()->notifyMediaModification( task.media );

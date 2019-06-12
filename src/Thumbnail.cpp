@@ -33,6 +33,7 @@ namespace medialibrary
 const std::string Thumbnail::Table::Name = "Thumbnail";
 const std::string Thumbnail::Table::PrimaryKeyColumn = "id_thumbnail";
 int64_t Thumbnail::*const Thumbnail::Table::PrimaryKey = &Thumbnail::m_id;
+const std::string Thumbnail::LinkingTable::Name = "ThumbnailLinking";
 
 const std::string Thumbnail::EmptyMrl;
 
@@ -41,6 +42,7 @@ Thumbnail::Thumbnail( MediaLibraryPtr ml, sqlite::Row& row )
     , m_id( row.extract<decltype(m_id)>() )
     , m_mrl( row.extract<decltype(m_mrl)>() )
     , m_origin( row.extract<decltype(m_origin)>() )
+    , m_sizeType( row.extract<decltype(m_sizeType)>() )
     , m_isOwned( row.extract<decltype(m_isOwned)>() )
 {
     assert( row.hasRemainingColumns() == false );
@@ -57,11 +59,12 @@ Thumbnail::Thumbnail( MediaLibraryPtr ml, sqlite::Row& row )
 }
 
 Thumbnail::Thumbnail( MediaLibraryPtr ml, std::string mrl,
-                      Thumbnail::Origin origin, bool isOwned )
+                      Thumbnail::Origin origin, ThumbnailSizeType sizeType, bool isOwned )
     : m_ml( ml )
     , m_id( 0 )
     , m_mrl( std::move( mrl ) )
     , m_origin( origin )
+    , m_sizeType( sizeType )
     , m_isOwned( isOwned )
 {
     // Store the mrl as is, and fiddle with it upon insertion as we only care
@@ -82,9 +85,9 @@ const std::string& Thumbnail::mrl() const
     return m_mrl;
 }
 
-bool Thumbnail::update( std::string mrl, Origin origin, bool isOwned )
+bool Thumbnail::update( std::string mrl, bool isOwned )
 {
-    if ( m_mrl == mrl && m_origin == origin && isOwned == m_isOwned )
+    if ( m_mrl == mrl && isOwned == m_isOwned )
         return true;
     std::string storedMrl;
     if ( isOwned )
@@ -92,14 +95,46 @@ bool Thumbnail::update( std::string mrl, Origin origin, bool isOwned )
     else
         storedMrl = mrl;
     static const std::string req = "UPDATE " + Thumbnail::Table::Name +
-            " SET mrl = ?, origin = ?, is_generated = ? WHERE id_thumbnail = ?";
-    if( sqlite::Tools::executeUpdate( m_ml->getConn(), req, storedMrl, origin,
+            " SET mrl = ?, is_generated = ? WHERE id_thumbnail = ?";
+    if( sqlite::Tools::executeUpdate( m_ml->getConn(), req, storedMrl,
                                       isOwned, m_id ) == false )
         return false;
     m_mrl = std::move( mrl );
-    m_origin = origin;
     m_isOwned = isOwned;
     return true;
+}
+
+bool Thumbnail::updateLinkRecord( int64_t entityId, EntityType type,
+                                  Thumbnail::Origin origin )
+{
+    const std::string req = "UPDATE " + LinkingTable::Name +
+        " SET thumbnail_id = ?, origin = ?"
+        " WHERE entity_id = ? AND entity_type = ? AND size_type = ?";
+    // This needs to be run in a transaction, as we insert the new thumbnail
+    // record or update the linked thumbnail
+    assert( sqlite::Transaction::transactionInProgress() == true );
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id, origin,
+                                       entityId, type, m_sizeType ) == false )
+        return false;
+    m_origin = origin;
+    return true;
+}
+
+void Thumbnail::insertLinkRecord( int64_t entityId, EntityType type,
+                                  Thumbnail::Origin origin )
+{
+    const std::string req = "INSERT INTO " + LinkingTable::Name +
+            " (entity_id, entity_type, size_type, thumbnail_id, origin)"
+            " VALUES(?, ?, ?, ?, ?)";
+    sqlite::Tools::executeInsert( m_ml->getConn(), req, entityId, type,
+                                  m_sizeType, m_id, origin );
+}
+
+void Thumbnail::unlinkThumbnail( int64_t entityId, EntityType type )
+{
+    const std::string req = "DELETE FROM " + LinkingTable::Name +
+            " WHERE entity_id = ? AND entity_type = ? AND size_type = ?";
+    sqlite::Tools::executeDelete( m_ml->getConn(), req, entityId, type, m_sizeType );
 }
 
 bool Thumbnail::isValid() const
@@ -115,6 +150,11 @@ Thumbnail::Origin Thumbnail::origin() const
 bool Thumbnail::isOwned() const
 {
     return m_isOwned;
+}
+
+ThumbnailSizeType Thumbnail::sizeType() const
+{
+    return m_sizeType;
 }
 
 bool Thumbnail::isFailureRecord() const
@@ -134,27 +174,39 @@ void Thumbnail::createTable( sqlite::Connection* dbConnection )
 }
 
 std::shared_ptr<Thumbnail> Thumbnail::create( MediaLibraryPtr ml, std::string mrl,
-                                              Thumbnail::Origin origin, bool isOwned )
+                                              Thumbnail::Origin origin,
+                                              ThumbnailSizeType sizeType, bool isOwned )
 {
     static const std::string req = "INSERT INTO " + Thumbnail::Table::Name +
-            "(mrl, origin, is_generated) VALUES(?,?,?)";
-    auto self = std::make_shared<Thumbnail>( ml, mrl, origin, isOwned );
+            "(mrl, is_generated) VALUES(?,?)";
+    auto self = std::make_shared<Thumbnail>( ml, mrl, origin, sizeType, isOwned );
     assert( self->isValid() == true || self->isFailureRecord() == true );
     if ( DatabaseHelpers<Thumbnail>::insert( ml, self, req,
                                              sqlite::NullableString{ mrl },
-                                             origin, isOwned ) == false )
+                                             isOwned ) == false )
         return nullptr;
     return self;
+}
+
+std::shared_ptr<Thumbnail> Thumbnail::fetch( MediaLibraryPtr ml, EntityType type,
+                                             int64_t entityId, ThumbnailSizeType sizeType )
+{
+    std::string req = "SELECT t.id_thumbnail, t.mrl, ent.origin, ent.size_type, t.is_generated "
+            "FROM " + Table::Name + " t "
+            "INNER JOIN " + LinkingTable::Name + " ent "
+                "ON t.id_thumbnail = ent.thumbnail_id "
+            "WHERE ent.entity_id = ? AND ent.entity_type = ? AND ent.size_type = ?";
+    return DatabaseHelpers<Thumbnail>::fetch( ml, req, entityId, type, sizeType );
 }
 
 int64_t Thumbnail::insert()
 {
     assert( m_id == 0 );
     static const std::string req = "INSERT INTO " + Thumbnail::Table::Name +
-            "(mrl, origin, is_generated) VALUES(?,?,?)";
+            "(mrl, is_generated) VALUES(?,?)";
     auto pKey = sqlite::Tools::executeInsert( m_ml->getConn(), req,
                             m_isOwned == true ? toRelativeMrl( m_mrl ) : m_mrl,
-                            m_origin, m_isOwned );
+                            m_isOwned );
     if ( pKey == 0 )
         return 0;
     m_id = pKey;

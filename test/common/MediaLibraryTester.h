@@ -55,7 +55,6 @@ public:
     FolderPtr folder( const std::string& path ) const override;
     virtual FolderPtr folder( int64_t id ) const override;
     void deleteAlbum( int64_t albumId );
-    std::shared_ptr<Album> createAlbum( const std::string& title );
     std::shared_ptr<Genre> createGenre( const std::string& name );
     void deleteGenre( int64_t genreId );
     void deleteArtist( int64_t artistId );

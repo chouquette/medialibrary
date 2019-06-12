@@ -50,7 +50,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
             static int64_t Album::*const PrimaryKey;
         };
         Album( MediaLibraryPtr ml, sqlite::Row& row );
-        Album( MediaLibraryPtr ml, const std::string& title, int64_t thumbnailId );
+        Album( MediaLibraryPtr ml, const std::string& title );
         Album( MediaLibraryPtr ml, const Artist* artist );
 
         virtual int64_t id() const override;
@@ -68,9 +68,10 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         bool setReleaseYear( unsigned int date, bool force );
         virtual const std::string& shortSummary() const override;
         bool setShortSummary( const std::string& summary );
-        virtual bool isThumbnailGenerated() const override;
-        virtual const std::string& thumbnailMrl() const override;
-        std::shared_ptr<Thumbnail> thumbnail();
+        virtual bool isThumbnailGenerated( ThumbnailSizeType sizeType ) const override;
+        virtual const std::string& thumbnailMrl( ThumbnailSizeType sizeType ) const override;
+        std::shared_ptr<Thumbnail> thumbnail( ThumbnailSizeType sizeType ) const;
+        bool setThumbnail( std::shared_ptr<Thumbnail> thumbnail );
         virtual Query<IMedia> tracks( const QueryParameters* params ) const override;
         virtual Query<IMedia> tracks( GenrePtr genre, const QueryParameters* params ) const override;
         ///
@@ -102,7 +103,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
 
         static void createTable( sqlite::Connection* dbConnection );
         static void createTriggers( sqlite::Connection* dbConnection );
-        static std::shared_ptr<Album> create( MediaLibraryPtr ml, const std::string& title, int64_t thumbnailId );
+        static std::shared_ptr<Album> create( MediaLibraryPtr ml, const std::string& title );
         static std::shared_ptr<Album> createUnknownAlbum( MediaLibraryPtr ml, const Artist* artist );
         ///
         /// \brief search search for an album, through its albumartist or title
@@ -137,7 +138,6 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         int64_t m_artistId;
         unsigned int m_releaseYear;
         std::string m_shortSummary;
-        int64_t m_thumbnailId;
         unsigned int m_nbTracks;
         unsigned int m_duration;
         uint32_t m_nbDiscs;
@@ -145,7 +145,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
 
         mutable std::vector<MediaPtr> m_tracks;
         mutable std::shared_ptr<Artist> m_albumArtist;
-        mutable std::shared_ptr<Thumbnail> m_thumbnail;
+        mutable std::shared_ptr<Thumbnail> m_thumbnails[Thumbnail::SizeToInt( ThumbnailSizeType::Count )];
 };
 
 }

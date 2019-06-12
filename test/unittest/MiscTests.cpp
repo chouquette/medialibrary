@@ -39,7 +39,7 @@
 namespace
 {
     auto constexpr NbTriggers = 34u;
-    auto constexpr NbIndexes = 16u;
+    auto constexpr NbIndexes = 17u;
     const std::vector<const char*> expectedTriggers{
         "add_album_track", "cascade_file_deletion", "decrement_media_nb_playlist",
         "delete_album_fts", "delete_album_track", "delete_artist_fts",
@@ -273,8 +273,6 @@ TEST_F( DbModel, Upgrade13to14 )
     ASSERT_EQ( m->fileName(), "file with space.avi" );
 
     m = media[1];
-    ASSERT_EQ( m->thumbnailMrl(), "" );
-    ASSERT_FALSE( m->isThumbnailGenerated() );
 
     // Ensure we're probing the correct fake media
     ASSERT_EQ( m->id(), 2 );

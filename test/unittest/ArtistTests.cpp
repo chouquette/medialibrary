@@ -79,40 +79,42 @@ TEST_F( Artists, ArtworkMrl )
 {
     auto a = ml->createArtist( "Dream seaotter" );
     ASSERT_NE( a, nullptr );
-    ASSERT_EQ( a->thumbnailMrl(), "" );
-    ASSERT_FALSE( a->isThumbnailGenerated() );
+    ASSERT_EQ( a->thumbnailMrl( ThumbnailSizeType::Thumbnail ), "" );
+    ASSERT_FALSE( a->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
 
     std::string artwork("file:///tmp/otter.png");
-    a->setArtworkMrl( artwork, Thumbnail::Origin::UserProvided, false );
-    ASSERT_EQ( a->thumbnailMrl(), artwork );
-    ASSERT_TRUE( a->isThumbnailGenerated() );
+    a->setArtworkMrl( artwork, Thumbnail::Origin::UserProvided,
+                      ThumbnailSizeType::Thumbnail, false );
+    ASSERT_EQ( a->thumbnailMrl( ThumbnailSizeType::Thumbnail ), artwork );
+    ASSERT_TRUE( a->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
 
     Reload();
 
     auto a2 = ml->artist( a->id() );
     ASSERT_NE( a2, nullptr );
-    ASSERT_EQ( a2->thumbnailMrl(), artwork );
-    ASSERT_TRUE( a->isThumbnailGenerated() );
+    ASSERT_EQ( a2->thumbnailMrl( ThumbnailSizeType::Thumbnail ), artwork );
+    ASSERT_TRUE( a->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
 }
 
 TEST_F( Artists, Thumbnail )
 {
     auto a = ml->createArtist( "artist" );
-    auto t = a->thumbnail();
+    auto t = a->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_EQ( nullptr, t );
 
     std::string mrl = "file:///path/to/sea/otter/artwork.png";
-    auto res = a->setArtworkMrl( mrl, Thumbnail::Origin::UserProvided, false );
+    auto res = a->setArtworkMrl( mrl, Thumbnail::Origin::UserProvided,
+                                 ThumbnailSizeType::Thumbnail, false );
     ASSERT_TRUE( res );
 
-    t = a->thumbnail();
+    t = a->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_NE( nullptr, t );
     ASSERT_EQ( mrl, t->mrl() );
 
     Reload();
 
     a = std::static_pointer_cast<Artist>( ml->artist( a->id() ) );
-    t = a->thumbnail();
+    t = a->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_NE( nullptr, t );
     ASSERT_EQ( mrl, t->mrl() );
 }

@@ -37,6 +37,7 @@ class IShowEpisode;
 class ITrackInformation;
 class IMetadata;
 struct QueryParameters;
+enum class ThumbnailSizeType : uint8_t;
 
 class IMedia
 {
@@ -170,32 +171,35 @@ class IMedia
         ///
         virtual Query<IChapter> chapters( const QueryParameters* params ) const = 0;
         ///
-        /// \brief thumbnail Returns the mrl of a thumbnail for this media
+        /// \brief thumbnail Returns the mrl of a thumbnail of the given size for this media
+        /// \param sizeType The targeted thumbnail size
         /// \return An mrl, representing the absolute path to the media thumbnail
         ///         or an empty string, if the thumbnail generation failed
         ///
         /// \sa{isThumbnailGenerated}
         ///
-        virtual const std::string& thumbnailMrl() const = 0;
+        virtual const std::string& thumbnailMrl( ThumbnailSizeType sizeType ) const = 0;
         ///
         /// \brief isThumbnailGenerated Returns true if a thumbnail generation was
-        ///                             attempted.
+        ///                             attempted, or if a thumbnail was assigned to thie media
+        /// \param sizeType The targeted thumbnail size type
         /// In case the thumbnail generation failed, this will still be true, but
         /// the mrl returned by \sa{thumbnailMrl} will be empty.
         /// This is intended as a helper for the client application, so it doesn't
         /// attempt ask for a new thumbmail generation.
         /// \return
         ///
-        virtual bool isThumbnailGenerated() const = 0;
+        virtual bool isThumbnailGenerated( ThumbnailSizeType sizeType ) const = 0;
         ///
         /// \brief setThumbnail Sets a thumbnail for the current media
         /// \param mrl A mrl pointing the the thumbnail file.
+        /// \param sizeType The targeted thumbnail size type
         /// \return true in case the thumbnail was successfully stored to database
         ///         false otherwise
         /// This is intended to be used by applications that have their own way
         /// of computing thumbnails.
         ///
-        virtual bool setThumbnail( const std::string& mrl ) = 0;
+        virtual bool setThumbnail( const std::string& mrl, ThumbnailSizeType sizeType ) = 0;
         virtual unsigned int insertionDate() const = 0;
         virtual unsigned int releaseDate() const = 0;
 

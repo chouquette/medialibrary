@@ -120,13 +120,15 @@ class Media : public IMedia,
         virtual Query<ISubtitleTrack> subtitleTracks() const override;
         virtual Query<IChapter> chapters( const QueryParameters* params ) const override;
         bool addChapter( int64_t offset, int64_t duration, std::string name );
-        std::shared_ptr<Thumbnail> thumbnail() const;
-        virtual const std::string& thumbnailMrl() const override;
-        virtual bool isThumbnailGenerated() const override;
-        virtual bool setThumbnail( const std::string &thumbnail ) override;
+        std::shared_ptr<Thumbnail> thumbnail( ThumbnailSizeType sizeType ) const;
+        virtual const std::string& thumbnailMrl( ThumbnailSizeType sizeType ) const override;
+        virtual bool isThumbnailGenerated(  ThumbnailSizeType sizeType ) const override;
+        virtual bool setThumbnail( const std::string &thumbnail,
+                                   ThumbnailSizeType sizeType ) override;
         bool setThumbnail( const std::string& thumbnail, Thumbnail::Origin origin,
-                           bool isOwned );
+                           ThumbnailSizeType sizeType, bool isOwned );
         bool setThumbnail( std::shared_ptr<Thumbnail> thumbnail );
+        void removeThumbnail( ThumbnailSizeType sizeType );
         virtual unsigned int insertionDate() const override;
         virtual unsigned int releaseDate() const override;
         /**
@@ -198,7 +200,6 @@ private:
         std::time_t m_lastPlayedDate;
         const std::time_t m_insertionDate;
         unsigned int m_releaseDate;
-        int64_t m_thumbnailId;
         std::string m_title;
         // We store the filename as a shortcut when sorting. The filename (*not* the title
         // might be used as a fallback
@@ -212,7 +213,7 @@ private:
         mutable MoviePtr m_movie;
         mutable std::vector<FilePtr> m_files;
         mutable Metadata m_metadata;
-        mutable std::shared_ptr<Thumbnail> m_thumbnail;
+        mutable std::shared_ptr<Thumbnail> m_thumbnails[Thumbnail::SizeToInt( ThumbnailSizeType::Count )];
         bool m_changed;
 
         friend Media::Table;

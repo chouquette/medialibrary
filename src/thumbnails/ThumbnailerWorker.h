@@ -26,6 +26,7 @@
 #include "compat/Thread.h"
 #include "medialibrary/Types.h"
 #include "medialibrary/IThumbnailer.h"
+#include "medialibrary/IMediaLibrary.h"
 #include "Types.h"
 
 #include <queue>
@@ -40,7 +41,7 @@ public:
     explicit ThumbnailerWorker( MediaLibraryPtr ml,
                                 std::shared_ptr<IThumbnailer> thumbnailer );
     virtual ~ThumbnailerWorker();
-    void requestThumbnail( MediaPtr media );
+    void requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType );
     void pause();
     void resume();
 
@@ -48,6 +49,7 @@ private:
     struct Task
     {
         MediaPtr media;
+        ThumbnailSizeType sizeType;
     };
 
 private:

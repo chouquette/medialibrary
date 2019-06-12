@@ -345,7 +345,8 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
         media->setTitleBuffered( title );
 
         if ( artworkMrl.empty() == false )
-            media->setThumbnail( artworkMrl, Thumbnail::Origin::Media, false );
+            media->setThumbnail( artworkMrl, Thumbnail::Origin::Media,
+                                 ThumbnailSizeType::Thumbnail, false );
 
         if ( showName.length() != 0 )
         {
@@ -383,7 +384,7 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
     });
     if ( res == false )
         return false;
-    auto thumbnail = media->thumbnail();
+    auto thumbnail = media->thumbnail( ThumbnailSizeType::Thumbnail );
     if ( thumbnail != nullptr )
         relocateThumbnail( *thumbnail, media->id() );
     return true;
@@ -629,22 +630,15 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
                 if ( albumArtist && albumArtist->id() != albumTrack->artistId() )
                     albumArtist->updateNbTrack( -1 );
 
-                auto thumbnail = media->thumbnail();
-                if ( thumbnail != nullptr )
+                // In case we don't have a thumbnail for the updated media
+                // but had a thumbnail in the past, we don't want to lose it.
+                // In case the file changed completely but has the same mrl
+                // this will lead to a wrong thumbnail being used, but this
+                // case is deemed unlikely enough to care.
+                if ( item.meta( IItem::Metadata::ArtworkUrl ).empty() == false )
                 {
-                    // In case we don't have a thumbnail for the updated media
-                    // but had a thumbnail in the past, we don't want to lose it.
-                    // In case the file changed completely but has the same mrl
-                    // this will lead to a wrong thumbnail being used, but this
-                    // case is deemed unlikely enough to care.
-                    if ( item.meta( IItem::Metadata::ArtworkUrl ).empty() == false )
-                    {
-                        // We can't delete the thumbnail in case more entities
-                        // depend on it. Even more, should we find a better thumbnail
-                        // after reloading, we want that new thumbnail to be
-                        // shared by all entities that were using the previous one.
-                        thumbnail->update( "", Thumbnail::Origin::Empty, false );
-                    }
+                    for ( auto i = 0u; i < Thumbnail::SizeToInt( ThumbnailSizeType::Count ); ++i )
+                        media->removeThumbnail( static_cast<ThumbnailSizeType>( i ) );
                 }
 
                 album->removeTrack( *media, *albumTrack );
@@ -720,15 +714,16 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
 
         // Fetch any potentially existing media thumbnail first, to update
         // it in case it already exist and we're reloading a media
-        thumbnail = media->thumbnail();
+        thumbnail = media->thumbnail( ThumbnailSizeType::Thumbnail );
         if ( thumbnail != nullptr )
         {
             assert( item.isRefresh() == true );
-            thumbnail->update( artworkMrl, Thumbnail::Origin::Media, false );
+            thumbnail->update( artworkMrl, false );
         }
         else
             thumbnail = std::make_shared<Thumbnail>( m_ml, artworkMrl,
                                                      Thumbnail::Origin::Media,
+                                                     ThumbnailSizeType::Thumbnail,
                                                      false );
     }
 
@@ -748,12 +743,11 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
         if ( album == nullptr )
         {
             const auto& albumName = item.meta( IItem::Metadata::Album );
-            int64_t thumbnailId = 0;
-            if ( thumbnail != nullptr )
-                thumbnailId = thumbnail->id();
-            album = m_ml->createAlbum( albumName, thumbnailId );
+            album = m_ml->createAlbum( albumName );
             if ( album == nullptr )
                 return false;
+            if ( thumbnail != nullptr )
+                album->setThumbnail( thumbnail );
         }
         // TODO: Use embedded artwork for the album
 
@@ -819,7 +813,8 @@ std::shared_ptr<Thumbnail> MetadataAnalyzer::findAlbumArtwork( IItem& item )
                   "discrimination logic." );
     auto fileFs = files[0];
     return std::make_shared<Thumbnail>( m_ml, fileFs->mrl(),
-                                        Thumbnail::Origin::CoverFile, false );
+                                        Thumbnail::Origin::CoverFile,
+                                        ThumbnailSizeType::Thumbnail, false );
 }
 
 void MetadataAnalyzer::relocateThumbnail( Thumbnail& thumbnail, int64_t mediaId ) const
@@ -833,7 +828,7 @@ void MetadataAnalyzer::relocateThumbnail( Thumbnail& thumbnail, int64_t mediaId 
     {
         auto destMrl = utils::file::toMrl( destPath );
         if ( sqlite::Tools::withRetries( 3, [&thumbnail, &destMrl]() {
-            return thumbnail.update( destMrl, thumbnail.origin(), true );
+            return thumbnail.update( destMrl, true );
         } ) == false )
             utils::fs::remove( destPath );
     }
@@ -1121,7 +1116,7 @@ bool MetadataAnalyzer::link( IItem& item, Album& album,
 
     if ( thumbnail != nullptr )
     {
-        auto albumThumbnail = album.thumbnail();
+        auto albumThumbnail = album.thumbnail( thumbnail->sizeType() );
 
         // We might modify albumArtist later, hence handle thumbnails before.
         // If we have an albumArtist (meaning the track was properly tagged, we
@@ -1133,7 +1128,7 @@ bool MetadataAnalyzer::link( IItem& item, Album& album,
              albumArtist->id() != VariousArtistID &&
              albumThumbnail != nullptr )
         {
-            auto albumArtistThumbnail = albumArtist->thumbnail();
+            auto albumArtistThumbnail = albumArtist->thumbnail( thumbnail->sizeType() );
             // If the album artist has no thumbnail, let's assign it
             if ( albumArtistThumbnail == nullptr )
             {
@@ -1150,7 +1145,8 @@ bool MetadataAnalyzer::link( IItem& item, Album& album,
         // for artists
         if ( artist != nullptr && artist->id() != UnknownArtistID &&
              artist->id() != VariousArtistID &&
-             albumThumbnail != nullptr && artist->thumbnail() == nullptr )
+             albumThumbnail != nullptr &&
+             artist->thumbnail( thumbnail->sizeType() ) == nullptr )
         {
             artist->setThumbnail( thumbnail );
         }

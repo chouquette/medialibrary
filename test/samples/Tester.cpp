@@ -352,14 +352,14 @@ void Tests::checkMedias(const rapidjson::Value& expectedMedias)
         if ( expectedMedia.HasMember( "snapshotExpected" ) == true )
         {
             auto snapshotExpected = expectedMedia["snapshotExpected"].GetBool();
-            if ( snapshotExpected && media->thumbnailMrl().empty() == true )
+            if ( snapshotExpected && media->thumbnailMrl( ThumbnailSizeType::Thumbnail ).empty() == true )
             {
                 m_cb->prepareWaitForThumbnail( media );
-                m_ml->requestThumbnail( media );
+                m_ml->requestThumbnail( media, ThumbnailSizeType::Thumbnail );
                 auto res = m_cb->waitForThumbnail();
                 ASSERT_TRUE( res );
             }
-            ASSERT_EQ( !snapshotExpected, media->thumbnailMrl().empty() );
+            ASSERT_EQ( !snapshotExpected, media->thumbnailMrl( ThumbnailSizeType::Thumbnail ).empty() );
         }
     }
 }
@@ -465,8 +465,10 @@ void Tests::checkAlbums( const rapidjson::Value& expectedAlbums, std::vector<Alb
             }
             if ( expectedAlbum.HasMember( "hasArtwork" ) )
             {
-                if ( expectedAlbum["hasArtwork"].GetBool() == a->thumbnailMrl().empty()
-                  || a->thumbnailMrl().compare(0, 13, "attachment://") == 0 )
+                if ( expectedAlbum["hasArtwork"].GetBool() ==
+                     a->thumbnailMrl( ThumbnailSizeType::Thumbnail ).empty() ||
+                     a->thumbnailMrl( ThumbnailSizeType::Thumbnail )
+                        .compare( 0, 13, "attachment://") == 0 )
                     return false;
             }
             if ( expectedAlbum.HasMember( "nbDiscs" ) )
@@ -521,7 +523,7 @@ void Tests::checkArtists(const rapidjson::Value& expectedArtists, std::vector<Ar
             }
             if ( expectedArtist.HasMember( "hasArtwork" ) )
             {
-                auto artwork = artist->thumbnailMrl();
+                auto artwork = artist->thumbnailMrl( ThumbnailSizeType::Thumbnail );
                 if ( artwork.empty() == expectedArtist["hasArtwork"].GetBool() ||
                      artwork.compare( 0, 13, "attachment://" ) == 0 )
                     return false;
@@ -582,8 +584,10 @@ void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& 
         }
         if ( expectedTrack.HasMember( "hasArtwork" ) )
         {
-            ASSERT_EQ( expectedTrack["hasArtwork"].GetBool(), track->thumbnailMrl().empty() == false );
-            ASSERT_TRUE( track->thumbnailMrl().compare(0, 13, "attachment://") != 0 );
+            ASSERT_EQ( expectedTrack["hasArtwork"].GetBool(),
+                       track->thumbnailMrl( ThumbnailSizeType::Thumbnail ).empty() == false );
+            ASSERT_TRUE( track->thumbnailMrl( ThumbnailSizeType::Thumbnail )
+                                    .compare(0, 13, "attachment://") != 0 );
         }
         // Always check if the album link is correct. This isn't part of finding the proper album, so just fail hard
         // if the check fails.
