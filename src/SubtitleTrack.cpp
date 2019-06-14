@@ -42,6 +42,9 @@ SubtitleTrack::SubtitleTrack( MediaLibraryPtr, sqlite::Row& row )
     , m_description( row.extract<decltype(m_description)>() )
     , m_encoding( row.extract<decltype(m_encoding)>() )
 {
+    // Ensure there is a media id to load
+    assert( row.extract<int64_t>() );
+    assert( row.hasRemainingColumns() == false );
 }
 
 SubtitleTrack::SubtitleTrack( MediaLibraryPtr, std::string codec,

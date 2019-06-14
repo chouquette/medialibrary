@@ -46,6 +46,7 @@ AudioTrack::AudioTrack( MediaLibraryPtr, sqlite::Row& row )
     , m_description( row.extract<decltype(m_description)>() )
     , m_mediaId( row.extract<decltype(m_mediaId)>() )
 {
+    assert( row.hasRemainingColumns() == false );
 }
 
 AudioTrack::AudioTrack( MediaLibraryPtr, const std::string& codec, unsigned int bitrate, unsigned int sampleRate,

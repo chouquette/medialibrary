@@ -43,6 +43,7 @@ Movie::Movie(MediaLibraryPtr ml, sqlite::Row& row )
     , m_summary( row.extract<decltype(m_summary)>() )
     , m_imdbId( row.extract<decltype(m_imdbId)>() )
 {
+    assert( row.hasRemainingColumns() == false );
 }
 
 Movie::Movie( MediaLibraryPtr ml, int64_t mediaId )

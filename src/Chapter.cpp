@@ -105,6 +105,9 @@ Chapter::Chapter( MediaLibraryPtr ml, sqlite::Row& row )
     , m_duration( row.extract<decltype(m_offset)>() )
     , m_name( row.extract<decltype(m_name)>() )
 {
+    // Simply check that the media_id row is present, until we eventually store it
+    assert( row.extract<int64_t>() );
+    assert( row.hasRemainingColumns() == false );
 }
 
 Chapter::Chapter( MediaLibraryPtr ml, int64_t offset, int64_t duration,

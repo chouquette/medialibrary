@@ -47,6 +47,7 @@ ShowEpisode::ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row )
     , m_tvdbId( row.extract<decltype(m_tvdbId)>() )
     , m_showId( row.extract<decltype(m_showId)>() )
 {
+    assert( row.hasRemainingColumns() == false );
 }
 
 ShowEpisode::ShowEpisode( MediaLibraryPtr ml, int64_t mediaId,

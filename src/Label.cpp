@@ -45,6 +45,7 @@ Label::Label(MediaLibraryPtr ml, sqlite::Row& row )
     , m_id( row.extract<decltype(m_id)>() )
     , m_name( row.extract<decltype (m_name)>() )
 {
+    assert( row.hasRemainingColumns() == false );
 }
 
 Label::Label( MediaLibraryPtr ml, const std::string& name )

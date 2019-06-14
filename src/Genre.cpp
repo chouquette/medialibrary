@@ -45,6 +45,7 @@ Genre::Genre( MediaLibraryPtr ml, sqlite::Row& row )
     , m_name( row.extract<decltype(m_name)>() )
     , m_nbTracks( row.extract<decltype(m_nbTracks)>() )
 {
+    assert( row.hasRemainingColumns() == false );
 }
 
 Genre::Genre( MediaLibraryPtr ml, const std::string& name )

@@ -48,6 +48,7 @@ VideoTrack::VideoTrack( MediaLibraryPtr, sqlite::Row& row )
     , m_language( row.extract<decltype(m_language)>() )
     , m_description( row.extract<decltype(m_description)>() )
 {
+    assert( row.hasRemainingColumns() == false );
 }
 
 VideoTrack::VideoTrack( MediaLibraryPtr, const std::string& codec, unsigned int width,

@@ -43,6 +43,7 @@ Device::Device( MediaLibraryPtr ml, sqlite::Row& row )
     , m_isPresent( row.extract<decltype(m_isPresent)>() )
     , m_lastSeen( row.extract<decltype(m_lastSeen)>() )
 {
+    assert( row.hasRemainingColumns() == false );
 }
 
 Device::Device( MediaLibraryPtr ml, const std::string& uuid,

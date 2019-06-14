@@ -47,6 +47,7 @@ Playlist::Playlist( MediaLibraryPtr ml, sqlite::Row& row )
     , m_creationDate( row.extract<decltype(m_creationDate)>() )
     , m_artworkMrl( row.extract<decltype(m_artworkMrl)>() )
 {
+    assert( row.hasRemainingColumns() == false );
 }
 
 Playlist::Playlist( MediaLibraryPtr ml, const std::string& name )

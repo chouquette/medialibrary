@@ -52,6 +52,7 @@ File::File( MediaLibraryPtr ml, sqlite::Row& row )
     , m_isExternal( row.extract<decltype(m_isExternal)>() )
     , m_isNetwork( row.extract<decltype(m_isNetwork)>() )
 {
+    assert( row.hasRemainingColumns() == false );
 }
 
 File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type,

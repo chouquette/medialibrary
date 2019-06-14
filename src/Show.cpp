@@ -49,6 +49,7 @@ Show::Show( MediaLibraryPtr ml, sqlite::Row& row )
     , m_artworkMrl( row.extract<decltype(m_artworkMrl)>() )
     , m_tvdbId( row.extract<decltype(m_tvdbId)>() )
 {
+    assert( row.hasRemainingColumns() == false );
 }
 
 Show::Show( MediaLibraryPtr ml, const std::string& name )

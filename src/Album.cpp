@@ -56,6 +56,7 @@ Album::Album(MediaLibraryPtr ml, sqlite::Row& row)
     , m_nbDiscs( row.extract<decltype(m_nbDiscs)>() )
     , m_isPresent( row.extract<decltype(m_isPresent)>() )
 {
+    assert( row.hasRemainingColumns() == false );
 }
 
 Album::Album( MediaLibraryPtr ml, const std::string& title, int64_t thumbnailId )

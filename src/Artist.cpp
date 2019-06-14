@@ -50,6 +50,7 @@ Artist::Artist( MediaLibraryPtr ml, sqlite::Row& row )
     , m_mbId( row.extract<decltype(m_mbId)>() )
     , m_isPresent( row.extract<decltype(m_isPresent)>() )
 {
+    assert( row.hasRemainingColumns() == false );
 }
 
 Artist::Artist( MediaLibraryPtr ml, const std::string& name )

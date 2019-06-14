@@ -86,6 +86,7 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
+    assert( row.nbColumns() == 17 );
 }
 
 Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
