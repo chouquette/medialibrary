@@ -71,13 +71,18 @@ Status VLCMetadataService::run( IItem& item )
     });
     {
         std::unique_lock<compat::Mutex> lock( m_mutex );
+        m_currentMedia = vlcMedia;
 
         if ( vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local | VLC::Media::ParseFlags::Network |
                                              VLC::Media::ParseFlags::FetchLocal, 5000 ) == false )
+        {
+            m_currentMedia = VLC::Media{};
             return Status::Fatal;
+        }
         m_cond.wait( lock, [&done]() {
             return done == true;
         });
+        m_currentMedia = VLC::Media{};
     }
     event->unregister();
     if ( status == VLC::Media::ParsedStatus::Failed || status == VLC::Media::ParsedStatus::Timeout )
@@ -120,6 +125,9 @@ Step VLCMetadataService::targetedStep() const
 
 void VLCMetadataService::stop()
 {
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
+    if ( m_currentMedia.isValid() )
+        m_currentMedia.parseStop();
 }
 
 void VLCMetadataService::mediaToItem( VLC::Media& media, IItem& item )

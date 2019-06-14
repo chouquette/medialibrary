@@ -55,6 +55,7 @@ private:
     VLC::Instance m_instance;
     compat::Mutex m_mutex;
     compat::ConditionVariable m_cond;
+    VLC::Media m_currentMedia;
 };
 
 }
