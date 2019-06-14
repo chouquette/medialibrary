@@ -43,6 +43,7 @@ libmedialibrary_la_HEADERS = \
 	include/medialibrary/IMetadata.h \
 	include/medialibrary/ISubtitleTrack.h \
 	include/medialibrary/IThumbnailer.h \
+	include/medialibrary/IInterruptProbe.h \
 	$(NULL)
 
 libmedialibraryfsdir = $(libmedialibrary_ladir)/filesystem

@@ -93,6 +93,11 @@ public:
      * function gets called.
      */
     virtual void onRestarted() = 0;
+
+    /**
+     * @brief stop Require the service to interrupt its processing as soon as possible
+     */
+    virtual void stop() = 0;
 };
 
 }

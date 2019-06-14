@@ -24,6 +24,7 @@
 
 #include "MediaLibrary.h"
 #include "medialibrary/parser/IParserService.h"
+#include "medialibrary/IInterruptProbe.h"
 
 namespace medialibrary
 {
@@ -34,7 +35,7 @@ class Thumbnail;
 namespace parser
 {
 
-class MetadataAnalyzer : public IParserService
+class MetadataAnalyzer : public IParserService, public IInterruptProbe
 {
 public:
     MetadataAnalyzer();
@@ -48,6 +49,9 @@ protected:
     virtual void onFlushing() override;
     virtual void onRestarted() override;
     virtual Step targetedStep() const override;
+    virtual void stop() override;
+
+    virtual bool isInterrupted() const override;
 
     Status addPlaylistMedias( IItem& item ) const;
     void addPlaylistElement( IItem& item, std::shared_ptr<Playlist> playlistPtr,
@@ -80,6 +84,7 @@ private:
     std::shared_ptr<Artist> m_variousArtists;
     std::shared_ptr<Album> m_previousAlbum;
     int64_t m_previousFolderId;
+    std::atomic_bool m_stopped;
 };
 
 }

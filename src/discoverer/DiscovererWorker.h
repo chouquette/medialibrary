@@ -36,7 +36,7 @@
 namespace medialibrary
 {
 
-class DiscovererWorker
+class DiscovererWorker : public IInterruptProbe
 {
     struct Task
     {
@@ -85,6 +85,9 @@ private:
     void runBan( const std::string& entryPoint );
     void runUnban( const std::string& entryPoint );
     void runReloadDevice( int64_t deviceId );
+
+private:
+    virtual bool isInterrupted() const override;
 
 private:
 

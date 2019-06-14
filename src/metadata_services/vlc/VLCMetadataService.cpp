@@ -123,6 +123,10 @@ Step VLCMetadataService::targetedStep() const
     return Step::MetadataExtraction;
 }
 
+void VLCMetadataService::stop()
+{
+}
+
 void VLCMetadataService::mediaToItem( VLC::Media& media, IItem& item )
 {
     item.setMeta( IItem::Metadata::Title,

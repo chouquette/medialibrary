@@ -49,6 +49,7 @@ private:
         virtual void onFlushing() override;
         virtual void onRestarted() override;
         virtual parser::Step targetedStep() const override;
+        virtual void stop() override;
 
         void mediaToItem( VLC::Media& media, parser::IItem& item );
 

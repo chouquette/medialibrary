@@ -52,7 +52,8 @@ FsDiscoverer::FsDiscoverer( std::shared_ptr<fs::IFileSystemFactory> fsFactory, M
 {
 }
 
-bool FsDiscoverer::discover( const std::string& entryPoint )
+bool FsDiscoverer::discover( const std::string& entryPoint,
+                             const IInterruptProbe& interruptProbe )
 {
     if ( m_fsFactory->isMrlSupported( entryPoint ) == false )
         return false;
@@ -78,7 +79,8 @@ bool FsDiscoverer::discover( const std::string& entryPoint )
             return true;
         // Fetch files explicitly
         fsDir->files();
-        auto res = addFolder( std::move( fsDir ), m_probe->getFolderParent().get() );
+        auto res = addFolder( std::move( fsDir ), m_probe->getFolderParent().get(),
+                              interruptProbe );
         m_ml->getCb()->onEntryPointAdded( entryPoint, res );
         return res;
     }
@@ -94,7 +96,8 @@ bool FsDiscoverer::discover( const std::string& entryPoint )
     return true;
 }
 
-bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
+bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
+                                 const IInterruptProbe& probe )
 {
     assert( f->isPresent() );
     auto mrl = f->mrl();
@@ -125,7 +128,7 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
     }
     try
     {
-        checkFolder( std::move( directory ), std::move( f ), false );
+        checkFolder( std::move( directory ), std::move( f ), false, probe );
     }
     catch ( fs::DeviceRemovedException& )
     {
@@ -135,25 +138,28 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f )
     return true;
 }
 
-bool FsDiscoverer::reload()
+bool FsDiscoverer::reload( const IInterruptProbe& interruptProbe )
 {
     LOG_INFO( "Reloading all folders" );
     auto rootFolders = Folder::fetchRootFolders( m_ml );
     for ( const auto& f : rootFolders )
     {
+        if ( interruptProbe.isInterrupted() == true )
+            break;
         // fetchRootFolders only returns present folders
         assert( f->isPresent() == true );
         auto mrl = f->mrl();
         if ( m_fsFactory->isMrlSupported( mrl ) == false )
             continue;
         m_cb->onReloadStarted( mrl );
-        auto res = reloadFolder( f );
+        auto res = reloadFolder( f, interruptProbe );
         m_cb->onReloadCompleted( mrl, res );
     }
     return true;
 }
 
-bool FsDiscoverer::reload( const std::string& entryPoint )
+bool FsDiscoverer::reload( const std::string& entryPoint,
+                           const IInterruptProbe& interruptProbe )
 {
     if ( m_fsFactory->isMrlSupported( entryPoint ) == false )
         return false;
@@ -169,13 +175,14 @@ bool FsDiscoverer::reload( const std::string& entryPoint )
                   "be reloaded" );
         return false;
     }
-    reloadFolder( std::move( folder ) );
+    reloadFolder( std::move( folder ), interruptProbe );
     return true;
 }
 
 void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                                 std::shared_ptr<Folder> currentFolder,
-                                bool newFolder ) const
+                                bool newFolder,
+                                const IInterruptProbe& interruptProbe ) const
 {
     try
     {
@@ -243,6 +250,8 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
         subFoldersInDB = currentFolder->folders();
     for ( const auto& subFolder : currentFolderFs->dirs() )
     {
+        if ( interruptProbe.isInterrupted() == true )
+            break;
         if ( subFolder->device() == nullptr )
             continue;
         if ( m_probe->stopFileDiscovery() == true )
@@ -260,7 +269,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
             LOG_DEBUG( "New folder detected: ", subFolder->mrl() );
             try
             {
-                addFolder( subFolder, currentFolder.get() );
+                addFolder( subFolder, currentFolder.get(), interruptProbe );
                 continue;
             }
             catch ( sqlite::errors::ConstraintViolation& ex )
@@ -281,7 +290,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
         // In any case, check for modifications, as a change related to a mountpoint might
         // not update the folder modification date.
         // Also, relying on the modification date probably isn't portable
-        checkFolder( subFolder, folderInDb, false );
+        checkFolder( subFolder, folderInDb, false, interruptProbe );
         subFoldersInDB.erase( it );
     }
     if ( m_probe->deleteUnseenFolders() == true )
@@ -293,12 +302,13 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
             m_ml->deleteFolder( *f );
         }
     }
-    checkFiles( currentFolderFs, currentFolder );
+    checkFiles( currentFolderFs, currentFolder, interruptProbe );
     LOG_DEBUG( "Done checking subfolders in ", currentFolderFs->mrl() );
 }
 
 void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
-                               std::shared_ptr<Folder> parentFolder ) const
+                               std::shared_ptr<Folder> parentFolder,
+                               const IInterruptProbe& interruptProbe) const
 {
     LOG_DEBUG( "Checking file in ", parentFolderFs->mrl() );
 
@@ -307,6 +317,8 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
     std::vector<std::pair<std::shared_ptr<File>, std::shared_ptr<fs::IFile>>> filesToRefresh;
     for ( const auto& fileFs: parentFolderFs->files() )
     {
+        if ( interruptProbe.isInterrupted() == true )
+            return;
         if ( m_probe->stopFileDiscovery() == true )
             break;
         if ( m_probe->proceedOnFile( *fileFs ) == false )
@@ -332,11 +344,13 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
     using FilesT = decltype( files );
     using FilesToRefreshT = decltype( filesToRefresh );
     using FilesToAddT = decltype( filesToAdd );
-    sqlite::Tools::withRetries( 3, [this, &parentFolder, &parentFolderFs]
+    sqlite::Tools::withRetries( 3, [this, &parentFolder, &parentFolderFs, &interruptProbe]
                             ( FilesT files, FilesToAddT filesToAdd, FilesToRefreshT filesToRefresh ) {
         auto t = m_ml->getConn()->newTransaction();
         for ( const auto& file : files )
         {
+            if ( interruptProbe.isInterrupted() == true )
+                break;
             LOG_DEBUG( "File ", file->mrl(), " not found on filesystem, deleting it" );
             auto media = file->media();
             if ( media != nullptr )
@@ -350,18 +364,27 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
             }
         }
         for ( auto& p: filesToRefresh )
+        {
+            if ( interruptProbe.isInterrupted() == true )
+                break;
             m_ml->onUpdatedFile( std::move( p.first ), std::move( p.second ) );
+        }
         // Insert all files at once to avoid SQL write contention
         for ( auto& p : filesToAdd )
+        {
+            if ( interruptProbe.isInterrupted() == true )
+                break;
             m_ml->onDiscoveredFile( p, parentFolder, parentFolderFs,
                                     IFile::Type::Main, m_probe->getPlaylistParent() );
+        }
         t->commit();
         LOG_DEBUG( "Done checking files in ", parentFolderFs->mrl() );
     }, std::move( files ), std::move( filesToAdd ), std::move( filesToRefresh ) );
 }
 
 bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
-                              Folder* parentFolder ) const
+                              Folder* parentFolder,
+                              const IInterruptProbe& interruptProbe ) const
 {
     auto deviceFs = folder->device();
     // We are creating a folder, there has to be a device containing it.
@@ -385,7 +408,7 @@ bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
                              *device, *deviceFs );
     if ( f == nullptr )
         return false;
-    checkFolder( std::move( folder ), std::move( f ), true );
+    checkFolder( std::move( folder ), std::move( f ), true, interruptProbe );
     return true;
 }
 

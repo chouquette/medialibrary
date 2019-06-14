@@ -74,6 +74,7 @@ void Worker::signalStop()
             m_stopParser = true;
         }
     }
+    m_service->stop();
 }
 
 void Worker::stop()

@@ -57,6 +57,7 @@ namespace parser
 MetadataAnalyzer::MetadataAnalyzer()
     : m_ml( nullptr )
     , m_previousFolderId( 0 )
+    , m_stopped( false )
 {
 }
 
@@ -233,8 +234,12 @@ Status MetadataAnalyzer::addPlaylistMedias( IItem& item ) const
     // be recreated if need be, and appropriate entries in PlaylistMediaRelation
     // table will be recreated to link things together.
 
-    for ( auto i = 0u; i < item.nbSubItems(); ++i ) // FIXME: Interrupt loop if paused
+    for ( auto i = 0u; i < item.nbSubItems(); ++i )
+    {
+        if ( m_stopped.load() == true )
+            break;
         addPlaylistElement( item, playlistPtr, item.subItem( i ) );
+    }
 
     return Status::Success;
 }
@@ -309,7 +314,7 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
                        isDirectory, std::move( playlistPtr ), parentFolder,
                        utils::file::toLocalPath( directoryMrl ), subitem.parentPlaylistIndex(), true } );
         FsDiscoverer discoverer( fsFactory, m_ml, nullptr, std::move( probePtr ) );
-        discoverer.reload( entryPoint );
+        discoverer.reload( entryPoint, *this );
         return;
     }
     auto probePtr = std::unique_ptr<prober::PathProbe>(
@@ -319,13 +324,13 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
     FsDiscoverer discoverer( fsFactory, m_ml, nullptr, std::move( probePtr ) );
     if ( parentKnown == false )
     {
-        discoverer.discover( entryPoint );
+        discoverer.discover( entryPoint, *this );
         auto entryFolder = Folder::fromMrl( m_ml, entryPoint );
         if ( entryFolder != nullptr )
             Folder::excludeEntryFolder( m_ml, entryFolder->id() );
         return;
     }
-    discoverer.reload( directoryMrl );
+    discoverer.reload( directoryMrl, *this );
 }
 
 /* Video files */
@@ -1237,11 +1242,22 @@ void MetadataAnalyzer::onRestarted()
 {
     // Reset locally cached entities
     cacheUnknownArtist();
+    m_stopped.store( false );
 }
 
 Step MetadataAnalyzer::targetedStep() const
 {
     return Step::MetadataAnalysis;
+}
+
+void MetadataAnalyzer::stop()
+{
+    m_stopped.store( true );
+}
+
+bool MetadataAnalyzer::isInterrupted() const
+{
+    return m_stopped.load();
 }
 
 }

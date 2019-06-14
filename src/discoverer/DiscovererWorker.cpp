@@ -196,13 +196,13 @@ void DiscovererWorker::runReload( const std::string& entryPoint )
             if ( entryPoint.empty() == true )
             {
                 // Let the discoverer invoke the callbacks for all its known folders
-                d->reload();
+                d->reload( *this );
             }
             else
             {
                 m_ml->getCb()->onReloadStarted( entryPoint );
                 LOG_INFO( "Reloading folder ", entryPoint );
-                auto res = d->reload( entryPoint );
+                auto res = d->reload( entryPoint, *this );
                 m_ml->getCb()->onReloadCompleted( entryPoint, res );
             }
         }
@@ -292,6 +292,11 @@ void DiscovererWorker::runReloadDevice( int64_t deviceId )
     }
 }
 
+bool DiscovererWorker::isInterrupted() const
+{
+    return m_run.load() == false;
+}
+
 void DiscovererWorker::runDiscover( const std::string& entryPoint )
 {
     m_ml->getCb()->onDiscoveryStarted( entryPoint );
@@ -303,7 +308,7 @@ void DiscovererWorker::runDiscover( const std::string& entryPoint )
         try
         {
             auto chrono = std::chrono::steady_clock::now();
-            if ( d->discover( entryPoint ) == true )
+            if ( d->discover( entryPoint, *this ) == true )
             {
                 auto duration = std::chrono::steady_clock::now() - chrono;
                 LOG_VERBOSE( "Discovered ", entryPoint, " in ",

@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Media Library
  *****************************************************************************
- * Copyright (C) 2015 Hugo Beauzée-Luyssen, Videolabs
+ * Copyright (C) 2019 Hugo Beauzée-Luyssen, Videolabs, VideoLAN
  *
  * Authors: Hugo Beauzée-Luyssen<hugo@beauzee.fr>
  *
@@ -20,30 +20,11 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef IDISCOVERER_H
-# define IDISCOVERER_H
+#pragma once
 
-#include <string>
-#include "Types.h"
-#include "medialibrary/filesystem/IDirectory.h"
-#include "medialibrary/filesystem/IFile.h"
-#include "medialibrary/IMediaLibrary.h"
-#include "medialibrary/IInterruptProbe.h"
-
-namespace medialibrary
-{
-
-class IDiscoverer
+class IInterruptProbe
 {
 public:
-    virtual ~IDiscoverer() = default;
-    virtual bool discover( const std::string& entryPoint,
-                           const IInterruptProbe& interruptProbe ) = 0;
-    virtual bool reload( const IInterruptProbe& interruptProbe ) = 0;
-    virtual bool reload( const std::string& entryPoint,
-                         const IInterruptProbe& interruptProbe ) = 0;
+    virtual ~IInterruptProbe() = default;
+    virtual bool isInterrupted() const = 0;
 };
-
-}
-
-#endif // IDISCOVERER_H

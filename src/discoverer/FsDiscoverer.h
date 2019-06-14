@@ -42,9 +42,11 @@ class FsDiscoverer : public IDiscoverer
 {
 public:
     FsDiscoverer( std::shared_ptr<fs::IFileSystemFactory> fsFactory, MediaLibrary* ml , IMediaLibraryCb* cb, std::unique_ptr<prober::IProbe> probe );
-    virtual bool discover(const std::string& entryPoint ) override;
-    virtual bool reload() override;
-    virtual bool reload( const std::string& entryPoint ) override;
+    virtual bool discover( const std::string& entryPoint,
+                           const IInterruptProbe& interruptProbe ) override;
+    virtual bool reload( const IInterruptProbe& interruptProbe ) override;
+    virtual bool reload( const std::string& entryPoint,
+                         const IInterruptProbe& interruptProbe ) override;
 
 private:
     ///
@@ -52,12 +54,16 @@ private:
     /// \return true if files in this folder needs to be listed, false otherwise
     ///
     void checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
-                      std::shared_ptr<Folder> currentFolder, bool newFolder ) const;
+                      std::shared_ptr<Folder> currentFolder, bool newFolder,
+                      const IInterruptProbe& interruptProbe ) const;
     void checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
-                     std::shared_ptr<Folder> parentFolder ) const;
+                     std::shared_ptr<Folder> parentFolder,
+                     const IInterruptProbe& interruptProbe ) const;
     bool addFolder( std::shared_ptr<fs::IDirectory> folder,
-                    Folder* parentFolder ) const;
-    bool reloadFolder( std::shared_ptr<Folder> folder );
+                    Folder* parentFolder,
+                    const IInterruptProbe& interruptProbe) const;
+    bool reloadFolder( std::shared_ptr<Folder> folder,
+                       const IInterruptProbe& probe );
 
 private:
     MediaLibrary* m_ml;
