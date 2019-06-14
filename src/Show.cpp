@@ -163,7 +163,7 @@ Query<IMedia> Show::episodes( const QueryParameters* params ) const
             break;
 
     }
-    return make_query<Media, IMedia>( m_ml, "*", std::move( req ),
+    return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
                                       std::move( orderBy), m_id );
 }
 
