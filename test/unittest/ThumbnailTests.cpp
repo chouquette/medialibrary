@@ -121,8 +121,7 @@ TEST_F( Thumbnails, UnshareMedia )
     m->setThumbnail( t );
     a->setThumbnail( t );
 
-    auto thumbnails = Thumbnail::fetchAll( ml.get() );
-    ASSERT_EQ( 1u, thumbnails.size() );
+    ASSERT_EQ( 1u, ml->countNbThumbnails() );
 
     auto artistThumbnail = a->thumbnail();
     auto mediaThumbnail = m->thumbnail();
@@ -136,8 +135,7 @@ TEST_F( Thumbnails, UnshareMedia )
     auto newThumbnail = Thumbnail::create( ml.get(), "file:///tmp/newthumb.jpg",
                                            Thumbnail::Origin::UserProvided, false );
     m->setThumbnail( newThumbnail );
-    thumbnails = Thumbnail::fetchAll( ml.get() );
-    ASSERT_EQ( 2u, thumbnails.size() );
+    ASSERT_EQ( 2u, ml->countNbThumbnails() );
 
     artistThumbnail = a->thumbnail();
     mediaThumbnail = m->thumbnail();
@@ -155,8 +153,7 @@ TEST_F( Thumbnails, UnshareMedia )
     auto res = m->setThumbnail( newMrl, Thumbnail::Origin::UserProvided, false );
     ASSERT_TRUE( res );
 
-    thumbnails = Thumbnail::fetchAll( ml.get() );
-    ASSERT_EQ( 2u, thumbnails.size() );
+    ASSERT_EQ( 2u, ml->countNbThumbnails() );
 
     auto newMediaThumbnail = m->thumbnail();
     ASSERT_EQ( mediaThumbnail->id(), newMediaThumbnail->id() );
@@ -175,8 +172,7 @@ TEST_F( Thumbnails, UnshareArtist )
     m->setThumbnail( t );
     a->setThumbnail( t );
 
-    auto thumbnails = Thumbnail::fetchAll( ml.get() );
-    ASSERT_EQ( 1u, thumbnails.size() );
+    ASSERT_EQ( 1u, ml->countNbThumbnails() );
 
     auto artistThumbnail = a->thumbnail();
     auto mediaThumbnail = m->thumbnail();
@@ -190,8 +186,7 @@ TEST_F( Thumbnails, UnshareArtist )
     auto newThumbnail = Thumbnail::create( ml.get(), "file:///tmp/newthumb.jpg",
                                            Thumbnail::Origin::UserProvided, false );
     a->setThumbnail( newThumbnail );
-    thumbnails = Thumbnail::fetchAll( ml.get() );
-    ASSERT_EQ( 2u, thumbnails.size() );
+    ASSERT_EQ( 2u, ml->countNbThumbnails() );
 
     artistThumbnail = a->thumbnail();
     mediaThumbnail = m->thumbnail();
@@ -209,8 +204,7 @@ TEST_F( Thumbnails, UnshareArtist )
     auto res = a->setThumbnail( newMrl );
     ASSERT_TRUE( res );
 
-    thumbnails = Thumbnail::fetchAll( ml.get() );
-    ASSERT_EQ( 2u, thumbnails.size() );
+    ASSERT_EQ( 2u, ml->countNbThumbnails() );
 
     auto newArtistThumbnail = a->thumbnail();
     ASSERT_EQ( artistThumbnail->id(), newArtistThumbnail->id() );

@@ -219,8 +219,15 @@ void Tests::runChecks(const rapidjson::Document& doc)
     }
     if ( expected.HasMember( "nbThumbnails" ) )
     {
-        const auto thumbnails = Thumbnail::fetchAll( m_ml.get() );
-        ASSERT_EQ( expected["nbThumbnails"].GetUint(), thumbnails.size() );
+        sqlite::Statement stmt{
+            m_ml->getConn()->handle(),
+            "SELECT COUNT(*) FROM " + Thumbnail::Table::Name
+        };
+        uint32_t nbThumbnails;
+        stmt.execute();
+        auto row = stmt.row();
+        row >> nbThumbnails;
+        ASSERT_EQ( expected["nbThumbnails"].GetUint(), nbThumbnails );
     }
 }
 

@@ -280,3 +280,16 @@ void MediaLibraryTester::setAlbumTrackGenre( int64_t albumTrackId, int64_t genre
             + " SET genre_id = ? WHERE id_track = ?";
     sqlite::Tools::executeUpdate( getConn(), req, genreId, albumTrackId );
 }
+
+uint32_t MediaLibraryTester::countNbThumbnails()
+{
+    sqlite::Statement stmt{
+        getDbConn()->handle(),
+        "SELECT COUNT(*) FROM " + Thumbnail::Table::Name
+    };
+    uint32_t res;
+    stmt.execute();
+    auto row = stmt.row();
+    row >> res;
+    return res;
+}
