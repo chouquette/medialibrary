@@ -56,8 +56,6 @@ public:
         UserProvided,
         /// An image (jpg or png) that was located in the album folder
         CoverFile,
-        /// A temporarily empty thumbnail, when reloading a media
-        Empty = 0xFF,
     };
     enum class EntityType
     {

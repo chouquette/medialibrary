@@ -436,7 +436,6 @@ bool Media::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
             case Thumbnail::Origin::AlbumArtist:    // unused for now
             case Thumbnail::Origin::Media:          // media specific
             case Thumbnail::Origin::UserProvided:   // Already per-media
-            case Thumbnail::Origin::Empty:          // The thumbnail was reset to be reloaded, update it
             {
                 // In all these cases, the thumbnail should be per-media, and can
                 // be safely overriden.

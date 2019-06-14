@@ -213,8 +213,7 @@ bool Artist::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
     if ( currentThumbnail != nullptr )
     {
         if ( currentThumbnail->origin() == Thumbnail::Origin::Artist ||
-             currentThumbnail->origin() == Thumbnail::Origin::UserProvided ||
-             currentThumbnail->origin() == Thumbnail::Origin::Empty )
+             currentThumbnail->origin() == Thumbnail::Origin::UserProvided )
         {
             std::unique_ptr<sqlite::Transaction> t;
             if ( sqlite::Transaction::transactionInProgress() == false )
