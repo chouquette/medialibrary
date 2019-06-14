@@ -123,6 +123,18 @@ public:
         return m_stmt != nullptr;
     }
 
+    /**
+     * @brief hasRemainingColumns Returns true if there are more column to extract
+     *
+     * This is meant to be used after a serie of calls to extract().
+     * When load() is used, the internal index isn't updated and this function
+     * would always return true if there is at least one column.
+     */
+    bool hasRemainingColumns() const
+    {
+        return m_idx < m_nbColumns;
+    }
+
 private:
     sqlite3_stmt* m_stmt;
     unsigned int m_idx;
