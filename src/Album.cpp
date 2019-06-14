@@ -572,7 +572,7 @@ Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, const Que
         break;
     }
 
-    return make_query<Album, IAlbum>( ml, "*", std::move( req ),
+    return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       std::move( groupAndOrder ),
                                       artistId, artistId );
 }
