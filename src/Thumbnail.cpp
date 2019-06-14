@@ -67,7 +67,7 @@ Thumbnail::Thumbnail( MediaLibraryPtr ml, std::string mrl,
     // Store the mrl as is, and fiddle with it upon insertion as we only care
     // about storing a relative path in db, but we want to return the mrl as it
     // was given, ie. as an absolute mrl.
-    assert( m_mrl.empty() == true ||
+    assert( ( m_mrl.empty() == true && isOwned == false ) ||
             utils::file::scheme( m_mrl ).empty() == false );
 }
 
@@ -121,7 +121,7 @@ bool Thumbnail::isFailureRecord() const
 {
     return m_mrl.empty() == true &&
            m_origin == Origin::Media &&
-           m_isOwned == true;
+           m_isOwned == false;
 }
 
 void Thumbnail::createTable( sqlite::Connection* dbConnection )

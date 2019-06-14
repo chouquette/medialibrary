@@ -171,7 +171,7 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
      * This is done here instead of from the mainloop as we don't want to prevent
      * the thumbnail generation of a file that has been removed.
      */
-    m->setThumbnail( "", Thumbnail::Origin::Media, true );
+    m->setThumbnail( "", Thumbnail::Origin::Media, false );
 
     if ( m_generator->generate( mrl, dest ) == false )
         return false;

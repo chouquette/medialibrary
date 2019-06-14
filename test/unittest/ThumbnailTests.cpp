@@ -96,7 +96,7 @@ TEST_F( Thumbnails, MarkFailure )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
     ASSERT_FALSE( m->isThumbnailGenerated() );
-    auto res = m->setThumbnail( "", Thumbnail::Origin::Media, true );
+    auto res = m->setThumbnail( "", Thumbnail::Origin::Media, false );
     ASSERT_TRUE( res );
 
     ASSERT_TRUE( m->isThumbnailGenerated() );
@@ -105,6 +105,8 @@ TEST_F( Thumbnails, MarkFailure )
 
     m = std::static_pointer_cast<Media>( ml->media( m->id() ) );
     ASSERT_TRUE( m->isThumbnailGenerated() );
+    auto t = m->thumbnail();
+    ASSERT_TRUE( t->isFailureRecord() );
 }
 
 TEST_F( Thumbnails, UnshareMedia )
