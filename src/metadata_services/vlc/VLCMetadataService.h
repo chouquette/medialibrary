@@ -1,9 +1,9 @@
 /*****************************************************************************
  * Media Library
  *****************************************************************************
- * Copyright (C) 2015 Hugo Beauzée-Luyssen, Videolabs
+ * Copyright (C) 2015-2019 Hugo Beauzée-Luyssen, Videolabs, VideoLAN
  *
- * Authors: Hugo Beauzée-Luyssen<hugo@beauzee.fr>
+ * Authors: Hugo Beauzée-Luyssen <hugo@beauzee.fr>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -20,8 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef VLCMETADATASERVICE_H
-#define VLCMETADATASERVICE_H
+#pragma once
 
 #include "compat/ConditionVariable.h"
 #include <vlcpp/vlc.hpp>
@@ -38,28 +37,26 @@ namespace parser
 
 class VLCMetadataService : public IParserService
 {
-    public:
-        explicit VLCMetadataService();
+public:
+    explicit VLCMetadataService();
 
 private:
-        virtual bool initialize( IMediaLibrary* ml ) override;
-        virtual parser::Status run( parser::IItem& item ) override;
-        virtual const char* name() const override;
-        virtual uint8_t nbThreads() const override;
-        virtual void onFlushing() override;
-        virtual void onRestarted() override;
-        virtual parser::Step targetedStep() const override;
-        virtual void stop() override;
+    virtual bool initialize( IMediaLibrary* ml ) override;
+    virtual parser::Status run( parser::IItem& item ) override;
+    virtual const char* name() const override;
+    virtual uint8_t nbThreads() const override;
+    virtual void onFlushing() override;
+    virtual void onRestarted() override;
+    virtual parser::Step targetedStep() const override;
+    virtual void stop() override;
 
-        void mediaToItem( VLC::Media& media, parser::IItem& item );
+    void mediaToItem( VLC::Media& media, parser::IItem& item );
 
 private:
-        VLC::Instance m_instance;
-        compat::Mutex m_mutex;
-        compat::ConditionVariable m_cond;
+    VLC::Instance m_instance;
+    compat::Mutex m_mutex;
+    compat::ConditionVariable m_cond;
 };
 
 }
 }
-
-#endif // VLCMETADATASERVICE_H
