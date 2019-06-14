@@ -1119,38 +1119,41 @@ bool MetadataAnalyzer::link( IItem& item, Album& album,
     }
     assert( albumArtist != nullptr );
 
-    auto albumThumbnail = album.thumbnail();
-
-    // We might modify albumArtist later, hence handle thumbnails before.
-    // If we have an albumArtist (meaning the track was properly tagged, we
-    // can assume this artist is a correct match. We can use the thumbnail from
-    // the current album for the albumArtist, if none has been set before.
-    // Although we don't want to do this for unknown/various artists, as the
-    // thumbnail wouldn't reflect those "special" artists
-    if ( albumArtist->id() != UnknownArtistID &&
-         albumArtist->id() != VariousArtistID &&
-         albumThumbnail != nullptr )
+    if ( thumbnail != nullptr )
     {
-        auto albumArtistThumbnail = albumArtist->thumbnail();
-        // If the album artist has no thumbnail, let's assign it
-        if ( albumArtistThumbnail == nullptr )
-        {
-            albumArtist->setThumbnail( thumbnail );
-        }
-        else if ( albumArtistThumbnail->origin() == Thumbnail::Origin::Artist )
-        {
-            // We only want to change the thumbnail if it was assigned from an
-            // album this artist was only featuring on
-        }
-    }
+        auto albumThumbnail = album.thumbnail();
 
-    // Until we have a better artwork extraction/assignation, simply do the same
-    // for artists
-    if ( artist != nullptr && artist->id() != UnknownArtistID &&
-         artist->id() != VariousArtistID &&
-         albumThumbnail != nullptr && artist->thumbnail() == nullptr )
-    {
-        artist->setThumbnail( thumbnail );
+        // We might modify albumArtist later, hence handle thumbnails before.
+        // If we have an albumArtist (meaning the track was properly tagged, we
+        // can assume this artist is a correct match. We can use the thumbnail from
+        // the current album for the albumArtist, if none has been set before.
+        // Although we don't want to do this for unknown/various artists, as the
+        // thumbnail wouldn't reflect those "special" artists
+        if ( albumArtist->id() != UnknownArtistID &&
+             albumArtist->id() != VariousArtistID &&
+             albumThumbnail != nullptr )
+        {
+            auto albumArtistThumbnail = albumArtist->thumbnail();
+            // If the album artist has no thumbnail, let's assign it
+            if ( albumArtistThumbnail == nullptr )
+            {
+                albumArtist->setThumbnail( thumbnail );
+            }
+            else if ( albumArtistThumbnail->origin() == Thumbnail::Origin::Artist )
+            {
+                // We only want to change the thumbnail if it was assigned from an
+                // album this artist was only featuring on
+            }
+        }
+
+        // Until we have a better artwork extraction/assignation, simply do the same
+        // for artists
+        if ( artist != nullptr && artist->id() != UnknownArtistID &&
+             artist->id() != VariousArtistID &&
+             albumThumbnail != nullptr && artist->thumbnail() == nullptr )
+        {
+            artist->setThumbnail( thumbnail );
+        }
     }
 
     albumArtist->addMedia( media );
