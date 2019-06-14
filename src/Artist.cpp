@@ -211,9 +211,9 @@ std::shared_ptr<Thumbnail> Artist::thumbnail()
     return m_thumbnail;
 }
 
-bool Artist::setThumbnail( std::shared_ptr<Thumbnail> thumbnail )
+bool Artist::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
 {
-    assert( thumbnail != nullptr );
+    assert( newThumbnail != nullptr );
 
     if ( m_thumbnailId != 0 )
     {
@@ -226,27 +226,27 @@ bool Artist::setThumbnail( std::shared_ptr<Thumbnail> thumbnail )
         if ( m_thumbnail->origin() == Thumbnail::Origin::Artist ||
              m_thumbnail->origin() == Thumbnail::Origin::UserProvided ||
              m_thumbnail->origin() == Thumbnail::Origin::Empty )
-            return m_thumbnail->update( thumbnail->mrl(),
-                                        thumbnail->origin(),
-                                        thumbnail->isOwned() );
+            return m_thumbnail->update( newThumbnail->mrl(),
+                                        newThumbnail->origin(),
+                                        newThumbnail->isOwned() );
     }
     std::unique_ptr<sqlite::Transaction> t;
     if ( sqlite::Transaction::transactionInProgress() == false )
         t = m_ml->getConn()->newTransaction();
-    if ( thumbnail->id() == 0 )
+    if ( newThumbnail->id() == 0 )
     {
-        if ( thumbnail->insert() == 0 )
+        if ( newThumbnail->insert() == 0 )
             return false;
     }
     static const std::string req = "UPDATE " + Artist::Table::Name +
             " SET thumbnail_id = ? WHERE id_artist = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, thumbnail->id(),
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, newThumbnail->id(),
                                        m_id ) == false )
         return false;
     if ( t != nullptr )
         t->commit();
-    m_thumbnailId = thumbnail->id();
-    m_thumbnail = std::move( thumbnail );
+    m_thumbnailId = newThumbnail->id();
+    m_thumbnail = std::move( newThumbnail );
     return true;
 }
 
