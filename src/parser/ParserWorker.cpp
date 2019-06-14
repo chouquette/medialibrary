@@ -45,9 +45,8 @@ Worker::Worker()
 void Worker::start()
 {
     // Ensure we don't start multiple times.
-    assert( m_threads.size() == 0 );
-    for ( auto i = 0u; i < m_service->nbThreads(); ++i )
-        m_threads.emplace_back( &Worker::mainloop, this );
+    assert( m_thread.joinable() == false );
+    m_thread = compat::Thread{ &Worker::mainloop, this };
 }
 
 void Worker::pause()
@@ -65,25 +64,19 @@ void Worker::resume()
 
 void Worker::signalStop()
 {
-    for ( auto& t : m_threads )
+    if ( m_thread.joinable() )
     {
-        if ( t.joinable() )
-        {
-            std::lock_guard<compat::Mutex> lock( m_lock );
-            m_cond.notify_all();
-            m_stopParser = true;
-        }
+        std::lock_guard<compat::Mutex> lock( m_lock );
+        m_cond.notify_all();
+        m_stopParser = true;
     }
     m_service->stop();
 }
 
 void Worker::stop()
 {
-    for ( auto& t : m_threads )
-    {
-        if ( t.joinable() )
-            t.join();
-    }
+    if ( m_thread.joinable() == true )
+        m_thread.join();
 }
 
 void Worker::parse( std::shared_ptr<Task> t )
@@ -102,7 +95,7 @@ void Worker::parse( std::shared_ptr<Task> t )
     // we're currently doing a stop/start
     {
         std::lock_guard<compat::Mutex> lock( m_lock );
-        if ( m_threads.size() == 0 )
+        if ( m_thread.get_id() == compat::Thread::id{} )
         {
             m_tasks.push( std::move( t ) );
             start();
@@ -131,7 +124,7 @@ bool Worker::isIdle() const
 void Worker::flush()
 {
     std::unique_lock<compat::Mutex> lock( m_lock );
-    assert( m_paused == true || m_threads.empty() == true );
+    assert( m_paused == true || m_thread.get_id() == compat::Thread::id{} );
     m_idleCond.wait( lock, [this]() {
         return m_idle == true;
     });

@@ -1221,16 +1221,6 @@ const char* MetadataAnalyzer::name() const
     return "Metadata";
 }
 
-uint8_t MetadataAnalyzer::nbThreads() const
-{
-//    auto nbProcs = std::thread::hardware_concurrency();
-//    if ( nbProcs == 0 )
-//        return 1;
-//    return nbProcs;
-    // Let's make this code thread-safe first :)
-    return 1;
-}
-
 void MetadataAnalyzer::onFlushing()
 {
     m_variousArtists = nullptr;

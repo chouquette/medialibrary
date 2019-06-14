@@ -45,7 +45,6 @@ protected:
     virtual bool initialize( IMediaLibrary* ml ) override;
     virtual Status run( IItem& item ) override;
     virtual const char* name() const override;
-    virtual uint8_t nbThreads() const override;
     virtual void onFlushing() override;
     virtual void onRestarted() override;
     virtual Step targetedStep() const override;

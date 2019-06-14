@@ -50,13 +50,6 @@ public:
      * This is for logging purposes only.
      */
     virtual const char* name() const = 0;
-    /**
-     * @brief nbThreads Returns the number of thread this service wishes to run
-     *
-     * @return Concurrency, including database coherence, is the service's
-     * responsibility.
-     */
-    virtual uint8_t nbThreads() const = 0;
 
     /**
      * @brief targetedStep Returns the ParserStep targeted by this service.

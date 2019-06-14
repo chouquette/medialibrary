@@ -96,7 +96,7 @@ private:
     compat::ConditionVariable m_cond;
     compat::ConditionVariable m_idleCond;
     std::queue<std::shared_ptr<Task>> m_tasks;
-    std::vector<compat::Thread> m_threads;
+    compat::Thread m_thread;
     compat::Mutex m_lock;
 };
 
