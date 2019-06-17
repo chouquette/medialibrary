@@ -49,6 +49,7 @@ VmemThumbnailer::VmemThumbnailer( MediaLibraryPtr ml )
 }
 
 bool VmemThumbnailer::generate( const std::string& mrl,
+                                uint32_t desiredWidth, uint32_t desiredHeight,
                                 const std::string& dest )
 {
     VLC::Media vlcMedia = VLC::Media( VLCInstance::get(), mrl,
@@ -68,7 +69,7 @@ bool VmemThumbnailer::generate( const std::string& mrl,
         vlcMedia.addOption( ss.str() );
     }
 
-    Task task{ mrl, 320, 200 };
+    Task task{ mrl, desiredWidth, desiredHeight };
 
     task.mp = VLC::MediaPlayer( vlcMedia );
 

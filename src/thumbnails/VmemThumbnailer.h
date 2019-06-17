@@ -55,6 +55,7 @@ class VmemThumbnailer : public IThumbnailer
 public:
     VmemThumbnailer( MediaLibraryPtr ml );
     virtual bool generate( const std::string& mrl,
+                           uint32_t desiredWidth, uint32_t desiredHeight,
                            const std::string& dest ) override;
     bool seekAhead( Task& task );
     void setupVout( Task& task );

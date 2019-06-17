@@ -558,10 +558,18 @@ public:
      * will be called.
      * In case a thumbnail was already generated for the media, false will be returned.
      * If so, no callback will be invoked
+     * \param media The media for which to generate a thumbnail
+     * \param sizeType The size type of the thumbnail to generate
+     * \param desiredWidth The desired thumbnail width
+     * \param desiredHeight The desired thumbnail height
+     *
+     * The generated thumbnail will try to oblige by the requested size, while
+     * respecting the source aspect ratio.
      *
      * This function is thread-safe
      */
-    virtual bool requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType ) = 0;
+    virtual bool requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType,
+                                   uint32_t desiredWidth, uint32_t desiredHeight ) = 0;
 
     virtual void addParserService( std::shared_ptr<parser::IParserService> service ) = 0;
 

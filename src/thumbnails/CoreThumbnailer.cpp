@@ -42,7 +42,8 @@ CoreThumbnailer::CoreThumbnailer( MediaLibraryPtr ml )
 {
 }
 
-bool CoreThumbnailer::generate( const std::string& mrl, const std::string& dest )
+bool CoreThumbnailer::generate( const std::string& mrl, uint32_t desiredWidth,
+                                uint32_t desiredHeight, const std::string& dest )
 {
     VLC::Media vlcMedia{ VLCInstance::get(), mrl, VLC::Media::FromType::FromLocation };
     auto em = vlcMedia.eventManager();
@@ -64,7 +65,8 @@ bool CoreThumbnailer::generate( const std::string& mrl, const std::string& dest 
     {
         std::unique_lock<compat::Mutex> l( lock );
         auto request = vlcMedia.thumbnailRequestByPos( 0.3f, VLC::Media::ThumbnailSeekSpeed::Fast,
-                                                       320, 200, VLC::Picture::Type::Jpg, 3000 );
+                                                       desiredWidth, desiredHeight,
+                                                       VLC::Picture::Type::Jpg, 3000 );
         if ( request == nullptr )
             return false;
         cond.wait( l, [&done]() { return done == true; } );

@@ -355,7 +355,7 @@ void Tests::checkMedias(const rapidjson::Value& expectedMedias)
             if ( snapshotExpected && media->thumbnailMrl( ThumbnailSizeType::Thumbnail ).empty() == true )
             {
                 m_cb->prepareWaitForThumbnail( media );
-                m_ml->requestThumbnail( media, ThumbnailSizeType::Thumbnail );
+                m_ml->requestThumbnail( media, ThumbnailSizeType::Thumbnail, 320, 200 );
                 auto res = m_cb->waitForThumbnail();
                 ASSERT_TRUE( res );
             }

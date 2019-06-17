@@ -41,7 +41,8 @@ public:
     explicit ThumbnailerWorker( MediaLibraryPtr ml,
                                 std::shared_ptr<IThumbnailer> thumbnailer );
     virtual ~ThumbnailerWorker();
-    void requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType );
+    void requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType,
+                           uint32_t desiredWidth, uint32_t desiredHeight );
     void pause();
     void resume();
 
@@ -50,6 +51,8 @@ private:
     {
         MediaPtr media;
         ThumbnailSizeType sizeType;
+        uint32_t desiredWidth;
+        uint32_t desiredHeight;
     };
 
 private:

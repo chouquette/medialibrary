@@ -183,7 +183,8 @@ public:
 
     virtual void enableFailedThumbnailRegeneration() override;
 
-    virtual bool requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType ) override;
+    virtual bool requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType,
+                                   uint32_t desiredWidth, uint32_t desiredHeight) override;
 
     virtual void addParserService( std::shared_ptr<parser::IParserService> service ) override;
 

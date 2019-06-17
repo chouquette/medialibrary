@@ -1719,13 +1719,14 @@ void MediaLibrary::enableFailedThumbnailRegeneration()
     Thumbnail::deleteFailureRecords( this );
 }
 
-bool MediaLibrary::requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType )
+bool MediaLibrary::requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType,
+                                     uint32_t desiredWidth, uint32_t desiredHeight )
 {
     if ( m_thumbnailer == nullptr )
         return false;
     if ( media->isThumbnailGenerated( sizeType ) == true )
         return false;
-    m_thumbnailer->requestThumbnail( media, sizeType );
+    m_thumbnailer->requestThumbnail( media, sizeType, desiredWidth, desiredHeight );
     return true;
 }
 

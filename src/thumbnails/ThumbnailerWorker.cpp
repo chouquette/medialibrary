@@ -53,11 +53,17 @@ ThumbnailerWorker::~ThumbnailerWorker()
     stop();
 }
 
-void ThumbnailerWorker::requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType )
+void ThumbnailerWorker::requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType,
+                                          uint32_t desiredWidth, uint32_t desiredHeight )
 {
     std::unique_lock<compat::Mutex> lock( m_mutex );
 
-    Task t{ std::move( media ), sizeType };
+    Task t{
+        std::move( media ),
+        sizeType,
+        desiredWidth,
+        desiredHeight
+    };
     m_tasks.push( std::move( t ) );
     if ( m_thread.get_id() == compat::Thread::id{} )
     {
@@ -173,7 +179,8 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
      */
     m->setThumbnail( "", Thumbnail::Origin::Media, task.sizeType, false );
 
-    if ( m_generator->generate( mrl, dest ) == false )
+    if ( m_generator->generate( mrl, task.desiredWidth, task.desiredHeight,
+                                dest ) == false )
         return false;
 
     auto destMrl = utils::file::toMrl( dest );
