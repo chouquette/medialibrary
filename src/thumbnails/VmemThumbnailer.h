@@ -57,6 +57,7 @@ public:
     virtual bool generate(const std::string& mrl,
                            uint32_t desiredWidth, uint32_t desiredHeight, float position,
                            const std::string& dest ) override;
+    virtual void stop() override;
     bool seekAhead( Task& task, float position );
     void setupVout( Task& task );
     bool takeThumbnail( Task& task, const std::string& dest );

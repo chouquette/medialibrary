@@ -122,6 +122,7 @@ void ThumbnailerWorker::stop()
     bool running = true;
     if ( m_run.compare_exchange_strong( running, false ) )
     {
+        m_generator->stop();
         {
             std::unique_lock<compat::Mutex> lock( m_mutex );
             while ( m_tasks.empty() == false )
@@ -182,7 +183,18 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
 
     if ( m_generator->generate( mrl, task.desiredWidth, task.desiredHeight,
                                 task.position, dest ) == false )
+    {
+        if ( m_run == false )
+        {
+            // The generation failed because the thumbnailer was interrupted.
+
+            // Unlink the media and the thumbnail, otherwise we will have a
+            // failure record and no way of regenerating the thumbnail, while
+            // the generation was only cancelled, and might not fail at all.
+            m->removeThumbnail( task.sizeType );
+        }
         return false;
+    }
 
     auto destMrl = utils::file::toMrl( dest );
     if ( m->setThumbnail( destMrl, Thumbnail::Origin::Media, task.sizeType,

@@ -32,8 +32,6 @@
 #include "MediaLibrary.h"
 #include "utils/VLCInstance.h"
 
-#include <vlcpp/vlc.hpp>
-
 namespace medialibrary
 {
 
@@ -46,17 +44,18 @@ bool CoreThumbnailer::generate( const std::string& mrl, uint32_t desiredWidth,
                                 uint32_t desiredHeight, float position,
                                 const std::string& dest )
 {
-    VLC::Media vlcMedia{ VLCInstance::get(), mrl, VLC::Media::FromType::FromLocation };
-    auto em = vlcMedia.eventManager();
-
     compat::ConditionVariable cond;
-    compat::Mutex lock;
     auto done = false;
     VLC::Picture thumbnail;
+    {
+    std::unique_lock<compat::Mutex> l{ m_mutex };
 
-    em.onThumbnailGenerated([&cond, &lock, &thumbnail, &done]( const VLC::Picture* p ) {
+    m_vlcMedia = VLC::Media{ VLCInstance::get(), mrl, VLC::Media::FromType::FromLocation };
+    auto em = m_vlcMedia.eventManager();
+
+    em.onThumbnailGenerated([this, &cond, &thumbnail, &done]( const VLC::Picture* p ) {
         {
-            std::unique_lock<compat::Mutex> l( lock );
+            std::unique_lock<compat::Mutex> l{ m_mutex };
             if( p != nullptr )
                 thumbnail = *p;
             done = true;
@@ -64,18 +63,30 @@ bool CoreThumbnailer::generate( const std::string& mrl, uint32_t desiredWidth,
         cond.notify_all();
     });
     {
-        std::unique_lock<compat::Mutex> l( lock );
-        auto request = vlcMedia.thumbnailRequestByPos( position, VLC::Media::ThumbnailSeekSpeed::Fast,
+        m_request = m_vlcMedia.thumbnailRequestByPos( position, VLC::Media::ThumbnailSeekSpeed::Fast,
                                                        desiredWidth, desiredHeight, true,
                                                        VLC::Picture::Type::Jpg, 3000 );
-        if ( request == nullptr )
+        if ( m_request == nullptr )
+        {
+            m_vlcMedia = VLC::Media{};
             return false;
+        }
         cond.wait( l, [&done]() { return done == true; } );
+    }
+    m_request = nullptr;
+    m_vlcMedia = VLC::Media{};
     }
     if ( thumbnail.isValid() == false )
         return false;
 
     return thumbnail.save( dest );
+}
+
+void CoreThumbnailer::stop()
+{
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
+    if ( m_request != nullptr )
+        m_vlcMedia.thumbnailCancel( m_request );
 }
 
 }

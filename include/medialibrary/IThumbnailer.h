@@ -39,13 +39,18 @@ public:
      * @param position The position at which to generate the thumbnail, in the [0;1] range
      * @param destination The path in which to save the thumbnail
      *
-     * This method is expected to be blocking until the generation is successful.
+     * This method is expected to be blocking until the generation is
+     * successful or stopped.
      * Upon successful return, the <destination> path must contain the generated
      * thumbnail
      */
     virtual bool generate( const std::string& mrl,
                            uint32_t desiredWidth, uint32_t desiredHeight,
                            float position, const std::string& destination ) = 0;
+    /**
+     * @brief stop Stop any ongoing processing as soon as possible
+     */
+    virtual void stop() = 0;
 };
 
 }

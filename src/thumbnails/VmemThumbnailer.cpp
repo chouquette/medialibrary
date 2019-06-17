@@ -199,6 +199,11 @@ bool VmemThumbnailer::compress( Task& task, const std::string& dest )
                                    hOffset, vOffset );
 }
 
+void VmemThumbnailer::stop()
+{
+    // Not implemented
+}
+
 VmemThumbnailer::Task::Task( std::string mrl, uint32_t desiredWidth,
                              uint32_t desiredHeight )
     : mrl( std::move( mrl ) )

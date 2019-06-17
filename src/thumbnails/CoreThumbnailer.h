@@ -25,6 +25,9 @@
 #include "medialibrary/Types.h"
 #include "Types.h"
 #include "medialibrary/IThumbnailer.h"
+#include "compat/Mutex.h"
+
+#include <vlcpp/vlc.hpp>
 
 namespace medialibrary
 {
@@ -37,8 +40,13 @@ public:
     virtual bool generate( const std::string& mrl,
                            uint32_t desiredWidth, uint32_t desiredHeight,
                            float position, const std::string& dest ) override;
+    virtual void stop() override;
+
 private:
     MediaLibraryPtr m_ml;
+    compat::Mutex m_mutex;
+    VLC::Media m_vlcMedia;
+    VLC::Media::ThumbnailRequest* m_request;
 };
 
 }
