@@ -109,14 +109,6 @@ void ThumbnailerWorker::run()
             t = std::move( m_tasks.front() );
             m_tasks.pop();
         }
-        if ( t.media->isThumbnailGenerated( t.sizeType ) == true )
-        {
-            LOG_INFO( "Skipping thumbnail generation of a media with a thumbnail ",
-                      t.media->fileName() );
-            m_ml->getCb()->onMediaThumbnailReady( t.media,
-                                                  t.media->thumbnailMrl( t.sizeType ).empty() == false );
-            continue;
-        }
         bool res = generateThumbnail( t );
         m_ml->getCb()->onMediaThumbnailReady( t.media, res );
     }
@@ -170,14 +162,19 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
     auto dest = Thumbnail::pathForMedia( m_ml, task.media->id() );
     LOG_DEBUG( "Generating ", mrl, " thumbnail in ", dest );
     auto m = static_cast<Media*>( task.media.get() );
-    /*
-     * Insert a failure record before computing the thumbnail.
-     * If the thumbnailer crashes, we don't want to re-run it. If it succeeds,
-     * the thumbnail will be updated right after
-     * This is done here instead of from the mainloop as we don't want to prevent
-     * the thumbnail generation of a file that has been removed.
-     */
-    m->setThumbnail( "", Thumbnail::Origin::Media, task.sizeType, false );
+    if ( m->isThumbnailGenerated( task.sizeType ) == false )
+    {
+        /*
+         * Insert a failure record before computing the thumbnail.
+         * If the thumbnailer crashes, we don't want to re-run it. If it succeeds,
+         * the thumbnail will be updated right after
+         * This is done here instead of from the mainloop as we don't want to prevent
+         * the thumbnail generation of a file that has been removed.
+         *
+         * This assumes that the thumbnail won't crash if it succeeded once.
+         */
+        m->setThumbnail( "", Thumbnail::Origin::Media, task.sizeType, false );
+    }
 
     if ( m_generator->generate( mrl, task.desiredWidth, task.desiredHeight,
                                 dest ) == false )

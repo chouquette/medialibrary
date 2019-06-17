@@ -419,7 +419,13 @@ bool Media::requestThumbnail( ThumbnailSizeType sizeType, uint32_t desiredWidth,
     auto thumbnailer = m_ml->thumbnailer();
     if ( thumbnailer == nullptr )
         return false;
-    if ( isThumbnailGenerated( sizeType ) == true )
+    // We allow a new thumbnail to be generated, except if we have a failure
+    // stored. In this case, the user will explicitely have to ask for failed
+    // thumbnail regeneration (which most likely should only happen after an app
+    // update, after the bug causing the previous failures has been fixed in
+    // the underlying thumbnail)
+    auto t = thumbnail( sizeType );
+    if ( t != nullptr && t->isFailureRecord() == true )
         return false;
     thumbnailer->requestThumbnail( shared_from_this(), sizeType,
                                    desiredWidth, desiredHeight );
