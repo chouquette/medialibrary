@@ -91,7 +91,8 @@ void MockCallback::onParsingStatsUpdated(uint32_t percent)
     }
 }
 
-void MockCallback::onMediaThumbnailReady( MediaPtr media, bool success )
+void MockCallback::onMediaThumbnailReady( MediaPtr media, ThumbnailSizeType,
+                                          bool success )
 {
     std::unique_lock<compat::Mutex> lock( m_thumbnailMutex );
 

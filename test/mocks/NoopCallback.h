@@ -57,7 +57,7 @@ class NoopCallback : public IMediaLibraryCb
     virtual void onEntryPointBanned( const std::string&, bool ) override {}
     virtual void onEntryPointUnbanned( const std::string&, bool ) override {}
     virtual void onBackgroundTasksIdleChanged( bool ) override {}
-    virtual void onMediaThumbnailReady( MediaPtr, bool ) override {}
+    virtual void onMediaThumbnailReady( MediaPtr, ThumbnailSizeType, bool ) override {}
 };
 
 }
