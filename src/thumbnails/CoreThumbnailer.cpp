@@ -48,21 +48,20 @@ bool CoreThumbnailer::generate( const std::string& mrl, uint32_t desiredWidth,
     auto done = false;
     VLC::Picture thumbnail;
     {
-    std::unique_lock<compat::Mutex> l{ m_mutex };
+        std::unique_lock<compat::Mutex> l{ m_mutex };
 
-    m_vlcMedia = VLC::Media{ VLCInstance::get(), mrl, VLC::Media::FromType::FromLocation };
-    auto em = m_vlcMedia.eventManager();
+        m_vlcMedia = VLC::Media{ VLCInstance::get(), mrl, VLC::Media::FromType::FromLocation };
+        auto em = m_vlcMedia.eventManager();
 
-    em.onThumbnailGenerated([this, &cond, &thumbnail, &done]( const VLC::Picture* p ) {
-        {
-            std::unique_lock<compat::Mutex> l{ m_mutex };
-            if( p != nullptr )
-                thumbnail = *p;
-            done = true;
-        }
-        cond.notify_all();
-    });
-    {
+        em.onThumbnailGenerated([this, &cond, &thumbnail, &done]( const VLC::Picture* p ) {
+            {
+                std::unique_lock<compat::Mutex> l{ m_mutex };
+                if( p != nullptr )
+                    thumbnail = *p;
+                done = true;
+            }
+            cond.notify_all();
+        });
         m_request = m_vlcMedia.thumbnailRequestByPos( position, VLC::Media::ThumbnailSeekSpeed::Fast,
                                                        desiredWidth, desiredHeight, true,
                                                        VLC::Picture::Type::Jpg, 3000 );
@@ -72,9 +71,9 @@ bool CoreThumbnailer::generate( const std::string& mrl, uint32_t desiredWidth,
             return false;
         }
         cond.wait( l, [&done]() { return done == true; } );
-    }
-    m_request = nullptr;
-    m_vlcMedia = VLC::Media{};
+
+        m_request = nullptr;
+        m_vlcMedia = VLC::Media{};
     }
     if ( thumbnail.isValid() == false )
         return false;
