@@ -229,6 +229,25 @@ class IMedia
         /// was never played.
         ///
         virtual void removeFromHistory() = 0;
+
+        ///
+        /// \brief requestThumbnail Queues a thumbnail generation request for
+        /// this media, to be run asynchronously.
+        /// Upon completion (successful or not) IMediaLibraryCb::onMediaThumbnailReady
+        /// will be called.
+        /// In case a thumbnail was already generated for the media, false will be returned.
+        /// If so, no callback will be invoked
+        /// \param sizeType The size type of the thumbnail to generate
+        /// \param desiredWidth The desired thumbnail width
+        /// \param desiredHeight The desired thumbnail height
+        ///
+        /// The generated thumbnail will try to oblige by the requested size, while
+        /// respecting the source aspect ratio.
+        ///
+        /// This function is thread-safe
+        ///
+        virtual bool requestThumbnail( ThumbnailSizeType sizeType, uint32_t desiredWidth,
+                                       uint32_t desiredHeight ) = 0;
 };
 
 }

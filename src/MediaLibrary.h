@@ -173,6 +173,7 @@ public:
     sqlite::Connection* getConn() const;
     IMediaLibraryCb* getCb() const;
     std::shared_ptr<ModificationNotifier> getNotifier() const;
+    ThumbnailerWorker* thumbnailer() const;
 
     virtual IDeviceListerCb* setDeviceLister( DeviceListerPtr lister ) override;
     std::shared_ptr<fs::IFileSystemFactory> fsFactoryForMrl( const std::string& path ) const;
@@ -182,9 +183,6 @@ public:
     virtual void forceRescan() override;
 
     virtual void enableFailedThumbnailRegeneration() override;
-
-    virtual bool requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType,
-                                   uint32_t desiredWidth, uint32_t desiredHeight) override;
 
     virtual void addParserService( std::shared_ptr<parser::IParserService> service ) override;
 

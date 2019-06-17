@@ -1524,6 +1524,11 @@ std::shared_ptr<ModificationNotifier> MediaLibrary::getNotifier() const
     return m_modificationNotifier;
 }
 
+ThumbnailerWorker* MediaLibrary::thumbnailer() const
+{
+    return m_thumbnailer.get();
+}
+
 IDeviceListerCb* MediaLibrary::setDeviceLister( DeviceListerPtr lister )
 {
     assert( m_initialized == false );
@@ -1717,17 +1722,6 @@ void MediaLibrary::forceRescan()
 void MediaLibrary::enableFailedThumbnailRegeneration()
 {
     Thumbnail::deleteFailureRecords( this );
-}
-
-bool MediaLibrary::requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType,
-                                     uint32_t desiredWidth, uint32_t desiredHeight )
-{
-    if ( m_thumbnailer == nullptr )
-        return false;
-    if ( media->isThumbnailGenerated( sizeType ) == true )
-        return false;
-    m_thumbnailer->requestThumbnail( media, sizeType, desiredWidth, desiredHeight );
-    return true;
 }
 
 void MediaLibrary::addParserService( std::shared_ptr<parser::IParserService> service )

@@ -53,6 +53,7 @@
 #include "medialibrary/filesystem/IDevice.h"
 #include "utils/ModificationsNotifier.h"
 #include "utils/Filename.h"
+#include "thumbnails/ThumbnailerWorker.h"
 
 namespace medialibrary
 {
@@ -410,6 +411,19 @@ bool Media::unsetMetadata(IMedia::MetadataType type)
     if ( m_metadata.isReady() == false )
         m_metadata.init( m_id, IMedia::NbMeta );
     return m_metadata.unset( static_cast<MDType>( type ) );
+}
+
+bool Media::requestThumbnail( ThumbnailSizeType sizeType, uint32_t desiredWidth,
+                              uint32_t desiredHeight )
+{
+    auto thumbnailer = m_ml->thumbnailer();
+    if ( thumbnailer == nullptr )
+        return false;
+    if ( isThumbnailGenerated( sizeType ) == true )
+        return false;
+    thumbnailer->requestThumbnail( shared_from_this(), sizeType,
+                                   desiredWidth, desiredHeight );
+    return true;
 }
 
 void Media::setReleaseDate( unsigned int date )
