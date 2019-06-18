@@ -36,7 +36,7 @@ public:
 
     virtual bool generate( const std::string& mrl,
                            uint32_t desiredWidth, uint32_t desiredHeight,
-                           const std::string& dest) override;
+                           float position, const std::string& dest ) override;
 private:
     MediaLibraryPtr m_ml;
 };

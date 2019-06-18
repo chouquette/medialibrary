@@ -42,7 +42,8 @@ public:
                                 std::shared_ptr<IThumbnailer> thumbnailer );
     virtual ~ThumbnailerWorker();
     void requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType,
-                           uint32_t desiredWidth, uint32_t desiredHeight );
+                           uint32_t desiredWidth, uint32_t desiredHeight,
+                           float position );
     void pause();
     void resume();
 
@@ -53,6 +54,7 @@ private:
         ThumbnailSizeType sizeType;
         uint32_t desiredWidth;
         uint32_t desiredHeight;
+        float position;
     };
 
 private:

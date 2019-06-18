@@ -244,6 +244,7 @@ class IMedia
         /// \param sizeType The size type of the thumbnail to generate
         /// \param desiredWidth The desired thumbnail width
         /// \param desiredHeight The desired thumbnail height
+        /// \param position The position at which to generate the thumbnail, in [0;1] range
         ///
         /// The generated thumbnail will try to oblige by the requested size, while
         /// respecting the source aspect ratio.
@@ -251,7 +252,7 @@ class IMedia
         /// This function is thread-safe
         ///
         virtual bool requestThumbnail( ThumbnailSizeType sizeType, uint32_t desiredWidth,
-                                       uint32_t desiredHeight ) = 0;
+                                       uint32_t desiredHeight, float position ) = 0;
 };
 
 }

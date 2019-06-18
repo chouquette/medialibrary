@@ -146,7 +146,7 @@ class Media : public IMedia,
         virtual bool unsetMetadata( MetadataType type ) override;
 
         virtual bool requestThumbnail( ThumbnailSizeType sizeType, uint32_t desiredWidth,
-                                       uint32_t desiredHeight ) override;
+                                       uint32_t desiredHeight, float position ) override;
 
         void setReleaseDate( unsigned int date );
         bool save();

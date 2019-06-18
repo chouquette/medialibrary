@@ -36,6 +36,7 @@ public:
      * @param mrl The mrl to the main file for this media
      * @param desiredWidth The desired thumbnail width
      * @param desiredHeight The desired thumbnail height
+     * @param position The position at which to generate the thumbnail, in the [0;1] range
      * @param destination The path in which to save the thumbnail
      *
      * This method is expected to be blocking until the generation is successful.
@@ -44,7 +45,7 @@ public:
      */
     virtual bool generate( const std::string& mrl,
                            uint32_t desiredWidth, uint32_t desiredHeight,
-                           const std::string& destination ) = 0;
+                           float position, const std::string& destination ) = 0;
 };
 
 }

@@ -414,7 +414,7 @@ bool Media::unsetMetadata(IMedia::MetadataType type)
 }
 
 bool Media::requestThumbnail( ThumbnailSizeType sizeType, uint32_t desiredWidth,
-                              uint32_t desiredHeight )
+                              uint32_t desiredHeight, float position )
 {
     auto thumbnailer = m_ml->thumbnailer();
     if ( thumbnailer == nullptr )
@@ -428,7 +428,7 @@ bool Media::requestThumbnail( ThumbnailSizeType sizeType, uint32_t desiredWidth,
     if ( t != nullptr && t->isFailureRecord() == true )
         return false;
     thumbnailer->requestThumbnail( shared_from_this(), sizeType,
-                                   desiredWidth, desiredHeight );
+                                   desiredWidth, desiredHeight, position );
     return true;
 }
 

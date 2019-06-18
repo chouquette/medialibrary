@@ -50,7 +50,7 @@ VmemThumbnailer::VmemThumbnailer( MediaLibraryPtr ml )
 
 bool VmemThumbnailer::generate( const std::string& mrl,
                                 uint32_t desiredWidth, uint32_t desiredHeight,
-                                const std::string& dest )
+                                float position, const std::string& dest )
 {
     VLC::Media vlcMedia = VLC::Media( VLCInstance::get(), mrl,
                                       VLC::Media::FromType::FromLocation );
@@ -65,7 +65,7 @@ bool VmemThumbnailer::generate( const std::string& mrl,
     {
         std::ostringstream ss;
         // Duration is in ms, start-time in seconds, and we're aiming at 1/4th of the media
-        ss << ":start-time=" << duration / 4000;
+        ss << ":start-time=" << position * duration / 1000;
         vlcMedia.addOption( ss.str() );
     }
 
@@ -85,7 +85,7 @@ bool VmemThumbnailer::generate( const std::string& mrl,
     if ( duration <= 0 )
     {
         // Seek ahead to have a significant preview
-        res = seekAhead( task );
+        res = seekAhead( task, position );
         if ( res == false )
         {
             LOG_WARN( "Failed to generate ", mrl, " thumbnail: Failed to seek ahead" );
@@ -95,7 +95,7 @@ bool VmemThumbnailer::generate( const std::string& mrl,
     return takeThumbnail( task, dest );
 }
 
-bool VmemThumbnailer::seekAhead( Task& task )
+bool VmemThumbnailer::seekAhead( Task& task, float position )
 {
     float pos = .0f;
     auto event = task.mp.eventManager().onPositionChanged([&task, &pos](float p) {
@@ -106,7 +106,7 @@ bool VmemThumbnailer::seekAhead( Task& task )
     auto success = false;
     {
         std::unique_lock<compat::Mutex> lock( task.mutex );
-        task.mp.setPosition( .4f );
+        task.mp.setPosition( position );
         success = task.cond.wait_for( lock, std::chrono::seconds( 3 ), [&pos]() {
             return pos >= .1f;
         });
