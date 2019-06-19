@@ -26,6 +26,9 @@
 
 #include "Thumbnail.h"
 #include "utils/Filename.h"
+#include "Album.h"
+#include "Artist.h"
+#include "Media.h"
 
 namespace medialibrary
 {

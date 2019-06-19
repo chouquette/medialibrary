@@ -104,6 +104,8 @@
 
 #include "database/tables/Thumbnail_v17.sql"
 
+#include "database/tables/Thumbnail_triggers_v17.sql"
+
 /**********************************************
  * Remove an old incorrectly migrated trigger *
  **********************************************/

@@ -29,6 +29,7 @@
 #include "Thumbnail.h"
 #include "Media.h"
 #include "Artist.h"
+#include "Album.h"
 #include "utils/Filename.h"
 
 class Thumbnails : public Tests
@@ -327,4 +328,30 @@ TEST_F( Thumbnails, AutoDelete )
     m->removeThumbnail( ThumbnailSizeType::Thumbnail );
 
     ASSERT_EQ( 1u, ml->countNbThumbnails() );
+}
+
+TEST_F( Thumbnails, AutoDeleteAfterEntityRemoved )
+{
+    /*
+     * Checks that the thumbnail gets removed when the associated entity is removed
+     */
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "test.mkv" ) );
+    auto alb = std::static_pointer_cast<Album>( ml->createAlbum( "album" ) );
+    auto art = std::static_pointer_cast<Artist>( ml->createArtist( "artist" ) );
+    m->setThumbnail( "https://otters.org/fluffy.png", ThumbnailSizeType::Thumbnail );
+    alb->setThumbnail( std::make_shared<Thumbnail>( ml.get(), "https://thumbnail.org",
+                                                    Thumbnail::Origin::Album,
+                                                    ThumbnailSizeType::Thumbnail, false ) );
+    art->setThumbnail( "http://thumbnail.org/pangolin.png", ThumbnailSizeType::Thumbnail );
+
+    ASSERT_EQ( 3u, ml->countNbThumbnails() );
+
+    Media::destroy( ml.get(), m->id() );
+    ASSERT_EQ( 2u, ml->countNbThumbnails() );
+
+    Album::destroy( ml.get(), alb->id() );
+    ASSERT_EQ( 1u, ml->countNbThumbnails() );
+
+    Artist::destroy( ml.get(), art->id() );
+    ASSERT_EQ( 0u, ml->countNbThumbnails() );
 }
