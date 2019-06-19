@@ -219,6 +219,12 @@ void MediaLibrary::registerEntityHooks()
             return;
         m_modificationNotifier->notifyGenreRemoval( rowId );
     });
+    m_dbConnection->registerUpdateHook( Genre::Table::Name,
+                                        [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
+        if ( reason != sqlite::Connection::HookReason::Delete )
+            return;
+        m_modificationNotifier->notifyThumbnailRemoval( rowId );
+    });
 }
 
 bool MediaLibrary::validateSearchPattern( const std::string& pattern )

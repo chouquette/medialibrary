@@ -133,6 +133,11 @@ void ModificationNotifier::notifyGenreRemoval( int64_t genreId )
     notifyRemoval( genreId, m_genres );
 }
 
+void ModificationNotifier::notifyThumbnailRemoval( int64_t thumbnailId )
+{
+    notifyRemoval( thumbnailId, m_thumbnails );
+}
+
 void ModificationNotifier::flush()
 {
     std::unique_lock<compat::Mutex> lock( m_lock );
@@ -160,6 +165,7 @@ void ModificationNotifier::run()
     Queue<IAlbum> albums;
     Queue<IPlaylist> playlists;
     Queue<IGenre> genres;
+    Queue<void> thumbnails;
 
     while ( m_stop == false )
     {
@@ -182,33 +188,20 @@ void ModificationNotifier::run()
             checkQueue( m_albums, albums, nextTimeout, now );
             checkQueue( m_playlists, playlists, nextTimeout, now );
             checkQueue( m_genres, genres, nextTimeout, now );
+            checkQueue( m_thumbnails, thumbnails, nextTimeout, now );
             m_timeout = nextTimeout;
         }
-        // Best attempt at automatically removing the thumbnail upon media
-        // deletion. This is probably not the best place for doing so, but any
-        // other would probably require an extra thread
-        for ( auto mediaId : media.removed )
-            removeMediaThumbnail( mediaId );
         notify( std::move( media ), &IMediaLibraryCb::onMediaAdded, &IMediaLibraryCb::onMediaModified, &IMediaLibraryCb::onMediaDeleted );
         notify( std::move( artists ), &IMediaLibraryCb::onArtistsAdded, &IMediaLibraryCb::onArtistsModified, &IMediaLibraryCb::onArtistsDeleted );
-        for ( auto albumId : albums.removed )
-            removeAlbumThumbnail( albumId );
         notify( std::move( albums ), &IMediaLibraryCb::onAlbumsAdded, &IMediaLibraryCb::onAlbumsModified, &IMediaLibraryCb::onAlbumsDeleted );
         notify( std::move( playlists ), &IMediaLibraryCb::onPlaylistsAdded, &IMediaLibraryCb::onPlaylistsModified, &IMediaLibraryCb::onPlaylistsDeleted );
         notify( std::move( genres ), &IMediaLibraryCb::onGenresAdded, &IMediaLibraryCb::onGenresModified, &IMediaLibraryCb::onGenresDeleted );
+        for ( auto thumbnailId : thumbnails.removed )
+        {
+            auto path = Thumbnail::path( m_ml, thumbnailId );
+            utils::fs::remove( path );
+        }
     }
-}
-
-void ModificationNotifier::removeMediaThumbnail( int64_t mediaId )
-{
-    auto path = Thumbnail::pathForMedia( m_ml, mediaId );
-    utils::fs::remove( path );
-}
-
-void ModificationNotifier::removeAlbumThumbnail( int64_t albumId )
-{
-    auto path = Thumbnail::pathForAlbum( m_ml, albumId );
-    utils::fs::remove( path );
 }
 
 }

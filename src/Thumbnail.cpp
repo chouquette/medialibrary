@@ -234,16 +234,6 @@ std::string Thumbnail::path( MediaLibraryPtr ml, int64_t thumbnailId )
     return ml->thumbnailPath() + std::to_string( thumbnailId ) + ".jpg";
 }
 
-std::string Thumbnail::pathForMedia( MediaLibraryPtr ml, int64_t mediaId )
-{
-    return ml->thumbnailPath() + std::to_string( mediaId ) + ".jpg";
-}
-
-std::string Thumbnail::pathForAlbum( MediaLibraryPtr ml, int64_t albumId )
-{
-    return ml->thumbnailPath() + "album_" + std::to_string( albumId ) + ".jpg";
-}
-
 std::string Thumbnail::toRelativeMrl( const std::string& absoluteMrl )
 {
     // We can still

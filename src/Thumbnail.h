@@ -163,8 +163,6 @@ public:
     static bool deleteFailureRecords( MediaLibraryPtr ml );
 
     static std::string path( MediaLibraryPtr ml, int64_t thumbnailId );
-    static std::string pathForMedia( MediaLibraryPtr ml, int64_t mediaId );
-    static std::string pathForAlbum( MediaLibraryPtr ml, int64_t albumId );
 
     static const std::string EmptyMrl;
 

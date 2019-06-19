@@ -63,6 +63,8 @@ public:
     void notifyGenreModification( GenrePtr genre );
     void notifyGenreRemoval( int64_t genreId );
 
+    void notifyThumbnailRemoval( int64_t thumbnailId );
+
     /**
      * @brief flush Flushes the notifications queues
      *
@@ -76,8 +78,6 @@ public:
 private:
     void run();
     void notify();
-    void removeMediaThumbnail( int64_t mediaId );
-    void removeAlbumThumbnail( int64_t albumId );
 
 private:
     // Use a dummy type since only partial specialization is allowed.
@@ -175,6 +175,7 @@ private:
     Queue<IAlbum> m_albums;
     Queue<IPlaylist> m_playlists;
     Queue<IGenre> m_genres;
+    Queue<void> m_thumbnails;
 
     // Notifier thread
     compat::Mutex m_lock;
