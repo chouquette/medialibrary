@@ -712,19 +712,14 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
         // We don't insert the thumbnail in DB yet, to process everything
         // as part of the transaction
 
-        // Fetch any potentially existing media thumbnail first, to update
-        // it in case it already exist and we're reloading a media
-        thumbnail = media->thumbnail( ThumbnailSizeType::Thumbnail );
-        if ( thumbnail != nullptr )
-        {
-            assert( item.isRefresh() == true );
-            thumbnail->update( artworkMrl, false );
-        }
-        else
-            thumbnail = std::make_shared<Thumbnail>( m_ml, artworkMrl,
-                                                     Thumbnail::Origin::Media,
-                                                     ThumbnailSizeType::Thumbnail,
-                                                     false );
+        // If this task is a refresh task, we already dropped the thumbnail
+        // in case we had an artwork mrl.
+        // If this is a new media, we won't have a thumbnail at all
+        assert( media->thumbnail( ThumbnailSizeType::Thumbnail ) == nullptr );
+        thumbnail = std::make_shared<Thumbnail>( m_ml, artworkMrl,
+                                                 Thumbnail::Origin::Media,
+                                                 ThumbnailSizeType::Thumbnail,
+                                                 false );
     }
 
     auto res = sqlite::Tools::withRetries( 3,
