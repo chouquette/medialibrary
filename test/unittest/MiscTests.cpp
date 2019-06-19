@@ -201,6 +201,7 @@ TEST_F( DbModel, NbTriggers )
     ASSERT_EQ( InitializeResult::Success, res );
     CheckNbTriggers( NbTriggers );
     CheckTriggers( expectedTriggers );
+    CheckNbIndexes( NbIndexes );
 }
 
 TEST_F( DbModel, Upgrade3to5 )
