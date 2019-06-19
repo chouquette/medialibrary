@@ -161,8 +161,6 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
         return false;
     }
 
-    auto dest = Thumbnail::pathForMedia( m_ml, task.media->id() );
-    LOG_DEBUG( "Generating ", mrl, " thumbnail in ", dest );
     auto m = static_cast<Media*>( task.media.get() );
     if ( m->isThumbnailGenerated( task.sizeType ) == false )
     {
@@ -177,6 +175,10 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
          */
         m->setThumbnail( "", Thumbnail::Origin::Media, task.sizeType, false );
     }
+    auto thumbnail = m->thumbnail( task.sizeType );
+    assert( thumbnail != nullptr );
+    auto dest = Thumbnail::path( m_ml, thumbnail->id() );
+    LOG_DEBUG( "Generating ", mrl, " thumbnail in ", dest );
 
     if ( m_generator->generate( mrl, task.desiredWidth, task.desiredHeight,
                                 task.position, dest ) == false )
