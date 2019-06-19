@@ -39,7 +39,7 @@
 namespace
 {
     auto constexpr NbTriggers = 34u;
-    auto constexpr NbIndexes = 35u;
+    auto constexpr NbIndexes = 16u;
     const std::vector<const char*> expectedTriggers{
         "add_album_track", "cascade_file_deletion", "decrement_media_nb_playlist",
         "delete_album_fts", "delete_album_track", "delete_artist_fts",
@@ -167,7 +167,8 @@ public:
     void CheckNbIndexes( uint32_t expected )
     {
         medialibrary::sqlite::Statement stmt{ ml->getDbConn()->handle(),
-                "SELECT COUNT(*) FROM sqlite_master WHERE type='index'" };
+                "SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND "
+                "name NOT LIKE 'sqlite_autoindex%'" };
         stmt.execute();
         auto row = stmt.row();
         uint32_t nbIndexes;
