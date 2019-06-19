@@ -171,7 +171,7 @@ public:
         auto row = stmt.row();
         uint32_t nbIndexes;
         row >> nbIndexes;
-        ASSERT_EQ( nbIndexes, expected );
+        ASSERT_EQ( expected, nbIndexes );
     }
 
     virtual void TearDown() override
@@ -186,7 +186,7 @@ public:
             auto row = stmt.row();
             uint32_t dbVersion;
             row >> dbVersion;
-            ASSERT_EQ( dbVersion, Settings::DbModelVersion );
+            ASSERT_EQ( Settings::DbModelVersion, dbVersion );
         }
         medialibrary::sqlite::Statement::FlushStatementCache();
     }
