@@ -80,11 +80,19 @@ private:
     void removeAlbumThumbnail( int64_t albumId );
 
 private:
-    template <typename T>
+    // Use a dummy type since only partial specialization is allowed.
+    template <typename T, typename DUMMY = void>
     struct Queue
     {
         std::vector<std::shared_ptr<T>> added;
         std::vector<std::shared_ptr<T>> modified;
+        std::vector<int64_t> removed;
+        std::chrono::time_point<std::chrono::steady_clock> timeout;
+    };
+
+    template <typename DUMMY>
+    struct Queue<void, DUMMY>
+    {
         std::vector<int64_t> removed;
         std::chrono::time_point<std::chrono::steady_clock> timeout;
     };
