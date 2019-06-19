@@ -39,6 +39,7 @@
 namespace
 {
     auto constexpr NbTriggers = 34u;
+    auto constexpr NbIndexes = 35u;
     const std::vector<const char*> expectedTriggers{
         "add_album_track", "cascade_file_deletion", "decrement_media_nb_playlist",
         "delete_album_fts", "delete_album_track", "delete_artist_fts",
@@ -311,7 +312,7 @@ TEST_F( DbModel, Upgrade14to15 )
     auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     CheckNbTriggers( NbTriggers );
-    CheckNbIndexes( 35 );
+    CheckNbIndexes( NbIndexes );
     CheckTriggers( expectedTriggers );
 }
 
@@ -321,7 +322,7 @@ TEST_F( DbModel, Upgrade15to16 )
     auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     CheckNbTriggers( NbTriggers );
-    CheckNbIndexes( 35 );
+    CheckNbIndexes( NbIndexes );
     CheckTriggers( expectedTriggers );
 
     // Check that playlists were properly migrated
@@ -355,6 +356,6 @@ TEST_F( DbModel, Upgrade16to17 )
     auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     CheckNbTriggers( NbTriggers );
-    CheckNbIndexes( 35 );
+    CheckNbIndexes( NbIndexes );
     CheckTriggers( expectedTriggers );
 }
