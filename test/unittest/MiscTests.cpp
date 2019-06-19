@@ -38,10 +38,11 @@
 
 namespace
 {
-    auto constexpr NbTriggers = 34u;
+    auto constexpr NbTriggers = 35u;
     auto constexpr NbIndexes = 17u;
     const std::vector<const char*> expectedTriggers{
-        "add_album_track", "cascade_file_deletion", "decrement_media_nb_playlist",
+        "add_album_track", "auto_delete_thumbnails_after_delete", "cascade_file_deletion",
+        "decrement_media_nb_playlist",
         "delete_album_fts", "delete_album_track", "delete_artist_fts",
         "delete_folder_fts", "delete_genre_fts", "delete_label_fts",
         "delete_media_fts", "delete_playlist_fts", "delete_show_fts",

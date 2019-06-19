@@ -181,6 +181,7 @@ void MediaLibrary::createAllTriggers()
     Playlist::createTriggers( m_dbConnection.get() );
     Label::createTriggers( m_dbConnection.get() );
     Show::createTriggers( m_dbConnection.get() );
+    Thumbnail::createTriggers( m_dbConnection.get() );
 }
 
 void MediaLibrary::registerEntityHooks()

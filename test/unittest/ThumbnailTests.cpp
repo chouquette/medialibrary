@@ -294,3 +294,37 @@ TEST_F( Thumbnails, CheckMultipleSizes )
     ASSERT_EQ( Thumbnail::Origin::UserProvided, thumbnail->origin() );
     ASSERT_EQ( Thumbnail::Origin::UserProvided, banner->origin() );
 }
+
+TEST_F( Thumbnails, AutoDelete )
+{
+    /*
+     * Add 3 media, and share a thumbnail between 2 of them.
+     * When the shared thumbnail gets unlinked from the 1st media, it should
+     * stay in db. We then unlink the 2nd media from the shared thumbnail, and
+     * expect the thumbnail to be removed afterward.
+     */
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media1.mkv" ) );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mkv" ) );
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mkv" ) );
+
+    auto res = m->setThumbnail( "https://thumbnail.org/otter.gif",
+                                ThumbnailSizeType::Thumbnail );
+    ASSERT_TRUE( res );
+    res = m2->setThumbnail( "https://thumbnail.org/cutter_otter.gif",
+                            ThumbnailSizeType::Thumbnail );
+    ASSERT_TRUE( res );
+    auto thumbnail = m->thumbnail( ThumbnailSizeType::Thumbnail );
+    ASSERT_NE( nullptr, thumbnail );
+    res = m3->setThumbnail( thumbnail );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( 2u, ml->countNbThumbnails() );
+
+    m3->removeThumbnail( ThumbnailSizeType::Thumbnail );
+
+    ASSERT_EQ( 2u, ml->countNbThumbnails() );
+
+    m->removeThumbnail( ThumbnailSizeType::Thumbnail );
+
+    ASSERT_EQ( 1u, ml->countNbThumbnails() );
+}

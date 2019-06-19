@@ -173,6 +173,15 @@ void Thumbnail::createTable( sqlite::Connection* dbConnection )
         sqlite::Tools::executeRequest( dbConnection, req );
 }
 
+void Thumbnail::createTriggers( sqlite::Connection* dbConnection )
+{
+    const std::string reqs[] = {
+        #include "database/tables/Thumbnail_triggers_v17.sql"
+    };
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConnection, req );
+}
+
 std::shared_ptr<Thumbnail> Thumbnail::create( MediaLibraryPtr ml, std::string mrl,
                                               Thumbnail::Origin origin,
                                               ThumbnailSizeType sizeType, bool isOwned )

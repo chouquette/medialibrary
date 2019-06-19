@@ -143,6 +143,7 @@ public:
     bool isFailureRecord() const;
 
     static void createTable( sqlite::Connection* dbConnection );
+    static void createTriggers( sqlite::Connection* dbConnection );
     static std::shared_ptr<Thumbnail> create( MediaLibraryPtr ml, std::string mrl,
                                               Origin origin, ThumbnailSizeType sizeType,
                                               bool isOwned );
