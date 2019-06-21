@@ -66,7 +66,7 @@ bool CoreThumbnailer::generate( const std::string& mrl, uint32_t desiredWidth,
     {
         std::unique_lock<compat::Mutex> l( lock );
         auto request = vlcMedia.thumbnailRequestByPos( position, VLC::Media::ThumbnailSeekSpeed::Fast,
-                                                       desiredWidth, desiredHeight,
+                                                       desiredWidth, desiredHeight, true,
                                                        VLC::Picture::Type::Jpg, 3000 );
         if ( request == nullptr )
             return false;
