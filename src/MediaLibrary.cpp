@@ -1662,6 +1662,11 @@ void MediaLibrary::unbanFolder( const std::string& entryPoint )
     m_discovererWorker->unban( entryPoint );
 }
 
+Query<IFolder> MediaLibrary::bannedEntryPoints() const
+{
+    return Folder::entryPoints( this, true, 0 );
+}
+
 const std::string& MediaLibrary::thumbnailPath() const
 {
     return m_thumbnailPath;

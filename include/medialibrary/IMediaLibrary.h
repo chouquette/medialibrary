@@ -504,6 +504,13 @@ public:
      * discovery/ban/unban operations have completed.
      */
     virtual void unbanFolder( const std::string& entryPoint ) = 0;
+    /**
+     * @brief bannedEntryPoints Returns a query representing the banned entry points
+     *
+     * The result set will include entry points on missing devices as well. Folder
+     * hierarchy isn't preserved, and the results are flattened.
+     */
+    virtual Query<IFolder> bannedEntryPoints() const = 0;
     virtual void setLogger( ILogger* logger ) = 0;
     /**
      * @brief pauseBackgroundOperations Will stop potentially CPU intensive background

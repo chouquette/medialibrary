@@ -158,6 +158,7 @@ public:
     virtual void removeEntryPoint( const std::string& entryPoint ) override;
     virtual void banFolder( const std::string& path ) override;
     virtual void unbanFolder( const std::string& path ) override;
+    virtual Query<IFolder> bannedEntryPoints() const override;
 
     const std::string& thumbnailPath() const;
     virtual void setLogger( ILogger* logger ) override;

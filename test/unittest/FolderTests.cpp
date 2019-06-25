@@ -793,3 +793,36 @@ TEST_F( FoldersNoDiscover, IsBanned )
     res = ml->isBanned( "not even an mrl" );
     ASSERT_FALSE( res );
 }
+
+TEST_F( FoldersNoDiscover, BannedEntryPoints )
+{
+    auto res = ml->bannedEntryPoints();
+    ASSERT_NE( nullptr, res );
+    ASSERT_EQ( 0u, res->all().size() );
+    ASSERT_EQ( 0u, res->count() );
+
+    ml->banFolder( mock::FileSystemFactory::SubFolder );
+    cbMock->waitBanFolder();
+
+    res = ml->bannedEntryPoints();
+    ASSERT_NE( nullptr, res );
+    ASSERT_EQ( 1u, res->all().size() );
+    ASSERT_EQ( 1u, res->count() );
+    ASSERT_EQ( mock::FileSystemFactory::SubFolder, res->all()[0]->mrl() );
+
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    res = ml->bannedEntryPoints();
+    ASSERT_NE( nullptr, res );
+    ASSERT_EQ( 1u, res->all().size() );
+    ASSERT_EQ( 1u, res->count() );
+    ASSERT_EQ( mock::FileSystemFactory::SubFolder, res->all()[0]->mrl() );
+
+    res = ml->entryPoints();
+    ASSERT_NE( nullptr, res );
+    ASSERT_EQ( 1u, res->all().size() );
+    ASSERT_EQ( 1u, res->count() );
+    ASSERT_EQ( mock::FileSystemFactory::Root, res->all()[0]->mrl() );
+}
