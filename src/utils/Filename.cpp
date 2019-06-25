@@ -207,8 +207,9 @@ std::string toMrl( const std::string& path )
 {
     auto normalized = path;
     std::replace( begin( normalized ), end( normalized ), '\\', '/' );
+    if ( isalpha( normalized[0] ) )
+        normalized = "/" + normalized;
     return std::string{ "file://" } +
-            ( isalpha( normalized[0] ) ? "/" : "" ) +
             utils::url::encode( normalized );
 }
 
