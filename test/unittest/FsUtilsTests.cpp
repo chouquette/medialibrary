@@ -121,22 +121,28 @@ TEST( FsUtils, toLocalPath )
     ASSERT_EQ( "/yea /sp ace", utils::file::toLocalPath( "file:///yea%20/sp%20ace" ) );
     ASSERT_EQ( "/tést/ßóíú/file", utils::file::toLocalPath( "file:///t%C3%A9st/%C3%9F%C3%B3%C3%AD%C3%BA/file" ) );
     ASSERT_EQ( "/&/#/~", utils::file::toLocalPath( "file:///%26/%23/%7E" ) );
+    ASSERT_EQ( "/yea /sp ace", utils::file::toLocalPath( "file:///yea%20/sp%20ace" ) );
+    ASSERT_EQ( "/c/foo/bar.mkv", utils::file::toLocalPath( "file:///c/foo/bar.mkv" ) );
 #else
     ASSERT_EQ( "a\\b\\c\\movie.avi", utils::file::toLocalPath( "file:///a/b/c/movie.avi" ) );
     ASSERT_EQ( "x\\yea \\sp ace", utils::file::toLocalPath( "file:///x/yea%20/sp%20ace" ) );
     ASSERT_EQ( "d\\tést\\ßóíú\\file", utils::file::toLocalPath( "file:///d/t%C3%A9st/%C3%9F%C3%B3%C3%AD%C3%BA/file" ) );
     ASSERT_EQ( "c\\&\\#\\~", utils::file::toLocalPath( "file:///c/%26/%23/%7E" ) );
+    ASSERT_EQ( "c\\foo\\bar.mkv", utils::file::toLocalPath( "file:///c/foo/bar.mkv" ) );
+    ASSERT_EQ( "x\\yea \\sp ace", utils::file::toLocalPath( "file:///x/yea%20/sp%20ace" ) );
 #endif
 }
 
 TEST( FsUtils, toMrl )
 {
 #ifndef _WIN32
-    ASSERT_EQ( "/yea /sp ace", utils::file::toLocalPath( "file:///yea%20/sp%20ace" ) );
-    ASSERT_EQ( "/c/foo/bar.mkv", utils::file::toLocalPath( "file:///c/foo/bar.mkv" ) );
+    ASSERT_EQ( "file:///media/file.mkv", utils::file::toMrl( "/media/file.mkv" ) );
+    ASSERT_EQ( "file://", utils::file::toMrl( "" ) );
+    ASSERT_EQ( "file:///path%20with%20spaces/file%20.mkv", utils::file::toMrl( "/path with spaces/file .mkv" ) );
 #else
-    ASSERT_EQ( "c\\foo\\bar.mkv", utils::file::toLocalPath( "file:///c/foo/bar.mkv" ) );
-    ASSERT_EQ( "x\\yea \\sp ace", utils::file::toLocalPath( "file:///x/yea%20/sp%20ace" ) );
+    ASSERT_EQ( "file://", utils::file::toMrl( "" ) );
+    ASSERT_EQ( "file:///C:/path/to/file.mkv", utils::file::toMrl( "C:\\path\\to/file.mkv" ) );
+    ASSERT_EQ( "file:///C:/path/to%3Aa/file%20with%20spaces.mkv", utils::file::toMrl( "C:\\path\\to:a\\file with spaces.mkv" ) );
 #endif
 }
 
