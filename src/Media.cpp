@@ -780,6 +780,10 @@ bool Media::setTitle( const std::string& title )
     }
 
     m_title = title;
+
+    auto notifier = m_ml->getNotifier();
+    if ( notifier != nullptr )
+        notifier->notifyMediaModification( shared_from_this() );
     return true;
 }
 
