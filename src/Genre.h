@@ -50,7 +50,8 @@ public:
     virtual Query<IArtist> artists( const QueryParameters* params ) const override;
     virtual Query<IArtist> searchArtists( const std::string& pattern,
                                          const QueryParameters* params = nullptr ) const override;
-    virtual Query<IMedia> tracks( const QueryParameters* params ) const override;
+    virtual Query<IMedia> tracks( bool withThumbnail,
+                                  const QueryParameters* params ) const override;
     virtual Query<IMedia> searchTracks( const std::string& pattern,
                                   const QueryParameters* params = nullptr ) const override;
     virtual Query<IAlbum> albums( const QueryParameters* params ) const override;

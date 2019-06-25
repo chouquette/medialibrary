@@ -48,7 +48,7 @@ TEST_F( Genres, Create )
 {
     ASSERT_NE( nullptr, g );
     ASSERT_EQ( "genre", g->name() );
-    auto tracks = g->tracks( nullptr )->all();
+    auto tracks = g->tracks( false, nullptr )->all();
     ASSERT_EQ( 0u, tracks.size() );
 }
 
@@ -69,7 +69,7 @@ TEST_F( Genres, ListAlbumTracks )
         auto m = std::static_pointer_cast<Media>( ml->addMedia( "track" + std::to_string( i ) + ".mp3" ) );
         auto t = a->addTrack( m, i, 1, 0, i != 1 ? g.get() : nullptr );
     }
-    auto tracks = g->tracks( nullptr )->all();
+    auto tracks = g->tracks( false, nullptr )->all();
     ASSERT_EQ( 2u, tracks.size() );
 }
 
@@ -173,13 +173,13 @@ TEST_F( Genres, SortTracks )
         m->save();
     }
     QueryParameters params { SortingCriteria::Duration, false };
-    auto tracks = g->tracks( &params )->all();
+    auto tracks = g->tracks( false, &params )->all();
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( 1u, tracks[0]->albumTrack()->trackNumber() );
     ASSERT_EQ( 2u, tracks[1]->albumTrack()->trackNumber() );
 
     params.desc = true;
-    tracks = g->tracks( &params )->all();
+    tracks = g->tracks( false, &params )->all();
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( 1u, tracks[1]->albumTrack()->trackNumber() );
     ASSERT_EQ( 2u, tracks[0]->albumTrack()->trackNumber() );
@@ -306,4 +306,26 @@ TEST_F( Genres, SearchAlbums )
     albums = query->all();
     ASSERT_EQ( 2u, albums.size() );
     ASSERT_EQ( a1->id(), albums[0]->id() );
+}
+
+TEST_F( Genres, WithThumbnail )
+{
+    auto a1 = ml->createAlbum( "an album" );
+
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
+    auto t = a1->addTrack( m, 1, 1, 0, g.get() );
+    m->save();
+    m->setThumbnail( "file:///path/to/thumbnail.png", ThumbnailSizeType::Thumbnail );
+
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
+    auto t2 = a1->addTrack( m2, 1, 1, 0, g.get() );
+    m2->save();
+
+    auto tracks = g->tracks( true, nullptr );
+    ASSERT_EQ( 1u, tracks->count() );
+    ASSERT_EQ( 1u, tracks->all().size() );
+
+    tracks = g->tracks( false, nullptr );
+    ASSERT_EQ( 2u, tracks->count() );
+    ASSERT_EQ( 2u, tracks->all().size() );
 }

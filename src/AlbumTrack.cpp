@@ -140,11 +140,17 @@ AlbumTrackPtr AlbumTrack::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
     return fetch( ml, req, mediaId );
 }
 
-Query<IMedia> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId, const QueryParameters* params )
+Query<IMedia> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId,
+                                     bool withThumbnail, const QueryParameters* params )
 {
     std::string req = "FROM " + Media::Table::Name + " m"
             " INNER JOIN " + AlbumTrack::Table::Name + " t ON m.id_media = t.media_id"
             " WHERE t.genre_id = ?1 AND m.is_present = 1";
+    if ( withThumbnail == true )
+    {
+        req += " AND EXISTS(SELECT entity_id FROM " + Thumbnail::LinkingTable::Name +
+               " WHERE entity_id = m.id_media AND entity_type = ?2)";
+    }
     std::string orderBy = "ORDER BY ";
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
     auto desc = params != nullptr ? params->desc : false;
@@ -175,6 +181,10 @@ Query<IMedia> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId, const 
 
     if ( desc == true )
         orderBy += " DESC";
+    if ( withThumbnail == true )
+        return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
+                                          std::move( orderBy ), genreId,
+                                          Thumbnail::EntityType::Media );
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       std::move( orderBy ), genreId );
 }
