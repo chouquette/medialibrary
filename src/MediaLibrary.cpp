@@ -1611,6 +1611,14 @@ bool MediaLibrary::isIndexed( const std::string& mrl ) const
     return folder != nullptr;
 }
 
+bool MediaLibrary::isBanned( const std::string& mrl ) const
+{
+    auto folder = Folder::fromMrl( this, mrl, Folder::BannedType::Any );
+    if ( folder == nullptr )
+        return false;
+    return folder->isBanned();
+}
+
 Query<IFolder> MediaLibrary::folders( IMedia::Type type,
                                       const QueryParameters* params ) const
 {

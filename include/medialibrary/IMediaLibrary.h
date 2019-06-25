@@ -452,6 +452,13 @@ public:
      */
     virtual bool isIndexed( const std::string& mrl ) const = 0;
     /**
+     * @brief isBanned Returns true if the folder represented by the MRL is banned
+     * @param mrl The folder MRL to probe
+     * @return true is banned, false otherwise (including if the MRL is not matching
+     *         any known folder)
+     */
+    virtual bool isBanned( const std::string& mrl ) const = 0;
+    /**
      * @brief folders Returns a flattened list of all folders containing at least a media of a given type
      * @param type A required type of media, or IMedia::Type::Unknown if any media type is fine.
      * @param params A query parameters object

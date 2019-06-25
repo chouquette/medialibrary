@@ -780,3 +780,16 @@ TEST_F( FoldersNoDiscover, Name )
     ASSERT_EQ( "folder with spaces", spacesFolder->name() );
     ASSERT_EQ( newFolder, spacesFolder->mrl() );
 }
+
+TEST_F( FoldersNoDiscover, IsBanned )
+{
+    auto res = ml->isBanned( mock::FileSystemFactory::Root );
+    ASSERT_FALSE( res );
+    ml->banFolder( mock::FileSystemFactory::Root );
+    cbMock->waitBanFolder();
+    res = ml->isBanned( mock::FileSystemFactory::Root );
+    ASSERT_TRUE( res );
+
+    res = ml->isBanned( "not even an mrl" );
+    ASSERT_FALSE( res );
+}
