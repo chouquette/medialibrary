@@ -71,7 +71,7 @@ public:
                                            const std::string& pattern,
                                            IMedia::Type type,
                                            const QueryParameters* params );
-    static Query<IFolder> entryPoints( MediaLibraryPtr ml, int64_t deviceId );
+    static Query<IFolder> entryPoints( MediaLibraryPtr ml, bool banned, int64_t deviceId );
 
     virtual int64_t id() const override;
     virtual const std::string& mrl() const override;

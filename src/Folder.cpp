@@ -401,14 +401,14 @@ Query<IFolder> Folder::searchWithMedia( MediaLibraryPtr ml,
     return make_query<Folder, IFolder>( ml, "*", req, sortRequest( params ), pattern );
 }
 
-Query<IFolder> Folder::entryPoints( MediaLibraryPtr ml, int64_t deviceId )
+Query<IFolder> Folder::entryPoints( MediaLibraryPtr ml, bool banned, int64_t deviceId )
 {
     std::string req = "FROM " + Folder::Table::Name + " WHERE parent_id IS NULL"
-            " AND is_banned = 0";
+            " AND is_banned = ?";
     if ( deviceId == 0 )
-        return make_query<Folder, IFolder>( ml, "*", req, "" );
+        return make_query<Folder, IFolder>( ml, "*", req, "", banned );
     req += " AND device_id = ?";
-    return make_query<Folder, IFolder>( ml, "*", req, "",
+    return make_query<Folder, IFolder>( ml, "*", req, "", banned,
                                         sqlite::ForeignKey{ deviceId } );
 }
 

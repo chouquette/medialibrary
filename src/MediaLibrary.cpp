@@ -1601,7 +1601,7 @@ bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
 
 Query<IFolder> MediaLibrary::entryPoints() const
 {
-    return Folder::entryPoints( this, 0 );
+    return Folder::entryPoints( this, false, 0 );
 }
 
 bool MediaLibrary::isIndexed( const std::string& mrl ) const

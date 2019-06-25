@@ -274,7 +274,7 @@ void DiscovererWorker::runReloadDevice( int64_t deviceId )
         LOG_ERROR( "Can't fetch device ", deviceId, " to reload it" );
         return;
     }
-    auto entryPoints = Folder::entryPoints( m_ml, device->id() );
+    auto entryPoints = Folder::entryPoints( m_ml, false, device->id() );
     if ( entryPoints == nullptr )
         return;
     for ( const auto& ep : entryPoints->all() )
