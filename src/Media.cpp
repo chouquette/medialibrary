@@ -598,7 +598,7 @@ std::shared_ptr<File> Media::addFile( const fs::IFile& fileFs, int64_t parentFol
     return File::createFromMedia( m_ml, m_id, type, fileFs, parentFolderId, isFolderFsRemovable);
 }
 
-FilePtr Media::addExternalMrl( const std::string& mrl , IFile::Type type )
+FilePtr Media::addExternalMrl( const std::string& mrl, IFile::Type type )
 {
     try
     {
