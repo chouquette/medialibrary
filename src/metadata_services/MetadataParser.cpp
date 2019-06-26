@@ -823,8 +823,17 @@ void MetadataAnalyzer::relocateThumbnail( Thumbnail& thumbnail, int64_t mediaId 
     auto destPath = m_ml->thumbnailPath() +
                     std::to_string( mediaId ) + "." +
                     utils::file::extension( originalMrl );
-    if ( utils::fs::copy( utils::file::toLocalPath( originalMrl ),
-                          destPath ) == true )
+    std::string localPath;
+    try
+    {
+        localPath = utils::file::toLocalPath( originalMrl );
+    }
+    catch ( const std::exception& ex )
+    {
+        LOG_ERROR( "Failed to relocate thumbnail ", originalMrl, ": ", ex.what() );
+        return;
+    }
+    if ( utils::fs::copy( localPath, destPath ) == true )
     {
         auto destMrl = utils::file::toMrl( destPath );
         if ( sqlite::Tools::withRetries( 3, [&thumbnail, &destMrl]() {
