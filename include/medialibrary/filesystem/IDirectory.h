@@ -45,6 +45,12 @@ namespace fs
         /// Returns a list of absolute path to this folder subdirectories
         virtual const std::vector<std::shared_ptr<IDirectory>>& dirs() const = 0;
         virtual std::shared_ptr<IDevice> device() const = 0;
+        ///
+        /// \brief file Returns a file matching the provided mrl from this directory
+        /// \param mrl A file mrl. It can be an absolute file mrl, or just the filename (url encoded)
+        /// \return An IFile instance if a file matched, nullptr otherwise.
+        ///
+        virtual std::shared_ptr<IFile> file( const std::string& mrl ) const = 0;
     };
 }
 

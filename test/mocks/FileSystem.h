@@ -369,6 +369,11 @@ class NoopDirectory : public fs::IDirectory
         abort();
     }
 
+    virtual std::shared_ptr<fs::IFile> file( const std::string& ) const override
+    {
+        abort();
+    }
+
     virtual const std::vector<std::shared_ptr<fs::IDirectory>>& dirs() const override
     {
         abort();

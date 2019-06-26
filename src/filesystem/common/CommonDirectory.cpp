@@ -25,11 +25,13 @@
 #endif
 
 #include "CommonDirectory.h"
+#include "medialibrary/filesystem/IFile.h"
 #include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "utils/Filename.h"
 #include <dirent.h>
 #include <cerrno>
 #include <cstring>
+#include <algorithm>
 
 namespace medialibrary
 {
@@ -60,6 +62,21 @@ std::shared_ptr<IDevice> CommonDirectory::device() const
     if ( m_device == nullptr )
         m_device = m_fsFactory.createDeviceFromMrl( mrl() );
     return m_device;
+}
+
+std::shared_ptr<IFile> CommonDirectory::file( const std::string& mrl ) const
+{
+    auto fs = files();
+    // Don't compare entire mrls, this might yield false negative when a
+    // device has multiple mountpoints.
+    auto fileName = utils::file::fileName( mrl );
+    auto it = std::find_if( cbegin( fs ), cend( fs ),
+                            [&fileName]( const std::shared_ptr<fs::IFile> f ) {
+                                return f->name() == fileName;
+                            });
+    if ( it == cend( fs ) )
+        return nullptr;
+    return *it;
 }
 
 }
