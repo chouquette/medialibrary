@@ -412,26 +412,14 @@ bool Task::restoreLinkedEntities()
     std::shared_ptr<fs::IFile> fileFs;
     try
     {
-        auto files = parentFolderFs->files();
-        // Don't compare entire mrls, this might yield false negative when a
-        // device has multiple mountpoints.
-        auto fileName = utils::file::fileName( mrl );
-        auto it = std::find_if( begin( files ), end( files ), [&fileName]( std::shared_ptr<fs::IFile> f ) {
-            return f->name() == fileName;
-        });
-        if ( it == end( files ) )
-        {
-            LOG_ERROR( "Failed to restore fs::IFile associated with ", mrl );
-            return false;
-        }
-        fileFs = std::move( *it );
+        fileFs = parentFolderFs->file( mrl );
     }
     catch ( const fs::DeviceRemovedException& )
     {
         LOG_WARN( "Failed to restore file on an unmounted device: ", mrl );
         return false;
     }
-    catch ( const std::system_error& ex )
+    catch ( const std::exception& ex )
     {
         // If we never found the file yet, we can delete the task. It will be
         // recreated upon next discovery
