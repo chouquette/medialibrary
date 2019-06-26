@@ -157,6 +157,7 @@ class Media : public IMedia,
 
         std::shared_ptr<File> addFile( const fs::IFile& fileFs, int64_t parentFolderId,
                                        bool isFolderFsRemovable, IFile::Type type );
+        virtual FilePtr addFile( const std::string& mrl, IFile::Type fileType ) override;
         virtual FilePtr addExternalMrl( const std::string& mrl, IFile::Type type ) override;
         void removeFile( File& file );
 

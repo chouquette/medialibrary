@@ -598,6 +598,36 @@ std::shared_ptr<File> Media::addFile( const fs::IFile& fileFs, int64_t parentFol
     return File::createFromMedia( m_ml, m_id, type, fileFs, parentFolderId, isFolderFsRemovable);
 }
 
+FilePtr Media::addFile( const std::string& mrl, IFile::Type fileType )
+{
+    auto fsFactory = m_ml->fsFactoryForMrl( mrl );
+    if ( fsFactory == nullptr )
+    {
+        LOG_INFO( "Failed to find an fs factory for mrl: ", mrl );
+        return nullptr;
+    }
+    auto deviceFs = fsFactory->createDeviceFromMrl( mrl );
+    if ( deviceFs == nullptr )
+    {
+        LOG_INFO( "Failed to fetch device for mrl: ", mrl );
+        return nullptr;
+    }
+    std::shared_ptr<fs::IFile> fileFs;
+    try
+    {
+        fileFs = fsFactory->createFile( mrl );
+    }
+    catch ( const std::system_error& ex )
+    {
+        LOG_INFO( "Failed to create a file instance for mrl: ", mrl, ": ", ex.what() );
+        return nullptr;
+    }
+    auto folderMrl = utils::file::directory( mrl );
+    auto folder = Folder::fromMrl( m_ml, folderMrl );
+    return addFile( *fileFs, folder != nullptr ? folder->id() : 0,
+                    deviceFs->isRemovable(), fileType );
+}
+
 FilePtr Media::addExternalMrl( const std::string& mrl, IFile::Type type )
 {
     try

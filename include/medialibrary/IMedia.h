@@ -147,6 +147,13 @@ class IMedia
         virtual ShowEpisodePtr showEpisode() const = 0;
         virtual const std::vector<FilePtr>& files() const = 0;
         /**
+         * @brief addFile Add a file to this media
+         * @param mrl The new file mrl
+         * @param fileType The new file type
+         * @return
+         */
+        virtual FilePtr addFile( const std::string& mrl, IFile::Type fileType ) = 0;
+        /**
          * @return The main file's filename
          */
         virtual const std::string& fileName() const = 0;
