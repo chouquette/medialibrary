@@ -755,10 +755,10 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
         auto track = handleTrack( album, item, artists.second ? artists.second : artists.first,
                                   genre.get() );
 
-        auto res = link( item, *album, artists.first, artists.second, thumbnail );
+        link( item, *album, artists.first, artists.second, thumbnail );
         media->save();
         t->commit();
-        return res;
+        return true;
     });
 
     if ( res == false )
@@ -1100,7 +1100,7 @@ std::shared_ptr<AlbumTrack> MetadataAnalyzer::handleTrack( std::shared_ptr<Album
 
 /* Misc */
 
-bool MetadataAnalyzer::link( IItem& item, Album& album,
+void MetadataAnalyzer::link( IItem& item, Album& album,
                              std::shared_ptr<Artist> albumArtist,
                              std::shared_ptr<Artist> artist,
                              std::shared_ptr<Thumbnail> thumbnail )
@@ -1212,8 +1212,6 @@ bool MetadataAnalyzer::link( IItem& item, Album& album,
     {
         album.setNbDiscs( std::max( discTotal, discNumber ) );
     }
-
-    return true;
 }
 
 const char* MetadataAnalyzer::name() const
