@@ -222,7 +222,8 @@ TEST_F( Folders, UpdateFile )
     auto id = f->id();
 
     ml.reset();
-    fsMock->file( filePath )->markAsModified();
+    auto fsFile = std::static_pointer_cast<mock::File>( fsMock->file( filePath ) );
+    fsFile->markAsModified();
 
     Reload();
 

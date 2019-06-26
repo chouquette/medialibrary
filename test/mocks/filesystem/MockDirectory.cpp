@@ -133,7 +133,7 @@ void Directory::removeFile(const std::string& filePath)
     }
 }
 
-std::shared_ptr<File> Directory::file(const std::string& filePath)
+std::shared_ptr<fs::IFile> Directory::file(const std::string& filePath) const
 {
     auto subFolder = utils::file::firstFolder( filePath );
     if ( subFolder.empty() == true )

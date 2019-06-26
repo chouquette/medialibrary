@@ -117,7 +117,7 @@ void Device::removeFolder(const std::string& filePath)
         m_root->removeFolder( relPath );
 }
 
-std::shared_ptr<File> Device::file(const std::string& filePath )
+std::shared_ptr<fs::IFile> Device::file(const std::string& filePath )
 {
     if ( m_root == nullptr || m_present == false )
         return nullptr;

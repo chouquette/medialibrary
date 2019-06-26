@@ -26,6 +26,7 @@
 #include <memory>
 
 #include "medialibrary/filesystem/IDevice.h"
+#include "medialibrary/filesystem/IFile.h"
 
 using namespace medialibrary;
 
@@ -64,7 +65,7 @@ public:
     void addFolder( const std::string& path );
     void removeFile( const std::string& filePath );
     void removeFolder( const std::string& filePath );
-    std::shared_ptr<File> file( const std::string& filePath );
+    std::shared_ptr<fs::IFile> file( const std::string& filePath );
     std::shared_ptr<Directory> directory( const std::string& path );
     void setMountpointRoot( const std::string& path, std::shared_ptr<Directory> root );
     void invalidateMountpoint( const std::string& path );

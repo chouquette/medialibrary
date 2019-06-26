@@ -150,7 +150,7 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         d->removeFolder( mrl );
     }
 
-    std::shared_ptr<File> file( const std::string& mrl )
+    std::shared_ptr<fs::IFile> file( const std::string& mrl )
     {
         auto d = device( mrl );
         return d->file( mrl );
