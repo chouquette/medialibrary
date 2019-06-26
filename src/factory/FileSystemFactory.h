@@ -43,6 +43,7 @@ class FileSystemFactory : public fs::IFileSystemFactory
 public:
     FileSystemFactory( DeviceListerPtr lister );
     virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& mrl ) override;
+    virtual std::shared_ptr<fs::IFile> createFile( const std::string& mrl ) override;
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override;
     virtual std::shared_ptr<fs::IDevice> createDeviceFromMrl( const std::string& mrl ) override;
     virtual void refreshDevices() override;

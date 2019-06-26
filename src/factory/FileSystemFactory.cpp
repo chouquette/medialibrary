@@ -48,6 +48,7 @@
 #include "compat/Mutex.h"
 
 #include <algorithm>
+#include <cassert>
 
 namespace medialibrary
 {
@@ -63,6 +64,13 @@ FileSystemFactory::FileSystemFactory( DeviceListerPtr lister )
 std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::string& mrl )
 {
     return std::make_shared<fs::Directory>( mrl, *this );
+}
+
+std::shared_ptr<fs::IFile> FileSystemFactory::createFile( const std::string& mrl )
+{
+    auto fsDir = createDirectory( utils::file::directory( mrl ) );
+    assert( fsDir != nullptr );
+    return fsDir->file( mrl );
 }
 
 std::shared_ptr<fs::IDevice> FileSystemFactory::createDevice( const std::string& uuid )

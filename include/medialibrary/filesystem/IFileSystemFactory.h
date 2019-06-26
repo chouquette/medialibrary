@@ -76,6 +76,14 @@ namespace fs
         ///
         virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& mrl ) = 0;
         ///
+        /// \brief createFile Creates a representation of a file
+        /// \note This method can fail by throwing an exception if the file
+        ///       doesn't exist, or if any other I/O issue occurs.
+        /// \note The resulting file will have its mrl sanitized.
+        /// \param mrl An MRL describing the desired file
+        ///
+        virtual std::shared_ptr<fs::IFile> createFile( const std::string& mrl ) = 0;
+        ///
         /// \brief createDevice creates a representation of a device
         /// \param uuid The device UUID
         /// \return A representation of the device, or nullptr if the device is currently unavailable.

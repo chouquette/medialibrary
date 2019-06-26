@@ -75,7 +75,7 @@ std::shared_ptr<IFile> CommonDirectory::file( const std::string& mrl ) const
                                 return f->name() == fileName;
                             });
     if ( it == cend( fs ) )
-        return nullptr;
+        throw std::runtime_error( mrl + " wasn't found in the directory" );
     return *it;
 }
 

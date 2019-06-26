@@ -60,6 +60,14 @@ std::shared_ptr<fs::IDirectory> NetworkFileSystemFactory::createDirectory( const
     return std::make_shared<fs::NetworkDirectory>( mrl, *this );
 }
 
+std::shared_ptr<fs::IFile> NetworkFileSystemFactory::createFile( const std::string& mrl )
+{
+    auto fsDir = createDirectory( utils::file::directory( mrl ) );
+    if ( fsDir == nullptr )
+        return nullptr;
+    return fsDir->file( mrl );
+}
+
 std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::createDevice( const std::string& mrl )
 {
     std::shared_ptr<fs::IDevice> res;

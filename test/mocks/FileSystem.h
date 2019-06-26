@@ -173,6 +173,14 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         return dir;
     }
 
+    virtual std::shared_ptr<fs::IFile> createFile( const std::string& mrl ) override
+    {
+        auto dir = createDirectory( mrl );
+        if ( dir == nullptr )
+            return nullptr;
+        return dir->file( mrl );
+    }
+
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override
     {
         auto it = std::find_if( begin( devices ), end( devices ), [uuid]( const std::shared_ptr<Device>& d ) {
@@ -391,6 +399,11 @@ public:
     virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& ) override
     {
         throw std::system_error{ ENOENT, std::generic_category(), "Mock directory" };
+    }
+
+    virtual std::shared_ptr<fs::IFile> createFile( const std::string& ) override
+    {
+        throw std::system_error{ ENOENT, std::generic_category(), "Mock file" };
     }
 
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& ) override
