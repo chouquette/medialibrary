@@ -362,3 +362,13 @@ TEST_F( DbModel, Upgrade16to17 )
     CheckNbIndexes( NbIndexes );
     CheckTriggers( expectedTriggers );
 }
+
+TEST_F( DbModel, Upgrade17to18 )
+{
+    LoadFakeDB( SRC_DIR "/test/unittest/db_v17.sql" );
+    auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
+    ASSERT_EQ( InitializeResult::Success, res );
+    CheckNbTriggers( NbTriggers );
+    CheckNbIndexes( NbIndexes );
+    CheckTriggers( expectedTriggers );
+}

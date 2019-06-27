@@ -964,6 +964,11 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 previousVersion = 17;
                 needRescan = true;
             }
+            if ( previousVersion == 17 )
+            {
+                migrateModel17to18();
+                previousVersion = 18;
+            }
             // To be continued in the future!
 
             if ( needRescan == true )
@@ -1422,6 +1427,16 @@ void MediaLibrary::migrateModel16to17( uint32_t originalPreviousVersion )
     }
 
     m_settings.setDbModelVersion( 17 );
+    m_settings.save();
+    t->commit();
+}
+
+void MediaLibrary::migrateModel17to18()
+{
+    auto dbConn = getConn();
+    sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
+    auto t = dbConn->newTransaction();
+    m_settings.setDbModelVersion( 18 );
     m_settings.save();
     t->commit();
 }
