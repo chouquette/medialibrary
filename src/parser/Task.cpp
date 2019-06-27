@@ -490,7 +490,7 @@ void Task::setMrl( std::string newMrl )
 void Task::createTable( sqlite::Connection* dbConnection )
 {
     std::string reqs[] = {
-        #include "database/tables/Task_v14.sql"
+        #include "database/tables/Task_v18.sql"
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConnection, req );
