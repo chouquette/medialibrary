@@ -416,8 +416,8 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
     }
     try
     {
-        auto isAudio = std::find_if( begin( tracks ), end( tracks ), [](const Task::Item::Track& t) {
-            return t.type == Task::Item::Track::Type::Video;
+        auto isAudio = std::find_if( begin( tracks ), end( tracks ), [](const IItem::Track& t) {
+            return t.type == IItem::Track::Type::Video;
         }) == end( tracks );
         auto t = m_ml->getConn()->newTransaction();
         auto file = File::fromExternalMrl( m_ml, mrl );
@@ -627,8 +627,8 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
         media->setTitleBuffered( newTitle );
 
     auto tracks = item.tracks();
-    auto isAudio = std::find_if( begin( tracks ), end( tracks ), [](const Task::Item::Track& t) {
-        return t.type == Task::Item::Track::Type::Video;
+    auto isAudio = std::find_if( begin( tracks ), end( tracks ), [](const IItem::Track& t) {
+        return t.type == IItem::Track::Type::Video;
     }) == end( tracks );
 
     if ( isAudio == true && media->type() == IMedia::Type::Video )

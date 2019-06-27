@@ -180,17 +180,17 @@ void Worker::mainloop()
         }
         if ( task->isStepCompleted( m_service->targetedStep() ) == true )
         {
-            LOG_DEBUG( "Skipping completed task [", serviceName, "] on ", task->item().mrl() );
+            LOG_DEBUG( "Skipping completed task [", serviceName, "] on ", task->mrl() );
             m_parserCb->done( std::move( task ), Status::Success );
             continue;
         }
         Status status;
         try
         {
-            LOG_DEBUG( "Executing ", serviceName, " task on ", task->item().mrl() );
+            LOG_DEBUG( "Executing ", serviceName, " task on ", task->mrl() );
             auto chrono = std::chrono::steady_clock::now();
-            auto file = std::static_pointer_cast<File>( task->item().file() );
-            auto media = std::static_pointer_cast<Media>( task->item().media() );
+            auto file = std::static_pointer_cast<File>( task->file() );
+            auto media = std::static_pointer_cast<Media>( task->media() );
 
             if ( file != nullptr && file->isRemovable() )
             {
@@ -204,22 +204,22 @@ void Worker::mainloop()
                 }
             }
             task->startParserStep();
-            status = m_service->run( task->item() );
+            status = m_service->run( *task );
             auto duration = std::chrono::steady_clock::now() - chrono;
-            LOG_DEBUG( "Done executing ", serviceName, " task on ", task->item().mrl(), " in ",
+            LOG_DEBUG( "Done executing ", serviceName, " task on ", task->mrl(), " in ",
                        std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(),
                        "ms. Result: ",
                        static_cast<std::underlying_type_t<parser::Status>>( status ) );
         }
         catch ( const fs::DeviceRemovedException& )
         {
-            LOG_ERROR( "Parsing of ", task->item().mrl(), " was interrupted "
+            LOG_ERROR( "Parsing of ", task->mrl(), " was interrupted "
                        "due to its containing device being unmounted" );
             status = Status::TemporaryUnavailable;
         }
         catch ( const std::exception& ex )
         {
-            LOG_ERROR( "Caught an exception during ", task->item().mrl(), " [", serviceName, "] parsing: ", ex.what() );
+            LOG_ERROR( "Caught an exception during ", task->mrl(), " [", serviceName, "] parsing: ", ex.what() );
             status = Status::Fatal;
         }
         if ( handleServiceResult( *task, status ) == false )

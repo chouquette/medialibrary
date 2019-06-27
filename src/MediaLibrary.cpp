@@ -1351,7 +1351,7 @@ void MediaLibrary::migrateModel15to16()
         auto tasks = parser::Task::fetchAll<parser::Task>( this );
         for ( auto& t : tasks )
         {
-            auto newMrl = utils::url::encode( utils::url::decode( t->item().mrl() ) );
+            auto newMrl = utils::url::encode( utils::url::decode( t->mrl() ) );
             t->setMrl( std::move( newMrl ) );
         }
     }

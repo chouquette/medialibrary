@@ -27,10 +27,9 @@
 #include <utility>
 #include <vector>
 #include <string>
-#include <unordered_map>
 
-#include "database/DatabaseHelpers.h"
 #include "medialibrary/parser/IItem.h"
+#include "database/DatabaseHelpers.h"
 #include "medialibrary/parser/Parser.h"
 
 namespace medialibrary
@@ -55,14 +54,7 @@ class Task;
 namespace parser
 {
 
-class ITaskCb
-{
-public:
-    virtual ~ITaskCb() = default;
-    virtual bool updateFileId( int64_t fileId ) = 0;
-};
-
-class Task : public DatabaseHelpers<Task>, private ITaskCb
+class Task : public DatabaseHelpers<Task>, public IItem
 {
 public:
     struct Table
@@ -71,92 +63,14 @@ public:
         static const std::string PrimaryKeyColumn;
         static int64_t parser::Task::*const PrimaryKey;
     };
-    class Item : public IItem
+
+    struct MetadataHash
     {
-    public:
-        struct MetadataHash
+        size_t operator()(IItem::Metadata m) const
         {
-            size_t operator()(IItem::Metadata m) const
-            {
-                return static_cast<size_t>( m );
-            }
-        };
-
-        Item() = default;
-        /**
-         * @brief Item Construct a parser item with a given mrl and subitem index
-         * @param mrl The item's mrl
-         * @param subitemPosition A potential subitem index, if any, or 0 if none.
-         *
-         * The position is used to keep subitems ordering for playlists
-         */
-        Item( ITaskCb* taskCb, std::string mrl, IFile::Type fileType,
-              unsigned int subitemIndex, bool isRefresh );
-        Item( ITaskCb* taskCb, std::string mrl, std::shared_ptr<fs::IFile> fileFs,
-              std::shared_ptr<Folder> folder, std::shared_ptr<fs::IDirectory> folderFs,
-              IFile::Type fileType,
-              std::shared_ptr<Playlist> parentPlaylist, unsigned int parentPlaylistIndex,
-              bool isRefresh );
-        Item( ITaskCb* taskCb, std::shared_ptr<File> file, std::shared_ptr<fs::IFile> fileFs );
-
-
-        virtual std::string meta( Metadata type ) const override;
-        virtual void setMeta( Metadata type, std::string value ) override;
-
-        virtual const std::string& mrl() const override;
-        void setMrl( std::string mrl );
-
-        virtual IFile::Type fileType() const override;
-
-        virtual size_t nbSubItems() const override;
-        virtual const IItem& subItem( unsigned int index ) const override;
-        virtual IItem& createSubItem( std::string mrl, unsigned int playlistIndex ) override;
-
-        virtual int64_t duration() const override;
-        virtual void setDuration( int64_t duration ) override;
-
-        virtual const std::vector<Track>& tracks() const override;
-        virtual void addTrack( Track&& t ) override;
-
-        virtual MediaPtr media() override;
-        virtual void setMedia( MediaPtr media ) override;
-
-        virtual FilePtr file() override;
-        virtual bool setFile( FilePtr file ) override;
-
-        virtual FolderPtr parentFolder() override;
-
-        virtual std::shared_ptr<fs::IFile> fileFs() override;
-
-        virtual std::shared_ptr<fs::IDirectory> parentFolderFs() override;
-
-        virtual PlaylistPtr parentPlaylist() override;
-
-        virtual unsigned int parentPlaylistIndex() const override;
-
-        virtual bool isRefresh() const override;
-
-    private:
-        ITaskCb* m_taskCb;
-
-        std::string m_mrl;
-        IFile::Type m_fileType;
-        std::unordered_map<Metadata, std::string, MetadataHash> m_metadata;
-        std::vector<Item> m_subItems;
-        std::vector<Track> m_tracks;
-        int64_t m_duration;
-        MediaPtr m_media;
-        FilePtr m_file;
-        std::shared_ptr<fs::IFile> m_fileFs;
-        FolderPtr m_parentFolder;
-        std::shared_ptr<fs::IDirectory> m_parentFolderFs;
-        PlaylistPtr m_parentPlaylist;
-        unsigned int m_parentPlaylistIndex;
-        bool m_isRefresh;
+            return static_cast<size_t>( m );
+        }
     };
-
-    static_assert( std::is_move_assignable<Item>::value, "Item must be move assignable" );
-
 
     Task( MediaLibraryPtr ml, sqlite::Row& row );
     /**
@@ -184,6 +98,11 @@ public:
     Task( MediaLibraryPtr ml, std::shared_ptr<File> file,
           std::shared_ptr<fs::IFile> fileFs );
 
+    /**
+     * @brief Task Constructor for dummy tasks, to represent subitems
+     */
+    Task( std::string mrl, IFile::Type fileType, unsigned int playlistIndex );
+
     /*
      * We need to decouple the current parser state and the saved one.
      * For instance, metadata extraction won't save anything in DB, so while
@@ -205,10 +124,7 @@ public:
      */
     void startParserStep();
 
-    virtual bool updateFileId( int64_t fileId ) override;
     int64_t id() const;
-
-    Item& item();
 
     // Restore attached entities such as media/files
     bool restoreLinkedEntities();
@@ -238,15 +154,66 @@ public:
     static void removePlaylistContentTasks( MediaLibraryPtr ml, int64_t playlistId );
     static void recoverUnscannedFiles( MediaLibraryPtr ml );
 
+    /***************************************************************************
+     * IItem interface implementation
+     **************************************************************************/
+    virtual std::string meta( Metadata type ) const override;
+    virtual void setMeta( Metadata type, std::string value ) override;
+
+    virtual const std::string& mrl() const override;
+    virtual IFile::Type fileType() const override;
+
+    virtual size_t nbSubItems() const override;
+    virtual const IItem& subItem( unsigned int index ) const override;
+    virtual IItem& createSubItem( std::string mrl, unsigned int playlistIndex ) override;
+
+    virtual int64_t duration() const override;
+    virtual void setDuration( int64_t duration ) override;
+
+    virtual const std::vector<Track>& tracks() const override;
+    virtual void addTrack( Track&& t ) override;
+
+    virtual MediaPtr media() override;
+    virtual void setMedia( MediaPtr media ) override;
+
+    virtual FilePtr file() override;
+    virtual bool setFile( FilePtr file ) override;
+
+    virtual FolderPtr parentFolder() override;
+
+    virtual std::shared_ptr<fs::IFile> fileFs() override;
+
+    virtual std::shared_ptr<fs::IDirectory> parentFolderFs() override;
+
+    virtual PlaylistPtr parentPlaylist() override;
+
+    virtual unsigned int parentPlaylistIndex() const override;
+
+    virtual bool isRefresh() const override;
+
 private:
     MediaLibraryPtr m_ml;
     int64_t     m_id;
     Step        m_step;
     int         m_retryCount;
+    std::string m_mrl;
+    IFile::Type m_fileType;
     int64_t     m_fileId;
     int64_t     m_parentFolderId;
     int64_t     m_parentPlaylistId;
-    Item        m_item;
+    unsigned int m_parentPlaylistIndex;
+    bool m_isRefresh;
+
+    std::unordered_map<Metadata, std::string, MetadataHash> m_metadata;
+    std::vector<Task> m_subItems;
+    std::vector<Track> m_tracks;
+    int64_t m_duration;
+    MediaPtr m_media;
+    FilePtr m_file;
+    std::shared_ptr<fs::IFile> m_fileFs;
+    FolderPtr m_parentFolder;
+    std::shared_ptr<fs::IDirectory> m_parentFolderFs;
+    PlaylistPtr m_parentPlaylist;
 
     friend Task::Table;
 };
