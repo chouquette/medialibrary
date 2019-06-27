@@ -126,6 +126,19 @@ void VmemThumbnailer::setupVout( Task& task )
 
             const float inputAR = (float)*width / *height;
 
+            if ( task.desiredWidth == 0 && task.desiredHeight == 0 )
+            {
+                task.desiredWidth = *width;
+                task.desiredHeight = *height;
+            }
+            else if ( task.desiredHeight == 0 )
+            {
+                task.desiredHeight = (float)task.desiredWidth / inputAR;
+            }
+            else if ( task.desiredWidth == 0 )
+            {
+                task.desiredWidth = (float)task.desiredHeight * inputAR;
+            }
             task.width = task.desiredWidth;
             task.height = (float)task.width / inputAR + 1;
             if ( task.height < task.desiredHeight )

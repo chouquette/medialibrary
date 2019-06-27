@@ -63,8 +63,9 @@ bool CoreThumbnailer::generate( const std::string& mrl, uint32_t desiredWidth,
             cond.notify_all();
         });
         m_request = m_vlcMedia.thumbnailRequestByPos( position, VLC::Media::ThumbnailSeekSpeed::Fast,
-                                                       desiredWidth, desiredHeight, true,
-                                                       VLC::Picture::Type::Jpg, 3000 );
+                                                      desiredWidth, desiredHeight,
+                                                      desiredWidth != 0 && desiredHeight != 0,
+                                                      VLC::Picture::Type::Jpg, 3000 );
         if ( m_request == nullptr )
         {
             m_vlcMedia = VLC::Media{};

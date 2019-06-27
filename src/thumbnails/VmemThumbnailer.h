@@ -48,8 +48,8 @@ class VmemThumbnailer : public IThumbnailer
         uint32_t height;
         VLC::MediaPlayer mp;
         std::atomic_bool thumbnailRequired;
-        const uint32_t desiredWidth;
-        const uint32_t desiredHeight;
+        uint32_t desiredWidth;
+        uint32_t desiredHeight;
     };
 
 public:

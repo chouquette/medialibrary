@@ -247,7 +247,10 @@ class IMedia
         /// \param position The position at which to generate the thumbnail, in [0;1] range
         ///
         /// The generated thumbnail will try to oblige by the requested size, while
-        /// respecting the source aspect ratio.
+        /// respecting the source aspect ratio. If the aspect ratios differ, the
+        /// source image will be cropped.
+        /// If one of the dimension is 0, the other one will be deduced from the
+        /// source aspect ratio. If both are 0, the source dimensions will be used.
         ///
         /// This function is thread-safe
         ///
