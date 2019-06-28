@@ -1124,29 +1124,11 @@ void MediaLibrary::migrateModel9to10()
 
 void MediaLibrary::migrateModel10to11()
 {
-    const std::string req = "SELECT * FROM " + parser::Task::Table::Name +
-            " WHERE mrl LIKE '%#%%' ESCAPE '#'";
-    const std::string folderReq = "SELECT * FROM " + Folder::Table::Name +
-            " WHERE path LIKE '%#%%' ESCAPE '#'";
-    auto tasks = parser::Task::fetchAll<parser::Task>( this, req );
-    auto folders = Folder::fetchAll<Folder>( this, folderReq );
-    auto t = getConn()->newTransaction();
-    for ( const auto& t : tasks )
-    {
-        auto newMrl = utils::url::encode( utils::url::decode( t->item().mrl() ) );
-        LOG_DEBUG( "Converting task mrl: ", t->item().mrl(), " to ", newMrl );
-        t->setMrl( std::move( newMrl ) );
-    }
-    for ( const auto &f : folders )
-    {
-        // We must not call mrl() from here. We might not have all devices yet,
-        // and calling mrl would crash for files stored on removable devices.
-        auto newMrl = utils::url::encode( utils::url::decode( f->rawMrl() ) );
-        f->setMrl( std::move( newMrl ) );
-    }
+    // Now empty because migration 15 to 16 is doing the same thing again
+    // We updated the MRL encoding in 10 to 11, but again from 15 to 16, so we
+    // might as well re encode everything only once.
     m_settings.setDbModelVersion( 11 );
     m_settings.save();
-    t->commit();
 }
 
 /*
