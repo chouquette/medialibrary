@@ -342,39 +342,39 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
     if ( m_probe->deleteUnseenFiles() == false )
         files.clear();
 
-        auto t = m_ml->getConn()->newTransaction();
-        for ( const auto& file : files )
+    auto t = m_ml->getConn()->newTransaction();
+    for ( const auto& file : files )
+    {
+        if ( interruptProbe.isInterrupted() == true )
+            break;
+        LOG_DEBUG( "File ", file->mrl(), " not found on filesystem, deleting it" );
+        auto media = file->media();
+        if ( media != nullptr )
+            media->removeFile( *file );
+        else
         {
-            if ( interruptProbe.isInterrupted() == true )
-                break;
-            LOG_DEBUG( "File ", file->mrl(), " not found on filesystem, deleting it" );
-            auto media = file->media();
-            if ( media != nullptr )
-                media->removeFile( *file );
-            else
-            {
-                // This is unexpected, as the file should have been deleted when the media was
-                // removed.
-                LOG_WARN( "Deleting a file without an associated media." );
-                file->destroy();
-            }
+            // This is unexpected, as the file should have been deleted when the media was
+            // removed.
+            LOG_WARN( "Deleting a file without an associated media." );
+            file->destroy();
         }
-        for ( auto& p: filesToRefresh )
-        {
-            if ( interruptProbe.isInterrupted() == true )
-                break;
-            m_ml->onUpdatedFile( std::move( p.first ), std::move( p.second ) );
-        }
-        // Insert all files at once to avoid SQL write contention
-        for ( auto& p : filesToAdd )
-        {
-            if ( interruptProbe.isInterrupted() == true )
-                break;
-            m_ml->onDiscoveredFile( p, parentFolder, parentFolderFs,
-                                    IFile::Type::Main, m_probe->getPlaylistParent() );
-        }
-        t->commit();
-        LOG_DEBUG( "Done checking files in ", parentFolderFs->mrl() );
+    }
+    for ( auto& p: filesToRefresh )
+    {
+        if ( interruptProbe.isInterrupted() == true )
+            break;
+        m_ml->onUpdatedFile( std::move( p.first ), std::move( p.second ) );
+    }
+    // Insert all files at once to avoid SQL write contention
+    for ( auto& p : filesToAdd )
+    {
+        if ( interruptProbe.isInterrupted() == true )
+            break;
+        m_ml->onDiscoveredFile( p, parentFolder, parentFolderFs,
+                                IFile::Type::Main, m_probe->getPlaylistParent() );
+    }
+    t->commit();
+    LOG_DEBUG( "Done checking files in ", parentFolderFs->mrl() );
 }
 
 bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
