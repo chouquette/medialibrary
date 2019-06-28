@@ -341,11 +341,7 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
     }
     if ( m_probe->deleteUnseenFiles() == false )
         files.clear();
-    using FilesT = decltype( files );
-    using FilesToRefreshT = decltype( filesToRefresh );
-    using FilesToAddT = decltype( filesToAdd );
-    sqlite::Tools::withRetries( 3, [this, &parentFolder, &parentFolderFs, &interruptProbe]
-                            ( FilesT files, FilesToAddT filesToAdd, FilesToRefreshT filesToRefresh ) {
+
         auto t = m_ml->getConn()->newTransaction();
         for ( const auto& file : files )
         {
@@ -379,7 +375,6 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
         }
         t->commit();
         LOG_DEBUG( "Done checking files in ", parentFolderFs->mrl() );
-    }, std::move( files ), std::move( filesToAdd ), std::move( filesToRefresh ) );
 }
 
 bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
