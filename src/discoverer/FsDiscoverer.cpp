@@ -342,7 +342,6 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
     if ( m_probe->deleteUnseenFiles() == false )
         files.clear();
 
-    auto t = m_ml->getConn()->newTransaction();
     for ( const auto& file : files )
     {
         if ( interruptProbe.isInterrupted() == true )
@@ -365,7 +364,6 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
             break;
         m_ml->onUpdatedFile( std::move( p.first ), std::move( p.second ) );
     }
-    // Insert all files at once to avoid SQL write contention
     for ( auto& p : filesToAdd )
     {
         if ( interruptProbe.isInterrupted() == true )
@@ -373,7 +371,6 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
         m_ml->onDiscoveredFile( p, parentFolder, parentFolderFs,
                                 IFile::Type::Main, m_probe->getPlaylistParent() );
     }
-    t->commit();
     LOG_DEBUG( "Done checking files in ", parentFolderFs->mrl() );
 }
 
