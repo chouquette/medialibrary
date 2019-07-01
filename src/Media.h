@@ -67,7 +67,7 @@ class Media : public IMedia,
                                               int64_t deviceId, int64_t folderId,
                                               const std::string& fileName,
                                               int64_t duration );
-        static void createTable( sqlite::Connection* connection, uint32_t modelVersion );
+        static void createTable( sqlite::Connection* connection );
         static void createTriggers( sqlite::Connection* connection, uint32_t modelVersion );
 
         virtual int64_t id() const override;
