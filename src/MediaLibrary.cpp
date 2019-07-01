@@ -138,7 +138,6 @@ MediaLibrary::~MediaLibrary()
 
 void MediaLibrary::createAllTables()
 {
-    auto dbModelVersion = m_settings.dbModelVersion();
     // We need to create the tables in order of triggers creation
     // Device is the "root of all evil". When a device is modified,
     // we will trigger an update on folder, which will trigger
@@ -150,7 +149,7 @@ void MediaLibrary::createAllTables()
     Media::createTable( m_dbConnection.get() );
     File::createTable( m_dbConnection.get() );
     Label::createTable( m_dbConnection.get() );
-    Playlist::createTable( m_dbConnection.get(), dbModelVersion );
+    Playlist::createTable( m_dbConnection.get() );
     Genre::createTable( m_dbConnection.get() );
     Album::createTable( m_dbConnection.get() );
     AlbumTrack::createTable( m_dbConnection.get() );
@@ -178,7 +177,7 @@ void MediaLibrary::createAllTriggers()
     Media::createTriggers( m_dbConnection.get(), dbModelVersion );
     File::createTriggers( m_dbConnection.get() );
     Genre::createTriggers( m_dbConnection.get() );
-    Playlist::createTriggers( m_dbConnection.get() );
+    Playlist::createTriggers( m_dbConnection.get(), dbModelVersion );
     Label::createTriggers( m_dbConnection.get() );
     Show::createTriggers( m_dbConnection.get() );
     Thumbnail::createTriggers( m_dbConnection.get() );
@@ -1035,7 +1034,7 @@ void MediaLibrary::migrateModel3to5()
         sqlite::Tools::executeRequest( getConn(), req );
     // Re-create triggers removed in the process
     Media::createTriggers( getConn(), 5 );
-    Playlist::createTriggers( getConn() );
+    Playlist::createTriggers( getConn(), 5 );
     m_settings.setDbModelVersion( 5 );
     m_settings.save();
     t->commit();
@@ -1281,7 +1280,7 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     Album::createTriggers( dbConn );
     Artist::createTriggers( dbConn, 14 );
     Show::createTriggers( dbConn );
-    Playlist::createTriggers( dbConn );
+    Playlist::createTriggers( dbConn, 14 );
     Folder::createTriggers( dbConn, 14 );
     auto folders = Folder::fetchAll<Folder>( this );
     for ( const auto& f : folders )

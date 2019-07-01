@@ -319,10 +319,19 @@ bool Playlist::remove( uint32_t position )
     return true;
 }
 
-void Playlist::createTable( sqlite::Connection* dbConn, uint32_t dbModel )
+void Playlist::createTable( sqlite::Connection* dbConn )
 {
     std::string reqs[] = {
         #include "database/tables/Playlist_v16.sql"
+    };
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConn, req );
+}
+
+void Playlist::createTriggers( sqlite::Connection* dbConn, uint32_t dbModel )
+{
+    std::string reqs[] = {
+        #include "database/tables/Playlist_triggers_v16.sql"
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
@@ -333,15 +342,6 @@ void Playlist::createTable( sqlite::Connection* dbConn, uint32_t dbModel )
         sqlite::Tools::executeRequest( dbConn, "CREATE INDEX IF NOT EXISTS "
             "playlist_file_id ON " + Playlist::Table::Name + "(file_id)" );
     }
-}
-
-void Playlist::createTriggers( sqlite::Connection* dbConn )
-{
-    std::string reqs[] = {
-        #include "database/tables/Playlist_triggers_v16.sql"
-    };
-    for ( const auto& req : reqs )
-        sqlite::Tools::executeRequest( dbConn, req );
 }
 
 Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,
