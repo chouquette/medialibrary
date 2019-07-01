@@ -160,7 +160,6 @@ void MediaLibrary::createAllTables()
     AudioTrack::createTable( m_dbConnection.get() );
     Artist::createTable( m_dbConnection.get() );
     Artist::createDefaultArtists( m_dbConnection.get() );
-    Settings::createTable( m_dbConnection.get() );
     parser::Task::createTable( m_dbConnection.get() );
     Metadata::createTable( m_dbConnection.get() );
     SubtitleTrack::createTable( m_dbConnection.get() );
@@ -335,12 +334,13 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     try
     {
         auto t = m_dbConnection->newTransaction();
-        createAllTables();
+        Settings::createTable( m_dbConnection.get() );
         if ( m_settings.load() == false )
         {
             LOG_ERROR( "Failed to load settings" );
             return InitializeResult::Failed;
         }
+        createAllTables();
         createAllTriggers();
         t->commit();
 
@@ -1011,6 +1011,7 @@ bool MediaLibrary::recreateDatabase( const std::string& dbPath )
     m_dbConnection.reset();
     unlink( dbPath.c_str() );
     m_dbConnection = sqlite::Connection::connect( dbPath );
+    Settings::createTable( m_dbConnection.get() );
     createAllTables();
     // We dropped the database, there is no setting to be read anymore
     return m_settings.load();
