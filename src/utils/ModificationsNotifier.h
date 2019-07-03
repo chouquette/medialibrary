@@ -129,7 +129,7 @@ private:
     {
         std::lock_guard<compat::Mutex> lock( m_lock );
         queue.removed.push_back( rowId );
-        updateTimeout( m_media );
+        updateTimeout( queue );
     }
 
     template <typename T>
