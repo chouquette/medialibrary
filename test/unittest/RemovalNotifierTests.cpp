@@ -60,7 +60,7 @@ private:
     uint32_t m_nbMedia;
 };
 
-class RemovalNotifierTests : public Tests
+class ModificationsNotifierTests : public Tests
 {
 protected:
     std::unique_ptr<MockCallback> cbMock;
@@ -77,7 +77,7 @@ protected:
     }
 };
 
-TEST_F( RemovalNotifierTests, DeleteOne )
+TEST_F( ModificationsNotifierTests, DeleteOne )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.avi" ) );
     auto lock = cbMock->prepareWait();
@@ -89,7 +89,7 @@ TEST_F( RemovalNotifierTests, DeleteOne )
 }
 
 #ifdef FIX_TEST_ON_SLOW_CI
-TEST_F( RemovalNotifierTests, DeleteBatch )
+TEST_F( ModificationsNotifierTests, DeleteBatch )
 {
     std::shared_ptr<Media> media[5];
     for ( auto i = 0u; i < 5; ++i )
