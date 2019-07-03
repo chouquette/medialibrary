@@ -135,10 +135,20 @@ private:
     template <typename T>
     void updateTimeout( Queue<T>& queue )
     {
-        queue.timeout = std::chrono::steady_clock::now() + std::chrono::milliseconds{ 500 };
+        if ( queue.timeout == std::chrono::time_point<std::chrono::steady_clock>{} )
+        {
+            queue.timeout = std::chrono::steady_clock::now() +
+#ifdef NDEBUG
+                    std::chrono::milliseconds{ 3000 };
+#else
+                    std::chrono::milliseconds{ 500 };
+#endif
+
+        }
         if ( m_timeout == std::chrono::time_point<std::chrono::steady_clock>{} )
         {
-            // If no wake up has been scheduled, schedule one now
+            // If no wake up has been scheduled, or if we need to wake up faster
+            // than expected, update the timeout now
             m_timeout = queue.timeout;
             m_cond.notify_all();
         }
