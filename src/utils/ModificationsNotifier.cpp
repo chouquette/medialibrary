@@ -179,7 +179,8 @@ void ModificationNotifier::run()
             if ( m_timeout == ZeroTimeout )
             {
                 m_cond.wait( lock, [this, ZeroTimeout](){
-                    return m_timeout != ZeroTimeout || m_stop == true;
+                    return m_timeout != ZeroTimeout || m_stop == true ||
+                           m_flushing == true;
                 });
             }
             m_cond.wait_until( lock, m_timeout, [this]() {
