@@ -34,12 +34,13 @@
 class MockCallback : public mock::NoopCallback
 {
 public:
-    MockCallback() : m_nbMedia( 0 ) {}
+    MockCallback() : m_nbMedia( 0 ), m_nbTotalMedia( 0 ) {}
 private:
     virtual void onMediaDeleted( std::vector<int64_t> batch ) override
     {
         std::lock_guard<compat::Mutex> lock( m_lock );
         m_nbMedia = batch.size();
+        m_nbTotalMedia += batch.size();
         m_cond.notify_all();
     }
 
@@ -47,6 +48,7 @@ public:
     std::unique_lock<compat::Mutex> prepareWait()
     {
         m_nbMedia = 0;
+        m_nbTotalMedia = 0;
         return std::unique_lock<compat::Mutex>{ m_lock };
     }
 
@@ -60,10 +62,17 @@ public:
         return m_nbMedia;
     }
 
+    uint32_t getNbTotalMediaDeleted()
+    {
+        std::lock_guard<compat::Mutex> lock( m_lock );
+        return m_nbTotalMedia;
+    }
+
 private:
     compat::Mutex m_lock;
     compat::ConditionVariable m_cond;
     uint32_t m_nbMedia;
+    uint32_t m_nbTotalMedia;
 };
 
 class ModificationsNotifierTests : public Tests
@@ -96,3 +105,16 @@ TEST_F( ModificationsNotifierTests, DeleteOne )
     ASSERT_EQ( 1u, res );
 }
 
+TEST_F( ModificationsNotifierTests, Flush )
+{
+    for ( auto i = 0u; i < 10; ++i )
+        ml->addMedia( std::string{ "media" } + std::to_string( i ) + ".mkv" );
+
+    for ( auto i = 0u; i < 10; ++i )
+        ml->deleteMedia( i + 1 );
+
+    // We can't lock here since flush is blocking until the callbacks have been called
+    ml->getNotifier()->flush();
+    auto nbMediaSignaled = cbMock->getNbTotalMediaDeleted();
+    ASSERT_EQ( 10u, nbMediaSignaled );
+}
