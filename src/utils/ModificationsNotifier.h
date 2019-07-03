@@ -1,9 +1,9 @@
 /*****************************************************************************
  * Media Library
  *****************************************************************************
- * Copyright (C) 2015 Hugo Beauzée-Luyssen, Videolabs
+ * Copyright (C) 2015-2019 Hugo Beauzée-Luyssen, Videolabs, VideoLAN
  *
- * Authors: Hugo Beauzée-Luyssen<hugo@beauzee.fr>
+ * Authors: Hugo Beauzée-Luyssen <hugo@beauzee.fr>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -145,7 +145,8 @@ private:
     }
 
     template <typename T>
-    void checkQueue( Queue<T>& input, Queue<T>& output, std::chrono::time_point<std::chrono::steady_clock>& nextTimeout,
+    void checkQueue( Queue<T>& input, Queue<T>& output,
+                     std::chrono::time_point<std::chrono::steady_clock>& nextTimeout,
                      std::chrono::time_point<std::chrono::steady_clock> now )
     {
 #if !defined(_LIBCPP_STD_VER) || (_LIBCPP_STD_VER > 11 && !defined(_LIBCPP_HAS_NO_CXX14_CONSTEXPR))
@@ -159,7 +160,8 @@ private:
             swap( input, output );
         }
         // Or is scheduled for timeout soon:
-        else if ( input.timeout != ZeroTimeout && ( nextTimeout == ZeroTimeout || input.timeout < nextTimeout ) )
+        else if ( input.timeout != ZeroTimeout &&
+                  ( nextTimeout == ZeroTimeout || input.timeout < nextTimeout ) )
         {
             nextTimeout = input.timeout;
         }

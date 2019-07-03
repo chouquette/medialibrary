@@ -1,9 +1,9 @@
 /*****************************************************************************
  * Media Library
  *****************************************************************************
- * Copyright (C) 2015 Hugo Beauzée-Luyssen, Videolabs
+ * Copyright (C) 2015-2019 Hugo Beauzée-Luyssen, Videolabs, VideoLAN
  *
- * Authors: Hugo Beauzée-Luyssen<hugo@beauzee.fr>
+ * Authors: Hugo Beauzée-Luyssen <hugo@beauzee.fr>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -177,8 +177,14 @@ void ModificationNotifier::run()
                 m_flushing = false;
             }
             if ( m_timeout == ZeroTimeout )
-                m_cond.wait( lock, [this, ZeroTimeout](){ return m_timeout != ZeroTimeout || m_stop == true; } );
-            m_cond.wait_until( lock, m_timeout, [this]() { return m_stop == true || m_flushing == true; });
+            {
+                m_cond.wait( lock, [this, ZeroTimeout](){
+                    return m_timeout != ZeroTimeout || m_stop == true;
+                });
+            }
+            m_cond.wait_until( lock, m_timeout, [this]() {
+                return m_stop == true || m_flushing == true;
+            });
             if ( m_stop == true )
                 break;
             const auto now = std::chrono::steady_clock::now();
@@ -191,11 +197,16 @@ void ModificationNotifier::run()
             checkQueue( m_thumbnails, thumbnails, nextTimeout, now );
             m_timeout = nextTimeout;
         }
-        notify( std::move( media ), &IMediaLibraryCb::onMediaAdded, &IMediaLibraryCb::onMediaModified, &IMediaLibraryCb::onMediaDeleted );
-        notify( std::move( artists ), &IMediaLibraryCb::onArtistsAdded, &IMediaLibraryCb::onArtistsModified, &IMediaLibraryCb::onArtistsDeleted );
-        notify( std::move( albums ), &IMediaLibraryCb::onAlbumsAdded, &IMediaLibraryCb::onAlbumsModified, &IMediaLibraryCb::onAlbumsDeleted );
-        notify( std::move( playlists ), &IMediaLibraryCb::onPlaylistsAdded, &IMediaLibraryCb::onPlaylistsModified, &IMediaLibraryCb::onPlaylistsDeleted );
-        notify( std::move( genres ), &IMediaLibraryCb::onGenresAdded, &IMediaLibraryCb::onGenresModified, &IMediaLibraryCb::onGenresDeleted );
+        notify( std::move( media ), &IMediaLibraryCb::onMediaAdded,
+                &IMediaLibraryCb::onMediaModified, &IMediaLibraryCb::onMediaDeleted );
+        notify( std::move( artists ), &IMediaLibraryCb::onArtistsAdded,
+                &IMediaLibraryCb::onArtistsModified, &IMediaLibraryCb::onArtistsDeleted );
+        notify( std::move( albums ), &IMediaLibraryCb::onAlbumsAdded,
+                &IMediaLibraryCb::onAlbumsModified, &IMediaLibraryCb::onAlbumsDeleted );
+        notify( std::move( playlists ), &IMediaLibraryCb::onPlaylistsAdded,
+                &IMediaLibraryCb::onPlaylistsModified, &IMediaLibraryCb::onPlaylistsDeleted );
+        notify( std::move( genres ), &IMediaLibraryCb::onGenresAdded,
+                &IMediaLibraryCb::onGenresModified, &IMediaLibraryCb::onGenresDeleted );
         for ( auto thumbnailId : thumbnails.removed )
         {
             auto path = Thumbnail::path( m_ml, thumbnailId );
