@@ -1376,8 +1376,8 @@ void MediaLibrary::migrateModel15to16()
  * - Remove Media.thumbnail_id
  * - Remove Album.thumbnail_id
  * - Remove Artist.thumbnail_id
- * - Add MediaThumbnail, AlbumThumbnail & ArtistThumbnail tables
- * - Move thumbnail origin to the thumbnail linking tables
+ * - Add ThumbnailLinking table
+ * - Move thumbnail origin to the thumbnail linking table
  */
 void MediaLibrary::migrateModel16to17( uint32_t originalPreviousVersion )
 {
