@@ -173,8 +173,8 @@ void ModificationNotifier::run()
             std::unique_lock<compat::Mutex> lock( m_lock );
             if ( m_flushing == true )
             {
-                m_flushedCond.notify_all();
                 m_flushing = false;
+                m_flushedCond.notify_all();
             }
             if ( m_timeout == ZeroTimeout )
             {
