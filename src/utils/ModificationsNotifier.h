@@ -138,12 +138,7 @@ private:
         if ( queue.timeout == std::chrono::time_point<std::chrono::steady_clock>{} )
         {
             queue.timeout = std::chrono::steady_clock::now() +
-#ifdef NDEBUG
-                    std::chrono::milliseconds{ 3000 };
-#else
-                    std::chrono::milliseconds{ 500 };
-#endif
-
+                    std::chrono::milliseconds{ 1000 };
         }
         if ( m_timeout == std::chrono::time_point<std::chrono::steady_clock>{} )
         {

@@ -100,7 +100,9 @@ TEST_F( ModificationsNotifierTests, DeleteOne )
     m->removeFile( static_cast<File&>( *m->files()[0] ) );
     // This media doesn't have any associated files, and should be removed by a sqlite hook
     // The notification will arrive "late", as it will need to timeout first
-    auto res = cbMock->waitForNotif( std::move( lock ), std::chrono::seconds{ 1 }, hasTimedout );
+    auto res = cbMock->waitForNotif( std::move( lock ),
+        std::chrono::duration_cast<std::chrono::seconds>( std::chrono::milliseconds{ 1500 } ),
+        hasTimedout );
     ASSERT_FALSE( hasTimedout );
     ASSERT_EQ( 1u, res );
 }
