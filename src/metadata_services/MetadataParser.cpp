@@ -573,33 +573,7 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshFile( IItem& item ) const
         case IFile::Type::Main:
             return refreshMedia( item );
         case IFile::Type::Playlist:
-        {
-            auto playlist = Playlist::fromFile( m_ml, file->id() );
-            if ( playlist == nullptr )
-            {
-                LOG_WARN( "Failed to find playlist associated to modified playlist file ",
-                          item.mrl() );
-                return std::make_tuple( false, false );
-            }
-            LOG_DEBUG( "Reloading playlist ", playlist->name(), " on ", item.mrl() );
-            /*
-             * We need to remove all the existing tasks associated with this playlist.
-             * When scanning a playlist, all its content gets analyzed by the path
-             * crawler, and ultimately triggers MediaLibrary::onDiscoveredFile.
-             * Not removing the tasks would lead to a constraint violation (since
-             * the playlist has been ingested before), and while the file would
-             * exist in database, it wouldn't be added back to the playlist.
-             * We can't simply force all existing tasks to be re-run, as some of
-             * the previous playlist content might have been removed.
-             * Should the media be imported as non external, they will be refreshed
-             * if they need to since the FsDiscoverer will scan them again.
-             */
-            auto t = m_ml->getConn()->newTransaction();
-            parser::Task::removePlaylistContentTasks( m_ml, playlist->id() );
-            playlist->clearContent();
-            t->commit();
-            return std::make_tuple( true, true );
-        }
+            return refreshPlaylist( item );
         case IFile::Type::Part:
         case IFile::Type::Soundtrack:
         case IFile::Type::Subtitles:
@@ -734,6 +708,35 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
     t->commit();
     item.setMedia( std::move( media ) );
     return std::make_tuple( true, needRescan );
+}
+
+std::tuple<bool, bool> MetadataAnalyzer::refreshPlaylist(IItem& item) const
+{
+    auto playlist = Playlist::fromFile( m_ml, item.file()->id() );
+    if ( playlist == nullptr )
+    {
+        LOG_WARN( "Failed to find playlist associated to modified playlist file ",
+                  item.mrl() );
+        return std::make_tuple( false, false );
+    }
+    LOG_DEBUG( "Reloading playlist ", playlist->name(), " on ", item.mrl() );
+    /*
+     * We need to remove all the existing tasks associated with this playlist.
+     * When scanning a playlist, all its content gets analyzed by the path
+     * crawler, and ultimately triggers MediaLibrary::onDiscoveredFile.
+     * Not removing the tasks would lead to a constraint violation (since
+     * the playlist has been ingested before), and while the file would
+     * exist in database, it wouldn't be added back to the playlist.
+     * We can't simply force all existing tasks to be re-run, as some of
+     * the previous playlist content might have been removed.
+     * Should the media be imported as non external, they will be refreshed
+     * if they need to since the FsDiscoverer will scan them again.
+     */
+    auto t = m_ml->getConn()->newTransaction();
+    parser::Task::removePlaylistContentTasks( m_ml, playlist->id() );
+    playlist->clearContent();
+    t->commit();
+    return std::make_tuple( true, true );
 }
 
 /* Audio files */
