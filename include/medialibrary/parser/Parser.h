@@ -38,6 +38,8 @@ enum class Status
     Success,
     /// We can't compute this file for now (for instance the file was on a network drive which
     /// isn't connected anymore)
+    /// The task will be run again next time the parser gets started.
+    /// This will still increment the task's retry count
     TemporaryUnavailable,
     /// Something failed and we won't continue
     Fatal,
