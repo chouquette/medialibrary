@@ -69,7 +69,7 @@ void Parser::parse( std::shared_ptr<Task> task )
     m_services[0]->parse( std::move( task ) );
     if ( isRestoreTask == false )
     {
-        m_opToDo += m_services.size();
+        ++m_opToDo;
         updateStats();
     }
 }
@@ -144,8 +144,6 @@ void Parser::updateStats()
 
 void Parser::done( std::shared_ptr<Task> t, Status status )
 {
-    ++m_opDone;
-
     auto serviceIdx = t->goToNextService();
 
     if ( status == Status::TemporaryUnavailable ||
@@ -153,11 +151,8 @@ void Parser::done( std::shared_ptr<Task> t, Status status )
          status == Status::Discarded ||
          t->isCompleted() )
     {
-        if ( serviceIdx < m_services.size() )
-        {
-            // We won't process the next tasks, so we need to keep the number of "todo" operations coherent:
-            m_opToDo -= m_services.size() - serviceIdx;
-        }
+        ++m_opDone;
+
         updateStats();
         // We create a separate task for refresh, which doesn't count toward
         // (mrl,parent_playlist) uniqueness. In order to allow for a subsequent
