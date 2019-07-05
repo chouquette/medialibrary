@@ -52,7 +52,6 @@ class Parser : IParserCb
 {
 public:
     using ServicePtr = std::shared_ptr<IParserService>;
-    using WorkerPtr = std::unique_ptr<Worker>;
 
     Parser( MediaLibrary* ml );
     virtual ~Parser();
@@ -79,10 +78,7 @@ private:
     virtual void onIdleChanged( bool idle ) override;
 
 private:
-    typedef std::vector<WorkerPtr> ServiceList;
-
-private:
-    ServiceList m_services;
+    std::vector<std::unique_ptr<Worker>> m_services;
 
     MediaLibrary* m_ml;
     IMediaLibraryCb* m_callback;
