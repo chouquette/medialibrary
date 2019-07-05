@@ -144,6 +144,11 @@ void Task::startParserStep()
     sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id );
 }
 
+uint32_t Task::goToNextService()
+{
+    return ++m_currentService;
+}
+
 int64_t Task::id() const
 {
     return m_id;

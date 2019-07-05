@@ -123,14 +123,17 @@ public:
      * @brief startParserStep Do some internal book keeping to avoid restarting a step too many time
      */
     void startParserStep();
+    /**
+     * @brief goToNextService Increments the internal current service id and return it.
+     * @return
+     */
+    uint32_t goToNextService();
 
     int64_t id() const;
 
     // Restore attached entities such as media/files
     bool restoreLinkedEntities();
     void setMrl( std::string mrl );
-
-    unsigned int                    currentService = 0;
 
     static void createTable( sqlite::Connection* dbConnection );
     static void resetRetryCount( MediaLibraryPtr ml );
@@ -204,6 +207,7 @@ private:
     unsigned int m_parentPlaylistIndex = 0;
     bool m_isRefresh = false;
 
+    unsigned int m_currentService = 0;
     std::unordered_map<Metadata, std::string, MetadataHash> m_metadata;
     std::vector<Task> m_subItems;
     std::vector<Track> m_tracks;

@@ -146,7 +146,7 @@ void Parser::done( std::shared_ptr<Task> t, Status status )
 {
     ++m_opDone;
 
-    auto serviceIdx = ++t->currentService;
+    auto serviceIdx = t->goToNextService();
 
     if ( status == Status::TemporaryUnavailable ||
          status == Status::Fatal ||
