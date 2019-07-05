@@ -50,6 +50,11 @@ enum class Status
     /// This is likely to be used when trying to parse playlist items,
     /// as they already could have been queued before.
     Discarded,
+    /// The task can't be run right now, but should be rescheduled at the back
+    /// of the queue.
+    /// The task's retry count will still be incremented to avoid looping forever
+    /// if this gets returned continuously
+    Requeue,
 };
 
 enum class Step : uint8_t
