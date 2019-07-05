@@ -175,6 +175,7 @@ public:
     sqlite::Connection* getConn() const;
     IMediaLibraryCb* getCb() const;
     std::shared_ptr<ModificationNotifier> getNotifier() const;
+    parser::Parser* getParser() const;
     ThumbnailerWorker* thumbnailer() const;
 
     virtual IDeviceListerCb* setDeviceLister( DeviceListerPtr lister ) override;

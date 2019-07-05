@@ -375,6 +375,9 @@ Task::create( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> fi
                  sqlite::ForeignKey( parentPlaylistId ),
                  parentPlaylistIndex, false ) == false )
         return nullptr;
+    auto parser = ml->getParser();
+    if ( parser != nullptr )
+        parser->parse( self );
     return self;
 }
 
@@ -390,6 +393,9 @@ Task::createRefreshTask( MediaLibraryPtr ml, std::shared_ptr<File> file,
     if ( insert( ml, self, req, self->mrl(), self->file()->type(),
                  self->file()->id(), parentFolderId, true ) == false )
         return nullptr;
+    auto parser = ml->getParser();
+    if ( parser != nullptr )
+        parser->parse( self );
     return self;
 }
 

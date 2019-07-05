@@ -499,11 +499,9 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                 return;
             }
         }
-        task = parser::Task::create( this, mrl, std::move( fileFs ), std::move( parentFolder ),
-                                     std::move( parentFolderFs ), fileType,
-                                     std::move( parentPlaylist ) );
-        if ( task != nullptr && m_parser != nullptr )
-            m_parser->parse( task );
+        parser::Task::create( this, mrl, std::move( fileFs ), std::move( parentFolder ),
+                              std::move( parentFolderFs ), fileType,
+                              std::move( parentPlaylist ) );
     }
     catch(sqlite::errors::ConstraintViolation& ex)
     {
@@ -520,9 +518,8 @@ void MediaLibrary::onUpdatedFile( std::shared_ptr<File> file,
     auto mrl = fileFs->mrl();
     try
     {
-        auto task = parser::Task::createRefreshTask( this, std::move( file ), std::move( fileFs ) );
-        if ( task != nullptr && m_parser != nullptr )
-            m_parser->parse( std::move( task ) );
+        parser::Task::createRefreshTask( this, std::move( file ),
+                                         std::move( fileFs ) );
     }
     catch( const sqlite::errors::ConstraintViolation& ex )
     {
@@ -1539,6 +1536,11 @@ IMediaLibraryCb* MediaLibrary::getCb() const
 std::shared_ptr<ModificationNotifier> MediaLibrary::getNotifier() const
 {
     return m_modificationNotifier;
+}
+
+parser::Parser* MediaLibrary::getParser() const
+{
+    return m_parser.get();
 }
 
 ThumbnailerWorker* MediaLibrary::thumbnailer() const
