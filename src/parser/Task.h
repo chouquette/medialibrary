@@ -130,7 +130,7 @@ public:
     bool restoreLinkedEntities();
     void setMrl( std::string mrl );
 
-    unsigned int                    currentService;
+    unsigned int                    currentService = 0;
 
     static void createTable( sqlite::Connection* dbConnection );
     static void resetRetryCount( MediaLibraryPtr ml );
@@ -192,22 +192,22 @@ public:
     virtual bool isRefresh() const override;
 
 private:
-    MediaLibraryPtr m_ml;
-    int64_t     m_id;
-    Step        m_step;
-    int         m_retryCount;
+    MediaLibraryPtr m_ml = nullptr;
+    int64_t     m_id = 0;
+    Step        m_step = Step::None;
+    int         m_retryCount = 0;
     std::string m_mrl;
-    IFile::Type m_fileType;
-    int64_t     m_fileId;
-    int64_t     m_parentFolderId;
-    int64_t     m_parentPlaylistId;
-    unsigned int m_parentPlaylistIndex;
-    bool m_isRefresh;
+    IFile::Type m_fileType = IFile::Type::Unknown;
+    int64_t     m_fileId = 0;
+    int64_t     m_parentFolderId = 0;
+    int64_t     m_parentPlaylistId = 0;
+    unsigned int m_parentPlaylistIndex = 0;
+    bool m_isRefresh = false;
 
     std::unordered_map<Metadata, std::string, MetadataHash> m_metadata;
     std::vector<Task> m_subItems;
     std::vector<Track> m_tracks;
-    int64_t m_duration;
+    int64_t m_duration = 0;
     MediaPtr m_media;
     FilePtr m_file;
     std::shared_ptr<fs::IFile> m_fileFs;

@@ -52,9 +52,7 @@ const std::string Task::Table::PrimaryKeyColumn = "id_task";
 int64_t parser::Task::* const Task::Table::PrimaryKey = &parser::Task::m_id;
 
 Task::Task( MediaLibraryPtr ml, sqlite::Row& row )
-    : currentService( 0 )
-    , m_ml( ml )
-    , m_duration( 0 )
+    : m_ml( ml )
 {
     row >> m_id
         >> m_step
@@ -74,19 +72,12 @@ Task::Task( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> file
             IFile::Type fileType,
             std::shared_ptr<Playlist> parentPlaylist,
             unsigned int parentPlaylistIndex )
-    : currentService( 0 )
-    , m_ml( ml )
-    , m_id( 0 )
-    , m_step( Step::None )
-    , m_retryCount( 0 )
+    : m_ml( ml )
     , m_mrl( std::move( mrl ) )
     , m_fileType( fileType )
-    , m_fileId( 0 )
     , m_parentFolderId( parentFolder->id() )
     , m_parentPlaylistId( parentPlaylist != nullptr ? parentPlaylist->id() : 0 )
     , m_parentPlaylistIndex( parentPlaylistIndex )
-    , m_isRefresh( false )
-    , m_duration( 0 )
     , m_fileFs( std::move( fileFs ) )
     , m_parentFolder( std::move( parentFolder ) )
     , m_parentFolderFs( std::move( parentFolderFs ) )
@@ -96,16 +87,10 @@ Task::Task( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> file
 
 Task::Task( MediaLibraryPtr ml, std::shared_ptr<File> file,
             std::shared_ptr<fs::IFile> fileFs )
-    : currentService( 0 )
-    , m_ml( ml )
-    , m_step( Step::None )
-    , m_retryCount( 0 )
+    : m_ml( ml )
     , m_mrl( file->mrl() )
     , m_fileType( file->type() )
     , m_fileId( file->id() )
-    , m_parentFolderId( 0 )
-    , m_parentPlaylistId( 0 )
-    , m_parentPlaylistIndex( 0 )
     , m_isRefresh( true )
     , m_file( std::move( file ) )
     , m_fileFs( std::move( fileFs ) )
@@ -113,18 +98,9 @@ Task::Task( MediaLibraryPtr ml, std::shared_ptr<File> file,
 }
 
 Task::Task( std::string mrl, IFile::Type fileType, unsigned int playlistIndex )
-    : currentService( 0 )
-    , m_ml( nullptr )
-    , m_step( Step::None )
-    , m_retryCount( 0 )
-    , m_mrl( std::move( mrl ) )
+    : m_mrl( std::move( mrl ) )
     , m_fileType( fileType )
-    , m_fileId( 0 )
-    , m_parentFolderId( 0 )
-    , m_parentPlaylistId( 0 )
     , m_parentPlaylistIndex( playlistIndex )
-    , m_isRefresh( false )
-    , m_duration( 0 )
 {
 }
 
