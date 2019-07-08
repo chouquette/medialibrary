@@ -25,6 +25,7 @@
 #endif
 
 #include "Thumbnail.h"
+#include "utils/File.h"
 #include "utils/Filename.h"
 #include "Album.h"
 #include "Artist.h"
@@ -164,7 +165,38 @@ bool Thumbnail::isFailureRecord() const
 {
     return m_mrl.empty() == true &&
            m_origin == Origin::Media &&
-           m_isOwned == false;
+            m_isOwned == false;
+}
+
+void Thumbnail::relocate()
+{
+    // There is no point in relocating a failure record.
+    assert( isValid() == true );
+
+    auto originalMrl = m_mrl;
+    auto destPath = m_ml->thumbnailPath() +
+                    std::to_string( m_id ) + "." +
+                    utils::file::extension( originalMrl );
+    std::string localPath;
+    try
+    {
+        localPath = utils::file::toLocalPath( originalMrl );
+    }
+    catch ( const std::exception& ex )
+    {
+        LOG_ERROR( "Failed to relocate thumbnail ", originalMrl, ": ", ex.what() );
+        return;
+    }
+    if ( utils::fs::copy( localPath, destPath ) == true )
+    {
+        auto destMrl = utils::file::toMrl( destPath );
+        if ( sqlite::Tools::withRetries( 3, [this, &destMrl]() {
+                return update( destMrl, true );
+            }) == false )
+        {
+            utils::fs::remove( destPath );
+        }
+    }
 }
 
 void Thumbnail::createTable( sqlite::Connection* dbConnection )

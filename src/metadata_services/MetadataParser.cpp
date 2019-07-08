@@ -40,7 +40,6 @@
 #include "Movie.h"
 #include "utils/Directory.h"
 #include "utils/Filename.h"
-#include "utils/File.h"
 #include "utils/Url.h"
 #include "utils/ModificationsNotifier.h"
 #include "discoverer/FsDiscoverer.h"
@@ -397,7 +396,7 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
         // When parsing the media, we only assign the thumbnail if it has a non
         // empty mrl
         assert( thumbnail->isValid() );
-        relocateThumbnail( *thumbnail );
+        thumbnail->relocate();
     }
     return true;
 }
@@ -774,7 +773,7 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
     if ( thumbnail != nullptr )
     {
         assert( thumbnail->isValid() );
-        relocateThumbnail( *thumbnail );
+        thumbnail->relocate();
     }
     if ( newAlbum == true )
         m_notifier->notifyAlbumCreation( album );
@@ -825,32 +824,6 @@ std::shared_ptr<Thumbnail> MetadataAnalyzer::findAlbumArtwork( IItem& item )
     return std::make_shared<Thumbnail>( m_ml, fileFs->mrl(),
                                         Thumbnail::Origin::CoverFile,
                                         ThumbnailSizeType::Thumbnail, false );
-}
-
-void MetadataAnalyzer::relocateThumbnail( Thumbnail& thumbnail ) const
-{
-    auto originalMrl = thumbnail.mrl();
-    auto destPath = m_ml->thumbnailPath() +
-                    std::to_string( thumbnail.id() ) + "." +
-                    utils::file::extension( originalMrl );
-    std::string localPath;
-    try
-    {
-        localPath = utils::file::toLocalPath( originalMrl );
-    }
-    catch ( const std::exception& ex )
-    {
-        LOG_ERROR( "Failed to relocate thumbnail ", originalMrl, ": ", ex.what() );
-        return;
-    }
-    if ( utils::fs::copy( localPath, destPath ) == true )
-    {
-        auto destMrl = utils::file::toMrl( destPath );
-        if ( sqlite::Tools::withRetries( 3, [&thumbnail, &destMrl]() {
-            return thumbnail.update( destMrl, true );
-        } ) == false )
-            utils::fs::remove( destPath );
-    }
 }
 
 /* Album handling */

@@ -142,6 +142,15 @@ public:
      */
     bool isFailureRecord() const;
 
+    /**
+     * @brief relocate Moves the file associated with the thumbnail to the dedicated
+     * media library folder.
+     *
+     * @note This function assumes that the thumbnail is valid. Failure records
+     * must not be relocated.
+     */
+    void relocate();
+
     static void createTable( sqlite::Connection* dbConnection );
     static void createTriggers( sqlite::Connection* dbConnection );
     static std::shared_ptr<Thumbnail> create( MediaLibraryPtr ml, std::string mrl,
