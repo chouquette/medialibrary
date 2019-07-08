@@ -24,6 +24,7 @@
 
 #include <vector>
 #include <memory>
+#include <unordered_map>
 
 #include "IFile.h"
 #include "Types.h"
@@ -218,11 +219,23 @@ class IMedia
         ///
         virtual const IMetadata& metadata( MetadataType type ) const = 0;
         ///
+        /// \brief metadata Returns all the meta set for this device.
+        ///
+        virtual std::unordered_map<MetadataType, std::string> metadata() const = 0;
+        ///
         /// \brief setMetadata Immediatly saves a metadata in database
         ///
         virtual bool setMetadata( MetadataType type, const std::string& value ) = 0;
         virtual bool setMetadata( MetadataType type, int64_t value ) = 0;
         virtual bool unsetMetadata( MetadataType type ) = 0;
+        ///
+        /// \brief setMetadata Sets multiple metadata at once
+        /// \param meta An unordered_map, indexed by the provided meta, containing a string as value
+        /// \return true if all meta were successfully set, false otherwise.
+        ///
+        /// If this function returns false, no meta will have been updated.
+        ///
+        virtual bool setMetadata( std::unordered_map<MetadataType, std::string> meta ) = 0;
 
         ///
         /// \brief removeFromHistory Removes a media from the history.

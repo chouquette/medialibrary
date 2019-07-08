@@ -652,6 +652,79 @@ TEST_F( Medias, MetadataUnset )
     ASSERT_FALSE( md2.isSet() );
 }
 
+TEST_F( Medias, MetadataGetBatch )
+{
+    auto m = ml->addMedia( "media.mp3" );
+    auto metas = m->metadata();
+    ASSERT_EQ( 0u, metas.size() );
+
+    m->setMetadata( IMedia::MetadataType::Crop, "crop" );
+    m->setMetadata( IMedia::MetadataType::Gain, "gain" );
+    m->setMetadata( IMedia::MetadataType::Seen, "seen" );
+
+    metas = m->metadata();
+    ASSERT_EQ( 3u, metas.size() );
+    ASSERT_EQ( metas[IMedia::MetadataType::Crop], "crop" );
+    ASSERT_EQ( metas[IMedia::MetadataType::Gain], "gain" );
+    ASSERT_EQ( metas[IMedia::MetadataType::Seen], "seen" );
+
+    Reload();
+
+    m = ml->media( m->id() );
+    metas = m->metadata();
+    ASSERT_EQ( 3u, metas.size() );
+    ASSERT_EQ( metas[IMedia::MetadataType::Crop], "crop" );
+    ASSERT_EQ( metas[IMedia::MetadataType::Gain], "gain" );
+    ASSERT_EQ( metas[IMedia::MetadataType::Seen], "seen" );
+
+    m->unsetMetadata( IMedia::MetadataType::Gain );
+    metas = m->metadata();
+    ASSERT_EQ( 2u, metas.size() );
+    ASSERT_EQ( metas[IMedia::MetadataType::Crop], "crop" );
+    ASSERT_EQ( metas[IMedia::MetadataType::Seen], "seen" );
+}
+
+TEST_F( Medias, SetBatch )
+{
+    auto m = ml->addMedia( "media.mp3" );
+    auto metas = m->metadata();
+    ASSERT_EQ( 0u, metas.size() );
+
+    auto res = m->setMetadata( {
+        { IMedia::MetadataType::Crop, "crop" },
+        { IMedia::MetadataType::Gain, "gain" },
+        { IMedia::MetadataType::Seen, "seen" },
+    });
+    ASSERT_TRUE( res );
+
+    metas = m->metadata();
+    ASSERT_EQ( 3u, metas.size() );
+    ASSERT_EQ( metas[IMedia::MetadataType::Crop], "crop" );
+    ASSERT_EQ( metas[IMedia::MetadataType::Gain], "gain" );
+    ASSERT_EQ( metas[IMedia::MetadataType::Seen], "seen" );
+
+    Reload();
+
+    m = ml->media( m->id() );
+    metas = m->metadata();
+    ASSERT_EQ( 3u, metas.size() );
+    ASSERT_EQ( metas[IMedia::MetadataType::Crop], "crop" );
+    ASSERT_EQ( metas[IMedia::MetadataType::Gain], "gain" );
+    ASSERT_EQ( metas[IMedia::MetadataType::Seen], "seen" );
+
+    // Partial override
+    m->setMetadata( {
+        { IMedia::MetadataType::Seen, "unseen" },
+        { IMedia::MetadataType::Zoom, "zoom"  }
+    });
+    metas = m->metadata();
+    ASSERT_EQ( 4u, metas.size() );
+    ASSERT_EQ( metas[IMedia::MetadataType::Crop], "crop" );
+    ASSERT_EQ( metas[IMedia::MetadataType::Gain], "gain" );
+    ASSERT_EQ( metas[IMedia::MetadataType::Seen], "unseen" );
+    ASSERT_EQ( metas[IMedia::MetadataType::Zoom], "zoom" );
+}
+
 TEST_F( Medias, ExternalMrl )
 {
     auto m = ml->addExternalMedia( "https://foo.bar/sea-otters.mkv" );

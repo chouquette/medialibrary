@@ -141,9 +141,11 @@ class Media : public IMedia,
         uint32_t nbPlaylists() const;
 
         virtual const IMetadata& metadata( MetadataType type ) const override;
+        virtual std::unordered_map<MetadataType, std::string> metadata() const override;
         virtual bool setMetadata( MetadataType type, const std::string& value ) override;
         virtual bool setMetadata( MetadataType type, int64_t value ) override;
         virtual bool unsetMetadata( MetadataType type ) override;
+        virtual bool setMetadata( std::unordered_map<MetadataType, std::string> metadata ) override;
 
         virtual bool requestThumbnail( ThumbnailSizeType sizeType, uint32_t desiredWidth,
                                        uint32_t desiredHeight, float position ) override;

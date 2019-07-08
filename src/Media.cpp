@@ -392,6 +392,22 @@ const IMetadata& Media::metadata( IMedia::MetadataType type ) const
     return m_metadata.get( static_cast<MDType>( type ) );
 }
 
+std::unordered_map<IMedia::MetadataType, std::string> Media::metadata() const
+{
+    if ( m_metadata.isReady() == false )
+        m_metadata.init( m_id, IMedia::NbMeta );
+    const auto& records = m_metadata.all();
+    std::unordered_map<IMedia::MetadataType, std::string> res;
+    for ( const auto& r : records )
+    {
+        if ( r.isSet() == false )
+            continue;
+        res.emplace( static_cast<IMedia::MetadataType>( r.type() ),
+                     r.str() );
+    }
+    return res;
+}
+
 bool Media::setMetadata( IMedia::MetadataType type, const std::string& value )
 {
     using MDType = typename std::underlying_type<IMedia::MetadataType>::type;
@@ -420,6 +436,24 @@ bool Media::unsetMetadata(IMedia::MetadataType type)
     if ( m_metadata.isReady() == false )
         m_metadata.init( m_id, IMedia::NbMeta );
     return m_metadata.unset( static_cast<MDType>( type ) );
+}
+
+bool Media::setMetadata( std::unordered_map<IMedia::MetadataType, std::string> metadata )
+{
+    if ( m_metadata.isReady() == false )
+        m_metadata.init( m_id, IMedia::NbMeta );
+    using MDType = typename std::underlying_type<IMedia::MetadataType>::type;
+    auto t = m_ml->getConn()->newTransaction();
+    for ( const auto& m : metadata )
+    {
+        if ( m_metadata.set( static_cast<MDType>( m.first ), m.second ) == false )
+        {
+            m_metadata.clear();
+            return false;
+        }
+    }
+    t->commit();
+    return true;
 }
 
 bool Media::requestThumbnail( ThumbnailSizeType sizeType, uint32_t desiredWidth,

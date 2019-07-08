@@ -109,6 +109,12 @@ void Metadata::init( int64_t entityId, uint32_t nbMeta )
     }
 }
 
+void Metadata::clear()
+{
+    m_records.clear();
+    m_records.reserve( m_nbMeta );
+}
+
 bool Metadata::isReady() const
 {
     return m_nbMeta != 0;
