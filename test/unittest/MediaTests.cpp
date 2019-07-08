@@ -130,15 +130,15 @@ TEST_F( Medias, PlayCount )
 TEST_F( Medias, Progress )
 {
     auto f = std::static_pointer_cast<Media>( ml->addMedia( "media.avi" ) );
-    ASSERT_EQ( 0, f->metadata( Media::MetadataType::Progress ).integer() );
+    ASSERT_EQ( 0, f->metadata( Media::MetadataType::Progress ).asInt() );
     f->setMetadata( Media::MetadataType::Progress, 123 );
-    ASSERT_EQ( 123, f->metadata( Media::MetadataType::Progress ).integer() );
+    ASSERT_EQ( 123, f->metadata( Media::MetadataType::Progress ).asInt() );
     ASSERT_TRUE( f->metadata( Media::MetadataType::Progress ).isSet() );
 
     Reload();
 
     f = ml->media( f->id() );
-    ASSERT_EQ( 123, f->metadata( Media::MetadataType::Progress ).integer() );
+    ASSERT_EQ( 123, f->metadata( Media::MetadataType::Progress ).asInt() );
 }
 
 TEST_F( Medias, Rating )
@@ -146,13 +146,13 @@ TEST_F( Medias, Rating )
     auto f = std::static_pointer_cast<Media>( ml->addMedia( "media.avi" ) );
     ASSERT_FALSE( f->metadata( Media::MetadataType::Rating ).isSet() );
     f->setMetadata( Media::MetadataType::Rating, 12345 );
-    ASSERT_EQ( 12345, f->metadata( Media::MetadataType::Rating ).integer() );
+    ASSERT_EQ( 12345, f->metadata( Media::MetadataType::Rating ).asInt() );
     ASSERT_TRUE( f->metadata( Media::MetadataType::Rating ).isSet() );
 
     Reload();
 
     f = ml->media( f->id() );
-    ASSERT_EQ( 12345, f->metadata( Media::MetadataType::Rating ).integer() );
+    ASSERT_EQ( 12345, f->metadata( Media::MetadataType::Rating ).asInt() );
 }
 
 TEST_F( Medias, Search )
@@ -431,7 +431,7 @@ TEST_F( Medias, RemoveFromHistory )
     ASSERT_EQ( m->id(), history[0]->id() );
     ASSERT_EQ( 1u, m->playCount() );
     ASSERT_TRUE( m->metadata( IMedia::MetadataType::Progress ).isSet() );
-    ASSERT_EQ( m->metadata( IMedia::MetadataType::Progress ).str(), "50" );
+    ASSERT_EQ( m->metadata( IMedia::MetadataType::Progress ).asStr(), "50" );
 
     m->removeFromHistory();
 
@@ -598,14 +598,14 @@ TEST_F( Medias, Metadata )
 
     {
         const auto& md = m->metadata( Media::MetadataType::Speed );
-        ASSERT_EQ( "foo", md.str() );
+        ASSERT_EQ( "foo", md.asStr() );
     }
 
     Reload();
 
     m = ml->media( m->id() );
     const auto& md = m->metadata( Media::MetadataType::Speed );
-    ASSERT_EQ( "foo", md.str() );
+    ASSERT_EQ( "foo", md.asStr() );
 }
 
 TEST_F( Medias, MetadataOverride )
@@ -617,14 +617,14 @@ TEST_F( Medias, MetadataOverride )
     m->setMetadata( Media::MetadataType::Speed, "otter" );
     {
         const auto& md = m->metadata( Media::MetadataType::Speed );
-        ASSERT_EQ( "otter", md.str() );
+        ASSERT_EQ( "otter", md.asStr() );
     }
 
     Reload();
 
     m = ml->media( m->id() );
     const auto& md = m->metadata( Media::MetadataType::Speed );
-    ASSERT_EQ( "otter", md.str() );
+    ASSERT_EQ( "otter", md.asStr() );
 }
 
 TEST_F( Medias, MetadataUnset )
@@ -638,7 +638,7 @@ TEST_F( Medias, MetadataUnset )
 
     auto& md = m->metadata( Media::MetadataType::ApplicationSpecific );
     ASSERT_TRUE( md.isSet() );
-    ASSERT_EQ( "otters", md.str() );
+    ASSERT_EQ( "otters", md.asStr() );
 
     res = m->unsetMetadata( Media::MetadataType::ApplicationSpecific );
     ASSERT_TRUE( res );

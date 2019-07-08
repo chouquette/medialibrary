@@ -53,7 +53,7 @@ bool Metadata::Record::isSet() const
     return m_isSet;
 }
 
-int64_t Metadata::Record::integer() const
+int64_t Metadata::Record::asInt() const
 {
     return atoll( m_value.c_str() );
 }
@@ -63,7 +63,7 @@ double Metadata::Record::asDouble() const
     return atof( m_value.c_str() );
 }
 
-const std::string& Metadata::Record::str() const
+const std::string& Metadata::Record::asStr() const
 {
     return m_value;
 }

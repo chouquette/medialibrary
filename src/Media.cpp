@@ -403,7 +403,7 @@ std::unordered_map<IMedia::MetadataType, std::string> Media::metadata() const
         if ( r.isSet() == false )
             continue;
         res.emplace( static_cast<IMedia::MetadataType>( r.type() ),
-                     r.str() );
+                     r.asStr() );
     }
     return res;
 }

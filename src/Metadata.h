@@ -48,9 +48,9 @@ public:
         Record( uint32_t t, std::string v );
         Record( uint32_t t );
         virtual bool isSet() const override;
-        virtual int64_t integer() const override;
+        virtual int64_t asInt() const override;
         virtual double asDouble() const override;
-        virtual const std::string& str() const override;
+        virtual const std::string& asStr() const override;
         void unset();
         void set( const std::string& value );
         uint32_t type() const;

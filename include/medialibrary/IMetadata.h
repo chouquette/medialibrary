@@ -36,9 +36,9 @@ public:
     };
     virtual ~IMetadata() = default;
     virtual bool isSet() const = 0;
-    virtual int64_t integer() const = 0;
+    virtual int64_t asInt() const = 0;
     virtual double asDouble() const = 0;
-    virtual const std::string& str() const = 0;
+    virtual const std::string& asStr() const = 0;
 };
 
 }
