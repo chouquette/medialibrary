@@ -58,6 +58,11 @@ int64_t Metadata::Record::integer() const
     return atoll( m_value.c_str() );
 }
 
+double Metadata::Record::asDouble() const
+{
+    return atof( m_value.c_str() );
+}
+
 const std::string& Metadata::Record::str() const
 {
     return m_value;

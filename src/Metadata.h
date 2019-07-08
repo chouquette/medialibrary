@@ -67,6 +67,7 @@ private:
         Record( uint32_t t );
         virtual bool isSet() const override;
         virtual int64_t integer() const override;
+        virtual double asDouble() const override;
         virtual const std::string& str() const override;
         void unset();
         void set( const std::string& value );
