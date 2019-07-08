@@ -391,7 +391,14 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
         return false;
     auto thumbnail = media->thumbnail( ThumbnailSizeType::Thumbnail );
     if ( thumbnail != nullptr )
-        relocateThumbnail( *thumbnail, media->id() );
+    {
+        // In case we are refreshing a media, we deleted the previous link
+        // between the media and its potential thumbnail.
+        // When parsing the media, we only assign the thumbnail if it has a non
+        // empty mrl
+        assert( thumbnail->isValid() );
+        relocateThumbnail( *thumbnail );
+    }
     return true;
 }
 
@@ -765,7 +772,10 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
         return false;
 
     if ( thumbnail != nullptr )
-        relocateThumbnail( *thumbnail, media->id() );
+    {
+        assert( thumbnail->isValid() );
+        relocateThumbnail( *thumbnail );
+    }
     if ( newAlbum == true )
         m_notifier->notifyAlbumCreation( album );
     else
@@ -817,11 +827,11 @@ std::shared_ptr<Thumbnail> MetadataAnalyzer::findAlbumArtwork( IItem& item )
                                         ThumbnailSizeType::Thumbnail, false );
 }
 
-void MetadataAnalyzer::relocateThumbnail( Thumbnail& thumbnail, int64_t mediaId ) const
+void MetadataAnalyzer::relocateThumbnail( Thumbnail& thumbnail ) const
 {
     auto originalMrl = thumbnail.mrl();
     auto destPath = m_ml->thumbnailPath() +
-                    std::to_string( mediaId ) + "." +
+                    std::to_string( thumbnail.id() ) + "." +
                     utils::file::extension( originalMrl );
     std::string localPath;
     try
