@@ -201,4 +201,9 @@ void Metadata::Record::set( const std::string& value )
     m_isSet = true;
 }
 
+uint32_t Metadata::Record::type() const
+{
+    return m_type;
+}
+
 }

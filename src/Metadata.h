@@ -71,6 +71,7 @@ private:
         virtual const std::string& str() const override;
         void unset();
         void set( const std::string& value );
+        uint32_t type() const;
 
     private:
         const uint32_t m_type;
