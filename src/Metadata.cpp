@@ -179,6 +179,11 @@ bool Metadata::unset( uint32_t type )
     return true;
 }
 
+const std::vector<Metadata::Record>& Metadata::all() const
+{
+    return m_records;
+}
+
 void Metadata::unset( sqlite::Connection* dbConn, IMetadata::EntityType entityType, uint32_t type )
 {
     static const std::string req = "DELETE FROM " + Metadata::Table::Name +

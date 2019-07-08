@@ -41,24 +41,6 @@ public:
     {
         static const std::string Name;
     };
-    Metadata( MediaLibraryPtr ml, IMetadata::EntityType entityType );
-
-    // We have to "lazy init" this object since during containing object creation,
-    // we might not know the ID yet (for instance. when instantiating the
-    // metadata object during the creation of a new Media)
-    void init( int64_t entityId, uint32_t nbMeta );
-    bool isReady() const;
-
-    IMetadata& get( uint32_t type ) const;
-    bool set( uint32_t type, const std::string& value );
-    bool set( uint32_t type, int64_t value );
-    bool unset( uint32_t type );
-
-    static void unset( sqlite::Connection* dbConn, IMetadata::EntityType entityType, uint32_t type );
-
-    static void createTable( sqlite::Connection* connection );
-
-private:
     class Record : public IMetadata
     {
     public:
@@ -80,6 +62,25 @@ private:
 
         friend Metadata;
     };
+    Metadata( MediaLibraryPtr ml, IMetadata::EntityType entityType );
+
+    // We have to "lazy init" this object since during containing object creation,
+    // we might not know the ID yet (for instance. when instantiating the
+    // metadata object during the creation of a new Media)
+    void init( int64_t entityId, uint32_t nbMeta );
+    // Clears the metadata cache
+    void clear();
+    bool isReady() const;
+
+    IMetadata& get( uint32_t type ) const;
+    bool set( uint32_t type, const std::string& value );
+    bool set( uint32_t type, int64_t value );
+    bool unset( uint32_t type );
+    const std::vector<Record>& all() const;
+
+    static void unset( sqlite::Connection* dbConn, IMetadata::EntityType entityType, uint32_t type );
+
+    static void createTable( sqlite::Connection* connection );
 
 private:
     MediaLibraryPtr m_ml;
