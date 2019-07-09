@@ -294,6 +294,18 @@ std::shared_ptr<File> File::createFromPlaylist( MediaLibraryPtr ml, int64_t play
     return self;
 }
 
+bool File::exists( MediaLibraryPtr ml, const std::string& mrl )
+{
+    sqlite::Statement stmt{ ml->getConn()->handle(), "SELECT EXISTS("
+        "SELECT id_file FROM " + Table::Name + " WHERE mrl = ?)"
+    };
+    stmt.execute( mrl );
+    auto row = stmt.row();
+    auto res = row.extract<bool>();
+    assert( stmt.row() == nullptr );
+    return res;
+}
+
 std::shared_ptr<File> File::fromMrl( MediaLibraryPtr ml, const std::string& mrl )
 {
     auto fsFactory = ml->fsFactoryForMrl( mrl );

@@ -108,3 +108,9 @@ TEST_F( Files, UpdateFsInfo )
     ASSERT_EQ( 123u, f->lastModificationDate() );
     ASSERT_EQ( 456u, f->size() );
 }
+
+TEST_F( Files, Exists )
+{
+    ASSERT_TRUE( File::exists( ml.get(), "media.mkv" ) );
+    ASSERT_FALSE( File::exists( ml.get(), "another%20file.avi" ) );
+}

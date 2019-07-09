@@ -81,6 +81,7 @@ public:
     static std::shared_ptr<File> createFromPlaylist( MediaLibraryPtr ml, int64_t playlistId, const fs::IFile& file,
                                                      int64_t folderId, bool isRemovable );
 
+    static bool exists( MediaLibraryPtr ml, const std::string& mrl );
     /**
      * @brief fromPath  Attempts to fetch a file using its mrl
      * This will only work if the file was stored on a non removable device
