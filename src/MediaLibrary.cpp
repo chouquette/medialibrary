@@ -889,7 +889,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
             {
                 // Force a rescan to solve metadata analysis problems.
                 // The insertion is fixed, but won't edit already inserted data.
-                forceRescan();
+                needRescan = true;
                 previousVersion = 7;
             }
             /**
