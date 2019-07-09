@@ -82,7 +82,7 @@ public:
 
     virtual std::shared_ptr<Folder> getFolderParent() = 0;
 
-    virtual std::pair<std::shared_ptr<Playlist>, unsigned int> getPlaylistParent() = 0;
+    virtual std::pair<int64_t, int64_t> getPlaylistParent() = 0;
 };
 
 }

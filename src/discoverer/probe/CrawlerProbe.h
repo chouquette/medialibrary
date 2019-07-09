@@ -85,9 +85,9 @@ public:
         return nullptr;
     }
 
-    virtual std::pair<std::shared_ptr<Playlist>, unsigned int> getPlaylistParent() override
+    virtual std::pair<int64_t,int64_t> getPlaylistParent() override
     {
-        return { nullptr, 0 };
+        return { 0, 0 };
     }
 
 private:

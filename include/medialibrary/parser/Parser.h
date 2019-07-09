@@ -64,6 +64,8 @@ enum class Step : uint8_t
     MetadataAnalysis = 2,
 
     Completed = 1 | 2,
+
+    Linking = 4,
 };
 
 }

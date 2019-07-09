@@ -91,4 +91,9 @@ CREATE TRIGGER auto_delete_media_thumbnail AFTER DELETE ON Media BEGIN DELETE FR
 CREATE TRIGGER auto_delete_artist_thumbnail AFTER DELETE ON Artist BEGIN DELETE FROM ThumbnailLinking WHERE entity_id = old.id_artist AND entity_type = 2; END;
 CREATE TRIGGER auto_delete_album_thumbnail AFTER DELETE ON Album BEGIN DELETE FROM ThumbnailLinking WHERE entity_id = old.id_album AND entity_type = 1; END;
 CREATE TRIGGER add_album_track AFTER INSERT ON AlbumTrack BEGIN UPDATE Album SET duration = duration + new.duration, nb_tracks = nb_tracks + 1, is_present = is_present + 1 WHERE id_album = new.album_id; END;
+INSERT INTO `Media` (id_media,type,subtype,duration,play_count,last_played_date,real_last_played_date,insertion_date,release_date,title,filename,is_favorite,is_present,device_id,nb_playlists,folder_id) VALUES (1,1,0,12345,NULL,NULL,NULL,NULL,NULL,'movie','movie.mkv',0,1,NULL,0,NULL);
+INSERT INTO `Device` (id_device,uuid,scheme,is_removable,is_present,last_seen) VALUES (1,'{fake-uuid}','file://',0,1,NULL);
+INSERT INTO `Folder` (id_folder,path,name,parent_id,is_banned,device_id,is_removable,nb_audio,nb_video) VALUES (1,'/root/path','path',NULL,0,1,0,0,1);
+INSERT INTO `File` (id_file,media_id,playlist_id,mrl,type,last_modification_date,size,folder_id,is_removable,is_external,is_network) VALUES (1,1,NULL,'file:///root/path/movie.mkv',1,NULL,NULL,1,'','','');
+INSERT INTO `Task` (id_task,step,retry_count,mrl,file_type,file_id,parent_folder_id,parent_playlist_id,parent_playlist_index,is_refresh) VALUES (1,0,0,'file:///root/path/movie.mkv',1,1,1,NULL,NULL,0);
 COMMIT;

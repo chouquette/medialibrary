@@ -82,11 +82,10 @@ public:
     virtual Query<IMedia> audioFiles( const QueryParameters* params ) const override;
     virtual Query<IMedia> videoFiles( const QueryParameters* params ) const override;
 
-    virtual void onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
+    virtual void onDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,
                                    std::shared_ptr<Folder> parentFolder,
                                    std::shared_ptr<fs::IDirectory> parentFolderFs,
-                                   IFile::Type fileType,
-                                   std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist );
+                                   IFile::Type fileType , std::pair<int64_t, int64_t> parentPlaylist);
     void onUpdatedFile( std::shared_ptr<File> file,
                         std::shared_ptr<fs::IFile> fileFs );
 
@@ -222,7 +221,7 @@ private:
     void migrateModel14to15();
     void migrateModel15to16();
     void migrateModel16to17( uint32_t originalPreviousVersion );
-    void migrateModel17to18();
+    void migrateModel17to18(uint32_t originalPreviousVersion);
     void createAllTables();
     void createAllTriggers();
     void registerEntityHooks();

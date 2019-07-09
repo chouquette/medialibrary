@@ -40,6 +40,13 @@ namespace parser
 class IItem
 {
 public:
+    enum class LinkType : uint8_t
+    {
+        NoLink,
+        Playlist,
+        Media,
+    };
+
     enum class Metadata : uint8_t
     {
         Title,
@@ -212,27 +219,11 @@ public:
      */
     virtual std::shared_ptr<fs::IDirectory> parentFolderFs() = 0;
 
-    /**
-     * @brief parentPlaylist Returns the playlist containing this item, if any
-     *
-     * Even if the item being processed does belong in a playlist, its associated
-     * playlist entity might have not been created, depending on the analysis progress.
-     * Usually the playlists are created after the MetadataAnalysis step.
-     */
-    virtual PlaylistPtr parentPlaylist() = 0;
-
-    /**
-     * @brief parentPlaylistIndex Returns this item's index in a playlist, if any.
-     *
-     * If this item belong in a playlist, this will return a non 0 value. If 0
-     * is returned, this item doesn't belong in any playlist.
-     */
-    virtual unsigned int parentPlaylistIndex() const = 0;
-
-    /**
-     * @brief isRefresh Returns true if this item is a refresh of an existing media
-     */
     virtual bool isRefresh() const = 0;
+
+    virtual LinkType linkType() const = 0;
+    virtual int64_t linkToId() const = 0;
+    virtual int64_t linkExtra() const = 0;
 };
 
 }

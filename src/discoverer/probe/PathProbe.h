@@ -40,10 +40,10 @@ class PathProbe : public IProbe
 public:
     explicit PathProbe( std::string path,                         // The path we target
                         bool isDirectory,                         // The PathProbe behave differently between files & folders
-                        std::shared_ptr<Playlist> parentPlaylist, // Playlist to be attach to the file addition task
                         std::shared_ptr<Folder> parentFolder,     // known parent folder to start from, if any
                         const std::string& parentFolderPath,      // known parent folder path
-                        unsigned int playlistIndex,
+                        int64_t parentPlaylistId,
+                        int64_t parentPlaylistIndex,
                         bool reload );
 
     virtual bool proceedOnDirectory( const fs::IDirectory& directory ) override;
@@ -81,19 +81,19 @@ public:
         return m_parentFolder;
     }
 
-    virtual std::pair<std::shared_ptr<Playlist>, unsigned int> getPlaylistParent() override
+    virtual std::pair<int64_t,int64_t> getPlaylistParent() override
     {
-        return { m_parentPlaylist, m_playlistIndex };
+        return { m_parentPlaylistId, m_playlistIndex };
     }
 
 private:
     bool m_isDirectory;
     std::stack<std::string> m_splitPath;
     bool m_isDiscoveryEnded;
-    std::shared_ptr<Playlist> m_parentPlaylist;
     std::shared_ptr<Folder> m_parentFolder;
     std::string m_path;
-    unsigned int m_playlistIndex;
+    int64_t m_parentPlaylistId;
+    int64_t m_playlistIndex;
 };
 
 }

@@ -73,6 +73,8 @@
 #include "metadata_services/vlc/VLCMetadataService.h"
 #endif
 #include "metadata_services/MetadataParser.h"
+#include "metadata_services/LinkService.h"
+
 #include "thumbnails/ThumbnailerWorker.h"
 
 // FileSystem
@@ -139,10 +141,17 @@ MediaLibrary::~MediaLibrary()
 
 void MediaLibrary::createAllTables()
 {
+    auto dbModelVersion = m_settings.dbModelVersion();
     // We need to create the tables in order of triggers creation
     // Device is the "root of all evil". When a device is modified,
     // we will trigger an update on folder, which will trigger
     // an update on files, and so on.
+
+    // We may specify the current model version when creating the tables, in order
+    // for the old versions to be created as they were before, only to be migrated
+    // afterward.
+    // Individual migrations might take shortcuts, but it will become increasingly
+    // hard to do, as we have to mainting major changes across versions.
 
     Device::createTable( m_dbConnection.get() );
     Folder::createTable( m_dbConnection.get() );
@@ -161,7 +170,7 @@ void MediaLibrary::createAllTables()
     AudioTrack::createTable( m_dbConnection.get() );
     Artist::createTable( m_dbConnection.get() );
     Artist::createDefaultArtists( m_dbConnection.get() );
-    parser::Task::createTable( m_dbConnection.get() );
+    parser::Task::createTable( m_dbConnection.get(), dbModelVersion );
     Metadata::createTable( m_dbConnection.get() );
     SubtitleTrack::createTable( m_dbConnection.get() );
     Chapter::createTable( m_dbConnection.get() );
@@ -480,28 +489,16 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                                      std::shared_ptr<Folder> parentFolder,
                                      std::shared_ptr<fs::IDirectory> parentFolderFs,
                                      IFile::Type fileType,
-                                     std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist )
+                                     std::pair<int64_t, int64_t> parentPlaylist )
 {
     auto mrl = fileFs->mrl();
+    std::unique_ptr<sqlite::Transaction> t;
+    if ( parentPlaylist.first != 0 )
+        t = getConn()->newTransaction();
     try
     {
-        std::shared_ptr<parser::Task> task;
-        if ( parentPlaylist.first == nullptr )
-        {
-            // Sqlite won't ensure uniqueness for Task with the same (mrl, parent_playlist_id)
-            // when parent_playlist_id is null, so we have to ensure of it ourselves
-            const std::string req = "SELECT * FROM " + parser::Task::Table::Name + " "
-                    "WHERE mrl = ? AND parent_playlist_id IS NULL";
-            task = parser::Task::fetch( this, req, mrl );
-            if ( task != nullptr )
-            {
-                LOG_INFO( "Not creating duplicated task for mrl: ", mrl );
-                return;
-            }
-        }
         parser::Task::create( this, mrl, std::move( fileFs ), std::move( parentFolder ),
-                              std::move( parentFolderFs ), fileType,
-                              std::move( parentPlaylist ) );
+                              std::move( parentFolderFs ), fileType );
     }
     catch(sqlite::errors::ConstraintViolation& ex)
     {
@@ -509,6 +506,14 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
         // discovery after a crash.
         LOG_WARN( "Failed to insert ", mrl, ": ", ex.what(), ". "
                   "Assuming the file is already scheduled for discovery" );
+    }
+    if ( parentPlaylist.first != 0 )
+    {
+        if ( parser::Task::createLinkTask( this, mrl, parentPlaylist.first,
+                                           parser::IItem::LinkType::Playlist,
+                                           parentPlaylist.second ) == nullptr )
+            return;
+        t->commit();
     }
 }
 
@@ -791,6 +796,7 @@ bool MediaLibrary::startParser()
         m_parser->addService( m_services[0] );
     }
     m_parser->addService( std::make_shared<parser::MetadataAnalyzer>() );
+    m_parser->addService( std::make_shared<parser::LinkService>() );
     m_parser->start();
     return true;
 }
@@ -963,7 +969,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
             }
             if ( previousVersion == 17 )
             {
-                migrateModel17to18();
+                migrateModel17to18( originalPreviousVersion );
                 needRescan = true;
                 previousVersion = 18;
             }
@@ -1343,16 +1349,6 @@ void MediaLibrary::migrateModel15to16()
         }
     }
 
-    // Migrate tasks
-    {
-        auto tasks = parser::Task::fetchAll<parser::Task>( this );
-        for ( auto& t : tasks )
-        {
-            auto newMrl = utils::url::encode( utils::url::decode( t->mrl() ) );
-            t->setMrl( std::move( newMrl ) );
-        }
-    }
-
     m_settings.setDbModelVersion( 16 );
     m_settings.save();
     t->commit();
@@ -1414,8 +1410,11 @@ void MediaLibrary::migrateModel16to17( uint32_t originalPreviousVersion )
 /**
  * Model 17 to 18 migration:
  * - Add thumbnail.shared_counter
+ * - Add Task.link_to_id
+ * - Add Task.link_to_type
+ * - Add Task.link_extra
  */
-void MediaLibrary::migrateModel17to18()
+void MediaLibrary::migrateModel17to18( uint32_t originalPreviousVersion )
 {
     auto dbConn = getConn();
     sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
@@ -1427,6 +1426,19 @@ void MediaLibrary::migrateModel17to18()
 
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
+
+    if ( originalPreviousVersion <= 15 )
+    {
+        // Migrate tasks
+        {
+            auto tasks = parser::Task::fetchAll<parser::Task>( this );
+            for ( auto& t : tasks )
+            {
+                auto newMrl = utils::url::encode( utils::url::decode( t->mrl() ) );
+                t->setMrl( std::move( newMrl ) );
+            }
+        }
+    }
 
     m_settings.setDbModelVersion( 18 );
     m_settings.save();
@@ -1737,6 +1749,7 @@ void MediaLibrary::forceRescan()
         VideoTrack::deleteAll( this );
         AudioTrack::deleteAll( this );
         Playlist::clearExternalPlaylistContent( this );
+        parser::Task::removePlaylistContentTasks( this );
         parser::Task::resetParsing( this );
         Artist::createDefaultArtists( getConn() );
         Thumbnail::deleteAll( this );

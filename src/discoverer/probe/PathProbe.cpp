@@ -37,14 +37,14 @@ namespace medialibrary
 namespace prober
 {
 
-PathProbe::PathProbe( std::string path, bool isDirectory, std::shared_ptr<Playlist> parentPlaylist,
+PathProbe::PathProbe( std::string path, bool isDirectory,
                       std::shared_ptr<Folder> parentFolder, const std::string& parentFolderPath,
-                      unsigned int playlistIndex, bool reload )
+                      int64_t parentPlaylistId, int64_t playlistIndex, bool reload )
     : m_isDirectory( isDirectory )
     , m_isDiscoveryEnded( false )
-    , m_parentPlaylist( std::move( parentPlaylist ) )
     , m_parentFolder( std::move( parentFolder ) )
     , m_path( std::move( path ) )
+    , m_parentPlaylistId( parentPlaylistId )
     , m_playlistIndex( playlistIndex )
 {
     assert( m_path.size() >= parentFolderPath.size() );

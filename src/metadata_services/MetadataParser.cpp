@@ -159,9 +159,6 @@ Status MetadataAnalyzer::run( IItem& item )
     }
     auto media = std::static_pointer_cast<Media>( item.media() );
 
-    if ( item.parentPlaylist() != nullptr )
-        item.parentPlaylist()->add( *media, item.parentPlaylistIndex() );
-
     if ( isAudio == true )
     {
         if ( parseAudioFile( item ) == false )
@@ -245,42 +242,44 @@ Status MetadataAnalyzer::addPlaylistMedias( IItem& item ) const
 }
 
 void MetadataAnalyzer::addPlaylistElement( IItem& item,
-                                         std::shared_ptr<Playlist> playlistPtr,
-                                         const IItem& subitem ) const
+                                           std::shared_ptr<Playlist> playlistPtr,
+                                           const IItem& subitem ) const
 {
     const auto& mrl = subitem.mrl();
     const auto& playlistMrl = item.mrl();
     LOG_DEBUG( "Try to add ", mrl, " to the playlist ", playlistMrl );
-    auto media = m_ml->media( mrl );
-    if ( media != nullptr )
-    {
-        LOG_DEBUG( "Media for ", mrl, " already exists, adding it to the playlist ", playlistMrl );
-        auto res = playlistPtr->add( *media, subitem.parentPlaylistIndex() );
-        if ( res == false )
-            LOG_ERROR( "Failed to insert ", mrl, " in playlist ", playlistMrl );
-        return;
-    }
     // Create Media, etc.
     auto fsFactory = m_ml->fsFactoryForMrl( mrl );
 
     if ( fsFactory == nullptr ) // Media not supported by any FsFactory, registering it as external
     {
         auto t2 = m_ml->getConn()->newTransaction();
-        auto externalMedia = Media::create( m_ml, IMedia::Type::External, 0, 0,
-                                            subitem.meta( IItem::Metadata::Title ), -1 );
-        if ( externalMedia == nullptr )
+        // Check if the file was already created before. Beware that the MRL here
+        // is not the item's one. The mrl we're interested in is the one from the
+        // subitem, ie. the playlist item we're adding.
+        if ( File::exists( m_ml, mrl ) == false )
         {
-            LOG_ERROR( "Failed to create external media for ", mrl, " in the playlist ", playlistMrl );
+            auto externalMedia = Media::create( m_ml, IMedia::Type::External, 0, 0,
+                                                subitem.meta( IItem::Metadata::Title ), -1 );
+            if ( externalMedia == nullptr )
+            {
+                LOG_ERROR( "Failed to create external media for ", mrl, " in the playlist ", playlistMrl );
+                return;
+            }
+            // Assuming that external mrl present in playlist file is a main media resource
+            auto externalFile = externalMedia->addExternalMrl( mrl, IFile::Type::Main );
+            if ( externalFile == nullptr )
+            {
+                LOG_ERROR( "Failed to create external file for ", mrl, " in the playlist ", playlistMrl );
+                return;
+            }
+        }
+        if ( Task::createLinkTask( m_ml, mrl, playlistPtr->id(),
+                                   Task::LinkType::Playlist,
+                                   subitem.linkExtra() ) == nullptr )
+        {
             return;
         }
-        // Assuming that external mrl present in playlist file is a main media resource
-        auto externalFile = externalMedia->addExternalMrl( mrl, IFile::Type::Main );
-        if ( externalFile == nullptr )
-        {
-            LOG_ERROR( "Failed to create external file for ", mrl, " in the playlist ", playlistMrl );
-            return;
-        }
-        playlistPtr->add( *externalMedia, subitem.parentPlaylistIndex() );
         t2->commit();
         return;
     }
@@ -311,16 +310,18 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
     {
         auto probePtr = std::unique_ptr<prober::PathProbe>(
                     new prober::PathProbe{ utils::file::toLocalPath( mrl ),
-                       isDirectory, std::move( playlistPtr ), parentFolder,
-                       utils::file::toLocalPath( directoryMrl ), subitem.parentPlaylistIndex(), true } );
+                                           isDirectory, parentFolder,
+                                           utils::file::toLocalPath( directoryMrl ),
+                                           playlistPtr->id(), subitem.linkExtra(), true } );
         FsDiscoverer discoverer( fsFactory, m_ml, nullptr, std::move( probePtr ) );
         discoverer.reload( entryPoint, *this );
         return;
     }
     auto probePtr = std::unique_ptr<prober::PathProbe>(
                 new prober::PathProbe{ utils::file::toLocalPath( mrl ),
-                   isDirectory, std::move( playlistPtr ), parentFolder,
-                   utils::file::toLocalPath( directoryMrl ), subitem.parentPlaylistIndex(), false } );
+                                    isDirectory, parentFolder,
+                                    utils::file::toLocalPath( directoryMrl ),
+                                    playlistPtr->id(), subitem.linkExtra(), false } );
     FsDiscoverer discoverer( fsFactory, m_ml, nullptr, std::move( probePtr ) );
     if ( parentKnown == false )
     {
@@ -414,103 +415,61 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
         LOG_WARN( "Failed to analyze ", item.mrl(), ": no tracks found" );
         return std::make_tuple( Status::Fatal, false );
     }
-    try
+    auto isAudio = std::find_if( begin( tracks ), end( tracks ), [](const IItem::Track& t) {
+        return t.type == IItem::Track::Type::Video;
+    }) == end( tracks );
+    auto t = m_ml->getConn()->newTransaction();
+    auto file = File::fromExternalMrl( m_ml, mrl );
+    // Check if this media was already added before as an external media
+    if ( file != nullptr && file->type() == IFile::Type::Main )
     {
-        auto isAudio = std::find_if( begin( tracks ), end( tracks ), [](const IItem::Track& t) {
-            return t.type == IItem::Track::Type::Video;
-        }) == end( tracks );
-        auto t = m_ml->getConn()->newTransaction();
-        auto file = File::fromExternalMrl( m_ml, mrl );
-        // Check if this media was already added before as an external media
-        if ( file != nullptr && file->type() == IFile::Type::Main )
+        auto media = file->media();
+        if ( media == nullptr )
         {
-            auto media = file->media();
-            if ( media == nullptr )
-            {
-                assert( !"External file must have an associated media" );
-                return std::make_tuple( Status::Fatal, false );
-            }
-            if ( media->type() == IMedia::Type::External )
-            {
-                auto res = overrideExternalMedia( item, media, file, isAudio );
-                t->commit();
-                item.setMedia( std::move( media ) );
-                item.setFile( std::move( file ) );
-                return std::make_tuple( res, isAudio );
-            }
-        }
-        LOG_DEBUG( "Adding ", mrl );
-        auto folder = static_cast<Folder*>( item.parentFolder().get() );
-        auto m = Media::create( m_ml, isAudio ? IMedia::Type::Audio : IMedia::Type::Video,
-                                folder->deviceId(), folder->id(),
-                                utils::url::decode( utils::file::fileName( mrl ) ),
-                                item.duration() );
-        if ( m == nullptr )
-        {
-            LOG_ERROR( "Failed to add media ", mrl, " to the media library" );
+            assert( !"External file must have an associated media" );
             return std::make_tuple( Status::Fatal, false );
         }
-        auto deviceFs = item.parentFolderFs()->device();
-        if ( deviceFs == nullptr )
-            throw fs::DeviceRemovedException{};
-        // For now, assume all media are made of a single file
-        file = m->addFile( *item.fileFs(),
-                                item.parentFolder()->id(),
-                                deviceFs->isRemovable(),
-                                File::Type::Main );
-        if ( file == nullptr )
+        if ( media->type() == IMedia::Type::External )
         {
-            LOG_ERROR( "Failed to add file ", mrl, " to media #", m->id() );
-            return std::make_tuple( Status::Fatal, false );
+            auto res = overrideExternalMedia( item, media, file, isAudio );
+            t->commit();
+            item.setMedia( std::move( media ) );
+            item.setFile( std::move( file ) );
+            return std::make_tuple( res, isAudio );
         }
-        createTracks( *m, tracks );
-
-        item.setMedia( std::move( m ) );
-        // Will invoke ITaskCb::updateFileId to upadte m_fileId & its
-        // representation in DB
-        item.setFile( std::move( file ) );
-
-        t->commit();
-        m_notifier->notifyMediaCreation( item.media() );
-        return std::make_tuple( Status::Success, isAudio );
     }
-    // Voluntarily trigger an exception for a valid, but less common case, to avoid database overhead
-    catch ( sqlite::errors::ConstraintViolation& ex )
-    {
-        LOG_WARN( "Creation of Media & File failed because ", ex.what(),
-                  ". Assuming this task is a duplicate" );
-        // continue out of the exception handler
-    }
-    // Try to retrieve file & Media from database
-    auto fileInDB = File::fromMrl( m_ml, mrl );
-    if ( fileInDB == nullptr ) // The file is no longer present in DB, gracefully delete task
-    {
-        LOG_ERROR( "File ", mrl, " no longer present in DB, aborting");
+    LOG_DEBUG( "Adding ", mrl );
+    auto folder = static_cast<Folder*>( item.parentFolder().get() );
+    auto m = Media::create( m_ml, isAudio ? IMedia::Type::Audio : IMedia::Type::Video,
+                            folder->deviceId(), folder->id(),
+                            utils::url::decode( utils::file::fileName( mrl ) ),
+                            item.duration() );
+    if ( m == nullptr )
+   {
+        LOG_ERROR( "Failed to add media ", mrl, " to the media library" );
         return std::make_tuple( Status::Fatal, false );
     }
-    // Now that we ran some basic sanity check, if this was not a playlist
-    // insertion, there's nothing much left to do anyway
-    if ( item.parentPlaylist() == nullptr )
-        return std::make_tuple( Status::Discarded, false );
-    auto media = fileInDB->media();
-    if ( media == nullptr )
+    auto deviceFs = item.parentFolderFs()->device();
+    if ( deviceFs == nullptr )
+        throw fs::DeviceRemovedException{};
+    // For now, assume all media are made of a single file
+    file = m->addFile( *item.fileFs(), item.parentFolder()->id(),
+                       deviceFs->isRemovable(), File::Type::Main );
+    if ( file == nullptr )
     {
-        LOG_ERROR( "File ", mrl, " doesn't have an associated media: aborting" );
+        LOG_ERROR( "Failed to add file ", mrl, " to media #", m->id() );
         return std::make_tuple( Status::Fatal, false );
     }
-    // The media was already inserted but this task still exists, with a playlist
-    // index, so we need to ensure the media was already inserted into the playlist
-    auto playlist = static_cast<Playlist*>( item.parentPlaylist().get() );
-    if ( playlist->contains( media->id(), item.parentPlaylistIndex() ) == false )
-    {
-        auto success = item.parentPlaylist()->add( *media, item.parentPlaylistIndex() );
-        if ( success == false )
-            return std::make_tuple( Status::Discarded, false );
-    }
-    // In any case, there is nothing else to do for this task, return Completed to avoid
-    // the task itself being deleted & to prevent the analysis to continue.
-    // In this case, isAudio will be ignored
-    return std::make_tuple( Status::Completed, false );
+    createTracks( *m, tracks );
+
+    item.setMedia( std::move( m ) );
+    // Will invoke ITaskCb::updateFileId to upadte m_fileId & its
+    // representation in DB
+    item.setFile( std::move( file ) );
+
+    t->commit();
+    m_notifier->notifyMediaCreation( item.media() );
+    return std::make_tuple( Status::Success, isAudio );
 }
 
 Status MetadataAnalyzer::overrideExternalMedia( IItem& item, std::shared_ptr<Media> media,

@@ -72,6 +72,18 @@ public:
         }
     };
 
+    enum class Type : uint8_t
+    {
+        /// This task is about creating an entity (Media, Playlist, ...)
+        Creation,
+        /// This task is about linking entities together (Adding playlist items
+        /// in a playlist for instance)
+        Link,
+        /// This task is about refreshing an existing item because it associated
+        /// file was updated on disk
+        Refresh,
+    };
+
     Task( MediaLibraryPtr ml, sqlite::Row& row );
     /**
      * @brief Task Construct a task for a newly detected file
@@ -86,9 +98,7 @@ public:
     Task( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> fileFs,
           std::shared_ptr<Folder> parentFolder,
           std::shared_ptr<fs::IDirectory> parentFolderFs,
-          IFile::Type fileType,
-          std::shared_ptr<Playlist> parentPlaylist,
-          unsigned int parentPlaylistIndex );
+          IFile::Type fileType );
     /**
      * @brief Task Constructor for refresh tasks
      * @param ml A medialibrary instance pointer
@@ -97,6 +107,17 @@ public:
      */
     Task( MediaLibraryPtr ml, std::shared_ptr<File> file,
           std::shared_ptr<fs::IFile> fileFs );
+
+    /**
+     * @brief Task Contructor for a link task
+     * @param ml A medialibrary instance pointer
+     * @param linkToId The entity to link to ID
+     * @param linkToType The entity to link to type
+     * @param linkExtra An extra parameter, contextual to the type of linking.
+     * @param mrl The mrl of the new entity to link
+     */
+    Task( MediaLibraryPtr ml, std::string mrl, int64_t linkToId,
+          LinkType linkToType, int64_t linkExtra);
 
     /**
      * @brief Task Constructor for dummy tasks, to represent subitems
@@ -135,19 +156,20 @@ public:
     bool restoreLinkedEntities();
     void setMrl( std::string mrl );
 
-    static void createTable( sqlite::Connection* dbConnection );
+    static void createTable( sqlite::Connection* dbConnection , uint32_t dbModel );
     static void resetRetryCount( MediaLibraryPtr ml );
     static void resetParsing( MediaLibraryPtr ml );
     static std::vector<std::shared_ptr<Task>> fetchUncompleted( MediaLibraryPtr ml );
     static std::shared_ptr<Task> create( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> fileFs,
                                          std::shared_ptr<Folder> parentFolder,
                                          std::shared_ptr<fs::IDirectory> parentFolderFs,
-                                         IFile::Type fileType,
-                                         std::pair<std::shared_ptr<Playlist>,
-                                         unsigned int> parentPlaylist );
+                                         IFile::Type fileType );
     static std::shared_ptr<Task> createRefreshTask( MediaLibraryPtr ml,
                                                     std::shared_ptr<File> file,
                                                     std::shared_ptr<fs::IFile> fsFile );
+    static std::shared_ptr<Task> createLinkTask( MediaLibraryPtr ml, std::string mrl,
+                                                 int64_t linkToId, LinkType linkToType,
+                                                 int64_t linkToExtra );
     /**
      * @brief removePlaylistContentTasks Removes existing task associated with
      *                                   the given playlist
@@ -155,6 +177,12 @@ public:
      * Only completed tasks will be removed.
      */
     static void removePlaylistContentTasks( MediaLibraryPtr ml, int64_t playlistId );
+    /**
+     * @brief removePlaylistContentTasks
+     * @param ml
+     * @param playlistId
+     */
+    static void removePlaylistContentTasks( MediaLibraryPtr ml );
     static void recoverUnscannedFiles( MediaLibraryPtr ml );
 
     /***************************************************************************
@@ -188,24 +216,26 @@ public:
 
     virtual std::shared_ptr<fs::IDirectory> parentFolderFs() override;
 
-    virtual PlaylistPtr parentPlaylist() override;
-
-    virtual unsigned int parentPlaylistIndex() const override;
-
     virtual bool isRefresh() const override;
+    bool isLinkTask() const;
+
+    virtual LinkType linkType() const override;
+    virtual int64_t linkToId() const override;
+    virtual int64_t linkExtra() const override;
 
 private:
     MediaLibraryPtr m_ml = nullptr;
     int64_t     m_id = 0;
     Step        m_step = Step::None;
     int         m_retryCount = 0;
+    Type        m_type;
     std::string m_mrl;
     IFile::Type m_fileType = IFile::Type::Unknown;
     int64_t     m_fileId = 0;
     int64_t     m_parentFolderId = 0;
-    int64_t     m_parentPlaylistId = 0;
-    unsigned int m_parentPlaylistIndex = 0;
-    bool m_isRefresh = false;
+    int64_t     m_linkToId = 0;
+    LinkType    m_linkToType = LinkType::NoLink;
+    int64_t     m_linkExtra = 0;
 
     unsigned int m_currentService = 0;
     std::unordered_map<Metadata, std::string, MetadataHash> m_metadata;
@@ -217,7 +247,6 @@ private:
     std::shared_ptr<fs::IFile> m_fileFs;
     FolderPtr m_parentFolder;
     std::shared_ptr<fs::IDirectory> m_parentFolderFs;
-    PlaylistPtr m_parentPlaylist;
 
     friend Task::Table;
 };

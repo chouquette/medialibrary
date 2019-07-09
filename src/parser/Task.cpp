@@ -57,50 +57,59 @@ Task::Task( MediaLibraryPtr ml, sqlite::Row& row )
     row >> m_id
         >> m_step
         >> m_retryCount
+        >> m_type
         >> m_mrl
         >> m_fileType
         >> m_fileId
         >> m_parentFolderId
-        >> m_parentPlaylistId
-        >> m_parentPlaylistIndex
-        >> m_isRefresh;
+        >> m_linkToId
+        >> m_linkToType
+        >> m_linkExtra;
 }
 
 Task::Task( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> fileFs,
             std::shared_ptr<Folder> parentFolder,
             std::shared_ptr<fs::IDirectory> parentFolderFs,
-            IFile::Type fileType,
-            std::shared_ptr<Playlist> parentPlaylist,
-            unsigned int parentPlaylistIndex )
+            IFile::Type fileType )
     : m_ml( ml )
+    , m_type( Type::Creation )
     , m_mrl( std::move( mrl ) )
     , m_fileType( fileType )
     , m_parentFolderId( parentFolder->id() )
-    , m_parentPlaylistId( parentPlaylist != nullptr ? parentPlaylist->id() : 0 )
-    , m_parentPlaylistIndex( parentPlaylistIndex )
     , m_fileFs( std::move( fileFs ) )
     , m_parentFolder( std::move( parentFolder ) )
     , m_parentFolderFs( std::move( parentFolderFs ) )
-    , m_parentPlaylist( std::move( parentPlaylist ) )
 {
 }
 
 Task::Task( MediaLibraryPtr ml, std::shared_ptr<File> file,
             std::shared_ptr<fs::IFile> fileFs )
     : m_ml( ml )
+    , m_type( Type::Refresh )
     , m_mrl( file->mrl() )
     , m_fileType( file->type() )
     , m_fileId( file->id() )
-    , m_isRefresh( true )
     , m_file( std::move( file ) )
     , m_fileFs( std::move( fileFs ) )
+{
+}
+
+Task::Task( MediaLibraryPtr ml, std::string mrl, int64_t linkToId,
+            Task::LinkType linkToType, int64_t linkExtra )
+    : m_ml( ml )
+    , m_type( Type::Link )
+    , m_mrl( std::move( mrl ) )
+    , m_linkToId( linkToId )
+    , m_linkToType( linkToType )
+    , m_linkExtra( linkExtra )
 {
 }
 
 Task::Task( std::string mrl, IFile::Type fileType, unsigned int playlistIndex )
     : m_mrl( std::move( mrl ) )
     , m_fileType( fileType )
-    , m_parentPlaylistIndex( playlistIndex )
+    , m_linkToType( LinkType::Playlist )
+    , m_linkExtra( playlistIndex )
 {
 }
 
@@ -134,6 +143,12 @@ bool Task::isCompleted() const
 
 bool Task::isStepCompleted( Step step ) const
 {
+    if ( m_type == Type::Link )
+    {
+        // We always want to return true for any step which isn't the linking step
+        // since we don't want to run any service other than the linking one
+        return step != Step::Linking;
+    }
     return ( static_cast<uint8_t>( m_step ) & static_cast<uint8_t>( step ) ) != 0;
 }
 
@@ -156,6 +171,9 @@ int64_t Task::id() const
 
 bool Task::restoreLinkedEntities()
 {
+    // No need to restore anything for link tasks, they only contain mrls & ids.
+    if ( isLinkTask() == true )
+        return true;
     LOG_DEBUG("Restoring linked entities of task ", m_id);
     // MRL will be empty if the task has been resumed from unparsed files
     // (during 11 -> 12 migration)
@@ -280,15 +298,6 @@ bool Task::restoreLinkedEntities()
         LOG_ERROR( "Failed to restore parent folder #", m_parentFolderId );
         return false;
     }
-    if ( m_parentPlaylistId != 0 )
-    {
-        m_parentPlaylist = Playlist::fetch( m_ml, m_parentPlaylistId );
-        if ( m_parentPlaylist == nullptr )
-        {
-            LOG_ERROR( "Failed to restore parent playlist #", m_parentPlaylistId );
-            return false;
-        }
-    }
 
     if ( file != nullptr )
     {
@@ -318,21 +327,36 @@ void Task::setMrl( std::string newMrl )
     m_mrl = std::move( newMrl );
 }
 
-void Task::createTable( sqlite::Connection* dbConnection )
+void Task::createTable( sqlite::Connection* dbConnection, uint32_t dbModel )
 {
-    std::string reqs[] = {
-        #include "database/tables/Task_v18.sql"
-    };
-    for ( const auto& req : reqs )
-        sqlite::Tools::executeRequest( dbConnection, req );
+    /**
+     * In case we're coming from an old model, create the table as it was, so that
+     * intermediate migration don't fail.
+     */
+    if ( dbModel < 18 )
+    {
+        std::string reqs[] = {
+            #include "database/tables/Task_v14.sql"
+        };
+        for ( const auto& req : reqs )
+            sqlite::Tools::executeRequest( dbConnection, req );
+    }
+    else
+    {
+        std::string reqs[] = {
+            #include "database/tables/Task_v18.sql"
+        };
+        for ( const auto& req : reqs )
+            sqlite::Tools::executeRequest( dbConnection, req );
+    }
 }
 
 void Task::resetRetryCount( MediaLibraryPtr ml )
 {
     static const std::string req = "UPDATE " + Task::Table::Name + " SET "
-            "retry_count = 0 WHERE step & ? != ?";
+            "retry_count = 0 WHERE step & ?1 != ?1 AND step != ?2";
     sqlite::Tools::executeUpdate( ml->getConn(), req, Step::Completed,
-                                  Step::Completed);
+                                  Step::Linking );
 }
 
 void Task::resetParsing( MediaLibraryPtr ml )
@@ -357,23 +381,17 @@ std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
 std::shared_ptr<Task>
 Task::create( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> fileFs,
               std::shared_ptr<Folder> parentFolder, std::shared_ptr<fs::IDirectory> parentFolderFs,
-              IFile::Type fileType,
-              std::pair<std::shared_ptr<Playlist>, unsigned int> parentPlaylist )
+              IFile::Type fileType )
 {
     auto parentFolderId = parentFolder->id();
-    auto parentPlaylistId = parentPlaylist.first != nullptr ? parentPlaylist.first->id() : 0;
-    auto parentPlaylistIndex = parentPlaylist.second;
 
     std::shared_ptr<Task> self = std::make_shared<Task>( ml, std::move( mrl ), std::move( fileFs ),
-        std::move( parentFolder ), std::move( parentFolderFs ), fileType,
-        std::move( parentPlaylist.first ), parentPlaylist.second );
+        std::move( parentFolder ), std::move( parentFolderFs ), fileType );
     const std::string req = "INSERT INTO " + Task::Table::Name +
-        "(mrl, file_type, parent_folder_id, parent_playlist_id, "
-        "parent_playlist_index, is_refresh) "
-        "VALUES(?, ?, ?, ?, ?, ?)";
-    if ( insert( ml, self, req, self->mrl(), fileType, parentFolderId,
-                 sqlite::ForeignKey( parentPlaylistId ),
-                 parentPlaylistIndex, false ) == false )
+        "(type, mrl, file_type, parent_folder_id) "
+        "VALUES(?, ?, ?, ?)";
+    if ( insert( ml, self, req, Type::Creation, self->mrl(), fileType,
+                 parentFolderId ) == false )
         return nullptr;
     auto parser = ml->getParser();
     if ( parser != nullptr )
@@ -388,10 +406,28 @@ Task::createRefreshTask( MediaLibraryPtr ml, std::shared_ptr<File> file,
     auto parentFolderId = file->folderId();
     auto self = std::make_shared<Task>( ml, std::move( file ), std::move( fileFs ) );
     const std::string req = "INSERT INTO " + Task::Table::Name +
-            "(mrl, file_type, file_id, parent_folder_id, is_refresh) "
+            "(type, mrl, file_type, file_id, parent_folder_id ) "
             "VALUES(?, ?, ?, ?, ?)";
-    if ( insert( ml, self, req, self->mrl(), self->file()->type(),
-                 self->file()->id(), parentFolderId, true ) == false )
+    if ( insert( ml, self, req, Type::Refresh, self->mrl(), self->file()->type(),
+                 self->file()->id(), parentFolderId ) == false )
+        return nullptr;
+    auto parser = ml->getParser();
+    if ( parser != nullptr )
+        parser->parse( self );
+    return self;
+}
+
+std::shared_ptr<Task> Task::createLinkTask( MediaLibraryPtr ml, std::string mrl,
+                                            int64_t linkToId, Task::LinkType linkToType,
+                                            int64_t linkToExtra )
+{
+    auto self = std::make_shared<Task>( ml, std::move( mrl ), linkToId, linkToType,
+                                        linkToExtra );
+    const std::string req = "INSERT INTO " + Task::Table::Name +
+            "(type, mrl, file_type, file_id, parent_folder_id, link_to_id,"
+            "link_to_type, link_extra) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+    if ( insert( ml, self, req, Type::Link, self->mrl(), IFile::Type::Unknown,
+                 nullptr, nullptr, linkToId, linkToType, linkToExtra ) == false )
         return nullptr;
     auto parser = ml->getParser();
     if ( parser != nullptr )
@@ -402,9 +438,17 @@ Task::createRefreshTask( MediaLibraryPtr ml, std::shared_ptr<File> file,
 void Task::removePlaylistContentTasks( MediaLibraryPtr ml, int64_t playlistId )
 {
     const std::string req = "DELETE FROM " + Task::Table::Name + " "
-            "WHERE parent_playlist_id = ? AND step & ? = ?";
-    sqlite::Tools::executeDelete( ml->getConn(), req, playlistId,
-                                  Step::Completed, Step::Completed );
+            "WHERE type = ? AND link_to_type = ? AND link_to_id = ? AND step = ?";
+    sqlite::Tools::executeDelete( ml->getConn(), req, Task::Type::Link,
+                                  LinkType::Playlist, playlistId, Step::Completed );
+}
+
+void Task::removePlaylistContentTasks( MediaLibraryPtr ml )
+{
+    const std::string req = "DELETE FROM " + Task::Table::Name + " "
+            "WHERE type = ? AND link_to_type = ? AND step = ?";
+    sqlite::Tools::executeDelete( ml->getConn(), req, Task::Type::Link,
+                                  LinkType::Playlist, Step::Completed );
 }
 
 void Task::recoverUnscannedFiles( MediaLibraryPtr ml )
@@ -524,19 +568,29 @@ std::shared_ptr<fs::IDirectory> Task::parentFolderFs()
     return m_parentFolderFs;
 }
 
-PlaylistPtr Task::parentPlaylist()
-{
-    return m_parentPlaylist;
-}
-
-unsigned int Task::parentPlaylistIndex() const
-{
-    return m_parentPlaylistIndex;
-}
-
 bool Task::isRefresh() const
 {
-    return m_isRefresh;
+    return m_type == Type::Refresh;
+}
+
+bool Task::isLinkTask() const
+{
+    return m_type == Type::Link;
+}
+
+IItem::LinkType Task::linkType() const
+{
+    return m_linkToType;
+}
+
+int64_t Task::linkToId() const
+{
+    return m_linkToId;
+}
+
+int64_t Task::linkExtra() const
+{
+    return m_linkExtra;
 }
 
 }

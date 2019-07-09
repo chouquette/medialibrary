@@ -98,6 +98,7 @@ libmedialibrary_la_SOURCES = \
 	src/logging/IostreamLogger.cpp \
 	src/logging/Logger.cpp \
 	src/metadata_services/MetadataParser.cpp \
+	src/metadata_services/LinkService.cpp \
 	src/thumbnails/ThumbnailerWorker.cpp \
 	src/parser/Parser.cpp \
 	src/parser/ParserWorker.cpp \
@@ -155,6 +156,7 @@ noinst_HEADERS = \
 	src/Media.h \
 	src/MediaLibrary.h \
 	src/metadata_services/MetadataParser.h \
+	src/metadata_services/LinkService.h \
 	src/thumbnails/ThumbnailerWorker.h \
 	src/Movie.h \
 	src/parser/Parser.h \

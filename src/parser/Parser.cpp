@@ -76,6 +76,7 @@ void Parser::parse( std::shared_ptr<Task> task )
 
 void Parser::start()
 {
+    assert( m_services.size() == 3 );
     restore();
 }
 
