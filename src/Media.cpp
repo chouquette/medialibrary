@@ -80,7 +80,7 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     // Skip is_present
     , m_deviceId( row.load<decltype(m_deviceId)>( 13 ) )
     , m_nbPlaylists( row.load<unsigned int>( 14 ) )
-    // Skip folder_id if any field gets added afterward
+    , m_folderId( row.load<decltype(m_folderId)>( 15 ) )
 
     // End of DB fields extraction
     , m_metadata( m_ml, IMetadata::EntityType::Media )
@@ -106,6 +106,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
     , m_isFavorite( false )
     , m_deviceId( 0 )
     , m_nbPlaylists( 0 )
+    , m_folderId( 0 )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
@@ -454,6 +455,19 @@ void Media::setDeviceId( int64_t deviceId )
     m_changed = true;
 }
 
+int64_t Media::folderId() const
+{
+    return m_folderId;
+}
+
+void Media::setFolderId( int64_t folderId )
+{
+    if ( m_folderId == folderId )
+        return;
+    m_folderId = folderId;
+    m_changed = true;
+}
+
 bool Media::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
 {
     assert( newThumbnail != nullptr );
@@ -563,12 +577,13 @@ bool Media::save()
 {
     static const std::string req = "UPDATE " + Media::Table::Name + " SET "
             "type = ?, subtype = ?, duration = ?, release_date = ?,"
-            "title = ?, device_id = ? WHERE id_media = ?";
+            "title = ?, device_id = ?, folder_id = ? WHERE id_media = ?";
     if ( m_changed == false )
         return true;
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_type, m_subType, m_duration,
                                        m_releaseDate, m_title,
                                        sqlite::ForeignKey{ m_deviceId },
+                                       sqlite::ForeignKey{ m_folderId },
                                        m_id ) == false )
     {
         return false;

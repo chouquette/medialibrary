@@ -36,6 +36,7 @@
 #include "mocks/DiscovererCbMock.h"
 #include "compat/Thread.h"
 #include "Playlist.h"
+#include "Device.h"
 
 class Medias : public Tests
 {
@@ -957,6 +958,24 @@ TEST_F( Medias, SetDeviceId )
 
     m = ml->media( m->id() );
     ASSERT_EQ( 123u, m->deviceId() );
+}
+
+TEST_F( Medias, SetFolderId )
+{
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
+    mock::NoopDevice deviceFs{};
+    auto d = Device::create( ml.get(), deviceFs.uuid(), "file://", false );
+    auto folder = Folder::create( ml.get(), "path/to/folder", 0, *d, deviceFs );
+    ASSERT_EQ( 0u, m->folderId() );
+    m->setFolderId( d->id() );
+    m->save();
+
+    ASSERT_EQ( folder->id(), m->folderId() );
+
+    Reload();
+
+    m = ml->media( m->id() );
+    ASSERT_EQ( folder->id(), m->folderId() );
 }
 
 class FetchMedia : public Tests
