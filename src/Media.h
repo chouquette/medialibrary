@@ -149,6 +149,8 @@ class Media : public IMedia,
                                        uint32_t desiredHeight, float position ) override;
 
         void setReleaseDate( unsigned int date );
+        int64_t deviceId() const; // Used for unit tests purposes only
+        void setDeviceId( int64_t deviceId );
         bool save();
 
         std::shared_ptr<File> addFile( const fs::IFile& fileFs, int64_t parentFolderId,
@@ -208,6 +210,7 @@ private:
         // might be used as a fallback
         std::string m_filename;
         bool m_isFavorite;
+        int64_t m_deviceId;
         uint32_t m_nbPlaylists;
 
         // Auto fetched related properties

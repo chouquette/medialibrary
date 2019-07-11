@@ -78,7 +78,7 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     , m_filename( row.load<decltype(m_filename)>( 10 ) )
     , m_isFavorite( row.load<decltype(m_isFavorite)>( 11 ) )
     // Skip is_present
-    // Skip device_id
+    , m_deviceId( row.load<decltype(m_deviceId)>( 13 ) )
     , m_nbPlaylists( row.load<unsigned int>( 14 ) )
     // Skip folder_id if any field gets added afterward
 
@@ -104,6 +104,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
     // When creating a Media, meta aren't parsed, and therefor, the title is the filename
     , m_filename( title )
     , m_isFavorite( false )
+    , m_deviceId( 0 )
     , m_nbPlaylists( 0 )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
@@ -440,6 +441,19 @@ void Media::setReleaseDate( unsigned int date )
     m_changed = true;
 }
 
+int64_t Media::deviceId() const
+{
+    return m_deviceId;
+}
+
+void Media::setDeviceId( int64_t deviceId )
+{
+    if ( m_deviceId == deviceId )
+        return;
+    m_deviceId = deviceId;
+    m_changed = true;
+}
+
 bool Media::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
 {
     assert( newThumbnail != nullptr );
@@ -549,11 +563,13 @@ bool Media::save()
 {
     static const std::string req = "UPDATE " + Media::Table::Name + " SET "
             "type = ?, subtype = ?, duration = ?, release_date = ?,"
-            "title = ? WHERE id_media = ?";
+            "title = ?, device_id = ? WHERE id_media = ?";
     if ( m_changed == false )
         return true;
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_type, m_subType, m_duration,
-                                       m_releaseDate, m_title, m_id ) == false )
+                                       m_releaseDate, m_title,
+                                       sqlite::ForeignKey{ m_deviceId },
+                                       m_id ) == false )
     {
         return false;
     }

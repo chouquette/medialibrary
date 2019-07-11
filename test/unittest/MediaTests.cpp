@@ -944,6 +944,21 @@ TEST_F( Medias, SetPlayCount )
     ASSERT_EQ( 123u, m->playCount() );
 }
 
+TEST_F( Medias, SetDeviceId )
+{
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
+    ASSERT_EQ( 0u, m->deviceId() );
+
+    m->setDeviceId( 123u );
+    ASSERT_EQ( 123u, m->deviceId() );
+    m->save();
+
+    Reload();
+
+    m = ml->media( m->id() );
+    ASSERT_EQ( 123u, m->deviceId() );
+}
+
 class FetchMedia : public Tests
 {
 protected:
