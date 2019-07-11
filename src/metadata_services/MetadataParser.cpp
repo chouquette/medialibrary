@@ -44,6 +44,7 @@
 #include "utils/ModificationsNotifier.h"
 #include "discoverer/FsDiscoverer.h"
 #include "discoverer/probe/PathProbe.h"
+#include "Device.h"
 
 #include <cstdlib>
 #include <algorithm>
@@ -419,6 +420,25 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
             return t.type == Task::Item::Track::Type::Video;
         }) == end( tracks );
         auto t = m_ml->getConn()->newTransaction();
+        auto file = File::fromExternalMrl( m_ml, mrl );
+        // Check if this media was already added before as an external media
+        if ( file != nullptr && file->type() == IFile::Type::Main )
+        {
+            auto media = file->media();
+            if ( media == nullptr )
+            {
+                assert( !"External file must have an associated media" );
+                return std::make_tuple( Status::Fatal, false );
+            }
+            if ( media->type() == IMedia::Type::External )
+            {
+                auto res = overrideExternalMedia( item, media, file, isAudio );
+                t->commit();
+                item.setMedia( std::move( media ) );
+                item.setFile( std::move( file ) );
+                return std::make_tuple( res, isAudio );
+            }
+        }
         LOG_DEBUG( "Adding ", mrl );
         auto folder = static_cast<Folder*>( item.parentFolder().get() );
         auto m = Media::create( m_ml, isAudio ? IMedia::Type::Audio : IMedia::Type::Video,
@@ -434,7 +454,7 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
         if ( deviceFs == nullptr )
             throw fs::DeviceRemovedException{};
         // For now, assume all media are made of a single file
-        auto file = m->addFile( *item.fileFs(),
+        file = m->addFile( *item.fileFs(),
                                 item.parentFolder()->id(),
                                 deviceFs->isRemovable(),
                                 File::Type::Main );
@@ -491,6 +511,27 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
     // the task itself being deleted & to prevent the analysis to continue.
     // In this case, isAudio will be ignored
     return std::make_tuple( Status::Completed, false );
+}
+
+Status MetadataAnalyzer::overrideExternalMedia( IItem& item, std::shared_ptr<Media> media,
+                                                std::shared_ptr<File> file, bool isAudio ) const
+{
+    // If the file is on a removable device, we need to update its mrl
+    assert( sqlite::Transaction::transactionInProgress() == true );
+    auto fsDir = item.parentFolderFs();
+    auto deviceFs = fsDir->device();
+    auto device = Device::fromUuid( m_ml, deviceFs->uuid() );
+    if ( device == nullptr )
+        return Status::Fatal;
+    if ( file->update( *item.fileFs(), item.parentFolder()->id(),
+                       deviceFs->isRemovable() ) == false )
+        return Status::Fatal;
+    media->setType( isAudio == true ? IMedia::Type::Audio : IMedia::Type::Video );
+    media->setDuration( item.duration() );
+    media->setDeviceId( device->id() );
+    media->setFolderId( item.parentFolder()->id() );
+    media->save();
+    return Status::Success;
 }
 
 void MetadataAnalyzer::createTracks( Media& m, const std::vector<IItem::Track>& tracks ) const

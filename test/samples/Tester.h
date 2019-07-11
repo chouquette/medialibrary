@@ -103,6 +103,10 @@ protected:
     void checkAlbumTracks(const IAlbum* album, const std::vector<MediaPtr>& tracks, const rapidjson::Value& expectedTracks , bool& found) const;
 };
 
+class ReducedTests : public Tests
+{
+};
+
 class ResumeTests : public Tests
 {
 public:

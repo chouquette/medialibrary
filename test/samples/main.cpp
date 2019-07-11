@@ -25,6 +25,8 @@
 #endif
 
 #include "Tester.h"
+#include "medialibrary/filesystem/IDirectory.h"
+#include "medialibrary/filesystem/IFile.h"
 #include "utils/Filename.h"
 #include "utils/Directory.h"
 
@@ -54,6 +56,11 @@ static const char* testCases[] = {
     "playlist_same_folder",
     "same_album_with_subfolder",
     "compilation_different_years"
+};
+
+static const char* reducedTestCases[] = {
+    "featuring",
+    "parse_video",
 };
 
 TEST_P( Tests, Parse )
@@ -190,6 +197,71 @@ TEST_P( RefreshTests, Refresh )
     runChecks( doc );
 }
 
+TEST_P( ReducedTests, OverrideExternalMedia )
+{
+    auto testDir = ForcedTestDirectory.empty() == false ? ForcedTestDirectory : TestDirectory;
+    auto casePath = testDir + "testcases/" + GetParam() + ".json";
+    std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
+    ASSERT_NE( nullptr, f );
+    char buff[65536]; // That's how ugly I am!
+    auto ret = fread( buff, sizeof(buff[0]), sizeof(buff), f.get() );
+    ASSERT_NE( 0u, ret );
+    buff[ret] = 0;
+    rapidjson::Document doc;
+    doc.Parse( buff );
+
+    ASSERT_TRUE( doc.HasMember( "input" ) );
+    const auto& input = doc["input"];
+    auto nbMedia = 0u;
+    for ( auto i = 0u; i < input.Size(); ++i )
+    {
+        // Quick and dirty check to ensure we're discovering something that exists
+        auto samplesDir = testDir + "samples/" + input[i].GetString();
+        // Fetch all files in the sample directory and insert those as external
+        // media before the discovery starts
+        ASSERT_TRUE( utils::fs::isDirectory( samplesDir ) );
+        samplesDir = utils::fs::toAbsolute( samplesDir );
+        auto samplesMrl = utils::file::toMrl( samplesDir );
+        auto fsFactory = m_ml->fsFactoryForMrl( samplesMrl );
+        auto dir = fsFactory->createDirectory( samplesMrl );
+        auto files = dir->files();
+        for ( const auto& f : files )
+        {
+            auto media = m_ml->addExternalMedia( f->mrl() );
+            ASSERT_NE( nullptr, media );
+            ASSERT_EQ( IMedia::Type::External, media->type() );
+            ASSERT_EQ( -1, media->duration() );
+            ++nbMedia;
+        }
+
+        m_ml->discover( utils::file::toMrl( samplesDir ) );
+    }
+    ASSERT_NE( 0u, nbMedia );
+    auto folders = m_ml->folders( IMedia::Type::Unknown )->all();
+    ASSERT_EQ( 0u, folders.size() );
+
+    ASSERT_TRUE( m_cb->waitForParsingComplete() );
+
+    for ( auto i = 1u; i <= nbMedia; ++i )
+    {
+        auto media = m_ml->media( i );
+        ASSERT_NE( nullptr, media );
+        ASSERT_NE( IMedia::Type::External, media->type() );
+        ASSERT_TRUE( media->type() == IMedia::Type::Audio ||
+                     media->type() == IMedia::Type::Video );
+        ASSERT_NE( -1, media->duration() );
+    }
+    // Check that the media are correctly linked with their folders
+    folders = m_ml->folders( IMedia::Type::Unknown )->all();
+    ASSERT_NE( 0u, folders.size() );
+    auto nbMediaByFolders = 0u;
+    for ( auto i = 0u; i < folders.size(); ++i )
+    {
+        nbMediaByFolders += folders[i]->media( IMedia::Type::Unknown, nullptr )->count();
+    }
+    ASSERT_EQ( nbMedia, nbMediaByFolders );
+}
+
 int main(int ac, char** av)
 {
     ::testing::InitGoogleTest(&ac, av);
@@ -214,6 +286,9 @@ int main(int ac, char** av)
 
 INSTANTIATE_TEST_CASE_P(SamplesTests, Tests,
                         ::testing::ValuesIn(testCases) );
+
+INSTANTIATE_TEST_CASE_P(SamplesTests, ReducedTests,
+                        ::testing::ValuesIn(reducedTestCases) );
 
 INSTANTIATE_TEST_CASE_P(SamplesTests, ResumeTests,
                         ::testing::ValuesIn(testCases) );

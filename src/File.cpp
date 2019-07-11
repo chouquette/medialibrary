@@ -207,6 +207,17 @@ int64_t File::folderId()
     return m_folderId;
 }
 
+bool File::update( const fs::IFile& fileFs, int64_t folderId, bool isRemovable )
+{
+    const std::string req = "UPDATE " + Table::Name + " SET "
+        "mrl = ?, last_modification_date = ?, size = ?, folder_id = ?, "
+        "is_removable = ?, is_external = ?, is_network = ? WHERE id_file = ?";
+    return sqlite::Tools::executeUpdate( m_ml->getConn(), req,
+        isRemovable == true ? fileFs.name() : fileFs.mrl(),
+        fileFs.lastModificationDate(), fileFs.size(), folderId, isRemovable,
+        false, fileFs.isNetwork(), m_id );
+}
+
 void File::createTable( sqlite::Connection* dbConnection )
 {
     std::string req {
