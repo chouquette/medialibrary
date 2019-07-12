@@ -223,8 +223,8 @@ private:
     void migrateModel15to16();
     void migrateModel16to17( uint32_t originalPreviousVersion );
     void migrateModel17to18(uint32_t originalPreviousVersion);
-    void createAllTables();
-    void createAllTriggers();
+    void createAllTables( uint32_t dbModelVersion );
+    void createAllTriggers( uint32_t dbModelVersion );
     void registerEntityHooks();
     static bool validateSearchPattern( const std::string& pattern );
     bool createThumbnailFolder( const std::string& thumbnailPath ) const;

@@ -139,9 +139,8 @@ MediaLibrary::~MediaLibrary()
         m_parser->stop();
 }
 
-void MediaLibrary::createAllTables()
+void MediaLibrary::createAllTables( uint32_t dbModelVersion )
 {
-    auto dbModelVersion = m_settings.dbModelVersion();
     // We need to create the tables in order of triggers creation
     // Device is the "root of all evil". When a device is modified,
     // we will trigger an update on folder, which will trigger
@@ -177,9 +176,8 @@ void MediaLibrary::createAllTables()
     Bookmark::createTable( m_dbConnection.get() );
 }
 
-void MediaLibrary::createAllTriggers()
+void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
 {
-    auto dbModelVersion = m_settings.dbModelVersion();
     Folder::createTriggers( m_dbConnection.get(), dbModelVersion );
     Album::createTriggers( m_dbConnection.get() );
     AlbumTrack::createTriggers( m_dbConnection.get() );
@@ -352,8 +350,9 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
             LOG_ERROR( "Failed to load settings" );
             return InitializeResult::Failed;
         }
-        createAllTables();
-        createAllTriggers();
+        auto dbModel = m_settings.dbModelVersion();
+        createAllTables( dbModel );
+        createAllTriggers( dbModel );
         t->commit();
 
         if ( m_settings.dbModelVersion() != Settings::DbModelVersion )
@@ -1028,7 +1027,7 @@ bool MediaLibrary::recreateDatabase( const std::string& dbPath )
     unlink( dbPath.c_str() );
     m_dbConnection = sqlite::Connection::connect( dbPath );
     Settings::createTable( m_dbConnection.get() );
-    createAllTables();
+    createAllTables( Settings::DbModelVersion );
     // We dropped the database, there is no setting to be read anymore
     return m_settings.load();
 }
