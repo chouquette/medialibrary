@@ -63,6 +63,7 @@
 #include "Metadata.h"
 #include "parser/Task.h"
 #include "utils/Charsets.h"
+#include "Bookmark.h"
 
 // Discoverers:
 #include "discoverer/FsDiscoverer.h"
@@ -164,6 +165,7 @@ void MediaLibrary::createAllTables()
     Metadata::createTable( m_dbConnection.get() );
     SubtitleTrack::createTable( m_dbConnection.get() );
     Chapter::createTable( m_dbConnection.get() );
+    Bookmark::createTable( m_dbConnection.get() );
 }
 
 void MediaLibrary::createAllTriggers()

@@ -33,6 +33,7 @@
 #include "Album.h"
 #include "AlbumTrack.h"
 #include "Artist.h"
+#include "Bookmark.h"
 #include "AudioTrack.h"
 #include "Chapter.h"
 #include "Device.h"
@@ -649,6 +650,31 @@ void Media::removeFile( File& file )
     });
     if ( it != end( m_files ) )
         m_files.erase( it );
+}
+
+Query<IBookmark> Media::bookmarks( const QueryParameters* params ) const
+{
+    return Bookmark::fromMedia( m_ml, m_id, params );
+}
+
+BookmarkPtr Media::bookmark( int64_t time ) const
+{
+    return Bookmark::fromMedia( m_ml, m_id, time );
+}
+
+BookmarkPtr Media::addBookmark( int64_t time )
+{
+    return Bookmark::create( m_ml, time, m_id );
+}
+
+bool Media::removeBookmark( int64_t time )
+{
+    return Bookmark::remove( m_ml, time, m_id );
+}
+
+bool Media::removeAllBookmarks()
+{
+    return Bookmark::removeAll( m_ml, m_id );
 }
 
 std::string Media::addRequestJoin( const QueryParameters* params, bool forceFile,

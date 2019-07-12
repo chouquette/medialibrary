@@ -108,6 +108,7 @@ libmedialibrary_la_SOURCES = \
 	src/utils/Strings.cpp \
 	src/utils/Url.cpp \
 	src/utils/File.cpp \
+	src/Bookmark.cpp \
 	$(NULL)
 
 
@@ -177,6 +178,7 @@ noinst_HEADERS = \
 	src/compat/Mutex.h \
 	src/compat/ConditionVariable.h \
 	src/SubtitleTrack.h \
+	src/Bookmark.h \
 	$(NULL)
 
 
@@ -325,6 +327,7 @@ unittest_SOURCES = \
 	test/unittest/MiscTests.cpp \
 	test/unittest/ThumbnailTests.cpp \
 	test/unittest/SubtitleTrackTests.cpp \
+	test/unittest/BookmarkTests.cpp \
 	$(NULL)
 
 EXTRA_DIST += test/unittest/db_v3.sql

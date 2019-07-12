@@ -263,6 +263,39 @@ class IMedia
         ///
         virtual bool requestThumbnail( ThumbnailSizeType sizeType, uint32_t desiredWidth,
                                        uint32_t desiredHeight, float position ) = 0;
+
+        ///
+        /// \brief bookmarks Returns a query representing this media bookmarks
+        /// \param params Some query parameters, or nullptr for the default
+        ///
+        /// The sorting criteria supported for this requests are Alpha & Default
+        /// (default being by ascending time)
+        /// Any other criteria will fallback to default.
+        ///
+        virtual Query<IBookmark> bookmarks( const QueryParameters* params ) const = 0;
+        ///
+        /// \brief bookmark Returns the bookmark at the provided time
+        /// \return A bookmark if found, nullptr otherwise
+        ///
+        virtual BookmarkPtr bookmark( int64_t time ) const = 0;
+        ///
+        ///
+        /// \brief addBookmark Add a bookmark to this media
+        /// \param time The bookmark time
+        /// \return A pointer to the new bookmark in case of successful
+        ///         addition, or nullptr otherwise
+        ///
+        virtual BookmarkPtr addBookmark( int64_t time ) = 0;
+        ///
+        /// \brief removeBookmark Removes a bookmark by its time
+        /// \param time The time at which the bookmark must be removed.
+        /// \return
+        ///
+        virtual bool removeBookmark( int64_t time ) = 0;
+        ///
+        /// \brief removeAllBookmarks Remove all bookmarks attached to this media
+        ///
+        virtual bool removeAllBookmarks() = 0;
 };
 
 }

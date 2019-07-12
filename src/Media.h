@@ -161,6 +161,12 @@ class Media : public IMedia,
         virtual FilePtr addExternalMrl( const std::string& mrl, IFile::Type type ) override;
         void removeFile( File& file );
 
+        virtual Query<IBookmark> bookmarks( const QueryParameters* params ) const override;
+        virtual BookmarkPtr bookmark( int64_t time ) const override;
+        virtual BookmarkPtr addBookmark(int64_t time) override;
+        virtual bool removeBookmark( int64_t time ) override;
+        virtual bool removeAllBookmarks() override;
+
         static Query<IMedia> listAll(MediaLibraryPtr ml, Type type, const QueryParameters* params );
 
         static Query<IMedia> search( MediaLibraryPtr ml, const std::string& title,
