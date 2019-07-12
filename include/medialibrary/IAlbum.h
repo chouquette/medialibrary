@@ -81,7 +81,10 @@ public:
      * Defaults to 1
      */
     virtual uint32_t nbDiscs() const = 0;
-    virtual unsigned int duration() const = 0;
+    /**
+     * @brief duration Returns the total album duration in milliseconds
+     */
+    virtual int64_t duration() const = 0;
     /**
      * @brief isUnknownAlbum returns true is this is an unknown album
      */

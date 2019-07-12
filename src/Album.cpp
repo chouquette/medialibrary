@@ -392,7 +392,7 @@ bool Album::setNbDiscs( uint32_t nbDiscs )
     return true;
 }
 
-unsigned int Album::duration() const
+int64_t Album::duration() const
 {
     return m_duration;
 }

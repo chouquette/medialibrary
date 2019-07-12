@@ -94,7 +94,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         unsigned int nbTracks() const override;
         virtual uint32_t nbDiscs() const override;
         bool setNbDiscs( uint32_t nbDiscs );
-        unsigned int duration() const override;
+        virtual int64_t duration() const override;
         virtual bool isUnknownAlbum() const override;
 
         virtual ArtistPtr albumArtist() const override;
@@ -142,7 +142,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         unsigned int m_releaseYear;
         std::string m_shortSummary;
         unsigned int m_nbTracks;
-        unsigned int m_duration;
+        int64_t m_duration;
         uint32_t m_nbDiscs;
         bool m_isPresent;
 
