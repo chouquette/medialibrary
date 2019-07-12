@@ -1028,6 +1028,7 @@ bool MediaLibrary::recreateDatabase( const std::string& dbPath )
     m_dbConnection = sqlite::Connection::connect( dbPath );
     Settings::createTable( m_dbConnection.get() );
     createAllTables( Settings::DbModelVersion );
+    createAllTriggers( Settings::DbModelVersion );
     // We dropped the database, there is no setting to be read anymore
     return m_settings.load();
 }
