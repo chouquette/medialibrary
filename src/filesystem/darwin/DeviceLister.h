@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Media Library
  *****************************************************************************
- * Copyright (C) 2015-2017 Hugo Beauzée-Luyssen, Videolabs
+ * Copyright (C) 2015-2019 Hugo Beauzée-Luyssen, Videolabs, VideoLAN
  *
  * Authors: Hugo Beauzée-Luyssen <hugo@beauzee.fr>
  *
