@@ -474,12 +474,10 @@ Query<IArtist> Artist::listAll( MediaLibraryPtr ml, bool includeAll,
                                 const QueryParameters* params )
 {
     std::string req = "FROM " + Artist::Table::Name + " WHERE ";
-    if ( includeAll == true )
-        req += "( nb_albums > 0 OR nb_tracks > 0 )";
-    else
-        req += "nb_albums > 0";
+    if ( includeAll == false )
+        req += "nb_albums > 0 AND";
 
-    req += " AND is_present != 0";
+    req += " is_present != 0";
     return make_query<Artist, IArtist>( ml, "*", std::move( req ),
                                         sortRequest( params ) );
 }
