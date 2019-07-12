@@ -51,6 +51,9 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         };
         Album( MediaLibraryPtr ml, sqlite::Row& row );
         Album( MediaLibraryPtr ml, const std::string& title );
+        /**
+         * @brief Album Constructs an unknown album for the provided artist
+         */
         Album( MediaLibraryPtr ml, const Artist* artist );
 
         virtual int64_t id() const override;
