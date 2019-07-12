@@ -351,17 +351,21 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
             return InitializeResult::Failed;
         }
         auto dbModel = m_settings.dbModelVersion();
-        createAllTables( dbModel );
-        createAllTriggers( dbModel );
-        t->commit();
-
-        if ( m_settings.dbModelVersion() != Settings::DbModelVersion )
+        if ( dbModel != Settings::DbModelVersion )
         {
-            res = updateDatabaseModel( m_settings.dbModelVersion(), dbPath );
-            if ( res == InitializeResult::Failed )
+            if ( dbModel == 0 )
+                dbModel = Settings::DbModelVersion;
+            createAllTables( dbModel );
+            createAllTriggers( dbModel );
+            t->commit();
+            if ( dbModel != Settings::DbModelVersion )
             {
-                LOG_ERROR( "Failed to update database model" );
-                return res;
+                res = updateDatabaseModel( dbModel, dbPath );
+                if ( res == InitializeResult::Failed )
+                {
+                    LOG_ERROR( "Failed to update database model" );
+                    return res;
+                }
             }
         }
     }

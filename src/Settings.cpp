@@ -50,7 +50,7 @@ bool Settings::load()
     {
         if ( sqlite::Tools::executeInsert( m_ml->getConn(), "INSERT INTO Settings VALUES(?)", DbModelVersion ) == false )
             return false;
-        m_dbModelVersion = DbModelVersion;
+        m_dbModelVersion = 0;
     }
     else
     {
