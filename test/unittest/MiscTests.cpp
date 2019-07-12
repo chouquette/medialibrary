@@ -139,7 +139,7 @@ public:
 
     void CheckNbTriggers( uint32_t expected )
     {
-        medialibrary::sqlite::Statement stmt{ ml->getDbConn()->handle(),
+        medialibrary::sqlite::Statement stmt{ ml->getConn()->handle(),
                 "SELECT COUNT(*) FROM sqlite_master WHERE type='trigger'" };
         stmt.execute();
         auto row = stmt.row();
@@ -150,7 +150,7 @@ public:
 
     void CheckTriggers( std::vector<const char*> expected )
     {
-        medialibrary::sqlite::Statement stmt{ ml->getDbConn()->handle(),
+        medialibrary::sqlite::Statement stmt{ ml->getConn()->handle(),
                 "SELECT name FROM sqlite_master WHERE type='trigger' "
                     "ORDER BY name;"
         };
@@ -169,7 +169,7 @@ public:
 
     void CheckNbIndexes( uint32_t expected )
     {
-        medialibrary::sqlite::Statement stmt{ ml->getDbConn()->handle(),
+        medialibrary::sqlite::Statement stmt{ ml->getConn()->handle(),
                 "SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND "
                 "name NOT LIKE 'sqlite_autoindex%'" };
         stmt.execute();
@@ -330,7 +330,7 @@ TEST_F( DbModel, Upgrade15to16 )
 
     // Check that playlists were properly migrated
     medialibrary::sqlite::Statement stmt{
-        ml->getDbConn()->handle(),
+        ml->getConn()->handle(),
         "SELECT playlist_id, position FROM PlaylistMediaRelation "
             "ORDER BY playlist_id, position"
     };

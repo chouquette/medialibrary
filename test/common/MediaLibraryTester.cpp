@@ -220,11 +220,6 @@ void MediaLibraryTester::onDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,
     addFile( fileFs, parentFolder, parentFolderFs, fileType, IMedia::Type::Unknown );
 }
 
-sqlite::Connection* MediaLibraryTester::getDbConn()
-{
-    return m_dbConnection.get();
-}
-
 void MediaLibraryTester::startThumbnailer()
 {
 }
@@ -279,7 +274,7 @@ void MediaLibraryTester::setAlbumTrackGenre( int64_t albumTrackId, int64_t genre
 uint32_t MediaLibraryTester::countNbThumbnails()
 {
     sqlite::Statement stmt{
-        getDbConn()->handle(),
+        getConn()->handle(),
         "SELECT COUNT(*) FROM " + Thumbnail::Table::Name
     };
     uint32_t res;

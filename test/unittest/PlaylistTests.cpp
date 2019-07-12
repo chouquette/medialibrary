@@ -44,7 +44,7 @@ protected:
     void CheckContiguity()
     {
         medialibrary::sqlite::Statement stmt{
-            ml->getDbConn()->handle(),
+            ml->getConn()->handle(),
             "SELECT position FROM PlaylistMediaRelation "
                 "WHERE playlist_id=? ORDER BY position"
         };
