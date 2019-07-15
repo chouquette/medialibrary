@@ -264,17 +264,10 @@ bool Artist::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
     return true;
 }
 
-bool Artist::setThumbnail( const std::string& thumbnailMrl,
-                            Thumbnail::Origin origin, ThumbnailSizeType sizeType,
-                            bool isOwned )
-{
-    return setThumbnail( std::make_shared<Thumbnail>( m_ml, thumbnailMrl,
-                                                      origin, sizeType, isOwned ) );
-}
-
 bool Artist::setThumbnail( const std::string& thumbnailMrl, ThumbnailSizeType sizeType )
 {
-    return setThumbnail( thumbnailMrl, Thumbnail::Origin::UserProvided, sizeType, false );
+    return setThumbnail( std::make_shared<Thumbnail>( m_ml,
+                thumbnailMrl, Thumbnail::Origin::UserProvided, sizeType, false ) );
 }
 
 bool Artist::updateNbAlbum( int increment )
