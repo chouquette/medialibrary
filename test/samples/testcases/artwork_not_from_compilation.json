@@ -1,0 +1,46 @@
+{
+    "input": [
+        "music/artwork_not_from_compilation"
+    ],
+    "expected": {
+        "nbAudios": 4,
+        "nbVideos": 0,
+        "albums": [
+            {
+                "comment": "This compilation will have its own cover",
+                "title": "compilation",
+                "artist": "compilation artist"
+            },
+            {
+                "comment": "This album also has its cover, and must not use the compilation one",
+                "title": "album",
+                "artist": "artist 1"
+            },
+            {
+                "comment": "This album doesn't have a cover, and shouldn't use the compilation one",
+                "title": "album",
+                "artist": "artist 2"
+            }
+        ],
+        "artists": [
+            {
+                "comment": "This artist can use the compilation cover",
+                "name": "compilation artist",
+                "nbTracks": 2,
+                "nbAlbums": 1
+            },
+            {
+                "comment": "This artist must use its album cover",
+                "name": "artist 1",
+                "nbTracks": 2,
+                "nbAlbums": 1
+            },
+            {
+                "comment": "This artist must have no thumbnail",
+                "name": "artist 2",
+                "nbTracks": 2,
+                "nbAlbums": 1
+            }
+        ]
+    }
+}
