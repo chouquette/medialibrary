@@ -264,7 +264,7 @@ bool Artist::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
     return true;
 }
 
-bool Artist::setArtworkMrl( const std::string& thumbnailMrl,
+bool Artist::setThumbnail( const std::string& thumbnailMrl,
                             Thumbnail::Origin origin, ThumbnailSizeType sizeType,
                             bool isOwned )
 {
@@ -274,7 +274,7 @@ bool Artist::setArtworkMrl( const std::string& thumbnailMrl,
 
 bool Artist::setThumbnail( const std::string& thumbnailMrl, ThumbnailSizeType sizeType )
 {
-    return setArtworkMrl( thumbnailMrl, Thumbnail::Origin::UserProvided, sizeType, false );
+    return setThumbnail( thumbnailMrl, Thumbnail::Origin::UserProvided, sizeType, false );
 }
 
 bool Artist::updateNbAlbum( int increment )
