@@ -1173,16 +1173,6 @@ void MetadataAnalyzer::link( IItem& item, Album& album,
                 // album this artist was only featuring on
             }
         }
-
-        // Until we have a better artwork extraction/assignation, simply do the same
-        // for artists
-        if ( artist != nullptr && artist->id() != UnknownArtistID &&
-             artist->id() != VariousArtistID &&
-             albumThumbnail != nullptr &&
-             artist->thumbnail( mediaThumbnail->sizeType() ) == nullptr )
-        {
-            artist->setThumbnail( mediaThumbnail, Thumbnail::Origin::Artist );
-        }
     }
 
     albumArtist->addMedia( media );
