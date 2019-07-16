@@ -201,6 +201,8 @@ private:
         static std::string addRequestJoin(const QueryParameters* params, bool forceFile , bool forceAlbumTrack);
         static std::string sortRequest( const QueryParameters* params );
         static Query<IMedia> fetchHistoryByType( MediaLibraryPtr ml, IMedia::Type type );
+        bool shouldUpdateThumbnail( Thumbnail& currentThumbnail,
+                                    Thumbnail::Origin newOrigin );
 
 private:
         MediaLibraryPtr m_ml;

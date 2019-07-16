@@ -45,10 +45,14 @@ public:
 
     enum class Origin : uint8_t
     {
+        /// The thumbnail comes from a media that was tagged using Artist.
+        /// This means the thumbnail may be from a compilation album
         Artist,
+        /// The thumbnail comes from a media that was tagged using AlbumArtist.
+        /// This means the artist is either a various artist, or the main artist
+        /// of an album.
+        /// AlbumArtist has a higher priority than Artist when selecting a thumbnail
         AlbumArtist,
-        /// Taken from the album this media belongs to
-        Album,
         /// An artwork that was attached to the media, or a generated video
         /// thumbnail
         Media,
@@ -57,6 +61,7 @@ public:
         /// An image (jpg or png) that was located in the album folder
         CoverFile,
     };
+
     enum class EntityType
     {
         Media,
@@ -82,36 +87,12 @@ public:
 
     int64_t id() const;
     const std::string& mrl() const;
-    bool update( std::string mrl, bool isOwned );
-    /**
-     * @brief updateLinkEntity Updates the record linking an entity and a thumbnail
-     * @param entityId The target entity ID
-     * @param type The type of entity for this linking record
-     * @param sizeType The thumbnail size type
-     * @return true in case of success, false otherwise
-     *
-     * @warning This must be run in a transaction, as the associated thumbnail
-     * gets inserted.
-     * This is expected to be called when a new thumbnail had to be inserted, and
-     * the linking entity needs updating.
-     */
-    bool updateLinkRecord( int64_t entityId, EntityType type, Origin origin );
+
     /**
      * @brief insert Insert the thumbnail in database
      * @return The new entity primary key, or 0 in case of failure
      */
     int64_t insert();
-
-    /**
-     * @brief insertLinkRecord Insert a new record to link an entity and a thumbnail
-     * @param entityId The target entity id
-     * @param type The type of entity to insert a linking record for
-     * @param origin The thumbnail origin
-     *
-     * This is expected to be called when a new thumbnail gets inserted, or
-     * when it can be shared with another entity.
-     */
-    void insertLinkRecord( int64_t entityId, EntityType type, Origin origin );
 
     /**
      * @brief unlinkThumbnail Removes the link between an entity and a thumbnail
@@ -133,6 +114,7 @@ public:
      * folder.
      */
     bool isOwned() const;
+    bool isShared() const;
 
     ThumbnailSizeType sizeType() const;
 
@@ -150,6 +132,11 @@ public:
      * must not be relocated.
      */
     void relocate();
+
+    static std::shared_ptr<Thumbnail>
+    updateOrReplace( MediaLibraryPtr ml, std::shared_ptr<Thumbnail> oldThumbnail,
+                     std::shared_ptr<Thumbnail> newThumbnail, int64_t entityId,
+                     EntityType entityType );
 
     static void createTable( sqlite::Connection* dbConnection );
     static void createTriggers( sqlite::Connection* dbConnection );
@@ -188,6 +175,33 @@ private:
      */
     std::string toRelativeMrl( const std::string& absoluteMrl );
 
+
+    /**
+     * @brief updateLinkEntity Updates the record linking an entity and a thumbnail
+     * @param entityId The target entity ID
+     * @param type The type of entity for this linking record
+     * @param sizeType The thumbnail size type
+     * @return true in case of success, false otherwise
+     *
+     * @warning This must be run in a transaction, as the associated thumbnail
+     * gets inserted.
+     * This is expected to be called when a new thumbnail had to be inserted, and
+     * the linking entity needs updating.
+     */
+    bool updateLinkRecord( int64_t entityId, EntityType type, Origin origin );
+    /**
+     * @brief insertLinkRecord Insert a new record to link an entity and a thumbnail
+     * @param entityId The target entity id
+     * @param type The type of entity to insert a linking record for
+     * @param origin The thumbnail origin
+     *
+     * This is expected to be called when a new thumbnail gets inserted, or
+     * when it can be shared with another entity.
+     */
+    void insertLinkRecord( int64_t entityId, EntityType type, Origin origin );
+
+    bool update( std::string mrl, bool isOwned );
+
 private:
     MediaLibraryPtr m_ml;
     int64_t m_id;
@@ -195,6 +209,7 @@ private:
     Origin m_origin;
     ThumbnailSizeType m_sizeType;
     bool m_isOwned;
+    uint32_t m_sharedCounter;
 
     friend Thumbnail::Table;
 };

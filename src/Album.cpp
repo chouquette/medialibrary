@@ -166,65 +166,53 @@ std::shared_ptr<Thumbnail> Album::thumbnail( ThumbnailSizeType sizeType ) const
     return m_thumbnails[idx];
 }
 
+bool Album::shouldUpdateThumbnail( Thumbnail& currentThumbnail,
+                                   Thumbnail::Origin newOrigin )
+{
+    switch ( currentThumbnail.origin() )
+    {
+        case Thumbnail::Origin::Artist:
+        case Thumbnail::Origin::AlbumArtist:
+        case Thumbnail::Origin::Media:
+        {
+            // In all this cases, we are only interested in an album specific
+            // thumbnail, ie. provided by a cover file, or a user provided cover
+            return newOrigin == Thumbnail::Origin::CoverFile ||
+                   newOrigin == Thumbnail::Origin::UserProvided;
+        }
+        case Thumbnail::Origin::CoverFile:
+        case Thumbnail::Origin::UserProvided:
+        {
+            // Another cover file for the same album is dubious, and is likely the
+            // same album being discovered, but with another file than when the
+            // thumbnail got originally assigned to this album. Let's reject it.
+            // And as usual, accept anything which is user provided.
+
+            // And for user provided thumbnail, only another user provided
+            // thumbnail can override it.
+            return newOrigin == Thumbnail::Origin::UserProvided;
+        }
+        default:
+            assert( !"Unreachable" );
+            return false;
+    }
+}
+
 bool Album::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
 {
     assert( newThumbnail != nullptr );
     auto currentThumbnail = thumbnail( newThumbnail->sizeType() );
     auto thumbnailIdx = Thumbnail::SizeToInt( newThumbnail->sizeType() );
-    if ( currentThumbnail != nullptr )
-    {
-        if ( currentThumbnail->origin() == Thumbnail::Origin::Album )
-        {
-            std::unique_ptr<sqlite::Transaction> t;
-            if ( sqlite::Transaction::transactionInProgress() == false )
-                t = m_ml->getConn()->newTransaction();
-            auto replace = newThumbnail->id() != 0;
-            if ( replace == true )
-                currentThumbnail = newThumbnail;
-            else
-            {
-                if ( currentThumbnail->update( newThumbnail->mrl(),
-                                               newThumbnail->isOwned() ) == false )
-                    return false;
-            }
-            if ( replace || currentThumbnail->origin() != newThumbnail->origin() )
-            {
-                if ( currentThumbnail->updateLinkRecord( m_id,
-                                                         Thumbnail::EntityType::Album,
-                                                         newThumbnail->origin() ) == false )
-                    return false;
-            }
-            if ( t != nullptr )
-                t->commit();
-            m_thumbnails[thumbnailIdx] = currentThumbnail;
+    if ( currentThumbnail != nullptr &&
+         shouldUpdateThumbnail( *currentThumbnail, newThumbnail->origin() ) == false )
             return true;
-        }
-    }
-    std::unique_ptr<sqlite::Transaction> t;
-    if ( sqlite::Transaction::transactionInProgress() == false )
-        t = m_ml->getConn()->newTransaction();
-    if ( newThumbnail->id() == 0 )
-    {
-        if ( newThumbnail->insert() == 0 )
-            return false;
-    }
-    // If we already had a thumbnail, we need to update the linking entity
-    // Otherwise, we need to insert it
-    if ( currentThumbnail == nullptr )
-    {
-        newThumbnail->insertLinkRecord( m_id, Thumbnail::EntityType::Album,
-                                        newThumbnail->origin() );
-    }
-    else
-    {
-        newThumbnail->updateLinkRecord( m_id, Thumbnail::EntityType::Album,
-                                        newThumbnail->origin() );
-    }
 
-    if ( t != nullptr )
-        t->commit();
-    m_thumbnails[thumbnailIdx] = std::move( newThumbnail );
-    return true;
+    currentThumbnail = Thumbnail::updateOrReplace( m_ml, currentThumbnail,
+                                                   newThumbnail, m_id,
+                                                   Thumbnail::EntityType::Album );
+    auto res = currentThumbnail != nullptr;
+    m_thumbnails[thumbnailIdx] = std::move( currentThumbnail );
+    return res;
 }
 
 std::string Album::orderTracksBy( const QueryParameters* params = nullptr )

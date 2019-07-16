@@ -469,86 +469,51 @@ void Media::setFolderId( int64_t folderId )
     m_changed = true;
 }
 
+bool Media::shouldUpdateThumbnail( Thumbnail& currentThumbnail,
+                                   Thumbnail::Origin newOrigin )
+{
+    switch ( currentThumbnail.origin() )
+    {
+        case Thumbnail::Origin::Artist:
+        case Thumbnail::Origin::AlbumArtist:
+        {
+            // We don't expect an album or an artist thumbnail to be assigned to
+            // a media
+            assert( !"Unexpected current thumbnail type" );
+            return false;
+        }
+        case Thumbnail::Origin::CoverFile:
+        case Thumbnail::Origin::Media:
+        {
+            // This media was assigned a thumbnail from its album, or its embedded
+            // art, we only update in case the new thumbnail is user provided
+            // or the thumbnail was re-generated
+            return newOrigin == Thumbnail::Origin::Media ||
+                   newOrigin == Thumbnail::Origin::UserProvided;
+        }
+        case Thumbnail::Origin::UserProvided:
+            return newOrigin == Thumbnail::Origin::UserProvided;
+        default:
+            assert( !"Unreachable" );
+            return false;
+    }
+}
+
 bool Media::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
 {
     assert( newThumbnail != nullptr );
     auto thumbnailIdx = Thumbnail::SizeToInt( newThumbnail->sizeType() );
     auto currentThumbnail = thumbnail( newThumbnail->sizeType() );
     // If we already have a thumbnail, we need to update it or insert a new one
-    if ( currentThumbnail != nullptr )
-    {
-        // Now we need to figure out if we need to update the current thumbnail,
-        // or generate a new one
-        switch ( currentThumbnail->origin() )
-        {
-            case Thumbnail::Origin::Artist:         // unused for now
-            case Thumbnail::Origin::AlbumArtist:    // unused for now
-            case Thumbnail::Origin::Media:          // media specific
-            case Thumbnail::Origin::UserProvided:   // Already per-media
-            {
-                // In all these cases, the thumbnail should be per-media, and can
-                // be safely overriden.
-                std::unique_ptr<sqlite::Transaction> t;
-                if ( sqlite::Transaction::transactionInProgress() == false )
-                    t = m_ml->getConn()->newTransaction();
-                // If the thumbnail is already inserted, we can simply share it
-                // and remove the previous one
-                auto replace = newThumbnail->id() != 0;
-                if ( replace == true )
-                    currentThumbnail = newThumbnail;
-                else
-                {
-                    if ( currentThumbnail->update( newThumbnail->mrl(),
-                                                   newThumbnail->isOwned() ) == false )
-                        return false;
-                }
-
-                if ( replace || currentThumbnail->origin() != newThumbnail->origin() )
-                {
-                    if ( currentThumbnail->updateLinkRecord( m_id,
-                                                             Thumbnail::EntityType::Media,
-                                                             newThumbnail->origin() ) == false )
-                        return false;
-                }
-
-                if ( t != nullptr )
-                    t->commit();
-                m_thumbnails[thumbnailIdx] = currentThumbnail;
-                return true;
-            }
-            case Thumbnail::Origin::Album:
-            case Thumbnail::Origin::CoverFile:
-                // We need a new thumbnail, otherwise we'd override the mrl for
-                // another user of the same thumbnail
-                break;
-        }
-    }
-
-    std::unique_ptr<sqlite::Transaction> t;
-    if ( sqlite::Transaction::transactionInProgress() == false )
-        t = m_ml->getConn()->newTransaction();
-    if ( newThumbnail->id() == 0 )
-    {
-        if ( newThumbnail->insert() == 0 )
-            return false;
-    }
-    // If we already had a thumbnail, we need to update the linking entity
-    // Otherwise, we need to insert it
-    if ( currentThumbnail == nullptr )
-    {
-        newThumbnail->insertLinkRecord( m_id, Thumbnail::EntityType::Media,
-                                        newThumbnail->origin() );
-    }
-    else
-    {
-        newThumbnail->updateLinkRecord( m_id, Thumbnail::EntityType::Media,
-                                        newThumbnail->origin() );
-    }
-
-    if ( t != nullptr )
-        t->commit();
-    m_thumbnails[thumbnailIdx] = std::move( newThumbnail );
-    return true;
+    if ( currentThumbnail != nullptr &&
+         shouldUpdateThumbnail( *currentThumbnail, newThumbnail->origin() ) == false )
+            return true;
+    currentThumbnail = Thumbnail::updateOrReplace( m_ml, currentThumbnail,
+                                                   newThumbnail, m_id,
+                                                   Thumbnail::EntityType::Media );
+    auto res = currentThumbnail != nullptr;
+    m_thumbnails[thumbnailIdx] = std::move( currentThumbnail );
+    return res;
 }
 
 void Media::removeThumbnail( ThumbnailSizeType sizeType )

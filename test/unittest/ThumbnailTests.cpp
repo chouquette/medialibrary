@@ -66,41 +66,42 @@ TEST_F( Thumbnails, MediaSetThumbnail )
 TEST_F( Thumbnails, Update )
 {
     std::string mrl = "file:///path/to/thumbnail.png";
-    auto t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::UserProvided,
+    auto t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::Media,
                                 ThumbnailSizeType::Thumbnail, false );
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "test.mkv" ) );
     m->setThumbnail( t );
     ASSERT_EQ( t->mrl(), mrl );
-    ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
+    ASSERT_EQ( t->origin(), Thumbnail::Origin::Media );
 
     // Just update the mrl first
     mrl = "file:///better/thumbnail.gif";
-    auto res = m->setThumbnail( mrl, Thumbnail::Origin::UserProvided,
+    auto res = m->setThumbnail( mrl, Thumbnail::Origin::Media,
                                 ThumbnailSizeType::Thumbnail, false );
     ASSERT_TRUE( res );
     ASSERT_EQ( t->mrl(), mrl );
-    ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
+
+    ASSERT_EQ( t->origin(), Thumbnail::Origin::Media );
 
     Reload();
 
     m = ml->media( m->id() );
     t = m->thumbnail( t->sizeType() );
     ASSERT_EQ( t->mrl(), mrl );
-    ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
+    ASSERT_EQ( t->origin(), Thumbnail::Origin::Media );
 
     // Now update the origin
-    res = m->setThumbnail( mrl, Thumbnail::Origin::AlbumArtist,
+    res = m->setThumbnail( mrl, Thumbnail::Origin::UserProvided,
                            ThumbnailSizeType::Thumbnail, false );
     ASSERT_TRUE( res );
     ASSERT_EQ( t->mrl(), mrl );
-    ASSERT_EQ( t->origin(), Thumbnail::Origin::AlbumArtist );
+    ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
 
     Reload();
 
     m = ml->media( m->id() );
     t = m->thumbnail( t->sizeType() );
     ASSERT_EQ( t->mrl(), mrl );
-    ASSERT_EQ( t->origin(), Thumbnail::Origin::AlbumArtist );
+    ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
 }
 
 TEST_F( Thumbnails, MarkFailure )
@@ -134,7 +135,7 @@ TEST_F( Thumbnails, UnshareMedia )
     auto a = ml->createArtist(  "artist" );
 
     m->setThumbnail( t );
-    a->setThumbnail( t );
+    a->setThumbnail( t, t->origin() );
 
     ASSERT_EQ( 1u, ml->countNbThumbnails() );
 
@@ -189,7 +190,7 @@ TEST_F( Thumbnails, UnshareArtist )
     auto a = ml->createArtist(  "artist" );
 
     m->setThumbnail( t );
-    a->setThumbnail( t );
+    a->setThumbnail( t, t->origin() );
 
     ASSERT_EQ( 1u, ml->countNbThumbnails() );
 
@@ -205,7 +206,7 @@ TEST_F( Thumbnails, UnshareArtist )
     auto newThumbnail = Thumbnail::create( ml.get(), "file:///tmp/newthumb.jpg",
                                            Thumbnail::Origin::UserProvided,
                                            ThumbnailSizeType::Thumbnail, false );
-    a->setThumbnail( newThumbnail );
+    a->setThumbnail( newThumbnail, newThumbnail->origin() );
     ASSERT_EQ( 2u, ml->countNbThumbnails() );
 
     artistThumbnail = a->thumbnail( ThumbnailSizeType::Thumbnail );
@@ -370,7 +371,7 @@ TEST_F( Thumbnails, AutoDeleteAfterEntityRemoved )
     auto art = std::static_pointer_cast<Artist>( ml->createArtist( "artist" ) );
     m->setThumbnail( "https://otters.org/fluffy.png", ThumbnailSizeType::Thumbnail );
     alb->setThumbnail( std::make_shared<Thumbnail>( ml.get(), "https://thumbnail.org",
-                                                    Thumbnail::Origin::Album,
+                                                    Thumbnail::Origin::CoverFile,
                                                     ThumbnailSizeType::Thumbnail, false ) );
     art->setThumbnail( "http://thumbnail.org/pangolin.png", ThumbnailSizeType::Thumbnail );
 

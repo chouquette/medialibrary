@@ -60,7 +60,23 @@ public:
     virtual bool isThumbnailGenerated( ThumbnailSizeType sizeType ) const override;
     virtual const std::string& thumbnailMrl( ThumbnailSizeType sizeType ) const override;
     std::shared_ptr<Thumbnail> thumbnail( ThumbnailSizeType sizeType ) const;
-    bool setThumbnail( std::shared_ptr<Thumbnail> newThumbnail );
+    /**
+     * @brief setThumbnail Set a new thumbnail for this artist.
+     * @param newThumbnail A thumbnail object. It can be already inserted in DB or not
+     * @param origin The origin for this thumbnail
+     * @return true if the thumbnail was updated (or wilfully ignored), false in case of failure
+     *
+     * The origin parameter is there in case the thumbnail was create for an entity
+     * but shared through another one.
+     * For instance, if an artist gets assigned the cover from an album, the
+     * thumbnail object is likely to have the Media origin if the album was just
+     * created.
+     * Specifying the origin explicitely allows for a finer control on the hierarchy
+     *
+     * The implementation may chose to ignore a thumbnail update based on the
+     * current & new origin. In this case, `true` will still be returned.
+     */
+    bool setThumbnail( std::shared_ptr<Thumbnail> newThumbnail, Thumbnail::Origin origin );
     virtual bool setThumbnail( const std::string& thumbnailMrl,
                                ThumbnailSizeType sizeType  ) override;
     bool updateNbAlbum( int increment );
@@ -106,6 +122,8 @@ public:
 
 private:
     static std::string sortRequest( const QueryParameters* params );
+    bool shouldUpdateThumbnail( Thumbnail& currentThumbnail,
+                                Thumbnail::Origin newOrigin );
 
 private:
     MediaLibraryPtr m_ml;

@@ -74,7 +74,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         virtual bool isThumbnailGenerated( ThumbnailSizeType sizeType ) const override;
         virtual const std::string& thumbnailMrl( ThumbnailSizeType sizeType ) const override;
         std::shared_ptr<Thumbnail> thumbnail( ThumbnailSizeType sizeType ) const;
-        bool setThumbnail( std::shared_ptr<Thumbnail> thumbnail );
+        bool setThumbnail(std::shared_ptr<Thumbnail> thumbnail );
         virtual Query<IMedia> tracks( const QueryParameters* params ) const override;
         virtual Query<IMedia> tracks( GenrePtr genre, const QueryParameters* params ) const override;
         ///
@@ -134,6 +134,9 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
     private:
         static std::string orderTracksBy( const QueryParameters* params );
         static std::string orderBy( const QueryParameters* params );
+        bool shouldUpdateThumbnail(Thumbnail& currentThumbnail,
+                                    Thumbnail::Origin newOrigin );
+
     protected:
         MediaLibraryPtr m_ml;
         int64_t m_id;

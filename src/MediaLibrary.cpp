@@ -967,6 +967,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
             if ( previousVersion == 17 )
             {
                 migrateModel17to18();
+                needRescan = true;
                 previousVersion = 18;
             }
             // To be continued in the future!
@@ -1431,6 +1432,10 @@ void MediaLibrary::migrateModel16to17( uint32_t originalPreviousVersion )
     t->commit();
 }
 
+/**
+ * Model 17 to 18 migration:
+ * - Add thumbnail.shared_counter
+ */
 void MediaLibrary::migrateModel17to18()
 {
     auto dbConn = getConn();

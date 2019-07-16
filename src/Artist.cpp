@@ -204,70 +204,70 @@ std::shared_ptr<Thumbnail> Artist::thumbnail( ThumbnailSizeType sizeType ) const
     return m_thumbnails[idx];
 }
 
-bool Artist::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
+bool Artist::shouldUpdateThumbnail( Thumbnail& currentThumbnail,
+                                    Thumbnail::Origin newOrigin )
+{
+    switch( currentThumbnail.origin() )
+    {
+        case Thumbnail::Origin::Artist:
+        {
+            // The previous thumbnail was based on an artist.
+            // AlbumArtist has a higher priority over this, otherwise reject
+            // anything that is not used provided.
+            return newOrigin != Thumbnail::Origin::AlbumArtist &&
+                   newOrigin != Thumbnail::Origin::UserProvided;
+        }
+        case Thumbnail::Origin::AlbumArtist:
+        {
+            // This is the highest ranking for an artist thumbnail, so
+            // we only accept to override it with a user provided thumbnail
+            return newOrigin == Thumbnail::Origin::UserProvided;
+        }
+        case Thumbnail::Origin::Media:
+        {
+            // The thumbnail was determined by an embeded artwork, we can
+            // accept pretty much anything else
+            return newOrigin != Thumbnail::Origin::Media;
+        }
+        case Thumbnail::Origin::CoverFile:
+        {
+            // The previous thumbnail came from an album cover file.
+            // Accept only thumbnails from artists & user provided
+            return newOrigin == Thumbnail::Origin::Artist ||
+                   newOrigin == Thumbnail::Origin::AlbumArtist ||
+                   newOrigin == Thumbnail::Origin::UserProvided;
+        }
+        case Thumbnail::Origin::UserProvided:
+            return true;
+        default:
+            assert( !"Unreachable" );
+            return false;
+    }
+}
+
+bool Artist::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail,
+                           Thumbnail::Origin origin )
 {
     assert( newThumbnail != nullptr );
 
     auto thumbnailIdx = Thumbnail::SizeToInt( newThumbnail->sizeType() );
     auto currentThumbnail = thumbnail( newThumbnail->sizeType() );
-    if ( currentThumbnail != nullptr )
-    {
-        if ( currentThumbnail->origin() == Thumbnail::Origin::Artist ||
-             currentThumbnail->origin() == Thumbnail::Origin::UserProvided )
-        {
-            std::unique_ptr<sqlite::Transaction> t;
-            if ( sqlite::Transaction::transactionInProgress() == false )
-                t = m_ml->getConn()->newTransaction();
-            auto replace = newThumbnail->id() != 0;
-            if ( replace == true )
-                currentThumbnail = newThumbnail;
-            else
-            {
-                if ( currentThumbnail->update( newThumbnail->mrl(),
-                                               newThumbnail->isOwned() ) == false )
-                    return false;
-            }
-            if ( replace || currentThumbnail->origin() != newThumbnail->origin() )
-            {
-                if ( currentThumbnail->updateLinkRecord( m_id,
-                                                         Thumbnail::EntityType::Artist,
-                                                         newThumbnail->origin() ) == false )
-                    return false;
-            }
-            if ( t != nullptr )
-                t->commit();
+    if ( currentThumbnail != nullptr &&
+         shouldUpdateThumbnail( *newThumbnail, origin ) == false )
             return true;
-        }
-    }
-    std::unique_ptr<sqlite::Transaction> t;
-    if ( sqlite::Transaction::transactionInProgress() == false )
-        t = m_ml->getConn()->newTransaction();
-    if ( newThumbnail->id() == 0 )
-    {
-        if ( newThumbnail->insert() == 0 )
-            return false;
-    }
-    if ( currentThumbnail == nullptr )
-    {
-        newThumbnail->insertLinkRecord( m_id, Thumbnail::EntityType::Artist,
-                                        newThumbnail->origin() );
-    }
-    else
-    {
-        newThumbnail->updateLinkRecord( m_id, Thumbnail::EntityType::Artist,
-                                        newThumbnail->origin() );
-    }
-
-    if ( t != nullptr )
-        t->commit();
-    m_thumbnails[thumbnailIdx] = std::move( newThumbnail );
-    return true;
+    currentThumbnail = Thumbnail::updateOrReplace( m_ml, currentThumbnail,
+                                                   newThumbnail, m_id,
+                                                   Thumbnail::EntityType::Artist );
+    auto res = currentThumbnail != nullptr;
+    m_thumbnails[thumbnailIdx] = std::move( currentThumbnail );
+    return res;
 }
 
 bool Artist::setThumbnail( const std::string& thumbnailMrl, ThumbnailSizeType sizeType )
 {
     return setThumbnail( std::make_shared<Thumbnail>( m_ml,
-                thumbnailMrl, Thumbnail::Origin::UserProvided, sizeType, false ) );
+                thumbnailMrl, Thumbnail::Origin::UserProvided, sizeType, false ),
+                Thumbnail::Origin::UserProvided );
 }
 
 bool Artist::updateNbAlbum( int increment )
