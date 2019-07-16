@@ -351,6 +351,17 @@ void Task::createTable( sqlite::Connection* dbConnection, uint32_t dbModel )
     }
 }
 
+void Task::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModel )
+{
+    if ( dbModel < 18 )
+        return;
+    std::string reqs[] = {
+        #include "database/tables/Task_triggers_v18.sql"
+    };
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConnection, req );
+}
+
 void Task::resetRetryCount( MediaLibraryPtr ml )
 {
     static const std::string req = "UPDATE " + Task::Table::Name + " SET "

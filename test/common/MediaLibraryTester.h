@@ -89,6 +89,7 @@ public:
     void setMediaType( int64_t mediaId, IMedia::Type type );
     void setAlbumTrackGenre( int64_t albumTrackId, int64_t genreId );
     uint32_t countNbThumbnails();
+    uint32_t countNbTasks();
 
 private:
     std::shared_ptr<fs::IDirectory> dummyDirectory;

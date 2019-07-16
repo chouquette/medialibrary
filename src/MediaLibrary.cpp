@@ -191,6 +191,7 @@ void MediaLibrary::createAllTriggers()
     Label::createTriggers( m_dbConnection.get() );
     Show::createTriggers( m_dbConnection.get() );
     Thumbnail::createTriggers( m_dbConnection.get() );
+    parser::Task::createTriggers( m_dbConnection.get(), dbModelVersion );
 }
 
 void MediaLibrary::registerEntityHooks()
@@ -1410,6 +1411,7 @@ void MediaLibrary::migrateModel16to17( uint32_t originalPreviousVersion )
 /**
  * Model 17 to 18 migration:
  * - Add thumbnail.shared_counter
+ * - Add Task.type
  * - Add Task.link_to_id
  * - Add Task.link_to_type
  * - Add Task.link_extra

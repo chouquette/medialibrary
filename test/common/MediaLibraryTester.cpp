@@ -283,3 +283,16 @@ uint32_t MediaLibraryTester::countNbThumbnails()
     row >> res;
     return res;
 }
+
+uint32_t MediaLibraryTester::countNbTasks()
+{
+    sqlite::Statement stmt{
+        getConn()->handle(),
+        "SELECT COUNT(*) FROM " + parser::Task::Table::Name
+    };
+    uint32_t res;
+    stmt.execute();
+    auto row = stmt.row();
+    row >> res;
+    return res;
+}

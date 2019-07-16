@@ -611,3 +611,13 @@ TEST_F( Playlists, InsertRemoveDuplicateMedia )
     ASSERT_EQ( 5u, items[4]->id() );
     CheckContiguity();
 }
+
+TEST_F( Playlists, AutoRemoveTask )
+{
+    auto t = parser::Task::createLinkTask( ml.get(), "file:///tmp/playlist.m3u",
+                                           pl->id(), parser::Task::LinkType::Playlist,
+                                           0 );
+    ASSERT_EQ( 1u, ml->countNbTasks() );
+    Playlist::destroy( ml.get(), pl->id() );
+    ASSERT_EQ( 0u, ml->countNbTasks() );
+}
