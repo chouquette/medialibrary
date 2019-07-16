@@ -408,3 +408,13 @@ TEST_F( Thumbnails, ShareThumbnail )
     t2 = m2->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_EQ( t1->id(), t2->id() );
 }
+
+TEST_F( Thumbnails, AutoDeleteAfterUnlink )
+{
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "test.asf" ) );
+    m->setThumbnail( "https://otters.org/jugglingotter.png", ThumbnailSizeType::Thumbnail );
+    ASSERT_EQ( 1u, ml->countNbThumbnails() );
+    auto t = m->thumbnail( ThumbnailSizeType::Thumbnail );
+    t->unlinkThumbnail( m->id(), Thumbnail::EntityType::Media );
+    ASSERT_EQ( 0u, ml->countNbThumbnails() );
+}

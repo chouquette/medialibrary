@@ -38,17 +38,18 @@
 
 namespace
 {
-    auto constexpr NbTriggers = 39u;
+    auto constexpr NbTriggers = 41u;
     auto constexpr NbIndexes = 19u;
     const std::vector<const char*> expectedTriggers{
         "add_album_track", "auto_delete_album_thumbnail",
         "auto_delete_artist_thumbnail", "auto_delete_media_thumbnail",
-        "auto_delete_thumbnails_after_delete", "auto_delete_thumbnails_after_update",
-        "cascade_file_deletion", "decrement_media_nb_playlist",
+        "cascade_file_deletion", "decr_thumbnail_refcount", "decrement_media_nb_playlist",
         "delete_album_fts", "delete_album_track", "delete_artist_fts",
         "delete_folder_fts", "delete_genre_fts", "delete_label_fts",
         "delete_media_fts", "delete_playlist_fts", "delete_show_fts",
+        "delete_unused_thumbnail",
         "has_album_remaining", "has_track_remaining", "has_tracks_present",
+        "incr_thumbnail_refcount",
         "increment_media_nb_playlist", "insert_album_fts", "insert_artist_fts",
         "insert_folder_fts", "insert_genre_fts", "insert_media_fts",
         "insert_playlist_fts", "insert_show_fts", "is_album_present",
@@ -56,7 +57,8 @@ namespace
         "update_folder_nb_media_on_insert", "update_folder_nb_media_on_update",
         "update_genre_on_new_track", "update_genre_on_track_deleted",
         "update_media_title_fts", "update_playlist_fts",
-        "update_playlist_order_on_delete", "update_playlist_order_on_insert"
+        "update_playlist_order_on_delete", "update_playlist_order_on_insert",
+        "update_thumbnail_refcount",
     };
 
     bool checkAlphaOrderedVector( const std::vector<const char*> in )

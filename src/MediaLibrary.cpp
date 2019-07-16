@@ -1436,6 +1436,14 @@ void MediaLibrary::migrateModel17to18()
     auto dbConn = getConn();
     sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
     auto t = dbConn->newTransaction();
+
+    std::string reqs[] = {
+#       include "database/migrations/migration17-18.sql"
+    };
+
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConn, req );
+
     m_settings.setDbModelVersion( 18 );
     m_settings.save();
     t->commit();

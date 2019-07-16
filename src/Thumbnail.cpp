@@ -202,7 +202,7 @@ void Thumbnail::relocate()
 void Thumbnail::createTable( sqlite::Connection* dbConnection )
 {
     const std::string reqs[] = {
-        #include "database/tables/Thumbnail_v17.sql"
+        #include "database/tables/Thumbnail_v18.sql"
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConnection, req );
@@ -211,7 +211,7 @@ void Thumbnail::createTable( sqlite::Connection* dbConnection )
 void Thumbnail::createTriggers( sqlite::Connection* dbConnection )
 {
     const std::string reqs[] = {
-        #include "database/tables/Thumbnail_triggers_v17.sql"
+        #include "database/tables/Thumbnail_triggers_v18.sql"
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConnection, req );
