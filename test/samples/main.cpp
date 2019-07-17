@@ -35,38 +35,59 @@ static std::string ForcedTestDirectory;
 bool Verbose = false;
 bool ExtraVerbose = false;
 
-static const char* testCases[] = {
-    "featuring",
-    "parse_video",
-    "parse_audio",
-    "same_album_name_different_artist",
-    "same_album_name_same_artist",
-    "compilation",
-    "compilation_no_albumartist",
-    "release_year_same",
-    "notags",
-    "multi_cd",
-    "no_album_artist",
-    "utf8",
-    "deduce_artwork_from_album",
-    "deduce_artwork_from_track",
-    "xiph_embedded_artwork",
-    "playlist_external_media",
-    "playlist_external_folder",
-    "playlist_same_folder",
-    "same_album_with_subfolder",
-    "compilation_different_years"
+#define TEST_CASE_LIST \
+    X("featuring") \
+    X("parse_video") \
+    X("parse_audio") \
+    X("same_album_name_different_artist") \
+    X("same_album_name_same_artist") \
+    X("compilation") \
+    X("compilation_no_albumartist") \
+    X("release_year_same") \
+    X("notags") \
+    X("multi_cd") \
+    X("no_album_artist") \
+    X("utf8") \
+    X("deduce_artwork_from_album") \
+    X("deduce_artwork_from_track") \
+    X("xiph_embedded_artwork") \
+    X("playlist_external_media") \
+    X("playlist_external_folder") \
+    X("playlist_same_folder") \
+    X("same_album_with_subfolder") \
+    X("compilation_different_years")
+
+
+#define REDUCED_TEST_CASE_LIST \
+    X("featuring") \
+    X("parse_video")
+
+#define TEST_WITH_REMOVABLE_STORAGE(testCare) \
+    { testCase, true }
+
+
+static std::tuple<std::string, bool> testCases[] = {
+    #define X(TESTCASE) std::make_tuple( TESTCASE, false ),
+    TEST_CASE_LIST
+    #undef X
+    #define X(TESTCASE) std::make_tuple( TESTCASE, true ),
+    TEST_CASE_LIST
+    #undef X
 };
 
-static const char* reducedTestCases[] = {
-    "featuring",
-    "parse_video",
+static std::tuple<std::string, bool> reducedTestCases[] = {
+    #define X(TESTCASE) std::make_tuple( TESTCASE, false ),
+    REDUCED_TEST_CASE_LIST
+    #undef X
+    #define X(TESTCASE) std::make_tuple( TESTCASE, true ),
+    REDUCED_TEST_CASE_LIST
+    #undef X
 };
 
 TEST_P( Tests, Parse )
 {
     auto testDir = ForcedTestDirectory.empty() == false ? ForcedTestDirectory : TestDirectory;
-    auto casePath = testDir + "testcases/" + GetParam() + ".json";
+    auto casePath = testDir + "testcases/" + std::get<0>( GetParam() ) + ".json";
     std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
     ASSERT_NE( nullptr, f );
     char buff[65536]; // That's how ugly I am!
@@ -95,7 +116,7 @@ TEST_P( Tests, Parse )
 TEST_P( ResumeTests, Parse )
 {
     auto testDir = ForcedTestDirectory.empty() == false ? ForcedTestDirectory : TestDirectory;
-    auto casePath = testDir + "testcases/" + GetParam() + ".json";
+    auto casePath = testDir + "testcases/" + std::get<0>( GetParam() ) + ".json";
     std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
     ASSERT_NE( nullptr, f );
     char buff[65536]; // That's how ugly I am!
@@ -127,7 +148,7 @@ TEST_P( ResumeTests, Parse )
 TEST_P( ResumeTests, Rescan )
 {
     auto testDir = ForcedTestDirectory.empty() == false ? ForcedTestDirectory : TestDirectory;
-    auto casePath = testDir + "testcases/" + GetParam() + ".json";
+    auto casePath = testDir + "testcases/" + std::get<0>( GetParam() ) + ".json";
     std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
     ASSERT_NE( nullptr, f );
     char buff[65536]; // That's how ugly I am!
@@ -163,7 +184,7 @@ TEST_P( ResumeTests, Rescan )
 TEST_P( RefreshTests, Refresh )
 {
     auto testDir = ForcedTestDirectory.empty() == false ? ForcedTestDirectory : TestDirectory;
-    auto casePath = testDir + "testcases/" + GetParam() + ".json";
+    auto casePath = testDir + "testcases/" + std::get<0>( GetParam() ) + ".json";
     std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
     ASSERT_NE( nullptr, f );
     char buff[65536]; // That's how ugly I am!
@@ -200,7 +221,7 @@ TEST_P( RefreshTests, Refresh )
 TEST_P( ReducedTests, OverrideExternalMedia )
 {
     auto testDir = ForcedTestDirectory.empty() == false ? ForcedTestDirectory : TestDirectory;
-    auto casePath = testDir + "testcases/" + GetParam() + ".json";
+    auto casePath = testDir + "testcases/" + std::get<0>( GetParam() ) + ".json";
     std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
     ASSERT_NE( nullptr, f );
     char buff[65536]; // That's how ugly I am!

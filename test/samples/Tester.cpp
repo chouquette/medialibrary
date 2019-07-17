@@ -30,6 +30,7 @@
 #include "Thumbnail.h"
 #include "File.h"
 #include "utils/Filename.h"
+#include "factory/DeviceListerFactory.h"
 
 #include <algorithm>
 
@@ -164,6 +165,9 @@ void Tests::SetUp()
     // This assumes wine for now
     auto thumbnailDir = "Z:\\tmp\\ml_thumbnails\\";
 #endif
+
+    if ( std::get<1>( GetParam() ) == true )
+        m_ml->setDeviceLister( std::make_shared<ForceRemovableStorareDeviceLister>() );
 
     auto res = m_ml->initialize( "test.db", thumbnailDir, m_cb.get() );
     ASSERT_EQ( InitializeResult::Success, res );
@@ -646,4 +650,19 @@ void RefreshTests::forceRefresh()
 void RefreshTests::InitializeCallback()
 {
     m_cb.reset( new MockResumeCallback );
+}
+
+ForceRemovableStorareDeviceLister::ForceRemovableStorareDeviceLister()
+{
+    m_lister = factory::createDeviceLister();
+    assert( m_lister != nullptr );
+}
+
+std::vector<std::tuple<std::string, std::string, bool>>
+ForceRemovableStorareDeviceLister::devices() const
+{
+    auto devices = m_lister->devices();
+    for ( auto& d : devices )
+        std::get<2>( d ) = true;
+    return devices;
 }

@@ -39,6 +39,7 @@
 #include "medialibrary/IPlaylist.h"
 #include "medialibrary/ISubtitleTrack.h"
 #include "mocks/NoopCallback.h"
+#include "medialibrary/IDeviceLister.h"
 
 class MockCallback : public mock::NoopCallback
 {
@@ -66,6 +67,16 @@ protected:
     bool m_discoveryCompleted;
 };
 
+class ForceRemovableStorareDeviceLister : public IDeviceLister
+{
+public:
+    ForceRemovableStorareDeviceLister();
+    virtual std::vector<std::tuple<std::string, std::string, bool>> devices() const override;
+
+private:
+    DeviceListerPtr m_lister;
+};
+
 class MockResumeCallback : public MockCallback
 {
 public:
@@ -80,7 +91,13 @@ private:
     compat::Mutex m_discoveryMutex;
 };
 
-class Tests : public ::testing::TestWithParam<const char*>
+struct TestParams
+{
+    const char* testCase;
+    bool useRemovableFiles;
+};
+
+class Tests : public ::testing::TestWithParam<std::tuple<std::string, bool>>
 {
 protected:
     std::unique_ptr<MockCallback> m_cb;
