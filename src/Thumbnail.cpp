@@ -100,10 +100,13 @@ bool Thumbnail::update( std::string mrl, bool isOwned )
         storedMrl = toRelativeMrl( mrl );
     else
         storedMrl = mrl;
+    // Also include the current generated state to the request, in case this update
+    // request came while the thumbnailer was also generating a thumbnail
     static const std::string req = "UPDATE " + Thumbnail::Table::Name +
-            " SET mrl = ?, is_generated = ? WHERE id_thumbnail = ?";
+            " SET mrl = ?, is_generated = ? "
+            "WHERE id_thumbnail = ? AND is_generated = ?";
     if( sqlite::Tools::executeUpdate( m_ml->getConn(), req, storedMrl,
-                                      isOwned, m_id ) == false )
+                                      isOwned, m_id, m_isOwned ) == false )
         return false;
     m_mrl = std::move( mrl );
     m_isOwned = isOwned;
