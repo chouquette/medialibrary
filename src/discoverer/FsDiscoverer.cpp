@@ -362,7 +362,8 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
     {
         if ( interruptProbe.isInterrupted() == true )
             break;
-        m_ml->onUpdatedFile( std::move( p.first ), std::move( p.second ) );
+        m_ml->onUpdatedFile( std::move( p.first ), std::move( p.second ),
+                             parentFolder, parentFolderFs );
     }
     for ( auto& p : filesToAdd )
     {

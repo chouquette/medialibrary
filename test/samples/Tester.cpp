@@ -628,6 +628,7 @@ void RefreshTests::forceRefresh()
         if ( f->isExternal() == true )
             continue;
         auto mrl = f->mrl();
+        auto folder = Folder::fetch( m_ml.get(), f->folderId() );
         auto fsFactory = m_ml->fsFactoryForMrl( mrl );
         auto folderMrl = utils::file::directory( mrl );
         auto fileName = utils::file::fileName( mrl );
@@ -638,7 +639,7 @@ void RefreshTests::forceRefresh()
                 return f->name() == fileName;
             });
         assert( fileFsIt != cend( filesFs ) );
-        m_ml->onUpdatedFile( f, *fileFsIt );
+        m_ml->onUpdatedFile( f, *fileFsIt, std::move( folder ), std::move( folderFs ) );
     }
 }
 

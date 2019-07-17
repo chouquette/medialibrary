@@ -83,7 +83,8 @@ Task::Task( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> file
 }
 
 Task::Task( MediaLibraryPtr ml, std::shared_ptr<File> file,
-            std::shared_ptr<fs::IFile> fileFs )
+            std::shared_ptr<fs::IFile> fileFs, std::shared_ptr<Folder> parentFolder,
+            std::shared_ptr<fs::IDirectory> parentFolderFs )
     : m_ml( ml )
     , m_type( Type::Refresh )
     , m_mrl( file->mrl() )
@@ -91,6 +92,8 @@ Task::Task( MediaLibraryPtr ml, std::shared_ptr<File> file,
     , m_fileId( file->id() )
     , m_file( std::move( file ) )
     , m_fileFs( std::move( fileFs ) )
+    , m_parentFolder( std::move( parentFolder ) )
+    , m_parentFolderFs( std::move( parentFolderFs ) )
 {
 }
 
@@ -412,10 +415,14 @@ Task::create( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> fi
 
 std::shared_ptr<Task>
 Task::createRefreshTask( MediaLibraryPtr ml, std::shared_ptr<File> file,
-                         std::shared_ptr<fs::IFile> fileFs )
+                         std::shared_ptr<fs::IFile> fileFs,
+                         std::shared_ptr<Folder> parentFolder,
+                         std::shared_ptr<fs::IDirectory> parentFolderFs )
 {
     auto parentFolderId = file->folderId();
-    auto self = std::make_shared<Task>( ml, std::move( file ), std::move( fileFs ) );
+    auto self = std::make_shared<Task>( ml, std::move( file ), std::move( fileFs ),
+                                        std::move( parentFolder ),
+                                        std::move( parentFolderFs ) );
     const std::string req = "INSERT INTO " + Task::Table::Name +
             "(type, mrl, file_type, file_id, parent_folder_id ) "
             "VALUES(?, ?, ?, ?, ?)";

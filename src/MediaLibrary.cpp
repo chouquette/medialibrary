@@ -519,13 +519,17 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
 }
 
 void MediaLibrary::onUpdatedFile( std::shared_ptr<File> file,
-                                  std::shared_ptr<fs::IFile> fileFs )
+                                  std::shared_ptr<fs::IFile> fileFs,
+                                  std::shared_ptr<Folder> parentFolder,
+                                  std::shared_ptr<fs::IDirectory> parentFolderFs )
 {
     auto mrl = fileFs->mrl();
     try
     {
         parser::Task::createRefreshTask( this, std::move( file ),
-                                         std::move( fileFs ) );
+                                         std::move( fileFs ),
+                                         std::move( parentFolder ),
+                                         std::move( parentFolderFs ) );
     }
     catch( const sqlite::errors::ConstraintViolation& ex )
     {

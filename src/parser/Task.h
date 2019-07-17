@@ -106,7 +106,8 @@ public:
      * @param fileFs The updated file, on the filesystem
      */
     Task( MediaLibraryPtr ml, std::shared_ptr<File> file,
-          std::shared_ptr<fs::IFile> fileFs );
+          std::shared_ptr<fs::IFile> fileFs, std::shared_ptr<Folder> parentFolder,
+          std::shared_ptr<fs::IDirectory> parentFolderFs );
 
     /**
      * @brief Task Contructor for a link task
@@ -167,7 +168,9 @@ public:
                                          IFile::Type fileType );
     static std::shared_ptr<Task> createRefreshTask( MediaLibraryPtr ml,
                                                     std::shared_ptr<File> file,
-                                                    std::shared_ptr<fs::IFile> fsFile );
+                                                    std::shared_ptr<fs::IFile> fsFile,
+                                                    std::shared_ptr<Folder> parentFolder,
+                                                    std::shared_ptr<fs::IDirectory> parentFolderFs );
     static std::shared_ptr<Task> createLinkTask( MediaLibraryPtr ml, std::string mrl,
                                                  int64_t linkToId, LinkType linkToType,
                                                  int64_t linkToExtra );
