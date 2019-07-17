@@ -391,13 +391,12 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
     if ( res == false )
         return false;
     auto thumbnail = media->thumbnail( ThumbnailSizeType::Thumbnail );
-    if ( thumbnail != nullptr )
+    // before relocating the thumbnail of a video media, bear in mind that the
+    // thumbnailer thread might be processing the same media, and can be generating
+    // a thumbnail right now
+    if ( thumbnail != nullptr && thumbnail->isValid() &&
+         thumbnail->isOwned() == false )
     {
-        // In case we are refreshing a media, we deleted the previous link
-        // between the media and its potential thumbnail.
-        // When parsing the media, we only assign the thumbnail if it has a non
-        // empty mrl
-        assert( thumbnail->isValid() );
         thumbnail->relocate();
     }
     return true;
