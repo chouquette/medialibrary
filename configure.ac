@@ -1,8 +1,8 @@
 m4_define([MEDIALIB_MAJOR], [0])
-m4_define([MEDIALIB_MINOR], [4])
+m4_define([MEDIALIB_MINOR], [5])
 m4_define([MEDIALIB_MICRO], [0])
 
-AC_COPYRIGHT([Copyright 2014-2017 Hugo Beauzée-Luyssen - VideoLabs - VideoLAN])
+AC_COPYRIGHT([Copyright 2014-2019 Hugo Beauzée-Luyssen - VideoLabs - VideoLAN])
 
 AC_INIT([medialibrary], [MEDIALIB_MAJOR.MEDIALIB_MINOR.MEDIALIB_MICRO])
 AC_CONFIG_HEADERS([config.h])
