@@ -24,6 +24,7 @@ libmedialibrary_la_HEADERS = \
 	include/medialibrary/IAlbumTrack.h \
 	include/medialibrary/IArtist.h \
 	include/medialibrary/IAudioTrack.h \
+	include/medialibrary/IBookmark.h \
 	include/medialibrary/IChapter.h \
 	include/medialibrary/IFile.h \
 	include/medialibrary/IGenre.h \
@@ -388,6 +389,7 @@ EXTRA_DIST += medialibrary.pc \
 	src/database/migrations/migration14-15.sql \
 	src/database/migrations/migration15-16.sql \
 	src/database/migrations/migration16-17.sql \
+	src/database/migrations/migration17-18.sql \
 	src/database/tables/File_v14.sql \
 	src/database/tables/File_triggers_v14.sql \
 	src/database/tables/Media_v14.sql \
@@ -406,11 +408,16 @@ EXTRA_DIST += medialibrary.pc \
 	src/database/tables/Device_v14.sql \
 	src/database/tables/Task_v14.sql \
 	src/database/tables/Task_v18.sql \
+	src/database/tables/Task_triggers_v18.sql \
 	src/database/tables/Thumbnail_v17.sql \
+	src/database/tables/Thumbnail_triggers_v17.sql \
+	src/database/tables/Thumbnail_v18.sql \
+	src/database/tables/Thumbnail_triggers_v18.sql \
 	src/database/tables/Artist_v16.sql \
 	src/database/tables/Artist_v17.sql \
 	src/database/tables/Album_v16.sql \
 	src/database/tables/Album_v17.sql \
+	src/database/tables/Bookmark_v17.sql \
 	$(NULL)
 	
 
