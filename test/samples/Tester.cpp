@@ -40,6 +40,8 @@ extern bool ExtraVerbose;
 MockCallback::MockCallback()
 {
     // Start locked. The locked will be released when waiting for parsing to be completed
+    m_discoveryCompleted = false;
+    m_done = false;
     m_parsingMutex.lock();
 }
 
@@ -128,8 +130,8 @@ void MockResumeCallback::reinit()
 
 bool MockResumeCallback::waitForDiscoveryComplete()
 {
+    assert( m_discoveryCompleted == false );
     std::unique_lock<compat::Mutex> lock( m_discoveryMutex, std::adopt_lock );
-    m_discoveryCompleted = false;
     // Wait for a while, generating snapshots can be heavy...
     return m_discoveryCompletedVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
         return m_discoveryCompleted;
