@@ -5,6 +5,7 @@
 "DROP TRIGGER auto_delete_thumbnails_after_update",
 
 "DROP TABLE " + Thumbnail::Table::Name,
+"DROP TABLE " + Thumbnail::LinkingTable::Name,
 
 #include "database/tables/Thumbnail_v18.sql"
 
