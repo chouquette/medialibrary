@@ -44,4 +44,4 @@
         " entity_type = " + std::to_string(
             static_cast<std::underlying_type_t<Thumbnail::EntityType>>(
                 Thumbnail::EntityType::Media ) ) + ";"
-" END;"
+" END;",
