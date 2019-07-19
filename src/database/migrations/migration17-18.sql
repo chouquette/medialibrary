@@ -15,7 +15,7 @@
  * Split Task into Task & Item                                    *
  *****************************************************************/
 
-"CREATE TABLE IF NOT EXISTS " + parser::Task::Table::Name + "_backup"
+"CREATE TEMPORARY TABLE " + parser::Task::Table::Name + "_backup"
 "("
     "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
     "mrl TEXT,"
