@@ -81,6 +81,7 @@ bool Settings::save()
 
 void Settings::setDbModelVersion(uint32_t dbModelVersion)
 {
+    assert( dbModelVersion != m_dbModelVersion );
     m_dbModelVersion = dbModelVersion;
     m_changed = true;
 }
