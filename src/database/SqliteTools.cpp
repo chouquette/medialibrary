@@ -26,6 +26,8 @@
 
 #include "SqliteTools.h"
 
+#include <algorithm>
+
 namespace medialibrary
 {
 
@@ -35,6 +37,26 @@ std::unordered_map<Connection::Handle,
                     std::unordered_map<std::string, Statement::CachedStmtPtr>> Statement::StatementsCache;
 
 compat::Mutex Statement::StatementsCacheLock;
+
+std::string Tools::sanitizePattern( const std::string& pattern )
+{
+    // This assumes the input pattern is a regular user input, ie. that it is not
+    // supposed to contain anything that ressembles SQL. What this actually means
+    // is that if the user provides an escaped double quote «""» it will result in 2
+    // escaped double quotes («""""»)
+    std::string res;
+    res.reserve( pattern.size() + 3 );
+    res.append( "\"" );
+    for ( const auto c : pattern )
+    {
+        if ( c == '"' || c == '\'' )
+            res += c;
+        res += c;
+    }
+    res.append( "*\"" );
+    return res;
+}
+
 }
 
 }
