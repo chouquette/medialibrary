@@ -74,6 +74,10 @@ namespace
 
 class Misc : public Tests
 {
+    virtual void SetUp() override
+    {
+        // No need to setup anything, those tests are not using the DB
+    }
 };
 
 TEST_F( Misc, FileExtensions )
