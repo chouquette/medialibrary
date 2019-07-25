@@ -372,6 +372,13 @@ class Tools
             }
         }
 
+        /**
+         * @brief sanitizePattern Ensures the pattern is valid, and append a wildcard char
+         * @return Essentially returns pattern with «'» and «"» encoded for
+         *         sqlite, and a '*' appended
+         */
+        static std::string sanitizePattern( const std::string& pattern );
+
     private:
         template <typename... Args>
         static void executeRequestLocked( sqlite::Connection* dbConnection, const std::string& req, Args&&... args )

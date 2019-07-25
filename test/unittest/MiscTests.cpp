@@ -92,6 +92,17 @@ TEST_F( Misc, TrimString )
     ASSERT_EQ( utils::str::trim( "" ), "" );
 }
 
+TEST_F( Misc, SanitizePattern )
+{
+    // "" will become " "" "" *", (without spaces) as all double quotes are
+    // escaped, and the pattern itself is enclosed between " *"
+    ASSERT_EQ( "\"\"\"\"\"*\"", sqlite::Tools::sanitizePattern( "\"\"" ) );
+    ASSERT_EQ( "\"Little Bobby Table*\"", sqlite::Tools::sanitizePattern( "Little Bobby Table" ) );
+    ASSERT_EQ( "\"Test \"\" Pattern*\"", sqlite::Tools::sanitizePattern( "Test \" Pattern" ) );
+    ASSERT_EQ( "\"It''s a test*\"", sqlite::Tools::sanitizePattern( "It's a test" ) );
+    ASSERT_EQ( "\"''\"\"*\"", sqlite::Tools::sanitizePattern( "\'\"" ) );
+}
+
 class DbModel : public testing::Test
 {
 protected:
