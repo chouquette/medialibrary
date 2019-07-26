@@ -149,11 +149,13 @@ void Worker::mainloop()
     LOG_INFO("Entering ParserService [", serviceName, "] thread");
     setIdle( false );
 
-    while ( m_stopParser == false )
+    while ( true )
     {
         std::shared_ptr<Task> task;
         {
             std::unique_lock<compat::Mutex> lock( m_lock );
+            if ( m_stopParser == true )
+                break;
             if ( m_tasks.empty() == true || m_paused == true )
             {
                 LOG_DEBUG( "Halting ParserService [", serviceName, "] mainloop" );
