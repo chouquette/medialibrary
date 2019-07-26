@@ -534,10 +534,11 @@ Query<IAlbum> Album::search( MediaLibraryPtr ml, const std::string& pattern,
     std::string req = "FROM " + Table::Name + " alb "
             "WHERE id_album IN "
             "(SELECT rowid FROM " + Table::Name + "Fts WHERE " +
-            Table::Name + "Fts MATCH '*' || ? || '*')"
+            Table::Name + "Fts MATCH ?)"
             "AND is_present != 0";
     return make_query<Album, IAlbum>( ml, "*", std::move( req ),
-                                      orderBy( params ), pattern );
+                                      orderBy( params ),
+                                      sqlite::Tools::sanitizePattern( pattern ) );
 }
 
 Query<IAlbum> Album::searchFromArtist( MediaLibraryPtr ml, const std::string& pattern,
@@ -546,11 +547,13 @@ Query<IAlbum> Album::searchFromArtist( MediaLibraryPtr ml, const std::string& pa
     std::string req = "FROM " + Table::Name + " alb "
             "WHERE id_album IN "
             "(SELECT rowid FROM " + Table::Name + "Fts WHERE " +
-            Table::Name + "Fts MATCH '*' || ? || '*')"
+            Table::Name + "Fts MATCH ?)"
             "AND is_present != 0 "
             "AND artist_id = ?";
     return make_query<Album, IAlbum>( ml, "*", std::move( req ),
-                                      orderBy( params ), pattern, artistId );
+                                      orderBy( params ),
+                                      sqlite::Tools::sanitizePattern( pattern ),
+                                      artistId );
 }
 
 Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, const QueryParameters* params )
@@ -610,11 +613,12 @@ Query<IAlbum> Album::searchFromGenre( MediaLibraryPtr ml, const std::string& pat
             "INNER JOIN " + AlbumTrack::Table::Name + " att ON att.album_id = alb.id_album "
             "WHERE id_album IN "
             "(SELECT rowid FROM " + Table::Name + "Fts WHERE " +
-            Table::Name + "Fts MATCH '*' || ? || '*')"
+            Table::Name + "Fts MATCH ?)"
             "AND att.genre_id = ?";
     std::string groupAndOrderBy = "GROUP BY att.album_id" + orderBy( params );
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
-                                      std::move( groupAndOrderBy ), pattern,
+                                      std::move( groupAndOrderBy ),
+                                      sqlite::Tools::sanitizePattern( pattern ),
                                       genreId );
 }
 

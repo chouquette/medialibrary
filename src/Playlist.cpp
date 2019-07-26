@@ -348,9 +348,10 @@ Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,
                                    const QueryParameters* params )
 {
     std::string req = "FROM " + Playlist::Table::Name + " WHERE id_playlist IN "
-            "(SELECT rowid FROM " + Playlist::Table::Name + "Fts WHERE name MATCH '*' || ? || '*')";
+            "(SELECT rowid FROM " + Playlist::Table::Name + "Fts WHERE name MATCH ?)";
     return make_query<Playlist, IPlaylist>( ml, "*", std::move( req ),
-                                            sortRequest( params ), name );
+                                            sortRequest( params ),
+                                            sqlite::Tools::sanitizePattern( name ) );
 }
 
 Query<IPlaylist> Playlist::listAll( MediaLibraryPtr ml, const QueryParameters* params )

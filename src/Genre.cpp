@@ -190,7 +190,7 @@ Query<IGenre> Genre::search( MediaLibraryPtr ml, const std::string& name,
 {
     std::string req = "FROM " + Genre::Table::Name + " WHERE id_genre IN "
             "(SELECT rowid FROM " + Genre::Table::Name + "Fts "
-            "WHERE name MATCH '*' || ? || '*')";
+            "WHERE name MATCH ?)";
     std::string orderBy = "ORDER BY name";
     if ( params != nullptr )
     {
@@ -200,7 +200,8 @@ Query<IGenre> Genre::search( MediaLibraryPtr ml, const std::string& name,
             orderBy += " DESC";
     }
     return make_query<Genre, IGenre>( ml, "*", std::move( req ),
-                                      std::move( orderBy ), name );
+                                      std::move( orderBy ),
+                                      sqlite::Tools::sanitizePattern( name ) );
 }
 
 Query<IGenre> Genre::listAll( MediaLibraryPtr ml, const QueryParameters* params )

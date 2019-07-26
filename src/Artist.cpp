@@ -452,7 +452,7 @@ Query<IArtist> Artist::search( MediaLibraryPtr ml, const std::string& name,
                                bool includeAll, const QueryParameters* params )
 {
     std::string req = "FROM " + Artist::Table::Name + " WHERE id_artist IN "
-            "(SELECT rowid FROM " + Artist::Table::Name + "Fts WHERE name MATCH '*' || ? || '*')"
+            "(SELECT rowid FROM " + Artist::Table::Name + "Fts WHERE name MATCH ?)"
             "AND is_present != 0";
     // We are searching based on the name, so we're ignoring unknown/various artist
     // This means all artist we find has at least one track associated with it, so
@@ -460,7 +460,8 @@ Query<IArtist> Artist::search( MediaLibraryPtr ml, const std::string& name,
     if ( includeAll == false )
         req += " AND nb_albums > 0";
     return make_query<Artist, IArtist>( ml, "*", std::move( req ),
-                                        sortRequest( params ), name );
+                                        sortRequest( params ),
+                                        sqlite::Tools::sanitizePattern( name ) );
 }
 
 Query<IArtist> Artist::listAll( MediaLibraryPtr ml, bool includeAll,
@@ -481,7 +482,7 @@ Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pat
     std::string req = "FROM " + Artist::Table::Name + " a "
                 "INNER JOIN " + AlbumTrack::Table::Name + " att ON att.artist_id = a.id_artist "
                 "WHERE id_artist IN "
-                    "(SELECT rowid FROM " + Artist::Table::Name + "Fts WHERE name MATCH '*' || ? || '*')"
+                    "(SELECT rowid FROM " + Artist::Table::Name + "Fts WHERE name MATCH ?)"
                 "AND att.genre_id = ? ";
 
     std::string groupBy = "GROUP BY att.artist_id "
@@ -494,7 +495,9 @@ Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pat
             groupBy += " DESC";
     }
     return make_query<Artist, IArtist>( ml, "a.*", std::move( req ),
-                                        std::move( groupBy ), pattern, genreId );
+                                        std::move( groupBy ),
+                                        sqlite::Tools::sanitizePattern( pattern ),
+                                        genreId );
 }
 
 void Artist::dropMediaArtistRelation( MediaLibraryPtr ml, int64_t mediaId )
