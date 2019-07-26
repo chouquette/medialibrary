@@ -302,6 +302,21 @@ TEST_F( Medias, SearchTracks )
     ASSERT_EQ( 0u, tracks.size() );
 }
 
+TEST_F( Medias, SearchWeirdPatterns )
+{
+    auto m = std::static_pointer_cast<Media>(
+                ml->addMedia( "track.mp3", IMedia::Type::Audio ) );
+    m->save();
+    // All we care about is this not crashing
+    // https://code.videolan.org/videolan/medialibrary/issues/116
+    auto media = ml->searchMedia( "@*\"", nullptr )->all();
+    ASSERT_EQ( 0u, media.size() );
+    media = ml->searchMedia( "'''''% % \"'", nullptr )->all();
+    ASSERT_EQ( 0u, media.size() );
+    media = ml->searchMedia( "Robert'); DROP TABLE STUDENTS;--", nullptr )->all();
+    ASSERT_EQ( 0u, media.size() );
+}
+
 TEST_F( Medias, Favorite )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );

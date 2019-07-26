@@ -396,9 +396,10 @@ Query<IFolder> Folder::searchWithMedia( MediaLibraryPtr ml,
             " LEFT JOIN " + Device::Table::Name +
                 " d ON d.id_device = f.device_id "
             "WHERE f.id_folder IN (SELECT rowid FROM " + Table::Name + "Fts WHERE " +
-                Table::Name + "Fts MATCH '*' || ? || '*') "
+                Table::Name + "Fts MATCH ?) "
             "AND d.is_present != 0 AND " + filterByMediaType( type );
-    return make_query<Folder, IFolder>( ml, "*", req, sortRequest( params ), pattern );
+    return make_query<Folder, IFolder>( ml, "*", req, sortRequest( params ),
+                                        sqlite::Tools::sanitizePattern( pattern ) );
 }
 
 Query<IFolder> Folder::entryPoints( MediaLibraryPtr ml, bool banned, int64_t deviceId )

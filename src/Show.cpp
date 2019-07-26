@@ -261,9 +261,10 @@ Query<IShow> Show::search( MediaLibraryPtr ml, const std::string& pattern,
 {
     std::string req = "FROM " + Show::Table::Name + " WHERE id_show IN"
             "(SELECT rowid FROM " + Show::Table::Name + "Fts WHERE " +
-            Show::Table::Name + "Fts MATCH '*' || ? || '*')";
+            Show::Table::Name + "Fts MATCH ?)";
     return make_query<Show, IShow>( ml, "*", std::move( req ),
-                                    orderBy( params ), pattern );
+                                    orderBy( params ),
+                                    sqlite::Tools::sanitizePattern( pattern ) );
 }
 
 }
