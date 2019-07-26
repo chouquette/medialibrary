@@ -44,6 +44,8 @@ Worker::Worker()
 
 void Worker::start()
 {
+    // This function is called from a locked context.
+
     // Ensure we don't start multiple times.
     assert( m_thread.joinable() == false );
     m_thread = compat::Thread{ &Worker::mainloop, this };
