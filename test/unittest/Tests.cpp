@@ -65,7 +65,6 @@ void Tests::Reload()
     ml->reload();
 }
 
-
 void Tests::SetUp()
 {
     unlink("test.db");
