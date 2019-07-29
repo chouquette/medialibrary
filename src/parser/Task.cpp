@@ -167,6 +167,11 @@ uint32_t Task::goToNextService()
     return ++m_currentService;
 }
 
+void Task::resetCurrentService()
+{
+    m_currentService = 0;
+}
+
 int64_t Task::id() const
 {
     return m_id;
