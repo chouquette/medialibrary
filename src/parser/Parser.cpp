@@ -163,7 +163,10 @@ void Parser::done( std::shared_ptr<Task> t, Status status )
         return;
     }
     if ( status == Status::Requeue )
+    {
+        t->resetCurrentService();
         serviceIdx = 0;
+    }
 
     // If some services declined to parse the file, start over again.
     assert( serviceIdx < m_services.size() );

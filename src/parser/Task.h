@@ -150,6 +150,7 @@ public:
      * @return
      */
     uint32_t goToNextService();
+    void resetCurrentService();
 
     int64_t id() const;
 
