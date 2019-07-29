@@ -28,6 +28,11 @@
 
 #include "mocks/FileSystem.h"
 
+Tests::Tests()
+    : mlCb( nullptr )
+{
+}
+
 void Tests::TearDown()
 {
     ml.reset();

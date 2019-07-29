@@ -31,6 +31,7 @@
 class Tests : public testing::Test
 {
 protected:
+    Tests();
     std::unique_ptr<MediaLibraryTester> ml;
     std::unique_ptr<mock::NoopCallback> cbMock;
     IMediaLibraryCb* mlCb;
