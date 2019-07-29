@@ -369,9 +369,6 @@ public:
      * @brief clearHistory will clear both streams history & media history.
      * @return true in case of success, false otherwise. The database will stay untouched in case
      *              of failure.
-     *
-     * This will flush the entity cache, but will not edit any existing instance of a media entity,
-     * meaning any instance of media you're holding will outdated fields.
      */
     virtual bool clearHistory() = 0;
 
