@@ -200,6 +200,9 @@ bool Media::increasePlayCount()
         return false;
     m_playCount++;
     m_lastPlayedDate = lastPlayedDate;
+    auto historyType = ( m_type == Type::Video || m_type == Type::Audio ) ?
+                       HistoryType::Media : HistoryType::Streams;
+    m_ml->getCb()->onHistoryChanged( historyType );
     return true;
 }
 
@@ -231,6 +234,9 @@ void Media::removeFromHistory()
     t->commit();
     m_lastPlayedDate = 0;
     m_playCount = 0;
+    auto historyType = ( m_type == Type::Video || m_type == Type::Audio ) ?
+                       HistoryType::Media : HistoryType::Streams;
+    m_ml->getCb()->onHistoryChanged( historyType );
 }
 
 bool Media::isFavorite() const
@@ -1181,6 +1187,8 @@ void Media::clearHistory( MediaLibraryPtr ml )
 
     sqlite::Tools::executeUpdate( dbConn, req );
     t->commit();
+    ml->getCb()->onHistoryChanged( HistoryType::Media );
+    ml->getCb()->onHistoryChanged( HistoryType::Streams );
 }
 
 void Media::removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime )

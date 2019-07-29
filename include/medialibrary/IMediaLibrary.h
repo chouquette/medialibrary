@@ -104,6 +104,14 @@ enum class ThumbnailSizeType : uint8_t
     Count,
 };
 
+enum class HistoryType : uint8_t
+{
+    /// The history of media analyzed by the media library
+    Media,
+    /// The network streams history
+    Streams,
+};
+
 class IMediaLibraryCb
 {
 public:
@@ -238,6 +246,11 @@ public:
      */
     virtual void onMediaThumbnailReady( MediaPtr media, ThumbnailSizeType sizeType,
                                         bool success ) = 0;
+    /**
+     * @brief onHistoryChanged Called when a media history gets modified (including when cleared)
+     * @param type The history type
+     */
+    virtual void onHistoryChanged( HistoryType type ) = 0;
 };
 
 class IMediaLibrary
