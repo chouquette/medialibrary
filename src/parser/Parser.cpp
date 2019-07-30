@@ -164,6 +164,16 @@ void Parser::done( std::shared_ptr<Task> t, Status status )
     }
     if ( status == Status::Requeue )
     {
+        // The retry_count is mostly handled when fetching the remaining tasks
+        // from the database. However, when requeuing, it all happens at runtime
+        // in the C++ code, so we also need to ensure we're not requeuing tasks
+        // forever.
+        if ( t->retryCount() >= 3 )
+        {
+            ++m_opDone;
+            updateStats();
+            return;
+        }
         t->resetCurrentService();
         serviceIdx = 0;
     }
