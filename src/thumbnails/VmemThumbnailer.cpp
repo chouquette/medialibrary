@@ -97,10 +97,10 @@ bool VmemThumbnailer::generate( const std::string& mrl,
 
 bool VmemThumbnailer::seekAhead( Task& task, float position )
 {
-    float pos = .0f;
-    auto event = task.mp.eventManager().onPositionChanged([&task, &pos](float p) {
+    float newPos = .0f;
+    auto event = task.mp.eventManager().onPositionChanged([&task, &newPos](float p) {
         std::unique_lock<compat::Mutex> lock( task.mutex );
-        pos = p;
+        newPos = p;
         task.cond.notify_all();
     });
     auto success = false;
@@ -110,8 +110,8 @@ bool VmemThumbnailer::seekAhead( Task& task, float position )
         // While seeking, we might land on a position that is slightly before what
         // we asked for
         auto expectedPos = position * 0.70;
-        success = task.cond.wait_for( lock, std::chrono::seconds( 3 ), [&pos, expectedPos]() {
-            return pos >= expectedPos;
+        success = task.cond.wait_for( lock, std::chrono::seconds( 3 ), [&newPos, expectedPos]() {
+            return newPos >= expectedPos;
         });
     }
     // Since we're locking a mutex for each position changed, let's unregister ASAP
