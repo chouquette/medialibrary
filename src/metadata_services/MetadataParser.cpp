@@ -1067,7 +1067,6 @@ std::shared_ptr<AlbumTrack> MetadataAnalyzer::handleTrack( std::shared_ptr<Album
     auto media = std::static_pointer_cast<Media>( item.media() );
     if ( title.empty() == true )
     {
-        LOG_WARN( "Failed to get track title" );
         if ( trackNumber != 0 )
         {
             title = "Track #";
