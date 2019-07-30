@@ -151,6 +151,7 @@ public:
      */
     uint32_t goToNextService();
     void resetCurrentService();
+    int retryCount() const;
 
     int64_t id() const;
 
