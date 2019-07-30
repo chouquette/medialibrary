@@ -126,14 +126,20 @@ bool Task::saveParserStep()
 {
     static const std::string req = "UPDATE " + Task::Table::Name + " SET step = ?, "
             "retry_count = 0 WHERE id_task = ?";
-    return sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_step, m_id );
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_step, m_id ) == false )
+        return false;
+    m_retryCount = 0;
+    return true;
 }
 
 bool Task::decrementRetryCount()
 {
     static const std::string req = "UPDATE " + Task::Table::Name + " SET "
             "retry_count = retry_count - 1 WHERE id_task = ?";
-    return sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id );
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id ) == false )
+        return false;
+    --m_retryCount;
+    return true;
 }
 
 bool Task::isCompleted() const
@@ -159,7 +165,9 @@ void Task::startParserStep()
 {
     static const std::string req = "UPDATE " + Task::Table::Name + " SET "
             "retry_count = retry_count + 1 WHERE id_task = ?";
-    sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id );
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id ) == false )
+        return;
+    ++m_retryCount;
 }
 
 uint32_t Task::goToNextService()
@@ -170,6 +178,11 @@ uint32_t Task::goToNextService()
 void Task::resetCurrentService()
 {
     m_currentService = 0;
+}
+
+int Task::retryCount() const
+{
+    return m_retryCount;
 }
 
 int64_t Task::id() const
