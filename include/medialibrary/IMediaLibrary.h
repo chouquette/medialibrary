@@ -109,7 +109,7 @@ enum class HistoryType : uint8_t
     /// The history of media analyzed by the media library
     Media,
     /// The network streams history
-    Streams,
+    Network,
 };
 
 class IMediaLibraryCb
