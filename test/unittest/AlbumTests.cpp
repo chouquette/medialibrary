@@ -260,6 +260,58 @@ TEST_F( Albums, AlbumArtist )
     ASSERT_EQ( albumArtist->name(), artist->name() );
 }
 
+TEST_F( Albums, SortAlbumThenArtist )
+{
+    // First
+    auto albumOttersO = ml->createAlbum( "otters" );
+    // Second
+    auto albumPangolinsP = ml->createAlbum( "pangolins of fire" );
+    // Fourth
+    auto albumPangolinsS = ml->createAlbum( "see otters" );
+    // Third
+    auto albumOttersS = ml->createAlbum( "sea otters" );
+    // Originally the medialibrary handled ordering in case of identical
+    // album name by using the insertion order.
+    // Here the insertion order is different than the expected sort order.
+
+    auto artistP = ml->createArtist( "pangolins" );
+    auto artistO = ml->createArtist( "otters" );
+
+    albumOttersO->setAlbumArtist( artistO );
+    albumPangolinsP->setAlbumArtist( artistP );
+    albumOttersS->setAlbumArtist( artistO );
+    albumPangolinsS->setAlbumArtist( artistP);
+
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
+    albumOttersO->addTrack( m, 1, 0, 0, nullptr );
+    m->save();
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3" ) );
+    albumPangolinsP->addTrack( m2, 1, 0, 0, nullptr );
+    m2->save();
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3" ) );
+    albumOttersS->addTrack( m3, 1, 0, 0, nullptr );
+    m3->save();
+    auto m4 = std::static_pointer_cast<Media>( ml->addMedia( "media4.mp3" ) );
+    albumPangolinsS->addTrack( m4, 1, 0, 0, nullptr );
+    m3->save();
+
+    QueryParameters params { SortingCriteria::Alpha, false };
+    auto albums = ml->albums( &params )->all();
+    ASSERT_EQ( 4u, albums.size() );
+    ASSERT_EQ( albumOttersO->id(), albums[0]->id() );
+    ASSERT_EQ( albumPangolinsP->id(), albums[1]->id() );
+    ASSERT_EQ( albumOttersS->id(), albums[2]->id() );
+    ASSERT_EQ( albumPangolinsS->id(), albums[3]->id() );
+
+    params.desc = true;
+    albums = ml->albums( &params )->all();
+    ASSERT_EQ( 4u, albums.size() );
+    ASSERT_EQ( albumPangolinsS->id(), albums[0]->id() );
+    ASSERT_EQ( albumOttersS->id(), albums[1]->id() );
+    ASSERT_EQ( albumPangolinsP->id(), albums[2]->id() );
+    ASSERT_EQ( albumOttersO->id(), albums[3]->id() );
+}
+
 TEST_F( Albums, SearchByTitle )
 {
     auto a1 = ml->createAlbum( "sea otters" );

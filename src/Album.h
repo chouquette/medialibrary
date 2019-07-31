@@ -132,6 +132,8 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         static bool checkDBConsistency( MediaLibraryPtr ml );
 
     private:
+        static std::string addRequestJoin( const QueryParameters* params,
+                                           bool albumTrack);
         static std::string orderTracksBy( const QueryParameters* params );
         static std::string orderBy( const QueryParameters* params );
         bool shouldUpdateThumbnail(Thumbnail& currentThumbnail,
