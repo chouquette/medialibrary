@@ -389,3 +389,27 @@ TEST_F( DbModel, Upgrade17to18 )
     CheckNbIndexes( NbIndexes );
     CheckTriggers( expectedTriggers );
 }
+
+TEST_F( DbModel, Upgrade18to19Broken )
+{
+    // Test the repair migration after a broken 17/18 migration
+    LoadFakeDB( SRC_DIR "/test/unittest/db_v18_broken.sql" );
+    auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
+    ASSERT_EQ( InitializeResult::Success, res );
+    CheckNbTriggers( NbTriggers );
+    CheckNbIndexes( NbIndexes );
+    CheckTriggers( expectedTriggers );
+}
+
+
+TEST_F( DbModel, Upgrade18to19Noop )
+{
+    // Check that the repair migration doesn't do anything for a successful
+    // 17->18 migration
+    LoadFakeDB( SRC_DIR "/test/unittest/db_v18_ok.sql" );
+    auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
+    ASSERT_EQ( InitializeResult::Success, res );
+    CheckNbTriggers( NbTriggers );
+    CheckNbIndexes( NbIndexes );
+    CheckTriggers( expectedTriggers );
+}

@@ -981,6 +981,13 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 needRescan = true;
                 previousVersion = 18;
             }
+            if ( previousVersion == 18 )
+            {
+                // Even though this migration doesn't force a rescan, don't
+                // override any potential previous request.
+                needRescan |= migrateModel18to19();
+                previousVersion = 19;
+            }
             // To be continued in the future!
 
             if ( needRescan == true )
@@ -1453,6 +1460,40 @@ void MediaLibrary::migrateModel17to18( uint32_t originalPreviousVersion )
     m_settings.setDbModelVersion( 18 );
     m_settings.save();
     t->commit();
+}
+
+/**
+ * 18 to 19 model migration
+ * This is a best guess attempt at replaying a part of the 17/18 migration which
+ * didn't happen well on some android devices during the
+ */
+bool MediaLibrary::migrateModel18to19()
+{
+    auto dbConn = getConn();
+    sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
+    auto t = dbConn->newTransaction();
+
+    std::string reqs[] = {
+#       include "database/migrations/migration18-19.sql"
+    };
+
+    auto forceRescan = false;
+    try
+    {
+        for ( const auto& req : reqs )
+            sqlite::Tools::executeRequest( dbConn, req );
+    }
+    catch ( const sqlite::errors::Generic& )
+    {
+        // Ignoring, this is because parent_playlist_id column doesn't exist
+        // anymore, which means the 17->18 migration completed properly.
+        forceRescan = true;
+    }
+
+    m_settings.setDbModelVersion( 19 );
+    m_settings.save();
+    t->commit();
+    return forceRescan;
 }
 
 void MediaLibrary::reload()
