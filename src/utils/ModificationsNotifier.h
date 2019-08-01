@@ -167,6 +167,7 @@ private:
         {
             using std::swap;
             swap( input, output );
+            assert( input.timeout == ZeroTimeout );
         }
         // Or is scheduled for timeout soon:
         else if ( nextTimeout == ZeroTimeout || input.timeout < nextTimeout )
