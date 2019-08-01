@@ -45,14 +45,19 @@ private:
     }
 
 public:
-    std::unique_lock<compat::Mutex> prepareWait()
+    void resetCount()
     {
         m_nbMedia = 0;
         m_nbTotalMedia = 0;
+    }
+
+    std::unique_lock<compat::Mutex> prepareWait()
+    {
+        resetCount();
         return std::unique_lock<compat::Mutex>{ m_lock };
     }
 
-    unsigned int waitForNotif( std::unique_lock<compat::Mutex> preparedLock,
+    unsigned int waitForNotif( std::unique_lock<compat::Mutex>& preparedLock,
                                std::chrono::duration<int64_t> timeout, bool& hasTimedout )
     {
         hasTimedout = !m_cond.wait_for( preparedLock, timeout, [this]() {
@@ -100,11 +105,51 @@ TEST_F( ModificationsNotifierTests, DeleteOne )
     m->removeFile( static_cast<File&>( *m->files()[0] ) );
     // This media doesn't have any associated files, and should be removed by a sqlite hook
     // The notification will arrive "late", as it will need to timeout first
-    auto res = cbMock->waitForNotif( std::move( lock ),
+    auto res = cbMock->waitForNotif( lock,
         std::chrono::duration_cast<std::chrono::seconds>( std::chrono::milliseconds{ 1500 } ),
         hasTimedout );
     ASSERT_FALSE( hasTimedout );
     ASSERT_EQ( 1u, res );
+
+    // Re-run a notification after the queues have been used before
+    cbMock->resetCount();
+
+    m = std::static_pointer_cast<Media>( ml->addMedia( "media.avi" ) );
+    m->removeFile( static_cast<File&>( *m->files()[0] ) );
+
+    // Wait for a notification for 500ms. It shouldn't arrive, and we should timeout
+    res = cbMock->waitForNotif( lock,
+        std::chrono::duration_cast<std::chrono::seconds>( std::chrono::milliseconds{ 500 } ),
+        hasTimedout );
+    ASSERT_TRUE( hasTimedout );
+    ASSERT_EQ( 0u, res );
+
+    // Wait again, now it should arrive.
+    res = cbMock->waitForNotif( lock,
+        std::chrono::duration_cast<std::chrono::seconds>( std::chrono::milliseconds{ 1000 } ),
+        hasTimedout );
+    ASSERT_FALSE( hasTimedout );
+    ASSERT_EQ( 1u, res );
+}
+
+TEST_F( ModificationsNotifierTests, DeleteBatch )
+{
+    for ( auto i = 0u; i < 10; ++i )
+        ml->addMedia( std::string{ "media" } + std::to_string( i ) + ".mkv" );
+
+    auto lock = cbMock->prepareWait();
+    bool hasTimedout;
+
+    for ( auto i = 0u; i < 10; ++i )
+        ml->deleteMedia( i + 1 );
+
+    // This media doesn't have any associated files, and should be removed by a sqlite hook
+    // The notification will arrive "late", as it will need to timeout first
+    auto res = cbMock->waitForNotif( lock,
+        std::chrono::duration_cast<std::chrono::seconds>( std::chrono::milliseconds{ 1500 } ),
+        hasTimedout );
+    ASSERT_FALSE( hasTimedout );
+    ASSERT_EQ( 10u, res );
 }
 
 TEST_F( ModificationsNotifierTests, Flush )
