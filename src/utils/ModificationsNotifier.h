@@ -106,6 +106,7 @@ private:
             (*m_cb.*modifiedCb)( std::move( queue.modified ) );
         if ( queue.removed.size() > 0 )
             (*m_cb.*removedCb)( std::move( queue.removed ) );
+        queue.timeout = std::chrono::time_point<std::chrono::steady_clock>{};
     }
 
     template <typename T>
