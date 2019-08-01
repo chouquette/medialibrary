@@ -163,13 +163,14 @@ private:
         // If this queue has no timeout setup, there's nothing to do with it.
         if ( input.timeout == ZeroTimeout )
             return;
+        // Otherwise, check if this queue is due for signaling now
         if ( input.timeout <= now || m_flushing == true )
         {
             using std::swap;
             swap( input, output );
             assert( input.timeout == ZeroTimeout );
         }
-        // Or is scheduled for timeout soon:
+        // Or is we need to schedule it for the next timeout
         else if ( nextTimeout == ZeroTimeout || input.timeout < nextTimeout )
             nextTimeout = input.timeout;
     }
