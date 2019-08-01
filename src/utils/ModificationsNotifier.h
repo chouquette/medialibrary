@@ -160,17 +160,17 @@ private:
 #else
         const auto ZeroTimeout = std::chrono::time_point<std::chrono::steady_clock>{};
 #endif
+        // If this queue has no timeout setup, there's nothing to do with it.
+        if ( input.timeout == ZeroTimeout )
+            return;
         if ( input.timeout <= now || m_flushing == true )
         {
             using std::swap;
             swap( input, output );
         }
         // Or is scheduled for timeout soon:
-        else if ( input.timeout != ZeroTimeout &&
-                  ( nextTimeout == ZeroTimeout || input.timeout < nextTimeout ) )
-        {
+        else if ( nextTimeout == ZeroTimeout || input.timeout < nextTimeout )
             nextTimeout = input.timeout;
-        }
     }
 
 private:
