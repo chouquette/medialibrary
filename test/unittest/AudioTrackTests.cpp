@@ -79,3 +79,19 @@ TEST_F( AudioTracks, FetchTracks )
     auto ts = f->audioTracks()->all();
     ASSERT_EQ( ts.size(), 2u );
 }
+
+TEST_F( AudioTracks, RemoveTracks )
+{
+    auto f1 = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
+    auto f2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3" ) );
+    f1->addAudioTrack( "PCM", 128, 44100, 2, "en", "test desc" );
+    f2->addAudioTrack( "WMA", 128, 48000, 2, "fr", "test desc" );
+
+    ASSERT_EQ( 1u, f1->audioTracks()->count() );
+    ASSERT_EQ( 1u, f2->audioTracks()->count() );
+
+    AudioTrack::removeFromMedia( ml.get(), f1->id() );
+
+    ASSERT_EQ( 0u, f1->audioTracks()->count() );
+    ASSERT_EQ( 1u, f2->audioTracks()->count() );
+}
