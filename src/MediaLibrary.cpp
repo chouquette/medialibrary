@@ -1799,6 +1799,7 @@ void MediaLibrary::forceRescan()
         Show::deleteAll( this );
         VideoTrack::deleteAll( this );
         AudioTrack::deleteAll( this );
+        SubtitleTrack::deleteAll( this );
         Playlist::clearExternalPlaylistContent( this );
         parser::Task::removePlaylistContentTasks( this );
         parser::Task::resetParsing( this );
