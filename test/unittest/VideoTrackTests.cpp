@@ -70,6 +70,7 @@ TEST_F( VideoTracks, FetchTracks )
     ASSERT_NE( nullptr, m );
     ts = m->videoTracks()->all();
     ASSERT_EQ( ts.size(), 2u );
+    ASSERT_EQ( 2u, m->videoTracks()->count() );
     t2 = ts[0];
     ASSERT_EQ( t2->codec(), "H264" );
     ASSERT_EQ( t2->width(), 1920u );
@@ -82,4 +83,22 @@ TEST_F( VideoTracks, FetchTracks )
     ASSERT_EQ( t2->description(), "d1" );
 }
 
+TEST_F( VideoTracks, RemoveTrack )
+{
+    auto f1 = std::static_pointer_cast<Media>( ml->addMedia( "file.avi" ) );
+    auto f2 = std::static_pointer_cast<Media>( ml->addMedia( "file2.avi" ) );
+    bool res = f1->addVideoTrack( "H264", 1920, 1080, 3000, 1001, 1234,
+                                 16, 9, "language", "description" );
+    ASSERT_TRUE( res );
+    res = f2->addVideoTrack( "AV1", 1920, 1080, 3000, 1001, 1234,
+                             16, 9, "language", "description" );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( 1u, f1->videoTracks()->count() );
+    ASSERT_EQ( 1u, f2->videoTracks()->count() );
+
+    VideoTrack::removeFromMedia( ml.get(), f1->id() );
+    ASSERT_EQ( 0u, f1->videoTracks()->count() );
+    ASSERT_EQ( 1u, f2->videoTracks()->count() );
+}
 
