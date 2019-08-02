@@ -74,3 +74,21 @@ TEST_F( SubtitleTracks, FetchTracks )
     ASSERT_EQ( "of",        tracks[1]->description() );
     ASSERT_EQ( "year",      tracks[1]->encoding() );
 }
+
+TEST_F( SubtitleTracks, RemoveTrack )
+{
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
+    auto res = m1->addSubtitleTrack( "sea", "otter", "awareness", "week" );
+    ASSERT_TRUE( res );
+    auto m2 =  std::static_pointer_cast<Media>( ml->addMedia( "media2.mkv" ) );
+    res = m2->addSubtitleTrack( "sea", "otter", "awareness", "week" );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( 1u, m1->subtitleTracks()->count() );
+    ASSERT_EQ( 1u, m2->subtitleTracks()->count() );
+
+    SubtitleTrack::removeFromMedia( ml.get(), m1->id() );
+
+    ASSERT_EQ( 0u, m1->subtitleTracks()->count() );
+    ASSERT_EQ( 1u, m2->subtitleTracks()->count() );
+}
