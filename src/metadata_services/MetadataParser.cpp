@@ -149,7 +149,8 @@ Status MetadataAnalyzer::run( IItem& item )
         // However in case we crashed or got interrupted in the middle of parsing,
         // we don't want to recreate tracks
         if ( item.media()->audioTracks()->count() == 0 &&
-             item.media()->videoTracks()->count() == 0 )
+             item.media()->videoTracks()->count() == 0 &&
+             item.media()->subtitleTracks()->count() == 0 )
         {
             auto t = m_ml->getConn()->newTransaction();
             createTracks( static_cast<Media&>( *item.media() ), item.tracks() );
