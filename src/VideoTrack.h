@@ -67,6 +67,10 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack>
                                     uint32_t fpsDen, uint32_t bitrate, uint32_t sarNum,
                                     uint32_t sarDen, int64_t mediaId, const std::string& language,
                                     const std::string& description );
+        /**
+         * @brief removeFromMedia Remove all video tracks from a media
+         */
+        static void removeFromMedia( MediaLibraryPtr ml, int64_t mediaId );
 
     private:
         int64_t m_id;
