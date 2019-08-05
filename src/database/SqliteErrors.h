@@ -58,17 +58,17 @@ public:
  * This is the general type for runtime error, ie. when the request is being
  * executed.
  */
-class GenericExecution : public Generic
+class Runtime : public Generic
 {
 public:
-    GenericExecution( const char* req, const char* errMsg, int extendedCode )
+    Runtime( const char* req, const char* errMsg, int extendedCode )
         : Generic( std::string( "Failed to run request [" ) + req + "]: " + errMsg +
                    "(" + std::to_string( extendedCode ) + ")" )
         , m_errorCode( extendedCode )
     {
     }
 
-    GenericExecution( const std::string& msg, int errCode )
+    Runtime( const std::string& msg, int errCode )
         : Generic( msg )
         , m_errorCode( errCode )
     {
@@ -93,101 +93,101 @@ public:
     }
 };
 
-class GenericError : public GenericExecution
+class GenericError : public Runtime
 {
 public:
     GenericError( const char* req, const char* errMsg, int extendedCode )
-        : GenericExecution( req, errMsg, extendedCode )
+        : Runtime( req, errMsg, extendedCode )
     {
     }
 };
 
-class DatabaseBusy : public GenericExecution
+class DatabaseBusy : public Runtime
 {
 public:
     DatabaseBusy( const char* req, const char* errMsg, int extendedCode )
-        : GenericExecution( req, errMsg, extendedCode )
+        : Runtime( req, errMsg, extendedCode )
     {
     }
 };
 
-class DatabaseLocked : public GenericExecution
+class DatabaseLocked : public Runtime
 {
 public:
     DatabaseLocked( const char* req, const char* errMsg, int extendedCode )
-        : GenericExecution( req, errMsg, extendedCode )
+        : Runtime( req, errMsg, extendedCode )
     {
     }
 };
 
-class DatabaseReadOnly : public GenericExecution
+class DatabaseReadOnly : public Runtime
 {
 public:
     DatabaseReadOnly( const char* req, const char* errMsg, int extendedCode )
-        : GenericExecution( req, errMsg, extendedCode )
+        : Runtime( req, errMsg, extendedCode )
     {
     }
 };
 
-class DatabaseIOErr : public GenericExecution
+class DatabaseIOErr : public Runtime
 {
 public:
     DatabaseIOErr( const char* req, const char* errMsg, int extendedCode )
-        : GenericExecution( req, errMsg, extendedCode )
+        : Runtime( req, errMsg, extendedCode )
     {
     }
 };
 
-class DatabaseCorrupt : public GenericExecution
+class DatabaseCorrupt : public Runtime
 {
 public:
     DatabaseCorrupt( const char* req, const char* errMsg, int extendedCode )
-        : GenericExecution( req, errMsg, extendedCode )
+        : Runtime( req, errMsg, extendedCode )
     {
     }
 };
 
-class DatabaseFull: public GenericExecution
+class DatabaseFull: public Runtime
 {
 public:
     DatabaseFull( const char* req, const char* errMsg, int extendedCode )
-        : GenericExecution( req, errMsg, extendedCode )
+        : Runtime( req, errMsg, extendedCode )
     {
     }
 };
 
-class ProtocolError : public GenericExecution
+class ProtocolError : public Runtime
 {
 public:
     ProtocolError( const char* req, const char* errMsg, int extendedCode )
-        : GenericExecution( req, errMsg, extendedCode )
+        : Runtime( req, errMsg, extendedCode )
     {
     }
 };
 
-class DatabaseSchemaChanged : public GenericExecution
+class DatabaseSchemaChanged : public Runtime
 {
 public:
     DatabaseSchemaChanged( const char* req, const char* errMsg, int extendedCode )
-        : GenericExecution( req, errMsg, extendedCode )
+        : Runtime( req, errMsg, extendedCode )
     {
     }
 };
 
-class TypeMismatch : public GenericExecution
+class TypeMismatch : public Runtime
 {
 public:
     TypeMismatch( const char* req, const char* errMsg, int extendedCode )
-        : GenericExecution( req, errMsg, extendedCode )
+        : Runtime( req, errMsg, extendedCode )
     {
     }
 };
 
-class LibMisuse : public GenericExecution
+class LibMisuse : public Runtime
 {
 public:
     LibMisuse( const char* req, const char* errMsg, int extendedCode )
-        : GenericExecution( req, errMsg, extendedCode )
+        : Runtime( req, errMsg, extendedCode )
     {
     }
 };
@@ -221,7 +221,7 @@ static inline bool isInnocuous( int errCode )
     return false;
 }
 
-static inline bool isInnocuous( const GenericExecution& ex )
+static inline bool isInnocuous( const Runtime& ex )
 {
     return isInnocuous( ex.code() );
 }

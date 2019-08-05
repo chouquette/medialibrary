@@ -44,7 +44,7 @@ class DatabaseHelpers
             {
                 return sqlite::Tools::fetchOne<IMPL>( ml, req, std::forward<Args>( args )... );
             }
-            catch ( const sqlite::errors::GenericExecution& ex )
+            catch ( const sqlite::errors::Runtime& ex )
             {
                 if ( sqlite::errors::isInnocuous( ex ) == false )
                     throw;
@@ -61,7 +61,7 @@ class DatabaseHelpers
             {
                 return sqlite::Tools::fetchOne<IMPL>( ml, req, pkValue );
             }
-            catch ( const sqlite::errors::GenericExecution& ex )
+            catch ( const sqlite::errors::Runtime& ex )
             {
                 if ( sqlite::errors::isInnocuous( ex ) == false )
                     throw;
@@ -80,7 +80,7 @@ class DatabaseHelpers
             {
                 return sqlite::Tools::fetchAll<IMPL, INTF>( ml, req );
             }
-            catch ( const sqlite::errors::GenericExecution& ex )
+            catch ( const sqlite::errors::Runtime& ex )
             {
                 if ( sqlite::errors::isInnocuous( ex ) == false )
                     throw;
@@ -96,7 +96,7 @@ class DatabaseHelpers
             {
                 return sqlite::Tools::fetchAll<IMPL, INTF>( ml, req, std::forward<Args>( args )... );
             }
-            catch ( const sqlite::errors::GenericExecution& ex )
+            catch ( const sqlite::errors::Runtime& ex )
             {
                 if ( sqlite::errors::isInnocuous( ex ) == false )
                     throw;
