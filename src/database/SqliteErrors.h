@@ -138,6 +138,24 @@ public:
     }
 };
 
+class DatabaseLockedSharedCache : public DatabaseLocked
+{
+public:
+    DatabaseLockedSharedCache( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseLocked( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseLockedVtab : public DatabaseLocked
+{
+public:
+    DatabaseLockedVtab( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseLocked( req, errMsg, extendedCode )
+    {
+    }
+};
+
 class DatabaseReadOnly : public Runtime
 {
 public:
@@ -522,7 +540,17 @@ static inline void mapToException( const char* reqStr, const char* errMsg, int e
             }
         }
         case SQLITE_LOCKED:
-            throw errors::DatabaseLocked( reqStr, errMsg, extRes );
+        {
+            switch ( extRes )
+            {
+                case SQLITE_LOCKED_SHAREDCACHE:
+                    throw errors::DatabaseLockedSharedCache( reqStr, errMsg, extRes );
+                case SQLITE_LOCKED_VTAB:
+                    throw errors::DatabaseLockedVtab( reqStr, errMsg, extRes );
+                default:
+                throw errors::DatabaseLocked( reqStr, errMsg, extRes );
+            }
+        }
         case SQLITE_READONLY:
         {
             switch ( extRes )
