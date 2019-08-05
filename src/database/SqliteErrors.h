@@ -111,6 +111,24 @@ public:
     }
 };
 
+class DatabaseBusyRecovery : public DatabaseBusy
+{
+public:
+    DatabaseBusyRecovery( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseBusy( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseBusySnapshot: public DatabaseBusy
+{
+public:
+    DatabaseBusySnapshot( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseBusy( req, errMsg, extendedCode )
+    {
+    }
+};
+
 class DatabaseLocked : public Runtime
 {
 public:
@@ -492,7 +510,17 @@ static inline void mapToException( const char* reqStr, const char* errMsg, int e
         case SQLITE_CONSTRAINT:
             throw errors::ConstraintViolation( reqStr, errMsg, extRes );
         case SQLITE_BUSY:
-            throw errors::DatabaseBusy( reqStr, errMsg, extRes );
+        {
+            switch ( extRes )
+            {
+                case SQLITE_BUSY_RECOVERY:
+                    throw errors::DatabaseBusyRecovery( reqStr, errMsg, extRes );
+                case SQLITE_BUSY_SNAPSHOT:
+                    throw errors::DatabaseBusySnapshot( reqStr, errMsg, extRes );
+                default:
+                    throw errors::DatabaseBusy( reqStr, errMsg, extRes );
+            }
+        }
         case SQLITE_LOCKED:
             throw errors::DatabaseLocked( reqStr, errMsg, extRes );
         case SQLITE_READONLY:
