@@ -102,6 +102,33 @@ public:
     }
 };
 
+class ErrorMissingColSeq : public GenericError
+{
+public:
+    ErrorMissingColSeq( const char* req, const char* errMsg, int extendedCode )
+        : GenericError( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class ErrorRetry : public GenericError
+{
+public:
+    ErrorRetry( const char* req, const char* errMsg, int extendedCode )
+        : GenericError( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class ErrorSnapshot : public GenericError
+{
+public:
+    ErrorSnapshot( const char* req, const char* errMsg, int extendedCode )
+        : GenericError( req, errMsg, extendedCode )
+    {
+    }
+};
+
 class DatabaseBusy : public Runtime
 {
 public:
@@ -648,7 +675,19 @@ static inline void mapToException( const char* reqStr, const char* errMsg, int e
         case SQLITE_MISUSE:
             throw errors::LibMisuse( reqStr, errMsg, extRes );
         case SQLITE_ERROR:
-            throw errors::GenericError( reqStr, errMsg, extRes );
+        {
+            switch ( extRes )
+            {
+                case SQLITE_ERROR_MISSING_COLLSEQ:
+                    throw errors::ErrorMissingColSeq( reqStr, errMsg, extRes );
+                case SQLITE_ERROR_RETRY:
+                    throw errors::ErrorRetry( reqStr, errMsg, extRes );
+                case SQLITE_ERROR_SNAPSHOT:
+                    throw errors::ErrorSnapshot( reqStr, errMsg, extRes );
+                default:
+                    throw errors::GenericError( reqStr, errMsg, extRes );
+            }
+        }
         default:
             throw errors::Runtime( reqStr, errMsg, extRes );
     }
