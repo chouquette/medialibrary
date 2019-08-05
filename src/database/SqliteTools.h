@@ -250,7 +250,12 @@ private:
     {
         auto res = Traits<T>::Bind( m_stmt.get(), m_bindIdx, std::forward<T>( value ) );
         if ( res != SQLITE_OK )
-            throw errors::Generic( sqlite3_sql( m_stmt.get() ), "Failed to bind parameter", res );
+        {
+            auto sqlStr = sqlite3_sql( m_stmt.get() );
+            if ( res == SQLITE_RANGE )
+                throw errors::ColumnOutOfRange( sqlStr );
+            throw errors::Generic( sqlStr, "Failed to bind parameter", res );
+        }
         m_bindIdx++;
         return true;
     }
