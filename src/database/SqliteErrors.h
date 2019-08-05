@@ -200,6 +200,12 @@ public:
                    " from a request with " + std::to_string( nbColumns ) + " columns" )
     {
     }
+
+    ColumnOutOfRange( const char* req )
+        : Generic( std::string{ "Failed to bind to " } + req +
+                   ": Parameter out of range" )
+    {
+    }
 };
 
 static inline bool isInnocuous( int errCode )
