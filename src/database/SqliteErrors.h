@@ -93,6 +93,105 @@ public:
     }
 };
 
+class GenericError : public GenericExecution
+{
+public:
+    GenericError( const char* req, const char* errMsg, int extendedCode )
+        : GenericExecution( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseBusy : public GenericExecution
+{
+public:
+    DatabaseBusy( const char* req, const char* errMsg, int extendedCode )
+        : GenericExecution( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseLocked : public GenericExecution
+{
+public:
+    DatabaseLocked( const char* req, const char* errMsg, int extendedCode )
+        : GenericExecution( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseReadOnly : public GenericExecution
+{
+public:
+    DatabaseReadOnly( const char* req, const char* errMsg, int extendedCode )
+        : GenericExecution( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIOErr : public GenericExecution
+{
+public:
+    DatabaseIOErr( const char* req, const char* errMsg, int extendedCode )
+        : GenericExecution( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseCorrupt : public GenericExecution
+{
+public:
+    DatabaseCorrupt( const char* req, const char* errMsg, int extendedCode )
+        : GenericExecution( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseFull: public GenericExecution
+{
+public:
+    DatabaseFull( const char* req, const char* errMsg, int extendedCode )
+        : GenericExecution( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class ProtocolError : public GenericExecution
+{
+public:
+    ProtocolError( const char* req, const char* errMsg, int extendedCode )
+        : GenericExecution( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseSchemaChanged : public GenericExecution
+{
+public:
+    DatabaseSchemaChanged( const char* req, const char* errMsg, int extendedCode )
+        : GenericExecution( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class TypeMismatch : public GenericExecution
+{
+public:
+    TypeMismatch( const char* req, const char* errMsg, int extendedCode )
+        : GenericExecution( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class LibMisuse : public GenericExecution
+{
+public:
+    LibMisuse( const char* req, const char* errMsg, int extendedCode )
+        : GenericExecution( req, errMsg, extendedCode )
+    {
+    }
+};
+
 class ColumnOutOfRange : public Generic
 {
 public:
