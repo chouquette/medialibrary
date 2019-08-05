@@ -138,6 +138,208 @@ public:
     }
 };
 
+class DatabaseIoErrAccess : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrAccess( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIoErrRead : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrRead( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIoErrShortRead : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrShortRead( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIoErrWrite : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrWrite( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+
+class DatabaseIoErrFsync : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrFsync( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIoErrDirClose : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrDirClose( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIoErrDirFsync : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrDirFsync( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIoErrTruncate : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrTruncate( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIoErrCheckReservedLock : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrCheckReservedLock( const char* req, const char* errMsg,
+                                    int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIoErrUnlock : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrUnlock( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIoErrRdLock : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrRdLock( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+
+class DatabaseIoErrDelete: public DatabaseIOErr
+{
+public:
+    DatabaseIoErrDelete( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+
+class DatabaseIoErrDeleteNoEnt : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrDeleteNoEnt( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIoErrLock : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrLock( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIoErrClose : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrClose( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIoErrShmOpen : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrShmOpen( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIoErrShmSize: public DatabaseIOErr
+{
+public:
+    DatabaseIoErrShmSize( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIoErrShMmap : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrShMmap( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIoErrFstat : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrFstat( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIoErrSeek : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrSeek( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIoErrGetTempPath : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrGetTempPath( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseIoErrMmap : public DatabaseIOErr
+{
+public:
+    DatabaseIoErrMmap( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseIOErr( req, errMsg, extendedCode )
+    {
+    }
+};
+
 class DatabaseCorrupt : public Runtime
 {
 public:
@@ -240,7 +442,71 @@ static inline void mapToException( const char* reqStr, const char* errMsg, int e
         case SQLITE_READONLY:
             throw errors::DatabaseReadOnly( reqStr, errMsg, extRes );
         case SQLITE_IOERR:
-            throw errors::DatabaseIOErr( reqStr, errMsg, extRes );
+        {
+            switch ( extRes )
+            {
+                case SQLITE_IOERR_READ:
+                    throw DatabaseIoErrRead( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_SHORT_READ:
+                    throw DatabaseIoErrShortRead( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_WRITE:
+                    throw DatabaseIoErrWrite( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_FSYNC:
+                    throw DatabaseIoErrFsync( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_DIR_FSYNC:
+                    throw DatabaseIoErrDirFsync( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_TRUNCATE:
+                    throw DatabaseIoErrTruncate( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_LOCK:
+                    throw DatabaseIoErrLock( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_ACCESS:
+                    throw DatabaseIoErrAccess( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_CHECKRESERVEDLOCK:
+                    throw DatabaseIoErrCheckReservedLock( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_CLOSE:
+                    throw DatabaseIoErrClose( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_SHMOPEN:
+                    throw DatabaseIoErrShmOpen( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_SHMMAP:
+                    throw DatabaseIoErrShMmap( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_SEEK:
+                    throw DatabaseIoErrSeek( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_MMAP:
+                    throw DatabaseIoErrMmap( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_FSTAT:
+                    throw DatabaseIoErrFstat( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_UNLOCK:
+                    throw DatabaseIoErrUnlock( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_RDLOCK:
+                    throw DatabaseIoErrRdLock( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_DELETE:
+                    throw DatabaseIoErrDelete( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_DELETE_NOENT:
+                    throw DatabaseIoErrDeleteNoEnt( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_DIR_CLOSE:
+                    throw DatabaseIoErrDirClose( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_SHMSIZE:
+                    throw DatabaseIoErrShmSize( reqStr, errMsg, extRes );
+                case SQLITE_IOERR_GETTEMPPATH:
+                    throw DatabaseIoErrGetTempPath( reqStr, errMsg, extRes );
+
+                // This code is expected to be converted to SQLITE_NOMEM
+                case SQLITE_IOERR_NOMEM:
+                // This code is only used on cygwin
+                case SQLITE_IOERR_CONVPATH:
+                // These error codes are undocumented
+                case SQLITE_IOERR_VNODE:
+                case SQLITE_IOERR_AUTH:
+                case SQLITE_IOERR_COMMIT_ATOMIC:
+                case SQLITE_IOERR_BEGIN_ATOMIC:
+                case SQLITE_IOERR_ROLLBACK_ATOMIC:
+                // The remaining error code are not used by sqlite anymore
+                case SQLITE_IOERR_BLOCKED:
+                case SQLITE_IOERR_SHMLOCK:
+                default:
+                    throw errors::DatabaseIOErr( reqStr, errMsg, extRes );
+            }
+        }
         case SQLITE_CORRUPT:
             throw errors::DatabaseCorrupt( reqStr, errMsg, extRes );
         case SQLITE_FULL:
