@@ -129,6 +129,62 @@ public:
     }
 };
 
+class DatabaseReadOnlyRecovery : public DatabaseReadOnly
+{
+public:
+    DatabaseReadOnlyRecovery( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseReadOnly( req, errMsg, extendedCode )
+    {
+    }
+};
+
+
+class DatabaseReadOnlyCantLock : public DatabaseReadOnly
+{
+public:
+    DatabaseReadOnlyCantLock( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseReadOnly( req, errMsg, extendedCode )
+    {
+    }
+};
+
+
+class DatabaseReadOnlyRollback : public DatabaseReadOnly
+{
+public:
+    DatabaseReadOnlyRollback( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseReadOnly( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseReadOnlyDbMoved : public DatabaseReadOnly
+{
+public:
+    DatabaseReadOnlyDbMoved( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseReadOnly( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseReadOnlyCantInit : public DatabaseReadOnly
+{
+public:
+    DatabaseReadOnlyCantInit( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseReadOnly( req, errMsg, extendedCode )
+    {
+    }
+};
+
+class DatabaseReadOnlyDirectory : public DatabaseReadOnly
+{
+public:
+    DatabaseReadOnlyDirectory( const char* req, const char* errMsg, int extendedCode )
+        : DatabaseReadOnly( req, errMsg, extendedCode )
+    {
+    }
+};
+
 class DatabaseIOErr : public Runtime
 {
 public:
@@ -440,7 +496,25 @@ static inline void mapToException( const char* reqStr, const char* errMsg, int e
         case SQLITE_LOCKED:
             throw errors::DatabaseLocked( reqStr, errMsg, extRes );
         case SQLITE_READONLY:
-            throw errors::DatabaseReadOnly( reqStr, errMsg, extRes );
+        {
+            switch ( extRes )
+            {
+                case SQLITE_READONLY_RECOVERY:
+                    throw DatabaseReadOnlyRecovery( reqStr, errMsg, extRes );
+                case SQLITE_READONLY_CANTLOCK:
+                    throw DatabaseReadOnlyCantLock( reqStr, errMsg, extRes );
+                case SQLITE_READONLY_ROLLBACK:
+                    throw DatabaseReadOnlyRollback( reqStr, errMsg, extRes );
+                case SQLITE_READONLY_DBMOVED:
+                    throw DatabaseReadOnlyDbMoved( reqStr, errMsg, extRes );
+                case SQLITE_READONLY_CANTINIT:
+                    throw DatabaseReadOnlyCantInit( reqStr, errMsg, extRes );
+                case SQLITE_READONLY_DIRECTORY:
+                    throw DatabaseReadOnlyDirectory( reqStr, errMsg, extRes );
+                default:
+                    throw errors::DatabaseReadOnly( reqStr, errMsg, extRes );
+            }
+        }
         case SQLITE_IOERR:
         {
             switch ( extRes )
