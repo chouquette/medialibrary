@@ -45,6 +45,9 @@
 #include "discoverer/FsDiscoverer.h"
 #include "discoverer/probe/PathProbe.h"
 #include "Device.h"
+#include "VideoTrack.h"
+#include "AudioTrack.h"
+#include "SubtitleTrack.h"
 
 #include <cstdlib>
 #include <algorithm>
@@ -574,6 +577,9 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
     if ( media->subType() != IMedia::SubType::Unknown )
     {
         needRescan = true;
+        VideoTrack::removeFromMedia( m_ml, media->id() );
+        AudioTrack::removeFromMedia( m_ml, media->id() );
+        SubtitleTrack::removeFromMedia( m_ml, media->id() );
         switch( media->subType() )
         {
             case IMedia::SubType::AlbumTrack:
