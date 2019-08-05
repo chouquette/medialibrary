@@ -226,6 +226,37 @@ static inline bool isInnocuous( const Runtime& ex )
     return isInnocuous( ex.code() );
 }
 
+static inline void mapToException( const char* reqStr, const char* errMsg, int extRes )
+{
+    auto res = extRes & 0xFF;
+    switch ( res )
+    {
+        case SQLITE_CONSTRAINT:
+            throw errors::ConstraintViolation( reqStr, errMsg, extRes );
+        case SQLITE_BUSY:
+            throw errors::DatabaseBusy( reqStr, errMsg, extRes );
+        case SQLITE_LOCKED:
+            throw errors::DatabaseLocked( reqStr, errMsg, extRes );
+        case SQLITE_READONLY:
+            throw errors::DatabaseReadOnly( reqStr, errMsg, extRes );
+        case SQLITE_IOERR:
+            throw errors::DatabaseIOErr( reqStr, errMsg, extRes );
+        case SQLITE_CORRUPT:
+            throw errors::DatabaseCorrupt( reqStr, errMsg, extRes );
+        case SQLITE_FULL:
+            throw errors::DatabaseFull( reqStr, errMsg, extRes );
+        case SQLITE_PROTOCOL:
+            throw errors::ProtocolError( reqStr, errMsg, extRes );
+        case SQLITE_MISMATCH:
+            throw errors::TypeMismatch( reqStr, errMsg, extRes );
+        case SQLITE_MISUSE:
+            throw errors::LibMisuse( reqStr, errMsg, extRes );
+        case SQLITE_ERROR:
+            throw errors::GenericError( reqStr, errMsg, extRes );
+        default:
+            throw errors::Runtime( reqStr, errMsg, extRes );
+    }
+}
 
 } // namespace errors
 } // namespace sqlite
