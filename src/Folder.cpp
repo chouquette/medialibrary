@@ -445,9 +445,10 @@ const std::string& Folder::mrl() const
     // a device still is present while it's not.
     if( deviceFs == nullptr )
     {
-        assert( !"File system Device representation couldn't be found" );
-        m_fullPath = "";
-        return m_fullPath;
+        // We only checked for the database representation so far. If the device
+        // representation in DB was not updated but we can't find the device, we
+        // should still assume that the device was removed
+        throw fs::DeviceRemovedException();
     }
     m_fullPath = deviceFs->absoluteMrl( m_path );
     return m_fullPath;

@@ -148,7 +148,19 @@ bool FsDiscoverer::reload( const IInterruptProbe& interruptProbe )
             break;
         // fetchRootFolders only returns present folders
         assert( f->isPresent() == true );
-        auto mrl = f->mrl();
+        std::string mrl;
+        try
+        {
+            mrl = f->mrl();
+        }
+        catch ( const fs::DeviceRemovedException& ex )
+        {
+            // If the device was removed, let's wait until it comes back, but
+            // don't abort all entry points reloading
+            LOG_INFO( "Can't reload folder on a removed device" );
+            continue;
+        }
+
         if ( m_fsFactory->isMrlSupported( mrl ) == false )
             continue;
         m_cb->onReloadStarted( mrl );
