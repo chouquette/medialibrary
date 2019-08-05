@@ -205,7 +205,7 @@ public:
                 case SQLITE_CONSTRAINT:
                     throw errors::ConstraintViolation( reqStr, errMsg );
                 default:
-                    throw errors::GenericExecution( reqStr, errMsg, res, extRes );
+                    throw errors::GenericExecution( reqStr, errMsg, extRes );
             }
         }
     }
