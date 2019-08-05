@@ -160,6 +160,16 @@ bool FsDiscoverer::reload( const IInterruptProbe& interruptProbe )
             LOG_INFO( "Can't reload folder on a removed device" );
             continue;
         }
+        catch ( const fs::UnknownSchemeException& ex )
+        {
+            // We might have added a folder before, but the FS factory required to
+            // handle it has not been inserted yet, or maybe some type of discoveries
+            // have been disabled (most likely network discovery)
+            // In this case, we must not fail hard, but simply ignore that folder.
+            LOG_INFO( "No file system factory was able to handle scheme ",
+                      ex.scheme() );
+            continue;
+        }
 
         if ( m_fsFactory->isMrlSupported( mrl ) == false )
             continue;
