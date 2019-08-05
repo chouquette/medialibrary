@@ -203,7 +203,7 @@ public:
             switch ( res )
             {
                 case SQLITE_CONSTRAINT:
-                    throw errors::ConstraintViolation( reqStr, errMsg );
+                    throw errors::ConstraintViolation( reqStr, errMsg, extRes );
                 case SQLITE_BUSY:
                     throw errors::DatabaseBusy( reqStr, errMsg, extRes );
                 case SQLITE_LOCKED:

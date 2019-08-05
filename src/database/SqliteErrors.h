@@ -83,12 +83,12 @@ private:
     int m_errorCode;
 };
 
-class ConstraintViolation : public Generic
+class ConstraintViolation : public Runtime
 {
 public:
-    ConstraintViolation( const std::string& req, const std::string& err )
-        : Generic( std::string( "Request [" ) + req + "] aborted due to "
-                    "constraint violation (" + err + ")" )
+    ConstraintViolation( const char* req, const char* err, int errCode )
+        : Runtime( std::string( "Request [" ) + req + "] aborted due to "
+                    "constraint violation (" + err + ")", errCode )
     {
     }
 };
