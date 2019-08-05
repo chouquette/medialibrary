@@ -36,6 +36,10 @@ namespace sqlite
 namespace errors
 {
 
+/**
+ * These errors happen before the request gets executed. Usually because of a
+ * syntax error, or an invalid bind index
+ */
 class Generic : public std::runtime_error
 {
 public:
@@ -50,6 +54,10 @@ public:
     }
 };
 
+/**
+ * This is the general type for runtime error, ie. when the request is being
+ * executed.
+ */
 class GenericExecution : public Generic
 {
 public:
