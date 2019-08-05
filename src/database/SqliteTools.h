@@ -225,7 +225,7 @@ public:
                 case SQLITE_ERROR:
                     throw errors::GenericError( reqStr, errMsg, extRes );
                 default:
-                    throw errors::GenericExecution( reqStr, errMsg, extRes );
+                    throw errors::Runtime( reqStr, errMsg, extRes );
             }
         }
     }
@@ -386,7 +386,7 @@ class Tools
                 {
                     return f( std::forward<Args>( args )... );
                 }
-                catch ( const sqlite::errors::GenericExecution& ex )
+                catch ( const sqlite::errors::Runtime& ex )
                 {
                     if ( i > nbRetries || sqlite::errors::isInnocuous( ex ) == false )
                         throw;
