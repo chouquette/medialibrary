@@ -145,11 +145,19 @@ TEST_F( ModificationsNotifierTests, DeleteBatch )
 
     // This media doesn't have any associated files, and should be removed by a sqlite hook
     // The notification will arrive "late", as it will need to timeout first
-    auto res = cbMock->waitForNotif( lock,
-        std::chrono::duration_cast<std::chrono::seconds>( std::chrono::milliseconds{ 1500 } ),
-        hasTimedout );
-    ASSERT_FALSE( hasTimedout );
-    ASSERT_EQ( 10u, res );
+    uint32_t nbTotalNotified = 0;
+    while ( nbTotalNotified != 10 )
+    {
+        auto nbNotified = cbMock->waitForNotif( lock,
+            std::chrono::duration_cast<std::chrono::seconds>( std::chrono::milliseconds{ 1500 } ),
+            hasTimedout );
+        ASSERT_NE( 0u, nbNotified );
+        ASSERT_FALSE( hasTimedout );
+        ASSERT_TRUE( nbNotified != 1 || nbNotified + nbTotalNotified == 10 );
+        nbTotalNotified += nbNotified;
+        cbMock->resetCount();
+    }
+    ASSERT_EQ( 10u, nbTotalNotified );
 }
 
 TEST_F( ModificationsNotifierTests, Flush )
