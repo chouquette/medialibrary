@@ -372,11 +372,16 @@ samples_LDADD = 		\
 	$(SQLITE_LIBS)		\
 	$(NULL)
 
-EXTRA_PROGRAMS = test_discoverer
+EXTRA_PROGRAMS = test_discoverer sqlite_load
 
 test_discoverer_SOURCES = test/discoverer/main.cpp
 test_discoverer_CXXFLAGS = $(MEDIALIB_CPPFLAGS)
 test_discoverer_LDADD = libmedialibrary.la $(SQLITE_LIBS)
+
+sqlite_load_SOURCES = test/sqlite_load/SqliteLoadTest.cpp
+sqlite_load_CPPFLAGS = -I$(top_srcdir)/test
+sqlite_load_CXXFLAGS = $(MEDIALIB_CPPFLAGS)
+sqlite_load_LDADD = libmedialibrary.la $(SQLITE_LIBS)
 
 endif
 
