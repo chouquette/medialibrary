@@ -97,7 +97,7 @@ Status VLCMetadataService::run( IItem& item )
         else
             LOG_WARN( "Artwork for ", mrl, " is an attachment. Falling back to playback" );
         VLC::MediaPlayer mp( vlcMedia );
-        auto res = MetadataCommon::startPlayback( vlcMedia, mp );
+        auto res = MetadataCommon::startPlayback( vlcMedia, mp, m_mutex, m_cond );
         if ( res == false )
             return Status::Fatal;
     }

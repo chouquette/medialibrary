@@ -24,12 +24,17 @@
 
 #include <vlcpp/vlc.hpp>
 
+#include "compat/Mutex.h"
+#include "compat/ConditionVariable.h"
+
 namespace medialibrary
 {
 
 struct MetadataCommon
 {
-    static bool startPlayback( VLC::Media& media, VLC::MediaPlayer& mp );
+    static bool startPlayback( VLC::Media& media, VLC::MediaPlayer& mp,
+                               compat::Mutex& mutex,
+                               compat::ConditionVariable& cond );
 };
 
 }

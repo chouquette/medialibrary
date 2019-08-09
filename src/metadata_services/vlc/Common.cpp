@@ -34,14 +34,15 @@
 namespace medialibrary
 {
 
-bool medialibrary::MetadataCommon::startPlayback( VLC::Media& media, VLC::MediaPlayer& mp )
+bool medialibrary::MetadataCommon::startPlayback( VLC::Media& media,
+                                                  VLC::MediaPlayer& mp,
+                                                  compat::Mutex& mutex,
+                                                  compat::ConditionVariable& cond )
 {
     bool hasVideoTrack = false;
     bool failedToStart = false;
     bool hasAnyTrack = false;
     bool success = false;
-    compat::Mutex mutex;
-    compat::ConditionVariable cond;
     // Use a copy of the event manager to automatically unregister all events as soon
     // as we leave this method.
     auto em = mp.eventManager();

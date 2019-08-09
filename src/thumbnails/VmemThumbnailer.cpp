@@ -75,7 +75,8 @@ bool VmemThumbnailer::generate( const std::string& mrl,
 
     setupVout( task );
 
-    auto res = MetadataCommon::startPlayback( vlcMedia, task.mp );
+    auto res = MetadataCommon::startPlayback( vlcMedia, task.mp, task.mutex,
+                                              task.cond );
     if ( res == false )
     {
         LOG_WARN( "Failed to generate ", mrl, " thumbnail: Can't start playback" );
