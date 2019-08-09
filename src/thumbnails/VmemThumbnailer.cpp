@@ -106,8 +106,8 @@ bool VmemThumbnailer::seekAhead( Task& task, float position )
     });
     auto success = false;
     {
-        std::unique_lock<compat::Mutex> lock( task.mutex );
         task.mp.setPosition( position );
+        std::unique_lock<compat::Mutex> lock( task.mutex );
         // While seeking, we might land on a position that is slightly before what
         // we asked for
         auto expectedPos = position * 0.70;
