@@ -95,6 +95,10 @@ bool Playlist::setName( const std::string& name )
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, name, m_id ) == false )
         return false;
     m_name = name;
+
+    auto notifier = m_ml->getNotifier();
+    if ( notifier != nullptr )
+        notifier->notifyPlaylistModification( shared_from_this() );
     return true;
 }
 
