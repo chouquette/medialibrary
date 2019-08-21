@@ -152,17 +152,7 @@ void Connection::setRecursiveTriggersEnabled( bool value )
 {
     // Ensure no request will run while we change this setting
     auto ctx = acquireWriteContext();
-
-    // Changing the recursive_triggers setting affects the execution of all
-    // statements prepared using the database connection, including those
-    // prepared before the setting was changed. Any existing statements prepared
-    // using the legacy sqlite3_prepare() interface may fail with an
-    // SQLITE_SCHEMA error after the recursive_triggers setting is changed.
-    // https://sqlite.org/pragma.html#pragma_recursive_triggers
-    auto h = handle();
-    sqlite::Statement::FlushConnectionStatementCache( h );
-
-    setPragma( h, "recursive_triggers", value == true ? "1" : "0" );
+    setPragma( handle(), "recursive_triggers", value == true ? "1" : "0" );
 }
 
 void Connection::registerUpdateHook( const std::string& table, Connection::UpdateHookCb cb )
