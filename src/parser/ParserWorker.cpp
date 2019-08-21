@@ -97,13 +97,12 @@ void Worker::parse( std::shared_ptr<Task> t )
     // we're currently doing a stop/start
     {
         std::lock_guard<compat::Mutex> lock( m_lock );
+        m_tasks.push( std::move( t ) );
         if ( m_thread.get_id() == compat::Thread::id{} )
         {
-            m_tasks.push( std::move( t ) );
             start();
             return;
         }
-        m_tasks.push( std::move( t ) );
     }
     m_cond.notify_all();
 }
