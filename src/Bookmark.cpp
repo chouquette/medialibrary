@@ -126,7 +126,7 @@ void Bookmark::createTable(sqlite::Connection* dbConn)
 std::string Bookmark::schema( const std::string& tableName, uint32_t )
 {
     assert( tableName == Table::Name );
-    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    return "CREATE TABLE " + Table::Name +
     "("
         "id_bookmark INTEGER PRIMARY KEY AUTOINCREMENT,"
         "time UNSIGNED INTEGER NOT NULL,"
