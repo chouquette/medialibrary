@@ -36,21 +36,23 @@ namespace sqlite
 namespace errors
 {
 
+class Generic : public std::runtime_error
+{
+public:
+    Generic( const std::string& msg ) : std::runtime_error( msg.c_str() ) {}
+};
+
 /**
  * These errors happen before the request gets executed. Usually because of a
  * syntax error, or an invalid bind index
  */
-class Generic : public std::runtime_error
+class Prepare : public Generic
 {
 public:
-    Generic( const char* req, const char* msg, int extendedCode )
-        : std::runtime_error( std::string( "Failed to compile/prepare request [" )
-                              + req + "]: " + msg + " (error code: " +
-                              std::to_string( extendedCode ) + ")" )
-    {
-    }
-    Generic( const std::string& msg )
-        : std::runtime_error( msg )
+    Prepare( const char* req, const char* msg, int extendedCode )
+        : Generic( std::string( "Failed to compile/prepare request [" )
+                   + req + "]: " + msg + " (error code: " +
+                   std::to_string( extendedCode ) + ")" )
     {
     }
 };

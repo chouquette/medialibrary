@@ -162,7 +162,7 @@ public:
             int res = sqlite3_prepare_v2( dbConnection, req.c_str(), -1, &stmt, nullptr );
             if ( res != SQLITE_OK )
             {
-                throw errors::Generic( req.c_str(), sqlite3_errmsg( dbConnection ), res );
+                throw errors::Prepare( req.c_str(), sqlite3_errmsg( dbConnection ), res );
             }
             m_stmt.reset( stmt );
             connMap.emplace( req, CachedStmtPtr( stmt, &sqlite3_finalize ) );
@@ -229,7 +229,7 @@ private:
             auto sqlStr = sqlite3_sql( m_stmt.get() );
             if ( res == SQLITE_RANGE )
                 throw errors::ColumnOutOfRange( sqlStr );
-            throw errors::Generic( sqlStr, "Failed to bind parameter", res );
+            throw errors::Prepare( sqlStr, "Failed to bind parameter", res );
         }
         m_bindIdx++;
         return true;

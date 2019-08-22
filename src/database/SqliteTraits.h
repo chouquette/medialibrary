@@ -198,7 +198,7 @@ private:
     {
         int res = Traits<Value>::Bind( stmt, pos, std::forward<Value>( value ) );
         if ( res != SQLITE_OK )
-            throw errors::Generic( sqlite3_sql( stmt ), "Failed to bind parameter", res );
+            throw errors::Prepare( sqlite3_sql( stmt ), "Failed to bind parameter", res );
         ++pos;
         return true;
     }
