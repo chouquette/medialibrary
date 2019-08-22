@@ -343,7 +343,6 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     auto res = InitializeResult::Success;
     try
     {
-        auto t = m_dbConnection->newTransaction();
         Settings::createTable( m_dbConnection.get() );
         if ( m_settings.load() == false )
         {
@@ -351,13 +350,16 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
             return InitializeResult::Failed;
         }
         auto dbModel = m_settings.dbModelVersion();
-        if ( dbModel != Settings::DbModelVersion )
+        if ( dbModel == 0 )
         {
-            if ( dbModel == 0 )
-                dbModel = Settings::DbModelVersion;
+            dbModel = Settings::DbModelVersion;
+            auto t = m_dbConnection->newTransaction();
             createAllTables( dbModel );
             createAllTriggers( dbModel );
             t->commit();
+        }
+        else if ( dbModel != Settings::DbModelVersion )
+        {
             if ( dbModel != Settings::DbModelVersion )
             {
                 res = updateDatabaseModel( dbModel, dbPath );
