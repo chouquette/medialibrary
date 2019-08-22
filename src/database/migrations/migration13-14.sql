@@ -134,7 +134,7 @@ IMedia::Type::Unknown ) ),
 
 "DROP TABLE " + Device::Table::Name,
 
-#include "database/tables/Device_v14.sql"
+Device::schema( Device::Table::Name, 14 ),
 
 "INSERT INTO " + Device::Table::Name + " SELECT id_device, uuid, scheme, is_removable, is_present,"
     "strftime('%s', 'now') FROM " + Device::Table::Name + "_backup",

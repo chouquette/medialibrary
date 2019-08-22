@@ -154,11 +154,33 @@ std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& u
 
 void Device::createTable( sqlite::Connection* connection )
 {
-    const std::string reqs[] = {
-        #include "database/tables/Device_v14.sql"
-    };
-    for ( const auto& req : reqs )
-        sqlite::Tools::executeRequest( connection, req );
+    sqlite::Tools::executeRequest( connection,
+                                   schema( Table::Name, Settings::DbModelVersion ) );
+}
+
+std::string Device::schema( const std::string& tableName, uint32_t dbModel )
+{
+    assert( tableName == Table::Name );
+    if ( dbModel <= 13 )
+    {
+        return "CREATE TABLE IF NOT EXISTS " + Device::Table::Name +
+        "("
+            "id_device INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "uuid TEXT UNIQUE ON CONFLICT FAIL,"
+            "scheme TEXT,"
+            "is_removable BOOLEAN,"
+            "is_present BOOLEAN"
+        ")";
+    }
+    return "CREATE TABLE IF NOT EXISTS " + Device::Table::Name +
+    "("
+        "id_device INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "uuid TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
+        "scheme TEXT,"
+        "is_removable BOOLEAN,"
+        "is_present BOOLEAN,"
+        "last_seen UNSIGNED INTEGER"
+    ")";
 }
 
 std::shared_ptr<Device> Device::fromUuid( MediaLibraryPtr ml, const std::string& uuid )
