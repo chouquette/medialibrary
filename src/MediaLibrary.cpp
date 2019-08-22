@@ -1287,10 +1287,10 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     // We will run a re-scan, so we don't care about keeping their content
     std::string recreateReqs[] = {
         Album::schema( Album::Table::Name, 14 ),
+        Artist::schema( Artist::Table::Name, 14 ),
     };
     for ( const auto& req : recreateReqs )
         sqlite::Tools::executeRequest( dbConn, req );
-    Artist::createTable( dbConn );
     Movie::createTable( dbConn );
     Show::createTable( dbConn );
     VideoTrack::createTable( dbConn );

@@ -435,12 +435,12 @@ std::string Artist::schema( const std::string& tableName, uint32_t dbModelVersio
 {
     if ( tableName == FtsTable::Name )
     {
-        return "CREATE VIRTUAL TABLE IF NOT EXISTS " + FtsTable::Name +
+        return "CREATE VIRTUAL TABLE " + FtsTable::Name +
                 " USING FTS3(name)";
     }
     else if ( tableName == MediaRelationTable::Name )
     {
-        return "CREATE TABLE IF NOT EXISTS " + MediaRelationTable::Name +
+        return "CREATE TABLE " + MediaRelationTable::Name +
         "("
             "media_id INTEGER NOT NULL,"
             "artist_id INTEGER,"
@@ -454,7 +454,7 @@ std::string Artist::schema( const std::string& tableName, uint32_t dbModelVersio
     assert( tableName == Table::Name );
     if ( dbModelVersion <= 16 )
     {
-        return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+        return "CREATE TABLE " + Table::Name +
         "("
             "id_artist INTEGER PRIMARY KEY AUTOINCREMENT,"
             "name TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
@@ -469,7 +469,7 @@ std::string Artist::schema( const std::string& tableName, uint32_t dbModelVersio
             + "(id_thumbnail)"
         ")";
     }
-    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    return "CREATE TABLE " + Table::Name +
     "("
         "id_artist INTEGER PRIMARY KEY AUTOINCREMENT,"
         "name TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
