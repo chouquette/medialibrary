@@ -87,24 +87,8 @@ int64_t AlbumTrack::artistId() const
 
 void AlbumTrack::createTable( sqlite::Connection* dbConnection )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + AlbumTrack::Table::Name + "("
-                "id_track INTEGER PRIMARY KEY AUTOINCREMENT,"
-                "media_id INTEGER UNIQUE,"
-                "duration INTEGER NOT NULL,"
-                "artist_id UNSIGNED INTEGER,"
-                "genre_id INTEGER,"
-                "track_number UNSIGNED INTEGER,"
-                "album_id UNSIGNED INTEGER NOT NULL,"
-                "disc_number UNSIGNED INTEGER,"
-                "FOREIGN KEY (media_id) REFERENCES " + Media::Table::Name + "(id_media)"
-                    " ON DELETE CASCADE,"
-                "FOREIGN KEY (artist_id) REFERENCES " + Artist::Table::Name + "(id_artist)"
-                    " ON DELETE CASCADE,"
-                "FOREIGN KEY (genre_id) REFERENCES " + Genre::Table::Name + "(id_genre),"
-                "FOREIGN KEY (album_id) REFERENCES Album(id_album) "
-                    " ON DELETE CASCADE"
-            ")";
-    sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection, schema( Table::Name,
+                                                         Settings::DbModelVersion ) );
 }
 
 void AlbumTrack::createTriggers(sqlite::Connection* dbConnection)
@@ -117,6 +101,29 @@ void AlbumTrack::createTriggers(sqlite::Connection* dbConnection)
             "ON " + AlbumTrack::Table::Name + "(album_id, genre_id, artist_id)";
     sqlite::Tools::executeRequest( dbConnection, indexReq );
     sqlite::Tools::executeRequest( dbConnection, indexAlbumIdReq );
+}
+
+std::string AlbumTrack::schema( const std::string& tableName, uint32_t )
+{
+    assert( tableName == Table::Name );
+    return "CREATE TABLE IF NOT EXISTS " + AlbumTrack::Table::Name +
+    "("
+         "id_track INTEGER PRIMARY KEY AUTOINCREMENT,"
+         "media_id INTEGER UNIQUE,"
+         "duration INTEGER NOT NULL,"
+         "artist_id UNSIGNED INTEGER,"
+         "genre_id INTEGER,"
+         "track_number UNSIGNED INTEGER,"
+         "album_id UNSIGNED INTEGER NOT NULL,"
+         "disc_number UNSIGNED INTEGER,"
+         "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name + "(id_media)"
+             " ON DELETE CASCADE,"
+         "FOREIGN KEY(artist_id) REFERENCES " + Artist::Table::Name + "(id_artist)"
+             " ON DELETE CASCADE,"
+         "FOREIGN KEY(genre_id) REFERENCES " + Genre::Table::Name + "(id_genre),"
+         "FOREIGN KEY(album_id) REFERENCES Album(id_album) "
+             " ON DELETE CASCADE"
+    ")";
 }
 
 std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, int64_t albumId,
