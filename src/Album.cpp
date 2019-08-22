@@ -42,6 +42,7 @@ namespace medialibrary
 const std::string Album::Table::Name = "Album";
 const std::string Album::Table::PrimaryKeyColumn = "id_album";
 int64_t Album::* const Album::Table::PrimaryKey = &Album::m_id;
+const std::string Album::FtsTable::Name = "AlbumFts";
 
 Album::Album(MediaLibraryPtr ml, sqlite::Row& row)
     : m_ml( ml )
@@ -474,7 +475,7 @@ bool Album::setAlbumArtist( std::shared_ptr<Artist> artist )
     m_artistId = artist->id();
     m_albumArtist = artist;
     artist->updateNbAlbum( 1 );
-    static const std::string ftsReq = "UPDATE " + Table::Name + "Fts SET "
+    static const std::string ftsReq = "UPDATE " + FtsTable::Name + " SET "
             " artist = ? WHERE rowid = ?";
     sqlite::Tools::executeUpdate( m_ml->getConn(), ftsReq, artist->name(), m_id );
     return true;
@@ -547,14 +548,14 @@ void Album::createTriggers( sqlite::Connection* dbConnection )
             // Skip unknown albums
             " WHEN new.title IS NOT NULL"
             " BEGIN"
-            " INSERT INTO " + Table::Name + "Fts(rowid, title) VALUES(new.id_album, new.title);"
+            " INSERT INTO " + FtsTable::Name + "(rowid, title) VALUES(new.id_album, new.title);"
             " END";
     static const std::string vtriggerDelete = "CREATE TRIGGER IF NOT EXISTS delete_album_fts BEFORE DELETE ON "
             + Table::Name +
             // Unknown album probably won't be deleted, but better safe than sorry
             " WHEN old.title IS NOT NULL"
             " BEGIN"
-            " DELETE FROM " + Table::Name + "Fts WHERE rowid = old.id_album;"
+            " DELETE FROM " + FtsTable::Name + " WHERE rowid = old.id_album;"
             " END";
     sqlite::Tools::executeRequest( dbConnection, indexReq );
     sqlite::Tools::executeRequest( dbConnection, triggerReq );
@@ -590,8 +591,8 @@ Query<IAlbum> Album::search( MediaLibraryPtr ml, const std::string& pattern,
     std::string req = "FROM " + Table::Name + " alb ";
     req += addRequestJoin( params, false );
     req += "WHERE id_album IN "
-            "(SELECT rowid FROM " + Table::Name + "Fts WHERE " +
-            Table::Name + "Fts MATCH ?)"
+            "(SELECT rowid FROM " + FtsTable::Name + " WHERE " +
+            FtsTable::Name + " MATCH ?)"
             "AND alb.is_present != 0";
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       orderBy( params ),
@@ -604,8 +605,8 @@ Query<IAlbum> Album::searchFromArtist( MediaLibraryPtr ml, const std::string& pa
     std::string req = "FROM " + Table::Name + " alb ";
     req += addRequestJoin( params, false );
     req += "WHERE id_album IN "
-            "(SELECT rowid FROM " + Table::Name + "Fts WHERE " +
-            Table::Name + "Fts MATCH ?)"
+            "(SELECT rowid FROM " + FtsTable::Name + " WHERE " +
+            FtsTable::Name + " MATCH ?)"
             "AND alb.is_present != 0 "
             "AND artist_id = ?";
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
@@ -670,8 +671,8 @@ Query<IAlbum> Album::searchFromGenre( MediaLibraryPtr ml, const std::string& pat
     std::string req = "FROM " + Table::Name + " alb ";
     req += addRequestJoin( params, true );
     req += "WHERE id_album IN "
-            "(SELECT rowid FROM " + Table::Name + "Fts WHERE " +
-            Table::Name + "Fts MATCH ?)"
+            "(SELECT rowid FROM " + FtsTable::Name + " WHERE " +
+            FtsTable::Name + " MATCH ?)"
             "AND att.genre_id = ?";
     std::string groupAndOrderBy = "GROUP BY att.album_id" + orderBy( params );
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),

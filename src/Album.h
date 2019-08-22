@@ -49,6 +49,11 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
             static const std::string PrimaryKeyColumn;
             static int64_t Album::*const PrimaryKey;
         };
+        struct FtsTable
+        {
+            static const std::string Name;
+        };
+
         Album( MediaLibraryPtr ml, sqlite::Row& row );
         Album( MediaLibraryPtr ml, const std::string& title );
         /**

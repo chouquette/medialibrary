@@ -21,7 +21,7 @@
     + "(id_thumbnail)"
 ")",
 
-"CREATE VIRTUAL TABLE IF NOT EXISTS " + Table::Name + "Fts USING FTS3("
+"CREATE VIRTUAL TABLE IF NOT EXISTS " + FtsTable::Name + " USING FTS3("
     "title,"
     "artist"
 ")",

@@ -18,7 +18,7 @@
     + "(id_artist) ON DELETE CASCADE"
 ")",
 
-"CREATE VIRTUAL TABLE IF NOT EXISTS " + Album::Table::Name + "Fts USING FTS3("
+"CREATE VIRTUAL TABLE IF NOT EXISTS " + Album::FtsTable::Name + " USING FTS3("
     "title,"
     "artist"
 ")",
