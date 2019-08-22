@@ -106,7 +106,7 @@ void AlbumTrack::createTriggers(sqlite::Connection* dbConnection)
 std::string AlbumTrack::schema( const std::string& tableName, uint32_t )
 {
     assert( tableName == Table::Name );
-    return "CREATE TABLE IF NOT EXISTS " + AlbumTrack::Table::Name +
+    return "CREATE TABLE " + AlbumTrack::Table::Name +
     "("
          "id_track INTEGER PRIMARY KEY AUTOINCREMENT,"
          "media_id INTEGER UNIQUE,"
