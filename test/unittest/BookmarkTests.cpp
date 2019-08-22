@@ -260,3 +260,9 @@ TEST_F( Bookmarks, DeleteAll )
     ASSERT_EQ( 0u, query->count() );
     ASSERT_EQ( 0u, query->all().size() );
 }
+
+TEST_F( Bookmarks, CheckDbModel )
+{
+    auto res = Bookmark::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}
