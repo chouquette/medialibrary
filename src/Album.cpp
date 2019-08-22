@@ -572,7 +572,7 @@ std::string Album::schema( const std::string& tableName, uint32_t dbModel )
     {
         if ( dbModel <= 16 )
         {
-            return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+            return "CREATE TABLE " + Table::Name +
             "("
                 "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "title TEXT COLLATE NOCASE,"
@@ -595,7 +595,7 @@ std::string Album::schema( const std::string& tableName, uint32_t dbModel )
                 + "(id_thumbnail)"
             ")";
         }
-        return "CREATE TABLE IF NOT EXISTS " + Album::Table::Name +
+        return "CREATE TABLE " + Album::Table::Name +
         "("
             "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
             "title TEXT COLLATE NOCASE,"
@@ -617,7 +617,7 @@ std::string Album::schema( const std::string& tableName, uint32_t dbModel )
     }
     else if ( tableName == FtsTable::Name )
     {
-        return "CREATE VIRTUAL TABLE IF NOT EXISTS " + Album::FtsTable::Name +
+        return "CREATE VIRTUAL TABLE " + Album::FtsTable::Name +
                 " USING FTS3(title,artist)";
     }
     assert( !"Invalid table name provided" );

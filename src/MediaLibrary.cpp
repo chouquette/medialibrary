@@ -1285,7 +1285,11 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     }
     // Re-create tables that we just removed
     // We will run a re-scan, so we don't care about keeping their content
-    Album::createTable( dbConn );
+    std::string recreateReqs[] = {
+        Album::schema( Album::Table::Name, 14 ),
+    };
+    for ( const auto& req : recreateReqs )
+        sqlite::Tools::executeRequest( dbConn, req );
     Artist::createTable( dbConn );
     Movie::createTable( dbConn );
     Show::createTable( dbConn );
