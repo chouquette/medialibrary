@@ -95,3 +95,9 @@ TEST_F( AudioTracks, RemoveTracks )
     ASSERT_EQ( 0u, f1->audioTracks()->count() );
     ASSERT_EQ( 1u, f2->audioTracks()->count() );
 }
+
+TEST_F( AudioTracks, CheckDbModel )
+{
+    auto res = AudioTrack::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}

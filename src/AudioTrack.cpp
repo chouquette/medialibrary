@@ -129,6 +129,13 @@ std::string AudioTrack::schema( const std::string& tableName, uint32_t )
     ")";
 }
 
+bool AudioTrack::checkDbModel( MediaLibraryPtr ml )
+{
+    return sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name );
+}
+
 std::shared_ptr<AudioTrack> AudioTrack::create( MediaLibraryPtr ml, const std::string& codec,
                                                 unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels,
                                                 const std::string& language, const std::string& desc, int64_t mediaId )
