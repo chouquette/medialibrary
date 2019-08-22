@@ -154,17 +154,6 @@ public:
         }
     }
 
-    void CheckNbTriggers( uint32_t expected )
-    {
-        medialibrary::sqlite::Statement stmt{ ml->getConn()->handle(),
-                "SELECT COUNT(*) FROM sqlite_master WHERE type='trigger'" };
-        stmt.execute();
-        auto row = stmt.row();
-        uint32_t nbTriggers;
-        row >> nbTriggers;
-        ASSERT_EQ( nbTriggers, expected );
-    }
-
     void CheckTriggers( std::vector<const char*> expected )
     {
         medialibrary::sqlite::Statement stmt{ ml->getConn()->handle(),
@@ -177,6 +166,7 @@ public:
         for ( const auto& expectedName : expected )
         {
             auto row = stmt.row();
+            ASSERT_TRUE( row != nullptr );
             ASSERT_EQ( 1u, row.nbColumns() );
             auto name = row.extract<std::string>();
             ASSERT_EQ( expectedName, name );
@@ -219,7 +209,6 @@ TEST_F( DbModel, NbTriggers )
     // Test the expected number of triggers on a freshly created database
     auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    CheckNbTriggers( NbTriggers );
     CheckTriggers( expectedTriggers );
     CheckNbIndexes( NbIndexes );
 }
@@ -274,7 +263,7 @@ TEST_F( DbModel, Upgrade12to13 )
     // We can't check for the number of albums anymore since they are deleted
     // as part of 13 -> 14 migration
 
-    CheckNbTriggers( NbTriggers );
+    CheckTriggers( expectedTriggers );
 }
 
 TEST_F( DbModel, Upgrade13to14 )
@@ -322,7 +311,6 @@ TEST_F( DbModel, Upgrade13to14 )
     ASSERT_EQ( 2u, folder->media( IMedia::Type::Unknown, nullptr )->count() );
     ASSERT_EQ( "folder", folder->name() );
 
-    CheckNbTriggers( NbTriggers );
     CheckTriggers( expectedTriggers );
 }
 
@@ -331,7 +319,6 @@ TEST_F( DbModel, Upgrade14to15 )
     LoadFakeDB( SRC_DIR "/test/unittest/db_v14.sql" );
     auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    CheckNbTriggers( NbTriggers );
     CheckNbIndexes( NbIndexes );
     CheckTriggers( expectedTriggers );
 }
@@ -341,7 +328,6 @@ TEST_F( DbModel, Upgrade15to16 )
     LoadFakeDB( SRC_DIR "/test/unittest/db_v15.sql" );
     auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    CheckNbTriggers( NbTriggers );
     CheckNbIndexes( NbIndexes );
     CheckTriggers( expectedTriggers );
 
@@ -375,7 +361,6 @@ TEST_F( DbModel, Upgrade16to17 )
     LoadFakeDB( SRC_DIR "/test/unittest/db_v16.sql" );
     auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    CheckNbTriggers( NbTriggers );
     CheckNbIndexes( NbIndexes );
     CheckTriggers( expectedTriggers );
 }
@@ -385,7 +370,6 @@ TEST_F( DbModel, Upgrade17to18 )
     LoadFakeDB( SRC_DIR "/test/unittest/db_v17.sql" );
     auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    CheckNbTriggers( NbTriggers );
     CheckNbIndexes( NbIndexes );
     CheckTriggers( expectedTriggers );
 }
@@ -396,7 +380,6 @@ TEST_F( DbModel, Upgrade18to19Broken )
     LoadFakeDB( SRC_DIR "/test/unittest/db_v18_broken.sql" );
     auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    CheckNbTriggers( NbTriggers );
     CheckNbIndexes( NbIndexes );
     CheckTriggers( expectedTriggers );
 }
@@ -409,7 +392,6 @@ TEST_F( DbModel, Upgrade18to19Noop )
     LoadFakeDB( SRC_DIR "/test/unittest/db_v18_ok.sql" );
     auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    CheckNbTriggers( NbTriggers );
     CheckNbIndexes( NbIndexes );
     CheckTriggers( expectedTriggers );
 }
