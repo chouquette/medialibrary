@@ -39,18 +39,24 @@ int64_t Chapter::* const Chapter::Table::PrimaryKey = &Chapter::m_id;
 
 void Chapter::createTable( sqlite::Connection* dbConn )
 {
-    std::string req = "CREATE TABLE IF NOT EXISTS " + Table::Name +
-            "("
-                + Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                "offset INTEGER NOT NULL,"
-                "duration INTEGER NOT NULL,"
-                "name TEXT,"
-                "media_id INTEGER,"
-                "FOREIGN KEY(media_id) REFERENCES " +
-                    Media::Table::Name + "(" + Media::Table::PrimaryKeyColumn + ")"
-                    "ON DELETE CASCADE"
-            ")";
-    return sqlite::Tools::executeRequest( dbConn, req );
+    return sqlite::Tools::executeRequest( dbConn,
+                                          schema( Table::Name, Settings::DbModelVersion ) );
+}
+
+std::string Chapter::schema( const std::string& tableName, uint32_t )
+{
+    assert( tableName == Table::Name );
+    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    "("
+        + Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "offset INTEGER NOT NULL,"
+        "duration INTEGER NOT NULL,"
+        "name TEXT,"
+        "media_id INTEGER,"
+        "FOREIGN KEY(media_id) REFERENCES " +
+            Media::Table::Name + "(" + Media::Table::PrimaryKeyColumn + ")"
+            " ON DELETE CASCADE"
+    ")";
 }
 
 std::shared_ptr<Chapter> Chapter::create( MediaLibraryPtr ml, int64_t offset,

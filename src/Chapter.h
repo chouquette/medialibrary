@@ -49,6 +49,7 @@ public:
     virtual int64_t duration() const override;
 
     static void createTable( sqlite::Connection* dbConn );
+    static std::string schema( const std::string& tableName, uint32_t dbModel );
     static std::shared_ptr<Chapter> create( MediaLibraryPtr ml, int64_t offset,
                                             int64_t duration, std::string name,
                                             int64_t mediaId );
