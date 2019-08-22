@@ -190,6 +190,7 @@ void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
     Show::createTriggers( m_dbConnection.get() );
     Thumbnail::createTriggers( m_dbConnection.get() );
     parser::Task::createTriggers( m_dbConnection.get(), dbModelVersion );
+    AudioTrack::createIndexes( m_dbConnection.get() );
 }
 
 void MediaLibrary::registerEntityHooks()
