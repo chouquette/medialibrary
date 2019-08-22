@@ -660,3 +660,9 @@ TEST_F( Artists, SearchAll )
     artists = ml->searchArtists( "artist", true, nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
 }
+
+TEST_F( Artists, CheckDbModel )
+{
+    auto res = Artist::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}

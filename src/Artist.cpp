@@ -491,6 +491,19 @@ std::string Artist::schema( const std::string& tableName, uint32_t dbModelVersio
     ")";
 }
 
+bool Artist::checkDbModel(MediaLibraryPtr ml)
+{
+    return sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name ) &&
+           sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( FtsTable::Name, Settings::DbModelVersion ),
+                                       FtsTable::Name ) &&
+           sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( MediaRelationTable::Name, Settings::DbModelVersion ),
+                                       MediaRelationTable::Name );
+}
+
 bool Artist::createDefaultArtists( sqlite::Connection* dbConnection )
 {
     // Don't rely on Artist::create, since we want to insert or do nothing here.
