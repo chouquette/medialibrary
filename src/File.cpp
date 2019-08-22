@@ -236,7 +236,7 @@ void File::createTriggers( sqlite::Connection* dbConnection )
 std::string File::schema( const std::string& tableName, uint32_t )
 {
     assert( tableName == Table::Name );
-    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    return "CREATE TABLE " + Table::Name +
     "("
         "id_file INTEGER PRIMARY KEY AUTOINCREMENT,"
         "media_id UNSIGNED INT DEFAULT NULL,"
