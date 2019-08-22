@@ -372,6 +372,19 @@ class Tools
             }
         }
 
+        static bool checkSchema( sqlite::Connection* dbConn,
+                                 const std::string& schema,
+                                 const std::string& tableName )
+        {
+            auto actualSchema = fetchTableSchema( dbConn, tableName );
+            if ( actualSchema == schema )
+                return true;
+            LOG_ERROR( "Mismatching schema for table ", tableName, "." );
+            LOG_ERROR( "Expected: ", schema );
+            LOG_ERROR( "Actual:   ", actualSchema );
+            return false;
+        }
+
         /**
          * @brief sanitizePattern Ensures the pattern is valid, and append a wildcard char
          * @return Essentially returns pattern with «'» and «"» encoded for
@@ -391,6 +404,24 @@ class Tools
             auto duration = std::chrono::steady_clock::now() - chrono;
             LOG_VERBOSE("Executed ", req, " in ",
                      std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
+        }
+
+        static std::string fetchTableSchema( sqlite::Connection* dbConn,
+                                             const std::string& tableName )
+        {
+            const std::string req{ "SELECT sql FROM sqlite_master "
+                                 "WHERE type='table' AND name=?" };
+            auto chrono = std::chrono::steady_clock::now();
+            Statement stmt( dbConn->handle(), req );
+            stmt.execute( tableName );
+            auto row = stmt.row();
+            assert( row != nullptr );
+            assert( row.nbColumns() == 1 );
+            auto res = row.extract<std::string>();
+            auto duration = std::chrono::steady_clock::now() - chrono;
+            LOG_VERBOSE("Executed ", req, " in ",
+                     std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
+            return res;
         }
 };
 
