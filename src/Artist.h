@@ -47,6 +47,10 @@ public:
     {
         static const std::string Name;
     };
+    struct MediaRelationTable
+    {
+        static const std::string Name;
+    };
 
     Artist( MediaLibraryPtr ml, sqlite::Row& row );
     Artist( MediaLibraryPtr ml, const std::string& name );

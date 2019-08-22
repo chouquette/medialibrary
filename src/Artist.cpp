@@ -39,6 +39,7 @@ const std::string Artist::Table::Name = "Artist";
 const std::string Artist::Table::PrimaryKeyColumn = "id_artist";
 int64_t Artist::*const Artist::Table::PrimaryKey = &Artist::m_id;
 const std::string Artist::FtsTable::Name = "ArtistFts";
+const std::string Artist::MediaRelationTable::Name = "MediaArtistRelation";
 
 Artist::Artist( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -111,7 +112,8 @@ Query<IMedia> Artist::tracks( const QueryParameters* params ) const
     // instead of listing all tracks by this artist, as there will be none.
     if ( m_id != VariousArtistID )
     {
-        req += "INNER JOIN MediaArtistRelation mar ON mar.media_id = med.id_media ";
+        req += "INNER JOIN " + MediaRelationTable::Name +
+                " mar ON mar.media_id = med.id_media ";
         if ( sort != SortingCriteria::Duration &&
              sort != SortingCriteria::InsertionDate &&
              sort != SortingCriteria::ReleaseDate &&
@@ -170,7 +172,8 @@ Query<IMedia> Artist::searchTracks( const std::string& pattern, const QueryParam
 
 bool Artist::addMedia( Media& media )
 {
-    static const std::string req = "INSERT INTO MediaArtistRelation VALUES(?, ?)";
+    static const std::string req = "INSERT INTO " + MediaRelationTable::Name +
+            " VALUES(?, ?)";
     // If track's ID is 0, the request will fail due to table constraints
     sqlite::ForeignKey artistForeignKey( m_id );
     return sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(), artistForeignKey ) != 0;
@@ -503,7 +506,8 @@ Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pat
 
 void Artist::dropMediaArtistRelation( MediaLibraryPtr ml, int64_t mediaId )
 {
-    const std::string req = "DELETE FROM MediaArtistRelation WHERE media_id = ?";
+    const std::string req = "DELETE FROM " + MediaRelationTable::Name +
+            " WHERE media_id = ?";
     sqlite::Tools::executeDelete( ml->getConn(), req, mediaId );
 }
 

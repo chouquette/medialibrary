@@ -22,7 +22,7 @@
     + "(id_thumbnail)"
 ")",
 
-"CREATE TABLE IF NOT EXISTS MediaArtistRelation"
+"CREATE TABLE IF NOT EXISTS " + Artist::MediaRelationTable::Name +
 "("
     "media_id INTEGER NOT NULL,"
     "artist_id INTEGER,"
