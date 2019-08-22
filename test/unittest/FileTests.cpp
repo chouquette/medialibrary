@@ -114,3 +114,9 @@ TEST_F( Files, Exists )
     ASSERT_TRUE( File::exists( ml.get(), "media.mkv" ) );
     ASSERT_FALSE( File::exists( ml.get(), "another%20file.avi" ) );
 }
+
+TEST_F( Files, CheckDbModel )
+{
+    auto res = File::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}

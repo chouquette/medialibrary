@@ -263,6 +263,13 @@ std::string File::schema( const std::string& tableName, uint32_t )
     ")";
 }
 
+bool File::checkDbModel(MediaLibraryPtr ml)
+{
+    return sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name );
+}
+
 std::shared_ptr<File> File::createFromMedia( MediaLibraryPtr ml, int64_t mediaId,
                                              Type type, const fs::IFile& fileFs,
                                              int64_t folderId, bool isRemovable )
