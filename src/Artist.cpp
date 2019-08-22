@@ -38,6 +38,7 @@ namespace medialibrary
 const std::string Artist::Table::Name = "Artist";
 const std::string Artist::Table::PrimaryKeyColumn = "id_artist";
 int64_t Artist::*const Artist::Table::PrimaryKey = &Artist::m_id;
+const std::string Artist::FtsTable::Name = "ArtistFts";
 
 Artist::Artist( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -400,13 +401,13 @@ void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelV
             " AFTER INSERT ON " + Artist::Table::Name +
             " WHEN new.name IS NOT NULL"
             " BEGIN"
-            " INSERT INTO " + Artist::Table::Name + "Fts(rowid,name) VALUES(new.id_artist, new.name);"
+            " INSERT INTO " + Artist::FtsTable::Name + "(rowid,name) VALUES(new.id_artist, new.name);"
             " END";
     static const std::string ftsDeleteTrigger = "CREATE TRIGGER IF NOT EXISTS delete_artist_fts"
             " BEFORE DELETE ON " + Artist::Table::Name +
             " WHEN old.name IS NOT NULL"
             " BEGIN"
-            " DELETE FROM " + Artist::Table::Name + "Fts WHERE rowid=old.id_artist;"
+            " DELETE FROM " + Artist::FtsTable::Name + " WHERE rowid=old.id_artist;"
             " END";
     sqlite::Tools::executeRequest( dbConnection, triggerReq );
     sqlite::Tools::executeRequest( dbConnection, autoDeleteAlbumTriggerReq );
@@ -452,7 +453,7 @@ Query<IArtist> Artist::search( MediaLibraryPtr ml, const std::string& name,
                                bool includeAll, const QueryParameters* params )
 {
     std::string req = "FROM " + Artist::Table::Name + " WHERE id_artist IN "
-            "(SELECT rowid FROM " + Artist::Table::Name + "Fts WHERE name MATCH ?)"
+            "(SELECT rowid FROM " + Artist::FtsTable::Name + " WHERE name MATCH ?)"
             "AND is_present != 0";
     // We are searching based on the name, so we're ignoring unknown/various artist
     // This means all artist we find has at least one track associated with it, so
@@ -482,7 +483,7 @@ Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pat
     std::string req = "FROM " + Artist::Table::Name + " a "
                 "INNER JOIN " + AlbumTrack::Table::Name + " att ON att.artist_id = a.id_artist "
                 "WHERE id_artist IN "
-                    "(SELECT rowid FROM " + Artist::Table::Name + "Fts WHERE name MATCH ?)"
+                    "(SELECT rowid FROM " + Artist::FtsTable::Name + " WHERE name MATCH ?)"
                 "AND att.genre_id = ? ";
 
     std::string groupBy = "GROUP BY att.artist_id "
