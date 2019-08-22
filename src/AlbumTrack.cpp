@@ -126,6 +126,13 @@ std::string AlbumTrack::schema( const std::string& tableName, uint32_t )
     ")";
 }
 
+bool AlbumTrack::checkDbModel(MediaLibraryPtr ml)
+{
+    return sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name );
+}
+
 std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, int64_t albumId,
                                                 std::shared_ptr<Media> media, unsigned int trackNb,
                                                 unsigned int discNumber, int64_t artistId, int64_t genreId,

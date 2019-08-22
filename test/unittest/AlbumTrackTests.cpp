@@ -72,3 +72,9 @@ TEST_F( AlbumTracks, Album )
     ASSERT_EQ( albumFromTrack->id(), a2->id() );
     ASSERT_EQ( aft2->id(), a2->id() );
 }
+
+TEST_F( AlbumTracks, CheckDbModel )
+{
+    auto res = AlbumTrack::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}
