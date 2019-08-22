@@ -50,6 +50,7 @@ public:
 
     static void createTable( sqlite::Connection* dbConn );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
+    static bool checkDbModel( MediaLibraryPtr ml );
     static std::shared_ptr<Chapter> create( MediaLibraryPtr ml, int64_t offset,
                                             int64_t duration, std::string name,
                                             int64_t mediaId );

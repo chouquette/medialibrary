@@ -98,3 +98,9 @@ TEST_F( ChapterTests, Fetch )
     ASSERT_EQ( "chapter 2", chapters[2]->name() );
     ASSERT_EQ( 11, chapters[2]->offset() );
 }
+
+TEST_F( ChapterTests, CheckDbModel )
+{
+    auto res = Chapter::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}
