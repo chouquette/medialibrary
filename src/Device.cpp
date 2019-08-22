@@ -183,6 +183,13 @@ std::string Device::schema( const std::string& tableName, uint32_t dbModel )
     ")";
 }
 
+bool Device::checkDbModel( MediaLibraryPtr ml )
+{
+    return sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name );
+}
+
 std::shared_ptr<Device> Device::fromUuid( MediaLibraryPtr ml, const std::string& uuid )
 {
     static const std::string req = "SELECT * FROM " + Device::Table::Name +

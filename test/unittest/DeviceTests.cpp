@@ -115,6 +115,12 @@ TEST_F( DeviceEntity, SetPresent )
     ASSERT_FALSE( d->isPresent() );
 }
 
+TEST_F( DeviceEntity, CheckDbModel )
+{
+    auto res = Device::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}
+
 // Filesystem tests:
 
 TEST_F( DeviceFs, RemoveDisk )
