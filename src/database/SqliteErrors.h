@@ -44,8 +44,9 @@ class Generic : public std::runtime_error
 {
 public:
     Generic( const char* req, const char* msg, int extendedCode )
-        : std::runtime_error( std::string( "Failed to compile/prepare request [" ) + req
-                                           + "]: " + msg + "(" + std::to_string( extendedCode ) + ")" )
+        : std::runtime_error( std::string( "Failed to compile/prepare request [" )
+                              + req + "]: " + msg + " (error code: " +
+                              std::to_string( extendedCode ) + ")" )
     {
     }
     Generic( const std::string& msg )
