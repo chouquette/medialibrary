@@ -117,10 +117,27 @@ bool Bookmark::move( int64_t newTime )
 void Bookmark::createTable(sqlite::Connection* dbConn)
 {
     const std::string reqs[] = {
-        #include "database/tables/Bookmark_v17.sql"
+        schema( Table::Name, Settings::DbModelVersion ),
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
+}
+
+std::string Bookmark::schema( const std::string& tableName, uint32_t )
+{
+    assert( tableName == Table::Name );
+    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    "("
+        "id_bookmark INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "time UNSIGNED INTEGER NOT NULL,"
+        "name TEXT,"
+        "description TEXT,"
+        "media_id UNSIGNED INTEGER NOT NULL,"
+
+        "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
+        + "(id_media),"
+        "UNIQUE(time,media_id) ON CONFLICT FAIL"
+    ")";
 }
 
 std::shared_ptr<Bookmark> Bookmark::create( MediaLibraryPtr ml, int64_t time,

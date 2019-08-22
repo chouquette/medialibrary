@@ -51,6 +51,7 @@ public:
     virtual bool move( int64_t newTime ) override;
 
     static void createTable( sqlite::Connection* dbConn );
+    static std::string schema( const std::string& tableName, uint32_t dbModel );
     static std::shared_ptr<Bookmark> create(MediaLibraryPtr ml, int64_t time, int64_t mediaId );
     static bool remove( MediaLibraryPtr ml, int64_t time, int64_t mediaId );
     static Query<IBookmark> fromMedia( MediaLibraryPtr ml, int64_t mediaId,
