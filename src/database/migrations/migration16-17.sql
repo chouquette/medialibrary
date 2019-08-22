@@ -61,7 +61,7 @@
 
 "DROP TABLE " + Album::Table::Name,
 
-#include "database/tables/Album_v17.sql"
+Album::schema( Album::Table::Name, 17 ),
 
 "INSERT INTO " + Album::Table::Name + " SELECT * FROM " + Album::Table::Name + "_backup",
 

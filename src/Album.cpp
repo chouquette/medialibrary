@@ -500,7 +500,8 @@ Query<IArtist> Album::artists( const QueryParameters* params ) const
 void Album::createTable( sqlite::Connection* dbConnection )
 {
     const std::string reqs[] = {
-        #include "database/tables/Album_v17.sql"
+        schema( Table::Name, Settings::DbModelVersion ),
+        schema( FtsTable::Name, Settings::DbModelVersion ),
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConnection, req );
@@ -563,6 +564,64 @@ void Album::createTriggers( sqlite::Connection* dbConnection )
     sqlite::Tools::executeRequest( dbConnection, updateAddTrackTriggerReq );
     sqlite::Tools::executeRequest( dbConnection, vtriggerInsert );
     sqlite::Tools::executeRequest( dbConnection, vtriggerDelete );
+}
+
+std::string Album::schema( const std::string& tableName, uint32_t dbModel )
+{
+    if ( tableName == Table::Name )
+    {
+        if ( dbModel <= 16 )
+        {
+            return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+            "("
+                "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
+                "title TEXT COLLATE NOCASE,"
+                "artist_id UNSIGNED INTEGER,"
+                "release_year UNSIGNED INTEGER,"
+                "short_summary TEXT,"
+                "thumbnail_id UNSIGNED INT,"
+                // Number of tracks in this album, regardless of their presence
+                // state.
+                "nb_tracks UNSIGNED INTEGER DEFAULT 0,"
+                "duration UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+                "nb_discs UNSIGNED INTEGER NOT NULL DEFAULT 1,"
+                // The album presence state, which is the number of present tracks
+                // in this album
+                "is_present UNSIGNED INTEGER NOT NULL DEFAULT 0 "
+                    "CHECK(is_present <= nb_tracks),"
+                "FOREIGN KEY(artist_id) REFERENCES " + Artist::Table::Name
+                + "(id_artist) ON DELETE CASCADE,"
+                "FOREIGN KEY(thumbnail_id) REFERENCES " + Thumbnail::Table::Name
+                + "(id_thumbnail)"
+            ")";
+        }
+        return "CREATE TABLE IF NOT EXISTS " + Album::Table::Name +
+        "("
+            "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "title TEXT COLLATE NOCASE,"
+            "artist_id UNSIGNED INTEGER,"
+            "release_year UNSIGNED INTEGER,"
+            "short_summary TEXT,"
+            // Number of tracks in this album, regardless of their presence
+            // state.
+            "nb_tracks UNSIGNED INTEGER DEFAULT 0,"
+            "duration UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+            "nb_discs UNSIGNED INTEGER NOT NULL DEFAULT 1,"
+            // The album presence state, which is the number of present tracks
+            // in this album
+            "is_present UNSIGNED INTEGER NOT NULL DEFAULT 0 "
+                "CHECK(is_present <= nb_tracks),"
+            "FOREIGN KEY(artist_id) REFERENCES " + Artist::Table::Name
+            + "(id_artist) ON DELETE CASCADE"
+        ")";
+    }
+    else if ( tableName == FtsTable::Name )
+    {
+        return "CREATE VIRTUAL TABLE IF NOT EXISTS " + Album::FtsTable::Name +
+                " USING FTS3(title,artist)";
+    }
+    assert( !"Invalid table name provided" );
+    return "<not a valid request>";
 }
 
 std::shared_ptr<Album> Album::create( MediaLibraryPtr ml, const std::string& title )
