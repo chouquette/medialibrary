@@ -199,7 +199,7 @@ Device::schema( Device::Table::Name, 14 ),
 
 "DROP TABLE " + File::Table::Name,
 
-#include "database/tables/File_v14.sql"
+File::schema( File::Table::Name, 14 ),
 
 "INSERT INTO " + File::Table::Name + "("
 "id_file, media_id, playlist_id, mrl, type, last_modification_date, size,"
