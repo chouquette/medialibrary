@@ -100,23 +100,29 @@ const std::string& AudioTrack::description() const
 
 void AudioTrack::createTable( sqlite::Connection* dbConnection )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + AudioTrack::Table::Name
-            + "(" +
-                AudioTrack::Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                "codec TEXT,"
-                "bitrate UNSIGNED INTEGER,"
-                "samplerate UNSIGNED INTEGER,"
-                "nb_channels UNSIGNED INTEGER,"
-                "language TEXT,"
-                "description TEXT,"
-                "media_id UNSIGNED INT,"
-                "FOREIGN KEY ( media_id ) REFERENCES " + Media::Table::Name
-                    + "( id_media ) ON DELETE CASCADE"
-            ")";
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS audio_track_media_idx ON " +
             AudioTrack::Table::Name + "(media_id)";
-    sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   schema( Table::Name, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection, indexReq );
+}
+
+std::string AudioTrack::schema( const std::string& tableName, uint32_t )
+{
+    assert( tableName == Table::Name );
+    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    "(" +
+        AudioTrack::Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "codec TEXT,"
+        "bitrate UNSIGNED INTEGER,"
+        "samplerate UNSIGNED INTEGER,"
+        "nb_channels UNSIGNED INTEGER,"
+        "language TEXT,"
+        "description TEXT,"
+        "media_id UNSIGNED INT,"
+        "FOREIGN KEY ( media_id ) REFERENCES " + Media::Table::Name
+            + "( id_media ) ON DELETE CASCADE"
+    ")";
 }
 
 std::shared_ptr<AudioTrack> AudioTrack::create( MediaLibraryPtr ml, const std::string& codec,
