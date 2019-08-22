@@ -1086,6 +1086,7 @@ void MediaLibrary::migrateModel7to8()
 {
     sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
     auto t = getConn()->newTransaction();
+    parser::Task::createTable( getConn(), 8u );
     std::string reqs[] = {
 #               include "database/migrations/migration7-8.sql"
     };
@@ -1235,6 +1236,9 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     auto dbConn = getConn();
     sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
     auto t = dbConn->newTransaction();
+    Thumbnail::createTable( dbConn );
+    SubtitleTrack::createTable( dbConn );
+    Chapter::createTable( dbConn );
     std::string reqs[] = {
 #               include "database/migrations/migration13-14.sql"
     };
@@ -1292,6 +1296,7 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     Show::createTriggers( dbConn );
     Playlist::createTriggers( dbConn, 14 );
     Folder::createTriggers( dbConn, 14 );
+    File::createTriggers( dbConn );
     auto folders = Folder::fetchAll<Folder>( this );
     for ( const auto& f : folders )
     {
@@ -1320,6 +1325,7 @@ void MediaLibrary::migrateModel14to15()
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
     Folder::createTriggers( dbConn, 15 );
+    Playlist::createTriggers( dbConn, 15 );
     m_settings.setDbModelVersion( 15 );
     m_settings.save();
     t->commit();
@@ -1383,6 +1389,7 @@ void MediaLibrary::migrateModel16to17( uint32_t originalPreviousVersion )
     auto dbConn = getConn();
     sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
     auto t = dbConn->newTransaction();
+    Bookmark::createTable( dbConn );
     std::string reqs[] = {
 #               include "database/migrations/migration16-17.sql"
     };
