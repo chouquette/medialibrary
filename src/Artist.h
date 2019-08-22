@@ -98,6 +98,7 @@ public:
 
     static void createTable( sqlite::Connection* dbConnection );
     static void createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion );
+    static std::string schema( const std::string& tableName, uint32_t dbModelVersion );
     static bool createDefaultArtists( sqlite::Connection* dbConnection );
     static std::shared_ptr<Artist> create( MediaLibraryPtr ml, const std::string& name );
     static Query<IArtist> search(MediaLibraryPtr ml, const std::string& name, bool includeAll,

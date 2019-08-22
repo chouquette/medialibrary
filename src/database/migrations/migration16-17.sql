@@ -88,7 +88,7 @@ Album::schema( Album::Table::Name, 17 ),
 
 "DROP TABLE " + Artist::Table::Name,
 
-#include "database/tables/Artist_v17.sql"
+Artist::schema( Artist::Table::Name, 17 ),
 
 "INSERT INTO " + Artist::Table::Name + " SELECT * FROM " + Artist::Table::Name + "_backup",
 

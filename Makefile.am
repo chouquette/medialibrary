@@ -418,8 +418,6 @@ EXTRA_DIST += medialibrary.pc \
 	src/database/tables/Thumbnail_triggers_v17.sql \
 	src/database/tables/Thumbnail_v18.sql \
 	src/database/tables/Thumbnail_triggers_v18.sql \
-	src/database/tables/Artist_v16.sql \
-	src/database/tables/Artist_v17.sql \
 	src/database/tables/Bookmark_v17.sql \
 	$(NULL)
 	
