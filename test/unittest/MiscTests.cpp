@@ -61,6 +61,28 @@ namespace
         "update_thumbnail_refcount",
     };
 
+    const std::vector<const char*> expectedIndexes{
+        "album_artist_id_idx",
+        "album_media_artist_genre_album_idx",
+        "album_track_album_genre_artist_ids",
+        "audio_track_media_idx",
+        "file_folder_id_index",
+        "file_media_id_index",
+        "folder_device_id_idx",
+        "index_last_played_date",
+        "index_media_presence",
+        "media_last_usage_dates_idx",
+        "media_types_idx",
+        "movie_media_idx",
+        "parent_folder_id_idx",
+        "playlist_file_id",
+        "playlist_position_pl_id_index",
+        "show_episode_media_show_idx",
+        "subtitle_track_media_idx",
+        "thumbnail_link_index",
+        "video_track_media_idx",
+    };
+
     bool checkAlphaOrderedVector( const std::vector<const char*> in )
     {
         for ( auto i = 0u; i < in.size() - 1; i++ )
@@ -174,16 +196,24 @@ public:
         ASSERT_EQ( stmt.row(), nullptr );
     }
 
-    void CheckNbIndexes( uint32_t expected )
+    void CheckIndexes( std::vector<const char*> expected )
     {
+        auto res = checkAlphaOrderedVector( expected );
+        ASSERT_TRUE( res );
+
         medialibrary::sqlite::Statement stmt{ ml->getConn()->handle(),
-                "SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND "
-                "name NOT LIKE 'sqlite_autoindex%'" };
+                "SELECT name FROM sqlite_master WHERE type='index' AND "
+                "name NOT LIKE 'sqlite_autoindex%' ORDER BY name" };
         stmt.execute();
-        auto row = stmt.row();
-        uint32_t nbIndexes;
-        row >> nbIndexes;
-        ASSERT_EQ( expected, nbIndexes );
+        for ( const auto& expectedName : expected )
+        {
+            auto row = stmt.row();
+            ASSERT_TRUE( row != nullptr );
+            ASSERT_EQ( 1u, row.nbColumns() );
+            auto name = row.extract<std::string>();
+            ASSERT_EQ( expectedName, name );
+        }
+        ASSERT_EQ( stmt.row(), nullptr );
     }
 
     virtual void TearDown() override
@@ -210,7 +240,7 @@ TEST_F( DbModel, NbTriggers )
     auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     CheckTriggers( expectedTriggers );
-    CheckNbIndexes( NbIndexes );
+    CheckIndexes( expectedIndexes );
 }
 
 TEST_F( DbModel, Upgrade3to5 )
@@ -264,6 +294,7 @@ TEST_F( DbModel, Upgrade12to13 )
     // as part of 13 -> 14 migration
 
     CheckTriggers( expectedTriggers );
+    CheckIndexes( expectedIndexes );
 }
 
 TEST_F( DbModel, Upgrade13to14 )
@@ -319,7 +350,7 @@ TEST_F( DbModel, Upgrade14to15 )
     LoadFakeDB( SRC_DIR "/test/unittest/db_v14.sql" );
     auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    CheckNbIndexes( NbIndexes );
+    CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
 }
 
@@ -328,7 +359,7 @@ TEST_F( DbModel, Upgrade15to16 )
     LoadFakeDB( SRC_DIR "/test/unittest/db_v15.sql" );
     auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    CheckNbIndexes( NbIndexes );
+    CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
 
     // Check that playlists were properly migrated
@@ -361,7 +392,7 @@ TEST_F( DbModel, Upgrade16to17 )
     LoadFakeDB( SRC_DIR "/test/unittest/db_v16.sql" );
     auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    CheckNbIndexes( NbIndexes );
+    CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
 }
 
@@ -370,7 +401,7 @@ TEST_F( DbModel, Upgrade17to18 )
     LoadFakeDB( SRC_DIR "/test/unittest/db_v17.sql" );
     auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    CheckNbIndexes( NbIndexes );
+    CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
 }
 
@@ -380,7 +411,7 @@ TEST_F( DbModel, Upgrade18to19Broken )
     LoadFakeDB( SRC_DIR "/test/unittest/db_v18_broken.sql" );
     auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    CheckNbIndexes( NbIndexes );
+    CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
 }
 
@@ -392,6 +423,6 @@ TEST_F( DbModel, Upgrade18to19Noop )
     LoadFakeDB( SRC_DIR "/test/unittest/db_v18_ok.sql" );
     auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
-    CheckNbIndexes( NbIndexes );
+    CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
 }
