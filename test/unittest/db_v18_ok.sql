@@ -53,6 +53,8 @@ CREATE INDEX IF NOT EXISTS `audio_track_media_idx` ON `AudioTrack` (`media_id`);
 CREATE INDEX IF NOT EXISTS `album_track_album_genre_artist_ids` ON `AlbumTrack` (`album_id`,`genre_id`,`artist_id`);
 CREATE INDEX IF NOT EXISTS `album_media_artist_genre_album_idx` ON `AlbumTrack` (`media_id`,`artist_id`,`genre_id`,`album_id`);
 CREATE INDEX IF NOT EXISTS `album_artist_id_idx` ON `Album` (`artist_id`);
+CREATE INDEX IF NOT EXISTS `playlist_file_id` ON `Playlist` (`file_id`);
+CREATE INDEX IF NOT EXISTS `media_last_usage_dates_idx` ON `Media` (`last_played_date`, `real_last_played_date`, `insertion_date`);
 CREATE TRIGGER update_thumbnail_refcount AFTER UPDATE OF thumbnail_id ON ThumbnailLinking WHEN old.thumbnail_id != new.thumbnail_id BEGIN UPDATE Thumbnail SET shared_counter = shared_counter - 1 WHERE id_thumbnail = old.thumbnail_id;UPDATE Thumbnail SET shared_counter = shared_counter + 1 WHERE id_thumbnail = new.thumbnail_id;END;
 CREATE TRIGGER update_playlist_order_on_insert AFTER INSERT ON PlaylistMediaRelation WHEN new.position IS NOT NULL BEGIN UPDATE PlaylistMediaRelation SET position = position + 1 WHERE playlist_id = new.playlist_id AND position >= new.position AND rowid != new.rowid; END;
 CREATE TRIGGER update_playlist_order_on_delete AFTER DELETE ON PlaylistMediaRelation BEGIN UPDATE PlaylistMediaRelation SET position = position - 1 WHERE playlist_id = old.playlist_id AND position > old.position; END;

@@ -41,6 +41,8 @@ CREATE INDEX `audio_track_media_idx` ON `AudioTrack` (`media_id`);
 CREATE INDEX `album_track_album_genre_artist_ids` ON `AlbumTrack` (`album_id`,`genre_id`,`artist_id`);
 CREATE INDEX `album_media_artist_genre_album_idx` ON `AlbumTrack` (`media_id`,`artist_id`,`genre_id`,`album_id`);
 CREATE INDEX `album_artist_id_idx` ON `Album` (`artist_id`);
+CREATE INDEX IF NOT EXISTS `playlist_file_id` ON `Playlist` (`file_id`);
+CREATE INDEX IF NOT EXISTS `media_last_usage_dates_idx` ON `Media` (`last_played_date`, `real_last_played_date`, `insertion_date`);
 CREATE TRIGGER update_playlist_fts AFTER UPDATE OF name ON Playlist BEGIN UPDATE PlaylistFts SET name = new.name WHERE rowid = new.id_playlist; END;
 CREATE TRIGGER update_media_title_fts AFTER UPDATE OF title ON Media BEGIN UPDATE MediaFts SET title = new.title WHERE rowid = new.id_media; END;
 CREATE TRIGGER update_genre_on_track_deleted AFTER DELETE ON AlbumTrack WHEN old.genre_id IS NOT NULL BEGIN UPDATE Genre SET nb_tracks = nb_tracks - 1 WHERE id_genre = old.genre_id; DELETE FROM Genre WHERE nb_tracks = 0; END;
