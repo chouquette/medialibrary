@@ -83,6 +83,43 @@ namespace
         "video_track_media_idx",
     };
 
+    const std::vector<const char*> expectedTables{
+        "Album",
+        "AlbumFts",
+        "AlbumTrack",
+        "Artist",
+        "ArtistFts",
+        "AudioTrack",
+        "Bookmark",
+        "Chapter",
+        "Device",
+        "ExcludedEntryFolder",
+        "File",
+        "Folder",
+        "FolderFts",
+        "Genre",
+        "GenreFts",
+        "Label",
+        "LabelFileRelation",
+        "Media",
+        "MediaArtistRelation",
+        "MediaFts",
+        "Metadata",
+        "Movie",
+        "Playlist",
+        "PlaylistFts",
+        "PlaylistMediaRelation",
+        "Settings",
+        "Show",
+        "ShowEpisode",
+        "ShowFts",
+        "SubtitleTrack",
+        "Task",
+        "Thumbnail",
+        "ThumbnailLinking",
+        "VideoTrack",
+    };
+
     bool checkAlphaOrderedVector( const std::vector<const char*> in )
     {
         for ( auto i = 0u; i < in.size() - 1; i++ )
@@ -216,6 +253,26 @@ public:
         ASSERT_EQ( stmt.row(), nullptr );
     }
 
+    void CheckTables( std::vector<const char*> expected )
+    {
+        auto res = checkAlphaOrderedVector( expected );
+        ASSERT_TRUE( res );
+
+        medialibrary::sqlite::Statement stmt{ ml->getConn()->handle(),
+                "SELECT name FROM sqlite_master WHERE type='table' "
+                "AND name NOT LIKE '%#_%' ESCAPE '#' ORDER BY name"
+        };
+        stmt.execute();
+        for ( const auto& expectedName : expected )
+        {
+            auto row = stmt.row();
+            ASSERT_EQ( 1u, row.nbColumns() );
+            auto name = row.extract<std::string>();
+            ASSERT_EQ( expectedName, name );
+        }
+        ASSERT_EQ( stmt.row(), nullptr );
+    }
+
     virtual void TearDown() override
     {
         medialibrary::sqlite::Connection::Handle conn;
@@ -250,6 +307,7 @@ TEST_F( DbModel, Upgrade3to5 )
     ASSERT_EQ( InitializeResult::Success, res );
     // All is done during the database initialization, we only care about no
     // exception being thrown, and MediaLibrary::initialize() returning true
+    CheckTables( expectedTables );
 }
 
 TEST_F( DbModel, Upgrade4to5 )
@@ -264,6 +322,8 @@ TEST_F( DbModel, Upgrade4to5 )
     ASSERT_NE( m, nullptr );
     auto files = ml->files();
     ASSERT_NE( files.size(), 0u );
+
+    CheckTables( expectedTables );
 }
 
 TEST_F( DbModel, Upgrade7to8 )
@@ -273,6 +333,8 @@ TEST_F( DbModel, Upgrade7to8 )
     ASSERT_EQ( InitializeResult::Success, res );
     // Removed post migration tests starting with V9, since we force a re-scan,
     // there is no content left to test
+
+    CheckTables( expectedTables );
 }
 
 TEST_F( DbModel, Upgrade8to9 )
@@ -283,6 +345,8 @@ TEST_F( DbModel, Upgrade8to9 )
     // We expect the file-orphaned media to have been deleted
     auto media = ml->files();
     ASSERT_EQ( 1u, media.size() );
+
+    CheckTables( expectedTables );
 }
 
 TEST_F( DbModel, Upgrade12to13 )
@@ -295,6 +359,7 @@ TEST_F( DbModel, Upgrade12to13 )
 
     CheckTriggers( expectedTriggers );
     CheckIndexes( expectedIndexes );
+    CheckTables( expectedTables );
 }
 
 TEST_F( DbModel, Upgrade13to14 )
@@ -343,6 +408,7 @@ TEST_F( DbModel, Upgrade13to14 )
     ASSERT_EQ( "folder", folder->name() );
 
     CheckTriggers( expectedTriggers );
+    CheckTables( expectedTables );
 }
 
 TEST_F( DbModel, Upgrade14to15 )
@@ -352,6 +418,7 @@ TEST_F( DbModel, Upgrade14to15 )
     ASSERT_EQ( InitializeResult::Success, res );
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
+    CheckTables( expectedTables );
 }
 
 TEST_F( DbModel, Upgrade15to16 )
@@ -361,6 +428,7 @@ TEST_F( DbModel, Upgrade15to16 )
     ASSERT_EQ( InitializeResult::Success, res );
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
+    CheckTables( expectedTables );
 
     // Check that playlists were properly migrated
     medialibrary::sqlite::Statement stmt{
@@ -394,6 +462,7 @@ TEST_F( DbModel, Upgrade16to17 )
     ASSERT_EQ( InitializeResult::Success, res );
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
+    CheckTables( expectedTables );
 }
 
 TEST_F( DbModel, Upgrade17to18 )
@@ -403,6 +472,7 @@ TEST_F( DbModel, Upgrade17to18 )
     ASSERT_EQ( InitializeResult::Success, res );
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
+    CheckTables( expectedTables );
 }
 
 TEST_F( DbModel, Upgrade18to19Broken )
@@ -413,6 +483,7 @@ TEST_F( DbModel, Upgrade18to19Broken )
     ASSERT_EQ( InitializeResult::Success, res );
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
+    CheckTables( expectedTables );
 }
 
 
@@ -425,4 +496,5 @@ TEST_F( DbModel, Upgrade18to19Noop )
     ASSERT_EQ( InitializeResult::Success, res );
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
+    CheckTables( expectedTables );
 }
