@@ -718,3 +718,9 @@ TEST_F( Albums, NbDiscs )
     alb = std::static_pointer_cast<Album>( ml->album( alb->id() ) );
     ASSERT_EQ( 123u, alb->nbDiscs() );
 }
+
+TEST_F( Albums, CheckDbModel )
+{
+    auto res = Album::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}

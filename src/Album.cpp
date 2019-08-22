@@ -624,6 +624,16 @@ std::string Album::schema( const std::string& tableName, uint32_t dbModel )
     return "<not a valid request>";
 }
 
+bool Album::checkDbModel( MediaLibraryPtr ml )
+{
+    return sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name ) &&
+           sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( FtsTable::Name, Settings::DbModelVersion ),
+                                       FtsTable::Name );
+}
+
 std::shared_ptr<Album> Album::create( MediaLibraryPtr ml, const std::string& title )
 {
     auto album = std::make_shared<Album>( ml, title );
