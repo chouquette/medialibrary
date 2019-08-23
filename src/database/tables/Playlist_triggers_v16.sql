@@ -33,3 +33,6 @@
 " BEGIN"
 " DELETE FROM " + Playlist::Table::Name + "Fts WHERE rowid = old.id_playlist;"
 " END",
+
+"CREATE INDEX IF NOT EXISTS playlist_position_pl_id_index "
+    "ON PlaylistMediaRelation(playlist_id, position)",

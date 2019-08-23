@@ -20,9 +20,6 @@
         + Playlist::Table::PrimaryKeyColumn + ") ON DELETE CASCADE"
 ")",
 
-"CREATE INDEX IF NOT EXISTS playlist_media_pl_id_index "
-    "ON PlaylistMediaRelation(media_id, playlist_id)",
-
 "CREATE VIRTUAL TABLE IF NOT EXISTS " + Playlist::Table::Name + "Fts USING FTS3"
 "("
     "name"

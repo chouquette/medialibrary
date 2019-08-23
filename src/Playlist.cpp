@@ -346,6 +346,12 @@ void Playlist::createTriggers( sqlite::Connection* dbConn, uint32_t dbModel )
         sqlite::Tools::executeRequest( dbConn, "CREATE INDEX IF NOT EXISTS "
             "playlist_file_id ON " + Playlist::Table::Name + "(file_id)" );
     }
+    else
+    {
+        sqlite::Tools::executeRequest( dbConn,
+            "CREATE INDEX IF NOT EXISTS playlist_media_pl_id_index "
+            "ON PlaylistMediaRelation(media_id, playlist_id)" );
+    }
 }
 
 Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,
