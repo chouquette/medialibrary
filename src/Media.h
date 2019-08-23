@@ -55,6 +55,11 @@ class Media : public IMedia,
             static const std::string PrimaryKeyColumn;
             static int64_t Media::*const PrimaryKey;
         };
+        struct FtsTable
+        {
+            static const std::string Name;
+        };
+
         // Those should be private, however the standard states that the expression
         // ::new (pv) T(std::forward(args)...)
         // shall be well-formed, and private constructor would prevent that.

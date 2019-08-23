@@ -26,7 +26,7 @@
     "(type, subtype)",
 
 "CREATE VIRTUAL TABLE IF NOT EXISTS "
-    + Media::Table::Name + "Fts USING FTS3("
+    + Media::FtsTable::Name + " USING FTS3("
     "title,"
     "labels"
 ")",

@@ -62,6 +62,7 @@ namespace medialibrary
 const std::string Media::Table::Name = "Media";
 const std::string Media::Table::PrimaryKeyColumn = "id_media";
 int64_t Media::* const Media::Table::PrimaryKey = &Media::m_id;
+const std::string Media::FtsTable::Name = "MediaFts";
 
 Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -957,7 +958,7 @@ bool Media::addLabel( LabelPtr label )
             std::string req = "INSERT INTO " + Label::FileRelationTable::Name + " VALUES(?, ?)";
             if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, label->id(), m_id ) == 0 )
                 return false;
-            const std::string reqFts = "UPDATE " + Media::Table::Name + "Fts "
+            const std::string reqFts = "UPDATE " + Media::FtsTable::Name + " "
                 "SET labels = labels || ' ' || ? WHERE rowid = ?";
             if ( sqlite::Tools::executeUpdate( m_ml->getConn(), reqFts, label->name(), m_id ) == false )
                 return false;
@@ -987,7 +988,7 @@ bool Media::removeLabel( LabelPtr label )
             std::string req = "DELETE FROM " + Label::FileRelationTable::Name + " WHERE label_id = ? AND media_id = ?";
             if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, label->id(), m_id ) == false )
                 return false;
-            const std::string reqFts = "UPDATE " + Media::Table::Name + "Fts "
+            const std::string reqFts = "UPDATE " + Media::FtsTable::Name + " "
                     "SET labels = TRIM(REPLACE(labels, ?, '')) WHERE rowid = ?";
             if ( sqlite::Tools::executeUpdate( m_ml->getConn(), reqFts, label->name(), m_id ) == false )
                 return false;
@@ -1010,8 +1011,8 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
     req += addRequestJoin( params, true, false );
 
     req +=  " WHERE"
-            " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
-            " WHERE " + Media::Table::Name + "Fts MATCH ?)"
+            " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
+            " WHERE " + Media::FtsTable::Name + " MATCH ?)"
             " AND m.is_present = 1"
             " AND (f.type = ? OR f.type = ?)"
             " AND m.type != ? AND m.type != ?";
@@ -1029,8 +1030,8 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
 
     req += addRequestJoin( params, true, false );
     req +=  " WHERE"
-            " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
-            " WHERE " + Media::Table::Name + "Fts MATCH ?)"
+            " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
+            " WHERE " + Media::FtsTable::Name + " MATCH ?)"
             " AND m.is_present = 1"
             " AND (f.type = ? OR f.type = ?)"
             " AND m.type = ?";
@@ -1047,8 +1048,8 @@ Query<IMedia> Media::searchAlbumTracks(MediaLibraryPtr ml, const std::string& pa
 
     req += addRequestJoin( params, true, true );
     req +=  " WHERE"
-            " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
-            " WHERE " + Media::Table::Name + "Fts MATCH ?)"
+            " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
+            " WHERE " + Media::FtsTable::Name + " MATCH ?)"
             " AND att.album_id = ?"
             " AND m.is_present = 1"
             " AND f.type = ?"
@@ -1066,8 +1067,8 @@ Query<IMedia> Media::searchArtistTracks(MediaLibraryPtr ml, const std::string& p
     req += addRequestJoin( params, true, true );
 
     req +=  " WHERE"
-            " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
-            " WHERE " + Media::Table::Name + "Fts MATCH ?)"
+            " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
+            " WHERE " + Media::FtsTable::Name + " MATCH ?)"
             " AND att.artist_id = ?"
             " AND m.is_present = 1"
             " AND f.type = ?"
@@ -1085,8 +1086,8 @@ Query<IMedia> Media::searchGenreTracks(MediaLibraryPtr ml, const std::string& pa
     req += addRequestJoin( params, true, true );
 
     req +=  " WHERE"
-            " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
-            " WHERE " + Media::Table::Name + "Fts MATCH ?)"
+            " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
+            " WHERE " + Media::FtsTable::Name + " MATCH ?)"
             " AND att.genre_id = ?"
             " AND m.is_present = 1"
             " AND f.type = ?"
@@ -1106,8 +1107,8 @@ Query<IMedia> Media::searchShowEpisodes(MediaLibraryPtr ml, const std::string& p
 
     req +=  " INNER JOIN " + ShowEpisode::Table::Name + " ep ON ep.media_id = m.id_media "
             " WHERE"
-            " m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
-            " WHERE " + Media::Table::Name + "Fts MATCH ?)"
+            " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
+            " WHERE " + Media::FtsTable::Name + " MATCH ?)"
             " AND ep.show_id = ?"
             " AND m.is_present = 1"
             " AND f.type = ?"
@@ -1127,8 +1128,8 @@ Query<IMedia> Media::searchInPlaylist( MediaLibraryPtr ml, const std::string& pa
 
     req += "LEFT JOIN PlaylistMediaRelation pmr ON pmr.media_id = m.id_media "
            "WHERE pmr.playlist_id = ? AND m.is_present != 0 AND "
-           "m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts "
-           "WHERE " + Media::Table::Name + "Fts MATCH ?)";
+           "m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name + " "
+           "WHERE " + Media::FtsTable::Name + " MATCH ?)";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ), playlistId,
                                       sqlite::Tools::sanitizePattern( pattern ) );
@@ -1192,8 +1193,8 @@ Query<IMedia> Media::searchFromFolderId( MediaLibraryPtr ml,
     std::string req = "FROM " + Table::Name +  " m ";
     req += addRequestJoin( params, false, false );
     req += " WHERE m.folder_id = ?";
-    req += " AND m.id_media IN (SELECT rowid FROM " + Media::Table::Name + "Fts"
-    " WHERE " + Media::Table::Name + "Fts MATCH ?)";
+    req += " AND m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
+    " WHERE " + Media::FtsTable::Name + " MATCH ?)";
     if ( type != Type::Unknown )
     {
         req += " AND m.type = ?";
