@@ -77,6 +77,7 @@ public:
     static void createTable( sqlite::Connection* dbConn );
     static void createTriggers( sqlite::Connection* dbConn , uint32_t dbModel);
     static std::string schema( const std::string& tableName, uint32_t dbModel );
+    static bool checkDbModel( MediaLibraryPtr ml );
     static Query<IPlaylist> search( MediaLibraryPtr ml, const std::string& name,
                                     const QueryParameters* params );
     static Query<IPlaylist> listAll( MediaLibraryPtr ml, const QueryParameters* params );

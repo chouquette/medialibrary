@@ -399,6 +399,19 @@ std::string Playlist::schema( const std::string& tableName, uint32_t )
     ")";
 }
 
+bool Playlist::checkDbModel(MediaLibraryPtr ml)
+{
+    return sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name ) &&
+           sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( FtsTable::Name, Settings::DbModelVersion ),
+                                       FtsTable::Name ) &&
+           sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( MediaRelationTable::Name, Settings::DbModelVersion ),
+                                       MediaRelationTable::Name );
+}
+
 Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,
                                    const QueryParameters* params )
 {

@@ -621,3 +621,9 @@ TEST_F( Playlists, AutoRemoveTask )
     Playlist::destroy( ml.get(), pl->id() );
     ASSERT_EQ( 0u, ml->countNbTasks() );
 }
+
+TEST_F( Playlists, CheckDbModel )
+{
+    auto res = Playlist::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}
