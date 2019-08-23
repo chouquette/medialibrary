@@ -215,11 +215,11 @@ std::string Show::schema( const std::string& tableName, uint32_t )
 {
     if ( tableName == FtsTable::Name )
     {
-        return "CREATE VIRTUAL TABLE IF NOT EXISTS " + FtsTable::Name +
+        return "CREATE VIRTUAL TABLE " + FtsTable::Name +
                " USING FTS3(title)";
     }
     assert( tableName == Table::Name );
-    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    return "CREATE TABLE " + Table::Name +
     "("
        "id_show INTEGER PRIMARY KEY AUTOINCREMENT,"
        "title TEXT,"
