@@ -19,7 +19,7 @@
 
 "DROP TABLE " + Media::Table::Name,
 
-#include "database/tables/Media_v14.sql"
+Media::schema( Media::Table::Name, 14 ),
 
 "INSERT INTO " + Media::Table::Name + "("
     "id_media, type, subtype, duration, play_count, last_played_date, real_last_played_date, insertion_date,"

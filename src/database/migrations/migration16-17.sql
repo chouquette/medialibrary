@@ -32,7 +32,7 @@
 
 "DROP TABLE " + Media::Table::Name,
 
-#include "database/tables/Media_v17.sql"
+Media::schema( Media::Table::Name, 17 ),
 
 "INSERT INTO " + Media::Table::Name + " SELECT * FROM " + Media::Table::Name + "_backup",
 "DROP TABLE " + Media::Table::Name + "_backup",

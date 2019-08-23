@@ -900,7 +900,8 @@ void Media::setFileName( std::string fileName )
 void Media::createTable( sqlite::Connection* connection )
 {
     std::string reqs[] = {
-        #include "database/tables/Media_v17.sql"
+        schema( Table::Name, Settings::DbModelVersion ),
+        schema( FtsTable::Name, Settings::DbModelVersion ),
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( connection, req );
@@ -941,6 +942,45 @@ void Media::createTriggers( sqlite::Connection* connection, uint32_t modelVersio
                 "(last_played_date, real_last_played_date, insertion_date)";
         sqlite::Tools::executeRequest( connection, req );
     }
+}
+
+std::string Media::schema( const std::string& tableName, uint32_t dbModel )
+{
+    if ( tableName == FtsTable::Name )
+    {
+        return "CREATE VIRTUAL TABLE IF NOT EXISTS " + FtsTable::Name +
+               " USING FTS3(title,labels)";
+    }
+    assert( tableName == Table::Name );
+    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    "("
+        "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "type INTEGER,"
+        "subtype INTEGER NOT NULL DEFAULT " +
+            std::to_string( static_cast<typename std::underlying_type<SubType>::type>(
+                                SubType::Unknown ) ) + ","
+        "duration INTEGER DEFAULT -1,"
+        "play_count UNSIGNED INTEGER,"
+        "last_played_date UNSIGNED INTEGER,"
+        "real_last_played_date UNSIGNED INTEGER,"
+        "insertion_date UNSIGNED INTEGER,"
+        "release_date UNSIGNED INTEGER," +
+        ( dbModel >= 17 ? "" : "thumbnail_id INTEGER," ) +
+        "title TEXT COLLATE NOCASE,"
+        "filename TEXT COLLATE NOCASE,"
+        "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
+        "is_present BOOLEAN NOT NULL DEFAULT 1,"
+        "device_id INTEGER,"
+        "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+        "folder_id UNSIGNED INTEGER," +
+        (
+            dbModel >= 17 ? "" :
+              "FOREIGN KEY(thumbnail_id) REFERENCES " + Thumbnail::Table::Name
+                + "(id_thumbnail),"
+        ) +
+        "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
+        + "(id_folder)"
+    ")";
 }
 
 bool Media::addLabel( LabelPtr label )
