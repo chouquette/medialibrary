@@ -1,17 +1,19 @@
 "CREATE TRIGGER IF NOT EXISTS update_playlist_order_on_insert AFTER INSERT"
-" ON PlaylistMediaRelation"
+" ON " + Playlist::MediaRelationTable::Name +
 " WHEN new.position IS NOT NULL"
 " BEGIN "
-    "UPDATE PlaylistMediaRelation SET position = position + 1"
+    "UPDATE " + Playlist::MediaRelationTable::Name +
+    " SET position = position + 1"
     " WHERE playlist_id = new.playlist_id"
     " AND position >= new.position"
     " AND rowid != new.rowid;"
 " END",
 
 "CREATE TRIGGER IF NOT EXISTS update_playlist_order_on_delete AFTER DELETE"
-" ON PlaylistMediaRelation"
+" ON " + Playlist::MediaRelationTable::Name +
 " BEGIN "
-    "UPDATE PlaylistMediaRelation SET position = position - 1"
+    "UPDATE " + Playlist::MediaRelationTable::Name +
+    " SET position = position - 1"
     " WHERE playlist_id = old.playlist_id"
     " AND position > old.position;"
 " END",
@@ -35,4 +37,4 @@
 " END",
 
 "CREATE INDEX IF NOT EXISTS playlist_position_pl_id_index "
-    "ON PlaylistMediaRelation(playlist_id, position)",
+    "ON " + Playlist::MediaRelationTable::Name + "(playlist_id, position)",

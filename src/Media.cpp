@@ -45,6 +45,7 @@
 #include "Movie.h"
 #include "ShowEpisode.h"
 #include "SubtitleTrack.h"
+#include "Playlist.h"
 
 #include "database/SqliteTools.h"
 #include "database/SqliteQuery.h"
@@ -920,7 +921,7 @@ void Media::createTriggers( sqlite::Connection* connection, uint32_t modelVersio
     {
         sqlite::Tools::executeRequest( connection,
             "CREATE TRIGGER IF NOT EXISTS increment_media_nb_playlist AFTER INSERT ON "
-            " PlaylistMediaRelation "
+            + Playlist::MediaRelationTable::Name +
             " BEGIN "
                 " UPDATE " + Media::Table::Name + " SET nb_playlists = nb_playlists + 1 "
                     " WHERE id_media = new.media_id;"
@@ -929,7 +930,7 @@ void Media::createTriggers( sqlite::Connection* connection, uint32_t modelVersio
 
         sqlite::Tools::executeRequest( connection,
             "CREATE TRIGGER IF NOT EXISTS decrement_media_nb_playlist AFTER DELETE ON "
-            " PlaylistMediaRelation "
+            + Playlist::MediaRelationTable::Name +
             " BEGIN "
                 " UPDATE " + Media::Table::Name + " SET nb_playlists = nb_playlists - 1 "
                     " WHERE id_media = old.media_id;"
@@ -1176,7 +1177,8 @@ Query<IMedia> Media::searchInPlaylist( MediaLibraryPtr ml, const std::string& pa
 
     req += addRequestJoin( params, true, false );
 
-    req += "LEFT JOIN PlaylistMediaRelation pmr ON pmr.media_id = m.id_media "
+    req += "LEFT JOIN " + Playlist::MediaRelationTable::Name + " pmr "
+           "ON pmr.media_id = m.id_media "
            "WHERE pmr.playlist_id = ? AND m.is_present != 0 AND "
            "m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name + " "
            "WHERE " + Media::FtsTable::Name + " MATCH ?)";

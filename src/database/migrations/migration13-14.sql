@@ -38,8 +38,9 @@ Media::schema( Media::Table::Name, 14 ),
 /******************* Populate new media.nb_playlists **************************/
 
 "UPDATE " + Media::Table::Name + " SET nb_playlists = "
-"(SELECT COUNT(media_id) FROM PlaylistMediaRelation WHERE media_id = id_media )"
-"WHERE id_media IN (SELECT media_id FROM PlaylistMediaRelation)",
+"(SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
+" WHERE media_id = id_media )"
+"WHERE id_media IN (SELECT media_id FROM " + Playlist::MediaRelationTable::Name + ")",
 
 /*************** Populate new media.device_id & folder_id *********************/
 
@@ -97,7 +98,7 @@ Metadata::schema( Metadata::Table::Name, 14 ),
     "artwork_mrl TEXT"
 ")",
 
-"CREATE TEMPORARY TABLE PlaylistMediaRelation_backup"
+"CREATE TEMPORARY TABLE " + Playlist::MediaRelationTable::Name + "_backup"
 "("
     "media_id INTEGER,"
     "playlist_id INTEGER,"
@@ -105,19 +106,19 @@ Metadata::schema( Metadata::Table::Name, 14 ),
 ")",
 
 "INSERT INTO " + Playlist::Table::Name + "_backup SELECT * FROM " + Playlist::Table::Name,
-"INSERT INTO PlaylistMediaRelation_backup SELECT * FROM PlaylistMediaRelation",
+"INSERT INTO " + Playlist::MediaRelationTable::Name + "_backup SELECT * FROM " + Playlist::MediaRelationTable::Name,
 
 "DROP TABLE " + Playlist::Table::Name,
-"DROP TABLE PlaylistMediaRelation",
+"DROP TABLE " + Playlist::MediaRelationTable::Name,
 
 #include "database/tables/Playlist_v14.sql"
 
 "INSERT INTO " + Playlist::Table::Name + " SELECT * FROM " + Playlist::Table::Name + "_backup",
-"INSERT INTO PlaylistMediaRelation SELECT media_id, NULL, playlist_id, position "
-    "FROM PlaylistMediaRelation_backup",
+"INSERT INTO " + Playlist::MediaRelationTable::Name + " SELECT media_id, NULL, playlist_id, position "
+    "FROM " + Playlist::MediaRelationTable::Name + "_backup",
 
 "DROP TABLE " + Playlist::Table::Name + "_backup",
-"DROP TABLE PlaylistMediaRelation_backup",
+"DROP TABLE " + Playlist::MediaRelationTable::Name + "_backup",
 
 /******************* Migrate Device table *************************************/
 

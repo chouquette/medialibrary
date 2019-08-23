@@ -39,6 +39,7 @@ const std::string Playlist::Table::Name = "Playlist";
 const std::string Playlist::Table::PrimaryKeyColumn = "id_playlist";
 int64_t Playlist::* const Playlist::Table::PrimaryKey = &Playlist::m_id;
 const std::string Playlist::FtsTable::Name = "PlaylistFts";
+const std::string Playlist::MediaRelationTable::Name = "PlaylistMediaRelation";
 
 
 Playlist::Playlist( MediaLibraryPtr ml, sqlite::Row& row )
@@ -117,7 +118,7 @@ const std::string& Playlist::artworkMrl() const
 Query<IMedia> Playlist::media() const
 {
     static const std::string base = "FROM " + Media::Table::Name + " m "
-        "LEFT JOIN PlaylistMediaRelation pmr ON pmr.media_id = m.id_media "
+        "LEFT JOIN " + Playlist::MediaRelationTable::Name + " pmr ON pmr.media_id = m.id_media "
         "WHERE pmr.playlist_id = ? AND m.is_present != 0";
     static const std::string req = "SELECT m.* " + base + " ORDER BY pmr.position";
     static const std::string countReq = "SELECT COUNT(*) " + base;
@@ -138,12 +139,13 @@ void Playlist::curateNullMediaID() const
 {
     auto dbConn = m_ml->getConn();
     auto t = dbConn->newTransaction();
-    std::string req = "SELECT rowid, mrl FROM PlaylistMediaRelation "
+    std::string req = "SELECT rowid, mrl FROM " + Playlist::MediaRelationTable::Name + " "
             "WHERE media_id IS NULL "
             "AND playlist_id = ?";
     sqlite::Statement stmt{ dbConn->handle(), req };
     stmt.execute( m_id );
-    std::string updateReq = "UPDATE PlaylistMediaRelation SET media_id = ? WHERE rowid = ?";
+    std::string updateReq = "UPDATE " + Playlist::MediaRelationTable::Name +
+            " SET media_id = ? WHERE rowid = ?";
     auto mediaNotFound = false;
 
     for ( sqlite::Row row = stmt.row(); row != nullptr; row = stmt.row() )
@@ -168,7 +170,7 @@ void Playlist::curateNullMediaID() const
     if ( mediaNotFound )
     {
         // Batch all deletion at once instead of doing it during the loop
-        std::string deleteReq = "DELETE FROM PlaylistMediaRelation "
+        std::string deleteReq = "DELETE FROM " + Playlist::MediaRelationTable::Name + " "
                 "WHERE playlist_id = ? AND media_id IS NULL";
         sqlite::Tools::executeDelete( dbConn, deleteReq, m_id );
     }
@@ -194,18 +196,20 @@ bool Playlist::add( const IMedia& media, uint32_t position )
     }
     if ( position == UINT32_MAX )
     {
-        static const std::string req = "INSERT INTO PlaylistMediaRelation"
+        static const std::string req = "INSERT INTO " + Playlist::MediaRelationTable::Name +
                 "(media_id, mrl, playlist_id, position) VALUES(?1, ?2, ?3,"
-                "(SELECT COUNT(media_id) FROM PlaylistMediaRelation WHERE playlist_id = ?3))";
+                "(SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
+                " WHERE playlist_id = ?3))";
         if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
                                            (*mainFile)->mrl(), m_id ) == false )
             return false;
     }
     else
     {
-        static const std::string req = "INSERT INTO PlaylistMediaRelation"
+        static const std::string req = "INSERT INTO " + Playlist::MediaRelationTable::Name + " "
                 "(media_id, mrl, playlist_id, position) VALUES(?1, ?2, ?3,"
-                "min(?4, (SELECT COUNT(media_id) FROM PlaylistMediaRelation WHERE playlist_id = ?3)))";
+                "min(?4, (SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
+                " WHERE playlist_id = ?3)))";
         if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
                                            (*mainFile)->mrl(), m_id, position ) == false )
             return false;
@@ -251,8 +255,9 @@ std::shared_ptr<File> Playlist::addFile( const fs::IFile& fileFs, int64_t parent
 
 bool Playlist::contains( int64_t mediaId, uint32_t position )
 {
-    static const std::string req = "SELECT COUNT(media_id) FROM PlaylistMediaRelation "
-            "WHERE media_id = ? AND playlist_id = ? AND position = ?";
+    static const std::string req = "SELECT COUNT(media_id) FROM "
+            + Playlist::MediaRelationTable::Name +
+            " WHERE media_id = ? AND playlist_id = ? AND position = ?";
     uint32_t count;
     auto dbConn = m_ml->getConn();
     {
@@ -281,8 +286,9 @@ bool Playlist::move( uint32_t from, uint32_t position )
      * However to do so, we need to fetch the media ID at the previous location.
      */
     auto t = dbConn->newTransaction();
-    const std::string fetchReq = "SELECT media_id FROM PlaylistMediaRelation WHERE"
-            " playlist_id = ? AND position = ?";
+    const std::string fetchReq = "SELECT media_id FROM " +
+            Playlist::MediaRelationTable::Name +
+            " WHERE playlist_id = ? AND position = ?";
     sqlite::Statement stmt( dbConn->handle(), fetchReq );
     int64_t mediaId;
     stmt.execute( m_id, from );
@@ -315,8 +321,9 @@ bool Playlist::move( uint32_t from, uint32_t position )
 
 bool Playlist::remove( uint32_t position )
 {
-    static const std::string req = "DELETE FROM PlaylistMediaRelation WHERE "
-            "playlist_id = ? AND position = ?";
+    static const std::string req = "DELETE FROM " +
+            Playlist::MediaRelationTable::Name +
+            " WHERE playlist_id = ? AND position = ?";
     if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, position ) == false )
         return false;
     auto notifier = m_ml->getNotifier();
@@ -352,7 +359,7 @@ void Playlist::createTriggers( sqlite::Connection* dbConn, uint32_t dbModel )
     {
         sqlite::Tools::executeRequest( dbConn,
             "CREATE INDEX IF NOT EXISTS playlist_media_pl_id_index "
-            "ON PlaylistMediaRelation(media_id, playlist_id)" );
+            "ON " + Playlist::MediaRelationTable::Name + "(media_id, playlist_id)" );
     }
 }
 
@@ -379,7 +386,8 @@ void Playlist::clearExternalPlaylistContent(MediaLibraryPtr ml)
     // deletion of the associated task through the Task.playlist_id Playlist.id_playlist
     // foreign key, and therefor they wouldn't be rescanned.
     // Instead, flush the playlist content.
-    const std::string req = "DELETE FROM PlaylistMediaRelation WHERE playlist_id IN ("
+    const std::string req = "DELETE FROM " + Playlist::MediaRelationTable::Name +
+            " WHERE playlist_id IN ("
             "SELECT id_playlist FROM " + Playlist::Table::Name + " WHERE "
             "file_id IS NOT NULL)";
     sqlite::Tools::executeDelete( ml->getConn(), req );
@@ -387,7 +395,8 @@ void Playlist::clearExternalPlaylistContent(MediaLibraryPtr ml)
 
 void Playlist::clearContent()
 {
-    const std::string req = "DELETE FROM PlaylistMediaRelation WHERE playlist_id = ?";
+    const std::string req = "DELETE FROM " + Playlist::MediaRelationTable::Name +
+            " WHERE playlist_id = ?";
     sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id );
 }
 

@@ -1,7 +1,8 @@
 "CREATE TRIGGER IF NOT EXISTS update_playlist_order AFTER UPDATE OF position"
-" ON PlaylistMediaRelation"
+" ON " + Playlist::MediaRelationTable::Name +
 " BEGIN "
-    "UPDATE PlaylistMediaRelation SET position = position + 1"
+    "UPDATE " + Playlist::MediaRelationTable::Name +
+    " SET position = position + 1"
     " WHERE playlist_id = new.playlist_id"
     " AND position = new.position"
     // We don't want to trigger a self-update when the insert trigger fires.
@@ -9,19 +10,21 @@
 " END",
 
 "CREATE TRIGGER IF NOT EXISTS append_new_playlist_record AFTER INSERT"
-" ON PlaylistMediaRelation"
+" ON " + Playlist::MediaRelationTable::Name +
 " WHEN new.position IS NULL"
 " BEGIN "
-    " UPDATE PlaylistMediaRelation SET position = ("
-        "SELECT COUNT(media_id) FROM PlaylistMediaRelation WHERE playlist_id = new.playlist_id"
+    " UPDATE " + Playlist::MediaRelationTable::Name + " SET position = ("
+        "SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
+        " WHERE playlist_id = new.playlist_id"
     ") WHERE playlist_id=new.playlist_id AND media_id = new.media_id;"
 " END",
 
 "CREATE TRIGGER IF NOT EXISTS update_playlist_order_on_insert AFTER INSERT"
-" ON PlaylistMediaRelation"
+" ON " + Playlist::MediaRelationTable::Name +
 " WHEN new.position IS NOT NULL"
 " BEGIN "
-    "UPDATE PlaylistMediaRelation SET position = position + 1"
+    "UPDATE " + Playlist::MediaRelationTable::Name +
+    " SET position = position + 1"
     " WHERE playlist_id = new.playlist_id"
     " AND position = new.position"
     " AND media_id != new.media_id;"

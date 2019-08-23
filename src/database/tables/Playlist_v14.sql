@@ -8,7 +8,7 @@
     + "(id_file) ON DELETE CASCADE"
 ")",
 
-"CREATE TABLE IF NOT EXISTS PlaylistMediaRelation"
+"CREATE TABLE IF NOT EXISTS " + Playlist::MediaRelationTable::Name +
 "("
     "media_id INTEGER,"
     "mrl STRING,"

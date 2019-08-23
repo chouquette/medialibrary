@@ -1,6 +1,6 @@
 /* Migrate to contiguous playlist position index */
 
-"CREATE TEMPORARY TABLE PlaylistMediaRelation_backup"
+"CREATE TEMPORARY TABLE " + Playlist::MediaRelationTable::Name + "_backup"
 "("
     "media_id INTEGER,"
     "mrl STRING,"
@@ -8,20 +8,21 @@
     "position INTEGER"
 ")",
 
-"INSERT INTO PlaylistMediaRelation_backup"
+"INSERT INTO " + Playlist::MediaRelationTable::Name + "_backup"
     "(media_id, mrl, playlist_id, position) "
     "SELECT media_id, mrl, playlist_id, ROW_NUMBER() OVER ("
         "PARTITION BY playlist_id "
         "ORDER BY position"
     ") - 1 "
-"FROM PlaylistMediaRelation",
+"FROM " + Playlist::MediaRelationTable::Name,
 
-"DROP TABLE PlaylistMediaRelation",
+"DROP TABLE " + Playlist::MediaRelationTable::Name + "",
 
 #include "database/tables/Playlist_v16.sql"
 
-"INSERT INTO PlaylistMediaRelation SELECT * FROM PlaylistMediaRelation_backup",
-"DROP TABLE PlaylistMediaRelation_backup",
+"INSERT INTO " + Playlist::MediaRelationTable::Name +
+" SELECT * FROM " + Playlist::MediaRelationTable::Name + "_backup",
+"DROP TABLE " + Playlist::MediaRelationTable::Name + "_backup",
 
 #include "database/tables/Playlist_triggers_v16.sql"
 
