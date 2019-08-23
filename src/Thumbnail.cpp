@@ -324,7 +324,7 @@ std::string Thumbnail::schema( const std::string& tableName, uint32_t dbModel )
             assert( !"Invalid model version for thumbnail linking table schema" );
             return "<invalid request>";
         }
-        return "CREATE TABLE IF NOT EXISTS " + LinkingTable::Name +
+        return "CREATE TABLE " + LinkingTable::Name +
         "("
             "entity_id UNSIGNED INTEGER NOT NULL,"
             "entity_type UNSIGNED INTEGER NOT NULL,"
@@ -340,14 +340,14 @@ std::string Thumbnail::schema( const std::string& tableName, uint32_t dbModel )
     assert( tableName == Table::Name );
     if ( dbModel <= 17 )
     {
-        return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+        return "CREATE TABLE " + Table::Name +
         "("
             "id_thumbnail INTEGER PRIMARY KEY AUTOINCREMENT,"
             "mrl TEXT,"
             "is_generated BOOLEAN NOT NULL"
         ")";
     }
-    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    return "CREATE TABLE " + Table::Name +
     "("
         "id_thumbnail INTEGER PRIMARY KEY AUTOINCREMENT,"
         "mrl TEXT,"

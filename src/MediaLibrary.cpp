@@ -1242,12 +1242,12 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     auto dbConn = getConn();
     sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
     auto t = dbConn->newTransaction();
-    Thumbnail::createTable( dbConn );
     SubtitleTrack::createTable( dbConn );
     SubtitleTrack::createTriggers( dbConn );
     Chapter::createTable( dbConn );
     std::string reqs[] = {
 #               include "database/migrations/migration13-14.sql"
+        Thumbnail::schema( Thumbnail::Table::Name, 14 ),
     };
 
     for ( const auto& req : reqs )
