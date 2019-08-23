@@ -127,22 +127,8 @@ std::shared_ptr<IShow> ShowEpisode::show()
 
 void ShowEpisode::createTable( sqlite::Connection* dbConnection )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + ShowEpisode::Table::Name
-            + "("
-                "id_episode INTEGER PRIMARY KEY AUTOINCREMENT,"
-                "media_id UNSIGNED INTEGER NOT NULL,"
-                "episode_number UNSIGNED INT,"
-                "season_number UNSIGNED INT,"
-                "episode_summary TEXT,"
-                "tvdb_id TEXT,"
-                "show_id UNSIGNED INT,"
-                "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
-                    + "(id_media) ON DELETE CASCADE,"
-                "FOREIGN KEY(show_id) REFERENCES " + Show::Table::Name
-                    + "(id_show) ON DELETE CASCADE"
-            ")";
-
-    sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   schema( Table::Name, Settings::DbModelVersion ) );
 }
 
 void ShowEpisode::createTrigger( sqlite::Connection* dbConnection )
@@ -150,6 +136,25 @@ void ShowEpisode::createTrigger( sqlite::Connection* dbConnection )
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS show_episode_media_show_idx ON " +
             ShowEpisode::Table::Name + "(media_id, show_id)";
     sqlite::Tools::executeRequest( dbConnection, indexReq );
+}
+
+std::string ShowEpisode::schema( const std::string& tableName, uint32_t )
+{
+    assert( tableName == Table::Name );
+    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    "("
+        "id_episode INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "media_id UNSIGNED INTEGER NOT NULL,"
+        "episode_number UNSIGNED INT,"
+        "season_number UNSIGNED INT,"
+        "episode_summary TEXT,"
+        "tvdb_id TEXT,"
+        "show_id UNSIGNED INT,"
+        "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
+            + "(id_media) ON DELETE CASCADE,"
+        "FOREIGN KEY(show_id) REFERENCES " + Show::Table::Name
+            + "(id_show) ON DELETE CASCADE"
+    ")";
 }
 
 std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml, int64_t mediaId,
