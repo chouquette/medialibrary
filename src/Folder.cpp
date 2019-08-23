@@ -99,6 +99,15 @@ void Folder::createTriggers( sqlite::Connection* connection, uint32_t modelVersi
             "CREATE INDEX IF NOT EXISTS folder_parent_id ON " + Table::Name +
             "(parent_id)" );
     }
+    else if ( modelVersion == 15 )
+    {
+        sqlite::Tools::executeRequest( connection,
+            "CREATE INDEX IF NOT EXISTS folder_device_id ON " + Table::Name +
+                "(device_id)" );
+        sqlite::Tools::executeRequest( connection,
+            "CREATE INDEX IF NOT EXISTS folder_parent_id ON " + Table::Name +
+                "(parent_id)" );
+    }
     if ( modelVersion >= 14 )
     {
         const std::string v14Reqs[] = {
