@@ -157,25 +157,8 @@ void VideoTrack::removeFromMedia( MediaLibraryPtr ml, int64_t mediaId )
 
 void VideoTrack::createTable( sqlite::Connection* dbConnection )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + VideoTrack::Table::Name
-            + "(" +
-                VideoTrack::Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                "codec TEXT,"
-                "width UNSIGNED INTEGER,"
-                "height UNSIGNED INTEGER,"
-                "fps_num UNSIGNED INTEGER,"
-                "fps_den UNSIGNED INTEGER,"
-                "bitrate UNSIGNED INTEGER,"
-                "sar_num UNSIGNED INTEGER,"
-                "sar_den UNSIGNED INTEGER,"
-                "media_id UNSIGNED INT,"
-                "language TEXT,"
-                "description TEXT,"
-                "FOREIGN KEY ( media_id ) REFERENCES " + Media::Table::Name +
-                    "(id_media) ON DELETE CASCADE"
-            ")";
-
-    sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   schema( Table::Name, Settings::DbModelVersion ) );
 }
 
 void VideoTrack::createIndexes( sqlite::Connection* dbConnection )
@@ -183,6 +166,28 @@ void VideoTrack::createIndexes( sqlite::Connection* dbConnection )
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS video_track_media_idx ON " +
             Table::Name + "(media_id)";
     sqlite::Tools::executeRequest( dbConnection, indexReq );
+}
+
+std::string VideoTrack::schema( const std::string& tableName, uint32_t )
+{
+    assert( tableName == Table::Name );
+    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    "(" +
+        Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "codec TEXT,"
+        "width UNSIGNED INTEGER,"
+        "height UNSIGNED INTEGER,"
+        "fps_num UNSIGNED INTEGER,"
+        "fps_den UNSIGNED INTEGER,"
+        "bitrate UNSIGNED INTEGER,"
+        "sar_num UNSIGNED INTEGER,"
+        "sar_den UNSIGNED INTEGER,"
+        "media_id UNSIGNED INT,"
+        "language TEXT,"
+        "description TEXT,"
+        "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name +
+            "(id_media) ON DELETE CASCADE"
+    ")";
 }
 
 }
