@@ -85,19 +85,8 @@ const std::string&SubtitleTrack::encoding() const
 
 void SubtitleTrack::createTable( sqlite::Connection* dbConnection )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + Table::Name +
-            "(" +
-                Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                "codec TEXT,"
-                "language TEXT,"
-                "description TEXT,"
-                "encoding TEXT,"
-                "media_id UNSIGNED INT,"
-                "FOREIGN KEY( media_id ) REFERENCES " + Media::Table::Name +
-                    "(id_media) ON DELETE CASCADE"
-            ")";
-
-    sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   schema( Table::Name, Settings::DbModelVersion ) );
 }
 
 void SubtitleTrack::createTriggers( sqlite::Connection* dbConnection )
@@ -105,6 +94,22 @@ void SubtitleTrack::createTriggers( sqlite::Connection* dbConnection )
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS subtitle_track_media_idx "
             " ON " + Table::Name + "(media_id)";
     sqlite::Tools::executeRequest( dbConnection, indexReq );
+}
+
+std::string SubtitleTrack::schema( const std::string& tableName, uint32_t )
+{
+    assert( tableName == Table::Name );
+    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    "(" +
+        Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "codec TEXT,"
+        "language TEXT,"
+        "description TEXT,"
+        "encoding TEXT,"
+        "media_id UNSIGNED INT,"
+        "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name +
+            "(id_media) ON DELETE CASCADE"
+    ")";
 }
 
 std::shared_ptr<SubtitleTrack> SubtitleTrack::create( MediaLibraryPtr ml,
