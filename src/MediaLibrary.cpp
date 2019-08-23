@@ -192,6 +192,7 @@ void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
     Thumbnail::createTriggers( m_dbConnection.get() );
     parser::Task::createTriggers( m_dbConnection.get(), dbModelVersion );
     AudioTrack::createIndexes( m_dbConnection.get() );
+    SubtitleTrack::createTriggers( m_dbConnection.get() );
 }
 
 void MediaLibrary::registerEntityHooks()
@@ -1243,6 +1244,7 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     auto t = dbConn->newTransaction();
     Thumbnail::createTable( dbConn );
     SubtitleTrack::createTable( dbConn );
+    SubtitleTrack::createTriggers( dbConn );
     Chapter::createTable( dbConn );
     std::string reqs[] = {
 #               include "database/migrations/migration13-14.sql"

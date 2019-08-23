@@ -47,6 +47,7 @@ public:
     virtual const std::string& encoding() const override;
 
     static void createTable( sqlite::Connection* dbConnection );
+    static void createTriggers( sqlite::Connection* dbConnection );
     static std::shared_ptr<SubtitleTrack> create( MediaLibraryPtr ml,
                 std::string codec, std::string language, std::string description,
                 std::string encoding, int64_t mediaId );
