@@ -211,14 +211,14 @@ std::string Metadata::schema( const std::string& tableName, uint32_t dbModel )
     assert( tableName == Table::Name );
     if ( dbModel < 14 )
     {
-        return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+        return "CREATE TABLE " + Table::Name +
         "("
             "id_media INTEGER,"
             "type INTEGER,"
             "value TEXT"
         ")";
     }
-    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    return "CREATE TABLE " + Table::Name +
     "("
         "id_media INTEGER,"
         "entity_type INTEGER,"
