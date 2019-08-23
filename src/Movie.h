@@ -51,6 +51,7 @@ class Movie : public IMovie, public DatabaseHelpers<Movie>
         bool setImdbId(const std::string& imdbId);
 
         static void createTable( sqlite::Connection* dbConnection );
+        static std::string schema( const std::string& tableName, uint32_t dbModel );
         static std::shared_ptr<Movie> create( MediaLibraryPtr ml, int64_t mediaId );
         static MoviePtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
 

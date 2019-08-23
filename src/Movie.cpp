@@ -90,19 +90,26 @@ bool Movie::setImdbId( const std::string& imdbId )
 
 void Movie::createTable( sqlite::Connection* dbConnection )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + Movie::Table::Name
-            + "("
-                "id_movie INTEGER PRIMARY KEY AUTOINCREMENT,"
-                "media_id UNSIGNED INTEGER NOT NULL,"
-                "summary TEXT,"
-                "imdb_id TEXT,"
-                "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
-                + "(id_media) ON DELETE CASCADE"
-            ")";
-    const std::string indexReq = "CREATE INDEX IF NOT EXISTS movie_media_idx ON " +
-            Movie::Table::Name + "(media_id)";
-    sqlite::Tools::executeRequest( dbConnection, req );
-    sqlite::Tools::executeRequest( dbConnection, indexReq );
+    const std::string reqs[] = {
+        schema( Table::Name, Settings::DbModelVersion ),
+        "CREATE INDEX IF NOT EXISTS movie_media_idx ON " + Table::Name + "(media_id)",
+    };
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConnection, req );
+}
+
+std::string Movie::schema( const std::string& tableName, uint32_t )
+{
+    assert( tableName == Table::Name );
+    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    "("
+        "id_movie INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "media_id UNSIGNED INTEGER NOT NULL,"
+        "summary TEXT,"
+        "imdb_id TEXT,"
+        "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
+            + "(id_media) ON DELETE CASCADE"
+    ")";
 }
 
 std::shared_ptr<Movie> Movie::create(MediaLibraryPtr ml, int64_t mediaId )
