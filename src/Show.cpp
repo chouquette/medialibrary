@@ -227,7 +227,17 @@ std::string Show::schema( const std::string& tableName, uint32_t )
        "short_summary TEXT,"
        "artwork_mrl TEXT,"
        "tvdb_id TEXT"
-   ")";
+    ")";
+}
+
+bool Show::checkDbModel(MediaLibraryPtr ml)
+{
+    return sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name ) &&
+           sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( FtsTable::Name, Settings::DbModelVersion ),
+                                       FtsTable::Name );
 }
 
 std::shared_ptr<Show> Show::create( MediaLibraryPtr ml, const std::string& name )

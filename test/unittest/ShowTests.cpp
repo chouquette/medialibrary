@@ -332,3 +332,9 @@ TEST_F( Shows, SearchEpisodes )
     ASSERT_EQ( 1u, episodes.size() );
     ASSERT_EQ( m1->id(), episodes[0]->id() );
 }
+
+TEST_F( Shows, CheckDbModel )
+{
+    auto res = Show::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}
