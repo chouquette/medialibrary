@@ -167,11 +167,11 @@ std::string Genre::schema( const std::string& tableName, uint32_t )
 {
     if ( tableName == FtsTable::Name )
     {
-        return "CREATE VIRTUAL TABLE IF NOT EXISTS " + FtsTable::Name +
+        return "CREATE VIRTUAL TABLE " + FtsTable::Name +
                " USING FTS3(name)";
     }
     assert( tableName == Table::Name );
-    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    return "CREATE TABLE " + Table::Name +
     "("
         "id_genre INTEGER PRIMARY KEY AUTOINCREMENT,"
         "name TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
