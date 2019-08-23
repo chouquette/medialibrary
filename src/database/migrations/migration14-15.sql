@@ -17,7 +17,7 @@
 
 "DROP TABLE " + Folder::Table::Name,
 
-#include "database/tables/Folder_v15.sql"
+Folder::schema( Folder::Table::Name, 15 ),
 
 "INSERT INTO " + Folder::Table::Name + "("
     "id_folder, path, name, parent_id, is_banned, device_id, is_removable,"

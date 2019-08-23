@@ -77,7 +77,9 @@ Folder::Folder(MediaLibraryPtr ml, const std::string& path,
 void Folder::createTable( sqlite::Connection* connection)
 {
     const std::string reqs[] = {
-        #include "database/tables/Folder_v16.sql"
+        schema( Table::Name, Settings::DbModelVersion ),
+        schema( ExcludedFolderTable::Name, Settings::DbModelVersion ),
+        schema( FtsTable::Name, Settings::DbModelVersion ),
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( connection, req );
@@ -194,6 +196,48 @@ void Folder::createTriggers( sqlite::Connection* connection, uint32_t modelVersi
         for ( const auto& req : v14Reqs )
             sqlite::Tools::executeRequest( connection, req );
     }
+}
+
+std::string Folder::schema( const std::string& tableName, uint32_t dbModel )
+{
+    if ( tableName == FtsTable::Name )
+    {
+        return "CREATE VIRTUAL TABLE IF NOT EXISTS " + FtsTable::Name +
+                " USING FTS3(name)";
+    }
+    else if ( tableName == ExcludedFolderTable::Name )
+    {
+        return "CREATE TABLE IF NOT EXISTS " + ExcludedFolderTable::Name +
+        "("
+            "folder_id UNSIGNED INTEGER NOT NULL,"
+
+            "FOREIGN KEY(folder_id) REFERENCES " + Table::Name +
+            "(id_folder) ON DELETE CASCADE,"
+
+            "UNIQUE(folder_id) ON CONFLICT FAIL"
+        ")";
+    }
+    assert( tableName == Table::Name );
+    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    "("
+        "id_folder INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "path TEXT,"
+        "name TEXT" + (dbModel >= 15 ? " COLLATE NOCASE" : "") + ","
+        "parent_id UNSIGNED INTEGER,"
+        "is_banned BOOLEAN NOT NULL DEFAULT 0,"
+        "device_id UNSIGNED INTEGER,"
+        "is_removable BOOLEAN NOT NULL,"
+        "nb_audio UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+        "nb_video UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+
+        "FOREIGN KEY(parent_id) REFERENCES " + Table::Name +
+        "(id_folder) ON DELETE CASCADE,"
+
+        "FOREIGN KEY(device_id) REFERENCES " + Device::Table::Name +
+        "(id_device) ON DELETE CASCADE,"
+
+        "UNIQUE(path,device_id) ON CONFLICT FAIL"
+    ")";
 }
 
 std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& mrl,
@@ -492,9 +536,6 @@ void Folder::setName( std::string name )
     auto dbConn = m_ml->getConn();
     if ( sqlite::Tools::executeUpdate( dbConn, req, name, m_id ) == false )
         return;
-    static const std::string reqFts = "INSERT INTO " + FtsTable::Name + " "
-            "(rowid, name) VALUES(?, ?)";
-    sqlite::Tools::executeInsert( dbConn, reqFts, m_id, name );
     m_name = std::move( name );
 }
 

@@ -67,6 +67,7 @@ public:
 
     static void createTable( sqlite::Connection* connection );
     static void createTriggers( sqlite::Connection* connection, uint32_t modelVersion );
+    static std::string schema( const std::string& tableName, uint32_t dbModel );
     static std::shared_ptr<Folder> create( MediaLibraryPtr ml, const std::string& mrl, int64_t parentId, Device& device, fs::IDevice& deviceFs );
     static void excludeEntryFolder( MediaLibraryPtr ml, int64_t folderId );
     static bool ban( MediaLibraryPtr ml, const std::string& mrl );

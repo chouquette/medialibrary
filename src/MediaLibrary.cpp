@@ -1221,6 +1221,7 @@ void MediaLibrary::migrateModel12to13()
  *          .nb_video
  *      - Remove .is_present
  *      - Rename is_blacklisted to is_banned
+ *  _ Add a Folder FTS table
  *  - File:
  *      - Add .is_network
  *      - Remove .is_present

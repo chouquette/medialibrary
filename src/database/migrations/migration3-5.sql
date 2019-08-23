@@ -63,3 +63,5 @@
  " SELECT * FROM " + Playlist::Table::Name + "_backup;",
 
 "DROP TABLE " + Playlist::Table::Name + "_backup;",
+
+Folder::schema( Folder::ExcludedFolderTable::Name, 5 ),
