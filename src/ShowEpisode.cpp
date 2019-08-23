@@ -141,7 +141,7 @@ void ShowEpisode::createTrigger( sqlite::Connection* dbConnection )
 std::string ShowEpisode::schema( const std::string& tableName, uint32_t )
 {
     assert( tableName == Table::Name );
-    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    return "CREATE TABLE " + Table::Name +
     "("
         "id_episode INTEGER PRIMARY KEY AUTOINCREMENT,"
         "media_id UNSIGNED INTEGER NOT NULL,"
