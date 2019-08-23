@@ -725,6 +725,12 @@ TEST_F( Medias, SetBatch )
     ASSERT_EQ( metas[IMedia::MetadataType::Zoom], "zoom" );
 }
 
+TEST_F( Medias, MetadataCheckDbModel )
+{
+    auto res = Metadata::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}
+
 TEST_F( Medias, ExternalMrl )
 {
     auto m = ml->addExternalMedia( "https://foo.bar/sea-otters.mkv" );

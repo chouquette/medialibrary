@@ -82,6 +82,7 @@ public:
 
     static void createTable( sqlite::Connection* connection );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
+    static bool checkDbModel( MediaLibraryPtr ml );
 
 private:
     MediaLibraryPtr m_ml;
