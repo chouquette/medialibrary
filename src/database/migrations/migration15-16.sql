@@ -18,7 +18,7 @@
 
 "DROP TABLE " + Playlist::MediaRelationTable::Name + "",
 
-#include "database/tables/Playlist_v16.sql"
+Playlist::schema( Playlist::MediaRelationTable::Name, 16 ),
 
 "INSERT INTO " + Playlist::MediaRelationTable::Name +
 " SELECT * FROM " + Playlist::MediaRelationTable::Name + "_backup",

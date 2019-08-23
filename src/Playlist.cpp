@@ -335,7 +335,9 @@ bool Playlist::remove( uint32_t position )
 void Playlist::createTable( sqlite::Connection* dbConn )
 {
     std::string reqs[] = {
-        #include "database/tables/Playlist_v16.sql"
+        schema( Table::Name, Settings::DbModelVersion ),
+        schema( FtsTable::Name, Settings::DbModelVersion ),
+        schema( MediaRelationTable::Name, Settings::DbModelVersion )
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
@@ -361,6 +363,40 @@ void Playlist::createTriggers( sqlite::Connection* dbConn, uint32_t dbModel )
             "CREATE INDEX IF NOT EXISTS playlist_media_pl_id_index "
             "ON " + Playlist::MediaRelationTable::Name + "(media_id, playlist_id)" );
     }
+}
+
+std::string Playlist::schema( const std::string& tableName, uint32_t )
+{
+    if ( tableName == FtsTable::Name )
+    {
+        return "CREATE VIRTUAL TABLE IF NOT EXISTS " + FtsTable::Name +
+               " USING FTS3(name)";
+    }
+    else if ( tableName == Table::Name )
+    {
+        return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+        "("
+            + Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "name TEXT COLLATE NOCASE,"
+            "file_id UNSIGNED INT DEFAULT NULL,"
+            "creation_date UNSIGNED INT NOT NULL,"
+            "artwork_mrl TEXT,"
+            "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
+            + "(id_file) ON DELETE CASCADE"
+        ")";
+    }
+    assert( tableName == MediaRelationTable::Name );
+    return "CREATE TABLE IF NOT EXISTS " + MediaRelationTable::Name +
+    "("
+        "media_id INTEGER,"
+        "mrl STRING,"
+        "playlist_id INTEGER,"
+        "position INTEGER,"
+        "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name + "("
+            + Media::Table::PrimaryKeyColumn + ") ON DELETE SET NULL,"
+        "FOREIGN KEY(playlist_id) REFERENCES " + Playlist::Table::Name + "("
+            + Playlist::Table::PrimaryKeyColumn + ") ON DELETE CASCADE"
+    ")";
 }
 
 Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,

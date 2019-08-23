@@ -111,7 +111,8 @@ Metadata::schema( Metadata::Table::Name, 14 ),
 "DROP TABLE " + Playlist::Table::Name,
 "DROP TABLE " + Playlist::MediaRelationTable::Name,
 
-#include "database/tables/Playlist_v14.sql"
+Playlist::schema( Playlist::Table::Name, 14 ),
+Playlist::schema( Playlist::MediaRelationTable::Name, 14 ),
 
 "INSERT INTO " + Playlist::Table::Name + " SELECT * FROM " + Playlist::Table::Name + "_backup",
 "INSERT INTO " + Playlist::MediaRelationTable::Name + " SELECT media_id, NULL, playlist_id, position "
