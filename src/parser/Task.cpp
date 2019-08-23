@@ -350,26 +350,7 @@ void Task::setMrl( std::string newMrl )
 
 void Task::createTable( sqlite::Connection* dbConnection, uint32_t dbModel )
 {
-    /**
-     * In case we're coming from an old model, create the table as it was, so that
-     * intermediate migration don't fail.
-     */
-    if ( dbModel < 18 )
-    {
-        std::string reqs[] = {
-            #include "database/tables/Task_v14.sql"
-        };
-        for ( const auto& req : reqs )
-            sqlite::Tools::executeRequest( dbConnection, req );
-    }
-    else
-    {
-        std::string reqs[] = {
-            #include "database/tables/Task_v18.sql"
-        };
-        for ( const auto& req : reqs )
-            sqlite::Tools::executeRequest( dbConnection, req );
-    }
+    sqlite::Tools::executeRequest( dbConnection, schema( Table::Name, dbModel ) );
 }
 
 void Task::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModel )
@@ -381,6 +362,56 @@ void Task::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModel )
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConnection, req );
+}
+
+std::string Task::schema( const std::string& tableName, uint32_t dbModel )
+{
+    assert( tableName == Table::Name );
+    if ( dbModel <= 17 )
+    {
+        return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+        "("
+            "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "step INTEGER NOT NULL DEFAULT 0,"
+            "retry_count INTEGER NOT NULL DEFAULT 0,"
+            "mrl TEXT,"
+            "file_type INTEGER NOT NULL,"
+            "file_id UNSIGNED INTEGER,"
+            "parent_folder_id UNSIGNED INTEGER,"
+            "parent_playlist_id INTEGER,"
+            "parent_playlist_index UNSIGNED INTEGER,"
+            "is_refresh BOOLEAN NOT NULL DEFAULT 0,"
+            "UNIQUE(mrl, parent_playlist_id, is_refresh) ON CONFLICT FAIL,"
+            "FOREIGN KEY(parent_folder_id) REFERENCES " + Folder::Table::Name
+            + "(id_folder) ON DELETE CASCADE,"
+            "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
+            + "(id_file) ON DELETE CASCADE,"
+            "FOREIGN KEY(parent_playlist_id) REFERENCES " + Playlist::Table::Name
+            + "(id_playlist) ON DELETE CASCADE"
+        ")";
+    }
+    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    "("
+        "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "step INTEGER NOT NULL DEFAULT 0,"
+        "retry_count INTEGER NOT NULL DEFAULT 0,"
+        "type INTEGER NOT NULL,"
+        "mrl TEXT,"
+        "file_type INTEGER NOT NULL,"
+        "file_id UNSIGNED INTEGER,"
+        "parent_folder_id UNSIGNED INTEGER,"
+
+        // For linking purposes
+        "link_to_id UNSIGNED INTEGER,"
+        "link_to_type UNSIGNED INTEGER,"
+        "link_extra UNSIGNED INTEGER,"
+
+        "UNIQUE(mrl,type) ON CONFLICT FAIL,"
+        "FOREIGN KEY(parent_folder_id) REFERENCES " + Folder::Table::Name
+        + "(id_folder) ON DELETE CASCADE,"
+        "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
+        + "(id_file) ON DELETE CASCADE"
+    ")";
 }
 
 void Task::resetRetryCount( MediaLibraryPtr ml )

@@ -33,7 +33,7 @@ Thumbnail::schema( Thumbnail::LinkingTable::Name, 18 ),
 
 "DROP TABLE " + parser::Task::Table::Name,
 
-#include "database/tables/Task_v18.sql"
+parser::Task::schema( parser::Task::Table::Name, 18 ),
 #include "database/tables/Task_triggers_v18.sql"
 
 "INSERT INTO " + parser::Task::Table::Name +

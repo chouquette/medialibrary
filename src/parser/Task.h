@@ -161,6 +161,7 @@ public:
 
     static void createTable( sqlite::Connection* dbConnection , uint32_t dbModel );
     static void createTriggers(sqlite::Connection* dbConnection , uint32_t dbModel);
+    static std::string schema( const std::string& tableName, uint32_t dbModel );
     static void resetRetryCount( MediaLibraryPtr ml );
     static void resetParsing( MediaLibraryPtr ml );
     static std::vector<std::shared_ptr<Task>> fetchUncompleted( MediaLibraryPtr ml );
