@@ -338,3 +338,9 @@ TEST_F( Shows, CheckDbModel )
     auto res = Show::checkDbModel( ml.get() );
     ASSERT_TRUE( res );
 }
+
+TEST_F( Shows, CheckShowEpisodeDbModel )
+{
+    auto res = ShowEpisode::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}

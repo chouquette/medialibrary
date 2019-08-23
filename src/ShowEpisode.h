@@ -61,6 +61,7 @@ class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode>
         static void createTable( sqlite::Connection* dbConnection );
         static void createTrigger( sqlite::Connection* dbConnection );
         static std::string schema( const std::string& tableName, uint32_t dbModel );
+        static bool checkDbModel( MediaLibraryPtr ml );
         static std::shared_ptr<ShowEpisode> create( MediaLibraryPtr ml, int64_t mediaId, unsigned int episodeNumber, int64_t showId );
         static ShowEpisodePtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
 

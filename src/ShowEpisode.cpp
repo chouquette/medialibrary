@@ -157,6 +157,13 @@ std::string ShowEpisode::schema( const std::string& tableName, uint32_t )
     ")";
 }
 
+bool ShowEpisode::checkDbModel(MediaLibraryPtr ml)
+{
+    return sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name );
+}
+
 std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml, int64_t mediaId,
                                                   unsigned int episodeNumber, int64_t showId )
 {
