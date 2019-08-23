@@ -101,7 +101,7 @@ void Movie::createTable( sqlite::Connection* dbConnection )
 std::string Movie::schema( const std::string& tableName, uint32_t )
 {
     assert( tableName == Table::Name );
-    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    return "CREATE TABLE " + Table::Name +
     "("
         "id_movie INTEGER PRIMARY KEY AUTOINCREMENT,"
         "media_id UNSIGNED INTEGER NOT NULL,"
