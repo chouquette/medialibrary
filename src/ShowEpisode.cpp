@@ -141,9 +141,14 @@ void ShowEpisode::createTable( sqlite::Connection* dbConnection )
                 "FOREIGN KEY(show_id) REFERENCES " + Show::Table::Name
                     + "(id_show) ON DELETE CASCADE"
             ")";
+
+    sqlite::Tools::executeRequest( dbConnection, req );
+}
+
+void ShowEpisode::createTrigger( sqlite::Connection* dbConnection )
+{
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS show_episode_media_show_idx ON " +
             ShowEpisode::Table::Name + "(media_id, show_id)";
-    sqlite::Tools::executeRequest( dbConnection, req );
     sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
 
