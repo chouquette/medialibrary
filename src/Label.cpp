@@ -87,7 +87,7 @@ std::string Label::schema( const std::string& tableName, uint32_t )
 {
     if ( tableName == FileRelationTable::Name )
     {
-        return "CREATE TABLE IF NOT EXISTS " + FileRelationTable::Name +
+        return "CREATE TABLE " + FileRelationTable::Name +
         "("
             "label_id INTEGER,"
             "media_id INTEGER,"
@@ -99,7 +99,7 @@ std::string Label::schema( const std::string& tableName, uint32_t )
         ")";
     }
     assert( tableName == Table::Name );
-    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    return "CREATE TABLE " + Table::Name +
     "("
         "id_label INTEGER PRIMARY KEY AUTOINCREMENT,"
         "name TEXT UNIQUE ON CONFLICT FAIL"
