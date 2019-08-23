@@ -38,6 +38,7 @@ namespace medialibrary
 const std::string Genre::Table::Name = "Genre";
 const std::string Genre::Table::PrimaryKeyColumn = "id_genre";
 int64_t Genre::* const Genre::Table::PrimaryKey = &Genre::m_id;
+const std::string Genre::FtsTable::Name = "GenreFts";
 
 Genre::Genre( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -129,7 +130,7 @@ void Genre::createTable( sqlite::Connection* dbConn )
             "nb_tracks INTEGER NOT NULL DEFAULT 0"
         ")";
     const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
-                + Genre::Table::Name + "Fts USING FTS3("
+                + Genre::FtsTable::Name + " USING FTS3("
                 "name"
             ")";
 
@@ -142,12 +143,12 @@ void Genre::createTriggers( sqlite::Connection* dbConn )
     const std::string vtableInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_genre_fts"
             " AFTER INSERT ON " + Genre::Table::Name +
             " BEGIN"
-            " INSERT INTO " + Genre::Table::Name + "Fts(rowid,name) VALUES(new.id_genre, new.name);"
+            " INSERT INTO " + Genre::FtsTable::Name + "(rowid,name) VALUES(new.id_genre, new.name);"
             " END";
     const std::string vtableDeleteTrigger = "CREATE TRIGGER IF NOT EXISTS delete_genre_fts"
             " BEFORE DELETE ON " + Genre::Table::Name +
             " BEGIN"
-            " DELETE FROM " + Genre::Table::Name + "Fts WHERE rowid = old.id_genre;"
+            " DELETE FROM " + Genre::FtsTable::Name + " WHERE rowid = old.id_genre;"
             " END";
     const std::string onTrackCreated = "CREATE TRIGGER IF NOT EXISTS update_genre_on_new_track"
             " AFTER INSERT ON " + AlbumTrack::Table::Name +
@@ -189,7 +190,7 @@ Query<IGenre> Genre::search( MediaLibraryPtr ml, const std::string& name,
                              const QueryParameters* params )
 {
     std::string req = "FROM " + Genre::Table::Name + " WHERE id_genre IN "
-            "(SELECT rowid FROM " + Genre::Table::Name + "Fts "
+            "(SELECT rowid FROM " + Genre::FtsTable::Name + " "
             "WHERE name MATCH ?)";
     std::string orderBy = "ORDER BY name";
     if ( params != nullptr )

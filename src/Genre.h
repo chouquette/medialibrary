@@ -40,6 +40,10 @@ public:
         static const std::string PrimaryKeyColumn;
         static int64_t Genre::*const PrimaryKey;
     };
+    struct FtsTable
+    {
+        static const std::string Name;
+    };
 
     Genre( MediaLibraryPtr ml, sqlite::Row& row );
     Genre( MediaLibraryPtr ml, const std::string& name );
