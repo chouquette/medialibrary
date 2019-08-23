@@ -83,22 +83,37 @@ LabelPtr Label::create( MediaLibraryPtr ml, const std::string& name )
     return self;
 }
 
+std::string Label::schema( const std::string& tableName, uint32_t )
+{
+    if ( tableName == FileRelationTable::Name )
+    {
+        return "CREATE TABLE IF NOT EXISTS " + FileRelationTable::Name +
+        "("
+            "label_id INTEGER,"
+            "media_id INTEGER,"
+            "PRIMARY KEY(label_id,media_id),"
+            "FOREIGN KEY(label_id) "
+                "REFERENCES " + Table::Name + "(id_label) ON DELETE CASCADE,"
+            "FOREIGN KEY(media_id) "
+                "REFERENCES " + Media::Table::Name + "(id_media) ON DELETE CASCADE"
+        ")";
+    }
+    assert( tableName == Table::Name );
+    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    "("
+        "id_label INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "name TEXT UNIQUE ON CONFLICT FAIL"
+    ")";
+}
+
 void Label::createTable( sqlite::Connection* dbConnection )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + Label::Table::Name + "("
-                "id_label INTEGER PRIMARY KEY AUTOINCREMENT, "
-                "name TEXT UNIQUE ON CONFLICT FAIL"
-            ")";
-    const std::string relReq = "CREATE TABLE IF NOT EXISTS " + FileRelationTable::Name +
-            "("
-                "label_id INTEGER,"
-                "media_id INTEGER,"
-            "PRIMARY KEY (label_id, media_id),"
-            "FOREIGN KEY(label_id) REFERENCES Label(id_label) ON DELETE CASCADE,"
-            "FOREIGN KEY(media_id) REFERENCES Media(id_media) ON DELETE CASCADE);";
-
-    sqlite::Tools::executeRequest( dbConnection, req );
-    sqlite::Tools::executeRequest( dbConnection, relReq );
+    const std::string reqs[] = {
+        schema( Table::Name, Settings::DbModelVersion ),
+        schema( FileRelationTable::Name, Settings::DbModelVersion ),
+    };
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConnection, req );
 }
 
 void Label::createTriggers( sqlite::Connection* dbConnection )

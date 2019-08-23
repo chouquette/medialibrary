@@ -56,6 +56,8 @@ class Label : public ILabel, public DatabaseHelpers<Label>
         virtual Query<IMedia> media() override;
 
         static LabelPtr create( MediaLibraryPtr ml, const std::string& name );
+        static std::string schema( const std::string& tableName, uint32_t dbModel );
+        static bool checkDbModel( MediaLibraryPtr ml );
         static void createTable( sqlite::Connection* dbConnection );
         static void createTriggers( sqlite::Connection* dbConnection );
 
