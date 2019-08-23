@@ -403,7 +403,6 @@ EXTRA_DIST += medialibrary.pc \
 	src/database/tables/Playlist_v16.sql \
 	src/database/tables/Playlist_triggers_v14.sql \
 	src/database/tables/Playlist_triggers_v16.sql \
-	src/database/tables/Metadata_v14.sql \
 	src/database/tables/Task_v14.sql \
 	src/database/tables/Task_v18.sql \
 	src/database/tables/Task_triggers_v18.sql \

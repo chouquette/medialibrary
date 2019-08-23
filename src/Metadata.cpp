@@ -200,10 +200,32 @@ void Metadata::unset( sqlite::Connection* dbConn, IMetadata::EntityType entityTy
 void Metadata::createTable(sqlite::Connection* connection)
 {
     const std::string reqs[] = {
-        #include "database/tables/Metadata_v14.sql"
+        schema( Table::Name, Settings::DbModelVersion ),
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( connection, req );
+}
+
+std::string Metadata::schema( const std::string& tableName, uint32_t dbModel )
+{
+    assert( tableName == Table::Name );
+    if ( dbModel < 14 )
+    {
+        return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+        "("
+            "id_media INTEGER,"
+            "type INTEGER,"
+            "value TEXT"
+        ")";
+    }
+    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    "("
+        "id_media INTEGER,"
+        "entity_type INTEGER,"
+        "type INTEGER,"
+        "value TEXT,"
+        "PRIMARY KEY(id_media,entity_type,type)"
+    ")";
 }
 
 void Metadata::Record::set( const std::string& value )

@@ -75,7 +75,7 @@ IMedia::Type::Unknown ) ),
 "DROP TABLE MediaMetadata",
 
 // Recreate the new table
-#include "database/tables/Metadata_v14.sql"
+Metadata::schema( Metadata::Table::Name, 14 ),
 
 "INSERT INTO " + Metadata::Table::Name + " "
 "SELECT "
