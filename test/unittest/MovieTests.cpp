@@ -105,3 +105,9 @@ TEST_F( Movies, AssignToFile )
     auto m2 = f2->movie();
     ASSERT_NE( m2, nullptr );
 }
+
+TEST_F( Movies, CheckDbModel )
+{
+    auto res = Movie::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}

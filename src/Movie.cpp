@@ -112,6 +112,13 @@ std::string Movie::schema( const std::string& tableName, uint32_t )
     ")";
 }
 
+bool Movie::checkDbModel(MediaLibraryPtr ml)
+{
+    return sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name );
+}
+
 std::shared_ptr<Movie> Movie::create(MediaLibraryPtr ml, int64_t mediaId )
 {
     auto movie = std::make_shared<Movie>( ml, mediaId );
