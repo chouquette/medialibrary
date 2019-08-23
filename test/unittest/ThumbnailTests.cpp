@@ -419,3 +419,9 @@ TEST_F( Thumbnails, AutoDeleteAfterUnlink )
     t->unlinkThumbnail( m->id(), Thumbnail::EntityType::Media );
     ASSERT_EQ( 0u, ml->countNbThumbnails() );
 }
+
+TEST_F( Thumbnails, CheckDbModel )
+{
+    auto res = Thumbnail::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}

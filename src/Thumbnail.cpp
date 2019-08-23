@@ -356,6 +356,16 @@ std::string Thumbnail::schema( const std::string& tableName, uint32_t dbModel )
     ")";
 }
 
+bool Thumbnail::checkDbModel(MediaLibraryPtr ml)
+{
+    return sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name ) &&
+           sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( LinkingTable::Name, Settings::DbModelVersion ),
+                                       LinkingTable::Name );
+}
+
 std::shared_ptr<Thumbnail> Thumbnail::create( MediaLibraryPtr ml, std::string mrl,
                                               Thumbnail::Origin origin,
                                               ThumbnailSizeType sizeType, bool isOwned )
