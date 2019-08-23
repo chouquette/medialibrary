@@ -193,6 +193,7 @@ void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
     parser::Task::createTriggers( m_dbConnection.get(), dbModelVersion );
     AudioTrack::createIndexes( m_dbConnection.get() );
     SubtitleTrack::createTriggers( m_dbConnection.get() );
+    VideoTrack::createIndexes( m_dbConnection.get() );
 }
 
 void MediaLibrary::registerEntityHooks()
@@ -1308,6 +1309,7 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     Playlist::createTriggers( dbConn, 14 );
     Folder::createTriggers( dbConn, 14 );
     File::createTriggers( dbConn );
+    VideoTrack::createIndexes( dbConn );
     auto folders = Folder::fetchAll<Folder>( this );
     for ( const auto& f : folders )
     {

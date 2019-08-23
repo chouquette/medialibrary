@@ -62,6 +62,7 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack>
         virtual const std::string& description() const override;
 
         static void createTable( sqlite::Connection* dbConnection );
+        static void createIndexes( sqlite::Connection* dbConnection );
         static std::shared_ptr<VideoTrack> create( MediaLibraryPtr ml, const std::string& codec,
                                     unsigned int width, unsigned int height, uint32_t fpsNum,
                                     uint32_t fpsDen, uint32_t bitrate, uint32_t sarNum,

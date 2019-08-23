@@ -174,9 +174,14 @@ void VideoTrack::createTable( sqlite::Connection* dbConnection )
                 "FOREIGN KEY ( media_id ) REFERENCES " + Media::Table::Name +
                     "(id_media) ON DELETE CASCADE"
             ")";
-    const std::string indexReq = "CREATE INDEX IF NOT EXISTS video_track_media_idx ON " +
-            VideoTrack::Table::Name + "(media_id)";
+
     sqlite::Tools::executeRequest( dbConnection, req );
+}
+
+void VideoTrack::createIndexes( sqlite::Connection* dbConnection )
+{
+    const std::string indexReq = "CREATE INDEX IF NOT EXISTS video_track_media_idx ON " +
+            Table::Name + "(media_id)";
     sqlite::Tools::executeRequest( dbConnection, indexReq );
 }
 
