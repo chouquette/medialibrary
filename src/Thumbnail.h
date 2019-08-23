@@ -140,6 +140,7 @@ public:
 
     static void createTable( sqlite::Connection* dbConnection );
     static void createTriggers( sqlite::Connection* dbConnection );
+    static std::string schema( const std::string& tableName, uint32_t dbModel );
     static std::shared_ptr<Thumbnail> create( MediaLibraryPtr ml, std::string mrl,
                                               Origin origin, ThumbnailSizeType sizeType,
                                               bool isOwned );

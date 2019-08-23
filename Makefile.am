@@ -404,9 +404,7 @@ EXTRA_DIST += medialibrary.pc \
 	src/database/tables/Task_v14.sql \
 	src/database/tables/Task_v18.sql \
 	src/database/tables/Task_triggers_v18.sql \
-	src/database/tables/Thumbnail_v17.sql \
 	src/database/tables/Thumbnail_triggers_v17.sql \
-	src/database/tables/Thumbnail_v18.sql \
 	src/database/tables/Thumbnail_triggers_v18.sql \
 	$(NULL)
 	

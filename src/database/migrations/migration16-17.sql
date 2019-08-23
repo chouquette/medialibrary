@@ -102,7 +102,8 @@ Artist::schema( Artist::Table::Name, 17 ),
 
 "DROP TABLE " + Thumbnail::Table::Name,
 
-#include "database/tables/Thumbnail_v17.sql"
+Thumbnail::schema( Thumbnail::Table::Name, 17 ),
+Thumbnail::schema( Thumbnail::LinkingTable::Name, 17 ),
 
 #include "database/tables/Thumbnail_triggers_v17.sql"
 

@@ -7,7 +7,8 @@
 "DROP TABLE " + Thumbnail::Table::Name,
 "DROP TABLE " + Thumbnail::LinkingTable::Name,
 
-#include "database/tables/Thumbnail_v18.sql"
+Thumbnail::schema( Thumbnail::Table::Name, 18 ),
+Thumbnail::schema( Thumbnail::LinkingTable::Name, 18 ),
 
 #include "database/tables/Thumbnail_triggers_v18.sql"
 

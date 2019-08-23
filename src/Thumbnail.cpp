@@ -298,7 +298,8 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
 void Thumbnail::createTable( sqlite::Connection* dbConnection )
 {
     const std::string reqs[] = {
-        #include "database/tables/Thumbnail_v18.sql"
+        schema( Table::Name, Settings::DbModelVersion ),
+        schema( LinkingTable::Name, Settings::DbModelVersion )
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConnection, req );
@@ -311,6 +312,48 @@ void Thumbnail::createTriggers( sqlite::Connection* dbConnection )
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConnection, req );
+}
+
+std::string Thumbnail::schema( const std::string& tableName, uint32_t dbModel )
+{
+    if ( tableName == LinkingTable::Name )
+    {
+        // The linking table was added in model 17
+        if ( dbModel < 17 )
+        {
+            assert( !"Invalid model version for thumbnail linking table schema" );
+            return "<invalid request>";
+        }
+        return "CREATE TABLE IF NOT EXISTS " + LinkingTable::Name +
+        "("
+            "entity_id UNSIGNED INTEGER NOT NULL,"
+            "entity_type UNSIGNED INTEGER NOT NULL,"
+            "size_type UNSIGNED INTEGER NOT NULL,"
+            "thumbnail_id UNSIGNED INTEGER NOT NULL,"
+            "origin UNSIGNED INT NOT NULL,"
+
+            "PRIMARY KEY(entity_id,entity_type,size_type),"
+            "FOREIGN KEY(thumbnail_id) REFERENCES " +
+                Table::Name + "(id_thumbnail) ON DELETE CASCADE"
+        ")";
+    }
+    assert( tableName == Table::Name );
+    if ( dbModel <= 17 )
+    {
+        return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+        "("
+            "id_thumbnail INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "mrl TEXT,"
+            "is_generated BOOLEAN NOT NULL"
+        ")";
+    }
+    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    "("
+        "id_thumbnail INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "mrl TEXT,"
+        "is_generated BOOLEAN NOT NULL,"
+        "shared_counter INTEGER NOT NULL DEFAULT 0"
+    ")";
 }
 
 std::shared_ptr<Thumbnail> Thumbnail::create( MediaLibraryPtr ml, std::string mrl,
