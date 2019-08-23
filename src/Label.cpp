@@ -39,6 +39,7 @@ namespace medialibrary
 const std::string Label::Table::Name = "Label";
 const std::string Label::Table::PrimaryKeyColumn = "id_label";
 int64_t Label::* const Label::Table::PrimaryKey = &Label::m_id;
+const std::string Label::FileRelationTable::Name = "LabelFileRelation";
 
 Label::Label(MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -68,7 +69,7 @@ const std::string& Label::name() const
 Query<IMedia> Label::media()
 {
     static const std::string req = "FROM " + Media::Table::Name + " f "
-            "INNER JOIN LabelFileRelation lfr ON lfr.media_id = f.id_media "
+            "INNER JOIN " + FileRelationTable::Name + " lfr ON lfr.media_id = f.id_media "
             "WHERE lfr.label_id = ?";
     return make_query<Media, IMedia>( m_ml, "f.*", req, "", m_id );
 }
@@ -88,7 +89,8 @@ void Label::createTable( sqlite::Connection* dbConnection )
                 "id_label INTEGER PRIMARY KEY AUTOINCREMENT, "
                 "name TEXT UNIQUE ON CONFLICT FAIL"
             ")";
-    const std::string relReq = "CREATE TABLE IF NOT EXISTS LabelFileRelation("
+    const std::string relReq = "CREATE TABLE IF NOT EXISTS " + FileRelationTable::Name +
+            "("
                 "label_id INTEGER,"
                 "media_id INTEGER,"
             "PRIMARY KEY (label_id, media_id),"

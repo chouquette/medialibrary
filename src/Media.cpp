@@ -179,7 +179,7 @@ void Media::setShowEpisode( ShowEpisodePtr episode )
 Query<ILabel> Media::labels() const
 {
     static const std::string req = "FROM " + Label::Table::Name + " l "
-            "INNER JOIN LabelFileRelation lfr ON lfr.label_id = l.id_label "
+            "INNER JOIN " + Label::FileRelationTable::Name + " lfr ON lfr.label_id = l.id_label "
             "WHERE lfr.media_id = ?";
     return make_query<Label, ILabel>( m_ml, "l.*", req, "", m_id );
 }
@@ -954,7 +954,7 @@ bool Media::addLabel( LabelPtr label )
         return sqlite::Tools::withRetries( 3, [this]( LabelPtr label ) {
             auto t = m_ml->getConn()->newTransaction();
 
-            const char* req = "INSERT INTO LabelFileRelation VALUES(?, ?)";
+            std::string req = "INSERT INTO " + Label::FileRelationTable::Name + " VALUES(?, ?)";
             if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, label->id(), m_id ) == 0 )
                 return false;
             const std::string reqFts = "UPDATE " + Media::Table::Name + "Fts "
@@ -984,7 +984,7 @@ bool Media::removeLabel( LabelPtr label )
         return sqlite::Tools::withRetries( 3, [this]( LabelPtr label ) {
             auto t = m_ml->getConn()->newTransaction();
 
-            const char* req = "DELETE FROM LabelFileRelation WHERE label_id = ? AND media_id = ?";
+            std::string req = "DELETE FROM " + Label::FileRelationTable::Name + " WHERE label_id = ? AND media_id = ?";
             if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, label->id(), m_id ) == false )
                 return false;
             const std::string reqFts = "UPDATE " + Media::Table::Name + "Fts "

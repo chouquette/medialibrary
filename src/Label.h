@@ -42,6 +42,11 @@ class Label : public ILabel, public DatabaseHelpers<Label>
             static const std::string PrimaryKeyColumn;
             static int64_t Label::*const PrimaryKey;
         };
+        struct FileRelationTable
+        {
+            static const std::string Name;
+        };
+
         Label( MediaLibraryPtr ml, sqlite::Row& row );
         Label( MediaLibraryPtr ml, const std::string& name );
 
