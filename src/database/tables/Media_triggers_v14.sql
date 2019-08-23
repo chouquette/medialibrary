@@ -38,3 +38,6 @@
 " BEGIN"
     " UPDATE " + Media::Table::Name + "Fts SET title = new.title WHERE rowid = new.id_media;"
 " END",
+
+"CREATE INDEX IF NOT EXISTS media_types_idx ON " + Media::Table::Name +
+    "(type, subtype)",

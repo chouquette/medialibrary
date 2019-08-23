@@ -25,9 +25,6 @@
     + "(id_folder)"
 ")",
 
-"CREATE INDEX IF NOT EXISTS media_types_idx ON " + Media::Table::Name +
-    "(type, subtype)",
-
 "CREATE VIRTUAL TABLE IF NOT EXISTS "
     + Media::FtsTable::Name + " USING FTS3("
     "title,"
