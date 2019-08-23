@@ -202,12 +202,12 @@ std::string Folder::schema( const std::string& tableName, uint32_t dbModel )
 {
     if ( tableName == FtsTable::Name )
     {
-        return "CREATE VIRTUAL TABLE IF NOT EXISTS " + FtsTable::Name +
+        return "CREATE VIRTUAL TABLE " + FtsTable::Name +
                 " USING FTS3(name)";
     }
     else if ( tableName == ExcludedFolderTable::Name )
     {
-        return "CREATE TABLE IF NOT EXISTS " + ExcludedFolderTable::Name +
+        return "CREATE TABLE " + ExcludedFolderTable::Name +
         "("
             "folder_id UNSIGNED INTEGER NOT NULL,"
 
@@ -218,7 +218,7 @@ std::string Folder::schema( const std::string& tableName, uint32_t dbModel )
         ")";
     }
     assert( tableName == Table::Name );
-    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    return "CREATE TABLE " + Table::Name +
     "("
         "id_folder INTEGER PRIMARY KEY AUTOINCREMENT,"
         "path TEXT,"
