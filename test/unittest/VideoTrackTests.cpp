@@ -102,3 +102,8 @@ TEST_F( VideoTracks, RemoveTrack )
     ASSERT_EQ( 1u, f2->videoTracks()->count() );
 }
 
+TEST_F( VideoTracks, CheckDbModel )
+{
+    auto res = VideoTrack::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}

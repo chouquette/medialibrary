@@ -190,4 +190,11 @@ std::string VideoTrack::schema( const std::string& tableName, uint32_t )
     ")";
 }
 
+bool VideoTrack::checkDbModel( MediaLibraryPtr ml )
+{
+    return sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name );
+}
+
 }
