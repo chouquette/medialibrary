@@ -42,6 +42,11 @@ public:
         static const std::string PrimaryKeyColumn;
         static int64_t Playlist::*const PrimaryKey;
     };
+    struct FtsTable
+    {
+        static const std::string Name;
+    };
+
     Playlist( MediaLibraryPtr ml, sqlite::Row& row );
     Playlist( MediaLibraryPtr ml, const std::string& name );
 

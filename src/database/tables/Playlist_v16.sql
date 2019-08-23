@@ -20,7 +20,7 @@
         + Playlist::Table::PrimaryKeyColumn + ") ON DELETE CASCADE"
 ")",
 
-"CREATE VIRTUAL TABLE IF NOT EXISTS " + Playlist::Table::Name + "Fts USING FTS3"
+"CREATE VIRTUAL TABLE IF NOT EXISTS " + Playlist::FtsTable::Name + " USING FTS3"
 "("
     "name"
 ")",

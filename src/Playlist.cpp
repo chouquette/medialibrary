@@ -38,6 +38,8 @@ namespace medialibrary
 const std::string Playlist::Table::Name = "Playlist";
 const std::string Playlist::Table::PrimaryKeyColumn = "id_playlist";
 int64_t Playlist::* const Playlist::Table::PrimaryKey = &Playlist::m_id;
+const std::string Playlist::FtsTable::Name = "PlaylistFts";
+
 
 Playlist::Playlist( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -358,7 +360,7 @@ Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,
                                    const QueryParameters* params )
 {
     std::string req = "FROM " + Playlist::Table::Name + " WHERE id_playlist IN "
-            "(SELECT rowid FROM " + Playlist::Table::Name + "Fts WHERE name MATCH ?)";
+            "(SELECT rowid FROM " + FtsTable::Name + " WHERE name MATCH ?)";
     return make_query<Playlist, IPlaylist>( ml, "*", std::move( req ),
                                             sortRequest( params ),
                                             sqlite::Tools::sanitizePattern( name ) );
