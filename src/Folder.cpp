@@ -45,6 +45,7 @@ namespace medialibrary
 const std::string Folder::Table::Name = "Folder";
 const std::string Folder::Table::PrimaryKeyColumn = "id_folder";
 int64_t Folder::* const Folder::Table::PrimaryKey = &Folder::m_id;
+const std::string Folder::FtsTable::Name = "FolderFts";
 
 Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -395,8 +396,8 @@ Query<IFolder> Folder::searchWithMedia( MediaLibraryPtr ml,
     std::string req = "FROM " + Table::Name + " f "
             " LEFT JOIN " + Device::Table::Name +
                 " d ON d.id_device = f.device_id "
-            "WHERE f.id_folder IN (SELECT rowid FROM " + Table::Name + "Fts WHERE " +
-                Table::Name + "Fts MATCH ?) "
+            "WHERE f.id_folder IN (SELECT rowid FROM " + FtsTable::Name + " WHERE " +
+                FtsTable::Name + " MATCH ?) "
             "AND d.is_present != 0 AND " + filterByMediaType( type );
     return make_query<Folder, IFolder>( ml, "*", req, sortRequest( params ),
                                         sqlite::Tools::sanitizePattern( pattern ) );
@@ -471,7 +472,7 @@ void Folder::setName( std::string name )
     auto dbConn = m_ml->getConn();
     if ( sqlite::Tools::executeUpdate( dbConn, req, name, m_id ) == false )
         return;
-    static const std::string reqFts = "INSERT INTO " + Table::Name + "Fts "
+    static const std::string reqFts = "INSERT INTO " + FtsTable::Name + " "
             "(rowid, name) VALUES(?, ?)";
     sqlite::Tools::executeInsert( dbConn, reqFts, m_id, name );
     m_name = std::move( name );

@@ -53,6 +53,11 @@ public:
         static const std::string PrimaryKeyColumn;
         static int64_t Folder::*const PrimaryKey;
     };
+    struct FtsTable
+    {
+        static const std::string Name;
+    };
+
     Folder( MediaLibraryPtr ml, sqlite::Row& row );
     Folder(MediaLibraryPtr ml, const std::string& path, int64_t parent , int64_t deviceId , bool isRemovable );
 
