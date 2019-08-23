@@ -369,7 +369,7 @@ std::string Task::schema( const std::string& tableName, uint32_t dbModel )
     assert( tableName == Table::Name );
     if ( dbModel <= 17 )
     {
-        return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+        return "CREATE TABLE " + Table::Name +
         "("
             "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
             "step INTEGER NOT NULL DEFAULT 0,"
@@ -390,7 +390,7 @@ std::string Task::schema( const std::string& tableName, uint32_t dbModel )
             + "(id_playlist) ON DELETE CASCADE"
         ")";
     }
-    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    return "CREATE TABLE " + Table::Name +
     "("
         "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
         "step INTEGER NOT NULL DEFAULT 0,"
