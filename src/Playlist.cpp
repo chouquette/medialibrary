@@ -369,12 +369,12 @@ std::string Playlist::schema( const std::string& tableName, uint32_t )
 {
     if ( tableName == FtsTable::Name )
     {
-        return "CREATE VIRTUAL TABLE IF NOT EXISTS " + FtsTable::Name +
+        return "CREATE VIRTUAL TABLE " + FtsTable::Name +
                " USING FTS3(name)";
     }
     else if ( tableName == Table::Name )
     {
-        return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+        return "CREATE TABLE " + Table::Name +
         "("
             + Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             "name TEXT COLLATE NOCASE,"
@@ -386,7 +386,7 @@ std::string Playlist::schema( const std::string& tableName, uint32_t )
         ")";
     }
     assert( tableName == MediaRelationTable::Name );
-    return "CREATE TABLE IF NOT EXISTS " + MediaRelationTable::Name +
+    return "CREATE TABLE " + MediaRelationTable::Name +
     "("
         "media_id INTEGER,"
         "mrl STRING,"
