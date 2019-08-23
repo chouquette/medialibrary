@@ -123,19 +123,12 @@ Query<IAlbum> Genre::searchAlbums( const std::string& pattern,
 
 void Genre::createTable( sqlite::Connection* dbConn )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + Genre::Table::Name +
-        "("
-            "id_genre INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "name TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
-            "nb_tracks INTEGER NOT NULL DEFAULT 0"
-        ")";
-    const std::string vtableReq = "CREATE VIRTUAL TABLE IF NOT EXISTS "
-                + Genre::FtsTable::Name + " USING FTS3("
-                "name"
-            ")";
-
-    sqlite::Tools::executeRequest( dbConn, req );
-    sqlite::Tools::executeRequest( dbConn, vtableReq );
+    const std::string reqs[] = {
+        schema( Table::Name, Settings::DbModelVersion ),
+        schema( FtsTable::Name, Settings::DbModelVersion ),
+    };
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConn, req );
 }
 
 void Genre::createTriggers( sqlite::Connection* dbConn )
@@ -168,6 +161,22 @@ void Genre::createTriggers( sqlite::Connection* dbConn )
     sqlite::Tools::executeRequest( dbConn, vtableDeleteTrigger );
     sqlite::Tools::executeRequest( dbConn, onTrackCreated );
     sqlite::Tools::executeRequest( dbConn, onTrackDeleted );
+}
+
+std::string Genre::schema( const std::string& tableName, uint32_t )
+{
+    if ( tableName == FtsTable::Name )
+    {
+        return "CREATE VIRTUAL TABLE IF NOT EXISTS " + FtsTable::Name +
+               " USING FTS3(name)";
+    }
+    assert( tableName == Table::Name );
+    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    "("
+        "id_genre INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "name TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
+        "nb_tracks INTEGER NOT NULL DEFAULT 0"
+    ")";
 }
 
 std::shared_ptr<Genre> Genre::create( MediaLibraryPtr ml, const std::string& name )
