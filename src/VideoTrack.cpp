@@ -171,7 +171,7 @@ void VideoTrack::createIndexes( sqlite::Connection* dbConnection )
 std::string VideoTrack::schema( const std::string& tableName, uint32_t )
 {
     assert( tableName == Table::Name );
-    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    return "CREATE TABLE " + Table::Name +
     "(" +
         Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
         "codec TEXT,"
