@@ -329,3 +329,9 @@ TEST_F( Genres, WithThumbnail )
     ASSERT_EQ( 2u, tracks->count() );
     ASSERT_EQ( 2u, tracks->all().size() );
 }
+
+TEST_F( Genres, CheckDbModel )
+{
+    auto res = Genre::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}

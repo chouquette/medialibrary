@@ -65,6 +65,7 @@ public:
     static void createTable( sqlite::Connection* dbConn );
     static void createTriggers( sqlite::Connection* dbConn );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
+    static bool checkDbModel( MediaLibraryPtr ml );
     static std::shared_ptr<Genre> create( MediaLibraryPtr ml, const std::string& name );
     static std::shared_ptr<Genre> fromName( MediaLibraryPtr ml, const std::string& name );
     static Query<IGenre> search( MediaLibraryPtr ml, const std::string& name, const QueryParameters* params );

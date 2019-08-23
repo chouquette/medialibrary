@@ -179,6 +179,16 @@ std::string Genre::schema( const std::string& tableName, uint32_t )
     ")";
 }
 
+bool Genre::checkDbModel(MediaLibraryPtr ml)
+{
+    return sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name ) &&
+           sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( FtsTable::Name, Settings::DbModelVersion ),
+                                       FtsTable::Name );
+}
+
 std::shared_ptr<Genre> Genre::create( MediaLibraryPtr ml, const std::string& name )
 {
     static const std::string req = "INSERT INTO " + Genre::Table::Name + "(name)"
