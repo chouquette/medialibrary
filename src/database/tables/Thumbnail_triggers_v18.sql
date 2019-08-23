@@ -66,3 +66,6 @@
 "BEGIN "
     "DELETE FROM " + Thumbnail::Table::Name + " WHERE id_thumbnail = new.id_thumbnail;"
 "END",
+
+"CREATE INDEX IF NOT EXISTS thumbnail_link_index "
+"ON " + Thumbnail::Table::Name + "(id_thumbnail)",
