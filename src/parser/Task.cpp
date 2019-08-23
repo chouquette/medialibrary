@@ -414,6 +414,13 @@ std::string Task::schema( const std::string& tableName, uint32_t dbModel )
     ")";
 }
 
+bool Task::checkDbModel( MediaLibraryPtr ml )
+{
+    return sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name );
+}
+
 void Task::resetRetryCount( MediaLibraryPtr ml )
 {
     static const std::string req = "UPDATE " + Task::Table::Name + " SET "

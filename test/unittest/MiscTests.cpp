@@ -166,6 +166,16 @@ TEST_F( Misc, SanitizePattern )
     ASSERT_EQ( "\"''\"\"*\"", sqlite::Tools::sanitizePattern( "\'\"" ) );
 }
 
+class MiscDb : public Tests
+{
+};
+
+TEST_F( MiscDb, TaskCheckDbModel )
+{
+    auto res = parser::Task::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}
+
 class DbModel : public testing::Test
 {
 protected:
