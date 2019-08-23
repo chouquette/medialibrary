@@ -29,6 +29,7 @@
 #include "medialibrary/IMediaLibrary.h"
 #include "Media.h"
 #include "medialibrary/ILabel.h"
+#include "Label.h"
 
 class Labels : public Tests
 {
@@ -152,3 +153,8 @@ TEST_F( Labels, Delete )
     ASSERT_FALSE( res );
 }
 
+TEST_F( Labels, CheckDbModel )
+{
+    auto res = Label::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}

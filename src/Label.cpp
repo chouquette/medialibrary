@@ -106,6 +106,16 @@ std::string Label::schema( const std::string& tableName, uint32_t )
     ")";
 }
 
+bool Label::checkDbModel( MediaLibraryPtr ml )
+{
+    return sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name ) &&
+           sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( FileRelationTable::Name, Settings::DbModelVersion ),
+                                       FileRelationTable::Name );
+}
+
 void Label::createTable( sqlite::Connection* dbConnection )
 {
     const std::string reqs[] = {
