@@ -72,6 +72,7 @@ class Show : public IShow, public DatabaseHelpers<Show>
 
         static void createTable( sqlite::Connection* dbConnection );
         static void createTriggers( sqlite::Connection* dbConnection );
+        static std::string schema( const std::string& tableName, uint32_t dbModel );
         static std::shared_ptr<Show> create( MediaLibraryPtr ml, const std::string& title );
 
         static Query<IShow> listAll( MediaLibraryPtr ml, const QueryParameters* params );

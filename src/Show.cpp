@@ -187,21 +187,12 @@ uint32_t Show::nbEpisodes() const
 
 void Show::createTable( sqlite::Connection* dbConnection )
 {
-    const std::string req = "CREATE TABLE IF NOT EXISTS " + Show::Table::Name + "("
-                        "id_show INTEGER PRIMARY KEY AUTOINCREMENT,"
-                        "title TEXT, "
-                        "release_date UNSIGNED INTEGER,"
-                        "short_summary TEXT,"
-                        "artwork_mrl TEXT,"
-                        "tvdb_id TEXT"
-                    ")";
-    const std::string reqFts = "CREATE VIRTUAL TABLE IF NOT EXISTS " +
-                FtsTable::Name + " USING FTS3"
-            "("
-                "title"
-            ")";
-    sqlite::Tools::executeRequest( dbConnection, req );
-    sqlite::Tools::executeRequest( dbConnection, reqFts );
+    const std::string reqs[] = {
+        schema( Table::Name, Settings::DbModelVersion ),
+        schema( FtsTable::Name, Settings::DbModelVersion )
+    };
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConnection, req );
 }
 
 void Show::createTriggers( sqlite::Connection* dbConnection )
@@ -218,6 +209,25 @@ void Show::createTriggers( sqlite::Connection* dbConnection )
             " END";
     sqlite::Tools::executeRequest( dbConnection, insertTrigger );
     sqlite::Tools::executeRequest( dbConnection, deleteTrigger );
+}
+
+std::string Show::schema( const std::string& tableName, uint32_t )
+{
+    if ( tableName == FtsTable::Name )
+    {
+        return "CREATE VIRTUAL TABLE IF NOT EXISTS " + FtsTable::Name +
+               " USING FTS3(title)";
+    }
+    assert( tableName == Table::Name );
+    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    "("
+       "id_show INTEGER PRIMARY KEY AUTOINCREMENT,"
+       "title TEXT,"
+       "release_date UNSIGNED INTEGER,"
+       "short_summary TEXT,"
+       "artwork_mrl TEXT,"
+       "tvdb_id TEXT"
+   ")";
 }
 
 std::shared_ptr<Show> Show::create( MediaLibraryPtr ml, const std::string& name )
