@@ -112,6 +112,13 @@ std::string SubtitleTrack::schema( const std::string& tableName, uint32_t )
     ")";
 }
 
+bool SubtitleTrack::checkDbModel( MediaLibraryPtr ml )
+{
+    return sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name );
+}
+
 std::shared_ptr<SubtitleTrack> SubtitleTrack::create( MediaLibraryPtr ml,
             std::string codec, std::string language, std::string description,
             std::string encoding, int64_t mediaId )

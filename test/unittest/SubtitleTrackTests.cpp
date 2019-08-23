@@ -92,3 +92,9 @@ TEST_F( SubtitleTracks, RemoveTrack )
     ASSERT_EQ( 0u, m1->subtitleTracks()->count() );
     ASSERT_EQ( 1u, m2->subtitleTracks()->count() );
 }
+
+TEST_F( SubtitleTracks, CheckDbModel )
+{
+    auto res = SubtitleTrack::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}
