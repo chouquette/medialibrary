@@ -25,7 +25,7 @@
 "CREATE INDEX IF NOT EXISTS folder_parent_id ON " + Folder::Table::Name +
     "(parent_id)",
 
-"CREATE TABLE IF NOT EXISTS ExcludedEntryFolder"
+"CREATE TABLE IF NOT EXISTS " + Folder::ExcludedFolderTable::Name +
 "("
     "folder_id UNSIGNED INTEGER NOT NULL,"
 

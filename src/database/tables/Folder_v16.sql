@@ -19,7 +19,7 @@
     "UNIQUE(path, device_id) ON CONFLICT FAIL"
 ")",
 
-"CREATE TABLE IF NOT EXISTS ExcludedEntryFolder"
+"CREATE TABLE IF NOT EXISTS " + Folder::ExcludedFolderTable::Name +
 "("
     "folder_id UNSIGNED INTEGER NOT NULL,"
 

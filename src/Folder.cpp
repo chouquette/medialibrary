@@ -46,6 +46,7 @@ const std::string Folder::Table::Name = "Folder";
 const std::string Folder::Table::PrimaryKeyColumn = "id_folder";
 int64_t Folder::* const Folder::Table::PrimaryKey = &Folder::m_id;
 const std::string Folder::FtsTable::Name = "FolderFts";
+const std::string Folder::ExcludedFolderTable::Name = "ExcludedEntryFolder";
 
 Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -200,7 +201,8 @@ std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& m
 
 void Folder::excludeEntryFolder( MediaLibraryPtr ml, int64_t folderId )
 {
-    std::string req = "INSERT INTO ExcludedEntryFolder(folder_id) VALUES(?)";
+    std::string req = "INSERT INTO " + ExcludedFolderTable::Name +
+            "(folder_id) VALUES(?)";
     sqlite::Tools::executeRequest( ml->getConn(), req, folderId );
 }
 
@@ -604,10 +606,10 @@ Query<IFolder> Folder::subfolders( const QueryParameters* params ) const
 std::vector<std::shared_ptr<Folder>> Folder::fetchRootFolders( MediaLibraryPtr ml )
 {
     static const std::string req = "SELECT * FROM " + Folder::Table::Name + " f "
-            " LEFT JOIN ExcludedEntryFolder"
-            " ON f.id_folder = ExcludedEntryFolder.folder_id"
+            " LEFT JOIN " + ExcludedFolderTable::Name +
+            " ON f.id_folder = " + ExcludedFolderTable::Name + ".folder_id"
             " LEFT JOIN " + Device::Table::Name + " d ON d.id_device = f.device_id"
-            " WHERE ExcludedEntryFolder.folder_id IS NULL AND"
+            " WHERE " + ExcludedFolderTable::Name + ".folder_id IS NULL AND"
             " parent_id IS NULL AND is_banned = 0 AND d.is_present != 0";
     return DatabaseHelpers::fetchAll<Folder>( ml, req );
 }

@@ -57,6 +57,10 @@ public:
     {
         static const std::string Name;
     };
+    struct ExcludedFolderTable
+    {
+        static const std::string Name;
+    };
 
     Folder( MediaLibraryPtr ml, sqlite::Row& row );
     Folder(MediaLibraryPtr ml, const std::string& path, int64_t parent , int64_t deviceId , bool isRemovable );
