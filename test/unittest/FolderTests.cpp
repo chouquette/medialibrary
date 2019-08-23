@@ -827,3 +827,9 @@ TEST_F( FoldersNoDiscover, BannedEntryPoints )
     ASSERT_EQ( 1u, res->count() );
     ASSERT_EQ( mock::FileSystemFactory::Root, res->all()[0]->mrl() );
 }
+
+TEST_F( FoldersNoDiscover, CheckDbModel )
+{
+    auto res = Folder::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}

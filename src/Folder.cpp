@@ -240,6 +240,19 @@ std::string Folder::schema( const std::string& tableName, uint32_t dbModel )
     ")";
 }
 
+bool Folder::checkDbModel( MediaLibraryPtr ml )
+{
+    return sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name ) &&
+        sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( FtsTable::Name, Settings::DbModelVersion ),
+                                       FtsTable::Name ) &&
+        sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( ExcludedFolderTable::Name, Settings::DbModelVersion ),
+                                       ExcludedFolderTable::Name );
+}
+
 std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& mrl,
                                         int64_t parentId, Device& device,
                                         fs::IDevice& deviceFs )
