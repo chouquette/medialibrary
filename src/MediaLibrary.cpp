@@ -152,48 +152,52 @@ void MediaLibrary::createAllTables( uint32_t dbModelVersion )
     // Individual migrations might take shortcuts, but it will become increasingly
     // hard to do, as we have to mainting major changes across versions.
 
-    Device::createTable( m_dbConnection.get() );
-    Folder::createTable( m_dbConnection.get() );
-    Thumbnail::createTable( m_dbConnection.get() );
-    Media::createTable( m_dbConnection.get() );
-    File::createTable( m_dbConnection.get() );
-    Label::createTable( m_dbConnection.get() );
-    Playlist::createTable( m_dbConnection.get() );
-    Genre::createTable( m_dbConnection.get() );
-    Album::createTable( m_dbConnection.get() );
-    AlbumTrack::createTable( m_dbConnection.get() );
-    Show::createTable( m_dbConnection.get() );
-    ShowEpisode::createTable( m_dbConnection.get() );
-    Movie::createTable( m_dbConnection.get() );
-    VideoTrack::createTable( m_dbConnection.get() );
-    AudioTrack::createTable( m_dbConnection.get() );
-    Artist::createTable( m_dbConnection.get() );
-    Artist::createDefaultArtists( m_dbConnection.get() );
-    parser::Task::createTable( m_dbConnection.get(), dbModelVersion );
-    Metadata::createTable( m_dbConnection.get() );
-    SubtitleTrack::createTable( m_dbConnection.get() );
-    Chapter::createTable( m_dbConnection.get() );
-    Bookmark::createTable( m_dbConnection.get() );
+    auto dbConn = m_dbConnection.get();
+
+    Device::createTable( dbConn );
+    Folder::createTable( dbConn );
+    Thumbnail::createTable( dbConn );
+    Media::createTable( dbConn );
+    File::createTable( dbConn );
+    Label::createTable( dbConn );
+    Playlist::createTable( dbConn );
+    Genre::createTable( dbConn );
+    Album::createTable( dbConn );
+    AlbumTrack::createTable( dbConn );
+    Show::createTable( dbConn );
+    ShowEpisode::createTable( dbConn );
+    Movie::createTable( dbConn );
+    VideoTrack::createTable( dbConn );
+    AudioTrack::createTable( dbConn );
+    Artist::createTable( dbConn );
+    Artist::createDefaultArtists( dbConn );
+    parser::Task::createTable( dbConn, dbModelVersion );
+    Metadata::createTable( dbConn );
+    SubtitleTrack::createTable( dbConn );
+    Chapter::createTable( dbConn );
+    Bookmark::createTable( dbConn );
 }
 
 void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
 {
-    Folder::createTriggers( m_dbConnection.get(), dbModelVersion );
-    Album::createTriggers( m_dbConnection.get() );
-    AlbumTrack::createTriggers( m_dbConnection.get() );
-    Artist::createTriggers( m_dbConnection.get(), dbModelVersion );
-    Media::createTriggers( m_dbConnection.get(), dbModelVersion );
-    File::createTriggers( m_dbConnection.get() );
-    Genre::createTriggers( m_dbConnection.get() );
-    Playlist::createTriggers( m_dbConnection.get(), dbModelVersion );
-    Label::createTriggers( m_dbConnection.get() );
-    Show::createTriggers( m_dbConnection.get() );
-    ShowEpisode::createTrigger( m_dbConnection.get() );
-    Thumbnail::createTriggers( m_dbConnection.get() );
-    parser::Task::createTriggers( m_dbConnection.get(), dbModelVersion );
-    AudioTrack::createIndexes( m_dbConnection.get() );
-    SubtitleTrack::createTriggers( m_dbConnection.get() );
-    VideoTrack::createIndexes( m_dbConnection.get() );
+    auto dbConn = m_dbConnection.get();
+
+    Folder::createTriggers( dbConn, dbModelVersion );
+    Album::createTriggers( dbConn );
+    AlbumTrack::createTriggers( dbConn );
+    Artist::createTriggers( dbConn, dbModelVersion );
+    Media::createTriggers( dbConn, dbModelVersion );
+    File::createTriggers( dbConn );
+    Genre::createTriggers( dbConn );
+    Playlist::createTriggers( dbConn, dbModelVersion );
+    Label::createTriggers( dbConn );
+    Show::createTriggers( dbConn );
+    ShowEpisode::createTrigger( dbConn );
+    Thumbnail::createTriggers( dbConn );
+    parser::Task::createTriggers( dbConn, dbModelVersion );
+    AudioTrack::createIndexes( dbConn );
+    SubtitleTrack::createTriggers( dbConn );
+    VideoTrack::createIndexes( dbConn );
 }
 
 void MediaLibrary::registerEntityHooks()
