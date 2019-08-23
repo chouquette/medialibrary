@@ -45,6 +45,11 @@ class Show : public IShow, public DatabaseHelpers<Show>
             static const std::string PrimaryKeyColumn;
             static int64_t Show::*const PrimaryKey;
         };
+        struct FtsTable
+        {
+            static const std::string Name;
+        };
+
         Show( MediaLibraryPtr ml, sqlite::Row& row );
         Show( MediaLibraryPtr ml, const std::string& title );
 

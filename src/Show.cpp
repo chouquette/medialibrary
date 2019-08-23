@@ -39,6 +39,7 @@ namespace medialibrary
 const std::string Show::Table::Name = "Show";
 const std::string Show::Table::PrimaryKeyColumn = "id_show";
 int64_t Show::* const Show::Table::PrimaryKey = &Show::m_id;
+const std::string Show::FtsTable::Name = "ShowFts";
 
 Show::Show( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -195,7 +196,7 @@ void Show::createTable( sqlite::Connection* dbConnection )
                         "tvdb_id TEXT"
                     ")";
     const std::string reqFts = "CREATE VIRTUAL TABLE IF NOT EXISTS " +
-                Show::Table::Name + "Fts USING FTS3"
+                FtsTable::Name + " USING FTS3"
             "("
                 "title"
             ")";
@@ -208,12 +209,12 @@ void Show::createTriggers( sqlite::Connection* dbConnection )
     const std::string insertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_show_fts"
             " AFTER INSERT ON " + Show::Table::Name +
             " BEGIN"
-            " INSERT INTO " + Show::Table::Name + "Fts(rowid,title) VALUES(new.id_show, new.title);"
+            " INSERT INTO " + Show::FtsTable::Name + "(rowid,title) VALUES(new.id_show, new.title);"
             " END";
     const std::string deleteTrigger = "CREATE TRIGGER IF NOT EXISTS delete_show_fts"
             " BEFORE DELETE ON " + Show::Table::Name +
             " BEGIN"
-            " DELETE FROM " + Show::Table::Name + "Fts WHERE rowid = old.id_show;"
+            " DELETE FROM " + Show::FtsTable::Name + " WHERE rowid = old.id_show;"
             " END";
     sqlite::Tools::executeRequest( dbConnection, insertTrigger );
     sqlite::Tools::executeRequest( dbConnection, deleteTrigger );
@@ -260,8 +261,8 @@ Query<IShow> Show::search( MediaLibraryPtr ml, const std::string& pattern,
                            const QueryParameters* params )
 {
     std::string req = "FROM " + Show::Table::Name + " WHERE id_show IN"
-            "(SELECT rowid FROM " + Show::Table::Name + "Fts WHERE " +
-            Show::Table::Name + "Fts MATCH ?)";
+            "(SELECT rowid FROM " + Show::FtsTable::Name + " WHERE " +
+            Show::FtsTable::Name + " MATCH ?)";
     return make_query<Show, IShow>( ml, "*", std::move( req ),
                                     orderBy( params ),
                                     sqlite::Tools::sanitizePattern( pattern ) );
