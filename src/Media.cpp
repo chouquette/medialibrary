@@ -948,11 +948,11 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
 {
     if ( tableName == FtsTable::Name )
     {
-        return "CREATE VIRTUAL TABLE IF NOT EXISTS " + FtsTable::Name +
+        return "CREATE VIRTUAL TABLE " + FtsTable::Name +
                " USING FTS3(title,labels)";
     }
     assert( tableName == Table::Name );
-    return "CREATE TABLE IF NOT EXISTS " + Table::Name +
+    return "CREATE TABLE " + Table::Name +
     "("
         "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
         "type INTEGER,"
