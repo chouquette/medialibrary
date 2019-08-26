@@ -998,6 +998,12 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 needRescan |= migrateModel18to19();
                 previousVersion = 19;
             }
+            if ( previousVersion == 19 )
+            {
+                migrateModel19to20();
+                needRescan = true;
+                previousVersion = 20;
+            }
             // To be continued in the future!
 
             if ( needRescan == true )
@@ -1518,6 +1524,36 @@ bool MediaLibrary::migrateModel18to19()
     m_settings.save();
     t->commit();
     return forceRescan;
+}
+
+/**
+ * @brief MediaLibrary::migrateModel19to20
+ * - Remove leftover AlbumTrack.is_present field
+ * - Remove leftover ShowEpisode.artwork_mrl field
+ * - Ensure Genre.name is case insensitive
+ */
+void MediaLibrary::migrateModel19to20()
+{
+    auto dbConn = getConn();
+    sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
+    auto t = dbConn->newTransaction();
+
+    std::string reqs[] = {
+#       include "database/migrations/migration19-20.sql"
+    };
+
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConn, req );
+
+    Album::createTriggers( dbConn );
+    AlbumTrack::createTriggers( dbConn );
+    Artist::createTriggers( dbConn, 20 );
+    Genre::createTriggers( dbConn );
+    ShowEpisode::createTrigger( dbConn );
+
+    m_settings.setDbModelVersion( 20 );
+    m_settings.save();
+    t->commit();
 }
 
 void MediaLibrary::reload()

@@ -508,3 +508,16 @@ TEST_F( DbModel, Upgrade18to19Noop )
     CheckTriggers( expectedTriggers );
     CheckTables( expectedTables );
 }
+
+
+TEST_F( DbModel, Upgrade19to20 )
+{
+    // Check that the repair migration doesn't do anything for a successful
+    // 17->18 migration
+    LoadFakeDB( SRC_DIR "/test/unittest/db_v19.sql" );
+    auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
+    ASSERT_EQ( InitializeResult::Success, res );
+    CheckIndexes( expectedIndexes );
+    CheckTriggers( expectedTriggers );
+    CheckTables( expectedTables );
+}
