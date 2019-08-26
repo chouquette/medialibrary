@@ -898,11 +898,12 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
     // Up until model 3, it's safer (and potentially more efficient with index changes) to drop the DB
     // It's also way simpler to implement
     // In case of downgrade, just recreate the database
+    auto success = false;
+    auto needRescan = false;
     for ( auto i = 0u; i < 3; ++i )
     {
         try
         {
-            bool needRescan = false;
             // Up until model 3, it's safer (and potentially more efficient with index changes) to drop the DB
             // It's also way simpler to implement
             // In case of downgrade, just recreate the database
@@ -1031,17 +1032,8 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
             }
             // To be continued in the future!
 
-            if ( needRescan == true )
-                forceRescan();
-
-            // Safety check: ensure we didn't forget a migration along the way
-            assert( previousVersion == Settings::DbModelVersion );
-            assert( previousVersion == m_settings.dbModelVersion() );
-
-            if ( checkDatabaseIntegrity() == false )
-                return InitializeResult::DbCorrupted;
-
-            return InitializeResult::Success;
+            success = true;
+            break;
         }
         catch( const std::exception& ex )
         {
@@ -1056,7 +1048,20 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
     }
     // If we failed 3 times to migrate the database, assume the database to be
     // corrupted.
-    return InitializeResult::DbCorrupted;
+    if ( success == false )
+        return InitializeResult::DbCorrupted;
+
+    if ( needRescan == true )
+        forceRescan();
+
+    // Safety check: ensure we didn't forget a migration along the way
+    assert( previousVersion == Settings::DbModelVersion );
+    assert( previousVersion == m_settings.dbModelVersion() );
+
+    if ( checkDatabaseIntegrity() == false )
+        return InitializeResult::DbCorrupted;
+
+    return InitializeResult::Success;
 }
 
 bool MediaLibrary::recreateDatabase( const std::string& dbPath )
