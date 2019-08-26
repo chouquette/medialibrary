@@ -283,7 +283,9 @@ public:
      * media library thumbnails. It might be emptied if the media library needs
      * to regenerate the thumbnails.
      */
-    virtual InitializeResult initialize( const std::string& dbPath, const std::string& thumbnailPath, IMediaLibraryCb* mlCallback ) = 0;
+    virtual InitializeResult initialize( const std::string& dbPath,
+                                         const std::string& thumbnailPath,
+                                         IMediaLibraryCb* mlCallback ) = 0;
 
     /**
      * @brief start Starts the background thread and reload the medialibrary content
@@ -413,8 +415,10 @@ public:
      */
     virtual Query<IMedia> searchMedia( const std::string& pattern,
                                                const QueryParameters* params = nullptr ) const = 0;
-    virtual Query<IMedia> searchAudio( const std::string& pattern, const QueryParameters* params = nullptr ) const = 0;
-    virtual Query<IMedia> searchVideo( const std::string& pattern, const QueryParameters* params = nullptr ) const = 0;
+    virtual Query<IMedia> searchAudio( const std::string& pattern,
+                                       const QueryParameters* params = nullptr ) const = 0;
+    virtual Query<IMedia> searchVideo( const std::string& pattern,
+                                       const QueryParameters* params = nullptr ) const = 0;
 
     virtual Query<IPlaylist> searchPlaylists( const std::string& name,
                                               const QueryParameters* params = nullptr ) const = 0;
