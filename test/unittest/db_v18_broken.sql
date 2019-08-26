@@ -98,6 +98,8 @@ CREATE TRIGGER auto_delete_artist_thumbnail AFTER DELETE ON Artist BEGIN DELETE 
 CREATE TRIGGER auto_delete_album_thumbnail AFTER DELETE ON Album BEGIN DELETE FROM ThumbnailLinking WHERE entity_id = old.id_album AND entity_type = 1; END;
 CREATE TRIGGER add_album_track AFTER INSERT ON AlbumTrack BEGIN UPDATE Album SET duration = duration + new.duration,nb_tracks = nb_tracks + 1,is_present = is_present + 1 WHERE id_album = new.album_id; END;
 INSERT INTO Task(id_task,step,retry_count,mrl,file_type,file_id,parent_folder_id,parent_playlist_id,parent_playlist_index,is_refresh) VALUES(1,0,0,'file:///root/path/movie.mkv',1,1,1,NULL,NULL,0);
+INSERT INTO Media(id_media,type,subtype,duration,play_count,last_played_date,real_last_played_date,insertion_date,release_date,title,filename,is_favorite,is_present,device_id,nb_playlists,folder_id) VALUES(1,1,0,12345,NULL,NULL,NULL,NULL,NULL,'movie','movie.mkv',0,1,NULL,0,NULL);
+INSERT INTO File(id_file,media_id,playlist_id,mrl,type,last_modification_date,size,folder_id,is_removable,is_external,is_network) VALUES(1,1,NULL,'file:///root/path/movie.mkv',1,NULL,NULL,1,'','','');
 INSERT INTO Device(id_device,uuid,scheme,is_removable,is_present,last_seen) VALUES(1,'main-storage','file://',0,1,0);
 INSERT INTO Artist(id_artist,name,shortbio,nb_albums,nb_tracks,mb_id,is_present) VALUES(1,NULL,NULL,0,0,NULL,0);
 INSERT INTO Artist(id_artist,name,shortbio,nb_albums,nb_tracks,mb_id,is_present) VALUES(2,NULL,NULL,0,0,NULL,0);
