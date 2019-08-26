@@ -304,7 +304,7 @@ public:
 TEST_F( DbModel, NbTriggers )
 {
     // Test the expected number of triggers on a freshly created database
-    auto res = ml->initialize( "test.db", "/tmp", cbMock.get() );
+    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     CheckTriggers( expectedTriggers );
     CheckIndexes( expectedIndexes );
@@ -313,7 +313,7 @@ TEST_F( DbModel, NbTriggers )
 TEST_F( DbModel, Upgrade3to5 )
 {
     LoadFakeDB( SRC_DIR "/test/unittest/db_v3.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
+    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     // All is done during the database initialization, we only care about no
     // exception being thrown, and MediaLibrary::initialize() returning true
@@ -323,7 +323,7 @@ TEST_F( DbModel, Upgrade3to5 )
 TEST_F( DbModel, Upgrade4to5 )
 {
     LoadFakeDB( SRC_DIR "/test/unittest/db_v4.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
+    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
     ASSERT_EQ( InitializeResult::DbReset, res );
 
     // The culprit  with V4 was an invalid migration, leading to missing fields
@@ -339,7 +339,7 @@ TEST_F( DbModel, Upgrade4to5 )
 TEST_F( DbModel, Upgrade7to8 )
 {
     LoadFakeDB( SRC_DIR "/test/unittest/db_v7.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
+    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     // Removed post migration tests starting with V9, since we force a re-scan,
     // there is no content left to test
@@ -350,7 +350,7 @@ TEST_F( DbModel, Upgrade7to8 )
 TEST_F( DbModel, Upgrade8to9 )
 {
     LoadFakeDB( SRC_DIR "/test/unittest/db_v8.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
+    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     // We expect the file-orphaned media to have been deleted
     auto media = ml->files();
@@ -362,7 +362,7 @@ TEST_F( DbModel, Upgrade8to9 )
 TEST_F( DbModel, Upgrade12to13 )
 {
     LoadFakeDB( SRC_DIR "/test/unittest/db_v12.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
+    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     // We can't check for the number of albums anymore since they are deleted
     // as part of 13 -> 14 migration
@@ -375,7 +375,7 @@ TEST_F( DbModel, Upgrade12to13 )
 TEST_F( DbModel, Upgrade13to14 )
 {
     LoadFakeDB( SRC_DIR "/test/unittest/db_v13.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
+    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     auto media = ml->files();
     ASSERT_EQ( 4u, media.size() );
@@ -424,7 +424,7 @@ TEST_F( DbModel, Upgrade13to14 )
 TEST_F( DbModel, Upgrade14to15 )
 {
     LoadFakeDB( SRC_DIR "/test/unittest/db_v14.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
+    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
@@ -434,7 +434,7 @@ TEST_F( DbModel, Upgrade14to15 )
 TEST_F( DbModel, Upgrade15to16 )
 {
     LoadFakeDB( SRC_DIR "/test/unittest/db_v15.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
+    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
@@ -468,7 +468,7 @@ TEST_F( DbModel, Upgrade15to16 )
 TEST_F( DbModel, Upgrade16to17 )
 {
     LoadFakeDB( SRC_DIR "/test/unittest/db_v16.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
+    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
@@ -478,7 +478,7 @@ TEST_F( DbModel, Upgrade16to17 )
 TEST_F( DbModel, Upgrade17to18 )
 {
     LoadFakeDB( SRC_DIR "/test/unittest/db_v17.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
+    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
@@ -489,7 +489,7 @@ TEST_F( DbModel, Upgrade18to19Broken )
 {
     // Test the repair migration after a broken 17/18 migration
     LoadFakeDB( SRC_DIR "/test/unittest/db_v18_broken.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
+    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
@@ -502,7 +502,7 @@ TEST_F( DbModel, Upgrade18to19Noop )
     // Check that the repair migration doesn't do anything for a successful
     // 17->18 migration
     LoadFakeDB( SRC_DIR "/test/unittest/db_v18_ok.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
+    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
@@ -515,7 +515,7 @@ TEST_F( DbModel, Upgrade19to20 )
     // Check that the repair migration doesn't do anything for a successful
     // 17->18 migration
     LoadFakeDB( SRC_DIR "/test/unittest/db_v19.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_thumbnails/", cbMock.get() );
+    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );

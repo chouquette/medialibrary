@@ -160,16 +160,16 @@ void Tests::SetUp()
         m_ml->setVerbosity( LogLevel::Info );
 
 #ifndef _WIN32
-    auto thumbnailDir = "/tmp/ml_thumbnails/";
+    auto mlDir = "/tmp/ml_folder/";
 #else
     // This assumes wine for now
-    auto thumbnailDir = "Z:\\tmp\\ml_thumbnails\\";
+    auto mlDir = "Z:\\tmp\\ml_folder\\";
 #endif
 
     if ( std::get<1>( GetParam() ) == true )
         m_ml->setDeviceLister( std::make_shared<ForceRemovableStorareDeviceLister>() );
 
-    auto res = m_ml->initialize( "test.db", thumbnailDir, m_cb.get() );
+    auto res = m_ml->initialize( "test.db", mlDir, m_cb.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     ASSERT_TRUE( m_ml->start() );
 }

@@ -341,7 +341,7 @@ void MediaLibrary::removeThumbnails()
 }
 
 InitializeResult MediaLibrary::initialize( const std::string& dbPath,
-                                           const std::string& thumbnailPath,
+                                           const std::string& mlFolderPath,
                                            IMediaLibraryCb* mlCallback )
 {
     LOG_INFO( "Initializing medialibrary..." );
@@ -361,7 +361,8 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     }
     addLocalFsFactory();
     populateNetworkFsFactories();
-    m_thumbnailPath = utils::file::toFolderPath( thumbnailPath );
+    auto mlFolder = utils::file::toFolderPath( mlFolderPath );
+    m_thumbnailPath = mlFolder + "thumbnails/";
     if ( createThumbnailFolder( m_thumbnailPath ) == false )
     {
         LOG_ERROR( "Failed to create thumbnail directory (", m_thumbnailPath,

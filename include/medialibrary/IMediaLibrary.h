@@ -267,8 +267,7 @@ public:
      * initialized and ready to return a list of all known devices before calling this method.
      *
      * \param dbPath        Path to the database file
-     * \param thumbnailPath Path to a folder that will contain the thumbnails. It will be
-     *                      created if required.
+     * \param mlFolderPath Path to a folder that will contain medialibrary's files.
      * \param mlCallback    A pointer to an IMediaLibraryCb that will be invoked with various
      *                      events during the medialibrary lifetime.
      * \return true in case of success, false otherwise
@@ -279,12 +278,11 @@ public:
      * In case DbReset is returned, it is up to application to decide what
      * to do to repopulate the database.
      *
-     * The thumbnail path is assumed to be a folder dedicated to store the
-     * media library thumbnails. It might be emptied if the media library needs
-     * to regenerate the thumbnails.
+     * The ml folder path is assumed to be a folder dedicated to store the
+     * various media library files. It might be emptied or modified at any time.
      */
     virtual InitializeResult initialize( const std::string& dbPath,
-                                         const std::string& thumbnailPath,
+                                         const std::string& mlFolderPath,
                                          IMediaLibraryCb* mlCallback ) = 0;
 
     /**

@@ -136,7 +136,7 @@ int main( int argc, char** argv )
     std::unique_ptr<medialibrary::IMediaLibrary> ml( NewMediaLibrary() );
 
     ml->setVerbosity( medialibrary::LogLevel::Info );
-    ml->initialize( "/tmp/test.db", "/tmp/ml_thumbnails", testCb.get() );
+    ml->initialize( "/tmp/test.db", "/tmp/ml_folder", testCb.get() );
     ml->setDiscoverNetworkEnabled( true );
     ml->start();
     ml->discover( argv[1] );
