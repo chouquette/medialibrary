@@ -369,6 +369,14 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
                     ": ", strerror( errno ) );
         return InitializeResult::Failed;
     }
+    m_playlistPath = mlFolder + "playlists/";
+    if ( createFolder( m_playlistPath ) == false )
+    {
+        LOG_ERROR( "Failed to create playlist export directory (", m_playlistPath,
+                    ": ", strerror( errno ) );
+        return InitializeResult::Failed;
+    }
+
     m_callback = mlCallback;
     m_dbConnection = sqlite::Connection::connect( dbPath );
 
@@ -1829,6 +1837,11 @@ Query<IFolder> MediaLibrary::bannedEntryPoints() const
 const std::string& MediaLibrary::thumbnailPath() const
 {
     return m_thumbnailPath;
+}
+
+const std::string& MediaLibrary::playlistPath() const
+{
+    return m_playlistPath;
 }
 
 void MediaLibrary::setLogger( ILogger* logger )

@@ -161,6 +161,7 @@ public:
     virtual Query<IFolder> bannedEntryPoints() const override;
 
     const std::string& thumbnailPath() const;
+    const std::string& playlistPath() const;
     virtual void setLogger( ILogger* logger ) override;
     //Temporarily public, move back to private as soon as we start monitoring the FS
     virtual void reload() override;
@@ -273,6 +274,7 @@ protected:
     std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_fsFactories;
     std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_externalNetworkFsFactories;
     std::string m_thumbnailPath;
+    std::string m_playlistPath;
     IMediaLibraryCb* m_callback;
     FsFactoryCb m_fsFactoryCb;
     // Private IDeviceListerCb implementation
