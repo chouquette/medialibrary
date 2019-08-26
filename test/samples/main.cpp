@@ -54,6 +54,7 @@ bool ExtraVerbose = false;
     X("playlist_external_media") \
     X("playlist_external_folder") \
     X("playlist_same_folder") \
+    X("playlist_mixed_content") \
     X("same_album_with_subfolder") \
     X("compilation_different_years")
 
