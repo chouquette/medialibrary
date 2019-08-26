@@ -89,6 +89,8 @@ public:
     void setRecursiveTriggersEnabled( bool value );
 
     void registerUpdateHook( const std::string& table, UpdateHookCb cb );
+    bool checkSchemaIntegrity();
+    bool checkForeignKeysIntegrity();
 
     static std::shared_ptr<Connection> connect( const std::string& dbPath );
 

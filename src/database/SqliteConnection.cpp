@@ -160,6 +160,53 @@ void Connection::registerUpdateHook( const std::string& table, Connection::Updat
     m_hooks.emplace( table, cb );
 }
 
+bool Connection::checkSchemaIntegrity()
+{
+    auto conn = handle();
+    std::string req = std::string{ "PRAGMA integrity_check" };
+
+    sqlite::Statement stmt( conn, req );
+    stmt.execute();
+    auto row = stmt.row();
+    if ( row.load<std::string>( 0 ) == "ok" )
+    {
+        row = stmt.row();
+        assert( row == nullptr );
+        return true;
+    }
+    do
+    {
+        LOG_ERROR( "Error string from integrity_check: ", row.load<std::string>( 0 ) );
+        row = stmt.row();
+    }
+    while ( row != nullptr );
+    return false;
+}
+
+bool Connection::checkForeignKeysIntegrity()
+{
+    auto conn = handle();
+    std::string req = std::string{ "PRAGMA foreign_key_check" };
+
+    sqlite::Statement stmt( conn, req );
+    stmt.execute();
+    auto row = stmt.row();
+    if ( row == nullptr )
+        return true;
+    do
+    {
+        auto table = row.extract<std::string>();
+        auto rowid = row.extract<int64_t>();
+        auto targetTable = row.extract<std::string>();
+        auto idx = row.extract<int64_t>();
+        LOG_ERROR( "Foreign Key error: In table ", table, " rowid: ", rowid,
+                   " referring to table ", targetTable, " at index ", idx );
+        row = stmt.row();
+    }
+    while ( row != nullptr );
+    return false;
+}
+
 std::shared_ptr<Connection> Connection::connect( const std::string& dbPath )
 {
     // Use a wrapper to allow make_shared to use the private Connection ctor
