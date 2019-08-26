@@ -1066,6 +1066,12 @@ TEST_F( Medias, SetFolderId )
     ASSERT_EQ( folder->id(), m->folderId() );
 }
 
+TEST_F( Medias, CheckDbModel )
+{
+    auto res = Media::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}
+
 class FetchMedia : public Tests
 {
 protected:

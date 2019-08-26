@@ -75,6 +75,7 @@ class Media : public IMedia,
         static void createTable( sqlite::Connection* connection );
         static void createTriggers( sqlite::Connection* connection, uint32_t modelVersion );
         static std::string schema( const std::string& tableName, uint32_t dbModel );
+        static bool checkDbModel( MediaLibraryPtr ml );
 
         virtual int64_t id() const override;
         virtual Type type() const override;

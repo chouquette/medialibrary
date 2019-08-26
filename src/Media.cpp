@@ -983,6 +983,16 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
     ")";
 }
 
+bool Media::checkDbModel( MediaLibraryPtr ml )
+{
+    return sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name ) &&
+           sqlite::Tools::checkSchema( ml->getConn(),
+                                       schema( FtsTable::Name, Settings::DbModelVersion ),
+                                       FtsTable::Name );
+}
+
 bool Media::addLabel( LabelPtr label )
 {
     if ( m_id == 0 || label->id() == 0 )
