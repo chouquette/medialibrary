@@ -11,8 +11,8 @@
   "is_present BOOLEAN NOT NULL DEFAULT 1,"
   "is_removable BOOLEAN NOT NULL,"
   "is_external BOOLEAN NOT NULL,"
-  "FOREIGN KEY (media_id) REFERENCES " + Media::Table::Name + "(id_media) ON DELETE CASCADE,"
-  "FOREIGN KEY (folder_id) REFERENCES " + Folder::Table::Name + "(id_folder) ON DELETE CASCADE,"
+  "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name + "(id_media) ON DELETE CASCADE,"
+  "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name + "(id_folder) ON DELETE CASCADE,"
   "UNIQUE( mrl, folder_id ) ON CONFLICT FAIL);",
 
 "INSERT INTO " + File::Table::Name + "_backup SELECT * FROM " + File::Table::Name + ";",
@@ -32,9 +32,9 @@
                   "is_present BOOLEAN NOT NULL DEFAULT 1,"
                   "is_removable BOOLEAN NOT NULL,"
                   "is_external BOOLEAN NOT NULL,"
-  "FOREIGN KEY (media_id) REFERENCES " + Media::Table::Name + "(id_media) ON DELETE CASCADE,"
-  "FOREIGN KEY (playlist_id) REFERENCES " + Playlist::Table::Name + "(id_playlist) ON DELETE CASCADE," // Added
-  "FOREIGN KEY (folder_id) REFERENCES " + Folder::Table::Name + "(id_folder) ON DELETE CASCADE,"
+  "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name + "(id_media) ON DELETE CASCADE,"
+  "FOREIGN KEY(playlist_id) REFERENCES " + Playlist::Table::Name + "(id_playlist) ON DELETE CASCADE," // Added
+  "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name + "(id_folder) ON DELETE CASCADE,"
   "UNIQUE( mrl, folder_id ) ON CONFLICT FAIL);",
 
 "INSERT INTO " + File::Table::Name + "(id_file,media_id,mrl,type,last_modification_date,size,parser_step,parser_retries,folder_id,is_present,is_removable,is_external)"
@@ -57,7 +57,7 @@
   "file_id UNSIGNED INT DEFAULT NULL," // Added
   "creation_date UNSIGNED INT NOT NULL,"
   "artwork_mrl TEXT," // Added
-  "FOREIGN KEY (file_id) REFERENCES " + File::Table::Name + "(id_file) ON DELETE CASCADE);", // Added
+  "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name + "(id_file) ON DELETE CASCADE);", // Added
 
 "INSERT INTO " + Playlist::Table::Name + "(id_playlist,name,creation_date)"
  " SELECT * FROM " + Playlist::Table::Name + "_backup;",

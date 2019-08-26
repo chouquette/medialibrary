@@ -60,9 +60,9 @@
   "is_present BOOLEAN NOT NULL DEFAULT 1,"
   "is_removable BOOLEAN NOT NULL,"
   "is_external BOOLEAN NOT NULL,"
-  "FOREIGN KEY (media_id) REFERENCES " + Media::Table::Name + "(id_media) ON DELETE CASCADE,"
-  "FOREIGN KEY (playlist_id) REFERENCES " + Playlist::Table::Name + "(id_playlist) ON DELETE CASCADE,"
-  "FOREIGN KEY (folder_id) REFERENCES " + Folder::Table::Name + "(id_folder) ON DELETE CASCADE,"
+  "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name + "(id_media) ON DELETE CASCADE,"
+  "FOREIGN KEY(playlist_id) REFERENCES " + Playlist::Table::Name + "(id_playlist) ON DELETE CASCADE,"
+  "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name + "(id_folder) ON DELETE CASCADE,"
   "UNIQUE( mrl, folder_id ) ON CONFLICT FAIL);",
 
 "INSERT INTO " + File::Table::Name + "_backup SELECT * FROM " + File::Table::Name + ";",
@@ -81,9 +81,9 @@
                   "is_present BOOLEAN NOT NULL DEFAULT 1,"
                   "is_removable BOOLEAN NOT NULL,"
                   "is_external BOOLEAN NOT NULL,"
-  "FOREIGN KEY (media_id) REFERENCES " + Media::Table::Name + "(id_media) ON DELETE CASCADE,"
-  "FOREIGN KEY (playlist_id) REFERENCES " + Playlist::Table::Name + "(id_playlist) ON DELETE CASCADE,"
-  "FOREIGN KEY (folder_id) REFERENCES " + Folder::Table::Name + "(id_folder) ON DELETE CASCADE,"
+  "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name + "(id_media) ON DELETE CASCADE,"
+  "FOREIGN KEY(playlist_id) REFERENCES " + Playlist::Table::Name + "(id_playlist) ON DELETE CASCADE,"
+  "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name + "(id_folder) ON DELETE CASCADE,"
   "UNIQUE( mrl, folder_id ) ON CONFLICT FAIL);",
 
 "INSERT INTO " + File::Table::Name + "("
