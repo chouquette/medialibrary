@@ -62,10 +62,6 @@ bool ExtraVerbose = false;
     X("featuring") \
     X("parse_video")
 
-#define TEST_WITH_REMOVABLE_STORAGE(testCare) \
-    { testCase, true }
-
-
 static std::tuple<std::string, bool> testCases[] = {
     #define X(TESTCASE) std::make_tuple( TESTCASE, false ),
     TEST_CASE_LIST
