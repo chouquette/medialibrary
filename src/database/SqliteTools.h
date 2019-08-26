@@ -109,7 +109,7 @@ public:
     T load(unsigned int idx) const
     {
         if ( idx >= m_nbColumns )
-            throw errors::ColumnOutOfRange( m_idx, m_nbColumns );
+            throw errors::ColumnOutOfRange( idx, m_nbColumns );
         return sqlite::Traits<T>::Load( m_stmt, idx );
     }
 
