@@ -276,7 +276,7 @@ bool MediaLibrary::validateSearchPattern( const std::string& pattern )
     return pattern.size() >= 3;
 }
 
-bool MediaLibrary::createThumbnailFolder( const std::string& thumbnailPath ) const
+bool MediaLibrary::createFolder( const std::string& thumbnailPath ) const
 {
     auto paths = utils::file::splitPath( thumbnailPath, true );
 #ifndef _WIN32
@@ -363,7 +363,7 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     populateNetworkFsFactories();
     auto mlFolder = utils::file::toFolderPath( mlFolderPath );
     m_thumbnailPath = mlFolder + "thumbnails/";
-    if ( createThumbnailFolder( m_thumbnailPath ) == false )
+    if ( createFolder( m_thumbnailPath ) == false )
     {
         LOG_ERROR( "Failed to create thumbnail directory (", m_thumbnailPath,
                     ": ", strerror( errno ) );

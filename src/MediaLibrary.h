@@ -230,7 +230,7 @@ private:
     bool checkDatabaseIntegrity();
     void registerEntityHooks();
     static bool validateSearchPattern( const std::string& pattern );
-    bool createThumbnailFolder( const std::string& thumbnailPath ) const;
+    bool createFolder( const std::string& thumbnailPath ) const;
     void removeThumbnails();
 
 protected:
