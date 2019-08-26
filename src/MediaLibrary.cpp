@@ -202,7 +202,7 @@ void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
 
 bool MediaLibrary::checkDatabaseIntegrity()
 {
-    return Device::checkDbModel( this ) &&
+    auto schemaOk = Device::checkDbModel( this ) &&
             Folder::checkDbModel( this ) &&
             Thumbnail::checkDbModel( this ) &&
             Media::checkDbModel( this ) &&
@@ -223,6 +223,9 @@ bool MediaLibrary::checkDatabaseIntegrity()
             SubtitleTrack::checkDbModel( this ) &&
             Chapter::checkDbModel( this ) &&
             Bookmark::checkDbModel( this );
+    return schemaOk == true &&
+            m_dbConnection->checkSchemaIntegrity() == true &&
+            m_dbConnection->checkForeignKeysIntegrity() == true;
 }
 
 void MediaLibrary::registerEntityHooks()
@@ -1058,6 +1061,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
     assert( previousVersion == Settings::DbModelVersion );
     assert( previousVersion == m_settings.dbModelVersion() );
 
+    auto ctx = getConn()->acquireWriteContext();
     if ( checkDatabaseIntegrity() == false )
         return InitializeResult::DbCorrupted;
 
