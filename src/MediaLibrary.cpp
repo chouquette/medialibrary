@@ -1039,7 +1039,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
             assert( previousVersion == m_settings.dbModelVersion() );
 
             if ( checkDatabaseIntegrity() == false )
-                return InitializeResult::Failed;
+                return InitializeResult::DbCorrupted;
 
             return InitializeResult::Success;
         }
@@ -1054,25 +1054,9 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
         }
         LOG_WARN( "Retrying database migration, attempt ", i + 1, " / 3" );
     }
-    LOG_ERROR( "Failed to upgrade database, recreating it" );
-    for ( auto i = 0u; i < 3; ++i )
-    {
-        try
-        {
-            if( recreateDatabase( dbPath ) == true )
-                return InitializeResult::DbReset;
-        }
-        catch( const std::exception& ex )
-        {
-            LOG_ERROR( "Failed to recreate database: ", ex.what() );
-        }
-        catch(...)
-        {
-            LOG_ERROR( "Unknown error while trying to recreate the database." );
-        }
-        LOG_WARN( "Retrying to recreate the database, attempt ", i + 1, " / 3" );
-    }
-    return InitializeResult::Failed;
+    // If we failed 3 times to migrate the database, assume the database to be
+    // corrupted.
+    return InitializeResult::DbCorrupted;
 }
 
 bool MediaLibrary::recreateDatabase( const std::string& dbPath )

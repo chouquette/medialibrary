@@ -91,6 +91,9 @@ enum class InitializeResult
     //< The database was reset, the caller needs to re-configure folders to
     // discover at the bare minimum.
     DbReset,
+    //< Something is wrong with the database. It is up to the application to
+    //< chose what to do, the DB needs to be recovered or dropped in any case.
+    DbCorrupted,
 };
 
 enum class ThumbnailSizeType : uint8_t
