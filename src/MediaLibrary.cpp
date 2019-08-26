@@ -200,6 +200,31 @@ void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
     VideoTrack::createIndexes( dbConn );
 }
 
+bool MediaLibrary::checkDatabaseIntegrity()
+{
+    return Device::checkDbModel( this ) &&
+            Folder::checkDbModel( this ) &&
+            Thumbnail::checkDbModel( this ) &&
+            Media::checkDbModel( this ) &&
+            File::checkDbModel( this ) &&
+            Label::checkDbModel( this ) &&
+            Playlist::checkDbModel( this ) &&
+            Genre::checkDbModel( this ) &&
+            Album::checkDbModel( this ) &&
+            AlbumTrack::checkDbModel( this ) &&
+            Show::checkDbModel( this ) &&
+            ShowEpisode::checkDbModel( this ) &&
+            Movie::checkDbModel( this ) &&
+            VideoTrack::checkDbModel( this ) &&
+            AudioTrack::checkDbModel( this ) &&
+            Artist::checkDbModel( this ) &&
+            parser::Task::checkDbModel( this ) &&
+            Metadata::checkDbModel( this ) &&
+            SubtitleTrack::checkDbModel( this ) &&
+            Chapter::checkDbModel( this ) &&
+            Bookmark::checkDbModel( this );
+}
+
 void MediaLibrary::registerEntityHooks()
 {
     if ( m_modificationNotifier == nullptr )
@@ -1012,6 +1037,9 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
             // Safety check: ensure we didn't forget a migration along the way
             assert( previousVersion == Settings::DbModelVersion );
             assert( previousVersion == m_settings.dbModelVersion() );
+
+            if ( checkDatabaseIntegrity() == false )
+                return InitializeResult::Failed;
 
             return InitializeResult::Success;
         }

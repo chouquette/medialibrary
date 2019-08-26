@@ -227,6 +227,7 @@ private:
     void migrateModel19to20();
     void createAllTables( uint32_t dbModelVersion );
     void createAllTriggers( uint32_t dbModelVersion );
+    bool checkDatabaseIntegrity();
     void registerEntityHooks();
     static bool validateSearchPattern( const std::string& pattern );
     bool createThumbnailFolder( const std::string& thumbnailPath ) const;
