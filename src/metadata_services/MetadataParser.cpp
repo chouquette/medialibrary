@@ -123,7 +123,7 @@ Status MetadataAnalyzer::run( IItem& item )
         if ( res != Status::Success ) // playlist addition may fail due to constraint violation
             return res;
 
-        assert( item.file() != nullptr );
+        assert( item.file() != nullptr || item.isRestore() == true );
         return Status::Completed;
     }
 
@@ -214,20 +214,29 @@ Status MetadataAnalyzer::addPlaylistMedias( IItem& item ) const
         }
         m_notifier->notifyPlaylistCreation( playlistPtr );
 
-        auto deviceFs = item.parentFolderFs()->device();
-        if ( deviceFs == nullptr )
-            throw fs::DeviceRemovedException{};
-        auto file = playlistPtr->addFile( *item.fileFs(),
-                                          item.parentFolder()->id(),
-                                          deviceFs->isRemovable() );
-        if ( file == nullptr )
+        // If we're in a restore task, we can accept a playlist without a parent
+        // folder, as we're trying to restore a user-created playlist, which isn't
+        // backed by an actual playlist file.
+        // Actually we don't want to store any reference to the backup file even
+        // if we have some, since this would make the playlist look like a file
+        // backed one.
+        if ( item.isRestore() == false )
         {
-            LOG_ERROR( "Failed to add playlist file ", mrl );
-            return Status::Fatal;
+            auto deviceFs = item.parentFolderFs()->device();
+            if ( deviceFs == nullptr )
+                throw fs::DeviceRemovedException{};
+            auto file = playlistPtr->addFile( *item.fileFs(),
+                                              item.parentFolder()->id(),
+                                              deviceFs->isRemovable() );
+            if ( file == nullptr )
+            {
+                LOG_ERROR( "Failed to add playlist file ", mrl );
+                return Status::Fatal;
+            }
+            // Will invoke ITaskCb::updateFileId to upadte m_fileId & its
+            // representation in DB
+            item.setFile( std::move( file ) );
         }
-        // Will invoke ITaskCb::updateFileId to upadte m_fileId & its
-        // representation in DB
-        item.setFile( std::move( file ) );
         t->commit();
     }
     // Now regardless of if the playlist is re-scanned or discovered from the

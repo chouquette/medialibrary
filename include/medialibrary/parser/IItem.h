@@ -220,6 +220,7 @@ public:
     virtual std::shared_ptr<fs::IDirectory> parentFolderFs() = 0;
 
     virtual bool isRefresh() const = 0;
+    virtual bool isRestore() const = 0;
 
     virtual LinkType linkType() const = 0;
     virtual int64_t linkToId() const = 0;

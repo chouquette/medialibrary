@@ -108,6 +108,13 @@ Task::Task( MediaLibraryPtr ml, std::string mrl, int64_t linkToId,
 {
 }
 
+Task::Task( MediaLibraryPtr ml, std::string mrl )
+    : m_ml( ml )
+    , m_type( Type::Restore )
+    , m_mrl( std::move( mrl ) )
+{
+}
+
 Task::Task( std::string mrl, IFile::Type fileType, unsigned int playlistIndex )
     : m_mrl( std::move( mrl ) )
     , m_fileType( fileType )
@@ -193,7 +200,7 @@ int64_t Task::id() const
 bool Task::restoreLinkedEntities()
 {
     // No need to restore anything for link tasks, they only contain mrls & ids.
-    if ( isLinkTask() == true )
+    if ( isLinkTask() == true || isRestore() == true )
         return true;
     LOG_DEBUG("Restoring linked entities of task ", m_id);
     // MRL will be empty if the task has been resumed from unparsed files
@@ -509,6 +516,20 @@ std::shared_ptr<Task> Task::createLinkTask( MediaLibraryPtr ml, std::string mrl,
     return self;
 }
 
+std::shared_ptr<Task> Task::createRestoreTask( MediaLibraryPtr ml, std::string mrl )
+{
+    auto self = std::make_shared<Task>( ml, std::move( mrl ) );
+    const std::string req = "INSERT INTO " + Table::Name +
+            "(type, mrl, file_type) VALUES(?, ?, ?)";
+    if ( insert( ml, self, req, Type::Restore, self->mrl(),
+                 IFile::Type::Unknown ) == false )
+        return nullptr;
+    auto parser = ml->getParser();
+    if ( parser != nullptr )
+        parser->parse( self );
+    return self;
+}
+
 void Task::removePlaylistContentTasks( MediaLibraryPtr ml, int64_t playlistId )
 {
     const std::string req = "DELETE FROM " + Task::Table::Name + " "
@@ -650,6 +671,11 @@ bool Task::isRefresh() const
 bool Task::isLinkTask() const
 {
     return m_type == Type::Link;
+}
+
+bool Task::isRestore() const
+{
+    return m_type == Type::Restore;
 }
 
 IItem::LinkType Task::linkType() const

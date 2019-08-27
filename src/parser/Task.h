@@ -82,6 +82,9 @@ public:
         /// This task is about refreshing an existing item because it associated
         /// file was updated on disk
         Refresh,
+        /// This task is meant to restore something. For now, this is only used
+        /// to restore a playlist backup, in the event of a database corruption
+        Restore,
     };
 
     Task( MediaLibraryPtr ml, sqlite::Row& row );
@@ -119,6 +122,13 @@ public:
      */
     Task( MediaLibraryPtr ml, std::string mrl, int64_t linkToId,
           LinkType linkToType, int64_t linkExtra);
+
+    /**
+     * @brief Task Contructor for restore tasks
+     * @param ml A medialibrary instance pointer
+     * @param mrl The mrl of the entity to restore
+     */
+    Task( MediaLibraryPtr ml, std::string mrl );
 
     /**
      * @brief Task Constructor for dummy tasks, to represent subitems
@@ -178,6 +188,8 @@ public:
     static std::shared_ptr<Task> createLinkTask( MediaLibraryPtr ml, std::string mrl,
                                                  int64_t linkToId, LinkType linkToType,
                                                  int64_t linkToExtra );
+
+    static std::shared_ptr<Task> createRestoreTask( MediaLibraryPtr ml, std::string mrl );
     /**
      * @brief removePlaylistContentTasks Removes existing task associated with
      *                                   the given playlist
@@ -226,6 +238,7 @@ public:
 
     virtual bool isRefresh() const override;
     bool isLinkTask() const;
+    virtual bool isRestore() const override;
 
     virtual LinkType linkType() const override;
     virtual int64_t linkToId() const override;
