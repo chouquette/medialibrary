@@ -1562,6 +1562,8 @@ bool MediaLibrary::migrateModel18to19()
  * - Remove leftover AlbumTrack.is_present field
  * - Remove leftover ShowEpisode.artwork_mrl field
  * - Ensure Genre.name is case insensitive
+ * - Enforce Task.link_to_id to be non NULL
+ * - Include Task.link_to_id in the task uniqueness constraint
  */
 void MediaLibrary::migrateModel19to20()
 {

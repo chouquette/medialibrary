@@ -413,12 +413,19 @@ std::string Task::schema( const std::string& tableName, uint32_t dbModel,
         "parent_folder_id UNSIGNED INTEGER,"
 
         // For linking purposes
-        "link_to_id UNSIGNED INTEGER,"
-        "link_to_type UNSIGNED INTEGER,"
-        "link_extra UNSIGNED INTEGER,"
 
-        "UNIQUE(mrl,type) ON CONFLICT FAIL,"
-        "FOREIGN KEY(parent_folder_id) REFERENCES " + Folder::Table::Name
+        // link_to_id needs to be not null, so the unique constraint always take
+        // its value into account
+        "link_to_id UNSIGNED INTEGER " +
+            (dbModel >= 20 ? "NOT NULL" : "") + ","
+        "link_to_type UNSIGNED INTEGER,"
+        "link_extra UNSIGNED INTEGER," +
+        (
+            dbModel >= 20 ?
+            "UNIQUE(mrl,type, link_to_id) ON CONFLICT FAIL," :
+            "UNIQUE(mrl,type) ON CONFLICT FAIL,"
+        )
+        + "FOREIGN KEY(parent_folder_id) REFERENCES " + Folder::Table::Name
         + "(id_folder) ON DELETE CASCADE,"
         "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
         + "(id_file) ON DELETE CASCADE"
@@ -469,8 +476,8 @@ Task::create( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> fi
     std::shared_ptr<Task> self = std::make_shared<Task>( ml, std::move( mrl ), std::move( fileFs ),
         std::move( parentFolder ), std::move( parentFolderFs ), fileType );
     const std::string req = "INSERT INTO " + Task::Table::Name +
-        "(type, mrl, file_type, parent_folder_id) "
-        "VALUES(?, ?, ?, ?)";
+        "(type, mrl, file_type, parent_folder_id, link_to_id) "
+        "VALUES(?, ?, ?, ?, 0)";
     if ( insert( ml, self, req, Type::Creation, self->mrl(), fileType,
                  parentFolderId ) == false )
         return nullptr;
@@ -491,8 +498,8 @@ Task::createRefreshTask( MediaLibraryPtr ml, std::shared_ptr<File> file,
                                         std::move( parentFolder ),
                                         std::move( parentFolderFs ) );
     const std::string req = "INSERT INTO " + Task::Table::Name +
-            "(type, mrl, file_type, file_id, parent_folder_id ) "
-            "VALUES(?, ?, ?, ?, ?)";
+            "(type, mrl, file_type, file_id, parent_folder_id, link_to_id) "
+            "VALUES(?, ?, ?, ?, ?, 0)";
     if ( insert( ml, self, req, Type::Refresh, self->mrl(), self->file()->type(),
                  self->file()->id(), parentFolderId ) == false )
         return nullptr;
@@ -524,7 +531,7 @@ std::shared_ptr<Task> Task::createRestoreTask( MediaLibraryPtr ml, std::string m
 {
     auto self = std::make_shared<Task>( ml, std::move( mrl ) );
     const std::string req = "INSERT INTO " + Table::Name +
-            "(type, mrl, file_type) VALUES(?, ?, ?)";
+            "(type, mrl, file_type, link_to_id) VALUES(?, ?, ?, 0)";
     if ( insert( ml, self, req, Type::Restore, self->mrl(),
                  IFile::Type::Unknown ) == false )
         return nullptr;
