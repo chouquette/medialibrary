@@ -1315,7 +1315,7 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
 
             "DROP TABLE " + parser::Task::Table::Name,
 
-            parser::Task::schema( parser::Task::Table::Name, 14 ),
+            parser::Task::schema( parser::Task::Table::Name, 14, false ),
 
             "INSERT INTO " + parser::Task::Table::Name + " SELECT "
             "id_task, step, retry_count, mrl, " +

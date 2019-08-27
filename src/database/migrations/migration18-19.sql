@@ -15,7 +15,7 @@
 
 "DROP TABLE " + parser::Task::Table::Name,
 
-parser::Task::schema( parser::Task::Table::Name, 19 ),
+parser::Task::schema( parser::Task::Table::Name, 19, false ),
 #include "database/tables/Task_triggers_v18.sql"
 
 "INSERT INTO " + parser::Task::Table::Name +

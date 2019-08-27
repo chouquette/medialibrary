@@ -357,7 +357,8 @@ void Task::setMrl( std::string newMrl )
 
 void Task::createTable( sqlite::Connection* dbConnection, uint32_t dbModel )
 {
-    sqlite::Tools::executeRequest( dbConnection, schema( Table::Name, dbModel ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   schema( Table::Name, dbModel, false ) );
 }
 
 void Task::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModel )
@@ -371,11 +372,13 @@ void Task::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModel )
         sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-std::string Task::schema( const std::string& tableName, uint32_t dbModel )
+std::string Task::schema( const std::string& tableName, uint32_t dbModel,
+                          bool backup )
 {
     assert( tableName == Table::Name );
     if ( dbModel <= 17 )
     {
+        assert( backup == false );
         return "CREATE TABLE " + Table::Name +
         "("
             "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -397,7 +400,8 @@ std::string Task::schema( const std::string& tableName, uint32_t dbModel )
             + "(id_playlist) ON DELETE CASCADE"
         ")";
     }
-    return "CREATE TABLE " + Table::Name +
+    return std::string{ "CREATE " } + (backup ? "TEMPORARY " : "") +
+            "TABLE " + Table::Name + (backup ? "_backup" : "" ) +
     "("
         "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
         "step INTEGER NOT NULL DEFAULT 0,"
@@ -424,7 +428,7 @@ std::string Task::schema( const std::string& tableName, uint32_t dbModel )
 bool Task::checkDbModel( MediaLibraryPtr ml )
 {
     return sqlite::Tools::checkSchema( ml->getConn(),
-                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       schema( Table::Name, Settings::DbModelVersion, false ),
                                        Table::Name );
 }
 
