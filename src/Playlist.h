@@ -35,6 +35,15 @@ class File;
 
 class Playlist : public IPlaylist, public DatabaseHelpers<Playlist>, public std::enable_shared_from_this<Playlist>
 {
+private:
+    struct Backup
+    {
+        Backup( int64_t id, std::string name ) : id(id), name(std::move(name)) {}
+        int64_t id;
+        std::string name;
+        std::vector<std::string> mrls;
+    };
+
 public:
     struct Table
     {
@@ -94,10 +103,13 @@ public:
      */
     void clearContent();
 
+    static bool backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel);
+
     static std::shared_ptr<Playlist> fromFile( MediaLibraryPtr ml, int64_t fileId );
 
 private:
     static std::string sortRequest( const QueryParameters* params );
+    static bool writeBackup(const Backup& backup , const std::string& playlistFolder);
     void curateNullMediaID() const;
 
 private:

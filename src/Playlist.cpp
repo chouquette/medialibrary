@@ -26,6 +26,8 @@
 
 #include "Playlist.h"
 
+#include "Device.h"
+#include "Folder.h"
 #include "Media.h"
 #include "utils/ModificationsNotifier.h"
 #include "database/SqliteQuery.h"
@@ -476,6 +478,104 @@ std::string Playlist::sortRequest( const QueryParameters* params )
     if ( params != nullptr && params->desc == true )
         req += " DESC";
     return req;
+}
+
+bool Playlist::backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel )
+{
+    /* We can't use the Playlist class directly for this, as it's tied with the
+     * current database model, and we're trying to run this before a
+     * migration, meaning we'd be using the old database model.
+     * Instead, we have to pull the mrl by hand, and generate a simple playlist
+     * with that
+     */
+
+    auto dbConn = ml->getConn();
+    auto ctx = dbConn->acquireReadContext();
+    std::vector<Backup> pls;
+    // There was no file_id field before model 5
+    sqlite::Statement stmt{ dbConn->handle(),
+        "SELECT id_playlist, name FROM " + Table::Name +
+        (dbModel >= 5 ? " WHERE file_id IS NULL" : "")
+    };
+    stmt.execute();
+    sqlite::Row row;
+    while ( ( row = stmt.row() ) != nullptr )
+        pls.push_back( { row.load<int64_t>( 0 ), row.load<std::string>( 1 ) } );
+
+    auto res = true;
+    for ( auto& pl : pls )
+    {
+        /* We can't simply fetch the mrls from the MediaRelation table, since this
+         * wouldn't work for media on removable devices.
+         * If we find out that the file is not removable, then we don't need the device
+         */
+        stmt = sqlite::Statement{ dbConn->handle(),
+            "SELECT f.mrl, f.is_removable, fo.path, d.uuid, d.scheme FROM " + File::Table::Name + " f"
+            " INNER JOIN " + MediaRelationTable::Name + " pmr"
+                " ON f.media_id = pmr.media_id"
+            " LEFT JOIN " + Folder::Table::Name + " fo"
+                " ON fo.id_folder = f.folder_id"
+            " LEFT JOIN " + Device::Table::Name + " d"
+                " ON d.id_device = fo.device_id"
+            " WHERE pmr.playlist_id = ?"
+                " AND f.type = ?"
+            " ORDER BY pmr.position "
+        };
+        stmt.execute( pl.id, File::Type::Main );
+        while ( ( row = stmt.row() ) != nullptr )
+        {
+            auto mrl = row.extract<std::string>();
+            auto isRemovable = row.extract<bool>();
+            auto folderPath = row.extract<std::string>();
+            auto uuid = row.extract<std::string>();
+            auto scheme = row.extract<std::string>();
+            if ( isRemovable == true )
+            {
+                auto fsFactory = ml->fsFactoryForMrl( scheme );
+                if ( fsFactory == nullptr )
+                    continue;
+                auto device = fsFactory->createDevice( uuid );
+                if ( device == nullptr )
+                    continue;
+                mrl = device->mountpoint() + folderPath + mrl;
+            }
+            pl.mrls.push_back( std::move( mrl ) );
+        }
+        res = writeBackup( pl, ml->playlistPath() ) && res;
+    }
+    return res;
+}
+
+bool Playlist::writeBackup( const Playlist::Backup& backup,
+                            const std::string& playlistFolder )
+{
+    auto output = playlistFolder + std::to_string( backup.id ) + ".xspf";
+    auto file = std::unique_ptr<FILE, decltype(&fclose)>{
+        fopen( output.c_str(), "w" ), &fclose
+    };
+    if ( file == nullptr )
+        return false;
+
+    std::string doc{
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        "<playlist version=\"1\" xmlns=\"http://xspf.org/ns/0/\">\n"
+    };
+    doc += "<title>" + backup.name + "</title>\n<trackList>\n";
+    for ( const auto mrl : backup.mrls )
+        doc += "<track><location>" + mrl + "</location></track>\n";
+    doc += "</trackList>\n</playlist>";
+
+    auto buff = doc.c_str();
+    auto length = doc.size();
+    auto i = 0u;
+    constexpr auto ChunkSize = 4096u;
+    while ( i < length )
+    {
+        auto nmemb = length <= ChunkSize ? length : ChunkSize;
+        auto res = fwrite( buff + i, sizeof( *buff ), nmemb, file.get() );
+        i += res;
+    }
+    return true;
 }
 
 }
