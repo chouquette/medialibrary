@@ -354,6 +354,7 @@ samples_SOURCES = 						\
 	test/common/MediaLibraryTester.cpp 	\
 	test/samples/main.cpp 				\
 	test/samples/Tester.cpp 			\
+	test/samples/BackupRestorePlaylist.cpp \
 	$(NULL)
 
 samples_CPPFLAGS = 			\

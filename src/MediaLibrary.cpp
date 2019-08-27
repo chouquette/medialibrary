@@ -1616,6 +1616,33 @@ bool MediaLibrary::forceParserRetry()
     }
 }
 
+void MediaLibrary::clearDatabase( bool restorePlaylists )
+{
+    if ( recreateDatabase( m_dbConnection->dbPath() ) == false )
+        return;
+    if ( restorePlaylists == false )
+        return;
+    auto playlistFolderMrl = utils::file::toMrl( m_playlistPath );
+    auto fsFactory = fsFactoryForMrl( playlistFolderMrl );
+    std::shared_ptr<fs::IDirectory> plFolder;
+    try
+    {
+        plFolder = fsFactory->createDirectory( playlistFolderMrl );
+        // Explicitely preload files to catch potential exceptions now
+        plFolder->files();
+    }
+    catch ( const std::system_error& ex )
+    {
+        LOG_ERROR( "Can't open playlist folder: ", ex.what() );
+        return;
+    }
+    for ( const auto& f : plFolder->files() )
+    {
+        LOG_DEBUG( "Queuing restore task for ", f->mrl() );
+        parser::Task::createRestoreTask( this, f->mrl() );
+    }
+}
+
 void MediaLibrary::pauseBackgroundOperations()
 {
     if ( m_parser != nullptr )

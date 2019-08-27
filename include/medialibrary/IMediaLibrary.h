@@ -594,6 +594,13 @@ public:
      * file systems discovery.
      */
     virtual void addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory ) = 0;
+
+    /**
+     * @brief clearDatabase Will drop & recreate the database
+     * @param restorePlaylists If true, the media library will attempt to keep
+     *                         the user created playlists
+     */
+    virtual void clearDatabase( bool restorePlaylists ) = 0;
 };
 
 }

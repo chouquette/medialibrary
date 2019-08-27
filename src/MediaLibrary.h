@@ -167,6 +167,7 @@ public:
     virtual void reload() override;
     virtual void reload( const std::string& entryPoint ) override;
     virtual bool forceParserRetry() override;
+    virtual void clearDatabase( bool restorePlaylists ) override;
 
     virtual void pauseBackgroundOperations() override;
     virtual void resumeBackgroundOperations() override;
