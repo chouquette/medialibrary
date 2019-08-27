@@ -1537,7 +1537,7 @@ bool MediaLibrary::migrateModel18to19()
 #       include "database/migrations/migration18-19.sql"
     };
 
-    auto forceRescan = false;
+    auto forceRescan = true;
     try
     {
         for ( const auto& req : reqs )
@@ -1547,7 +1547,7 @@ bool MediaLibrary::migrateModel18to19()
     {
         // Ignoring, this is because parent_playlist_id column doesn't exist
         // anymore, which means the 17->18 migration completed properly.
-        forceRescan = true;
+        forceRescan = false;
     }
 
     m_settings.setDbModelVersion( 19 );
