@@ -91,6 +91,7 @@ public:
     void registerUpdateHook( const std::string& table, UpdateHookCb cb );
     bool checkSchemaIntegrity();
     bool checkForeignKeysIntegrity();
+    const std::string& dbPath() const;
 
     static std::shared_ptr<Connection> connect( const std::string& dbPath );
 

@@ -207,6 +207,11 @@ bool Connection::checkForeignKeysIntegrity()
     return false;
 }
 
+const std::string&Connection::dbPath() const
+{
+    return m_dbPath;
+}
+
 std::shared_ptr<Connection> Connection::connect( const std::string& dbPath )
 {
     // Use a wrapper to allow make_shared to use the private Connection ctor
