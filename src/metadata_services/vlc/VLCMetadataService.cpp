@@ -76,8 +76,8 @@ Status VLCMetadataService::run( IItem& item )
             m_currentMedia = vlcMedia;
         }
 
-        if ( vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local | VLC::Media::ParseFlags::Network |
-                                        VLC::Media::ParseFlags::FetchLocal, 5000 ) == false )
+        if ( vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local |
+                                        VLC::Media::ParseFlags::Network, 5000 ) == false )
         {
             std::unique_lock<compat::Mutex> lock( m_mutex );
             m_currentMedia = VLC::Media{};
