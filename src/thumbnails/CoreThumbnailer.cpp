@@ -48,8 +48,6 @@ bool CoreThumbnailer::generate( const std::string& mrl, uint32_t desiredWidth,
     auto done = false;
     VLC::Picture thumbnail;
     {
-        std::unique_lock<compat::Mutex> l{ m_mutex };
-
         m_vlcMedia = VLC::Media{ VLCInstance::get(), mrl, VLC::Media::FromType::FromLocation };
         auto em = m_vlcMedia.eventManager();
 
@@ -71,6 +69,7 @@ bool CoreThumbnailer::generate( const std::string& mrl, uint32_t desiredWidth,
             m_vlcMedia = VLC::Media{};
             return false;
         }
+        std::unique_lock<compat::Mutex> l{ m_mutex };
         cond.wait( l, [&done]() { return done == true; } );
 
         m_request = nullptr;
