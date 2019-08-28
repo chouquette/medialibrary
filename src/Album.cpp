@@ -319,6 +319,15 @@ std::string Album::orderBy( const QueryParameters* params )
         if ( desc == false )
             req += " DESC";
         break;
+    case SortingCriteria::PlayCount:
+        /* This voluntarily overrides the initial "ORDER BY" in req, since
+         * we need the GROUP BY first */
+        req = "GROUP BY alb.id_album "
+              "ORDER BY SUM(m.play_count) ";
+        if ( desc == false )
+            req += "DESC "; // Most played first by default
+        req += ", alb.title";
+        break;
     default:
         LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default (Alpha)" );
         /* fall-through */
@@ -747,25 +756,12 @@ Query<IAlbum> Album::searchFromGenre( MediaLibraryPtr ml, const std::string& pat
 
 Query<IAlbum> Album::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
-    auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
-    auto desc = params != nullptr ? params->desc : false;
     std::string countReq = "SELECT COUNT(*) FROM " + Table::Name + " WHERE "
             "is_present != 0";
     std::string req = "SELECT alb.* FROM " + Table::Name + " alb ";
     req += addRequestJoin( params, false );
     req += "WHERE alb.is_present != 0 ";
-    if ( sort == SortingCriteria::PlayCount )
-    {
-        req += "GROUP BY id_album "
-               "ORDER BY SUM(m.play_count) ";
-        if ( desc == false )
-            req += "DESC "; // Most played first by default
-        req += ", alb.title";
-    }
-    else
-    {
-        req += orderBy( params );
-    }
+    req += orderBy( params );
     return make_query_with_count<Album, IAlbum>( ml, std::move( countReq ),
                                                  std::move( req ) );
 }
