@@ -612,6 +612,51 @@ TEST_F( Albums, SortByArtist )
     ASSERT_EQ( a1->id(), albums[2]->id() );
 }
 
+TEST_F( Albums, SortByNonSensical )
+{
+    // Not that this sorting criteria makes a lot of sense, but it used to
+    // trigger a crash on vlc desktop, because the criteria handling was
+    // different when adding the joins and when selecting the fields.
+    // Basically any non-explicitely handled sorting criteria was causing a crash
+    auto artist1 = ml->createArtist( "Artist" );
+    auto artist2 = ml->createArtist( "Artist 2" );
+
+    // Create albums with a non-alphabetical order to avoid a false positive (where sorting by pkey
+    // is the same as sorting by title)
+    auto a1 = ml->createAlbum( "A" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
+    a1->addTrack( m, 1, 0, 0, nullptr );
+    m->save();
+    a1->setAlbumArtist( artist1 );
+
+    auto a2 = ml->createAlbum( "B" );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3" ) );
+    a2->addTrack( m2, 1, 0, 0, nullptr );
+    m2->save();
+    a2->setAlbumArtist( artist2 );
+
+    auto a3 = ml->createAlbum( "C" );
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3" ) );
+    a3->addTrack( m3, 1, 0, 0, nullptr );
+    m3->save();
+    a3->setAlbumArtist( artist1 );
+
+    QueryParameters params { SortingCriteria::InsertionDate, false };
+    auto albums = ml->albums( &params )->all();
+    ASSERT_EQ( 3u, albums.size() );
+    ASSERT_EQ( a1->id(), albums[0]->id() );
+    ASSERT_EQ( a2->id(), albums[1]->id() );
+    ASSERT_EQ( a3->id(), albums[2]->id() );
+
+    params.desc = true;
+    albums = ml->albums( &params )->all();
+    ASSERT_EQ( 3u, albums.size() );
+    // We expect Artist to be sorted in reverse order, but still in alphabetical order for albums
+    ASSERT_EQ( a3->id(), albums[0]->id() );
+    ASSERT_EQ( a2->id(), albums[1]->id() );
+    ASSERT_EQ( a1->id(), albums[2]->id() );
+}
+
 TEST_F( Albums, Duration )
 {
     auto a = ml->createAlbum( "album" );

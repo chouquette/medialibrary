@@ -225,29 +225,24 @@ std::string Album::addRequestJoin( const QueryParameters* params,
 
     switch( sort )
     {
-        case SortingCriteria::Duration:
-        case SortingCriteria::InsertionDate:
         case SortingCriteria::ReleaseDate:
-        case SortingCriteria::Filename:
-        case SortingCriteria::Album:
-        case SortingCriteria::LastModificationDate:
-        case SortingCriteria::FileSize:
+        case SortingCriteria::Duration:
         case SortingCriteria::TrackNumber:
-        case SortingCriteria::NbAudio:
-        case SortingCriteria::NbVideo:
-        case SortingCriteria::NbMedia:
-            // Unused for album sorting
-            break;
-        case SortingCriteria::Artist:
-        case SortingCriteria::Alpha:
-        case SortingCriteria::Default:
-            // In case of identical album name
-            // sort should continue with artist name
-            artist = true;
+            /* No other tables required for this criterias */
             break;
         case SortingCriteria::PlayCount:
             albumTrack = true;
             media = true;
+            break;
+        case SortingCriteria::Artist:
+            /* Different case than default, but same tables in the end */
+            /* fall-through */
+        case SortingCriteria::Alpha:
+        case SortingCriteria::Default:
+        default:
+            // In case of identical album name
+            // sort should continue with artist name
+            artist = true;
             break;
     }
     std::string req;
