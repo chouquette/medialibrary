@@ -853,26 +853,41 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
      * Check for a cover file out of the transaction/retry scope
      * We only check for album artwork when the album is about to be created
      */
-    std::shared_ptr<Thumbnail> mediaThumbnail;
+    std::shared_ptr<Thumbnail> thumbnail;
 
-    auto artworkMrl = item.meta( IItem::Metadata::ArtworkUrl );
-
-    if ( artworkMrl.empty() == false )
+    /* First, let's try to find a cover file if this is a new album */
+    if ( newAlbum == true )
     {
-        // Here we expect the thumbnail mrl to be an attachment. Any xxx.jpg
-        // should have been found by findAlbumArtwork
-        // We don't insert the thumbnail in DB yet, to process everything
-        // as part of the transaction
-
-        // If this task is a refresh task, we already dropped the thumbnail
-        // in case we had an artwork mrl.
-        // If this is a new media, we won't have a thumbnail at all
-        assert( media->thumbnail( ThumbnailSizeType::Thumbnail ) == nullptr );
-        mediaThumbnail = std::make_shared<Thumbnail>( m_ml, artworkMrl,
-                                                 Thumbnail::Origin::Media,
-                                                 ThumbnailSizeType::Thumbnail,
-                                                 false );
+        thumbnail = findAlbumArtwork( item );
     }
+    else
+    {
+        /*
+         * If this is not a new album, it might have been assigned a thumbnail
+         * already.
+         */
+        thumbnail = album->thumbnail( ThumbnailSizeType::Thumbnail );
+    }
+    if ( thumbnail == nullptr )
+    {
+        /* If we haven't find any thumbnail yet, let's check for embedded cover */
+        auto artworkMrl = item.meta( IItem::Metadata::ArtworkUrl );
+        if ( artworkMrl.empty() == false )
+        {
+            // If this task is a refresh task, we already dropped the thumbnail
+            // in case we had an artwork mrl.
+            // If this is a new media, we won't have a thumbnail at all
+            assert( media->thumbnail( ThumbnailSizeType::Thumbnail ) == nullptr );
+            thumbnail = std::make_shared<Thumbnail>( m_ml, artworkMrl,
+                                                     Thumbnail::Origin::Media,
+                                                     ThumbnailSizeType::Thumbnail,
+                                                     false );
+        }
+    }
+    /*
+     * In any case, we don't insert the thumbnail in DB yet, to process everything
+     * as part of the transaction
+     */
 
     /*
      * Any entity that might be modified in the retry scope needs to be passed
@@ -882,19 +897,19 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
      * anymore, and we wouldn't recreate it
      */
     auto res = sqlite::Tools::withRetries( 3,
-            [this, &item, &artists, media, &mediaThumbnail, &genre, newAlbum]
+            [this, &item, &artists, media, &thumbnail, &genre, newAlbum]
             ( std::shared_ptr<Album> album ) {
 
         auto t = m_ml->getConn()->newTransaction();
 
-        if ( mediaThumbnail != nullptr )
+        if ( thumbnail != nullptr )
         {
-            if ( mediaThumbnail->id() == 0 )
-                mediaThumbnail->insert();
+            if ( thumbnail->id() == 0 )
+                thumbnail->insert();
             // Don't rely on the same thumbnail as the one for the album, the
             // user can always update the media specific thumbnail, and we don't
             // want that to propagate to the album
-            media->setThumbnail( mediaThumbnail );
+            media->setThumbnail( thumbnail );
         }
         if ( album == nullptr )
         {
@@ -902,10 +917,26 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
             album = m_ml->createAlbum( albumName );
             if ( album == nullptr )
                 return Status::Fatal;
-            if ( mediaThumbnail != nullptr )
-                album->setThumbnail( mediaThumbnail );
+            if ( thumbnail != nullptr )
+                album->setThumbnail( thumbnail );
         }
-        // TODO: Use embedded artwork for the album
+        else if ( thumbnail != nullptr &&
+                  album->thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
+                    ThumbnailStatus::Missing )
+        {
+            album->setThumbnail( thumbnail );
+            // Since we just assigned a thumbnail to the album, check if
+            // other tracks from this album require a thumbnail
+            for ( auto t : album->cachedTracks() )
+            {
+                if ( t->thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
+                     ThumbnailStatus::Missing )
+                {
+                    auto m = static_cast<Media*>( t.get() );
+                    m->setThumbnail( thumbnail );
+                }
+            }
+        }
 
         try
         {
@@ -934,7 +965,7 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
             return Status::Completed;
         }
 
-        link( item, *album, artists.first, artists.second, mediaThumbnail );
+        link( item, *album, artists.first, artists.second, thumbnail );
         media->save();
         t->commit();
 
@@ -949,10 +980,10 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
     if ( res != Status::Success )
         return res;
 
-    if ( mediaThumbnail != nullptr )
+    if ( thumbnail != nullptr )
     {
-        assert( mediaThumbnail->status() == ThumbnailStatus::Available );
-        mediaThumbnail->relocate();
+        assert( thumbnail->status() == ThumbnailStatus::Available );
+        thumbnail->relocate();
     }
     return Status::Success;
 }
