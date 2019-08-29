@@ -200,3 +200,25 @@ Artist::schema( Artist::FtsTable::Name, 20 ),
 
 "DROP TABLE " + Artist::MediaRelationTable::Name,
 Artist::schema( Artist::MediaRelationTable::Name, 20 ),
+
+/* Metadata table */
+"CREATE TEMPORARY TABLE " + Metadata::Table::Name + "_backup"
+"("
+    "id_media INTEGER,"
+    "entity_type INTEGER,"
+    "type INTEGER,"
+    "value TEXT,"
+    "PRIMARY KEY(id_media,entity_type,type)"
+")",
+
+"INSERT INTO " + Metadata::Table::Name + "_backup "
+    "SELECT * FROM " + Metadata::Table::Name,
+
+"DROP TABLE " + Metadata::Table::Name,
+
+Metadata::schema( Metadata::Table::Name, 20 ),
+
+"INSERT INTO " + Metadata::Table::Name + " "
+    "SELECT * FROM " + Metadata::Table::Name + "_backup",
+
+"DROP TABLE " + Metadata::Table::Name + "_backup",
