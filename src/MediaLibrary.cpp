@@ -1588,6 +1588,7 @@ void MediaLibrary::migrateModel19to20()
     Folder::createTriggers( dbConn, 20 );
     File::createTriggers( dbConn );
     Media::createTriggers( dbConn, 20 );
+    Label::createTriggers( dbConn );
 
     m_settings.setDbModelVersion( 20 );
     m_settings.save();

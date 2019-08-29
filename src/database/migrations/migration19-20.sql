@@ -110,3 +110,22 @@ File::schema( File::Table::Name, 20 ),
     "SELECT * FROM " + File::Table::Name + "_backup",
 
 "DROP TABLE " + File::Table::Name + "_backup",
+
+/* Label table */
+"CREATE TEMPORARY TABLE " + Label::Table::Name + "_backup"
+"("
+    "id_label INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "name TEXT UNIQUE ON CONFLICT FAIL"
+")",
+
+"INSERT INTO " + Label::Table::Name + "_backup "
+    "SELECT * FROM " + Label::Table::Name,
+
+"DROP TABLE " + Label::Table::Name,
+
+Label::schema( Label::Table::Name, 20 ),
+
+"INSERT INTO " + Label::Table::Name + " "
+    "SELECT * FROM " + Label::Table::Name + "_backup",
+
+"DROP TABLE " + Label::Table::Name + "_backup",
