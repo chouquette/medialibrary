@@ -541,6 +541,8 @@ bool Playlist::backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel )
             }
             pl.mrls.push_back( std::move( mrl ) );
         }
+        if ( pl.mrls.empty() == true )
+            continue;
         res = writeBackup( pl, ml->playlistPath() ) && res;
     }
     return res;
