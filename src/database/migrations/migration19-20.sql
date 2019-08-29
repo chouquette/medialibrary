@@ -226,3 +226,7 @@ Metadata::schema( Metadata::Table::Name, 20 ),
 /* Subtitle track table */
 "DROP TABLE " + SubtitleTrack::Table::Name,
 SubtitleTrack::schema( SubtitleTrack::Table::Name, 20 ),
+
+/* Chapter table */
+"DROP TABLE " + Chapter::Table::Name,
+Chapter::schema( Chapter::Table::Name, 20 ),
