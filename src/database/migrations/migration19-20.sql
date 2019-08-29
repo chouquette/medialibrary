@@ -78,3 +78,7 @@ Folder::schema( Folder::ExcludedFolderTable::Name, 20 ),
 
 "DROP TABLE " + Folder::ExcludedFolderTable::Name + "_backup",
 
+/* Thumbnail Linking Table */
+
+"DROP TABLE " + Thumbnail::LinkingTable::Name,
+Thumbnail::schema( Thumbnail::LinkingTable::Name, 20 ),

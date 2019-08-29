@@ -1580,6 +1580,7 @@ void MediaLibrary::migrateModel19to20()
         sqlite::Tools::executeRequest( dbConn, req );
 
     Album::createTriggers( dbConn );
+    Thumbnail::createTriggers( dbConn );
     AlbumTrack::createTriggers( dbConn );
     Artist::createTriggers( dbConn, 20 );
     Genre::createTriggers( dbConn );
