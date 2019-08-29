@@ -230,3 +230,25 @@ SubtitleTrack::schema( SubtitleTrack::Table::Name, 20 ),
 /* Chapter table */
 "DROP TABLE " + Chapter::Table::Name,
 Chapter::schema( Chapter::Table::Name, 20 ),
+
+/* Bookmark table */
+"CREATE TEMPORARY TABLE " + Bookmark::Table::Name + "_backup"
+"("
+    "id_bookmark INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "time UNSIGNED INTEGER NOT NULL,"
+    "name TEXT,"
+    "description TEXT,"
+    "media_id UNSIGNED INTEGER NOT NULL"
+")",
+
+"INSERT INTO " + Bookmark::Table::Name + "_backup "
+    "SELECT * FROM " + Bookmark::Table::Name,
+
+"DROP TABLE " + Bookmark::Table::Name,
+
+Bookmark::schema( Bookmark::Table::Name, 20 ),
+
+"INSERT INTO " + Bookmark::Table::Name + " "
+    "SELECT * FROM " + Bookmark::Table::Name + "_backup",
+
+"DROP TABLE " + Bookmark::Table::Name + "_backup",
