@@ -185,3 +185,7 @@ Show::schema( Show::FtsTable::Name, 20 ),
 /* VideoTrack Table */
 "DROP TABLE " + VideoTrack::Table::Name,
 VideoTrack::schema( VideoTrack::Table::Name, 20 ),
+
+/* Audio Track table */
+"DROP TABLE " + AudioTrack::Table::Name,
+AudioTrack::schema( AudioTrack::Table::Name, 20 ),

@@ -1593,6 +1593,7 @@ void MediaLibrary::migrateModel19to20()
     parser::Task::createTriggers( dbConn, 20 );
     Show::createTriggers( dbConn );
     VideoTrack::createIndexes( dbConn );
+    AudioTrack::createIndexes( dbConn );
 
     m_settings.setDbModelVersion( 20 );
     m_settings.save();
