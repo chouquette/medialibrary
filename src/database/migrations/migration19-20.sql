@@ -147,3 +147,25 @@ Label::schema( Label::FileRelationTable::Name, 20 ),
 
 "INSERT INTO " + Label::FileRelationTable::Name + " "
     "SELECT * FROM " + Label::FileRelationTable::Name + "_backup",
+
+/* Playlist table */
+"CREATE TEMPORARY TABLE " + Playlist::Table::Name + "_backup"
+"("
+    "id_playlist INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "name TEXT COLLATE NOCASE,"
+    "file_id UNSIGNED INT DEFAULT NULL,"
+    "creation_date UNSIGNED INT NOT NULL,"
+    "artwork_mrl TEXT"
+")",
+
+"INSERT INTO " + Playlist::Table::Name + "_backup "
+    "SELECT * FROM " + Playlist::Table::Name,
+
+"DROP TABLE " + Playlist::Table::Name,
+
+Playlist::schema( Playlist::Table::Name, 20 ),
+
+"INSERT INTO " + Playlist::Table::Name + " "
+    "SELECT * FROM " + Playlist::Table::Name + "_backup",
+
+"DROP TABLE " + Playlist::Table::Name + "_backup",

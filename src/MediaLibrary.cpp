@@ -1589,6 +1589,8 @@ void MediaLibrary::migrateModel19to20()
     File::createTriggers( dbConn );
     Media::createTriggers( dbConn, 20 );
     Label::createTriggers( dbConn );
+    Playlist::createTriggers( dbConn, 20 );
+    parser::Task::createTriggers( dbConn, 20 );
 
     m_settings.setDbModelVersion( 20 );
     m_settings.save();
