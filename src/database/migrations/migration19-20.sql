@@ -5,7 +5,9 @@ AlbumTrack::schema( AlbumTrack::Table::Name, 20 ),
 ShowEpisode::schema( ShowEpisode::Table::Name, 20 ),
 
 "DROP TABLE " + Genre::Table::Name,
+"DROP TABLE " + Genre::FtsTable::Name,
 Genre::schema( Genre::Table::Name, 20 ),
+Genre::schema( Genre::FtsTable::Name, 20 ),
 
 /* Migrate the task table to update the Task.link_to_id field to a NOT NULL one
  * and update the UNIQUE constaint on (task type/mrl/link_to_id) accordingly */
