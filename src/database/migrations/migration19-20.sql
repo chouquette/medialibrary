@@ -222,3 +222,7 @@ Metadata::schema( Metadata::Table::Name, 20 ),
     "SELECT * FROM " + Metadata::Table::Name + "_backup",
 
 "DROP TABLE " + Metadata::Table::Name + "_backup",
+
+/* Subtitle track table */
+"DROP TABLE " + SubtitleTrack::Table::Name,
+SubtitleTrack::schema( SubtitleTrack::Table::Name, 20 ),
