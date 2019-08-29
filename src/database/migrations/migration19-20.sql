@@ -195,3 +195,8 @@ AudioTrack::schema( AudioTrack::Table::Name, 20 ),
 "DROP TABLE " + Artist::FtsTable::Name,
 Artist::schema( Artist::Table::Name, 20 ),
 Artist::schema( Artist::FtsTable::Name, 20 ),
+
+/* Artist MediaRelation table */
+
+"DROP TABLE " + Artist::MediaRelationTable::Name,
+Artist::schema( Artist::MediaRelationTable::Name, 20 ),
