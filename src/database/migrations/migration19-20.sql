@@ -181,3 +181,7 @@ Album::schema( Album::FtsTable::Name, 20 ),
 "DROP TABLE " + Show::FtsTable::Name,
 Show::schema( Show::Table::Name, 20 ),
 Show::schema( Show::FtsTable::Name, 20 ),
+
+/* VideoTrack Table */
+"DROP TABLE " + VideoTrack::Table::Name,
+VideoTrack::schema( VideoTrack::Table::Name, 20 ),
