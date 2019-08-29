@@ -40,6 +40,7 @@
 #include "MediaLibrary.h"
 #include "probe/CrawlerProbe.h"
 #include "utils/Filename.h"
+#include "utils/Url.h"
 
 namespace medialibrary
 {
@@ -282,7 +283,8 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
             continue;
         auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ),
                                 [&subFolder](const std::shared_ptr<Folder>& f) {
-            return f->mrl() == subFolder->mrl();
+            auto subFolderName = utils::file::directoryName( subFolder->mrl() );
+            return f->name() == utils::url::decode( subFolderName );
         });
         // We don't know this folder, it's a new one
         if ( it == end( subFoldersInDB ) )
