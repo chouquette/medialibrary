@@ -82,3 +82,31 @@ Folder::schema( Folder::ExcludedFolderTable::Name, 20 ),
 
 "DROP TABLE " + Thumbnail::LinkingTable::Name,
 Thumbnail::schema( Thumbnail::LinkingTable::Name, 20 ),
+
+/* File table */
+"CREATE TABLE " + File::Table::Name + "_backup"
+"("
+    "id_file INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "media_id UNSIGNED INT DEFAULT NULL,"
+    "playlist_id UNSIGNED INT DEFAULT NULL,"
+    "mrl TEXT,"
+    "type UNSIGNED INTEGER,"
+    "last_modification_date UNSIGNED INT,"
+    "size UNSIGNED INT,"
+    "folder_id UNSIGNED INTEGER,"
+    "is_removable BOOLEAN NOT NULL,"
+    "is_external BOOLEAN NOT NULL,"
+    "is_network BOOLEAN NOT NULL"
+")",
+
+"INSERT INTO " + File::Table::Name + "_backup "
+    "SELECT * FROM " + File::Table::Name,
+
+"DROP TABLE " + File::Table::Name,
+
+File::schema( File::Table::Name, 20 ),
+
+"INSERT INTO " + File::Table::Name + " "
+    "SELECT * FROM " + File::Table::Name + "_backup",
+
+"DROP TABLE " + File::Table::Name + "_backup",
