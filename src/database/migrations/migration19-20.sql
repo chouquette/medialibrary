@@ -189,3 +189,9 @@ VideoTrack::schema( VideoTrack::Table::Name, 20 ),
 /* Audio Track table */
 "DROP TABLE " + AudioTrack::Table::Name,
 AudioTrack::schema( AudioTrack::Table::Name, 20 ),
+
+/* Artist table */
+"DROP TABLE " + Artist::Table::Name,
+"DROP TABLE " + Artist::FtsTable::Name,
+Artist::schema( Artist::Table::Name, 20 ),
+Artist::schema( Artist::FtsTable::Name, 20 ),
