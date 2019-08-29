@@ -129,3 +129,21 @@ Label::schema( Label::Table::Name, 20 ),
     "SELECT * FROM " + Label::Table::Name + "_backup",
 
 "DROP TABLE " + Label::Table::Name + "_backup",
+
+/* Label/File relation table */
+"CREATE TEMPORARY TABLE " + Label::FileRelationTable::Name + "_backup"
+"("
+    "label_id INTEGER,"
+    "media_id INTEGER,"
+    "PRIMARY KEY(label_id,media_id)"
+")",
+
+"INSERT INTO " + Label::FileRelationTable::Name + "_backup "
+    "SELECT * FROM " + Label::FileRelationTable::Name,
+
+"DROP TABLE " + Label::FileRelationTable::Name,
+
+Label::schema( Label::FileRelationTable::Name, 20 ),
+
+"INSERT INTO " + Label::FileRelationTable::Name + " "
+    "SELECT * FROM " + Label::FileRelationTable::Name + "_backup",
