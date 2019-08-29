@@ -304,7 +304,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                               ". Assuming it was deleted due to being banned" );
                     return;
                 }
-                LOG_WARN( "Creation of a duplicated folder failed: ", ex.what(), ". Assuming it was banned" );
+                LOG_WARN( "Creation of a folder failed: ", ex.what(), ". Assuming it was banned" );
                 continue;
             }
         }
