@@ -28,7 +28,11 @@ parser::Task::schema( parser::Task::Table::Name, 20, false ),
 
 "DROP TABLE " +  parser::Task::Table::Name + "_backup",
 
-/* Migrate tables so their schema matches our expectations */
+/*******************************************************************************
+ * Migrate tables so their schema matches our expectations
+*******************************************************************************/
+
+/* Folder table */
 
 "CREATE TABLE " + Folder::Table::Name + "_backup"
 "("
@@ -54,3 +58,23 @@ Folder::schema( Folder::Table::Name, 20 ),
     "SELECT * FROM " + Folder::Table::Name + "_backup ",
 
 "DROP TABLE " + Folder::Table::Name + "_backup",
+
+/* ExcludedFolderTable */
+
+"CREATE TABLE " + Folder::ExcludedFolderTable::Name + "_backup"
+"("
+    "folder_id UNSIGNED INTEGER NOT NULL"
+")",
+
+"INSERT INTO " + Folder::ExcludedFolderTable::Name + "_backup "
+    "SELECT * FROM " + Folder::ExcludedFolderTable::Name,
+
+"DROP TABLE " + Folder::ExcludedFolderTable::Name,
+
+Folder::schema( Folder::ExcludedFolderTable::Name, 20 ),
+
+"INSERT INTO " + Folder::ExcludedFolderTable::Name + " "
+    "SELECT * FROM " + Folder::ExcludedFolderTable::Name + "_backup ",
+
+"DROP TABLE " + Folder::ExcludedFolderTable::Name + "_backup",
+
