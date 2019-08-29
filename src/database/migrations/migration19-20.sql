@@ -169,3 +169,9 @@ Playlist::schema( Playlist::Table::Name, 20 ),
     "SELECT * FROM " + Playlist::Table::Name + "_backup",
 
 "DROP TABLE " + Playlist::Table::Name + "_backup",
+
+/* Album table */
+"DROP TABLE " + Album::Table::Name,
+"DROP TABLE " + Album::FtsTable::Name,
+Album::schema( Album::Table::Name, 20 ),
+Album::schema( Album::FtsTable::Name, 20 ),
