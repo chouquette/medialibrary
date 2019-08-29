@@ -175,3 +175,9 @@ Playlist::schema( Playlist::Table::Name, 20 ),
 "DROP TABLE " + Album::FtsTable::Name,
 Album::schema( Album::Table::Name, 20 ),
 Album::schema( Album::FtsTable::Name, 20 ),
+
+/* Show table */
+"DROP TABLE " + Show::Table::Name,
+"DROP TABLE " + Show::FtsTable::Name,
+Show::schema( Show::Table::Name, 20 ),
+Show::schema( Show::FtsTable::Name, 20 ),
