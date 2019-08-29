@@ -280,7 +280,8 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
             break;
         if ( m_probe->proceedOnDirectory( *subFolder ) == false )
             continue;
-        auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ), [&subFolder](const std::shared_ptr<Folder>& f) {
+        auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ),
+                                [&subFolder](const std::shared_ptr<Folder>& f) {
             return f->mrl() == subFolder->mrl();
         });
         // We don't know this folder, it's a new one
