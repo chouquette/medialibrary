@@ -87,9 +87,12 @@ public:
     }
 
 private:
+    bool proceedOnEntryPoint( const fs::IDirectory& directory );
+
     bool m_isDirectory;
     std::stack<std::string> m_splitPath;
     bool m_isDiscoveryEnded;
+    bool m_entryPointHandled;
     std::shared_ptr<Folder> m_parentFolder;
     std::string m_path;
     int64_t m_parentPlaylistId;

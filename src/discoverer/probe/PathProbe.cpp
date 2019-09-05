@@ -42,6 +42,7 @@ PathProbe::PathProbe( std::string path, bool isDirectory,
                       int64_t parentPlaylistId, int64_t playlistIndex, bool reload )
     : m_isDirectory( isDirectory )
     , m_isDiscoveryEnded( false )
+    , m_entryPointHandled( false )
     , m_parentFolder( std::move( parentFolder ) )
     , m_path( std::move( path ) )
     , m_parentPlaylistId( parentPlaylistId )
@@ -67,8 +68,39 @@ PathProbe::PathProbe( std::string path, bool isDirectory,
         m_splitPath.pop();
 }
 
+bool PathProbe::proceedOnEntryPoint( const fs::IDirectory& entryPoint )
+{
+    if ( m_splitPath.empty() == true )
+        return true;
+    auto directoryPath = utils::file::toLocalPath( entryPoint.mrl() );
+#ifndef _WIN32
+    // In case we are discovering from "/", the root folder isn't part of the
+    // splitted path stack, which would cause the prober to reject it.
+    if ( directoryPath == "/" )
+        return true;
+#endif
+    auto splitDirectoryPath = utils::file::splitPath( directoryPath, true );
+    while ( !splitDirectoryPath.empty() )
+    {
+        if (m_splitPath.top() != splitDirectoryPath.top() )
+            return false;
+
+        m_splitPath.pop();
+        if ( m_splitPath.empty() )
+            return true;
+
+        splitDirectoryPath.pop();
+    }
+    return true;
+}
+
 bool PathProbe::proceedOnDirectory( const fs::IDirectory& directory )
 {
+    if ( !m_entryPointHandled )
+    {
+        m_entryPointHandled = true;
+        return proceedOnEntryPoint(directory);
+    }
     if ( m_isDirectory && m_splitPath.empty() == true )
     {
         auto directoryPath = utils::file::toLocalPath( directory.mrl() );
