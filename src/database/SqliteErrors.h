@@ -685,8 +685,10 @@ static inline void mapToException( const char* reqStr, const char* errMsg, int e
                     throw errors::ErrorMissingColSeq( reqStr, errMsg, extRes );
                 case SQLITE_ERROR_RETRY:
                     throw errors::ErrorRetry( reqStr, errMsg, extRes );
+#ifdef SQLITE_ERROR_SNAPSHOT
                 case SQLITE_ERROR_SNAPSHOT:
                     throw errors::ErrorSnapshot( reqStr, errMsg, extRes );
+#endif
                 default:
                     throw errors::GenericError( reqStr, errMsg, extRes );
             }
