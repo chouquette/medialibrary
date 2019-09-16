@@ -163,7 +163,8 @@ public:
                                           req.size() + 1, &stmt, nullptr );
             if ( res != SQLITE_OK )
             {
-                throw errors::Prepare( req.c_str(), sqlite3_errmsg( dbConnection ), res );
+                throw errors::Prepare( req.c_str(),
+                                       sqlite3_errmsg( dbConnection ), res );
             }
             m_stmt.reset( stmt );
             connMap.emplace( req, CachedStmtPtr( stmt, &sqlite3_finalize ) );
@@ -193,8 +194,9 @@ public:
             if ( res == SQLITE_ROW )
                 return Row( m_stmt.get() );
             else if ( res == SQLITE_DONE )
-                return Row();
-            else if ( ( Transaction::transactionInProgress() == false || m_isCommit == true ) &&
+                return Row{};
+            else if ( ( Transaction::transactionInProgress() == false ||
+                        m_isCommit == true ) &&
                      errors::isInnocuous( res ) && maxRetries-- > 0 )
                 continue;
             auto errMsg = sqlite3_errmsg( m_dbConn );
@@ -224,7 +226,8 @@ private:
     template <typename T>
     bool _bind( T&& value )
     {
-        auto res = Traits<T>::Bind( m_stmt.get(), m_bindIdx, std::forward<T>( value ) );
+        auto res = Traits<T>::Bind( m_stmt.get(), m_bindIdx,
+                                    std::forward<T>( value ) );
         if ( res != SQLITE_OK )
         {
             auto sqlStr = sqlite3_sql( m_stmt.get() );
@@ -262,7 +265,9 @@ class Tools
          *                  be discarded.
          */
         template <typename IMPL, typename INTF, typename... Args>
-        static std::vector<std::shared_ptr<INTF> > fetchAll( MediaLibraryPtr ml, const std::string& req, Args&&... args )
+        static std::vector<std::shared_ptr<INTF>> fetchAll( MediaLibraryPtr ml,
+                                                            const std::string& req,
+                                                            Args&&... args )
         {
             auto dbConnection = ml->getConn();
             Connection::ReadContext ctx;
@@ -281,12 +286,13 @@ class Tools
             }
             auto duration = std::chrono::steady_clock::now() - chrono;
             LOG_VERBOSE("Executed ", req, " in ",
-                     std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
+                std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
             return results;
         }
 
         template <typename T, typename... Args>
-        static std::shared_ptr<T> fetchOne( MediaLibraryPtr ml, const std::string& req, Args&&... args )
+        static std::shared_ptr<T> fetchOne( MediaLibraryPtr ml,
+                                            const std::string& req, Args&&... args )
         {
             auto dbConnection = ml->getConn();
             Connection::ReadContext ctx;
@@ -302,12 +308,13 @@ class Tools
                 res = std::make_shared<T>( ml, row );
             auto duration = std::chrono::steady_clock::now() - chrono;
             LOG_VERBOSE("Executed ", req, " in ",
-                     std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
+                std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
             return res;
         }
 
         template <typename... Args>
-        static void executeRequest( sqlite::Connection* dbConnection, const std::string& req, Args&&... args )
+        static void executeRequest( sqlite::Connection* dbConnection,
+                                    const std::string& req, Args&&... args )
         {
             Connection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
@@ -316,7 +323,8 @@ class Tools
         }
 
         template <typename... Args>
-        static bool executeDelete( sqlite::Connection* dbConnection, const std::string& req, Args&&... args )
+        static bool executeDelete( sqlite::Connection* dbConnection,
+                                   const std::string& req, Args&&... args )
         {
             Connection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
@@ -326,7 +334,8 @@ class Tools
         }
 
         template <typename... Args>
-        static bool executeUpdate( sqlite::Connection* dbConnection, const std::string& req, Args&&... args )
+        static bool executeUpdate( sqlite::Connection* dbConnection,
+                                   const std::string& req, Args&&... args )
         {
             // The code would be exactly the same, do not freak out because it calls executeDelete :)
             return executeDelete( dbConnection, req, std::forward<Args>( args )... );
@@ -337,7 +346,8 @@ class Tools
          * Returns 0 (which is an invalid sqlite primary key) when insertion fails.
          */
         template <typename... Args>
-        static int64_t executeInsert( sqlite::Connection* dbConnection, const std::string& req, Args&&... args )
+        static int64_t executeInsert( sqlite::Connection* dbConnection,
+                                      const std::string& req, Args&&... args )
         {
             Connection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
@@ -395,7 +405,8 @@ class Tools
 
     private:
         template <typename... Args>
-        static void executeRequestLocked( sqlite::Connection* dbConnection, const std::string& req, Args&&... args )
+        static void executeRequestLocked( sqlite::Connection* dbConnection,
+                                          const std::string& req, Args&&... args )
         {
             auto chrono = std::chrono::steady_clock::now();
             Statement stmt( dbConnection->handle(), req );
@@ -404,7 +415,7 @@ class Tools
                 ;
             auto duration = std::chrono::steady_clock::now() - chrono;
             LOG_VERBOSE("Executed ", req, " in ",
-                     std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
+                std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
         }
 
         static std::string fetchTableSchema( sqlite::Connection* dbConn,
@@ -421,7 +432,7 @@ class Tools
             auto res = row.extract<std::string>();
             auto duration = std::chrono::steady_clock::now() - chrono;
             LOG_VERBOSE("Executed ", req, " in ",
-                     std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
+                std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
             return res;
         }
 };
