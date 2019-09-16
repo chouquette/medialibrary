@@ -361,6 +361,9 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     }
     addLocalFsFactory();
     populateNetworkFsFactories();
+    for ( auto& fsFactory : m_fsFactories )
+        fsFactory->refreshDevices();
+
     auto mlFolder = utils::file::toFolderPath( mlFolderPath );
     m_thumbnailPath = mlFolder + "thumbnails/";
     if ( createFolder( m_thumbnailPath ) == false )
