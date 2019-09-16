@@ -281,7 +281,7 @@ AM_CONDITIONAL(HAVE_LIBVLC, [test "${with_libvlc}" != "no"])
 AM_CONDITIONAL(HAVE_LIBVLC4, [test "${have_libvlc4}" = "yes" ])
 AM_CONDITIONAL([HAVE_LIBJPEG], [test "${have_libjpeg}" = "yes"])
 
-PKG_CHECK_MODULES(SQLITE, sqlite3)
+PKG_CHECK_MODULES(SQLITE, [sqlite3 >= 3.25.0])
 
 AC_ARG_ENABLE(tests,AC_HELP_STRING([--disable-tests], [Disable build of automated tests suites]))
 AM_CONDITIONAL([HAVE_TESTS], [test "${enable_tests}" = "yes"])
