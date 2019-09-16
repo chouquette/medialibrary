@@ -421,6 +421,10 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
         LOG_ERROR( "Can't initialize medialibrary: ", ex.what() );
         return InitializeResult::Failed;
     }
+
+    for ( auto& fsFactory : m_fsFactories )
+        refreshDevices( *fsFactory );
+
     m_initialized = true;
     LOG_INFO( "Successfuly initialized" );
     return res;
@@ -433,8 +437,6 @@ bool MediaLibrary::start()
     if ( m_parser != nullptr )
         return false;
 
-    for ( auto& fsFactory : m_fsFactories )
-        refreshDevices( *fsFactory );
     // Now that we know which devices are plugged, check for outdated devices
     // Approximate 6 months for old device precision.
     Device::removeOldDevices( this, std::chrono::seconds{ 3600 * 24 * 30 * 6 } );
