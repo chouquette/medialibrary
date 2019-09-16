@@ -239,6 +239,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                       device != nullptr ? "removable" : "not found",
                       ". Refreshing device cache..." );
 
+            m_fsFactory->refreshDevices();
             m_ml->refreshDevices( *m_fsFactory );
             // If the device was missing, refresh our list of devices in case
             // the device was plugged back and/or we missed a notification for it

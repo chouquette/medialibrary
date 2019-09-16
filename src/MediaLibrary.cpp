@@ -2030,6 +2030,7 @@ bool MediaLibrary::DeviceListerCb::onDeviceMounted( const std::string& uuid,
             }
             else
             {
+                fsFactory->refreshDevices();
                 m_ml->refreshDevices( *fsFactory );
                 deviceFs = fsFactory->createDevice( uuid );
                 if ( deviceFs == nullptr )
@@ -2110,7 +2111,10 @@ void MediaLibrary::DeviceListerCb::onDeviceUnmounted( const std::string& uuid,
                 }
             }
             else
+            {
+                fsFactory->refreshDevices();
                 m_ml->refreshDevices( *fsFactory );
+            }
         }
     }
 }
