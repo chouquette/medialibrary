@@ -1255,7 +1255,7 @@ Query<IMedia> Media::searchFromFolderId( MediaLibraryPtr ml,
     }
     // Don't explicitely filter by type since only video/audio media have a
     // non NULL folder_id
-    return make_query<Media, IMedia>( ml, "*", req, sortRequest( params ),
+    return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
                                       folderId,
                                       sqlite::Tools::sanitizePattern( pattern ) );
 }
