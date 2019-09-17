@@ -398,6 +398,7 @@ EXTRA_DIST += medialibrary.pc \
 	src/database/migrations/migration17-18.sql \
 	src/database/migrations/migration18-19.sql \
 	src/database/migrations/migration19-20.sql \
+	src/database/migrations/migration20-21.sql \
 	src/database/tables/File_triggers_v14.sql \
 	src/database/tables/Media_triggers_v14.sql \
 	src/database/tables/Folder_triggers_v14.sql \

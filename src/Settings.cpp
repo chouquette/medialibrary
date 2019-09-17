@@ -32,7 +32,7 @@
 namespace medialibrary
 {
 
-const uint32_t Settings::DbModelVersion = 20u;
+const uint32_t Settings::DbModelVersion = 21u;
 
 Settings::Settings( MediaLibrary* ml )
     : m_ml( ml )

@@ -227,6 +227,7 @@ private:
     void migrateModel17to18(uint32_t originalPreviousVersion);
     bool migrateModel18to19();
     void migrateModel19to20();
+    void migrateModel20to21();
     void createAllTables( uint32_t dbModelVersion );
     void createAllTriggers( uint32_t dbModelVersion );
     bool checkDatabaseIntegrity();
