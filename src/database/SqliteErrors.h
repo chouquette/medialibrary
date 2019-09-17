@@ -578,7 +578,7 @@ static inline void mapToException( const char* reqStr, const char* errMsg, int e
                 case SQLITE_LOCKED_VTAB:
                     throw errors::DatabaseLockedVtab( reqStr, errMsg, extRes );
                 default:
-                throw errors::DatabaseLocked( reqStr, errMsg, extRes );
+                    throw errors::DatabaseLocked( reqStr, errMsg, extRes );
             }
         }
         case SQLITE_READONLY:
