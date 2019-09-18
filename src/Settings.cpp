@@ -37,7 +37,6 @@ const uint32_t Settings::DbModelVersion = 21u;
 Settings::Settings( MediaLibrary* ml )
     : m_ml( ml )
     , m_dbModelVersion( 0 )
-    , m_changed( false )
 {
 }
 
@@ -66,24 +65,14 @@ uint32_t Settings::dbModelVersion() const
     return m_dbModelVersion;
 }
 
-bool Settings::save()
-{
-    static const std::string req = "UPDATE Settings SET db_model_version = ?";
-    if ( m_changed == false )
-        return true;
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_dbModelVersion ) == true )
-    {
-        m_changed = false;
-        return true;
-    }
-    return false;
-}
-
-void Settings::setDbModelVersion(uint32_t dbModelVersion)
+bool Settings::setDbModelVersion( uint32_t dbModelVersion )
 {
     assert( dbModelVersion != m_dbModelVersion );
+    static const std::string req = "UPDATE Settings SET db_model_version = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, dbModelVersion ) == false )
+        return false;
     m_dbModelVersion = dbModelVersion;
-    m_changed = true;
+    return true;
 }
 
 void Settings::createTable( sqlite::Connection* dbConn )

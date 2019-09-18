@@ -1144,7 +1144,6 @@ void MediaLibrary::migrateModel3to5()
     Media::createTriggers( getConn(), 5 );
     Playlist::createTriggers( getConn(), 5 );
     m_settings.setDbModelVersion( 5 );
-    m_settings.save();
     t->commit();
 }
 
@@ -1159,7 +1158,6 @@ void MediaLibrary::migrateModel5to6()
     req = "UPDATE " + Media::Table::Name + " SET is_present = 1 WHERE is_present != 0";
     sqlite::Tools::executeRequest( getConn(), req );
     m_settings.setDbModelVersion( 6 );
-    m_settings.save();
 }
 
 void MediaLibrary::migrateModel7to8()
@@ -1178,7 +1176,6 @@ void MediaLibrary::migrateModel7to8()
     Media::createTriggers( getConn(), 5 );
     File::createTriggers( getConn() );
     m_settings.setDbModelVersion( 8 );
-    m_settings.save();
     t->commit();
 }
 
@@ -1199,7 +1196,6 @@ void MediaLibrary::migrateModel8to9()
     // Quite the opposite actually :)
     sqlite::Tools::executeDelete( getConn(), req );
     m_settings.setDbModelVersion( 9 );
-    m_settings.save();
     t->commit();
 }
 
@@ -1218,7 +1214,6 @@ void MediaLibrary::migrateModel9to10()
         f->setMrl( std::move( newMrl ) );
     }
     m_settings.setDbModelVersion( 10 );
-    m_settings.save();
     t->commit();
 }
 
@@ -1228,7 +1223,6 @@ void MediaLibrary::migrateModel10to11()
     // We updated the MRL encoding in 10 to 11, but again from 15 to 16, so we
     // might as well re encode everything only once.
     m_settings.setDbModelVersion( 11 );
-    m_settings.save();
 }
 
 /*
@@ -1265,7 +1259,6 @@ void MediaLibrary::migrateModel12to13()
             " WHERE id_media = media_id)";
     sqlite::Tools::executeUpdate( getConn(), migrateData );
     m_settings.setDbModelVersion( 13 );
-    m_settings.save();
     t->commit();
 }
 
@@ -1390,7 +1383,6 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
         f->setName( utils::file::directoryName( f->rawMrl() ) );
     }
     m_settings.setDbModelVersion( 14 );
-    m_settings.save();
 
     t->commit();
 }
@@ -1414,7 +1406,6 @@ void MediaLibrary::migrateModel14to15()
     Folder::createTriggers( dbConn, 15 );
     Playlist::createTriggers( dbConn, 15 );
     m_settings.setDbModelVersion( 15 );
-    m_settings.save();
     t->commit();
 }
 
@@ -1459,7 +1450,6 @@ void MediaLibrary::migrateModel15to16()
     }
 
     m_settings.setDbModelVersion( 16 );
-    m_settings.save();
     t->commit();
 }
 
@@ -1513,7 +1503,6 @@ void MediaLibrary::migrateModel16to17( uint32_t originalPreviousVersion )
     }
 
     m_settings.setDbModelVersion( 17 );
-    m_settings.save();
     t->commit();
 }
 
@@ -1552,7 +1541,6 @@ void MediaLibrary::migrateModel17to18( uint32_t originalPreviousVersion )
     }
 
     m_settings.setDbModelVersion( 18 );
-    m_settings.save();
     t->commit();
 }
 
@@ -1576,7 +1564,6 @@ bool MediaLibrary::migrateModel18to19()
         for ( const auto& req : reqs )
             sqlite::Tools::executeRequest( dbConn, req );
         m_settings.setDbModelVersion( 19 );
-        m_settings.save();
         t->commit();
         return true;
     }
@@ -1587,7 +1574,6 @@ bool MediaLibrary::migrateModel18to19()
     }
     // The previous migration succeeded, we just need to bump the version
     m_settings.setDbModelVersion( 19 );
-    m_settings.save();
     return false;
 }
 
@@ -1630,7 +1616,6 @@ void MediaLibrary::migrateModel19to20()
     SubtitleTrack::createTriggers( dbConn );
 
     m_settings.setDbModelVersion( 20 );
-    m_settings.save();
     t->commit();
 }
 
@@ -1648,7 +1633,6 @@ void MediaLibrary::migrateModel20to21()
         sqlite::Tools::executeRequest( dbConn, req );
 
     m_settings.setDbModelVersion( 21 );
-    m_settings.save();
     t->commit();
 }
 

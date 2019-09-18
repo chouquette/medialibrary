@@ -46,8 +46,7 @@ public:
      * This can be different from the \ref DbModelVersion when upgrading the model
      */
     uint32_t dbModelVersion() const;
-    bool save();
-    void setDbModelVersion( uint32_t dbModelVersion );
+    bool setDbModelVersion( uint32_t dbModelVersion );
 
     static void createTable( sqlite::Connection* dbConn );
 
@@ -57,8 +56,6 @@ private:
     MediaLibrary* m_ml;
 
     uint32_t m_dbModelVersion;
-
-    bool m_changed;
 };
 
 }
