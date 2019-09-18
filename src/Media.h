@@ -202,6 +202,9 @@ class Media : public IMedia,
                                                  const std::string& pattern,
                                                  Type type, int64_t folderId,
                                                  const QueryParameters* params );
+        static Query<IMedia> fromGroup( MediaLibraryPtr ml,
+                                        const std::string& name,
+                                        const QueryParameters* params );
 
         static void clearHistory( MediaLibraryPtr ml );
         static void removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime );

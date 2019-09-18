@@ -81,6 +81,8 @@ public:
     virtual bool removeExternalMedia( MediaPtr media ) override;
     virtual Query<IMedia> audioFiles( const QueryParameters* params ) const override;
     virtual Query<IMedia> videoFiles( const QueryParameters* params ) const override;
+    virtual Query<IVideoGroup> videoGroups( const QueryParameters* params = nullptr ) const override;
+
 
     virtual void onDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,
                                    std::shared_ptr<Folder> parentFolder,

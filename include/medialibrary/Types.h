@@ -44,6 +44,7 @@ class IVideoTrack;
 class ILogger;
 class IArtist;
 class IPlaylist;
+class IVideoGroup;
 class IMediaLibraryCb;
 class IDeviceLister;
 class IDeviceListerCb;

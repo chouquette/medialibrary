@@ -1260,6 +1260,16 @@ Query<IMedia> Media::searchFromFolderId( MediaLibraryPtr ml,
                                       sqlite::Tools::sanitizePattern( pattern ) );
 }
 
+Query<IMedia> Media::fromGroup( MediaLibraryPtr ml, const std::string& name,
+                                const QueryParameters* params )
+{
+    std::string req = "FROM " + Table::Name + " m ";
+    req += addRequestJoin( params, false, false );
+    req += " WHERE SUBSTR(title, 1, 6) = ?";
+    return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
+                                      name );
+}
+
 void Media::clearHistory( MediaLibraryPtr ml )
 {
     auto dbConn = ml->getConn();

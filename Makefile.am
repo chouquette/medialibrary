@@ -45,6 +45,7 @@ libmedialibrary_la_HEADERS = \
 	include/medialibrary/ISubtitleTrack.h \
 	include/medialibrary/IThumbnailer.h \
 	include/medialibrary/IInterruptProbe.h \
+	include/medialibrary/IVideoGroup.h \
 	$(NULL)
 
 libmedialibraryfsdir = $(libmedialibrary_ladir)/filesystem
@@ -111,6 +112,7 @@ libmedialibrary_la_SOURCES = \
 	src/utils/Url.cpp \
 	src/utils/File.cpp \
 	src/Bookmark.cpp \
+	src/VideoGroup.cpp \
 	$(NULL)
 
 
@@ -182,6 +184,7 @@ noinst_HEADERS = \
 	src/compat/ConditionVariable.h \
 	src/SubtitleTrack.h \
 	src/Bookmark.h \
+	src/VideoGroup.h \
 	$(NULL)
 
 
@@ -331,6 +334,7 @@ unittest_SOURCES = \
 	test/unittest/ThumbnailTests.cpp \
 	test/unittest/SubtitleTrackTests.cpp \
 	test/unittest/BookmarkTests.cpp \
+	test/unittest/VideoGroupTests.cpp \
 	$(NULL)
 
 EXTRA_DIST += test/unittest/db_v3.sql

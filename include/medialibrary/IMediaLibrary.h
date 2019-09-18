@@ -69,6 +69,7 @@ enum class SortingCriteria
     // Valid for folders only. Default order is descending
     NbVideo,
     NbAudio,
+    // Valid for folders & media groups
     NbMedia,
 };
 
@@ -336,6 +337,13 @@ public:
 
     virtual Query<IMedia> audioFiles( const QueryParameters* params = nullptr ) const = 0;
     virtual Query<IMedia> videoFiles( const QueryParameters* params = nullptr ) const = 0;
+    /**
+     * @brief videoGroups Returns the media, grouped by their first characters
+     * @param params Some query parameter. Only Alpha & NbMedia/NbVideo sorting criteria
+     *               are supported. The default is Alpha
+     * @return A query object, or nullptr in case of an error.
+     */
+    virtual Query<IVideoGroup> videoGroups( const QueryParameters* params = nullptr ) const = 0;
     virtual AlbumPtr album( int64_t id ) const = 0;
     virtual Query<IAlbum> albums( const QueryParameters* params = nullptr ) const = 0;
     virtual ShowPtr show( int64_t id ) const = 0;

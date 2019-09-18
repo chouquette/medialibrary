@@ -43,6 +43,7 @@
 #include "Folder.h"
 #include "Genre.h"
 #include "Media.h"
+#include "VideoGroup.h"
 #include "MediaLibrary.h"
 #include "Label.h"
 #include "logging/Logger.h"
@@ -158,6 +159,7 @@ void MediaLibrary::createAllTables( uint32_t dbModelVersion )
     Folder::createTable( dbConn );
     Thumbnail::createTable( dbConn );
     Media::createTable( dbConn );
+    VideoGroup::createView( dbConn );
     File::createTable( dbConn );
     Label::createTable( dbConn );
     Playlist::createTable( dbConn );
@@ -554,6 +556,11 @@ Query<IMedia> MediaLibrary::audioFiles( const QueryParameters* params ) const
 Query<IMedia> MediaLibrary::videoFiles( const QueryParameters* params ) const
 {
     return Media::listAll( this, IMedia::Type::Video, params );
+}
+
+Query<IVideoGroup> MediaLibrary::videoGroups( const QueryParameters* params ) const
+{
+    return VideoGroup::listAll( this, params );
 }
 
 bool MediaLibrary::isExtensionSupported( const char* ext )

@@ -120,6 +120,10 @@ namespace
         "VideoTrack",
     };
 
+    const std::vector<const char*> expectedViews{
+        "VideoGroup",
+    };
+
     bool checkAlphaOrderedVector( const std::vector<const char*> in )
     {
         for ( auto i = 0u; i < in.size() - 1; i++ )
@@ -283,6 +287,25 @@ public:
         ASSERT_EQ( stmt.row(), nullptr );
     }
 
+    void CheckViews( std::vector<const char*> expected )
+    {
+        auto res = checkAlphaOrderedVector( expected );
+        ASSERT_TRUE( res );
+
+        medialibrary::sqlite::Statement stmt{ ml->getConn()->handle(),
+                "SELECT name FROM sqlite_master WHERE type='view'"
+        };
+        stmt.execute();
+        for ( const auto& expectedName : expected )
+        {
+            auto row = stmt.row();
+            ASSERT_EQ( 1u, row.nbColumns() );
+            auto name = row.extract<std::string>();
+            ASSERT_EQ( expectedName, name );
+        }
+        ASSERT_EQ( stmt.row(), nullptr );
+    }
+
     virtual void TearDown() override
     {
         medialibrary::sqlite::Connection::Handle conn;
@@ -309,6 +332,7 @@ TEST_F( DbModel, NbTriggers )
     CheckTriggers( expectedTriggers );
     CheckIndexes( expectedIndexes );
     CheckTables( expectedTables );
+    CheckViews( expectedViews );
 }
 
 TEST_F( DbModel, Upgrade3to5 )
@@ -319,6 +343,7 @@ TEST_F( DbModel, Upgrade3to5 )
     // All is done during the database initialization, we only care about no
     // exception being thrown, and MediaLibrary::initialize() returning true
     CheckTables( expectedTables );
+    CheckViews( expectedViews );
 }
 
 TEST_F( DbModel, Upgrade4to5 )
@@ -335,6 +360,7 @@ TEST_F( DbModel, Upgrade4to5 )
     ASSERT_NE( files.size(), 0u );
 
     CheckTables( expectedTables );
+    CheckViews( expectedViews );
 }
 
 TEST_F( DbModel, Upgrade7to8 )
@@ -346,6 +372,7 @@ TEST_F( DbModel, Upgrade7to8 )
     // there is no content left to test
 
     CheckTables( expectedTables );
+    CheckViews( expectedViews );
 }
 
 TEST_F( DbModel, Upgrade8to9 )
@@ -358,6 +385,7 @@ TEST_F( DbModel, Upgrade8to9 )
     ASSERT_EQ( 1u, media.size() );
 
     CheckTables( expectedTables );
+    CheckViews( expectedViews );
 }
 
 TEST_F( DbModel, Upgrade12to13 )
@@ -371,6 +399,7 @@ TEST_F( DbModel, Upgrade12to13 )
     CheckTriggers( expectedTriggers );
     CheckIndexes( expectedIndexes );
     CheckTables( expectedTables );
+    CheckViews( expectedViews );
 }
 
 TEST_F( DbModel, Upgrade13to14 )
@@ -420,6 +449,7 @@ TEST_F( DbModel, Upgrade13to14 )
 
     CheckTriggers( expectedTriggers );
     CheckTables( expectedTables );
+    CheckViews( expectedViews );
 }
 
 TEST_F( DbModel, Upgrade14to15 )
@@ -430,6 +460,7 @@ TEST_F( DbModel, Upgrade14to15 )
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
     CheckTables( expectedTables );
+    CheckViews( expectedViews );
 }
 
 TEST_F( DbModel, Upgrade15to16 )
@@ -440,6 +471,7 @@ TEST_F( DbModel, Upgrade15to16 )
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
     CheckTables( expectedTables );
+    CheckViews( expectedViews );
 
     // Check that playlists were properly migrated
     medialibrary::sqlite::Statement stmt{
@@ -474,6 +506,7 @@ TEST_F( DbModel, Upgrade16to17 )
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
     CheckTables( expectedTables );
+    CheckViews( expectedViews );
 }
 
 TEST_F( DbModel, Upgrade17to18 )
@@ -484,6 +517,7 @@ TEST_F( DbModel, Upgrade17to18 )
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
     CheckTables( expectedTables );
+    CheckViews( expectedViews );
 }
 
 TEST_F( DbModel, Upgrade18to19Broken )
@@ -495,6 +529,7 @@ TEST_F( DbModel, Upgrade18to19Broken )
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
     CheckTables( expectedTables );
+    CheckViews( expectedViews );
 }
 
 
@@ -508,6 +543,7 @@ TEST_F( DbModel, Upgrade18to19Noop )
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
     CheckTables( expectedTables );
+    CheckViews( expectedViews );
 }
 
 
@@ -521,6 +557,7 @@ TEST_F( DbModel, Upgrade19to20 )
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
     CheckTables( expectedTables );
+    CheckViews( expectedViews );
 }
 
 TEST_F( DbModel, Upgrade20to21 )
@@ -531,4 +568,5 @@ TEST_F( DbModel, Upgrade20to21 )
     CheckIndexes( expectedIndexes );
     CheckTriggers( expectedTriggers );
     CheckTables( expectedTables );
+    CheckViews( expectedViews );
 }
