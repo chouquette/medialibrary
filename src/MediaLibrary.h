@@ -82,6 +82,7 @@ public:
     virtual Query<IMedia> audioFiles( const QueryParameters* params ) const override;
     virtual Query<IMedia> videoFiles( const QueryParameters* params ) const override;
     virtual Query<IVideoGroup> videoGroups( const QueryParameters* params = nullptr ) const override;
+    virtual void setVideoGroupsPrefixLength( uint32_t prefixLength ) override;
 
 
     virtual void onDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,

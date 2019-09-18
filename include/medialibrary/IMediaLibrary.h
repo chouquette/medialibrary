@@ -344,6 +344,18 @@ public:
      * @return A query object, or nullptr in case of an error.
      */
     virtual Query<IVideoGroup> videoGroups( const QueryParameters* params = nullptr ) const = 0;
+    /**
+     * @brief setVideoGroupsPrefixLength Sets the size of the common prefix for
+     *                                   a video group
+     *
+     * The provided value is the size of each group. For instance, if set to 4
+     * "TestGroup" and "TestSomething" will be part of the same group, but if set
+     * to 5, they will not.
+     * This can be called at any point during the program lifetime.
+     * The value will persist in database across multiple executions
+     * The default value is 6
+     */
+    virtual void setVideoGroupsPrefixLength( uint32_t prefixLength ) = 0;
     virtual AlbumPtr album( int64_t id ) const = 0;
     virtual Query<IAlbum> albums( const QueryParameters* params = nullptr ) const = 0;
     virtual ShowPtr show( int64_t id ) const = 0;

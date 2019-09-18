@@ -47,8 +47,11 @@ bool Settings::load()
     // First launch: no settings
     if ( row == nullptr )
     {
-        if ( sqlite::Tools::executeInsert( m_ml->getConn(), "INSERT INTO Settings VALUES(?)", DbModelVersion ) == false )
+        if ( sqlite::Tools::executeInsert( m_ml->getConn(),
+                "INSERT INTO Settings VALUES(?, ?)", DbModelVersion, 6) == false )
+        {
             return false;
+        }
         m_dbModelVersion = 0;
     }
     else
@@ -75,10 +78,17 @@ bool Settings::setDbModelVersion( uint32_t dbModelVersion )
     return true;
 }
 
+bool Settings::setVideoGroupPrefixLength( uint32_t prefixLength )
+{
+    const std::string req = "UPDATE Settings SET video_groups_prefix_length = ?";
+    return sqlite::Tools::executeUpdate( m_ml->getConn(), req, prefixLength );
+}
+
 void Settings::createTable( sqlite::Connection* dbConn )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS Settings("
-                "db_model_version UNSIGNED INTEGER NOT NULL"
+                "db_model_version UNSIGNED INTEGER NOT NULL,"
+                "video_groups_prefix_length UNSIGNED INTEGER NOT NULL"
             ")";
     sqlite::Tools::executeRequest( dbConn, req );
 }

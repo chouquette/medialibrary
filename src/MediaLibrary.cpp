@@ -563,6 +563,11 @@ Query<IVideoGroup> MediaLibrary::videoGroups( const QueryParameters* params ) co
     return VideoGroup::listAll( this, params );
 }
 
+void MediaLibrary::setVideoGroupsPrefixLength( uint32_t prefixLength )
+{
+    m_settings.setVideoGroupPrefixLength( prefixLength );
+}
+
 bool MediaLibrary::isExtensionSupported( const char* ext )
 {
     return std::binary_search( std::begin( supportedExtensions ),

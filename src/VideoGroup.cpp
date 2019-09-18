@@ -93,7 +93,7 @@ std::string VideoGroup::schema( const std::string& tableName, uint32_t )
                         "WHEN title LIKE 'The %' THEN SUBSTR(title, 5) "
                         "ELSE title "
                     "END, "
-                "1, 6) as grp, COUNT() as cnt"
+                "1, (SELECT video_groups_prefix_length FROM Settings)) as grp, COUNT() as cnt"
            " FROM Media "
            " WHERE type = " +
                 std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(

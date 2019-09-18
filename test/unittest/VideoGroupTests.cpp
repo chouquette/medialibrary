@@ -193,3 +193,19 @@ TEST_F( VideoGroups, IgnorePrefix )
     ASSERT_EQ( "Therem", groups[1]->name() );
     ASSERT_EQ( 1u, groups[1]->count() );
 }
+
+TEST_F( VideoGroups, AdjustSize )
+{
+    ml->addMedia( "Otters are cool.mkv", IMedia::Type::Video );
+    ml->addMedia( "Otters are fluffy.mkv", IMedia::Type::Video );
+    ml->addMedia( "Otters are cute.mkv", IMedia::Type::Video );
+    ml->addMedia( "OtteITSATRAP.mkv", IMedia::Type::Video );
+
+    auto groups = ml->videoGroups( nullptr )->all();
+    ASSERT_EQ( 2u, groups.size() );
+
+    ml->setVideoGroupsPrefixLength( 4 );
+    groups = ml->videoGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+
+}
