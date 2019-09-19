@@ -263,6 +263,12 @@ void MediaLibrary::registerEntityHooks()
         else if ( reason == sqlite::Connection::HookReason::Update )
             m_modificationNotifier->notifyPlaylistModification( rowId );
     });
+    m_dbConnection->registerUpdateHook( Playlist::MediaRelationTable::Name,
+                                        [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
+        if ( reason == sqlite::Connection::HookReason::Delete ||
+             reason == sqlite::Connection::HookReason::Update )
+            m_modificationNotifier->notifyPlaylistModification( rowId );
+    });
     m_dbConnection->registerUpdateHook( Genre::Table::Name,
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
         if ( reason == sqlite::Connection::HookReason::Delete )
