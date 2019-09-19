@@ -15,7 +15,7 @@ linux:
       - ./samples -vv
 
 win32:
-    image: registry.videolan.org/medialibrary-win32:20190625083440
+    image: registry.videolan.org/medialibrary-win32:20190919125007
     tags:
       - win32
     script:
@@ -31,7 +31,7 @@ win32:
       - wine samples.exe -vv
 
 win64:
-    image: registry.videolan.org/medialibrary-win64:20190625085114
+    image: registry.videolan.org/medialibrary-win64:20190919130659
     tags:
       - win64
     script:
