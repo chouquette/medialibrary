@@ -1266,6 +1266,7 @@ Query<IMedia> Media::fromGroup( MediaLibraryPtr ml, const std::string& name,
     std::string req = "FROM " + Table::Name + " m ";
     req += addRequestJoin( params, false, false );
     req += " WHERE SUBSTR(title, 1, (SELECT video_groups_prefix_length FROM Settings)) = ?";
+    req += " AND m.is_present != 0";
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
                                       name );
 }
