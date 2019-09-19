@@ -209,3 +209,28 @@ TEST_F( VideoGroups, AdjustSize )
     ASSERT_EQ( 1u, groups.size() );
 
 }
+
+TEST_F( VideoGroups, GetByName )
+{
+    ml->addMedia( "Otters are cool.mkv", IMedia::Type::Video );
+    ml->addMedia( "Otters are fluffy.mkv", IMedia::Type::Video );
+    ml->addMedia( "Otters are cute.mkv", IMedia::Type::Video );
+
+    auto group = ml->videoGroup( "Otters" );
+    ASSERT_NE( nullptr, group );
+    ASSERT_EQ( 3u, group->count() );
+
+    group = ml->videoGroup( "otter" );
+    ASSERT_EQ( nullptr, group );
+
+    group = ml->videoGroup( "otter are" );
+    ASSERT_EQ( nullptr, group );
+
+    ml->setVideoGroupsPrefixLength( 5 );
+    group = ml->videoGroup( "otters" );
+    ASSERT_EQ( nullptr, group );
+
+    group = ml->videoGroup( "Otter" );
+    ASSERT_NE( nullptr, group );
+    ASSERT_EQ( 3u, group->count() );
+}

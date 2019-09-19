@@ -563,6 +563,11 @@ Query<IVideoGroup> MediaLibrary::videoGroups( const QueryParameters* params ) co
     return VideoGroup::listAll( this, params );
 }
 
+VideoGroupPtr MediaLibrary::videoGroup( const std::string& name ) const
+{
+    return VideoGroup::fromName( this, name );
+}
+
 void MediaLibrary::setVideoGroupsPrefixLength( uint32_t prefixLength )
 {
     m_settings.setVideoGroupPrefixLength( prefixLength );

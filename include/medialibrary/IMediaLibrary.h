@@ -345,6 +345,12 @@ public:
      */
     virtual Query<IVideoGroup> videoGroups( const QueryParameters* params = nullptr ) const = 0;
     /**
+     * @brief videoGroup Return the representation of a specific video group
+     * @param name The group name
+     * @return The associated IVideoGroup, or nullptr if that group doesn't exist
+     */
+    virtual VideoGroupPtr videoGroup( const std::string& name ) const = 0;
+    /**
      * @brief setVideoGroupsPrefixLength Sets the size of the common prefix for
      *                                   a video group
      *

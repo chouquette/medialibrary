@@ -83,6 +83,12 @@ Query<IVideoGroup> VideoGroup::listAll( MediaLibraryPtr ml, const QueryParameter
     return make_query_with_count<VideoGroup, IVideoGroup>( ml, countReq, req);
 }
 
+VideoGroupPtr VideoGroup::fromName( MediaLibraryPtr ml, const std::string& name )
+{
+    const std::string req = "SELECT * FROM " + Table::Name + " WHERE grp = ?";
+    return fetch( ml, req, name );
+}
+
 std::string VideoGroup::schema( const std::string& tableName, uint32_t )
 {
     assert( tableName == Table::Name );

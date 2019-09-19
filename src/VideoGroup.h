@@ -48,6 +48,7 @@ public:
 
     static Query<IVideoGroup> listAll( MediaLibraryPtr ml,
                                        const QueryParameters* params );
+    static VideoGroupPtr fromName( MediaLibraryPtr ml, const std::string& name );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
     static void createView( sqlite::Connection* dbConn );
 
