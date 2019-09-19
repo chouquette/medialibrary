@@ -191,7 +191,6 @@ Status MetadataAnalyzer::run( IItem& item )
         file->updateFsInfo( item.fileFs()->lastModificationDate(),
                             item.fileFs()->size() );
     }
-    m_notifier->notifyMediaModification( media );
     return Status::Success;
 }
 
@@ -812,14 +811,6 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
     }
     if ( newAlbum == true )
         m_notifier->notifyAlbumCreation( album );
-    else
-        m_notifier->notifyAlbumModification( album );
-    if ( genre != nullptr )
-        m_notifier->notifyGenreModification( genre );
-    if ( artists.first != nullptr )
-        m_notifier->notifyArtistModification( artists.first );
-    if ( artists.second != nullptr )
-        m_notifier->notifyArtistModification( artists.second );
     return true;
 }
 

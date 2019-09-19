@@ -100,10 +100,6 @@ bool Playlist::setName( const std::string& name )
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, name, m_id ) == false )
         return false;
     m_name = name;
-
-    auto notifier = m_ml->getNotifier();
-    if ( notifier != nullptr )
-        notifier->notifyPlaylistModification( shared_from_this() );
     return true;
 }
 
@@ -202,24 +198,15 @@ bool Playlist::add( const IMedia& media, uint32_t position )
                 "(media_id, mrl, playlist_id, position) VALUES(?1, ?2, ?3,"
                 "(SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
                 " WHERE playlist_id = ?3))";
-        if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
-                                           (*mainFile)->mrl(), m_id ) == false )
-            return false;
+        return sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
+                                             (*mainFile)->mrl(), m_id );
     }
-    else
-    {
-        static const std::string req = "INSERT INTO " + Playlist::MediaRelationTable::Name + " "
-                "(media_id, mrl, playlist_id, position) VALUES(?1, ?2, ?3,"
-                "min(?4, (SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
-                " WHERE playlist_id = ?3)))";
-        if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
-                                           (*mainFile)->mrl(), m_id, position ) == false )
-            return false;
-    }
-    auto notifier = m_ml->getNotifier();
-    if ( notifier != nullptr )
-        notifier->notifyPlaylistModification( shared_from_this() );
-    return true;
+    static const std::string req = "INSERT INTO " + Playlist::MediaRelationTable::Name + " "
+            "(media_id, mrl, playlist_id, position) VALUES(?1, ?2, ?3,"
+            "min(?4, (SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
+            " WHERE playlist_id = ?3)))";
+    return sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
+                                       (*mainFile)->mrl(), m_id, position );
 }
 
 bool Playlist::append( int64_t mediaId )
@@ -315,9 +302,6 @@ bool Playlist::move( uint32_t from, uint32_t position )
     }
     t->commit();
 
-    auto notifier = m_ml->getNotifier();
-    if ( notifier != nullptr )
-        notifier->notifyPlaylistModification( shared_from_this() );
     return true;
 }
 
@@ -326,12 +310,7 @@ bool Playlist::remove( uint32_t position )
     static const std::string req = "DELETE FROM " +
             Playlist::MediaRelationTable::Name +
             " WHERE playlist_id = ? AND position = ?";
-    if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, position ) == false )
-        return false;
-    auto notifier = m_ml->getNotifier();
-    if ( notifier != nullptr )
-        notifier->notifyPlaylistModification( shared_from_this() );
-    return true;
+    return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, position );
 }
 
 void Playlist::createTable( sqlite::Connection* dbConn )

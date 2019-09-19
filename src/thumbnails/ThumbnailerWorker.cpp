@@ -197,12 +197,7 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
     }
 
     auto destMrl = utils::file::toMrl( dest );
-    if ( m->setThumbnail( destMrl, Thumbnail::Origin::Media, task.sizeType,
-                          true ) == false )
-        return false;
-
-    m_ml->getNotifier()->notifyMediaModification( task.media );
-    return true;
+    return m->setThumbnail( destMrl, Thumbnail::Origin::Media, task.sizeType, true );
 }
 
 }

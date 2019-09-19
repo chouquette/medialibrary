@@ -418,9 +418,6 @@ bool Media::setMetadata( IMedia::MetadataType type, const std::string& value )
     auto res = m_metadata.set( static_cast<MDType>( type ), value );
     if ( res == false )
         return false;
-    auto notifier = m_ml->getNotifier();
-    if ( notifier )
-        notifier->notifyMediaModification( shared_from_this() );
     return true;
 }
 
@@ -875,9 +872,6 @@ bool Media::setTitle( const std::string& title )
 
     m_title = title;
 
-    auto notifier = m_ml->getNotifier();
-    if ( notifier != nullptr )
-        notifier->notifyMediaModification( shared_from_this() );
     return true;
 }
 
