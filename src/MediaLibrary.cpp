@@ -237,39 +237,43 @@ void MediaLibrary::registerEntityHooks()
 
     m_dbConnection->registerUpdateHook( Media::Table::Name,
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
-        if ( reason != sqlite::Connection::HookReason::Delete )
-            return;
-        m_modificationNotifier->notifyMediaRemoval( rowId );
+        if ( reason == sqlite::Connection::HookReason::Delete )
+            m_modificationNotifier->notifyMediaRemoval( rowId );
+        else if ( reason == sqlite::Connection::HookReason::Update )
+            m_modificationNotifier->notifyMediaModification( rowId );
     });
     m_dbConnection->registerUpdateHook( Artist::Table::Name,
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
-        if ( reason != sqlite::Connection::HookReason::Delete )
-            return;
-        m_modificationNotifier->notifyArtistRemoval( rowId );
+        if ( reason == sqlite::Connection::HookReason::Delete )
+            m_modificationNotifier->notifyArtistRemoval( rowId );
+        else if ( reason == sqlite::Connection::HookReason::Update )
+            m_modificationNotifier->notifyArtistModification( rowId );
     });
     m_dbConnection->registerUpdateHook( Album::Table::Name,
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
-        if ( reason != sqlite::Connection::HookReason::Delete )
-            return;
-        m_modificationNotifier->notifyAlbumRemoval( rowId );
+        if ( reason == sqlite::Connection::HookReason::Delete )
+            m_modificationNotifier->notifyAlbumRemoval( rowId );
+        else if ( reason == sqlite::Connection::HookReason::Update )
+            m_modificationNotifier->notifyAlbumModification( rowId );
     });
     m_dbConnection->registerUpdateHook( Playlist::Table::Name,
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
-        if ( reason != sqlite::Connection::HookReason::Delete )
-            return;
-        m_modificationNotifier->notifyPlaylistRemoval( rowId );
+        if ( reason == sqlite::Connection::HookReason::Delete )
+            m_modificationNotifier->notifyPlaylistRemoval( rowId );
+        else if ( reason == sqlite::Connection::HookReason::Update )
+            m_modificationNotifier->notifyPlaylistModification( rowId );
     });
     m_dbConnection->registerUpdateHook( Genre::Table::Name,
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
-        if ( reason != sqlite::Connection::HookReason::Delete )
-            return;
-        m_modificationNotifier->notifyGenreRemoval( rowId );
+        if ( reason == sqlite::Connection::HookReason::Delete )
+            m_modificationNotifier->notifyGenreRemoval( rowId );
+        else if ( reason == sqlite::Connection::HookReason::Update )
+            m_modificationNotifier->notifyGenreModification( rowId );
     });
     m_dbConnection->registerUpdateHook( Genre::Table::Name,
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
-        if ( reason != sqlite::Connection::HookReason::Delete )
-            return;
-        m_modificationNotifier->notifyThumbnailRemoval( rowId );
+        if ( reason == sqlite::Connection::HookReason::Delete )
+            m_modificationNotifier->notifyThumbnailRemoval( rowId );
     });
 }
 
