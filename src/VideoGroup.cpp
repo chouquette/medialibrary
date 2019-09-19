@@ -85,7 +85,8 @@ Query<IVideoGroup> VideoGroup::listAll( MediaLibraryPtr ml, const QueryParameter
 
 VideoGroupPtr VideoGroup::fromName( MediaLibraryPtr ml, const std::string& name )
 {
-    const std::string req = "SELECT * FROM " + Table::Name + " WHERE grp = ?";
+    const std::string req = "SELECT * FROM " + Table::Name +
+            " WHERE grp = LOWER(?)";
     return fetch( ml, req, name );
 }
 
@@ -94,12 +95,13 @@ std::string VideoGroup::schema( const std::string& tableName, uint32_t )
     assert( tableName == Table::Name );
     return "CREATE VIEW " + Table::Name + " AS"
            " SELECT "
-                "SUBSTR("
+                "LOWER(SUBSTR("
                     "CASE "
                         "WHEN title LIKE 'The %' THEN SUBSTR(title, 5) "
                         "ELSE title "
                     "END, "
-                "1, (SELECT video_groups_prefix_length FROM Settings)) as grp, COUNT() as cnt"
+                "1, (SELECT video_groups_prefix_length FROM Settings)))"
+           " as grp, COUNT() as cnt"
            " FROM Media "
            " WHERE type = " +
                 std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(

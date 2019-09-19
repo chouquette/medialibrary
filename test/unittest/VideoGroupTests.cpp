@@ -180,6 +180,7 @@ TEST_F( VideoGroups, IgnorePrefix )
 {
     ml->addMedia( "The groupname.mkv", IMedia::Type::Video );
     ml->addMedia( "The groupname.avi", IMedia::Type::Video );
+    ml->addMedia( "the groupname.avi", IMedia::Type::Video );
     ml->addMedia( "groupname.mkv", IMedia::Type::Video );
     ml->addMedia( "Theremin.mkv", IMedia::Type::Video );
 
@@ -189,8 +190,8 @@ TEST_F( VideoGroups, IgnorePrefix )
     auto groups = ml->videoGroups( &params )->all();
     ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( "groupn", groups[0]->name() );
-    ASSERT_EQ( 3u, groups[0]->count() );
-    ASSERT_EQ( "Therem", groups[1]->name() );
+    ASSERT_EQ( 4u, groups[0]->count() );
+    ASSERT_EQ( "therem", groups[1]->name() );
     ASSERT_EQ( 1u, groups[1]->count() );
 }
 
@@ -230,7 +231,17 @@ TEST_F( VideoGroups, GetByName )
     group = ml->videoGroup( "otters" );
     ASSERT_EQ( nullptr, group );
 
-    group = ml->videoGroup( "Otter" );
+    group = ml->videoGroup( "otter" );
     ASSERT_NE( nullptr, group );
     ASSERT_EQ( 3u, group->count() );
+}
+
+TEST_F( VideoGroups, CaseInsensitive )
+{
+    ml->addMedia( "otters are cool.mkv", IMedia::Type::Video );
+    ml->addMedia( "OTTERS are fluffy.mkv", IMedia::Type::Video );
+    ml->addMedia( "OtTeRs are cute.mkv", IMedia::Type::Video );
+
+    auto groups = ml->videoGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
 }
