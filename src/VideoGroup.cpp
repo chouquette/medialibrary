@@ -106,6 +106,7 @@ std::string VideoGroup::schema( const std::string& tableName, uint32_t )
            " WHERE type = " +
                 std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
                                     IMedia::Type::Video ) ) +
+           " AND is_present != 0"
            " GROUP BY grp";
 
 }
