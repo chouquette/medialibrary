@@ -45,6 +45,8 @@ public:
     virtual const std::string& name() const override;
     virtual size_t count() const override;
     virtual Query<IMedia> media( const QueryParameters* params ) const override;
+    virtual Query<IMedia> searchMedia( const std::string& pattern,
+                                       const QueryParameters* params ) const override;
 
     static Query<IVideoGroup> listAll( MediaLibraryPtr ml,
                                        const QueryParameters* params );

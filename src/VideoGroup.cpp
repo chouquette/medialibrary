@@ -57,6 +57,14 @@ Query<IMedia> VideoGroup::media( const QueryParameters* params ) const
     return Media::fromGroup( m_ml, m_name, params );
 }
 
+Query<IMedia> VideoGroup::searchMedia( const std::string& pattern,
+                                       const QueryParameters* params ) const
+{
+    if ( pattern.size() < 3 )
+        return nullptr;
+    return Media::searchFromGroup( m_ml, m_name, pattern, params );
+}
+
 Query<IVideoGroup> VideoGroup::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;

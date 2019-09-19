@@ -47,6 +47,11 @@ public:
      * @brief media Returns a query object to fetch this group media
      */
     virtual Query<IMedia> media( const QueryParameters* params ) const = 0;
+    /**
+     * @brief media Returns a query object to search this group media
+     */
+    virtual Query<IMedia> searchMedia( const std::string& pattern,
+                                       const QueryParameters* params ) const = 0;
 };
 
 }

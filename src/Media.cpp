@@ -1271,6 +1271,20 @@ Query<IMedia> Media::fromGroup( MediaLibraryPtr ml, const std::string& name,
                                       name );
 }
 
+Query<IMedia> Media::searchFromGroup( MediaLibraryPtr ml, const std::string& groupName,
+                                      const std::string& pattern,
+                                      const QueryParameters* params )
+{
+    std::string req = "FROM " + Table::Name + " m ";
+    req += addRequestJoin( params, false, false );
+    req += " WHERE m.id_media IN (SELECT rowid FROM " + FtsTable::Name +
+                " WHERE " + FtsTable::Name + " MATCH ?)"
+           " AND m.is_present != 0"
+           " AND SUBSTR(title, 1, (SELECT video_groups_prefix_length FROM Settings)) = ?";
+    return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
+                                      pattern, groupName );
+}
+
 void Media::clearHistory( MediaLibraryPtr ml )
 {
     auto dbConn = ml->getConn();

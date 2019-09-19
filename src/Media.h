@@ -205,6 +205,10 @@ class Media : public IMedia,
         static Query<IMedia> fromGroup( MediaLibraryPtr ml,
                                         const std::string& name,
                                         const QueryParameters* params );
+        static Query<IMedia> searchFromGroup( MediaLibraryPtr ml,
+                                              const std::string& groupName,
+                                              const std::string& pattern,
+                                              const QueryParameters* params );
 
         static void clearHistory( MediaLibraryPtr ml );
         static void removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime );

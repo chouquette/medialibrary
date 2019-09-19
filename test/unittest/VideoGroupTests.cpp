@@ -176,6 +176,35 @@ TEST_F( VideoGroups, MediaPaging )
     ASSERT_EQ( 0u, media.size() );
 }
 
+TEST_F( VideoGroups, SearchMedia )
+{
+    ml->addMedia( "groupname foo.mkv", IMedia::Type::Video );
+    ml->addMedia( "groupname bar", IMedia::Type::Video );
+    ml->addMedia( "foo.avi", IMedia::Type::Video );
+    ml->addMedia( "bar.mkv", IMedia::Type::Video );
+
+    QueryParameters params;
+    params.sort = SortingCriteria::NbMedia;
+    params.desc = true;
+    auto groups = ml->videoGroups( &params )->all();
+    ASSERT_EQ( 3u, groups.size() );
+    auto group = groups[0];
+    ASSERT_EQ( "groupn", group->name() );
+    ASSERT_EQ( 2u, group->count() );
+
+    auto mediaQuery = group->searchMedia( "no", nullptr );
+    ASSERT_EQ( nullptr, mediaQuery );
+
+    mediaQuery = group->searchMedia( "foo", nullptr );
+    ASSERT_EQ( 1u, mediaQuery->count() );
+    auto media = mediaQuery->all();
+    ASSERT_EQ( 1u, media.size() );
+    ASSERT_EQ( "groupname foo.mkv", media[0]->title() );
+
+    mediaQuery = group->searchMedia( "plonkitiplonk", nullptr );
+    ASSERT_EQ( 0u, mediaQuery->count() );
+}
+
 TEST_F( VideoGroups, IgnorePrefix )
 {
     ml->addMedia( "The groupname.mkv", IMedia::Type::Video );
