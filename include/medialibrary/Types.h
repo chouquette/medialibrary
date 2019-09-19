@@ -79,6 +79,7 @@ using VideoTrackPtr = std::shared_ptr<IVideoTrack>;
 using DeviceListerPtr = std::shared_ptr<IDeviceLister>;
 using FolderPtr = std::shared_ptr<IFolder>;
 using SubtitleTrackPtr = std::shared_ptr<ISubtitleTrack>;
+using VideoGroupPtr = std::shared_ptr<IVideoGroup>;
 
 }
 
