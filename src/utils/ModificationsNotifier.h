@@ -44,23 +44,23 @@ public:
 
     void start();
     void notifyMediaCreation( MediaPtr media );
-    void notifyMediaModification( MediaPtr media );
+    void notifyMediaModification( int64_t media );
     void notifyMediaRemoval( int64_t media );
 
     void notifyArtistCreation( ArtistPtr artist );
-    void notifyArtistModification( ArtistPtr artist );
+    void notifyArtistModification( int64_t artist );
     void notifyArtistRemoval( int64_t artist );
 
     void notifyAlbumCreation( AlbumPtr album );
-    void notifyAlbumModification( AlbumPtr album );
+    void notifyAlbumModification( int64_t album );
     void notifyAlbumRemoval( int64_t albumId );
 
     void notifyPlaylistCreation( PlaylistPtr playlist );
-    void notifyPlaylistModification( PlaylistPtr playlist );
+    void notifyPlaylistModification( int64_t playlist );
     void notifyPlaylistRemoval( int64_t playlistId );
 
     void notifyGenreCreation( GenrePtr genre );
-    void notifyGenreModification( GenrePtr genre );
+    void notifyGenreModification( int64_t genre );
     void notifyGenreRemoval( int64_t genreId );
 
     void notifyThumbnailRemoval( int64_t thumbnailId );
@@ -85,7 +85,7 @@ private:
     struct Queue
     {
         std::vector<std::shared_ptr<T>> added;
-        std::vector<std::shared_ptr<T>> modified;
+        std::vector<int64_t> modified;
         std::vector<int64_t> removed;
         std::chrono::time_point<std::chrono::steady_clock> timeout;
     };
@@ -118,7 +118,7 @@ private:
     }
 
     template <typename T>
-    void notifyModification( std::shared_ptr<T> entity, Queue<T>& queue )
+    void notifyModification( int64_t entity, Queue<T>& queue )
     {
         std::lock_guard<compat::Mutex> lock( m_lock );
         queue.modified.push_back( std::move( entity ) );

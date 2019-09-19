@@ -32,23 +32,23 @@ namespace mock
 class NoopCallback : public IMediaLibraryCb
 {
     virtual void onMediaAdded( std::vector<MediaPtr> ) override {}
-    virtual void onMediaModified( std::vector<MediaPtr> ) override {}
+    virtual void onMediaModified( std::vector<int64_t> ) override {}
     virtual void onMediaDeleted( std::vector<int64_t> ) override {}
     virtual void onDiscoveryStarted(const std::string&) override {}
     virtual void onDiscoveryProgress(const std::string&) override {}
     virtual void onDiscoveryCompleted( const std::string&, bool ) override {}
     virtual void onArtistsAdded( std::vector<ArtistPtr> ) override {}
-    virtual void onArtistsModified( std::vector<ArtistPtr> ) override {}
+    virtual void onArtistsModified( std::vector<int64_t> ) override {}
     virtual void onArtistsDeleted( std::vector<int64_t> ) override {}
     virtual void onAlbumsAdded( std::vector<AlbumPtr> ) override {}
-    virtual void onAlbumsModified( std::vector<AlbumPtr> ) override {}
+    virtual void onAlbumsModified( std::vector<int64_t> ) override {}
     virtual void onAlbumsDeleted( std::vector<int64_t> ) override {}
     virtual void onParsingStatsUpdated( uint32_t ) override {}
     virtual void onPlaylistsAdded( std::vector<PlaylistPtr> ) override {}
-    virtual void onPlaylistsModified( std::vector<PlaylistPtr> ) override {}
+    virtual void onPlaylistsModified( std::vector<int64_t> ) override {}
     virtual void onPlaylistsDeleted( std::vector<int64_t> ) override {}
     virtual void onGenresAdded( std::vector<GenrePtr> ) override {}
-    virtual void onGenresModified( std::vector<GenrePtr> ) override {}
+    virtual void onGenresModified( std::vector<int64_t> ) override {}
     virtual void onGenresDeleted( std::vector<int64_t> ) override {}
     virtual void onReloadStarted( const std::string& ) override {}
     virtual void onReloadCompleted( const std::string&, bool ) override {}

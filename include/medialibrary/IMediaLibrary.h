@@ -132,24 +132,24 @@ public:
     /**
      * @brief onMediaUpdated Will be called when a file metadata gets updated.
      */
-    virtual void onMediaModified( std::vector<MediaPtr> media ) = 0;
+    virtual void onMediaModified( std::vector<int64_t> media ) = 0;
 
     virtual void onMediaDeleted( std::vector<int64_t> mediaIds ) = 0;
 
     virtual void onArtistsAdded( std::vector<ArtistPtr> artists ) = 0;
-    virtual void onArtistsModified( std::vector<ArtistPtr> artists ) = 0;
+    virtual void onArtistsModified( std::vector<int64_t> artists ) = 0;
     virtual void onArtistsDeleted( std::vector<int64_t> artistsIds ) = 0;
 
     virtual void onAlbumsAdded( std::vector<AlbumPtr> albums ) = 0;
-    virtual void onAlbumsModified( std::vector<AlbumPtr> albums ) = 0;
+    virtual void onAlbumsModified( std::vector<int64_t> albums ) = 0;
     virtual void onAlbumsDeleted( std::vector<int64_t> albumsIds ) = 0;
 
     virtual void onPlaylistsAdded( std::vector<PlaylistPtr> playlists ) = 0;
-    virtual void onPlaylistsModified( std::vector<PlaylistPtr> playlists ) = 0;
+    virtual void onPlaylistsModified( std::vector<int64_t> playlists ) = 0;
     virtual void onPlaylistsDeleted( std::vector<int64_t> playlistIds ) = 0;
 
     virtual void onGenresAdded( std::vector<GenrePtr> genres ) = 0;
-    virtual void onGenresModified( std::vector<GenrePtr> genres ) = 0;
+    virtual void onGenresModified( std::vector<int64_t> genres ) = 0;
     virtual void onGenresDeleted( std::vector<int64_t> genreIds ) = 0;
 
     /**

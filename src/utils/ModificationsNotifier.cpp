@@ -63,7 +63,7 @@ void ModificationNotifier::notifyMediaCreation( MediaPtr media )
     notifyCreation( std::move( media ), m_media );
 }
 
-void ModificationNotifier::notifyMediaModification( MediaPtr media )
+void ModificationNotifier::notifyMediaModification( int64_t media )
 {
     notifyModification( std::move( media ), m_media );
 }
@@ -78,7 +78,7 @@ void ModificationNotifier::notifyArtistCreation( ArtistPtr artist )
     notifyCreation( std::move( artist ), m_artists );
 }
 
-void ModificationNotifier::notifyArtistModification( ArtistPtr artist )
+void ModificationNotifier::notifyArtistModification( int64_t artist )
 {
     notifyModification( std::move( artist ), m_artists );
 }
@@ -93,7 +93,7 @@ void ModificationNotifier::notifyAlbumCreation( AlbumPtr album )
     notifyCreation( std::move( album ), m_albums );
 }
 
-void ModificationNotifier::notifyAlbumModification( AlbumPtr album )
+void ModificationNotifier::notifyAlbumModification( int64_t album )
 {
     notifyModification( std::move( album ), m_albums );
 }
@@ -108,7 +108,7 @@ void ModificationNotifier::notifyPlaylistCreation( PlaylistPtr playlist )
     notifyCreation( std::move( playlist ), m_playlists );
 }
 
-void ModificationNotifier::notifyPlaylistModification( PlaylistPtr playlist )
+void ModificationNotifier::notifyPlaylistModification( int64_t playlist )
 {
     notifyModification( std::move( playlist ), m_playlists );
 }
@@ -123,7 +123,7 @@ void ModificationNotifier::notifyGenreCreation( GenrePtr genre )
     notifyCreation( std::move( genre ), m_genres );
 }
 
-void ModificationNotifier::notifyGenreModification( GenrePtr genre )
+void ModificationNotifier::notifyGenreModification( int64_t genre )
 {
     notifyModification( std::move( genre ), m_genres );
 }
