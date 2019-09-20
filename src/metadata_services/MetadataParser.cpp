@@ -128,6 +128,7 @@ Status MetadataAnalyzer::run( IItem& item )
     }
 
     bool isAudio;
+    bool isFileModified = false;
 
     if ( item.file() == nullptr )
     {
@@ -159,6 +160,16 @@ Status MetadataAnalyzer::run( IItem& item )
             createTracks( static_cast<Media&>( *item.media() ), item.tracks() );
             t->commit();
         }
+        /* Best effort attempt to detect that a file changed while a rescan
+         * was triggered. In this case, we want to avoid avoid creating a refresh
+         * task in the future, since we're about to rescan it.
+         * However, if we were to update the modification date now, a parsing
+         * failure would prevent this file for being refreshed, so we postpone
+         * the actual modification in db
+         */
+        if ( item.file()->lastModificationDate() !=
+             item.fileFs()->lastModificationDate() )
+            isFileModified = true;
         isAudio = item.media()->type() == IMedia::Type::Audio;
     }
     auto media = std::static_pointer_cast<Media>( item.media() );
@@ -174,6 +185,12 @@ Status MetadataAnalyzer::run( IItem& item )
             return Status::Fatal;
     }
 
+    if ( isFileModified == true )
+    {
+        auto file = static_cast<File*>( item.file().get() );
+        file->updateFsInfo( item.fileFs()->lastModificationDate(),
+                            item.fileFs()->size() );
+    }
     m_notifier->notifyMediaModification( media );
     return Status::Success;
 }
