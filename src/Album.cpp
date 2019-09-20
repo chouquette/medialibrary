@@ -401,7 +401,7 @@ std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsig
     // the first track in this album
     if ( ( m_tracks.empty() == true && m_nbTracks == 1 ) ||
          ( m_tracks.empty() == false && m_nbTracks > 1 ) )
-        m_tracks.push_back( media );
+        m_tracks.push_back( std::move( media ) );
     return track;
 }
 
