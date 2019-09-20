@@ -282,6 +282,12 @@ TEST_F( VideoGroups, CaseInsensitive )
 
     group = ml->videoGroup( "otters" );
     ASSERT_NE( nullptr, group );
+
+    // Now ensure that we are capable of fetching the media
+    auto mediaQuery = group->media( nullptr );
+    ASSERT_EQ( 3u, mediaQuery->count() );
+    auto media = mediaQuery->all();
+    ASSERT_EQ( 3u, media.size() );
 }
 
 TEST_F( VideoGroups, UseMediaName )
