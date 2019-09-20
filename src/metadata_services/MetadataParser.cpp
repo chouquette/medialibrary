@@ -107,7 +107,7 @@ Status MetadataAnalyzer::run( IItem& item )
         std::tie( success, needRescan ) = refreshFile( item );
         if ( success == false )
             return Status::Fatal;
-        auto file = std::static_pointer_cast<File>( item.file() );
+        auto file = static_cast<File*>( item.file().get() );
         // Now that the refresh request was processed, we can update the last
         // modification date in database
         file->updateFsInfo( item.fileFs()->lastModificationDate(),
