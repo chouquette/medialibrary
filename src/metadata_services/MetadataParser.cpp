@@ -596,16 +596,16 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
                 auto albumTrack = std::static_pointer_cast<AlbumTrack>( media->albumTrack() );
                 if ( albumTrack == nullptr )
                 {
-                    assert( false );
                     LOG_ERROR( "Can't fetch album track associated with media ", media->id() );
+                    assert( false );
                     break;
                 }
                 auto album = std::static_pointer_cast<Album>( albumTrack->album() );
                 if ( album == nullptr )
                 {
-                    assert( false );
                     LOG_ERROR( "Can't fetch album associated to album track ",
                                albumTrack->id(), "(media ", media->id(), ")" );
+                    assert( false );
                 }
                 // No need to decrement the number of tracks for the artist
                 // Removing the AlbumTrack will cause the 'delete_album_track'
