@@ -1320,4 +1320,12 @@ void Media::removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime
                                   IMedia::Type::External, IMedia::Type::Stream );
 }
 
+void Media::resetSubTypes( MediaLibraryPtr ml )
+{
+    const std::string req = "UPDATE " + Media::Table::Name +
+            " SET subtype = ? WHERE type = ? OR type = ?";
+    sqlite::Tools::executeUpdate( ml->getConn(), req, SubType::Unknown,
+                                  Type::Video, Type::Audio );
+}
+
 }

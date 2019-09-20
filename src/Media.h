@@ -213,6 +213,16 @@ class Media : public IMedia,
         static void clearHistory( MediaLibraryPtr ml );
         static void removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime );
 
+        /**
+         * @brief resetSubTypes Reset all parsed media subtypes
+         *
+         * This is meant to be invoked as part of a rescan setup, so that the media
+         * aren't tagged as an albumtrack/showepisode/movie, since the associated
+         * entities will have been deleted
+         * This will only affect media with a `Type` of Video/Audio
+         */
+        static void resetSubTypes( MediaLibraryPtr ml );
+
 private:
         static std::string addRequestJoin(const QueryParameters* params, bool forceFile , bool forceAlbumTrack);
         static std::string sortRequest( const QueryParameters* params );

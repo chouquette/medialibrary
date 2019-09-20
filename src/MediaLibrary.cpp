@@ -1994,6 +1994,7 @@ void MediaLibrary::forceRescan()
         parser::Task::resetParsing( this );
         Artist::createDefaultArtists( getConn() );
         Thumbnail::deleteAll( this );
+        Media::resetSubTypes( this );
         t->commit();
     }
     removeThumbnails();
