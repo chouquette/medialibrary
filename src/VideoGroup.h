@@ -58,6 +58,7 @@ private:
     MediaLibraryPtr m_ml;
     std::string m_name;
     size_t m_count;
+    std::string m_mediaName;
 };
 
 }

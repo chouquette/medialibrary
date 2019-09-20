@@ -38,12 +38,16 @@ VideoGroup::VideoGroup( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
     , m_name( row.extract<decltype(m_name)>() )
     , m_count( row.extract<decltype(m_count)>() )
+    , m_mediaName( row.extract<decltype(m_mediaName)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
 
 const std::string& VideoGroup::name() const
 {
+    if ( m_count == 1 )
+        return m_mediaName;
+    assert( m_mediaName.empty() == true );
     return m_name;
 }
 
@@ -94,7 +98,7 @@ Query<IVideoGroup> VideoGroup::listAll( MediaLibraryPtr ml, const QueryParameter
 VideoGroupPtr VideoGroup::fromName( MediaLibraryPtr ml, const std::string& name )
 {
     const std::string req = "SELECT * FROM " + Table::Name +
-            " WHERE grp = LOWER(?)";
+            " WHERE grp = LOWER(?1) OR media_title = ?1";
     return fetch( ml, req, name );
 }
 
@@ -109,7 +113,8 @@ std::string VideoGroup::schema( const std::string& tableName, uint32_t )
                         "ELSE title "
                     "END, "
                 "1, (SELECT video_groups_prefix_length FROM Settings)))"
-           " as grp, COUNT() as cnt"
+           " as grp, COUNT() as cnt,"
+           " CASE WHEN COUNT() = 1 THEN title ELSE NULL END as media_title"
            " FROM Media "
            " WHERE type = " +
                 std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(

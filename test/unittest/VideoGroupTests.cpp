@@ -42,7 +42,7 @@ TEST_F( VideoGroups, List )
     auto groups = ml->videoGroups( nullptr )->all();
     // Default sorting order is alpha, so expect the «lonely» group first
     ASSERT_EQ( 2u, groups.size() );
-    ASSERT_EQ( "lonely", groups[0]->name() );
+    ASSERT_EQ( "lonelyotter.mkv", groups[0]->name() );
     ASSERT_EQ( "video.", groups[1]->name() );
 
     ASSERT_EQ( 1u, groups[0]->count() );
@@ -61,7 +61,7 @@ TEST_F( VideoGroups, Paging )
 
     auto gs = groupsQuery->items( 1, 0 );
     ASSERT_EQ( 1u, gs.size() );
-    ASSERT_EQ( "lonely", gs[0]->name() );
+    ASSERT_EQ( "lonelyotter.mkv", gs[0]->name() );
 
     gs = groupsQuery->items( 1, 1 );
     ASSERT_EQ( 1u, gs.size() );
@@ -220,7 +220,7 @@ TEST_F( VideoGroups, IgnorePrefix )
     ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( "groupn", groups[0]->name() );
     ASSERT_EQ( 4u, groups[0]->count() );
-    ASSERT_EQ( "therem", groups[1]->name() );
+    ASSERT_EQ( "Theremin.mkv", groups[1]->name() );
     ASSERT_EQ( 1u, groups[1]->count() );
 }
 
@@ -273,4 +273,18 @@ TEST_F( VideoGroups, CaseInsensitive )
 
     auto groups = ml->videoGroups( nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
+}
+
+TEST_F( VideoGroups, UseMediaName )
+{
+    /* Check that a group with a single media reports the media title as its name */
+    auto m = ml->addMedia( "otters otters otters.mkv", IMedia::Type::Video );
+    auto groups = ml->videoGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    ASSERT_EQ( m->title(), groups[0]->name() );
+
+    auto group = ml->videoGroup( m->title() );
+    ASSERT_NE( nullptr, group );
+    ASSERT_EQ( 1u, group->count() );
+    ASSERT_EQ( m->title(), group->name() );
 }
