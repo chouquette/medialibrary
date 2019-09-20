@@ -449,9 +449,16 @@ void Task::resetRetryCount( MediaLibraryPtr ml )
 
 void Task::resetParsing( MediaLibraryPtr ml )
 {
-    static const std::string req = "UPDATE " + Task::Table::Name + " SET "
+    assert( sqlite::Transaction::transactionInProgress() == true );
+    static const std::string resetReq = "UPDATE " + Task::Table::Name + " SET "
             "retry_count = 0, step = ?";
-    sqlite::Tools::executeUpdate( ml->getConn(), req, Step::None );
+    /* We also want to delete the refresh tasks, since we are going to rescan
+     * all existing media anyway
+     */
+    static const std::string deleteRefreshReq = "DELETE FROM " + Task::Table::Name +
+            " WHERE type = ?";
+    sqlite::Tools::executeUpdate( ml->getConn(), resetReq, Step::None );
+    sqlite::Tools::executeDelete( ml->getConn(), deleteRefreshReq, Type::Refresh );
 }
 
 std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
