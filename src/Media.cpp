@@ -1284,7 +1284,8 @@ Query<IMedia> Media::searchFromGroup( MediaLibraryPtr ml, const std::string& gro
            " AND LOWER(SUBSTR(title, 1,"
            " (SELECT video_groups_prefix_length FROM Settings))) = ?";
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
-                                      pattern, groupName );
+                                      sqlite::Tools::sanitizePattern( pattern ),
+                                      groupName );
 }
 
 void Media::clearHistory( MediaLibraryPtr ml )

@@ -182,12 +182,13 @@ TEST_F( VideoGroups, SearchMedia )
     ml->addMedia( "groupname bar", IMedia::Type::Video );
     ml->addMedia( "foo.avi", IMedia::Type::Video );
     ml->addMedia( "bar.mkv", IMedia::Type::Video );
+    ml->addMedia( "12345678.mkv", IMedia::Type::Video );
 
     QueryParameters params;
     params.sort = SortingCriteria::NbMedia;
     params.desc = true;
     auto groups = ml->videoGroups( &params )->all();
-    ASSERT_EQ( 3u, groups.size() );
+    ASSERT_EQ( 4u, groups.size() );
     auto group = groups[0];
     ASSERT_EQ( "groupn", group->name() );
     ASSERT_EQ( 2u, group->count() );
@@ -203,6 +204,15 @@ TEST_F( VideoGroups, SearchMedia )
 
     mediaQuery = group->searchMedia( "plonkitiplonk", nullptr );
     ASSERT_EQ( 0u, mediaQuery->count() );
+
+    // Search for a numerical pattern, but also a partial word (the previous
+    // tests were only testing for a full word match)
+    group = ml->videoGroup( "123456" );
+    ASSERT_NE( nullptr, group );
+    mediaQuery = group->searchMedia( "123456", nullptr );
+    ASSERT_EQ( 1u, mediaQuery->count() );
+    media = mediaQuery->all();
+    ASSERT_EQ( 1u, media.size() );
 }
 
 TEST_F( VideoGroups, IgnorePrefix )
