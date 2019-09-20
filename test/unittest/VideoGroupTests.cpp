@@ -273,6 +273,15 @@ TEST_F( VideoGroups, CaseInsensitive )
 
     auto groups = ml->videoGroups( nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
+
+    auto group = ml->videoGroup( "OTTERS" );
+    ASSERT_NE( nullptr, group );
+
+    group = ml->videoGroup( "OTtERs" );
+    ASSERT_NE( nullptr, group );
+
+    group = ml->videoGroup( "otters" );
+    ASSERT_NE( nullptr, group );
 }
 
 TEST_F( VideoGroups, UseMediaName )
