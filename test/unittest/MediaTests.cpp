@@ -485,6 +485,35 @@ TEST_F( Medias, SortByAlpha )
     ASSERT_EQ( m1->id(), media[2]->id() );
 }
 
+TEST_F( Medias, SortByReleaseDate )
+{
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3", Media::Type::Audio ) );
+    m1->setReleaseDate( 1111 );
+    m1->save();
+
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3", Media::Type::Audio ) );
+    m2->setReleaseDate( 3333 );
+    m2->save();
+
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3", Media::Type::Audio ) );
+    m3->setReleaseDate( 2222 );
+    m3->save();
+
+    QueryParameters params { SortingCriteria::ReleaseDate, false };
+    auto media = ml->audioFiles( &params )->all();
+    ASSERT_EQ( 3u, media.size() );
+    ASSERT_EQ( m1->id(), media[0]->id() );
+    ASSERT_EQ( m3->id(), media[1]->id() );
+    ASSERT_EQ( m2->id(), media[2]->id() );
+
+    params.desc = true;
+    media = ml->audioFiles( &params )->all();
+    ASSERT_EQ( 3u, media.size() );
+    ASSERT_EQ( m2->id(), media[0]->id() );
+    ASSERT_EQ( m3->id(), media[1]->id() );
+    ASSERT_EQ( m1->id(), media[2]->id() );
+}
+
 TEST_F( Medias, SortByLastModifDate )
 {
     auto file1 = std::make_shared<mock::NoopFile>( "media.mkv" );
