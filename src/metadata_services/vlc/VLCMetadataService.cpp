@@ -70,15 +70,23 @@ Status VLCMetadataService::run( IItem& item )
         m_cond.notify_all();
     });
     {
-        std::unique_lock<compat::Mutex> lock( m_mutex );
-        m_currentMedia = vlcMedia;
+        {
+            // We need m_currentMedia to be updated from a locked context
+            // but we also need parseWithOption to be called with the lock
+            // unlocked, to avoid a potential lock inversion with VLC's internal
+            // mutexes.
+            std::unique_lock<compat::Mutex> lock( m_mutex );
+            m_currentMedia = vlcMedia;
+        }
 
         if ( vlcMedia.parseWithOptions( VLC::Media::ParseFlags::Local | VLC::Media::ParseFlags::Network |
-                                             VLC::Media::ParseFlags::FetchLocal, 5000 ) == false )
+                                        VLC::Media::ParseFlags::FetchLocal, 5000 ) == false )
         {
+            std::unique_lock<compat::Mutex> lock( m_mutex );
             m_currentMedia = VLC::Media{};
             return Status::Fatal;
         }
+        std::unique_lock<compat::Mutex> lock( m_mutex );
         m_cond.wait( lock, [&done]() {
             return done == true;
         });
