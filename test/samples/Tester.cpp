@@ -42,12 +42,15 @@ MockCallback::MockCallback()
     // Start locked. The locked will be released when waiting for parsing to be completed
     m_discoveryCompleted = false;
     m_done = false;
-    m_parsingMutex.lock();
 }
 
-bool MockCallback::waitForParsingComplete()
+std::unique_lock<compat::Mutex> MockCallback::lock()
 {
-    std::unique_lock<compat::Mutex> lock( m_parsingMutex, std::adopt_lock );
+    return std::unique_lock<compat::Mutex>{ m_parsingMutex };
+}
+
+bool MockCallback::waitForParsingComplete( std::unique_lock<compat::Mutex>& lock )
+{
     m_done = false;
     m_discoveryCompleted = false;
     // Wait for a while, generating snapshots can be heavy...
@@ -108,7 +111,6 @@ void MockCallback::onMediaThumbnailReady( MediaPtr media, ThumbnailSizeType,
 
 MockResumeCallback::MockResumeCallback()
 {
-    m_discoveryMutex.lock();
 }
 
 void MockResumeCallback::onDiscoveryCompleted( const std::string& entryPoint, bool )
@@ -116,34 +118,31 @@ void MockResumeCallback::onDiscoveryCompleted( const std::string& entryPoint, bo
     if ( entryPoint.empty() == true )
         return;
 
-    std::lock_guard<compat::Mutex> lock( m_discoveryMutex );
+    std::lock_guard<compat::Mutex> lock( m_parsingMutex );
     m_discoveryCompleted = true;
     m_discoveryCompletedVar.notify_all();
 }
 
 void MockResumeCallback::reinit()
 {
-    m_parsingMutex.lock();
     m_discoveryCompleted = true;
     m_done = false;
 }
 
-bool MockResumeCallback::waitForDiscoveryComplete()
+bool MockResumeCallback::waitForDiscoveryComplete( std::unique_lock<compat::Mutex>& lock )
 {
     assert( m_discoveryCompleted == false );
-    std::unique_lock<compat::Mutex> lock( m_discoveryMutex, std::adopt_lock );
     // Wait for a while, generating snapshots can be heavy...
     return m_discoveryCompletedVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
         return m_discoveryCompleted;
     });
 }
 
-bool MockResumeCallback::waitForParsingComplete()
+bool MockResumeCallback::waitForParsingComplete( std::unique_lock<compat::Mutex>& lock )
 {
     // Reimplement without checking for discovery complete. This class is meant to be used
     // in 2 steps: waiting for discovery completed, then for parsing completed
     assert( m_discoveryCompleted == true );
-    std::unique_lock<compat::Mutex> lock( m_parsingMutex, std::adopt_lock );
     m_done = false;
     // Wait for a while, generating snapshots can be heavy...
     return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {

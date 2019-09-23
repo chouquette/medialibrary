@@ -45,11 +45,12 @@ class MockCallback : public mock::NoopCallback
 {
 public:
     MockCallback();
-    virtual bool waitForParsingComplete();
-    virtual bool waitForDiscoveryComplete() { return true; }
+    virtual bool waitForParsingComplete( std::unique_lock<compat::Mutex>& lock );
+    virtual bool waitForDiscoveryComplete( std::unique_lock<compat::Mutex>& ) { return true; }
     virtual void reinit() {}
     void prepareWaitForThumbnail( MediaPtr media );
     bool waitForThumbnail();
+    std::unique_lock<compat::Mutex> lock();
 protected:
     virtual void onDiscoveryCompleted( const std::string&, bool ) override;
     virtual void onParsingStatsUpdated(uint32_t percent) override;
@@ -81,14 +82,13 @@ class MockResumeCallback : public MockCallback
 {
 public:
     MockResumeCallback();
-    virtual bool waitForDiscoveryComplete() override;
-    virtual bool waitForParsingComplete() override;
+    virtual bool waitForDiscoveryComplete( std::unique_lock<compat::Mutex>& lock ) override;
+    virtual bool waitForParsingComplete( std::unique_lock<compat::Mutex>& lock ) override;
     virtual void onDiscoveryCompleted( const std::string& entryPoint, bool ) override;
     virtual void reinit() override;
 
 private:
     compat::ConditionVariable m_discoveryCompletedVar;
-    compat::Mutex m_discoveryMutex;
 };
 
 struct TestParams

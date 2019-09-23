@@ -41,13 +41,11 @@ public:
     // event and just ignore it.
     void prepareForPlaylistReload()
     {
-        m_parsingMutex.lock();
         m_discoveryCompleted = true;
     }
 
-    bool waitForPlaylistReload()
+    bool waitForPlaylistReload( std::unique_lock<compat::Mutex>& lock )
     {
-        std::unique_lock<compat::Mutex> lock( m_parsingMutex, std::adopt_lock );
         m_done = false;
         // Wait for a while, generating snapshots can be heavy...
         return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
@@ -86,13 +84,14 @@ protected:
 
 TEST_F( MiscTests, ExportRestorePlaylist )
 {
+    auto lock = m_cb->lock();
     auto res = m_ml->start();
     ASSERT_TRUE( res );
     auto samplesFolder = std::string{ SRC_DIR "/test/samples/samples/playlist/tracks" };
     ASSERT_TRUE( utils::fs::isDirectory( samplesFolder ) );
     samplesFolder = utils::fs::toAbsolute( samplesFolder );
     m_ml->discover( utils::file::toMrl( samplesFolder ) );
-    res = m_cb->waitForParsingComplete();
+    res = m_cb->waitForParsingComplete( lock );
     ASSERT_TRUE( res );
     // Now we should have discovered some media
 
@@ -125,7 +124,7 @@ TEST_F( MiscTests, ExportRestorePlaylist )
 
     m_ml->resumeBackgroundOperations();
 
-    res = m_cb->waitForPlaylistReload();
+    res = m_cb->waitForPlaylistReload( lock );
     ASSERT_TRUE( res );
 
     playlists = m_ml->playlists( nullptr )->all();

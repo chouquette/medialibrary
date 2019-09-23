@@ -96,6 +96,7 @@ TEST_P( Tests, Parse )
 
     ASSERT_TRUE( doc.HasMember( "input" ) );
     const auto& input = doc["input"];
+    auto lock = m_cb->lock();
     for ( auto i = 0u; i < input.Size(); ++i )
     {
         // Quick and dirty check to ensure we're discovering something that exists
@@ -105,7 +106,7 @@ TEST_P( Tests, Parse )
 
         m_ml->discover( utils::file::toMrl( samplesDir ) );
     }
-    ASSERT_TRUE( m_cb->waitForParsingComplete() );
+    ASSERT_TRUE( m_cb->waitForParsingComplete( lock ) );
 
     runChecks( doc );
 }
@@ -122,9 +123,9 @@ TEST_P( ResumeTests, Parse )
     buff[ret] = 0;
     rapidjson::Document doc;
     doc.Parse( buff );
-
     ASSERT_TRUE( doc.HasMember( "input" ) );
     const auto& input = doc["input"];
+    auto lock = m_cb->lock();
     for ( auto i = 0u; i < input.Size(); ++i )
     {
         // Quick and dirty check to ensure we're discovering something that exists
@@ -134,10 +135,10 @@ TEST_P( ResumeTests, Parse )
 
         m_ml->discover( utils::file::toMrl( samplesDir ) );
     }
-    ASSERT_TRUE( m_cb->waitForDiscoveryComplete() );
+    ASSERT_TRUE( m_cb->waitForDiscoveryComplete( lock ) );
     auto testMl = static_cast<MediaLibraryResumeTest*>( m_ml.get() );
     testMl->forceParserStart();
-    ASSERT_TRUE( m_cb->waitForParsingComplete() );
+    ASSERT_TRUE( m_cb->waitForParsingComplete( lock ) );
 
     runChecks( doc );
 }
@@ -157,6 +158,7 @@ TEST_P( ResumeTests, Rescan )
 
     ASSERT_TRUE( doc.HasMember( "input" ) );
     const auto& input = doc["input"];
+    auto lock = m_cb->lock();
     for ( auto i = 0u; i < input.Size(); ++i )
     {
         // Quick and dirty check to ensure we're discovering something that exists
@@ -166,14 +168,14 @@ TEST_P( ResumeTests, Rescan )
 
         m_ml->discover( utils::file::toMrl( samplesDir ) );
     }
-    ASSERT_TRUE( m_cb->waitForDiscoveryComplete() );
+    ASSERT_TRUE( m_cb->waitForDiscoveryComplete( lock ) );
     auto testMl = static_cast<MediaLibraryResumeTest*>( m_ml.get() );
     testMl->forceParserStart();
-    ASSERT_TRUE( m_cb->waitForParsingComplete() );
+    ASSERT_TRUE( m_cb->waitForParsingComplete( lock ) );
 
     m_cb->reinit();
     m_ml->forceRescan();
-    ASSERT_TRUE( m_cb->waitForParsingComplete() );
+    ASSERT_TRUE( m_cb->waitForParsingComplete( lock ) );
 
     runChecks( doc );
 }
@@ -193,6 +195,7 @@ TEST_P( RefreshTests, Refresh )
 
     ASSERT_TRUE( doc.HasMember( "input" ) );
     const auto& input = doc["input"];
+    auto lock = m_cb->lock();
     for ( auto i = 0u; i < input.Size(); ++i )
     {
         // Quick and dirty check to ensure we're discovering something that exists
@@ -202,15 +205,15 @@ TEST_P( RefreshTests, Refresh )
 
         m_ml->discover( utils::file::toMrl( samplesDir ) );
     }
-    ASSERT_TRUE( m_cb->waitForDiscoveryComplete() );
-    ASSERT_TRUE( m_cb->waitForParsingComplete() );
+    ASSERT_TRUE( m_cb->waitForDiscoveryComplete( lock ) );
+    ASSERT_TRUE( m_cb->waitForParsingComplete( lock ) );
 
     runChecks( doc );
 
     m_cb->reinit();
     forceRefresh();
 
-    ASSERT_TRUE( m_cb->waitForParsingComplete() );
+    ASSERT_TRUE( m_cb->waitForParsingComplete( lock ) );
 
     runChecks( doc );
 }
@@ -231,6 +234,7 @@ TEST_P( ReducedTests, OverrideExternalMedia )
     ASSERT_TRUE( doc.HasMember( "input" ) );
     const auto& input = doc["input"];
     auto nbMedia = 0u;
+    auto lock = m_cb->lock();
     for ( auto i = 0u; i < input.Size(); ++i )
     {
         // Quick and dirty check to ensure we're discovering something that exists
@@ -258,7 +262,7 @@ TEST_P( ReducedTests, OverrideExternalMedia )
     auto folders = m_ml->folders( IMedia::Type::Unknown )->all();
     ASSERT_EQ( 0u, folders.size() );
 
-    ASSERT_TRUE( m_cb->waitForParsingComplete() );
+    ASSERT_TRUE( m_cb->waitForParsingComplete( lock ) );
 
     for ( auto i = 1u; i <= nbMedia; ++i )
     {
