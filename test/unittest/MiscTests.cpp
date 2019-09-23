@@ -38,8 +38,6 @@
 
 namespace
 {
-    auto constexpr NbTriggers = 42u;
-    auto constexpr NbIndexes = 19u;
     const std::vector<const char*> expectedTriggers{
         "add_album_track", "auto_delete_album_thumbnail",
         "auto_delete_artist_thumbnail", "auto_delete_media_thumbnail",
