@@ -12,7 +12,7 @@ linux:
       - make -j4
       - make -j4 check
       - ./unittest
-      - ./samples -vv
+      - ./samples
 
 win32:
     image: registry.videolan.org/medialibrary-win32:20190923112742
@@ -28,7 +28,7 @@ win32:
       - cp /prefix/dll/libvlccore.dll .
       - ln -s /prefix/lib/vlc/plugins/ .
       - wine unittest.exe
-      - wine samples.exe -vv
+      - wine samples.exe
 
 win64:
     image: registry.videolan.org/medialibrary-win64:20190923114812
@@ -44,7 +44,7 @@ win64:
       - cp /prefix/dll/libvlccore.dll .
       - ln -s /prefix/lib/vlc/plugins/ .
       - wine unittest.exe
-      - wine samples.exe -vv
+      - wine samples.exe
 
 coverage:
     image: registry.videolan.org/medialibrary:20190531150343
@@ -86,4 +86,4 @@ asan-ubsan:
       - make -j4
       - make -j4 check
       - ./unittest
-      - ./samples -vv
+      - ./samples
