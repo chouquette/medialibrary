@@ -66,12 +66,11 @@ void Worker::resume()
 
 void Worker::signalStop()
 {
-    if ( m_thread.joinable() )
     {
         std::lock_guard<compat::Mutex> lock( m_lock );
         m_stopParser = true;
-        m_cond.notify_all();
     }
+    m_cond.notify_all();
     m_service->stop();
 }
 
