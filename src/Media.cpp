@@ -1261,9 +1261,10 @@ Query<IMedia> Media::fromVideoGroup( MediaLibraryPtr ml, const std::string& name
     req += addRequestJoin( params, false, false );
     req += " WHERE LOWER(SUBSTR(title, 1, "
            " (SELECT video_groups_prefix_length FROM Settings))) = ?"
-           " AND m.is_present != 0";
+           " AND m.is_present != 0"
+           " AND m.type = ?";
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
-                                      name );
+                                      name, IMedia::Type::Video );
 }
 
 Query<IMedia> Media::searchFromVideoGroup( MediaLibraryPtr ml, const std::string& groupName,
@@ -1275,11 +1276,12 @@ Query<IMedia> Media::searchFromVideoGroup( MediaLibraryPtr ml, const std::string
     req += " WHERE m.id_media IN (SELECT rowid FROM " + FtsTable::Name +
                 " WHERE " + FtsTable::Name + " MATCH ?)"
            " AND m.is_present != 0"
+           " AND m.type = ?"
            " AND LOWER(SUBSTR(title, 1,"
            " (SELECT video_groups_prefix_length FROM Settings))) = ?";
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
-                                      groupName );
+                                      IMedia::Type::Video, groupName );
 }
 
 void Media::clearHistory( MediaLibraryPtr ml )

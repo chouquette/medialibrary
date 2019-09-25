@@ -31,6 +31,13 @@
 
 class VideoGroups : public Tests
 {
+    virtual void SetUp() override
+    {
+        Tests::SetUp();
+        ml->addMedia( "otters are fluffy.mp3", IMedia::Type::Audio );
+        ml->addMedia( "the groupname.mp3", IMedia::Type::Audio );
+        ml->addMedia( "lonelyotter.mp3", IMedia::Type::Audio );
+    }
 };
 
 TEST_F( VideoGroups, List )
