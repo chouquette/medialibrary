@@ -349,8 +349,10 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
             break;
         if ( m_probe->proceedOnFile( *fileFs ) == false )
             continue;
-        auto it = std::find_if( begin( files ), end( files ), [fileFs](const std::shared_ptr<File>& f) {
-            return f->mrl() == fileFs->mrl();
+        auto it = std::find_if( begin( files ), end( files ),
+                                [fileFs](const std::shared_ptr<File>& f) {
+            auto fileName = utils::file::fileName( f->mrl() );
+            return fileName == fileFs->name();
         });
         if ( it == end( files ) || m_probe->forceFileRefresh() == true )
         {
