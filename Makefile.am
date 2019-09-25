@@ -111,6 +111,7 @@ libmedialibrary_la_SOURCES = \
 	src/utils/Strings.cpp \
 	src/utils/Url.cpp \
 	src/utils/File.cpp \
+	src/utils/TitleAnalyzer.cpp \
 	src/Bookmark.cpp \
 	src/VideoGroup.cpp \
 	$(NULL)
@@ -178,6 +179,7 @@ noinst_HEADERS = \
 	src/utils/SWMRLock.h \
 	src/utils/Url.h \
 	src/utils/File.h \
+	src/utils/TitleAnalyzer.h \
 	src/VideoTrack.h \
 	src/Metadata.h \
 	src/compat/Thread.h \
@@ -336,6 +338,7 @@ unittest_SOURCES = \
 	test/unittest/SubtitleTrackTests.cpp \
 	test/unittest/BookmarkTests.cpp \
 	test/unittest/VideoGroupTests.cpp \
+	test/unittest/TitleAnalyzerTests.cpp \
 	$(NULL)
 
 EXTRA_DIST += test/unittest/db_v3.sql
