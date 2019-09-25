@@ -1259,8 +1259,13 @@ Query<IMedia> Media::fromVideoGroup( MediaLibraryPtr ml, const std::string& name
 {
     std::string req = "FROM " + Table::Name + " m ";
     req += addRequestJoin( params, false, false );
-    req += " WHERE LOWER(SUBSTR(title, 1, "
-           " (SELECT video_groups_prefix_length FROM Settings))) = ?"
+    req += " WHERE"
+           " (LOWER(SUBSTR("
+                "CASE"
+                    " WHEN title LIKE 'The %' THEN SUBSTR(title, 5)"
+                    " ELSE title"
+                " END,"
+                " 1, (SELECT video_groups_prefix_length FROM Settings)))) = ?"
            " AND m.is_present != 0"
            " AND m.type = ?";
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
@@ -1277,8 +1282,12 @@ Query<IMedia> Media::searchFromVideoGroup( MediaLibraryPtr ml, const std::string
                 " WHERE " + FtsTable::Name + " MATCH ?)"
            " AND m.is_present != 0"
            " AND m.type = ?"
-           " AND LOWER(SUBSTR(title, 1,"
-           " (SELECT video_groups_prefix_length FROM Settings))) = ?";
+           " AND (LOWER(SUBSTR("
+                "CASE"
+                    " WHEN title LIKE 'The %' THEN SUBSTR(title, 5)"
+                    " ELSE title"
+                " END,"
+                " 1, (SELECT video_groups_prefix_length FROM Settings)))) = ?";
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
                                       IMedia::Type::Video, groupName );

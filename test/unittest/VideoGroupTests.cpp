@@ -239,6 +239,13 @@ TEST_F( VideoGroups, IgnorePrefix )
     ASSERT_EQ( 4u, groups[0]->count() );
     ASSERT_EQ( "Theremin.mkv", groups[1]->name() );
     ASSERT_EQ( 1u, groups[1]->count() );
+
+    auto mediaQuery = groups[0]->media( nullptr );
+    ASSERT_EQ( 4u, mediaQuery->count() );
+    ASSERT_EQ( 4u, mediaQuery->all().size() );
+    mediaQuery = groups[0]->searchMedia( "groupname", nullptr );
+    ASSERT_EQ( 4u, mediaQuery->count() );
+    ASSERT_EQ( 4u, mediaQuery->all().size() );
 }
 
 TEST_F( VideoGroups, AdjustSize )
@@ -254,7 +261,6 @@ TEST_F( VideoGroups, AdjustSize )
     ml->setVideoGroupsPrefixLength( 4 );
     groups = ml->videoGroups( nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
-
 }
 
 TEST_F( VideoGroups, GetByName )
