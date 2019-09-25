@@ -1078,7 +1078,8 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
             {
                 migrateModel21to22();
                 // Use this migration to ensure playlists containing the same
-                // item twice or more are now properly scanned
+                // item twice or more are now properly scanned, and to regenerate
+                // the video titles with the new title sanitizer
                 needRescan = true;
                 previousVersion = 22;
             }

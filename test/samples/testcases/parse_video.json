@@ -6,7 +6,7 @@
         "nbVideos": 1,
         "nbAudios": 0,
         "media": [{
-            "title": "mrmssmith.mkv",
+            "title": "mrmssmith",
             "nbVideoTracks": 1,
             "nbAudioTracks": 1,
             "snapshotExpected": true,

@@ -42,6 +42,7 @@
 #include "utils/Filename.h"
 #include "utils/Url.h"
 #include "utils/ModificationsNotifier.h"
+#include "utils/TitleAnalyzer.h"
 #include "discoverer/FsDiscoverer.h"
 #include "discoverer/probe/PathProbe.h"
 #include "Device.h"
@@ -372,9 +373,10 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
 bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
 {
     auto media = static_cast<Media*>( item.media().get() );
-    const auto& title = item.meta( IItem::Metadata::Title );
-    if ( title.length() == 0 )
-        return true;
+    // Even though the title is usually the same as the filename when dealing
+    // with a video file, we might be refreshing that media, and it might already
+    // have a title, so let's analyse the filename again instead.
+    auto title = utils::title::sanitize( item.media()->fileName() );
 
     const auto& showName = item.meta( IItem::Metadata::ShowName );
     const auto& artworkMrl = item.meta( IItem::Metadata::ArtworkUrl );
@@ -590,14 +592,16 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
     if ( media->duration() != item.duration() )
         media->setDuration( item.duration() );
 
-    auto newTitle = item.meta( IItem::Metadata::Title );
-    if ( media->title() != newTitle )
-        media->setTitleBuffered( newTitle );
-
     auto tracks = item.tracks();
     auto isAudio = std::find_if( begin( tracks ), end( tracks ), [](const IItem::Track& t) {
         return t.type == IItem::Track::Type::Video;
     }) == end( tracks );
+
+    if ( isAudio == false )
+    {
+        auto newTitle = utils::title::sanitize( media->fileName() );
+        media->setTitleBuffered( newTitle );
+    }
 
     if ( isAudio == true && media->type() == IMedia::Type::Video )
         media->setType( IMedia::Type::Audio );
