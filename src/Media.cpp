@@ -1254,8 +1254,8 @@ Query<IMedia> Media::searchFromFolderId( MediaLibraryPtr ml,
                                       sqlite::Tools::sanitizePattern( pattern ) );
 }
 
-Query<IMedia> Media::fromGroup( MediaLibraryPtr ml, const std::string& name,
-                                const QueryParameters* params )
+Query<IMedia> Media::fromVideoGroup( MediaLibraryPtr ml, const std::string& name,
+                                     const QueryParameters* params )
 {
     std::string req = "FROM " + Table::Name + " m ";
     req += addRequestJoin( params, false, false );
@@ -1266,9 +1266,9 @@ Query<IMedia> Media::fromGroup( MediaLibraryPtr ml, const std::string& name,
                                       name );
 }
 
-Query<IMedia> Media::searchFromGroup( MediaLibraryPtr ml, const std::string& groupName,
-                                      const std::string& pattern,
-                                      const QueryParameters* params )
+Query<IMedia> Media::searchFromVideoGroup( MediaLibraryPtr ml, const std::string& groupName,
+                                           const std::string& pattern,
+                                           const QueryParameters* params )
 {
     std::string req = "FROM " + Table::Name + " m ";
     req += addRequestJoin( params, false, false );

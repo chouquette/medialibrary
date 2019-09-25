@@ -58,7 +58,7 @@ size_t VideoGroup::count() const
 
 Query<IMedia> VideoGroup::media( const QueryParameters* params ) const
 {
-    return Media::fromGroup( m_ml, m_name, params );
+    return Media::fromVideoGroup( m_ml, m_name, params );
 }
 
 Query<IMedia> VideoGroup::searchMedia( const std::string& pattern,
@@ -66,7 +66,7 @@ Query<IMedia> VideoGroup::searchMedia( const std::string& pattern,
 {
     if ( pattern.size() < 3 )
         return nullptr;
-    return Media::searchFromGroup( m_ml, m_name, pattern, params );
+    return Media::searchFromVideoGroup( m_ml, m_name, pattern, params );
 }
 
 Query<IVideoGroup> VideoGroup::listAll( MediaLibraryPtr ml, const QueryParameters* params )
