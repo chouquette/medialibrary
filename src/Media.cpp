@@ -938,6 +938,12 @@ void Media::createTriggers( sqlite::Connection* connection, uint32_t modelVersio
                 "(last_played_date, real_last_played_date, insertion_date)";
         sqlite::Tools::executeRequest( connection, req );
     }
+    if ( modelVersion >= 22 )
+    {
+        sqlite::Tools::executeRequest( connection,
+            "CREATE INDEX IF NOT EXISTS media_folder_id_idx ON " +
+                Media::Table::Name + "(folder_id)" );
+    }
 }
 
 std::string Media::schema( const std::string& tableName, uint32_t dbModel )
