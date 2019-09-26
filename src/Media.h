@@ -66,7 +66,7 @@ class Media : public IMedia,
         // There might be a way with a user-defined allocator, but we'll see that later...
         Media( MediaLibraryPtr ml , sqlite::Row& row );
         Media( MediaLibraryPtr ml, const std::string& title, Type type,
-               int64_t duration );
+               int64_t duration, int64_t deviceId, int64_t folderId );
 
         static std::shared_ptr<Media> create( MediaLibraryPtr ml, Type type,
                                               int64_t deviceId, int64_t folderId,
