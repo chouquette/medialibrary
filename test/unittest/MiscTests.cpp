@@ -35,6 +35,7 @@
 #include "Media.h"
 #include "Metadata.h"
 #include "Playlist.h"
+#include "Device.h"
 
 namespace
 {
@@ -578,4 +579,27 @@ TEST_F( DbModel, Upgrate21to22 )
     CheckTriggers( expectedTriggers );
     CheckTables( expectedTables );
     CheckViews( expectedViews );
+
+    // The medialibrary may not find the device in the dummy database, so it
+    // will be marked as missing, causing no folders to be returned.
+    // However, if the device matches the one in the dummy database (ie. on my
+    // machine...) the setPresent method will assert, causing the test to fail
+    // in a different way.
+    auto devices = Device::fetchAll( ml.get() );
+    ASSERT_EQ( 1u, devices.size() );
+    if ( devices[0]->isPresent() == false )
+        devices[0]->setPresent( true );
+
+    auto folders = ml->folders( IMedia::Type::Audio, nullptr )->all();
+    ASSERT_EQ( 3u, folders.size() );
+    for ( const auto f : folders )
+    {
+        auto audioQuery = f->media( IMedia::Type::Audio, nullptr );
+        ASSERT_EQ( 1u, audioQuery->count() );
+        ASSERT_EQ( 1u, audioQuery->all().size() );
+
+        auto videoQuery = f->media( IMedia::Type::Video, nullptr );
+        ASSERT_EQ( 0u, videoQuery->count() );
+        ASSERT_EQ( 0u, videoQuery->all().size() );
+    }
 }
