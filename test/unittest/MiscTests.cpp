@@ -568,3 +568,14 @@ TEST_F( DbModel, Upgrade20to21 )
     CheckTables( expectedTables );
     CheckViews( expectedViews );
 }
+
+TEST_F( DbModel, Upgrate21to22 )
+{
+    LoadFakeDB( SRC_DIR "/test/unittest/db_v21.sql" );
+    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
+    ASSERT_EQ( InitializeResult::Success, res );
+    CheckIndexes( expectedIndexes );
+    CheckTriggers( expectedTriggers );
+    CheckTables( expectedTables );
+    CheckViews( expectedViews );
+}
