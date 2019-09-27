@@ -56,7 +56,7 @@ public:
 
 private:
     MediaLibraryPtr m_ml;
-    std::string m_name;
+    std::string m_groupPattern;
     size_t m_count;
     std::string m_mediaName;
 };

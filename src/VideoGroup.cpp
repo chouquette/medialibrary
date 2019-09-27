@@ -36,7 +36,7 @@ const std::string VideoGroup::Table::Name = "VideoGroup";
 
 VideoGroup::VideoGroup( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
-    , m_name( row.extract<decltype(m_name)>() )
+    , m_groupPattern( row.extract<decltype(m_groupPattern)>() )
     , m_count( row.extract<decltype(m_count)>() )
     , m_mediaName( row.extract<decltype(m_mediaName)>() )
 {
@@ -48,7 +48,7 @@ const std::string& VideoGroup::name() const
     if ( m_count == 1 )
         return m_mediaName;
     assert( m_mediaName.empty() == true );
-    return m_name;
+    return m_groupPattern;
 }
 
 size_t VideoGroup::count() const
@@ -58,7 +58,7 @@ size_t VideoGroup::count() const
 
 Query<IMedia> VideoGroup::media( const QueryParameters* params ) const
 {
-    return Media::fromVideoGroup( m_ml, m_name, params );
+    return Media::fromVideoGroup( m_ml, m_groupPattern, params );
 }
 
 Query<IMedia> VideoGroup::searchMedia( const std::string& pattern,
@@ -66,7 +66,7 @@ Query<IMedia> VideoGroup::searchMedia( const std::string& pattern,
 {
     if ( pattern.size() < 3 )
         return nullptr;
-    return Media::searchFromVideoGroup( m_ml, m_name, pattern, params );
+    return Media::searchFromVideoGroup( m_ml, m_groupPattern, pattern, params );
 }
 
 Query<IVideoGroup> VideoGroup::listAll( MediaLibraryPtr ml, const QueryParameters* params )
