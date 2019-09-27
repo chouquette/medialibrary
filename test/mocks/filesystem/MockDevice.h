@@ -24,9 +24,11 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 
 #include "medialibrary/filesystem/IDevice.h"
 #include "medialibrary/filesystem/IFile.h"
+#include "filesystem/common/CommonDevice.h"
 
 using namespace medialibrary;
 
@@ -36,7 +38,7 @@ namespace mock
 class Directory;
 class File;
 
-class Device : public fs::IDevice, public std::enable_shared_from_this<Device>
+class Device : public fs::CommonDevice, public std::enable_shared_from_this<Device>
 {
 public:
     Device( const std::string& mountpoint, const std::string& uuid );
@@ -48,19 +50,12 @@ public:
 
     std::shared_ptr<Directory> root();
 
-    virtual const std::string& uuid() const override;
-    virtual bool isRemovable() const override;
     virtual bool isPresent() const override;
-    virtual const std::string& mountpoint() const override;
-    virtual void addMountpoint( std::string mountpoint ) override;
-    virtual void removeMountpoint( const std::string& mountpoint ) override;
-    virtual std::tuple<bool, std::string> matchesMountpoint( const std::string& mrl ) const override;
+    virtual bool isRemovable() const override;
 
     void setRemovable( bool value );
     void setPresent( bool value );
 
-    virtual std::string relativeMrl( const std::string& mrl ) const override;
-    virtual std::string absoluteMrl( const std::string& mrl ) const override;
     void addFile( const std::string& filePath );
     void addFolder( const std::string& path );
     void removeFile( const std::string& filePath );
@@ -71,10 +66,8 @@ public:
     void invalidateMountpoint( const std::string& path );
 
 private:
-    std::string m_uuid;
-    bool m_removable;
     bool m_present;
-    std::string m_mountpoint;
+    bool m_removable;
     std::shared_ptr<Directory> m_root;
 };
 

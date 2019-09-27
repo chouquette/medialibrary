@@ -35,18 +35,15 @@ namespace mock
 {
 
 Device::Device(const std::string& mountpoint, const std::string& uuid)
-    : m_uuid( uuid )
-    , m_removable( false )
+    : CommonDevice( uuid, mountpoint, false )
     , m_present( true )
-    , m_mountpoint( mountpoint )
+    , m_removable( false )
 {
-    if ( ( *m_mountpoint.crbegin() ) != '/' )
-        m_mountpoint += '/';
 }
 
 void Device::setupRoot()
 {
-    m_root = std::make_shared<Directory>( m_mountpoint, shared_from_this() );
+    m_root = std::make_shared<Directory>( mountpoint(), shared_from_this() );
 }
 
 std::shared_ptr<Directory> Device::root()
@@ -54,44 +51,13 @@ std::shared_ptr<Directory> Device::root()
     return m_root;
 }
 
-const std::string&Device::uuid() const { return m_uuid; }
-
-bool Device::isRemovable() const { return m_removable; }
-
 bool Device::isPresent() const { return m_present; }
 
-const std::string&Device::mountpoint() const { return m_mountpoint; }
-
-void Device::addMountpoint( std::string )
-{
-    assert( false );
-}
-
-void Device::removeMountpoint( const std::string& )
-{
-    assert( false );
-}
-
-std::tuple<bool, std::string> Device::matchesMountpoint( const std::string& mrl ) const
-{
-    if ( mrl.find( m_mountpoint ) != 0 )
-        return { false, "" };
-    return { true, m_mountpoint };
-}
+bool Device::isRemovable() const { return m_removable; }
 
 void Device::setRemovable(bool value) { m_removable = value; }
 
 void Device::setPresent(bool value) { m_present = value; }
-
-std::string Device::relativeMrl( const std::string& mrl ) const
-{
-    return utils::file::removePath( mrl, m_mountpoint );
-}
-
-std::string Device::absoluteMrl(const std::string& mrl) const
-{
-    return m_mountpoint + mrl;
-}
 
 void Device::addFile(const std::string& filePath )
 {

@@ -94,8 +94,6 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         auto it = std::find_if( begin( devices ), end( devices ), [uuid]( const std::shared_ptr<Device>& d ) {
             return d->uuid() == uuid;
         } );
-        if ( it == end( devices ) )
-            return;
         auto d = *it;
         d->setPresent( false );
         auto mountpointDevice = device( d->mountpoint() );
