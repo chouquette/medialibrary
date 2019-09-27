@@ -95,7 +95,10 @@ struct FileSystemFactory : public fs::IFileSystemFactory
             return d->uuid() == uuid;
         } );
         auto d = *it;
+        // Mark the device as being removed
         d->setPresent( false );
+        // And now fetch the device that contains the mountpoint of the device
+        // we just removed.
         auto mountpointDevice = device( d->mountpoint() );
         mountpointDevice->invalidateMountpoint( d->mountpoint() );
     }
