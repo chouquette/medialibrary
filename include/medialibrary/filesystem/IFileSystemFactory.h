@@ -110,10 +110,15 @@ namespace fs
         ///
         /// \brief createDeviceFromPath creates a representation of a device
         /// \param path An MRL.
-        /// \return A representation of the device.
+        /// \return A representation of the device, or nullptr if none match.
         ///
         /// The provided path can and most often will refer to a file in that
         /// device, and will not simply be the path to the device mountpoint
+        /// This function guarantees that the returned device, if any, is the
+        /// one that matches the mrl best.
+        /// For instance, if a device contains another device mountpoint, if
+        /// that mountpoint or once of its subfolder is passed, the innermost
+        /// device will be returned, even though more than one device matched
         ///
         virtual std::shared_ptr<fs::IDevice> createDeviceFromMrl( const std::string& mrl ) = 0;
         ///
