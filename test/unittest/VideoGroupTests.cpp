@@ -115,7 +115,7 @@ TEST_F( VideoGroups, ListMedia )
     auto groups = ml->videoGroups( nullptr )->all();
     ASSERT_EQ( 2u, groups.size() );
     auto g = groups[0];
-    ASSERT_EQ( g->name(), "avideo" );
+    ASSERT_EQ( g->name(), "avideo." );
     auto media = g->media( nullptr )->all();
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( "avideo.avi", media[0]->title() );
@@ -138,7 +138,7 @@ TEST_F( VideoGroups, SortMedia )
     auto groups = ml->videoGroups( nullptr )->all();
     ASSERT_EQ( 2u, groups.size() );
     auto g = groups[0];
-    ASSERT_EQ( g->name(), "avideo" );
+    ASSERT_EQ( g->name(), "avideo." );
     QueryParameters params;
     params.sort = SortingCriteria::Duration;
     params.desc = false;
@@ -197,7 +197,7 @@ TEST_F( VideoGroups, SearchMedia )
     auto groups = ml->videoGroups( &params )->all();
     ASSERT_EQ( 4u, groups.size() );
     auto group = groups[0];
-    ASSERT_EQ( "groupn", group->name() );
+    ASSERT_EQ( "groupname ", group->name() );
     ASSERT_EQ( 2u, group->count() );
 
     auto mediaQuery = group->searchMedia( "no", nullptr );
@@ -214,7 +214,7 @@ TEST_F( VideoGroups, SearchMedia )
 
     // Search for a numerical pattern, but also a partial word (the previous
     // tests were only testing for a full word match)
-    group = ml->videoGroup( "123456" );
+    group = ml->videoGroup( "12345678.mkv" );
     ASSERT_NE( nullptr, group );
     mediaQuery = group->searchMedia( "123456", nullptr );
     ASSERT_EQ( 1u, mediaQuery->count() );
@@ -235,7 +235,7 @@ TEST_F( VideoGroups, IgnorePrefix )
     params.desc = true;
     auto groups = ml->videoGroups( &params )->all();
     ASSERT_EQ( 2u, groups.size() );
-    ASSERT_EQ( "groupn", groups[0]->name() );
+    ASSERT_EQ( "(The) groupname.", groups[0]->name() );
     ASSERT_EQ( 4u, groups[0]->count() );
     ASSERT_EQ( "Theremin.mkv", groups[1]->name() );
     ASSERT_EQ( 1u, groups[1]->count() );
@@ -269,7 +269,7 @@ TEST_F( VideoGroups, GetByName )
     ml->addMedia( "Otters are fluffy.mkv", IMedia::Type::Video );
     ml->addMedia( "Otters are cute.mkv", IMedia::Type::Video );
 
-    auto group = ml->videoGroup( "Otters" );
+    auto group = ml->videoGroup( "Otters are " );
     ASSERT_NE( nullptr, group );
     ASSERT_EQ( 3u, group->count() );
 
@@ -278,14 +278,6 @@ TEST_F( VideoGroups, GetByName )
 
     group = ml->videoGroup( "otter are" );
     ASSERT_EQ( nullptr, group );
-
-    ml->setVideoGroupsPrefixLength( 5 );
-    group = ml->videoGroup( "otters" );
-    ASSERT_EQ( nullptr, group );
-
-    group = ml->videoGroup( "otter" );
-    ASSERT_NE( nullptr, group );
-    ASSERT_EQ( 3u, group->count() );
 }
 
 TEST_F( VideoGroups, CaseInsensitive )
@@ -297,17 +289,8 @@ TEST_F( VideoGroups, CaseInsensitive )
     auto groups = ml->videoGroups( nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
 
-    auto group = ml->videoGroup( "OTTERS" );
-    ASSERT_NE( nullptr, group );
-
-    group = ml->videoGroup( "OTtERs" );
-    ASSERT_NE( nullptr, group );
-
-    group = ml->videoGroup( "otters" );
-    ASSERT_NE( nullptr, group );
-
     // Now ensure that we are capable of fetching the media
-    auto mediaQuery = group->media( nullptr );
+    auto mediaQuery = groups[0]->media( nullptr );
     ASSERT_EQ( 3u, mediaQuery->count() );
     auto media = mediaQuery->all();
     ASSERT_EQ( 3u, media.size() );
@@ -325,4 +308,48 @@ TEST_F( VideoGroups, UseMediaName )
     ASSERT_NE( nullptr, group );
     ASSERT_EQ( 1u, group->count() );
     ASSERT_EQ( m->title(), group->name() );
+}
+
+TEST_F( VideoGroups, UpdatePrefix )
+{
+    ml->addMedia( "The otters.mkv", IMedia::Type::Video );
+
+    auto groups = ml->videoGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    auto group = groups[0];
+    ASSERT_EQ( "The otters.mkv", group->name() );
+
+    ml->addMedia( "Otters are cool.mkv", IMedia::Type::Video );
+    groups = ml->videoGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    group = groups[0];
+    ASSERT_EQ( "(The) otters", group->name() );
+}
+
+TEST_F( VideoGroups, UpdatePrefixInverted )
+{
+    // For the sake of testing the aggregate function, try it the other way around
+    ml->addMedia( "Awesome group.mkv", IMedia::Type::Video );
+
+    auto groups = ml->videoGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    auto group = groups[0];
+    ASSERT_EQ( "Awesome group.mkv", group->name() );
+
+    ml->addMedia( "The awesome group.mkv", IMedia::Type::Video );
+    groups = ml->videoGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    group = groups[0];
+    ASSERT_EQ( "(The) Awesome group.mkv", group->name() );
+}
+
+TEST_F( VideoGroups, DontModifyPrefix )
+{
+    ml->addMedia( "The prefix should not change.mkv", IMedia::Type::Video );
+    ml->addMedia( "The prefix already contains the.mkv", IMedia::Type::Video );
+
+    auto groups = ml->videoGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    auto group = groups[0];
+    ASSERT_EQ( "The prefix ", group->name() );
 }

@@ -33,4 +33,7 @@
     "nb_video = (SELECT COUNT() FROM " + Media::Table::Name + " WHERE type = " +
         std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
             IMedia::Type::Video ) ) +
-    " AND folder_id = f.id_folder)"
+    " AND folder_id = f.id_folder)",
+
+"DROP VIEW " + VideoGroup::Table::Name,
+VideoGroup::schema( VideoGroup::Table::Name, 22 ),

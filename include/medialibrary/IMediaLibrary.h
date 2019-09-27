@@ -348,6 +348,9 @@ public:
      * @brief videoGroup Return the representation of a specific video group
      * @param name The group name
      * @return The associated IVideoGroup, or nullptr if that group doesn't exist
+     *
+     * The provided name must be exactly the same as the one returned
+     * by IVideoGroup::name()
      */
     virtual VideoGroupPtr videoGroup( const std::string& name ) const = 0;
     /**

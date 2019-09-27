@@ -38,17 +38,14 @@ VideoGroup::VideoGroup( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
     , m_groupPattern( row.extract<decltype(m_groupPattern)>() )
     , m_count( row.extract<decltype(m_count)>() )
-    , m_mediaName( row.extract<decltype(m_mediaName)>() )
+    , m_name( row.extract<decltype(m_name)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
 
 const std::string& VideoGroup::name() const
 {
-    if ( m_count == 1 )
-        return m_mediaName;
-    assert( m_mediaName.empty() == true );
-    return m_groupPattern;
+    return m_name;
 }
 
 size_t VideoGroup::count() const
@@ -98,13 +95,32 @@ Query<IVideoGroup> VideoGroup::listAll( MediaLibraryPtr ml, const QueryParameter
 VideoGroupPtr VideoGroup::fromName( MediaLibraryPtr ml, const std::string& name )
 {
     const std::string req = "SELECT * FROM " + Table::Name +
-            " WHERE grp = LOWER(?1) OR media_title = ?1";
+            " WHERE display = ?1";
     return fetch( ml, req, name );
 }
 
-std::string VideoGroup::schema( const std::string& tableName, uint32_t )
+std::string VideoGroup::schema( const std::string& tableName, uint32_t dbModel )
 {
     assert( tableName == Table::Name );
+    if ( dbModel <= 21 )
+    {
+        return "CREATE VIEW " + Table::Name + " AS"
+               " SELECT "
+                    "LOWER(SUBSTR("
+                        "CASE "
+                            "WHEN title LIKE 'The %' THEN SUBSTR(title, 5) "
+                            "ELSE title "
+                        "END, "
+                    "1, (SELECT video_groups_prefix_length FROM Settings)))"
+               " as grp, COUNT() as cnt,"
+               " CASE WHEN COUNT() = 1 THEN title ELSE NULL END as media_title"
+               " FROM Media "
+               " WHERE type = " +
+                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                        IMedia::Type::Video ) ) +
+               " AND is_present != 0"
+               " GROUP BY grp";
+    }
     return "CREATE VIEW " + Table::Name + " AS"
            " SELECT "
                 "LOWER(SUBSTR("
@@ -114,14 +130,13 @@ std::string VideoGroup::schema( const std::string& tableName, uint32_t )
                     "END, "
                 "1, (SELECT video_groups_prefix_length FROM Settings)))"
            " as grp, COUNT() as cnt,"
-           " CASE WHEN COUNT() = 1 THEN title ELSE NULL END as media_title"
+           " VIDEO_GROUP_AGGREGATE(title) as display"
            " FROM Media "
            " WHERE type = " +
                 std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
                                     IMedia::Type::Video ) ) +
            " AND is_present != 0"
            " GROUP BY grp";
-
 }
 
 void VideoGroup::createView( sqlite::Connection* dbConn )
