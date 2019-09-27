@@ -577,6 +577,36 @@ TEST_F( FoldersNoDiscover, IsIndexed )
     ASSERT_TRUE( res );
 }
 
+TEST_F( FoldersNoDiscover, IsIndexedMultipleMountpoint )
+{
+    auto device = fsMock->device( mock::FileSystemFactory::Root );
+    ASSERT_NE( nullptr, device );
+    device->setRemovable( true );
+    auto mp1 = std::string{ "file:///grouik/test/" };
+    device->addMountpoint( mp1 );
+    auto mp2 = std::string{ "file:///sea/otter/" };
+    device->addMountpoint( mp2 );
+
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    auto res = ml->isIndexed( mock::FileSystemFactory::SubFolder );
+    ASSERT_TRUE( res );
+
+    // Ensure we have the correct assumption for path manipulations
+    ASSERT_EQ( mock::FileSystemFactory::SubFolder, mock::FileSystemFactory::Root + "folder/" );
+
+    res = ml->isIndexed( mp1 + "folder/" );
+    ASSERT_TRUE( res );
+
+    res = ml->isIndexed( mp2 + "folder/" );
+    ASSERT_TRUE( res );
+
+    res = ml->isIndexed( "file:///this/path/is/not/valid/folder/" );
+    ASSERT_FALSE( res );
+}
+
 TEST_F( FoldersNoDiscover, IsBannedFolderIndexed )
 {
     ml->banFolder( mock::FileSystemFactory::SubFolder );

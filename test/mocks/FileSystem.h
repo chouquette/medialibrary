@@ -73,6 +73,17 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         return dev;
     }
 
+    bool addDeviceMountpoint( const std::string& mountpoint, const std::string& uuid )
+    {
+        auto it = std::find_if( begin( devices ), end( devices ), [uuid]( const std::shared_ptr<Device>& d ) {
+            return d->uuid() == uuid;
+        } );
+        if ( it == end( devices ) )
+            return false;
+        (*it)->addMountpoint( mountpoint );
+        return true;
+    }
+
     std::shared_ptr<Device> removeDevice( const std::string& uuid )
     {
         auto it = std::find_if( begin( devices ), end( devices ), [uuid]( const std::shared_ptr<Device>& d ) {
