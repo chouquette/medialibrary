@@ -88,6 +88,10 @@ Connection::Handle Connection::handle()
         // would result from a recursive call and a deadlock from here.
         setPragma( dbConnection, "foreign_keys", "1" );
         setPragma( dbConnection, "recursive_triggers", "1" );
+        sqlite3_create_window_function( dbConnection, "VIDEO_GROUP_AGGREGATE",
+                                        1, SQLITE_UTF8, nullptr,
+                                        &groupAggregateStep, &groupAggregateFinal,
+                                        nullptr, nullptr, nullptr );
 #ifdef __ANDROID__
         // https://github.com/mozilla/mentat/issues/505
         // Should solve `Failed to run request <DELETE FROM File WHERE id_file = ?>: disk I/O error(6410)`
@@ -220,6 +224,90 @@ std::shared_ptr<Connection> Connection::connect( const std::string& dbPath )
         SqliteConnectionWrapper( const std::string& p ) : Connection( p ) {}
     };
     return std::make_shared<SqliteConnectionWrapper>( dbPath );
+}
+
+void Connection::groupAggregateStep( sqlite3_context* ctx, int nArg,
+                                     sqlite3_value** values )
+{
+    if ( nArg != 1 )
+    {
+        assert( !"Invalid aggregate function usage" );
+        sqlite3_result_error(ctx, "invalid number of argument", -1);
+        return;
+    }
+    if ( sqlite3_value_type( values[0] ) != SQLITE_TEXT )
+    {
+        sqlite3_result_error(ctx, "invalid argument type", -1);
+        return;
+    }
+    auto param = reinterpret_cast<const char*>( sqlite3_value_text( values[0] ) );
+    auto pText = static_cast<char**>(
+                sqlite3_aggregate_context( ctx, sizeof( char** ) ) );
+    if ( pText == nullptr )
+    {
+        sqlite3_result_error(ctx, "Allocation failure", -1);
+        return;
+    }
+    if ( *pText == nullptr )
+    {
+        // Account for a potentially ignored 'The' prefix
+        *pText = static_cast<char*>( malloc( ( strlen( param ) +
+                                               strlen( "(the) " ) + 1 ) *
+                                               sizeof( **pText ) ) );
+        if ( *pText == nullptr )
+        {
+            sqlite3_result_error(ctx, "Allocation failure", -1);
+            return;
+        }
+        strcpy( *pText, param );
+        return;
+    }
+    auto currentAggregate = *pText;
+    auto i = 0u;
+    // Check if we already have aggregated 2 media with a 'The ' prefix
+    if ( strncmp( currentAggregate, "(The) ", 6 ) == 0 )
+    {
+        // If so, we just have to compare from after the prefixes
+        currentAggregate += 6;
+        if ( strncasecmp( param, "the ", 4 ) == 0 )
+            param += 4;
+    }
+    else
+    {
+        // If one of the operands are containing a "The " prefix, we need to
+        // aggregate them as '(The) '
+        // However if both are containing 'The ', we must not change anything
+        auto aggregatePrefixed = strncasecmp( currentAggregate, "the ", 4 ) == 0;
+        auto paramPrefixed = strncasecmp( param, "the ", 4 ) == 0;
+        if ( aggregatePrefixed != paramPrefixed )
+        {
+            // If the current aggregate is prefixed, we need to skip the 'the '
+            // prefix, and leave room for the new '(The) ' prefix
+            // Otherwise, we can just shift the entire buffer
+            auto offset = aggregatePrefixed == true ? 4 : 0;
+            memmove( currentAggregate + 6, currentAggregate + offset,
+                     strlen( currentAggregate ) + 1 - offset );
+            memcpy( currentAggregate, "(The) ", 6 );
+            // Now the aggregate contains '(The) ', which we need to skip to
+            // compare with the new value
+            currentAggregate += 6;
+            if ( paramPrefixed == true )
+                param += 4;
+        }
+    }
+    for ( ; param[i] != 0 && currentAggregate[i] != 0; ++i )
+    {
+        if ( std::tolower( param[i] ) != std::tolower( currentAggregate[i] ) )
+            break;
+    }
+    currentAggregate[i] = 0;
+}
+
+void Connection::groupAggregateFinal( sqlite3_context* ctx )
+{
+//    fprintf(stderr, "Reached the final function\n" );
+    auto res = static_cast<char**>( sqlite3_aggregate_context( ctx, 0 ) );
+    sqlite3_result_text( ctx, res != nullptr ? *res : nullptr, -1, &free );
 }
 
 void Connection::updateHook( void* data, int reason, const char*,

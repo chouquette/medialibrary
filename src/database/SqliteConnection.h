@@ -95,6 +95,9 @@ public:
 
     static std::shared_ptr<Connection> connect( const std::string& dbPath );
 
+    static void groupAggregateStep( sqlite3_context* ctx, int nArg, sqlite3_value** values );
+    static void groupAggregateFinal( sqlite3_context* ctx );
+
 protected:
     explicit Connection( const std::string& dbPath );
     ~Connection();
