@@ -199,11 +199,21 @@ struct FileSystemFactory : public fs::IFileSystemFactory
     std::shared_ptr<Device> device( const std::string& mrl )
     {
         std::shared_ptr<Device> ret;
+        std::string mountpoint;
         for ( auto& d : devices )
         {
-            if ( mrl.find( d->mountpoint() ) == 0 && d->isPresent() == true &&
-                 ( ret == nullptr || ret->mountpoint().length() < d->mountpoint().length() ) )
-                ret = d;
+            if ( d->isPresent() == false )
+                continue;
+            auto match = d->matchesMountpoint( mrl );
+            if ( std::get<0>( match ) == true )
+            {
+                const auto& newMountpoint = std::get<1>( match );
+                if ( ret == nullptr || mountpoint.length() < newMountpoint.length() )
+                {
+                    ret = d;
+                    mountpoint = newMountpoint;
+                }
+            }
         }
         return ret;
     }
