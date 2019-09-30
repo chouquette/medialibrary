@@ -1336,6 +1336,7 @@ void MediaLibrary::migrateModel12to13()
  *  - Update is_album_present trigger
  *  - Update add_album_track trigger
  *  - Update delete_album_track trigger
+ *  - New chapters table
  */
 void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
 {
@@ -1422,7 +1423,6 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
 /**
  * Model 14 to 15 migration:
  * - Folder.name is now case insensitive
- * - New chapters table
  */
 void MediaLibrary::migrateModel14to15()
 {
