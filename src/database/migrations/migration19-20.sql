@@ -228,7 +228,7 @@ Metadata::schema( Metadata::Table::Name, 20 ),
 SubtitleTrack::schema( SubtitleTrack::Table::Name, 20 ),
 
 /* Chapter table */
-"DROP TABLE " + Chapter::Table::Name,
+"DROP TABLE IF EXISTS " + Chapter::Table::Name,
 Chapter::schema( Chapter::Table::Name, 20 ),
 
 /* Bookmark table */
