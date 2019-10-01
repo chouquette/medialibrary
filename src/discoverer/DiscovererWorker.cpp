@@ -139,7 +139,7 @@ void DiscovererWorker::notify()
         m_cond.notify_all();
 }
 
-void DiscovererWorker::run()
+void DiscovererWorker::run() try
 {
     LOG_INFO( "Entering DiscovererWorker thread" );
     m_ml->onDiscovererIdleChanged( false );
@@ -185,6 +185,13 @@ void DiscovererWorker::run()
     }
     LOG_INFO( "Exiting DiscovererWorker thread" );
     m_ml->onDiscovererIdleChanged( true );
+}
+catch ( const std::exception& ex )
+{
+    if ( m_ml->getCb()->onUnhandledException( "DiscovererWorker",
+                                              ex.what() ) == true )
+        return;
+    throw;
 }
 
 void DiscovererWorker::runReload( const std::string& entryPoint )

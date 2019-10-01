@@ -91,7 +91,7 @@ void ThumbnailerWorker::resume()
     m_cond.notify_all();
 }
 
-void ThumbnailerWorker::run()
+void ThumbnailerWorker::run() try
 {
     LOG_INFO( "Starting thumbnailer thread" );
     while ( m_run == true )
@@ -115,6 +115,13 @@ void ThumbnailerWorker::run()
         m_ml->getCb()->onMediaThumbnailReady( t.media, t.sizeType, res );
     }
     LOG_INFO( "Exiting thumbnailer thread" );
+}
+catch ( const std::exception& ex )
+{
+    if ( m_ml->getCb()->onUnhandledException( "ThumbnailerWorker",
+                                              ex.what() ) == true )
+        return;
+    throw;
 }
 
 void ThumbnailerWorker::stop()

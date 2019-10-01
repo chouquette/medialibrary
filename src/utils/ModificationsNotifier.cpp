@@ -149,7 +149,7 @@ void ModificationNotifier::flush()
     });
 }
 
-void ModificationNotifier::run()
+void ModificationNotifier::run() try
 {
 #if !defined(_LIBCPP_STD_VER) || (_LIBCPP_STD_VER > 11 && !defined(_LIBCPP_HAS_NO_CXX14_CONSTEXPR))
     constexpr auto ZeroTimeout = std::chrono::time_point<std::chrono::steady_clock>{};
@@ -214,6 +214,13 @@ void ModificationNotifier::run()
             utils::fs::remove( path );
         }
     }
+}
+catch ( const std::exception& ex )
+{
+    if ( m_ml->getCb()->onUnhandledException( "ModificationNotifier",
+                                              ex.what() ) == true )
+        return;
+    throw;
 }
 
 }

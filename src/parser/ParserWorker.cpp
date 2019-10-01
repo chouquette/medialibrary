@@ -138,7 +138,7 @@ void Worker::restart()
     m_service->onRestarted();
 }
 
-void Worker::mainloop()
+void Worker::mainloop() try
 {
     // It would be unsafe to call name() at the end of this function, since
     // we might stop the thread during ParserService destruction. This implies
@@ -230,6 +230,13 @@ void Worker::mainloop()
     }
     LOG_INFO("Exiting ParserService [", serviceName, "] thread");
     setIdle( true );
+}
+catch ( const std::exception& ex )
+{
+    if ( m_ml->getCb()->onUnhandledException( "ParserWorker",
+                                              ex.what() ) == true )
+        return;
+    throw;
 }
 
 void Worker::setIdle(bool isIdle)
