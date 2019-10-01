@@ -187,7 +187,7 @@ void Task::resetCurrentService()
     m_currentService = 0;
 }
 
-int Task::retryCount() const
+unsigned int Task::retryCount() const
 {
     return m_retryCount;
 }
