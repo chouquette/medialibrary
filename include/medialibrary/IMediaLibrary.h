@@ -255,6 +255,21 @@ public:
      * @param type The history type
      */
     virtual void onHistoryChanged( HistoryType type ) = 0;
+
+    /**
+     * @brief onUnhandledException will be invoked in case of an unhandled exception
+     *
+     * @param context A minimal context hint
+     * @param errMsg  The exception string, as returned by std::exception::what()
+     *
+     * If the application chooses to handle the error to present it to the user
+     * or report it somehow, it should:
+     * - Return true
+     * - Assume the media library is no longer in a usable state and restart it.
+     * If the implementation returns false, then the exception will be rethrown
+     */
+    virtual bool onUnhandledException( const char* /* context */,
+                                       const char* /* errMsg */ ) { return false; }
 };
 
 class IMediaLibrary
