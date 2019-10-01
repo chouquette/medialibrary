@@ -54,6 +54,8 @@ class Task;
 namespace parser
 {
 
+static constexpr auto MaxNbRetries = 3u;
+
 class Task : public DatabaseHelpers<Task>, public IItem
 {
 public:
