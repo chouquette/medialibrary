@@ -70,8 +70,11 @@ Query<IVideoGroup> VideoGroup::listAll( MediaLibraryPtr ml, const QueryParameter
 {
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
     auto desc = params != nullptr ? params->desc : false;
-    std::string req = "SELECT * FROM " + Table::Name;
-    const std::string countReq = "SELECT COUNT() FROM " + Table::Name;
+    const std::string whereClause = " WHERE cnt >= "
+            "(SELECT video_groups_minimum_media_count FROM Settings)";
+    std::string req = "SELECT * FROM " + Table::Name + whereClause;
+    const std::string countReq = "SELECT COUNT() FROM " + Table::Name + whereClause;
+
     switch ( sort )
     {
         default:

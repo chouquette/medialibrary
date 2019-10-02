@@ -353,3 +353,22 @@ TEST_F( VideoGroups, DontModifyPrefix )
     auto group = groups[0];
     ASSERT_EQ( "The prefix ", group->name() );
 }
+
+TEST_F( VideoGroups, UpdateMinimumMediaCount )
+{
+    ml->addMedia( "Otters are amazing .mkv", IMedia::Type::Video );
+    ml->addMedia( "but so are weasels.avi", IMedia::Type::Video );
+    ml->addMedia( "Grouped media.mkv", IMedia::Type::Video );
+    ml->addMedia( "Grouped media2.mkv", IMedia::Type::Video );
+
+    auto groups = ml->videoGroups( nullptr )->all();
+    ASSERT_EQ( 3u, groups.size() );
+
+    ml->setVideoGroupsAllowSingleVideo( false );
+    groups = ml->videoGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+
+    ml->setVideoGroupsAllowSingleVideo( true );
+    groups = ml->videoGroups( nullptr )->all();
+    ASSERT_EQ( 3u, groups.size() );
+}

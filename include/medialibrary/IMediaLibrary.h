@@ -365,6 +365,14 @@ public:
      * The default value is 6
      */
     virtual void setVideoGroupsPrefixLength( uint32_t prefixLength ) = 0;
+    /**
+     * @brief setAllowSingleVideoGroups Allow groups with a single video.
+     *
+     * The default is true. If this is set to false, only groups with at least
+     * 2 videos will be returned
+     * The vallue will persist in database across multiple executions.
+     */
+    virtual void setVideoGroupsAllowSingleVideo( bool enable ) = 0;
     virtual AlbumPtr album( int64_t id ) const = 0;
     virtual Query<IAlbum> albums( const QueryParameters* params = nullptr ) const = 0;
     virtual ShowPtr show( int64_t id ) const = 0;

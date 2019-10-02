@@ -583,6 +583,11 @@ void MediaLibrary::setVideoGroupsPrefixLength( uint32_t prefixLength )
     m_settings.setVideoGroupPrefixLength( prefixLength );
 }
 
+void MediaLibrary::setVideoGroupsAllowSingleVideo( bool enable )
+{
+    m_settings.setVideoGroupMinimumMediaCount( enable == true ? 1 : 2 );
+}
+
 bool MediaLibrary::isExtensionSupported( const char* ext )
 {
     return std::binary_search( std::begin( supportedExtensions ),

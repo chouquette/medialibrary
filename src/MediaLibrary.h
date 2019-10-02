@@ -84,6 +84,8 @@ public:
     virtual Query<IVideoGroup> videoGroups( const QueryParameters* params = nullptr ) const override;
     virtual VideoGroupPtr videoGroup( const std::string& name ) const override;
     virtual void setVideoGroupsPrefixLength( uint32_t prefixLength ) override;
+    virtual void setVideoGroupsAllowSingleVideo( bool enable ) override;
+
 
 
     virtual void onDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,

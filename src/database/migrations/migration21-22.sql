@@ -37,3 +37,5 @@
 
 "DROP VIEW " + VideoGroup::Table::Name,
 VideoGroup::schema( VideoGroup::Table::Name, 22 ),
+
+"ALTER TABLE Settings ADD COLUMN video_groups_minimum_media_count UNSIGNED INTEGER NOT NULL DEFAULT 1",
