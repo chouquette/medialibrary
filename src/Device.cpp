@@ -133,7 +133,8 @@ void Device::updateLastSeen()
     auto lastSeen = std::chrono::duration_cast<std::chrono::seconds>(
         std::chrono::system_clock::now().time_since_epoch()
     ).count();
-    sqlite::Tools::executeUpdate( m_ml->getConn(), req, lastSeen, m_id );
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, lastSeen, m_id ) == false )
+        LOG_WARN( "Failed to update last seen date for device ", m_uuid );
 }
 
 std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& uuid,
@@ -203,7 +204,9 @@ void Device::removeOldDevices( MediaLibraryPtr ml, std::chrono::seconds maxLifeT
             "WHERE last_seen < ? AND is_removable != 0";
     auto deadline = std::chrono::duration_cast<std::chrono::seconds>(
                 (std::chrono::system_clock::now() - maxLifeTime).time_since_epoch() );
-    sqlite::Tools::executeDelete( ml->getConn(), req, deadline.count() );
+    if ( sqlite::Tools::executeDelete( ml->getConn(), req,
+                                       deadline.count() ) == false )
+        LOG_WARN( "Failed to remove old devices" );
 }
 
 std::vector<std::shared_ptr<Device>> Device::fetchByScheme( MediaLibraryPtr ml,
