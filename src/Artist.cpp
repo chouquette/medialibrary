@@ -574,11 +574,11 @@ Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pat
                                         genreId );
 }
 
-void Artist::dropMediaArtistRelation( MediaLibraryPtr ml, int64_t mediaId )
+bool Artist::dropMediaArtistRelation( MediaLibraryPtr ml, int64_t mediaId )
 {
     const std::string req = "DELETE FROM " + MediaRelationTable::Name +
             " WHERE media_id = ?";
-    sqlite::Tools::executeDelete( ml->getConn(), req, mediaId );
+    return sqlite::Tools::executeDelete( ml->getConn(), req, mediaId );
 }
 
 std::string Artist::sortRequest( const QueryParameters* params )

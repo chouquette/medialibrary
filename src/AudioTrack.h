@@ -61,7 +61,7 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack>
         static std::shared_ptr<AudioTrack> create( MediaLibraryPtr ml, const std::string& codec,
                                                    unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels,
                                                    const std::string& language, const std::string& desc, int64_t mediaId );
-        static void removeFromMedia( MediaLibraryPtr ml, int64_t mediaId );
+        static bool removeFromMedia( MediaLibraryPtr ml, int64_t mediaId );
 
     private:
         int64_t m_id;

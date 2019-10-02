@@ -602,9 +602,12 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
     if ( media->subType() != IMedia::SubType::Unknown )
     {
         needRescan = true;
-        VideoTrack::removeFromMedia( m_ml, media->id() );
-        AudioTrack::removeFromMedia( m_ml, media->id() );
-        SubtitleTrack::removeFromMedia( m_ml, media->id() );
+        if ( VideoTrack::removeFromMedia( m_ml, media->id() ) == false ||
+             AudioTrack::removeFromMedia( m_ml, media->id() ) == false ||
+             SubtitleTrack::removeFromMedia( m_ml, media->id() ) == false )
+        {
+            return std::make_tuple( false, false );
+        }
         switch( media->subType() )
         {
             case IMedia::SubType::AlbumTrack:
@@ -660,7 +663,8 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
 
                 album->removeTrack( *media, *albumTrack );
                 AlbumTrack::destroy( m_ml, albumTrack->id() );
-                Artist::dropMediaArtistRelation( m_ml, media->id() );
+                if ( Artist::dropMediaArtistRelation( m_ml, media->id() ) == false )
+                    return std::make_tuple( false, false );
                 break;
             }
             case IMedia::SubType::Movie:

@@ -148,11 +148,11 @@ std::shared_ptr<AudioTrack> AudioTrack::create( MediaLibraryPtr ml, const std::s
     return track;
 }
 
-void AudioTrack::removeFromMedia(MediaLibraryPtr ml, int64_t mediaId)
+bool AudioTrack::removeFromMedia(MediaLibraryPtr ml, int64_t mediaId)
 {
     static const std::string req = "DELETE FROM " + Table::Name + " "
             "WHERE media_id = ?";
-    sqlite::Tools::executeDelete( ml->getConn(), req, mediaId );
+    return sqlite::Tools::executeDelete( ml->getConn(), req, mediaId );
 }
 
 }

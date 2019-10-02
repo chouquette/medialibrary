@@ -120,7 +120,7 @@ public:
      * can't delete it, at the risk of dropping it from any playlist, and we
      * won't delete an artist when a media gets updated.
      */
-    static void dropMediaArtistRelation( MediaLibraryPtr ml, int64_t mediaId );
+    static bool dropMediaArtistRelation( MediaLibraryPtr ml, int64_t mediaId );
 
     /**
      * @brief checkDBConsistency Checks the consistency of all artists records

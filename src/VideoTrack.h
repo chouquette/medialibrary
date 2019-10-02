@@ -73,7 +73,7 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack>
         /**
          * @brief removeFromMedia Remove all video tracks from a media
          */
-        static void removeFromMedia( MediaLibraryPtr ml, int64_t mediaId );
+        static bool removeFromMedia( MediaLibraryPtr ml, int64_t mediaId );
 
     private:
         int64_t m_id;

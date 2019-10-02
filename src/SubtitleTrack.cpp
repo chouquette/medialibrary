@@ -134,11 +134,11 @@ std::shared_ptr<SubtitleTrack> SubtitleTrack::create( MediaLibraryPtr ml,
     return track;
 }
 
-void SubtitleTrack::removeFromMedia(MediaLibraryPtr ml, int64_t mediaId)
+bool SubtitleTrack::removeFromMedia( MediaLibraryPtr ml, int64_t mediaId )
 {
     static const std::string req = "DELETE FROM " + Table::Name + " "
             "WHERE media_id = ?";
-    sqlite::Tools::executeDelete( ml->getConn(), req, mediaId );
+    return sqlite::Tools::executeDelete( ml->getConn(), req, mediaId );
 }
 
 }
