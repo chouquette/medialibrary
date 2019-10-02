@@ -2035,7 +2035,8 @@ bool MediaLibrary::forceRescan()
         Playlist::clearExternalPlaylistContent( this );
         parser::Task::removePlaylistContentTasks( this );
         parser::Task::resetParsing( this );
-        Artist::createDefaultArtists( getConn() );
+        if ( Artist::createDefaultArtists( getConn() ) == false )
+            return false;
         Thumbnail::deleteAll( this );
         Media::resetSubTypes( this );
         t->commit();

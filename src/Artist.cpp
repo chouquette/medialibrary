@@ -506,15 +506,10 @@ bool Artist::checkDbModel(MediaLibraryPtr ml)
 
 bool Artist::createDefaultArtists( sqlite::Connection* dbConnection )
 {
-    // Don't rely on Artist::create, since we want to insert or do nothing here.
-    // This will skip the cache for those new entities, but they will be inserted soon enough anyway.
-    static const std::string req = "INSERT OR IGNORE INTO " + Artist::Table::Name +
+    static const std::string req = "INSERT INTO " + Artist::Table::Name +
             "(id_artist) VALUES(?),(?)";
-    sqlite::Tools::executeInsert( dbConnection, req, UnknownArtistID,
-                                          VariousArtistID );
-    // Always return true. The insertion might succeed, but we consider it a failure when 0 row
-    // gets inserted, while we are explicitely specifying "OR IGNORE" here.
-    return true;
+    return sqlite::Tools::executeInsert( dbConnection, req, UnknownArtistID,
+                                         VariousArtistID ) != 0;
 }
 
 std::shared_ptr<Artist> Artist::create( MediaLibraryPtr ml, const std::string& name )
