@@ -614,7 +614,7 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
                 {
                     LOG_ERROR( "Can't fetch album track associated with media ", media->id() );
                     assert( false );
-                    break;
+                    return std::make_tuple( false, false );
                 }
                 auto album = std::static_pointer_cast<Album>( albumTrack->album() );
                 if ( album == nullptr )
@@ -622,6 +622,7 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
                     LOG_ERROR( "Can't fetch album associated to album track ",
                                albumTrack->id(), "(media ", media->id(), ")" );
                     assert( false );
+                    return std::make_tuple( false, false );
                 }
                 // No need to decrement the number of tracks for the artist
                 // Removing the AlbumTrack will cause the 'delete_album_track'
@@ -669,7 +670,7 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
                 {
                     LOG_ERROR( "Failed to fetch movie associated with media ", media->id() );
                     assert( false );
-                    break;
+                    return std::make_tuple( false, false );
                 }
                 Movie::destroy( m_ml, movie->id() );
                 break;
@@ -681,14 +682,14 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
                 {
                     LOG_ERROR( "Failed to fetch show episode associated with media ", media->id() );
                     assert( false );
-                    break;
+                    return std::make_tuple( false, false );
                 }
                 ShowEpisode::destroy( m_ml, episode->id() );
                 break;
             }
             case IMedia::SubType::Unknown:
                 assert( !"Unreachable" );
-                break;
+                return std::make_tuple( false, false );
         }
         media->setSubType( IMedia::SubType::Unknown );
     }
