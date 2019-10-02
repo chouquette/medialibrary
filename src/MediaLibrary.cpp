@@ -140,7 +140,7 @@ MediaLibrary::~MediaLibrary()
         m_parser->stop();
 }
 
-void MediaLibrary::createAllTables( uint32_t dbModelVersion )
+bool MediaLibrary::createAllTables( uint32_t dbModelVersion )
 {
     // We need to create the tables in order of triggers creation
     // Device is the "root of all evil". When a device is modified,
@@ -172,12 +172,14 @@ void MediaLibrary::createAllTables( uint32_t dbModelVersion )
     VideoTrack::createTable( dbConn );
     AudioTrack::createTable( dbConn );
     Artist::createTable( dbConn );
-    Artist::createDefaultArtists( dbConn );
+    if ( Artist::createDefaultArtists( dbConn ) == false )
+        return false;
     parser::Task::createTable( dbConn, dbModelVersion );
     Metadata::createTable( dbConn );
     SubtitleTrack::createTable( dbConn );
     Chapter::createTable( dbConn );
     Bookmark::createTable( dbConn );
+    return true;
 }
 
 void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
@@ -414,7 +416,8 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
         {
             dbModel = Settings::DbModelVersion;
             auto t = m_dbConnection->newTransaction();
-            createAllTables( dbModel );
+            if ( createAllTables( dbModel ) == false )
+                return InitializeResult::Failed;
             createAllTriggers( dbModel );
             t->commit();
         }
@@ -1155,7 +1158,8 @@ bool MediaLibrary::recreateDatabase( const std::string& dbPath )
     unlink( dbPath.c_str() );
     m_dbConnection = sqlite::Connection::connect( dbPath );
     Settings::createTable( m_dbConnection.get() );
-    createAllTables( Settings::DbModelVersion );
+    if ( createAllTables( Settings::DbModelVersion ) == false )
+        return false;
     createAllTriggers( Settings::DbModelVersion );
     // We dropped the database, there is no setting to be read anymore
     return m_settings.load();

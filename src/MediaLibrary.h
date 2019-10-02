@@ -235,7 +235,7 @@ private:
     void migrateModel19to20();
     void migrateModel20to21();
     void migrateModel21to22();
-    void createAllTables( uint32_t dbModelVersion );
+    bool createAllTables( uint32_t dbModelVersion );
     void createAllTriggers( uint32_t dbModelVersion );
     bool checkDatabaseIntegrity();
     void registerEntityHooks();
