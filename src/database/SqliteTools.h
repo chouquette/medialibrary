@@ -329,8 +329,27 @@ class Tools
             Connection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
                 ctx = dbConnection->acquireWriteContext();
-            executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
-            return sqlite3_changes( dbConnection->handle() ) > 0;
+            try
+            {
+                executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
+            }
+            // We explicitely don't want to catch ContraintViolations. They need
+            // to be propagated higher up the chain, as some logic expect to know
+            // when a constraint is violated.
+            catch ( const sqlite::errors::ConstraintViolation& )
+            {
+                throw;
+            }
+            catch ( const sqlite::errors::Runtime& ex )
+            {
+                if ( sqlite::errors::isInnocuous( ex ) == true )
+                {
+                    LOG_ERROR( "Failed to execute update/delete: ", ex.what() );
+                    return false;
+                }
+                throw;
+            }
+            return true;
         }
 
         template <typename... Args>
@@ -352,8 +371,20 @@ class Tools
             Connection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
                 ctx = dbConnection->acquireWriteContext();
-            executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
-            return sqlite3_last_insert_rowid( dbConnection->handle() );
+            try
+            {
+                executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
+                return sqlite3_last_insert_rowid( dbConnection->handle() );
+            }
+            catch ( const sqlite::errors::Runtime& ex )
+            {
+                if ( sqlite::errors::isInnocuous( ex ) == true )
+                {
+                    LOG_ERROR( "Failed to execute update/delete: ", ex.what() );
+                    return false;
+                }
+                throw;
+            }
         }
 
         /**

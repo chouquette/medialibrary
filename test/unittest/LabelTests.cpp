@@ -85,7 +85,7 @@ TEST_F( Labels, Remove )
 
     // Remove a non-linked label
     res = m->removeLabel( l1 );
-    ASSERT_FALSE( res );
+    ASSERT_TRUE( res );
 
     // Remove the last label
     res = m->removeLabel( l2 );
@@ -148,9 +148,9 @@ TEST_F( Labels, Delete )
     labels = f->labels()->all();
     ASSERT_EQ( labels.size(), 0u );
 
-    // Nothing to delete anymore, this should fail gracefuly
+    // Nothing to delete anymore, this should just do nothing
     bool res = ml->deleteLabel( l1 );
-    ASSERT_FALSE( res );
+    ASSERT_TRUE( res );
 }
 
 TEST_F( Labels, CheckDbModel )

@@ -202,7 +202,7 @@ TEST_F( Bookmarks, Delete )
     ASSERT_EQ( 2u, query->all().size() );
 
     res = m->removeBookmark( 0 );
-    ASSERT_FALSE( res );
+    ASSERT_TRUE( res );
     query = m->bookmarks( nullptr );
     ASSERT_EQ( 2u, query->count() );
     ASSERT_EQ( 2u, query->all().size() );
