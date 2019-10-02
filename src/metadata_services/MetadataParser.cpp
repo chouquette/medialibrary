@@ -667,8 +667,8 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
                 auto movie = media->movie();
                 if ( movie == nullptr )
                 {
-                    assert( false );
                     LOG_ERROR( "Failed to fetch movie associated with media ", media->id() );
+                    assert( false );
                     break;
                 }
                 Movie::destroy( m_ml, movie->id() );
@@ -679,8 +679,8 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
                 auto episode = std::static_pointer_cast<ShowEpisode>( media->showEpisode() );
                 if ( episode == nullptr )
                 {
-                    assert( false );
                     LOG_ERROR( "Failed to fetch show episode associated with media ", media->id() );
+                    assert( false );
                     break;
                 }
                 ShowEpisode::destroy( m_ml, episode->id() );
