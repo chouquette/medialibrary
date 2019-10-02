@@ -120,6 +120,7 @@ noinst_HEADERS = \
 	include/discoverer/IDiscoverer.h \
 	include/Fixup.h \
 	include/Types.h \
+	include/Common.h \
 	src/Album.h \
 	src/AlbumTrack.h \
 	src/Artist.h \
