@@ -729,7 +729,8 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshPlaylist(IItem& item) const
      */
     auto t = m_ml->getConn()->newTransaction();
     parser::Task::removePlaylistContentTasks( m_ml, playlist->id() );
-    playlist->clearContent();
+    if ( playlist->clearContent() == false )
+        return std::make_tuple( false, false );
     t->commit();
     return std::make_tuple( true, true );
 }

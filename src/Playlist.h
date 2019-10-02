@@ -96,12 +96,12 @@ public:
      *                          that were parsed from playlist files.
      * Playlist manually added by the user are untouched
      */
-    static void clearExternalPlaylistContent( MediaLibraryPtr ml );
+    static bool clearExternalPlaylistContent( MediaLibraryPtr ml );
 
     /**
      * @brief clearContent Removes all media from this playlist.
      */
-    void clearContent();
+    bool clearContent();
 
     static bool backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel);
 

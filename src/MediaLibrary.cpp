@@ -2032,7 +2032,8 @@ bool MediaLibrary::forceRescan()
         VideoTrack::deleteAll( this );
         AudioTrack::deleteAll( this );
         SubtitleTrack::deleteAll( this );
-        Playlist::clearExternalPlaylistContent( this );
+        if ( Playlist::clearExternalPlaylistContent( this ) == false )
+            return false;
         parser::Task::removePlaylistContentTasks( this );
         parser::Task::resetParsing( this );
         if ( Artist::createDefaultArtists( getConn() ) == false )

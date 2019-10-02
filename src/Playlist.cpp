@@ -156,7 +156,12 @@ void Playlist::curateNullMediaID() const
         {
             LOG_INFO( "Updating playlist item mediaId (playlist: ", m_id,
                       "; mrl: ", mrl, ')' );
-            sqlite::Tools::executeUpdate( dbConn, updateReq, media->id(), rowId );
+            if ( sqlite::Tools::executeUpdate( dbConn, updateReq, media->id(),
+                                               rowId ) == false )
+            {
+                LOG_WARN( "Failed to currate NULL media_id from playlist" );
+                return;
+            }
         }
         else
         {
@@ -170,7 +175,11 @@ void Playlist::curateNullMediaID() const
         // Batch all deletion at once instead of doing it during the loop
         std::string deleteReq = "DELETE FROM " + Playlist::MediaRelationTable::Name + " "
                 "WHERE playlist_id = ? AND media_id IS NULL";
-        sqlite::Tools::executeDelete( dbConn, deleteReq, m_id );
+        if ( sqlite::Tools::executeDelete( dbConn, deleteReq, m_id ) == false )
+        {
+            LOG_WARN( "Failed to remove remaining NULL media_id from playlist" );
+            return;
+        }
     }
     t->commit();
 }
@@ -410,7 +419,7 @@ Query<IPlaylist> Playlist::listAll( MediaLibraryPtr ml, const QueryParameters* p
                                             sortRequest( params ) );
 }
 
-void Playlist::clearExternalPlaylistContent(MediaLibraryPtr ml)
+bool Playlist::clearExternalPlaylistContent(MediaLibraryPtr ml)
 {
     // We can't delete all external playlist as such, since this would cause the
     // deletion of the associated task through the Task.playlist_id Playlist.id_playlist
@@ -420,14 +429,14 @@ void Playlist::clearExternalPlaylistContent(MediaLibraryPtr ml)
             " WHERE playlist_id IN ("
             "SELECT id_playlist FROM " + Playlist::Table::Name + " WHERE "
             "file_id IS NOT NULL)";
-    sqlite::Tools::executeDelete( ml->getConn(), req );
+    return sqlite::Tools::executeDelete( ml->getConn(), req );
 }
 
-void Playlist::clearContent()
+bool Playlist::clearContent()
 {
     const std::string req = "DELETE FROM " + Playlist::MediaRelationTable::Name +
             " WHERE playlist_id = ?";
-    sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id );
+    return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id );
 }
 
 std::shared_ptr<Playlist> Playlist::fromFile( MediaLibraryPtr ml, int64_t fileId )
