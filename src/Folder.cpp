@@ -614,7 +614,9 @@ bool Folder::forceNonRemovable( const std::string& fullMrl )
     {
         // Don't check the return value as some updates might fail, because we
         // removed the parents folder before firing the update itself
-        sqlite::Tools::executeUpdate( m_ml->getConn(), req, fullMrl, false, m_id );
+        if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, fullMrl, false,
+                                           m_id ) == false )
+            return false;
     }
     catch ( sqlite::errors::ConstraintViolation& )
     {
