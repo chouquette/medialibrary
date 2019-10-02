@@ -191,7 +191,7 @@ public:
 
     void refreshDevices(fs::IFileSystemFactory& fsFactory);
 
-    virtual void forceRescan() override;
+    virtual bool forceRescan() override;
 
     virtual void enableFailedThumbnailRegeneration() override;
 

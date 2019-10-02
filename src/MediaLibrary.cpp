@@ -2012,7 +2012,7 @@ void MediaLibrary::refreshDevices( fs::IFileSystemFactory& fsFactory )
     LOG_DEBUG( "Done refreshing devices in database." );
 }
 
-void MediaLibrary::forceRescan()
+bool MediaLibrary::forceRescan()
 {
     if ( m_parser != nullptr )
     {
@@ -2047,6 +2047,7 @@ void MediaLibrary::forceRescan()
         m_parser->restore();
         m_parser->resume();
     }
+    return true;
 }
 
 void MediaLibrary::enableFailedThumbnailRegeneration()
