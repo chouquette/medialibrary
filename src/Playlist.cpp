@@ -500,6 +500,13 @@ bool Playlist::backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel )
 
     auto dbConn = ml->getConn();
     auto ctx = dbConn->acquireReadContext();
+    struct Backup
+    {
+        Backup( int64_t id, std::string name ) : id(id), name(std::move(name)) {}
+        int64_t id;
+        std::string name;
+        std::vector<std::string> mrls;
+    };
     std::vector<Backup> pls;
     // There was no file_id field before model 5
     sqlite::Statement stmt{ dbConn->handle(),
@@ -552,17 +559,18 @@ bool Playlist::backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel )
         }
         if ( pl.mrls.empty() == true )
             continue;
-        res = writeBackup( pl, ml->playlistPath() ) && res;
+        auto output = ml->playlistPath() + std::to_string( pl.id ) + ".xspf";
+        res = writeBackup( pl.name, pl.mrls, output ) && res;
     }
     return res;
 }
 
-bool Playlist::writeBackup( const Playlist::Backup& backup,
-                            const std::string& playlistFolder )
+bool Playlist::writeBackup( const std::string& name,
+                            const std::vector<std::string>& mrls,
+                            const std::string& destFile )
 {
-    auto output = playlistFolder + std::to_string( backup.id ) + ".xspf";
     auto file = std::unique_ptr<FILE, decltype(&fclose)>{
-        fopen( output.c_str(), "w" ), &fclose
+        fopen( destFile.c_str(), "w" ), &fclose
     };
     if ( file == nullptr )
         return false;
@@ -571,8 +579,8 @@ bool Playlist::writeBackup( const Playlist::Backup& backup,
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<playlist version=\"1\" xmlns=\"http://xspf.org/ns/0/\">\n"
     };
-    doc += "<title>" + backup.name + "</title>\n<trackList>\n";
-    for ( const auto mrl : backup.mrls )
+    doc += "<title>" + name + "</title>\n<trackList>\n";
+    for ( const auto mrl : mrls )
         doc += "<track><location>" + mrl + "</location></track>\n";
     doc += "</trackList>\n</playlist>";
 
