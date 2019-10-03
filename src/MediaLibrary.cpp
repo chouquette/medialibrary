@@ -2029,17 +2029,13 @@ bool MediaLibrary::forceRescan()
         VideoTrack::deleteAll( this );
         AudioTrack::deleteAll( this );
         SubtitleTrack::deleteAll( this );
-        if ( Playlist::clearExternalPlaylistContent( this ) == false )
-            return false;
-        if ( parser::Task::removePlaylistContentTasks( this ) == false )
-            return false;
-        if ( parser::Task::resetParsing( this ) == false )
-            return false;
-        if ( Artist::createDefaultArtists( getConn() ) == false )
+        if ( Playlist::clearExternalPlaylistContent( this ) == false ||
+             parser::Task::removePlaylistContentTasks( this ) == false ||
+             parser::Task::resetParsing( this ) == false ||
+             Artist::createDefaultArtists( getConn() ) == false ||
+             Media::resetSubTypes( this ) == false )
             return false;
         Thumbnail::deleteAll( this );
-        if ( Media::resetSubTypes( this ) == false )
-            return false;
         t->commit();
     }
     removeThumbnails();
