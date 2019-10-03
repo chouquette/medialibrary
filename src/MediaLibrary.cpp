@@ -1219,7 +1219,7 @@ void MediaLibrary::migrateModel7to8()
     t->commit();
 }
 
-void MediaLibrary::migrateModel8to9()
+bool MediaLibrary::migrateModel8to9()
 {
     // A bug in a previous migration caused our triggers to be missing for the
     // first application run (after the migration).
@@ -1234,9 +1234,11 @@ void MediaLibrary::migrateModel8to9()
 
     // Don't check for the return value, we don't mind if nothing deleted.
     // Quite the opposite actually :)
-    sqlite::Tools::executeDelete( getConn(), req );
+    if ( sqlite::Tools::executeDelete( getConn(), req ) == false )
+        return false;
     m_settings.setDbModelVersion( 9 );
     t->commit();
+    return false;
 }
 
 void MediaLibrary::migrateModel9to10()
@@ -1277,7 +1279,7 @@ void MediaLibrary::migrateModel10to11()
  *   will be enforced, causing the entire update chain to be triggered, and
  *   restoring correct is_present values for all AlbumTrack/Album/Artist entries
  */
-void MediaLibrary::migrateModel12to13()
+bool MediaLibrary::migrateModel12to13()
 {
     auto t = getConn()->newTransaction();
     const std::string reqs[] = {
@@ -1287,7 +1289,10 @@ void MediaLibrary::migrateModel12to13()
     };
 
     for ( const auto& req : reqs )
-        sqlite::Tools::executeDelete( getConn(), req );
+    {
+        if ( sqlite::Tools::executeDelete( getConn(), req ) == false )
+            return false;
+    }
 
     AlbumTrack::createTriggers( getConn() );
     Album::createTriggers( getConn() );
@@ -1297,9 +1302,11 @@ void MediaLibrary::migrateModel12to13()
     const std::string migrateData = "UPDATE " + AlbumTrack::Table::Name +
             " SET is_present = (SELECT is_present FROM " + Media::Table::Name +
             " WHERE id_media = media_id)";
-    sqlite::Tools::executeUpdate( getConn(), migrateData );
+    if ( sqlite::Tools::executeUpdate( getConn(), migrateData ) == false )
+        return false;
     m_settings.setDbModelVersion( 13 );
     t->commit();
+    return true;
 }
 
 /*

@@ -238,37 +238,38 @@ void MediaLibraryTester::deleteMedia( int64_t mediaId )
     Media::destroy( this, mediaId );
 }
 
-void MediaLibraryTester::outdateAllDevices()
+bool MediaLibraryTester::outdateAllDevices()
 {
     std::string req = "UPDATE " + Device::Table::Name + " SET last_seen = 1";
-    sqlite::Tools::executeUpdate( getConn(), req );
+    return sqlite::Tools::executeUpdate( getConn(), req );
 }
 
-void MediaLibraryTester::setMediaInsertionDate( int64_t mediaId, time_t t )
+bool MediaLibraryTester::setMediaInsertionDate( int64_t mediaId, time_t t )
 {
     std::string req = "UPDATE " + Media::Table::Name + " SET insertion_date = ? "
             "WHERE id_media = ?";
-    sqlite::Tools::executeUpdate( getConn(), req, mediaId, t );
+    return sqlite::Tools::executeUpdate( getConn(), req, mediaId, t );
 }
 
-void MediaLibraryTester::outdateAllExternalMedia()
+bool MediaLibraryTester::outdateAllExternalMedia()
 {
     std::string req = "UPDATE " + Media::Table::Name + " SET real_last_played_date = 1 "
             "WHERE type = ? OR type = ?";
-    sqlite::Tools::executeUpdate( getConn(), req, IMedia::Type::External, IMedia::Type::Stream );
+    return sqlite::Tools::executeUpdate( getConn(), req, IMedia::Type::External,
+                                         IMedia::Type::Stream );
 }
 
-void MediaLibraryTester::setMediaType(int64_t mediaId, IMedia::Type type)
+bool MediaLibraryTester::setMediaType(int64_t mediaId, IMedia::Type type)
 {
     std::string req = "UPDATE " + Media::Table::Name + " SET type = ? WHERE id_media = ?";
-    sqlite::Tools::executeUpdate( getConn(), req, type, mediaId );
+    return sqlite::Tools::executeUpdate( getConn(), req, type, mediaId );
 }
 
-void MediaLibraryTester::setAlbumTrackGenre( int64_t albumTrackId, int64_t genreId )
+bool MediaLibraryTester::setAlbumTrackGenre( int64_t albumTrackId, int64_t genreId )
 {
     static const std::string req = "UPDATE " + AlbumTrack::Table::Name
             + " SET genre_id = ? WHERE id_track = ?";
-    sqlite::Tools::executeUpdate( getConn(), req, genreId, albumTrackId );
+    return sqlite::Tools::executeUpdate( getConn(), req, genreId, albumTrackId );
 }
 
 uint32_t MediaLibraryTester::countNbThumbnails()

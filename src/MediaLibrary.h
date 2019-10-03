@@ -222,10 +222,10 @@ private:
     void migrateModel3to5();
     void migrateModel5to6();
     void migrateModel7to8();
-    void migrateModel8to9();
+    bool migrateModel8to9();
     void migrateModel9to10();
     void migrateModel10to11();
-    void migrateModel12to13();
+    bool migrateModel12to13();
     void migrateModel13to14( uint32_t originalPreviousVersion );
     void migrateModel14to15();
     void migrateModel15to16();

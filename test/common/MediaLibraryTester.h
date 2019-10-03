@@ -83,11 +83,11 @@ public:
     virtual void populateNetworkFsFactories() override;
     MediaPtr addMedia( const std::string& mrl, IMedia::Type type = IMedia::Type::External );
     void deleteMedia( int64_t mediaId );
-    void outdateAllDevices();
-    void setMediaInsertionDate( int64_t mediaId, time_t t );
-    void outdateAllExternalMedia();
-    void setMediaType( int64_t mediaId, IMedia::Type type );
-    void setAlbumTrackGenre( int64_t albumTrackId, int64_t genreId );
+    bool outdateAllDevices();
+    bool setMediaInsertionDate( int64_t mediaId, time_t t );
+    bool outdateAllExternalMedia();
+    bool setMediaType( int64_t mediaId, IMedia::Type type );
+    bool setAlbumTrackGenre( int64_t albumTrackId, int64_t genreId );
     uint32_t countNbThumbnails();
     uint32_t countNbTasks();
 
