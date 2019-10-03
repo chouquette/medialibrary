@@ -32,6 +32,7 @@
 #include <vector>
 
 #include <compat/Mutex.h>
+#include "Common.h"
 #include "database/SqliteConnection.h"
 #include "database/SqliteErrors.h"
 #include "database/SqliteTraits.h"
@@ -323,8 +324,9 @@ class Tools
         }
 
         template <typename... Args>
-        static bool executeDelete( sqlite::Connection* dbConnection,
-                                   const std::string& req, Args&&... args )
+        ML_FORCE_USED static bool executeDelete( sqlite::Connection* dbConnection,
+                                                 const std::string& req,
+                                                 Args&&... args )
         {
             Connection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
@@ -353,8 +355,9 @@ class Tools
         }
 
         template <typename... Args>
-        static bool executeUpdate( sqlite::Connection* dbConnection,
-                                   const std::string& req, Args&&... args )
+        ML_FORCE_USED static bool executeUpdate( sqlite::Connection* dbConnection,
+                                                 const std::string& req,
+                                                 Args&&... args )
         {
             // The code would be exactly the same, do not freak out because it calls executeDelete :)
             return executeDelete( dbConnection, req, std::forward<Args>( args )... );
@@ -365,8 +368,9 @@ class Tools
          * Returns 0 (which is an invalid sqlite primary key) when insertion fails.
          */
         template <typename... Args>
-        static int64_t executeInsert( sqlite::Connection* dbConnection,
-                                      const std::string& req, Args&&... args )
+        ML_FORCE_USED static int64_t executeInsert( sqlite::Connection* dbConnection,
+                                                    const std::string& req,
+                                                    Args&&... args )
         {
             Connection::WriteContext ctx;
             if (Transaction::transactionInProgress() == false)
