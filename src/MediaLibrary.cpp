@@ -58,6 +58,7 @@
 #include "database/SqliteConnection.h"
 #include "database/SqliteQuery.h"
 #include "utils/Filename.h"
+#include "utils/Directory.h"
 #include "utils/Url.h"
 #include "utils/File.h"
 #include "VideoTrack.h"
@@ -290,45 +291,6 @@ bool MediaLibrary::validateSearchPattern( const std::string& pattern )
     return pattern.size() >= 3;
 }
 
-bool MediaLibrary::createFolder( const std::string& thumbnailPath ) const
-{
-    auto paths = utils::file::splitPath( thumbnailPath, true );
-#ifndef _WIN32
-    std::string fullPath{ "/" };
-#else
-    std::string fullPath;
-#endif
-    while ( paths.empty() == false )
-    {
-        fullPath += paths.top();
-
-#ifdef _WIN32
-        // Don't try to create C: or various other drives
-        if ( isalpha( fullPath[0] ) && fullPath[1] == ':' && fullPath.length() == 2 )
-        {
-            fullPath += "\\";
-            paths.pop();
-            continue;
-        }
-        auto wFullPath = charset::ToWide( fullPath.c_str() );
-        if ( _wmkdir( wFullPath.get() ) != 0 )
-#else
-        if ( mkdir( fullPath.c_str(), S_IRWXU ) != 0 )
-#endif
-        {
-            if ( errno != EEXIST )
-                return false;
-        }
-        paths.pop();
-#ifndef _WIN32
-        fullPath += "/";
-#else
-        fullPath += "\\";
-#endif
-    }
-    return true;
-}
-
 void MediaLibrary::removeThumbnails()
 {
     auto thumbnailsFolderMrl = utils::file::toMrl( m_thumbnailPath );
@@ -380,14 +342,14 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
 
     auto mlFolder = utils::file::toFolderPath( mlFolderPath );
     m_thumbnailPath = mlFolder + "thumbnails/";
-    if ( createFolder( m_thumbnailPath ) == false )
+    if ( utils::fs::mkdir( m_thumbnailPath ) == false )
     {
         LOG_ERROR( "Failed to create thumbnail directory (", m_thumbnailPath,
                     ": ", strerror( errno ) );
         return InitializeResult::Failed;
     }
     m_playlistPath = mlFolder + "playlists/";
-    if ( createFolder( m_playlistPath ) == false )
+    if ( utils::fs::mkdir( m_playlistPath ) == false )
     {
         LOG_ERROR( "Failed to create playlist export directory (", m_playlistPath,
                     ": ", strerror( errno ) );

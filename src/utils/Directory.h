@@ -36,6 +36,7 @@ namespace fs
 
 bool isDirectory( const std::string& path );
 std::string toAbsolute( const std::string& path );
+bool mkdir( const std::string& path );
 
 }
 

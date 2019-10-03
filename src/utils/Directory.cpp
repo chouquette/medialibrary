@@ -101,6 +101,45 @@ std::string toAbsolute( const std::string& path )
 #endif
 }
 
+bool mkdir( const std::string& path )
+{
+    auto paths = utils::file::splitPath( path, true );
+#ifndef _WIN32
+    std::string fullPath{ "/" };
+#else
+    std::string fullPath;
+#endif
+    while ( paths.empty() == false )
+    {
+        fullPath += paths.top();
+
+#ifdef _WIN32
+        // Don't try to create C: or various other drives
+        if ( isalpha( fullPath[0] ) && fullPath[1] == ':' && fullPath.length() == 2 )
+        {
+            fullPath += "\\";
+            paths.pop();
+            continue;
+        }
+        auto wFullPath = charset::ToWide( fullPath.c_str() );
+        if ( _wmkdir( wFullPath.get() ) != 0 )
+#else
+        if ( ::mkdir( fullPath.c_str(), S_IRWXU ) != 0 )
+#endif
+        {
+            if ( errno != EEXIST )
+                return false;
+        }
+        paths.pop();
+#ifndef _WIN32
+        fullPath += "/";
+#else
+        fullPath += "\\";
+#endif
+    }
+    return true;
+}
+
 }
 
 }
