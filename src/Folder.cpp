@@ -274,11 +274,11 @@ std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& m
     return self;
 }
 
-void Folder::excludeEntryFolder( MediaLibraryPtr ml, int64_t folderId )
+bool Folder::excludeEntryFolder( MediaLibraryPtr ml, int64_t folderId )
 {
     std::string req = "INSERT INTO " + ExcludedFolderTable::Name +
             "(folder_id) VALUES(?)";
-    sqlite::Tools::executeRequest( ml->getConn(), req, folderId );
+    return sqlite::Tools::executeInsert( ml->getConn(), req, folderId ) != 0;
 }
 
 bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl )
