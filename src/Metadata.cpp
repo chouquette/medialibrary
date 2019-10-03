@@ -190,11 +190,12 @@ const std::vector<Metadata::Record>& Metadata::all() const
     return m_records;
 }
 
-void Metadata::unset( sqlite::Connection* dbConn, IMetadata::EntityType entityType, uint32_t type )
+bool Metadata::unset( sqlite::Connection* dbConn, IMetadata::EntityType entityType,
+                      uint32_t type )
 {
     static const std::string req = "DELETE FROM " + Metadata::Table::Name +
             " WHERE entity_type = ? AND type = ? ";
-    sqlite::Tools::executeDelete( dbConn, req, entityType, type );
+    return sqlite::Tools::executeDelete( dbConn, req, entityType, type );
 }
 
 void Metadata::createTable(sqlite::Connection* connection)

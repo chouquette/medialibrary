@@ -1313,8 +1313,9 @@ bool Media::clearHistory( MediaLibraryPtr ml )
             "last_played_date = NULL";
 
     using MDType = typename std::underlying_type<IMedia::MetadataType>::type;
-    Metadata::unset( dbConn, IMetadata::EntityType::Media,
-                     static_cast<MDType>( IMedia::MetadataType::Progress ) );
+    if ( Metadata::unset( dbConn, IMetadata::EntityType::Media,
+                    static_cast<MDType>( IMedia::MetadataType::Progress ) ) == false )
+        return false;
 
     if ( sqlite::Tools::executeUpdate( dbConn, req ) == false )
         return false;
