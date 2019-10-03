@@ -812,8 +812,7 @@ bool MediaLibrary::clearHistory()
     try
     {
         return sqlite::Tools::withRetries( 3, [this]() {
-            Media::clearHistory( this );
-            return true;
+            return Media::clearHistory( this );
         });
     }
     catch ( sqlite::errors::Generic& ex )
@@ -2039,7 +2038,8 @@ bool MediaLibrary::forceRescan()
         if ( Artist::createDefaultArtists( getConn() ) == false )
             return false;
         Thumbnail::deleteAll( this );
-        Media::resetSubTypes( this );
+        if ( Media::resetSubTypes( this ) == false )
+            return false;
         t->commit();
     }
     removeThumbnails();

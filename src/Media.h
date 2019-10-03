@@ -92,7 +92,7 @@ class Media : public IMedia,
         ///
         void setTitleBuffered( const std::string& title );
         // Should only be used by 13->14 migration
-        void setFileName( std::string fileName );
+        bool setFileName( std::string fileName );
         virtual AlbumTrackPtr albumTrack() const override;
         void setAlbumTrack( AlbumTrackPtr albumTrack );
         virtual int64_t duration() const override;
@@ -106,7 +106,7 @@ class Media : public IMedia,
         virtual bool increasePlayCount() override;
         virtual bool setPlayCount( uint32_t playCount ) override;
         virtual time_t lastPlayedDate() const override;
-        virtual void removeFromHistory() override;
+        virtual bool removeFromHistory() override;
         virtual bool isFavorite() const override;
         virtual bool setFavorite( bool favorite ) override;
         virtual const std::vector<FilePtr>& files() const override;
@@ -210,8 +210,8 @@ class Media : public IMedia,
                                                    const std::string& pattern,
                                                    const QueryParameters* params );
 
-        static void clearHistory( MediaLibraryPtr ml );
-        static void removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime );
+        static bool clearHistory( MediaLibraryPtr ml );
+        static bool removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime );
 
         /**
          * @brief resetSubTypes Reset all parsed media subtypes
@@ -221,7 +221,7 @@ class Media : public IMedia,
          * entities will have been deleted
          * This will only affect media with a `Type` of Video/Audio
          */
-        static void resetSubTypes( MediaLibraryPtr ml );
+        static bool resetSubTypes( MediaLibraryPtr ml );
 
 private:
         static std::string addRequestJoin(const QueryParameters* params, bool forceFile , bool forceAlbumTrack);

@@ -248,7 +248,9 @@ class IMedia
         /// After calling this method, the observable state is as if the media
         /// was never played.
         ///
-        virtual void removeFromHistory() = 0;
+        /// This will return false in case of a database failure
+        ///
+        virtual bool removeFromHistory() = 0;
 
         ///
         /// \brief requestThumbnail Queues a thumbnail generation request for
@@ -302,7 +304,7 @@ class IMedia
         ///
         /// \brief removeBookmark Removes a bookmark by its time
         /// \param time The time at which the bookmark must be removed.
-        /// \return
+        /// \return false in case of a database error
         ///
         virtual bool removeBookmark( int64_t time ) = 0;
         ///

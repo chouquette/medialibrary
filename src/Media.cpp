@@ -224,14 +224,15 @@ time_t Media::lastPlayedDate() const
     return m_lastPlayedDate;
 }
 
-void Media::removeFromHistory()
+bool Media::removeFromHistory()
 {
     static const std::string req = "UPDATE " + Media::Table::Name + " SET "
             "play_count = ?, last_played_date = ? WHERE id_media = ?";
     auto dbConn = m_ml->getConn();
     auto t = dbConn->newTransaction();
 
-    sqlite::Tools::executeUpdate( dbConn, req, 0, nullptr, m_id );
+    if ( sqlite::Tools::executeUpdate( dbConn, req, 0, nullptr, m_id ) == false )
+        return false;
     unsetMetadata( MetadataType::Progress );
 
     t->commit();
@@ -240,6 +241,7 @@ void Media::removeFromHistory()
     auto historyType = ( m_type == Type::Video || m_type == Type::Audio ) ?
                        HistoryType::Media : HistoryType::Network;
     m_ml->getCb()->onHistoryChanged( historyType );
+    return true;
 }
 
 bool Media::isFavorite() const
@@ -884,13 +886,15 @@ void Media::setTitleBuffered( const std::string& title )
     m_changed = true;
 }
 
-void Media::setFileName( std::string fileName )
+bool Media::setFileName( std::string fileName )
 {
     if ( fileName == m_filename )
-        return;
+        return true;
     static const std::string req = "UPDATE " + Media::Table::Name + " SET filename = ? WHERE id_media = ?";
-    sqlite::Tools::executeUpdate( m_ml->getConn(), req, fileName, m_id );
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, fileName, m_id ) == false )
+        return false;
     m_filename = std::move( fileName );
+    return true;
 }
 
 void Media::createTable( sqlite::Connection* connection )
@@ -1300,7 +1304,7 @@ Query<IMedia> Media::searchFromVideoGroup( MediaLibraryPtr ml, const std::string
                                       IMedia::Type::Video, groupName );
 }
 
-void Media::clearHistory( MediaLibraryPtr ml )
+bool Media::clearHistory( MediaLibraryPtr ml )
 {
     auto dbConn = ml->getConn();
     auto t = dbConn->newTransaction();
@@ -1312,13 +1316,15 @@ void Media::clearHistory( MediaLibraryPtr ml )
     Metadata::unset( dbConn, IMetadata::EntityType::Media,
                      static_cast<MDType>( IMedia::MetadataType::Progress ) );
 
-    sqlite::Tools::executeUpdate( dbConn, req );
+    if ( sqlite::Tools::executeUpdate( dbConn, req ) == false )
+        return false;
     t->commit();
     ml->getCb()->onHistoryChanged( HistoryType::Media );
     ml->getCb()->onHistoryChanged( HistoryType::Network );
+    return true;
 }
 
-void Media::removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime )
+bool Media::removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime )
 {
     // Media that were never played have a real_last_played_date = NULL, so they
     // won't match for real_last_played_date < X
@@ -1330,17 +1336,17 @@ void Media::removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime
             "AND nb_playlists = 0";
     auto deadline = std::chrono::duration_cast<std::chrono::seconds>(
                 (std::chrono::system_clock::now() - maxLifeTime).time_since_epoch() );
-    sqlite::Tools::executeDelete( ml->getConn(), req, deadline.count(),
-                                  deadline.count(),
-                                  IMedia::Type::External, IMedia::Type::Stream );
+    return sqlite::Tools::executeDelete( ml->getConn(), req, deadline.count(),
+                                         deadline.count(),
+                                         IMedia::Type::External, IMedia::Type::Stream );
 }
 
-void Media::resetSubTypes( MediaLibraryPtr ml )
+bool Media::resetSubTypes( MediaLibraryPtr ml )
 {
     const std::string req = "UPDATE " + Media::Table::Name +
             " SET subtype = ? WHERE type = ? OR type = ?";
-    sqlite::Tools::executeUpdate( ml->getConn(), req, SubType::Unknown,
-                                  Type::Video, Type::Audio );
+    return sqlite::Tools::executeUpdate( ml->getConn(), req, SubType::Unknown,
+                                         Type::Video, Type::Audio );
 }
 
 }
