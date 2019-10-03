@@ -233,7 +233,7 @@ private:
         {
             auto sqlStr = sqlite3_sql( m_stmt.get() );
             if ( res == SQLITE_RANGE )
-                throw errors::ColumnOutOfRange( sqlStr );
+                throw errors::ColumnOutOfRange( sqlStr, sqlite3_sql( m_stmt.get() ), res );
             throw errors::Prepare( sqlStr, "Failed to bind parameter", res );
         }
         m_bindIdx++;

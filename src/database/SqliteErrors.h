@@ -536,20 +536,21 @@ public:
     }
 };
 
-class ColumnOutOfRange : public Generic
+class ColumnOutOfRange : public Runtime
 {
 public:
-    ColumnOutOfRange( unsigned int idx, unsigned int nbColumns )
-        : Generic( "Attempting to extract column at index " + std::to_string( idx ) +
-                   " from a request with " + std::to_string( nbColumns ) + " columns" )
+    ColumnOutOfRange( const char* req, const char* errMsg, int extendedCode )
+        : Runtime( req, errMsg, extendedCode )
     {
     }
 
-    ColumnOutOfRange( const char* req )
-        : Generic( std::string{ "Failed to bind to " } + req +
-                   ": Parameter out of range" )
+    ColumnOutOfRange( unsigned int idx, unsigned int nbColumns )
+        : Runtime( "Attempting to extract column at index " + std::to_string( idx ) +
+                   " from a request with " + std::to_string( nbColumns ) + " columns",
+                   SQLITE_RANGE )
     {
     }
+
 };
 
 static inline bool isInnocuous( int errCode )
@@ -697,6 +698,8 @@ static inline void mapToException( const char* reqStr, const char* errMsg, int e
             throw errors::TypeMismatch( reqStr, errMsg, extRes );
         case SQLITE_MISUSE:
             throw errors::LibMisuse( reqStr, errMsg, extRes );
+        case SQLITE_RANGE:
+            throw errors::ColumnOutOfRange( reqStr, errMsg, extRes );
         case SQLITE_ERROR:
         {
             switch ( extRes )
