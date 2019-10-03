@@ -1709,16 +1709,7 @@ void MediaLibrary::reload( const std::string& entryPoint )
 
 bool MediaLibrary::forceParserRetry()
 {
-    try
-    {
-        parser::Task::resetRetryCount( this );
-        return true;
-    }
-    catch ( const sqlite::errors::Generic& ex )
-    {
-        LOG_ERROR( "Failed to force parser retry: ", ex.what() );
-        return false;
-    }
+    return parser::Task::resetRetryCount( this );
 }
 
 void MediaLibrary::clearDatabase( bool restorePlaylists )
@@ -2033,8 +2024,10 @@ bool MediaLibrary::forceRescan()
         SubtitleTrack::deleteAll( this );
         if ( Playlist::clearExternalPlaylistContent( this ) == false )
             return false;
-        parser::Task::removePlaylistContentTasks( this );
-        parser::Task::resetParsing( this );
+        if ( parser::Task::removePlaylistContentTasks( this ) == false )
+            return false;
+        if ( parser::Task::resetParsing( this ) == false )
+            return false;
         if ( Artist::createDefaultArtists( getConn() ) == false )
             return false;
         Thumbnail::deleteAll( this );

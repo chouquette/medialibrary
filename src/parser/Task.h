@@ -176,8 +176,8 @@ public:
     static std::string schema( const std::string& tableName, uint32_t dbModel,
                                bool backup );
     static bool checkDbModel( MediaLibraryPtr ml );
-    static void resetRetryCount( MediaLibraryPtr ml );
-    static void resetParsing( MediaLibraryPtr ml );
+    static bool resetRetryCount( MediaLibraryPtr ml );
+    static bool resetParsing( MediaLibraryPtr ml );
     static std::vector<std::shared_ptr<Task>> fetchUncompleted( MediaLibraryPtr ml );
     static std::shared_ptr<Task> create( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> fileFs,
                                          std::shared_ptr<Folder> parentFolder,
@@ -199,14 +199,14 @@ public:
      *
      * Only completed tasks will be removed.
      */
-    static void removePlaylistContentTasks( MediaLibraryPtr ml, int64_t playlistId );
+    static bool removePlaylistContentTasks( MediaLibraryPtr ml, int64_t playlistId );
     /**
      * @brief removePlaylistContentTasks
      * @param ml
      * @param playlistId
      */
-    static void removePlaylistContentTasks( MediaLibraryPtr ml );
-    static void recoverUnscannedFiles( MediaLibraryPtr ml );
+    static bool removePlaylistContentTasks( MediaLibraryPtr ml );
+    static bool recoverUnscannedFiles( MediaLibraryPtr ml );
 
     /***************************************************************************
      * IItem interface implementation

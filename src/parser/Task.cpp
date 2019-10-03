@@ -439,15 +439,15 @@ bool Task::checkDbModel( MediaLibraryPtr ml )
                                        Table::Name );
 }
 
-void Task::resetRetryCount( MediaLibraryPtr ml )
+bool Task::resetRetryCount( MediaLibraryPtr ml )
 {
     static const std::string req = "UPDATE " + Task::Table::Name + " SET "
             "retry_count = 0 WHERE step & ?1 != ?1 AND step != ?2";
-    sqlite::Tools::executeUpdate( ml->getConn(), req, Step::Completed,
-                                  Step::Linking );
+    return sqlite::Tools::executeUpdate( ml->getConn(), req, Step::Completed,
+                                         Step::Linking );
 }
 
-void Task::resetParsing( MediaLibraryPtr ml )
+bool Task::resetParsing( MediaLibraryPtr ml )
 {
     assert( sqlite::Transaction::transactionInProgress() == true );
     static const std::string resetReq = "UPDATE " + Task::Table::Name + " SET "
@@ -457,8 +457,8 @@ void Task::resetParsing( MediaLibraryPtr ml )
      */
     static const std::string deleteRefreshReq = "DELETE FROM " + Task::Table::Name +
             " WHERE type = ?";
-    sqlite::Tools::executeUpdate( ml->getConn(), resetReq, Step::None );
-    sqlite::Tools::executeDelete( ml->getConn(), deleteRefreshReq, Type::Refresh );
+    return sqlite::Tools::executeUpdate( ml->getConn(), resetReq, Step::None ) &&
+           sqlite::Tools::executeDelete( ml->getConn(), deleteRefreshReq, Type::Refresh );
 }
 
 std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
@@ -548,23 +548,24 @@ std::shared_ptr<Task> Task::createRestoreTask( MediaLibraryPtr ml, std::string m
     return self;
 }
 
-void Task::removePlaylistContentTasks( MediaLibraryPtr ml, int64_t playlistId )
+bool Task::removePlaylistContentTasks( MediaLibraryPtr ml, int64_t playlistId )
 {
     const std::string req = "DELETE FROM " + Task::Table::Name + " "
             "WHERE type = ? AND link_to_type = ? AND link_to_id = ? AND step = ?";
-    sqlite::Tools::executeDelete( ml->getConn(), req, Task::Type::Link,
-                                  LinkType::Playlist, playlistId, Step::Completed );
+    return sqlite::Tools::executeDelete( ml->getConn(), req, Task::Type::Link,
+                                         LinkType::Playlist, playlistId,
+                                         Step::Completed );
 }
 
-void Task::removePlaylistContentTasks( MediaLibraryPtr ml )
+bool Task::removePlaylistContentTasks( MediaLibraryPtr ml )
 {
     const std::string req = "DELETE FROM " + Task::Table::Name + " "
             "WHERE type = ? AND link_to_type = ? AND step = ?";
-    sqlite::Tools::executeDelete( ml->getConn(), req, Task::Type::Link,
-                                  LinkType::Playlist, Step::Completed );
+    return sqlite::Tools::executeDelete( ml->getConn(), req, Task::Type::Link,
+                                         LinkType::Playlist, Step::Completed );
 }
 
-void Task::recoverUnscannedFiles( MediaLibraryPtr ml )
+bool Task::recoverUnscannedFiles( MediaLibraryPtr ml )
 {
     static const std::string req = "INSERT INTO " + Task::Table::Name +
             "(file_id, parent_folder_id)"
@@ -572,7 +573,7 @@ void Task::recoverUnscannedFiles( MediaLibraryPtr ml )
             " f LEFT JOIN " + Task::Table::Name + " t"
             " ON t.file_id = f.id_file WHERE t.file_id IS NULL"
             " AND f.folder_id IS NOT NULL";
-    sqlite::Tools::executeInsert( ml->getConn(), req );
+    return sqlite::Tools::executeInsert( ml->getConn(), req );
 }
 
 std::string Task::meta( Task::Metadata type ) const

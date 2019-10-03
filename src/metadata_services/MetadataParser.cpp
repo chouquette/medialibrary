@@ -728,7 +728,8 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshPlaylist(IItem& item) const
      * if they need to since the FsDiscoverer will scan them again.
      */
     auto t = m_ml->getConn()->newTransaction();
-    parser::Task::removePlaylistContentTasks( m_ml, playlist->id() );
+    if ( parser::Task::removePlaylistContentTasks( m_ml, playlist->id() ) == false )
+        return std::make_tuple( false, false );
     if ( playlist->clearContent() == false )
         return std::make_tuple( false, false );
     t->commit();
