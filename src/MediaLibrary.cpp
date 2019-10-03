@@ -278,7 +278,7 @@ void MediaLibrary::registerEntityHooks()
         else if ( reason == sqlite::Connection::HookReason::Update )
             m_modificationNotifier->notifyGenreModification( rowId );
     });
-    m_dbConnection->registerUpdateHook( Genre::Table::Name,
+    m_dbConnection->registerUpdateHook( Thumbnail::Table::Name,
                                         [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
         if ( reason == sqlite::Connection::HookReason::Delete )
             m_modificationNotifier->notifyThumbnailRemoval( rowId );
