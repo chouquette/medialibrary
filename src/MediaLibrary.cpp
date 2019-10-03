@@ -969,7 +969,6 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
 {
     LOG_INFO( "Updating database model from ", previousVersion, " to ", Settings::DbModelVersion );
     auto originalPreviousVersion = previousVersion;
-    Playlist::backupPlaylists( this, previousVersion );
     // Up until model 3, it's safer (and potentially more efficient with index changes) to drop the DB
     // It's also way simpler to implement
     // In case of downgrade, just recreate the database
@@ -1721,29 +1720,69 @@ bool MediaLibrary::forceParserRetry()
 
 void MediaLibrary::clearDatabase( bool restorePlaylists )
 {
-    if ( recreateDatabase( m_dbConnection->dbPath() ) == false )
-        return;
+    pauseBackgroundOperations();
+    // If we don't care about playlists, take a shortcut.
     if ( restorePlaylists == false )
+    {
+        recreateDatabase( m_dbConnection->dbPath() );
+        resumeBackgroundOperations();
         return;
+    }
+
     auto playlistFolderMrl = utils::file::toMrl( m_playlistPath );
     auto fsFactory = fsFactoryForMrl( playlistFolderMrl );
-    std::shared_ptr<fs::IDirectory> plFolder;
+
+    // First, remove previous backups if any
+    {
+        auto plFolder = fsFactory->createDirectory( playlistFolderMrl );
+        std::vector<std::shared_ptr<fs::IFile>> files;
+        try
+        {
+            // Preload files to catch exception now.
+            files = plFolder->files();
+        }
+        catch ( const std::system_error& ex )
+        {
+            LOG_ERROR( "Failed to list old playlist backups" );
+        }
+        for ( const auto& f : files )
+        {
+            utils::fs::remove( f->mrl() );
+        }
+    }
+
+    // Now, create new playlist backups
+    uint32_t currentModel;
+    {
+        auto ctx = m_dbConnection->acquireReadContext();
+        sqlite::Statement s{ m_dbConnection->handle(),
+                             "SELECT db_model_version FROM Settings"
+        };
+        auto row = s.row();
+        row >> currentModel;
+    }
+    Playlist::backupPlaylists( this, currentModel );
+
+    recreateDatabase( m_dbConnection->dbPath() );
+
+    // And iterate again to schedule the backups parsing
+    auto plFolder = fsFactory->createDirectory( playlistFolderMrl );
+    std::vector<std::shared_ptr<fs::IFile>> files;
     try
     {
-        plFolder = fsFactory->createDirectory( playlistFolderMrl );
-        // Explicitely preload files to catch potential exceptions now
-        plFolder->files();
+        // Preload files to catch exception now.
+        files = plFolder->files();
     }
     catch ( const std::system_error& ex )
     {
-        LOG_ERROR( "Can't open playlist folder: ", ex.what() );
-        return;
+        LOG_ERROR( "Failed to list old playlist backups" );
     }
-    for ( const auto& f : plFolder->files() )
+    for ( const auto& f : files )
     {
         LOG_DEBUG( "Queuing restore task for ", f->mrl() );
         parser::Task::createRestoreTask( this, f->mrl() );
     }
+    resumeBackgroundOperations();
 }
 
 void MediaLibrary::pauseBackgroundOperations()

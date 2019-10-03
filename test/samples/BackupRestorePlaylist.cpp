@@ -119,15 +119,10 @@ TEST_F( MiscTests, ExportRestorePlaylist )
     m_ml->clearDatabase( true );
     m_cb->prepareForPlaylistReload();
 
-    auto playlists = m_ml->playlists( nullptr )->all();
-    ASSERT_EQ( 0u, playlists.size() );
-
-    m_ml->resumeBackgroundOperations();
-
     res = m_cb->waitForPlaylistReload( lock );
     ASSERT_TRUE( res );
 
-    playlists = m_ml->playlists( nullptr )->all();
+    auto playlists = m_ml->playlists( nullptr )->all();
     ASSERT_EQ( 2u, playlists.size() );
     auto playlist1 = playlists[0];
     media = playlist1->media()->all();
