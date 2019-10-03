@@ -96,6 +96,11 @@ public:
     }
 };
 
+/*
+ * /!\ Warning /!\
+ * This is not a generic error in the sense of the exception types
+ * hierarchy. It's the SQLITE_ERROR counterpart.
+ */
 class GenericError : public Runtime
 {
 public:
