@@ -155,7 +155,7 @@ bool Metadata::set( uint32_t type, const std::string& value )
         return sqlite::Tools::executeInsert( m_ml->getConn(), req, m_entityId, m_entityType,
                                              type, value );
     }
-    catch ( const sqlite::errors::Generic& ex )
+    catch ( const sqlite::errors::Exception& ex )
     {
         LOG_ERROR( "Failed to update media metadata: ", ex.what() );
         return false;

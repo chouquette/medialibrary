@@ -80,8 +80,7 @@ Connection::Handle Connection::handle()
         auto res = sqlite3_open( m_dbPath.c_str(), &dbConnection );
         ConnPtr dbConn( dbConnection, &sqlite3_close );
         if ( res != SQLITE_OK )
-            throw sqlite::errors::Generic( std::string( "Failed to connect to database: " )
-                                           + sqlite3_errstr( res ) );
+            errors::mapToException( "<connecting to db>", "", res );
         sqlite3_extended_result_codes( dbConnection, 1 );
         sqlite3_busy_timeout( dbConnection, 500 );
         // Don't use public wrapper, they need to be able to call getConn, which

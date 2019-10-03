@@ -164,8 +164,8 @@ public:
                                           req.size() + 1, &stmt, nullptr );
             if ( res != SQLITE_OK )
             {
-                throw errors::Prepare( req.c_str(),
-                                       sqlite3_errmsg( dbConnection ), res );
+                errors::mapToException( req.c_str(), sqlite3_errmsg( dbConnection ),
+                                        res );
             }
             m_stmt.reset( stmt );
             connMap.emplace( req, CachedStmtPtr( stmt, &sqlite3_finalize ) );
@@ -232,9 +232,7 @@ private:
         if ( res != SQLITE_OK )
         {
             auto sqlStr = sqlite3_sql( m_stmt.get() );
-            if ( res == SQLITE_RANGE )
-                throw errors::ColumnOutOfRange( sqlStr, sqlite3_sql( m_stmt.get() ), res );
-            throw errors::Prepare( sqlStr, "Failed to bind parameter", res );
+            errors::mapToException( sqlStr, sqlite3_errmsg( m_dbConn ), res );
         }
         m_bindIdx++;
         return true;
@@ -342,7 +340,7 @@ class Tools
             {
                 throw;
             }
-            catch ( const sqlite::errors::Runtime& ex )
+            catch ( const sqlite::errors::Exception& ex )
             {
                 if ( sqlite::errors::isInnocuous( ex ) == true )
                 {
@@ -380,7 +378,7 @@ class Tools
                 executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
                 return sqlite3_last_insert_rowid( dbConnection->handle() );
             }
-            catch ( const sqlite::errors::Runtime& ex )
+            catch ( const sqlite::errors::Exception& ex )
             {
                 if ( sqlite::errors::isInnocuous( ex ) == true )
                 {
@@ -407,7 +405,7 @@ class Tools
                 {
                     return f( std::forward<Args>( args )... );
                 }
-                catch ( const sqlite::errors::Runtime& ex )
+                catch ( const sqlite::errors::Exception& ex )
                 {
                     if ( i > nbRetries || sqlite::errors::isInnocuous( ex ) == false )
                         throw;

@@ -434,7 +434,7 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
             }
         }
     }
-    catch ( const sqlite::errors::Generic& ex )
+    catch ( const sqlite::errors::Exception& ex )
     {
         LOG_ERROR( "Can't initialize medialibrary: ", ex.what() );
         return InitializeResult::Failed;
@@ -455,7 +455,7 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
         LOG_ERROR( "SQLite reported the database as corrupted" );
         res = InitializeResult::DbCorrupted;
     }
-    catch ( const sqlite::errors::Prepare& )
+    catch ( const sqlite::errors::GenericError& )
     {
         // This should only happen when the request is invalid, but can happen
         // in case a migration fails, and we end up referencing a field that
@@ -464,12 +464,12 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
         assert( false );
         return InitializeResult::DbCorrupted;
     }
-    catch ( const sqlite::errors::Runtime& ex )
+    // Handle every other errors as a critical failure
+    catch ( const sqlite::errors::Exception& ex )
     {
         LOG_ERROR( "An SQLite error occured: ", ex.what() );
         return InitializeResult::Failed;
     }
-
 
     m_initialized = true;
     LOG_INFO( "Successfuly initialized" );
@@ -533,7 +533,7 @@ MediaPtr MediaLibrary::addExternalMedia( const std::string& mrl, IMedia::Type ty
             return media;
         });
     }
-    catch ( const sqlite::errors::Generic& ex )
+    catch ( const sqlite::errors::Exception& ex )
     {
         LOG_ERROR( "Failed to create external media: ", ex.what() );
         return nullptr;
@@ -665,7 +665,7 @@ LabelPtr MediaLibrary::createLabel( const std::string& label )
     {
         return Label::create( this, label );
     }
-    catch ( const sqlite::errors::Generic& ex )
+    catch ( const sqlite::errors::Exception& ex )
     {
         LOG_ERROR( "Failed to create a label: ", ex.what() );
         return nullptr;
@@ -678,7 +678,7 @@ bool MediaLibrary::deleteLabel( LabelPtr label )
     {
         return Label::destroy( this, label->id() );
     }
-    catch ( const sqlite::errors::Generic& ex )
+    catch ( const sqlite::errors::Exception& ex )
     {
         LOG_ERROR( "Failed to delete label: ", ex.what() );
         return false;
@@ -762,7 +762,7 @@ PlaylistPtr MediaLibrary::createPlaylist( const std::string& name )
             m_modificationNotifier->notifyPlaylistCreation( pl );
         return pl;
     }
-    catch ( const sqlite::errors::Generic& ex )
+    catch ( const sqlite::errors::Exception& ex )
     {
         LOG_ERROR( "Failed to create a playlist: ", ex.what() );
         return nullptr;
@@ -785,7 +785,7 @@ bool MediaLibrary::deletePlaylist( int64_t playlistId )
     {
         return Playlist::destroy( this, playlistId );
     }
-    catch ( const sqlite::errors::Generic& ex )
+    catch ( const sqlite::errors::Exception& ex )
     {
         LOG_ERROR( "Failed to delete playlist: ", ex.what() );
         return false;
@@ -815,7 +815,7 @@ bool MediaLibrary::clearHistory()
             return Media::clearHistory( this );
         });
     }
-    catch ( sqlite::errors::Generic& ex )
+    catch ( sqlite::errors::Exception& ex )
     {
         LOG_ERROR( "Failed to clear history: ", ex.what() );
         return false;
@@ -1613,7 +1613,7 @@ bool MediaLibrary::migrateModel18to19()
         t->commit();
         return true;
     }
-    catch ( const sqlite::errors::Generic& )
+    catch ( const sqlite::errors::Exception& )
     {
         // Ignoring, this is because parent_playlist_id column doesn't exist
         // anymore, which means the 17->18 migration completed properly.

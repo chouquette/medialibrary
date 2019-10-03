@@ -642,7 +642,7 @@ FilePtr Media::addExternalMrl( const std::string& mrl, IFile::Type type )
     {
         return File::createFromMedia( m_ml, m_id, type, mrl );
     }
-    catch ( const sqlite::errors::Generic& ex )
+    catch ( const sqlite::errors::Exception& ex )
     {
         LOG_ERROR( "Failed to add media external MRL: ", ex.what() );
         return nullptr;
@@ -867,7 +867,7 @@ bool Media::setTitle( const std::string& title )
         if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, title, m_id ) == false )
             return false;
     }
-    catch ( const sqlite::errors::Generic& ex )
+    catch ( const sqlite::errors::Exception& ex )
     {
         LOG_ERROR( "Failed to set media title: ", ex.what() );
         return false;
@@ -1022,7 +1022,7 @@ bool Media::addLabel( LabelPtr label )
             return true;
         }, std::move( label ) );
     }
-    catch ( const sqlite::errors::Generic& ex )
+    catch ( const sqlite::errors::Exception& ex )
     {
         LOG_ERROR( "Failed to add label: ", ex.what() );
         return false;
@@ -1052,7 +1052,7 @@ bool Media::removeLabel( LabelPtr label )
             return true;
         }, std::move( label ) );
     }
-    catch ( const sqlite::errors::Generic& ex )
+    catch ( const sqlite::errors::Exception& ex )
     {
         LOG_ERROR( "Failed to remove label: ", ex.what() );
         return false;

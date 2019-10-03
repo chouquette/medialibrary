@@ -27,6 +27,8 @@
 #include <atomic>
 #include <utility>
 
+#include "SqliteErrors.h"
+
 namespace medialibrary
 {
 
@@ -198,7 +200,7 @@ private:
     {
         int res = Traits<Value>::Bind( stmt, pos, std::forward<Value>( value ) );
         if ( res != SQLITE_OK )
-            throw errors::Prepare( sqlite3_sql( stmt ), "Failed to bind parameter", res );
+            errors::mapToException( sqlite3_sql( stmt ), "Failed to bind parameter", res );
         ++pos;
         return true;
     }

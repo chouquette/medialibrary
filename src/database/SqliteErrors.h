@@ -36,43 +36,21 @@ namespace sqlite
 namespace errors
 {
 
-class Generic : public std::runtime_error
-{
-public:
-    Generic( const std::string& msg ) : std::runtime_error( msg.c_str() ) {}
-};
-
 /**
- * These errors happen before the request gets executed. Usually because of a
- * syntax error, or an invalid bind index
+ * This is the general type for all sqlite error
  */
-class Prepare : public Generic
+class Exception : public std::runtime_error
 {
 public:
-    Prepare( const char* req, const char* msg, int extendedCode )
-        : Generic( std::string( "Failed to compile/prepare request [" )
-                   + req + "]: " + msg + " (error code: " +
-                   std::to_string( extendedCode ) + ")" )
-    {
-    }
-};
-
-/**
- * This is the general type for runtime error, ie. when the request is being
- * executed.
- */
-class Runtime : public Generic
-{
-public:
-    Runtime( const char* req, const char* errMsg, int extendedCode )
-        : Generic( std::string( "Failed to run request [" ) + req + "]: " + errMsg +
+    Exception( const char* req, const char* errMsg, int extendedCode )
+        : std::runtime_error( std::string( "Failed to run request [" ) + req + "]: " + errMsg +
                    "(" + std::to_string( extendedCode ) + ")" )
         , m_errorCode( extendedCode )
     {
     }
 
-    Runtime( const std::string& msg, int errCode )
-        : Generic( msg )
+    Exception( const std::string& msg, int errCode )
+        : std::runtime_error( msg )
         , m_errorCode( errCode )
     {
     }
@@ -96,11 +74,11 @@ private:
     int m_errorCode;
 };
 
-class ConstraintViolation : public Runtime
+class ConstraintViolation : public Exception
 {
 public:
     ConstraintViolation( const char* req, const char* err, int errCode )
-        : Runtime( std::string( "Request [" ) + req + "] aborted due to "
+        : Exception( std::string( "Request [" ) + req + "] aborted due to "
                     "constraint violation (" + err + ")", errCode )
     {
     }
@@ -111,11 +89,11 @@ public:
  * This is not a generic error in the sense of the exception types
  * hierarchy. It's the SQLITE_ERROR counterpart.
  */
-class GenericError : public Runtime
+class GenericError : public Exception
 {
 public:
     GenericError( const char* req, const char* errMsg, int extendedCode )
-        : Runtime( req, errMsg, extendedCode )
+        : Exception( req, errMsg, extendedCode )
     {
     }
 };
@@ -147,11 +125,11 @@ public:
     }
 };
 
-class DatabaseBusy : public Runtime
+class DatabaseBusy : public Exception
 {
 public:
     DatabaseBusy( const char* req, const char* errMsg, int extendedCode )
-        : Runtime( req, errMsg, extendedCode )
+        : Exception( req, errMsg, extendedCode )
     {
     }
 };
@@ -174,11 +152,11 @@ public:
     }
 };
 
-class DatabaseLocked : public Runtime
+class DatabaseLocked : public Exception
 {
 public:
     DatabaseLocked( const char* req, const char* errMsg, int extendedCode )
-        : Runtime( req, errMsg, extendedCode )
+        : Exception( req, errMsg, extendedCode )
     {
     }
 };
@@ -201,11 +179,11 @@ public:
     }
 };
 
-class DatabaseReadOnly : public Runtime
+class DatabaseReadOnly : public Exception
 {
 public:
     DatabaseReadOnly( const char* req, const char* errMsg, int extendedCode )
-        : Runtime( req, errMsg, extendedCode )
+        : Exception( req, errMsg, extendedCode )
     {
     }
 };
@@ -266,11 +244,11 @@ public:
     }
 };
 
-class DatabaseIOErr : public Runtime
+class DatabaseIOErr : public Exception
 {
 public:
     DatabaseIOErr( const char* req, const char* errMsg, int extendedCode )
-        : Runtime( req, errMsg, extendedCode )
+        : Exception( req, errMsg, extendedCode )
     {
     }
 };
@@ -477,11 +455,11 @@ public:
     }
 };
 
-class DatabaseCorrupt : public Runtime
+class DatabaseCorrupt : public Exception
 {
 public:
     DatabaseCorrupt( const char* req, const char* errMsg, int extendedCode )
-        : Runtime( req, errMsg, extendedCode )
+        : Exception( req, errMsg, extendedCode )
     {
     }
 
@@ -491,66 +469,65 @@ public:
     }
 };
 
-class DatabaseFull: public Runtime
+class DatabaseFull: public Exception
 {
 public:
     DatabaseFull( const char* req, const char* errMsg, int extendedCode )
-        : Runtime( req, errMsg, extendedCode )
+        : Exception( req, errMsg, extendedCode )
     {
     }
 };
 
-class ProtocolError : public Runtime
+class ProtocolError : public Exception
 {
 public:
     ProtocolError( const char* req, const char* errMsg, int extendedCode )
-        : Runtime( req, errMsg, extendedCode )
+        : Exception( req, errMsg, extendedCode )
     {
     }
 };
 
-class DatabaseSchemaChanged : public Runtime
+class DatabaseSchemaChanged : public Exception
 {
 public:
     DatabaseSchemaChanged( const char* req, const char* errMsg, int extendedCode )
-        : Runtime( req, errMsg, extendedCode )
+        : Exception( req, errMsg, extendedCode )
     {
     }
 };
 
-class TypeMismatch : public Runtime
+class TypeMismatch : public Exception
 {
 public:
     TypeMismatch( const char* req, const char* errMsg, int extendedCode )
-        : Runtime( req, errMsg, extendedCode )
+        : Exception( req, errMsg, extendedCode )
     {
     }
 };
 
-class LibMisuse : public Runtime
+class LibMisuse : public Exception
 {
 public:
     LibMisuse( const char* req, const char* errMsg, int extendedCode )
-        : Runtime( req, errMsg, extendedCode )
+        : Exception( req, errMsg, extendedCode )
     {
     }
 };
 
-class ColumnOutOfRange : public Runtime
+class ColumnOutOfRange : public Exception
 {
 public:
     ColumnOutOfRange( const char* req, const char* errMsg, int extendedCode )
-        : Runtime( req, errMsg, extendedCode )
+        : Exception( req, errMsg, extendedCode )
     {
     }
 
     ColumnOutOfRange( unsigned int idx, unsigned int nbColumns )
-        : Runtime( "Attempting to extract column at index " + std::to_string( idx ) +
+        : Exception( "Attempting to extract column at index " + std::to_string( idx ) +
                    " from a request with " + std::to_string( nbColumns ) + " columns",
                    SQLITE_RANGE )
     {
     }
-
 };
 
 static inline bool isInnocuous( int errCode )
@@ -566,7 +543,7 @@ static inline bool isInnocuous( int errCode )
     return false;
 }
 
-static inline bool isInnocuous( const Runtime& ex )
+static inline bool isInnocuous( const Exception& ex )
 {
     return isInnocuous( ex.code() );
 }
@@ -717,7 +694,7 @@ static inline void mapToException( const char* reqStr, const char* errMsg, int e
             }
         }
         default:
-            throw errors::Runtime( reqStr, errMsg, extRes );
+            throw errors::Exception( reqStr, errMsg, extRes );
     }
 }
 
