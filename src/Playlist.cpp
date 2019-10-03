@@ -30,6 +30,7 @@
 #include "Folder.h"
 #include "Media.h"
 #include "utils/ModificationsNotifier.h"
+#include "utils/Filename.h"
 #include "database/SqliteQuery.h"
 
 #include <algorithm>
@@ -437,6 +438,26 @@ bool Playlist::clearContent()
     const std::string req = "DELETE FROM " + Playlist::MediaRelationTable::Name +
             " WHERE playlist_id = ?";
     return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id );
+}
+
+std::vector<std::string> Playlist::loadBackups( MediaLibraryPtr ml )
+{
+    auto playlistFolderMrl = utils::file::toMrl( ml->playlistPath() );
+    auto fsFactory = ml->fsFactoryForMrl( playlistFolderMrl );
+    std::vector<std::string> backups;
+
+    auto plFolder = fsFactory->createDirectory( playlistFolderMrl );
+    std::vector<std::shared_ptr<fs::IFile>> files;
+    try
+    {
+        for ( const auto& f : plFolder->files() )
+            backups.push_back( f->mrl() );
+    }
+    catch ( const std::system_error& ex )
+    {
+        LOG_ERROR( "Failed to list old playlist backups" );
+    }
+    return backups;
 }
 
 std::shared_ptr<Playlist> Playlist::fromFile( MediaLibraryPtr ml, int64_t fileId )

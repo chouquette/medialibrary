@@ -1729,26 +1729,10 @@ void MediaLibrary::clearDatabase( bool restorePlaylists )
         return;
     }
 
-    auto playlistFolderMrl = utils::file::toMrl( m_playlistPath );
-    auto fsFactory = fsFactoryForMrl( playlistFolderMrl );
-
-    // First, remove previous backups if any
+    auto playlistsBackups = Playlist::loadBackups( this );
+    for ( const auto& mrl : playlistsBackups )
     {
-        auto plFolder = fsFactory->createDirectory( playlistFolderMrl );
-        std::vector<std::shared_ptr<fs::IFile>> files;
-        try
-        {
-            // Preload files to catch exception now.
-            files = plFolder->files();
-        }
-        catch ( const std::system_error& ex )
-        {
-            LOG_ERROR( "Failed to list old playlist backups" );
-        }
-        for ( const auto& f : files )
-        {
-            utils::fs::remove( f->mrl() );
-        }
+        utils::fs::remove( mrl );
     }
 
     // Now, create new playlist backups
@@ -1765,22 +1749,11 @@ void MediaLibrary::clearDatabase( bool restorePlaylists )
 
     recreateDatabase( m_dbConnection->dbPath() );
 
-    // And iterate again to schedule the backups parsing
-    auto plFolder = fsFactory->createDirectory( playlistFolderMrl );
-    std::vector<std::shared_ptr<fs::IFile>> files;
-    try
+    playlistsBackups = Playlist::loadBackups( this );
+    for ( const auto& mrl : playlistsBackups )
     {
-        // Preload files to catch exception now.
-        files = plFolder->files();
-    }
-    catch ( const std::system_error& ex )
-    {
-        LOG_ERROR( "Failed to list old playlist backups" );
-    }
-    for ( const auto& f : files )
-    {
-        LOG_DEBUG( "Queuing restore task for ", f->mrl() );
-        parser::Task::createRestoreTask( this, f->mrl() );
+        LOG_DEBUG( "Queuing restore task for ", mrl );
+        parser::Task::createRestoreTask( this, mrl );
     }
     resumeBackgroundOperations();
 }

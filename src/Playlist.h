@@ -103,6 +103,7 @@ public:
      */
     bool clearContent();
 
+    static std::vector<std::string> loadBackups( MediaLibraryPtr ml );
     static bool backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel);
 
     static std::shared_ptr<Playlist> fromFile( MediaLibraryPtr ml, int64_t fileId );
