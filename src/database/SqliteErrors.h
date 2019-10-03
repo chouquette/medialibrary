@@ -82,6 +82,16 @@ public:
         return m_errorCode & 0xFF;
     }
 
+    /**
+     * @brief requiresDbReset returns true if the error is critical enough
+     *          to denote a need for a database reset, for instacne if sqlite
+     *          reports the database as corrupted.
+     */
+    virtual bool requiresDbReset() const
+    {
+        return false;
+    }
+
 private:
     int m_errorCode;
 };
@@ -473,6 +483,11 @@ public:
     DatabaseCorrupt( const char* req, const char* errMsg, int extendedCode )
         : Runtime( req, errMsg, extendedCode )
     {
+    }
+
+    virtual bool requiresDbReset() const override
+    {
+        return true;
     }
 };
 
