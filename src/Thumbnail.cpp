@@ -129,15 +129,17 @@ bool Thumbnail::updateLinkRecord( int64_t entityId, EntityType type,
     return true;
 }
 
-void Thumbnail::insertLinkRecord( int64_t entityId, EntityType type,
+bool Thumbnail::insertLinkRecord( int64_t entityId, EntityType type,
                                   Thumbnail::Origin origin )
 {
     const std::string req = "INSERT INTO " + LinkingTable::Name +
             " (entity_id, entity_type, size_type, thumbnail_id, origin)"
             " VALUES(?, ?, ?, ?, ?)";
-    sqlite::Tools::executeInsert( m_ml->getConn(), req, entityId, type,
-                                  m_sizeType, m_id, origin );
+    if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, entityId, type,
+                                  m_sizeType, m_id, origin ) == false )
+        return false;
     m_sharedCounter++;
+    return true;
 }
 
 void Thumbnail::unlinkThumbnail( int64_t entityId, EntityType type )
@@ -251,7 +253,9 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
             if ( newThumbnail->insert() == 0 )
                 return nullptr;
         }
-        newThumbnail->insertLinkRecord( entityId, entityType, newThumbnail->origin() );
+        if ( newThumbnail->insertLinkRecord( entityId, entityType,
+                                             newThumbnail->origin() ) == false )
+            return nullptr;
         res = std::move( newThumbnail );
     }
     else if ( newThumbnail->id() != 0 )

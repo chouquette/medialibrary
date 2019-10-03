@@ -200,7 +200,7 @@ private:
      * This is expected to be called when a new thumbnail gets inserted, or
      * when it can be shared with another entity.
      */
-    void insertLinkRecord( int64_t entityId, EntityType type, Origin origin );
+    bool insertLinkRecord( int64_t entityId, EntityType type, Origin origin );
 
     bool update( std::string mrl, bool isOwned );
 
