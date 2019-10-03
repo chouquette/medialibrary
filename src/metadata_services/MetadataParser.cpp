@@ -357,7 +357,11 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
         discoverer.discover( entryPoint, *this );
         auto entryFolder = Folder::fromMrl( m_ml, entryPoint );
         if ( entryFolder != nullptr )
-            Folder::excludeEntryFolder( m_ml, entryFolder->id() );
+        {
+            sqlite::Tools::withRetries( 3, [this, entryFolder]() {
+                Folder::excludeEntryFolder( m_ml, entryFolder->id() );
+            });
+        }
         return;
     }
     discoverer.reload( directoryMrl, *this );
