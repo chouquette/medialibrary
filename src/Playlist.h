@@ -27,6 +27,8 @@
 #include "database/SqliteTools.h"
 #include "database/DatabaseHelpers.h"
 
+#include <map>
+
 namespace medialibrary
 {
 
@@ -50,6 +52,8 @@ public:
     {
         static const std::string Name;
     };
+    // Contains the backup date as the index, and a vector of playlist files as values
+    using Backups = std::map<time_t, std::vector<std::string>>;
 
     Playlist( MediaLibraryPtr ml, sqlite::Row& row );
     Playlist( MediaLibraryPtr ml, const std::string& name );
@@ -94,8 +98,9 @@ public:
      */
     bool clearContent();
 
-    static std::vector<std::string> loadBackups( MediaLibraryPtr ml );
-    static bool backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel);
+    static Backups loadBackups( MediaLibraryPtr ml );
+    static std::tuple<bool, time_t, std::vector<std::string>>
+        backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel);
 
     static std::shared_ptr<Playlist> fromFile( MediaLibraryPtr ml, int64_t fileId );
 

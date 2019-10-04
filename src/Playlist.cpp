@@ -31,6 +31,7 @@
 #include "Media.h"
 #include "utils/ModificationsNotifier.h"
 #include "utils/Filename.h"
+#include "utils/Directory.h"
 #include "database/SqliteQuery.h"
 
 #include <algorithm>
@@ -440,18 +441,24 @@ bool Playlist::clearContent()
     return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id );
 }
 
-std::vector<std::string> Playlist::loadBackups( MediaLibraryPtr ml )
+Playlist::Backups Playlist::loadBackups( MediaLibraryPtr ml )
 {
     auto playlistFolderMrl = utils::file::toMrl( ml->playlistPath() );
     auto fsFactory = ml->fsFactoryForMrl( playlistFolderMrl );
-    std::vector<std::string> backups;
+    Backups backups;
 
     auto plFolder = fsFactory->createDirectory( playlistFolderMrl );
     std::vector<std::shared_ptr<fs::IFile>> files;
     try
     {
-        for ( const auto& f : plFolder->files() )
-            backups.push_back( f->mrl() );
+        for ( const auto& folder : plFolder->dirs() )
+        {
+            std::vector<std::string> mrls;
+            for ( const auto& f : folder->files() )
+                mrls.push_back( f->mrl() );
+            auto backupDate = std::stol( utils::file::directoryName( folder->mrl() ) );
+            backups.emplace( backupDate, std::move( mrls ) );
+        }
     }
     catch ( const std::system_error& ex )
     {
@@ -489,7 +496,8 @@ std::string Playlist::sortRequest( const QueryParameters* params )
     return req;
 }
 
-bool Playlist::backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel )
+std::tuple<bool, time_t, std::vector<std::string>>
+Playlist::backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel )
 {
     /* We can't use the Playlist class directly for this, as it's tied with the
      * current database model, and we're trying to run this before a
@@ -497,7 +505,7 @@ bool Playlist::backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel )
      * Instead, we have to pull the mrl by hand, and generate a simple playlist
      * with that
      */
-
+    auto backupDate = time( nullptr );
     auto dbConn = ml->getConn();
     auto ctx = dbConn->acquireReadContext();
     struct Backup
@@ -517,6 +525,26 @@ bool Playlist::backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel )
     sqlite::Row row;
     while ( ( row = stmt.row() ) != nullptr )
         pls.push_back( { row.load<int64_t>( 0 ), row.load<std::string>( 1 ) } );
+
+    auto backupFolder = utils::file::toFolderPath( ml->playlistPath() +
+                                                   std::to_string( backupDate ) );
+    try
+    {
+        // This sucks badly, isDirectory will throw if the directory doesn't exist
+        // which is what we want, but in case it returns false, it means the
+        // playlist backup folder is actually a file, so we definitely don't
+        // want to do anything with it.
+        // Baiscally, we *want* isDirectory to throw.
+        utils::fs::isDirectory( backupFolder );
+        return std::make_tuple( false, 0, std::vector<std::string>{} );
+    }
+    catch ( const std::system_error&  )
+    {
+        // isDirectory will throw if the directory doesn't exist, so we can just proceed
+    }
+
+    utils::fs::mkdir( backupFolder );
+    std::vector<std::string> outputFiles;
 
     auto res = true;
     for ( auto& pl : pls )
@@ -559,10 +587,11 @@ bool Playlist::backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel )
         }
         if ( pl.mrls.empty() == true )
             continue;
-        auto output = ml->playlistPath() + std::to_string( pl.id ) + ".xspf";
+        auto output = backupFolder + std::to_string( pl.id ) + ".xspf";
         res = writeBackup( pl.name, pl.mrls, output ) && res;
+        outputFiles.push_back( utils::file::toMrl( output ) );
     }
-    return res;
+    return std::make_tuple( res, backupDate, std::move( outputFiles ) );
 }
 
 bool Playlist::writeBackup( const std::string& name,

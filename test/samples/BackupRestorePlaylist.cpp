@@ -111,13 +111,11 @@ TEST_F( MiscTests, ExportRestorePlaylist )
     pl2->append( *m2 );
     pl2->append( *m1 );
 
-    res = Playlist::backupPlaylists( m_ml.get(), Settings::DbModelVersion );
-    ASSERT_TRUE( res );
+    auto backup = Playlist::backupPlaylists( m_ml.get(), Settings::DbModelVersion );
+    ASSERT_TRUE( std::get<0>( backup ) );
 
-    m_ml->pauseBackgroundOperations();
-
-    m_ml->clearDatabase( true );
     m_cb->prepareForPlaylistReload();
+    m_ml->clearDatabase( true );
 
     res = m_cb->waitForPlaylistReload( lock );
     ASSERT_TRUE( res );

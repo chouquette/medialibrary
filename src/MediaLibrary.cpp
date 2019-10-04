@@ -931,6 +931,9 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
 {
     LOG_INFO( "Updating database model from ", previousVersion, " to ", Settings::DbModelVersion );
     auto originalPreviousVersion = previousVersion;
+
+    Playlist::backupPlaylists( this, previousVersion );
+
     // Up until model 3, it's safer (and potentially more efficient with index changes) to drop the DB
     // It's also way simpler to implement
     // In case of downgrade, just recreate the database
@@ -1692,30 +1695,42 @@ void MediaLibrary::clearDatabase( bool restorePlaylists )
     }
 
     auto playlistsBackups = Playlist::loadBackups( this );
-    for ( const auto& mrl : playlistsBackups )
+
+    // If we have a backup from the last minute, assume this is after a migration
+    // and we don't need to try to generate a new backup
+    // Otherwise, try to generate a new backup. If it works, cool, if it
+    // doesn't, we'll use an old one. Best effort is all we can do if the
+    // database is broken
+    if ( playlistsBackups.empty() == false ||
+         playlistsBackups.rbegin()->first < time(nullptr) - 60 )
     {
-        utils::fs::remove( mrl );
+        uint32_t currentModel;
+        {
+            auto ctx = m_dbConnection->acquireReadContext();
+            sqlite::Statement s{ m_dbConnection->handle(),
+                                 "SELECT db_model_version FROM Settings"
+            };
+            auto row = s.row();
+            row >> currentModel;
+        }
+        auto newBackup = Playlist::backupPlaylists( this, currentModel );
+        if ( std::get<0>( newBackup ) == true )
+            playlistsBackups.emplace( std::get<1>( newBackup ),
+                                      std::move( std::get<2>( newBackup ) ) );
     }
 
-    // Now, create new playlist backups
-    uint32_t currentModel;
-    {
-        auto ctx = m_dbConnection->acquireReadContext();
-        sqlite::Statement s{ m_dbConnection->handle(),
-                             "SELECT db_model_version FROM Settings"
-        };
-        auto row = s.row();
-        row >> currentModel;
-    }
-    Playlist::backupPlaylists( this, currentModel );
+    // Create a new playlist backups
 
     recreateDatabase( m_dbConnection->dbPath() );
 
-    playlistsBackups = Playlist::loadBackups( this );
-    for ( const auto& mrl : playlistsBackups )
+    if ( playlistsBackups.empty() == false )
     {
-        LOG_DEBUG( "Queuing restore task for ", mrl );
-        parser::Task::createRestoreTask( this, mrl );
+        auto& backup = playlistsBackups.rbegin()->second;
+        for ( const auto& mrl : backup )
+        {
+            LOG_DEBUG( "Queuing restore task for ", mrl );
+            parser::Task::createRestoreTask( this, mrl );
+        }
     }
     resumeBackgroundOperations();
 }
