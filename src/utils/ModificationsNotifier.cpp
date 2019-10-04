@@ -213,6 +213,8 @@ void ModificationNotifier::run() try
             auto path = Thumbnail::path( m_ml, thumbnailId );
             utils::fs::remove( path );
         }
+        thumbnails.removed.clear();
+        thumbnails.timeout = ZeroTimeout;
     }
 }
 catch ( const std::exception& ex )
