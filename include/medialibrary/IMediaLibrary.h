@@ -261,6 +261,8 @@ public:
      *
      * @param context A minimal context hint
      * @param errMsg  The exception string, as returned by std::exception::what()
+     * @param clearSuggested A boolean to inform the application that a database
+     *                       clearing is suggested.
      *
      * If the application chooses to handle the error to present it to the user
      * or report it somehow, it should:
@@ -269,7 +271,8 @@ public:
      * If the implementation returns false, then the exception will be rethrown
      */
     virtual bool onUnhandledException( const char* /* context */,
-                                       const char* /* errMsg */ ) { return false; }
+                                       const char* /* errMsg */,
+                                       bool /* clearSuggested */ ) { return false; }
 };
 
 class IMediaLibrary

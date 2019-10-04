@@ -219,6 +219,14 @@ void Worker::mainloop() try
                        "due to its containing device being unmounted" );
             status = Status::TemporaryUnavailable;
         }
+        catch ( const sqlite::errors::Exception& ex )
+        {
+            // Propagate critical sqlite errors higher up for the application
+            // to handle
+            if ( sqlite::errors::isInnocuous( ex ) == false )
+                throw;
+            status = Status::Fatal;
+        }
         catch ( const std::exception& ex )
         {
             LOG_ERROR( "Caught an exception during ", task->mrl(), " [", serviceName, "] parsing: ", ex.what() );
@@ -231,10 +239,18 @@ void Worker::mainloop() try
     LOG_INFO("Exiting ParserService [", serviceName, "] thread");
     setIdle( true );
 }
+catch ( const sqlite::errors::Exception& ex )
+{
+    if ( m_ml->getCb()->onUnhandledException( "ParserWorker",
+                                              ex.what(),
+                                              ex.requiresDbReset() ) == true )
+        return;
+    throw;
+}
 catch ( const std::exception& ex )
 {
     if ( m_ml->getCb()->onUnhandledException( "ParserWorker",
-                                              ex.what() ) == true )
+                                              ex.what(), false ) == true )
         return;
     throw;
 }

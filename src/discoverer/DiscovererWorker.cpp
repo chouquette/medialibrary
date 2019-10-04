@@ -186,10 +186,18 @@ void DiscovererWorker::run() try
     LOG_INFO( "Exiting DiscovererWorker thread" );
     m_ml->onDiscovererIdleChanged( true );
 }
+catch ( const sqlite::errors::Exception& ex )
+{
+    if ( m_ml->getCb()->onUnhandledException( "DiscovererWorker",
+                                              ex.what(),
+                                              ex.requiresDbReset() ) == true )
+        return;
+    throw;
+}
 catch ( const std::exception& ex )
 {
     if ( m_ml->getCb()->onUnhandledException( "DiscovererWorker",
-                                              ex.what() ) == true )
+                                              ex.what(), false ) == true )
         return;
     throw;
 }

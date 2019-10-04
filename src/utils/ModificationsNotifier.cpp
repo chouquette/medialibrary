@@ -217,10 +217,18 @@ void ModificationNotifier::run() try
         thumbnails.timeout = ZeroTimeout;
     }
 }
+catch ( const sqlite::errors::Exception& ex )
+{
+    if ( m_ml->getCb()->onUnhandledException( "ModificationNotifier",
+                                              ex.what(),
+                                              ex.requiresDbReset() ) == true )
+        return;
+    throw;
+}
 catch ( const std::exception& ex )
 {
     if ( m_ml->getCb()->onUnhandledException( "ModificationNotifier",
-                                              ex.what() ) == true )
+                                              ex.what(), false ) == true )
         return;
     throw;
 }
