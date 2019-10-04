@@ -538,6 +538,7 @@ static inline bool isInnocuous( int errCode )
     case SQLITE_NOMEM:
     case SQLITE_BUSY:
     case SQLITE_READONLY:
+    case SQLITE_FULL:
         return true;
     }
     return false;
