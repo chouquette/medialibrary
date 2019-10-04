@@ -31,10 +31,14 @@
 #include <stdexcept>
 #include <system_error>
 #include "utils/Filename.h"
+#include "utils/File.h"
 #include "logging/Logger.h"
+#include "medialibrary/filesystem/IDirectory.h"
+#include "medialibrary/filesystem/IFile.h"
 
 #ifdef _WIN32
 # include <windows.h>
+# include <direct.h>
 #include "utils/Charsets.h"
 #else
 # include <cerrno>
@@ -42,6 +46,7 @@
 # include <sys/stat.h>
 # include <limits.h>
 # include <cstdlib>
+# include <unistd.h>
 #endif
 
 namespace medialibrary
@@ -138,6 +143,28 @@ bool mkdir( const std::string& path )
 #endif
     }
     return true;
+}
+
+bool rmdir( medialibrary::fs::IDirectory& dir )
+{
+    try
+    {
+        for ( const auto& f : dir.files() )
+        {
+            utils::fs::remove( utils::file::toLocalPath( f->mrl() ) );
+        }
+    }
+    catch ( std::runtime_error& ex )
+    {
+        LOG_WARN( "Failed to remove directory \"", dir.mrl(), "\": ", ex.what() );
+        return false;
+    }
+#ifdef _WIN32
+    auto wPath = charset::ToWide( dir.mrl().c_str() );
+    return _wrmdir( wPath.get() ) != 0;
+#else
+    return ::rmdir( utils::file::toLocalPath( dir.mrl() ).c_str() ) == 0;
+#endif
 }
 
 }
