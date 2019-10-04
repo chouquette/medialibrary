@@ -333,13 +333,6 @@ class Tools
             {
                 executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
             }
-            // We explicitely don't want to catch ContraintViolations. They need
-            // to be propagated higher up the chain, as some logic expect to know
-            // when a constraint is violated.
-            catch ( const sqlite::errors::ConstraintViolation& )
-            {
-                throw;
-            }
             catch ( const sqlite::errors::Exception& ex )
             {
                 if ( sqlite::errors::isInnocuous( ex ) == true )
