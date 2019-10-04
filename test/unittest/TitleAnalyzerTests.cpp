@@ -28,6 +28,11 @@
 
 #include "utils/TitleAnalyzer.h"
 
+/* This test causes wine to crash, but is now fixed upstream.
+ * See https://github.com/mstorsjo/llvm-mingw/issues/52
+ */
+#ifndef _WIN32
+
 class TitleAnalyzerTests : public Tests
 {
 };
@@ -101,3 +106,5 @@ TEST_F( TitleAnalyzerTests, RemovePatterns )
     CHECK( "The Walking Dead S08 E02",
            "The.Walking.Dead.S08.E02.1080p.BluRay.x264-ROVERS AMC.mkv" );
 }
+
+#endif

@@ -376,7 +376,11 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
     // Even though the title is usually the same as the filename when dealing
     // with a video file, we might be refreshing that media, and it might already
     // have a title, so let's analyse the filename again instead.
+#ifndef _WIN32
     auto title = utils::title::sanitize( item.media()->fileName() );
+#else
+    auto title = item.media()->fileName();
+#endif
 
     const auto& showName = item.meta( IItem::Metadata::ShowName );
     const auto& artworkMrl = item.meta( IItem::Metadata::ArtworkUrl );
