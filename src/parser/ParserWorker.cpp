@@ -193,7 +193,6 @@ void Worker::mainloop() ML_UNHANDLED_EXCEPTION_INIT
             LOG_DEBUG( "Executing ", serviceName, " task on ", task->mrl() );
             auto chrono = std::chrono::steady_clock::now();
             auto file = std::static_pointer_cast<File>( task->file() );
-            auto media = std::static_pointer_cast<Media>( task->media() );
 
             if ( file != nullptr && file->isRemovable() )
             {
