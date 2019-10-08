@@ -91,7 +91,7 @@ void ThumbnailerWorker::resume()
     m_cond.notify_all();
 }
 
-void ThumbnailerWorker::run() try
+void ThumbnailerWorker::run() ML_UNHANDLED_EXCEPTION_INIT
 {
     LOG_INFO( "Starting thumbnailer thread" );
     while ( m_run == true )
@@ -116,21 +116,7 @@ void ThumbnailerWorker::run() try
     }
     LOG_INFO( "Exiting thumbnailer thread" );
 }
-catch ( const sqlite::errors::Exception& ex )
-{
-    if ( m_ml->getCb()->onUnhandledException( "ThumbnailerWorker",
-                                              ex.what(),
-                                              ex.requiresDbReset() ) == true )
-        return;
-    throw;
-}
-catch ( const std::exception& ex )
-{
-    if ( m_ml->getCb()->onUnhandledException( "ThumbnailerWorker",
-                                              ex.what(), false ) == true )
-        return;
-    throw;
-}
+ML_UNHANDLED_EXCEPTION_BODY( "ThumbnailerWorker" )
 
 void ThumbnailerWorker::stop()
 {

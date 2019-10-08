@@ -139,7 +139,7 @@ void DiscovererWorker::notify()
         m_cond.notify_all();
 }
 
-void DiscovererWorker::run() try
+void DiscovererWorker::run() ML_UNHANDLED_EXCEPTION_INIT
 {
     LOG_INFO( "Entering DiscovererWorker thread" );
     m_ml->onDiscovererIdleChanged( false );
@@ -186,21 +186,7 @@ void DiscovererWorker::run() try
     LOG_INFO( "Exiting DiscovererWorker thread" );
     m_ml->onDiscovererIdleChanged( true );
 }
-catch ( const sqlite::errors::Exception& ex )
-{
-    if ( m_ml->getCb()->onUnhandledException( "DiscovererWorker",
-                                              ex.what(),
-                                              ex.requiresDbReset() ) == true )
-        return;
-    throw;
-}
-catch ( const std::exception& ex )
-{
-    if ( m_ml->getCb()->onUnhandledException( "DiscovererWorker",
-                                              ex.what(), false ) == true )
-        return;
-    throw;
-}
+ML_UNHANDLED_EXCEPTION_BODY( "DiscovererWorker" )
 
 void DiscovererWorker::runReload( const std::string& entryPoint )
 {

@@ -24,6 +24,7 @@
 # include "config.h"
 #endif
 
+#include "Common.h"
 #include "ParserWorker.h"
 #include "Parser.h"
 #include "Media.h"
@@ -138,7 +139,7 @@ void Worker::restart()
     m_service->onRestarted();
 }
 
-void Worker::mainloop() try
+void Worker::mainloop() ML_UNHANDLED_EXCEPTION_INIT
 {
     // It would be unsafe to call name() at the end of this function, since
     // we might stop the thread during ParserService destruction. This implies
@@ -239,21 +240,7 @@ void Worker::mainloop() try
     LOG_INFO("Exiting ParserService [", serviceName, "] thread");
     setIdle( true );
 }
-catch ( const sqlite::errors::Exception& ex )
-{
-    if ( m_ml->getCb()->onUnhandledException( "ParserWorker",
-                                              ex.what(),
-                                              ex.requiresDbReset() ) == true )
-        return;
-    throw;
-}
-catch ( const std::exception& ex )
-{
-    if ( m_ml->getCb()->onUnhandledException( "ParserWorker",
-                                              ex.what(), false ) == true )
-        return;
-    throw;
-}
+ML_UNHANDLED_EXCEPTION_BODY( "ParserWorker" )
 
 void Worker::setIdle(bool isIdle)
 {

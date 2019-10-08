@@ -27,3 +27,26 @@
 #else
 #define ML_FORCE_USED
 #endif
+
+#ifdef _NDEBUG
+# define ML_UNHANDLED_EXCEPTION_INIT try
+# define ML_UNHANDLED_EXCEPTION_BODY(ctx) \
+    catch ( const sqlite::errors::Exception& ex ) \
+    { \
+        if ( m_ml->getCb()->onUnhandledException( ctx, \
+                                                  ex.what(), \
+                                                  ex.requiresDbReset() ) == true ) \
+            return; \
+        throw; \
+    } \
+    catch ( const std::exception& ex ) \
+    { \
+        if ( m_ml->getCb()->onUnhandledException( ctx, \
+                                                  ex.what(), false ) == true ) \
+            return; \
+        throw; \
+    }
+#else
+# define ML_UNHANDLED_EXCEPTION_INIT
+# define ML_UNHANDLED_EXCEPTION_BODY(ctx)
+#endif
