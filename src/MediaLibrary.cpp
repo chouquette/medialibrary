@@ -1077,6 +1077,9 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
             if ( previousVersion == 21 )
             {
                 migrateModel21to22();
+                // Use this migration to ensure playlists containing the same
+                // item twice or more are now properly scanned
+                needRescan = true;
                 previousVersion = 22;
             }
             // To be continued in the future!
