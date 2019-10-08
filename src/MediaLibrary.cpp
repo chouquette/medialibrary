@@ -1101,7 +1101,12 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
         return InitializeResult::DbCorrupted;
 
     if ( needRescan == true )
-        forceRescan();
+    {
+        if ( forceRescan() == false )
+        {
+            LOG_WARN( "Failed to force a rescan" );
+        }
+    }
 
     // Safety check: ensure we didn't forget a migration along the way
     assert( previousVersion == Settings::DbModelVersion );
