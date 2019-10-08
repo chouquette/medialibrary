@@ -2030,23 +2030,26 @@ bool MediaLibrary::forceRescan()
     {
         auto t = getConn()->newTransaction();
         // Let the triggers clear out the Fts tables
-        AlbumTrack::deleteAll( this );
-        Genre::deleteAll( this );
-        Album::deleteAll( this );
-        Artist::deleteAll( this );
-        Movie::deleteAll( this );
-        ShowEpisode::deleteAll( this );
-        Show::deleteAll( this );
-        VideoTrack::deleteAll( this );
-        AudioTrack::deleteAll( this );
-        SubtitleTrack::deleteAll( this );
-        if ( Playlist::clearExternalPlaylistContent( this ) == false ||
+        if ( AlbumTrack::deleteAll( this ) == false ||
+             Genre::deleteAll( this ) == false ||
+             Album::deleteAll( this ) == false ||
+             Artist::deleteAll( this ) == false ||
+             Movie::deleteAll( this ) == false ||
+             ShowEpisode::deleteAll( this ) == false ||
+             Show::deleteAll( this ) == false ||
+             VideoTrack::deleteAll( this ) == false ||
+             AudioTrack::deleteAll( this ) == false ||
+             SubtitleTrack::deleteAll( this ) == false ||
+             Playlist::clearExternalPlaylistContent( this ) == false ||
              parser::Task::removePlaylistContentTasks( this ) == false ||
              parser::Task::resetParsing( this ) == false ||
              Artist::createDefaultArtists( getConn() ) == false ||
-             Media::resetSubTypes( this ) == false )
-            return false;
-        Thumbnail::deleteAll( this );
+             Media::resetSubTypes( this ) == false ||
+             Thumbnail::deleteAll( this ) == false )
+        {
+                return false;
+        }
+
         t->commit();
     }
     removeThumbnails();
