@@ -39,3 +39,22 @@
 VideoGroup::schema( VideoGroup::Table::Name, 22 ),
 
 "ALTER TABLE Settings ADD COLUMN video_groups_minimum_media_count UNSIGNED INTEGER NOT NULL DEFAULT 1",
+
+/*
+ * Update UNIQUE contraint and NOT NULL contraints for Taks.link_* fields
+ */
+ parser::Task::schema( parser::Task::Table::Name, 21, true ),
+
+ "INSERT INTO " + parser::Task::Table::Name + "_backup"
+     " SELECT * FROM " + parser::Task::Table::Name,
+
+ "DROP TABLE " + parser::Task::Table::Name,
+
+ parser::Task::schema( parser::Task::Table::Name, 22, false ),
+
+ "INSERT INTO " + parser::Task::Table::Name +
+     " SELECT id_task, step, retry_count, type, mrl, file_type, file_id,"
+         "parent_folder_id, link_to_id, ifnull(link_to_type, 0), ifnull(link_extra, 0)"
+     " FROM " + parser::Task::Table::Name + "_backup",
+
+ "DROP TABLE " +  parser::Task::Table::Name + "_backup",
