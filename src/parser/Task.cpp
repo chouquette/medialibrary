@@ -577,9 +577,9 @@ bool Task::removePlaylistContentTasks( MediaLibraryPtr ml, int64_t playlistId )
 bool Task::removePlaylistContentTasks( MediaLibraryPtr ml )
 {
     const std::string req = "DELETE FROM " + Task::Table::Name + " "
-            "WHERE type = ? AND link_to_type = ? AND step = ?";
+            "WHERE type = ? AND link_to_type = ?";
     return sqlite::Tools::executeDelete( ml->getConn(), req, Task::Type::Link,
-                                         LinkType::Playlist, Step::Completed );
+                                         LinkType::Playlist );
 }
 
 /*
