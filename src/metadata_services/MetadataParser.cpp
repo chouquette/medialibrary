@@ -554,7 +554,6 @@ void MetadataAnalyzer::createTracks( Media& m, const std::vector<IItem::Track>& 
 
 std::tuple<bool, bool> MetadataAnalyzer::refreshFile( IItem& item ) const
 {
-    assert( item.media() == nullptr );
     assert( item.file() != nullptr );
 
     auto file = item.file();
@@ -581,7 +580,11 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshFile( IItem& item ) const
 std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
 {
     auto file = std::static_pointer_cast<File>( item.file() );
-    auto media = file->media();
+    // If we restored this task, we already know the media. Otherwise, it's not
+    // loaded in the item yet.
+    auto media = std::static_pointer_cast<Media>( item.media() );
+    if ( media == nullptr )
+        media = file->media();
     assert( media != nullptr );
 
     if ( media->duration() != item.duration() )
