@@ -54,6 +54,7 @@ libmedialibraryfs_HEADERS = \
 	include/medialibrary/filesystem/IDirectory.h \
 	include/medialibrary/filesystem/IFile.h \
 	include/medialibrary/filesystem/IFileSystemFactory.h \
+	include/medialibrary/filesystem/Errors.h \
 	$(NULL)
 
 libmedialibraryparserdir = $(libmedialibrary_ladir)/parser
