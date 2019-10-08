@@ -31,6 +31,7 @@
 #include "Folder.h"
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
+#include "medialibrary/filesystem/Errors.h"
 #include "utils/ModificationsNotifier.h"
 #include "utils/Filename.h"
 
@@ -156,7 +157,7 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
     {
         mrl = file->mrl();
     }
-    catch ( const fs::DeviceRemovedException& )
+    catch ( const fs::errors::DeviceRemoved& )
     {
         LOG_WARN( "Aborting file ", file->rawMrl(), " generation due to its "
                   "containing device being missing" );

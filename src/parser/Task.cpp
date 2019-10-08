@@ -29,6 +29,7 @@
 
 #include "medialibrary/filesystem/IFile.h"
 #include "medialibrary/filesystem/IDirectory.h"
+#include "medialibrary/filesystem/Errors.h"
 #include "Device.h"
 #include "File.h"
 #include "Folder.h"
@@ -248,7 +249,7 @@ bool Task::restoreLinkedEntities()
         {
             mrl = file->mrl();
         }
-        catch ( const fs::DeviceRemovedException& )
+        catch ( const fs::errors::DeviceRemoved& )
         {
             LOG_WARN( "Postponing rescan of removable file ", file->rawMrl(),
                       " until the device containing it is present again" );
@@ -287,7 +288,7 @@ bool Task::restoreLinkedEntities()
     {
         m_fileFs = m_parentFolderFs->file( mrl );
     }
-    catch ( const fs::DeviceRemovedException& )
+    catch ( const fs::errors::DeviceRemoved& )
     {
         LOG_WARN( "Failed to restore file on an unmounted device: ", mrl );
         return false;

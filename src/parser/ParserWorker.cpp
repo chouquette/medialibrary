@@ -28,6 +28,7 @@
 #include "ParserWorker.h"
 #include "Parser.h"
 #include "Media.h"
+#include "medialibrary/filesystem/Errors.h"
 #include "Folder.h"
 
 namespace medialibrary
@@ -214,7 +215,7 @@ void Worker::mainloop() ML_UNHANDLED_EXCEPTION_INIT
                        "ms. Result: ",
                        static_cast<std::underlying_type_t<parser::Status>>( status ) );
         }
-        catch ( const fs::DeviceRemovedException& )
+        catch ( const fs::errors::DeviceRemoved& )
         {
             LOG_ERROR( "Parsing of ", task->mrl(), " was interrupted "
                        "due to its containing device being unmounted" );

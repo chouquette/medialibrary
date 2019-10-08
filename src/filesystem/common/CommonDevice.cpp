@@ -25,6 +25,7 @@
 #endif
 
 #include "CommonDevice.h"
+#include "medialibrary/filesystem/Errors.h"
 #include "utils/Filename.h"
 
 #include <algorithm>
@@ -60,7 +61,7 @@ bool CommonDevice::isPresent() const
 const std::string& CommonDevice::mountpoint() const
 {
     if ( m_mountpoints.empty() == true )
-        throw fs::DeviceRemovedException();
+        throw fs::errors::DeviceRemoved();
     return m_mountpoints[0];
 }
 
@@ -90,7 +91,7 @@ CommonDevice::matchesMountpoint( const std::string& mrl ) const
 std::string CommonDevice::relativeMrl( const std::string& absoluteMrl ) const
 {
     if ( m_mountpoints.empty() == true )
-        throw fs::DeviceRemovedException();
+        throw fs::errors::DeviceRemoved{};
     auto res = matchesMountpoint( absoluteMrl );
     if ( std::get<0>( res ) == false )
         throw std::runtime_error( "The provided mrl doesn't match this device" );
@@ -100,7 +101,7 @@ std::string CommonDevice::relativeMrl( const std::string& absoluteMrl ) const
 std::string CommonDevice::absoluteMrl( const std::string& relativeMrl ) const
 {
     if ( m_mountpoints.empty() == true )
-        throw fs::DeviceRemovedException();
+        throw fs::errors::DeviceRemoved{};
     return m_mountpoints[0] + relativeMrl;
 }
 

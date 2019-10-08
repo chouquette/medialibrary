@@ -32,6 +32,7 @@
 #include "MediaLibrary.h"
 #include "Device.h"
 #include "utils/Filename.h"
+#include "medialibrary/filesystem/Errors.h"
 #include <cassert>
 
 namespace medialibrary
@@ -286,7 +287,7 @@ void DiscovererWorker::runReloadDevice( int64_t deviceId )
             LOG_INFO( "Reloading entrypoint on mounted device: ", mrl );
             runReload( mrl );
         }
-        catch ( const fs::DeviceRemovedException& )
+        catch ( const fs::errors::DeviceRemoved& )
         {
             LOG_INFO( "Can't reload device ", device->uuid(), " as it was removed" );
         }

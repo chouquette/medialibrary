@@ -90,7 +90,7 @@ bool FsDiscoverer::discover( const std::string& entryPoint,
     {
         LOG_DEBUG( fsDirMrl, " discovery aborted (assuming banned folder): ", ex.what() );
     }
-    catch ( fs::DeviceRemovedException& )
+    catch ( fs::errors::DeviceRemoved& )
     {
         // Simply ignore, the device has already been marked as removed and the DB updated accordingly
         LOG_DEBUG( "Discovery of ", fsDirMrl, " was stopped after the device was removed" );
@@ -132,7 +132,7 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
     {
         checkFolder( std::move( directory ), std::move( f ), false, probe );
     }
-    catch ( fs::DeviceRemovedException& )
+    catch ( fs::errors::DeviceRemoved& )
     {
         LOG_INFO( "Reloading of ", mrl, " was stopped after the device was removed" );
         return false;
@@ -155,7 +155,7 @@ bool FsDiscoverer::reload( const IInterruptProbe& interruptProbe )
         {
             mrl = f->mrl();
         }
-        catch ( const fs::DeviceRemovedException& ex )
+        catch ( const fs::errors::DeviceRemoved& ex )
         {
             // If the device was removed, let's wait until it comes back, but
             // don't abort all entry points reloading
@@ -248,7 +248,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                 device = currentFolderFs->device();
             // The device presence flag will be changed in place, so simply retest it
             if ( device == nullptr || device->isPresent() == false )
-                throw fs::DeviceRemovedException();
+                throw fs::errors::DeviceRemoved{};
             LOG_INFO( "Device was not removed" );
         }
         // However if the device isn't removable, we want to:

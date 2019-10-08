@@ -31,15 +31,6 @@ namespace medialibrary
 namespace fs
 {
 
-class DeviceRemovedException : public std::runtime_error
-{
-public:
-    DeviceRemovedException() noexcept
-        : std::runtime_error( "The device containing this file/folder was removed" )
-    {
-    }
-};
-
 class IDevice
 {
 public:

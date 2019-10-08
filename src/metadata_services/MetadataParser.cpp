@@ -29,6 +29,7 @@
 #include "AlbumTrack.h"
 #include "Artist.h"
 #include "File.h"
+#include "medialibrary/filesystem/Errors.h"
 #include "medialibrary/filesystem/IDevice.h"
 #include "medialibrary/filesystem/IDirectory.h"
 #include "Folder.h"
@@ -241,7 +242,7 @@ Status MetadataAnalyzer::addPlaylistMedias( IItem& item ) const
         {
             auto deviceFs = item.parentFolderFs()->device();
             if ( deviceFs == nullptr )
-                throw fs::DeviceRemovedException{};
+                throw fs::errors::DeviceRemoved{};
             auto file = playlistPtr->addFile( *item.fileFs(),
                                               item.parentFolder()->id(),
                                               deviceFs->isRemovable() );
@@ -489,7 +490,7 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
     }
     auto deviceFs = item.parentFolderFs()->device();
     if ( deviceFs == nullptr )
-        throw fs::DeviceRemovedException{};
+        throw fs::errors::DeviceRemoved{};
     // For now, assume all media are made of a single file
     file = m->addFile( *item.fileFs(), item.parentFolder()->id(),
                        deviceFs->isRemovable(), File::Type::Main );

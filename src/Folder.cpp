@@ -510,7 +510,7 @@ const std::string& Folder::mrl() const
     // mountpoint, therefor we don't know the full path. Calling isPresent will
     // ensure we have the device representation cached locally
     if ( isPresent() == false )
-        throw fs::DeviceRemovedException();
+        throw fs::errors::DeviceRemoved{};
 
     auto fsFactory = m_ml->fsFactoryForMrl( m_device->scheme() );
     if ( fsFactory == nullptr )
@@ -523,7 +523,7 @@ const std::string& Folder::mrl() const
         // We only checked for the database representation so far. If the device
         // representation in DB was not updated but we can't find the device, we
         // should still assume that the device was removed
-        throw fs::DeviceRemovedException();
+        throw fs::errors::DeviceRemoved{};
     }
     m_fullPath = deviceFs->absoluteMrl( m_path );
     return m_fullPath;

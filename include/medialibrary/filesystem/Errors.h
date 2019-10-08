@@ -49,6 +49,16 @@ public:
 private:
     std::string m_scheme;
 };
+
+class DeviceRemoved : public std::runtime_error
+{
+public:
+    DeviceRemoved() noexcept
+        : std::runtime_error( "The device containing this file/folder was removed" )
+    {
+    }
+};
+
 }
 
 }
