@@ -32,7 +32,23 @@ namespace fs
 
 namespace errors
 {
+class UnknownScheme : public std::runtime_error
+{
+public:
+    UnknownScheme( const std::string& scheme )
+        : std::runtime_error( "No filesystem factory found for scheme " + scheme )
+        , m_scheme( scheme )
+    {
+    }
 
+    const std::string& scheme() const
+    {
+        return m_scheme;
+    }
+
+private:
+    std::string m_scheme;
+};
 }
 
 }

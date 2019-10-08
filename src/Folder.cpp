@@ -34,6 +34,7 @@
 #include "medialibrary/filesystem/IDirectory.h"
 #include "medialibrary/filesystem/IDevice.h"
 #include "medialibrary/filesystem/IFileSystemFactory.h"
+#include "medialibrary/filesystem/Errors.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
 
@@ -513,7 +514,7 @@ const std::string& Folder::mrl() const
 
     auto fsFactory = m_ml->fsFactoryForMrl( m_device->scheme() );
     if ( fsFactory == nullptr )
-        throw fs::UnknownSchemeException{ m_device->scheme() };
+        throw fs::errors::UnknownScheme{ m_device->scheme() };
     auto deviceFs = fsFactory->createDevice( m_device->uuid() );
     // In case the device lister hasn't been updated accordingly, we might think
     // a device still is present while it's not.

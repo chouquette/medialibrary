@@ -34,24 +34,6 @@ namespace fs
     class IFile;
     class IDevice;
 
-    class UnknownSchemeException : public std::runtime_error
-    {
-    public:
-        UnknownSchemeException( const std::string& scheme )
-            : std::runtime_error( "No filesystem factory found for scheme " + scheme )
-            , m_scheme( scheme )
-        {
-        }
-
-        const std::string& scheme() const
-        {
-            return m_scheme;
-        }
-
-    private:
-        std::string m_scheme;
-    };
-
     /**
      * @brief IFileSystemFactoryCb is for external file system factories to signal device changes
      */

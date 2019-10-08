@@ -32,6 +32,7 @@
 
 #include "factory/FileSystemFactory.h"
 #include "medialibrary/filesystem/IDevice.h"
+#include "medialibrary/filesystem/Errors.h"
 #include "Media.h"
 #include "File.h"
 #include "Device.h"
@@ -161,7 +162,7 @@ bool FsDiscoverer::reload( const IInterruptProbe& interruptProbe )
             LOG_INFO( "Can't reload folder on a removed device" );
             continue;
         }
-        catch ( const fs::UnknownSchemeException& ex )
+        catch ( const fs::errors::UnknownScheme& ex )
         {
             // We might have added a folder before, but the FS factory required to
             // handle it has not been inserted yet, or maybe some type of discoveries
