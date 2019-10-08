@@ -32,11 +32,21 @@ namespace fs
 
 namespace errors
 {
-class UnknownScheme : public std::runtime_error
+
+class Exception : public std::runtime_error
+{
+public:
+    Exception( const std::string& str )
+        : std::runtime_error( str )
+    {
+    }
+};
+
+class UnknownScheme : public Exception
 {
 public:
     UnknownScheme( const std::string& scheme )
-        : std::runtime_error( "No filesystem factory found for scheme " + scheme )
+        : Exception( "No filesystem factory found for scheme " + scheme )
         , m_scheme( scheme )
     {
     }
@@ -50,11 +60,11 @@ private:
     std::string m_scheme;
 };
 
-class DeviceRemoved : public std::runtime_error
+class DeviceRemoved : public Exception
 {
 public:
     DeviceRemoved() noexcept
-        : std::runtime_error( "The device containing this file/folder was removed" )
+        : Exception( "The device containing this file/folder was removed" )
     {
     }
 };
