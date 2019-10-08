@@ -276,7 +276,7 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
 {
     const auto& mrl = subitem.mrl();
     const auto& playlistMrl = item.mrl();
-    LOG_DEBUG( "Try to add ", mrl, " to the playlist ", playlistMrl );
+    LOG_DEBUG( "Try to add ", mrl, " to the playlist ", playlistMrl, " at index ", subitem.linkExtra() );
     // Create Media, etc.
     auto fsFactory = m_ml->fsFactoryForMrl( mrl );
 
