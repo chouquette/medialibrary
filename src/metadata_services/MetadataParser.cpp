@@ -390,7 +390,7 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
         if ( showName.length() != 0 )
         {
             const std::string req = "SELECT * FROM " + Show::Table::Name +
-                    " WHERE name = ?";
+                    " WHERE title = ?";
 
             auto shows = Show::fetchAll<Show>( m_ml, req, showName );
             std::shared_ptr<Show> show;
