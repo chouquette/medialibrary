@@ -582,6 +582,10 @@ bool Task::removePlaylistContentTasks( MediaLibraryPtr ml )
                                          LinkType::Playlist, Step::Completed );
 }
 
+/*
+ * This is used only by the 11 -> 12 migration, and is refering to an old
+ * DB model on purpose
+ */
 bool Task::recoverUnscannedFiles( MediaLibraryPtr ml )
 {
     static const std::string req = "INSERT INTO " + Task::Table::Name +
