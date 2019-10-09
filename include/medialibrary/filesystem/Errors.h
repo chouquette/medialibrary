@@ -60,6 +60,24 @@ private:
     std::string m_scheme;
 };
 
+class UnhandledScheme : public Exception
+{
+public:
+    UnhandledScheme( const std::string& scheme )
+        : Exception( "Unhandled MRL scheme: " + scheme )
+        , m_scheme( scheme )
+    {
+    }
+
+    const std::string& scheme() const
+    {
+        return m_scheme;
+    }
+
+private:
+    std::string m_scheme;
+};
+
 class DeviceRemoved : public Exception
 {
 public:

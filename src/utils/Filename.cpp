@@ -26,6 +26,7 @@
 
 #include "utils/Filename.h"
 #include "utils/Url.h"
+#include "medialibrary/filesystem/Errors.h"
 
 #include <stdexcept>
 #include <algorithm>
@@ -166,7 +167,7 @@ std::string scheme( const std::string& mrl )
 {
     auto pos = mrl.find( "://" );
     if ( pos == std::string::npos )
-        throw std::runtime_error( "Invalid MRL provided" );
+        throw fs::errors::UnhandledScheme( "<empty scheme>" );
     return mrl.substr( 0, pos + 3 );
 }
 
@@ -175,7 +176,7 @@ std::string scheme( const std::string& mrl )
 std::string toLocalPath( const std::string& mrl )
 {
     if ( mrl.compare( 0, 7, "file://" ) != 0 )
-        throw std::runtime_error( mrl + " is not representing a local path" );
+        throw fs::errors::UnhandledScheme( utils::file::scheme( mrl ) );
     return utils::url::decode( mrl.substr( 7 ) );
 }
 
@@ -189,7 +190,7 @@ std::string toMrl( const std::string& path )
 std::string toLocalPath( const std::string& mrl )
 {
     if ( mrl.compare( 0, 7, "file://" ) != 0 )
-        throw std::runtime_error( mrl + " is not representing a local path" );
+        throw fs::errors::UnhandledScheme( utils::file::scheme( mrl ) );
     auto path = mrl.substr( 7 );
     // If the path is a local path (ie. X:\path\to and not \\path\to) skip the
     // initial backslash, as it is only part of our representation, and not
