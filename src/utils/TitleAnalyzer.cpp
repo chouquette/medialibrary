@@ -55,7 +55,7 @@ std::string sanitize( const std::string& fileName )
                     "MEMENTO"
                 ")"
                 SEPARATORS,
-                std::regex_constants::icase | std::regex_constants::ECMAScript,
+                std::regex_constants::icase | std::regex_constants::ECMAScript
             },
             "$1$3"
         },
@@ -68,7 +68,7 @@ std::string sanitize( const std::string& fileName )
                 "(\\b|" SEPARATORS ")"
                     "(5\\.1|Web(\\.|-)DL|HD.TS|Ohys-Raws|AT-X|LOST-UGM)"
                 "(\\b|" SEPARATORS ")",
-                std::regex_constants::icase | std::regex_constants::ECMAScript,
+                std::regex_constants::icase | std::regex_constants::ECMAScript
             },
             ""
         },
