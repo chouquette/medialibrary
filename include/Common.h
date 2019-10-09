@@ -28,7 +28,7 @@
 #define ML_FORCE_USED
 #endif
 
-#ifdef _NDEBUG
+#ifdef NDEBUG
 # define ML_UNHANDLED_EXCEPTION_INIT try
 # define ML_UNHANDLED_EXCEPTION_BODY(ctx) \
     catch ( const sqlite::errors::Exception& ex ) \
