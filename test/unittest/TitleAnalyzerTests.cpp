@@ -71,6 +71,11 @@ TEST_F( TitleAnalyzerTests, SimpleTests )
     CHECK( "trailing separators nospace", "trailing separators nospace." );
     CHECK( "trailing separators", "trailing separators ." );
     CHECK( "some words", "some words -" );
+    CHECK( "a file", "a 123GB file" );
+    CHECK( "a file", "a 1.23GB file" );
+    CHECK( "a file", "a 123MB file" );
+    CHECK( "a 1 2 3GB file", "a 1.2.3GB file" );
+    CHECK( "something something 12GB file", "something something.12GB file" );
 }
 
 TEST_F( TitleAnalyzerTests, RemovePatterns )
@@ -79,7 +84,7 @@ TEST_F( TitleAnalyzerTests, RemovePatterns )
            "Deadly.Still.2019.BDRip.XviD.AC3-EVO" );
     CHECK( "Avengers Endgame 2019 SPECIAL EDITION GalaxyRG",
            "Avengers.Endgame.2019.HDTC.SPECIAL-1337x-EDITION.x264-GalaxyRG" );
-    CHECK( "The Avengers 2012 1GB",
+    CHECK( "The Avengers 2012",
            "The Avengers 2012 720p BRrip X264 - 1GB - YIFY" );
     CHECK( "Avengers: Age of Ultron (2015)",
            "Avengers: Age of Ultron (2015) 720p BrRip x264 - YIFY" );
@@ -105,6 +110,26 @@ TEST_F( TitleAnalyzerTests, RemovePatterns )
            "[Ohys-Raws] Shinchou Yuusha Kono Yuusha ga Ore Tueee Kuse ni Shinchou Sugiru - 01 (AT-X 1280x720 x264 AAC).mp4");
     CHECK( "The Walking Dead S08 E02",
            "The.Walking.Dead.S08.E02.1080p.BluRay.x264-ROVERS AMC.mkv" );
+    CHECK( "Ant Man And The Wasp 2018",
+           "Ant-Man.And.The.Wasp.2018.720p.WEBRip.x264-[YTS.AM].mp4" );
+    CHECK( "Enter The Void 2009",
+           "Enter.The.Void.2009.720p.BluRay.H264.AAC-RARBG.mp4" );
+    CHECK( "Jurassic World Fallen Kingdom 2018",
+           "Jurassic.World.Fallen.Kingdom.2018.1080p.BluRay.x264-[YTS.AM].mp4" );
+    CHECK( "Kong Skull Island 2017",
+           "Kong.Skull.Island.2017.720p.BluRay.x264-[YTS.AG].mp4" );
+    CHECK( "Coffee and Cigarettes 2003",
+           "Coffee.and.Cigarettes.2003.1080p.BluRay.x264.anoXmous__.mp4" );
+    CHECK( "chernobyl s01e02 internal web",
+           "chernobyl.s01e02.internal.1080p.web.h264-memento.mkv" );
+    CHECK( "Doctor Strange 2016",
+           "Doctor.Strange.2016.1080p.HDRip.X264.AC3-EVO[EtHD].mkv" );
+    CHECK( "Du Jour Au Lendemain FRENCH",
+           "Du.Jour.Au.Lendemain.FRENCH.DVDRip.XviD-LOST-UGM.avi" );
+    CHECK( "Escape From New York 1981",
+           "Escape.From.New.York.1981.1080p.BrRip.x264.BOKUTOX.YIFY.mp4" );
+    CHECK( "Memento (2000)",
+           "Memento (2000) 1080p BrRip x264 - 1.6GB - YIFY" );
 }
 
 #endif

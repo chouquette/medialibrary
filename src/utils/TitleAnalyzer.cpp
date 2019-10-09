@@ -46,6 +46,19 @@ std::string sanitize( const std::string& fileName )
         const char* substitute;
     } replacePatterns[] =
     {
+        // A small subset of patterns that need to be matched between separators
+        // *excluding* spaces, but keeping the separators for now
+        {
+            std::regex{
+                SEPARATORS
+                "("
+                    "MEMENTO"
+                ")"
+                SEPARATORS,
+                std::regex_constants::icase | std::regex_constants::ECMAScript,
+            },
+            "$1$3"
+        },
         // A small subset of patterns to remove that contain separators, and
         // that we want to match using those separators. For instance, "5.1"
         // would be changed to "5 1", and we don't want to remove a potentially
@@ -53,7 +66,7 @@ std::string sanitize( const std::string& fileName )
         {
             std::regex{
                 "(\\b|" SEPARATORS ")"
-                    "(5\\.1|Web(\\.|-)DL|HD.TS|Ohys-Raws|AT-X)"
+                    "(5\\.1|Web(\\.|-)DL|HD.TS|Ohys-Raws|AT-X|LOST-UGM)"
                 "(\\b|" SEPARATORS ")",
                 std::regex_constants::icase | std::regex_constants::ECMAScript,
             },
@@ -64,6 +77,18 @@ std::string sanitize( const std::string& fileName )
             std::regex{ "\\.[[:alnum:]]{2,4}$" },
             ""
         },
+        {
+            // File size, which we need to handle before removing a potential dot
+            // We do not use \b before the size pattern to avoid considering
+            // <something>.<number>.<nummber>GB as a size, we want a clean
+            // <something unrelated><numerator>.<denominator><unit> pattern
+            std::regex{
+                "(\\s|-|_)(\\d{1,4}(\\.\\d{1,3})?(MB|GB))\\b",
+                std::regex_constants::icase | std::regex_constants::ECMAScript
+            },
+            ""
+        },
+
         // Replace '.' separating words by a space.
         // This is done before removing most of the common patterns, so the
         // word boundaries are still present
@@ -76,9 +101,9 @@ std::string sanitize( const std::string& fileName )
                 "\\b("
 
                 // Various patterns:
-                "xvid|h264|dvd|rip|divx|x264|hdtv|aac|"
+                "xvid|h264|dvd|rip|divx|x264|hdtv|aac|webrip|"
                 "bluray|bdrip|brrip|dvdrip|ac3|HDTC|x265|h265|mp4|mkv|10\\s?bit(s)?|"
-                "avi|"
+                "avi|HDRip|"
 
                 // Try to match most resolutions in one go:
                 "([0-9]{3,4}(p|i))|"
@@ -97,7 +122,8 @@ std::string sanitize( const std::string& fileName )
 
                 // Usually found team names:
                 "ETTV|ETHD|DTOne|1337x|xrg|evo|yify|PuyaSubs!|HorribleSubs|"
-                "JiyuuNoFansub|ROVERS"
+                "JiyuuNoFansub|ROVERS|YTS(\\s[A-Z]{2,})?|AMZN|RARBG|anoXmous(_){0,2}|"
+                "BOKUTOX"
                 // Ohys-Raws contains a separator so it's found in the corresponding
                 // special rule above
 
@@ -119,6 +145,12 @@ std::string sanitize( const std::string& fileName )
         {
             std::regex{ "(\\(\\)|\\[\\])" },
             ""
+        },
+        // Now that we removed many elements, re-remove the separators since the
+        // word boundaries have changed
+        {
+            std::regex{ "(\\s|\\b|\\(|\\[|^)" SEPARATORS "(\\b|\\s|\\)|\\]|$)" },
+            " "
         },
         {
             // Trim the output. Leading & trailing spaces have no group so they will be
