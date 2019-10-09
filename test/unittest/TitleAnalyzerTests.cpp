@@ -130,6 +130,14 @@ TEST_F( TitleAnalyzerTests, RemovePatterns )
            "Escape.From.New.York.1981.1080p.BrRip.x264.BOKUTOX.YIFY.mp4" );
     CHECK( "Memento (2000)",
            "Memento (2000) 1080p BrRip x264 - 1.6GB - YIFY" );
+    CHECK( "Uchuu Patrol Luluco 10 [967D0521]",
+           "[PuyaSubs!] Uchuu Patrol Luluco - 10 [720p][967D0521].mkv" );
+    CHECK( "Code Geass Lelouch of the Rebellion R2 15 [DCA806F7]",
+           "[Eclipse] Code Geass - Lelouch of the Rebellion R2 - 15 (1280x720 h264) [DCA806F7].mkv" );
+    CHECK( "Youkoso Japari Park 19 ~ 22 [Multiple Subtitle]",
+           "[Erai-raws] Youkoso Japari Park - 19 ~ 22 [1080p][Multiple Subtitle]" );
+    CHECK( "Nanatsu no Taizai Kamigami no Gekirin 01",
+           "[Ohys-Raws] Nanatsu no Taizai Kamigami no Gekirin - 01 (TX 1280x720 x264 AAC).mp4" );
 }
 
 #endif

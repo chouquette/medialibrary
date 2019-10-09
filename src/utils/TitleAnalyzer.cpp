@@ -65,9 +65,13 @@ std::string sanitize( const std::string& fileName )
         // relevent string by assuming there was a dot before.
         {
             std::regex{
-                "(\\b|" SEPARATORS ")"
-                    "(5\\.1|Web(\\.|-)DL|HD.TS|Ohys-Raws|AT-X|LOST-UGM)"
-                "(\\b|" SEPARATORS ")",
+                "((\\b|" SEPARATORS ")"
+                    "("
+                        "5\\.1|Web(\\.|-)DL|HD.TS|AT-X|LOST-UGM"
+                    ")"
+                "(\\b|" SEPARATORS "))|"
+                // Attempt to match most <foo>-Raws anime teams
+                "(\\[[a-z]+-raws\\])",
                 std::regex_constants::icase | std::regex_constants::ECMAScript
             },
             ""
@@ -98,6 +102,13 @@ std::string sanitize( const std::string& fileName )
         },
         {
             std::regex{
+                "\\bPuyaSubs!",
+                std::regex_constants::icase | std::regex_constants::ECMAScript
+            },
+            ""
+        },
+        {
+            std::regex{
                 "\\b("
 
                 // Various patterns:
@@ -116,12 +127,12 @@ std::string sanitize( const std::string& fileName )
                 "(VOST( )?([a-z]{2})?)|"
 
                 // Various TV channels
-                "HBO|AMC|"
+                "HBO|AMC|TX|"
                 // AT-X contains a separator, so see above
 
 
                 // Usually found team names:
-                "ETTV|ETHD|DTOne|1337x|xrg|evo|yify|PuyaSubs!|HorribleSubs|"
+                "ETTV|ETHD|DTOne|1337x|xrg|evo|yify|HorribleSubs|Eclipse|"
                 "JiyuuNoFansub|ROVERS|YTS(\\s[A-Z]{2,})?|AMZN|RARBG|anoXmous(_){0,2}|"
                 "BOKUTOX"
                 // Ohys-Raws contains a separator so it's found in the corresponding
