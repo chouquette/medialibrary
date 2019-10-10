@@ -221,9 +221,9 @@ void Worker::mainloop() ML_UNHANDLED_EXCEPTION_INIT
                        "due to its containing device being unmounted" );
             status = Status::TemporaryUnavailable;
         }
-        catch ( const std::exception& ex )
+        catch ( const fs::errors::Exception& ex )
         {
-            LOG_ERROR( "Caught an exception during ", task->mrl(), " [", serviceName, "] parsing: ", ex.what() );
+            LOG_ERROR( "Caught an FS exception during ", task->mrl(), " [", serviceName, "] parsing: ", ex.what() );
             status = Status::Fatal;
         }
         if ( handleServiceResult( *task, status ) == false )
