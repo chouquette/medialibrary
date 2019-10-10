@@ -30,6 +30,7 @@
 #include "Album.h"
 #include "Artist.h"
 #include "Media.h"
+#include "medialibrary/filesystem/Errors.h"
 
 namespace medialibrary
 {
@@ -199,7 +200,7 @@ void Thumbnail::relocate()
     {
         localPath = utils::file::toLocalPath( originalMrl );
     }
-    catch ( const std::exception& ex )
+    catch ( const fs::errors::Exception& ex )
     {
         LOG_ERROR( "Failed to relocate thumbnail ", originalMrl, ": ", ex.what() );
         return;

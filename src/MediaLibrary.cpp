@@ -97,6 +97,7 @@ using ThumbnailerType = medialibrary::VmemThumbnailer;
 #endif
 
 #include "medialibrary/filesystem/IDevice.h"
+#include "medialibrary/filesystem/Errors.h"
 
 namespace medialibrary
 {
@@ -310,7 +311,7 @@ void MediaLibrary::removeThumbnails()
             utils::fs::remove( path );
         }
     }
-    catch ( const std::exception& ex )
+    catch ( const fs::errors::Exception& ex )
     {
         LOG_ERROR( "Failed to remove thumbnail files: ", ex.what() );
     }
