@@ -221,14 +221,6 @@ void Worker::mainloop() ML_UNHANDLED_EXCEPTION_INIT
                        "due to its containing device being unmounted" );
             status = Status::TemporaryUnavailable;
         }
-        catch ( const sqlite::errors::Exception& ex )
-        {
-            // Propagate critical sqlite errors higher up for the application
-            // to handle
-            if ( sqlite::errors::isInnocuous( ex ) == false )
-                throw;
-            status = Status::Fatal;
-        }
         catch ( const std::exception& ex )
         {
             LOG_ERROR( "Caught an exception during ", task->mrl(), " [", serviceName, "] parsing: ", ex.what() );
