@@ -105,6 +105,15 @@ public:
     }
 };
 
+class NotFound : public Exception
+{
+public:
+    NotFound( const std::string& mrl, const std::string& container )
+        : Exception( mrl + " was not found in " + container )
+    {
+    }
+};
+
 }
 
 }

@@ -27,6 +27,7 @@
 #include "CommonDirectory.h"
 #include "medialibrary/filesystem/IFile.h"
 #include "medialibrary/filesystem/IFileSystemFactory.h"
+#include "medialibrary/filesystem/Errors.h"
 #include "utils/Filename.h"
 #include <dirent.h>
 #include <cerrno>
@@ -75,7 +76,7 @@ std::shared_ptr<IFile> CommonDirectory::file( const std::string& mrl ) const
                                 return f->name() == fileName;
                             });
     if ( it == cend( fs ) )
-        throw std::runtime_error( mrl + " wasn't found in the directory" );
+        throw fs::errors::NotFound{ mrl, "directory" };
     return *it;
 }
 

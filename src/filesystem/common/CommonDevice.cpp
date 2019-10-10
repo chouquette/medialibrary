@@ -94,7 +94,7 @@ std::string CommonDevice::relativeMrl( const std::string& absoluteMrl ) const
         throw fs::errors::DeviceRemoved{};
     auto res = matchesMountpoint( absoluteMrl );
     if ( std::get<0>( res ) == false )
-        throw std::runtime_error( "The provided mrl doesn't match this device" );
+        throw errors::NotFound{ absoluteMrl, "device " + m_mountpoints[0] };
     return utils::file::removePath( absoluteMrl, std::get<1>( res ) );
 }
 
