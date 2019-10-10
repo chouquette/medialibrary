@@ -87,6 +87,24 @@ public:
     }
 };
 
+class DeviceMapper : public Exception
+{
+public:
+    DeviceMapper( const std::string& str )
+        : Exception( "Failed to resolve using device mapper: " + str )
+    {
+    }
+};
+
+class DeviceListing : public Exception
+{
+public:
+    DeviceListing( const std::string& str )
+        : Exception( "Failed to list devices: " + str )
+    {
+    }
+};
+
 }
 
 }

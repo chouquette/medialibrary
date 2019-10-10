@@ -49,8 +49,8 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
     if ( handle == INVALID_HANDLE_VALUE )
     {
         std::stringstream ss;
-        ss << "Failed to list devices (error code" << GetLastError() << ')';
-        throw std::runtime_error( ss.str() );
+        ss << "error code" << GetLastError();
+        throw fs::errors::DeviceListing{ ss.str() };
     }
     std::unique_ptr<typename std::remove_pointer<HANDLE>::type, decltype(&FindVolumeClose)>
             uh( handle, &FindVolumeClose );
@@ -63,8 +63,8 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
             if ( err == ERROR_NO_MORE_FILES )
                 break;
             std::stringstream ss;
-            ss << "Failed to list devices (error code" << err << ')';
-            throw std::runtime_error( ss.str() );
+            ss << "error code" << err;
+            throw fs::errors::DeviceListing{ ss.str() };
         }
 
         auto lastChar = wcslen( volumeName ) - 1;

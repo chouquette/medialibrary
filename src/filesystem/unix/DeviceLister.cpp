@@ -27,6 +27,7 @@
 #include "DeviceLister.h"
 #include "logging/Logger.h"
 #include "utils/Filename.h"
+#include "medialibrary/filesystem/Errors.h"
 
 #include <dirent.h>
 #include <mntent.h>
@@ -58,7 +59,7 @@ DeviceLister::DeviceMap DeviceLister::listDevices() const
     {
         std::stringstream err;
         err << "Failed to open /dev/disk/by-uuid: " << strerror(errno);
-        throw std::runtime_error( err.str() );
+        throw fs::errors::DeviceListing{ err.str() };
     }
     DeviceMap res;
     dirent* result = nullptr;
@@ -77,7 +78,7 @@ DeviceLister::DeviceMap DeviceLister::listDevices() const
             std::stringstream err;
             err << "Failed to resolve uuid -> device link: "
                 << result->d_name << " (" << strerror(errno) << ')';
-            throw std::runtime_error( err.str() );
+            throw fs::errors::DeviceListing{ err.str() };
         }
         auto deviceName = utils::file::fileName( linkPath );
         if ( std::find_if( begin( bannedDevice ), end( bannedDevice ),
@@ -106,7 +107,7 @@ DeviceLister::MountpointMap DeviceLister::listMountpoints() const
     mntent smnt;
     FILE* f = setmntent("/etc/mtab", "r");
     if ( f == nullptr )
-        throw std::runtime_error( "Failed to read /etc/mtab" );
+        throw fs::errors::DeviceListing{ "Failed to read /etc/mtab" };
     std::unique_ptr<FILE, int(*)(FILE*)> fPtr( f, &endmntent );
     while ( getmntent_r( f, &smnt, buff, sizeof(buff) ) != nullptr )
     {
@@ -140,7 +141,7 @@ DeviceLister::deviceFromDeviceMapper( const std::string& devicePath ) const
         std::stringstream err;
         err << "Failed to resolve device -> mapper link: "
             << devicePath << " (" << strerror(errno) << ')';
-        throw std::runtime_error( err.str() );
+        throw fs::errors::DeviceMapper{ err.str() };
     }
     linkPath[linkSize] = 0;
     LOG_DEBUG( "Resolved ", devicePath, " to ", linkPath, " device mapper" );
@@ -154,7 +155,7 @@ DeviceLister::deviceFromDeviceMapper( const std::string& devicePath ) const
         std::stringstream err;
         err << "Failed to open device-mapper slaves directory (" <<
                linkPath << ')';
-        throw std::runtime_error( err.str() );
+        throw fs::errors::DeviceMapper{ err.str() };
     }
     dirent* result;
     while ( ( result = readdir( dir.get() ) ) != nullptr )
@@ -225,9 +226,9 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
                     // the block device it points to
                     dmPair = deviceFromDeviceMapper( devicePath );
                 }
-                catch( std::runtime_error& ex )
+                catch( fs::errors::DeviceMapper& ex )
                 {
-                    LOG_WARN( "Failed to resolve using device mapper: ", ex.what() );
+                    LOG_WARN( ex.what() );
                     continue;
                 }
                 // First try with the block device
@@ -260,10 +261,9 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
             }
         }
     }
-    catch(std::runtime_error& ex)
+    catch( const fs::errors::DeviceListing& ex )
     {
-        LOG_WARN( "Failed to list devices: ", ex.what(),
-                  ". Falling back to a dummy device containing '/'" );
+        LOG_WARN( ex.what(), ". Falling back to a dummy device containing '/'" );
         res.emplace_back( std::make_tuple( "{dummy-device}", utils::file::toMrl( "/" ),
                                            false ) );
     }
