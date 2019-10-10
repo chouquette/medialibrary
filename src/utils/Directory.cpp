@@ -147,17 +147,9 @@ bool mkdir( const std::string& path )
 
 bool rmdir( medialibrary::fs::IDirectory& dir )
 {
-    try
+    for ( const auto& f : dir.files() )
     {
-        for ( const auto& f : dir.files() )
-        {
-            utils::fs::remove( utils::file::toLocalPath( f->mrl() ) );
-        }
-    }
-    catch ( std::runtime_error& ex )
-    {
-        LOG_WARN( "Failed to remove directory \"", dir.mrl(), "\": ", ex.what() );
-        return false;
+        utils::fs::remove( utils::file::toLocalPath( f->mrl() ) );
     }
 #ifdef _WIN32
     auto wPath = charset::ToWide( dir.mrl().c_str() );
