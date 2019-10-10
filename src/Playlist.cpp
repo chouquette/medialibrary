@@ -448,10 +448,10 @@ Playlist::Backups Playlist::loadBackups( MediaLibraryPtr ml )
     auto fsFactory = ml->fsFactoryForMrl( playlistFolderMrl );
     Backups backups;
 
-    auto plFolder = fsFactory->createDirectory( playlistFolderMrl );
-    std::vector<std::shared_ptr<fs::IFile>> files;
     try
     {
+        auto plFolder = fsFactory->createDirectory( playlistFolderMrl );
+        std::vector<std::shared_ptr<fs::IFile>> files;
         for ( const auto& folder : plFolder->dirs() )
         {
             std::vector<std::string> mrls;
