@@ -23,6 +23,7 @@
 #pragma once
 
 #include <stdexcept>
+#include <system_error>
 
 namespace medialibrary
 {
@@ -69,7 +70,7 @@ public:
     {
     }
 
-    const std::string& scheme() const
+    const std::string& scheme() const noexcept
     {
         return m_scheme;
     }
@@ -112,6 +113,33 @@ public:
         : Exception( mrl + " was not found in " + container )
     {
     }
+};
+
+class System : public Exception
+{
+public:
+#ifdef _WIN32
+    System( unsigned long err, const std::string& msg )
+        : Exception( msg +
+                     std::error_code( err, std::generic_category() ).message() )
+        , m_errc( err, std::generic_category() )
+    {
+    }
+#endif
+    System( int err, const std::string& msg )
+        : Exception( msg +
+                     std::error_code( err, std::generic_category() ).message() )
+        , m_errc( err, std::generic_category() )
+    {
+    }
+
+    const std::error_code& code() const noexcept
+    {
+        return m_errc;
+    }
+
+private:
+    std::error_code m_errc;
 };
 
 }

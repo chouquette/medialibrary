@@ -25,16 +25,18 @@
 #endif
 
 #include <cassert>
-#include <system_error>
 
 #include "MockDirectory.h"
 #include "MockFile.h"
 #include "MockDevice.h"
 
+#include "medialibrary/filesystem/Errors.h"
 #include "utils/Filename.h"
 
 namespace mock
 {
+
+namespace errors = medialibrary::fs::errors;
 
 Directory::Directory( const std::string& mrl, std::shared_ptr<Device> device)
     : m_mrl( mrl )
@@ -53,7 +55,7 @@ const std::vector<std::shared_ptr<fs::IFile>>& Directory::files() const
 {
     // Assume no device means a wrong path
     if ( m_device.lock() == nullptr )
-        throw std::system_error( ENOENT, std::generic_category(), "Failed to open mock directory" );
+        throw errors::System{ ENOENT, "Failed to open mock directory" };
     m_filePathes.clear();
     for ( auto& f : m_files )
         m_filePathes.push_back( f.second );
@@ -63,7 +65,7 @@ const std::vector<std::shared_ptr<fs::IFile>>& Directory::files() const
 const std::vector<std::shared_ptr<fs::IDirectory>>& Directory::dirs() const
 {
     if ( m_device.lock() == nullptr )
-        throw std::system_error( ENOENT, std::generic_category(), "Failed to open mock directory" );
+        throw errors::System{ ENOENT, "Failed to open mock directory" };
     m_dirPathes.clear();
     for ( const auto& d : m_dirs )
         m_dirPathes.push_back( d.second );
@@ -159,7 +161,7 @@ std::shared_ptr<Directory> Directory::directory(const std::string& path)
     {
         auto it = m_dirs.find( subFolder );
         if ( it == end( m_dirs ) )
-            throw std::system_error{ ENOENT, std::generic_category(), "Mock directory" };
+            throw errors::System{ ENOENT, "Failed to open mock directory" };
         return it->second;
     }
     else

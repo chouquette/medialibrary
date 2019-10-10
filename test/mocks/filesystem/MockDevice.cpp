@@ -25,11 +25,11 @@
 #endif
 
 #include <cassert>
-#include <system_error>
 
 #include "MockDevice.h"
 #include "MockDirectory.h"
 #include "utils/Filename.h"
+#include "medialibrary/filesystem/Errors.h"
 
 namespace mock
 {
@@ -93,7 +93,7 @@ std::shared_ptr<fs::IFile> Device::file(const std::string& filePath )
 std::shared_ptr<Directory> Device::directory(const std::string& path)
 {
     if ( m_root == nullptr || m_present == false )
-        throw std::system_error{ ENOENT, std::generic_category(), "Mock directory" };
+        throw medialibrary::fs::errors::System{ ENOENT, "Mock directory" };
     const auto relPath = relativeMrl( path );
     if ( relPath.empty() == true )
         return m_root;

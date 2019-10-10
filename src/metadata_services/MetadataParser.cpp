@@ -319,7 +319,12 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
     {
         isDirectory = utils::fs::isDirectory( utils::file::toLocalPath( mrl ) );
     }
-    catch ( std::system_error& ex )
+    catch ( const fs::errors::UnhandledScheme& ex )
+    {
+        LOG_ERROR( "Can't check if ", mrl, " is a directory: ", ex.what() );
+        return;
+    }
+    catch ( const fs::errors::System& ex )
     {
         LOG_ERROR( "Failed to check if ", mrl, " was a directory: ", ex.what() );
         return;

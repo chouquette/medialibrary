@@ -29,12 +29,12 @@
 
 #include <cstring>
 #include <stdexcept>
-#include <system_error>
 #include "utils/Filename.h"
 #include "utils/File.h"
 #include "logging/Logger.h"
 #include "medialibrary/filesystem/IDirectory.h"
 #include "medialibrary/filesystem/IFile.h"
+#include "medialibrary/filesystem/Errors.h"
 
 #ifdef _WIN32
 # include <windows.h>
@@ -51,6 +51,8 @@
 
 namespace medialibrary
 {
+
+namespace errors = fs::errors;
 
 namespace utils
 {
@@ -69,16 +71,12 @@ bool isDirectory( const std::string& path )
     auto wpath = charset::ToWide( path.c_str() );
     auto attr = GetFileAttributes( wpath.get() );
     if ( attr == INVALID_FILE_ATTRIBUTES )
-    {
-        DWORD errVal = GetLastError();
-        std::error_code ec( errVal, std::system_category() );
-        throw std::system_error( ec, ERR_FS_OBJECT_ACCESS + path );
-    }
+        throw errors::System{ GetLastError(), ERR_FS_OBJECT_ACCESS + path };
     return attr & FILE_ATTRIBUTE_DIRECTORY;
 #else
     struct stat s;
     if ( lstat( path.c_str(), &s ) != 0 )
-        throw std::system_error( errno, std::system_category(), ERR_FS_OBJECT_ACCESS + path );
+        throw errors::System{ errno, ERR_FS_OBJECT_ACCESS + path };
     return S_ISDIR( s.st_mode );
 #endif
 }
@@ -90,7 +88,7 @@ std::string toAbsolute( const std::string& path )
     if ( realpath( path.c_str(), abs ) == nullptr )
     {
         LOG_ERROR( "Failed to convert ", path, " to absolute path" );
-        throw std::system_error( errno, std::generic_category(), "Failed to convert to absolute path" );
+        throw errors::System{ errno, "Failed to convert to absolute path" };
     }
     return file::toFolderPath( abs );
 #else
@@ -99,7 +97,7 @@ std::string toAbsolute( const std::string& path )
     if ( GetFullPathName( wpath.get(), MAX_PATH, buff, nullptr ) == 0 )
     {
         LOG_ERROR( "Failed to convert ", path, " to absolute path" );
-        throw std::system_error( GetLastError(), std::generic_category(), "Failed to convert to absolute path" );
+        throw errors::System{ GetLastError(), "Failed to convert to absolute path" };
     }
     auto upath = charset::FromWide( buff );
     return file::toFolderPath( upath.get() );

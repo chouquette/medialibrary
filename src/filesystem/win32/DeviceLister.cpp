@@ -25,6 +25,7 @@
 #endif
 
 #include "DeviceLister.h"
+#include "medialibrary/filesystem/Errors.h"
 
 #if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP)
 

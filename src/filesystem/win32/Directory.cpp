@@ -30,6 +30,7 @@
 #include "utils/Url.h"
 #include "utils/Directory.h"
 #include "medialibrary/filesystem/IFileSystemFactory.h"
+#include "medialibrary/filesystem/Errors.h"
 #include "File.h"
 #include "logging/Logger.h"
 
@@ -69,7 +70,7 @@ void Directory::read() const
     if ( h == INVALID_HANDLE_VALUE )
     {
         LOG_ERROR( "Failed to browse ", m_path );
-        throw std::system_error( GetLastError(), std::generic_category(), "Failed to browse through directory" );
+        throw errors::System( GetLastError(), "Failed to browse through directory" );
     }
     do
     {
@@ -85,7 +86,7 @@ void Directory::read() const
             else
                 m_files.emplace_back( std::make_shared<File>( fullpath ) );
         }
-        catch ( const std::system_error& ex )
+        catch ( const errors::System& ex )
         {
             LOG_WARN( "Failed to access a listed file/dir: ", ex.what() ,
                       ". Ignoring this entry." );
@@ -105,7 +106,7 @@ void Directory::read() const
     if ( handle == INVALID_HANDLE_VALUE )
     {
         LOG_ERROR( "Failed to open directory ", m_path );
-        throw std::system_error( GetLastError(), std::generic_category(), "Failed to open directory" );
+        throw errors::System{ GetLastError(), "Failed to open directory" };
     }
 
     std::unique_ptr<typename std::remove_pointer<HANDLE>::type,
@@ -136,7 +137,7 @@ void Directory::read() const
                 continue;
             }
             LOG_ERROR( "Failed to browse ", m_path, ". GetLastError(): ", GetLastError() );
-            throw std::system_error( GetLastError(), std::generic_category(), "Failed to browse through directory" );
+            throw errors::System{ GetLastError(), "Failed to browse through directory" };
         }
 
         auto file = charset::FromWide( dirInfo->FileName );
@@ -149,7 +150,7 @@ void Directory::read() const
             else
                 m_files.emplace_back( std::make_shared<File>( m_path + file.get()) );
         }
-        catch ( const std::system_error& ex )
+        catch ( const errors::System& ex )
         {
             LOG_WARN( "Failed to access a listed file/dir: ", ex.what() ,
                       ". Ignoring this entry." );

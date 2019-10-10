@@ -305,7 +305,7 @@ bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl )
         {
             folderFs = fsFactory->createDirectory( mrl );
         }
-        catch ( std::system_error& ex )
+        catch ( const fs::errors::System& ex )
         {
             LOG_ERROR( "Failed to instantiate a directory to ban folder: ", ex.what() );
             return false;
@@ -359,7 +359,7 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
     {
         folderFs = fsFactory->createDirectory( mrl );
     }
-    catch ( const std::system_error& ex )
+    catch ( const fs::errors::System& ex )
     {
         LOG_ERROR( "Failed to instanciate a folder for mrl: ", mrl, ": ",
                    ex.what() );

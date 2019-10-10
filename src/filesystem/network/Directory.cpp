@@ -32,6 +32,7 @@
 #include "File.h"
 #include "utils/Filename.h"
 #include "utils/VLCInstance.h"
+#include "medialibrary/filesystem/Errors.h"
 
 #include "compat/ConditionVariable.h"
 #include "compat/Mutex.h"
@@ -78,11 +79,11 @@ void NetworkDirectory::read() const
     });
     eventHandler->unregister();
     if ( success == false )
-        throw std::system_error( ETIMEDOUT, std::generic_category(),
-                                 "Failed to browse network directory: Network is too slow" );
+        throw errors::System{ ETIMEDOUT,
+                              "Failed to browse network directory: Network is too slow" };
     if ( res == VLC::Media::ParsedStatus::Failed )
-        throw std::system_error( EIO, std::generic_category(),
-                                 "Failed to browse network directory: Unknown error" );
+        throw errors::System{ EIO,
+                              "Failed to browse network directory: Unknown error" };
     auto subItems = media.subitems();
     for ( auto i = 0; i < subItems->count(); ++i )
     {

@@ -27,6 +27,7 @@
 #include "factory/FileSystemFactory.h"
 #include "medialibrary/filesystem/IDirectory.h"
 #include "medialibrary/filesystem/IFile.h"
+#include "medialibrary/filesystem/Errors.h"
 #include "logging/Logger.h"
 #include "utils/Filename.h"
 #include "utils/Directory.h"
@@ -89,7 +90,7 @@ std::shared_ptr<fs::IDevice> FileSystemFactory::createDeviceFromMrl( const std::
         auto canonicalPath = utils::fs::toAbsolute( utils::file::toLocalPath( mrl ) );
         canonicalMrl = utils::file::toMrl( canonicalPath );
     }
-    catch ( const std::system_error& ex )
+    catch ( const fs::errors::System& ex )
     {
         LOG_WARN( "Failed to canonicalize mountpoint ", mrl, ": ", ex.what() );
         return nullptr;

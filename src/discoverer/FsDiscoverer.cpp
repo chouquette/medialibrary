@@ -65,7 +65,7 @@ bool FsDiscoverer::discover( const std::string& entryPoint,
     {
         fsDir = m_fsFactory->createDirectory( entryPoint );
     }
-    catch ( std::system_error& ex )
+    catch ( const fs::errors::System& ex )
     {
         LOG_WARN( entryPoint, " discovery aborted because of a filesystem error: ", ex.what() );
         return true;
@@ -112,7 +112,7 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
         if ( directory->device() == nullptr )
             return false;
     }
-    catch ( const std::system_error& ex )
+    catch ( const fs::errors::System& ex )
     {
         LOG_INFO( "Failed to instanciate a directory for ", mrl, ": ", ex.what(),
                   ". Can't reload the folder." );
@@ -221,9 +221,9 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
         // Ensuring that the file fetching is done in this scope, to catch errors
         currentFolderFs->files();
     }
-    // Only check once for a system_error. They are bound to happen when we list the files/folders
+    // Only check once for a fs system error. They are bound to happen when we list the files/folders
     // within, and IProbe::isHidden is the first place when this is done
-    catch ( std::system_error& ex )
+    catch ( const fs::errors::System& ex )
     {
         LOG_WARN( "Failed to browse ", currentFolderFs->mrl(), ": ", ex.what() );
         // Even when we're discovering a new folder, we want to rule out device removal as the cause of

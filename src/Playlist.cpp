@@ -33,6 +33,7 @@
 #include "utils/Filename.h"
 #include "utils/Directory.h"
 #include "database/SqliteQuery.h"
+#include "medialibrary/filesystem/Errors.h"
 
 #include <algorithm>
 
@@ -460,9 +461,9 @@ Playlist::Backups Playlist::loadBackups( MediaLibraryPtr ml )
             backups.emplace( backupDate, std::move( mrls ) );
         }
     }
-    catch ( const std::system_error& ex )
+    catch ( const fs::errors::System& ex )
     {
-        LOG_ERROR( "Failed to list old playlist backups" );
+        LOG_ERROR( "Failed to list old playlist backups: ", ex.what() );
     }
     return backups;
 }
@@ -538,7 +539,7 @@ Playlist::backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel )
         utils::fs::isDirectory( backupFolder );
         return std::make_tuple( false, 0, std::vector<std::string>{} );
     }
-    catch ( const std::system_error&  )
+    catch ( const fs::errors::System&  )
     {
         // isDirectory will throw if the directory doesn't exist, so we can just proceed
     }

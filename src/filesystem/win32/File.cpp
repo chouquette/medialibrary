@@ -28,12 +28,12 @@
 #include "logging/Logger.h"
 #include "utils/Charsets.h"
 #include "utils/Filename.h"
+#include "medialibrary/filesystem/Errors.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
 
 #include <stdexcept>
-#include <system_error>
 
 #include <windows.h>
 
@@ -50,7 +50,7 @@ File::File( const std::string& filePath )
     if ( _wstat( charset::ToWide( filePath.c_str() ).get(), &s ) != 0 )
     {
         LOG_ERROR( "Failed to get ", filePath, " stats" );
-        throw std::system_error( errno, std::generic_category(), "Failed to get stats" );
+        throw errors::System{ errno, "Failed to get stats" };
     }
 
     m_lastModificationDate = s.st_mtime;

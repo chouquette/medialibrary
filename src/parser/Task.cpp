@@ -278,7 +278,7 @@ bool Task::restoreLinkedEntities()
     {
         m_parentFolderFs = fsFactory->createDirectory( utils::file::directory( mrl ) );
     }
-    catch ( const std::system_error& ex )
+    catch ( const fs::errors::System& ex )
     {
         LOG_ERROR( "Failed to restore task: ", ex.what() );
         return false;

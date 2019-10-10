@@ -32,11 +32,11 @@
 #include "utils/Filename.h"
 #include "utils/Directory.h"
 #include "utils/Url.h"
+#include "medialibrary/filesystem/Errors.h"
 
 #include <cstring>
 #include <dirent.h>
 #include <sys/stat.h>
-#include <system_error>
 #include <unistd.h>
 
 namespace medialibrary
@@ -65,7 +65,7 @@ void Directory::read() const
     if ( dir == nullptr )
     {
         LOG_ERROR( "Failed to open directory ", m_path );
-        throw std::system_error( errno, std::generic_category(), "Failed to open directory" );
+        throw errors::System( errno, "Failed to open directory" );
     }
 
     dirent* result = nullptr;
@@ -94,7 +94,7 @@ void Directory::read() const
             if ( errno != EOVERFLOW )
             {
                 LOG_ERROR( "Failed to get file ", path, " info" );
-                throw std::system_error( errno, std::generic_category(), "Failed to get file info" );
+                throw errors::System{ errno, "Failed to get file info" };
             }
         }
         try
@@ -105,7 +105,7 @@ void Directory::read() const
             else
                 m_files.emplace_back( std::make_shared<File>( path, s ) );
         }
-        catch ( const std::system_error& err )
+        catch ( const errors::System& err )
         {
             if ( err.code() == std::errc::no_such_file_or_directory )
             {

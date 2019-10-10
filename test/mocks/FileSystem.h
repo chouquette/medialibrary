@@ -29,12 +29,12 @@
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
-#include <system_error>
 
 #include "medialibrary/filesystem/IDirectory.h"
 #include "medialibrary/filesystem/IFile.h"
 #include "medialibrary/filesystem/IDevice.h"
 #include "medialibrary/filesystem/IFileSystemFactory.h"
+#include "medialibrary/filesystem/Errors.h"
 #include "utils/Filename.h"
 
 #include "mocks/filesystem/MockDevice.h"
@@ -178,10 +178,10 @@ struct FileSystemFactory : public fs::IFileSystemFactory
     {
         auto d = device( mrl );
         if ( d == nullptr )
-            throw std::system_error{ ENOENT, std::generic_category(), "Mock directory" };
+            throw fs::errors::System{ ENOENT, "Mock directory" };
         auto dir = d->directory( mrl );
         if ( dir == nullptr )
-            throw std::system_error{ ENOENT, std::generic_category(), "Mock directory" };
+            throw fs::errors::System{ ENOENT, "Mock directory" };
         return dir;
     }
 
@@ -420,12 +420,12 @@ class NoopFsFactory : public fs::IFileSystemFactory
 public:
     virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& ) override
     {
-        throw std::system_error{ ENOENT, std::generic_category(), "Mock directory" };
+        throw fs::errors::System{ ENOENT, "Mock directory" };
     }
 
     virtual std::shared_ptr<fs::IFile> createFile( const std::string& ) override
     {
-        throw std::system_error{ ENOENT, std::generic_category(), "Mock file" };
+        throw fs::errors::System{ ENOENT, "Mock directory" };
     }
 
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& ) override

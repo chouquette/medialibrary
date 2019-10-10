@@ -53,6 +53,7 @@
 #include "medialibrary/filesystem/IFile.h"
 #include "medialibrary/filesystem/IDirectory.h"
 #include "medialibrary/filesystem/IDevice.h"
+#include "medialibrary/filesystem/Errors.h"
 #include "utils/ModificationsNotifier.h"
 #include "utils/Filename.h"
 #include "thumbnails/ThumbnailerWorker.h"
@@ -625,7 +626,7 @@ FilePtr Media::addFile( const std::string& mrl, IFile::Type fileType )
     {
         fileFs = fsFactory->createFile( mrl );
     }
-    catch ( const std::system_error& ex )
+    catch ( const fs::errors::System& ex )
     {
         LOG_INFO( "Failed to create a file instance for mrl: ", mrl, ": ", ex.what() );
         return nullptr;
