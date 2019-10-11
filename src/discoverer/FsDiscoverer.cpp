@@ -286,8 +286,6 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
     {
         if ( interruptProbe.isInterrupted() == true )
             break;
-        if ( subFolder->device() == nullptr )
-            continue;
         if ( m_probe->stopFileDiscovery() == true )
             break;
         if ( m_probe->proceedOnDirectory( *subFolder ) == false )
