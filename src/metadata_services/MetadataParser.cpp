@@ -230,7 +230,6 @@ Status MetadataAnalyzer::addPlaylistMedias( IItem& item ) const
             LOG_ERROR( "Failed to create playlist ", mrl, " to the media library" );
             return Status::Fatal;
         }
-        m_notifier->notifyPlaylistCreation( playlistPtr );
 
         // If we're in a restore task, we can accept a playlist without a parent
         // folder, as we're trying to restore a user-created playlist, which isn't
@@ -256,6 +255,7 @@ Status MetadataAnalyzer::addPlaylistMedias( IItem& item ) const
             item.setFile( std::move( file ) );
         }
         t->commit();
+        m_notifier->notifyPlaylistCreation( playlistPtr );
     }
     // Now regardless of if the playlist is re-scanned or discovered from the
     // first time, just schedule all members for insertion. media & files will
