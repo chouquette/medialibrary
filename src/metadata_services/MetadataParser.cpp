@@ -208,9 +208,7 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
         // We are most likely re-scanning a file representing a playlist.
         // If a task has a file, it means the playlist & the associated file have
         // been created.
-        std::string req = "SELECT * FROM " + Playlist::Table::Name +
-                " WHERE file_id = ?";
-        playlistPtr = Playlist::fetch( m_ml, req, item.file()->id() );
+        playlistPtr = Playlist::fromFile( m_ml, item.file()->id() );
         if ( playlistPtr == nullptr )
         {
             // The playlist had to be created, something is very wrong, give up
