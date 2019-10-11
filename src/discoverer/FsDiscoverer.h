@@ -64,6 +64,9 @@ private:
                     const IInterruptProbe& interruptProbe) const;
     bool reloadFolder( std::shared_ptr<Folder> folder,
                        const IInterruptProbe& probe );
+    void checkRemovedDevices( fs::IDirectory& fsFolder, Folder& folder,
+                              bool newFolder) const;
+
 
 private:
     MediaLibrary* m_ml;
