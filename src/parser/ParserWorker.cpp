@@ -197,7 +197,8 @@ void Worker::mainloop() ML_UNHANDLED_EXCEPTION_INIT
             if ( file != nullptr && file->isRemovable() )
             {
                 auto folder = Folder::fetch( m_ml, file->folderId() );
-                if ( folder->isPresent() == false )
+                assert( folder != nullptr );
+                if ( folder == nullptr || folder->isPresent() == false )
                 {
                     LOG_DEBUG( "Postponing parsing of ", file->rawMrl(),
                               " until the device containing it gets mounted back" );
