@@ -250,8 +250,6 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
                 LOG_ERROR( "Failed to add playlist file ", mrl );
                 return Status::Fatal;
             }
-            // Will invoke ITaskCb::updateFileId to upadte m_fileId & its
-            // representation in DB
             item.setFile( std::move( file ) );
         }
         t->commit();
@@ -507,8 +505,6 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
     createTracks( *m, tracks );
 
     item.setMedia( std::move( m ) );
-    // Will invoke ITaskCb::updateFileId to upadte m_fileId & its
-    // representation in DB
     item.setFile( std::move( file ) );
 
     t->commit();
