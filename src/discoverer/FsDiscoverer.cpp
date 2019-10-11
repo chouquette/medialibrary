@@ -298,11 +298,11 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
         // We don't know this folder, it's a new one
         if ( it == end( subFoldersInDB ) )
         {
-            if ( m_probe->isHidden( *subFolder ) )
-                continue;
             LOG_DEBUG( "New folder detected: ", subFolder->mrl() );
             try
             {
+                if ( m_probe->isHidden( *subFolder ) )
+                    continue;
                 addFolder( subFolder, currentFolder.get(), interruptProbe );
                 continue;
             }
@@ -317,6 +317,12 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                     return;
                 }
                 LOG_WARN( "Creation of a folder failed: ", ex.what(), ". Assuming it was banned" );
+                continue;
+            }
+            catch ( const fs::errors::System& ex )
+            {
+                LOG_WARN( "Failed to browse folder ", subFolder->mrl(), ": ",
+                          ex.what() );
                 continue;
             }
         }
