@@ -259,20 +259,6 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                 m_ml->deleteFolder( *currentFolder );
             return;
         }
-        // Ensuring that the file fetching is done in this scope, to catch errors
-        currentFolderFs->files();
-    }
-    // Only check once for a fs system error. They are bound to happen when we list the files/folders
-    // within, and IProbe::isHidden is the first place when this is done
-    catch ( const fs::errors::System& ex )
-    {
-        LOG_WARN( "Failed to browse ", currentFolderFs->mrl(), ": ", ex.what() );
-        checkRemovedDevices( *currentFolderFs, *currentFolder, newFolder );
-        // If the device has indeed been removed, fs::errors::DeviceRemoved will
-        // be thrown, otherwise, we just failed to browse that folder and will
-        // have to try again later.
-        return;
-    }
 
     if ( m_cb != nullptr )
         m_cb->onDiscoveryProgress( currentFolderFs->mrl() );
@@ -343,6 +329,18 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
         }
     }
     checkFiles( currentFolderFs, currentFolder, interruptProbe );
+    }
+    // Only check once for a fs system error. They are bound to happen when we list the files/folders
+    // within, and IProbe::isHidden is the first place when this is done
+    catch ( const fs::errors::System& ex )
+    {
+        LOG_WARN( "Failed to browse ", currentFolderFs->mrl(), ": ", ex.what() );
+        checkRemovedDevices( *currentFolderFs, *currentFolder, newFolder );
+        // If the device has indeed been removed, fs::errors::DeviceRemoved will
+        // be thrown, otherwise, we just failed to browse that folder and will
+        // have to try again later.
+        return;
+    }
     LOG_DEBUG( "Done checking subfolders in ", currentFolderFs->mrl() );
 }
 
