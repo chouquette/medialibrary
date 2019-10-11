@@ -260,75 +260,75 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
             return;
         }
 
-    if ( m_cb != nullptr )
-        m_cb->onDiscoveryProgress( currentFolderFs->mrl() );
-    // Load the folders we already know of:
-    LOG_DEBUG( "Checking for modifications in ", currentFolderFs->mrl() );
-    // Don't try to fetch any potential sub folders if the folder was freshly added
-    std::vector<std::shared_ptr<Folder>> subFoldersInDB;
-    if ( newFolder == false )
-        subFoldersInDB = currentFolder->folders();
-    for ( const auto& subFolder : currentFolderFs->dirs() )
-    {
-        if ( interruptProbe.isInterrupted() == true )
-            break;
-        if ( m_probe->stopFileDiscovery() == true )
-            break;
-        if ( m_probe->proceedOnDirectory( *subFolder ) == false )
-            continue;
-        auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ),
-                                [&subFolder](const std::shared_ptr<Folder>& f) {
-            auto subFolderName = utils::file::directoryName( subFolder->mrl() );
-            return f->name() == utils::url::decode( subFolderName );
-        });
-        // We don't know this folder, it's a new one
-        if ( it == end( subFoldersInDB ) )
+        if ( m_cb != nullptr )
+            m_cb->onDiscoveryProgress( currentFolderFs->mrl() );
+        // Load the folders we already know of:
+        LOG_DEBUG( "Checking for modifications in ", currentFolderFs->mrl() );
+        // Don't try to fetch any potential sub folders if the folder was freshly added
+        std::vector<std::shared_ptr<Folder>> subFoldersInDB;
+        if ( newFolder == false )
+            subFoldersInDB = currentFolder->folders();
+        for ( const auto& subFolder : currentFolderFs->dirs() )
         {
-            LOG_DEBUG( "New folder detected: ", subFolder->mrl() );
-            try
-            {
-                if ( m_probe->isHidden( *subFolder ) )
-                    continue;
-                addFolder( subFolder, currentFolder.get(), interruptProbe );
+            if ( interruptProbe.isInterrupted() == true )
+                break;
+            if ( m_probe->stopFileDiscovery() == true )
+                break;
+            if ( m_probe->proceedOnDirectory( *subFolder ) == false )
                 continue;
-            }
-            catch ( sqlite::errors::ConstraintViolation& ex )
+            auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ),
+                                    [&subFolder](const std::shared_ptr<Folder>& f) {
+                auto subFolderName = utils::file::directoryName( subFolder->mrl() );
+                return f->name() == utils::url::decode( subFolderName );
+            });
+            // We don't know this folder, it's a new one
+            if ( it == end( subFoldersInDB ) )
             {
-                // Best attempt to detect a foreign key violation, indicating the
-                // parent folders have been deleted due to being banned
-                if ( strstr( ex.what(), "foreign key" ) != nullptr )
+                LOG_DEBUG( "New folder detected: ", subFolder->mrl() );
+                try
                 {
-                    LOG_WARN( "Creation of a folder failed because the parent is non existing: ", ex.what(),
-                              ". Assuming it was deleted due to being banned" );
-                    return;
+                    if ( m_probe->isHidden( *subFolder ) )
+                        continue;
+                    addFolder( subFolder, currentFolder.get(), interruptProbe );
+                    continue;
                 }
-                LOG_WARN( "Creation of a folder failed: ", ex.what(), ". Assuming it was banned" );
-                continue;
+                catch ( sqlite::errors::ConstraintViolation& ex )
+                {
+                    // Best attempt to detect a foreign key violation, indicating the
+                    // parent folders have been deleted due to being banned
+                    if ( strstr( ex.what(), "foreign key" ) != nullptr )
+                    {
+                        LOG_WARN( "Creation of a folder failed because the parent is non existing: ", ex.what(),
+                                  ". Assuming it was deleted due to being banned" );
+                        return;
+                    }
+                    LOG_WARN( "Creation of a folder failed: ", ex.what(), ". Assuming it was banned" );
+                    continue;
+                }
+                catch ( const fs::errors::System& ex )
+                {
+                    LOG_WARN( "Failed to browse folder ", subFolder->mrl(), ": ",
+                              ex.what() );
+                    continue;
+                }
             }
-            catch ( const fs::errors::System& ex )
-            {
-                LOG_WARN( "Failed to browse folder ", subFolder->mrl(), ": ",
-                          ex.what() );
-                continue;
-            }
+            auto folderInDb = *it;
+            // In any case, check for modifications, as a change related to a mountpoint might
+            // not update the folder modification date.
+            // Also, relying on the modification date probably isn't portable
+            checkFolder( subFolder, folderInDb, false, interruptProbe );
+            subFoldersInDB.erase( it );
         }
-        auto folderInDb = *it;
-        // In any case, check for modifications, as a change related to a mountpoint might
-        // not update the folder modification date.
-        // Also, relying on the modification date probably isn't portable
-        checkFolder( subFolder, folderInDb, false, interruptProbe );
-        subFoldersInDB.erase( it );
-    }
-    if ( m_probe->deleteUnseenFolders() == true )
-    {
-        // Now all folders we had in DB but haven't seen from the FS must have been deleted.
-        for ( const auto& f : subFoldersInDB )
+        if ( m_probe->deleteUnseenFolders() == true )
         {
-            LOG_DEBUG( "Folder ", f->mrl(), " not found in FS, deleting it" );
-            m_ml->deleteFolder( *f );
+            // Now all folders we had in DB but haven't seen from the FS must have been deleted.
+            for ( const auto& f : subFoldersInDB )
+            {
+                LOG_DEBUG( "Folder ", f->mrl(), " not found in FS, deleting it" );
+                m_ml->deleteFolder( *f );
+            }
         }
-    }
-    checkFiles( currentFolderFs, currentFolder, interruptProbe );
+        checkFiles( currentFolderFs, currentFolder, interruptProbe );
     }
     // Only check once for a fs system error. They are bound to happen when we list the files/folders
     // within, and IProbe::isHidden is the first place when this is done
