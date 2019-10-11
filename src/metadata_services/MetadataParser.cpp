@@ -121,7 +121,7 @@ Status MetadataAnalyzer::run( IItem& item )
     // Assume that file containing subitem(s) is a Playlist
     if ( nbSubitem > 0 )
     {
-        auto res = addPlaylistMedias( item );
+        auto res = parsePlaylist( item );
         if ( res != Status::Success ) // playlist addition may fail due to constraint violation
             return res;
 
@@ -198,7 +198,7 @@ Status MetadataAnalyzer::run( IItem& item )
 
 /* Playlist files */
 
-Status MetadataAnalyzer::addPlaylistMedias( IItem& item ) const
+Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
 {
     const auto& mrl = item.mrl();
     LOG_DEBUG( "Try to import ", mrl, " as a playlist" );
