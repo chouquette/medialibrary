@@ -494,8 +494,11 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
         }
     }
     LOG_DEBUG( "Adding ", mrl );
+    std::shared_ptr<Media> m;
+    try
+    {
     auto folder = static_cast<Folder*>( item.parentFolder().get() );
-    auto m = Media::create( m_ml, isAudio ? IMedia::Type::Audio : IMedia::Type::Video,
+    m = Media::create( m_ml, isAudio ? IMedia::Type::Audio : IMedia::Type::Video,
                             folder->deviceId(), folder->id(),
                             utils::url::decode( utils::file::fileName( mrl ) ),
                             item.duration() );
@@ -514,6 +517,13 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
     {
         LOG_ERROR( "Failed to add file ", mrl, " to media #", m->id() );
         return std::make_tuple( Status::Fatal, false );
+    }
+    }
+    catch ( const sqlite::errors::ConstraintForeignKey& ex )
+    {
+        LOG_INFO( "Failed to add a media: ", ex.what(), ". Assuming the "
+                  "containing folder got removed concurrently" );
+        return std::make_tuple( Status::Discarded, false );
     }
     createTracks( *m, tracks );
 
