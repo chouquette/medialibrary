@@ -396,7 +396,13 @@ class Tools
             {
                 try
                 {
-                    return f( std::forward<Args>( args )... );
+                    /*
+                     * Don't perfect forward the arguments, we don't want to move
+                     * any potential rvalue reference into the actual function
+                     * since we wouldn't be able to retry afterward, as the
+                     * parameter would be invalid
+                     */
+                    return f( args... );
                 }
                 catch ( const sqlite::errors::Exception& ex )
                 {
