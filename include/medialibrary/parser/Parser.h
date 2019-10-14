@@ -46,7 +46,8 @@ enum class Status
     /// The task must now be considered completed, regardless of the
     /// current step.
     Completed,
-    /// The task should be discarded, regardless of its status
+    /// The task should be discarded, ie removed from the database, regardless
+    /// of its status.
     /// This is likely to be used when trying to parse playlist items,
     /// as they already could have been queued before.
     Discarded,

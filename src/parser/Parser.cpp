@@ -158,6 +158,8 @@ void Parser::done( std::shared_ptr<Task> t, Status status )
         // We create a separate task for refresh, which doesn't count toward
         // (mrl,parent_playlist) uniqueness. In order to allow for a subsequent
         // refresh of the same file, we remove it once the refresh is complete.
+        // In case the status was `Discarded`, the task was already deleted from
+        // the database.
         if ( t->isRefresh() == true )
             Task::destroy( m_ml, t->id() );
         return;
