@@ -84,6 +84,60 @@ public:
     }
 };
 
+class ConstraintCheck : public ConstraintViolation
+{
+public:
+    ConstraintCheck( const char* req, const char* err, int errCode )
+        : ConstraintViolation( req, err, errCode )
+    {
+    }
+};
+
+class ConstraintForeignKey : public ConstraintViolation
+{
+public:
+    ConstraintForeignKey( const char* req, const char* err, int errCode )
+        : ConstraintViolation( req, err, errCode )
+    {
+    }
+};
+
+class ConstraintNotNull : public ConstraintViolation
+{
+public:
+    ConstraintNotNull( const char* req, const char* err, int errCode )
+        : ConstraintViolation( req, err, errCode )
+    {
+    }
+};
+
+class ConstraintPrimaryKey : public ConstraintViolation
+{
+public:
+    ConstraintPrimaryKey( const char* req, const char* err, int errCode )
+        : ConstraintViolation( req, err, errCode )
+    {
+    }
+};
+
+class ConstraintRowId : public ConstraintViolation
+{
+public:
+    ConstraintRowId( const char* req, const char* err, int errCode )
+        : ConstraintViolation( req, err, errCode )
+    {
+    }
+};
+
+class ConstraintUnique : public ConstraintViolation
+{
+public:
+    ConstraintUnique( const char* req, const char* err, int errCode )
+        : ConstraintViolation( req, err, errCode )
+    {
+    }
+};
+
 /*
  * /!\ Warning /!\
  * This is not a generic error in the sense of the exception types
@@ -555,7 +609,25 @@ static inline void mapToException( const char* reqStr, const char* errMsg, int e
     switch ( res )
     {
         case SQLITE_CONSTRAINT:
-            throw errors::ConstraintViolation( reqStr, errMsg, extRes );
+        {
+            switch ( extRes )
+            {
+                case SQLITE_CONSTRAINT_CHECK:
+                    throw errors::ConstraintCheck( reqStr, errMsg, extRes );
+                case SQLITE_CONSTRAINT_FOREIGNKEY:
+                    throw errors::ConstraintForeignKey( reqStr, errMsg, extRes );
+                case SQLITE_CONSTRAINT_NOTNULL:
+                    throw errors::ConstraintNotNull( reqStr, errMsg, extRes );
+                case SQLITE_CONSTRAINT_PRIMARYKEY:
+                    throw errors::ConstraintPrimaryKey( reqStr, errMsg, extRes );
+                case SQLITE_CONSTRAINT_ROWID:
+                    throw errors::ConstraintRowId( reqStr, errMsg, extRes );
+                case SQLITE_CONSTRAINT_UNIQUE:
+                    throw errors::ConstraintUnique( reqStr, errMsg, extRes );
+                default:
+                    throw errors::ConstraintViolation( reqStr, errMsg, extRes );
+            }
+        }
         case SQLITE_BUSY:
         {
             switch ( extRes )
