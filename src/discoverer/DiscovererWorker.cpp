@@ -112,8 +112,17 @@ void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
 {
     std::unique_lock<compat::Mutex> lock( m_mutex );
 
-    LOG_INFO( "Queuing entrypoint ", entryPoint, " of type ",
-              static_cast<typename std::underlying_type<Task::Type>::type>( type ) );
+    if ( entryPoint.empty() == false )
+    {
+        LOG_INFO( "Queuing entrypoint ", entryPoint, " of type ",
+                  static_cast<typename std::underlying_type<Task::Type>::type>( type ) );
+    }
+    else
+    {
+        assert( type == Task::Type::Reload );
+        LOG_INFO( "Queuing global reload request" );
+    }
+
     m_tasks.emplace( entryPoint, type );
     notify();
 }
