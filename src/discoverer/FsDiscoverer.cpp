@@ -292,16 +292,17 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                     addFolder( subFolder, currentFolder.get(), interruptProbe );
                     continue;
                 }
+                catch ( const sqlite::errors::ConstraintForeignKey& ex )
+                {
+                    // A foreign key constraint violation indicates that the
+                    // parent folders have been deleted due to being banned
+                    LOG_WARN( "Creation of a folder failed because the parent is"
+                              " non existing: ", ex.what(),
+                              ". Assuming it was deleted due to being banned" );
+                    return;
+                }
                 catch ( sqlite::errors::ConstraintViolation& ex )
                 {
-                    // Best attempt to detect a foreign key violation, indicating the
-                    // parent folders have been deleted due to being banned
-                    if ( strstr( ex.what(), "foreign key" ) != nullptr )
-                    {
-                        LOG_WARN( "Creation of a folder failed because the parent is non existing: ", ex.what(),
-                                  ". Assuming it was deleted due to being banned" );
-                        return;
-                    }
                     LOG_WARN( "Creation of a folder failed: ", ex.what(), ". Assuming it was banned" );
                     continue;
                 }
