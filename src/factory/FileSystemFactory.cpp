@@ -131,7 +131,7 @@ void FileSystemFactory::refreshDevices()
     for ( const auto& d : devices )
     {
         const auto& uuid = std::get<0>( d );
-        const auto& mountpoint = std::get<1>( d );
+        const auto& mountpoint = utils::file::toFolderPath( std::get<1>( d ) );
         const auto removable = std::get<2>( d );
 
         auto it = m_deviceCache.find( uuid );
