@@ -825,8 +825,17 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
                                                  false );
     }
 
+    /*
+     * Any entity that might be modified in the retry scope needs to be passed
+     * as parameter, so that we only modify a copy of it.
+     * For instance, if we create the album, and fail later on, we would rollback
+     * the transaction and retry, however the album instance wouldn't be nullptr
+     * anymore, and we wouldn't recreate it
+     */
     auto res = sqlite::Tools::withRetries( 3,
-            [this, &item, &artists, media, &mediaThumbnail, &album, &genre]() {
+            [this, &item, &artists, media, &mediaThumbnail, &genre, newAlbum]
+            ( std::shared_ptr<Album> album ) {
+
         auto t = m_ml->getConn()->newTransaction();
 
         if ( mediaThumbnail != nullptr )
@@ -856,8 +865,14 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
         link( item, *album, artists.first, artists.second, mediaThumbnail );
         media->save();
         t->commit();
+
+        /* We won't retry anymore, so send any notification now, as the outer
+         * scope doesn't know we modified the passed instance */
+        if ( newAlbum == true )
+            m_notifier->notifyAlbumCreation( album );
+
         return true;
-    });
+    }, std::move( album ) );
 
     if ( res == false )
         return false;
@@ -867,8 +882,6 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
         assert( mediaThumbnail->isValid() );
         mediaThumbnail->relocate();
     }
-    if ( newAlbum == true )
-        m_notifier->notifyAlbumCreation( album );
     return true;
 }
 
