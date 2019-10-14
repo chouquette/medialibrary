@@ -316,10 +316,22 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
                 return;
             }
         }
-        if ( Task::createLinkTask( m_ml, mrl, playlistPtr->id(),
-                                   Task::LinkType::Playlist,
-                                   subitem.linkExtra() ) == nullptr )
+        try
         {
+            if ( Task::createLinkTask( m_ml, mrl, playlistPtr->id(),
+                                       Task::LinkType::Playlist,
+                                       subitem.linkExtra() ) == nullptr )
+            {
+                return;
+            }
+        }
+        catch ( const sqlite::errors::ConstraintUnique& ex )
+        {
+            // A duplicated file shouldn't happen as we're in a transaction, meaning
+            // other threads can't write to the database. However, we might be trying
+            // to insert a duplicated link task
+            LOG_INFO( "Failed to insert duplicated link task: ", ex.what(),
+                      ". Ignoring" );
             return;
         }
         t2->commit();
