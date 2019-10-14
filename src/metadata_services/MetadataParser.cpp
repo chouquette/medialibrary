@@ -158,9 +158,24 @@ Status MetadataAnalyzer::run( IItem& item )
              item.media()->videoTracks()->count() == 0 &&
              item.media()->subtitleTracks()->count() == 0 )
         {
-            auto t = m_ml->getConn()->newTransaction();
-            createTracks( static_cast<Media&>( *item.media() ), item.tracks() );
-            t->commit();
+            try
+            {
+                auto t = m_ml->getConn()->newTransaction();
+                createTracks( static_cast<Media&>( *item.media() ), item.tracks() );
+                t->commit();
+            }
+            catch ( const sqlite::errors::ConstraintForeignKey& ex )
+            {
+                /* We're aiming at catching an error during the insertion of the
+                 * tracks, which have a foreign key pointing to Media.id_media
+                 * If the media was removed by the Discoverer thread, the insertion
+                 * will fail, and we need to abort & discard this task, and the
+                 * file/media don't exist anymore
+                 */
+                LOG_INFO( "Failed to add tracks to a media. Assuming it was "
+                          "concurrently deleted" );
+                return Status::Discarded;
+            }
         }
         /* Best effort attempt to detect that a file changed while a rescan
          * was triggered. In this case, we want to avoid avoid creating a refresh
