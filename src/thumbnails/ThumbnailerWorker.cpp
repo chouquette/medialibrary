@@ -150,7 +150,11 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
                                     [](FilePtr f) {
                                         return f->isMain();
                                    });
-    assert( mainFileIt != files.cend() );
+    if ( mainFileIt == files.cend() )
+    {
+        assert( !"A media must have a file of type Main" );
+        return false;
+    }
     auto file = std::static_pointer_cast<File>( *mainFileIt );
     std::string mrl;
     try
