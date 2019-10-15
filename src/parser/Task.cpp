@@ -569,10 +569,9 @@ std::shared_ptr<Task> Task::createRestoreTask( MediaLibraryPtr ml, std::string m
 bool Task::removePlaylistContentTasks( MediaLibraryPtr ml, int64_t playlistId )
 {
     const std::string req = "DELETE FROM " + Task::Table::Name + " "
-            "WHERE type = ? AND link_to_type = ? AND link_to_id = ? AND step = ?";
+            "WHERE type = ? AND link_to_type = ? AND link_to_id = ?";
     return sqlite::Tools::executeDelete( ml->getConn(), req, Task::Type::Link,
-                                         LinkType::Playlist, playlistId,
-                                         Step::Completed );
+                                         LinkType::Playlist, playlistId );
 }
 
 bool Task::removePlaylistContentTasks( MediaLibraryPtr ml )
