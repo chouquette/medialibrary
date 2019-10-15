@@ -240,36 +240,36 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
             playlistName = utils::url::decode( utils::file::fileName( mrl ) );
         try
         {
-        auto t = m_ml->getConn()->newTransaction();
-        playlistPtr = Playlist::create( m_ml, playlistName );
-        if ( playlistPtr == nullptr )
-        {
-            LOG_ERROR( "Failed to create playlist ", mrl, " to the media library" );
-            return Status::Fatal;
-        }
-
-        // If we're in a restore task, we can accept a playlist without a parent
-        // folder, as we're trying to restore a user-created playlist, which isn't
-        // backed by an actual playlist file.
-        // Actually we don't want to store any reference to the backup file even
-        // if we have some, since this would make the playlist look like a file
-        // backed one.
-        if ( item.isRestore() == false )
-        {
-            auto deviceFs = item.parentFolderFs()->device();
-            if ( deviceFs == nullptr )
-                throw fs::errors::DeviceRemoved{};
-            auto file = playlistPtr->addFile( *item.fileFs(),
-                                              item.parentFolder()->id(),
-                                              deviceFs->isRemovable() );
-            if ( file == nullptr )
+            auto t = m_ml->getConn()->newTransaction();
+            playlistPtr = Playlist::create( m_ml, playlistName );
+            if ( playlistPtr == nullptr )
             {
-                LOG_ERROR( "Failed to add playlist file ", mrl );
+                LOG_ERROR( "Failed to create playlist ", mrl, " to the media library" );
                 return Status::Fatal;
             }
-            item.setFile( std::move( file ) );
-        }
-        t->commit();
+
+            // If we're in a restore task, we can accept a playlist without a parent
+            // folder, as we're trying to restore a user-created playlist, which isn't
+            // backed by an actual playlist file.
+            // Actually we don't want to store any reference to the backup file even
+            // if we have some, since this would make the playlist look like a file
+            // backed one.
+            if ( item.isRestore() == false )
+            {
+                auto deviceFs = item.parentFolderFs()->device();
+                if ( deviceFs == nullptr )
+                    throw fs::errors::DeviceRemoved{};
+                auto file = playlistPtr->addFile( *item.fileFs(),
+                                                  item.parentFolder()->id(),
+                                                  deviceFs->isRemovable() );
+                if ( file == nullptr )
+                {
+                    LOG_ERROR( "Failed to add playlist file ", mrl );
+                    return Status::Fatal;
+                }
+                item.setFile( std::move( file ) );
+            }
+            t->commit();
         }
         catch ( const sqlite::errors::ConstraintUnique& )
         {
