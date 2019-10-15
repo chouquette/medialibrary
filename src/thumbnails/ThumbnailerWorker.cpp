@@ -179,7 +179,12 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
         m->setThumbnail( "", Thumbnail::Origin::Media, task.sizeType, false );
     }
     auto thumbnail = m->thumbnail( task.sizeType );
-    assert( thumbnail != nullptr );
+    if ( thumbnail == nullptr )
+    {
+        // Handle sporadic read errors gracefully
+        assert( !"The thumbnail can't be nullptr as it just was inserted" );
+        return false;
+    }
     auto dest = Thumbnail::path( m_ml, thumbnail->id() );
     LOG_DEBUG( "Generating ", mrl, " thumbnail in ", dest );
 
