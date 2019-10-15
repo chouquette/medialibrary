@@ -43,7 +43,8 @@ class Exception : public std::runtime_error
 {
 public:
     Exception( const char* req, const char* errMsg, int extendedCode )
-        : std::runtime_error( std::string( "Failed to run request [" ) + req + "]: " + errMsg +
+        : std::runtime_error( std::string( "Failed to run request [" ) + req + "]: " +
+                    ( errMsg != nullptr ? errMsg : "" ) +
                    "(" + std::to_string( extendedCode ) + ")" )
         , m_errorCode( extendedCode )
     {
