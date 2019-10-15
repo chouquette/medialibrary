@@ -499,9 +499,11 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
         if ( media->type() == IMedia::Type::External )
         {
             auto res = overrideExternalMedia( item, media, file, isAudio );
+            // IItem::setFile will update the task in db, so run it as part of
+            // the transation
+            item.setFile( std::move( file ) );
             t->commit();
             item.setMedia( std::move( media ) );
-            item.setFile( std::move( file ) );
             return std::make_tuple( res, isAudio );
         }
     }
