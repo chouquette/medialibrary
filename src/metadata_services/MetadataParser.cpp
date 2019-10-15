@@ -238,6 +238,8 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
         auto playlistName = item.meta( IItem::Metadata::Title );
         if ( playlistName.empty() == true )
             playlistName = utils::url::decode( utils::file::fileName( mrl ) );
+        try
+        {
         auto t = m_ml->getConn()->newTransaction();
         playlistPtr = Playlist::create( m_ml, playlistName );
         if ( playlistPtr == nullptr )
@@ -268,6 +270,20 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
             item.setFile( std::move( file ) );
         }
         t->commit();
+        }
+        catch ( const sqlite::errors::ConstraintUnique& )
+        {
+            // Attempt to recover from some potentially invalid tasks records
+            // See https://code.videolan.org/videolan/medialibrary/issues/166
+            assert( sqlite::Transaction::transactionInProgress() == false );
+            auto t = m_ml->getConn()->newTransaction();
+            auto f = File::fromMrl( m_ml, mrl );
+            if ( f != nullptr )
+            {
+                item.setFile( std::move( f ) );
+                t->commit();
+            }
+        }
         m_notifier->notifyPlaylistCreation( playlistPtr );
     }
     // Now regardless of if the playlist is re-scanned or discovered from the
