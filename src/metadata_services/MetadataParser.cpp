@@ -227,8 +227,10 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
         if ( playlistPtr == nullptr )
         {
             // The playlist had to be created, something is very wrong, give up
+            // We *must* not discard the task though, the error might be sporadic
+            // and we don't want to recreate this task during next reload.
             assert( false );
-            return Status::Discarded;
+            return Status::Fatal;
         }
     }
     else
