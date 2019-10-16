@@ -78,29 +78,24 @@ void Transaction::onCurrentTransactionFailure( std::function<void ()> f )
 
 Transaction::~Transaction()
 {
-    try
+    if ( CurrentTransaction != nullptr )
     {
-        if ( CurrentTransaction != nullptr )
+        try
         {
             Statement s( m_dbConn->handle(), "ROLLBACK" );
             s.execute();
             while ( s.row() != nullptr )
                 ;
-            for ( const auto& f : m_failureHandlers )
-                f();
-            CurrentTransaction = nullptr;
         }
-    }
-    // Ignore a rollback failure as it is most likely innocuous (see
-    // http://www.sqlite.org/lang_transaction.html
-    catch( const std::exception& ex )
-    {
-        // Ensure we don't assume a transaction is still running
+        // Ignore a rollback failure as it is most likely innocuous (see
+        // http://www.sqlite.org/lang_transaction.html
+        catch( const std::exception& ex )
+        {
+            LOG_WARN( "Failed to rollback transaction: ", ex.what() );
+        }
         for ( const auto& f : m_failureHandlers )
             f();
         CurrentTransaction = nullptr;
-        LOG_WARN( "Failed to rollback transaction: ", ex.what() );
-        // Don't call std::terminate if ROLLBACK throws an exception
     }
 }
 
