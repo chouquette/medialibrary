@@ -186,6 +186,7 @@ bool File::isMain() const
 
 std::shared_ptr<Media> File::media() const
 {
+    assert( m_type != IFile::Type::Playlist );
     if ( m_mediaId == 0 )
         return nullptr;
     auto media = m_media.lock();
