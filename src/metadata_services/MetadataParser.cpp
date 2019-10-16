@@ -267,7 +267,8 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
                     LOG_ERROR( "Failed to add playlist file ", mrl );
                     return Status::Fatal;
                 }
-                item.setFile( std::move( file ) );
+                if ( item.setFile( std::move( file ) ) == false )
+                    return Status::Fatal;
             }
             t->commit();
         }
