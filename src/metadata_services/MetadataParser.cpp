@@ -104,6 +104,7 @@ Status MetadataAnalyzer::run( IItem& item )
 {
     if ( item.isRefresh() )
     {
+        LOG_DEBUG( "Refreshing MRL: ", item.mrl() );
         bool success;
         bool needRescan;
         std::tie( success, needRescan ) = refreshFile( item );
