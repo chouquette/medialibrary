@@ -899,8 +899,9 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
         try
         {
             // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist
-            handleTrack( album, item, artists.second ? artists.second : artists.first,
-                         genre.get() );
+            if ( handleTrack( album, item, artists.second ? artists.second : artists.first,
+                              genre.get() ) == nullptr )
+                return false;
         }
         catch ( const sqlite::errors::ConstraintForeignKey& ex )
         {
