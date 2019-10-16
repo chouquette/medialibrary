@@ -68,7 +68,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack>
         static std::string schema( const std::string& tableName, uint32_t dbModel );
         static bool checkDbModel( MediaLibraryPtr ml );
         static std::shared_ptr<AlbumTrack> create(MediaLibraryPtr ml, int64_t albumId,
-                                    std::shared_ptr<Media> media, unsigned int trackNb,
+                                    int64_t mediaId, unsigned int trackNb,
                                     unsigned int discNumber, int64_t artistId, int64_t genreId,
                                     int64_t duration );
         static AlbumTrackPtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );

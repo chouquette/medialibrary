@@ -383,7 +383,7 @@ Query<IMedia> Album::searchTracks( const std::string& pattern,
 std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsigned int trackNb,
                                              unsigned int discNumber, int64_t artistId, Genre* genre )
 {
-    auto track = AlbumTrack::create( m_ml, m_id, media, trackNb, discNumber, artistId,
+    auto track = AlbumTrack::create( m_ml, m_id, media->id(), trackNb, discNumber, artistId,
                                      genre != nullptr ? genre->id() : 0, media->duration() );
     if ( track == nullptr )
         return nullptr;

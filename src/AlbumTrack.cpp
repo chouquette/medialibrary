@@ -134,14 +134,14 @@ bool AlbumTrack::checkDbModel(MediaLibraryPtr ml)
 }
 
 std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, int64_t albumId,
-                                                std::shared_ptr<Media> media, unsigned int trackNb,
+                                                int64_t mediaId, unsigned int trackNb,
                                                 unsigned int discNumber, int64_t artistId, int64_t genreId,
                                                 int64_t duration )
 {
-    auto self = std::make_shared<AlbumTrack>( ml, media->id(), artistId, genreId, trackNb, albumId, discNumber );
+    auto self = std::make_shared<AlbumTrack>( ml, mediaId, artistId, genreId, trackNb, albumId, discNumber );
     static const std::string req = "INSERT INTO " + AlbumTrack::Table::Name
             + "(media_id, duration, artist_id, genre_id, track_number, album_id, disc_number) VALUES(?, ?, ?, ?, ?, ?, ?)";
-    if ( insert( ml, self, req, media->id(), duration >= 0 ? duration : 0, sqlite::ForeignKey( artistId ),
+    if ( insert( ml, self, req, mediaId, duration >= 0 ? duration : 0, sqlite::ForeignKey( artistId ),
                  sqlite::ForeignKey( genreId ), trackNb, albumId, discNumber ) == false )
         return nullptr;
     return self;
