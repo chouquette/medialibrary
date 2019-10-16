@@ -896,12 +896,11 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
         }
         // TODO: Use embedded artwork for the album
 
-        std::shared_ptr<AlbumTrack> track;
         try
         {
             // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist
-            track = handleTrack( album, item, artists.second ? artists.second : artists.first,
-                                 genre.get() );
+            handleTrack( album, item, artists.second ? artists.second : artists.first,
+                         genre.get() );
         }
         catch ( const sqlite::errors::ConstraintForeignKey& ex )
         {
