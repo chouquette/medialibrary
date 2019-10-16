@@ -672,16 +672,32 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
         media->setType( IMedia::Type::Video );
 
     auto t = m_ml->getConn()->newTransaction();
+    if ( VideoTrack::removeFromMedia( m_ml, media->id() ) == false ||
+         AudioTrack::removeFromMedia( m_ml, media->id() ) == false ||
+         SubtitleTrack::removeFromMedia( m_ml, media->id() ) == false )
+    {
+        return std::make_tuple( false, false );
+    }
+    try
+    {
+        createTracks( *media, tracks );
+    }
+    catch ( const sqlite::errors::ConstraintForeignKey& ex )
+    {
+        /* We're aiming at catching an error during the insertion of the
+         * tracks, which have a foreign key pointing to Media.id_media
+         * If the media was removed by the Discoverer thread, the insertion
+         * will fail, and we need to abort & discard this task, and the
+         * file/media don't exist anymore
+         */
+        LOG_INFO( "Failed to add tracks to a media. Assuming it was "
+                  "concurrently deleted" );
+        return std::make_tuple( false, false );
+    }
     bool needRescan = false;
     if ( media->subType() != IMedia::SubType::Unknown )
     {
         needRescan = true;
-        if ( VideoTrack::removeFromMedia( m_ml, media->id() ) == false ||
-             AudioTrack::removeFromMedia( m_ml, media->id() ) == false ||
-             SubtitleTrack::removeFromMedia( m_ml, media->id() ) == false )
-        {
-            return std::make_tuple( false, false );
-        }
         switch( media->subType() )
         {
             case IMedia::SubType::AlbumTrack:
