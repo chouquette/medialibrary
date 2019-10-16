@@ -388,15 +388,22 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
         if ( interruptProbe.isInterrupted() == true )
             break;
         LOG_DEBUG( "File ", file->mrl(), " not found on filesystem, deleting it" );
-        auto media = file->media();
-        if ( media != nullptr )
-            media->removeFile( *file );
+        if ( file->type() == IFile::Type::Playlist )
+        {
+            file->destroy();
+        }
         else
         {
-            // This is unexpected, as the file should have been deleted when the media was
-            // removed.
-            LOG_WARN( "Deleting a file without an associated media." );
-            file->destroy();
+            auto media = file->media();
+            if ( media != nullptr )
+                media->removeFile( *file );
+            else
+            {
+                // This is unexpected, as the file should have been deleted when the media was
+                // removed.
+                LOG_WARN( "Deleting a file without an associated media." );
+                file->destroy();
+            }
         }
     }
     for ( auto& p: filesToRefresh )
