@@ -58,9 +58,9 @@ public:
     void setMrl( std::string mrl );
     virtual Type type() const override;
     virtual unsigned int lastModificationDate() const override;
-    virtual unsigned int size() const override;
+    virtual int64_t size() const override;
     virtual bool isExternal() const override;
-    bool updateFsInfo( uint32_t newLastModificationDate, uint32_t newSize );
+    bool updateFsInfo( uint32_t newLastModificationDate, int64_t newSize );
     virtual bool isRemovable() const override;
     virtual bool isNetwork() const override;
     virtual bool isMain() const override;
@@ -127,7 +127,7 @@ private:
     std::string m_mrl;
     const Type m_type;
     std::time_t m_lastModificationDate;
-    unsigned int m_size;
+    int64_t m_size;
     const int64_t m_folderId;
     const bool m_isRemovable;
     const bool m_isExternal;

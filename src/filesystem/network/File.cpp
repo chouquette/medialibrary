@@ -45,7 +45,7 @@ unsigned int NetworkFile::lastModificationDate() const
     return 0;
 }
 
-unsigned int NetworkFile::size() const
+int64_t NetworkFile::size() const
 {
     return 0;
 }

@@ -36,11 +36,11 @@ public:
     File( const std::string& filePath );
 
     unsigned int lastModificationDate() const override;
-    unsigned int size() const override;
+    int64_t size() const override;
 
 private:
     unsigned int m_lastModificationDate;
-    unsigned int m_size;
+    int64_t m_size;
 };
 
 }

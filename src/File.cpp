@@ -143,7 +143,7 @@ unsigned int File::lastModificationDate() const
     return static_cast<unsigned int>( m_lastModificationDate );
 }
 
-unsigned int File::size() const
+int64_t File::size() const
 {
     return m_size;
 }
@@ -153,7 +153,7 @@ bool File::isExternal() const
     return m_isExternal;
 }
 
-bool File::updateFsInfo( uint32_t newLastModificationDate, uint32_t newSize )
+bool File::updateFsInfo( uint32_t newLastModificationDate, int64_t newSize )
 {
     if ( m_lastModificationDate == newLastModificationDate && m_size == newSize )
         return true;

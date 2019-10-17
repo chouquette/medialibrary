@@ -39,7 +39,7 @@ namespace fs
         virtual const std::string& mrl() const = 0;
         virtual const std::string& extension() const = 0;
         virtual unsigned int lastModificationDate() const = 0;
-        virtual unsigned int size() const = 0;
+        virtual int64_t size() const = 0;
         virtual bool isNetwork() const = 0;
     };
 }
