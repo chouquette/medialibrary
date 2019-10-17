@@ -45,14 +45,11 @@ public:
     void commit();
 
     static bool transactionInProgress();
-    static void onCurrentTransactionFailure( std::function<void()> f );
     ~Transaction();
 
 private:
     sqlite::Connection* m_dbConn;
     Connection::WriteContext m_ctx;
-    std::vector<std::function<void()>> m_failureHandlers;
-
 
     static thread_local Transaction* CurrentTransaction;
 };
