@@ -2068,6 +2068,7 @@ bool MediaLibrary::forceRescan()
     removeThumbnails();
     if ( m_parser != nullptr )
     {
+        m_callback->onRescanStarted();
         m_parser->restart();
         m_parser->restore();
         m_parser->resume();

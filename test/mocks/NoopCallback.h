@@ -59,6 +59,7 @@ class NoopCallback : public IMediaLibraryCb
     virtual void onBackgroundTasksIdleChanged( bool ) override {}
     virtual void onMediaThumbnailReady( MediaPtr, ThumbnailSizeType, bool ) override {}
     virtual void onHistoryChanged( HistoryType ) override {}
+    virtual void onRescanStarted() override {}
 };
 
 }

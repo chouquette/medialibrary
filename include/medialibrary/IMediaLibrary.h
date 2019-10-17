@@ -279,6 +279,13 @@ public:
     virtual bool onUnhandledException( const char* /* context */,
                                        const char* /* errMsg */,
                                        bool /* clearSuggested */ ) { return false; }
+    /**
+     * @brief onRescanStarted will be invoked when a rescan is started.
+     *
+     * This won't be emited when the media library issues a rescan itself, due
+     * to a migration.
+     */
+    virtual void onRescanStarted() = 0;
 };
 
 class IMediaLibrary
