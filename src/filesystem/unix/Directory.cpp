@@ -90,12 +90,8 @@ void Directory::read() const
                 LOG_WARN( "Ignoring unexpected ENOENT while listing folder content." );
                 continue;
             }
-            // Ignore EOVERFLOW since we are not (yet?) interested in the file size
-            if ( errno != EOVERFLOW )
-            {
-                LOG_ERROR( "Failed to get file ", path, " info" );
-                throw errors::System{ errno, "Failed to get file info" };
-            }
+            LOG_ERROR( "Failed to get file ", path, " info" );
+            throw errors::System{ errno, "Failed to get file info" };
         }
         try
         {
