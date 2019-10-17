@@ -378,6 +378,13 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
             LOG_DEBUG( "Forcing file refresh ", fileFs->mrl() );
             filesToRefresh.emplace_back( std::move( *it ), fileFs );
         }
+        /* File sizes were stored as uint32_t, this is a best attempt to detect
+         * those which were truncated
+         */
+        else if ( fileFs->size() != (*it)->size() && fileFs->size() > 0xFFFFFFFF )
+        {
+            (*it)->updateFsInfo( fileFs->lastModificationDate(), fileFs->size() );
+        }
         files.erase( it );
     }
     if ( m_probe->deleteUnseenFiles() == false )
