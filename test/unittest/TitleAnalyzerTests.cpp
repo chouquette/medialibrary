@@ -138,6 +138,8 @@ TEST_F( TitleAnalyzerTests, RemovePatterns )
            "[Erai-raws] Youkoso Japari Park - 19 ~ 22 [1080p][Multiple Subtitle]" );
     CHECK( "Nanatsu no Taizai Kamigami no Gekirin 01",
            "[Ohys-Raws] Nanatsu no Taizai Kamigami no Gekirin - 01 (TX 1280x720 x264 AAC).mp4" );
+    CHECK( "snow raws unwrapped 第09話",
+           "[Snow-Raws] snow-raws-unwrapped 第09話 (BD 1920x1080 HEVC-YUV420P10 FLAC)" );
 }
 
 #endif

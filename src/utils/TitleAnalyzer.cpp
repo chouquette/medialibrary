@@ -67,7 +67,7 @@ std::string sanitize( const std::string& fileName )
             std::regex{
                 "((\\b|" SEPARATORS ")"
                     "("
-                        "5\\.1|Web(\\.|-)DL|HD.TS|AT-X|LOST-UGM"
+                        "5\\.1|Web(\\.|-)DL|HD.TS|AT-X|LOST-UGM|BD"
                     ")"
                 "(\\b|" SEPARATORS "))|"
                 // Attempt to match most <foo>-Raws anime teams
@@ -101,6 +101,10 @@ std::string sanitize( const std::string& fileName )
             " "
         },
         {
+            // Since this pattern ends with a '!', we can't use it with the other
+            // list of patterns that are bound by `\b`. `\b` implies that the
+            // current caracter is an alphanumerical character, which isn't the
+            // case of '!'
             std::regex{
                 "\\bPuyaSubs!",
                 std::regex_constants::icase | std::regex_constants::ECMAScript
@@ -114,7 +118,7 @@ std::string sanitize( const std::string& fileName )
                 // Various patterns:
                 "xvid|h264|dvd|rip|divx|x264|hdtv|aac|webrip|"
                 "bluray|bdrip|brrip|dvdrip|ac3|HDTC|x265|h265|mp4|mkv|10\\s?bit(s)?|"
-                "avi|HDRip|"
+                "avi|HDRip|HEVC|YUV420P10|FLAC|"
 
                 // Try to match most resolutions in one go:
                 "([0-9]{3,4}(p|i))|"
