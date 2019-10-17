@@ -90,8 +90,19 @@ Status LinkService::linkToPlaylist(IItem& item)
     auto playlist = Playlist::fetch( m_ml, item.linkToId() );
     if ( playlist == nullptr )
         return Status::Fatal;
-    if ( playlist->add( *media, item.linkExtra() ) == false )
+    try
+    {
+        if ( playlist->add( *media, item.linkExtra() ) == false )
+            return Status::Fatal;
+    }
+    catch ( const sqlite::errors::ConstraintForeignKey& )
+    {
+        // In the unlikely case the playlist or media gets deleted while we're
+        // linking the playlist & media, just report an error.
+        // If the playlist was deleted, the task will be deleted through a
+        // trigger and we won't retry it anyway.
         return Status::Fatal;
+    }
     // Explicitely mark the task as completed, as there is nothing more to run.
     // This shouldn't be needed, but requires a better handling of multiple pipeline.
     return Status::Completed;
