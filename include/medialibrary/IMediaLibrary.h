@@ -265,12 +265,16 @@ public:
      *                       clearing is suggested.
      *
      * If the application chooses to handle the error to present it to the user
-     * or report it somehow, it should:
-     * - Return true
-     * - Assume the media library is no longer in a usable state and restart it.
-     * If the application chooses to invoke clearDatabase, it is preferable to do so
-     * before reinitializing & restarting the media library
+     * or report it somehow, it should return true.
      * If the implementation returns false, then the exception will be rethrown
+     * If clearSuggested is true, the application is advised to call
+     * IMediaLibrary::clearDatabase. After doing so, the medialibrary can still
+     * be used without any further calls (but will need to rescan the entire user
+     * collection). If clearDatabase isn't called, the database should be
+     * considered as corrupted, and therefor the medialibrary considered unusable.
+     *
+     * If clearSuggested is false, there are no certain way of knowing if the
+     * database is still usable or not.
      */
     virtual bool onUnhandledException( const char* /* context */,
                                        const char* /* errMsg */,
