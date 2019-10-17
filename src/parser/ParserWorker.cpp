@@ -232,7 +232,7 @@ void Worker::mainloop()
                 status = Status::Fatal;
             m_parserCb->done( std::move( task ), status );
         }
-        ML_UNHANDLED_EXCEPTION_BODY( "ParserWorker" )
+        ML_UNHANDLED_EXCEPTION_BODY( serviceName.c_str() )
     }
     LOG_INFO("Exiting ParserService [", serviceName, "] thread");
     setIdle( true );
