@@ -322,6 +322,18 @@ public:
         }
         medialibrary::sqlite::Statement::FlushStatementCache();
     }
+
+    void CommonMigrationTest( const char* mockDb )
+    {
+        LoadFakeDB( mockDb );
+        auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
+        ASSERT_EQ( InitializeResult::Success, res );
+
+        CheckTriggers( expectedTriggers );
+        CheckIndexes( expectedIndexes );
+        CheckTables( expectedTables );
+        CheckViews( expectedViews );
+    }
 };
 
 TEST_F( DbModel, NbTriggers )
@@ -337,13 +349,7 @@ TEST_F( DbModel, NbTriggers )
 
 TEST_F( DbModel, Upgrade3to5 )
 {
-    LoadFakeDB( SRC_DIR "/test/unittest/db_v3.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
-    ASSERT_EQ( InitializeResult::Success, res );
-    // All is done during the database initialization, we only care about no
-    // exception being thrown, and MediaLibrary::initialize() returning true
-    CheckTables( expectedTables );
-    CheckViews( expectedViews );
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v3.sql" );
 }
 
 TEST_F( DbModel, Upgrade4to5 )
@@ -365,48 +371,26 @@ TEST_F( DbModel, Upgrade4to5 )
 
 TEST_F( DbModel, Upgrade7to8 )
 {
-    LoadFakeDB( SRC_DIR "/test/unittest/db_v7.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
-    ASSERT_EQ( InitializeResult::Success, res );
-    // Removed post migration tests starting with V9, since we force a re-scan,
-    // there is no content left to test
-
-    CheckTables( expectedTables );
-    CheckViews( expectedViews );
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v7.sql" );
 }
 
 TEST_F( DbModel, Upgrade8to9 )
 {
-    LoadFakeDB( SRC_DIR "/test/unittest/db_v8.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
-    ASSERT_EQ( InitializeResult::Success, res );
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v8.sql" );
+
     // We expect the file-orphaned media to have been deleted
     auto media = ml->files();
     ASSERT_EQ( 1u, media.size() );
-
-    CheckTables( expectedTables );
-    CheckViews( expectedViews );
 }
 
 TEST_F( DbModel, Upgrade12to13 )
 {
-    LoadFakeDB( SRC_DIR "/test/unittest/db_v12.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
-    ASSERT_EQ( InitializeResult::Success, res );
-    // We can't check for the number of albums anymore since they are deleted
-    // as part of 13 -> 14 migration
-
-    CheckTriggers( expectedTriggers );
-    CheckIndexes( expectedIndexes );
-    CheckTables( expectedTables );
-    CheckViews( expectedViews );
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v12.sql" );
 }
 
 TEST_F( DbModel, Upgrade13to14 )
 {
-    LoadFakeDB( SRC_DIR "/test/unittest/db_v13.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
-    ASSERT_EQ( InitializeResult::Success, res );
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v13.sql" );
     auto media = ml->files();
     ASSERT_EQ( 4u, media.size() );
     auto m = media[0];
@@ -446,32 +430,16 @@ TEST_F( DbModel, Upgrade13to14 )
     ASSERT_NE( nullptr, folder );
     ASSERT_EQ( 2u, folder->media( IMedia::Type::Unknown, nullptr )->count() );
     ASSERT_EQ( "folder", folder->name() );
-
-    CheckTriggers( expectedTriggers );
-    CheckTables( expectedTables );
-    CheckViews( expectedViews );
 }
 
 TEST_F( DbModel, Upgrade14to15 )
 {
-    LoadFakeDB( SRC_DIR "/test/unittest/db_v14.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
-    ASSERT_EQ( InitializeResult::Success, res );
-    CheckIndexes( expectedIndexes );
-    CheckTriggers( expectedTriggers );
-    CheckTables( expectedTables );
-    CheckViews( expectedViews );
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v14.sql" );
 }
 
 TEST_F( DbModel, Upgrade15to16 )
 {
-    LoadFakeDB( SRC_DIR "/test/unittest/db_v15.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
-    ASSERT_EQ( InitializeResult::Success, res );
-    CheckIndexes( expectedIndexes );
-    CheckTriggers( expectedTriggers );
-    CheckTables( expectedTables );
-    CheckViews( expectedViews );
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v15.sql" );
 
     // Check that playlists were properly migrated
     medialibrary::sqlite::Statement stmt{
@@ -500,86 +468,42 @@ TEST_F( DbModel, Upgrade15to16 )
 
 TEST_F( DbModel, Upgrade16to17 )
 {
-    LoadFakeDB( SRC_DIR "/test/unittest/db_v16.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
-    ASSERT_EQ( InitializeResult::Success, res );
-    CheckIndexes( expectedIndexes );
-    CheckTriggers( expectedTriggers );
-    CheckTables( expectedTables );
-    CheckViews( expectedViews );
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v16.sql" );
 }
 
 TEST_F( DbModel, Upgrade17to18 )
 {
-    LoadFakeDB( SRC_DIR "/test/unittest/db_v17.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
-    ASSERT_EQ( InitializeResult::Success, res );
-    CheckIndexes( expectedIndexes );
-    CheckTriggers( expectedTriggers );
-    CheckTables( expectedTables );
-    CheckViews( expectedViews );
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v17.sql" );
 }
 
 TEST_F( DbModel, Upgrade18to19Broken )
 {
     // Test the repair migration after a broken 17/18 migration
-    LoadFakeDB( SRC_DIR "/test/unittest/db_v18_broken.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
-    ASSERT_EQ( InitializeResult::Success, res );
-    CheckIndexes( expectedIndexes );
-    CheckTriggers( expectedTriggers );
-    CheckTables( expectedTables );
-    CheckViews( expectedViews );
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v18_broken.sql" );
 }
-
 
 TEST_F( DbModel, Upgrade18to19Noop )
 {
     // Check that the repair migration doesn't do anything for a successful
     // 17->18 migration
-    LoadFakeDB( SRC_DIR "/test/unittest/db_v18_ok.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
-    ASSERT_EQ( InitializeResult::Success, res );
-    CheckIndexes( expectedIndexes );
-    CheckTriggers( expectedTriggers );
-    CheckTables( expectedTables );
-    CheckViews( expectedViews );
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v18_ok.sql" );
 }
-
 
 TEST_F( DbModel, Upgrade19to20 )
 {
     // Check that the repair migration doesn't do anything for a successful
     // 17->18 migration
-    LoadFakeDB( SRC_DIR "/test/unittest/db_v19.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
-    ASSERT_EQ( InitializeResult::Success, res );
-    CheckIndexes( expectedIndexes );
-    CheckTriggers( expectedTriggers );
-    CheckTables( expectedTables );
-    CheckViews( expectedViews );
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v19.sql" );
 }
 
 TEST_F( DbModel, Upgrade20to21 )
 {
-    LoadFakeDB( SRC_DIR "/test/unittest/db_v20.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
-    ASSERT_EQ( InitializeResult::Success, res );
-    CheckIndexes( expectedIndexes );
-    CheckTriggers( expectedTriggers );
-    CheckTables( expectedTables );
-    CheckViews( expectedViews );
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v20.sql" );
 }
 
 TEST_F( DbModel, Upgrate21to22 )
 {
-    LoadFakeDB( SRC_DIR "/test/unittest/db_v21.sql" );
-    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
-    ASSERT_EQ( InitializeResult::Success, res );
-    CheckIndexes( expectedIndexes );
-    CheckTriggers( expectedTriggers );
-    CheckTables( expectedTables );
-    CheckViews( expectedViews );
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v21.sql" );
 
     // The medialibrary may not find the device in the dummy database, so it
     // will be marked as missing, causing no folders to be returned.
