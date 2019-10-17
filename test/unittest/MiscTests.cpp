@@ -180,7 +180,7 @@ TEST_F( MiscDb, TaskCheckDbModel )
     ASSERT_TRUE( res );
 }
 
-class DbModel : public testing::Test
+class DbModel : public Tests
 {
 protected:
     std::unique_ptr<MediaLibraryTester> ml;
