@@ -140,7 +140,7 @@ void Worker::restart()
     m_service->onRestarted();
 }
 
-void Worker::mainloop() ML_UNHANDLED_EXCEPTION_INIT
+void Worker::mainloop()
 {
     // It would be unsafe to call name() at the end of this function, since
     // we might stop the thread during ParserService destruction. This implies
@@ -152,6 +152,8 @@ void Worker::mainloop() ML_UNHANDLED_EXCEPTION_INIT
     while ( true )
     {
         std::shared_ptr<Task> task;
+        ML_UNHANDLED_EXCEPTION_INIT
+        {
         {
             std::unique_lock<compat::Mutex> lock( m_lock );
             if ( m_stopParser == true )
@@ -229,11 +231,12 @@ void Worker::mainloop() ML_UNHANDLED_EXCEPTION_INIT
         if ( handleServiceResult( *task, status ) == false )
             status = Status::Fatal;
         m_parserCb->done( std::move( task ), status );
+        }
+        ML_UNHANDLED_EXCEPTION_BODY( "ParserWorker" )
     }
     LOG_INFO("Exiting ParserService [", serviceName, "] thread");
     setIdle( true );
 }
-ML_UNHANDLED_EXCEPTION_BODY( "ParserWorker" )
 
 void Worker::setIdle(bool isIdle)
 {

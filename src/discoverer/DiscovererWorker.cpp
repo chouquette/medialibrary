@@ -149,12 +149,14 @@ void DiscovererWorker::notify()
         m_cond.notify_all();
 }
 
-void DiscovererWorker::run() ML_UNHANDLED_EXCEPTION_INIT
+void DiscovererWorker::run()
 {
     LOG_INFO( "Entering DiscovererWorker thread" );
     m_ml->onDiscovererIdleChanged( false );
     while ( m_run == true )
     {
+        ML_UNHANDLED_EXCEPTION_INIT
+        {
         Task task;
         {
             std::unique_lock<compat::Mutex> lock( m_mutex );
@@ -192,11 +194,12 @@ void DiscovererWorker::run() ML_UNHANDLED_EXCEPTION_INIT
         default:
             assert(false);
         }
+        }
+        ML_UNHANDLED_EXCEPTION_BODY( "DiscovererWorker" )
     }
     LOG_INFO( "Exiting DiscovererWorker thread" );
     m_ml->onDiscovererIdleChanged( true );
 }
-ML_UNHANDLED_EXCEPTION_BODY( "DiscovererWorker" )
 
 void DiscovererWorker::runReload( const std::string& entryPoint )
 {

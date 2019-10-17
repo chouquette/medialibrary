@@ -92,11 +92,13 @@ void ThumbnailerWorker::resume()
     m_cond.notify_all();
 }
 
-void ThumbnailerWorker::run() ML_UNHANDLED_EXCEPTION_INIT
+void ThumbnailerWorker::run()
 {
     LOG_INFO( "Starting thumbnailer thread" );
     while ( m_run == true )
     {
+        ML_UNHANDLED_EXCEPTION_INIT
+        {
         Task t;
         {
             std::unique_lock<compat::Mutex> lock( m_mutex );
@@ -114,10 +116,11 @@ void ThumbnailerWorker::run() ML_UNHANDLED_EXCEPTION_INIT
         }
         bool res = generateThumbnail( t );
         m_ml->getCb()->onMediaThumbnailReady( t.media, t.sizeType, res );
+        }
+        ML_UNHANDLED_EXCEPTION_BODY( "ThumbnailerWorker" )
     }
     LOG_INFO( "Exiting thumbnailer thread" );
 }
-ML_UNHANDLED_EXCEPTION_BODY( "ThumbnailerWorker" )
 
 void ThumbnailerWorker::stop()
 {

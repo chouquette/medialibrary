@@ -149,7 +149,7 @@ void ModificationNotifier::flush()
     });
 }
 
-void ModificationNotifier::run() ML_UNHANDLED_EXCEPTION_INIT
+void ModificationNotifier::run()
 {
 #if !defined(_LIBCPP_STD_VER) || (_LIBCPP_STD_VER > 11 && !defined(_LIBCPP_HAS_NO_CXX14_CONSTEXPR))
     constexpr auto ZeroTimeout = std::chrono::time_point<std::chrono::steady_clock>{};
@@ -169,6 +169,8 @@ void ModificationNotifier::run() ML_UNHANDLED_EXCEPTION_INIT
 
     while ( m_stop == false )
     {
+        ML_UNHANDLED_EXCEPTION_INIT
+        {
         {
             std::unique_lock<compat::Mutex> lock( m_lock );
             if ( m_flushing == true )
@@ -215,8 +217,9 @@ void ModificationNotifier::run() ML_UNHANDLED_EXCEPTION_INIT
         }
         thumbnails.removed.clear();
         thumbnails.timeout = ZeroTimeout;
+        }
+        ML_UNHANDLED_EXCEPTION_BODY( "ModificationNotifier" )
     }
 }
-ML_UNHANDLED_EXCEPTION_BODY( "ModificationNotifier" )
 
 }
