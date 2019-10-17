@@ -268,6 +268,8 @@ public:
      * or report it somehow, it should:
      * - Return true
      * - Assume the media library is no longer in a usable state and restart it.
+     * If the application chooses to invoke clearDatabase, it is preferable to do so
+     * before reinitializing & restarting the media library
      * If the implementation returns false, then the exception will be rethrown
      */
     virtual bool onUnhandledException( const char* /* context */,
