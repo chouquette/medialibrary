@@ -182,7 +182,7 @@ void Tests::InitializeCallback()
 
 void Tests::InitializeMediaLibrary()
 {
-    m_ml.reset( new MediaLibrary );
+    m_ml.reset( NewMediaLibrary() );
 }
 
 void Tests::runChecks(const rapidjson::Document& doc)
@@ -226,7 +226,7 @@ void Tests::runChecks(const rapidjson::Document& doc)
     if ( expected.HasMember( "nbThumbnails" ) )
     {
         sqlite::Statement stmt{
-            m_ml->getConn()->handle(),
+            static_cast<MediaLibrary*>( m_ml.get() )->getConn()->handle(),
             "SELECT COUNT(*) FROM " + Thumbnail::Table::Name
         };
         uint32_t nbThumbnails;
@@ -627,14 +627,15 @@ bool ResumeTests::MediaLibraryResumeTest::startParser()
 
 void RefreshTests::forceRefresh()
 {
-    auto files = medialibrary::File::fetchAll( m_ml.get() );
+    auto ml = static_cast<MediaLibrary*>( m_ml.get() );
+    auto files = medialibrary::File::fetchAll( ml );
     for ( const auto& f : files )
     {
         if ( f->isExternal() == true )
             continue;
         auto mrl = f->mrl();
-        auto folder = Folder::fetch( m_ml.get(), f->folderId() );
-        auto fsFactory = m_ml->fsFactoryForMrl( mrl );
+        auto folder = Folder::fetch( ml, f->folderId() );
+        auto fsFactory = ml->fsFactoryForMrl( mrl );
         auto folderMrl = utils::file::directory( mrl );
         auto fileName = utils::file::fileName( mrl );
         auto folderFs = fsFactory->createDirectory( folderMrl );
@@ -644,7 +645,7 @@ void RefreshTests::forceRefresh()
                 return f->name() == fileName;
             });
         assert( fileFsIt != cend( filesFs ) );
-        m_ml->onUpdatedFile( f, *fileFsIt, std::move( folder ), std::move( folderFs ) );
+        ml->onUpdatedFile( f, *fileFsIt, std::move( folder ), std::move( folderFs ) );
     }
 }
 

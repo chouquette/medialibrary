@@ -275,7 +275,8 @@ TEST_P( ReducedTests, OverrideExternalMedia )
         ASSERT_TRUE( utils::fs::isDirectory( samplesDir ) );
         samplesDir = utils::fs::toAbsolute( samplesDir );
         auto samplesMrl = utils::file::toMrl( samplesDir );
-        auto fsFactory = m_ml->fsFactoryForMrl( samplesMrl );
+        auto ml = static_cast<MediaLibrary*>( m_ml.get() );
+        auto fsFactory = ml->fsFactoryForMrl( samplesMrl );
         auto dir = fsFactory->createDirectory( samplesMrl );
         auto files = dir->files();
         for ( const auto& f : files )
