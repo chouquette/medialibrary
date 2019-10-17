@@ -171,52 +171,52 @@ void ModificationNotifier::run()
     {
         ML_UNHANDLED_EXCEPTION_INIT
         {
-        {
-            std::unique_lock<compat::Mutex> lock( m_lock );
-            if ( m_flushing == true )
             {
-                m_flushing = false;
-                m_flushedCond.notify_all();
-            }
-            if ( m_timeout == ZeroTimeout )
-            {
-                m_cond.wait( lock, [this, ZeroTimeout](){
-                    return m_timeout != ZeroTimeout || m_stop == true ||
-                           m_flushing == true;
+                std::unique_lock<compat::Mutex> lock( m_lock );
+                if ( m_flushing == true )
+                {
+                    m_flushing = false;
+                    m_flushedCond.notify_all();
+                }
+                if ( m_timeout == ZeroTimeout )
+                {
+                    m_cond.wait( lock, [this, ZeroTimeout](){
+                        return m_timeout != ZeroTimeout || m_stop == true ||
+                               m_flushing == true;
+                    });
+                }
+                m_cond.wait_until( lock, m_timeout, [this]() {
+                    return m_stop == true || m_flushing == true;
                 });
+                if ( m_stop == true )
+                    break;
+                const auto now = std::chrono::steady_clock::now();
+                auto nextTimeout = ZeroTimeout;
+                checkQueue( m_media, media, nextTimeout, now );
+                checkQueue( m_artists, artists, nextTimeout, now );
+                checkQueue( m_albums, albums, nextTimeout, now );
+                checkQueue( m_playlists, playlists, nextTimeout, now );
+                checkQueue( m_genres, genres, nextTimeout, now );
+                checkQueue( m_thumbnails, thumbnails, nextTimeout, now );
+                m_timeout = nextTimeout;
             }
-            m_cond.wait_until( lock, m_timeout, [this]() {
-                return m_stop == true || m_flushing == true;
-            });
-            if ( m_stop == true )
-                break;
-            const auto now = std::chrono::steady_clock::now();
-            auto nextTimeout = ZeroTimeout;
-            checkQueue( m_media, media, nextTimeout, now );
-            checkQueue( m_artists, artists, nextTimeout, now );
-            checkQueue( m_albums, albums, nextTimeout, now );
-            checkQueue( m_playlists, playlists, nextTimeout, now );
-            checkQueue( m_genres, genres, nextTimeout, now );
-            checkQueue( m_thumbnails, thumbnails, nextTimeout, now );
-            m_timeout = nextTimeout;
-        }
-        notify( std::move( media ), &IMediaLibraryCb::onMediaAdded,
-                &IMediaLibraryCb::onMediaModified, &IMediaLibraryCb::onMediaDeleted );
-        notify( std::move( artists ), &IMediaLibraryCb::onArtistsAdded,
-                &IMediaLibraryCb::onArtistsModified, &IMediaLibraryCb::onArtistsDeleted );
-        notify( std::move( albums ), &IMediaLibraryCb::onAlbumsAdded,
-                &IMediaLibraryCb::onAlbumsModified, &IMediaLibraryCb::onAlbumsDeleted );
-        notify( std::move( playlists ), &IMediaLibraryCb::onPlaylistsAdded,
-                &IMediaLibraryCb::onPlaylistsModified, &IMediaLibraryCb::onPlaylistsDeleted );
-        notify( std::move( genres ), &IMediaLibraryCb::onGenresAdded,
-                &IMediaLibraryCb::onGenresModified, &IMediaLibraryCb::onGenresDeleted );
-        for ( auto thumbnailId : thumbnails.removed )
-        {
-            auto path = Thumbnail::path( m_ml, thumbnailId );
-            utils::fs::remove( path );
-        }
-        thumbnails.removed.clear();
-        thumbnails.timeout = ZeroTimeout;
+            notify( std::move( media ), &IMediaLibraryCb::onMediaAdded,
+                    &IMediaLibraryCb::onMediaModified, &IMediaLibraryCb::onMediaDeleted );
+            notify( std::move( artists ), &IMediaLibraryCb::onArtistsAdded,
+                    &IMediaLibraryCb::onArtistsModified, &IMediaLibraryCb::onArtistsDeleted );
+            notify( std::move( albums ), &IMediaLibraryCb::onAlbumsAdded,
+                    &IMediaLibraryCb::onAlbumsModified, &IMediaLibraryCb::onAlbumsDeleted );
+            notify( std::move( playlists ), &IMediaLibraryCb::onPlaylistsAdded,
+                    &IMediaLibraryCb::onPlaylistsModified, &IMediaLibraryCb::onPlaylistsDeleted );
+            notify( std::move( genres ), &IMediaLibraryCb::onGenresAdded,
+                    &IMediaLibraryCb::onGenresModified, &IMediaLibraryCb::onGenresDeleted );
+            for ( auto thumbnailId : thumbnails.removed )
+            {
+                auto path = Thumbnail::path( m_ml, thumbnailId );
+                utils::fs::remove( path );
+            }
+            thumbnails.removed.clear();
+            thumbnails.timeout = ZeroTimeout;
         }
         ML_UNHANDLED_EXCEPTION_BODY( "ModificationNotifier" )
     }

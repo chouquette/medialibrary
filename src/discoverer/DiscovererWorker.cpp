@@ -157,43 +157,43 @@ void DiscovererWorker::run()
     {
         ML_UNHANDLED_EXCEPTION_INIT
         {
-        Task task;
-        {
-            std::unique_lock<compat::Mutex> lock( m_mutex );
-            if ( m_tasks.size() == 0 )
+            Task task;
             {
-                m_ml->onDiscovererIdleChanged( true );
-                m_cond.wait( lock, [this]() { return m_tasks.size() > 0 || m_run == false; } );
-                if ( m_run == false )
-                    break;
-                m_ml->onDiscovererIdleChanged( false );
+                std::unique_lock<compat::Mutex> lock( m_mutex );
+                if ( m_tasks.size() == 0 )
+                {
+                    m_ml->onDiscovererIdleChanged( true );
+                    m_cond.wait( lock, [this]() { return m_tasks.size() > 0 || m_run == false; } );
+                    if ( m_run == false )
+                        break;
+                    m_ml->onDiscovererIdleChanged( false );
+                }
+                task = m_tasks.front();
+                m_tasks.pop();
             }
-            task = m_tasks.front();
-            m_tasks.pop();
-        }
-        switch ( task.type )
-        {
-        case Task::Type::Discover:
-            runDiscover( task.entryPoint );
-            break;
-        case Task::Type::Reload:
-            runReload( task.entryPoint );
-            break;
-        case Task::Type::Remove:
-            runRemove( task.entryPoint );
-            break;
-        case Task::Type::Ban:
-            runBan( task.entryPoint );
-            break;
-        case Task::Type::Unban:
-            runUnban( task.entryPoint );
-            break;
-        case Task::Type::ReloadDevice:
-            runReloadDevice( task.entityId );
-            break;
-        default:
-            assert(false);
-        }
+            switch ( task.type )
+            {
+            case Task::Type::Discover:
+                runDiscover( task.entryPoint );
+                break;
+            case Task::Type::Reload:
+                runReload( task.entryPoint );
+                break;
+            case Task::Type::Remove:
+                runRemove( task.entryPoint );
+                break;
+            case Task::Type::Ban:
+                runBan( task.entryPoint );
+                break;
+            case Task::Type::Unban:
+                runUnban( task.entryPoint );
+                break;
+            case Task::Type::ReloadDevice:
+                runReloadDevice( task.entityId );
+                break;
+            default:
+                assert(false);
+            }
         }
         ML_UNHANDLED_EXCEPTION_BODY( "DiscovererWorker" )
     }

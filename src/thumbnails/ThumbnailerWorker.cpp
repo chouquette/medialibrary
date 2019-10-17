@@ -99,23 +99,23 @@ void ThumbnailerWorker::run()
     {
         ML_UNHANDLED_EXCEPTION_INIT
         {
-        Task t;
-        {
-            std::unique_lock<compat::Mutex> lock( m_mutex );
-            if ( m_tasks.size() == 0 || m_paused == true )
+            Task t;
             {
-                m_cond.wait( lock, [this]() {
-                    return ( m_tasks.size() > 0 && m_paused == false ) ||
-                            m_run == false;
-                });
-                if ( m_run == false )
-                    break;
+                std::unique_lock<compat::Mutex> lock( m_mutex );
+                if ( m_tasks.size() == 0 || m_paused == true )
+                {
+                    m_cond.wait( lock, [this]() {
+                        return ( m_tasks.size() > 0 && m_paused == false ) ||
+                                m_run == false;
+                    });
+                    if ( m_run == false )
+                        break;
+                }
+                t = std::move( m_tasks.front() );
+                m_tasks.pop();
             }
-            t = std::move( m_tasks.front() );
-            m_tasks.pop();
-        }
-        bool res = generateThumbnail( t );
-        m_ml->getCb()->onMediaThumbnailReady( t.media, t.sizeType, res );
+            bool res = generateThumbnail( t );
+            m_ml->getCb()->onMediaThumbnailReady( t.media, t.sizeType, res );
         }
         ML_UNHANDLED_EXCEPTION_BODY( "ThumbnailerWorker" )
     }

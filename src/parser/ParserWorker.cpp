@@ -154,83 +154,83 @@ void Worker::mainloop()
         std::shared_ptr<Task> task;
         ML_UNHANDLED_EXCEPTION_INIT
         {
-        {
-            std::unique_lock<compat::Mutex> lock( m_lock );
-            if ( m_stopParser == true )
-                break;
-            if ( m_tasks.empty() == true || m_paused == true )
             {
-                LOG_DEBUG( "Halting ParserService [", serviceName, "] mainloop" );
-                setIdle( true );
-                m_idleCond.notify_all();
-                m_cond.wait( lock, [this]() {
-                    return ( m_tasks.empty() == false && m_paused == false )
-                            || m_stopParser == true;
-                });
-                LOG_DEBUG( "Resuming ParserService [", serviceName, "] mainloop" );
-                // We might have been woken up because the parser is being destroyed
-                if ( m_stopParser  == true )
+                std::unique_lock<compat::Mutex> lock( m_lock );
+                if ( m_stopParser == true )
                     break;
-                setIdle( false );
-            }
-            // Otherwise it's safe to assume we have at least one element.
-            LOG_DEBUG('[', serviceName, "] has ", m_tasks.size(), " tasks remaining" );
-            task = std::move( m_tasks.front() );
-            m_tasks.pop();
-        }
-        // Special case to restore uncompleted tasks from a parser thread
-        if ( task == nullptr )
-        {
-            restoreTasks();
-            continue;
-        }
-        if ( task->isStepCompleted( m_service->targetedStep() ) == true )
-        {
-            LOG_DEBUG( "Skipping completed task [", serviceName, "] on ", task->mrl() );
-            m_parserCb->done( std::move( task ), Status::Success );
-            continue;
-        }
-        Status status;
-        try
-        {
-            LOG_DEBUG( "Executing ", serviceName, " task on ", task->mrl() );
-            auto chrono = std::chrono::steady_clock::now();
-            auto file = std::static_pointer_cast<File>( task->file() );
-
-            if ( file != nullptr && file->isRemovable() )
-            {
-                auto folder = Folder::fetch( m_ml, file->folderId() );
-                assert( folder != nullptr );
-                if ( folder == nullptr || folder->isPresent() == false )
+                if ( m_tasks.empty() == true || m_paused == true )
                 {
-                    LOG_DEBUG( "Postponing parsing of ", file->rawMrl(),
-                              " until the device containing it gets mounted back" );
-                    m_parserCb->done( std::move( task ), Status::TemporaryUnavailable );
-                    continue;
+                    LOG_DEBUG( "Halting ParserService [", serviceName, "] mainloop" );
+                    setIdle( true );
+                    m_idleCond.notify_all();
+                    m_cond.wait( lock, [this]() {
+                        return ( m_tasks.empty() == false && m_paused == false )
+                                || m_stopParser == true;
+                    });
+                    LOG_DEBUG( "Resuming ParserService [", serviceName, "] mainloop" );
+                    // We might have been woken up because the parser is being destroyed
+                    if ( m_stopParser  == true )
+                        break;
+                    setIdle( false );
                 }
+                // Otherwise it's safe to assume we have at least one element.
+                LOG_DEBUG('[', serviceName, "] has ", m_tasks.size(), " tasks remaining" );
+                task = std::move( m_tasks.front() );
+                m_tasks.pop();
             }
-            task->startParserStep();
-            status = m_service->run( *task );
-            auto duration = std::chrono::steady_clock::now() - chrono;
-            LOG_DEBUG( "Done executing ", serviceName, " task on ", task->mrl(), " in ",
-                       std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(),
-                       "ms. Result: ",
-                       static_cast<std::underlying_type_t<parser::Status>>( status ) );
-        }
-        catch ( const fs::errors::DeviceRemoved& )
-        {
-            LOG_ERROR( "Parsing of ", task->mrl(), " was interrupted "
-                       "due to its containing device being unmounted" );
-            status = Status::TemporaryUnavailable;
-        }
-        catch ( const fs::errors::Exception& ex )
-        {
-            LOG_ERROR( "Caught an FS exception during ", task->mrl(), " [", serviceName, "] parsing: ", ex.what() );
-            status = Status::Fatal;
-        }
-        if ( handleServiceResult( *task, status ) == false )
-            status = Status::Fatal;
-        m_parserCb->done( std::move( task ), status );
+            // Special case to restore uncompleted tasks from a parser thread
+            if ( task == nullptr )
+            {
+                restoreTasks();
+                continue;
+            }
+            if ( task->isStepCompleted( m_service->targetedStep() ) == true )
+            {
+                LOG_DEBUG( "Skipping completed task [", serviceName, "] on ", task->mrl() );
+                m_parserCb->done( std::move( task ), Status::Success );
+                continue;
+            }
+            Status status;
+            try
+            {
+                LOG_DEBUG( "Executing ", serviceName, " task on ", task->mrl() );
+                auto chrono = std::chrono::steady_clock::now();
+                auto file = std::static_pointer_cast<File>( task->file() );
+
+                if ( file != nullptr && file->isRemovable() )
+                {
+                    auto folder = Folder::fetch( m_ml, file->folderId() );
+                    assert( folder != nullptr );
+                    if ( folder == nullptr || folder->isPresent() == false )
+                    {
+                        LOG_DEBUG( "Postponing parsing of ", file->rawMrl(),
+                                  " until the device containing it gets mounted back" );
+                        m_parserCb->done( std::move( task ), Status::TemporaryUnavailable );
+                        continue;
+                    }
+                }
+                task->startParserStep();
+                status = m_service->run( *task );
+                auto duration = std::chrono::steady_clock::now() - chrono;
+                LOG_DEBUG( "Done executing ", serviceName, " task on ", task->mrl(), " in ",
+                           std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(),
+                           "ms. Result: ",
+                           static_cast<std::underlying_type_t<parser::Status>>( status ) );
+            }
+            catch ( const fs::errors::DeviceRemoved& )
+            {
+                LOG_ERROR( "Parsing of ", task->mrl(), " was interrupted "
+                           "due to its containing device being unmounted" );
+                status = Status::TemporaryUnavailable;
+            }
+            catch ( const fs::errors::Exception& ex )
+            {
+                LOG_ERROR( "Caught an FS exception during ", task->mrl(), " [", serviceName, "] parsing: ", ex.what() );
+                status = Status::Fatal;
+            }
+            if ( handleServiceResult( *task, status ) == false )
+                status = Status::Fatal;
+            m_parserCb->done( std::move( task ), status );
         }
         ML_UNHANDLED_EXCEPTION_BODY( "ParserWorker" )
     }
