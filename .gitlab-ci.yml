@@ -66,6 +66,9 @@ coverage:
         - lcov --remove coverage.info "$CI_PROJECT_DIR/googletest/*" -o coverage.info
         - lcov --remove coverage.info "$CI_PROJECT_DIR/src/logging/*" -o coverage.info
         - lcov --remove coverage.info "$CI_PROJECT_DIR/libvlcpp/*" -o coverage.info
+        - lcov --remove coverage.info "$CI_PROJECT_DIR/src/database/SqliteErrors.h" -o coverage.info
+        - lcov --remove coverage.info "$CI_PROJECT_DIR/include/medialibrary/filesystem/Errors.h" -o coverage.info
+        - lcov --remove coverage.info "$CI_PROJECT_DIR/include/medialibrary/IMediaLibrary.h" -o coverage.info
         - lcov --summary coverage.info
         - genhtml coverage.info --output-directory html/
     artifacts:
