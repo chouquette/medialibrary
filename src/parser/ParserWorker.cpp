@@ -37,7 +37,8 @@ namespace parser
 {
 
 Worker::Worker()
-    : m_parserCb( nullptr )
+    : m_ml( nullptr )
+    , m_parserCb( nullptr )
     , m_stopParser( false )
     , m_paused( false )
     , m_idle( true )
