@@ -117,7 +117,8 @@ Task::Task( MediaLibraryPtr ml, std::string mrl )
 }
 
 Task::Task( std::string mrl, IFile::Type fileType, unsigned int playlistIndex )
-    : m_mrl( std::move( mrl ) )
+    : m_type( Type::Temporary )
+    , m_mrl( std::move( mrl ) )
     , m_fileType( fileType )
     , m_linkToType( LinkType::Playlist )
     , m_linkExtra( playlistIndex )

@@ -87,6 +87,9 @@ public:
         /// This task is meant to restore something. For now, this is only used
         /// to restore a playlist backup, in the event of a database corruption
         Restore,
+        /// This is a temporary task, used to convey information about an item
+        /// but it will never be processed by the parser pipeline.
+        Temporary = UINT8_MAX,
     };
 
     Task( MediaLibraryPtr ml, sqlite::Row& row );
