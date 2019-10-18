@@ -1,0 +1,2 @@
+race:libavcodec.so
+race:libavutil.so

@@ -90,3 +90,19 @@ asan-ubsan:
       - make -j4 check
       - ./unittest
       - ./samples
+
+tsan:
+    image: registry.videolan.org/medialibrary-tsan:20191018115854
+    tags:
+      - debian
+      - amd64
+    variables:
+        PKG_CONFIG_PATH: '$PKG_CONFIG_PATH:/prefix/lib/pkgconfig'
+        TSAN_OPTIONS: 'suppressions=ci/tsan_suppress_file'
+    script:
+      - ./bootstrap
+      - ./configure --enable-tests CXXFLAGS="-g -O1 -fsanitize=thread"
+      - make -j4
+      - make -j4 check
+      - ./unittest
+      - ./samples
