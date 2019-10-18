@@ -37,6 +37,7 @@ int64_t Bookmark::* const Bookmark::Table::PrimaryKey = &Bookmark::m_id;
 
 Bookmark::Bookmark( MediaLibraryPtr ml, int64_t time )
     : m_ml( ml )
+    , m_id( 0 )
     , m_time( time )
 {
 }
