@@ -72,14 +72,16 @@ DeviceLister::DeviceMap DeviceLister::listDevices() const
             continue;
         }
         std::string path = devPath + result->d_name;
-        char linkPath[PATH_MAX] = {};
-        if ( readlink( path.c_str(), linkPath, PATH_MAX ) < 0 )
+        char linkPath[PATH_MAX + 1];
+        auto nbBytes = readlink( path.c_str(), linkPath, PATH_MAX );
+        if ( nbBytes < 0 )
         {
             std::stringstream err;
             err << "Failed to resolve uuid -> device link: "
                 << result->d_name << " (" << strerror(errno) << ')';
             throw fs::errors::DeviceListing{ err.str() };
         }
+        linkPath[nbBytes] = 0;
         auto deviceName = utils::file::fileName( linkPath );
         if ( std::find_if( begin( bannedDevice ), end( bannedDevice ),
                         [&deviceName]( const std::string& pattern ) {
