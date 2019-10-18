@@ -52,7 +52,7 @@ class DiscovererWorker : public IInterruptProbe
 
         Task() = default;
         Task( const std::string& entryPoint, Type type )
-            : entryPoint( entryPoint ), type( type ) {}
+            : entryPoint( entryPoint ), entityId( 0 ), type( type ) {}
         Task( int64_t entityId, Type type )
             : entityId( entityId ), type( type ) {}
         std::string entryPoint;
