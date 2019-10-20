@@ -442,7 +442,7 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     }
 
     m_initialized = true;
-    LOG_INFO( "Successfuly initialized" );
+    LOG_INFO( "Successfully initialized" );
     return res;
 }
 
