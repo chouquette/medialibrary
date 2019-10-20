@@ -87,7 +87,7 @@ enum class InitializeResult
     //< Should be considered the same as Success, but is an indication of
     // unrequired subsequent calls to initialize.
     AlreadyInitialized,
-    //< A fatal error occured, the IMediaLibrary instance should be destroyed
+    //< A fatal error occurred, the IMediaLibrary instance should be destroyed
     Failed,
     //< The database was reset, the caller needs to re-configure folders to
     // discover at the bare minimum.

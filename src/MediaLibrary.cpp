@@ -428,7 +428,7 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     // Handle every other errors as a critical failure
     catch ( const sqlite::errors::Exception& ex )
     {
-        LOG_ERROR( "An SQLite error occured: ", ex.what() );
+        LOG_ERROR( "An SQLite error occurred: ", ex.what() );
         return InitializeResult::Failed;
     }
 
@@ -1101,12 +1101,12 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
         }
         catch( const std::exception& ex )
         {
-            LOG_ERROR( "An error occured during the database upgrade: ",
+            LOG_ERROR( "An error occurred during the database upgrade: ",
                        ex.what() );
         }
         catch( ... )
         {
-            LOG_ERROR( "An unknown error occured during the database upgrade." );
+            LOG_ERROR( "An unknown error occurred during the database upgrade." );
         }
         LOG_WARN( "Retrying database migration, attempt ", i + 1, " / 3" );
     }
