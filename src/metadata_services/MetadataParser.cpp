@@ -736,28 +736,6 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
                     assert( false );
                     return std::make_tuple( false, false );
                 }
-                // No need to decrement the number of tracks for the artist
-                // Removing the AlbumTrack will cause the 'delete_album_track'
-                // trigger to fire, which will update nb_tracks/duration/presence
-                // Additionally, it might delete the album if no more songs are
-                // contained in it
-                // However, that trigger isn't run for unknown/various artists
-                // FIXME: Run the trigger for unknown/various artists, but do
-                // not delete the artist when they reach 0 tracks themselves.
-                if ( albumTrack->artistId() == UnknownArtistID ||
-                     albumTrack->artistId() == VariousArtistID )
-                {
-                    auto artist = std::static_pointer_cast<Artist>( albumTrack->artist() );
-                    artist->updateNbTrack( -1 );
-                }
-
-                // The album artist however will not be affected by this trigger
-                // so we need to decrement its tracks count manually
-                // FIXME: Add a trigger to react upon MediaArtistRelation
-                // deletion & insertion.
-                auto albumArtist = std::static_pointer_cast<Artist>( album->albumArtist() );
-                if ( albumArtist && albumArtist->id() != albumTrack->artistId() )
-                    albumArtist->updateNbTrack( -1 );
 
                 // In case we don't have a thumbnail for the updated media
                 // but had a thumbnail in the past, we don't want to lose it.
@@ -1323,17 +1301,6 @@ void MetadataAnalyzer::link( IItem& item, Album& album,
         // as the albumartist until proven we were wrong (ie. until one of the next tracks
         // has a different artist)
         album.setAlbumArtist( albumArtist );
-        // Always add the album artist as an artist
-        // Always update the album artist number of tracks.
-        // The artist might be different, and will be handled a few lines below
-        albumArtist->updateNbTrack( 1 );
-        if ( artist != nullptr )
-        {
-            // If the album artist is not the artist, we need to update the
-            // album artist track count as well.
-            if ( albumArtist->id() != artist->id() )
-                artist->updateNbTrack( 1 );
-        }
     }
     else
     {
@@ -1351,21 +1318,16 @@ void MetadataAnalyzer::link( IItem& item, Album& album,
                 auto currentAlbumTracks = album.tracks( nullptr )->all();
                 for ( const auto& track : currentAlbumTracks )
                     m_variousArtists->addMedia( static_cast<Media&>( *track ) );
-                m_variousArtists->updateNbTrack( album.nbTracks() );
                 album.setAlbumArtist( m_variousArtists );
             }
             // However we always need to bump the various artist number of tracks
             else
             {
-                m_variousArtists->updateNbTrack( 1 );
                 // Link this media with 'Various Artists' so that it gets in
                 // Various Artists' tracks listing.
                 m_variousArtists->addMedia( media );
             }
         }
-        if ( artist != nullptr && artist->id() != albumArtist->id() )
-           artist->updateNbTrack( 1 );
-        albumArtist->updateNbTrack( 1 );
     }
 
     const auto discTotal = toInt( item, IItem::Metadata::DiscTotal );

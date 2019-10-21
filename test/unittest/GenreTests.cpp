@@ -242,13 +242,13 @@ TEST_F( Genres, SearchArtists )
     {
         auto m = std::static_pointer_cast<Media>( ml->addMedia( std::to_string( i ) + ".mp3" ) );
         auto track = album->addTrack( m, i, 1, a->id(), g.get() );
-        a->updateNbTrack( 1 );
+        a->addMedia( *m );
     }
     for ( auto i = 1u; i <= 5; ++i )
     {
         auto m = std::static_pointer_cast<Media>( ml->addMedia( std::to_string( i ) + "_2.mp3" ) );
         auto track = album2->addTrack( m, i, 1, a2->id(), nullptr );
-        a2->updateNbTrack( 1 );
+        a2->addMedia( *m );
     }
     artists = ml->searchArtists( "loutre", true, nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );

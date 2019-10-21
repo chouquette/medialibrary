@@ -89,7 +89,6 @@ public:
     virtual bool setThumbnail( const std::string& thumbnailMrl,
                                ThumbnailSizeType sizeType  ) override;
     bool updateNbAlbum( int increment );
-    bool updateNbTrack( int increment );
     std::shared_ptr<Album> unknownAlbum();
     virtual const std::string& musicBrainzId() const override;
     bool setMusicBrainzId( const std::string& musicBrainzId );

@@ -271,20 +271,6 @@ bool Artist::updateNbAlbum( int increment )
     return true;
 }
 
-bool Artist::updateNbTrack(int increment)
-{
-    assert( increment != 0 );
-    assert( increment > 0 || ( increment < 0 && m_nbTracks >= 1 ) );
-    static const std::string req = "UPDATE " + Artist::Table::Name +
-            " SET nb_tracks = nb_tracks + ?, is_present = is_present + ?"
-            " WHERE id_artist = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, increment,
-                                       increment, m_id ) == false )
-        return false;
-    m_nbTracks += increment;
-    return true;
-}
-
 std::shared_ptr<Album> Artist::unknownAlbum()
 {
     static const std::string req = "SELECT * FROM " + Album::Table::Name +
@@ -393,7 +379,7 @@ void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelV
     // field, it was present from before version 3, so it wouldn't be recreated.
     // As we don't support any model before 3 (or rather we just recreate
     // everything), we don't have to bother here.
-    if ( dbModelVersion >= 8 )
+    if ( dbModelVersion >= 8 && dbModelVersion < 23 )
     {
         static const std::string autoDeleteTrackTriggerReq = "CREATE TRIGGER IF NOT EXISTS has_track_remaining"
                 " AFTER DELETE ON " + AlbumTrack::Table::Name +
@@ -411,8 +397,42 @@ void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelV
 
         sqlite::Tools::executeRequest( dbConnection, autoDeleteTrackTriggerReq );
     }
+    else
+    {
+        static const std::string autoDeleteArtistWithoutTracks =
+                "CREATE TRIGGER IF NOT EXISTS delete_artist_without_tracks"
+                " AFTER UPDATE OF nb_tracks ON " + Table::Name +
+                " WHEN new.nb_tracks = 0"
+                    " AND new.id_artist != " + std::to_string( UnknownArtistID ) +
+                    " AND new.id_artist != " + std::to_string( VariousArtistID ) +
+                " BEGIN"
+                    " DELETE FROM " + Table::Name + " WHERE id_artist = old.id_artist;"
+                " END";
+        sqlite::Tools::executeRequest( dbConnection, autoDeleteArtistWithoutTracks );
+    }
     sqlite::Tools::executeRequest( dbConnection, ftsInsertTrigger );
     sqlite::Tools::executeRequest( dbConnection, ftsDeleteTrigger );
+    if ( dbModelVersion >= 23 )
+    {
+        static const std::string incrementNbTracksTrigger = "CREATE TRIGGER IF NOT EXISTS"
+                " artist_increment_nb_tracks"
+                " AFTER INSERT ON " + MediaRelationTable::Name +
+                " BEGIN"
+                    " UPDATE " + Table::Name +
+                    " SET nb_tracks = nb_tracks + 1, is_present = is_present + 1"
+                        " WHERE id_artist = new.artist_id;"
+                " END";
+        static const std::string decrementNbTracksTrigger = "CREATE TRIGGER IF NOT EXISTS"
+                " artist_decrement_nb_tracks"
+                " AFTER DELETE ON " + MediaRelationTable::Name +
+                " BEGIN"
+                    " UPDATE " + Table::Name +
+                    " SET nb_tracks = nb_tracks - 1, is_present = is_present - 1"
+                    " WHERE id_artist = old.artist_id;"
+                " END";
+        sqlite::Tools::executeRequest( dbConnection, incrementNbTracksTrigger );
+        sqlite::Tools::executeRequest( dbConnection, decrementNbTracksTrigger );
+    }
 }
 
 std::string Artist::schema( const std::string& tableName, uint32_t dbModelVersion )

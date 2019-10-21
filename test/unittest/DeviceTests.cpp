@@ -245,11 +245,11 @@ TEST_F( DeviceFs, RemoveAlbumAndArtist )
     // Create an album on a non-removable device
     {
         auto album = std::static_pointer_cast<Album>( ml->createAlbum( "album" ) );
-        auto media = ml->media( mock::FileSystemFactory::Root + "audio.mp3" );
+        auto media = std::static_pointer_cast<Media>( ml->media( mock::FileSystemFactory::Root + "audio.mp3" ) );
         auto artist = ml->createArtist( "artist" );
         album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1, artist->id(), 0 );
         album->setAlbumArtist( artist );
-        artist->updateNbTrack( 1 );
+        artist->addMedia( *media );
     }
     // And an album that will disappear, along with its artist
     {
@@ -266,7 +266,10 @@ TEST_F( DeviceFs, RemoveAlbumAndArtist )
         album2->addTrack( std::static_pointer_cast<Media>( media4 ), 2, 1, artist->id(), nullptr );
         album->setAlbumArtist( artist );
         album2->setAlbumArtist( artist );
-        artist->updateNbTrack( 4 );
+        artist->addMedia( *media1 );
+        artist->addMedia( *media2 );
+        artist->addMedia( *media3 );
+        artist->addMedia( *media4 );
         media1->save();
         media2->save();
         media3->save();
@@ -330,8 +333,6 @@ TEST_F( DeviceFs, RemoveArtist )
     artist->addMedia( *media1 );
     artist->addMedia( *media2 );
     artist->addMedia( *media3 );
-    // This would be done by the metadata parser, but there's none during unittests
-    artist->updateNbTrack( 3 );
 
     auto res = Artist::checkDBConsistency( ml.get() );
     ASSERT_TRUE( res );
@@ -401,7 +402,6 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
         album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1, newArtist->id(), nullptr );
         album->addTrack( std::static_pointer_cast<Media>( media2 ), 2, 1, newArtist->id(), nullptr );
         album->setAlbumArtist( newArtist );
-        newArtist->updateNbTrack( 2 );
         newArtist->addMedia( static_cast<Media&>( *media ) );
         newArtist->addMedia( static_cast<Media&>( *media2 ) );
     }

@@ -222,7 +222,7 @@ TEST_F( Artists, GetAll )
         ASSERT_NE( nullptr, alb );
         alb->setAlbumArtist( a );
         ASSERT_NE( a, nullptr );
-        a->updateNbTrack( 1 );
+        a->addMedia( *m );
     }
     artists = ml->artists( true, nullptr )->all();
     ASSERT_EQ( artists.size(), 5u );
@@ -242,7 +242,9 @@ TEST_F( Artists, GetAllNoAlbum )
     for ( int i = 0; i < 3; i++ )
     {
         auto a = ml->createArtist( std::to_string( i ) );
-        a->updateNbTrack( 1 );
+        auto m = std::static_pointer_cast<Media>(
+                    ml->addMedia( "media" + std::to_string( i ) + ".mp3" ) );
+        a->addMedia( *m );
     }
     artists = ml->artists( false, nullptr )->all();
     ASSERT_EQ( artists.size(), 0u );
@@ -294,10 +296,12 @@ TEST_F( Artists, MusicBrainzId )
 TEST_F( Artists, Search )
 {
     auto a1 = ml->createArtist( "artist 1" );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3" ) );
     auto a2 = ml->createArtist( "artist 2" );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3" ) );
     ml->createArtist( "dream seaotter" );
-    a1->updateNbTrack( 1 );
-    a2->updateNbTrack( 1 );
+    a1->addMedia( *m1 );
+    a2->addMedia( *m2 );
 
     auto artists = ml->searchArtists( "artist", true, nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
@@ -316,9 +320,12 @@ TEST_F( Artists, SearchAfterDelete )
     auto a = ml->createArtist( "artist 1" );
     auto a2 = ml->createArtist( "artist 2" );
     auto a3 = ml->createArtist( "dream seaotter" );
-    a->updateNbTrack( 1 );
-    a2->updateNbTrack( 1 );
-    a3->updateNbTrack( 1 );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3" ) );
+    a->addMedia( *m1 );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3" ) );
+    a2->addMedia( *m2 );
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3" ) );
+    a3->addMedia( *m3 );
 
     auto artists = ml->searchArtists( "artist", true, nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
@@ -458,13 +465,15 @@ TEST_F( Artists, Sort )
     // Keep in mind that artists are only listed when they are marked as album artist at least once
     auto a1 = ml->createArtist( "A" );
     auto alb1 = ml->createAlbum( "albumA" );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "mediaA.mp3" ) );
     alb1->setAlbumArtist( a1 );
     auto a2 = ml->createArtist( "B" );
     auto alb2 = ml->createAlbum( "albumB" );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "mediaB.mp3" ) );
     alb2->setAlbumArtist( a2 );
 
-    a1->updateNbTrack( 1 );
-    a2->updateNbTrack( 2 );
+    a1->addMedia( *m1 );
+    a2->addMedia( *m2 );
 
     QueryParameters params { SortingCriteria::Alpha, false };
     auto artists = ml->artists( true, &params )->all();
@@ -486,12 +495,12 @@ TEST_F( Artists, DeleteWhenNoAlbum )
     album->setAlbumArtist( artist );
     auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
     auto track1 = album->addTrack( m1, 1, 1, artist->id(), nullptr );
-    artist->updateNbTrack( 1 );
+    artist->addMedia( *m1 );
 
     auto artists = ml->artists( true, nullptr )->all();
     ASSERT_EQ( 1u, artists.size() );
 
-    ml->deleteTrack( track1->id() );
+    ml->deleteMedia( track1->id() );
     artists = ml->artists( true, nullptr )->all();
     ASSERT_EQ( 0u, artists.size() );
 
@@ -505,21 +514,34 @@ TEST_F( Artists, UpdateNbTracks )
 {
     auto artist = ml->createArtist( "artist" );
     ASSERT_EQ( 0u, artist->nbTracks() );
-    artist->updateNbTrack( 1 );
-    ASSERT_EQ( 1u, artist->nbTracks() );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3" ) );
+    artist->addMedia( *m1 );
 
     Reload();
 
     artist = std::static_pointer_cast<Artist>( ml->artist( artist->id() ) );
     ASSERT_EQ( 1u, artist->nbTracks() );
 
-    artist->updateNbTrack( -1 );
-    ASSERT_EQ( 0u, artist->nbTracks() );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3" ) );
+    artist->addMedia( *m2 );
+
+    Reload();
+    artist = std::static_pointer_cast<Artist>( ml->artist( artist->id() ) );
+    ASSERT_EQ( 2u, artist->nbTracks() );
+
+    ml->deleteMedia( m1->id() );
 
     Reload();
 
     artist = std::static_pointer_cast<Artist>( ml->artist( artist->id() ) );
-    ASSERT_EQ( 0u, artist->nbTracks() );
+    ASSERT_EQ( 1u, artist->nbTracks() );
+
+    ml->deleteMedia( m2->id() );
+
+    Reload();
+
+    artist = std::static_pointer_cast<Artist>( ml->artist( artist->id() ) );
+    ASSERT_EQ( nullptr, artist );
 }
 
 TEST_F( Artists, SortTracksMultiDisc )
@@ -572,9 +594,11 @@ TEST_F( Artists, SortTracksMultiDisc )
 TEST_F( Artists, Query )
 {
     auto artist1 = ml->createArtist( "artist1" );
-    artist1->updateNbTrack( 1 );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3" ) );
+    artist1->addMedia( *m1 );
     auto artist2 = ml->createArtist( "artist2" );
-    artist2->updateNbTrack( 1 );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3" ) );
+    artist2->addMedia( *m2 );
 
     auto query = ml->artists( true, nullptr );
     auto artists = query->items( 1, 0 );
@@ -644,14 +668,15 @@ TEST_F( Artists, SearchAll )
     album1->addTrack( m2, 2, 0, artist1->id(), nullptr );
     m1->save();
     m2->save();
-    artist1->updateNbTrack( 2 );
+    artist1->addMedia( *m1 );
+    artist1->addMedia( *m2 );
     // Artist 1 now has 0 album but 2 tracks
 
     auto album2 = ml->createAlbum( "album2" );
     auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3" ) );
     album2->addTrack( m3, 1, 0, artist2->id(), nullptr );
     album2->setAlbumArtist( artist2 );
-    artist2->updateNbTrack( 1 );
+    artist2->addMedia( *m3 );
     m3->save();
 
     auto artists = ml->searchArtists( "artist", false, nullptr )->all();
