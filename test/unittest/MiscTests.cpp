@@ -528,3 +528,8 @@ TEST_F( DbModel, Upgrate21to22 )
         ASSERT_EQ( 0u, videoQuery->all().size() );
     }
 }
+
+TEST_F( DbModel, Upgrade22to23 )
+{
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v22.sql" );
+}

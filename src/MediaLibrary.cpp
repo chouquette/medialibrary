@@ -1094,6 +1094,11 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 needRescan = true;
                 previousVersion = 22;
             }
+            if ( previousVersion == 22 )
+            {
+                migrateModel22to23();
+                previousVersion = 23;
+            }
             // To be continued in the future!
 
             success = true;
@@ -1683,6 +1688,23 @@ void MediaLibrary::migrateModel21to22()
     Media::createTriggers( dbConn, 22 );
 
     m_settings.setDbModelVersion( 22 );
+    t->commit();
+}
+
+void MediaLibrary::migrateModel22to23()
+{
+    auto dbConn = getConn();
+    sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
+    auto t = dbConn->newTransaction();
+
+    std::string reqs[] = {
+#       include "database/migrations/migration22-23.sql"
+    };
+
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConn, req );
+
+    m_settings.setDbModelVersion( 23 );
     t->commit();
 }
 
