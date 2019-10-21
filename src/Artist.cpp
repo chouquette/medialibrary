@@ -174,9 +174,7 @@ bool Artist::addMedia( Media& media )
 {
     static const std::string req = "INSERT INTO " + MediaRelationTable::Name +
             " VALUES(?, ?)";
-    // If track's ID is 0, the request will fail due to table constraints
-    sqlite::ForeignKey artistForeignKey( m_id );
-    return sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(), artistForeignKey ) != 0;
+    return sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(), m_id ) != 0;
 }
 
 bool Artist::isThumbnailGenerated( ThumbnailSizeType sizeType ) const
