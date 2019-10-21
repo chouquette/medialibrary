@@ -1347,6 +1347,10 @@ void MetadataAnalyzer::link( IItem& item, Album& album,
             {
                 // All tracks from this album must now also be reflected in various
                 // artist number of tracks
+                // We also need to link all existing tracks to Various Artists
+                auto currentAlbumTracks = album.tracks( nullptr )->all();
+                for ( const auto& track : currentAlbumTracks )
+                    m_variousArtists->addMedia( static_cast<Media&>( *track ) );
                 m_variousArtists->updateNbTrack( album.nbTracks() );
                 album.setAlbumArtist( m_variousArtists );
             }
@@ -1354,6 +1358,9 @@ void MetadataAnalyzer::link( IItem& item, Album& album,
             else
             {
                 m_variousArtists->updateNbTrack( 1 );
+                // Link this media with 'Various Artists' so that it gets in
+                // Various Artists' tracks listing.
+                m_variousArtists->addMedia( media );
             }
         }
         if ( artist != nullptr && artist->id() != albumArtist->id() )
