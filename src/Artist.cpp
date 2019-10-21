@@ -119,8 +119,8 @@ Query<IMedia> Artist::tracks( const QueryParameters* params ) const
              sort != SortingCriteria::ReleaseDate &&
              sort != SortingCriteria::Alpha )
         {
-            req += "INNER JOIN Album alb ON alb.id_album = atr.album_id "
-                   "INNER JOIN AlbumTrack atr ON atr.media_id = med.id_media ";
+            req += "INNER JOIN AlbumTrack atr ON atr.media_id = med.id_media "
+                   "INNER JOIN Album alb ON alb.id_album = atr.album_id ";
         }
         req += "WHERE mar.artist_id = ? ";
     }
