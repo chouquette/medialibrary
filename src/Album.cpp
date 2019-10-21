@@ -470,15 +470,8 @@ bool Album::setAlbumArtist( std::shared_ptr<Artist> artist )
             "artist_id = ? WHERE id_album = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, artist->id(), m_id ) == false )
         return false;
-    if ( m_artistId != 0 )
-    {
-        if ( m_albumArtist == nullptr )
-            albumArtist();
-        m_albumArtist->updateNbAlbum( -1 );
-    }
     m_artistId = artist->id();
     m_albumArtist = artist;
-    artist->updateNbAlbum( 1 );
     static const std::string ftsReq = "UPDATE " + FtsTable::Name + " SET "
             " artist = ? WHERE rowid = ?";
     return sqlite::Tools::executeUpdate( m_ml->getConn(), ftsReq, artist->name(), m_id );

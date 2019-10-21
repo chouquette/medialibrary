@@ -258,19 +258,6 @@ bool Artist::setThumbnail( const std::string& thumbnailMrl, ThumbnailSizeType si
                 Thumbnail::Origin::UserProvided );
 }
 
-bool Artist::updateNbAlbum( int increment )
-{
-    assert( increment != 0 );
-    assert( increment > 0 || ( increment < 0 && m_nbAlbums >= 1 ) );
-
-    static const std::string req = "UPDATE " + Artist::Table::Name +
-            " SET nb_albums = nb_albums + ? WHERE id_artist = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, increment, m_id ) == false )
-        return false;
-    m_nbAlbums += increment;
-    return true;
-}
-
 std::shared_ptr<Album> Artist::unknownAlbum()
 {
     static const std::string req = "SELECT * FROM " + Album::Table::Name +
@@ -281,11 +268,7 @@ std::shared_ptr<Album> Artist::unknownAlbum()
         album = Album::createUnknownAlbum( m_ml, this );
         if ( album == nullptr )
             return nullptr;
-        if ( updateNbAlbum( 1 ) == false )
-        {
-            Album::destroy( m_ml, album->id() );
-            return nullptr;
-        }
+        m_nbAlbums = 1;
     }
     return album;
 }
@@ -342,21 +325,25 @@ void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelV
                     " WHERE media_id = new.id_media "
                 ");"
             " END";
-    // Automatically delete the artists that don't have any albums left, except the 2 special artists.
-    // Those are assumed to always exist, and deleting them would cause a constaint violation error
-    // when inserting an album with unknown/various artist(s).
-    // The alternative would be to always check the special artists for existence, which would be much
-    // slower when inserting an unknown artist album
-    static const std::string autoDeleteAlbumTriggerReq = "CREATE TRIGGER IF NOT EXISTS has_album_remaining"
-            " AFTER DELETE ON " + Album::Table::Name +
-            " WHEN old.artist_id != " + std::to_string( UnknownArtistID ) +
-            " AND  old.artist_id != " + std::to_string( VariousArtistID ) +
-            " BEGIN"
-            " UPDATE " + Artist::Table::Name + " SET nb_albums = nb_albums - 1 WHERE id_artist = old.artist_id;"
-            " DELETE FROM " + Artist::Table::Name + " WHERE id_artist = old.artist_id "
-            " AND nb_albums = 0 "
-            " AND nb_tracks = 0;"
-            " END";
+    if ( dbModelVersion < 23 )
+    {
+        // Automatically delete the artists that don't have any albums left, except the 2 special artists.
+        // Those are assumed to always exist, and deleting them would cause a constaint violation error
+        // when inserting an album with unknown/various artist(s).
+        // The alternative would be to always check the special artists for existence, which would be much
+        // slower when inserting an unknown artist album
+        static const std::string autoDeleteAlbumTriggerReq = "CREATE TRIGGER IF NOT EXISTS has_album_remaining"
+                " AFTER DELETE ON " + Album::Table::Name +
+                " WHEN old.artist_id != " + std::to_string( UnknownArtistID ) +
+                " AND  old.artist_id != " + std::to_string( VariousArtistID ) +
+                " BEGIN"
+                " UPDATE " + Artist::Table::Name + " SET nb_albums = nb_albums - 1 WHERE id_artist = old.artist_id;"
+                " DELETE FROM " + Artist::Table::Name + " WHERE id_artist = old.artist_id "
+                " AND nb_albums = 0 "
+                " AND nb_tracks = 0;"
+                " END";
+        sqlite::Tools::executeRequest( dbConnection, autoDeleteAlbumTriggerReq );
+    }
 
     static const std::string ftsInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_artist_fts"
             " AFTER INSERT ON " + Artist::Table::Name +
@@ -371,7 +358,6 @@ void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelV
             " DELETE FROM " + Artist::FtsTable::Name + " WHERE rowid=old.id_artist;"
             " END";
     sqlite::Tools::executeRequest( dbConnection, triggerReq );
-    sqlite::Tools::executeRequest( dbConnection, autoDeleteAlbumTriggerReq );
     // Don't create this trigger if the database is about to be migrated.
     // This could make earlier migration fail, and needs to be done when
     // migrating to v7 to v8.
@@ -401,8 +387,8 @@ void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelV
     {
         static const std::string autoDeleteArtistWithoutTracks =
                 "CREATE TRIGGER IF NOT EXISTS delete_artist_without_tracks"
-                " AFTER UPDATE OF nb_tracks ON " + Table::Name +
-                " WHEN new.nb_tracks = 0"
+                " AFTER UPDATE OF nb_tracks, nb_albums ON " + Table::Name +
+                " WHEN new.nb_tracks = 0 AND new.nb_albums = 0"
                     " AND new.id_artist != " + std::to_string( UnknownArtistID ) +
                     " AND new.id_artist != " + std::to_string( VariousArtistID ) +
                 " BEGIN"
@@ -430,8 +416,37 @@ void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelV
                     " SET nb_tracks = nb_tracks - 1, is_present = is_present - 1"
                     " WHERE id_artist = old.artist_id;"
                 " END";
+        static const std::string updateNbAlbumTrigger = "CREATE TRIGGER IF NOT EXISTS"
+                " artist_update_nb_albums"
+                " AFTER UPDATE OF artist_id ON " + Album::Table::Name +
+                " BEGIN"
+                    " UPDATE " + Table::Name + " SET nb_albums = nb_albums + 1"
+                        " WHERE id_artist = new.artist_id;"
+                    // Even if this is the first update, the old value will be NULL
+                    // and won't update anything
+                    " UPDATE " + Table::Name + " SET nb_albums = nb_albums - 1"
+                        " WHERE id_artist = old.artist_id;"
+                " END";
+        static const std::string decrementNbAlbumTrigger = "CREATE TRIGGER IF NOT EXISTS"
+                " artist_decrement_nb_albums"
+                " AFTER DELETE ON " + Album::Table::Name +
+                " BEGIN"
+                    " UPDATE " + Table::Name + " SET nb_albums = nb_albums - 1"
+                        " WHERE id_artist = old.artist_id;"
+                " END";
+        static const std::string updateNbAlbumUnknown = "CREATE TRIGGER IF NOT EXISTS"
+                " artist_increment_nb_albums_unknown_album"
+                " AFTER INSERT ON " + Album::Table::Name +
+                " WHEN new.artist_id IS NOT NULL"
+                " BEGIN"
+                    " UPDATE " + Table::Name + " SET nb_albums = nb_albums + 1"
+                        " WHERE id_artist = new.artist_id;"
+                " END";
         sqlite::Tools::executeRequest( dbConnection, incrementNbTracksTrigger );
         sqlite::Tools::executeRequest( dbConnection, decrementNbTracksTrigger );
+        sqlite::Tools::executeRequest( dbConnection, updateNbAlbumTrigger );
+        sqlite::Tools::executeRequest( dbConnection, decrementNbAlbumTrigger );
+        sqlite::Tools::executeRequest( dbConnection, updateNbAlbumUnknown );
     }
 }
 

@@ -172,6 +172,8 @@ TEST_F( Artists, NbAlbums )
     album1->setAlbumArtist( artist );
     album2->setAlbumArtist( artist );
 
+    artist = std::static_pointer_cast<Artist>( ml->artist( artist->id() ) );
+
     auto nbAlbums = artist->nbAlbums();
     ASSERT_EQ( nbAlbums, 2u );
 
