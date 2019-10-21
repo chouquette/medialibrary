@@ -223,6 +223,7 @@ endif
 
 libmedialibrary_la_LIBADD = \
 	$(SQLITE_LIBS) 			\
+	$(THREAD_LIBS)			\
 	$(NULL)
 
 libmedialibrary_la_LDFLAGS = -no-undefined -export-symbols-regex 'NewMediaLibrary'
