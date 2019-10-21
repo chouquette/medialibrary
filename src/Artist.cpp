@@ -372,20 +372,6 @@ void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelV
             " AND nb_tracks = 0;"
             " END";
 
-    static const std::string autoDeleteTrackTriggerReq = "CREATE TRIGGER IF NOT EXISTS has_track_remaining"
-            " AFTER DELETE ON " + AlbumTrack::Table::Name +
-            " WHEN old.artist_id != " + std::to_string( UnknownArtistID ) +
-            " AND  old.artist_id != " + std::to_string( VariousArtistID ) +
-            " BEGIN"
-            " UPDATE " + Artist::Table::Name + " SET"
-                " nb_tracks = nb_tracks - 1,"
-                " is_present = is_present - 1"
-                " WHERE id_artist = old.artist_id;"
-            " DELETE FROM " + Artist::Table::Name + " WHERE id_artist = old.artist_id "
-            " AND nb_albums = 0 "
-            " AND nb_tracks = 0;"
-            " END";
-
     static const std::string ftsInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_artist_fts"
             " AFTER INSERT ON " + Artist::Table::Name +
             " WHEN new.name IS NOT NULL"
@@ -409,6 +395,20 @@ void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelV
     // everything), we don't have to bother here.
     if ( dbModelVersion >= 8 )
     {
+        static const std::string autoDeleteTrackTriggerReq = "CREATE TRIGGER IF NOT EXISTS has_track_remaining"
+                " AFTER DELETE ON " + AlbumTrack::Table::Name +
+                " WHEN old.artist_id != " + std::to_string( UnknownArtistID ) +
+                " AND  old.artist_id != " + std::to_string( VariousArtistID ) +
+                " BEGIN"
+                " UPDATE " + Artist::Table::Name + " SET"
+                    " nb_tracks = nb_tracks - 1,"
+                    " is_present = is_present - 1"
+                    " WHERE id_artist = old.artist_id;"
+                " DELETE FROM " + Artist::Table::Name + " WHERE id_artist = old.artist_id "
+                " AND nb_albums = 0 "
+                " AND nb_tracks = 0;"
+                " END";
+
         sqlite::Tools::executeRequest( dbConnection, autoDeleteTrackTriggerReq );
     }
     sqlite::Tools::executeRequest( dbConnection, ftsInsertTrigger );
