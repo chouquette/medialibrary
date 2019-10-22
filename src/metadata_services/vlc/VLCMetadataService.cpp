@@ -54,7 +54,6 @@ bool VLCMetadataService::initialize( IMediaLibrary* )
 Status VLCMetadataService::run( IItem& item )
 {
     auto mrl = item.mrl();
-    LOG_DEBUG( "Parsing ", mrl );
 
     // Having a valid media means we're re-executing this parser after the thumbnailer,
     // which isn't expected, as we always mark this task as completed.
