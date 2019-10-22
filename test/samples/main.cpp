@@ -35,7 +35,6 @@ static std::string ForcedTestDirectory;
 bool Verbose = false;
 bool ExtraVerbose = false;
 
-#ifndef _WIN32
 #define TEST_CASE_LIST \
     X("featuring") \
     X("parse_video") \
@@ -63,36 +62,6 @@ bool ExtraVerbose = false;
 #define REDUCED_TEST_CASE_LIST \
     X("featuring") \
     X("parse_video")
-
-#else
-// Disable the parse_video tests on windows for now, since we can't run the
-// title analyzer on wine yet.
-#define TEST_CASE_LIST \
-    X("featuring") \
-    X("parse_audio") \
-    X("same_album_name_different_artist") \
-    X("same_album_name_same_artist") \
-    X("compilation") \
-    X("compilation_no_albumartist") \
-    X("release_year_same") \
-    X("notags") \
-    X("multi_cd") \
-    X("no_album_artist") \
-    X("utf8") \
-    X("deduce_artwork_from_album") \
-    X("deduce_artwork_from_track") \
-    X("xiph_embedded_artwork") \
-    X("playlist_external_media") \
-    X("playlist_external_folder") \
-    X("playlist_same_folder") \
-    X("playlist_mixed_content") \
-    X("same_album_with_subfolder") \
-    X("compilation_different_years")
-
-#define REDUCED_TEST_CASE_LIST \
-    X("featuring")
-
-#endif
 
 static std::tuple<std::string, bool> testCases[] = {
     #define X(TESTCASE) std::make_tuple( TESTCASE, false ),
