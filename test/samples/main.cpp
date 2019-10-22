@@ -338,15 +338,15 @@ int main(int ac, char** av)
     return RUN_ALL_TESTS();
 }
 
-INSTANTIATE_TEST_CASE_P(SamplesTests, Tests,
+INSTANTIATE_TEST_SUITE_P(SamplesTests, Tests,
                         ::testing::ValuesIn(testCases) );
 
-INSTANTIATE_TEST_CASE_P(SamplesTests, ReducedTests,
+INSTANTIATE_TEST_SUITE_P(SamplesTests, ReducedTests,
                         ::testing::ValuesIn(reducedTestCases) );
 
-INSTANTIATE_TEST_CASE_P(SamplesTests, ResumeTests,
+INSTANTIATE_TEST_SUITE_P(SamplesTests, ResumeTests,
                         ::testing::ValuesIn(testCases) );
 
-INSTANTIATE_TEST_CASE_P(SamplesTests, RefreshTests,
+INSTANTIATE_TEST_SUITE_P(SamplesTests, RefreshTests,
                         ::testing::ValuesIn(testCases) );
 

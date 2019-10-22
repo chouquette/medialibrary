@@ -298,15 +298,15 @@ check_PROGRAMS = unittest samples
 lib_LTLIBRARIES += libgtest.la libgtestmain.la
 
 libgtest_la_SOURCES = \
-	googletest/src/gtest-all.cc
+	googletest/googletest/src/gtest-all.cc
 
 libgtestmain_la_SOURCES = \
-	googletest/src/gtest_main.cc
+	googletest/googletest/src/gtest_main.cc
 
 libgtest_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
-	-I$(top_srcdir)/googletest \
-	-I$(top_srcdir)/googletest/include
+	-I$(top_srcdir)/googletest/googletest \
+	-I$(top_srcdir)/googletest/googletest/include
 
 libgtestmain_la_CPPFLAGS = $(AM_CPPFLAGS) $(libgtest_la_CPPFLAGS)
 
@@ -349,7 +349,7 @@ unittest_CPPFLAGS = 		\
 	$(MEDIALIB_CPPFLAGS) 	\
 	-DSRC_DIR=\"$(abs_srcdir)\"	\
 	-I$(top_srcdir)/test	\
-	-I$(top_srcdir)/googletest/include \
+	-I$(top_srcdir)/googletest/googletest/include \
 	$(libmedialibrary_la_CPPFLAGS) \
 	$(NULL)
 
@@ -371,7 +371,7 @@ samples_CPPFLAGS = 			\
 	$(MEDIALIB_CPPFLAGS)	\
 	-DSRC_DIR=\"$(abs_srcdir)\"	\
 	-I$(top_srcdir)/test	\
-	-I$(top_srcdir)/googletest/include \
+	-I$(top_srcdir)/googletest/googletest/include \
 	$(RAPIDJSON_CFLAGS)		\
 	$(libmedialibrary_la_CPPFLAGS) \
 	$(NULL)
