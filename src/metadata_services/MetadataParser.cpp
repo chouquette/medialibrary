@@ -910,6 +910,19 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
                       "Assuming the media was deleted concurrently" );
             return Status::Fatal;
         }
+        catch ( const sqlite::errors::ConstraintUnique& ex )
+        {
+            // If the application crashed before the parser bookkeeping completed
+            // we might try to reprocess this task while it's finished.
+            // If the AlbumTrack was already inserted, it means that we already
+            // commited the current transaction, so there's nothing more
+            // for this task to do.
+            //
+            // See https://code.videolan.org/videolan/medialibrary/issues/103
+            LOG_INFO( "Failed to insert album track: ", ex.what(), ". "
+                      "Assuming the task was already processed." );
+            return Status::Completed;
+        }
 
         link( item, *album, artists.first, artists.second, mediaThumbnail );
         media->save();
