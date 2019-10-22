@@ -627,3 +627,8 @@ TEST_F( Playlists, CheckDbModel )
     auto res = Playlist::checkDbModel( ml.get() );
     ASSERT_TRUE( res );
 }
+
+TEST_F( Playlists, IsReadOnly )
+{
+    ASSERT_FALSE( pl->isReadOnly() );
+}

@@ -325,6 +325,11 @@ bool Playlist::remove( uint32_t position )
     return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, position );
 }
 
+bool Playlist::isReadOnly() const
+{
+    return m_fileId != 0;
+}
+
 void Playlist::createTable( sqlite::Connection* dbConn )
 {
     std::string reqs[] = {

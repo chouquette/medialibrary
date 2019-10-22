@@ -74,6 +74,7 @@ public:
     virtual bool add( int64_t mediaId, uint32_t position ) override;
     virtual bool move( uint32_t from, uint32_t position ) override;
     virtual bool remove( uint32_t position ) override;
+    virtual bool isReadOnly() const override;
     std::shared_ptr<File> addFile( const fs::IFile& fileFs, int64_t parentFolderId,
                                    bool isFolderFsRemovable );
     bool contains( int64_t mediaId, uint32_t position );

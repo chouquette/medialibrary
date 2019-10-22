@@ -387,6 +387,8 @@ void Tests::checkPlaylists( const rapidjson::Value& expectedPlaylists, std::vect
         playlists.erase( it );
         const auto& items = playlist->media()->all();
 
+        ASSERT_TRUE( playlist->isReadOnly() );
+
         if ( expectedPlaylist.HasMember( "nbItems" ) )
         {
             ASSERT_EQ( expectedPlaylist["nbItems"].GetUint(), items.size() );

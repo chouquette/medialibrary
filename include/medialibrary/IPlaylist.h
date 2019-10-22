@@ -124,6 +124,16 @@ public:
     /// \return true on success, false on failure
     ///
     virtual bool remove( uint32_t position ) = 0;
+    ///
+    /// \brief isReadOnly Return true if the playlist is backed by an actual file
+    ///                   and should therefor not modified directly.
+    /// \return true if the playlist should be considered read-only, false otherwise
+    ///
+    /// If the application doesn't respect this, the medialibrary will, for
+    /// now, accept the changes, but if the playlist file changes, any user
+    /// provided changes will be discarded without warning.
+    ///
+    virtual bool isReadOnly() const = 0;
 };
 
 }
