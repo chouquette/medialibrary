@@ -330,6 +330,21 @@ bool Playlist::isReadOnly() const
     return m_fileId != 0;
 }
 
+std::string Playlist::mrl() const
+{
+    auto file = File::fetch( m_ml, m_fileId );
+    if ( file == nullptr )
+        return {};
+    try
+    {
+        return file->mrl();
+    }
+    catch ( const fs::errors::DeviceRemoved& )
+    {
+        return {};
+    }
+}
+
 void Playlist::createTable( sqlite::Connection* dbConn )
 {
     std::string reqs[] = {

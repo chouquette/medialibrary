@@ -134,6 +134,14 @@ public:
     /// provided changes will be discarded without warning.
     ///
     virtual bool isReadOnly() const = 0;
+    ///
+    /// \brief mrl Return the file backing this playlist.
+    ///
+    /// This must be called only when isReadOnly() returns true, as a modifiable
+    /// playlist has no file associated with it.
+    /// In case of errors, an empty string will be returned.
+    ///
+    virtual std::string mrl() const = 0;
 };
 
 }

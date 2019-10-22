@@ -631,4 +631,5 @@ TEST_F( Playlists, CheckDbModel )
 TEST_F( Playlists, IsReadOnly )
 {
     ASSERT_FALSE( pl->isReadOnly() );
+    ASSERT_EQ( "", pl->mrl() );
 }
