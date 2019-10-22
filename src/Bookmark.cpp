@@ -159,7 +159,7 @@ std::shared_ptr<Bookmark> Bookmark::create( MediaLibraryPtr ml, int64_t time,
         if ( insert( ml, self, req, time, mediaId ) == false )
             return nullptr;
     }
-    catch ( const sqlite::errors::ConstraintViolation& )
+    catch ( const sqlite::errors::ConstraintUnique& )
     {
         return nullptr;
     }
