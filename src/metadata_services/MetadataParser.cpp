@@ -194,8 +194,9 @@ Status MetadataAnalyzer::run( IItem& item )
 
     if ( isAudio == true )
     {
-        if ( parseAudioFile( item ) == false )
-            return Status::Fatal;
+        auto status = parseAudioFile( item );
+        if ( status != Status::Success )
+            return status;
     }
     else
     {
@@ -827,14 +828,14 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshPlaylist(IItem& item) const
 
 /* Audio files */
 
-bool MetadataAnalyzer::parseAudioFile( IItem& item )
+Status MetadataAnalyzer::parseAudioFile( IItem& item )
 {
     auto media = static_cast<Media*>( item.media().get() );
 
     auto genre = handleGenre( item );
     auto artists = findOrCreateArtist( item );
     if ( artists.first == nullptr && artists.second == nullptr )
-        return false;
+        return Status::Fatal;
     auto album = findAlbum( item, artists.first, artists.second );
     auto newAlbum = album == nullptr;
 
@@ -923,14 +924,14 @@ bool MetadataAnalyzer::parseAudioFile( IItem& item )
     }, std::move( album ) );
 
     if ( res == false )
-        return false;
+        return Status::Fatal;
 
     if ( mediaThumbnail != nullptr )
     {
         assert( mediaThumbnail->isValid() );
         mediaThumbnail->relocate();
     }
-    return true;
+    return Status::Success;
 }
 
 std::shared_ptr<Genre> MetadataAnalyzer::handleGenre( IItem& item ) const

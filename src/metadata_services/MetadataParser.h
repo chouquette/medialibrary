@@ -55,7 +55,7 @@ protected:
     Status parsePlaylist( IItem& item ) const;
     void addPlaylistElement( IItem& item, std::shared_ptr<Playlist> playlistPtr,
                              const IItem& subitem ) const;
-    bool parseAudioFile( IItem& task );
+    Status parseAudioFile( IItem& task );
     bool parseVideoFile( IItem& task ) const;
     std::tuple<Status, bool> createFileAndMedia( IItem& item ) const;
     Status overrideExternalMedia( IItem& item, std::shared_ptr<Media> media,
