@@ -891,7 +891,7 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
             const auto& albumName = item.meta( IItem::Metadata::Album );
             album = m_ml->createAlbum( albumName );
             if ( album == nullptr )
-                return false;
+                return Status::Fatal;
             if ( mediaThumbnail != nullptr )
                 album->setThumbnail( mediaThumbnail );
         }
@@ -902,13 +902,13 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
             // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist
             if ( handleTrack( album, item, artists.second ? artists.second : artists.first,
                               genre.get() ) == nullptr )
-                return false;
+                return Status::Fatal;
         }
         catch ( const sqlite::errors::ConstraintForeignKey& ex )
         {
             LOG_INFO( "Failed to insert album track: ", ex.what(), ". "
                       "Assuming the media was deleted concurrently" );
-            return false;
+            return Status::Fatal;
         }
 
         link( item, *album, artists.first, artists.second, mediaThumbnail );
@@ -920,11 +920,11 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
         if ( newAlbum == true )
             m_notifier->notifyAlbumCreation( album );
 
-        return true;
+        return Status::Success;
     }, std::move( album ) );
 
-    if ( res == false )
-        return Status::Fatal;
+    if ( res != Status::Completed )
+        return res;
 
     if ( mediaThumbnail != nullptr )
     {
