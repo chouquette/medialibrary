@@ -553,12 +553,33 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
     if ( deviceFs == nullptr )
         throw fs::errors::DeviceRemoved{};
     // For now, assume all media are made of a single file
-    file = m->addFile( *item.fileFs(), item.parentFolder()->id(),
-                       deviceFs->isRemovable(), File::Type::Main );
-    if ( file == nullptr )
+    try
     {
-        LOG_ERROR( "Failed to add file ", mrl, " to media #", m->id() );
-        return std::make_tuple( Status::Fatal, false );
+        file = m->addFile( *item.fileFs(), item.parentFolder()->id(),
+                           deviceFs->isRemovable(), File::Type::Main );
+        if ( file == nullptr )
+        {
+            LOG_ERROR( "Failed to add file ", mrl, " to media #", m->id() );
+            return std::make_tuple( Status::Fatal, false );
+        }
+    }
+    catch ( const sqlite::errors::ConstraintUnique& ex )
+    {
+        /* This can happen if we end up with two logically identical MRLs. The
+         * string representations differ, but they point to the same actual file.
+         * When inserting the File in DB, we account for multiple mountpoints and
+         * will end up adding a file with the same folder_id & mrl, which would
+         * be a UNIQUE constraint violation.
+         * If that happens, just discard the 2nd task.
+         * However, this is not expected for non removable devices, as their MRL
+         * should be identical. This might change in the future if we have
+         * multiple mountpoints for the same non-removable device though.
+         */
+        if ( deviceFs->isRemovable() == false )
+            throw;
+        LOG_INFO( "Failed to insert File in db: ", ex.what(), ". Assuming the"
+                  "mrl duplicate" );
+        return std::make_tuple( Status::Discarded, false );
     }
 
     createTracks( *m, tracks );
