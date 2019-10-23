@@ -537,22 +537,6 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
                                 folder->deviceId(), folder->id(),
                                 utils::url::decode( utils::file::fileName( mrl ) ),
                                 item.duration() );
-        if ( m == nullptr )
-        {
-            LOG_ERROR( "Failed to add media ", mrl, " to the media library" );
-            return std::make_tuple( Status::Fatal, false );
-        }
-        auto deviceFs = item.parentFolderFs()->device();
-        if ( deviceFs == nullptr )
-            throw fs::errors::DeviceRemoved{};
-        // For now, assume all media are made of a single file
-        file = m->addFile( *item.fileFs(), item.parentFolder()->id(),
-                           deviceFs->isRemovable(), File::Type::Main );
-        if ( file == nullptr )
-        {
-            LOG_ERROR( "Failed to add file ", mrl, " to media #", m->id() );
-            return std::make_tuple( Status::Fatal, false );
-        }
     }
     catch ( const sqlite::errors::ConstraintForeignKey& ex )
     {
@@ -560,6 +544,23 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
                   "containing folder got removed concurrently" );
         return std::make_tuple( Status::Discarded, false );
     }
+    if ( m == nullptr )
+    {
+        LOG_ERROR( "Failed to add media ", mrl, " to the media library" );
+        return std::make_tuple( Status::Fatal, false );
+    }
+    auto deviceFs = item.parentFolderFs()->device();
+    if ( deviceFs == nullptr )
+        throw fs::errors::DeviceRemoved{};
+    // For now, assume all media are made of a single file
+    file = m->addFile( *item.fileFs(), item.parentFolder()->id(),
+                       deviceFs->isRemovable(), File::Type::Main );
+    if ( file == nullptr )
+    {
+        LOG_ERROR( "Failed to add file ", mrl, " to media #", m->id() );
+        return std::make_tuple( Status::Fatal, false );
+    }
+
     createTracks( *m, tracks );
 
     item.setMedia( std::move( m ) );
