@@ -262,7 +262,21 @@ bool Task::restoreLinkedEntities()
         // parsing process will depend on the mrl stored in the item, not the
         // one we now have here.
         if ( m_mrl.empty() == true || m_mrl != mrl )
-            setMrl( mrl );
+        {
+            // There can be an existing task with the same MRL, in case a task
+            // wasn't processed before we re detect a file as new
+            // See https://code.videolan.org/videolan/medialibrary/issues/157
+            try
+            {
+                setMrl( mrl );
+            }
+            catch ( const sqlite::errors::ConstraintUnique& )
+            {
+                LOG_INFO( "Duplicated task after mrl update, discarding the "
+                          "duplicate." );
+                destroy( m_ml, m_id );
+            }
+        }
     }
 
     // Now we always have a valid MRL, but we might not have a fileId
