@@ -73,6 +73,7 @@ bool CoreThumbnailer::generate( const std::string& mrl, uint32_t desiredWidth,
         std::unique_lock<compat::Mutex> l{ m_mutex };
         cond.wait( l, [&done]() { return done == true; } );
 
+        m_vlcMedia.thumbnailRequestDestroy( m_request );
         m_request = nullptr;
         m_vlcMedia = VLC::Media{};
     }
@@ -86,7 +87,7 @@ void CoreThumbnailer::stop()
 {
     std::lock_guard<compat::Mutex> lock{ m_mutex };
     if ( m_request != nullptr )
-        m_vlcMedia.thumbnailCancel( m_request );
+        m_vlcMedia.thumbnailRequestDestroy( m_request );
 }
 
 }
