@@ -932,7 +932,7 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
         return Status::Success;
     }, std::move( album ) );
 
-    if ( res != Status::Completed )
+    if ( res != Status::Success )
         return res;
 
     if ( mediaThumbnail != nullptr )
