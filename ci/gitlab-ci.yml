@@ -23,12 +23,12 @@ win32:
       - ./bootstrap
       - ./configure --enable-tests --host=i686-w64-mingw32 --disable-shared
       - make -j4
-      - make -j4 check
-      - cp /prefix/dll/libvlc.dll .
-      - cp /prefix/dll/libvlccore.dll .
-      - ln -s /prefix/lib/vlc/plugins/ .
-      - wine unittest.exe
-      - wine samples.exe
+        #- make -j4 check
+        #- cp /prefix/dll/libvlc.dll .
+        #- cp /prefix/dll/libvlccore.dll .
+        #- ln -s /prefix/lib/vlc/plugins/ .
+        #- wine unittest.exe
+        #- wine samples.exe
 
 win64:
     image: registry.videolan.org/medialibrary-win64:20191022141424
