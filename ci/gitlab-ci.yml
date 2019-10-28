@@ -15,7 +15,7 @@ linux:
       - ./samples
 
 win32:
-    image: registry.videolan.org/medialibrary-win32:20191022135409
+    image: registry.videolan.org/medialibrary-win32:20191028111213
     tags:
       - win32
     script:
@@ -31,7 +31,7 @@ win32:
         #- wine samples.exe
 
 win64:
-    image: registry.videolan.org/medialibrary-win64:20191022141424
+    image: registry.videolan.org/medialibrary-win64:20191028112938
     tags:
       - win64
     script:
@@ -92,7 +92,7 @@ asan-ubsan:
       - ./samples
 
 tsan:
-    image: registry.videolan.org/medialibrary-tsan:20191018115854
+    image: registry.videolan.org/medialibrary-tsan:20191028110735
     tags:
       - debian
       - amd64
