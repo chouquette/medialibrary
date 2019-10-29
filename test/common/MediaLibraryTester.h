@@ -67,10 +67,7 @@ public:
     std::shared_ptr<Media> addFile(std::shared_ptr<fs::IFile> file, IMedia::Type type);
     // Used when we need an actual file instead of an external media
     std::shared_ptr<Media> addFile(const std::string& path , IMedia::Type type);
-    std::shared_ptr<Media> addFile( std::shared_ptr<fs::IFile> fileFs,
-                                    std::shared_ptr<Folder> parentFolder,
-                                    std::shared_ptr<fs::IDirectory> parentFolderFs, IFile::Type fileType,
-                                    IMedia::Type type );
+
     virtual void addLocalFsFactory() override;
     std::shared_ptr<Device> device( const std::string& uuid );
     std::vector<const char*> getSupportedExtensions() const;
@@ -90,6 +87,12 @@ public:
     bool setAlbumTrackGenre( int64_t albumTrackId, int64_t genreId );
     uint32_t countNbThumbnails();
     uint32_t countNbTasks();
+
+private:
+    std::shared_ptr<Media> addFile( std::shared_ptr<fs::IFile> fileFs,
+                                    std::shared_ptr<Folder> parentFolder,
+                                    std::shared_ptr<fs::IDirectory> parentFolderFs, IFile::Type fileType,
+                                    IMedia::Type type );
 
 private:
     std::shared_ptr<fs::IDirectory> dummyDirectory;
