@@ -478,6 +478,16 @@ bool Media::isDiscoveredMedia() const
     return m_type != IMedia::Type::Stream && m_type != IMedia::Type::External;
 }
 
+bool Media::isExternalMedia() const
+{
+    return m_type == IMedia::Type::External || m_type == IMedia::Type::Stream;
+}
+
+bool Media::isStream() const
+{
+    return m_type == IMedia::Type::Stream;
+}
+
 void Media::setReleaseDate( unsigned int date )
 {
     if ( m_releaseDate == date )

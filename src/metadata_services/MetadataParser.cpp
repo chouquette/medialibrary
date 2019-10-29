@@ -514,7 +514,7 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
             assert( !"External file must have an associated media" );
             return std::make_tuple( Status::Fatal, false );
         }
-        if ( media->type() == IMedia::Type::External )
+        if ( media->isExternalMedia() == true )
         {
             auto res = overrideExternalMedia( item, media, file, isAudio );
             // IItem::setFile will update the task in db, so run it as part of

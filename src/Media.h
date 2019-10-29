@@ -143,6 +143,8 @@ class Media : public IMedia,
         virtual bool requestThumbnail( ThumbnailSizeType sizeType, uint32_t desiredWidth,
                                        uint32_t desiredHeight, float position ) override;
         virtual bool isDiscoveredMedia() const override;
+        virtual bool isExternalMedia() const override;
+        virtual bool isStream() const override;
 
         void setReleaseDate( unsigned int date );
         int64_t deviceId() const; // Used for unit tests purposes only

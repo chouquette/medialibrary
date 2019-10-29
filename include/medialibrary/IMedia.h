@@ -318,6 +318,17 @@ class IMedia
         /// as a stream, or an external media
         ///
         virtual bool isDiscoveredMedia() const = 0;
+        ///
+        /// \brief isExternalMedia Returns true if the media was explicitely added
+        ///                        by the application.
+        /// This is the opposite counterpart of isDiscoveredMedia
+        ///
+        virtual bool isExternalMedia() const = 0;
+        ///
+        /// \brief isStream Returns true if this media is an external media, and
+        ///                  of type stream.
+        ///
+        virtual bool isStream() const = 0;
 };
 
 }

@@ -767,6 +767,7 @@ TEST_F( Medias, ExternalMrl )
     ASSERT_NE( nullptr, m );
 
     ASSERT_EQ( m->title(), "sea-otters.mkv" );
+    ASSERT_TRUE( m->isExternalMedia() );
 
     // External files shouldn't appear in listings
     auto videos = ml->videoFiles( nullptr )->all();
@@ -780,12 +781,26 @@ TEST_F( Medias, ExternalMrl )
     auto m2 = ml->media( "https://foo.bar/sea-otters.mkv" );
     ASSERT_NE( nullptr, m2 );
     ASSERT_EQ( m->id(), m2->id() );
+    ASSERT_TRUE( m2->isExternalMedia() );
 
     auto files = m2->files();
     ASSERT_EQ( 1u, files.size() );
     auto f = files[0];
     ASSERT_TRUE( f->isExternal() );
     ASSERT_EQ( File::Type::Main, f->type() );
+}
+
+TEST_F( Medias, AddStream )
+{
+    auto m = ml->addStream( "https://foo.bar/stream.mkv" );
+    ASSERT_EQ( m->title(), "stream.mkv" );
+    ASSERT_TRUE( m->isStream() );
+
+    Reload();
+
+    m = ml->media( m->id() );
+    ASSERT_EQ( m->title(), "stream.mkv" );
+    ASSERT_TRUE( m->isStream() );
 }
 
 TEST_F( Medias, DuplicatedExternalMrl )
