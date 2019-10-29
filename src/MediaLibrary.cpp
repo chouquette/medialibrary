@@ -579,7 +579,7 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
     {
         // Most likely the file is already scheduled and we restarted the
         // discovery after a crash.
-        LOG_WARN( "Failed to insert ", mrl, ": ", ex.what(), ". "
+        LOG_INFO( "Failed to insert ", mrl, ": ", ex.what(), ". "
                   "Assuming the file is already scheduled for discovery" );
     }
     try
@@ -599,7 +599,7 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
         // needs to be in a different catch clause (otherwise we'd have a
         // constraint violation for the Creation task, and wouldn't try to
         // create the link task while it should be.
-        LOG_WARN( "Failed to create link task for ", mrl, ": ", ex.what(), ". "
+        LOG_INFO( "Failed to create link task for ", mrl, ": ", ex.what(), ". "
                   "Assuming it was already created before" );
     }
 }
@@ -621,7 +621,7 @@ void MediaLibrary::onUpdatedFile( std::shared_ptr<File> file,
     {
         // Most likely the file is already scheduled and we restarted the
         // discovery after a crash.
-        LOG_WARN( "Failed to insert ", mrl, ": ", ex.what(), ". "
+        LOG_INFO( "Failed to insert ", mrl, ": ", ex.what(), ". "
                   "Assuming the file is already scheduled for discovery" );
     }
 }
