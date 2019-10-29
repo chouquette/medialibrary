@@ -1060,18 +1060,16 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, true, false );
+    req += addRequestJoin( params, false, false );
 
     req +=  " WHERE"
             " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
             " AND m.is_present = 1"
-            " AND (f.type = ? OR f.type = ?)"
             " AND m.type != ? AND m.type != ?";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( title ),
-                                      File::Type::Main, File::Type::Disc,
                                       Media::Type::External, Media::Type::Stream );
 }
 
