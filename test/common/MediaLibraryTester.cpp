@@ -231,7 +231,9 @@ void MediaLibraryTester::populateNetworkFsFactories()
 
 MediaPtr MediaLibraryTester::addMedia( const std::string& mrl, IMedia::Type type )
 {
-    return addExternalMedia( mrl, type );
+    if ( type == IMedia::Type::External || type == IMedia::Type::Stream )
+        return addExternalMedia( mrl );
+    return addFile( mrl, type );
 }
 
 void MediaLibraryTester::deleteMedia( int64_t mediaId )
