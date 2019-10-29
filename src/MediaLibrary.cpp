@@ -513,10 +513,9 @@ MediaPtr MediaLibrary::addStream( const std::string& mrl )
 
 bool MediaLibrary::removeExternalMedia(MediaPtr media)
 {
-    if ( media->type() != Media::Type::External &&
-         media->type() != Media::Type::Stream )
+    if ( media->isDiscoveredMedia() == true )
     {
-        assert( !"Invalid media provided" );
+        assert( !"Invalid (non-external) media provided" );
         return false;
     }
     return Media::destroy( this, media->id() );

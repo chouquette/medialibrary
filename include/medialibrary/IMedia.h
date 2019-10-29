@@ -311,6 +311,13 @@ class IMedia
         /// \brief removeAllBookmarks Remove all bookmarks attached to this media
         ///
         virtual bool removeAllBookmarks() = 0;
+        ///
+        /// \brief isDiscoveredMedia Returns true if this media was discovered
+        ///                          during a scan.
+        /// false means that the media has been explicitely added by the user
+        /// as a stream, or an external media
+        ///
+        virtual bool isDiscoveredMedia() const = 0;
 };
 
 }

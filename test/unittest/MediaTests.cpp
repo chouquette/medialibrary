@@ -58,6 +58,7 @@ TEST_F( Medias, Create )
     ASSERT_EQ( m->showEpisode(), nullptr );
     ASSERT_EQ( m->duration(), -1 );
     ASSERT_NE( 0u, m->insertionDate() );
+    ASSERT_TRUE( m->isDiscoveredMedia() );
 
     auto files = m->files();
     ASSERT_EQ( 1u, files.size() );
