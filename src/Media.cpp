@@ -954,7 +954,7 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
                " USING FTS3(title,labels)";
     }
     assert( tableName == Table::Name );
-    return "CREATE TABLE " + Table::Name +
+    auto req = "CREATE TABLE " + Table::Name +
     "("
         "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
         "type INTEGER,"
@@ -966,23 +966,28 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
         "last_played_date UNSIGNED INTEGER,"
         "real_last_played_date UNSIGNED INTEGER,"
         "insertion_date UNSIGNED INTEGER,"
-        "release_date UNSIGNED INTEGER," +
-        ( dbModel >= 17 ? "" : "thumbnail_id INTEGER," ) +
-        "title TEXT COLLATE NOCASE,"
+        "release_date UNSIGNED INTEGER,";
+
+    if ( dbModel < 17 )
+        req += "thumbnail_id INTEGER,";
+
+    req += "title TEXT COLLATE NOCASE,"
         "filename TEXT COLLATE NOCASE,"
         "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
         "is_present BOOLEAN NOT NULL DEFAULT 1,"
         "device_id INTEGER,"
         "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
-        "folder_id UNSIGNED INTEGER," +
-        (
-            dbModel >= 17 ? "" :
-              "FOREIGN KEY(thumbnail_id) REFERENCES " + Thumbnail::Table::Name
-                + "(id_thumbnail),"
-        ) +
-        "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
+        "folder_id UNSIGNED INTEGER,";
+
+    if ( dbModel < 17 )
+    {
+          req += "FOREIGN KEY(thumbnail_id) REFERENCES " + Thumbnail::Table::Name
+            + "(id_thumbnail),";
+    }
+    req += "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
         + "(id_folder)"
     ")";
+    return req;
 }
 
 bool Media::checkDbModel( MediaLibraryPtr ml )
