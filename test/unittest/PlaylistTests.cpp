@@ -443,8 +443,8 @@ TEST_F( Playlists, SearchMedia )
 
 TEST_F( Playlists, ReinsertMedia )
 {
-    auto m1 = ml->addMedia( "http://sea.otters/fluffy.mkv", IMedia::Type::External );
-    auto m2 = ml->addMedia( "https:///cuteotters.org/holding_hands.mp4", IMedia::Type::External );
+    auto m1 = ml->addExternalMedia( "http://sea.otters/fluffy.mkv" );
+    auto m2 = ml->addExternalMedia( "https:///cuteotters.org/holding_hands.mp4" );
     auto m3 = ml->addMedia( "media.mp3", IMedia::Type::Audio );
     pl->append( *m1 );
     pl->append( *m2 );
@@ -468,8 +468,8 @@ TEST_F( Playlists, ReinsertMedia )
     Reload();
     pl = std::static_pointer_cast<Playlist>( ml->playlist( pl->id() ) );
 
-    m1 = ml->addMedia( "http://sea.otters/fluffy.mkv", IMedia::Type::External );
-    m2 = ml->addMedia( "https:///cuteotters.org/holding_hands.mp4", IMedia::Type::External );
+    m1 = ml->addExternalMedia( "http://sea.otters/fluffy.mkv" );
+    m2 = ml->addExternalMedia( "https:///cuteotters.org/holding_hands.mp4" );
 
     media = pl->media()->all();
     ASSERT_EQ( 3u, media.size() );
@@ -483,7 +483,7 @@ TEST_F( Playlists, ReinsertMedia )
 
 TEST_F( Playlists, RemoveMedia )
 {
-    auto m1 = ml->addMedia( "http://sea.otters/fluffy.mkv", IMedia::Type::External );
+    auto m1 = ml->addExternalMedia( "http://sea.otters/fluffy.mkv" );
     auto m2 = ml->addMedia( "file:///cute_otters_holding_hands.mp4", IMedia::Type::Video );
     auto m3 = ml->addMedia( "media.mp3", IMedia::Type::Audio );
     pl->append( *m1 );
