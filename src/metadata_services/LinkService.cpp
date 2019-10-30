@@ -82,9 +82,19 @@ void LinkService::stop()
 
 Status LinkService::linkToPlaylist(IItem& item)
 {
-    auto media = m_ml->media( item.mrl() );
-    // If the media isn't present yet, we assume it wasn't created yet. Let's
+    auto mrl = item.mrl();
+    auto file = File::fromExternalMrl( m_ml, mrl );
+    // If the file isn't present yet, we assume it wasn't created yet. Let's
     // try to link it later
+    if ( file == nullptr )
+    {
+        file = File::fromMrl( m_ml, mrl );
+        if ( file == nullptr )
+            return Status::Requeue;
+    }
+    if ( file->isMain() == false )
+        return Status::Fatal;
+    auto media = file->media();
     if ( media == nullptr )
         return Status::Requeue;
     auto playlist = Playlist::fetch( m_ml, item.linkToId() );
