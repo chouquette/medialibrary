@@ -477,42 +477,14 @@ MediaPtr MediaLibrary::media( const std::string& mrl ) const
     return file->media();
 }
 
-MediaPtr MediaLibrary::addExternalMedia( const std::string& mrl, IMedia::Type type )
-{
-    assert( type == IMedia::Type::External || type == IMedia::Type::Stream );
-    try
-    {
-        return sqlite::Tools::withRetries( 3, [this, &mrl, type]() -> MediaPtr {
-            auto t = m_dbConnection->newTransaction();
-            auto fileName = utils::file::fileName( mrl );
-            std::shared_ptr<Media> media;
-            if ( type == IMedia::Type::External )
-                media = Media::createExternal( this, utils::url::decode( fileName ) );
-            else
-                media = Media::createStream( this, utils::url::decode( fileName ) );
-            if ( media == nullptr )
-                return nullptr;
-            if ( media->addExternalMrl( mrl, IFile::Type::Main ) == nullptr )
-                return nullptr;
-            t->commit();
-            return media;
-        });
-    }
-    catch ( const sqlite::errors::Exception& ex )
-    {
-        LOG_ERROR( "Failed to create external media: ", ex.what() );
-        return nullptr;
-    }
-}
-
 MediaPtr MediaLibrary::addExternalMedia( const std::string& mrl )
 {
-    return addExternalMedia( mrl, IMedia::Type::External );
+    return Media::createExternal( this, mrl );
 }
 
 MediaPtr MediaLibrary::addStream( const std::string& mrl )
 {
-    return addExternalMedia( mrl, IMedia::Type::Stream );
+    return Media::createStream( this, mrl );
 }
 
 bool MediaLibrary::removeExternalMedia(MediaPtr media)

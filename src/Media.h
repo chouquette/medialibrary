@@ -63,7 +63,7 @@ class Media : public IMedia,
         Media( MediaLibraryPtr ml, const std::string& title, Type type,
                int64_t duration, int64_t deviceId, int64_t folderId );
 
-        Media( MediaLibraryPtr ml, const std::string& title, Type type );
+        Media( MediaLibraryPtr ml, const std::string& fileName, Type type );
 
         static std::shared_ptr<Media> create( MediaLibraryPtr ml, Type type,
                                               int64_t deviceId, int64_t folderId,
@@ -234,7 +234,7 @@ private:
         bool shouldUpdateThumbnail( Thumbnail& currentThumbnail,
                                     Thumbnail::Origin newOrigin );
         static std::shared_ptr<Media> createExternalMedia( MediaLibraryPtr ml,
-                                                           const std::string& fileName,
+                                                           const std::string& mrl,
                                                            IMedia::Type type );
 
 private:

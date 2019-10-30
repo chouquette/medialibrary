@@ -245,7 +245,6 @@ private:
 
 protected:
     virtual void addLocalFsFactory();
-    MediaPtr addExternalMedia( const std::string& mrl, IMedia::Type type );
 
     // Mark IDeviceListerCb callbacks as private. They must be invoked through the interface.
 private:

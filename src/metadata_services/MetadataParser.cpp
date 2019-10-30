@@ -323,20 +323,15 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
         // subitem, ie. the playlist item we're adding.
         if ( File::exists( m_ml, mrl ) == false )
         {
-            auto externalMedia = Media::createExternal( m_ml,
-                                                        subitem.meta( IItem::Metadata::Title ) );
+            auto externalMedia = Media::createExternal( m_ml, mrl );
             if ( externalMedia == nullptr )
             {
                 LOG_ERROR( "Failed to create external media for ", mrl, " in the playlist ", playlistMrl );
                 return;
             }
-            // Assuming that external mrl present in playlist file is a main media resource
-            auto externalFile = externalMedia->addExternalMrl( mrl, IFile::Type::Main );
-            if ( externalFile == nullptr )
-            {
-                LOG_ERROR( "Failed to create external file for ", mrl, " in the playlist ", playlistMrl );
-                return;
-            }
+            auto title = subitem.meta( IItem::Metadata::Title );
+            if ( title.empty() == false )
+                externalMedia->setTitle( title );
         }
         try
         {

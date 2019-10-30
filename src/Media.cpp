@@ -51,6 +51,7 @@
 #include "medialibrary/filesystem/IDevice.h"
 #include "medialibrary/filesystem/Errors.h"
 #include "utils/Filename.h"
+#include "utils/Url.h"
 #include "thumbnails/ThumbnailerWorker.h"
 
 namespace medialibrary
@@ -111,7 +112,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
 {
 }
 
-Media::Media( MediaLibraryPtr ml, const std::string& title, IMedia::Type type )
+Media::Media( MediaLibraryPtr ml, const std::string& fileName, IMedia::Type type )
     : m_ml( ml )
     , m_id( 0 )
     , m_type( type )
@@ -121,8 +122,8 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, IMedia::Type type )
     , m_lastPlayedDate( 0 )
     , m_insertionDate( time( nullptr ) )
     , m_releaseDate( 0 )
-    , m_title( title )
-    , m_filename( title )
+    , m_title( fileName )
+    , m_filename( fileName )
     , m_isFavorite( false )
     , m_deviceId( 0 )
     , m_nbPlaylists( 0 )
@@ -150,9 +151,14 @@ std::shared_ptr<Media> Media::create( MediaLibraryPtr ml, Type type,
 }
 
 std::shared_ptr<Media> Media::createExternalMedia( MediaLibraryPtr ml,
-                                                   const std::string& fileName,
+                                                   const std::string& mrl,
                                                    IMedia::Type type )
 {
+    std::unique_ptr<sqlite::Transaction> t;
+    if ( sqlite::Transaction::transactionInProgress() == false )
+        t = ml->getConn()->newTransaction();
+
+    auto fileName = utils::url::decode( utils::file::fileName( mrl ) );
     auto self = std::make_shared<Media>( ml, fileName, type );
     static const std::string req = "INSERT INTO " + Media::Table::Name +
             "(type, insertion_date, title, filename) "
@@ -161,6 +167,12 @@ std::shared_ptr<Media> Media::createExternalMedia( MediaLibraryPtr ml,
     if ( insert( ml, self, req, type, self->m_insertionDate,
                  self->m_title, self->m_filename ) == false )
         return nullptr;
+
+    if ( self->addExternalMrl( mrl, IFile::Type::Main ) == nullptr )
+        return nullptr;
+
+    if ( t != nullptr )
+        t->commit();
     return self;
 }
 
@@ -170,7 +182,7 @@ std::shared_ptr<Media> Media::createExternal( MediaLibraryPtr ml,
     return createExternalMedia( ml, fileName, IMedia::Type::External );
 }
 
-std::shared_ptr<Media> Media::createStream(MediaLibraryPtr ml, const std::string& fileName)
+std::shared_ptr<Media> Media::createStream( MediaLibraryPtr ml, const std::string& fileName )
 {
     return createExternalMedia( ml, fileName, IMedia::Type::Stream );
 }
