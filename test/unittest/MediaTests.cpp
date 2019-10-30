@@ -871,7 +871,7 @@ TEST_F( Medias, SortFilename )
 TEST_F( Medias, CreateStream )
 {
     auto m1 = ml->addStream( "http://foo.bar/media.mkv" );
-    ASSERT_EQ( IMedia::Type::Stream, m1->type() );
+    ASSERT_TRUE( m1->isStream() );
 }
 
 TEST_F( Medias, SearchExternal )
