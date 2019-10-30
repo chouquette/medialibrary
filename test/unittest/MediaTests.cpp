@@ -1104,7 +1104,7 @@ TEST_F( Medias, SetFolderId )
     auto d = Device::create( ml.get(), deviceFs.uuid(), "file://", false );
     auto folder = Folder::create( ml.get(), "path/to/folder", 0, *d, deviceFs );
     ASSERT_EQ( 0u, m->folderId() );
-    m->setFolderId( d->id() );
+    m->setFolderId( folder->id() );
     m->save();
 
     ASSERT_EQ( folder->id(), m->folderId() );
