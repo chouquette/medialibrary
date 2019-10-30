@@ -236,6 +236,11 @@ private:
     void migrateModel20to21();
     void migrateModel21to22();
     void migrateModel22to23();
+    /**
+     * Runs some migration steps that depend on the actual C++ code, and that
+     * therefor require the migration to have already completed
+     */
+    void migrationEpilogue( uint32_t originalPreviousVersion );
     bool createAllTables( uint32_t dbModelVersion );
     void createAllTriggers( uint32_t dbModelVersion );
     bool checkDatabaseIntegrity();
