@@ -32,6 +32,7 @@
 #include "utils/Filename.h"
 #include "factory/DeviceListerFactory.h"
 #include "medialibrary/filesystem/IFile.h"
+#include "medialibrary/filesystem/IDirectory.h"
 
 #include <algorithm>
 

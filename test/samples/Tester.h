@@ -28,7 +28,6 @@
 #include <mutex>
 #include <rapidjson/document.h>
 
-#include "common/MediaLibraryTester.h"
 #include "medialibrary/IAlbum.h"
 #include "medialibrary/IArtist.h"
 #include "medialibrary/IMedia.h"
@@ -38,8 +37,13 @@
 #include "medialibrary/IGenre.h"
 #include "medialibrary/IPlaylist.h"
 #include "medialibrary/ISubtitleTrack.h"
+#include "medialibrary/IFolder.h"
+#include "Folder.h"
 #include "mocks/NoopCallback.h"
 #include "medialibrary/IDeviceLister.h"
+#include "MediaLibrary.h"
+#include "compat/Mutex.h"
+#include "compat/ConditionVariable.h"
 
 class MockCallback : public mock::NoopCallback
 {
