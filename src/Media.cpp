@@ -111,6 +111,27 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
 {
 }
 
+Media::Media( MediaLibraryPtr ml, const std::string& title, IMedia::Type type )
+    : m_ml( ml )
+    , m_id( 0 )
+    , m_type( type )
+    , m_subType( SubType::Unknown )
+    , m_duration( -1 )
+    , m_playCount( 0 )
+    , m_lastPlayedDate( 0 )
+    , m_insertionDate( time( nullptr ) )
+    , m_releaseDate( 0 )
+    , m_title( title )
+    , m_filename( title )
+    , m_isFavorite( false )
+    , m_deviceId( 0 )
+    , m_nbPlaylists( 0 )
+    , m_folderId( 0 )
+    , m_metadata( m_ml, IMetadata::EntityType::Media )
+    , m_changed( false )
+{
+}
+
 std::shared_ptr<Media> Media::create( MediaLibraryPtr ml, Type type,
                                       int64_t deviceId, int64_t folderId,
                                       const std::string& fileName,
@@ -123,10 +144,35 @@ std::shared_ptr<Media> Media::create( MediaLibraryPtr ml, Type type,
             "VALUES(?, ?, ?, ?, ?, ?, ?)";
 
     if ( insert( ml, self, req, type, self->m_duration, self->m_insertionDate,
-                 self->m_title, self->m_filename, sqlite::ForeignKey{ deviceId },
-                 sqlite::ForeignKey{ folderId } ) == false )
+                 self->m_title, self->m_filename, deviceId, folderId ) == false )
         return nullptr;
     return self;
+}
+
+std::shared_ptr<Media> Media::createExternalMedia( MediaLibraryPtr ml,
+                                                   const std::string& fileName,
+                                                   IMedia::Type type )
+{
+    auto self = std::make_shared<Media>( ml, fileName, type );
+    static const std::string req = "INSERT INTO " + Media::Table::Name +
+            "(type, insertion_date, title, filename) "
+            "VALUES(?, ?, ?, ?)";
+
+    if ( insert( ml, self, req, type, self->m_insertionDate,
+                 self->m_title, self->m_filename ) == false )
+        return nullptr;
+    return self;
+}
+
+std::shared_ptr<Media> Media::createExternal( MediaLibraryPtr ml,
+                                              const std::string& fileName )
+{
+    return createExternalMedia( ml, fileName, IMedia::Type::External );
+}
+
+std::shared_ptr<Media> Media::createStream(MediaLibraryPtr ml, const std::string& fileName)
+{
+    return createExternalMedia( ml, fileName, IMedia::Type::Stream );
 }
 
 AlbumTrackPtr Media::albumTrack() const

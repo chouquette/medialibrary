@@ -51,13 +51,28 @@ class Media : public IMedia,
         // shall be well-formed, and private constructor would prevent that.
         // There might be a way with a user-defined allocator, but we'll see that later...
         Media( MediaLibraryPtr ml , sqlite::Row& row );
+        ///
+        /// \brief Media Construct a discovered media
+        /// \param ml A media library instance pointer
+        /// \param title The media title
+        /// \param type The media type
+        /// \param duration The media duration
+        /// \param deviceId The device containing this media's ID
+        /// \param folderId The folder containing this media's ID
+        ///
         Media( MediaLibraryPtr ml, const std::string& title, Type type,
                int64_t duration, int64_t deviceId, int64_t folderId );
+
+        Media( MediaLibraryPtr ml, const std::string& title, Type type );
 
         static std::shared_ptr<Media> create( MediaLibraryPtr ml, Type type,
                                               int64_t deviceId, int64_t folderId,
                                               const std::string& fileName,
                                               int64_t duration );
+        static std::shared_ptr<Media> createExternal( MediaLibraryPtr ml,
+                                                      const std::string& fileName );
+        static std::shared_ptr<Media> createStream( MediaLibraryPtr ml,
+                                                    const std::string& fileName );
         static void createTable( sqlite::Connection* connection );
         static void createTriggers( sqlite::Connection* connection, uint32_t modelVersion );
         static std::string schema( const std::string& tableName, uint32_t dbModel );
@@ -218,6 +233,9 @@ private:
         static Query<IMedia> fetchHistoryByType( MediaLibraryPtr ml, IMedia::Type type );
         bool shouldUpdateThumbnail( Thumbnail& currentThumbnail,
                                     Thumbnail::Origin newOrigin );
+        static std::shared_ptr<Media> createExternalMedia( MediaLibraryPtr ml,
+                                                           const std::string& fileName,
+                                                           IMedia::Type type );
 
 private:
         MediaLibraryPtr m_ml;

@@ -479,13 +479,17 @@ MediaPtr MediaLibrary::media( const std::string& mrl ) const
 
 MediaPtr MediaLibrary::addExternalMedia( const std::string& mrl, IMedia::Type type )
 {
+    assert( type == IMedia::Type::External || type == IMedia::Type::Stream );
     try
     {
         return sqlite::Tools::withRetries( 3, [this, &mrl, type]() -> MediaPtr {
             auto t = m_dbConnection->newTransaction();
             auto fileName = utils::file::fileName( mrl );
-            auto media = Media::create( this, type, 0, 0,
-                                        utils::url::decode( fileName ), -1 );
+            std::shared_ptr<Media> media;
+            if ( type == IMedia::Type::External )
+                media = Media::createExternal( this, utils::url::decode( fileName ) );
+            else
+                media = Media::createStream( this, utils::url::decode( fileName ) );
             if ( media == nullptr )
                 return nullptr;
             if ( media->addExternalMrl( mrl, IFile::Type::Main ) == nullptr )
