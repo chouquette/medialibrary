@@ -27,6 +27,7 @@
 #include "Metadata.h"
 
 #include "database/SqliteTools.h"
+#include "utils/ModificationsNotifier.h"
 
 #include <algorithm>
 
@@ -152,8 +153,18 @@ bool Metadata::set( uint32_t type, const std::string& value )
     {
         static const std::string req = "INSERT OR REPLACE INTO " + Metadata::Table::Name +
                 "(id_media, entity_type, type, value) VALUES(?, ?, ?, ?)";
-        return sqlite::Tools::executeInsert( m_ml->getConn(), req, m_entityId, m_entityType,
-                                             type, value );
+
+        if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, m_entityId, m_entityType,
+                                          type, value ) == false )
+            return false;
+
+        if ( m_entityType == IMetadata::EntityType::Media )
+        {
+            auto notifier = m_ml->getNotifier();
+            if ( notifier != nullptr )
+                notifier->notifyMediaModification( m_entityId );
+        }
+        return true;
     }
     catch ( const sqlite::errors::Exception& ex )
     {
