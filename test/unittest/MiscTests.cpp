@@ -428,7 +428,7 @@ TEST_F( DbModel, Upgrade13to14 )
     ASSERT_EQ( media[2]->id(), playlistMedia[2]->id() );
     ASSERT_EQ( 1u, std::static_pointer_cast<Media>( playlistMedia[2] )->nbPlaylists() );
 
-    ASSERT_EQ( IMedia::Type::External, media[2]->type() );
+    ASSERT_TRUE( media[2]->isExternalMedia() );
 
     auto externalMedia = ml->media( 99 );
     ASSERT_NE( nullptr, externalMedia );

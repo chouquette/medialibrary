@@ -252,7 +252,7 @@ TEST_P( ReducedTests, OverrideExternalMedia )
         {
             auto media = m_ml->addExternalMedia( f->mrl() );
             ASSERT_NE( nullptr, media );
-            ASSERT_EQ( IMedia::Type::External, media->type() );
+            ASSERT_TRUE( media->isExternalMedia() );
             ASSERT_EQ( -1, media->duration() );
             ++nbMedia;
         }
@@ -269,7 +269,7 @@ TEST_P( ReducedTests, OverrideExternalMedia )
     {
         auto media = m_ml->media( i );
         ASSERT_NE( nullptr, media );
-        ASSERT_NE( IMedia::Type::External, media->type() );
+        ASSERT_TRUE( media->isDiscoveredMedia() );
         ASSERT_TRUE( media->type() == IMedia::Type::Audio ||
                      media->type() == IMedia::Type::Video );
         ASSERT_NE( -1, media->duration() );
