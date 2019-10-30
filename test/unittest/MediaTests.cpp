@@ -1085,7 +1085,8 @@ TEST_F( Medias, SetPlayCount )
 TEST_F( Medias, SetDeviceId )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
-    ASSERT_EQ( 0u, m->deviceId() );
+    // This will be assigned to the mock device
+    ASSERT_EQ( 1u, m->deviceId() );
 
     m->setDeviceId( 123u );
     ASSERT_EQ( 123u, m->deviceId() );
@@ -1100,10 +1101,13 @@ TEST_F( Medias, SetDeviceId )
 TEST_F( Medias, SetFolderId )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    // The media will be assigned to the mock folder
+    ASSERT_EQ( 1u, m->folderId() );
     mock::NoopDevice deviceFs{};
-    auto d = Device::create( ml.get(), deviceFs.uuid(), "file://", false );
+    // The device is automatically created by the MediaLibraryTester
+    auto d = Device::fromUuid( ml.get(), deviceFs.uuid() );
     auto folder = Folder::create( ml.get(), "path/to/folder", 0, *d, deviceFs );
-    ASSERT_EQ( 0u, m->folderId() );
+
     m->setFolderId( folder->id() );
     m->save();
 

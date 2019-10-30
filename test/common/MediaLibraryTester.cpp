@@ -40,8 +40,8 @@
 
 
 MediaLibraryTester::MediaLibraryTester()
-    : dummyDirectory( new mock::NoopDirectory )
-    , dummyFolder( std::make_shared<Folder>( nullptr, "./", 0, 0, false ) )
+    : dummyDevice( new mock::NoopDevice )
+    , dummyDirectory( new mock::NoopDirectory )
 {
 }
 
@@ -298,4 +298,37 @@ uint32_t MediaLibraryTester::countNbTasks()
     auto row = stmt.row();
     row >> res;
     return res;
+}
+
+bool MediaLibraryTester::setupDummyFolder()
+{
+    // We create a dummy device in database, and a dummy folder.
+    // This allows us to have a DB setup which is equivalent to an real one
+    // File need to have a parent folder to be considered non-external, and a
+    // folder needs to have a parent device.
+    // However, if we just add a dummy device to DB and be done with it, when
+    // the media library refreshes the devices, it will not find the device we
+    // inserted and will mark it as missing, which will cause all its media to
+    // be marked missing as well, which tends to make the tests fail
+    std::shared_ptr<Device> device;
+    try
+    {
+        device = Device::create( this, mock::FileSystemFactory::NoopDeviceUuid,
+                                 "file://", false );
+        if ( device == nullptr )
+            return false;
+    }
+    catch ( const sqlite::errors::ConstraintUnique& )
+    {
+        // Most test cases call Reload() which will end up calling setupDummyFolder
+        // again. We don't want the UNIQUE constraint to terminate the test.
+        device = Device::fromUuid( this, mock::FileSystemFactory::NoopDeviceUuid );
+        // Let's assume that this folder will be the first create folder
+        dummyFolder = Folder::fetch( this, 1 );
+        return true;
+    }
+    dummyFolder = Folder::create( this, "./", 0, *device, *dummyDevice );
+    if ( dummyFolder->id() != 1 )
+        return false;
+    return dummyFolder != nullptr;
 }

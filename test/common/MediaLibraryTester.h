@@ -87,6 +87,7 @@ public:
     bool setAlbumTrackGenre( int64_t albumTrackId, int64_t genreId );
     uint32_t countNbThumbnails();
     uint32_t countNbTasks();
+    virtual bool setupDummyFolder();
 
 private:
     std::shared_ptr<Media> addFile( std::shared_ptr<fs::IFile> fileFs,
@@ -95,6 +96,7 @@ private:
                                     IMedia::Type type );
 
 private:
+    std::shared_ptr<fs::IDevice> dummyDevice;
     std::shared_ptr<fs::IDirectory> dummyDirectory;
     std::shared_ptr<fs::IFileSystemFactory> fsFactory;
     std::shared_ptr<Folder> dummyFolder;
@@ -102,6 +104,11 @@ private:
 
 class MediaLibraryWithDiscoverer : public MediaLibraryTester
 {
+    virtual bool setupDummyFolder() override
+    {
+        return true;
+    }
+
     virtual void startDiscoverer() override
     {
         // Fall back to the default variant which actually starts the discoverer

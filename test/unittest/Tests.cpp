@@ -60,6 +60,8 @@ void Tests::Reload()
     ml->setVerbosity( LogLevel::Error );
     auto res = ml->initialize( "test.db", "/tmp/ml_folder/", mlCb );
     ASSERT_EQ( InitializeResult::Success, res );
+    auto setupRes = ml->setupDummyFolder();
+    ASSERT_TRUE( setupRes );
     auto startRes = ml->start();
     ASSERT_TRUE( startRes );
     ml->reload();

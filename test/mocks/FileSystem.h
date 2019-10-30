@@ -49,6 +49,7 @@ struct FileSystemFactory : public fs::IFileSystemFactory
     static const std::string Root;
     static const std::string SubFolder;
     static const std::string RootDeviceUuid;
+    static const std::string NoopDeviceUuid;
 
     FileSystemFactory()
     {
@@ -333,7 +334,7 @@ class NoopDevice : public fs::IDevice
 public:
     NoopDevice()
     {
-        m_uuid = "{noop-device}";
+        m_uuid = mock::FileSystemFactory::NoopDeviceUuid;
     }
 
     virtual const std::string& uuid() const override
@@ -428,8 +429,10 @@ public:
         throw fs::errors::System{ ENOENT, "Mock directory" };
     }
 
-    virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& ) override
+    virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override
     {
+        if ( uuid == mock::FileSystemFactory::NoopDeviceUuid )
+            return std::make_shared<mock::NoopDevice>();
         return nullptr;
     }
 
