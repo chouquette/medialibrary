@@ -36,7 +36,7 @@ protected:
     virtual void SetUp() override
     {
         Tests::SetUp();
-        m = std::static_pointer_cast<Media>( ml->addMedia( "fluffyotters.mkv" ) );
+        m = std::static_pointer_cast<Media>( ml->addMedia( "fluffyotters.mkv", IMedia::Type::Video ) );
     }
 };
 

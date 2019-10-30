@@ -35,14 +35,14 @@ class AudioTracks : public Tests
 
 TEST_F( AudioTracks, AddTrack )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.mp3" ) );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.mp3", IMedia::Type::Audio ) );
     bool res = f->addAudioTrack( "PCM", 128, 44100, 2, "fr", "test" );
     ASSERT_TRUE( res );
 }
 
 TEST_F( AudioTracks, GetSetProperties )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.mp3" ) );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.mp3", IMedia::Type::Audio ) );
     ASSERT_NE( f, nullptr );
     f->addAudioTrack( "PCM", 128, 44100, 2, "en", "test desc" );
     auto tracks = f->audioTracks()->all();
@@ -72,7 +72,7 @@ TEST_F( AudioTracks, GetSetProperties )
 
 TEST_F( AudioTracks, FetchTracks )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.mp3" ) );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.mp3", IMedia::Type::Audio ) );
     f->addAudioTrack( "PCM", 128, 44100, 2, "en", "test desc" );
     f->addAudioTrack( "WMA", 128, 48000, 2, "fr", "test desc 2" );
 
@@ -82,8 +82,8 @@ TEST_F( AudioTracks, FetchTracks )
 
 TEST_F( AudioTracks, RemoveTracks )
 {
-    auto f1 = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
-    auto f2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3" ) );
+    auto f1 = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
+    auto f2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
     f1->addAudioTrack( "PCM", 128, 44100, 2, "en", "test desc" );
     f2->addAudioTrack( "WMA", 128, 48000, 2, "fr", "test desc" );
 

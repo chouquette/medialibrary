@@ -78,7 +78,7 @@ public:
                                    std::pair<int64_t, int64_t> ) override;
     virtual void startThumbnailer() override;
     virtual void populateNetworkFsFactories() override;
-    MediaPtr addMedia( const std::string& mrl, IMedia::Type type = IMedia::Type::External );
+    MediaPtr addMedia( const std::string& mrl, IMedia::Type type );
     void deleteMedia( int64_t mediaId );
     bool outdateAllDevices();
     bool setMediaInsertionDate( int64_t mediaId, time_t t );

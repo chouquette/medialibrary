@@ -369,7 +369,7 @@ TEST_F( DbModel, Upgrade4to5 )
 
     // The culprit  with V4 was an invalid migration, leading to missing fields
     // in File and most likely Playlist tables. Simply try to create/fetch a file
-    auto m = ml->addMedia( "test.mkv" );
+    auto m = ml->addMedia( "test.mkv", IMedia::Type::Video );
     ASSERT_NE( m, nullptr );
     auto files = ml->files();
     ASSERT_NE( files.size(), 0u );

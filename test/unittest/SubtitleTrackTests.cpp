@@ -35,14 +35,14 @@ class SubtitleTracks : public Tests
 
 TEST_F( SubtitleTracks, AddTrack )
 {
-    auto media = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
+    auto media = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     auto res = media->addSubtitleTrack( "sea", "otter", "awareness", "week" );
     ASSERT_TRUE( res );
 }
 
 TEST_F( SubtitleTracks, FetchTracks )
 {
-    auto media = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
+    auto media = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     media->addSubtitleTrack( "sea", "otter", "awareness", "week" );
     media->addSubtitleTrack( "best", "time", "of", "year" );
 
@@ -77,10 +77,10 @@ TEST_F( SubtitleTracks, FetchTracks )
 
 TEST_F( SubtitleTracks, RemoveTrack )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     auto res = m1->addSubtitleTrack( "sea", "otter", "awareness", "week" );
     ASSERT_TRUE( res );
-    auto m2 =  std::static_pointer_cast<Media>( ml->addMedia( "media2.mkv" ) );
+    auto m2 =  std::static_pointer_cast<Media>( ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
     res = m2->addSubtitleTrack( "sea", "otter", "awareness", "week" );
     ASSERT_TRUE( res );
 

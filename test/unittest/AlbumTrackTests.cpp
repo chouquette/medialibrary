@@ -39,7 +39,7 @@ class AlbumTracks : public Tests
 TEST_F( AlbumTracks, Create )
 {
     auto album = ml->createAlbum( "album" );
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
     auto track = album->addTrack( f, 1, 10, 0, nullptr );
     f->save();
     ASSERT_NE( nullptr, track );
@@ -54,7 +54,7 @@ TEST_F( AlbumTracks, Create )
 TEST_F( AlbumTracks, Album )
 {
     auto album = ml->createAlbum( "album" );
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3" ) );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
     auto track = album->addTrack( f, 1, 0, 0, nullptr );
     f->save();
 

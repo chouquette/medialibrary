@@ -49,7 +49,7 @@ TEST_F( Thumbnails, Create )
 TEST_F( Thumbnails, MediaSetThumbnail )
 {
     std::string mrl = "file:///path/to/thumbnail.png";
-    auto m = ml->addMedia( "/path/to/media.mp3" );
+    auto m = ml->addMedia( "/path/to/media.mp3", IMedia::Type::Audio );
     ASSERT_FALSE( m->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
     auto res = m->setThumbnail( mrl, ThumbnailSizeType::Thumbnail );
     ASSERT_TRUE( res );
@@ -68,7 +68,7 @@ TEST_F( Thumbnails, Update )
     std::string mrl = "file:///path/to/thumbnail.png";
     auto t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::Media,
                                 ThumbnailSizeType::Thumbnail, false );
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "test.mkv" ) );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "test.mkv", IMedia::Type::Video ) );
     m->setThumbnail( t );
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::Media );
@@ -106,7 +106,7 @@ TEST_F( Thumbnails, Update )
 
 TEST_F( Thumbnails, MarkFailure )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
 
     ASSERT_FALSE( m->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
     auto res = m->setThumbnail( "", Thumbnail::Origin::Media,
@@ -131,7 +131,7 @@ TEST_F( Thumbnails, UnshareMedia )
     auto t = Thumbnail::create( ml.get(), "file:///tmp/thumb.jpg",
                                 Thumbnail::Origin::CoverFile,
                                 ThumbnailSizeType::Thumbnail, false );
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     auto a = ml->createArtist(  "artist" );
 
     m->setThumbnail( t );
@@ -186,7 +186,7 @@ TEST_F( Thumbnails, UnshareArtist )
     auto t = Thumbnail::create( ml.get(), "file:///tmp/thumb.jpg",
                                 Thumbnail::Origin::Media,
                                 ThumbnailSizeType::Thumbnail, false );
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3" ) );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     auto a = ml->createArtist(  "artist" );
 
     m->setThumbnail( t );
@@ -234,7 +234,7 @@ TEST_F( Thumbnails, UnshareArtist )
 
 TEST_F( Thumbnails, UpdateIsOwned )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv" ) );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     auto mrl = std::string{ "file://path/to/a/thumbnail.jpg" };
     auto res = m->setThumbnail( mrl, Thumbnail::Origin::Media,
                                 ThumbnailSizeType::Thumbnail, false );
@@ -255,7 +255,7 @@ TEST_F( Thumbnails, UpdateIsOwned )
 
 TEST_F( Thumbnails, CheckMultipleSizes )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.asf" ) );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.asf", IMedia::Type::Video ) );
     std::string smallMrl = "http://small_thumbnail.png";
     std::string largeMrl = "http://large_thumbnail.png";
     auto res = m->setThumbnail( smallMrl, ThumbnailSizeType::Thumbnail );
@@ -305,9 +305,9 @@ TEST_F( Thumbnails, AutoDelete )
      * stay in db. We then unlink the 2nd media from the shared thumbnail, and
      * expect the thumbnail to be removed afterward.
      */
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media1.mkv" ) );
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mkv" ) );
-    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mkv" ) );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mkv", IMedia::Type::Video ) );
 
     auto res = m->setThumbnail( "https://thumbnail.org/otter.gif",
                                 ThumbnailSizeType::Thumbnail );
@@ -337,8 +337,8 @@ TEST_F( Thumbnails, AutoDeleteAfterUpdate )
      * Checks that the thumbnail is correctly considered unused and gets deleted
      * when we update an existing linking record (so we're not deleting it)
      */
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media1.mkv" ) );
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mkv" ) );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
 
     auto res = m->setThumbnail( "https://thumbnail.org/otter.gif",
                                 ThumbnailSizeType::Thumbnail );
@@ -366,7 +366,7 @@ TEST_F( Thumbnails, AutoDeleteAfterEntityRemoved )
     /*
      * Checks that the thumbnail gets removed when the associated entity is removed
      */
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "test.mkv" ) );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "test.mkv", IMedia::Type::Video ) );
     auto alb = std::static_pointer_cast<Album>( ml->createAlbum( "album" ) );
     auto art = std::static_pointer_cast<Artist>( ml->createArtist( "artist" ) );
     m->setThumbnail( "https://otters.org/fluffy.png", ThumbnailSizeType::Thumbnail );
@@ -393,8 +393,8 @@ TEST_F( Thumbnails, ShareThumbnail )
      * Create 2 media with 2 different thumbnails, then assign the 1st thumbnail
      * to the second media, and check that they are effectively shared
      */
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "test.mkv" ) );
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "test2.mkv" ) );
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "test.mkv", IMedia::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "test2.mkv", IMedia::Type::Video ) );
     m1->setThumbnail( "https://fluffy.org/otters.png", ThumbnailSizeType::Thumbnail );
     m2->setThumbnail( "https://cute.org/otters.png", ThumbnailSizeType::Thumbnail );
 
@@ -412,7 +412,7 @@ TEST_F( Thumbnails, ShareThumbnail )
 
 TEST_F( Thumbnails, AutoDeleteAfterUnlink )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "test.asf" ) );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "test.asf", IMedia::Type::Video ) );
     m->setThumbnail( "https://otters.org/jugglingotter.png", ThumbnailSizeType::Thumbnail );
     ASSERT_EQ( 1u, ml->countNbThumbnails() );
     auto t = m->thumbnail( ThumbnailSizeType::Thumbnail );

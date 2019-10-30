@@ -35,7 +35,7 @@ class VideoTracks : public Tests
 
 TEST_F( VideoTracks, AddTrack )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.avi" ) );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.avi", IMedia::Type::Video ) );
     bool res = f->addVideoTrack( "H264", 1920, 1080, 3000, 1001, 1234,
                                  16, 9, "language", "description" );
     ASSERT_TRUE( res );
@@ -43,7 +43,7 @@ TEST_F( VideoTracks, AddTrack )
 
 TEST_F( VideoTracks, FetchTracks )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.avi" ) );
+    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.avi", IMedia::Type::Video ) );
     f->addVideoTrack( "H264", 1920, 1080, 3000, 100, 5678, 16, 10, "l1", "d1" );
     f->addVideoTrack( "VP80", 640, 480, 3000, 100, 9876, 16, 9, "l2", "d2" );
 
@@ -85,8 +85,8 @@ TEST_F( VideoTracks, FetchTracks )
 
 TEST_F( VideoTracks, RemoveTrack )
 {
-    auto f1 = std::static_pointer_cast<Media>( ml->addMedia( "file.avi" ) );
-    auto f2 = std::static_pointer_cast<Media>( ml->addMedia( "file2.avi" ) );
+    auto f1 = std::static_pointer_cast<Media>( ml->addMedia( "file.avi", IMedia::Type::Video ) );
+    auto f2 = std::static_pointer_cast<Media>( ml->addMedia( "file2.avi", IMedia::Type::Video ) );
     bool res = f1->addVideoTrack( "H264", 1920, 1080, 3000, 1001, 1234,
                                  16, 9, "language", "description" );
     ASSERT_TRUE( res );

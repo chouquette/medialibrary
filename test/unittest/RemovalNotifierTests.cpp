@@ -99,7 +99,7 @@ protected:
 
 TEST_F( ModificationsNotifierTests, DeleteOne )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.avi" ) );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.avi", IMedia::Type::Video ) );
     auto lock = cbMock->prepareWait();
     bool hasTimedout;
     m->removeFile( static_cast<File&>( *m->files()[0] ) );
@@ -114,7 +114,7 @@ TEST_F( ModificationsNotifierTests, DeleteOne )
     // Re-run a notification after the queues have been used before
     cbMock->resetCount();
 
-    m = std::static_pointer_cast<Media>( ml->addMedia( "media.avi" ) );
+    m = std::static_pointer_cast<Media>( ml->addMedia( "media.avi", IMedia::Type::Video ) );
     m->removeFile( static_cast<File&>( *m->files()[0] ) );
 
     // Wait for a notification for 500ms. It shouldn't arrive, and we should timeout
@@ -135,7 +135,7 @@ TEST_F( ModificationsNotifierTests, DeleteOne )
 TEST_F( ModificationsNotifierTests, DeleteBatch )
 {
     for ( auto i = 0u; i < 10; ++i )
-        ml->addMedia( std::string{ "media" } + std::to_string( i ) + ".mkv" );
+        ml->addMedia( std::string{ "media" } + std::to_string( i ) + ".mkv", IMedia::Type::Video );
 
     auto lock = cbMock->prepareWait();
     bool hasTimedout;
@@ -163,7 +163,7 @@ TEST_F( ModificationsNotifierTests, DeleteBatch )
 TEST_F( ModificationsNotifierTests, Flush )
 {
     for ( auto i = 0u; i < 10; ++i )
-        ml->addMedia( std::string{ "media" } + std::to_string( i ) + ".mkv" );
+        ml->addMedia( std::string{ "media" } + std::to_string( i ) + ".mkv", IMedia::Type::Video );
 
     for ( auto i = 0u; i < 10; ++i )
         ml->deleteMedia( i + 1 );

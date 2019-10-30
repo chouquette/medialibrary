@@ -130,7 +130,7 @@ TEST_F( Playlists, FetchAll )
 
 TEST_F( Playlists, Add )
 {
-    auto m = ml->addMedia( "file.mkv" );
+    auto m = ml->addMedia( "file.mkv", IMedia::Type::Video );
     auto res = pl->append( *m );
 
     CheckContiguity();
@@ -145,7 +145,7 @@ TEST_F( Playlists, Append )
 {
     for ( auto i = 0; i < 5; ++i )
     {
-        auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv" );
+        auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv", IMedia::Type::Video );
         ASSERT_NE( nullptr, m );
         pl->append( *m );
     }
@@ -163,19 +163,19 @@ TEST_F( Playlists, Insert )
 {
     for ( auto i = 1; i < 4; ++i )
     {
-        auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv" );
+        auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv", IMedia::Type::Video );
         ASSERT_NE( nullptr, m );
         auto res = pl->append( *m );
         ASSERT_TRUE( res );
     }
     // [<1,0>,<2,1>,<3,2>]
-    auto firstMedia = ml->addMedia( "first.mkv" );
+    auto firstMedia = ml->addMedia( "first.mkv", IMedia::Type::Video );
 
     pl->add( *firstMedia, 0 );
     CheckContiguity();
 
     // [<4,0>,<1,1>,<2,2>,<3,3>]
-    auto middleMedia = ml->addMedia( "middle.mkv" );
+    auto middleMedia = ml->addMedia( "middle.mkv", IMedia::Type::Video );
     pl->add( *middleMedia, 2 );
     CheckContiguity();
     // [<4,0>,<1,1>,<5,2>,<2,3>,<3,4>]
@@ -193,7 +193,7 @@ TEST_F( Playlists, Move )
 {
     for ( auto i = 1; i < 6; ++i )
     {
-        auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv" );
+        auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv", IMedia::Type::Video );
         ASSERT_NE( nullptr, m );
         auto res = pl->append( *m );
         ASSERT_TRUE( res );
@@ -262,7 +262,7 @@ TEST_F( Playlists, Remove )
 {
     for ( auto i = 1; i < 6; ++i )
     {
-        auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv" );
+        auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv", IMedia::Type::Video );
         ASSERT_NE( nullptr, m );
         auto res = pl->append( *m );
         ASSERT_TRUE( res );
@@ -289,7 +289,7 @@ TEST_F( Playlists, DeleteFile )
 {
     for ( auto i = 1; i < 6; ++i )
     {
-        auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv" );
+        auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv", IMedia::Type::Video );
         ASSERT_NE( nullptr, m );
         auto res = pl->append( *m );
         ASSERT_TRUE( res );
@@ -400,7 +400,7 @@ TEST_F( Playlists, Sort )
 
 TEST_F( Playlists, AddDuplicate )
 {
-    auto m = ml->addMedia( "file.mkv" );
+    auto m = ml->addMedia( "file.mkv", IMedia::Type::Video );
     auto res = pl->append( *m );
     ASSERT_TRUE( res );
     res = pl->append( *m );
@@ -443,9 +443,9 @@ TEST_F( Playlists, SearchMedia )
 
 TEST_F( Playlists, ReinsertMedia )
 {
-    auto m1 = ml->addMedia( "http://sea.otters/fluffy.mkv" );
-    auto m2 = ml->addMedia( "file:///cute_otters_holding_hands.mp4" );
-    auto m3 = ml->addMedia( "media.mp3" );
+    auto m1 = ml->addMedia( "http://sea.otters/fluffy.mkv", IMedia::Type::External );
+    auto m2 = ml->addMedia( "https:///cuteotters.org/holding_hands.mp4", IMedia::Type::External );
+    auto m3 = ml->addMedia( "media.mp3", IMedia::Type::Audio );
     pl->append( *m1 );
     pl->append( *m2 );
     pl->append( *m3 );
@@ -468,8 +468,8 @@ TEST_F( Playlists, ReinsertMedia )
     Reload();
     pl = std::static_pointer_cast<Playlist>( ml->playlist( pl->id() ) );
 
-    m1 = ml->addMedia( "http://sea.otters/fluffy.mkv" );
-    m2 = ml->addMedia( "file:///cute_otters_holding_hands.mp4" );
+    m1 = ml->addMedia( "http://sea.otters/fluffy.mkv", IMedia::Type::External );
+    m2 = ml->addMedia( "https:///cuteotters.org/holding_hands.mp4", IMedia::Type::External );
 
     media = pl->media()->all();
     ASSERT_EQ( 3u, media.size() );
@@ -483,9 +483,9 @@ TEST_F( Playlists, ReinsertMedia )
 
 TEST_F( Playlists, RemoveMedia )
 {
-    auto m1 = ml->addMedia( "http://sea.otters/fluffy.mkv" );
-    auto m2 = ml->addMedia( "file:///cute_otters_holding_hands.mp4" );
-    auto m3 = ml->addMedia( "media.mp3" );
+    auto m1 = ml->addMedia( "http://sea.otters/fluffy.mkv", IMedia::Type::External );
+    auto m2 = ml->addMedia( "file:///cute_otters_holding_hands.mp4", IMedia::Type::Video );
+    auto m3 = ml->addMedia( "media.mp3", IMedia::Type::Audio );
     pl->append( *m1 );
     pl->append( *m2 );
     pl->append( *m3 );
@@ -512,8 +512,8 @@ TEST_F( Playlists, RemoveMedia )
 
 TEST_F( Playlists, ClearContent )
 {
-    auto m1 = ml->addMedia( "seaotter.mkv" );
-    auto m2 = ml->addMedia( "fluffyfurball.mp4" );
+    auto m1 = ml->addMedia( "seaotter.mkv", IMedia::Type::Video );
+    auto m2 = ml->addMedia( "fluffyfurball.mp4", IMedia::Type::Video );
     auto pl2 = ml->createPlaylist( "playlist 2" );
 
     pl->append( *m1 );
@@ -530,9 +530,9 @@ TEST_F( Playlists, ClearContent )
 
 TEST_F( Playlists, RemoveReAddMedia )
 {
-    auto m1 = ml->addMedia( "one.mp3" );
-    auto m2 = ml->addMedia( "second soufle.mp3" );
-    auto m3 = ml->addMedia( "third quarter storm.mp3" );
+    auto m1 = ml->addMedia( "one.mp3", IMedia::Type::Audio );
+    auto m2 = ml->addMedia( "second soufle.mp3", IMedia::Type::Audio );
+    auto m3 = ml->addMedia( "third quarter storm.mp3", IMedia::Type::Audio );
     pl->append( *m1 );
     pl->append( *m2 );
     pl->append( *m3 );
@@ -585,7 +585,7 @@ TEST_F( Playlists, InsertRemoveDuplicateMedia )
     MediaPtr m;
     for ( auto i = 0u; i < 5; ++i )
     {
-        m = ml->addMedia( std::to_string( i + 1 ) + ".mp3" );
+        m = ml->addMedia( std::to_string( i + 1 ) + ".mp3", IMedia::Type::Audio );
         pl->append( *m );
     }
     pl->append( *m );

@@ -66,7 +66,8 @@ TEST_F( Genres, ListAlbumTracks )
 
     for ( auto i = 1u; i <= 3; i++ )
     {
-        auto m = std::static_pointer_cast<Media>( ml->addMedia( "track" + std::to_string( i ) + ".mp3" ) );
+        auto m = std::static_pointer_cast<Media>(
+                    ml->addMedia( "track" + std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
         auto t = a->addTrack( m, i, 1, 0, i != 1 ? g.get() : nullptr );
     }
     auto tracks = g->tracks( false, nullptr )->all();
@@ -87,12 +88,14 @@ TEST_F( Genres, ListArtists )
 
     for ( auto i = 1u; i <= 5; ++i )
     {
-        auto m = std::static_pointer_cast<Media>( ml->addMedia( std::to_string( i ) + ".mp3" ) );
+        auto m = std::static_pointer_cast<Media>(
+                    ml->addMedia( std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
         auto track = album->addTrack( m, i, 1, a->id(), g.get() );
     }
     for ( auto i = 1u; i <= 5; ++i )
     {
-        auto m = std::static_pointer_cast<Media>( ml->addMedia( std::to_string( i ) + "_2.mp3" ) );
+        auto m = std::static_pointer_cast<Media>(
+                    ml->addMedia( std::to_string( i ) + "_2.mp3", IMedia::Type::Audio ) );
         auto track = album2->addTrack( m, i, 1, a2->id(), g.get() );
     }
     auto query = g->artists( nullptr );
@@ -104,18 +107,21 @@ TEST_F( Genres, ListArtists )
 TEST_F( Genres, ListAlbums )
 {
     auto album = ml->createAlbum( "album" );
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "some track.mp3" ) );
+    auto m = std::static_pointer_cast<Media>(
+                ml->addMedia( "some track.mp3", IMedia::Type::Audio ) );
     auto t = album->addTrack( m, 10, 1, 0, g.get() );
 
     auto album2 = ml->createAlbum( "album2" );
-    m = std::static_pointer_cast<Media>( ml->addMedia( "some other track.mp3" ) );
+    m = std::static_pointer_cast<Media>(
+                ml->addMedia( "some other track.mp3", IMedia::Type::Audio ) );
     t = album2->addTrack( m, 10, 1, 0, g.get() );
 
     // We have 2 albums with at least a song with genre "g" (as defined in SetUp)
     // Now we create more albums with "random" genre, all of them should have 1 album
     for ( auto i = 1u; i <= 5u; ++i )
     {
-        auto m = std::static_pointer_cast<Media>( ml->addMedia( std::to_string( i ) + ".mp3" ) );
+        auto m = std::static_pointer_cast<Media>(
+                    ml->addMedia( std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
         auto g = ml->createGenre( std::to_string( i ) );
         auto track = album->addTrack( m, i, 1, 0, g.get() );
     }
@@ -167,7 +173,8 @@ TEST_F( Genres, SortTracks )
 
     for ( auto i = 1u; i <= 2; i++ )
     {
-        auto m = std::static_pointer_cast<Media>( ml->addMedia( "track" + std::to_string( i ) + ".mp3" ) );
+        auto m = std::static_pointer_cast<Media>(
+                    ml->addMedia( "track" + std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
         auto t = a->addTrack( m, i, 1, 0, g.get() );
         m->setDuration( i );
         m->save();
@@ -206,7 +213,8 @@ TEST_F( Genres, NbTracks )
     ASSERT_EQ( 0u, g->nbTracks() );
 
     auto a = ml->createAlbum( "album" );
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "track.mp3" ) );
+    auto m = std::static_pointer_cast<Media>(
+                ml->addMedia( "track.mp3", IMedia::Type::Audio ) );
     auto t = a->addTrack( m, 1, 1, g->id(), g.get() );
 
     ASSERT_EQ( 1u, g->nbTracks() );
@@ -240,13 +248,15 @@ TEST_F( Genres, SearchArtists )
 
     for ( auto i = 1u; i <= 5; ++i )
     {
-        auto m = std::static_pointer_cast<Media>( ml->addMedia( std::to_string( i ) + ".mp3" ) );
+        auto m = std::static_pointer_cast<Media>(
+                    ml->addMedia( std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
         auto track = album->addTrack( m, i, 1, a->id(), g.get() );
         a->addMedia( *m );
     }
     for ( auto i = 1u; i <= 5; ++i )
     {
-        auto m = std::static_pointer_cast<Media>( ml->addMedia( std::to_string( i ) + "_2.mp3" ) );
+        auto m = std::static_pointer_cast<Media>(
+                    ml->addMedia( std::to_string( i ) + "_2.mp3", IMedia::Type::Audio ) );
         auto track = album2->addTrack( m, i, 1, a2->id(), nullptr );
         a2->addMedia( *m );
     }
