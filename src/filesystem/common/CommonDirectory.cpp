@@ -29,9 +29,6 @@
 #include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "medialibrary/filesystem/Errors.h"
 #include "utils/Filename.h"
-#include <dirent.h>
-#include <cerrno>
-#include <cstring>
 #include <algorithm>
 
 namespace medialibrary
