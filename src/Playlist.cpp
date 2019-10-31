@@ -29,7 +29,6 @@
 #include "Device.h"
 #include "Folder.h"
 #include "Media.h"
-#include "utils/ModificationsNotifier.h"
 #include "utils/Filename.h"
 #include "utils/Directory.h"
 #include "database/SqliteQuery.h"
