@@ -28,13 +28,11 @@
 # error This file requires libvlc
 #endif
 
-#include <chrono>
-
 #include "VLCMetadataService.h"
-#include "Media.h"
 #include "utils/VLCInstance.h"
 #include "metadata_services/vlc/Common.hpp"
 #include "utils/Filename.h"
+#include "logging/Logger.h"
 
 namespace medialibrary
 {
