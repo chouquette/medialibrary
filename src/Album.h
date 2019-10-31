@@ -24,7 +24,6 @@
 #define ALBUM_H
 
 #include <memory>
-#include <sqlite3.h>
 
 #include "medialibrary/IMediaLibrary.h"
 
@@ -35,7 +34,6 @@
 namespace medialibrary
 {
 
-class Album;
 class AlbumTrack;
 class Artist;
 class Media;
