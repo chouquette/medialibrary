@@ -27,7 +27,6 @@
 #include "File.h"
 #include "utils/Filename.h"
 
-#include <stdexcept>
 #include <sys/stat.h>
 
 namespace medialibrary
