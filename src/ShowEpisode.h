@@ -24,17 +24,12 @@
 #define SHOWEPISODE_H
 
 #include <string>
-#include <sqlite3.h>
 
-#include "medialibrary/IMediaLibrary.h"
 #include "medialibrary/IShowEpisode.h"
 #include "database/DatabaseHelpers.h"
 
 namespace medialibrary
 {
-
-class Show;
-class ShowEpisode;
 
 class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode>
 {
