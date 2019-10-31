@@ -24,7 +24,6 @@
 
 #include <atomic>
 #include "compat/ConditionVariable.h"
-#include <functional>
 #include <vector>
 #include <chrono>
 
