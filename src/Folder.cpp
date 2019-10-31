@@ -38,8 +38,6 @@
 #include "utils/Filename.h"
 #include "utils/Url.h"
 
-#include <unordered_map>
-
 namespace medialibrary
 {
 
