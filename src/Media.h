@@ -22,27 +22,13 @@
 
 #pragma once
 
-#include <sqlite3.h>
-
 #include "medialibrary/IMedia.h"
-#include "medialibrary/filesystem/IFileSystemFactory.h"
-#include "File.h"
 #include "Thumbnail.h"
 #include "database/DatabaseHelpers.h"
-#include "medialibrary/IMetadata.h"
 #include "Metadata.h"
-
-#include <atomic>
 
 namespace medialibrary
 {
-
-class Album;
-class Folder;
-class ShowEpisode;
-class AlbumTrack;
-
-class Media;
 
 class Media : public IMedia,
               public DatabaseHelpers<Media>,

@@ -29,6 +29,7 @@
 #include "MediaLibrary.h"
 #include "Playlist.h"
 #include "Media.h"
+#include "File.h"
 
 namespace medialibrary
 {

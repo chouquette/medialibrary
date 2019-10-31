@@ -26,6 +26,7 @@
 
 #include "Tests.h"
 
+#include "File.h"
 #include "Playlist.h"
 #include "Media.h"
 #include "parser/Task.h"

@@ -27,6 +27,7 @@
 #include "Playlist.h"
 
 #include "Device.h"
+#include "File.h"
 #include "Folder.h"
 #include "Media.h"
 #include "utils/Filename.h"
