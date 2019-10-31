@@ -26,12 +26,9 @@
 
 #include "Parser.h"
 
-#include <algorithm>
 #include <utility>
 
 #include "medialibrary/IMediaLibrary.h"
-#include "Media.h"
-#include "File.h"
 #include "ParserWorker.h"
 
 namespace medialibrary
