@@ -203,12 +203,21 @@ std::shared_ptr<Device> MediaLibraryTester::device( const std::string& uuid )
     return Device::fromUuid( this, uuid );
 }
 
-std::vector<const char*> MediaLibraryTester::getSupportedExtensions() const
+std::vector<const char*> MediaLibraryTester::getSupportedMediaExtensions() const
 {
     std::vector<const char*> res;
-    res.reserve( NbSupportedExtensions );
-    for ( auto i = 0u; i < NbSupportedExtensions; ++i )
-        res.push_back( supportedExtensions[i] );
+    res.reserve( NbSupportedMediaExtensions );
+    for ( auto i = 0u; i < NbSupportedMediaExtensions; ++i )
+        res.push_back( supportedMediaExtensions[i] );
+    return res;
+}
+
+std::vector<const char*> MediaLibraryTester::getSupportedPlaylistExtensions() const
+{
+    std::vector<const char*> res;
+    res.reserve( NbSupportedPlaylistExtensions );
+    for ( auto i = 0u; i < NbSupportedPlaylistExtensions; ++i )
+        res.push_back( supportedPlaylistExtensions[i] );
     return res;
 }
 

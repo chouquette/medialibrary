@@ -201,12 +201,15 @@ public:
 
     virtual void addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory ) override;
 
-    static bool isExtensionSupported( const char* ext );
+    static bool isSupportedMediaExtension( const char* ext );
+    static bool isSupportedPlaylistExtension( const char* ext );
 
 protected:
     // Allow access to unit test MediaLibrary implementations
-    static const char* const supportedExtensions[];
-    static const size_t NbSupportedExtensions;
+    static const char* const supportedMediaExtensions[];
+    static const size_t NbSupportedMediaExtensions;
+    static const char* const supportedPlaylistExtensions[];
+    static const size_t NbSupportedPlaylistExtensions;
 
 protected:
     virtual bool startParser();

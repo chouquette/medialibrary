@@ -102,23 +102,32 @@ using ThumbnailerType = medialibrary::VmemThumbnailer;
 namespace medialibrary
 {
 
-const char* const MediaLibrary::supportedExtensions[] = {
+const char* const MediaLibrary::supportedMediaExtensions[] = {
     "3g2", "3gp", "a52", "aac", "ac3", "adx", "aif", "aifc",
-    "aiff", "alac", "amr", "amv", "aob", "ape", "asf", "asx",
-    "avi", "b4s", "conf", /*"cue",*/ "divx", "dts", "dv",
-    "flac", "flv", "gxf", "ifo", "iso", "it", "itml",
-    "m1v", "m2t", "m2ts", "m2v", "m3u", "m3u8", "m4a", "m4b",
+    "aiff", "alac", "amr", "amv", "aob", "ape", "asf",
+    "avi", "divx", "dts", "dv",
+    "flac", "flv", "gxf", "iso", "it", "itml",
+    "m1v", "m2t", "m2ts", "m2v", "m4a", "m4b",
     "m4p", "m4v", "mid", "mka", "mkv", "mlp", "mod", "mov",
     "mp1", "mp2", "mp3", "mp4", "mpc", "mpeg", "mpeg1", "mpeg2",
     "mpeg4", "mpg", "mts", "mxf", "nsv", "nuv", "oga", "ogg",
-    "ogm", "ogv", "ogx", "oma", "opus", "pls", "ps", "qtl",
-    "ram", "rec", "rm", "rmi", "rmvb", "s3m", "sdp", "spx",
-    "tod", "trp", "ts", "tta", "vlc", "vob", "voc", "vqf",
-    "vro", "w64", "wav", "wax", "webm", "wma", "wmv", "wmx",
-    "wpl", "wv", "wvx", "xa", "xm", "xspf"
+    "ogm", "ogv", "ogx", "oma", "opus", "ps", "qtl",
+    "rec", "rm", "rmi", "rmvb", "s3m", "spx",
+    "tod", "trp", "ts", "tta", "vob", "voc", "vqf",
+    "vro", "w64", "wav", "webm", "wma", "wmv", "wmx",
+    "wpl", "wv", "wvx", "xa", "xm"
 };
 
-const size_t MediaLibrary::NbSupportedExtensions = sizeof(supportedExtensions) / sizeof(supportedExtensions[0]);
+const char* const MediaLibrary::supportedPlaylistExtensions[] = {
+    "asx", "b4s", "conf", /*"cue",*/ "ifo", "m3u", "m3u8", "pls", "ram", "sdp",
+    "vlc", "wax", "xspf"
+};
+
+const size_t MediaLibrary::NbSupportedMediaExtensions =
+        sizeof(supportedMediaExtensions) / sizeof(supportedMediaExtensions[0]);
+
+const size_t MediaLibrary::NbSupportedPlaylistExtensions =
+        sizeof(supportedPlaylistExtensions) / sizeof(supportedPlaylistExtensions[0]);
 
 MediaLibrary::MediaLibrary()
     : m_callback( nullptr )
@@ -527,10 +536,18 @@ void MediaLibrary::setVideoGroupsAllowSingleVideo( bool enable )
     m_settings.setVideoGroupMinimumMediaCount( enable == true ? 1 : 2 );
 }
 
-bool MediaLibrary::isExtensionSupported( const char* ext )
+bool MediaLibrary::isSupportedMediaExtension( const char* ext )
 {
-    return std::binary_search( std::begin( supportedExtensions ),
-        std::end( supportedExtensions ), ext, [](const char* l, const char* r) {
+    return std::binary_search( std::begin( supportedMediaExtensions ),
+        std::end( supportedMediaExtensions ), ext, [](const char* l, const char* r) {
+            return strcasecmp( l, r ) < 0;
+        });
+}
+
+bool MediaLibrary::isSupportedPlaylistExtension(const char* ext)
+{
+    return std::binary_search( std::begin( supportedPlaylistExtensions ),
+        std::end( supportedPlaylistExtensions ), ext, [](const char* l, const char* r) {
             return strcasecmp( l, r ) < 0;
         });
 }

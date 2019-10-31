@@ -349,8 +349,18 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
 {
     LOG_DEBUG( "Checking file in ", parentFolderFs->mrl() );
 
+    struct FilesToAdd
+    {
+        FilesToAdd( std::shared_ptr<fs::IFile> f, IFile::Type t )
+            : file( std::move( f ) ), type( t )
+        {
+        }
+        std::shared_ptr<fs::IFile> file;
+        IFile::Type type;
+    };
+
     auto files = File::fromParentFolder( m_ml, parentFolder->id() );
-    std::vector<std::shared_ptr<fs::IFile>> filesToAdd;
+    std::vector<FilesToAdd> filesToAdd;
     std::vector<std::pair<std::shared_ptr<File>, std::shared_ptr<fs::IFile>>> filesToRefresh;
     for ( const auto& fileFs: parentFolderFs->files() )
     {
@@ -367,8 +377,14 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
         });
         if ( it == end( files ) || m_probe->forceFileRefresh() == true )
         {
-            if ( MediaLibrary::isExtensionSupported( fileFs->extension().c_str() ) == true )
-                filesToAdd.push_back( fileFs );
+            const auto ext = fileFs->extension();
+            auto type = IFile::Type::Unknown;
+            if ( MediaLibrary::isSupportedMediaExtension( ext.c_str() ) == true )
+                 type = IFile::Type::Main;
+            else if ( MediaLibrary::isSupportedPlaylistExtension( ext.c_str() ) == true )
+                type = IFile::Type::Playlist;
+            if ( type != IFile::Type::Unknown )
+                filesToAdd.emplace_back( std::move( fileFs ), type );
             continue;
         }
         if ( fileFs->lastModificationDate() != (*it)->lastModificationDate() )
@@ -422,8 +438,8 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
     {
         if ( interruptProbe.isInterrupted() == true )
             break;
-        m_ml->onDiscoveredFile( p, parentFolder, parentFolderFs,
-                                IFile::Type::Main, m_probe->getPlaylistParent() );
+        m_ml->onDiscoveredFile( p.file, parentFolder, parentFolderFs,
+                                p.type, m_probe->getPlaylistParent() );
     }
     LOG_DEBUG( "Done checking files in ", parentFolderFs->mrl() );
 }

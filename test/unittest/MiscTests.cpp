@@ -152,9 +152,16 @@ class Misc : public Tests
     }
 };
 
-TEST_F( Misc, FileExtensions )
+TEST_F( Misc, MediaExtensions )
 {
-    const auto supportedExtensions = ml->getSupportedExtensions();
+    const auto supportedExtensions = ml->getSupportedMediaExtensions();
+    auto res = checkAlphaOrderedVector( supportedExtensions );
+    ASSERT_TRUE( res );
+}
+
+TEST_F( Misc, PlaylistExtensions )
+{
+    const auto supportedExtensions = ml->getSupportedPlaylistExtensions();
     auto res = checkAlphaOrderedVector( supportedExtensions );
     ASSERT_TRUE( res );
 }

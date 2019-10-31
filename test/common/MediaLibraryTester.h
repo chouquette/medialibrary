@@ -70,7 +70,8 @@ public:
 
     virtual void addLocalFsFactory() override;
     std::shared_ptr<Device> device( const std::string& uuid );
-    std::vector<const char*> getSupportedExtensions() const;
+    std::vector<const char*> getSupportedMediaExtensions() const;
+    std::vector<const char*> getSupportedPlaylistExtensions() const;
     virtual void onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                                    std::shared_ptr<Folder> parentFolder,
                                    std::shared_ptr<fs::IDirectory> parentFolderFs,
