@@ -22,15 +22,24 @@
 
 #pragma once
 
-#include "MediaLibrary.h"
 #include "medialibrary/parser/IParserService.h"
 #include "medialibrary/IInterruptProbe.h"
+
+#include <atomic>
 
 namespace medialibrary
 {
 
 class AlbumTrack;
 class Thumbnail;
+class Playlist;
+class Media;
+class File;
+class Artist;
+class Album;
+class Genre;
+class MediaLibrary;
+class ModificationNotifier;
 
 namespace parser
 {
