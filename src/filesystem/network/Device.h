@@ -24,9 +24,6 @@
 
 #include "filesystem/common/CommonDevice.h"
 
-#include <memory>
-#include <unordered_map>
-
 namespace medialibrary
 {
 
