@@ -25,8 +25,6 @@
 #endif
 
 #include "Directory.h"
-#include "Media.h"
-#include "Device.h"
 #include "filesystem/unix/File.h"
 #include "logging/Logger.h"
 #include "utils/Filename.h"
@@ -34,10 +32,10 @@
 #include "utils/Url.h"
 #include "medialibrary/filesystem/Errors.h"
 
-#include <cstring>
 #include <dirent.h>
 #include <sys/stat.h>
-#include <unistd.h>
+#include <cstring>
+#include <cassert>
 
 namespace medialibrary
 {
