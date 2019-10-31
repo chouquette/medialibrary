@@ -23,9 +23,7 @@
 #ifndef ALBUMTRACK_H
 #define ALBUMTRACK_H
 
-#include <sqlite3.h>
 #include <string>
-#include <vector>
 
 #include "medialibrary/IAlbumTrack.h"
 #include "medialibrary/IMediaLibrary.h"
