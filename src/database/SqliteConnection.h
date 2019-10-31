@@ -25,7 +25,6 @@
 #include <functional>
 #include <memory>
 #include <sqlite3.h>
-#include "compat/ConditionVariable.h"
 #include <unordered_map>
 #include <string>
 
