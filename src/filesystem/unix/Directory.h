@@ -27,8 +27,6 @@
 namespace medialibrary
 {
 
-namespace factory { class IFileSystem; }
-
 namespace fs
 {
 
