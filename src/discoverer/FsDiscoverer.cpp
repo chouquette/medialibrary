@@ -27,10 +27,8 @@
 #include "FsDiscoverer.h"
 
 #include <algorithm>
-#include <queue>
 #include <utility>
 
-#include "factory/FileSystemFactory.h"
 #include "medialibrary/filesystem/IDevice.h"
 #include "medialibrary/filesystem/Errors.h"
 #include "Media.h"
@@ -39,9 +37,9 @@
 #include "Folder.h"
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
-#include "probe/CrawlerProbe.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
+#include "discoverer/probe/IProbe.h"
 
 namespace medialibrary
 {
