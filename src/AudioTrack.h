@@ -24,13 +24,10 @@
 #define AUDIOTRACK_H
 
 #include "medialibrary/IAudioTrack.h"
-#include "medialibrary/IMediaLibrary.h"
 #include "database/DatabaseHelpers.h"
 
 namespace medialibrary
 {
-
-class AudioTrack;
 
 class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack>
 {
