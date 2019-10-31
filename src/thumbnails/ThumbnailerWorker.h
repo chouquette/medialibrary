@@ -25,7 +25,6 @@
 #include "compat/ConditionVariable.h"
 #include "compat/Thread.h"
 #include "medialibrary/Types.h"
-#include "medialibrary/IThumbnailer.h"
 #include "medialibrary/IMediaLibrary.h"
 #include "Types.h"
 
@@ -34,6 +33,8 @@
 
 namespace medialibrary
 {
+
+class IThumbnailer;
 
 class ThumbnailerWorker
 {

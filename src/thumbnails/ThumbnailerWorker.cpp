@@ -34,6 +34,7 @@
 #include "medialibrary/filesystem/Errors.h"
 #include "utils/ModificationsNotifier.h"
 #include "utils/Filename.h"
+#include "medialibrary/IThumbnailer.h"
 
 #include <algorithm>
 
