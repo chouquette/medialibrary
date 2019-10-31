@@ -25,8 +25,6 @@
 #endif
 
 #include <cassert>
-#include <cstdlib>
-#include <cstring>
 
 #include "Label.h"
 #include "Media.h"
