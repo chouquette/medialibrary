@@ -36,6 +36,7 @@
 #include "medialibrary/filesystem/Errors.h"
 #include "medialibrary/filesystem/IDirectory.h"
 #include "medialibrary/filesystem/IFile.h"
+#include "medialibrary/filesystem/IDevice.h"
 
 #include <algorithm>
 

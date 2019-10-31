@@ -24,22 +24,13 @@
 
 #include "medialibrary/IFolder.h"
 #include "medialibrary/IMedia.h"
-#include "medialibrary/filesystem/IDevice.h"
 #include "database/DatabaseHelpers.h"
-
-#include <sqlite3.h>
 
 namespace medialibrary
 {
 
 class File;
-class Folder;
 class Device;
-
-namespace fs
-{
-    class IDirectory;
-}
 
 // This doesn't publicly expose the DatabaseHelper inheritance in order to force
 // the user to go through Folder's overloads, as they take care of the device mountpoint

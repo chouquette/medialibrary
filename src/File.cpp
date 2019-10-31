@@ -31,6 +31,7 @@
 #include "Playlist.h"
 #include "utils/Filename.h"
 #include "medialibrary/filesystem/IFile.h"
+#include "medialibrary/filesystem/IDevice.h"
 
 namespace medialibrary
 {
