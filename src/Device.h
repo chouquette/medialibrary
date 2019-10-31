@@ -29,8 +29,6 @@
 namespace medialibrary
 {
 
-class Device;
-
 class Device : public DatabaseHelpers<Device>
 {
 public:
