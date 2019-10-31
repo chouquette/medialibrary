@@ -24,6 +24,7 @@
 #pragma once
 
 #include "discoverer/probe/IProbe.h"
+#include <cstring>
 
 namespace medialibrary
 {

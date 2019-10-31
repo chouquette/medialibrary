@@ -28,6 +28,8 @@
 
 #include "database/SqliteTools.h"
 
+#include <cstring>
+
 namespace medialibrary
 {
 namespace sqlite

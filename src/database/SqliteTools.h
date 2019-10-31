@@ -24,7 +24,6 @@
 
 #include <cassert>
 #include <chrono>
-#include <cstring>
 #include <memory>
 #include <sqlite3.h>
 #include <string>
