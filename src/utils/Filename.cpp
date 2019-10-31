@@ -28,9 +28,6 @@
 #include "utils/Url.h"
 #include "medialibrary/filesystem/Errors.h"
 
-#include <stdexcept>
-#include <algorithm>
-
 #ifdef _WIN32
 # define DIR_SEPARATOR "\\/"
 # define DIR_SEPARATOR_CHAR '\\'
