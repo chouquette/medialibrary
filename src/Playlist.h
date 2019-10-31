@@ -24,7 +24,6 @@
 
 #include "medialibrary/IPlaylist.h"
 
-#include "database/SqliteTools.h"
 #include "database/DatabaseHelpers.h"
 
 #include <map>
@@ -32,7 +31,6 @@
 namespace medialibrary
 {
 
-class Playlist;
 class File;
 
 class Playlist : public IPlaylist, public DatabaseHelpers<Playlist>, public std::enable_shared_from_this<Playlist>
