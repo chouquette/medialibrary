@@ -31,7 +31,6 @@
 
 #include <dirent.h>
 #include <mntent.h>
-#include <sys/types.h>
 #include <vector>
 #include <memory>
 #include <cerrno>
