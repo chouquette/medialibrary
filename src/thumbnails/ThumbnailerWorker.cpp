@@ -28,11 +28,9 @@
 
 #include "Media.h"
 #include "File.h"
-#include "Folder.h"
 #include "logging/Logger.h"
 #include "MediaLibrary.h"
 #include "medialibrary/filesystem/Errors.h"
-#include "utils/ModificationsNotifier.h"
 #include "utils/Filename.h"
 #include "medialibrary/IThumbnailer.h"
 
