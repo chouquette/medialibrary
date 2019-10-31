@@ -23,20 +23,23 @@
 #pragma once
 
 #include <memory>
-#include <queue>
-
-#include "File.h"
-
+#include <atomic>
+#include <chrono>
+#include <vector>
 #include "medialibrary/parser/Parser.h"
-#include "parser/Task.h"
 
 namespace medialibrary
 {
+
+class MediaLibrary;
+class IMediaLibraryCb;
+
 namespace parser
 {
 
 class IParserService;
 class Worker;
+class Task;
 
 // Use an interface to expose only the "done" method
 class IParserCb

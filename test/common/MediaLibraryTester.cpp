@@ -36,6 +36,7 @@
 #include "Folder.h"
 #include "Show.h"
 #include "mocks/FileSystem.h"
+#include "parser/Task.h"
 
 
 MediaLibraryTester::MediaLibraryTester()

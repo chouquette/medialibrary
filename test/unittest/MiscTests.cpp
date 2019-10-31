@@ -36,6 +36,7 @@
 #include "Metadata.h"
 #include "Playlist.h"
 #include "Device.h"
+#include "parser/Task.h"
 
 namespace
 {

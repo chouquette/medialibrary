@@ -28,6 +28,7 @@
 
 #include "Playlist.h"
 #include "Media.h"
+#include "parser/Task.h"
 
 class Playlists : public Tests
 {

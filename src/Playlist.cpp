@@ -34,6 +34,7 @@
 #include "utils/Directory.h"
 #include "database/SqliteQuery.h"
 #include "medialibrary/filesystem/Errors.h"
+#include "medialibrary/filesystem/IDirectory.h"
 
 #include <algorithm>
 

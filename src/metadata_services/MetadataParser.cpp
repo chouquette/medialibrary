@@ -50,6 +50,7 @@
 #include "VideoTrack.h"
 #include "AudioTrack.h"
 #include "SubtitleTrack.h"
+#include "parser/Task.h"
 
 #include <cstdlib>
 #include <algorithm>
