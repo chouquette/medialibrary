@@ -28,7 +28,7 @@
 #include "ParserWorker.h"
 #include "Parser.h"
 #include "parser/Task.h"
-#include "Media.h"
+#include "File.h"
 #include "medialibrary/filesystem/Errors.h"
 #include "Folder.h"
 
