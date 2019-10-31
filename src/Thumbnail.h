@@ -27,8 +27,6 @@
 namespace medialibrary
 {
 
-class Thumbnail;
-
 class Thumbnail : public DatabaseHelpers<Thumbnail>
 {
 public:
