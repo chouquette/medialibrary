@@ -27,7 +27,6 @@
 #include "Movie.h"
 #include "Media.h"
 #include "database/SqliteTools.h"
-#include "database/SqliteQuery.h"
 
 namespace medialibrary
 {
