@@ -27,8 +27,6 @@
 
 #include "Directory.h"
 
-#include <cstring>
-#include <stdexcept>
 #include "utils/Filename.h"
 #include "utils/File.h"
 #include "logging/Logger.h"
@@ -42,7 +40,6 @@
 #include "utils/Charsets.h"
 #else
 # include <cerrno>
-# include <sys/types.h>
 # include <sys/stat.h>
 # include <limits.h>
 # include <cstdlib>
