@@ -27,9 +27,12 @@
 #include "Parser.h"
 
 #include <utility>
+#include <cassert>
 
-#include "medialibrary/IMediaLibrary.h"
+#include "MediaLibrary.h"
 #include "ParserWorker.h"
+#include "parser/Task.h"
+#include "logging/Logger.h"
 
 namespace medialibrary
 {

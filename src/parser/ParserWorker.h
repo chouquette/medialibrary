@@ -26,22 +26,20 @@
 #include "compat/ConditionVariable.h"
 #include <queue>
 
-#include "Task.h"
 #include "medialibrary/parser/IParserService.h"
 #include "medialibrary/Types.h"
 #include "compat/Mutex.h"
 #include "compat/Thread.h"
-#include "File.h"
 
 namespace medialibrary
 {
 
-class ModificationNotifier;
 class MediaLibrary;
 
 namespace parser
 {
 class IParserCb;
+class Task;
 
 class Worker
 {
