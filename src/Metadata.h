@@ -23,8 +23,9 @@
 #pragma once
 
 #include "medialibrary/IMetadata.h"
-#include "medialibrary/IMedia.h"
 #include "Types.h"
+
+#include <vector>
 
 namespace medialibrary
 {
