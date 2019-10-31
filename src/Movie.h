@@ -24,13 +24,10 @@
 #define MOVIE_H
 
 #include "medialibrary/IMovie.h"
-#include <sqlite3.h>
 #include "database/DatabaseHelpers.h"
 
 namespace medialibrary
 {
-
-class Movie;
 
 class Movie : public IMovie, public DatabaseHelpers<Movie>
 {
