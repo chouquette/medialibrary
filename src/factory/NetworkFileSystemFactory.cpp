@@ -32,7 +32,6 @@
 #include "filesystem/network/Directory.h"
 #include "utils/VLCInstance.h"
 #include "utils/Filename.h"
-#include "MediaLibrary.h"
 
 #include <algorithm>
 
