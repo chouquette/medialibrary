@@ -30,9 +30,6 @@
 namespace medialibrary
 {
 
-class Media;
-class Label;
-
 class Label : public ILabel, public DatabaseHelpers<Label>
 {
     public:
