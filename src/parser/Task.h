@@ -24,7 +24,6 @@
 #pragma once
 
 #include <memory>
-#include <utility>
 #include <vector>
 #include <string>
 
@@ -41,15 +40,8 @@ class IDirectory;
 class IFile;
 }
 
-class Media;
 class File;
 class Folder;
-class Playlist;
-
-namespace parser
-{
-class Task;
-}
 
 namespace parser
 {
