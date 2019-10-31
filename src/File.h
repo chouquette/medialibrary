@@ -23,15 +23,11 @@
 #pragma once
 
 #include "medialibrary/IFile.h"
-#include "medialibrary/filesystem/IFile.h"
 #include "database/DatabaseHelpers.h"
-#include "database/SqliteConnection.h"
-#include "parser/Parser.h"
 
 namespace medialibrary
 {
 
-class File;
 class Media;
 
 class File : public IFile, public DatabaseHelpers<File>

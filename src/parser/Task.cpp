@@ -36,6 +36,7 @@
 #include "Playlist.h"
 #include "Media.h"
 #include "parser/Task.h"
+#include "parser/Parser.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
 #include "utils/Strings.h"

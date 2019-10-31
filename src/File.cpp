@@ -30,6 +30,7 @@
 #include "Folder.h"
 #include "Playlist.h"
 #include "utils/Filename.h"
+#include "medialibrary/filesystem/IFile.h"
 
 namespace medialibrary
 {
