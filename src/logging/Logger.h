@@ -27,7 +27,6 @@
 #include <sstream>
 
 #include "medialibrary/ILogger.h"
-#include "medialibrary/Types.h"
 
 namespace medialibrary
 {
