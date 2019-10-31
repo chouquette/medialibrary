@@ -24,11 +24,8 @@
 
 #include "compat/ConditionVariable.h"
 #include <vlcpp/vlc.hpp>
-#include <mutex>
 
 #include "medialibrary/parser/IParserService.h"
-#include "parser/Parser.h"
-#include "AlbumTrack.h"
 
 namespace medialibrary
 {
