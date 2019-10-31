@@ -26,8 +26,6 @@
 
 #include "SqliteTools.h"
 
-#include <algorithm>
-
 namespace medialibrary
 {
 
