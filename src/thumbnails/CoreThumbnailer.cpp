@@ -28,8 +28,6 @@
 
 #include "compat/ConditionVariable.h"
 #include "compat/Mutex.h"
-#include "Media.h"
-#include "MediaLibrary.h"
 #include "utils/VLCInstance.h"
 
 namespace medialibrary
