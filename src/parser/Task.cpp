@@ -40,8 +40,6 @@
 #include "utils/Url.h"
 #include "utils/Strings.h"
 
-#include <algorithm>
-
 namespace medialibrary
 {
 
