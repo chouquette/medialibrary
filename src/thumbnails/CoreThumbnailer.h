@@ -22,7 +22,6 @@
 
 #pragma once
 
-#include "medialibrary/Types.h"
 #include "Types.h"
 #include "medialibrary/IThumbnailer.h"
 #include "compat/Mutex.h"
