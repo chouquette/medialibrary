@@ -29,8 +29,6 @@
 namespace medialibrary
 {
 
-class Genre;
-
 class Genre : public IGenre, public DatabaseHelpers<Genre>
 {
 public:
