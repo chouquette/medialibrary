@@ -28,7 +28,6 @@
 
 #include "logging/Logger.h"
 #include "Folder.h"
-#include "Media.h"
 #include "MediaLibrary.h"
 #include "Device.h"
 #include "utils/Filename.h"
