@@ -26,8 +26,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstdlib>
-#include <cstring>
 #include <ctime>
 
 #include "Album.h"
@@ -50,11 +48,8 @@
 #include "database/SqliteTools.h"
 #include "database/SqliteQuery.h"
 #include "VideoTrack.h"
-#include "medialibrary/filesystem/IFile.h"
-#include "medialibrary/filesystem/IDirectory.h"
 #include "medialibrary/filesystem/IDevice.h"
 #include "medialibrary/filesystem/Errors.h"
-#include "utils/ModificationsNotifier.h"
 #include "utils/Filename.h"
 #include "thumbnails/ThumbnailerWorker.h"
 
