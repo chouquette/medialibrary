@@ -30,7 +30,6 @@
 namespace medialibrary
 {
 
-class Artist;
 class Album;
 class Media;
 
