@@ -597,7 +597,7 @@ Status MetadataAnalyzer::overrideExternalMedia( IItem& item, std::shared_ptr<Med
     if ( file->update( *item.fileFs(), item.parentFolder()->id(),
                        deviceFs->isRemovable() ) == false )
         return Status::Fatal;
-    media->setType( isAudio == true ? IMedia::Type::Audio : IMedia::Type::Video );
+    media->setTypeBuffered( isAudio == true ? IMedia::Type::Audio : IMedia::Type::Video );
     media->setDuration( item.duration() );
     media->setDeviceId( device->id() );
     media->setFolderId( item.parentFolder()->id() );

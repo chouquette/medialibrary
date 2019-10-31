@@ -915,6 +915,18 @@ IMedia::Type Media::type() const
     return m_type;
 }
 
+bool Media::setType( IMedia::Type type )
+{
+    if ( type == m_type )
+        return true;
+    const std::string req = "UPDATE " + Table::Name + " SET type = ? "
+            "WHERE id_media = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, type, m_id ) == false )
+        return false;
+    m_type = type;
+    return true;
+}
+
 IMedia::SubType Media::subType() const
 {
     return m_subType;
@@ -928,7 +940,7 @@ void Media::setSubType( IMedia::SubType subType )
     m_changed = true;
 }
 
-void Media::setType( Type type )
+void Media::setTypeBuffered( Type type )
 {
     if ( m_type == type )
         return;

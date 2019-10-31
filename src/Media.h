@@ -103,7 +103,8 @@ class Media : public IMedia,
 
         virtual int64_t id() const override;
         virtual Type type() const override;
-        void setType(Type type);
+        bool setType( Type type ) override;
+        void setTypeBuffered( Type type );
         virtual SubType subType() const override;
         void setSubType( SubType subType );
 

@@ -105,6 +105,7 @@ class IMedia
 
         virtual int64_t id() const = 0;
         virtual Type type() const = 0;
+        virtual bool setType( Type type ) = 0;
         virtual SubType subType() const = 0;
         virtual const std::string& title() const = 0;
         virtual bool setTitle( const std::string& title ) = 0;

@@ -585,7 +585,28 @@ TEST_F( Medias, SetType )
     auto m1 = std::static_pointer_cast<Media>( ml->addExternalMedia( "media1.mp3" ) );
     ASSERT_TRUE( m1->isExternalMedia() );
 
-    m1->setType( IMedia::Type::Video );
+    auto res = m1->setType( IMedia::Type::Video );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( IMedia::Type::Video, m1->type() );
+
+    Reload();
+
+    auto m2 = ml->media( m1->id() );
+    ASSERT_EQ( IMedia::Type::Video, m2->type() );
+
+    // For safety check, just set the type to the current value and ensure it
+    // still returns true
+    res = m1->setType( IMedia::Type::Video );
+    ASSERT_TRUE( res );
+}
+
+TEST_F( Medias, SetTypeBuffered )
+{
+    auto m1 = std::static_pointer_cast<Media>( ml->addExternalMedia( "media1.mp3" ) );
+    ASSERT_TRUE( m1->isExternalMedia() );
+
+    m1->setTypeBuffered( IMedia::Type::Video );
     m1->save();
 
     ASSERT_EQ( IMedia::Type::Video, m1->type() );
