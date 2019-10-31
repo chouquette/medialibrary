@@ -55,10 +55,8 @@ Media::schema( Media::Table::Name, 14 ),
 ")",
 
 /************ Playlist external media were stored as Unknown ******************/
-
-"UPDATE " + Media::Table::Name + " SET type = " +
-std::to_string( static_cast<typename std::underlying_type<IMedia::Type>::type>(
-            IMedia::Type::External ) ) + " "
+/* External type was removed in model 23 but used to be equal to 3 */
+"UPDATE " + Media::Table::Name + " SET type = 3 "
 "WHERE nb_playlists > 0 AND "
 "type = " + std::to_string( static_cast<typename std::underlying_type<IMedia::Type>::type>(
 IMedia::Type::Unknown ) ),

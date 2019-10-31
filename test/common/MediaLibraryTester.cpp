@@ -231,7 +231,6 @@ void MediaLibraryTester::populateNetworkFsFactories()
 
 MediaPtr MediaLibraryTester::addMedia( const std::string& mrl, IMedia::Type type )
 {
-    assert( type != IMedia::Type::External && type != IMedia::Type::Stream );
     return addFile( mrl, type );
 }
 
@@ -256,9 +255,8 @@ bool MediaLibraryTester::setMediaInsertionDate( int64_t mediaId, time_t t )
 bool MediaLibraryTester::outdateAllExternalMedia()
 {
     std::string req = "UPDATE " + Media::Table::Name + " SET real_last_played_date = 1 "
-            "WHERE type = ? OR type = ?";
-    return sqlite::Tools::executeUpdate( getConn(), req, IMedia::Type::External,
-                                         IMedia::Type::Stream );
+            "WHERE import_type != ?";
+    return sqlite::Tools::executeUpdate( getConn(), req, Media::ImportType::Internal );
 }
 
 bool MediaLibraryTester::setMediaType(int64_t mediaId, IMedia::Type type)

@@ -541,4 +541,16 @@ TEST_F( DbModel, Upgrate21to22 )
 TEST_F( DbModel, Upgrade22to23 )
 {
     CommonMigrationTest( SRC_DIR "/test/unittest/db_v22.sql" );
+
+    // Check that we correctly migrated an internal media:
+    auto m1 = ml->media( 1 );
+    ASSERT_EQ( IMedia::Type::Audio, m1->type() );
+    ASSERT_TRUE( m1->isDiscoveredMedia() );
+
+    // Check that the stream media was correctly migrated as well
+    auto m2 = ml->media( 4 );
+    ASSERT_EQ( IMedia::Type::Unknown, m2->type() );
+    ASSERT_FALSE( m2->isDiscoveredMedia() );
+    ASSERT_TRUE( m2->isExternalMedia() );
+    ASSERT_TRUE( m2->isStream() );
 }

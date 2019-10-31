@@ -81,12 +81,13 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     , m_deviceId( row.load<decltype(m_deviceId)>( 13 ) )
     , m_nbPlaylists( row.load<unsigned int>( 14 ) )
     , m_folderId( row.load<decltype(m_folderId)>( 15 ) )
+    , m_importType( row.load<decltype(m_importType)>( 16 ) )
 
     // End of DB fields extraction
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
-    assert( row.nbColumns() == 16 );
+    assert( row.nbColumns() == 17 );
 }
 
 Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
@@ -107,15 +108,16 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
     , m_deviceId( deviceId )
     , m_nbPlaylists( 0 )
     , m_folderId( folderId )
+    , m_importType( ImportType::Internal )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
 }
 
-Media::Media( MediaLibraryPtr ml, const std::string& fileName, IMedia::Type type )
+Media::Media(MediaLibraryPtr ml, const std::string& fileName, ImportType importType )
     : m_ml( ml )
     , m_id( 0 )
-    , m_type( type )
+    , m_type( Type::Unknown )
     , m_subType( SubType::Unknown )
     , m_duration( -1 )
     , m_playCount( 0 )
@@ -128,6 +130,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& fileName, IMedia::Type type
     , m_deviceId( 0 )
     , m_nbPlaylists( 0 )
     , m_folderId( 0 )
+    , m_importType( importType )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
@@ -141,31 +144,33 @@ std::shared_ptr<Media> Media::create( MediaLibraryPtr ml, Type type,
     auto self = std::make_shared<Media>( ml, fileName, type, duration, deviceId,
                                          folderId );
     static const std::string req = "INSERT INTO " + Media::Table::Name +
-            "(type, duration, insertion_date, title, filename, device_id, folder_id) "
-            "VALUES(?, ?, ?, ?, ?, ?, ?)";
+            "(type, duration, insertion_date, title, filename, device_id, "
+            "folder_id, import_type) "
+            "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
 
     if ( insert( ml, self, req, type, self->m_duration, self->m_insertionDate,
-                 self->m_title, self->m_filename, deviceId, folderId ) == false )
+                 self->m_title, self->m_filename, deviceId, folderId,
+                 ImportType::Internal ) == false )
         return nullptr;
     return self;
 }
 
 std::shared_ptr<Media> Media::createExternalMedia( MediaLibraryPtr ml,
                                                    const std::string& mrl,
-                                                   IMedia::Type type )
+                                                   ImportType importType )
 {
     std::unique_ptr<sqlite::Transaction> t;
     if ( sqlite::Transaction::transactionInProgress() == false )
         t = ml->getConn()->newTransaction();
 
     auto fileName = utils::url::decode( utils::file::fileName( mrl ) );
-    auto self = std::make_shared<Media>( ml, fileName, type );
+    auto self = std::make_shared<Media>( ml, fileName, importType );
     static const std::string req = "INSERT INTO " + Media::Table::Name +
-            "(type, insertion_date, title, filename) "
-            "VALUES(?, ?, ?, ?)";
+            "(type, insertion_date, title, filename, import_type) "
+            "VALUES(?, ?, ?, ?, ?)";
 
-    if ( insert( ml, self, req, type, self->m_insertionDate,
-                 self->m_title, self->m_filename ) == false )
+    if ( insert( ml, self, req, Type::Unknown, self->m_insertionDate,
+                 self->m_title, self->m_filename, importType ) == false )
         return nullptr;
 
     if ( self->addExternalMrl( mrl, IFile::Type::Main ) == nullptr )
@@ -179,12 +184,12 @@ std::shared_ptr<Media> Media::createExternalMedia( MediaLibraryPtr ml,
 std::shared_ptr<Media> Media::createExternal( MediaLibraryPtr ml,
                                               const std::string& fileName )
 {
-    return createExternalMedia( ml, fileName, IMedia::Type::External );
+    return createExternalMedia( ml, fileName, ImportType::External );
 }
 
 std::shared_ptr<Media> Media::createStream( MediaLibraryPtr ml, const std::string& fileName )
 {
-    return createExternalMedia( ml, fileName, IMedia::Type::Stream );
+    return createExternalMedia( ml, fileName, ImportType::Stream );
 }
 
 AlbumTrackPtr Media::albumTrack() const
@@ -533,17 +538,17 @@ bool Media::requestThumbnail( ThumbnailSizeType sizeType, uint32_t desiredWidth,
 
 bool Media::isDiscoveredMedia() const
 {
-    return m_type != IMedia::Type::Stream && m_type != IMedia::Type::External;
+    return m_importType == ImportType::Internal;
 }
 
 bool Media::isExternalMedia() const
 {
-    return m_type == IMedia::Type::External || m_type == IMedia::Type::Stream;
+    return m_importType != ImportType::Internal;
 }
 
 bool Media::isStream() const
 {
-    return m_type == IMedia::Type::Stream;
+    return m_importType == ImportType::Stream;
 }
 
 void Media::setReleaseDate( unsigned int date )
@@ -577,6 +582,14 @@ void Media::setFolderId( int64_t folderId )
     if ( m_folderId == folderId )
         return;
     m_folderId = folderId;
+    m_changed = true;
+}
+
+void Media::markAsInternal()
+{
+    if ( m_importType == ImportType::Internal )
+        return;
+    m_importType = ImportType::Internal;
     m_changed = true;
 }
 
@@ -654,13 +667,15 @@ bool Media::save()
 {
     static const std::string req = "UPDATE " + Media::Table::Name + " SET "
             "type = ?, subtype = ?, duration = ?, release_date = ?,"
-            "title = ?, device_id = ?, folder_id = ? WHERE id_media = ?";
+            "title = ?, device_id = ?, folder_id = ?, import_type = ? "
+            "WHERE id_media = ?";
     if ( m_changed == false )
         return true;
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_type, m_subType, m_duration,
                                        m_releaseDate, m_title,
                                        sqlite::ForeignKey{ m_deviceId },
                                        sqlite::ForeignKey{ m_folderId },
+                                       m_importType,
                                        m_id ) == false )
     {
         return false;
@@ -1051,7 +1066,10 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
         "device_id INTEGER,"
         "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
         "folder_id UNSIGNED INTEGER,";
-
+    if ( dbModel >= 23 )
+    {
+        req += "import_type UNSIGNED INTEGER NOT NULL,";
+    }
     if ( dbModel < 17 )
     {
           req += "FOREIGN KEY(thumbnail_id) REFERENCES " + Thumbnail::Table::Name
@@ -1144,11 +1162,11 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
             " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
             " AND m.is_present = 1"
-            " AND m.type != ? AND m.type != ?";
+            " AND m.import_type = ?";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( title ),
-                                      Media::Type::External, Media::Type::Stream );
+                                      ImportType::Internal );
 }
 
 Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
@@ -1268,19 +1286,20 @@ Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml )
 {
     static const std::string req = "FROM " + Media::Table::Name +
             " WHERE last_played_date IS NOT NULL"
-            " AND type != ?";
+            " AND import_type != ?";
     return make_query<Media, IMedia>( ml, "*", req,
                                       "ORDER BY last_played_date DESC",
-                                      IMedia::Type::Stream );
+                                      ImportType::Stream );
 }
 
 Query<IMedia> Media::fetchHistoryByType( MediaLibraryPtr ml, IMedia::Type type )
 {
     static const std::string req = "FROM " + Media::Table::Name +
             " WHERE last_played_date IS NOT NULL"
-            " AND type = ?";
+            " AND type = ? AND import_type = ?";
     return make_query<Media, IMedia>( ml, "*", req,
-                                      "ORDER BY last_played_date DESC", type );
+                                      "ORDER BY last_played_date DESC", type,
+                                      ImportType::Internal );
 }
 
 Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml, IMedia::Type type )
@@ -1291,7 +1310,12 @@ Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml, IMedia::Type type )
 
 Query<IMedia> Media::fetchStreamHistory(MediaLibraryPtr ml)
 {
-    return fetchHistoryByType( ml, IMedia::Type::Stream );
+    static const std::string req = "FROM " + Media::Table::Name +
+            " WHERE last_played_date IS NOT NULL"
+            " AND import_type = ?";
+    return make_query<Media, IMedia>( ml, "*", req,
+                                      "ORDER BY last_played_date DESC",
+                                      ImportType::Stream );
 }
 
 Query<IMedia> Media::fromFolderId( MediaLibraryPtr ml, IMedia::Type type,
@@ -1405,13 +1429,13 @@ bool Media::removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime
     const std::string req = "DELETE FROM " + Media::Table::Name + " "
             "WHERE ( real_last_played_date < ? OR "
                 "( real_last_played_date IS NULL AND insertion_date < ? ) )"
-            "AND ( type = ? OR type = ? ) "
+            "AND import_type != ? "
             "AND nb_playlists = 0";
     auto deadline = std::chrono::duration_cast<std::chrono::seconds>(
                 (std::chrono::system_clock::now() - maxLifeTime).time_since_epoch() );
     return sqlite::Tools::executeDelete( ml->getConn(), req, deadline.count(),
                                          deadline.count(),
-                                         IMedia::Type::External, IMedia::Type::Stream );
+                                         ImportType::Internal );
 }
 
 bool Media::resetSubTypes( MediaLibraryPtr ml )

@@ -35,6 +35,29 @@ class Media : public IMedia,
               public std::enable_shared_from_this<Media>
 {
     public:
+        enum class ImportType : uint8_t
+        {
+            /**
+             * Internal media, which was discovered and imported by the media
+             * library.
+             */
+            Internal,
+            /**
+             * External media, ie. media that were not discovered by the media
+             * library, but that were added manually by the user.
+             * These media are not analyzed, so their subtype, tracks, or other
+             * details are not known.
+             * They can, however, be used to store meta or be included in the
+             * playback history.
+             */
+            External,
+            /**
+             * Represent a stream, which is a specific kind of External media.
+             * This type of media is also intended to be inserted manually by
+             * the user.
+             */
+            Stream,
+        };
         struct Table
         {
             static const std::string Name;
@@ -63,7 +86,7 @@ class Media : public IMedia,
         Media( MediaLibraryPtr ml, const std::string& title, Type type,
                int64_t duration, int64_t deviceId, int64_t folderId );
 
-        Media( MediaLibraryPtr ml, const std::string& fileName, Type type );
+        Media( MediaLibraryPtr ml, const std::string& fileName, ImportType type );
 
         static std::shared_ptr<Media> create( MediaLibraryPtr ml, Type type,
                                               int64_t deviceId, int64_t folderId,
@@ -166,6 +189,7 @@ class Media : public IMedia,
         void setDeviceId( int64_t deviceId );
         int64_t folderId() const; // Used for unit tests purposes only
         void setFolderId( int64_t folderId );
+        void markAsInternal();
         bool save();
 
         std::shared_ptr<File> addFile( const fs::IFile& fileFs, int64_t parentFolderId,
@@ -235,7 +259,7 @@ private:
                                     Thumbnail::Origin newOrigin );
         static std::shared_ptr<Media> createExternalMedia( MediaLibraryPtr ml,
                                                            const std::string& mrl,
-                                                           IMedia::Type type );
+                                                           ImportType importType );
 
 private:
         MediaLibraryPtr m_ml;
@@ -257,6 +281,7 @@ private:
         int64_t m_deviceId;
         uint32_t m_nbPlaylists;
         int64_t m_folderId;
+        ImportType m_importType;
 
         // Auto fetched related properties
         mutable AlbumTrackPtr m_albumTrack;

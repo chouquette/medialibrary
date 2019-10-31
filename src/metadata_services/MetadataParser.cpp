@@ -601,6 +601,7 @@ Status MetadataAnalyzer::overrideExternalMedia( IItem& item, std::shared_ptr<Med
     media->setDuration( item.duration() );
     media->setDeviceId( device->id() );
     media->setFolderId( item.parentFolder()->id() );
+    media->markAsInternal();
     media->save();
     return Status::Success;
 }

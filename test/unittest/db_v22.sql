@@ -105,9 +105,11 @@ INSERT INTO Folder VALUES(4,'file:///home/chouquette/dev/medialibrary/test/sampl
 INSERT INTO Media VALUES(1,2,3,10057,NULL,NULL,NULL,1571660066,2000,'Track 3','track3.mp3',0,1,1,0,2);
 INSERT INTO Media VALUES(2,2,3,10057,NULL,NULL,NULL,1571660066,2000,'Track 2','track2.mp3',0,1,1,0,3);
 INSERT INTO Media VALUES(3,2,3,10057,NULL,NULL,NULL,1571660066,2000,'Track 1','track1.mp3',0,1,1,0,4);
+INSERT INTO Media VALUES(4,4,0,0,NULL,NULL,NULL,1571660066,0,'Stream Track','stream.mp3',0,1,NULL,0,NULL);
 INSERT INTO File VALUES(1,1,NULL,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/multi_cd/folder3/track3.mp3',1,1531495970,139264,2,0,0,0);
 INSERT INTO File VALUES(2,2,NULL,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/multi_cd/folder2/track2.mp3',1,1531495970,139264,3,0,0,0);
 INSERT INTO File VALUES(3,3,NULL,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/multi_cd/folder1/track1.mp3',1,1531495970,139264,4,0,0,0);
+INSERT INTO File VALUES(4,4,NULL,'https://stream.org/stream.mp3',1,0,0,NULL,0,1,0);
 INSERT INTO Album VALUES(1,'Album',3,2000,NULL,3,30171,3,3);
 INSERT INTO AlbumTrack VALUES(1,1,10057,3,NULL,0,1,3);
 INSERT INTO AlbumTrack VALUES(2,2,10057,3,NULL,0,1,2);

@@ -884,11 +884,13 @@ TEST_F( Medias, SearchExternal )
     auto media = ml->searchMedia( "otter", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
 
+    // The type is no longer bound to the internal/external distinction, so
+    // updating the type will not yield different results anymore.
     ml->setMediaType( m1->id(), IMedia::Type::Video );
     ml->setMediaType( m2->id(), IMedia::Type::Video );
 
     media = ml->searchMedia( "otter", nullptr )->all();
-    ASSERT_EQ( 2u, media.size() );
+    ASSERT_EQ( 0u, media.size() );
 }
 
 TEST_F( Medias, VacuumOldExternal )

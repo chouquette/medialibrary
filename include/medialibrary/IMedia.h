@@ -59,21 +59,6 @@ class IMedia
              * Audio media
              */
             Audio,
-            /**
-             * External media, ie. media that were not discovered by the media
-             * library, but that were added manually by the user.
-             * These media are not analyzed, so their subtype, tracks, or other
-             * details are not known.
-             * They can, however, be used to store meta or be included in the
-             * playback history.
-             */
-            External,
-            /**
-             * Represent a stream, which is a specific kind of External media.
-             * This type of media is also intended to be inserted manually by
-             * the user.
-             */
-            Stream,
         };
         enum class SubType : uint8_t
         {
