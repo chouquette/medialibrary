@@ -26,16 +26,13 @@
 
 #include "factory/FileSystemFactory.h"
 #include "medialibrary/filesystem/IDirectory.h"
-#include "medialibrary/filesystem/IFile.h"
 #include "medialibrary/filesystem/Errors.h"
 #include "logging/Logger.h"
 #include "utils/Filename.h"
 #include "utils/Directory.h"
-#include "utils/Url.h"
 
 #if defined(__linux__) || defined(__APPLE__)
 # include "filesystem/unix/Directory.h"
-# include "filesystem/unix/File.h"
 # include "filesystem/unix/Device.h"
 #elif defined(_WIN32)
 # include "filesystem/win32/Directory.h"
@@ -46,7 +43,6 @@
 #endif
 
 #include "medialibrary/IDeviceLister.h"
-#include "compat/Mutex.h"
 
 #include <algorithm>
 #include <cassert>
