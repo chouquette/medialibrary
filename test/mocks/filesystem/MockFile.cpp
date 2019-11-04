@@ -64,6 +64,16 @@ bool File::isNetwork() const
     return false;
 }
 
+fs::IFile::LinkedFileType File::linkedType() const
+{
+    return LinkedFileType::None;
+}
+
+const std::string &File::linkedWith() const
+{
+    return m_linkedWith;
+}
+
 unsigned int File::lastModificationDate() const
 {
     return m_lastModification;

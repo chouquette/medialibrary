@@ -265,6 +265,7 @@ class NoopFile : public fs::IFile
     std::string m_path;
     std::string m_fileName;
     std::string m_extension;
+    std::string m_linkedWith;
     unsigned int m_lastModifDate;
     int64_t m_size;
 
@@ -318,6 +319,16 @@ public:
     virtual int64_t size() const
     {
         return m_size;
+    }
+
+    LinkedFileType linkedType() const
+    {
+        return LinkedFileType::None;
+    }
+
+    const std::string& linkedWith() const
+    {
+        return m_linkedWith;
     }
 
     void setLastModificationDate( unsigned int date )

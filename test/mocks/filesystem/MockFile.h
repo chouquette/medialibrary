@@ -44,12 +44,15 @@ public:
     void markAsModified();
     virtual const std::string& mrl() const override;
     virtual bool isNetwork() const override;
+    virtual LinkedFileType linkedType() const override;
+    virtual const std::string& linkedWith() const override;
 
 private:
     std::string m_name;
     std::string m_extension;
     unsigned int m_lastModification;
     std::string m_mrl;
+    std::string m_linkedWith;
 };
 
 }

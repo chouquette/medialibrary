@@ -27,6 +27,8 @@
 #include "CommonFile.h"
 #include "utils/Filename.h"
 
+#include <cassert>
+
 namespace medialibrary
 {
 
@@ -37,6 +39,7 @@ CommonFile::CommonFile( std::string mrl )
     : m_mrl( std::move( mrl ) )
     , m_name( utils::file::fileName( m_mrl ) )
     , m_extension( utils::file::extension( m_mrl ) )
+    , m_linkedType( LinkedFileType::None )
 {
 }
 
@@ -58,6 +61,17 @@ const std::string& CommonFile::mrl() const
 bool CommonFile::isNetwork() const
 {
     return false;
+}
+
+IFile::LinkedFileType CommonFile::linkedType() const
+{
+    return m_linkedType;
+}
+
+const std::string& CommonFile::linkedWith() const
+{
+    assert( m_linkedType != LinkedFileType::None );
+    return m_linkedFile;
 }
 
 }

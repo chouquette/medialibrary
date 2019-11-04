@@ -32,6 +32,15 @@ namespace fs
     class IFile
     {
     public:
+        enum class LinkedFileType : uint8_t
+        {
+            ///< This file is not a linked file
+            None,
+            ///< This is a linked subtitle file
+            Subtitles,
+            ///< This is a linked soundtrack file
+            SoundTrack,
+        };
         virtual ~IFile() = default;
         /// Returns the URL encoded filename, including the extension
         virtual const std::string& name() const = 0;
@@ -41,6 +50,17 @@ namespace fs
         virtual unsigned int lastModificationDate() const = 0;
         virtual int64_t size() const = 0;
         virtual bool isNetwork() const = 0;
+        /**
+         * @brief type Returns the file type, or None if not linked with another file
+         */
+        virtual LinkedFileType linkedType() const = 0;
+        /**
+         * @brief linkedWith Return the MRL this file is linked to, or an empty
+         *                   string if it's not linked with anything
+         *
+         * If type() is None, it's invalid to call this function
+         */
+        virtual const std::string& linkedWith() const = 0;
     };
 }
 
