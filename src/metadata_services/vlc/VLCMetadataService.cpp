@@ -94,13 +94,15 @@ Status VLCMetadataService::run( IItem& item )
         return Status::Fatal;
     auto tracks = vlcMedia.tracks();
     auto artworkMrl = vlcMedia.meta( libvlc_meta_ArtworkURL );
-    if ( ( tracks.size() == 0 && vlcMedia.subitems()->count() == 0 ) ||
-         utils::file::schemeIs( "attachment://", artworkMrl ) == true )
+    if ( item.fileType() == IFile::Type::Playlist &&
+         vlcMedia.subitems()->count() == 0 )
     {
-        if ( tracks.size() == 0 && vlcMedia.subitems()->count() == 0 )
-            LOG_WARN( "Failed to fetch any tracks for ", mrl, ". Falling back to playback" );
-        else
-            LOG_WARN( "Artwork for ", mrl, " is an attachment. Falling back to playback" );
+        LOG_DEBUG( "Discarding playlist file with no subitem: ", mrl );
+        return Status::Fatal;
+    }
+    if ( utils::file::schemeIs( "attachment://", artworkMrl ) == true )
+    {
+        LOG_WARN( "Artwork for ", mrl, " is an attachment. Falling back to playback" );
         VLC::MediaPlayer mp( vlcMedia );
         auto res = MetadataCommon::startPlayback( vlcMedia, mp, m_mutex, m_cond );
         if ( res == false )
