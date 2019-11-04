@@ -29,6 +29,7 @@
 #include "MockDevice.h"
 #include "MockDirectory.h"
 #include "utils/Filename.h"
+#include "utils/Url.h"
 #include "medialibrary/filesystem/Errors.h"
 
 namespace mock
@@ -87,7 +88,7 @@ std::shared_ptr<fs::IFile> Device::file(const std::string& mrl )
 {
     if ( m_root == nullptr || m_present == false )
         return nullptr;
-    return m_root->file( relativeMrl( mrl ) );
+    return m_root->fileFromPath( utils::url::decode( relativeMrl( mrl ) ) );
 }
 
 std::shared_ptr<Directory> Device::directory( const std::string& mrl )

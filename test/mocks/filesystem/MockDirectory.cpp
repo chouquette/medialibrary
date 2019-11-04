@@ -32,6 +32,7 @@
 
 #include "medialibrary/filesystem/Errors.h"
 #include "utils/Filename.h"
+#include "utils/Url.h"
 
 namespace mock
 {
@@ -135,7 +136,15 @@ void Directory::removeFile(const std::string& filePath)
     }
 }
 
-std::shared_ptr<fs::IFile> Directory::file(const std::string& filePath) const
+std::shared_ptr<fs::IFile> Directory::file( const std::string& mrl ) const
+{
+    // The actual implementation ignores the full path and just resolves to the
+    // filename (since we can't rely on the full path for removable storages,
+    // which can have multiple mountpoints) so we replicate this behavior here
+    return fileFromPath( utils::file::fileName( mrl ) );
+}
+
+std::shared_ptr<fs::IFile> Directory::fileFromPath( const std::string& filePath ) const
 {
     auto subFolder = utils::file::firstFolder( filePath );
     if ( subFolder.empty() == true )
@@ -149,7 +158,7 @@ std::shared_ptr<fs::IFile> Directory::file(const std::string& filePath) const
         auto it = m_dirs.find( subFolder );
         assert( it != end( m_dirs ) );
         auto remainingPath = utils::file::removePath( filePath, subFolder );
-        return it->second->file( remainingPath );
+        return it->second->fileFromPath( remainingPath );
     }
 }
 

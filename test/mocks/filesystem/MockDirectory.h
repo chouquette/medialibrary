@@ -47,7 +47,8 @@ public:
     void addFile( const std::string& filePath );
     void addFolder( const std::string& folder );
     void removeFile( const std::string& filePath  );
-    std::shared_ptr<fs::IFile> file( const std::string& filePath ) const override;
+    std::shared_ptr<fs::IFile> file( const std::string& mrl ) const override;
+    std::shared_ptr<fs::IFile> fileFromPath( const std::string& filePath ) const;
     std::shared_ptr<Directory> directory( const std::string& path );
     void removeFolder( const std::string& path );
     void setMountpointRoot( const std::string& path, std::shared_ptr<Directory> root );
