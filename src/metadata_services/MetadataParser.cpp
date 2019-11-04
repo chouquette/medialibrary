@@ -131,14 +131,11 @@ Status MetadataAnalyzer::run( IItem& item )
         return Status::Completed;
     }
 
-    bool isAudio;
     bool isFileModified = false;
 
     if ( item.file() == nullptr )
     {
-        Status status;
-
-        std::tie(status, isAudio) = createFileAndMedia( item );
+        auto status = createFileAndMedia( item );
         if ( status != Status::Success )
             return status;
     }
@@ -189,11 +186,10 @@ Status MetadataAnalyzer::run( IItem& item )
         if ( item.file()->lastModificationDate() !=
              item.fileFs()->lastModificationDate() )
             isFileModified = true;
-        isAudio = item.media()->type() == IMedia::Type::Audio;
     }
     auto media = std::static_pointer_cast<Media>( item.media() );
 
-    if ( isAudio == true )
+    if ( media->type() == IMedia::Type::Audio )
     {
         auto status = parseAudioFile( item );
         if ( status != Status::Success )
@@ -483,7 +479,7 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
     return true;
 }
 
-std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) const
+Status MetadataAnalyzer::createFileAndMedia( IItem& item ) const
 {
     assert( item.media() == nullptr );
     // Try to create Media & File
@@ -493,7 +489,7 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
     if ( tracks.empty() == true )
     {
         LOG_WARN( "Failed to analyze ", item.mrl(), ": no tracks found" );
-        return std::make_tuple( Status::Fatal, false );
+        return Status::Fatal;
     }
     auto isAudio = std::find_if( begin( tracks ), end( tracks ), [](const IItem::Track& t) {
         return t.type == IItem::Track::Type::Video;
@@ -507,7 +503,7 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
         if ( media == nullptr )
         {
             assert( !"External file must have an associated media" );
-            return std::make_tuple( Status::Fatal, false );
+            return Status::Fatal;
         }
         if ( media->isExternalMedia() == true )
         {
@@ -517,7 +513,7 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
             item.setFile( std::move( file ) );
             t->commit();
             item.setMedia( std::move( media ) );
-            return std::make_tuple( res, isAudio );
+            return res;
         }
     }
     LOG_DEBUG( "Adding ", mrl );
@@ -534,12 +530,12 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
     {
         LOG_INFO( "Failed to add a media: ", ex.what(), ". Assuming the "
                   "containing folder got removed concurrently" );
-        return std::make_tuple( Status::Discarded, false );
+        return Status::Discarded;
     }
     if ( m == nullptr )
     {
         LOG_ERROR( "Failed to add media ", mrl, " to the media library" );
-        return std::make_tuple( Status::Fatal, false );
+        return Status::Fatal;
     }
     auto deviceFs = item.parentFolderFs()->device();
     if ( deviceFs == nullptr )
@@ -552,7 +548,7 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
         if ( file == nullptr )
         {
             LOG_ERROR( "Failed to add file ", mrl, " to media #", m->id() );
-            return std::make_tuple( Status::Fatal, false );
+            return Status::Fatal;
         }
     }
     catch ( const sqlite::errors::ConstraintUnique& ex )
@@ -571,7 +567,7 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
             throw;
         LOG_INFO( "Failed to insert File in db: ", ex.what(), ". Assuming the"
                   "mrl duplicate" );
-        return std::make_tuple( Status::Discarded, false );
+        return Status::Discarded;
     }
 
     createTracks( *m, tracks );
@@ -581,7 +577,7 @@ std::tuple<Status, bool> MetadataAnalyzer::createFileAndMedia( IItem& item ) con
 
     t->commit();
     m_notifier->notifyMediaCreation( item.media() );
-    return std::make_tuple( Status::Success, isAudio );
+    return Status::Success;
 }
 
 Status MetadataAnalyzer::overrideExternalMedia( IItem& item, std::shared_ptr<Media> media,
