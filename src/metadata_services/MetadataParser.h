@@ -24,6 +24,7 @@
 
 #include "medialibrary/parser/IParserService.h"
 #include "medialibrary/IInterruptProbe.h"
+#include "medialibrary/IMedia.h"
 
 #include <atomic>
 
@@ -67,8 +68,8 @@ protected:
     Status parseAudioFile( IItem& task );
     bool parseVideoFile( IItem& task ) const;
     Status createFileAndMedia( IItem& item ) const;
-    Status overrideExternalMedia( IItem& item, std::shared_ptr<Media> media,
-                                  std::shared_ptr<File> file, bool isAudio ) const;
+    Status overrideExternalMedia(IItem& item, std::shared_ptr<Media> media,
+                                  std::shared_ptr<File> file, IMedia::Type newType ) const;
     void createTracks( Media& m, const std::vector<IItem::Track>& tracks ) const;
     std::tuple<bool, bool> refreshFile( IItem& item ) const;
     std::tuple<bool, bool> refreshMedia( IItem& item ) const;

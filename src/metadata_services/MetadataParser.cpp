@@ -119,10 +119,9 @@ Status MetadataAnalyzer::run( IItem& item )
         if ( needRescan == false )
             return Status::Success;
     }
-    auto nbSubitem = item.nbSubItems();
-    // Assume that file containing subitem(s) is a Playlist
-    if ( nbSubitem > 0 )
+    if ( item.fileType() == IFile::Type::Playlist )
     {
+        assert( item.nbSubItems() > 0 );
         auto res = parsePlaylist( item );
         if ( res != Status::Success ) // playlist addition may fail due to constraint violation
             return res;
@@ -195,7 +194,7 @@ Status MetadataAnalyzer::run( IItem& item )
         if ( status != Status::Success )
             return status;
     }
-    else
+    else if ( media->type() == IMedia::Type::Video )
     {
         if (parseVideoFile( item ) == false )
             return Status::Fatal;
@@ -486,14 +485,18 @@ Status MetadataAnalyzer::createFileAndMedia( IItem& item ) const
     auto mrl = item.mrl();
     const auto& tracks = item.tracks();
 
-    if ( tracks.empty() == true )
+    auto mediaType = IMedia::Type::Unknown;
+    if ( tracks.empty() == false )
     {
-        LOG_WARN( "Failed to analyze ", item.mrl(), ": no tracks found" );
-        return Status::Fatal;
+        if ( std::find_if( begin( tracks ), end( tracks ), [](const IItem::Track& t) {
+            return t.type == IItem::Track::Type::Video;
+        }) == end( tracks ) )
+        {
+            mediaType = IMedia::Type::Audio;
+        }
+        else
+            mediaType = IMedia::Type::Video;
     }
-    auto isAudio = std::find_if( begin( tracks ), end( tracks ), [](const IItem::Track& t) {
-        return t.type == IItem::Track::Type::Video;
-    }) == end( tracks );
     auto t = m_ml->getConn()->newTransaction();
     auto file = File::fromExternalMrl( m_ml, mrl );
     // Check if this media was already added before as an external media
@@ -507,7 +510,7 @@ Status MetadataAnalyzer::createFileAndMedia( IItem& item ) const
         }
         if ( media->isExternalMedia() == true )
         {
-            auto res = overrideExternalMedia( item, media, file, isAudio );
+            auto res = overrideExternalMedia( item, media, file, mediaType );
             // IItem::setFile will update the task in db, so run it as part of
             // the transation
             item.setFile( std::move( file ) );
@@ -521,8 +524,7 @@ Status MetadataAnalyzer::createFileAndMedia( IItem& item ) const
     try
     {
         auto folder = static_cast<Folder*>( item.parentFolder().get() );
-        m = Media::create( m_ml, isAudio ? IMedia::Type::Audio : IMedia::Type::Video,
-                                folder->deviceId(), folder->id(),
+        m = Media::create( m_ml, mediaType, folder->deviceId(), folder->id(),
                                 utils::url::decode( utils::file::fileName( mrl ) ),
                                 item.duration() );
     }
@@ -581,7 +583,8 @@ Status MetadataAnalyzer::createFileAndMedia( IItem& item ) const
 }
 
 Status MetadataAnalyzer::overrideExternalMedia( IItem& item, std::shared_ptr<Media> media,
-                                                std::shared_ptr<File> file, bool isAudio ) const
+                                                std::shared_ptr<File> file,
+                                                IMedia::Type newType ) const
 {
     // If the file is on a removable device, we need to update its mrl
     assert( sqlite::Transaction::transactionInProgress() == true );
@@ -593,7 +596,7 @@ Status MetadataAnalyzer::overrideExternalMedia( IItem& item, std::shared_ptr<Med
     if ( file->update( *item.fileFs(), item.parentFolder()->id(),
                        deviceFs->isRemovable() ) == false )
         return Status::Fatal;
-    media->setTypeBuffered( isAudio == true ? IMedia::Type::Audio : IMedia::Type::Video );
+    media->setTypeBuffered( newType );
     media->setDuration( item.duration() );
     media->setDeviceId( device->id() );
     media->setFolderId( item.parentFolder()->id() );
