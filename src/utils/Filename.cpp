@@ -157,7 +157,9 @@ std::string toFolderPath( const std::string& path )
 std::string stripScheme( const std::string& mrl )
 {
     auto pos = mrl.find( "://" );
-    return pos == std::string::npos ? mrl : mrl.substr( pos + 3 );
+    if ( pos == std::string::npos )
+        throw fs::errors::UnhandledScheme( "<empty scheme>" );
+    return mrl.substr( pos + 3 );
 }
 
 std::string scheme( const std::string& mrl )

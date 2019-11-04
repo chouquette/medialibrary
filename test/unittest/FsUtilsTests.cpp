@@ -27,6 +27,7 @@
 #include "gtest/gtest.h"
 
 #include "utils/Filename.h"
+#include "medialibrary/filesystem/Errors.h"
 
 using namespace medialibrary;
 
@@ -149,7 +150,7 @@ TEST( FsUtils, toMrl )
 TEST( FsUtils, stripScheme )
 {
   ASSERT_EQ( "space%20marine", utils::file::stripScheme( "sc2://space%20marine" ) );
-  ASSERT_EQ( "bl%40bla", utils::file::stripScheme( "bl%40bla" ) );
+  ASSERT_THROW( utils::file::stripScheme( "bl%40bla" ), fs::errors::UnhandledScheme );
   ASSERT_EQ( "", utils::file::stripScheme( "vlc://" ) );
   ASSERT_EQ( "leaf/ern/%C3%A7a/pak.one", utils::file::stripScheme( "bteam://leaf/ern/%C3%A7a/pak.one" ) );
   ASSERT_EQ( "/I", utils::file::stripScheme( "file:///I" ) );
