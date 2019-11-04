@@ -41,6 +41,8 @@
 #include "utils/Url.h"
 #include "utils/Strings.h"
 
+#include <algorithm>
+
 namespace medialibrary
 {
 
@@ -546,6 +548,42 @@ Task::createRefreshTask( MediaLibraryPtr ml, std::shared_ptr<File> file,
     if ( parser != nullptr )
         parser->parse( self );
     return self;
+}
+
+std::shared_ptr<Task>
+Task::createMediaRefreshTask( MediaLibraryPtr ml, std::shared_ptr<Media> media )
+{
+    auto files = media->files();
+    auto mainFileIt = std::find_if( cbegin( files ), cend( files ),
+                                  []( const std::shared_ptr<IFile>& f ) {
+        return f->isMain();
+    });
+    if ( mainFileIt == cend( files ) )
+        return nullptr;
+    auto mainFile = std::static_pointer_cast<File>( *mainFileIt );
+    auto mrl = mainFile->mrl();
+    auto fsFactory = ml->fsFactoryForMrl( mrl );
+    if ( fsFactory == nullptr )
+        return nullptr;
+    auto folder = Folder::fetch( ml, mainFile->folderId() );
+    if ( folder == nullptr )
+        return nullptr;
+    auto folderMrl = utils::file::directory( mrl );
+    std::shared_ptr<fs::IDirectory> folderFs;
+    std::shared_ptr<fs::IFile> fileFs;
+    try
+    {
+        folderFs = fsFactory->createDirectory( folderMrl );
+        fileFs = folderFs->file( mrl );
+    }
+    catch ( const fs::errors::Exception& ex )
+    {
+        LOG_INFO( "Failed to create a media restore task: ", ex.what() );
+        return nullptr;
+    }
+    assert( fileFs != nullptr );
+    return createRefreshTask( ml, std::move( mainFile ), std::move( fileFs ),
+                              std::move( folder ), std::move( folderFs ) );
 }
 
 std::shared_ptr<Task> Task::createLinkTask( MediaLibraryPtr ml, std::string mrl,

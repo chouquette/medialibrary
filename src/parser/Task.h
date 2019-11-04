@@ -183,6 +183,14 @@ public:
                                                     std::shared_ptr<fs::IFile> fsFile,
                                                     std::shared_ptr<Folder> parentFolder,
                                                     std::shared_ptr<fs::IDirectory> parentFolderFs );
+    /**
+     * @brief createMediaRefreshTask Convenienve method to create a media refresh task
+     *
+     * This is basically just a wrapper to createRefreshTask, but it will handle
+     * the required boilerplate of fetching parent folders, fs files, ...
+     */
+    static std::shared_ptr<Task> createMediaRefreshTask( MediaLibraryPtr ml,
+                                                         std::shared_ptr<Media> media );
     static std::shared_ptr<Task> createLinkTask( MediaLibraryPtr ml, std::string mrl,
                                                  int64_t linkToId, LinkType linkToType,
                                                  int64_t linkToExtra );
