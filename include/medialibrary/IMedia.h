@@ -105,6 +105,16 @@ class IMedia
 
         virtual int64_t id() const = 0;
         virtual Type type() const = 0;
+        /**
+         * @brief setType Updates this media's type
+         * @param type The new type
+         * @return true in case of success, false otherwise.
+         *
+         * If the media type was Unknown before, this will trigger a refresh for
+         * this media.
+         * If the refresh task fails to be created, false will be returned, and
+         * the media will stay unmodified.
+         */
         virtual bool setType( Type type ) = 0;
         virtual SubType subType() const = 0;
         virtual const std::string& title() const = 0;

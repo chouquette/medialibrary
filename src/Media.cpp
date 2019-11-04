@@ -44,6 +44,7 @@
 #include "ShowEpisode.h"
 #include "SubtitleTrack.h"
 #include "Playlist.h"
+#include "parser/Task.h"
 
 #include "database/SqliteTools.h"
 #include "database/SqliteQuery.h"
@@ -923,6 +924,8 @@ bool Media::setType( IMedia::Type type )
             "WHERE id_media = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, type, m_id ) == false )
         return false;
+    if ( m_type == IMedia::Type::Unknown )
+        parser::Task::createMediaRefreshTask( m_ml, shared_from_this() );
     m_type = type;
     return true;
 }
