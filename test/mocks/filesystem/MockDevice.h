@@ -56,14 +56,14 @@ public:
     void setRemovable( bool value );
     void setPresent( bool value );
 
-    void addFile( const std::string& filePath );
-    void addFolder( const std::string& path );
-    void removeFile( const std::string& filePath );
-    void removeFolder( const std::string& filePath );
-    std::shared_ptr<fs::IFile> file( const std::string& filePath );
-    std::shared_ptr<Directory> directory( const std::string& path );
-    void setMountpointRoot( const std::string& path, std::shared_ptr<Directory> root );
-    void invalidateMountpoint( const std::string& path );
+    void addFile( const std::string& mrl );
+    void addFolder( const std::string& mrl );
+    void removeFile( const std::string& mrl );
+    void removeFolder( const std::string& mrl );
+    std::shared_ptr<fs::IFile> file( const std::string& mrl );
+    std::shared_ptr<Directory> directory( const std::string& mrl );
+    void setMountpointRoot( const std::string& mrl, std::shared_ptr<Directory> root );
+    void invalidateMountpoint( const std::string& mrl );
 
 private:
     bool m_present;

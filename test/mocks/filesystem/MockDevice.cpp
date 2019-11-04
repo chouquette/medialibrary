@@ -59,60 +59,60 @@ void Device::setRemovable(bool value) { m_removable = value; }
 
 void Device::setPresent(bool value) { m_present = value; }
 
-void Device::addFile(const std::string& filePath )
+void Device::addFile( const std::string& mrl )
 {
-    m_root->addFile( relativeMrl( filePath ) );
+    m_root->addFile( relativeMrl( mrl ) );
 }
 
-void Device::addFolder(const std::string& mrl)
+void Device::addFolder( const std::string& mrl )
 {
     m_root->addFolder( relativeMrl( mrl ) );
 }
 
-void Device::removeFile(const std::string& filePath)
+void Device::removeFile( const std::string& mrl )
 {
-    m_root->removeFile( relativeMrl( filePath ) );
+    m_root->removeFile( relativeMrl( mrl ) );
 }
 
-void Device::removeFolder(const std::string& filePath)
+void Device::removeFolder( const std::string& mrl )
 {
-    auto relPath = relativeMrl( filePath );
-    if ( relPath.empty() == true )
+    auto relMrl = relativeMrl( mrl );
+    if ( relMrl.empty() == true )
         m_root = nullptr;
     else
-        m_root->removeFolder( relPath );
+        m_root->removeFolder( relMrl );
 }
 
-std::shared_ptr<fs::IFile> Device::file(const std::string& filePath )
+std::shared_ptr<fs::IFile> Device::file(const std::string& mrl )
 {
     if ( m_root == nullptr || m_present == false )
         return nullptr;
-    return m_root->file( relativeMrl( filePath ) );
+    return m_root->file( relativeMrl( mrl ) );
 }
 
-std::shared_ptr<Directory> Device::directory(const std::string& path)
+std::shared_ptr<Directory> Device::directory( const std::string& mrl )
 {
     if ( m_root == nullptr || m_present == false )
         throw medialibrary::fs::errors::System{ ENOENT, "Mock directory" };
-    const auto relPath = relativeMrl( path );
-    if ( relPath.empty() == true )
+    const auto relMrl = relativeMrl( mrl );
+    if ( relMrl.empty() == true )
         return m_root;
-    return m_root->directory( relPath );
+    return m_root->directory( relMrl );
 }
 
-void Device::setMountpointRoot(const std::string& mrl, std::shared_ptr<Directory> root)
+void Device::setMountpointRoot( const std::string& mrl, std::shared_ptr<Directory> root )
 {
-    auto relPath = relativeMrl( mrl );
+    auto relMrl = relativeMrl( mrl );
     // m_root is already a mountpoint, we can't add a mountpoint to it.
-    assert( relPath.empty() == false );
-    m_root->setMountpointRoot( relPath, root );
+    assert( relMrl.empty() == false );
+    m_root->setMountpointRoot( relMrl, root );
 }
 
-void Device::invalidateMountpoint(const std::string& path)
+void Device::invalidateMountpoint( const std::string& mrl )
 {
-    auto relPath = relativeMrl( path );
-    assert( relPath.empty() == false );
-    m_root->invalidateMountpoint( relPath );
+    auto relMrl = relativeMrl( mrl );
+    assert( relMrl.empty() == false );
+    m_root->invalidateMountpoint( relMrl );
 }
 
 }
