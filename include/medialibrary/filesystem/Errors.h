@@ -120,14 +120,14 @@ class System : public Exception
 public:
 #ifdef _WIN32
     System( unsigned long err, const std::string& msg )
-        : Exception( msg +
+        : Exception( msg + ": " +
                      std::error_code( err, std::generic_category() ).message() )
         , m_errc( err, std::generic_category() )
     {
     }
 #endif
     System( int err, const std::string& msg )
-        : Exception( msg +
+        : Exception( msg + ": " +
                      std::error_code( err, std::generic_category() ).message() )
         , m_errc( err, std::generic_category() )
     {
