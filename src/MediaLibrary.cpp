@@ -1787,7 +1787,7 @@ void MediaLibrary::clearDatabase( bool restorePlaylists )
         for ( const auto& mrl : backup )
         {
             LOG_DEBUG( "Queuing restore task for ", mrl );
-            parser::Task::createRestoreTask( this, mrl );
+            parser::Task::createRestoreTask( this, mrl, IFile::Type::Playlist );
         }
     }
     resumeBackgroundOperations();

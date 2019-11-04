@@ -108,10 +108,11 @@ Task::Task( MediaLibraryPtr ml, std::string mrl, int64_t linkToId,
 {
 }
 
-Task::Task( MediaLibraryPtr ml, std::string mrl )
+Task::Task( MediaLibraryPtr ml, std::string mrl , IFile::Type fileType )
     : m_ml( ml )
     , m_type( Type::Restore )
     , m_mrl( std::move( mrl ) )
+    , m_fileType( fileType )
 {
 }
 
@@ -565,14 +566,14 @@ std::shared_ptr<Task> Task::createLinkTask( MediaLibraryPtr ml, std::string mrl,
     return self;
 }
 
-std::shared_ptr<Task> Task::createRestoreTask( MediaLibraryPtr ml, std::string mrl )
+std::shared_ptr<Task> Task::createRestoreTask( MediaLibraryPtr ml, std::string mrl,
+                                               IFile::Type fileType )
 {
-    auto self = std::make_shared<Task>( ml, std::move( mrl ) );
+    auto self = std::make_shared<Task>( ml, std::move( mrl ), fileType );
     const std::string req = "INSERT INTO " + Table::Name +
             "(type, mrl, file_type, link_to_id, link_to_type, link_extra) "
             "VALUES(?, ?, ?, 0, 0, 0)";
-    if ( insert( ml, self, req, Type::Restore, self->mrl(),
-                 IFile::Type::Unknown ) == false )
+    if ( insert( ml, self, req, Type::Restore, self->mrl(), fileType ) == false )
         return nullptr;
     auto parser = ml->getParser();
     if ( parser != nullptr )

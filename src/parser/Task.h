@@ -125,7 +125,7 @@ public:
      * @param ml A medialibrary instance pointer
      * @param mrl The mrl of the entity to restore
      */
-    Task( MediaLibraryPtr ml, std::string mrl );
+    Task( MediaLibraryPtr ml, std::string mrl, IFile::Type fileType );
 
     /**
      * @brief Task Constructor for dummy tasks, to represent subitems
@@ -187,7 +187,9 @@ public:
                                                  int64_t linkToId, LinkType linkToType,
                                                  int64_t linkToExtra );
 
-    static std::shared_ptr<Task> createRestoreTask( MediaLibraryPtr ml, std::string mrl );
+    static std::shared_ptr<Task> createRestoreTask( MediaLibraryPtr ml,
+                                                    std::string mrl,
+                                                    IFile::Type fileType );
     /**
      * @brief removePlaylistContentTasks Removes existing task associated with
      *                                   the given playlist
