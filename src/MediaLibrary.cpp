@@ -395,14 +395,11 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
         }
         else if ( dbModel != Settings::DbModelVersion )
         {
-            if ( dbModel != Settings::DbModelVersion )
+            res = updateDatabaseModel( dbModel );
+            if ( res == InitializeResult::Failed )
             {
-                res = updateDatabaseModel( dbModel );
-                if ( res == InitializeResult::Failed )
-                {
-                    LOG_ERROR( "Failed to update database model" );
-                    return res;
-                }
+                LOG_ERROR( "Failed to update database model" );
+                return res;
             }
         }
     }
