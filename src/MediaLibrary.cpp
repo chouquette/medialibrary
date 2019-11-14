@@ -745,6 +745,7 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
         t = getConn()->newTransaction();
     try
     {
+        assert( fileType != IFile::Type::Unknown );
         parser::Task::create( this, std::move( fileFs ), std::move( parentFolder ),
                               std::move( parentFolderFs ), fileType );
     }
@@ -774,6 +775,21 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
             LOG_INFO( "Failed to create link task for ", mrl, ": ", ex.what(), ". "
                       "Assuming it was already created before" );
         }
+    }
+}
+
+void MediaLibrary::onDiscoveredLinkedFile( std::shared_ptr<fs::IFile> fileFs,
+                                           IFile::Type fileType )
+{
+    try
+    {
+        parser::Task::createLinkTask( this, fileFs->mrl(), fileType, fileFs->linkedWith(),
+                                      parser::Task::LinkType::Media, 0 );
+    }
+    catch ( const sqlite::errors::ConstraintUnique& ex )
+    {
+        LOG_INFO( "Failed to create link task for ", fileFs->mrl(), ": ",
+                  ex.what(), ". Assuming it was already created before" );
     }
 }
 
