@@ -397,7 +397,7 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
         {
             if ( dbModel != Settings::DbModelVersion )
             {
-                res = updateDatabaseModel( dbModel, dbPath );
+                res = updateDatabaseModel( dbModel );
                 if ( res == InitializeResult::Failed )
                 {
                     LOG_ERROR( "Failed to update database model" );
@@ -939,8 +939,7 @@ void MediaLibrary::addLocalFsFactory()
     m_fsFactories.emplace( begin( m_fsFactories ), std::make_shared<factory::FileSystemFactory>( m_deviceLister ) );
 }
 
-InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion,
-                                        const std::string& dbPath )
+InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
 {
     LOG_INFO( "Updating database model from ", previousVersion, " to ", Settings::DbModelVersion );
     auto originalPreviousVersion = previousVersion;
@@ -965,7 +964,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                  previousVersion > Settings::DbModelVersion ||
                  previousVersion == 4 )
             {
-                if( recreateDatabase( dbPath ) == false )
+                if( recreateDatabase() == false )
                     throw std::runtime_error( "Failed to recreate the database" );
                 return InitializeResult::DbReset;
             }
@@ -1144,13 +1143,10 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
     return InitializeResult::Success;
 }
 
-/* This take a copy by design.
- * If the path comes from sqlite::Connection::dbPath, we're about to release it
- * and the reference will become dangling.
- */
-bool MediaLibrary::recreateDatabase( std::string dbPath )
+bool MediaLibrary::recreateDatabase()
 {
     // Close all active connections, flushes all previously run statements.
+    auto dbPath = m_dbConnection->dbPath();
     m_dbConnection.reset();
     if ( unlink( dbPath.c_str() ) != 0 )
         return false;
@@ -1755,7 +1751,7 @@ void MediaLibrary::clearDatabase( bool restorePlaylists )
     // If we don't care about playlists, take a shortcut.
     if ( restorePlaylists == false )
     {
-        recreateDatabase( m_dbConnection->dbPath() );
+        recreateDatabase();
         resumeBackgroundOperations();
         return;
     }
@@ -1787,7 +1783,7 @@ void MediaLibrary::clearDatabase( bool restorePlaylists )
 
     // Create a new playlist backups
 
-    recreateDatabase( m_dbConnection->dbPath() );
+    recreateDatabase();
 
     if ( playlistsBackups.empty() == false )
     {
