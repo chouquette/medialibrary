@@ -233,7 +233,7 @@ private:
     void migrateModel13to14( uint32_t originalPreviousVersion );
     void migrateModel14to15();
     void migrateModel15to16();
-    void migrateModel16to17( uint32_t originalPreviousVersion );
+    void migrateModel16to17();
     void migrateModel17to18(uint32_t originalPreviousVersion);
     bool migrateModel18to19();
     void migrateModel19to20();

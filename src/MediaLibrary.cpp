@@ -1055,7 +1055,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
             }
             if ( previousVersion == 16 )
             {
-                migrateModel16to17( originalPreviousVersion );
+                migrateModel16to17();
                 previousVersion = 17;
                 needRescan = true;
             }
@@ -1504,7 +1504,7 @@ void MediaLibrary::migrateModel15to16()
  * - Add ThumbnailLinking table
  * - Move thumbnail origin to the thumbnail linking table
  */
-void MediaLibrary::migrateModel16to17( uint32_t originalPreviousVersion )
+void MediaLibrary::migrateModel16to17()
 {
     auto dbConn = getConn();
     sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
