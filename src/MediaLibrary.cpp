@@ -1152,7 +1152,8 @@ bool MediaLibrary::recreateDatabase( std::string dbPath )
 {
     // Close all active connections, flushes all previously run statements.
     m_dbConnection.reset();
-    unlink( dbPath.c_str() );
+    if ( unlink( dbPath.c_str() ) != 0 )
+        return false;
     m_dbConnection = sqlite::Connection::connect( dbPath );
     auto t = m_dbConnection->newTransaction();
     Settings::createTable( m_dbConnection.get() );
