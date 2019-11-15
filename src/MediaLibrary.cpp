@@ -329,12 +329,11 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
                                            const std::string& mlFolderPath,
                                            IMediaLibraryCb* mlCallback )
 {
-    LOG_INFO( "Initializing medialibrary..." );
+    std::lock_guard<compat::Mutex> lock( m_mutex );
     if ( m_initialized == true )
-    {
-        LOG_INFO( "...Already initialized" );
         return InitializeResult::AlreadyInitialized;
-    }
+
+    LOG_INFO( "Initializing medialibrary..." );
     if ( m_deviceLister == nullptr )
     {
         m_deviceLister = factory::createDeviceLister();

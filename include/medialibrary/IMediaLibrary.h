@@ -313,6 +313,10 @@ public:
      *
      * The ml folder path is assumed to be a folder dedicated to store the
      * various media library files. It might be emptied or modified at any time.
+     *
+     * This method is thread safe. If multiple initialization start simultaneously
+     * only the first one will return Success, the later ones will return
+     * AlreadyInitialized
      */
     virtual InitializeResult initialize( const std::string& dbPath,
                                          const std::string& mlFolderPath,
