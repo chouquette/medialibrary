@@ -59,6 +59,19 @@ std::string sanitize( const std::string& fileName )
             },
             "$1$3"
         },
+        // Some specific patterns that we want to match in a case sensitive way, and
+        // between specific separators
+        {
+            std::regex{
+                "(\\b|" SEPARATORS ")"
+                "("
+                    "MeGusta|CRiMSON|Eclipse"
+                ")"
+                "(\\b|" SEPARATORS ")",
+                std::regex_constants::ECMAScript
+            },
+            ""
+        },
         // A small subset of patterns to remove that contain separators, and
         // that we want to match using those separators. For instance, "5.1"
         // would be changed to "5 1", and we don't want to remove a potentially
@@ -136,7 +149,7 @@ std::string sanitize( const std::string& fileName )
 
 
                 // Usually found team names:
-                "ETTV|ETHD|DTOne|1337x|xrg|evo|yify|HorribleSubs|Eclipse|"
+                "ETTV|ETHD|DTOne|1337x|xrg|evo|yify|HorribleSubs|"
                 "JiyuuNoFansub|ROVERS|YTS(\\s[A-Z]{2,})?|AMZN|RARBG|anoXmous(_){0,2}|"
                 "BOKUTOX"
                 // Ohys-Raws contains a separator so it's found in the corresponding
