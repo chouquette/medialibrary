@@ -327,10 +327,11 @@ public:
      * device lister, and it become impossible to know wether a removable storage device has been
      * inserted for the first time or not.
      *
-     * @return true in case of success, false otherwise.
-     * * If start returns false, this medialibrary must not be used anymore, and should be
-     * disposed off.
+     * @return true in case of success or if already started, false otherwise.
+     * * If start returns false, this medialibrary must not be used anymore,
+     * and should be disposed off.
      * If it returns true the first time, calling this method again is a no-op
+     * This method is thread-safe
      */
     virtual bool start() = 0;
     virtual void setVerbosity( LogLevel v ) = 0;

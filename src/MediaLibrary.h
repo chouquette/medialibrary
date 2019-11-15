@@ -29,6 +29,7 @@
 #include "medialibrary/IDeviceLister.h"
 #include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "medialibrary/IMedia.h"
+#include "compat/Mutex.h"
 
 #include <atomic>
 
@@ -286,6 +287,7 @@ private:
     };
 
 protected:
+    compat::Mutex m_mutex;
     std::shared_ptr<sqlite::Connection> m_dbConnection;
     std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_fsFactories;
     std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_externalNetworkFsFactories;
@@ -314,6 +316,7 @@ protected:
     LogLevel m_verbosity;
     Settings m_settings;
     bool m_initialized;
+    bool m_started;
     std::atomic_bool m_discovererIdle;
     std::atomic_bool m_parserIdle;
     std::unique_ptr<ThumbnailerWorker> m_thumbnailer;

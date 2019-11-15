@@ -136,6 +136,7 @@ MediaLibrary::MediaLibrary()
     , m_verbosity( LogLevel::Error )
     , m_settings( this )
     , m_initialized( false )
+    , m_started( false )
     , m_discovererIdle( true )
     , m_parserIdle( true )
 {
@@ -448,15 +449,17 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
 
 bool MediaLibrary::start()
 {
-    LOG_INFO( "Starting medialibrary..." );
     assert( m_initialized == true );
-    if ( m_parser != nullptr )
-        return false;
+    std::lock_guard<compat::Mutex> lock( m_mutex );
+    if ( m_started == true )
+        return true;
+    LOG_INFO( "Starting medialibrary..." );
 
     startDiscoverer();
     if ( startParser() == false )
         return false;
     startThumbnailer();
+    m_started = true;
     return true;
 }
 
