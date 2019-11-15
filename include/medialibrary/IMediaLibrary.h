@@ -302,11 +302,12 @@ public:
      * \param mlFolderPath Path to a folder that will contain medialibrary's files.
      * \param mlCallback    A pointer to an IMediaLibraryCb that will be invoked with various
      *                      events during the medialibrary lifetime.
-     * \return true in case of success, false otherwise
+     * \return An \see{InitializeResult} code.
      *
-     * If initialize returns Fail, this medialibrary must not be used
+     * If initialize returns Failed, this medialibrary must not be used
      * anymore, and should be disposed off.
-     * If it returns Ok the first time, calling this method again is a no-op
+     * If it returns Ok the first time, calling this method again is a no-op and
+     * AlreadyInitialized will be returned
      * In case DbReset is returned, it is up to application to decide what
      * to do to repopulate the database.
      *
