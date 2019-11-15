@@ -72,6 +72,7 @@ public:
     virtual InitializeResult initialize( const std::string& dbPath,
                                          const std::string& thumbnailPath,
                                          IMediaLibraryCb* mlCallback ) override;
+    virtual bool isInitialized() const override;
     virtual bool start() override;
     virtual void setVerbosity( LogLevel v ) override;
 
@@ -287,7 +288,7 @@ private:
     };
 
 protected:
-    compat::Mutex m_mutex;
+    mutable compat::Mutex m_mutex;
     std::shared_ptr<sqlite::Connection> m_dbConnection;
     std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_fsFactories;
     std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_externalNetworkFsFactories;

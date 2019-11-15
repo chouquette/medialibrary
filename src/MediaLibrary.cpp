@@ -446,6 +446,12 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     return res;
 }
 
+bool MediaLibrary::isInitialized() const
+{
+    std::lock_guard<compat::Mutex> lock( m_mutex );
+    return m_initialized;
+}
+
 bool MediaLibrary::start()
 {
     assert( m_initialized == true );

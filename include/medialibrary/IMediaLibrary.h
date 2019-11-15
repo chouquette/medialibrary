@@ -321,6 +321,17 @@ public:
     virtual InitializeResult initialize( const std::string& dbPath,
                                          const std::string& mlFolderPath,
                                          IMediaLibraryCb* mlCallback ) = 0;
+    /**
+     * @brief isInitialized Convenience helper to know if the media library is
+     *                      already initialized.
+     *
+     * @return true is the media library is already initialized, false otherwise.
+     *
+     * If multiple threads are calling this to conditionnaly initialize the
+     * media library, only the first one will return InitializeResult::Success
+     * and the later ones will return InitializeResult::AlreadyInitialized
+     */
+    virtual bool isInitialized() const = 0;
 
     /**
      * @brief start Starts the background thread and reload the medialibrary content
