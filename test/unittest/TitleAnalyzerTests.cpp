@@ -135,4 +135,68 @@ TEST_F( TitleAnalyzerTests, RemovePatterns )
            "[Ohys-Raws] Nanatsu no Taizai Kamigami no Gekirin - 01 (TX 1280x720 x264 AAC).mp4" );
     CHECK( "snow raws unwrapped 第09話",
            "[Snow-Raws] snow-raws-unwrapped 第09話 (BD 1920x1080 HEVC-YUV420P10 FLAC)" );
+    CHECK( "American Horror Story 1984 S09E09 Final Girl",
+           "American.Horror.Story.1984.S09E09.Final.Girl.HDTV.x264-CRiMSON" );
+}
+
+#undef CHECK
+
+#define CHECK( input, success, season, episode ) \
+    do \
+    { \
+        auto sanitized = utils::title::sanitize( input ); \
+        auto res = utils::title::analyze( sanitized ); \
+        if ( success == false ) \
+            ASSERT_FALSE( std::get<0>( res ) ); \
+        else \
+        { \
+            ASSERT_TRUE( std::get<0>( res ) ); \
+            ASSERT_EQ( season, std::get<1>( res ) ); \
+            ASSERT_EQ( episode, std::get<2>( res ) ); \
+        } \
+    } \
+    while ( false );
+
+TEST_F( TitleAnalyzerTests, EpisodeNumber )
+{
+    // Simple tests for season/episode number extraction
+    CHECK( "S02e03", true, 2u, 3u );
+    CHECK( "S02x03", true, 2u, 3u );
+    CHECK( "S02   03", true, 2u, 3u );
+    CHECK( "S12  E123", true, 12u, 123u );
+    // Because some people use "B(ooks)"
+    CHECK( "B12E123", true, 12u, 123u );
+
+    CHECK( "S02xx03", false, 0u, 0u );
+}
+
+#undef CHECK
+
+#define CHECK( input, season, episode, showName, episodeTitle ) \
+    do \
+    { \
+        auto sanitized = utils::title::sanitize( input ); \
+        auto res = utils::title::analyze( sanitized ); \
+        ASSERT_TRUE( std::get<0>( res ) ); \
+        ASSERT_EQ( season, std::get<1>( res ) ); \
+        ASSERT_EQ( episode, std::get<2>( res ) ); \
+        ASSERT_EQ( showName, std::get<3>( res ) ); \
+        ASSERT_EQ( episodeTitle, std::get<4>( res ) ); \
+    } \
+    while ( false );
+
+TEST_F( TitleAnalyzerTests, FullExtraction )
+{
+    CHECK( "The.Walking.Dead.S08.E02.1080p.BluRay.x264-ROVERS AMC.mkv",
+           8u, 2u, "The Walking Dead", "" );
+    CHECK( "Friends S02E19 The One Where Eddie Won't Go (1080p x265 10bit Joy).mkv",
+           2u, 19u, "Friends", "The One Where Eddie Won't Go (Joy)" );
+    CHECK( "Desperate Housewives - 4x01 - Now You Know VOST FR.avi",
+           4u, 1u, "Desperate Housewives", "Now You Know" );
+    CHECK( "Underground.Marvels.S01E05.Cave.of.the.Body.Snatchers.480p.x264-",
+           1u, 5u, "Underground Marvels", "Cave of the Body Snatchers" );
+    CHECK( "MasterChef The Professionals S12E04 1080p HEVC x265-MeGusta",
+           12u, 4u, "MasterChef The Professionals", "" );
+    CHECK( "American.Horror.Story.1984.S09E09.Final.Girl.HDTV.x264-CRiMSON",
+           9u, 9u, "American Horror Story 1984", "Final Girl" );
 }

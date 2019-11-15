@@ -25,6 +25,7 @@
 #endif
 
 #include "TitleAnalyzer.h"
+#include "Strings.h"
 
 #include <regex>
 
@@ -200,6 +201,46 @@ std::string sanitize( const std::string& fileName )
         return fileName;
 
     return res;
+}
+
+std::tuple<bool, uint32_t, uint32_t, std::string, std::string>
+analyze( const std::string& title )
+{
+    struct {
+        std::regex pattern;
+        uint32_t seasonGroupIdx;
+        uint32_t episodeGroupIdx;
+    } patterns[] = {
+        {
+            std::regex{
+                "(?:S|B)(\\d{1,3})(?:\\s*E|x|\\s+E?)(\\d{1,3})",
+                std::regex_constants::icase | std::regex_constants::ECMAScript
+            }, 1, 2
+        },
+        {
+            std::regex{
+                "\\b(\\d{1,3})x(\\d{1,3})\\b",
+                std::regex_constants::icase | std::regex_constants::ECMAScript
+            }, 1, 2
+        },
+    };
+
+    for ( const auto& p : patterns )
+    {
+        std::smatch parts;
+        if ( std::regex_search( title, parts, p.pattern ) == false )
+            continue;
+
+        auto seasonStr = parts[p.seasonGroupIdx].str();
+        auto episodeStr = parts[p.episodeGroupIdx].str();
+        std::string showName = parts.prefix();
+        std::string episodeTitle = parts.suffix();
+        utils::str::trim( showName );
+        utils::str::trim( episodeTitle );
+        return std::make_tuple( true, std::stoul( seasonStr ),
+                                std::stoul( episodeStr ), showName, episodeTitle );
+    }
+    return std::make_tuple( false, 0, 0, std::string{}, std::string{} );
 }
 
 }

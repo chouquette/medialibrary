@@ -23,6 +23,7 @@
 #pragma once
 
 #include <string>
+#include <tuple>
 
 namespace medialibrary
 {
@@ -34,6 +35,17 @@ namespace title
 {
 
 std::string sanitize( const std::string& title );
+
+/**
+ * @brief analyze Attempts to extract information about a media based on its title
+ * @param title The title, preferably sanitized.
+ * @return A tuple containing: success, season number, episode number, show name, episode title
+ *
+ * The returned title will not be sanitized, so it preferably should be sanitized
+ * prior to calling this
+ */
+std::tuple<bool, uint32_t, uint32_t, std::string, std::string>
+analyze( const std::string& title );
 
 }
 
