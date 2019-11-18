@@ -20,8 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef SHOWEPISODE_H
-#define SHOWEPISODE_H
+#pragma once
 
 #include <string>
 
@@ -33,47 +32,48 @@ namespace medialibrary
 
 class ShowEpisode : public IShowEpisode, public DatabaseHelpers<ShowEpisode>
 {
-    public:
-        struct Table
-        {
-            static const std::string Name;
-            static const std::string PrimaryKeyColumn;
-            static int64_t ShowEpisode::*const PrimaryKey;
-        };
-        ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row );
-        ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, unsigned int episodeNumber, int64_t showId );
+public:
+    struct Table
+    {
+        static const std::string Name;
+        static const std::string PrimaryKeyColumn;
+        static int64_t ShowEpisode::*const PrimaryKey;
+    };
 
-        virtual int64_t id() const override;
-        virtual unsigned int episodeNumber() const override;
-        unsigned int seasonNumber() const override;
-        bool setSeasonNumber(unsigned int seasonNumber);
-        virtual const std::string& shortSummary() const override;
-        bool setShortSummary( const std::string& summary );
-        virtual const std::string& tvdbId() const override;
-        bool setTvdbId( const std::string& tvdbId );
-        virtual ShowPtr show() override;
+    ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row );
+    ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, unsigned int episodeNumber,
+                 int64_t showId );
 
-        static void createTable( sqlite::Connection* dbConnection );
-        static void createTrigger( sqlite::Connection* dbConnection );
-        static std::string schema( const std::string& tableName, uint32_t dbModel );
-        static bool checkDbModel( MediaLibraryPtr ml );
-        static std::shared_ptr<ShowEpisode> create( MediaLibraryPtr ml, int64_t mediaId, unsigned int episodeNumber, int64_t showId );
-        static ShowEpisodePtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
+    virtual int64_t id() const override;
+    virtual unsigned int episodeNumber() const override;
+    unsigned int seasonNumber() const override;
+    bool setSeasonNumber(unsigned int seasonNumber);
+    virtual const std::string& shortSummary() const override;
+    bool setShortSummary( const std::string& summary );
+    virtual const std::string& tvdbId() const override;
+    bool setTvdbId( const std::string& tvdbId );
+    virtual ShowPtr show() override;
 
-    private:
-        MediaLibraryPtr m_ml;
-        int64_t m_id;
-        const int64_t m_mediaId;
-        const unsigned int m_episodeNumber;
-        unsigned int m_seasonNumber;
-        std::string m_shortSummary;
-        std::string m_tvdbId;
-        const int64_t m_showId;
-        ShowPtr m_show;
+    static void createTable( sqlite::Connection* dbConnection );
+    static void createTrigger( sqlite::Connection* dbConnection );
+    static std::string schema( const std::string& tableName, uint32_t dbModel );
+    static bool checkDbModel( MediaLibraryPtr ml );
+    static std::shared_ptr<ShowEpisode> create( MediaLibraryPtr ml, int64_t mediaId,
+                                                unsigned int episodeNumber, int64_t showId );
+    static ShowEpisodePtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
 
-        friend struct ShowEpisode::Table;
+private:
+    MediaLibraryPtr m_ml;
+    int64_t m_id;
+    const int64_t m_mediaId;
+    const unsigned int m_episodeNumber;
+    unsigned int m_seasonNumber;
+    std::string m_shortSummary;
+    std::string m_tvdbId;
+    const int64_t m_showId;
+    ShowPtr m_show;
+
+    friend struct ShowEpisode::Table;
 };
 
 }
-
-#endif // SHOWEPISODE_H
