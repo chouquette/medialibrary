@@ -42,12 +42,12 @@ public:
 
     ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row );
     ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, uint32_t seasonId,
-                 uint32_t episodeNumber, int64_t showId );
+                 uint32_t episodeId, int64_t showId );
 
     virtual int64_t id() const override;
-    virtual unsigned int episodeNumber() const override;
-    unsigned int seasonNumber() const override;
-    bool setSeasonNumber(unsigned int seasonNumber);
+    virtual unsigned int episodeId() const override;
+    unsigned int seasonId() const override;
+    bool setSeasonId(unsigned int seasonId);
     virtual const std::string& shortSummary() const override;
     bool setShortSummary( const std::string& summary );
     virtual const std::string& tvdbId() const override;
@@ -60,7 +60,7 @@ public:
     static bool checkDbModel( MediaLibraryPtr ml );
     static std::shared_ptr<ShowEpisode> create( MediaLibraryPtr ml, int64_t mediaId,
                                                 uint32_t seasonId,
-                                                uint32_t episodeNumber,
+                                                uint32_t episodeId,
                                                 int64_t showId );
     static ShowEpisodePtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
 
@@ -68,8 +68,8 @@ private:
     MediaLibraryPtr m_ml;
     int64_t m_id;
     const int64_t m_mediaId;
-    const unsigned int m_episodeNumber;
-    unsigned int m_seasonNumber;
+    const unsigned int m_episodeId;
+    unsigned int m_seasonId;
     std::string m_shortSummary;
     std::string m_tvdbId;
     const int64_t m_showId;

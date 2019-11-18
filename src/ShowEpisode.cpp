@@ -41,8 +41,8 @@ ShowEpisode::ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
     , m_id( row.extract<decltype(m_id)>() )
     , m_mediaId( row.extract<decltype(m_mediaId)>() )
-    , m_episodeNumber( row.extract<decltype(m_episodeNumber)>() )
-    , m_seasonNumber( row.extract<decltype(m_seasonNumber)>() )
+    , m_episodeId( row.extract<decltype(m_episodeId)>() )
+    , m_seasonId( row.extract<decltype(m_seasonId)>() )
     , m_shortSummary( row.extract<decltype(m_shortSummary)>() )
     , m_tvdbId( row.extract<decltype(m_tvdbId)>() )
     , m_showId( row.extract<decltype(m_showId)>() )
@@ -55,8 +55,8 @@ ShowEpisode::ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, uint32_t seasonId
     : m_ml( ml )
     , m_id( 0 )
     , m_mediaId( mediaId )
-    , m_episodeNumber( episodeNumber )
-    , m_seasonNumber( seasonId )
+    , m_episodeId( episodeNumber )
+    , m_seasonId( seasonId )
     , m_showId( showId )
 {
 }
@@ -66,23 +66,23 @@ int64_t ShowEpisode::id() const
     return m_id;
 }
 
-unsigned int ShowEpisode::episodeNumber() const
+unsigned int ShowEpisode::episodeId() const
 {
-    return m_episodeNumber;
+    return m_episodeId;
 }
 
-unsigned int ShowEpisode::seasonNumber() const
+unsigned int ShowEpisode::seasonId() const
 {
-    return m_seasonNumber;
+    return m_seasonId;
 }
 
-bool ShowEpisode::setSeasonNumber( unsigned int seasonNumber )
+bool ShowEpisode::setSeasonId( unsigned int seasonNumber )
 {
     static const std::string req = "UPDATE " + ShowEpisode::Table::Name
             + " SET season_number = ? WHERE id_episode = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, seasonNumber, m_id ) == false )
         return false;
-    m_seasonNumber = seasonNumber;
+    m_seasonId = seasonNumber;
     return true;
 }
 

@@ -34,8 +34,8 @@ class IShowEpisode
         virtual ~IShowEpisode(){}
 
         virtual int64_t id() const = 0;
-        virtual unsigned int episodeNumber() const = 0;
-        virtual unsigned int seasonNumber() const = 0;
+        virtual unsigned int episodeId() const = 0;
+        virtual unsigned int seasonId() const = 0;
         virtual const std::string& shortSummary() const = 0;
         virtual const std::string& tvdbId() const = 0;
         virtual std::shared_ptr<IShow> show() = 0;
