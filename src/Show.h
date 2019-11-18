@@ -20,8 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef SHOW_H
-#define SHOW_H
+#pragma once
 
 #include "database/DatabaseHelpers.h"
 #include "medialibrary/IShow.h"
@@ -34,64 +33,62 @@ class ShowEpisode;
 
 class Show : public IShow, public DatabaseHelpers<Show>
 {
-    public:
-        struct Table
-        {
-            static const std::string Name;
-            static const std::string PrimaryKeyColumn;
-            static int64_t Show::*const PrimaryKey;
-        };
-        struct FtsTable
-        {
-            static const std::string Name;
-        };
+public:
+    struct Table
+    {
+        static const std::string Name;
+        static const std::string PrimaryKeyColumn;
+        static int64_t Show::*const PrimaryKey;
+    };
+    struct FtsTable
+    {
+        static const std::string Name;
+    };
 
-        Show( MediaLibraryPtr ml, sqlite::Row& row );
-        Show( MediaLibraryPtr ml, const std::string& title );
+    Show( MediaLibraryPtr ml, sqlite::Row& row );
+    Show( MediaLibraryPtr ml, const std::string& title );
 
-        virtual int64_t id() const override;
-        virtual const std::string& title() const override;
-        virtual time_t releaseDate() const override;
-        bool setReleaseDate( time_t date );
-        virtual const std::string& shortSummary() const override;
-        bool setShortSummary( const std::string& summary );
-        virtual const std::string& artworkMrl() const override;
-        bool setArtworkMrl( const std::string& artworkMrl );
-        virtual const std::string& tvdbId() const override;
-        bool setTvdbId( const std::string& summary );
-        std::shared_ptr<ShowEpisode> addEpisode( Media& media, unsigned int episodeNumber );
-        virtual Query<IMedia> episodes( const QueryParameters* params ) const override;
-        virtual Query<IMedia> searchEpisodes( const std::string& pattern,
-                                              const QueryParameters* params = nullptr ) const override;
-        virtual uint32_t nbSeasons() const override;
-        virtual uint32_t nbEpisodes() const override;
+    virtual int64_t id() const override;
+    virtual const std::string& title() const override;
+    virtual time_t releaseDate() const override;
+    bool setReleaseDate( time_t date );
+    virtual const std::string& shortSummary() const override;
+    bool setShortSummary( const std::string& summary );
+    virtual const std::string& artworkMrl() const override;
+    bool setArtworkMrl( const std::string& artworkMrl );
+    virtual const std::string& tvdbId() const override;
+    bool setTvdbId( const std::string& summary );
+    std::shared_ptr<ShowEpisode> addEpisode( Media& media, unsigned int episodeNumber );
+    virtual Query<IMedia> episodes( const QueryParameters* params ) const override;
+    virtual Query<IMedia> searchEpisodes( const std::string& pattern,
+                                          const QueryParameters* params = nullptr ) const override;
+    virtual uint32_t nbSeasons() const override;
+    virtual uint32_t nbEpisodes() const override;
 
-        static void createTable( sqlite::Connection* dbConnection );
-        static void createTriggers( sqlite::Connection* dbConnection );
-        static std::string schema( const std::string& tableName, uint32_t dbModel );
-        static bool checkDbModel( MediaLibraryPtr ml );
-        static std::shared_ptr<Show> create( MediaLibraryPtr ml, const std::string& title );
+    static void createTable( sqlite::Connection* dbConnection );
+    static void createTriggers( sqlite::Connection* dbConnection );
+    static std::string schema( const std::string& tableName, uint32_t dbModel );
+    static bool checkDbModel( MediaLibraryPtr ml );
+    static std::shared_ptr<Show> create( MediaLibraryPtr ml, const std::string& title );
 
-        static Query<IShow> listAll( MediaLibraryPtr ml, const QueryParameters* params );
-        static Query<IShow> search( MediaLibraryPtr ml, const std::string& pattern,
-                                    const QueryParameters* params );
+    static Query<IShow> listAll( MediaLibraryPtr ml, const QueryParameters* params );
+    static Query<IShow> search( MediaLibraryPtr ml, const std::string& pattern,
+                                const QueryParameters* params );
 
-    private:
-        static std::string orderBy( const QueryParameters* params );
+private:
+    static std::string orderBy( const QueryParameters* params );
 
-    protected:
-        MediaLibraryPtr m_ml;
+protected:
+    MediaLibraryPtr m_ml;
 
-        int64_t m_id;
-        const std::string m_title;
-        time_t m_releaseDate;
-        std::string m_shortSummary;
-        std::string m_artworkMrl;
-        std::string m_tvdbId;
+    int64_t m_id;
+    const std::string m_title;
+    time_t m_releaseDate;
+    std::string m_shortSummary;
+    std::string m_artworkMrl;
+    std::string m_tvdbId;
 
-        friend struct Show::Table;
+    friend struct Show::Table;
 };
 
 }
-
-#endif // SHOW_H
