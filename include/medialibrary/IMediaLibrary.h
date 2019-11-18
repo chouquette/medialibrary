@@ -36,6 +36,7 @@ namespace medialibrary
 
 static constexpr auto UnknownArtistID = 1u;
 static constexpr auto VariousArtistID = 2u;
+static constexpr auto UnknownShowID = 1u;
 
 struct SearchAggregate
 {

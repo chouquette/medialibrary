@@ -41,6 +41,7 @@ class Album;
 class Genre;
 class MediaLibrary;
 class ModificationNotifier;
+class Show;
 
 namespace parser
 {
@@ -52,6 +53,7 @@ public:
 
 protected:
     bool cacheUnknownArtist();
+    bool cacheUnknownShow();
     virtual bool initialize( IMediaLibrary* ml ) override;
     virtual Status run( IItem& item ) override;
     virtual const char* name() const override;
@@ -94,6 +96,7 @@ private:
     std::shared_ptr<Artist> m_unknownArtist;
     std::shared_ptr<Artist> m_variousArtists;
     std::shared_ptr<Album> m_previousAlbum;
+    std::shared_ptr<Show> m_unknownShow;
     int64_t m_previousFolderId;
     std::atomic_bool m_stopped;
 };

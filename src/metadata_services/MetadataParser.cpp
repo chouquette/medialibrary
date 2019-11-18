@@ -75,11 +75,22 @@ bool MetadataAnalyzer::cacheUnknownArtist()
     return m_unknownArtist != nullptr;
 }
 
+bool MetadataAnalyzer::cacheUnknownShow()
+{
+    m_unknownShow = Show::fetch( m_ml, UnknownShowID );
+    if ( m_unknownShow == nullptr )
+    {
+        LOG_ERROR( "Failed to cache unknown show" );
+        return false;
+    }
+    return true;
+}
+
 bool MetadataAnalyzer::initialize( IMediaLibrary* ml )
 {
     m_ml = static_cast<MediaLibrary*>( ml );
     m_notifier = m_ml->getNotifier();
-    return cacheUnknownArtist();
+    return cacheUnknownArtist() && cacheUnknownShow();
 }
 
 int MetadataAnalyzer::toInt( IItem& item, IItem::Metadata meta )
@@ -1353,6 +1364,7 @@ void MetadataAnalyzer::onRestarted()
 {
     // Reset locally cached entities
     cacheUnknownArtist();
+    cacheUnknownShow();
     m_stopped.store( false );
 }
 

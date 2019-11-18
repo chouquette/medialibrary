@@ -74,6 +74,7 @@ public:
     static Query<IShow> listAll( MediaLibraryPtr ml, const QueryParameters* params );
     static Query<IShow> search( MediaLibraryPtr ml, const std::string& pattern,
                                 const QueryParameters* params );
+    static bool createUnknownShow( sqlite::Connection* dbConn );
 
 private:
     static std::string orderBy( const QueryParameters* params );

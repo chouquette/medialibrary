@@ -342,4 +342,10 @@ Query<IShow> Show::search( MediaLibraryPtr ml, const std::string& pattern,
                                     sqlite::Tools::sanitizePattern( pattern ) );
 }
 
+bool Show::createUnknownShow( sqlite::Connection* dbConn )
+{
+    const std::string req = "INSERT INTO " + Table::Name + " (id_show) VALUES(?)";
+    return sqlite::Tools::executeInsert( dbConn, req, UnknownShowID );
+}
+
 }

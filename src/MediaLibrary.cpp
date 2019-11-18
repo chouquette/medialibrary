@@ -179,6 +179,8 @@ bool MediaLibrary::createAllTables( uint32_t dbModelVersion )
     Album::createTable( dbConn );
     AlbumTrack::createTable( dbConn );
     Show::createTable( dbConn );
+    if ( Show::createUnknownShow( dbConn ) == false )
+        return false;
     ShowEpisode::createTable( dbConn );
     Movie::createTable( dbConn );
     VideoTrack::createTable( dbConn );
@@ -2097,6 +2099,7 @@ bool MediaLibrary::forceRescan()
              parser::Task::removePlaylistContentTasks( this ) == false ||
              parser::Task::resetParsing( this ) == false ||
              Artist::createDefaultArtists( getConn() ) == false ||
+             Show::createUnknownShow( getConn() ) == false ||
              Media::resetSubTypes( this ) == false ||
              Thumbnail::deleteAll( this ) == false )
         {
