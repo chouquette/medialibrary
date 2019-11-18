@@ -344,3 +344,35 @@ TEST_F( Shows, CheckShowEpisodeDbModel )
     auto res = ShowEpisode::checkDbModel( ml.get() );
     ASSERT_TRUE( res );
 }
+
+TEST_F( Shows, NbEpisodes )
+{
+    auto show = ml->createShow( "The Otters Show" );
+    ASSERT_EQ( 0u, show->nbEpisodes() );
+
+    auto media = std::static_pointer_cast<Media>( ml->addMedia( "Fluffy otters.mkv",
+                                                                IMedia::Type::Video ) );
+    show->addEpisode( *media, 1 );
+    ASSERT_EQ( 1u, show->nbEpisodes() );
+
+    Reload();
+
+    show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
+    ASSERT_EQ( 1u, show->nbEpisodes() );
+
+    auto media2 = std::static_pointer_cast<Media>( ml->addMedia( "Juggling otters.mkv",
+                                                                 IMedia::Type::Video ) );
+    show->addEpisode( *media2, 2 );
+    ASSERT_EQ( 2u, show->nbEpisodes() );
+
+    Reload();
+
+    show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
+    ASSERT_EQ( 2u, show->nbEpisodes() );
+
+    ml->deleteMedia( media->id() );
+    ml->deleteMedia( media2->id() );
+
+    show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
+    ASSERT_EQ( 0u, show->nbEpisodes() );
+}

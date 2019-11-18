@@ -47,3 +47,7 @@ Media::schema( Media::Table::Name, 23 ),
 
 "DROP TABLE " + Media::Table::Name + "_backup",
 
+/******* Migrate show table *******/
+
+"DROP TABLE " + Show::Table::Name,
+Show::schema( Show::Table::Name, 23 ),

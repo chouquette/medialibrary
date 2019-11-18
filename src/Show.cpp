@@ -45,6 +45,7 @@ Show::Show( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
     , m_id( row.extract<decltype(m_id)>() )
     , m_title( row.extract<decltype(m_title)>() )
+    , m_nbEpisodes( row.extract<decltype(m_nbEpisodes)>() )
     , m_releaseDate( row.extract<decltype(m_releaseDate)>() )
     , m_shortSummary( row.extract<decltype(m_shortSummary)>() )
     , m_artworkMrl( row.extract<decltype(m_artworkMrl)>() )
@@ -57,6 +58,7 @@ Show::Show( MediaLibraryPtr ml, const std::string& name )
     : m_ml( ml )
     , m_id( 0 )
     , m_title( name )
+    , m_nbEpisodes( 0 )
     , m_releaseDate( 0 )
 {
 }
@@ -136,6 +138,7 @@ std::shared_ptr<ShowEpisode> Show::addEpisode( Media& media, unsigned int episod
     auto episode = ShowEpisode::create( m_ml, media.id(), episodeNumber, m_id );
     media.setShowEpisode( episode );
     media.save();
+    m_nbEpisodes++;
     return episode;
 }
 
@@ -182,7 +185,7 @@ uint32_t Show::nbSeasons() const
 
 uint32_t Show::nbEpisodes() const
 {
-    return 0;
+    return m_nbEpisodes;
 }
 
 void Show::createTable( sqlite::Connection* dbConnection )
@@ -195,7 +198,7 @@ void Show::createTable( sqlite::Connection* dbConnection )
         sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-void Show::createTriggers( sqlite::Connection* dbConnection )
+void Show::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion )
 {
     const std::string insertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_show_fts"
             " AFTER INSERT ON " + Show::Table::Name +
@@ -209,9 +212,27 @@ void Show::createTriggers( sqlite::Connection* dbConnection )
             " END";
     sqlite::Tools::executeRequest( dbConnection, insertTrigger );
     sqlite::Tools::executeRequest( dbConnection, deleteTrigger );
+
+    if ( dbModelVersion < 23 )
+        return;
+
+    const std::string incrementNbEpisodeTrigger = "CREATE TRIGGER IF NOT EXISTS"
+            " show_increment_nb_episode AFTER INSERT ON " + ShowEpisode::Table::Name +
+            " BEGIN"
+            " UPDATE " + Table::Name + " SET nb_episodes = nb_episodes + 1"
+                " WHERE id_show = new.show_id;"
+            " END";
+    const std::string decrementNbEpisodeTrigger = "CREATE TRIGGER IF NOT EXISTS"
+            " show_decrement_nb_episode AFTER DELETE ON " + ShowEpisode::Table::Name +
+            " BEGIN"
+            " UPDATE " + Table::Name + " SET nb_episodes = nb_episodes - 1"
+                " WHERE id_show = old.show_id;"
+            " END";
+    sqlite::Tools::executeRequest( dbConnection, incrementNbEpisodeTrigger );
+    sqlite::Tools::executeRequest( dbConnection, decrementNbEpisodeTrigger );
 }
 
-std::string Show::schema( const std::string& tableName, uint32_t )
+std::string Show::schema( const std::string& tableName, uint32_t dbModelVersion )
 {
     if ( tableName == FtsTable::Name )
     {
@@ -219,10 +240,23 @@ std::string Show::schema( const std::string& tableName, uint32_t )
                " USING FTS3(title)";
     }
     assert( tableName == Table::Name );
+    if ( dbModelVersion < 23 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+           "id_show INTEGER PRIMARY KEY AUTOINCREMENT,"
+           "title TEXT,"
+           "release_date UNSIGNED INTEGER,"
+           "short_summary TEXT,"
+           "artwork_mrl TEXT,"
+           "tvdb_id TEXT"
+        ")";
+    }
     return "CREATE TABLE " + Table::Name +
     "("
        "id_show INTEGER PRIMARY KEY AUTOINCREMENT,"
        "title TEXT,"
+       "nb_episodes UNSIGNED INTEGER NOT NULL DEFAULT 0,"
        "release_date UNSIGNED INTEGER,"
        "short_summary TEXT,"
        "artwork_mrl TEXT,"

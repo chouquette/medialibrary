@@ -66,7 +66,7 @@ public:
     virtual uint32_t nbEpisodes() const override;
 
     static void createTable( sqlite::Connection* dbConnection );
-    static void createTriggers( sqlite::Connection* dbConnection );
+    static void createTriggers(sqlite::Connection* dbConnection , uint32_t dbModelVersion);
     static std::string schema( const std::string& tableName, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     static std::shared_ptr<Show> create( MediaLibraryPtr ml, const std::string& title );
@@ -83,6 +83,7 @@ protected:
 
     int64_t m_id;
     const std::string m_title;
+    uint32_t m_nbEpisodes;
     time_t m_releaseDate;
     std::string m_shortSummary;
     std::string m_artworkMrl;
