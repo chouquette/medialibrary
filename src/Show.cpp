@@ -146,7 +146,8 @@ Query<IMedia> Show::episodes( const QueryParameters* params ) const
 {
     std::string req = "FROM " + Media::Table::Name + " med "
             " INNER JOIN " + ShowEpisode::Table::Name + " ep ON ep.media_id = med.id_media "
-            + " WHERE ep.show_id = ?";
+            + " WHERE ep.show_id = ?"
+            " AND med.is_present != 0";
     std::string orderBy = " ORDER BY ";
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
     auto desc = params != nullptr ? params->desc : false;
