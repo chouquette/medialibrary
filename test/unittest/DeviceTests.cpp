@@ -45,6 +45,7 @@ protected:
     static const std::string RemovableDeviceMountpoint;
     std::shared_ptr<mock::FileSystemFactory> fsMock;
     std::unique_ptr<mock::WaitForDiscoveryComplete> cbMock;
+    static constexpr auto NbRemovableMedia = 4u;
 
 protected:
     virtual void SetUp() override
@@ -130,7 +131,7 @@ TEST_F( DeviceFs, RemoveDisk )
     ASSERT_TRUE( discovered );
 
     auto files = ml->files();
-    ASSERT_EQ( 7u, files.size() );
+    ASSERT_EQ( 3u + NbRemovableMedia, files.size() );
 
     auto media = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, media );
@@ -153,7 +154,7 @@ TEST_F( DeviceFs, UnmountDisk )
     ASSERT_TRUE( discovered );
 
     auto files = ml->files();
-    ASSERT_EQ( 7u, files.size() );
+    ASSERT_EQ( 3u + NbRemovableMedia, files.size() );
 
     auto media = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, media );
@@ -173,7 +174,7 @@ TEST_F( DeviceFs, UnmountDisk )
     Reload();
 
     files = ml->files();
-    ASSERT_EQ( 7u, files.size() );
+    ASSERT_EQ( 3u + NbRemovableMedia, files.size() );
 
     media = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, media );
@@ -186,7 +187,7 @@ TEST_F( DeviceFs, ReplugDisk )
     ASSERT_TRUE( discovered );
 
     auto files = ml->files();
-    ASSERT_EQ( 7u, files.size() );
+    ASSERT_EQ( 3u + NbRemovableMedia, files.size() );
 
     auto media = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, media );
@@ -205,7 +206,7 @@ TEST_F( DeviceFs, ReplugDisk )
     Reload();
 
     files = ml->files();
-    ASSERT_EQ( 7u, files.size() );
+    ASSERT_EQ( 3u + NbRemovableMedia, files.size() );
 
     media = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, media );
@@ -218,7 +219,7 @@ TEST_F( DeviceFs, ReplugDiskWithExtraFiles )
     ASSERT_TRUE( discovered );
 
     auto files = ml->files();
-    ASSERT_EQ( 7u, files.size() );
+    ASSERT_EQ( 3u + NbRemovableMedia, files.size() );
 
     auto device = fsMock->removeDevice( RemovableDeviceUuid );
 
@@ -233,7 +234,7 @@ TEST_F( DeviceFs, ReplugDiskWithExtraFiles )
     Reload();
 
     files = ml->files();
-    ASSERT_EQ( 8u, files.size() );
+    ASSERT_EQ( 3u + NbRemovableMedia + 1, files.size() );
 }
 
 TEST_F( DeviceFs, RemoveAlbumAndArtist )
@@ -495,7 +496,7 @@ TEST_F( DeviceFs, OutdatedDevices )
     bool discovered = cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
-    ASSERT_EQ( 7u, ml->files().size() );
+    ASSERT_EQ( 3u + NbRemovableMedia, ml->files().size() );
     auto oldMediaCount = ml->files().size();
 
     ml->outdateAllDevices();
