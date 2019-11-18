@@ -152,22 +152,6 @@ TEST_F( Shows, FetchShowFromEpisode )
     ASSERT_EQ( s->title(), s2->title() );
 }
 
-TEST_F( Shows, SetEpisodeSeasonNumber )
-{
-    auto show = ml->createShow( "show" );
-    auto media = std::static_pointer_cast<Media>( ml->addMedia( "episode.mkv", IMedia::Type::Video ) );
-    auto e = show->addEpisode( *media, 1, 1 );
-    bool res = e->setSeasonId( 42 );
-    ASSERT_TRUE( res );
-    ASSERT_EQ( e->seasonId(), 42u );
-
-    Reload();
-
-    show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
-    auto episodes = show->episodes( nullptr )->all();
-    ASSERT_EQ( episodes[0]->showEpisode()->seasonId(), e->seasonId() );
-}
-
 TEST_F( Shows, SetEpisodeSummary )
 {
     auto show = ml->createShow( "show" );
@@ -244,16 +228,13 @@ TEST_F( Shows, ListEpisodes )
 {
     auto show = ml->createShow( "show" );
     auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "episode1.avi", IMedia::Type::Video ) );
-    auto s02e01 = show->addEpisode( *m1, 1, 1 );
-    s02e01->setSeasonId( 2 );
+    auto s02e01 = show->addEpisode( *m1, 2, 1 );
 
     auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "episode2.avi", IMedia::Type::Video ) );
     auto s01e01 = show->addEpisode( *m2, 1, 1 );
-    s01e01->setSeasonId( 1 );
 
     auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "episode3.avi", IMedia::Type::Video ) );
     auto s01e02 = show->addEpisode( *m3, 1, 2 );
-    s01e02->setSeasonId( 1 );
 
     auto episodes = show->episodes( nullptr )->all();
     ASSERT_EQ( 3u, episodes.size() );

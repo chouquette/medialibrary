@@ -47,7 +47,6 @@ public:
     virtual int64_t id() const override;
     virtual unsigned int episodeId() const override;
     unsigned int seasonId() const override;
-    bool setSeasonId(unsigned int seasonId);
     virtual const std::string& shortSummary() const override;
     bool setShortSummary( const std::string& summary );
     virtual const std::string& tvdbId() const override;
@@ -69,7 +68,7 @@ private:
     int64_t m_id;
     const int64_t m_mediaId;
     const unsigned int m_episodeId;
-    unsigned int m_seasonId;
+    const unsigned int m_seasonId;
     std::string m_shortSummary;
     std::string m_tvdbId;
     const int64_t m_showId;

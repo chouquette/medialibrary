@@ -76,16 +76,6 @@ unsigned int ShowEpisode::seasonId() const
     return m_seasonId;
 }
 
-bool ShowEpisode::setSeasonId( unsigned int seasonNumber )
-{
-    static const std::string req = "UPDATE " + ShowEpisode::Table::Name
-            + " SET season_number = ? WHERE id_episode = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, seasonNumber, m_id ) == false )
-        return false;
-    m_seasonId = seasonNumber;
-    return true;
-}
-
 const std::string& ShowEpisode::shortSummary() const
 {
     return m_shortSummary;
