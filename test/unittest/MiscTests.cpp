@@ -64,6 +64,7 @@ namespace
         "is_media_device_present",
         "show_decrement_nb_episode",
         "show_increment_nb_episode",
+        "show_update_is_present",
         "update_folder_nb_media_on_delete",
         "update_folder_nb_media_on_insert", "update_folder_nb_media_on_update",
         "update_genre_on_new_track", "update_genre_on_track_deleted",

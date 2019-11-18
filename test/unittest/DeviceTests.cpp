@@ -31,6 +31,7 @@
 #include "File.h"
 #include "Media.h"
 #include "Artist.h"
+#include "Show.h"
 #include "mocks/FileSystem.h"
 #include "mocks/DiscovererCbMock.h"
 
@@ -45,7 +46,7 @@ protected:
     static const std::string RemovableDeviceMountpoint;
     std::shared_ptr<mock::FileSystemFactory> fsMock;
     std::unique_ptr<mock::WaitForDiscoveryComplete> cbMock;
-    static constexpr auto NbRemovableMedia = 4u;
+    static constexpr auto NbRemovableMedia = 6u;
 
 protected:
     virtual void SetUp() override
@@ -59,6 +60,8 @@ protected:
         fsMock->addFile( RemovableDeviceMountpoint + "removablefile2.mp3" );
         fsMock->addFile( RemovableDeviceMountpoint + "removablefile3.mp3" );
         fsMock->addFile( RemovableDeviceMountpoint + "removablefile4.mp3" );
+        fsMock->addFile( RemovableDeviceMountpoint + "removablevideo.mkv" );
+        fsMock->addFile( RemovableDeviceMountpoint + "removablevideo2.mkv" );
         fsFactory = fsMock;
         mlCb = cbMock.get();
         Tests::SetUp();
@@ -516,4 +519,79 @@ TEST_F( DeviceFs, RemovableMountPointName )
     auto f = ml->folder( RemovableDeviceMountpoint );
     ASSERT_NE( nullptr, f );
     ASSERT_NE( 0u, f->name().size() );
+}
+
+TEST_F( DeviceFs, RemoveShowEpisodes )
+{
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    auto show1 = ml->createShow( "Show1" );
+    auto media1 = std::static_pointer_cast<Media>(
+                ml->media( RemovableDeviceMountpoint + "removablevideo.mkv" ) );
+    show1->addEpisode( *media1, 1 );
+    auto media2 = std::static_pointer_cast<Media>(
+                ml->media( RemovableDeviceMountpoint + "removablevideo2.mkv" ) );
+    show1->addEpisode( *media2, 2 );
+
+    auto showsQuery = ml->shows( nullptr );
+    ASSERT_EQ( 1u, showsQuery->count() );
+    ASSERT_EQ( 1u, showsQuery->all().size() );
+
+    auto device = fsMock->removeDevice( RemovableDeviceUuid );
+    Reload();
+
+    showsQuery = ml->shows( nullptr );
+    ASSERT_EQ( 0u, showsQuery->count() );
+    ASSERT_EQ( 0u, showsQuery->all().size() );
+
+    fsMock->addDevice( device );
+    Reload();
+
+    showsQuery = ml->shows( nullptr );
+    ASSERT_EQ( 1u, showsQuery->count() );
+    ASSERT_EQ( 1u, showsQuery->all().size() );
+}
+
+TEST_F( DeviceFs, PartialRemoveShowEpisodes )
+{
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    auto show1 = ml->createShow( "Show1" );
+    auto media1 = std::static_pointer_cast<Media>(
+                ml->media( mock::FileSystemFactory::Root + "video.avi" ) );
+    show1->addEpisode( *media1, 1 );
+    auto media2 = std::static_pointer_cast<Media>(
+                ml->media( RemovableDeviceMountpoint + "removablevideo.mkv" ) );
+    show1->addEpisode( *media2, 2 );
+
+    auto shows = ml->shows( nullptr )->all();
+    ASSERT_EQ( 1u, shows.size() );
+
+    auto episodeQuery = shows[0]->episodes( nullptr );
+    ASSERT_EQ( 2u, episodeQuery->count() );
+    ASSERT_EQ( 2u, episodeQuery->all().size() );
+
+    auto device = fsMock->removeDevice( RemovableDeviceUuid );
+    Reload();
+
+    shows = ml->shows( nullptr )->all();
+    ASSERT_EQ( 1u, shows.size() );
+
+    episodeQuery = shows[0]->episodes( nullptr );
+    ASSERT_EQ( 1u, episodeQuery->count() );
+    ASSERT_EQ( 1u, episodeQuery->all().size() );
+
+    fsMock->addDevice( device );
+    Reload();
+
+    shows = ml->shows( nullptr )->all();
+    ASSERT_EQ( 1u, shows.size() );
+
+    episodeQuery = shows[0]->episodes( nullptr );
+    ASSERT_EQ( 2u, episodeQuery->count() );
+    ASSERT_EQ( 2u, episodeQuery->all().size() );
 }

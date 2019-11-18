@@ -202,10 +202,19 @@ TEST_F( Shows, SetEpisodeTvdbId )
 TEST_F( Shows, ListAll )
 {
     auto show1 = ml->createShow( "aaaa" );
+    auto media1 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
+    show1->addEpisode( *media1, 1 );
     show1->setReleaseDate( 5 );
     auto show2 = ml->createShow( "zzzz" );
+    auto media2 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    show2->addEpisode( *media2, 1 );
     show2->setReleaseDate( 1 );
     auto show3 = ml->createShow( "pppp" );
+    auto media3 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media3.mkv", IMedia::Type::Video ) );
+    show3->addEpisode( *media3, 1 );
     show3->setReleaseDate( 10 );
 
     auto shows = ml->shows( nullptr )->all();
@@ -262,8 +271,14 @@ TEST_F( Shows, ListEpisodes )
 TEST_F( Shows, Search )
 {
     auto show1 = ml->createShow( "Cute fluffy sea otters" );
+    auto media1 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
+    show1->addEpisode( *media1, 1 );
     show1->setReleaseDate( 10 );
     auto show2 = ml->createShow( "Less cute less fluffy naked mole rats" );
+    auto media2 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    show2->addEpisode( *media2, 1 );
     show2->setReleaseDate( 100 );
 
     auto shows = ml->searchShows( "otters" )->all();
@@ -280,6 +295,9 @@ TEST_F( Shows, Search )
 TEST_F( Shows, RemoveFromFts )
 {
     auto show1 = ml->createShow( "The otters show" );
+    auto media1 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
+    show1->addEpisode( *media1, 1 );
 
     auto shows = ml->searchShows( "otters" )->all();
     ASSERT_EQ( 1u, shows.size() );

@@ -50,8 +50,9 @@ Show::Show( MediaLibraryPtr ml, sqlite::Row& row )
     , m_shortSummary( row.extract<decltype(m_shortSummary)>() )
     , m_artworkMrl( row.extract<decltype(m_artworkMrl)>() )
     , m_tvdbId( row.extract<decltype(m_tvdbId)>() )
+    // Don't load is_present
 {
-    assert( row.hasRemainingColumns() == false );
+    assert( row.nbColumns() == 8 );
 }
 
 Show::Show( MediaLibraryPtr ml, const std::string& name )
@@ -220,17 +221,33 @@ void Show::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVer
     const std::string incrementNbEpisodeTrigger = "CREATE TRIGGER IF NOT EXISTS"
             " show_increment_nb_episode AFTER INSERT ON " + ShowEpisode::Table::Name +
             " BEGIN"
-            " UPDATE " + Table::Name + " SET nb_episodes = nb_episodes + 1"
+            " UPDATE " + Table::Name +
+                " SET nb_episodes = nb_episodes + 1, is_present = is_present + 1"
                 " WHERE id_show = new.show_id;"
             " END";
     const std::string decrementNbEpisodeTrigger = "CREATE TRIGGER IF NOT EXISTS"
             " show_decrement_nb_episode AFTER DELETE ON " + ShowEpisode::Table::Name +
             " BEGIN"
-            " UPDATE " + Table::Name + " SET nb_episodes = nb_episodes - 1"
+            " UPDATE " + Table::Name +
+                " SET nb_episodes = nb_episodes - 1, is_present = is_present - 1"
                 " WHERE id_show = old.show_id;"
+            " END";
+    const std::string updateIsPresentTrigger = "CREATE TRIGGER IF NOT EXISTS"
+            " show_update_is_present AFTER UPDATE OF "
+                "is_present ON " + Media::Table::Name +
+            " WHEN new.subtype = " +
+                std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
+                                    IMedia::SubType::ShowEpisode ) ) +
+            " AND new.is_present != old.is_present"
+            " BEGIN "
+            " UPDATE " + Table::Name + " SET is_present=is_present +"
+                " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
+                " WHERE id_show = (SELECT show_id FROM " + ShowEpisode::Table::Name +
+                    " WHERE media_id = new.id_media);"
             " END";
     sqlite::Tools::executeRequest( dbConnection, incrementNbEpisodeTrigger );
     sqlite::Tools::executeRequest( dbConnection, decrementNbEpisodeTrigger );
+    sqlite::Tools::executeRequest( dbConnection, updateIsPresentTrigger );
 }
 
 std::string Show::schema( const std::string& tableName, uint32_t dbModelVersion )
@@ -261,7 +278,9 @@ std::string Show::schema( const std::string& tableName, uint32_t dbModelVersion 
        "release_date UNSIGNED INTEGER,"
        "short_summary TEXT,"
        "artwork_mrl TEXT,"
-       "tvdb_id TEXT"
+       "tvdb_id TEXT,"
+       "is_present UNSIGNED INTEGER NOT NULL DEFAULT 0 "
+            "CHECK(is_present <= nb_episodes)"
     ")";
 }
 
@@ -287,7 +306,7 @@ std::shared_ptr<Show> Show::create( MediaLibraryPtr ml, const std::string& name 
 
 Query<IShow> Show::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
-    std::string req = "FROM " + Show::Table::Name;
+    std::string req = "FROM " + Show::Table::Name + " WHERE is_present != 0";
     return make_query<Show, IShow>( ml, "*", std::move( req ), orderBy( params ) );
 }
 
@@ -317,7 +336,7 @@ Query<IShow> Show::search( MediaLibraryPtr ml, const std::string& pattern,
 {
     std::string req = "FROM " + Show::Table::Name + " WHERE id_show IN"
             "(SELECT rowid FROM " + Show::FtsTable::Name + " WHERE " +
-            Show::FtsTable::Name + " MATCH ?)";
+            Show::FtsTable::Name + " MATCH ?) AND is_present != 0";
     return make_query<Show, IShow>( ml, "*", std::move( req ),
                                     orderBy( params ),
                                     sqlite::Tools::sanitizePattern( pattern ) );
