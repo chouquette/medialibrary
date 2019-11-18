@@ -429,11 +429,11 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
     // with a video file, we might be refreshing that media, and it might already
     // have a title, so let's analyse the filename again instead.
     auto title = utils::title::sanitize( item.media()->fileName() );
+    auto showInfo = utils::title::analyze( title );
 
-    const auto& showName = item.meta( IItem::Metadata::ShowName );
     const auto& artworkMrl = item.meta( IItem::Metadata::ArtworkUrl );
 
-    auto res = sqlite::Tools::withRetries( 3, [this, &showName, &title, media, &item, &artworkMrl]() {
+    auto res = sqlite::Tools::withRetries( 3, [this, &showInfo, &title, media, &artworkMrl]() {
         auto t = m_ml->getConn()->newTransaction();
         media->setTitleBuffered( title );
 
@@ -441,31 +441,23 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
             media->setThumbnail( artworkMrl, Thumbnail::Origin::Media,
                                  ThumbnailSizeType::Thumbnail, false );
 
-        if ( showName.length() != 0 )
+        if ( std::get<0>( showInfo ) == true )
         {
-            const std::string req = "SELECT * FROM " + Show::Table::Name +
-                    " WHERE title = ?";
+            auto seasonId = std::get<1>( showInfo );
+            auto episodeId = std::get<2>( showInfo );
+            auto showName = std::get<3>( showInfo );
+            auto episodeTitle = std::get<4>( showInfo );
 
-            auto shows = Show::fetchAll<Show>( m_ml, req, showName );
-            std::shared_ptr<Show> show;
-            if ( shows.empty() == true )
+            auto show = findShow( showName );
+            if ( show == nullptr )
             {
                 show = m_ml->createShow( showName );
                 if ( show == nullptr )
                     return false;
             }
-            else
-            {
-                //FIXME: Discriminate amongst shows
-                LOG_WARN( "Defaulting to first matching show" );
-                show = shows[0];
-            }
-            auto episode = toInt( item, IItem::Metadata::Episode );
-            if ( episode != 0 )
-            {
-                std::shared_ptr<Show> s = std::static_pointer_cast<Show>( show );
-                s->addEpisode( *media, 0, episode );
-            }
+            show->addEpisode( *media, seasonId, episodeId );
+            if ( episodeTitle.empty() == false )
+                media->setTitleBuffered( episodeTitle );
         }
         else
         {
@@ -986,6 +978,21 @@ std::shared_ptr<Thumbnail> MetadataAnalyzer::findAlbumArtwork( IItem& item )
     return std::make_shared<Thumbnail>( m_ml, fileFs->mrl(),
                                         Thumbnail::Origin::CoverFile,
                                         ThumbnailSizeType::Thumbnail, false );
+}
+
+std::shared_ptr<Show> MetadataAnalyzer::findShow( const std::string& showName ) const
+{
+    if ( showName.empty() == true )
+        return m_unknownShow;
+
+    const std::string req = "SELECT * FROM " + Show::Table::Name +
+            " WHERE title = ?";
+
+    auto shows = Show::fetchAll<Show>( m_ml, req, showName );
+    if ( shows.empty() == true )
+        return nullptr;
+    //FIXME: Discriminate amongst shows
+    return shows[0];
 }
 
 /* Album handling */
