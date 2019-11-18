@@ -50,13 +50,13 @@ ShowEpisode::ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row )
     assert( row.hasRemainingColumns() == false );
 }
 
-ShowEpisode::ShowEpisode( MediaLibraryPtr ml, int64_t mediaId,
-                          unsigned int episodeNumber, int64_t showId )
+ShowEpisode::ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, uint32_t seasonId,
+                          uint32_t episodeNumber, int64_t showId )
     : m_ml( ml )
     , m_id( 0 )
     , m_mediaId( mediaId )
     , m_episodeNumber( episodeNumber )
-    , m_seasonNumber( 0 )
+    , m_seasonNumber( seasonId )
     , m_showId( showId )
 {
 }
@@ -164,13 +164,17 @@ bool ShowEpisode::checkDbModel(MediaLibraryPtr ml)
                                        Table::Name );
 }
 
-std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml, int64_t mediaId,
-                                                  unsigned int episodeNumber, int64_t showId )
+std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml,
+                                                  int64_t mediaId,
+                                                  uint32_t seasonId,
+                                                  uint32_t episodeId,
+                                                  int64_t showId )
 {
-    auto episode = std::make_shared<ShowEpisode>( ml, mediaId, episodeNumber, showId );
+    auto episode = std::make_shared<ShowEpisode>( ml, mediaId, seasonId, episodeId,
+                                                  showId );
     static const std::string req = "INSERT INTO " + ShowEpisode::Table::Name
-            + "(media_id, episode_number, show_id) VALUES(?, ?, ?)";
-    if ( insert( ml, episode, req, mediaId, episodeNumber, showId ) == false )
+            + "(media_id, episode_number, season_number, show_id) VALUES(?, ?, ?, ?)";
+    if ( insert( ml, episode, req, mediaId, episodeId, seasonId, showId ) == false )
         return nullptr;
     return episode;
 }

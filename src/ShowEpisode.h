@@ -41,8 +41,8 @@ public:
     };
 
     ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row );
-    ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, unsigned int episodeNumber,
-                 int64_t showId );
+    ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, uint32_t seasonId,
+                 uint32_t episodeNumber, int64_t showId );
 
     virtual int64_t id() const override;
     virtual unsigned int episodeNumber() const override;
@@ -59,7 +59,9 @@ public:
     static std::string schema( const std::string& tableName, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     static std::shared_ptr<ShowEpisode> create( MediaLibraryPtr ml, int64_t mediaId,
-                                                unsigned int episodeNumber, int64_t showId );
+                                                uint32_t seasonId,
+                                                uint32_t episodeNumber,
+                                                int64_t showId );
     static ShowEpisodePtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
 
 private:
