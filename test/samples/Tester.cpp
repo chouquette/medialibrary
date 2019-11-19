@@ -33,6 +33,8 @@
 #include "factory/DeviceListerFactory.h"
 #include "medialibrary/filesystem/IFile.h"
 #include "medialibrary/filesystem/IDirectory.h"
+#include "medialibrary/IShow.h"
+#include "medialibrary/IShowEpisode.h"
 
 #include <algorithm>
 
@@ -236,6 +238,10 @@ void Tests::runChecks(const rapidjson::Document& doc)
         auto row = stmt.row();
         row >> nbThumbnails;
         ASSERT_EQ( expected["nbThumbnails"].GetUint(), nbThumbnails );
+    }
+    if ( expected.HasMember( "shows" ) == true )
+    {
+        checkShows( expected["shows"], m_ml->shows( nullptr )->all() );
     }
 }
 
@@ -607,6 +613,60 @@ void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& 
         ASSERT_EQ( album->id(), trackAlbum->id() );
     }
     found = true;
+}
+
+void Tests::checkShows(const rapidjson::Value& expectedShows, std::vector<ShowPtr> shows)
+{
+    for ( auto i = 0u; i < expectedShows.Size(); ++i )
+    {
+        auto& expectedShow = expectedShows[i];
+        ASSERT_TRUE( expectedShow.HasMember( "name" ) );
+        auto showName = expectedShow["name"].GetString();
+        auto showIt = std::find_if( cbegin( shows ), cend( shows ),
+                                  [showName]( const ShowPtr& s ) {
+            if ( strlen( showName ) == 0 )
+                return s->id() == UnknownShowID;
+            return s->title() == showName;
+        });
+        ASSERT_NE( showIt, cend( shows ) );
+        auto show = *showIt;
+        if ( expectedShow.HasMember( "nbEpisodes" ) == true )
+        {
+            ASSERT_EQ( expectedShow["nbEpisodes"].GetUint(), show->nbEpisodes() );
+        }
+        if ( expectedShow.HasMember( "episodes" ) == true )
+        {
+            auto episodes = show->episodes( nullptr )->all();
+            ASSERT_FALSE( episodes.empty() );
+            checkShowEpisodes( expectedShow["episodes"], std::move( episodes ) );
+        }
+    }
+}
+
+void Tests::checkShowEpisodes( const rapidjson::Value& expectedEpisodes,
+                               std::vector<MediaPtr> episodes )
+{
+    for ( auto i = 0u; i < expectedEpisodes.Size(); ++i )
+    {
+        auto& expectedEpisode = expectedEpisodes[i];
+        ASSERT_TRUE( expectedEpisode.HasMember( "seasonId" ) );
+        ASSERT_TRUE( expectedEpisode.HasMember( "episodeId" ) );
+        auto seasonId = expectedEpisode["seasonId"].GetUint();
+        auto episodeId = expectedEpisode["episodeId"].GetUint();
+        auto episodeIt = std::find_if( cbegin( episodes ), cend( episodes ),
+                                       [seasonId, episodeId](const MediaPtr m) {
+            auto showEp = m->showEpisode();
+            if ( showEp == nullptr )
+                return false;
+            return showEp->seasonId() == seasonId && showEp->episodeId() == episodeId;
+        });
+        ASSERT_NE( episodeIt, cend( episodes ) );
+        auto episode = *episodeIt;
+        if ( expectedEpisode.HasMember( "title" ) == true )
+        {
+            ASSERT_EQ( expectedEpisode["title"].GetString(), episode->title() );
+        }
+    }
 }
 
 void ResumeTests::InitializeMediaLibrary()

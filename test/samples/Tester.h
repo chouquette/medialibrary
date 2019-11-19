@@ -122,6 +122,8 @@ protected:
     void checkAlbums(const rapidjson::Value& expectedAlbums, std::vector<AlbumPtr> albums);
     void checkArtists( const rapidjson::Value& expectedArtists, std::vector<ArtistPtr> artists );
     void checkAlbumTracks(const IAlbum* album, const std::vector<MediaPtr>& tracks, const rapidjson::Value& expectedTracks , bool& found) const;
+    void checkShows( const rapidjson::Value& expectedShows, std::vector<ShowPtr> shows );
+    void checkShowEpisodes( const rapidjson::Value& expectedEpisodes, std::vector<MediaPtr> episodes );
 };
 
 class ReducedTests : public Tests
