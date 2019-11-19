@@ -1,23 +1,23 @@
 {
     "input": [
-        "video/unknown_tv_show/"
+        "video/tvshow/"
     ],
     "expected": {
         "nbVideos": 2,
         "shows": [
             {
-                "name": "",
+                "name": "Mr Robot",
                 "nbEpisodes": 2,
                 "episodes": [
                     {
-                        "title": "A random tv show",
-                        "seasonId": 3,
-                        "episodeId": 4
+                        "title": "401 Unauthorized",
+                        "seasonId": 4,
+                        "episodeId": 1
                     },
                     {
-                        "title": "Another episode",
+                        "title": "Mr Robot S04E02",
                         "seasonId": 4,
-                        "episodeId": 13
+                        "episodeId": 2
                     }
                 ]
             }
