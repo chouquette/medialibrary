@@ -34,7 +34,7 @@ namespace medialibrary
 {
 
 const std::string ShowEpisode::Table::Name = "ShowEpisode";
-const std::string ShowEpisode::Table::PrimaryKeyColumn = "show_id";
+const std::string ShowEpisode::Table::PrimaryKeyColumn = "id_episode";
 int64_t ShowEpisode::* const ShowEpisode::Table::PrimaryKey = &ShowEpisode::m_id;
 
 ShowEpisode::ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row )
