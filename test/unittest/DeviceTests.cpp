@@ -531,9 +531,11 @@ TEST_F( DeviceFs, RemoveShowEpisodes )
     auto media1 = std::static_pointer_cast<Media>(
                 ml->media( RemovableDeviceMountpoint + "removablevideo.mkv" ) );
     show1->addEpisode( *media1, 1, 1 );
+    media1->save();
     auto media2 = std::static_pointer_cast<Media>(
                 ml->media( RemovableDeviceMountpoint + "removablevideo2.mkv" ) );
     show1->addEpisode( *media2, 1, 2 );
+    media2->save();
 
     auto showsQuery = ml->shows( nullptr );
     ASSERT_EQ( 1u, showsQuery->count() );
@@ -564,9 +566,12 @@ TEST_F( DeviceFs, PartialRemoveShowEpisodes )
     auto media1 = std::static_pointer_cast<Media>(
                 ml->media( mock::FileSystemFactory::Root + "video.avi" ) );
     show1->addEpisode( *media1, 1, 1 );
+    media1->save();
+
     auto media2 = std::static_pointer_cast<Media>(
                 ml->media( RemovableDeviceMountpoint + "removablevideo.mkv" ) );
     show1->addEpisode( *media2, 1, 2 );
+    media2->save();
 
     auto shows = ml->shows( nullptr )->all();
     ASSERT_EQ( 1u, shows.size() );

@@ -139,7 +139,6 @@ std::shared_ptr<ShowEpisode> Show::addEpisode( Media& media, uint32_t seasonId,
 {
     auto episode = ShowEpisode::create( m_ml, media.id(), seasonId, episodeId, m_id );
     media.setShowEpisode( episode );
-    media.save();
     m_nbEpisodes++;
     return episode;
 }
