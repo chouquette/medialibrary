@@ -81,7 +81,9 @@ std::string sanitize( const std::string& fileName )
             std::regex{
                 "((\\b|" SEPARATORS ")"
                     "("
-                        "5\\.1|Web(\\.|-)DL|HD.TS|AT-X|LOST-UGM|BD"
+                        "DDP(" SEPARATORS "|\\s)?((5|2)\\.(1|0))?|"
+                        "5\\.1|Web(\\.|-)DL|HD.TS|AT-X|LOST-UGM|BD|"
+                        "h(" SEPARATORS ")?26(4|5)"
                     ")"
                 "(\\b|" SEPARATORS "))|"
                 // Attempt to match most <foo>-Raws anime teams
@@ -130,8 +132,8 @@ std::string sanitize( const std::string& fileName )
                 "\\b("
 
                 // Various patterns:
-                "xvid|h264|dvd|rip|divx|x264|hdtv|aac|webrip|"
-                "bluray|bdrip|brrip|dvdrip|ac3|HDTC|x265|h265|mp4|mkv|10\\s?bit(s)?|"
+                "xvid|dvd|rip|divx|x264|hdtv|aac|webrip|"
+                "bluray|bdrip|brrip|dvdrip|ac3|HDTC|x265|mp4|mkv|10\\s?bit(s)?|"
                 "avi|HDRip|HEVC|YUV420P10|FLAC|"
 
                 // Try to match most resolutions in one go:

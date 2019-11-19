@@ -71,6 +71,11 @@ TEST_F( TitleAnalyzerTests, SimpleTests )
     CHECK( "a file", "a 123MB file" );
     CHECK( "a 1 2 3GB file", "a 1.2.3GB file" );
     CHECK( "something something 12GB file", "something something.12GB file" );
+    CHECK( "Audio track is", "Audio track is DDP2.0" );
+    CHECK( "Audio track is", "Audio track is DDP2.1" );
+    CHECK( "Audio track is", "Audio track is DDP.5.1" );
+    CHECK( "Weird writing for", "Weird writing for H-264" );
+    CHECK( "Weird writing for", "Weird writing for H_265" );
 }
 
 TEST_F( TitleAnalyzerTests, RemovePatterns )
@@ -137,6 +142,8 @@ TEST_F( TitleAnalyzerTests, RemovePatterns )
            "[Snow-Raws] snow-raws-unwrapped 第09話 (BD 1920x1080 HEVC-YUV420P10 FLAC)" );
     CHECK( "American Horror Story 1984 S09E09 Final Girl",
            "American.Horror.Story.1984.S09E09.Final.Girl.HDTV.x264-CRiMSON" );
+    CHECK( "Mr Robot S04E01 401 Unauthorized",
+           "Mr.Robot.S04E01.401.Unauthorized.1080p.AMZN.WEB-DL.DDP5.1.H.264-.mkv" );
 }
 
 #undef CHECK
