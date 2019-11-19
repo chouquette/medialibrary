@@ -76,6 +76,8 @@ TEST_F( TitleAnalyzerTests, SimpleTests )
     CHECK( "Audio track is", "Audio track is DDP.5.1" );
     CHECK( "Weird writing for", "Weird writing for H-264" );
     CHECK( "Weird writing for", "Weird writing for H_265" );
+    CHECK( "A movie about the web", "A movie about the web.mkv" );
+    CHECK( "The dark web", "The dark web" );
 }
 
 TEST_F( TitleAnalyzerTests, RemovePatterns )
@@ -92,7 +94,7 @@ TEST_F( TitleAnalyzerTests, RemovePatterns )
            "Avengers.Infinity.War.2018.1080p.WEB-DL.H264.AC3-EVO[EtHD]" );
     CHECK( "Avengers Infinity War 2018 English",
            "Avengers Infinity War 2018 English 720p HD-TS x264 AAC - xRG" );
-    CHECK( "Game of Thrones S08E02 WEB ADRENALiNE",
+    CHECK( "Game of Thrones S08E02",
            "Game.of.Thrones.S08E02.1080p.WEB.x264-ADRENALiNE[ettv]" );
     CHECK( "Game of Thrones S07 Complete Season 7",
            "Game of Thrones S07 Complete Season 7 720p x264 AC3 5.1 (MP4)" );
@@ -120,7 +122,7 @@ TEST_F( TitleAnalyzerTests, RemovePatterns )
            "Kong.Skull.Island.2017.720p.BluRay.x264-[YTS.AG].mp4" );
     CHECK( "Coffee and Cigarettes 2003",
            "Coffee.and.Cigarettes.2003.1080p.BluRay.x264.anoXmous__.mp4" );
-    CHECK( "chernobyl s01e02 internal web",
+    CHECK( "chernobyl s01e02 internal",
            "chernobyl.s01e02.internal.1080p.web.h264-memento.mkv" );
     CHECK( "Doctor Strange 2016",
            "Doctor.Strange.2016.1080p.HDRip.X264.AC3-EVO[EtHD].mkv" );
@@ -144,6 +146,8 @@ TEST_F( TitleAnalyzerTests, RemovePatterns )
            "American.Horror.Story.1984.S09E09.Final.Girl.HDTV.x264-CRiMSON" );
     CHECK( "Mr Robot S04E01 401 Unauthorized",
            "Mr.Robot.S04E01.401.Unauthorized.1080p.AMZN.WEB-DL.DDP5.1.H.264-.mkv" );
+    CHECK( "Mr Robot S04E02",
+           "Mr.Robot.S04E02.720p.WEB.x265-MiNX[TGx].mkv" );
 }
 
 #undef CHECK

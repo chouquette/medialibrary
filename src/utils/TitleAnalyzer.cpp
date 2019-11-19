@@ -52,8 +52,8 @@ std::string sanitize( const std::string& fileName )
         {
             std::regex{
                 SEPARATORS
-                "("
-                    "MEMENTO"
+                "(?:"
+                    "MEMENTO|Web((\\.|-)DL)?"
                 ")"
                 SEPARATORS,
                 std::regex_constants::icase | std::regex_constants::ECMAScript
@@ -65,13 +65,13 @@ std::string sanitize( const std::string& fileName )
         {
             std::regex{
                 "(\\b|" SEPARATORS ")"
-                "("
-                    "MeGusta|CRiMSON|Eclipse"
+                "(?:"
+                    "MeGusta|CRiMSON|Eclipse|MiNX\\[TGx\\]|ADRENALiNE"
                 ")"
                 "(\\b|" SEPARATORS ")",
                 std::regex_constants::ECMAScript
             },
-            ""
+            "$1$3"
         },
         // A small subset of patterns to remove that contain separators, and
         // that we want to match using those separators. For instance, "5.1"
@@ -80,9 +80,9 @@ std::string sanitize( const std::string& fileName )
         {
             std::regex{
                 "((\\b|" SEPARATORS ")"
-                    "("
+                    "(?:"
                         "DDP(" SEPARATORS "|\\s)?((5|2)\\.(1|0))?|"
-                        "5\\.1|Web(\\.|-)DL|HD.TS|AT-X|LOST-UGM|BD|"
+                        "5\\.1|HD.TS|AT-X|LOST-UGM|BD|"
                         "h(" SEPARATORS ")?26(4|5)"
                     ")"
                 "(\\b|" SEPARATORS "))|"
@@ -112,8 +112,10 @@ std::string sanitize( const std::string& fileName )
         // Replace '.' separating words by a space.
         // This is done before removing most of the common patterns, so the
         // word boundaries are still present
+        // Allow more 1 or 2 juxtaposed separators, but not 3, in order not to
+        // remove '...'
         {
-            std::regex{ "(\\s|\\b|\\(|\\[|^)" SEPARATORS "(\\b|\\s|\\)|\\]|$)" },
+            std::regex{ "(\\s|\\b|\\(|\\[|^)" SEPARATORS "{1,2}(\\b|\\s|\\)|\\]|$)" },
             " "
         },
         {
