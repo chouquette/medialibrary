@@ -92,17 +92,24 @@ asan-ubsan:
       - ./samples
 
 tsan:
-    image: registry.videolan.org/medialibrary-tsan:20191028110735
+    image: registry.videolan.org/vlc-debian-unstable:20191204094457
+    only:
+      - schedules
     tags:
       - debian
       - amd64
     variables:
-        PKG_CONFIG_PATH: '$PKG_CONFIG_PATH:/prefix/lib/pkgconfig'
-        TSAN_OPTIONS: 'suppressions=ci/tsan_suppress_file'
+        TSAN_OPTIONS: 'suppressions=$CI_PROJECT_DIR/ci/tsan_suppress_file'
     script:
+      - git clone https://git.videolan.org/git/vlc.git --depth=1
+      - cd vlc && ./bootstrap
+      - ./configure LDFLAGS="-ltsan" --prefix=$(pwd)/prefix --disable-qt --with-sanitizer=thread --disable-medialibrary --disable-nls --enable-debug
+      - make install -j8
+      - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(pwd)/prefix/lib/pkgconfig"
+      - cd ..
       - ./bootstrap
       - ./configure --enable-tests CXXFLAGS="-g -O1 -fsanitize=thread"
-      - make -j4
-      - make -j4 check
+      - make -j8
+      - make -j8 check
       - ./unittest
       - ./samples
