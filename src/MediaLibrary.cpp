@@ -1725,7 +1725,7 @@ void MediaLibrary::clearDatabase( bool restorePlaylists )
     // Otherwise, try to generate a new backup. If it works, cool, if it
     // doesn't, we'll use an old one. Best effort is all we can do if the
     // database is broken
-    if ( playlistsBackups.empty() == false ||
+    if ( playlistsBackups.empty() == true ||
          playlistsBackups.rbegin()->first < time(nullptr) - 60 )
     {
         uint32_t currentModel;
