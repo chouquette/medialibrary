@@ -196,6 +196,16 @@ TEST_F( MiscDb, TaskCheckDbModel )
     ASSERT_TRUE( res );
 }
 
+TEST_F( MiscDb, ClearDatabaseKeepPlaylist )
+{
+    ml->clearDatabase( true );
+}
+
+TEST_F( MiscDb, ClearDatabase )
+{
+    ml->clearDatabase( false );
+}
+
 class DbModel : public Tests
 {
 protected:
