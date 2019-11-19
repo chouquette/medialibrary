@@ -1144,12 +1144,16 @@ bool MediaLibrary::recreateDatabase( std::string dbPath )
     m_dbConnection.reset();
     unlink( dbPath.c_str() );
     m_dbConnection = sqlite::Connection::connect( dbPath );
+    auto t = m_dbConnection->newTransaction();
     Settings::createTable( m_dbConnection.get() );
     if ( createAllTables( Settings::DbModelVersion ) == false )
         return false;
     createAllTriggers( Settings::DbModelVersion );
+
     // We dropped the database, there is no setting to be read anymore
-    return m_settings.load();
+    auto res = m_settings.load();
+    t->commit();
+    return res;
 }
 
 void MediaLibrary::migrateModel3to5()
