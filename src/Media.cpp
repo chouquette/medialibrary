@@ -939,6 +939,20 @@ void Media::setSubType( IMedia::SubType subType )
 {
     if ( subType == m_subType )
         return;
+    switch ( m_subType )
+    {
+        case IMedia::SubType::AlbumTrack:
+            m_albumTrack = nullptr;
+            break;
+        case IMedia::SubType::ShowEpisode:
+            m_showEpisode = nullptr;
+            break;
+        case IMedia::SubType::Movie:
+            m_movie = nullptr;
+            break;
+        case IMedia::SubType::Unknown:
+            break;
+    }
     m_subType = subType;
     m_changed = true;
 }
