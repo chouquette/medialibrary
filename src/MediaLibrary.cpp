@@ -1141,7 +1141,11 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
     return InitializeResult::Success;
 }
 
-bool MediaLibrary::recreateDatabase( const std::string& dbPath )
+/* This take a copy by design.
+ * If the path comes from sqlite::Connection::dbPath, we're about to release it
+ * and the reference will become dangling.
+ */
+bool MediaLibrary::recreateDatabase( std::string dbPath )
 {
     // Close all active connections, flushes all previously run statements.
     m_dbConnection.reset();

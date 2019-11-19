@@ -221,7 +221,7 @@ protected:
     virtual void populateNetworkFsFactories();
 
 private:
-    bool recreateDatabase( const std::string& dbPath );
+    bool recreateDatabase( std::string dbPath );
     InitializeResult updateDatabaseModel( unsigned int previousVersion,
                                           const std::string& path );
     void migrateModel3to5();
