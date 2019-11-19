@@ -1022,12 +1022,58 @@ void Media::createTable( sqlite::Connection* connection )
 
 void Media::createTriggers( sqlite::Connection* connection, uint32_t modelVersion )
 {
-    const std::string reqs[] = {
-        #include "database/tables/Media_triggers_v14.sql"
-    };
+    const std::string lastPlayedIndex = "CREATE INDEX IF NOT EXISTS "
+            "index_last_played_date ON " + Media::Table::Name + "(last_played_date DESC)";
+    sqlite::Tools::executeRequest( connection, lastPlayedIndex );
 
-    for ( const auto& req : reqs )
-        sqlite::Tools::executeRequest( connection, req );
+    const std::string mediaPresenceIndex = "CREATE INDEX IF NOT EXISTS "
+            "index_media_presence ON " + Media::Table::Name + "(is_present)";
+    sqlite::Tools::executeRequest( connection, mediaPresenceIndex );
+
+    const std::string mediaTypesIndex = "CREATE INDEX IF NOT EXISTS "
+            "media_types_idx ON " + Media::Table::Name + "(type, subtype)";
+    sqlite::Tools::executeRequest( connection, mediaTypesIndex );
+
+    const std::string mediaDevicePresenceTrigger = "CREATE TRIGGER IF NOT EXISTS "
+            "is_media_device_present AFTER UPDATE OF "
+            "is_present ON " + Device::Table::Name + " "
+            "BEGIN "
+            "UPDATE " + Media::Table::Name + " "
+                "SET is_present=new.is_present "
+                "WHERE device_id=new.id_device;"
+            "END;";
+    sqlite::Tools::executeRequest( connection, mediaDevicePresenceTrigger );
+
+    const std::string cascadeFileDeletionTrigger = "CREATE TRIGGER IF NOT EXISTS "
+            "cascade_file_deletion AFTER DELETE ON " + File::Table::Name +
+            " BEGIN "
+            " DELETE FROM " + Media::Table::Name + " WHERE "
+                "(SELECT COUNT(id_file) FROM " + File::Table::Name +
+                    " WHERE media_id=old.media_id) = 0"
+                    " AND id_media=old.media_id;"
+            " END;";
+    sqlite::Tools::executeRequest( connection, cascadeFileDeletionTrigger );
+
+    const std::string insertMediaFtsTrigger = "CREATE TRIGGER IF NOT EXISTS "
+            "insert_media_fts AFTER INSERT ON " + Media::Table::Name +
+            " BEGIN"
+                " INSERT INTO " + Media::Table::Name + "Fts(rowid,title,labels) VALUES(new.id_media, new.title, '');"
+            " END";
+    sqlite::Tools::executeRequest( connection, insertMediaFtsTrigger );
+
+    const std::string deleteMediaFtsTrigger = "CREATE TRIGGER IF NOT EXISTS "
+            "delete_media_fts BEFORE DELETE ON " + Media::Table::Name +
+            " BEGIN"
+                " DELETE FROM " + Media::Table::Name + "Fts WHERE rowid = old.id_media;"
+            " END";
+    sqlite::Tools::executeRequest( connection, deleteMediaFtsTrigger );
+
+    const std::string updateMediaTitleFtsTrigger = "CREATE TRIGGER IF NOT EXISTS "
+            "update_media_title_fts AFTER UPDATE OF title ON " + Media::Table::Name +
+            " BEGIN"
+                " UPDATE " + Media::Table::Name + "Fts SET title = new.title WHERE rowid = new.id_media;"
+            " END";
+    sqlite::Tools::executeRequest( connection, updateMediaTitleFtsTrigger );
 
     if ( modelVersion >= 14 )
     {
