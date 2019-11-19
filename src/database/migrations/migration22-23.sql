@@ -51,3 +51,7 @@ Media::schema( Media::Table::Name, 23 ),
 
 "DROP TABLE " + Show::Table::Name,
 Show::schema( Show::Table::Name, 23 ),
+
+/*** Migrate media presence trigger ***/
+
+"DROP TRIGGER is_media_device_present",

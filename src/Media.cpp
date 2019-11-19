@@ -1034,15 +1034,31 @@ void Media::createTriggers( sqlite::Connection* connection, uint32_t modelVersio
             "media_types_idx ON " + Media::Table::Name + "(type, subtype)";
     sqlite::Tools::executeRequest( connection, mediaTypesIndex );
 
-    const std::string mediaDevicePresenceTrigger = "CREATE TRIGGER IF NOT EXISTS "
-            "is_media_device_present AFTER UPDATE OF "
-            "is_present ON " + Device::Table::Name + " "
-            "BEGIN "
-            "UPDATE " + Media::Table::Name + " "
-                "SET is_present=new.is_present "
-                "WHERE device_id=new.id_device;"
-            "END;";
-    sqlite::Tools::executeRequest( connection, mediaDevicePresenceTrigger );
+    if ( modelVersion < 23 )
+    {
+        const std::string mediaDevicePresenceTrigger = "CREATE TRIGGER IF NOT EXISTS "
+                "is_media_device_present AFTER UPDATE OF "
+                "is_present ON " + Device::Table::Name + " "
+                "BEGIN "
+                "UPDATE " + Media::Table::Name + " "
+                    "SET is_present=new.is_present "
+                    "WHERE device_id=new.id_device;"
+                "END;";
+        sqlite::Tools::executeRequest( connection, mediaDevicePresenceTrigger );
+    }
+    else
+    {
+        const std::string mediaDevicePresenceTrigger = "CREATE TRIGGER IF NOT EXISTS "
+                "media_update_device_presence AFTER UPDATE OF "
+                "is_present ON " + Device::Table::Name + " "
+                "WHEN old.is_present != new.is_present "
+                "BEGIN "
+                "UPDATE " + Media::Table::Name + " "
+                    "SET is_present=new.is_present "
+                    "WHERE device_id=new.id_device;"
+                "END;";
+        sqlite::Tools::executeRequest( connection, mediaDevicePresenceTrigger );
+    }
 
     const std::string cascadeFileDeletionTrigger = "CREATE TRIGGER IF NOT EXISTS "
             "cascade_file_deletion AFTER DELETE ON " + File::Table::Name +

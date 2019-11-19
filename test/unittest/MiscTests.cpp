@@ -61,7 +61,7 @@ namespace
         "increment_media_nb_playlist", "insert_album_fts", "insert_artist_fts",
         "insert_folder_fts", "insert_genre_fts", "insert_media_fts",
         "insert_playlist_fts", "insert_show_fts", "is_album_present",
-        "is_media_device_present",
+        "media_update_device_presence",
         "show_decrement_nb_episode",
         "show_increment_nb_episode",
         "show_update_is_present",
