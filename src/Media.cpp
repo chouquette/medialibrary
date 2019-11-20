@@ -802,13 +802,13 @@ std::string Media::addRequestJoin( const QueryParameters* params, bool forceFile
             albumTrack = true;
             album = true;
             break;
-        case SortingCriteria::TrackNumber:
         case SortingCriteria::TrackId:
             albumTrack = true;
             break;
         case SortingCriteria::NbAudio:
         case SortingCriteria::NbVideo:
         case SortingCriteria::NbMedia:
+        case SortingCriteria::TrackNumber:
             // Unrelated to media requests
             break;
     }
@@ -873,7 +873,7 @@ std::string Media::sortRequest( const QueryParameters* params )
     case SortingCriteria::Artist:
         req += "art.name";
         break;
-    case SortingCriteria::TrackNumber:
+    case SortingCriteria::TrackId:
         if ( desc == true )
             req += "att.track_number DESC, att.disc_number";
         else
