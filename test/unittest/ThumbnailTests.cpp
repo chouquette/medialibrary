@@ -39,9 +39,10 @@ class Thumbnails : public Tests
 TEST_F( Thumbnails, Create )
 {
     std::string mrl = "file:///path/to/thumbnail.png";
-    auto t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::UserProvided,
-                                ThumbnailSizeType::Thumbnail, false );
-    ASSERT_NE( t, nullptr );
+    auto t = std::make_shared<Thumbnail>( ml.get(), mrl, Thumbnail::Origin::UserProvided,
+                                          ThumbnailSizeType::Thumbnail, false );
+    auto id = t->insert();
+    ASSERT_NE( 0, id );
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
 }
@@ -66,8 +67,10 @@ TEST_F( Thumbnails, MediaSetThumbnail )
 TEST_F( Thumbnails, Update )
 {
     std::string mrl = "file:///path/to/thumbnail.png";
-    auto t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::Media,
-                                ThumbnailSizeType::Thumbnail, false );
+    auto t = std::make_shared<Thumbnail>( ml.get(), mrl, Thumbnail::Origin::Media,
+                                          ThumbnailSizeType::Thumbnail, false );
+    auto id = t->insert();
+    ASSERT_NE( 0, id );
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "test.mkv", IMedia::Type::Video ) );
     m->setThumbnail( t );
     ASSERT_EQ( t->mrl(), mrl );
@@ -128,9 +131,11 @@ TEST_F( Thumbnails, UnshareMedia )
     // Check that all thumbnails are shared, until we want to update the
     // shared version, in which case it should be duplicated
 
-    auto t = Thumbnail::create( ml.get(), "file:///tmp/thumb.jpg",
-                                Thumbnail::Origin::CoverFile,
-                                ThumbnailSizeType::Thumbnail, false );
+    auto t = std::make_shared<Thumbnail>( ml.get(), "file:///tmp/thumb.jpg",
+                                          Thumbnail::Origin::CoverFile,
+                                          ThumbnailSizeType::Thumbnail, false );
+    auto id = t->insert();
+    ASSERT_NE( 0, id );
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     auto a = ml->createArtist(  "artist" );
 
@@ -148,9 +153,11 @@ TEST_F( Thumbnails, UnshareMedia )
     // media thumbnail, and check that the artist still has the same thumbnail &
     // thumbnail id, while the media has its own thumbnail
 
-    auto newThumbnail = Thumbnail::create( ml.get(), "file:///tmp/newthumb.jpg",
-                                           Thumbnail::Origin::UserProvided,
-                                           ThumbnailSizeType::Thumbnail, false );
+    auto newThumbnail = std::make_shared<Thumbnail>( ml.get(), "file:///tmp/newthumb.jpg",
+                                                     Thumbnail::Origin::UserProvided,
+                                                     ThumbnailSizeType::Thumbnail, false );
+    id = newThumbnail->insert();
+    ASSERT_NE( 0, id );
     m->setThumbnail( newThumbnail );
     ASSERT_EQ( 2u, ml->countNbThumbnails() );
 
@@ -183,9 +190,11 @@ TEST_F( Thumbnails, UnshareArtist )
     // Check that all thumbnails are shared, until we want to update the
     // shared version, in which case it should be duplicated
 
-    auto t = Thumbnail::create( ml.get(), "file:///tmp/thumb.jpg",
-                                Thumbnail::Origin::Media,
-                                ThumbnailSizeType::Thumbnail, false );
+    auto t = std::make_shared<Thumbnail>( ml.get(), "file:///tmp/thumb.jpg",
+                                          Thumbnail::Origin::Media,
+                                          ThumbnailSizeType::Thumbnail, false );
+    auto id = t->insert();
+    ASSERT_NE( 0, id );
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     auto a = ml->createArtist(  "artist" );
 
@@ -203,9 +212,11 @@ TEST_F( Thumbnails, UnshareArtist )
     // media thumbnail, and check that the artist still has the same thumbnail &
     // thumbnail id, while the media has its own thumbnail
 
-    auto newThumbnail = Thumbnail::create( ml.get(), "file:///tmp/newthumb.jpg",
-                                           Thumbnail::Origin::UserProvided,
-                                           ThumbnailSizeType::Thumbnail, false );
+    auto newThumbnail = std::make_shared<Thumbnail>( ml.get(), "file:///tmp/newthumb.jpg",
+                                                     Thumbnail::Origin::UserProvided,
+                                                     ThumbnailSizeType::Thumbnail, false );
+    // Don't insert the thumbnail from here, check that the common thumbnail code
+    // will take care of inserting to db if needed
     a->setThumbnail( newThumbnail, newThumbnail->origin() );
     ASSERT_EQ( 2u, ml->countNbThumbnails() );
 

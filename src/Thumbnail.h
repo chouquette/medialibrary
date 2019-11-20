@@ -140,9 +140,6 @@ public:
     static void createTriggers( sqlite::Connection* dbConnection );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
-    static std::shared_ptr<Thumbnail> create( MediaLibraryPtr ml, std::string mrl,
-                                              Origin origin, ThumbnailSizeType sizeType,
-                                              bool isOwned );
     // This also hides the database helper variant, as we can't just select from
     // the thumbnail table. We need to get data from both the thumbnail & linking
     // tables.

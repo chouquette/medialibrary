@@ -371,21 +371,6 @@ bool Thumbnail::checkDbModel(MediaLibraryPtr ml)
                                        LinkingTable::Name );
 }
 
-std::shared_ptr<Thumbnail> Thumbnail::create( MediaLibraryPtr ml, std::string mrl,
-                                              Thumbnail::Origin origin,
-                                              ThumbnailSizeType sizeType, bool isOwned )
-{
-    static const std::string req = "INSERT INTO " + Thumbnail::Table::Name +
-            "(mrl, is_generated) VALUES(?,?)";
-    auto self = std::make_shared<Thumbnail>( ml, mrl, origin, sizeType, isOwned );
-    assert( self->isValid() == true || self->isFailureRecord() == true );
-    if ( DatabaseHelpers<Thumbnail>::insert( ml, self, req,
-                                             sqlite::NullableString{ mrl },
-                                             isOwned ) == false )
-        return nullptr;
-    return self;
-}
-
 std::shared_ptr<Thumbnail> Thumbnail::fetch( MediaLibraryPtr ml, EntityType type,
                                              int64_t entityId, ThumbnailSizeType sizeType )
 {

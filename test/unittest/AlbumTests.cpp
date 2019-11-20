@@ -172,9 +172,10 @@ TEST_F( Albums, Thumbnail )
     ASSERT_FALSE( a->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
 
     std::string mrl = "file:///path/to/sea/otter/artwork.png";
-    t = Thumbnail::create( ml.get(), mrl, Thumbnail::Origin::UserProvided,
-                           ThumbnailSizeType::Thumbnail, false );
-    ASSERT_NE( nullptr, t );
+    t = std::make_shared<Thumbnail>( ml.get(), mrl, Thumbnail::Origin::UserProvided,
+                                     ThumbnailSizeType::Thumbnail, false );
+    auto id = t->insert();
+    ASSERT_NE( 0, id );
     a = ml->MediaLibrary::createAlbum( "album 2" );
     a->setThumbnail( t );
 
