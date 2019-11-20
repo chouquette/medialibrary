@@ -803,6 +803,7 @@ std::string Media::addRequestJoin( const QueryParameters* params, bool forceFile
             album = true;
             break;
         case SortingCriteria::TrackId:
+            album = true;
             albumTrack = true;
             break;
         case SortingCriteria::NbAudio:
@@ -875,9 +876,9 @@ std::string Media::sortRequest( const QueryParameters* params )
         break;
     case SortingCriteria::TrackId:
         if ( desc == true )
-            req += "att.track_number DESC, att.disc_number";
+            req += "alb.title, att.track_number DESC, att.disc_number";
         else
-            req += "att.track_number, att.disc_number";
+            req += "alb.title, att.track_number, att.disc_number";
         break;
     default:
         LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default (Alpha)" );
@@ -887,7 +888,8 @@ std::string Media::sortRequest( const QueryParameters* params )
         req += "m.title";
         break;
     }
-    if ( desc == true && sort != SortingCriteria::Album )
+    if ( desc == true && sort != SortingCriteria::Album &&
+         sort != SortingCriteria::TrackId )
         req += " DESC";
     return req;
 }

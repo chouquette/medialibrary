@@ -1148,6 +1148,52 @@ TEST_F( Medias, CheckDbModel )
     ASSERT_TRUE( res );
 }
 
+TEST_F( Medias, SortByTrackId )
+{
+    // Create 3 albums, each with one track.
+    // Aalbum1: track 3
+    // Balbum2: track 2
+    // Calbum3: track 1
+    // To ensure tracks are first grouped by album, and only then by tracks
+    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3", IMedia::Type::Audio ) );
+    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3", IMedia::Type::Audio ) );
+
+    // Create the albums in reversed alphabetical order to ensure id & alpha orders
+    // are different
+    auto album1 = ml->createAlbum( "Aalbum1");
+    auto album2 = ml->createAlbum( "Balbum2" );
+    auto album3 = ml->createAlbum( "Calbum3" );
+
+    album1->addTrack( m1, 3, 0, 0, nullptr );
+    album2->addTrack( m2, 2, 0, 0, nullptr );
+    album3->addTrack( m3, 1, 0, 0, nullptr );
+
+    m1->save();
+    m2->save();
+    m3->save();
+
+    QueryParameters params;
+    params.sort = SortingCriteria::TrackId;
+    params.desc = false;
+    auto tracksQuery = ml->audioFiles( &params );
+    ASSERT_EQ( 3u, tracksQuery->count() );
+    auto tracks = tracksQuery->all();
+    ASSERT_EQ( 3u, tracks.size() );
+    ASSERT_EQ( tracks[0]->id(), m1->id() );
+    ASSERT_EQ( tracks[1]->id(), m2->id() );
+    ASSERT_EQ( tracks[2]->id(), m3->id() );
+
+    params.desc = true;
+    tracksQuery = ml->audioFiles( &params );
+    ASSERT_EQ( 3u, tracksQuery->count() );
+    tracks = tracksQuery->all();
+    ASSERT_EQ( 3u, tracks.size() );
+    ASSERT_EQ( tracks[0]->id(), m1->id() );
+    ASSERT_EQ( tracks[1]->id(), m2->id() );
+    ASSERT_EQ( tracks[2]->id(), m3->id() );
+}
+
 class FetchMedia : public Tests
 {
 protected:
