@@ -108,7 +108,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
                                             const QueryParameters* params = nullptr ) const override;
 
         static void createTable( sqlite::Connection* dbConnection );
-        static void createTriggers( sqlite::Connection* dbConnection );
+        static void createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion );
         static std::string schema( const std::string& tableName, uint32_t dbModel );
         static bool checkDbModel( MediaLibraryPtr ml );
         static std::shared_ptr<Album> create( MediaLibraryPtr ml, const std::string& title );

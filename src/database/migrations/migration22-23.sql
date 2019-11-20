@@ -55,3 +55,5 @@ Show::schema( Show::Table::Name, 23 ),
 /*** Migrate media presence trigger ***/
 
 "DROP TRIGGER is_media_device_present",
+
+/*** is_album_present was implicitely deleted when deleting the Media table ***/

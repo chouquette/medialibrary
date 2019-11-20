@@ -503,22 +503,43 @@ void Album::createTable( sqlite::Connection* dbConnection )
         sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-void Album::createTriggers( sqlite::Connection* dbConnection )
+void Album::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion )
 {
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS album_artist_id_idx ON " +
             Table::Name + "(artist_id)";
-    static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_album_present AFTER UPDATE OF "
-            "is_present ON " + Media::Table::Name +
-            " WHEN new.subtype = " +
-                std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
-                                    IMedia::SubType::AlbumTrack ) ) +
-            " BEGIN "
-            " UPDATE " + Table::Name + " SET is_present=is_present + "
-                "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
-                "WHERE id_album = (SELECT album_id FROM " + AlbumTrack::Table::Name + " "
-                    "WHERE media_id = new.id_media"
-                ");"
-            " END";
+    if ( dbModelVersion < 23 )
+    {
+        static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_album_present AFTER UPDATE OF "
+                "is_present ON " + Media::Table::Name +
+                " WHEN new.subtype = " +
+                    std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
+                                        IMedia::SubType::AlbumTrack ) ) +
+                " BEGIN "
+                " UPDATE " + Table::Name + " SET is_present=is_present + "
+                    "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
+                    "WHERE id_album = (SELECT album_id FROM " + AlbumTrack::Table::Name + " "
+                        "WHERE media_id = new.id_media"
+                    ");"
+                " END";
+        sqlite::Tools::executeRequest( dbConnection, triggerReq );
+    }
+    else
+    {
+        static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS album_is_present AFTER UPDATE OF "
+                "is_present ON " + Media::Table::Name +
+                " WHEN new.subtype = " +
+                    std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
+                                        IMedia::SubType::AlbumTrack ) ) +
+                " AND old.is_present != new.is_present"
+                " BEGIN "
+                " UPDATE " + Table::Name + " SET is_present=is_present + "
+                    "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
+                    "WHERE id_album = (SELECT album_id FROM " + AlbumTrack::Table::Name + " "
+                        "WHERE media_id = new.id_media"
+                    ");"
+                " END";
+        sqlite::Tools::executeRequest( dbConnection, triggerReq );
+    }
     static const std::string deleteTriggerReq = "CREATE TRIGGER IF NOT EXISTS delete_album_track AFTER DELETE ON "
              + AlbumTrack::Table::Name +
             " BEGIN "
@@ -555,7 +576,6 @@ void Album::createTriggers( sqlite::Connection* dbConnection )
             " DELETE FROM " + FtsTable::Name + " WHERE rowid = old.id_album;"
             " END";
     sqlite::Tools::executeRequest( dbConnection, indexReq );
-    sqlite::Tools::executeRequest( dbConnection, triggerReq );
     sqlite::Tools::executeRequest( dbConnection, deleteTriggerReq );
     sqlite::Tools::executeRequest( dbConnection, updateAddTrackTriggerReq );
     sqlite::Tools::executeRequest( dbConnection, vtriggerInsert );

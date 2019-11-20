@@ -201,7 +201,7 @@ void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
     auto dbConn = m_dbConnection.get();
 
     Folder::createTriggers( dbConn, dbModelVersion );
-    Album::createTriggers( dbConn );
+    Album::createTriggers( dbConn, dbModelVersion );
     AlbumTrack::createTriggers( dbConn );
     Artist::createTriggers( dbConn, dbModelVersion );
     Media::createTriggers( dbConn, dbModelVersion );
@@ -1291,7 +1291,7 @@ bool MediaLibrary::migrateModel12to13()
     }
 
     AlbumTrack::createTriggers( getConn() );
-    Album::createTriggers( getConn() );
+    Album::createTriggers( getConn(), 13 );
     Artist::createTriggers( getConn(), 13 );
     // Leave the weak context as we now need to update is_present fields, which
     // are propagated through recursive triggers
@@ -1414,7 +1414,7 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     // Re-create triggers removed in the process
     Media::createTriggers( dbConn, 14 );
     AlbumTrack::createTriggers( dbConn );
-    Album::createTriggers( dbConn );
+    Album::createTriggers( dbConn, 14 );
     Artist::createTriggers( dbConn, 14 );
     Show::createTriggers( dbConn, 14 );
     Playlist::createTriggers( dbConn, 14 );
@@ -1518,7 +1518,7 @@ void MediaLibrary::migrateModel16to17()
         sqlite::Tools::executeRequest( dbConn, req );
 
     Media::createTriggers( dbConn, 17 );
-    Album::createTriggers( dbConn );
+    Album::createTriggers( dbConn, 17 );
     Artist::createTriggers( dbConn, 17 );
     Folder::createTriggers( dbConn, 17 );
 
@@ -1618,7 +1618,7 @@ void MediaLibrary::migrateModel19to20()
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
 
-    Album::createTriggers( dbConn );
+    Album::createTriggers( dbConn, 20 );
     Thumbnail::createTriggers( dbConn );
     AlbumTrack::createTriggers( dbConn );
     Artist::createTriggers( dbConn, 20 );
@@ -1691,7 +1691,7 @@ void MediaLibrary::migrateModel22to23()
     Artist::createTriggers( dbConn, 23 );
     Media::createTriggers( dbConn, 23 );
     Thumbnail::createTriggers( dbConn );
-    Album::createTriggers( dbConn );
+    Album::createTriggers( dbConn, 23 );
     Folder::createTriggers( dbConn, 23 );
     Show::createTriggers( dbConn, 23 );
 

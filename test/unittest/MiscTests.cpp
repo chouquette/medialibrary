@@ -42,6 +42,7 @@ namespace
 {
     const std::vector<const char*> expectedTriggers{
         "add_album_track",
+        "album_is_present",
         "artist_decrement_nb_albums",
         "artist_decrement_nb_tracks",
         "artist_increment_nb_albums_unknown_album",
@@ -60,7 +61,7 @@ namespace
         "incr_thumbnail_refcount",
         "increment_media_nb_playlist", "insert_album_fts", "insert_artist_fts",
         "insert_folder_fts", "insert_genre_fts", "insert_media_fts",
-        "insert_playlist_fts", "insert_show_fts", "is_album_present",
+        "insert_playlist_fts", "insert_show_fts",
         "media_update_device_presence",
         "show_decrement_nb_episode",
         "show_increment_nb_episode",
