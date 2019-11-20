@@ -130,15 +130,15 @@ const size_t MediaLibrary::NbSupportedPlaylistExtensions =
         sizeof(supportedPlaylistExtensions) / sizeof(supportedPlaylistExtensions[0]);
 
 MediaLibrary::MediaLibrary()
-    : m_callback( nullptr )
-    , m_fsFactoryCb( this )
-    , m_deviceListerCbImpl( this )
-    , m_verbosity( LogLevel::Error )
+    : m_verbosity( LogLevel::Error )
     , m_settings( this )
     , m_initialized( false )
     , m_started( false )
     , m_discovererIdle( true )
     , m_parserIdle( true )
+    , m_fsFactoryCb( this )
+    , m_deviceListerCbImpl( this )
+    , m_callback( nullptr )
 {
     Log::setLogLevel( m_verbosity );
 }
