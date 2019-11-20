@@ -261,7 +261,7 @@ std::string Album::addRequestJoin( const QueryParameters* params,
 std::string Album::orderTracksBy( const QueryParameters* params = nullptr )
 {
     std::string req = " ORDER BY ";
-    auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
+    auto sort = params != nullptr ? params->sort : SortingCriteria::TrackId;
     auto desc = params != nullptr ? params->desc : false;
     switch ( sort )
     {
@@ -277,6 +277,7 @@ std::string Album::orderTracksBy( const QueryParameters* params = nullptr )
     default:
         LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default" );
         /* fall-through */
+    case SortingCriteria::TrackId:
     case SortingCriteria::Default:
         if ( desc == true )
             req += "att.disc_number DESC, att.track_number DESC, med.filename";

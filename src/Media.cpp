@@ -803,6 +803,7 @@ std::string Media::addRequestJoin( const QueryParameters* params, bool forceFile
             album = true;
             break;
         case SortingCriteria::TrackNumber:
+        case SortingCriteria::TrackId:
             albumTrack = true;
             break;
         case SortingCriteria::NbAudio:

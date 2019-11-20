@@ -66,7 +66,10 @@ enum class SortingCriteria
     PlayCount,
     Album,
     Filename,
+    // Sort by number of tracks in the containing entity (album, genre, artist, ...)
     TrackNumber,
+    // Sort by track ID (Track #1, track #2, ...)
+    TrackId,
     // Valid for folders only. Default order is descending
     NbVideo,
     NbAudio,

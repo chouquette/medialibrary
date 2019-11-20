@@ -444,7 +444,7 @@ TEST_F( Albums, SortTracks )
     ASSERT_EQ( t2->id(), tracks[1]->id() );
 
     // Reverse order
-    QueryParameters params { SortingCriteria::Default, true };
+    QueryParameters params { SortingCriteria::TrackId, true };
     tracks = a->tracks( &params )->all();
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( t1->id(), tracks[1]->id() );
