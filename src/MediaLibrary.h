@@ -279,16 +279,28 @@ private:
 
 protected:
     std::shared_ptr<sqlite::Connection> m_dbConnection;
-    std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_fsFactories;
-    std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_externalNetworkFsFactories;
-    std::string m_thumbnailPath;
-    std::string m_playlistPath;
-    IMediaLibraryCb* m_callback;
+
+    LogLevel m_verbosity;
+    Settings m_settings;
+    bool m_initialized;
+    std::atomic_bool m_discovererIdle;
+    std::atomic_bool m_parserIdle;
+
+    /* All fs factory callbacks must outlive the fs factory itself, since
+     * it might invoke some of the callback interface methods during teardown
+     */
     FsFactoryCb m_fsFactoryCb;
     // Private IDeviceListerCb implementation
     DeviceListerCb m_deviceListerCbImpl;
+
+    std::string m_thumbnailPath;
+    std::string m_playlistPath;
+    IMediaLibraryCb* m_callback;
+
     // External device lister
     DeviceListerPtr m_deviceLister;
+    std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_fsFactories;
+    std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_externalNetworkFsFactories;
 
     // User provided parser services
     std::vector<std::shared_ptr<parser::IParserService>> m_services;
@@ -303,11 +315,6 @@ protected:
     //FIXME: Having to maintain a specific ordering sucks, let's use shared_ptr or something
     std::unique_ptr<DiscovererWorker> m_discovererWorker;
     std::shared_ptr<ModificationNotifier> m_modificationNotifier;
-    LogLevel m_verbosity;
-    Settings m_settings;
-    bool m_initialized;
-    std::atomic_bool m_discovererIdle;
-    std::atomic_bool m_parserIdle;
     std::unique_ptr<ThumbnailerWorker> m_thumbnailer;
 };
 
