@@ -313,20 +313,22 @@ void Artist::createTable( sqlite::Connection* dbConnection )
 
 void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion )
 {
-    static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS has_tracks_present AFTER UPDATE OF "
-            "is_present ON " + Media::Table::Name +
-            " WHEN new.subtype = " +
-                std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
-                                    IMedia::SubType::AlbumTrack ) ) +
-            " BEGIN "
-            " UPDATE " + Table::Name + " SET is_present=is_present + "
-                "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
-                "WHERE id_artist = (SELECT artist_id FROM " + AlbumTrack::Table::Name + " "
-                    " WHERE media_id = new.id_media "
-                ");"
-            " END";
     if ( dbModelVersion < 23 )
     {
+        static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS has_tracks_present AFTER UPDATE OF "
+                "is_present ON " + Media::Table::Name +
+                " WHEN new.subtype = " +
+                    std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
+                                        IMedia::SubType::AlbumTrack ) ) +
+                " BEGIN "
+                " UPDATE " + Table::Name + " SET is_present=is_present + "
+                    "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
+                    "WHERE id_artist = (SELECT artist_id FROM " + AlbumTrack::Table::Name + " "
+                        " WHERE media_id = new.id_media "
+                    ");"
+                " END";
+        sqlite::Tools::executeRequest( dbConnection, triggerReq );
+
         // Automatically delete the artists that don't have any albums left, except the 2 special artists.
         // Those are assumed to always exist, and deleting them would cause a constaint violation error
         // when inserting an album with unknown/various artist(s).
@@ -344,6 +346,24 @@ void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelV
                 " END";
         sqlite::Tools::executeRequest( dbConnection, autoDeleteAlbumTriggerReq );
     }
+    if ( dbModelVersion >= 23 )
+    {
+        static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS"
+                " artist_has_tracks_present AFTER UPDATE OF"
+                " is_present ON " + Media::Table::Name +
+                " WHEN new.subtype = " +
+                    std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
+                                        IMedia::SubType::AlbumTrack ) ) +
+                " AND old.is_present != new.is_present"
+                " BEGIN "
+                " UPDATE " + Table::Name + " SET is_present=is_present + "
+                    "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
+                    "WHERE id_artist = (SELECT artist_id FROM " + AlbumTrack::Table::Name + " "
+                        " WHERE media_id = new.id_media "
+                    ");"
+                " END";
+        sqlite::Tools::executeRequest( dbConnection, triggerReq );
+    }
 
     static const std::string ftsInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_artist_fts"
             " AFTER INSERT ON " + Artist::Table::Name +
@@ -357,7 +377,6 @@ void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelV
             " BEGIN"
             " DELETE FROM " + Artist::FtsTable::Name + " WHERE rowid=old.id_artist;"
             " END";
-    sqlite::Tools::executeRequest( dbConnection, triggerReq );
     // Don't create this trigger if the database is about to be migrated.
     // This could make earlier migration fail, and needs to be done when
     // migrating to v7 to v8.

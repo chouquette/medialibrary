@@ -57,3 +57,4 @@ Show::schema( Show::Table::Name, 23 ),
 "DROP TRIGGER is_media_device_present",
 
 /*** is_album_present was implicitely deleted when deleting the Media table ***/
+/*** has_tracks_present was implicitely deleted when deleting the Media table ***/
