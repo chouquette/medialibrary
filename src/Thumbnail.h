@@ -82,6 +82,15 @@ public:
      */
     Thumbnail( MediaLibraryPtr ml, std::string mrl, Origin origin,
                ThumbnailSizeType sizeType, bool isOwned );
+    /**
+     * @brief Thumbnail Builds a temporary failure record in memory
+     * @param ml A pointer to the media library instance
+     * @param status The status, which must *not* be ThumbnailStatus::Success
+     * @param origin The thumbnail origin
+     * @param sizeType The thumbnail size type
+     */
+    Thumbnail( MediaLibraryPtr ml, ThumbnailStatus status, Origin origin,
+               ThumbnailSizeType sizeType );
 
     int64_t id() const;
     const std::string& mrl() const;
@@ -121,6 +130,11 @@ public:
      *                        previous failed request
      */
     bool isFailureRecord() const;
+    /**
+     * @brief setErrorStatus Updates the status in case of an error
+     * @param status An error status
+     */
+    bool setErrorStatus( ThumbnailStatus status );
 
     /**
      * @brief relocate Moves the file associated with the thumbnail to the dedicated
@@ -205,6 +219,7 @@ private:
     std::string m_mrl;
     Origin m_origin;
     ThumbnailSizeType m_sizeType;
+    ThumbnailStatus m_status;
     bool m_isOwned;
     uint32_t m_sharedCounter;
 

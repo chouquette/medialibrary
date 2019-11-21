@@ -59,3 +59,7 @@ Show::schema( Show::Table::Name, 23 ),
 /*** is_album_present was implicitely deleted when deleting the Media table ***/
 /*** has_tracks_present was implicitely deleted when deleting the Media table ***/
 "DROP TRIGGER cascade_file_deletion",
+
+/*** Migrate thumbnail table ***/
+"DROP TABLE " + Thumbnail::Table::Name,
+Thumbnail::schema( Thumbnail::Table::Name, 23 ),

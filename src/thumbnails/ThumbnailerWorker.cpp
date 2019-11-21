@@ -182,8 +182,9 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
          *
          * This assumes that the thumbnail won't crash if it succeeded once.
          */
-        m->setThumbnail( std::make_shared<Thumbnail>( m_ml, "", Thumbnail::Origin::Media,
-                                                      task.sizeType, false ) );
+        m->setThumbnail( std::make_shared<Thumbnail>( m_ml, ThumbnailStatus::Crash,
+                                                      Thumbnail::Origin::Media,
+                                                      task.sizeType ) );
     }
     auto thumbnail = m->thumbnail( task.sizeType );
     if ( thumbnail == nullptr )
@@ -206,6 +207,12 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
             // failure record and no way of regenerating the thumbnail, while
             // the generation was only cancelled, and might not fail at all.
             m->removeThumbnail( task.sizeType );
+        }
+        else
+        {
+            // Otherwise, update the failure reason to "Failure". This is a generic
+            // failure, but if we got here, it means we didn't crash
+            thumbnail->setErrorStatus( ThumbnailStatus::Failure );
         }
         return false;
     }

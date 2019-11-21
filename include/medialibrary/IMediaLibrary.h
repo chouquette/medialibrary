@@ -112,6 +112,21 @@ enum class ThumbnailSizeType : uint8_t
     Count,
 };
 
+enum class ThumbnailStatus : uint8_t
+{
+    /// This thumbnail was successfully generated or was provided by the user
+    /// and is available to use
+    Available,
+    /// The thumbnail generation failed, without specific reason, usually
+    /// because of a timeout.
+    /// It is fine to ask for a new generation in this case
+    Failure,
+    /// The thumbnail generation failed because of a crash. Asking for a new
+    /// generation is not recommended, unless you know the underlying issue was
+    /// fixed.
+    Crash,
+};
+
 enum class HistoryType : uint8_t
 {
     /// The history of media analyzed by the media library

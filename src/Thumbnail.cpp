@@ -48,6 +48,7 @@ Thumbnail::Thumbnail( MediaLibraryPtr ml, sqlite::Row& row )
     , m_mrl( row.extract<decltype(m_mrl)>() )
     , m_origin( row.extract<decltype(m_origin)>() )
     , m_sizeType( row.extract<decltype(m_sizeType)>() )
+    , m_status( row.extract<decltype(m_status)>() )
     , m_isOwned( row.extract<decltype(m_isOwned)>() )
     , m_sharedCounter( row.extract<decltype(m_sharedCounter)>() )
 {
@@ -79,6 +80,19 @@ Thumbnail::Thumbnail( MediaLibraryPtr ml, std::string mrl,
     // was given, ie. as an absolute mrl.
     assert( ( m_mrl.empty() == true && isOwned == false ) ||
             utils::file::scheme( m_mrl ).empty() == false );
+}
+
+Thumbnail::Thumbnail( MediaLibraryPtr ml, ThumbnailStatus status,
+                      Thumbnail::Origin origin, ThumbnailSizeType sizeType )
+    : m_ml( ml )
+    , m_id( 0 )
+    , m_origin( origin )
+    , m_sizeType( sizeType )
+    , m_status( status )
+    , m_isOwned( false )
+    , m_sharedCounter( 0 )
+{
+    assert( status != ThumbnailStatus::Available );
 }
 
 int64_t Thumbnail::id() const
@@ -181,9 +195,24 @@ ThumbnailSizeType Thumbnail::sizeType() const
 
 bool Thumbnail::isFailureRecord() const
 {
-    return m_mrl.empty() == true &&
-           m_origin == Origin::Media &&
-            m_isOwned == false;
+    return m_status != ThumbnailStatus::Available;
+}
+
+bool Thumbnail::setErrorStatus( ThumbnailStatus status )
+{
+    if ( status == ThumbnailStatus::Available )
+    {
+        assert( !"Invalid status provided" );
+        return false;
+    }
+    if ( m_status == status )
+        return true;
+    const std::string req = "UPDATE " + Table::Name +
+            " SET status = ? WHERE id_thumbnail = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, status, m_id ) == false )
+        return false;
+    m_status = status;
+    return true;
 }
 
 void Thumbnail::relocate()
@@ -352,13 +381,25 @@ std::string Thumbnail::schema( const std::string& tableName, uint32_t dbModel )
             "is_generated BOOLEAN NOT NULL"
         ")";
     }
+    if ( dbModel < 23 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_thumbnail INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "mrl TEXT,"
+            "is_generated BOOLEAN NOT NULL,"
+            "shared_counter INTEGER NOT NULL DEFAULT 0"
+        ")";
+    }
     return "CREATE TABLE " + Table::Name +
     "("
         "id_thumbnail INTEGER PRIMARY KEY AUTOINCREMENT,"
         "mrl TEXT,"
+        "status UNSIGNED INTEGER NOT NULL,"
         "is_generated BOOLEAN NOT NULL,"
         "shared_counter INTEGER NOT NULL DEFAULT 0"
     ")";
+
 }
 
 bool Thumbnail::checkDbModel(MediaLibraryPtr ml)
@@ -375,7 +416,7 @@ std::shared_ptr<Thumbnail> Thumbnail::fetch( MediaLibraryPtr ml, EntityType type
                                              int64_t entityId, ThumbnailSizeType sizeType )
 {
     std::string req = "SELECT t.id_thumbnail, t.mrl, ent.origin, ent.size_type,"
-            "t.is_generated, t.shared_counter "
+            "t.status, t.is_generated, t.shared_counter "
             "FROM " + Table::Name + " t "
             "INNER JOIN " + LinkingTable::Name + " ent "
                 "ON t.id_thumbnail = ent.thumbnail_id "
@@ -387,10 +428,10 @@ int64_t Thumbnail::insert()
 {
     assert( m_id == 0 );
     static const std::string req = "INSERT INTO " + Thumbnail::Table::Name +
-            "(mrl, is_generated) VALUES(?,?)";
+            "(mrl, status, is_generated) VALUES(?, ?, ?)";
     auto pKey = sqlite::Tools::executeInsert( m_ml->getConn(), req,
                             m_isOwned == true ? toRelativeMrl( m_mrl ) : m_mrl,
-                            m_isOwned );
+                            m_status, m_isOwned );
     if ( pKey == 0 )
         return 0;
     m_id = pKey;
