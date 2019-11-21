@@ -214,10 +214,6 @@ class IMedia
         /// will be called.
         /// In case a thumbnail was already generated for the media, a new thumbnail
         /// will be generated, and the previous one will be overriden.
-        /// In case a previous thumbnailing attempt failed, false will be returned
-        /// and no new generation will occur.
-        /// If you want to force a new generation, you need to
-        /// call \sa{IMediaLibrary::enableFailedThumbnailRegeneration} beforehand.
         /// \param sizeType The size type of the thumbnail to generate
         /// \param desiredWidth The desired thumbnail width
         /// \param desiredHeight The desired thumbnail height
