@@ -154,7 +154,7 @@ class Media : public IMedia,
         bool addChapter( int64_t offset, int64_t duration, std::string name );
         std::shared_ptr<Thumbnail> thumbnail( ThumbnailSizeType sizeType ) const;
         virtual const std::string& thumbnailMrl( ThumbnailSizeType sizeType ) const override;
-        virtual bool isThumbnailGenerated(  ThumbnailSizeType sizeType ) const override;
+        virtual ThumbnailStatus thumbnailStatus( ThumbnailSizeType sizeType ) const override;
         virtual bool setThumbnail( const std::string &thumbnail,
                                    ThumbnailSizeType sizeType ) override;
         bool setThumbnail( std::shared_ptr<Thumbnail> thumbnail );

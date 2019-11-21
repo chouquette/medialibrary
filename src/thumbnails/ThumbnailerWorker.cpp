@@ -171,7 +171,7 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
     }
 
     auto m = static_cast<Media*>( task.media.get() );
-    if ( m->isThumbnailGenerated( task.sizeType ) == false )
+    if ( m->thumbnailStatus( task.sizeType ) == ThumbnailStatus::Missing )
     {
         /*
          * Insert a failure record before computing the thumbnail.

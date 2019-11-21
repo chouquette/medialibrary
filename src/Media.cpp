@@ -427,11 +427,12 @@ const std::string& Media::thumbnailMrl( ThumbnailSizeType sizeType ) const
     return t->mrl();
 }
 
-bool Media::isThumbnailGenerated( ThumbnailSizeType sizeType ) const
+ThumbnailStatus Media::thumbnailStatus( ThumbnailSizeType sizeType ) const
 {
-    if ( m_thumbnails[Thumbnail::SizeToInt( sizeType )] != nullptr )
-        return true;
-    return thumbnail( sizeType ) != nullptr;
+    auto t = thumbnail( sizeType );
+    if ( t == nullptr )
+        return ThumbnailStatus::Missing;
+    return t->status();
 }
 
 unsigned int Media::insertionDate() const

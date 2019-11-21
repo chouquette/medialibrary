@@ -51,17 +51,17 @@ TEST_F( Thumbnails, MediaSetThumbnail )
 {
     std::string mrl = "file:///path/to/thumbnail.png";
     auto m = ml->addMedia( "/path/to/media.mp3", IMedia::Type::Audio );
-    ASSERT_FALSE( m->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_EQ( ThumbnailStatus::Missing, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
     auto res = m->setThumbnail( mrl, ThumbnailSizeType::Thumbnail );
     ASSERT_TRUE( res );
-    ASSERT_TRUE( m->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_EQ( ThumbnailStatus::Available, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
     ASSERT_EQ( m->thumbnailMrl( ThumbnailSizeType::Thumbnail ), mrl );
 
     Reload();
 
     m = ml->media( m->id() );
     ASSERT_EQ( m->thumbnailMrl( ThumbnailSizeType::Thumbnail ), mrl );
-    ASSERT_TRUE( m->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_EQ( ThumbnailStatus::Available, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
 }
 
 TEST_F( Thumbnails, Update )
@@ -113,19 +113,19 @@ TEST_F( Thumbnails, MarkFailure )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
 
-    ASSERT_FALSE( m->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_EQ( ThumbnailStatus::Missing, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
     auto thumbnail = std::make_shared<Thumbnail>( ml.get(), ThumbnailStatus::Failure,
                                                   Thumbnail::Origin::Media,
                                                   ThumbnailSizeType::Thumbnail );
     auto res = m->setThumbnail( std::move( thumbnail ) );
     ASSERT_TRUE( res );
 
-    ASSERT_TRUE( m->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_EQ( ThumbnailStatus::Failure, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
 
     Reload();
 
     m = std::static_pointer_cast<Media>( ml->media( m->id() ) );
-    ASSERT_TRUE( m->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_EQ( ThumbnailStatus::Failure, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
     auto t = m->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_TRUE( t->status() == ThumbnailStatus::Failure );
 }
@@ -279,8 +279,8 @@ TEST_F( Thumbnails, CheckMultipleSizes )
     std::string largeMrl = "http://large_thumbnail.png";
     auto res = m->setThumbnail( smallMrl, ThumbnailSizeType::Thumbnail );
     ASSERT_TRUE( res );
-    ASSERT_TRUE( m->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
-    ASSERT_FALSE( m->isThumbnailGenerated( ThumbnailSizeType::Banner ) );
+    ASSERT_EQ( ThumbnailStatus::Available, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_EQ( ThumbnailStatus::Missing, m->thumbnailStatus( ThumbnailSizeType::Banner ) );
 
     auto thumbnail = m->thumbnail( ThumbnailSizeType::Thumbnail );
     auto banner = m->thumbnail( ThumbnailSizeType::Banner );
