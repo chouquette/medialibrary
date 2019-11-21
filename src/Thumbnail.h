@@ -79,6 +79,8 @@ public:
      *
      * A thumbnail created with this constructor can be inserted in database
      * at a later time using \sa{Thumbnail::insert()}
+     * This constructor is meant for successful thumbnails only. Failure records
+     * need to use the constructor taking a ThumbnailStatus as 2nd parameter
      */
     Thumbnail( MediaLibraryPtr ml, std::string mrl, Origin origin,
                ThumbnailSizeType sizeType, bool isOwned );

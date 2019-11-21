@@ -72,13 +72,14 @@ Thumbnail::Thumbnail( MediaLibraryPtr ml, std::string mrl,
     , m_mrl( std::move( mrl ) )
     , m_origin( origin )
     , m_sizeType( sizeType )
+    , m_status( ThumbnailStatus::Available )
     , m_isOwned( isOwned )
     , m_sharedCounter( 0 )
 {
     // Store the mrl as is, and fiddle with it upon insertion as we only care
     // about storing a relative path in db, but we want to return the mrl as it
     // was given, ie. as an absolute mrl.
-    assert( ( m_mrl.empty() == true && isOwned == false ) ||
+    assert( m_mrl.empty() == false &&
             utils::file::scheme( m_mrl ).empty() == false );
 }
 

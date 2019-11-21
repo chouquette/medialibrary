@@ -114,8 +114,9 @@ TEST_F( Thumbnails, MarkFailure )
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
 
     ASSERT_FALSE( m->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
-    auto thumbnail = std::make_shared<Thumbnail>( ml.get(), "", Thumbnail::Origin::Media,
-                                                  ThumbnailSizeType::Thumbnail, false );
+    auto thumbnail = std::make_shared<Thumbnail>( ml.get(), ThumbnailStatus::Failure,
+                                                  Thumbnail::Origin::Media,
+                                                  ThumbnailSizeType::Thumbnail );
     auto res = m->setThumbnail( std::move( thumbnail ) );
     ASSERT_TRUE( res );
 
