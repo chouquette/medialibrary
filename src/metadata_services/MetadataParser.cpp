@@ -438,9 +438,11 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
         media->setTitleBuffered( title );
 
         if ( artworkMrl.empty() == false )
-            media->setThumbnail( artworkMrl, Thumbnail::Origin::Media,
-                                 ThumbnailSizeType::Thumbnail, false );
-
+        {
+            media->setThumbnail( std::make_shared<Thumbnail>( m_ml, artworkMrl,
+                                    Thumbnail::Origin::Media,
+                                    ThumbnailSizeType::Thumbnail, false ) );
+        }
         if ( std::get<0>( showInfo ) == true )
         {
             auto seasonId = std::get<1>( showInfo );

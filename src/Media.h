@@ -157,8 +157,6 @@ class Media : public IMedia,
         virtual bool isThumbnailGenerated(  ThumbnailSizeType sizeType ) const override;
         virtual bool setThumbnail( const std::string &thumbnail,
                                    ThumbnailSizeType sizeType ) override;
-        bool setThumbnail( const std::string& thumbnail, Thumbnail::Origin origin,
-                           ThumbnailSizeType sizeType, bool isOwned );
         bool setThumbnail( std::shared_ptr<Thumbnail> thumbnail );
         void removeThumbnail( ThumbnailSizeType sizeType );
         virtual unsigned int insertionDate() const override;

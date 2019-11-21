@@ -78,8 +78,9 @@ TEST_F( Thumbnails, Update )
 
     // Just update the mrl first
     mrl = "file:///better/thumbnail.gif";
-    auto res = m->setThumbnail( mrl, Thumbnail::Origin::Media,
-                                ThumbnailSizeType::Thumbnail, false );
+    auto thumbnail = std::make_shared<Thumbnail>( ml.get(), mrl, Thumbnail::Origin::Media,
+                                                  ThumbnailSizeType::Thumbnail, false );
+    auto res = m->setThumbnail( std::move( thumbnail ) );
     ASSERT_TRUE( res );
     ASSERT_EQ( t->mrl(), mrl );
 
@@ -93,8 +94,9 @@ TEST_F( Thumbnails, Update )
     ASSERT_EQ( t->origin(), Thumbnail::Origin::Media );
 
     // Now update the origin
-    res = m->setThumbnail( mrl, Thumbnail::Origin::UserProvided,
-                           ThumbnailSizeType::Thumbnail, false );
+    thumbnail = std::make_shared<Thumbnail>( ml.get(), mrl, Thumbnail::Origin::UserProvided,
+                                             ThumbnailSizeType::Thumbnail, false );
+    res = m->setThumbnail( std::move( thumbnail ) );
     ASSERT_TRUE( res );
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
@@ -112,8 +114,9 @@ TEST_F( Thumbnails, MarkFailure )
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
 
     ASSERT_FALSE( m->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
-    auto res = m->setThumbnail( "", Thumbnail::Origin::Media,
-                                ThumbnailSizeType::Thumbnail, false );
+    auto thumbnail = std::make_shared<Thumbnail>( ml.get(), "", Thumbnail::Origin::Media,
+                                                  ThumbnailSizeType::Thumbnail, false );
+    auto res = m->setThumbnail( std::move( thumbnail ) );
     ASSERT_TRUE( res );
 
     ASSERT_TRUE( m->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
@@ -174,8 +177,9 @@ TEST_F( Thumbnails, UnshareMedia )
 
     // Now let's re-update the media thumbnail, and check that it was only updated
     auto newMrl = std::string{ "file:///tmp/super_duper_new_thumbnail.png" };
-    auto res = m->setThumbnail( newMrl, Thumbnail::Origin::UserProvided,
-                                ThumbnailSizeType::Thumbnail, false );
+    auto thumbnail = std::make_shared<Thumbnail>( ml.get(), newMrl, Thumbnail::Origin::UserProvided,
+                                            ThumbnailSizeType::Thumbnail, false );
+    auto res = m->setThumbnail( std::move( thumbnail ) );
     ASSERT_TRUE( res );
 
     ASSERT_EQ( 2u, ml->countNbThumbnails() );
@@ -247,14 +251,17 @@ TEST_F( Thumbnails, UpdateIsOwned )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     auto mrl = std::string{ "file://path/to/a/thumbnail.jpg" };
-    auto res = m->setThumbnail( mrl, Thumbnail::Origin::Media,
-                                ThumbnailSizeType::Thumbnail, false );
+    auto thumbnail = std::make_shared<Thumbnail>( ml.get(), mrl,
+                                            Thumbnail::Origin::Media,
+                                            ThumbnailSizeType::Thumbnail, false );
+    auto res = m->setThumbnail( std::move( thumbnail ) );
     ASSERT_TRUE( res );
     ASSERT_EQ( mrl, m->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
 
     auto newMrl = utils::file::toMrl( ml->thumbnailPath() + "thumb.jpg" );
-    res = m->setThumbnail( newMrl, Thumbnail::Origin::Media,
-                           ThumbnailSizeType::Thumbnail, true );
+    thumbnail = std::make_shared<Thumbnail>( ml.get(), newMrl, Thumbnail::Origin::Media,
+                                             ThumbnailSizeType::Thumbnail, true );
+    res = m->setThumbnail( std::move( thumbnail ) );
     ASSERT_TRUE( res );
     ASSERT_EQ( m->thumbnailMrl( ThumbnailSizeType::Thumbnail ), newMrl );
 

@@ -650,18 +650,11 @@ void Media::removeThumbnail( ThumbnailSizeType sizeType )
     m_thumbnails[Thumbnail::SizeToInt( sizeType )] = nullptr;
 }
 
-bool Media::setThumbnail( const std::string& thumbnailMrl, Thumbnail::Origin origin,
-                          ThumbnailSizeType sizeType, bool isOwned )
-{
-    auto thumbnail = std::make_shared<Thumbnail>( m_ml, thumbnailMrl, origin,
-                                                  sizeType, isOwned );
-    assert( thumbnail->isValid() == true || thumbnail->isFailureRecord() == true );
-    return setThumbnail( std::move( thumbnail ) );
-}
-
 bool Media::setThumbnail( const std::string& thumbnailMrl, ThumbnailSizeType sizeType )
 {
-    return setThumbnail( thumbnailMrl, Thumbnail::Origin::UserProvided, sizeType, false );
+    return setThumbnail( std::make_shared<Thumbnail>( m_ml, thumbnailMrl,
+                                                      Thumbnail::Origin::UserProvided,
+                                                      sizeType, false ) );
 }
 
 bool Media::save()

@@ -182,7 +182,8 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
          *
          * This assumes that the thumbnail won't crash if it succeeded once.
          */
-        m->setThumbnail( "", Thumbnail::Origin::Media, task.sizeType, false );
+        m->setThumbnail( std::make_shared<Thumbnail>( m_ml, "", Thumbnail::Origin::Media,
+                                                      task.sizeType, false ) );
     }
     auto thumbnail = m->thumbnail( task.sizeType );
     if ( thumbnail == nullptr )
@@ -210,7 +211,8 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
     }
 
     auto destMrl = utils::file::toMrl( dest );
-    return m->setThumbnail( destMrl, Thumbnail::Origin::Media, task.sizeType, true );
+    return m->setThumbnail( std::make_shared<Thumbnail>( m_ml, destMrl,
+                        Thumbnail::Origin::Media, task.sizeType, true ) );
 }
 
 }
