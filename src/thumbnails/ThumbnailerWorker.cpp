@@ -210,9 +210,9 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
         }
         else
         {
-            // Otherwise, update the failure reason to "Failure". This is a generic
-            // failure, but if we got here, it means we didn't crash
-            thumbnail->setErrorStatus( ThumbnailStatus::Failure );
+            // Otherwise, ensure the status is "Failure" (since getting here means
+            // there was no crash) and bump the number of attempt
+            thumbnail->markFailed();
         }
         return false;
     }

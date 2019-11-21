@@ -132,7 +132,13 @@ public:
      * @brief setErrorStatus Updates the status in case of an error
      * @param status An error status
      */
-    bool setErrorStatus( ThumbnailStatus status );
+    bool markFailed();
+
+    /**
+     * @brief nbAttempts Returns the number of attempted generation for this thumbnail
+     * This is intended for unit testing purposes only.
+     */
+    uint32_t nbAttempts() const;
 
     /**
      * @brief relocate Moves the file associated with the thumbnail to the dedicated
@@ -218,6 +224,7 @@ private:
     Origin m_origin;
     ThumbnailSizeType m_sizeType;
     ThumbnailStatus m_status;
+    uint32_t m_nbAttempts;
     bool m_isOwned;
     uint32_t m_sharedCounter;
 

@@ -123,6 +123,9 @@ enum class ThumbnailStatus : uint8_t
     /// because of a timeout.
     /// It is fine to ask for a new generation in this case
     Failure,
+    /// The thumbnail generation failed at least 3 times. A new generation might
+    /// be required, but is likely to fail again.
+    PersistentFailure,
     /// The thumbnail generation failed because of a crash. Asking for a new
     /// generation is not recommended, unless you know the underlying issue was
     /// fixed.

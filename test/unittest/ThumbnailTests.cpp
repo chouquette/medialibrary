@@ -444,3 +444,67 @@ TEST_F( Thumbnails, CheckDbModel )
     auto res = Thumbnail::checkDbModel( ml.get() );
     ASSERT_TRUE( res );
 }
+
+TEST_F( Thumbnails, NbAttempts )
+{
+    auto t = std::make_shared<Thumbnail>( ml.get(), ThumbnailStatus::Failure,
+                                          Thumbnail::Origin::Media,
+                                          ThumbnailSizeType::Thumbnail );
+    auto id = t->insert();
+    ASSERT_NE( 0, id );
+    ASSERT_EQ( ThumbnailStatus::Failure, t->status() );
+
+    // First failed attempt, still returns Failure
+    auto res = t->markFailed();
+    ASSERT_TRUE( res );
+    ASSERT_EQ( ThumbnailStatus::Failure, t->status() );
+
+    // 2nd failed attempt, still returns failure
+    res = t->markFailed();
+    ASSERT_TRUE( res );
+    ASSERT_EQ( ThumbnailStatus::Failure, t->status() );
+
+    // 3rd failed attempt, will return PersistentFailure from now on
+    res = t->markFailed();
+    ASSERT_TRUE( res );
+    ASSERT_EQ( ThumbnailStatus::PersistentFailure, t->status() );
+}
+
+TEST_F( Thumbnails, OverridePersistentFailure )
+{
+    auto t = std::make_shared<Thumbnail>( ml.get(), ThumbnailStatus::Failure,
+                                          Thumbnail::Origin::Media,
+                                          ThumbnailSizeType::Banner );
+    auto media = std::static_pointer_cast<Media>(
+                ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    media->setThumbnail( t );
+    auto res = t->markFailed();
+    ASSERT_TRUE( res );
+    res = t->markFailed();
+    ASSERT_TRUE( res );
+    res = t->markFailed();
+    ASSERT_TRUE( res );
+    ASSERT_EQ( ThumbnailStatus::PersistentFailure, t->status() );
+
+    // Now, let's update the media thumbnail with a valid one, even though it failed
+    // multiple times before.
+    // We expect that thumbnail to be updated, and its status to be Success
+    res = media->setThumbnail( "file:///path/to/thumbnail.jpg", ThumbnailSizeType::Banner );
+    ASSERT_TRUE( res );
+    auto t2 = media->thumbnail( ThumbnailSizeType::Banner );
+    ASSERT_NE( nullptr, t2 );
+    ASSERT_EQ( t->id(), t2->id() );
+    ASSERT_EQ( ThumbnailStatus::Available, t2->status() );
+    ASSERT_EQ( 0u, t2->nbAttempts() );
+
+    Reload();
+
+    t2 = Thumbnail::fetch( ml.get(), Thumbnail::EntityType::Media, media->id(),
+                           ThumbnailSizeType::Banner );
+    ASSERT_NE( nullptr, t2 );
+    ASSERT_EQ( t->id(), t2->id() );
+    ASSERT_EQ( ThumbnailStatus::Available, t2->status() );
+    ASSERT_EQ( 0u, t2->nbAttempts() );
+
+    ASSERT_EQ( 1u, ml->countNbThumbnails() );
+}

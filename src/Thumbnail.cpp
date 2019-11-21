@@ -49,6 +49,7 @@ Thumbnail::Thumbnail( MediaLibraryPtr ml, sqlite::Row& row )
     , m_origin( row.extract<decltype(m_origin)>() )
     , m_sizeType( row.extract<decltype(m_sizeType)>() )
     , m_status( row.extract<decltype(m_status)>() )
+    , m_nbAttempts( row.extract<decltype(m_nbAttempts)>() )
     , m_isOwned( row.extract<decltype(m_isOwned)>() )
     , m_sharedCounter( row.extract<decltype(m_sharedCounter)>() )
 {
@@ -73,6 +74,7 @@ Thumbnail::Thumbnail( MediaLibraryPtr ml, std::string mrl,
     , m_origin( origin )
     , m_sizeType( sizeType )
     , m_status( ThumbnailStatus::Available )
+    , m_nbAttempts( 0 )
     , m_isOwned( isOwned )
     , m_sharedCounter( 0 )
 {
@@ -90,6 +92,7 @@ Thumbnail::Thumbnail( MediaLibraryPtr ml, ThumbnailStatus status,
     , m_origin( origin )
     , m_sizeType( sizeType )
     , m_status( status )
+    , m_nbAttempts( 0 )
     , m_isOwned( false )
     , m_sharedCounter( 0 )
 {
@@ -120,13 +123,16 @@ bool Thumbnail::update( std::string mrl, bool isOwned )
     // Also include the current generated state to the request, in case this update
     // request came while the thumbnailer was also generating a thumbnail
     static const std::string req = "UPDATE " + Thumbnail::Table::Name +
-            " SET mrl = ?, is_owned = ? "
+            " SET mrl = ?, status = ?, nb_attempts = 0, is_owned = ? "
             "WHERE id_thumbnail = ? AND is_owned = ?";
     if( sqlite::Tools::executeUpdate( m_ml->getConn(), req, storedMrl,
-                                      isOwned, m_id, m_isOwned ) == false )
+                                      ThumbnailStatus::Available, isOwned,
+                                      m_id, m_isOwned ) == false )
         return false;
     m_mrl = std::move( mrl );
     m_isOwned = isOwned;
+    m_status = ThumbnailStatus::Available;
+    m_nbAttempts = 0;
     return true;
 }
 
@@ -198,29 +204,32 @@ ThumbnailSizeType Thumbnail::sizeType() const
 ThumbnailStatus Thumbnail::status() const
 {
     /*
-     * Missing is only meant as a value to be returned when no thumbnail record
-     * is present. If a record has been inserted, it means a thumbnail generation
-     * was attempted, so we must have a status reflecting that
+     * Missing & PersistentFailure are only meant as a value to be returned when
+     * no thumbnail record is present or when the generation repeatidly fails.
+     * They are not meant to be inserted in database.
      */
-    assert( m_status != ThumbnailStatus::Missing );
+    assert( m_status != ThumbnailStatus::Missing &&
+            m_status != ThumbnailStatus::PersistentFailure );
+    if ( m_status == ThumbnailStatus::Failure && m_nbAttempts >= 3 )
+        return ThumbnailStatus::PersistentFailure;
     return m_status;
 }
 
-bool Thumbnail::setErrorStatus( ThumbnailStatus status )
+bool Thumbnail::markFailed()
 {
-    if ( status == ThumbnailStatus::Available || status == ThumbnailStatus::Missing )
-    {
-        assert( !"Invalid status provided" );
-        return false;
-    }
-    if ( m_status == status )
-        return true;
     const std::string req = "UPDATE " + Table::Name +
-            " SET status = ? WHERE id_thumbnail = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, status, m_id ) == false )
+            " SET status = ?, nb_attempts = nb_attempts + 1 WHERE id_thumbnail = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req,
+                                       ThumbnailStatus::Failure, m_id ) == false )
         return false;
-    m_status = status;
+    m_status = ThumbnailStatus::Failure;
+    ++m_nbAttempts;
     return true;
+}
+
+uint32_t Thumbnail::nbAttempts() const
+{
+    return m_nbAttempts;
 }
 
 void Thumbnail::relocate()
@@ -404,6 +413,7 @@ std::string Thumbnail::schema( const std::string& tableName, uint32_t dbModel )
         "id_thumbnail INTEGER PRIMARY KEY AUTOINCREMENT,"
         "mrl TEXT,"
         "status UNSIGNED INTEGER NOT NULL,"
+        "nb_attempts UNSIGNED INTEGER DEFAULT 0,"
         "is_owned BOOLEAN NOT NULL,"
         "shared_counter INTEGER NOT NULL DEFAULT 0"
     ")";
@@ -424,7 +434,7 @@ std::shared_ptr<Thumbnail> Thumbnail::fetch( MediaLibraryPtr ml, EntityType type
                                              int64_t entityId, ThumbnailSizeType sizeType )
 {
     std::string req = "SELECT t.id_thumbnail, t.mrl, ent.origin, ent.size_type,"
-            "t.status, t.is_owned, t.shared_counter "
+            "t.status, t.nb_attempts, t.is_owned, t.shared_counter "
             "FROM " + Table::Name + " t "
             "INNER JOIN " + LinkingTable::Name + " ent "
                 "ON t.id_thumbnail = ent.thumbnail_id "
