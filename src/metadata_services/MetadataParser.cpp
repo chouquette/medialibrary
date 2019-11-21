@@ -595,6 +595,8 @@ Status MetadataAnalyzer::overrideExternalMedia( IItem& item, std::shared_ptr<Med
     assert( sqlite::Transaction::transactionInProgress() == true );
     auto fsDir = item.parentFolderFs();
     auto deviceFs = fsDir->device();
+    if ( deviceFs == nullptr )
+        return Status::Fatal;
     auto device = Device::fromUuid( m_ml, deviceFs->uuid() );
     if ( device == nullptr )
         return Status::Fatal;
