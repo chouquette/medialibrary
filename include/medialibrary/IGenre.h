@@ -60,6 +60,29 @@ public:
     virtual Query<IAlbum> albums( const QueryParameters* params = nullptr ) const = 0;
     virtual Query<IAlbum> searchAlbums( const std::string& pattern,
                                         const QueryParameters* params = nullptr ) const = 0;
+
+    /**
+     * @brief thumbnailMrl Returns this genre thumbnail mrl
+     * @param sizeType The target thumbnail size type
+     * @return An mrl to the thumbnail if any, or an empty string
+     */
+    virtual const std::string& thumbnailMrl( ThumbnailSizeType sizeType ) const = 0;
+    /**
+     * @brief hasThumbnail Returns true if this genre has a thumbnail available
+     * @param sizeType The probed thumbnail size type
+     * @return true if a thumbnail is available, false otherwise
+     */
+    virtual bool hasThumbnail( ThumbnailSizeType sizeType ) const = 0;
+    /**
+     * @brief setThumbnail Set a thumbnail for this genre
+     * @param mrl The thumbnail mrl
+     * @param sizeType The thumbnail size type
+     * @param takeOwnership If true, the medialibrary will copy the thumbnail in
+     *                      its thumbnail directory and will manage its lifetime
+     * @return true if the thumbnail was successfully overriden, false otherwise.
+     */
+    virtual bool setThumbnail( const std::string& mrl, ThumbnailSizeType sizeType,
+                               bool takeOwnership ) = 0;
 };
 
 }

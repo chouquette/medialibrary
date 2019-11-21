@@ -65,6 +65,7 @@ public:
         Media,
         Album,
         Artist,
+        Genre,
     };
 
     Thumbnail( MediaLibraryPtr ml, sqlite::Row& row );

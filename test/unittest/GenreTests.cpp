@@ -345,3 +345,36 @@ TEST_F( Genres, CheckDbModel )
     auto res = Genre::checkDbModel( ml.get() );
     ASSERT_TRUE( res );
 }
+
+TEST_F( Genres, Thumbnails )
+{
+    ASSERT_FALSE( g->hasThumbnail( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_FALSE( g->hasThumbnail( ThumbnailSizeType::Banner ) );
+
+    auto mrl = std::string{ "file:///path/to/thumbnail.jpg" };
+    auto res = g->setThumbnail( mrl, ThumbnailSizeType::Thumbnail, false );
+    ASSERT_TRUE( res );
+    ASSERT_TRUE( g->hasThumbnail( ThumbnailSizeType::Thumbnail ) );
+
+    ASSERT_EQ( mrl, g->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
+
+    Reload();
+
+    g = std::static_pointer_cast<Genre>( ml->genre( g->id() ) );
+    ASSERT_EQ( mrl, g->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_TRUE( g->hasThumbnail( ThumbnailSizeType::Thumbnail ) );
+
+    // Update it, and expect the thumbnail to be updated, ie. no new thumbnail
+    // should be created
+    mrl = "file:///path/to/new/thumbnail.png";
+    res = g->setThumbnail( mrl, ThumbnailSizeType::Thumbnail, false );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( mrl, g->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
+
+    Reload();
+
+    g = std::static_pointer_cast<Genre>( ml->genre( g->id() ) );
+    ASSERT_EQ( mrl, g->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
+
+    ASSERT_EQ( 1u, ml->countNbThumbnails() );
+}

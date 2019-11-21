@@ -25,6 +25,7 @@
 #include "medialibrary/IGenre.h"
 
 #include "database/DatabaseHelpers.h"
+#include "Thumbnail.h"
 
 namespace medialibrary
 {
@@ -60,6 +61,12 @@ public:
     virtual Query<IAlbum> searchAlbums( const std::string& pattern,
                                         const QueryParameters* params = nullptr ) const override;
 
+    virtual const std::string& thumbnailMrl( ThumbnailSizeType sizeType ) const override;
+    virtual bool hasThumbnail( ThumbnailSizeType sizeType ) const override;
+    virtual bool setThumbnail( const std::string& mrl, ThumbnailSizeType sizeType,
+                               bool takeOwnership ) override;
+    std::shared_ptr<Thumbnail> thumbnail( ThumbnailSizeType sizeType ) const;
+
     static void createTable( sqlite::Connection* dbConn );
     static void createTriggers( sqlite::Connection* dbConn );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
@@ -75,6 +82,7 @@ private:
     int64_t m_id;
     const std::string m_name;
     uint32_t m_nbTracks;
+    mutable std::shared_ptr<Thumbnail> m_thumbnails[Thumbnail::SizeToInt( ThumbnailSizeType::Count )];
 
     friend Genre::Table;
 };

@@ -121,6 +121,53 @@ Query<IAlbum> Genre::searchAlbums( const std::string& pattern,
     return Album::searchFromGenre( m_ml, pattern, m_id, params );
 }
 
+const std::string&Genre::thumbnailMrl( ThumbnailSizeType sizeType ) const
+{
+    const auto t = thumbnail( sizeType );
+    if ( t == nullptr )
+        return Thumbnail::EmptyMrl;
+    return t->mrl();
+}
+
+bool Genre::hasThumbnail( ThumbnailSizeType sizeType ) const
+{
+    if ( m_thumbnails[Thumbnail::SizeToInt( sizeType )] != nullptr )
+        return true;
+    return thumbnail( sizeType ) != nullptr;
+}
+
+bool Genre::setThumbnail( const std::string& mrl, ThumbnailSizeType sizeType,
+                          bool takeOwnership )
+{
+    auto thumbnailIdx = Thumbnail::SizeToInt( sizeType );
+    auto currentThumbnail = thumbnail( sizeType );
+    auto newThumbnail = std::make_shared<Thumbnail>( m_ml, mrl,
+                            Thumbnail::Origin::UserProvided, sizeType, false );
+    currentThumbnail = Thumbnail::updateOrReplace( m_ml, currentThumbnail,
+                                                   newThumbnail, m_id,
+                                                   Thumbnail::EntityType::Genre );
+    if ( currentThumbnail == nullptr )
+        return false;
+    m_thumbnails[thumbnailIdx] = std::move( currentThumbnail );
+    if ( takeOwnership == true )
+        m_thumbnails[thumbnailIdx]->relocate();
+    return true;
+}
+
+std::shared_ptr<Thumbnail> Genre::thumbnail( ThumbnailSizeType sizeType ) const
+{
+    auto idx = Thumbnail::SizeToInt( sizeType );
+    if ( m_thumbnails[idx] == nullptr )
+    {
+        auto thumbnail = Thumbnail::fetch( m_ml, Thumbnail::EntityType::Genre,
+                                           m_id, sizeType );
+        if ( thumbnail == nullptr )
+            return nullptr;
+        m_thumbnails[idx] = std::move( thumbnail );
+    }
+    return m_thumbnails[idx];
+}
+
 void Genre::createTable( sqlite::Connection* dbConn )
 {
     const std::string reqs[] = {
