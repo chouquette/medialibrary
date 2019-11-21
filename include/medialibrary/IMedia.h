@@ -195,6 +195,7 @@ class IMedia
         /// results.
         ///
         virtual ThumbnailStatus thumbnailStatus( ThumbnailSizeType sizeType ) const = 0;
+
         ///
         /// \brief setThumbnail Sets a thumbnail for the current media
         /// \param mrl A mrl pointing the the thumbnail file.
@@ -205,6 +206,34 @@ class IMedia
         /// of computing thumbnails.
         ///
         virtual bool setThumbnail( const std::string& mrl, ThumbnailSizeType sizeType ) = 0;
+
+        ///
+        /// \brief requestThumbnail Queues a thumbnail generation request for
+        /// this media, to be run asynchronously.
+        /// Upon completion (successful or not) IMediaLibraryCb::onMediaThumbnailReady
+        /// will be called.
+        /// In case a thumbnail was already generated for the media, a new thumbnail
+        /// will be generated, and the previous one will be overriden.
+        /// In case a previous thumbnailing attempt failed, false will be returned
+        /// and no new generation will occur.
+        /// If you want to force a new generation, you need to
+        /// call \sa{IMediaLibrary::enableFailedThumbnailRegeneration} beforehand.
+        /// \param sizeType The size type of the thumbnail to generate
+        /// \param desiredWidth The desired thumbnail width
+        /// \param desiredHeight The desired thumbnail height
+        /// \param position The position at which to generate the thumbnail, in [0;1] range
+        ///
+        /// The generated thumbnail will try to oblige by the requested size, while
+        /// respecting the source aspect ratio. If the aspect ratios differ, the
+        /// source image will be cropped.
+        /// If one of the dimension is 0, the other one will be deduced from the
+        /// source aspect ratio. If both are 0, the source dimensions will be used.
+        ///
+        /// This function is thread-safe
+        ///
+        virtual bool requestThumbnail( ThumbnailSizeType sizeType, uint32_t desiredWidth,
+                                       uint32_t desiredHeight, float position ) = 0;
+
         virtual unsigned int insertionDate() const = 0;
         virtual unsigned int releaseDate() const = 0;
 
@@ -248,33 +277,6 @@ class IMedia
         /// This will return false in case of a database failure
         ///
         virtual bool removeFromHistory() = 0;
-
-        ///
-        /// \brief requestThumbnail Queues a thumbnail generation request for
-        /// this media, to be run asynchronously.
-        /// Upon completion (successful or not) IMediaLibraryCb::onMediaThumbnailReady
-        /// will be called.
-        /// In case a thumbnail was already generated for the media, a new thumbnail
-        /// will be generated, and the previous one will be overriden.
-        /// In case a previous thumbnailing attempt failed, false will be returned
-        /// and no new generation will occur.
-        /// If you want to force a new generation, you need to
-        /// call \sa{IMediaLibrary::enableFailedThumbnailRegeneration} beforehand.
-        /// \param sizeType The size type of the thumbnail to generate
-        /// \param desiredWidth The desired thumbnail width
-        /// \param desiredHeight The desired thumbnail height
-        /// \param position The position at which to generate the thumbnail, in [0;1] range
-        ///
-        /// The generated thumbnail will try to oblige by the requested size, while
-        /// respecting the source aspect ratio. If the aspect ratios differ, the
-        /// source image will be cropped.
-        /// If one of the dimension is 0, the other one will be deduced from the
-        /// source aspect ratio. If both are 0, the source dimensions will be used.
-        ///
-        /// This function is thread-safe
-        ///
-        virtual bool requestThumbnail( ThumbnailSizeType sizeType, uint32_t desiredWidth,
-                                       uint32_t desiredHeight, float position ) = 0;
 
         ///
         /// \brief bookmarks Returns a query representing this media bookmarks
