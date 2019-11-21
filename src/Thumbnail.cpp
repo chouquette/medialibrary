@@ -107,7 +107,7 @@ int64_t Thumbnail::id() const
 
 const std::string& Thumbnail::mrl() const
 {
-    assert( isValid() == true );
+    assert( status() == ThumbnailStatus::Available  );
     return m_mrl;
 }
 
@@ -175,11 +175,6 @@ void Thumbnail::unlinkThumbnail( int64_t entityId, EntityType type )
     --m_sharedCounter;
 }
 
-bool Thumbnail::isValid() const
-{
-    return m_mrl.empty() == false;
-}
-
 Thumbnail::Origin Thumbnail::origin() const
 {
     return m_origin;
@@ -235,7 +230,7 @@ uint32_t Thumbnail::nbAttempts() const
 void Thumbnail::relocate()
 {
     // There is no point in relocating a failure record.
-    assert( isValid() == true );
+    assert( status() == ThumbnailStatus::Available );
 
     auto originalMrl = m_mrl;
     auto destPath = m_ml->thumbnailPath() +

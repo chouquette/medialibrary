@@ -421,7 +421,7 @@ std::shared_ptr<Thumbnail> Media::thumbnail( ThumbnailSizeType sizeType ) const
 const std::string& Media::thumbnailMrl( ThumbnailSizeType sizeType ) const
 {
     auto t = thumbnail( sizeType );
-    if ( t == nullptr || t->isValid() == false )
+    if ( t == nullptr || t->status() != ThumbnailStatus::Available )
         return Thumbnail::EmptyMrl;
     assert( t == m_thumbnails[Thumbnail::SizeToInt( sizeType )] );
     return t->mrl();

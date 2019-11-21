@@ -475,7 +475,7 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
     // before relocating the thumbnail of a video media, bear in mind that the
     // thumbnailer thread might be processing the same media, and can be generating
     // a thumbnail right now
-    if ( thumbnail != nullptr && thumbnail->isValid() &&
+    if ( thumbnail != nullptr && thumbnail->status() == ThumbnailStatus::Available &&
          thumbnail->isOwned() == false )
     {
         thumbnail->relocate();
@@ -940,7 +940,7 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
 
     if ( mediaThumbnail != nullptr )
     {
-        assert( mediaThumbnail->isValid() );
+        assert( mediaThumbnail->status() == ThumbnailStatus::Available );
         mediaThumbnail->relocate();
     }
     return Status::Success;
