@@ -120,8 +120,8 @@ bool Thumbnail::update( std::string mrl, bool isOwned )
     // Also include the current generated state to the request, in case this update
     // request came while the thumbnailer was also generating a thumbnail
     static const std::string req = "UPDATE " + Thumbnail::Table::Name +
-            " SET mrl = ?, is_generated = ? "
-            "WHERE id_thumbnail = ? AND is_generated = ?";
+            " SET mrl = ?, is_owned = ? "
+            "WHERE id_thumbnail = ? AND is_owned = ?";
     if( sqlite::Tools::executeUpdate( m_ml->getConn(), req, storedMrl,
                                       isOwned, m_id, m_isOwned ) == false )
         return false;
@@ -404,7 +404,7 @@ std::string Thumbnail::schema( const std::string& tableName, uint32_t dbModel )
         "id_thumbnail INTEGER PRIMARY KEY AUTOINCREMENT,"
         "mrl TEXT,"
         "status UNSIGNED INTEGER NOT NULL,"
-        "is_generated BOOLEAN NOT NULL,"
+        "is_owned BOOLEAN NOT NULL,"
         "shared_counter INTEGER NOT NULL DEFAULT 0"
     ")";
 
@@ -424,7 +424,7 @@ std::shared_ptr<Thumbnail> Thumbnail::fetch( MediaLibraryPtr ml, EntityType type
                                              int64_t entityId, ThumbnailSizeType sizeType )
 {
     std::string req = "SELECT t.id_thumbnail, t.mrl, ent.origin, ent.size_type,"
-            "t.status, t.is_generated, t.shared_counter "
+            "t.status, t.is_owned, t.shared_counter "
             "FROM " + Table::Name + " t "
             "INNER JOIN " + LinkingTable::Name + " ent "
                 "ON t.id_thumbnail = ent.thumbnail_id "
@@ -436,7 +436,7 @@ int64_t Thumbnail::insert()
 {
     assert( m_id == 0 );
     static const std::string req = "INSERT INTO " + Thumbnail::Table::Name +
-            "(mrl, status, is_generated) VALUES(?, ?, ?)";
+            "(mrl, status, is_owned) VALUES(?, ?, ?)";
     auto pKey = sqlite::Tools::executeInsert( m_ml->getConn(), req,
                             m_isOwned == true ? toRelativeMrl( m_mrl ) : m_mrl,
                             m_status, m_isOwned );
