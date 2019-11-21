@@ -530,7 +530,7 @@ bool Media::requestThumbnail( ThumbnailSizeType sizeType, uint32_t desiredWidth,
     // update, after the bug causing the previous failures has been fixed in
     // the underlying thumbnail)
     auto t = thumbnail( sizeType );
-    if ( t != nullptr && t->isFailureRecord() == true )
+    if ( t != nullptr && t->status() != ThumbnailStatus::Available )
         return false;
     thumbnailer->requestThumbnail( shared_from_this(), sizeType,
                                    desiredWidth, desiredHeight, position );

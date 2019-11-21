@@ -127,7 +127,7 @@ TEST_F( Thumbnails, MarkFailure )
     m = std::static_pointer_cast<Media>( ml->media( m->id() ) );
     ASSERT_TRUE( m->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
     auto t = m->thumbnail( ThumbnailSizeType::Thumbnail );
-    ASSERT_TRUE( t->isFailureRecord() );
+    ASSERT_TRUE( t->status() == ThumbnailStatus::Failure );
 }
 
 TEST_F( Thumbnails, UnshareMedia )

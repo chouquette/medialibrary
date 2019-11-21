@@ -195,10 +195,15 @@ ThumbnailSizeType Thumbnail::sizeType() const
     return m_sizeType;
 }
 
-bool Thumbnail::isFailureRecord() const
+ThumbnailStatus Thumbnail::status() const
 {
+    /*
+     * Missing is only meant as a value to be returned when no thumbnail record
+     * is present. If a record has been inserted, it means a thumbnail generation
+     * was attempted, so we must have a status reflecting that
+     */
     assert( m_status != ThumbnailStatus::Missing );
-    return m_status != ThumbnailStatus::Available;
+    return m_status;
 }
 
 bool Thumbnail::setErrorStatus( ThumbnailStatus status )
@@ -455,10 +460,9 @@ std::string Thumbnail::path( MediaLibraryPtr ml, int64_t thumbnailId )
 
 std::string Thumbnail::toRelativeMrl( const std::string& absoluteMrl )
 {
-    // We can still
     if ( absoluteMrl.empty() == true )
     {
-        assert( isFailureRecord() == true );
+        assert( status() != ThumbnailStatus::Available );
         return absoluteMrl;
     }
     // Ensure the thumbnail mrl is an absolute mrl and contained in the

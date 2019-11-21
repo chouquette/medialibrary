@@ -127,11 +127,7 @@ public:
 
     ThumbnailSizeType sizeType() const;
 
-    /**
-     * @brief isFailureRecord returns true if this thumbnail is representing a
-     *                        previous failed request
-     */
-    bool isFailureRecord() const;
+    ThumbnailStatus status() const;
     /**
      * @brief setErrorStatus Updates the status in case of an error
      * @param status An error status
