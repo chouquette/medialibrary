@@ -93,7 +93,8 @@ Thumbnail::Thumbnail( MediaLibraryPtr ml, ThumbnailStatus status,
     , m_isOwned( false )
     , m_sharedCounter( 0 )
 {
-    assert( status != ThumbnailStatus::Available );
+    assert( m_status != ThumbnailStatus::Available &&
+            m_status != ThumbnailStatus::Missing );
 }
 
 int64_t Thumbnail::id() const
@@ -196,12 +197,13 @@ ThumbnailSizeType Thumbnail::sizeType() const
 
 bool Thumbnail::isFailureRecord() const
 {
+    assert( m_status != ThumbnailStatus::Missing );
     return m_status != ThumbnailStatus::Available;
 }
 
 bool Thumbnail::setErrorStatus( ThumbnailStatus status )
 {
-    if ( status == ThumbnailStatus::Available )
+    if ( status == ThumbnailStatus::Available || status == ThumbnailStatus::Missing )
     {
         assert( !"Invalid status provided" );
         return false;

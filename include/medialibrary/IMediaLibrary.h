@@ -114,6 +114,8 @@ enum class ThumbnailSizeType : uint8_t
 
 enum class ThumbnailStatus : uint8_t
 {
+    /// No thumbnail for this entity
+    Missing,
     /// This thumbnail was successfully generated or was provided by the user
     /// and is available to use
     Available,
