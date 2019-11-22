@@ -1048,6 +1048,16 @@ void Media::createTriggers( sqlite::Connection* connection, uint32_t modelVersio
                     "WHERE device_id=new.id_device;"
                 "END;";
         sqlite::Tools::executeRequest( connection, mediaDevicePresenceTrigger );
+
+        const std::string cascadeFileDeletionTrigger = "CREATE TRIGGER IF NOT EXISTS "
+                "cascade_file_deletion AFTER DELETE ON " + File::Table::Name +
+                " BEGIN "
+                " DELETE FROM " + Media::Table::Name + " WHERE "
+                    "(SELECT COUNT(id_file) FROM " + File::Table::Name +
+                        " WHERE media_id=old.media_id) = 0"
+                        " AND id_media=old.media_id;"
+                " END;";
+        sqlite::Tools::executeRequest( connection, cascadeFileDeletionTrigger );
     }
     else
     {
@@ -1061,17 +1071,21 @@ void Media::createTriggers( sqlite::Connection* connection, uint32_t modelVersio
                     "WHERE device_id=new.id_device;"
                 "END;";
         sqlite::Tools::executeRequest( connection, mediaDevicePresenceTrigger );
-    }
 
-    const std::string cascadeFileDeletionTrigger = "CREATE TRIGGER IF NOT EXISTS "
-            "cascade_file_deletion AFTER DELETE ON " + File::Table::Name +
-            " BEGIN "
-            " DELETE FROM " + Media::Table::Name + " WHERE "
-                "(SELECT COUNT(id_file) FROM " + File::Table::Name +
-                    " WHERE media_id=old.media_id) = 0"
-                    " AND id_media=old.media_id;"
-            " END;";
-    sqlite::Tools::executeRequest( connection, cascadeFileDeletionTrigger );
+        const std::string cascadeFileDeletionTrigger = "CREATE TRIGGER IF NOT EXISTS "
+                "media_cascade_file_deletion AFTER DELETE ON " + File::Table::Name +
+                " WHEN old.type = " +
+                    std::to_string( static_cast<std::underlying_type_t<File::Type>>(
+                                        IFile::Type::Main ) ) +
+                " OR old.type = " +
+                    std::to_string( static_cast<std::underlying_type_t<File::Type>>(
+                                        IFile::Type::Disc ) ) +
+                " BEGIN "
+                " DELETE FROM " + Media::Table::Name +
+                    " WHERE id_media=old.media_id;"
+                " END";
+        sqlite::Tools::executeRequest( connection, cascadeFileDeletionTrigger );
+    }
 
     const std::string insertMediaFtsTrigger = "CREATE TRIGGER IF NOT EXISTS "
             "insert_media_fts AFTER INSERT ON " + Media::Table::Name +
