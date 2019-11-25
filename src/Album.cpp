@@ -138,11 +138,12 @@ bool Album::setShortSummary( const std::string& summary )
     return true;
 }
 
-bool Album::isThumbnailGenerated( ThumbnailSizeType sizeType ) const
+ThumbnailStatus Album::thumbnailStatus( ThumbnailSizeType sizeType ) const
 {
-    if ( m_thumbnails[Thumbnail::SizeToInt( sizeType )] != nullptr )
-        return true;
-    return thumbnail( sizeType ) != nullptr;
+    auto t = thumbnail( sizeType );
+    if ( t == nullptr )
+        return ThumbnailStatus::Missing;
+    return t->status();
 }
 
 const std::string& Album::thumbnailMrl( ThumbnailSizeType sizeType ) const

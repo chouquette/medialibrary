@@ -41,12 +41,9 @@ public:
     virtual unsigned int releaseYear() const = 0;
     virtual const std::string& shortSummary() const = 0;
     /**
-     * @brief isThumbnailGenerated Returns true is a thumbnail generation was attempted.
-     *
-     * If the thumbnail generation failed, this will still return true, and the
-     * associated thumbnail mrl will be empty.
+     * @brief thumbnailStatus Returns this album current thumbnail status.
      */
-    virtual bool isThumbnailGenerated( ThumbnailSizeType sizeType ) const = 0;
+    virtual ThumbnailStatus thumbnailStatus( ThumbnailSizeType sizeType ) const = 0;
     virtual const std::string& thumbnailMrl( ThumbnailSizeType sizeType ) const = 0;
     /**
      * @brief tracks fetches album tracks from the database

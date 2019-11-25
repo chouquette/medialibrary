@@ -74,7 +74,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         bool setReleaseYear( unsigned int date, bool force );
         virtual const std::string& shortSummary() const override;
         bool setShortSummary( const std::string& summary );
-        virtual bool isThumbnailGenerated( ThumbnailSizeType sizeType ) const override;
+        virtual ThumbnailStatus thumbnailStatus( ThumbnailSizeType sizeType ) const override;
         virtual const std::string& thumbnailMrl( ThumbnailSizeType sizeType ) const override;
         std::shared_ptr<Thumbnail> thumbnail( ThumbnailSizeType sizeType ) const;
         bool setThumbnail(std::shared_ptr<Thumbnail> thumbnail );

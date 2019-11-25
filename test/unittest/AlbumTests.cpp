@@ -169,7 +169,8 @@ TEST_F( Albums, Thumbnail )
     auto a = ml->createAlbum( "album" );
     auto t = a->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_EQ( nullptr, t );
-    ASSERT_FALSE( a->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_EQ( ThumbnailStatus::Missing,
+               a->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
 
     std::string mrl = "file:///path/to/sea/otter/artwork.png";
     t = std::make_shared<Thumbnail>( ml.get(), mrl, Thumbnail::Origin::UserProvided,
@@ -182,7 +183,8 @@ TEST_F( Albums, Thumbnail )
     t = a->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_NE( nullptr, t );
     ASSERT_EQ( mrl, t->mrl() );
-    ASSERT_TRUE( a->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_EQ( ThumbnailStatus::Available,
+               a->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
 
     Reload();
 
@@ -190,7 +192,8 @@ TEST_F( Albums, Thumbnail )
     t = a->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_NE( nullptr, t );
     ASSERT_EQ( mrl, t->mrl() );
-    ASSERT_TRUE( a->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_EQ( ThumbnailStatus::Available,
+               a->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
 }
 
 TEST_F( Albums, FetchAlbumFromTrack )
