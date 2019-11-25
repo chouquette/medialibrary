@@ -80,19 +80,22 @@ TEST_F( Artists, ArtworkMrl )
     auto a = ml->createArtist( "Dream seaotter" );
     ASSERT_NE( a, nullptr );
     ASSERT_EQ( a->thumbnailMrl( ThumbnailSizeType::Thumbnail ), "" );
-    ASSERT_FALSE( a->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_EQ( ThumbnailStatus::Missing,
+               a->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
 
     std::string artwork("file:///tmp/otter.png");
     a->setThumbnail( artwork, ThumbnailSizeType::Thumbnail );
     ASSERT_EQ( a->thumbnailMrl( ThumbnailSizeType::Thumbnail ), artwork );
-    ASSERT_TRUE( a->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_EQ( ThumbnailStatus::Available,
+               a->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
 
     Reload();
 
     auto a2 = ml->artist( a->id() );
     ASSERT_NE( a2, nullptr );
     ASSERT_EQ( a2->thumbnailMrl( ThumbnailSizeType::Thumbnail ), artwork );
-    ASSERT_TRUE( a->isThumbnailGenerated( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_EQ( ThumbnailStatus::Available,
+               a->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
 }
 
 TEST_F( Artists, Thumbnail )

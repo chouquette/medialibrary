@@ -163,11 +163,12 @@ bool Artist::addMedia( Media& media )
     return sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(), m_id ) != 0;
 }
 
-bool Artist::isThumbnailGenerated( ThumbnailSizeType sizeType ) const
+ThumbnailStatus Artist::thumbnailStatus( ThumbnailSizeType sizeType ) const
 {
-    if ( m_thumbnails[Thumbnail::SizeToInt( sizeType )] != nullptr )
-        return true;
-    return thumbnail( sizeType ) != nullptr;
+    auto t = thumbnail( sizeType );
+    if ( t == nullptr )
+        return ThumbnailStatus::Missing;
+    return t->status();
 }
 
 const std::string& Artist::thumbnailMrl( ThumbnailSizeType sizeType ) const

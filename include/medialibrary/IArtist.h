@@ -49,15 +49,12 @@ public:
     virtual Query<IMedia> searchTracks( const std::string& pattern,
                                         const QueryParameters* params = nullptr ) const = 0;
     /**
-     * @brief isThumbnailGenerated Returns true is a thumbnail generation was
-     *                             attempted for the provided size.
+     * @brief thumbnailStatus returns this artist thumbnail status
      *
      * @param sizeType The targeted thumbnail size
-     *
-     * If the thumbnail generation failed, this will still return true, and the
-     * associated thumbnail mrl will be empty.
+     * @see{medialibrary::ThumbnailStatus}
      */
-    virtual bool isThumbnailGenerated( ThumbnailSizeType sizeType ) const = 0;
+    virtual ThumbnailStatus thumbnailStatus( ThumbnailSizeType sizeType ) const = 0;
     virtual const std::string& thumbnailMrl( ThumbnailSizeType sizeType ) const = 0;
     /**
      * @brief setThumbnail Assign a thumbnail to the artist

@@ -65,7 +65,7 @@ public:
     virtual Query<IMedia> searchTracks( const std::string& pattern,
                                         const QueryParameters* params = nullptr ) const override;
     bool addMedia( Media& tracks );
-    virtual bool isThumbnailGenerated( ThumbnailSizeType sizeType ) const override;
+    virtual ThumbnailStatus thumbnailStatus( ThumbnailSizeType sizeType ) const override;
     virtual const std::string& thumbnailMrl( ThumbnailSizeType sizeType ) const override;
     std::shared_ptr<Thumbnail> thumbnail( ThumbnailSizeType sizeType ) const;
     /**
