@@ -883,16 +883,23 @@ std::string Media::sortRequest( const QueryParameters* params )
 Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
                               const QueryParameters* params )
 {
+    assert( type == IMedia::Type::Audio || type == IMedia::Type::Video );
     std::string req = "FROM " + Media::Table::Name + " m ";
 
     req += addRequestJoin( params, true, false );
-    req +=  " WHERE m.type = ?"
-            " AND (f.type = ? OR f.type = ?)"
+    // We want to include unknown media to the video listing, so we invert the
+    // filter to exclude Audio (ie. we include Unknown & Video)
+    // If we only want audio media, then we just filter 'type = Audio'
+    if ( type == IMedia::Type::Video )
+        req += " WHERE m.type != ?";
+    else
+        req += " WHERE m.type = ?";
+    req +=  " AND (f.type = ? OR f.type = ?)"
             " AND f.is_external = 0"
             " AND m.is_present != 0";
 
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
-                                      sortRequest( params ), type,
+                                      sortRequest( params ), IMedia::Type::Audio,
                                       IFile::Type::Main, IFile::Type::Disc );
 }
 
