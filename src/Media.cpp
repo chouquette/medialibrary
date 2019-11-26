@@ -888,6 +888,7 @@ Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
     req += addRequestJoin( params, true, false );
     req +=  " WHERE m.type = ?"
             " AND (f.type = ? OR f.type = ?)"
+            " AND f.is_external = 0"
             " AND m.is_present != 0";
 
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
