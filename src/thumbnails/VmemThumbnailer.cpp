@@ -114,7 +114,7 @@ bool VmemThumbnailer::seekAhead( Task& task, float position )
         // While seeking, we might land on a position that is slightly before what
         // we asked for
         auto expectedPos = position * 0.70;
-        success = task.cond.wait_for( lock, std::chrono::seconds( 3 ), [&newPos, expectedPos]() {
+        success = task.cond.wait_for( lock, std::chrono::seconds( 6 ), [&newPos, expectedPos]() {
             return newPos >= expectedPos;
         });
     }
