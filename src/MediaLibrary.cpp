@@ -112,7 +112,7 @@ const char* const MediaLibrary::supportedMediaExtensions[] = {
     "mp1", "mp2", "mp3", "mp4", "mpc", "mpeg", "mpeg1", "mpeg2",
     "mpeg4", "mpg", "mts", "mxf", "nsv", "nuv", "oga", "ogg",
     "ogm", "ogv", "ogx", "oma", "opus", "ps", "qtl",
-    "rec", "rm", "rmi", "rmvb", "s3m", "spx",
+    "rec", "rm", "rmi", "rmj", "rmvb", "s3m", "spx",
     "tod", "trp", "ts", "tta", "vob", "voc", "vqf",
     "vro", "w64", "wav", "webm", "wma", "wmv", "wmx",
     "wpl", "wv", "wvx", "xa", "xm"
