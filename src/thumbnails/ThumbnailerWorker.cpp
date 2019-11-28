@@ -196,7 +196,7 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
     auto dest = Thumbnail::path( m_ml, thumbnail->id() );
     LOG_DEBUG( "Generating ", mrl, " thumbnail in ", dest );
 
-    if ( m_generator->generate( mrl, task.desiredWidth, task.desiredHeight,
+    if ( m_generator->generate( *m, mrl, task.desiredWidth, task.desiredHeight,
                                 task.position, dest ) == false )
     {
         if ( m_run == false )

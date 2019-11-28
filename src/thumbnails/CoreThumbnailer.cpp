@@ -39,9 +39,9 @@ CoreThumbnailer::CoreThumbnailer( MediaLibraryPtr ml )
 {
 }
 
-bool CoreThumbnailer::generate( const std::string& mrl, uint32_t desiredWidth,
-                                uint32_t desiredHeight, float position,
-                                const std::string& dest )
+bool CoreThumbnailer::generate( const IMedia&, const std::string& mrl,
+                                uint32_t desiredWidth, uint32_t desiredHeight,
+                                float position, const std::string& dest )
 {
     compat::ConditionVariable cond;
     auto done = false;

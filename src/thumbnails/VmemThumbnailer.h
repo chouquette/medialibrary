@@ -54,9 +54,9 @@ class VmemThumbnailer : public IThumbnailer
 
 public:
     VmemThumbnailer( MediaLibraryPtr ml );
-    virtual bool generate(const std::string& mrl,
-                           uint32_t desiredWidth, uint32_t desiredHeight, float position,
-                           const std::string& dest ) override;
+    virtual bool generate( const IMedia& media, const std::string& mrl,
+                           uint32_t desiredWidth, uint32_t desiredHeight,
+                           float position, const std::string& dest ) override;
     virtual void stop() override;
     bool seekAhead( Task& task, float position );
     void setupVout( Task& task );

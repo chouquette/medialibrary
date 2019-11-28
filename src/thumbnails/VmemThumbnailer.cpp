@@ -48,7 +48,7 @@ VmemThumbnailer::VmemThumbnailer( MediaLibraryPtr ml )
 #endif
 }
 
-bool VmemThumbnailer::generate( const std::string& mrl,
+bool VmemThumbnailer::generate( const IMedia& media, const std::string& mrl,
                                 uint32_t desiredWidth, uint32_t desiredHeight,
                                 float position, const std::string& dest )
 {

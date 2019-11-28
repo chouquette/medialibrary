@@ -33,6 +33,7 @@ public:
     virtual ~IThumbnailer() = default;
     /**
      * @brief request Generate a thumbnail for the provided media
+     * @param media A reference to the media a thumbnail is being generated for
      * @param mrl The mrl to the main file for this media
      * @param desiredWidth The desired thumbnail width
      * @param desiredHeight The desired thumbnail height
@@ -44,7 +45,7 @@ public:
      * Upon successful return, the <destination> path must contain the generated
      * thumbnail
      */
-    virtual bool generate( const std::string& mrl,
+    virtual bool generate( const IMedia& media, const std::string& mrl,
                            uint32_t desiredWidth, uint32_t desiredHeight,
                            float position, const std::string& destination ) = 0;
     /**
