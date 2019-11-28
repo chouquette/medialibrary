@@ -114,6 +114,8 @@ DeviceLister::MountpointMap DeviceLister::listMountpoints() const
                         s->mnt_type ) == end( allowedFsType ) )
             continue;
         auto deviceName = s->mnt_fsname;
+        if ( strncmp( "/dev/loop", deviceName, strlen( "/dev/loop") ) == 0 )
+            continue;
         auto& mountpoints = res[deviceName];
         LOG_INFO( "Discovered mountpoint ", deviceName, " mounted on ",
                   s->mnt_dir, " (", s->mnt_type, ')' );
