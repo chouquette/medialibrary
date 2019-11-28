@@ -103,9 +103,9 @@ DeviceLister::MountpointMap DeviceLister::listMountpoints() const
     mntent* s;
     char buff[512];
     mntent smnt;
-    FILE* f = setmntent("/etc/mtab", "r");
+    FILE* f = setmntent("/proc/mounts", "r");
     if ( f == nullptr )
-        throw fs::errors::DeviceListing{ "Failed to read /etc/mtab" };
+        throw fs::errors::DeviceListing{ "Failed to read /proc/mounts" };
     std::unique_ptr<FILE, int(*)(FILE*)> fPtr( f, &endmntent );
     while ( getmntent_r( f, &smnt, buff, sizeof(buff) ) != nullptr )
     {
