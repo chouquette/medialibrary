@@ -63,7 +63,7 @@ bool VmemThumbnailer::generate( const IMedia& media, const std::string& mrl,
 #if defined(__APPLE__)
     vlcMedia.addOption( ":no-videotoolbox" );
 #endif
-    auto duration = vlcMedia.duration();
+    auto duration = media.duration();
     if ( duration > 0 )
     {
         std::ostringstream ss;
