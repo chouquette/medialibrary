@@ -97,10 +97,7 @@ DeviceLister::DeviceMap DeviceLister::listDevices() const
 
 DeviceLister::MountpointMap DeviceLister::listMountpoints() const
 {
-    static const std::vector<std::string> allowedFsType = {
-        "vfat", "exfat", "sdcardfs", "fuse", "ntfs", "fat32", "ext3",
-        "ext4", "esdfs", "xfs"
-    };
+    const std::vector<std::string> allowedFsType = getAllowedFsTypes();
     MountpointMap res;
     errno = 0;
     mntent* s;
@@ -189,6 +186,32 @@ bool DeviceLister::isRemovable( const std::string& deviceName ) const
         return false;
     }
     return false;
+}
+
+std::vector<std::string> DeviceLister::getAllowedFsTypes() const
+{
+    std::unique_ptr<FILE, int(*)(FILE*)> fsFile( fopen( "/proc/filesystems", "r" ), &fclose );
+    if ( fsFile == nullptr )
+    {
+        // In the unlikely event there are no procfs support, return a best guess
+        return { "vfat", "exfat", "sdcardfs", "fuse", "ntfs", "fat32", "ext3",
+                 "ext4", "esdfs", "xfs"
+        };
+    }
+    std::vector<std::string> res;
+    size_t buffSize = 128u;
+    auto buff = static_cast<char*>( malloc( buffSize ) );
+    std::unique_ptr<char, decltype(&free)> buffPtr( buff, &free );
+    while ( getline( &buff, &buffSize, fsFile.get() ) != -1 )
+    {
+        std::istringstream iss{ buff };
+        std::string fsType;
+        iss >> fsType;
+        if ( fsType == "nodev" )
+            continue;
+        res.push_back( std::move( fsType ) );
+    }
+    return res;
 }
 
 std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() const
