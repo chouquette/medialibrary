@@ -508,3 +508,32 @@ TEST_F( Thumbnails, OverridePersistentFailure )
 
     ASSERT_EQ( 1u, ml->countNbThumbnails() );
 }
+
+TEST_F( Thumbnails, UpdateAfterSuccessAndFailure )
+{
+    // Generate a thumbnail
+    auto mrl = std::string{ "file:///thumbnail.jpg" };
+    auto t = std::make_shared<Thumbnail>( ml.get(), mrl,
+                                          Thumbnail::Origin::Media,
+                                          ThumbnailSizeType::Thumbnail, false );
+    auto media = std::static_pointer_cast<Media>(
+                ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    media->setThumbnail( t );
+
+    ASSERT_EQ( ThumbnailStatus::Available, t->status() );
+
+    // Now simulate a failure, for instance if the application wants to
+    // generate one at the new playback position
+    auto res = t->markFailed();
+    ASSERT_TRUE( res );
+    ASSERT_EQ( ThumbnailStatus::Failure, t->status() );
+
+    // Now regenerate a new thumbnail over the previous failure.
+    // The mrl & ownership will be the same, but we used to reject the update
+    // request, causing the status not to be updated as well, and the thumbnail
+    // status would be stucked to Failure, while the generation succeeded
+    media->setThumbnail( mrl, ThumbnailSizeType::Thumbnail );
+    t = media->thumbnail( ThumbnailSizeType::Thumbnail );
+    ASSERT_EQ( ThumbnailStatus::Available, t->status() );
+    ASSERT_EQ( mrl, t->mrl() );
+}

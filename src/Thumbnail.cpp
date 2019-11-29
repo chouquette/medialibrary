@@ -113,7 +113,8 @@ const std::string& Thumbnail::mrl() const
 
 bool Thumbnail::update( std::string mrl, bool isOwned )
 {
-    if ( m_mrl == mrl && isOwned == m_isOwned )
+    if ( m_mrl == mrl && isOwned == m_isOwned &&
+         m_status == ThumbnailStatus::Available )
         return true;
     std::string storedMrl;
     if ( isOwned )
