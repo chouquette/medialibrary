@@ -43,7 +43,7 @@ private:
     DeviceMap listDevices() const;
     MountpointMap listMountpoints() const;
     std::pair<std::string, std::string> deviceFromDeviceMapper( const std::string& devicePath ) const;
-    bool isRemovable( const std::string& deviceName ) const;
+    bool isRemovable( const std::string& devicePath ) const;
 
     std::vector<std::string> getAllowedFsTypes() const;
 

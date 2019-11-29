@@ -27,6 +27,7 @@
 #include "DeviceLister.h"
 #include "logging/Logger.h"
 #include "utils/Filename.h"
+#include "utils/Directory.h"
 #include "medialibrary/filesystem/Errors.h"
 
 #include <dirent.h>
@@ -40,6 +41,9 @@
 #include <cstring>
 #include <limits.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <sys/sysmacros.h>
+
 
 namespace medialibrary
 {
@@ -174,16 +178,43 @@ DeviceLister::deviceFromDeviceMapper( const std::string& devicePath ) const
     return { dmName, res };
 }
 
-bool DeviceLister::isRemovable( const std::string& deviceName ) const
+bool DeviceLister::isRemovable( const std::string& partitionPath ) const
 {
-    std::stringstream removableFilePath;
-    removableFilePath << "/sys/block/" << deviceName << "/removable";
-    std::unique_ptr<FILE, int(*)(FILE*)> removableFile( fopen( removableFilePath.str().c_str(), "r" ), &fclose );
+    // We have a partition, such as /dev/sda1. We need to find the associated
+    // device
+
+    struct stat s;
+    if ( stat( partitionPath.c_str(), &s ) != 0 )
+        return false;
+
+    std::string partitionSymlink = "/sys/dev/block/" +
+            std::to_string( major( s.st_rdev ) ) + ":" +
+            std::to_string( minor( s.st_rdev ) );
+
+    // This path is a symlink to a /sys/devices/....../block/device/partition folder
+    // We are interested in the <device> part
+    std::string partitionBlockPath;
+    try
+    {
+        partitionBlockPath = utils::fs::toAbsolute( partitionSymlink );
+    }
+    catch ( const fs::errors::System& ex )
+    {
+        LOG_WARN( "Failed to absolute path from block symlink: ", partitionSymlink,
+                  " ", ex.what() );
+        return false;
+    }
+    auto deviceName = utils::file::directoryName(
+                        utils::file::parentDirectory( partitionBlockPath ) );
+
+    std::string removableFilePath = "/sys/block/" + deviceName + "/removable";
+    std::unique_ptr<FILE, decltype(&fclose)> removableFile(
+                fopen( removableFilePath.c_str(), "r" ), &fclose );
     // Assume the file isn't removable by default
     if ( removableFile != nullptr )
     {
         char buff;
-        if ( fread(&buff, sizeof(buff), 1, removableFile.get() ) != 1 )
+        if ( fread(&buff, sizeof(buff), 1, removableFile.get() ) == 1 )
             return buff == '1';
         return false;
     }
@@ -275,7 +306,7 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
                     }
                 }
             }
-            auto removable = isRemovable( deviceName );
+            auto removable = isRemovable( partitionPath );
             for ( const auto& mountpoint : p.second )
             {
                 LOG_DEBUG( "Adding device ", deviceName, " uuid: ", uuid,
