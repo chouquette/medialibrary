@@ -235,8 +235,8 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
         }
         for ( const auto& p : mountpoints )
         {
-            const auto& devicePath = p.first;
-            auto deviceName = utils::file::fileName( devicePath );
+            const auto& partitionPath = p.first;
+            auto deviceName = utils::file::fileName( partitionPath );
             auto it = devices.find( deviceName );
             std::string uuid;
             if ( it != end( devices ) )
@@ -250,7 +250,7 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
                 {
                     // Fetch a pair containing the device-mapper device name and
                     // the block device it points to
-                    dmPair = deviceFromDeviceMapper( devicePath );
+                    dmPair = deviceFromDeviceMapper( partitionPath );
                 }
                 catch( fs::errors::DeviceMapper& ex )
                 {
