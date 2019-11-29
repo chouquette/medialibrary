@@ -196,6 +196,9 @@ AC_LANG_PUSH([C++])
 
 AC_CHECK_FUNCS([link])
 
+dnl Enforce 64bits off_t in order to always support files larger than 2GB
+AC_DEFINE([_FILE_OFFSET_BITS], 64, [Define to 64 for large files support.])
+
 AC_MSG_CHECKING([c++11 thread support])
 AC_COMPILE_IFELSE([AC_LANG_SOURCE([#include <thread>
                    int main() { std::thread t; }])], [
