@@ -83,7 +83,7 @@ public:
      * Media of 'b' would contain seaotter_themovie.mkv
      */
     virtual Query<IMedia> media( IMedia::Type type,
-                                  const QueryParameters* params ) const = 0;
+                                  const QueryParameters* params = nullptr ) const = 0;
 
     /**
      * @brief searchMedia Search the media of a given folder
@@ -114,7 +114,7 @@ public:
      * As an alternative, it is possible to use IMediaLibrary::folders to return
      * a flattened list of all folders that contain media.
      */
-    virtual Query<IFolder> subfolders( const QueryParameters* params ) const = 0;
+    virtual Query<IFolder> subfolders( const QueryParameters* params = nullptr ) const = 0;
 };
 
 }
