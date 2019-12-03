@@ -20,8 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef ISHOWEPISODE_H
-#define ISHOWEPISODE_H
+#pragma once
 
 #include "IMediaLibrary.h"
 
@@ -30,17 +29,15 @@ namespace medialibrary
 
 class IShowEpisode
 {
-    public:
-        virtual ~IShowEpisode() = default;
+public:
+    virtual ~IShowEpisode() = default;
 
-        virtual int64_t id() const = 0;
-        virtual unsigned int episodeId() const = 0;
-        virtual unsigned int seasonId() const = 0;
-        virtual const std::string& shortSummary() const = 0;
-        virtual const std::string& tvdbId() const = 0;
-        virtual std::shared_ptr<IShow> show() = 0;
+    virtual int64_t id() const = 0;
+    virtual unsigned int episodeId() const = 0;
+    virtual unsigned int seasonId() const = 0;
+    virtual const std::string& shortSummary() const = 0;
+    virtual const std::string& tvdbId() const = 0;
+    virtual std::shared_ptr<IShow> show() = 0;
 };
 
 }
-
-#endif // ISHOWEPISODE_H
