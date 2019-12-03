@@ -20,8 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef IMOVIE_H
-#define IMOVIE_H
+#pragma once
 
 #include "IMediaLibrary.h"
 
@@ -30,13 +29,11 @@ namespace medialibrary
 
 class IMovie
 {
-    public:
-        virtual ~IMovie() = default;
-        virtual int64_t id() const = 0;
-        virtual const std::string& shortSummary() const = 0;
-        virtual const std::string& imdbId() const = 0;
+public:
+    virtual ~IMovie() = default;
+    virtual int64_t id() const = 0;
+    virtual const std::string& shortSummary() const = 0;
+    virtual const std::string& imdbId() const = 0;
 };
 
 }
-
-#endif // IMOVIE_H
