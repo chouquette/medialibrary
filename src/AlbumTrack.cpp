@@ -155,12 +155,13 @@ AlbumTrackPtr AlbumTrack::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
 }
 
 Query<IMedia> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId,
-                                     bool withThumbnail, const QueryParameters* params )
+                                     IGenre::TracksIncluded included,
+                                     const QueryParameters* params )
 {
     std::string req = "FROM " + Media::Table::Name + " m"
             " INNER JOIN " + AlbumTrack::Table::Name + " t ON m.id_media = t.media_id"
             " WHERE t.genre_id = ?1 AND m.is_present = 1";
-    if ( withThumbnail == true )
+    if ( included == IGenre::TracksIncluded::WithThumbnailOnly )
     {
         req += " AND EXISTS(SELECT entity_id FROM " + Thumbnail::LinkingTable::Name +
                " WHERE entity_id = m.id_media AND entity_type = ?2)";
@@ -195,7 +196,7 @@ Query<IMedia> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId,
 
     if ( desc == true )
         orderBy += " DESC";
-    if ( withThumbnail == true )
+    if ( included == IGenre::TracksIncluded::WithThumbnailOnly )
         return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                           std::move( orderBy ), genreId,
                                           Thumbnail::EntityType::Media );

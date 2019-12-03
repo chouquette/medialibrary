@@ -48,7 +48,7 @@ TEST_F( Genres, Create )
 {
     ASSERT_NE( nullptr, g );
     ASSERT_EQ( "genre", g->name() );
-    auto tracks = g->tracks( false, nullptr )->all();
+    auto tracks = g->tracks( IGenre::TracksIncluded::All, nullptr )->all();
     ASSERT_EQ( 0u, tracks.size() );
 }
 
@@ -70,7 +70,7 @@ TEST_F( Genres, ListAlbumTracks )
                     ml->addMedia( "track" + std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
         auto t = a->addTrack( m, i, 1, 0, i != 1 ? g.get() : nullptr );
     }
-    auto tracks = g->tracks( false, nullptr )->all();
+    auto tracks = g->tracks( IGenre::TracksIncluded::All, nullptr )->all();
     ASSERT_EQ( 2u, tracks.size() );
 }
 
@@ -180,13 +180,13 @@ TEST_F( Genres, SortTracks )
         m->save();
     }
     QueryParameters params { SortingCriteria::Duration, false };
-    auto tracks = g->tracks( false, &params )->all();
+    auto tracks = g->tracks( IGenre::TracksIncluded::All, &params )->all();
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( 1u, tracks[0]->albumTrack()->trackNumber() );
     ASSERT_EQ( 2u, tracks[1]->albumTrack()->trackNumber() );
 
     params.desc = true;
-    tracks = g->tracks( false, &params )->all();
+    tracks = g->tracks( IGenre::TracksIncluded::All, &params )->all();
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( 1u, tracks[1]->albumTrack()->trackNumber() );
     ASSERT_EQ( 2u, tracks[0]->albumTrack()->trackNumber() );
@@ -331,11 +331,11 @@ TEST_F( Genres, WithThumbnail )
     auto t2 = a1->addTrack( m2, 1, 1, 0, g.get() );
     m2->save();
 
-    auto tracks = g->tracks( true, nullptr );
+    auto tracks = g->tracks( IGenre::TracksIncluded::WithThumbnailOnly, nullptr );
     ASSERT_EQ( 1u, tracks->count() );
     ASSERT_EQ( 1u, tracks->all().size() );
 
-    tracks = g->tracks( false, nullptr );
+    tracks = g->tracks( IGenre::TracksIncluded::All, nullptr );
     ASSERT_EQ( 2u, tracks->count() );
     ASSERT_EQ( 2u, tracks->all().size() );
 }

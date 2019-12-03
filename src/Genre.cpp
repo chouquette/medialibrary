@@ -100,9 +100,10 @@ Query<IArtist> Genre::searchArtists( const std::string& pattern,
     return Artist::searchByGenre( m_ml, pattern, params, m_id );
 }
 
-Query<IMedia> Genre::tracks( bool withThumbnail, const QueryParameters* params ) const
+Query<IMedia> Genre::tracks( TracksIncluded included,
+                             const QueryParameters* params ) const
 {
-    return AlbumTrack::fromGenre( m_ml, m_id, withThumbnail, params );
+    return AlbumTrack::fromGenre( m_ml, m_id, included, params );
 }
 
 Query<IMedia> Genre::searchTracks( const std::string& pattern, const QueryParameters* params ) const

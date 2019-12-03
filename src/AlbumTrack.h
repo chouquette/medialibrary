@@ -27,6 +27,7 @@
 
 #include "medialibrary/IAlbumTrack.h"
 #include "medialibrary/IMediaLibrary.h"
+#include "medialibrary/IGenre.h"
 #include "database/DatabaseHelpers.h"
 
 namespace medialibrary
@@ -71,7 +72,8 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack>
                                     int64_t duration );
         static AlbumTrackPtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
         static Query<IMedia> fromGenre( MediaLibraryPtr ml, int64_t genreId,
-                                        bool withThumbnail, const QueryParameters* params );
+                                        IGenre::TracksIncluded included,
+                                        const QueryParameters* params );
 
     private:
         MediaLibraryPtr m_ml;

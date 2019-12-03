@@ -30,6 +30,14 @@ namespace medialibrary
 class IGenre
 {
 public:
+    enum class TracksIncluded : uint8_t
+    {
+        /// Include all present tracks in the listing
+        All,
+        /// Only include tracks with a thumbnail
+        WithThumbnailOnly,
+    };
+
     virtual ~IGenre() = default;
     virtual int64_t id() const = 0;
     virtual const std::string& name() const = 0;
@@ -39,8 +47,7 @@ public:
                                          const QueryParameters* params = nullptr ) const = 0;
     /**
      * @brief tracks Returns the tracks associated with this genre
-     * @param withThumbnail True if only tracks with thumbnail should be fetched.
-     *                      False if any track can be returned.
+     * @param included A TracksIncluded flag to specify which tracks to return
      * @param params Some query parameters, or nullptr for the default.
      *
      * This function supports sorting by:
@@ -53,7 +60,7 @@ public:
      * track number, and finally file name in case of ambiguous results.
      * Sort is ascending by default.
      */
-    virtual Query<IMedia> tracks( bool withThumbnail,
+    virtual Query<IMedia> tracks( TracksIncluded included,
                                   const QueryParameters* params = nullptr ) const = 0;
     virtual Query<IMedia> searchTracks( const std::string& pattern,
                                   const QueryParameters* params = nullptr ) const = 0;
