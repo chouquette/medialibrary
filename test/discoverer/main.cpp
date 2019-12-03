@@ -56,19 +56,19 @@ public:
 
 private:
     virtual void onMediaAdded(std::vector<medialibrary::MediaPtr> ) override {}
-    virtual void onMediaModified(std::vector<medialibrary::MediaPtr> ) override {}
+    virtual void onMediaModified(std::vector<int64_t> ) override {}
     virtual void onMediaDeleted(std::vector<int64_t> ) override {}
     virtual void onArtistsAdded(std::vector<medialibrary::ArtistPtr> ) override {}
-    virtual void onArtistsModified(std::vector<medialibrary::ArtistPtr> ) override {}
+    virtual void onArtistsModified(std::vector<int64_t> ) override {}
     virtual void onArtistsDeleted(std::vector<int64_t> ) override {}
     virtual void onAlbumsAdded(std::vector<medialibrary::AlbumPtr> ) override {}
-    virtual void onAlbumsModified(std::vector<medialibrary::AlbumPtr> ) override {}
+    virtual void onAlbumsModified(std::vector<int64_t> ) override {}
     virtual void onAlbumsDeleted(std::vector<int64_t> ) override {}
     virtual void onPlaylistsAdded(std::vector<medialibrary::PlaylistPtr> ) override {}
-    virtual void onPlaylistsModified(std::vector<medialibrary::PlaylistPtr> ) override {}
+    virtual void onPlaylistsModified(std::vector<int64_t> ) override {}
     virtual void onPlaylistsDeleted(std::vector<int64_t> ) override {}
     virtual void onGenresAdded(std::vector<medialibrary::GenrePtr> ) override {}
-    virtual void onGenresModified(std::vector<medialibrary::GenrePtr> ) override {}
+    virtual void onGenresModified(std::vector<int64_t> ) override {}
     virtual void onGenresDeleted(std::vector<int64_t> ) override {}
     virtual void onDiscoveryStarted( const std::string& ) override
     {
@@ -112,7 +112,10 @@ private:
         }
         m_cond.notify_all();
     }
-    virtual void onMediaThumbnailReady(medialibrary::MediaPtr, bool ) override {}
+    virtual void onMediaThumbnailReady( medialibrary::MediaPtr, medialibrary::ThumbnailSizeType, bool ) override {}
+    virtual void onEntryPointAdded( const std::string&, bool ) override {}
+    virtual void onHistoryChanged( medialibrary::HistoryType ) override {}
+    virtual void onRescanStarted() override {}
 
 private:
     std::condition_variable m_cond;
