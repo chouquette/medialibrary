@@ -174,7 +174,7 @@ public:
     /// Default order for duration is from longer to shorter.
     /// Passing desc = true will invert this default.
     ///
-    virtual Query<IChapter> chapters( const QueryParameters* params ) const = 0;
+    virtual Query<IChapter> chapters( const QueryParameters* params = nullptr ) const = 0;
     ///
     /// \brief thumbnail Returns the mrl of a thumbnail of the given size for this media
     /// \param sizeType The targeted thumbnail size
@@ -282,7 +282,7 @@ public:
     /// (default being by ascending time)
     /// Any other criteria will fallback to default.
     ///
-    virtual Query<IBookmark> bookmarks( const QueryParameters* params ) const = 0;
+    virtual Query<IBookmark> bookmarks( const QueryParameters* params = nullptr ) const = 0;
     ///
     /// \brief bookmark Returns the bookmark at the provided time
     /// \return A bookmark if found, nullptr otherwise
