@@ -20,8 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef ISHOW_H
-#define ISHOW_H
+#pragma once
 
 #include "IMediaLibrary.h"
 
@@ -30,21 +29,19 @@ namespace medialibrary
 
 class IShow
 {
-    public:
-        virtual ~IShow() = default;
-        virtual int64_t id() const = 0;
-        virtual const std::string& title() const = 0;
-        virtual time_t releaseDate() const = 0;
-        virtual const std::string& shortSummary() const = 0;
-        virtual const std::string& artworkMrl() const = 0;
-        virtual const std::string& tvdbId() const = 0;
-        virtual Query<IMedia> episodes( const QueryParameters* params = nullptr ) const = 0;
-        virtual Query<IMedia> searchEpisodes( const std::string& pattern,
-                                              const QueryParameters* params = nullptr ) const = 0;
-        virtual uint32_t nbSeasons() const = 0;
-        virtual uint32_t nbEpisodes() const = 0;
+public:
+    virtual ~IShow() = default;
+    virtual int64_t id() const = 0;
+    virtual const std::string& title() const = 0;
+    virtual time_t releaseDate() const = 0;
+    virtual const std::string& shortSummary() const = 0;
+    virtual const std::string& artworkMrl() const = 0;
+    virtual const std::string& tvdbId() const = 0;
+    virtual Query<IMedia> episodes( const QueryParameters* params = nullptr ) const = 0;
+    virtual Query<IMedia> searchEpisodes( const std::string& pattern,
+                                          const QueryParameters* params = nullptr ) const = 0;
+    virtual uint32_t nbSeasons() const = 0;
+    virtual uint32_t nbEpisodes() const = 0;
 };
 
 }
-
-#endif // ISHOW_H
