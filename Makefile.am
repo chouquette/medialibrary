@@ -295,7 +295,7 @@ if HAVE_TESTS
 
 check_PROGRAMS = unittest samples
 
-lib_LTLIBRARIES += libgtest.la libgtestmain.la
+noinst_LTLIBRARIES = libgtest.la libgtestmain.la
 
 libgtest_la_SOURCES = \
 	googletest/googletest/src/gtest-all.cc
