@@ -15,7 +15,7 @@ linux:
       - ./samples
 
 win32:
-    image: registry.videolan.org/medialibrary-win32:20191028111213
+    image: registry.videolan.org/medialibrary-win32:20191203153222
     tags:
       - win32
     script:
@@ -23,15 +23,15 @@ win32:
       - ./bootstrap
       - ./configure --enable-tests --host=i686-w64-mingw32 --disable-shared
       - make -j4
-        #- make -j4 check
-        #- cp /prefix/dll/libvlc.dll .
-        #- cp /prefix/dll/libvlccore.dll .
-        #- ln -s /prefix/lib/vlc/plugins/ .
-        #- wine unittest.exe
-        #- wine samples.exe
+      - make -j4 check
+      - cp /prefix/dll/libvlc.dll .
+      - cp /prefix/dll/libvlccore.dll .
+      - ln -s /prefix/lib/vlc/plugins/ .
+      - wine unittest.exe
+      - wine samples.exe
 
 win64:
-    image: registry.videolan.org/medialibrary-win64:20191028112938
+    image: registry.videolan.org/medialibrary-win64:20191203155144
     tags:
       - win64
     script:
