@@ -53,7 +53,7 @@ coverage:
       - amd64
     only:
       refs:
-        - master
+        - schedules
     script:
         - ./bootstrap
         - CXXFLAGS='--coverage -g -O0' LDFLAGS='--coverage -g -O0' ./configure --enable-tests
