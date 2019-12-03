@@ -20,8 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#ifndef IMEDIALIBRARY_H
-#define IMEDIALIBRARY_H
+#pragma once
 
 #include <vector>
 #include <string>
@@ -240,20 +239,23 @@ public:
     virtual void onEntryPointAdded( const std::string& entryPoint, bool success ) = 0;
 
     /**
-     * @brief onEntryPointRemoved will be invoked when an entrypoint removal request gets processsed
+     * @brief onEntryPointRemoved will be invoked when an entrypoint removal
+     *                            request gets processsed
      * by the appropriate worker thread.
      * @param entryPoint The entry point which removal was required
      * @param success A boolean representing the operation's success
      */
     virtual void onEntryPointRemoved( const std::string& entryPoint, bool success ) = 0;
     /**
-     * @brief onEntryPointBanned will be called when an entrypoint ban request is done being processed.
+     * @brief onEntryPointBanned will be called when an entrypoint ban request
+     *                           is done being processed.
      * @param entryPoint The banned entrypoint
      * @param success A boolean representing the operation's success
      */
     virtual void onEntryPointBanned( const std::string& entryPoint, bool success ) = 0;
     /**
-     * @brief onEntryPointUnbanned will be called when an entrypoint unban request is done being processed.
+     * @brief onEntryPointUnbanned will be called when an entrypoint unban request
+     *                             is done being processed.
      * @param entryPoint The unbanned entrypoint
      * @param success A boolean representing the operation's success
      */
@@ -328,13 +330,14 @@ public:
     /**
      * \brief  initialize Initializes the media library.
      *
-     * In case the application uses a specific IDeviceLister, the device lister must be properly
-     * initialized and ready to return a list of all known devices before calling this method.
+     * In case the application uses a specific IDeviceLister, the device lister
+     * must be properly initialized and ready to return a list of all known
+     * devices before calling this method.
      *
      * \param dbPath        Path to the database file
      * \param mlFolderPath Path to a folder that will contain medialibrary's files.
-     * \param mlCallback    A pointer to an IMediaLibraryCb that will be invoked with various
-     *                      events during the medialibrary lifetime.
+     * \param mlCallback    A pointer to an IMediaLibraryCb that will be invoked
+     *                      with various events during the medialibrary lifetime.
      * \return An \see{InitializeResult} code.
      *
      * If initialize returns Failed, this medialibrary must not be used
@@ -531,7 +534,7 @@ public:
      * point to remote content, will *not* be included
      */
     virtual Query<IMedia> searchMedia( const std::string& pattern,
-                                               const QueryParameters* params = nullptr ) const = 0;
+                                       const QueryParameters* params = nullptr ) const = 0;
     virtual Query<IMedia> searchAudio( const std::string& pattern,
                                        const QueryParameters* params = nullptr ) const = 0;
     virtual Query<IMedia> searchVideo( const std::string& pattern,
@@ -593,8 +596,10 @@ public:
      */
     virtual bool isBanned( const std::string& mrl ) const = 0;
     /**
-     * @brief folders Returns a flattened list of all folders containing at least a media of a given type
-     * @param type A required type of media, or IMedia::Type::Unknown if any media type is fine.
+     * @brief folders Returns a flattened list of all folders containing at
+     *                least a media of a given type
+     * @param type A required type of media, or IMedia::Type::Unknown if any
+     *             media type is fine.
      * @param params A query parameters object
      * @return A query object to be used to fetch the results
      *
@@ -732,5 +737,3 @@ extern "C"
 {
     medialibrary::IMediaLibrary* NewMediaLibrary();
 }
-
-#endif // IMEDIALIBRARY_H
