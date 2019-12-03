@@ -31,7 +31,7 @@ namespace medialibrary
 class IShowEpisode
 {
     public:
-        virtual ~IShowEpisode(){}
+        virtual ~IShowEpisode() = default;
 
         virtual int64_t id() const = 0;
         virtual unsigned int episodeId() const = 0;
