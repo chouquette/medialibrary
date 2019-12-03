@@ -31,7 +31,7 @@ namespace medialibrary
 class IMovie
 {
     public:
-        virtual ~IMovie() {}
+        virtual ~IMovie() = default;
         virtual int64_t id() const = 0;
         virtual const std::string& shortSummary() const = 0;
         virtual const std::string& imdbId() const = 0;
