@@ -73,7 +73,7 @@ public:
     /// \return A query object, or nullptr in case of error or if the pattern is too short
     ///
     virtual Query<IMedia> searchMedia( const std::string& pattern,
-                                       const QueryParameters* params ) const = 0;
+                                       const QueryParameters* params = nullptr ) const = 0;
     ///
     /// \brief append Appends a media to a playlist
     /// The media will be the last element of a subsequent call to media()
