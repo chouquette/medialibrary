@@ -12,7 +12,7 @@ linux:
       - make -j4
       - make -j4 check
       - ./unittest
-      - ./samples
+      - ./samples --gtest_filter=-\*removable
 
 win32:
     image: registry.videolan.org/medialibrary-win32:20191203153222
@@ -28,7 +28,7 @@ win32:
       - cp /prefix/dll/libvlccore.dll .
       - ln -s /prefix/lib/vlc/plugins/ .
       - wine unittest.exe
-      - wine samples.exe
+      - wine samples.exe --gtest_filter=-\*removable
 
 win64:
     image: registry.videolan.org/medialibrary-win64:20191203155144
@@ -44,7 +44,7 @@ win64:
       - cp /prefix/dll/libvlccore.dll .
       - ln -s /prefix/lib/vlc/plugins/ .
       - wine unittest.exe
-      - wine samples.exe
+      - wine samples.exe --gtest_filter=\*removable
 
 coverage:
     image: registry.videolan.org/medialibrary:20190531150343
