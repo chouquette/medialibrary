@@ -77,13 +77,21 @@ coverage:
             - html/
 
 asan-ubsan:
-    image: registry.videolan.org/medialibrary:20190531150343
+    image: registry.videolan.org/vlc-debian-unstable:20191204094457
+    only:
+      - schedules
     tags:
       - debian
       - amd64
     variables:
       LSAN_OPTIONS: 'detect_leaks=0'
     script:
+      - git clone https://git.videolan.org/git/vlc.git --depth=1
+      - cd vlc && ./bootstrap
+      - ./configure LDFLAGS="-lasan -lubsan" --prefix=$(pwd)/prefix --disable-qt --with-sanitizer=address,undefined --disable-medialibrary --disable-nls --enable-debug
+      - make install -j8
+      - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(pwd)/prefix/lib/pkgconfig"
+      - cd ..
       - ./bootstrap
       - ./configure --enable-tests CXXFLAGS="-g -O1 -fsanitize=address,undefined"
       - make -j4
