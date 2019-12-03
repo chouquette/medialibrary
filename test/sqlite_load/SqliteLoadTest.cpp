@@ -151,7 +151,7 @@ void readerMainLoop( IMediaLibrary* ml, std::shared_ptr<MockCallback> cbMock )
             }
             case 2:
             {
-                auto artists = ml->artists( true, nullptr )->all();
+                auto artists = ml->artists( ArtistIncluded::All, nullptr )->all();
                 break;
             }
             case 3:
