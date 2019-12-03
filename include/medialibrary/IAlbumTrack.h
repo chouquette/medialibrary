@@ -30,29 +30,29 @@ namespace medialibrary
 
 class IAlbumTrack
 {
-    public:
-        virtual ~IAlbumTrack() = default;
+public:
+    virtual ~IAlbumTrack() = default;
 
-        virtual int64_t id() const = 0;
-        /**
-         * @brief artist Returns the artist, as tagged in the media.
-         * This can be different from the associated media's artist.
-         * For instance, in case of a featuring, Media::artist() might return
-         * "Artist 1", while IAlbumTrack::artist() might return something like
-         * "Artist 1 featuring Artist 2 and also artist 3 and a whole bunch of people"
-         * @return
-         */
-        virtual ArtistPtr artist() const = 0;
-        virtual int64_t artistId() const = 0;
-        virtual GenrePtr genre() = 0;
-        virtual int64_t genreId() const = 0;
-        virtual unsigned int trackNumber() const = 0;
-        virtual AlbumPtr album() = 0;
-        virtual int64_t albumId() const = 0;
-        /**
-         * @return Which disc this tracks appears on (or 0 if unspecified)
-         */
-        virtual unsigned int discNumber() const = 0;
+    virtual int64_t id() const = 0;
+    /**
+     * @brief artist Returns the artist, as tagged in the media.
+     * This can be different from the associated media's artist.
+     * For instance, in case of a featuring, Media::artist() might return
+     * "Artist 1", while IAlbumTrack::artist() might return something like
+     * "Artist 1 featuring Artist 2 and also artist 3 and a whole bunch of people"
+     * @return
+     */
+    virtual ArtistPtr artist() const = 0;
+    virtual int64_t artistId() const = 0;
+    virtual GenrePtr genre() = 0;
+    virtual int64_t genreId() const = 0;
+    virtual unsigned int trackNumber() const = 0;
+    virtual AlbumPtr album() = 0;
+    virtual int64_t albumId() const = 0;
+    /**
+     * @return Which disc this tracks appears on (or 0 if unspecified)
+     */
+    virtual unsigned int discNumber() const = 0;
 };
 
 }
