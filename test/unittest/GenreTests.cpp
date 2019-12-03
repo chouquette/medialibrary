@@ -260,7 +260,7 @@ TEST_F( Genres, SearchArtists )
         auto track = album2->addTrack( m, i, 1, a2->id(), nullptr );
         a2->addMedia( *m );
     }
-    artists = ml->searchArtists( "loutre", true, nullptr )->all();
+    artists = ml->searchArtists( "loutre", ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
 
     artists = g->searchArtists( "loutre" )->all();

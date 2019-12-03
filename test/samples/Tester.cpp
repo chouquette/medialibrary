@@ -225,7 +225,7 @@ void Tests::runChecks(const rapidjson::Document& doc)
     }
     if ( expected.HasMember( "artists" ) )
     {
-        checkArtists( expected["artists"], m_ml->artists( true, nullptr )->all() );
+        checkArtists( expected["artists"], m_ml->artists( ArtistIncluded::All, nullptr )->all() );
     }
     if ( expected.HasMember( "nbThumbnails" ) )
     {

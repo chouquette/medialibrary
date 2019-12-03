@@ -719,9 +719,10 @@ std::shared_ptr<Artist> MediaLibrary::createArtist( const std::string& name )
     return Artist::create( this, name );
 }
 
-Query<IArtist> MediaLibrary::artists( bool includeAll, const QueryParameters* params ) const
+Query<IArtist> MediaLibrary::artists( ArtistIncluded included,
+                                      const QueryParameters* params ) const
 {
-    return Artist::listAll( this, includeAll, params );
+    return Artist::listAll( this, included, params );
 }
 
 PlaylistPtr MediaLibrary::createPlaylist( const std::string& name )
@@ -839,12 +840,13 @@ Query<IGenre> MediaLibrary::searchGenre( const std::string& genre,
     return Genre::search( this, genre, params );
 }
 
-Query<IArtist> MediaLibrary::searchArtists( const std::string& name, bool includeAll,
+Query<IArtist> MediaLibrary::searchArtists( const std::string& name,
+                                            ArtistIncluded included,
                                             const QueryParameters* params ) const
 {
     if ( validateSearchPattern( name ) == false )
         return {};
-    return Artist::search( this, name, includeAll, params );
+    return Artist::search( this, name, included, params );
 }
 
 Query<IShow> MediaLibrary::searchShows( const std::string& pattern,
@@ -858,7 +860,7 @@ SearchAggregate MediaLibrary::search( const std::string& pattern,
 {
     SearchAggregate res;
     res.albums = searchAlbums( pattern, params );
-    res.artists = searchArtists( pattern, true, params );
+    res.artists = searchArtists( pattern, ArtistIncluded::All, params );
     res.genres = searchGenre( pattern, params );
     res.media = searchMedia( pattern, params );
     res.playlists = searchPlaylists( pattern, params );

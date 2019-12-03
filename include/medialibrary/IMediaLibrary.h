@@ -140,6 +140,15 @@ enum class HistoryType : uint8_t
     Network,
 };
 
+enum class ArtistIncluded : uint8_t
+{
+    /// Include all artists, as long as they have at least one track present
+    All,
+    /// Do not return the artist that are only doing featurings on some albums.
+    /// In other word, this would only return artists which have at least 1 album
+    AlbumArtistOnly,
+};
+
 class IMediaLibraryCb
 {
 public:
@@ -460,10 +469,11 @@ public:
      * @param includeAll If true, all artists including those without album
      *                   will be returned. If false, only artists which have
      *                   an album will be returned.
-     * @param sort A sorting criteria. So far, this is ignored, and artists are sorted by lexial order
-     * @param desc If true, the provided sorting criteria will be reversed.
+     * @param params Some query parameters
+     *
+     * This function only handles lexical sort
      */
-    virtual Query<IArtist> artists( bool includeAll,
+    virtual Query<IArtist> artists( ArtistIncluded included,
                                     const QueryParameters* params = nullptr ) const = 0;
     /**
      * @brief genres Return the list of music genres
@@ -533,7 +543,7 @@ public:
                                         const QueryParameters* params = nullptr ) const = 0;
     virtual Query<IGenre> searchGenre( const std::string& genre,
                                        const QueryParameters* params = nullptr ) const = 0;
-    virtual Query<IArtist> searchArtists( const std::string& name, bool includeAll,
+    virtual Query<IArtist> searchArtists( const std::string& name, ArtistIncluded included,
                                           const QueryParameters* params = nullptr  ) const = 0;
     virtual SearchAggregate search( const std::string& pattern,
                                     const QueryParameters* params = nullptr ) const = 0;

@@ -215,7 +215,7 @@ TEST_F( Artists, AllSongs )
 
 TEST_F( Artists, GetAll )
 {
-    auto artists = ml->artists( true, nullptr )->all();
+    auto artists = ml->artists( ArtistIncluded::All, nullptr )->all();
     // Ensure we don't include Unknown Artist // Various Artists
     ASSERT_EQ( artists.size(), 0u );
 
@@ -231,18 +231,18 @@ TEST_F( Artists, GetAll )
         ASSERT_NE( a, nullptr );
         a->addMedia( *m );
     }
-    artists = ml->artists( true, nullptr )->all();
+    artists = ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( artists.size(), 5u );
 
     Reload();
 
-    auto artists2 = ml->artists( true, nullptr )->all();
+    auto artists2 = ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( artists2.size(), 5u );
 }
 
 TEST_F( Artists, GetAllNoAlbum )
 {
-    auto artists = ml->artists( true, nullptr )->all();
+    auto artists = ml->artists( ArtistIncluded::All, nullptr )->all();
     // Ensure we don't include Unknown Artist // Various Artists
     ASSERT_EQ( artists.size(), 0u );
 
@@ -253,15 +253,15 @@ TEST_F( Artists, GetAllNoAlbum )
                     ml->addMedia( "media" + std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
         a->addMedia( *m );
     }
-    artists = ml->artists( false, nullptr )->all();
+    artists = ml->artists( ArtistIncluded::AlbumArtistOnly, nullptr )->all();
     ASSERT_EQ( artists.size(), 0u );
 
     Reload();
 
-    artists = ml->artists( false, nullptr )->all();
+    artists = ml->artists( ArtistIncluded::AlbumArtistOnly, nullptr )->all();
     ASSERT_EQ( artists.size(), 0u );
 
-    artists = ml->artists( true, nullptr )->all();
+    artists = ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( artists.size(), 3u );
 }
 
@@ -310,13 +310,13 @@ TEST_F( Artists, Search )
     a1->addMedia( *m1 );
     a2->addMedia( *m2 );
 
-    auto artists = ml->searchArtists( "artist", true, nullptr )->all();
+    auto artists = ml->searchArtists( "artist", ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
     ASSERT_EQ( artists[0]->id(), a1->id() );
     ASSERT_EQ( artists[1]->id(), a2->id() );
 
     QueryParameters params { SortingCriteria::Default, true };
-    artists = ml->searchArtists( "artist", true, &params )->all();
+    artists = ml->searchArtists( "artist", ArtistIncluded::All, &params )->all();
     ASSERT_EQ( 2u, artists.size() );
     ASSERT_EQ( artists[0]->id(), a2->id() );
     ASSERT_EQ( artists[1]->id(), a1->id() );
@@ -334,12 +334,12 @@ TEST_F( Artists, SearchAfterDelete )
     auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3", IMedia::Type::Audio ) );
     a3->addMedia( *m3 );
 
-    auto artists = ml->searchArtists( "artist", true, nullptr )->all();
+    auto artists = ml->searchArtists( "artist", ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
 
     ml->deleteArtist( a->id() );
 
-    artists = ml->searchArtists( "artist", true, nullptr )->all();
+    artists = ml->searchArtists( "artist", ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 1u, artists.size() );
 }
 
@@ -484,13 +484,13 @@ TEST_F( Artists, Sort )
     a2->addMedia( *m2 );
 
     QueryParameters params { SortingCriteria::Alpha, false };
-    auto artists = ml->artists( true, &params )->all();
+    auto artists = ml->artists( ArtistIncluded::All, &params )->all();
     ASSERT_EQ( 2u, artists.size() );
     ASSERT_EQ( a1->id(), artists[0]->id() );
     ASSERT_EQ( a2->id(), artists[1]->id() );
 
     params.desc = true;
-    artists = ml->artists( true, &params )->all();
+    artists = ml->artists( ArtistIncluded::All, &params )->all();
     ASSERT_EQ( 2u, artists.size() );
     ASSERT_EQ( a1->id(), artists[1]->id() );
     ASSERT_EQ( a2->id(), artists[0]->id() );
@@ -505,16 +505,16 @@ TEST_F( Artists, DeleteWhenNoAlbum )
     auto track1 = album->addTrack( m1, 1, 1, artist->id(), nullptr );
     artist->addMedia( *m1 );
 
-    auto artists = ml->artists( true, nullptr )->all();
+    auto artists = ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 1u, artists.size() );
 
     ml->deleteMedia( track1->id() );
-    artists = ml->artists( true, nullptr )->all();
+    artists = ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 0u, artists.size() );
 
     Reload();
 
-    artists = ml->artists( true, nullptr )->all();
+    artists = ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 0u, artists.size() );
 }
 
@@ -610,7 +610,7 @@ TEST_F( Artists, Query )
     auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3", IMedia::Type::Audio ) );
     artist2->addMedia( *m2 );
 
-    auto query = ml->artists( true, nullptr );
+    auto query = ml->artists( ArtistIncluded::All, nullptr );
     auto artists = query->items( 1, 0 );
     ASSERT_EQ( 1u, artists.size() );
     ASSERT_EQ( artist1->id(), artists[0]->id() );
@@ -689,10 +689,10 @@ TEST_F( Artists, SearchAll )
     artist2->addMedia( *m3 );
     m3->save();
 
-    auto artists = ml->searchArtists( "artist", false, nullptr )->all();
+    auto artists = ml->searchArtists( "artist", ArtistIncluded::AlbumArtistOnly, nullptr )->all();
     ASSERT_EQ( 1u, artists.size() );
 
-    artists = ml->searchArtists( "artist", true, nullptr )->all();
+    artists = ml->searchArtists( "artist", ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
 }
 

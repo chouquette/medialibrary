@@ -99,9 +99,9 @@ public:
     static bool checkDbModel( MediaLibraryPtr ml );
     static bool createDefaultArtists( sqlite::Connection* dbConnection );
     static std::shared_ptr<Artist> create( MediaLibraryPtr ml, const std::string& name );
-    static Query<IArtist> search(MediaLibraryPtr ml, const std::string& name, bool includeAll,
-                                           const QueryParameters* params );
-    static Query<IArtist> listAll( MediaLibraryPtr ml, bool includeAll,
+    static Query<IArtist> search( MediaLibraryPtr ml, const std::string& name,
+                                  ArtistIncluded included, const QueryParameters* params );
+    static Query<IArtist> listAll( MediaLibraryPtr ml, ArtistIncluded included,
                                    const QueryParameters* params );
     static Query<IArtist> searchByGenre( MediaLibraryPtr ml, const std::string& pattern,
                                          const QueryParameters* params, int64_t genreId );

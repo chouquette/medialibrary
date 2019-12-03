@@ -287,7 +287,7 @@ TEST_F( DeviceFs, RemoveAlbumAndArtist )
 
     auto albums = ml->albums( nullptr )->all();
     ASSERT_EQ( 3u, albums.size() );
-    auto artists = ml->artists( true, nullptr )->all();
+    auto artists = ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
 
     auto device = fsMock->removeDevice( RemovableDeviceUuid );
@@ -296,7 +296,7 @@ TEST_F( DeviceFs, RemoveAlbumAndArtist )
 
     albums = ml->albums( nullptr )->all();
     ASSERT_EQ( 1u, albums.size() );
-    artists = ml->artists( true, nullptr )->all();
+    artists = ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 1u, artists.size() );
 
     // Now check that everything appears again when we plug the device back in
@@ -307,7 +307,7 @@ TEST_F( DeviceFs, RemoveAlbumAndArtist )
 
     albums = ml->albums( nullptr )->all();
     ASSERT_EQ( 3u, albums.size() );
-    artists = ml->artists( true, nullptr )->all();
+    artists = ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
 
     res = Artist::checkDBConsistency( ml.get() );
@@ -345,7 +345,7 @@ TEST_F( DeviceFs, RemoveArtist )
 
     auto albums = ml->albums( nullptr )->all();
     ASSERT_EQ( 1u, albums.size() );
-    auto artists = ml->artists( true, nullptr )->all();
+    auto artists = ml->artists( ArtistIncluded::All, nullptr )->all();
 
     ASSERT_EQ( 1u, artists.size() );
 
@@ -363,7 +363,7 @@ TEST_F( DeviceFs, RemoveArtist )
 
     albums = ml->albums( nullptr )->all();
     ASSERT_EQ( 1u, albums.size() );
-    artists = ml->artists( true, nullptr )->all();
+    artists = ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 1u, artists.size() );
 
     // But we expect the tracks count to be down
@@ -379,7 +379,7 @@ TEST_F( DeviceFs, RemoveArtist )
 
     albums = ml->albums( nullptr )->all();
     ASSERT_EQ( 1u, albums.size() );
-    artists = ml->artists( true, nullptr )->all();
+    artists = ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 1u, artists.size() );
     artist = std::static_pointer_cast<Artist>( ml->artist( artist->id() ) );
     tracks = artist->tracks( nullptr )->all();
@@ -417,7 +417,7 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
 
     auto albums = ml->albums( nullptr )->all();
     ASSERT_EQ( 1u, albums.size() );
-    auto artists = ml->artists( true, nullptr )->all();
+    auto artists = ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 1u, artists.size() );
     auto artist = artists[0];
     ASSERT_EQ( 2u, artist->tracks( nullptr )->count() );
@@ -427,7 +427,7 @@ TEST_F( DeviceFs, PartialAlbumRemoval )
 
     albums = ml->albums( nullptr )->all();
     ASSERT_EQ( 1u, albums.size() );
-    artists = ml->artists( true, nullptr )->all();
+    artists = ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 1u, artists.size() );
     ASSERT_EQ( 1u, albums[0]->tracks( nullptr )->count() );
     ASSERT_EQ( 1u, artists[0]->tracks( nullptr )->count() );

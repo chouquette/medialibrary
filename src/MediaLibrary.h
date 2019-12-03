@@ -119,7 +119,7 @@ public:
 
     virtual ArtistPtr artist( int64_t id ) const override;
     std::shared_ptr<Artist> createArtist( const std::string& name );
-    virtual Query<IArtist> artists( bool includeAll,
+    virtual Query<IArtist> artists( ArtistIncluded included,
                                     const QueryParameters* params ) const override;
 
     virtual PlaylistPtr createPlaylist( const std::string& name ) override;
@@ -144,7 +144,7 @@ public:
                                         const QueryParameters* params ) const override;
     virtual Query<IGenre> searchGenre( const std::string& genre,
                                        const QueryParameters* params ) const override;
-    virtual Query<IArtist> searchArtists( const std::string& name, bool includeAll,
+    virtual Query<IArtist> searchArtists( const std::string& name, ArtistIncluded includeAll,
                                           const QueryParameters* params ) const override;
     virtual Query<IShow> searchShows( const std::string& pattern,
                                       const QueryParameters* params = nullptr ) const override;
