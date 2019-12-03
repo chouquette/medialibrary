@@ -370,6 +370,13 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     // Which allows us to register hooks, or not, depending on the presence of a notifier
     registerEntityHooks();
 
+    // Add a local fs factory to be able to flush the thumbnails if required
+    // We don't need to refresh it yet, as the FS classes are solely used to
+    // list & delete the files in the thumbnail directory. No device & mountpoint
+    // interraction will occur before we start the discoverer thread or we
+    // start refreshing the list of devices itself
+    addLocalFsFactory();
+
     auto res = InitializeResult::Success;
     try
     {
@@ -407,7 +414,6 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
 
     try
     {
-        addLocalFsFactory();
         populateNetworkFsFactories();
 
         for ( auto& fsFactory : m_fsFactories )
