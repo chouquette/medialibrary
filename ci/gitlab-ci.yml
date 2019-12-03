@@ -3,6 +3,8 @@ variables:
 
 linux:
     image: registry.videolan.org/medialibrary:20190531150343
+    except:
+      - schedules
     tags:
       - debian
       - amd64
@@ -16,6 +18,8 @@ linux:
 
 win32:
     image: registry.videolan.org/medialibrary-win32:20191203153222
+    except:
+      - schedules
     tags:
       - win32
     script:
@@ -32,6 +36,8 @@ win32:
 
 win64:
     image: registry.videolan.org/medialibrary-win64:20191203155144
+    except:
+      - schedules
     tags:
       - win64
     script:
