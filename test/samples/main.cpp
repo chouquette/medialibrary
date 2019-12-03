@@ -309,15 +309,25 @@ int main(int ac, char** av)
     return RUN_ALL_TESTS();
 }
 
+static std::string ParamToName( const ::testing::TestParamInfo<std::tuple<std::string, bool>>& p )
+{
+    return std::get<0>( p.param ) +
+           ( std::get<1>( p.param ) ? "_removable" : "" );
+}
+
 INSTANTIATE_TEST_SUITE_P(SamplesTests, Tests,
-                        ::testing::ValuesIn(testCases) );
+                        ::testing::ValuesIn(testCases),
+                        &ParamToName );
 
 INSTANTIATE_TEST_SUITE_P(SamplesTests, ReducedTests,
-                        ::testing::ValuesIn(reducedTestCases) );
+                        ::testing::ValuesIn(reducedTestCases),
+                        &ParamToName );
 
 INSTANTIATE_TEST_SUITE_P(SamplesTests, ResumeTests,
-                        ::testing::ValuesIn(testCases) );
+                        ::testing::ValuesIn(testCases),
+                        &ParamToName );
 
 INSTANTIATE_TEST_SUITE_P(SamplesTests, RefreshTests,
-                        ::testing::ValuesIn(testCases) );
+                        ::testing::ValuesIn(testCases),
+                        &ParamToName );
 
