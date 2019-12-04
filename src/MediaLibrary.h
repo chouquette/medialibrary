@@ -240,6 +240,7 @@ private:
     void migrateModel20to21();
     void migrateModel21to22();
     void migrateModel22to23();
+    void migrateModel23to24();
     /**
      * Runs some migration steps that depend on the actual C++ code, and that
      * therefor require the migration to have already completed

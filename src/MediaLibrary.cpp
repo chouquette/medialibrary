@@ -1118,6 +1118,11 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 needRescan = true;
                 previousVersion = 23;
             }
+            if ( previousVersion == 23 )
+            {
+                migrateModel23to24();
+                previousVersion = 24;
+            }
             // To be continued in the future!
 
             migrationEpilogue( originalPreviousVersion );
@@ -1716,6 +1721,16 @@ void MediaLibrary::migrateModel22to23()
     Show::createTriggers( dbConn, 23 );
 
     m_settings.setDbModelVersion( 23 );
+    t->commit();
+}
+
+void MediaLibrary::migrateModel23to24()
+{
+    auto dbConn = getConn();
+    sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
+    auto t = dbConn->newTransaction();
+
+    m_settings.setDbModelVersion( 24 );
     t->commit();
 }
 

@@ -592,3 +592,8 @@ TEST_F( DbModel, Upgrade22to23 )
     }
     ASSERT_EQ( 1u, nbPlaylistTask );
 }
+
+TEST_F( DbModel, Upgrade23to24 )
+{
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v23.sql" );
+}
