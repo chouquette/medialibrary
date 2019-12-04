@@ -448,7 +448,6 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
             auto seasonId = std::get<1>( showInfo );
             auto episodeId = std::get<2>( showInfo );
             auto showName = std::get<3>( showInfo );
-            auto episodeTitle = std::get<4>( showInfo );
 
             auto show = findShow( showName );
             if ( show == nullptr )
@@ -458,8 +457,6 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
                     return false;
             }
             show->addEpisode( *media, seasonId, episodeId );
-            if ( episodeTitle.empty() == false )
-                media->setTitleBuffered( episodeTitle );
         }
         else
         {

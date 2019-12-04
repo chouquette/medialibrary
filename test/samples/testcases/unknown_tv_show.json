@@ -10,12 +10,12 @@
                 "nbEpisodes": 2,
                 "episodes": [
                     {
-                        "title": "A random tv show",
+                        "title": "S03E04 A random tv show",
                         "seasonId": 3,
                         "episodeId": 4
                     },
                     {
-                        "title": "Another episode",
+                        "title": "S04E13 Another episode",
                         "seasonId": 4,
                         "episodeId": 13
                     }
