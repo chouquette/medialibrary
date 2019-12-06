@@ -457,6 +457,29 @@ public:
      * The vallue will persist in database across multiple executions.
      */
     virtual void setVideoGroupsAllowSingleVideo( bool enable ) = 0;
+    /**
+     * @brief createMediaGroup Creates a media group
+     * @param name The group name
+     * @return The new group instance, or nullptr in case of error
+     */
+    virtual MediaGroupPtr createMediaGroup( std::string name ) = 0;
+    /**
+     * @brief mediaGroup Returns a media group with the given id
+     * @return A media group, or nullptr if the group doesn't exist, or in case
+     *         of sporadic failure.
+     */
+    virtual std::shared_ptr<IMediaGroup> mediaGroup( int64_t id ) const = 0;
+    /**
+     * @brief mediaGroups Returns a query representing the root media groups
+     * @param params A query parameter
+     *
+     * The supported sorting criteria are:
+     * - Alpha (default)
+     * - NbVideo
+     * - NbAudio
+     * - NbMedia
+     */
+    virtual Query<IMediaGroup> mediaGroups( const QueryParameters* params ) const = 0;
     virtual AlbumPtr album( int64_t id ) const = 0;
     virtual Query<IAlbum> albums( const QueryParameters* params = nullptr ) const = 0;
     virtual ShowPtr show( int64_t id ) const = 0;

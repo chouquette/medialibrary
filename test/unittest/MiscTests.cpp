@@ -119,6 +119,7 @@ namespace
         "Media",
         "MediaArtistRelation",
         "MediaFts",
+        "MediaGroup",
         "Metadata",
         "Movie",
         "Playlist",

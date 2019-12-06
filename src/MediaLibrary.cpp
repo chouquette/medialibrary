@@ -66,6 +66,7 @@
 #include "parser/Task.h"
 #include "utils/Charsets.h"
 #include "Bookmark.h"
+#include "MediaGroup.h"
 
 // Discoverers:
 #include "discoverer/FsDiscoverer.h"
@@ -193,6 +194,7 @@ bool MediaLibrary::createAllTables( uint32_t dbModelVersion )
     SubtitleTrack::createTable( dbConn );
     Chapter::createTable( dbConn );
     Bookmark::createTable( dbConn );
+    MediaGroup::createTable( dbConn );
     return true;
 }
 
@@ -558,6 +560,21 @@ void MediaLibrary::setVideoGroupsPrefixLength( uint32_t prefixLength )
 void MediaLibrary::setVideoGroupsAllowSingleVideo( bool enable )
 {
     m_settings.setVideoGroupMinimumMediaCount( enable == true ? 1 : 2 );
+}
+
+MediaGroupPtr MediaLibrary::createMediaGroup( std::string name )
+{
+    return MediaGroup::create( this, 0, std::move( name ) );
+}
+
+std::shared_ptr<IMediaGroup> MediaLibrary::mediaGroup( int64_t id ) const
+{
+    return MediaGroup::fetch( this, id );
+}
+
+Query<IMediaGroup> MediaLibrary::mediaGroups( const QueryParameters* params ) const
+{
+    return MediaGroup::listAll( this, params );
 }
 
 bool MediaLibrary::isSupportedMediaExtension( const char* ext )
@@ -1729,6 +1746,13 @@ void MediaLibrary::migrateModel23to24()
     auto dbConn = getConn();
     sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
     auto t = dbConn->newTransaction();
+
+    std::string reqs[] = {
+#       include "database/migrations/migration23-24.sql"
+    };
+
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConn, req );
 
     m_settings.setDbModelVersion( 24 );
     t->commit();

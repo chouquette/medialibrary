@@ -88,6 +88,9 @@ public:
     virtual void setVideoGroupsPrefixLength( uint32_t prefixLength ) override;
     virtual void setVideoGroupsAllowSingleVideo( bool enable ) override;
 
+    virtual MediaGroupPtr createMediaGroup( std::string name ) override;
+    virtual std::shared_ptr<IMediaGroup> mediaGroup( int64_t id ) const override;
+    virtual Query<IMediaGroup> mediaGroups( const QueryParameters* params ) const override;
 
 
     virtual void onDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,
