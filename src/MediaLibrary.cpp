@@ -377,6 +377,12 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     addLocalFsFactory();
 
+    // This instantiates our own network FsFactory's and adds them to the list of
+    // available network factories, but they are not added to m_fsFactories yet.
+    // This will be done when the user explicitely
+    // invokes IMediaLibrary::setDiscoverNetworkEnabled
+    populateNetworkFsFactories();
+
     auto res = InitializeResult::Success;
     try
     {
@@ -414,8 +420,8 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
 
     try
     {
-        populateNetworkFsFactories();
-
+        // Now that we have initialized the database connection and migrated
+        // the model if needed, we can try to flush old devices.
         for ( auto& fsFactory : m_fsFactories )
             refreshDevices( *fsFactory );
 
