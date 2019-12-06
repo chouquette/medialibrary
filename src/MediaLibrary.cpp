@@ -371,10 +371,10 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     registerEntityHooks();
 
     // Add a local fs factory to be able to flush the thumbnails if required
-    // We don't need to refresh it yet, as the FS classes are solely used to
-    // list & delete the files in the thumbnail directory. No device & mountpoint
-    // interraction will occur before we start the discoverer thread or we
-    // start refreshing the list of devices itself
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // We need to have the device list ready, since we might need it to
+    // create backups for playlist on removable devices
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     addLocalFsFactory();
 
     auto res = InitializeResult::Success;
