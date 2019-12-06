@@ -952,9 +952,8 @@ void MediaLibrary::populateNetworkFsFactories()
 
 void MediaLibrary::addLocalFsFactory()
 {
-    auto fsFactory = std::make_shared<factory::FileSystemFactory>( m_deviceLister );
-    fsFactory->refreshDevices();
-    m_fsFactories.emplace( begin( m_fsFactories ), std::move( fsFactory ) );
+    m_fsFactories.emplace( begin( m_fsFactories ),
+            std::make_shared<factory::FileSystemFactory>( m_deviceLister ) );
 }
 
 InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion )

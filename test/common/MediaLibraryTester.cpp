@@ -139,7 +139,6 @@ void MediaLibraryTester::addLocalFsFactory()
     if ( fsFactory != nullptr )
     {
         m_fsFactories.clear();
-        fsFactory->refreshDevices();
         m_fsFactories.push_back( fsFactory );
     }
     else
