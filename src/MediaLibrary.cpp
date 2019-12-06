@@ -423,38 +423,38 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     // are first required during the discovery step.
     if ( res == InitializeResult::Success )
     {
-    try
-    {
-        // Now that we have initialized the database connection and migrated
-        // the model if needed, we can try to flush old devices.
-        for ( auto& fsFactory : m_fsFactories )
-            refreshDevices( *fsFactory );
+        try
+        {
+            // Now that we have initialized the database connection and migrated
+            // the model if needed, we can try to flush old devices.
+            for ( auto& fsFactory : m_fsFactories )
+                refreshDevices( *fsFactory );
 
-        // Now that we know which devices are plugged, check for outdated devices
-        // Approximate 6 months for old device precision.
-        Device::removeOldDevices( this, std::chrono::seconds{ 3600 * 24 * 30 * 6 } );
-        Media::removeOldMedia( this, std::chrono::seconds{ 3600 * 24 * 30 * 6 } );
-    }
-    catch ( const sqlite::errors::DatabaseCorrupt& )
-    {
-        LOG_ERROR( "SQLite reported the database as corrupted" );
-        res = InitializeResult::DbCorrupted;
-    }
-    catch ( const sqlite::errors::GenericError& )
-    {
-        // This should only happen when the request is invalid, but can happen
-        // in case a migration fails, and we end up referencing a field that
-        // doesn't exist.
-        // Report it for release builds, but fail hard otherwise
-        assert( false );
-        return InitializeResult::DbCorrupted;
-    }
-    // Handle every other errors as a critical failure
-    catch ( const sqlite::errors::Exception& ex )
-    {
-        LOG_ERROR( "An SQLite error occurred: ", ex.what() );
-        return InitializeResult::Failed;
-    }
+            // Now that we know which devices are plugged, check for outdated devices
+            // Approximate 6 months for old device precision.
+            Device::removeOldDevices( this, std::chrono::seconds{ 3600 * 24 * 30 * 6 } );
+            Media::removeOldMedia( this, std::chrono::seconds{ 3600 * 24 * 30 * 6 } );
+        }
+        catch ( const sqlite::errors::DatabaseCorrupt& )
+        {
+            LOG_ERROR( "SQLite reported the database as corrupted" );
+            res = InitializeResult::DbCorrupted;
+        }
+        catch ( const sqlite::errors::GenericError& )
+        {
+            // This should only happen when the request is invalid, but can happen
+            // in case a migration fails, and we end up referencing a field that
+            // doesn't exist.
+            // Report it for release builds, but fail hard otherwise
+            assert( false );
+            return InitializeResult::DbCorrupted;
+        }
+        // Handle every other errors as a critical failure
+        catch ( const sqlite::errors::Exception& ex )
+        {
+            LOG_ERROR( "An SQLite error occurred: ", ex.what() );
+            return InitializeResult::Failed;
+        }
     }
 
     m_initialized = true;
