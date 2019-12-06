@@ -940,7 +940,9 @@ void MediaLibrary::populateNetworkFsFactories()
 
 void MediaLibrary::addLocalFsFactory()
 {
-    m_fsFactories.emplace( begin( m_fsFactories ), std::make_shared<factory::FileSystemFactory>( m_deviceLister ) );
+    auto fsFactory = std::make_shared<factory::FileSystemFactory>( m_deviceLister );
+    fsFactory->refreshDevices();
+    m_fsFactories.emplace( begin( m_fsFactories ), std::move( fsFactory ) );
 }
 
 InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
@@ -2056,7 +2058,6 @@ void MediaLibrary::refreshDevices( fs::IFileSystemFactory& fsFactory )
     // Don't refuse to process devices when none seem to be present, it might be a valid case
     // if the user only discovered removable storages, and we would still need to mark those
     // as "not present"
-    fsFactory.refreshDevices();
     auto devices = Device::fetchByScheme( this, fsFactory.scheme() );
     for ( auto& d : devices )
     {
