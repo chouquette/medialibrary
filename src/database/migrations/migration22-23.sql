@@ -63,3 +63,6 @@ Show::schema( Show::Table::Name, 23 ),
 /*** Migrate thumbnail table ***/
 "DROP TABLE " + Thumbnail::Table::Name,
 Thumbnail::schema( Thumbnail::Table::Name, 23 ),
+/* Ensure we also flush the linking table since the foreign key
+ * ON DELETE CASCADE won't be processed during a DROP TABLE */
+"DELETE FROM " + Thumbnail::LinkingTable::Name,

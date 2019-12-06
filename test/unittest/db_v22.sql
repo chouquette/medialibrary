@@ -126,4 +126,8 @@ INSERT INTO MediaArtistRelation VALUES(3,3);
 INSERT INTO Task VALUES(1,3,0,0,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/multi_cd/folder3/track3.mp3',1,1,2,0,0,0);
 INSERT INTO Task VALUES(2,3,0,0,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/multi_cd/folder2/track2.mp3',1,2,3,0,0,0);
 INSERT INTO Task VALUES(3,3,0,0,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/multi_cd/folder1/track1.mp3',1,3,4,0,0,0);
+INSERT INTO `Thumbnail` (id_thumbnail,mrl,is_generated,shared_counter) VALUES (1,'1.jpg',1,1);
+INSERT INTO `Thumbnail` (id_thumbnail,mrl,is_generated,shared_counter) VALUES (2,'2.jpg',1,1);
+INSERT INTO `ThumbnailLinking` (entity_id,entity_type,size_type,thumbnail_id,origin) VALUES (1,0,0,1,2);
+INSERT INTO `ThumbnailLinking` (entity_id,entity_type,size_type,thumbnail_id,origin) VALUES (2,0,0,2,2);
 COMMIT;
