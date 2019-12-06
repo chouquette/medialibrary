@@ -105,7 +105,7 @@ bool JpegCompressor::compress( const uint8_t* buffer, const std::string& outputF
     compInfo.input_components = bpp();
     compInfo.in_color_space = JCS_RGB;
     jpeg_set_defaults( &compInfo );
-    jpeg_set_quality( &compInfo, 85, TRUE );
+    jpeg_set_quality( &compInfo, 80, TRUE );
 
     jpeg_start_compress( &compInfo, TRUE );
 
