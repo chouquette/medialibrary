@@ -418,6 +418,11 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
         return InitializeResult::Failed;
     }
 
+    // Don't run device refresh if the database is in a corrupted state
+    // We expect the user to recreate it, so devices will be added when they
+    // are first required during the discovery step.
+    if ( res == InitializeResult::Success )
+    {
     try
     {
         // Now that we have initialized the database connection and migrated
@@ -449,6 +454,7 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     {
         LOG_ERROR( "An SQLite error occurred: ", ex.what() );
         return InitializeResult::Failed;
+    }
     }
 
     m_initialized = true;
