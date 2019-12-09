@@ -27,6 +27,7 @@
 #include "Tests.h"
 
 #include "MediaGroup.h"
+#include "Media.h"
 
 class MediaGroups : public Tests
 {
@@ -290,4 +291,127 @@ TEST_F( MediaGroups, SearchMedia )
     media = mg->searchMedia( "otter", IMedia::Type::Video )->all();
     ASSERT_EQ( 1u, media.size() );
     ASSERT_EQ( v3->id(), media[0]->id() );
+}
+
+TEST_F( MediaGroups, UpdateNbMediaTypeChange )
+{
+    auto group1 = MediaGroup::create( ml.get(), 0, "group" );
+    auto group2 = MediaGroup::create( ml.get(), 0, "group2" );
+    ASSERT_NE( nullptr, group1 );
+    ASSERT_NE( nullptr, group2 );
+    ASSERT_EQ( 0u, group1->nbAudio() );
+    ASSERT_EQ( 0u, group1->nbVideo() );
+    ASSERT_EQ( 0u, group1->nbUnknown() );
+    ASSERT_EQ( 0u, group2->nbAudio() );
+    ASSERT_EQ( 0u, group2->nbVideo() );
+    ASSERT_EQ( 0u, group2->nbUnknown() );
+
+    // Insert an unknown media in a group
+    auto m = ml->addMedia( "media.mkv", IMedia::Type::Unknown );
+    group1->add( *m );
+
+    group1 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group1->id() ) );
+    group2 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group2->id() ) );
+    ASSERT_EQ( 0u, group1->nbAudio() );
+    ASSERT_EQ( 0u, group1->nbVideo() );
+    ASSERT_EQ( 1u, group1->nbUnknown() );
+    ASSERT_EQ( 0u, group2->nbAudio() );
+    ASSERT_EQ( 0u, group2->nbVideo() );
+    ASSERT_EQ( 0u, group2->nbUnknown() );
+
+    // Move that media to another group
+    group2->add( *m );
+
+    group1 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group1->id() ) );
+    group2 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group2->id() ) );
+    ASSERT_EQ( 0u, group1->nbAudio() );
+    ASSERT_EQ( 0u, group1->nbVideo() );
+    ASSERT_EQ( 0u, group1->nbUnknown() );
+    ASSERT_EQ( 0u, group2->nbAudio() );
+    ASSERT_EQ( 0u, group2->nbVideo() );
+    ASSERT_EQ( 1u, group2->nbUnknown() );
+
+    // Now change the media type
+    m->setType( IMedia::Type::Audio );
+    group1 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group1->id() ) );
+    group2 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group2->id() ) );
+    ASSERT_EQ( 0u, group1->nbAudio() );
+    ASSERT_EQ( 0u, group1->nbVideo() );
+    ASSERT_EQ( 0u, group1->nbUnknown() );
+    ASSERT_EQ( 1u, group2->nbAudio() );
+    ASSERT_EQ( 0u, group2->nbVideo() );
+    ASSERT_EQ( 0u, group2->nbUnknown() );
+
+    // Manually change both group & type to check if we properly support it
+    std::string req = "UPDATE " + Media::Table::Name +
+            " SET type = ?, group_id = ? WHERE id_media = ?";
+    auto res = sqlite::Tools::executeUpdate( ml->getConn(), req, IMedia::Type::Video,
+                                             group1->id(), m->id() );
+    ASSERT_TRUE( res );
+
+    group1 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group1->id() ) );
+    group2 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group2->id() ) );
+    ASSERT_EQ( 0u, group1->nbAudio() );
+    ASSERT_EQ( 1u, group1->nbVideo() );
+    ASSERT_EQ( 0u, group1->nbUnknown() );
+    ASSERT_EQ( 0u, group2->nbAudio() );
+    ASSERT_EQ( 0u, group2->nbVideo() );
+    ASSERT_EQ( 0u, group2->nbUnknown() );
+
+    // Now remove the media from the group:
+    group1->remove( m->id() );
+    group1 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group1->id() ) );
+    group2 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group2->id() ) );
+    ASSERT_EQ( 0u, group1->nbAudio() );
+    ASSERT_EQ( 0u, group1->nbVideo() );
+    ASSERT_EQ( 0u, group1->nbUnknown() );
+    ASSERT_EQ( 0u, group2->nbAudio() );
+    ASSERT_EQ( 0u, group2->nbVideo() );
+    ASSERT_EQ( 0u, group2->nbUnknown() );
+}
+
+TEST_F( MediaGroups, SortByNbMedia )
+{
+    auto mg1 = MediaGroup::create( ml.get(), 0, "A group" );
+    auto mg2 = MediaGroup::create( ml.get(), 0, "Z group" );
+
+    auto v1 = ml->addMedia( "media1.mkv", IMedia::Type::Video );
+    auto v2 = ml->addMedia( "media2.mkv", IMedia::Type::Video );
+    mg1->add( *v1 );
+    mg1->add( *v2 );
+
+    auto a1 = ml->addMedia( "audio1.mp3", IMedia::Type::Audio );
+    auto u1 = ml->addMedia( "unknown1.ts", IMedia::Type::Unknown );
+    auto u2 = ml->addMedia( "unknown2.ts", IMedia::Type::Unknown );
+    mg2->add( *a1 );
+    mg2->add( *u1 );
+    mg2->add( *u2 );
+
+    QueryParameters params{ SortingCriteria::NbVideo, false };
+
+    auto query = ml->mediaGroups( &params );
+    ASSERT_EQ( 2u, query->count() );
+    auto groups = query->all();
+    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( mg2->id(), groups[0]->id() );
+    ASSERT_EQ( mg1->id(), groups[1]->id() );
+
+    params.desc = true;
+    groups = ml->mediaGroups( &params )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( mg1->id(), groups[0]->id() );
+    ASSERT_EQ( mg2->id(), groups[1]->id() );
+
+    params.sort = SortingCriteria::NbMedia;
+    // still descending order, so mg2 comes first
+    groups = ml->mediaGroups( &params )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( mg2->id(), groups[0]->id() );
+    ASSERT_EQ( mg1->id(), groups[1]->id() );
+
+    params.desc = false;
+    groups = ml->mediaGroups( &params )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( mg1->id(), groups[0]->id() );
+    ASSERT_EQ( mg2->id(), groups[1]->id() );
 }

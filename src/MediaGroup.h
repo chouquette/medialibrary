@@ -46,7 +46,9 @@ public:
     enum class Triggers : uint8_t
     {
         InsertFts,
-        DeleteFts
+        DeleteFts,
+        IncrementNbMediaOnGroupChange,
+        DecrementNbMediaOnGroupChange,
     };
 
     MediaGroup( MediaLibraryPtr ml, sqlite::Row& row );

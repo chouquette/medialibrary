@@ -212,6 +212,10 @@ void MediaGroup::createTriggers( sqlite::Connection* connection )
                                    trigger( Triggers::InsertFts, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
                                    trigger( Triggers::DeleteFts, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::IncrementNbMediaOnGroupChange, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::DecrementNbMediaOnGroupChange, Settings::DbModelVersion ) );
 }
 
 std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
@@ -257,6 +261,54 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                    " DELETE FROM " + FtsTable::Name +
                        " WHERE rowid = old.id_group;"
                    " END";
+        case Triggers::IncrementNbMediaOnGroupChange:
+            return "CREATE TRIGGER media_group_increment_nb_media"
+                    " AFTER UPDATE OF type, group_id ON " + Media::Table::Name +
+                    " WHEN new.group_id IS NOT NULL AND"
+                        " (old.type != new.type OR IFNULL(old.group_id, 0) != new.group_id)"
+                    " BEGIN"
+                    " UPDATE " + Table::Name + " SET"
+                        " nb_video = nb_video + "
+                            "(CASE new.type WHEN " +
+                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                    IMedia::Type::Video ) ) +
+                                " THEN 1 ELSE 0 END),"
+                        " nb_audio = nb_audio + "
+                            "(CASE new.type WHEN " +
+                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                    IMedia::Type::Audio ) ) +
+                                " THEN 1 ELSE 0 END),"
+                        " nb_unknown = nb_unknown + "
+                            "(CASE new.type WHEN " +
+                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                    IMedia::Type::Unknown ) ) +
+                                " THEN 1 ELSE 0 END)"
+                    " WHERE id_group = new.group_id;"
+                    " END";
+        case Triggers::DecrementNbMediaOnGroupChange:
+            return "CREATE TRIGGER media_group_decrement_nb_media"
+                    " AFTER UPDATE OF type, group_id ON " + Media::Table::Name +
+                    " WHEN old.group_id IS NOT NULL AND"
+                        "(old.type != new.type OR old.group_id != IFNULL(new.group_id, 0))"
+                    " BEGIN"
+                    " UPDATE " + Table::Name + " SET"
+                        " nb_video = nb_video - "
+                            "(CASE old.type WHEN " +
+                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                    IMedia::Type::Video ) ) +
+                                " THEN 1 ELSE 0 END),"
+                        " nb_audio = nb_audio - "
+                            "(CASE old.type WHEN " +
+                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                    IMedia::Type::Audio ) ) +
+                                " THEN 1 ELSE 0 END),"
+                        " nb_unknown = nb_unknown - "
+                            "(CASE old.type WHEN " +
+                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                    IMedia::Type::Unknown ) ) +
+                                " THEN 1 ELSE 0 END)"
+                    " WHERE id_group = old.group_id;"
+                    " END";
         default:
             assert( !"Invalid trigger" );
     }

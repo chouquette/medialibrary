@@ -1,7 +1,5 @@
 MediaGroup::schema( MediaGroup::Table::Name, 24 ),
 MediaGroup::schema( MediaGroup::FtsTable::Name, 24 ),
-MediaGroup::trigger( MediaGroup::Triggers::InsertFts, 24 ),
-MediaGroup::trigger( MediaGroup::Triggers::DeleteFts, 24 ),
 
 /** Add group_id column for media */
 "CREATE TEMPORARY TABLE " + Media::Table::Name + "_backup"
@@ -38,3 +36,10 @@ Media::schema( Media::Table::Name, 24 ),
 " FROM " + Media::Table::Name + "_backup",
 
 "DROP TABLE " + Media::Table::Name + "_backup",
+
+/* Create the new media group triggers after recreating the media table, since
+   deleting the media table would delete the triggers, as they depend on it */
+MediaGroup::trigger( MediaGroup::Triggers::InsertFts, 24 ),
+MediaGroup::trigger( MediaGroup::Triggers::DeleteFts, 24 ),
+MediaGroup::trigger( MediaGroup::Triggers::IncrementNbMediaOnGroupChange, 24 ),
+MediaGroup::trigger( MediaGroup::Triggers::DecrementNbMediaOnGroupChange, 24 ),
