@@ -183,6 +183,10 @@ class Media : public IMedia,
         virtual bool isExternalMedia() const override;
         virtual bool isStream() const override;
 
+        virtual bool addToGroup( IMediaGroup& group ) override;
+        virtual bool addToGroup( int64_t groupId ) override;
+        virtual bool removeFromGroup() override;
+
         void setReleaseDate( unsigned int date );
         int64_t deviceId() const; // Used for unit tests purposes only
         void setDeviceId( int64_t deviceId );
@@ -236,6 +240,14 @@ class Media : public IMedia,
                                                    const std::string& groupName,
                                                    const std::string& pattern,
                                                    const QueryParameters* params );
+        static Query<IMedia> fromMediaGroup( MediaLibraryPtr ml,
+                                             int64_t groupId, Type type,
+                                             const QueryParameters* params );
+        static Query<IMedia> searchFromMediaGroup( MediaLibraryPtr ml,
+                                                   int64_t groupId, Type type,
+                                                   const std::string& pattern,
+                                                   const QueryParameters* params );
+        static bool setMediaGroup(MediaLibraryPtr ml, int64_t mediaId, int64_t groupId );
 
         static bool clearHistory( MediaLibraryPtr ml );
         static bool removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime );

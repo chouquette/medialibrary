@@ -549,6 +549,37 @@ bool Media::isStream() const
     return m_importType == ImportType::Stream;
 }
 
+/* Static helper to allow MediaGroup class to assign a group to a media without
+ * fetching an instance first.
+ */
+bool Media::setMediaGroup( MediaLibraryPtr ml, int64_t mediaId, int64_t groupId )
+{
+    const std::string req = "UPDATE " + Table::Name + " SET group_id = ? "
+            "WHERE id_media = ?";
+    return sqlite::Tools::executeUpdate( ml->getConn(), req,
+                                       sqlite::ForeignKey{ groupId }, mediaId );
+}
+
+bool Media::addToGroup( IMediaGroup& group )
+{
+    return addToGroup( group.id() );
+}
+
+bool Media::addToGroup( int64_t groupId )
+{
+    if ( m_groupId == groupId )
+        return true;
+    if ( setMediaGroup( m_ml, m_id, groupId ) == false )
+        return false;
+    m_groupId = groupId;
+    return true;
+}
+
+bool Media::removeFromGroup()
+{
+    return addToGroup( 0 );
+}
+
 void Media::setReleaseDate( unsigned int date )
 {
     if ( m_releaseDate == date )
@@ -1520,6 +1551,47 @@ Query<IMedia> Media::searchFromVideoGroup( MediaLibraryPtr ml, const std::string
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
                                       IMedia::Type::Video, groupName );
+}
+
+Query<IMedia> Media::fromMediaGroup(MediaLibraryPtr ml, int64_t groupId, Type type,
+                                     const QueryParameters* params )
+{
+    std::string req = "FROM " + Table::Name + " m ";
+    req += addRequestJoin( params, false, false );
+    req += " WHERE m.group_id = ?"
+           " AND m.is_present != 0";
+    if ( type != Type::Unknown )
+    {
+        req += " AND m.type = ?";
+        return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
+                                          groupId, type );
+    }
+    return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ), groupId );
+}
+
+Query<IMedia> Media::searchFromMediaGroup( MediaLibraryPtr ml, int64_t groupId,
+                                           IMedia::Type type,
+                                           const std::string& pattern,
+                                           const QueryParameters* params )
+{
+    if ( pattern.size() < 3 )
+        return nullptr;
+    std::string req = "FROM " + Table::Name + " m ";
+    req += addRequestJoin( params, false, false );
+    req += " WHERE m.id_media IN (SELECT rowid FROM " + FtsTable::Name +
+            " WHERE " + FtsTable::Name + " MATCH ?)"
+           " AND m.group_id = ?"
+           " AND m.is_present != 0";
+    if ( type != Type::Unknown )
+    {
+        req += " AND m.type = ?";
+        return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
+                                          sqlite::Tools::sanitizePattern( pattern ),
+                                          groupId, type );
+    }
+    return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
+                                      sqlite::Tools::sanitizePattern( pattern ),
+                                      groupId );
 }
 
 bool Media::clearHistory( MediaLibraryPtr ml )

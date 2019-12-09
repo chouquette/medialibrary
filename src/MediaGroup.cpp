@@ -25,6 +25,7 @@
 #endif
 
 #include "MediaGroup.h"
+#include "Media.h"
 #include "database/SqliteQuery.h"
 #include "medialibrary/IMediaLibrary.h"
 
@@ -90,6 +91,26 @@ uint32_t MediaGroup::nbUnknown() const
     return m_nbUnknown;
 }
 
+bool MediaGroup::add( IMedia& media )
+{
+    return media.addToGroup( m_id );
+}
+
+bool MediaGroup::add( int64_t mediaId )
+{
+    return Media::setMediaGroup( m_ml, mediaId, m_id );
+}
+
+bool MediaGroup::remove( IMedia& media )
+{
+    return media.removeFromGroup();
+}
+
+bool MediaGroup::remove( int64_t mediaId )
+{
+    return Media::setMediaGroup( m_ml, mediaId, 0 );
+}
+
 std::shared_ptr<IMediaGroup> MediaGroup::createSubgroup( const std::string& name )
 {
     return create( m_ml, m_id, name );
@@ -110,6 +131,17 @@ bool MediaGroup::isSubgroup() const
 std::shared_ptr<IMediaGroup> MediaGroup::parent() const
 {
     return fetch( m_ml, m_parentId );
+}
+
+Query<IMedia> MediaGroup::media( IMedia::Type mediaType, const QueryParameters* params)
+{
+    return Media::fromMediaGroup( m_ml, m_id, mediaType, params );
+}
+
+Query<IMedia> MediaGroup::searchMedia(const std::string& pattern, IMedia::Type mediaType,
+                                       const QueryParameters* params )
+{
+    return Media::searchFromMediaGroup( m_ml, m_id, mediaType, pattern, params );
 }
 
 std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,

@@ -57,10 +57,19 @@ public:
     virtual uint32_t nbVideo() const override;
     virtual uint32_t nbAudio() const override;
     virtual uint32_t nbUnknown() const override;
+    virtual bool add( IMedia& media ) override;
+    virtual bool add(int64_t mediaId ) override;
+    virtual bool remove( IMedia& media ) override;
+    virtual bool remove( int64_t mediaId ) override;
     virtual std::shared_ptr<IMediaGroup> createSubgroup( const std::string& name ) override;
     virtual Query<IMediaGroup> subgroups( const QueryParameters* params ) const override;
     virtual bool isSubgroup() const override;
     virtual std::shared_ptr<IMediaGroup> parent() const override;
+    virtual Query<IMedia> media( IMedia::Type mediaType,
+                                 const QueryParameters* params = nullptr ) override;
+    virtual Query<IMedia> searchMedia( const std::string& pattern,
+                                       IMedia::Type mediaType,
+                                       const QueryParameters* params = nullptr ) override;
 
     static std::shared_ptr<MediaGroup> create(MediaLibraryPtr ml,
                                                int64_t parentId, std::string name );

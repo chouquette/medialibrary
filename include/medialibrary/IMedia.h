@@ -324,6 +324,26 @@ public:
     ///                  of type stream.
     ///
     virtual bool isStream() const = 0;
+    ///
+    /// \brief addToGroup Adds this media to the given group
+    /// \param group The target media group
+    /// \return true if the media was successfully added, false otherwise
+    ///
+    virtual bool addToGroup( IMediaGroup& group ) = 0;
+    ///
+    /// \brief addToGroup Adds this media to the given group
+    /// \param groupId The target group ID
+    /// \return true if the media was successfully added, false otherwise
+    ///
+    virtual bool addToGroup( int64_t groupId ) = 0;
+    ///
+    /// \brief removeFromGroup Remove this media from its group
+    /// \return true if the media was successfully removed, false otherwise.
+    ///
+    /// If this media is not part of any group, true is returned, and no action
+    /// will occur.
+    ///
+    virtual bool removeFromGroup() = 0;
 };
 
 }

@@ -189,3 +189,105 @@ TEST_F( MediaGroups, Search )
     ASSERT_EQ( mg1->id(), groups[0]->id() );
     ASSERT_EQ( mg2->id(), groups[1]->id() );
 }
+
+TEST_F( MediaGroups, Media )
+{
+    auto mg = MediaGroup::create( ml.get(), 0, "group" );
+    auto video = ml->addMedia( "video.mkv", IMedia::Type::Video );
+    auto audio = ml->addMedia( "audio.mp3", IMedia::Type::Audio );
+    ASSERT_NE( nullptr, mg );
+    ASSERT_NE( nullptr, video );
+    ASSERT_NE( nullptr, audio );
+
+    auto sg = mg->createSubgroup( "subgroup" );
+    auto subvideo = ml->addMedia( "subvideo.mkv", IMedia::Type::Video );
+    auto subaudio = ml->addMedia( "subaudio.mkv", IMedia::Type::Audio );
+    auto subaudio2 = ml->addMedia( "subaudio2.mkv", IMedia::Type::Audio );
+    ASSERT_NE( nullptr, sg );
+    ASSERT_NE( nullptr, subvideo );
+
+    auto mediaQuery = mg->media( IMedia::Type::Unknown, nullptr );
+    ASSERT_EQ( 0u, mediaQuery->count() );
+    auto media = mediaQuery->all();
+    ASSERT_EQ( 0u, media.size() );
+
+    auto res = mg->add( *video );
+    ASSERT_TRUE( res );
+    res = mg->add( audio->id() );
+    ASSERT_TRUE( res );
+
+    res = subvideo->addToGroup( *sg );
+    ASSERT_TRUE( res );
+    res = subaudio->addToGroup( sg->id() );
+    ASSERT_TRUE( res );
+    res = subaudio2->addToGroup( sg->id() );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( 2u, mediaQuery->count() );
+    media = mediaQuery->all();
+    ASSERT_EQ( 2u, media.size() );
+    ASSERT_EQ( audio->id(), media[0]->id() );
+    ASSERT_EQ( video->id(), media[1]->id() );
+
+    media = mg->media( IMedia::Type::Video, nullptr )->all();
+    ASSERT_EQ( 1u, media.size() );
+    ASSERT_EQ( video->id(), media[0]->id() );
+
+    media = sg->media( IMedia::Type::Audio, nullptr )->all();
+    ASSERT_EQ( subaudio->id(), media[0]->id() );
+    ASSERT_EQ( subaudio2->id(), media[1]->id() );
+
+    // Now remove most media from groups
+    res = mg->remove( *video );
+    ASSERT_TRUE( res );
+    res = mg->remove( audio->id() );
+    ASSERT_TRUE( res );
+
+    res = subvideo->removeFromGroup();
+    ASSERT_TRUE( res );
+    res = subaudio->removeFromGroup();
+    ASSERT_TRUE( res );
+
+    media = mg->media( IMedia::Type::Unknown, nullptr )->all();
+    ASSERT_EQ( 0u, media.size() );
+    media = sg->media( IMedia::Type::Unknown, nullptr )->all();
+    ASSERT_EQ( 1u, media.size() );
+    ASSERT_EQ ( subaudio2->id(), media[0]->id() );
+}
+
+TEST_F( MediaGroups, SearchMedia )
+{
+    auto mg = MediaGroup::create( ml.get(), 0, "" );
+    auto m1 = ml->addMedia( "audio.mp3", IMedia::Type::Audio );
+    m1->setTitle( "The sea otters podcast" );
+    auto m2 = ml->addMedia( "audio2.mp3", IMedia::Type::Audio );
+    m2->setTitle( "A boring podcast" );
+    auto v1 = ml->addMedia( "a cute otter.mkv", IMedia::Type::Video );
+    auto v2 = ml->addMedia( "a boring animal.mkv", IMedia::Type::Video );
+    auto v3 = ml->addMedia( "more fluffy otters.mkv", IMedia::Type::Video );
+
+    mg->add( *m1 );
+    mg->add( *v2 );
+    mg->add( *v3 );
+
+    auto query = mg->searchMedia( "12", IMedia::Type::Unknown, nullptr );
+    ASSERT_EQ( nullptr, query );
+
+    query = mg->searchMedia( "otters", IMedia::Type::Audio );
+    ASSERT_EQ( 1u, query->count() );
+    auto media = query->all();
+    ASSERT_EQ( 1u, media.size() );
+    ASSERT_EQ( m1->id(), media[0]->id() );
+
+    media = mg->searchMedia( "otters", IMedia::Type::Unknown )->all();
+    ASSERT_EQ( 2u, media.size() );
+    ASSERT_EQ( v3->id(), media[0]->id() );
+    ASSERT_EQ( m1->id(), media[1]->id() );
+
+    media = mg->searchMedia( "boring", IMedia::Type::Audio )->all();
+    ASSERT_EQ( 0u, media.size() );
+
+    media = mg->searchMedia( "otter", IMedia::Type::Video )->all();
+    ASSERT_EQ( 1u, media.size() );
+    ASSERT_EQ( v3->id(), media[0]->id() );
+}
