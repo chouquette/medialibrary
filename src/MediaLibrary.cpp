@@ -1763,6 +1763,13 @@ void MediaLibrary::migrateModel23to24()
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
 
+    Media::createTriggers( dbConn, 24 );
+    Album::createTriggers( dbConn, 24 );
+    Artist::createTriggers( dbConn, 24 );
+    Thumbnail::createTriggers( dbConn );
+    Show::createTriggers( dbConn, 24 );
+    Folder::createTriggers( dbConn, 24 );
+
     m_settings.setDbModelVersion( 24 );
     t->commit();
 }

@@ -281,6 +281,7 @@ private:
         uint32_t m_nbPlaylists;
         int64_t m_folderId;
         ImportType m_importType;
+        int64_t m_groupId;
 
         // Auto fetched related properties
         mutable AlbumTrackPtr m_albumTrack;

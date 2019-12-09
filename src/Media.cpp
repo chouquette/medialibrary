@@ -44,6 +44,7 @@
 #include "ShowEpisode.h"
 #include "SubtitleTrack.h"
 #include "Playlist.h"
+#include "MediaGroup.h"
 #include "parser/Task.h"
 
 #include "database/SqliteTools.h"
@@ -83,12 +84,13 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     , m_nbPlaylists( row.load<unsigned int>( 14 ) )
     , m_folderId( row.load<decltype(m_folderId)>( 15 ) )
     , m_importType( row.load<decltype(m_importType)>( 16 ) )
+    , m_groupId( row.load<decltype(m_groupId)>( 17 ) )
 
     // End of DB fields extraction
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
-    assert( row.nbColumns() == 17 );
+    assert( row.nbColumns() == 18 );
 }
 
 Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
@@ -110,6 +112,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
     , m_nbPlaylists( 0 )
     , m_folderId( folderId )
     , m_importType( ImportType::Internal )
+    , m_groupId( 0 )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
@@ -132,6 +135,7 @@ Media::Media(MediaLibraryPtr ml, const std::string& fileName, ImportType importT
     , m_nbPlaylists( 0 )
     , m_folderId( 0 )
     , m_importType( importType )
+    , m_groupId( 0 )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
@@ -1134,6 +1138,12 @@ void Media::createTriggers( sqlite::Connection* connection, uint32_t modelVersio
             "CREATE INDEX IF NOT EXISTS media_folder_id_idx ON " +
                 Media::Table::Name + "(folder_id)" );
     }
+    if ( modelVersion >= 24 )
+    {
+        sqlite::Tools::executeRequest( connection,
+            "CREATE INDEX IF NOT EXISTS media_group_id_idx ON " +
+                Media::Table::Name + "(group_id)" );
+    }
 }
 
 std::string Media::schema( const std::string& tableName, uint32_t dbModel )
@@ -1172,13 +1182,23 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
     {
         req += "import_type UNSIGNED INTEGER NOT NULL,";
     }
+    if ( dbModel >= 24 )
+    {
+        req += "group_id UNSIGNED INTEGER,";
+    }
     if ( dbModel < 17 )
     {
           req += "FOREIGN KEY(thumbnail_id) REFERENCES " + Thumbnail::Table::Name
             + "(id_thumbnail),";
     }
+    if ( dbModel >= 24 )
+    {
+        req += "FOREIGN KEY(group_id) REFERENCES " + MediaGroup::Table::Name +
+                "(id_group),";
+    }
     req += "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
         + "(id_folder)"
+
     ")";
     return req;
 }

@@ -88,6 +88,7 @@ namespace
         "index_last_played_date",
         "index_media_presence",
         "media_folder_id_idx",
+        "media_group_id_idx",
         "media_last_usage_dates_idx",
         "media_types_idx",
         "movie_media_idx",
