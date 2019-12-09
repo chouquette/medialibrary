@@ -419,7 +419,30 @@ public:
      */
     virtual bool removeExternalMedia( MediaPtr media ) = 0;
 
+    /**
+     * @brief audioFiles Returns the media classified as Audio
+     * @param params Some query parameters.
+     * @return A query representing the results set
+     *
+     * All media accessors throughout the media library suppor the same sorting
+     * criteria, which are:
+     *   - Duration
+     *   - InsertionDate
+     *   - ReleaseDate
+     *   - PlayCount
+     *   - Filename
+     *   - LastModificationDate
+     *   - FileSize
+     * Default sorting parameter uses the media's title, in ascending order
+     */
     virtual Query<IMedia> audioFiles( const QueryParameters* params = nullptr ) const = 0;
+    /**
+     * @brief audioFiles Returns the media classified as Audio
+     * @param params Some query parameters.
+     * @return A query representing the results set
+     *
+     * \see{IMediaLibrary::audioFile} for the supported sorting criteria
+     */
     virtual Query<IMedia> videoFiles( const QueryParameters* params = nullptr ) const = 0;
     /**
      * @brief videoGroups Returns the media, grouped by their first characters
@@ -543,20 +566,13 @@ public:
      * @brief searchMedia, searchAudio, and searchVideo search for some media, based on a pattern.
      * @param pattern A 3 character or more pattern that will be matched against the media's title
      *                or filename if no title was set for this media.
-     * @param params Some query parameters. Valid sorting criteria are:
-     *               - Duration
-     *               - InsertionDate
-     *               - ReleaseDate
-     *               - PlayCount
-     *               - Filename
-     *               - LastModificationDate
-     *               - FileSize
-     *              Default sorting parameter uses the media's title.
-     *              Passing nullptr will default to default ascending sort
+     * @param params Some query parameters.
      *
      * Only media that were discovered by the medialibrary will be included.
      * For instance, media that are added explicitely, playlist items that
      * point to remote content, will *not* be included
+     *
+     * \see{IMediaLibrary::audioFile} for the supported sorting criteria
      */
     virtual Query<IMedia> searchMedia( const std::string& pattern,
                                        const QueryParameters* params = nullptr ) const = 0;
