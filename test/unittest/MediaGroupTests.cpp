@@ -73,12 +73,14 @@ TEST_F( MediaGroups, SubGroup )
 {
     auto name = std::string{ "group" };
     auto mg = MediaGroup::create( ml.get(), 0, name );
+    ASSERT_FALSE( mg->isSubgroup() );
 
     auto subname = std::string{ "subgroup" };
     auto subgroup = mg->createSubgroup( subname );
 
     ASSERT_NE( nullptr, subgroup );
     ASSERT_EQ( subname, subgroup->name() );
+    ASSERT_TRUE( subgroup->isSubgroup() );
     auto parent = subgroup->parent();
 
     ASSERT_NE( nullptr, parent );
@@ -153,4 +155,37 @@ TEST_F( MediaGroups, FetchOne )
     auto mg2 = ml->mediaGroup( mg->id() );
     ASSERT_NE( nullptr, mg2 );
     ASSERT_EQ( mg->id(), mg2->id() );
+}
+
+TEST_F( MediaGroups, Search )
+{
+    auto mg1 = MediaGroup::create( ml.get(), 0, "otter group" );
+    // Subgroups are included in search results
+    auto mg2 = mg1->createSubgroup( "sea otters group" );
+    auto mg3 = MediaGroup::create( ml.get(), 0, "weasels group" );
+
+    auto q = ml->searchMediaGroups( "12", nullptr );
+    ASSERT_EQ( nullptr, q );
+
+    QueryParameters params { SortingCriteria::Alpha, false };
+    q = ml->searchMediaGroups( "group", &params );
+    ASSERT_NE( nullptr, q );
+    ASSERT_EQ( 3u, q->count() );
+    auto groups = q->all();
+    ASSERT_EQ( 3u, groups.size() );
+    ASSERT_EQ( mg1->id(), groups[0]->id() );
+    ASSERT_EQ( mg2->id(), groups[1]->id() );
+    ASSERT_EQ( mg3->id(), groups[2]->id() );
+
+    params.desc = true;
+    groups = ml->searchMediaGroups( "group", &params )->all();
+    ASSERT_EQ( 3u, groups.size() );
+    ASSERT_EQ( mg3->id(), groups[0]->id() );
+    ASSERT_EQ( mg2->id(), groups[1]->id() );
+    ASSERT_EQ( mg1->id(), groups[2]->id() );
+
+    groups = ml->searchMediaGroups( "otter", nullptr )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( mg1->id(), groups[0]->id() );
+    ASSERT_EQ( mg2->id(), groups[1]->id() );
 }

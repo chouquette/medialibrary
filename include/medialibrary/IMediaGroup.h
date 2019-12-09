@@ -78,6 +78,7 @@ public:
      * - NbMedia
      */
     virtual Query<IMediaGroup> subgroups( const QueryParameters* params = nullptr ) const = 0;
+    virtual bool isSubgroup() const = 0;
     /**
      * @brief parent Returns this group's parent group, or nullptr if there are none
      */

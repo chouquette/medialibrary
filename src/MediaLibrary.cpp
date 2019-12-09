@@ -218,6 +218,7 @@ void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
     AudioTrack::createIndexes( dbConn );
     SubtitleTrack::createTriggers( dbConn );
     VideoTrack::createIndexes( dbConn );
+    MediaGroup::createTriggers( dbConn );
 }
 
 bool MediaLibrary::checkDatabaseIntegrity()
@@ -575,6 +576,14 @@ std::shared_ptr<IMediaGroup> MediaLibrary::mediaGroup( int64_t id ) const
 Query<IMediaGroup> MediaLibrary::mediaGroups( const QueryParameters* params ) const
 {
     return MediaGroup::listAll( this, params );
+}
+
+Query<IMediaGroup> MediaLibrary::searchMediaGroups( const std::string& pattern,
+                                                    const QueryParameters* params ) const
+{
+    if ( validateSearchPattern( pattern ) == false )
+        return {};
+    return MediaGroup::search( this, pattern, params );
 }
 
 bool MediaLibrary::isSupportedMediaExtension( const char* ext )

@@ -39,6 +39,15 @@ public:
         static const std::string PrimaryKeyColumn;
         static int64_t MediaGroup::*const PrimaryKey;
     };
+    struct FtsTable
+    {
+        static const std::string Name;
+    };
+    enum class Triggers : uint8_t
+    {
+        InsertFts,
+        DeleteFts
+    };
 
     MediaGroup( MediaLibraryPtr ml, sqlite::Row& row );
     MediaGroup( MediaLibraryPtr ml, int64_t parentId, std::string name );
@@ -50,6 +59,7 @@ public:
     virtual uint32_t nbUnknown() const override;
     virtual std::shared_ptr<IMediaGroup> createSubgroup( const std::string& name ) override;
     virtual Query<IMediaGroup> subgroups( const QueryParameters* params ) const override;
+    virtual bool isSubgroup() const override;
     virtual std::shared_ptr<IMediaGroup> parent() const override;
 
     static std::shared_ptr<MediaGroup> create(MediaLibraryPtr ml,
@@ -57,8 +67,12 @@ public:
     static std::shared_ptr<MediaGroup> fetchByName( MediaLibraryPtr ml,
                                             const std::string& name );
     static Query<IMediaGroup> listAll( MediaLibraryPtr ml, const QueryParameters* params );
+    static Query<IMediaGroup> search( MediaLibraryPtr ml, const std::string& pattern,
+                                      const QueryParameters* params );
     static void createTable( sqlite::Connection* connection );
+    static void createTriggers( sqlite::Connection* connection );
     static std::string schema( const std::string& name, uint32_t dbModel );
+    static std::string trigger( Triggers t, uint32_t dbModel );
 
 private:
     static std::string orderBy( const QueryParameters* params );

@@ -35,6 +35,8 @@ const std::string MediaGroup::Table::Name = "MediaGroup";
 const std::string MediaGroup::Table::PrimaryKeyColumn = "id_group";
 int64_t MediaGroup::*const MediaGroup::Table::PrimaryKey = &MediaGroup::m_id;
 
+const std::string MediaGroup::FtsTable::Name = "MediaGroupFts";
+
 MediaGroup::MediaGroup( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
     , m_id( row.extract<decltype(m_id)>() )
@@ -100,6 +102,11 @@ Query<IMediaGroup> MediaGroup::subgroups( const QueryParameters* params ) const
                                                 orderBy( params ), m_id );
 }
 
+bool MediaGroup::isSubgroup() const
+{
+    return m_parentId != 0;
+}
+
 std::shared_ptr<IMediaGroup> MediaGroup::parent() const
 {
     return fetch( m_ml, m_parentId );
@@ -149,15 +156,40 @@ Query<IMediaGroup> MediaGroup::listAll( MediaLibraryPtr ml,
     return make_query<MediaGroup, IMediaGroup>( ml, "mg.*", req, orderBy( params ) );
 }
 
+Query<IMediaGroup> MediaGroup::search( MediaLibraryPtr ml, const std::string& pattern,
+                                       const QueryParameters* params )
+{
+    const std::string req = "FROM " + Table::Name + " mg"
+            " WHERE id_group IN (SELECT rowid FROM " + FtsTable::Name +
+                " WHERE " + FtsTable::Name + " MATCH ?)";
+    return make_query<MediaGroup, IMediaGroup>( ml, "mg.*", req, orderBy( params ),
+                                                sqlite::Tools::sanitizePattern( pattern ) );
+}
+
 void MediaGroup::createTable(sqlite::Connection* dbConnection )
 {
     sqlite::Tools::executeRequest( dbConnection,
                                    schema( Table::Name, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   schema( FtsTable::Name, Settings::DbModelVersion ) );
+}
+
+void MediaGroup::createTriggers( sqlite::Connection* connection )
+{
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::InsertFts, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::DeleteFts, Settings::DbModelVersion ) );
 }
 
 std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
 {
     assert( dbModel >= 24 );
+    if ( name == FtsTable::Name )
+    {
+        return "CREATE VIRTUAL TABLE " + FtsTable::Name +
+                   " USING FTS3(name)";
+    }
     assert( name == Table::Name );
     return "CREATE TABLE " + Table::Name +
     "("
@@ -172,6 +204,31 @@ std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
             "(id_group) ON DELETE CASCADE,"
         "UNIQUE(parent_id, name) ON CONFLICT FAIL"
     ")";
+}
+
+std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
+{
+    assert( dbModel >= 24 );
+    switch ( t )
+    {
+        case Triggers::InsertFts:
+            return "CREATE TRIGGER media_group_insert_fts"
+                    " AFTER INSERT ON " + Table::Name +
+                    " BEGIN"
+                    " INSERT INTO " + FtsTable::Name + "(rowid, name)"
+                        " VALUES(new.rowid, new.name);"
+                    " END";
+        case Triggers::DeleteFts:
+            return "CREATE TRIGGER media_group_delete_fts"
+                   " AFTER DELETE ON " + Table::Name +
+                   " BEGIN"
+                   " DELETE FROM " + FtsTable::Name +
+                       " WHERE rowid = old.id_group;"
+                   " END";
+        default:
+            assert( !"Invalid trigger" );
+    }
+    return "<invalid request>";
 }
 
 std::string MediaGroup::orderBy(const QueryParameters* params)

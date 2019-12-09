@@ -480,6 +480,8 @@ public:
      * - NbMedia
      */
     virtual Query<IMediaGroup> mediaGroups( const QueryParameters* params ) const = 0;
+    virtual Query<IMediaGroup> searchMediaGroups( const std::string& pattern,
+                                                  const QueryParameters* params ) const = 0;
     virtual AlbumPtr album( int64_t id ) const = 0;
     virtual Query<IAlbum> albums( const QueryParameters* params = nullptr ) const = 0;
     virtual ShowPtr show( int64_t id ) const = 0;
