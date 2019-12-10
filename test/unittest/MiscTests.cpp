@@ -576,4 +576,19 @@ TEST_F( DbModel, Upgrade22to23 )
     ASSERT_FALSE( m2->isDiscoveredMedia() );
     ASSERT_TRUE( m2->isExternalMedia() );
     ASSERT_TRUE( m2->isStream() );
+
+    // Ensure we now have one playlist task, which was tagged as a media task before
+    uint32_t nbPlaylistTask;
+    {
+        sqlite::Statement stmt{
+            ml->getConn()->handle(),
+            "SELECT COUNT(*) FROM " + parser::Task::Table::Name +
+                " WHERE file_type = " + std::to_string(
+                        static_cast<std::underlying_type_t<IFile::Type>>( IFile::Type::Playlist ) )
+        };
+        stmt.execute();
+        auto row = stmt.row();
+        row >> nbPlaylistTask;
+    }
+    ASSERT_EQ( 1u, nbPlaylistTask );
 }

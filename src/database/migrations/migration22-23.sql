@@ -66,3 +66,15 @@ Thumbnail::schema( Thumbnail::Table::Name, 23 ),
 /* Ensure we also flush the linking table since the foreign key
  * ON DELETE CASCADE won't be processed during a DROP TABLE */
 "DELETE FROM " + Thumbnail::LinkingTable::Name,
+
+"UPDATE " + parser::Task::Table::Name + " AS t SET file_type = " +
+    std::to_string( static_cast<std::underlying_type_t<IFile::Type>>(
+        IFile::Type::Playlist ) ) +
+    " WHERE t.file_id IS NOT NULL"
+    " AND (SELECT playlist_id FROM " + File::Table::Name + " p"
+        " WHERE p.id_file = t.file_id) IS NOT NULL",
+
+"DELETE FROM " + parser::Task::Table::Name +
+    " WHERE file_id IS NULL AND type = " +
+    std::to_string( static_cast<std::underlying_type_t<parser::Task::Type>>(
+        parser::Task::Type::Creation ) ),
