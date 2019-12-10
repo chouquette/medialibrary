@@ -432,3 +432,21 @@ TEST_F( MediaGroups, FetchFromMedia )
     ASSERT_NE( nullptr, g );
     ASSERT_EQ( mg->id(), g->id() );
 }
+
+TEST_F( MediaGroups, Path )
+{
+    auto parent = ml->createMediaGroup( "parent" );
+    ASSERT_NE( nullptr, parent );
+    auto sub1 = parent->createSubgroup( "sub1" );
+    ASSERT_NE( nullptr, sub1 );
+    auto sub2 = sub1->createSubgroup( "sub2" );
+    ASSERT_NE( nullptr, sub2 );
+    auto sub3 = sub2->createSubgroup( "sub3" );
+    ASSERT_NE( nullptr, sub3 );
+
+    auto path = sub3->path();
+    ASSERT_EQ( "parent/sub1/sub2/sub3", path );
+
+    path = parent->path();
+    ASSERT_EQ( "parent", path );
+}

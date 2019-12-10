@@ -138,6 +138,12 @@ public:
      * @brief parent Returns this group's parent group, or nullptr if there are none
      */
     virtual std::shared_ptr<IMediaGroup> parent() const = 0;
+    /**
+     * @brief path Returns a virtual path to this group
+     *
+     * This consists of <parent group 1>/<parent group 2>/.../<group>
+     */
+    virtual std::string path() const = 0;
 };
 
 }

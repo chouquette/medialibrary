@@ -145,6 +145,22 @@ Query<IMedia> MediaGroup::searchMedia(const std::string& pattern, IMedia::Type m
     return Media::searchFromMediaGroup( m_ml, m_id, mediaType, pattern, params );
 }
 
+std::string MediaGroup::path() const
+{
+    auto res = name();
+    if ( isSubgroup() == false )
+        return res;
+    auto p = parent();
+    while ( p )
+    {
+        res = p->name() + '/' + res;
+        if ( p->isSubgroup() == false )
+            break;
+        p = p->parent();
+    }
+    return res;
+}
+
 std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
                                                 int64_t parentId, std::string name )
 {
