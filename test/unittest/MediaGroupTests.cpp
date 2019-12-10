@@ -450,3 +450,29 @@ TEST_F( MediaGroups, Path )
     path = parent->path();
     ASSERT_EQ( "parent", path );
 }
+
+TEST_F( MediaGroups, Rename )
+{
+    auto mg = ml->createMediaGroup( "group" );
+    ASSERT_NE( nullptr, mg );
+    auto m = ml->addMedia( "media.mkv", IMedia::Type::Video );
+    ASSERT_NE( nullptr, m );
+    mg->add( *m );
+
+    auto groupMedia = mg->media( IMedia::Type::Unknown, nullptr )->all();
+    ASSERT_EQ( 1u, groupMedia.size() );
+
+    std::string newName{ "better name" };
+    auto res = mg->rename( newName );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( newName, mg->name() );
+
+    Reload();
+
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_NE( nullptr, mg );
+    ASSERT_EQ( newName, mg->name() );
+
+    groupMedia = mg->media( IMedia::Type::Unknown, nullptr )->all();
+    ASSERT_EQ( 1u, groupMedia.size() );
+}

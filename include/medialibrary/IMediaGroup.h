@@ -144,6 +144,16 @@ public:
      * This consists of <parent group 1>/<parent group 2>/.../<group>
      */
     virtual std::string path() const = 0;
+    /**
+     * @brief rename Rename a group
+     * @param name The new name
+     * @return true if the rename was successfull, false otherwise
+     *
+     * This will not change the group content, however, it will prevent further
+     * media that matched the previous name to be automatically added to this
+     * group when they are added to the media library.
+     */
+    virtual bool rename( std::string name ) = 0;
 };
 
 }

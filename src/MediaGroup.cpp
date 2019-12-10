@@ -161,6 +161,18 @@ std::string MediaGroup::path() const
     return res;
 }
 
+bool MediaGroup::rename( std::string name )
+{
+    if ( name == m_name )
+        return true;
+    const std::string req = "UPDATE " + Table::Name +
+            " SET name = ? WHERE id_group = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, name, m_id ) == false )
+        return false;
+    m_name = std::move( name );
+    return true;
+}
+
 std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
                                                 int64_t parentId, std::string name )
 {

@@ -74,6 +74,7 @@ public:
                                        IMedia::Type mediaType,
                                        const QueryParameters* params = nullptr ) override;
     virtual std::string path() const override;
+    virtual bool rename( std::string name ) override;
 
     static std::shared_ptr<MediaGroup> create(MediaLibraryPtr ml,
                                                int64_t parentId, std::string name );
