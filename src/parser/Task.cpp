@@ -495,7 +495,7 @@ bool Task::resetParsing( MediaLibraryPtr ml )
 
 std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
 {
-    static const std::string req = "SELECT * FROM " + Task::Table::Name + " t"
+    static const std::string req = "SELECT t.* FROM " + Task::Table::Name + " t"
         " LEFT JOIN " + File::Table::Name + " f ON f.id_file = t.file_id"
         " LEFT JOIN " + Folder::Table::Name + " fol ON f.folder_id = fol.id_folder"
         " LEFT JOIN " + Device::Table::Name + " d ON d.id_device = fol.device_id"
