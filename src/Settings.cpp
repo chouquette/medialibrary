@@ -48,8 +48,7 @@ bool Settings::load()
     if ( row == nullptr )
     {
         if ( sqlite::Tools::executeInsert( m_ml->getConn(),
-                "INSERT INTO Settings VALUES(?, ?, ?)",
-                DbModelVersion, 6, 1 ) == false )
+                "INSERT INTO Settings VALUES(?)", DbModelVersion ) == false )
         {
             return false;
         }
@@ -79,24 +78,10 @@ bool Settings::setDbModelVersion( uint32_t dbModelVersion )
     return true;
 }
 
-bool Settings::setVideoGroupPrefixLength( uint32_t prefixLength )
-{
-    const std::string req = "UPDATE Settings SET video_groups_prefix_length = ?";
-    return sqlite::Tools::executeUpdate( m_ml->getConn(), req, prefixLength );
-}
-
-bool Settings::setVideoGroupMinimumMediaCount( uint32_t nbMedia )
-{
-    const std::string req = "UPDATE Settings SET video_groups_minimum_media_count = ?";
-    return sqlite::Tools::executeUpdate( m_ml->getConn(), req, nbMedia );
-}
-
 void Settings::createTable( sqlite::Connection* dbConn )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS Settings("
-                "db_model_version UNSIGNED INTEGER NOT NULL,"
-                "video_groups_prefix_length UNSIGNED INTEGER NOT NULL,"
-                "video_groups_minimum_media_count UNSIGNED INTEGER NOT NULL"
+                "db_model_version UNSIGNED INTEGER NOT NULL"
             ")";
     sqlite::Tools::executeRequest( dbConn, req );
 }

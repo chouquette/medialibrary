@@ -1748,6 +1748,10 @@ void MediaLibrary::migrateModel23to24()
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
 
+    /* Recreate the settings table to remove the 2 extra VideoGroups columns */
+    Settings::createTable( dbConn );
+    m_settings.load();
+
     Media::createTriggers( dbConn, 24 );
     Album::createTriggers( dbConn, 24 );
     Artist::createTriggers( dbConn, 24 );

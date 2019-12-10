@@ -47,8 +47,6 @@ public:
      */
     uint32_t dbModelVersion() const;
     bool setDbModelVersion( uint32_t dbModelVersion );
-    bool setVideoGroupPrefixLength( uint32_t prefixLength );
-    bool setVideoGroupMinimumMediaCount( uint32_t nbMedia );
 
     static void createTable( sqlite::Connection* dbConn );
 
