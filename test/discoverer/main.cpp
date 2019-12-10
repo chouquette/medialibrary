@@ -70,6 +70,9 @@ private:
     virtual void onGenresAdded(std::vector<medialibrary::GenrePtr> ) override {}
     virtual void onGenresModified(std::vector<int64_t> ) override {}
     virtual void onGenresDeleted(std::vector<int64_t> ) override {}
+    virtual void onMediaGroupAdded( std::vector<medialibrary::MediaGroupPtr> ) override {}
+    virtual void onMediaGroupModified( std::vector<int64_t> ) override {}
+    virtual void onMediaGroupDeleted( std::vector<int64_t> ) override {}
     virtual void onDiscoveryStarted( const std::string& ) override
     {
         {

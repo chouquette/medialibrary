@@ -133,6 +133,21 @@ void ModificationNotifier::notifyGenreRemoval( int64_t genreId )
     notifyRemoval( genreId, m_genres );
 }
 
+void ModificationNotifier::notifyMediaGroupCreation( MediaGroupPtr mediaGroup )
+{
+    notifyCreation( std::move( mediaGroup ), m_mediaGroups );
+}
+
+void ModificationNotifier::notifyMediaGroupModification( int64_t mediaGroupId )
+{
+    notifyModification( mediaGroupId, m_mediaGroups );
+}
+
+void ModificationNotifier::notifyMediaGroupRemoval( int64_t mediaGroupId )
+{
+    notifyRemoval( mediaGroupId, m_mediaGroups );
+}
+
 void ModificationNotifier::notifyThumbnailRemoval( int64_t thumbnailId )
 {
     notifyRemoval( thumbnailId, m_thumbnails );

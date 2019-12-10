@@ -28,6 +28,7 @@
 #include "Media.h"
 #include "database/SqliteQuery.h"
 #include "medialibrary/IMediaLibrary.h"
+#include "utils/ModificationsNotifier.h"
 
 namespace medialibrary
 {
@@ -170,6 +171,9 @@ std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
     }
     if ( t != nullptr )
         t->commit();
+    auto notifier = ml->getNotifier();
+    if ( notifier != nullptr )
+        notifier->notifyMediaGroupCreation( self );
     return self;
 }
 

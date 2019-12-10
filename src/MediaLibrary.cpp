@@ -298,6 +298,13 @@ void MediaLibrary::registerEntityHooks()
         if ( reason == sqlite::Connection::HookReason::Delete )
             m_modificationNotifier->notifyThumbnailRemoval( rowId );
     });
+    m_dbConnection->registerUpdateHook( MediaGroup::Table::Name,
+                                        [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
+        if ( reason == sqlite::Connection::HookReason::Update )
+            m_modificationNotifier->notifyMediaGroupModification( rowId );
+        else if ( reason == sqlite::Connection::HookReason::Delete )
+            m_modificationNotifier->notifyMediaGroupRemoval( rowId );
+    });
 }
 
 bool MediaLibrary::validateSearchPattern( const std::string& pattern )

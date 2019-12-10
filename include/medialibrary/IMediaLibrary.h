@@ -185,6 +185,13 @@ public:
     virtual void onGenresDeleted( std::vector<int64_t> genreIds ) = 0;
 
     /**
+     * MediaGroup notification apply to all groups, including subgroups.
+     */
+    virtual void onMediaGroupAdded( std::vector<MediaGroupPtr> mediaGroups ) = 0;
+    virtual void onMediaGroupModified( std::vector<int64_t> mediaGroupsIds ) = 0;
+    virtual void onMediaGroupDeleted( std::vector<int64_t> mediaGroupsIds ) = 0;
+
+    /**
      * @brief onDiscoveryStarted This callback will be invoked when a folder queued for discovery
      * (by calling IMediaLibrary::discover()) gets processed.
      * @param entryPoint The entrypoint being discovered

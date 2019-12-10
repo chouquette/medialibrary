@@ -62,6 +62,10 @@ public:
     void notifyGenreModification( int64_t genre );
     void notifyGenreRemoval( int64_t genreId );
 
+    void notifyMediaGroupCreation( MediaGroupPtr mediaGroup );
+    void notifyMediaGroupModification( int64_t mediaGroupId );
+    void notifyMediaGroupRemoval( int64_t mediaGroupId );
+
     void notifyThumbnailRemoval( int64_t thumbnailId );
 
     /**
@@ -184,6 +188,7 @@ private:
     Queue<IAlbum> m_albums;
     Queue<IPlaylist> m_playlists;
     Queue<IGenre> m_genres;
+    Queue<IMediaGroup> m_mediaGroups;
     Queue<void> m_thumbnails;
 
     // Notifier thread
