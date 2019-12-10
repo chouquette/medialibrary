@@ -236,13 +236,6 @@ class Media : public IMedia,
                                                  const std::string& pattern,
                                                  Type type, int64_t folderId,
                                                  const QueryParameters* params );
-        static Query<IMedia> fromVideoGroup( MediaLibraryPtr ml,
-                                             const std::string& name,
-                                             const QueryParameters* params );
-        static Query<IMedia> searchFromVideoGroup( MediaLibraryPtr ml,
-                                                   const std::string& groupName,
-                                                   const std::string& pattern,
-                                                   const QueryParameters* params );
         static Query<IMedia> fromMediaGroup( MediaLibraryPtr ml,
                                              int64_t groupId, Type type,
                                              const QueryParameters* params );

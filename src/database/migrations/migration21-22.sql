@@ -35,8 +35,11 @@
             IMedia::Type::Video ) ) +
     " AND folder_id = f.id_folder)",
 
+/* cf migration 20 -> 21 for the reasoning about videogroup being commented out */
+/*
 "DROP VIEW " + VideoGroup::Table::Name,
 VideoGroup::schema( VideoGroup::Table::Name, 22 ),
+*/
 
 "ALTER TABLE Settings ADD COLUMN video_groups_minimum_media_count UNSIGNED INTEGER NOT NULL DEFAULT 1",
 

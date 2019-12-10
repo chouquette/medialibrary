@@ -43,7 +43,6 @@
 #include "Folder.h"
 #include "Genre.h"
 #include "Media.h"
-#include "VideoGroup.h"
 #include "MediaLibrary.h"
 #include "Label.h"
 #include "logging/Logger.h"
@@ -172,7 +171,6 @@ bool MediaLibrary::createAllTables( uint32_t dbModelVersion )
     Folder::createTable( dbConn );
     Thumbnail::createTable( dbConn );
     Media::createTable( dbConn );
-    VideoGroup::createView( dbConn );
     File::createTable( dbConn );
     Label::createTable( dbConn );
     Playlist::createTable( dbConn );
@@ -548,26 +546,6 @@ Query<IMedia> MediaLibrary::audioFiles( const QueryParameters* params ) const
 Query<IMedia> MediaLibrary::videoFiles( const QueryParameters* params ) const
 {
     return Media::listAll( this, IMedia::Type::Video, params );
-}
-
-Query<IVideoGroup> MediaLibrary::videoGroups( const QueryParameters* params ) const
-{
-    return VideoGroup::listAll( this, params );
-}
-
-VideoGroupPtr MediaLibrary::videoGroup( const std::string& name ) const
-{
-    return VideoGroup::fromName( this, name );
-}
-
-void MediaLibrary::setVideoGroupsPrefixLength( uint32_t prefixLength )
-{
-    m_settings.setVideoGroupPrefixLength( prefixLength );
-}
-
-void MediaLibrary::setVideoGroupsAllowSingleVideo( bool enable )
-{
-    m_settings.setVideoGroupMinimumMediaCount( enable == true ? 1 : 2 );
 }
 
 MediaGroupPtr MediaLibrary::createMediaGroup( std::string name )

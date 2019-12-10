@@ -83,10 +83,6 @@ public:
     virtual bool removeExternalMedia( MediaPtr media ) override;
     virtual Query<IMedia> audioFiles( const QueryParameters* params ) const override;
     virtual Query<IMedia> videoFiles( const QueryParameters* params ) const override;
-    virtual Query<IVideoGroup> videoGroups( const QueryParameters* params = nullptr ) const override;
-    virtual VideoGroupPtr videoGroup( const std::string& name ) const override;
-    virtual void setVideoGroupsPrefixLength( uint32_t prefixLength ) override;
-    virtual void setVideoGroupsAllowSingleVideo( bool enable ) override;
 
     virtual MediaGroupPtr createMediaGroup( std::string name ) override;
     virtual std::shared_ptr<IMediaGroup> mediaGroup( int64_t id ) const override;

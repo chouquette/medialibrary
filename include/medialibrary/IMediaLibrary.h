@@ -452,42 +452,6 @@ public:
      */
     virtual Query<IMedia> videoFiles( const QueryParameters* params = nullptr ) const = 0;
     /**
-     * @brief videoGroups Returns the media, grouped by their first characters
-     * @param params Some query parameter. Only Alpha & NbMedia/NbVideo sorting criteria
-     *               are supported. The default is Alpha
-     * @return A query object, or nullptr in case of an error.
-     */
-    virtual Query<IVideoGroup> videoGroups( const QueryParameters* params = nullptr ) const = 0;
-    /**
-     * @brief videoGroup Return the representation of a specific video group
-     * @param name The group name
-     * @return The associated IVideoGroup, or nullptr if that group doesn't exist
-     *
-     * The provided name must be exactly the same as the one returned
-     * by IVideoGroup::name()
-     */
-    virtual VideoGroupPtr videoGroup( const std::string& name ) const = 0;
-    /**
-     * @brief setVideoGroupsPrefixLength Sets the size of the common prefix for
-     *                                   a video group
-     *
-     * The provided value is the size of each group. For instance, if set to 4
-     * "TestGroup" and "TestSomething" will be part of the same group, but if set
-     * to 5, they will not.
-     * This can be called at any point during the program lifetime.
-     * The value will persist in database across multiple executions
-     * The default value is 6
-     */
-    virtual void setVideoGroupsPrefixLength( uint32_t prefixLength ) = 0;
-    /**
-     * @brief setAllowSingleVideoGroups Allow groups with a single video.
-     *
-     * The default is true. If this is set to false, only groups with at least
-     * 2 videos will be returned
-     * The vallue will persist in database across multiple executions.
-     */
-    virtual void setVideoGroupsAllowSingleVideo( bool enable ) = 0;
-    /**
      * @brief createMediaGroup Creates a media group
      * @param name The group name
      * @return The new group instance, or nullptr in case of error

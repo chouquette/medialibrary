@@ -142,10 +142,6 @@ namespace
         "VideoTrack",
     };
 
-    const std::vector<const char*> expectedViews{
-        "VideoGroup",
-    };
-
     bool checkAlphaOrderedVector( const std::vector<const char*> in )
     {
         for ( auto i = 0u; i < in.size() - 1; i++ )
@@ -326,25 +322,6 @@ public:
         ASSERT_EQ( stmt.row(), nullptr );
     }
 
-    void CheckViews( std::vector<const char*> expected )
-    {
-        auto res = checkAlphaOrderedVector( expected );
-        ASSERT_TRUE( res );
-
-        medialibrary::sqlite::Statement stmt{ ml->getConn()->handle(),
-                "SELECT name FROM sqlite_master WHERE type='view'"
-        };
-        stmt.execute();
-        for ( const auto& expectedName : expected )
-        {
-            auto row = stmt.row();
-            ASSERT_EQ( 1u, row.nbColumns() );
-            auto name = row.extract<std::string>();
-            ASSERT_EQ( expectedName, name );
-        }
-        ASSERT_EQ( stmt.row(), nullptr );
-    }
-
     virtual void TearDown() override
     {
         medialibrary::sqlite::Connection::Handle conn;
@@ -371,7 +348,6 @@ public:
         CheckTriggers( expectedTriggers );
         CheckIndexes( expectedIndexes );
         CheckTables( expectedTables );
-        CheckViews( expectedViews );
     }
 };
 
@@ -383,7 +359,6 @@ TEST_F( DbModel, NbTriggers )
     CheckTriggers( expectedTriggers );
     CheckIndexes( expectedIndexes );
     CheckTables( expectedTables );
-    CheckViews( expectedViews );
 }
 
 TEST_F( DbModel, Upgrade3to5 )
@@ -405,7 +380,6 @@ TEST_F( DbModel, Upgrade4to5 )
     ASSERT_NE( files.size(), 0u );
 
     CheckTables( expectedTables );
-    CheckViews( expectedViews );
 }
 
 TEST_F( DbModel, Upgrade7to8 )
