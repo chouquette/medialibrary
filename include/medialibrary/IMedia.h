@@ -344,6 +344,8 @@ public:
     /// will occur.
     ///
     virtual bool removeFromGroup() = 0;
+
+    virtual MediaGroupPtr group() const = 0;
 };
 
 }

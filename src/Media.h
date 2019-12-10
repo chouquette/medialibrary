@@ -187,6 +187,9 @@ class Media : public IMedia,
         virtual bool addToGroup( int64_t groupId ) override;
         virtual bool removeFromGroup() override;
 
+        virtual MediaGroupPtr group() const override;
+        int64_t groupId() const;
+
         void setReleaseDate( unsigned int date );
         int64_t deviceId() const; // Used for unit tests purposes only
         void setDeviceId( int64_t deviceId );

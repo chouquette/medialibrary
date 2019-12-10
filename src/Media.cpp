@@ -580,6 +580,18 @@ bool Media::removeFromGroup()
     return addToGroup( 0 );
 }
 
+MediaGroupPtr Media::group() const
+{
+    if ( m_groupId == 0 )
+        return nullptr;
+    return MediaGroup::fetch( m_ml, m_groupId );
+}
+
+int64_t Media::groupId() const
+{
+    return m_groupId;
+}
+
 void Media::setReleaseDate( unsigned int date )
 {
     if ( m_releaseDate == date )

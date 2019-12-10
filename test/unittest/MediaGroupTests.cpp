@@ -415,3 +415,20 @@ TEST_F( MediaGroups, SortByNbMedia )
     ASSERT_EQ( mg1->id(), groups[0]->id() );
     ASSERT_EQ( mg2->id(), groups[1]->id() );
 }
+
+TEST_F( MediaGroups, FetchFromMedia )
+{
+    auto mg = ml->createMediaGroup( "group" );
+    auto m = std::static_pointer_cast<Media>(
+                ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    ASSERT_EQ( 0, m->groupId() );
+    auto g = m->group();
+    ASSERT_EQ( nullptr, g );
+
+    auto res = m->addToGroup( *mg );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( mg->id(), m->groupId() );
+    g = m->group();
+    ASSERT_NE( nullptr, g );
+    ASSERT_EQ( mg->id(), g->id() );
+}
