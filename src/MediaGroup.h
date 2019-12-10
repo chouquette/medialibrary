@@ -33,6 +33,7 @@ namespace medialibrary
 class MediaGroup : public IMediaGroup, public DatabaseHelpers<MediaGroup>
 {
 public:
+    static constexpr auto AutomaticGroupPrefixSize = 6u;
     struct Table
     {
         static const std::string Name;

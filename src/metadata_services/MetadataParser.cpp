@@ -51,6 +51,7 @@
 #include "AudioTrack.h"
 #include "SubtitleTrack.h"
 #include "parser/Task.h"
+#include "MediaGroup.h"
 
 #include <cstdlib>
 #include <algorithm>
@@ -148,6 +149,7 @@ Status MetadataAnalyzer::run( IItem& item )
         auto status = createFileAndMedia( item );
         if ( status != Status::Success )
             return status;
+        assignMediaToGroup( item );
     }
     else if ( item.media() == nullptr )
     {
@@ -994,6 +996,25 @@ std::shared_ptr<Show> MetadataAnalyzer::findShow( const std::string& showName ) 
         return nullptr;
     //FIXME: Discriminate amongst shows
     return shows[0];
+}
+
+bool MetadataAnalyzer::assignMediaToGroup( IItem &item )
+{
+    assert( item.media() != nullptr );
+    auto m = static_cast<Media*>( item.media().get() );
+    if ( m->type() != IMedia::Type::Video )
+        return true;
+    assert( m->groupId() == 0 );
+    auto prefix = m->title().substr( 0, MediaGroup::AutomaticGroupPrefixSize );
+    auto group = MediaGroup::fetchByName( m_ml, prefix );
+    if ( group == nullptr )
+    {
+        group = std::static_pointer_cast<MediaGroup>(
+                    m_ml->createMediaGroup( prefix ) );
+        if ( group == nullptr )
+            return false;
+    }
+    return group->add( *m );
 }
 
 /* Album handling */

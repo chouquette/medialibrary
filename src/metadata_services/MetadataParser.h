@@ -86,6 +86,7 @@ protected:
     std::shared_ptr<Genre> handleGenre( IItem& item ) const;
     std::shared_ptr<Thumbnail> findAlbumArtwork( IItem& item );
     std::shared_ptr<Show> findShow( const std::string& showName ) const;
+    bool assignMediaToGroup( IItem& item );
 
 private:
     static int toInt( IItem& item, IItem::Metadata meta );

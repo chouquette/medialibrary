@@ -25,6 +25,14 @@
                 "codec": "text",
                 "encoding": "UTF-8"
             }]
-        }]
+        }],
+        "mediaGroups": [
+            {
+                "name": "mrmssm",
+                "nbVideo": 1,
+                "nbAudio": 0,
+                "nbUnknown": 0
+            }
+        ]
     }
 }
