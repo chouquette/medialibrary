@@ -55,18 +55,19 @@ int64_t parser::Task::* const Task::Table::PrimaryKey = &parser::Task::m_id;
 
 Task::Task( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
+    , m_id( row.extract<decltype(m_id)>() )
+    , m_step( row.extract<decltype(m_step)>() )
+    , m_retryCount( row.extract<decltype(m_retryCount)>() )
+    , m_type( row.extract<decltype(m_type)>() )
+    , m_mrl( row.extract<decltype(m_mrl)>() )
+    , m_fileType( row.extract<decltype(m_fileType)>() )
+    , m_fileId( row.extract<decltype(m_fileId)>() )
+    , m_parentFolderId( row.extract<decltype(m_parentFolderId)>() )
+    , m_linkToId( row.extract<decltype(m_linkToId)>() )
+    , m_linkToType( row.extract<decltype(m_linkToType)>() )
+    , m_linkExtra( row.extract<decltype(m_linkExtra)>() )
 {
-    row >> m_id
-        >> m_step
-        >> m_retryCount
-        >> m_type
-        >> m_mrl
-        >> m_fileType
-        >> m_fileId
-        >> m_parentFolderId
-        >> m_linkToId
-        >> m_linkToType
-        >> m_linkExtra;
+    assert( row.hasRemainingColumns() == false );
 }
 
 Task::Task( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> fileFs,
