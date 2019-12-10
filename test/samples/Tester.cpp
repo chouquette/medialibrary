@@ -35,6 +35,7 @@
 #include "medialibrary/filesystem/IDirectory.h"
 #include "medialibrary/IShow.h"
 #include "medialibrary/IShowEpisode.h"
+#include "medialibrary/IMediaGroup.h"
 
 #include <algorithm>
 
@@ -242,6 +243,10 @@ void Tests::runChecks(const rapidjson::Document& doc)
     if ( expected.HasMember( "shows" ) == true )
     {
         checkShows( expected["shows"], m_ml->shows( nullptr )->all() );
+    }
+    if ( expected.HasMember( "mediaGroups" ) == true )
+    {
+        checkMediaGroups( expected["mediaGroups"], m_ml->mediaGroups( nullptr )->all() );
     }
 }
 
@@ -665,6 +670,35 @@ void Tests::checkShowEpisodes( const rapidjson::Value& expectedEpisodes,
         if ( expectedEpisode.HasMember( "title" ) == true )
         {
             ASSERT_EQ( expectedEpisode["title"].GetString(), episode->title() );
+        }
+    }
+}
+
+void Tests::checkMediaGroups( const rapidjson::Value &expectedMediaGroups,
+                              std::vector<MediaGroupPtr> mediaGroups)
+{
+    ASSERT_EQ( expectedMediaGroups.Size(), mediaGroups.size() );
+    for ( auto i = 0u; i < expectedMediaGroups.Size(); ++i )
+    {
+        auto& expectedGroup = expectedMediaGroups[i];
+        ASSERT_TRUE( expectedGroup.HasMember( "name" ) );
+        auto it = std::find_if( cbegin( mediaGroups ), cend( mediaGroups ),
+                                [&expectedGroup]( const MediaGroupPtr grp ) {
+            return grp->name() == expectedGroup["name"].GetString();
+        });
+        ASSERT_NE( cend( mediaGroups ), it );
+        auto group = *it;
+        if ( expectedGroup.HasMember( "nbAudio" ) )
+        {
+            ASSERT_EQ( expectedGroup["nbAudio"].GetUint(), group->nbAudio() );
+        }
+        if ( expectedGroup.HasMember( "nbVideo" ) )
+        {
+            ASSERT_EQ( expectedGroup["nbVideo"].GetUint(), group->nbVideo() );
+        }
+        if ( expectedGroup.HasMember( "nbUnknown" ) )
+        {
+            ASSERT_EQ( expectedGroup["nbUnknown"].GetUint(), group->nbUnknown() );
         }
     }
 }

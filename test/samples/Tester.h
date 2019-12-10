@@ -124,6 +124,8 @@ protected:
     void checkAlbumTracks(const IAlbum* album, const std::vector<MediaPtr>& tracks, const rapidjson::Value& expectedTracks , bool& found) const;
     void checkShows( const rapidjson::Value& expectedShows, std::vector<ShowPtr> shows );
     void checkShowEpisodes( const rapidjson::Value& expectedEpisodes, std::vector<MediaPtr> episodes );
+    void checkMediaGroups( const rapidjson::Value& expectedMediaGroups,
+                           std::vector<MediaGroupPtr> mediaGroups );
 };
 
 class ReducedTests : public Tests
