@@ -32,6 +32,7 @@
 #include "utils/ModificationsNotifier.h"
 #include "utils/Filename.h"
 #include "utils/Directory.h"
+#include "utils/Url.h"
 #include "database/SqliteQuery.h"
 #include "medialibrary/filesystem/Errors.h"
 
@@ -604,6 +605,9 @@ Playlist::backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel )
                     continue;
                 mrl = device->mountpoint() + folderPath + mrl;
             }
+            // account for potential leftovers & badly encoded mrls
+            mrl = utils::url::decode( mrl );
+            mrl = utils::url::encode( mrl );
             pl.mrls.push_back( std::move( mrl ) );
         }
         if ( pl.mrls.empty() == true )
