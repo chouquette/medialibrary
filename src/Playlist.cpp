@@ -643,7 +643,8 @@ bool Playlist::writeBackup( const std::string& name,
     constexpr auto ChunkSize = 4096u;
     while ( i < length )
     {
-        auto nmemb = length <= ChunkSize ? length : ChunkSize;
+        auto remaining = length - i;
+        auto nmemb = remaining <= ChunkSize ? remaining : ChunkSize;
         auto res = fwrite( buff + i, sizeof( *buff ), nmemb, file.get() );
         i += res;
     }
