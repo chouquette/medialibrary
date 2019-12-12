@@ -79,6 +79,26 @@ TEST_F( Albums, AddTrack )
     ASSERT_EQ( tracks[0]->albumTrack()->trackNumber(), track->trackNumber() );
 }
 
+TEST_F( Albums, RemoveTracks )
+{
+    auto a = ml->createAlbum( "albumtag" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "track.mp3", IMedia::Type::Audio ) );
+    auto track = a->addTrack( m, 10, 0, 0, nullptr );
+    m->save();
+    ASSERT_NE( track, nullptr );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
+    auto track2 = a->addTrack( m2, 11, 0, 0, nullptr );
+    m2->save();
+
+    auto tracks = a->tracks( nullptr )->all();
+    ASSERT_EQ( tracks.size(), 2u );
+
+    auto res = a->removeTrack( *m2, *track2 );
+    ASSERT_TRUE( res );
+    res = a->removeTrack( *m, *track );
+    ASSERT_TRUE( res );
+}
+
 TEST_F( Albums, NbTracks )
 {
     auto a = ml->createAlbum( "albumtag" );
