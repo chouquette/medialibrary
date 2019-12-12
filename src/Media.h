@@ -110,6 +110,7 @@ class Media : public IMedia,
 
         virtual const std::string& title() const override;
         virtual bool setTitle( const std::string& title ) override;
+        bool setTitle( const std::string& title, bool forced );
         ///
         /// \brief setTitleBuffered Mark the media as changed but doesn't save the change in DB
         /// Querying the title after this method will return the new title, but it won't appear in DB

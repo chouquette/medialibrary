@@ -1016,6 +1016,11 @@ const std::string& Media::title() const
 
 bool Media::setTitle( const std::string& title )
 {
+    return setTitle( title, true );
+}
+
+bool Media::setTitle( const std::string& title, bool )
+{
     static const std::string req = "UPDATE " + Media::Table::Name + " SET title = ? WHERE id_media = ?";
     if ( m_title == title )
         return true;
