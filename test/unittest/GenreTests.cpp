@@ -177,6 +177,7 @@ TEST_F( Genres, SortTracks )
                     ml->addMedia( "track" + std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
         auto t = a->addTrack( m, i, 1, 0, g.get() );
         m->setDuration( i );
+        m->setReleaseDate( 10 - i );
         m->save();
     }
     QueryParameters params { SortingCriteria::Duration, false };
@@ -190,6 +191,30 @@ TEST_F( Genres, SortTracks )
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( 1u, tracks[1]->albumTrack()->trackNumber() );
     ASSERT_EQ( 2u, tracks[0]->albumTrack()->trackNumber() );
+
+    params.sort = SortingCriteria::ReleaseDate;
+    tracks = g->tracks( IGenre::TracksIncluded::All, &params )->all();
+    ASSERT_EQ( 2u, tracks.size() );
+    ASSERT_EQ( 9u, tracks[0]->releaseDate() );
+    ASSERT_EQ( 8u, tracks[1]->releaseDate() );
+
+    params.desc = false;
+    tracks = g->tracks( IGenre::TracksIncluded::All, &params )->all();
+    ASSERT_EQ( 2u, tracks.size() );
+    ASSERT_EQ( 8u, tracks[0]->releaseDate() );
+    ASSERT_EQ( 9u, tracks[1]->releaseDate() );
+
+    params.sort = SortingCriteria::Alpha;
+    tracks = g->tracks( IGenre::TracksIncluded::All, &params )->all();
+    ASSERT_EQ( 2u, tracks.size() );
+    ASSERT_EQ( "track1.mp3", tracks[0]->title() );
+    ASSERT_EQ( "track2.mp3", tracks[1]->title() );
+
+    params.desc = true;
+    tracks = g->tracks( IGenre::TracksIncluded::All, &params )->all();
+    ASSERT_EQ( 2u, tracks.size() );
+    ASSERT_EQ( "track2.mp3", tracks[0]->title() );
+    ASSERT_EQ( "track1.mp3", tracks[1]->title() );
 }
 
 TEST_F( Genres, Sort )
