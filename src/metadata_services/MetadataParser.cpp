@@ -339,7 +339,7 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
             }
             auto title = subitem.meta( IItem::Metadata::Title );
             if ( title.empty() == false )
-                externalMedia->setTitle( title );
+                externalMedia->setTitle( title, false );
         }
         try
         {

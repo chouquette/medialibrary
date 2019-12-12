@@ -562,10 +562,10 @@ TEST_F( Medias, SortByFileSize )
 TEST_F( Medias, SortByFilename )
 {
     auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "zzzzz.mp3", Media::Type::Video ) );
-    m1->setTitle( "aaaaa" );
+    m1->setTitle( "aaaaa", false );
 
     auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "aaaaa.mp3", Media::Type::Video ) );
-    m2->setTitle( "zzzzz" );
+    m2->setTitle( "zzzzz", false );
 
     QueryParameters params { SortingCriteria::Filename, false };
     auto media = ml->videoFiles( &params )->all();
@@ -898,9 +898,9 @@ TEST_F( Medias, CreateStream )
 TEST_F( Medias, SearchExternal )
 {
     auto m1 = std::static_pointer_cast<Media>( ml->addExternalMedia( "localfile.mkv" ) );
-    m1->setTitle( "local otter" );
+    m1->setTitle( "local otter", false );
     auto m2 = std::static_pointer_cast<Media>( ml->addStream( "http://remote.file/media.asf" ) );
-    m2->setTitle( "remote otter" );
+    m2->setTitle( "remote otter", false );
 
     auto media = ml->searchMedia( "otter", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );

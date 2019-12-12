@@ -109,7 +109,6 @@ class Media : public IMedia,
         void setSubType( SubType subType );
 
         virtual const std::string& title() const override;
-        virtual bool setTitle( const std::string& title ) override;
         bool setTitle( const std::string& title, bool forced );
         ///
         /// \brief setTitleBuffered Mark the media as changed but doesn't save the change in DB
@@ -268,6 +267,13 @@ private:
         static std::shared_ptr<Media> createExternalMedia( MediaLibraryPtr ml,
                                                            const std::string& mrl,
                                                            ImportType importType );
+
+        /*
+         * Marked as private so that it can only be used through IMedia interface
+         * Internally, we have to use the setTitle( title, force ) overload
+        */
+        virtual bool setTitle( const std::string& title ) override;
+
 
 private:
         MediaLibraryPtr m_ml;
