@@ -778,3 +778,68 @@ TEST_F( Albums, CheckDbModel )
     auto res = Album::checkDbModel( ml.get() );
     ASSERT_TRUE( res );
 }
+
+TEST_F ( Albums, SortByDuration )
+{
+    auto shortAlb = ml->createAlbum( "Short" );
+    auto short1 = std::static_pointer_cast<Media>(
+                ml->addMedia( "short1.mp3", IMedia::Type::Audio ) );
+    // The media duration needs to be known when inserting an album track
+    short1->setDuration( 123 );
+    short1->save();
+    shortAlb->addTrack( short1, 1, 0, 0, nullptr );
+    short1->save();
+    auto short2 = std::static_pointer_cast<Media>(
+                ml->addMedia( "short2.mp3", IMedia::Type::Audio ) );
+    short2->setDuration( 456 );
+    short2->save();
+    shortAlb->addTrack( short2, 2, 0, 0, nullptr );
+    short2->save();
+
+    auto longAlb = ml->createAlbum( "Long" );
+    auto long1 = std::static_pointer_cast<Media>(
+                ml->addMedia( "long1.mp3", IMedia::Type::Audio ) );
+    long1->setDuration( 999999 );
+    long1->save();
+    longAlb->addTrack( long1, 1, 0, 0, nullptr );
+    long1->save();
+    auto long2 = std::static_pointer_cast<Media>(
+                ml->addMedia( "long2.mp3", IMedia::Type::Audio ) );
+    long2->setDuration( 888888 );
+    long2->save();
+    longAlb->addTrack( long2, 2, 0, 0, nullptr );
+    long2->save();
+
+    QueryParameters params{ SortingCriteria::Duration, false };
+    auto albumsQuery = ml->albums( &params );
+    ASSERT_NE( nullptr, albumsQuery );
+    ASSERT_EQ( 2u, albumsQuery->count() );
+    auto albums = albumsQuery->all();
+    ASSERT_EQ( 2u, albums.size() );
+    ASSERT_EQ( shortAlb->id(), albums[0]->id() );
+    ASSERT_EQ( short1->duration() + short2->duration(), albums[0]->duration() );
+    ASSERT_EQ( longAlb->id(), albums[1]->id() );
+    ASSERT_EQ( long1->duration() + long2->duration(), albums[1]->duration() );
+
+    params.desc = true;
+
+    albums = ml->albums( &params )->all();
+    ASSERT_EQ( 2u, albums.size() );
+    ASSERT_EQ( longAlb->id(), albums[0]->id() );
+    ASSERT_EQ( shortAlb->id(), albums[1]->id() );
+
+    // Now try sorting the tracks by duration
+    auto tracksQuery = albums[0]->tracks( &params );
+    ASSERT_EQ( 2u, tracksQuery->count() );
+    auto tracks = tracksQuery->all();
+    ASSERT_EQ( 2u, tracks.size() );
+    ASSERT_EQ( long1->id(), tracks[0]->id() );
+    ASSERT_EQ( long2->id(), tracks[1]->id() );
+
+    params.desc = false;
+    tracks = albums[0]->tracks( &params )->all();
+
+    ASSERT_EQ( 2u, tracks.size() );
+    ASSERT_EQ( long2->id(), tracks[0]->id() );
+    ASSERT_EQ( long1->id(), tracks[1]->id() );
+}
