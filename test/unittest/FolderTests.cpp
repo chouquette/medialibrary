@@ -646,6 +646,9 @@ TEST_F( FoldersNoDiscover, ListWithMedia )
     ASSERT_EQ( folders[1]->mrl(), mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( 1u, folders[1]->media( IMedia::Type::Unknown, nullptr )->count() );
 
+    // Keep in mind that this handles "desc" as "not the expected order"
+    // ie. you'd expect the folder with the most media/video/audio first, so
+    // desc = true will invert this.
     params.desc = true;
     folders = ml->folders( IMedia::Type::Video, &params )->all();
     ASSERT_EQ( 2u, folders.size() );
@@ -653,6 +656,18 @@ TEST_F( FoldersNoDiscover, ListWithMedia )
     ASSERT_EQ( 2u, folders[1]->media( IMedia::Type::Unknown, nullptr )->count() );
     ASSERT_EQ( folders[0]->mrl(), mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( 1u, folders[0]->media( IMedia::Type::Unknown, nullptr )->count() );
+
+    params.sort = SortingCriteria::NbAudio;
+    folders = ml->folders( IMedia::Type::Unknown, &params )->all();
+    ASSERT_EQ( 2u, folders.size() );
+    ASSERT_EQ( folders[0]->mrl(), mock::FileSystemFactory::SubFolder );
+    ASSERT_EQ( folders[1]->mrl(), mock::FileSystemFactory::Root );
+
+    params.desc = false;
+    folders = ml->folders( IMedia::Type::Unknown, &params )->all();
+    ASSERT_EQ( 2u, folders.size() );
+    ASSERT_EQ( folders[0]->mrl(), mock::FileSystemFactory::Root );
+    ASSERT_EQ( folders[1]->mrl(), mock::FileSystemFactory::SubFolder );
 
     // List folders with audio media only
     auto query = ml->folders( IMedia::Type::Audio, &params );
