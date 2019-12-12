@@ -297,6 +297,7 @@ private:
         int64_t m_folderId;
         ImportType m_importType;
         int64_t m_groupId;
+        bool m_forcedTitle;
 
         // Auto fetched related properties
         mutable AlbumTrackPtr m_albumTrack;

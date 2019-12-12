@@ -32,7 +32,7 @@ Media::schema( Media::Table::Name, 24 ),
 "INSERT INTO " + Media::Table::Name + " SELECT "
 "id_media, type, subtype, duration, play_count, last_played_date, real_last_played_date,"
 "insertion_date, release_date, title, filename, is_favorite, is_present, device_id,"
-"nb_playlists, folder_id, import_type, NULL "
+"nb_playlists, folder_id, import_type, NULL, 0 "
 " FROM " + Media::Table::Name + "_backup",
 
 "DROP TABLE " + Media::Table::Name + "_backup",

@@ -85,12 +85,13 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     , m_folderId( row.load<decltype(m_folderId)>( 15 ) )
     , m_importType( row.load<decltype(m_importType)>( 16 ) )
     , m_groupId( row.load<decltype(m_groupId)>( 17 ) )
+    , m_forcedTitle( row.load<decltype(m_forcedTitle)>( 18 ) )
 
     // End of DB fields extraction
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
-    assert( row.nbColumns() == 18 );
+    assert( row.nbColumns() == 19 );
 }
 
 Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
@@ -136,6 +137,7 @@ Media::Media(MediaLibraryPtr ml, const std::string& fileName, ImportType importT
     , m_folderId( 0 )
     , m_importType( importType )
     , m_groupId( 0 )
+    , m_forcedTitle( false )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
@@ -1232,7 +1234,8 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
     }
     if ( dbModel >= 24 )
     {
-        req += "group_id UNSIGNED INTEGER,";
+        req += "group_id UNSIGNED INTEGER,"
+               "forced_title BOOLEAN NOT NULL DEFAULT 0,";
     }
     if ( dbModel < 17 )
     {
