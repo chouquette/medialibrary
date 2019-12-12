@@ -114,6 +114,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
     , m_folderId( folderId )
     , m_importType( ImportType::Internal )
     , m_groupId( 0 )
+    , m_forcedTitle( false )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
@@ -1021,14 +1022,17 @@ bool Media::setTitle( const std::string& title )
     return setTitle( title, true );
 }
 
-bool Media::setTitle( const std::string& title, bool )
+bool Media::setTitle( const std::string& title, bool forced )
 {
-    static const std::string req = "UPDATE " + Media::Table::Name + " SET title = ? WHERE id_media = ?";
-    if ( m_title == title )
+    if ( ( m_forcedTitle == true && forced == false ) ||
+         m_title == title )
         return true;
+    static const std::string req = "UPDATE " + Media::Table::Name +
+            " SET title = ?, forced_title = ? WHERE id_media = ?";
     try
     {
-        if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, title, m_id ) == false )
+        if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, title, forced,
+                                           m_id ) == false )
             return false;
     }
     catch ( const sqlite::errors::Exception& ex )
@@ -1038,13 +1042,14 @@ bool Media::setTitle( const std::string& title, bool )
     }
 
     m_title = title;
+    m_forcedTitle = forced;
 
     return true;
 }
 
 void Media::setTitleBuffered( const std::string& title )
 {
-    if ( m_title == title )
+    if ( m_title == title || m_forcedTitle == true )
         return;
     m_title = title;
     m_changed = true;

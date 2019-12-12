@@ -1194,6 +1194,75 @@ TEST_F( Medias, SortByTrackId )
     ASSERT_EQ( tracks[2]->id(), m3->id() );
 }
 
+TEST_F( Medias, ForceTitle )
+{
+    auto m = std::static_pointer_cast<Media>(
+                ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    ASSERT_NE( nullptr, m );
+    ASSERT_EQ( "media.mkv", m->title() );
+
+    // Set an unforced title
+    std::string title{ "new title" };
+    auto res = m->setTitle( title, false );
+    ASSERT_TRUE( res );
+    // It should be updated
+    ASSERT_EQ( title, m->title() );
+
+    Reload();
+    m = ml->media( m->id() );
+    ASSERT_EQ( title, m->title() );
+
+    // Now force a new title
+    title = "forced title";
+    res = m->setTitle( title, true );
+    ASSERT_TRUE( res );
+    // It should still be updated
+    ASSERT_EQ( title, m->title() );
+
+    Reload();
+
+    m = ml->media( m->id() );
+    ASSERT_EQ( title, m->title() );
+
+    // Now set a non forced title, it should be rejected
+    std::string rejectedTitle{ "another title" };
+    res = m->setTitle( rejectedTitle, false );
+    ASSERT_TRUE( res );
+    ASSERT_NE( rejectedTitle, m->title() );
+    ASSERT_EQ( title, m->title() );
+
+    Reload();
+
+    m = ml->media( m->id() );
+    ASSERT_NE( rejectedTitle, m->title() );
+    ASSERT_EQ( title, m->title() );
+
+    // Check that setTitleBuffered is respecting forced title
+    m->setTitleBuffered( rejectedTitle );
+    res = m->save();
+    ASSERT_TRUE( res );
+    ASSERT_NE( rejectedTitle, m->title() );
+    ASSERT_EQ( title, m->title() );
+
+    Reload();
+
+    m = ml->media( m->id() );
+    ASSERT_NE( rejectedTitle, m->title() );
+    ASSERT_EQ( title, m->title() );
+
+    // Check that we can force a new title:
+    title = "new forced title";
+    res = m->setTitle( title, true );
+    ASSERT_TRUE( res );
+    // It should still be updated
+    ASSERT_EQ( title, m->title() );
+
+    Reload();
+
+    m = ml->media( m->id() );
+    ASSERT_EQ( title, m->title() );
+}
+
 class FetchMedia : public Tests
 {
 protected:
