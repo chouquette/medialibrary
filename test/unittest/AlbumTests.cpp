@@ -113,7 +113,11 @@ TEST_F( Albums, TracksByGenre )
         f->save();
         ASSERT_NE( track, nullptr );
     }
-    auto tracks = a->tracks( g, nullptr )->all();
+    auto tracksQuery = a->tracks( nullptr, nullptr );
+    ASSERT_EQ( nullptr, tracksQuery );
+    tracksQuery = a->tracks( g, nullptr );
+    ASSERT_EQ( 5u, tracksQuery->count() );
+    auto tracks = tracksQuery->all();
     ASSERT_EQ( 5u, tracks.size() );
 
     Reload();
@@ -258,7 +262,15 @@ TEST_F( Albums, AlbumArtist )
     auto album = ml->createAlbum( "test" );
     ASSERT_EQ( album->albumArtist(), nullptr );
     auto artist = ml->createArtist( "artist" );
-    album->setAlbumArtist( artist );
+    auto res = album->setAlbumArtist( artist );
+    ASSERT_TRUE( res );
+    // Override with the same artist, expect a success
+    res = album->setAlbumArtist( artist );
+    ASSERT_TRUE( res );
+    auto noartist = std::make_shared<Artist>( ml.get(), "dummy artist" );
+    ASSERT_EQ( 0, noartist->id() );
+    res = album->setAlbumArtist( noartist );
+    ASSERT_FALSE( res );
     ASSERT_NE( album->albumArtist(), nullptr );
 
     Reload();
