@@ -477,7 +477,12 @@ TEST_F( Albums, Sort )
     auto a3 = ml->createAlbum( "C" );
     auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3", IMedia::Type::Audio ) );
     a3->addTrack( m3, 1, 0, 0, nullptr );
+    m3->setReleaseDate( 1000 );
     m3->save();
+    auto m4 = std::static_pointer_cast<Media>( ml->addMedia( "media4.mp3", IMedia::Type::Audio ) );
+    a3->addTrack( m4, 2, 0, 0, nullptr );
+    m4->setReleaseDate( 995 );
+    m4->save();
     a3->setReleaseYear( 1000, false );
 
     QueryParameters params { SortingCriteria::ReleaseDate, false };
@@ -487,6 +492,13 @@ TEST_F( Albums, Sort )
     ASSERT_EQ( a3->id(), albums[1]->id() );
     ASSERT_EQ( a2->id(), albums[2]->id() );
 
+    // Also try to list tracks ordered by release dates:
+    auto tracksQuery = a3->tracks( &params );
+    ASSERT_EQ( 2u, tracksQuery->count() );
+    auto tracks = tracksQuery->all();
+    ASSERT_EQ( m4->id(), tracks[0]->id() );
+    ASSERT_EQ( m3->id(), tracks[1]->id() );
+
     params.desc = true;
     albums = ml->albums( &params )->all();
     // We do not invert the lexical order when sorting by DESC release date:
@@ -494,6 +506,10 @@ TEST_F( Albums, Sort )
     ASSERT_EQ( a2->id(), albums[0]->id() );
     ASSERT_EQ( a1->id(), albums[1]->id() );
     ASSERT_EQ( a3->id(), albums[2]->id() );
+
+    tracks = a3->tracks( &params )->all();
+    ASSERT_EQ( m3->id(), tracks[0]->id() );
+    ASSERT_EQ( m4->id(), tracks[1]->id() );
 
     // When listing all albums, default order is lexical order
     albums = ml->albums( nullptr )->all();
