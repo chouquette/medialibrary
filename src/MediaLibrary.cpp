@@ -1132,6 +1132,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
             if ( previousVersion == 23 )
             {
                 migrateModel23to24();
+                needRescan = true;
                 previousVersion = 24;
             }
             // To be continued in the future!
