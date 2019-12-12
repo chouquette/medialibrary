@@ -44,6 +44,11 @@ TEST_F( AlbumTracks, Create )
     f->save();
     ASSERT_NE( nullptr, track );
     ASSERT_EQ( 10u, track->discNumber() );
+    ASSERT_EQ( nullptr, track->artist() );
+    ASSERT_EQ( 0, track->artistId() );
+    ASSERT_EQ( album->id(), track->albumId() );
+    ASSERT_EQ( 0, track->genreId() );
+    ASSERT_EQ( nullptr, track->genre() );
 
     Reload();
 
