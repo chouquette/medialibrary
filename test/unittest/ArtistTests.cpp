@@ -346,12 +346,14 @@ TEST_F( Artists, SearchAfterDelete )
 TEST_F( Artists, SortMedia )
 {
     auto artist = ml->createArtist( "Russian Otters" );
-
+    auto album = ml->createAlbum( "album" );
     for (auto i = 1; i <= 3; ++i)
     {
         auto f = std::static_pointer_cast<Media>(
                     ml->addMedia( "song" + std::to_string(i) + ".mp3", IMedia::Type::Audio ) );
+        album->addTrack( f, i, 0, artist->id(), nullptr );
         f->setDuration( 10 - i );
+        f->setReleaseDate( i );
         f->save();
         artist->addMedia( *f );
     }
@@ -369,6 +371,35 @@ TEST_F( Artists, SortMedia )
     ASSERT_EQ( "song1.mp3", tracks[0]->title() );
     ASSERT_EQ( "song2.mp3", tracks[1]->title() );
     ASSERT_EQ( "song3.mp3", tracks[2]->title() );
+
+    params.sort = SortingCriteria::ReleaseDate;
+    tracks = artist->tracks( &params )->all();
+    ASSERT_EQ( 3u, tracks.size() );
+    ASSERT_EQ( 3u, tracks[0]->releaseDate() );
+    ASSERT_EQ( 2u, tracks[1]->releaseDate() );
+    ASSERT_EQ( 1u, tracks[2]->releaseDate() );
+
+    params.desc = false;
+    tracks = artist->tracks( &params )->all();
+    ASSERT_EQ( 3u, tracks.size() );
+    ASSERT_EQ( 1u, tracks[0]->releaseDate() );
+    ASSERT_EQ( 2u, tracks[1]->releaseDate() );
+    ASSERT_EQ( 3u, tracks[2]->releaseDate() );
+
+    // Ensure the fallback sort is alphabetical
+    params.sort = SortingCriteria::NbMedia;
+    tracks = artist->tracks( &params )->all();
+    ASSERT_EQ( 3u, tracks.size() );
+    ASSERT_EQ( 1u, tracks[0]->albumTrack()->trackNumber() );
+    ASSERT_EQ( 2u, tracks[1]->albumTrack()->trackNumber() );
+    ASSERT_EQ( 3u, tracks[2]->albumTrack()->trackNumber() );
+
+    params.desc = true;
+    tracks = artist->tracks( &params )->all();
+    ASSERT_EQ( 3u, tracks.size() );
+    ASSERT_EQ( 3u, tracks[0]->albumTrack()->trackNumber() );
+    ASSERT_EQ( 2u, tracks[1]->albumTrack()->trackNumber() );
+    ASSERT_EQ( 1u, tracks[2]->albumTrack()->trackNumber() );
 }
 
 TEST_F( Artists, SortMediaByAlbum )
