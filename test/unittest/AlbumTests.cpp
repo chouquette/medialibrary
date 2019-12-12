@@ -398,6 +398,7 @@ TEST_F( Albums, SearchNoUnknownAlbum )
 {
     auto artist = ml->createArtist( "otters" );
     auto album = artist->unknownAlbum();
+    ASSERT_TRUE( album->isUnknownAlbum() );
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     album->addTrack( m, 1, 0, 0, nullptr );
     m->save();
