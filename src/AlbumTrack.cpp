@@ -206,7 +206,7 @@ Query<IMedia> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId,
 
 GenrePtr AlbumTrack::genre()
 {
-    if ( m_genre == nullptr )
+    if ( m_genre == nullptr && m_genreId != 0 )
         m_genre = Genre::fetch( m_ml, m_genreId );
     return m_genre;
 }
