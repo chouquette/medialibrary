@@ -134,7 +134,7 @@ Query<IMedia> Artist::tracks( const QueryParameters* params ) const
         orderBy += "med.title";
         break;
     default:
-        LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default (Alpha)" );
+        LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default (Album)" );
         /* fall-through */
     case SortingCriteria::Album:
     case SortingCriteria::Default:
