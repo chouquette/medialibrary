@@ -161,7 +161,10 @@ Device::schema( Device::Table::Name, 14 ),
 Folder::schema( Folder::Table::Name, 14 ),
 Folder::schema( Folder::FtsTable::Name, 14 ),
 
-#include "database/tables/Folder_triggers_v14.sql"
+Folder::index( Folder::Indexes::DeviceId, 14 ),
+Folder::index( Folder::Indexes::ParentId, 14 ),
+Folder::trigger( Folder::Triggers::InsertFts, 14 ),
+Folder::trigger( Folder::Triggers::DeleteFts, 14 ),
 
 "INSERT INTO " + Folder::Table::Name + "("
     "id_folder, path, parent_id, is_banned, device_id, is_removable"

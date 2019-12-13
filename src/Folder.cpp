@@ -86,11 +86,6 @@ void Folder::createTable( sqlite::Connection* connection)
 
 void Folder::createTriggers( sqlite::Connection* connection, uint32_t modelVersion )
 {
-    const std::string reqs[] = {
-        #include "database/tables/Folder_triggers_v15.sql"
-    };
-    for ( const auto& req : reqs )
-        sqlite::Tools::executeRequest( connection, req );
     sqlite::Tools::executeRequest( connection,
                                    trigger( Triggers::InsertFts, modelVersion ) );
     sqlite::Tools::executeRequest( connection,
@@ -104,6 +99,14 @@ void Folder::createTriggers( sqlite::Connection* connection, uint32_t modelVersi
         sqlite::Tools::executeRequest( connection,
                                        trigger( Triggers::UpdateNbMediaOnUpdate, modelVersion ) );
     }
+}
+
+void Folder::createIndexes( sqlite::Connection* connection, uint32_t modelVersion )
+{
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::DeviceId, modelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::ParentId, modelVersion ) );
 }
 
 std::string Folder::schema( const std::string& tableName, uint32_t dbModel )
@@ -252,6 +255,22 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
 
         default:
             assert( !"Invalid trigger provided" );
+    }
+    return "<invalid request>";
+}
+
+std::string Folder::index( Indexes index, uint32_t )
+{
+    switch ( index )
+    {
+        case Indexes::DeviceId:
+            return "CREATE INDEX IF NOT EXISTS folder_device_id_idx ON " +
+                        Table::Name + " (device_id)";
+        case Indexes::ParentId:
+            return "CREATE INDEX IF NOT EXISTS parent_folder_id_idx ON " +
+                        Table::Name + " (parent_id)";
+        default:
+            assert( !"Invalid index provided" );
     }
     return "<invalid request>";
 }

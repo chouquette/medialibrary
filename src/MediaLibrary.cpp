@@ -201,6 +201,7 @@ void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
     auto dbConn = m_dbConnection.get();
 
     Folder::createTriggers( dbConn, dbModelVersion );
+    Folder::createIndexes( dbConn, dbModelVersion );
     Album::createTriggers( dbConn, dbModelVersion );
     Album::createIndexes( dbConn, dbModelVersion );
     AlbumTrack::createIndexes( dbConn );
@@ -1463,6 +1464,7 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     Show::createTriggers( dbConn, 14 );
     Playlist::createTriggers( dbConn, 14 );
     Folder::createTriggers( dbConn, 14 );
+    Folder::createIndexes( dbConn, 14 );
     File::createIndexes( dbConn );
     VideoTrack::createIndexes( dbConn );
     auto folders = Folder::fetchAll<Folder>( this );
@@ -1491,6 +1493,7 @@ void MediaLibrary::migrateModel14to15()
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
     Folder::createTriggers( dbConn, 15 );
+    Folder::createIndexes( dbConn, 15 );
     Playlist::createTriggers( dbConn, 15 );
     m_settings.setDbModelVersion( 15 );
     t->commit();
@@ -1671,6 +1674,7 @@ void MediaLibrary::migrateModel19to20()
     Genre::createTriggers( dbConn );
     ShowEpisode::createTrigger( dbConn );
     Folder::createTriggers( dbConn, 20 );
+    Folder::createIndexes( dbConn, 20 );
     File::createIndexes( dbConn );
     Media::createTriggers( dbConn, 20 );
     Label::createTriggers( dbConn );

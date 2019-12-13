@@ -60,14 +60,21 @@ public:
         UpdateNbMediaOnUpdate,
         UpdateNbMediaOnDelete,
     };
+    enum class Indexes : uint8_t
+    {
+        DeviceId,
+        ParentId,
+    };
 
     Folder( MediaLibraryPtr ml, sqlite::Row& row );
     Folder(MediaLibraryPtr ml, const std::string& path, int64_t parent , int64_t deviceId , bool isRemovable );
 
     static void createTable( sqlite::Connection* connection );
     static void createTriggers( sqlite::Connection* connection, uint32_t modelVersion );
+    static void createIndexes( sqlite::Connection* connection, uint32_t modelVersion );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
     static std::string trigger( Triggers trigger, uint32_t dbModel );
+    static std::string index( Indexes index, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     static std::shared_ptr<Folder> create( MediaLibraryPtr ml, const std::string& mrl, int64_t parentId, Device& device, fs::IDevice& deviceFs );
     static bool excludeEntryFolder( MediaLibraryPtr ml, int64_t folderId );
