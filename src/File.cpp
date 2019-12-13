@@ -227,7 +227,7 @@ void File::createTable( sqlite::Connection* dbConnection )
                                    schema( Table::Name, Settings::DbModelVersion ) );
 }
 
-void File::createTriggers( sqlite::Connection* dbConnection )
+void File::createIndexes( sqlite::Connection* dbConnection )
 {
     sqlite::Tools::executeRequest( dbConnection,
                                    index( Indexes::MediaId, Settings::DbModelVersion ) );

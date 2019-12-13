@@ -206,7 +206,7 @@ void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
     AlbumTrack::createIndexes( dbConn );
     Artist::createTriggers( dbConn, dbModelVersion );
     Media::createTriggers( dbConn, dbModelVersion );
-    File::createTriggers( dbConn );
+    File::createIndexes( dbConn );
     Genre::createTriggers( dbConn );
     Playlist::createTriggers( dbConn, dbModelVersion );
     Label::createTriggers( dbConn );
@@ -1253,7 +1253,7 @@ void MediaLibrary::migrateModel7to8()
     // Re-create triggers removed in the process
     Artist::createTriggers( getConn(), 8u );
     Media::createTriggers( getConn(), 5 );
-    File::createTriggers( getConn() );
+    File::createIndexes( getConn() );
     m_settings.setDbModelVersion( 8 );
     t->commit();
 }
@@ -1463,7 +1463,7 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     Show::createTriggers( dbConn, 14 );
     Playlist::createTriggers( dbConn, 14 );
     Folder::createTriggers( dbConn, 14 );
-    File::createTriggers( dbConn );
+    File::createIndexes( dbConn );
     VideoTrack::createIndexes( dbConn );
     auto folders = Folder::fetchAll<Folder>( this );
     for ( const auto& f : folders )
@@ -1671,7 +1671,7 @@ void MediaLibrary::migrateModel19to20()
     Genre::createTriggers( dbConn );
     ShowEpisode::createTrigger( dbConn );
     Folder::createTriggers( dbConn, 20 );
-    File::createTriggers( dbConn );
+    File::createIndexes( dbConn );
     Media::createTriggers( dbConn, 20 );
     Label::createTriggers( dbConn );
     Playlist::createTriggers( dbConn, 20 );
