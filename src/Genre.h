@@ -43,6 +43,13 @@ public:
     {
         static const std::string Name;
     };
+    enum class Triggers : uint8_t
+    {
+        InsertFts,
+        DeleteFts,
+        UpdateOnNewTrack,
+        UpdateOnTrackDelete
+    };
 
     Genre( MediaLibraryPtr ml, sqlite::Row& row );
     Genre( MediaLibraryPtr ml, const std::string& name );
@@ -70,6 +77,7 @@ public:
     static void createTable( sqlite::Connection* dbConn );
     static void createTriggers( sqlite::Connection* dbConn );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
+    static std::string trigger( Triggers trigger, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     static std::shared_ptr<Genre> create( MediaLibraryPtr ml, const std::string& name );
     static std::shared_ptr<Genre> fromName( MediaLibraryPtr ml, const std::string& name );

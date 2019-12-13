@@ -181,34 +181,14 @@ void Genre::createTable( sqlite::Connection* dbConn )
 
 void Genre::createTriggers( sqlite::Connection* dbConn )
 {
-    const std::string vtableInsertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_genre_fts"
-            " AFTER INSERT ON " + Genre::Table::Name +
-            " BEGIN"
-            " INSERT INTO " + Genre::FtsTable::Name + "(rowid,name) VALUES(new.id_genre, new.name);"
-            " END";
-    const std::string vtableDeleteTrigger = "CREATE TRIGGER IF NOT EXISTS delete_genre_fts"
-            " BEFORE DELETE ON " + Genre::Table::Name +
-            " BEGIN"
-            " DELETE FROM " + Genre::FtsTable::Name + " WHERE rowid = old.id_genre;"
-            " END";
-    const std::string onTrackCreated = "CREATE TRIGGER IF NOT EXISTS update_genre_on_new_track"
-            " AFTER INSERT ON " + AlbumTrack::Table::Name +
-            " WHEN new.genre_id IS NOT NULL"
-            " BEGIN"
-            " UPDATE " + Genre::Table::Name + " SET nb_tracks = nb_tracks + 1 WHERE id_genre = new.genre_id;"
-            " END";
-    const std::string onTrackDeleted = "CREATE TRIGGER IF NOT EXISTS update_genre_on_track_deleted"
-            " AFTER DELETE ON " + AlbumTrack::Table::Name +
-            " WHEN old.genre_id IS NOT NULL"
-            " BEGIN"
-            " UPDATE " + Genre::Table::Name + " SET nb_tracks = nb_tracks - 1 WHERE id_genre = old.genre_id;"
-            " DELETE FROM " + Genre::Table::Name + " WHERE nb_tracks = 0;"
-            " END";
-
-    sqlite::Tools::executeRequest( dbConn, vtableInsertTrigger );
-    sqlite::Tools::executeRequest( dbConn, vtableDeleteTrigger );
-    sqlite::Tools::executeRequest( dbConn, onTrackCreated );
-    sqlite::Tools::executeRequest( dbConn, onTrackDeleted );
+    sqlite::Tools::executeRequest( dbConn,
+                                   trigger( Triggers::InsertFts, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConn,
+                                   trigger( Triggers::DeleteFts, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConn,
+                                   trigger( Triggers::UpdateOnNewTrack, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConn,
+                                   trigger( Triggers::UpdateOnTrackDelete, Settings::DbModelVersion ) );
 }
 
 std::string Genre::schema( const std::string& tableName, uint32_t )
@@ -225,6 +205,50 @@ std::string Genre::schema( const std::string& tableName, uint32_t )
         "name TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
         "nb_tracks INTEGER NOT NULL DEFAULT 0"
     ")";
+}
+
+std::string Genre::trigger( Triggers trigger, uint32_t )
+{
+    switch ( trigger )
+    {
+        case Triggers::InsertFts:
+            return "CREATE TRIGGER IF NOT EXISTS insert_genre_fts"
+                   " AFTER INSERT ON " + Table::Name +
+                   " BEGIN"
+                        " INSERT INTO " + FtsTable::Name + "(rowid,name)"
+                            " VALUES(new.id_genre, new.name);"
+                   " END";
+        case Triggers::DeleteFts:
+            return "CREATE TRIGGER IF NOT EXISTS delete_genre_fts"
+                   " BEFORE DELETE ON " + Table::Name +
+                   " BEGIN"
+                        " DELETE FROM " + FtsTable::Name +
+                            " WHERE rowid = old.id_genre;"
+                   " END";
+        case Triggers::UpdateOnNewTrack:
+            return "CREATE TRIGGER IF NOT EXISTS update_genre_on_new_track"
+                    " AFTER INSERT ON " + AlbumTrack::Table::Name +
+                    " WHEN new.genre_id IS NOT NULL"
+                    " BEGIN"
+                        " UPDATE " + Table::Name +
+                            " SET nb_tracks = nb_tracks + 1"
+                                " WHERE id_genre = new.genre_id;"
+                    " END";
+        case Triggers::UpdateOnTrackDelete:
+            return "CREATE TRIGGER IF NOT EXISTS update_genre_on_track_deleted"
+                   " AFTER DELETE ON " + AlbumTrack::Table::Name +
+                   " WHEN old.genre_id IS NOT NULL"
+                   " BEGIN"
+                        " UPDATE " + Table::Name +
+                            " SET nb_tracks = nb_tracks - 1"
+                                " WHERE id_genre = old.genre_id;"
+                        " DELETE FROM " + Table::Name +
+                            " WHERE nb_tracks = 0;"
+                   " END";
+        default:
+            assert( !"Invalid trigger provided" );
+    }
+    return "<invalid request>";
 }
 
 bool Genre::checkDbModel(MediaLibraryPtr ml)
