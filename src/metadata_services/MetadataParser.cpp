@@ -55,6 +55,7 @@
 
 #include <cstdlib>
 #include <algorithm>
+#include <cstring>
 
 namespace medialibrary
 {
@@ -1005,7 +1006,10 @@ bool MetadataAnalyzer::assignMediaToGroup( IItem &item )
     if ( m->type() != IMedia::Type::Video )
         return true;
     assert( m->groupId() == 0 );
-    auto prefix = m->title().substr( 0, MediaGroup::AutomaticGroupPrefixSize );
+    auto title = m->title();
+    if ( strncasecmp( title.c_str(), "the ", 4 ) == 0 )
+        title.erase( title.begin(), title.begin() + 4 );
+    auto prefix = title.substr( 0, MediaGroup::AutomaticGroupPrefixSize );
     auto group = MediaGroup::fetchByName( m_ml, prefix );
     if ( group == nullptr )
     {

@@ -58,7 +58,8 @@ bool ExtraVerbose = false;
     X("same_album_with_subfolder") \
     X("compilation_different_years") \
     X("tvshow") \
-    X("unknown_tv_show")
+    X("unknown_tv_show") \
+    X("media_groups")
 
 
 #define REDUCED_TEST_CASE_LIST \

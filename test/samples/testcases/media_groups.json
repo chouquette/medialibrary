@@ -1,0 +1,21 @@
+{
+    "input": [
+        "video/media_groups"
+    ],
+    "expected": {
+        "nbVideos": 3,
+        "nbAudios": 0,
+        "mediaGroups": [
+            {
+                "name": "otters",
+                "nbVideo": 2,
+                "nbAudio": 0,
+                "nbUnknown": 0
+            },
+            {
+                "name": "anothe",
+                "nbVideo": 1
+            }
+        ]
+    }
+}
