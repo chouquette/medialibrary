@@ -507,10 +507,6 @@ void Album::createTable( sqlite::Connection* dbConnection )
 
 void Album::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion )
 {
-    const std::string indexReq = "CREATE INDEX IF NOT EXISTS album_artist_id_idx ON " +
-            Table::Name + "(artist_id)";
-    sqlite::Tools::executeRequest( dbConnection, indexReq );
-
     sqlite::Tools::executeRequest( dbConnection,
                                    trigger( Triggers::IsPresent, dbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
@@ -521,6 +517,12 @@ void Album::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVe
                                    trigger( Triggers::InsertFts, dbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
                                    trigger( Triggers::DeleteFts, dbModelVersion ) );
+}
+
+void Album::createIndexes( sqlite::Connection* dbConnection, uint32_t dbModelVersion )
+{
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::ArtistId, dbModelVersion ) );
 }
 
 std::string Album::schema( const std::string& tableName, uint32_t dbModel )
@@ -672,6 +674,13 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
             assert( !"Invalid trigger provided" );
     }
     return "<Invalid request provided>";
+}
+
+std::string Album::index( Indexes index, uint32_t )
+{
+    assert( index == Indexes::ArtistId );
+    return "CREATE INDEX IF NOT EXISTS album_artist_id_idx ON " +
+                Table::Name + "(artist_id)";
 }
 
 bool Album::checkDbModel( MediaLibraryPtr ml )
