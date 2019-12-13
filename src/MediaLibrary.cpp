@@ -203,7 +203,7 @@ void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
     Folder::createTriggers( dbConn, dbModelVersion );
     Album::createTriggers( dbConn, dbModelVersion );
     Album::createIndexes( dbConn, dbModelVersion );
-    AlbumTrack::createTriggers( dbConn );
+    AlbumTrack::createIndexes( dbConn );
     Artist::createTriggers( dbConn, dbModelVersion );
     Media::createTriggers( dbConn, dbModelVersion );
     File::createTriggers( dbConn );
@@ -1333,7 +1333,7 @@ bool MediaLibrary::migrateModel12to13()
             return false;
     }
 
-    AlbumTrack::createTriggers( getConn() );
+    AlbumTrack::createIndexes( getConn() );
     Album::createTriggers( getConn(), 13 );
     Artist::createTriggers( getConn(), 13 );
     // Leave the weak context as we now need to update is_present fields, which
@@ -1456,7 +1456,7 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     VideoTrack::createTable( dbConn );
     // Re-create triggers removed in the process
     Media::createTriggers( dbConn, 14 );
-    AlbumTrack::createTriggers( dbConn );
+    AlbumTrack::createIndexes( dbConn );
     Album::createTriggers( dbConn, 14 );
     Album::createIndexes( dbConn, 14 );
     Artist::createTriggers( dbConn, 14 );
@@ -1666,7 +1666,7 @@ void MediaLibrary::migrateModel19to20()
     Album::createTriggers( dbConn, 20 );
     Album::createIndexes( dbConn, 20 );
     Thumbnail::createTriggers( dbConn );
-    AlbumTrack::createTriggers( dbConn );
+    AlbumTrack::createIndexes( dbConn );
     Artist::createTriggers( dbConn, 20 );
     Genre::createTriggers( dbConn );
     ShowEpisode::createTrigger( dbConn );

@@ -91,7 +91,7 @@ void AlbumTrack::createTable( sqlite::Connection* dbConnection )
                                                          Settings::DbModelVersion ) );
 }
 
-void AlbumTrack::createTriggers(sqlite::Connection* dbConnection)
+void AlbumTrack::createIndexes( sqlite::Connection* dbConnection )
 {
     sqlite::Tools::executeRequest( dbConnection,
                                    index( Indexes::MediaArtistGenreAlbum, Settings::DbModelVersion ) );
