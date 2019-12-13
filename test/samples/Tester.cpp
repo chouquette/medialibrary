@@ -684,7 +684,7 @@ void Tests::checkMediaGroups( const rapidjson::Value &expectedMediaGroups,
         ASSERT_TRUE( expectedGroup.HasMember( "name" ) );
         auto it = std::find_if( cbegin( mediaGroups ), cend( mediaGroups ),
                                 [&expectedGroup]( const MediaGroupPtr grp ) {
-            return grp->name() == expectedGroup["name"].GetString();
+            return strcasecmp( grp->name().c_str(), expectedGroup["name"].GetString() ) == 0;
         });
         ASSERT_NE( cend( mediaGroups ), it );
         auto group = *it;
