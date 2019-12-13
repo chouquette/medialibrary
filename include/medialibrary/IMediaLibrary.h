@@ -464,6 +464,12 @@ public:
      */
     virtual std::shared_ptr<IMediaGroup> mediaGroup( int64_t id ) const = 0;
     /**
+     * @brief mediaGroup Returns a media group with the given name
+     * @return A media group, or nullptr if the group doesn't exist, or in case
+     *         of sporadic failure.
+     */
+    virtual MediaGroupPtr mediaGroup( const std::string& name ) const = 0;
+    /**
      * @brief mediaGroups Returns a query representing the root media groups
      * @param params A query parameter
      *

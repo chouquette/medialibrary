@@ -558,6 +558,11 @@ std::shared_ptr<IMediaGroup> MediaLibrary::mediaGroup( int64_t id ) const
     return MediaGroup::fetch( this, id );
 }
 
+MediaGroupPtr MediaLibrary::mediaGroup( const std::string& name ) const
+{
+    return MediaGroup::fetchByName( this, name );
+}
+
 Query<IMediaGroup> MediaLibrary::mediaGroups( const QueryParameters* params ) const
 {
     return MediaGroup::listAll( this, params );
