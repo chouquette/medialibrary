@@ -25,6 +25,11 @@ Playlist::schema( Playlist::MediaRelationTable::Name, 16 ),
 "DROP TABLE " + Playlist::MediaRelationTable::Name + "_backup",
 
 #include "database/tables/Playlist_triggers_v16.sql"
+Playlist::trigger( Playlist::Triggers::UpdateOrderOnInsert, 16 ),
+Playlist::trigger( Playlist::Triggers::UpdateOrderOnDelete, 16 ),
+Playlist::trigger( Playlist::Triggers::InsertFts, 16 ),
+Playlist::trigger( Playlist::Triggers::UpdateFts, 16 ),
+Playlist::trigger( Playlist::Triggers::DeleteFts, 16 ),
 
 "DROP INDEX IF EXISTS folder_device_id",
 "DROP INDEX IF EXISTS folder_parent_id",

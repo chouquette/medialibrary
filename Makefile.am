@@ -414,7 +414,6 @@ EXTRA_DIST += medialibrary.pc \
 	src/database/migrations/migration19-20.sql \
 	src/database/migrations/migration20-21.sql \
 	src/database/migrations/migration21-22.sql \
-	src/database/tables/Playlist_triggers_v14.sql \
 	src/database/tables/Playlist_triggers_v16.sql \
 	src/database/tables/Task_triggers_v18.sql \
 	src/database/tables/Thumbnail_triggers_v17.sql \

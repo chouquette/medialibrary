@@ -50,6 +50,19 @@ public:
     {
         static const std::string Name;
     };
+    enum class Triggers : uint8_t
+    {
+        UpdateOrderOnInsert,
+        UpdateOrderOnDelete,
+        InsertFts,
+        UpdateFts,
+        DeleteFts,
+
+        // Deprecated since model 16
+        Append,
+        UpdateOrderOnPositionUpdate
+    };
+
     // Contains the backup date as the index, and a vector of playlist files as values
     using Backups = std::map<time_t, std::vector<std::string>>;
 
@@ -81,6 +94,7 @@ public:
     static void createTable( sqlite::Connection* dbConn );
     static void createTriggers( sqlite::Connection* dbConn , uint32_t dbModel);
     static std::string schema( const std::string& tableName, uint32_t dbModel );
+    static std::string trigger( Triggers trigger, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     static Query<IPlaylist> search( MediaLibraryPtr ml, const std::string& name,
                                     const QueryParameters* params );

@@ -362,11 +362,28 @@ void Playlist::createTable( sqlite::Connection* dbConn )
 
 void Playlist::createTriggers( sqlite::Connection* dbConn, uint32_t dbModel )
 {
-    std::string reqs[] = {
-        #include "database/tables/Playlist_triggers_v16.sql"
-    };
-    for ( const auto& req : reqs )
-        sqlite::Tools::executeRequest( dbConn, req );
+    if ( dbModel < 16 )
+    {
+        sqlite::Tools::executeRequest( dbConn,
+                                       trigger( Triggers::UpdateOrderOnInsert, dbModel ) );
+        sqlite::Tools::executeRequest( dbConn,
+                                       trigger( Triggers::Append, dbModel ) );
+        sqlite::Tools::executeRequest( dbConn,
+                                       trigger( Triggers::UpdateOrderOnPositionUpdate, dbModel ) );
+    }
+    else
+    {
+        sqlite::Tools::executeRequest( dbConn,
+                                       trigger( Triggers::UpdateOrderOnInsert, dbModel ) );
+        sqlite::Tools::executeRequest( dbConn,
+                                       trigger( Triggers::UpdateOrderOnDelete, dbModel ) );
+    }
+    sqlite::Tools::executeRequest( dbConn,
+                                   trigger( Triggers::InsertFts, dbModel ) );
+    sqlite::Tools::executeRequest( dbConn,
+                                   trigger( Triggers::UpdateFts, dbModel ) );
+    sqlite::Tools::executeRequest( dbConn,
+                                   trigger( Triggers::DeleteFts, dbModel ) );
     // Playlist doesn't have an mrl field before version 14, so we must not
     // create the trigger before migrating to that version
     if ( dbModel >= 14 )
@@ -379,6 +396,12 @@ void Playlist::createTriggers( sqlite::Connection* dbConn, uint32_t dbModel )
         sqlite::Tools::executeRequest( dbConn,
             "CREATE INDEX IF NOT EXISTS playlist_media_pl_id_index "
             "ON " + Playlist::MediaRelationTable::Name + "(media_id, playlist_id)" );
+    }
+    if ( dbModel >= 16 )
+    {
+        sqlite::Tools::executeRequest( dbConn,
+            "CREATE INDEX IF NOT EXISTS playlist_position_pl_id_index "
+                "ON " + MediaRelationTable::Name + "(playlist_id, position)" );
     }
 }
 
@@ -413,7 +436,104 @@ std::string Playlist::schema( const std::string& tableName, uint32_t )
             + Media::Table::PrimaryKeyColumn + ") ON DELETE SET NULL,"
         "FOREIGN KEY(playlist_id) REFERENCES " + Playlist::Table::Name + "("
             + Playlist::Table::PrimaryKeyColumn + ") ON DELETE CASCADE"
-    ")";
+                                                  ")";
+}
+
+std::string Playlist::trigger( Triggers trigger, uint32_t dbModel )
+{
+    switch ( trigger )
+    {
+        case Triggers::UpdateOrderOnInsert:
+        {
+            if ( dbModel < 16 )
+            {
+                return "CREATE TRIGGER IF NOT EXISTS update_playlist_order_on_insert"
+                            " AFTER INSERT ON " + MediaRelationTable::Name +
+                       " WHEN new.position IS NOT NULL"
+                       " BEGIN "
+                           "UPDATE " + MediaRelationTable::Name +
+                           " SET position = position + 1"
+                           " WHERE playlist_id = new.playlist_id"
+                           " AND position = new.position"
+                           " AND media_id != new.media_id;"
+                       " END";
+            }
+            return "CREATE TRIGGER IF NOT EXISTS update_playlist_order_on_insert"
+                        " AFTER INSERT ON " + MediaRelationTable::Name +
+                   " WHEN new.position IS NOT NULL"
+                   " BEGIN "
+                       "UPDATE " + MediaRelationTable::Name +
+                       " SET position = position + 1"
+                       " WHERE playlist_id = new.playlist_id"
+                       " AND position >= new.position"
+                       " AND rowid != new.rowid;"
+                   " END";
+        }
+        case Triggers::UpdateOrderOnDelete:
+        {
+            assert( dbModel >= 16 );
+            return "CREATE TRIGGER IF NOT EXISTS update_playlist_order_on_delete"
+                        " AFTER DELETE ON " + MediaRelationTable::Name +
+                   " BEGIN "
+                       "UPDATE " + MediaRelationTable::Name +
+                       " SET position = position - 1"
+                       " WHERE playlist_id = old.playlist_id"
+                       " AND position > old.position;"
+                   " END";
+        }
+        case Triggers::InsertFts:
+            return "CREATE TRIGGER IF NOT EXISTS insert_playlist_fts"
+                        " AFTER INSERT ON " + Table::Name +
+                   " BEGIN"
+                       " INSERT INTO " + FtsTable::Name + "(rowid, name)"
+                            " VALUES(new.id_playlist, new.name);"
+                   " END";
+        case Triggers::UpdateFts:
+            return "CREATE TRIGGER IF NOT EXISTS update_playlist_fts AFTER UPDATE OF name"
+                   " ON " + Table::Name +
+                   " BEGIN"
+                       " UPDATE " + FtsTable::Name + " SET name = new.name"
+                            " WHERE rowid = new.id_playlist;"
+                   " END";
+        case Triggers::DeleteFts:
+            return "CREATE TRIGGER IF NOT EXISTS delete_playlist_fts"
+                        " BEFORE DELETE ON " + Table::Name +
+                   " BEGIN"
+                        " DELETE FROM " + FtsTable::Name +
+                            " WHERE rowid = old.id_playlist;"
+                   " END";
+        case Triggers::Append:
+        {
+            assert( dbModel <= 15 );
+            return "CREATE TRIGGER IF NOT EXISTS append_new_playlist_record AFTER INSERT"
+                   " ON " + MediaRelationTable::Name +
+                   " WHEN new.position IS NULL"
+                   " BEGIN "
+                       " UPDATE " + MediaRelationTable::Name + " SET position = ("
+                           "SELECT COUNT(media_id) FROM " + MediaRelationTable::Name +
+                           " WHERE playlist_id = new.playlist_id"
+                       ") WHERE playlist_id=new.playlist_id AND media_id = new.media_id;"
+                   " END";
+        }
+        case Triggers::UpdateOrderOnPositionUpdate:
+        {
+            assert( dbModel <= 15 );
+            return "CREATE TRIGGER IF NOT EXISTS update_playlist_order"
+                        " AFTER UPDATE OF position"
+                   " ON " + MediaRelationTable::Name +
+                   " BEGIN "
+                       "UPDATE " + MediaRelationTable::Name +
+                       " SET position = position + 1"
+                       " WHERE playlist_id = new.playlist_id"
+                       " AND position = new.position"
+                       // We don't want to trigger a self-update when the insert trigger fires.
+                       " AND media_id != new.media_id;"
+                   " END";
+        }
+        default:
+            assert( !"Invalid trigger provided" );
+    }
+    return "<invalid request>";
 }
 
 bool Playlist::checkDbModel(MediaLibraryPtr ml)
