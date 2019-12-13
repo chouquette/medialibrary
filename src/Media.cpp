@@ -1078,17 +1078,12 @@ void Media::createTable( sqlite::Connection* connection )
 
 void Media::createTriggers( sqlite::Connection* connection, uint32_t modelVersion )
 {
-    const std::string lastPlayedIndex = "CREATE INDEX IF NOT EXISTS "
-            "index_last_played_date ON " + Media::Table::Name + "(last_played_date DESC)";
-    sqlite::Tools::executeRequest( connection, lastPlayedIndex );
-
-    const std::string mediaPresenceIndex = "CREATE INDEX IF NOT EXISTS "
-            "index_media_presence ON " + Media::Table::Name + "(is_present)";
-    sqlite::Tools::executeRequest( connection, mediaPresenceIndex );
-
-    const std::string mediaTypesIndex = "CREATE INDEX IF NOT EXISTS "
-            "media_types_idx ON " + Media::Table::Name + "(type, subtype)";
-    sqlite::Tools::executeRequest( connection, mediaTypesIndex );
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::LastPlayedDate, modelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::Presence, modelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::Types, modelVersion ) );
 
     sqlite::Tools::executeRequest( connection,
                                    trigger( Triggers::IsPresent, modelVersion ) );
@@ -1107,23 +1102,18 @@ void Media::createTriggers( sqlite::Connection* connection, uint32_t modelVersio
         sqlite::Tools::executeRequest( connection,
                                        trigger( Triggers::DecrementNbPlaylist, modelVersion ) );
 
-        // Don't create this index before model 14, as the real_last_played_date
-        // was introduced in model version 14
-        const auto req = "CREATE INDEX IF NOT EXISTS media_last_usage_dates_idx ON " + Media::Table::Name +
-                "(last_played_date, real_last_played_date, insertion_date)";
-        sqlite::Tools::executeRequest( connection, req );
+        sqlite::Tools::executeRequest( connection,
+                                       index( Indexes::LastUsageDate, modelVersion ) );
     }
     if ( modelVersion >= 22 )
     {
         sqlite::Tools::executeRequest( connection,
-            "CREATE INDEX IF NOT EXISTS media_folder_id_idx ON " +
-                Media::Table::Name + "(folder_id)" );
+                                       index( Indexes::Folder, modelVersion ) );
     }
     if ( modelVersion >= 24 )
     {
         sqlite::Tools::executeRequest( connection,
-            "CREATE INDEX IF NOT EXISTS media_group_id_idx ON " +
-                Media::Table::Name + "(group_id)" );
+                                       index( Indexes::MediaGroup, modelVersion ) );
     }
 }
 
@@ -1278,6 +1268,40 @@ std::string Media::trigger( Triggers trigger, uint32_t dbModel )
 
         default:
             assert( !"Invalid trigger provided" );
+    }
+    return "<invalid request>";
+}
+
+std::string Media::index( Indexes index, uint32_t dbModel )
+{
+    switch ( index )
+    {
+        case Indexes::LastPlayedDate:
+            return "CREATE INDEX IF NOT EXISTS index_last_played_date"
+                        " ON " + Table::Name + "(last_played_date DESC)";
+        case Indexes::Presence:
+            return "CREATE INDEX IF NOT EXISTS index_media_presence"
+                        " ON " + Table::Name + "(is_present)";
+        case Indexes::Types:
+            return "CREATE INDEX IF NOT EXISTS media_types_idx"
+                        " ON " + Table::Name + "(type, subtype)";
+        case Indexes::LastUsageDate:
+            assert( dbModel >= 14 );
+            // Don't create this index before model 14, as the real_last_played_date
+            // column was introduced in model version 14
+            return "CREATE INDEX IF NOT EXISTS media_last_usage_dates_idx"
+                        " ON " + Table::Name + "(last_played_date, "
+                            "real_last_played_date, insertion_date)";
+        case Indexes::Folder:
+            assert( dbModel >= 22 );
+            return "CREATE INDEX IF NOT EXISTS media_folder_id_idx ON " +
+                        Table::Name + "(folder_id)";
+        case Indexes::MediaGroup:
+            assert( dbModel >= 24 );
+            return "CREATE INDEX IF NOT EXISTS media_group_id_idx ON " +
+                        Table::Name + "(group_id)";
+        default:
+            assert( !"Invalid index provided" );
     }
     return "<invalid request>";
 }
