@@ -39,6 +39,10 @@ public:
         static const std::string PrimaryKeyColumn;
         static int64_t ShowEpisode::*const PrimaryKey;
     };
+    enum class Indexes : uint8_t
+    {
+        MediaIdShowId,
+    };
 
     ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row );
     ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, uint32_t seasonId,
@@ -54,8 +58,9 @@ public:
     virtual ShowPtr show() override;
 
     static void createTable( sqlite::Connection* dbConnection );
-    static void createTrigger( sqlite::Connection* dbConnection );
+    static void createIndexes( sqlite::Connection* dbConnection );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
+    static std::string index( Indexes index, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     static std::shared_ptr<ShowEpisode> create( MediaLibraryPtr ml, int64_t mediaId,
                                                 uint32_t seasonId,

@@ -214,7 +214,7 @@ void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
     Playlist::createIndexes( dbConn, dbModelVersion );
     Label::createTriggers( dbConn );
     Show::createTriggers( dbConn, dbModelVersion );
-    ShowEpisode::createTrigger( dbConn );
+    ShowEpisode::createIndexes( dbConn );
     Thumbnail::createTriggers( dbConn );
     parser::Task::createTriggers( dbConn, dbModelVersion );
     AudioTrack::createIndexes( dbConn );
@@ -1680,7 +1680,7 @@ void MediaLibrary::migrateModel19to20()
     AlbumTrack::createIndexes( dbConn );
     Artist::createTriggers( dbConn, 20 );
     Genre::createTriggers( dbConn );
-    ShowEpisode::createTrigger( dbConn );
+    ShowEpisode::createIndexes( dbConn );
     Folder::createTriggers( dbConn, 20 );
     Folder::createIndexes( dbConn, 20 );
     File::createIndexes( dbConn );

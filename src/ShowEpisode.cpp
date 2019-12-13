@@ -121,11 +121,10 @@ void ShowEpisode::createTable( sqlite::Connection* dbConnection )
                                    schema( Table::Name, Settings::DbModelVersion ) );
 }
 
-void ShowEpisode::createTrigger( sqlite::Connection* dbConnection )
+void ShowEpisode::createIndexes( sqlite::Connection* dbConnection )
 {
-    const std::string indexReq = "CREATE INDEX IF NOT EXISTS show_episode_media_show_idx ON " +
-            ShowEpisode::Table::Name + "(media_id, show_id)";
-    sqlite::Tools::executeRequest( dbConnection, indexReq );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::MediaIdShowId, Settings::DbModelVersion ) );
 }
 
 std::string ShowEpisode::schema( const std::string& tableName, uint32_t )
@@ -145,6 +144,13 @@ std::string ShowEpisode::schema( const std::string& tableName, uint32_t )
         "FOREIGN KEY(show_id) REFERENCES " + Show::Table::Name
             + "(id_show) ON DELETE CASCADE"
     ")";
+}
+
+std::string ShowEpisode::index( Indexes index, uint32_t )
+{
+    assert( index == Indexes::MediaIdShowId );
+    return "CREATE INDEX IF NOT EXISTS show_episode_media_show_idx ON " +
+               Table::Name + "(media_id, show_id)";
 }
 
 bool ShowEpisode::checkDbModel(MediaLibraryPtr ml)
