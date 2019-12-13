@@ -85,7 +85,7 @@ public:
     virtual Query<IMedia> videoFiles( const QueryParameters* params ) const override;
 
     virtual MediaGroupPtr createMediaGroup( std::string name ) override;
-    virtual std::shared_ptr<IMediaGroup> mediaGroup( int64_t id ) const override;
+    virtual MediaGroupPtr mediaGroup( int64_t id ) const override;
     virtual MediaGroupPtr mediaGroup( const std::string& name ) const override;
     virtual Query<IMediaGroup> mediaGroups( const QueryParameters* params ) const override;
     virtual Query<IMediaGroup> searchMediaGroups( const std::string& pattern,

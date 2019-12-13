@@ -112,7 +112,7 @@ bool MediaGroup::remove( int64_t mediaId )
     return Media::setMediaGroup( m_ml, mediaId, 0 );
 }
 
-std::shared_ptr<IMediaGroup> MediaGroup::createSubgroup( const std::string& name )
+MediaGroupPtr MediaGroup::createSubgroup( const std::string& name )
 {
     return create( m_ml, m_id, name );
 }
@@ -129,7 +129,7 @@ bool MediaGroup::isSubgroup() const
     return m_parentId != 0;
 }
 
-std::shared_ptr<IMediaGroup> MediaGroup::parent() const
+MediaGroupPtr MediaGroup::parent() const
 {
     return fetch( m_ml, m_parentId );
 }

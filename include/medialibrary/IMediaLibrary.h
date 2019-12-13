@@ -462,7 +462,7 @@ public:
      * @return A media group, or nullptr if the group doesn't exist, or in case
      *         of sporadic failure.
      */
-    virtual std::shared_ptr<IMediaGroup> mediaGroup( int64_t id ) const = 0;
+    virtual MediaGroupPtr mediaGroup( int64_t id ) const = 0;
     /**
      * @brief mediaGroup Returns a media group with the given name
      * @return A media group, or nullptr if the group doesn't exist, or in case

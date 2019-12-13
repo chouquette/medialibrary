@@ -553,7 +553,7 @@ MediaGroupPtr MediaLibrary::createMediaGroup( std::string name )
     return MediaGroup::create( this, 0, std::move( name ) );
 }
 
-std::shared_ptr<IMediaGroup> MediaLibrary::mediaGroup( int64_t id ) const
+MediaGroupPtr MediaLibrary::mediaGroup( int64_t id ) const
 {
     return MediaGroup::fetch( this, id );
 }

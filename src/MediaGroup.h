@@ -64,10 +64,10 @@ public:
     virtual bool add(int64_t mediaId ) override;
     virtual bool remove( IMedia& media ) override;
     virtual bool remove( int64_t mediaId ) override;
-    virtual std::shared_ptr<IMediaGroup> createSubgroup( const std::string& name ) override;
+    virtual MediaGroupPtr createSubgroup( const std::string& name ) override;
     virtual Query<IMediaGroup> subgroups( const QueryParameters* params ) const override;
     virtual bool isSubgroup() const override;
-    virtual std::shared_ptr<IMediaGroup> parent() const override;
+    virtual MediaGroupPtr parent() const override;
     virtual Query<IMedia> media( IMedia::Type mediaType,
                                  const QueryParameters* params = nullptr ) override;
     virtual Query<IMedia> searchMedia( const std::string& pattern,

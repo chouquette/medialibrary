@@ -122,7 +122,7 @@ public:
      *
      * Names are required to be unique for a given parent group.
      */
-    virtual std::shared_ptr<IMediaGroup> createSubgroup( const std::string& name ) = 0;
+    virtual MediaGroupPtr createSubgroup( const std::string& name ) = 0;
     /**
      * @brief subgroups Returns the subgroups for this group
      *
@@ -137,7 +137,7 @@ public:
     /**
      * @brief parent Returns this group's parent group, or nullptr if there are none
      */
-    virtual std::shared_ptr<IMediaGroup> parent() const = 0;
+    virtual MediaGroupPtr parent() const = 0;
     /**
      * @brief path Returns a virtual path to this group
      *
