@@ -229,11 +229,10 @@ void File::createTable( sqlite::Connection* dbConnection )
 
 void File::createTriggers( sqlite::Connection* dbConnection )
 {
-    const std::string reqs[] = {
-        #include "database/tables/File_triggers_v14.sql"
-    };
-    for ( const auto& req : reqs )
-        sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::MediaId, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::FolderId, Settings::DbModelVersion ) );
 }
 
 std::string File::schema( const std::string& tableName, uint32_t )
@@ -263,7 +262,23 @@ std::string File::schema( const std::string& tableName, uint32_t )
         + "(id_folder) ON DELETE CASCADE,"
 
         "UNIQUE(mrl,folder_id) ON CONFLICT FAIL"
-    ")";
+          ")";
+}
+
+std::string File::index( Indexes index, uint32_t )
+{
+    switch ( index )
+    {
+        case Indexes::MediaId:
+            return "CREATE INDEX IF NOT EXISTS file_media_id_index ON " +
+                        Table::Name + "(media_id)";
+        case Indexes::FolderId:
+            return "CREATE INDEX IF NOT EXISTS file_folder_id_index ON " +
+                        Table::Name + "(folder_id)";
+        default:
+            assert( !"Invalid index provided" );
+    }
+    return "<invalid request>";
 }
 
 bool File::checkDbModel(MediaLibraryPtr ml)

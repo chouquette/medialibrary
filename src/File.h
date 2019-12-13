@@ -39,6 +39,12 @@ public:
         static const std::string PrimaryKeyColumn;
         static int64_t File::*const PrimaryKey;
     };
+    enum class Indexes : uint8_t
+    {
+        MediaId,
+        FolderId,
+    };
+
     File( MediaLibraryPtr ml, sqlite::Row& row );
     File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type, const fs::IFile& file, int64_t folderId, bool isRemovable );
     File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type, const std::string& mrl );
@@ -70,6 +76,7 @@ public:
     static void createTable( sqlite::Connection* dbConnection );
     static void createTriggers( sqlite::Connection* dbConnection );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
+    static std::string index( Indexes index, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     static std::shared_ptr<File> createFromMedia( MediaLibraryPtr ml, int64_t mediaId, Type type,
                                                   const fs::IFile& file, int64_t folderId, bool isRemovable );
