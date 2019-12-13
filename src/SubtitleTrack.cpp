@@ -91,9 +91,8 @@ void SubtitleTrack::createTable( sqlite::Connection* dbConnection )
 
 void SubtitleTrack::createTriggers( sqlite::Connection* dbConnection )
 {
-    const std::string indexReq = "CREATE INDEX IF NOT EXISTS subtitle_track_media_idx "
-            " ON " + Table::Name + "(media_id)";
-    sqlite::Tools::executeRequest( dbConnection, indexReq );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::MediaId, Settings::DbModelVersion ) );
 }
 
 std::string SubtitleTrack::schema( const std::string& tableName, uint32_t )
@@ -110,6 +109,13 @@ std::string SubtitleTrack::schema( const std::string& tableName, uint32_t )
         "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name +
             "(id_media) ON DELETE CASCADE"
     ")";
+}
+
+std::string SubtitleTrack::index( Indexes index, uint32_t )
+{
+    assert( index == Indexes::MediaId );
+    return "CREATE INDEX IF NOT EXISTS subtitle_track_media_idx "
+               " ON " + Table::Name + "(media_id)";
 }
 
 bool SubtitleTrack::checkDbModel( MediaLibraryPtr ml )

@@ -37,6 +37,11 @@ public:
         static const std::string PrimaryKeyColumn;
         static int64_t SubtitleTrack::* const PrimaryKey;
     };
+    enum class Indexes : uint8_t
+    {
+        MediaId
+    };
+
     SubtitleTrack( MediaLibraryPtr ml, sqlite::Row& row );
     SubtitleTrack( MediaLibraryPtr ml, std::string codec, std::string language,
                    std::string description, std::string encoding );
@@ -49,6 +54,7 @@ public:
     static void createTable( sqlite::Connection* dbConnection );
     static void createTriggers( sqlite::Connection* dbConnection );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
+    static std::string index( Indexes index, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     static std::shared_ptr<SubtitleTrack> create( MediaLibraryPtr ml,
                 std::string codec, std::string language, std::string description,
