@@ -43,6 +43,10 @@ class Label : public ILabel, public DatabaseHelpers<Label>
         {
             static const std::string Name;
         };
+        enum class Triggers : uint8_t
+        {
+            DeleteFts,
+        };
 
         Label( MediaLibraryPtr ml, sqlite::Row& row );
         Label( MediaLibraryPtr ml, const std::string& name );
@@ -54,6 +58,7 @@ class Label : public ILabel, public DatabaseHelpers<Label>
 
         static LabelPtr create( MediaLibraryPtr ml, const std::string& name );
         static std::string schema( const std::string& tableName, uint32_t dbModel );
+        static std::string trigger( Triggers trigger, uint32_t dbModel );
         static bool checkDbModel( MediaLibraryPtr ml );
         static void createTable( sqlite::Connection* dbConnection );
         static void createTriggers( sqlite::Connection* dbConnection );

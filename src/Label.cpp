@@ -104,6 +104,18 @@ std::string Label::schema( const std::string& tableName, uint32_t )
     ")";
 }
 
+std::string Label::trigger( Triggers trigger, uint32_t  )
+{
+    assert( trigger == Triggers::DeleteFts );
+    return "CREATE TRIGGER IF NOT EXISTS delete_label_fts "
+           "BEFORE DELETE ON " + Table::Name +
+           " BEGIN"
+           " UPDATE " + Media::FtsTable::Name +
+                " SET labels = TRIM(REPLACE(labels, old.name, ''))"
+                " WHERE labels MATCH old.name;"
+           " END";
+}
+
 bool Label::checkDbModel( MediaLibraryPtr ml )
 {
     return sqlite::Tools::checkSchema( ml->getConn(),
@@ -126,13 +138,8 @@ void Label::createTable( sqlite::Connection* dbConnection )
 
 void Label::createTriggers( sqlite::Connection* dbConnection )
 {
-    const std::string ftsTrigger = "CREATE TRIGGER IF NOT EXISTS delete_label_fts "
-            "BEFORE DELETE ON " + Label::Table::Name +
-            " BEGIN"
-            " UPDATE " + Media::Table::Name + "Fts SET labels = TRIM(REPLACE(labels, old.name, ''))"
-            " WHERE labels MATCH old.name;"
-            " END";
-    sqlite::Tools::executeRequest( dbConnection, ftsTrigger );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::DeleteFts, Settings::DbModelVersion ) );
 }
 
 }
