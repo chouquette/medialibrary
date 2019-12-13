@@ -1079,13 +1079,6 @@ void Media::createTable( sqlite::Connection* connection )
 void Media::createTriggers( sqlite::Connection* connection, uint32_t modelVersion )
 {
     sqlite::Tools::executeRequest( connection,
-                                   index( Indexes::LastPlayedDate, modelVersion ) );
-    sqlite::Tools::executeRequest( connection,
-                                   index( Indexes::Presence, modelVersion ) );
-    sqlite::Tools::executeRequest( connection,
-                                   index( Indexes::Types, modelVersion ) );
-
-    sqlite::Tools::executeRequest( connection,
                                    trigger( Triggers::IsPresent, modelVersion ) );
     sqlite::Tools::executeRequest( connection,
                                    trigger( Triggers::CascadeFileDeletion, modelVersion ) );
@@ -1101,7 +1094,20 @@ void Media::createTriggers( sqlite::Connection* connection, uint32_t modelVersio
                                        trigger( Triggers::IncrementNbPlaylist, modelVersion ) );
         sqlite::Tools::executeRequest( connection,
                                        trigger( Triggers::DecrementNbPlaylist, modelVersion ) );
+    }
+}
 
+void Media::createIndexes( sqlite::Connection* connection, uint32_t modelVersion )
+{
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::LastPlayedDate, modelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::Presence, modelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::Types, modelVersion ) );
+
+    if ( modelVersion >= 14 )
+    {
         sqlite::Tools::executeRequest( connection,
                                        index( Indexes::LastUsageDate, modelVersion ) );
     }

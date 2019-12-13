@@ -207,6 +207,7 @@ void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
     AlbumTrack::createIndexes( dbConn );
     Artist::createTriggers( dbConn, dbModelVersion );
     Media::createTriggers( dbConn, dbModelVersion );
+    Media::createIndexes( dbConn, dbModelVersion );
     File::createIndexes( dbConn );
     Genre::createTriggers( dbConn );
     Playlist::createTriggers( dbConn, dbModelVersion );
@@ -1457,6 +1458,7 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     VideoTrack::createTable( dbConn );
     // Re-create triggers removed in the process
     Media::createTriggers( dbConn, 14 );
+    Media::createIndexes( dbConn, 14 );
     AlbumTrack::createIndexes( dbConn );
     Album::createTriggers( dbConn, 14 );
     Album::createIndexes( dbConn, 14 );
@@ -1565,6 +1567,7 @@ void MediaLibrary::migrateModel16to17()
         sqlite::Tools::executeRequest( dbConn, req );
 
     Media::createTriggers( dbConn, 17 );
+    Media::createIndexes( dbConn, 17 );
     Album::createTriggers( dbConn, 17 );
     Album::createIndexes( dbConn, 17 );
     Artist::createTriggers( dbConn, 17 );
@@ -1740,6 +1743,7 @@ void MediaLibrary::migrateModel22to23()
 
     Artist::createTriggers( dbConn, 23 );
     Media::createTriggers( dbConn, 23 );
+    Media::createIndexes( dbConn, 23 );
     Thumbnail::createTriggers( dbConn );
     Album::createTriggers( dbConn, 23 );
     Folder::createTriggers( dbConn, 23 );
@@ -1767,6 +1771,7 @@ void MediaLibrary::migrateModel23to24()
     m_settings.load();
 
     Media::createTriggers( dbConn, 24 );
+    Media::createIndexes( dbConn, 24 );
     Album::createTriggers( dbConn, 24 );
     Artist::createTriggers( dbConn, 24 );
     Thumbnail::createTriggers( dbConn );
