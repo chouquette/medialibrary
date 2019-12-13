@@ -44,6 +44,14 @@ public:
     {
         static const std::string Name;
     };
+    enum class Triggers : uint8_t
+    {
+        InsertFts,
+        DeleteFts,
+        IncrementNbEpisode,
+        DecrementNbEpisode,
+        UpdateIsPresent,
+    };
 
     Show( MediaLibraryPtr ml, sqlite::Row& row );
     Show( MediaLibraryPtr ml, const std::string& title );
@@ -69,6 +77,7 @@ public:
     static void createTable( sqlite::Connection* dbConnection );
     static void createTriggers(sqlite::Connection* dbConnection , uint32_t dbModelVersion);
     static std::string schema( const std::string& tableName, uint32_t dbModel );
+    static std::string trigger( Triggers trigger, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     static std::shared_ptr<Show> create( MediaLibraryPtr ml, const std::string& title );
 

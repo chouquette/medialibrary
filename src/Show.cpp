@@ -202,52 +202,20 @@ void Show::createTable( sqlite::Connection* dbConnection )
 
 void Show::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion )
 {
-    const std::string insertTrigger = "CREATE TRIGGER IF NOT EXISTS insert_show_fts"
-            " AFTER INSERT ON " + Show::Table::Name +
-            " BEGIN"
-            " INSERT INTO " + Show::FtsTable::Name + "(rowid,title) VALUES(new.id_show, new.title);"
-            " END";
-    const std::string deleteTrigger = "CREATE TRIGGER IF NOT EXISTS delete_show_fts"
-            " BEFORE DELETE ON " + Show::Table::Name +
-            " BEGIN"
-            " DELETE FROM " + Show::FtsTable::Name + " WHERE rowid = old.id_show;"
-            " END";
-    sqlite::Tools::executeRequest( dbConnection, insertTrigger );
-    sqlite::Tools::executeRequest( dbConnection, deleteTrigger );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::InsertFts, dbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::DeleteFts, dbModelVersion ) );
 
     if ( dbModelVersion < 23 )
         return;
 
-    const std::string incrementNbEpisodeTrigger = "CREATE TRIGGER IF NOT EXISTS"
-            " show_increment_nb_episode AFTER INSERT ON " + ShowEpisode::Table::Name +
-            " BEGIN"
-            " UPDATE " + Table::Name +
-                " SET nb_episodes = nb_episodes + 1, is_present = is_present + 1"
-                " WHERE id_show = new.show_id;"
-            " END";
-    const std::string decrementNbEpisodeTrigger = "CREATE TRIGGER IF NOT EXISTS"
-            " show_decrement_nb_episode AFTER DELETE ON " + ShowEpisode::Table::Name +
-            " BEGIN"
-            " UPDATE " + Table::Name +
-                " SET nb_episodes = nb_episodes - 1, is_present = is_present - 1"
-                " WHERE id_show = old.show_id;"
-            " END";
-    const std::string updateIsPresentTrigger = "CREATE TRIGGER IF NOT EXISTS"
-            " show_update_is_present AFTER UPDATE OF "
-                "is_present ON " + Media::Table::Name +
-            " WHEN new.subtype = " +
-                std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
-                                    IMedia::SubType::ShowEpisode ) ) +
-            " AND new.is_present != old.is_present"
-            " BEGIN "
-            " UPDATE " + Table::Name + " SET is_present=is_present +"
-                " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
-                " WHERE id_show = (SELECT show_id FROM " + ShowEpisode::Table::Name +
-                    " WHERE media_id = new.id_media);"
-            " END";
-    sqlite::Tools::executeRequest( dbConnection, incrementNbEpisodeTrigger );
-    sqlite::Tools::executeRequest( dbConnection, decrementNbEpisodeTrigger );
-    sqlite::Tools::executeRequest( dbConnection, updateIsPresentTrigger );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::IncrementNbEpisode, dbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::DecrementNbEpisode, dbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::UpdateIsPresent, dbModelVersion ) );
 }
 
 std::string Show::schema( const std::string& tableName, uint32_t dbModelVersion )
@@ -282,6 +250,76 @@ std::string Show::schema( const std::string& tableName, uint32_t dbModelVersion 
        "is_present UNSIGNED INTEGER NOT NULL DEFAULT 0 "
             "CHECK(is_present <= nb_episodes)"
     ")";
+}
+
+std::string Show::trigger( Show::Triggers trigger, uint32_t dbModel )
+{
+    switch ( trigger )
+    {
+        case Triggers::InsertFts:
+        {
+            return "CREATE TRIGGER IF NOT EXISTS insert_show_fts"
+                   " AFTER INSERT ON " + Table::Name +
+                   " BEGIN"
+                   " INSERT INTO " + FtsTable::Name + "(rowid,title)"
+                        " VALUES(new.id_show, new.title);"
+                   " END";
+        }
+        case Triggers::DeleteFts:
+        {
+            return "CREATE TRIGGER IF NOT EXISTS delete_show_fts"
+                   " BEFORE DELETE ON " + Table::Name +
+                   " BEGIN"
+                   " DELETE FROM " + FtsTable::Name +
+                        " WHERE rowid = old.id_show;"
+                   " END";
+        }
+        case Triggers::IncrementNbEpisode:
+        {
+            assert( dbModel >= 23 );
+            return "CREATE TRIGGER IF NOT EXISTS show_increment_nb_episode"
+                   " AFTER INSERT ON " + ShowEpisode::Table::Name +
+                   " BEGIN"
+                   " UPDATE " + Table::Name +
+                       " SET nb_episodes = nb_episodes + 1,"
+                       " is_present = is_present + 1"
+                            " WHERE id_show = new.show_id;"
+                   " END";
+        }
+        case Triggers::DecrementNbEpisode:
+        {
+            assert( dbModel >= 23 );
+            return "CREATE TRIGGER IF NOT EXISTS"
+                   " show_decrement_nb_episode AFTER DELETE ON " + ShowEpisode::Table::Name +
+                   " BEGIN"
+                   " UPDATE " + Table::Name +
+                       " SET nb_episodes = nb_episodes - 1,"
+                       " is_present = is_present - 1"
+                            " WHERE id_show = old.show_id;"
+                   " END";
+        }
+        case Triggers::UpdateIsPresent:
+        {
+            assert( dbModel >= 23 );
+            return "CREATE TRIGGER IF NOT EXISTS"
+                   " show_update_is_present AFTER UPDATE OF "
+                       "is_present ON " + Media::Table::Name +
+                   " WHEN new.subtype = " +
+                       std::to_string(
+                        static_cast<typename std::underlying_type<IMedia::SubType>::type>(
+                                           IMedia::SubType::ShowEpisode ) ) +
+                   " AND new.is_present != old.is_present"
+                   " BEGIN "
+                   " UPDATE " + Table::Name + " SET is_present=is_present +"
+                       " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
+                       " WHERE id_show = (SELECT show_id FROM " + ShowEpisode::Table::Name +
+                           " WHERE media_id = new.id_media);"
+                   " END";
+        }
+        default:
+            assert( !"Invalid trigger provided" );
+    }
+    return "<invalid request>";
 }
 
 bool Show::checkDbModel(MediaLibraryPtr ml)
