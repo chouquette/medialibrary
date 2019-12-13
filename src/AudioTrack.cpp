@@ -106,9 +106,8 @@ void AudioTrack::createTable( sqlite::Connection* dbConnection )
 
 void AudioTrack::createIndexes(sqlite::Connection* dbConnection)
 {
-    const std::string indexReq = "CREATE INDEX IF NOT EXISTS "
-            "audio_track_media_idx ON " + Table::Name + "(media_id)";
-    sqlite::Tools::executeRequest( dbConnection, indexReq );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::MediaId, Settings::DbModelVersion ) );
 }
 
 std::string AudioTrack::schema( const std::string& tableName, uint32_t )
@@ -126,7 +125,14 @@ std::string AudioTrack::schema( const std::string& tableName, uint32_t )
         "media_id UNSIGNED INT,"
         "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
             + "(id_media) ON DELETE CASCADE"
-    ")";
+              ")";
+}
+
+std::string AudioTrack::index( AudioTrack::Indexes index, uint32_t )
+{
+    assert( index == Indexes::MediaId );
+    return "CREATE INDEX IF NOT EXISTS audio_track_media_idx ON "
+               + Table::Name + "(media_id)";
 }
 
 bool AudioTrack::checkDbModel( MediaLibraryPtr ml )

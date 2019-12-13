@@ -38,6 +38,11 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack>
             static const std::string PrimaryKeyColumn;
             static int64_t AudioTrack::* const PrimaryKey;
         };
+        enum class Indexes : uint8_t
+        {
+            MediaId,
+        };
+
         AudioTrack(MediaLibraryPtr ml, sqlite::Row& row );
         AudioTrack( MediaLibraryPtr ml, const std::string& codec, unsigned int bitrate,
                     unsigned int sampleRate, unsigned int nbChannels, const std::string& language,
@@ -54,6 +59,7 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack>
         static void createTable( sqlite::Connection* dbConnection );
         static void createIndexes( sqlite::Connection* dbConnection );
         static std::string schema( const std::string& tableName, uint32_t dbModel );
+        static std::string index( Indexes index, uint32_t dbModel );
         static bool checkDbModel( MediaLibraryPtr ml );
         static std::shared_ptr<AudioTrack> create( MediaLibraryPtr ml, const std::string& codec,
                                                    unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels,
