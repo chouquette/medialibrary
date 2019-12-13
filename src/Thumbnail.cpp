@@ -354,11 +354,23 @@ void Thumbnail::createTable( sqlite::Connection* dbConnection )
 
 void Thumbnail::createTriggers( sqlite::Connection* dbConnection )
 {
-    const std::string reqs[] = {
-        #include "database/tables/Thumbnail_triggers_v18.sql"
-    };
-    for ( const auto& req : reqs )
-        sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection,
+                trigger( Triggers::AutoDeleteAlbum, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                trigger( Triggers::AutoDeleteArtist, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                trigger( Triggers::AutoDeleteMedia, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                trigger( Triggers::IncrementRefcount, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                trigger( Triggers::DecrementRefcount, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                trigger( Triggers::UpdateRefcount, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                trigger( Triggers::DeleteUnused, Settings::DbModelVersion ) );
+
+    sqlite::Tools::executeRequest( dbConnection, "CREATE INDEX IF NOT EXISTS thumbnail_link_index "
+                "ON " + Table::Name + "(id_thumbnail)" );
 }
 
 std::string Thumbnail::schema( const std::string& tableName, uint32_t dbModel )
@@ -414,6 +426,108 @@ std::string Thumbnail::schema( const std::string& tableName, uint32_t dbModel )
         "shared_counter INTEGER NOT NULL DEFAULT 0"
     ")";
 
+}
+
+std::string Thumbnail::trigger(Thumbnail::Triggers trigger, uint32_t dbModel)
+{
+    switch ( trigger )
+    {
+        case Triggers::AutoDeleteAlbum:
+            return "CREATE TRIGGER IF NOT EXISTS auto_delete_album_thumbnail"
+                   " AFTER DELETE ON " + Album::Table::Name +
+                   " BEGIN"
+                       " DELETE FROM " + LinkingTable::Name + " WHERE"
+                           " entity_id = old.id_album AND"
+                           " entity_type = " + std::to_string(
+                               static_cast<std::underlying_type_t<EntityType>>(
+                                   EntityType::Album ) ) + ";"
+                   " END";
+        case Triggers::AutoDeleteArtist:
+            return "CREATE TRIGGER IF NOT EXISTS auto_delete_artist_thumbnail"
+                   " AFTER DELETE ON " + Artist::Table::Name +
+                   " BEGIN"
+                       " DELETE FROM " + LinkingTable::Name + " WHERE"
+                           " entity_id = old.id_artist AND"
+                           " entity_type = " + std::to_string(
+                               static_cast<std::underlying_type_t<EntityType>>(
+                                   EntityType::Artist ) ) + ";"
+                   " END";
+        case Triggers::AutoDeleteMedia:
+            return "CREATE TRIGGER IF NOT EXISTS auto_delete_media_thumbnail"
+                   " AFTER DELETE ON " + Media::Table::Name +
+                   " BEGIN"
+                       " DELETE FROM " + LinkingTable::Name + " WHERE"
+                           " entity_id = old.id_media AND"
+                           " entity_type = " + std::to_string(
+                               static_cast<std::underlying_type_t<EntityType>>(
+                                   EntityType::Media ) ) + ";"
+                   " END";
+
+        case Triggers::IncrementRefcount:
+            assert( dbModel >= 18 );
+            return "CREATE TRIGGER IF NOT EXISTS incr_thumbnail_refcount "
+                   "AFTER INSERT ON " + LinkingTable::Name + " "
+                   "BEGIN "
+                       "UPDATE " + Table::Name + " "
+                           "SET shared_counter = shared_counter + 1 "
+                           "WHERE id_thumbnail = new.thumbnail_id;"
+                   "END";
+        case Triggers::DecrementRefcount:
+            assert( dbModel >= 18 );
+            return "CREATE TRIGGER IF NOT EXISTS decr_thumbnail_refcount "
+                   "AFTER DELETE ON " + LinkingTable::Name + " "
+                   "BEGIN "
+                       "UPDATE " + Table::Name + " "
+                           "SET shared_counter = shared_counter - 1 "
+                           "WHERE id_thumbnail = old.thumbnail_id;"
+                   "END";
+        case Triggers::UpdateRefcount:
+            assert( dbModel >= 18 );
+            return "CREATE TRIGGER IF NOT EXISTS update_thumbnail_refcount "
+                   "AFTER UPDATE OF thumbnail_id ON " + LinkingTable::Name + " "
+                   "WHEN old.thumbnail_id != new.thumbnail_id "
+                   "BEGIN "
+                       "UPDATE " + Table::Name +
+                           " SET shared_counter = shared_counter - 1"
+                               " WHERE id_thumbnail = old.thumbnail_id;"
+                       "UPDATE " + Table::Name +
+                           " SET shared_counter = shared_counter + 1"
+                               " WHERE id_thumbnail = new.thumbnail_id;"
+                   "END";
+        case Triggers::DeleteUnused:
+        {
+            if ( dbModel <= 17 )
+            {
+                return "CREATE TRIGGER IF NOT EXISTS auto_delete_thumbnails_after_update"
+                       " AFTER UPDATE OF thumbnail_id ON " + LinkingTable::Name +
+                       " BEGIN "
+                           " DELETE FROM " + Table::Name +
+                           " WHERE id_thumbnail = old.thumbnail_id"
+                           " AND (SELECT COUNT(*) FROM " + LinkingTable::Name +
+                               " WHERE thumbnail_id = old.thumbnail_id) = 0;"
+                       "END;";
+            }
+            return "CREATE TRIGGER IF NOT EXISTS delete_unused_thumbnail "
+                   "AFTER UPDATE OF shared_counter ON " + Table::Name + " "
+                   "WHEN new.shared_counter = 0 "
+                   "BEGIN "
+                       "DELETE FROM " + Table::Name + " WHERE id_thumbnail = new.id_thumbnail;"
+                   "END";
+        }
+        case Triggers::DeleteAfterLinkingDelete:
+            assert( dbModel <= 17 );
+            return "CREATE TRIGGER IF NOT EXISTS auto_delete_thumbnails_after_delete"
+                   " AFTER DELETE ON " + LinkingTable::Name +
+                   " BEGIN "
+                       " DELETE FROM " + Table::Name +
+                       " WHERE id_thumbnail = old.thumbnail_id"
+                       " AND (SELECT COUNT(*) FROM " + LinkingTable::Name +
+                           " WHERE thumbnail_id = old.thumbnail_id) = 0;"
+                   "END";
+        default:
+            assert( !"Invalid trigger provided" );
+    }
+    return "<invalid request>";
 }
 
 bool Thumbnail::checkDbModel(MediaLibraryPtr ml)

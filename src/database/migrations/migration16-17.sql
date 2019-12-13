@@ -105,7 +105,11 @@ Artist::schema( Artist::Table::Name, 17 ),
 Thumbnail::schema( Thumbnail::Table::Name, 17 ),
 Thumbnail::schema( Thumbnail::LinkingTable::Name, 17 ),
 
-#include "database/tables/Thumbnail_triggers_v17.sql"
+Thumbnail::trigger( Thumbnail::Triggers::AutoDeleteAlbum, 17 ),
+Thumbnail::trigger( Thumbnail::Triggers::AutoDeleteArtist, 17 ),
+Thumbnail::trigger( Thumbnail::Triggers::AutoDeleteMedia, 17 ),
+Thumbnail::trigger( Thumbnail::Triggers::DeleteUnused, 17 ),
+Thumbnail::trigger( Thumbnail::Triggers::DeleteAfterLinkingDelete, 17 ),
 
 /**********************************************
  * Remove an old incorrectly migrated trigger *

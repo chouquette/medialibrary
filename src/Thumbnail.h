@@ -40,6 +40,19 @@ public:
     {
         static const std::string Name;
     };
+    enum class Triggers : uint8_t
+    {
+        AutoDeleteAlbum,
+        AutoDeleteArtist,
+        AutoDeleteMedia,
+        IncrementRefcount,
+        DecrementRefcount,
+        UpdateRefcount,
+        DeleteUnused,
+
+        // Deprecated since v18
+        DeleteAfterLinkingDelete,
+    };
 
     enum class Origin : uint8_t
     {
@@ -153,6 +166,7 @@ public:
     static void createTable( sqlite::Connection* dbConnection );
     static void createTriggers( sqlite::Connection* dbConnection );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
+    static std::string trigger( Triggers trigger, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     // This also hides the database helper variant, as we can't just select from
     // the thumbnail table. We need to get data from both the thumbnail & linking
