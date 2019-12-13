@@ -51,6 +51,14 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         {
             static const std::string Name;
         };
+        enum class Triggers : uint8_t
+        {
+            IsPresent,
+            AddTrack,
+            DeleteTrack,
+            InsertFts,
+            DeleteFts,
+        };
 
         Album( MediaLibraryPtr ml, sqlite::Row& row );
         Album( MediaLibraryPtr ml, const std::string& title );
@@ -110,6 +118,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         static void createTable( sqlite::Connection* dbConnection );
         static void createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion );
         static std::string schema( const std::string& tableName, uint32_t dbModel );
+        static std::string trigger( Triggers trigger, uint32_t dbModel );
         static bool checkDbModel( MediaLibraryPtr ml );
         static std::shared_ptr<Album> create( MediaLibraryPtr ml, const std::string& title );
         static std::shared_ptr<Album> createUnknownAlbum( MediaLibraryPtr ml, const Artist* artist );

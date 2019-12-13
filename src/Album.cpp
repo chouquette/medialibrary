@@ -509,79 +509,18 @@ void Album::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVe
 {
     const std::string indexReq = "CREATE INDEX IF NOT EXISTS album_artist_id_idx ON " +
             Table::Name + "(artist_id)";
-    if ( dbModelVersion < 23 )
-    {
-        static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS is_album_present AFTER UPDATE OF "
-                "is_present ON " + Media::Table::Name +
-                " WHEN new.subtype = " +
-                    std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
-                                        IMedia::SubType::AlbumTrack ) ) +
-                " BEGIN "
-                " UPDATE " + Table::Name + " SET is_present=is_present + "
-                    "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
-                    "WHERE id_album = (SELECT album_id FROM " + AlbumTrack::Table::Name + " "
-                        "WHERE media_id = new.id_media"
-                    ");"
-                " END";
-        sqlite::Tools::executeRequest( dbConnection, triggerReq );
-    }
-    else
-    {
-        static const std::string triggerReq = "CREATE TRIGGER IF NOT EXISTS album_is_present AFTER UPDATE OF "
-                "is_present ON " + Media::Table::Name +
-                " WHEN new.subtype = " +
-                    std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
-                                        IMedia::SubType::AlbumTrack ) ) +
-                " AND old.is_present != new.is_present"
-                " BEGIN "
-                " UPDATE " + Table::Name + " SET is_present=is_present + "
-                    "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
-                    "WHERE id_album = (SELECT album_id FROM " + AlbumTrack::Table::Name + " "
-                        "WHERE media_id = new.id_media"
-                    ");"
-                " END";
-        sqlite::Tools::executeRequest( dbConnection, triggerReq );
-    }
-    static const std::string deleteTriggerReq = "CREATE TRIGGER IF NOT EXISTS delete_album_track AFTER DELETE ON "
-             + AlbumTrack::Table::Name +
-            " BEGIN "
-            " UPDATE " + Table::Name +
-            " SET"
-                " nb_tracks = nb_tracks - 1,"
-                " is_present = is_present - 1,"
-                " duration = duration - old.duration"
-                " WHERE id_album = old.album_id;"
-            " DELETE FROM " + Table::Name +
-                " WHERE id_album=old.album_id AND nb_tracks = 0;"
-            " END";
-    static const std::string updateAddTrackTriggerReq = "CREATE TRIGGER IF NOT EXISTS add_album_track"
-            " AFTER INSERT ON " + AlbumTrack::Table::Name +
-            " BEGIN"
-            " UPDATE " + Table::Name +
-            " SET duration = duration + new.duration,"
-            " nb_tracks = nb_tracks + 1,"
-            " is_present = is_present + 1"
-            " WHERE id_album = new.album_id;"
-            " END";
-    static const std::string vtriggerInsert = "CREATE TRIGGER IF NOT EXISTS insert_album_fts AFTER INSERT ON "
-            + Table::Name +
-            // Skip unknown albums
-            " WHEN new.title IS NOT NULL"
-            " BEGIN"
-            " INSERT INTO " + FtsTable::Name + "(rowid, title) VALUES(new.id_album, new.title);"
-            " END";
-    static const std::string vtriggerDelete = "CREATE TRIGGER IF NOT EXISTS delete_album_fts BEFORE DELETE ON "
-            + Table::Name +
-            // Unknown album probably won't be deleted, but better safe than sorry
-            " WHEN old.title IS NOT NULL"
-            " BEGIN"
-            " DELETE FROM " + FtsTable::Name + " WHERE rowid = old.id_album;"
-            " END";
     sqlite::Tools::executeRequest( dbConnection, indexReq );
-    sqlite::Tools::executeRequest( dbConnection, deleteTriggerReq );
-    sqlite::Tools::executeRequest( dbConnection, updateAddTrackTriggerReq );
-    sqlite::Tools::executeRequest( dbConnection, vtriggerInsert );
-    sqlite::Tools::executeRequest( dbConnection, vtriggerDelete );
+
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::IsPresent, dbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::DeleteTrack, dbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::AddTrack, dbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::InsertFts, dbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::DeleteFts, dbModelVersion ) );
 }
 
 std::string Album::schema( const std::string& tableName, uint32_t dbModel )
@@ -640,6 +579,99 @@ std::string Album::schema( const std::string& tableName, uint32_t dbModel )
     }
     assert( !"Invalid table name provided" );
     return "<not a valid request>";
+}
+
+std::string Album::trigger( Triggers trigger, uint32_t dbModel )
+{
+    switch ( trigger )
+    {
+        case Triggers::IsPresent:
+        {
+            if ( dbModel < 23 )
+            {
+                return "CREATE TRIGGER IF NOT EXISTS is_album_present AFTER UPDATE OF"
+                        " is_present ON " + Media::Table::Name +
+                        " WHEN new.subtype = " +
+                            std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
+                                                IMedia::SubType::AlbumTrack ) ) +
+                        " BEGIN "
+                        " UPDATE " + Table::Name + " SET is_present=is_present + "
+                            "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
+                            "WHERE id_album = (SELECT album_id FROM " + AlbumTrack::Table::Name + " "
+                                "WHERE media_id = new.id_media"
+                            ");"
+                        " END";
+            }
+            else
+            {
+                return "CREATE TRIGGER IF NOT EXISTS album_is_present AFTER UPDATE OF"
+                       " is_present ON " + Media::Table::Name +
+                       " WHEN new.subtype = " +
+                           std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
+                                               IMedia::SubType::AlbumTrack ) ) +
+                       " AND old.is_present != new.is_present"
+                       " BEGIN "
+                       " UPDATE " + Table::Name + " SET is_present=is_present + "
+                           "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
+                           "WHERE id_album = (SELECT album_id FROM " + AlbumTrack::Table::Name + " "
+                               "WHERE media_id = new.id_media"
+                           ");"
+                       " END";
+            }
+        }
+        case Triggers::AddTrack:
+        {
+            return "CREATE TRIGGER IF NOT EXISTS add_album_track"
+                   " AFTER INSERT ON " + AlbumTrack::Table::Name +
+                   " BEGIN"
+                   " UPDATE " + Table::Name +
+                        " SET duration = duration + new.duration,"
+                        " nb_tracks = nb_tracks + 1,"
+                        " is_present = is_present + 1"
+                        " WHERE id_album = new.album_id;"
+                   " END";
+        }
+        case Triggers::DeleteTrack:
+        {
+            return "CREATE TRIGGER IF NOT EXISTS delete_album_track"
+                        " AFTER DELETE ON " + AlbumTrack::Table::Name +
+                   " BEGIN "
+                   " UPDATE " + Table::Name +
+                        " SET"
+                            " nb_tracks = nb_tracks - 1,"
+                            " is_present = is_present - 1,"
+                            " duration = duration - old.duration"
+                            " WHERE id_album = old.album_id;"
+                        " DELETE FROM " + Table::Name +
+                            " WHERE id_album=old.album_id AND nb_tracks = 0;"
+                   " END";
+        }
+        case Triggers::InsertFts:
+        {
+            return "CREATE TRIGGER IF NOT EXISTS insert_album_fts"
+                    " AFTER INSERT ON " + Table::Name +
+                    // Skip unknown albums
+                    " WHEN new.title IS NOT NULL"
+                    " BEGIN"
+                        " INSERT INTO " + FtsTable::Name + "(rowid, title)"
+                            " VALUES(new.id_album, new.title);"
+                    " END";
+        }
+        case Triggers::DeleteFts:
+        {
+            return "CREATE TRIGGER IF NOT EXISTS delete_album_fts"
+                    " BEFORE DELETE ON " + Table::Name +
+                    // Unknown album probably won't be deleted, but better safe than sorry
+                    " WHEN old.title IS NOT NULL"
+                    " BEGIN"
+                        " DELETE FROM " + FtsTable::Name +
+                            " WHERE rowid = old.id_album;"
+                    " END";
+        }
+        default:
+            assert( !"Invalid trigger provided" );
+    }
+    return "<Invalid request provided>";
 }
 
 bool Album::checkDbModel( MediaLibraryPtr ml )
