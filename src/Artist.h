@@ -50,6 +50,19 @@ public:
     {
         static const std::string Name;
     };
+    enum class Triggers : uint8_t
+    {
+        HasTrackPresent,
+        HasAlbumRemaining,
+        DeleteArtistsWithoutTracks,
+        IncrementNbTracks,
+        DecrementNbTracks,
+        UpdateNbAlbums,
+        DecrementNbAlbums,
+        IncrementNbAlbums,
+        InsertFts,
+        DeleteFts,
+    };
 
     Artist( MediaLibraryPtr ml, sqlite::Row& row );
     Artist( MediaLibraryPtr ml, const std::string& name );
@@ -96,6 +109,7 @@ public:
     static void createTable( sqlite::Connection* dbConnection );
     static void createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion );
     static std::string schema( const std::string& tableName, uint32_t dbModelVersion );
+    static std::string trigger( Triggers trigger, uint32_t dbModelVersion );
     static bool checkDbModel( MediaLibraryPtr ml );
     static bool createDefaultArtists( sqlite::Connection* dbConnection );
     static std::shared_ptr<Artist> create( MediaLibraryPtr ml, const std::string& name );
