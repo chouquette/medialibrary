@@ -91,91 +91,18 @@ void Folder::createTriggers( sqlite::Connection* connection, uint32_t modelVersi
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( connection, req );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::InsertFts, modelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::DeleteFts, modelVersion ) );
     if ( modelVersion >= 14 )
     {
-        const std::string v14Reqs[] = {
-            "CREATE TRIGGER IF NOT EXISTS update_folder_nb_media_on_insert "
-                "AFTER INSERT ON " + Media::Table::Name + " "
-                "WHEN new.folder_id IS NOT NULL "
-            "BEGIN "
-                "UPDATE " + Folder::Table::Name + " SET "
-                    "nb_audio = nb_audio + "
-                        "(CASE new.type "
-                            "WHEN " +
-                                std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
-                                    IMedia::Type::Audio ) ) + " THEN 1 "
-                            "ELSE 0 "
-                        "END),"
-                    "nb_video = nb_video + "
-                        "(CASE new.type WHEN " +
-                            std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
-                                                IMedia::Type::Video ) ) + " THEN 1 "
-                            "ELSE 0 "
-                        "END) "
-                    "WHERE id_folder = new.folder_id;"
-            "END",
-
-            "CREATE TRIGGER IF NOT EXISTS update_folder_nb_media_on_update "
-                "AFTER UPDATE ON " + Media::Table::Name + " "
-                "WHEN new.folder_id IS NOT NULL AND old.type != new.type "
-            "BEGIN "
-                "UPDATE " + Folder::Table::Name + " SET "
-                    "nb_audio = nb_audio + "
-                        "(CASE old.type "
-                            "WHEN " +
-                                std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
-                                                IMedia::Type::Audio ) ) + " THEN -1 "
-                            "ELSE 0 "
-                        "END)"
-                        "+"
-                        "(CASE new.type "
-                            "WHEN " +
-                                std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
-                                                IMedia::Type::Audio ) ) + " THEN 1 "
-                            "ELSE 0 "
-                        "END)"
-                    ","
-                    "nb_video = nb_video + "
-                        "(CASE old.type "
-                            "WHEN " +
-                                std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
-                                                    IMedia::Type::Video ) ) + " THEN -1 "
-                            "ELSE 0 "
-                        "END)"
-                        "+"
-                        "(CASE new.type "
-                            "WHEN " +
-                                std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
-                                                    IMedia::Type::Video ) ) + " THEN 1 "
-                            "ELSE 0 "
-                        "END)"
-                    "WHERE id_folder = new.folder_id;"
-            "END",
-
-            "CREATE TRIGGER IF NOT EXISTS update_folder_nb_media_on_delete "
-                "AFTER DELETE ON " + Media::Table::Name + " "
-                "WHEN old.folder_id IS NOT NULL "
-            "BEGIN "
-                "UPDATE " + Folder::Table::Name + " SET "
-                    "nb_audio = nb_audio + "
-                        "(CASE old.type "
-                            "WHEN " +
-                                std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
-                                                    IMedia::Type::Audio ) ) + " THEN -1 "
-                            "ELSE 0 "
-                        "END),"
-                    "nb_video = nb_video + "
-                        "(CASE old.type "
-                            "WHEN " +
-                                std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
-                                                    IMedia::Type::Video ) ) + " THEN -1 "
-                            "ELSE 0 "
-                        "END) "
-                    "WHERE id_folder = old.folder_id;"
-            "END",
-        };
-        for ( const auto& req : v14Reqs )
-            sqlite::Tools::executeRequest( connection, req );
+        sqlite::Tools::executeRequest( connection,
+                                       trigger( Triggers::UpdateNbMediaOnIndex, modelVersion ) );
+        sqlite::Tools::executeRequest( connection,
+                                       trigger( Triggers::UpdateNbMediaOnDelete, modelVersion ) );
+        sqlite::Tools::executeRequest( connection,
+                                       trigger( Triggers::UpdateNbMediaOnUpdate, modelVersion ) );
     }
 }
 
@@ -218,7 +145,115 @@ std::string Folder::schema( const std::string& tableName, uint32_t dbModel )
         "(id_device) ON DELETE CASCADE,"
 
         "UNIQUE(path,device_id) ON CONFLICT FAIL"
-    ")";
+        ")";
+}
+
+std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
+{
+    switch ( trigger )
+    {
+        case Triggers::InsertFts:
+            return "CREATE TRIGGER IF NOT EXISTS insert_folder_fts "
+                        "AFTER INSERT ON " + Table::Name + " "
+                   "BEGIN "
+                       "INSERT INTO " + FtsTable::Name + "(rowid,name) "
+                           "VALUES(new.id_folder,new.name);"
+                   "END";
+        case Triggers::DeleteFts:
+            return "CREATE TRIGGER IF NOT EXISTS delete_folder_fts "
+                        "BEFORE DELETE ON " + Table::Name + " "
+                   "BEGIN "
+                       "DELETE FROM " + FtsTable::Name +
+                            " WHERE rowid = old.id_folder;"
+                   "END";
+        case Triggers::UpdateNbMediaOnIndex:
+            assert( dbModel >= 14 );
+            return "CREATE TRIGGER IF NOT EXISTS update_folder_nb_media_on_insert "
+                        "AFTER INSERT ON " + Media::Table::Name + " "
+                        "WHEN new.folder_id IS NOT NULL "
+                    "BEGIN "
+                        "UPDATE " + Table::Name + " SET "
+                        "nb_audio = nb_audio + "
+                            "(CASE new.type "
+                                "WHEN " +
+                                    std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                        IMedia::Type::Audio ) ) + " THEN 1 "
+                                "ELSE 0 "
+                            "END),"
+                        "nb_video = nb_video + "
+                            "(CASE new.type WHEN " +
+                                std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                                    IMedia::Type::Video ) ) + " THEN 1 "
+                                "ELSE 0 "
+                            "END) "
+                        "WHERE id_folder = new.folder_id;"
+                    "END";
+        case Triggers::UpdateNbMediaOnUpdate:
+            assert( dbModel >= 14 );
+            return "CREATE TRIGGER IF NOT EXISTS update_folder_nb_media_on_update "
+                       "AFTER UPDATE ON " + Media::Table::Name + " "
+                       "WHEN new.folder_id IS NOT NULL AND old.type != new.type "
+                   "BEGIN "
+                       "UPDATE " + Table::Name + " SET "
+                       "nb_audio = nb_audio + "
+                           "(CASE old.type "
+                               "WHEN " +
+                                   std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                                   IMedia::Type::Audio ) ) + " THEN -1 "
+                               "ELSE 0 "
+                           "END)"
+                           "+"
+                           "(CASE new.type "
+                               "WHEN " +
+                                   std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                                   IMedia::Type::Audio ) ) + " THEN 1 "
+                               "ELSE 0 "
+                           "END)"
+                       ","
+                       "nb_video = nb_video + "
+                           "(CASE old.type "
+                               "WHEN " +
+                                   std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                                       IMedia::Type::Video ) ) + " THEN -1 "
+                               "ELSE 0 "
+                           "END)"
+                           "+"
+                           "(CASE new.type "
+                               "WHEN " +
+                                   std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                                       IMedia::Type::Video ) ) + " THEN 1 "
+                               "ELSE 0 "
+                           "END)"
+                       "WHERE id_folder = new.folder_id;"
+                   "END";
+        case Triggers::UpdateNbMediaOnDelete:
+            assert( dbModel >= 14 );
+            return "CREATE TRIGGER IF NOT EXISTS update_folder_nb_media_on_delete "
+                        "AFTER DELETE ON " + Media::Table::Name + " "
+                        "WHEN old.folder_id IS NOT NULL "
+                    "BEGIN "
+                        "UPDATE " + Table::Name + " SET "
+                        "nb_audio = nb_audio + "
+                            "(CASE old.type "
+                                "WHEN " +
+                                    std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                                        IMedia::Type::Audio ) ) + " THEN -1 "
+                                "ELSE 0 "
+                            "END),"
+                        "nb_video = nb_video + "
+                            "(CASE old.type "
+                                "WHEN " +
+                                    std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                                        IMedia::Type::Video ) ) + " THEN -1 "
+                                "ELSE 0 "
+                            "END) "
+                        "WHERE id_folder = old.folder_id;"
+                    "END";
+
+        default:
+            assert( !"Invalid trigger provided" );
+    }
+    return "<invalid request>";
 }
 
 bool Folder::checkDbModel( MediaLibraryPtr ml )
