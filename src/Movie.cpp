@@ -89,12 +89,14 @@ bool Movie::setImdbId( const std::string& imdbId )
 
 void Movie::createTable( sqlite::Connection* dbConnection )
 {
-    const std::string reqs[] = {
-        schema( Table::Name, Settings::DbModelVersion ),
-        "CREATE INDEX IF NOT EXISTS movie_media_idx ON " + Table::Name + "(media_id)",
-    };
-    for ( const auto& req : reqs )
-        sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   schema( Table::Name, Settings::DbModelVersion ) );
+}
+
+void Movie::createIndexes(sqlite::Connection* dbConnection)
+{
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::MediaId, Settings::DbModelVersion ) );
 }
 
 std::string Movie::schema( const std::string& tableName, uint32_t )
@@ -109,6 +111,13 @@ std::string Movie::schema( const std::string& tableName, uint32_t )
         "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
             + "(id_media) ON DELETE CASCADE"
     ")";
+}
+
+std::string Movie::index( Indexes index, uint32_t )
+{
+    assert( index == Indexes::MediaId );
+    return "CREATE INDEX IF NOT EXISTS movie_media_idx ON "
+                + Table::Name + "(media_id)";
 }
 
 bool Movie::checkDbModel(MediaLibraryPtr ml)

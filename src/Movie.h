@@ -38,6 +38,11 @@ class Movie : public IMovie, public DatabaseHelpers<Movie>
             static const std::string PrimaryKeyColumn;
             static int64_t Movie::*const PrimaryKey;
         };
+        enum class Indexes : uint8_t
+        {
+            MediaId
+        };
+
         Movie( MediaLibraryPtr ml, sqlite::Row& row );
         Movie( MediaLibraryPtr ml, int64_t mediaId );
 
@@ -48,7 +53,9 @@ class Movie : public IMovie, public DatabaseHelpers<Movie>
         bool setImdbId(const std::string& imdbId);
 
         static void createTable( sqlite::Connection* dbConnection );
+        static void createIndexes( sqlite::Connection* dbConnection );
         static std::string schema( const std::string& tableName, uint32_t dbModel );
+        static std::string index( Indexes index, uint32_t dbModel );
         static bool checkDbModel( MediaLibraryPtr ml );
         static std::shared_ptr<Movie> create( MediaLibraryPtr ml, int64_t mediaId );
         static MoviePtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );

@@ -221,6 +221,7 @@ void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
     VideoTrack::createIndexes( dbConn );
     MediaGroup::createTriggers( dbConn );
     MediaGroup::createIndexes( dbConn );
+    Movie::createIndexes( dbConn );
 }
 
 bool MediaLibrary::checkDatabaseIntegrity()
@@ -1455,6 +1456,7 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     for ( const auto& req : recreateReqs )
         sqlite::Tools::executeRequest( dbConn, req );
     Movie::createTable( dbConn );
+    Movie::createIndexes( dbConn );
     Show::createTable( dbConn );
     VideoTrack::createTable( dbConn );
     // Re-create triggers removed in the process
