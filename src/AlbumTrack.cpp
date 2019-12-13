@@ -93,14 +93,10 @@ void AlbumTrack::createTable( sqlite::Connection* dbConnection )
 
 void AlbumTrack::createTriggers(sqlite::Connection* dbConnection)
 {
-    const std::string indexReq = "CREATE INDEX IF NOT EXISTS "
-            "album_media_artist_genre_album_idx ON " +
-            AlbumTrack::Table::Name +
-            "(media_id, artist_id, genre_id, album_id)";
-    const std::string indexAlbumIdReq = "CREATE INDEX IF NOT EXISTS album_track_album_genre_artist_ids "
-            "ON " + AlbumTrack::Table::Name + "(album_id, genre_id, artist_id)";
-    sqlite::Tools::executeRequest( dbConnection, indexReq );
-    sqlite::Tools::executeRequest( dbConnection, indexAlbumIdReq );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::MediaArtistGenreAlbum, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::AlbumGenreArtist, Settings::DbModelVersion ) );
 }
 
 std::string AlbumTrack::schema( const std::string& tableName, uint32_t )
@@ -124,6 +120,23 @@ std::string AlbumTrack::schema( const std::string& tableName, uint32_t )
          "FOREIGN KEY(album_id) REFERENCES Album(id_album) "
              " ON DELETE CASCADE"
     ")";
+}
+
+std::string AlbumTrack::index( AlbumTrack::Indexes index, uint32_t )
+{
+    switch ( index )
+    {
+        case Indexes::AlbumGenreArtist:
+            return "CREATE INDEX IF NOT EXISTS "
+                    "album_track_album_genre_artist_ids ON " + Table::Name +
+                        "(album_id, genre_id, artist_id)";
+        case Indexes::MediaArtistGenreAlbum:
+            return  "CREATE INDEX IF NOT EXISTS "
+                    "album_media_artist_genre_album_idx ON " + Table::Name +
+                        "(media_id, artist_id, genre_id, album_id)";
+
+    }
+    return "<invalid request>";
 }
 
 bool AlbumTrack::checkDbModel(MediaLibraryPtr ml)

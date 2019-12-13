@@ -48,6 +48,12 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack>
             static const std::string PrimaryKeyColumn;
             static int64_t AlbumTrack::*const PrimaryKey;
         };
+        enum class Indexes : uint8_t
+        {
+            MediaArtistGenreAlbum,
+            AlbumGenreArtist,
+        };
+
         AlbumTrack( MediaLibraryPtr ml, sqlite::Row& row );
         AlbumTrack( MediaLibraryPtr ml, int64_t mediaId, int64_t artistId, int64_t genreId,
                     unsigned int trackNumber, int64_t albumId, unsigned int discNumber );
@@ -65,6 +71,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack>
         static void createTable( sqlite::Connection* dbConnection );
         static void createTriggers( sqlite::Connection* dbConnection );
         static std::string schema( const std::string& tableName, uint32_t dbModel );
+        static std::string index( Indexes index, uint32_t dbModel );
         static bool checkDbModel( MediaLibraryPtr ml );
         static std::shared_ptr<AlbumTrack> create(MediaLibraryPtr ml, int64_t albumId,
                                     int64_t mediaId, unsigned int trackNb,
