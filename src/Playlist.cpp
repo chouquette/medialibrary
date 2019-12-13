@@ -384,25 +384,13 @@ void Playlist::createTriggers( sqlite::Connection* dbConn, uint32_t dbModel )
                                    trigger( Triggers::UpdateFts, dbModel ) );
     sqlite::Tools::executeRequest( dbConn,
                                    trigger( Triggers::DeleteFts, dbModel ) );
-    // Playlist doesn't have an mrl field before version 14, so we must not
-    // create the trigger before migrating to that version
-    if ( dbModel >= 14 )
-    {
-        sqlite::Tools::executeRequest( dbConn, "CREATE INDEX IF NOT EXISTS "
-            "playlist_file_id ON " + Playlist::Table::Name + "(file_id)" );
-    }
-    else
-    {
-        sqlite::Tools::executeRequest( dbConn,
-            "CREATE INDEX IF NOT EXISTS playlist_media_pl_id_index "
-            "ON " + Playlist::MediaRelationTable::Name + "(media_id, playlist_id)" );
-    }
+}
+
+void Playlist::createIndexes( sqlite::Connection* dbConn, uint32_t dbModel )
+{
+    sqlite::Tools::executeRequest( dbConn, index( Indexes::FileId, dbModel ) );
     if ( dbModel >= 16 )
-    {
-        sqlite::Tools::executeRequest( dbConn,
-            "CREATE INDEX IF NOT EXISTS playlist_position_pl_id_index "
-                "ON " + MediaRelationTable::Name + "(playlist_id, position)" );
-    }
+        sqlite::Tools::executeRequest( dbConn, index( Indexes::PlaylistIdPosition, dbModel ) );
 }
 
 std::string Playlist::schema( const std::string& tableName, uint32_t )
@@ -532,6 +520,33 @@ std::string Playlist::trigger( Triggers trigger, uint32_t dbModel )
         }
         default:
             assert( !"Invalid trigger provided" );
+    }
+    return "<invalid request>";
+}
+
+std::string Playlist::index( Indexes index, uint32_t dbModel )
+{
+    switch ( index )
+    {
+        case Indexes::FileId:
+        {
+            if ( dbModel < 14 )
+            {
+                return "CREATE INDEX IF NOT EXISTS playlist_media_pl_id_index "
+                       "ON " + MediaRelationTable::Name + "(media_id, playlist_id)";
+            }
+            return "CREATE INDEX IF NOT EXISTS playlist_file_id ON "
+                        + Table::Name + "(file_id)";
+        }
+        case Indexes::PlaylistIdPosition:
+        {
+            assert( dbModel >= 16 );
+            return "CREATE INDEX IF NOT EXISTS playlist_position_pl_id_index "
+                   "ON " + MediaRelationTable::Name + "(playlist_id, position)";
+        }
+
+        default:
+            assert( !"Invalid index provided" );
     }
     return "<invalid request>";
 }
