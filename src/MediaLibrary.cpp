@@ -220,6 +220,7 @@ void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
     SubtitleTrack::createTriggers( dbConn );
     VideoTrack::createIndexes( dbConn );
     MediaGroup::createTriggers( dbConn );
+    MediaGroup::createIndexes( dbConn );
 }
 
 bool MediaLibrary::checkDatabaseIntegrity()

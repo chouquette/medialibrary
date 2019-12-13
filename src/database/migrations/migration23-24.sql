@@ -43,6 +43,7 @@ MediaGroup::trigger( MediaGroup::Triggers::InsertFts, 24 ),
 MediaGroup::trigger( MediaGroup::Triggers::DeleteFts, 24 ),
 MediaGroup::trigger( MediaGroup::Triggers::IncrementNbMediaOnGroupChange, 24 ),
 MediaGroup::trigger( MediaGroup::Triggers::DecrementNbMediaOnGroupChange, 24 ),
+MediaGroup::index( MediaGroup::Indexes::ParentId, 24 ),
 
 /* Remove the 2 VideoGroups related columns from the Settings table */
 "DROP TABLE Settings",

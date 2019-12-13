@@ -51,6 +51,10 @@ public:
         IncrementNbMediaOnGroupChange,
         DecrementNbMediaOnGroupChange,
     };
+    enum class Indexes : uint8_t
+    {
+        ParentId,
+    };
 
     MediaGroup( MediaLibraryPtr ml, sqlite::Row& row );
     MediaGroup( MediaLibraryPtr ml, int64_t parentId, std::string name );
@@ -85,8 +89,10 @@ public:
                                       const QueryParameters* params );
     static void createTable( sqlite::Connection* connection );
     static void createTriggers( sqlite::Connection* connection );
+    static void createIndexes( sqlite::Connection* connection );
     static std::string schema( const std::string& name, uint32_t dbModel );
     static std::string trigger( Triggers t, uint32_t dbModel );
+    static std::string index( Indexes i, uint32_t dbModel );
 
 private:
     static std::string orderBy( const QueryParameters* params );

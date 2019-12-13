@@ -250,6 +250,12 @@ void MediaGroup::createTriggers( sqlite::Connection* connection )
                                    trigger( Triggers::DecrementNbMediaOnGroupChange, Settings::DbModelVersion ) );
 }
 
+void MediaGroup::createIndexes( sqlite::Connection* connection )
+{
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::ParentId, Settings::DbModelVersion ) );
+}
+
 std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
 {
     assert( dbModel >= 24 );
@@ -345,6 +351,14 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
             assert( !"Invalid trigger" );
     }
     return "<invalid request>";
+}
+
+std::string MediaGroup::index( Indexes i, uint32_t dbModel )
+{
+    assert( i == Indexes::ParentId );
+    assert( dbModel >= 24 );
+    return "CREATE INDEX media_group_parent_id_idx ON " +
+            Table::Name + "(parent_id)";
 }
 
 std::string MediaGroup::orderBy(const QueryParameters* params)
