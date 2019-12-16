@@ -29,6 +29,7 @@
 #include "medialibrary/filesystem/Errors.h"
 
 #ifdef _WIN32
+# include <algorithm>
 # define DIR_SEPARATOR "\\/"
 # define DIR_SEPARATOR_CHAR '\\'
 #else
