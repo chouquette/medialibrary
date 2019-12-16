@@ -1277,8 +1277,6 @@ bool MediaLibrary::migrateModel8to9()
                 File::Table::Name + " f ON f.media_id = m.id_media "
                 "WHERE f.media_id IS NULL)";
 
-    // Don't check for the return value, we don't mind if nothing deleted.
-    // Quite the opposite actually :)
     if ( sqlite::Tools::executeDelete( getConn(), req ) == false )
         return false;
     m_settings.setDbModelVersion( 9 );
