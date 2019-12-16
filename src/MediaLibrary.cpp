@@ -1331,6 +1331,8 @@ bool MediaLibrary::migrateModel12to13()
         "DROP TRIGGER IF EXISTS is_track_presentAFTER",
         "DROP TRIGGER has_album_present",
         "DROP TRIGGER is_album_present",
+        Album::trigger( Album::Triggers::IsPresent, 13 ),
+        Artist::trigger( Artist::Triggers::HasTrackPresent, 13 ),
     };
 
     for ( const auto& req : reqs )
@@ -1339,9 +1341,6 @@ bool MediaLibrary::migrateModel12to13()
             return false;
     }
 
-    AlbumTrack::createIndexes( getConn() );
-    Album::createTriggers( getConn(), 13 );
-    Artist::createTriggers( getConn(), 13 );
     // Leave the weak context as we now need to update is_present fields, which
     // are propagated through recursive triggers
     const std::string migrateData = "UPDATE " + AlbumTrack::Table::Name +
