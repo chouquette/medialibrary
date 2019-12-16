@@ -1225,9 +1225,6 @@ void MediaLibrary::migrateModel3to5()
 
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( getConn(), req );
-    // Re-create triggers removed in the process
-    Media::createTriggers( getConn(), 5 );
-    Playlist::createTriggers( getConn(), 5 );
     m_settings.setDbModelVersion( 5 );
     t->commit();
 }
