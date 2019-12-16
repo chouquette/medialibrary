@@ -515,7 +515,7 @@ TEST_F( DbModel, Upgrade20to21 )
     CommonMigrationTest( SRC_DIR "/test/unittest/db_v20.sql" );
 }
 
-TEST_F( DbModel, Upgrate21to22 )
+TEST_F( DbModel, Upgrade21to22 )
 {
     CommonMigrationTest( SRC_DIR "/test/unittest/db_v21.sql" );
 
