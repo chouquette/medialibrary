@@ -1748,14 +1748,6 @@ void MediaLibrary::migrateModel22to23()
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
 
-    Artist::createTriggers( dbConn, 23 );
-    Media::createTriggers( dbConn, 23 );
-    Media::createIndexes( dbConn, 23 );
-    Thumbnail::createTriggers( dbConn );
-    Album::createTriggers( dbConn, 23 );
-    Folder::createTriggers( dbConn, 23 );
-    Show::createTriggers( dbConn, 23 );
-
     m_settings.setDbModelVersion( 23 );
     t->commit();
 }
