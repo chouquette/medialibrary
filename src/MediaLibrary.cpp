@@ -1257,9 +1257,6 @@ void MediaLibrary::migrateModel7to8()
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( getConn(), req );
     // Re-create triggers removed in the process
-    Artist::createTriggers( getConn(), 8u );
-    Media::createTriggers( getConn(), 5 );
-    File::createIndexes( getConn() );
     m_settings.setDbModelVersion( 8 );
     t->commit();
 }

@@ -95,3 +95,5 @@
  " FROM " + File::Table::Name + "_backup;",
 
 "DROP TABLE " + File::Table::Name + "_backup;",
+
+Artist::trigger( Artist::Triggers::DeleteArtistsWithoutTracks, 8 ),
