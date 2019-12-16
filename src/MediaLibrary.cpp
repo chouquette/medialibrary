@@ -1500,9 +1500,6 @@ void MediaLibrary::migrateModel14to15()
 
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
-    Folder::createTriggers( dbConn, 15 );
-    Folder::createIndexes( dbConn, 15 );
-    Playlist::createTriggers( dbConn, 15 );
     m_settings.setDbModelVersion( 15 );
     t->commit();
 }
