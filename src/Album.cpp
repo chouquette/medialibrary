@@ -591,8 +591,8 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
         {
             if ( dbModel < 23 )
             {
-                return "CREATE TRIGGER is_album_present AFTER UPDATE OF"
-                        " is_present ON " + Media::Table::Name +
+                return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                        " AFTER UPDATE OF is_present ON " + Media::Table::Name +
                         " WHEN new.subtype = " +
                             std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
                                                 IMedia::SubType::AlbumTrack ) ) +
@@ -606,8 +606,8 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
             }
             else
             {
-                return "CREATE TRIGGER album_is_present AFTER UPDATE OF"
-                       " is_present ON " + Media::Table::Name +
+                return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                       " AFTER UPDATE OF is_present ON " + Media::Table::Name +
                        " WHEN new.subtype = " +
                            std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
                                                IMedia::SubType::AlbumTrack ) ) +
@@ -623,7 +623,7 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
         }
         case Triggers::AddTrack:
         {
-            return "CREATE TRIGGER add_album_track"
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                    " AFTER INSERT ON " + AlbumTrack::Table::Name +
                    " BEGIN"
                    " UPDATE " + Table::Name +
@@ -635,7 +635,7 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
         }
         case Triggers::DeleteTrack:
         {
-            return "CREATE TRIGGER delete_album_track"
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                         " AFTER DELETE ON " + AlbumTrack::Table::Name +
                    " BEGIN "
                    " UPDATE " + Table::Name +
@@ -650,7 +650,7 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
         }
         case Triggers::InsertFts:
         {
-            return "CREATE TRIGGER insert_album_fts"
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                     " AFTER INSERT ON " + Table::Name +
                     // Skip unknown albums
                     " WHEN new.title IS NOT NULL"
@@ -661,7 +661,7 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
         }
         case Triggers::DeleteFts:
         {
-            return "CREATE TRIGGER delete_album_fts"
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                     " BEFORE DELETE ON " + Table::Name +
                     // Unknown album probably won't be deleted, but better safe than sorry
                     " WHEN old.title IS NOT NULL"
@@ -676,11 +676,40 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
     return "<Invalid request provided>";
 }
 
-std::string Album::index( Indexes index, uint32_t )
+std::string Album::triggerName( Album::Triggers trigger, uint32_t dbModel )
+{
+    switch ( trigger )
+    {
+        case Triggers::IsPresent:
+        {
+            if ( dbModel < 23 )
+                return "is_album_present";
+            return "album_is_present";
+        }
+        case Triggers::AddTrack:
+            return "add_album_track";
+        case Triggers::DeleteTrack:
+            return "delete_album_track";
+        case Triggers::InsertFts:
+            return "insert_album_fts";
+        case Triggers::DeleteFts:
+            return "delete_album_fts";
+        default:
+            assert( !"Invalid trigger provided" );
+}
+}
+
+std::string Album::index( Indexes index, uint32_t dbModel )
 {
     assert( index == Indexes::ArtistId );
-    return "CREATE INDEX album_artist_id_idx ON " +
-                Table::Name + "(artist_id)";
+    return "CREATE INDEX " + indexName( index, dbModel ) + " ON " +
+            Table::Name + "(artist_id)";
+}
+
+std::string Album::indexName( Album::Indexes index, uint32_t )
+{
+    assert( index == Indexes::ArtistId );
+    return "album_artist_id_idx";
 }
 
 bool Album::checkDbModel( MediaLibraryPtr ml )
