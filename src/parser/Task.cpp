@@ -384,11 +384,8 @@ void Task::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModel )
 {
     if ( dbModel < 18 )
         return;
-    std::string reqs[] = {
-        #include "database/tables/Task_triggers_v18.sql"
-    };
-    for ( const auto& req : reqs )
-        sqlite::Tools::executeRequest( dbConnection, req );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::DeletePlaylistLinkingTask, dbModel ) );
 }
 
 std::string Task::schema( const std::string& tableName, uint32_t dbModel,
@@ -463,6 +460,25 @@ std::string Task::schema( const std::string& tableName, uint32_t dbModel,
             + "(id_file) ON DELETE CASCADE"
     ")";
     return req;
+}
+
+std::string Task::trigger(Task::Triggers trigger, uint32_t dbModel )
+{
+    assert( trigger == Triggers::DeletePlaylistLinkingTask );
+    assert( dbModel >= 18 );
+    return "CREATE TRIGGER IF NOT EXISTS delete_playlist_linking_tasks "
+           "AFTER DELETE ON " + Playlist::Table::Name + " "
+           "BEGIN "
+               "DELETE FROM " + Table::Name + " "
+                   "WHERE link_to_type = " +
+                           std::to_string( static_cast<std::underlying_type_t<IItem::LinkType>>(
+                               IItem::LinkType::Playlist ) ) + " "
+                       "AND link_to_id = old.id_playlist "
+                       "AND type = " +
+                           std::to_string( static_cast<std::underlying_type_t<Type>>(
+                               Type::Link ) ) + ";"
+           "END";
+
 }
 
 bool Task::checkDbModel( MediaLibraryPtr ml )

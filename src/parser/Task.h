@@ -57,6 +57,10 @@ public:
         static const std::string PrimaryKeyColumn;
         static int64_t parser::Task::*const PrimaryKey;
     };
+    enum class Triggers : uint8_t
+    {
+        DeletePlaylistLinkingTask,
+    };
 
     struct MetadataHash
     {
@@ -170,6 +174,7 @@ public:
     static void createTriggers(sqlite::Connection* dbConnection , uint32_t dbModel);
     static std::string schema( const std::string& tableName, uint32_t dbModel,
                                bool backup );
+    static std::string trigger( Triggers trigger, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     static bool resetRetryCount( MediaLibraryPtr ml );
     static bool resetParsing( MediaLibraryPtr ml );

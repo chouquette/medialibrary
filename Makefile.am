@@ -414,7 +414,6 @@ EXTRA_DIST += medialibrary.pc \
 	src/database/migrations/migration19-20.sql \
 	src/database/migrations/migration20-21.sql \
 	src/database/migrations/migration21-22.sql \
-	src/database/tables/Task_triggers_v18.sql \
 	$(NULL)
 	
 
