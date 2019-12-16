@@ -622,15 +622,31 @@ std::string Artist::triggerName(Artist::Triggers trigger, uint32_t dbModelVersio
 
 bool Artist::checkDbModel(MediaLibraryPtr ml)
 {
-    return sqlite::Tools::checkTableSchema( ml->getConn(),
+    if ( sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
-                                       Table::Name ) &&
+                                       Table::Name ) == false ||
            sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( FtsTable::Name, Settings::DbModelVersion ),
-                                       FtsTable::Name ) &&
+                                       FtsTable::Name ) == false ||
            sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( MediaRelationTable::Name, Settings::DbModelVersion ),
-                                       MediaRelationTable::Name );
+                                       MediaRelationTable::Name ) == false )
+        return false;
+
+    auto check = []( sqlite::Connection* dbConn, Triggers t ) {
+        return sqlite::Tools::checkTriggerStatement( dbConn,
+                                    trigger( t, Settings::DbModelVersion ),
+                                    triggerName( t, Settings::DbModelVersion ) );
+    };
+    return check( ml->getConn(), Triggers::HasTrackPresent ) &&
+            check( ml->getConn(), Triggers::DeleteArtistsWithoutTracks ) &&
+            check( ml->getConn(), Triggers::IncrementNbTracks ) &&
+            check( ml->getConn(), Triggers::DecrementNbTracks ) &&
+            check( ml->getConn(), Triggers::UpdateNbAlbums ) &&
+            check( ml->getConn(), Triggers::DecrementNbAlbums ) &&
+            check( ml->getConn(), Triggers::IncrementNbAlbums ) &&
+            check( ml->getConn(), Triggers::InsertFts ) &&
+            check( ml->getConn(), Triggers::DeleteFts );
 }
 
 bool Artist::createDefaultArtists( sqlite::Connection* dbConnection )
