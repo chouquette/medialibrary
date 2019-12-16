@@ -122,7 +122,7 @@ std::string Movie::index( Indexes index, uint32_t )
 
 bool Movie::checkDbModel(MediaLibraryPtr ml)
 {
-    return sqlite::Tools::checkSchema( ml->getConn(),
+    return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name );
 }

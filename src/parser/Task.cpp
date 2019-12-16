@@ -483,7 +483,7 @@ std::string Task::trigger(Task::Triggers trigger, uint32_t dbModel )
 
 bool Task::checkDbModel( MediaLibraryPtr ml )
 {
-    return sqlite::Tools::checkSchema( ml->getConn(),
+    return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion, false ),
                                        Table::Name );
 }

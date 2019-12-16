@@ -118,10 +118,10 @@ std::string Label::trigger( Triggers trigger, uint32_t  )
 
 bool Label::checkDbModel( MediaLibraryPtr ml )
 {
-    return sqlite::Tools::checkSchema( ml->getConn(),
+    return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) &&
-           sqlite::Tools::checkSchema( ml->getConn(),
+           sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( FileRelationTable::Name, Settings::DbModelVersion ),
                                        FileRelationTable::Name );
 }

@@ -143,7 +143,7 @@ std::string Bookmark::schema( const std::string& tableName, uint32_t )
 
 bool Bookmark::checkDbModel(MediaLibraryPtr ml)
 {
-    return sqlite::Tools::checkSchema( ml->getConn(),
+    return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name );
 }

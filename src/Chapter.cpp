@@ -61,7 +61,7 @@ std::string Chapter::schema( const std::string& tableName, uint32_t )
 
 bool Chapter::checkDbModel( MediaLibraryPtr ml )
 {
-    return sqlite::Tools::checkSchema( ml->getConn(),
+    return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name );
 }

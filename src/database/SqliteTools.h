@@ -414,9 +414,9 @@ class Tools
             }
         }
 
-        static bool checkSchema( sqlite::Connection* dbConn,
-                                 const std::string& schema,
-                                 const std::string& tableName )
+        static bool checkTableSchema( sqlite::Connection* dbConn,
+                                      const std::string& schema,
+                                      const std::string& tableName )
         {
             auto actualSchema = fetchTableSchema( dbConn, tableName );
             if ( actualSchema == schema )

@@ -198,7 +198,7 @@ std::string VideoTrack::index( Indexes index, uint32_t )
 
 bool VideoTrack::checkDbModel( MediaLibraryPtr ml )
 {
-    return sqlite::Tools::checkSchema( ml->getConn(),
+    return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name );
 }

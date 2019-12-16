@@ -553,13 +553,13 @@ std::string Playlist::index( Indexes index, uint32_t dbModel )
 
 bool Playlist::checkDbModel(MediaLibraryPtr ml)
 {
-    return sqlite::Tools::checkSchema( ml->getConn(),
+    return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) &&
-           sqlite::Tools::checkSchema( ml->getConn(),
+           sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( FtsTable::Name, Settings::DbModelVersion ),
                                        FtsTable::Name ) &&
-           sqlite::Tools::checkSchema( ml->getConn(),
+           sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( MediaRelationTable::Name, Settings::DbModelVersion ),
                                        MediaRelationTable::Name );
 }

@@ -324,10 +324,10 @@ std::string Show::trigger( Show::Triggers trigger, uint32_t dbModel )
 
 bool Show::checkDbModel(MediaLibraryPtr ml)
 {
-    return sqlite::Tools::checkSchema( ml->getConn(),
+    return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) &&
-           sqlite::Tools::checkSchema( ml->getConn(),
+           sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( FtsTable::Name, Settings::DbModelVersion ),
                                        FtsTable::Name );
 }
