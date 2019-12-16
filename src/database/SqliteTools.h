@@ -414,6 +414,19 @@ class Tools
             }
         }
 
+        static bool checkTriggerStatement( sqlite::Connection* dbConn,
+                                           const std::string& expectedStatement,
+                                           const std::string& triggerName )
+        {
+            auto actualStatement = fetchTriggerStatement( dbConn, triggerName );
+            if ( actualStatement == expectedStatement )
+                return true;
+            LOG_ERROR( "Mismatching statement for trigger", triggerName, "." );
+            LOG_ERROR( "Expected: ", expectedStatement );
+            LOG_ERROR( "Actual:   ", actualStatement );
+            return false;
+        }
+
         static bool checkTableSchema( sqlite::Connection* dbConn,
                                       const std::string& schema,
                                       const std::string& tableName )
@@ -472,6 +485,12 @@ class Tools
                                              const std::string& tableName )
         {
             return fetchSchemaSql( dbConn, "table", tableName );
+        }
+
+        static std::string fetchTriggerStatement( sqlite::Connection* dbConn,
+                                                  const std::string& triggerName )
+        {
+            return fetchSchemaSql( dbConn, "trigger", triggerName );
         }
 };
 
