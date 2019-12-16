@@ -252,3 +252,56 @@ Bookmark::schema( Bookmark::Table::Name, 20 ),
     "SELECT * FROM " + Bookmark::Table::Name + "_backup",
 
 "DROP TABLE " + Bookmark::Table::Name + "_backup",
+
+Album::trigger( Album::Triggers::AddTrack, 20 ),
+Album::trigger( Album::Triggers::DeleteTrack, 20 ),
+Album::trigger( Album::Triggers::InsertFts, 20 ),
+Album::trigger( Album::Triggers::DeleteFts, 20 ),
+Album::index( Album::Indexes::ArtistId, 20 ),
+
+AlbumTrack::index( AlbumTrack::Indexes::AlbumGenreArtist, 20 ),
+AlbumTrack::index( AlbumTrack::Indexes::MediaArtistGenreAlbum, 20 ),
+
+ShowEpisode::index( ShowEpisode::Indexes::MediaIdShowId, 20 ),
+
+Artist::trigger( Artist::Triggers::DeleteArtistsWithoutTracks, 20 ),
+Artist::trigger( Artist::Triggers::HasAlbumRemaining, 20 ),
+Artist::trigger( Artist::Triggers::InsertFts, 20 ),
+Artist::trigger( Artist::Triggers::DeleteFts, 20 ),
+
+Media::trigger( Media::Triggers::CascadeFileDeletion, 20 ),
+
+Thumbnail::trigger( Thumbnail::Triggers::AutoDeleteAlbum, 20 ),
+Thumbnail::trigger( Thumbnail::Triggers::AutoDeleteArtist, 20 ),
+Thumbnail::trigger( Thumbnail::Triggers::IncrementRefcount, 20 ),
+Thumbnail::trigger( Thumbnail::Triggers::DecrementRefcount, 20 ),
+Thumbnail::trigger( Thumbnail::Triggers::UpdateRefcount, 20 ),
+
+Folder::trigger( Folder::Triggers::InsertFts, 20 ),
+Folder::trigger( Folder::Triggers::DeleteFts, 20 ),
+
+Genre::trigger( Genre::Triggers::InsertFts, 20 ),
+Genre::trigger( Genre::Triggers::DeleteFts, 20 ),
+Genre::trigger( Genre::Triggers::UpdateOnNewTrack, 20 ),
+Genre::trigger( Genre::Triggers::UpdateOnTrackDelete, 20 ),
+
+Label::trigger( Label::Triggers::DeleteFts, 20 ),
+
+Playlist::trigger( Playlist::Triggers::InsertFts, 20 ),
+Playlist::trigger( Playlist::Triggers::UpdateFts, 20 ),
+Playlist::trigger( Playlist::Triggers::DeleteFts, 20 ),
+Playlist::index( Playlist::Indexes::FileId, 20 ),
+
+parser::Task::trigger( parser::Task::Triggers::DeletePlaylistLinkingTask, 20 ),
+
+AudioTrack::index( AudioTrack::Indexes::MediaId, 20 ),
+
+VideoTrack::index( VideoTrack::Indexes::MediaId, 20 ),
+
+SubtitleTrack::index( SubtitleTrack::Indexes::MediaId, 20 ),
+
+Folder::index( Folder::Indexes::DeviceId, 20 ),
+Folder::index( Folder::Indexes::ParentId, 20 ),
+
+File::index( File::Indexes::MediaId, 20 ),
+File::index( File::Indexes::FolderId, 20 ),

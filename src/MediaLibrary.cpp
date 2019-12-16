@@ -1675,26 +1675,6 @@ void MediaLibrary::migrateModel19to20()
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
 
-    Album::createTriggers( dbConn, 20 );
-    Album::createIndexes( dbConn, 20 );
-    Thumbnail::createTriggers( dbConn );
-    AlbumTrack::createIndexes( dbConn );
-    Artist::createTriggers( dbConn, 20 );
-    Genre::createTriggers( dbConn );
-    ShowEpisode::createIndexes( dbConn );
-    Folder::createTriggers( dbConn, 20 );
-    Folder::createIndexes( dbConn, 20 );
-    File::createIndexes( dbConn );
-    Media::createTriggers( dbConn, 20 );
-    Label::createTriggers( dbConn );
-    Playlist::createTriggers( dbConn, 20 );
-    Playlist::createIndexes( dbConn, 20 );
-    parser::Task::createTriggers( dbConn, 20 );
-    Show::createTriggers( dbConn, 20 );
-    VideoTrack::createIndexes( dbConn );
-    AudioTrack::createIndexes( dbConn );
-    SubtitleTrack::createTriggers( dbConn );
-
     m_settings.setDbModelVersion( 20 );
     t->commit();
 }
