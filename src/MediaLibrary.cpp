@@ -1572,13 +1572,6 @@ void MediaLibrary::migrateModel16to17()
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
 
-    Media::createTriggers( dbConn, 17 );
-    Media::createIndexes( dbConn, 17 );
-    Album::createTriggers( dbConn, 17 );
-    Album::createIndexes( dbConn, 17 );
-    Artist::createTriggers( dbConn, 17 );
-    Folder::createTriggers( dbConn, 17 );
-
     m_settings.setDbModelVersion( 17 );
     t->commit();
 }

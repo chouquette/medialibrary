@@ -120,3 +120,11 @@ Thumbnail::index( Thumbnail::Indexes::ThumbnailId, 17 ),
 // ensure it's the correct one now.
 // Artists triggers are all recreated as part of the 16 -> 17 migration
 "DROP TRIGGER has_track_remaining",
+
+Artist::trigger( Artist::Triggers::HasTrackPresent, 17 ),
+Artist::trigger( Artist::Triggers::HasAlbumRemaining, 17 ),
+Artist::trigger( Artist::Triggers::DeleteArtistsWithoutTracks, 17 ),
+Artist::trigger( Artist::Triggers::InsertFts, 17 ),
+Artist::trigger( Artist::Triggers::DeleteFts, 17 ),
+
+
