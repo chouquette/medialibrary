@@ -255,3 +255,8 @@ File::schema( File::Table::Name, 14 ),
 
 // History table & its triggers were removed for good:
 "DROP TABLE History",
+
+Media::trigger( Media::Triggers::IsPresent, 14 ),
+
+Movie::schema( Movie::Table::Name, 14 ),
+Movie::index( Movie::Indexes::MediaId, 14 ),

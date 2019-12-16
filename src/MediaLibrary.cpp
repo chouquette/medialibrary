@@ -1457,24 +1457,8 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     };
     for ( const auto& req : recreateReqs )
         sqlite::Tools::executeRequest( dbConn, req );
-    Movie::createTable( dbConn );
-    Movie::createIndexes( dbConn );
     Show::createTable( dbConn );
     VideoTrack::createTable( dbConn );
-    // Re-create triggers removed in the process
-    Media::createTriggers( dbConn, 14 );
-    Media::createIndexes( dbConn, 14 );
-    AlbumTrack::createIndexes( dbConn );
-    Album::createTriggers( dbConn, 14 );
-    Album::createIndexes( dbConn, 14 );
-    Artist::createTriggers( dbConn, 14 );
-    Show::createTriggers( dbConn, 14 );
-    Playlist::createTriggers( dbConn, 14 );
-    Playlist::createIndexes( dbConn, 14 );
-    Folder::createTriggers( dbConn, 14 );
-    Folder::createIndexes( dbConn, 14 );
-    File::createIndexes( dbConn );
-    VideoTrack::createIndexes( dbConn );
     auto folders = Folder::fetchAll<Folder>( this );
     for ( const auto& f : folders )
     {
