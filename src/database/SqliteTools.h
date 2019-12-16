@@ -427,6 +427,19 @@ class Tools
             return false;
         }
 
+        static bool checkIndexStatement( sqlite::Connection* dbConn,
+                                         const std::string& expectedStatement,
+                                         const std::string& indexName )
+        {
+            auto actualStatement = fetchIndexStatement( dbConn, indexName );
+            if ( actualStatement == expectedStatement )
+                return true;
+            LOG_ERROR( "Mismatching statement for index", indexName, "." );
+            LOG_ERROR( "Expected: ", expectedStatement );
+            LOG_ERROR( "Actual:   ", actualStatement );
+            return false;
+        }
+
         static bool checkTableSchema( sqlite::Connection* dbConn,
                                       const std::string& schema,
                                       const std::string& tableName )
@@ -491,6 +504,12 @@ class Tools
                                                   const std::string& triggerName )
         {
             return fetchSchemaSql( dbConn, "trigger", triggerName );
+        }
+
+        static std::string fetchIndexStatement( sqlite::Connection* dbConn,
+                                                const std::string& indexName )
+        {
+            return fetchSchemaSql( dbConn, "index", indexName );
         }
 };
 
