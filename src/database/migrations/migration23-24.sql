@@ -37,6 +37,25 @@ Media::schema( Media::Table::Name, 24 ),
 
 "DROP TABLE " + Media::Table::Name + "_backup",
 
+Media::trigger( Media::Triggers::InsertFts, 24 ),
+Media::trigger( Media::Triggers::UpdateFts, 24 ),
+Media::trigger( Media::Triggers::DeleteFts, 24 ),
+
+Media::index( Media::Indexes::LastPlayedDate, 24 ),
+Media::index( Media::Indexes::Presence, 24 ),
+Media::index( Media::Indexes::Types, 24 ),
+Media::index( Media::Indexes::LastUsageDate, 24 ),
+Media::index( Media::Indexes::Folder, 24 ),
+Media::index( Media::Indexes::MediaGroup, 24 ),
+
+Album::trigger( Album::Triggers::IsPresent, 24 ),
+Artist::trigger( Artist::Triggers::HasTrackPresent, 24 ),
+Thumbnail::trigger( Thumbnail::Triggers::AutoDeleteMedia, 24 ),
+Show::trigger( Show::Triggers::UpdateIsPresent, 24 ),
+Folder::trigger( Folder::Triggers::UpdateNbMediaOnIndex, 24 ),
+Folder::trigger( Folder::Triggers::UpdateNbMediaOnUpdate, 24 ),
+Folder::trigger( Folder::Triggers::UpdateNbMediaOnDelete, 24 ),
+
 /* Create the new media group triggers after recreating the media table, since
    deleting the media table would delete the triggers, as they depend on it */
 MediaGroup::trigger( MediaGroup::Triggers::InsertFts, 24 ),

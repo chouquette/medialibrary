@@ -1777,14 +1777,6 @@ void MediaLibrary::migrateModel23to24()
     Settings::createTable( dbConn );
     m_settings.load();
 
-    Media::createTriggers( dbConn, 24 );
-    Media::createIndexes( dbConn, 24 );
-    Album::createTriggers( dbConn, 24 );
-    Artist::createTriggers( dbConn, 24 );
-    Thumbnail::createTriggers( dbConn );
-    Show::createTriggers( dbConn, 24 );
-    Folder::createTriggers( dbConn, 24 );
-
     m_settings.setDbModelVersion( 24 );
     t->commit();
 }
