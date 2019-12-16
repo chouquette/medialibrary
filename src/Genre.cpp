@@ -212,21 +212,21 @@ std::string Genre::trigger( Triggers trigger, uint32_t )
     switch ( trigger )
     {
         case Triggers::InsertFts:
-            return "CREATE TRIGGER IF NOT EXISTS insert_genre_fts"
+            return "CREATE TRIGGER insert_genre_fts"
                    " AFTER INSERT ON " + Table::Name +
                    " BEGIN"
                         " INSERT INTO " + FtsTable::Name + "(rowid,name)"
                             " VALUES(new.id_genre, new.name);"
                    " END";
         case Triggers::DeleteFts:
-            return "CREATE TRIGGER IF NOT EXISTS delete_genre_fts"
+            return "CREATE TRIGGER delete_genre_fts"
                    " BEFORE DELETE ON " + Table::Name +
                    " BEGIN"
                         " DELETE FROM " + FtsTable::Name +
                             " WHERE rowid = old.id_genre;"
                    " END";
         case Triggers::UpdateOnNewTrack:
-            return "CREATE TRIGGER IF NOT EXISTS update_genre_on_new_track"
+            return "CREATE TRIGGER update_genre_on_new_track"
                     " AFTER INSERT ON " + AlbumTrack::Table::Name +
                     " WHEN new.genre_id IS NOT NULL"
                     " BEGIN"
@@ -235,7 +235,7 @@ std::string Genre::trigger( Triggers trigger, uint32_t )
                                 " WHERE id_genre = new.genre_id;"
                     " END";
         case Triggers::UpdateOnTrackDelete:
-            return "CREATE TRIGGER IF NOT EXISTS update_genre_on_track_deleted"
+            return "CREATE TRIGGER update_genre_on_track_deleted"
                    " AFTER DELETE ON " + AlbumTrack::Table::Name +
                    " WHEN old.genre_id IS NOT NULL"
                    " BEGIN"

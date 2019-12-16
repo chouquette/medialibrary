@@ -258,7 +258,7 @@ std::string Show::trigger( Show::Triggers trigger, uint32_t dbModel )
     {
         case Triggers::InsertFts:
         {
-            return "CREATE TRIGGER IF NOT EXISTS insert_show_fts"
+            return "CREATE TRIGGER insert_show_fts"
                    " AFTER INSERT ON " + Table::Name +
                    " BEGIN"
                    " INSERT INTO " + FtsTable::Name + "(rowid,title)"
@@ -267,7 +267,7 @@ std::string Show::trigger( Show::Triggers trigger, uint32_t dbModel )
         }
         case Triggers::DeleteFts:
         {
-            return "CREATE TRIGGER IF NOT EXISTS delete_show_fts"
+            return "CREATE TRIGGER delete_show_fts"
                    " BEFORE DELETE ON " + Table::Name +
                    " BEGIN"
                    " DELETE FROM " + FtsTable::Name +
@@ -277,7 +277,7 @@ std::string Show::trigger( Show::Triggers trigger, uint32_t dbModel )
         case Triggers::IncrementNbEpisode:
         {
             assert( dbModel >= 23 );
-            return "CREATE TRIGGER IF NOT EXISTS show_increment_nb_episode"
+            return "CREATE TRIGGER show_increment_nb_episode"
                    " AFTER INSERT ON " + ShowEpisode::Table::Name +
                    " BEGIN"
                    " UPDATE " + Table::Name +
@@ -289,7 +289,7 @@ std::string Show::trigger( Show::Triggers trigger, uint32_t dbModel )
         case Triggers::DecrementNbEpisode:
         {
             assert( dbModel >= 23 );
-            return "CREATE TRIGGER IF NOT EXISTS"
+            return "CREATE TRIGGER "
                    " show_decrement_nb_episode AFTER DELETE ON " + ShowEpisode::Table::Name +
                    " BEGIN"
                    " UPDATE " + Table::Name +
@@ -301,7 +301,7 @@ std::string Show::trigger( Show::Triggers trigger, uint32_t dbModel )
         case Triggers::UpdateIsPresent:
         {
             assert( dbModel >= 23 );
-            return "CREATE TRIGGER IF NOT EXISTS"
+            return "CREATE TRIGGER "
                    " show_update_is_present AFTER UPDATE OF "
                        "is_present ON " + Media::Table::Name +
                    " WHEN new.subtype = " +

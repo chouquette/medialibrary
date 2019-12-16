@@ -156,14 +156,14 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
     switch ( trigger )
     {
         case Triggers::InsertFts:
-            return "CREATE TRIGGER IF NOT EXISTS insert_folder_fts "
+            return "CREATE TRIGGER insert_folder_fts "
                         "AFTER INSERT ON " + Table::Name + " "
                    "BEGIN "
                        "INSERT INTO " + FtsTable::Name + "(rowid,name) "
                            "VALUES(new.id_folder,new.name);"
                    "END";
         case Triggers::DeleteFts:
-            return "CREATE TRIGGER IF NOT EXISTS delete_folder_fts "
+            return "CREATE TRIGGER delete_folder_fts "
                         "BEFORE DELETE ON " + Table::Name + " "
                    "BEGIN "
                        "DELETE FROM " + FtsTable::Name +
@@ -171,7 +171,7 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                    "END";
         case Triggers::UpdateNbMediaOnIndex:
             assert( dbModel >= 14 );
-            return "CREATE TRIGGER IF NOT EXISTS update_folder_nb_media_on_insert "
+            return "CREATE TRIGGER update_folder_nb_media_on_insert "
                         "AFTER INSERT ON " + Media::Table::Name + " "
                         "WHEN new.folder_id IS NOT NULL "
                     "BEGIN "
@@ -193,7 +193,7 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                     "END";
         case Triggers::UpdateNbMediaOnUpdate:
             assert( dbModel >= 14 );
-            return "CREATE TRIGGER IF NOT EXISTS update_folder_nb_media_on_update "
+            return "CREATE TRIGGER update_folder_nb_media_on_update "
                        "AFTER UPDATE ON " + Media::Table::Name + " "
                        "WHEN new.folder_id IS NOT NULL AND old.type != new.type "
                    "BEGIN "
@@ -231,7 +231,7 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                    "END";
         case Triggers::UpdateNbMediaOnDelete:
             assert( dbModel >= 14 );
-            return "CREATE TRIGGER IF NOT EXISTS update_folder_nb_media_on_delete "
+            return "CREATE TRIGGER update_folder_nb_media_on_delete "
                         "AFTER DELETE ON " + Media::Table::Name + " "
                         "WHEN old.folder_id IS NOT NULL "
                     "BEGIN "
@@ -264,10 +264,10 @@ std::string Folder::index( Indexes index, uint32_t )
     switch ( index )
     {
         case Indexes::DeviceId:
-            return "CREATE INDEX IF NOT EXISTS folder_device_id_idx ON " +
+            return "CREATE INDEX folder_device_id_idx ON " +
                         Table::Name + " (device_id)";
         case Indexes::ParentId:
-            return "CREATE INDEX IF NOT EXISTS parent_folder_id_idx ON " +
+            return "CREATE INDEX parent_folder_id_idx ON " +
                         Table::Name + " (parent_id)";
         default:
             assert( !"Invalid index provided" );

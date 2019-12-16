@@ -107,7 +107,7 @@ std::string Label::schema( const std::string& tableName, uint32_t )
 std::string Label::trigger( Triggers trigger, uint32_t  )
 {
     assert( trigger == Triggers::DeleteFts );
-    return "CREATE TRIGGER IF NOT EXISTS delete_label_fts "
+    return "CREATE TRIGGER delete_label_fts "
            "BEFORE DELETE ON " + Table::Name +
            " BEGIN"
            " UPDATE " + Media::FtsTable::Name +

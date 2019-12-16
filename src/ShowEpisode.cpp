@@ -149,7 +149,7 @@ std::string ShowEpisode::schema( const std::string& tableName, uint32_t )
 std::string ShowEpisode::index( Indexes index, uint32_t )
 {
     assert( index == Indexes::MediaIdShowId );
-    return "CREATE INDEX IF NOT EXISTS show_episode_media_show_idx ON " +
+    return "CREATE INDEX show_episode_media_show_idx ON " +
                Table::Name + "(media_id, show_id)";
 }
 

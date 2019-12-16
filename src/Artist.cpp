@@ -413,7 +413,7 @@ std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )
         {
             if ( dbModelVersion < 23 )
             {
-                return "CREATE TRIGGER IF NOT EXISTS has_tracks_present AFTER UPDATE OF"
+                return "CREATE TRIGGER has_tracks_present AFTER UPDATE OF"
                        " is_present ON " + Media::Table::Name +
                        " WHEN new.subtype = " +
                            std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
@@ -426,7 +426,7 @@ std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )
                            ");"
                        " END";
             }
-            return "CREATE TRIGGER IF NOT EXISTS"
+            return "CREATE TRIGGER "
                    " artist_has_tracks_present AFTER UPDATE OF"
                    " is_present ON " + Media::Table::Name +
                    " WHEN new.subtype = " +
@@ -452,7 +452,7 @@ std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )
             // The alternative would be to always check the special artists for
             // existence, which would be much slower when inserting an unknown
             // artist album
-            return "CREATE TRIGGER IF NOT EXISTS has_album_remaining"
+            return "CREATE TRIGGER has_album_remaining"
                    " AFTER DELETE ON " + Album::Table::Name +
                    " WHEN old.artist_id != " + std::to_string( UnknownArtistID ) +
                    " AND  old.artist_id != " + std::to_string( VariousArtistID ) +
@@ -475,7 +475,7 @@ std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )
                 // field, it was present from before version 3, so it wouldn't be recreated.
                 // As we don't support any model before 3 (or rather we just recreate
                 // everything), we don't have to bother here.
-                return "CREATE TRIGGER IF NOT EXISTS has_track_remaining"
+                return "CREATE TRIGGER has_track_remaining"
                        " AFTER DELETE ON " + AlbumTrack::Table::Name +
                        " WHEN old.artist_id != " + std::to_string( UnknownArtistID ) +
                        " AND  old.artist_id != " + std::to_string( VariousArtistID ) +
@@ -489,7 +489,7 @@ std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )
                             " AND nb_tracks = 0;"
                        " END";
             }
-            return "CREATE TRIGGER IF NOT EXISTS delete_artist_without_tracks"
+            return "CREATE TRIGGER delete_artist_without_tracks"
                    " AFTER UPDATE OF nb_tracks, nb_albums ON " + Table::Name +
                    " WHEN new.nb_tracks = 0 AND new.nb_albums = 0"
                        " AND new.id_artist != " + std::to_string( UnknownArtistID ) +
@@ -501,7 +501,7 @@ std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )
         case Triggers::IncrementNbTracks:
         {
             assert( dbModelVersion >= 23 );
-            return "CREATE TRIGGER IF NOT EXISTS artist_increment_nb_tracks"
+            return "CREATE TRIGGER artist_increment_nb_tracks"
                    " AFTER INSERT ON " + MediaRelationTable::Name +
                    " BEGIN"
                        " UPDATE " + Table::Name +
@@ -512,7 +512,7 @@ std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )
         case Triggers::DecrementNbTracks:
         {
             assert( dbModelVersion >= 23 );
-            return "CREATE TRIGGER IF NOT EXISTS artist_decrement_nb_tracks"
+            return "CREATE TRIGGER artist_decrement_nb_tracks"
                    " AFTER DELETE ON " + MediaRelationTable::Name +
                    " BEGIN"
                        " UPDATE " + Table::Name +
@@ -523,7 +523,7 @@ std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )
         case Triggers::UpdateNbAlbums:
         {
             assert( dbModelVersion >= 23 );
-            return "CREATE TRIGGER IF NOT EXISTS artist_update_nb_albums"
+            return "CREATE TRIGGER artist_update_nb_albums"
                    " AFTER UPDATE OF artist_id ON " + Album::Table::Name +
                    " BEGIN"
                        " UPDATE " + Table::Name + " SET nb_albums = nb_albums + 1"
@@ -537,7 +537,7 @@ std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )
         case Triggers::DecrementNbAlbums:
         {
             assert( dbModelVersion >= 23 );
-            return "CREATE TRIGGER IF NOT EXISTS artist_decrement_nb_albums"
+            return "CREATE TRIGGER artist_decrement_nb_albums"
                    " AFTER DELETE ON " + Album::Table::Name +
                    " BEGIN"
                        " UPDATE " + Table::Name + " SET nb_albums = nb_albums - 1"
@@ -547,7 +547,7 @@ std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )
         case Triggers::IncrementNbAlbums:
         {
             assert( dbModelVersion >= 23 );
-            return "CREATE TRIGGER IF NOT EXISTS"
+            return "CREATE TRIGGER "
                    " artist_increment_nb_albums_unknown_album"
                    " AFTER INSERT ON " + Album::Table::Name +
                    " WHEN new.artist_id IS NOT NULL"
@@ -558,7 +558,7 @@ std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )
         }
         case Triggers::InsertFts:
         {
-            return "CREATE TRIGGER IF NOT EXISTS insert_artist_fts"
+            return "CREATE TRIGGER insert_artist_fts"
                    " AFTER INSERT ON " + Table::Name +
                    " WHEN new.name IS NOT NULL"
                    " BEGIN"
@@ -568,7 +568,7 @@ std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )
         }
         case Triggers::DeleteFts:
         {
-            return "CREATE TRIGGER IF NOT EXISTS delete_artist_fts"
+            return "CREATE TRIGGER delete_artist_fts"
                    " BEFORE DELETE ON " + Table::Name +
                    " WHEN old.name IS NOT NULL"
                    " BEGIN"

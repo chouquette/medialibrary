@@ -270,10 +270,10 @@ std::string File::index( Indexes index, uint32_t )
     switch ( index )
     {
         case Indexes::MediaId:
-            return "CREATE INDEX IF NOT EXISTS file_media_id_index ON " +
+            return "CREATE INDEX file_media_id_index ON " +
                         Table::Name + "(media_id)";
         case Indexes::FolderId:
-            return "CREATE INDEX IF NOT EXISTS file_folder_id_index ON " +
+            return "CREATE INDEX file_folder_id_index ON " +
                         Table::Name + "(folder_id)";
         default:
             assert( !"Invalid index provided" );

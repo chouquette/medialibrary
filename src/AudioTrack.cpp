@@ -131,7 +131,7 @@ std::string AudioTrack::schema( const std::string& tableName, uint32_t )
 std::string AudioTrack::index( AudioTrack::Indexes index, uint32_t )
 {
     assert( index == Indexes::MediaId );
-    return "CREATE INDEX IF NOT EXISTS audio_track_media_idx ON "
+    return "CREATE INDEX audio_track_media_idx ON "
                + Table::Name + "(media_id)";
 }
 

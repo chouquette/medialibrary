@@ -114,7 +114,7 @@ std::string SubtitleTrack::schema( const std::string& tableName, uint32_t )
 std::string SubtitleTrack::index( Indexes index, uint32_t )
 {
     assert( index == Indexes::MediaId );
-    return "CREATE INDEX IF NOT EXISTS subtitle_track_media_idx "
+    return "CREATE INDEX subtitle_track_media_idx "
                " ON " + Table::Name + "(media_id)";
 }
 

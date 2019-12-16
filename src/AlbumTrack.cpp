@@ -127,11 +127,11 @@ std::string AlbumTrack::index( AlbumTrack::Indexes index, uint32_t )
     switch ( index )
     {
         case Indexes::AlbumGenreArtist:
-            return "CREATE INDEX IF NOT EXISTS "
+            return "CREATE INDEX "
                     "album_track_album_genre_artist_ids ON " + Table::Name +
                         "(album_id, genre_id, artist_id)";
         case Indexes::MediaArtistGenreAlbum:
-            return  "CREATE INDEX IF NOT EXISTS "
+            return  "CREATE INDEX "
                     "album_media_artist_genre_album_idx ON " + Table::Name +
                         "(media_id, artist_id, genre_id, album_id)";
 

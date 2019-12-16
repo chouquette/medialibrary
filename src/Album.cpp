@@ -591,7 +591,7 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
         {
             if ( dbModel < 23 )
             {
-                return "CREATE TRIGGER IF NOT EXISTS is_album_present AFTER UPDATE OF"
+                return "CREATE TRIGGER is_album_present AFTER UPDATE OF"
                         " is_present ON " + Media::Table::Name +
                         " WHEN new.subtype = " +
                             std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
@@ -606,7 +606,7 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
             }
             else
             {
-                return "CREATE TRIGGER IF NOT EXISTS album_is_present AFTER UPDATE OF"
+                return "CREATE TRIGGER album_is_present AFTER UPDATE OF"
                        " is_present ON " + Media::Table::Name +
                        " WHEN new.subtype = " +
                            std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
@@ -623,7 +623,7 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
         }
         case Triggers::AddTrack:
         {
-            return "CREATE TRIGGER IF NOT EXISTS add_album_track"
+            return "CREATE TRIGGER add_album_track"
                    " AFTER INSERT ON " + AlbumTrack::Table::Name +
                    " BEGIN"
                    " UPDATE " + Table::Name +
@@ -635,7 +635,7 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
         }
         case Triggers::DeleteTrack:
         {
-            return "CREATE TRIGGER IF NOT EXISTS delete_album_track"
+            return "CREATE TRIGGER delete_album_track"
                         " AFTER DELETE ON " + AlbumTrack::Table::Name +
                    " BEGIN "
                    " UPDATE " + Table::Name +
@@ -650,7 +650,7 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
         }
         case Triggers::InsertFts:
         {
-            return "CREATE TRIGGER IF NOT EXISTS insert_album_fts"
+            return "CREATE TRIGGER insert_album_fts"
                     " AFTER INSERT ON " + Table::Name +
                     // Skip unknown albums
                     " WHEN new.title IS NOT NULL"
@@ -661,7 +661,7 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
         }
         case Triggers::DeleteFts:
         {
-            return "CREATE TRIGGER IF NOT EXISTS delete_album_fts"
+            return "CREATE TRIGGER delete_album_fts"
                     " BEFORE DELETE ON " + Table::Name +
                     // Unknown album probably won't be deleted, but better safe than sorry
                     " WHEN old.title IS NOT NULL"
@@ -679,7 +679,7 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
 std::string Album::index( Indexes index, uint32_t )
 {
     assert( index == Indexes::ArtistId );
-    return "CREATE INDEX IF NOT EXISTS album_artist_id_idx ON " +
+    return "CREATE INDEX album_artist_id_idx ON " +
                 Table::Name + "(artist_id)";
 }
 

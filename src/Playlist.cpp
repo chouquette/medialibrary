@@ -435,7 +435,7 @@ std::string Playlist::trigger( Triggers trigger, uint32_t dbModel )
         {
             if ( dbModel < 16 )
             {
-                return "CREATE TRIGGER IF NOT EXISTS update_playlist_order_on_insert"
+                return "CREATE TRIGGER update_playlist_order_on_insert"
                             " AFTER INSERT ON " + MediaRelationTable::Name +
                        " WHEN new.position IS NOT NULL"
                        " BEGIN "
@@ -446,7 +446,7 @@ std::string Playlist::trigger( Triggers trigger, uint32_t dbModel )
                            " AND media_id != new.media_id;"
                        " END";
             }
-            return "CREATE TRIGGER IF NOT EXISTS update_playlist_order_on_insert"
+            return "CREATE TRIGGER update_playlist_order_on_insert"
                         " AFTER INSERT ON " + MediaRelationTable::Name +
                    " WHEN new.position IS NOT NULL"
                    " BEGIN "
@@ -460,7 +460,7 @@ std::string Playlist::trigger( Triggers trigger, uint32_t dbModel )
         case Triggers::UpdateOrderOnDelete:
         {
             assert( dbModel >= 16 );
-            return "CREATE TRIGGER IF NOT EXISTS update_playlist_order_on_delete"
+            return "CREATE TRIGGER update_playlist_order_on_delete"
                         " AFTER DELETE ON " + MediaRelationTable::Name +
                    " BEGIN "
                        "UPDATE " + MediaRelationTable::Name +
@@ -470,21 +470,21 @@ std::string Playlist::trigger( Triggers trigger, uint32_t dbModel )
                    " END";
         }
         case Triggers::InsertFts:
-            return "CREATE TRIGGER IF NOT EXISTS insert_playlist_fts"
+            return "CREATE TRIGGER insert_playlist_fts"
                         " AFTER INSERT ON " + Table::Name +
                    " BEGIN"
                        " INSERT INTO " + FtsTable::Name + "(rowid, name)"
                             " VALUES(new.id_playlist, new.name);"
                    " END";
         case Triggers::UpdateFts:
-            return "CREATE TRIGGER IF NOT EXISTS update_playlist_fts AFTER UPDATE OF name"
+            return "CREATE TRIGGER update_playlist_fts AFTER UPDATE OF name"
                    " ON " + Table::Name +
                    " BEGIN"
                        " UPDATE " + FtsTable::Name + " SET name = new.name"
                             " WHERE rowid = new.id_playlist;"
                    " END";
         case Triggers::DeleteFts:
-            return "CREATE TRIGGER IF NOT EXISTS delete_playlist_fts"
+            return "CREATE TRIGGER delete_playlist_fts"
                         " BEFORE DELETE ON " + Table::Name +
                    " BEGIN"
                         " DELETE FROM " + FtsTable::Name +
@@ -493,7 +493,7 @@ std::string Playlist::trigger( Triggers trigger, uint32_t dbModel )
         case Triggers::Append:
         {
             assert( dbModel <= 15 );
-            return "CREATE TRIGGER IF NOT EXISTS append_new_playlist_record AFTER INSERT"
+            return "CREATE TRIGGER append_new_playlist_record AFTER INSERT"
                    " ON " + MediaRelationTable::Name +
                    " WHEN new.position IS NULL"
                    " BEGIN "
@@ -506,7 +506,7 @@ std::string Playlist::trigger( Triggers trigger, uint32_t dbModel )
         case Triggers::UpdateOrderOnPositionUpdate:
         {
             assert( dbModel <= 15 );
-            return "CREATE TRIGGER IF NOT EXISTS update_playlist_order"
+            return "CREATE TRIGGER update_playlist_order"
                         " AFTER UPDATE OF position"
                    " ON " + MediaRelationTable::Name +
                    " BEGIN "
@@ -532,16 +532,16 @@ std::string Playlist::index( Indexes index, uint32_t dbModel )
         {
             if ( dbModel < 14 )
             {
-                return "CREATE INDEX IF NOT EXISTS playlist_media_pl_id_index "
+                return "CREATE INDEX playlist_media_pl_id_index "
                        "ON " + MediaRelationTable::Name + "(media_id, playlist_id)";
             }
-            return "CREATE INDEX IF NOT EXISTS playlist_file_id ON "
+            return "CREATE INDEX playlist_file_id ON "
                         + Table::Name + "(file_id)";
         }
         case Indexes::PlaylistIdPosition:
         {
             assert( dbModel >= 16 );
-            return "CREATE INDEX IF NOT EXISTS playlist_position_pl_id_index "
+            return "CREATE INDEX playlist_position_pl_id_index "
                    "ON " + MediaRelationTable::Name + "(playlist_id, position)";
         }
 

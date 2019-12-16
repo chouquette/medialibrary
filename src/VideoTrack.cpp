@@ -192,7 +192,7 @@ std::string VideoTrack::schema( const std::string& tableName, uint32_t )
 std::string VideoTrack::index( Indexes index, uint32_t )
 {
     assert( index == Indexes::MediaId );
-    return "CREATE INDEX IF NOT EXISTS video_track_media_idx ON " +
+    return "CREATE INDEX video_track_media_idx ON " +
                Table::Name + "(media_id)";
 }
 

@@ -466,7 +466,7 @@ std::string Task::trigger(Task::Triggers trigger, uint32_t dbModel )
 {
     assert( trigger == Triggers::DeletePlaylistLinkingTask );
     assert( dbModel >= 18 );
-    return "CREATE TRIGGER IF NOT EXISTS delete_playlist_linking_tasks "
+    return "CREATE TRIGGER delete_playlist_linking_tasks "
            "AFTER DELETE ON " + Playlist::Table::Name + " "
            "BEGIN "
                "DELETE FROM " + Table::Name + " "
