@@ -714,12 +714,29 @@ std::string Album::indexName( Album::Indexes index, uint32_t )
 
 bool Album::checkDbModel( MediaLibraryPtr ml )
 {
-    return sqlite::Tools::checkTableSchema( ml->getConn(),
+    if ( sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
-                                       Table::Name ) &&
+                                       Table::Name ) == false ||
            sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( FtsTable::Name, Settings::DbModelVersion ),
-                                       FtsTable::Name );
+                                       FtsTable::Name ) == false )
+        return false;
+
+    if ( sqlite::Tools::checkIndexStatement( ml->getConn(),
+            index( Indexes::ArtistId, Settings::DbModelVersion ),
+            indexName( Indexes::ArtistId, Settings::DbModelVersion ) ) == false )
+        return false;
+
+    auto check = []( sqlite::Connection* dbConn, Triggers t ) {
+        return sqlite::Tools::checkTriggerStatement( dbConn,
+                                    trigger( t, Settings::DbModelVersion ),
+                                    triggerName( t, Settings::DbModelVersion ) );
+    };
+    return check( ml->getConn(), Triggers::IsPresent ) &&
+            check( ml->getConn(), Triggers::AddTrack ) &&
+            check( ml->getConn(), Triggers::DeleteTrack ) &&
+            check( ml->getConn(), Triggers::InsertFts ) &&
+            check( ml->getConn(), Triggers::DeleteFts );
 }
 
 std::shared_ptr<Album> Album::create( MediaLibraryPtr ml, const std::string& title )
