@@ -157,7 +157,13 @@ bool AlbumTrack::checkDbModel(MediaLibraryPtr ml)
 {
     return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
-                                       Table::Name );
+                                       Table::Name ) &&
+           sqlite::Tools::checkIndexStatement( ml->getConn(),
+                index( AlbumTrack::Indexes::AlbumGenreArtist, Settings::DbModelVersion ),
+                indexName( AlbumTrack::Indexes::AlbumGenreArtist, Settings::DbModelVersion ) ) &&
+            sqlite::Tools::checkIndexStatement( ml->getConn(),
+                 index( AlbumTrack::Indexes::MediaArtistGenreAlbum, Settings::DbModelVersion ),
+                 indexName( AlbumTrack::Indexes::MediaArtistGenreAlbum, Settings::DbModelVersion ) );
 }
 
 std::shared_ptr<AlbumTrack> AlbumTrack::create( MediaLibraryPtr ml, int64_t albumId,
