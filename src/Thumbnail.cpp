@@ -368,9 +368,12 @@ void Thumbnail::createTriggers( sqlite::Connection* dbConnection )
                 trigger( Triggers::UpdateRefcount, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
                 trigger( Triggers::DeleteUnused, Settings::DbModelVersion ) );
+}
 
-    sqlite::Tools::executeRequest( dbConnection, "CREATE INDEX IF NOT EXISTS thumbnail_link_index "
-                "ON " + Table::Name + "(id_thumbnail)" );
+void Thumbnail::createIndexes( sqlite::Connection* dbConnection )
+{
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::ThumbnailId, Settings::DbModelVersion ) );
 }
 
 std::string Thumbnail::schema( const std::string& tableName, uint32_t dbModel )
@@ -528,6 +531,14 @@ std::string Thumbnail::trigger(Thumbnail::Triggers trigger, uint32_t dbModel)
             assert( !"Invalid trigger provided" );
     }
     return "<invalid request>";
+}
+
+std::string Thumbnail::index( Indexes index, uint32_t dbModel )
+{
+    assert( index == Indexes::ThumbnailId );
+    assert( dbModel >= 17 );
+    return "CREATE INDEX IF NOT EXISTS thumbnail_link_index "
+                "ON " + Table::Name + "(id_thumbnail)";
 }
 
 bool Thumbnail::checkDbModel(MediaLibraryPtr ml)

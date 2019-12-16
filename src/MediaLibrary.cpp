@@ -216,6 +216,7 @@ void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
     Show::createTriggers( dbConn, dbModelVersion );
     ShowEpisode::createIndexes( dbConn );
     Thumbnail::createTriggers( dbConn );
+    Thumbnail::createIndexes( dbConn );
     parser::Task::createTriggers( dbConn, dbModelVersion );
     AudioTrack::createIndexes( dbConn );
     SubtitleTrack::createTriggers( dbConn );

@@ -110,6 +110,7 @@ Thumbnail::trigger( Thumbnail::Triggers::AutoDeleteArtist, 17 ),
 Thumbnail::trigger( Thumbnail::Triggers::AutoDeleteMedia, 17 ),
 Thumbnail::trigger( Thumbnail::Triggers::DeleteUnused, 17 ),
 Thumbnail::trigger( Thumbnail::Triggers::DeleteAfterLinkingDelete, 17 ),
+Thumbnail::index( Thumbnail::Indexes::ThumbnailId, 17 ),
 
 /**********************************************
  * Remove an old incorrectly migrated trigger *

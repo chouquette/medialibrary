@@ -9,8 +9,7 @@
 
 Thumbnail::schema( Thumbnail::Table::Name, 18 ),
 Thumbnail::schema( Thumbnail::LinkingTable::Name, 18 ),
-
-#include "database/tables/Thumbnail_triggers_v18.sql"
+Thumbnail::index( Thumbnail::Indexes::ThumbnailId, 18 ),
 
 /******************************************************************
  * Split Task into Task & Item                                    *

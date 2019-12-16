@@ -66,6 +66,8 @@ Thumbnail::schema( Thumbnail::Table::Name, 23 ),
 /* Ensure we also flush the linking table since the foreign key
  * ON DELETE CASCADE won't be processed during a DROP TABLE */
 "DELETE FROM " + Thumbnail::LinkingTable::Name,
+Thumbnail::index( Thumbnail::Indexes::ThumbnailId, 23 ),
+
 
 "UPDATE " + parser::Task::Table::Name + " AS t SET file_type = " +
     std::to_string( static_cast<std::underlying_type_t<IFile::Type>>(
