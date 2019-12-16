@@ -449,14 +449,15 @@ class Tools
                 std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
         }
 
-        static std::string fetchTableSchema( sqlite::Connection* dbConn,
-                                             const std::string& tableName )
+        static std::string fetchSchemaSql( sqlite::Connection* dbConn,
+                                           const std::string& type,
+                                           const std::string& name )
         {
             const std::string req{ "SELECT sql FROM sqlite_master "
-                                 "WHERE type='table' AND name=?" };
+                                 "WHERE type=? AND name=?" };
             auto chrono = std::chrono::steady_clock::now();
             Statement stmt( dbConn->handle(), req );
-            stmt.execute( tableName );
+            stmt.execute( type, name );
             auto row = stmt.row();
             assert( row != nullptr );
             assert( row.nbColumns() == 1 );
@@ -465,6 +466,12 @@ class Tools
             LOG_VERBOSE("Executed ", req, " in ",
                 std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
             return res;
+        }
+
+        static std::string fetchTableSchema( sqlite::Connection* dbConn,
+                                             const std::string& tableName )
+        {
+            return fetchSchemaSql( dbConn, "table", tableName );
         }
 };
 
