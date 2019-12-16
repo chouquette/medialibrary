@@ -163,9 +163,8 @@ void VideoTrack::createTable( sqlite::Connection* dbConnection )
 
 void VideoTrack::createIndexes( sqlite::Connection* dbConnection )
 {
-    const std::string indexReq = "CREATE INDEX IF NOT EXISTS video_track_media_idx ON " +
-            Table::Name + "(media_id)";
-    sqlite::Tools::executeRequest( dbConnection, indexReq );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::MediaId, Settings::DbModelVersion ) );
 }
 
 std::string VideoTrack::schema( const std::string& tableName, uint32_t )
@@ -188,6 +187,13 @@ std::string VideoTrack::schema( const std::string& tableName, uint32_t )
         "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name +
             "(id_media) ON DELETE CASCADE"
     ")";
+}
+
+std::string VideoTrack::index( Indexes index, uint32_t )
+{
+    assert( index == Indexes::MediaId );
+    return "CREATE INDEX IF NOT EXISTS video_track_media_idx ON " +
+               Table::Name + "(media_id)";
 }
 
 bool VideoTrack::checkDbModel( MediaLibraryPtr ml )

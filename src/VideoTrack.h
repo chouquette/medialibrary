@@ -42,6 +42,11 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack>
             static const std::string PrimaryKeyColumn;
             static int64_t VideoTrack::* const PrimaryKey;
         };
+        enum class Indexes : uint8_t
+        {
+            MediaId,
+        };
+
         VideoTrack( MediaLibraryPtr, sqlite::Row& row );
         VideoTrack( MediaLibraryPtr, const std::string& codec,
                     unsigned int width, unsigned int height, uint32_t fpsNum,
@@ -64,6 +69,7 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack>
         static void createTable( sqlite::Connection* dbConnection );
         static void createIndexes( sqlite::Connection* dbConnection );
         static std::string schema( const std::string& tableName, uint32_t dbModel );
+        static std::string index( Indexes index, uint32_t dbModel );
         static bool checkDbModel( MediaLibraryPtr ml );
         static std::shared_ptr<VideoTrack> create( MediaLibraryPtr ml, const std::string& codec,
                                     unsigned int width, unsigned int height, uint32_t fpsNum,
