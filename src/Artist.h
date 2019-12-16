@@ -110,6 +110,7 @@ public:
     static void createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion );
     static std::string schema( const std::string& tableName, uint32_t dbModelVersion );
     static std::string trigger( Triggers trigger, uint32_t dbModelVersion );
+    static std::string triggerName( Triggers trigger, uint32_t dbModelVersion );
     static bool checkDbModel( MediaLibraryPtr ml );
     static bool createDefaultArtists( sqlite::Connection* dbConnection );
     static std::shared_ptr<Artist> create( MediaLibraryPtr ml, const std::string& name );
