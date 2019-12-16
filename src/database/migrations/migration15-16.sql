@@ -26,10 +26,10 @@ Playlist::schema( Playlist::MediaRelationTable::Name, 16 ),
 
 Playlist::trigger( Playlist::Triggers::UpdateOrderOnInsert, 16 ),
 Playlist::trigger( Playlist::Triggers::UpdateOrderOnDelete, 16 ),
-Playlist::trigger( Playlist::Triggers::InsertFts, 16 ),
-Playlist::trigger( Playlist::Triggers::UpdateFts, 16 ),
-Playlist::trigger( Playlist::Triggers::DeleteFts, 16 ),
 Playlist::index( Playlist::Indexes::PlaylistIdPosition, 16 ),
+
+Media::trigger( Media::Triggers::IncrementNbPlaylist, 16 ),
+Media::trigger( Media::Triggers::DecrementNbPlaylist, 16 ),
 
 "DROP INDEX IF EXISTS folder_device_id",
 "DROP INDEX IF EXISTS folder_parent_id",

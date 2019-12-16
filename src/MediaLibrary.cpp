@@ -1525,7 +1525,6 @@ void MediaLibrary::migrateModel15to16()
 
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( getConn(), req );
-    Media::createTriggers( dbConn, 16 );
 
     // Migrate files mrl encoding
     {
