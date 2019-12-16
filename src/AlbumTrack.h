@@ -72,6 +72,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack>
         static void createIndexes( sqlite::Connection* dbConnection );
         static std::string schema( const std::string& tableName, uint32_t dbModel );
         static std::string index( Indexes index, uint32_t dbModel );
+        static std::string indexName( Indexes index, uint32_t dbModel );
         static bool checkDbModel( MediaLibraryPtr ml );
         static std::shared_ptr<AlbumTrack> create(MediaLibraryPtr ml, int64_t albumId,
                                     int64_t mediaId, unsigned int trackNb,

@@ -122,20 +122,34 @@ std::string AlbumTrack::schema( const std::string& tableName, uint32_t )
     ")";
 }
 
-std::string AlbumTrack::index( AlbumTrack::Indexes index, uint32_t )
+std::string AlbumTrack::index( AlbumTrack::Indexes index, uint32_t dbModel )
 {
     switch ( index )
     {
         case Indexes::AlbumGenreArtist:
-            return "CREATE INDEX "
-                    "album_track_album_genre_artist_ids ON " + Table::Name +
+            return "CREATE INDEX " + indexName( index, dbModel ) +
+                    " ON " + Table::Name +
                         "(album_id, genre_id, artist_id)";
         case Indexes::MediaArtistGenreAlbum:
-            return  "CREATE INDEX "
-                    "album_media_artist_genre_album_idx ON " + Table::Name +
+            return  "CREATE INDEX " + indexName( index, dbModel ) +
+                    " ON " + Table::Name +
                         "(media_id, artist_id, genre_id, album_id)";
 
     }
+    return "<invalid request>";
+}
+
+std::string AlbumTrack::indexName(AlbumTrack::Indexes index, uint32_t )
+{
+    switch ( index )
+    {
+        case Indexes::AlbumGenreArtist:
+            return "album_track_album_genre_artist_ids";
+        case Indexes::MediaArtistGenreAlbum:
+            return "album_media_artist_genre_album_idx";
+        default:
+            assert( !"Invalid index provided" );
+    };
     return "<invalid request>";
 }
 
