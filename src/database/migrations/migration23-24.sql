@@ -77,3 +77,7 @@ MediaGroup::index( MediaGroup::Indexes::ParentId, 24 ),
 /* Recreate PlaylistIdPosition trigger so that it passes sanity check */
 "DROP INDEX " + Playlist::indexName( Playlist::Indexes::PlaylistIdPosition, 23 ),
 Playlist::index( Playlist::Indexes::PlaylistIdPosition, 24 ),
+
+/* Recreate MediaId index so that it passes integrity checks */
+"DROP INDEX " + SubtitleTrack::indexName( SubtitleTrack::Indexes::MediaId, 23 ),
+SubtitleTrack::index( SubtitleTrack::Indexes::MediaId, 24 ),
