@@ -101,7 +101,9 @@ public:
     static void createIndexes( sqlite::Connection* dbConn, uint32_t dbModel );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
     static std::string trigger( Triggers trigger, uint32_t dbModel );
+    static std::string triggerName( Triggers trigger, uint32_t dbModel );
     static std::string index( Indexes index, uint32_t dbModel );
+    static std::string indexName( Indexes index, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     static Query<IPlaylist> search( MediaLibraryPtr ml, const std::string& name,
                                     const QueryParameters* params );
