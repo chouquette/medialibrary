@@ -92,7 +92,9 @@ public:
     static void createIndexes( sqlite::Connection* connection );
     static std::string schema( const std::string& name, uint32_t dbModel );
     static std::string trigger( Triggers t, uint32_t dbModel );
+    static std::string triggerName( Triggers t, uint32_t dbModel );
     static std::string index( Indexes i, uint32_t dbModel );
+    static std::string indexName( Indexes i, uint32_t dbModel );
 
 private:
     static std::string orderBy( const QueryParameters* params );

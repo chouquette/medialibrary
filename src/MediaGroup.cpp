@@ -286,21 +286,21 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
     switch ( t )
     {
         case Triggers::InsertFts:
-            return "CREATE TRIGGER media_group_insert_fts"
+            return "CREATE TRIGGER " + triggerName( t, dbModel ) +
                     " AFTER INSERT ON " + Table::Name +
                     " BEGIN"
                     " INSERT INTO " + FtsTable::Name + "(rowid, name)"
                         " VALUES(new.rowid, new.name);"
                     " END";
         case Triggers::DeleteFts:
-            return "CREATE TRIGGER media_group_delete_fts"
+            return "CREATE TRIGGER " + triggerName( t, dbModel ) +
                    " AFTER DELETE ON " + Table::Name +
                    " BEGIN"
                    " DELETE FROM " + FtsTable::Name +
                        " WHERE rowid = old.id_group;"
                    " END";
         case Triggers::IncrementNbMediaOnGroupChange:
-            return "CREATE TRIGGER media_group_increment_nb_media"
+            return "CREATE TRIGGER " + triggerName( t, dbModel ) +
                     " AFTER UPDATE OF type, group_id ON " + Media::Table::Name +
                     " WHEN new.group_id IS NOT NULL AND"
                         " (old.type != new.type OR IFNULL(old.group_id, 0) != new.group_id)"
@@ -324,7 +324,7 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                     " WHERE id_group = new.group_id;"
                     " END";
         case Triggers::DecrementNbMediaOnGroupChange:
-            return "CREATE TRIGGER media_group_decrement_nb_media"
+            return "CREATE TRIGGER " + triggerName( t, dbModel ) +
                     " AFTER UPDATE OF type, group_id ON " + Media::Table::Name +
                     " WHEN old.group_id IS NOT NULL AND"
                         "(old.type != new.type OR old.group_id != IFNULL(new.group_id, 0))"
@@ -353,12 +353,38 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
     return "<invalid request>";
 }
 
+std::string MediaGroup::triggerName(MediaGroup::Triggers t, uint32_t dbModel)
+{
+    assert( dbModel >= 24 );
+    switch ( t )
+    {
+        case Triggers::InsertFts:
+            return "media_group_insert_fts";
+        case Triggers::DeleteFts:
+            return "media_group_delete_fts";
+        case Triggers::IncrementNbMediaOnGroupChange:
+            return "media_group_increment_nb_media";
+        case Triggers::DecrementNbMediaOnGroupChange:
+            return "media_group_decrement_nb_media";
+        default:
+            assert( !"Invalid trigger" );
+    }
+    return "<invalid request>";
+}
+
 std::string MediaGroup::index( Indexes i, uint32_t dbModel )
 {
     assert( i == Indexes::ParentId );
     assert( dbModel >= 24 );
-    return "CREATE INDEX media_group_parent_id_idx ON " +
-            Table::Name + "(parent_id)";
+    return "CREATE INDEX " + indexName( i, dbModel ) +
+           " ON " + Table::Name + "(parent_id)";
+}
+
+std::string MediaGroup::indexName( Indexes i, uint32_t dbModel )
+{
+    assert( i == Indexes::ParentId );
+    assert( dbModel >= 24 );
+    return "media_group_parent_id_idx";
 }
 
 std::string MediaGroup::orderBy(const QueryParameters* params)
