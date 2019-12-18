@@ -129,7 +129,10 @@ bool Label::checkDbModel( MediaLibraryPtr ml )
                                        Table::Name ) &&
            sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( FileRelationTable::Name, Settings::DbModelVersion ),
-                                       FileRelationTable::Name );
+                                       FileRelationTable::Name ) &&
+           sqlite::Tools::checkTriggerStatement( ml->getConn(),
+                 trigger( Triggers::DeleteFts, Settings::DbModelVersion ),
+                 triggerName( Triggers::DeleteFts, Settings::DbModelVersion ) );
 }
 
 void Label::createTable( sqlite::Connection* dbConnection )
