@@ -1189,8 +1189,8 @@ std::string Media::trigger( Triggers trigger, uint32_t dbModel )
         {
             if ( dbModel < 23 )
             {
-                return "CREATE TRIGGER "
-                       "is_media_device_present AFTER UPDATE OF "
+                return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                       " AFTER UPDATE OF "
                        "is_present ON " + Device::Table::Name + " "
                        "BEGIN "
                        "UPDATE " + Table::Name + " "
@@ -1198,8 +1198,8 @@ std::string Media::trigger( Triggers trigger, uint32_t dbModel )
                                 "WHERE device_id=new.id_device;"
                        "END";
             }
-            return "CREATE TRIGGER "
-                   "media_update_device_presence AFTER UPDATE OF "
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                   " AFTER UPDATE OF "
                    "is_present ON " + Device::Table::Name + " "
                    "WHEN old.is_present != new.is_present "
                    "BEGIN "
@@ -1212,8 +1212,8 @@ std::string Media::trigger( Triggers trigger, uint32_t dbModel )
         {
             if ( dbModel < 23 )
             {
-                return "CREATE TRIGGER "
-                        " cascade_file_deletion AFTER DELETE ON " + File::Table::Name +
+                return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                        " AFTER DELETE ON " + File::Table::Name +
                         " BEGIN "
                         " DELETE FROM " + Table::Name + " WHERE "
                             "(SELECT COUNT(id_file) FROM " + File::Table::Name +
@@ -1221,8 +1221,8 @@ std::string Media::trigger( Triggers trigger, uint32_t dbModel )
                                 " AND id_media=old.media_id;"
                         " END";
             }
-            return "CREATE TRIGGER "
-                   " media_cascade_file_deletion AFTER DELETE ON " + File::Table::Name +
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                   " AFTER DELETE ON " + File::Table::Name +
                    " WHEN old.type = " +
                        std::to_string( static_cast<std::underlying_type_t<File::Type>>(
                                            IFile::Type::Main ) ) +
@@ -1236,7 +1236,7 @@ std::string Media::trigger( Triggers trigger, uint32_t dbModel )
         }
         case Triggers::IncrementNbPlaylist:
             assert( dbModel >= 14 );
-            return "CREATE TRIGGER increment_media_nb_playlist"
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                         " AFTER INSERT ON " + Playlist::MediaRelationTable::Name +
                     " BEGIN "
                         " UPDATE " + Table::Name + " SET nb_playlists = nb_playlists + 1 "
@@ -1244,29 +1244,29 @@ std::string Media::trigger( Triggers trigger, uint32_t dbModel )
                     " END";
         case Triggers::DecrementNbPlaylist:
             assert( dbModel >= 14 );
-            return "CREATE TRIGGER decrement_media_nb_playlist"
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                         " AFTER DELETE ON " + Playlist::MediaRelationTable::Name +
                     " BEGIN "
                         " UPDATE " + Table::Name + " SET nb_playlists = nb_playlists - 1 "
                             " WHERE id_media = old.media_id;"
                     " END";
         case Triggers::InsertFts:
-            return "CREATE TRIGGER "
-                   "insert_media_fts AFTER INSERT ON " + Table::Name +
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                   " AFTER INSERT ON " + Table::Name +
                    " BEGIN"
                        " INSERT INTO " + FtsTable::Name + "(rowid,title,labels)"
                            " VALUES(new.id_media, new.title, '');"
                    " END";
         case Triggers::DeleteFts:
-            return "CREATE TRIGGER "
-                   "delete_media_fts BEFORE DELETE ON " + Table::Name +
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                   " BEFORE DELETE ON " + Table::Name +
                    " BEGIN"
                        " DELETE FROM " + FtsTable::Name +
                            " WHERE rowid = old.id_media;"
                    " END";
         case Triggers::UpdateFts:
-            return "CREATE TRIGGER "
-                   "update_media_title_fts AFTER UPDATE OF title ON " + Table::Name +
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                   " AFTER UPDATE OF title ON " + Table::Name +
                    " BEGIN"
                        " UPDATE " + FtsTable::Name + " SET title = new.title"
                            " WHERE rowid = new.id_media;"
@@ -1278,34 +1278,95 @@ std::string Media::trigger( Triggers trigger, uint32_t dbModel )
     return "<invalid request>";
 }
 
+std::string Media::triggerName( Triggers trigger, uint32_t dbModel )
+{
+    switch ( trigger )
+    {
+        case Triggers::IsPresent:
+        {
+            if ( dbModel < 23 )
+                return "is_media_device_present";
+            return "media_update_device_presence";
+        }
+        case Triggers::CascadeFileDeletion:
+        {
+            if ( dbModel < 23 )
+                return "cascade_file_deletion";
+            return "media_cascade_file_deletion";
+        }
+        case Triggers::IncrementNbPlaylist:
+            assert( dbModel >= 14 );
+            return "increment_media_nb_playlist";
+        case Triggers::DecrementNbPlaylist:
+            assert( dbModel >= 14 );
+            return "decrement_media_nb_playlist";
+        case Triggers::InsertFts:
+            return "insert_media_fts";
+        case Triggers::DeleteFts:
+            return "delete_media_fts";
+        case Triggers::UpdateFts:
+            return "update_media_title_fts";
+        default:
+            assert( !"Invalid trigger provided" );
+    }
+    return "<invalid request>";
+}
+
 std::string Media::index( Indexes index, uint32_t dbModel )
 {
     switch ( index )
     {
         case Indexes::LastPlayedDate:
-            return "CREATE INDEX index_last_played_date"
+            return "CREATE INDEX " + indexName( index, dbModel ) +
                         " ON " + Table::Name + "(last_played_date DESC)";
         case Indexes::Presence:
-            return "CREATE INDEX index_media_presence"
+            return "CREATE INDEX " + indexName( index, dbModel ) +
                         " ON " + Table::Name + "(is_present)";
         case Indexes::Types:
-            return "CREATE INDEX media_types_idx"
+            return "CREATE INDEX " + indexName( index, dbModel ) +
                         " ON " + Table::Name + "(type, subtype)";
         case Indexes::LastUsageDate:
             assert( dbModel >= 14 );
             // Don't create this index before model 14, as the real_last_played_date
             // column was introduced in model version 14
-            return "CREATE INDEX media_last_usage_dates_idx"
+            return "CREATE INDEX " + indexName( index, dbModel ) +
                         " ON " + Table::Name + "(last_played_date, "
                             "real_last_played_date, insertion_date)";
         case Indexes::Folder:
             assert( dbModel >= 22 );
-            return "CREATE INDEX media_folder_id_idx ON " +
-                        Table::Name + "(folder_id)";
+            return "CREATE INDEX " + indexName( index, dbModel ) +
+                        " ON " + Table::Name + "(folder_id)";
         case Indexes::MediaGroup:
             assert( dbModel >= 24 );
-            return "CREATE INDEX media_group_id_idx ON " +
-                        Table::Name + "(group_id)";
+            return "CREATE INDEX " + indexName( index, dbModel ) +
+                        " ON " + Table::Name + "(group_id)";
+        default:
+            assert( !"Invalid index provided" );
+    }
+    return "<invalid request>";
+}
+
+std::string Media::indexName( Indexes index, uint32_t dbModel )
+{
+    switch ( index )
+    {
+        case Indexes::LastPlayedDate:
+            return "index_last_played_date";
+        case Indexes::Presence:
+            return "index_media_presence";
+        case Indexes::Types:
+            return "media_types_idx";
+        case Indexes::LastUsageDate:
+            assert( dbModel >= 14 );
+            // Don't create this index before model 14, as the real_last_played_date
+            // column was introduced in model version 14
+            return "media_last_usage_dates_idx";
+        case Indexes::Folder:
+            assert( dbModel >= 22 );
+            return "media_folder_id_idx";
+        case Indexes::MediaGroup:
+            assert( dbModel >= 24 );
+            return "media_group_id_idx";
         default:
             assert( !"Invalid index provided" );
     }

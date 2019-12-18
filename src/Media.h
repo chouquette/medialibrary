@@ -120,7 +120,9 @@ class Media : public IMedia,
         static void createIndexes( sqlite::Connection* connection, uint32_t modelVersion );
         static std::string schema( const std::string& tableName, uint32_t dbModel );
         static std::string trigger( Triggers trigger, uint32_t dbModel );
+        static std::string triggerName( Triggers trigger, uint32_t dbModel );
         static std::string index( Indexes index, uint32_t dbModel );
+        static std::string indexName( Indexes index, uint32_t dbModel );
         static bool checkDbModel( MediaLibraryPtr ml );
 
         virtual int64_t id() const override;
