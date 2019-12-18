@@ -584,12 +584,31 @@ std::string Thumbnail::indexName( Indexes index, uint32_t dbModel )
 
 bool Thumbnail::checkDbModel(MediaLibraryPtr ml)
 {
-    return sqlite::Tools::checkTableSchema( ml->getConn(),
+    if ( sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
-                                       Table::Name ) &&
-           sqlite::Tools::checkTableSchema( ml->getConn(),
+                                       Table::Name )== false ||
+         sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( LinkingTable::Name, Settings::DbModelVersion ),
-                                       LinkingTable::Name );
+                                       LinkingTable::Name ) == false ||
+         sqlite::Tools::checkIndexStatement( ml->getConn(),
+                 index( Indexes::ThumbnailId, Settings::DbModelVersion ),
+                 indexName( Indexes::ThumbnailId, Settings::DbModelVersion ) ) == false )
+        return false;
+
+
+
+    auto checkTrigger = []( sqlite::Connection* dbConn, Triggers t ) {
+        return sqlite::Tools::checkTriggerStatement( dbConn,
+                                    trigger( t, Settings::DbModelVersion ),
+                                    triggerName( t, Settings::DbModelVersion ) );
+    };
+    return checkTrigger( ml->getConn(), Triggers::AutoDeleteAlbum ) &&
+            checkTrigger( ml->getConn(), Triggers::AutoDeleteArtist ) &&
+            checkTrigger( ml->getConn(), Triggers::AutoDeleteMedia ) &&
+            checkTrigger( ml->getConn(), Triggers::IncrementRefcount ) &&
+            checkTrigger( ml->getConn(), Triggers::DecrementRefcount ) &&
+            checkTrigger( ml->getConn(), Triggers::UpdateRefcount ) &&
+            checkTrigger( ml->getConn(), Triggers::DeleteUnused );
 }
 
 std::shared_ptr<Thumbnail> Thumbnail::fetch( MediaLibraryPtr ml, EntityType type,
