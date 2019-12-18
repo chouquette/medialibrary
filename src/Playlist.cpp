@@ -579,7 +579,7 @@ std::string Playlist::index( Indexes index, uint32_t dbModel )
         {
             assert( dbModel >= 16 );
             return "CREATE INDEX " + indexName( index, dbModel ) +
-                   " ON " + MediaRelationTable::Name + "(playlist_id, position)";
+                   " ON " + MediaRelationTable::Name + "(playlist_id,position)";
         }
 
         default:

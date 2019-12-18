@@ -73,3 +73,7 @@ MediaGroup::index( MediaGroup::Indexes::ParentId, 24 ),
 
 /* Remove the 2 VideoGroups related columns from the Settings table */
 "DROP TABLE Settings",
+
+/* Recreate PlaylistIdPosition trigger so that it passes sanity check */
+"DROP INDEX " + Playlist::indexName( Playlist::Indexes::PlaylistIdPosition, 23 ),
+Playlist::index( Playlist::Indexes::PlaylistIdPosition, 24 ),
