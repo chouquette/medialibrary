@@ -156,24 +156,24 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
     switch ( trigger )
     {
         case Triggers::InsertFts:
-            return "CREATE TRIGGER insert_folder_fts "
-                        "AFTER INSERT ON " + Table::Name + " "
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                        " AFTER INSERT ON " + Table::Name + " "
                    "BEGIN "
                        "INSERT INTO " + FtsTable::Name + "(rowid,name) "
                            "VALUES(new.id_folder,new.name);"
                    "END";
         case Triggers::DeleteFts:
-            return "CREATE TRIGGER delete_folder_fts "
-                        "BEFORE DELETE ON " + Table::Name + " "
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                        " BEFORE DELETE ON " + Table::Name + " "
                    "BEGIN "
                        "DELETE FROM " + FtsTable::Name +
                             " WHERE rowid = old.id_folder;"
                    "END";
         case Triggers::UpdateNbMediaOnIndex:
             assert( dbModel >= 14 );
-            return "CREATE TRIGGER update_folder_nb_media_on_insert "
-                        "AFTER INSERT ON " + Media::Table::Name + " "
-                        "WHEN new.folder_id IS NOT NULL "
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                        " AFTER INSERT ON " + Media::Table::Name +
+                        " WHEN new.folder_id IS NOT NULL "
                     "BEGIN "
                         "UPDATE " + Table::Name + " SET "
                         "nb_audio = nb_audio + "
@@ -193,9 +193,9 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                     "END";
         case Triggers::UpdateNbMediaOnUpdate:
             assert( dbModel >= 14 );
-            return "CREATE TRIGGER update_folder_nb_media_on_update "
-                       "AFTER UPDATE ON " + Media::Table::Name + " "
-                       "WHEN new.folder_id IS NOT NULL AND old.type != new.type "
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                       " AFTER UPDATE ON " + Media::Table::Name +
+                       " WHEN new.folder_id IS NOT NULL AND old.type != new.type "
                    "BEGIN "
                        "UPDATE " + Table::Name + " SET "
                        "nb_audio = nb_audio + "
@@ -231,9 +231,9 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                    "END";
         case Triggers::UpdateNbMediaOnDelete:
             assert( dbModel >= 14 );
-            return "CREATE TRIGGER update_folder_nb_media_on_delete "
-                        "AFTER DELETE ON " + Media::Table::Name + " "
-                        "WHEN old.folder_id IS NOT NULL "
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                        " AFTER DELETE ON " + Media::Table::Name +
+                        " WHEN old.folder_id IS NOT NULL "
                     "BEGIN "
                         "UPDATE " + Table::Name + " SET "
                         "nb_audio = nb_audio + "
@@ -259,16 +259,53 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
     return "<invalid request>";
 }
 
-std::string Folder::index( Indexes index, uint32_t )
+std::string Folder::triggerName( Triggers trigger, uint32_t dbModel )
+{
+    switch ( trigger )
+    {
+        case Triggers::InsertFts:
+            return "insert_folder_fts";
+        case Triggers::DeleteFts:
+            return "delete_folder_fts";
+        case Triggers::UpdateNbMediaOnIndex:
+            assert( dbModel >= 14 );
+            return "update_folder_nb_media_on_insert";
+        case Triggers::UpdateNbMediaOnUpdate:
+            assert( dbModel >= 14 );
+            return "update_folder_nb_media_on_update";
+        case Triggers::UpdateNbMediaOnDelete:
+            assert( dbModel >= 14 );
+            return "update_folder_nb_media_on_delete";
+    default:
+        assert( !"Invalid trigger provided" );
+    }
+    return "<invalid request>";
+}
+
+std::string Folder::index( Indexes index, uint32_t dbModel )
 {
     switch ( index )
     {
         case Indexes::DeviceId:
-            return "CREATE INDEX folder_device_id_idx ON " +
+            return "CREATE INDEX " + indexName( index, dbModel ) + " ON " +
                         Table::Name + " (device_id)";
         case Indexes::ParentId:
-            return "CREATE INDEX parent_folder_id_idx ON " +
+            return "CREATE INDEX " + indexName( index, dbModel ) + " ON " +
                         Table::Name + " (parent_id)";
+        default:
+            assert( !"Invalid index provided" );
+    }
+    return "<invalid request>";
+}
+
+std::string Folder::indexName( Indexes index, uint32_t )
+{
+    switch ( index )
+    {
+        case Indexes::DeviceId:
+            return "folder_device_id_idx";
+        case Indexes::ParentId:
+            return "parent_folder_id_idx";
         default:
             assert( !"Invalid index provided" );
     }
