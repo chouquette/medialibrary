@@ -145,7 +145,10 @@ bool AudioTrack::checkDbModel( MediaLibraryPtr ml )
 {
     return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
-                                       Table::Name );
+                                       Table::Name ) &&
+           sqlite::Tools::checkIndexStatement( ml->getConn(),
+                index( Indexes::MediaId, Settings::DbModelVersion ),
+                indexName( Indexes::MediaId, Settings::DbModelVersion ) );
 }
 
 std::shared_ptr<AudioTrack> AudioTrack::create( MediaLibraryPtr ml, const std::string& codec,
