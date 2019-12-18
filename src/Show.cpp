@@ -353,12 +353,24 @@ std::string Show::triggerName( Triggers trigger, uint32_t dbModel )
 
 bool Show::checkDbModel(MediaLibraryPtr ml)
 {
-    return sqlite::Tools::checkTableSchema( ml->getConn(),
+    if ( sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
-                                       Table::Name ) &&
+                                       Table::Name ) == false ||
            sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( FtsTable::Name, Settings::DbModelVersion ),
-                                       FtsTable::Name );
+                                       FtsTable::Name ) == false )
+        return false;
+
+    auto checkTrigger = []( sqlite::Connection* dbConn, Triggers t ) {
+        return sqlite::Tools::checkTriggerStatement( dbConn,
+                                    trigger( t, Settings::DbModelVersion ),
+                                    triggerName( t, Settings::DbModelVersion ) );
+    };
+    return checkTrigger( ml->getConn(), Triggers::InsertFts ) &&
+            checkTrigger( ml->getConn(), Triggers::DeleteFts ) &&
+            checkTrigger( ml->getConn(), Triggers::IncrementNbEpisode ) &&
+            checkTrigger( ml->getConn(), Triggers::DecrementNbEpisode ) &&
+            checkTrigger( ml->getConn(), Triggers::UpdateIsPresent );
 }
 
 std::shared_ptr<Show> Show::create( MediaLibraryPtr ml, const std::string& name )
