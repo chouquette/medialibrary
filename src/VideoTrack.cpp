@@ -189,11 +189,17 @@ std::string VideoTrack::schema( const std::string& tableName, uint32_t )
     ")";
 }
 
-std::string VideoTrack::index( Indexes index, uint32_t )
+std::string VideoTrack::index( Indexes index, uint32_t dbModel )
 {
     assert( index == Indexes::MediaId );
-    return "CREATE INDEX video_track_media_idx ON " +
-               Table::Name + "(media_id)";
+    return "CREATE INDEX " + indexName( index, dbModel ) +
+           " ON " + Table::Name + "(media_id)";
+}
+
+std::string VideoTrack::indexName( Indexes index, uint32_t )
+{
+    assert( index == Indexes::MediaId );
+    return "video_track_media_idx";
 }
 
 bool VideoTrack::checkDbModel( MediaLibraryPtr ml )
