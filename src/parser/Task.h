@@ -175,6 +175,7 @@ public:
     static std::string schema( const std::string& tableName, uint32_t dbModel,
                                bool backup );
     static std::string trigger( Triggers trigger, uint32_t dbModel );
+    static std::string triggerName( Triggers trigger, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     static bool resetRetryCount( MediaLibraryPtr ml );
     static bool resetParsing( MediaLibraryPtr ml );

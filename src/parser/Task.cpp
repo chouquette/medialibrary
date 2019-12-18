@@ -466,9 +466,9 @@ std::string Task::trigger(Task::Triggers trigger, uint32_t dbModel )
 {
     assert( trigger == Triggers::DeletePlaylistLinkingTask );
     assert( dbModel >= 18 );
-    return "CREATE TRIGGER delete_playlist_linking_tasks "
-           "AFTER DELETE ON " + Playlist::Table::Name + " "
-           "BEGIN "
+    return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+           " AFTER DELETE ON " + Playlist::Table::Name +
+           " BEGIN "
                "DELETE FROM " + Table::Name + " "
                    "WHERE link_to_type = " +
                            std::to_string( static_cast<std::underlying_type_t<IItem::LinkType>>(
@@ -479,6 +479,13 @@ std::string Task::trigger(Task::Triggers trigger, uint32_t dbModel )
                                Type::Link ) ) + ";"
            "END";
 
+}
+
+std::string Task::triggerName( Triggers trigger, uint32_t dbModel )
+{
+    assert( trigger == Triggers::DeletePlaylistLinkingTask );
+    assert( dbModel >= 18 );
+    return "delete_playlist_linking_tasks";
 }
 
 bool Task::checkDbModel( MediaLibraryPtr ml )
