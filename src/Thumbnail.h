@@ -172,7 +172,9 @@ public:
     static void createIndexes( sqlite::Connection* dbConnection );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
     static std::string trigger( Triggers trigger, uint32_t dbModel );
+    static std::string triggerName( Triggers trigger, uint32_t dbModel );
     static std::string index( Indexes index, uint32_t dbModel );
+    static std::string indexName( Indexes index, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     // This also hides the database helper variant, as we can't just select from
     // the thumbnail table. We need to get data from both the thumbnail & linking

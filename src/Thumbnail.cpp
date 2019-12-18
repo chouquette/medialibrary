@@ -436,7 +436,7 @@ std::string Thumbnail::trigger(Thumbnail::Triggers trigger, uint32_t dbModel)
     switch ( trigger )
     {
         case Triggers::AutoDeleteAlbum:
-            return "CREATE TRIGGER auto_delete_album_thumbnail"
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                    " AFTER DELETE ON " + Album::Table::Name +
                    " BEGIN"
                        " DELETE FROM " + LinkingTable::Name + " WHERE"
@@ -446,7 +446,7 @@ std::string Thumbnail::trigger(Thumbnail::Triggers trigger, uint32_t dbModel)
                                    EntityType::Album ) ) + ";"
                    " END";
         case Triggers::AutoDeleteArtist:
-            return "CREATE TRIGGER auto_delete_artist_thumbnail"
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                    " AFTER DELETE ON " + Artist::Table::Name +
                    " BEGIN"
                        " DELETE FROM " + LinkingTable::Name + " WHERE"
@@ -456,7 +456,7 @@ std::string Thumbnail::trigger(Thumbnail::Triggers trigger, uint32_t dbModel)
                                    EntityType::Artist ) ) + ";"
                    " END";
         case Triggers::AutoDeleteMedia:
-            return "CREATE TRIGGER auto_delete_media_thumbnail"
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                    " AFTER DELETE ON " + Media::Table::Name +
                    " BEGIN"
                        " DELETE FROM " + LinkingTable::Name + " WHERE"
@@ -468,27 +468,27 @@ std::string Thumbnail::trigger(Thumbnail::Triggers trigger, uint32_t dbModel)
 
         case Triggers::IncrementRefcount:
             assert( dbModel >= 18 );
-            return "CREATE TRIGGER incr_thumbnail_refcount "
-                   "AFTER INSERT ON " + LinkingTable::Name + " "
-                   "BEGIN "
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                   " AFTER INSERT ON " + LinkingTable::Name +
+                   " BEGIN "
                        "UPDATE " + Table::Name + " "
                            "SET shared_counter = shared_counter + 1 "
                            "WHERE id_thumbnail = new.thumbnail_id;"
                    "END";
         case Triggers::DecrementRefcount:
             assert( dbModel >= 18 );
-            return "CREATE TRIGGER decr_thumbnail_refcount "
-                   "AFTER DELETE ON " + LinkingTable::Name + " "
-                   "BEGIN "
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                   " AFTER DELETE ON " + LinkingTable::Name +
+                   " BEGIN "
                        "UPDATE " + Table::Name + " "
                            "SET shared_counter = shared_counter - 1 "
                            "WHERE id_thumbnail = old.thumbnail_id;"
                    "END";
         case Triggers::UpdateRefcount:
             assert( dbModel >= 18 );
-            return "CREATE TRIGGER update_thumbnail_refcount "
-                   "AFTER UPDATE OF thumbnail_id ON " + LinkingTable::Name + " "
-                   "WHEN old.thumbnail_id != new.thumbnail_id "
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                   " AFTER UPDATE OF thumbnail_id ON " + LinkingTable::Name +
+                   " WHEN old.thumbnail_id != new.thumbnail_id "
                    "BEGIN "
                        "UPDATE " + Table::Name +
                            " SET shared_counter = shared_counter - 1"
@@ -501,7 +501,7 @@ std::string Thumbnail::trigger(Thumbnail::Triggers trigger, uint32_t dbModel)
         {
             if ( dbModel <= 17 )
             {
-                return "CREATE TRIGGER auto_delete_thumbnails_after_update"
+                return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                        " AFTER UPDATE OF thumbnail_id ON " + LinkingTable::Name +
                        " BEGIN "
                            " DELETE FROM " + Table::Name +
@@ -510,16 +510,16 @@ std::string Thumbnail::trigger(Thumbnail::Triggers trigger, uint32_t dbModel)
                                " WHERE thumbnail_id = old.thumbnail_id) = 0;"
                        "END;";
             }
-            return "CREATE TRIGGER delete_unused_thumbnail "
-                   "AFTER UPDATE OF shared_counter ON " + Table::Name + " "
-                   "WHEN new.shared_counter = 0 "
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                   " AFTER UPDATE OF shared_counter ON " + Table::Name +
+                   " WHEN new.shared_counter = 0 "
                    "BEGIN "
                        "DELETE FROM " + Table::Name + " WHERE id_thumbnail = new.id_thumbnail;"
                    "END";
         }
         case Triggers::DeleteAfterLinkingDelete:
             assert( dbModel <= 17 );
-            return "CREATE TRIGGER auto_delete_thumbnails_after_delete"
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                    " AFTER DELETE ON " + LinkingTable::Name +
                    " BEGIN "
                        " DELETE FROM " + Table::Name +
@@ -533,12 +533,53 @@ std::string Thumbnail::trigger(Thumbnail::Triggers trigger, uint32_t dbModel)
     return "<invalid request>";
 }
 
+std::string Thumbnail::triggerName( Thumbnail::Triggers trigger, uint32_t dbModel )
+{
+    switch ( trigger )
+    {
+        case Triggers::AutoDeleteAlbum:
+            return "auto_delete_album_thumbnail";
+        case Triggers::AutoDeleteArtist:
+            return "auto_delete_artist_thumbnail";
+        case Triggers::AutoDeleteMedia:
+            return "auto_delete_media_thumbnail";
+        case Triggers::IncrementRefcount:
+            assert( dbModel >= 18 );
+            return "incr_thumbnail_refcount";
+        case Triggers::DecrementRefcount:
+            assert( dbModel >= 18 );
+            return "decr_thumbnail_refcount";
+        case Triggers::UpdateRefcount:
+            assert( dbModel >= 18 );
+            return "update_thumbnail_refcount";
+        case Triggers::DeleteUnused:
+        {
+            if ( dbModel <= 17 )
+                return "auto_delete_thumbnails_after_update";
+            return "delete_unused_thumbnail";
+        }
+        case Triggers::DeleteAfterLinkingDelete:
+            assert( dbModel <= 17 );
+            return "auto_delete_thumbnails_after_delete";
+        default:
+            assert( !"Invalid trigger provided" );
+    }
+    return "<invalid request>";
+}
+
 std::string Thumbnail::index( Indexes index, uint32_t dbModel )
 {
     assert( index == Indexes::ThumbnailId );
     assert( dbModel >= 17 );
-    return "CREATE INDEX thumbnail_link_index "
-                "ON " + Table::Name + "(id_thumbnail)";
+    return "CREATE INDEX " + indexName( index, dbModel ) +
+           " ON " + Table::Name + "(id_thumbnail)";
+}
+
+std::string Thumbnail::indexName( Indexes index, uint32_t dbModel )
+{
+    assert( index == Indexes::ThumbnailId );
+    assert( dbModel >= 17 );
+    return "thumbnail_link_index";
 }
 
 bool Thumbnail::checkDbModel(MediaLibraryPtr ml)
