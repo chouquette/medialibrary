@@ -146,11 +146,17 @@ std::string ShowEpisode::schema( const std::string& tableName, uint32_t )
     ")";
 }
 
-std::string ShowEpisode::index( Indexes index, uint32_t )
+std::string ShowEpisode::index( Indexes index, uint32_t dbModel )
 {
     assert( index == Indexes::MediaIdShowId );
-    return "CREATE INDEX show_episode_media_show_idx ON " +
-               Table::Name + "(media_id, show_id)";
+    return "CREATE INDEX " + indexName( index, dbModel ) +
+           " ON " + Table::Name + "(media_id, show_id)";
+}
+
+std::string ShowEpisode::indexName( Indexes index, uint32_t )
+{
+    assert( index == Indexes::MediaIdShowId );
+    return "show_episode_media_show_idx";
 }
 
 bool ShowEpisode::checkDbModel(MediaLibraryPtr ml)
