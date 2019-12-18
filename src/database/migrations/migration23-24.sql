@@ -81,3 +81,8 @@ Playlist::index( Playlist::Indexes::PlaylistIdPosition, 24 ),
 /* Recreate MediaId index so that it passes integrity checks */
 "DROP INDEX " + SubtitleTrack::indexName( SubtitleTrack::Indexes::MediaId, 23 ),
 SubtitleTrack::index( SubtitleTrack::Indexes::MediaId, 24 ),
+
+/* Recreate thumbnail linking index as it was invalid and indexing the thumbnail
+   primary key */
+"DROP INDEX " + Thumbnail::indexName( Thumbnail::Indexes::ThumbnailId, 23 ),
+Thumbnail::index( Thumbnail::Indexes::ThumbnailId, 24 ),

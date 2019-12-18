@@ -572,7 +572,7 @@ std::string Thumbnail::index( Indexes index, uint32_t dbModel )
     assert( index == Indexes::ThumbnailId );
     assert( dbModel >= 17 );
     return "CREATE INDEX " + indexName( index, dbModel ) +
-           " ON " + Table::Name + "(id_thumbnail)";
+           " ON " + LinkingTable::Name + "(thumbnail_id)";
 }
 
 std::string Thumbnail::indexName( Indexes index, uint32_t dbModel )
