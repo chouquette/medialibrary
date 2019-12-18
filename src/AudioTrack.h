@@ -60,6 +60,7 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack>
         static void createIndexes( sqlite::Connection* dbConnection );
         static std::string schema( const std::string& tableName, uint32_t dbModel );
         static std::string index( Indexes index, uint32_t dbModel );
+        static std::string indexName( Indexes index, uint32_t dbModel );
         static bool checkDbModel( MediaLibraryPtr ml );
         static std::shared_ptr<AudioTrack> create( MediaLibraryPtr ml, const std::string& codec,
                                                    unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels,

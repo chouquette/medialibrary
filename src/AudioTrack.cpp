@@ -128,11 +128,17 @@ std::string AudioTrack::schema( const std::string& tableName, uint32_t )
               ")";
 }
 
-std::string AudioTrack::index( AudioTrack::Indexes index, uint32_t )
+std::string AudioTrack::index( AudioTrack::Indexes index, uint32_t dbModel )
 {
     assert( index == Indexes::MediaId );
-    return "CREATE INDEX audio_track_media_idx ON "
-               + Table::Name + "(media_id)";
+    return "CREATE INDEX " + indexName( index, dbModel ) + " ON "
+            + Table::Name + "(media_id)";
+}
+
+std::string AudioTrack::indexName( Indexes index, uint32_t )
+{
+    assert( index == Indexes::MediaId );
+    return "audio_track_media_idx";
 }
 
 bool AudioTrack::checkDbModel( MediaLibraryPtr ml )
