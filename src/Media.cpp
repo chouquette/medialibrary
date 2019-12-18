@@ -1375,12 +1375,39 @@ std::string Media::indexName( Indexes index, uint32_t dbModel )
 
 bool Media::checkDbModel( MediaLibraryPtr ml )
 {
-    return sqlite::Tools::checkTableSchema( ml->getConn(),
+    if ( sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
-                                       Table::Name ) &&
-           sqlite::Tools::checkTableSchema( ml->getConn(),
+                                       Table::Name ) == false ||
+         sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( FtsTable::Name, Settings::DbModelVersion ),
-                                       FtsTable::Name );
+                                       FtsTable::Name ) == false )
+        return false;
+
+    auto checkTrigger = []( sqlite::Connection* dbConn, Triggers t ) {
+        return sqlite::Tools::checkTriggerStatement( dbConn,
+                                    trigger( t, Settings::DbModelVersion ),
+                                    triggerName( t, Settings::DbModelVersion ) );
+    };
+
+    auto checkIndex = []( sqlite::Connection* dbConn, Indexes i ) {
+        return sqlite::Tools::checkIndexStatement( dbConn,
+                                    index( i, Settings::DbModelVersion ),
+                                    indexName( i, Settings::DbModelVersion ) );
+    };
+
+    return checkTrigger( ml->getConn(), Triggers::IsPresent ) &&
+            checkTrigger( ml->getConn(), Triggers::CascadeFileDeletion ) &&
+            checkTrigger( ml->getConn(), Triggers::IncrementNbPlaylist ) &&
+            checkTrigger( ml->getConn(), Triggers::DecrementNbPlaylist ) &&
+            checkTrigger( ml->getConn(), Triggers::InsertFts ) &&
+            checkTrigger( ml->getConn(), Triggers::DeleteFts ) &&
+            checkTrigger( ml->getConn(), Triggers::UpdateFts ) &&
+            checkIndex( ml->getConn(), Indexes::LastPlayedDate ) &&
+            checkIndex( ml->getConn(), Indexes::Presence ) &&
+            checkIndex( ml->getConn(), Indexes::Types ) &&
+            checkIndex( ml->getConn(), Indexes::LastUsageDate ) &&
+            checkIndex( ml->getConn(), Indexes::Folder ) &&
+            checkIndex( ml->getConn(), Indexes::MediaGroup );
 }
 
 bool Media::addLabel( LabelPtr label )
