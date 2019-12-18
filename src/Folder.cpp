@@ -314,15 +314,35 @@ std::string Folder::indexName( Indexes index, uint32_t )
 
 bool Folder::checkDbModel( MediaLibraryPtr ml )
 {
-    return sqlite::Tools::checkTableSchema( ml->getConn(),
+    if ( sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
-                                       Table::Name ) &&
+                                       Table::Name ) == false ||
         sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( FtsTable::Name, Settings::DbModelVersion ),
-                                       FtsTable::Name ) &&
+                                       FtsTable::Name ) == false ||
         sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( ExcludedFolderTable::Name, Settings::DbModelVersion ),
-                                       ExcludedFolderTable::Name );
+                                       ExcludedFolderTable::Name ) == false )
+        return false;
+
+    auto check = []( sqlite::Connection* dbConn, Triggers t ) {
+        return sqlite::Tools::checkTriggerStatement( dbConn,
+                                    trigger( t, Settings::DbModelVersion ),
+                                    triggerName( t, Settings::DbModelVersion ) );
+    };
+    if ( check( ml->getConn(), Triggers::InsertFts ) == false ||
+         check( ml->getConn(), Triggers::DeleteFts ) == false ||
+         check( ml->getConn(), Triggers::UpdateNbMediaOnIndex ) == false ||
+         check( ml->getConn(), Triggers::UpdateNbMediaOnUpdate ) == false ||
+         check( ml->getConn(), Triggers::UpdateNbMediaOnDelete )  == false )
+        return false;
+
+    return sqlite::Tools::checkIndexStatement( ml->getConn(),
+                index( Indexes::DeviceId, Settings::DbModelVersion ),
+                indexName( Indexes::DeviceId, Settings::DbModelVersion ) ) &&
+           sqlite::Tools::checkIndexStatement( ml->getConn(),
+                index( Indexes::ParentId, Settings::DbModelVersion ),
+                indexName( Indexes::ParentId, Settings::DbModelVersion ) );
 }
 
 std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& mrl,
