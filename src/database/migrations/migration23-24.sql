@@ -37,6 +37,13 @@ Media::schema( Media::Table::Name, 24 ),
 
 "DROP TABLE " + Media::Table::Name + "_backup",
 
+// Recreate the IncrementNbPlaylist & DecrementNbPlaylist triggers so they
+// pass the integrity checks
+"DROP TRIGGER " + Media::triggerName( Media::Triggers::IncrementNbPlaylist, 23 ),
+"DROP TRIGGER " + Media::triggerName( Media::Triggers::DecrementNbPlaylist, 23 ),
+
+Media::trigger( Media::Triggers::IncrementNbPlaylist, 24 ),
+Media::trigger( Media::Triggers::DecrementNbPlaylist, 24 ),
 Media::trigger( Media::Triggers::InsertFts, 24 ),
 Media::trigger( Media::Triggers::UpdateFts, 24 ),
 Media::trigger( Media::Triggers::DeleteFts, 24 ),

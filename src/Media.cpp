@@ -1238,7 +1238,7 @@ std::string Media::trigger( Triggers trigger, uint32_t dbModel )
             assert( dbModel >= 14 );
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                         " AFTER INSERT ON " + Playlist::MediaRelationTable::Name +
-                    " BEGIN "
+                    " BEGIN"
                         " UPDATE " + Table::Name + " SET nb_playlists = nb_playlists + 1 "
                             " WHERE id_media = new.media_id;"
                     " END";
@@ -1246,7 +1246,7 @@ std::string Media::trigger( Triggers trigger, uint32_t dbModel )
             assert( dbModel >= 14 );
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                         " AFTER DELETE ON " + Playlist::MediaRelationTable::Name +
-                    " BEGIN "
+                    " BEGIN"
                         " UPDATE " + Table::Name + " SET nb_playlists = nb_playlists - 1 "
                             " WHERE id_media = old.media_id;"
                     " END";
