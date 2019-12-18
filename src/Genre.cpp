@@ -271,12 +271,22 @@ std::string Genre::triggerName( Triggers trigger, uint32_t )
 
 bool Genre::checkDbModel(MediaLibraryPtr ml)
 {
-    return sqlite::Tools::checkTableSchema( ml->getConn(),
+    if ( sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
-                                       Table::Name ) &&
+                                       Table::Name ) == false ||
            sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( FtsTable::Name, Settings::DbModelVersion ),
-                                       FtsTable::Name );
+                                       FtsTable::Name ) == false )
+        return false;
+    auto check = []( sqlite::Connection* dbConn, Triggers t ) {
+        return sqlite::Tools::checkTriggerStatement( dbConn,
+                                    trigger( t, Settings::DbModelVersion ),
+                                    triggerName( t, Settings::DbModelVersion ) );
+    };
+    return check( ml->getConn(), Triggers::InsertFts ) &&
+            check( ml->getConn(), Triggers::DeleteFts ) &&
+            check( ml->getConn(), Triggers::UpdateOnNewTrack ) &&
+            check( ml->getConn(), Triggers::UpdateOnTrackDelete );
 }
 
 std::shared_ptr<Genre> Genre::create( MediaLibraryPtr ml, const std::string& name )
