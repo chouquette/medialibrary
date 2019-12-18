@@ -163,7 +163,10 @@ bool ShowEpisode::checkDbModel(MediaLibraryPtr ml)
 {
     return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
-                                       Table::Name );
+                                       Table::Name ) &&
+           sqlite::Tools::checkIndexStatement( ml->getConn(),
+                index( Indexes::MediaIdShowId, Settings::DbModelVersion ),
+                indexName( Indexes::MediaIdShowId, Settings::DbModelVersion ) );
 }
 
 std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml,
