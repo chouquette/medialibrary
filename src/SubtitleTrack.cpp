@@ -111,11 +111,17 @@ std::string SubtitleTrack::schema( const std::string& tableName, uint32_t )
     ")";
 }
 
-std::string SubtitleTrack::index( Indexes index, uint32_t )
+std::string SubtitleTrack::index( Indexes index, uint32_t dbModel )
 {
     assert( index == Indexes::MediaId );
-    return "CREATE INDEX subtitle_track_media_idx "
-               " ON " + Table::Name + "(media_id)";
+    return "CREATE INDEX " + indexName( index, dbModel ) +
+           " ON " + Table::Name + "(media_id)";
+}
+
+std::string SubtitleTrack::indexName( Indexes index, uint32_t )
+{
+    assert( index == Indexes::MediaId );
+    return "subtitle_track_media_idx";
 }
 
 bool SubtitleTrack::checkDbModel( MediaLibraryPtr ml )
