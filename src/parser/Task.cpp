@@ -492,7 +492,10 @@ bool Task::checkDbModel( MediaLibraryPtr ml )
 {
     return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion, false ),
-                                       Table::Name );
+                                       Table::Name ) &&
+           sqlite::Tools::checkTriggerStatement( ml->getConn(),
+                trigger( Triggers::DeletePlaylistLinkingTask, Settings::DbModelVersion ),
+                triggerName( Triggers::DeletePlaylistLinkingTask, Settings::DbModelVersion ) );
 }
 
 bool Task::resetRetryCount( MediaLibraryPtr ml )
