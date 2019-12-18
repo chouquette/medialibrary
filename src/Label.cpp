@@ -104,16 +104,22 @@ std::string Label::schema( const std::string& tableName, uint32_t )
     ")";
 }
 
-std::string Label::trigger( Triggers trigger, uint32_t  )
+std::string Label::trigger( Triggers trigger, uint32_t dbModel )
 {
     assert( trigger == Triggers::DeleteFts );
-    return "CREATE TRIGGER delete_label_fts "
-           "BEFORE DELETE ON " + Table::Name +
+    return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+           " BEFORE DELETE ON " + Table::Name +
            " BEGIN"
            " UPDATE " + Media::FtsTable::Name +
                 " SET labels = TRIM(REPLACE(labels, old.name, ''))"
                 " WHERE labels MATCH old.name;"
-           " END";
+                " END";
+}
+
+std::string Label::triggerName( Triggers trigger, uint32_t )
+{
+    assert( trigger == Triggers::DeleteFts );
+    return "delete_label_fts";
 }
 
 bool Label::checkDbModel( MediaLibraryPtr ml )
