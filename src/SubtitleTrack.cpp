@@ -128,7 +128,10 @@ bool SubtitleTrack::checkDbModel( MediaLibraryPtr ml )
 {
     return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
-                                       Table::Name );
+                                       Table::Name ) &&
+           sqlite::Tools::checkIndexStatement( ml->getConn(),
+                index( Indexes::MediaId, Settings::DbModelVersion ),
+                indexName( Indexes::MediaId, Settings::DbModelVersion ) );
 }
 
 std::shared_ptr<SubtitleTrack> SubtitleTrack::create( MediaLibraryPtr ml,
