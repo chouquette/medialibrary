@@ -89,7 +89,7 @@ void SubtitleTrack::createTable( sqlite::Connection* dbConnection )
                                    schema( Table::Name, Settings::DbModelVersion ) );
 }
 
-void SubtitleTrack::createTriggers( sqlite::Connection* dbConnection )
+void SubtitleTrack::createIndexes( sqlite::Connection* dbConnection )
 {
     sqlite::Tools::executeRequest( dbConnection,
                                    index( Indexes::MediaId, Settings::DbModelVersion ) );

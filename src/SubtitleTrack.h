@@ -52,7 +52,7 @@ public:
     virtual const std::string& encoding() const override;
 
     static void createTable( sqlite::Connection* dbConnection );
-    static void createTriggers( sqlite::Connection* dbConnection );
+    static void createIndexes( sqlite::Connection* dbConnection );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
     static std::string index( Indexes index, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );

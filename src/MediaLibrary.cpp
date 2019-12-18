@@ -219,7 +219,7 @@ void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
     Thumbnail::createIndexes( dbConn );
     parser::Task::createTriggers( dbConn, dbModelVersion );
     AudioTrack::createIndexes( dbConn );
-    SubtitleTrack::createTriggers( dbConn );
+    SubtitleTrack::createIndexes( dbConn );
     VideoTrack::createIndexes( dbConn );
     MediaGroup::createTriggers( dbConn );
     MediaGroup::createIndexes( dbConn );
@@ -1396,7 +1396,7 @@ void MediaLibrary::migrateModel13to14( uint32_t originalPreviousVersion )
     sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
     auto t = dbConn->newTransaction();
     SubtitleTrack::createTable( dbConn );
-    SubtitleTrack::createTriggers( dbConn );
+    SubtitleTrack::createIndexes( dbConn );
     Chapter::createTable( dbConn );
     std::string reqs[] = {
 #               include "database/migrations/migration13-14.sql"
