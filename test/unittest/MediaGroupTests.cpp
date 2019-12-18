@@ -476,3 +476,9 @@ TEST_F( MediaGroups, Rename )
     groupMedia = mg->media( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groupMedia.size() );
 }
+
+TEST_F( MediaGroups, CheckDbModel )
+{
+    auto res = MediaGroup::checkDbModel( ml.get() );
+    ASSERT_TRUE( res );
+}

@@ -248,7 +248,8 @@ bool MediaLibrary::checkDatabaseIntegrity()
             Metadata::checkDbModel( this ) &&
             SubtitleTrack::checkDbModel( this ) &&
             Chapter::checkDbModel( this ) &&
-            Bookmark::checkDbModel( this );
+            Bookmark::checkDbModel( this ) &&
+            MediaGroup::checkDbModel( this );
     return schemaOk == true &&
             m_dbConnection->checkSchemaIntegrity() == true &&
             m_dbConnection->checkForeignKeysIntegrity() == true;

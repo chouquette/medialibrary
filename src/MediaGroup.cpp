@@ -387,6 +387,32 @@ std::string MediaGroup::indexName( Indexes i, uint32_t dbModel )
     return "media_group_parent_id_idx";
 }
 
+bool MediaGroup::checkDbModel( MediaLibraryPtr ml )
+{
+    if ( sqlite::Tools::checkTableSchema( ml->getConn(),
+                                       schema( Table::Name, Settings::DbModelVersion ),
+                                       Table::Name ) == false ||
+           sqlite::Tools::checkTableSchema( ml->getConn(),
+                                       schema( FtsTable::Name, Settings::DbModelVersion ),
+                                       FtsTable::Name ) == false )
+        return false;
+
+    if ( sqlite::Tools::checkIndexStatement( ml->getConn(),
+            index( Indexes::ParentId, Settings::DbModelVersion ),
+            indexName( Indexes::ParentId, Settings::DbModelVersion ) ) == false )
+        return false;
+
+    auto check = []( sqlite::Connection* dbConn, Triggers t ) {
+        return sqlite::Tools::checkTriggerStatement( dbConn,
+                                    trigger( t, Settings::DbModelVersion ),
+                                    triggerName( t, Settings::DbModelVersion ) );
+    };
+    return check( ml->getConn(), Triggers::InsertFts ) &&
+            check( ml->getConn(), Triggers::DeleteFts ) &&
+            check( ml->getConn(), Triggers::IncrementNbMediaOnGroupChange ) &&
+            check( ml->getConn(), Triggers::DecrementNbMediaOnGroupChange );
+}
+
 std::string MediaGroup::orderBy(const QueryParameters* params)
 {
     std::string req = "ORDER BY ";

@@ -96,6 +96,8 @@ public:
     static std::string index( Indexes i, uint32_t dbModel );
     static std::string indexName( Indexes i, uint32_t dbModel );
 
+    static bool checkDbModel( MediaLibraryPtr ml );
+
 private:
     static std::string orderBy( const QueryParameters* params );
     /**
