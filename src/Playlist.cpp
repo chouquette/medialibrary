@@ -614,15 +614,36 @@ std::string Playlist::indexName( Indexes index, uint32_t dbModel )
 
 bool Playlist::checkDbModel(MediaLibraryPtr ml)
 {
-    return sqlite::Tools::checkTableSchema( ml->getConn(),
+    if ( sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
-                                       Table::Name ) &&
+                                       Table::Name ) == false ||
            sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( FtsTable::Name, Settings::DbModelVersion ),
-                                       FtsTable::Name ) &&
+                                       FtsTable::Name ) == false ||
            sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( MediaRelationTable::Name, Settings::DbModelVersion ),
-                                       MediaRelationTable::Name );
+                                       MediaRelationTable::Name ) == false )
+        return false;
+
+    auto checkTrigger = []( sqlite::Connection* dbConn, Triggers t ) {
+        return sqlite::Tools::checkTriggerStatement( dbConn,
+                                    trigger( t, Settings::DbModelVersion ),
+                                    triggerName( t, Settings::DbModelVersion ) );
+    };
+
+    auto checkIndex = []( sqlite::Connection* dbConn, Indexes i ) {
+        return sqlite::Tools::checkIndexStatement( dbConn,
+                                    index( i, Settings::DbModelVersion ),
+                                    indexName( i, Settings::DbModelVersion ) );
+    };
+
+    return checkTrigger( ml->getConn(), Triggers::UpdateOrderOnInsert ) &&
+            checkTrigger( ml->getConn(), Triggers::UpdateOrderOnDelete ) &&
+            checkTrigger( ml->getConn(), Triggers::InsertFts ) &&
+            checkTrigger( ml->getConn(), Triggers::UpdateFts ) &&
+            checkTrigger( ml->getConn(), Triggers::DeleteFts ) &&
+            checkIndex( ml->getConn(), Indexes::FileId ) &&
+            checkIndex( ml->getConn(), Indexes::PlaylistIdPosition );
 }
 
 Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,
