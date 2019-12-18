@@ -258,7 +258,7 @@ std::string Show::trigger( Show::Triggers trigger, uint32_t dbModel )
     {
         case Triggers::InsertFts:
         {
-            return "CREATE TRIGGER insert_show_fts"
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                    " AFTER INSERT ON " + Table::Name +
                    " BEGIN"
                    " INSERT INTO " + FtsTable::Name + "(rowid,title)"
@@ -267,7 +267,7 @@ std::string Show::trigger( Show::Triggers trigger, uint32_t dbModel )
         }
         case Triggers::DeleteFts:
         {
-            return "CREATE TRIGGER delete_show_fts"
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                    " BEFORE DELETE ON " + Table::Name +
                    " BEGIN"
                    " DELETE FROM " + FtsTable::Name +
@@ -277,7 +277,7 @@ std::string Show::trigger( Show::Triggers trigger, uint32_t dbModel )
         case Triggers::IncrementNbEpisode:
         {
             assert( dbModel >= 23 );
-            return "CREATE TRIGGER show_increment_nb_episode"
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                    " AFTER INSERT ON " + ShowEpisode::Table::Name +
                    " BEGIN"
                    " UPDATE " + Table::Name +
@@ -289,8 +289,8 @@ std::string Show::trigger( Show::Triggers trigger, uint32_t dbModel )
         case Triggers::DecrementNbEpisode:
         {
             assert( dbModel >= 23 );
-            return "CREATE TRIGGER "
-                   " show_decrement_nb_episode AFTER DELETE ON " + ShowEpisode::Table::Name +
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                   " AFTER DELETE ON " + ShowEpisode::Table::Name +
                    " BEGIN"
                    " UPDATE " + Table::Name +
                        " SET nb_episodes = nb_episodes - 1,"
@@ -301,8 +301,8 @@ std::string Show::trigger( Show::Triggers trigger, uint32_t dbModel )
         case Triggers::UpdateIsPresent:
         {
             assert( dbModel >= 23 );
-            return "CREATE TRIGGER "
-                   " show_update_is_present AFTER UPDATE OF "
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                   " AFTER UPDATE OF "
                        "is_present ON " + Media::Table::Name +
                    " WHEN new.subtype = " +
                        std::to_string(
@@ -315,6 +315,35 @@ std::string Show::trigger( Show::Triggers trigger, uint32_t dbModel )
                        " WHERE id_show = (SELECT show_id FROM " + ShowEpisode::Table::Name +
                            " WHERE media_id = new.id_media);"
                    " END";
+        }
+        default:
+            assert( !"Invalid trigger provided" );
+    }
+    return "<invalid request>";
+}
+
+std::string Show::triggerName( Triggers trigger, uint32_t dbModel )
+{
+    switch ( trigger )
+    {
+        case Triggers::InsertFts:
+            return "insert_show_fts";
+        case Triggers::DeleteFts:
+            return "delete_show_fts";
+        case Triggers::IncrementNbEpisode:
+        {
+            assert( dbModel >= 23 );
+            return "show_increment_nb_episode";
+        }
+        case Triggers::DecrementNbEpisode:
+        {
+            assert( dbModel >= 23 );
+            return "show_decrement_nb_episode";
+        }
+        case Triggers::UpdateIsPresent:
+        {
+            assert( dbModel >= 23 );
+            return "show_update_is_present";
         }
         default:
             assert( !"Invalid trigger provided" );
