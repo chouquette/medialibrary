@@ -482,3 +482,25 @@ TEST_F( MediaGroups, CheckDbModel )
     auto res = MediaGroup::checkDbModel( ml.get() );
     ASSERT_TRUE( res );
 }
+
+TEST_F( MediaGroups, Delete )
+{
+    auto mg = ml->createMediaGroup( "group" );
+    auto media = std::static_pointer_cast<Media>(
+                ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    mg->add( media->id() );
+
+    Reload();
+
+    media = ml->media( media->id() );
+    ASSERT_NE( nullptr, media->group() );
+    ASSERT_EQ( mg->id(), media->groupId() );
+
+    MediaGroup::destroy( ml.get(), mg->id() );
+
+    Reload();
+
+    media = ml->media( media->id() );
+    ASSERT_EQ( nullptr, media->group() );
+    ASSERT_EQ( 0, media->groupId() );
+}
