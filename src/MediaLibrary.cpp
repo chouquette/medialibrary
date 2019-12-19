@@ -2080,27 +2080,30 @@ void MediaLibrary::setLogger( ILogger* logger )
     Log::SetLogger( logger );
 }
 
+void MediaLibrary::refreshDevice( Device& device, fs::IFileSystemFactory* fsFactory )
+{
+    auto deviceFs = fsFactory != nullptr ?
+                        fsFactory->createDevice( device.uuid() ) : nullptr;
+    auto fsDevicePresent = deviceFs != nullptr && deviceFs->isPresent();
+    if ( device.isPresent() != fsDevicePresent )
+    {
+        LOG_INFO( "Device ", device.uuid(), " changed presence state: ",
+                  device.isPresent(), " -> ", fsDevicePresent );
+        device.setPresent( fsDevicePresent );
+    }
+    else
+        LOG_INFO( "Device ", device.uuid(), " presence is unchanged" );
+
+    if ( device.isRemovable() == true && device.isPresent() == true )
+        device.updateLastSeen();
+}
+
 void MediaLibrary::refreshDevices( fs::IFileSystemFactory& fsFactory )
 {
-    // Don't refuse to process devices when none seem to be present, it might be a valid case
-    // if the user only discovered removable storages, and we would still need to mark those
-    // as "not present"
     auto devices = Device::fetchByScheme( this, fsFactory.scheme() );
     for ( auto& d : devices )
     {
-        auto deviceFs = fsFactory.createDevice( d->uuid() );
-        auto fsDevicePresent = deviceFs != nullptr && deviceFs->isPresent();
-        if ( d->isPresent() != fsDevicePresent )
-        {
-            LOG_INFO( "Device ", d->uuid(), " changed presence state: ",
-                      d->isPresent(), " -> ", fsDevicePresent );
-            d->setPresent( fsDevicePresent );
-        }
-        else
-            LOG_INFO( "Device ", d->uuid(), " presence is unchanged" );
-
-        if ( d->isRemovable() == true && d->isPresent() == true )
-            d->updateLastSeen();
+        refreshDevice( *d, &fsFactory );
     }
     LOG_DEBUG( "Done refreshing devices in database." );
 }

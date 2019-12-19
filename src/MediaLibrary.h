@@ -254,6 +254,7 @@ private:
     void registerEntityHooks();
     static bool validateSearchPattern( const std::string& pattern );
     void removeThumbnails();
+    void refreshDevice( Device& device, fs::IFileSystemFactory* fsFactory );
 
 protected:
     virtual void addLocalFsFactory();
