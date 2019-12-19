@@ -443,8 +443,13 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
         {
             // Now that we have initialized the database connection and migrated
             // the model if needed, we can try to flush old devices.
+            // This only concerns local fs factories, as the network ones are
+            // not started yet, and do not have a device list available
             for ( auto& fsFactory : m_fsFactories )
+            {
+                assert( fsFactory->isNetworkFileSystem() == false );
                 refreshDevices( *fsFactory );
+            }
 
             // Now that we know which devices are plugged, check for outdated devices
             // Approximate 6 months for old device precision.
