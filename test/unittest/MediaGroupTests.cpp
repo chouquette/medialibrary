@@ -433,6 +433,33 @@ TEST_F( MediaGroups, FetchFromMedia )
     ASSERT_EQ( mg->id(), g->id() );
 }
 
+TEST_F( MediaGroups, MediaHasBeenGrouped )
+{
+    auto mg = ml->createMediaGroup( "group" );
+    auto m = std::static_pointer_cast<Media>(
+                ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    ASSERT_FALSE( m->hasBeenGrouped() );
+    ASSERT_FALSE( m2->hasBeenGrouped() );
+
+    auto res = m->addToGroup( *mg );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( mg->id(), m->groupId() );
+    ASSERT_TRUE( m->hasBeenGrouped() );
+
+    res = mg->add( m2->id() );
+    ASSERT_TRUE( res );
+    // We used the id, so the local instance shouldn't be updated:
+    ASSERT_FALSE( m2->hasBeenGrouped() );
+    ASSERT_EQ( 0, m2->groupId() );
+
+    Reload();
+
+    m2 = ml->media( m2->id() );
+    ASSERT_TRUE( m2->hasBeenGrouped() );
+}
+
 TEST_F( MediaGroups, Path )
 {
     auto parent = ml->createMediaGroup( "parent" );
