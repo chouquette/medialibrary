@@ -150,7 +150,6 @@ Status MetadataAnalyzer::run( IItem& item )
         auto status = createFileAndMedia( item );
         if ( status != Status::Success )
             return status;
-        assignMediaToGroup( item );
     }
     else if ( item.media() == nullptr )
     {
@@ -201,6 +200,18 @@ Status MetadataAnalyzer::run( IItem& item )
             isFileModified = true;
     }
     auto media = std::static_pointer_cast<Media>( item.media() );
+    if ( media->type() == IMedia::Type::Video && media->groupId() == 0 &&
+         media->hasBeenGrouped() == false )
+    {
+        /* We want to be able to assign a media to a group when reloading, but
+         * only if the media is not part of a group yet, and if it has never
+         * been assigned to a group.
+         * If we were not checking if the media has been assigned to a group
+         * we would always force the media back into a group, even if it was
+         * removed from one before.
+         */
+        assignMediaToGroup( item );
+    }
 
     if ( media->type() == IMedia::Type::Audio )
     {
@@ -1006,6 +1017,7 @@ bool MetadataAnalyzer::assignMediaToGroup( IItem &item )
     if ( m->type() != IMedia::Type::Video )
         return true;
     assert( m->groupId() == 0 );
+    assert( m->hasBeenGrouped() == false );
     auto title = m->title();
     if ( strncasecmp( title.c_str(), "the ", 4 ) == 0 )
         title.erase( title.begin(), title.begin() + 4 );
