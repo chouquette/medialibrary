@@ -886,6 +886,7 @@ std::string Media::sortRequest( const QueryParameters* params )
 
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
     auto desc = params != nullptr ? params->desc : false;
+    auto descAdded = false;
     switch ( sort )
     {
     case SortingCriteria::Duration:
@@ -915,6 +916,7 @@ std::string Media::sortRequest( const QueryParameters* params )
             req += "alb.title DESC, att.track_number";
         else
             req += "alb.title, att.track_number";
+	descAdded = true;
         break;
     case SortingCriteria::Artist:
         req += "art.name";
@@ -924,6 +926,7 @@ std::string Media::sortRequest( const QueryParameters* params )
             req += "alb.title, att.track_number DESC, att.disc_number";
         else
             req += "alb.title, att.track_number, att.disc_number";
+	descAdded = true;
         break;
     default:
         LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default (Alpha)" );
@@ -933,8 +936,7 @@ std::string Media::sortRequest( const QueryParameters* params )
         req += "m.title";
         break;
     }
-    if ( desc == true && sort != SortingCriteria::Album &&
-         sort != SortingCriteria::TrackId )
+    if ( desc == true && !descAdded )
         req += " DESC";
     return req;
 }
