@@ -2113,6 +2113,16 @@ void MediaLibrary::refreshDevices( fs::IFileSystemFactory& fsFactory )
     LOG_DEBUG( "Done refreshing devices in database." );
 }
 
+void MediaLibrary::refreshDevices()
+{
+    auto devices = Device::fetchAll( this );
+    for ( const auto& d : devices )
+    {
+        auto fsFactory = fsFactoryForMrl( d->scheme() );
+        refreshDevice( *d, fsFactory.get() );
+    }
+}
+
 bool MediaLibrary::forceRescan()
 {
     if ( m_parser != nullptr )

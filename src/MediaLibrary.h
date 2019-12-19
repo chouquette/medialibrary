@@ -193,7 +193,25 @@ public:
     virtual IDeviceListerCb* setDeviceLister( DeviceListerPtr lister ) override;
     std::shared_ptr<fs::IFileSystemFactory> fsFactoryForMrl( const std::string& path ) const;
 
+    /**
+     * @brief refreshDevices Refreshes the devices from a specific FS factory
+     * @param fsFactory The file system factory for which devices must be refreshed
+     *
+     * This is expected to be used when a specific factory signals that a device
+     * was plugged/unplugged.
+     */
     void refreshDevices(fs::IFileSystemFactory& fsFactory);
+    /**
+     * @brief refreshDevices Refreshes all known devices
+     *
+     * This will refresh the presence & last seen date for all known devices we
+     * have in database.
+     * This operation must not be based on the available FsFactories, as we might
+     * not have a factory that was used to create a device before (for instance
+     * if we restart with network discovery disabled)
+     * We still need to mark all the associated devices as missing.
+     */
+    void refreshDevices();
 
     virtual bool forceRescan() override;
 
