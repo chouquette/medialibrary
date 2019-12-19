@@ -48,6 +48,12 @@ class DiscovererWorker : public IInterruptProbe
             Ban,
             Unban,
             ReloadDevice,
+            /*
+             * Checks the presence of all devices in database
+             * This is expected to be run as the first task, before any other
+             * subsequent discovery requests.
+             */
+            ReloadAllDevices,
         };
 
         Task() = default;
@@ -73,6 +79,7 @@ public:
     void ban( const std::string& entryPoint );
     void unban( const std::string& entryPoint );
     void reloadDevice( int64_t deviceId );
+    void reloadAllDevices();
 
 private:
     void enqueue( const std::string& entryPoint, Task::Type type );
@@ -85,6 +92,7 @@ private:
     void runBan( const std::string& entryPoint );
     void runUnban( const std::string& entryPoint );
     void runReloadDevice( int64_t deviceId );
+    void runReloadAllDevices();
 
 private:
     virtual bool isInterrupted() const override;

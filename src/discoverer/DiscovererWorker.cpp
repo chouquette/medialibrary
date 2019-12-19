@@ -30,6 +30,7 @@
 #include "Folder.h"
 #include "MediaLibrary.h"
 #include "Device.h"
+#include "Media.h"
 #include "utils/Filename.h"
 #include "medialibrary/filesystem/Errors.h"
 #include <cassert>
@@ -105,6 +106,11 @@ void DiscovererWorker::unban( const std::string& entryPoint )
 void DiscovererWorker::reloadDevice(int64_t deviceId)
 {
     enqueue( deviceId, Task::Type::ReloadDevice );
+}
+
+void DiscovererWorker::reloadAllDevices()
+{
+    enqueue( 0, Task::Type::ReloadAllDevices );
 }
 
 void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
@@ -189,6 +195,9 @@ void DiscovererWorker::run()
                 break;
             case Task::Type::ReloadDevice:
                 runReloadDevice( task.entityId );
+                break;
+            case Task::Type::ReloadAllDevices:
+                runReloadAllDevices();
                 break;
             default:
                 assert(false);
@@ -303,6 +312,13 @@ void DiscovererWorker::runReloadDevice( int64_t deviceId )
             LOG_INFO( "Can't reload device ", device->uuid(), " as it was removed" );
         }
     }
+}
+
+void DiscovererWorker::runReloadAllDevices()
+{
+    m_ml->refreshDevices();
+
+    MediaLibrary::removeOldEntities( m_ml );
 }
 
 bool DiscovererWorker::isInterrupted() const
