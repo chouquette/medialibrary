@@ -941,7 +941,7 @@ TEST_F( Medias, VacuumOldExternal )
 
     ml->outdateAllExternalMedia();
 
-    Reload();
+    MediaLibrary::removeOldEntities( ml.get() );
 
     m1 = ml->media( m1->id() );
     m2 = ml->media( m2->id() );
@@ -964,7 +964,7 @@ TEST_F( Medias, VacuumNeverPlayedMedia )
 
     ml->setMediaInsertionDate( m1->id(), 1 );
 
-    Reload();
+    MediaLibrary::removeOldEntities( ml.get() );
 
     m1 = ml->media( m1->id() );
     m2 = ml->media( m2->id() );

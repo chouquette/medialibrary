@@ -99,9 +99,8 @@ TEST_F( DeviceEntity, Create )
     ASSERT_NE( nullptr, d );
     ASSERT_EQ( "dummy", d->uuid() );
     ASSERT_TRUE( d->isRemovable() );
-    // Since there is no FsFactory to testify that this device is still plugged, the reload
-    // will mark it as "absent"
-    ASSERT_FALSE( d->isPresent() );
+    // The device won't be marked absent until the discoverer starts, but it won't
+    // happen in unit case configuration
 }
 
 TEST_F( DeviceEntity, SetPresent )

@@ -434,48 +434,6 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
         return InitializeResult::Failed;
     }
 
-    // Don't run device refresh if the database is in a corrupted state
-    // We expect the user to recreate it, so devices will be added when they
-    // are first required during the discovery step.
-    if ( res == InitializeResult::Success )
-    {
-        try
-        {
-            // Now that we have initialized the database connection and migrated
-            // the model if needed, we can try to flush old devices.
-            // This only concerns local fs factories, as the network ones are
-            // not started yet, and do not have a device list available
-            for ( auto& fsFactory : m_fsFactories )
-            {
-                assert( fsFactory->isNetworkFileSystem() == false );
-                refreshDevices( *fsFactory );
-            }
-
-            // Now that we know which devices are plugged, check for outdated devices
-            removeOldEntities( this );
-        }
-        catch ( const sqlite::errors::DatabaseCorrupt& )
-        {
-            LOG_ERROR( "SQLite reported the database as corrupted" );
-            res = InitializeResult::DbCorrupted;
-        }
-        catch ( const sqlite::errors::GenericError& )
-        {
-            // This should only happen when the request is invalid, but can happen
-            // in case a migration fails, and we end up referencing a field that
-            // doesn't exist.
-            // Report it for release builds, but fail hard otherwise
-            assert( false );
-            return InitializeResult::DbCorrupted;
-        }
-        // Handle every other errors as a critical failure
-        catch ( const sqlite::errors::Exception& ex )
-        {
-            LOG_ERROR( "An SQLite error occurred: ", ex.what() );
-            return InitializeResult::Failed;
-        }
-    }
-
     m_initialized = true;
     LOG_INFO( "Successfully initialized" );
     return res;
@@ -958,6 +916,7 @@ void MediaLibrary::startDiscoverer()
         m_discovererWorker->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( fsFactory, this, m_callback,
                                                                                            std::move ( probePtr ) ) ) );
     }
+    m_discovererWorker->reloadAllDevices();
 }
 
 void MediaLibrary::startDeletionNotifier()
