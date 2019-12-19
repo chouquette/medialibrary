@@ -203,7 +203,7 @@ public:
 
     virtual void addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer ) override;
 
-    virtual void addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory ) override;
+    virtual bool addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory ) override;
 
     static bool isSupportedMediaExtension( const char* ext );
     static bool isSupportedPlaylistExtension( const char* ext );

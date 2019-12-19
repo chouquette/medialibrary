@@ -1947,9 +1947,17 @@ void MediaLibrary::discover( const std::string& entryPoint )
     m_discovererWorker->discover( entryPoint );
 }
 
-void MediaLibrary::addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory )
+bool MediaLibrary::addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory )
 {
+    auto it = std::find_if( cbegin( m_externalNetworkFsFactories ),
+                            cend( m_externalNetworkFsFactories ),
+                            [&fsFactory]( const std::shared_ptr<fs::IFileSystemFactory>& fsf ) {
+        return fsFactory->scheme() == fsf->scheme();
+    });
+    if ( it != cend( m_externalNetworkFsFactories ) )
+        return false;
     m_externalNetworkFsFactories.emplace_back( std::move( fsFactory ) );
+    return true;
 }
 
 bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
