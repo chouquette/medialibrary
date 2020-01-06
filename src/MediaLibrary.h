@@ -74,6 +74,7 @@ public:
                                          IMediaLibraryCb* mlCallback ) override;
     virtual bool isInitialized() const override;
     virtual bool start() override;
+    virtual bool isStarted() const override;
     virtual void setVerbosity( LogLevel v ) override;
 
     virtual MediaPtr media( int64_t mediaId ) const override;

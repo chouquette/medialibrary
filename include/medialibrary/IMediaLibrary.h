@@ -389,6 +389,12 @@ public:
      * This method is thread-safe
      */
     virtual bool start() = 0;
+    /**
+     * @brief isStarted Convenience helper to know if the media library was
+     *                  already started.
+     * @return true if the media library is started, false otherwise.
+     */
+    virtual bool isStarted() const = 0;
     virtual void setVerbosity( LogLevel v ) = 0;
 
     virtual LabelPtr createLabel( const std::string& label ) = 0;

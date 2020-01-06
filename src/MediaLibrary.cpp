@@ -500,6 +500,12 @@ bool MediaLibrary::start()
     return true;
 }
 
+bool MediaLibrary::isStarted() const
+{
+    std::lock_guard<compat::Mutex> lock( m_mutex );
+    return m_started;
+}
+
 void MediaLibrary::setVerbosity( LogLevel v )
 {
     m_verbosity = v;
