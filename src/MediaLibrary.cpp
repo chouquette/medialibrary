@@ -1914,6 +1914,8 @@ void MediaLibrary::discover( const std::string& entryPoint )
 
 bool MediaLibrary::addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory )
 {
+    std::lock_guard<compat::Mutex> lock( m_mutex );
+
     auto it = std::find_if( cbegin( m_externalNetworkFsFactories ),
                             cend( m_externalNetworkFsFactories ),
                             [&fsFactory]( const std::shared_ptr<fs::IFileSystemFactory>& fsf ) {
@@ -1921,6 +1923,8 @@ bool MediaLibrary::addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemF
     });
     if ( it != cend( m_externalNetworkFsFactories ) )
         return false;
+    if ( m_networkDiscoveryEnabled == true )
+        m_fsFactories.push_back( fsFactory );
     m_externalNetworkFsFactories.emplace_back( std::move( fsFactory ) );
     return true;
 }

@@ -754,13 +754,10 @@ public:
      * @brief addNetworkFileSystemFactory Provides a network filesystem factory implementation
      * @return true if the factory is accepted & inserted
      *
-     * This must be called between initialize() and start().
-     * A network file system factory must be inserted before enabling network
-     * file systems discovery.
+     * This must be called after initialize()
      * Only a single IFileSystemFactory instance per scheme is allowed.
      * If a factory is passed to this method and the scheme is already handled
      * by another factory, false will be returned.
-     *
      */
     virtual bool addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory ) = 0;
 
