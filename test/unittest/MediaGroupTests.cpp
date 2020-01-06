@@ -251,6 +251,12 @@ TEST_F( MediaGroups, Media )
 
     media = mg->media( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
+    // Check for the cached value
+    ASSERT_EQ( 0u, mg->nbMedia() );
+    // And ensure the DB also was updated:
+    mg = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( mg->id() ) );
+    ASSERT_EQ( 0u, mg->nbMedia() );
+
     media = sg->media( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
     ASSERT_EQ ( subaudio2->id(), media[0]->id() );
