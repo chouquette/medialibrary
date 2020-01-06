@@ -134,6 +134,7 @@ MediaLibrary::MediaLibrary()
     , m_settings( this )
     , m_initialized( false )
     , m_started( false )
+    , m_networkDiscoveryEnabled( false )
     , m_discovererIdle( true )
     , m_parserIdle( true )
     , m_fsFactoryCb( this )
@@ -1926,21 +1927,20 @@ bool MediaLibrary::addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemF
 
 bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
 {
+    std::lock_guard<compat::Mutex> lock( m_mutex );
+
+    if ( enabled == m_networkDiscoveryEnabled )
+        return true;
+
     if ( enabled )
     {
-        auto it = std::find_if( begin( m_fsFactories ),
-                                end( m_fsFactories ),
-                                []( const std::shared_ptr<fs::IFileSystemFactory> fs ) {
-                                    return fs->isNetworkFileSystem();
-                                });
-        if ( it != end( m_fsFactories ) )
-            return true;
         auto previousSize = m_fsFactories.size();
         for ( auto fsFactory : m_externalNetworkFsFactories )
         {
             if ( fsFactory->start( &m_fsFactoryCb ) == true )
                 m_fsFactories.push_back( std::move( fsFactory ) );
         }
+        m_networkDiscoveryEnabled = true;
         return m_fsFactories.size() != previousSize;
     }
 
@@ -1958,6 +1958,7 @@ bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
         fsFactory->stop();
     });
     m_fsFactories.erase( it, end( m_fsFactories ) );
+    m_networkDiscoveryEnabled = false;
     return true;
 }
 

@@ -594,8 +594,7 @@ public:
     virtual void discover( const std::string& entryPoint ) = 0;
     /**
      * @brief setDiscoverNetworkEnabled Enable discovery of network shares
-     * @return true if some IFileSystemFactory able of handling network
-     *         discovery were installed prior to calling this.
+     * @return true In case of success, false otherwise.
      *
      * This can be called at any time, but won't have any effect before
      * initialize() has been called.
@@ -606,8 +605,12 @@ public:
      * a USB drive, in the sense that the medialibrary will still store
      * information about network content and won't have to discover/parse it
      * again.
+     * When enabling, this method will consider the lack of network enabled
+     * IFsFactory implementation a failure.
+     * Setting the same state twice is considered as a success, regardless of
+     * the previous call status.
      */
-    virtual bool setDiscoverNetworkEnabled( bool enable ) = 0;
+    virtual bool setDiscoverNetworkEnabled( bool enabled ) = 0;
     /**
      * @brief entryPoints List the entrypoints that are managed by the medialibrary
      *

@@ -317,6 +317,7 @@ protected:
     Settings m_settings;
     bool m_initialized;
     bool m_started;
+    bool m_networkDiscoveryEnabled;
     std::atomic_bool m_discovererIdle;
     std::atomic_bool m_parserIdle;
 
