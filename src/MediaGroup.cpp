@@ -94,7 +94,21 @@ uint32_t MediaGroup::nbUnknown() const
 
 bool MediaGroup::add( IMedia& media )
 {
-    return media.addToGroup( m_id );
+    if ( media.addToGroup( m_id ) == false )
+        return false;
+    switch ( media.type() )
+    {
+        case IMedia::Type::Audio:
+            ++m_nbAudio;
+            break;
+        case IMedia::Type::Video:
+            ++m_nbVideo;
+            break;
+        case IMedia::Type::Unknown:
+            ++m_nbUnknown;
+            break;
+    }
+    return true;
 }
 
 bool MediaGroup::add( int64_t mediaId )
@@ -104,7 +118,21 @@ bool MediaGroup::add( int64_t mediaId )
 
 bool MediaGroup::remove( IMedia& media )
 {
-    return media.removeFromGroup();
+    if ( media.removeFromGroup() == false )
+        return false;
+    switch ( media.type() )
+    {
+        case IMedia::Type::Audio:
+            --m_nbAudio;
+            break;
+        case IMedia::Type::Video:
+            --m_nbVideo;
+            break;
+        case IMedia::Type::Unknown:
+            --m_nbUnknown;
+            break;
+    }
+    return true;
 }
 
 bool MediaGroup::remove( int64_t mediaId )
