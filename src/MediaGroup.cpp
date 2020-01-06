@@ -276,6 +276,8 @@ void MediaGroup::createTriggers( sqlite::Connection* connection )
                                    trigger( Triggers::IncrementNbMediaOnGroupChange, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
                                    trigger( Triggers::DecrementNbMediaOnGroupChange, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::DecrementNbMediaOnDeletion, Settings::DbModelVersion ) );
 }
 
 void MediaGroup::createIndexes( sqlite::Connection* connection )
@@ -375,6 +377,29 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                                 " THEN 1 ELSE 0 END)"
                     " WHERE id_group = old.group_id;"
                     " END";
+        case Triggers::DecrementNbMediaOnDeletion:
+            return "CREATE TRIGGER " + triggerName( t, dbModel ) +
+                   " AFTER DELETE ON " + Media::Table::Name +
+                   " WHEN old.group_id IS NOT NULL"
+                   " BEGIN"
+                   " UPDATE " + Table::Name + " SET"
+                       " nb_video = nb_video - "
+                           "(CASE old.type WHEN " +
+                               std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                   IMedia::Type::Video ) ) +
+                               " THEN 1 ELSE 0 END),"
+                       " nb_audio = nb_audio - "
+                           "(CASE old.type WHEN " +
+                               std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                   IMedia::Type::Audio ) ) +
+                               " THEN 1 ELSE 0 END),"
+                       " nb_unknown = nb_unknown - "
+                           "(CASE old.type WHEN " +
+                               std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                   IMedia::Type::Unknown ) ) +
+                               " THEN 1 ELSE 0 END)"
+                   " WHERE id_group = old.group_id;"
+                   " END";
         default:
             assert( !"Invalid trigger" );
     }
@@ -394,6 +419,8 @@ std::string MediaGroup::triggerName(MediaGroup::Triggers t, uint32_t dbModel)
             return "media_group_increment_nb_media";
         case Triggers::DecrementNbMediaOnGroupChange:
             return "media_group_decrement_nb_media";
+        case Triggers::DecrementNbMediaOnDeletion:
+            return "media_group_decrement_nb_media_on_deletion";
         default:
             assert( !"Invalid trigger" );
     }

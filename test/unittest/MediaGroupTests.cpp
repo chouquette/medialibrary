@@ -537,3 +537,49 @@ TEST_F( MediaGroups, Delete )
     ASSERT_EQ( nullptr, media->group() );
     ASSERT_EQ( 0, media->groupId() );
 }
+
+TEST_F( MediaGroups, DeleteMedia )
+{
+    auto mg = ml->createMediaGroup( "group" );
+    auto m1 = ml->addMedia( "otters.mkv", IMedia::Type::Video );
+    auto m2 = ml->addMedia( "squeaking otters.mp3", IMedia::Type::Audio );
+    auto m3 = ml->addMedia( "unknown otters.ts", IMedia::Type::Unknown );
+    ASSERT_NE( nullptr, mg );
+    ASSERT_NE( nullptr, m1 );
+    ASSERT_NE( nullptr, m2 );
+    ASSERT_NE( nullptr, m3 );
+
+    auto res = mg->add( *m1 );
+    ASSERT_TRUE( res );
+    res = mg->add( *m2 );
+    ASSERT_TRUE( res );
+    res = mg->add( *m3 );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( 3u, mg->nbMedia() );
+    ASSERT_EQ( 1u, mg->nbAudio() );
+    ASSERT_EQ( 1u, mg->nbVideo() );
+    ASSERT_EQ( 1u, mg->nbUnknown() );
+    // Ensure the value in DB is correct
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_EQ( 3u, mg->nbMedia() );
+    ASSERT_EQ( 1u, mg->nbAudio() );
+    ASSERT_EQ( 1u, mg->nbVideo() );
+    ASSERT_EQ( 1u, mg->nbUnknown() );
+
+    // Delete media and ensure the group media count is updated
+    ml->deleteMedia( m1->id() );
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_EQ( 2u, mg->nbMedia() );
+    ASSERT_EQ( 0u, mg->nbVideo() );
+
+    ml->deleteMedia( m2->id() );
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_EQ( 1u, mg->nbMedia() );
+    ASSERT_EQ( 0u, mg->nbAudio() );
+
+    ml->deleteMedia( m3->id() );
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_EQ( 0u, mg->nbMedia() );
+    ASSERT_EQ( 0u, mg->nbUnknown() );
+}

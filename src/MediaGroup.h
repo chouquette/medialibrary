@@ -50,6 +50,7 @@ public:
         DeleteFts,
         IncrementNbMediaOnGroupChange,
         DecrementNbMediaOnGroupChange,
+        DecrementNbMediaOnDeletion,
     };
     enum class Indexes : uint8_t
     {
