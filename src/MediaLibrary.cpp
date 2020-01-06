@@ -486,8 +486,8 @@ bool MediaLibrary::isInitialized() const
 
 bool MediaLibrary::start()
 {
-    assert( m_initialized == true );
     std::lock_guard<compat::Mutex> lock( m_mutex );
+    assert( m_initialized == true );
     if ( m_started == true )
         return true;
     LOG_INFO( "Starting medialibrary..." );
