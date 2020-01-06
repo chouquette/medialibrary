@@ -369,10 +369,6 @@ public:
      *                      already initialized.
      *
      * @return true is the media library is already initialized, false otherwise.
-     *
-     * If multiple threads are calling this to conditionnaly initialize the
-     * media library, only the first one will return InitializeResult::Success
-     * and the later ones will return InitializeResult::AlreadyInitialized
      */
     virtual bool isInitialized() const = 0;
 
