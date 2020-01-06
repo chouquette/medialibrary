@@ -1952,16 +1952,19 @@ bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
                               []( const std::shared_ptr<fs::IFileSystemFactory>& fs ) {
         return fs->isNetworkFileSystem();
     });
-    std::for_each( it, end( m_fsFactories ), [this]( const std::shared_ptr<fs::IFileSystemFactory>& fsFactory )
+    if ( it != end( m_fsFactories ) )
     {
         auto t = m_dbConnection->newTransaction();
-        auto devices = Device::fetchByScheme( this, fsFactory->scheme() );
-        for ( const auto& d : devices )
-            d->setPresent( false );
+        std::for_each( it, end( m_fsFactories ), [this]( const std::shared_ptr<fs::IFileSystemFactory>& fsFactory )
+        {
+            auto devices = Device::fetchByScheme( this, fsFactory->scheme() );
+            for ( const auto& d : devices )
+                d->setPresent( false );
+            fsFactory->stop();
+        });
         t->commit();
-        fsFactory->stop();
-    });
-    m_fsFactories.erase( it, end( m_fsFactories ) );
+        m_fsFactories.erase( it, end( m_fsFactories ) );
+    }
     m_networkDiscoveryEnabled = false;
     return true;
 }
