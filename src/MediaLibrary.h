@@ -207,6 +207,7 @@ public:
 
     static bool isSupportedMediaExtension( const char* ext );
     static bool isSupportedPlaylistExtension( const char* ext );
+    static void removeOldEntities( MediaLibraryPtr ml );
 
 protected:
     // Allow access to unit test MediaLibrary implementations

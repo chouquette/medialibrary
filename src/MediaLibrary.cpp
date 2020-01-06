@@ -452,9 +452,7 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
             }
 
             // Now that we know which devices are plugged, check for outdated devices
-            // Approximate 6 months for old device precision.
-            Device::removeOldDevices( this, std::chrono::seconds{ 3600 * 24 * 30 * 6 } );
-            Media::removeOldMedia( this, std::chrono::seconds{ 3600 * 24 * 30 * 6 } );
+            removeOldEntities( this );
         }
         catch ( const sqlite::errors::DatabaseCorrupt& )
         {
@@ -609,6 +607,13 @@ bool MediaLibrary::isSupportedPlaylistExtension(const char* ext)
         std::end( supportedPlaylistExtensions ), ext, [](const char* l, const char* r) {
             return strcasecmp( l, r ) < 0;
         });
+}
+
+void MediaLibrary::removeOldEntities( MediaLibraryPtr ml )
+{
+    // Approximate 6 months for old device precision.
+    Device::removeOldDevices( ml, std::chrono::seconds{ 3600 * 24 * 30 * 6 } );
+    Media::removeOldMedia( ml, std::chrono::seconds{ 3600 * 24 * 30 * 6 } );
 }
 
 void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
