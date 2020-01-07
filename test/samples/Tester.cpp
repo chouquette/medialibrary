@@ -464,6 +464,14 @@ void Tests::checkAlbums( const rapidjson::Value& expectedAlbums, std::vector<Alb
                         return false;
                 }
             }
+            if ( expectedAlbum.HasMember( "hasArtwork" ) )
+            {
+                if ( expectedAlbum["hasArtwork"].GetBool() ==
+                     a->thumbnailMrl( ThumbnailSizeType::Thumbnail ).empty() ||
+                     a->thumbnailMrl( ThumbnailSizeType::Thumbnail )
+                        .compare( 0, 13, "attachment://") == 0 )
+                    return false;
+            }
             if ( expectedAlbum.HasMember( "nbTracks" ) || expectedAlbum.HasMember( "tracks" ) )
             {
                 const auto tracks = a->tracks( nullptr )->all();
@@ -484,14 +492,6 @@ void Tests::checkAlbums( const rapidjson::Value& expectedAlbums, std::vector<Alb
             {
                 const auto releaseYear = expectedAlbum["releaseYear"].GetUint();
                 if ( a->releaseYear() != releaseYear )
-                    return false;
-            }
-            if ( expectedAlbum.HasMember( "hasArtwork" ) )
-            {
-                if ( expectedAlbum["hasArtwork"].GetBool() ==
-                     a->thumbnailMrl( ThumbnailSizeType::Thumbnail ).empty() ||
-                     a->thumbnailMrl( ThumbnailSizeType::Thumbnail )
-                        .compare( 0, 13, "attachment://") == 0 )
                     return false;
             }
             if ( expectedAlbum.HasMember( "nbDiscs" ) )
