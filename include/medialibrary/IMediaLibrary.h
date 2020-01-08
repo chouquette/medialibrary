@@ -100,6 +100,18 @@ enum class InitializeResult
     DbCorrupted,
 };
 
+enum class StartResult
+{
+    //< The media library was successfully started
+    Success,
+    //< Should be considered the same as Success, but is an indication of
+    // unrequired subsequent calls to start.
+    AlreadyStarted,
+    //< A fatal error occurred, it is possible to use the media library in read
+    //< mode only (no new media will be discovered nor analyzed)
+    Failed,
+};
+
 enum class ThumbnailSizeType : uint8_t
 {
     /// A small sized thumbnail. Considered to be the default value before model 17
@@ -385,10 +397,11 @@ public:
      * @return true in case of success or if already started, false otherwise.
      * * If start returns false, this medialibrary must not be used anymore,
      * and should be disposed off.
-     * If it returns true the first time, calling this method again is a no-op
+     * If it returns Success the first time, calling this method again is a
+     * no-op and AlreadyStarted will be returned
      * This method is thread-safe
      */
-    virtual bool start() = 0;
+    virtual StartResult start() = 0;
     /**
      * @brief isStarted Convenience helper to know if the media library was
      *                  already started.

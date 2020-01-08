@@ -73,7 +73,7 @@ public:
                                          const std::string& thumbnailPath,
                                          IMediaLibraryCb* mlCallback ) override;
     virtual bool isInitialized() const override;
-    virtual bool start() override;
+    virtual StartResult start() override;
     virtual bool isStarted() const override;
     virtual void setVerbosity( LogLevel v ) override;
 

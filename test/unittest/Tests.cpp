@@ -63,7 +63,7 @@ void Tests::Reload()
     auto setupRes = ml->setupDummyFolder();
     ASSERT_TRUE( setupRes );
     auto startRes = ml->start();
-    ASSERT_TRUE( startRes );
+    ASSERT_EQ( StartResult::Success, startRes );
     ml->reload();
 }
 

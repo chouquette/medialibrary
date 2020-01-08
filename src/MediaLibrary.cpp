@@ -484,20 +484,20 @@ bool MediaLibrary::isInitialized() const
     return m_initialized;
 }
 
-bool MediaLibrary::start()
+StartResult MediaLibrary::start()
 {
     std::lock_guard<compat::Mutex> lock( m_mutex );
     assert( m_initialized == true );
     if ( m_started == true )
-        return true;
+        return StartResult::AlreadyStarted;
     LOG_INFO( "Starting medialibrary..." );
 
     startDiscoverer();
     if ( startParser() == false )
-        return false;
+        return StartResult::Failed;
     startThumbnailer();
     m_started = true;
-    return true;
+    return StartResult::Success;
 }
 
 bool MediaLibrary::isStarted() const

@@ -85,13 +85,13 @@ protected:
 TEST_F( MiscTests, ExportRestorePlaylist )
 {
     auto lock = m_cb->lock();
-    auto res = m_ml->start();
-    ASSERT_TRUE( res );
+    auto startRes = m_ml->start();
+    ASSERT_EQ( StartResult::Success, startRes );
     auto samplesFolder = std::string{ SRC_DIR "/test/samples/samples/playlist/tracks" };
     ASSERT_TRUE( utils::fs::isDirectory( samplesFolder ) );
     samplesFolder = utils::fs::toAbsolute( samplesFolder );
     m_ml->discover( utils::file::toMrl( samplesFolder ) );
-    res = m_cb->waitForParsingComplete( lock );
+    auto res = m_cb->waitForParsingComplete( lock );
     ASSERT_TRUE( res );
     // Now we should have discovered some media
 

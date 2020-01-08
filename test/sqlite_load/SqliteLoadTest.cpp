@@ -117,8 +117,8 @@ void MockCallback::onParsingStatsUpdated(uint32_t percent)
 void discovererMainLoop( IMediaLibrary* ml, std::shared_ptr<MockCallback> cbMock,
                          std::string samplesFolder )
 {
-    auto res = ml->start();
-    assert( res == true );
+    auto startRes = ml->start();
+    assert( startRes == StartResult::Success );
     for ( auto i = 0u; i < NbIterations; ++i )
     {
         cbMock->initWait();
@@ -126,7 +126,7 @@ void discovererMainLoop( IMediaLibrary* ml, std::shared_ptr<MockCallback> cbMock
             ml->discover( samplesFolder );
         else
             ml->forceRescan();
-        res = cbMock->waitForParsingComplete();
+        auto res = cbMock->waitForParsingComplete();
         assert( res == true );
         std::cout << "Parsing #" << i << " completed." << std::endl;
     }
