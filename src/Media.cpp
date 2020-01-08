@@ -916,7 +916,7 @@ std::string Media::sortRequest( const QueryParameters* params )
             req += "alb.title DESC, att.track_number";
         else
             req += "alb.title, att.track_number";
-	descAdded = true;
+        descAdded = true;
         break;
     case SortingCriteria::Artist:
         req += "art.name";
@@ -926,7 +926,7 @@ std::string Media::sortRequest( const QueryParameters* params )
             req += "alb.title, att.track_number DESC, att.disc_number";
         else
             req += "alb.title, att.track_number, att.disc_number";
-	descAdded = true;
+        descAdded = true;
         break;
     default:
         LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default (Alpha)" );
