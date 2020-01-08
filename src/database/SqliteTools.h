@@ -375,7 +375,7 @@ class Tools
                 if ( sqlite::errors::isInnocuous( ex ) == true )
                 {
                     LOG_ERROR( "Failed to execute update/delete: ", ex.what() );
-                    return false;
+                    return 0;
                 }
                 throw;
             }
