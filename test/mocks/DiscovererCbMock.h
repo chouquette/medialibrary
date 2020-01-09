@@ -78,7 +78,7 @@ public:
     bool waitDiscovery()
     {
         std::unique_lock<compat::Mutex> lock( m_mutex );
-        auto res = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
+        auto res = m_cond.wait_for( lock, std::chrono::seconds{ 15 }, [this]() {
             return m_discoveryDone.load();
         } );
         m_discoveryDone = false;
@@ -93,7 +93,7 @@ public:
         if ( m_initialDiscoveryDone == false )
             return true;
         std::unique_lock<compat::Mutex> lock( m_mutex );
-        auto res = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
+        auto res = m_cond.wait_for( lock, std::chrono::seconds{ 15 }, [this]() {
             return m_reloadDone.load();
         } );
         m_reloadDone = false;
@@ -103,7 +103,7 @@ public:
     bool waitBanFolder()
     {
         std::unique_lock<compat::Mutex> lock( m_mutex );
-        auto res = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
+        auto res = m_cond.wait_for( lock, std::chrono::seconds{ 15 }, [this]() {
             return m_banFolderDone.load();
         });
         m_banFolderDone = false;
@@ -113,7 +113,7 @@ public:
     bool waitUnbanFolder()
     {
         std::unique_lock<compat::Mutex> lock( m_mutex );
-        auto res = m_cond.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
+        auto res = m_cond.wait_for( lock, std::chrono::seconds{ 15 }, [this]() {
             return m_unbanFolderDone.load();
         });
         m_unbanFolderDone = false;
@@ -123,7 +123,7 @@ public:
     bool waitEntryPointRemoved()
     {
         std::unique_lock<compat::Mutex> lock( m_mutex );
-        auto res =  m_cond.wait_for( lock, std::chrono::seconds( 5 ), [this]() {
+        auto res =  m_cond.wait_for( lock, std::chrono::seconds{ 15 }, [this]() {
             return m_entryPointRemoved.load();
         });
         m_entryPointRemoved = false;
