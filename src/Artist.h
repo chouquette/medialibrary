@@ -97,7 +97,7 @@ public:
      * The implementation may chose to ignore a thumbnail update based on the
      * current & new origin. In this case, `true` will still be returned.
      */
-    bool setThumbnail( std::shared_ptr<Thumbnail> newThumbnail, Thumbnail::Origin origin );
+    bool setThumbnail( std::shared_ptr<Thumbnail> newThumbnail );
     virtual bool setThumbnail( const std::string& thumbnailMrl,
                                ThumbnailSizeType sizeType  ) override;
     std::shared_ptr<Album> unknownAlbum();
@@ -145,8 +145,7 @@ public:
 
 private:
     static std::string sortRequest( const QueryParameters* params );
-    bool shouldUpdateThumbnail( Thumbnail& currentThumbnail,
-                                Thumbnail::Origin newOrigin );
+    static bool shouldUpdateThumbnail( const Thumbnail& currentThumbnail );
 
 private:
     MediaLibraryPtr m_ml;

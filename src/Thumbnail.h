@@ -85,6 +85,20 @@ public:
         Genre,
     };
 
+    /**
+     * This is a callback prototype intended to chose between updating an
+     * existing thumbnail, or inserting a new one and leaving the previous one
+     * untouched.
+     * If the old thumbnail should just be updated (meaning that all other
+     * entities using that thumbnail will start using the new one, as the
+     * thumbnail they link to will be updated), this must return true.
+     * If the user wishes to keep the previous thumbnail for other entities
+     * linking to it, they should return false. In which case, the new thumbnail
+     * will be inserted if requred, and a new linking record will be inserted
+     * to link the new thumbnail with the updated entity
+     */
+    using ShouldUpdateCb = bool( const Thumbnail& currentThumbnail );
+
     Thumbnail( MediaLibraryPtr ml, sqlite::Row& row );
     /**
      * @brief Thumbnail Builds a temporary thumbnail in memory
@@ -164,8 +178,8 @@ public:
 
     static std::shared_ptr<Thumbnail>
     updateOrReplace( MediaLibraryPtr ml, std::shared_ptr<Thumbnail> oldThumbnail,
-                     std::shared_ptr<Thumbnail> newThumbnail, int64_t entityId,
-                     EntityType entityType );
+                     std::shared_ptr<Thumbnail> newThumbnail, ShouldUpdateCb cb,
+                     int64_t entityId, EntityType entityType );
 
     static void createTable( sqlite::Connection* dbConnection );
     static void createTriggers( sqlite::Connection* dbConnection );
@@ -234,6 +248,19 @@ private:
     bool insertLinkRecord( int64_t entityId, EntityType type, Origin origin );
 
     bool update( std::string mrl, bool isOwned );
+
+    /**
+     * @brief updateAllLinkRecords Updates all link record using this thumbnail to
+     *                             use the one identified by newThumbnailId
+     * @param newThumbnailId The new thumbnail to link to
+     * @return true in case of success, false otherwise
+     *
+     * If this returns true, the instance must be considered invalid since it's
+     * pointing to the previous thumbnail, while it has now been removed from
+     * database, as the shared counter immediatly reached 0 (since no entity is
+     * linked with it anymore)
+     */
+    bool updateAllLinkRecords( int64_t newThumbnailId );
 
 private:
     MediaLibraryPtr m_ml;

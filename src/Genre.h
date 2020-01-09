@@ -86,6 +86,9 @@ public:
     static Query<IGenre> listAll( MediaLibraryPtr ml, const QueryParameters* params );
 
 private:
+    static bool shouldUpdateThumbnail( const Thumbnail& oldThumbnail );
+
+private:
     MediaLibraryPtr m_ml;
 
     int64_t m_id;

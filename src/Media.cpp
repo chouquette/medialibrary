@@ -646,34 +646,16 @@ void Media::markAsInternal()
     m_changed = true;
 }
 
-bool Media::shouldUpdateThumbnail( Thumbnail& currentThumbnail,
-                                   Thumbnail::Origin newOrigin )
+bool Media::shouldUpdateThumbnail( const Thumbnail& currentThumbnail )
 {
-    switch ( currentThumbnail.origin() )
-    {
-        case Thumbnail::Origin::Artist:
-        case Thumbnail::Origin::AlbumArtist:
-        {
-            // We don't expect an album or an artist thumbnail to be assigned to
-            // a media
-            assert( !"Unexpected current thumbnail type" );
-            return false;
-        }
-        case Thumbnail::Origin::CoverFile:
-        case Thumbnail::Origin::Media:
-        {
-            // This media was assigned a thumbnail from its album, or its embedded
-            // art, we only update in case the new thumbnail is user provided
-            // or the thumbnail was re-generated
-            return newOrigin == Thumbnail::Origin::Media ||
-                   newOrigin == Thumbnail::Origin::UserProvided;
-        }
-        case Thumbnail::Origin::UserProvided:
-            return newOrigin == Thumbnail::Origin::UserProvided;
-        default:
-            assert( !"Unreachable" );
-            return false;
-    }
+    /*
+     * We're about to update a media thumbnail.
+     * A media thumbnail might be shared by an album or an artist, which we most
+     * likely don't want to update when updating a specific media.
+     * In case the thumbnail is shared, we should just insert a new one.
+     * Otherwise, it's fine to just update the existing one.
+     */
+    return currentThumbnail.isShared() == false;
 }
 
 bool Media::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
@@ -681,13 +663,10 @@ bool Media::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
     assert( newThumbnail != nullptr );
     auto thumbnailIdx = Thumbnail::SizeToInt( newThumbnail->sizeType() );
     auto currentThumbnail = thumbnail( newThumbnail->sizeType() );
-    // If we already have a thumbnail, we need to update it or insert a new one
-    if ( currentThumbnail != nullptr &&
-         shouldUpdateThumbnail( *currentThumbnail, newThumbnail->origin() ) == false )
-            return true;
     currentThumbnail = Thumbnail::updateOrReplace( m_ml, currentThumbnail,
-                                                   newThumbnail, m_id,
-                                                   Thumbnail::EntityType::Media );
+                                                   newThumbnail,
+                                                   Media::shouldUpdateThumbnail,
+                                                   m_id, Thumbnail::EntityType::Media );
     auto res = currentThumbnail != nullptr;
     m_thumbnails[thumbnailIdx] = std::move( currentThumbnail );
     return res;

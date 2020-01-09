@@ -158,8 +158,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
                                            bool albumTrack);
         static std::string orderTracksBy( const QueryParameters* params );
         static std::string orderBy( const QueryParameters* params );
-        bool shouldUpdateThumbnail(Thumbnail& currentThumbnail,
-                                    Thumbnail::Origin newOrigin );
+        static bool shouldUpdateThumbnail( const Thumbnail& currentThumbnail );
 
     protected:
         MediaLibraryPtr m_ml;

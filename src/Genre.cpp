@@ -137,6 +137,11 @@ bool Genre::hasThumbnail( ThumbnailSizeType sizeType ) const
     return thumbnail( sizeType ) != nullptr;
 }
 
+bool Genre::shouldUpdateThumbnail( const Thumbnail& oldThumbnail )
+{
+    return oldThumbnail.isShared() == false;
+}
+
 bool Genre::setThumbnail( const std::string& mrl, ThumbnailSizeType sizeType,
                           bool takeOwnership )
 {
@@ -145,8 +150,9 @@ bool Genre::setThumbnail( const std::string& mrl, ThumbnailSizeType sizeType,
     auto newThumbnail = std::make_shared<Thumbnail>( m_ml, mrl,
                             Thumbnail::Origin::UserProvided, sizeType, false );
     currentThumbnail = Thumbnail::updateOrReplace( m_ml, currentThumbnail,
-                                                   newThumbnail, m_id,
-                                                   Thumbnail::EntityType::Genre );
+                                                   newThumbnail,
+                                                   Genre::shouldUpdateThumbnail,
+                                                   m_id, Thumbnail::EntityType::Genre );
     if ( currentThumbnail == nullptr )
         return false;
     m_thumbnails[thumbnailIdx] = std::move( currentThumbnail );

@@ -193,60 +193,30 @@ std::shared_ptr<Thumbnail> Artist::thumbnail( ThumbnailSizeType sizeType ) const
     return m_thumbnails[idx];
 }
 
-bool Artist::shouldUpdateThumbnail( Thumbnail& currentThumbnail,
-                                    Thumbnail::Origin newOrigin )
+bool Artist::shouldUpdateThumbnail( const Thumbnail& currentThumbnail )
 {
-    switch( currentThumbnail.origin() )
-    {
-        case Thumbnail::Origin::Artist:
-        {
-            // The previous thumbnail was based on an artist.
-            // AlbumArtist has a higher priority over this, otherwise reject
-            // anything that is not used provided.
-            return newOrigin != Thumbnail::Origin::AlbumArtist &&
-                   newOrigin != Thumbnail::Origin::UserProvided;
-        }
-        case Thumbnail::Origin::AlbumArtist:
-        {
-            // This is the highest ranking for an artist thumbnail, so
-            // we only accept to override it with a user provided thumbnail
-            return newOrigin == Thumbnail::Origin::UserProvided;
-        }
-        case Thumbnail::Origin::Media:
-        {
-            // The thumbnail was determined by an embeded artwork, we can
-            // accept pretty much anything else
-            return newOrigin != Thumbnail::Origin::Media;
-        }
-        case Thumbnail::Origin::CoverFile:
-        {
-            // The previous thumbnail came from an album cover file.
-            // Accept only thumbnails from artists & user provided
-            return newOrigin == Thumbnail::Origin::Artist ||
-                   newOrigin == Thumbnail::Origin::AlbumArtist ||
-                   newOrigin == Thumbnail::Origin::UserProvided;
-        }
-        case Thumbnail::Origin::UserProvided:
-            return true;
-        default:
-            assert( !"Unreachable" );
-            return false;
-    }
+    /*
+     * Regardless of the origin, we only want to update an artist thumbnail if
+     * it isn't shared.
+     * Artists don't have thumbnail of their own (yet), and will only rely on
+     * other entities providing thumbnail for them (albums or media), so they
+     * are extremely likely to be shared.
+     * If we are updating this specific artist thumbnail, we do not want to
+     * update the album or media we originally got the thumbnail from
+     */
+    return currentThumbnail.isShared() == false;
 }
 
-bool Artist::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail,
-                           Thumbnail::Origin origin )
+bool Artist::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
 {
     assert( newThumbnail != nullptr );
 
     auto thumbnailIdx = Thumbnail::SizeToInt( newThumbnail->sizeType() );
     auto currentThumbnail = thumbnail( newThumbnail->sizeType() );
-    if ( currentThumbnail != nullptr &&
-         shouldUpdateThumbnail( *newThumbnail, origin ) == false )
-            return true;
     currentThumbnail = Thumbnail::updateOrReplace( m_ml, currentThumbnail,
-                                                   newThumbnail, m_id,
-                                                   Thumbnail::EntityType::Artist );
+                                                   newThumbnail,
+                                                   Artist::shouldUpdateThumbnail,
+                                                   m_id, Thumbnail::EntityType::Artist );
     auto res = currentThumbnail != nullptr;
     m_thumbnails[thumbnailIdx] = std::move( currentThumbnail );
     return res;
@@ -255,8 +225,7 @@ bool Artist::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail,
 bool Artist::setThumbnail( const std::string& thumbnailMrl, ThumbnailSizeType sizeType )
 {
     return setThumbnail( std::make_shared<Thumbnail>( m_ml,
-                thumbnailMrl, Thumbnail::Origin::UserProvided, sizeType, false ),
-                Thumbnail::Origin::UserProvided );
+                thumbnailMrl, Thumbnail::Origin::UserProvided, sizeType, false ) );
 }
 
 std::shared_ptr<Album> Artist::unknownAlbum()

@@ -144,7 +144,7 @@ TEST_F( Thumbnails, UnshareMedia )
     auto a = ml->createArtist(  "artist" );
 
     m->setThumbnail( t );
-    a->setThumbnail( t, t->origin() );
+    a->setThumbnail( t );
 
     ASSERT_EQ( 1u, ml->countNbThumbnails() );
 
@@ -204,7 +204,7 @@ TEST_F( Thumbnails, UnshareArtist )
     auto a = ml->createArtist(  "artist" );
 
     m->setThumbnail( t );
-    a->setThumbnail( t, t->origin() );
+    a->setThumbnail( t );
 
     ASSERT_EQ( 1u, ml->countNbThumbnails() );
 
@@ -222,7 +222,7 @@ TEST_F( Thumbnails, UnshareArtist )
                                                      ThumbnailSizeType::Thumbnail, false );
     // Don't insert the thumbnail from here, check that the common thumbnail code
     // will take care of inserting to db if needed
-    a->setThumbnail( newThumbnail, newThumbnail->origin() );
+    a->setThumbnail( newThumbnail );
     ASSERT_EQ( 2u, ml->countNbThumbnails() );
 
     artistThumbnail = a->thumbnail( ThumbnailSizeType::Thumbnail );
@@ -251,17 +251,17 @@ TEST_F( Thumbnails, UnshareArtist )
 TEST_F( Thumbnails, UpdateIsOwned )
 {
     auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
-    auto mrl = std::string{ "file://path/to/a/thumbnail.jpg" };
+    auto mrl = utils::file::toMrl( ml->thumbnailPath() + "thumb.jpg" );
     auto thumbnail = std::make_shared<Thumbnail>( ml.get(), mrl,
                                             Thumbnail::Origin::Media,
-                                            ThumbnailSizeType::Thumbnail, false );
+                                            ThumbnailSizeType::Thumbnail, true );
     auto res = m->setThumbnail( std::move( thumbnail ) );
     ASSERT_TRUE( res );
     ASSERT_EQ( mrl, m->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
 
-    auto newMrl = utils::file::toMrl( ml->thumbnailPath() + "thumb.jpg" );
+    auto newMrl = std::string{ "file://path/to/a/thumbnail.jpg" };
     thumbnail = std::make_shared<Thumbnail>( ml.get(), newMrl, Thumbnail::Origin::Media,
-                                             ThumbnailSizeType::Thumbnail, true );
+                                             ThumbnailSizeType::Thumbnail, false );
     res = m->setThumbnail( std::move( thumbnail ) );
     ASSERT_TRUE( res );
     ASSERT_EQ( m->thumbnailMrl( ThumbnailSizeType::Thumbnail ), newMrl );

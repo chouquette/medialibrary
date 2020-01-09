@@ -168,34 +168,26 @@ std::shared_ptr<Thumbnail> Album::thumbnail( ThumbnailSizeType sizeType ) const
     return m_thumbnails[idx];
 }
 
-bool Album::shouldUpdateThumbnail( Thumbnail& currentThumbnail,
-                                   Thumbnail::Origin newOrigin )
+bool Album::shouldUpdateThumbnail( const Thumbnail& currentThumbnail )
 {
+    /*
+     * We want to update an album thumbnail.
+     *
+     * If we inherited the thumbnail from a media, we need to insert a new record
+     * as we won't want to update the source media's thumbnail.
+     *
+     * If the cover comes from an album file, we can update it, and let the
+     * thumbnails that were based on this album be updated as well
+     *
+     * In other cases, let's just insert a new thumbnail.
+     */
     switch ( currentThumbnail.origin() )
     {
-        case Thumbnail::Origin::Artist:
-        case Thumbnail::Origin::AlbumArtist:
         case Thumbnail::Origin::Media:
-        {
-            // In all this cases, we are only interested in an album specific
-            // thumbnail, ie. provided by a cover file, or a user provided cover
-            return newOrigin == Thumbnail::Origin::CoverFile ||
-                   newOrigin == Thumbnail::Origin::UserProvided;
-        }
+            return false;
         case Thumbnail::Origin::CoverFile:
-        case Thumbnail::Origin::UserProvided:
-        {
-            // Another cover file for the same album is dubious, and is likely the
-            // same album being discovered, but with another file than when the
-            // thumbnail got originally assigned to this album. Let's reject it.
-            // And as usual, accept anything which is user provided.
-
-            // And for user provided thumbnail, only another user provided
-            // thumbnail can override it.
-            return newOrigin == Thumbnail::Origin::UserProvided;
-        }
+            return true;
         default:
-            assert( !"Unreachable" );
             return false;
     }
 }
@@ -205,13 +197,10 @@ bool Album::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
     assert( newThumbnail != nullptr );
     auto currentThumbnail = thumbnail( newThumbnail->sizeType() );
     auto thumbnailIdx = Thumbnail::SizeToInt( newThumbnail->sizeType() );
-    if ( currentThumbnail != nullptr &&
-         shouldUpdateThumbnail( *currentThumbnail, newThumbnail->origin() ) == false )
-            return true;
-
     currentThumbnail = Thumbnail::updateOrReplace( m_ml, currentThumbnail,
-                                                   newThumbnail, m_id,
-                                                   Thumbnail::EntityType::Album );
+                                                   newThumbnail,
+                                                   Album::shouldUpdateThumbnail,
+                                                   m_id, Thumbnail::EntityType::Album );
     auto res = currentThumbnail != nullptr;
     m_thumbnails[thumbnailIdx] = std::move( currentThumbnail );
     return res;

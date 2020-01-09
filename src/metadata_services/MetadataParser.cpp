@@ -1330,7 +1330,7 @@ void MetadataAnalyzer::link( IItem& item, Album& album,
             // If the album artist has no thumbnail, let's assign it
             if ( albumArtistThumbnail == nullptr )
             {
-                albumArtist->setThumbnail( mediaThumbnail, Thumbnail::Origin::AlbumArtist );
+                albumArtist->setThumbnail( mediaThumbnail );
             }
             else if ( albumArtistThumbnail->origin() == Thumbnail::Origin::Artist )
             {
