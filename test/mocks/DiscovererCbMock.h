@@ -27,6 +27,10 @@
 
 #include "medialibrary/IMediaLibrary.h"
 #include "mocks/NoopCallback.h"
+#include "compat/Mutex.h"
+#include "compat/ConditionVariable.h"
+
+#include <cassert>
 
 namespace mock
 {
