@@ -980,7 +980,7 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
     if ( res != Status::Success )
         return res;
 
-    if ( thumbnail != nullptr )
+    if ( thumbnail != nullptr && thumbnail->isOwned() == false )
     {
         assert( thumbnail->status() == ThumbnailStatus::Available );
         thumbnail->relocate();
