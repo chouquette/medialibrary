@@ -22,8 +22,6 @@
 
 #pragma once
 
-// Unconditionaly include <mutex> for std::unique_lock
-#include <mutex>
 #include "compat/Mutex.h"
 
 #if CXX11_THREADS
