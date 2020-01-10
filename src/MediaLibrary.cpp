@@ -106,7 +106,7 @@ namespace medialibrary
 const char* const MediaLibrary::supportedMediaExtensions[] = {
     "3g2", "3gp", "a52", "aac", "ac3", "adx", "aif", "aifc",
     "aiff", "alac", "amr", "amv", "aob", "ape", "asf",
-    "avi", "divx", "dts", "dv",
+    "avi", "divx", "dts", "dv", "f4v",
     "flac", "flv", "gxf", "iso", "it", "itml",
     "m1v", "m2t", "m2ts", "m2v", "m4a", "m4b",
     "m4p", "m4v", "mid", "mka", "mkv", "mlp", "mod", "mov",
