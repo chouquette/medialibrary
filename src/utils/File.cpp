@@ -71,6 +71,7 @@ bool copy( const std::string& from, const std::string& to )
         return false;
     unsigned char buff[4096];
     size_t nbRead;
+
     do
     {
         nbRead = fread( buff, 1, 4096, input.get() );
@@ -82,8 +83,7 @@ bool copy( const std::string& from, const std::string& to )
         }
         if ( fwrite( buff, 1, nbRead, output.get() ) == 0 )
             return false;
-
-    } while ( nbRead > 0 );
+    } while ( feof( input.get() ) == 0 );
     return true;
 }
 
