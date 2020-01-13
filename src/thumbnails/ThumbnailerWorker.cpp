@@ -59,6 +59,9 @@ void ThumbnailerWorker::requestThumbnail( MediaPtr media, ThumbnailSizeType size
 {
     std::unique_lock<compat::Mutex> lock( m_mutex );
 
+    if ( m_queuedMedia.find( media->id() ) != cend( m_queuedMedia ) )
+        return;
+
     Task t{
         std::move( media ),
         sizeType,
@@ -66,7 +69,9 @@ void ThumbnailerWorker::requestThumbnail( MediaPtr media, ThumbnailSizeType size
         desiredHeight,
         position
     };
+    m_queuedMedia.insert( t.media->id() );
     m_tasks.push( std::move( t ) );
+    assert( m_tasks.size() == m_queuedMedia.size() );
     if ( m_thread.get_id() == compat::Thread::id{} )
     {
         m_run = true;
@@ -112,6 +117,8 @@ void ThumbnailerWorker::run()
                 }
                 t = std::move( m_tasks.front() );
                 m_tasks.pop();
+                m_queuedMedia.erase( t.media->id() );
+                assert( m_tasks.size() == m_queuedMedia.size() );
             }
             bool res = generateThumbnail( t );
             m_ml->getCb()->onMediaThumbnailReady( t.media, t.sizeType, res );
@@ -131,6 +138,7 @@ void ThumbnailerWorker::stop()
             std::unique_lock<compat::Mutex> lock( m_mutex );
             while ( m_tasks.empty() == false )
                 m_tasks.pop();
+            m_queuedMedia.clear();
         }
         m_cond.notify_all();
         m_thread.join();

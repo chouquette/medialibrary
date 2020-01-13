@@ -30,6 +30,7 @@
 
 #include <queue>
 #include <atomic>
+#include <set>
 
 namespace medialibrary
 {
@@ -69,6 +70,7 @@ private:
     compat::Mutex m_mutex;
     compat::ConditionVariable m_cond;
     std::queue<Task> m_tasks;
+    std::set<int64_t> m_queuedMedia;
     std::atomic_bool m_run;
     std::shared_ptr<IThumbnailer> m_generator;
     compat::Thread m_thread;
