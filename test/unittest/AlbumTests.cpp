@@ -458,7 +458,7 @@ TEST_F( Albums, AutoDelete )
     auto album = ml->album( a->id() );
     ASSERT_NE( nullptr, album );
 
-    ml->deleteTrack( t->id() );
+    ml->deleteMedia( m->id() );
 
     album = ml->album( a->id() );
     ASSERT_EQ( nullptr, album );
@@ -743,14 +743,14 @@ TEST_F( Albums, Duration )
     ASSERT_EQ( 300u, a2->duration() );
 
     // Check that the duration is updated when a media/track gets removed
-    ml->deleteTrack( t2->id() );
+    ml->deleteMedia( m2->id() );
 
     Reload();
     a2 = ml->album( a->id() );
     ASSERT_EQ( 100u, a2->duration() );
 
     // And check that we don't remove negative durations
-    ml->deleteTrack( t3->id() );
+    ml->deleteMedia( m3->id() );
     Reload();
     a2 = ml->album( a->id() );
     ASSERT_EQ( 100u, a2->duration() );

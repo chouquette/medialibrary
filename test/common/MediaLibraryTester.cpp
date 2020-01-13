@@ -182,11 +182,6 @@ void MediaLibraryTester::setFsFactory( std::shared_ptr<fs::IFileSystemFactory> f
     fsFactory = fsf;
 }
 
-void MediaLibraryTester::deleteTrack( int64_t trackId )
-{
-    AlbumTrack::destroy( this, trackId );
-}
-
 std::shared_ptr<AlbumTrack> MediaLibraryTester::albumTrack( int64_t id )
 {
     return AlbumTrack::fetch( this, id );

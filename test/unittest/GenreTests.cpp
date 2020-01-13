@@ -247,7 +247,7 @@ TEST_F( Genres, NbTracks )
     g = std::static_pointer_cast<Genre>( ml->genre( g->id() ) );
     ASSERT_EQ( 1u, g->nbTracks() );
 
-    ml->deleteTrack( t->id() );
+    ml->deleteMedia( m->id() );
 
     Reload();
 

@@ -61,7 +61,6 @@ public:
     void deleteShow( int64_t showId );
     std::shared_ptr<Device> addDevice( const std::string& uuid, bool isRemovable );
     void setFsFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory );
-    void deleteTrack( int64_t trackId );
     std::shared_ptr<AlbumTrack> albumTrack( int64_t id );
     // Use to run tests that fiddles with file properties (modification dates, size...)
     std::shared_ptr<Media> addFile(std::shared_ptr<fs::IFile> file, IMedia::Type type);
