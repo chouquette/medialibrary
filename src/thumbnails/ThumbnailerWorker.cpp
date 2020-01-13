@@ -179,6 +179,7 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
     }
 
     auto m = static_cast<Media*>( task.media.get() );
+    bool isFirstThumbnailGeneration = false;
     if ( m->thumbnailStatus( task.sizeType ) == ThumbnailStatus::Missing )
     {
         /*
@@ -193,6 +194,7 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
         m->setThumbnail( std::make_shared<Thumbnail>( m_ml, ThumbnailStatus::Crash,
                                                       Thumbnail::Origin::Media,
                                                       task.sizeType ) );
+        isFirstThumbnailGeneration = true;
     }
     auto thumbnail = m->thumbnail( task.sizeType );
     if ( thumbnail == nullptr )
@@ -209,12 +211,16 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
     {
         if ( m_run == false )
         {
-            // The generation failed because the thumbnailer was interrupted.
-
-            // Unlink the media and the thumbnail, otherwise we will have a
-            // failure record and no way of regenerating the thumbnail, while
-            // the generation was only cancelled, and might not fail at all.
-            m->removeThumbnail( task.sizeType );
+            /*
+             * The generation failed because the thumbnailer was interrupted.
+             *
+             * If we were trying to generate the first thumbnail for this media
+             * we need to remove the record, as there were no crashes, and we
+             * don't want to report that information to the user.
+             * Otherwise, just keep the previous thumbnail.
+             */
+            if ( isFirstThumbnailGeneration == true )
+                m->removeThumbnail( task.sizeType );
         }
         else
         {
