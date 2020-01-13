@@ -338,24 +338,26 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
              * However, the old thumbnail might be a thumbnail that we own,
              * and we need to ensure the file is gone from disk if its not used
              * anymore.
-             * For now, we do not expect the new thumbnail to be owned as well,
-             * during analysis, we only update thumbnails when no thumbnails were
-             * found for a specific entity.
-             * Overriding the thumbnails at a later time is only expected from
-             * the application, in response to the user setting a thumbnail
-             * explicitely.
-             *
              * To summarize, if we update a thumbnail we need to:
              * - Remove the file on disk when it was owned
              * - Update the MRL for this thumbnail, so all entities start using
              *   the new one
              */
-            assert( newThumbnail->isOwned() == false );
 
-            if ( newThumbnail->id() != 0 )
+            if ( newThumbnail->id() != 0 || newThumbnail->isOwned() == true )
             {
                 /*
-                 * However, if the new thumbnail is already inserted, we need
+                 * If we need to update to another owned thumbnail, we simply
+                 * update all linking records to point to the new thumbnail and
+                 * let the old one be removed once its shared_counter reaches 0
+                 */
+                if ( newThumbnail->id() == 0 )
+                {
+                    if ( newThumbnail->insert() == 0 )
+                        return nullptr;
+                }
+                /*
+                 * If the new thumbnail is already inserted, we need
                  * to update all linking records to point to this new thumbnail
                  * This won't break the Origin relation, since we just update
                  * the thumbnail_id. We will still be able to know why we are
