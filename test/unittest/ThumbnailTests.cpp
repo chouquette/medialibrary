@@ -93,7 +93,9 @@ TEST_F( Thumbnails, Update )
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::Media );
 
-    // Now update the origin
+    // Now update the origin + mrl (we don't support updating the origin only
+    // anymore)
+    mrl = "file://user/provided/mrl.jpg";
     thumbnail = std::make_shared<Thumbnail>( ml.get(), mrl, Thumbnail::Origin::UserProvided,
                                              ThumbnailSizeType::Thumbnail, false );
     res = m->setThumbnail( std::move( thumbnail ) );

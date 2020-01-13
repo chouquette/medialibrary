@@ -232,6 +232,11 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
     }
 
     auto destMrl = utils::file::toMrl( dest );
+    /*
+     * Even if we had a thumbnail before, we still might need to update its
+     * status, so we still invoke setThumbnail and let it decide what needs
+     * to be updated in db
+     */
     return m->setThumbnail( std::make_shared<Thumbnail>( m_ml, destMrl,
                         Thumbnail::Origin::Media, task.sizeType, true ) );
 }

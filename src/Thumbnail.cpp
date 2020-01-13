@@ -324,8 +324,12 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
          * update with the resulting object.
          * In any case, if the previous thumbnail failed to be generated, it
          * can't be shared and we can just update it.
+         * We also need to handle an update to an existing thumbnail through the
+         * thumbnailer. In that case, we just need to ensure that the status
+         * is set accordingly, since the thumbnail was overriden on disk
          */
-        if ( oldThumbnail->status() != ThumbnailStatus::Available )
+        if ( oldThumbnail->status() != ThumbnailStatus::Available ||
+             oldThumbnail->mrl() == newThumbnail->mrl() )
         {
             oldThumbnail->update( newThumbnail->mrl(), newThumbnail->isOwned() );
             res = std::move( oldThumbnail );
