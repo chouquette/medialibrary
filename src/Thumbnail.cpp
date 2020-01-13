@@ -352,7 +352,22 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
              */
             assert( newThumbnail->isOwned() == false );
 
-            if ( newThumbnail->id() == 0 )
+            if ( newThumbnail->id() != 0 )
+            {
+                /*
+                 * However, if the new thumbnail is already inserted, we need
+                 * to update all linking records to point to this new thumbnail
+                 * This won't break the Origin relation, since we just update
+                 * the thumbnail_id. We will still be able to know why we are
+                 * sharing this thumbnail
+                 */
+                if ( oldThumbnail->updateAllLinkRecords( newThumbnail->id() ) == false )
+                {
+                    return nullptr;
+                }
+                res = std::move( newThumbnail );
+            }
+            else
             {
                 /*
                  * We are about to use a non-owned thumbnail. Since we are
@@ -382,21 +397,6 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
                 oldThumbnail->updateLinkRecord( entityId, entityType,
                                                 newThumbnail->origin() );
                 res = std::move( oldThumbnail );
-            }
-            else
-            {
-                /*
-                 * However, if the new thumbnail is already inserted, we need
-                 * to update all linking records to point to this new thumbnail
-                 * This won't break the Origin relation, since we just update
-                 * the thumbnail_id. We will still be able to know why we are
-                 * sharing this thumbnail
-                 */
-                if ( oldThumbnail->updateAllLinkRecords( newThumbnail->id() ) == false )
-                {
-                    return nullptr;
-                }
-                res = std::move( newThumbnail );
             }
         }
         else
