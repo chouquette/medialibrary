@@ -64,6 +64,7 @@
 #include "Metadata.h"
 #include "parser/Task.h"
 #include "utils/Charsets.h"
+#include "utils/TitleAnalyzer.h"
 #include "Bookmark.h"
 #include "MediaGroup.h"
 
@@ -1687,6 +1688,55 @@ void MediaLibrary::migrateModel23to24()
     /* Recreate the settings table to remove the 2 extra VideoGroups columns */
     Settings::createTable( dbConn );
     m_settings.load();
+
+    {
+        sqlite::Row row;
+        int64_t mediaId;
+        std::string title;
+        std::string fileName;
+
+        auto batchSize = 100u;
+        auto offset = 0u;
+        /* We can't really check if the title was forced for audio media since
+         * this would require a preparse of each media.
+         * We also don't care about external media (ie. with no parent folder)
+         * since those are not analyzed, and we wouldn't override their titles.
+         */
+        const std::string req = "SELECT id_media, title, filename FROM " +
+                Media::Table::Name + " WHERE type != ? AND folder_id IS NOT NULL "
+                "LIMIT ? OFFSET ?";
+
+        while ( true )
+        {
+            /*
+             * Since we change the parameter along the loop, we need to recreate
+             * the statement for each iteration, in order to reset the bindings
+             */
+            sqlite::Statement stmt{ dbConn->handle(), req };
+            stmt.execute( Media::Type::Audio, batchSize, offset );
+            auto nbRow = 0u;
+            while ( ( row = stmt.row() ) != nullptr )
+            {
+                row >> mediaId >> title >> fileName;
+                auto sanitizedName = utils::title::sanitize( fileName );
+                if ( sanitizedName != title )
+                {
+                    /*
+                     * If the results differ, assume this is because the user
+                     * provided a custom title. This should be OK since the latest
+                     * changes in the title analyzer have been shipped in all
+                     * apps that are using the model 23 which we are currently
+                     * migrating from.
+                     */
+                    Media::setForcedTitle( this, mediaId );
+                }
+                nbRow++;
+            }
+            if ( nbRow < batchSize )
+                break;
+            offset += nbRow;
+        }
+    }
 
     m_settings.setDbModelVersion( 24 );
     t->commit();

@@ -135,6 +135,19 @@ class Media : public IMedia,
         virtual const std::string& title() const override;
         bool setTitle( const std::string& title, bool forced );
         ///
+        /// \brief setForcedTitle Force the forced_title field to true
+        /// \param mediaId The targetted media id
+        ///
+        /// This is only used for migration 23 -> 24
+        ///
+        static bool setForcedTitle(MediaLibraryPtr ml, int64_t mediaId );
+        ///
+        /// \brief isForcedTitle returns true if the title is forced by the user
+        ///
+        /// This is only intended for unit tests purposes
+        ///
+        bool isForcedTitle() const;
+        ///
         /// \brief setTitleBuffered Mark the media as changed but doesn't save the change in DB
         /// Querying the title after this method will return the new title, but it won't appear in DB
         /// until save() is called

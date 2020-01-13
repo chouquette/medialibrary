@@ -1037,6 +1037,18 @@ bool Media::setTitle( const std::string& title, bool forced )
     return true;
 }
 
+bool Media::setForcedTitle( MediaLibraryPtr ml, int64_t mediaId )
+{
+    const std::string req = "UPDATE " + Media::Table::Name +
+            " SET forced_title = 1 WHERE id_media = ?";
+    return sqlite::Tools::executeUpdate( ml->getConn(), req, mediaId );
+}
+
+bool Media::isForcedTitle() const
+{
+    return m_forcedTitle;
+}
+
 void Media::setTitleBuffered( const std::string& title )
 {
     if ( m_title == title || m_forcedTitle == true )

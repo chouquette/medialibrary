@@ -579,4 +579,11 @@ TEST_F( DbModel, Upgrade22to23 )
 TEST_F( DbModel, Upgrade23to24 )
 {
     CommonMigrationTest( SRC_DIR "/test/unittest/db_v23.sql" );
+
+    // Ensure user provided title was correctly deduced:
+    auto m5 = ml->media( 5 );
+    auto m6 = ml->media( 6 );
+    ASSERT_FALSE( m5->isForcedTitle() );
+    ASSERT_TRUE( m6->isForcedTitle() );
+    ASSERT_EQ( "Custom title", m6->title() );
 }

@@ -113,6 +113,8 @@ INSERT INTO File VALUES(1,1,NULL,'file:///home/chouquette/dev/medialibrary/test/
 INSERT INTO File VALUES(2,2,NULL,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/multi_cd/folder2/track2.mp3',1,1531495970,139264,3,0,0,0);
 INSERT INTO File VALUES(3,3,NULL,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/multi_cd/folder1/track1.mp3',1,1531495970,139264,4,0,0,0);
 INSERT INTO File VALUES(4,4,NULL,'https://stream.org/stream.mp3',1,0,0,NULL,0,1,0);
+INSERT INTO File VALUES(5,5,NULL,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/multi_cd/folder1/Avengers.Endgame.2019.HDTC.SPECIAL-1337x-EDITION.x264-GalaxyRG.mkv',1,1531495970,139264,4,0,0,0);
+INSERT INTO File VALUES(6,6,NULL,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/multi_cd/folder1/Deadly.Still.2019.BDRip.XviD.AC3-EVO.mkv',1,1531495970,139264,4,0,0,0);
 INSERT INTO Artist VALUES(1,NULL,NULL,0,0,NULL,0);
 INSERT INTO Artist VALUES(2,NULL,NULL,0,0,NULL,0);
 INSERT INTO Task VALUES(1,0,0,0,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/multi_cd/folder3/track3.mp3',1,1,2,0,0,0);
@@ -122,5 +124,7 @@ INSERT INTO Media VALUES(1,2,0,10057,NULL,NULL,NULL,1571660066,2000,'Track 3','t
 INSERT INTO Media VALUES(2,2,0,10057,NULL,NULL,NULL,1571660066,2000,'Track 2','track2.mp3',0,1,1,0,3,0);
 INSERT INTO Media VALUES(3,2,0,10057,NULL,NULL,NULL,1571660066,2000,'Track 1','track1.mp3',0,1,1,0,4,0);
 INSERT INTO Media VALUES(4,0,0,0,NULL,NULL,NULL,1571660066,0,'Stream Track','stream.mp3',0,1,NULL,0,NULL,2);
+INSERT INTO Media VALUES(5,1,0,10057,NULL,NULL,NULL,1571660066,2000,'Avengers Endgame 2019 SPECIAL EDITION GalaxyRG','Avengers.Endgame.2019.HDTC.SPECIAL-1337x-EDITION.x264-GalaxyRG.mkv',0,1,1,0,4,0);
+INSERT INTO Media VALUES(6,1,0,10057,NULL,NULL,NULL,1571660066,2000,'Custom title','Deadly.Still.2019.BDRip.XviD.AC3-EVO.mkv',0,1,1,0,4,0);
 INSERT INTO Show VALUES(1,NULL,0,NULL,NULL,NULL,NULL,0);
 COMMIT;
