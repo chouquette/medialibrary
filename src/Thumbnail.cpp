@@ -351,13 +351,22 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
              *   the new one
              */
             assert( newThumbnail->isOwned() == false );
-            if ( oldThumbnail->isOwned() )
-            {
-                auto path = Thumbnail::path( ml, oldThumbnail->id() );
-                utils::fs::remove( path );
-            }
+
             if ( newThumbnail->id() == 0 )
             {
+                /*
+                 * We are about to use a non-owned thumbnail. Since we are
+                 * keeping the same thumbnail entity, we need to cleanup the
+                 * previously generated thumbnail before updating the MRL
+                 * If we were switching to another thumbnail, this wouldn't be
+                 * required since owned thumbnail are cleaned up after they are
+                 * removed from DB
+                 */
+                if ( oldThumbnail->isOwned() )
+                {
+                    auto path = Thumbnail::path( ml, oldThumbnail->id() );
+                    utils::fs::remove( path );
+                }
                 /*
                  * If the thumbnail was not inserted, we just have to update the
                  * mrl in database
