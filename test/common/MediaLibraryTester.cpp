@@ -172,9 +172,10 @@ void MediaLibraryTester::deleteShow( int64_t showId )
     Show::destroy( this, showId );
 }
 
-std::shared_ptr<Device> MediaLibraryTester::addDevice( const std::string& uuid, bool isRemovable )
+std::shared_ptr<Device> MediaLibraryTester::addDevice( const std::string& uuid,
+                                                       const std::string& scheme, bool isRemovable )
 {
-    return Device::create( this, uuid, "file://", isRemovable );
+    return Device::create( this, uuid, scheme, isRemovable );
 }
 
 void MediaLibraryTester::setFsFactory( std::shared_ptr<fs::IFileSystemFactory> fsf )
@@ -193,9 +194,10 @@ std::vector<MediaPtr> MediaLibraryTester::files()
     return Media::fetchAll<IMedia>( this, req );
 }
 
-std::shared_ptr<Device> MediaLibraryTester::device( const std::string& uuid )
+std::shared_ptr<Device> MediaLibraryTester::device( const std::string& uuid,
+                                                    const std::string& scheme )
 {
-    return Device::fromUuid( this, uuid );
+    return Device::fromUuid( this, uuid, scheme );
 }
 
 std::vector<const char*> MediaLibraryTester::getSupportedMediaExtensions() const
@@ -324,7 +326,8 @@ bool MediaLibraryTester::setupDummyFolder()
     {
         // Most test cases call Reload() which will end up calling setupDummyFolder
         // again. We don't want the UNIQUE constraint to terminate the test.
-        device = Device::fromUuid( this, mock::FileSystemFactory::NoopDeviceUuid );
+        device = Device::fromUuid( this, mock::FileSystemFactory::NoopDeviceUuid,
+                                   "file://" );
         // Let's assume that this folder will be the first create folder
         dummyFolder = Folder::fetch( this, 1 );
         return true;

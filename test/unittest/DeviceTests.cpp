@@ -87,7 +87,7 @@ const std::string DeviceFs::RemovableDeviceMountpoint = "file:///a/mnt/fake-devi
 
 TEST_F( DeviceEntity, Create )
 {
-    auto d = ml->addDevice( "dummy", true );
+    auto d = ml->addDevice( "dummy", "file://", true );
     ASSERT_NE( nullptr, d );
     ASSERT_EQ( "dummy", d->uuid() );
     ASSERT_TRUE( d->isRemovable() );
@@ -95,7 +95,7 @@ TEST_F( DeviceEntity, Create )
 
     Reload();
 
-    d = ml->device( "dummy" );
+    d = ml->device( "dummy", "file://" );
     ASSERT_NE( nullptr, d );
     ASSERT_EQ( "dummy", d->uuid() );
     ASSERT_TRUE( d->isRemovable() );
@@ -105,7 +105,7 @@ TEST_F( DeviceEntity, Create )
 
 TEST_F( DeviceEntity, SetPresent )
 {
-    auto d = ml->addDevice( "dummy", true );
+    auto d = ml->addDevice( "dummy", "file://", true );
     ASSERT_NE( nullptr, d );
     ASSERT_TRUE( d->isPresent() );
 
@@ -114,7 +114,7 @@ TEST_F( DeviceEntity, SetPresent )
 
     Reload();
 
-    d = ml->device( "dummy" );
+    d = ml->device( "dummy", "file://" );
     ASSERT_FALSE( d->isPresent() );
 }
 
@@ -122,6 +122,21 @@ TEST_F( DeviceEntity, CheckDbModel )
 {
     auto res = Device::checkDbModel( ml.get() );
     ASSERT_TRUE( res );
+}
+
+TEST_F( DeviceEntity, MultipleScheme )
+{
+    auto d1 = ml->addDevice( "dummy", "file://", false );
+    auto d2 = ml->addDevice( "dummy", "smb://", true );
+    ASSERT_NE( nullptr, d1 );
+    ASSERT_NE( nullptr, d2 );
+    ASSERT_NE( d1->id(), d2->id() );
+
+    auto d = Device::fromUuid( ml.get(), d1->uuid(), d1->scheme() );
+    ASSERT_EQ( d->id(), d1->id() );
+
+    d = Device::fromUuid( ml.get(), d2->uuid(), d2->scheme() );
+    ASSERT_EQ( d->id(), d2->id() );
 }
 
 // Filesystem tests:

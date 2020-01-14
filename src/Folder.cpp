@@ -407,7 +407,7 @@ bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl )
             LOG_ERROR( "Can't find device associated with mrl ", mrl );
             return false;
         }
-        auto device = Device::fromUuid( ml, deviceFs->uuid() );
+        auto device = Device::fromUuid( ml, deviceFs->uuid(), fsFactory->scheme() );
         if ( device == nullptr )
             device = Device::create( ml, deviceFs->uuid(),
                                      utils::file::scheme( mrl ),
@@ -475,7 +475,7 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
                       bannedType == BannedType::Yes ? true : false );
     }
 
-    auto device = Device::fromUuid( ml, deviceFs->uuid() );
+    auto device = Device::fromUuid( ml, deviceFs->uuid(), fsFactory->scheme() );
     // We are trying to find a folder. If we don't know the device it's on, we don't know the folder.
     if ( device == nullptr )
         return nullptr;

@@ -204,11 +204,12 @@ bool Device::checkDbModel( MediaLibraryPtr ml )
                                        Table::Name );
 }
 
-std::shared_ptr<Device> Device::fromUuid( MediaLibraryPtr ml, const std::string& uuid )
+std::shared_ptr<Device> Device::fromUuid( MediaLibraryPtr ml, const std::string& uuid,
+                                          const std::string& scheme )
 {
     static const std::string req = "SELECT * FROM " + Device::Table::Name +
-            " WHERE uuid = ?";
-    return fetch( ml, req, uuid );
+            " WHERE uuid = ? AND scheme = ?";
+    return fetch( ml, req, uuid, scheme );
 }
 
 void Device::removeOldDevices( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime )

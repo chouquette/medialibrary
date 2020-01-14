@@ -59,7 +59,8 @@ public:
     void deleteGenre( int64_t genreId );
     void deleteArtist( int64_t artistId );
     void deleteShow( int64_t showId );
-    std::shared_ptr<Device> addDevice( const std::string& uuid, bool isRemovable );
+    std::shared_ptr<Device> addDevice( const std::string& uuid,
+                                       const std::string& scheme, bool isRemovable );
     void setFsFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory );
     std::shared_ptr<AlbumTrack> albumTrack( int64_t id );
     // Use to run tests that fiddles with file properties (modification dates, size...)
@@ -68,7 +69,8 @@ public:
     std::shared_ptr<Media> addFile(const std::string& path , IMedia::Type type);
 
     virtual void addLocalFsFactory() override;
-    std::shared_ptr<Device> device( const std::string& uuid );
+    std::shared_ptr<Device> device( const std::string& uuid,
+                                    const std::string& scheme);
     std::vector<const char*> getSupportedMediaExtensions() const;
     std::vector<const char*> getSupportedPlaylistExtensions() const;
     virtual void onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,

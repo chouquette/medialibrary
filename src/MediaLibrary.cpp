@@ -2217,7 +2217,8 @@ bool MediaLibrary::DeviceListerCb::onDeviceMounted( const std::string& uuid,
      * This is also used to refresh the state of non-removable storages.
      * deviceFs->isRemovable() must not be assumed to be true.
      */
-    auto currentDevice = Device::fromUuid( m_ml, uuid );
+    auto scheme = utils::file::scheme( mountedMountpoint );
+    auto currentDevice = Device::fromUuid( m_ml, uuid, scheme );
     auto mountpoint = utils::file::toFolderPath( mountedMountpoint );
     LOG_INFO( "Device ", uuid, " was plugged and mounted on ", mountpoint );
     for ( const auto& fsFactory : m_ml->m_fsFactories )
@@ -2312,7 +2313,8 @@ bool MediaLibrary::DeviceListerCb::onDeviceMounted( const std::string& uuid,
 void MediaLibrary::DeviceListerCb::onDeviceUnmounted( const std::string& uuid,
                                                       const std::string& unmountedMountpoint )
 {
-    auto device = Device::fromUuid( m_ml, uuid );
+    auto scheme = utils::file::scheme( unmountedMountpoint );
+    auto device = Device::fromUuid( m_ml, uuid, scheme );
     if ( device == nullptr )
     {
         LOG_WARN( "Unknown device ", uuid, " was unplugged. Ignoring." );
@@ -2356,9 +2358,11 @@ MediaLibrary::FsFactoryCb::FsFactoryCb(MediaLibrary* ml)
 }
 
 std::shared_ptr<Device>
-MediaLibrary::FsFactoryCb::onDeviceChanged( const fs::IDevice& deviceFs ) const
+MediaLibrary::FsFactoryCb::onDeviceChanged( const fs::IDevice& deviceFs,
+                                            const std::string& mountpoint ) const
 {
-    auto device = Device::fromUuid( m_ml, deviceFs.uuid() );
+    auto scheme = utils::file::scheme( mountpoint );
+    auto device = Device::fromUuid( m_ml, deviceFs.uuid(), scheme );
     // The device might be new and unused so far, we will create it when we need to
     if ( device == nullptr )
         return nullptr;
@@ -2377,7 +2381,7 @@ void MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs,
 {
     LOG_INFO( "Device ", deviceFs.uuid(), " mountpoint ", newMountpoint,
               " was mounted" );
-    auto device = onDeviceChanged( deviceFs );
+    auto device = onDeviceChanged( deviceFs, newMountpoint );
     if ( device != nullptr )
     {
         // We need to reload the entrypoint in case a previous discovery was
@@ -2394,7 +2398,7 @@ void MediaLibrary::FsFactoryCb::onDeviceUnmounted( const fs::IDevice& deviceFs,
 {
     LOG_INFO( "Device ", deviceFs.uuid(), " mountpoint ", unmountedMountpoint,
               " was unmounted" );
-    onDeviceChanged( deviceFs );
+    onDeviceChanged( deviceFs, unmountedMountpoint );
 }
 
 

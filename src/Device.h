@@ -64,7 +64,8 @@ public:
     static void createTable( sqlite::Connection* connection );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
-    static std::shared_ptr<Device> fromUuid( MediaLibraryPtr ml, const std::string& uuid );
+    static std::shared_ptr<Device> fromUuid( MediaLibraryPtr ml, const std::string& uuid,
+                                             const std::string& scheme );
     static void removeOldDevices( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime );
     static std::vector<std::shared_ptr<Device>> fetchByScheme( MediaLibraryPtr ml, const std::string& scheme );
 

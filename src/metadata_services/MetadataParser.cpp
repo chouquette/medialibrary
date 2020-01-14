@@ -608,7 +608,8 @@ Status MetadataAnalyzer::overrideExternalMedia( IItem& item, std::shared_ptr<Med
     auto deviceFs = fsDir->device();
     if ( deviceFs == nullptr )
         return Status::Fatal;
-    auto device = Device::fromUuid( m_ml, deviceFs->uuid() );
+    auto scheme = utils::file::scheme( deviceFs->mountpoint() );
+    auto device = Device::fromUuid( m_ml, deviceFs->uuid(), scheme );
     if ( device == nullptr )
         return Status::Fatal;
     if ( file->update( *item.fileFs(), item.parentFolder()->id(),

@@ -303,7 +303,8 @@ private:
                                         const std::string& removedMountpoint ) override;
         /// When a device overall presence state is changed, that device is
         /// returned
-        std::shared_ptr<Device> onDeviceChanged( const fs::IDevice& deviceFs ) const;
+        std::shared_ptr<Device> onDeviceChanged( const fs::IDevice& deviceFs,
+                                                 const std::string& mountpoint ) const;
     private:
         MediaLibrary* m_ml;
     };

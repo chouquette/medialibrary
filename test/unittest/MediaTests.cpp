@@ -1128,7 +1128,7 @@ TEST_F( Medias, SetFolderId )
     ASSERT_EQ( 1u, m->folderId() );
     mock::NoopDevice deviceFs{};
     // The device is automatically created by the MediaLibraryTester
-    auto d = Device::fromUuid( ml.get(), deviceFs.uuid() );
+    auto d = Device::fromUuid( ml.get(), deviceFs.uuid(), "file://" );
     auto folder = Folder::create( ml.get(), "path/to/folder", 0, *d, deviceFs );
 
     m->setFolderId( folder->id() );

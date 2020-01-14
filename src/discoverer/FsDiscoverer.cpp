@@ -454,7 +454,7 @@ bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
     // But gracefully handle failure in release mode
     if( deviceFs == nullptr )
         return false;
-    auto device = Device::fromUuid( m_ml, deviceFs->uuid() );
+    auto device = Device::fromUuid( m_ml, deviceFs->uuid(), m_fsFactory->scheme() );
     if ( device == nullptr )
     {
         LOG_INFO( "Creating new device in DB ", deviceFs->uuid() );
