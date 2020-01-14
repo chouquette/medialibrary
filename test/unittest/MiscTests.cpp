@@ -586,4 +586,7 @@ TEST_F( DbModel, Upgrade23to24 )
     ASSERT_FALSE( m5->isForcedTitle() );
     ASSERT_TRUE( m6->isForcedTitle() );
     ASSERT_EQ( "Custom title", m6->title() );
+
+    auto devices = Device::fetchAll( ml.get() );
+    ASSERT_EQ( 1u, devices.size() );
 }

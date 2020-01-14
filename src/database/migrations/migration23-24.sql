@@ -87,3 +87,27 @@ SubtitleTrack::index( SubtitleTrack::Indexes::MediaId, 24 ),
    primary key */
 "DROP INDEX " + Thumbnail::indexName( Thumbnail::Indexes::ThumbnailId, 23 ),
 Thumbnail::index( Thumbnail::Indexes::ThumbnailId, 24 ),
+
+/* Recreate the device table to update the UNIQUE constraint from (uuid) to
+   (uuid, scheme) */
+"CREATE TEMPORARY TABLE " + Device::Table::Name + "_backup"
+"("
+    "id_device INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "uuid TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
+    "scheme TEXT,"
+    "is_removable BOOLEAN,"
+    "is_present BOOLEAN,"
+    "last_seen UNSIGNED INTEGER"
+")",
+
+"INSERT INTO " + Device::Table::Name + "_backup SELECT * FROM " + Device::Table::Name,
+
+"DROP TABLE " + Device::Table::Name,
+Device::schema( Device::Table::Name, 24 ),
+
+"INSERT INTO " + Device::Table::Name + " SELECT * FROM " + Device::Table::Name + "_backup",
+
+"DROP TABLE " + Device::Table::Name + "_backup",
+
+/* Now recreate triggers based on the Device table */
+Media::trigger( Media::Triggers::IsPresent, 24 ),

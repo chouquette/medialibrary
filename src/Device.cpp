@@ -173,14 +173,27 @@ std::string Device::schema( const std::string& tableName, uint32_t dbModel )
             "is_present BOOLEAN"
         ")";
     }
+    if ( dbModel < 24 )
+    {
+        return "CREATE TABLE " + Device::Table::Name +
+        "("
+            "id_device INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "uuid TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
+            "scheme TEXT,"
+            "is_removable BOOLEAN,"
+            "is_present BOOLEAN,"
+            "last_seen UNSIGNED INTEGER"
+        ")";
+    }
     return "CREATE TABLE " + Device::Table::Name +
     "("
         "id_device INTEGER PRIMARY KEY AUTOINCREMENT,"
-        "uuid TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
+        "uuid TEXT COLLATE NOCASE,"
         "scheme TEXT,"
         "is_removable BOOLEAN,"
         "is_present BOOLEAN,"
-        "last_seen UNSIGNED INTEGER"
+        "last_seen UNSIGNED INTEGER,"
+        "UNIQUE(uuid,scheme) ON CONFLICT FAIL"
     ")";
 }
 
