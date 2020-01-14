@@ -287,7 +287,6 @@ private:
     private:
         virtual bool onDeviceMounted( const std::string& uuid, const std::string& mountpoint ) override;
         virtual void onDeviceUnmounted(const std::string& uuid, const std::string& mountpoint) override;
-        virtual bool isDeviceKnown( const std::string& uuid ) const override;
 
     private:
         MediaLibrary* m_ml;

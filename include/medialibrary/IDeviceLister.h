@@ -54,16 +54,6 @@ public:
      */
     virtual void onDeviceUnmounted( const std::string& uuid,
                                     const std::string& mountpoint ) = 0;
-    /**
-     * @brief isDeviceKnown Returns true is the provided device is already
-     *                      known to the media library
-     *
-     * @note This doesn't reflect the plugged/unplugged state of the device.
-     *       This is merely an indication that the device has been seen at least
-     *       once by the media library
-     * @param uuid The device UUID
-     */
-    virtual bool isDeviceKnown( const std::string& uuid ) const = 0;
 };
 
 class IDeviceLister

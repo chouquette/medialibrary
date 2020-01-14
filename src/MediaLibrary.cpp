@@ -2345,11 +2345,6 @@ void MediaLibrary::DeviceListerCb::onDeviceUnmounted( const std::string& uuid,
     }
 }
 
-bool MediaLibrary::DeviceListerCb::isDeviceKnown( const std::string& uuid ) const
-{
-    return Device::fromUuid( m_ml, uuid ) != nullptr;
-}
-
 MediaLibrary::DeviceListerCb::DeviceListerCb( MediaLibrary* ml )
     : m_ml( ml )
 {
