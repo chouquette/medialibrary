@@ -70,7 +70,9 @@ void Directory::read() const
 
     while ( ( result = readdir( dir.get() ) ) != nullptr )
     {
-        if ( result->d_name[0] == '.' && strcasecmp( result->d_name, ".nomedia" ) != 0 )
+        if ( result->d_name[0] == '.' &&
+             strcasecmp( result->d_name, ".nomedia" ) != 0 &&
+             strncmp( result->d_name, "...", 3 ) != 0 )
             continue;
 
         std::string path = m_path + result->d_name;

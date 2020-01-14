@@ -1,0 +1,19 @@
+{
+    "input": [
+        "music/hidden"
+    ],
+    "expected": {
+        "nbAudios": 2,
+        "nbVideos": 0,
+        "albums": [{
+            "title": "Album",
+            "artist": "Hidden Artist",
+            "tracks": [{
+                "title": "Track 1"
+            },
+            {
+                "title": "Track 2"
+            }]
+        }]
+    }
+}

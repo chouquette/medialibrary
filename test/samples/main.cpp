@@ -59,7 +59,8 @@ bool ExtraVerbose = false;
     X("compilation_different_years") \
     X("tvshow") \
     X("unknown_tv_show") \
-    X("media_groups")
+    X("media_groups") \
+    X_NO_WIN32("hidden")
 
 
 #define REDUCED_TEST_CASE_LIST \
