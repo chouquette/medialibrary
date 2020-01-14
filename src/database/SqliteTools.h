@@ -485,7 +485,8 @@ class Tools
             Statement stmt( dbConn->handle(), req );
             stmt.execute( type, name );
             auto row = stmt.row();
-            assert( row != nullptr );
+            if ( row == nullptr )
+                return "";
             assert( row.nbColumns() == 1 );
             auto res = row.extract<std::string>();
             auto duration = std::chrono::steady_clock::now() - chrono;
