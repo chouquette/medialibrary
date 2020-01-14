@@ -421,7 +421,7 @@ class Tools
             auto actualStatement = fetchTriggerStatement( dbConn, triggerName );
             if ( actualStatement == expectedStatement )
                 return true;
-            LOG_ERROR( "Mismatching statement for trigger", triggerName, "." );
+            LOG_ERROR( "Mismatching statement for trigger ", triggerName, "." );
             LOG_ERROR( "Expected: ", expectedStatement );
             LOG_ERROR( "Actual:   ", actualStatement );
             return false;
@@ -434,7 +434,7 @@ class Tools
             auto actualStatement = fetchIndexStatement( dbConn, indexName );
             if ( actualStatement == expectedStatement )
                 return true;
-            LOG_ERROR( "Mismatching statement for index", indexName, "." );
+            LOG_ERROR( "Mismatching statement for index ", indexName, "." );
             LOG_ERROR( "Expected: ", expectedStatement );
             LOG_ERROR( "Actual:   ", actualStatement );
             return false;
