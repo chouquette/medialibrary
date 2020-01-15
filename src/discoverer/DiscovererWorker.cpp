@@ -288,9 +288,16 @@ void DiscovererWorker::runUnban( const std::string& entryPoint )
     m_ml->getCb()->onEntryPointUnbanned( entryPoint, res );
 
     auto parentPath = utils::file::parentDirectory( entryPoint );
-    // If the parent folder was never added to the media library, the discoverer will reject it.
-    // We could check it from here, but that would mean fetching the folder twice, which would be a waste.
-    runReload( parentPath );
+    /*
+     * If the parent folder was never added to the media library,
+     * the discoverer will reject it.
+     * We could check it from here, but that would mean fetching the folder
+     * twice, which would be a waste.
+     *
+     * Re-enqueue the task to avoid blocking for too long while executing an
+     * unban task.
+     */
+    enqueue( parentPath, Task::Type::Reload );
 }
 
 void DiscovererWorker::runReloadDevice( int64_t deviceId )
