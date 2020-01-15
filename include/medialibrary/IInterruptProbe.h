@@ -22,9 +22,14 @@
 
 #pragma once
 
+namespace medialibrary
+{
+
 class IInterruptProbe
 {
 public:
     virtual ~IInterruptProbe() = default;
     virtual bool isInterrupted() const = 0;
 };
+
+}
