@@ -663,13 +663,27 @@ public:
                                           const QueryParameters* params = nullptr ) const = 0;
     virtual FolderPtr folder( int64_t folderId ) const = 0;
     virtual FolderPtr folder( const std::string& mrl ) const = 0;
+    /**
+     * @brief removeEntryPoint Removes an entry point
+     * @param entryPoint The MRL of the entry point to remove
+     *
+     * This will remove the provided entry point from the list of know locations
+     * to manage by the media library.
+     * The location will be ignored afterward, even if it is a sub folder of
+     * another managed location.
+     * This can be reverted by calling unbanFolder
+     * @note This method is asynchronous, but will interrupt any ongoing
+     *       discovery, process the request, and resume the previously running
+     *       task
+     */
     virtual void removeEntryPoint( const std::string& entryPoint ) = 0;
     /**
      * @brief banFolder will prevent an entry point folder from being discovered.
      * If the folder was already discovered, it will be removed prior to the ban, and all
      * associated media will be discarded.
-     * * @note This method is asynchronous and will run after all currently stacked
-     * discovery/ban/unban operations have completed.
+     * @note This method is asynchronous, but will interrupt any ongoing
+     *       discovery, process the request, and resume the previously running
+     *       task
      */
     virtual void banFolder( const std::string& path ) = 0;
     /**
@@ -677,8 +691,9 @@ public:
      * In case this entry point was indeed previously banned, this will issue a reload of
      * that entry point
      * @param entryPoint The entry point to unban
-     * @note This method is asynchronous and will run after all currently stacked
-     * discovery/ban/unban operations have completed.
+     * @note This method is asynchronous, but will interrupt any ongoing
+     *       discovery, process the request, and resume the previously running
+     *       task
      */
     virtual void unbanFolder( const std::string& entryPoint ) = 0;
     /**

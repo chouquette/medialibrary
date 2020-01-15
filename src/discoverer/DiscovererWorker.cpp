@@ -33,13 +33,18 @@
 #include "Media.h"
 #include "utils/Filename.h"
 #include "medialibrary/filesystem/Errors.h"
+#include "utils/Defer.h"
+
 #include <cassert>
+#include <algorithm>
 
 namespace medialibrary
 {
 
-DiscovererWorker::DiscovererWorker(MediaLibrary* ml )
-    : m_run( false )
+DiscovererWorker::DiscovererWorker( MediaLibrary* ml )
+    : m_currentTask( nullptr )
+    , m_run( false )
+    , m_taskInterrupted( false )
     , m_ml( ml )
 {
 }
@@ -112,12 +117,67 @@ void DiscovererWorker::reloadAllDevices()
     enqueue( 0, Task::Type::ReloadAllDevices );
 }
 
+void DiscovererWorker::enqueue( DiscovererWorker::Task t )
+{
+    std::unique_lock<compat::Mutex> lock( m_mutex );
+
+    switch ( t.type )
+    {
+        case Task::Type::Discover:
+        case Task::Type::Reload:
+        case Task::Type::ReloadAllDevices:
+            /*
+             * These task types may just be queued after any currently
+             * running tasks, no need to process them right now.
+             */
+            m_tasks.emplace_back( std::move( t ) );
+            break;
+        case Task::Type::Remove:
+        case Task::Type::Ban:
+        case Task::Type::Unban:
+        case Task::Type::ReloadDevice:
+        {
+            /*
+             * These types need to be processed as soon as possible, meaning we
+             * will:
+             * - Interrupt the currently running task if it's a long running one
+             * - queue the new task before the previously running one
+             * - start the previous task again
+             */
+            auto it = std::find_if( begin( m_tasks ), end( m_tasks ),
+                                    []( const Task& t ) {
+                return t.isLongRunning();
+            });
+            if ( m_currentTask != nullptr && m_currentTask->isLongRunning() )
+            {
+                /*
+                 * We only care about interrupting long tasks, which are
+                 * discover & reload tasks. Others are just a few requests and
+                 * some bookkeeping, which we can wait for.
+                 * We requeue a reload task for the currently processed
+                 * entrypoint instead of requeuing the same task type, since we
+                 * could end up requeuing a discovery task, which would
+                 * effectively cancel any potential remove operation we might
+                 * be queuing.
+                 */
+                m_taskInterrupted = true;
+                it = m_tasks.emplace( it, m_currentTask->entryPoint,
+                                      Task::Type::Reload );
+            }
+            m_tasks.insert( it, std::move( t ) );
+            break;
+        }
+        default:
+            assert( !"Unexpected task type" );
+    }
+
+    notify();
+}
+
 void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
 {
     assert( type != Task::Type::ReloadDevice &&
             type != Task::Type::ReloadAllDevices );
-
-    std::unique_lock<compat::Mutex> lock( m_mutex );
 
     if ( entryPoint.empty() == false )
     {
@@ -129,9 +189,7 @@ void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
         assert( type == Task::Type::Reload );
         LOG_INFO( "Queuing global reload request" );
     }
-
-    m_tasks.emplace_back( entryPoint, type );
-    notify();
+    enqueue( Task{ entryPoint, type } );
 }
 
 void DiscovererWorker::enqueue( int64_t entityId, Task::Type type )
@@ -139,12 +197,9 @@ void DiscovererWorker::enqueue( int64_t entityId, Task::Type type )
     assert( type == Task::Type::ReloadDevice ||
             type == Task::Type::ReloadAllDevices );
 
-    std::unique_lock<compat::Mutex> lock( m_mutex );
-
     LOG_INFO( "Queuing entity ", entityId, " of type ",
               static_cast<typename std::underlying_type<Task::Type>::type>( type ) );
-    m_tasks.emplace_back( entityId, type );
-    notify();
+    enqueue( Task{ entityId, type } );
 }
 
 void DiscovererWorker::notify()
@@ -168,6 +223,11 @@ void DiscovererWorker::run()
         ML_UNHANDLED_EXCEPTION_INIT
         {
             Task task;
+            auto d = utils::make_defer( [this](){
+                std::lock_guard<compat::Mutex> lock( m_mutex );
+                m_taskInterrupted = false;
+                m_currentTask = nullptr;
+            });
             {
                 std::unique_lock<compat::Mutex> lock( m_mutex );
                 if ( m_tasks.size() == 0 )
@@ -180,6 +240,7 @@ void DiscovererWorker::run()
                 }
                 task = m_tasks.front();
                 m_tasks.pop_front();
+                m_currentTask = &task;
             }
             switch ( task.type )
             {
@@ -335,7 +396,8 @@ void DiscovererWorker::runReloadAllDevices()
 
 bool DiscovererWorker::isInterrupted() const
 {
-    return m_run.load() == false;
+    return m_run.load() == false ||
+           m_taskInterrupted.load() == true;
 }
 
 void DiscovererWorker::runDiscover( const std::string& entryPoint )

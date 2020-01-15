@@ -61,6 +61,10 @@ class DiscovererWorker : public IInterruptProbe
             : entryPoint( entryPoint ), entityId( 0 ), type( type ) {}
         Task( int64_t entityId, Type type )
             : entityId( entityId ), type( type ) {}
+        bool isLongRunning() const
+        {
+            return type == Type::Discover || type == Type::Reload;
+        }
         std::string entryPoint;
         int64_t entityId;
         Type type;
@@ -82,6 +86,7 @@ public:
     void reloadAllDevices();
 
 private:
+    void enqueue( Task t );
     void enqueue( const std::string& entryPoint, Task::Type type );
     void enqueue( int64_t entityId, Task::Type type );
     void notify();
@@ -101,9 +106,13 @@ private:
 
     compat::Thread m_thread;
     std::list<Task> m_tasks;
+    Task* m_currentTask;
     compat::Mutex m_mutex;
     compat::ConditionVariable m_cond;
+    // This will be set to false when the worker needs to be stopped
     std::atomic_bool m_run;
+    // This will be true when a single task needs to be interrupted
+    std::atomic_bool m_taskInterrupted;
     std::vector<std::unique_ptr<IDiscoverer>> m_discoverers;
     MediaLibrary* m_ml;
 };
