@@ -30,6 +30,7 @@
 #include "database/SqliteTools.h"
 #include "database/SqliteConnection.h"
 #include "utils/Strings.h"
+#include "utils/Defer.h"
 
 #include "Artist.h"
 #include "Media.h"
@@ -195,6 +196,22 @@ TEST_F( Misc, SanitizePattern )
     ASSERT_EQ( "\"Test \"\" Pattern*\"", sqlite::Tools::sanitizePattern( "Test \" Pattern" ) );
     ASSERT_EQ( "\"It''s a test*\"", sqlite::Tools::sanitizePattern( "It's a test" ) );
     ASSERT_EQ( "\"''\"\"*\"", sqlite::Tools::sanitizePattern( "\'\"" ) );
+}
+
+TEST_F( Misc, Defer )
+{
+    auto i = 0u;
+    bool set = false;
+    {
+        auto d = utils::make_defer( [&i, &set]() {
+            ++i;
+            set = true;
+        });
+        ASSERT_FALSE( set );
+        ASSERT_EQ( 0u, i );
+    }
+    ASSERT_TRUE( set );
+    ASSERT_EQ( 1u, i );
 }
 
 class MiscDb : public Tests
