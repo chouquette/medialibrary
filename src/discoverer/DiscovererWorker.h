@@ -25,7 +25,7 @@
 #include <atomic>
 #include "compat/ConditionVariable.h"
 #include <memory>
-#include <queue>
+#include <list>
 #include <string>
 #include <vector>
 
@@ -100,7 +100,7 @@ private:
 private:
 
     compat::Thread m_thread;
-    std::queue<Task> m_tasks;
+    std::list<Task> m_tasks;
     compat::Mutex m_mutex;
     compat::ConditionVariable m_cond;
     std::atomic_bool m_run;

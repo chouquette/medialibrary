@@ -61,8 +61,7 @@ void DiscovererWorker::stop()
     {
         {
             std::unique_lock<compat::Mutex> lock( m_mutex );
-            while ( m_tasks.empty() == false )
-                m_tasks.pop();
+            m_tasks.clear();
         }
         m_cond.notify_all();
         m_thread.join();
@@ -131,7 +130,7 @@ void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
         LOG_INFO( "Queuing global reload request" );
     }
 
-    m_tasks.emplace( entryPoint, type );
+    m_tasks.emplace_back( entryPoint, type );
     notify();
 }
 
@@ -144,7 +143,7 @@ void DiscovererWorker::enqueue( int64_t entityId, Task::Type type )
 
     LOG_INFO( "Queuing entity ", entityId, " of type ",
               static_cast<typename std::underlying_type<Task::Type>::type>( type ) );
-    m_tasks.emplace( entityId, type );
+    m_tasks.emplace_back( entityId, type );
     notify();
 }
 
@@ -180,7 +179,7 @@ void DiscovererWorker::run()
                     m_ml->onDiscovererIdleChanged( false );
                 }
                 task = m_tasks.front();
-                m_tasks.pop();
+                m_tasks.pop_front();
             }
             switch ( task.type )
             {
