@@ -115,6 +115,9 @@ void DiscovererWorker::reloadAllDevices()
 
 void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
 {
+    assert( type != Task::Type::ReloadDevice &&
+            type != Task::Type::ReloadAllDevices );
+
     std::unique_lock<compat::Mutex> lock( m_mutex );
 
     if ( entryPoint.empty() == false )
@@ -134,6 +137,9 @@ void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
 
 void DiscovererWorker::enqueue( int64_t entityId, Task::Type type )
 {
+    assert( type == Task::Type::ReloadDevice ||
+            type == Task::Type::ReloadAllDevices );
+
     std::unique_lock<compat::Mutex> lock( m_mutex );
 
     LOG_INFO( "Queuing entity ", entityId, " of type ",
