@@ -105,6 +105,7 @@ asan-ubsan:
       - ./unittest
       - ./samples
       - ./test_fast_teardown $CI_PROJECT_DIR/samples/samples
+      - ./test_fast_discover $CI_PROJECT_DIR/samples/samples
 
 tsan:
     image: registry.videolan.org/vlc-debian-unstable:20191204094457
@@ -129,3 +130,5 @@ tsan:
       - ./unittest
       - ./samples
       - ./test_fast_teardown $CI_PROJECT_DIR/samples/samples
+      - ./test_fast_discover $CI_PROJECT_DIR/samples/samples
+

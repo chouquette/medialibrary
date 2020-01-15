@@ -382,7 +382,7 @@ samples_LDADD = 		\
 	$(SQLITE_LIBS)		\
 	$(NULL)
 
-check_PROGRAMS += test_discoverer sqlite_load test_fast_teardown
+check_PROGRAMS += test_discoverer sqlite_load test_fast_teardown test_fast_discover
 
 test_discoverer_SOURCES = test/discoverer/main.cpp
 test_discoverer_CXXFLAGS = $(MEDIALIB_CPPFLAGS)
@@ -398,6 +398,10 @@ test_fast_teardown_CPPFLAGS = -I$(top_srcdir)/test
 test_fast_teardown_CXXFLAGS = $(MEDIALIB_CPPFLAGS)
 test_fast_teardown_LDADD = libmedialibrary.la $(SQLITE_LIBS)
 
+test_fast_discover_SOURCES = test/fast_discover_cancel/main.cpp
+test_fast_discover_CPPFLAGS = -I$(top_srcdir)/test
+test_fast_discover_CXXFLAGS = $(MEDIALIB_CPPFLAGS)
+test_fast_discover_LDADD = libmedialibrary.la $(SQLITE_LIBS)
 endif
 
 pkgconfigdir = $(libdir)/pkgconfig
