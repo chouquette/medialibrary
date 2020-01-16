@@ -205,7 +205,7 @@ int64_t Task::id() const
 bool Task::restoreLinkedEntities()
 {
     // No need to restore anything for link tasks, they only contain mrls & ids.
-    if ( isLinkTask() == true || isRestore() == true )
+    if ( needEntityRestoration() == false )
         return true;
     LOG_DEBUG("Restoring linked entities of task ", m_id);
     // MRL will be empty if the task has been resumed from unparsed files
@@ -811,6 +811,13 @@ int64_t Task::linkToId() const
 int64_t Task::linkExtra() const
 {
     return m_linkExtra;
+}
+
+bool Task::needEntityRestoration() const
+{
+    if ( isLinkTask() == true || isRestore() == true )
+        return false;
+    return true;
 }
 
 }

@@ -258,6 +258,8 @@ public:
     virtual int64_t linkToId() const override;
     virtual int64_t linkExtra() const override;
 
+    bool needEntityRestoration() const;
+
 private:
     MediaLibraryPtr m_ml = nullptr;
     int64_t     m_id = 0;
