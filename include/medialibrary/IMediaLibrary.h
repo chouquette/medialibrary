@@ -394,12 +394,14 @@ public:
      * device lister, and it become impossible to know wether a removable storage device has been
      * inserted for the first time or not.
      *
-     * @return true in case of success or if already started, false otherwise.
-     * * If start returns false, this medialibrary must not be used anymore,
+     * @return Success in case of success or if already started, Failed otherwise.
+     * If start returns Failed, this medialibrary must not be used anymore,
      * and should be disposed off.
      * If it returns Success the first time, calling this method again is a
      * no-op and AlreadyStarted will be returned
      * This method is thread-safe
+     *
+     * @see{IMediaLibrary::StartResult}
      */
     virtual StartResult start() = 0;
     /**
