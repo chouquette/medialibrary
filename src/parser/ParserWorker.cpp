@@ -86,20 +86,24 @@ void Worker::stop()
 
 void Worker::parse( std::shared_ptr<Task> t )
 {
-    // Avoid flickering from idle/not idle when not many tasks are running.
-    // The thread calling parse for the next parser step might not have
-    // something left to do and would turn idle, potentially causing all
-    // services to be idle for a very short time, until this parser
-    // thread awakes/starts, causing the global parser idle state to be
-    // restored back to false.
-    // Since we are queuing a task, we already know that this thread is
-    // not idle
-    setIdle( false );
-
     // Even if no threads appear to be started, we need to lock this in case
     // we're currently doing a stop/start
     {
         std::lock_guard<compat::Mutex> lock( m_lock );
+
+        // Avoid flickering from idle/not idle when not many tasks are running.
+        // The thread calling parse for the next parser step might not have
+        // something left to do and would turn idle, potentially causing all
+        // services to be idle for a very short time, until this parser
+        // thread awakes/starts, causing the global parser idle state to be
+        // restored back to false.
+        // Since we are queuing a task, we already know that this thread is
+        // not idle
+        // However, we must not override the idle state if the worker was paused
+        // since the pausing thread is waiting for the worker to go idle.
+        if ( m_paused == false )
+            setIdle( false );
+
         m_tasks.push( std::move( t ) );
         if ( m_thread.get_id() == compat::Thread::id{} )
         {
