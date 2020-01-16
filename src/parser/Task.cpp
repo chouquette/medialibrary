@@ -205,8 +205,7 @@ int64_t Task::id() const
 bool Task::restoreLinkedEntities()
 {
     // No need to restore anything for link tasks, they only contain mrls & ids.
-    if ( needEntityRestoration() == false )
-        return true;
+    assert( needEntityRestoration() == true );
     LOG_DEBUG("Restoring linked entities of task ", m_id);
     // MRL will be empty if the task has been resumed from unparsed files
     // (during 11 -> 12 migration)
@@ -817,7 +816,9 @@ bool Task::needEntityRestoration() const
 {
     if ( isLinkTask() == true || isRestore() == true )
         return false;
-    return true;
+    return m_parentFolderFs == nullptr ||
+           m_fileFs == nullptr ||
+           m_parentFolder == nullptr;
 }
 
 }

@@ -192,6 +192,14 @@ void Worker::mainloop()
                 m_parserCb->done( std::move( task ), Status::Success );
                 continue;
             }
+            if ( task->needEntityRestoration() == true )
+            {
+                if ( task->restoreLinkedEntities() == false )
+                {
+                    m_parserCb->done( std::move( task ), Status::TemporaryUnavailable );
+                    continue;
+                }
+            }
             Status status;
             try
             {
@@ -302,8 +310,6 @@ void Worker::restoreTasks()
                 break;
         }
 
-        if ( t->restoreLinkedEntities() == false )
-            continue;
         m_parserCb->parse( std::move( t ) );
     }
 }
