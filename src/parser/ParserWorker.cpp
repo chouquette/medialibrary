@@ -149,7 +149,7 @@ void Worker::mainloop()
     // that the underlying service has been deleted already.
     std::string serviceName = m_service->name();
     LOG_INFO("Entering ParserService [", serviceName, "] thread");
-    setIdle( false );
+    m_parserCb->onIdleChanged( false );
 
     while ( true )
     {
