@@ -51,7 +51,7 @@ public:
     virtual void onIdleChanged( bool isIdle ) = 0;
 };
 
-class Parser : IParserCb
+class Parser : public IParserCb
 {
 public:
     using ServicePtr = std::shared_ptr<IParserService>;
