@@ -43,6 +43,7 @@ namespace parser
 
 class DiscovererWorker : public IInterruptProbe
 {
+protected:
     struct Task
     {
         enum class Type
@@ -94,7 +95,7 @@ private:
     void enqueue( Task t );
     void enqueue( const std::string& entryPoint, Task::Type type );
     void enqueue( int64_t entityId, Task::Type type );
-    void notify();
+    virtual void notify();
     void run();
     void runDiscover( const std::string& entryPoint );
     void runReload( const std::string& entryPoint );
@@ -103,12 +104,12 @@ private:
     void runUnban( const std::string& entryPoint );
     void runReloadDevice( int64_t deviceId );
     void runReloadAllDevices();
+    bool filter( const Task& newTask );
 
 private:
     virtual bool isInterrupted() const override;
 
-private:
-
+protected:
     compat::Thread m_thread;
     std::list<Task> m_tasks;
     Task* m_currentTask;

@@ -119,9 +119,153 @@ void DiscovererWorker::reloadAllDevices()
     enqueue( 0, Task::Type::ReloadAllDevices );
 }
 
+bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
+{
+    /* This *must* be called with the mutex locked */
+    auto filterOut = false;
+    switch ( newTask.type )
+    {
+        case Task::Type::Discover:
+        {
+            /*
+             * We are required to discover an entry point.
+             * If another discover task is queued for this entry point, we can
+             * simply ignore it.
+             * If we encounter a task which aims at removing this
+             * entry point, we can delete it from the task list since this is its
+             * inverse operation.
+             * If we see a reload task for this entry point, we can also remove it
+             * since the discover will also issue a reload.
+             */
+            for ( auto it = begin( m_tasks ); it != end( m_tasks ); )
+            {
+                if ( (*it).entryPoint == newTask.entryPoint )
+                {
+                    if ( (*it).type == Task::Type::Remove ||
+                         (*it).type == Task::Type::Reload )
+                    {
+                        it = m_tasks.erase( it );
+                        continue;
+                    }
+                    if ( (*it).type == Task::Type::Discover )
+                        return true;
+                }
+                ++it;
+            }
+            break;
+        }
+        case Task::Type::Reload:
+        {
+            /*
+             * We need to reload an entry point.
+             * If another task reloading the same entry point is already scheduled
+             * we can ignore it.
+             * If another task banning/removing this entry point is scheduled,
+             * we can ignore it as well.
+             */
+            for ( const auto& t : m_tasks )
+            {
+                if ( t.entryPoint == newTask.entryPoint &&
+                     ( t.type == Task::Type::Reload ||
+                       t.type == Task::Type::Remove ||
+                       t.type == Task::Type::Ban ) )
+                    return true;
+            }
+            break;
+        }
+        case Task::Type::Remove:
+        {
+            /*
+             * We are about to remove an entry point.
+             * If we see a task discovering or reloading this entry point, we
+             * can remove those.
+             * If another remove task for the same entrypoint is scheduled, we
+             * can filter this one out
+             */
+            for ( auto it = begin( m_tasks ); it != end( m_tasks ); )
+            {
+                if ( (*it).entryPoint == newTask.entryPoint )
+                {
+                    if ( (*it).type == Task::Type::Discover ||
+                         (*it).type == Task::Type::Reload )
+                    {
+                        it = m_tasks.erase( it );
+                        filterOut = true;
+                        continue;
+                    }
+                    if ( (*it).type == Task::Type::Remove )
+                        return true;
+                }
+                ++it;
+            }
+            break;
+        }
+        case Task::Type::Ban:
+        {
+            /*
+             * We are about to ban an entry point.
+             * If it's scheduled to be discovered/reload/unbanned, we can remove
+             * those tasks.
+             * If an identical ban request is to be found, we can discard the new
+             * one.
+             */
+            for ( auto it = begin( m_tasks ); it != end( m_tasks ); )
+            {
+                if ( (*it).entryPoint == newTask.entryPoint )
+                {
+                    if ( (*it).type == Task::Type::Discover ||
+                         (*it).type == Task::Type::Reload ||
+                         (*it).type == Task::Type::Unban )
+                    {
+                        it = m_tasks.erase( it );
+                        continue;
+                    }
+                    if ( (*it).type == Task::Type::Ban )
+                        return true;
+                }
+                ++it;
+            }
+            break;
+        }
+        case Task::Type::Unban:
+        {
+            /*
+             * We are about to unban an entry point.
+             * If we find a queue request for banning this folder, we can remove
+             * it and not queue this request
+             */
+            for ( auto it = begin( m_tasks ); it != end( m_tasks ); ++it )
+            {
+                if ( (*it).entryPoint == newTask.entryPoint &&
+                     (*it).type == Task::Type::Ban )
+                {
+                    m_tasks.erase( it );
+                    return true;
+                }
+            }
+            break;
+        }
+        case Task::Type::ReloadDevice:
+        {
+            for ( const auto& t : m_tasks )
+            {
+                if ( t.type == newTask.type && t.entityId == newTask.entityId )
+                    return true;
+            }
+            break;
+        }
+        case Task::Type::ReloadAllDevices:
+            break;
+    }
+    return filterOut;
+}
+
 void DiscovererWorker::enqueue( DiscovererWorker::Task t )
 {
     std::unique_lock<compat::Mutex> lock( m_mutex );
+
+    if ( filter( t ) == true )
+        return;
 
     switch ( t.type )
     {
@@ -163,8 +307,20 @@ void DiscovererWorker::enqueue( DiscovererWorker::Task t )
                  * be queuing.
                  */
                 m_taskInterrupted = true;
-                it = m_tasks.emplace( it, m_currentTask->entryPoint,
-                                      Task::Type::Reload );
+                /*
+                 * If we are interrupting a discover or reload operation with a
+                 * ban/remove operation on the same mountpoint, we might as well
+                 * not reload this folder since it won't be found afterward
+                 */
+                if ( ( m_currentTask->type != Task::Type::Discover &&
+                       m_currentTask->type != Task::Type::Reload ) ||
+                     ( t.type != Task::Type::Ban &&
+                       t.type != Task::Type::Remove ) ||
+                     t.entryPoint != m_currentTask->entryPoint )
+                {
+                    it = m_tasks.emplace( it, m_currentTask->entryPoint,
+                                          Task::Type::Reload );
+                }
             }
             m_tasks.insert( it, std::move( t ) );
             break;

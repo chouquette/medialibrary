@@ -341,6 +341,7 @@ unittest_SOURCES = \
 	test/unittest/BookmarkTests.cpp \
 	test/unittest/TitleAnalyzerTests.cpp \
 	test/unittest/MediaGroupTests.cpp \
+	test/unittest/DiscovererTests.cpp \
 	$(NULL)
 
 EXTRA_DIST += test/unittest/db_v3.sql
