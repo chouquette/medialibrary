@@ -130,6 +130,7 @@ void Parser::updateStats()
     if ( m_opDone == 0 && m_opToDo > 0 && m_chrono == decltype(m_chrono){})
         m_chrono = std::chrono::steady_clock::now();
     auto percent = m_opToDo > 0 ? ( m_opDone * 100 / m_opToDo ) : 0;
+    assert( m_opToDo >= m_opDone );
     if ( percent != m_percent )
     {
         m_percent = percent;
