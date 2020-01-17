@@ -108,6 +108,8 @@ void Parser::flush()
 {
     for ( auto& s : m_services )
         s->flush();
+    m_opToDo = 0;
+    m_opDone = 0;
 }
 
 void Parser::restart()
