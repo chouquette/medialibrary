@@ -253,7 +253,7 @@ public:
      * Later processing of that entry point will still cause \sa{onDiscoveryStarted}
      * \sa{onDiscoveryProgress} and \sa{onDiscoveryCompleted} events to be fired
      * \warning This event will be fired after \sa{onDiscoveryStarted} since we
-     * don't know if an entry point is known before starting it's processing
+     * don't know if an entry point is known before starting its processing
      */
     virtual void onEntryPointAdded( const std::string& entryPoint, bool success ) = 0;
 
