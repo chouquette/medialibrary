@@ -353,6 +353,10 @@ public:
     /// \brief isGrouped Returns true if the media belongs to a group, false otherwise
     ///
     virtual bool isGrouped() const = 0;
+    ///
+    /// \brief groupId Returns this media's group ID, or 0 if not grouped
+    ///
+    virtual int64_t groupId() const = 0;
 
     virtual MediaGroupPtr group() const = 0;
 };

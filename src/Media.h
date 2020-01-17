@@ -225,7 +225,7 @@ class Media : public IMedia,
         virtual bool removeFromGroup() override;
         virtual bool isGrouped() const override;
         virtual MediaGroupPtr group() const override;
-        int64_t groupId() const;
+        virtual int64_t groupId() const override;
         bool hasBeenGrouped() const;
 
         void setReleaseDate( unsigned int date );
