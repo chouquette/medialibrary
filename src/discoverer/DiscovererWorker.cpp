@@ -34,6 +34,7 @@
 #include "utils/Filename.h"
 #include "medialibrary/filesystem/Errors.h"
 #include "utils/Defer.h"
+#include "parser/Parser.h"
 
 #include <cassert>
 #include <algorithm>
@@ -243,6 +244,7 @@ void DiscovererWorker::run()
                 m_tasks.pop_front();
                 m_currentTask = &task;
             }
+            auto needTaskRefresh = false;
             switch ( task.type )
             {
             case Task::Type::Discover:
@@ -253,22 +255,36 @@ void DiscovererWorker::run()
                 break;
             case Task::Type::Remove:
                 runRemove( task.entryPoint );
+                needTaskRefresh = true;
                 break;
             case Task::Type::Ban:
                 runBan( task.entryPoint );
+                needTaskRefresh = true;
                 break;
             case Task::Type::Unban:
                 runUnban( task.entryPoint );
+                /*
+                 * No need to refresh the parser tasks for this case, as this
+                 * will only add new one which can be done on the fly
+                 */
                 break;
             case Task::Type::ReloadDevice:
                 runReloadDevice( task.entityId );
+                needTaskRefresh = true;
                 break;
             case Task::Type::ReloadAllDevices:
+                /*
+                 * This is a special case which is run only during media library
+                 * startup, we don't need to refresh the tasks list for this
+                 * as the task list hasn't been fetched from database yet
+                 */
                 runReloadAllDevices();
                 break;
             default:
                 assert(false);
             }
+            if ( needTaskRefresh == true && m_parserCb != nullptr )
+                m_parserCb->refreshTaskList();
         }
         ML_UNHANDLED_EXCEPTION_BODY( "DiscovererWorker" )
     }

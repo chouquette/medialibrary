@@ -125,6 +125,21 @@ void Parser::restore()
     parse( nullptr );
 }
 
+void Parser::refreshTaskList()
+{
+    /*
+     * We need to do this in various steps:
+     * - Pausing the workers after their currently running task
+     * - Flushing their task list
+     * - Restoring the task list from DB
+     * - Resuming the workers
+     */
+    pause();
+    flush();
+    restore();
+    resume();
+}
+
 void Parser::updateStats()
 {
     if ( m_opDone == 0 && m_opToDo > 0 && m_chrono == decltype(m_chrono){})
