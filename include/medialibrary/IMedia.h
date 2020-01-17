@@ -349,6 +349,10 @@ public:
     /// will occur.
     ///
     virtual bool removeFromGroup() = 0;
+    ///
+    /// \brief isGrouped Returns true if the media belongs to a group, false otherwise
+    ///
+    virtual bool isGrouped() const = 0;
 
     virtual MediaGroupPtr group() const = 0;
 };

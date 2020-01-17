@@ -199,6 +199,8 @@ TEST_F( MediaGroups, Media )
     ASSERT_NE( nullptr, mg );
     ASSERT_NE( nullptr, video );
     ASSERT_NE( nullptr, audio );
+    ASSERT_FALSE( video->isGrouped() );
+    ASSERT_FALSE( audio->isGrouped() );
 
     auto sg = mg->createSubgroup( "subgroup" );
     auto subvideo = ml->addMedia( "subvideo.mkv", IMedia::Type::Video );
@@ -214,6 +216,7 @@ TEST_F( MediaGroups, Media )
 
     auto res = mg->add( *video );
     ASSERT_TRUE( res );
+    ASSERT_TRUE( video->isGrouped() );
     res = mg->add( audio->id() );
     ASSERT_TRUE( res );
 
