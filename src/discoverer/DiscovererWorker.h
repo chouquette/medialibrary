@@ -36,6 +36,11 @@
 namespace medialibrary
 {
 
+namespace parser
+{
+    class IParserCb;
+}
+
 class DiscovererWorker : public IInterruptProbe
 {
     struct Task
@@ -71,7 +76,7 @@ class DiscovererWorker : public IInterruptProbe
     };
 
 public:
-    explicit DiscovererWorker( MediaLibrary* ml );
+    explicit DiscovererWorker( MediaLibrary* ml, parser::IParserCb* parserCb );
     ~DiscovererWorker();
     void addDiscoverer( std::unique_ptr<IDiscoverer> discoverer );
     void stop();
@@ -115,6 +120,7 @@ private:
     std::atomic_bool m_taskInterrupted;
     std::vector<std::unique_ptr<IDiscoverer>> m_discoverers;
     MediaLibrary* m_ml;
+    parser::IParserCb* m_parserCb;
 };
 
 }

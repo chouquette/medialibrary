@@ -41,11 +41,12 @@
 namespace medialibrary
 {
 
-DiscovererWorker::DiscovererWorker( MediaLibrary* ml )
+DiscovererWorker::DiscovererWorker( MediaLibrary* ml, parser::IParserCb* parserCb )
     : m_currentTask( nullptr )
     , m_run( false )
     , m_taskInterrupted( false )
     , m_ml( ml )
+    , m_parserCb( parserCb )
 {
 }
 

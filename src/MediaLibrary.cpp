@@ -455,9 +455,9 @@ StartResult MediaLibrary::start()
         return StartResult::AlreadyStarted;
     LOG_INFO( "Starting medialibrary..." );
 
-    startDiscoverer();
     if ( startParser() == false )
         return StartResult::Failed;
+    startDiscoverer();
     startThumbnailer();
     m_started = true;
     return StartResult::Success;
@@ -911,7 +911,7 @@ bool MediaLibrary::startParser()
 
 void MediaLibrary::startDiscoverer()
 {
-    m_discovererWorker.reset( new DiscovererWorker( this ) );
+    m_discovererWorker.reset( new DiscovererWorker( this, m_parser.get() ) );
     for ( const auto& fsFactory : m_fsFactories )
     {
         std::unique_ptr<prober::CrawlerProbe> probePtr( new prober::CrawlerProbe{} );
