@@ -48,6 +48,12 @@ namespace parser
 
 static constexpr auto MaxNbRetries = 1u;
 
+struct LastTaskInfo
+{
+    int64_t parentFolderId;
+    std::shared_ptr<fs::IDirectory> fsDir;
+};
+
 class Task : public DatabaseHelpers<Task>, public IItem
 {
 public:
@@ -171,7 +177,7 @@ public:
     int64_t id() const;
 
     // Restore attached entities such as media/files
-    bool restoreLinkedEntities();
+    bool restoreLinkedEntities( LastTaskInfo& lastTaskInfo );
     void setMrl( std::string mrl );
 
     static void createTable( sqlite::Connection* dbConnection , uint32_t dbModel );

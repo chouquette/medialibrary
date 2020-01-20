@@ -43,7 +43,9 @@ Worker::Worker()
     , m_stopParser( false )
     , m_paused( false )
     , m_idle( true )
+    , m_lastTaskInfo()
 {
+    assert( m_lastTaskInfo.parentFolderId == 0 && m_lastTaskInfo.fsDir == nullptr );
 }
 
 void Worker::start()
@@ -198,7 +200,7 @@ void Worker::mainloop()
             }
             if ( task->needEntityRestoration() == true )
             {
-                if ( task->restoreLinkedEntities() == false )
+                if ( task->restoreLinkedEntities( m_lastTaskInfo ) == false )
                 {
                     m_parserCb->done( std::move( task ), Status::TemporaryUnavailable );
                     continue;

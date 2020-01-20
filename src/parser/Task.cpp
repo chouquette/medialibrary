@@ -202,7 +202,7 @@ int64_t Task::id() const
     return m_id;
 }
 
-bool Task::restoreLinkedEntities()
+bool Task::restoreLinkedEntities( LastTaskInfo& lastTask )
 {
     // No need to restore anything for link tasks, they only contain mrls & ids.
     assert( needEntityRestoration() == true );
@@ -284,21 +284,30 @@ bool Task::restoreLinkedEntities()
     // Now we always have a valid MRL, but we might not have a fileId
     // In any case, we need to fetch the corresponding FS entities
 
-    auto fsFactory = m_ml->fsFactoryForMrl( mrl );
-    if ( fsFactory == nullptr )
+    if ( lastTask.parentFolderId == m_parentFolderId && m_parentFolderId != 0 )
     {
-        LOG_WARN( "No fs factory matched the task mrl (", mrl, "). Postponing" );
-        return false;
+        m_parentFolderFs = lastTask.fsDir;
     }
+    else
+    {
+        auto fsFactory = m_ml->fsFactoryForMrl( mrl );
+        if ( fsFactory == nullptr )
+        {
+            LOG_WARN( "No fs factory matched the task mrl (", mrl, "). Postponing" );
+            return false;
+        }
 
-    try
-    {
-        m_parentFolderFs = fsFactory->createDirectory( utils::file::directory( mrl ) );
-    }
-    catch ( const fs::errors::System& ex )
-    {
-        LOG_ERROR( "Failed to restore task: ", ex.what() );
-        return false;
+        try
+        {
+            m_parentFolderFs = fsFactory->createDirectory( utils::file::directory( mrl ) );
+        }
+        catch ( const fs::errors::System& ex )
+        {
+            LOG_ERROR( "Failed to restore task: ", ex.what() );
+            return false;
+        }
+        lastTask.fsDir = m_parentFolderFs;
+        lastTask.parentFolderId = m_parentFolderId;
     }
 
     try

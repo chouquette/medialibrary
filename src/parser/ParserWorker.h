@@ -30,6 +30,7 @@
 #include "medialibrary/Types.h"
 #include "compat/Mutex.h"
 #include "compat/Thread.h"
+#include "parser/Task.h"
 
 namespace medialibrary
 {
@@ -96,6 +97,7 @@ private:
     std::queue<std::shared_ptr<Task>> m_tasks;
     compat::Thread m_thread;
     compat::Mutex m_lock;
+    parser::LastTaskInfo m_lastTaskInfo;
 };
 
 }
