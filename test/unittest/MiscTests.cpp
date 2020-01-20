@@ -38,6 +38,8 @@
 #include "Playlist.h"
 #include "Device.h"
 #include "parser/Task.h"
+#include "Show.h"
+#include "ShowEpisode.h"
 
 namespace
 {
@@ -617,4 +619,12 @@ TEST_F( DbModel, Upgrade23to24 )
 
     auto devices = Device::fetchAll( ml.get() );
     ASSERT_EQ( 1u, devices.size() );
+
+    auto shows = Show::fetchAll( ml.get() );
+    ASSERT_EQ( 1u, shows.size() );
+    auto episodes = shows[0]->episodes( nullptr )->all();
+    ASSERT_EQ( 1u, episodes.size() );
+    auto showEpisode = episodes[0]->showEpisode();
+    ASSERT_NE( nullptr, showEpisode );
+    ASSERT_EQ( showEpisode->title(), episodes[0]->title() );
 }

@@ -114,3 +114,33 @@ Media::trigger( Media::Triggers::IsPresent, 24 ),
 
 /* Create a new Task index */
 parser::Task::index( parser::Task::Indexes::ParentFolderId, 24 ),
+
+/* Add the ShowEpisode.episode_title column */
+"CREATE TEMPORARY TABLE " + ShowEpisode::Table::Name + "_backup"
+"("
+    "id_episode INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "media_id UNSIGNED INTEGER NOT NULL,"
+    "episode_number UNSIGNED INT,"
+    "season_number UNSIGNED INT,"
+    "episode_summary TEXT,"
+    "tvdb_id TEXT,"
+    "show_id UNSIGNED INT"
+")",
+
+"INSERT INTO " + ShowEpisode::Table::Name + "_backup "
+    "SELECT * FROM " + ShowEpisode::Table::Name,
+
+"DROP TABLE " + ShowEpisode::Table::Name,
+
+ShowEpisode::schema( ShowEpisode::Table::Name, 24 ),
+
+"INSERT INTO " + ShowEpisode::Table::Name +
+    " SELECT id_episode, media_id, episode_number, season_number, "
+    "(SELECT title FROM " + Media::Table::Name + " WHERE id_media = media_id), "
+    "episode_summary, tvdb_id, show_id FROM " + ShowEpisode::Table::Name + "_backup",
+
+"DROP TABLE " + ShowEpisode::Table::Name + "_backup",
+
+Show::trigger( Show::Triggers::IncrementNbEpisode, 24 ),
+Show::trigger( Show::Triggers::DecrementNbEpisode, 24 ),
+ShowEpisode::index( ShowEpisode::Indexes::MediaIdShowId, 24 ),

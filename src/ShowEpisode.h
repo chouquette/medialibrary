@@ -56,6 +56,7 @@ public:
     virtual const std::string& tvdbId() const override;
     bool setTvdbId( const std::string& tvdbId );
     virtual ShowPtr show() override;
+    virtual const std::string& title() const override;
 
     static void createTable( sqlite::Connection* dbConnection );
     static void createIndexes( sqlite::Connection* dbConnection );
@@ -75,6 +76,7 @@ private:
     const int64_t m_mediaId;
     const unsigned int m_episodeId;
     const unsigned int m_seasonId;
+    std::string m_title;
     std::string m_shortSummary;
     std::string m_tvdbId;
     const int64_t m_showId;

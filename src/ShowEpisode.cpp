@@ -43,6 +43,7 @@ ShowEpisode::ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row )
     , m_mediaId( row.extract<decltype(m_mediaId)>() )
     , m_episodeId( row.extract<decltype(m_episodeId)>() )
     , m_seasonId( row.extract<decltype(m_seasonId)>() )
+    , m_title( row.extract<decltype(m_title)>() )
     , m_shortSummary( row.extract<decltype(m_shortSummary)>() )
     , m_tvdbId( row.extract<decltype(m_tvdbId)>() )
     , m_showId( row.extract<decltype(m_showId)>() )
@@ -106,6 +107,11 @@ bool ShowEpisode::setTvdbId( const std::string& tvdbId )
     return true;
 }
 
+const std::string&ShowEpisode::title() const
+{
+    return m_title;
+}
+
 std::shared_ptr<IShow> ShowEpisode::show()
 {
     if ( m_show == nullptr && m_showId != 0 )
@@ -127,15 +133,33 @@ void ShowEpisode::createIndexes( sqlite::Connection* dbConnection )
                                    index( Indexes::MediaIdShowId, Settings::DbModelVersion ) );
 }
 
-std::string ShowEpisode::schema( const std::string& tableName, uint32_t )
+std::string ShowEpisode::schema( const std::string& tableName, uint32_t dbModel )
 {
     assert( tableName == Table::Name );
+    if ( dbModel <= 23 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_episode INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "media_id UNSIGNED INTEGER NOT NULL,"
+            "episode_number UNSIGNED INT,"
+            "season_number UNSIGNED INT,"
+            "episode_summary TEXT,"
+            "tvdb_id TEXT,"
+            "show_id UNSIGNED INT,"
+            "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
+                + "(id_media) ON DELETE CASCADE,"
+            "FOREIGN KEY(show_id) REFERENCES " + Show::Table::Name
+                + "(id_show) ON DELETE CASCADE"
+        ")";
+    }
     return "CREATE TABLE " + Table::Name +
     "("
         "id_episode INTEGER PRIMARY KEY AUTOINCREMENT,"
         "media_id UNSIGNED INTEGER NOT NULL,"
         "episode_number UNSIGNED INT,"
         "season_number UNSIGNED INT,"
+        "episode_title TEXT,"
         "episode_summary TEXT,"
         "tvdb_id TEXT,"
         "show_id UNSIGNED INT,"
