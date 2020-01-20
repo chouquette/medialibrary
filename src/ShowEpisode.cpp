@@ -83,7 +83,7 @@ const std::string& ShowEpisode::shortSummary() const
 
 bool ShowEpisode::setShortSummary( const std::string& summary )
 {
-    static const std::string req = "UPDATE " + ShowEpisode::Table::Name
+    static const std::string req = "UPDATE " + Table::Name
             + " SET episode_summary = ? WHERE id_episode = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, summary, m_id ) == false )
         return false;
@@ -98,7 +98,7 @@ const std::string& ShowEpisode::tvdbId() const
 
 bool ShowEpisode::setTvdbId( const std::string& tvdbId )
 {
-    static const std::string req = "UPDATE " + ShowEpisode::Table::Name
+    static const std::string req = "UPDATE " + Table::Name
             + " SET tvdb_id = ? WHERE id_episode = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, tvdbId, m_id ) == false )
         return false;
@@ -177,7 +177,7 @@ std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml,
 {
     auto episode = std::make_shared<ShowEpisode>( ml, mediaId, seasonId, episodeId,
                                                   showId );
-    static const std::string req = "INSERT INTO " + ShowEpisode::Table::Name
+    static const std::string req = "INSERT INTO " + Table::Name
             + "(media_id, episode_number, season_number, show_id) VALUES(?, ?, ?, ?)";
     if ( insert( ml, episode, req, mediaId, episodeId, seasonId, showId ) == false )
         return nullptr;
@@ -186,7 +186,7 @@ std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml,
 
 ShowEpisodePtr ShowEpisode::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
 {
-    static const std::string req = "SELECT * FROM " + ShowEpisode::Table::Name + " WHERE media_id = ?";
+    static const std::string req = "SELECT * FROM " + Table::Name + " WHERE media_id = ?";
     return fetch( ml, req, mediaId );
 }
 
