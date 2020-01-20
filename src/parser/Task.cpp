@@ -550,8 +550,8 @@ bool Task::resetParsing( MediaLibraryPtr ml )
      */
     static const std::string deleteRefreshReq = "DELETE FROM " + Task::Table::Name +
             " WHERE type = ?";
-    return sqlite::Tools::executeUpdate( ml->getConn(), resetReq, Step::None ) &&
-           sqlite::Tools::executeDelete( ml->getConn(), deleteRefreshReq, Type::Refresh );
+    return sqlite::Tools::executeDelete( ml->getConn(), deleteRefreshReq, Type::Refresh ) &&
+            sqlite::Tools::executeUpdate( ml->getConn(), resetReq, Step::None );
 }
 
 std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
