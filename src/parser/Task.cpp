@@ -552,7 +552,7 @@ std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
         " LEFT JOIN " + Folder::Table::Name + " fol ON f.folder_id = fol.id_folder"
         " LEFT JOIN " + Device::Table::Name + " d ON d.id_device = fol.device_id"
         " WHERE step & ? != ? AND retry_count <= ? AND (d.is_present != 0 OR "
-        " t.file_id IS NULL)";
+        " t.file_id IS NULL) ORDER BY parent_folder_id";
     return Task::fetchAll<Task>( ml, req, Step::Completed,
                                  Step::Completed, parser::MaxNbRetries );
 }
