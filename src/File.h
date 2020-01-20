@@ -80,8 +80,9 @@ public:
     static bool checkDbModel( MediaLibraryPtr ml );
     static std::shared_ptr<File> createFromMedia( MediaLibraryPtr ml, int64_t mediaId, Type type,
                                                   const fs::IFile& file, int64_t folderId, bool isRemovable );
-    static std::shared_ptr<File> createFromMedia( MediaLibraryPtr ml, int64_t mediaId, Type type,
-                                                  const std::string& mrl );
+    static std::shared_ptr<File> createFromExternalMedia( MediaLibraryPtr ml,
+                                                          int64_t mediaId, Type type,
+                                                          const std::string& mrl );
 
     static std::shared_ptr<File> createFromPlaylist( MediaLibraryPtr ml, int64_t playlistId, const fs::IFile& file,
                                                      int64_t folderId, bool isRemovable );

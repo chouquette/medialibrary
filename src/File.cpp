@@ -306,8 +306,8 @@ std::shared_ptr<File> File::createFromMedia( MediaLibraryPtr ml, int64_t mediaId
     return self;
 }
 
-std::shared_ptr<File> File::createFromMedia( MediaLibraryPtr ml, int64_t mediaId,
-                                             IFile::Type type, const std::string& mrl )
+std::shared_ptr<File> File::createFromExternalMedia( MediaLibraryPtr ml, int64_t mediaId,
+                                                     IFile::Type type, const std::string& mrl )
 {
     assert( mediaId > 0 );
     // Sqlite won't ensure uniqueness for (folder_id, mrl) when folder_id is null, so we have to ensure
