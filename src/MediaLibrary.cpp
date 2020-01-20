@@ -802,9 +802,7 @@ bool MediaLibrary::clearHistory()
 {
     try
     {
-        return sqlite::Tools::withRetries( 3, [this]() {
-            return Media::clearHistory( this );
-        });
+        return Media::clearHistory( this );
     }
     catch ( sqlite::errors::Exception& ex )
     {

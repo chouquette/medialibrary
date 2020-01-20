@@ -424,11 +424,7 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
         discoverer.discover( entryPoint, *this );
         auto entryFolder = Folder::fromMrl( m_ml, entryPoint );
         if ( entryFolder != nullptr )
-        {
-            sqlite::Tools::withRetries( 3, [this, entryFolder]() {
-                Folder::excludeEntryFolder( m_ml, entryFolder->id() );
-            });
-        }
+            Folder::excludeEntryFolder( m_ml, entryFolder->id() );
         return;
     }
     discoverer.reload( directoryMrl, *this );
@@ -447,41 +443,36 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
 
     const auto& artworkMrl = item.meta( IItem::Metadata::ArtworkUrl );
 
-    auto res = sqlite::Tools::withRetries( 3, [this, &showInfo, &title, media, &artworkMrl]() {
-        auto t = m_ml->getConn()->newTransaction();
-        media->setTitleBuffered( title );
+    auto t = m_ml->getConn()->newTransaction();
+    media->setTitleBuffered( title );
 
-        if ( artworkMrl.empty() == false )
-        {
-            media->setThumbnail( std::make_shared<Thumbnail>( m_ml, artworkMrl,
-                                    Thumbnail::Origin::Media,
-                                    ThumbnailSizeType::Thumbnail, false ) );
-        }
-        if ( std::get<0>( showInfo ) == true )
-        {
-            auto seasonId = std::get<1>( showInfo );
-            auto episodeId = std::get<2>( showInfo );
-            auto showName = std::get<3>( showInfo );
+    if ( artworkMrl.empty() == false )
+    {
+        media->setThumbnail( std::make_shared<Thumbnail>( m_ml, artworkMrl,
+                                Thumbnail::Origin::Media,
+                                ThumbnailSizeType::Thumbnail, false ) );
+    }
+    if ( std::get<0>( showInfo ) == true )
+    {
+        auto seasonId = std::get<1>( showInfo );
+        auto episodeId = std::get<2>( showInfo );
+        auto showName = std::get<3>( showInfo );
 
-            auto show = findShow( showName );
+        auto show = findShow( showName );
+        if ( show == nullptr )
+        {
+            show = m_ml->createShow( showName );
             if ( show == nullptr )
-            {
-                show = m_ml->createShow( showName );
-                if ( show == nullptr )
-                    return false;
-            }
-            show->addEpisode( *media, seasonId, episodeId );
+                return false;
         }
-        else
-        {
-            // How do we know if it's a movie or a random video?
-        }
-        media->save();
-        t->commit();
-        return true;
-    });
-    if ( res == false )
-        return false;
+        show->addEpisode( *media, seasonId, episodeId );
+    }
+    else
+    {
+        // How do we know if it's a movie or a random video?
+    }
+    media->save();
+    t->commit();
     auto thumbnail = media->thumbnail( ThumbnailSizeType::Thumbnail );
     // before relocating the thumbnail of a video media, bear in mind that the
     // thumbnailer thread might be processing the same media, and can be generating
@@ -889,97 +880,79 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
      * In any case, we don't insert the thumbnail in DB yet, to process everything
      * as part of the transaction
      */
+    auto t = m_ml->getConn()->newTransaction();
 
-    /*
-     * Any entity that might be modified in the retry scope needs to be passed
-     * as parameter, so that we only modify a copy of it.
-     * For instance, if we create the album, and fail later on, we would rollback
-     * the transaction and retry, however the album instance wouldn't be nullptr
-     * anymore, and we wouldn't recreate it
-     */
-    auto res = sqlite::Tools::withRetries( 3,
-            [this, &item, &artists, media, &thumbnail, &genre, newAlbum]
-            ( std::shared_ptr<Album> album ) {
-
-        auto t = m_ml->getConn()->newTransaction();
-
-        if ( thumbnail != nullptr )
-        {
-            if ( thumbnail->id() == 0 )
-                thumbnail->insert();
-            // Don't rely on the same thumbnail as the one for the album, the
-            // user can always update the media specific thumbnail, and we don't
-            // want that to propagate to the album
-            media->setThumbnail( thumbnail );
-        }
+    if ( thumbnail != nullptr )
+    {
+        if ( thumbnail->id() == 0 )
+            thumbnail->insert();
+        // Don't rely on the same thumbnail as the one for the album, the
+        // user can always update the media specific thumbnail, and we don't
+        // want that to propagate to the album
+        media->setThumbnail( thumbnail );
+    }
+    if ( album == nullptr )
+    {
+        const auto& albumName = item.meta( IItem::Metadata::Album );
+        album = m_ml->createAlbum( albumName );
         if ( album == nullptr )
-        {
-            const auto& albumName = item.meta( IItem::Metadata::Album );
-            album = m_ml->createAlbum( albumName );
-            if ( album == nullptr )
-                return Status::Fatal;
-            if ( thumbnail != nullptr )
-                album->setThumbnail( thumbnail );
-        }
-        else if ( thumbnail != nullptr &&
-                  album->thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
-                    ThumbnailStatus::Missing )
-        {
+            return Status::Fatal;
+        if ( thumbnail != nullptr )
             album->setThumbnail( thumbnail );
-            // Since we just assigned a thumbnail to the album, check if
-            // other tracks from this album require a thumbnail
-            for ( auto t : album->cachedTracks() )
+    }
+    else if ( thumbnail != nullptr &&
+              album->thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
+                ThumbnailStatus::Missing )
+    {
+        album->setThumbnail( thumbnail );
+        // Since we just assigned a thumbnail to the album, check if
+        // other tracks from this album require a thumbnail
+        for ( auto t : album->cachedTracks() )
+        {
+            if ( t->thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
+                 ThumbnailStatus::Missing )
             {
-                if ( t->thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
-                     ThumbnailStatus::Missing )
-                {
-                    auto m = static_cast<Media*>( t.get() );
-                    m->setThumbnail( thumbnail );
-                }
+                auto m = static_cast<Media*>( t.get() );
+                m->setThumbnail( thumbnail );
             }
         }
+    }
 
-        try
-        {
-            // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist
-            if ( handleTrack( album, item, artists.second ? artists.second : artists.first,
-                              genre.get() ) == nullptr )
-                return Status::Fatal;
-        }
-        catch ( const sqlite::errors::ConstraintForeignKey& ex )
-        {
-            LOG_INFO( "Failed to insert album track: ", ex.what(), ". "
-                      "Assuming the media was deleted concurrently" );
+    try
+    {
+        // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist
+        if ( handleTrack( album, item, artists.second ? artists.second : artists.first,
+                          genre.get() ) == nullptr )
             return Status::Fatal;
-        }
-        catch ( const sqlite::errors::ConstraintUnique& ex )
-        {
-            // If the application crashed before the parser bookkeeping completed
-            // we might try to reprocess this task while it's finished.
-            // If the AlbumTrack was already inserted, it means that we already
-            // commited the current transaction, so there's nothing more
-            // for this task to do.
-            //
-            // See https://code.videolan.org/videolan/medialibrary/issues/103
-            LOG_INFO( "Failed to insert album track: ", ex.what(), ". "
-                      "Assuming the task was already processed." );
-            return Status::Completed;
-        }
+    }
+    catch ( const sqlite::errors::ConstraintForeignKey& ex )
+    {
+        LOG_INFO( "Failed to insert album track: ", ex.what(), ". "
+                  "Assuming the media was deleted concurrently" );
+        return Status::Fatal;
+    }
+    catch ( const sqlite::errors::ConstraintUnique& ex )
+    {
+        // If the application crashed before the parser bookkeeping completed
+        // we might try to reprocess this task while it's finished.
+        // If the AlbumTrack was already inserted, it means that we already
+        // commited the current transaction, so there's nothing more
+        // for this task to do.
+        //
+        // See https://code.videolan.org/videolan/medialibrary/issues/103
+        LOG_INFO( "Failed to insert album track: ", ex.what(), ". "
+                  "Assuming the task was already processed." );
+        return Status::Completed;
+    }
 
-        link( item, *album, artists.first, artists.second, thumbnail );
-        media->save();
-        t->commit();
+    link( item, *album, artists.first, artists.second, thumbnail );
+    media->save();
+    t->commit();
 
-        /* We won't retry anymore, so send any notification now, as the outer
-         * scope doesn't know we modified the passed instance */
-        if ( newAlbum == true )
-            m_notifier->notifyAlbumCreation( album );
-
-        return Status::Success;
-    }, std::move( album ) );
-
-    if ( res != Status::Success )
-        return res;
+    /* We won't retry anymore, so send any notification now, as the outer
+     * scope doesn't know we modified the passed instance */
+    if ( newAlbum == true )
+        m_notifier->notifyAlbumCreation( album );
 
     if ( thumbnail != nullptr && thumbnail->isOwned() == false )
     {

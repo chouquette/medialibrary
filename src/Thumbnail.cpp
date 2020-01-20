@@ -258,9 +258,7 @@ void Thumbnail::relocate()
     if ( utils::fs::copy( localPath, destPath ) == true )
     {
         auto destMrl = utils::file::toMrl( destPath );
-        if ( sqlite::Tools::withRetries( 3, [this, &destMrl]() {
-                return update( destMrl, true );
-            }) == false )
+        if ( update( destMrl, true ) == false )
         {
             utils::fs::remove( destPath );
         }

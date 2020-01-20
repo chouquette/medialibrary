@@ -376,56 +376,54 @@ bool Folder::excludeEntryFolder( MediaLibraryPtr ml, int64_t folderId )
 bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl )
 {
     // Ensure we delete the existing folder if any & ban the folder in an "atomic" way
-    return sqlite::Tools::withRetries( 3, [ml, &mrl]() {
-        auto t = ml->getConn()->newTransaction();
+    auto t = ml->getConn()->newTransaction();
 
-        auto f = fromMrl( ml, mrl, BannedType::Any );
-        if ( f != nullptr )
-        {
-            // No need to ban a folder twice
-            if ( f->m_isBanned == true )
-                return true;
-            // Let the foreign key destroy everything beneath this folder
-            destroy( ml, f->id() );
-        }
-        auto fsFactory = ml->fsFactoryForMrl( mrl );
-        if ( fsFactory == nullptr )
-            return false;
-        std::shared_ptr<fs::IDirectory> folderFs;
-        try
-        {
-            folderFs = fsFactory->createDirectory( mrl );
-        }
-        catch ( const fs::errors::System& ex )
-        {
-            LOG_ERROR( "Failed to instantiate a directory to ban folder: ", ex.what() );
-            return false;
-        }
-        auto deviceFs = folderFs->device();
-        if ( deviceFs == nullptr )
-        {
-            LOG_ERROR( "Can't find device associated with mrl ", mrl );
-            return false;
-        }
-        auto device = Device::fromUuid( ml, deviceFs->uuid(), fsFactory->scheme() );
-        if ( device == nullptr )
-            device = Device::create( ml, deviceFs->uuid(),
-                                     utils::file::scheme( mrl ),
-                                     deviceFs->isRemovable() );
-        std::string path;
-        if ( deviceFs->isRemovable() == true )
-            path = deviceFs->relativeMrl( mrl );
-        else
-            path = mrl;
-        static const std::string req = "INSERT INTO " + Folder::Table::Name +
-                "(path, parent_id, is_banned, device_id, is_removable) "
-                "VALUES(?, ?, ?, ?, ?)";
-        auto res = sqlite::Tools::executeInsert( ml->getConn(), req, path,
-                                                 nullptr, true, device->id(),
-                                                 deviceFs->isRemovable() ) != 0;
-        t->commit();
-        return res;
-    });
+    auto f = fromMrl( ml, mrl, BannedType::Any );
+    if ( f != nullptr )
+    {
+        // No need to ban a folder twice
+        if ( f->m_isBanned == true )
+            return true;
+        // Let the foreign key destroy everything beneath this folder
+        destroy( ml, f->id() );
+    }
+    auto fsFactory = ml->fsFactoryForMrl( mrl );
+    if ( fsFactory == nullptr )
+        return false;
+    std::shared_ptr<fs::IDirectory> folderFs;
+    try
+    {
+        folderFs = fsFactory->createDirectory( mrl );
+    }
+    catch ( const fs::errors::System& ex )
+    {
+        LOG_ERROR( "Failed to instantiate a directory to ban folder: ", ex.what() );
+        return false;
+    }
+    auto deviceFs = folderFs->device();
+    if ( deviceFs == nullptr )
+    {
+        LOG_ERROR( "Can't find device associated with mrl ", mrl );
+        return false;
+    }
+    auto device = Device::fromUuid( ml, deviceFs->uuid(), fsFactory->scheme() );
+    if ( device == nullptr )
+        device = Device::create( ml, deviceFs->uuid(),
+                                 utils::file::scheme( mrl ),
+                                 deviceFs->isRemovable() );
+    std::string path;
+    if ( deviceFs->isRemovable() == true )
+        path = deviceFs->relativeMrl( mrl );
+    else
+        path = mrl;
+    static const std::string req = "INSERT INTO " + Folder::Table::Name +
+            "(path, parent_id, is_banned, device_id, is_removable) "
+            "VALUES(?, ?, ?, ?, ?)";
+    auto res = sqlite::Tools::executeInsert( ml->getConn(), req, path,
+                                             nullptr, true, device->id(),
+                                             deviceFs->isRemovable() ) != 0;
+    t->commit();
+    return res;
 }
 
 std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& mrl )

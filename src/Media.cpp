@@ -1427,19 +1427,17 @@ bool Media::addLabel( LabelPtr label )
     }
     try
     {
-        return sqlite::Tools::withRetries( 3, [this]( LabelPtr label ) {
-            auto t = m_ml->getConn()->newTransaction();
+        auto t = m_ml->getConn()->newTransaction();
 
-            std::string req = "INSERT INTO " + Label::FileRelationTable::Name + " VALUES(?, ?)";
-            if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, label->id(), m_id ) == 0 )
-                return false;
-            const std::string reqFts = "UPDATE " + Media::FtsTable::Name + " "
-                "SET labels = labels || ' ' || ? WHERE rowid = ?";
-            if ( sqlite::Tools::executeUpdate( m_ml->getConn(), reqFts, label->name(), m_id ) == false )
-                return false;
-            t->commit();
-            return true;
-        }, std::move( label ) );
+        std::string req = "INSERT INTO " + Label::FileRelationTable::Name + " VALUES(?, ?)";
+        if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, label->id(), m_id ) == 0 )
+            return false;
+        const std::string reqFts = "UPDATE " + Media::FtsTable::Name + " "
+            "SET labels = labels || ' ' || ? WHERE rowid = ?";
+        if ( sqlite::Tools::executeUpdate( m_ml->getConn(), reqFts, label->name(), m_id ) == false )
+            return false;
+        t->commit();
+        return true;
     }
     catch ( const sqlite::errors::Exception& ex )
     {
@@ -1457,19 +1455,17 @@ bool Media::removeLabel( LabelPtr label )
     }
     try
     {
-        return sqlite::Tools::withRetries( 3, [this]( LabelPtr label ) {
-            auto t = m_ml->getConn()->newTransaction();
+        auto t = m_ml->getConn()->newTransaction();
 
-            std::string req = "DELETE FROM " + Label::FileRelationTable::Name + " WHERE label_id = ? AND media_id = ?";
-            if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, label->id(), m_id ) == false )
-                return false;
-            const std::string reqFts = "UPDATE " + Media::FtsTable::Name + " "
-                    "SET labels = TRIM(REPLACE(labels, ?, '')) WHERE rowid = ?";
-            if ( sqlite::Tools::executeUpdate( m_ml->getConn(), reqFts, label->name(), m_id ) == false )
-                return false;
-            t->commit();
-            return true;
-        }, std::move( label ) );
+        std::string req = "DELETE FROM " + Label::FileRelationTable::Name + " WHERE label_id = ? AND media_id = ?";
+        if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, label->id(), m_id ) == false )
+            return false;
+        const std::string reqFts = "UPDATE " + Media::FtsTable::Name + " "
+                "SET labels = TRIM(REPLACE(labels, ?, '')) WHERE rowid = ?";
+        if ( sqlite::Tools::executeUpdate( m_ml->getConn(), reqFts, label->name(), m_id ) == false )
+            return false;
+        t->commit();
+        return true;
     }
     catch ( const sqlite::errors::Exception& ex )
     {
