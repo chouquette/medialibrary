@@ -226,6 +226,7 @@ void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
     MediaGroup::createTriggers( dbConn );
     MediaGroup::createIndexes( dbConn );
     Movie::createIndexes( dbConn );
+    parser::Task::createIndex( dbConn, dbModelVersion );
 }
 
 bool MediaLibrary::checkDatabaseIntegrity()

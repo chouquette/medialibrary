@@ -102,6 +102,7 @@ namespace
         "playlist_position_pl_id_index",
         "show_episode_media_show_idx",
         "subtitle_track_media_idx",
+        "task_parent_folder_id_idx",
         "thumbnail_link_index",
         "video_track_media_idx",
     };

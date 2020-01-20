@@ -111,3 +111,6 @@ Device::schema( Device::Table::Name, 24 ),
 
 /* Now recreate triggers based on the Device table */
 Media::trigger( Media::Triggers::IsPresent, 24 ),
+
+/* Create a new Task index */
+parser::Task::index( parser::Task::Indexes::ParentFolderId, 24 ),

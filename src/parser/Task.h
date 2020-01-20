@@ -61,6 +61,10 @@ public:
     {
         DeletePlaylistLinkingTask,
     };
+    enum class Indexes : uint8_t
+    {
+        ParentFolderId,
+    };
 
     struct MetadataHash
     {
@@ -172,10 +176,13 @@ public:
 
     static void createTable( sqlite::Connection* dbConnection , uint32_t dbModel );
     static void createTriggers(sqlite::Connection* dbConnection , uint32_t dbModel);
+    static void createIndex( sqlite::Connection* dbConnection, uint32_t dbModel );
     static std::string schema( const std::string& tableName, uint32_t dbModel,
                                bool backup );
     static std::string trigger( Triggers trigger, uint32_t dbModel );
     static std::string triggerName( Triggers trigger, uint32_t dbModel );
+    static std::string index( Indexes index, uint32_t dbModel );
+    static std::string indexName( Indexes index, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     static bool resetRetryCount( MediaLibraryPtr ml );
     static bool resetParsing( MediaLibraryPtr ml );

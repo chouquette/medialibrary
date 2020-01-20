@@ -387,6 +387,14 @@ void Task::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModel )
                                    trigger( Triggers::DeletePlaylistLinkingTask, dbModel ) );
 }
 
+void Task::createIndex( sqlite::Connection* dbConnection, uint32_t dbModel )
+{
+    if ( dbModel < 24 )
+        return;
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::ParentFolderId, dbModel ) );
+}
+
 std::string Task::schema( const std::string& tableName, uint32_t dbModel,
                           bool backup )
 {
@@ -487,6 +495,21 @@ std::string Task::triggerName( Triggers trigger, uint32_t dbModel )
     return "delete_playlist_linking_tasks";
 }
 
+std::string Task::index(Task::Indexes index, uint32_t dbModel)
+{
+    assert( index == Indexes::ParentFolderId );
+    assert( dbModel >= 24 );
+    return "CREATE INDEX " + indexName( index, dbModel ) +
+            " ON " + Table::Name + "(parent_folder_id)";
+}
+
+std::string Task::indexName( Task::Indexes index, uint32_t dbModel )
+{
+    assert( index == Indexes::ParentFolderId );
+    assert( dbModel >= 24 );
+    return "task_parent_folder_id_idx";
+}
+
 bool Task::checkDbModel( MediaLibraryPtr ml )
 {
     return sqlite::Tools::checkTableSchema( ml->getConn(),
@@ -494,7 +517,10 @@ bool Task::checkDbModel( MediaLibraryPtr ml )
                                        Table::Name ) &&
            sqlite::Tools::checkTriggerStatement( ml->getConn(),
                 trigger( Triggers::DeletePlaylistLinkingTask, Settings::DbModelVersion ),
-                triggerName( Triggers::DeletePlaylistLinkingTask, Settings::DbModelVersion ) );
+                triggerName( Triggers::DeletePlaylistLinkingTask, Settings::DbModelVersion ) ) &&
+           sqlite::Tools::checkIndexStatement( ml->getConn(),
+                index( Indexes::ParentFolderId, Settings::DbModelVersion ),
+                indexName( Indexes::ParentFolderId, Settings::DbModelVersion ) );
 }
 
 bool Task::resetRetryCount( MediaLibraryPtr ml )
