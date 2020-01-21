@@ -67,7 +67,7 @@ public:
     virtual const std::string& tvdbId() const override;
     bool setTvdbId( const std::string& summary );
     std::shared_ptr<ShowEpisode> addEpisode( Media& media, uint32_t seasonId,
-                                             uint32_t episodeId );
+                                             uint32_t episodeId , std::string title );
     virtual Query<IMedia> episodes( const QueryParameters* params ) const override;
     virtual Query<IMedia> searchEpisodes( const std::string& pattern,
                                           const QueryParameters* params = nullptr ) const override;

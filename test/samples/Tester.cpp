@@ -667,10 +667,15 @@ void Tests::checkShowEpisodes( const rapidjson::Value& expectedEpisodes,
             return showEp->seasonId() == seasonId && showEp->episodeId() == episodeId;
         });
         ASSERT_NE( episodeIt, cend( episodes ) );
-        auto episode = *episodeIt;
+        auto media = *episodeIt;
+        auto showEp = media->showEpisode();
         if ( expectedEpisode.HasMember( "title" ) == true )
         {
-            ASSERT_EQ( expectedEpisode["title"].GetString(), episode->title() );
+            ASSERT_EQ( expectedEpisode["title"].GetString(), showEp->title() );
+        }
+        if ( expectedEpisode.HasMember( "mediaTitle" ) == true )
+        {
+            ASSERT_EQ( expectedEpisode["mediaTitle"].GetString(), media->title() );
         }
     }
 }

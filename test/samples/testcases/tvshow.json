@@ -10,12 +10,13 @@
                 "nbEpisodes": 2,
                 "episodes": [
                     {
-                        "title": "Mr Robot S04E01 401 Unauthorized",
+                        "title": "401 Unauthorized",
                         "seasonId": 4,
                         "episodeId": 1
                     },
                     {
-                        "title": "Mr Robot S04E02",
+                        "mediaTitle": "Mr Robot S04E02",
+                        "title": "",
                         "seasonId": 4,
                         "episodeId": 2
                     }

@@ -52,12 +52,13 @@ ShowEpisode::ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row )
 }
 
 ShowEpisode::ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, uint32_t seasonId,
-                          uint32_t episodeId, int64_t showId )
+                          uint32_t episodeId, std::string title, int64_t showId )
     : m_ml( ml )
     , m_id( 0 )
     , m_mediaId( mediaId )
     , m_episodeId( episodeId )
     , m_seasonId( seasonId )
+    , m_title( std::move( title ) )
     , m_showId( showId )
 {
 }
@@ -197,13 +198,16 @@ std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml,
                                                   int64_t mediaId,
                                                   uint32_t seasonId,
                                                   uint32_t episodeId,
+                                                  std::string title,
                                                   int64_t showId )
 {
     auto episode = std::make_shared<ShowEpisode>( ml, mediaId, seasonId, episodeId,
-                                                  showId );
+                                                  std::move( title ), showId );
     static const std::string req = "INSERT INTO " + Table::Name
-            + "(media_id, episode_number, season_number, show_id) VALUES(?, ?, ?, ?)";
-    if ( insert( ml, episode, req, mediaId, episodeId, seasonId, showId ) == false )
+            + "(media_id, episode_number, season_number, episode_title, show_id)"
+            " VALUES(?, ?, ?, ?, ?)";
+    if ( insert( ml, episode, req, mediaId, episodeId, seasonId,
+                 episode->title(), showId ) == false )
         return nullptr;
     return episode;
 }

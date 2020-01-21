@@ -46,7 +46,7 @@ public:
 
     ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row );
     ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, uint32_t seasonId,
-                 uint32_t episodeId, int64_t showId );
+                 uint32_t episodeId, std::string title, int64_t showId );
 
     virtual int64_t id() const override;
     virtual unsigned int episodeId() const override;
@@ -64,9 +64,9 @@ public:
     static std::string index( Indexes index, uint32_t dbModel );
     static std::string indexName( Indexes index, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
-    static std::shared_ptr<ShowEpisode> create( MediaLibraryPtr ml, int64_t mediaId,
+    static std::shared_ptr<ShowEpisode> create(MediaLibraryPtr ml, int64_t mediaId,
                                                 uint32_t seasonId,
-                                                uint32_t episodeId,
+                                                uint32_t episodeId, std::string title,
                                                 int64_t showId );
     static ShowEpisodePtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
 

@@ -119,13 +119,15 @@ TEST_F( Shows, AddEpisode )
 {
     auto show = ml->createShow( "show" );
     auto media = std::static_pointer_cast<Media>( ml->addMedia( "episode.avi", IMedia::Type::Video ) );
-    auto e = show->addEpisode( *media, 1, 1 );
+    auto e = show->addEpisode( *media, 1, 1, "episode title" );
     media->save();
     ASSERT_NE( e, nullptr );
 
     ASSERT_EQ( e->episodeId(), 1u );
     ASSERT_EQ( 1u, e->seasonId() );
     ASSERT_EQ( e->show()->id(), show->id() );
+    ASSERT_EQ( "episode title", e->title() );
+    ASSERT_EQ( "episode.avi", media->title() );
 
     auto episodes = show->episodes( nullptr )->all();
     ASSERT_EQ( episodes.size(), 1u );
@@ -136,7 +138,7 @@ TEST_F( Shows, FetchShowFromEpisode )
 {
     auto s = ml->createShow( "show" );
     auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.avi", IMedia::Type::Video ) );
-    auto e = s->addEpisode( *f, 1, 1 );
+    auto e = s->addEpisode( *f, 1, 1, "episode title" );
     f->save();
 
     auto e2 = f->showEpisode();
@@ -157,7 +159,7 @@ TEST_F( Shows, SetEpisodeSummary )
 {
     auto show = ml->createShow( "show" );
     auto media = std::static_pointer_cast<Media>( ml->addMedia( "episode.mkv", IMedia::Type::Video ) );
-    auto e = show->addEpisode( *media, 1, 1 );
+    auto e = show->addEpisode( *media, 1, 1, "episode title" );
     media->save();
     bool res = e->setShortSummary( "Insert spoilers here" );
     ASSERT_TRUE( res );
@@ -174,7 +176,7 @@ TEST_F( Shows, SetEpisodeTvdbId )
 {
     auto show = ml->createShow( "show" );
     auto media = std::static_pointer_cast<Media>( ml->addMedia( "episode.mkv", IMedia::Type::Video ) );
-    auto e = show->addEpisode( *media, 1, 1 );
+    auto e = show->addEpisode( *media, 1, 1, "episode title" );
     media->save();
     bool res = e->setTvdbId( "TVDBID" );
     ASSERT_TRUE( res );
@@ -192,19 +194,19 @@ TEST_F( Shows, ListAll )
     auto show1 = ml->createShow( "aaaa" );
     auto media1 = std::static_pointer_cast<Media>(
                 ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
-    show1->addEpisode( *media1, 1, 1 );
+    show1->addEpisode( *media1, 1, 1, "episode title" );
     show1->setReleaseDate( 5 );
     media1->save();
     auto show2 = ml->createShow( "zzzz" );
     auto media2 = std::static_pointer_cast<Media>(
                 ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
-    show2->addEpisode( *media2, 1, 1 );
+    show2->addEpisode( *media2, 1, 1, "episode title" );
     show2->setReleaseDate( 1 );
     media2->save();
     auto show3 = ml->createShow( "pppp" );
     auto media3 = std::static_pointer_cast<Media>(
                 ml->addMedia( "media3.mkv", IMedia::Type::Video ) );
-    show3->addEpisode( *media3, 1, 1 );
+    show3->addEpisode( *media3, 1, 1, "episode title" );
     show3->setReleaseDate( 10 );
     media3->save();
 
@@ -234,15 +236,15 @@ TEST_F( Shows, ListEpisodes )
 {
     auto show = ml->createShow( "show" );
     auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "episode1.avi", IMedia::Type::Video ) );
-    auto s02e01 = show->addEpisode( *m1, 2, 1 );
+    auto s02e01 = show->addEpisode( *m1, 2, 1, "episode title" );
     m1->save();
 
     auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "episode2.avi", IMedia::Type::Video ) );
-    auto s01e01 = show->addEpisode( *m2, 1, 1 );
+    auto s01e01 = show->addEpisode( *m2, 1, 1, "episode title" );
     m2->save();
 
     auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "episode3.avi", IMedia::Type::Video ) );
-    auto s01e02 = show->addEpisode( *m3, 1, 2 );
+    auto s01e02 = show->addEpisode( *m3, 1, 2, "episode title" );
     m3->save();
 
     auto episodes = show->episodes( nullptr )->all();
@@ -264,13 +266,13 @@ TEST_F( Shows, Search )
     auto show1 = ml->createShow( "Cute fluffy sea otters" );
     auto media1 = std::static_pointer_cast<Media>(
                 ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
-    show1->addEpisode( *media1, 1, 1 );
+    show1->addEpisode( *media1, 1, 1, "episode title" );
     show1->setReleaseDate( 10 );
     media1->save();
     auto show2 = ml->createShow( "Less cute less fluffy naked mole rats" );
     auto media2 = std::static_pointer_cast<Media>(
                 ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
-    show2->addEpisode( *media2, 1, 1 );
+    show2->addEpisode( *media2, 1, 1, "episode title" );
     show2->setReleaseDate( 100 );
     media2->save();
 
@@ -290,7 +292,7 @@ TEST_F( Shows, RemoveFromFts )
     auto show1 = ml->createShow( "The otters show" );
     auto media1 = std::static_pointer_cast<Media>(
                 ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
-    show1->addEpisode( *media1, 1, 1 );
+    show1->addEpisode( *media1, 1, 1, "episode title" );
     media1->save();
 
     auto shows = ml->searchShows( "otters" )->all();
@@ -312,7 +314,7 @@ TEST_F( Shows, FileSetShowEpisode )
     auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.avi", IMedia::Type::Video ) );
     ASSERT_EQ( f->showEpisode(), nullptr );
 
-    auto e = show->addEpisode( *f, 1, 1 );
+    auto e = show->addEpisode( *f, 1, 1, "episode title" );
     f->save();
 
     ASSERT_EQ( f->showEpisode(), e );
@@ -332,12 +334,12 @@ TEST_F( Shows, SearchEpisodes )
     auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "episode.mkv", IMedia::Type::Video ) );
     m1->setTitleBuffered( "cute otters" );
     // will save the media in db
-    auto ep1 = show1->addEpisode( *m1, 1, 1 );
+    auto ep1 = show1->addEpisode( *m1, 1, 1, "episode title" );
     m1->save();
 
     auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "other episode.mkv", IMedia::Type::Video ) );
     m2->setTitleBuffered( "fluffy otters" );
-    auto ep2 = show2->addEpisode( *m2, 1, 1 );
+    auto ep2 = show2->addEpisode( *m2, 1, 1, "episode title" );
     m2->save();
 
     auto episodes = ml->searchVideo( "otters", nullptr )->all();
@@ -367,7 +369,7 @@ TEST_F( Shows, NbEpisodes )
 
     auto media = std::static_pointer_cast<Media>( ml->addMedia( "Fluffy otters.mkv",
                                                                 IMedia::Type::Video ) );
-    show->addEpisode( *media, 1, 1 );
+    show->addEpisode( *media, 1, 1, "episode title" );
     media->save();
     ASSERT_EQ( 1u, show->nbEpisodes() );
 
@@ -378,7 +380,7 @@ TEST_F( Shows, NbEpisodes )
 
     auto media2 = std::static_pointer_cast<Media>( ml->addMedia( "Juggling otters.mkv",
                                                                  IMedia::Type::Video ) );
-    show->addEpisode( *media2, 1, 2 );
+    show->addEpisode( *media2, 1, 2, "episode title" );
     media2->save();
     ASSERT_EQ( 2u, show->nbEpisodes() );
 
