@@ -52,11 +52,11 @@ ShowEpisode::ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row )
 }
 
 ShowEpisode::ShowEpisode( MediaLibraryPtr ml, int64_t mediaId, uint32_t seasonId,
-                          uint32_t episodeNumber, int64_t showId )
+                          uint32_t episodeId, int64_t showId )
     : m_ml( ml )
     , m_id( 0 )
     , m_mediaId( mediaId )
-    , m_episodeId( episodeNumber )
+    , m_episodeId( episodeId )
     , m_seasonId( seasonId )
     , m_showId( showId )
 {
