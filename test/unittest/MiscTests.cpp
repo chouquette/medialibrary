@@ -235,17 +235,27 @@ TEST_F( MiscDb, ClearDatabase )
     ml->clearDatabase( false );
 }
 
+class MediaLibraryTesterNoForceRescan : public MediaLibraryTester
+{
+public:
+    /*
+     * Override forceRescan to avoid removing all entities after the migration.
+     * This allows more testing
+     */
+    virtual bool forceRescan() override { return true; }
+};
+
 class DbModel : public Tests
 {
 protected:
-    std::unique_ptr<MediaLibraryTester> ml;
+    std::unique_ptr<MediaLibraryTesterNoForceRescan> ml;
     std::unique_ptr<mock::NoopCallback> cbMock;
 
 public:
     virtual void SetUp() override
     {
         unlink("test.db");
-        ml.reset( new MediaLibraryTester );
+        ml.reset( new MediaLibraryTesterNoForceRescan );
         cbMock.reset( new mock::NoopCallback );
     }
 
