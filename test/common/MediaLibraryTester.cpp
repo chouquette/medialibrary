@@ -202,12 +202,12 @@ std::shared_ptr<Device> MediaLibraryTester::device( const std::string& uuid,
 
 std::vector<const char*> MediaLibraryTester::getSupportedMediaExtensions() const
 {
-    return supportedMediaExtensions;
+    return SupportedMediaExtensions;
 }
 
 std::vector<const char*> MediaLibraryTester::getSupportedPlaylistExtensions() const
 {
-    return supportedPlaylistExtensions;
+    return SupportedPlaylistExtensions;
 }
 
 void MediaLibraryTester::onDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,

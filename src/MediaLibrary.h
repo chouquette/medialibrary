@@ -229,8 +229,8 @@ public:
 
 protected:
     // Allow access to unit test MediaLibrary implementations
-    static const std::vector<const char*> supportedMediaExtensions;
-    static const std::vector<const char*> supportedPlaylistExtensions;
+    static const std::vector<const char*> SupportedMediaExtensions;
+    static const std::vector<const char*> SupportedPlaylistExtensions;
 
 protected:
     virtual bool startParser();

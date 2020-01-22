@@ -103,7 +103,7 @@ using ThumbnailerType = medialibrary::VmemThumbnailer;
 namespace medialibrary
 {
 
-const std::vector<const char*> MediaLibrary::supportedMediaExtensions = {
+const std::vector<const char*> MediaLibrary::SupportedMediaExtensions = {
     "3g2",
     "3ga",
     "3gp",
@@ -230,7 +230,7 @@ const std::vector<const char*> MediaLibrary::supportedMediaExtensions = {
     "xm"
 };
 
-const std::vector<const char*> MediaLibrary::supportedPlaylistExtensions = {
+const std::vector<const char*> MediaLibrary::SupportedPlaylistExtensions = {
     "asx",
     "b4s",
     "conf",
@@ -672,16 +672,16 @@ Query<IMediaGroup> MediaLibrary::searchMediaGroups( const std::string& pattern,
 
 bool MediaLibrary::isSupportedMediaExtension( const char* ext )
 {
-    return std::binary_search( std::begin( supportedMediaExtensions ),
-        std::end( supportedMediaExtensions ), ext, [](const char* l, const char* r) {
+    return std::binary_search( std::begin( SupportedMediaExtensions ),
+        std::end( SupportedMediaExtensions ), ext, [](const char* l, const char* r) {
             return strcasecmp( l, r ) < 0;
         });
 }
 
 bool MediaLibrary::isSupportedPlaylistExtension(const char* ext)
 {
-    return std::binary_search( std::begin( supportedPlaylistExtensions ),
-        std::end( supportedPlaylistExtensions ), ext, [](const char* l, const char* r) {
+    return std::binary_search( std::begin( SupportedPlaylistExtensions ),
+        std::end( SupportedPlaylistExtensions ), ext, [](const char* l, const char* r) {
             return strcasecmp( l, r ) < 0;
         });
 }
