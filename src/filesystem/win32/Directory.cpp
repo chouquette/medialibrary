@@ -75,8 +75,10 @@ void Directory::read() const
     do
     {
         auto file = charset::FromWide( f.cFileName );
-        if ( ( file[0] == '.' || (f.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0 )
-            && strcasecmp( file.get(), ".nomedia" ) )
+        if ( ( ( f.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN ) != 0 &&
+                    strcasecmp( file.get(), ".nomedia" ) != 0 ) ||
+              strcmp( file.get(), "." ) == 0 ||
+              strcmp( file.get(), ".." ) == 0 )
             continue;
         auto fullpath = m_path + file.get();
         try
@@ -142,7 +144,10 @@ void Directory::read() const
         }
 
         auto file = charset::FromWide( dirInfo->FileName );
-        if ( file[0] == '.' && strcasecmp( file.get(), ".nomedia" ) )
+        if ( ( dirInfo->FileAttributes & FILE_ATTRIBUTE_HIDDEN ) != 0 &&
+                strcasecmp( file.get(), ".nomedia" ) ||
+             strcmp( file.get(), "." ) == 0 ||
+             strcmp( file.get(), ".." ) == 0 )
             continue;
         try
         {
