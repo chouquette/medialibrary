@@ -223,12 +223,12 @@ public:
 
     virtual bool addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory ) override;
 
-    static bool isMediaExtensionSupported( const char* ext );
-    static bool isPlaylistExtensionSupported( const char* ext );
     static void removeOldEntities( MediaLibraryPtr ml );
 
     virtual const std::vector<const char*>& supportedMediaExtensions() const override;
     virtual const std::vector<const char*>& supportedPlaylistExtensions() const override;
+    virtual bool isMediaExtensionSupported( const char* ext ) const override;
+    virtual bool isPlaylistExtensionSupported( const char* ext ) const override;
 
 protected:
     // Allow access to unit test MediaLibrary implementations

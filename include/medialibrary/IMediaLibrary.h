@@ -792,11 +792,21 @@ public:
      */
     virtual const std::vector<const char*>& supportedMediaExtensions() const = 0;
     /**
+     * @brief isMediaExtensionSupported Checks if the provided media extension
+     *                                  is supported.
+     */
+    virtual bool isMediaExtensionSupported( const char* ext ) const = 0;
+    /**
      * @brief supportedPlaylistExtensions Returns the supported playlist extensions
      *
      * The list is guaranteed to be ordered alphabetically
      */
     virtual const std::vector<const char*>& supportedPlaylistExtensions() const = 0;
+    /**
+     * @brief isPlaylistExtensionSupported Checks if the provided playlist extension
+     *                                     is supported.
+     */
+    virtual bool isPlaylistExtensionSupported( const char* ext ) const = 0;
 };
 
 }

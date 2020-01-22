@@ -379,9 +379,9 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
         {
             const auto ext = fileFs->extension();
             auto type = IFile::Type::Unknown;
-            if ( MediaLibrary::isMediaExtensionSupported( ext.c_str() ) == true )
+            if ( m_ml->isMediaExtensionSupported( ext.c_str() ) == true )
                  type = IFile::Type::Main;
-            else if ( MediaLibrary::isPlaylistExtensionSupported( ext.c_str() ) == true )
+            else if ( m_ml->isPlaylistExtensionSupported( ext.c_str() ) == true )
                 type = IFile::Type::Playlist;
             if ( type != IFile::Type::Unknown )
                 filesToAdd.emplace_back( std::move( fileFs ), type );

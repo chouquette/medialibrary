@@ -670,7 +670,7 @@ Query<IMediaGroup> MediaLibrary::searchMediaGroups( const std::string& pattern,
     return MediaGroup::search( this, pattern, params );
 }
 
-bool MediaLibrary::isMediaExtensionSupported( const char* ext )
+bool MediaLibrary::isMediaExtensionSupported( const char* ext ) const
 {
     return std::binary_search( std::begin( SupportedMediaExtensions ),
         std::end( SupportedMediaExtensions ), ext, [](const char* l, const char* r) {
@@ -678,7 +678,7 @@ bool MediaLibrary::isMediaExtensionSupported( const char* ext )
         });
 }
 
-bool MediaLibrary::isPlaylistExtensionSupported(const char* ext)
+bool MediaLibrary::isPlaylistExtensionSupported( const char* ext ) const
 {
     return std::binary_search( std::begin( SupportedPlaylistExtensions ),
         std::end( SupportedPlaylistExtensions ), ext, [](const char* l, const char* r) {
