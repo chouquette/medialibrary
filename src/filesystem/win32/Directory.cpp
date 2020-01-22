@@ -105,7 +105,8 @@ void Directory::read() const
 
     CREATEFILE2_EXTENDED_PARAMETERS params{};
     params.dwFileFlags = FILE_FLAG_BACKUP_SEMANTICS;
-    auto handle = CreateFile2( wpath.get(), GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, &params );
+    auto handle = CreateFile2( wpath.get(), GENERIC_READ, FILE_SHARE_READ,
+                               OPEN_EXISTING, &params );
     if ( handle == INVALID_HANDLE_VALUE )
     {
         LOG_ERROR( "Failed to open directory ", m_path );
@@ -125,7 +126,8 @@ void Directory::read() const
 
     while ( true )
     {
-        auto h = GetFileInformationByHandleEx( handle, FileFullDirectoryInfo, dirInfo.get(), buffSize );
+        auto h = GetFileInformationByHandleEx( handle, FileFullDirectoryInfo,
+                                               dirInfo.get(), buffSize );
         if ( h == 0 )
         {
             auto error = GetLastError();
@@ -139,7 +141,8 @@ void Directory::read() const
                     throw std::bad_alloc();
                 continue;
             }
-            LOG_ERROR( "Failed to browse ", m_path, ". GetLastError(): ", GetLastError() );
+            LOG_ERROR( "Failed to browse ", m_path, ". GetLastError(): ",
+                       GetLastError() );
             throw errors::System{ GetLastError(), "Failed to browse through directory" };
         }
 
@@ -152,7 +155,8 @@ void Directory::read() const
         try
         {
             if ( ( dirInfo->FileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
-                m_dirs.emplace_back( m_fsFactory.createDirectory( m_path + utils::url::encode( file.get() ) ) );
+                m_dirs.emplace_back( m_fsFactory.createDirectory(
+                                         m_path + utils::url::encode( file.get() ) ) );
             else
                 m_files.emplace_back( std::make_shared<File>( m_path + file.get()) );
         }
