@@ -211,7 +211,8 @@ std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
     {
         // Since a null parent_id won't trigger the UNIQUE constraint, we need
         // to check for potential duplicates ourselves
-        t = ml->getConn()->newTransaction();
+        if ( sqlite::Transaction::transactionInProgress() == false )
+            t = ml->getConn()->newTransaction();
         if ( exists( ml, name ) == true )
             return nullptr;
     }
