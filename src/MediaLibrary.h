@@ -227,8 +227,8 @@ public:
     static bool isSupportedPlaylistExtension( const char* ext );
     static void removeOldEntities( MediaLibraryPtr ml );
 
-    std::vector<const char*> supportedMediaExtensions() const;
-    std::vector<const char*> supportedPlaylistExtensions() const;
+    virtual const std::vector<const char*>& supportedMediaExtensions() const override;
+    virtual const std::vector<const char*>& supportedPlaylistExtensions() const override;
 
 protected:
     // Allow access to unit test MediaLibrary implementations

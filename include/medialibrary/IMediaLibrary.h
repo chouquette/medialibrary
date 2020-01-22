@@ -784,6 +784,19 @@ public:
      *                         the user created playlists
      */
     virtual void clearDatabase( bool restorePlaylists ) = 0;
+
+    /**
+     * @brief supportedMediaExtensions Returns the supported media extensions
+     *
+     * The list is guaranteed to be ordered alphabetically
+     */
+    virtual const std::vector<const char*>& supportedMediaExtensions() const = 0;
+    /**
+     * @brief supportedPlaylistExtensions Returns the supported playlist extensions
+     *
+     * The list is guaranteed to be ordered alphabetically
+     */
+    virtual const std::vector<const char*>& supportedPlaylistExtensions() const = 0;
 };
 
 }
