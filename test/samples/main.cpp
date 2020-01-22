@@ -68,6 +68,11 @@ bool ExtraVerbose = false;
 
 static std::tuple<std::string, bool> testCases[] = {
     #define X(TESTCASE) std::make_tuple( TESTCASE, false ),
+#ifndef _WIN32
+    #define X_NO_WIN32(val) X(val)
+#else
+    #define X_NO_WIN32(val)
+#endif
     TEST_CASE_LIST
     #undef X
     #define X(TESTCASE) std::make_tuple( TESTCASE, true ),
