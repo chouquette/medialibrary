@@ -223,8 +223,8 @@ public:
 
     virtual bool addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory ) override;
 
-    static bool isSupportedMediaExtension( const char* ext );
-    static bool isSupportedPlaylistExtension( const char* ext );
+    static bool isMediaExtensionSupported( const char* ext );
+    static bool isPlaylistExtensionSupported( const char* ext );
     static void removeOldEntities( MediaLibraryPtr ml );
 
     virtual const std::vector<const char*>& supportedMediaExtensions() const override;
