@@ -163,7 +163,9 @@ class Misc : public Tests
 {
     virtual void SetUp() override
     {
-        // No need to setup anything, those tests are not using the DB
+        // No need to setup anything more than the media library instance,
+        // those tests are not using the DB
+        ml.reset( new MediaLibraryTester );
     }
 };
 
