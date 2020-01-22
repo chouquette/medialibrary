@@ -81,7 +81,7 @@ public:
     // Queues all unparsed files for parsing.
     void restore();
 
-    void refreshTaskList();
+    virtual void refreshTaskList() override;
 
 private:
     void updateStats();
