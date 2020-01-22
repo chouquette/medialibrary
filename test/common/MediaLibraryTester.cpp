@@ -200,12 +200,12 @@ std::shared_ptr<Device> MediaLibraryTester::device( const std::string& uuid,
     return Device::fromUuid( this, uuid, scheme );
 }
 
-std::vector<const char*> MediaLibraryTester::getSupportedMediaExtensions() const
+std::vector<const char*> MediaLibraryTester::supportedMediaExtensions() const
 {
     return SupportedMediaExtensions;
 }
 
-std::vector<const char*> MediaLibraryTester::getSupportedPlaylistExtensions() const
+std::vector<const char*> MediaLibraryTester::supportedPlaylistExtensions() const
 {
     return SupportedPlaylistExtensions;
 }

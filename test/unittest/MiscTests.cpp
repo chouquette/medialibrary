@@ -171,14 +171,14 @@ class Misc : public Tests
 
 TEST_F( Misc, MediaExtensions )
 {
-    const auto supportedExtensions = ml->getSupportedMediaExtensions();
+    const auto supportedExtensions = ml->supportedMediaExtensions();
     auto res = checkAlphaOrderedVector( supportedExtensions );
     ASSERT_TRUE( res );
 }
 
 TEST_F( Misc, PlaylistExtensions )
 {
-    const auto supportedExtensions = ml->getSupportedPlaylistExtensions();
+    const auto supportedExtensions = ml->supportedPlaylistExtensions();
     auto res = checkAlphaOrderedVector( supportedExtensions );
     ASSERT_TRUE( res );
 }
