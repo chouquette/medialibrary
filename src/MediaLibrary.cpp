@@ -2514,5 +2514,15 @@ void MediaLibrary::FsFactoryCb::onDeviceUnmounted( const fs::IDevice& deviceFs,
     onDeviceChanged( deviceFs, unmountedMountpoint );
 }
 
+std::vector<const char*> MediaLibrary::supportedMediaExtensions() const
+{
+    return SupportedMediaExtensions;
+}
+
+std::vector<const char*> MediaLibrary::supportedPlaylistExtensions() const
+{
+    return SupportedPlaylistExtensions;
+}
+
 
 }

@@ -227,6 +227,9 @@ public:
     static bool isSupportedPlaylistExtension( const char* ext );
     static void removeOldEntities( MediaLibraryPtr ml );
 
+    std::vector<const char*> supportedMediaExtensions() const;
+    std::vector<const char*> supportedPlaylistExtensions() const;
+
 protected:
     // Allow access to unit test MediaLibrary implementations
     static const std::vector<const char*> SupportedMediaExtensions;
