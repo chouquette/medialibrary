@@ -34,7 +34,7 @@ namespace medialibrary
 class CoreThumbnailer : public IThumbnailer
 {
 public:
-    CoreThumbnailer( MediaLibraryPtr ml );
+    CoreThumbnailer();
 
     virtual bool generate( const IMedia& media, const std::string& mrl,
                            uint32_t desiredWidth, uint32_t desiredHeight,
@@ -42,7 +42,6 @@ public:
     virtual void stop() override;
 
 private:
-    MediaLibraryPtr m_ml;
     compat::Mutex m_mutex;
     VLC::Media m_vlcMedia;
     VLC::Media::ThumbnailRequest* m_request;

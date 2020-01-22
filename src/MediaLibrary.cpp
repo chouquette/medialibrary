@@ -1052,7 +1052,7 @@ void MediaLibrary::startThumbnailer()
 {
 #ifdef HAVE_LIBVLC
     if ( m_thumbnailers.empty() == true )
-        m_thumbnailers.push_back( std::make_shared<ThumbnailerType>( this ) );
+        m_thumbnailers.push_back( std::make_shared<ThumbnailerType>() );
 #endif
     for ( const auto& thumbnailer : m_thumbnailers )
     {

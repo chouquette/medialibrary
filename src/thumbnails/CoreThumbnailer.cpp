@@ -33,9 +33,8 @@
 namespace medialibrary
 {
 
-CoreThumbnailer::CoreThumbnailer( MediaLibraryPtr ml )
-    : m_ml( ml )
-    , m_request( nullptr )
+CoreThumbnailer::CoreThumbnailer()
+    : m_request( nullptr )
 {
 }
 

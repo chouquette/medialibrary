@@ -39,9 +39,8 @@
 namespace medialibrary
 {
 
-VmemThumbnailer::VmemThumbnailer( MediaLibraryPtr ml )
-    : m_ml( ml )
-    , m_prevSize( 0 )
+VmemThumbnailer::VmemThumbnailer()
+    : m_prevSize( 0 )
 {
 #ifdef HAVE_JPEG
     m_compressor.reset( new JpegCompressor );

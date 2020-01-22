@@ -53,7 +53,7 @@ class VmemThumbnailer : public IThumbnailer
     };
 
 public:
-    VmemThumbnailer( MediaLibraryPtr ml );
+    VmemThumbnailer();
     virtual bool generate( const IMedia& media, const std::string& mrl,
                            uint32_t desiredWidth, uint32_t desiredHeight,
                            float position, const std::string& dest ) override;
@@ -64,7 +64,6 @@ public:
     bool compress( Task& task, const std::string& dest );
 
 private:
-    MediaLibraryPtr m_ml;
     std::unique_ptr<uint8_t[]> m_buff;
     uint32_t m_prevSize;
     std::unique_ptr<IImageCompressor> m_compressor;
