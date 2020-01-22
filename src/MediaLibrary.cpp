@@ -103,7 +103,7 @@ using ThumbnailerType = medialibrary::VmemThumbnailer;
 namespace medialibrary
 {
 
-const char* const MediaLibrary::supportedMediaExtensions[] = {
+const std::vector<const char*> MediaLibrary::supportedMediaExtensions = {
     "3g2",
     "3ga",
     "3gp",
@@ -230,7 +230,7 @@ const char* const MediaLibrary::supportedMediaExtensions[] = {
     "xm"
 };
 
-const char* const MediaLibrary::supportedPlaylistExtensions[] = {
+const std::vector<const char*> MediaLibrary::supportedPlaylistExtensions = {
     "asx",
     "b4s",
     "conf",
@@ -245,12 +245,6 @@ const char* const MediaLibrary::supportedPlaylistExtensions[] = {
     "wax",
     "xspf"
 };
-
-const size_t MediaLibrary::NbSupportedMediaExtensions =
-        sizeof(supportedMediaExtensions) / sizeof(supportedMediaExtensions[0]);
-
-const size_t MediaLibrary::NbSupportedPlaylistExtensions =
-        sizeof(supportedPlaylistExtensions) / sizeof(supportedPlaylistExtensions[0]);
 
 MediaLibrary::MediaLibrary()
     : m_verbosity( LogLevel::Error )
