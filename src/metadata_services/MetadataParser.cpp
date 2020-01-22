@@ -200,18 +200,6 @@ Status MetadataAnalyzer::run( IItem& item )
             isFileModified = true;
     }
     auto media = std::static_pointer_cast<Media>( item.media() );
-    if ( media->type() == IMedia::Type::Video && media->groupId() == 0 &&
-         media->hasBeenGrouped() == false )
-    {
-        /* We want to be able to assign a media to a group when reloading, but
-         * only if the media is not part of a group yet, and if it has never
-         * been assigned to a group.
-         * If we were not checking if the media has been assigned to a group
-         * we would always force the media back into a group, even if it was
-         * removed from one before.
-         */
-        assignMediaToGroup( item );
-    }
 
     if ( media->type() == IMedia::Type::Audio )
     {
@@ -445,6 +433,18 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
 
     auto t = m_ml->getConn()->newTransaction();
     media->setTitleBuffered( title );
+
+    if ( media->groupId() == 0 && media->hasBeenGrouped() == false )
+    {
+        /* We want to be able to assign a media to a group when reloading, but
+         * only if the media is not part of a group yet, and if it has never
+         * been assigned to a group.
+         * If we were not checking if the media has been assigned to a group
+         * we would always force the media back into a group, even if it was
+         * removed from one before.
+         */
+        assignMediaToGroup( item );
+    }
 
     if ( artworkMrl.empty() == false )
     {
@@ -1016,7 +1016,7 @@ std::shared_ptr<Show> MetadataAnalyzer::findShow( const std::string& showName ) 
     return shows[0];
 }
 
-bool MetadataAnalyzer::assignMediaToGroup( IItem &item )
+bool MetadataAnalyzer::assignMediaToGroup( IItem &item ) const
 {
     assert( item.media() != nullptr );
     auto m = static_cast<Media*>( item.media().get() );
