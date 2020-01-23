@@ -45,11 +45,12 @@ namespace fs
 
 Directory::Directory( const std::string& mrl, fs::IFileSystemFactory& fsFactory )
     : CommonDirectory( fsFactory )
+    , m_path( utils::file::toFolderPath(
+                  utils::fs::toAbsolute( utils::file::toLocalPath( mrl ) ) ) )
+    , m_mrl( utils::file::toMrl( m_path ) )
+
 {
-    m_path = utils::file::toFolderPath(
-                utils::fs::toAbsolute( utils::file::toLocalPath( mrl ) ) );
     assert( *m_path.crbegin() == '/' );
-    m_mrl = utils::file::toMrl( m_path );
 }
 
 const std::string& Directory::mrl() const
