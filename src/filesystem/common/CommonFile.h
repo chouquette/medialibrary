@@ -33,7 +33,7 @@ namespace fs
 class CommonFile : public IFile
 {
 public:
-    CommonFile( const std::string& filePath );
+    CommonFile( const std::string& mrl );
     virtual const std::string& name() const override;
     virtual const std::string& extension() const override;
     virtual const std::string& mrl() const override;
