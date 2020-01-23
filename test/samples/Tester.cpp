@@ -43,7 +43,9 @@ extern bool Verbose;
 extern bool ExtraVerbose;
 
 MockCallback::MockCallback()
-    : m_done( false )
+    : m_thumbnailDone( false )
+    , m_thumbnailSuccess( false )
+    , m_done( false )
     , m_discoveryCompleted( false )
 {
 
