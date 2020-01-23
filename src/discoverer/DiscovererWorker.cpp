@@ -388,10 +388,12 @@ void DiscovererWorker::run()
             });
             {
                 std::unique_lock<compat::Mutex> lock( m_mutex );
-                if ( m_tasks.size() == 0 )
+                if ( m_tasks.empty() == true )
                 {
                     m_ml->onDiscovererIdleChanged( true );
-                    m_cond.wait( lock, [this]() { return m_tasks.size() > 0 || m_run == false; } );
+                    m_cond.wait( lock, [this]() {
+                        return m_tasks.empty() == false || m_run == false;
+                    } );
                     if ( m_run == false )
                         break;
                     m_ml->onDiscovererIdleChanged( false );
