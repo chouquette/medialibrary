@@ -31,7 +31,7 @@ namespace fs
 class NetworkFile : public CommonFile
 {
 public:
-    NetworkFile( const std::string& mrl );
+    explicit NetworkFile( const std::string& mrl );
     virtual unsigned int lastModificationDate() const override;
     virtual int64_t size() const override;
     virtual bool isNetwork() const override;
