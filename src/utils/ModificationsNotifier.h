@@ -80,7 +80,6 @@ public:
 
 private:
     void run();
-    void notify();
 
 private:
     // Use a dummy type since only partial specialization is allowed.
