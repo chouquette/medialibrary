@@ -40,8 +40,8 @@ private:
     virtual void read() const override;
 
 private:
-    std::string m_path;
-    std::string m_mrl;
+    const std::string m_path;
+    const std::string m_mrl;
 };
 
 }
