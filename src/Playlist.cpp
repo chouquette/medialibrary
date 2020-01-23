@@ -850,7 +850,7 @@ bool Playlist::writeBackup( const std::string& name,
         "<playlist version=\"1\" xmlns=\"http://xspf.org/ns/0/\">\n"
     };
     doc += "<title>" + name + "</title>\n<trackList>\n";
-    for ( const auto mrl : mrls )
+    for ( const auto& mrl : mrls )
         doc += "<track><location>" + mrl + "</location></track>\n";
     doc += "</trackList>\n</playlist>";
 
