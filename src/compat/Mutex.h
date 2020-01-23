@@ -74,7 +74,7 @@ public:
         LeaveCriticalSection( &m_lock );
     }
 
-    native_handle_type native_handle()
+    native_handle_type native_handle() noexcept
     {
         return &m_lock;
     }
