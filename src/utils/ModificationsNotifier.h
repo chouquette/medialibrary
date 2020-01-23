@@ -38,7 +38,7 @@ namespace medialibrary
 class ModificationNotifier
 {
 public:
-    ModificationNotifier( MediaLibraryPtr ml );
+    explicit ModificationNotifier( MediaLibraryPtr ml );
     ~ModificationNotifier();
 
     void start();
