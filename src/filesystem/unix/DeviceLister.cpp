@@ -136,7 +136,7 @@ DeviceLister::MountpointMap DeviceLister::listMountpoints() const
 std::pair<std::string,std::string>
 DeviceLister::deviceFromDeviceMapper( const std::string& devicePath ) const
 {
-    if ( devicePath.find( "/dev/mapper" ) != 0 )
+    if ( devicePath.compare( 0, strlen( "/dev/mapper" ), "/dev/mapper" ) != 0 )
         return {};
     char linkPath[PATH_MAX + 1];
     auto linkSize = readlink( devicePath.c_str(), linkPath, PATH_MAX );
