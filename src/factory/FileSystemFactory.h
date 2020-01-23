@@ -41,7 +41,7 @@ class FileSystemFactory : public fs::IFileSystemFactory
     using DeviceCacheMap = std::unordered_map<std::string, std::shared_ptr<fs::IDevice>>;
 
 public:
-    FileSystemFactory( DeviceListerPtr lister );
+    explicit FileSystemFactory( DeviceListerPtr lister );
     virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& mrl ) override;
     virtual std::shared_ptr<fs::IFile> createFile( const std::string& mrl ) override;
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override;
