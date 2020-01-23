@@ -38,7 +38,7 @@ class Connection;
 class Settings
 {
 public:
-    Settings( MediaLibrary* ml );
+    explicit Settings( MediaLibrary* ml );
     bool load();
     /**
      * @brief dbModelVersion returns the current database model version.
