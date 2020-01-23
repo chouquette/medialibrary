@@ -166,8 +166,8 @@ public:
     virtual FolderPtr folder( int64_t id ) const override;
     virtual FolderPtr folder( const std::string& mrl ) const override;
     virtual void removeEntryPoint( const std::string& entryPoint ) override;
-    virtual void banFolder( const std::string& path ) override;
-    virtual void unbanFolder( const std::string& path ) override;
+    virtual void banFolder( const std::string& entryPoint ) override;
+    virtual void unbanFolder( const std::string& entryPoint ) override;
     virtual Query<IFolder> bannedEntryPoints() const override;
 
     const std::string& thumbnailPath() const;
@@ -191,7 +191,7 @@ public:
     ThumbnailerWorker* thumbnailer() const;
 
     virtual IDeviceListerCb* setDeviceLister( DeviceListerPtr lister ) override;
-    std::shared_ptr<fs::IFileSystemFactory> fsFactoryForMrl( const std::string& path ) const;
+    std::shared_ptr<fs::IFileSystemFactory> fsFactoryForMrl( const std::string& mrl ) const;
 
     /**
      * @brief refreshDevices Refreshes the devices from a specific FS factory
