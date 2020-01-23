@@ -104,7 +104,7 @@ int MetadataAnalyzer::toInt( IItem& item, IItem::Metadata meta )
         {
             return std::stoi( str );
         }
-        catch( std::logic_error& ex)
+        catch( const std::logic_error& ex )
         {
             LOG_WARN( "Invalid meta #",
                       static_cast<typename std::underlying_type<IItem::Metadata>::type>( meta ),
@@ -175,7 +175,7 @@ Status MetadataAnalyzer::run( IItem& item )
                 createTracks( static_cast<Media&>( *item.media() ), item.tracks() );
                 t->commit();
             }
-            catch ( const sqlite::errors::ConstraintForeignKey& ex )
+            catch ( const sqlite::errors::ConstraintForeignKey& )
             {
                 /* We're aiming at catching an error during the insertion of the
                  * tracks, which have a foreign key pointing to Media.id_media
@@ -708,7 +708,7 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
     {
         createTracks( *media, tracks );
     }
-    catch ( const sqlite::errors::ConstraintForeignKey& ex )
+    catch ( const sqlite::errors::ConstraintForeignKey& )
     {
         /* We're aiming at catching an error during the insertion of the
          * tracks, which have a foreign key pointing to Media.id_media
