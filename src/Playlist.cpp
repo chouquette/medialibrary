@@ -688,7 +688,6 @@ Playlist::Backups Playlist::loadBackups( MediaLibraryPtr ml )
     try
     {
         auto plFolder = fsFactory->createDirectory( playlistFolderMrl );
-        std::vector<std::shared_ptr<fs::IFile>> files;
         for ( const auto& folder : plFolder->dirs() )
         {
             std::vector<std::string> mrls;
