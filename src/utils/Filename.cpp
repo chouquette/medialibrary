@@ -121,11 +121,12 @@ std::string removePath( const std::string& fullPath, const std::string& toRemove
         return fullPath;
     pos += toRemove.length();
     // Skip over potentially duplicated DIR_SEPARATOR
-    while ( ( fullPath[pos] == DIR_SEPARATOR_CHAR
+    while ( pos < fullPath.length() &&
+            ( fullPath[pos] == DIR_SEPARATOR_CHAR
 #ifdef _WIN32
                 || fullPath[pos] == '/'
 #endif
-            ) && pos < fullPath.length() )
+            ) )
         pos++;
     if ( pos >= fullPath.length() )
         return {};
