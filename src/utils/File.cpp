@@ -70,11 +70,10 @@ bool copy( const std::string& from, const std::string& to )
     if ( input == nullptr || output == nullptr )
         return false;
     unsigned char buff[4096];
-    size_t nbRead;
 
     do
     {
-        nbRead = fread( buff, 1, 4096, input.get() );
+        auto nbRead = fread( buff, 1, 4096, input.get() );
         if ( nbRead == 0 )
         {
             if ( ferror( input.get() ) )
