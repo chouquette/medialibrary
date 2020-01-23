@@ -43,9 +43,10 @@ extern bool Verbose;
 extern bool ExtraVerbose;
 
 MockCallback::MockCallback()
+    : m_done( false )
+    , m_discoveryCompleted( false )
 {
-    m_discoveryCompleted = false;
-    m_done = false;
+
 }
 
 std::unique_lock<compat::Mutex> MockCallback::lock()
