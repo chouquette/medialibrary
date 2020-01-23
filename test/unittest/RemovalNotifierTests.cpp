@@ -53,8 +53,9 @@ public:
 
     std::unique_lock<compat::Mutex> prepareWait()
     {
+        std::unique_lock<compat::Mutex> lock{ m_lock };
         resetCount();
-        return std::unique_lock<compat::Mutex>{ m_lock };
+        return lock;
     }
 
     unsigned int waitForNotif( std::unique_lock<compat::Mutex>& preparedLock,
