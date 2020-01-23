@@ -304,8 +304,6 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
         if ( newThumbnail->insertLinkRecord( entityId, entityType,
                                              newThumbnail->origin() ) == false )
             return nullptr;
-        if ( oldThumbnail != nullptr )
-            --oldThumbnail->m_sharedCounter;
         res = std::move( newThumbnail );
     }
     else
