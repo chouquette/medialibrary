@@ -284,7 +284,7 @@ private:
     class DeviceListerCb : public IDeviceListerCb
     {
     public:
-        DeviceListerCb( MediaLibrary* ml );
+        explicit DeviceListerCb( MediaLibrary* ml );
     private:
         virtual bool onDeviceMounted( const std::string& uuid, const std::string& mountpoint ) override;
         virtual void onDeviceUnmounted(const std::string& uuid, const std::string& mountpoint) override;
@@ -296,7 +296,7 @@ private:
     class FsFactoryCb : public fs::IFileSystemFactoryCb
     {
     public:
-        FsFactoryCb( MediaLibrary* ml );
+        explicit FsFactoryCb( MediaLibrary* ml );
     private:
         virtual void onDeviceMounted( const fs::IDevice& deviceFs,
                                       const std::string& newMountpoint ) override;
