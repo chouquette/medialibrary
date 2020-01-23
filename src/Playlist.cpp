@@ -529,11 +529,7 @@ std::string Playlist::triggerName(Playlist::Triggers trigger, uint32_t dbModel)
     switch ( trigger )
     {
         case Triggers::UpdateOrderOnInsert:
-        {
-            if ( dbModel < 16 )
-                return "update_playlist_order_on_insert";
             return "update_playlist_order_on_insert";
-        }
         case Triggers::UpdateOrderOnDelete:
         {
             assert( dbModel >= 16 );
