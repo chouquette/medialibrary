@@ -37,7 +37,7 @@ namespace sqlite
 class Transaction
 {
 public:
-    Transaction( sqlite::Connection* dbConn );
+    explicit Transaction( sqlite::Connection* dbConn );
     Transaction( const Transaction& ) = delete;
     Transaction( Transaction&& ) = delete;
     Transaction& operator=( const Transaction& ) = delete;

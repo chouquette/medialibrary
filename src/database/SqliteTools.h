@@ -48,7 +48,7 @@ namespace sqlite
 class Row
 {
 public:
-    Row( sqlite3_stmt* stmt )
+    explicit Row( sqlite3_stmt* stmt )
         : m_stmt( stmt )
         , m_idx( 0 )
         , m_nbColumns( sqlite3_column_count( stmt ) )

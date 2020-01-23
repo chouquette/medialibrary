@@ -218,7 +218,7 @@ std::shared_ptr<Connection> Connection::connect( const std::string& dbPath )
     // Use a wrapper to allow make_shared to use the private Connection ctor
     struct SqliteConnectionWrapper : public Connection
     {
-        SqliteConnectionWrapper( const std::string& p ) : Connection( p ) {}
+        explicit SqliteConnectionWrapper( const std::string& p ) : Connection( p ) {}
     };
     return std::make_shared<SqliteConnectionWrapper>( dbPath );
 }

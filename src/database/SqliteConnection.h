@@ -54,7 +54,7 @@ public:
     };
     struct WeakDbContext
     {
-        WeakDbContext( Connection* conn );
+        explicit WeakDbContext( Connection* conn );
         ~WeakDbContext();
         WeakDbContext( const WeakDbContext& ) = delete;
         WeakDbContext( WeakDbContext&& ) = delete;
@@ -112,7 +112,7 @@ private:
 private:
     struct ThreadSpecificConnection
     {
-        ThreadSpecificConnection( std::shared_ptr<Connection> conn );
+        explicit ThreadSpecificConnection( std::shared_ptr<Connection> conn );
         ~ThreadSpecificConnection();
 
     private:
