@@ -44,7 +44,6 @@ extern bool ExtraVerbose;
 
 MockCallback::MockCallback()
 {
-    // Start locked. The locked will be released when waiting for parsing to be completed
     m_discoveryCompleted = false;
     m_done = false;
 }
