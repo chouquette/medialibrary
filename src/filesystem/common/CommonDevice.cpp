@@ -82,7 +82,7 @@ CommonDevice::matchesMountpoint( const std::string& mrl ) const
 {
     for ( const auto& m : m_mountpoints )
     {
-        if ( mrl.find( m ) == 0 )
+        if ( mrl.compare( 0, m.size(), m ) == 0 )
             return std::make_tuple( true, m );
     }
     return std::make_tuple( false, "" );
