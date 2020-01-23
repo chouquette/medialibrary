@@ -33,7 +33,7 @@ namespace fs
 class File : public CommonFile
 {
 public:
-    File( const std::string& filePath );
+    explicit File( const std::string& filePath );
 
     unsigned int lastModificationDate() const override;
     int64_t size() const override;
