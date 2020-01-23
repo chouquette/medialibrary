@@ -63,7 +63,7 @@ class Parser : public IParserCb
 public:
     using ServicePtr = std::shared_ptr<IParserService>;
 
-    Parser( MediaLibrary* ml );
+    explicit Parser( MediaLibrary* ml );
     virtual ~Parser();
     void addService( ServicePtr service );
     virtual void parse( std::shared_ptr<Task> task ) override;
