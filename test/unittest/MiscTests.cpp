@@ -630,3 +630,9 @@ TEST_F( DbModel, Upgrade23to24 )
     ASSERT_NE( nullptr, showEpisode );
     ASSERT_EQ( showEpisode->title(), episodes[0]->title() );
 }
+
+
+TEST_F( DbModel, Upgrade24to25 )
+{
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v24.sql" );
+}

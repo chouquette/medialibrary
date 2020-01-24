@@ -441,6 +441,7 @@ EXTRA_DIST += medialibrary.pc \
 	src/database/migrations/migration21-22.sql \
 	src/database/migrations/migration22-23.sql \
 	src/database/migrations/migration23-24.sql \
+	src/database/migrations/migration24-25.sql \
 	$(NULL)
 	
 
