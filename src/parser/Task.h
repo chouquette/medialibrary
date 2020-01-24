@@ -270,6 +270,7 @@ public:
     virtual LinkType linkType() const override;
     virtual int64_t linkToId() const override;
     virtual int64_t linkExtra() const override;
+    virtual const std::string& linkToMrl() const override;
 
     bool needEntityRestoration() const;
 
@@ -286,6 +287,7 @@ private:
     int64_t     m_linkToId = 0;
     LinkType    m_linkToType = LinkType::NoLink;
     int64_t     m_linkExtra = 0;
+    std::string m_linkToMrl;
 
     unsigned int m_currentService = 0;
     std::unordered_map<Metadata, std::string, MetadataHash> m_metadata;

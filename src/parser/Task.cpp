@@ -66,6 +66,7 @@ Task::Task( MediaLibraryPtr ml, sqlite::Row& row )
     , m_linkToId( row.extract<decltype(m_linkToId)>() )
     , m_linkToType( row.extract<decltype(m_linkToType)>() )
     , m_linkExtra( row.extract<decltype(m_linkExtra)>() )
+    , m_linkToMrl( row.extract<decltype(m_linkToMrl)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -451,7 +452,16 @@ std::string Task::schema( const std::string& tableName, uint32_t dbModel )
         // its value into account
         // Starting from model 22, this is true for all link_ fields.
 
-    if ( dbModel >= 22 )
+    if ( dbModel >= 25 )
+    {
+        req += "link_to_id UNSIGNED INTEGER NOT NULL,"
+               "link_to_type UNSIGNED INTEGER NOT NULL,"
+               "link_extra UNSIGNED INTEGER NOT NULL,"
+               "link_to_mrl TEXT NOT NULL,"
+               "UNIQUE(mrl,type, link_to_id, link_to_type, link_extra, link_to_mrl) "
+               "ON CONFLICT FAIL,";
+    }
+    else if ( dbModel >= 22 )
     {
         req += "link_to_id UNSIGNED INTEGER NOT NULL,"
                "link_to_type UNSIGNED INTEGER NOT NULL,"
@@ -579,8 +589,8 @@ Task::create( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> fi
         std::move( parentFolder ), std::move( parentFolderFs ), fileType );
     const std::string req = "INSERT INTO " + Task::Table::Name +
         "(type, mrl, file_type, parent_folder_id, link_to_id, link_to_type, "
-            "link_extra)"
-            "VALUES(?, ?, ?, ?, 0, 0, 0)";
+            "link_extra, link_to_mrl)"
+            "VALUES(?, ?, ?, ?, 0, 0, 0, '')";
     if ( insert( ml, self, req, Type::Creation, self->mrl(), fileType,
                  parentFolderId ) == false )
         return nullptr;
@@ -602,8 +612,8 @@ Task::createRefreshTask( MediaLibraryPtr ml, std::shared_ptr<File> file,
                                         std::move( parentFolderFs ) );
     const std::string req = "INSERT INTO " + Task::Table::Name +
             "(type, mrl, file_type, file_id, parent_folder_id, link_to_id, "
-            "link_to_type, link_extra)"
-            "VALUES(?, ?, ?, ?, ?, 0, 0, 0)";
+            "link_to_type, link_extra, link_to_mrl)"
+            "VALUES(?, ?, ?, ?, ?, 0, 0, 0, '')";
     if ( insert( ml, self, req, Type::Refresh, self->mrl(), self->file()->type(),
                  self->file()->id(), parentFolderId ) == false )
         return nullptr;
@@ -657,7 +667,7 @@ std::shared_ptr<Task> Task::createLinkTask( MediaLibraryPtr ml, std::string mrl,
                                         linkToExtra );
     const std::string req = "INSERT INTO " + Task::Table::Name +
             "(type, mrl, file_type, file_id, parent_folder_id, link_to_id,"
-            "link_to_type, link_extra) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+            "link_to_type, link_extra, link_to_mrl) VALUES(?, ?, ?, ?, ?, ?, ?, ?, '')";
     if ( insert( ml, self, req, Type::Link, self->mrl(), IFile::Type::Unknown,
                  nullptr, nullptr, linkToId, linkToType, linkToExtra ) == false )
         return nullptr;
@@ -672,8 +682,8 @@ std::shared_ptr<Task> Task::createRestoreTask( MediaLibraryPtr ml, std::string m
 {
     auto self = std::make_shared<Task>( ml, std::move( mrl ), fileType );
     const std::string req = "INSERT INTO " + Table::Name +
-            "(type, mrl, file_type, link_to_id, link_to_type, link_extra) "
-            "VALUES(?, ?, ?, 0, 0, 0)";
+            "(type, mrl, file_type, link_to_id, link_to_type, link_extra, link_to_mrl) "
+            "VALUES(?, ?, ?, 0, 0, 0, '')";
     if ( insert( ml, self, req, Type::Restore, self->mrl(), fileType ) == false )
         return nullptr;
     auto parser = ml->getParser();
@@ -847,6 +857,11 @@ int64_t Task::linkToId() const
 int64_t Task::linkExtra() const
 {
     return m_linkExtra;
+}
+
+const std::string& Task::linkToMrl() const
+{
+    return m_linkToMrl;
 }
 
 bool Task::needEntityRestoration() const

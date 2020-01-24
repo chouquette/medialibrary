@@ -23,3 +23,32 @@ MediaGroup::schema( MediaGroup::Table::Name, 25 ),
 MediaGroup::trigger( MediaGroup::Triggers::InsertFts, 25 ),
 MediaGroup::trigger( MediaGroup::Triggers::DeleteFts, 25 ),
 MediaGroup::index( MediaGroup::Indexes::ParentId, 25 ),
+
+"CREATE TEMPORARY TABLE " + parser::Task::Table::Name + "_backup"
+"("
+    "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "step INTEGER NOT NULL DEFAULT 0,"
+    "retry_count INTEGER NOT NULL DEFAULT 0,"
+    "type INTEGER NOT NULL,"
+    "mrl TEXT,"
+    "file_type INTEGER NOT NULL,"
+    "file_id UNSIGNED INTEGER,"
+    "parent_folder_id UNSIGNED INTEGER,"
+    "link_to_id UNSIGNED INTEGER NOT NULL,"
+    "link_to_type UNSIGNED INTEGER NOT NULL,"
+    "link_extra UNSIGNED INTEGER NOT NULL"
+")",
+
+"INSERT INTO " + parser::Task::Table::Name + "_backup"
+    " SELECT * FROM " + parser::Task::Table::Name,
+
+"DROP TABLE " + parser::Task::Table::Name,
+
+parser::Task::schema( parser::Task::Table::Name, 25 ),
+
+"INSERT INTO " + parser::Task::Table::Name +
+    " SELECT *, '' FROM " + parser::Task::Table::Name + "_backup",
+
+"DROP TABLE " + parser::Task::Table::Name + "_backup",
+
+parser::Task::index( parser::Task::Indexes::ParentFolderId, 25 ),

@@ -225,6 +225,7 @@ public:
     virtual LinkType linkType() const = 0;
     virtual int64_t linkToId() const = 0;
     virtual int64_t linkExtra() const = 0;
+    virtual const std::string& linkToMrl() const = 0;
 };
 
 }
