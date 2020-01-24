@@ -385,7 +385,7 @@ void Task::setMrl( std::string newMrl )
 void Task::createTable( sqlite::Connection* dbConnection, uint32_t dbModel )
 {
     sqlite::Tools::executeRequest( dbConnection,
-                                   schema( Table::Name, dbModel, false ) );
+                                   schema( Table::Name, dbModel ) );
 }
 
 void Task::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModel )
@@ -404,13 +404,11 @@ void Task::createIndex( sqlite::Connection* dbConnection, uint32_t dbModel )
                                    index( Indexes::ParentFolderId, dbModel ) );
 }
 
-std::string Task::schema( const std::string& tableName, uint32_t dbModel,
-                          bool backup )
+std::string Task::schema( const std::string& tableName, uint32_t dbModel )
 {
     assert( tableName == Table::Name );
     if ( dbModel <= 17 )
     {
-        assert( backup == false );
         return "CREATE TABLE " + Table::Name +
         "("
             "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -432,8 +430,7 @@ std::string Task::schema( const std::string& tableName, uint32_t dbModel,
             + "(id_playlist) ON DELETE CASCADE"
         ")";
     }
-    auto req = std::string{ "CREATE " } + (backup ? "TEMPORARY " : "") +
-            "TABLE " + Table::Name + (backup ? "_backup" : "" ) +
+    auto req = "CREATE TABLE " + Table::Name +
     "("
         "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
         "step INTEGER NOT NULL DEFAULT 0,"
@@ -522,7 +519,7 @@ std::string Task::indexName( Task::Indexes index, uint32_t dbModel )
 bool Task::checkDbModel( MediaLibraryPtr ml )
 {
     return sqlite::Tools::checkTableSchema( ml->getConn(),
-                                       schema( Table::Name, Settings::DbModelVersion, false ),
+                                       schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) &&
            sqlite::Tools::checkTriggerStatement( ml->getConn(),
                 trigger( Triggers::DeletePlaylistLinkingTask, Settings::DbModelVersion ),

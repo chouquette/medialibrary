@@ -46,14 +46,27 @@ VideoGroup::schema( VideoGroup::Table::Name, 22 ),
 /*
  * Update UNIQUE contraint and NOT NULL contraints for Taks.link_* fields
  */
- parser::Task::schema( parser::Task::Table::Name, 21, true ),
+ "CREATE TEMPORARY TABLE " + parser::Task::Table::Name + "_backup"
+ "("
+     "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
+     "step INTEGER NOT NULL DEFAULT 0,"
+     "retry_count INTEGER NOT NULL DEFAULT 0,"
+     "type INTEGER NOT NULL,"
+     "mrl TEXT,"
+     "file_type INTEGER NOT NULL,"
+     "file_id UNSIGNED INTEGER,"
+     "parent_folder_id UNSIGNED INTEGER,"
+     "link_to_id UNSIGNED INTEGER,"
+     "link_to_type UNSIGNED INTEGER,"
+     "link_extra UNSIGNED INTEGER"
+")",
 
  "INSERT INTO " + parser::Task::Table::Name + "_backup"
      " SELECT * FROM " + parser::Task::Table::Name,
 
  "DROP TABLE " + parser::Task::Table::Name,
 
- parser::Task::schema( parser::Task::Table::Name, 22, false ),
+ parser::Task::schema( parser::Task::Table::Name, 22 ),
 
  "INSERT INTO " + parser::Task::Table::Name +
      " SELECT id_task, step, retry_count, type, mrl, file_type, file_id,"

@@ -15,7 +15,7 @@
 
 "DROP TABLE " + parser::Task::Table::Name,
 
-parser::Task::schema( parser::Task::Table::Name, 19, false ),
+parser::Task::schema( parser::Task::Table::Name, 19 ),
 
 "INSERT INTO " + parser::Task::Table::Name +
     "(id_task, type, mrl, file_type, file_id, parent_folder_id)"

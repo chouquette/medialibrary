@@ -32,7 +32,7 @@ Thumbnail::index( Thumbnail::Indexes::ThumbnailId, 18 ),
 
 "DROP TABLE " + parser::Task::Table::Name,
 
-parser::Task::schema( parser::Task::Table::Name, 18, false ),
+parser::Task::schema( parser::Task::Table::Name, 18 ),
 parser::Task::trigger( parser::Task::Triggers::DeletePlaylistLinkingTask, 18 ),
 
 "INSERT INTO " + parser::Task::Table::Name +
