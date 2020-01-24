@@ -36,7 +36,7 @@ class MockCallback : public mock::NoopCallback
 public:
     MockCallback() : m_nbMedia( 0 ), m_nbTotalMedia( 0 ) {}
 private:
-    virtual void onMediaDeleted( std::vector<int64_t> batch ) override
+    virtual void onMediaDeleted( std::set<int64_t> batch ) override
     {
         std::lock_guard<compat::Mutex> lock( m_lock );
         m_nbMedia = batch.size();

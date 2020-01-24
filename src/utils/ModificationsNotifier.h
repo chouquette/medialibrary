@@ -25,6 +25,7 @@
 #include <atomic>
 #include "compat/ConditionVariable.h"
 #include <vector>
+#include <set>
 #include <chrono>
 
 #include "medialibrary/Types.h"
@@ -87,15 +88,15 @@ private:
     struct Queue
     {
         std::vector<std::shared_ptr<T>> added;
-        std::vector<int64_t> modified;
-        std::vector<int64_t> removed;
+        std::set<int64_t> modified;
+        std::set<int64_t> removed;
         std::chrono::time_point<std::chrono::steady_clock> timeout;
     };
 
     template <typename DUMMY>
     struct Queue<void, DUMMY>
     {
-        std::vector<int64_t> removed;
+        std::set<int64_t> removed;
         std::chrono::time_point<std::chrono::steady_clock> timeout;
     };
 
@@ -120,10 +121,10 @@ private:
     }
 
     template <typename T>
-    void notifyModification( int64_t entity, Queue<T>& queue )
+    void notifyModification( int64_t rowId, Queue<T>& queue )
     {
         std::lock_guard<compat::Mutex> lock( m_lock );
-        queue.modified.push_back( std::move( entity ) );
+        queue.modified.insert( rowId );
         updateTimeout( queue );
     }
 
@@ -131,7 +132,7 @@ private:
     void notifyRemoval( int64_t rowId, Queue<T>& queue )
     {
         std::lock_guard<compat::Mutex> lock( m_lock );
-        queue.removed.push_back( rowId );
+        queue.removed.insert( rowId );
         updateTimeout( queue );
     }
 

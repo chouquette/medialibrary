@@ -23,6 +23,7 @@
 #pragma once
 
 #include <vector>
+#include <set>
 #include <string>
 
 #include "medialibrary/ILogger.h"
@@ -176,32 +177,32 @@ public:
     /**
      * @brief onMediaUpdated Will be called when a file metadata gets updated.
      */
-    virtual void onMediaModified( std::vector<int64_t> mediaIds ) = 0;
+    virtual void onMediaModified( std::set<int64_t> mediaIds ) = 0;
 
-    virtual void onMediaDeleted( std::vector<int64_t> mediaIds ) = 0;
+    virtual void onMediaDeleted( std::set<int64_t> mediaIds ) = 0;
 
     virtual void onArtistsAdded( std::vector<ArtistPtr> artists ) = 0;
-    virtual void onArtistsModified( std::vector<int64_t> artistsIds ) = 0;
-    virtual void onArtistsDeleted( std::vector<int64_t> artistsIds ) = 0;
+    virtual void onArtistsModified( std::set<int64_t> artistsIds ) = 0;
+    virtual void onArtistsDeleted( std::set<int64_t> artistsIds ) = 0;
 
     virtual void onAlbumsAdded( std::vector<AlbumPtr> albums ) = 0;
-    virtual void onAlbumsModified( std::vector<int64_t> albumsIds ) = 0;
-    virtual void onAlbumsDeleted( std::vector<int64_t> albumsIds ) = 0;
+    virtual void onAlbumsModified( std::set<int64_t> albumsIds ) = 0;
+    virtual void onAlbumsDeleted( std::set<int64_t> albumsIds ) = 0;
 
     virtual void onPlaylistsAdded( std::vector<PlaylistPtr> playlists ) = 0;
-    virtual void onPlaylistsModified( std::vector<int64_t> playlistsIds ) = 0;
-    virtual void onPlaylistsDeleted( std::vector<int64_t> playlistIds ) = 0;
+    virtual void onPlaylistsModified( std::set<int64_t> playlistsIds ) = 0;
+    virtual void onPlaylistsDeleted( std::set<int64_t> playlistIds ) = 0;
 
     virtual void onGenresAdded( std::vector<GenrePtr> genres ) = 0;
-    virtual void onGenresModified( std::vector<int64_t> genresIds ) = 0;
-    virtual void onGenresDeleted( std::vector<int64_t> genreIds ) = 0;
+    virtual void onGenresModified( std::set<int64_t> genresIds ) = 0;
+    virtual void onGenresDeleted( std::set<int64_t> genreIds ) = 0;
 
     /**
      * MediaGroup notification apply to all groups, including subgroups.
      */
     virtual void onMediaGroupAdded( std::vector<MediaGroupPtr> mediaGroups ) = 0;
-    virtual void onMediaGroupModified( std::vector<int64_t> mediaGroupsIds ) = 0;
-    virtual void onMediaGroupDeleted( std::vector<int64_t> mediaGroupsIds ) = 0;
+    virtual void onMediaGroupModified( std::set<int64_t> mediaGroupsIds ) = 0;
+    virtual void onMediaGroupDeleted( std::set<int64_t> mediaGroupsIds ) = 0;
 
     /**
      * @brief onDiscoveryStarted This callback will be invoked when a folder queued for discovery
