@@ -135,6 +135,18 @@ public:
           LinkType linkToType, int64_t linkExtra);
 
     /**
+     * @brief Task constructor for a link task with an unknown entity
+     * @param ml A medialibrary instance pointer
+     * @param mrl The entity being linked's mrl
+     * @param fileType The entity being linked's type
+     * @param linkToMrl The entity being linked *to*'s mrl
+     * @param linkToType The entity being linked'd type
+     * @param linkExtra An extra parameter, contextual to the type of linking.
+     */
+    Task( MediaLibraryPtr ml, std::string mrl, IFile::Type fileType,
+          std::string linkToMrl, LinkType linkToType, int64_t linkExtra );
+
+    /**
      * @brief Task Contructor for restore tasks
      * @param ml A medialibrary instance pointer
      * @param mrl The mrl of the entity to restore
@@ -210,8 +222,39 @@ public:
      */
     static std::shared_ptr<Task> createMediaRefreshTask( MediaLibraryPtr ml,
                                                          std::shared_ptr<Media> media );
+    /**
+     * @brief createLinkTask Create a link task with a known entity
+     * @param ml A media library instance
+     * @param mrl The mrl of the entity being linked
+     * @param linkToType The type of the entity being linked *to*
+     * @param linkToExtra Some extra linking parameter
+     * @return A new task
+     *
+     * This will create the task in database and automatically push it to the
+     * parser task queue.
+     */
     static std::shared_ptr<Task> createLinkTask( MediaLibraryPtr ml, std::string mrl,
                                                  int64_t linkToId, LinkType linkToType,
+                                                 int64_t linkToExtra );
+    /**
+     * @brief createLinkTask Create a link task with an unknown entity
+     * @param ml A media library instance
+     * @param mrl The mrl of the entity being linked
+     * @param fileType The linked file type
+     * @param linkToMrl The mrl of the entity being linked *to*
+     * @param linkToType The type of the entity being linked *to*
+     * @param linkToExtra Some extra linking parameter
+     * @return a new task
+     *
+     * This will create the task in database and automatically push it to the
+     * parser task queue.
+     * This will *not*, however, create the task responsible for creating the
+     * entity to be linked *to*.
+     */
+    static std::shared_ptr<Task> createLinkTask( MediaLibraryPtr ml, std::string mrl,
+                                                 IFile::Type fileType,
+                                                 std::string linkToMrl,
+                                                 LinkType linkToType,
                                                  int64_t linkToExtra );
 
     static std::shared_ptr<Task> createRestoreTask( MediaLibraryPtr ml,

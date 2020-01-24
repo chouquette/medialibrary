@@ -113,6 +113,18 @@ Task::Task( MediaLibraryPtr ml, std::string mrl, int64_t linkToId,
 {
 }
 
+Task::Task( MediaLibraryPtr ml, std::string mrl, IFile::Type fileType,
+            std::string linkToMrl, IItem::LinkType linkToType, int64_t linkExtra )
+    : m_ml( ml )
+    , m_type( Type::Link )
+    , m_mrl( std::move( mrl ) )
+    , m_fileType( fileType )
+    , m_linkToType( linkToType )
+    , m_linkExtra( linkExtra )
+    , m_linkToMrl( std::move( linkToMrl ) )
+{
+}
+
 Task::Task( MediaLibraryPtr ml, std::string mrl , IFile::Type fileType )
     : m_ml( ml )
     , m_type( Type::Restore )
@@ -677,6 +689,27 @@ std::shared_ptr<Task> Task::createLinkTask( MediaLibraryPtr ml, std::string mrl,
     if ( insert( ml, self, req, Type::Link, self->mrl(), IFile::Type::Unknown,
                  nullptr, nullptr, linkToId, linkToType, linkToExtra ) == false )
         return nullptr;
+    if ( parser != nullptr )
+        parser->parse( self );
+    return self;
+}
+
+std::shared_ptr<Task> Task::createLinkTask( MediaLibraryPtr ml, std::string mrl,
+                                            IFile::Type fileType,
+                                            std::string linkToMrl,
+                                            LinkType linkToType,
+                                            int64_t linkToExtra )
+{
+    auto self = std::make_shared<Task>( ml, std::move( mrl ), fileType,
+                                        std::move( linkToMrl ), linkToType,
+                                        linkToExtra );
+    const std::string req = "INSERT INTO " + Task::Table::Name +
+            "(type, mrl, file_type, link_to_id, link_to_type, link_extra, link_to_mrl) "
+            "VALUES(?, ?, ?, 0, ?, ?, ?)";
+    if ( insert( ml, self, req, Type::Link, self->mrl(), fileType, linkToType,
+                 linkToExtra, self->linkToMrl() ) == false )
+        return nullptr;
+    auto parser = ml->getParser();
     if ( parser != nullptr )
         parser->parse( self );
     return self;
