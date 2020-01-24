@@ -345,7 +345,26 @@ unittest_SOURCES = \
 	test/unittest/DiscovererTests.cpp \
 	$(NULL)
 
-EXTRA_DIST += test/unittest/db_v3.sql
+EXTRA_DIST += test/unittest/db_v3.sql \
+	test/unittest/db_v4.sql \
+	test/unittest/db_v7.sql \
+	test/unittest/db_v8.sql \
+	test/unittest/db_v10.sql \
+	test/unittest/db_v12.sql \
+	test/unittest/db_v13.sql \
+	test/unittest/db_v14.sql \
+	test/unittest/db_v15.sql \
+	test/unittest/db_v16.sql \
+	test/unittest/db_v17.sql \
+	test/unittest/db_v18_broken.sql \
+	test/unittest/db_v18_ok.sql \
+	test/unittest/db_v19.sql \
+	test/unittest/db_v20.sql \
+	test/unittest/db_v21.sql \
+	test/unittest/db_v22.sql \
+	test/unittest/db_v23.sql \
+	$(NULL)
+
 
 unittest_CPPFLAGS = 		\
 	$(MEDIALIB_CPPFLAGS) 	\
