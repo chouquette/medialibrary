@@ -25,12 +25,13 @@
 #endif
 
 #include "medialibrary/IMediaLibrary.h"
+#include "test/mocks/NoopCallback.h"
 
 #include <iostream>
 #include <condition_variable>
 #include <mutex>
 
-class TestCb : public medialibrary::IMediaLibraryCb
+class TestCb : public mock::NoopCallback
 {
 public:
     TestCb()
@@ -55,24 +56,6 @@ public:
     }
 
 private:
-    virtual void onMediaAdded(std::vector<medialibrary::MediaPtr> ) override {}
-    virtual void onMediaModified(std::vector<int64_t> ) override {}
-    virtual void onMediaDeleted(std::vector<int64_t> ) override {}
-    virtual void onArtistsAdded(std::vector<medialibrary::ArtistPtr> ) override {}
-    virtual void onArtistsModified(std::vector<int64_t> ) override {}
-    virtual void onArtistsDeleted(std::vector<int64_t> ) override {}
-    virtual void onAlbumsAdded(std::vector<medialibrary::AlbumPtr> ) override {}
-    virtual void onAlbumsModified(std::vector<int64_t> ) override {}
-    virtual void onAlbumsDeleted(std::vector<int64_t> ) override {}
-    virtual void onPlaylistsAdded(std::vector<medialibrary::PlaylistPtr> ) override {}
-    virtual void onPlaylistsModified(std::vector<int64_t> ) override {}
-    virtual void onPlaylistsDeleted(std::vector<int64_t> ) override {}
-    virtual void onGenresAdded(std::vector<medialibrary::GenrePtr> ) override {}
-    virtual void onGenresModified(std::vector<int64_t> ) override {}
-    virtual void onGenresDeleted(std::vector<int64_t> ) override {}
-    virtual void onMediaGroupAdded( std::vector<medialibrary::MediaGroupPtr> ) override {}
-    virtual void onMediaGroupModified( std::vector<int64_t> ) override {}
-    virtual void onMediaGroupDeleted( std::vector<int64_t> ) override {}
     virtual void onDiscoveryStarted( const std::string& ) override
     {
         {
@@ -82,7 +65,6 @@ private:
         }
         m_cond.notify_all();
     }
-    virtual void onDiscoveryProgress(const std::string& ) override {}
     virtual void onDiscoveryCompleted(const std::string&, bool success ) override
     {
         {
@@ -94,11 +76,6 @@ private:
         }
         m_cond.notify_all();
     }
-    virtual void onReloadStarted(const std::string& ) override {}
-    virtual void onReloadCompleted(const std::string&, bool ) override {}
-    virtual void onEntryPointRemoved(const std::string&, bool ) override {}
-    virtual void onEntryPointBanned(const std::string&, bool ) override {}
-    virtual void onEntryPointUnbanned(const std::string&, bool ) override {}
     virtual void onParsingStatsUpdated(uint32_t percent) override
     {
         {
@@ -115,10 +92,6 @@ private:
         }
         m_cond.notify_all();
     }
-    virtual void onMediaThumbnailReady( medialibrary::MediaPtr, medialibrary::ThumbnailSizeType, bool ) override {}
-    virtual void onEntryPointAdded( const std::string&, bool ) override {}
-    virtual void onHistoryChanged( medialibrary::HistoryType ) override {}
-    virtual void onRescanStarted() override {}
 
 private:
     std::condition_variable m_cond;
