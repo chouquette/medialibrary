@@ -1670,11 +1670,35 @@ void MediaLibrary::migrateModel17to18( uint32_t originalPreviousVersion )
     {
         // Migrate tasks
         {
-            auto tasks = parser::Task::fetchAll<parser::Task>( this );
-            for ( auto& t : tasks )
+            sqlite::Row row;
+            int64_t taskId;
+            std::string mrl;
+
+            auto batchSize = 100u;
+            auto offset = 0u;
+            const std::string req = "SELECT id_task, mrl FROM " +
+                    parser::Task::Table::Name + " LIMIT ? OFFSET ?";
+
+            while ( true )
             {
-                auto newMrl = utils::url::encode( utils::url::decode( t->mrl() ) );
-                t->setMrl( std::move( newMrl ) );
+                /*
+                 * Since we change the parameter along the loop, we need to recreate
+                 * the statement for each iteration, in order to reset the bindings
+                 */
+                sqlite::Statement stmt{ dbConn->handle(), req };
+                stmt.execute( batchSize, offset );
+                auto nbRow = 0u;
+                while ( ( row = stmt.row() ) != nullptr )
+                {
+                    row >> taskId >> mrl;
+                    auto newMrl = utils::url::encode( utils::url::decode( mrl ) );
+                    if ( newMrl != mrl )
+                        parser::Task::setMrl( this, taskId, std::move( newMrl ) );
+                    nbRow++;
+                }
+                if ( nbRow < batchSize )
+                    break;
+                offset += nbRow;
             }
         }
     }

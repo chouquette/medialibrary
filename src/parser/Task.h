@@ -178,6 +178,7 @@ public:
 
     // Restore attached entities such as media/files
     bool restoreLinkedEntities( LastTaskInfo& lastTaskInfo );
+    static bool setMrl( MediaLibraryPtr ml, int64_t taskId, const std::string& mrl );
     void setMrl( std::string mrl );
 
     static void createTable( sqlite::Connection* dbConnection , uint32_t dbModel );

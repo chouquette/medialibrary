@@ -371,13 +371,18 @@ bool Task::restoreLinkedEntities( LastTaskInfo& lastTask )
     return true;
 }
 
+bool Task::setMrl( MediaLibraryPtr ml, int64_t taskId, const std::string& mrl )
+{
+    static const std::string req = "UPDATE " + Task::Table::Name + " SET "
+            "mrl = ? WHERE id_task = ?";
+    return sqlite::Tools::executeUpdate( ml->getConn(), req, mrl, taskId );
+}
+
 void Task::setMrl( std::string newMrl )
 {
     if ( m_mrl == newMrl )
         return;
-    static const std::string req = "UPDATE " + Task::Table::Name + " SET "
-            "mrl = ? WHERE id_task = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, newMrl, m_id ) == false )
+    if ( setMrl( m_ml, m_id, newMrl ) == false )
         return;
     m_mrl = std::move( newMrl );
 }
