@@ -181,6 +181,7 @@ noinst_HEADERS = \
 	src/utils/Url.h \
 	src/utils/File.h \
 	src/utils/TitleAnalyzer.h \
+	src/utils/Defer.h \
 	src/VideoTrack.h \
 	src/Metadata.h \
 	src/compat/Thread.h \
