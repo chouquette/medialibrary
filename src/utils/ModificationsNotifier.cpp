@@ -180,6 +180,7 @@ void ModificationNotifier::run()
     Queue<IAlbum> albums;
     Queue<IPlaylist> playlists;
     Queue<IGenre> genres;
+    Queue<IMediaGroup> mediaGroups;
     Queue<void> thumbnails;
 
     while ( m_stop == false )
@@ -212,6 +213,7 @@ void ModificationNotifier::run()
                 checkQueue( m_albums, albums, nextTimeout, now );
                 checkQueue( m_playlists, playlists, nextTimeout, now );
                 checkQueue( m_genres, genres, nextTimeout, now );
+                checkQueue( m_mediaGroups, mediaGroups, nextTimeout, now );
                 checkQueue( m_thumbnails, thumbnails, nextTimeout, now );
                 m_timeout = nextTimeout;
             }
@@ -225,6 +227,8 @@ void ModificationNotifier::run()
                     &IMediaLibraryCb::onPlaylistsModified, &IMediaLibraryCb::onPlaylistsDeleted );
             notify( std::move( genres ), &IMediaLibraryCb::onGenresAdded,
                     &IMediaLibraryCb::onGenresModified, &IMediaLibraryCb::onGenresDeleted );
+            notify( std::move( mediaGroups ), &IMediaLibraryCb::onMediaGroupAdded,
+                    &IMediaLibraryCb::onMediaGroupModified, &IMediaLibraryCb::onMediaGroupDeleted );
             for ( auto thumbnailId : thumbnails.removed )
             {
                 auto path = Thumbnail::path( m_ml, thumbnailId );
