@@ -197,7 +197,7 @@ public:
     static bool resetRetryCount( MediaLibraryPtr ml );
     static bool resetParsing( MediaLibraryPtr ml );
     static std::vector<std::shared_ptr<Task>> fetchUncompleted( MediaLibraryPtr ml );
-    static std::shared_ptr<Task> create( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> fileFs,
+    static std::shared_ptr<Task> create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
                                          std::shared_ptr<Folder> parentFolder,
                                          std::shared_ptr<fs::IDirectory> parentFolderFs,
                                          IFile::Type fileType );

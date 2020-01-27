@@ -745,7 +745,7 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
         t = getConn()->newTransaction();
     try
     {
-        parser::Task::create( this, mrl, std::move( fileFs ), std::move( parentFolder ),
+        parser::Task::create( this, std::move( fileFs ), std::move( parentFolder ),
                               std::move( parentFolderFs ), fileType );
     }
     catch ( const sqlite::errors::ConstraintViolation& ex )

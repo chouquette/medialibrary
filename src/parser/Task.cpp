@@ -581,7 +581,7 @@ std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
 }
 
 std::shared_ptr<Task>
-Task::create( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> fileFs,
+Task::create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
               std::shared_ptr<Folder> parentFolder, std::shared_ptr<fs::IDirectory> parentFolderFs,
               IFile::Type fileType )
 {
@@ -594,8 +594,10 @@ Task::create( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> fi
     auto parser = ml->getParser();
     auto parentFolderId = parentFolder->id();
 
-    std::shared_ptr<Task> self = std::make_shared<Task>( ml, std::move( mrl ), std::move( fileFs ),
-        std::move( parentFolder ), std::move( parentFolderFs ), fileType );
+    auto mrl = fileFs->mrl();
+    std::shared_ptr<Task> self = std::make_shared<Task>( ml, std::move( mrl ),
+        std::move( fileFs ), std::move( parentFolder ), std::move( parentFolderFs ),
+        fileType );
     const std::string req = "INSERT INTO " + Task::Table::Name +
         "(type, mrl, file_type, parent_folder_id, link_to_id, link_to_type, "
             "link_extra, link_to_mrl)"
