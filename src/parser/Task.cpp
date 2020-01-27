@@ -785,20 +785,20 @@ IFile::Type Task::fileType() const
     return m_fileType;
 }
 
-size_t Task::nbSubItems() const
+size_t Task::nbLinkedItems() const
 {
-    return m_subItems.size();
+    return m_linkedItems.size();
 }
 
-const IItem& Task::subItem( unsigned int index ) const
+const IItem& Task::linkedItem( unsigned int index ) const
 {
-    return m_subItems[index];
+    return m_linkedItems[index];
 }
 
-IItem& Task::createSubItem( std::string mrl, unsigned int playlistIndex )
+IItem& Task::createLinkedItem( std::string mrl, unsigned int playlistIndex )
 {
-    m_subItems.emplace_back( std::move( mrl ), IFile::Type::Main, playlistIndex );
-    return m_subItems.back();
+    m_linkedItems.emplace_back( std::move( mrl ), IFile::Type::Main, playlistIndex );
+    return m_linkedItems.back();
 }
 
 int64_t Task::duration() const

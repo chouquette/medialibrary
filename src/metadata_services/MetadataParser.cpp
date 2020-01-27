@@ -134,7 +134,7 @@ Status MetadataAnalyzer::run( IItem& item )
     }
     if ( item.fileType() == IFile::Type::Playlist )
     {
-        assert( item.nbSubItems() > 0 );
+        assert( item.nbLinkedItems() > 0 );
         auto res = parsePlaylist( item );
         if ( res != Status::Success ) // playlist addition may fail due to constraint violation
             return res;
@@ -303,11 +303,11 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
     // be recreated if need be, and appropriate entries in PlaylistMediaRelation
     // table will be recreated to link things together.
 
-    for ( auto i = 0u; i < item.nbSubItems(); ++i )
+    for ( auto i = 0u; i < item.nbLinkedItems(); ++i )
     {
         if ( m_stopped.load() == true )
             break;
-        addPlaylistElement( item, playlistPtr, item.subItem( i ) );
+        addPlaylistElement( item, playlistPtr, item.linkedItem( i ) );
     }
 
     return Status::Success;

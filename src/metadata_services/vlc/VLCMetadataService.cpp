@@ -226,7 +226,7 @@ void VLCMetadataService::mediaToItem( VLC::Media& media, IItem& item )
             assert( vlcMedia != nullptr );
             auto mrl = vlcMedia->mrl();
             mrl = utils::url::encode( utils::url::decode( mrl ) );
-            IItem& subItem = item.createSubItem( std::move( mrl ), i );
+            IItem& subItem = item.createLinkedItem( mrl, i );
             mediaToItem( *vlcMedia, subItem );
         }
     }

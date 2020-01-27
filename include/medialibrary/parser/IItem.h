@@ -133,24 +133,24 @@ public:
     virtual IFile::Type fileType() const = 0;
 
     /**
-     * @return The number of subitems for this item.
+     * @return The number of linked items for this item.
      */
-    virtual size_t nbSubItems() const = 0;
+    virtual size_t nbLinkedItems() const = 0;
     /**
-     * @return The subitem at the given index.
-     * The subitems are owned by their parent items. No bound checking is
+     * @return The linked item at the given index.
+     * The linked items are owned by their parent item. No bound checking is
      * performed.
      */
-    virtual const IItem& subItem( unsigned int index ) const = 0;
+    virtual const IItem& linkedItem( unsigned int index ) const = 0;
     /**
-     * @brief createSubItem Create a subitem in place.
-     * @param mrl The subitem's MRL
+     * @brief createLinkedItem Create a linked item in place.
+     * @param mrl The item's MRL
      * @param playlistIndex If the parent item is a playlist, this will hold its
      *                      position. Otherwise, this must be 0.
      * @return A *reference* to the created item, so the item can be populated
      *         after its creation.
      */
-    virtual IItem& createSubItem( std::string mrl, unsigned int playlistIndex ) = 0;
+    virtual IItem& createLinkedItem( std::string mrl, unsigned int playlistIndex ) = 0;
 
     /**
      * @brief duration Returns the item duration in milliseconds

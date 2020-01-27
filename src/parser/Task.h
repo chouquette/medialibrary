@@ -284,9 +284,9 @@ public:
     virtual const std::string& mrl() const override;
     virtual IFile::Type fileType() const override;
 
-    virtual size_t nbSubItems() const override;
-    virtual const IItem& subItem( unsigned int index ) const override;
-    virtual IItem& createSubItem( std::string mrl, unsigned int playlistIndex ) override;
+    virtual size_t nbLinkedItems() const override;
+    virtual const IItem& linkedItem( unsigned int index ) const override;
+    virtual IItem& createLinkedItem( std::string mrl, unsigned int playlistIndex ) override;
 
     virtual int64_t duration() const override;
     virtual void setDuration( int64_t duration ) override;
@@ -334,7 +334,7 @@ private:
 
     unsigned int m_currentService = 0;
     std::unordered_map<Metadata, std::string, MetadataHash> m_metadata;
-    std::vector<Task> m_subItems;
+    std::vector<Task> m_linkedItems;
     std::vector<Track> m_tracks;
     int64_t m_duration = 0;
     MediaPtr m_media;
