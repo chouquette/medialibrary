@@ -227,8 +227,8 @@ void ModificationNotifier::run()
                     &IMediaLibraryCb::onPlaylistsModified, &IMediaLibraryCb::onPlaylistsDeleted );
             notify( std::move( genres ), &IMediaLibraryCb::onGenresAdded,
                     &IMediaLibraryCb::onGenresModified, &IMediaLibraryCb::onGenresDeleted );
-            notify( std::move( mediaGroups ), &IMediaLibraryCb::onMediaGroupAdded,
-                    &IMediaLibraryCb::onMediaGroupModified, &IMediaLibraryCb::onMediaGroupDeleted );
+            notify( std::move( mediaGroups ), &IMediaLibraryCb::onMediaGroupsAdded,
+                    &IMediaLibraryCb::onMediaGroupsModified, &IMediaLibraryCb::onMediaGroupsDeleted );
             for ( auto thumbnailId : thumbnails.removed )
             {
                 auto path = Thumbnail::path( m_ml, thumbnailId );

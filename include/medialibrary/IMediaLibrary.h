@@ -200,9 +200,9 @@ public:
     /**
      * MediaGroup notification apply to all groups, including subgroups.
      */
-    virtual void onMediaGroupAdded( std::vector<MediaGroupPtr> mediaGroups ) = 0;
-    virtual void onMediaGroupModified( std::set<int64_t> mediaGroupsIds ) = 0;
-    virtual void onMediaGroupDeleted( std::set<int64_t> mediaGroupsIds ) = 0;
+    virtual void onMediaGroupsAdded( std::vector<MediaGroupPtr> mediaGroups ) = 0;
+    virtual void onMediaGroupsModified( std::set<int64_t> mediaGroupsIds ) = 0;
+    virtual void onMediaGroupsDeleted( std::set<int64_t> mediaGroupsIds ) = 0;
 
     /**
      * @brief onDiscoveryStarted This callback will be invoked when a folder queued for discovery
