@@ -720,9 +720,9 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
         LOG_INFO( "Failed to insert ", mrl, ": ", ex.what(), ". "
                   "Assuming the file is already scheduled for discovery" );
     }
-    try
+    if ( parentPlaylist.first != 0 )
     {
-        if ( parentPlaylist.first != 0 )
+        try
         {
             if ( parser::Task::createLinkTask( this, mrl, parentPlaylist.first,
                                                parser::IItem::LinkType::Playlist,
@@ -730,15 +730,15 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                 return;
             t->commit();
         }
-    }
-    catch( const sqlite::errors::ConstraintViolation& ex )
-    {
-        // We might have created the file but not the link task yet, so this
-        // needs to be in a different catch clause (otherwise we'd have a
-        // constraint violation for the Creation task, and wouldn't try to
-        // create the link task while it should be.
-        LOG_INFO( "Failed to create link task for ", mrl, ": ", ex.what(), ". "
-                  "Assuming it was already created before" );
+        catch( const sqlite::errors::ConstraintViolation& ex )
+        {
+            // We might have created the file but not the link task yet, so this
+            // needs to be in a different catch clause (otherwise we'd have a
+            // constraint violation for the Creation task, and wouldn't try to
+            // create the link task while it should be.
+            LOG_INFO( "Failed to create link task for ", mrl, ": ", ex.what(), ". "
+                      "Assuming it was already created before" );
+        }
     }
 }
 
