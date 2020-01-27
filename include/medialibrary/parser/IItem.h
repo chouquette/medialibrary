@@ -145,12 +145,13 @@ public:
     /**
      * @brief createLinkedItem Create a linked item in place.
      * @param mrl The item's MRL
-     * @param playlistIndex If the parent item is a playlist, this will hold its
-     *                      position. Otherwise, this must be 0.
+     * @param itemType The linked item type
+     * @param linkExtra Some additional information about the item being linked
      * @return A *reference* to the created item, so the item can be populated
      *         after its creation.
      */
-    virtual IItem& createLinkedItem( std::string mrl, unsigned int playlistIndex ) = 0;
+    virtual IItem& createLinkedItem( std::string mrl, IFile::Type itemType,
+                                     int64_t linkExtra ) = 0;
 
     /**
      * @brief duration Returns the item duration in milliseconds

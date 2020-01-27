@@ -93,9 +93,6 @@ public:
         /// This task is meant to restore something. For now, this is only used
         /// to restore a playlist backup, in the event of a database corruption
         Restore,
-        /// This is a temporary task, used to convey information about an item
-        /// but it will never be processed by the parser pipeline.
-        Temporary = UINT8_MAX,
     };
 
     Task( MediaLibraryPtr ml, sqlite::Row& row );
@@ -152,11 +149,6 @@ public:
      * @param mrl The mrl of the entity to restore
      */
     Task( MediaLibraryPtr ml, std::string mrl, IFile::Type fileType );
-
-    /**
-     * @brief Task Constructor for dummy tasks, to represent subitems
-     */
-    Task( std::string mrl, IFile::Type fileType, unsigned int playlistIndex );
 
     /*
      * We need to decouple the current parser state and the saved one.
@@ -286,7 +278,8 @@ public:
 
     virtual size_t nbLinkedItems() const override;
     virtual const IItem& linkedItem( unsigned int index ) const override;
-    virtual IItem& createLinkedItem( std::string mrl, unsigned int playlistIndex ) override;
+    virtual IItem& createLinkedItem( std::string mrl, IFile::Type itemType,
+                                     int64_t linkExtra ) override;
 
     virtual int64_t duration() const override;
     virtual void setDuration( int64_t duration ) override;

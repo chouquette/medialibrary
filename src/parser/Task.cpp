@@ -133,15 +133,6 @@ Task::Task( MediaLibraryPtr ml, std::string mrl , IFile::Type fileType )
 {
 }
 
-Task::Task( std::string mrl, IFile::Type fileType, unsigned int playlistIndex )
-    : m_type( Type::Temporary )
-    , m_mrl( std::move( mrl ) )
-    , m_fileType( fileType )
-    , m_linkToType( LinkType::Playlist )
-    , m_linkExtra( playlistIndex )
-{
-}
-
 void Task::markStepCompleted( Step stepCompleted )
 {
     m_step = static_cast<Step>( static_cast<uint8_t>( m_step ) |
@@ -795,9 +786,25 @@ const IItem& Task::linkedItem( unsigned int index ) const
     return m_linkedItems[index];
 }
 
-IItem& Task::createLinkedItem( std::string mrl, unsigned int playlistIndex )
+IItem& Task::createLinkedItem( std::string mrl, IFile::Type itemType,
+                               int64_t linkExtra )
 {
-    m_linkedItems.emplace_back( std::move( mrl ), IFile::Type::Main, playlistIndex );
+    LinkType linkType;
+    switch ( m_fileType )
+    {
+        case IFile::Type::Main:
+        case IFile::Type::Disc:
+            linkType = LinkType::Media;
+            break;
+        case IFile::Type::Playlist:
+            linkType = LinkType::Playlist;
+            break;
+        default:
+            throw std::runtime_error{ "Can't create a linked item for this item"
+                                      " type" };
+    }
+    m_linkedItems.emplace_back( m_ml, std::move( mrl ), itemType, m_mrl,
+                                linkType, linkExtra );
     return m_linkedItems.back();
 }
 
