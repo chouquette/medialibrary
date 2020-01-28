@@ -254,6 +254,8 @@ public:
     virtual const std::vector<const char*>& supportedPlaylistExtensions() const override;
     virtual bool isMediaExtensionSupported( const char* ext ) const override;
     virtual bool isPlaylistExtensionSupported( const char* ext ) const override;
+    virtual const std::vector<const char*>& supportedSubtitleExtensions() const override;
+    virtual bool isSubtitleExtensionSupported( const char* ext ) const override;
 
     virtual bool isDeviceKnown( const std::string& uuid,
                                 const std::string& mountpoint,
@@ -272,6 +274,7 @@ protected:
     // Allow access to unit test MediaLibrary implementations
     static const std::vector<const char*> SupportedMediaExtensions;
     static const std::vector<const char*> SupportedPlaylistExtensions;
+    static const std::vector<const char*> SupportedSubtitleExtensions;
 
 protected:
     virtual void startParser();

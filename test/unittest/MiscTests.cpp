@@ -194,6 +194,13 @@ TEST_F( Misc, PlaylistExtensions )
     ASSERT_TRUE( res );
 }
 
+TEST_F( Misc, SubtitleExtensions )
+{
+    const auto supportedExtensions = ml->supportedSubtitleExtensions();
+    auto res = checkAlphaOrderedVector( supportedExtensions );
+    ASSERT_TRUE( res );
+}
+
 TEST_F( Misc, TrimString )
 {
     ASSERT_EQ( utils::str::trim( "hello world" ), "hello world" );

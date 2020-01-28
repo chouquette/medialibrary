@@ -868,6 +868,18 @@ public:
      * to be inserted in the database
      */
     virtual bool deleteRemovableDevices() = 0;
+
+    /**
+     * @brief supportedSubtitlesExtensions Returns the supported subtitle extensions
+     *
+     * The list is guaranteed to be ordered alphabetically
+     */
+    virtual const std::vector<const char*>& supportedSubtitleExtensions() const = 0;
+    /**
+     * @brief isSubtitleExtensionSupported Checks if the provided subtitle extension
+     *                                     is supported.
+     */
+    virtual bool isSubtitleExtensionSupported( const char* ext ) const = 0;
 };
 
 }

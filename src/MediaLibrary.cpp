@@ -251,6 +251,33 @@ const std::vector<const char*> MediaLibrary::SupportedPlaylistExtensions = {
     "xspf"
 };
 
+const std::vector<const char*> MediaLibrary::SupportedSubtitleExtensions = {
+    "aqt",
+    "ass",
+    "cdg",
+    "dks",
+    "idx",
+    "jss",
+    "mpl2",
+    "mpsub",
+    "pjs",
+    "psb",
+    "rt",
+    "sami",
+    "sbv",
+    "scc",
+    "smi",
+    "srt",
+    "ssa",
+    "stl",
+    "sub",
+    "tt",
+    "ttml",
+    "usf",
+    "vtt",
+    "webvtt"
+};
+
 MediaLibrary::MediaLibrary()
     : m_verbosity( LogLevel::Error )
     , m_settings( this )
@@ -718,6 +745,19 @@ bool MediaLibrary::isDeviceKnown( const std::string &uuid,
 bool MediaLibrary::deleteRemovableDevices()
 {
     return Device::deleteRemovable( this );
+}
+
+const std::vector<const char*>&MediaLibrary::supportedSubtitleExtensions() const
+{
+    return SupportedSubtitleExtensions;
+}
+
+bool MediaLibrary::isSubtitleExtensionSupported(const char* ext) const
+{
+    return std::binary_search( std::begin( SupportedSubtitleExtensions ),
+        std::end( SupportedMediaExtensions ), ext, [](const char* l, const char* r) {
+            return strcasecmp( l, r ) < 0;
+        });
 }
 
 void MediaLibrary::ensureDeviceListersAreStarted() const
