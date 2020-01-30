@@ -45,7 +45,7 @@ Status LinkService::run( IItem& item )
                        "linking service" );
             return Status::Fatal;
         case IItem::LinkType::Media:
-            return Status::Fatal; //Not implemented yet
+            return linkToMedia( item );
         case IItem::LinkType::Playlist:
             return linkToPlaylist( item );
     }
@@ -116,6 +116,55 @@ Status LinkService::linkToPlaylist(IItem& item)
     }
     // Explicitely mark the task as completed, as there is nothing more to run.
     // This shouldn't be needed, but requires a better handling of multiple pipeline.
+    return Status::Completed;
+}
+
+Status LinkService::linkToMedia( IItem &item )
+{
+    auto media = m_ml->media( item.linkToMrl() );
+    if ( media == nullptr )
+        return Status::Requeue;
+
+    /*
+     * When linking a subtitle file, it's quite easier since we don't
+     * automatically import those, so we can safely assume the file isn't present
+     * in DB, add it and be done with it.
+     * For audio files though, it might be already imported, in which case we
+     * will need to link it with the media associated with it, and effectively
+     * delete the media that was created from that file
+     */
+    if ( item.fileType() == IFile::Type::Subtitles )
+    {
+        try
+        {
+            media->addFile( item.mrl(), item.fileType() );
+        }
+        catch ( const sqlite::errors::ConstraintUnique& )
+        {
+            /*
+             * Assume that the task was already executed, and the file already linked
+             * but the task bookeeping failed afterward.
+             * Just ignore the error & mark the task as completed.
+             */
+        }
+    }
+    else if ( item.fileType() == IFile::Type::Soundtrack )
+    {
+        auto mrl = item.mrl();
+        auto file = File::fromMrl( m_ml, mrl );
+        if ( file == nullptr )
+        {
+            file = File::fromExternalMrl( m_ml, mrl );
+            if ( file == nullptr )
+            {
+                if ( media->addFile( std::move( mrl ), item.fileType() ) == nullptr )
+                    return Status::Fatal;
+                return Status::Completed;
+            }
+        }
+        if ( file->setMediaId( media->id() ) == false )
+            return Status::Fatal;
+    }
     return Status::Completed;
 }
 
