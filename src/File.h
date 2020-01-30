@@ -69,6 +69,12 @@ public:
     virtual bool isMain() const override;
 
     std::shared_ptr<Media> media() const;
+    /**
+     * @brief setMediaId Associates this file with a different media
+     *
+     * If this was the previous media's main file, it will be deleted.
+     */
+    bool setMediaId( int64_t mediaId );
     bool destroy();
     int64_t folderId();
 
@@ -126,7 +132,7 @@ private:
     MediaLibraryPtr m_ml;
 
     int64_t m_id;
-    const int64_t m_mediaId;
+    int64_t m_mediaId;
     const int64_t m_playlistId;
     // Contains the path relative to the containing folder for files contained in a removable folder
     // or the full file MRL for non removable ones

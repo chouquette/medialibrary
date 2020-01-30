@@ -72,6 +72,7 @@ class Media : public IMedia,
         {
             IsPresent,
             CascadeFileDeletion,
+            CascadeFileUpdate,
             IncrementNbPlaylist,
             DecrementNbPlaylist,
             InsertFts,

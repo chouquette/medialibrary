@@ -1209,6 +1209,9 @@ void Media::createTriggers( sqlite::Connection* connection )
                                    trigger( Triggers::InsertFts,
                                             Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::CascadeFileUpdate,
+                                            Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
                                    trigger( Triggers::DeleteFts,
                                             Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
@@ -1365,6 +1368,19 @@ std::string Media::trigger( Triggers trigger, uint32_t dbModel )
                        " WHERE id_media=old.media_id;"
                    " END";
         }
+        case Triggers::CascadeFileUpdate:
+        {
+            assert( dbModel >= 27 );
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                   " AFTER UPDATE OF media_id ON " + File::Table::Name +
+                   " WHEN old.media_id != new.media_id AND old.type = " +
+                        std::to_string(
+                            static_cast<std::underlying_type_t<IFile::Type>>( IFile::Type::Main ) ) +
+                   " BEGIN"
+                   " DELETE FROM " + Table::Name +
+                        " WHERE id_media = old.media_id;"
+                   "END";
+        }
         case Triggers::IncrementNbPlaylist:
             assert( dbModel >= 14 );
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
@@ -1425,6 +1441,9 @@ std::string Media::triggerName( Triggers trigger, uint32_t dbModel )
                 return "cascade_file_deletion";
             return "media_cascade_file_deletion";
         }
+        case Triggers::CascadeFileUpdate:
+            assert( dbModel >= 27 );
+            return "media_cascade_file_update";
         case Triggers::IncrementNbPlaylist:
             assert( dbModel >= 14 );
             return "increment_media_nb_playlist";

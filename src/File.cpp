@@ -205,6 +205,18 @@ std::shared_ptr<Media> File::media() const
     return media;
 }
 
+bool File::setMediaId( int64_t mediaId )
+{
+    if ( mediaId == m_mediaId )
+        return true;
+    const std::string req = "UPDATE " + Table::Name + " SET media_id = ? "
+            "WHERE id_file = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, mediaId, m_id ) == false )
+        return false;
+    m_mediaId = mediaId;
+    return true;
+}
+
 bool File::destroy()
 {
     return DatabaseHelpers::destroy( m_ml, m_id );

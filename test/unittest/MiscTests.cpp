@@ -68,6 +68,7 @@ namespace
         "insert_folder_fts", "insert_genre_fts", "insert_media_fts",
         "insert_playlist_fts", "insert_show_fts",
         "media_cascade_file_deletion",
+        "media_cascade_file_update",
         "media_group_decrement_nb_media_on_deletion",
         "media_group_delete_empty_group",
         "media_group_delete_fts",

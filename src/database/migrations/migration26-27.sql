@@ -39,6 +39,7 @@ Media::schema( Media::Table::Name, 27 ),
 Media::trigger( Media::Triggers::InsertFts, 27 ),
 Media::trigger( Media::Triggers::UpdateFts, 27 ),
 Media::trigger( Media::Triggers::DeleteFts, 27 ),
+Media::trigger( Media::Triggers::CascadeFileUpdate, 27 ),
 
 Media::index( Media::Indexes::LastPlayedDate, 27 ),
 Media::index( Media::Indexes::Presence, 27 ),

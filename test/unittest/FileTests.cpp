@@ -114,3 +114,26 @@ TEST_F( Files, CheckDbModel )
     auto res = File::checkDbModel( ml.get() );
     ASSERT_TRUE( res );
 }
+
+TEST_F( Files, SetMediaId )
+{
+    // First media is automatically added by the test SetUp()
+    auto media2 = ml->addMedia( "media.ac3", IMedia::Type::Audio );
+
+    auto files = m->files();
+    ASSERT_EQ( 1u, files.size() );
+
+    files = media2->files();
+    ASSERT_EQ( 1u, files.size() );
+    auto file2 = std::static_pointer_cast<File>( files[0] );
+    auto res = file2->setMediaId( m->id() );
+    ASSERT_TRUE( res );
+
+    media2 = ml->media( media2->id() );
+    ASSERT_EQ( nullptr, media2 );
+
+    // Reload media to avoid failing because of an outdated cache
+    m = ml->media( m->id() );
+    files = m->files();
+    ASSERT_EQ( 2u, files.size() );
+}
