@@ -647,6 +647,11 @@ MediaGroupPtr MediaLibrary::createMediaGroup( std::string name )
     return MediaGroup::create( this, 0, std::move( name ) );
 }
 
+bool MediaLibrary::deleteMediaGroup( int64_t id )
+{
+    return MediaGroup::destroy( this, id );
+}
+
 MediaGroupPtr MediaLibrary::mediaGroup( int64_t id ) const
 {
     return MediaGroup::fetch( this, id );

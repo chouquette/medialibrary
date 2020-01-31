@@ -476,6 +476,14 @@ public:
      */
     virtual MediaGroupPtr createMediaGroup( std::string name ) = 0;
     /**
+     * @brief deleteMediaGroup Deletes a media group
+     * @param id The group ID
+     * @return true in case of success, false otherwise
+     *
+     * This will ungroup all media that were part of the group.
+     */
+    virtual bool deleteMediaGroup( int64_t id ) = 0;
+    /**
      * @brief mediaGroup Returns a media group with the given id
      * @return A media group, or nullptr if the group doesn't exist, or in case
      *         of sporadic failure.

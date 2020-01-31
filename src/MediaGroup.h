@@ -80,6 +80,7 @@ public:
                                        const QueryParameters* params = nullptr ) override;
     virtual std::string path() const override;
     virtual bool rename( std::string name ) override;
+    virtual bool destroy() override;
 
     static std::shared_ptr<MediaGroup> create(MediaLibraryPtr ml,
                                                int64_t parentId, std::string name );
@@ -98,6 +99,8 @@ public:
     static std::string indexName( Indexes i, uint32_t dbModel );
 
     static bool checkDbModel( MediaLibraryPtr ml );
+
+    using DatabaseHelpers<MediaGroup>::destroy;
 
 private:
     static std::string orderBy( const QueryParameters* params );

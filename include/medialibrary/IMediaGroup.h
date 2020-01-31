@@ -154,6 +154,13 @@ public:
      * group when they are added to the media library.
      */
     virtual bool rename( std::string name ) = 0;
+    /**
+     * @brief destroy Destroys a media group.
+     * @return true in case of success, false otherwise
+     *
+     * This will ungroup all media that are part of this group.
+     */
+    virtual bool destroy() = 0;
 };
 
 }

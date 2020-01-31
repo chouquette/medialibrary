@@ -201,6 +201,11 @@ bool MediaGroup::rename( std::string name )
     return true;
 }
 
+bool MediaGroup::destroy()
+{
+    return DatabaseHelpers<MediaGroup>::destroy( m_ml, m_id );
+}
+
 std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
                                                 int64_t parentId, std::string name )
 {
