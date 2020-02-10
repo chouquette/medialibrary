@@ -67,5 +67,15 @@ public:
      * - A 'removable' state, being true if the device can be removed, false otherwise.
      */
     virtual std::vector<std::tuple<std::string, std::string, bool>> devices() const = 0;
+    /**
+     * @brief start Starts watching for new device
+     * @param cb An IDeviceListerCb implementation to invoke upon device changes
+     * @return true in case of success, false otherwise
+     */
+    virtual bool start( IDeviceListerCb* cb ) = 0;
+    /**
+     * @brief stop Stop watching for new device
+     */
+    virtual void stop() = 0;
 };
 }

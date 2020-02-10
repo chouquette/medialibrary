@@ -773,3 +773,12 @@ ForceRemovableStorareDeviceLister::devices() const
         std::get<2>( d ) = true;
     return devices;
 }
+
+bool ForceRemovableStorareDeviceLister::start( IDeviceListerCb* )
+{
+    return true;
+}
+
+void ForceRemovableStorareDeviceLister::stop()
+{
+}

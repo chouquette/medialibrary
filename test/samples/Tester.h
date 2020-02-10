@@ -77,6 +77,8 @@ class ForceRemovableStorareDeviceLister : public IDeviceLister
 public:
     ForceRemovableStorareDeviceLister();
     virtual std::vector<std::tuple<std::string, std::string, bool>> devices() const override;
+    virtual bool start( IDeviceListerCb* ) override;
+    virtual void stop() override;
 
 private:
     DeviceListerPtr m_lister;

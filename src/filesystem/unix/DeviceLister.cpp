@@ -328,5 +328,14 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
     return res;
 }
 
+bool DeviceLister::start( IDeviceListerCb* )
+{
+    return true;
+}
+
+void DeviceLister::stop()
+{
+}
+
 }
 }

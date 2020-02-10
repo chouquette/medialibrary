@@ -33,6 +33,15 @@ public:
     {
         abort();
     }
+
+    virtual bool start( medialibrary::IDeviceListerCb* ) override
+    {
+        return true;
+    }
+
+    virtual void stop() override
+    {
+    }
 };
 
 }
