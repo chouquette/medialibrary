@@ -295,20 +295,6 @@ private:
 protected:
     virtual void addLocalFsFactory();
 
-    // Mark IDeviceListerCb callbacks as private. They must be invoked through the interface.
-private:
-    class DeviceListerCb : public IDeviceListerCb
-    {
-    public:
-        explicit DeviceListerCb( MediaLibrary* ml );
-    private:
-        virtual bool onDeviceMounted( const std::string& uuid, const std::string& mountpoint ) override;
-        virtual void onDeviceUnmounted(const std::string& uuid, const std::string& mountpoint) override;
-
-    private:
-        MediaLibrary* m_ml;
-    };
-
     class FsFactoryCb : public fs::IFileSystemFactoryCb
     {
     public:
@@ -317,11 +303,7 @@ private:
         virtual void onDeviceMounted( const fs::IDevice& deviceFs,
                                       const std::string& newMountpoint ) override;
         virtual void onDeviceUnmounted( const fs::IDevice& deviceFs,
-                                        const std::string& removedMountpoint ) override;
-        /// When a device overall presence state is changed, that device is
-        /// returned
-        std::shared_ptr<Device> onDeviceChanged( const fs::IDevice& deviceFs,
-                                                 const std::string& mountpoint ) const;
+                                        const std::string& newMountpoint ) override;
     private:
         MediaLibrary* m_ml;
     };
@@ -342,8 +324,6 @@ protected:
      * it might invoke some of the callback interface methods during teardown
      */
     FsFactoryCb m_fsFactoryCb;
-    // Private IDeviceListerCb implementation
-    DeviceListerCb m_deviceListerCbImpl;
 
     std::string m_thumbnailPath;
     std::string m_playlistPath;

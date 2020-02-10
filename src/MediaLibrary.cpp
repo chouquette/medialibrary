@@ -255,7 +255,6 @@ MediaLibrary::MediaLibrary()
     , m_discovererIdle( true )
     , m_parserIdle( true )
     , m_fsFactoryCb( this )
-    , m_deviceListerCbImpl( this )
     , m_callback( nullptr )
 {
     Log::setLogLevel( m_verbosity );
@@ -2399,195 +2398,69 @@ void MediaLibrary::addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer )
     m_thumbnailer = std::move( thumbnailer );
 }
 
-bool MediaLibrary::DeviceListerCb::onDeviceMounted( const std::string& uuid,
-                                                    const std::string& mountedMountpoint )
-{
-    /**
-     * This is also used to refresh the state of non-removable storages.
-     * deviceFs->isRemovable() must not be assumed to be true.
-     */
-    auto scheme = utils::file::scheme( mountedMountpoint );
-    auto currentDevice = Device::fromUuid( m_ml, uuid, scheme );
-    auto mountpoint = utils::file::toFolderPath( mountedMountpoint );
-    LOG_INFO( "Device ", uuid, " was plugged and mounted on ", mountpoint );
-    for ( const auto& fsFactory : m_ml->m_fsFactories )
-    {
-        if ( fsFactory->isMrlSupported( mountpoint ) )
-        {
-            auto deviceFs = fsFactory->createDevice( uuid );
-            if ( deviceFs != nullptr )
-            {
-                auto previousPresence = deviceFs->isPresent();
-                deviceFs->addMountpoint( mountpoint );
-                if ( previousPresence == false )
-                {
-                    LOG_INFO( "Device ", uuid, " changed presence state: 0 -> 1" );
-                    if ( currentDevice != nullptr )
-                        currentDevice->setPresent( true );
-                }
-                else if ( currentDevice != nullptr && currentDevice->isRemovable() == true &&
-                          deviceFs->isRemovable() == false )
-                {
-                    /// During Android 3.1.0-rc phase, the main storage device was
-                    /// created as a removable device, while it isn't.
-                    /// We need to fix the DB state:
-                    auto res = currentDevice->forceNonRemovable();
-                    if ( res == true )
-                    {
-                        LOG_INFO( "Recovered from an invalid database state. "
-                                  "Device ", uuid, " was marked back as non-removable" );
-                    }
-                    else
-                    {
-                        LOG_WARN( "The database is left in an invalid state, "
-                                  "you might want to force a complete rescan" );
-                    }
-                }
-            }
-            else
-            {
-                fsFactory->refreshDevices();
-                m_ml->refreshDevices( *fsFactory );
-                deviceFs = fsFactory->createDevice( uuid );
-                if ( deviceFs == nullptr )
-                {
-                    assert( !"The device must be available after a refresh" );
-                    return false;
-                }
-                // Don't try to insert the device if we already know it
-                if ( currentDevice == nullptr )
-                {
-                    try
-                    {
-                        if ( Device::create( m_ml, uuid, fsFactory->scheme(),
-                                             deviceFs->isRemovable() ) == nullptr )
-                            return false;
-                    }
-                    // And be conservative and assume another thread might have
-                    // inserted the device between our previous check and now
-                    catch ( const sqlite::errors::ConstraintViolation& )
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    // We already knew the device, we need to check for a broken
-                    // removable state:
-                    if ( currentDevice->isRemovable() == true && deviceFs->isRemovable() == false )
-                    {
-                        /// During Android 3.1.0-rc phase, the main storage device was
-                        /// created as a removable device, while it isn't.
-                        /// We need to fix the DB state:
-                        auto res = currentDevice->forceNonRemovable();
-                        if ( res == true )
-                        {
-                            LOG_INFO( "Recovered from an invalid database state. "
-                                      "Device ", uuid, " was marked back as non-removable" );
-                        }
-                        else
-                        {
-                            LOG_WARN( "The database is left in an invalid state, "
-                                      "you might want to force a complete rescan" );
-                        }
-                    }
-                }
-            }
-            break;
-        }
-    }
-    return currentDevice == nullptr;
-}
-
-void MediaLibrary::DeviceListerCb::onDeviceUnmounted( const std::string& uuid,
-                                                      const std::string& unmountedMountpoint )
-{
-    auto scheme = utils::file::scheme( unmountedMountpoint );
-    auto device = Device::fromUuid( m_ml, uuid, scheme );
-    if ( device == nullptr )
-    {
-        LOG_WARN( "Unknown device ", uuid, " was unplugged. Ignoring." );
-        return;
-    }
-    assert( device->isRemovable() == true );
-    auto mountpoint = utils::file::toFolderPath( unmountedMountpoint );
-    LOG_INFO( "Device ", uuid, " was unplugged. Mountpoint was ", mountpoint );
-    for ( const auto& fsFactory : m_ml->m_fsFactories )
-    {
-        if ( fsFactory->scheme() == device->scheme() )
-        {
-            auto deviceFs = fsFactory->createDevice( uuid );
-            if ( deviceFs != nullptr )
-            {
-                assert( deviceFs->isPresent() == true );
-                deviceFs->removeMountpoint( mountpoint );
-                if ( deviceFs->isPresent() == false )
-                {
-                    LOG_INFO( "Device ", uuid, " changed presence state: 1 -> 0" );
-                    device->setPresent( false );
-                }
-            }
-            else
-            {
-                fsFactory->refreshDevices();
-                m_ml->refreshDevices( *fsFactory );
-            }
-        }
-    }
-}
-
-MediaLibrary::DeviceListerCb::DeviceListerCb( MediaLibrary* ml )
-    : m_ml( ml )
-{
-}
-
 MediaLibrary::FsFactoryCb::FsFactoryCb(MediaLibrary* ml)
     : m_ml( ml )
 {
 }
 
-std::shared_ptr<Device>
-MediaLibrary::FsFactoryCb::onDeviceChanged( const fs::IDevice& deviceFs,
-                                            const std::string& mountpoint ) const
+void MediaLibrary::FsFactoryCb::onDeviceMounted(const fs::IDevice& deviceFs , const std::string& newMountpoint)
 {
-    auto scheme = utils::file::scheme( mountpoint );
-    auto device = Device::fromUuid( m_ml, deviceFs.uuid(), scheme );
-    // The device might be new and unused so far, we will create it when we need to
+    auto device = Device::fromUuid( m_ml, deviceFs.uuid(), deviceFs.scheme() );
     if ( device == nullptr )
-        return nullptr;
+    {
+        try
+        {
+            device = Device::create( m_ml, deviceFs.uuid(), deviceFs.scheme(),
+                                     deviceFs.isRemovable() );
+        }
+        catch ( const sqlite::errors::ConstraintUnique& )
+        {
+            /* In case of a sporadic read failure, just ignore the insertion error */
+        }
+        return;
+    }
     assert( device->isRemovable() == true );
     if ( device->isPresent() == deviceFs.isPresent() )
-        return nullptr;
+        return;
+
     LOG_INFO( "Device ", deviceFs.uuid(), " changed presence state: ",
               device->isPresent() ? "1" : "0", " -> ",
               deviceFs.isPresent() ? "1" : "0" );
+    auto previousPresence = device->isPresent();
     device->setPresent( deviceFs.isPresent() );
-    return device;
-}
-
-void MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs,
-                                                 const std::string& newMountpoint )
-{
-    LOG_INFO( "Device ", deviceFs.uuid(), " mountpoint ", newMountpoint,
-              " was mounted" );
-    auto device = onDeviceChanged( deviceFs, newMountpoint );
-    if ( device != nullptr )
+    if ( previousPresence == false )
     {
         // We need to reload the entrypoint in case a previous discovery was
         // interrupted before its end (causing the tasks that were spawned
         // to be deleted when the device go away, requiring a new discovery)
         // Also, there might be new content on the device since it was last
         // scanned.
+        assert( deviceFs.isPresent() == true );
         m_ml->m_discovererWorker->reloadDevice( device->id() );
     }
+    return;
 }
 
-void MediaLibrary::FsFactoryCb::onDeviceUnmounted( const fs::IDevice& deviceFs,
-                                                   const std::string& unmountedMountpoint )
+void MediaLibrary::FsFactoryCb::onDeviceUnmounted(const fs::IDevice& deviceFs , const std::string& newMountpoint)
 {
-    LOG_INFO( "Device ", deviceFs.uuid(), " mountpoint ", unmountedMountpoint,
-              " was unmounted" );
-    onDeviceChanged( deviceFs, unmountedMountpoint );
+    auto device = Device::fromUuid( m_ml, deviceFs.uuid(), deviceFs.scheme() );
+    if ( device == nullptr )
+    {
+        /*
+         * Since we systematically add new devices to the database, we must have
+         * a database representation available when it's being unmounted
+         */
+        assert( !"An unknown device was removed" );
+        return;
+    }
+    assert( device->isRemovable() == true );
+    if ( device->isPresent() == deviceFs.isPresent() )
+        return;
+
+    LOG_INFO( "Device ", deviceFs.uuid(), " changed presence state: ",
+              device->isPresent() ? "1" : "0", " -> ",
+              deviceFs.isPresent() ? "1" : "0" );
+    device->setPresent( deviceFs.isPresent() );
 }
 
 const std::vector<const char*>& MediaLibrary::supportedMediaExtensions() const
