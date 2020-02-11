@@ -2135,11 +2135,10 @@ ThumbnailerWorker* MediaLibrary::thumbnailer() const
     return m_thumbnailerWorker.get();
 }
 
-IDeviceListerCb* MediaLibrary::setDeviceLister( DeviceListerPtr lister )
+void MediaLibrary::setDeviceLister( DeviceListerPtr lister )
 {
     assert( m_initialized == false );
     m_deviceLister = lister;
-    return static_cast<IDeviceListerCb*>( &m_deviceListerCbImpl );
 }
 
 std::shared_ptr<fs::IFileSystemFactory> MediaLibrary::fsFactoryForMrl( const std::string& mrl ) const

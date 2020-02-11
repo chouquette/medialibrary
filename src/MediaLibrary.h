@@ -205,7 +205,7 @@ public:
     parser::Parser* tryGetParser();
     ThumbnailerWorker* thumbnailer() const;
 
-    virtual IDeviceListerCb* setDeviceLister( DeviceListerPtr lister ) override;
+    virtual void setDeviceLister( DeviceListerPtr lister ) override;
     std::shared_ptr<fs::IFileSystemFactory> fsFactoryForMrl( const std::string& mrl ) const;
 
     /**

@@ -764,14 +764,10 @@ public:
      * This is meant for OSes with complicated/impossible to achieve device listing (due to
      * missing APIs, permissions problems...)
      * @param lister A device lister
-     * @return In case of successfull registration, this will return a IDeviceListerCb, which
-     * can be used to signal changes related to the devices available. This callback is owned by
-     * the medialibrary, and must *NOT* be released by the application.
-     * In case of failure, nullptr will be returned.
      *
      * This must be called *before* initialize()
      */
-    virtual IDeviceListerCb* setDeviceLister( DeviceListerPtr lister ) = 0;
+    virtual void setDeviceLister( DeviceListerPtr lister ) = 0;
 
     /**
      * @brief forceRescan Deletes all entities except Media and Playlist, and
