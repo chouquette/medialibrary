@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Media Library
  *****************************************************************************
- * Copyright (C) 2015-2019 Hugo Beauzée-Luyssen, Videolabs, VideoLAN
+ * Copyright (C) 2020 Hugo Beauzée-Luyssen, Videolabs, VideoLAN
  *
  * Authors: Hugo Beauzée-Luyssen <hugo@beauzee.fr>
  *
@@ -20,9 +20,11 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#pragma once
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
-#include "filesystem/common/CommonDevice.h"
+#include "filesystem/win32/Device.h"
 
 namespace medialibrary
 {
@@ -30,12 +32,12 @@ namespace medialibrary
 namespace fs
 {
 
-class Device : public CommonDevice
+Device::Device( const std::string& uuid, const std::string& mountpoint,
+                bool isRemovable )
+    : CommonDevice( uuid, mountpoint, "file://", isRemovable )
 {
-public:
-    Device( const std::string& uuid, const std::string& mountpoint, bool isRemovable );
-};
-
 }
+
+};
 
 }

@@ -335,11 +335,17 @@ public:
     NoopDevice()
     {
         m_uuid = mock::FileSystemFactory::NoopDeviceUuid;
+        m_scheme = "file://";
     }
 
     virtual const std::string& uuid() const override
     {
         return m_uuid;
+    }
+
+    virtual const std::string& scheme() const override
+    {
+        return m_scheme;
     }
 
     virtual bool isRemovable() const override
@@ -384,6 +390,7 @@ public:
 
 private:
     std::string m_uuid;
+    std::string m_scheme;
     std::string m_mountpoint;
 };
 

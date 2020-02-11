@@ -36,6 +36,13 @@ class IDevice
 public:
     virtual ~IDevice() = default;
     virtual const std::string& uuid() const = 0;
+    /**
+     * @brief scheme Returns this device scheme
+     *
+     * Since if the device has no remaining mountpoint, this getter can be used
+     * to know what scheme this device is using at any time.
+     */
+    virtual const std::string& scheme() const = 0;
     virtual bool isRemovable() const = 0;
     virtual bool isPresent() const = 0;
     /**

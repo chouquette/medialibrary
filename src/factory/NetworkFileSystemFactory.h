@@ -63,11 +63,12 @@ private:
 private:
     struct Device
     {
-        Device( const std::string& name, const std::string& mrl, VLC::Media media )
+        Device( const std::string& name, const std::string& mrl, std::string scheme,
+                VLC::Media media )
             : name( name )
             , mrl( mrl )
             , media( media )
-            , device( std::make_shared<fs::NetworkDevice>( name, mrl ) )
+            , device( std::make_shared<fs::NetworkDevice>( name, mrl, std::move( scheme ) ) )
         {}
         std::string name;
         std::string mrl;

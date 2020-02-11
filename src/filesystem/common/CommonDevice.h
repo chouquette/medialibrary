@@ -33,8 +33,10 @@ namespace fs
 class CommonDevice : public IDevice
 {
 public:
-    CommonDevice( const std::string& uuid, const std::string& mountpoint, bool isRemovable );
+    CommonDevice( const std::string& uuid, const std::string& mountpoint,
+                  std::string scheme, bool isRemovable );
     virtual const std::string& uuid() const override;
+    virtual const std::string& scheme() const override;
     virtual bool isRemovable() const override;
     virtual bool isPresent() const override;
     virtual const std::string& mountpoint() const override;
@@ -48,6 +50,7 @@ public:
 private:
     std::string m_uuid;
     std::vector<std::string> m_mountpoints;
+    std::string m_scheme;
     bool m_removable;
 };
 

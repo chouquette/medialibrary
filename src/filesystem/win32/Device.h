@@ -33,7 +33,7 @@ namespace fs
 class Device : public CommonDevice
 {
 public:
-    using CommonDevice::CommonDevice;
+    Device( const std::string& uuid, const std::string& mountpoint, bool isRemovable );
 };
 
 }

@@ -148,7 +148,7 @@ void NetworkFileSystemFactory::onDeviceAdded( VLC::MediaPtr media )
         if ( it != end( m_devices ) )
             return;
 
-        m_devices.emplace_back( name, mrl, *media );
+        m_devices.emplace_back( name, mrl, m_protocol, *media );
     }
     m_deviceCond.notify_one();
     LOG_INFO( "Adding new network device: name: ", name, " - mrl: ", mrl );

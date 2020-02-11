@@ -33,7 +33,7 @@ namespace fs
 class NetworkDevice : public CommonDevice
 {
 public:
-    NetworkDevice( const std::string& name, const std::string& mrl );
+    NetworkDevice(const std::string& name, const std::string& mrl , std::string scheme);
 };
 
 }

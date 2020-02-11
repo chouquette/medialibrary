@@ -197,6 +197,7 @@ if HAVE_WIN32
 libmedialibrary_la_SOURCES += \
 	src/filesystem/win32/Directory.cpp \
 	src/filesystem/win32/File.cpp \
+	src/filesystem/win32/Device.cpp \
 	src/filesystem/win32/DeviceLister.cpp \
 	$(NULL)
 noinst_HEADERS += \
@@ -206,6 +207,7 @@ else
 libmedialibrary_la_SOURCES += \
 	src/filesystem/unix/Directory.cpp \
 	src/filesystem/unix/File.cpp \
+	src/filesystem/unix/Device.cpp \
 	$(NULL)
 if HAVE_LINUX
 if !HAVE_ANDROID

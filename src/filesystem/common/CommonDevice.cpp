@@ -37,9 +37,11 @@ namespace medialibrary
 namespace fs
 {
 
-CommonDevice::CommonDevice( const std::string& uuid, const std::string& mountpoint, bool isRemovable )
+CommonDevice::CommonDevice( const std::string& uuid, const std::string& mountpoint,
+                            std::string scheme, bool isRemovable )
     : m_uuid( uuid )
     , m_mountpoints( { utils::file::toFolderPath( mountpoint ) } )
+    , m_scheme( scheme )
     , m_removable( isRemovable )
 {
 }
@@ -47,6 +49,11 @@ CommonDevice::CommonDevice( const std::string& uuid, const std::string& mountpoi
 const std::string& CommonDevice::uuid() const
 {
     return m_uuid;
+}
+
+const std::string& CommonDevice::scheme() const
+{
+    return m_scheme;
 }
 
 bool CommonDevice::isRemovable() const
