@@ -43,10 +43,12 @@ public:
      * @brief onDeviceMounted Shall be invoked when a known device gets mounted
      * @param uuid The device UUID
      * @param mountpoint The device new mountpoint
+     * @param removable The removable state of the mounted device
      * @returns true is the device was unknown. false otherwise
      */
     virtual bool onDeviceMounted( const std::string& uuid,
-                                  const std::string& mountpoint ) = 0;
+                                  const std::string& mountpoint,
+                                  bool removable ) = 0;
     /**
      * @brief onDeviceUnmounted Shall be invoked when a known device gets unmounted
      * @param uuid The device UUID
