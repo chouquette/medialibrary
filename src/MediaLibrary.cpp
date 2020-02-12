@@ -1045,6 +1045,8 @@ void MediaLibrary::startDiscoverer()
     m_discovererWorker.reset( new DiscovererWorker( this ) );
     for ( const auto& fsFactory : m_fsFactories )
     {
+        fsFactory->start( &m_fsFactoryCb );
+        fsFactory->refreshDevices();
         std::unique_ptr<prober::CrawlerProbe> probePtr( new prober::CrawlerProbe{} );
         m_discovererWorker->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( fsFactory, this, m_callback,
                                                                                            std::move ( probePtr ) ) ) );
@@ -2186,7 +2188,10 @@ bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
         for ( auto fsFactory : m_externalNetworkFsFactories )
         {
             if ( fsFactory->start( &m_fsFactoryCb ) == true )
+            {
+                fsFactory->refreshDevices();
                 m_fsFactories.push_back( std::move( fsFactory ) );
+            }
         }
         m_networkDiscoveryEnabled = true;
         return m_fsFactories.size() != previousSize;
@@ -2419,9 +2424,10 @@ void MediaLibrary::FsFactoryCb::onDeviceMounted(const fs::IDevice& deviceFs , co
         }
         return;
     }
-    assert( device->isRemovable() == true );
     if ( device->isPresent() == deviceFs.isPresent() )
         return;
+
+    assert( device->isRemovable() == true );
 
     LOG_INFO( "Device ", deviceFs.uuid(), " changed presence state: ",
               device->isPresent() ? "1" : "0", " -> ",

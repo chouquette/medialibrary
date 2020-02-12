@@ -56,7 +56,6 @@ namespace factory
 FileSystemFactory::FileSystemFactory( DeviceListerPtr lister )
     : m_deviceLister( std::move( lister ) )
 {
-    refreshDevices();
 }
 
 std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::string& mrl )
@@ -113,39 +112,7 @@ std::shared_ptr<fs::IDevice> FileSystemFactory::createDeviceFromMrl( const std::
 void FileSystemFactory::refreshDevices()
 {
     LOG_INFO( "Refreshing devices from IDeviceLister" );
-    auto devices = m_deviceLister->devices();
-
-    for ( auto& devicePair : m_deviceCache )
-    {
-        auto it = std::find_if( begin( devices ), end( devices ),
-                                [&devicePair]( decltype(devices)::value_type& deviceTuple ) {
-                                    return std::get<0>( deviceTuple ) == devicePair.first;
-        });
-        if ( it != end( devices ) )
-            devices.erase( it );
-    }
-    // And now insert all new devices, if any
-    for ( const auto& d : devices )
-    {
-        const auto& uuid = std::get<0>( d );
-        const auto& mountpoint = utils::file::toFolderPath( std::get<1>( d ) );
-        const auto removable = std::get<2>( d );
-
-        auto it = m_deviceCache.find( uuid );
-        if ( it == end( m_deviceCache ) )
-        {
-            LOG_INFO( "Caching device ", uuid, " mounted on ", mountpoint,
-                      ". Removable: ", removable ? "true" : "false" );
-            m_deviceCache.emplace( uuid,
-                                   std::make_shared<fs::Device>( uuid, mountpoint,
-                                                                removable ) );
-        }
-        else
-        {
-            LOG_INFO( "Adding mountpoint to device ", uuid, ": ", mountpoint );
-            it->second->addMountpoint( mountpoint );
-        }
-    }
+    m_deviceLister->refresh();
     LOG_INFO( "Done refreshing devices from IDeviceLister" );
 }
 
@@ -165,13 +132,50 @@ const std::string& FileSystemFactory::scheme() const
     return s;
 }
 
-bool FileSystemFactory::start( fs::IFileSystemFactoryCb* )
+bool FileSystemFactory::start( fs::IFileSystemFactoryCb* cb )
 {
+    m_cb = cb;
+    m_deviceLister->start( this );
     return true;
 }
 
 void FileSystemFactory::stop()
 {
+}
+
+bool FileSystemFactory::onDeviceMounted( const std::string& uuid,
+                                         const std::string& mp,
+                                         bool removable )
+{
+    auto deviceIt = m_deviceCache.find( uuid );
+    auto mountpoint = utils::file::toFolderPath( mp );
+    std::shared_ptr<fs::IDevice> device;
+    if ( deviceIt == end( m_deviceCache ) )
+    {
+        device = std::make_shared<fs::Device>( uuid, mountpoint, removable );
+        m_deviceCache.emplace( uuid, device );
+    }
+    else
+    {
+        device = deviceIt->second;
+        device->addMountpoint( mountpoint );
+    }
+    m_cb->onDeviceMounted( *device, mountpoint );
+    return false;
+}
+
+void FileSystemFactory::onDeviceUnmounted( const std::string& uuid,
+                                           const std::string& mp )
+{
+    auto deviceIt = m_deviceCache.find( uuid );
+    if ( deviceIt == end( m_deviceCache ) )
+    {
+        assert( !"An unknown device was unmounted" );
+        return;
+    }
+    auto mountpoint = utils::file::toFolderPath( mp );
+    deviceIt->second->removeMountpoint( mountpoint );
+    m_cb->onDeviceUnmounted( *(deviceIt->second), mountpoint );
 }
 
 }

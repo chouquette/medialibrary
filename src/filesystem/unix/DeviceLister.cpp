@@ -43,7 +43,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
-
+#include <cassert>
 
 namespace medialibrary
 {
@@ -123,7 +123,7 @@ DeviceLister::MountpointMap DeviceLister::listMountpoints() const
         auto& mountpoints = res[deviceName];
         LOG_INFO( "Discovered mountpoint ", deviceName, " mounted on ",
                   s->mnt_dir, " (", s->mnt_type, ')' );
-        mountpoints.emplace_back( s->mnt_dir );
+        mountpoints.emplace_back( utils::file::toMrl( s->mnt_dir ) );
         errno = 0;
     }
     if ( errno != 0 )
@@ -247,9 +247,84 @@ std::vector<std::string> DeviceLister::getAllowedFsTypes() const
     return res;
 }
 
-std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() const
+void DeviceLister::refresh()
 {
-    std::vector<std::tuple<std::string, std::string, bool>> res;
+    /* We need the device lister to be started before refreshing anything */
+    assert( m_cb != nullptr );
+
+    auto newDeviceList = devices();
+    for ( auto knownDeviceIt = begin( m_knownDevices );
+          knownDeviceIt != end( m_knownDevices ); )
+    {
+        auto& knownDevice = *knownDeviceIt;
+        auto newDeviceIt = std::find_if( begin( newDeviceList ), end( newDeviceList ),
+                                         [&knownDevice]( const Device& d ) {
+            return d.uuid == knownDevice.uuid;
+        });
+        if ( newDeviceIt == end( newDeviceList ) )
+        {
+            /* A previously known device was removed */
+            for ( const auto& mountpoint : knownDevice.mountpoints )
+                m_cb->onDeviceUnmounted( knownDevice.uuid, mountpoint );
+            knownDeviceIt = m_knownDevices.erase( knownDeviceIt );
+            continue;
+        }
+        /* The device still exists, check its mountpoint */
+        auto& newDevice = *newDeviceIt;
+        for ( auto knownMountpointIt = begin( knownDevice.mountpoints );
+              knownMountpointIt != end( knownDevice.mountpoints ); )
+        {
+            const auto& knownMountpoint = *knownMountpointIt;
+            auto newMountpointIt = std::find( begin( newDevice.mountpoints ),
+                                              end( newDevice.mountpoints ),
+                                              knownMountpoint );
+            if ( newMountpointIt == end( newDevice.mountpoints ) )
+            {
+                /* The device still exists but lost a mountpoint */
+                m_cb->onDeviceUnmounted( knownDevice.uuid, knownMountpoint );
+                knownMountpointIt = knownDevice.mountpoints.erase( knownMountpointIt );
+                continue;
+            }
+            /*
+             * The mountpoint is still there, remove it from the list of current
+             * mountpoints to detect new ones at the end of the loop
+             */
+            newDevice.mountpoints.erase( newMountpointIt );
+            ++knownMountpointIt;
+        }
+        for ( auto newMountpointIt = begin( newDevice.mountpoints );
+              newMountpointIt != end( newDevice.mountpoints ); ++newMountpointIt )
+        {
+            knownDevice.mountpoints.push_back( std::move( *newMountpointIt ) );
+            m_cb->onDeviceMounted( knownDevice.uuid,
+                                   *knownDevice.mountpoints.rbegin(),
+                                   knownDevice.removable );
+        }
+        newDeviceList.erase( newDeviceIt );
+        ++knownDeviceIt;
+    }
+    /*
+     * Devices leftover in newDevices are entirely new devices which we now need
+     * to signal about, and propagate to the list of known devices for later refresh
+     */
+    for ( auto& newDevice : newDeviceList )
+    {
+        m_knownDevices.push_back( std::move( newDevice ) );
+        const auto& insertedNewDevice = *m_knownDevices.rbegin();
+        for ( const auto& mp : insertedNewDevice.mountpoints )
+        {
+            LOG_DEBUG( "Adding device uuid: ", insertedNewDevice.uuid,
+                       " mounted on: ", mp, " removable: ",
+                       insertedNewDevice.removable ? "yes" : "no" );
+            m_cb->onDeviceMounted( insertedNewDevice.uuid, mp,
+                                   insertedNewDevice.removable );
+        }
+    }
+}
+
+std::vector<DeviceLister::Device> DeviceLister::devices() const
+{
+    std::vector<Device> res;
     try
     {
         MountpointMap mountpoints = listMountpoints();
@@ -266,6 +341,8 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
         }
         for ( const auto& p : mountpoints )
         {
+            assert( p.second.empty() == false );
+
             const auto& partitionPath = p.first;
             auto deviceName = utils::file::fileName( partitionPath );
             auto it = devices.find( deviceName );
@@ -307,29 +384,23 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
                 }
             }
             auto removable = isRemovable( partitionPath );
-            for ( const auto& mountpoint : p.second )
-            {
-                LOG_DEBUG( "Adding device ", deviceName, " uuid: ", uuid,
-                           " mounted on: ", mountpoint, " removable: ",
-                           removable ? "yes" : "no" );
-                res.emplace_back( std::make_tuple( uuid,
-                                                   utils::file::toMrl( mountpoint ),
-                                                   removable ) );
-            }
+
+            res.emplace_back( uuid, std::move( p.second ), removable );
         }
     }
     catch( const fs::errors::DeviceListing& ex )
     {
         LOG_WARN( ex.what(), ". Falling back to a dummy device containing '/'" );
-        res.emplace_back( std::make_tuple( "{dummy-device}", utils::file::toMrl( "/" ),
-                                           false ) );
+        res.emplace_back( "{dummy-device}",
+                          std::vector<std::string> { utils::file::toMrl( "/" ) },
+                          false );
     }
-
     return res;
 }
 
-bool DeviceLister::start( IDeviceListerCb* )
+bool DeviceLister::start( IDeviceListerCb* cb )
 {
+    m_cb = cb;
     return true;
 }
 

@@ -34,6 +34,19 @@ namespace fs
 class DeviceLister : public IDeviceLister
 {
 private:
+    struct Device
+    {
+        Device( std::string u, std::vector<std::string> m, bool r )
+            : uuid( std::move( u ) )
+            , mountpoints( std::move( m ) )
+            , removable( r )
+        {
+        }
+        std::string uuid;
+        std::vector<std::string> mountpoints;
+        bool removable;
+    };
+
     // Device name / UUID map
     using DeviceMap = std::unordered_map<std::string, std::string>;
     // Device path / Mountpoints map
@@ -43,13 +56,19 @@ private:
     DeviceMap listDevices() const;
     MountpointMap listMountpoints() const;
     std::pair<std::string, std::string> deviceFromDeviceMapper( const std::string& devicePath ) const;
+    std::vector<Device> devices() const;
+
     bool isRemovable( const std::string& devicePath ) const;
 
     std::vector<std::string> getAllowedFsTypes() const;
 
-    virtual std::vector<std::tuple<std::string, std::string, bool>> devices() const override;
+    virtual void refresh() override;
     virtual bool start( IDeviceListerCb* ) override;
     virtual void stop() override;
+
+private:
+    IDeviceListerCb* m_cb = nullptr;
+    std::vector<Device> m_knownDevices;
 };
 
 }

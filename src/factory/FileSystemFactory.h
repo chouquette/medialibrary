@@ -25,6 +25,7 @@
 #include "compat/Mutex.h"
 #include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "medialibrary/Types.h"
+#include "medialibrary/IDeviceLister.h"
 
 #include <string>
 #include <unordered_map>
@@ -35,7 +36,7 @@ namespace medialibrary
 namespace factory
 {
 
-class FileSystemFactory : public fs::IFileSystemFactory
+class FileSystemFactory : public fs::IFileSystemFactory, public IDeviceListerCb
 {
     // UUID -> Device instance map
     using DeviceCacheMap = std::unordered_map<std::string, std::shared_ptr<fs::IDevice>>;
@@ -54,9 +55,16 @@ public:
     virtual void stop() override;
 
 private:
+    virtual bool onDeviceMounted( const std::string& uuid,
+                                  const std::string& mountpoint,
+                                  bool removable ) override;
+    virtual void onDeviceUnmounted( const std::string& uuid,
+                                    const std::string& mountpoint ) override;
+
+private:
     DeviceListerPtr m_deviceLister;
     DeviceCacheMap m_deviceCache;
-
+    fs::IFileSystemFactoryCb* m_cb;
 };
 
 }

@@ -72,16 +72,22 @@ protected:
     bool m_discoveryCompleted;
 };
 
-class ForceRemovableStorareDeviceLister : public IDeviceLister
+class ForceRemovableStorareDeviceLister : public IDeviceLister, public IDeviceListerCb
 {
 public:
     ForceRemovableStorareDeviceLister();
-    virtual std::vector<std::tuple<std::string, std::string, bool>> devices() const override;
-    virtual bool start( IDeviceListerCb* ) override;
+    virtual void refresh() override;
+    virtual bool start( IDeviceListerCb* cb ) override;
     virtual void stop() override;
 
 private:
     DeviceListerPtr m_lister;
+
+    // IDeviceListerCb interface
+public:
+    virtual bool onDeviceMounted( const std::string& uuid, const std::string& mountpoint, bool removable ) override;
+    virtual void onDeviceUnmounted( const std::string& uuid, const std::string& mountpoint ) override;
+    IDeviceListerCb* m_cb;
 };
 
 class MockResumeCallback : public MockCallback

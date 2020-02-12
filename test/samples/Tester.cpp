@@ -765,20 +765,33 @@ ForceRemovableStorareDeviceLister::ForceRemovableStorareDeviceLister()
     assert( m_lister != nullptr );
 }
 
-std::vector<std::tuple<std::string, std::string, bool>>
-ForceRemovableStorareDeviceLister::devices() const
+void ForceRemovableStorareDeviceLister::refresh()
 {
-    auto devices = m_lister->devices();
-    for ( auto& d : devices )
-        std::get<2>( d ) = true;
-    return devices;
+    m_lister->refresh();
 }
 
-bool ForceRemovableStorareDeviceLister::start( IDeviceListerCb* )
+bool ForceRemovableStorareDeviceLister::start( IDeviceListerCb* cb )
 {
+    m_cb = cb;
+    m_lister->start( this );
     return true;
 }
 
 void ForceRemovableStorareDeviceLister::stop()
 {
+    m_lister->stop();
+}
+
+
+bool ForceRemovableStorareDeviceLister::onDeviceMounted( const std::string& uuid,
+                                                         const std::string& mountpoint,
+                                                         bool )
+{
+    return m_cb->onDeviceMounted( uuid, mountpoint, true );
+}
+
+void ForceRemovableStorareDeviceLister::onDeviceUnmounted( const std::string& uuid,
+                                                           const std::string& mountpoint )
+{
+    m_cb->onDeviceUnmounted( uuid, mountpoint );
 }

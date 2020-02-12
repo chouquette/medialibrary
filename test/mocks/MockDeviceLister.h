@@ -29,7 +29,7 @@ namespace mock
 class MockDeviceLister : public medialibrary::IDeviceLister
 {
 public:
-    virtual std::vector<std::tuple<std::string, std::string, bool>> devices() const override
+    virtual void refresh() override
     {
         abort();
     }
