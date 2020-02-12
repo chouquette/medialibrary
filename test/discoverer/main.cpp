@@ -30,6 +30,7 @@
 #include <iostream>
 #include <condition_variable>
 #include <mutex>
+#include <unistd.h>
 
 class TestCb : public mock::NoopCallback
 {
@@ -110,6 +111,8 @@ int main( int argc, char** argv )
         std::cerr << "usage: " << argv[0] << " <entrypoint>" << std::endl;
         return 1;
     }
+
+    unlink( "/tmp/test.db" );
 
     auto testCb = std::make_unique<TestCb>();
     std::unique_ptr<medialibrary::IMediaLibrary> ml( NewMediaLibrary() );
