@@ -300,10 +300,8 @@ protected:
     public:
         explicit FsFactoryCb( MediaLibrary* ml );
     private:
-        virtual void onDeviceMounted( const fs::IDevice& deviceFs,
-                                      const std::string& newMountpoint ) override;
-        virtual void onDeviceUnmounted( const fs::IDevice& deviceFs,
-                                        const std::string& newMountpoint ) override;
+        virtual bool onDeviceMounted( const fs::IDevice& deviceFs ) override;
+        virtual void onDeviceUnmounted( const fs::IDevice& deviceFs ) override;
     private:
         MediaLibrary* m_ml;
     };

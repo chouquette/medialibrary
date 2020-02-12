@@ -152,7 +152,7 @@ void NetworkFileSystemFactory::onDeviceAdded( VLC::MediaPtr media )
     }
     m_deviceCond.notify_one();
     LOG_INFO( "Adding new network device: name: ", name, " - mrl: ", mrl );
-    m_cb->onDeviceMounted( *(*m_devices.rbegin()).device, mrl );
+    m_cb->onDeviceMounted( *(*m_devices.rbegin()).device );
 }
 
 void NetworkFileSystemFactory::onDeviceRemoved( VLC::MediaPtr media )
@@ -177,7 +177,7 @@ void NetworkFileSystemFactory::onDeviceRemoved( VLC::MediaPtr media )
     }
     const auto name = utils::file::stripScheme( mrl );
     LOG_INFO( "Device ", mrl, " was removed" );
-    m_cb->onDeviceUnmounted( *device, mrl );
+    m_cb->onDeviceUnmounted( *device );
 }
 
 }

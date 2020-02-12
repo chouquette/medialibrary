@@ -160,7 +160,7 @@ bool FileSystemFactory::onDeviceMounted( const std::string& uuid,
         device = deviceIt->second;
         device->addMountpoint( mountpoint );
     }
-    m_cb->onDeviceMounted( *device, mountpoint );
+    m_cb->onDeviceMounted( *device );
     return false;
 }
 
@@ -175,7 +175,7 @@ void FileSystemFactory::onDeviceUnmounted( const std::string& uuid,
     }
     auto mountpoint = utils::file::toFolderPath( mp );
     deviceIt->second->removeMountpoint( mountpoint );
-    m_cb->onDeviceUnmounted( *(deviceIt->second), mountpoint );
+    m_cb->onDeviceUnmounted( *(deviceIt->second) );
 }
 
 }

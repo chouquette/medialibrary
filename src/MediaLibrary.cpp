@@ -2408,7 +2408,7 @@ MediaLibrary::FsFactoryCb::FsFactoryCb(MediaLibrary* ml)
 {
 }
 
-void MediaLibrary::FsFactoryCb::onDeviceMounted(const fs::IDevice& deviceFs , const std::string& newMountpoint)
+bool MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs )
 {
     auto device = Device::fromUuid( m_ml, deviceFs.uuid(), deviceFs.scheme() );
     if ( device == nullptr )
@@ -2417,15 +2417,16 @@ void MediaLibrary::FsFactoryCb::onDeviceMounted(const fs::IDevice& deviceFs , co
         {
             device = Device::create( m_ml, deviceFs.uuid(), deviceFs.scheme(),
                                      deviceFs.isRemovable() );
+            return device != nullptr;
         }
         catch ( const sqlite::errors::ConstraintUnique& )
         {
             /* In case of a sporadic read failure, just ignore the insertion error */
         }
-        return;
+        return false;
     }
     if ( device->isPresent() == deviceFs.isPresent() )
-        return;
+        return false;
 
     assert( device->isRemovable() == true );
 
@@ -2444,10 +2445,10 @@ void MediaLibrary::FsFactoryCb::onDeviceMounted(const fs::IDevice& deviceFs , co
         assert( deviceFs.isPresent() == true );
         m_ml->m_discovererWorker->reloadDevice( device->id() );
     }
-    return;
+    return false;
 }
 
-void MediaLibrary::FsFactoryCb::onDeviceUnmounted(const fs::IDevice& deviceFs , const std::string& newMountpoint)
+void MediaLibrary::FsFactoryCb::onDeviceUnmounted( const fs::IDevice& deviceFs )
 {
     auto device = Device::fromUuid( m_ml, deviceFs.uuid(), deviceFs.scheme() );
     if ( device == nullptr )

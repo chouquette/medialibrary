@@ -44,23 +44,22 @@ namespace fs
         /**
          * @brief onDevicePlugged Shall be invoked when a device gets plugged
          * @param device The mounted device
-         * @param newMountpoint The device mountpoint that was just mounted
          *
-         * When this callback returns, the medialibrary will assume that the
-         * corresponding fs::IDevice::isPresent method will return true.
+         * When this callback is invoked, the FS device presence must already be
+         * updated.
+         * If this is the first time this device gets plugged, this callback
+         * will return true, false otherwise.
          */
-        virtual void onDeviceMounted( const fs::IDevice& device,
-                                      const std::string& newMountpoint ) = 0;
+        virtual bool onDeviceMounted( const fs::IDevice& device ) = 0;
         /**
          * @brief onDeviceUnplugged Shall be invoked when a device gets unplugged
          * @param device The unmounted device
-         * @param unmountedMountpoint The device mountpoint that was just unmounted
          *
-         * When this callback returns, the medialibrary will assume that the
-         * corresponding fs::IDevice::isPresent method will return false.
+         * When this callback is invoked, the FS device presence must already be
+         * updated. If no more mountpoints are available, device->isPresent must
+         * return false by the time this is called
          */
-        virtual void onDeviceUnmounted( const fs::IDevice& device,
-                                        const std::string& unmountedMountpoint ) = 0;
+        virtual void onDeviceUnmounted( const fs::IDevice& device ) = 0;
     };
 
     class IFileSystemFactory
