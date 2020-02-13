@@ -23,6 +23,7 @@
 #pragma once
 
 #include "medialibrary/filesystem/IDevice.h"
+#include "compat/Mutex.h"
 #include <vector>
 
 namespace medialibrary
@@ -48,9 +49,14 @@ public:
     virtual std::string absoluteMrl( const std::string& relativeMrl ) const override;
 
 private:
+    std::tuple<bool, std::string>
+        matchesMountpointLocked( const std::string& mrl ) const;
+
+private:
     std::string m_uuid;
     std::vector<std::string> m_mountpoints;
     std::string m_scheme;
+    mutable compat::Mutex m_mutex;
     bool m_removable;
 };
 
