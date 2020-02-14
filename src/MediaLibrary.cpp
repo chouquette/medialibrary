@@ -477,16 +477,8 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
         return InitializeResult::AlreadyInitialized;
 
     LOG_INFO( "Initializing medialibrary..." );
-    if ( m_deviceListers.find( "file://" ) == cend( m_deviceListers ) )
-    {
-        auto devLister = factory::createDeviceLister();
-        if ( devLister == nullptr )
-        {
-            LOG_ERROR( "No available IDeviceLister was found." );
-            return InitializeResult::Failed;
-        }
-        m_deviceListers["file://"] = std::move( devLister );
-    }
+    if ( addDefaultDeviceListers() == false )
+        return InitializeResult::Failed;
 
     auto mlFolder = utils::file::toFolderPath( mlFolderPath );
     m_thumbnailPath = mlFolder + "thumbnails/";
@@ -1086,6 +1078,21 @@ void MediaLibrary::addLocalFsFactory()
 {
     m_fsFactories.emplace( begin( m_fsFactories ),
             std::make_shared<factory::FileSystemFactory>( this ) );
+}
+
+bool MediaLibrary::addDefaultDeviceListers()
+{
+    if ( m_deviceListers.find( "file://" ) == cend( m_deviceListers ) )
+    {
+        auto devLister = factory::createDeviceLister();
+        if ( devLister == nullptr )
+        {
+            LOG_ERROR( "No available IDeviceLister was found." );
+            return false;
+        }
+        m_deviceListers["file://"] = std::move( devLister );
+    }
+    return true;
 }
 
 InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
