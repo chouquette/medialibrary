@@ -43,7 +43,7 @@ namespace medialibrary
 namespace fs
 {
 
-std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() const
+std::vector<CommonDeviceLister::Device> DeviceLister::devices() const
 {
     wchar_t volumeName[MAX_PATH];
     auto handle = FindFirstVolume( volumeName, sizeof(volumeName)/sizeof(volumeName[0]) );
@@ -55,7 +55,7 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
     }
     std::unique_ptr<typename std::remove_pointer<HANDLE>::type, decltype(&FindVolumeClose)>
             uh( handle, &FindVolumeClose );
-    std::vector<std::tuple<std::string, std::string, bool>> res;
+    std::vector<Device> res;
     for ( BOOL success =  TRUE; ; success = FindNextVolume( handle, volumeName, sizeof( volumeName )/sizeof(volumeName[0]) ) )
     {
         if ( success == FALSE )
@@ -90,8 +90,9 @@ std::vector<std::tuple<std::string, std::string, bool>> DeviceLister::devices() 
 
         LOG_INFO( "Discovered device ", uuid, "; mounted on ", mountpoint, "; removable: ",
                   type == DRIVE_REMOVABLE ? "yes" : "no" );
-        res.emplace_back( std::make_tuple( uuid, utils::file::toMrl( mountpoint ),
-                                           type == DRIVE_REMOVABLE ) );
+        res.emplace_back( uuid,
+                          std::vector<std::string>{ utils::file::toMrl( mountpoint ) },
+                          type == DRIVE_REMOVABLE );
     }
     return res;
 }
