@@ -205,7 +205,11 @@ public:
     parser::Parser* tryGetParser();
     ThumbnailerWorker* thumbnailer() const;
 
-    virtual void setDeviceLister( DeviceListerPtr lister ) override;
+    virtual void registerDeviceLister( DeviceListerPtr lister,
+                                       const std::string& scheme ) override;
+    virtual DeviceListerPtr deviceLister( const std::string& scheme ) const override;
+    DeviceListerPtr deviceListerLocked( const std::string& scheme ) const;
+
     std::shared_ptr<fs::IFileSystemFactory> fsFactoryForMrl( const std::string& mrl ) const;
 
     /**
@@ -328,7 +332,7 @@ protected:
     IMediaLibraryCb* m_callback;
 
     // External device lister
-    DeviceListerPtr m_deviceLister;
+    std::unordered_map<std::string, DeviceListerPtr> m_deviceListers;
     std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_fsFactories;
     std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_externalNetworkFsFactories;
 

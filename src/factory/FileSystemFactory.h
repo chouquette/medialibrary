@@ -25,6 +25,7 @@
 #include "compat/Mutex.h"
 #include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "medialibrary/Types.h"
+#include "Types.h"
 #include "medialibrary/IDeviceLister.h"
 
 #include <string>
@@ -42,7 +43,7 @@ class FileSystemFactory : public fs::IFileSystemFactory, public IDeviceListerCb
     using DeviceCacheMap = std::unordered_map<std::string, std::shared_ptr<fs::IDevice>>;
 
 public:
-    explicit FileSystemFactory( DeviceListerPtr lister );
+    explicit FileSystemFactory( MediaLibraryPtr ml );
     virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& mrl ) override;
     virtual std::shared_ptr<fs::IFile> createFile( const std::string& mrl ) override;
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override;

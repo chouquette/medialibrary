@@ -56,7 +56,7 @@ void Tests::Reload()
         mockDeviceLister = std::make_shared<mock::MockDeviceLister>();
 
     ml->setFsFactory( fsFactory );
-    ml->setDeviceLister( mockDeviceLister );
+    ml->registerDeviceLister( mockDeviceLister, "file://" );
     ml->setVerbosity( LogLevel::Error );
     auto res = ml->initialize( "test.db", "/tmp/ml_folder/", mlCb );
     ASSERT_EQ( InitializeResult::Success, res );

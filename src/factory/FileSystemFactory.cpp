@@ -30,6 +30,7 @@
 #include "logging/Logger.h"
 #include "utils/Filename.h"
 #include "utils/Directory.h"
+#include "MediaLibrary.h"
 
 #if defined(__linux__) || defined(__APPLE__)
 # include "filesystem/unix/Directory.h"
@@ -53,9 +54,11 @@ namespace medialibrary
 namespace factory
 {
 
-FileSystemFactory::FileSystemFactory( DeviceListerPtr lister )
-    : m_deviceLister( std::move( lister ) )
+FileSystemFactory::FileSystemFactory( MediaLibraryPtr ml )
+    : m_deviceLister( ml->deviceListerLocked( "file://" ) )
 {
+    if ( m_deviceLister == nullptr )
+        throw std::runtime_error( "Failed to acquire a local device lister" );
 }
 
 std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::string& mrl )

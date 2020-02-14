@@ -175,7 +175,10 @@ void Tests::SetUp()
 #endif
 
     if ( std::get<1>( GetParam() ) == true )
-        m_ml->setDeviceLister( std::make_shared<ForceRemovableStorareDeviceLister>() );
+    {
+        auto devLister = std::make_shared<ForceRemovableStorareDeviceLister>();
+        m_ml->registerDeviceLister( std::move( devLister ), "file://" );
+    }
 
     auto res = m_ml->initialize( "test.db", mlDir, m_cb.get() );
     ASSERT_EQ( InitializeResult::Success, res );

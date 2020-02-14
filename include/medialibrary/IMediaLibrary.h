@@ -760,14 +760,29 @@ public:
     virtual bool forceParserRetry() = 0;
 
     /**
-     * @brief setDeviceLister Sets a device lister.
+     * @brief registerDeviceLister Registers a device lister for a given scheme
      * This is meant for OSes with complicated/impossible to achieve device listing (due to
-     * missing APIs, permissions problems...)
+     * missing APIs, permissions problems...), or for non-local devices, such as
+     * network shares.
      * @param lister A device lister
+     * @param scheme The listed devices scheme (file://, smb://, foo://, ...)
      *
-     * This must be called *before* initialize()
+     * This must be called *before* initialize(). Calling it once the medialib
+     * has been initialized will have no effect.
+     * Any previously matching device lister will be overriden.
      */
-    virtual void setDeviceLister( DeviceListerPtr lister ) = 0;
+    virtual void registerDeviceLister( DeviceListerPtr lister,
+                                       const std::string& scheme ) = 0;
+    /**
+     * @brief deviceLister Get a device lister for the provided scheme
+     * @param scheme The scheme for which a device lister is required
+     * @return A device lister instance, if any.
+     *
+     * This will return the device lister registered by registerDeviceLister()
+     * or a media library provided one.
+     * If no device lister is available for this scheme, nullptr will be returned
+     */
+    virtual DeviceListerPtr deviceLister( const std::string& scheme ) const = 0;
 
     /**
      * @brief forceRescan Deletes all entities except Media and Playlist, and

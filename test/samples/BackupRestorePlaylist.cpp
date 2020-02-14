@@ -76,7 +76,8 @@ protected:
         // This assumes wine for now
         auto mlDir = "Z:\\tmp\\ml_folder\\";
     #endif
-        m_ml->setDeviceLister( std::make_shared<ForceRemovableStorareDeviceLister>() );
+        auto devLister = std::make_shared<ForceRemovableStorareDeviceLister>();
+        m_ml->registerDeviceLister( std::move( devLister ), "file://" );
         auto res = m_ml->initialize( "test.db", mlDir, m_cb.get() );
         ASSERT_EQ( InitializeResult::Success, res );
     }

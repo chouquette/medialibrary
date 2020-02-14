@@ -477,14 +477,15 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
         return InitializeResult::AlreadyInitialized;
 
     LOG_INFO( "Initializing medialibrary..." );
-    if ( m_deviceLister == nullptr )
+    if ( m_deviceListers.find( "file://" ) == cend( m_deviceListers ) )
     {
-        m_deviceLister = factory::createDeviceLister();
-        if ( m_deviceLister == nullptr )
+        auto devLister = factory::createDeviceLister();
+        if ( devLister == nullptr )
         {
             LOG_ERROR( "No available IDeviceLister was found." );
             return InitializeResult::Failed;
         }
+        m_deviceListers["file://"] = std::move( devLister );
     }
 
     auto mlFolder = utils::file::toFolderPath( mlFolderPath );
@@ -1084,7 +1085,7 @@ void MediaLibrary::populateNetworkFsFactories()
 void MediaLibrary::addLocalFsFactory()
 {
     m_fsFactories.emplace( begin( m_fsFactories ),
-            std::make_shared<factory::FileSystemFactory>( m_deviceLister ) );
+            std::make_shared<factory::FileSystemFactory>( this ) );
 }
 
 InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
@@ -2136,10 +2137,26 @@ ThumbnailerWorker* MediaLibrary::thumbnailer() const
     return m_thumbnailerWorker.get();
 }
 
-void MediaLibrary::setDeviceLister( DeviceListerPtr lister )
+void MediaLibrary::registerDeviceLister( DeviceListerPtr lister,
+                                         const std::string& scheme )
 {
     assert( m_initialized == false );
-    m_deviceLister = lister;
+    std::lock_guard<compat::Mutex> lock( m_mutex );
+    m_deviceListers[scheme] = std::move( lister );
+}
+
+DeviceListerPtr MediaLibrary::deviceLister( const std::string& scheme ) const
+{
+    std::lock_guard<compat::Mutex> lock( m_mutex );
+    return deviceListerLocked( scheme );
+}
+
+DeviceListerPtr MediaLibrary::deviceListerLocked(const std::string& scheme) const
+{
+    auto it = m_deviceListers.find( scheme );
+    if ( it == cend( m_deviceListers ) )
+        return nullptr;
+    return it->second;
 }
 
 std::shared_ptr<fs::IFileSystemFactory> MediaLibrary::fsFactoryForMrl( const std::string& mrl ) const
