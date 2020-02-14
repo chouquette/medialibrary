@@ -78,6 +78,9 @@ const std::string& CommonDevice::mountpoint() const
 void CommonDevice::addMountpoint( std::string mountpoint )
 {
     std::unique_lock<compat::Mutex> lock{ m_mutex };
+    if ( std::find( cbegin( m_mountpoints ),
+                    cend( m_mountpoints ), mountpoint ) != cend( m_mountpoints ) )
+        return;
     m_mountpoints.push_back( std::move( mountpoint ) );
 }
 
