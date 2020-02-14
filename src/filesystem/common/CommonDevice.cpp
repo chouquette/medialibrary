@@ -30,6 +30,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstring>
 
 namespace medialibrary
 {
@@ -82,7 +83,7 @@ CommonDevice::matchesMountpoint( const std::string& mrl ) const
 {
     for ( const auto& m : m_mountpoints )
     {
-        if ( mrl.compare( 0, m.size(), m ) == 0 )
+        if ( strncasecmp( m.c_str(), mrl.c_str(), m.size() ) == 0 )
             return std::make_tuple( true, m );
     }
     return std::make_tuple( false, "" );
