@@ -30,12 +30,12 @@
 
 #include "NetworkFileSystemFactory.h"
 #include "filesystem/network/Directory.h"
-#include "utils/VLCInstance.h"
+#include "filesystem/network/Device.h"
 #include "utils/Filename.h"
+#include "MediaLibrary.h"
 
 #include <algorithm>
-
-#include "logging/Logger.h"
+#include <cstring>
 #include <cassert>
 
 namespace medialibrary
@@ -43,16 +43,11 @@ namespace medialibrary
 namespace factory
 {
 
-NetworkFileSystemFactory::NetworkFileSystemFactory(const std::string& protocol,
-                                                    const std::string& name )
+NetworkFileSystemFactory::NetworkFileSystemFactory( MediaLibraryPtr ml,
+                                                    const std::string& protocol )
     : m_protocol( protocol )
-    , m_discoverer( VLCInstance::get(), name )
-    , m_mediaList( m_discoverer.mediaList() )
-    , m_cb( nullptr )
+    , m_deviceLister( ml->deviceListerLocked( protocol ) )
 {
-    auto& em = m_mediaList->eventManager();
-    em.onItemAdded( [this]( VLC::MediaPtr m, int ) { onDeviceAdded( std::move( m ) ); } );
-    em.onItemDeleted( [this]( VLC::MediaPtr m, int ) { onDeviceRemoved( std::move( m ) ); } );
 }
 
 std::shared_ptr<fs::IDirectory> NetworkFileSystemFactory::createDirectory( const std::string& mrl )
@@ -67,41 +62,36 @@ std::shared_ptr<fs::IFile> NetworkFileSystemFactory::createFile( const std::stri
     return fsDir->file( mrl );
 }
 
-std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::createDevice( const std::string& mrl )
+std::shared_ptr<fs::IDevice>
+NetworkFileSystemFactory::createDevice( const std::string& uuid )
 {
     std::shared_ptr<fs::IDevice> res;
     std::unique_lock<compat::Mutex> lock( m_devicesLock );
 
-    m_deviceCond.wait_for( lock, std::chrono::seconds{ 5 }, [this, &res, &mrl]() {
-        auto it = std::find_if( begin( m_devices ), end( m_devices ), [&mrl]( const Device& d ) {
-            return strcasecmp( d.mrl.c_str(), mrl.c_str() ) == 0;
-        });
-        if ( it == end( m_devices ) )
-            return false;
-        res = it->device;
-        return true;
+    m_devicesCond.wait_for( lock, std::chrono::seconds{ 5 },
+                            [this, &res, &uuid]() {
+        res = deviceByUuidLocked( uuid );
+        return res != nullptr;
     });
     return res;
 }
 
-std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::createDeviceFromMrl( const std::string& mrl )
+std::shared_ptr<fs::IDevice>
+NetworkFileSystemFactory::createDeviceFromMrl( const std::string& mrl )
 {
     std::shared_ptr<fs::IDevice> res;
     std::unique_lock<compat::Mutex> lock( m_devicesLock );
-    m_deviceCond.wait_for( lock, std::chrono::seconds{ 5 }, [this, &res, &mrl]() {
-        auto it = std::find_if( begin( m_devices ), end( m_devices ), [&mrl]( const Device& d ) {
-            return strncasecmp( mrl.c_str(), d.mrl.c_str(), d.mrl.length() ) == 0;
-        });
-        if ( it == end( m_devices ) )
-            return false;
-        res = it->device;
-        return true;
+    m_devicesCond.wait_for( lock, std::chrono::seconds{ 5 },
+                            [this, &res, &mrl]() {
+        res = deviceByMrlLocked( mrl );
+        return res != nullptr;
     });
     return res;
 }
 
 void NetworkFileSystemFactory::refreshDevices()
 {
+    m_deviceLister->refresh();
 }
 
 bool NetworkFileSystemFactory::isMrlSupported( const std::string& mrl ) const
@@ -123,61 +113,77 @@ const std::string& NetworkFileSystemFactory::scheme() const
 bool NetworkFileSystemFactory::start( fs::IFileSystemFactoryCb* cb )
 {
     m_cb = cb;
-    return m_discoverer.start();
+    return m_deviceLister->start( this );
 }
 
 void NetworkFileSystemFactory::stop()
 {
-    m_discoverer.stop();
+    m_deviceLister->stop();
 }
 
-void NetworkFileSystemFactory::onDeviceAdded( VLC::MediaPtr media )
+bool NetworkFileSystemFactory::onDeviceMounted( const std::string& uuid,
+                                                const std::string& mountpoint,
+                                                bool removable )
 {
-    const auto& mrl = media->mrl();
-    //FIXME: Shouldn't this be an assert?
-    if ( isMrlSupported( mrl ) == false )
-        return;
-
-    auto name = utils::file::stripScheme( mrl );
-
+    assert( removable == true );
+    auto addMountpoint = true;
+    std::shared_ptr<fs::IDevice> device;
     {
-        std::lock_guard<compat::Mutex> lock( m_devicesLock );
-        auto it = std::find_if( begin( m_devices ), end( m_devices ), [&mrl]( const Device& d ) {
-            return d.mrl== mrl;
-        });
-        if ( it != end( m_devices ) )
-            return;
-
-        m_devices.emplace_back( name, mrl, m_protocol, *media );
-    }
-    m_deviceCond.notify_one();
-    LOG_INFO( "Adding new network device: name: ", name, " - mrl: ", mrl );
-    m_cb->onDeviceMounted( *(*m_devices.rbegin()).device );
-}
-
-void NetworkFileSystemFactory::onDeviceRemoved( VLC::MediaPtr media )
-{
-    const auto& mrl = media->mrl();
-    std::shared_ptr<fs::NetworkDevice> device;
-    {
-        std::lock_guard<compat::Mutex> lock( m_devicesLock );
-        auto it = std::find_if( begin( m_devices ), end( m_devices ), [&mrl]( const Device& d ) {
-            return d.mrl == mrl;
-        });
-        if ( it != end( m_devices ) )
+        std::unique_lock<compat::Mutex> lock( m_devicesLock );
+        device = deviceByUuidLocked( uuid );
+        if ( device == nullptr )
         {
-            device =(*it).device;
-            m_devices.erase( it );
+            device = std::make_shared<fs::NetworkDevice>( uuid, mountpoint, m_protocol );
+            m_devices.push_back( device );
+            addMountpoint = false;
         }
+    }
+    /* Update the mountpoint outside of the device list lock context */
+    if ( addMountpoint == true )
+        device->addMountpoint( mountpoint );
+
+    m_devicesCond.notify_all();
+    return m_cb->onDeviceMounted( *device );
+}
+
+void NetworkFileSystemFactory::onDeviceUnmounted( const std::string& uuid,
+                                                  const std::string& mountpoint )
+{
+    std::shared_ptr<fs::IDevice> device;
+    {
+        std::unique_lock<compat::Mutex> lock( m_devicesLock );
+        device = deviceByUuidLocked( uuid );
     }
     if ( device == nullptr )
     {
-        assert( !"Unknown network device was removed" );
+        assert( !"Unknown device was unmounted" );
         return;
     }
-    const auto name = utils::file::stripScheme( mrl );
-    LOG_INFO( "Device ", mrl, " was removed" );
+    device->removeMountpoint( mountpoint );
     m_cb->onDeviceUnmounted( *device );
+}
+
+std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::deviceByUuidLocked( const std::string& uuid )
+{
+    auto it = std::find_if( begin( m_devices ), end( m_devices ),
+                            [&uuid]( const std::shared_ptr<fs::IDevice>& d ) {
+        return strcasecmp( d->uuid().c_str(), uuid.c_str() ) == 0;
+    });
+    if ( it == end( m_devices ) )
+        return nullptr;
+    return *it;
+}
+
+std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::deviceByMrlLocked( const std::string& mrl )
+{
+    auto it = std::find_if( begin( m_devices ), end( m_devices ),
+                            [&mrl]( const std::shared_ptr<fs::IDevice>& d ) {
+        auto match = d->matchesMountpoint( mrl );
+        return std::get<0>( match );
+    });
+    if ( it == end( m_devices ) )
+        return nullptr;
+    return *it;
 }
 
 }

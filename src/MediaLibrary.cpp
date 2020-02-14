@@ -86,6 +86,7 @@
 
 #ifdef HAVE_LIBVLC
 #include "factory/NetworkFileSystemFactory.h"
+#include "filesystem/network/DeviceLister.h"
 
 #include <vlcpp/vlc.hpp>
 #if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
@@ -1069,8 +1070,8 @@ void MediaLibrary::startThumbnailer() const
 void MediaLibrary::populateNetworkFsFactories()
 {
 #ifdef HAVE_LIBVLC
-    m_externalNetworkFsFactories.emplace_back(
-        std::make_shared<factory::NetworkFileSystemFactory>( "smb://", "dsm-sd" ) );
+    auto fsFactory = std::make_shared<factory::NetworkFileSystemFactory>( this, "smb://" );
+        m_externalNetworkFsFactories.emplace_back( std::move( fsFactory ) );
 #endif
 }
 
@@ -1092,6 +1093,13 @@ bool MediaLibrary::addDefaultDeviceListers()
         }
         m_deviceListers["file://"] = std::move( devLister );
     }
+#ifdef HAVE_LIBVLC
+    if ( m_deviceListers.find( "smb://" ) == cend( m_deviceListers ) )
+    {
+        auto deviceLister = std::make_shared<NetworkDeviceLister>( "smb://", "dsm-sd" );
+        m_deviceListers["smb://"] = std::move( deviceLister );
+    }
+#endif
     return true;
 }
 

@@ -23,28 +23,24 @@
 #pragma once
 
 #include "medialibrary/filesystem/IFileSystemFactory.h"
-#include "filesystem/network/Device.h"
-#include "compat/ConditionVariable.h"
+#include "medialibrary/IDeviceLister.h"
 #include "compat/Mutex.h"
-
-#include <vlcpp/vlc.hpp>
-
+#include "compat/ConditionVariable.h"
+#include "Types.h"
 
 namespace medialibrary
 {
 
-class IDeviceListerCb;
-
 namespace factory
 {
-class NetworkFileSystemFactory : public fs::IFileSystemFactory
+class NetworkFileSystemFactory : public fs::IFileSystemFactory, public IDeviceListerCb
 {
 public:
     /**
      * @brief NetworkFileSystemFactory Constructs a network protocol specific filesystem factory
      * @param protocol The protocol name
      */
-    NetworkFileSystemFactory( const std::string& protocol, const std::string& name );
+    NetworkFileSystemFactory( MediaLibraryPtr ml, const std::string& protocol );
     virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& mrl ) override;
     virtual std::shared_ptr<fs::IFile> createFile( const std::string& mrl ) override;
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override;
@@ -57,31 +53,19 @@ public:
     virtual void stop() override;
 
 private:
-    void onDeviceAdded( VLC::MediaPtr media );
-    void onDeviceRemoved( VLC::MediaPtr media );
+    virtual bool onDeviceMounted( const std::string& uuid,
+                                  const std::string& mountpoint, bool removable ) override;
+    virtual void onDeviceUnmounted( const std::string& uuid, const std::string& mountpoint ) override;
+
+    std::shared_ptr<fs::IDevice> deviceByUuidLocked( const std::string& uuid );
+    std::shared_ptr<fs::IDevice> deviceByMrlLocked( const std::string& mrl );
 
 private:
-    struct Device
-    {
-        Device( const std::string& name, const std::string& mrl, std::string scheme,
-                VLC::Media media )
-            : name( name )
-            , mrl( mrl )
-            , media( media )
-            , device( std::make_shared<fs::NetworkDevice>( name, mrl, std::move( scheme ) ) )
-        {}
-        std::string name;
-        std::string mrl;
-        VLC::Media media;
-        std::shared_ptr<fs::NetworkDevice> device;
-    };
-
     const std::string m_protocol;
     compat::Mutex m_devicesLock;
-    compat::ConditionVariable m_deviceCond;
-    std::vector<Device> m_devices;
-    VLC::MediaDiscoverer m_discoverer;
-    std::shared_ptr<VLC::MediaList> m_mediaList;
+    compat::ConditionVariable m_devicesCond;
+    std::vector<std::shared_ptr<fs::IDevice>> m_devices;
+    std::shared_ptr<IDeviceLister> m_deviceLister;
     fs::IFileSystemFactoryCb* m_cb;
 };
 

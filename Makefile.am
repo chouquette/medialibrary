@@ -271,6 +271,7 @@ libmedialibrary_la_SOURCES += \
 	src/filesystem/network/Directory.cpp \
 	src/filesystem/network/File.cpp \
 	src/filesystem/network/Device.cpp \
+	src/filesystem/network/DeviceLister.cpp \
 	$(NULL)
 
 noinst_HEADERS += \
@@ -282,6 +283,7 @@ noinst_HEADERS += \
 	src/filesystem/network/Device.h \
 	src/filesystem/network/Directory.h \
 	src/filesystem/network/File.h \
+	src/filesystem/network/DeviceLister.h \
 	$(NULL)
 
 libmedialibrary_la_CPPFLAGS += \
