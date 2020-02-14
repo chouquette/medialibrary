@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Media Library
  *****************************************************************************
- * Copyright (C) 2015-2019 Hugo Beauzée-Luyssen, Videolabs, VideoLAN
+ * Copyright (C) 2020 Hugo Beauzée-Luyssen, Videolabs, VideoLAN
  *
  * Authors: Hugo Beauzée-Luyssen <hugo@beauzee.fr>
  *
@@ -22,34 +22,45 @@
 
 #pragma once
 
-#include "filesystem/common/CommonDeviceLister.h"
+#include "medialibrary/IDeviceLister.h"
 
-#include <unordered_map>
+#include <vector>
+#include <string>
 
 namespace medialibrary
 {
 namespace fs
 {
 
-class DeviceLister : public CommonDeviceLister
+class CommonDeviceLister : public IDeviceLister
 {
+protected:
+    struct Device
+    {
+        Device( std::string u, std::vector<std::string> m, bool r )
+            : uuid( std::move( u ) )
+            , mountpoints( std::move( m ) )
+            , removable( r )
+        {
+        }
+        std::string uuid;
+        std::vector<std::string> mountpoints;
+        bool removable;
+    };
+
+public:
+    virtual ~CommonDeviceLister() = default;
+
+    virtual bool start( IDeviceListerCb* ) override;
+    virtual void stop() override;
+    virtual void refresh() override;
+
+protected:
+    virtual std::vector<Device> devices() const = 0;
+
 private:
-    // Device name / UUID map
-    using DeviceMap = std::unordered_map<std::string, std::string>;
-    // Device path / Mountpoints map
-    using MountpointMap = std::unordered_map<std::string,
-                                             std::vector<std::string>>;
-
-    DeviceMap listDevices() const;
-    MountpointMap listMountpoints() const;
-    std::pair<std::string, std::string> deviceFromDeviceMapper( const std::string& devicePath ) const;
-    virtual std::vector<Device> devices() const override;
-
-    bool isRemovable( const std::string& devicePath ) const;
-
-    std::vector<std::string> getAllowedFsTypes() const;
-
-private:
+    IDeviceListerCb* m_cb = nullptr;
+    std::vector<Device> m_knownDevices;
 };
 
 }
