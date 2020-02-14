@@ -36,6 +36,7 @@
 #include <algorithm>
 
 #include "logging/Logger.h"
+#include <cassert>
 
 namespace medialibrary
 {
@@ -104,9 +105,10 @@ void NetworkFileSystemFactory::refreshDevices()
 {
 }
 
-bool NetworkFileSystemFactory::isMrlSupported( const std::string& path ) const
+bool NetworkFileSystemFactory::isMrlSupported( const std::string& mrl ) const
 {
-    return m_protocol.compare( 0, m_protocol.length(), path );
+    return strncasecmp( m_protocol.c_str(), mrl.c_str(),
+                        m_protocol.length() ) == 0;
 }
 
 bool NetworkFileSystemFactory::isNetworkFileSystem() const

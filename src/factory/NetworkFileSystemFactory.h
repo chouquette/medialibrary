@@ -50,7 +50,7 @@ public:
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override;
     virtual std::shared_ptr<fs::IDevice> createDeviceFromMrl( const std::string& mrl ) override;
     virtual void refreshDevices() override;
-    virtual bool isMrlSupported( const std::string& path ) const override;
+    virtual bool isMrlSupported( const std::string& mrl ) const override;
     virtual bool isNetworkFileSystem() const override;
     virtual const std::string& scheme() const override;
     virtual bool start( fs::IFileSystemFactoryCb* cb ) override;
