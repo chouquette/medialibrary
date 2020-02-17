@@ -29,30 +29,38 @@
 #endif
 
 #include "File.h"
+#include "medialibrary/filesystem/IFileSystemFactory.h"
+#include "utils/Filename.h"
+#include "medialibrary/filesystem/Errors.h"
 
 namespace medialibrary
 {
 namespace fs
 {
 
-NetworkFile::NetworkFile( const std::string& mrl )
+NetworkFile::NetworkFile( const std::string& mrl, fs::IFileSystemFactory& fsFactory,
+                          uint32_t lastModificationDate, int64_t size )
     : CommonFile( mrl )
+    , m_lastModificationDate( lastModificationDate )
+    , m_size( size )
+    , m_isNetwork( fsFactory.isNetworkFileSystem() )
 {
+
 }
 
 unsigned int NetworkFile::lastModificationDate() const
 {
-    return 0;
+    return m_lastModificationDate;
 }
 
 int64_t NetworkFile::size() const
 {
-    return 0;
+    return m_size;
 }
 
 bool NetworkFile::isNetwork() const
 {
-    return true;
+    return m_isNetwork;
 }
 
 }

@@ -34,9 +34,18 @@
 #include "utils/Url.h"
 #include "utils/VLCInstance.h"
 #include "medialibrary/filesystem/Errors.h"
+#include "logging/Logger.h"
+#include "medialibrary/filesystem/IFileSystemFactory.h"
 
 #include "compat/ConditionVariable.h"
 #include "compat/Mutex.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#ifdef _WIN32
+# include "utils/Charsets.h"
+#endif
 
 #include <vlcpp/vlc.hpp>
 
@@ -94,7 +103,46 @@ void NetworkDirectory::read() const
         if ( m->type() == VLC::Media::Type::Directory )
             m_dirs.push_back( std::make_shared<fs::NetworkDirectory>( m->mrl(), m_fsFactory ) );
         else
-            m_files.push_back( std::make_shared<fs::NetworkFile>( m->mrl() ) );
+        {
+            uint32_t lastModificationDate = 0;
+            int64_t fileSize = 0;
+            auto mrl = m->mrl();
+
+            if ( m_fsFactory.isNetworkFileSystem() == false )
+            {
+                auto path = utils::file::toLocalPath( mrl );
+
+#ifdef _WIN32
+                struct _stat64 s;
+                if ( _wstat64( charset::ToWide( path.c_str() ).get(), &s ) != 0 )
+                {
+                    LOG_ERROR( "Failed to get ", path, " stats" );
+                    throw errors::System{ errno, "Failed to get stats" };
+                }
+#else
+                struct stat s;
+                if ( lstat( path.c_str(), &s ) != 0 )
+                {
+                    if ( errno == EACCES )
+                        continue;
+                    // some Android devices will list folder content, but will yield
+                    // ENOENT when accessing those.
+                    // See https://trac.videolan.org/vlc/ticket/19909
+                    if ( errno == ENOENT )
+                    {
+                        LOG_WARN( "Ignoring unexpected ENOENT while listing folder content." );
+                        continue;
+                    }
+                    LOG_ERROR( "Failed to get file ", mrl, " info" );
+                    throw errors::System{ errno, "Failed to get file info" };
+                }
+#endif
+                lastModificationDate = s.st_mtime;
+                fileSize = s.st_size;
+            }
+            m_files.push_back( std::make_shared<fs::NetworkFile>( std::move( mrl ),
+                               m_fsFactory, lastModificationDate, fileSize ) );
+        }
     }
 }
 

@@ -28,13 +28,22 @@ namespace medialibrary
 {
 namespace fs
 {
+
+class IFileSystemFactory;
+
 class NetworkFile : public CommonFile
 {
 public:
-    explicit NetworkFile( const std::string& mrl );
+    NetworkFile( const std::string& mrl, IFileSystemFactory& fsFactory,
+                 uint32_t lastModificationDate, int64_t size );
     virtual unsigned int lastModificationDate() const override;
     virtual int64_t size() const override;
     virtual bool isNetwork() const override;
+
+private:
+    uint32_t m_lastModificationDate;
+    int64_t m_size;
+    bool m_isNetwork;
 };
 }
 }
