@@ -48,6 +48,8 @@ NetworkFileSystemFactory::NetworkFileSystemFactory( MediaLibraryPtr ml,
     : m_scheme( scheme )
     , m_deviceLister( ml->deviceListerLocked( scheme ) )
 {
+    m_isNetwork = strncasecmp( m_scheme.c_str(), "file://",
+                               m_scheme.length() ) != 0;
 }
 
 std::shared_ptr<fs::IDirectory> NetworkFileSystemFactory::createDirectory( const std::string& mrl )
@@ -102,7 +104,7 @@ bool NetworkFileSystemFactory::isMrlSupported( const std::string& mrl ) const
 
 bool NetworkFileSystemFactory::isNetworkFileSystem() const
 {
-    return true;
+    return m_isNetwork;
 }
 
 const std::string& NetworkFileSystemFactory::scheme() const

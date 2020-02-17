@@ -67,6 +67,7 @@ private:
     std::vector<std::shared_ptr<fs::IDevice>> m_devices;
     std::shared_ptr<IDeviceLister> m_deviceLister;
     fs::IFileSystemFactoryCb* m_cb;
+    bool m_isNetwork;
 };
 
 }
