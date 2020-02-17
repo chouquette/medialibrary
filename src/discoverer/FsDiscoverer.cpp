@@ -44,9 +44,9 @@
 namespace medialibrary
 {
 
-FsDiscoverer::FsDiscoverer( std::shared_ptr<fs::IFileSystemFactory> fsFactory, MediaLibrary* ml, IMediaLibraryCb* cb, std::unique_ptr<prober::IProbe> probe )
+FsDiscoverer::FsDiscoverer( MediaLibrary* ml, IMediaLibraryCb* cb,
+                            std::unique_ptr<prober::IProbe> probe )
     : m_ml( ml )
-    , m_fsFactory( std::move( fsFactory ))
     , m_cb( cb )
     , m_probe( std::move( probe ) )
 {
@@ -55,13 +55,14 @@ FsDiscoverer::FsDiscoverer( std::shared_ptr<fs::IFileSystemFactory> fsFactory, M
 bool FsDiscoverer::discover( const std::string& entryPoint,
                              const IInterruptProbe& interruptProbe )
 {
-    if ( m_fsFactory->isMrlSupported( entryPoint ) == false )
+    auto fsFactory = m_ml->fsFactoryForMrl( entryPoint );
+    if ( fsFactory == nullptr )
         return false;
 
     std::shared_ptr<fs::IDirectory> fsDir;
     try
     {
-        fsDir = m_fsFactory->createDirectory( entryPoint );
+        fsDir = fsFactory->createDirectory( entryPoint );
     }
     catch ( const fs::errors::System& ex )
     {
@@ -80,7 +81,7 @@ bool FsDiscoverer::discover( const std::string& entryPoint,
         // Fetch files explicitly
         fsDir->files();
         auto res = addFolder( std::move( fsDir ), m_probe->getFolderParent().get(),
-                              interruptProbe );
+                              interruptProbe, *fsFactory );
         m_ml->getCb()->onEntryPointAdded( entryPoint, res );
         return res;
     }
@@ -97,7 +98,8 @@ bool FsDiscoverer::discover( const std::string& entryPoint,
 }
 
 bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
-                                 const IInterruptProbe& probe )
+                                 const IInterruptProbe& probe,
+                                 fs::IFileSystemFactory& fsFactory )
 {
     assert( f->isPresent() );
     auto mrl = f->mrl();
@@ -105,7 +107,7 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
     std::shared_ptr<fs::IDirectory> directory;
     try
     {
-        directory = m_fsFactory->createDirectory( mrl );
+        directory = fsFactory.createDirectory( mrl );
         assert( directory->device() != nullptr );
         if ( directory->device() == nullptr )
             return false;
@@ -117,7 +119,7 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
     }
     if ( directory == nullptr )
     {
-        auto device = m_fsFactory->createDeviceFromMrl( mrl );
+        auto device = fsFactory.createDeviceFromMrl( mrl );
         if ( device == nullptr || device->isRemovable() == false )
         {
             LOG_DEBUG( "Failed to find folder matching entrypoint ", mrl, ". "
@@ -128,7 +130,8 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
     }
     try
     {
-        checkFolder( std::move( directory ), std::move( f ), false, probe );
+        checkFolder( std::move( directory ), std::move( f ), probe, fsFactory,
+                     false );
     }
     catch ( fs::errors::DeviceRemoved& )
     {
@@ -139,6 +142,7 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
 }
 
 void FsDiscoverer::checkRemovedDevices( fs::IDirectory& fsFolder, Folder& folder,
+                                        fs::IFileSystemFactory& fsFactory,
                                         bool newFolder ) const
 {
     // Even when we're discovering a new folder, we want to rule out device removal as the cause of
@@ -155,8 +159,8 @@ void FsDiscoverer::checkRemovedDevices( fs::IDirectory& fsFolder, Folder& folder
                   device != nullptr ? "removable" : "not found",
                   ". Refreshing device cache..." );
 
-        m_fsFactory->refreshDevices();
-        m_ml->refreshDevices( *m_fsFactory );
+        fsFactory.refreshDevices();
+        m_ml->refreshDevices( fsFactory );
         // If the device was missing, refresh our list of devices in case
         // the device was plugged back and/or we missed a notification for it
         if ( device == nullptr )
@@ -211,11 +215,12 @@ bool FsDiscoverer::reload( const IInterruptProbe& interruptProbe )
                       ex.scheme() );
             continue;
         }
-
-        if ( m_fsFactory->isMrlSupported( mrl ) == false )
+        auto fsFactory = m_ml->fsFactoryForMrl( mrl );
+        if ( fsFactory == nullptr)
             continue;
+
         m_cb->onReloadStarted( mrl );
-        auto res = reloadFolder( f, interruptProbe );
+        auto res = reloadFolder( f, interruptProbe, *fsFactory );
         m_cb->onReloadCompleted( mrl, res );
     }
     return true;
@@ -224,8 +229,10 @@ bool FsDiscoverer::reload( const IInterruptProbe& interruptProbe )
 bool FsDiscoverer::reload( const std::string& entryPoint,
                            const IInterruptProbe& interruptProbe )
 {
-    if ( m_fsFactory->isMrlSupported( entryPoint ) == false )
+    auto fsFactory = m_ml->fsFactoryForMrl( entryPoint );
+    if ( fsFactory == nullptr )
         return false;
+
     auto folder = Folder::fromMrl( m_ml, entryPoint );
     if ( folder == nullptr )
     {
@@ -238,14 +245,15 @@ bool FsDiscoverer::reload( const std::string& entryPoint,
                   "be reloaded" );
         return false;
     }
-    reloadFolder( std::move( folder ), interruptProbe );
+    reloadFolder( std::move( folder ), interruptProbe, *fsFactory );
     return true;
 }
 
 void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                                 std::shared_ptr<Folder> currentFolder,
-                                bool newFolder,
-                                const IInterruptProbe& interruptProbe ) const
+                                const IInterruptProbe& interruptProbe,
+                                fs::IFileSystemFactory& fsFactory,
+                                bool newFolder ) const
 {
     try
     {
@@ -287,7 +295,8 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                 {
                     if ( m_probe->isHidden( *subFolder ) )
                         continue;
-                    addFolder( subFolder, currentFolder.get(), interruptProbe );
+                    addFolder( subFolder, currentFolder.get(), interruptProbe,
+                               fsFactory );
                     continue;
                 }
                 catch ( const sqlite::errors::ConstraintForeignKey& ex )
@@ -315,7 +324,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
             // In any case, check for modifications, as a change related to a mountpoint might
             // not update the folder modification date.
             // Also, relying on the modification date probably isn't portable
-            checkFolder( subFolder, folderInDb, false, interruptProbe );
+            checkFolder( subFolder, folderInDb, interruptProbe, fsFactory, false );
             subFoldersInDB.erase( it );
         }
         if ( m_probe->deleteUnseenFolders() == true )
@@ -334,7 +343,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
     catch ( const fs::errors::System& ex )
     {
         LOG_WARN( "Failed to browse ", currentFolderFs->mrl(), ": ", ex.what() );
-        checkRemovedDevices( *currentFolderFs, *currentFolder, newFolder );
+        checkRemovedDevices( *currentFolderFs, *currentFolder, fsFactory, newFolder );
         // If the device has indeed been removed, fs::errors::DeviceRemoved will
         // be thrown, otherwise, we just failed to browse that folder and will
         // have to try again later.
@@ -446,7 +455,8 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
 
 bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
                               Folder* parentFolder,
-                              const IInterruptProbe& interruptProbe ) const
+                              const IInterruptProbe& interruptProbe,
+                              fs::IFileSystemFactory& fsFactory ) const
 {
     auto deviceFs = folder->device();
     // We are creating a folder, there has to be a device containing it.
@@ -454,7 +464,7 @@ bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
     // But gracefully handle failure in release mode
     if( deviceFs == nullptr )
         return false;
-    auto device = Device::fromUuid( m_ml, deviceFs->uuid(), m_fsFactory->scheme() );
+    auto device = Device::fromUuid( m_ml, deviceFs->uuid(), fsFactory.scheme() );
     if ( device == nullptr )
     {
         LOG_INFO( "Creating new device in DB ", deviceFs->uuid() );
@@ -470,7 +480,7 @@ bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
                              *device, *deviceFs );
     if ( f == nullptr )
         return false;
-    checkFolder( std::move( folder ), std::move( f ), true, interruptProbe );
+    checkFolder( std::move( folder ), std::move( f ), interruptProbe, fsFactory, true );
     return true;
 }
 

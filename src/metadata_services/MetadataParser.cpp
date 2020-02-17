@@ -397,7 +397,7 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
                                            isDirectory, parentFolder,
                                            utils::file::toLocalPath( directoryMrl ),
                                            playlistPtr->id(), subitem.linkExtra(), true } );
-        FsDiscoverer discoverer( fsFactory, m_ml, nullptr, std::move( probePtr ) );
+        FsDiscoverer discoverer( m_ml, nullptr, std::move( probePtr ) );
         discoverer.reload( entryPoint, *this );
         return;
     }
@@ -406,7 +406,7 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
                                     isDirectory, parentFolder,
                                     utils::file::toLocalPath( directoryMrl ),
                                     playlistPtr->id(), subitem.linkExtra(), false } );
-    FsDiscoverer discoverer( fsFactory, m_ml, nullptr, std::move( probePtr ) );
+    FsDiscoverer discoverer( m_ml, nullptr, std::move( probePtr ) );
     if ( parentKnown == false )
     {
         discoverer.discover( entryPoint, *this );

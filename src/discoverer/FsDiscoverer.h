@@ -41,7 +41,7 @@ class IProbe;
 class FsDiscoverer : public IDiscoverer
 {
 public:
-    FsDiscoverer( std::shared_ptr<fs::IFileSystemFactory> fsFactory, MediaLibrary* ml , IMediaLibraryCb* cb, std::unique_ptr<prober::IProbe> probe );
+    FsDiscoverer( MediaLibrary* ml , IMediaLibraryCb* cb, std::unique_ptr<prober::IProbe> probe );
     virtual bool discover( const std::string& entryPoint,
                            const IInterruptProbe& interruptProbe ) override;
     virtual bool reload( const IInterruptProbe& interruptProbe ) override;
@@ -54,23 +54,23 @@ private:
     /// \return true if files in this folder needs to be listed, false otherwise
     ///
     void checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
-                      std::shared_ptr<Folder> currentFolder, bool newFolder,
-                      const IInterruptProbe& interruptProbe ) const;
+                      std::shared_ptr<Folder> currentFolder,
+                      const IInterruptProbe& interruptProbe,
+                      fs::IFileSystemFactory& fsFactory, bool newFolder ) const;
     void checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
                      std::shared_ptr<Folder> parentFolder,
                      const IInterruptProbe& interruptProbe ) const;
-    bool addFolder( std::shared_ptr<fs::IDirectory> folder,
-                    Folder* parentFolder,
-                    const IInterruptProbe& interruptProbe) const;
+    bool addFolder( std::shared_ptr<fs::IDirectory> folder, Folder* parentFolder,
+                    const IInterruptProbe& interruptProbe,
+                    fs::IFileSystemFactory& fsFactory ) const;
     bool reloadFolder( std::shared_ptr<Folder> folder,
-                       const IInterruptProbe& probe );
+                       const IInterruptProbe& probe, fs::IFileSystemFactory& fsFactory );
     void checkRemovedDevices( fs::IDirectory& fsFolder, Folder& folder,
-                              bool newFolder) const;
+                              fs::IFileSystemFactory& fsFactory, bool newFolder) const;
 
 
 private:
     MediaLibrary* m_ml;
-    std::shared_ptr<fs::IFileSystemFactory> m_fsFactory;
     IMediaLibraryCb* m_cb;
     std::unique_ptr<prober::IProbe> m_probe;
 };

@@ -1042,7 +1042,7 @@ void MediaLibrary::startDiscoverer()
         fsFactory->start( &m_fsFactoryCb );
         fsFactory->refreshDevices();
         std::unique_ptr<prober::CrawlerProbe> probePtr( new prober::CrawlerProbe{} );
-        m_discovererWorker->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( fsFactory, this, m_callback,
+        m_discovererWorker->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( this, m_callback,
                                                                                            std::move ( probePtr ) ) ) );
     }
     m_discovererWorker->reloadAllDevices();
