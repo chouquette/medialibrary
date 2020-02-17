@@ -35,11 +35,6 @@ namespace medialibrary
 
 namespace fs
 {
-NetworkDevice::NetworkDevice( const std::string& name, const std::string& mrl,
-                              std::string scheme )
-    : CommonDevice( name, mrl, std::move( scheme ), true )
-{
-}
 
 }
 

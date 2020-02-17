@@ -127,7 +127,6 @@ bool NetworkFileSystemFactory::onDeviceMounted( const std::string& uuid,
                                                 const std::string& mountpoint,
                                                 bool removable )
 {
-    assert( removable == true );
     auto addMountpoint = true;
     std::shared_ptr<fs::IDevice> device;
     {
@@ -135,7 +134,8 @@ bool NetworkFileSystemFactory::onDeviceMounted( const std::string& uuid,
         device = deviceByUuidLocked( uuid );
         if ( device == nullptr )
         {
-            device = std::make_shared<fs::NetworkDevice>( uuid, mountpoint, m_scheme );
+            device = std::make_shared<fs::NetworkDevice>( uuid, mountpoint,
+                                                          m_scheme, removable );
             m_devices.push_back( device );
             addMountpoint = false;
         }
