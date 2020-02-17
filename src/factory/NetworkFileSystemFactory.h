@@ -40,7 +40,7 @@ public:
      * @brief NetworkFileSystemFactory Constructs a network protocol specific filesystem factory
      * @param protocol The protocol name
      */
-    NetworkFileSystemFactory( MediaLibraryPtr ml, const std::string& protocol );
+    NetworkFileSystemFactory( MediaLibraryPtr ml, const std::string& scheme );
     virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& mrl ) override;
     virtual std::shared_ptr<fs::IFile> createFile( const std::string& mrl ) override;
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override;
@@ -61,7 +61,7 @@ private:
     std::shared_ptr<fs::IDevice> deviceByMrlLocked( const std::string& mrl );
 
 private:
-    const std::string m_protocol;
+    const std::string m_scheme;
     compat::Mutex m_devicesLock;
     compat::ConditionVariable m_devicesCond;
     std::vector<std::shared_ptr<fs::IDevice>> m_devices;

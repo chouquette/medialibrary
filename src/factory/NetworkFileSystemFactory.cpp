@@ -44,9 +44,9 @@ namespace factory
 {
 
 NetworkFileSystemFactory::NetworkFileSystemFactory( MediaLibraryPtr ml,
-                                                    const std::string& protocol )
-    : m_protocol( protocol )
-    , m_deviceLister( ml->deviceListerLocked( protocol ) )
+                                                    const std::string& scheme )
+    : m_scheme( scheme )
+    , m_deviceLister( ml->deviceListerLocked( scheme ) )
 {
 }
 
@@ -96,8 +96,8 @@ void NetworkFileSystemFactory::refreshDevices()
 
 bool NetworkFileSystemFactory::isMrlSupported( const std::string& mrl ) const
 {
-    return strncasecmp( m_protocol.c_str(), mrl.c_str(),
-                        m_protocol.length() ) == 0;
+    return strncasecmp( m_scheme.c_str(), mrl.c_str(),
+                        m_scheme.length() ) == 0;
 }
 
 bool NetworkFileSystemFactory::isNetworkFileSystem() const
@@ -107,7 +107,7 @@ bool NetworkFileSystemFactory::isNetworkFileSystem() const
 
 const std::string& NetworkFileSystemFactory::scheme() const
 {
-    return m_protocol;
+    return m_scheme;
 }
 
 bool NetworkFileSystemFactory::start( fs::IFileSystemFactoryCb* cb )
@@ -133,7 +133,7 @@ bool NetworkFileSystemFactory::onDeviceMounted( const std::string& uuid,
         device = deviceByUuidLocked( uuid );
         if ( device == nullptr )
         {
-            device = std::make_shared<fs::NetworkDevice>( uuid, mountpoint, m_protocol );
+            device = std::make_shared<fs::NetworkDevice>( uuid, mountpoint, m_scheme );
             m_devices.push_back( device );
             addMountpoint = false;
         }
