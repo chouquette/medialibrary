@@ -77,9 +77,8 @@ protected:
     };
 
 public:
-    explicit DiscovererWorker( MediaLibrary* ml );
+    DiscovererWorker( MediaLibrary* ml, std::unique_ptr<IDiscoverer> discoverer );
     ~DiscovererWorker();
-    void addDiscoverer( std::unique_ptr<IDiscoverer> discoverer );
     void stop();
 
     bool discover( const std::string& entryPoint );
@@ -119,7 +118,7 @@ protected:
     std::atomic_bool m_run;
     // This will be true when a single task needs to be interrupted
     std::atomic_bool m_taskInterrupted;
-    std::vector<std::unique_ptr<IDiscoverer>> m_discoverers;
+    std::unique_ptr<IDiscoverer> m_discoverer;
     MediaLibrary* m_ml;
 };
 

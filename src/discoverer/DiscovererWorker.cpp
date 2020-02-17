@@ -42,10 +42,12 @@
 namespace medialibrary
 {
 
-DiscovererWorker::DiscovererWorker( MediaLibrary* ml )
+DiscovererWorker::DiscovererWorker( MediaLibrary* ml,
+                                    std::unique_ptr<IDiscoverer> discoverer )
     : m_currentTask( nullptr )
     , m_run( false )
     , m_taskInterrupted( false )
+    , m_discoverer( std::move( discoverer ) )
     , m_ml( ml )
 {
 }
@@ -53,11 +55,6 @@ DiscovererWorker::DiscovererWorker( MediaLibrary* ml )
 DiscovererWorker::~DiscovererWorker()
 {
     stop();
-}
-
-void DiscovererWorker::addDiscoverer( std::unique_ptr<IDiscoverer> discoverer )
-{
-    m_discoverers.push_back( std::move( discoverer ) );
 }
 
 void DiscovererWorker::stop()
@@ -455,29 +452,24 @@ void DiscovererWorker::run()
 
 void DiscovererWorker::runReload( const std::string& entryPoint )
 {
-    for ( auto& d : m_discoverers )
+    try
     {
-        try
+        if ( entryPoint.empty() == true )
         {
-            if ( entryPoint.empty() == true )
-            {
-                // Let the discoverer invoke the callbacks for all its known folders
-                d->reload( *this );
-            }
-            else
-            {
-                m_ml->getCb()->onReloadStarted( entryPoint );
-                LOG_INFO( "Reloading folder ", entryPoint );
-                auto res = d->reload( entryPoint, *this );
-                m_ml->getCb()->onReloadCompleted( entryPoint, res );
-            }
+            // Let the discoverer invoke the callbacks for all its known folders
+            m_discoverer->reload( *this );
         }
-        catch(std::exception& ex)
+        else
         {
-            LOG_ERROR( "Fatal error while reloading: ", ex.what() );
+            m_ml->getCb()->onReloadStarted( entryPoint );
+            LOG_INFO( "Reloading folder ", entryPoint );
+            auto res = m_discoverer->reload( entryPoint, *this );
+            m_ml->getCb()->onReloadCompleted( entryPoint, res );
         }
-        if ( m_run == false )
-            break;
+    }
+    catch(std::exception& ex)
+    {
+        LOG_ERROR( "Fatal error while reloading: ", ex.what() );
     }
 }
 
@@ -581,33 +573,25 @@ bool DiscovererWorker::isInterrupted() const
 void DiscovererWorker::runDiscover( const std::string& entryPoint )
 {
     m_ml->getCb()->onDiscoveryStarted( entryPoint );
-    auto discovered = false;
     LOG_INFO( "Running discover on: ", entryPoint );
-    for ( auto& d : m_discoverers )
+    // Assume only one discoverer can handle an entrypoint.
+    bool discovered = false;
+    try
     {
-        // Assume only one discoverer can handle an entrypoint.
-        try
+        auto chrono = std::chrono::steady_clock::now();
+        discovered = m_discoverer->discover( entryPoint, *this );
+        if ( discovered == true )
         {
-            auto chrono = std::chrono::steady_clock::now();
-            if ( d->discover( entryPoint, *this ) == true )
-            {
-                auto duration = std::chrono::steady_clock::now() - chrono;
-                LOG_VERBOSE( "Discovered ", entryPoint, " in ",
-                           std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
-                discovered = true;
-                break;
-            }
+            auto duration = std::chrono::steady_clock::now() - chrono;
+            LOG_VERBOSE( "Discovered ", entryPoint, " in ",
+                       std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
         }
-        catch(std::exception& ex)
-        {
-            LOG_ERROR( "Fatal error while discovering ", entryPoint, ": ", ex.what() );
-        }
-
-        if ( m_run == false )
-            break;
     }
-    if ( discovered == false )
-        LOG_WARN( "No IDiscoverer found to discover ", entryPoint );
+    catch(std::exception& ex)
+    {
+        LOG_ERROR( "Fatal error while discovering ", entryPoint, ": ", ex.what() );
+    }
+
     m_ml->getCb()->onDiscoveryCompleted( entryPoint, discovered );
 }
 

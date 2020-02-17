@@ -1036,15 +1036,16 @@ void MediaLibrary::startParser()
 
 void MediaLibrary::startDiscoverer()
 {
-    m_discovererWorker.reset( new DiscovererWorker( this ) );
     for ( const auto& fsFactory : m_fsFactories )
     {
         fsFactory->start( &m_fsFactoryCb );
         fsFactory->refreshDevices();
-        std::unique_ptr<prober::CrawlerProbe> probePtr( new prober::CrawlerProbe{} );
-        m_discovererWorker->addDiscoverer( std::unique_ptr<IDiscoverer>( new FsDiscoverer( this, m_callback,
-                                                                                           std::move ( probePtr ) ) ) );
     }
+    auto discoverer = std::make_unique<FsDiscoverer>( this, m_callback,
+                                    std::make_unique<prober::CrawlerProbe>() );
+    m_discovererWorker.reset( new DiscovererWorker( this,
+                                                    std::move( discoverer ) ) );
+
     m_discovererWorker->reloadAllDevices();
 }
 
