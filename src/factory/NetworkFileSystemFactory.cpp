@@ -63,8 +63,7 @@ std::shared_ptr<fs::IDirectory> NetworkFileSystemFactory::createDirectory( const
 std::shared_ptr<fs::IFile> NetworkFileSystemFactory::createFile( const std::string& mrl )
 {
     auto fsDir = createDirectory( utils::file::directory( mrl ) );
-    if ( fsDir == nullptr )
-        return nullptr;
+    assert( fsDir != nullptr );
     return fsDir->file( mrl );
 }
 
