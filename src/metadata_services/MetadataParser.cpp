@@ -392,20 +392,18 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
     auto entryPoint = device->mountpoint();
     if ( parentKnown == false && Folder::fromMrl( m_ml, entryPoint ) != nullptr )
     {
-        auto probePtr = std::unique_ptr<prober::PathProbe>(
-                    new prober::PathProbe{ utils::file::toLocalPath( mrl ),
-                                           isDirectory, parentFolder,
-                                           utils::file::toLocalPath( directoryMrl ),
-                                           playlistPtr->id(), subitem.linkExtra(), true } );
+        auto probePtr = std::make_unique<prober::PathProbe>(
+                    utils::file::toLocalPath( mrl ), isDirectory, parentFolder,
+                    utils::file::toLocalPath( directoryMrl ), playlistPtr->id(),
+                    subitem.linkExtra(), true );
         FsDiscoverer discoverer( m_ml, nullptr, std::move( probePtr ) );
         discoverer.reload( entryPoint, *this );
         return;
     }
-    auto probePtr = std::unique_ptr<prober::PathProbe>(
-                new prober::PathProbe{ utils::file::toLocalPath( mrl ),
-                                    isDirectory, parentFolder,
-                                    utils::file::toLocalPath( directoryMrl ),
-                                    playlistPtr->id(), subitem.linkExtra(), false } );
+    auto probePtr = std::make_unique<prober::PathProbe>(
+                utils::file::toLocalPath( mrl ), isDirectory, parentFolder,
+                utils::file::toLocalPath( directoryMrl ), playlistPtr->id(),
+                subitem.linkExtra(), false );
     FsDiscoverer discoverer( m_ml, nullptr, std::move( probePtr ) );
     if ( parentKnown == false )
     {
