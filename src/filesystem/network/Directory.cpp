@@ -76,6 +76,9 @@ void NetworkDirectory::read() const
     compat::ConditionVariable cond;
     VLC::Media::ParsedStatus res = VLC::Media::ParsedStatus::Skipped;
 
+    media.addOption( ":show-hiddenfiles=true" );
+    media.addOption( ":ignore-filetypes=''" );
+
     auto eventHandler = media.eventManager().onParsedChanged(
         [&mutex, &cond, &res]( VLC::Media::ParsedStatus status) {
             std::lock_guard<compat::Mutex> lock( mutex );
