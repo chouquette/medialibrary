@@ -178,14 +178,21 @@ std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::deviceByUuidLocked( const
 
 std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::deviceByMrlLocked( const std::string& mrl )
 {
-    auto it = std::find_if( begin( m_devices ), end( m_devices ),
-                            [&mrl]( const std::shared_ptr<fs::IDevice>& d ) {
+    std::shared_ptr<fs::IDevice> res;
+    std::string mountpoint;
+    for ( const auto& d : m_devices )
+    {
         auto match = d->matchesMountpoint( mrl );
-        return std::get<0>( match );
-    });
-    if ( it == end( m_devices ) )
-        return nullptr;
-    return *it;
+        if ( std::get<0>( match ) == false )
+            continue;
+        auto newMountpoint = std::get<1>( match );
+        if ( res == nullptr || newMountpoint.length() > mountpoint.length() )
+        {
+            res = d;
+            mountpoint = std::move( newMountpoint );
+        }
+    }
+    return res;
 }
 
 }
