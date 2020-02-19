@@ -31,6 +31,7 @@
 #include "Directory.h"
 #include "File.h"
 #include "utils/Filename.h"
+#include "utils/Url.h"
 #include "utils/VLCInstance.h"
 #include "medialibrary/filesystem/Errors.h"
 
@@ -46,8 +47,10 @@ namespace fs
 
 NetworkDirectory::NetworkDirectory( const std::string& mrl, fs::IFileSystemFactory& fsFactory )
     : CommonDirectory( fsFactory )
-    , m_mrl( utils::file::toFolderPath( mrl ) )
+    , m_mrl( utils::url::encode( utils::url::decode( mrl ) ) )
 {
+    // Add the final '/' in place if needed to avoid a useless copy in the init list
+    utils::file::toFolderPath( m_mrl );
 }
 
 const std::string& NetworkDirectory::mrl() const
