@@ -30,11 +30,16 @@
 namespace medialibrary
 {
 
-class NetworkDeviceLister : public IDeviceLister
+namespace fs
+{
+namespace libvlc
+{
+
+class DeviceLister : public IDeviceLister
 {
 public:
-    NetworkDeviceLister( const std::string& protocol, const std::string& sdName );
-    virtual ~NetworkDeviceLister() = default;
+    DeviceLister( const std::string& protocol, const std::string& sdName );
+    virtual ~DeviceLister() = default;
 
     virtual void refresh() override;
     virtual bool start( IDeviceListerCb* cb ) override;
@@ -51,4 +56,6 @@ private:
     IDeviceListerCb* m_cb;
 };
 
+}
+}
 }

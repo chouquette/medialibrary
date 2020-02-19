@@ -53,8 +53,10 @@ namespace medialibrary
 {
 namespace fs
 {
+namespace libvlc
+{
 
-NetworkDirectory::NetworkDirectory( const std::string& mrl, fs::IFileSystemFactory& fsFactory )
+Directory::Directory( const std::string& mrl, fs::IFileSystemFactory& fsFactory )
     : CommonDirectory( fsFactory )
     , m_mrl( utils::url::encode( utils::url::decode( mrl ) ) )
 {
@@ -62,12 +64,12 @@ NetworkDirectory::NetworkDirectory( const std::string& mrl, fs::IFileSystemFacto
     utils::file::toFolderPath( m_mrl );
 }
 
-const std::string& NetworkDirectory::mrl() const
+const std::string& Directory::mrl() const
 {
     return m_mrl;
 }
 
-void NetworkDirectory::read() const
+void Directory::read() const
 {
     VLC::Media media( VLCInstance::get(), m_mrl, VLC::Media::FromLocation );
     assert( media.parsedStatus() != VLC::Media::ParsedStatus::Done );
@@ -104,7 +106,7 @@ void NetworkDirectory::read() const
     {
         auto m = subItems->itemAtIndex( i );
         if ( m->type() == VLC::Media::Type::Directory )
-            m_dirs.push_back( std::make_shared<fs::NetworkDirectory>( m->mrl(), m_fsFactory ) );
+            m_dirs.push_back( std::make_shared<Directory>( m->mrl(), m_fsFactory ) );
         else
         {
             uint32_t lastModificationDate = 0;
@@ -143,11 +145,12 @@ void NetworkDirectory::read() const
                 lastModificationDate = s.st_mtime;
                 fileSize = s.st_size;
             }
-            m_files.push_back( std::make_shared<fs::NetworkFile>( std::move( mrl ),
+            m_files.push_back( std::make_shared<File>( std::move( mrl ),
                                m_fsFactory, lastModificationDate, fileSize ) );
         }
     }
 }
 
+}
 }
 }

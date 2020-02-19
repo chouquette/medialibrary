@@ -28,9 +28,9 @@
 # error This file requires libvlc
 #endif
 
-#include "NetworkFileSystemFactory.h"
-#include "filesystem/network/Directory.h"
-#include "filesystem/network/Device.h"
+#include "FileSystemFactory.h"
+#include "filesystem/libvlc/Directory.h"
+#include "filesystem/libvlc/Device.h"
 #include "utils/Filename.h"
 #include "MediaLibrary.h"
 
@@ -40,10 +40,12 @@
 
 namespace medialibrary
 {
-namespace factory
+namespace fs
+{
+namespace libvlc
 {
 
-NetworkFileSystemFactory::NetworkFileSystemFactory( MediaLibraryPtr ml,
+FileSystemFactory::FileSystemFactory( MediaLibraryPtr ml,
                                                     const std::string& scheme )
     : m_scheme( scheme )
     , m_deviceLister( ml->deviceListerLocked( scheme ) )
@@ -53,12 +55,12 @@ NetworkFileSystemFactory::NetworkFileSystemFactory( MediaLibraryPtr ml,
                                m_scheme.length() ) != 0;
 }
 
-std::shared_ptr<fs::IDirectory> NetworkFileSystemFactory::createDirectory( const std::string& mrl )
+std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::string& mrl )
 {
-    return std::make_shared<fs::NetworkDirectory>( mrl, *this );
+    return std::make_shared<Directory>( mrl, *this );
 }
 
-std::shared_ptr<fs::IFile> NetworkFileSystemFactory::createFile( const std::string& mrl )
+std::shared_ptr<fs::IFile> FileSystemFactory::createFile( const std::string& mrl )
 {
     auto fsDir = createDirectory( utils::file::directory( mrl ) );
     assert( fsDir != nullptr );
@@ -66,7 +68,7 @@ std::shared_ptr<fs::IFile> NetworkFileSystemFactory::createFile( const std::stri
 }
 
 std::shared_ptr<fs::IDevice>
-NetworkFileSystemFactory::createDevice( const std::string& uuid )
+FileSystemFactory::createDevice( const std::string& uuid )
 {
     std::shared_ptr<fs::IDevice> res;
     std::unique_lock<compat::Mutex> lock( m_devicesLock );
@@ -80,7 +82,7 @@ NetworkFileSystemFactory::createDevice( const std::string& uuid )
 }
 
 std::shared_ptr<fs::IDevice>
-NetworkFileSystemFactory::createDeviceFromMrl( const std::string& mrl )
+FileSystemFactory::createDeviceFromMrl( const std::string& mrl )
 {
     std::shared_ptr<fs::IDevice> res;
     std::unique_lock<compat::Mutex> lock( m_devicesLock );
@@ -92,43 +94,43 @@ NetworkFileSystemFactory::createDeviceFromMrl( const std::string& mrl )
     return res;
 }
 
-void NetworkFileSystemFactory::refreshDevices()
+void FileSystemFactory::refreshDevices()
 {
     m_deviceLister->refresh();
 }
 
-bool NetworkFileSystemFactory::isMrlSupported( const std::string& mrl ) const
+bool FileSystemFactory::isMrlSupported( const std::string& mrl ) const
 {
     return strncasecmp( m_scheme.c_str(), mrl.c_str(),
                         m_scheme.length() ) == 0;
 }
 
-bool NetworkFileSystemFactory::isNetworkFileSystem() const
+bool FileSystemFactory::isNetworkFileSystem() const
 {
     return m_isNetwork;
 }
 
-const std::string& NetworkFileSystemFactory::scheme() const
+const std::string& FileSystemFactory::scheme() const
 {
     return m_scheme;
 }
 
-bool NetworkFileSystemFactory::start( fs::IFileSystemFactoryCb* cb )
+bool FileSystemFactory::start( fs::IFileSystemFactoryCb* cb )
 {
     assert( m_cb == nullptr );
     m_cb = cb;
     return m_deviceLister->start( this );
 }
 
-void NetworkFileSystemFactory::stop()
+void FileSystemFactory::stop()
 {
     m_deviceLister->stop();
     m_cb = nullptr;
 }
 
-void NetworkFileSystemFactory::onDeviceMounted( const std::string& uuid,
-                                                const std::string& mountpoint,
-                                                bool removable )
+void FileSystemFactory::onDeviceMounted( const std::string& uuid,
+                                         const std::string& mountpoint,
+                                         bool removable )
 {
     auto addMountpoint = true;
     std::shared_ptr<fs::IDevice> device;
@@ -137,9 +139,8 @@ void NetworkFileSystemFactory::onDeviceMounted( const std::string& uuid,
         device = deviceByUuidLocked( uuid );
         if ( device == nullptr )
         {
-            device = std::make_shared<fs::NetworkDevice>( uuid, mountpoint,
-                                                          m_scheme, removable,
-                                                          true );
+            device = std::make_shared<Device>( uuid, mountpoint,
+                                               m_scheme, removable, true );
             m_devices.push_back( device );
             addMountpoint = false;
         }
@@ -152,7 +153,7 @@ void NetworkFileSystemFactory::onDeviceMounted( const std::string& uuid,
     m_cb->onDeviceMounted( *device );
 }
 
-void NetworkFileSystemFactory::onDeviceUnmounted( const std::string& uuid,
+void FileSystemFactory::onDeviceUnmounted( const std::string& uuid,
                                                   const std::string& mountpoint )
 {
     std::shared_ptr<fs::IDevice> device;
@@ -169,7 +170,7 @@ void NetworkFileSystemFactory::onDeviceUnmounted( const std::string& uuid,
     m_cb->onDeviceUnmounted( *device );
 }
 
-std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::deviceByUuidLocked( const std::string& uuid )
+std::shared_ptr<fs::IDevice> FileSystemFactory::deviceByUuidLocked( const std::string& uuid )
 {
     auto it = std::find_if( begin( m_devices ), end( m_devices ),
                             [&uuid]( const std::shared_ptr<fs::IDevice>& d ) {
@@ -180,7 +181,7 @@ std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::deviceByUuidLocked( const
     return *it;
 }
 
-std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::deviceByMrlLocked( const std::string& mrl )
+std::shared_ptr<fs::IDevice> FileSystemFactory::deviceByMrlLocked( const std::string& mrl )
 {
     std::shared_ptr<fs::IDevice> res;
     std::string mountpoint;
@@ -199,5 +200,6 @@ std::shared_ptr<fs::IDevice> NetworkFileSystemFactory::deviceByMrlLocked( const 
     return res;
 }
 
+}
 }
 }

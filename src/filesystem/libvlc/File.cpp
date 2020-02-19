@@ -37,9 +37,11 @@ namespace medialibrary
 {
 namespace fs
 {
+namespace libvlc
+{
 
-NetworkFile::NetworkFile( const std::string& mrl, fs::IFileSystemFactory& fsFactory,
-                          uint32_t lastModificationDate, int64_t size )
+File::File( const std::string& mrl, fs::IFileSystemFactory& fsFactory,
+            uint32_t lastModificationDate, int64_t size )
     : CommonFile( mrl )
     , m_lastModificationDate( lastModificationDate )
     , m_size( size )
@@ -48,20 +50,21 @@ NetworkFile::NetworkFile( const std::string& mrl, fs::IFileSystemFactory& fsFact
 
 }
 
-unsigned int NetworkFile::lastModificationDate() const
+unsigned int File::lastModificationDate() const
 {
     return m_lastModificationDate;
 }
 
-int64_t NetworkFile::size() const
+int64_t File::size() const
 {
     return m_size;
 }
 
-bool NetworkFile::isNetwork() const
+bool File::isNetwork() const
 {
     return m_isNetwork;
 }
 
+}
 }
 }

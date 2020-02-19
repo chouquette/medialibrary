@@ -254,11 +254,11 @@ libmedialibrary_la_SOURCES += \
 	src/metadata_services/vlc/VLCMetadataService.cpp \
 	src/metadata_services/vlc/Common.cpp \
 	src/utils/VLCInstance.cpp \
-	src/factory/NetworkFileSystemFactory.cpp \
-	src/filesystem/network/Directory.cpp \
-	src/filesystem/network/File.cpp \
-	src/filesystem/network/Device.cpp \
-	src/filesystem/network/DeviceLister.cpp \
+	src/filesystem/libvlc/FileSystemFactory.cpp \
+	src/filesystem/libvlc/Directory.cpp \
+	src/filesystem/libvlc/File.cpp \
+	src/filesystem/libvlc/Device.cpp \
+	src/filesystem/libvlc/DeviceLister.cpp \
 	$(NULL)
 
 noinst_HEADERS += \
@@ -266,11 +266,11 @@ noinst_HEADERS += \
     src/metadata_services/vlc/Common.hpp \
 	src/metadata_services/vlc/VLCMetadataService.h \
 	src/thumbnails/imagecompressors/IImageCompressor.h \
-	src/factory/NetworkFileSystemFactory.h \
-	src/filesystem/network/Device.h \
-	src/filesystem/network/Directory.h \
-	src/filesystem/network/File.h \
-	src/filesystem/network/DeviceLister.h \
+	src/filesystem/libvlc/FileSystemFactory.h \
+	src/filesystem/libvlc/Device.h \
+	src/filesystem/libvlc/Directory.h \
+	src/filesystem/libvlc/File.h \
+	src/filesystem/libvlc/DeviceLister.h \
 	$(NULL)
 
 libmedialibrary_la_CPPFLAGS += \

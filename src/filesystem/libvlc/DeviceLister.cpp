@@ -24,17 +24,21 @@
 # include "config.h"
 #endif
 
-#include "filesystem/network/DeviceLister.h"
+#include "filesystem/libvlc/DeviceLister.h"
 #include "utils/VLCInstance.h"
 #include "utils/Filename.h"
-#include "filesystem/network/Device.h"
+#include "filesystem/libvlc/Device.h"
 
 #include "logging/Logger.h"
 
 namespace medialibrary
 {
+namespace fs
+{
+namespace libvlc
+{
 
-NetworkDeviceLister::NetworkDeviceLister( const std::string &protocol,
+DeviceLister::DeviceLister( const std::string &protocol,
                                           const std::string &sdName )
     : m_protocol( protocol )
     , m_discoverer( VLCInstance::get(), sdName )
@@ -46,7 +50,7 @@ NetworkDeviceLister::NetworkDeviceLister( const std::string &protocol,
     em.onItemDeleted( [this]( VLC::MediaPtr m, int ) { onDeviceRemoved( std::move( m ) ); } );
 }
 
-void NetworkDeviceLister::refresh()
+void DeviceLister::refresh()
 {
     /*
      * We are continuously refreshing through libvlc's discoverer so there's
@@ -54,18 +58,18 @@ void NetworkDeviceLister::refresh()
      */
 }
 
-bool NetworkDeviceLister::start( IDeviceListerCb *cb )
+bool DeviceLister::start( IDeviceListerCb *cb )
 {
     m_cb = cb;
     return m_discoverer.start();
 }
 
-void NetworkDeviceLister::stop()
+void DeviceLister::stop()
 {
     m_discoverer.stop();
 }
 
-void NetworkDeviceLister::onDeviceAdded( VLC::MediaPtr media )
+void DeviceLister::onDeviceAdded( VLC::MediaPtr media )
 {
     const auto& mrl = media->mrl();
     assert( utils::file::scheme( mrl ) == m_protocol );
@@ -75,7 +79,7 @@ void NetworkDeviceLister::onDeviceAdded( VLC::MediaPtr media )
     m_cb->onDeviceMounted( uuid, utils::file::toFolderPath( mrl ), true );
 }
 
-void NetworkDeviceLister::onDeviceRemoved( VLC::MediaPtr media )
+void DeviceLister::onDeviceRemoved( VLC::MediaPtr media )
 {
     const auto& mrl = media->mrl();
     assert( utils::file::scheme( mrl ) == m_protocol );
@@ -87,4 +91,6 @@ void NetworkDeviceLister::onDeviceRemoved( VLC::MediaPtr media )
 }
 
 
+}
+}
 }

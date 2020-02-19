@@ -22,28 +22,25 @@
 
 #pragma once
 
-#include "filesystem/common/CommonFile.h"
+#include "filesystem/common/CommonDevice.h"
 
 namespace medialibrary
 {
+
 namespace fs
 {
 
-class IFileSystemFactory;
+namespace libvlc
+{
 
-class NetworkFile : public CommonFile
+class Device : public CommonDevice
 {
 public:
-    NetworkFile( const std::string& mrl, IFileSystemFactory& fsFactory,
-                 uint32_t lastModificationDate, int64_t size );
-    virtual unsigned int lastModificationDate() const override;
-    virtual int64_t size() const override;
-    virtual bool isNetwork() const override;
-
-private:
-    uint32_t m_lastModificationDate;
-    int64_t m_size;
-    bool m_isNetwork;
+    using CommonDevice::CommonDevice;
 };
+
 }
+
+}
+
 }
