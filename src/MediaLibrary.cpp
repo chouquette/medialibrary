@@ -82,7 +82,6 @@
 
 // FileSystem
 #include "factory/DeviceListerFactory.h"
-#include "factory/FileSystemFactory.h"
 
 #ifdef HAVE_LIBVLC
 #include "factory/NetworkFileSystemFactory.h"
@@ -1097,7 +1096,7 @@ void MediaLibrary::populateNetworkFsFactories()
 void MediaLibrary::addLocalFsFactory()
 {
 #ifdef HAVE_LIBVLC
-    addFileSystemFactoryLocked( std::make_shared<factory::FileSystemFactory>( this ) );
+    addFileSystemFactoryLocked( std::make_shared<factory::NetworkFileSystemFactory>( this, "file://" ) );
 #endif
 }
 
