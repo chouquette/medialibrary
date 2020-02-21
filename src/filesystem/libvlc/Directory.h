@@ -23,6 +23,7 @@
 #pragma once
 
 #include "filesystem/common/CommonDirectory.h"
+#include "medialibrary/filesystem/IFile.h"
 
 namespace medialibrary
 {
@@ -41,7 +42,8 @@ private:
     // These are unintuitively const, because the files/subfolders list is
     // lazily initialized when calling files() / dirs()
     virtual void read() const override;
-    void addFile(std::string mrl ) const;
+    void addFile( std::string mrl, IFile::LinkedFileType fileType,
+                  std::string linkedWith ) const;
 
 private:
     std::string m_mrl;

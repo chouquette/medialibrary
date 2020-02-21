@@ -39,6 +39,9 @@ class File : public CommonFile
 public:
     File( std::string mrl, IFileSystemFactory& fsFactory,
           uint32_t lastModificationDate, int64_t size );
+    File( std::string mrl, IFileSystemFactory& fsFactory,
+          uint32_t lastModificationDate, int64_t size,
+          IFile::LinkedFileType linkedType, std::string linkedFile );
     virtual unsigned int lastModificationDate() const override;
     virtual int64_t size() const override;
     virtual bool isNetwork() const override;

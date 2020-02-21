@@ -43,6 +43,17 @@ CommonFile::CommonFile( std::string mrl )
 {
 }
 
+CommonFile::CommonFile( std::string mrl, IFile::LinkedFileType linkedType,
+                        std::string linkedFile )
+    : m_mrl( std::move( mrl ) )
+    , m_name( utils::file::fileName( m_mrl ) )
+    , m_extension( utils::file::extension( m_mrl ) )
+    , m_linkedFile( std::move( linkedFile ) )
+    , m_linkedType( linkedType )
+{
+
+}
+
 const std::string& CommonFile::name() const
 {
     return m_name;

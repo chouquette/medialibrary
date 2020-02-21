@@ -50,6 +50,16 @@ File::File( std::string mrl, fs::IFileSystemFactory& fsFactory,
 
 }
 
+File::File( std::string mrl, IFileSystemFactory& fsFactory,
+            uint32_t lastModificationDate, int64_t size,
+            IFile::LinkedFileType linkedType, std::string linkedFile )
+    : CommonFile( std::move( mrl ), linkedType, std::move( linkedFile ) )
+    , m_lastModificationDate( lastModificationDate )
+    , m_size( size )
+    , m_isNetwork( fsFactory.isNetworkFileSystem() )
+{
+}
+
 unsigned int File::lastModificationDate() const
 {
     return m_lastModificationDate;

@@ -34,6 +34,8 @@ class CommonFile : public IFile
 {
 public:
     explicit CommonFile( std::string mrl );
+    explicit CommonFile( std::string mrl, LinkedFileType linkedType,
+                         std::string linkedFile );
     virtual const std::string& name() const override;
     virtual const std::string& extension() const override;
     virtual const std::string& mrl() const override;

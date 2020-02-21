@@ -80,6 +80,7 @@ void Directory::read() const
 
     media.addOption( ":show-hiddenfiles=true" );
     media.addOption( ":ignore-filetypes=''" );
+    media.addOption( ":sub-autodetect-fuzzy=2" );
 
     auto eventHandler = media.eventManager().onParsedChanged(
         [&mutex, &cond, &res]( VLC::Media::ParsedStatus status) {
@@ -109,12 +110,25 @@ void Directory::read() const
             m_dirs.push_back( std::make_shared<Directory>( m->mrl(), m_fsFactory ) );
         else
         {
-            addFile( m->mrl() );
+            addFile( m->mrl(), IFile::LinkedFileType::None, {} );
+            for ( const auto& am : m->slaves() )
+            {
+                IFile::LinkedFileType linkedType;
+                if ( am.type() == VLC::MediaSlave::Type::Audio )
+                    linkedType = IFile::LinkedFileType::SoundTrack;
+                else
+                {
+                    assert( am.type() == VLC::MediaSlave::Type::Subtitle );
+                    linkedType = IFile::LinkedFileType::Subtitles;
+                }
+                addFile( am.uri(), linkedType, m->mrl() );
+            }
         }
     }
 }
 
-void Directory::addFile( std::string mrl ) const
+void Directory::addFile( std::string mrl, fs::IFile::LinkedFileType linkedType,
+                         std::string linkedWith ) const
 {
     uint32_t lastModificationDate = 0;
     int64_t fileSize = 0;
@@ -151,8 +165,13 @@ void Directory::addFile( std::string mrl ) const
         lastModificationDate = s.st_mtime;
         fileSize = s.st_size;
     }
-    m_files.push_back( std::make_shared<File>( std::move( mrl ),
-                       m_fsFactory, lastModificationDate, fileSize ) );
+    if ( linkedType == IFile::LinkedFileType::None )
+        m_files.push_back( std::make_shared<File>( std::move( mrl ),
+                           m_fsFactory, lastModificationDate, fileSize ) );
+    else
+        m_files.push_back( std::make_shared<File>( std::move( mrl ),
+                           m_fsFactory, lastModificationDate, fileSize,
+                           linkedType, std::move( linkedWith ) ) );
 }
 
 }
