@@ -38,7 +38,10 @@ public:
     virtual const std::string& mrl() const override;
 
 private:
+    // These are unintuitively const, because the files/subfolders list is
+    // lazily initialized when calling files() / dirs()
     virtual void read() const override;
+    void addFile(std::string mrl ) const;
 
 private:
     std::string m_mrl;
