@@ -33,10 +33,10 @@ namespace medialibrary
 namespace fs
 {
 
-CommonFile::CommonFile( const std::string& mrl )
-    : m_name( utils::file::fileName( mrl ) )
-    , m_extension( utils::file::extension( mrl ) )
-    , m_mrl( mrl )
+CommonFile::CommonFile( std::string mrl )
+    : m_mrl( std::move( mrl ) )
+    , m_name( utils::file::fileName( m_mrl ) )
+    , m_extension( utils::file::extension( m_mrl ) )
 {
 }
 

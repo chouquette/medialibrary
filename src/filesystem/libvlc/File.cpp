@@ -40,9 +40,9 @@ namespace fs
 namespace libvlc
 {
 
-File::File( const std::string& mrl, fs::IFileSystemFactory& fsFactory,
+File::File( std::string mrl, fs::IFileSystemFactory& fsFactory,
             uint32_t lastModificationDate, int64_t size )
-    : CommonFile( mrl )
+    : CommonFile( std::move( mrl ) )
     , m_lastModificationDate( lastModificationDate )
     , m_size( size )
     , m_isNetwork( fsFactory.isNetworkFileSystem() )

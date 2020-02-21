@@ -37,7 +37,7 @@ namespace libvlc
 class File : public CommonFile
 {
 public:
-    File( const std::string& mrl, IFileSystemFactory& fsFactory,
+    File( std::string mrl, IFileSystemFactory& fsFactory,
           uint32_t lastModificationDate, int64_t size );
     virtual unsigned int lastModificationDate() const override;
     virtual int64_t size() const override;

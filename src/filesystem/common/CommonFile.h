@@ -33,16 +33,16 @@ namespace fs
 class CommonFile : public IFile
 {
 public:
-    explicit CommonFile( const std::string& mrl );
+    explicit CommonFile( std::string mrl );
     virtual const std::string& name() const override;
     virtual const std::string& extension() const override;
     virtual const std::string& mrl() const override;
     virtual bool isNetwork() const override;
 
 protected:
+    const std::string m_mrl;
     const std::string m_name;
     const std::string m_extension;
-    const std::string m_mrl;
 };
 
 }
