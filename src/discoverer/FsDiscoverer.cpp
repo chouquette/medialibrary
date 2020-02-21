@@ -376,6 +376,7 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
 
     auto files = File::fromParentFolder( m_ml, parentFolder->id() );
     std::vector<FilesToAdd> filesToAdd;
+    std::vector<FilesToAdd> linkedFilesToAdd;
     std::vector<std::pair<std::shared_ptr<File>, std::shared_ptr<fs::IFile>>> filesToRefresh;
     for ( const auto& fileFs: parentFolderFs->files() )
     {
@@ -392,14 +393,35 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
         });
         if ( it == end( files ) || m_probe->forceFileRefresh() == true )
         {
-            const auto ext = fileFs->extension();
-            auto type = IFile::Type::Unknown;
-            if ( m_ml->isMediaExtensionSupported( ext.c_str() ) == true )
-                 type = IFile::Type::Main;
-            else if ( m_ml->isPlaylistExtensionSupported( ext.c_str() ) == true )
-                type = IFile::Type::Playlist;
-            if ( type != IFile::Type::Unknown )
-                filesToAdd.emplace_back( std::move( fileFs ), type );
+            if ( fileFs->linkedType() == fs::IFile::LinkedFileType::None )
+            {
+                const auto ext = fileFs->extension();
+                IFile::Type fileType = IFile::Type::Unknown;
+                if ( m_ml->isMediaExtensionSupported( ext.c_str() ) == true )
+                     fileType = IFile::Type::Main;
+                else if ( m_ml->isPlaylistExtensionSupported( ext.c_str() ) == true )
+                    fileType = IFile::Type::Playlist;
+                if ( fileType != IFile::Type::Unknown )
+                    filesToAdd.emplace_back( std::move( fileFs ), fileType );
+            }
+            else
+            {
+                auto fileType = IFile::Type::Unknown;
+                switch ( fileFs->linkedType() )
+                {
+                    case fs::IFile::LinkedFileType::None:
+                        assert( !"The linked file type can't be none" );
+                        break;
+                    case fs::IFile::LinkedFileType::Subtitles:
+                        fileType = IFile::Type::Subtitles;
+                        break;
+                    case fs::IFile::LinkedFileType::SoundTrack:
+                        fileType = IFile::Type::Soundtrack;
+                        break;
+                }
+                if ( fileType != IFile::Type::Unknown )
+                    linkedFilesToAdd.emplace_back( std::move( fileFs ), fileType );
+            }
             continue;
         }
         if ( fileFs->lastModificationDate() != (*it)->lastModificationDate() )
@@ -455,6 +477,12 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
             break;
         m_ml->onDiscoveredFile( p.file, parentFolder, parentFolderFs,
                                 p.type, m_probe->getPlaylistParent() );
+    }
+    for ( auto p : linkedFilesToAdd )
+    {
+        if ( interruptProbe.isInterrupted() == true )
+            break;
+        m_ml->onDiscoveredLinkedFile( std::move( p.file ), p.type );
     }
     LOG_DEBUG( "Done checking files in ", parentFolderFs->mrl() );
 }
