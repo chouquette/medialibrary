@@ -259,6 +259,9 @@ TEST_P( ReducedTests, OverrideExternalMedia )
         auto files = dir->files();
         for ( const auto& f : files )
         {
+            auto ext = utils::file::extension( f->mrl() );
+            if ( m_ml->isMediaExtensionSupported( ext.c_str() ) == false )
+                continue;
             auto media = m_ml->addExternalMedia( f->mrl() );
             ASSERT_NE( nullptr, media );
             ASSERT_TRUE( media->isExternalMedia() );
