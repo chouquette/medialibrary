@@ -30,6 +30,8 @@
 #include "medialibrary/IMediaLibrary.h"
 #include "utils/ModificationsNotifier.h"
 
+#include <cstring>
+
 namespace medialibrary
 {
 
@@ -472,6 +474,27 @@ bool MediaGroup::checkDbModel( MediaLibraryPtr ml )
             check( ml->getConn(), Triggers::DeleteFts ) &&
             check( ml->getConn(), Triggers::IncrementNbMediaOnGroupChange ) &&
             check( ml->getConn(), Triggers::DecrementNbMediaOnGroupChange );
+}
+
+std::string MediaGroup::commonPattern( const std::string& groupName,
+                                       const std::string& newTitle )
+{
+    auto groupIdx = 0u;
+    auto groupBegin = 0u;
+    auto titleIdx = 0u;
+    if ( strncasecmp( groupName.c_str(), "the ", 4 ) == 0 )
+        groupBegin = groupIdx = 4u;
+    if ( strncasecmp( newTitle.c_str(), "the ", 4 ) == 0 )
+        titleIdx = 4;
+    while ( groupIdx < groupName.size() && titleIdx < newTitle.size() &&
+            tolower( groupName[groupIdx] ) == tolower( newTitle[titleIdx] ) )
+    {
+        ++groupIdx;
+        ++titleIdx;
+    }
+    if ( groupIdx - groupBegin < AutomaticGroupPrefixSize )
+        return {};
+    return groupName.substr( groupBegin, groupIdx - groupBegin );
 }
 
 std::string MediaGroup::orderBy(const QueryParameters* params)

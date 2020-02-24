@@ -100,6 +100,9 @@ public:
 
     static bool checkDbModel( MediaLibraryPtr ml );
 
+    static std::string commonPattern( const std::string& groupName,
+                                      const std::string& newTitle );
+
     using DatabaseHelpers<MediaGroup>::destroy;
 
 private:

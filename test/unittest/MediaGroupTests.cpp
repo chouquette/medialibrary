@@ -624,3 +624,31 @@ TEST_F( MediaGroups, DeleteGroup )
     m2 = ml->media( m2->id() );
     ASSERT_FALSE( m2->isGrouped() );
 }
+
+TEST_F( MediaGroups, CommonPattern )
+{
+    auto res = MediaGroup::commonPattern( "", "" );
+    ASSERT_EQ( "", res );
+
+    res = MediaGroup::commonPattern( "The ", "The " );
+    ASSERT_EQ( "", res );
+
+    res = MediaGroup::commonPattern( "This matches perfectly",
+                                    "This matches perfectly" );
+    ASSERT_EQ( "This matches perfectly", res );
+
+    res = MediaGroup::commonPattern( "This matches perfectly.mkv",
+                                    "This matches perfectly.avi" );
+    ASSERT_EQ( "This matches perfectly.", res );
+
+    res = MediaGroup::commonPattern( "THIS KIND OF MATCHES.avi",
+                                    "this KiNd of MatchES.mkv" );
+    ASSERT_EQ( "THIS KIND OF MATCHES.", res );
+
+    // Not enough character match, so this returns a no-match
+    res = MediaGroup::commonPattern( "Smallmatch", "smalldifference" );
+    ASSERT_EQ( "", res );
+
+    res = MediaGroup::commonPattern( "Small", "sma" );
+    ASSERT_EQ( "", res );
+}
