@@ -1022,21 +1022,7 @@ bool MetadataAnalyzer::assignMediaToGroup( IItem &item ) const
     auto m = static_cast<Media*>( item.media().get() );
     if ( m->type() != IMedia::Type::Video )
         return true;
-    assert( m->groupId() == 0 );
-    assert( m->hasBeenGrouped() == false );
-    auto title = m->title();
-    if ( strncasecmp( title.c_str(), "the ", 4 ) == 0 )
-        title.erase( title.begin(), title.begin() + 4 );
-    auto prefix = title.substr( 0, MediaGroup::AutomaticGroupPrefixSize );
-    auto group = MediaGroup::fetchByName( m_ml, prefix );
-    if ( group == nullptr )
-    {
-        group = std::static_pointer_cast<MediaGroup>(
-                    m_ml->createMediaGroup( prefix ) );
-        if ( group == nullptr )
-            return false;
-    }
-    return group->add( *m );
+    return MediaGroup::assignToGroup( m_ml, *m );
 }
 
 /* Album handling */

@@ -476,6 +476,24 @@ bool MediaGroup::checkDbModel( MediaLibraryPtr ml )
             check( ml->getConn(), Triggers::DecrementNbMediaOnGroupChange );
 }
 
+bool MediaGroup::assignToGroup( MediaLibraryPtr ml, Media& m )
+{
+    assert( m.groupId() == 0 );
+    assert( m.hasBeenGrouped() == false );
+    auto title = m.title();
+    if ( strncasecmp( title.c_str(), "the ", 4 ) == 0 )
+        title.erase( title.begin(), title.begin() + 4 );
+    auto prefix = title.substr( 0, MediaGroup::AutomaticGroupPrefixSize );
+    auto group = MediaGroup::fetchByName( ml, prefix );
+    if ( group == nullptr )
+    {
+        group = create( ml, 0, prefix );
+        if ( group == nullptr )
+            return false;
+    }
+    return group->add( m );
+}
+
 std::string MediaGroup::commonPattern( const std::string& groupName,
                                        const std::string& newTitle )
 {

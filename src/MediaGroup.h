@@ -100,6 +100,7 @@ public:
 
     static bool checkDbModel( MediaLibraryPtr ml );
 
+    static bool assignToGroup( MediaLibraryPtr ml, Media& m );
     static std::string commonPattern( const std::string& groupName,
                                       const std::string& newTitle );
 
