@@ -112,6 +112,10 @@ private:
      * @brief exists Checks for the existance of a root group with the given name
      */
     static bool exists( MediaLibraryPtr ml, const std::string& name );
+    static std::string prefix( const std::string& title );
+    static std::vector<std::shared_ptr<MediaGroup> > fetchMatching( MediaLibraryPtr ml,
+                                                  const std::string& prefix );
+
 
 private:
     MediaLibraryPtr m_ml;

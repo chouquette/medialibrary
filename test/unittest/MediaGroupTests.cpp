@@ -651,4 +651,71 @@ TEST_F( MediaGroups, CommonPattern )
 
     res = MediaGroup::commonPattern( "Small", "sma" );
     ASSERT_EQ( "", res );
+
+    res = MediaGroup::commonPattern( "The match is real", "match is real" );
+    ASSERT_EQ( "match is real", res );
+
+    res = MediaGroup::commonPattern( "match is real", "The match is real" );
+    ASSERT_EQ( "match is real", res );
+}
+
+TEST_F( MediaGroups, AssignToGroups )
+{
+    auto m1 = std::static_pointer_cast<Media>(
+                ml->addMedia( "The otters are fluffy.mkv", IMedia::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>(
+                ml->addMedia( "otters are cute.mkv", IMedia::Type::Video ) );
+
+    auto groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 0u, groups.size() );
+
+    /*
+     * First assign m1, then m2, and do it again for a different group to check
+     * that the "the " prefix is correctly handled regardless of the insertion
+     * order
+     */
+    auto res = MediaGroup::assignToGroup( ml.get(), *m1 );
+    ASSERT_TRUE( res );
+    groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    ASSERT_EQ( 1u, groups[0]->nbVideo() );
+    ASSERT_EQ( groups[0]->name(), "otters are fluffy.mkv" );
+
+    res = MediaGroup::assignToGroup( ml.get(), *m2 );
+    ASSERT_TRUE( res );
+    groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    ASSERT_EQ( 2u, groups[0]->nbVideo() );
+    ASSERT_EQ( groups[0]->name(), "otters are " );
+
+    groups[0]->destroy();
+
+    /*
+     * Delete the media since they have been grouped, and assignToGroup asserts
+     * that the media have never been grouped, which is a valid assertion as
+     * grouping comes from the metadataparser, which only groups media when they
+     * were never grouped
+     */
+    ml->deleteMedia( m1->id() );
+    ml->deleteMedia( m2->id() );
+
+    m1 = std::static_pointer_cast<Media>(
+                ml->addMedia( "The otters are fluffy.mkv", IMedia::Type::Video ) );
+    m2 = std::static_pointer_cast<Media>(
+                ml->addMedia( "otters are cute.mkv", IMedia::Type::Video ) );
+
+    /* Now try again with the other ordering */
+    res = MediaGroup::assignToGroup( ml.get(), *m2 );
+    ASSERT_TRUE( res );
+    groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    ASSERT_EQ( 1u, groups[0]->nbVideo() );
+    ASSERT_EQ( groups[0]->name(), "otters are cute.mkv" );
+
+    res = MediaGroup::assignToGroup( ml.get(), *m1 );
+    ASSERT_TRUE( res );
+    groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    ASSERT_EQ( 2u, groups[0]->nbVideo() );
+    ASSERT_EQ( groups[0]->name(), "otters are " );
 }

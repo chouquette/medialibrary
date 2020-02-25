@@ -249,6 +249,14 @@ std::shared_ptr<MediaGroup> MediaGroup::fetchByName( MediaLibraryPtr ml,
     return fetch( ml, req, name );
 }
 
+std::vector<std::shared_ptr<MediaGroup>>
+MediaGroup::fetchMatching( MediaLibraryPtr ml, const std::string& prefix )
+{
+    static const std::string req = "SELECT * FROM " + Table::Name +
+            " WHERE SUBSTR(name, 1, ?) = ? COLLATE NOCASE";
+    return fetchAll<MediaGroup>( ml, req, prefix.length(), prefix );
+}
+
 Query<IMediaGroup> MediaGroup::listAll( MediaLibraryPtr ml,
                                         const QueryParameters* params )
 {
@@ -481,17 +489,45 @@ bool MediaGroup::assignToGroup( MediaLibraryPtr ml, Media& m )
     assert( m.groupId() == 0 );
     assert( m.hasBeenGrouped() == false );
     auto title = m.title();
-    if ( strncasecmp( title.c_str(), "the ", 4 ) == 0 )
-        title.erase( title.begin(), title.begin() + 4 );
-    auto prefix = title.substr( 0, MediaGroup::AutomaticGroupPrefixSize );
-    auto group = MediaGroup::fetchByName( ml, prefix );
-    if ( group == nullptr )
+    auto p = prefix( title );
+    auto groups = MediaGroup::fetchMatching( ml, p );
+    if ( groups.empty() == true )
     {
-        group = create( ml, 0, prefix );
+        if ( strncasecmp( title.c_str(), "the ", 4 ) == 0 )
+            title = title.substr( 4 );
+        auto group = create( ml, 0, std::move( title ) );
         if ( group == nullptr )
             return false;
+        return group->add( m );
     }
-    return group->add( m );
+    std::string longestPattern;
+    std::shared_ptr<MediaGroup> target;
+    for ( const auto& group : groups )
+    {
+        auto match = commonPattern( group->name(), title );
+        assert( match.empty() == false );
+        if ( match.length() > longestPattern.length() )
+        {
+            longestPattern = match;
+            target = group;
+        }
+    }
+    if ( target == nullptr )
+    {
+        assert( !"There should have been a match" );
+        return false;
+    }
+    if ( target->rename( longestPattern ) == false )
+        return false;
+    return target->add( m );
+}
+
+std::string MediaGroup::prefix( const std::string& title )
+{
+    auto offset = 0u;
+    if ( strncasecmp( title.c_str(), "the ", 4 ) == 0 )
+        offset = 4;
+    return title.substr( offset, AutomaticGroupPrefixSize + offset );
 }
 
 std::string MediaGroup::commonPattern( const std::string& groupName,

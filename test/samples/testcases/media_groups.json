@@ -7,13 +7,13 @@
         "nbAudios": 0,
         "mediaGroups": [
             {
-                "name": "otters",
+                "name": "otters are ",
                 "nbVideo": 2,
                 "nbAudio": 0,
                 "nbUnknown": 0
             },
             {
-                "name": "anothe",
+                "name": "Another Video about otters",
                 "nbVideo": 1
             }
         ]
