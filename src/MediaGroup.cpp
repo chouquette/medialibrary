@@ -64,6 +64,16 @@ MediaGroup::MediaGroup(MediaLibraryPtr ml, int64_t parentId, std::string name )
 {
 }
 
+MediaGroup::MediaGroup( MediaLibraryPtr ml )
+    : m_ml( ml )
+    , m_id( 0 )
+    , m_parentId( 0 )
+    , m_nbVideo( 0 )
+    , m_nbAudio( 0 )
+    , m_nbUnknown( 0 )
+{
+}
+
 int64_t MediaGroup::id() const
 {
     return m_id;
@@ -221,6 +231,33 @@ std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
     auto notifier = ml->getNotifier();
     if ( notifier != nullptr )
         notifier->notifyMediaGroupCreation( self );
+    return self;
+}
+
+std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
+                                                const std::vector<int64_t>& mediaIds )
+{
+    static const std::string req = "INSERT INTO " + Table::Name + " DEFAULT VALUES";
+    auto self = std::make_shared<MediaGroup>( ml );
+    if ( insert( ml, self, req ) == false )
+        return nullptr;
+    auto notifier = ml->getNotifier();
+    if ( notifier != nullptr )
+        notifier->notifyMediaGroupCreation( self );
+    for ( const auto mId : mediaIds )
+    {
+        auto media = ml->media( mId );
+        if ( media == nullptr )
+        {
+            /*
+             * Hope it was a sporadic failure and attempt to link the media
+             * anyway. The counters won't be up to date but the media will be linked.
+             */
+            self->add( mId );
+        }
+        else
+            self->add( *media );
+    }
     return self;
 }
 

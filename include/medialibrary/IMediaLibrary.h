@@ -476,6 +476,16 @@ public:
      */
     virtual MediaGroupPtr createMediaGroup( std::string name ) = 0;
     /**
+     * @brief createMediaGroup Creates a media group with the provided media
+     * @param mediaIds A list of media to be included in the group
+     * @return The new group instance, or nullptr in case of error
+     *
+     * If the provided media are already part of a group, they will be moved to
+     * the newly created one.
+     * The group will have no name and will return an empty string.
+     */
+    virtual MediaGroupPtr createMediaGroup( const std::vector<int64_t>& mediaIds ) = 0;
+    /**
      * @brief deleteMediaGroup Deletes a media group
      * @param id The group ID
      * @return true in case of success, false otherwise

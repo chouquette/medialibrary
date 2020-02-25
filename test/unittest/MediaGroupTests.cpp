@@ -703,3 +703,45 @@ TEST_F( MediaGroups, AssignToGroups )
     ASSERT_EQ( 2u, groups[0]->nbVideo() );
     ASSERT_EQ( groups[0]->name(), "otters are " );
 }
+
+TEST_F( MediaGroups, CreateFromMedia )
+{
+    auto m1 = ml->addMedia( "media1.mkv", IMedia::Type::Video );
+    auto m2 = ml->addMedia( "media2.mkv", IMedia::Type::Video );
+    auto m3 = ml->addMedia( "media3.mkv", IMedia::Type::Video );
+
+    auto mg = ml->createMediaGroup( std::vector<int64_t>{ m1->id(), m2->id() } );
+    ASSERT_NE( nullptr, mg );
+
+    ASSERT_EQ( 2u, mg->nbVideo() );
+    ASSERT_EQ( 0u, mg->nbAudio() );
+    ASSERT_EQ( 2u, mg->nbMedia() );
+
+    auto mediaQuery = mg->media( IMedia::Type::Video, nullptr );
+    ASSERT_EQ( 2u, mediaQuery->count() );
+    auto media = mediaQuery->all();
+    ASSERT_EQ( 2u, media.size() );
+    ASSERT_EQ( m1->id(), media[0]->id() );
+    ASSERT_EQ( m2->id(), media[1]->id() );
+
+    auto mg2 = ml->createMediaGroup( std::vector<int64_t>{ m3->id(), m2->id() } );
+    ASSERT_NE( nullptr, mg2 );
+
+    ASSERT_EQ( 2u, mg2->nbVideo() );
+    ASSERT_EQ( 0u, mg2->nbAudio() );
+    ASSERT_EQ( 2u, mg2->nbMedia() );
+
+    mediaQuery = mg2->media( IMedia::Type::Video, nullptr );
+    ASSERT_EQ( 2u, mediaQuery->count() );
+    media = mediaQuery->all();
+    ASSERT_EQ( 2u, media.size() );
+    ASSERT_EQ( m2->id(), media[0]->id() );
+    ASSERT_EQ( m3->id(), media[1]->id() );
+
+    // Double check that m2 was removed from mg
+    mediaQuery = mg->media( IMedia::Type::Video, nullptr );
+    ASSERT_EQ( 1u, mediaQuery->count() );
+    media = mediaQuery->all();
+    ASSERT_EQ( 1u, media.size() );
+    ASSERT_EQ( m1->id(), media[0]->id() );
+}
