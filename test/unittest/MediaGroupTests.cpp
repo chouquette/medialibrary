@@ -43,6 +43,7 @@ TEST_F( MediaGroups, Create )
     ASSERT_EQ( 0u, mg->nbAudio() );
     ASSERT_EQ( 0u, mg->nbMedia() );
     ASSERT_EQ( 0u, mg->nbUnknown() );
+    ASSERT_EQ( false, mg->hasBeenRenamed() );
 
     Reload();
 

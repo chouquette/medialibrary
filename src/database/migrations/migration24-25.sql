@@ -15,7 +15,8 @@
 MediaGroup::schema( MediaGroup::Table::Name, 25 ),
 
 "INSERT INTO " + MediaGroup::Table::Name +
-    " SELECT * FROM " + MediaGroup::Table::Name + "_backup ",
+    " SELECT id_group, parent_id, name, nb_video, nb_audio, nb_unknown, false"
+    " FROM " + MediaGroup::Table::Name + "_backup ",
 
 "DROP TABLE " + MediaGroup::Table::Name + "_backup",
 

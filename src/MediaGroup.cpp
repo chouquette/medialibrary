@@ -49,6 +49,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, sqlite::Row& row )
     , m_nbVideo( row.extract<decltype(m_nbVideo)>() )
     , m_nbAudio( row.extract<decltype(m_nbAudio)>() )
     , m_nbUnknown( row.extract<decltype(m_nbUnknown)>() )
+    , m_hasBeenRenamed( row.extract<decltype(m_hasBeenRenamed)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -61,6 +62,7 @@ MediaGroup::MediaGroup(MediaLibraryPtr ml, int64_t parentId, std::string name )
     , m_nbVideo( 0 )
     , m_nbAudio( 0 )
     , m_nbUnknown( 0 )
+    , m_hasBeenRenamed( false )
 {
 }
 
@@ -71,6 +73,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml )
     , m_nbVideo( 0 )
     , m_nbAudio( 0 )
     , m_nbUnknown( 0 )
+    , m_hasBeenRenamed( false )
 {
 }
 
@@ -102,6 +105,11 @@ uint32_t MediaGroup::nbAudio() const
 uint32_t MediaGroup::nbUnknown() const
 {
     return m_nbUnknown;
+}
+
+bool MediaGroup::hasBeenRenamed() const
+{
+    return m_hasBeenRenamed;
 }
 
 bool MediaGroup::add( IMedia& media )
@@ -323,7 +331,22 @@ std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
                    " USING FTS3(name)";
     }
     assert( name == Table::Name );
-    auto req = "CREATE TABLE " + Table::Name +
+    if ( dbModel == 24 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_group INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "parent_id INTEGER,"
+            "name TEXT COLLATE NOCASE,"
+            "nb_video UNSIGNED INTEGER DEFAULT 0,"
+            "nb_audio UNSIGNED INTEGER DEFAULT 0,"
+            "nb_unknown UNSIGNED INTEGER DEFAULT 0,"
+            "FOREIGN KEY(parent_id) REFERENCES " + Table::Name +
+                "(id_group) ON DELETE CASCADE,"
+            "UNIQUE(parent_id, name) ON CONFLICT FAIL"
+        ")";
+    }
+    return "CREATE TABLE " + Table::Name +
     "("
         "id_group INTEGER PRIMARY KEY AUTOINCREMENT,"
         "parent_id INTEGER,"
@@ -331,15 +354,10 @@ std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
         "nb_video UNSIGNED INTEGER DEFAULT 0,"
         "nb_audio UNSIGNED INTEGER DEFAULT 0,"
         "nb_unknown UNSIGNED INTEGER DEFAULT 0,"
-
+        "has_been_renamed BOOLEAN DEFAULT FALSE,"
         "FOREIGN KEY(parent_id) REFERENCES " + Table::Name +
-            "(id_group) ON DELETE CASCADE";
-    if ( dbModel < 25 )
-    {
-        req += ",UNIQUE(parent_id, name) ON CONFLICT FAIL";
-    }
-    req += ")";
-    return req;
+            "(id_group) ON DELETE CASCADE"
+    ")";
 }
 
 std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )

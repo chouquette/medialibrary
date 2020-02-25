@@ -62,6 +62,10 @@ public:
      */
     virtual uint32_t nbUnknown() const = 0;
     /**
+     * @brief hasBeenRenamed Returns true if the group was manually renamed
+     */
+    virtual bool hasBeenRenamed() const = 0;
+    /**
      * @brief add Adds a media to this group.
      * @param media A reference to the media to add
      * @return true if the media was successfully added to the group, false otherwise

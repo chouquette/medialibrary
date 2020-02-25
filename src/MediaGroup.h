@@ -66,6 +66,7 @@ public:
     virtual uint32_t nbVideo() const override;
     virtual uint32_t nbAudio() const override;
     virtual uint32_t nbUnknown() const override;
+    virtual bool hasBeenRenamed() const override;
     virtual bool add( IMedia& media ) override;
     virtual bool add(int64_t mediaId ) override;
     virtual bool remove( IMedia& media ) override;
@@ -126,6 +127,7 @@ private:
     uint32_t m_nbVideo;
     uint32_t m_nbAudio;
     uint32_t m_nbUnknown;
+    bool m_hasBeenRenamed;
 };
 
 }
