@@ -84,8 +84,6 @@ public:
 
     static std::shared_ptr<MediaGroup> create(MediaLibraryPtr ml,
                                                int64_t parentId, std::string name );
-    static std::shared_ptr<MediaGroup> fetchByName( MediaLibraryPtr ml,
-                                            const std::string& name );
     static Query<IMediaGroup> listAll( MediaLibraryPtr ml, const QueryParameters* params );
     static Query<IMediaGroup> search( MediaLibraryPtr ml, const std::string& pattern,
                                       const QueryParameters* params );

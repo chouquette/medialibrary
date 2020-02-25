@@ -224,14 +224,6 @@ std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
     return self;
 }
 
-std::shared_ptr<MediaGroup> MediaGroup::fetchByName( MediaLibraryPtr ml,
-                                             const std::string& name )
-{
-    static const std::string req = "SELECT * FROM " + Table::Name +
-            " WHERE name = ?";
-    return fetch( ml, req, name );
-}
-
 std::vector<std::shared_ptr<MediaGroup>>
 MediaGroup::fetchMatching( MediaLibraryPtr ml, const std::string& prefix )
 {

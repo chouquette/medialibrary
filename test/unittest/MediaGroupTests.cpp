@@ -46,19 +46,9 @@ TEST_F( MediaGroups, Create )
 
     Reload();
 
-    mg = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( name ) );
+    mg = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( mg->id() ) );
     ASSERT_NE( nullptr, mg );
     ASSERT_EQ( "group", mg->name() );
-}
-
-TEST_F( MediaGroups, CaseInsensitive )
-{
-    auto mg = MediaGroup::create( ml.get(), 0, "GrOUpNAmE" );
-    ASSERT_NE( nullptr, mg );
-
-    auto mg2 = ml->mediaGroup( "groupname" );
-    ASSERT_NE( nullptr, mg2 );
-    ASSERT_EQ( mg->id(), mg2->id() );
 }
 
 TEST_F( MediaGroups, SubGroup )
