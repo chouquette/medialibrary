@@ -462,7 +462,7 @@ public:
      */
     virtual Query<IMedia> audioFiles( const QueryParameters* params = nullptr ) const = 0;
     /**
-     * @brief audioFiles Returns the media classified as Audio
+     * @brief videoFiles Returns the media classified as Video
      * @param params Some query parameters.
      * @return A query representing the results set
      *
