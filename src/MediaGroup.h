@@ -82,6 +82,15 @@ public:
                                        const QueryParameters* params = nullptr ) override;
     virtual std::string path() const override;
     virtual bool rename( std::string name ) override;
+    /**
+     * @brief rename Rename a group
+     * @param name The new name
+     * @param userInitiated true if this comes from the public API
+     *
+     * If userInitiated is true, the has_been_renamed column will be set to true
+     * Otherwise, this is assumed to be an internal change and the user will not
+     * be notified
+     */
     virtual bool destroy() override;
 
     static std::shared_ptr<MediaGroup> create( MediaLibraryPtr ml,
@@ -117,7 +126,7 @@ private:
     static std::string prefix( const std::string& title );
     static std::vector<std::shared_ptr<MediaGroup> > fetchMatching( MediaLibraryPtr ml,
                                                   const std::string& prefix );
-
+    bool rename( std::string name, bool userInitiated );
 
 private:
     MediaLibraryPtr m_ml;

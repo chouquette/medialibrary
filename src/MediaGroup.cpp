@@ -211,14 +211,31 @@ std::string MediaGroup::path() const
 
 bool MediaGroup::rename( std::string name )
 {
+    return rename( std::move( name ), true );
+}
+
+bool MediaGroup::rename( std::string name, bool userInitiated )
+{
     if ( name.empty() == true )
         return false;
     if ( name == m_name )
         return true;
-    const std::string req = "UPDATE " + Table::Name +
-            " SET name = ? WHERE id_group = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, name, m_id ) == false )
-        return false;
+    /* No need to update the has_been_renamed column if it's already set to true */
+    if ( userInitiated == false || m_hasBeenRenamed == true )
+    {
+        const std::string req = "UPDATE " + Table::Name +
+                " SET name = ? WHERE id_group = ?";
+        if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, name, m_id ) == false )
+            return false;
+    }
+    else
+    {
+        const std::string req = "UPDATE " + Table::Name +
+                " SET name = ?, has_been_renamed = true WHERE id_group = ?";
+        if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, name, m_id ) == false )
+            return false;
+        m_hasBeenRenamed = true;
+    }
     m_name = std::move( name );
     return true;
 }
@@ -551,7 +568,7 @@ bool MediaGroup::assignToGroup( MediaLibraryPtr ml, Media& m )
         assert( !"There should have been a match" );
         return false;
     }
-    if ( target->rename( longestPattern ) == false )
+    if ( target->rename( longestPattern, false ) == false )
         return false;
     return target->add( m );
 }

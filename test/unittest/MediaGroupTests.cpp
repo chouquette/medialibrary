@@ -472,6 +472,7 @@ TEST_F( MediaGroups, Path )
 TEST_F( MediaGroups, Rename )
 {
     auto mg = ml->createMediaGroup( "group" );
+    ASSERT_FALSE( mg->hasBeenRenamed() );
     ASSERT_NE( nullptr, mg );
     auto m = ml->addMedia( "media.mkv", IMedia::Type::Video );
     ASSERT_NE( nullptr, m );
@@ -483,6 +484,7 @@ TEST_F( MediaGroups, Rename )
     std::string newName{ "better name" };
     auto res = mg->rename( newName );
     ASSERT_TRUE( res );
+    ASSERT_TRUE( mg->hasBeenRenamed() );
     ASSERT_EQ( newName, mg->name() );
 
     Reload();
@@ -490,6 +492,7 @@ TEST_F( MediaGroups, Rename )
     mg = ml->mediaGroup( mg->id() );
     ASSERT_NE( nullptr, mg );
     ASSERT_EQ( newName, mg->name() );
+    ASSERT_TRUE( mg->hasBeenRenamed() );
 
     groupMedia = mg->media( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groupMedia.size() );
