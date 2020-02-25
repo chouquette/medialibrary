@@ -193,6 +193,8 @@ std::string MediaGroup::path() const
 
 bool MediaGroup::rename( std::string name )
 {
+    if ( name.empty() == true )
+        return false;
     if ( name == m_name )
         return true;
     const std::string req = "UPDATE " + Table::Name +
@@ -211,30 +213,11 @@ bool MediaGroup::destroy()
 std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
                                                 int64_t parentId, std::string name )
 {
-    std::unique_ptr<sqlite::Transaction> t;
     static const std::string req = "INSERT INTO " + Table::Name +
             "(parent_id, name) VALUES(?, ?)";
-    if ( parentId == 0 )
-    {
-        // Since a null parent_id won't trigger the UNIQUE constraint, we need
-        // to check for potential duplicates ourselves
-        if ( sqlite::Transaction::transactionInProgress() == false )
-            t = ml->getConn()->newTransaction();
-        if ( exists( ml, name ) == true )
-            return nullptr;
-    }
     auto self = std::make_shared<MediaGroup>( ml, parentId, std::move( name ) );
-    try
-    {
-        if ( insert( ml, self, req, sqlite::ForeignKey{ parentId }, self->name() ) == false )
-            return nullptr;
-    }
-    catch ( sqlite::errors::ConstraintUnique& )
-    {
+    if ( insert( ml, self, req, sqlite::ForeignKey{ parentId }, self->name() ) == false )
         return nullptr;
-    }
-    if ( t != nullptr )
-        t->commit();
     auto notifier = ml->getNotifier();
     if ( notifier != nullptr )
         notifier->notifyMediaGroupCreation( self );
@@ -311,7 +294,7 @@ std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
                    " USING FTS3(name)";
     }
     assert( name == Table::Name );
-    return "CREATE TABLE " + Table::Name +
+    auto req = "CREATE TABLE " + Table::Name +
     "("
         "id_group INTEGER PRIMARY KEY AUTOINCREMENT,"
         "parent_id INTEGER,"
@@ -321,9 +304,13 @@ std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
         "nb_unknown UNSIGNED INTEGER DEFAULT 0,"
 
         "FOREIGN KEY(parent_id) REFERENCES " + Table::Name +
-            "(id_group) ON DELETE CASCADE,"
-        "UNIQUE(parent_id, name) ON CONFLICT FAIL"
-    ")";
+            "(id_group) ON DELETE CASCADE";
+    if ( dbModel < 25 )
+    {
+        req += ",UNIQUE(parent_id, name) ON CONFLICT FAIL";
+    }
+    req += ")";
+    return req;
 }
 
 std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )

@@ -51,15 +51,6 @@ TEST_F( MediaGroups, Create )
     ASSERT_EQ( "group", mg->name() );
 }
 
-TEST_F( MediaGroups, Unique )
-{
-    std::string name{ "group" };
-    auto mg = MediaGroup::create( ml.get(), 0, name );
-    ASSERT_NE( nullptr, mg );
-    mg = MediaGroup::create( ml.get(), 0, name );
-    ASSERT_EQ( nullptr, mg );
-}
-
 TEST_F( MediaGroups, CaseInsensitive )
 {
     auto mg = MediaGroup::create( ml.get(), 0, "GrOUpNAmE" );
@@ -511,6 +502,9 @@ TEST_F( MediaGroups, Rename )
 
     groupMedia = mg->media( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groupMedia.size() );
+
+    res = mg->rename( "" );
+    ASSERT_FALSE( res );
 }
 
 TEST_F( MediaGroups, CheckDbModel )
