@@ -357,7 +357,9 @@ public:
     /// \brief groupId Returns this media's group ID, or 0 if not grouped
     ///
     virtual int64_t groupId() const = 0;
-
+    ///
+    /// \brief group Return this media's group, or nullptr if the media isn't grouped
+    ///
     virtual MediaGroupPtr group() const = 0;
 };
 
