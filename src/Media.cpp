@@ -604,6 +604,37 @@ int64_t Media::groupId() const
     return m_groupId;
 }
 
+std::vector<std::shared_ptr<Media>> Media::fetchMatchingUngrouped()
+{
+    const std::string req = "SELECT * FROM " + Table::Name +
+            " WHERE group_id IS NULL AND"
+            " SUBSTR(title, 1, ?) = ? COLLATE NOCASE";
+    auto prefix = MediaGroup::prefix( m_title );
+    return fetchAll<Media>( m_ml, req, prefix.length(), prefix );
+}
+
+bool Media::regroup()
+{
+    if ( m_groupId != 0 )
+        return false;
+    auto t = m_ml->getConn()->newTransaction();
+    auto group = MediaGroup::create( m_ml, 0, m_title );
+    if ( group == nullptr )
+        return false;
+    if ( group->add( *this ) == false )
+        return false;
+    auto candidates = fetchMatchingUngrouped();
+    std::string groupName = m_title;
+    for ( const auto& c : candidates )
+    {
+        groupName = MediaGroup::commonPattern( groupName, c->title() );
+        group->add( c->id() );
+    }
+    group->rename( std::move( groupName ), false );
+    t->commit();
+    return true;
+}
+
 bool Media::hasBeenGrouped() const
 {
     return m_hasBeenGrouped;

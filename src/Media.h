@@ -226,6 +226,7 @@ class Media : public IMedia,
         virtual bool isGrouped() const override;
         virtual MediaGroupPtr group() const override;
         virtual int64_t groupId() const override;
+        virtual bool regroup() override;
         bool hasBeenGrouped() const;
 
         void setReleaseDate( unsigned int date );
@@ -304,6 +305,7 @@ private:
         static std::shared_ptr<Media> createExternalMedia( MediaLibraryPtr ml,
                                                            const std::string& mrl,
                                                            ImportType importType );
+        std::vector<std::shared_ptr<Media>> fetchMatchingUngrouped();
 
         /*
          * Marked as private so that it can only be used through IMedia interface

@@ -749,3 +749,49 @@ TEST_F( MediaGroups, CreateFromMedia )
     ASSERT_EQ( 1u, media.size() );
     ASSERT_EQ( m1->id(), media[0]->id() );
 }
+
+TEST_F( MediaGroups, Regroup )
+{
+    // 2 media we expect to be regrouped
+    auto m1 = ml->addMedia( "matching title 1.mkv", IMedia::Type::Video );
+    auto m2 = ml->addMedia( "MATCHING TITLE 2.mkv", IMedia::Type::Video );
+    // And another one, but with a slightly different name to check we adjust
+    // the group name accordingly
+    auto m3 = ml->addMedia( "matching trout.mkv", IMedia::Type::Video );
+    // A video that won't match the automatic grouping patterns
+    auto m4 = ml->addMedia( "fluffy otters is no match for you.avi", IMedia::Type::Video );
+    // A video that should match but which will be already grouped
+    auto m5 = ml->addMedia( "matching title 3.mkv", IMedia::Type::Video );
+
+    auto mg = ml->createMediaGroup( std::vector<int64_t>{ m5->id() } );
+    m5 = ml->media( m5->id() );
+    ASSERT_TRUE( m5->isGrouped() );
+    ASSERT_EQ( mg->id(), m5->groupId() );
+
+    auto res = m1->regroup();
+    ASSERT_TRUE( res );
+    ASSERT_TRUE( m1->isGrouped() );
+
+    m2 = ml->media( m2->id() );
+    ASSERT_TRUE( m2->isGrouped() );
+    ASSERT_EQ( m1->groupId(), m2->groupId() );
+
+    m3 = ml->media( m3->id() );
+    ASSERT_TRUE( m3->isGrouped() );
+    ASSERT_EQ( m1->groupId(), m3->groupId() );
+
+    m4 = ml->media( m4->id() );
+    ASSERT_FALSE( m4->isGrouped() );
+
+    m5 = ml->media( m5->id() );
+    ASSERT_TRUE( m5->isGrouped() );
+    ASSERT_NE( m5->groupId(), m1->groupId() );
+
+    auto newGroup = m1->group();
+    ASSERT_EQ( 3u, newGroup->nbVideo() );
+    ASSERT_EQ( "matching t", newGroup->name() );
+
+    // Ensure we refuse to regroup an already grouped media
+    res = m5->regroup();
+    ASSERT_FALSE( res );
+}

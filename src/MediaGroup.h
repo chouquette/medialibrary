@@ -82,6 +82,8 @@ public:
                                        const QueryParameters* params = nullptr ) override;
     virtual std::string path() const override;
     virtual bool rename( std::string name ) override;
+    bool rename( std::string name, bool userInitiated );
+
     /**
      * @brief rename Rename a group
      * @param name The new name
@@ -114,6 +116,7 @@ public:
     static bool assignToGroup( MediaLibraryPtr ml, Media& m );
     static std::string commonPattern( const std::string& groupName,
                                       const std::string& newTitle );
+    static std::string prefix( const std::string& title );
 
     using DatabaseHelpers<MediaGroup>::destroy;
 
@@ -123,10 +126,8 @@ private:
      * @brief exists Checks for the existance of a root group with the given name
      */
     static bool exists( MediaLibraryPtr ml, const std::string& name );
-    static std::string prefix( const std::string& title );
     static std::vector<std::shared_ptr<MediaGroup> > fetchMatching( MediaLibraryPtr ml,
                                                   const std::string& prefix );
-    bool rename( std::string name, bool userInitiated );
 
 private:
     MediaLibraryPtr m_ml;
