@@ -568,8 +568,11 @@ bool MediaGroup::assignToGroup( MediaLibraryPtr ml, Media& m )
         assert( !"There should have been a match" );
         return false;
     }
-    if ( target->rename( longestPattern, false ) == false )
+    if ( target->hasBeenRenamed() == false &&
+         target->rename( longestPattern, false ) == false )
+    {
         return false;
+    }
     return target->add( m );
 }
 
