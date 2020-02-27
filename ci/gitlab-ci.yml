@@ -1,8 +1,12 @@
 variables:
   GIT_SUBMODULE_STRATEGY: normal
+  MEDIALIBRARY_IMG: registry.videolan.org/medialibrary:20190531150343
+  MEDIALIBRARY_WIN32_IMG: registry.videolan.org/medialibrary-win32:20191203153222
+  MEDIALIBRARY_WIN64_IMG: registry.videolan.org/medialibrary-win64:20191203155144
+  VLC_DEBIAN_UNSTABLE_IMG: registry.videolan.org/vlc-debian-unstable:20191204094457
 
 linux:
-    image: registry.videolan.org/medialibrary:20190531150343
+    image: $MEDIALIBRARY_IMG
     except:
       - schedules
     tags:
@@ -17,7 +21,7 @@ linux:
       - ./samples --gtest_filter=-\*removable
 
 win32:
-    image: registry.videolan.org/medialibrary-win32:20191203153222
+    image: $MEDIALIBRARY_WIN32_IMG
     except:
       - schedules
     tags:
@@ -36,7 +40,7 @@ win32:
       - wine samples.exe --gtest_filter=-\*removable
 
 win64:
-    image: registry.videolan.org/medialibrary-win64:20191203155144
+    image: $MEDIALIBRARY_WIN64_IMG
     except:
       - schedules
     tags:
@@ -55,7 +59,7 @@ win64:
       - wine samples.exe --gtest_filter=\*removable
 
 coverage:
-    image: registry.videolan.org/medialibrary:20190531150343
+    image: $MEDIALIBRARY_IMG
     tags:
       - debian
       - amd64
@@ -84,7 +88,7 @@ coverage:
             - html/
 
 asan-ubsan:
-    image: registry.videolan.org/vlc-debian-unstable:20191204094457
+    image: $VLC_DEBIAN_UNSTABLE_IMG
     only:
       - schedules
     tags:
@@ -109,7 +113,7 @@ asan-ubsan:
       - ./test_fast_discover $CI_PROJECT_DIR/test/samples/samples
 
 tsan:
-    image: registry.videolan.org/vlc-debian-unstable:20191204094457
+    image: $VLC_DEBIAN_UNSTABLE_IMG
     only:
       - schedules
     tags:
