@@ -115,6 +115,10 @@ public:
      * a flattened list of all folders that contain media.
      */
     virtual Query<IFolder> subfolders( const QueryParameters* params = nullptr ) const = 0;
+
+    virtual uint32_t nbVideo() const = 0;
+    virtual uint32_t nbAudio() const = 0;
+    virtual uint32_t nbMedia() const = 0;
 };
 
 }

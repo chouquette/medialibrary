@@ -116,6 +116,10 @@ public:
                                        const QueryParameters* params = nullptr ) const override;
     virtual Query<IFolder> subfolders( const QueryParameters* params ) const override;
 
+    virtual uint32_t nbVideo() const override;
+    virtual uint32_t nbAudio() const override;
+    virtual uint32_t nbMedia() const override;
+
     enum class BannedType
     {
         Yes,    //< Only select banned folders
@@ -143,6 +147,8 @@ private:
     // Can't be const anymore, but should be if we ever get to remove the
     // removable->non removable device fixup (introduced after vlc-android 3.1.0 rc3)
     bool m_isRemovable;
+    uint32_t m_nbAudio;
+    uint32_t m_nbVideo;
 
     mutable std::shared_ptr<Device> m_device;
     // This contains the full path, including device mountpoint (and mrl scheme,

@@ -56,7 +56,8 @@ Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
     , m_isBanned( row.load<decltype(m_isBanned)>( 4 ) )
     , m_deviceId( row.load<decltype(m_deviceId)>( 5 ) )
     , m_isRemovable( row.load<decltype(m_isRemovable)>( 6 ) )
-    // Skip nb_audio/nb_video
+    , m_nbAudio( row.load<decltype(m_nbAudio)>( 7 ) )
+    , m_nbVideo( row.load<decltype(m_nbVideo)>( 8 ) )
 {
 }
 
@@ -70,6 +71,8 @@ Folder::Folder(MediaLibraryPtr ml, const std::string& path,
     , m_isBanned( false )
     , m_deviceId( deviceId )
     , m_isRemovable( isRemovable )
+    , m_nbAudio( 0 )
+    , m_nbVideo( 0 )
 {
 }
 
@@ -765,6 +768,21 @@ Query<IFolder> Folder::subfolders( const QueryParameters* params ) const
 {
     static const std::string req = "FROM " + Table::Name + " WHERE parent_id = ?";
     return make_query<Folder, IFolder>( m_ml, "*", req, sortRequest( params ), m_id );
+}
+
+uint32_t Folder::nbVideo() const
+{
+    return m_nbVideo;
+}
+
+uint32_t Folder::nbAudio() const
+{
+    return m_nbAudio;
+}
+
+uint32_t Folder::nbMedia() const
+{
+    return m_nbAudio + m_nbVideo;
 }
 
 std::vector<std::shared_ptr<Folder>> Folder::fetchRootFolders( MediaLibraryPtr ml )

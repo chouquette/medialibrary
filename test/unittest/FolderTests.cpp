@@ -643,8 +643,14 @@ TEST_F( FoldersNoDiscover, ListWithMedia )
     ASSERT_EQ( 2u, folders.size() );
     ASSERT_EQ( folders[0]->mrl(), mock::FileSystemFactory::Root );
     ASSERT_EQ( 2u, folders[0]->media( IMedia::Type::Unknown, nullptr )->count() );
+    ASSERT_EQ( 1u, folders[0]->nbVideo() );
+    ASSERT_EQ( 1u, folders[0]->nbAudio() );
+    ASSERT_EQ( 2u, folders[0]->nbMedia() );
     ASSERT_EQ( folders[1]->mrl(), mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( 1u, folders[1]->media( IMedia::Type::Unknown, nullptr )->count() );
+    ASSERT_EQ( 1u, folders[1]->nbVideo() );
+    ASSERT_EQ( 0u, folders[1]->nbAudio() );
+    ASSERT_EQ( 1u, folders[1]->nbMedia() );
 
     // Keep in mind that this handles "desc" as "not the expected order"
     // ie. you'd expect the folder with the most media/video/audio first, so
