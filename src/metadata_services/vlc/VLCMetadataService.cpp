@@ -33,6 +33,7 @@
 #include "metadata_services/vlc/Common.hpp"
 #include "utils/Filename.h"
 #include "logging/Logger.h"
+#include "utils/Url.h"
 
 namespace medialibrary
 {
@@ -214,7 +215,9 @@ void VLCMetadataService::mediaToItem( VLC::Media& media, IItem& item )
         {
             auto vlcMedia = subItems->itemAtIndex( i );
             assert( vlcMedia != nullptr );
-            IItem& subItem = item.createSubItem( vlcMedia->mrl(), i );
+            auto mrl = vlcMedia->mrl();
+            mrl = utils::url::encode( utils::url::decode( mrl ) );
+            IItem& subItem = item.createSubItem( std::move( mrl ), i );
             mediaToItem( *vlcMedia, subItem );
         }
     }
