@@ -31,10 +31,8 @@
 #ifdef _WIN32
 # include <algorithm>
 # define DIR_SEPARATOR "\\/"
-# define DIR_SEPARATOR_CHAR '\\'
 #else
 # define DIR_SEPARATOR "/"
-# define DIR_SEPARATOR_CHAR '/'
 #endif
 
 namespace medialibrary
@@ -122,9 +120,9 @@ std::string removePath( const std::string& fullPath, const std::string& toRemove
     pos += toRemove.length();
     // Skip over potentially duplicated DIR_SEPARATOR
     while ( pos < fullPath.length() &&
-            ( fullPath[pos] == DIR_SEPARATOR_CHAR
+            ( fullPath[pos] == '/'
 #ifdef _WIN32
-                || fullPath[pos] == '/'
+                || fullPath[pos] == '\\'
 #endif
             ) )
         pos++;
@@ -135,24 +133,24 @@ std::string removePath( const std::string& fullPath, const std::string& toRemove
 
 std::string& toFolderPath( std::string& path )
 {
-    if ( *path.crbegin() != DIR_SEPARATOR_CHAR
+    if ( *path.crbegin() != '/'
 #ifdef _WIN32
-            && *path.crbegin() != '/'
+            && *path.crbegin() != '\\'
 #endif
          )
-        path += DIR_SEPARATOR_CHAR;
+        path += '/';
     return path;
 }
 
 std::string toFolderPath( const std::string& path )
 {
     auto p = path;
-    if ( *p.crbegin() != DIR_SEPARATOR_CHAR
+    if ( *p.crbegin() != '/'
 #ifdef _WIN32
-            && *p.crbegin() != '/'
+            && *p.crbegin() != '\\'
 #endif
          )
-        p += DIR_SEPARATOR_CHAR;
+        p += '/';
     return p;
 }
 
