@@ -133,11 +133,12 @@ std::string removePath( const std::string& fullPath, const std::string& toRemove
 
 std::string& toFolderPath( std::string& path )
 {
-    if ( *path.crbegin() != '/'
 #ifdef _WIN32
-            && *path.crbegin() != '\\'
+    if ( *path.crbegin() == '\\' )
+        *path.rbegin() = '/';
+    else
 #endif
-         )
+    if ( *path.crbegin() != '/' )
         path += '/';
     return path;
 }
@@ -145,11 +146,12 @@ std::string& toFolderPath( std::string& path )
 std::string toFolderPath( const std::string& path )
 {
     auto p = path;
-    if ( *p.crbegin() != '/'
 #ifdef _WIN32
-            && *p.crbegin() != '\\'
+    if ( *p.crbegin() == '\\' )
+        *p.rbegin() = '/';
+    else
 #endif
-         )
+    if ( *p.crbegin() != '/' )
         p += '/';
     return p;
 }

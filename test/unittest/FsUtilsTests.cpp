@@ -201,3 +201,24 @@ TEST( FsUtils, stripExtension )
     ASSERT_EQ( "dummy", utils::file::stripExtension( "dummy" ) );
     ASSERT_EQ( "test.with.dot", utils::file::stripExtension( "test.with.dot.ext" ) );
 }
+
+TEST( FsUtils, ToFolderPath )
+{
+    const std::string i1{ "/path/to/folder" };
+    auto res = utils::file::toFolderPath( i1 );
+    ASSERT_EQ( "/path/to/folder/", res );
+
+    std::string i2{ "/path/to/folder" };
+    utils::file::toFolderPath( i2 );
+    ASSERT_EQ( "/path/to/folder/", i2 );
+
+#ifdef _WIN32
+    const std::string i3{ "/path/to/folder\\" };
+    res = utils::file::toFolderPath( i3 );
+    ASSERT_EQ( "/path/to/folder/", res );
+
+    std::string i4{ "/path/to/folder\\" };
+    utils::file::toFolderPath( i4 );
+    ASSERT_EQ( "/path/to/folder/", i4 );
+#endif
+}
