@@ -44,14 +44,17 @@ public:
         static const std::string PrimaryKeyColumn;
         static int64_t Folder::*const PrimaryKey;
     };
+
     struct FtsTable
     {
         static const std::string Name;
     };
+
     struct ExcludedFolderTable
     {
         static const std::string Name;
     };
+
     enum class Triggers : uint8_t
     {
         InsertFts,
@@ -60,14 +63,23 @@ public:
         UpdateNbMediaOnUpdate,
         UpdateNbMediaOnDelete,
     };
+
     enum class Indexes : uint8_t
     {
         DeviceId,
         ParentId,
     };
 
+    enum class BannedType
+    {
+        Yes,    //< Only select banned folders
+        No,     //< Only select unbanned folders
+        Any,    //< Well... any of the above.
+    };
+
     Folder( MediaLibraryPtr ml, sqlite::Row& row );
-    Folder(MediaLibraryPtr ml, const std::string& path, int64_t parent , int64_t deviceId , bool isRemovable );
+    Folder( MediaLibraryPtr ml, const std::string& path, int64_t parent,
+            int64_t deviceId , bool isRemovable );
 
     static void createTable( sqlite::Connection* connection );
     static void createTriggers( sqlite::Connection* connection, uint32_t modelVersion );
@@ -78,20 +90,25 @@ public:
     static std::string index( Indexes index, uint32_t dbModel );
     static std::string indexName( Indexes index, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
-    static std::shared_ptr<Folder> create( MediaLibraryPtr ml, const std::string& mrl, int64_t parentId, Device& device, fs::IDevice& deviceFs );
+    static std::shared_ptr<Folder> create( MediaLibraryPtr ml, const std::string& mrl,
+                                           int64_t parentId, Device& device,
+                                           fs::IDevice& deviceFs );
     static bool excludeEntryFolder( MediaLibraryPtr ml, int64_t folderId );
     static bool ban( MediaLibraryPtr ml, const std::string& mrl );
     static std::vector<std::shared_ptr<Folder>> fetchRootFolders( MediaLibraryPtr ml );
 
-    static std::shared_ptr<Folder> fromMrl(MediaLibraryPtr ml, const std::string& mrl );
-    static std::shared_ptr<Folder> bannedFolder(MediaLibraryPtr ml, const std::string& mrl );
+    static std::shared_ptr<Folder> fromMrl( MediaLibraryPtr ml,
+                                            const std::string& mrl );
+    static std::shared_ptr<Folder> bannedFolder( MediaLibraryPtr ml,
+                                                 const std::string& mrl );
     static Query<IFolder> withMedia( MediaLibraryPtr ml, IMedia::Type type,
                                      const QueryParameters* params );
     static Query<IFolder> searchWithMedia( MediaLibraryPtr ml,
                                            const std::string& pattern,
                                            IMedia::Type type,
                                            const QueryParameters* params );
-    static Query<IFolder> entryPoints( MediaLibraryPtr ml, bool banned, int64_t deviceId );
+    static Query<IFolder> entryPoints( MediaLibraryPtr ml, bool banned,
+                                       int64_t deviceId );
 
     virtual int64_t id() const override;
     virtual const std::string& mrl() const override;
@@ -120,14 +137,9 @@ public:
     virtual uint32_t nbAudio() const override;
     virtual uint32_t nbMedia() const override;
 
-    enum class BannedType
-    {
-        Yes,    //< Only select banned folders
-        No,     //< Only select unbanned folders
-        Any,    //< Well... any of the above.
-    };
-
-    static std::shared_ptr<Folder> fromMrl( MediaLibraryPtr ml, const std::string& mrl, BannedType bannedType );
+    static std::shared_ptr<Folder> fromMrl( MediaLibraryPtr ml,
+                                            const std::string& mrl,
+                                            BannedType bannedType );
 
 private:
     static std::string sortRequest( const QueryParameters* params );

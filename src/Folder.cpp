@@ -183,13 +183,13 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                         "nb_audio = nb_audio + "
                             "(CASE new.type "
                                 "WHEN " +
-                                    std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
                                         IMedia::Type::Audio ) ) + " THEN 1 "
                                 "ELSE 0 "
                             "END),"
                         "nb_video = nb_video + "
                             "(CASE new.type WHEN " +
-                                std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
                                                     IMedia::Type::Video ) ) + " THEN 1 "
                                 "ELSE 0 "
                             "END) "
@@ -205,14 +205,14 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                        "nb_audio = nb_audio + "
                            "(CASE old.type "
                                "WHEN " +
-                                   std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
                                                    IMedia::Type::Audio ) ) + " THEN -1 "
                                "ELSE 0 "
                            "END)"
                            "+"
                            "(CASE new.type "
                                "WHEN " +
-                                   std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
                                                    IMedia::Type::Audio ) ) + " THEN 1 "
                                "ELSE 0 "
                            "END)"
@@ -220,14 +220,14 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                        "nb_video = nb_video + "
                            "(CASE old.type "
                                "WHEN " +
-                                   std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
                                                        IMedia::Type::Video ) ) + " THEN -1 "
                                "ELSE 0 "
                            "END)"
                            "+"
                            "(CASE new.type "
                                "WHEN " +
-                                   std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
                                                        IMedia::Type::Video ) ) + " THEN 1 "
                                "ELSE 0 "
                            "END)"
@@ -243,14 +243,14 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                         "nb_audio = nb_audio + "
                             "(CASE old.type "
                                 "WHEN " +
-                                    std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
                                                         IMedia::Type::Audio ) ) + " THEN -1 "
                                 "ELSE 0 "
                             "END),"
                         "nb_video = nb_video + "
                             "(CASE old.type "
                                 "WHEN " +
-                                    std::to_string( static_cast<std::underlying_type<IMedia::Type>::type>(
+                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
                                                         IMedia::Type::Video ) ) + " THEN -1 "
                                 "ELSE 0 "
                             "END) "
@@ -440,7 +440,8 @@ std::shared_ptr<Folder> Folder::bannedFolder( MediaLibraryPtr ml, const std::str
     return fromMrl( ml, mrl, BannedType::Yes );
 }
 
-std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& mrl, BannedType bannedType )
+std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& mrl,
+                                         BannedType bannedType )
 {
     if ( mrl.empty() == true )
         return nullptr;
