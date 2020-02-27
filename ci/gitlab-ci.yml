@@ -7,8 +7,9 @@ variables:
 
 linux:
     image: $MEDIALIBRARY_IMG
-    except:
-      - schedules
+    only:
+      - merge_requests
+      - master@videolan/medialibrary
     tags:
       - debian
       - amd64
@@ -22,8 +23,9 @@ linux:
 
 win32:
     image: $MEDIALIBRARY_WIN32_IMG
-    except:
-      - schedules
+    only:
+      - merge_requests
+      - master@videolan/medialibrary
     tags:
       - win32
     script:
@@ -41,8 +43,9 @@ win32:
 
 win64:
     image: $MEDIALIBRARY_WIN64_IMG
-    except:
-      - schedules
+    only:
+      - merge_requests
+      - master@videolan/medialibrary
     tags:
       - win64
     script:
