@@ -49,16 +49,17 @@ const std::string Folder::ExcludedFolderTable::Name = "ExcludedEntryFolder";
 
 Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
-    , m_id( row.load<decltype(m_id)>( 0 ) )
-    , m_path( row.load<decltype(m_path)>( 1 ) )
-    , m_name( row.load<decltype(m_name)>( 2 ) )
-    , m_parent( row.load<decltype(m_parent)>( 3 ) )
-    , m_isBanned( row.load<decltype(m_isBanned)>( 4 ) )
-    , m_deviceId( row.load<decltype(m_deviceId)>( 5 ) )
-    , m_isRemovable( row.load<decltype(m_isRemovable)>( 6 ) )
-    , m_nbAudio( row.load<decltype(m_nbAudio)>( 7 ) )
-    , m_nbVideo( row.load<decltype(m_nbVideo)>( 8 ) )
+    , m_id( row.extract<decltype(m_id)>() )
+    , m_path( row.extract<decltype(m_path)>() )
+    , m_name( row.extract<decltype(m_name)>() )
+    , m_parent( row.extract<decltype(m_parent)>() )
+    , m_isBanned( row.extract<decltype(m_isBanned)>() )
+    , m_deviceId( row.extract<decltype(m_deviceId)>() )
+    , m_isRemovable( row.extract<decltype(m_isRemovable)>() )
+    , m_nbAudio( row.extract<decltype(m_nbAudio)>() )
+    , m_nbVideo( row.extract<decltype(m_nbVideo)>() )
 {
+    assert( row.hasRemainingColumns() == false );
 }
 
 Folder::Folder(MediaLibraryPtr ml, const std::string& path,
