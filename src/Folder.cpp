@@ -555,7 +555,7 @@ Query<IFolder> Folder::withMedia( MediaLibraryPtr ml, IMedia::Type type,
                             " d ON d.id_device = f.device_id "
                       " WHERE " + filterByMediaType( type ) +
                             " AND d.is_present != 0";
-    return make_query<Folder, IFolder>( ml, "*", req, sortRequest( params ) );
+    return make_query<Folder, IFolder>( ml, "f.*", req, sortRequest( params ) );
 }
 
 Query<IFolder> Folder::searchWithMedia( MediaLibraryPtr ml,
@@ -569,7 +569,7 @@ Query<IFolder> Folder::searchWithMedia( MediaLibraryPtr ml,
             "WHERE f.id_folder IN (SELECT rowid FROM " + FtsTable::Name + " WHERE " +
                 FtsTable::Name + " MATCH ?) "
             "AND d.is_present != 0 AND " + filterByMediaType( type );
-    return make_query<Folder, IFolder>( ml, "*", req, sortRequest( params ),
+    return make_query<Folder, IFolder>( ml, "f.*", req, sortRequest( params ),
                                         sqlite::Tools::sanitizePattern( pattern ) );
 }
 
@@ -674,7 +674,7 @@ std::vector<std::shared_ptr<File>> Folder::files()
 
 std::vector<std::shared_ptr<Folder>> Folder::folders()
 {
-    static const std::string req = "SELECT * FROM " + Folder::Table::Name + " f "
+    static const std::string req = "SELECT f.* FROM " + Folder::Table::Name + " f "
             " LEFT JOIN " + Device::Table::Name + " d ON d.id_device = f.device_id"
             " WHERE parent_id = ? AND is_banned = 0 AND d.is_present != 0";
     return DatabaseHelpers::fetchAll<Folder>( m_ml, req, m_id );
@@ -787,7 +787,7 @@ uint32_t Folder::nbMedia() const
 
 std::vector<std::shared_ptr<Folder>> Folder::fetchRootFolders( MediaLibraryPtr ml )
 {
-    static const std::string req = "SELECT * FROM " + Folder::Table::Name + " f "
+    static const std::string req = "SELECT f.* FROM " + Folder::Table::Name + " f "
             " LEFT JOIN " + ExcludedFolderTable::Name +
             " ON f.id_folder = " + ExcludedFolderTable::Name + ".folder_id"
             " LEFT JOIN " + Device::Table::Name + " d ON d.id_device = f.device_id"
