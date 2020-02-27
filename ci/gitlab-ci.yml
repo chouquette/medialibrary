@@ -60,7 +60,6 @@ coverage:
       - debian
       - amd64
     only:
-      refs:
         - schedules
     script:
         - ./bootstrap
