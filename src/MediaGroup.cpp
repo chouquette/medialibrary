@@ -289,6 +289,8 @@ std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
 std::vector<std::shared_ptr<MediaGroup>>
 MediaGroup::fetchMatching( MediaLibraryPtr ml, const std::string& prefix )
 {
+    if ( prefix.length() < AutomaticGroupPrefixSize )
+        return {};
     static const std::string req = "SELECT * FROM " + Table::Name +
             " WHERE SUBSTR(name, 1, ?) = ? COLLATE NOCASE";
     return fetchAll<MediaGroup>( ml, req, prefix.length(), prefix );

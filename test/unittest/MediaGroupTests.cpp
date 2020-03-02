@@ -653,6 +653,14 @@ TEST_F( MediaGroups, AssignToGroups )
                 ml->addMedia( "The otters are fluffy.mkv", IMedia::Type::Video ) );
     auto m2 = std::static_pointer_cast<Media>(
                 ml->addMedia( "otters are cute.mkv", IMedia::Type::Video ) );
+    /*
+     * Add a media with a title smaller than the common prefix for groups. It
+     * shouldn't be grouped with anything else, and will have its own group
+     * Since the title sanitizer doesn't run here, we need to omit the extension
+     * for the title to be actually less than 6 chars
+     */
+    auto m3 = std::static_pointer_cast<Media>(
+                ml->addMedia( "the otter", IMedia::Type::Video ) );
 
     auto groups = ml->mediaGroups( nullptr )->all();
     ASSERT_EQ( 0u, groups.size() );
@@ -676,7 +684,17 @@ TEST_F( MediaGroups, AssignToGroups )
     ASSERT_EQ( 2u, groups[0]->nbVideo() );
     ASSERT_EQ( groups[0]->name(), "otters are " );
 
+    res = MediaGroup::assignToGroup( ml.get(), *m3 );
+    ASSERT_TRUE( res );
+    groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( 1u, groups[0]->nbVideo() );
+    ASSERT_EQ( groups[0]->name(), "otter" );
+    ASSERT_EQ( 2u, groups[1]->nbVideo() );
+    ASSERT_EQ( groups[1]->name(), "otters are " );
+
     groups[0]->destroy();
+    groups[1]->destroy();
 
     /*
      * Delete the media since they have been grouped, and assignToGroup asserts
@@ -686,26 +704,36 @@ TEST_F( MediaGroups, AssignToGroups )
      */
     ml->deleteMedia( m1->id() );
     ml->deleteMedia( m2->id() );
+    ml->deleteMedia( m3->id() );
 
     m1 = std::static_pointer_cast<Media>(
                 ml->addMedia( "The otters are fluffy.mkv", IMedia::Type::Video ) );
     m2 = std::static_pointer_cast<Media>(
                 ml->addMedia( "otters are cute.mkv", IMedia::Type::Video ) );
+    m3 = std::static_pointer_cast<Media>(
+                ml->addMedia( "the otter", IMedia::Type::Video ) );
 
     /* Now try again with the other ordering */
-    res = MediaGroup::assignToGroup( ml.get(), *m2 );
+    res = MediaGroup::assignToGroup( ml.get(), *m3 );
     ASSERT_TRUE( res );
     groups = ml->mediaGroups( nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
     ASSERT_EQ( 1u, groups[0]->nbVideo() );
-    ASSERT_EQ( groups[0]->name(), "otters are cute.mkv" );
+    ASSERT_EQ( groups[0]->name(), "otter" );
+
+    res = MediaGroup::assignToGroup( ml.get(), *m2 );
+    ASSERT_TRUE( res );
+    groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( 1u, groups[1]->nbVideo() );
+    ASSERT_EQ( groups[1]->name(), "otters are cute.mkv" );
 
     res = MediaGroup::assignToGroup( ml.get(), *m1 );
     ASSERT_TRUE( res );
     groups = ml->mediaGroups( nullptr )->all();
-    ASSERT_EQ( 1u, groups.size() );
-    ASSERT_EQ( 2u, groups[0]->nbVideo() );
-    ASSERT_EQ( groups[0]->name(), "otters are " );
+    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( 2u, groups[1]->nbVideo() );
+    ASSERT_EQ( groups[1]->name(), "otters are " );
 }
 
 TEST_F( MediaGroups, CreateFromMedia )
