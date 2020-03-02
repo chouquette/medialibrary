@@ -77,6 +77,7 @@ const std::string& CommonDevice::mountpoint() const
 
 void CommonDevice::addMountpoint( std::string mountpoint )
 {
+    utils::file::toFolderPath( mountpoint );
     std::unique_lock<compat::Mutex> lock{ m_mutex };
     if ( std::find( cbegin( m_mountpoints ),
                     cend( m_mountpoints ), mountpoint ) != cend( m_mountpoints ) )
