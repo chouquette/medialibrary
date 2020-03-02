@@ -578,6 +578,7 @@ void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& 
             return ;
         const auto track = *it;
         const auto albumTrack = track->albumTrack();
+        ASSERT_NE( nullptr, albumTrack );
         if ( expectedTrack.HasMember( "number" ) )
         {
             if ( expectedTrack["number"].GetUint() != albumTrack->trackNumber() )
