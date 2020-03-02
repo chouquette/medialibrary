@@ -819,7 +819,7 @@ public:
      * If a factory is passed to this method and the scheme is already handled
      * by another factory, false will be returned.
      */
-    virtual bool addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory ) = 0;
+    virtual bool addFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory ) = 0;
 
     /**
      * @brief clearDatabase Will drop & recreate the database

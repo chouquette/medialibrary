@@ -2190,7 +2190,7 @@ void MediaLibrary::discover( const std::string& entryPoint )
     m_discovererWorker->discover( entryPoint );
 }
 
-bool MediaLibrary::addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory )
+bool MediaLibrary::addFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory )
 {
     std::lock_guard<compat::Mutex> lock( m_mutex );
 
