@@ -259,6 +259,7 @@ MediaLibrary::MediaLibrary()
     , m_callback( nullptr )
 {
     Log::setLogLevel( m_verbosity );
+    addDefaultDeviceListers();
 }
 
 MediaLibrary::~MediaLibrary()
@@ -478,7 +479,6 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
         return InitializeResult::AlreadyInitialized;
 
     LOG_INFO( "Initializing medialibrary..." );
-    addDefaultDeviceListers();
 
     auto mlFolder = utils::file::toFolderPath( mlFolderPath );
     m_thumbnailPath = mlFolder + "thumbnails/";
