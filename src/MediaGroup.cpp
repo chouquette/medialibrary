@@ -54,7 +54,8 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, sqlite::Row& row )
     assert( row.hasRemainingColumns() == false );
 }
 
-MediaGroup::MediaGroup(MediaLibraryPtr ml, int64_t parentId, std::string name )
+MediaGroup::MediaGroup( MediaLibraryPtr ml, int64_t parentId, std::string name,
+                        bool userInitiated )
     : m_ml( ml )
     , m_id( 0 )
     , m_parentId( parentId )
@@ -62,7 +63,7 @@ MediaGroup::MediaGroup(MediaLibraryPtr ml, int64_t parentId, std::string name )
     , m_nbVideo( 0 )
     , m_nbAudio( 0 )
     , m_nbUnknown( 0 )
-    , m_hasBeenRenamed( false )
+    , m_hasBeenRenamed( userInitiated )
 {
 }
 
@@ -162,7 +163,7 @@ bool MediaGroup::remove( int64_t mediaId )
 
 MediaGroupPtr MediaGroup::createSubgroup( const std::string& name )
 {
-    return create( m_ml, m_id, name );
+    return create( m_ml, m_id, name, true );
 }
 
 Query<IMediaGroup> MediaGroup::subgroups( const QueryParameters* params ) const
@@ -246,12 +247,15 @@ bool MediaGroup::destroy()
 }
 
 std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
-                                                int64_t parentId, std::string name )
+                                                int64_t parentId, std::string name,
+                                                bool userInitiated )
 {
     static const std::string req = "INSERT INTO " + Table::Name +
-            "(parent_id, name) VALUES(?, ?)";
-    auto self = std::make_shared<MediaGroup>( ml, parentId, std::move( name ) );
-    if ( insert( ml, self, req, sqlite::ForeignKey{ parentId }, self->name() ) == false )
+            "(parent_id, name, has_been_renamed) VALUES(?, ?, ?)";
+    auto self = std::make_shared<MediaGroup>( ml, parentId, std::move( name ),
+                                              userInitiated );
+    if ( insert( ml, self, req, sqlite::ForeignKey{ parentId }, self->name(),
+                 userInitiated ) == false )
         return nullptr;
     auto notifier = ml->getNotifier();
     if ( notifier != nullptr )
@@ -548,7 +552,7 @@ bool MediaGroup::assignToGroup( MediaLibraryPtr ml, Media& m )
     {
         if ( strncasecmp( title.c_str(), "the ", 4 ) == 0 )
             title = title.substr( 4 );
-        auto group = create( ml, 0, std::move( title ) );
+        auto group = create( ml, 0, std::move( title ), false );
         if ( group == nullptr )
             return false;
         return group->add( m );

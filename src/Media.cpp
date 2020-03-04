@@ -618,7 +618,7 @@ bool Media::regroup()
     if ( m_groupId != 0 )
         return false;
     auto t = m_ml->getConn()->newTransaction();
-    auto group = MediaGroup::create( m_ml, 0, m_title );
+    auto group = MediaGroup::create( m_ml, 0, m_title, false );
     if ( group == nullptr )
         return false;
     if ( group->add( *this ) == false )

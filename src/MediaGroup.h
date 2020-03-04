@@ -58,7 +58,8 @@ public:
     };
 
     MediaGroup( MediaLibraryPtr ml, sqlite::Row& row );
-    MediaGroup( MediaLibraryPtr ml, int64_t parentId, std::string name );
+    MediaGroup( MediaLibraryPtr ml, int64_t parentId, std::string name,
+                bool userInitiated );
     MediaGroup( MediaLibraryPtr ml );
     virtual int64_t id() const override;
     virtual const std::string& name() const override;
@@ -96,7 +97,8 @@ public:
     virtual bool destroy() override;
 
     static std::shared_ptr<MediaGroup> create( MediaLibraryPtr ml,
-                                               int64_t parentId, std::string name );
+                                               int64_t parentId, std::string name,
+                                               bool usedInitiated );
     static std::shared_ptr<MediaGroup> create( MediaLibraryPtr ml,
                                                const std::vector<int64_t>& mediaIds );
     static Query<IMediaGroup> listAll( MediaLibraryPtr ml, const QueryParameters* params );
