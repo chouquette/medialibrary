@@ -36,7 +36,7 @@ class MediaGroups : public Tests
 TEST_F( MediaGroups, Create )
 {
     auto name = std::string{ "group" };
-    auto mg = MediaGroup::create( ml.get(), 0, name );
+    auto mg = ml->createMediaGroup( name );
     ASSERT_NE( nullptr, mg );
     ASSERT_EQ( "group", mg->name() );
     ASSERT_EQ( 0u, mg->nbVideo() );
@@ -55,7 +55,7 @@ TEST_F( MediaGroups, Create )
 TEST_F( MediaGroups, SubGroup )
 {
     auto name = std::string{ "group" };
-    auto mg = MediaGroup::create( ml.get(), 0, name );
+    auto mg = ml->createMediaGroup( name );
     ASSERT_FALSE( mg->isSubgroup() );
 
     auto subname = std::string{ "subgroup" };
@@ -78,7 +78,7 @@ TEST_F( MediaGroups, SubGroup )
 TEST_F( MediaGroups, ListSubGroups )
 {
     auto name = std::string{ "group" };
-    auto mg = MediaGroup::create( ml.get(), 0, name );
+    auto mg = ml->createMediaGroup( name );
 
     for ( auto i = 0; i < 3; ++i )
     {
@@ -105,9 +105,9 @@ TEST_F( MediaGroups, ListSubGroups )
 
 TEST_F( MediaGroups, ListAll )
 {
-    auto mg1 = MediaGroup::create( ml.get(), 0, "weasels group" );
-    auto mg2 = MediaGroup::create( ml.get(), 0, "pangolin group" );
-    auto mg3 = MediaGroup::create( ml.get(), 0, "otters group" );
+    auto mg1 = ml->createMediaGroup( "weasels group" );
+    auto mg2 = ml->createMediaGroup( "pangolin group" );
+    auto mg3 = ml->createMediaGroup( "otters group" );
     // Subgroups shouldn't be listed
     auto sg = mg1->createSubgroup( "subotters" );
 
@@ -132,7 +132,7 @@ TEST_F( MediaGroups, ListAll )
 
 TEST_F( MediaGroups, FetchOne )
 {
-    auto mg = MediaGroup::create( ml.get(), 0, "group" );
+    auto mg = ml->createMediaGroup( "group" );
     ASSERT_NE( nullptr, mg );
 
     auto mg2 = ml->mediaGroup( mg->id() );
@@ -142,10 +142,10 @@ TEST_F( MediaGroups, FetchOne )
 
 TEST_F( MediaGroups, Search )
 {
-    auto mg1 = MediaGroup::create( ml.get(), 0, "otter group" );
+    auto mg1 = ml->createMediaGroup( "otter group" );
     // Subgroups are included in search results
     auto mg2 = mg1->createSubgroup( "sea otters group" );
-    auto mg3 = MediaGroup::create( ml.get(), 0, "weasels group" );
+    auto mg3 = ml->createMediaGroup( "weasels group" );
 
     auto q = ml->searchMediaGroups( "12", nullptr );
     ASSERT_EQ( nullptr, q );
@@ -175,7 +175,7 @@ TEST_F( MediaGroups, Search )
 
 TEST_F( MediaGroups, Media )
 {
-    auto mg = MediaGroup::create( ml.get(), 0, "group" );
+    auto mg = ml->createMediaGroup( "group" );
     auto video = ml->addMedia( "video.mkv", IMedia::Type::Video );
     auto audio = ml->addMedia( "audio.mp3", IMedia::Type::Audio );
     ASSERT_NE( nullptr, mg );
@@ -249,7 +249,7 @@ TEST_F( MediaGroups, Media )
 
 TEST_F( MediaGroups, SearchMedia )
 {
-    auto mg = MediaGroup::create( ml.get(), 0, "" );
+    auto mg = ml->createMediaGroup( "" );
     auto m1 = ml->addMedia( "audio.mp3", IMedia::Type::Audio );
     m1->setTitle( "The sea otters podcast" );
     auto m2 = ml->addMedia( "audio2.mp3", IMedia::Type::Audio );
@@ -286,8 +286,8 @@ TEST_F( MediaGroups, SearchMedia )
 
 TEST_F( MediaGroups, UpdateNbMediaTypeChange )
 {
-    auto group1 = MediaGroup::create( ml.get(), 0, "group" );
-    auto group2 = MediaGroup::create( ml.get(), 0, "group2" );
+    auto group1 = ml->createMediaGroup( "group" );
+    auto group2 = ml->createMediaGroup( "group2" );
     ASSERT_NE( nullptr, group1 );
     ASSERT_NE( nullptr, group2 );
     ASSERT_EQ( 0u, group1->nbAudio() );
@@ -363,8 +363,8 @@ TEST_F( MediaGroups, UpdateNbMediaTypeChange )
 
 TEST_F( MediaGroups, SortByNbMedia )
 {
-    auto mg1 = MediaGroup::create( ml.get(), 0, "A group" );
-    auto mg2 = MediaGroup::create( ml.get(), 0, "Z group" );
+    auto mg1 = ml->createMediaGroup( "A group" );
+    auto mg2 = ml->createMediaGroup( "Z group" );
 
     auto v1 = ml->addMedia( "media1.mkv", IMedia::Type::Video );
     auto v2 = ml->addMedia( "media2.mkv", IMedia::Type::Video );
