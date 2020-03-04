@@ -68,11 +68,6 @@ TEST_F( MediaGroups, SubGroup )
 
     ASSERT_NE( nullptr, parent );
     ASSERT_EQ( mg->id(), parent->id() );
-
-    // Ensure the UNIQUE constraint doesn't span accross all groups, but only
-    // across groups from the same parent
-    auto g = MediaGroup::create( ml.get(), 0, subname );
-    ASSERT_NE( nullptr, g );
 }
 
 TEST_F( MediaGroups, ListSubGroups )
