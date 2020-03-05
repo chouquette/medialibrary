@@ -43,7 +43,7 @@ TEST_F( MediaGroups, Create )
     ASSERT_EQ( 0u, mg->nbAudio() );
     ASSERT_EQ( 0u, mg->nbMedia() );
     ASSERT_EQ( 0u, mg->nbUnknown() );
-    ASSERT_EQ( true, mg->hasBeenRenamed() );
+    ASSERT_EQ( true, mg->userInteracted() );
 
     Reload();
 
@@ -352,7 +352,7 @@ TEST_F( MediaGroups, Rename )
     auto m = ml->addMedia( "media.mkv", IMedia::Type::Video );
     ASSERT_NE( nullptr, m );
     auto mg = ml->createMediaGroup( std::vector<int64_t>{ m->id() } );
-    ASSERT_FALSE( mg->hasBeenRenamed() );
+    ASSERT_TRUE( mg->userInteracted() );
     ASSERT_NE( nullptr, mg );
 
     auto groupMedia = mg->media( IMedia::Type::Unknown, nullptr )->all();
@@ -361,7 +361,7 @@ TEST_F( MediaGroups, Rename )
     std::string newName{ "better name" };
     auto res = mg->rename( newName );
     ASSERT_TRUE( res );
-    ASSERT_TRUE( mg->hasBeenRenamed() );
+    ASSERT_TRUE( mg->userInteracted() );
     ASSERT_EQ( newName, mg->name() );
 
     Reload();
@@ -369,7 +369,7 @@ TEST_F( MediaGroups, Rename )
     mg = ml->mediaGroup( mg->id() );
     ASSERT_NE( nullptr, mg );
     ASSERT_EQ( newName, mg->name() );
-    ASSERT_TRUE( mg->hasBeenRenamed() );
+    ASSERT_TRUE( mg->userInteracted() );
 
     groupMedia = mg->media( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groupMedia.size() );
@@ -659,7 +659,7 @@ TEST_F( MediaGroups, CreateFromMedia )
 
     auto mg = ml->createMediaGroup( std::vector<int64_t>{ m1->id(), m2->id() } );
     ASSERT_NE( nullptr, mg );
-    ASSERT_FALSE( mg->hasBeenRenamed() );
+    ASSERT_TRUE( mg->userInteracted() );
 
     ASSERT_EQ( 2u, mg->nbVideo() );
     ASSERT_EQ( 0u, mg->nbAudio() );

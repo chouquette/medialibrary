@@ -62,9 +62,15 @@ public:
      */
     virtual uint32_t nbUnknown() const = 0;
     /**
-     * @brief hasBeenRenamed Returns true if the group was manually renamed
+     * @brief userInteracted Returns true if the group has had user interactions
+     *
+     * This includes being renamed, or being explicitely created with some specific
+     * media or an explicit title.
+     * It doesn't include groups that were automatically created by the media library
+     * Removing a media from an automatically created group won't be interpreted
+     * as a user interaction.
      */
-    virtual bool hasBeenRenamed() const = 0;
+    virtual bool userInteracted() const = 0;
     /**
      * @brief add Adds a media to this group.
      * @param media A reference to the media to add

@@ -48,7 +48,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, sqlite::Row& row )
     , m_nbVideo( row.extract<decltype(m_nbVideo)>() )
     , m_nbAudio( row.extract<decltype(m_nbAudio)>() )
     , m_nbUnknown( row.extract<decltype(m_nbUnknown)>() )
-    , m_hasBeenRenamed( row.extract<decltype(m_hasBeenRenamed)>() )
+    , m_userInteracted( row.extract<decltype(m_userInteracted)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -60,7 +60,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, std::string name, bool userInitiated
     , m_nbVideo( 0 )
     , m_nbAudio( 0 )
     , m_nbUnknown( 0 )
-    , m_hasBeenRenamed( userInitiated )
+    , m_userInteracted( userInitiated )
 {
 }
 
@@ -70,7 +70,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml )
     , m_nbVideo( 0 )
     , m_nbAudio( 0 )
     , m_nbUnknown( 0 )
-    , m_hasBeenRenamed( false )
+    , m_userInteracted( true )
 {
 }
 
@@ -104,9 +104,9 @@ uint32_t MediaGroup::nbUnknown() const
     return m_nbUnknown;
 }
 
-bool MediaGroup::hasBeenRenamed() const
+bool MediaGroup::userInteracted() const
 {
-    return m_hasBeenRenamed;
+    return m_userInteracted;
 }
 
 bool MediaGroup::add( IMedia& media )
@@ -179,8 +179,8 @@ bool MediaGroup::rename( std::string name, bool userInitiated )
         return false;
     if ( name == m_name )
         return true;
-    /* No need to update the has_been_renamed column if it's already set to true */
-    if ( userInitiated == false || m_hasBeenRenamed == true )
+    /* No need to update the user_interacted column if it's already set to false */
+    if ( userInitiated == false || m_userInteracted == true )
     {
         const std::string req = "UPDATE " + Table::Name +
                 " SET name = ? WHERE id_group = ?";
@@ -190,10 +190,10 @@ bool MediaGroup::rename( std::string name, bool userInitiated )
     else
     {
         const std::string req = "UPDATE " + Table::Name +
-                " SET name = ?, has_been_renamed = true WHERE id_group = ?";
+                " SET name = ?, user_interacted = true WHERE id_group = ?";
         if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, name, m_id ) == false )
             return false;
-        m_hasBeenRenamed = true;
+        m_userInteracted = true;
     }
     m_name = std::move( name );
     return true;
@@ -209,7 +209,7 @@ std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
                                                 bool userInitiated )
 {
     static const std::string req = "INSERT INTO " + Table::Name +
-            "(name, has_been_renamed) VALUES(?, ?)";
+            "(name, user_interacted) VALUES(?, ?)";
     auto self = std::make_shared<MediaGroup>( ml, std::move( name ),
                                               userInitiated );
     if ( insert( ml, self, req, self->name(), userInitiated ) == false )
@@ -223,9 +223,10 @@ std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
 std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
                                                 const std::vector<int64_t>& mediaIds )
 {
-    static const std::string req = "INSERT INTO " + Table::Name + " DEFAULT VALUES";
+    static const std::string req = "INSERT INTO " + Table::Name +
+            "(user_interacted) VALUES(?)";
     auto self = std::make_shared<MediaGroup>( ml );
-    if ( insert( ml, self, req ) == false )
+    if ( insert( ml, self, req, true ) == false )
         return nullptr;
     auto notifier = ml->getNotifier();
     if ( notifier != nullptr )
@@ -333,7 +334,7 @@ std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
         "nb_video UNSIGNED INTEGER DEFAULT 0,"
         "nb_audio UNSIGNED INTEGER DEFAULT 0,"
         "nb_unknown UNSIGNED INTEGER DEFAULT 0,"
-        "has_been_renamed BOOLEAN DEFAULT FALSE"
+        "user_interacted BOOLEAN"
     ")";
 }
 
@@ -534,7 +535,7 @@ bool MediaGroup::assignToGroup( MediaLibraryPtr ml, Media& m )
         assert( !"There should have been a match" );
         return false;
     }
-    if ( target->hasBeenRenamed() == false &&
+    if ( target->userInteracted() == false &&
          target->rename( longestPattern, false ) == false )
     {
         return false;
