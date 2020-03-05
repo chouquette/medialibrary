@@ -59,7 +59,8 @@ public:
     };
 
     MediaGroup( MediaLibraryPtr ml, sqlite::Row& row );
-    MediaGroup( MediaLibraryPtr ml, std::string name, bool userInitiated );
+    MediaGroup( MediaLibraryPtr ml, std::string name, bool userInitiated,
+                bool forcedSingleton );
     MediaGroup( MediaLibraryPtr ml );
     virtual int64_t id() const override;
     virtual const std::string& name() const override;
@@ -91,8 +92,8 @@ public:
      */
     virtual bool destroy() override;
 
-    static std::shared_ptr<MediaGroup> create(MediaLibraryPtr ml, std::string name,
-                                               bool usedInitiated );
+    static std::shared_ptr<MediaGroup> create( MediaLibraryPtr ml, std::string name,
+                                               bool usedInitiated, bool isForcedSingleton );
     static std::shared_ptr<MediaGroup> create( MediaLibraryPtr ml,
                                                const std::vector<int64_t>& mediaIds );
     static Query<IMediaGroup> listAll( MediaLibraryPtr ml, const QueryParameters* params );
@@ -128,7 +129,13 @@ private:
     uint32_t m_nbVideo;
     uint32_t m_nbAudio;
     uint32_t m_nbUnknown;
+    /* Has the group been interacted with by the user */
     bool m_userInteracted;
+    /*
+     * Should this group be considered when automatically grouping.
+     * This is true for groups we create to contain a single "ungrouped" media
+     */
+    bool m_forcedSingleton;
 };
 
 }

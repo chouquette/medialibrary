@@ -49,11 +49,13 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, sqlite::Row& row )
     , m_nbAudio( row.extract<decltype(m_nbAudio)>() )
     , m_nbUnknown( row.extract<decltype(m_nbUnknown)>() )
     , m_userInteracted( row.extract<decltype(m_userInteracted)>() )
+    , m_forcedSingleton( row.extract<decltype(m_forcedSingleton)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
 
-MediaGroup::MediaGroup( MediaLibraryPtr ml, std::string name, bool userInitiated )
+MediaGroup::MediaGroup( MediaLibraryPtr ml, std::string name, bool userInitiated,
+                        bool isForcedSingleton )
     : m_ml( ml )
     , m_id( 0 )
     , m_name( std::move( name ) )
@@ -61,6 +63,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, std::string name, bool userInitiated
     , m_nbAudio( 0 )
     , m_nbUnknown( 0 )
     , m_userInteracted( userInitiated )
+    , m_forcedSingleton( isForcedSingleton )
 {
 }
 
@@ -71,6 +74,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml )
     , m_nbAudio( 0 )
     , m_nbUnknown( 0 )
     , m_userInteracted( true )
+    , m_forcedSingleton( false )
 {
 }
 
@@ -206,12 +210,13 @@ bool MediaGroup::destroy()
 
 std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
                                                 std::string name,
-                                                bool userInitiated )
+                                                bool userInitiated,
+                                                bool isForcedSingleton )
 {
     static const std::string req = "INSERT INTO " + Table::Name +
-            "(name, user_interacted) VALUES(?, ?)";
+            "(name, user_interacted, forced_singleton) VALUES(?, ?, ?)";
     auto self = std::make_shared<MediaGroup>( ml, std::move( name ),
-                                              userInitiated );
+                                              userInitiated, isForcedSingleton );
     if ( insert( ml, self, req, self->name(), userInitiated ) == false )
         return nullptr;
     auto notifier = ml->getNotifier();
@@ -224,9 +229,9 @@ std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
                                                 const std::vector<int64_t>& mediaIds )
 {
     static const std::string req = "INSERT INTO " + Table::Name +
-            "(user_interacted) VALUES(?)";
+            "(user_interacted, forced_singleton) VALUES(?, ?)";
     auto self = std::make_shared<MediaGroup>( ml );
-    if ( insert( ml, self, req, true ) == false )
+    if ( insert( ml, self, req, true, false ) == false )
         return nullptr;
     auto notifier = ml->getNotifier();
     if ( notifier != nullptr )
@@ -334,7 +339,8 @@ std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
         "nb_video UNSIGNED INTEGER DEFAULT 0,"
         "nb_audio UNSIGNED INTEGER DEFAULT 0,"
         "nb_unknown UNSIGNED INTEGER DEFAULT 0,"
-        "user_interacted BOOLEAN"
+        "user_interacted BOOLEAN,"
+        "forced_singleton BOOLEAN"
     ")";
 }
 
@@ -513,7 +519,7 @@ bool MediaGroup::assignToGroup( MediaLibraryPtr ml, Media& m )
     {
         if ( strncasecmp( title.c_str(), "the ", 4 ) == 0 )
             title = title.substr( 4 );
-        auto group = create( ml, std::move( title ), false );
+        auto group = create( ml, std::move( title ), false, false );
         if ( group == nullptr )
             return false;
         return group->add( m );

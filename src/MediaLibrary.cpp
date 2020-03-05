@@ -644,7 +644,7 @@ Query<IMedia> MediaLibrary::videoFiles( const QueryParameters* params ) const
 
 MediaGroupPtr MediaLibrary::createMediaGroup( std::string name )
 {
-    return MediaGroup::create( this, std::move( name ), true );
+    return MediaGroup::create( this, std::move( name ), true, false );
 }
 
 MediaGroupPtr MediaLibrary::createMediaGroup( const std::vector<int64_t>& mediaIds )
