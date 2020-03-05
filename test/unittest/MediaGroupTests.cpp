@@ -52,60 +52,11 @@ TEST_F( MediaGroups, Create )
     ASSERT_EQ( "group", mg->name() );
 }
 
-TEST_F( MediaGroups, SubGroup )
-{
-    auto name = std::string{ "group" };
-    auto mg = ml->createMediaGroup( name );
-    ASSERT_FALSE( mg->isSubgroup() );
-
-    auto subname = std::string{ "subgroup" };
-    auto subgroup = mg->createSubgroup( subname );
-
-    ASSERT_NE( nullptr, subgroup );
-    ASSERT_EQ( subname, subgroup->name() );
-    ASSERT_TRUE( subgroup->isSubgroup() );
-    ASSERT_TRUE( subgroup->hasBeenRenamed() );
-    auto parent = subgroup->parent();
-
-    ASSERT_NE( nullptr, parent );
-    ASSERT_EQ( mg->id(), parent->id() );
-}
-
-TEST_F( MediaGroups, ListSubGroups )
-{
-    auto name = std::string{ "group" };
-    auto mg = ml->createMediaGroup( name );
-
-    for ( auto i = 0; i < 3; ++i )
-    {
-        auto subname = "subgroup_" + std::to_string( 3 - i );
-        mg->createSubgroup( subname );
-    }
-
-    auto subgroupQuery = mg->subgroups( nullptr );
-    ASSERT_EQ( 3u, subgroupQuery->count() );
-    auto subgroups = subgroupQuery->all();
-    ASSERT_EQ( 3u, subgroups.size() );
-    ASSERT_EQ( "subgroup_1", subgroups[0]->name() );
-    ASSERT_EQ( "subgroup_2", subgroups[1]->name() );
-    ASSERT_EQ( "subgroup_3", subgroups[2]->name() );
-
-    QueryParameters params { SortingCriteria::Alpha, true };
-    subgroups = mg->subgroups( &params )->all();
-
-    ASSERT_EQ( 3u, subgroups.size() );
-    ASSERT_EQ( "subgroup_3", subgroups[0]->name() );
-    ASSERT_EQ( "subgroup_2", subgroups[1]->name() );
-    ASSERT_EQ( "subgroup_1", subgroups[2]->name() );
-}
-
 TEST_F( MediaGroups, ListAll )
 {
     auto mg1 = ml->createMediaGroup( "weasels group" );
     auto mg2 = ml->createMediaGroup( "pangolin group" );
     auto mg3 = ml->createMediaGroup( "otters group" );
-    // Subgroups shouldn't be listed
-    auto sg = mg1->createSubgroup( "subotters" );
 
     auto mgQuery = ml->mediaGroups( nullptr );
     ASSERT_EQ( 3u, mgQuery->count() );
@@ -139,9 +90,7 @@ TEST_F( MediaGroups, FetchOne )
 TEST_F( MediaGroups, Search )
 {
     auto mg1 = ml->createMediaGroup( "otter group" );
-    // Subgroups are included in search results
-    auto mg2 = mg1->createSubgroup( "sea otters group" );
-    auto mg3 = ml->createMediaGroup( "weasels group" );
+    auto mg2 = ml->createMediaGroup( "weasels group" );
 
     auto q = ml->searchMediaGroups( "12", nullptr );
     ASSERT_EQ( nullptr, q );
@@ -149,24 +98,21 @@ TEST_F( MediaGroups, Search )
     QueryParameters params { SortingCriteria::Alpha, false };
     q = ml->searchMediaGroups( "group", &params );
     ASSERT_NE( nullptr, q );
-    ASSERT_EQ( 3u, q->count() );
+    ASSERT_EQ( 2u, q->count() );
     auto groups = q->all();
-    ASSERT_EQ( 3u, groups.size() );
-    ASSERT_EQ( mg1->id(), groups[0]->id() );
-    ASSERT_EQ( mg2->id(), groups[1]->id() );
-    ASSERT_EQ( mg3->id(), groups[2]->id() );
-
-    params.desc = true;
-    groups = ml->searchMediaGroups( "group", &params )->all();
-    ASSERT_EQ( 3u, groups.size() );
-    ASSERT_EQ( mg3->id(), groups[0]->id() );
-    ASSERT_EQ( mg2->id(), groups[1]->id() );
-    ASSERT_EQ( mg1->id(), groups[2]->id() );
-
-    groups = ml->searchMediaGroups( "otter", nullptr )->all();
     ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( mg1->id(), groups[0]->id() );
     ASSERT_EQ( mg2->id(), groups[1]->id() );
+
+    params.desc = true;
+    groups = ml->searchMediaGroups( "group", &params )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( mg2->id(), groups[0]->id() );
+    ASSERT_EQ( mg1->id(), groups[1]->id() );
+
+    groups = ml->searchMediaGroups( "otter", nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    ASSERT_EQ( mg1->id(), groups[0]->id() );
 }
 
 TEST_F( MediaGroups, Media )
@@ -180,13 +126,6 @@ TEST_F( MediaGroups, Media )
     ASSERT_FALSE( video->isGrouped() );
     ASSERT_FALSE( audio->isGrouped() );
 
-    auto sg = mg->createSubgroup( "subgroup" );
-    auto subvideo = ml->addMedia( "subvideo.mkv", IMedia::Type::Video );
-    auto subaudio = ml->addMedia( "subaudio.mkv", IMedia::Type::Audio );
-    auto subaudio2 = ml->addMedia( "subaudio2.mkv", IMedia::Type::Audio );
-    ASSERT_NE( nullptr, sg );
-    ASSERT_NE( nullptr, subvideo );
-
     auto mediaQuery = mg->media( IMedia::Type::Unknown, nullptr );
     ASSERT_EQ( 0u, mediaQuery->count() );
     auto media = mediaQuery->all();
@@ -196,13 +135,6 @@ TEST_F( MediaGroups, Media )
     ASSERT_TRUE( res );
     ASSERT_TRUE( video->isGrouped() );
     res = mg->add( audio->id() );
-    ASSERT_TRUE( res );
-
-    res = subvideo->addToGroup( *sg );
-    ASSERT_TRUE( res );
-    res = subaudio->addToGroup( sg->id() );
-    ASSERT_TRUE( res );
-    res = subaudio2->addToGroup( sg->id() );
     ASSERT_TRUE( res );
 
     ASSERT_EQ( 2u, mediaQuery->count() );
@@ -215,19 +147,10 @@ TEST_F( MediaGroups, Media )
     ASSERT_EQ( 1u, media.size() );
     ASSERT_EQ( video->id(), media[0]->id() );
 
-    media = sg->media( IMedia::Type::Audio, nullptr )->all();
-    ASSERT_EQ( subaudio->id(), media[0]->id() );
-    ASSERT_EQ( subaudio2->id(), media[1]->id() );
-
     // Now remove most media from groups
     res = mg->remove( *video );
     ASSERT_TRUE( res );
     res = mg->remove( audio->id() );
-    ASSERT_TRUE( res );
-
-    res = subvideo->removeFromGroup();
-    ASSERT_TRUE( res );
-    res = subaudio->removeFromGroup();
     ASSERT_TRUE( res );
 
     media = mg->media( IMedia::Type::Unknown, nullptr )->all();
@@ -237,10 +160,6 @@ TEST_F( MediaGroups, Media )
     // And ensure the DB also was updated:
     mg = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( mg->id() ) );
     ASSERT_EQ( 0u, mg->nbMedia() );
-
-    media = sg->media( IMedia::Type::Unknown, nullptr )->all();
-    ASSERT_EQ( 1u, media.size() );
-    ASSERT_EQ ( subaudio2->id(), media[0]->id() );
 }
 
 TEST_F( MediaGroups, SearchMedia )
@@ -445,24 +364,6 @@ TEST_F( MediaGroups, MediaHasBeenGrouped )
 
     m2 = ml->media( m2->id() );
     ASSERT_TRUE( m2->hasBeenGrouped() );
-}
-
-TEST_F( MediaGroups, Path )
-{
-    auto parent = ml->createMediaGroup( "parent" );
-    ASSERT_NE( nullptr, parent );
-    auto sub1 = parent->createSubgroup( "sub1" );
-    ASSERT_NE( nullptr, sub1 );
-    auto sub2 = sub1->createSubgroup( "sub2" );
-    ASSERT_NE( nullptr, sub2 );
-    auto sub3 = sub2->createSubgroup( "sub3" );
-    ASSERT_NE( nullptr, sub3 );
-
-    auto path = sub3->path();
-    ASSERT_EQ( "parent/sub1/sub2/sub3", path );
-
-    path = parent->path();
-    ASSERT_EQ( "parent", path );
 }
 
 TEST_F( MediaGroups, Rename )

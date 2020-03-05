@@ -58,8 +58,7 @@ public:
     };
 
     MediaGroup( MediaLibraryPtr ml, sqlite::Row& row );
-    MediaGroup( MediaLibraryPtr ml, int64_t parentId, std::string name,
-                bool userInitiated );
+    MediaGroup( MediaLibraryPtr ml, std::string name, bool userInitiated );
     MediaGroup( MediaLibraryPtr ml );
     virtual int64_t id() const override;
     virtual const std::string& name() const override;
@@ -72,16 +71,11 @@ public:
     virtual bool add(int64_t mediaId ) override;
     virtual bool remove( IMedia& media ) override;
     virtual bool remove( int64_t mediaId ) override;
-    virtual MediaGroupPtr createSubgroup( const std::string& name ) override;
-    virtual Query<IMediaGroup> subgroups( const QueryParameters* params ) const override;
-    virtual bool isSubgroup() const override;
-    virtual MediaGroupPtr parent() const override;
     virtual Query<IMedia> media( IMedia::Type mediaType,
                                  const QueryParameters* params = nullptr ) override;
     virtual Query<IMedia> searchMedia( const std::string& pattern,
                                        IMedia::Type mediaType,
                                        const QueryParameters* params = nullptr ) override;
-    virtual std::string path() const override;
     virtual bool rename( std::string name ) override;
     bool rename( std::string name, bool userInitiated );
 
@@ -96,8 +90,7 @@ public:
      */
     virtual bool destroy() override;
 
-    static std::shared_ptr<MediaGroup> create( MediaLibraryPtr ml,
-                                               int64_t parentId, std::string name,
+    static std::shared_ptr<MediaGroup> create(MediaLibraryPtr ml, std::string name,
                                                bool usedInitiated );
     static std::shared_ptr<MediaGroup> create( MediaLibraryPtr ml,
                                                const std::vector<int64_t>& mediaIds );
@@ -130,7 +123,6 @@ private:
 private:
     MediaLibraryPtr m_ml;
     int64_t m_id;
-    int64_t m_parentId;
     std::string m_name;
     uint32_t m_nbVideo;
     uint32_t m_nbAudio;

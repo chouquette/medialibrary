@@ -44,7 +44,6 @@ const std::string MediaGroup::FtsTable::Name = "MediaGroupFts";
 MediaGroup::MediaGroup( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
     , m_id( row.extract<decltype(m_id)>() )
-    , m_parentId( row.extract<decltype(m_parentId)>() )
     , m_name( row.extract<decltype(m_name)>() )
     , m_nbVideo( row.extract<decltype(m_nbVideo)>() )
     , m_nbAudio( row.extract<decltype(m_nbAudio)>() )
@@ -54,11 +53,9 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, sqlite::Row& row )
     assert( row.hasRemainingColumns() == false );
 }
 
-MediaGroup::MediaGroup( MediaLibraryPtr ml, int64_t parentId, std::string name,
-                        bool userInitiated )
+MediaGroup::MediaGroup( MediaLibraryPtr ml, std::string name, bool userInitiated )
     : m_ml( ml )
     , m_id( 0 )
-    , m_parentId( parentId )
     , m_name( std::move( name ) )
     , m_nbVideo( 0 )
     , m_nbAudio( 0 )
@@ -70,7 +67,6 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, int64_t parentId, std::string name,
 MediaGroup::MediaGroup( MediaLibraryPtr ml )
     : m_ml( ml )
     , m_id( 0 )
-    , m_parentId( 0 )
     , m_nbVideo( 0 )
     , m_nbAudio( 0 )
     , m_nbUnknown( 0 )
@@ -161,28 +157,6 @@ bool MediaGroup::remove( int64_t mediaId )
     return Media::setMediaGroup( m_ml, mediaId, 0 );
 }
 
-MediaGroupPtr MediaGroup::createSubgroup( const std::string& name )
-{
-    return create( m_ml, m_id, name, true );
-}
-
-Query<IMediaGroup> MediaGroup::subgroups( const QueryParameters* params ) const
-{
-    const std::string req = "FROM " + Table::Name + " mg WHERE parent_id = ?";
-    return make_query<MediaGroup, IMediaGroup>( m_ml, "mg.*", req,
-                                                orderBy( params ), m_id );
-}
-
-bool MediaGroup::isSubgroup() const
-{
-    return m_parentId != 0;
-}
-
-MediaGroupPtr MediaGroup::parent() const
-{
-    return fetch( m_ml, m_parentId );
-}
-
 Query<IMedia> MediaGroup::media( IMedia::Type mediaType, const QueryParameters* params)
 {
     return Media::fromMediaGroup( m_ml, m_id, mediaType, params );
@@ -192,22 +166,6 @@ Query<IMedia> MediaGroup::searchMedia(const std::string& pattern, IMedia::Type m
                                        const QueryParameters* params )
 {
     return Media::searchFromMediaGroup( m_ml, m_id, mediaType, pattern, params );
-}
-
-std::string MediaGroup::path() const
-{
-    auto res = name();
-    if ( isSubgroup() == false )
-        return res;
-    auto p = parent();
-    while ( p )
-    {
-        res = p->name() + '/' + res;
-        if ( p->isSubgroup() == false )
-            break;
-        p = p->parent();
-    }
-    return res;
 }
 
 bool MediaGroup::rename( std::string name )
@@ -247,15 +205,14 @@ bool MediaGroup::destroy()
 }
 
 std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
-                                                int64_t parentId, std::string name,
+                                                std::string name,
                                                 bool userInitiated )
 {
     static const std::string req = "INSERT INTO " + Table::Name +
-            "(parent_id, name, has_been_renamed) VALUES(?, ?, ?)";
-    auto self = std::make_shared<MediaGroup>( ml, parentId, std::move( name ),
+            "(name, has_been_renamed) VALUES(?, ?)";
+    auto self = std::make_shared<MediaGroup>( ml, std::move( name ),
                                               userInitiated );
-    if ( insert( ml, self, req, sqlite::ForeignKey{ parentId }, self->name(),
-                 userInitiated ) == false )
+    if ( insert( ml, self, req, self->name(), userInitiated ) == false )
         return nullptr;
     auto notifier = ml->getNotifier();
     if ( notifier != nullptr )
@@ -303,7 +260,7 @@ MediaGroup::fetchMatching( MediaLibraryPtr ml, const std::string& prefix )
 Query<IMediaGroup> MediaGroup::listAll( MediaLibraryPtr ml,
                                         const QueryParameters* params )
 {
-    const std::string req = "FROM " + Table::Name + " mg WHERE parent_id IS NULL";
+    const std::string req = "FROM " + Table::Name + " mg";
     return make_query<MediaGroup, IMediaGroup>( ml, "mg.*", req, orderBy( params ) );
 }
 
@@ -339,10 +296,8 @@ void MediaGroup::createTriggers( sqlite::Connection* connection )
                                    trigger( Triggers::DecrementNbMediaOnDeletion, Settings::DbModelVersion ) );
 }
 
-void MediaGroup::createIndexes( sqlite::Connection* connection )
+void MediaGroup::createIndexes( sqlite::Connection* )
 {
-    sqlite::Tools::executeRequest( connection,
-                                   index( Indexes::ParentId, Settings::DbModelVersion ) );
 }
 
 std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
@@ -372,14 +327,11 @@ std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
     return "CREATE TABLE " + Table::Name +
     "("
         "id_group INTEGER PRIMARY KEY AUTOINCREMENT,"
-        "parent_id INTEGER,"
         "name TEXT COLLATE NOCASE,"
         "nb_video UNSIGNED INTEGER DEFAULT 0,"
         "nb_audio UNSIGNED INTEGER DEFAULT 0,"
         "nb_unknown UNSIGNED INTEGER DEFAULT 0,"
-        "has_been_renamed BOOLEAN DEFAULT FALSE,"
-        "FOREIGN KEY(parent_id) REFERENCES " + Table::Name +
-            "(id_group) ON DELETE CASCADE"
+        "has_been_renamed BOOLEAN DEFAULT FALSE"
     ")";
 }
 
@@ -503,7 +455,7 @@ std::string MediaGroup::triggerName(MediaGroup::Triggers t, uint32_t dbModel)
 std::string MediaGroup::index( Indexes i, uint32_t dbModel )
 {
     assert( i == Indexes::ParentId );
-    assert( dbModel >= 24 );
+    assert( dbModel == 24 );
     return "CREATE INDEX " + indexName( i, dbModel ) +
            " ON " + Table::Name + "(parent_id)";
 }
@@ -511,7 +463,7 @@ std::string MediaGroup::index( Indexes i, uint32_t dbModel )
 std::string MediaGroup::indexName( Indexes i, uint32_t dbModel )
 {
     assert( i == Indexes::ParentId );
-    assert( dbModel >= 24 );
+    assert( dbModel == 24 );
     return "media_group_parent_id_idx";
 }
 
@@ -523,11 +475,6 @@ bool MediaGroup::checkDbModel( MediaLibraryPtr ml )
            sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( FtsTable::Name, Settings::DbModelVersion ),
                                        FtsTable::Name ) == false )
-        return false;
-
-    if ( sqlite::Tools::checkIndexStatement( ml->getConn(),
-            index( Indexes::ParentId, Settings::DbModelVersion ),
-            indexName( Indexes::ParentId, Settings::DbModelVersion ) ) == false )
         return false;
 
     auto check = []( sqlite::Connection* dbConn, Triggers t ) {
@@ -552,7 +499,7 @@ bool MediaGroup::assignToGroup( MediaLibraryPtr ml, Media& m )
     {
         if ( strncasecmp( title.c_str(), "the ", 4 ) == 0 )
             title = title.substr( 4 );
-        auto group = create( ml, 0, std::move( title ), false );
+        auto group = create( ml, std::move( title ), false );
         if ( group == nullptr )
             return false;
         return group->add( m );

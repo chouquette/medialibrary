@@ -120,35 +120,6 @@ public:
                                        const QueryParameters* params = nullptr ) = 0;
 
     /**
-     * @brief createSubgroup Create a subgroup
-     * @param name This subgroup name
-     * @return The newly created group, or nullptr in case of error
-     *
-     * Names are required to be unique for a given parent group.
-     */
-    virtual MediaGroupPtr createSubgroup( const std::string& name ) = 0;
-    /**
-     * @brief subgroups Returns the subgroups for this group
-     *
-     * Supported sorting criteria are:
-     * - Alpha (default)
-     * - NbVideo
-     * - NbAudio
-     * - NbMedia
-     */
-    virtual Query<IMediaGroup> subgroups( const QueryParameters* params = nullptr ) const = 0;
-    virtual bool isSubgroup() const = 0;
-    /**
-     * @brief parent Returns this group's parent group, or nullptr if there are none
-     */
-    virtual MediaGroupPtr parent() const = 0;
-    /**
-     * @brief path Returns a virtual path to this group
-     *
-     * This consists of <parent group 1>/<parent group 2>/.../<group>
-     */
-    virtual std::string path() const = 0;
-    /**
      * @brief rename Rename a group
      * @param name The new name
      * @return true if the rename was successfull, false otherwise

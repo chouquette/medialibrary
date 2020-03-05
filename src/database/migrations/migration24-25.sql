@@ -15,14 +15,13 @@
 MediaGroup::schema( MediaGroup::Table::Name, 25 ),
 
 "INSERT INTO " + MediaGroup::Table::Name +
-    " SELECT id_group, parent_id, name, nb_video, nb_audio, nb_unknown, false"
+    " SELECT id_group, name, nb_video, nb_audio, nb_unknown, false"
     " FROM " + MediaGroup::Table::Name + "_backup ",
 
 "DROP TABLE " + MediaGroup::Table::Name + "_backup",
 
 MediaGroup::trigger( MediaGroup::Triggers::InsertFts, 25 ),
 MediaGroup::trigger( MediaGroup::Triggers::DeleteFts, 25 ),
-MediaGroup::index( MediaGroup::Indexes::ParentId, 25 ),
 
 "CREATE TEMPORARY TABLE " + parser::Task::Table::Name + "_backup"
 "("
