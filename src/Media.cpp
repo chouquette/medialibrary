@@ -609,8 +609,10 @@ int64_t Media::groupId() const
 
 std::vector<std::shared_ptr<Media>> Media::fetchMatchingUngrouped()
 {
-    const std::string req = "SELECT * FROM " + Table::Name +
-            " WHERE group_id IS NULL AND"
+    const std::string req = "SELECT m.* FROM " + Table::Name + " m "
+            " INNER JOIN " + MediaGroup::Table::Name + " mg ON "
+                " m.group_id = mg.id_group "
+            " WHERE mg.forced_singleton != 0 AND"
             " SUBSTR(title, 1, ?) = ? COLLATE NOCASE";
     auto prefix = MediaGroup::prefix( m_title );
     return fetchAll<Media>( m_ml, req, prefix.length(), prefix );
@@ -618,7 +620,10 @@ std::vector<std::shared_ptr<Media>> Media::fetchMatchingUngrouped()
 
 bool Media::regroup()
 {
-    if ( m_groupId != 0 )
+    assert( m_groupId != 0 );
+    auto singleton = std::static_pointer_cast<MediaGroup>( group() );
+    /* Refuse to regroup a media that isn't in a locked group */
+    if ( singleton == nullptr || singleton->isForcedSingleton() == false )
         return false;
     auto t = m_ml->getConn()->newTransaction();
     auto group = MediaGroup::create( m_ml, m_title, false, false );
