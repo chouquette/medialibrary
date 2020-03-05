@@ -557,10 +557,10 @@ bool Media::isStream() const
  */
 bool Media::setMediaGroup( MediaLibraryPtr ml, int64_t mediaId, int64_t groupId )
 {
+    assert( groupId != 0 );
     const std::string req = "UPDATE " + Table::Name + " SET group_id = ?"
             " WHERE id_media = ?";
-    return sqlite::Tools::executeUpdate( ml->getConn(), req,
-                                       sqlite::ForeignKey{ groupId }, mediaId );
+    return sqlite::Tools::executeUpdate( ml->getConn(), req, groupId, mediaId );
 }
 
 bool Media::addToGroup( IMediaGroup& group )
@@ -580,7 +580,19 @@ bool Media::addToGroup( int64_t groupId )
 
 bool Media::removeFromGroup()
 {
-    return addToGroup( 0 );
+    std::unique_ptr<sqlite::Transaction> t;
+    if ( sqlite::Transaction::transactionInProgress() == false )
+        t = m_ml->getConn()->newTransaction();
+    auto group = MediaGroup::create( m_ml, m_title, false, true );
+    if ( group == nullptr )
+        return false;
+    auto res = group->add( *this );
+    if ( res == false )
+        return false;
+    if ( t != nullptr )
+        t->commit();
+    m_groupId = group->id();
+    return true;
 }
 
 MediaGroupPtr Media::group() const

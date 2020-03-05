@@ -81,6 +81,8 @@ public:
     virtual bool rename( std::string name ) override;
     bool rename( std::string name, bool userInitiated );
 
+    bool isForcedSingleton() const;
+
     /**
      * @brief rename Rename a group
      * @param name The new name

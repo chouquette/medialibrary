@@ -158,7 +158,10 @@ bool MediaGroup::remove( IMedia& media )
 
 bool MediaGroup::remove( int64_t mediaId )
 {
-    return Media::setMediaGroup( m_ml, mediaId, 0 );
+    auto media = Media::fetch( m_ml, mediaId );
+    if ( media == nullptr )
+        return false;
+    return remove( *media );
 }
 
 Query<IMedia> MediaGroup::media( IMedia::Type mediaType, const QueryParameters* params)
@@ -203,6 +206,11 @@ bool MediaGroup::rename( std::string name, bool userInitiated )
     return true;
 }
 
+bool MediaGroup::isForcedSingleton() const
+{
+    return m_forcedSingleton;
+}
+
 bool MediaGroup::destroy()
 {
     return DatabaseHelpers<MediaGroup>::destroy( m_ml, m_id );
@@ -217,7 +225,8 @@ std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
             "(name, user_interacted, forced_singleton) VALUES(?, ?, ?)";
     auto self = std::make_shared<MediaGroup>( ml, std::move( name ),
                                               userInitiated, isForcedSingleton );
-    if ( insert( ml, self, req, self->name(), userInitiated ) == false )
+    if ( insert( ml, self, req, self->name(), userInitiated,
+                 isForcedSingleton ) == false )
         return nullptr;
     auto notifier = ml->getNotifier();
     if ( notifier != nullptr )
