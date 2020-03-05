@@ -56,6 +56,7 @@ public:
     enum class Indexes : uint8_t
     {
         ParentId,
+        ForcedSingleton,
     };
 
     MediaGroup( MediaLibraryPtr ml, sqlite::Row& row );

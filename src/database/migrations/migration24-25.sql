@@ -22,6 +22,7 @@ MediaGroup::schema( MediaGroup::Table::Name, 25 ),
 
 MediaGroup::trigger( MediaGroup::Triggers::InsertFts, 25 ),
 MediaGroup::trigger( MediaGroup::Triggers::DeleteFts, 25 ),
+MediaGroup::index( MediaGroup::Indexes::ForcedSingleton, 25 ),
 
 "CREATE TEMPORARY TABLE " + parser::Task::Table::Name + "_backup"
 "("

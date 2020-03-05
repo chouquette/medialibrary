@@ -313,8 +313,10 @@ void MediaGroup::createTriggers( sqlite::Connection* connection )
                                    trigger( Triggers::DeleteEmptyGroups, Settings::DbModelVersion ) );
 }
 
-void MediaGroup::createIndexes( sqlite::Connection* )
+void MediaGroup::createIndexes( sqlite::Connection* connection )
 {
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::ForcedSingleton, Settings::DbModelVersion ) );
 }
 
 std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
@@ -484,17 +486,28 @@ std::string MediaGroup::triggerName(MediaGroup::Triggers t, uint32_t dbModel)
 
 std::string MediaGroup::index( Indexes i, uint32_t dbModel )
 {
-    assert( i == Indexes::ParentId );
-    assert( dbModel == 24 );
+    if ( i == Indexes::ParentId )
+    {
+        assert( dbModel == 24 );
+        return "CREATE INDEX " + indexName( i, dbModel ) +
+               " ON " + Table::Name + "(parent_id)";
+    }
+    assert( i == Indexes::ForcedSingleton );
+    assert( dbModel >= 25 );
     return "CREATE INDEX " + indexName( i, dbModel ) +
-           " ON " + Table::Name + "(parent_id)";
+            " ON " + Table::Name + "(forced_singleton)";
 }
 
 std::string MediaGroup::indexName( Indexes i, uint32_t dbModel )
 {
-    assert( i == Indexes::ParentId );
-    assert( dbModel == 24 );
-    return "media_group_parent_id_idx";
+    if ( i == Indexes::ParentId )
+    {
+        assert( dbModel == 24 );
+        return "media_group_parent_id_idx";
+    }
+    assert( i == Indexes::ForcedSingleton );
+    assert( dbModel >= 25 );
+    return "media_group_forced_singleton";
 }
 
 bool MediaGroup::checkDbModel( MediaLibraryPtr ml )
