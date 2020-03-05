@@ -111,11 +111,6 @@ void DiscovererWorker::reloadDevice(int64_t deviceId)
     enqueue( deviceId, Task::Type::ReloadDevice );
 }
 
-void DiscovererWorker::reloadAllDevices()
-{
-    enqueue( 0, Task::Type::ReloadAllDevices );
-}
-
 bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
 {
     /* This *must* be called with the mutex locked */
@@ -251,8 +246,6 @@ bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
             }
             break;
         }
-        case Task::Type::ReloadAllDevices:
-            break;
     }
     return filterOut;
 }
@@ -268,7 +261,6 @@ void DiscovererWorker::enqueue( DiscovererWorker::Task t )
     {
         case Task::Type::Discover:
         case Task::Type::Reload:
-        case Task::Type::ReloadAllDevices:
             /*
              * These task types may just be queued after any currently
              * running tasks, no need to process them right now.
@@ -331,8 +323,7 @@ void DiscovererWorker::enqueue( DiscovererWorker::Task t )
 
 void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
 {
-    assert( type != Task::Type::ReloadDevice &&
-            type != Task::Type::ReloadAllDevices );
+    assert( type != Task::Type::ReloadDevice );
 
     if ( entryPoint.empty() == false )
     {
@@ -349,8 +340,7 @@ void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
 
 void DiscovererWorker::enqueue( int64_t entityId, Task::Type type )
 {
-    assert( type == Task::Type::ReloadDevice ||
-            type == Task::Type::ReloadAllDevices );
+    assert( type == Task::Type::ReloadDevice );
 
     LOG_INFO( "Queuing entity ", entityId, " of type ",
               static_cast<typename std::underlying_type<Task::Type>::type>( type ) );
@@ -366,6 +356,7 @@ void DiscovererWorker::run()
 {
     LOG_INFO( "Entering DiscovererWorker thread" );
     m_ml->onDiscovererIdleChanged( false );
+    runReloadAllDevices();
     while ( m_run == true )
     {
         ML_UNHANDLED_EXCEPTION_INIT
@@ -419,14 +410,6 @@ void DiscovererWorker::run()
             case Task::Type::ReloadDevice:
                 runReloadDevice( task.entityId );
                 needTaskRefresh = true;
-                break;
-            case Task::Type::ReloadAllDevices:
-                /*
-                 * This is a special case which is run only during media library
-                 * startup, we don't need to refresh the tasks list for this
-                 * as the task list hasn't been fetched from database yet
-                 */
-                runReloadAllDevices();
                 break;
             default:
                 assert(false);

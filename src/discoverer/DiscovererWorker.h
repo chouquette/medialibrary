@@ -54,12 +54,6 @@ protected:
             Ban,
             Unban,
             ReloadDevice,
-            /*
-             * Checks the presence of all devices in database
-             * This is expected to be run as the first task, before any other
-             * subsequent discovery requests.
-             */
-            ReloadAllDevices,
         };
 
         Task() = default;
@@ -92,7 +86,6 @@ public:
     void ban( const std::string& entryPoint );
     void unban( const std::string& entryPoint );
     void reloadDevice( int64_t deviceId );
-    void reloadAllDevices();
 
 private:
     void enqueue( Task t );

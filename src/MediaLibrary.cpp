@@ -1045,7 +1045,6 @@ void MediaLibrary::startDiscoverer()
     m_discovererWorker.reset( new DiscovererWorker( this,
                                                     std::move( discoverer ) ) );
 
-    m_discovererWorker->reloadAllDevices();
 }
 
 void MediaLibrary::startDeletionNotifier()
