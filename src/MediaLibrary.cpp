@@ -2193,7 +2193,11 @@ void MediaLibrary::discover( const std::string& entryPoint )
 bool MediaLibrary::addFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory )
 {
     std::lock_guard<compat::Mutex> lock( m_mutex );
+    return addFileSystemFactoryLocked( std::move( fsFactory ) );
+}
 
+bool MediaLibrary::addFileSystemFactoryLocked(std::shared_ptr<fs::IFileSystemFactory> fsFactory)
+{
     auto it = std::find_if( cbegin( m_fsFactories  ),
                             cend( m_fsFactories ),
                             [&fsFactory]( const std::shared_ptr<fs::IFileSystemFactory>& fsf ) {

@@ -242,6 +242,7 @@ public:
     virtual void addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer ) override;
 
     virtual bool addFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory ) override;
+    bool addFileSystemFactoryLocked( std::shared_ptr<fs::IFileSystemFactory> fsFactory );
 
     static void removeOldEntities( MediaLibraryPtr ml );
 
