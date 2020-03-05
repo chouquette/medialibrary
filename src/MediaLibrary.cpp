@@ -1071,7 +1071,7 @@ void MediaLibrary::populateNetworkFsFactories()
 {
 #ifdef HAVE_LIBVLC
     auto fsFactory = std::make_shared<factory::NetworkFileSystemFactory>( this, "smb://" );
-        m_externalNetworkFsFactories.emplace_back( std::move( fsFactory ) );
+        m_fsFactories.emplace_back( std::move( fsFactory ) );
 #endif
 }
 
@@ -2194,16 +2194,14 @@ bool MediaLibrary::addNetworkFileSystemFactory( std::shared_ptr<fs::IFileSystemF
 {
     std::lock_guard<compat::Mutex> lock( m_mutex );
 
-    auto it = std::find_if( cbegin( m_externalNetworkFsFactories ),
-                            cend( m_externalNetworkFsFactories ),
+    auto it = std::find_if( cbegin( m_fsFactories  ),
+                            cend( m_fsFactories ),
                             [&fsFactory]( const std::shared_ptr<fs::IFileSystemFactory>& fsf ) {
         return fsFactory->scheme() == fsf->scheme();
     });
-    if ( it != cend( m_externalNetworkFsFactories ) )
+    if ( it != cend( m_fsFactories ) )
         return false;
-    if ( m_networkDiscoveryEnabled == true )
-        m_fsFactories.push_back( fsFactory );
-    m_externalNetworkFsFactories.emplace_back( std::move( fsFactory ) );
+    m_fsFactories.emplace_back( std::move( fsFactory ) );
     return true;
 }
 
@@ -2213,41 +2211,40 @@ bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
 
     if ( enabled == m_networkDiscoveryEnabled )
         return true;
+    auto affected = false;
 
-    if ( enabled )
+    std::unique_ptr<sqlite::Transaction> t;
+    if ( enabled == false )
+        t = m_dbConnection->newTransaction();
+
+    for ( auto fsFactory : m_fsFactories )
     {
-        auto previousSize = m_fsFactories.size();
-        for ( auto fsFactory : m_externalNetworkFsFactories )
+        if ( fsFactory->isNetworkFileSystem() == false )
+            continue;
+        if ( enabled == true )
         {
             if ( fsFactory->start( &m_fsFactoryCb ) == true )
             {
                 fsFactory->refreshDevices();
                 m_fsFactories.push_back( std::move( fsFactory ) );
+                affected = true;
             }
         }
-        m_networkDiscoveryEnabled = true;
-        return m_fsFactories.size() != previousSize;
-    }
-
-    auto it = std::remove_if( begin( m_fsFactories ), end( m_fsFactories ),
-                              []( const std::shared_ptr<fs::IFileSystemFactory>& fs ) {
-        return fs->isNetworkFileSystem();
-    });
-    if ( it != end( m_fsFactories ) )
-    {
-        auto t = m_dbConnection->newTransaction();
-        std::for_each( it, end( m_fsFactories ), [this]( const std::shared_ptr<fs::IFileSystemFactory>& fsFactory )
+        else
         {
             auto devices = Device::fetchByScheme( this, fsFactory->scheme() );
             for ( const auto& d : devices )
                 d->setPresent( false );
             fsFactory->stop();
-        });
-        t->commit();
-        m_fsFactories.erase( it, end( m_fsFactories ) );
+            affected = true;
+        }
     }
-    m_networkDiscoveryEnabled = false;
-    return true;
+
+    if ( t != nullptr )
+        t->commit();
+
+    m_networkDiscoveryEnabled = enabled;
+    return affected;
 }
 
 bool MediaLibrary::isDiscoverNetworkEnabled() const

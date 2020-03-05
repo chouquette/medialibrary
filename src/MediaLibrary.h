@@ -338,7 +338,6 @@ protected:
     // External device lister
     std::unordered_map<std::string, DeviceListerPtr> m_deviceListers;
     std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_fsFactories;
-    std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_externalNetworkFsFactories;
 
     // User provided parser services
     std::vector<std::shared_ptr<parser::IParserService>> m_services;
