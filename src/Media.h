@@ -226,7 +226,6 @@ class Media : public IMedia,
         virtual MediaGroupPtr group() const override;
         virtual int64_t groupId() const override;
         virtual bool regroup() override;
-        bool hasBeenGrouped() const;
 
         void setReleaseDate( unsigned int date );
         int64_t deviceId() const; // Used for unit tests purposes only
@@ -335,9 +334,6 @@ private:
         int64_t m_folderId;
         ImportType m_importType;
         int64_t m_groupId;
-        // Will be false until the media is grouped for the first time.
-        // If true, we must not assign this media to a group automatically
-        bool m_hasBeenGrouped;
         bool m_forcedTitle;
 
         // Auto fetched related properties

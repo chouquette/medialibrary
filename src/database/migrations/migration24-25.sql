@@ -51,3 +51,65 @@ parser::Task::schema( parser::Task::Table::Name, 25 ),
 "DROP TABLE " + parser::Task::Table::Name + "_backup",
 
 parser::Task::index( parser::Task::Indexes::ParentFolderId, 25 ),
+
+/* Remove Media.has_been_grouped column */
+"CREATE TEMPORARY TABLE " + Media::Table::Name + "_backup"
+"("
+    "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "type INTEGER,"
+    "subtype INTEGER,"
+    "duration INTEGER,"
+    "play_count UNSIGNED INTEGER,"
+    "last_played_date UNSIGNED INTEGER,"
+    "real_last_played_date UNSIGNED INTEGER,"
+    "insertion_date UNSIGNED INTEGER,"
+    "release_date UNSIGNED INTEGER,"
+    "title TEXT COLLATE NOCASE,"
+    "filename TEXT COLLATE NOCASE,"
+    "is_favorite BOOLEAN,"
+    "is_present BOOLEAN,"
+    "device_id INTEGER,"
+    "nb_playlists UNSIGNED INTEGER,"
+    "folder_id UNSIGNED INTEGER,"
+    "import_type UNSIGNED INTEGER,"
+    "group_id UNSIGNED INTEGER,"
+    "forced_title BOOLEAN"
+")",
+
+"INSERT INTO " + Media::Table::Name + "_backup SELECT "
+    "id_media, type, subtype, duration, play_count, last_played_date, real_last_played_date,"
+    "insertion_date, release_date, title, filename, is_favorite, is_present, device_id,"
+    "nb_playlists, folder_id, import_type, group_id, forced_title "
+    " FROM " + Media::Table::Name,
+
+"DROP TABLE " + Media::Table::Name,
+
+Media::schema( Media::Table::Name, 25 ),
+
+"INSERT INTO " + Media::Table::Name +
+    " SELECT * FROM " + Media::Table::Name + "_backup",
+
+"DROP TABLE " + Media::Table::Name + "_backup",
+
+Media::trigger( Media::Triggers::InsertFts, 25 ),
+Media::trigger( Media::Triggers::UpdateFts, 25 ),
+Media::trigger( Media::Triggers::DeleteFts, 25 ),
+
+Media::index( Media::Indexes::LastPlayedDate, 25 ),
+Media::index( Media::Indexes::Presence, 25 ),
+Media::index( Media::Indexes::Types, 25 ),
+Media::index( Media::Indexes::LastUsageDate, 25 ),
+Media::index( Media::Indexes::Folder, 25 ),
+Media::index( Media::Indexes::MediaGroup, 25 ),
+
+Album::trigger( Album::Triggers::IsPresent, 25 ),
+Artist::trigger( Artist::Triggers::HasTrackPresent, 25 ),
+Thumbnail::trigger( Thumbnail::Triggers::AutoDeleteMedia, 25 ),
+Show::trigger( Show::Triggers::UpdateIsPresent, 25 ),
+Folder::trigger( Folder::Triggers::UpdateNbMediaOnIndex, 25 ),
+Folder::trigger( Folder::Triggers::UpdateNbMediaOnUpdate, 25 ),
+Folder::trigger( Folder::Triggers::UpdateNbMediaOnDelete, 25 ),
+
+MediaGroup::trigger( MediaGroup::Triggers::IncrementNbMediaOnGroupChange, 25 ),
+MediaGroup::trigger( MediaGroup::Triggers::DecrementNbMediaOnGroupChange, 25 ),
+MediaGroup::trigger( MediaGroup::Triggers::DecrementNbMediaOnDeletion, 25 ),

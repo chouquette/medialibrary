@@ -491,7 +491,6 @@ bool MediaGroup::checkDbModel( MediaLibraryPtr ml )
 bool MediaGroup::assignToGroup( MediaLibraryPtr ml, Media& m )
 {
     assert( m.groupId() == 0 );
-    assert( m.hasBeenGrouped() == false );
     auto title = m.title();
     auto p = prefix( title );
     auto groups = MediaGroup::fetchMatching( ml, p );
