@@ -115,7 +115,7 @@ TEST_F( MediaGroups, Search )
     ASSERT_EQ( mg1->id(), groups[0]->id() );
 }
 
-TEST_F( MediaGroups, Media )
+TEST_F( MediaGroups, FetchMedia )
 {
     auto mg = ml->createMediaGroup( "group" );
     auto video = ml->addMedia( "video.mkv", IMedia::Type::Video );
