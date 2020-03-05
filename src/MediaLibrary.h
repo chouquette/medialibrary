@@ -222,16 +222,16 @@ public:
      */
     void refreshDevices(fs::IFileSystemFactory& fsFactory);
     /**
-     * @brief refreshDevices Refreshes all known devices
+     * @brief startFsFactoriesAndRefresh Starts fs factories & refreshes all known devices
      *
-     * This will refresh the presence & last seen date for all known devices we
-     * have in database.
+     * This will start all provided & required file system factories (ie. local
+     * ones, and network ones if network discovery is enabled), and refresh the
+     * presence & last seen date for all known devices we have in database.
      * This operation must not be based on the available FsFactories, as we might
-     * not have a factory that was used to create a device before (for instance
-     * if we restart with network discovery disabled)
+     * not have a factory that was used to create a device before.
      * We still need to mark all the associated devices as missing.
      */
-    void refreshDevices();
+    void startFsFactoriesAndRefresh();
 
     virtual bool forceRescan() override;
 

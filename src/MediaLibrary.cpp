@@ -2371,7 +2371,7 @@ void MediaLibrary::refreshDevices( fs::IFileSystemFactory& fsFactory )
     LOG_DEBUG( "Done refreshing devices in database." );
 }
 
-void MediaLibrary::refreshDevices()
+void MediaLibrary::startFsFactoriesAndRefresh()
 {
     std::lock_guard<compat::Mutex> lock( m_mutex );
 

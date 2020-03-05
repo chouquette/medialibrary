@@ -536,7 +536,7 @@ void DiscovererWorker::runReloadDevice( int64_t deviceId )
 
 void DiscovererWorker::runReloadAllDevices()
 {
-    m_ml->refreshDevices();
+    m_ml->startFsFactoriesAndRefresh();
 
     MediaLibrary::removeOldEntities( m_ml );
 }
