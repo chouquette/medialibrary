@@ -1248,6 +1248,13 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
             if ( previousVersion == 24 )
             {
                 migrateModel24to25();
+                /*
+                 * Force a rescan to assign all potentially ungrouped media to
+                 * a group.
+                 * We are now assuming that a media is always grouped, so we
+                 * need to ensure this is true
+                 */
+                needRescan = true;
                 previousVersion = 25;
             }
             // To be continued in the future!
