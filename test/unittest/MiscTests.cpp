@@ -68,6 +68,7 @@ namespace
         "media_cascade_file_deletion",
         "media_group_decrement_nb_media",
         "media_group_decrement_nb_media_on_deletion",
+        "media_group_delete_empty_group",
         "media_group_delete_fts",
         "media_group_increment_nb_media",
         "media_group_insert_fts",

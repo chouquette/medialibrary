@@ -113,3 +113,5 @@ Folder::trigger( Folder::Triggers::UpdateNbMediaOnDelete, 25 ),
 MediaGroup::trigger( MediaGroup::Triggers::IncrementNbMediaOnGroupChange, 25 ),
 MediaGroup::trigger( MediaGroup::Triggers::DecrementNbMediaOnGroupChange, 25 ),
 MediaGroup::trigger( MediaGroup::Triggers::DecrementNbMediaOnDeletion, 25 ),
+
+MediaGroup::trigger( MediaGroup::Triggers::DeleteEmptyGroups, 25 ),

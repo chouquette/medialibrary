@@ -131,7 +131,7 @@ TEST_F( MediaGroups, FetchMedia )
 
     auto res = mg->add( *video );
     ASSERT_TRUE( res );
-    res = mg->add( audio->id() );
+    res = mg->add( *audio );
     ASSERT_TRUE( res );
 
     ASSERT_EQ( 2u, mediaQuery->count() );
@@ -144,19 +144,20 @@ TEST_F( MediaGroups, FetchMedia )
     ASSERT_EQ( 1u, media.size() );
     ASSERT_EQ( video->id(), media[0]->id() );
 
-    // Now remove most media from groups
+    // Now remove media from groups
     res = mg->remove( *video );
-    ASSERT_TRUE( res );
-    res = mg->remove( audio->id() );
     ASSERT_TRUE( res );
 
     media = mg->media( IMedia::Type::Unknown, nullptr )->all();
-    ASSERT_EQ( 0u, media.size() );
+    ASSERT_EQ( 1u, media.size() );
     // Check for the cached value
-    ASSERT_EQ( 0u, mg->nbMedia() );
-    // And ensure the DB also was updated:
+    ASSERT_EQ( 1u, mg->nbMedia() );
+    // And check that the DB was updated
     mg = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( mg->id() ) );
-    ASSERT_EQ( 0u, mg->nbMedia() );
+    ASSERT_EQ( 1u, mg->nbMedia() );
+
+    // Don't remove more, since the media group would be deleted.
+    // This is checked by the DeleteEmpty test
 }
 
 TEST_F( MediaGroups, SearchMedia )
@@ -210,17 +211,25 @@ TEST_F( MediaGroups, UpdateNbMediaTypeChange )
     ASSERT_EQ( 0u, group2->nbUnknown() );
 
     // Insert an unknown media in a group
+    // Also insert a media for each group, to avoid their count to reach 0 which
+    // would cause the group to be deleted
     auto m = ml->addMedia( "media.mkv", IMedia::Type::Unknown );
+    auto m2 = ml->addMedia( "media2.avi", IMedia::Type::Video );
+    auto m3 = ml->addMedia( "media3.mp3", IMedia::Type::Audio );
     group1->add( *m );
+    group1->add( *m2 );
+    group2->add( *m3 );
 
     group1 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group1->id() ) );
     group2 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group2->id() ) );
     ASSERT_EQ( 0u, group1->nbAudio() );
-    ASSERT_EQ( 0u, group1->nbVideo() );
+    ASSERT_EQ( 1u, group1->nbVideo() );
     ASSERT_EQ( 1u, group1->nbUnknown() );
-    ASSERT_EQ( 0u, group2->nbAudio() );
+    ASSERT_EQ( 2u, group1->nbMedia() );
+    ASSERT_EQ( 1u, group2->nbAudio() );
     ASSERT_EQ( 0u, group2->nbVideo() );
     ASSERT_EQ( 0u, group2->nbUnknown() );
+    ASSERT_EQ( 1u, group2->nbMedia() );
 
     // Move that media to another group
     group2->add( *m );
@@ -228,20 +237,22 @@ TEST_F( MediaGroups, UpdateNbMediaTypeChange )
     group1 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group1->id() ) );
     group2 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group2->id() ) );
     ASSERT_EQ( 0u, group1->nbAudio() );
-    ASSERT_EQ( 0u, group1->nbVideo() );
+    ASSERT_EQ( 1u, group1->nbVideo() );
     ASSERT_EQ( 0u, group1->nbUnknown() );
-    ASSERT_EQ( 0u, group2->nbAudio() );
+    ASSERT_EQ( 1u, group1->nbMedia() );
+    ASSERT_EQ( 1u, group2->nbAudio() );
     ASSERT_EQ( 0u, group2->nbVideo() );
     ASSERT_EQ( 1u, group2->nbUnknown() );
+    ASSERT_EQ( 2u, group2->nbMedia() );
 
     // Now change the media type
     m->setType( IMedia::Type::Audio );
     group1 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group1->id() ) );
     group2 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group2->id() ) );
     ASSERT_EQ( 0u, group1->nbAudio() );
-    ASSERT_EQ( 0u, group1->nbVideo() );
+    ASSERT_EQ( 1u, group1->nbVideo() );
     ASSERT_EQ( 0u, group1->nbUnknown() );
-    ASSERT_EQ( 1u, group2->nbAudio() );
+    ASSERT_EQ( 2u, group2->nbAudio() );
     ASSERT_EQ( 0u, group2->nbVideo() );
     ASSERT_EQ( 0u, group2->nbUnknown() );
 
@@ -255,9 +266,9 @@ TEST_F( MediaGroups, UpdateNbMediaTypeChange )
     group1 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group1->id() ) );
     group2 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group2->id() ) );
     ASSERT_EQ( 0u, group1->nbAudio() );
-    ASSERT_EQ( 1u, group1->nbVideo() );
+    ASSERT_EQ( 2u, group1->nbVideo() );
     ASSERT_EQ( 0u, group1->nbUnknown() );
-    ASSERT_EQ( 0u, group2->nbAudio() );
+    ASSERT_EQ( 1u, group2->nbAudio() );
     ASSERT_EQ( 0u, group2->nbVideo() );
     ASSERT_EQ( 0u, group2->nbUnknown() );
 
@@ -266,9 +277,9 @@ TEST_F( MediaGroups, UpdateNbMediaTypeChange )
     group1 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group1->id() ) );
     group2 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group2->id() ) );
     ASSERT_EQ( 0u, group1->nbAudio() );
-    ASSERT_EQ( 0u, group1->nbVideo() );
+    ASSERT_EQ( 1u, group1->nbVideo() );
     ASSERT_EQ( 0u, group1->nbUnknown() );
-    ASSERT_EQ( 0u, group2->nbAudio() );
+    ASSERT_EQ( 1u, group2->nbAudio() );
     ASSERT_EQ( 0u, group2->nbVideo() );
     ASSERT_EQ( 0u, group2->nbUnknown() );
 }
@@ -437,8 +448,50 @@ TEST_F( MediaGroups, DeleteMedia )
 
     ml->deleteMedia( m3->id() );
     mg = ml->mediaGroup( mg->id() );
-    ASSERT_EQ( 0u, mg->nbMedia() );
-    ASSERT_EQ( 0u, mg->nbUnknown() );
+    ASSERT_EQ( nullptr, mg );
+}
+
+
+TEST_F( MediaGroups, DeleteEmpty )
+{
+    /*
+     * Create 3 groups with the 3 different media type, and check that deleting
+     * every media is causing the group to be deleted as well
+     */
+    auto m1 = ml->addMedia( "media1.mkv", IMedia::Type::Video );
+    auto m2 = ml->addMedia( "media2.mp3", IMedia::Type::Audio );
+    auto m3 = ml->addMedia( "media3.ts", IMedia::Type::Unknown );
+
+    auto mg1 = ml->createMediaGroup( std::vector<int64_t>{ m1->id() } );
+    auto mg2 = ml->createMediaGroup( std::vector<int64_t>{ m2->id() } );
+    auto mg3 = ml->createMediaGroup( std::vector<int64_t>{ m3->id() } );
+
+    auto groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 3u, groups.size() );
+
+    ml->deleteMedia( m1->id() );
+    groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    mg1 = ml->mediaGroup( mg1->id() );
+    ASSERT_EQ( nullptr, mg1 );
+    mg2 = ml->mediaGroup( mg2->id() );
+    ASSERT_NE( nullptr, mg2 );
+    mg3 = ml->mediaGroup( mg3->id() );
+    ASSERT_NE( nullptr, mg3 );
+
+    ml->deleteMedia( m2->id() );
+    groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    mg2 = ml->mediaGroup( mg2->id() );
+    ASSERT_EQ( nullptr, mg2 );
+    mg3 = ml->mediaGroup( mg3->id() );
+    ASSERT_NE( nullptr, mg3 );
+
+    ml->deleteMedia( m3->id() );
+    groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 0u, groups.size() );
+    mg3 = ml->mediaGroup( mg3->id() );
+    ASSERT_EQ( nullptr, mg3 );
 }
 
 TEST_F( MediaGroups, DeleteGroup )

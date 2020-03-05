@@ -294,6 +294,8 @@ void MediaGroup::createTriggers( sqlite::Connection* connection )
                                    trigger( Triggers::DecrementNbMediaOnGroupChange, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
                                    trigger( Triggers::DecrementNbMediaOnDeletion, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::DeleteEmptyGroups, Settings::DbModelVersion ) );
 }
 
 void MediaGroup::createIndexes( sqlite::Connection* )
@@ -425,6 +427,15 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                                " THEN 1 ELSE 0 END)"
                    " WHERE id_group = old.group_id;"
                    " END";
+        case Triggers::DeleteEmptyGroups:
+            assert( dbModel >= 25 );
+            return "CREATE TRIGGER " + triggerName( t, dbModel ) +
+                   " AFTER UPDATE OF nb_video, nb_audio, nb_unknown"
+                       " ON " + Table::Name +
+                   " WHEN new.nb_video = 0 AND new.nb_audio = 0 AND new.nb_unknown = 0"
+                   " BEGIN"
+                   " DELETE FROM " + Table::Name + " WHERE id_group = new.id_group;"
+                   " END";
         default:
             assert( !"Invalid trigger" );
     }
@@ -446,6 +457,9 @@ std::string MediaGroup::triggerName(MediaGroup::Triggers t, uint32_t dbModel)
             return "media_group_decrement_nb_media";
         case Triggers::DecrementNbMediaOnDeletion:
             return "media_group_decrement_nb_media_on_deletion";
+        case Triggers::DeleteEmptyGroups:
+            assert( dbModel >= 25 );
+            return "media_group_delete_empty_group";
         default:
             assert( !"Invalid trigger" );
     }
