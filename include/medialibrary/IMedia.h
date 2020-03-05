@@ -345,20 +345,13 @@ public:
     /// \brief removeFromGroup Remove this media from its group
     /// \return true if the media was successfully removed, false otherwise.
     ///
-    /// If this media is not part of any group, true is returned, and no action
-    /// will occur.
-    ///
     virtual bool removeFromGroup() = 0;
     ///
-    /// \brief isGrouped Returns true if the media belongs to a group, false otherwise
-    ///
-    virtual bool isGrouped() const = 0;
-    ///
-    /// \brief groupId Returns this media's group ID, or 0 if not grouped
+    /// \brief groupId Returns this media's group ID
     ///
     virtual int64_t groupId() const = 0;
     ///
-    /// \brief group Return this media's group, or nullptr if the media isn't grouped
+    /// \brief group Return this media's group
     ///
     virtual MediaGroupPtr group() const = 0;
     ///

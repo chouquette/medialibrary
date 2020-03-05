@@ -123,8 +123,6 @@ TEST_F( MediaGroups, FetchMedia )
     ASSERT_NE( nullptr, mg );
     ASSERT_NE( nullptr, video );
     ASSERT_NE( nullptr, audio );
-    ASSERT_FALSE( video->isGrouped() );
-    ASSERT_FALSE( audio->isGrouped() );
 
     auto mediaQuery = mg->media( IMedia::Type::Unknown, nullptr );
     ASSERT_EQ( 0u, mediaQuery->count() );
@@ -133,7 +131,6 @@ TEST_F( MediaGroups, FetchMedia )
 
     auto res = mg->add( *video );
     ASSERT_TRUE( res );
-    ASSERT_TRUE( video->isGrouped() );
     res = mg->add( audio->id() );
     ASSERT_TRUE( res );
 
@@ -489,8 +486,6 @@ TEST_F( MediaGroups, DeleteGroup )
 
     m1 = ml->media( m1->id() );
     m2 = ml->media( m2->id() );
-    ASSERT_TRUE( m1->isGrouped() );
-    ASSERT_TRUE( m2->isGrouped() );
 
     auto res = ml->deleteMediaGroup( mg1->id() );
     ASSERT_TRUE( res );
@@ -498,7 +493,6 @@ TEST_F( MediaGroups, DeleteGroup )
     mg1 = ml->mediaGroup( mg1->id() );
     ASSERT_EQ( nullptr, mg1 );
     m1 = ml->media( m1->id() );
-    ASSERT_FALSE( m1->isGrouped() );
 
     res = mg2->destroy();
     ASSERT_TRUE( res );
@@ -506,7 +500,6 @@ TEST_F( MediaGroups, DeleteGroup )
     mg2 = ml->mediaGroup( mg2->id() );
     ASSERT_EQ( nullptr, mg2 );
     m2 = ml->media( m2->id() );
-    ASSERT_FALSE( m2->isGrouped() );
 }
 
 TEST_F( MediaGroups, CommonPattern )
@@ -690,26 +683,20 @@ TEST_F( MediaGroups, Regroup )
 
     auto mg = ml->createMediaGroup( std::vector<int64_t>{ m5->id() } );
     m5 = ml->media( m5->id() );
-    ASSERT_TRUE( m5->isGrouped() );
     ASSERT_EQ( mg->id(), m5->groupId() );
 
     auto res = m1->regroup();
     ASSERT_TRUE( res );
-    ASSERT_TRUE( m1->isGrouped() );
 
     m2 = ml->media( m2->id() );
-    ASSERT_TRUE( m2->isGrouped() );
     ASSERT_EQ( m1->groupId(), m2->groupId() );
 
     m3 = ml->media( m3->id() );
-    ASSERT_TRUE( m3->isGrouped() );
     ASSERT_EQ( m1->groupId(), m3->groupId() );
 
     m4 = ml->media( m4->id() );
-    ASSERT_FALSE( m4->isGrouped() );
 
     m5 = ml->media( m5->id() );
-    ASSERT_TRUE( m5->isGrouped() );
     ASSERT_NE( m5->groupId(), m1->groupId() );
 
     auto newGroup = m1->group();

@@ -587,11 +587,6 @@ bool Media::removeFromGroup()
     return addToGroup( 0 );
 }
 
-bool Media::isGrouped() const
-{
-    return m_groupId != 0;
-}
-
 MediaGroupPtr Media::group() const
 {
     if ( m_groupId == 0 )
