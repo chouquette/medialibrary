@@ -1037,8 +1037,16 @@ void MediaLibrary::startDiscoverer()
 {
     for ( const auto& fsFactory : m_fsFactories )
     {
-        fsFactory->start( &m_fsFactoryCb );
-        fsFactory->refreshDevices();
+        /*
+         * We only want to start the fs factory if it is a local one, or if
+         * it's a network one and network discovery is enabled
+         */
+        if ( m_networkDiscoveryEnabled == true ||
+             fsFactory->isNetworkFileSystem() == false )
+        {
+            fsFactory->start( &m_fsFactoryCb );
+            fsFactory->refreshDevices();
+        }
     }
     auto discoverer = std::make_unique<FsDiscoverer>( this, m_callback,
                                     std::make_unique<prober::CrawlerProbe>() );
@@ -2219,6 +2227,11 @@ bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
 
     if ( enabled == m_networkDiscoveryEnabled )
         return true;
+    if ( m_started == false )
+    {
+        m_networkDiscoveryEnabled = enabled;
+        return true;
+    }
     auto affected = false;
 
     std::unique_ptr<sqlite::Transaction> t;
