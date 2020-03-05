@@ -397,7 +397,7 @@ TEST_F( MediaGroups, Delete )
     ASSERT_NE( nullptr, media->group() );
     ASSERT_EQ( mg->id(), media->groupId() );
 
-    MediaGroup::destroy( ml.get(), mg->id() );
+    ml->deleteMediaGroup( mg->id() );
 
     Reload();
 
@@ -811,4 +811,23 @@ TEST_F( MediaGroups, RegroupLocked )
     // Ensure we refuse to regroup an already grouped media
     res = m5->regroup();
     ASSERT_FALSE( res );
+}
+
+TEST_F( MediaGroups, ForcedSingletonRestrictions )
+{
+    auto m = ml->addMedia( "media.mkv", IMedia::Type::Video );
+    auto mg = ml->createMediaGroup( std::vector<int64_t>{ m->id() } );
+    auto res = mg->remove( *m );
+    ASSERT_TRUE( res );
+    mg = m->group();
+
+    res = mg->rename( "Another name" );
+    ASSERT_FALSE( res );
+    ASSERT_EQ( "media.mkv", mg->name() );
+
+    res = mg->destroy();
+    ASSERT_FALSE( res );
+    auto groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    ASSERT_EQ( groups[0]->id(), mg->id() );
 }

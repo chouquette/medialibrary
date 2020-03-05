@@ -654,7 +654,10 @@ MediaGroupPtr MediaLibrary::createMediaGroup( const std::vector<int64_t>& mediaI
 
 bool MediaLibrary::deleteMediaGroup( int64_t id )
 {
-    return MediaGroup::destroy( this, id );
+    auto mg = MediaGroup::fetch( this, id );
+    if ( mg == nullptr )
+        return false;
+    return mg->destroy();
 }
 
 MediaGroupPtr MediaLibrary::mediaGroup( int64_t id ) const

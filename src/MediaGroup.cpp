@@ -184,6 +184,8 @@ bool MediaGroup::rename( std::string name, bool userInitiated )
 {
     if ( name.empty() == true )
         return false;
+    if ( m_forcedSingleton == true )
+        return false;
     if ( name == m_name )
         return true;
     /* No need to update the user_interacted column if it's already set to false */
@@ -213,6 +215,8 @@ bool MediaGroup::isForcedSingleton() const
 
 bool MediaGroup::destroy()
 {
+    if ( m_forcedSingleton == true )
+        return false;
     return DatabaseHelpers<MediaGroup>::destroy( m_ml, m_id );
 }
 

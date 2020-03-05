@@ -118,8 +118,6 @@ public:
                                       const std::string& newTitle );
     static std::string prefix( const std::string& title );
 
-    using DatabaseHelpers<MediaGroup>::destroy;
-
 private:
     static std::string orderBy( const QueryParameters* params );
     static std::vector<std::shared_ptr<MediaGroup> > fetchMatching( MediaLibraryPtr ml,
