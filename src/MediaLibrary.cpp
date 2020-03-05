@@ -1070,15 +1070,15 @@ void MediaLibrary::startThumbnailer() const
 void MediaLibrary::populateNetworkFsFactories()
 {
 #ifdef HAVE_LIBVLC
-    auto fsFactory = std::make_shared<factory::NetworkFileSystemFactory>( this, "smb://" );
-        m_fsFactories.emplace_back( std::move( fsFactory ) );
+    addFileSystemFactoryLocked( std::make_shared<factory::NetworkFileSystemFactory>( this, "smb://" ) );
 #endif
 }
 
 void MediaLibrary::addLocalFsFactory()
 {
-    m_fsFactories.emplace( begin( m_fsFactories ),
-            std::make_shared<factory::FileSystemFactory>( this ) );
+#ifdef HAVE_LIBVLC
+    addFileSystemFactoryLocked( std::make_shared<factory::FileSystemFactory>( this ) );
+#endif
 }
 
 void MediaLibrary::addDefaultDeviceListers()
