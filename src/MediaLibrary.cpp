@@ -1035,24 +1035,10 @@ void MediaLibrary::startParser()
 
 void MediaLibrary::startDiscoverer()
 {
-    for ( const auto& fsFactory : m_fsFactories )
-    {
-        /*
-         * We only want to start the fs factory if it is a local one, or if
-         * it's a network one and network discovery is enabled
-         */
-        if ( m_networkDiscoveryEnabled == true ||
-             fsFactory->isNetworkFileSystem() == false )
-        {
-            fsFactory->start( &m_fsFactoryCb );
-            fsFactory->refreshDevices();
-        }
-    }
     auto discoverer = std::make_unique<FsDiscoverer>( this, m_callback,
                                     std::make_unique<prober::CrawlerProbe>() );
     m_discovererWorker.reset( new DiscovererWorker( this,
                                                     std::move( discoverer ) ) );
-
 }
 
 void MediaLibrary::startDeletionNotifier()
@@ -2387,6 +2373,21 @@ void MediaLibrary::refreshDevices( fs::IFileSystemFactory& fsFactory )
 
 void MediaLibrary::refreshDevices()
 {
+    std::lock_guard<compat::Mutex> lock( m_mutex );
+
+    for ( const auto& fsFactory : m_fsFactories )
+    {
+        /*
+         * We only want to start the fs factory if it is a local one, or if
+         * it's a network one and network discovery is enabled
+         */
+        if ( m_networkDiscoveryEnabled == true ||
+             fsFactory->isNetworkFileSystem() == false )
+        {
+            fsFactory->start( &m_fsFactoryCb );
+            fsFactory->refreshDevices();
+        }
+    }
     auto devices = Device::fetchAll( this );
     for ( const auto& d : devices )
     {
