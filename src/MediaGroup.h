@@ -124,10 +124,6 @@ public:
 
 private:
     static std::string orderBy( const QueryParameters* params );
-    /**
-     * @brief exists Checks for the existance of a root group with the given name
-     */
-    static bool exists( MediaLibraryPtr ml, const std::string& name );
     static std::vector<std::shared_ptr<MediaGroup> > fetchMatching( MediaLibraryPtr ml,
                                                   const std::string& prefix );
 

@@ -641,17 +641,4 @@ std::string MediaGroup::orderBy(const QueryParameters* params)
     return req;
 }
 
-bool MediaGroup::exists(MediaLibraryPtr ml, const std::string& name)
-{
-    sqlite::Statement stmt{ ml->getConn()->handle(), "SELECT EXISTS("
-        "SELECT id_group FROM " + Table::Name +
-        " WHERE parent_id IS NULL AND name = ?)"
-    };
-    stmt.execute( name );
-    auto row = stmt.row();
-    auto res = row.extract<bool>();
-    assert( stmt.row() == nullptr );
-    return res;
-}
-
 }
