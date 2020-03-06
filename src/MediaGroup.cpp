@@ -312,7 +312,8 @@ MediaGroup::fetchMatching( MediaLibraryPtr ml, const std::string& prefix )
     if ( prefix.length() < AutomaticGroupPrefixSize )
         return {};
     static const std::string req = "SELECT * FROM " + Table::Name +
-            " WHERE SUBSTR(name, 1, ?) = ? COLLATE NOCASE";
+            " WHERE forced_singleton = 0"
+            " AND SUBSTR(name, 1, ?) = ? COLLATE NOCASE";
     return fetchAll<MediaGroup>( ml, req, prefix.length(), prefix );
 }
 

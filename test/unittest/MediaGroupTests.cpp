@@ -565,35 +565,47 @@ TEST_F( MediaGroups, AssignToGroups )
     ASSERT_EQ( 0u, groups.size() );
 
     /*
+     * Create a forced singleton group to ensure it's not considered a valid
+     * candidate for grouping
+     */
+    auto m4 = ml->addMedia( "otters are so fluffy.mkv", IMedia::Type::Video );
+    auto mg = ml->createMediaGroup( std::vector<int64_t>{ m4->id() } );
+    auto res = mg->remove( *m4 );
+    ASSERT_TRUE( res );
+    groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    ASSERT_TRUE( static_cast<MediaGroup*>( groups[0].get() )->isForcedSingleton() );
+
+    /*
      * First assign m1, then m2, and do it again for a different group to check
      * that the "the " prefix is correctly handled regardless of the insertion
      * order
      */
-    auto res = MediaGroup::assignToGroup( ml.get(), *m1 );
+    res = MediaGroup::assignToGroup( ml.get(), *m1 );
     ASSERT_TRUE( res );
     groups = ml->mediaGroups( nullptr )->all();
-    ASSERT_EQ( 1u, groups.size() );
+    ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( 1u, groups[0]->nbVideo() );
     ASSERT_EQ( groups[0]->name(), "otters are fluffy.mkv" );
+    ASSERT_EQ( m4->groupId(), groups[1]->id() );
+    ASSERT_TRUE( static_cast<MediaGroup*>( groups[1].get() )->isForcedSingleton() );
+    ASSERT_EQ( m4->title(), groups[1]->name() );
 
     res = MediaGroup::assignToGroup( ml.get(), *m2 );
     ASSERT_TRUE( res );
     groups = ml->mediaGroups( nullptr )->all();
-    ASSERT_EQ( 1u, groups.size() );
+    ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( 2u, groups[0]->nbVideo() );
     ASSERT_EQ( groups[0]->name(), "otters are " );
 
     res = MediaGroup::assignToGroup( ml.get(), *m3 );
     ASSERT_TRUE( res );
     groups = ml->mediaGroups( nullptr )->all();
-    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( 3u, groups.size() );
     ASSERT_EQ( 1u, groups[0]->nbVideo() );
     ASSERT_EQ( groups[0]->name(), "otter" );
     ASSERT_EQ( 2u, groups[1]->nbVideo() );
     ASSERT_EQ( groups[1]->name(), "otters are " );
-
-    groups[0]->destroy();
-    groups[1]->destroy();
 
     /*
      * Delete the media since they have been grouped, and assignToGroup asserts
@@ -604,6 +616,11 @@ TEST_F( MediaGroups, AssignToGroups )
     ml->deleteMedia( m1->id() );
     ml->deleteMedia( m2->id() );
     ml->deleteMedia( m3->id() );
+    ml->deleteMedia( m4->id() );
+
+    /* Which should delete all the groups */
+    groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 0u, groups.size() );
 
     m1 = std::static_pointer_cast<Media>(
                 ml->addMedia( "The otters are fluffy.mkv", IMedia::Type::Video ) );
@@ -612,25 +629,29 @@ TEST_F( MediaGroups, AssignToGroups )
     m3 = std::static_pointer_cast<Media>(
                 ml->addMedia( "the otter", IMedia::Type::Video ) );
 
+    m4 = ml->addMedia( "otters are so fluffy.mkv", IMedia::Type::Video );
+    mg = ml->createMediaGroup( std::vector<int64_t>{ m4->id() } );
+    res = mg->remove( *m4 );
+
     /* Now try again with the other ordering */
     res = MediaGroup::assignToGroup( ml.get(), *m3 );
     ASSERT_TRUE( res );
     groups = ml->mediaGroups( nullptr )->all();
-    ASSERT_EQ( 1u, groups.size() );
+    ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( 1u, groups[0]->nbVideo() );
     ASSERT_EQ( groups[0]->name(), "otter" );
 
     res = MediaGroup::assignToGroup( ml.get(), *m2 );
     ASSERT_TRUE( res );
     groups = ml->mediaGroups( nullptr )->all();
-    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( 3u, groups.size() );
     ASSERT_EQ( 1u, groups[1]->nbVideo() );
     ASSERT_EQ( groups[1]->name(), "otters are cute.mkv" );
 
     res = MediaGroup::assignToGroup( ml.get(), *m1 );
     ASSERT_TRUE( res );
     groups = ml->mediaGroups( nullptr )->all();
-    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( 3u, groups.size() );
     ASSERT_EQ( 2u, groups[1]->nbVideo() );
     ASSERT_EQ( groups[1]->name(), "otters are " );
 }
