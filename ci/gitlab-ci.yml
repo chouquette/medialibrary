@@ -10,6 +10,8 @@ linux:
     only:
       - merge_requests
       - master@videolan/medialibrary
+    except:
+      - schedules
     tags:
       - debian
       - amd64
@@ -26,6 +28,8 @@ win32:
     only:
       - merge_requests
       - master@videolan/medialibrary
+    except:
+      - schedules
     tags:
       - win32
     script:
@@ -46,6 +50,8 @@ win64:
     only:
       - merge_requests
       - master@videolan/medialibrary
+    except:
+      - schedules
     tags:
       - win64
     script:
