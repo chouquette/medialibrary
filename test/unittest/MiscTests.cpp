@@ -72,6 +72,7 @@ namespace
         "media_group_delete_fts",
         "media_group_increment_nb_media",
         "media_group_insert_fts",
+        "media_group_rename_forced_singleton",
         "media_update_device_presence",
         "show_decrement_nb_episode",
         "show_increment_nb_episode",

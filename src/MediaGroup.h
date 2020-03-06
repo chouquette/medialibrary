@@ -52,6 +52,7 @@ public:
         DecrementNbMediaOnGroupChange,
         DecrementNbMediaOnDeletion,
         DeleteEmptyGroups,
+        RenameForcedSingleton,
     };
     enum class Indexes : uint8_t
     {

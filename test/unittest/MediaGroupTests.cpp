@@ -852,3 +852,37 @@ TEST_F( MediaGroups, ForcedSingletonRestrictions )
     ASSERT_EQ( 1u, media.size() );
     ASSERT_EQ( m->id(), media[0]->id() );
 }
+
+TEST_F( MediaGroups, RenameForcedSingleton )
+{
+    auto m = ml->addMedia( "media.mkv", IMedia::Type::Video );
+    auto mg = ml->createMediaGroup( std::vector<int64_t>{ m->id() } );
+    mg->remove( *m );
+    auto singleton = m->group();
+    ASSERT_NE( mg->id(), singleton->id() );
+
+    auto groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    ASSERT_EQ( singleton->id(), groups[0]->id() );
+    ASSERT_EQ( m->title(), groups[0]->name() );
+
+    auto res = m->setTitle( "sea otter makes a better title" );
+    ASSERT_TRUE( res );
+
+    singleton = ml->mediaGroup( singleton->id() );
+    ASSERT_EQ( m->title(), singleton->name() );
+
+    /* Ensure we don't do anything for non singleton groups */
+    mg = ml->createMediaGroup( "otters group" );
+    res = mg->add( *m );
+    ASSERT_TRUE( res );
+
+    groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+
+    res = m->setTitle( "Better otter related title" );
+    ASSERT_TRUE( res );
+
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_NE( mg->name(), m->title() );
+}

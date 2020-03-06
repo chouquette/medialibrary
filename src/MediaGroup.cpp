@@ -356,6 +356,8 @@ void MediaGroup::createTriggers( sqlite::Connection* connection )
                                    trigger( Triggers::DecrementNbMediaOnDeletion, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
                                    trigger( Triggers::DeleteEmptyGroups, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::RenameForcedSingleton, Settings::DbModelVersion ) );
 }
 
 void MediaGroup::createIndexes( sqlite::Connection* connection )
@@ -499,6 +501,16 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                    " BEGIN"
                    " DELETE FROM " + Table::Name + " WHERE id_group = new.id_group;"
                    " END";
+        case Triggers::RenameForcedSingleton:
+            assert( dbModel >= 25 );
+            return "CREATE TRIGGER " + triggerName( t, dbModel ) +
+                   " AFTER UPDATE OF title ON " + Media::Table::Name +
+                   " WHEN new.group_id IS NOT NULL"
+                   " BEGIN"
+                       " UPDATE " + Table::Name + " SET name = new.title"
+                           " WHERE id_group = new.group_id"
+                           " AND forced_singleton != 0;"
+                   " END";
         default:
             assert( !"Invalid trigger" );
     }
@@ -523,6 +535,9 @@ std::string MediaGroup::triggerName(MediaGroup::Triggers t, uint32_t dbModel)
         case Triggers::DeleteEmptyGroups:
             assert( dbModel >= 25 );
             return "media_group_delete_empty_group";
+        case Triggers::RenameForcedSingleton:
+            assert( dbModel >= 25 );
+            return "media_group_rename_forced_singleton";
         default:
             assert( !"Invalid trigger" );
     }
