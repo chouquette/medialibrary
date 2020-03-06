@@ -115,7 +115,7 @@ bool MediaGroup::userInteracted() const
 
 bool MediaGroup::add( IMedia& media )
 {
-    if ( media.addToGroup( m_id ) == false )
+    if ( Media::setMediaGroup( m_ml, media.id(), m_id ) == false )
         return false;
     switch ( media.type() )
     {
@@ -129,6 +129,8 @@ bool MediaGroup::add( IMedia& media )
             ++m_nbUnknown;
             break;
     }
+    auto& m = static_cast<Media&>( media );
+    m.setMediaGroupId( m_id );
     return true;
 }
 

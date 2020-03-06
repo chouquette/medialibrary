@@ -565,17 +565,24 @@ bool Media::setMediaGroup( MediaLibraryPtr ml, int64_t mediaId, int64_t groupId 
 
 bool Media::addToGroup( IMediaGroup& group )
 {
-    return addToGroup( group.id() );
+    if ( group.id() == m_groupId )
+        return true;
+    return group.add( *this );
 }
 
 bool Media::addToGroup( int64_t groupId )
 {
     if ( m_groupId == groupId )
         return true;
-    if ( setMediaGroup( m_ml, m_id, groupId ) == false )
+    auto group = MediaGroup::fetch( m_ml, groupId );
+    if ( group == nullptr )
         return false;
+    return addToGroup( *group );
+}
+
+void Media::setMediaGroupId( int64_t groupId )
+{
     m_groupId = groupId;
-    return true;
 }
 
 bool Media::removeFromGroup()

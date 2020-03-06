@@ -222,6 +222,7 @@ class Media : public IMedia,
 
         virtual bool addToGroup( IMediaGroup& group ) override;
         virtual bool addToGroup( int64_t groupId ) override;
+        void setMediaGroupId( int64_t groupId );
         virtual bool removeFromGroup() override;
         virtual MediaGroupPtr group() const override;
         virtual int64_t groupId() const override;
