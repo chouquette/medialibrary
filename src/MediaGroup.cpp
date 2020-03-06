@@ -141,8 +141,23 @@ bool MediaGroup::add( int64_t mediaId )
 
 bool MediaGroup::remove( IMedia& media )
 {
-    if ( media.removeFromGroup() == false )
+    std::unique_ptr<sqlite::Transaction> t;
+    if ( sqlite::Transaction::transactionInProgress() == false )
+        t = m_ml->getConn()->newTransaction();
+
+    auto group = MediaGroup::create( m_ml, media.title(), false, true );
+    if ( group == nullptr )
         return false;
+    auto res = group->add( media );
+    if ( res == false )
+        return false;
+
+    if ( t != nullptr )
+        t->commit();
+
+    auto& m = static_cast<Media&>( media );
+    m.setMediaGroupId( group->id() );
+
     switch ( media.type() )
     {
         case IMedia::Type::Audio:

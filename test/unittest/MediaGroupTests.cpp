@@ -693,6 +693,9 @@ TEST_F( MediaGroups, RemoveMedia )
     auto groups = ml->mediaGroups( nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
 
+    // Refresh the media since it needs to know it's part of a group
+    m = ml->media( m->id() );
+
     auto res = m->removeFromGroup();
     ASSERT_TRUE( res );
 

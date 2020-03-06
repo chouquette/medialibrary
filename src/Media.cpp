@@ -587,19 +587,10 @@ void Media::setMediaGroupId( int64_t groupId )
 
 bool Media::removeFromGroup()
 {
-    std::unique_ptr<sqlite::Transaction> t;
-    if ( sqlite::Transaction::transactionInProgress() == false )
-        t = m_ml->getConn()->newTransaction();
-    auto group = MediaGroup::create( m_ml, m_title, false, true );
-    if ( group == nullptr )
+    auto g = group();
+    if ( g == nullptr )
         return false;
-    auto res = group->add( *this );
-    if ( res == false )
-        return false;
-    if ( t != nullptr )
-        t->commit();
-    m_groupId = group->id();
-    return true;
+    return g->remove( *this );
 }
 
 MediaGroupPtr Media::group() const
