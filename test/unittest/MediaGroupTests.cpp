@@ -387,23 +387,41 @@ TEST_F( MediaGroups, CheckDbModel )
 TEST_F( MediaGroups, Delete )
 {
     auto mg = ml->createMediaGroup( "group" );
-    auto media = std::static_pointer_cast<Media>(
-                ml->addMedia( "media.mkv", IMedia::Type::Video ) );
-    mg->add( media->id() );
+    auto m1 = std::static_pointer_cast<Media>(
+                ml->addMedia( "sea otters.mkv", IMedia::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>(
+                ml->addMedia( "fluffy otters.mkv", IMedia::Type::Video ) );
+    mg->add( m1->id() );
+    mg->add( m2->id() );
+
+    auto groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
 
     Reload();
 
-    media = ml->media( media->id() );
-    ASSERT_NE( nullptr, media->group() );
-    ASSERT_EQ( mg->id(), media->groupId() );
+    m1 = ml->media( m1->id() );
+    ASSERT_NE( nullptr, m1->group() );
+    ASSERT_EQ( mg->id(), m1->groupId() );
 
     ml->deleteMediaGroup( mg->id() );
 
     Reload();
 
-    media = ml->media( media->id() );
-    ASSERT_EQ( nullptr, media->group() );
-    ASSERT_EQ( 0, media->groupId() );
+    m1 = ml->media( m1->id() );
+    m2 = ml->media( m2->id() );
+    ASSERT_NE( nullptr, m1->group() );
+    auto lockedGroup = std::static_pointer_cast<MediaGroup>( m1->group() );
+    ASSERT_TRUE( lockedGroup->isForcedSingleton() );
+    ASSERT_EQ( m1->title(), lockedGroup->name() );
+
+    lockedGroup = std::static_pointer_cast<MediaGroup>( m2->group() );
+    ASSERT_TRUE( lockedGroup->isForcedSingleton() );
+    ASSERT_EQ( m2->title(), lockedGroup->name() );
+
+    groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( m2->groupId(), groups[0]->id() );
+    ASSERT_EQ( m1->groupId(), groups[1]->id() );
 }
 
 TEST_F( MediaGroups, DeleteMedia )

@@ -217,7 +217,16 @@ bool MediaGroup::destroy()
 {
     if ( m_forcedSingleton == true )
         return false;
-    return DatabaseHelpers<MediaGroup>::destroy( m_ml, m_id );
+    auto t = m_ml->getConn()->newTransaction();
+    auto content = media( IMedia::Type::Unknown, nullptr )->all();
+    for ( auto& m : content )
+    {
+        if ( remove( *m ) == false )
+            return false;
+    }
+    // Let the empty group be removed by the DeleteEmptyGroups trigger
+    t->commit();
+    return true;
 }
 
 std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
