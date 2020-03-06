@@ -123,6 +123,9 @@ private:
     static std::vector<std::shared_ptr<MediaGroup> > fetchMatching( MediaLibraryPtr ml,
                                                   const std::string& prefix );
 
+    bool add( IMedia& media, bool force );
+    bool add( int64_t mediaId, bool force );
+
 private:
     MediaLibraryPtr m_ml;
     int64_t m_id;

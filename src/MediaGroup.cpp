@@ -115,6 +115,18 @@ bool MediaGroup::userInteracted() const
 
 bool MediaGroup::add( IMedia& media )
 {
+    return add( media, false );
+}
+
+bool MediaGroup::add( int64_t mediaId )
+{
+    return add( mediaId, false );
+}
+
+bool MediaGroup::add( IMedia& media, bool forced )
+{
+    if ( m_forcedSingleton == true && forced == false )
+        return false;
     if ( Media::setMediaGroup( m_ml, media.id(), m_id ) == false )
         return false;
     switch ( media.type() )
@@ -134,8 +146,10 @@ bool MediaGroup::add( IMedia& media )
     return true;
 }
 
-bool MediaGroup::add( int64_t mediaId )
+bool MediaGroup::add( int64_t mediaId, bool forced )
 {
+    if ( m_forcedSingleton == true && forced == false )
+        return false;
     return Media::setMediaGroup( m_ml, mediaId, m_id );
 }
 
@@ -148,7 +162,7 @@ bool MediaGroup::remove( IMedia& media )
     auto group = MediaGroup::create( m_ml, media.title(), false, true );
     if ( group == nullptr )
         return false;
-    auto res = group->add( media );
+    auto res = group->add( media, true );
     if ( res == false )
         return false;
 

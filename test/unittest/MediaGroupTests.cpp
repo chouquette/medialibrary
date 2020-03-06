@@ -803,6 +803,7 @@ TEST_F( MediaGroups, RegroupLocked )
 TEST_F( MediaGroups, ForcedSingletonRestrictions )
 {
     auto m = ml->addMedia( "media.mkv", IMedia::Type::Video );
+    auto m2 = ml->addMedia( "media2.mkv", IMedia::Type::Video );
     auto mg = ml->createMediaGroup( std::vector<int64_t>{ m->id() } );
     auto res = mg->remove( *m );
     ASSERT_TRUE( res );
@@ -817,4 +818,16 @@ TEST_F( MediaGroups, ForcedSingletonRestrictions )
     auto groups = ml->mediaGroups( nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
     ASSERT_EQ( groups[0]->id(), mg->id() );
+
+    res = mg->add( *m2 );
+    ASSERT_FALSE( res );
+    auto media = mg->media( IMedia::Type::Unknown, nullptr )->all();
+    ASSERT_EQ( 1u, media.size() );
+    ASSERT_EQ( m->id(), media[0]->id() );
+
+    mg->add( m2->id() );
+    ASSERT_FALSE( res );
+    media = mg->media( IMedia::Type::Unknown, nullptr )->all();
+    ASSERT_EQ( 1u, media.size() );
+    ASSERT_EQ( m->id(), media[0]->id() );
 }
