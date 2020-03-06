@@ -494,40 +494,6 @@ TEST_F( MediaGroups, DeleteEmpty )
     ASSERT_EQ( nullptr, mg3 );
 }
 
-TEST_F( MediaGroups, DeleteGroup )
-{
-    auto mg1 = ml->createMediaGroup( "group 1" );
-    auto mg2 = ml->createMediaGroup( "group 2" );
-    auto m1 = ml->addMedia( "otters.mkv", IMedia::Type::Video );
-    auto m2 = ml->addMedia( "squeaking otters.mp3", IMedia::Type::Audio );
-    mg1->add( *m1 );
-    mg2->add( *m2 );
-
-    Reload();
-
-    mg1 = ml->mediaGroup( mg1->id() );
-    mg2 = ml->mediaGroup( mg2->id() );
-    ASSERT_EQ( 1u, mg1->nbMedia() );
-    ASSERT_EQ( 1u, mg2->nbMedia() );
-
-    m1 = ml->media( m1->id() );
-    m2 = ml->media( m2->id() );
-
-    auto res = ml->deleteMediaGroup( mg1->id() );
-    ASSERT_TRUE( res );
-
-    mg1 = ml->mediaGroup( mg1->id() );
-    ASSERT_EQ( nullptr, mg1 );
-    m1 = ml->media( m1->id() );
-
-    res = mg2->destroy();
-    ASSERT_TRUE( res );
-
-    mg2 = ml->mediaGroup( mg2->id() );
-    ASSERT_EQ( nullptr, mg2 );
-    m2 = ml->media( m2->id() );
-}
-
 TEST_F( MediaGroups, CommonPattern )
 {
     auto res = MediaGroup::commonPattern( "", "" );
