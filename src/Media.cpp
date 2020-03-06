@@ -1213,7 +1213,7 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
     if ( dbModel >= 24 )
     {
         req += "FOREIGN KEY(group_id) REFERENCES " + MediaGroup::Table::Name +
-                "(id_group) ON DELETE SET NULL,";
+                "(id_group) ON DELETE RESTRICT,";
     }
     req += "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
         + "(id_folder)"
