@@ -814,10 +814,11 @@ public:
      * @brief addNetworkFileSystemFactory Provides a network filesystem factory implementation
      * @return true if the factory is accepted & inserted
      *
-     * This must be called after initialize()
+     * This must be called *before* initialize()
      * Only a single IFileSystemFactory instance per scheme is allowed.
      * If a factory is passed to this method and the scheme is already handled
      * by another factory, false will be returned.
+     * The provided factory won't be started until the media library itself is.
      */
     virtual bool addFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory ) = 0;
 

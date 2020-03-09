@@ -2198,6 +2198,7 @@ bool MediaLibrary::addFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory>
 
 bool MediaLibrary::addFileSystemFactoryLocked(std::shared_ptr<fs::IFileSystemFactory> fsFactory)
 {
+    assert( m_initialized == false );
     auto it = std::find_if( cbegin( m_fsFactories  ),
                             cend( m_fsFactories ),
                             [&fsFactory]( const std::shared_ptr<fs::IFileSystemFactory>& fsf ) {
