@@ -2251,6 +2251,12 @@ bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
     return true;
 }
 
+bool MediaLibrary::isDiscoverNetworkEnabled() const
+{
+    std::lock_guard<compat::Mutex> lock( m_mutex );
+    return m_networkDiscoveryEnabled;
+}
+
 Query<IFolder> MediaLibrary::entryPoints() const
 {
     return Folder::entryPoints( this, false, 0 );

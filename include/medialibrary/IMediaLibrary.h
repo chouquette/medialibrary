@@ -644,6 +644,7 @@ public:
      * the previous call status.
      */
     virtual bool setDiscoverNetworkEnabled( bool enabled ) = 0;
+    virtual bool isDiscoverNetworkEnabled() const = 0;
     /**
      * @brief entryPoints List the entrypoints that are managed by the medialibrary
      *
