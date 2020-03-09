@@ -2179,7 +2179,11 @@ std::shared_ptr<fs::IFileSystemFactory> MediaLibrary::fsFactoryForMrl( const std
     for ( const auto& f : m_fsFactories )
     {
         if ( f->isMrlSupported( mrl ) )
+        {
+            if ( f->isNetworkFileSystem() && m_networkDiscoveryEnabled == false )
+                return nullptr;
             return f;
+        }
     }
     return nullptr;
 }
