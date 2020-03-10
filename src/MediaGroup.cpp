@@ -720,6 +720,9 @@ std::string MediaGroup::orderBy(const QueryParameters* params)
         case SortingCriteria::NbMedia:
             req += "mg.nb_audio + mg.nb_video + mg.nb_unknown";
             break;
+        case SortingCriteria::Duration:
+            req += "mg.duration";
+            break;
         default:
             LOG_WARN( "Unsupported sorting criteria for media groups: ",
                       static_cast<std::underlying_type_t<SortingCriteria>>( sort ),

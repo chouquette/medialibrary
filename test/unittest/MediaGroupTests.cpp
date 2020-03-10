@@ -965,3 +965,40 @@ TEST_F( MediaGroups, UpdateDuration )
     mg = ml->mediaGroup( mg->id() );
     ASSERT_EQ( nullptr, mg );
 }
+
+TEST_F( MediaGroups, OrderByDuration )
+{
+    auto m1 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    m1->setDuration( 999 );
+    m1->save();
+    auto mg1 = ml->createMediaGroup( std::vector<int64_t>{ m1->id() } );
+    mg1->rename( "a" );
+
+    auto m2 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    m2->setDuration( 111 );
+    m2->save();
+    auto mg2 = ml->createMediaGroup( std::vector<int64_t>{ m2->id() } );
+    mg2->rename( "z" );
+
+    QueryParameters params{ SortingCriteria::Default, false };
+    auto groups = ml->mediaGroups( &params )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( mg1->id(), groups[0]->id() );
+    ASSERT_EQ( m1->duration(), groups[0]->duration() );
+    ASSERT_EQ( mg2->id(), groups[1]->id() );
+    ASSERT_EQ( m2->duration(), groups[1]->duration() );
+
+    params.sort = SortingCriteria::Duration;
+    groups = ml->mediaGroups( &params )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( mg2->id(), groups[0]->id() );
+    ASSERT_EQ( mg1->id(), groups[1]->id() );
+
+    params.desc = true;
+    groups = ml->mediaGroups( &params )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( mg1->id(), groups[0]->id() );
+    ASSERT_EQ( mg2->id(), groups[1]->id() );
+}
