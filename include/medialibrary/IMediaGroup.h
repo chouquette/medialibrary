@@ -68,6 +68,21 @@ public:
      */
     virtual int64_t duration() const = 0;
     /**
+     * @brief creationDate Returns the group creation date
+     *
+     * The date is expressed as per time(2), ie. a number of seconds since
+     * Epoch (UTC)
+     */
+    virtual time_t creationDate() const = 0;
+    /**
+     * @brief lastModificationDate Returns the group last modification date
+     *
+     * Modification date include last media addition/removal, and renaming
+     * The date is expressed as per time(2), ie. a number of seconds since
+     * Epoch (UTC)
+     */
+    virtual time_t lastModificationDate() const = 0;
+    /**
      * @brief userInteracted Returns true if the group has had user interactions
      *
      * This includes being renamed, or being explicitely created with some specific

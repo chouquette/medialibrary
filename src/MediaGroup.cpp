@@ -49,6 +49,8 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, sqlite::Row& row )
     , m_nbAudio( row.extract<decltype(m_nbAudio)>() )
     , m_nbUnknown( row.extract<decltype(m_nbUnknown)>() )
     , m_duration( row.extract<decltype(m_duration)>() )
+    , m_creationDate( row.extract<decltype(m_creationDate)>() )
+    , m_lastModificationDate( row.extract<decltype(m_lastModificationDate)>() )
     , m_userInteracted( row.extract<decltype(m_userInteracted)>() )
     , m_forcedSingleton( row.extract<decltype(m_forcedSingleton)>() )
 {
@@ -64,6 +66,8 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, std::string name, bool userInitiated
     , m_nbAudio( 0 )
     , m_nbUnknown( 0 )
     , m_duration( 0 )
+    , m_creationDate( time( nullptr ) )
+    , m_lastModificationDate( m_creationDate )
     , m_userInteracted( userInitiated )
     , m_forcedSingleton( isForcedSingleton )
 {
@@ -76,6 +80,8 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml )
     , m_nbAudio( 0 )
     , m_nbUnknown( 0 )
     , m_duration( 0 )
+    , m_creationDate( time( nullptr ) )
+    , m_lastModificationDate( m_creationDate )
     , m_userInteracted( true )
     , m_forcedSingleton( false )
 {
@@ -116,6 +122,16 @@ int64_t MediaGroup::duration() const
     return m_duration;
 }
 
+time_t MediaGroup::creationDate() const
+{
+    return m_creationDate;
+}
+
+time_t MediaGroup::lastModificationDate() const
+{
+    return m_lastModificationDate;
+}
+
 bool MediaGroup::userInteracted() const
 {
     return m_userInteracted;
@@ -151,6 +167,7 @@ bool MediaGroup::add( IMedia& media, bool forced )
     }
     if ( media.duration() > 0 )
         m_duration += media.duration();
+    m_lastModificationDate = time( nullptr );
     auto& m = static_cast<Media&>( media );
     m.setMediaGroupId( m_id );
     return true;
@@ -160,6 +177,7 @@ bool MediaGroup::add( int64_t mediaId, bool forced )
 {
     if ( m_forcedSingleton == true && forced == false )
         return false;
+    m_lastModificationDate = time( nullptr );
     return Media::setMediaGroup( m_ml, mediaId, m_id );
 }
 
@@ -235,18 +253,21 @@ bool MediaGroup::rename( std::string name, bool userInitiated )
     if ( userInitiated == false || m_userInteracted == true )
     {
         const std::string req = "UPDATE " + Table::Name +
-                " SET name = ? WHERE id_group = ?";
+                " SET name = ?, last_modification_date = strftime('%s')"
+                " WHERE id_group = ?";
         if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, name, m_id ) == false )
             return false;
     }
     else
     {
         const std::string req = "UPDATE " + Table::Name +
-                " SET name = ?, user_interacted = true WHERE id_group = ?";
+                " SET name = ?, last_modification_date = strftime('%s'),"
+                " user_interacted = true WHERE id_group = ?";
         if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, name, m_id ) == false )
             return false;
         m_userInteracted = true;
     }
+    m_lastModificationDate = time( nullptr );
     m_name = std::move( name );
     return true;
 }
@@ -278,11 +299,13 @@ std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
                                                 bool isForcedSingleton )
 {
     static const std::string req = "INSERT INTO " + Table::Name +
-            "(name, user_interacted, forced_singleton) VALUES(?, ?, ?)";
+            "(name, user_interacted, forced_singleton, creation_date, last_modification_date) "
+            "VALUES(?, ?, ?, ?, ?)";
     auto self = std::make_shared<MediaGroup>( ml, std::move( name ),
                                               userInitiated, isForcedSingleton );
     if ( insert( ml, self, req, self->name(), userInitiated,
-                 isForcedSingleton ) == false )
+                 isForcedSingleton, self->creationDate(),
+                 self->lastModificationDate() ) == false )
         return nullptr;
     auto notifier = ml->getNotifier();
     if ( notifier != nullptr )
@@ -294,9 +317,11 @@ std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
                                                 const std::vector<int64_t>& mediaIds )
 {
     static const std::string req = "INSERT INTO " + Table::Name +
-            "(user_interacted, forced_singleton) VALUES(?, ?)";
+            "(user_interacted, forced_singleton, creation_date, last_modification_date) "
+            "VALUES(?, ?, ?, ?)";
     auto self = std::make_shared<MediaGroup>( ml );
-    if ( insert( ml, self, req, true, false ) == false )
+    if ( insert( ml, self, req, true, false, self->creationDate(),
+                 self->lastModificationDate() ) == false )
         return nullptr;
     auto notifier = ml->getNotifier();
     if ( notifier != nullptr )
@@ -414,6 +439,8 @@ std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
         "nb_audio UNSIGNED INTEGER DEFAULT 0,"
         "nb_unknown UNSIGNED INTEGER DEFAULT 0,"
         "duration INTEGER DEFAULT 0,"
+        "creation_date INTEGER NOT NULL,"
+        "last_modification_date INTEGER NOT NULL,"
         "user_interacted BOOLEAN,"
         "forced_singleton BOOLEAN"
     ")";
@@ -459,7 +486,8 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                             "(CASE new.type WHEN " +
                                 std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
                                                     IMedia::Type::Unknown ) ) +
-                                " THEN 1 ELSE 0 END)"
+                                " THEN 1 ELSE 0 END),"
+                        " last_modification_date = strftime('%s')"
                     " WHERE id_group = new.group_id;"
                     " END";
         case Triggers::DecrementNbMediaOnGroupChange:
@@ -483,7 +511,8 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                             "(CASE old.type WHEN " +
                                 std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
                                                     IMedia::Type::Unknown ) ) +
-                                " THEN 1 ELSE 0 END)"
+                                " THEN 1 ELSE 0 END),"
+                        " last_modification_date = strftime('%s')"
                     " WHERE id_group = old.group_id;"
                     " END";
         case Triggers::DecrementNbMediaOnDeletion:
@@ -506,7 +535,8 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                            "(CASE old.type WHEN " +
                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
                                                    IMedia::Type::Unknown ) ) +
-                               " THEN 1 ELSE 0 END)"
+                               " THEN 1 ELSE 0 END),"
+                       " last_modification_date = strftime('%s')"
                    " WHERE id_group = old.group_id;"
                    " END";
         case Triggers::DeleteEmptyGroups:
@@ -722,6 +752,12 @@ std::string MediaGroup::orderBy(const QueryParameters* params)
             break;
         case SortingCriteria::Duration:
             req += "mg.duration";
+            break;
+        case SortingCriteria::InsertionDate:
+            req += "mg.creation_date";
+            break;
+        case SortingCriteria::LastModificationDate:
+            req += "mg.last_modification_date";
             break;
         default:
             LOG_WARN( "Unsupported sorting criteria for media groups: ",

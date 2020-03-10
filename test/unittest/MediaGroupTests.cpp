@@ -1002,3 +1002,123 @@ TEST_F( MediaGroups, OrderByDuration )
     ASSERT_EQ( mg1->id(), groups[0]->id() );
     ASSERT_EQ( mg2->id(), groups[1]->id() );
 }
+
+TEST_F( MediaGroups, CreationDate )
+{
+    /*
+     * Check that the creation date makes sense.
+     */
+    auto now = time( nullptr );
+    auto mg = ml->createMediaGroup( "group" );
+    ASSERT_NE( nullptr, mg );
+    /*
+     * We can't check for equality since we might create get the current time on
+     * the edge of a second, and do the insertion on the other edge
+     */
+    auto diff = mg->creationDate() - now;
+    ASSERT_LE( diff, 1 );
+
+    auto m1 = ml->addMedia( "media.mkv", IMedia::Type::Video );
+    now = time( nullptr );
+    mg = ml->createMediaGroup( std::vector<int64_t>{ m1->id() } );
+    ASSERT_NE( nullptr, mg );
+    diff = mg->creationDate() - now;
+    ASSERT_LE( diff, 1 );
+}
+
+TEST_F( MediaGroups, OrderByCreationDate )
+{
+    auto forceCreationDate = [this]( int64_t groupId, time_t t ) {
+        const std::string req = "UPDATE " + MediaGroup::Table::Name +
+                " SET creation_date = ? WHERE id_group = ?";
+        return sqlite::Tools::executeUpdate( ml->getConn(), req, t, groupId );
+    };
+    auto mg1 = ml->createMediaGroup( "a" );
+    forceCreationDate( mg1->id(), 999 );
+    auto mg2 = ml->createMediaGroup( "z" );
+    forceCreationDate( mg2->id(), 111 );
+
+    QueryParameters params{ SortingCriteria::InsertionDate, false };
+    auto groups = ml->mediaGroups( &params )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( mg2->id(), groups[0]->id() );
+    ASSERT_EQ( mg1->id(), groups[1]->id() );
+
+    params.desc = true;
+    groups = ml->mediaGroups( &params )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( mg1->id(), groups[0]->id() );
+    ASSERT_EQ( mg2->id(), groups[1]->id() );
+}
+
+TEST_F( MediaGroups, LastModificationDate )
+{
+    auto resetModificationDate = [this]( int64_t groupId ) {
+        const std::string req = "UPDATE " + MediaGroup::Table::Name +
+                " SET last_modification_date = 0 WHERE id_group = ?";
+        return sqlite::Tools::executeUpdate( ml->getConn(), req, groupId );
+    };
+    auto mg = ml->createMediaGroup( "group" );
+    ASSERT_EQ( mg->creationDate(), mg->lastModificationDate() );
+    resetModificationDate( mg->id() );
+
+    /* Ensure we update the modification date on insertion */
+    auto m1 = ml->addMedia( "media.mkv", IMedia::Type::Video );
+    mg->add( *m1 );
+
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_NE( 0, mg->lastModificationDate() );
+
+    /* Ensure we update the modification date on renaming */
+    resetModificationDate( mg->id() );
+    auto res = mg->rename( "new name" );
+    ASSERT_TRUE( res );
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_NE( 0, mg->lastModificationDate() );
+
+    /*
+     * Ensure we update the modification date on removal.
+     * We need to add a 2nd media beforehand, otherwise the group will be deleted
+     */
+    auto m2 = ml->addMedia( "media2.mkv", IMedia::Type::Video );
+    mg->add( *m2 );
+    resetModificationDate( mg->id() );
+    mg->remove( *m2 );
+
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_NE( 0, mg->lastModificationDate() );
+
+    /* Ensure we update the modification date on media deletion */
+    m2 = ml->addMedia( "media3.mkv", IMedia::Type::Video );
+    mg->add( *m2 );
+    resetModificationDate( mg->id() );
+    ml->deleteMedia( m2->id() );
+
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_NE( 0, mg->lastModificationDate() );
+}
+
+TEST_F( MediaGroups, OrderByLastModificationDate )
+{
+    auto forceLastModificationDate = [this]( int64_t groupId, time_t t ) {
+        const std::string req = "UPDATE " + MediaGroup::Table::Name +
+                " SET last_modification_date = ? WHERE id_group = ?";
+        return sqlite::Tools::executeUpdate( ml->getConn(), req, t, groupId );
+    };
+    auto mg1 = ml->createMediaGroup( "a" );
+    forceLastModificationDate( mg1->id(), 999 );
+    auto mg2 = ml->createMediaGroup( "z" );
+    forceLastModificationDate( mg2->id(), 111 );
+
+    QueryParameters params{ SortingCriteria::LastModificationDate, false };
+    auto groups = ml->mediaGroups( &params )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( mg2->id(), groups[0]->id() );
+    ASSERT_EQ( mg1->id(), groups[1]->id() );
+
+    params.desc = true;
+    groups = ml->mediaGroups( &params )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    ASSERT_EQ( mg1->id(), groups[0]->id() );
+    ASSERT_EQ( mg2->id(), groups[1]->id() );
+}

@@ -73,6 +73,8 @@ public:
     virtual uint32_t nbAudio() const override;
     virtual uint32_t nbUnknown() const override;
     virtual int64_t duration() const override;
+    virtual time_t creationDate() const override;
+    virtual time_t lastModificationDate() const override;
     virtual bool userInteracted() const override;
     virtual bool add( IMedia& media ) override;
     virtual bool add(int64_t mediaId ) override;
@@ -138,6 +140,8 @@ private:
     uint32_t m_nbAudio;
     uint32_t m_nbUnknown;
     int64_t m_duration;
+    time_t m_creationDate;
+    time_t m_lastModificationDate;
     /* Has the group been interacted with by the user */
     bool m_userInteracted;
     /*

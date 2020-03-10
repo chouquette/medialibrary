@@ -17,7 +17,7 @@ MediaGroup::schema( MediaGroup::Table::Name, 25 ),
 "INSERT INTO " + MediaGroup::Table::Name +
     " SELECT id_group, name, nb_video, nb_audio, nb_unknown, "
     " (SELECT SUM(max(duration, 0)) FROM " + Media::Table::Name +
-        " WHERE group_id = id_group), false, false"
+        " WHERE group_id = id_group), 0, 0, false, false"
     " FROM " + MediaGroup::Table::Name + "_backup ",
 
 "DROP TABLE " + MediaGroup::Table::Name + "_backup",
