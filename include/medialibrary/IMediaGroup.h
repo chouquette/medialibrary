@@ -62,6 +62,12 @@ public:
      */
     virtual uint32_t nbUnknown() const = 0;
     /**
+     * @brief duration Returns this group duration
+     *
+     * Which is equal to the sum of all its member's durations
+     */
+    virtual int64_t duration() const = 0;
+    /**
      * @brief userInteracted Returns true if the group has had user interactions
      *
      * This includes being renamed, or being explicitely created with some specific

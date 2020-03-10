@@ -886,3 +886,82 @@ TEST_F( MediaGroups, RenameForcedSingleton )
     mg = ml->mediaGroup( mg->id() );
     ASSERT_NE( mg->name(), m->title() );
 }
+
+TEST_F( MediaGroups, UpdateDuration )
+{
+    auto mg = ml->createMediaGroup( "test group" );
+    ASSERT_EQ( 0, mg->duration() );
+
+    auto m1 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+
+    /* Insert a media with an already known duration */
+    m1->setDuration( 123 );
+    m1->save();
+    auto res = mg->add( *m1 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 123, mg->duration() );
+
+    /* Check the result in DB as well */
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_EQ( 123, mg->duration() );
+
+    /*
+     * Now add a media with its default duration to the group, and only then
+     * update the media duration
+     */
+    auto m2 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    res = mg->add( *m2 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 123, mg->duration() );
+
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_EQ( 123, mg->duration() );
+
+    m2->setDuration( 999 );
+    m2->save();
+
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_EQ( 123 + 999, mg->duration() );
+
+    /* Now remove the first media and check that the duration is updated accordingly */
+    res = mg->remove( *m1 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 999, mg->duration() );
+
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_EQ( 999, mg->duration() );
+
+    /* Ensure the new singleton group has the proper duration set */
+    m1 = ml->media( m1->id() );
+    auto singleton = m1->group();
+    ASSERT_NE( nullptr, singleton );
+    ASSERT_NE( singleton->id(), mg->id() );
+    ASSERT_EQ( m1->duration(), singleton->duration() );
+
+    /*
+     * Now add a media with a default duration and remove it, check that
+     * nothing changes
+     */
+    auto m3 = ml->addMedia( "media3.mkv", IMedia::Type::Video );
+    res = mg->add( *m3 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 999, mg->duration() );
+
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_EQ( 999, mg->duration() );
+
+    mg->remove( *m3 );
+    ASSERT_EQ( 999, mg->duration() );
+
+    /*
+     * Now remove the last media from the group, and expect the group to be
+     * successfully deleted and that the duration update trigger doesn't conflict
+     * with the empty group auto removal
+     */
+    res = mg->remove( *m2 );
+    ASSERT_TRUE( res );
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_EQ( nullptr, mg );
+}

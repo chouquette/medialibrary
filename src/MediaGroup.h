@@ -53,6 +53,8 @@ public:
         DecrementNbMediaOnDeletion,
         DeleteEmptyGroups,
         RenameForcedSingleton,
+        UpdateDurationOnMediaChange,
+        UpdateDurationOnMediaDeletion,
     };
     enum class Indexes : uint8_t
     {
@@ -70,6 +72,7 @@ public:
     virtual uint32_t nbVideo() const override;
     virtual uint32_t nbAudio() const override;
     virtual uint32_t nbUnknown() const override;
+    virtual int64_t duration() const override;
     virtual bool userInteracted() const override;
     virtual bool add( IMedia& media ) override;
     virtual bool add(int64_t mediaId ) override;
@@ -134,6 +137,7 @@ private:
     uint32_t m_nbVideo;
     uint32_t m_nbAudio;
     uint32_t m_nbUnknown;
+    int64_t m_duration;
     /* Has the group been interacted with by the user */
     bool m_userInteracted;
     /*

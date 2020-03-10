@@ -15,7 +15,9 @@
 MediaGroup::schema( MediaGroup::Table::Name, 25 ),
 
 "INSERT INTO " + MediaGroup::Table::Name +
-    " SELECT id_group, name, nb_video, nb_audio, nb_unknown, false, false"
+    " SELECT id_group, name, nb_video, nb_audio, nb_unknown, "
+    " (SELECT SUM(max(duration, 0)) FROM " + Media::Table::Name +
+        " WHERE group_id = id_group), false, false"
     " FROM " + MediaGroup::Table::Name + "_backup ",
 
 "DROP TABLE " + MediaGroup::Table::Name + "_backup",
@@ -117,3 +119,5 @@ MediaGroup::trigger( MediaGroup::Triggers::DecrementNbMediaOnDeletion, 25 ),
 
 MediaGroup::trigger( MediaGroup::Triggers::DeleteEmptyGroups, 25 ),
 MediaGroup::trigger( MediaGroup::Triggers::RenameForcedSingleton, 25 ),
+MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaChange, 25 ),
+MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaDeletion, 25 ),

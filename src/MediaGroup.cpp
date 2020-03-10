@@ -48,6 +48,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, sqlite::Row& row )
     , m_nbVideo( row.extract<decltype(m_nbVideo)>() )
     , m_nbAudio( row.extract<decltype(m_nbAudio)>() )
     , m_nbUnknown( row.extract<decltype(m_nbUnknown)>() )
+    , m_duration( row.extract<decltype(m_duration)>() )
     , m_userInteracted( row.extract<decltype(m_userInteracted)>() )
     , m_forcedSingleton( row.extract<decltype(m_forcedSingleton)>() )
 {
@@ -62,6 +63,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, std::string name, bool userInitiated
     , m_nbVideo( 0 )
     , m_nbAudio( 0 )
     , m_nbUnknown( 0 )
+    , m_duration( 0 )
     , m_userInteracted( userInitiated )
     , m_forcedSingleton( isForcedSingleton )
 {
@@ -73,6 +75,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml )
     , m_nbVideo( 0 )
     , m_nbAudio( 0 )
     , m_nbUnknown( 0 )
+    , m_duration( 0 )
     , m_userInteracted( true )
     , m_forcedSingleton( false )
 {
@@ -108,6 +111,11 @@ uint32_t MediaGroup::nbUnknown() const
     return m_nbUnknown;
 }
 
+int64_t MediaGroup::duration() const
+{
+    return m_duration;
+}
+
 bool MediaGroup::userInteracted() const
 {
     return m_userInteracted;
@@ -141,6 +149,8 @@ bool MediaGroup::add( IMedia& media, bool forced )
             ++m_nbUnknown;
             break;
     }
+    if ( media.duration() > 0 )
+        m_duration += media.duration();
     auto& m = static_cast<Media&>( media );
     m.setMediaGroupId( m_id );
     return true;
@@ -184,6 +194,8 @@ bool MediaGroup::remove( IMedia& media )
             --m_nbUnknown;
             break;
     }
+    if ( media.duration() > 0 )
+        m_duration -= media.duration();
     return true;
 }
 
@@ -358,6 +370,10 @@ void MediaGroup::createTriggers( sqlite::Connection* connection )
                                    trigger( Triggers::DeleteEmptyGroups, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
                                    trigger( Triggers::RenameForcedSingleton, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::UpdateDurationOnMediaChange, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::UpdateDurationOnMediaDeletion, Settings::DbModelVersion ) );
 }
 
 void MediaGroup::createIndexes( sqlite::Connection* connection )
@@ -397,6 +413,7 @@ std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
         "nb_video UNSIGNED INTEGER DEFAULT 0,"
         "nb_audio UNSIGNED INTEGER DEFAULT 0,"
         "nb_unknown UNSIGNED INTEGER DEFAULT 0,"
+        "duration INTEGER DEFAULT 0,"
         "user_interacted BOOLEAN,"
         "forced_singleton BOOLEAN"
     ")";
@@ -511,6 +528,27 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                            " WHERE id_group = new.group_id"
                            " AND forced_singleton != 0;"
                    " END";
+        case Triggers::UpdateDurationOnMediaChange:
+            assert( dbModel >= 25 );
+            return "CREATE TRIGGER " + triggerName( t, dbModel ) +
+                   " AFTER UPDATE OF duration, group_id ON " + Media::Table::Name +
+                   " BEGIN"
+                       " UPDATE " + Table::Name +
+                           " SET duration = duration - max(old.duration, 0)"
+                           " WHERE id_group = old.group_id;"
+                       " UPDATE " + Table::Name +
+                           " SET duration = duration + max(new.duration, 0)"
+                           " WHERE id_group = new.group_id;"
+                   " END";
+        case Triggers::UpdateDurationOnMediaDeletion:
+            return "CREATE TRIGGER " + triggerName( t, dbModel ) +
+                   " AFTER DELETE ON " + Media::Table::Name +
+                   " WHEN old.group_id IS NOT NULL AND old.duration > 0"
+                   " BEGIN"
+                       " UPDATE " + Table::Name +
+                           " SET duration = duration - old.duration"
+                           " WHERE id_group = old.group_id;"
+                   " END";
         default:
             assert( !"Invalid trigger" );
     }
@@ -538,6 +576,12 @@ std::string MediaGroup::triggerName(MediaGroup::Triggers t, uint32_t dbModel)
         case Triggers::RenameForcedSingleton:
             assert( dbModel >= 25 );
             return "media_group_rename_forced_singleton";
+        case Triggers::UpdateDurationOnMediaChange:
+            assert( dbModel >= 25 );
+            return "media_group_update_duration_on_media_change";
+        case Triggers::UpdateDurationOnMediaDeletion:
+            assert( dbModel >= 25 );
+            return "media_group_update_duration_on_media_deletion";
         default:
             assert( !"Invalid trigger" );
     }

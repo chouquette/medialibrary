@@ -40,6 +40,7 @@
 #include "parser/Task.h"
 #include "Show.h"
 #include "ShowEpisode.h"
+#include "MediaGroup.h"
 
 namespace
 {
@@ -73,6 +74,8 @@ namespace
         "media_group_increment_nb_media",
         "media_group_insert_fts",
         "media_group_rename_forced_singleton",
+        "media_group_update_duration_on_media_change",
+        "media_group_update_duration_on_media_deletion",
         "media_update_device_presence",
         "show_decrement_nb_episode",
         "show_increment_nb_episode",
@@ -637,4 +640,8 @@ TEST_F( DbModel, Upgrade23to24 )
 TEST_F( DbModel, Upgrade24to25 )
 {
     CommonMigrationTest( SRC_DIR "/test/unittest/db_v24.sql" );
+    auto groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    ASSERT_EQ( 2 * 10057u, groups[0]->duration() );
+    ASSERT_EQ( "test group", groups[0]->name() );
 }
