@@ -60,6 +60,9 @@ public:
     {
         ParentId,
         ForcedSingleton,
+        Duration,
+        CreationDate,
+        LastModificationDate,
     };
 
     MediaGroup( MediaLibraryPtr ml, sqlite::Row& row );

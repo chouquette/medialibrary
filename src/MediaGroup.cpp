@@ -405,6 +405,12 @@ void MediaGroup::createIndexes( sqlite::Connection* connection )
 {
     sqlite::Tools::executeRequest( connection,
                                    index( Indexes::ForcedSingleton, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::Duration, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::CreationDate, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::LastModificationDate, Settings::DbModelVersion ) );
 }
 
 std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
@@ -620,28 +626,53 @@ std::string MediaGroup::triggerName(MediaGroup::Triggers t, uint32_t dbModel)
 
 std::string MediaGroup::index( Indexes i, uint32_t dbModel )
 {
-    if ( i == Indexes::ParentId )
+    switch ( i )
     {
-        assert( dbModel == 24 );
-        return "CREATE INDEX " + indexName( i, dbModel ) +
-               " ON " + Table::Name + "(parent_id)";
+        case Indexes::ParentId:
+            assert( dbModel == 24 );
+            return "CREATE INDEX " + indexName( i, dbModel ) +
+                   " ON " + Table::Name + "(parent_id)";
+        case Indexes::ForcedSingleton:
+            assert( dbModel >= 25 );
+            return "CREATE INDEX " + indexName( i, dbModel ) +
+                   " ON " + Table::Name + "(forced_singleton)";
+        case Indexes::Duration:
+            assert( dbModel >= 25 );
+            return "CREATE INDEX " + indexName( i, dbModel ) +
+                   " ON " + Table::Name + "(duration)";
+        case Indexes::CreationDate:
+            assert( dbModel >= 25 );
+            return "CREATE INDEX " + indexName( i, dbModel ) +
+                   " ON " + Table::Name + "(creation_date)";
+        case Indexes::LastModificationDate:
+            assert( dbModel >= 25 );
+            return "CREATE INDEX " + indexName( i, dbModel ) +
+                   " ON " + Table::Name + "(last_modification_date)";
     }
-    assert( i == Indexes::ForcedSingleton );
-    assert( dbModel >= 25 );
-    return "CREATE INDEX " + indexName( i, dbModel ) +
-            " ON " + Table::Name + "(forced_singleton)";
+    return "<invalid request>";
 }
 
 std::string MediaGroup::indexName( Indexes i, uint32_t dbModel )
 {
-    if ( i == Indexes::ParentId )
+    switch ( i )
     {
-        assert( dbModel == 24 );
-        return "media_group_parent_id_idx";
+        case Indexes::ParentId:
+            assert( dbModel == 24 );
+            return "media_group_parent_id_idx";
+        case Indexes::ForcedSingleton:
+            assert( dbModel >= 25 );
+            return "media_group_forced_singleton";
+        case Indexes::Duration:
+            assert( dbModel >= 25 );
+            return "media_group_duration";
+        case Indexes::CreationDate:
+            assert( dbModel >= 25 );
+            return "media_group_creation_date";
+        case Indexes::LastModificationDate:
+            assert( dbModel >= 25 );
+            return "media_group_last_modification_date";
     }
-    assert( i == Indexes::ForcedSingleton );
-    assert( dbModel >= 25 );
-    return "media_group_forced_singleton";
+    return "<invalid request>";
 }
 
 bool MediaGroup::checkDbModel( MediaLibraryPtr ml )
