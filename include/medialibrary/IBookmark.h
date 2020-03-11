@@ -33,6 +33,10 @@ class IBookmark
 public:
     virtual ~IBookmark() = default;
     /**
+     * @brief id Returns the bookmark unique identifier
+     */
+    virtual int64_t id() const = 0;
+    /**
      * @brief time Returns the time of this bookmark, as it was
      * provided to \ref{IMedia::addBookmark}
      */

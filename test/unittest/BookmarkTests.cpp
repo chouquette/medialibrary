@@ -44,6 +44,7 @@ TEST_F( Bookmarks, Create )
 {
     auto b = Bookmark::create( ml.get(), 1, m->id() );
     ASSERT_NE( nullptr, b );
+    ASSERT_NE( 0, b->id() );
     ASSERT_EQ( 1, b->time() );
     ASSERT_EQ( "", b->name() );
     ASSERT_EQ( "", b->description() );
@@ -51,6 +52,7 @@ TEST_F( Bookmarks, Create )
     Reload();
 
     b = Bookmark::fetch( ml.get(), b->id() );
+    ASSERT_NE( 0, b->id() );
     ASSERT_EQ( 1, b->time() );
     ASSERT_EQ( "", b->name() );
     ASSERT_EQ( "", b->description() );
