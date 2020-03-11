@@ -48,6 +48,7 @@ TEST_F( Bookmarks, Create )
     ASSERT_EQ( 1, b->time() );
     ASSERT_EQ( "", b->name() );
     ASSERT_EQ( "", b->description() );
+    ASSERT_EQ( b->mediaId(), m->id() );
 
     Reload();
 
@@ -56,6 +57,7 @@ TEST_F( Bookmarks, Create )
     ASSERT_EQ( 1, b->time() );
     ASSERT_EQ( "", b->name() );
     ASSERT_EQ( "", b->description() );
+    ASSERT_EQ( b->mediaId(), m->id() );
 }
 
 TEST_F( Bookmarks, SetName )

@@ -39,9 +39,10 @@ public:
         static int64_t Bookmark::*const PrimaryKey;
     };
 
-    Bookmark(MediaLibraryPtr ml, int64_t time);
+    Bookmark( MediaLibraryPtr ml, int64_t time, int64_t mediaId );
     Bookmark( MediaLibraryPtr ml, sqlite::Row& row );
     virtual int64_t id() const override;
+    virtual int64_t mediaId() const override;
     virtual int64_t time() const override;
     virtual const std::string& name() const override;
     virtual bool setName( std::string name ) override;
@@ -67,6 +68,7 @@ private:
     int64_t m_time;
     std::string m_name;
     std::string m_description;
+    int64_t m_mediaId;
 };
 
 }

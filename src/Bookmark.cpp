@@ -35,10 +35,11 @@ const std::string Bookmark::Table::Name = "Bookmark";
 const std::string Bookmark::Table::PrimaryKeyColumn = "id_bookmark";
 int64_t Bookmark::* const Bookmark::Table::PrimaryKey = &Bookmark::m_id;
 
-Bookmark::Bookmark( MediaLibraryPtr ml, int64_t time )
+Bookmark::Bookmark( MediaLibraryPtr ml, int64_t time, int64_t mediaId )
     : m_ml( ml )
     , m_id( 0 )
     , m_time( time )
+    , m_mediaId( mediaId )
 {
 }
 
@@ -48,14 +49,19 @@ Bookmark::Bookmark( MediaLibraryPtr ml, sqlite::Row& row )
     , m_time( row.extract<decltype(m_time)>() )
     , m_name( row.extract<decltype(m_name)>() )
     , m_description( row.extract<decltype(m_description)>() )
-    // Don't extract mediaId
+    , m_mediaId( row.extract<decltype(m_mediaId)>() )
 {
-    assert( row.nbColumns() == 5 );
+    assert( row.hasRemainingColumns() == false );
 }
 
 int64_t Bookmark::id() const
 {
     return m_id;
+}
+
+int64_t Bookmark::mediaId() const
+{
+    return m_mediaId;
 }
 
 int64_t Bookmark::time() const
@@ -151,7 +157,7 @@ bool Bookmark::checkDbModel(MediaLibraryPtr ml)
 std::shared_ptr<Bookmark> Bookmark::create( MediaLibraryPtr ml, int64_t time,
                                             int64_t mediaId )
 {
-    auto self = std::make_shared<Bookmark>( ml, time );
+    auto self = std::make_shared<Bookmark>( ml, time, mediaId );
     const std::string req = "INSERT INTO " + Table::Name + "(time, media_id)"
             "VALUES(?, ?)";
     try

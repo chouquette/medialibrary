@@ -37,6 +37,10 @@ public:
      */
     virtual int64_t id() const = 0;
     /**
+     * @brief mediaId Returns the associated media ID
+     */
+    virtual int64_t mediaId() const = 0;
+    /**
      * @brief time Returns the time of this bookmark, as it was
      * provided to \ref{IMedia::addBookmark}
      */
