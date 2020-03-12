@@ -127,4 +127,5 @@ Artist::trigger( Artist::Triggers::DeleteArtistsWithoutTracks, 17 ),
 Artist::trigger( Artist::Triggers::InsertFts, 17 ),
 Artist::trigger( Artist::Triggers::DeleteFts, 17 ),
 
+Bookmark::schema( Bookmark::Table::Name, 17 ),
 

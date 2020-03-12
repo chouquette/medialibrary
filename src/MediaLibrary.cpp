@@ -1655,7 +1655,6 @@ void MediaLibrary::migrateModel16to17()
     auto dbConn = getConn();
     sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
     auto t = dbConn->newTransaction();
-    Bookmark::createTable( dbConn );
     std::string reqs[] = {
 #               include "database/migrations/migration16-17.sql"
     };
