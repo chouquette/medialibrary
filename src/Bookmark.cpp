@@ -42,6 +42,7 @@ Bookmark::Bookmark( MediaLibraryPtr ml, int64_t time, int64_t mediaId )
     , m_time( time )
     , m_mediaId( mediaId )
     , m_creationDate( ::time( nullptr ) )
+    , m_type( Type::Simple )
 {
 }
 
@@ -53,6 +54,7 @@ Bookmark::Bookmark( MediaLibraryPtr ml, sqlite::Row& row )
     , m_description( row.extract<decltype(m_description)>() )
     , m_mediaId( row.extract<decltype(m_mediaId)>() )
     , m_creationDate( row.extract<decltype(m_creationDate)>() )
+    , m_type( row.extract<decltype(m_type)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -90,6 +92,11 @@ const std::string&Bookmark::description() const
 time_t Bookmark::creationDate() const
 {
     return m_creationDate;
+}
+
+IBookmark::Type Bookmark::type() const
+{
+    return m_type;
 }
 
 bool Bookmark::setDescription( std::string description )
@@ -151,7 +158,10 @@ std::string Bookmark::schema( const std::string& tableName, uint32_t dbModel )
         "media_id UNSIGNED INTEGER NOT NULL,";
 
     if ( dbModel >= 25 )
-        req += "creation_date UNSIGNED INTEGER NOT NULL,";
+    {
+        req += "creation_date UNSIGNED INTEGER NOT NULL,"
+               "type UNSIGNED INTEGER NOT NULL,";
+    }
 
     req += "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name +
             "(id_media),"
@@ -172,10 +182,11 @@ std::shared_ptr<Bookmark> Bookmark::create( MediaLibraryPtr ml, int64_t time,
 {
     auto self = std::make_shared<Bookmark>( ml, time, mediaId );
     const std::string req = "INSERT INTO " + Table::Name +
-            "(time, media_id, creation_date) VALUES(?, ?, ?)";
+            "(time, media_id, creation_date, type) VALUES(?, ?, ?, ?)";
     try
     {
-        if ( insert( ml, self, req, time, mediaId, self->creationDate() ) == false )
+        if ( insert( ml, self, req, time, mediaId, self->creationDate(),
+                     self->type() ) == false )
             return nullptr;
     }
     catch ( const sqlite::errors::ConstraintUnique& )

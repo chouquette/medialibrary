@@ -31,6 +31,11 @@ namespace medialibrary
 class IBookmark
 {
 public:
+    enum class Type : uint8_t
+    {
+        Simple,
+    };
+
     virtual ~IBookmark() = default;
     /**
      * @brief id Returns the bookmark unique identifier
@@ -63,6 +68,13 @@ public:
      * The date is expressed in seconds since Epoch (UTC)
      */
     virtual time_t creationDate() const = 0;
+    /**
+     * @brief type Returns this bookmark type
+     *
+     * This is not returning valuable information for now and is here for
+     * future use.
+     */
+    virtual Type type() const = 0;
     /**
      * @brief setDescription Updates the bookmark description
      */

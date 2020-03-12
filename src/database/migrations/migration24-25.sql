@@ -114,7 +114,10 @@ Media::schema( Media::Table::Name, 25 ),
 Bookmark::schema( Bookmark::Table::Name, 25 ),
 
 "INSERT INTO " + Bookmark::Table::Name +
-    " SELECT *, 0 FROM " + Bookmark::Table::Name + "_backup",
+    " SELECT *, 0, " +
+    std::to_string( static_cast<std::underlying_type_t<IBookmark::Type>>(
+        IBookmark::Type::Simple ) ) +
+    " FROM " + Bookmark::Table::Name + "_backup",
 
 Media::trigger( Media::Triggers::InsertFts, 25 ),
 Media::trigger( Media::Triggers::UpdateFts, 25 ),

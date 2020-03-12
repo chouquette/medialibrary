@@ -50,6 +50,7 @@ TEST_F( Bookmarks, Create )
     ASSERT_EQ( "", b->description() );
     ASSERT_EQ( b->mediaId(), m->id() );
     ASSERT_NE( 0, b->creationDate() );
+    ASSERT_EQ( IBookmark::Type::Simple, b->type() );
 
     Reload();
 
@@ -60,6 +61,7 @@ TEST_F( Bookmarks, Create )
     ASSERT_EQ( "", b->description() );
     ASSERT_EQ( b->mediaId(), m->id() );
     ASSERT_NE( 0, b->creationDate() );
+    ASSERT_EQ( IBookmark::Type::Simple, b->type() );
 }
 
 TEST_F( Bookmarks, SetName )
