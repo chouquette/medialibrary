@@ -67,6 +67,10 @@ public:
     void notifyMediaGroupModification( int64_t mediaGroupId );
     void notifyMediaGroupRemoval( int64_t mediaGroupId );
 
+    void notifyBookmarkCreation( BookmarkPtr bookmark );
+    void notifyBookmarkModification( int64_t bookmarkId );
+    void notifyBookmarkRemoval( int64_t bookmarkId );
+
     void notifyThumbnailRemoval( int64_t thumbnailId );
 
     /**
@@ -189,6 +193,7 @@ private:
     Queue<IPlaylist> m_playlists;
     Queue<IGenre> m_genres;
     Queue<IMediaGroup> m_mediaGroups;
+    Queue<IBookmark> m_bookmarks;
     Queue<void> m_thumbnails;
 
     // Notifier thread

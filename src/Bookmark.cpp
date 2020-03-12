@@ -27,6 +27,7 @@
 #include "Bookmark.h"
 #include "Media.h"
 #include "database/SqliteQuery.h"
+#include "utils/ModificationsNotifier.h"
 
 namespace medialibrary
 {
@@ -169,6 +170,9 @@ std::shared_ptr<Bookmark> Bookmark::create( MediaLibraryPtr ml, int64_t time,
     {
         return nullptr;
     }
+    auto notifier = ml->getNotifier();
+    if ( notifier != nullptr )
+        notifier->notifyBookmarkCreation( self );
     return self;
 }
 

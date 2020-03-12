@@ -148,6 +148,21 @@ void ModificationNotifier::notifyMediaGroupRemoval( int64_t mediaGroupId )
     notifyRemoval( mediaGroupId, m_mediaGroups );
 }
 
+void ModificationNotifier::notifyBookmarkCreation( BookmarkPtr bookmark )
+{
+    notifyCreation( std::move( bookmark ), m_bookmarks );
+}
+
+void ModificationNotifier::notifyBookmarkModification(int64_t bookmarkId)
+{
+    notifyModification( bookmarkId, m_bookmarks );
+}
+
+void ModificationNotifier::notifyBookmarkRemoval( int64_t bookmarkId )
+{
+    notifyRemoval( bookmarkId, m_bookmarks );
+}
+
 void ModificationNotifier::notifyThumbnailRemoval( int64_t thumbnailId )
 {
     notifyRemoval( thumbnailId, m_thumbnails );
@@ -181,6 +196,7 @@ void ModificationNotifier::run()
     Queue<IPlaylist> playlists;
     Queue<IGenre> genres;
     Queue<IMediaGroup> mediaGroups;
+    Queue<IBookmark> bookmarks;
     Queue<void> thumbnails;
 
     while ( m_stop == false )
@@ -215,6 +231,7 @@ void ModificationNotifier::run()
                 checkQueue( m_genres, genres, nextTimeout, now );
                 checkQueue( m_mediaGroups, mediaGroups, nextTimeout, now );
                 checkQueue( m_thumbnails, thumbnails, nextTimeout, now );
+                checkQueue( m_bookmarks, bookmarks, nextTimeout, now );
                 m_timeout = nextTimeout;
             }
             notify( std::move( media ), &IMediaLibraryCb::onMediaAdded,
@@ -229,6 +246,8 @@ void ModificationNotifier::run()
                     &IMediaLibraryCb::onGenresModified, &IMediaLibraryCb::onGenresDeleted );
             notify( std::move( mediaGroups ), &IMediaLibraryCb::onMediaGroupsAdded,
                     &IMediaLibraryCb::onMediaGroupsModified, &IMediaLibraryCb::onMediaGroupsDeleted );
+            notify( std::move( bookmarks ), &IMediaLibraryCb::onBookmarksAdded,
+                    &IMediaLibraryCb::onBookmarksModified, &IMediaLibraryCb::onBookmarksDeleted );
             for ( auto thumbnailId : thumbnails.removed )
             {
                 auto path = Thumbnail::path( m_ml, thumbnailId );

@@ -53,6 +53,9 @@ class NoopCallback : public IMediaLibraryCb
     virtual void onMediaGroupsAdded( std::vector<MediaGroupPtr> ) override {}
     virtual void onMediaGroupsModified( std::set<int64_t> ) override {}
     virtual void onMediaGroupsDeleted( std::set<int64_t> ) override {}
+    virtual void onBookmarksAdded( std::vector<BookmarkPtr> ) override {}
+    virtual void onBookmarksModified( std::set<int64_t> ) override {}
+    virtual void onBookmarksDeleted( std::set<int64_t> ) override {}
     virtual void onReloadStarted( const std::string& ) override {}
     virtual void onReloadCompleted( const std::string&, bool ) override {}
     virtual void onEntryPointAdded( const std::string&, bool ) override {}
