@@ -217,6 +217,9 @@ Query<IBookmark> Bookmark::fromMedia( MediaLibraryPtr ml, int64_t mediaId,
         case SortingCriteria::Alpha:
             orderBy += "name";
             break;
+        case SortingCriteria::InsertionDate:
+            orderBy += "creation_date";
+            break;
         default:
             LOG_INFO( "Unsupported sorting criteria, falling back to default" );
             /* fall-through */

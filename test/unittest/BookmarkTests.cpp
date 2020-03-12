@@ -274,3 +274,32 @@ TEST_F( Bookmarks, CheckDbModel )
     auto res = Bookmark::checkDbModel( ml.get() );
     ASSERT_TRUE( res );
 }
+
+TEST_F( Bookmarks, OrderByCreationDate )
+{
+    auto forceCreationDate = [this]( int64_t bookmarkId, time_t t ) {
+        const std::string req = "UPDATE " + Bookmark::Table::Name +
+                " SET creation_date = ? WHERE id_bookmark = ?";
+        return sqlite::Tools::executeUpdate( ml->getConn(), req, t, bookmarkId );
+    };
+    auto b1 = m->addBookmark( 0 );
+    auto b2 = m->addBookmark( 10 );
+    auto b3 = m->addBookmark( 100 );
+    forceCreationDate( b1->id(), 111 );
+    forceCreationDate( b2->id(), 333 );
+    forceCreationDate( b3->id(), 222 );
+
+    QueryParameters params{ SortingCriteria::InsertionDate, false };
+    auto bookmarks = m->bookmarks( &params )->all();
+    ASSERT_EQ( 3u, bookmarks.size() );
+    ASSERT_EQ( b1->id(), bookmarks[0]->id() );
+    ASSERT_EQ( b3->id(), bookmarks[1]->id() );
+    ASSERT_EQ( b2->id(), bookmarks[2]->id() );
+
+    params.desc = true;
+    bookmarks = m->bookmarks( &params )->all();
+    ASSERT_EQ( 3u, bookmarks.size() );
+    ASSERT_EQ( b2->id(), bookmarks[0]->id() );
+    ASSERT_EQ( b3->id(), bookmarks[1]->id() );
+    ASSERT_EQ( b1->id(), bookmarks[2]->id() );
+}
