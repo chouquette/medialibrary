@@ -58,6 +58,12 @@ public:
      */
     virtual const std::string& description() const = 0;
     /**
+     * @brief creationDate Returns this bookmark creation date
+     *
+     * The date is expressed in seconds since Epoch (UTC)
+     */
+    virtual time_t creationDate() const = 0;
+    /**
      * @brief setDescription Updates the bookmark description
      */
     virtual bool setDescription( std::string description ) = 0;

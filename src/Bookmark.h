@@ -47,6 +47,7 @@ public:
     virtual const std::string& name() const override;
     virtual bool setName( std::string name ) override;
     virtual const std::string& description() const override;
+    virtual time_t creationDate() const override;
     virtual bool setDescription( std::string description ) override;
     virtual bool setNameAndDescription( std::string name, std::string desc ) override;
     virtual bool move( int64_t newTime ) override;
@@ -69,6 +70,7 @@ private:
     std::string m_name;
     std::string m_description;
     int64_t m_mediaId;
+    time_t m_creationDate;
 };
 
 }

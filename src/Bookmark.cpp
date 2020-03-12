@@ -41,6 +41,7 @@ Bookmark::Bookmark( MediaLibraryPtr ml, int64_t time, int64_t mediaId )
     , m_id( 0 )
     , m_time( time )
     , m_mediaId( mediaId )
+    , m_creationDate( ::time( nullptr ) )
 {
 }
 
@@ -51,6 +52,7 @@ Bookmark::Bookmark( MediaLibraryPtr ml, sqlite::Row& row )
     , m_name( row.extract<decltype(m_name)>() )
     , m_description( row.extract<decltype(m_description)>() )
     , m_mediaId( row.extract<decltype(m_mediaId)>() )
+    , m_creationDate( row.extract<decltype(m_creationDate)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -83,6 +85,11 @@ bool Bookmark::setName( std::string name )
 const std::string&Bookmark::description() const
 {
     return m_description;
+}
+
+time_t Bookmark::creationDate() const
+{
+    return m_creationDate;
 }
 
 bool Bookmark::setDescription( std::string description )
@@ -131,21 +138,26 @@ void Bookmark::createTable(sqlite::Connection* dbConn)
         sqlite::Tools::executeRequest( dbConn, req );
 }
 
-std::string Bookmark::schema( const std::string& tableName, uint32_t )
+std::string Bookmark::schema( const std::string& tableName, uint32_t dbModel )
 {
+    assert( dbModel >= 17 );
     assert( tableName == Table::Name );
-    return "CREATE TABLE " + Table::Name +
+    std::string req = "CREATE TABLE " + Table::Name +
     "("
         "id_bookmark INTEGER PRIMARY KEY AUTOINCREMENT,"
         "time UNSIGNED INTEGER NOT NULL,"
         "name TEXT,"
         "description TEXT,"
-        "media_id UNSIGNED INTEGER NOT NULL,"
+        "media_id UNSIGNED INTEGER NOT NULL,";
 
-        "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
-        + "(id_media),"
-        "UNIQUE(time,media_id) ON CONFLICT FAIL"
+    if ( dbModel >= 25 )
+        req += "creation_date UNSIGNED INTEGER NOT NULL,";
+
+    req += "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name +
+            "(id_media),"
+            "UNIQUE(time,media_id) ON CONFLICT FAIL"
     ")";
+    return req;
 }
 
 bool Bookmark::checkDbModel(MediaLibraryPtr ml)
@@ -159,11 +171,11 @@ std::shared_ptr<Bookmark> Bookmark::create( MediaLibraryPtr ml, int64_t time,
                                             int64_t mediaId )
 {
     auto self = std::make_shared<Bookmark>( ml, time, mediaId );
-    const std::string req = "INSERT INTO " + Table::Name + "(time, media_id)"
-            "VALUES(?, ?)";
+    const std::string req = "INSERT INTO " + Table::Name +
+            "(time, media_id, creation_date) VALUES(?, ?, ?)";
     try
     {
-        if ( insert( ml, self, req, time, mediaId ) == false )
+        if ( insert( ml, self, req, time, mediaId, self->creationDate() ) == false )
             return nullptr;
     }
     catch ( const sqlite::errors::ConstraintUnique& )

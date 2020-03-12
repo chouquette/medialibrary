@@ -97,6 +97,25 @@ Media::schema( Media::Table::Name, 25 ),
 
 "DROP TABLE " + Media::Table::Name + "_backup",
 
+"CREATE TEMPORARY TABLE " + Bookmark::Table::Name + "_backup"
+"("
+    "id_bookmark INTEGER PRIMARY KEY,"
+    "time UNSIGNED INTEGER,"
+    "name TEXT,"
+    "description TEXT,"
+    "media_id UNSIGNED INTEGER"
+")",
+
+"INSERT INTO " + Bookmark::Table::Name + "_backup "
+    "SELECT * FROM " + Bookmark::Table::Name,
+
+"DROP TABLE " + Bookmark::Table::Name,
+
+Bookmark::schema( Bookmark::Table::Name, 25 ),
+
+"INSERT INTO " + Bookmark::Table::Name +
+    " SELECT *, 0 FROM " + Bookmark::Table::Name + "_backup",
+
 Media::trigger( Media::Triggers::InsertFts, 25 ),
 Media::trigger( Media::Triggers::UpdateFts, 25 ),
 Media::trigger( Media::Triggers::DeleteFts, 25 ),
