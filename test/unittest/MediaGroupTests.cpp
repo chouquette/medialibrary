@@ -1122,3 +1122,26 @@ TEST_F( MediaGroups, OrderByLastModificationDate )
     ASSERT_EQ( mg1->id(), groups[0]->id() );
     ASSERT_EQ( mg2->id(), groups[1]->id() );
 }
+
+TEST_F( MediaGroups, Destroy )
+{
+    /* Ensures a deleted media group exposes a valid state */
+    auto mg = ml->createMediaGroup( "group" );
+    auto m1 = ml->addMedia( "media1.mkv", IMedia::Type::Video );
+    auto m2 = ml->addMedia( "media2.mkv", IMedia::Type::Video );
+    mg->add( *m1 );
+    mg->add( *m2 );
+
+    ASSERT_EQ( 2u, mg->nbMedia() );
+
+    Reload();
+
+    mg = ml->mediaGroup( mg->id() );
+
+    auto res = mg->destroy();
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 0u, mg->nbMedia() );
+
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_EQ( nullptr, mg );
+}
