@@ -241,7 +241,6 @@ protected:
     virtual bool startParser();
     virtual void startDiscoverer();
     virtual void startDeletionNotifier();
-    virtual void startThumbnailer();
     virtual void populateNetworkFsFactories();
 
 private:
@@ -278,6 +277,7 @@ private:
     static bool validateSearchPattern( const std::string& pattern );
     void removeThumbnails();
     void refreshDevice( Device& device, fs::IFileSystemFactory* fsFactory );
+    void startThumbnailer() const;
 
 protected:
     virtual void addLocalFsFactory();
@@ -343,7 +343,7 @@ protected:
 
     // User provided parser services
     std::vector<std::shared_ptr<parser::IParserService>> m_services;
-    std::shared_ptr<IThumbnailer> m_thumbnailer;
+    mutable std::shared_ptr<IThumbnailer> m_thumbnailer;
     // Keep the parser as last field.
     // The parser holds a (raw) pointer to the media library. When MediaLibrary's destructor gets called
     // it might still finish a few operations before exiting the parser thread. Those operations are
@@ -354,7 +354,7 @@ protected:
     //FIXME: Having to maintain a specific ordering sucks, let's use shared_ptr or something
     std::unique_ptr<DiscovererWorker> m_discovererWorker;
     std::shared_ptr<ModificationNotifier> m_modificationNotifier;
-    std::unique_ptr<ThumbnailerWorker> m_thumbnailerWorker;
+    mutable std::unique_ptr<ThumbnailerWorker> m_thumbnailerWorker;
 };
 
 }

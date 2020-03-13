@@ -76,7 +76,6 @@ public:
                                    std::shared_ptr<fs::IDirectory> parentFolderFs,
                                    IFile::Type fileType,
                                    std::pair<int64_t, int64_t> ) override;
-    virtual void startThumbnailer() override;
     virtual void populateNetworkFsFactories() override;
     MediaPtr addMedia( const std::string& mrl, IMedia::Type type );
     void deleteMedia( int64_t mediaId );

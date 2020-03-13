@@ -209,10 +209,6 @@ void MediaLibraryTester::onDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,
     addFile( fileFs, parentFolder, parentFolderFs, fileType, IMedia::Type::Unknown );
 }
 
-void MediaLibraryTester::startThumbnailer()
-{
-}
-
 void MediaLibraryTester::populateNetworkFsFactories()
 {
 }

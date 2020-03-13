@@ -582,7 +582,6 @@ StartResult MediaLibrary::start()
     if ( startParser() == false )
         return StartResult::Failed;
     startDiscoverer();
-    startThumbnailer();
     m_started = true;
     return StartResult::Success;
 }
@@ -1062,7 +1061,7 @@ void MediaLibrary::startDeletionNotifier()
     m_modificationNotifier->start();
 }
 
-void MediaLibrary::startThumbnailer()
+void MediaLibrary::startThumbnailer() const
 {
 #ifdef HAVE_LIBVLC
     if ( m_thumbnailer == nullptr )
@@ -2035,6 +2034,8 @@ void MediaLibrary::clearDatabase( bool restorePlaylists )
 
 void MediaLibrary::pauseBackgroundOperations()
 {
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
+
     if ( m_parser != nullptr )
         m_parser->pause();
     if ( m_thumbnailerWorker != nullptr )
@@ -2043,6 +2044,8 @@ void MediaLibrary::pauseBackgroundOperations()
 
 void MediaLibrary::resumeBackgroundOperations()
 {
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
+
     if ( m_parser != nullptr )
         m_parser->resume();
     if ( m_thumbnailerWorker != nullptr )
@@ -2117,6 +2120,9 @@ parser::Parser* MediaLibrary::getParser() const
 
 ThumbnailerWorker* MediaLibrary::thumbnailer() const
 {
+    std::unique_lock<compat::Mutex> lock{ m_mutex };
+    if ( m_thumbnailerWorker == nullptr )
+        startThumbnailer();
     return m_thumbnailerWorker.get();
 }
 
