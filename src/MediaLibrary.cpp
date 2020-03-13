@@ -1065,17 +1065,14 @@ void MediaLibrary::startDeletionNotifier()
 void MediaLibrary::startThumbnailer()
 {
 #ifdef HAVE_LIBVLC
-    if ( m_thumbnailers.empty() == true )
-        m_thumbnailers.push_back( std::make_shared<ThumbnailerType>() );
-#endif
-    for ( const auto& thumbnailer : m_thumbnailers )
+    if ( m_thumbnailer == nullptr )
     {
-        // For now this make little sense (as we are instantiating the same
-        // object in a loop, but at some point we will have multiple thumbnailer,
-        // or the thumbnailer worker will handle multiple IThumbnailer implementations
-        m_thumbnailer = std::unique_ptr<ThumbnailerWorker>(
-                    new ThumbnailerWorker( this, thumbnailer ) );
+        m_thumbnailer = std::make_unique<ThumbnailerType>();
     }
+#else
+    assert( m_thumbnailer != nullptr );
+#endif
+    m_thumbnailerWorker = std::make_unique<ThumbnailerWorker>( this, m_thumbnailer );
 }
 
 void MediaLibrary::populateNetworkFsFactories()
@@ -2040,16 +2037,16 @@ void MediaLibrary::pauseBackgroundOperations()
 {
     if ( m_parser != nullptr )
         m_parser->pause();
-    if ( m_thumbnailer != nullptr )
-        m_thumbnailer->pause();
+    if ( m_thumbnailerWorker != nullptr )
+        m_thumbnailerWorker->pause();
 }
 
 void MediaLibrary::resumeBackgroundOperations()
 {
     if ( m_parser != nullptr )
         m_parser->resume();
-    if ( m_thumbnailer != nullptr )
-        m_thumbnailer->resume();
+    if ( m_thumbnailerWorker != nullptr )
+        m_thumbnailerWorker->resume();
 }
 
 void MediaLibrary::onDiscovererIdleChanged( bool idle )
@@ -2120,7 +2117,7 @@ parser::Parser* MediaLibrary::getParser() const
 
 ThumbnailerWorker* MediaLibrary::thumbnailer() const
 {
-    return m_thumbnailer.get();
+    return m_thumbnailerWorker.get();
 }
 
 IDeviceListerCb* MediaLibrary::setDeviceLister( DeviceListerPtr lister )
@@ -2385,13 +2382,12 @@ void MediaLibrary::addParserService( std::shared_ptr<parser::IParserService> ser
 
 void MediaLibrary::addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer )
 {
-    if ( m_thumbnailers.empty() == false )
+    if ( m_thumbnailer != nullptr )
     {
         // We only support a single thumbnailer for videos for now.
-        LOG_WARN( "Discarding thumbnailer since one has already been provided" );
-        return;
+        LOG_WARN( "Discarding previous thumbnailer since one has already been provided" );
     }
-    m_thumbnailers.push_back( std::move( thumbnailer ) );
+    m_thumbnailer = std::move( thumbnailer );
 }
 
 bool MediaLibrary::DeviceListerCb::onDeviceMounted( const std::string& uuid,
