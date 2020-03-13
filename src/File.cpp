@@ -361,6 +361,22 @@ bool File::exists( MediaLibraryPtr ml, const std::string& mrl )
 
 std::shared_ptr<File> File::fromMrl( MediaLibraryPtr ml, const std::string& mrl )
 {
+    /* Be optimistic and attempt to fetch a non-removable file first */
+    static const std::string req = "SELECT * FROM " + File::Table::Name +
+            " WHERE mrl = ? AND folder_id IS NOT NULL";
+    auto file = fetch( ml, req, mrl );
+    if ( file != nullptr )
+    {
+        // safety checks: since this only works for files on non removable devices
+        // isRemovable must be false
+        assert( file->m_isRemovable == false );
+        return file;
+    }
+
+    /*
+     * Otherwise, fallback to constructing the mrl based on the device that
+     * stores it
+     */
     auto fsFactory = ml->fsFactoryForMrl( mrl );
     if ( fsFactory == nullptr )
     {
@@ -375,15 +391,14 @@ std::shared_ptr<File> File::fromMrl( MediaLibraryPtr ml, const std::string& mrl 
     }
     if ( device->isRemovable() == false )
     {
-        static const std::string req = "SELECT * FROM " + File::Table::Name +
-                " WHERE mrl = ? AND folder_id IS NOT NULL";
-        auto file = fetch( ml, req, mrl );
-        if ( file == nullptr )
-            return nullptr;
-        // safety checks: since this only works for files on non removable devices
-        // isRemovable must be false
-        assert( file->m_isRemovable == false );
-        return file;
+        /*
+         * We only expect removable devices at this point, but could find
+         * a matching mountpoint that used to contain a removed device mountpoint.
+         * (For instance '/mnt/removable/file.mkv' can match with '/'
+         * We can't assert that the device is removable, but if it's not, this
+         * is not the device we're looking for
+         */
+        return nullptr;
     }
     auto folder = Folder::fromMrl( ml, utils::file::directory( mrl ) );
     if ( folder == nullptr )
@@ -396,7 +411,7 @@ std::shared_ptr<File> File::fromMrl( MediaLibraryPtr ml, const std::string& mrl 
         LOG_INFO( "Found a folder containing ", mrl, " but it is not present" );
         return nullptr;
     }
-    auto file = fromFileName( ml, utils::file::fileName( mrl ), folder->id() );
+    file = fromFileName( ml, utils::file::fileName( mrl ), folder->id() );
     if ( file == nullptr )
     {
         LOG_WARN( "Failed to fetch file for ", mrl, " (device ", device->uuid(), " was ",
