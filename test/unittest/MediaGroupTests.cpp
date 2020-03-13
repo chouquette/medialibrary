@@ -1145,3 +1145,43 @@ TEST_F( MediaGroups, Destroy )
     mg = ml->mediaGroup( mg->id() );
     ASSERT_EQ( nullptr, mg );
 }
+
+TEST_F( MediaGroups, RegroupAll )
+{
+    auto createLockedGroup = [this]( MediaPtr m ) {
+        auto mg = ml->createMediaGroup( std::vector<int64_t>{ m->id() } );
+        auto res = mg->remove( *m );
+        ASSERT_TRUE( res );
+    };
+    auto m1 = ml->addMedia( "otters are not grouped.mkv", IMedia::Type::Video );
+    auto m2 = ml->addMedia( "pangolins are cute.mkv", IMedia::Type::Video );
+    auto m3 = ml->addMedia( "otters are not responsible for COVID19.mkv", IMedia::Type::Video );
+    auto m4 = ml->addMedia( "pangolins are vectors of diseases.mkv", IMedia::Type::Video );
+    auto m5 = ml->addMedia( "cats are unrelated to otters and pangolins.mkv", IMedia::Type::Video );
+    auto m6 = ml->addMedia( "otters is already grouped.mkv", IMedia::Type::Video );
+
+    createLockedGroup( m1 );
+    createLockedGroup( m2 );
+    createLockedGroup( m3 );
+    createLockedGroup( m4 );
+    createLockedGroup( m5 );
+    auto mg = ml->createMediaGroup( std::vector<int64_t>{ m6->id() } );
+
+    auto groups = ml->mediaGroups( nullptr )->all();
+    /* We expect 1 group per media */
+    ASSERT_EQ( 6u, groups.size() );
+
+    /* Now regroup all the things!, we expect 4 groups as a result:
+     * - otters
+     * - pangolins
+     * - cats
+     * - otters (but the manually grouped one)
+     */
+    ml->regroupAll();
+    groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 4u, groups.size() );
+    ASSERT_EQ( groups[0]->name(), "" );
+    ASSERT_EQ( groups[1]->name(), "cats are unrelated to otters and pangolins.mkv" );
+    ASSERT_EQ( groups[2]->name(), "otters are not " );
+    ASSERT_EQ( groups[3]->name(), "pangolins are " );
+}

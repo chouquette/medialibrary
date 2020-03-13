@@ -92,6 +92,7 @@ public:
     virtual Query<IMediaGroup> mediaGroups( const QueryParameters* params ) const override;
     virtual Query<IMediaGroup> searchMediaGroups( const std::string& pattern,
                                                   const QueryParameters* params ) const override;
+    virtual bool regroupAll() override;
 
     virtual void onDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,
                                    std::shared_ptr<Folder> parentFolder,

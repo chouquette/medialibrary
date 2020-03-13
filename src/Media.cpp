@@ -1804,4 +1804,20 @@ bool Media::resetSubTypes( MediaLibraryPtr ml )
                                          Type::Video, Type::Audio );
 }
 
+bool Media::regroupAll( MediaLibraryPtr ml )
+{
+    const std::string req = "SELECT m.* FROM " + Table::Name + " m "
+                           " INNER JOIN " + MediaGroup::Table::Name + " mg ON "
+                               " m.group_id = mg.id_group "
+                           " WHERE mg.forced_singleton != 0 LIMIT 1";
+    while ( true )
+    {
+        auto m = fetch( ml, req );
+        if ( m == nullptr )
+            return true;
+        if ( m->regroup() == false )
+            return false;
+    }
+}
+
 }

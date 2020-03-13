@@ -296,6 +296,8 @@ class Media : public IMedia,
          */
         static bool resetSubTypes( MediaLibraryPtr ml );
 
+        static bool regroupAll( MediaLibraryPtr ml );
+
 private:
         static std::string addRequestJoin(const QueryParameters* params, bool forceFile , bool forceAlbumTrack);
         static std::string sortRequest( const QueryParameters* params );

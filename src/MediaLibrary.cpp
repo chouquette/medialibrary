@@ -685,6 +685,11 @@ Query<IMediaGroup> MediaLibrary::searchMediaGroups( const std::string& pattern,
     return MediaGroup::search( this, pattern, params );
 }
 
+bool MediaLibrary::regroupAll()
+{
+    return Media::regroupAll( this );
+}
+
 bool MediaLibrary::isMediaExtensionSupported( const char* ext ) const
 {
     return std::binary_search( std::begin( SupportedMediaExtensions ),
