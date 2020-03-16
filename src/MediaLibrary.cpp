@@ -2330,10 +2330,7 @@ void MediaLibrary::refreshDevices()
 bool MediaLibrary::forceRescan()
 {
     if ( m_parser != nullptr )
-    {
-        m_parser->pause();
-        m_parser->flush();
-    }
+        m_parser->prepareRescan();
     {
         auto t = getConn()->newTransaction();
         // Let the triggers clear out the Fts tables
@@ -2364,9 +2361,7 @@ bool MediaLibrary::forceRescan()
     if ( m_parser != nullptr )
     {
         m_callback->onRescanStarted();
-        m_parser->restart();
-        m_parser->restore();
-        m_parser->resume();
+        m_parser->rescan();
     }
     return true;
 }

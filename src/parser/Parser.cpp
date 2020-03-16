@@ -109,6 +109,19 @@ void Parser::flush()
     m_opDone = 0;
 }
 
+void Parser::prepareRescan()
+{
+    pause();
+    flush();
+}
+
+void Parser::rescan()
+{
+    restart();
+    restore();
+    resume();
+}
+
 void Parser::restart()
 {
     for ( auto& s : m_services )

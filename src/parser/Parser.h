@@ -73,6 +73,19 @@ public:
     void stop();
     void flush();
     ///
+    /// \brief prepareRescan Prepares the parser for a forced rescan
+    ///
+    /// This will pause all workers and flush the tasks list.
+    ///
+    void prepareRescan();
+    ///
+    /// \brief rescan Launch a rescan of all processed files.
+    ///
+    /// This will prepare the worker for restart, fetch all uncompleted tasks and
+    /// start them.
+    ///
+    void rescan();
+    ///
     /// \brief restart Will instruct the parser services to prepare for restarting
     ///                after a flush operation. This is different from resume
     ///                as it can imply initialization side effects
