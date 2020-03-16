@@ -65,13 +65,10 @@ void Parser::parse( std::shared_ptr<Task> task )
 {
     if ( m_services.empty() == true )
         return;
-    auto isRestoreTask = task == nullptr;
+    assert( task != nullptr );
     m_services[0]->parse( std::move( task ) );
-    if ( isRestoreTask == false )
-    {
-        ++m_opToDo;
-        updateStats();
-    }
+    ++m_opToDo;
+    updateStats();
 }
 
 void Parser::start()
@@ -122,7 +119,16 @@ void Parser::restore()
 {
     if ( m_services.empty() == true )
         return;
-    parse( nullptr );
+    auto tasks = Task::fetchUncompleted( m_ml );
+    if ( tasks.empty() == true )
+    {
+        LOG_DEBUG( "No task to resume." );
+        return;
+    }
+    LOG_INFO( "Resuming parsing on ", tasks.size(), " tasks" );
+    m_opToDo += tasks.size();
+    updateStats();
+    m_services[0]->parse( std::move( tasks ) );
 }
 
 void Parser::refreshTaskList()

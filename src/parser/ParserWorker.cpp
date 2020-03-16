@@ -116,6 +116,25 @@ void Worker::parse( std::shared_ptr<Task> t )
     m_cond.notify_all();
 }
 
+void Worker::parse( std::vector<std::shared_ptr<Task>> tasks )
+{
+    {
+        std::lock_guard<compat::Mutex> lock( m_lock );
+
+        if ( m_paused == false )
+            setIdle( false );
+
+        for ( auto& t : tasks )
+            m_tasks.push( std::move( t ) );
+        if ( m_thread.get_id() == compat::Thread::id{} )
+        {
+            start();
+            return;
+        }
+    }
+    m_cond.notify_all();
+}
+
 bool Worker::initialize( MediaLibrary* ml, IParserCb* parserCb,
                                std::shared_ptr<IParserService> service )
 {
@@ -185,12 +204,6 @@ void Worker::mainloop()
                 LOG_DEBUG('[', serviceName, "] has ", m_tasks.size(), " tasks remaining" );
                 task = std::move( m_tasks.front() );
                 m_tasks.pop();
-            }
-            // Special case to restore uncompleted tasks from a parser thread
-            if ( task == nullptr )
-            {
-                restoreTasks();
-                continue;
             }
             if ( task->isStepCompleted( m_service->targetedStep() ) == true )
             {
@@ -299,25 +312,6 @@ bool Worker::handleServiceResult( Task& task, Status status )
         return Task::destroy( m_ml, task.id() );
     }
     return true;
-}
-
-void Worker::restoreTasks()
-{
-    auto tasks = Task::fetchUncompleted( m_ml );
-    if ( tasks.size() > 0 )
-        LOG_INFO( "Resuming parsing on ", tasks.size(), " tasks" );
-    else
-        LOG_DEBUG( "No task to resume." );
-    for ( auto& t : tasks )
-    {
-        {
-            std::lock_guard<compat::Mutex> lock( m_lock );
-            if ( m_stopParser == true )
-                break;
-        }
-
-        m_parserCb->parse( std::move( t ) );
-    }
 }
 
 }

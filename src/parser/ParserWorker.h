@@ -62,6 +62,13 @@ public:
     ///
     void stop();
     void parse( std::shared_ptr<Task> t );
+    ///
+    /// \brief parse Overload to queue a batch of tasks
+    ///
+    /// This is used when restoring uncompleted tasks, to avoid
+    /// locking/queuing/unlocking in a loop
+    ///
+    void parse( std::vector<std::shared_ptr<Task>> tasks );
     bool initialize( MediaLibrary* ml, IParserCb* parserCb, std::shared_ptr<IParserService> service );
     bool isIdle() const;
     ///
@@ -83,7 +90,6 @@ private:
     void mainloop();
     void setIdle( bool isIdle );
     bool handleServiceResult( Task& task, Status status );
-    void restoreTasks();
 
 private:
     MediaLibrary* m_ml;
