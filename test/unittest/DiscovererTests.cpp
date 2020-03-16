@@ -64,7 +64,7 @@ public:
     virtual void SetUp() override
     {
         InstantiateMediaLibrary();
-        discoverer.reset( new DiscovererWorkerTest( ml.get(), nullptr ) );
+        discoverer.reset( new DiscovererWorkerTest( ml.get() ) );
     }
 };
 

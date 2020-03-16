@@ -1045,7 +1045,7 @@ bool MediaLibrary::startParser()
 
 void MediaLibrary::startDiscoverer()
 {
-    m_discovererWorker.reset( new DiscovererWorker( this, m_parser.get() ) );
+    m_discovererWorker.reset( new DiscovererWorker( this ) );
     for ( const auto& fsFactory : m_fsFactories )
     {
         std::unique_ptr<prober::CrawlerProbe> probePtr( new prober::CrawlerProbe{} );

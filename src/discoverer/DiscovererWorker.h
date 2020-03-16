@@ -77,7 +77,7 @@ protected:
     };
 
 public:
-    explicit DiscovererWorker( MediaLibrary* ml, parser::IParserCb* parserCb );
+    explicit DiscovererWorker( MediaLibrary* ml );
     ~DiscovererWorker();
     void addDiscoverer( std::unique_ptr<IDiscoverer> discoverer );
     void stop();
@@ -121,7 +121,6 @@ protected:
     std::atomic_bool m_taskInterrupted;
     std::vector<std::unique_ptr<IDiscoverer>> m_discoverers;
     MediaLibrary* m_ml;
-    parser::IParserCb* m_parserCb;
 };
 
 }

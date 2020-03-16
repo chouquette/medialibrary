@@ -42,12 +42,11 @@
 namespace medialibrary
 {
 
-DiscovererWorker::DiscovererWorker( MediaLibrary* ml, parser::IParserCb* parserCb )
+DiscovererWorker::DiscovererWorker( MediaLibrary* ml )
     : m_currentTask( nullptr )
     , m_run( false )
     , m_taskInterrupted( false )
     , m_ml( ml )
-    , m_parserCb( parserCb )
 {
 }
 
@@ -441,8 +440,12 @@ void DiscovererWorker::run()
             default:
                 assert(false);
             }
-            if ( needTaskRefresh == true && m_parserCb != nullptr )
-                m_parserCb->refreshTaskList();
+            if ( needTaskRefresh == true )
+            {
+                auto parser = m_ml->getParser();
+                if ( parser != nullptr )
+                    parser->refreshTaskList();
+            }
         }
         ML_UNHANDLED_EXCEPTION_BODY( "DiscovererWorker" )
     }
