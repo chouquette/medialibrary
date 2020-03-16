@@ -71,7 +71,6 @@ public:
     void pause();
     void resume();
     void stop();
-    void flush();
     ///
     /// \brief prepareRescan Prepares the parser for a forced rescan
     ///
@@ -85,14 +84,6 @@ public:
     /// start them.
     ///
     void rescan();
-    ///
-    /// \brief restart Will instruct the parser services to prepare for restarting
-    ///                after a flush operation. This is different from resume
-    ///                as it can imply initialization side effects
-    ///
-    void restart();
-    // Queues all unparsed files for parsing.
-    void restore();
 
     virtual void refreshTaskList() override;
 
@@ -101,7 +92,15 @@ private:
     virtual void done( std::shared_ptr<Task> task,
                        Status status ) override;
     virtual void onIdleChanged( bool idle ) override;
-
+    void flush();
+    // Queues all unparsed files for parsing.
+    void restore();
+    ///
+    /// \brief restart Will instruct the parser services to prepare for restarting
+    ///                after a flush operation. This is different from resume
+    ///                as it can imply initialization side effects
+    ///
+    void restart();
 private:
     std::vector<std::unique_ptr<Worker>> m_services;
 
