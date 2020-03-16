@@ -38,7 +38,7 @@ class MediaLibraryTester : public MediaLibrary
 {
 public:
     MediaLibraryTester();
-    virtual bool startParser() override { return true; }
+    virtual void startParser() override { return; }
     virtual void startDiscoverer() override {}
     virtual void startDeletionNotifier() override {}
     virtual void removeEntryPoint( const std::string& entryPoint ) override;

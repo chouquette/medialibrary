@@ -189,7 +189,20 @@ public:
     sqlite::Connection* getConn() const;
     IMediaLibraryCb* getCb() const;
     std::shared_ptr<ModificationNotifier> getNotifier() const;
+    /**
+     * @brief getParser Returns a parser instance
+     *
+     * This will instantiate and start the parser if needed. It may still return
+     * a nullptr instance, in case no service are generated, or in some tests
+     * configurations
+     */
     parser::Parser* getParser() const;
+    /**
+     * @brief tryGetParser Returns a parser instance if it exists.
+     *
+     * If no parser has been created, nullptr will be returned
+     */
+    parser::Parser* tryGetParser();
     ThumbnailerWorker* thumbnailer() const;
 
     virtual IDeviceListerCb* setDeviceLister( DeviceListerPtr lister ) override;
@@ -238,7 +251,7 @@ protected:
     static const std::vector<const char*> SupportedPlaylistExtensions;
 
 protected:
-    virtual bool startParser();
+    virtual void startParser();
     virtual void startDiscoverer();
     virtual void startDeletionNotifier();
     virtual void populateNetworkFsFactories();
@@ -349,7 +362,7 @@ protected:
     // it might still finish a few operations before exiting the parser thread. Those operations are
     // likely to require a valid MediaLibrary, which would be compromised if some fields have already been
     // deleted/destroyed.
-    std::unique_ptr<parser::Parser> m_parser;
+    mutable std::unique_ptr<parser::Parser> m_parser;
     // Same reasoning applies here.
     //FIXME: Having to maintain a specific ordering sucks, let's use shared_ptr or something
     std::unique_ptr<DiscovererWorker> m_discovererWorker;

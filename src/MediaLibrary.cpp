@@ -579,8 +579,6 @@ StartResult MediaLibrary::start()
         return StartResult::AlreadyStarted;
     LOG_INFO( "Starting medialibrary..." );
 
-    if ( startParser() == false )
-        return StartResult::Failed;
     startDiscoverer();
     m_started = true;
     return StartResult::Success;
@@ -1020,27 +1018,27 @@ SearchAggregate MediaLibrary::search( const std::string& pattern,
     return res;
 }
 
-bool MediaLibrary::startParser()
+void MediaLibrary::startParser()
 {
-    m_parser.reset( new parser::Parser( this ) );
+    auto parser = std::make_unique<parser::Parser>( this );
 
     if ( m_services.empty() == true )
     {
 #ifdef HAVE_LIBVLC
-        m_parser->addService( std::make_shared<parser::VLCMetadataService>() );
+        parser->addService( std::make_shared<parser::VLCMetadataService>() );
 #else
-        return false;
+        return;
 #endif
     }
     else
     {
         assert( m_services[0]->targetedStep() == parser::Step::MetadataExtraction );
-        m_parser->addService( m_services[0] );
+        parser->addService( m_services[0] );
     }
-    m_parser->addService( std::make_shared<parser::MetadataAnalyzer>() );
-    m_parser->addService( std::make_shared<parser::LinkService>() );
-    m_parser->start();
-    return true;
+    parser->addService( std::make_shared<parser::MetadataAnalyzer>() );
+    parser->addService( std::make_shared<parser::LinkService>() );
+    parser->start();
+    m_parser = std::move( parser );
 }
 
 void MediaLibrary::startDiscoverer()
@@ -2113,8 +2111,19 @@ std::shared_ptr<ModificationNotifier> MediaLibrary::getNotifier() const
     return m_modificationNotifier;
 }
 
+parser::Parser *MediaLibrary::tryGetParser()
+{
+    return m_parser.get();
+}
+
 parser::Parser* MediaLibrary::getParser() const
 {
+    std::unique_lock<compat::Mutex> lock{ m_mutex };
+    if ( m_parser == nullptr )
+    {
+        auto self = const_cast<MediaLibrary*>( this );
+        self->startParser();
+    }
     return m_parser.get();
 }
 
