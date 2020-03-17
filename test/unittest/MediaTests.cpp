@@ -1276,8 +1276,7 @@ protected:
         fsMock.reset( new mock::FileSystemFactory );
         cbMock.reset( new mock::WaitForDiscoveryComplete );
         fsMock->addFolder( "file:///a/mnt/" );
-        auto device = fsMock->addDevice( RemovableDeviceMountpoint, RemovableDeviceUuid );
-        device->setRemovable( true );
+        auto device = fsMock->addDevice( RemovableDeviceMountpoint, RemovableDeviceUuid, true );
         fsMock->addFile( RemovableDeviceMountpoint + "removablefile.mp3" );
         fsFactory = fsMock;
         mlCb = cbMock.get();

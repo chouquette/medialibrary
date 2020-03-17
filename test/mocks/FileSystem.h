@@ -54,7 +54,7 @@ struct FileSystemFactory : public fs::IFileSystemFactory
     FileSystemFactory()
     {
         // Add a root device unremovable
-        auto rootDevice = addDevice( Root, RootDeviceUuid );
+        auto rootDevice = addDevice( Root, RootDeviceUuid, false );
         rootDevice->addFile( Root + "video.avi" );
         rootDevice->addFile( Root + "audio.mp3" );
         rootDevice->addFile( Root + "not_a_media.something" );
@@ -63,9 +63,10 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         rootDevice->addFile( SubFolder + "subfile.mp4" );
     }
 
-    std::shared_ptr<Device> addDevice( const std::string& mountpointMrl, const std::string& uuid )
+    std::shared_ptr<Device> addDevice( const std::string& mountpointMrl, const std::string& uuid,
+                                       bool removable )
     {
-        auto dev = std::make_shared<Device>( mountpointMrl, uuid );
+        auto dev = std::make_shared<Device>( mountpointMrl, uuid, removable );
         dev->setupRoot();
         auto d = device( mountpointMrl );
         if ( d != nullptr )

@@ -41,7 +41,7 @@ class File;
 class Device : public fs::CommonDevice, public std::enable_shared_from_this<Device>
 {
 public:
-    Device( const std::string& mountpoint, const std::string& uuid );
+    Device( const std::string& mountpoint, const std::string& uuid, bool removable );
 
     // We need at least one existing shared ptr before calling shared_from_this.
     // Let the device be initialized and stored in a shared_ptr by the FileSystemFactory, and then
