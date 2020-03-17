@@ -125,7 +125,6 @@ int main( int argc, char** argv )
 //    ml->setVerbosity( LogLevel::Debug );
     unlink( "/tmp/test.db" );
     ml->initialize( "/tmp/test.db", "/tmp/ml_folder", testCb.get() );
-    ml->start();
 
     ml->discover( entrypoint );
 

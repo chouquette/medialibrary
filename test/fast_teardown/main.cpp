@@ -85,7 +85,6 @@ int main( int argc, char** argv )
         std::unique_ptr<medialibrary::IMediaLibrary> ml( NewMediaLibrary() );
         ml->initialize( "/tmp/test.db", "/tmp/ml_folder", testCb.get() );
         testCb->prepareWait();
-        ml->start();
         ml->discover( entryPoint );
         ml->reload();
         testCb->waitForDiscoveryStarted();

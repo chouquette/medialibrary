@@ -73,8 +73,6 @@ public:
                                          const std::string& thumbnailPath,
                                          IMediaLibraryCb* mlCallback ) override;
     virtual bool isInitialized() const override;
-    virtual StartResult start() override;
-    virtual bool isStarted() const override;
     virtual void setVerbosity( LogLevel v ) override;
 
     virtual MediaPtr media( int64_t mediaId ) const override;
@@ -322,7 +320,6 @@ protected:
     LogLevel m_verbosity;
     Settings m_settings;
     bool m_initialized;
-    bool m_started;
     bool m_networkDiscoveryEnabled;
     std::atomic_bool m_discovererIdle;
     std::atomic_bool m_parserIdle;

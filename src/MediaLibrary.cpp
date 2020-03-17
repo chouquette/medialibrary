@@ -251,7 +251,6 @@ MediaLibrary::MediaLibrary()
     : m_verbosity( LogLevel::Error )
     , m_settings( this )
     , m_initialized( false )
-    , m_started( false )
     , m_networkDiscoveryEnabled( false )
     , m_discovererIdle( true )
     , m_parserIdle( true )
@@ -561,24 +560,6 @@ bool MediaLibrary::isInitialized() const
 {
     std::lock_guard<compat::Mutex> lock( m_mutex );
     return m_initialized;
-}
-
-StartResult MediaLibrary::start()
-{
-    std::lock_guard<compat::Mutex> lock( m_mutex );
-    assert( m_initialized == true );
-    if ( m_started == true )
-        return StartResult::AlreadyStarted;
-    LOG_INFO( "Starting medialibrary..." );
-
-    m_started = true;
-    return StartResult::Success;
-}
-
-bool MediaLibrary::isStarted() const
-{
-    std::lock_guard<compat::Mutex> lock( m_mutex );
-    return m_started;
 }
 
 void MediaLibrary::setVerbosity( LogLevel v )
@@ -2215,7 +2196,7 @@ bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
 
     if ( enabled == m_networkDiscoveryEnabled )
         return true;
-    if ( m_started == false )
+    if ( m_discovererWorker == nullptr )
     {
         m_networkDiscoveryEnabled = enabled;
         return true;

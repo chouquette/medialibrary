@@ -101,18 +101,6 @@ enum class InitializeResult
     DbCorrupted,
 };
 
-enum class StartResult
-{
-    //< The media library was successfully started
-    Success,
-    //< Should be considered the same as Success, but is an indication of
-    // unrequired subsequent calls to start.
-    AlreadyStarted,
-    //< A fatal error occurred, it is possible to use the media library in read
-    //< mode only (no new media will be discovered nor analyzed)
-    Failed,
-};
-
 enum class ThumbnailSizeType : uint8_t
 {
     /// A small sized thumbnail. Considered to be the default value before model 17
@@ -386,32 +374,6 @@ public:
      */
     virtual bool isInitialized() const = 0;
 
-    /**
-     * @brief start Starts the background thread and reload the medialibrary content
-     * This *MUST* be called after initialize.
-     *
-     * The user is expected to populate its device lister between a call to initialize() and a
-     * call to start().
-     * Once this method has been called, the medialibrary will know all the device known to the
-     * device lister, and it become impossible to know wether a removable storage device has been
-     * inserted for the first time or not.
-     *
-     * @return Success in case of success or if already started, Failed otherwise.
-     * If start returns Failed, this medialibrary must not be used anymore,
-     * and should be disposed off.
-     * If it returns Success the first time, calling this method again is a
-     * no-op and AlreadyStarted will be returned
-     * This method is thread-safe
-     *
-     * @see{IMediaLibrary::StartResult}
-     */
-    virtual StartResult start() = 0;
-    /**
-     * @brief isStarted Convenience helper to know if the media library was
-     *                  already started.
-     * @return true if the media library is started, false otherwise.
-     */
-    virtual bool isStarted() const = 0;
     virtual void setVerbosity( LogLevel v ) = 0;
 
     virtual LabelPtr createLabel( const std::string& label ) = 0;

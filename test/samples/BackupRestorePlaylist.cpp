@@ -86,8 +86,6 @@ protected:
 TEST_F( MiscTests, ExportRestorePlaylist )
 {
     auto lock = m_cb->lock();
-    auto startRes = m_ml->start();
-    ASSERT_EQ( StartResult::Success, startRes );
     auto samplesFolder = std::string{ SRC_DIR "/test/samples/samples/playlist/tracks" };
     ASSERT_TRUE( utils::fs::isDirectory( samplesFolder ) );
     samplesFolder = utils::fs::toAbsolute( samplesFolder );
