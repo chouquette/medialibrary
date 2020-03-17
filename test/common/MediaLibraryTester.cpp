@@ -45,42 +45,6 @@ MediaLibraryTester::MediaLibraryTester()
 {
 }
 
-void MediaLibraryTester::removeEntryPoint( const std::string& entryPoint )
-{
-    if ( m_discovererWorker != nullptr )
-        MediaLibrary::removeEntryPoint( entryPoint );
-}
-
-void MediaLibraryTester::reload()
-{
-    if ( m_discovererWorker != nullptr )
-        MediaLibrary::reload();
-}
-
-void MediaLibraryTester::reload( const std::string& entryPoint )
-{
-    if ( m_discovererWorker != nullptr )
-        MediaLibrary::reload( entryPoint );
-}
-
-void MediaLibraryTester::banFolder( const std::string& path )
-{
-    if ( m_discovererWorker != nullptr )
-        MediaLibrary::banFolder( path );
-}
-
-void MediaLibraryTester::unbanFolder( const std::string& path )
-{
-    if ( m_discovererWorker != nullptr )
-        MediaLibrary::unbanFolder( path );
-}
-
-void MediaLibraryTester::discover( const std::string& entryPoint )
-{
-    if ( m_discovererWorker != nullptr )
-        MediaLibrary::discover( entryPoint );
-}
-
 std::shared_ptr<Media> MediaLibraryTester::media( int64_t id )
 {
     return std::static_pointer_cast<Media>( MediaLibrary::media( id ) );
