@@ -571,7 +571,6 @@ StartResult MediaLibrary::start()
         return StartResult::AlreadyStarted;
     LOG_INFO( "Starting medialibrary..." );
 
-    startDiscoverer();
     m_started = true;
     return StartResult::Success;
 }
@@ -1035,6 +1034,9 @@ void MediaLibrary::startParser()
 
 void MediaLibrary::startDiscoverer()
 {
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
+    if ( m_discovererWorker != nullptr )
+        return;
     auto discoverer = std::make_unique<FsDiscoverer>( this, m_callback,
                                     std::make_unique<prober::CrawlerProbe>() );
     m_discovererWorker.reset( new DiscovererWorker( this,
@@ -1955,13 +1957,13 @@ void MediaLibrary::migrationEpilogue( uint32_t originalPreviousVersion )
 
 void MediaLibrary::reload()
 {
-    assert( m_discovererWorker != nullptr );
+    startDiscoverer();
     m_discovererWorker->reload();
 }
 
 void MediaLibrary::reload( const std::string& entryPoint )
 {
-    assert( m_discovererWorker != nullptr );
+    startDiscoverer();
     m_discovererWorker->reload( entryPoint );
 }
 
@@ -2183,7 +2185,7 @@ std::shared_ptr<fs::IFileSystemFactory> MediaLibrary::fsFactoryForMrl( const std
 
 void MediaLibrary::discover( const std::string& entryPoint )
 {
-    assert( m_discovererWorker != nullptr );
+    startDiscoverer();
     m_discovererWorker->discover( entryPoint );
 }
 
@@ -2307,19 +2309,19 @@ FolderPtr MediaLibrary::folder( const std::string& mrl ) const
 
 void MediaLibrary::removeEntryPoint( const std::string& entryPoint )
 {
-    assert( m_discovererWorker != nullptr );
+    startDiscoverer();
     m_discovererWorker->remove( entryPoint );
 }
 
 void MediaLibrary::banFolder( const std::string& entryPoint )
 {
-    assert( m_discovererWorker != nullptr );
+    startDiscoverer();
     m_discovererWorker->ban( entryPoint );
 }
 
 void MediaLibrary::unbanFolder( const std::string& entryPoint )
 {
-    assert( m_discovererWorker != nullptr );
+    startDiscoverer();
     m_discovererWorker->unban( entryPoint );
 }
 
