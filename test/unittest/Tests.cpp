@@ -64,7 +64,6 @@ void Tests::Reload()
     ASSERT_TRUE( setupRes );
     auto startRes = ml->start();
     ASSERT_EQ( StartResult::Success, startRes );
-    ml->reload();
 }
 
 void Tests::SetUp()

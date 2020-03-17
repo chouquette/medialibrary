@@ -74,6 +74,7 @@ protected:
     virtual void Reload() override
     {
         Tests::Reload();
+        ml->reload();
         auto res = cbMock->waitReload();
         ASSERT_TRUE( res );
     }

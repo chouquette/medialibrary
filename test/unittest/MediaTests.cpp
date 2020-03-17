@@ -1321,6 +1321,7 @@ TEST_F( FetchMedia, FetchRemovableUnplugged )
     fsMock->unmountDevice( RemovableDeviceUuid );
 
     Reload();
+    ml->reload();
     bool reloaded = cbMock->waitReload();
     ASSERT_TRUE( reloaded );
 
