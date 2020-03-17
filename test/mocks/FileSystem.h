@@ -95,6 +95,7 @@ struct FileSystemFactory : public fs::IFileSystemFactory
             return nullptr;
         auto ret = *it;
         devices.erase( it );
+        assert( ret->isRemovable() == true );
         // Now flag the mountpoint as belonging to its containing device, since it's now
         // just a regular folder
         auto d = device( ret->mountpoint() );
