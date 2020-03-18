@@ -470,7 +470,7 @@ bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
         LOG_INFO( "Creating new device in DB ", deviceFs->uuid() );
         device = Device::create( m_ml, deviceFs->uuid(),
                                  utils::file::scheme( folder->mrl() ),
-                                 deviceFs->isRemovable() );
+                                 deviceFs->isRemovable(), deviceFs->isNetwork() );
         if ( device == nullptr )
             return false;
     }

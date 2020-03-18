@@ -39,7 +39,7 @@ public:
         static int64_t Device::*const PrimaryKey;
     };
     Device( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme,
-            bool isRemovable, time_t insertionDate );
+            bool isRemovable, bool isNetwork, time_t insertionDate );
     Device( MediaLibraryPtr ml, sqlite::Row& row );
     int64_t id() const;
     const std::string& uuid() const;
@@ -51,6 +51,7 @@ public:
     bool forceNonRemovable();
     bool isPresent() const;
     void setPresent( bool value );
+    bool isNetwork() const;
     ///
     /// \brief scheme returns the scheme that was used for this device when it was
     /// originally created. This allows to use the apropriate IFileSystemFactory to find the
@@ -60,7 +61,7 @@ public:
     const std::string& scheme() const;
     void updateLastSeen();
 
-    static std::shared_ptr<Device> create( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme, bool isRemovable );
+    static std::shared_ptr<Device> create(MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme, bool isRemovable , bool isNetwork);
     static void createTable( sqlite::Connection* connection );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
@@ -81,6 +82,7 @@ private:
     // removable->non removable device fixup (introduced after vlc-android 3.1.0 rc3)
     bool m_isRemovable;
     bool m_isPresent;
+    bool m_isNetwork;
     time_t m_lastSeen;
 
     friend struct Device::Table;

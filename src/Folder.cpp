@@ -414,7 +414,8 @@ bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl )
     if ( device == nullptr )
         device = Device::create( ml, deviceFs->uuid(),
                                  utils::file::scheme( mrl ),
-                                 deviceFs->isRemovable() );
+                                 deviceFs->isRemovable(),
+                                 deviceFs->isNetwork() );
     std::string path;
     if ( deviceFs->isRemovable() == true )
         path = deviceFs->relativeMrl( mrl );

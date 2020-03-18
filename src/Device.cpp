@@ -41,13 +41,15 @@ Device::Device( MediaLibraryPtr ml, sqlite::Row& row )
     , m_scheme( row.extract<decltype(m_scheme)>() )
     , m_isRemovable( row.extract<decltype(m_isRemovable)>() )
     , m_isPresent( row.extract<decltype(m_isPresent)>() )
+    , m_isNetwork( row.extract<decltype(m_isNetwork)>() )
     , m_lastSeen( row.extract<decltype(m_lastSeen)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
 
 Device::Device( MediaLibraryPtr ml, const std::string& uuid,
-                const std::string& scheme, bool isRemovable, time_t lastSeen )
+                const std::string& scheme, bool isRemovable, bool isNetwork,
+                time_t lastSeen )
     : m_ml( ml )
     , m_id( 0 )
     , m_uuid( uuid )
@@ -55,6 +57,7 @@ Device::Device( MediaLibraryPtr ml, const std::string& uuid,
     , m_isRemovable( isRemovable )
     // Assume we can't add an absent device
     , m_isPresent( true )
+    , m_isNetwork( isNetwork )
     , m_lastSeen( lastSeen )
 {
 }
@@ -120,6 +123,11 @@ void Device::setPresent(bool value)
     m_isPresent = value;
 }
 
+bool Device::isNetwork() const
+{
+    return m_isNetwork;
+}
+
 const std::string& Device::scheme() const
 {
     return m_scheme;
@@ -138,17 +146,19 @@ void Device::updateLastSeen()
 }
 
 std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& uuid,
-                                        const std::string& scheme, bool isRemovable )
+                                        const std::string& scheme, bool isRemovable,
+                                        bool isNetwork )
 {
     static const std::string req = "INSERT INTO " + Device::Table::Name
-            + "(uuid, scheme, is_removable, is_present, last_seen) "
-            "VALUES(?, ?, ?, ?, ?)";
+            + "(uuid, scheme, is_removable, is_present, is_network, last_seen) "
+            "VALUES(?, ?, ?, ?, ?, ?)";
     auto lastSeen = isRemovable ? std::chrono::duration_cast<std::chrono::seconds>(
         std::chrono::system_clock::now().time_since_epoch()
     ).count() : 0;
-    auto self = std::make_shared<Device>( ml, uuid, scheme, isRemovable, lastSeen );
+    auto self = std::make_shared<Device>( ml, uuid, scheme, isRemovable, isNetwork,
+                                          lastSeen );
     if ( insert( ml, self, req, uuid, scheme, isRemovable, self->isPresent(),
-                 lastSeen ) == false )
+                 self->isNetwork(), lastSeen ) == false )
         return nullptr;
     return self;
 }
@@ -185,6 +195,19 @@ std::string Device::schema( const std::string& tableName, uint32_t dbModel )
             "last_seen UNSIGNED INTEGER"
         ")";
     }
+    else if ( dbModel == 24 )
+    {
+        return "CREATE TABLE " + Device::Table::Name +
+        "("
+            "id_device INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "uuid TEXT COLLATE NOCASE,"
+            "scheme TEXT,"
+            "is_removable BOOLEAN,"
+            "is_present BOOLEAN,"
+            "last_seen UNSIGNED INTEGER,"
+            "UNIQUE(uuid,scheme) ON CONFLICT FAIL"
+        ")";
+    }
     return "CREATE TABLE " + Device::Table::Name +
     "("
         "id_device INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -192,6 +215,7 @@ std::string Device::schema( const std::string& tableName, uint32_t dbModel )
         "scheme TEXT,"
         "is_removable BOOLEAN,"
         "is_present BOOLEAN,"
+        "is_network BOOLEAN,"
         "last_seen UNSIGNED INTEGER,"
         "UNIQUE(uuid,scheme) ON CONFLICT FAIL"
     ")";

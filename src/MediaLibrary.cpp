@@ -2455,7 +2455,7 @@ bool MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs )
         try
         {
             device = Device::create( m_ml, deviceFs.uuid(), deviceFs.scheme(),
-                                     deviceFs.isRemovable() );
+                                     deviceFs.isRemovable(), deviceFs.isNetwork() );
             return device != nullptr;
         }
         catch ( const sqlite::errors::ConstraintUnique& )

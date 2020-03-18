@@ -137,9 +137,10 @@ void MediaLibraryTester::deleteShow( int64_t showId )
 }
 
 std::shared_ptr<Device> MediaLibraryTester::addDevice( const std::string& uuid,
-                                                       const std::string& scheme, bool isRemovable )
+                                                       const std::string& scheme,
+                                                       bool isRemovable )
 {
-    return Device::create( this, uuid, scheme, isRemovable );
+    return Device::create( this, uuid, scheme, isRemovable, false );
 }
 
 void MediaLibraryTester::setFsFactory( std::shared_ptr<fs::IFileSystemFactory> fsf )
@@ -260,7 +261,7 @@ bool MediaLibraryTester::setupDummyFolder()
     try
     {
         device = Device::create( this, mock::FileSystemFactory::NoopDeviceUuid,
-                                 "file://", false );
+                                 "file://", false, false );
         if ( device == nullptr )
             return false;
     }

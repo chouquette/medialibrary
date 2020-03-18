@@ -119,6 +119,32 @@ Bookmark::schema( Bookmark::Table::Name, 25 ),
         IBookmark::Type::Simple ) ) +
     " FROM " + Bookmark::Table::Name + "_backup",
 
+"CREATE TEMPORARY TABLE " + Device::Table::Name + "_backup"
+"("
+    "id_device INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "uuid TEXT COLLATE NOCASE,"
+    "scheme TEXT,"
+    "is_removable BOOLEAN,"
+    "is_present BOOLEAN,"
+    "last_seen UNSIGNED INTEGER"
+")",
+
+"INSERT INTO " + Device::Table::Name + "_backup SELECT * FROM " + Device::Table::Name,
+
+"DROP TABLE " + Device::Table::Name,
+Device::schema( Device::Table::Name, 25 ),
+
+"INSERT INTO " + Device::Table::Name +
+    " SELECT id_device, uuid, scheme, is_removable, is_present,"
+    "(is_removable != 0 AND scheme != 'file://'), last_seen FROM "
+    + Device::Table::Name + "_backup",
+
+"DROP TABLE " + Device::Table::Name + "_backup",
+
+/* Now recreate triggers based on the Device table */
+Media::trigger( Media::Triggers::IsPresent, 25 ),
+
+
 Media::trigger( Media::Triggers::InsertFts, 25 ),
 Media::trigger( Media::Triggers::UpdateFts, 25 ),
 Media::trigger( Media::Triggers::DeleteFts, 25 ),
