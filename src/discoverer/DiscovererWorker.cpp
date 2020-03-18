@@ -45,10 +45,11 @@ namespace medialibrary
 DiscovererWorker::DiscovererWorker( MediaLibrary* ml,
                                     std::unique_ptr<IDiscoverer> discoverer )
     : m_currentTask( nullptr )
-    , m_run( false )
+    , m_run( true )
     , m_taskInterrupted( false )
     , m_discoverer( std::move( discoverer ) )
     , m_ml( ml )
+    , m_thread( &DiscovererWorker::run, this )
 {
 }
 
@@ -358,14 +359,7 @@ void DiscovererWorker::enqueue( int64_t entityId, Task::Type type )
 
 void DiscovererWorker::notify()
 {
-    if ( m_thread.get_id() == compat::Thread::id{} )
-    {
-        m_run = true;
-        m_thread = compat::Thread( &DiscovererWorker::run, this );
-    }
-    // Since we just added an element, let's not check for size == 0 :)
-    else if ( m_tasks.size() == 1 )
-        m_cond.notify_all();
+    m_cond.notify_all();
 }
 
 void DiscovererWorker::run()

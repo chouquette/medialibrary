@@ -113,7 +113,6 @@ private:
     virtual bool isInterrupted() const override;
 
 protected:
-    compat::Thread m_thread;
     std::list<Task> m_tasks;
     Task* m_currentTask;
     compat::Mutex m_mutex;
@@ -124,6 +123,7 @@ protected:
     std::atomic_bool m_taskInterrupted;
     std::unique_ptr<IDiscoverer> m_discoverer;
     MediaLibrary* m_ml;
+    compat::Thread m_thread;
 };
 
 }
