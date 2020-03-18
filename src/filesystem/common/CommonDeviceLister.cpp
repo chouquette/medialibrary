@@ -103,9 +103,6 @@ void CommonDeviceLister::refresh()
         const auto& insertedNewDevice = *m_knownDevices.rbegin();
         for ( const auto& mp : insertedNewDevice.mountpoints )
         {
-            LOG_DEBUG( "Adding device uuid: ", insertedNewDevice.uuid,
-                       " mounted on: ", mp, " removable: ",
-                       insertedNewDevice.removable ? "yes" : "no" );
             m_cb->onDeviceMounted( insertedNewDevice.uuid, mp,
                                    insertedNewDevice.removable );
         }
