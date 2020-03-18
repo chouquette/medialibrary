@@ -1947,12 +1947,18 @@ void MediaLibrary::reload()
 {
     startDiscoverer();
     m_discovererWorker->reload();
+    /*
+     * Initialize the parser and implicitely restart uncompleted parser tasks
+     * If the parser was already started, this is a no-op
+     */
+    getParser();
 }
 
 void MediaLibrary::reload( const std::string& entryPoint )
 {
     startDiscoverer();
     m_discovererWorker->reload( entryPoint );
+    getParser();
 }
 
 bool MediaLibrary::forceParserRetry()
