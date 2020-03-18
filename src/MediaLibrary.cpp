@@ -998,6 +998,7 @@ SearchAggregate MediaLibrary::search( const std::string& pattern,
 
 void MediaLibrary::startParser()
 {
+    assert( m_parser == nullptr );
     auto parser = std::make_unique<parser::Parser>( this );
 
     if ( m_services.empty() == true )
