@@ -727,6 +727,7 @@ void ResumeTests::InitializeCallback()
 
 void ResumeTests::MediaLibraryResumeTest::forceParserStart()
 {
+    std::unique_lock<compat::Mutex> lock{ m_mutex };
     MediaLibrary::startParser();
 }
 
