@@ -38,11 +38,12 @@ namespace fs
 {
 
 CommonDevice::CommonDevice( const std::string& uuid, const std::string& mountpoint,
-                            std::string scheme, bool isRemovable )
+                            std::string scheme, bool isRemovable, bool isNetwork )
     : m_uuid( uuid )
     , m_mountpoints( { utils::file::toFolderPath( mountpoint ) } )
     , m_scheme( scheme )
     , m_removable( isRemovable )
+    , m_isNetwork( isNetwork )
 {
 }
 
@@ -65,6 +66,11 @@ bool CommonDevice::isPresent() const
 {
     std::unique_lock<compat::Mutex> lock{ m_mutex };
     return m_mountpoints.empty() == false;
+}
+
+bool CommonDevice::isNetwork() const
+{
+    return m_isNetwork;
 }
 
 const std::string& CommonDevice::mountpoint() const

@@ -360,6 +360,11 @@ public:
         return true;
     }
 
+    virtual bool isNetwork() const override
+    {
+        return false;
+    }
+
     virtual const std::string& mountpoint() const override
     {
         return m_mountpoint;

@@ -34,7 +34,7 @@ namespace fs
 
 Device::Device( const std::string& uuid, const std::string& mountpoint,
                 bool isRemovable )
-    : CommonDevice( uuid, mountpoint, "file://", isRemovable )
+    : CommonDevice( uuid, mountpoint, "file://", isRemovable, false )
 {
 }
 

@@ -45,6 +45,7 @@ public:
     virtual const std::string& scheme() const = 0;
     virtual bool isRemovable() const = 0;
     virtual bool isPresent() const = 0;
+    virtual bool isNetwork() const = 0;
     /**
      * @brief mountpoint Returns a mountpoint of this device.
      *

@@ -35,11 +35,12 @@ class CommonDevice : public IDevice
 {
 public:
     CommonDevice( const std::string& uuid, const std::string& mountpoint,
-                  std::string scheme, bool isRemovable );
+                  std::string scheme, bool isRemovable, bool isNetwork );
     virtual const std::string& uuid() const override;
     virtual const std::string& scheme() const override;
     virtual bool isRemovable() const override;
     virtual bool isPresent() const override;
+    virtual bool isNetwork() const override;
     virtual const std::string& mountpoint() const override;
     virtual void addMountpoint( std::string mountpoint ) override;
     virtual void removeMountpoint( const std::string& mountpoint ) override;
@@ -58,6 +59,7 @@ private:
     std::string m_scheme;
     mutable compat::Mutex m_mutex;
     bool m_removable;
+    bool m_isNetwork;
 };
 
 }

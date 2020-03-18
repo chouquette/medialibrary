@@ -36,7 +36,7 @@ namespace mock
 {
 
 Device::Device( const std::string& mountpoint, const std::string& uuid, bool removable )
-    : CommonDevice( uuid, mountpoint, "file://", false )
+    : CommonDevice( uuid, mountpoint, "file://", false, false )
     , m_present( true )
     , m_removable( removable )
 {

@@ -135,7 +135,8 @@ bool NetworkFileSystemFactory::onDeviceMounted( const std::string& uuid,
         if ( device == nullptr )
         {
             device = std::make_shared<fs::NetworkDevice>( uuid, mountpoint,
-                                                          m_scheme, removable );
+                                                          m_scheme, removable,
+                                                          true );
             m_devices.push_back( device );
             addMountpoint = false;
         }
