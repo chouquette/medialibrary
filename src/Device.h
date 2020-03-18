@@ -69,7 +69,16 @@ public:
                                              const std::string& scheme );
     static void removeOldDevices( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime );
     static std::vector<std::shared_ptr<Device>> fetchByScheme( MediaLibraryPtr ml, const std::string& scheme );
-
+    /**
+     * @brief markNetworkDeviceMissing Will mark all network devices as missing
+     * @param ml A media library instance
+     * @return true if the request successfully executed. False otherwise
+     *
+     * This is used to have a coherent state before the device lister are started.
+     * We don't know what devices are present, so we mark them all as missing and
+     * wait for the device lister to signal their presence
+     */
+    static bool markNetworkAsDeviceMissing( MediaLibraryPtr ml );
 private:
     MediaLibraryPtr m_ml;
     // This is a database ID

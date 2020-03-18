@@ -551,6 +551,8 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
         return InitializeResult::Failed;
     }
 
+    Device::markNetworkAsDeviceMissing( this );
+
     m_initialized = true;
     LOG_INFO( "Successfully initialized" );
     return res;

@@ -254,4 +254,11 @@ std::vector<std::shared_ptr<Device>> Device::fetchByScheme( MediaLibraryPtr ml,
     return fetchAll<Device>( ml, req, scheme );
 }
 
+bool Device::markNetworkAsDeviceMissing( MediaLibraryPtr ml )
+{
+    const std::string req = "UPDATE " + Table::Name + " SET is_present = 0 "
+            "WHERE is_present != 0 AND is_network != 0 AND is_removable != 0";
+    return sqlite::Tools::executeUpdate( ml->getConn(), req );
+}
+
 }
