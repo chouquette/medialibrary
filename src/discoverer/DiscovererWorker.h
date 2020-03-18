@@ -76,6 +76,10 @@ protected:
         Type type;
     };
 
+    // This is reserved for the DiscovererTests and aims at not creating the
+    // background thread when it's not required
+    DiscovererWorker() = default;
+
 public:
     DiscovererWorker( MediaLibrary* ml, std::unique_ptr<IDiscoverer> discoverer );
     ~DiscovererWorker();
