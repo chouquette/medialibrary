@@ -35,7 +35,7 @@
 # if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP)
 #  define USE_BUILTIN_DEVICE_LISTER 1
 # endif
-#elif defined(__APPLE__)
+#elif TARGET_OS_MAC
 # include "filesystem/darwin/DeviceLister.h"
 # define USE_BUILTIN_DEVICE_LISTER 1
 #endif

@@ -218,7 +218,7 @@ libmedialibrary_la_SOURCES += \
 	$(NULL)
 endif
 endif
-if HAVE_DARWIN
+if HAVE_OSX
 libmedialibrary_macos_la_CPPFLAGS = $(libmedialibrary_la_CPPFLAGS)
 libmedialibrary_macos_la_SOURCES = \
 	src/filesystem/darwin/DeviceLister.mm \
@@ -232,13 +232,13 @@ libmedialibrary_la_LIBADD = \
 	$(NULL)
 
 libmedialibrary_la_LDFLAGS = -no-undefined -export-symbols-regex 'NewMediaLibrary'
-if HAVE_DARWIN
+if HAVE_OSX
 libmedialibrary_la_LIBADD += libmedialibrary_macos.la
 libmedialibrary_la_LDFLAGS += -Wl,-undefined,dynamic_lookup,-framework,Foundation
 endif
 
 lib_LTLIBRARIES = libmedialibrary.la
-if HAVE_DARWIN
+if HAVE_OSX
 lib_LTLIBRARIES += libmedialibrary_macos.la
 endif
 
