@@ -2391,6 +2391,15 @@ bool MediaLibrary::forceRescan()
 
 bool MediaLibrary::forceRescanLocked()
 {
+    /*
+     * If the parser hasn't been initialized yet, don't force it to start until
+     * we are done flushing entities from the database.
+     * This saves us from starting it only to pause/resume it immediately after
+     * Additionnaly, in the case of a migration from <24 to a later version, we
+     * don't create the unknown show during the migration, which causes the
+     * MetadataParser to refuse to initialize since it can't fetch & cache the
+     * unknown show
+     */
     if ( m_parser != nullptr )
         m_parser->prepareRescan();
     {
@@ -2424,6 +2433,14 @@ bool MediaLibrary::forceRescanLocked()
     {
         m_callback->onRescanStarted();
         m_parser->rescan();
+    }
+    else
+    {
+        /*
+         * Implicitely create & start the parser, which will invoke restore()
+         * as its first operation, which will start the reseted tasks parsing.
+         */
+        getParserLocked();
     }
     return true;
 }
