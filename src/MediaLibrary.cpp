@@ -1309,7 +1309,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
 
     if ( needRescan == true )
     {
-        if ( forceRescan() == false )
+        if ( forceRescanLocked() == false )
         {
             LOG_WARN( "Failed to force a rescan" );
         }
@@ -2384,6 +2384,12 @@ void MediaLibrary::refreshDevices()
 }
 
 bool MediaLibrary::forceRescan()
+{
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
+    return forceRescanLocked();
+}
+
+bool MediaLibrary::forceRescanLocked()
 {
     if ( m_parser != nullptr )
         m_parser->prepareRescan();

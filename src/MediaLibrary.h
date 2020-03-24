@@ -297,6 +297,7 @@ private:
     void refreshDevice( Device& device, fs::IFileSystemFactory* fsFactory );
     void startThumbnailer() const;
     parser::Parser* getParserLocked() const;
+    virtual bool forceRescanLocked();
 
 protected:
     virtual void addLocalFsFactory();

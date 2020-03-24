@@ -251,10 +251,10 @@ class MediaLibraryTesterNoForceRescan : public MediaLibraryTester
 {
 public:
     /*
-     * Override forceRescan to avoid removing all entities after the migration.
+     * Override forceRescanLocked to avoid removing all entities after the migration.
      * This allows more testing
      */
-    virtual bool forceRescan() override { return true; }
+    virtual bool forceRescanLocked() override { return true; }
 };
 
 class DbModel : public Tests
