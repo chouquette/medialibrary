@@ -2134,15 +2134,20 @@ parser::Parser *MediaLibrary::tryGetParser()
     return m_parser.get();
 }
 
-parser::Parser* MediaLibrary::getParser() const
+parser::Parser *MediaLibrary::getParserLocked() const
 {
-    std::unique_lock<compat::Mutex> lock{ m_mutex };
     if ( m_parser == nullptr )
     {
         auto self = const_cast<MediaLibrary*>( this );
         self->startParser();
     }
     return m_parser.get();
+}
+
+parser::Parser* MediaLibrary::getParser() const
+{
+    std::unique_lock<compat::Mutex> lock{ m_mutex };
+    return getParserLocked();
 }
 
 ThumbnailerWorker* MediaLibrary::thumbnailer() const

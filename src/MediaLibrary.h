@@ -296,6 +296,7 @@ private:
     void removeThumbnails();
     void refreshDevice( Device& device, fs::IFileSystemFactory* fsFactory );
     void startThumbnailer() const;
+    parser::Parser* getParserLocked() const;
 
 protected:
     virtual void addLocalFsFactory();
