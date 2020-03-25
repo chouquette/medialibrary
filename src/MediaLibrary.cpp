@@ -1087,12 +1087,8 @@ bool MediaLibrary::addDefaultDeviceListers()
     if ( m_deviceListers.find( "file://" ) == cend( m_deviceListers ) )
     {
         auto devLister = factory::createDeviceLister();
-        if ( devLister == nullptr )
-        {
-            LOG_ERROR( "No available IDeviceLister was found." );
-            return false;
-        }
-        m_deviceListers["file://"] = std::move( devLister );
+        if ( devLister != nullptr )
+            m_deviceListers["file://"] = std::move( devLister );
     }
 #ifdef HAVE_LIBVLC
     if ( m_deviceListers.find( "smb://" ) == cend( m_deviceListers ) )
