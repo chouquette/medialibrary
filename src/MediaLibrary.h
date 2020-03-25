@@ -301,7 +301,7 @@ private:
 
 protected:
     virtual void addLocalFsFactory();
-    bool addDefaultDeviceListers();
+    void addDefaultDeviceListers();
 
     class FsFactoryCb : public fs::IFileSystemFactoryCb
     {

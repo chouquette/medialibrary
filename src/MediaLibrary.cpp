@@ -478,8 +478,7 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
         return InitializeResult::AlreadyInitialized;
 
     LOG_INFO( "Initializing medialibrary..." );
-    if ( addDefaultDeviceListers() == false )
-        return InitializeResult::Failed;
+    addDefaultDeviceListers();
 
     auto mlFolder = utils::file::toFolderPath( mlFolderPath );
     m_thumbnailPath = mlFolder + "thumbnails/";
@@ -1082,7 +1081,7 @@ void MediaLibrary::addLocalFsFactory()
             std::make_shared<factory::FileSystemFactory>( this ) );
 }
 
-bool MediaLibrary::addDefaultDeviceListers()
+void MediaLibrary::addDefaultDeviceListers()
 {
     if ( m_deviceListers.find( "file://" ) == cend( m_deviceListers ) )
     {
@@ -1097,7 +1096,6 @@ bool MediaLibrary::addDefaultDeviceListers()
         m_deviceListers["smb://"] = std::move( deviceLister );
     }
 #endif
-    return true;
 }
 
 InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion )
