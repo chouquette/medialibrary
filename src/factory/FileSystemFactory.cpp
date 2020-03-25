@@ -150,10 +150,11 @@ bool FileSystemFactory::onDeviceMounted( const std::string& uuid,
                                          const std::string& mp,
                                          bool removable )
 {
-    LOG_DEBUG( "Device: ", uuid, "; mounted on: ", mp, "; removable: ",
-               removable ? "yes" : "no" );
+
     auto deviceIt = m_deviceCache.find( uuid );
     auto mountpoint = utils::file::toFolderPath( mp );
+    LOG_DEBUG( "Device: ", uuid, "; mounted on: ", mountpoint, "; removable: ",
+               removable ? "yes" : "no" );
     std::shared_ptr<fs::IDevice> device;
     if ( deviceIt == end( m_deviceCache ) )
     {
