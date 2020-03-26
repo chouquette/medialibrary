@@ -355,7 +355,6 @@ EXTRA_DIST += test/unittest/db_v3.sql \
 	test/unittest/db_v4.sql \
 	test/unittest/db_v7.sql \
 	test/unittest/db_v8.sql \
-	test/unittest/db_v10.sql \
 	test/unittest/db_v12.sql \
 	test/unittest/db_v13.sql \
 	test/unittest/db_v14.sql \
