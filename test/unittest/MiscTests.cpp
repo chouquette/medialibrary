@@ -652,3 +652,8 @@ TEST_F( DbModel, Upgrade24to25 )
     ASSERT_NE( networkDevice, nullptr );
     ASSERT_TRUE( networkDevice->isNetwork() );
 }
+
+TEST_F( DbModel, Upgrade25to26 )
+{
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v25.sql" );
+}

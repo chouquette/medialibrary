@@ -369,6 +369,7 @@ EXTRA_DIST += test/unittest/db_v3.sql \
 	test/unittest/db_v22.sql \
 	test/unittest/db_v23.sql \
 	test/unittest/db_v24.sql \
+	test/unittest/db_v25.sql \
 	$(NULL)
 
 
