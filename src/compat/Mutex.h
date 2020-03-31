@@ -37,6 +37,8 @@ using Mutex = std::mutex;
 
 #else
 
+#ifdef _WIN32
+
 #include <windows.h>
 
 namespace medialibrary
@@ -86,4 +88,7 @@ private:
 }
 }
 
-#endif
+#else
+#error "Missing mutex implementation"
+#endif // _WIN32
+#endif // HAVE_MUTEX

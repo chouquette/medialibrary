@@ -37,7 +37,7 @@ namespace compat
 }
 
 #else
-
+#ifdef _WIN32
 #include <windows.h>
 
 namespace medialibrary
@@ -112,4 +112,7 @@ private:
 }
 }
 
-#endif
+#else //_WIN32
+# error "Missing condition variable implementation"
+#endif //_WIN32
+#endif // CXX11_THREADS
