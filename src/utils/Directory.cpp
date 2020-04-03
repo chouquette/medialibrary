@@ -91,7 +91,7 @@ std::string toAbsolute( const std::string& path )
 #else
     wchar_t buff[MAX_PATH];
     auto wpath = charset::ToWide( path.c_str() );
-    if ( GetFullPathName( wpath.get(), MAX_PATH, buff, nullptr ) == 0 )
+    if ( GetFullPathNameW( wpath.get(), MAX_PATH, buff, nullptr ) == 0 )
     {
         LOG_ERROR( "Failed to convert ", path, " to absolute path" );
         throw errors::System{ GetLastError(), "Failed to convert to absolute path" };
