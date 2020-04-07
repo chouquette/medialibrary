@@ -581,9 +581,11 @@ public:
 
     /**
      * @brief discover Launch a discovery on the provided entry point.
+     * This will start the discoverer thread, device listers, and file system
+     * factories if needed
      * The actuall discovery will run asynchronously, meaning this method will immediatly return.
      * Depending on which discoverer modules where provided, this might or might not work
-     * \note This must be called after start()
+     * \note This must be called after initialize()
      * @param entryPoint The MRL of the entrypoint to discover.
      */
     virtual void discover( const std::string& entryPoint ) = 0;
