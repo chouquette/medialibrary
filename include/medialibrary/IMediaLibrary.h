@@ -714,9 +714,17 @@ public:
     /**
      * @brief reload Reload all known entry points
      *
-     * This must be called after start()
+     * This will start the discoverer thread, appropriate device listers and
+     * file system factories if needed.
      */
     virtual void reload() = 0;
+    /**
+     * @brief reload Reload a specific entry point
+     * @param entryPoint The entrypoint to reload
+     *
+     * This will start the discoverer thread, appropriate device listers and
+     * file system factories if needed.
+     */
     virtual void reload( const std::string& entryPoint ) = 0;
     /**
      * @brief forceParserRetry Forces a re-run of all metadata parsers and resets any
