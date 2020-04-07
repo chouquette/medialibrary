@@ -591,8 +591,10 @@ public:
      * @brief setDiscoverNetworkEnabled Enable discovery of network shares
      * @return true In case of success, false otherwise.
      *
-     * This can be called at any time, but won't have any effect before
-     * initialize() has been called.
+     * This can be called at any time.
+     * If enabling before the discoverer thread gets started, the intent will
+     * be stored, but the device listers nor the file system factories won't be
+     * started.
      * When disabling network discovery, all content that was discovered on
      * the network will be marked as non-present, meaning they won't be
      * returned until network discovery gets enabled again.
