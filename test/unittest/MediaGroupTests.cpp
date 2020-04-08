@@ -1185,3 +1185,40 @@ TEST_F( MediaGroups, RegroupAll )
     ASSERT_EQ( groups[2]->name(), "otters are not " );
     ASSERT_EQ( groups[3]->name(), "pangolins are " );
 }
+TEST_F( MediaGroups, MergeAutoCreated )
+{
+    /*
+     * Checks that we can appen a media from an automatically created group
+     * into another automatically created group
+     */
+    auto m1 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    auto res = MediaGroup::assignToGroup( ml.get(), *m1 );
+    ASSERT_TRUE( res );
+    res = MediaGroup::assignToGroup( ml.get(), *m2 );
+    ASSERT_TRUE( res );
+
+    auto groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    auto group1 = groups[0];
+    auto group2 = groups[1];
+    ASSERT_EQ( 1u, group1->nbMedia() );
+    ASSERT_EQ( 1u, group2->nbMedia() );
+
+    auto group2Media = group2->media( IMedia::Type::Unknown )->all();
+    ASSERT_EQ( 1u, group2Media.size() );
+    res = group1->add( *group2Media[0] );
+    ASSERT_TRUE( res );
+
+    groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+
+    ASSERT_EQ( 2u, group1->nbMedia() );
+
+    Reload();
+
+    group1 = ml->mediaGroup( group1->id() );
+    ASSERT_EQ( 2u, group1->nbMedia() );
+}
