@@ -839,18 +839,44 @@ TEST_F( MediaGroups, ForcedSingletonRestrictions )
     auto groups = ml->mediaGroups( nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
     ASSERT_EQ( groups[0]->id(), mg->id() );
+}
 
-    res = mg->add( *m2 );
-    ASSERT_FALSE( res );
-    auto media = mg->media( IMedia::Type::Unknown, nullptr )->all();
-    ASSERT_EQ( 1u, media.size() );
-    ASSERT_EQ( m->id(), media[0]->id() );
+TEST_F( MediaGroups, AddToForcedSingleton )
+{
+    auto createForcedSingleton = [this]( MediaPtr m ) {
+        auto mg = ml->createMediaGroup( std::vector<int64_t>{ m->id() } );
+        auto res = mg->remove( *m );
+        ASSERT_TRUE( res );
+    };
+    auto m1 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    createForcedSingleton( m1 );
+    createForcedSingleton( m2 );
 
-    mg->add( m2->id() );
-    ASSERT_FALSE( res );
-    media = mg->media( IMedia::Type::Unknown, nullptr )->all();
+    auto groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    auto g1 = std::static_pointer_cast<MediaGroup>( groups[0] );
+    auto g2 = std::static_pointer_cast<MediaGroup>( groups[1] );
+
+    ASSERT_TRUE( g1->isForcedSingleton() );
+    ASSERT_TRUE( g2->isForcedSingleton() );
+
+    auto media = g2->media( IMedia::Type::Video, nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
-    ASSERT_EQ( m->id(), media[0]->id() );
+
+    auto res = g1->add( *media[0] );
+    ASSERT_TRUE( res );
+    ASSERT_FALSE( g1->isForcedSingleton() );
+    ASSERT_EQ( 2u, g1->nbMedia() );
+
+    g1 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( g1->id() ) );
+    ASSERT_FALSE( g1->isForcedSingleton() );
+    ASSERT_EQ( 2u, g1->nbMedia() );
+
+    g2 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( g2->id() ) );
+    ASSERT_EQ( nullptr, g2 );
 }
 
 TEST_F( MediaGroups, RenameForcedSingleton )

@@ -147,11 +147,9 @@ bool MediaGroup::add( int64_t mediaId )
     return add( mediaId, false );
 }
 
-bool MediaGroup::add( IMedia& media, bool forced )
+bool MediaGroup::add( IMedia& media, bool initForceSingleton )
 {
-    if ( m_forcedSingleton == true && forced == false )
-        return false;
-    if ( Media::setMediaGroup( m_ml, media.id(), m_id ) == false )
+    if ( add( media.id(), initForceSingleton ) == false )
         return false;
     switch ( media.type() )
     {
@@ -167,16 +165,29 @@ bool MediaGroup::add( IMedia& media, bool forced )
     }
     if ( media.duration() > 0 )
         m_duration += media.duration();
-    m_lastModificationDate = time( nullptr );
     auto& m = static_cast<Media&>( media );
     m.setMediaGroupId( m_id );
     return true;
 }
 
-bool MediaGroup::add( int64_t mediaId, bool forced )
+bool MediaGroup::add( int64_t mediaId, bool initForceSingleton )
 {
-    if ( m_forcedSingleton == true && forced == false )
+    std::unique_ptr<sqlite::Transaction> t;
+    if ( m_forcedSingleton == true && initForceSingleton == false &&
+         sqlite::Transaction::transactionInProgress() == false )
+        t = m_ml->getConn()->newTransaction();
+    if ( Media::setMediaGroup( m_ml, mediaId, m_id ) == false )
         return false;
+    if ( m_forcedSingleton == true && initForceSingleton == false )
+    {
+        const std::string req = "UPDATE " + Table::Name +
+                " SET forced_singleton = 0 WHERE id_group = ?";
+        if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id ) == false )
+            return false;
+        m_forcedSingleton = false;
+    }
+    if ( t != nullptr )
+        t->commit();
     m_lastModificationDate = time( nullptr );
     return Media::setMediaGroup( m_ml, mediaId, m_id );
 }
