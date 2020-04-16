@@ -27,7 +27,7 @@
 #include "compat/Thread.h"
 #include "compat/Mutex.h"
 #include "compat/ConditionVariable.h"
-#include "mocks/NoopCallback.h"
+#include "common/NoopCallback.h"
 #include "medialibrary/IMediaLibrary.h"
 
 #include <atomic>

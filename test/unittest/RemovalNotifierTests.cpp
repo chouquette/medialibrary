@@ -27,7 +27,7 @@
 #include "Tests.h"
 #include "Media.h"
 #include "File.h"
-#include "mocks/NoopCallback.h"
+#include "common/NoopCallback.h"
 #include "utils/ModificationsNotifier.h"
 #include "compat/Mutex.h"
 

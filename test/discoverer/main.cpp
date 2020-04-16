@@ -25,7 +25,7 @@
 #endif
 
 #include "medialibrary/IMediaLibrary.h"
-#include "test/mocks/NoopCallback.h"
+#include "test/common/NoopCallback.h"
 #include "compat/Mutex.h"
 #include "compat/ConditionVariable.h"
 

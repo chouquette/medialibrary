@@ -23,9 +23,9 @@
 #include "gtest/gtest.h"
 
 #include "medialibrary/filesystem/IFileSystemFactory.h"
-#include "mocks/NoopCallback.h"
+#include "common/NoopCallback.h"
 #include "mocks/MockDeviceLister.h"
-#include "common/MediaLibraryTester.h"
+#include "MediaLibraryTester.h"
 #include "medialibrary/filesystem/IDirectory.h"
 
 class Tests : public testing::Test

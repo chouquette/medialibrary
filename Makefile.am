@@ -309,11 +309,11 @@ libgtest_la_CPPFLAGS = \
 libgtestmain_la_CPPFLAGS = $(AM_CPPFLAGS) $(libgtest_la_CPPFLAGS)
 
 unittest_SOURCES = \
-	test/common/MediaLibraryTester.cpp \
-	test/mocks/FileSystem.cpp \
-	test/mocks/filesystem/MockDevice.cpp \
-	test/mocks/filesystem/MockDirectory.cpp \
-	test/mocks/filesystem/MockFile.cpp \
+	test/unittest/MediaLibraryTester.cpp \
+	test/unittest/mocks/FileSystem.cpp \
+	test/unittest/mocks/filesystem/MockDevice.cpp \
+	test/unittest/mocks/filesystem/MockDirectory.cpp \
+	test/unittest/mocks/filesystem/MockFile.cpp \
 	test/unittest/AlbumTests.cpp \
 	test/unittest/AlbumTrackTests.cpp \
 	test/unittest/ArtistTests.cpp \
@@ -369,6 +369,7 @@ unittest_CPPFLAGS = 		\
 	$(MEDIALIB_CPPFLAGS) 	\
 	-DSRC_DIR=\"$(abs_srcdir)\"	\
 	-I$(top_srcdir)/test	\
+	-I$(top_srcdir)/test/unittest/	\
 	-I$(top_srcdir)/googletest/googletest/include \
 	$(libmedialibrary_la_CPPFLAGS) \
 	$(NULL)

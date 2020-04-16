@@ -25,7 +25,7 @@
 #endif
 
 #include "MediaLibrary.h"
-#include "mocks/NoopCallback.h"
+#include "common/NoopCallback.h"
 #include "utils/Filename.h"
 #include "medialibrary/filesystem/IDirectory.h"
 #include "compat/Mutex.h"

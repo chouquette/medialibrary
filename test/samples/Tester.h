@@ -39,7 +39,7 @@
 #include "medialibrary/ISubtitleTrack.h"
 #include "medialibrary/IFolder.h"
 #include "Folder.h"
-#include "mocks/NoopCallback.h"
+#include "common/NoopCallback.h"
 #include "medialibrary/IDeviceLister.h"
 #include "MediaLibrary.h"
 #include "compat/Mutex.h"
