@@ -71,27 +71,28 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     , m_type( row.load<decltype(m_type)>( 1 ) )
     , m_subType( row.load<decltype(m_subType)>( 2 ) )
     , m_duration( row.load<decltype(m_duration)>( 3 ) )
-    , m_playCount( row.load<decltype(m_playCount)>( 4 ) )
-    , m_lastPlayedDate( row.load<decltype(m_lastPlayedDate)>( 5 ) )
+    , m_progress( row.load<decltype(m_progress)>( 4 ) )
+    , m_playCount( row.load<decltype(m_playCount)>( 5 ) )
+    , m_lastPlayedDate( row.load<decltype(m_lastPlayedDate)>( 6 ) )
     // skip real_last_played_date as we don't need it in memory
-    , m_insertionDate( row.load<decltype(m_insertionDate)>( 7 ) )
-    , m_releaseDate( row.load<decltype(m_releaseDate)>( 8 ) )
-    , m_title( row.load<decltype(m_title)>( 9 ) )
-    , m_filename( row.load<decltype(m_filename)>( 10 ) )
-    , m_isFavorite( row.load<decltype(m_isFavorite)>( 11 ) )
+    , m_insertionDate( row.load<decltype(m_insertionDate)>( 8 ) )
+    , m_releaseDate( row.load<decltype(m_releaseDate)>( 9 ) )
+    , m_title( row.load<decltype(m_title)>( 10 ) )
+    , m_filename( row.load<decltype(m_filename)>( 11 ) )
+    , m_isFavorite( row.load<decltype(m_isFavorite)>( 12 ) )
     // Skip is_present
-    , m_deviceId( row.load<decltype(m_deviceId)>( 13 ) )
-    , m_nbPlaylists( row.load<unsigned int>( 14 ) )
-    , m_folderId( row.load<decltype(m_folderId)>( 15 ) )
-    , m_importType( row.load<decltype(m_importType)>( 16 ) )
-    , m_groupId( row.load<decltype(m_groupId)>( 17 ) )
-    , m_forcedTitle( row.load<decltype(m_forcedTitle)>( 18 ) )
+    , m_deviceId( row.load<decltype(m_deviceId)>( 14 ) )
+    , m_nbPlaylists( row.load<unsigned int>( 15 ) )
+    , m_folderId( row.load<decltype(m_folderId)>( 16 ) )
+    , m_importType( row.load<decltype(m_importType)>( 17 ) )
+    , m_groupId( row.load<decltype(m_groupId)>( 18 ) )
+    , m_forcedTitle( row.load<decltype(m_forcedTitle)>( 19 ) )
 
     // End of DB fields extraction
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
-    assert( row.nbColumns() == 19 );
+    assert( row.nbColumns() == 20 );
 }
 
 Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
@@ -101,6 +102,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
     , m_type( type )
     , m_subType( SubType::Unknown )
     , m_duration( duration )
+    , m_progress( -1.0f )
     , m_playCount( 0 )
     , m_lastPlayedDate( 0 )
     , m_insertionDate( time( nullptr ) )
@@ -126,6 +128,7 @@ Media::Media(MediaLibraryPtr ml, const std::string& fileName, ImportType importT
     , m_type( Type::Unknown )
     , m_subType( SubType::Unknown )
     , m_duration( -1 )
+    , m_progress( -1.0f )
     , m_playCount( 0 )
     , m_lastPlayedDate( 0 )
     , m_insertionDate( time( nullptr ) )
@@ -219,6 +222,11 @@ void Media::setAlbumTrack( AlbumTrackPtr albumTrack )
 int64_t Media::duration() const
 {
     return m_duration;
+}
+
+float Media::progress() const
+{
+    return m_progress;
 }
 
 void Media::setDuration( int64_t duration )
@@ -1183,7 +1191,12 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
         "subtype INTEGER NOT NULL DEFAULT " +
             std::to_string( static_cast<typename std::underlying_type<SubType>::type>(
                                 SubType::Unknown ) ) + ","
-        "duration INTEGER DEFAULT -1,"
+        "duration INTEGER DEFAULT -1,";
+
+    if ( dbModel >= 27 )
+        req += "progress REAL DEFAULT -1,";
+
+    req +=
         "play_count UNSIGNED INTEGER,"
         "last_played_date UNSIGNED INTEGER,"
         "real_last_played_date UNSIGNED INTEGER,"

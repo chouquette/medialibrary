@@ -132,6 +132,15 @@ public:
     virtual int64_t duration() const = 0;
     virtual uint32_t playCount() const = 0;
     /**
+     * @brief progress Returns the media progress, in percent
+     *
+     * This is the same unit as VLC's playback position, ie. a float between
+     * 0 and 1.
+     * If the value is negative, it means the playback has either never been
+     * played, or it was played to completion
+     */
+    virtual float progress() const = 0;
+    /**
      * @brief increasePlayCount Increment this media play count by 1.
      *
      * This also bumps the last played date to "now", causing the media

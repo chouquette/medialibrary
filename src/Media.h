@@ -158,6 +158,7 @@ class Media : public IMedia,
         virtual AlbumTrackPtr albumTrack() const override;
         void setAlbumTrack( AlbumTrackPtr albumTrack );
         virtual int64_t duration() const override;
+        virtual float progress() const override;
         void setDuration( int64_t duration);
         virtual ShowEpisodePtr showEpisode() const override;
         void setShowEpisode( ShowEpisodePtr episode );
@@ -323,6 +324,7 @@ private:
         Type m_type;
         SubType m_subType;
         int64_t m_duration;
+        float m_progress;
         unsigned int m_playCount;
         std::time_t m_lastPlayedDate;
         const std::time_t m_insertionDate;
