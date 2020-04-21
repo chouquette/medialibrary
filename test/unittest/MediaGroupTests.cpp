@@ -699,6 +699,18 @@ TEST_F( MediaGroups, CreateFromMedia )
     ASSERT_EQ( m1->id(), media[0]->id() );
 }
 
+TEST_F( MediaGroups, CreateWithUnknownMedia )
+{
+    auto mg = ml->createMediaGroup( std::vector<int64_t>{ 7, 8, 9, 10 } );
+    ASSERT_EQ( nullptr, mg );
+
+    auto m = ml->addMedia( "media.mkv", IMedia::Type::Video );
+    ASSERT_NE( nullptr, m );
+    mg = ml->createMediaGroup( std::vector<int64_t>{ m->id(), 13, 12 } );
+    ASSERT_NE( nullptr, mg );
+    ASSERT_EQ( 1u, mg->nbMedia() );
+}
+
 TEST_F( MediaGroups, RemoveMedia )
 {
     /*

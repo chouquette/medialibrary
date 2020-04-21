@@ -327,6 +327,16 @@ std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
 std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
                                                 const std::vector<int64_t>& mediaIds )
 {
+    std::vector<MediaPtr> media;
+    for ( const auto mId : mediaIds )
+    {
+        auto m = ml->media( mId );
+        if ( m == nullptr )
+            continue;
+        media.push_back( std::move( m ) );
+    }
+    if ( media.size() == 0 )
+        return nullptr;
     static const std::string req = "INSERT INTO " + Table::Name +
             "(user_interacted, forced_singleton, creation_date, last_modification_date) "
             "VALUES(?, ?, ?, ?)";
@@ -337,19 +347,9 @@ std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
     auto notifier = ml->getNotifier();
     if ( notifier != nullptr )
         notifier->notifyMediaGroupCreation( self );
-    for ( const auto mId : mediaIds )
+    for ( const auto& m : media )
     {
-        auto media = ml->media( mId );
-        if ( media == nullptr )
-        {
-            /*
-             * Hope it was a sporadic failure and attempt to link the media
-             * anyway. The counters won't be up to date but the media will be linked.
-             */
-            self->add( mId );
-        }
-        else
-            self->add( *media );
+        self->add( *m );
     }
     return self;
 }
