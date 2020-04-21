@@ -68,7 +68,7 @@ public:
     MediaGroup( MediaLibraryPtr ml, sqlite::Row& row );
     MediaGroup( MediaLibraryPtr ml, std::string name, bool userInitiated,
                 bool forcedSingleton );
-    MediaGroup( MediaLibraryPtr ml );
+    MediaGroup( MediaLibraryPtr ml, std::string name );
     virtual int64_t id() const override;
     virtual const std::string& name() const override;
     virtual uint32_t nbMedia() const override;

@@ -711,6 +711,29 @@ TEST_F( MediaGroups, CreateWithUnknownMedia )
     ASSERT_EQ( 1u, mg->nbMedia() );
 }
 
+TEST_F( MediaGroups, CheckFromMediaName )
+{
+    /*
+     * First create a group with an existing match, then create a group with
+     * no match. Ensure the first group has a name, and the 2nd doesn't
+     */
+    auto m1 = ml->addMedia( "otters are fluffy.mkv", IMedia::Type::Video );
+    auto m2 = ml->addMedia( "otters are cute.mkv", IMedia::Type::Video );
+    auto m3 = ml->addMedia( "pangolins don't match otters.mkv", IMedia::Type::Video );
+
+    auto mg = ml->createMediaGroup( std::vector<int64_t>{ m1->id(), m2->id() } );
+    ASSERT_NE( nullptr, mg );
+    ASSERT_EQ( "otters are ", mg->name() );
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_EQ( "otters are ", mg->name() );
+
+    mg = ml->createMediaGroup( std::vector<int64_t>{ m3->id(), m2->id() } );
+    ASSERT_NE( nullptr, mg );
+    ASSERT_EQ( "", mg->name() );
+    mg = ml->mediaGroup( mg->id() );
+    ASSERT_EQ( "", mg->name() );
+}
+
 TEST_F( MediaGroups, RemoveMedia )
 {
     /*
@@ -1218,9 +1241,9 @@ TEST_F( MediaGroups, RegroupAll )
     ml->regroupAll();
     groups = ml->mediaGroups( nullptr )->all();
     ASSERT_EQ( 4u, groups.size() );
-    ASSERT_EQ( groups[0]->name(), "" );
-    ASSERT_EQ( groups[1]->name(), "cats are unrelated to otters and pangolins.mkv" );
-    ASSERT_EQ( groups[2]->name(), "otters are not " );
+    ASSERT_EQ( groups[0]->name(), "cats are unrelated to otters and pangolins.mkv" );
+    ASSERT_EQ( groups[1]->name(), "otters are not " );
+    ASSERT_EQ( groups[2]->name(), "otters is already grouped.mkv" );
     ASSERT_EQ( groups[3]->name(), "pangolins are " );
 }
 TEST_F( MediaGroups, MergeAutoCreated )

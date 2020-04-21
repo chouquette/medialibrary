@@ -73,9 +73,10 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, std::string name, bool userInitiated
 {
 }
 
-MediaGroup::MediaGroup( MediaLibraryPtr ml )
+MediaGroup::MediaGroup( MediaLibraryPtr ml , std::string name )
     : m_ml( ml )
     , m_id( 0 )
+    , m_name( std::move( name ) )
     , m_nbVideo( 0 )
     , m_nbAudio( 0 )
     , m_nbUnknown( 0 )
@@ -328,20 +329,34 @@ std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
                                                 const std::vector<int64_t>& mediaIds )
 {
     std::vector<MediaPtr> media;
+    std::string name;
     for ( const auto mId : mediaIds )
     {
         auto m = ml->media( mId );
         if ( m == nullptr )
             continue;
+        if ( media.empty() == true )
+        {
+            /*
+             * Only assign the media title for the first media. If at a later
+             * point there is no match, we will empty 'name', and we'd end up
+             * reseting it to an arbitrary media title if we'd only check if
+             * 'name' was empty before assigning it
+             */
+            assert( name.empty() == true );
+            name = m->title();
+        }
+        else
+            name = commonPattern( name, m->title() );
         media.push_back( std::move( m ) );
     }
     if ( media.size() == 0 )
         return nullptr;
     static const std::string req = "INSERT INTO " + Table::Name +
-            "(user_interacted, forced_singleton, creation_date, last_modification_date) "
-            "VALUES(?, ?, ?, ?)";
-    auto self = std::make_shared<MediaGroup>( ml );
-    if ( insert( ml, self, req, true, false, self->creationDate(),
+            "(name, user_interacted, forced_singleton, creation_date, last_modification_date) "
+            "VALUES(?, ?, ?, ?, ?)";
+    auto self = std::make_shared<MediaGroup>( ml, std::move( name ) );
+    if ( insert( ml, self, req, self->name(), true, false, self->creationDate(),
                  self->lastModificationDate() ) == false )
         return nullptr;
     auto notifier = ml->getNotifier();
