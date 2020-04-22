@@ -701,10 +701,25 @@ bool MediaGroup::checkDbModel( MediaLibraryPtr ml )
                                     trigger( t, Settings::DbModelVersion ),
                                     triggerName( t, Settings::DbModelVersion ) );
     };
+    auto checkIndex = []( sqlite::Connection* dbConn, Indexes i ) {
+        return sqlite::Tools::checkIndexStatement( dbConn,
+                                    index( i, Settings::DbModelVersion ),
+                                    indexName( i, Settings::DbModelVersion ) );
+    };
+
     return check( ml->getConn(), Triggers::InsertFts ) &&
             check( ml->getConn(), Triggers::DeleteFts ) &&
             check( ml->getConn(), Triggers::IncrementNbMediaOnGroupChange ) &&
-            check( ml->getConn(), Triggers::DecrementNbMediaOnGroupChange );
+            check( ml->getConn(), Triggers::DecrementNbMediaOnGroupChange ) &&
+            check( ml->getConn(), Triggers::DecrementNbMediaOnGroupChange ) &&
+            check( ml->getConn(), Triggers::DecrementNbMediaOnGroupChange ) &&
+            check( ml->getConn(), Triggers::DecrementNbMediaOnGroupChange ) &&
+            check( ml->getConn(), Triggers::DecrementNbMediaOnGroupChange ) &&
+            check( ml->getConn(), Triggers::DecrementNbMediaOnGroupChange ) &&
+            checkIndex( ml->getConn(), Indexes::ForcedSingleton ) &&
+            checkIndex( ml->getConn(), Indexes::Duration ) &&
+            checkIndex( ml->getConn(), Indexes::CreationDate ) &&
+            checkIndex( ml->getConn(), Indexes::LastModificationDate );
 }
 
 bool MediaGroup::assignToGroup( MediaLibraryPtr ml, Media& m )
