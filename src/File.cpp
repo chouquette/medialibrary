@@ -265,20 +265,32 @@ std::string File::schema( const std::string& tableName, uint32_t )
           ")";
 }
 
-std::string File::index( Indexes index, uint32_t )
+std::string File::index( Indexes index, uint32_t dbModel )
 {
     switch ( index )
     {
         case Indexes::MediaId:
-            return "CREATE INDEX file_media_id_index ON " +
+            return "CREATE INDEX " + indexName( index, dbModel ) + " ON " +
                         Table::Name + "(media_id)";
         case Indexes::FolderId:
-            return "CREATE INDEX file_folder_id_index ON " +
+            return "CREATE INDEX " + indexName( index, dbModel ) + " ON " +
                         Table::Name + "(folder_id)";
         default:
             assert( !"Invalid index provided" );
     }
     return "<invalid request>";
+}
+
+std::string File::indexName( File::Indexes index, uint32_t )
+{
+    switch ( index )
+    {
+        case Indexes::MediaId:
+            return "file_media_id_index";
+        case Indexes::FolderId:
+            return "file_folder_id_index";
+    }
+    return "<invalid trigger>";
 }
 
 bool File::checkDbModel(MediaLibraryPtr ml)
