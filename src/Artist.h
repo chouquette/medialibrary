@@ -107,7 +107,7 @@ public:
     virtual unsigned int nbTracks() const override;
 
     static void createTable( sqlite::Connection* dbConnection );
-    static void createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion );
+    static void createTriggers( sqlite::Connection* dbConnection );
     static std::string schema( const std::string& tableName, uint32_t dbModelVersion );
     static std::string trigger( Triggers trigger, uint32_t dbModelVersion );
     static std::string triggerName( Triggers trigger, uint32_t dbModelVersion );

@@ -270,7 +270,7 @@ MediaLibrary::~MediaLibrary()
         m_parser->stop();
 }
 
-bool MediaLibrary::createAllTables( uint32_t dbModelVersion )
+bool MediaLibrary::createAllTables()
 {
     // We need to create the tables in order of triggers creation
     // Device is the "root of all evil". When a device is modified,
@@ -305,7 +305,7 @@ bool MediaLibrary::createAllTables( uint32_t dbModelVersion )
     Artist::createTable( dbConn );
     if ( Artist::createDefaultArtists( dbConn ) == false )
         return false;
-    parser::Task::createTable( dbConn, dbModelVersion );
+    parser::Task::createTable( dbConn );
     Metadata::createTable( dbConn );
     SubtitleTrack::createTable( dbConn );
     Chapter::createTable( dbConn );
@@ -314,35 +314,35 @@ bool MediaLibrary::createAllTables( uint32_t dbModelVersion )
     return true;
 }
 
-void MediaLibrary::createAllTriggers(uint32_t dbModelVersion)
+void MediaLibrary::createAllTriggers()
 {
     auto dbConn = m_dbConnection.get();
 
-    Folder::createTriggers( dbConn, dbModelVersion );
-    Folder::createIndexes( dbConn, dbModelVersion );
-    Album::createTriggers( dbConn, dbModelVersion );
-    Album::createIndexes( dbConn, dbModelVersion );
+    Folder::createTriggers( dbConn );
+    Folder::createIndexes( dbConn );
+    Album::createTriggers( dbConn );
+    Album::createIndexes( dbConn );
     AlbumTrack::createIndexes( dbConn );
-    Artist::createTriggers( dbConn, dbModelVersion );
-    Media::createTriggers( dbConn, dbModelVersion );
-    Media::createIndexes( dbConn, dbModelVersion );
+    Artist::createTriggers( dbConn );
+    Media::createTriggers( dbConn );
+    Media::createIndexes( dbConn );
     File::createIndexes( dbConn );
     Genre::createTriggers( dbConn );
-    Playlist::createTriggers( dbConn, dbModelVersion );
-    Playlist::createIndexes( dbConn, dbModelVersion );
+    Playlist::createTriggers( dbConn );
+    Playlist::createIndexes( dbConn );
     Label::createTriggers( dbConn );
-    Show::createTriggers( dbConn, dbModelVersion );
+    Show::createTriggers( dbConn );
     ShowEpisode::createIndexes( dbConn );
     Thumbnail::createTriggers( dbConn );
     Thumbnail::createIndexes( dbConn );
-    parser::Task::createTriggers( dbConn, dbModelVersion );
+    parser::Task::createTriggers( dbConn );
     AudioTrack::createIndexes( dbConn );
     SubtitleTrack::createIndexes( dbConn );
     VideoTrack::createIndexes( dbConn );
     MediaGroup::createTriggers( dbConn );
     MediaGroup::createIndexes( dbConn );
     Movie::createIndexes( dbConn );
-    parser::Task::createIndex( dbConn, dbModelVersion );
+    parser::Task::createIndex( dbConn );
 }
 
 bool MediaLibrary::checkDatabaseIntegrity()
@@ -528,11 +528,10 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
         auto dbModel = m_settings.dbModelVersion();
         if ( dbModel == 0 )
         {
-            dbModel = Settings::DbModelVersion;
             auto t = m_dbConnection->newTransaction();
-            if ( createAllTables( dbModel ) == false )
+            if ( createAllTables() == false )
                 return InitializeResult::Failed;
-            createAllTriggers( dbModel );
+            createAllTriggers();
             t->commit();
         }
         else if ( dbModel != Settings::DbModelVersion )
@@ -1315,9 +1314,9 @@ bool MediaLibrary::recreateDatabase()
     m_dbConnection = sqlite::Connection::connect( dbPath );
     auto t = m_dbConnection->newTransaction();
     Settings::createTable( m_dbConnection.get() );
-    if ( createAllTables( Settings::DbModelVersion ) == false )
+    if ( createAllTables() == false )
         return false;
-    createAllTriggers( Settings::DbModelVersion );
+    createAllTriggers();
 
     // We dropped the database, there is no setting to be read anymore
     auto res = m_settings.load();
@@ -1362,9 +1361,9 @@ void MediaLibrary::migrateModel7to8()
 {
     sqlite::Connection::WeakDbContext weakConnCtx{ getConn() };
     auto t = getConn()->newTransaction();
-    parser::Task::createTable( getConn(), 8u );
     std::string reqs[] = {
-#               include "database/migrations/migration7-8.sql"
+        parser::Task::schema( parser::Task::Table::Name, 8 ),
+#       include "database/migrations/migration7-8.sql"
     };
 
     for ( const auto& req : reqs )

@@ -202,22 +202,23 @@ void Show::createTable( sqlite::Connection* dbConnection )
         sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-void Show::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion )
+void Show::createTriggers( sqlite::Connection* dbConnection )
 {
     sqlite::Tools::executeRequest( dbConnection,
-                                   trigger( Triggers::InsertFts, dbModelVersion ) );
+                                   trigger( Triggers::InsertFts,
+                                            Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
-                                   trigger( Triggers::DeleteFts, dbModelVersion ) );
-
-    if ( dbModelVersion < 23 )
-        return;
-
+                                   trigger( Triggers::DeleteFts,
+                                            Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
-                                   trigger( Triggers::IncrementNbEpisode, dbModelVersion ) );
+                                   trigger( Triggers::IncrementNbEpisode,
+                                            Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
-                                   trigger( Triggers::DecrementNbEpisode, dbModelVersion ) );
+                                   trigger( Triggers::DecrementNbEpisode,
+                                            Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
-                                   trigger( Triggers::UpdateIsPresent, dbModelVersion ) );
+                                   trigger( Triggers::UpdateIsPresent,
+                                            Settings::DbModelVersion ) );
 }
 
 std::string Show::schema( const std::string& tableName, uint32_t dbModelVersion )

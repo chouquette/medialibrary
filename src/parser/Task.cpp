@@ -388,26 +388,24 @@ void Task::setMrl( std::string newMrl )
     m_mrl = std::move( newMrl );
 }
 
-void Task::createTable( sqlite::Connection* dbConnection, uint32_t dbModel )
+void Task::createTable( sqlite::Connection* dbConnection )
 {
     sqlite::Tools::executeRequest( dbConnection,
-                                   schema( Table::Name, dbModel ) );
+                                   schema( Table::Name, Settings::DbModelVersion ) );
 }
 
-void Task::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModel )
+void Task::createTriggers( sqlite::Connection* dbConnection )
 {
-    if ( dbModel < 18 )
-        return;
     sqlite::Tools::executeRequest( dbConnection,
-                                   trigger( Triggers::DeletePlaylistLinkingTask, dbModel ) );
+                                   trigger( Triggers::DeletePlaylistLinkingTask,
+                                            Settings::DbModelVersion ) );
 }
 
-void Task::createIndex( sqlite::Connection* dbConnection, uint32_t dbModel )
+void Task::createIndex( sqlite::Connection* dbConnection )
 {
-    if ( dbModel < 24 )
-        return;
     sqlite::Tools::executeRequest( dbConnection,
-                                   index( Indexes::ParentFolderId, dbModel ) );
+                                   index( Indexes::ParentFolderId,
+                                          Settings::DbModelVersion ) );
 }
 
 std::string Task::schema( const std::string& tableName, uint32_t dbModel )

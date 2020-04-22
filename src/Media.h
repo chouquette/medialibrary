@@ -116,8 +116,8 @@ class Media : public IMedia,
         static std::shared_ptr<Media> createStream( MediaLibraryPtr ml,
                                                     const std::string& fileName );
         static void createTable( sqlite::Connection* connection );
-        static void createTriggers( sqlite::Connection* connection, uint32_t modelVersion );
-        static void createIndexes( sqlite::Connection* connection, uint32_t modelVersion );
+        static void createTriggers( sqlite::Connection* connection );
+        static void createIndexes( sqlite::Connection* connection );
         static std::string schema( const std::string& tableName, uint32_t dbModel );
         static std::string trigger( Triggers trigger, uint32_t dbModel );
         static std::string triggerName( Triggers trigger, uint32_t dbModel );

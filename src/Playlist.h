@@ -97,8 +97,8 @@ public:
     bool contains( int64_t mediaId, uint32_t position );
 
     static void createTable( sqlite::Connection* dbConn );
-    static void createTriggers( sqlite::Connection* dbConn , uint32_t dbModel);
-    static void createIndexes( sqlite::Connection* dbConn, uint32_t dbModel );
+    static void createTriggers( sqlite::Connection* dbConn );
+    static void createIndexes( sqlite::Connection* dbConn );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
     static std::string trigger( Triggers trigger, uint32_t dbModel );
     static std::string triggerName( Triggers trigger, uint32_t dbModel );

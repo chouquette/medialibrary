@@ -281,37 +281,37 @@ void Artist::createTable( sqlite::Connection* dbConnection )
         sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-void Artist::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion )
+void Artist::createTriggers( sqlite::Connection* dbConnection )
 {
     sqlite::Tools::executeRequest( dbConnection,
-                                   trigger( Triggers::HasTrackPresent, dbModelVersion ) );
-
-    if ( dbModelVersion < 23 )
-    {
-        sqlite::Tools::executeRequest( dbConnection,
-                                       trigger( Triggers::HasAlbumRemaining, dbModelVersion ) );
-    }
+                                   trigger( Triggers::HasTrackPresent,
+                                            Settings::DbModelVersion ) );
 
     sqlite::Tools::executeRequest( dbConnection,
-                                   trigger( Triggers::InsertFts, dbModelVersion ) );
+                                   trigger( Triggers::InsertFts,
+                                            Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
-                                   trigger( Triggers::DeleteFts, dbModelVersion ) );
+                                   trigger( Triggers::DeleteFts,
+                                            Settings::DbModelVersion ) );
 
     sqlite::Tools::executeRequest( dbConnection,
-                                   trigger( Triggers::DeleteArtistsWithoutTracks, dbModelVersion ) );
-    if ( dbModelVersion >= 23 )
-    {
-        sqlite::Tools::executeRequest( dbConnection,
-                                       trigger( Triggers::IncrementNbTracks, dbModelVersion ) );
-        sqlite::Tools::executeRequest( dbConnection,
-                                       trigger( Triggers::DecrementNbTracks, dbModelVersion ) );
-        sqlite::Tools::executeRequest( dbConnection,
-                                       trigger( Triggers::UpdateNbAlbums, dbModelVersion ) );
-        sqlite::Tools::executeRequest( dbConnection,
-                                       trigger( Triggers::DecrementNbAlbums, dbModelVersion ) );
-        sqlite::Tools::executeRequest( dbConnection,
-                                       trigger( Triggers::IncrementNbAlbums, dbModelVersion ) );
-    }
+                                   trigger( Triggers::DeleteArtistsWithoutTracks,
+                                            Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::IncrementNbTracks,
+                                            Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::DecrementNbTracks,
+                                            Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::UpdateNbAlbums,
+                                            Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::DecrementNbAlbums,
+                                            Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::IncrementNbAlbums,
+                                            Settings::DbModelVersion ) );
 }
 
 std::string Artist::schema( const std::string& tableName, uint32_t dbModelVersion )

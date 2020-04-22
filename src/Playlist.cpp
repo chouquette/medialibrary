@@ -360,37 +360,31 @@ void Playlist::createTable( sqlite::Connection* dbConn )
         sqlite::Tools::executeRequest( dbConn, req );
 }
 
-void Playlist::createTriggers( sqlite::Connection* dbConn, uint32_t dbModel )
+void Playlist::createTriggers( sqlite::Connection* dbConn )
 {
-    if ( dbModel < 16 )
-    {
-        sqlite::Tools::executeRequest( dbConn,
-                                       trigger( Triggers::UpdateOrderOnInsert, dbModel ) );
-        sqlite::Tools::executeRequest( dbConn,
-                                       trigger( Triggers::Append, dbModel ) );
-        sqlite::Tools::executeRequest( dbConn,
-                                       trigger( Triggers::UpdateOrderOnPositionUpdate, dbModel ) );
-    }
-    else
-    {
-        sqlite::Tools::executeRequest( dbConn,
-                                       trigger( Triggers::UpdateOrderOnInsert, dbModel ) );
-        sqlite::Tools::executeRequest( dbConn,
-                                       trigger( Triggers::UpdateOrderOnDelete, dbModel ) );
-    }
     sqlite::Tools::executeRequest( dbConn,
-                                   trigger( Triggers::InsertFts, dbModel ) );
+                                   trigger( Triggers::UpdateOrderOnInsert,
+                                            Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConn,
-                                   trigger( Triggers::UpdateFts, dbModel ) );
+                                   trigger( Triggers::UpdateOrderOnDelete,
+                                            Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConn,
-                                   trigger( Triggers::DeleteFts, dbModel ) );
+                                   trigger( Triggers::InsertFts,
+                                            Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConn,
+                                   trigger( Triggers::UpdateFts,
+                                            Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConn,
+                                   trigger( Triggers::DeleteFts,
+                                            Settings::DbModelVersion ) );
 }
 
-void Playlist::createIndexes( sqlite::Connection* dbConn, uint32_t dbModel )
+void Playlist::createIndexes( sqlite::Connection* dbConn )
 {
-    sqlite::Tools::executeRequest( dbConn, index( Indexes::FileId, dbModel ) );
-    if ( dbModel >= 16 )
-        sqlite::Tools::executeRequest( dbConn, index( Indexes::PlaylistIdPosition, dbModel ) );
+    sqlite::Tools::executeRequest( dbConn, index( Indexes::FileId,
+                                                  Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConn, index( Indexes::PlaylistIdPosition,
+                                                  Settings::DbModelVersion ) );
 }
 
 std::string Playlist::schema( const std::string& tableName, uint32_t )

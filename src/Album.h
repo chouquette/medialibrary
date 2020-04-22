@@ -120,8 +120,8 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
                                             const QueryParameters* params = nullptr ) const override;
 
         static void createTable( sqlite::Connection* dbConnection );
-        static void createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion );
-        static void createIndexes( sqlite::Connection* dbConnection, uint32_t dbModelVersion );
+        static void createTriggers( sqlite::Connection* dbConnection );
+        static void createIndexes( sqlite::Connection* dbConnection );
         static std::string schema( const std::string& tableName, uint32_t dbModel );
         static std::string trigger( Triggers trigger, uint32_t dbModel );
         static std::string triggerName(Triggers trigger , uint32_t dbModel);

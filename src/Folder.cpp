@@ -88,29 +88,29 @@ void Folder::createTable( sqlite::Connection* connection)
         sqlite::Tools::executeRequest( connection, req );
 }
 
-void Folder::createTriggers( sqlite::Connection* connection, uint32_t modelVersion )
+void Folder::createTriggers( sqlite::Connection* connection )
 {
     sqlite::Tools::executeRequest( connection,
-                                   trigger( Triggers::InsertFts, modelVersion ) );
+                                   trigger( Triggers::InsertFts, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
-                                   trigger( Triggers::DeleteFts, modelVersion ) );
-    if ( modelVersion >= 14 )
-    {
-        sqlite::Tools::executeRequest( connection,
-                                       trigger( Triggers::UpdateNbMediaOnIndex, modelVersion ) );
-        sqlite::Tools::executeRequest( connection,
-                                       trigger( Triggers::UpdateNbMediaOnDelete, modelVersion ) );
-        sqlite::Tools::executeRequest( connection,
-                                       trigger( Triggers::UpdateNbMediaOnUpdate, modelVersion ) );
-    }
+                                   trigger( Triggers::DeleteFts, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::UpdateNbMediaOnIndex,
+                                            Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::UpdateNbMediaOnDelete,
+                                            Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::UpdateNbMediaOnUpdate,
+                                            Settings::DbModelVersion ) );
 }
 
-void Folder::createIndexes( sqlite::Connection* connection, uint32_t modelVersion )
+void Folder::createIndexes( sqlite::Connection* connection )
 {
     sqlite::Tools::executeRequest( connection,
-                                   index( Indexes::DeviceId, modelVersion ) );
+                                   index( Indexes::DeviceId, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
-                                   index( Indexes::ParentId, modelVersion ) );
+                                   index( Indexes::ParentId, Settings::DbModelVersion ) );
 }
 
 std::string Folder::schema( const std::string& tableName, uint32_t dbModel )

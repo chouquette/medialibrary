@@ -1115,51 +1115,51 @@ void Media::createTable( sqlite::Connection* connection )
         sqlite::Tools::executeRequest( connection, req );
 }
 
-void Media::createTriggers( sqlite::Connection* connection, uint32_t modelVersion )
+void Media::createTriggers( sqlite::Connection* connection )
 {
     sqlite::Tools::executeRequest( connection,
-                                   trigger( Triggers::IsPresent, modelVersion ) );
+                                   trigger( Triggers::IsPresent,
+                                            Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
-                                   trigger( Triggers::CascadeFileDeletion, modelVersion ) );
+                                   trigger( Triggers::CascadeFileDeletion,
+                                            Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
-                                   trigger( Triggers::InsertFts, modelVersion ) );
+                                   trigger( Triggers::InsertFts,
+                                            Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
-                                   trigger( Triggers::DeleteFts, modelVersion ) );
+                                   trigger( Triggers::DeleteFts,
+                                            Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
-                                   trigger( Triggers::UpdateFts, modelVersion ) );
-    if ( modelVersion >= 14 )
-    {
-        sqlite::Tools::executeRequest( connection,
-                                       trigger( Triggers::IncrementNbPlaylist, modelVersion ) );
-        sqlite::Tools::executeRequest( connection,
-                                       trigger( Triggers::DecrementNbPlaylist, modelVersion ) );
-    }
+                                   trigger( Triggers::UpdateFts,
+                                            Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::IncrementNbPlaylist,
+                                            Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::DecrementNbPlaylist,
+                                            Settings::DbModelVersion ) );
 }
 
-void Media::createIndexes( sqlite::Connection* connection, uint32_t modelVersion )
+void Media::createIndexes( sqlite::Connection* connection )
 {
     sqlite::Tools::executeRequest( connection,
-                                   index( Indexes::LastPlayedDate, modelVersion ) );
+                                   index( Indexes::LastPlayedDate,
+                                          Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
-                                   index( Indexes::Presence, modelVersion ) );
+                                   index( Indexes::Presence,
+                                          Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
-                                   index( Indexes::Types, modelVersion ) );
-
-    if ( modelVersion >= 14 )
-    {
-        sqlite::Tools::executeRequest( connection,
-                                       index( Indexes::LastUsageDate, modelVersion ) );
-    }
-    if ( modelVersion >= 22 )
-    {
-        sqlite::Tools::executeRequest( connection,
-                                       index( Indexes::Folder, modelVersion ) );
-    }
-    if ( modelVersion >= 24 )
-    {
-        sqlite::Tools::executeRequest( connection,
-                                       index( Indexes::MediaGroup, modelVersion ) );
-    }
+                                   index( Indexes::Types,
+                                          Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::LastUsageDate,
+                                          Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::Folder,
+                                          Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::MediaGroup,
+                                          Settings::DbModelVersion ) );
 }
 
 std::string Media::schema( const std::string& tableName, uint32_t dbModel )

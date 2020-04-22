@@ -293,8 +293,8 @@ private:
      * therefor require the migration to have already completed
      */
     void migrationEpilogue( uint32_t originalPreviousVersion );
-    bool createAllTables( uint32_t dbModelVersion );
-    void createAllTriggers( uint32_t dbModelVersion );
+    bool createAllTables();
+    void createAllTriggers();
     bool checkDatabaseIntegrity();
     void registerEntityHooks();
     static bool validateSearchPattern( const std::string& pattern );

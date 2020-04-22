@@ -495,24 +495,24 @@ void Album::createTable( sqlite::Connection* dbConnection )
         sqlite::Tools::executeRequest( dbConnection, req );
 }
 
-void Album::createTriggers( sqlite::Connection* dbConnection, uint32_t dbModelVersion )
+void Album::createTriggers( sqlite::Connection* dbConnection )
 {
     sqlite::Tools::executeRequest( dbConnection,
-                                   trigger( Triggers::IsPresent, dbModelVersion ) );
+                                   trigger( Triggers::IsPresent, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
-                                   trigger( Triggers::DeleteTrack, dbModelVersion ) );
+                                   trigger( Triggers::DeleteTrack, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
-                                   trigger( Triggers::AddTrack, dbModelVersion ) );
+                                   trigger( Triggers::AddTrack, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
-                                   trigger( Triggers::InsertFts, dbModelVersion ) );
+                                   trigger( Triggers::InsertFts, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
-                                   trigger( Triggers::DeleteFts, dbModelVersion ) );
+                                   trigger( Triggers::DeleteFts, Settings::DbModelVersion ) );
 }
 
-void Album::createIndexes( sqlite::Connection* dbConnection, uint32_t dbModelVersion )
+void Album::createIndexes( sqlite::Connection* dbConnection )
 {
     sqlite::Tools::executeRequest( dbConnection,
-                                   index( Indexes::ArtistId, dbModelVersion ) );
+                                   index( Indexes::ArtistId, Settings::DbModelVersion ) );
 }
 
 std::string Album::schema( const std::string& tableName, uint32_t dbModel )
