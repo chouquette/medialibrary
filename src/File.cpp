@@ -297,7 +297,14 @@ bool File::checkDbModel(MediaLibraryPtr ml)
 {
     return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
-                                       Table::Name );
+                                       Table::Name ) &&
+            sqlite::Tools::checkIndexStatement( ml->getConn(),
+                        index( Indexes::MediaId, Settings::DbModelVersion ),
+                        indexName( Indexes::MediaId, Settings::DbModelVersion ) ) &&
+            sqlite::Tools::checkIndexStatement( ml->getConn(),
+                        index( Indexes::FolderId, Settings::DbModelVersion ),
+                        indexName( Indexes::FolderId, Settings::DbModelVersion ) );
+
 }
 
 std::shared_ptr<File> File::createFromMedia( MediaLibraryPtr ml, int64_t mediaId,
