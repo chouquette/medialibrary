@@ -705,6 +705,9 @@ playlist_tests = [
   'SortByCreationDate',
   'NbMedia',
   'Duration',
+  'UpdateNbMediaOnInsertAndDelete',
+  'UpdateNbMediaOnMediaRemoval',
+  'UpdateNbMediaOnMediaTypeChange',
 ]
 
 foreach t : playlist_tests

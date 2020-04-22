@@ -58,12 +58,16 @@ public:
         UpdateFts,
         DeleteFts,
         UpdateNbMediaOnMediaDeletion,
-        UpdateNbPresentMediaOnPresenceChange,
+        // Introduced in model 33
         UpdateDurationOnMediaChange,
+        UpdateNbMediaOnMediaChange,
 
         // Deprecated since model 16
         Append,
-        UpdateOrderOnPositionUpdate
+        UpdateOrderOnPositionUpdate,
+
+        // Deprecated since model 33
+        UpdateNbPresentMediaOnPresenceChange,
     };
     enum class Indexes : uint8_t
     {
@@ -85,7 +89,13 @@ public:
     virtual unsigned int creationDate() const override;
     virtual const std::string& artworkMrl() const override;
     virtual uint32_t nbMedia() const override;
+    virtual uint32_t nbVideo() const override;
+    virtual uint32_t nbAudio() const override;
+    virtual uint32_t nbUnknown() const override;
     virtual uint32_t nbPresentMedia() const override;
+    virtual uint32_t nbPresentVideo() const override;
+    virtual uint32_t nbPresentAudio() const override;
+    virtual uint32_t nbPresentUnknown() const override;
     virtual int64_t duration() const override;
     virtual Query<IMedia> media( const QueryParameters* params ) const override;
     virtual Query<IMedia> searchMedia( const std::string& pattern,
@@ -155,8 +165,12 @@ private:
     int64_t m_fileId;
     const unsigned int m_creationDate;
     std::string m_artworkMrl;
-    uint32_t m_nbMedia;
-    uint32_t m_nbPresentMedia;
+    uint32_t m_nbVideo;
+    uint32_t m_nbAudio;
+    uint32_t m_nbUnknown;
+    uint32_t m_nbPresentVideo;
+    uint32_t m_nbPresentAudio;
+    uint32_t m_nbPresentUnknown;
     int64_t m_duration;
 
     friend Playlist::Table;

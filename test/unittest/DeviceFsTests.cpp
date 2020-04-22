@@ -810,6 +810,8 @@ static void PlaylistPresence( DeviceFsTests* T )
     bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
+    T->enforceFakeMediaTypes();
+
     auto pl = T->ml->createPlaylist( "test playlist" );
     auto pl2 = T->ml->createPlaylist( "test playlist 2" );
     auto media1 = std::static_pointer_cast<Media>( T->ml->media( mock::FileSystemFactory::Root + "audio.mp3" ) );
@@ -825,27 +827,39 @@ static void PlaylistPresence( DeviceFsTests* T )
 
     ASSERT_EQ( 2u, pl->nbMedia() );
     ASSERT_EQ( 2u, pl->nbPresentMedia() );
+    ASSERT_EQ( 2u, pl->nbAudio() );
+    ASSERT_EQ( 2u, pl->nbPresentAudio() );
     ASSERT_EQ( 1u, pl2->nbMedia() );
     ASSERT_EQ( 1u, pl2->nbPresentMedia() );
+    ASSERT_EQ( 1u, pl2->nbAudio() );
+    ASSERT_EQ( 1u, pl2->nbPresentAudio() );
 
     pl = std::static_pointer_cast<Playlist>( T->ml->playlist( pl->id() ) );
     pl2 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl2->id() ) );
 
     ASSERT_EQ( 2u, pl->nbMedia() );
     ASSERT_EQ( 2u, pl->nbPresentMedia() );
+    ASSERT_EQ( 2u, pl->nbAudio() );
+    ASSERT_EQ( 2u, pl->nbPresentAudio() );
     ASSERT_EQ( 1u, pl2->nbMedia() );
     ASSERT_EQ( 1u, pl2->nbPresentMedia() );
+    ASSERT_EQ( 1u, pl2->nbAudio() );
+    ASSERT_EQ( 1u, pl2->nbPresentAudio() );
 
     auto device = T->fsMock->removeDevice( DeviceFsTests::RemovableDeviceUuid );
     T->Reload();
 
     pl = std::static_pointer_cast<Playlist>( T->ml->playlist( pl->id() ) );
     ASSERT_EQ( 2u, pl->nbMedia() );
+    ASSERT_EQ( 2u, pl->nbAudio() );
     ASSERT_EQ( 1u, pl->nbPresentMedia() );
+    ASSERT_EQ( 1u, pl->nbPresentAudio() );
 
     pl2 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl2->id() ) );
     ASSERT_EQ( 1u, pl2->nbMedia() );
     ASSERT_EQ( 1u, pl2->nbPresentMedia() );
+    ASSERT_EQ( 1u, pl2->nbAudio() );
+    ASSERT_EQ( 1u, pl2->nbPresentAudio() );
 
     QueryParameters params{};
     auto plMedia = pl->media( &params )->all();
@@ -905,12 +919,48 @@ static void PlaylistPresence( DeviceFsTests* T )
     ASSERT_EQ( 1u, pl2->nbMedia() );
     ASSERT_EQ( 1u, pl2->nbPresentMedia() );
 
+    /*
+     * Now try to update the type of media which is handled by the same trigger
+     * as the presence
+     */
+    res = media1->setType( IMedia::Type::Video );
+    ASSERT_TRUE( res );
+
+    pl = std::static_pointer_cast<Playlist>( T->ml->playlist( pl->id() ) );
+    ASSERT_EQ( 2u, pl->nbMedia() );
+    ASSERT_EQ( 2u, pl->nbPresentMedia() );
+    ASSERT_EQ( 1u, pl->nbPresentAudio() );
+    ASSERT_EQ( 1u, pl->nbPresentVideo() );
+
+    pl2 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl2->id() ) );
+    ASSERT_EQ( 1u, pl2->nbMedia() );
+    ASSERT_EQ( 1u, pl2->nbVideo() );
+    ASSERT_EQ( 1u, pl2->nbPresentVideo() );
+    ASSERT_EQ( 1u, pl2->nbPresentMedia() );
+
+    res = media2->setType( IMedia::Type::Video );
+    ASSERT_TRUE( res );
+
+    pl = std::static_pointer_cast<Playlist>( T->ml->playlist( pl->id() ) );
+    ASSERT_EQ( 2u, pl->nbMedia() );
+    ASSERT_EQ( 2u, pl->nbPresentMedia() );
+    ASSERT_EQ( 0u, pl->nbPresentAudio() );
+    ASSERT_EQ( 2u, pl->nbPresentVideo() );
+
+    pl2 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl2->id() ) );
+    ASSERT_EQ( 1u, pl2->nbMedia() );
+    ASSERT_EQ( 0u, pl2->nbPresentAudio() );
+    ASSERT_EQ( 1u, pl2->nbPresentVideo() );
+    ASSERT_EQ( 1u, pl2->nbPresentMedia() );
+
     device = T->fsMock->removeDevice( DeviceFsTests::RemovableDeviceUuid );
     T->Reload();
 
     pl = std::static_pointer_cast<Playlist>( T->ml->playlist( pl->id() ) );
     ASSERT_EQ( 2u, pl->nbMedia() );
     ASSERT_EQ( 1u, pl->nbPresentMedia() );
+    ASSERT_EQ( 1u, pl->nbPresentVideo() );
+    ASSERT_EQ( 2u, pl->nbVideo() );
 
     T->ml->deleteMedia( media2->id() );
 

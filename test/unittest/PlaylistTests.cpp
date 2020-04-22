@@ -66,6 +66,12 @@ static void Create( PlaylistTests* T )
     ASSERT_NE( 0u, T->pl->id() );
     ASSERT_EQ( "test playlist", T->pl->name() );
     ASSERT_NE( 0u, T->pl->creationDate() );
+    ASSERT_EQ( 0u, T->pl->nbVideo() );
+    ASSERT_EQ( 0u, T->pl->nbAudio() );
+    ASSERT_EQ( 0u, T->pl->nbUnknown() );
+    ASSERT_EQ( 0u, T->pl->nbPresentVideo() );
+    ASSERT_EQ( 0u, T->pl->nbPresentAudio() );
+    ASSERT_EQ( 0u, T->pl->nbPresentUnknown() );
 }
 
 static void CreateDuplicate( PlaylistTests* T )
@@ -832,6 +838,181 @@ static void Duration( PlaylistTests* T )
     ASSERT_EQ( 0, T->pl->duration() );
 }
 
+static void UpdateNbMediaOnInsertAndDelete( PlaylistTests* T )
+{
+    auto m1 = T->ml->addMedia( "media1.mp3", IMedia::Type::Audio );
+    auto m2 = T->ml->addMedia( "media2.mkv", IMedia::Type::Video );
+
+    ASSERT_EQ( 0u, T->pl->nbAudio() );
+    ASSERT_EQ( 0u, T->pl->nbVideo() );
+    ASSERT_EQ( 0u, T->pl->nbUnknown() );
+    auto res = T->pl->append( *m1 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 1u, T->pl->nbAudio() );
+    ASSERT_EQ( 0u, T->pl->nbVideo() );
+    ASSERT_EQ( 0u, T->pl->nbUnknown() );
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 1u, T->pl->nbAudio() );
+    ASSERT_EQ( 0u, T->pl->nbVideo() );
+    ASSERT_EQ( 0u, T->pl->nbUnknown() );
+
+    res = T->pl->add( *m2, 0 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 1u, T->pl->nbAudio() );
+    ASSERT_EQ( 1u, T->pl->nbVideo() );
+    ASSERT_EQ( 0u, T->pl->nbUnknown() );
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 1u, T->pl->nbAudio() );
+    ASSERT_EQ( 1u, T->pl->nbVideo() );
+    ASSERT_EQ( 0u, T->pl->nbUnknown() );
+
+    res = T->pl->remove( 0 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 1u, T->pl->nbAudio() );
+    ASSERT_EQ( 0u, T->pl->nbVideo() );
+    ASSERT_EQ( 0u, T->pl->nbUnknown() );
+    // remove() doesn't update the nb_non_audio since it's not passed a media instance
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 1u, T->pl->nbAudio() );
+    ASSERT_EQ( 0u, T->pl->nbVideo() );
+    ASSERT_EQ( 0u, T->pl->nbUnknown() );
+}
+
+static void UpdateNbMediaOnMediaRemoval( PlaylistTests* T )
+{
+    auto pl2 = T->ml->createPlaylist( "pl2" );
+    auto m1 = T->ml->addMedia( "media1.mp3", IMedia::Type::Audio );
+    auto m2 = T->ml->addMedia( "media2.mkv", IMedia::Type::Video );
+    auto m3 = T->ml->addMedia( "media3.mp3", IMedia::Type::Audio );
+
+    ASSERT_EQ( 0u, T->pl->nbAudio() );
+    ASSERT_EQ( 0u, T->pl->nbVideo() );
+    ASSERT_EQ( 0u, T->pl->nbUnknown() );
+    auto res = T->pl->append( *m1 );
+    ASSERT_TRUE( res );
+    res = T->pl->append( *m2 );
+    ASSERT_TRUE( res );
+    res = T->pl->append( *m3 );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( 2u, T->pl->nbAudio() );
+    ASSERT_EQ( 1u, T->pl->nbVideo() );
+    ASSERT_EQ( 0u, T->pl->nbUnknown() );
+
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 2u, T->pl->nbAudio() );
+    ASSERT_EQ( 1u, T->pl->nbVideo() );
+    ASSERT_EQ( 0u, T->pl->nbUnknown() );
+
+    res = pl2->append( *m1 );
+    ASSERT_TRUE( res );
+    res = pl2->append( *m2 );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( 1u, pl2->nbAudio() );
+    ASSERT_EQ( 1u, pl2->nbVideo() );
+    ASSERT_EQ( 0u, pl2->nbUnknown() );
+
+    pl2 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl2->id() ) );
+    ASSERT_EQ( 1u, pl2->nbAudio() );
+    ASSERT_EQ( 1u, pl2->nbVideo() );
+    ASSERT_EQ( 0u, pl2->nbUnknown() );
+
+    // Now delete the media, since it involves different path for the triggers
+    T->ml->deleteMedia( m2->id() );
+
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 2u, T->pl->nbAudio() );
+    ASSERT_EQ( 0u, T->pl->nbVideo() );
+    ASSERT_EQ( 0u, T->pl->nbUnknown() );
+
+    pl2 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl2->id() ) );
+    ASSERT_EQ( 1u, pl2->nbAudio() );
+    ASSERT_EQ( 0u, pl2->nbVideo() );
+    ASSERT_EQ( 0u, pl2->nbUnknown() );
+
+    T->ml->deleteMedia( m3->id() );
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 1u, T->pl->nbAudio() );
+    ASSERT_EQ( 0u, T->pl->nbVideo() );
+    ASSERT_EQ( 0u, T->pl->nbUnknown() );
+
+    pl2 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl2->id() ) );
+    ASSERT_EQ( 1u, pl2->nbAudio() );
+    ASSERT_EQ( 0u, pl2->nbVideo() );
+    ASSERT_EQ( 0u, pl2->nbUnknown() );
+
+    T->ml->deleteMedia( m1->id() );
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 0u, T->pl->nbAudio() );
+    ASSERT_EQ( 0u, T->pl->nbVideo() );
+    ASSERT_EQ( 0u, T->pl->nbUnknown() );
+
+    pl2 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl2->id() ) );
+    ASSERT_EQ( 0u, pl2->nbAudio() );
+    ASSERT_EQ( 0u, pl2->nbVideo() );
+    ASSERT_EQ( 0u, pl2->nbUnknown() );
+}
+
+static void UpdateNbMediaOnMediaTypeChange( PlaylistTests* T )
+{
+    auto pl2 = T->ml->createPlaylist( "pl2" );
+    auto m1 = T->ml->addMedia( "media1.mp3", IMedia::Type::Audio );
+    auto m2 = T->ml->addMedia( "media2.mkv", IMedia::Type::Video );
+    auto m3 = T->ml->addMedia( "media3.mp3", IMedia::Type::Audio );
+
+    ASSERT_EQ( 0u, T->pl->nbAudio() );
+    ASSERT_EQ( 0u, T->pl->nbVideo() );
+    ASSERT_EQ( 0u, T->pl->nbUnknown() );
+    auto res = T->pl->append( *m1 );
+    ASSERT_TRUE( res );
+    res = T->pl->append( *m2 );
+    ASSERT_TRUE( res );
+    res = T->pl->append( *m3 );
+    ASSERT_TRUE( res );
+
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 2u, T->pl->nbAudio() );
+    ASSERT_EQ( 1u, T->pl->nbVideo() );
+    ASSERT_EQ( 0u, T->pl->nbUnknown() );
+
+    res = pl2->append( *m1 );
+    ASSERT_TRUE( res );
+    res = pl2->append( *m2 );
+    ASSERT_TRUE( res );
+
+    pl2 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl2->id() ) );
+    ASSERT_EQ( 1u, pl2->nbAudio() );
+    ASSERT_EQ( 1u, pl2->nbVideo() );
+    ASSERT_EQ( 0u, pl2->nbUnknown() );
+
+    res = m3->setType( IMedia::Type::Unknown );
+    ASSERT_TRUE( res );
+
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 1u, T->pl->nbAudio() );
+    ASSERT_EQ( 1u, T->pl->nbVideo() );
+    ASSERT_EQ( 1u, T->pl->nbUnknown() );
+
+    pl2 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl2->id() ) );
+    ASSERT_EQ( 1u, pl2->nbAudio() );
+    ASSERT_EQ( 1u, pl2->nbVideo() );
+    ASSERT_EQ( 0u, pl2->nbUnknown() );
+
+    res = m2->setType( IMedia::Type::Audio );
+    ASSERT_TRUE( res );
+
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 2u, T->pl->nbAudio() );
+    ASSERT_EQ( 0u, T->pl->nbVideo() );
+    ASSERT_EQ( 1u, T->pl->nbUnknown() );
+
+    pl2 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl2->id() ) );
+    ASSERT_EQ( 2u, pl2->nbAudio() );
+    ASSERT_EQ( 0u, pl2->nbVideo() );
+    ASSERT_EQ( 0u, pl2->nbUnknown() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( PlaylistTests );
@@ -865,6 +1046,9 @@ int main( int ac, char** av )
     ADD_TEST( SortByCreationDate );
     ADD_TEST( NbMedia );
     ADD_TEST( Duration );
+    ADD_TEST( UpdateNbMediaOnInsertAndDelete );
+    ADD_TEST( UpdateNbMediaOnMediaRemoval );
+    ADD_TEST( UpdateNbMediaOnMediaTypeChange );
 
     END_TESTS
 }

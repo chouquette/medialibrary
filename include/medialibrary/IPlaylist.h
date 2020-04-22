@@ -66,10 +66,16 @@ public:
     /// media, use nbPresentMedia
     ///
     virtual uint32_t nbMedia() const = 0;
+    virtual uint32_t nbVideo() const = 0;
+    virtual uint32_t nbAudio() const = 0;
+    virtual uint32_t nbUnknown() const = 0;
     ///
     /// \brief nbPresentMedia Returns the number of present media in this playlist
     ///
     virtual uint32_t nbPresentMedia() const = 0;
+    virtual uint32_t nbPresentVideo() const = 0;
+    virtual uint32_t nbPresentAudio() const = 0;
+    virtual uint32_t nbPresentUnknown() const = 0;
     ///
     /// \brief duration Returns the duration of the playlist
     /// This is equal to the sum of the duration for all media belonging to

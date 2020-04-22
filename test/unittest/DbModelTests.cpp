@@ -80,8 +80,8 @@ namespace
         "media_group_update_nb_media_types_presence",
         "media_update_device_presence",
         "playlist_update_duration_on_media_change",
+        "playlist_update_nb_media_on_media_change",
         "playlist_update_nb_media_on_media_deletion",
-        "playlist_update_nb_present_media",
         "show_decrement_nb_episode",
         "show_increment_nb_episode",
         "show_update_is_present",
@@ -712,6 +712,23 @@ static void Upgrade32to33( DbModel* T )
     auto pl = T->ml->playlist( 1 );
     ASSERT_NON_NULL( pl );
     ASSERT_EQ( pl->duration(), 33 );
+
+    auto playlists = T->ml->playlists( nullptr )->all();
+    ASSERT_EQ( 3u, playlists.size() );
+    ASSERT_EQ( "audio playlist", playlists[0]->name() );
+    ASSERT_EQ( 0u, playlists[0]->nbVideo() );
+    ASSERT_EQ( 3u, playlists[0]->nbAudio() );
+    ASSERT_EQ( 0u, playlists[0]->nbUnknown() );
+
+    ASSERT_EQ( "mixed playlist", playlists[1]->name() );
+    ASSERT_EQ( 1u, playlists[1]->nbVideo() );
+    ASSERT_EQ( 3u, playlists[1]->nbAudio() );
+    ASSERT_EQ( 0u, playlists[1]->nbUnknown() );
+
+    ASSERT_EQ( "Z empty playlist", playlists[2]->name() );
+    ASSERT_EQ( 0u, playlists[2]->nbVideo() );
+    ASSERT_EQ( 0u, playlists[2]->nbAudio() );
+    ASSERT_EQ( 0u, playlists[2]->nbUnknown() );
 }
 
 int main( int ac, char** av )
