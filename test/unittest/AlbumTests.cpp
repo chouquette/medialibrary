@@ -549,34 +549,30 @@ TEST_F( Albums, SortByPlayCount )
     auto t2 = a1->addTrack( f2, 2, 0, 0, nullptr );
     f2->save();
 
-    ASSERT_TRUE( f1->increasePlayCount() );
-    ASSERT_TRUE( f1->increasePlayCount() );
+    ASSERT_TRUE( f1->setPlayCount( 2 ) );
 
-    ASSERT_TRUE( f2->increasePlayCount() );
+    ASSERT_TRUE( f2->setPlayCount( 1 ) );
 
     auto a2 = ml->createAlbum( "East" );
     auto f3 = std::static_pointer_cast<Media>( ml->addMedia( "third.opus", IMedia::Type::Audio ) );
     auto t3 = a2->addTrack( f3, 1, 0, 0, nullptr );
     f3->save();
 
-    ASSERT_TRUE( f3->increasePlayCount() );
-    ASSERT_TRUE( f3->increasePlayCount() );
-    ASSERT_TRUE( f3->increasePlayCount() );
-    ASSERT_TRUE( f3->increasePlayCount() );
+    ASSERT_TRUE( f3->setPlayCount( 4 ) );
 
     auto a3 = ml->createAlbum( "South" );
     auto f4 = std::static_pointer_cast<Media>( ml->addMedia( "fourth.opus", IMedia::Type::Audio ) );
     auto t4 = a3->addTrack( f4, 1, 0, 0, nullptr );
     f4->save();
 
-    ASSERT_TRUE( f4->increasePlayCount() );
+    ASSERT_TRUE( f4->setPlayCount( 1 ) );
 
     auto a4 = ml->createAlbum( "West" );
     auto f5 = std::static_pointer_cast<Media>( ml->addMedia( "fifth.opus", IMedia::Type::Audio ) );
     auto t5 = a4->addTrack( f5, 1, 0, 0, nullptr );
     f5->save();
 
-    ASSERT_TRUE( f5->increasePlayCount() );
+    ASSERT_TRUE( f5->setPlayCount( 1 ) );
 
     QueryParameters params { SortingCriteria::PlayCount, false };
     auto query = ml->albums( &params );
@@ -598,8 +594,8 @@ TEST_F( Albums, SortByPlayCount )
     ASSERT_EQ( a2->id(), albums[3]->id() ); // 4 plays
 
     // ♪ Listening North album ♫
-    ASSERT_TRUE( f1->increasePlayCount() );
-    ASSERT_TRUE( f2->increasePlayCount() );
+    ASSERT_TRUE( f1->setPlayCount( f1->playCount() + 1 ) );
+    ASSERT_TRUE( f2->setPlayCount( f2->playCount() + 1 ) );
 
     params.desc = false;
     albums = ml->albums( &params )->all();
