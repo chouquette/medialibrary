@@ -109,27 +109,100 @@ TEST_F( Medias, Thumbnail )
     ASSERT_EQ( f2->thumbnailMrl( ThumbnailSizeType::Thumbnail ), newThumbnail );
 }
 
-TEST_F( Medias, PlayCount )
+TEST_F( Medias, SetProgress )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "media.avi", IMedia::Type::Video ) );
-    ASSERT_EQ( 0u, f->playCount() );
-    f->increasePlayCount();
-    ASSERT_EQ( 1u, f->playCount() );
+    auto m1 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
+    m1->setDuration( 60 * 30 * 1000 ); // 30min
+    m1->save();
+    auto m2 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    m2->setDuration( 5 * 3600 * 1000 ); // 5h
+    m2->save();
 
-    f = std::static_pointer_cast<Media>( ml->media( f->id() ) );
-    ASSERT_EQ( 1u, f->playCount() );
-}
+    ASSERT_EQ( -1.f, m1->progress() );
+    ASSERT_EQ( -1.f, m2->progress() );
 
-TEST_F( Medias, Progress )
-{
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "media.avi", IMedia::Type::Video ) );
-    ASSERT_EQ( 0, f->metadata( Media::MetadataType::Progress ).asInt() );
-    f->setMetadata( Media::MetadataType::Progress, 123 );
-    ASSERT_EQ( 123, f->metadata( Media::MetadataType::Progress ).asInt() );
-    ASSERT_TRUE( f->metadata( Media::MetadataType::Progress ).isSet() );
+    /*
+     * Test a duration in the middle of the media. This should just bump the
+     * duration as such
+     */
+    auto res = m1->setProgress( 0.5 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 0.5, m1->progress() );
+    ASSERT_EQ( 0u, m1->playCount() );
+    m1 = ml->media( m1->id() );
+    ASSERT_EQ( 0.5, m1->progress() );
+    ASSERT_EQ( 0u, m1->playCount() );
 
-    f = ml->media( f->id() );
-    ASSERT_EQ( 123, f->metadata( Media::MetadataType::Progress ).asInt() );
+    /* Then update to a progress to 3%. This should reset it to -1 */
+    res = m1->setProgress( .03f );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( -1.f, m1->progress() );
+    ASSERT_EQ( 0u, m1->playCount() );
+    m1 = ml->media( m1->id() );
+    ASSERT_EQ( -1.f, m1->progress() );
+    ASSERT_EQ( 0u, m1->playCount() );
+
+    /* Then again at 4% and ensure the progress is still -1 */
+    res = m1->setProgress( .04f );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( -1.f, m1->progress() );
+    ASSERT_EQ( 0u, m1->playCount() );
+    m1 = ml->media( m1->id() );
+    ASSERT_EQ( -1.f, m1->progress() );
+    ASSERT_EQ( 0u, m1->playCount() );
+
+    /*
+     * Now set a progress of 99% and check the playcount was bumped, and
+     * progress reset
+     */
+    res = m1->setProgress( .98f );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( -1.f, m1->progress() );
+    ASSERT_EQ( 1u, m1->playCount() );
+    m1 = ml->media( m1->id() );
+    ASSERT_EQ( -1.f, m1->progress() );
+    ASSERT_EQ( 1u, m1->playCount() );
+
+    /* Now do the same with a longer media to ensure the "margin" are updated */
+    res = m2->setProgress( 0.5 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 0.5, m2->progress() );
+    ASSERT_EQ( 0u, m2->playCount() );
+    m2 = ml->media( m2->id() );
+    ASSERT_EQ( 0.5, m2->progress() );
+    ASSERT_EQ( 0u, m2->playCount() );
+
+    /* This media should only ignore the first & last percent */
+    res = m2->setProgress( .009f );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( -1.f, m2->progress() );
+    ASSERT_EQ( 0u, m2->playCount() );
+    m2 = ml->media( m2->id() );
+    ASSERT_EQ( -1.f, m2->progress() );
+    ASSERT_EQ( 0u, m2->playCount() );
+
+    /* So check 0.01 is not ignored */
+    res = m2->setProgress( .01f );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 0.01f, m2->progress() );
+    ASSERT_EQ( 0u, m2->playCount() );
+    m2 = ml->media( m2->id() );
+    ASSERT_EQ( 0.01f, m2->progress() );
+    ASSERT_EQ( 0u, m2->playCount() );
+
+    /*
+     * And finally check that 0.98 is just a regular progress and not the end of
+     * the media since it's 5hours long
+     */
+    res = m2->setProgress( .98f );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( .98f, m2->progress() );
+    ASSERT_EQ( 0u, m2->playCount() );
+    m2 = ml->media( m2->id() );
+    ASSERT_EQ( .98f, m2->progress() );
+    ASSERT_EQ( 0u, m2->playCount() );
 }
 
 TEST_F( Medias, Rating )
@@ -325,7 +398,7 @@ TEST_F( Medias, History )
     auto history = ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
 
-    m->increasePlayCount();
+    m->setProgress( 0.5f );
     m->save();
     history = ml->history()->all();
     ASSERT_EQ( 1u, history.size() );
@@ -333,7 +406,7 @@ TEST_F( Medias, History )
 
     compat::this_thread::sleep_for( std::chrono::seconds{ 1 } );
     auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
-    m2->increasePlayCount();
+    m2->setProgress( 0.5f );
 
     history = ml->history()->all();
     ASSERT_EQ( 2u, history.size() );
@@ -347,9 +420,9 @@ TEST_F( Medias, StreamHistory )
     auto m2 = std::static_pointer_cast<Media>( ml->addStream( "http://media.org/sample2.mkv" ) );
     auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "localfile.mkv", IMedia::Type::Video ) );
 
-    m1->increasePlayCount();
-    m2->increasePlayCount();
-    m3->increasePlayCount();
+    m1->setProgress( 0.5f );
+    m2->setProgress( 0.5f );
+    m3->setProgress( 0.5f );
 
     auto history = ml->streamHistory()->all();
     ASSERT_EQ( 2u, history.size() );
@@ -361,12 +434,12 @@ TEST_F( Medias, StreamHistory )
 TEST_F( Medias, HistoryByType )
 {
     auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "video.mkv", IMedia::Type::Video ) );
-    m1->increasePlayCount();
+    m1->setProgress( 0.5f );
     m1->save();
 
     auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "audio.mp3", IMedia::Type::Audio ) );
     m2->save();
-    m2->increasePlayCount();
+    m2->setProgress( 0.5f );
 
     auto h = ml->history( IMedia::Type::Audio )->all();
     ASSERT_EQ( 1u, h.size() );
@@ -385,7 +458,7 @@ TEST_F( Medias, ClearHistory )
     auto history = ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
 
-    m->increasePlayCount();
+    m->setProgress( 0.5f );
     m->save();
     history = ml->history()->all();
     ASSERT_EQ( 1u, history.size() );
@@ -406,7 +479,7 @@ TEST_F( Medias, RemoveFromHistory )
     auto history = ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
 
-    m->increasePlayCount();
+    m->setProgress( 1.f );
     m->save();
     m->setMetadata( IMedia::MetadataType::Progress, "50" );
     history = ml->history()->all();

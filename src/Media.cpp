@@ -267,17 +267,68 @@ uint32_t Media::playCount() const
     return m_playCount;
 }
 
-bool Media::increasePlayCount()
+bool Media::setProgress( float progress )
 {
-    static const std::string req = "UPDATE " + Media::Table::Name + " SET "
-            "play_count = ?, last_played_date = ?, real_last_played_date = ? "
-            "WHERE id_media = ?";
+    float margin;
+    if ( m_duration < std::chrono::duration_cast<std::chrono::milliseconds>(
+             std::chrono::hours{ 1 } ).count() )
+        margin = 0.05;
+    else if ( m_duration < std::chrono::duration_cast<std::chrono::milliseconds>(
+                  std::chrono::hours{ 2 } ).count() )
+        margin = 0.04;
+    else if ( m_duration < std::chrono::duration_cast<std::chrono::milliseconds>(
+                 std::chrono::hours{ 3 } ).count() )
+        margin = 0.03;
+    else if ( m_duration < std::chrono::duration_cast<std::chrono::milliseconds>(
+                 std::chrono::hours{ 4 } ).count() )
+        margin = 0.02;
+    else
+        margin = 0.01;
+    float curatedProgress;
     auto lastPlayedDate = time( nullptr );
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_playCount + 1,
-                                       lastPlayedDate, lastPlayedDate, m_id ) == false )
+    bool incrementPlaycount = false;
+    std::string req;
+    if ( progress < margin )
+    {
+        /*
+         * This is not far enough in the playback to update the progress, except
+         * in case we had a progress saved before, then we want to reset it to
+         * avoid offering to resume the playback at an old position.
+         * In any case we want to bump the last played date.
+         */
+        req = "UPDATE " + Table::Name + " SET progress = ?, last_played_date = ?"
+                " WHERE id_media = ?";
+        curatedProgress = -1.f;
+    }
+    else if ( progress > ( 1.f - margin ) )
+    {
+        /*
+         * We consider this to have reached the end of the media, so we bump
+         * the play count, reset the progress, and bump the last played date
+         */
+        req = "UPDATE " + Table::Name + " SET progress = ?,"
+                " play_count = ifnull(play_count, 0) + 1,"
+                " last_played_date = ? WHERE id_media = ?";
+        curatedProgress = -1.f;
+        incrementPlaycount = true;
+    }
+    else
+    {
+        /*
+         * Just bump the progress, the playback isn't completed but advanced
+         * enough for us to care about the current position
+         */
+        req = "UPDATE " + Table::Name + " SET progress = ?, last_played_date = ?"
+                " WHERE id_media = ?";
+        curatedProgress = progress;
+    }
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, curatedProgress,
+                                       lastPlayedDate, m_id ) == false )
         return false;
-    m_playCount++;
+    if ( incrementPlaycount == true )
+        m_playCount++;
     m_lastPlayedDate = lastPlayedDate;
+    m_progress = curatedProgress;
     auto historyType = ( m_type == Type::Video || m_type == Type::Audio ) ?
                        HistoryType::Media : HistoryType::Network;
     m_ml->getCb()->onHistoryChanged( historyType );

@@ -141,12 +141,28 @@ public:
      */
     virtual float progress() const = 0;
     /**
-     * @brief increasePlayCount Increment this media play count by 1.
+     * @brief setProgress updates the media playback progress
      *
-     * This also bumps the last played date to "now", causing the media
-     * to be the recent when fetching the history.
+     * @param progress The current media progress
+     *
+     * The media library will interpret the value to determine if the playback
+     * is completed and the media should be marked as watched (therefor increasing
+     * the playcount). If the progress isn't large enough, the media library will
+     * ignore the new progress.
+     * The base value for the beginning/end of a media is 5%, meaning that the
+     * first 5% will not increase the progress, and the last 5% will mark the
+     * media as watched and reset the progress value (so that next playback
+     * restarts from the beginning)
+     * These 5% are decreased by 1% for every playback hour, so for instance, a
+     * 3h movie will use 5% - (3h * 1%), so the first 2% will be ignored, the last
+     * 2% will trigger the completion.
+     *
+     * This returns true in case of success, false otherwise.
+     * Calling progress() or playCount() afterward will fetch the curated values.
+     * This will also bump the media last played date, causing it to appear at
+     * the top of the history
      */
-    virtual bool increasePlayCount() = 0;
+    virtual bool setProgress( float progress ) = 0;
     /**
      * @brief setPlayCount Set a specific value to this media's play count
      *

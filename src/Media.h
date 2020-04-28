@@ -166,7 +166,7 @@ class Media : public IMedia,
         virtual bool removeLabel( LabelPtr label ) override;
         virtual Query<ILabel> labels() const override;
         virtual uint32_t playCount() const override;
-        virtual bool increasePlayCount() override;
+        virtual bool setProgress( float progress ) override;
         virtual bool setPlayCount( uint32_t playCount ) override;
         virtual time_t lastPlayedDate() const override;
         virtual bool removeFromHistory() override;
