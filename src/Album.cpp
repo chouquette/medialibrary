@@ -686,7 +686,8 @@ std::string Album::triggerName( Album::Triggers trigger, uint32_t dbModel )
             return "delete_album_fts";
         default:
             assert( !"Invalid trigger provided" );
-}
+    }
+    return "<invalid request>";
 }
 
 std::string Album::index( Indexes index, uint32_t dbModel )
