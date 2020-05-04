@@ -93,7 +93,6 @@ Status VLCMetadataService::run( IItem& item )
     event->unregister();
     if ( status == VLC::Media::ParsedStatus::Failed || status == VLC::Media::ParsedStatus::Timeout )
         return Status::Fatal;
-    auto tracks = vlcMedia.tracks();
     auto artworkMrl = vlcMedia.meta( libvlc_meta_ArtworkURL );
     if ( item.fileType() == IFile::Type::Playlist &&
          vlcMedia.subitems()->count() == 0 )
