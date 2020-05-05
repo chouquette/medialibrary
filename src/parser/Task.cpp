@@ -278,6 +278,7 @@ bool Task::restoreLinkedEntities( LastTaskInfo& lastTask )
                 LOG_INFO( "Duplicated task after mrl update, discarding the "
                           "duplicate." );
                 destroy( m_ml, m_id );
+                return false;
             }
         }
     }
