@@ -94,6 +94,7 @@ Task::Task( MediaLibraryPtr ml, std::shared_ptr<File> file,
     , m_mrl( file->mrl() )
     , m_fileType( file->type() )
     , m_fileId( file->id() )
+    , m_parentFolderId( parentFolder->id() )
     , m_file( std::move( file ) )
     , m_fileFs( std::move( fileFs ) )
     , m_parentFolder( std::move( parentFolder ) )
