@@ -507,16 +507,18 @@ Status MetadataAnalyzer::createFileAndMedia( IItem& item ) const
             assert( !"External file must have an associated media" );
             return Status::Fatal;
         }
-        if ( media->isExternalMedia() == true )
+        if ( media->isExternalMedia() == false )
         {
-            auto res = overrideExternalMedia( item, media, file, mediaType );
-            // IItem::setFile will update the task in db, so run it as part of
-            // the transation
-            item.setFile( std::move( file ) );
-            t->commit();
-            item.setMedia( std::move( media ) );
-            return res;
+            assert( !"An external main file must be associated with an external media" );
+            return Status::Fatal;
         }
+        auto res = overrideExternalMedia( item, media, file, mediaType );
+        // IItem::setFile will update the task in db, so run it as part of
+        // the transation
+        item.setFile( std::move( file ) );
+        t->commit();
+        item.setMedia( std::move( media ) );
+        return res;
     }
     LOG_DEBUG( "Adding ", mrl );
     std::shared_ptr<Media> m;
