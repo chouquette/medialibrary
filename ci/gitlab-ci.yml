@@ -13,7 +13,7 @@ linux:
     except:
       - schedules
     tags:
-      - debian
+      - docker
       - amd64
     script:
       - ./bootstrap
@@ -31,7 +31,8 @@ win32:
     except:
       - schedules
     tags:
-      - win32
+      - docker
+      - amd64
     script:
       - wineserver -p && wine wineboot
       - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/prefix/lib/pkgconfig"
@@ -53,7 +54,8 @@ win64:
     except:
       - schedules
     tags:
-      - win64
+      - docker
+      - amd64
     script:
       - wineserver -p && wine wineboot
       - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/prefix/lib/pkgconfig"
@@ -70,7 +72,7 @@ win64:
 coverage:
     image: $MEDIALIBRARY_IMG
     tags:
-      - debian
+      - docker
       - amd64
     only:
         - schedules
@@ -101,7 +103,7 @@ asan-ubsan:
     only:
       - schedules
     tags:
-      - debian
+      - docker
       - amd64
     variables:
       LSAN_OPTIONS: 'detect_leaks=0'
@@ -126,7 +128,7 @@ tsan:
     only:
       - schedules
     tags:
-      - debian
+      - docker
       - amd64
     variables:
         TSAN_OPTIONS: 'suppressions=$CI_PROJECT_DIR/ci/tsan_suppress_file'
