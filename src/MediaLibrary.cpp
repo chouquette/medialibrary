@@ -2489,19 +2489,7 @@ bool MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs )
 {
     auto device = Device::fromUuid( m_ml, deviceFs.uuid(), deviceFs.scheme() );
     if ( device == nullptr )
-    {
-        try
-        {
-            device = Device::create( m_ml, deviceFs.uuid(), deviceFs.scheme(),
-                                     deviceFs.isRemovable(), deviceFs.isNetwork() );
-            return device != nullptr;
-        }
-        catch ( const sqlite::errors::ConstraintUnique& )
-        {
-            /* In case of a sporadic read failure, just ignore the insertion error */
-        }
         return false;
-    }
     if ( device->isPresent() == deviceFs.isPresent() )
         return false;
 
