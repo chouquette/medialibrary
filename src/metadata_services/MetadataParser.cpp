@@ -638,9 +638,13 @@ void MetadataAnalyzer::createTracks( Media& m, const std::vector<IItem::Track>& 
 
 std::tuple<bool, bool> MetadataAnalyzer::refreshFile( IItem& item ) const
 {
-    assert( item.file() != nullptr );
-
     auto file = item.file();
+
+    if ( file == nullptr )
+    {
+        assert( !"Can't refresh a non-existing file" );
+        return std::make_tuple( false, false );
+    }
 
     switch ( file->type() )
     {
