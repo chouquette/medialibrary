@@ -786,11 +786,11 @@ void ForceRemovableStorareDeviceLister::stop()
 }
 
 
-bool ForceRemovableStorareDeviceLister::onDeviceMounted( const std::string& uuid,
+void ForceRemovableStorareDeviceLister::onDeviceMounted( const std::string& uuid,
                                                          const std::string& mountpoint,
                                                          bool )
 {
-    return m_cb->onDeviceMounted( uuid, mountpoint, true );
+    m_cb->onDeviceMounted( uuid, mountpoint, true );
 }
 
 void ForceRemovableStorareDeviceLister::onDeviceUnmounted( const std::string& uuid,

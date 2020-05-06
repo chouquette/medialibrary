@@ -123,7 +123,7 @@ void NetworkFileSystemFactory::stop()
     m_deviceLister->stop();
 }
 
-bool NetworkFileSystemFactory::onDeviceMounted( const std::string& uuid,
+void NetworkFileSystemFactory::onDeviceMounted( const std::string& uuid,
                                                 const std::string& mountpoint,
                                                 bool removable )
 {
@@ -146,7 +146,7 @@ bool NetworkFileSystemFactory::onDeviceMounted( const std::string& uuid,
         device->addMountpoint( mountpoint );
 
     m_devicesCond.notify_all();
-    return m_cb->onDeviceMounted( *device );
+    m_cb->onDeviceMounted( *device );
 }
 
 void NetworkFileSystemFactory::onDeviceUnmounted( const std::string& uuid,

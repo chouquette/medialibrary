@@ -2485,13 +2485,13 @@ MediaLibrary::FsFactoryCb::FsFactoryCb(MediaLibrary* ml)
 {
 }
 
-bool MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs )
+void MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs )
 {
     auto device = Device::fromUuid( m_ml, deviceFs.uuid(), deviceFs.scheme() );
     if ( device == nullptr )
-        return false;
+        return;
     if ( device->isPresent() == deviceFs.isPresent() )
-        return false;
+        return;
 
     assert( device->isRemovable() == true );
 
@@ -2510,7 +2510,6 @@ bool MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs )
         assert( deviceFs.isPresent() == true );
         m_ml->m_discovererWorker->reloadDevice( device->id() );
     }
-    return false;
 }
 
 void MediaLibrary::FsFactoryCb::onDeviceUnmounted( const fs::IDevice& deviceFs )

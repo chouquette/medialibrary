@@ -47,10 +47,8 @@ namespace fs
          *
          * When this callback is invoked, the FS device presence must already be
          * updated.
-         * If this is the first time this device gets plugged, this callback
-         * will return true, false otherwise.
          */
-        virtual bool onDeviceMounted( const fs::IDevice& device ) = 0;
+        virtual void onDeviceMounted( const fs::IDevice& device ) = 0;
         /**
          * @brief onDeviceUnplugged Shall be invoked when a device gets unplugged
          * @param device The unmounted device

@@ -824,7 +824,7 @@ public:
      * @brief isPlaylistExtensionSupported Checks if the provided playlist extension
      *                                     is supported.
      */
-    virtual bool isPlaylistExtensionSupported( const char* ext ) const = 0;
+    virtual bool isPlaylistExtensionSupported( const char* ext ) const = 0;    
 };
 
 }

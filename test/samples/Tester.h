@@ -85,7 +85,7 @@ private:
 
     // IDeviceListerCb interface
 public:
-    virtual bool onDeviceMounted( const std::string& uuid, const std::string& mountpoint, bool removable ) override;
+    virtual void onDeviceMounted( const std::string& uuid, const std::string& mountpoint, bool removable ) override;
     virtual void onDeviceUnmounted( const std::string& uuid, const std::string& mountpoint ) override;
     IDeviceListerCb* m_cb;
 };
