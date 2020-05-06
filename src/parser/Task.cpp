@@ -876,7 +876,8 @@ bool Task::needEntityRestoration() const
         return false;
     return m_parentFolderFs == nullptr ||
            m_fileFs == nullptr ||
-           m_parentFolder == nullptr;
+           m_parentFolder == nullptr ||
+           ( m_file == nullptr && m_fileId != 0 );
 }
 
 }
