@@ -58,44 +58,44 @@ void Parser::addService( ServicePtr service )
     auto worker = std::unique_ptr<Worker>( new Worker );
     if ( worker->initialize( m_ml, this, std::move( service ) ) == false )
         return;
-    m_services.push_back( std::move( worker ) );
+    m_serviceWorkers.push_back( std::move( worker ) );
 }
 
 void Parser::parse( std::shared_ptr<Task> task )
 {
-    if ( m_services.empty() == true )
+    if ( m_serviceWorkers.empty() == true )
         return;
     assert( task != nullptr );
-    m_services[0]->parse( std::move( task ) );
+    m_serviceWorkers[0]->parse( std::move( task ) );
     ++m_opToDo;
     updateStats();
 }
 
 void Parser::start()
 {
-    assert( m_services.size() == 3 );
+    assert( m_serviceWorkers.size() == 3 );
     restore();
 }
 
 void Parser::pause()
 {
-    for ( auto& s : m_services )
+    for ( auto& s : m_serviceWorkers )
         s->pause();
 }
 
 void Parser::resume()
 {
-    for ( auto& s : m_services )
+    for ( auto& s : m_serviceWorkers )
         s->resume();
 }
 
 void Parser::stop()
 {
-    for ( auto& s : m_services )
+    for ( auto& s : m_serviceWorkers )
     {
         s->signalStop();
     }
-    for ( auto& s : m_services )
+    for ( auto& s : m_serviceWorkers )
     {
         s->stop();
     }
@@ -103,7 +103,7 @@ void Parser::stop()
 
 void Parser::flush()
 {
-    for ( auto& s : m_services )
+    for ( auto& s : m_serviceWorkers )
         s->flush();
     m_opToDo = 0;
     m_opDone = 0;
@@ -124,13 +124,13 @@ void Parser::rescan()
 
 void Parser::restart()
 {
-    for ( auto& s : m_services )
+    for ( auto& s : m_serviceWorkers )
         s->restart();
 }
 
 void Parser::restore()
 {
-    if ( m_services.empty() == true )
+    if ( m_serviceWorkers.empty() == true )
         return;
     auto tasks = Task::fetchUncompleted( m_ml );
     if ( tasks.empty() == true )
@@ -141,7 +141,7 @@ void Parser::restore()
     LOG_INFO( "Resuming parsing on ", tasks.size(), " tasks" );
     m_opToDo += tasks.size();
     updateStats();
-    m_services[0]->parse( std::move( tasks ) );
+    m_serviceWorkers[0]->parse( std::move( tasks ) );
 }
 
 void Parser::refreshTaskList()
@@ -218,9 +218,9 @@ void Parser::done( std::shared_ptr<Task> t, Status status )
     }
 
     // If some services declined to parse the file, start over again.
-    assert( serviceIdx < m_services.size() );
+    assert( serviceIdx < m_serviceWorkers.size() );
     updateStats();
-    m_services[serviceIdx]->parse( std::move( t ) );
+    m_serviceWorkers[serviceIdx]->parse( std::move( t ) );
 }
 
 void Parser::onIdleChanged( bool idle )
@@ -232,7 +232,7 @@ void Parser::onIdleChanged( bool idle )
         return;
     }
     // Otherwise the parser is idle when all services are idle
-    for ( const auto& s : m_services )
+    for ( const auto& s : m_serviceWorkers )
     {
         // We're switching a service from "not idle" to "idle" here, so as far as the medialibrary
         // is concerned the parser is still "not idle". In case a single parser service isn't

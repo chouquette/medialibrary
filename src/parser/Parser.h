@@ -102,7 +102,7 @@ private:
     ///
     void restart();
 private:
-    std::vector<std::unique_ptr<Worker>> m_services;
+    std::vector<std::unique_ptr<Worker>> m_serviceWorkers;
 
     MediaLibrary* m_ml;
     IMediaLibraryCb* m_callback;
