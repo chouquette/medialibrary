@@ -572,7 +572,7 @@ TEST_F( DbModel, Upgrade21to22 )
 
     auto folders = ml->folders( IMedia::Type::Audio, nullptr )->all();
     ASSERT_EQ( 3u, folders.size() );
-    for ( const auto f : folders )
+    for ( const auto& f : folders )
     {
         auto audioQuery = f->media( IMedia::Type::Audio, nullptr );
         ASSERT_EQ( 1u, audioQuery->count() );
