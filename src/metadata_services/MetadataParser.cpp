@@ -669,7 +669,12 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
     auto media = std::static_pointer_cast<Media>( item.media() );
     if ( media == nullptr )
         media = file->media();
-    assert( media != nullptr );
+
+    if ( media == nullptr )
+    {
+        assert( !"Can't refresh a non-existing media" );
+        return std::make_tuple( false, false );
+    }
 
     if ( media->duration() != item.duration() )
         media->setDuration( item.duration() );
