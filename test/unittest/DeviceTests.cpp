@@ -139,6 +139,31 @@ TEST_F( DeviceEntity, MultipleScheme )
     ASSERT_EQ( d->id(), d2->id() );
 }
 
+TEST_F( DeviceEntity, IsKnown )
+{
+    const std::string uuid{ "{device-uuid}" };
+    const std::string localMountpoint{ "file:///path/to/device" };
+    const std::string smbMountpoint{ "smb:///1.3.1.2/" };
+
+    auto res = ml->isDeviceKnown( uuid, localMountpoint, false );
+    ASSERT_FALSE( res );
+    res = ml->isDeviceKnown( uuid, localMountpoint, false );
+    ASSERT_TRUE( res );
+
+    /* Ensure the removable flag doesn't change anything regarding probing */
+    res = ml->isDeviceKnown( uuid, localMountpoint, true );
+    ASSERT_TRUE( res );
+
+    /*
+     * Now check that device are uniquely identified by their scheme & uuid, not
+     * just their uuid
+     */
+    res = ml->isDeviceKnown( uuid, smbMountpoint, false );
+    ASSERT_FALSE( res );
+    res = ml->isDeviceKnown( uuid, smbMountpoint, false );
+    ASSERT_TRUE( res );
+}
+
 // Filesystem tests:
 
 TEST_F( DeviceFs, RemoveDisk )

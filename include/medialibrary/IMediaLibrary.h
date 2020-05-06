@@ -824,7 +824,21 @@ public:
      * @brief isPlaylistExtensionSupported Checks if the provided playlist extension
      *                                     is supported.
      */
-    virtual bool isPlaylistExtensionSupported( const char* ext ) const = 0;    
+    virtual bool isPlaylistExtensionSupported( const char* ext ) const = 0;
+
+    /**
+     * @brief isDeviceKnown Probes a device to know if it has been seen by the medialibrary
+     * @param uuid The device UUID
+     * @param mountpoint The device mountpoint, as an MRL
+     * @param isRemovable The device's removable state
+     * @return true if the device has been seen by the media library
+     *
+     * If this function returns false, a representation for this device will be
+     * inserted in database, and any later call will return true.
+     */
+    virtual bool isDeviceKnown( const std::string& uuid,
+                                const std::string& mountpoint,
+                                bool isRemovable ) = 0;
 };
 
 }

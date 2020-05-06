@@ -673,7 +673,23 @@ bool MediaLibrary::isPlaylistExtensionSupported( const char* ext ) const
     return std::binary_search( std::begin( SupportedPlaylistExtensions ),
         std::end( SupportedPlaylistExtensions ), ext, [](const char* l, const char* r) {
             return strcasecmp( l, r ) < 0;
-        });
+    });
+}
+
+bool MediaLibrary::isDeviceKnown( const std::string &uuid,
+                                  const std::string &mountpoint, bool isRemovable )
+{
+    auto scheme = utils::file::scheme( mountpoint );
+    auto isNetwork = scheme != "file://";
+    try
+    {
+        Device::create( this, uuid, scheme, isRemovable, isNetwork );
+    }
+    catch ( const sqlite::errors::ConstraintUnique& )
+    {
+        return true;
+    }
+    return false;
 }
 
 void MediaLibrary::ensureDeviceListersAreStarted() const

@@ -249,6 +249,10 @@ public:
     virtual bool isMediaExtensionSupported( const char* ext ) const override;
     virtual bool isPlaylistExtensionSupported( const char* ext ) const override;
 
+    virtual bool isDeviceKnown( const std::string& uuid,
+                                const std::string& mountpoint,
+                                bool isRemovable ) override;
+
     /**
      * Helper to allow FS classes to ensure the required FS factories & device
      * listers have been started
