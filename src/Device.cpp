@@ -115,6 +115,11 @@ bool Device::isPresent() const
 
 void Device::setPresent(bool value)
 {
+    if ( m_isRemovable == false )
+    {
+        assert( !"Can't change the presence of a non-removable device" );
+        return;
+    }
     assert( m_isPresent != value );
     static const std::string req = "UPDATE " + Device::Table::Name +
             " SET is_present = ? WHERE id_device = ?";
