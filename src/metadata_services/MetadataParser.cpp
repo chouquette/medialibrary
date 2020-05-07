@@ -695,9 +695,9 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
     }
 
     if ( isAudio == true && media->type() == IMedia::Type::Video )
-        media->setType( IMedia::Type::Audio );
+        media->setTypeBuffered( IMedia::Type::Audio );
     else if ( isAudio == false && media->type() == IMedia::Type::Audio )
-        media->setType( IMedia::Type::Video );
+        media->setTypeBuffered( IMedia::Type::Video );
 
     auto t = m_ml->getConn()->newTransaction();
     if ( VideoTrack::removeFromMedia( m_ml, media->id() ) == false ||
