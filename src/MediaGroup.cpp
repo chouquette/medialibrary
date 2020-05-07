@@ -836,6 +836,7 @@ std::string MediaGroup::orderBy(const QueryParameters* params)
                       static_cast<std::underlying_type_t<SortingCriteria>>( sort ),
                       ". Falling back to default (Alpha)" );
             /* fall-through */
+        case SortingCriteria::Default:
         case SortingCriteria::Alpha:
             req += "mg.name";
             break;
