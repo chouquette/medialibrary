@@ -656,4 +656,7 @@ TEST_F( DbModel, Upgrade24to25 )
 TEST_F( DbModel, Upgrade25to26 )
 {
     CommonMigrationTest( SRC_DIR "/test/unittest/db_v25.sql" );
+
+    auto show = ml->createShow( "new test show" );
+    ASSERT_NE( nullptr, show );
 }
