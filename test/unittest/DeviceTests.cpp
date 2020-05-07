@@ -93,8 +93,6 @@ TEST_F( DeviceEntity, Create )
     ASSERT_TRUE( d->isRemovable() );
     ASSERT_TRUE( d->isPresent() );
 
-    Reload();
-
     d = ml->device( "dummy", "file://" );
     ASSERT_NE( nullptr, d );
     ASSERT_EQ( "dummy", d->uuid() );
@@ -111,8 +109,6 @@ TEST_F( DeviceEntity, SetPresent )
 
     d->setPresent( false );
     ASSERT_FALSE( d->isPresent() );
-
-    Reload();
 
     d = ml->device( "dummy", "file://" );
     ASSERT_FALSE( d->isPresent() );

@@ -58,8 +58,6 @@ TEST_F( SubtitleTracks, FetchTracks )
     ASSERT_EQ( "of",        tracks[1]->description() );
     ASSERT_EQ( "year",      tracks[1]->encoding() );
 
-    Reload();
-
     media = ml->media( media->id() );
     tracks = media->subtitleTracks()->all();
 

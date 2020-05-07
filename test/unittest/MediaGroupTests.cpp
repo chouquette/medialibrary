@@ -45,8 +45,6 @@ TEST_F( MediaGroups, Create )
     ASSERT_EQ( 0u, mg->nbUnknown() );
     ASSERT_EQ( true, mg->userInteracted() );
 
-    Reload();
-
     mg = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( mg->id() ) );
     ASSERT_NE( nullptr, mg );
     ASSERT_EQ( "group", mg->name() );
@@ -364,8 +362,6 @@ TEST_F( MediaGroups, Rename )
     ASSERT_TRUE( mg->userInteracted() );
     ASSERT_EQ( newName, mg->name() );
 
-    Reload();
-
     mg = ml->mediaGroup( mg->id() );
     ASSERT_NE( nullptr, mg );
     ASSERT_EQ( newName, mg->name() );
@@ -397,15 +393,11 @@ TEST_F( MediaGroups, Delete )
     auto groups = ml->mediaGroups( nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
 
-    Reload();
-
     m1 = ml->media( m1->id() );
     ASSERT_NE( nullptr, m1->group() );
     ASSERT_EQ( mg->id(), m1->groupId() );
 
     ml->deleteMediaGroup( mg->id() );
-
-    Reload();
 
     m1 = ml->media( m1->id() );
     m2 = ml->media( m2->id() );
@@ -1195,8 +1187,6 @@ TEST_F( MediaGroups, Destroy )
 
     ASSERT_EQ( 2u, mg->nbMedia() );
 
-    Reload();
-
     mg = ml->mediaGroup( mg->id() );
 
     auto res = mg->destroy();
@@ -1277,8 +1267,6 @@ TEST_F( MediaGroups, MergeAutoCreated )
     ASSERT_EQ( 1u, groups.size() );
 
     ASSERT_EQ( 2u, group1->nbMedia() );
-
-    Reload();
 
     group1 = ml->mediaGroup( group1->id() );
     ASSERT_EQ( 2u, group1->nbMedia() );

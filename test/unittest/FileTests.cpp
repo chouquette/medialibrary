@@ -68,8 +68,6 @@ TEST_F( Files, Media )
 {
     ASSERT_EQ( m->id(), f->media()->id() );
 
-    Reload();
-
     m = ml->media( m->id() );
     auto files = m->files();
     ASSERT_EQ( 1u, files.size() );
@@ -82,8 +80,6 @@ TEST_F( Files, SetMrl )
     const std::string newMrl = "/sea/otters/rules.mkv";
     f->setMrl( newMrl );
     ASSERT_EQ( newMrl, f->mrl() );
-
-    Reload();
 
     auto files = m->files();
     ASSERT_EQ( 1u, files.size() );
@@ -99,8 +95,6 @@ TEST_F( Files, UpdateFsInfo )
     f->updateFsInfo( 123, 456 );
     ASSERT_EQ( 123u, f->lastModificationDate() );
     ASSERT_EQ( 456u, f->size() );
-
-    Reload();
 
     auto files = m->files();
     ASSERT_EQ( 1u, files.size() );

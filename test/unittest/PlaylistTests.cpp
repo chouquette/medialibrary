@@ -106,8 +106,6 @@ TEST_F( Playlists, SetName )
     ASSERT_TRUE( res );
     ASSERT_EQ( newName, pl->name() );
 
-    Reload();
-
     pl = std::static_pointer_cast<Playlist>( ml->playlist( pl->id() ) );
     ASSERT_EQ( newName, pl->name() );
 }
@@ -465,7 +463,6 @@ TEST_F( Playlists, ReinsertMedia )
     ml->deleteMedia( m2->id() );
     CheckContiguity();
 
-    Reload();
     pl = std::static_pointer_cast<Playlist>( ml->playlist( pl->id() ) );
 
     m1 = ml->addExternalMedia( "http://sea.otters/fluffy.mkv" );
@@ -499,8 +496,6 @@ TEST_F( Playlists, RemoveMedia )
 
     ml->deleteMedia( m1->id() );
     ml->deleteMedia( m2->id() );
-
-    Reload();
 
     pl = std::static_pointer_cast<Playlist>( ml->playlist( pl->id() ) );
 

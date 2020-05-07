@@ -41,8 +41,6 @@ TEST_F( Artists, Create )
     ASSERT_NE( a, nullptr );
     ASSERT_EQ( a->name(), "Flying Otters" );
 
-    Reload();
-
     auto a2 = ml->artist( a->id() );
     ASSERT_NE( a2, nullptr );
     ASSERT_EQ( a2->name(), "Flying Otters" );
@@ -68,8 +66,6 @@ TEST_F( Artists, ShortBio )
     a->setShortBio( bio );
     ASSERT_EQ( a->shortBio(), bio );
 
-    Reload();
-
     auto a2 = ml->artist( a->id() );
     ASSERT_NE( a2, nullptr );
     ASSERT_EQ( a2->shortBio(), bio );
@@ -88,8 +84,6 @@ TEST_F( Artists, ArtworkMrl )
     ASSERT_EQ( a->thumbnailMrl( ThumbnailSizeType::Thumbnail ), artwork );
     ASSERT_EQ( ThumbnailStatus::Available,
                a->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
-
-    Reload();
 
     auto a2 = ml->artist( a->id() );
     ASSERT_NE( a2, nullptr );
@@ -111,8 +105,6 @@ TEST_F( Artists, Thumbnail )
     t = a->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_NE( nullptr, t );
     ASSERT_EQ( mrl, t->mrl() );
-
-    Reload();
 
     a = std::static_pointer_cast<Artist>( ml->artist( a->id() ) );
     t = a->thumbnail( ThumbnailSizeType::Thumbnail );
@@ -154,8 +146,6 @@ TEST_F( Artists, Albums )
     auto albums = query->all();
     ASSERT_EQ( albums.size(), 2u );
 
-    Reload();
-
     auto artist2 = ml->artist( artist->id() );
     auto albums2 = artist2->albums( nullptr )->all();
     ASSERT_EQ( albums2.size(), 2u );
@@ -180,8 +170,6 @@ TEST_F( Artists, NbAlbums )
     auto nbAlbums = artist->nbAlbums();
     ASSERT_EQ( nbAlbums, 2u );
 
-    Reload();
-
     auto artist2 = ml->artist( artist->id() );
     nbAlbums = artist2->nbAlbums();
     ASSERT_EQ( nbAlbums, 2u );
@@ -205,8 +193,6 @@ TEST_F( Artists, AllSongs )
     params.desc = false;
     auto songs = artist->tracks( &params )->all();
     ASSERT_EQ( songs.size(), 3u );
-
-    Reload();
 
     auto artist2 = ml->artist( artist->id() );
     songs = artist2->tracks( &params )->all();
@@ -234,8 +220,6 @@ TEST_F( Artists, GetAll )
     artists = ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( artists.size(), 5u );
 
-    Reload();
-
     auto artists2 = ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( artists2.size(), 5u );
 }
@@ -256,8 +240,6 @@ TEST_F( Artists, GetAllNoAlbum )
     artists = ml->artists( ArtistIncluded::AlbumArtistOnly, nullptr )->all();
     ASSERT_EQ( artists.size(), 0u );
 
-    Reload();
-
     artists = ml->artists( ArtistIncluded::AlbumArtistOnly, nullptr )->all();
     ASSERT_EQ( artists.size(), 0u );
 
@@ -275,8 +257,6 @@ TEST_F( Artists, UnknownAlbum )
     ASSERT_NE( nullptr, album2 );
     ASSERT_EQ( album->id(), album2->id() );
 
-    Reload();
-
     a = std::static_pointer_cast<Artist>( ml->artist( a->id() ) );
     album2 = a->unknownAlbum();
     ASSERT_NE( nullptr, album2 );
@@ -292,8 +272,6 @@ TEST_F( Artists, MusicBrainzId )
     std::string mbId("{this-id-an-id}");
     a->setMusicBrainzId( mbId );
     ASSERT_EQ( a->musicBrainzId(), mbId );
-
-    Reload();
 
     auto a2 = ml->artist( a->id() );
     ASSERT_NE( a2, nullptr );
@@ -543,8 +521,6 @@ TEST_F( Artists, DeleteWhenNoAlbum )
     artists = ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 0u, artists.size() );
 
-    Reload();
-
     artists = ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 0u, artists.size() );
 }
@@ -556,28 +532,21 @@ TEST_F( Artists, UpdateNbTracks )
     auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3", IMedia::Type::Audio ) );
     artist->addMedia( *m1 );
 
-    Reload();
-
     artist = std::static_pointer_cast<Artist>( ml->artist( artist->id() ) );
     ASSERT_EQ( 1u, artist->nbTracks() );
 
     auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3", IMedia::Type::Audio ) );
     artist->addMedia( *m2 );
 
-    Reload();
     artist = std::static_pointer_cast<Artist>( ml->artist( artist->id() ) );
     ASSERT_EQ( 2u, artist->nbTracks() );
 
     ml->deleteMedia( m1->id() );
 
-    Reload();
-
     artist = std::static_pointer_cast<Artist>( ml->artist( artist->id() ) );
     ASSERT_EQ( 1u, artist->nbTracks() );
 
     ml->deleteMedia( m2->id() );
-
-    Reload();
 
     artist = std::static_pointer_cast<Artist>( ml->artist( artist->id() ) );
     ASSERT_EQ( nullptr, artist );

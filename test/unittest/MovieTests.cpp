@@ -52,8 +52,6 @@ TEST_F( Movies, Fetch )
     ASSERT_NE( nullptr, m2 );
     ASSERT_EQ( m->id(), m2->id() );
 
-    Reload();
-
     m2 = ml->movie( m->id() );
     ASSERT_NE( m2, nullptr );
 }
@@ -67,8 +65,6 @@ TEST_F( Movies, SetShortSummary )
     ASSERT_EQ( m->shortSummary().length(), 0u );
     m->setShortSummary( "great movie" );
     ASSERT_EQ( m->shortSummary(), "great movie" );
-
-    Reload();
 
     auto m2 = ml->movie( m->id() );
     ASSERT_EQ( m2->shortSummary(), "great movie" );
@@ -84,8 +80,6 @@ TEST_F( Movies, SetImdbId )
     m->setImdbId( "id" );
     ASSERT_EQ( m->imdbId(), "id" );
 
-    Reload();
-
     auto m2 = ml->movie( m->id() );
     ASSERT_EQ( m2->imdbId(), "id" );
 }
@@ -98,8 +92,6 @@ TEST_F( Movies, AssignToFile )
     auto m = ml->createMovie( *f );
 
     ASSERT_EQ( f->movie(), m );
-
-    Reload();
 
     auto f2 = ml->media( f->id() );
     auto m2 = f2->movie();

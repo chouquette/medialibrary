@@ -63,9 +63,6 @@ TEST_F( VideoTracks, FetchTracks )
     ASSERT_EQ( t2->language(), "l1" );
     ASSERT_EQ( t2->description(), "d1" );
 
-    // Reload from DB
-    Reload();
-
     auto m = ml->media( f->id() );
     ASSERT_NE( nullptr, m );
     ts = m->videoTracks()->all();

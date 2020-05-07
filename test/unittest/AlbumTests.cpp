@@ -50,9 +50,6 @@ TEST_F( Albums, Fetch )
 {
     auto a = ml->createAlbum( "album" );
 
-    // Clear the cache
-    Reload();
-
     auto a2 = ml->album( a->id() );
     // The shared pointer are expected to point to a different instance
     ASSERT_NE( a, a2 );
@@ -70,8 +67,6 @@ TEST_F( Albums, AddTrack )
 
     auto tracks = a->tracks( nullptr )->all();
     ASSERT_EQ( tracks.size(), 1u );
-
-    Reload();
 
     a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
     tracks = a->tracks( nullptr )->all();
@@ -113,8 +108,6 @@ TEST_F( Albums, NbTracks )
     auto tracks = a->tracks( nullptr )->all();
     ASSERT_EQ( tracks.size(), a->nbTracks() );
 
-    Reload();
-
     a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
     tracks = a->tracks( nullptr )->all();
     ASSERT_EQ( tracks.size(), a->nbTracks() );
@@ -139,8 +132,6 @@ TEST_F( Albums, TracksByGenre )
     ASSERT_EQ( 5u, tracksQuery->count() );
     auto tracks = tracksQuery->all();
     ASSERT_EQ( 5u, tracks.size() );
-
-    Reload();
 
     a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
     tracks = a->tracks( g, nullptr )->all();
@@ -169,8 +160,6 @@ TEST_F( Albums, SetReleaseDate )
     a->setReleaseYear( 9876, true );
     ASSERT_EQ( 9876u, a->releaseYear() );
 
-    Reload();
-
     auto a2 = ml->album( a->id() );
     ASSERT_EQ( a->releaseYear(), a2->releaseYear() );
 }
@@ -181,8 +170,6 @@ TEST_F( Albums, SetShortSummary )
 
     a->setShortSummary( "summary" );
     ASSERT_EQ( a->shortSummary(), "summary" );
-
-    Reload();
 
     auto a2 = ml->album( a->id() );
     ASSERT_EQ( a->shortSummary(), a2->shortSummary() );
@@ -210,8 +197,6 @@ TEST_F( Albums, Thumbnail )
     ASSERT_EQ( ThumbnailStatus::Available,
                a->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
 
-    Reload();
-
     a = std::static_pointer_cast<Album>( ml->album( a->id() ) );
     t = a->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_NE( nullptr, t );
@@ -227,8 +212,6 @@ TEST_F( Albums, FetchAlbumFromTrack )
                 ml->addMedia( "file.mp3", IMedia::Type::Audio ) );
     auto t = a->addTrack( f, 1, 0, 0, nullptr );
     f->save();
-
-    Reload();
 
     f = ml->media( f->id() );
     auto t2 = f->albumTrack();
@@ -265,8 +248,6 @@ TEST_F( Albums, Artists )
     ASSERT_EQ( artist1->id(), artists[1]->id() );
     ASSERT_EQ( artist2->id(), artists[0]->id() );
 
-    Reload();
-
     params.desc = true;
     album = std::static_pointer_cast<Album>( ml->album( album->id() ) );
     query = album->artists( &params );
@@ -292,8 +273,6 @@ TEST_F( Albums, AlbumArtist )
     res = album->setAlbumArtist( noartist );
     ASSERT_FALSE( res );
     ASSERT_NE( album->albumArtist(), nullptr );
-
-    Reload();
 
     album = std::static_pointer_cast<Album>( ml->album( album->id() ) );
     auto albumArtist = album->albumArtist();
@@ -737,21 +716,17 @@ TEST_F( Albums, Duration )
     auto t3 = a->addTrack( m3, 1, 1, 0, nullptr );
     ASSERT_EQ( 300u, a->duration() );
 
-    Reload();
-
     auto a2 = ml->album( a->id() );
     ASSERT_EQ( 300u, a2->duration() );
 
     // Check that the duration is updated when a media/track gets removed
     ml->deleteMedia( m2->id() );
 
-    Reload();
     a2 = ml->album( a->id() );
     ASSERT_EQ( 100u, a2->duration() );
 
     // And check that we don't remove negative durations
     ml->deleteMedia( m3->id() );
-    Reload();
     a2 = ml->album( a->id() );
     ASSERT_EQ( 100u, a2->duration() );
 }
@@ -815,8 +790,6 @@ TEST_F( Albums, NbDiscs )
     auto res = alb->setNbDiscs( 123 );
     ASSERT_TRUE( res );
     ASSERT_EQ( 123u, alb->nbDiscs() );
-
-    Reload();
 
     alb = std::static_pointer_cast<Album>( ml->album( alb->id() ) );
     ASSERT_EQ( 123u, alb->nbDiscs() );

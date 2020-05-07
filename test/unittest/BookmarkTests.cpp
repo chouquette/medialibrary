@@ -52,8 +52,6 @@ TEST_F( Bookmarks, Create )
     ASSERT_NE( 0, b->creationDate() );
     ASSERT_EQ( IBookmark::Type::Simple, b->type() );
 
-    Reload();
-
     b = Bookmark::fetch( ml.get(), b->id() );
     ASSERT_NE( 0, b->id() );
     ASSERT_EQ( 1, b->time() );
@@ -77,8 +75,6 @@ TEST_F( Bookmarks, SetName )
     ASSERT_EQ( newName, b->name() );
     ASSERT_EQ( "", b->description() );
 
-    Reload();
-
     b = Bookmark::fetch( ml.get(), b->id() );
     ASSERT_EQ( newName, b->name() );
     ASSERT_EQ( "", b->description() );
@@ -96,8 +92,6 @@ TEST_F( Bookmarks, SetDescription )
     ASSERT_TRUE( res );
     ASSERT_EQ( "", b->name() );
     ASSERT_EQ( newDesc, b->description() );
-
-    Reload();
 
     b = Bookmark::fetch( ml.get(), b->id() );
     ASSERT_EQ( "", b->name() );
@@ -117,8 +111,6 @@ TEST_F( Bookmarks, SetNameAndDesc )
 
     ASSERT_EQ( newName, b->name() );
     ASSERT_EQ( newDesc, b->description() );
-
-    Reload();
 
     b = Bookmark::fetch( ml.get(), b->id() );
     ASSERT_EQ( newName, b->name() );
@@ -246,8 +238,6 @@ TEST_F( Bookmarks, Move )
     auto res = b->move( 321 );
     ASSERT_TRUE( res );
     ASSERT_EQ( 321, b->time() );
-
-    Reload();
 
     b = Bookmark::fetch( ml.get(), b->id() );
     ASSERT_EQ( 321, b->time() );

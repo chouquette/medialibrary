@@ -73,9 +73,6 @@ TEST_F( Medias, Fetch )
     auto f2 = ml->media( f->id() );
     ASSERT_EQ( f->id(), f2->id() );
 
-    // Flush cache and fetch from DB
-    Reload();
-
     f2 = std::static_pointer_cast<Media>( ml->media( f->id() ) );
     ASSERT_EQ( f->id(), f2->id() );
 }
@@ -92,8 +89,6 @@ TEST_F( Medias, Duration )
     f->save();
     ASSERT_EQ( f->duration(), d );
 
-    Reload();
-
     auto f2 = ml->media( f->id() );
     ASSERT_EQ( f2->duration(), d );
 }
@@ -109,8 +104,6 @@ TEST_F( Medias, Thumbnail )
     f->save();
     ASSERT_EQ( f->thumbnailMrl( ThumbnailSizeType::Thumbnail ), newThumbnail );
 
-    Reload();
-
     auto f2 = ml->media( f->id() );
     ASSERT_EQ( f2->thumbnailMrl( ThumbnailSizeType::Thumbnail ), newThumbnail );
 }
@@ -121,8 +114,6 @@ TEST_F( Medias, PlayCount )
     ASSERT_EQ( 0u, f->playCount() );
     f->increasePlayCount();
     ASSERT_EQ( 1u, f->playCount() );
-
-    Reload();
 
     f = std::static_pointer_cast<Media>( ml->media( f->id() ) );
     ASSERT_EQ( 1u, f->playCount() );
@@ -136,8 +127,6 @@ TEST_F( Medias, Progress )
     ASSERT_EQ( 123, f->metadata( Media::MetadataType::Progress ).asInt() );
     ASSERT_TRUE( f->metadata( Media::MetadataType::Progress ).isSet() );
 
-    Reload();
-
     f = ml->media( f->id() );
     ASSERT_EQ( 123, f->metadata( Media::MetadataType::Progress ).asInt() );
 }
@@ -149,8 +138,6 @@ TEST_F( Medias, Rating )
     f->setMetadata( Media::MetadataType::Rating, 12345 );
     ASSERT_EQ( 12345, f->metadata( Media::MetadataType::Rating ).asInt() );
     ASSERT_TRUE( f->metadata( Media::MetadataType::Rating ).isSet() );
-
-    Reload();
 
     f = ml->media( f->id() );
     ASSERT_EQ( 12345, f->metadata( Media::MetadataType::Rating ).asInt() );
@@ -326,8 +313,6 @@ TEST_F( Medias, Favorite )
     m->setFavorite( true );
     ASSERT_TRUE( m->isFavorite() );
 
-    Reload();
-
     m = ml->media( m->id() );
     ASSERT_TRUE( m->isFavorite() );
 }
@@ -409,8 +394,6 @@ TEST_F( Medias, ClearHistory )
     history = ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
 
-    Reload();
-
     history = ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
 }
@@ -448,8 +431,6 @@ TEST_F( Medias, SetReleaseDate )
     m->setReleaseDate( 1234 );
     m->save();
     ASSERT_EQ( m->releaseDate(), 1234u );
-
-    Reload();
 
     auto m2 = ml->media( m->id() );
     ASSERT_EQ( m2->releaseDate(), 1234u );
@@ -590,8 +571,6 @@ TEST_F( Medias, SetType )
 
     ASSERT_EQ( IMedia::Type::Video, m1->type() );
 
-    Reload();
-
     auto m2 = ml->media( m1->id() );
     ASSERT_EQ( IMedia::Type::Video, m2->type() );
 
@@ -611,8 +590,6 @@ TEST_F( Medias, SetTypeBuffered )
 
     ASSERT_EQ( IMedia::Type::Video, m1->type() );
 
-    Reload();
-
     auto m2 = ml->media( m1->id() );
     ASSERT_EQ( IMedia::Type::Video, m2->type() );
 }
@@ -626,8 +603,6 @@ TEST_F( Medias, SetSubType )
     m1->save();
 
     ASSERT_EQ( IMedia::SubType::Movie, m1->subType() );
-
-    Reload();
 
     auto m2 = ml->media( m1->id() );
     ASSERT_EQ( IMedia::SubType::Movie, m1->subType() );
@@ -650,8 +625,6 @@ TEST_F( Medias, Metadata )
         ASSERT_EQ( "foo", md.asStr() );
     }
 
-    Reload();
-
     m = ml->media( m->id() );
     const auto& md = m->metadata( Media::MetadataType::Speed );
     ASSERT_EQ( "foo", md.asStr() );
@@ -668,8 +641,6 @@ TEST_F( Medias, MetadataOverride )
         const auto& md = m->metadata( Media::MetadataType::Speed );
         ASSERT_EQ( "otter", md.asStr() );
     }
-
-    Reload();
 
     m = ml->media( m->id() );
     const auto& md = m->metadata( Media::MetadataType::Speed );
@@ -694,8 +665,6 @@ TEST_F( Medias, MetadataUnset )
 
     ASSERT_FALSE( md.isSet() );
 
-    Reload();
-
     m = ml->media( m->id() );
     auto& md2 = m->metadata( Media::MetadataType::ApplicationSpecific );
     ASSERT_FALSE( md2.isSet() );
@@ -716,8 +685,6 @@ TEST_F( Medias, MetadataGetBatch )
     ASSERT_EQ( metas[IMedia::MetadataType::Crop], "crop" );
     ASSERT_EQ( metas[IMedia::MetadataType::Gain], "gain" );
     ASSERT_EQ( metas[IMedia::MetadataType::Seen], "seen" );
-
-    Reload();
 
     m = ml->media( m->id() );
     metas = m->metadata();
@@ -751,8 +718,6 @@ TEST_F( Medias, SetBatch )
     ASSERT_EQ( metas[IMedia::MetadataType::Crop], "crop" );
     ASSERT_EQ( metas[IMedia::MetadataType::Gain], "gain" );
     ASSERT_EQ( metas[IMedia::MetadataType::Seen], "seen" );
-
-    Reload();
 
     m = ml->media( m->id() );
     metas = m->metadata();
@@ -795,8 +760,6 @@ TEST_F( Medias, ExternalMrl )
     auto audios = ml->audioFiles( nullptr )->all();
     ASSERT_EQ( 0u, audios.size() );
 
-    Reload();
-
     auto m2 = ml->media( "https://foo.bar/sea-otters.mkv" );
     ASSERT_NE( nullptr, m2 );
     ASSERT_EQ( m->id(), m2->id() );
@@ -814,8 +777,6 @@ TEST_F( Medias, AddStream )
     auto m = ml->addStream( "https://foo.bar/stream.mkv" );
     ASSERT_EQ( m->title(), "stream.mkv" );
     ASSERT_TRUE( m->isStream() );
-
-    Reload();
 
     m = ml->media( m->id() );
     ASSERT_EQ( m->title(), "stream.mkv" );
@@ -837,8 +798,6 @@ TEST_F( Medias, SetTitle )
     auto res = m->setTitle( "sea otters" );
     ASSERT_TRUE( res );
     ASSERT_EQ( "sea otters", m->title() );
-
-    Reload();
 
     m = ml->media( m->id() );
     ASSERT_EQ( "sea otters", m->title() );
@@ -926,8 +885,6 @@ TEST_F( Medias, VacuumOldExternal )
 
     // Check that they will not be vacuumed even if they haven't been played yet.
 
-    Reload();
-
     m1 = ml->media( m1->id() );
     m2 = ml->media( m2->id() );
     s1 = ml->media( s1->id() );
@@ -998,15 +955,11 @@ TEST_F( Medias, NbPlaylists )
     auto res = playlist->append( *m );
     ASSERT_TRUE( res );
 
-    Reload();
-
     m = ml->media( m->id() );
     ASSERT_EQ( 1u, m->nbPlaylists() );
 
     playlist = ml->playlist( playlist->id() );
     playlist->remove( 0 );
-
-    Reload();
 
     m = ml->media( m->id() );
     ASSERT_EQ( 0u, m->nbPlaylists() );
@@ -1015,16 +968,12 @@ TEST_F( Medias, NbPlaylists )
     playlist->append( *m );
     playlist->append( *m );
 
-    Reload();
-
     m = ml->media( m->id() );
     playlist = ml->playlist( playlist->id() );
 
     ASSERT_EQ( 2u, m->nbPlaylists() );
 
     playlist->remove( 0 );
-
-    Reload();
 
     m = ml->media( m->id() );
     // The media was inserted twice in the playlist and should therefor still have
@@ -1033,7 +982,6 @@ TEST_F( Medias, NbPlaylists )
 
     ml->deletePlaylist( playlist->id() );
 
-    Reload();
     m = ml->media( m->id() );
     ASSERT_EQ( 0u, m->nbPlaylists() );
 }
@@ -1085,8 +1033,6 @@ TEST_F( Medias, SetFilename )
     m->setFileName( "sea_otter.asf" );
     ASSERT_EQ( "sea_otter.asf", m->fileName() );
 
-    Reload();
-
     m = ml->media( m->id() );
     ASSERT_EQ( "sea_otter.asf", m->fileName() );
 }
@@ -1098,8 +1044,6 @@ TEST_F( Medias, SetPlayCount )
     auto res = m->setPlayCount( 123 );
     ASSERT_TRUE( res );
     ASSERT_EQ( 123u, m->playCount() );
-
-    Reload();
 
     m = ml->media( m->id() );
     ASSERT_EQ( 123u, m->playCount() );
@@ -1114,8 +1058,6 @@ TEST_F( Medias, SetDeviceId )
     m->setDeviceId( 123u );
     ASSERT_EQ( 123u, m->deviceId() );
     m->save();
-
-    Reload();
 
     m = ml->media( m->id() );
     ASSERT_EQ( 123u, m->deviceId() );
@@ -1135,8 +1077,6 @@ TEST_F( Medias, SetFolderId )
     m->save();
 
     ASSERT_EQ( folder->id(), m->folderId() );
-
-    Reload();
 
     m = ml->media( m->id() );
     ASSERT_EQ( folder->id(), m->folderId() );
@@ -1208,7 +1148,6 @@ TEST_F( Medias, ForceTitle )
     // It should be updated
     ASSERT_EQ( title, m->title() );
 
-    Reload();
     m = ml->media( m->id() );
     ASSERT_EQ( title, m->title() );
 
@@ -1219,8 +1158,6 @@ TEST_F( Medias, ForceTitle )
     // It should still be updated
     ASSERT_EQ( title, m->title() );
 
-    Reload();
-
     m = ml->media( m->id() );
     ASSERT_EQ( title, m->title() );
 
@@ -1230,8 +1167,6 @@ TEST_F( Medias, ForceTitle )
     ASSERT_TRUE( res );
     ASSERT_NE( rejectedTitle, m->title() );
     ASSERT_EQ( title, m->title() );
-
-    Reload();
 
     m = ml->media( m->id() );
     ASSERT_NE( rejectedTitle, m->title() );
@@ -1244,8 +1179,6 @@ TEST_F( Medias, ForceTitle )
     ASSERT_NE( rejectedTitle, m->title() );
     ASSERT_EQ( title, m->title() );
 
-    Reload();
-
     m = ml->media( m->id() );
     ASSERT_NE( rejectedTitle, m->title() );
     ASSERT_EQ( title, m->title() );
@@ -1256,8 +1189,6 @@ TEST_F( Medias, ForceTitle )
     ASSERT_TRUE( res );
     // It should still be updated
     ASSERT_EQ( title, m->title() );
-
-    Reload();
 
     m = ml->media( m->id() );
     ASSERT_EQ( title, m->title() );
@@ -1320,7 +1251,6 @@ TEST_F( FetchMedia, FetchRemovableUnplugged )
 
     fsMock->unmountDevice( RemovableDeviceUuid );
 
-    Reload();
     ml->reload();
     bool reloaded = cbMock->waitReload();
     ASSERT_TRUE( reloaded );

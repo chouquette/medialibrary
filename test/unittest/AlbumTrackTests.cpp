@@ -50,8 +50,6 @@ TEST_F( AlbumTracks, Create )
     ASSERT_EQ( 0, track->genreId() );
     ASSERT_EQ( nullptr, track->genre() );
 
-    Reload();
-
     f = std::static_pointer_cast<Media>( ml->media( f->id() ) );
     ASSERT_EQ( 10u, f->albumTrack()->discNumber() );
 }
@@ -65,8 +63,6 @@ TEST_F( AlbumTracks, Album )
 
     auto albumFromTrack = track->album();
     ASSERT_EQ( album->id(), albumFromTrack->id() );
-
-    Reload();
 
     track = ml->albumTrack( track->id() );
     albumFromTrack = track->album();

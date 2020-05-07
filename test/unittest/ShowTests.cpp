@@ -48,9 +48,6 @@ TEST_F( Shows, Fetch )
 {
     auto s = ml->createShow( "show" );
 
-    // Clear the cache
-    Reload();
-
     auto s2 = ml->show( s->id() );
     // The shared pointers are expected to point to different instances
     ASSERT_NE( s, s2 );
@@ -65,8 +62,6 @@ TEST_F( Shows, SetReleaseDate )
     s->setReleaseDate( 1234 );
     ASSERT_EQ( s->releaseDate(), 1234 );
 
-    Reload();
-
     auto s2 = ml->show( s->id() );
     ASSERT_EQ( s->releaseDate(), s2->releaseDate() );
 }
@@ -79,8 +74,6 @@ TEST_F( Shows, SetShortSummary )
     ASSERT_EQ( s->shortSummary(), "summary" );
 
 
-    Reload();
-
     auto s2 = ml->show( s->id() );
     ASSERT_EQ( s->shortSummary(), s2->shortSummary() );
 }
@@ -92,8 +85,6 @@ TEST_F( Shows, SetArtworkMrl )
     s->setArtworkMrl( "artwork" );
     ASSERT_EQ( s->artworkMrl(), "artwork" );
 
-    Reload();
-
     auto s2 = ml->show( s->id() );
     ASSERT_EQ( s->artworkMrl(), s2->artworkMrl() );
 }
@@ -104,8 +95,6 @@ TEST_F( Shows, SetTvdbId )
 
     s->setTvdbId( "TVDBID" );
     ASSERT_EQ( s->tvdbId(), "TVDBID" );
-
-    Reload();
 
     auto s2 = ml->show( s->id() );
     ASSERT_EQ( s->tvdbId(), s2->tvdbId() );
@@ -146,8 +135,6 @@ TEST_F( Shows, FetchShowFromEpisode )
     ASSERT_NE( s2, nullptr );
     ASSERT_EQ( s->id(), s2->id() );
 
-    Reload();
-
     f = std::static_pointer_cast<Media>( ml->media( f->id() ) );
     ASSERT_NE( nullptr, f->showEpisode() );
     s2 = f->showEpisode()->show();
@@ -165,8 +152,6 @@ TEST_F( Shows, SetEpisodeSummary )
     ASSERT_TRUE( res );
     ASSERT_EQ( e->shortSummary(), "Insert spoilers here" );
 
-    Reload();
-
     show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
     auto episodes = show->episodes( nullptr )->all();
     ASSERT_EQ( episodes[0]->showEpisode()->shortSummary(), e->shortSummary() );
@@ -181,8 +166,6 @@ TEST_F( Shows, SetEpisodeTvdbId )
     bool res = e->setTvdbId( "TVDBID" );
     ASSERT_TRUE( res );
     ASSERT_EQ( e->tvdbId(), "TVDBID" );
-
-    Reload();
 
     show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
     auto episodes = show->episodes( nullptr )->all();
@@ -319,8 +302,6 @@ TEST_F( Shows, FileSetShowEpisode )
 
     ASSERT_EQ( f->showEpisode(), e );
 
-    Reload();
-
     f = ml->media( f->id() );
     auto e2 = f->showEpisode();
     ASSERT_NE( e2, nullptr );
@@ -373,8 +354,6 @@ TEST_F( Shows, NbEpisodes )
     media->save();
     ASSERT_EQ( 1u, show->nbEpisodes() );
 
-    Reload();
-
     show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
     ASSERT_EQ( 1u, show->nbEpisodes() );
 
@@ -383,8 +362,6 @@ TEST_F( Shows, NbEpisodes )
     show->addEpisode( *media2, 1, 2, "episode title" );
     media2->save();
     ASSERT_EQ( 2u, show->nbEpisodes() );
-
-    Reload();
 
     show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
     ASSERT_EQ( 2u, show->nbEpisodes() );

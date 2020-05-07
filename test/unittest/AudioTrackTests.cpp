@@ -56,8 +56,6 @@ TEST_F( AudioTracks, GetSetProperties )
     ASSERT_EQ( t->language(), "en" );
     ASSERT_EQ( t->description(), "test desc" );
 
-    Reload();
-
     auto f2 = ml->media( f->id() );
     tracks = f2->audioTracks()->all();
     ASSERT_EQ( tracks.size(), 1u );

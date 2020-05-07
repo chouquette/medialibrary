@@ -57,8 +57,6 @@ TEST_F( Thumbnails, MediaSetThumbnail )
     ASSERT_EQ( ThumbnailStatus::Available, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
     ASSERT_EQ( m->thumbnailMrl( ThumbnailSizeType::Thumbnail ), mrl );
 
-    Reload();
-
     m = ml->media( m->id() );
     ASSERT_EQ( m->thumbnailMrl( ThumbnailSizeType::Thumbnail ), mrl );
     ASSERT_EQ( ThumbnailStatus::Available, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
@@ -86,8 +84,6 @@ TEST_F( Thumbnails, Update )
 
     ASSERT_EQ( t->origin(), Thumbnail::Origin::Media );
 
-    Reload();
-
     m = ml->media( m->id() );
     t = m->thumbnail( t->sizeType() );
     ASSERT_EQ( t->mrl(), mrl );
@@ -102,8 +98,6 @@ TEST_F( Thumbnails, Update )
     ASSERT_TRUE( res );
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
-
-    Reload();
 
     m = ml->media( m->id() );
     t = m->thumbnail( t->sizeType() );
@@ -123,8 +117,6 @@ TEST_F( Thumbnails, MarkFailure )
     ASSERT_TRUE( res );
 
     ASSERT_EQ( ThumbnailStatus::Failure, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
-
-    Reload();
 
     m = std::static_pointer_cast<Media>( ml->media( m->id() ) );
     ASSERT_EQ( ThumbnailStatus::Failure, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
@@ -268,8 +260,6 @@ TEST_F( Thumbnails, UpdateIsOwned )
     ASSERT_TRUE( res );
     ASSERT_EQ( m->thumbnailMrl( ThumbnailSizeType::Thumbnail ), newMrl );
 
-    Reload();
-
     m = ml->media( m->id() );
     ASSERT_EQ( newMrl, m->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
 }
@@ -302,8 +292,6 @@ TEST_F( Thumbnails, CheckMultipleSizes )
     ASSERT_EQ( ThumbnailSizeType::Banner, banner->sizeType() );
     ASSERT_EQ( Thumbnail::Origin::UserProvided, thumbnail->origin() );
     ASSERT_EQ( Thumbnail::Origin::UserProvided, banner->origin() );
-
-    Reload();
 
     m = ml->media( m->id() );
     thumbnail = m->thumbnail( ThumbnailSizeType::Thumbnail );
@@ -498,8 +486,6 @@ TEST_F( Thumbnails, OverridePersistentFailure )
     ASSERT_EQ( t->id(), t2->id() );
     ASSERT_EQ( ThumbnailStatus::Available, t2->status() );
     ASSERT_EQ( 0u, t2->nbAttempts() );
-
-    Reload();
 
     t2 = Thumbnail::fetch( ml.get(), Thumbnail::EntityType::Media, media->id(),
                            ThumbnailSizeType::Banner );

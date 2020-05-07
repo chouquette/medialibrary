@@ -243,13 +243,10 @@ TEST_F( Genres, NbTracks )
     auto t = a->addTrack( m, 1, 1, g->id(), g.get() );
 
     ASSERT_EQ( 1u, g->nbTracks() );
-    Reload();
     g = std::static_pointer_cast<Genre>( ml->genre( g->id() ) );
     ASSERT_EQ( 1u, g->nbTracks() );
 
     ml->deleteMedia( m->id() );
-
-    Reload();
 
     g = std::static_pointer_cast<Genre>( ml->genre( g->id() ) );
     ASSERT_EQ( nullptr, g );
@@ -383,8 +380,6 @@ TEST_F( Genres, Thumbnails )
 
     ASSERT_EQ( mrl, g->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
 
-    Reload();
-
     g = std::static_pointer_cast<Genre>( ml->genre( g->id() ) );
     ASSERT_EQ( mrl, g->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
     ASSERT_TRUE( g->hasThumbnail( ThumbnailSizeType::Thumbnail ) );
@@ -395,8 +390,6 @@ TEST_F( Genres, Thumbnails )
     res = g->setThumbnail( mrl, ThumbnailSizeType::Thumbnail, false );
     ASSERT_TRUE( res );
     ASSERT_EQ( mrl, g->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
-
-    Reload();
 
     g = std::static_pointer_cast<Genre>( ml->genre( g->id() ) );
     ASSERT_EQ( mrl, g->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
