@@ -835,6 +835,7 @@ public:
      *
      * If this function returns false, a representation for this device will be
      * inserted in database, and any later call will return true.
+     * This must be called *after* calling initialize()
      */
     virtual bool isDeviceKnown( const std::string& uuid,
                                 const std::string& mountpoint,
