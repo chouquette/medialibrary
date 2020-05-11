@@ -415,7 +415,7 @@ void MediaGroup::createTriggers( sqlite::Connection* connection )
     sqlite::Tools::executeRequest( connection,
                                    trigger( Triggers::DeleteFts, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
-                                   trigger( Triggers::UpdateNbMedia, Settings::DbModelVersion ) );
+                                   trigger( Triggers::UpdateNbMediaPerType, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
                                    trigger( Triggers::DecrementNbMediaOnDeletion, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
@@ -573,7 +573,7 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                     " WHERE id_group = old.group_id;"
                     " END";
         }
-        case Triggers::UpdateNbMedia:
+        case Triggers::UpdateNbMediaPerType:
         {
             assert( dbModel >= 26 );
             return "CREATE TRIGGER " + triggerName( t, dbModel ) +
@@ -720,9 +720,9 @@ std::string MediaGroup::triggerName(MediaGroup::Triggers t, uint32_t dbModel)
         case Triggers::UpdateDurationOnMediaDeletion:
             assert( dbModel >= 25 );
             return "media_group_update_duration_on_media_deletion";
-        case Triggers::UpdateNbMedia:
+        case Triggers::UpdateNbMediaPerType:
             assert( dbModel >= 26 );
-            return "media_group_update_nb_media";
+            return "media_group_update_nb_media_types";
         default:
             assert( !"Invalid trigger" );
     }
@@ -803,7 +803,7 @@ bool MediaGroup::checkDbModel( MediaLibraryPtr ml )
 
     return check( ml->getConn(), Triggers::InsertFts ) &&
             check( ml->getConn(), Triggers::DeleteFts ) &&
-            check( ml->getConn(), Triggers::UpdateNbMedia ) &&
+            check( ml->getConn(), Triggers::UpdateNbMediaPerType ) &&
             check( ml->getConn(), Triggers::DecrementNbMediaOnDeletion ) &&
             check( ml->getConn(), Triggers::DeleteEmptyGroups ) &&
             check( ml->getConn(), Triggers::RenameForcedSingleton ) &&

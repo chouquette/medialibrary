@@ -63,7 +63,7 @@ MediaGroup::schema( MediaGroup::Table::Name, 26 ),
 /* Update MediaGroup triggers */
 "DROP TRIGGER " + MediaGroup::triggerName( MediaGroup::Triggers::IncrementNbMediaOnGroupChange, 25 ),
 "DROP TRIGGER " + MediaGroup::triggerName( MediaGroup::Triggers::DecrementNbMediaOnGroupChange, 25 ),
-MediaGroup::trigger( MediaGroup::Triggers::UpdateNbMedia, 26 ),
+MediaGroup::trigger( MediaGroup::Triggers::UpdateNbMediaPerType, 26 ),
 
 /* Recreate MediaGroup indexes & triggers that were deleted during the migration */
 MediaGroup::trigger( MediaGroup::Triggers::InsertFts, 26 ),

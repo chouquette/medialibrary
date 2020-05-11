@@ -55,7 +55,7 @@ public:
         RenameForcedSingleton,
         UpdateDurationOnMediaChange,
         UpdateDurationOnMediaDeletion,
-        UpdateNbMedia,
+        UpdateNbMediaPerType,
     };
     enum class Indexes : uint8_t
     {
