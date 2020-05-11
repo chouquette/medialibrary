@@ -75,6 +75,7 @@ namespace
         "media_group_update_duration_on_media_change",
         "media_group_update_duration_on_media_deletion",
         "media_group_update_nb_media_types",
+        "media_group_update_total_nb_media",
         "media_update_device_presence",
         "show_decrement_nb_episode",
         "show_increment_nb_episode",

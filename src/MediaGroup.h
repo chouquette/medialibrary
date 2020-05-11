@@ -56,6 +56,7 @@ public:
         UpdateDurationOnMediaChange,
         UpdateDurationOnMediaDeletion,
         UpdateNbMediaPerType,
+        UpdateTotalNbMedia,
     };
     enum class Indexes : uint8_t
     {
@@ -73,6 +74,7 @@ public:
     virtual int64_t id() const override;
     virtual const std::string& name() const override;
     virtual uint32_t nbMedia() const override;
+    virtual uint32_t nbTotalMedia() const override;
     virtual uint32_t nbVideo() const override;
     virtual uint32_t nbAudio() const override;
     virtual uint32_t nbUnknown() const override;

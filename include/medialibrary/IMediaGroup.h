@@ -46,7 +46,15 @@ public:
      */
     virtual const std::string& name() const = 0;
     /**
-     * @brief nbMedia Returns the number of media in this group
+     * @brief nbTotalMedia Returns the number of media in this group, not accounting
+     *                     for their presence.
+     *
+     * Even if all this group's media are missing, this will still return a non
+     * 0 count.
+     */
+    virtual uint32_t nbTotalMedia() const = 0;
+    /**
+     * @brief nbMedia Returns the number of present media in this group
      */
     virtual uint32_t nbMedia() const = 0;
     /**

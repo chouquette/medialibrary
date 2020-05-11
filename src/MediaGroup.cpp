@@ -106,6 +106,11 @@ uint32_t MediaGroup::nbMedia() const
     return m_nbVideo + m_nbAudio + m_nbUnknown;
 }
 
+uint32_t MediaGroup::nbTotalMedia() const
+{
+    return m_nbMedia;
+}
+
 uint32_t MediaGroup::nbVideo() const
 {
     return m_nbVideo;
@@ -192,6 +197,7 @@ bool MediaGroup::add( int64_t mediaId, bool initForceSingleton )
     }
     if ( t != nullptr )
         t->commit();
+    ++m_nbMedia;
     m_lastModificationDate = time( nullptr );
     return Media::setMediaGroup( m_ml, mediaId, m_id );
 }
@@ -227,6 +233,7 @@ bool MediaGroup::remove( IMedia& media )
             --m_nbUnknown;
             break;
     }
+    --m_nbMedia;
     if ( media.duration() > 0 )
         m_duration -= media.duration();
     return true;
@@ -426,6 +433,8 @@ void MediaGroup::createTriggers( sqlite::Connection* connection )
                                    trigger( Triggers::UpdateDurationOnMediaChange, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
                                    trigger( Triggers::UpdateDurationOnMediaDeletion, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::UpdateTotalNbMedia, Settings::DbModelVersion ) );
 }
 
 void MediaGroup::createIndexes( sqlite::Connection* connection )
@@ -642,6 +651,7 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
                                                    IMedia::Type::Unknown ) ) +
                                " THEN 1 ELSE 0 END),"
+                       " nb_media = nb_media - 1,"
                        " last_modification_date = strftime('%s')"
                    " WHERE id_group = old.group_id;"
                    " END";
@@ -685,6 +695,19 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                            " SET duration = duration - old.duration"
                            " WHERE id_group = old.group_id;"
                    " END";
+        case Triggers::UpdateTotalNbMedia:
+        {
+            assert( dbModel >= 26 );
+            return "CREATE TRIGGER " + triggerName( t, dbModel ) +
+                   " AFTER UPDATE OF group_id ON " + Media::Table::Name +
+                   " WHEN IFNULL(old.group_id, 0) != IFNULL(new.group_id, 0)"
+                   " BEGIN"
+                       " UPDATE " + Table::Name + " SET nb_media = nb_media - 1"
+                            " WHERE old.group_id IS NOT NULL AND id_group = old.group_id;"
+                       " UPDATE " + Table::Name + " SET nb_media = nb_media + 1"
+                            " WHERE new.group_id IS NOT NULL AND id_group = new.group_id;"
+                   " END";
+        }
         default:
             assert( !"Invalid trigger" );
     }
@@ -723,6 +746,9 @@ std::string MediaGroup::triggerName(MediaGroup::Triggers t, uint32_t dbModel)
         case Triggers::UpdateNbMediaPerType:
             assert( dbModel >= 26 );
             return "media_group_update_nb_media_types";
+        case Triggers::UpdateTotalNbMedia:
+            assert( dbModel >= 26 );
+            return "media_group_update_total_nb_media";
         default:
             assert( !"Invalid trigger" );
     }

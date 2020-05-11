@@ -208,9 +208,6 @@ TEST_F( MediaGroups, UpdateNbMediaTypeChange )
     ASSERT_EQ( 0u, group2->nbVideo() );
     ASSERT_EQ( 0u, group2->nbUnknown() );
 
-    // Insert an unknown media in a group
-    // Also insert a media for each group, to avoid their count to reach 0 which
-    // would cause the group to be deleted
     auto m = ml->addMedia( "media.mkv", IMedia::Type::Unknown );
     auto m2 = ml->addMedia( "media2.avi", IMedia::Type::Video );
     auto m3 = ml->addMedia( "media3.mp3", IMedia::Type::Audio );
@@ -289,16 +286,15 @@ TEST_F( MediaGroups, UpdateNbMediaNoDelete )
     ASSERT_EQ( 0u, group1->nbAudio() );
     ASSERT_EQ( 0u, group1->nbVideo() );
     ASSERT_EQ( 0u, group1->nbUnknown() );
+    ASSERT_EQ( 0u, group1->nbMedia() );
 
-    // Insert an unknown media in a group
-    // Also insert a media for each group, to avoid their count to reach 0 which
-    // would cause the group to be deleted
     auto m = ml->addMedia( "media.mkv", IMedia::Type::Unknown );
     group1->add( *m );
 
     ASSERT_EQ( 0u, group1->nbAudio() );
     ASSERT_EQ( 0u, group1->nbVideo() );
     ASSERT_EQ( 1u, group1->nbUnknown() );
+    ASSERT_EQ( 1u, group1->nbMedia() );
 
     // Now change the media type
     m->setType( IMedia::Type::Audio );
@@ -307,6 +303,7 @@ TEST_F( MediaGroups, UpdateNbMediaNoDelete )
     ASSERT_EQ( 1u, group1->nbAudio() );
     ASSERT_EQ( 0u, group1->nbVideo() );
     ASSERT_EQ( 0u, group1->nbUnknown() );
+    ASSERT_EQ( 1u, group1->nbMedia() );
 }
 
 TEST_F( MediaGroups, SortByNbMedia )

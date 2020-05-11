@@ -65,6 +65,12 @@ MediaGroup::schema( MediaGroup::Table::Name, 26 ),
 "DROP TRIGGER " + MediaGroup::triggerName( MediaGroup::Triggers::DecrementNbMediaOnGroupChange, 25 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateNbMediaPerType, 26 ),
 
+"DROP TRIGGER " + MediaGroup::triggerName( MediaGroup::Triggers::DecrementNbMediaOnDeletion, 25 ),
+MediaGroup::trigger( MediaGroup::Triggers::DecrementNbMediaOnDeletion, 26 ),
+
+/* Create new MediaGroup trigger */
+MediaGroup::trigger( MediaGroup::Triggers::UpdateTotalNbMedia, 26 ),
+
 /* Recreate MediaGroup indexes & triggers that were deleted during the migration */
 MediaGroup::trigger( MediaGroup::Triggers::InsertFts, 26 ),
 MediaGroup::trigger( MediaGroup::Triggers::DeleteFts, 26 ),
