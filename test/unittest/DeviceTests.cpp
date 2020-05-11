@@ -32,6 +32,8 @@
 #include "Media.h"
 #include "Artist.h"
 #include "Show.h"
+#include "MediaGroup.h"
+
 #include "mocks/FileSystem.h"
 #include "mocks/DiscovererCbMock.h"
 
@@ -77,6 +79,54 @@ protected:
         ml->reload();
         auto res = cbMock->waitReload();
         ASSERT_TRUE( res );
+    }
+
+    void enforceFakeMediaTypes()
+    {
+        auto media = std::static_pointer_cast<Media>( ml->media(
+                                    mock::FileSystemFactory::Root + "video.avi" ) );
+        media->setType( IMedia::Type::Video );
+        media->save();
+
+        media = std::static_pointer_cast<Media>( ml->media(
+                                        mock::FileSystemFactory::Root + "audio.mp3" ) );
+        media->setType( IMedia::Type::Audio );
+        media->save();
+
+        media = std::static_pointer_cast<Media>( ml->media(
+                                        mock::FileSystemFactory::SubFolder + "subfile.mp4" ) );
+        media->setType( IMedia::Type::Video );
+        media->save();
+
+        media = std::static_pointer_cast<Media>( ml->media(
+                                        RemovableDeviceMountpoint + "removablefile.mp3" ) );
+        media->setType( IMedia::Type::Audio );
+        media->save();
+
+        media = std::static_pointer_cast<Media>( ml->media(
+                                        RemovableDeviceMountpoint + "removablefile2.mp3" ) );
+        media->setType( IMedia::Type::Audio );
+        media->save();
+
+        media = std::static_pointer_cast<Media>( ml->media(
+                                        RemovableDeviceMountpoint + "removablefile3.mp3" ) );
+        media->setType( IMedia::Type::Audio );
+        media->save();
+
+        media = std::static_pointer_cast<Media>( ml->media(
+                                        RemovableDeviceMountpoint + "removablefile4.mp3" ) );
+        media->setType( IMedia::Type::Audio );
+        media->save();
+
+        media = std::static_pointer_cast<Media>( ml->media(
+                                        RemovableDeviceMountpoint + "removablevideo.mkv" ) );
+        media->setType( IMedia::Type::Video );
+        media->save();
+
+        media = std::static_pointer_cast<Media>( ml->media(
+                                        RemovableDeviceMountpoint + "removablevideo2.mkv" ) );
+        media->setType( IMedia::Type::Video );
+        media->save();
     }
 };
 
@@ -634,4 +684,71 @@ TEST_F( DeviceFs, PartialRemoveShowEpisodes )
     episodeQuery = shows[0]->episodes( nullptr );
     ASSERT_EQ( 2u, episodeQuery->count() );
     ASSERT_EQ( 2u, episodeQuery->all().size() );
+}
+
+TEST_F( DeviceFs, MediaGroupPresence )
+{
+    ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    enforceFakeMediaTypes();
+
+    auto addToGroup = [this]( IMediaGroup& mg, const std::string& mrl ) {
+        auto m = ml->media( mrl );
+        ASSERT_NE( nullptr, m );
+        auto res = mg.add( *m );
+        ASSERT_TRUE( res );
+    };
+
+    auto rmg = ml->createMediaGroup( "removable group" );
+
+    addToGroup( *rmg, RemovableDeviceMountpoint + "removablefile.mp3" );
+    addToGroup( *rmg, RemovableDeviceMountpoint + "removablefile2.mp3" );
+    addToGroup( *rmg, RemovableDeviceMountpoint + "removablefile3.mp3" );
+    addToGroup( *rmg, RemovableDeviceMountpoint + "removablefile4.mp3" );
+    addToGroup( *rmg, RemovableDeviceMountpoint + "removablevideo.mkv" );
+    addToGroup( *rmg, RemovableDeviceMountpoint + "removablevideo2.mkv" );
+
+    ASSERT_EQ( 4u, rmg->nbAudio() );
+    ASSERT_EQ( 2u, rmg->nbVideo() );
+    ASSERT_EQ( 0u, rmg->nbUnknown() );
+    ASSERT_EQ( 6u, rmg->nbMedia() );
+
+    auto groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    rmg = ml->mediaGroup( rmg->id() );
+
+    ASSERT_EQ( 4u, rmg->nbAudio() );
+    ASSERT_EQ( 2u, rmg->nbVideo() );
+    ASSERT_EQ( 0u, rmg->nbUnknown() );
+    ASSERT_EQ( 6u, rmg->nbMedia() );
+    ASSERT_EQ( 6u, rmg->nbTotalMedia() );
+
+    auto device = fsMock->removeDevice( RemovableDeviceUuid );
+    Reload();
+
+    rmg = ml->mediaGroup( rmg->id() );
+
+    ASSERT_EQ( 0u, rmg->nbAudio() );
+    ASSERT_EQ( 0u, rmg->nbVideo() );
+    ASSERT_EQ( 0u, rmg->nbUnknown() );
+    ASSERT_EQ( 0u, rmg->nbMedia() );
+    ASSERT_EQ( 6u, rmg->nbTotalMedia() );
+
+    groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 0u, groups.size() );
+
+    fsMock->addDevice( device );
+    Reload();
+
+    groups = ml->mediaGroups( nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+
+    rmg = ml->mediaGroup( rmg->id() );
+
+    ASSERT_EQ( 4u, rmg->nbAudio() );
+    ASSERT_EQ( 2u, rmg->nbVideo() );
+    ASSERT_EQ( 0u, rmg->nbUnknown() );
+    ASSERT_EQ( 6u, rmg->nbMedia() );
 }

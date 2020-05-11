@@ -57,6 +57,7 @@ public:
         UpdateDurationOnMediaDeletion,
         UpdateNbMediaPerType,
         UpdateTotalNbMedia,
+        UpdateMediaCountOnPresenceChange,
     };
     enum class Indexes : uint8_t
     {

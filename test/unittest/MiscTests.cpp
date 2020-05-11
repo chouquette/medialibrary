@@ -75,6 +75,7 @@ namespace
         "media_group_update_duration_on_media_change",
         "media_group_update_duration_on_media_deletion",
         "media_group_update_nb_media_types",
+        "media_group_update_nb_media_types_presence",
         "media_group_update_total_nb_media",
         "media_update_device_presence",
         "show_decrement_nb_episode",
@@ -673,4 +674,12 @@ TEST_F( DbModel, Upgrade25to26 )
         row >> nbUnknownFileTypeRestoreTask;
     }
     ASSERT_EQ( 0u, nbUnknownFileTypeRestoreTask );
+
+    auto mg = ml->mediaGroup( 1 );
+    ASSERT_EQ( "test-group", mg->name() );
+    ASSERT_EQ( 1u, mg->nbAudio() );
+    ASSERT_EQ( 0u, mg->nbVideo() );
+    ASSERT_EQ( 0u, mg->nbUnknown() );
+    ASSERT_EQ( 1u, mg->nbMedia() );
+    ASSERT_EQ( 2u, mg->nbTotalMedia() );
 }

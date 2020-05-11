@@ -52,8 +52,17 @@ Show::trigger( Show::Triggers::DeleteFts, 26 ),
 
 MediaGroup::schema( MediaGroup::Table::Name, 26 ),
 
+#define COUNT_MEDIA(type) \
+    " (SELECT COUNT(*) FROM " + Media::Table::Name + " m" \
+    " WHERE m.group_id = mg.id_group AND m.is_present != 0 AND " \
+    " m.type = " + std::to_string(  \
+        static_cast<std::underlying_type_t<IMedia::Type>>( type ) ) + "), "
+
 "INSERT INTO " + MediaGroup::Table::Name +
-    " SELECT id_group, name, nb_video, nb_audio, nb_unknown, "
+    " SELECT id_group, name,"
+    COUNT_MEDIA(IMedia::Type::Video)
+    COUNT_MEDIA(IMedia::Type::Audio)
+    COUNT_MEDIA(IMedia::Type::Unknown)
     "(SELECT COUNT(*) FROM " + Media::Table::Name + " m WHERE m.group_id = mg.id_group), "
     "duration, creation_date, last_modification_date, user_interacted, forced_singleton "
     " FROM " + MediaGroup::Table::Name + "_backup mg",
@@ -68,8 +77,9 @@ MediaGroup::trigger( MediaGroup::Triggers::UpdateNbMediaPerType, 26 ),
 "DROP TRIGGER " + MediaGroup::triggerName( MediaGroup::Triggers::DecrementNbMediaOnDeletion, 25 ),
 MediaGroup::trigger( MediaGroup::Triggers::DecrementNbMediaOnDeletion, 26 ),
 
-/* Create new MediaGroup trigger */
+/* Create new MediaGroup triggers */
 MediaGroup::trigger( MediaGroup::Triggers::UpdateTotalNbMedia, 26 ),
+MediaGroup::trigger( MediaGroup::Triggers::UpdateMediaCountOnPresenceChange, 26 ),
 
 /* Recreate MediaGroup indexes & triggers that were deleted during the migration */
 MediaGroup::trigger( MediaGroup::Triggers::InsertFts, 26 ),
