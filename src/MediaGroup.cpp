@@ -726,11 +726,11 @@ bool MediaGroup::checkDbModel( MediaLibraryPtr ml )
             check( ml->getConn(), Triggers::DeleteFts ) &&
             check( ml->getConn(), Triggers::IncrementNbMediaOnGroupChange ) &&
             check( ml->getConn(), Triggers::DecrementNbMediaOnGroupChange ) &&
-            check( ml->getConn(), Triggers::DecrementNbMediaOnGroupChange ) &&
-            check( ml->getConn(), Triggers::DecrementNbMediaOnGroupChange ) &&
-            check( ml->getConn(), Triggers::DecrementNbMediaOnGroupChange ) &&
-            check( ml->getConn(), Triggers::DecrementNbMediaOnGroupChange ) &&
-            check( ml->getConn(), Triggers::DecrementNbMediaOnGroupChange ) &&
+            check( ml->getConn(), Triggers::DecrementNbMediaOnDeletion ) &&
+            check( ml->getConn(), Triggers::DeleteEmptyGroups ) &&
+            check( ml->getConn(), Triggers::RenameForcedSingleton ) &&
+            check( ml->getConn(), Triggers::UpdateDurationOnMediaChange ) &&
+            check( ml->getConn(), Triggers::UpdateDurationOnMediaDeletion ) &&
             checkIndex( ml->getConn(), Indexes::ForcedSingleton ) &&
             checkIndex( ml->getConn(), Indexes::Duration ) &&
             checkIndex( ml->getConn(), Indexes::CreationDate ) &&

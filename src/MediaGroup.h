@@ -58,7 +58,7 @@ public:
     };
     enum class Indexes : uint8_t
     {
-        ParentId,
+        ParentId, // Deprecated in model 25
         ForcedSingleton,
         Duration,
         CreationDate,
