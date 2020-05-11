@@ -33,3 +33,19 @@ Show::trigger( Show::Triggers::DeleteFts, 26 ),
 "DROP TRIGGER " + MediaGroup::triggerName( MediaGroup::Triggers::IncrementNbMediaOnGroupChange, 25 ),
 "DROP TRIGGER " + MediaGroup::triggerName( MediaGroup::Triggers::DecrementNbMediaOnGroupChange, 25 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateNbMedia, 26 ),
+
+
+/*
+ * Ensure we don't have restore tasks with no file_type specified. At this point
+ * the only restore tasks that can be found in database are playlist restoration
+ * tasks.
+ */
+"UPDATE " + parser::Task::Table::Name + " SET file_type = " +
+    std::to_string( static_cast<std::underlying_type_t<IFile::Type>>(
+        IFile::Type::Playlist ) ) +
+    " WHERE type = " +
+    std::to_string( static_cast<std::underlying_type_t<parser::Task::Type>>(
+        parser::Task::Type::Restore ) ) +
+    " AND file_type = " +
+    std::to_string( static_cast<std::underlying_type_t<IFile::Type>>(
+        IFile::Type::Unknown ) ),

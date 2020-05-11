@@ -161,4 +161,5 @@ INSERT INTO Task VALUES(1,3,0,0,'file:///home/chouquette/dev/medialibrary/test/s
 INSERT INTO Task VALUES(2,3,0,0,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/compilation/track2.mp3',1,2,1,0,0,0,'');
 INSERT INTO Task VALUES(3,3,0,0,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/compilation/track3.mp3',1,3,1,0,0,0,'');
 INSERT INTO Task VALUES(4,3,0,0,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/compilation/track4.mp3',1,4,1,0,0,0,'');
+INSERT INTO Task VALUES(5,0,0,3,'file:///home/chouquette/dev/medialibrary/path/to/backup/playlist1.xspf',0,NULL,NULL,0,0,0,'');
 COMMIT;

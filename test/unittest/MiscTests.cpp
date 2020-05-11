@@ -658,4 +658,18 @@ TEST_F( DbModel, Upgrade25to26 )
 
     auto show = ml->createShow( "new test show" );
     ASSERT_NE( nullptr, show );
+
+    /* Ensure we don't have any restore task with unknown file_type field anymode */
+    uint32_t nbUnknownFileTypeRestoreTask;
+    {
+        sqlite::Statement stmt{
+            ml->getConn()->handle(),
+            "SELECT COUNT(*) FROM " + parser::Task::Table::Name +
+                " WHERE file_type = ? AND type = ? "
+        };
+        stmt.execute( IFile::Type::Unknown, parser::Task::Type::Restore );
+        auto row = stmt.row();
+        row >> nbUnknownFileTypeRestoreTask;
+    }
+    ASSERT_EQ( 0u, nbUnknownFileTypeRestoreTask );
 }
