@@ -53,8 +53,17 @@ TEST_F( MediaGroups, Create )
 TEST_F( MediaGroups, ListAll )
 {
     auto mg1 = ml->createMediaGroup( "weasels group" );
+    auto m1 = ml->addMedia( "media.mkv", IMedia::Type::Video );
+    auto res = mg1->add( *m1 );
+    ASSERT_TRUE( res );
     auto mg2 = ml->createMediaGroup( "pangolin group" );
+    auto m2 = ml->addMedia( "media2.mkv", IMedia::Type::Video );
+    res = mg2->add( *m2 );
+    ASSERT_TRUE( res );
     auto mg3 = ml->createMediaGroup( "otters group" );
+    auto m3 = ml->addMedia( "media3.mkv", IMedia::Type::Video );
+    res = mg3->add( *m3 );
+    ASSERT_TRUE( res );
 
     auto mgQuery = ml->mediaGroups( nullptr );
     ASSERT_EQ( 3u, mgQuery->count() );
@@ -88,7 +97,13 @@ TEST_F( MediaGroups, FetchOne )
 TEST_F( MediaGroups, Search )
 {
     auto mg1 = ml->createMediaGroup( "otter group" );
+    auto m1 = ml->addMedia( "media.mkv", IMedia::Type::Video );
+    auto res = mg1->add( *m1 );
+    ASSERT_TRUE( res );
     auto mg2 = ml->createMediaGroup( "weasels group" );
+    auto m2 = ml->addMedia( "media2.mkv", IMedia::Type::Video );
+    res = mg2->add( *m2 );
+    ASSERT_TRUE( res );
 
     auto q = ml->searchMediaGroups( "12", nullptr );
     ASSERT_EQ( nullptr, q );
@@ -1111,8 +1126,14 @@ TEST_F( MediaGroups, OrderByCreationDate )
         return sqlite::Tools::executeUpdate( ml->getConn(), req, t, groupId );
     };
     auto mg1 = ml->createMediaGroup( "a" );
+    auto m1 = ml->addMedia( "media.mkv", IMedia::Type::Video );
+    auto res = mg1->add( *m1 );
+    ASSERT_TRUE( res );
     forceCreationDate( mg1->id(), 999 );
     auto mg2 = ml->createMediaGroup( "z" );
+    auto m2 = ml->addMedia( "media2.mkv", IMedia::Type::Video );
+    res = mg2->add( *m2 );
+    ASSERT_TRUE( res );
     forceCreationDate( mg2->id(), 111 );
 
     QueryParameters params{ SortingCriteria::InsertionDate, false };
@@ -1183,8 +1204,14 @@ TEST_F( MediaGroups, OrderByLastModificationDate )
         return sqlite::Tools::executeUpdate( ml->getConn(), req, t, groupId );
     };
     auto mg1 = ml->createMediaGroup( "a" );
+    auto m1 = ml->addMedia( "media.mkv", IMedia::Type::Video );
+    auto res = mg1->add( *m1 );
+    ASSERT_TRUE( res );
     forceLastModificationDate( mg1->id(), 999 );
     auto mg2 = ml->createMediaGroup( "z" );
+    auto m2 = ml->addMedia( "media2.mkv", IMedia::Type::Video );
+    res = mg2->add( *m2 );
+    ASSERT_TRUE( res );
     forceLastModificationDate( mg2->id(), 111 );
 
     QueryParameters params{ SortingCriteria::LastModificationDate, false };
