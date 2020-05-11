@@ -587,8 +587,9 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
             assert( dbModel >= 26 );
             return "CREATE TRIGGER " + triggerName( t, dbModel ) +
                     " AFTER UPDATE OF type, group_id ON " + Media::Table::Name +
-                        " WHEN IFNULL(old.group_id, 0) != IFNULL(new.group_id, 0) OR"
-                        " old.type != new.type"
+                        " WHEN (IFNULL(old.group_id, 0) != IFNULL(new.group_id, 0) OR"
+                        " old.type != new.type)"
+                        " AND new.is_present != 0"
                     " BEGIN"
                     // Handle increment
                     " UPDATE " + Table::Name + " SET"
