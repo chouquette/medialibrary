@@ -143,6 +143,7 @@ private:
     uint32_t m_nbVideo;
     uint32_t m_nbAudio;
     uint32_t m_nbUnknown;
+    uint32_t m_nbMedia;
     int64_t m_duration;
     time_t m_creationDate;
     time_t m_lastModificationDate;

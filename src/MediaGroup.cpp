@@ -48,6 +48,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, sqlite::Row& row )
     , m_nbVideo( row.extract<decltype(m_nbVideo)>() )
     , m_nbAudio( row.extract<decltype(m_nbAudio)>() )
     , m_nbUnknown( row.extract<decltype(m_nbUnknown)>() )
+    , m_nbMedia( row.extract<decltype(m_nbMedia)>() )
     , m_duration( row.extract<decltype(m_duration)>() )
     , m_creationDate( row.extract<decltype(m_creationDate)>() )
     , m_lastModificationDate( row.extract<decltype(m_lastModificationDate)>() )
@@ -65,6 +66,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, std::string name, bool userInitiated
     , m_nbVideo( 0 )
     , m_nbAudio( 0 )
     , m_nbUnknown( 0 )
+    , m_nbMedia( 0 )
     , m_duration( 0 )
     , m_creationDate( time( nullptr ) )
     , m_lastModificationDate( m_creationDate )
@@ -80,6 +82,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml , std::string name )
     , m_nbVideo( 0 )
     , m_nbAudio( 0 )
     , m_nbUnknown( 0 )
+    , m_nbMedia( 0 )
     , m_duration( 0 )
     , m_creationDate( time( nullptr ) )
     , m_lastModificationDate( m_creationDate )
@@ -461,13 +464,32 @@ std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
             "UNIQUE(parent_id, name) ON CONFLICT FAIL"
         ")";
     }
+    if ( dbModel == 25 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_group INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "name TEXT COLLATE NOCASE,"
+            "nb_video UNSIGNED INTEGER DEFAULT 0,"
+            "nb_audio UNSIGNED INTEGER DEFAULT 0,"
+            "nb_unknown UNSIGNED INTEGER DEFAULT 0,"
+            "duration INTEGER DEFAULT 0,"
+            "creation_date INTEGER NOT NULL,"
+            "last_modification_date INTEGER NOT NULL,"
+            "user_interacted BOOLEAN,"
+            "forced_singleton BOOLEAN"
+        ")";
+    }
     return "CREATE TABLE " + Table::Name +
     "("
         "id_group INTEGER PRIMARY KEY AUTOINCREMENT,"
         "name TEXT COLLATE NOCASE,"
+        // Nb media per type, accounting for their presence.
         "nb_video UNSIGNED INTEGER DEFAULT 0,"
         "nb_audio UNSIGNED INTEGER DEFAULT 0,"
         "nb_unknown UNSIGNED INTEGER DEFAULT 0,"
+        // Total number of media, regardless of presence
+        "nb_media UNSIGNED INTEGER DEFAULT 0,"
         "duration INTEGER DEFAULT 0,"
         "creation_date INTEGER NOT NULL,"
         "last_modification_date INTEGER NOT NULL,"
