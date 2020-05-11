@@ -30,6 +30,8 @@
 
 #include <cstring>
 
+#define DEBUG_SQLITE_TRIGGERS 0
+
 namespace medialibrary
 {
 namespace sqlite
@@ -94,7 +96,13 @@ Connection::Handle Connection::handle()
         // Should solve `Failed to run request <DELETE FROM File WHERE id_file = ?>: disk I/O error(6410)`
         setPragma( dbConnection, "temp_store", "2" );
 #endif
-
+#if DEBUG_SQLITE_TRIGGERS
+        sqlite3_trace_v2( dbConnection, SQLITE_TRACE_STMT, [](unsigned int, void* , void* , void* x) {
+            const char* str = static_cast<const char*>( x );
+            LOG_ERROR( "Executed: ", str );
+            return 0;
+        }, nullptr );
+#endif
         m_conns.emplace( compat::this_thread::get_id(), std::move( dbConn ) );
         sqlite3_update_hook( dbConnection, &updateHook, this );
         static thread_local ThreadSpecificConnection tsc( shared_from_this() );

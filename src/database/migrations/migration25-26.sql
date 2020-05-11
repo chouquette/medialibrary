@@ -28,3 +28,8 @@ Show::schema( Show::FtsTable::Name, 26 ),
 
 Show::trigger( Show::Triggers::InsertFts, 26 ),
 Show::trigger( Show::Triggers::DeleteFts, 26 ),
+
+/* Update MediaGroup triggers */
+"DROP TRIGGER " + MediaGroup::triggerName( MediaGroup::Triggers::IncrementNbMediaOnGroupChange, 25 ),
+"DROP TRIGGER " + MediaGroup::triggerName( MediaGroup::Triggers::DecrementNbMediaOnGroupChange, 25 ),
+MediaGroup::trigger( MediaGroup::Triggers::UpdateNbMedia, 26 ),

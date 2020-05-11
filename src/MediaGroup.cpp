@@ -412,9 +412,7 @@ void MediaGroup::createTriggers( sqlite::Connection* connection )
     sqlite::Tools::executeRequest( connection,
                                    trigger( Triggers::DeleteFts, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
-                                   trigger( Triggers::IncrementNbMediaOnGroupChange, Settings::DbModelVersion ) );
-    sqlite::Tools::executeRequest( connection,
-                                   trigger( Triggers::DecrementNbMediaOnGroupChange, Settings::DbModelVersion ) );
+                                   trigger( Triggers::UpdateNbMedia, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
                                    trigger( Triggers::DecrementNbMediaOnDeletion, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
@@ -498,6 +496,8 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                        " WHERE rowid = old.id_group;"
                    " END";
         case Triggers::IncrementNbMediaOnGroupChange:
+        {
+            assert( dbModel < 26 );
             return "CREATE TRIGGER " + triggerName( t, dbModel ) +
                     " AFTER UPDATE OF type, group_id ON " + Media::Table::Name +
                     " WHEN new.group_id IS NOT NULL AND"
@@ -522,7 +522,10 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                         " last_modification_date = strftime('%s')"
                     " WHERE id_group = new.group_id;"
                     " END";
+        }
         case Triggers::DecrementNbMediaOnGroupChange:
+        {
+            assert( dbModel < 26 );
             return "CREATE TRIGGER " + triggerName( t, dbModel ) +
                     " AFTER UPDATE OF type, group_id ON " + Media::Table::Name +
                     " WHEN old.group_id IS NOT NULL AND"
@@ -547,6 +550,55 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                         " last_modification_date = strftime('%s')"
                     " WHERE id_group = old.group_id;"
                     " END";
+        }
+        case Triggers::UpdateNbMedia:
+        {
+            assert( dbModel >= 26 );
+            return "CREATE TRIGGER " + triggerName( t, dbModel ) +
+                    " AFTER UPDATE OF type, group_id ON " + Media::Table::Name +
+                        " WHEN IFNULL(old.group_id, 0) != IFNULL(new.group_id, 0) OR"
+                        " old.type != new.type"
+                    " BEGIN"
+                    // Handle increment
+                    " UPDATE " + Table::Name + " SET"
+                        " nb_video = nb_video + "
+                            "(CASE new.type WHEN " +
+                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                    IMedia::Type::Video ) ) +
+                                " THEN 1 ELSE 0 END),"
+                        " nb_audio = nb_audio + "
+                            "(CASE new.type WHEN " +
+                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                    IMedia::Type::Audio ) ) +
+                                " THEN 1 ELSE 0 END),"
+                        " nb_unknown = nb_unknown + "
+                            "(CASE new.type WHEN " +
+                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                    IMedia::Type::Unknown ) ) +
+                                " THEN 1 ELSE 0 END),"
+                        " last_modification_date = strftime('%s')"
+                    " WHERE new.group_id IS NOT NULL AND id_group = new.group_id;"
+                    // Handle decrement
+                    " UPDATE " + Table::Name + " SET"
+                        " nb_video = nb_video - "
+                            "(CASE old.type WHEN " +
+                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                    IMedia::Type::Video ) ) +
+                                " THEN 1 ELSE 0 END),"
+                        " nb_audio = nb_audio - "
+                            "(CASE old.type WHEN " +
+                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                    IMedia::Type::Audio ) ) +
+                                " THEN 1 ELSE 0 END),"
+                        " nb_unknown = nb_unknown - "
+                            "(CASE old.type WHEN " +
+                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                    IMedia::Type::Unknown ) ) +
+                                " THEN 1 ELSE 0 END),"
+                        " last_modification_date = strftime('%s')"
+                    " WHERE old.group_id IS NOT NULL AND id_group = old.group_id;"
+                    " END";
+        }
         case Triggers::DecrementNbMediaOnDeletion:
             return "CREATE TRIGGER " + triggerName( t, dbModel ) +
                    " AFTER DELETE ON " + Media::Table::Name +
@@ -627,8 +679,10 @@ std::string MediaGroup::triggerName(MediaGroup::Triggers t, uint32_t dbModel)
         case Triggers::DeleteFts:
             return "media_group_delete_fts";
         case Triggers::IncrementNbMediaOnGroupChange:
+            assert( dbModel < 26 );
             return "media_group_increment_nb_media";
         case Triggers::DecrementNbMediaOnGroupChange:
+            assert( dbModel < 26 );
             return "media_group_decrement_nb_media";
         case Triggers::DecrementNbMediaOnDeletion:
             return "media_group_decrement_nb_media_on_deletion";
@@ -644,6 +698,9 @@ std::string MediaGroup::triggerName(MediaGroup::Triggers t, uint32_t dbModel)
         case Triggers::UpdateDurationOnMediaDeletion:
             assert( dbModel >= 25 );
             return "media_group_update_duration_on_media_deletion";
+        case Triggers::UpdateNbMedia:
+            assert( dbModel >= 26 );
+            return "media_group_update_nb_media";
         default:
             assert( !"Invalid trigger" );
     }
@@ -724,8 +781,7 @@ bool MediaGroup::checkDbModel( MediaLibraryPtr ml )
 
     return check( ml->getConn(), Triggers::InsertFts ) &&
             check( ml->getConn(), Triggers::DeleteFts ) &&
-            check( ml->getConn(), Triggers::IncrementNbMediaOnGroupChange ) &&
-            check( ml->getConn(), Triggers::DecrementNbMediaOnGroupChange ) &&
+            check( ml->getConn(), Triggers::UpdateNbMedia ) &&
             check( ml->getConn(), Triggers::DecrementNbMediaOnDeletion ) &&
             check( ml->getConn(), Triggers::DeleteEmptyGroups ) &&
             check( ml->getConn(), Triggers::RenameForcedSingleton ) &&

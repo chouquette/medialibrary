@@ -282,6 +282,33 @@ TEST_F( MediaGroups, UpdateNbMediaTypeChange )
     ASSERT_EQ( 0u, group2->nbUnknown() );
 }
 
+TEST_F( MediaGroups, UpdateNbMediaNoDelete )
+{
+    auto group1 = ml->createMediaGroup( "group" );
+    ASSERT_NE( nullptr, group1 );
+    ASSERT_EQ( 0u, group1->nbAudio() );
+    ASSERT_EQ( 0u, group1->nbVideo() );
+    ASSERT_EQ( 0u, group1->nbUnknown() );
+
+    // Insert an unknown media in a group
+    // Also insert a media for each group, to avoid their count to reach 0 which
+    // would cause the group to be deleted
+    auto m = ml->addMedia( "media.mkv", IMedia::Type::Unknown );
+    group1->add( *m );
+
+    ASSERT_EQ( 0u, group1->nbAudio() );
+    ASSERT_EQ( 0u, group1->nbVideo() );
+    ASSERT_EQ( 1u, group1->nbUnknown() );
+
+    // Now change the media type
+    m->setType( IMedia::Type::Audio );
+
+    group1 = std::static_pointer_cast<MediaGroup>( ml->mediaGroup( group1->id() ) );
+    ASSERT_EQ( 1u, group1->nbAudio() );
+    ASSERT_EQ( 0u, group1->nbVideo() );
+    ASSERT_EQ( 0u, group1->nbUnknown() );
+}
+
 TEST_F( MediaGroups, SortByNbMedia )
 {
     auto mg1 = ml->createMediaGroup( "A group" );

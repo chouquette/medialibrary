@@ -48,13 +48,14 @@ public:
     {
         InsertFts,
         DeleteFts,
-        IncrementNbMediaOnGroupChange,
-        DecrementNbMediaOnGroupChange,
+        IncrementNbMediaOnGroupChange, // Deprecated in model 26
+        DecrementNbMediaOnGroupChange, // Deprecated in model 26
         DecrementNbMediaOnDeletion,
         DeleteEmptyGroups,
         RenameForcedSingleton,
         UpdateDurationOnMediaChange,
         UpdateDurationOnMediaDeletion,
+        UpdateNbMedia,
     };
     enum class Indexes : uint8_t
     {
