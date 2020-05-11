@@ -393,7 +393,8 @@ MediaGroup::fetchMatching( MediaLibraryPtr ml, const std::string& prefix )
 Query<IMediaGroup> MediaGroup::listAll( MediaLibraryPtr ml,
                                         const QueryParameters* params )
 {
-    const std::string req = "FROM " + Table::Name + " mg";
+    const std::string req = "FROM " + Table::Name + " mg "
+            "WHERE nb_video > 0 OR nb_audio > 0 OR nb_unknown > 0";
     return make_query<MediaGroup, IMediaGroup>( ml, "mg.*", req, orderBy( params ) );
 }
 
@@ -402,7 +403,8 @@ Query<IMediaGroup> MediaGroup::search( MediaLibraryPtr ml, const std::string& pa
 {
     const std::string req = "FROM " + Table::Name + " mg"
             " WHERE id_group IN (SELECT rowid FROM " + FtsTable::Name +
-                " WHERE " + FtsTable::Name + " MATCH ?)";
+                " WHERE " + FtsTable::Name + " MATCH ?)"
+            " AND nb_video > 0 OR nb_audio > 0 OR nb_unknown > 0";
     return make_query<MediaGroup, IMediaGroup>( ml, "mg.*", req, orderBy( params ),
                                                 sqlite::Tools::sanitizePattern( pattern ) );
 }
