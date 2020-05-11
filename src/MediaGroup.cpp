@@ -656,14 +656,26 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                    " WHERE id_group = old.group_id;"
                    " END";
         case Triggers::DeleteEmptyGroups:
+        {
             assert( dbModel >= 25 );
+            if ( dbModel == 25 )
+            {
+                return "CREATE TRIGGER " + triggerName( t, dbModel ) +
+                       " AFTER UPDATE OF nb_video, nb_audio, nb_unknown"
+                           " ON " + Table::Name +
+                       " WHEN new.nb_video = 0 AND new.nb_audio = 0 AND new.nb_unknown = 0"
+                       " BEGIN"
+                       " DELETE FROM " + Table::Name + " WHERE id_group = new.id_group;"
+                       " END";
+            }
             return "CREATE TRIGGER " + triggerName( t, dbModel ) +
-                   " AFTER UPDATE OF nb_video, nb_audio, nb_unknown"
+                   " AFTER UPDATE OF nb_media"
                        " ON " + Table::Name +
-                   " WHEN new.nb_video = 0 AND new.nb_audio = 0 AND new.nb_unknown = 0"
+                   " WHEN new.nb_media != old.nb_media AND new.nb_media = 0"
                    " BEGIN"
                    " DELETE FROM " + Table::Name + " WHERE id_group = new.id_group;"
                    " END";
+        }
         case Triggers::RenameForcedSingleton:
             assert( dbModel >= 25 );
             return "CREATE TRIGGER " + triggerName( t, dbModel ) +
