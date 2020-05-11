@@ -7,6 +7,8 @@ AM_CXXFLAGS = -Wall -Wsign-compare -Wextra -Wstrict-aliasing -Wstrict-overflow \
 
 MEDIALIB_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/include -I$(top_srcdir)/src
 
+libmedialibrary_macos_la_LIBTOOLFLAGS = --tag CC
+
 libmedialibrary_ladir = $(includedir)/medialibrary
 
 libmedialibrary_la_CXXFLAGS = \
