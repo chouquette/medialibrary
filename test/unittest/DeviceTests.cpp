@@ -37,8 +37,22 @@
 #include "mocks/FileSystem.h"
 #include "mocks/DiscovererCbMock.h"
 
+namespace
+{
+
+class MediaLibraryTesterDevices : public MediaLibraryTester
+{
+    virtual bool setupDummyFolder() override { return true; }
+};
+
+}
+
 class DeviceEntity : public Tests
 {
+    virtual void InstantiateMediaLibrary() override
+    {
+        ml.reset( new MediaLibraryTesterDevices );
+    }
 };
 
 class DeviceFs : public Tests
