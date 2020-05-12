@@ -83,7 +83,7 @@ std::vector<CommonDeviceLister::Device> DeviceLister::devices() const
         // Filter out anything which isn't a removable or fixed drive. We don't care about network
         // drive here.
         auto type = GetDriveType( buffer );
-        if ( type != DRIVE_REMOVABLE && type != DRIVE_FIXED )
+        if ( type != DRIVE_REMOVABLE && type != DRIVE_FIXED && type != DRIVE_REMOTE )
             continue;
 
         std::string uuid =  charset::FromWide( volumeName ).get();
