@@ -687,4 +687,12 @@ TEST_F( DbModel, Upgrade25to26 )
     auto encodedFile = File::fetch( ml.get(), 6 );
     ASSERT_NE( nullptr, encodedFile );
     ASSERT_EQ( "udp://@224.10.50.36:5004", encodedFile->mrl() );
+    ASSERT_TRUE( encodedFile->isNetwork() );
+
+    const std::string req = "SELECT * FROM " + File::Table::Name +
+            " WHERE is_network = 1";
+    auto networkFiles = File::fetchAll<File>( ml.get(), req );
+    ASSERT_EQ( 1u, networkFiles.size() );
+    ASSERT_EQ( networkFiles[0]->id(), encodedFile->id() );
+
 }

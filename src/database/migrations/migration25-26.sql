@@ -105,3 +105,9 @@ MediaGroup::index( MediaGroup::Indexes::LastModificationDate, 26 ),
     " AND file_type = " +
     std::to_string( static_cast<std::underlying_type_t<IFile::Type>>(
         IFile::Type::Unknown ) ),
+
+/*
+ * Fix external files is_network state
+ */
+"UPDATE " + File::Table::Name + " SET is_network = 1"
+    " WHERE is_external = 1 AND substr(mrl, 0, 7) != 'file://'",
