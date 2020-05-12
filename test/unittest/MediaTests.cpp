@@ -769,7 +769,22 @@ TEST_F( Medias, ExternalMrl )
     ASSERT_EQ( 1u, files.size() );
     auto f = files[0];
     ASSERT_TRUE( f->isExternal() );
+    ASSERT_TRUE( f->isNetwork() );
     ASSERT_EQ( File::Type::Main, f->type() );
+
+    auto f2 = m2->addExternalMrl( "file:///path/to/subtitles.srt", IFile::Type::Subtitles );
+    ASSERT_NE( nullptr, f2 );
+    ASSERT_FALSE( f2->isNetwork() );
+
+    files = m2->files();
+    ASSERT_EQ( 2u, files.size() );
+    ASSERT_TRUE( files[0]->isExternal() );
+    ASSERT_TRUE( files[0]->isNetwork() );
+    ASSERT_EQ( File::Type::Main, files[0]->type() );
+
+    ASSERT_TRUE( files[1]->isExternal() );
+    ASSERT_FALSE( files[1]->isNetwork() );
+    ASSERT_EQ( File::Type::Subtitles, files[1]->type() );
 }
 
 TEST_F( Medias, AddStream )
