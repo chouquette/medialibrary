@@ -58,6 +58,7 @@ public:
      */
     const std::string& rawMrl() const;
     void setMrl( std::string mrl );
+    static bool setMrl(MediaLibraryPtr ml, const std::string &mrl, int64_t fileId );
     virtual Type type() const override;
     virtual unsigned int lastModificationDate() const override;
     virtual int64_t size() const override;

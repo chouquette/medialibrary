@@ -132,11 +132,13 @@ INSERT INTO Media VALUES(2,2,3,10057,NULL,NULL,NULL,1585305577,2011,'Track 2','t
 INSERT INTO Media VALUES(3,2,3,10057,NULL,NULL,NULL,1585305577,0,'Track 3','track3.mp3',0,1,1,0,1,0,NULL,0);
 INSERT INTO Media VALUES(4,2,3,10057,NULL,NULL,NULL,1585305577,2013,'Track 4','track4.mp3',0,1,1,0,1,0,1,0);
 INSERT INTO Media VALUES(5,2,3,10057,NULL,NULL,NULL,1585305577,2013,'Track 4','track4.mp3',0,0,4,0,1,0,1,0);
+INSERT INTO Media VALUES(6,0,0,-1,NULL,NULL,NULL,1585305577,NULL,'BR HD','@224.10.50.36:5004',0,1,NULL,0,NULL,1,NULL,0);
 INSERT INTO File VALUES(1,1,NULL,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/compilation/track.mp3',1,1574114470,139264,1,0,0,0);
 INSERT INTO File VALUES(2,2,NULL,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/compilation/track2.mp3',1,1574114470,139264,1,0,0,0);
 INSERT INTO File VALUES(3,3,NULL,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/compilation/track3.mp3',1,1574114470,139264,1,0,0,0);
 INSERT INTO File VALUES(4,4,NULL,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/compilation/track4.mp3',1,1574114470,139264,1,0,0,0);
 INSERT INTO File VALUES(5,5,NULL,'removabletrack.mp3',1,1574114470,139264,2,1,0,0);
+INSERT INTO File VALUES(6,6,NULL,'udp://%40224.10.50.36%3A5004',1,0,0,NULL,0,1,0);
 INSERT INTO Album VALUES(1,'Compilation',3,0,NULL,4,40228,1,4);
 INSERT INTO AlbumTrack VALUES(1,1,10057,4,NULL,0,1,0);
 INSERT INTO AlbumTrack VALUES(2,2,10057,5,NULL,0,1,0);

@@ -41,6 +41,7 @@
 #include "Show.h"
 #include "ShowEpisode.h"
 #include "MediaGroup.h"
+#include "File.h"
 
 namespace
 {
@@ -682,4 +683,8 @@ TEST_F( DbModel, Upgrade25to26 )
     ASSERT_EQ( 0u, mg->nbUnknown() );
     ASSERT_EQ( 1u, mg->nbMedia() );
     ASSERT_EQ( 2u, mg->nbTotalMedia() );
+
+    auto encodedFile = File::fetch( ml.get(), 6 );
+    ASSERT_NE( nullptr, encodedFile );
+    ASSERT_EQ( "udp://@224.10.50.36:5004", encodedFile->mrl() );
 }

@@ -128,11 +128,16 @@ void File::setMrl( std::string mrl )
 {
     if ( m_mrl == mrl )
         return;
-    const static std::string req = "UPDATE " + File::Table::Name + " SET "
-            "mrl = ? WHERE id_file = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, mrl, m_id ) == false )
+    if ( setMrl( m_ml, mrl, m_id ) == false )
         return;
     m_mrl = std::move( mrl );
+}
+
+bool File::setMrl( MediaLibraryPtr ml, const std::string& mrl, int64_t fileId )
+{
+    const static std::string req = "UPDATE " + File::Table::Name + " SET "
+            "mrl = ? WHERE id_file = ?";
+    return sqlite::Tools::executeUpdate( ml->getConn(), req, mrl, fileId );
 }
 
 IFile::Type File::type() const

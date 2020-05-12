@@ -1951,6 +1951,42 @@ void MediaLibrary::migrateModel25to26()
 
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
+
+    {
+        sqlite::Row row;
+        int64_t fileId;
+        std::string mrl;
+
+        auto batchSize = 100u;
+        auto offset = 0u;
+        const std::string req = "SELECT id_file, mrl FROM " +
+                File::Table::Name + " WHERE is_external = 1 OR is_network = 1 "
+                "AND ( mrl LIKE '%#%40%' ESCAPE '#' OR mrl LIKE '%#%3A%' ESCAPE '#')"
+                "LIMIT ? OFFSET ?";
+
+        while ( true )
+        {
+            /*
+             * Since we change the parameter along the loop, we need to recreate
+             * the statement for each iteration, in order to reset the bindings
+             */
+            sqlite::Statement stmt{ dbConn->handle(), req };
+            stmt.execute( batchSize, offset );
+            auto nbRow = 0u;
+            while ( ( row = stmt.row() ) != nullptr )
+            {
+                row >> fileId >> mrl;
+                auto newMrl = utils::url::encode( utils::url::decode( mrl ) );
+                if ( mrl != newMrl )
+                    File::setMrl( this, newMrl, fileId );
+                nbRow++;
+            }
+            if ( nbRow < batchSize )
+                break;
+            offset += nbRow;
+        }
+    }
+
     m_settings.setDbModelVersion( 26 );
     t->commit();
 }
