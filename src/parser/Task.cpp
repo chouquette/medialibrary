@@ -825,7 +825,7 @@ FolderPtr Task::parentFolder()
     return m_parentFolder;
 }
 
-std::shared_ptr<fs::IFile> Task::fileFs()
+std::shared_ptr<fs::IFile> Task::fileFs() const
 {
     return m_fileFs;
 }

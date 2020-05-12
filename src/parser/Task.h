@@ -259,7 +259,7 @@ public:
 
     virtual FolderPtr parentFolder() override;
 
-    virtual std::shared_ptr<fs::IFile> fileFs() override;
+    virtual std::shared_ptr<fs::IFile> fileFs() const override;
 
     virtual std::shared_ptr<fs::IDirectory> parentFolderFs() override;
 

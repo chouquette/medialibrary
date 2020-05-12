@@ -209,7 +209,7 @@ public:
      *
      * This will return nullptr for external media.
      */
-    virtual std::shared_ptr<fs::IFile> fileFs() = 0;
+    virtual std::shared_ptr<fs::IFile> fileFs() const = 0;
 
     /**
      * @brief parentFolderFs Returns an fs::IDirectory representing the parent
