@@ -40,6 +40,33 @@ inline bool isSafe( char c )
 #endif
                    , c ) != nullptr;
 }
+
+std::string::const_iterator encodeSegment( std::string& res,
+                                           std::string::const_iterator begin,
+                                           std::string::const_iterator end,
+                                           const char* extraChars )
+{
+    for ( auto i = begin; i < end; ++i )
+    {
+        // This must be an unsigned char for the bits operations below to work.
+        // auto will yield a signed char here.
+        const unsigned char c = *i;
+        if ( ( c >= 32 && c <= 126 ) && (
+                 ( c >= 'a' && c <= 'z' ) ||
+                 ( c >= 'A' && c <= 'Z' ) ||
+                 ( c >= '0' && c <= '9' ) ||
+                 isSafe( c ) == true ||
+                 ( extraChars != nullptr && strchr( extraChars, c ) != nullptr ) )
+             )
+        {
+            res.push_back( c );
+        }
+        else
+            res.append({ '%', "0123456789ABCDEF"[c >> 4], "0123456789ABCDEF"[c & 0xF] });
+    }
+    return end;
+}
+
 }
 
 namespace medialibrary
@@ -96,23 +123,7 @@ std::string encode( const std::string& str )
         i += 3;
     }
 #endif
-    for ( ; i < str.size(); ++i )
-    {
-        // This must be an unsigned char for the bits operations below to work.
-        // auto will yield a signed char here.
-        const unsigned char c = str[i];
-        if ( ( c >= 32 && c <= 126 ) && (
-                 ( c >= 'a' && c <= 'z' ) ||
-                 ( c >= 'A' && c <= 'Z' ) ||
-                 ( c >= '0' && c <= '9' ) ||
-                 isSafe( c ) == true )
-             )
-        {
-            res.push_back( c );
-        }
-        else
-            res.append({ '%', "0123456789ABCDEF"[c >> 4], "0123456789ABCDEF"[c & 0xF] });
-    }
+    encodeSegment( res, str.begin() + i, str.end(), nullptr );
     return res;
 }
 
