@@ -38,6 +38,12 @@ TEST( UrlUtils, encode )
     ASSERT_EQ( "/file/with%23sharp", utils::url::encode( "/file/with#sharp" ) );
     ASSERT_EQ( "file:///file%20with%20spaces/test.mp4",
                utils::url::encode( "file:///file with spaces/test.mp4" ) );
+    ASSERT_EQ( "http://foo:bar@examples.com:1234/h%40ck3rz%3A%20episode2.avi",
+               utils::url::encode( "http://foo:bar@examples.com:1234/h@ck3rz: episode2.avi" ) );
+    ASSERT_EQ( "http://justhost", utils::url::encode( "http://justhost" ) );
+    ASSERT_EQ( "http://@1.2.3.4", utils::url::encode( "http://@1.2.3.4" ) );
+    ASSERT_EQ( "http:///invalid.url", utils::url::encode( "http:///invalid.url" ) );
+    ASSERT_EQ( "file://%40encodeme%3A/file.mkv", utils::url::encode( "file://@encodeme:/file.mkv" ) );
 #ifdef _WIN32
     ASSERT_EQ( "file:///C:/file%3Atest.mkv", utils::url::encode( "file:///C:/file:test.mkv" ) );
     ASSERT_EQ( "file://", utils::url::encode( "file://" ) );

@@ -107,23 +107,35 @@ std::string encode( const std::string& str )
 
     res.reserve( str.size() );
     auto schemePos = str.find( "://" );
-    auto i = 0u;
+    auto i = str.cbegin();
     if ( schemePos != std::string::npos )
     {
-        i = schemePos + 3;
-        std::copy( str.cbegin(), str.cbegin() + i, std::back_inserter( res ) );
+        i += schemePos + 3;
+        std::copy( str.cbegin(), i, std::back_inserter( res ) );
+        if ( str.compare( 0, schemePos, "file" ) != 0 )
+        {
+            /* We need to allow some special characters in the host segment */
+            auto endHost = str.find( '/', schemePos + 3 );
+            if ( endHost != std::string::npos )
+                i = encodeSegment( res, i, str.cbegin() + endHost, "@:" );
+            else
+            {
+                encodeSegment( res, i, str.cend(), "@:" );
+                return res;
+            }
+        }
     }
 #ifdef _WIN32
-    if ( str[i] == '/' && isalpha( str[i + 1] ) && str[i + 2] == ':' )
+    if ( *i == '/' && isalpha( *(i + 1) ) && *(i + 2) == ':' )
     {
         // Don't encode the ':' after the drive letter.
         // All other ':' need to be encoded, there are not allowed in a file path
         // on windows, but they might appear in urls
-        std::copy( str.cbegin() + i, str.cbegin() + i + 3, std::back_inserter( res ) );
+        std::copy( i, i + 3, std::back_inserter( res ) );
         i += 3;
     }
 #endif
-    encodeSegment( res, str.begin() + i, str.end(), nullptr );
+    encodeSegment( res, i, str.end(), nullptr );
     return res;
 }
 
