@@ -259,6 +259,13 @@ std::vector<std::shared_ptr<Device>> Device::fetchByScheme( MediaLibraryPtr ml,
     return fetchAll<Device>( ml, req, scheme );
 }
 
+bool Device::deleteRemovable( MediaLibraryPtr ml )
+{
+    const std::string req = "DELETE FROM " + Device::Table::Name +
+                " WHERE is_removable = 1";
+    return sqlite::Tools::executeDelete( ml->getConn(), req );
+}
+
 bool Device::markNetworkAsDeviceMissing( MediaLibraryPtr ml )
 {
     const std::string req = "UPDATE " + Table::Name + " SET is_present = 0 "

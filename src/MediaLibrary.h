@@ -253,6 +253,9 @@ public:
                                 const std::string& mountpoint,
                                 bool isRemovable ) override;
 
+    virtual bool deleteRemovableDevices() override;
+
+
     /**
      * Helper to allow FS classes to ensure the required FS factories & device
      * listers have been started

@@ -692,6 +692,11 @@ bool MediaLibrary::isDeviceKnown( const std::string &uuid,
     return false;
 }
 
+bool MediaLibrary::deleteRemovableDevices()
+{
+    return Device::deleteRemovable( this );
+}
+
 void MediaLibrary::ensureDeviceListersAreStarted() const
 {
     auto self = const_cast<MediaLibrary*>( this );

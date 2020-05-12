@@ -840,6 +840,17 @@ public:
     virtual bool isDeviceKnown( const std::string& uuid,
                                 const std::string& mountpoint,
                                 bool isRemovable ) = 0;
+    /**
+     * @brief deleteRemovableDevices Deletes all removable devices
+     * @return true if devices were deleted, false otherwise
+     *
+     * This will delete *ALL* removable devices from the database, causing *ALL*
+     * files & media stored on that device to be deleted as well.
+     * This is intended for applications with an external device lister to
+     * recover in case of an issue causing multiple devices or invalide entries
+     * to be inserted in the database
+     */
+    virtual bool deleteRemovableDevices() = 0;
 };
 
 }

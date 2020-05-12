@@ -69,6 +69,7 @@ public:
                                              const std::string& scheme );
     static void removeOldDevices( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime );
     static std::vector<std::shared_ptr<Device>> fetchByScheme( MediaLibraryPtr ml, const std::string& scheme );
+    static bool deleteRemovable( MediaLibraryPtr ml );
     /**
      * @brief markNetworkDeviceMissing Will mark all network devices as missing
      * @param ml A media library instance

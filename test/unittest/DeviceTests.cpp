@@ -224,6 +224,25 @@ TEST_F( DeviceEntity, IsKnown )
     ASSERT_TRUE( res );
 }
 
+TEST_F( DeviceEntity, DeleteRemovable )
+{
+    auto d = Device::create( ml.get(), "fake-device", "file://", false, false );
+    ASSERT_NE( nullptr, d );
+    d = Device::create( ml.get(), "fake-removable-device", "file://", true, false );
+    ASSERT_NE( nullptr, d );
+    d = Device::create( ml.get(), "another-removable-device", "file://", true, false );
+    ASSERT_NE( nullptr, d );
+
+    auto devices = Device::fetchAll( ml.get() );
+    ASSERT_EQ( 3u, devices.size() );
+
+    auto res = ml->deleteRemovableDevices();
+    ASSERT_TRUE( res );
+
+    devices = Device::fetchAll( ml.get() );
+    ASSERT_EQ( 1u, devices.size() );
+}
+
 // Filesystem tests:
 
 TEST_F( DeviceFs, RemoveDisk )
