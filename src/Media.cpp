@@ -784,15 +784,21 @@ FilePtr Media::addFile( const std::string& mrl, IFile::Type fileType )
 
 FilePtr Media::addExternalMrl( const std::string& mrl, IFile::Type type )
 {
+    FilePtr res;
     try
     {
-        return File::createFromExternalMedia( m_ml, m_id, type, mrl );
+        res = File::createFromExternalMedia( m_ml, m_id, type, mrl );
     }
     catch ( const sqlite::errors::Exception& ex )
     {
         LOG_ERROR( "Failed to add media external MRL: ", ex.what() );
         return nullptr;
     }
+    if ( res == nullptr )
+        return nullptr;
+    if ( m_files.empty() == false )
+        m_files.push_back( res );
+    return res;
 }
 
 void Media::removeFile( File& file )
