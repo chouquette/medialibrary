@@ -477,6 +477,27 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
     return true;
 }
 
+IMedia::Type MetadataAnalyzer::guessMediaType( const IItem &item ) const
+{
+    auto ext = utils::file::extension( item.mrl() );
+    if ( ext == "vob" || ext == "ts" || ext == "ogv" || ext == "mpg" ||
+         ext == "ogm" || ext == "m2ts" || ext == "m2v" || ext == "mpeg" ||
+         ext == "xvid" || ext == "ogx" )
+        return IMedia::Type::Video;
+
+    if ( ext == "oga" || ext == "flac" || ext == "opus" || ext == "spx" )
+        return IMedia::Type::Audio;
+
+    if ( ext == "ogg" )
+    {
+        if ( item.fileFs()->size() > 15 * 1024 * 1024 )
+            return IMedia::Type::Video;
+        return IMedia::Type::Audio;
+    }
+
+    return IMedia::Type::Unknown;
+}
+
 Status MetadataAnalyzer::createFileAndMedia( IItem& item ) const
 {
     assert( item.media() == nullptr );
@@ -496,6 +517,8 @@ Status MetadataAnalyzer::createFileAndMedia( IItem& item ) const
         else
             mediaType = IMedia::Type::Video;
     }
+    else
+        mediaType = guessMediaType( item );
     auto t = m_ml->getConn()->newTransaction();
     auto file = File::fromExternalMrl( m_ml, mrl );
     // Check if this media was already added before as an external media

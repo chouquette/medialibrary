@@ -90,6 +90,7 @@ protected:
 
 private:
     static int toInt( IItem& item, IItem::Metadata meta );
+    IMedia::Type guessMediaType( const IItem &item ) const;
 
 private:
     MediaLibrary* m_ml;
