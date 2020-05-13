@@ -24,6 +24,7 @@
 
 #include <tuple>
 #include <vector>
+#include <string>
 
 namespace medialibrary
 {
