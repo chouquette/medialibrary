@@ -35,9 +35,12 @@
 # if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP)
 #  define USE_BUILTIN_DEVICE_LISTER 1
 # endif
-#elif TARGET_OS_MAC
-# include "filesystem/darwin/DeviceLister.h"
-# define USE_BUILTIN_DEVICE_LISTER 1
+#elif __APPLE__
+# include <TargetConditionals.h>
+# if !TARGET_OS_IPHONE
+#  include "filesystem/darwin/DeviceLister.h"
+#  define USE_BUILTIN_DEVICE_LISTER 1
+# endif
 #endif
 
 medialibrary::DeviceListerPtr medialibrary::factory::createDeviceLister()
