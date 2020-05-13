@@ -20,18 +20,18 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#include "medialibrary/IDeviceLister.h"
+#include "filesystem/common/CommonDeviceLister.h"
 
 namespace medialibrary
 {
 namespace fs
 {
 
-class DeviceLister : public IDeviceLister
+class DeviceLister : public CommonDeviceLister
 {
 
 public:
-    virtual std::vector<std::tuple<std::string, std::string, bool>> devices() const override;
+    virtual std::vector<Device> devices() const override;
 };
 
 }

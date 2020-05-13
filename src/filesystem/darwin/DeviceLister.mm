@@ -29,9 +29,14 @@
 #include "logging/Logger.h"
 #include <vector>
 
-std::vector<std::tuple<std::string, std::string, bool>> medialibrary::fs::DeviceLister::devices() const
+namespace medialibrary
 {
-    std::vector<std::tuple<std::string, std::string, bool>> res;
+namespace fs
+{
+
+std::vector<CommonDeviceLister::Device> medialibrary::fs::DeviceLister::devices() const
+{
+    std::vector<Device> res;
     NSArray *keys = [NSArray arrayWithObjects:NSURLVolumeUUIDStringKey, NSURLVolumeIsRemovableKey, nil];
     NSArray *mountPoints = [[NSFileManager defaultManager] mountedVolumeURLsIncludingResourceValuesForKeys:keys options:0];
 
@@ -51,7 +56,12 @@ std::vector<std::tuple<std::string, std::string, bool>> medialibrary::fs::Device
         tmp = deviceInfo[NSURLVolumeUUIDStringKey];
         uuid = ( tmp != nil ) ? [tmp UTF8String] : "";
         isRemovable = ( ( NSNumber * )deviceInfo[NSURLVolumeIsRemovableKey] ).boolValue;
-        res.emplace_back( std::make_tuple( uuid, [[url absoluteString] UTF8String], isRemovable ) );
+        res.emplace_back( uuid,
+                          std::vector<std::string>{ [[url absoluteString] UTF8String] },
+                          isRemovable );
     }
     return res;
+}
+
+}
 }
