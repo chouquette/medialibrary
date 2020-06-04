@@ -38,11 +38,6 @@
 namespace medialibrary
 {
 
-const char* JpegCompressor::extension() const
-{
-    return "jpg";
-}
-
 const char* JpegCompressor::fourCC() const
 {
     return "RV24";

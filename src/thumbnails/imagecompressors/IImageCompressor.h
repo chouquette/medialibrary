@@ -32,10 +32,6 @@ class IImageCompressor
 public:
     virtual ~IImageCompressor() = default;
     /**
-     * @return
-     */
-    virtual const char* extension() const = 0;
-    /**
      * @return Returns the desired input fourcc for this compressor
      */
     virtual const char* fourCC() const = 0;

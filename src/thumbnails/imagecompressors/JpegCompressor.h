@@ -30,7 +30,6 @@ namespace medialibrary
 class JpegCompressor : public IImageCompressor
 {
 public:
-    virtual const char* extension() const override;
     virtual const char* fourCC() const override;
     virtual uint32_t bpp() const override;
     virtual bool compress(const uint8_t* buffer, const std::string& output,
