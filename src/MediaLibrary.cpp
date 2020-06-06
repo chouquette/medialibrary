@@ -156,6 +156,7 @@ const std::vector<const char*> MediaLibrary::SupportedMediaExtensions = {
     "m4v",
     "m5p",
     "mid",
+    "mk3d",
     "mka",
     "mkv",
     "mlp",
