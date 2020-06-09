@@ -87,7 +87,8 @@ public:
     virtual MediaGroupPtr createMediaGroup( const std::vector<int64_t>& mediaIds ) override;
     virtual bool deleteMediaGroup( int64_t id ) override;
     virtual MediaGroupPtr mediaGroup( int64_t id ) const override;
-    virtual Query<IMediaGroup> mediaGroups( const QueryParameters* params ) const override;
+    virtual Query<IMediaGroup> mediaGroups( IMedia::Type mediaType,
+                                            const QueryParameters* params ) const override;
     virtual Query<IMediaGroup> searchMediaGroups( const std::string& pattern,
                                                   const QueryParameters* params ) const override;
     virtual bool regroupAll() override;

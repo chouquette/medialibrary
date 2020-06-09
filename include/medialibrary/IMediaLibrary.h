@@ -464,6 +464,8 @@ public:
     virtual MediaGroupPtr mediaGroup( int64_t id ) const = 0;
     /**
      * @brief mediaGroups Returns a query representing the root media groups
+     * @param mediaType The type of media contained in this group, or Unknown if all
+     *                  types should be returned
      * @param params A query parameter
      *
      * The supported sorting criteria are:
@@ -472,7 +474,8 @@ public:
      * - NbAudio
      * - NbMedia
      */
-    virtual Query<IMediaGroup> mediaGroups( const QueryParameters* params = nullptr ) const = 0;
+    virtual Query<IMediaGroup> mediaGroups( IMedia::Type mediaType,
+                                            const QueryParameters* params = nullptr ) const = 0;
     virtual Query<IMediaGroup> searchMediaGroups( const std::string& pattern,
                                                   const QueryParameters* params = nullptr ) const = 0;
     /**

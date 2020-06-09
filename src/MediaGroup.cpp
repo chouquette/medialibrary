@@ -390,11 +390,22 @@ MediaGroup::fetchMatching( MediaLibraryPtr ml, const std::string& prefix )
     return fetchAll<MediaGroup>( ml, req, prefix.length(), prefix );
 }
 
-Query<IMediaGroup> MediaGroup::listAll( MediaLibraryPtr ml,
+Query<IMediaGroup> MediaGroup::listAll( MediaLibraryPtr ml, IMedia::Type mediaType,
                                         const QueryParameters* params )
 {
-    const std::string req = "FROM " + Table::Name + " mg "
-            "WHERE nb_video > 0 OR nb_audio > 0 OR nb_unknown > 0";
+    std::string req = "FROM " + Table::Name + " mg ";
+    switch ( mediaType )
+    {
+        case IMedia::Type::Unknown:
+            req += "WHERE nb_video > 0 OR nb_audio > 0 OR nb_unknown > 0";
+            break;
+        case IMedia::Type::Audio:
+            req += "WHERE nb_audio > 0";
+            break;
+        case IMedia::Type::Video:
+            req += "WHERE nb_video > 0";
+            break;
+    }
     return make_query<MediaGroup, IMediaGroup>( ml, "mg.*", req, orderBy( params ) );
 }
 

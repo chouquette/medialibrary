@@ -643,9 +643,10 @@ MediaGroupPtr MediaLibrary::mediaGroup( int64_t id ) const
     return MediaGroup::fetch( this, id );
 }
 
-Query<IMediaGroup> MediaLibrary::mediaGroups( const QueryParameters* params ) const
+Query<IMediaGroup> MediaLibrary::mediaGroups( IMedia::Type mediaType,
+                                              const QueryParameters* params ) const
 {
-    return MediaGroup::listAll( this, params );
+    return MediaGroup::listAll( this, mediaType, params );
 }
 
 Query<IMediaGroup> MediaLibrary::searchMediaGroups( const std::string& pattern,

@@ -250,7 +250,8 @@ void Tests::runChecks(const rapidjson::Document& doc)
     }
     if ( expected.HasMember( "mediaGroups" ) == true )
     {
-        checkMediaGroups( expected["mediaGroups"], m_ml->mediaGroups( nullptr )->all() );
+        checkMediaGroups( expected["mediaGroups"],
+                m_ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all() );
     }
 }
 

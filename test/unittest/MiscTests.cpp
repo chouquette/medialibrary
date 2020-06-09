@@ -645,7 +645,7 @@ TEST_F( DbModel, Upgrade23to24 )
 TEST_F( DbModel, Upgrade24to25 )
 {
     CommonMigrationTest( SRC_DIR "/test/unittest/db_v24.sql" );
-    auto groups = ml->mediaGroups( nullptr )->all();
+    auto groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
     ASSERT_EQ( 2 * 10057u, groups[0]->duration() );
     ASSERT_EQ( "test group", groups[0]->name() );

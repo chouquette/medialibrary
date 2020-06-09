@@ -112,7 +112,8 @@ public:
                                                bool usedInitiated, bool isForcedSingleton );
     static std::shared_ptr<MediaGroup> create( MediaLibraryPtr ml,
                                                const std::vector<int64_t>& mediaIds );
-    static Query<IMediaGroup> listAll( MediaLibraryPtr ml, const QueryParameters* params );
+    static Query<IMediaGroup> listAll( MediaLibraryPtr ml, IMedia::Type mediaType,
+                                       const QueryParameters* params );
     static Query<IMediaGroup> search( MediaLibraryPtr ml, const std::string& pattern,
                                       const QueryParameters* params );
     static void createTable( sqlite::Connection* connection );

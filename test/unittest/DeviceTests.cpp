@@ -748,7 +748,7 @@ TEST_F( DeviceFs, MediaGroupPresence )
     ASSERT_EQ( 0u, rmg->nbUnknown() );
     ASSERT_EQ( 6u, rmg->nbMedia() );
 
-    auto groups = ml->mediaGroups( nullptr )->all();
+    auto groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
     rmg = ml->mediaGroup( rmg->id() );
 
@@ -769,13 +769,13 @@ TEST_F( DeviceFs, MediaGroupPresence )
     ASSERT_EQ( 0u, rmg->nbMedia() );
     ASSERT_EQ( 6u, rmg->nbTotalMedia() );
 
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 0u, groups.size() );
 
     fsMock->addDevice( device );
     Reload();
 
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
 
     rmg = ml->mediaGroup( rmg->id() );
@@ -784,4 +784,18 @@ TEST_F( DeviceFs, MediaGroupPresence )
     ASSERT_EQ( 2u, rmg->nbVideo() );
     ASSERT_EQ( 0u, rmg->nbUnknown() );
     ASSERT_EQ( 6u, rmg->nbMedia() );
+
+    auto videos = rmg->media( IMedia::Type::Video, nullptr )->all();
+    ASSERT_EQ( 2u, videos.size() );
+    for ( const auto& m : videos )
+        rmg->remove( *m );
+
+    groups = ml->mediaGroups( IMedia::Type::Video, nullptr )->all();
+    ASSERT_EQ( 2u, groups.size() );
+    for ( const auto& g : groups )
+    {
+        ASSERT_TRUE( static_cast<MediaGroup*>( g.get() )->isForcedSingleton() );
+    }
+    groups = ml->mediaGroups( IMedia::Type::Audio, nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
 }

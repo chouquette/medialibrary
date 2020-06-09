@@ -65,7 +65,7 @@ TEST_F( MediaGroups, ListAll )
     res = mg3->add( *m3 );
     ASSERT_TRUE( res );
 
-    auto mgQuery = ml->mediaGroups( nullptr );
+    auto mgQuery = ml->mediaGroups( IMedia::Type::Unknown, nullptr );
     ASSERT_EQ( 3u, mgQuery->count() );
     auto groups = mgQuery->all();
     ASSERT_EQ( 3u, groups.size() );
@@ -76,7 +76,7 @@ TEST_F( MediaGroups, ListAll )
     ASSERT_EQ( mg1->id(), groups[2]->id() );
 
     QueryParameters params{ SortingCriteria::Alpha, true };
-    groups = ml->mediaGroups( &params )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, &params )->all();
 
     ASSERT_EQ( 3u, groups.size() );
     ASSERT_EQ( mg1->id(), groups[0]->id() );
@@ -340,7 +340,7 @@ TEST_F( MediaGroups, SortByNbMedia )
 
     QueryParameters params{ SortingCriteria::NbVideo, false };
 
-    auto query = ml->mediaGroups( &params );
+    auto query = ml->mediaGroups( IMedia::Type::Unknown, &params );
     ASSERT_EQ( 2u, query->count() );
     auto groups = query->all();
     ASSERT_EQ( 2u, groups.size() );
@@ -348,20 +348,20 @@ TEST_F( MediaGroups, SortByNbMedia )
     ASSERT_EQ( mg1->id(), groups[1]->id() );
 
     params.desc = true;
-    groups = ml->mediaGroups( &params )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, &params )->all();
     ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( mg1->id(), groups[0]->id() );
     ASSERT_EQ( mg2->id(), groups[1]->id() );
 
     params.sort = SortingCriteria::NbMedia;
     // still descending order, so mg2 comes first
-    groups = ml->mediaGroups( &params )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, &params )->all();
     ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( mg2->id(), groups[0]->id() );
     ASSERT_EQ( mg1->id(), groups[1]->id() );
 
     params.desc = false;
-    groups = ml->mediaGroups( &params )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, &params )->all();
     ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( mg1->id(), groups[0]->id() );
     ASSERT_EQ( mg2->id(), groups[1]->id() );
@@ -429,7 +429,7 @@ TEST_F( MediaGroups, Delete )
     mg->add( m1->id() );
     mg->add( m2->id() );
 
-    auto groups = ml->mediaGroups( nullptr )->all();
+    auto groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
 
     m1 = ml->media( m1->id() );
@@ -449,7 +449,7 @@ TEST_F( MediaGroups, Delete )
     ASSERT_TRUE( lockedGroup->isForcedSingleton() );
     ASSERT_EQ( m2->title(), lockedGroup->name() );
 
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( m2->groupId(), groups[0]->id() );
     ASSERT_EQ( m1->groupId(), groups[1]->id() );
@@ -515,11 +515,11 @@ TEST_F( MediaGroups, DeleteEmpty )
     auto mg2 = ml->createMediaGroup( std::vector<int64_t>{ m2->id() } );
     auto mg3 = ml->createMediaGroup( std::vector<int64_t>{ m3->id() } );
 
-    auto groups = ml->mediaGroups( nullptr )->all();
+    auto groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 3u, groups.size() );
 
     ml->deleteMedia( m1->id() );
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 2u, groups.size() );
     mg1 = ml->mediaGroup( mg1->id() );
     ASSERT_EQ( nullptr, mg1 );
@@ -529,7 +529,7 @@ TEST_F( MediaGroups, DeleteEmpty )
     ASSERT_NE( nullptr, mg3 );
 
     ml->deleteMedia( m2->id() );
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
     mg2 = ml->mediaGroup( mg2->id() );
     ASSERT_EQ( nullptr, mg2 );
@@ -537,7 +537,7 @@ TEST_F( MediaGroups, DeleteEmpty )
     ASSERT_NE( nullptr, mg3 );
 
     ml->deleteMedia( m3->id() );
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 0u, groups.size() );
     mg3 = ml->mediaGroup( mg3->id() );
     ASSERT_EQ( nullptr, mg3 );
@@ -592,7 +592,7 @@ TEST_F( MediaGroups, AssignToGroups )
     auto m3 = std::static_pointer_cast<Media>(
                 ml->addMedia( "the otter", IMedia::Type::Video ) );
 
-    auto groups = ml->mediaGroups( nullptr )->all();
+    auto groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 0u, groups.size() );
 
     /*
@@ -603,7 +603,7 @@ TEST_F( MediaGroups, AssignToGroups )
     auto mg = ml->createMediaGroup( std::vector<int64_t>{ m4->id() } );
     auto res = mg->remove( *m4 );
     ASSERT_TRUE( res );
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
     ASSERT_TRUE( static_cast<MediaGroup*>( groups[0].get() )->isForcedSingleton() );
 
@@ -614,7 +614,7 @@ TEST_F( MediaGroups, AssignToGroups )
      */
     res = MediaGroup::assignToGroup( ml.get(), *m1 );
     ASSERT_TRUE( res );
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( 1u, groups[0]->nbVideo() );
     ASSERT_EQ( groups[0]->name(), "otters are fluffy.mkv" );
@@ -624,14 +624,14 @@ TEST_F( MediaGroups, AssignToGroups )
 
     res = MediaGroup::assignToGroup( ml.get(), *m2 );
     ASSERT_TRUE( res );
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( 2u, groups[0]->nbVideo() );
     ASSERT_EQ( groups[0]->name(), "otters are " );
 
     res = MediaGroup::assignToGroup( ml.get(), *m3 );
     ASSERT_TRUE( res );
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 3u, groups.size() );
     ASSERT_EQ( 1u, groups[0]->nbVideo() );
     ASSERT_EQ( groups[0]->name(), "otter" );
@@ -650,7 +650,7 @@ TEST_F( MediaGroups, AssignToGroups )
     ml->deleteMedia( m4->id() );
 
     /* Which should delete all the groups */
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 0u, groups.size() );
 
     m1 = std::static_pointer_cast<Media>(
@@ -667,21 +667,21 @@ TEST_F( MediaGroups, AssignToGroups )
     /* Now try again with the other ordering */
     res = MediaGroup::assignToGroup( ml.get(), *m3 );
     ASSERT_TRUE( res );
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( 1u, groups[0]->nbVideo() );
     ASSERT_EQ( groups[0]->name(), "otter" );
 
     res = MediaGroup::assignToGroup( ml.get(), *m2 );
     ASSERT_TRUE( res );
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 3u, groups.size() );
     ASSERT_EQ( 1u, groups[1]->nbVideo() );
     ASSERT_EQ( groups[1]->name(), "otters are cute.mkv" );
 
     res = MediaGroup::assignToGroup( ml.get(), *m1 );
     ASSERT_TRUE( res );
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 3u, groups.size() );
     ASSERT_EQ( 2u, groups[1]->nbVideo() );
     ASSERT_EQ( groups[1]->name(), "otters are " );
@@ -777,7 +777,7 @@ TEST_F( MediaGroups, RemoveMedia )
     ASSERT_NE( nullptr, mg );
     ASSERT_FALSE( mg->isForcedSingleton() );
 
-    auto groups = ml->mediaGroups( nullptr )->all();
+    auto groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
 
     // Refresh the media since it needs to know it's part of a group
@@ -787,7 +787,7 @@ TEST_F( MediaGroups, RemoveMedia )
     ASSERT_TRUE( res );
 
     /* The previous group will be removed, but a new one should be created */
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
 
     ASSERT_NE( groups[0]->id(), mg->id() );
@@ -799,7 +799,7 @@ TEST_F( MediaGroups, RemoveMedia )
     ASSERT_EQ( 0u, lockedGroup->nbUnknown() );
 
     ml->deleteMedia( m->id() );
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 0u, groups.size() );
 
     /* Now try again with the other way of removing media from a group */
@@ -810,14 +810,14 @@ TEST_F( MediaGroups, RemoveMedia )
     ASSERT_NE( nullptr, mg );
     ASSERT_FALSE( mg->isForcedSingleton() );
 
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
 
     res = mg->remove( m->id() );
     ASSERT_TRUE( res );
 
     /* The previous group will be removed, but a new one should be created */
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
 
     ASSERT_NE( groups[0]->id(), mg->id() );
@@ -829,7 +829,7 @@ TEST_F( MediaGroups, RemoveMedia )
     ASSERT_EQ( 0u, lockedGroup->nbUnknown() );
 
     ml->deleteMedia( m->id() );
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 0u, groups.size() );
 }
 
@@ -902,7 +902,7 @@ TEST_F( MediaGroups, ForcedSingletonRestrictions )
 
     res = mg->destroy();
     ASSERT_FALSE( res );
-    auto groups = ml->mediaGroups( nullptr )->all();
+    auto groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
     ASSERT_EQ( groups[0]->id(), mg->id() );
 }
@@ -921,7 +921,7 @@ TEST_F( MediaGroups, AddToForcedSingleton )
     createForcedSingleton( m1 );
     createForcedSingleton( m2 );
 
-    auto groups = ml->mediaGroups( nullptr )->all();
+    auto groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 2u, groups.size() );
     auto g1 = std::static_pointer_cast<MediaGroup>( groups[0] );
     auto g2 = std::static_pointer_cast<MediaGroup>( groups[1] );
@@ -953,7 +953,7 @@ TEST_F( MediaGroups, RenameForcedSingleton )
     auto singleton = m->group();
     ASSERT_NE( mg->id(), singleton->id() );
 
-    auto groups = ml->mediaGroups( nullptr )->all();
+    auto groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
     ASSERT_EQ( singleton->id(), groups[0]->id() );
     ASSERT_EQ( m->title(), groups[0]->name() );
@@ -969,7 +969,7 @@ TEST_F( MediaGroups, RenameForcedSingleton )
     res = mg->add( *m );
     ASSERT_TRUE( res );
 
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
 
     res = m->setTitle( "Better otter related title" );
@@ -1075,7 +1075,7 @@ TEST_F( MediaGroups, OrderByDuration )
     mg2->rename( "z" );
 
     QueryParameters params{ SortingCriteria::Default, false };
-    auto groups = ml->mediaGroups( &params )->all();
+    auto groups = ml->mediaGroups( IMedia::Type::Unknown, &params )->all();
     ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( mg1->id(), groups[0]->id() );
     ASSERT_EQ( m1->duration(), groups[0]->duration() );
@@ -1083,13 +1083,13 @@ TEST_F( MediaGroups, OrderByDuration )
     ASSERT_EQ( m2->duration(), groups[1]->duration() );
 
     params.sort = SortingCriteria::Duration;
-    groups = ml->mediaGroups( &params )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, &params )->all();
     ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( mg2->id(), groups[0]->id() );
     ASSERT_EQ( mg1->id(), groups[1]->id() );
 
     params.desc = true;
-    groups = ml->mediaGroups( &params )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, &params )->all();
     ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( mg1->id(), groups[0]->id() );
     ASSERT_EQ( mg2->id(), groups[1]->id() );
@@ -1137,13 +1137,13 @@ TEST_F( MediaGroups, OrderByCreationDate )
     forceCreationDate( mg2->id(), 111 );
 
     QueryParameters params{ SortingCriteria::InsertionDate, false };
-    auto groups = ml->mediaGroups( &params )->all();
+    auto groups = ml->mediaGroups( IMedia::Type::Unknown, &params )->all();
     ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( mg2->id(), groups[0]->id() );
     ASSERT_EQ( mg1->id(), groups[1]->id() );
 
     params.desc = true;
-    groups = ml->mediaGroups( &params )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, &params )->all();
     ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( mg1->id(), groups[0]->id() );
     ASSERT_EQ( mg2->id(), groups[1]->id() );
@@ -1215,13 +1215,13 @@ TEST_F( MediaGroups, OrderByLastModificationDate )
     forceLastModificationDate( mg2->id(), 111 );
 
     QueryParameters params{ SortingCriteria::LastModificationDate, false };
-    auto groups = ml->mediaGroups( &params )->all();
+    auto groups = ml->mediaGroups( IMedia::Type::Unknown, &params )->all();
     ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( mg2->id(), groups[0]->id() );
     ASSERT_EQ( mg1->id(), groups[1]->id() );
 
     params.desc = true;
-    groups = ml->mediaGroups( &params )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, &params )->all();
     ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( mg1->id(), groups[0]->id() );
     ASSERT_EQ( mg2->id(), groups[1]->id() );
@@ -1269,7 +1269,7 @@ TEST_F( MediaGroups, RegroupAll )
     createLockedGroup( m5 );
     auto mg = ml->createMediaGroup( std::vector<int64_t>{ m6->id() } );
 
-    auto groups = ml->mediaGroups( nullptr )->all();
+    auto groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     /* We expect 1 group per media */
     ASSERT_EQ( 6u, groups.size() );
 
@@ -1280,7 +1280,7 @@ TEST_F( MediaGroups, RegroupAll )
      * - otters (but the manually grouped one)
      */
     ml->regroupAll();
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 4u, groups.size() );
     ASSERT_EQ( groups[0]->name(), "cats are unrelated to otters and pangolins.mkv" );
     ASSERT_EQ( groups[1]->name(), "otters are not " );
@@ -1302,7 +1302,7 @@ TEST_F( MediaGroups, MergeAutoCreated )
     res = MediaGroup::assignToGroup( ml.get(), *m2 );
     ASSERT_TRUE( res );
 
-    auto groups = ml->mediaGroups( nullptr )->all();
+    auto groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 2u, groups.size() );
     auto group1 = groups[0];
     auto group2 = groups[1];
@@ -1314,7 +1314,7 @@ TEST_F( MediaGroups, MergeAutoCreated )
     res = group1->add( *group2Media[0] );
     ASSERT_TRUE( res );
 
-    groups = ml->mediaGroups( nullptr )->all();
+    groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
 
     ASSERT_EQ( 2u, group1->nbMedia() );
