@@ -29,6 +29,7 @@
 #include "database/SqliteQuery.h"
 #include "medialibrary/IMediaLibrary.h"
 #include "utils/ModificationsNotifier.h"
+#include "utils/Strings.h"
 
 #include <cstring>
 
@@ -384,10 +385,11 @@ MediaGroup::fetchMatching( MediaLibraryPtr ml, const std::string& prefix )
 {
     if ( prefix.length() < AutomaticGroupPrefixSize )
         return {};
+    auto nbChar = utils::str::utf8::nbChars( prefix );
     static const std::string req = "SELECT * FROM " + Table::Name +
             " WHERE forced_singleton = 0"
             " AND SUBSTR(name, 1, ?) = ? COLLATE NOCASE";
-    return fetchAll<MediaGroup>( ml, req, prefix.length(), prefix );
+    return fetchAll<MediaGroup>( ml, req, nbChar, prefix );
 }
 
 Query<IMediaGroup> MediaGroup::listAll( MediaLibraryPtr ml, IMedia::Type mediaType,
@@ -951,28 +953,23 @@ std::string MediaGroup::prefix( const std::string& title )
     auto offset = 0u;
     if ( strncasecmp( title.c_str(), "the ", 4 ) == 0 )
         offset = 4;
-    return title.substr( offset, AutomaticGroupPrefixSize + offset );
+    /* We need to get a number of characters, not bytes */
+    auto nbBytes = utils::str::utf8::nbBytes( title, offset, AutomaticGroupPrefixSize );
+    return title.substr( offset, nbBytes + offset );
 }
 
 std::string MediaGroup::commonPattern( const std::string& groupName,
                                        const std::string& newTitle )
 {
     auto groupIdx = 0u;
-    auto groupBegin = 0u;
     auto titleIdx = 0u;
     if ( strncasecmp( groupName.c_str(), "the ", 4 ) == 0 )
-        groupBegin = groupIdx = 4u;
+        groupIdx = 4u;
     if ( strncasecmp( newTitle.c_str(), "the ", 4 ) == 0 )
         titleIdx = 4;
-    while ( groupIdx < groupName.size() && titleIdx < newTitle.size() &&
-            tolower( groupName[groupIdx] ) == tolower( newTitle[titleIdx] ) )
-    {
-        ++groupIdx;
-        ++titleIdx;
-    }
-    if ( groupIdx - groupBegin < AutomaticGroupPrefixSize )
-        return {};
-    return groupName.substr( groupBegin, groupIdx - groupBegin );
+    return utils::str::utf8::commonPattern( groupName, groupIdx,
+                                            newTitle, titleIdx,
+                                            AutomaticGroupPrefixSize );
 }
 
 std::string MediaGroup::orderBy(const QueryParameters* params)

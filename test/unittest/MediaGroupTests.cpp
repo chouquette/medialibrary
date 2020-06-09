@@ -575,6 +575,27 @@ TEST_F( MediaGroups, CommonPattern )
 
     res = MediaGroup::commonPattern( "match is real", "The match is real" );
     ASSERT_EQ( "match is real", res );
+
+    res = MediaGroup::commonPattern( "áßçḋéḟblabla", "áßçḋéḟsomethingelse" );
+    ASSERT_EQ( "áßçḋéḟ", res );
+
+    res = MediaGroup::commonPattern( "the áßçḋéḟblabla", "áßçḋéḟsomethingelse" );
+    ASSERT_EQ( "áßçḋéḟ", res );
+
+    res = MediaGroup::commonPattern( "áßçḋéḟblabla", "the áßçḋéḟsomethingelse" );
+    ASSERT_EQ( "áßçḋéḟ", res );
+
+    res = MediaGroup::commonPattern( "áßç", "áßç" );
+    ASSERT_EQ( "", res );
+
+    res = MediaGroup::commonPattern( "áßç\xEC\xB0", "áßç\xEC\xB0" );
+    ASSERT_EQ( "", res );
+
+    res = MediaGroup::commonPattern( "áßçḋéḟǵ\xEC", "áßçḋéḟǵ\xEC" );
+    ASSERT_EQ( "áßçḋéḟǵ", res );
+
+    res = MediaGroup::commonPattern( "lalalalére", "lalalalère" );
+    ASSERT_EQ( "lalalal", res );
 }
 
 TEST_F( MediaGroups, AssignToGroups )
@@ -1321,4 +1342,33 @@ TEST_F( MediaGroups, MergeAutoCreated )
 
     group1 = ml->mediaGroup( group1->id() );
     ASSERT_EQ( 2u, group1->nbMedia() );
+}
+
+TEST_F( MediaGroups, KoreanTitles )
+{
+    auto m1 = std::static_pointer_cast<Media>(
+                ml->addMedia( "[NEO지식창고] 03월01일 TEST1.mp4", IMedia::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>(
+                ml->addMedia( "[NEO지식창고] 03월01일 TEST2.mp4", IMedia::Type::Video ) );
+    auto m3 = std::static_pointer_cast<Media>(
+                ml->addMedia( "[NEO지식창고] 03월01일 TEST3.mp4", IMedia::Type::Video ) );
+    auto m4 = std::static_pointer_cast<Media>(
+                ml->addMedia( "[NEO지식창고] 03월01일 TEST4.mp4", IMedia::Type::Video ) );
+    auto m5 = std::static_pointer_cast<Media>(
+                ml->addMedia( "[NEO지식창고] 03월01일 TEST5.mp4", IMedia::Type::Video ) );
+
+    auto res = MediaGroup::assignToGroup( ml.get(), *m1 );
+    ASSERT_TRUE( res );
+    res = MediaGroup::assignToGroup( ml.get(), *m2 );
+    ASSERT_TRUE( res );
+    res = MediaGroup::assignToGroup( ml.get(), *m3 );
+    ASSERT_TRUE( res );
+    res = MediaGroup::assignToGroup( ml.get(), *m4 );
+    ASSERT_TRUE( res );
+    res = MediaGroup::assignToGroup( ml.get(), *m5 );
+    ASSERT_TRUE( res );
+
+    auto groups = ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    ASSERT_EQ( "[NEO지식창고] 03월01일 TEST", groups[0]->name() );
 }
