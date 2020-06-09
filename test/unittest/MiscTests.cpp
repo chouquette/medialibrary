@@ -213,6 +213,29 @@ TEST_F( Misc, SanitizePattern )
     ASSERT_EQ( "\"''\"\"*\"", sqlite::Tools::sanitizePattern( "\'\"" ) );
 }
 
+TEST_F( Misc, Utf8NbChars )
+{
+    ASSERT_EQ( 0u, utils::str::utf8::nbChars( "" ) );
+    ASSERT_EQ( 5u, utils::str::utf8::nbChars( "ABCDE" ) );
+    ASSERT_EQ( 7u, utils::str::utf8::nbChars( "NEO지식창고" ) );
+    ASSERT_EQ( 0u, utils::str::utf8::nbChars( "INVALID\xC3" ) );
+    ASSERT_EQ( 0u, utils::str::utf8::nbChars( "\xEC\xEC" ) );
+}
+
+TEST_F( Misc, Utf8NbBytes )
+{
+    ASSERT_EQ( 5u, utils::str::utf8::nbBytes( "ABCDE", 0, 5 ) );
+    ASSERT_EQ( 0u, utils::str::utf8::nbBytes( "ABCDE", 0, 0 ) );
+    ASSERT_EQ( 5u, utils::str::utf8::nbBytes( "ABCDE", 0, 999 ) );
+    ASSERT_EQ( 4u, utils::str::utf8::nbBytes( "ABCDéFG", 4, 3 ) );
+
+    ASSERT_EQ( 15u, utils::str::utf8::nbBytes( "NEO지식창고", 0, 7 ) );
+    ASSERT_EQ( 12u, utils::str::utf8::nbBytes( "NEO지식창고", 0, 6 ) );
+
+    ASSERT_EQ( 0u, utils::str::utf8::nbBytes( "INVALID\xC3", 5, 3 ) );
+    ASSERT_EQ( 0u, utils::str::utf8::nbBytes( "\xEC\xEC", 5, 3 ) );
+}
+
 TEST_F( Misc, Defer )
 {
     auto i = 0u;
