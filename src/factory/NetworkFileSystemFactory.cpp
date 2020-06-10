@@ -47,6 +47,7 @@ NetworkFileSystemFactory::NetworkFileSystemFactory( MediaLibraryPtr ml,
                                                     const std::string& scheme )
     : m_scheme( scheme )
     , m_deviceLister( ml->deviceListerLocked( scheme ) )
+    , m_cb( nullptr )
 {
     m_isNetwork = strncasecmp( m_scheme.c_str(), "file://",
                                m_scheme.length() ) != 0;
@@ -114,6 +115,7 @@ const std::string& NetworkFileSystemFactory::scheme() const
 
 bool NetworkFileSystemFactory::start( fs::IFileSystemFactoryCb* cb )
 {
+    assert( m_cb == nullptr );
     m_cb = cb;
     return m_deviceLister->start( this );
 }
@@ -121,6 +123,7 @@ bool NetworkFileSystemFactory::start( fs::IFileSystemFactoryCb* cb )
 void NetworkFileSystemFactory::stop()
 {
     m_deviceLister->stop();
+    m_cb = nullptr;
 }
 
 void NetworkFileSystemFactory::onDeviceMounted( const std::string& uuid,
