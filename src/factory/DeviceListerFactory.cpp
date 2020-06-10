@@ -47,6 +47,7 @@ medialibrary::DeviceListerPtr medialibrary::factory::createDeviceLister()
 {
 #ifdef USE_BUILTIN_DEVICE_LISTER
     return std::make_shared<fs::DeviceLister>();
-#endif
+#else
     return nullptr;
+#endif
 }
