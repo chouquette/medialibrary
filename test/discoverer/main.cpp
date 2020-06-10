@@ -31,6 +31,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <unistd.h>
+#include <cassert>
 
 class TestCb : public mock::NoopCallback
 {
@@ -119,9 +120,10 @@ int main( int argc, char** argv )
 
     ml->setVerbosity( medialibrary::LogLevel::Info );
     ml->initialize( "/tmp/test.db", "/tmp/ml_folder", testCb.get() );
-    ml->setDiscoverNetworkEnabled( true );
+    auto res = ml->setDiscoverNetworkEnabled( true );
+    assert( res );
     ml->discover( argv[1] );
 
-    auto res = testCb->waitForCompletion();
+    res = testCb->waitForCompletion();
     return res == true ? 0 : 1;
 }
