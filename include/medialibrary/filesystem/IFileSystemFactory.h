@@ -105,7 +105,7 @@ namespace fs
         ///
         virtual void refreshDevices() = 0;
         ///
-        /// \brief isPathSupported Checks for support of a path by this FS facotry
+        /// \brief isPathSupported Checks for support of a path by this FS factory
         /// \param path The path to probe for support
         /// \return True if supported, false otherwise
         ///
