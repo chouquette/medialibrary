@@ -56,6 +56,7 @@ namespace factory
 
 FileSystemFactory::FileSystemFactory( MediaLibraryPtr ml )
     : m_deviceLister( ml->deviceListerLocked( "file://" ) )
+    , m_cb( nullptr )
 {
     if ( m_deviceLister == nullptr )
         throw std::runtime_error( "Failed to acquire a local device lister" );
@@ -137,6 +138,7 @@ const std::string& FileSystemFactory::scheme() const
 
 bool FileSystemFactory::start( fs::IFileSystemFactoryCb* cb )
 {
+    assert( m_cb == nullptr );
     m_cb = cb;
     m_deviceLister->start( this );
     return true;
@@ -144,6 +146,7 @@ bool FileSystemFactory::start( fs::IFileSystemFactoryCb* cb )
 
 void FileSystemFactory::stop()
 {
+    m_cb = nullptr;
 }
 
 void FileSystemFactory::onDeviceMounted( const std::string& uuid,
