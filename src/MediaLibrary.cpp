@@ -2588,8 +2588,11 @@ void MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs )
         // to be deleted when the device go away, requiring a new discovery)
         // Also, there might be new content on the device since it was last
         // scanned.
+        // We also want to resume any parsing tasks that were previously
+        // started before the device went away
         assert( deviceFs.isPresent() == true );
         m_ml->m_discovererWorker->reloadDevice( device->id() );
+        m_ml->m_parser->refreshTaskList();
     }
 }
 
@@ -2613,6 +2616,14 @@ void MediaLibrary::FsFactoryCb::onDeviceUnmounted( const fs::IDevice& deviceFs )
               device->isPresent() ? "1" : "0", " -> ",
               deviceFs.isPresent() ? "1" : "0" );
     device->setPresent( deviceFs.isPresent() );
+    if ( deviceFs.isPresent() == false )
+    {
+        /*
+         * The device went away, let's ensure we're not still trying to
+         * analyze its content
+         */
+        m_ml->m_parser->refreshTaskList();
+    }
 }
 
 const std::vector<const char*>& MediaLibrary::supportedMediaExtensions() const
