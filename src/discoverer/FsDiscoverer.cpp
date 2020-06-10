@@ -74,6 +74,18 @@ bool FsDiscoverer::discover( const std::string& entryPoint,
     // If the folder exists, we assume it will be handled by reload()
     if ( f != nullptr )
         return true;
+    /*
+     * Ensure we have a device containing the folder before trying to probe it
+     * IFileSystemFactory::createDirectory doesn't check for the actual mrl
+     * existence, so we might be trying to index something that doesn't exist.
+     */
+    auto deviceFs = fsDir->device();
+    if ( deviceFs == nullptr )
+    {
+        LOG_INFO( "Can't discover ", entryPoint, ": no associated device is "
+                  "present" );
+        return false;
+    }
     try
     {
         if ( m_probe->proceedOnDirectory( *fsDir ) == false || m_probe->isHidden( *fsDir ) == true )
