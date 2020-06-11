@@ -325,12 +325,6 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                     LOG_WARN( "Creation of a folder failed: ", ex.what(), ". Assuming it was banned" );
                     continue;
                 }
-                catch ( const fs::errors::System& ex )
-                {
-                    LOG_WARN( "Failed to browse folder ", subFolder->mrl(), ": ",
-                              ex.what() );
-                    continue;
-                }
             }
             auto folderInDb = *it;
             // In any case, check for modifications, as a change related to a mountpoint might
