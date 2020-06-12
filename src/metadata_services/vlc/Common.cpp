@@ -46,7 +46,11 @@ bool medialibrary::MetadataCommon::startPlayback( VLC::Media& media,
     // as we leave this method.
     auto em = mp.eventManager();
 
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+    em.onESAdded([&mutex, &cond, &hasVideoTrack, &hasAnyTrack]( libvlc_track_type_t type, const std::string& ) {
+#else
     em.onESAdded([&mutex, &cond, &hasVideoTrack, &hasAnyTrack]( libvlc_track_type_t type, int ) {
+#endif
         std::lock_guard<compat::Mutex> lock( mutex );
         if ( type == libvlc_track_video )
             hasVideoTrack = true;
