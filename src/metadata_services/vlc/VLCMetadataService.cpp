@@ -169,20 +169,12 @@ void VLCMetadataService::mediaToItem( VLC::Media& media, IItem& item )
     auto tracks = media.tracks();
 #else
     std::vector<VLC::MediaTrack> tracks;
-    auto appendTracks = []( const VLC::TrackList& tl,
-                          std::vector<VLC::MediaTrack>& tracks ) {
-        for ( auto i = 0u; i < tl.count(); ++i )
-            tracks.push_back( tl.at( i ) );
-    };
-    auto trackList = media.tracks( libvlc_track_audio );
-    if ( trackList != nullptr )
-        appendTracks( *trackList, tracks );
-    trackList = media.tracks( libvlc_track_video );
-    if ( trackList != nullptr )
-        appendTracks( *trackList, tracks );
-    trackList = media.tracks( libvlc_track_text );
-    if ( trackList != nullptr )
-        appendTracks( *trackList, tracks );
+    auto trackList = media.tracks( VLC::MediaTrack::Type::Audio );
+    std::move( begin( trackList ), end( trackList ), std::back_inserter( tracks ) );
+    trackList = media.tracks( VLC::MediaTrack::Type::Video );
+    std::move( begin( trackList ), end( trackList ), std::back_inserter( tracks ) );
+    trackList = media.tracks( VLC::MediaTrack::Type::Subtitle );
+    std::move( begin( trackList ), end( trackList ), std::back_inserter( tracks ) );
 #endif
     for ( const auto& track : tracks )
     {
