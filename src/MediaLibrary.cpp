@@ -2592,7 +2592,8 @@ void MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs )
         // started before the device went away
         assert( deviceFs.isPresent() == true );
         m_ml->m_discovererWorker->reloadDevice( device->id() );
-        m_ml->m_parser->refreshTaskList();
+        if ( m_ml->m_parser != nullptr )
+            m_ml->m_parser->refreshTaskList();
     }
 }
 
@@ -2616,7 +2617,7 @@ void MediaLibrary::FsFactoryCb::onDeviceUnmounted( const fs::IDevice& deviceFs )
               device->isPresent() ? "1" : "0", " -> ",
               deviceFs.isPresent() ? "1" : "0" );
     device->setPresent( deviceFs.isPresent() );
-    if ( deviceFs.isPresent() == false )
+    if ( deviceFs.isPresent() == false && m_ml->m_parser != nullptr )
     {
         /*
          * The device went away, let's ensure we're not still trying to
