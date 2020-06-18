@@ -2603,12 +2603,13 @@ void MediaLibrary::FsFactoryCb::onDeviceUnmounted( const fs::IDevice& deviceFs )
     if ( device == nullptr )
     {
         /*
-         * Since we systematically add new devices to the database, we must have
-         * a database representation available when it's being unmounted
+         * If we haven't added this device to the database, it means we never
+         * discovered anything on it, so we don't really care if it's mounted
+         * or not
          */
-        assert( !"An unknown device was removed" );
         return;
     }
+
     assert( device->isRemovable() == true );
     if ( device->isPresent() == deviceFs.isPresent() )
         return;
