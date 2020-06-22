@@ -551,10 +551,23 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
         return InitializeResult::Failed;
     }
 
-    Device::markNetworkAsDeviceMissing( this );
+    if ( res == InitializeResult::Success || res == InitializeResult::DbReset )
+    {
+        /* In case the database was detected as corrupted, we don't want to
+         * interract with the database, but we want to mark the medialib as
+         * initialized, and let the application handle what to do with its
+         * corrupted database
+         */
+        Device::markNetworkAsDeviceMissing( this );
+        LOG_INFO( "Successfully initialized" );
+    }
+    else
+    {
+        assert( res == InitializeResult::DbCorrupted );
+        LOG_WARN( "Initialization complete; Database corruption was detected" );
+    }
 
     m_initialized = true;
-    LOG_INFO( "Successfully initialized" );
     return res;
 }
 
