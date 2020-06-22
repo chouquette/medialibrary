@@ -1119,6 +1119,10 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
     auto needRescan = false;
     for ( auto i = 0u; i < 3; ++i )
     {
+        if ( i > 0 )
+        {
+            LOG_WARN( "Retrying database migration, attempt ", i + 1, " / 3" );
+        }
         try
         {
             // Up until model 3, it's safer (and potentially more efficient with index changes) to drop the DB
@@ -1307,7 +1311,6 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
         {
             LOG_ERROR( "An unknown error occurred during the database upgrade." );
         }
-        LOG_WARN( "Retrying database migration, attempt ", i + 1, " / 3" );
     }
     // If we failed 3 times to migrate the database, assume the database to be
     // corrupted.
