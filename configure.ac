@@ -1,6 +1,6 @@
 AC_COPYRIGHT([Copyright 2014-2019 Hugo Beauzée-Luyssen - VideoLabs - VideoLAN])
 
-AC_INIT([medialibrary], [0.8.0-dev])
+AC_INIT([medialibrary], [0.9.0-dev])
 AC_CONFIG_HEADERS([config.h])
 
 AM_INIT_AUTOMAKE([foreign subdir-objects])
