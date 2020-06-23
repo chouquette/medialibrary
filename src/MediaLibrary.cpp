@@ -636,6 +636,11 @@ Query<IMedia> MediaLibrary::videoFiles( const QueryParameters* params ) const
     return Media::listAll( this, IMedia::Type::Video, params );
 }
 
+Query<IMedia> MediaLibrary::inProgressMedia( IMedia::Type type, const QueryParameters *params ) const
+{
+    return Media::listInProgress( this, type, params );
+}
+
 MediaGroupPtr MediaLibrary::createMediaGroup( std::string name )
 {
     return MediaGroup::create( this, std::move( name ), true, false );

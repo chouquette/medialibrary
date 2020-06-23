@@ -82,6 +82,8 @@ public:
     virtual bool removeExternalMedia( MediaPtr media ) override;
     virtual Query<IMedia> audioFiles( const QueryParameters* params ) const override;
     virtual Query<IMedia> videoFiles( const QueryParameters* params ) const override;
+    virtual Query<IMedia> inProgressMedia( IMedia::Type type,
+                                           const QueryParameters* params ) const override;
 
     virtual MediaGroupPtr createMediaGroup( std::string name ) override;
     virtual MediaGroupPtr createMediaGroup( const std::vector<int64_t>& mediaIds ) override;

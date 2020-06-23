@@ -432,6 +432,17 @@ public:
      * \see{IMediaLibrary::audioFile} for the supported sorting criteria
      */
     virtual Query<IMedia> videoFiles( const QueryParameters* params = nullptr ) const = 0;
+
+    /**
+     * @brief inProgressMedia Returns media for which playback wasn't completed
+     * @param type The type of media to fetch, or 'Unknown' for all
+     * @param params Some query parameters
+     * @return A query representing the results set
+     *
+     * @see{IMedia::setProgress}
+     */
+    virtual Query<IMedia> inProgressMedia( IMedia::Type type,
+                                           const QueryParameters* params = nullptr ) const = 0;
     /**
      * @brief createMediaGroup Creates a media group
      * @param name The group name

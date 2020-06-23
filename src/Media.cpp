@@ -1045,6 +1045,23 @@ Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
                                       IFile::Type::Main, IFile::Type::Disc );
 }
 
+Query<IMedia> Media::listInProgress( MediaLibraryPtr ml, IMedia::Type type,
+                                     const QueryParameters *params )
+{
+    std::string req = "FROM " + Media::Table::Name + " m ";
+
+    req += addRequestJoin( params, false, false );
+    req += " WHERE m.is_present != 0 AND m.progress >= 0.0";
+    if ( type == IMedia::Type::Unknown )
+    {
+        return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
+                                          sortRequest( params ) );
+    }
+    req += " AND m.type = ?";
+    return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
+                                      sortRequest( params ), type );
+}
+
 int64_t Media::id() const
 {
     return m_id;

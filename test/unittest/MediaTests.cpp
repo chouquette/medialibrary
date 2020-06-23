@@ -1284,6 +1284,50 @@ TEST_F( Medias, ForceTitle )
     ASSERT_EQ( title, m->title() );
 }
 
+TEST_F( Medias, FetchInProgress )
+{
+    auto m1 = ml->addMedia( "media.mkv", IMedia::Type::Video );
+    auto m2 = ml->addMedia( "media.mp3", IMedia::Type::Audio );
+
+    auto m = ml->inProgressMedia( IMedia::Type::Unknown, nullptr )->all();
+    ASSERT_EQ( 0u, m.size() );
+
+    m1->setProgress( 0.5f );
+    m = ml->inProgressMedia( IMedia::Type::Unknown, nullptr )->all();
+    ASSERT_EQ( 1u, m.size() );
+    ASSERT_EQ( m1->id(), m[0]->id() );
+
+    m = ml->inProgressMedia( IMedia::Type::Video, nullptr )->all();
+    ASSERT_EQ( 1u, m.size() );
+    ASSERT_EQ( m1->id(), m[0]->id() );
+
+    m = ml->inProgressMedia( IMedia::Type::Audio, nullptr )->all();
+    ASSERT_EQ( 0u, m.size() );
+
+    m2->setProgress( 0.8f );
+
+    m = ml->inProgressMedia( IMedia::Type::Unknown, nullptr )->all();
+    ASSERT_EQ( 2u, m.size() );
+
+    m = ml->inProgressMedia( IMedia::Type::Video, nullptr )->all();
+    ASSERT_EQ( 1u, m.size() );
+    ASSERT_EQ( m1->id(), m[0]->id() );
+
+    m = ml->inProgressMedia( IMedia::Type::Audio, nullptr )->all();
+    ASSERT_EQ( 1u, m.size() );
+    ASSERT_EQ( m2->id(), m[0]->id() );
+
+    m1->setProgress( .9999f );
+
+    m = ml->inProgressMedia( IMedia::Type::Unknown, nullptr )->all();
+    ASSERT_EQ( 1u, m.size() );
+    ASSERT_EQ( m2->id(), m[0]->id() );
+
+    m1 = ml->media( m1->id() );
+    ASSERT_EQ( -1.f, m1->progress() );
+    ASSERT_EQ( 1u, m1->playCount() );
+}
+
 class FetchMedia : public Tests
 {
 protected:

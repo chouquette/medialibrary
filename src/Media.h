@@ -251,6 +251,8 @@ class Media : public IMedia,
         virtual bool removeAllBookmarks() override;
 
         static Query<IMedia> listAll(MediaLibraryPtr ml, Type type, const QueryParameters* params );
+        static Query<IMedia> listInProgress( MediaLibraryPtr ml, Type type,
+                                             const QueryParameters* params );
 
         static Query<IMedia> search( MediaLibraryPtr ml, const std::string& title,
                                      const QueryParameters* params );
