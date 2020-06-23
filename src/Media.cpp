@@ -353,15 +353,15 @@ time_t Media::lastPlayedDate() const
 bool Media::removeFromHistory()
 {
     static const std::string req = "UPDATE " + Media::Table::Name + " SET "
-            "play_count = ?, last_played_date = ? WHERE id_media = ?";
+            "progress = ?, play_count = ?, last_played_date = ? WHERE id_media = ?";
     auto dbConn = m_ml->getConn();
     auto t = dbConn->newTransaction();
 
-    if ( sqlite::Tools::executeUpdate( dbConn, req, 0, nullptr, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( dbConn, req, -1.f, 0, nullptr, m_id ) == false )
         return false;
-    unsetMetadata( MetadataType::Progress );
 
     t->commit();
+    m_progress = -1.f;
     m_lastPlayedDate = 0;
     m_playCount = 0;
     auto historyType = ( m_type == Type::Video || m_type == Type::Audio ) ?
@@ -1843,13 +1843,8 @@ bool Media::clearHistory( MediaLibraryPtr ml )
     auto dbConn = ml->getConn();
     auto t = dbConn->newTransaction();
     static const std::string req = "UPDATE " + Media::Table::Name + " SET "
-            "play_count = 0,"
+            "progress = -1, play_count = 0,"
             "last_played_date = NULL";
-
-    using MDType = typename std::underlying_type<IMedia::MetadataType>::type;
-    if ( Metadata::unset( dbConn, IMetadata::EntityType::Media,
-                    static_cast<MDType>( IMedia::MetadataType::Progress ) ) == false )
-        return false;
 
     if ( sqlite::Tools::executeUpdate( dbConn, req ) == false )
         return false;

@@ -545,6 +545,9 @@ public:
      * @brief clearHistory will clear both streams history & media history.
      * @return true in case of success, false otherwise. The database will stay untouched in case
      *              of failure.
+     *
+     * This will clear all history, and also reset any potential playback progress
+     * for all media
      */
     virtual bool clearHistory() = 0;
 

@@ -468,8 +468,8 @@ TEST_F( Medias, ClearHistory )
     history = ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
 
-    history = ml->history()->all();
-    ASSERT_EQ( 0u, history.size() );
+    m = ml->media( m->id() );
+    ASSERT_EQ( -1.f, m->progress() );
 }
 
 TEST_F( Medias, RemoveFromHistory )
@@ -481,20 +481,21 @@ TEST_F( Medias, RemoveFromHistory )
 
     m->setProgress( 1.f );
     m->save();
-    m->setMetadata( IMedia::MetadataType::Progress, "50" );
     history = ml->history()->all();
     ASSERT_EQ( 1u, history.size() );
     ASSERT_EQ( m->id(), history[0]->id() );
     ASSERT_EQ( 1u, m->playCount() );
-    ASSERT_TRUE( m->metadata( IMedia::MetadataType::Progress ).isSet() );
-    ASSERT_EQ( m->metadata( IMedia::MetadataType::Progress ).asStr(), "50" );
 
     m->removeFromHistory();
 
     history = ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
     ASSERT_EQ( 0u, m->playCount() );
-    ASSERT_FALSE( m->metadata( IMedia::MetadataType::Progress ).isSet() );
+    ASSERT_EQ( -1.f, m->progress() );
+
+    m = ml->media( m->id() );
+    ASSERT_EQ( 0u, m->playCount() );
+    ASSERT_EQ( -1.f, m->progress() );
 }
 
 TEST_F( Medias, SetReleaseDate )

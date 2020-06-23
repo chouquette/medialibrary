@@ -486,7 +486,8 @@ TEST_F( DbModel, Upgrade13to14 )
 
     // Ensure we're probing the correct fake media
     ASSERT_EQ( m->id(), 2 );
-    auto& meta = m->metadata( IMedia::MetadataType::Progress );
+    // Was IMedia::MetadataType::Progress
+    auto& meta = m->metadata( static_cast<IMedia::MetadataType>( 50 ) );
     ASSERT_EQ( "fake progress", meta.asStr() );
 
     auto playlists = ml->playlists( nullptr )->all();

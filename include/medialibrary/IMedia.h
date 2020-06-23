@@ -73,8 +73,12 @@ public:
         Rating = 1,
 
         // Playback
-        Progress = 50,
-        Speed,
+        /*
+         * Removed starting from model 27, this is now a full field in the
+         * media table
+         * Progress = 50,
+         */
+        Speed = 51,
         Title,
         Chapter,
         Program,
