@@ -1307,6 +1307,18 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 needRescan = true;
                 previousVersion = 26;
             }
+            if ( previousVersion == 26 )
+            {
+                migrateModel26to27();
+                /*
+                 * Force a rescan to account for recent media groups changes
+                 * and trigger a regroup that accounts for utf8
+                 * This is not directly related to this migration but needs
+                 * to be done regardless.
+                 */
+                needRescan = true;
+                previousVersion = 27;
+            }
             // To be continued in the future!
 
             migrationEpilogue( originalPreviousVersion );
@@ -2011,6 +2023,22 @@ void MediaLibrary::migrateModel25to26()
     }
 
     m_settings.setDbModelVersion( 26 );
+    t->commit();
+}
+
+void MediaLibrary::migrateModel26to27()
+{
+    auto dbConn = getConn();
+    sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
+    auto t = dbConn->newTransaction();
+
+    std::string reqs[] = {
+#       include "database/migrations/migration26-27.sql"
+    };
+
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConn, req );
+    m_settings.setDbModelVersion( 27 );
     t->commit();
 }
 

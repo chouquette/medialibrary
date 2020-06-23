@@ -719,3 +719,8 @@ TEST_F( DbModel, Upgrade25to26 )
     ASSERT_EQ( networkFiles[0]->id(), encodedFile->id() );
 
 }
+
+TEST_F( DbModel, Upgrade26to27 )
+{
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v26.sql" );
+}

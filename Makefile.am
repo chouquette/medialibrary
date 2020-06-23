@@ -357,6 +357,7 @@ EXTRA_DIST += test/unittest/db_v3.sql \
 	test/unittest/db_v23.sql \
 	test/unittest/db_v24.sql \
 	test/unittest/db_v25.sql \
+	test/unittest/db_v26.sql \
 	$(NULL)
 
 
@@ -437,6 +438,7 @@ EXTRA_DIST += medialibrary.pc \
 	src/database/migrations/migration23-24.sql \
 	src/database/migrations/migration24-25.sql \
 	src/database/migrations/migration25-26.sql \
+	src/database/migrations/migration26-27.sql \
 	$(NULL)
 	
 
