@@ -46,6 +46,7 @@ Media::index( Media::Indexes::Types, 27 ),
 Media::index( Media::Indexes::LastUsageDate, 27 ),
 Media::index( Media::Indexes::Folder, 27 ),
 Media::index( Media::Indexes::MediaGroup, 27 ),
+Media::index( Media::Indexes::Progress, 27 ),
 
 Album::trigger( Album::Triggers::IsPresent, 27 ),
 Artist::trigger( Artist::Triggers::HasTrackPresent, 27 ),

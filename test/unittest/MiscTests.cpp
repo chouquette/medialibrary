@@ -107,6 +107,7 @@ namespace
         "media_group_id_idx",
         "media_group_last_modification_date",
         "media_last_usage_dates_idx",
+        "media_progress_idx",
         "media_types_idx",
         "movie_media_idx",
         "parent_folder_id_idx",

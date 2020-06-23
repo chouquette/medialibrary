@@ -86,6 +86,7 @@ class Media : public IMedia,
             LastUsageDate,
             Folder,
             MediaGroup,
+            Progress,
         };
 
         // Those should be private, however the standard states that the expression

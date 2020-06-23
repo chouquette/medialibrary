@@ -1225,6 +1225,9 @@ void Media::createIndexes( sqlite::Connection* connection )
     sqlite::Tools::executeRequest( connection,
                                    index( Indexes::MediaGroup,
                                           Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::Progress,
+                                          Settings::DbModelVersion ) );
 }
 
 std::string Media::schema( const std::string& tableName, uint32_t dbModel )
@@ -1451,6 +1454,10 @@ std::string Media::index( Indexes index, uint32_t dbModel )
             assert( dbModel >= 24 );
             return "CREATE INDEX " + indexName( index, dbModel ) +
                         " ON " + Table::Name + "(group_id)";
+        case Indexes::Progress:
+            assert( dbModel >= 27 );
+            return "CREATE INDEX " + indexName( index, dbModel ) +
+                    " ON " + Table::Name + "(progress)";
         default:
             assert( !"Invalid index provided" );
     }
@@ -1478,6 +1485,9 @@ std::string Media::indexName( Indexes index, uint32_t dbModel )
         case Indexes::MediaGroup:
             assert( dbModel >= 24 );
             return "media_group_id_idx";
+        case Indexes::Progress:
+            assert( dbModel >= 27 );
+            return "media_progress_idx";
         default:
             assert( !"Invalid index provided" );
     }
