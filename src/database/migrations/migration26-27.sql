@@ -63,3 +63,25 @@ MediaGroup::trigger( MediaGroup::Triggers::DecrementNbMediaOnDeletion, 27 ),
 MediaGroup::trigger( MediaGroup::Triggers::RenameForcedSingleton, 27 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaChange, 27 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaDeletion, 27 ),
+
+#if defined(__ANDROID__) || (defined(__APPLE__) && defined(TARGET_OS_IPHONE))
+
+"UPDATE " + Media::Table::Name + " AS m SET progress = (" +
+
+#ifdef __ANDROID__
+"SELECT CAST(value AS REAL) / m.duration"
+#else
+"SELECT CAST(value AS REAL)"
+#endif
+
+" FROM " + Metadata::Table::Name + " md "
+    " WHERE entity_type = " +
+        std::to_string(static_cast<std::underlying_type_t<IMetadata::EntityType>>(
+            IMetadata::EntityType::Media ) ) +
+    " AND type = 50 AND md.id_media = m.id_media "
+")"
+#ifdef __ANDROID__
+" WHERE m.duration > 0",
+#endif
+
+#endif

@@ -100,6 +100,10 @@ using ThumbnailerType = medialibrary::VmemThumbnailer;
 #include "medialibrary/filesystem/IDevice.h"
 #include "medialibrary/filesystem/Errors.h"
 
+#if __APPLE__
+# include <TargetConditionals.h>
+#endif
+
 namespace medialibrary
 {
 
