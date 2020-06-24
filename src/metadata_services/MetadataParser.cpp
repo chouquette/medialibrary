@@ -654,7 +654,7 @@ void MetadataAnalyzer::createTracks( Media& m, const std::vector<IItem::Track>& 
         {
             assert( track.type == IItem::Track::Type::Subtitle );
             m.addSubtitleTrack( track.codec, track.language, track.description,
-                                track.s.encoding );
+                                track.s.encoding, 0 );
         }
     }
 }

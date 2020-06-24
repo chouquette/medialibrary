@@ -187,7 +187,8 @@ class Media : public IMedia,
         bool addAudioTrack( const std::string& codec, unsigned int bitrate, unsigned int sampleRate,
                             unsigned int nbChannels, const std::string& language, const std::string& desc );
         bool addSubtitleTrack( std::string codec, std::string language,
-                               std::string description, std::string encoding );
+                               std::string description, std::string encoding,
+                               int64_t attachedFileId );
         virtual Query<IAudioTrack> audioTracks() const override;
         virtual Query<ISubtitleTrack> subtitleTracks() const override;
         virtual Query<IChapter> chapters( const QueryParameters* params ) const override;

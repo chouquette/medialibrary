@@ -36,6 +36,11 @@ public:
     virtual const std::string& language() const = 0;
     virtual const std::string& description() const = 0;
     virtual const std::string& encoding() const = 0;
+    /**
+     * @brief isInAttachedFile Returns true if the track is in an attached
+     *                        (ie. not the main file)
+     */
+    virtual bool isInAttachedFile() const = 0;
 };
 
 }

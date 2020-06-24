@@ -86,3 +86,28 @@ MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaDeletion, 27 ),
 #endif
 
 #endif
+
+"CREATE TEMPORARY TABLE " + SubtitleTrack::Table::Name + "_backup"
+"("
+    "id_track INTEGER PRIMARY KEY,"
+    "codec TEXT,"
+    "language TEXT,"
+    "description TEXT,"
+    "encoding TEXT,"
+    "media_id UNSIGNED INT"
+")",
+
+"INSERT INTO " + SubtitleTrack::Table::Name + "_backup "
+    "SELECT * FROM " + SubtitleTrack::Table::Name,
+
+"DROP TABLE " + SubtitleTrack::Table::Name,
+
+SubtitleTrack::schema( SubtitleTrack::Table::Name, 27 ),
+
+"INSERT INTO " + SubtitleTrack::Table::Name +
+    " SELECT id_track, codec, language, description, encoding, media_id, NULL"
+    " FROM " + SubtitleTrack::Table::Name,
+
+"DROP TABLE " + SubtitleTrack::Table::Name + "_backup",
+
+SubtitleTrack::index( SubtitleTrack::Indexes::MediaId, 27 ),

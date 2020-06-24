@@ -443,11 +443,12 @@ bool Media::addAudioTrack( const std::string& codec, unsigned int bitrate,
 }
 
 bool Media::addSubtitleTrack( std::string codec, std::string language,
-                              std::string description, std::string encoding )
+                              std::string description, std::string encoding,
+                              int64_t attachedFileId )
 {
     return SubtitleTrack::create( m_ml, std::move( codec ), std::move( language ),
                                   std::move( description ), std::move( encoding ),
-                                  m_id ) != nullptr;
+                                  m_id, attachedFileId ) != nullptr;
 }
 
 Query<IAudioTrack> Media::audioTracks() const

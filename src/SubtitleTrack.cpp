@@ -28,6 +28,7 @@
 
 #include "Media.h"
 #include "database/SqliteQuery.h"
+#include "File.h"
 
 namespace medialibrary
 {
@@ -37,25 +38,25 @@ const std::string SubtitleTrack::Table::PrimaryKeyColumn = "id_track";
 int64_t SubtitleTrack::* const SubtitleTrack::Table::PrimaryKey = &SubtitleTrack::m_id;
 
 SubtitleTrack::SubtitleTrack( MediaLibraryPtr, sqlite::Row& row )
-    : m_id( row.extract<decltype(m_id)>() )
-    , m_codec( row.extract<decltype(m_codec)>() )
-    , m_language( row.extract<decltype(m_language)>() )
-    , m_description( row.extract<decltype(m_description)>() )
-    , m_encoding( row.extract<decltype(m_encoding)>() )
+    : m_id( row.load<decltype(m_id)>( 0 ) )
+    , m_codec( row.load<decltype(m_codec)>( 1 ) )
+    , m_language( row.load<decltype(m_language)>( 2 ) )
+    , m_description( row.load<decltype(m_description)>( 3 ) )
+    , m_encoding( row.load<decltype(m_encoding)>( 4 ) )
+    , m_attachedFileId( row.load<decltype(m_attachedFileId)>( 6 ) )
 {
-    // Ensure there is a media id to load
-    assert( row.extract<int64_t>() );
-    assert( row.hasRemainingColumns() == false );
+    assert( row.nbColumns() == 7 );
 }
 
 SubtitleTrack::SubtitleTrack( MediaLibraryPtr, std::string codec,
                               std::string language, std::string description,
-                              std::string encoding )
+                              std::string encoding, int64_t attachedFileId )
     : m_id( 0 )
     , m_codec( std::move( codec ) )
     , m_language( std::move( language ) )
     , m_description( std::move( description ) )
     , m_encoding( std::move( encoding ) )
+    , m_attachedFileId( attachedFileId )
 {
 }
 
@@ -84,6 +85,11 @@ const std::string&SubtitleTrack::encoding() const
     return m_encoding;
 }
 
+bool SubtitleTrack::isInAttachedFile() const
+{
+    return m_attachedFileId != 0;
+}
+
 void SubtitleTrack::createTable( sqlite::Connection* dbConnection )
 {
     sqlite::Tools::executeRequest( dbConnection,
@@ -96,9 +102,23 @@ void SubtitleTrack::createIndexes( sqlite::Connection* dbConnection )
                                    index( Indexes::MediaId, Settings::DbModelVersion ) );
 }
 
-std::string SubtitleTrack::schema( const std::string& tableName, uint32_t )
+std::string SubtitleTrack::schema( const std::string& tableName, uint32_t dbModel )
 {
     assert( tableName == Table::Name );
+    if ( dbModel < 27 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "(" +
+            Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "codec TEXT,"
+            "language TEXT,"
+            "description TEXT,"
+            "encoding TEXT,"
+            "media_id UNSIGNED INT,"
+            "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name +
+                "(id_media) ON DELETE CASCADE"
+        ")";
+    }
     return "CREATE TABLE " + Table::Name +
     "(" +
         Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -107,8 +127,12 @@ std::string SubtitleTrack::schema( const std::string& tableName, uint32_t )
         "description TEXT,"
         "encoding TEXT,"
         "media_id UNSIGNED INT,"
+        "attached_file_id UNSIGNED INT,"
         "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name +
-            "(id_media) ON DELETE CASCADE"
+            "(id_media) ON DELETE CASCADE,"
+        "FOREIGN KEY(attached_file_id) REFERENCES " + File::Table::Name +
+            "(id_file) ON DELETE CASCADE,"
+        "UNIQUE(media_id, attached_file_id) ON CONFLICT FAIL"
     ")";
 }
 
@@ -137,15 +161,17 @@ bool SubtitleTrack::checkDbModel( MediaLibraryPtr ml )
 
 std::shared_ptr<SubtitleTrack> SubtitleTrack::create( MediaLibraryPtr ml,
             std::string codec, std::string language, std::string description,
-            std::string encoding, int64_t mediaId )
+            std::string encoding, int64_t mediaId, int64_t attachedFileId )
 {
     const std::string req = "INSERT INTO " + Table::Name + "(codec, language,"
-            "description, encoding, media_id) VALUES(?, ?, ?, ?, ?)";
+            "description, encoding, media_id, attached_file_id) "
+            "VALUES(?, ?, ?, ?, ?, ?)";
     auto track = std::make_shared<SubtitleTrack>( ml, std::move( codec ),
                     std::move( language ), std::move( description ),
-                    std::move( encoding ) );
+                    std::move( encoding ), attachedFileId );
     if ( insert( ml, track, req, track->codec(), track->language(),
-                 track->description(), track->encoding(), mediaId ) == false )
+                 track->description(), track->encoding(), mediaId,
+                 sqlite::ForeignKey{ attachedFileId } ) == false )
         return nullptr;
     return track;
 }

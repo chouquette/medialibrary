@@ -28,6 +28,7 @@
 
 #include "SubtitleTrack.h"
 #include "Media.h"
+#include "File.h"
 
 class SubtitleTracks : public Tests
 {
@@ -36,15 +37,15 @@ class SubtitleTracks : public Tests
 TEST_F( SubtitleTracks, AddTrack )
 {
     auto media = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
-    auto res = media->addSubtitleTrack( "sea", "otter", "awareness", "week" );
+    auto res = media->addSubtitleTrack( "sea", "otter", "awareness", "week", 0 );
     ASSERT_TRUE( res );
 }
 
 TEST_F( SubtitleTracks, FetchTracks )
 {
     auto media = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
-    media->addSubtitleTrack( "sea", "otter", "awareness", "week" );
-    media->addSubtitleTrack( "best", "time", "of", "year" );
+    media->addSubtitleTrack( "sea", "otter", "awareness", "week", 0 );
+    media->addSubtitleTrack( "best", "time", "of", "year", 0 );
 
     auto tracks = media->subtitleTracks()->all();
     ASSERT_EQ( 2u, tracks.size() );
@@ -76,10 +77,10 @@ TEST_F( SubtitleTracks, FetchTracks )
 TEST_F( SubtitleTracks, RemoveTrack )
 {
     auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
-    auto res = m1->addSubtitleTrack( "sea", "otter", "awareness", "week" );
+    auto res = m1->addSubtitleTrack( "sea", "otter", "awareness", "week", 0 );
     ASSERT_TRUE( res );
     auto m2 =  std::static_pointer_cast<Media>( ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
-    res = m2->addSubtitleTrack( "sea", "otter", "awareness", "week" );
+    res = m2->addSubtitleTrack( "sea", "otter", "awareness", "week", 0 );
     ASSERT_TRUE( res );
 
     ASSERT_EQ( 1u, m1->subtitleTracks()->count() );
@@ -95,4 +96,25 @@ TEST_F( SubtitleTracks, CheckDbModel )
 {
     auto res = SubtitleTrack::checkDbModel( ml.get() );
     ASSERT_TRUE( res );
+}
+
+TEST_F( SubtitleTracks, UnlinkExternalTrack )
+{
+    auto m = std::static_pointer_cast<Media>(
+                ml->addMedia( "mainmedia.mkv", IMedia::Type::Video ) );
+    ASSERT_NE( nullptr, m );
+    auto f = std::static_pointer_cast<File>(
+                m->addExternalMrl( "subs.srt", IFile::Type::Subtitles ) );
+    ASSERT_NE( nullptr, f );
+    auto res = m->addSubtitleTrack( "test", "en", "test", "utf8", f->id() );
+    ASSERT_TRUE( res );
+
+    auto tracks = m->subtitleTracks()->all();
+    ASSERT_EQ( 1u, tracks.size() );
+
+    res = f->destroy();
+    ASSERT_TRUE( res );
+
+    tracks = m->subtitleTracks()->all();
+    ASSERT_EQ( 0u, tracks.size() );
 }
