@@ -134,6 +134,7 @@ protected:
     void checkShowEpisodes( const rapidjson::Value& expectedEpisodes, std::vector<MediaPtr> episodes );
     void checkMediaGroups( const rapidjson::Value& expectedMediaGroups,
                            std::vector<MediaGroupPtr> mediaGroups );
+    void checkMediaFiles( const IMedia* media, const rapidjson::Value &expectedFiles );
 };
 
 class ReducedTests : public Tests

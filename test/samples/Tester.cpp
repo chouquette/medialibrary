@@ -334,6 +334,30 @@ void Tests::checkSubtitleTracks( const rapidjson::Value& expectedTracks,
     }
 }
 
+void Tests::checkMediaFiles( const IMedia *media, const rapidjson::Value& expectedFiles )
+{
+    ASSERT_TRUE( expectedFiles.IsArray() );
+    auto files = media->files();
+    ASSERT_EQ( expectedFiles.Size(), files.size() );
+    for ( auto i = 0u; i < expectedFiles.Size(); ++i )
+    {
+        const auto& expectedFile = expectedFiles[i];
+        ASSERT_TRUE( expectedFile.HasMember( "filename" ) );
+        auto it = std::find_if( begin( files ), end( files ), [&expectedFile]( FilePtr f ) {
+            return utils::file::fileName( f->mrl() ) == expectedFile["filename"].GetString();
+        });
+        ASSERT_NE( it, end( files ) );
+
+        if ( expectedFile.HasMember( "type" ) )
+        {
+            auto expectedType = expectedFile["type"].GetInt();
+            ASSERT_EQ( expectedType,
+                       static_cast<std::underlying_type_t<IFile::Type>>( (*it)->type() ) );
+        }
+        files.erase( it );
+    }
+}
+
 void Tests::checkMedias(const rapidjson::Value& expectedMedias)
 {
     ASSERT_TRUE( expectedMedias.IsArray() );
@@ -394,6 +418,10 @@ void Tests::checkMedias(const rapidjson::Value& expectedMedias)
                 ASSERT_TRUE( res );
             }
             ASSERT_EQ( !snapshotExpected, media->thumbnailMrl( ThumbnailSizeType::Thumbnail ).empty() );
+        }
+        if ( expectedMedia.HasMember( "files" ) )
+        {
+            checkMediaFiles( media.get(), expectedMedia["files"] );
         }
     }
 }
