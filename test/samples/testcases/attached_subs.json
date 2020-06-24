@@ -1,0 +1,24 @@
+{
+    "input": [
+        "video/attached_subs"
+    ],
+    "expected": {
+        "nbVideos": 1,
+        "nbAudios": 0,
+        "media": [{
+            "title": "sample",
+            "nbVideoTracks": 1,
+            "nbAudioTracks": 1,
+            "files": [
+                {
+                    "filename": "sample.mp4",
+                    "type": 1
+                },
+                {
+                    "filename": "sample.srt",
+                    "type": 4
+                }
+            ]
+        }]
+    }
+}
