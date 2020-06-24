@@ -572,12 +572,14 @@ bool Task::resetParsing( MediaLibraryPtr ml )
 std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
 {
     static const std::string req = "SELECT t.* FROM " + Task::Table::Name + " t"
-        " INNER JOIN " + Folder::Table::Name + " fol ON t.parent_folder_id = fol.id_folder"
-        " INNER JOIN " + Device::Table::Name + " d ON d.id_device = fol.device_id"
-        " WHERE step & ? != ? AND retry_count <= ? AND d.is_present != 0 "
+        " LEFT JOIN " + Folder::Table::Name + " fol ON t.parent_folder_id = fol.id_folder"
+        " LEFT JOIN " + Device::Table::Name + " d ON d.id_device = fol.device_id"
+        " WHERE step & ? != ? AND retry_count <= ? AND "
+            "(d.is_present != 0 OR (t.parent_folder_id IS NULL AND t.type = ?))"
         " ORDER BY parent_folder_id";
     return Task::fetchAll<Task>( ml, req, Step::Completed,
-                                 Step::Completed, parser::MaxNbRetries );
+                                 Step::Completed, parser::MaxNbRetries,
+                                 Type::Link );
 }
 
 std::shared_ptr<Task>
