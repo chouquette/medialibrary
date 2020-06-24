@@ -21,10 +21,7 @@
                 "sampleRate": 44100,
                 "nbChannels": 2
             }],
-            "subtitleTracks": [{
-                "codec": "text",
-                "encoding": "UTF-8"
-            }]
+            "nbSubtitleTracks": 1
         }],
         "mediaGroups": [
             {

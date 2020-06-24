@@ -373,6 +373,16 @@ void Tests::checkMedias(const rapidjson::Value& expectedMedias)
             if ( expectedMedia.HasMember( "audioTracks" ) )
                 checkAudioTracks( expectedMedia[ "audioTracks" ], audioTracks );
         }
+        if ( expectedMedia.HasMember( "nbSubtitleTracks" ) || expectedMedia.HasMember( "subtitleTracks" ) )
+        {
+            auto subtitleTracks = media->subtitleTracks()->all();
+            if ( expectedMedia.HasMember( "nbSubtitleTracks" ) )
+            {
+                ASSERT_EQ( expectedMedia[ "nbSubtitleTracks" ].GetUint(), subtitleTracks.size() );
+            }
+            if ( expectedMedia.HasMember( "subtitleTracks" ) )
+                checkSubtitleTracks( expectedMedia[ "subtitleTracks" ], subtitleTracks );
+        }
         if ( expectedMedia.HasMember( "snapshotExpected" ) == true )
         {
             auto snapshotExpected = expectedMedia["snapshotExpected"].GetBool();
