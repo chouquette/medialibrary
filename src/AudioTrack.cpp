@@ -28,6 +28,7 @@
 
 #include "Media.h"
 #include "database/SqliteQuery.h"
+#include "File.h"
 
 namespace medialibrary
 {
@@ -45,13 +46,14 @@ AudioTrack::AudioTrack( MediaLibraryPtr, sqlite::Row& row )
     , m_language( row.extract<decltype(m_language)>() )
     , m_description( row.extract<decltype(m_description)>() )
     , m_mediaId( row.extract<decltype(m_mediaId)>() )
+    , m_attachedFileId( row.extract<decltype(m_attachedFileId)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
 
 AudioTrack::AudioTrack( MediaLibraryPtr, const std::string& codec, unsigned int bitrate, unsigned int sampleRate,
                         unsigned int nbChannels, const std::string& language, const std::string& desc,
-                        int64_t mediaId )
+                        int64_t mediaId, int64_t attachedFileId )
     : m_id( 0 )
     , m_codec( codec )
     , m_bitrate( bitrate )
@@ -60,6 +62,7 @@ AudioTrack::AudioTrack( MediaLibraryPtr, const std::string& codec, unsigned int 
     , m_language( language )
     , m_description( desc )
     , m_mediaId( mediaId )
+    , m_attachedFileId( attachedFileId )
 {
 }
 
@@ -98,6 +101,11 @@ const std::string& AudioTrack::description() const
     return m_description;
 }
 
+bool AudioTrack::isInAttachedFile() const
+{
+    return m_attachedFileId != 0;
+}
+
 void AudioTrack::createTable( sqlite::Connection* dbConnection )
 {
     sqlite::Tools::executeRequest( dbConnection,
@@ -110,9 +118,26 @@ void AudioTrack::createIndexes(sqlite::Connection* dbConnection)
                                    index( Indexes::MediaId, Settings::DbModelVersion ) );
 }
 
-std::string AudioTrack::schema( const std::string& tableName, uint32_t )
+std::string AudioTrack::schema( const std::string& tableName, uint32_t dbModel )
 {
     assert( tableName == Table::Name );
+
+    if ( dbModel < 27 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "(" +
+            AudioTrack::Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "codec TEXT,"
+            "bitrate UNSIGNED INTEGER,"
+            "samplerate UNSIGNED INTEGER,"
+            "nb_channels UNSIGNED INTEGER,"
+            "language TEXT,"
+            "description TEXT,"
+            "media_id UNSIGNED INT,"
+            "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
+                + "(id_media) ON DELETE CASCADE"
+        ")";
+    }
     return "CREATE TABLE " + Table::Name +
     "(" +
         AudioTrack::Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -123,9 +148,13 @@ std::string AudioTrack::schema( const std::string& tableName, uint32_t )
         "language TEXT,"
         "description TEXT,"
         "media_id UNSIGNED INT,"
+        "attached_file_id UNSIGNED INT,"
         "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
-            + "(id_media) ON DELETE CASCADE"
-              ")";
+            + "(id_media) ON DELETE CASCADE,"
+        "FOREIGN KEY(attached_file_id) REFERENCES " + File::Table::Name +
+            "(id_file) ON DELETE CASCADE,"
+        "UNIQUE(media_id, attached_file_id) ON CONFLICT FAIL"
+    ")";
 }
 
 std::string AudioTrack::index( AudioTrack::Indexes index, uint32_t dbModel )
@@ -153,12 +182,18 @@ bool AudioTrack::checkDbModel( MediaLibraryPtr ml )
 
 std::shared_ptr<AudioTrack> AudioTrack::create( MediaLibraryPtr ml, const std::string& codec,
                                                 unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels,
-                                                const std::string& language, const std::string& desc, int64_t mediaId )
+                                                const std::string& language, const std::string& desc,
+                                                int64_t mediaId,
+                                                int64_t attachedFileId )
 {
     static const std::string req = "INSERT INTO " + AudioTrack::Table::Name
-            + "(codec, bitrate, samplerate, nb_channels, language, description, media_id) VALUES(?, ?, ?, ?, ?, ?, ?)";
-    auto track = std::make_shared<AudioTrack>( ml, codec, bitrate, sampleRate, nbChannels, language, desc, mediaId );
-    if ( insert( ml, track, req, codec, bitrate, sampleRate, nbChannels, language, desc, mediaId ) == false )
+            + "(codec, bitrate, samplerate, nb_channels, language, description, "
+            "media_id, attached_file_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+    auto track = std::make_shared<AudioTrack>( ml, codec, bitrate, sampleRate,
+                                               nbChannels, language, desc, mediaId,
+                                               attachedFileId );
+    if ( insert( ml, track, req, codec, bitrate, sampleRate, nbChannels, language,
+                 desc, mediaId, sqlite::ForeignKey{ attachedFileId } ) == false )
         return nullptr;
     return track;
 }

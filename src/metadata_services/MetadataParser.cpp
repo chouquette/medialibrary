@@ -649,7 +649,7 @@ void MetadataAnalyzer::createTracks( Media& m, const std::vector<IItem::Track>& 
         {
             m.addAudioTrack( track.codec, track.bitrate,
                                        track.a.rate, track.a.nbChannels,
-                                       track.language, track.description );
+                                       track.language, track.description, 0 );
         }
         else
         {

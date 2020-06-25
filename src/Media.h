@@ -184,8 +184,10 @@ class Media : public IMedia,
                             uint32_t sarDen, const std::string& language,
                             const std::string& description );
         virtual Query<IVideoTrack> videoTracks() const override;
-        bool addAudioTrack( const std::string& codec, unsigned int bitrate, unsigned int sampleRate,
-                            unsigned int nbChannels, const std::string& language, const std::string& desc );
+        bool addAudioTrack( const std::string& codec, unsigned int bitrate,
+                            unsigned int sampleRate, unsigned int nbChannels,
+                            const std::string& language, const std::string& desc,
+                            int64_t attachedFileId );
         bool addSubtitleTrack( std::string codec, std::string language,
                                std::string description, std::string encoding,
                                int64_t attachedFileId );

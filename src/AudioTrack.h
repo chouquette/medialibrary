@@ -46,7 +46,7 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack>
         AudioTrack(MediaLibraryPtr ml, sqlite::Row& row );
         AudioTrack( MediaLibraryPtr ml, const std::string& codec, unsigned int bitrate,
                     unsigned int sampleRate, unsigned int nbChannels, const std::string& language,
-                    const std::string& desc, int64_t mediaId );
+                    const std::string& desc, int64_t mediaId, int64_t attachedFileId );
 
         virtual int64_t id() const override;
         virtual const std::string&codec() const override;
@@ -55,6 +55,7 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack>
         virtual unsigned int nbChannels() const override;
         virtual const std::string& language() const override;
         virtual const std::string& description() const override;
+        virtual bool isInAttachedFile() const override;
 
         static void createTable( sqlite::Connection* dbConnection );
         static void createIndexes( sqlite::Connection* dbConnection );
@@ -64,7 +65,8 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack>
         static bool checkDbModel( MediaLibraryPtr ml );
         static std::shared_ptr<AudioTrack> create( MediaLibraryPtr ml, const std::string& codec,
                                                    unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels,
-                                                   const std::string& language, const std::string& desc, int64_t mediaId );
+                                                   const std::string& language, const std::string& desc,
+                                                   int64_t mediaId, int64_t attachedFileId );
         static bool removeFromMedia( MediaLibraryPtr ml, int64_t mediaId );
         static Query<IAudioTrack> fromMedia( MediaLibraryPtr ml, int64_t mediaId );
 
@@ -77,6 +79,7 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack>
         const std::string m_language;
         const std::string m_description;
         const int64_t m_mediaId;
+        const int64_t m_attachedFileId;
 
     private:
         friend struct AudioTrack::Table;

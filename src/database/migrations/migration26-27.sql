@@ -111,3 +111,33 @@ SubtitleTrack::schema( SubtitleTrack::Table::Name, 27 ),
 "DROP TABLE " + SubtitleTrack::Table::Name + "_backup",
 
 SubtitleTrack::index( SubtitleTrack::Indexes::MediaId, 27 ),
+
+/* Migrate AudioTrack table */
+
+"CREATE TEMPORARY TABLE " + AudioTrack::Table::Name + "_backup"
+"("
+    "id_track INTEGER PRIMARY KEY,"
+    "codec TEXT,"
+    "bitrate UNSIGNED INTEGER,"
+    "samplerate UNSIGNED INTEGER,"
+    "nb_channels UNSIGNED INTEGER,"
+    "language TEXT,"
+    "description TEXT,"
+    "media_id UNSIGNED INT"
+")",
+
+"INSERT INTO " + AudioTrack::Table::Name + "_backup "
+    "SELECT * FROM " + AudioTrack::Table::Name,
+
+"DROP TABLE " + AudioTrack::Table::Name,
+
+AudioTrack::schema( AudioTrack::Table::Name, 27 ),
+
+"INSERT INTO " + AudioTrack::Table::Name +
+    " SELECT id_track, codec, bitrate, samplerate, nb_channels, language, "
+        "description, media_id, NULL"
+    " FROM " + AudioTrack::Table::Name,
+
+"DROP TABLE " + AudioTrack::Table::Name + "_backup",
+
+AudioTrack::index( AudioTrack::Indexes::MediaId, 27 ),

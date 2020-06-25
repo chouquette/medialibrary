@@ -436,10 +436,12 @@ Query<IVideoTrack> Media::videoTracks() const
 }
 
 bool Media::addAudioTrack( const std::string& codec, unsigned int bitrate,
-                          unsigned int sampleRate, unsigned int nbChannels,
-                          const std::string& language, const std::string& desc )
+                           unsigned int sampleRate, unsigned int nbChannels,
+                           const std::string& language, const std::string& desc,
+                           int64_t attachedFileId )
 {
-    return AudioTrack::create( m_ml, codec, bitrate, sampleRate, nbChannels, language, desc, m_id ) != nullptr;
+    return AudioTrack::create( m_ml, codec, bitrate, sampleRate, nbChannels,
+                               language, desc, m_id, attachedFileId ) != nullptr;
 }
 
 bool Media::addSubtitleTrack( std::string codec, std::string language,
