@@ -8,7 +8,7 @@
         "media": [{
             "title": "sample",
             "nbVideoTracks": 1,
-            "nbAudioTracks": 1,
+            "nbAudioTracks": 2,
             "files": [
                 {
                     "filename": "sample.mp4",

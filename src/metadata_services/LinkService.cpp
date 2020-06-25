@@ -168,19 +168,32 @@ Status LinkService::linkToMedia( IItem &item )
     else if ( item.fileType() == IFile::Type::Soundtrack )
     {
         auto mrl = item.mrl();
-        auto file = File::fromMrl( m_ml, mrl );
-        if ( file == nullptr )
+        auto t = m_ml->getConn()->newTransaction();
+        if ( item.fileId() == 0 )
         {
-            file = File::fromExternalMrl( m_ml, mrl );
+            auto file = File::fromMrl( m_ml, mrl );
             if ( file == nullptr )
             {
-                if ( media->addFile( std::move( mrl ), item.fileType() ) == nullptr )
-                    return Status::Fatal;
-                return Status::Completed;
+                file = File::fromExternalMrl( m_ml, mrl );
+                if ( file == nullptr )
+                {
+                    file = std::static_pointer_cast<File>(
+                                media->addFile( std::move( mrl ), item.fileType() ) );
+                    if ( file == nullptr )
+                        return Status::Fatal;
+                }
             }
+            if ( file->setMediaId( media->id() ) == false )
+                return Status::Fatal;
+            item.setFile( std::move( file ) );
         }
-        if ( file->setMediaId( media->id() ) == false )
-            return Status::Fatal;
+        auto tracks = item.tracks();
+        for ( const auto& t : tracks )
+        {
+            media->addAudioTrack( t.codec, t.bitrate, t.a.rate, t.a.nbChannels,
+                                  t.language, t.description, item.fileId() );
+        }
+        t->commit();
     }
     return Status::Completed;
 }
