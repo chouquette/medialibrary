@@ -191,6 +191,11 @@ class Media : public IMedia,
                                int64_t attachedFileId );
         virtual Query<IAudioTrack> audioTracks() const override;
         virtual Query<ISubtitleTrack> subtitleTracks() const override;
+        /**
+         * @brief integratedSubtitleTracks Equivalent to subtitleTracks, but doesn't
+         *                                 include the tracks on external files
+         */
+        Query<ISubtitleTrack> integratedSubtitleTracks();
         virtual Query<IChapter> chapters( const QueryParameters* params ) const override;
         bool addChapter( int64_t offset, int64_t duration, std::string name );
         std::shared_ptr<Thumbnail> thumbnail( ThumbnailSizeType sizeType ) const;

@@ -62,8 +62,10 @@ public:
     static std::shared_ptr<SubtitleTrack> create( MediaLibraryPtr ml,
                 std::string codec, std::string language, std::string description,
                 std::string encoding, int64_t mediaId, int64_t attachedFileId );
-    static bool removeFromMedia( MediaLibraryPtr ml, int64_t mediaId );
-    static Query<ISubtitleTrack> fromMedia( MediaLibraryPtr ml, int64_t mediaId );
+    static bool removeFromMedia( MediaLibraryPtr ml, int64_t mediaId,
+                                 bool internalTracksOnly );
+    static Query<ISubtitleTrack> fromMedia( MediaLibraryPtr ml, int64_t mediaId,
+                                            bool internalTracksOnly );
 
 private:
     int64_t m_id;

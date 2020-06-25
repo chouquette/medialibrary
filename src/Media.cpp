@@ -460,7 +460,12 @@ Query<IAudioTrack> Media::audioTracks() const
 
 Query<ISubtitleTrack> Media::subtitleTracks() const
 {
-    return SubtitleTrack::fromMedia( m_ml, m_id );
+    return SubtitleTrack::fromMedia( m_ml, m_id, false );
+}
+
+Query<ISubtitleTrack> Media::integratedSubtitleTracks()
+{
+    return SubtitleTrack::fromMedia( m_ml, m_id, true );
 }
 
 Query<IChapter> Media::chapters( const QueryParameters* params ) const

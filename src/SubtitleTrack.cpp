@@ -176,16 +176,21 @@ std::shared_ptr<SubtitleTrack> SubtitleTrack::create( MediaLibraryPtr ml,
     return track;
 }
 
-bool SubtitleTrack::removeFromMedia( MediaLibraryPtr ml, int64_t mediaId )
+bool SubtitleTrack::removeFromMedia( MediaLibraryPtr ml, int64_t mediaId,
+                                     bool internalTracksOnly )
 {
-    static const std::string req = "DELETE FROM " + Table::Name + " "
-            "WHERE media_id = ?";
+    std::string req = "DELETE FROM " + Table::Name + " WHERE media_id = ?";
+    if ( internalTracksOnly == true )
+        req += " AND attached_file_id IS NULL";
     return sqlite::Tools::executeDelete( ml->getConn(), req, mediaId );
 }
 
-Query<ISubtitleTrack> SubtitleTrack::fromMedia(MediaLibraryPtr ml, int64_t mediaId)
+Query<ISubtitleTrack> SubtitleTrack::fromMedia( MediaLibraryPtr ml, int64_t mediaId,
+                                                bool internalTracksOnly )
 {
-    static const std::string req = "FROM " + Table::Name + " WHERE media_id = ?";
+    std::string req = "FROM " + Table::Name + " WHERE media_id = ?";
+    if ( internalTracksOnly == true )
+        req += " AND attached_file_id IS NULL";
     return make_query<SubtitleTrack, ISubtitleTrack>( ml, "*", req, "", mediaId );
 }
 

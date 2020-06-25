@@ -86,7 +86,7 @@ TEST_F( SubtitleTracks, RemoveTrack )
     ASSERT_EQ( 1u, m1->subtitleTracks()->count() );
     ASSERT_EQ( 1u, m2->subtitleTracks()->count() );
 
-    SubtitleTrack::removeFromMedia( ml.get(), m1->id() );
+    SubtitleTrack::removeFromMedia( ml.get(), m1->id(), false );
 
     ASSERT_EQ( 0u, m1->subtitleTracks()->count() );
     ASSERT_EQ( 1u, m2->subtitleTracks()->count() );

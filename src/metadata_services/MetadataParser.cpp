@@ -165,9 +165,10 @@ Status MetadataAnalyzer::run( IItem& item )
         // If we re-parsing this media, there should not be any tracks known for now
         // However in case we crashed or got interrupted in the middle of parsing,
         // we don't want to recreate tracks
-        if ( item.media()->audioTracks()->count() == 0 &&
-             item.media()->videoTracks()->count() == 0 &&
-             item.media()->subtitleTracks()->count() == 0 )
+        auto media = static_cast<Media*>( item.media().get() );
+        if ( media->audioTracks()->count() == 0 &&
+             media->videoTracks()->count() == 0 &&
+             media->integratedSubtitleTracks()->count() == 0 )
         {
             try
             {
@@ -725,7 +726,7 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
     auto t = m_ml->getConn()->newTransaction();
     if ( VideoTrack::removeFromMedia( m_ml, media->id() ) == false ||
          AudioTrack::removeFromMedia( m_ml, media->id() ) == false ||
-         SubtitleTrack::removeFromMedia( m_ml, media->id() ) == false )
+         SubtitleTrack::removeFromMedia( m_ml, media->id(), true ) == false )
     {
         return std::make_tuple( false, false );
     }
