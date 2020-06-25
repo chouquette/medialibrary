@@ -198,17 +198,21 @@ std::shared_ptr<AudioTrack> AudioTrack::create( MediaLibraryPtr ml, const std::s
     return track;
 }
 
-bool AudioTrack::removeFromMedia(MediaLibraryPtr ml, int64_t mediaId)
+bool AudioTrack::removeFromMedia( MediaLibraryPtr ml, int64_t mediaId,
+                                  bool internalTracksOnly )
 {
-    static const std::string req = "DELETE FROM " + Table::Name + " "
-            "WHERE media_id = ?";
+    std::string req = "DELETE FROM " + Table::Name + " WHERE media_id = ?";
+    if ( internalTracksOnly == true )
+        req += " AND attached_file_id IS NULL";
     return sqlite::Tools::executeDelete( ml->getConn(), req, mediaId );
 }
 
-Query<IAudioTrack> AudioTrack::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
+Query<IAudioTrack> AudioTrack::fromMedia( MediaLibraryPtr ml, int64_t mediaId,
+                                          bool internalTracksOnly )
 {
-    static const std::string req = "FROM " + AudioTrack::Table::Name +
-            " WHERE media_id = ?";
+    std::string req = "FROM " + AudioTrack::Table::Name + " WHERE media_id = ?";
+    if ( internalTracksOnly == true )
+        req += " AND attached_file_id IS NULL";
     return make_query<AudioTrack, IAudioTrack>( ml, "*", req, "", mediaId );
 }
 

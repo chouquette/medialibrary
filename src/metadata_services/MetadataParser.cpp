@@ -166,7 +166,7 @@ Status MetadataAnalyzer::run( IItem& item )
         // However in case we crashed or got interrupted in the middle of parsing,
         // we don't want to recreate tracks
         auto media = static_cast<Media*>( item.media().get() );
-        if ( media->audioTracks()->count() == 0 &&
+        if ( media->integratedAudioTracks()->count() == 0 &&
              media->videoTracks()->count() == 0 &&
              media->integratedSubtitleTracks()->count() == 0 )
         {
@@ -725,7 +725,7 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
 
     auto t = m_ml->getConn()->newTransaction();
     if ( VideoTrack::removeFromMedia( m_ml, media->id() ) == false ||
-         AudioTrack::removeFromMedia( m_ml, media->id() ) == false ||
+         AudioTrack::removeFromMedia( m_ml, media->id(), true ) == false ||
          SubtitleTrack::removeFromMedia( m_ml, media->id(), true ) == false )
     {
         return std::make_tuple( false, false );

@@ -192,6 +192,11 @@ class Media : public IMedia,
                                std::string description, std::string encoding,
                                int64_t attachedFileId );
         virtual Query<IAudioTrack> audioTracks() const override;
+        /**
+         * @brief integratedAudioTracks Equivalent to audioTracks, but doesn't
+         *                              include the tracks on attached files
+         */
+        Query<IAudioTrack> integratedAudioTracks() const;
         virtual Query<ISubtitleTrack> subtitleTracks() const override;
         /**
          * @brief integratedSubtitleTracks Equivalent to subtitleTracks, but doesn't

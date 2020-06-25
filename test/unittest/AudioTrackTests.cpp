@@ -89,7 +89,7 @@ TEST_F( AudioTracks, RemoveTracks )
     ASSERT_EQ( 1u, f1->audioTracks()->count() );
     ASSERT_EQ( 1u, f2->audioTracks()->count() );
 
-    AudioTrack::removeFromMedia( ml.get(), f1->id() );
+    AudioTrack::removeFromMedia( ml.get(), f1->id(), false );
 
     ASSERT_EQ( 0u, f1->audioTracks()->count() );
     ASSERT_EQ( 1u, f2->audioTracks()->count() );

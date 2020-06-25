@@ -455,7 +455,12 @@ bool Media::addSubtitleTrack( std::string codec, std::string language,
 
 Query<IAudioTrack> Media::audioTracks() const
 {
-    return AudioTrack::fromMedia( m_ml, m_id );
+    return AudioTrack::fromMedia( m_ml, m_id, false );
+}
+
+Query<IAudioTrack> Media::integratedAudioTracks() const
+{
+    return AudioTrack::fromMedia( m_ml, m_id, true );
 }
 
 Query<ISubtitleTrack> Media::subtitleTracks() const
