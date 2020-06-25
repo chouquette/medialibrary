@@ -121,7 +121,7 @@ Status LinkService::linkToPlaylist(IItem& item)
 
 Status LinkService::linkToMedia( IItem &item )
 {
-    auto media = m_ml->media( item.linkToMrl() );
+    auto media = std::static_pointer_cast<Media>( m_ml->media( item.linkToMrl() ) );
     if ( media == nullptr )
         return Status::Requeue;
 
@@ -137,7 +137,24 @@ Status LinkService::linkToMedia( IItem &item )
     {
         try
         {
-            media->addFile( item.mrl(), item.fileType() );
+            auto t = m_ml->getConn()->newTransaction();
+            int64_t fileId = item.fileId();
+            /*
+             * In case a rescan was forced, or the item gets refreshed, we already
+             * inserted the file in database, and we just need to link that file
+             * with a subtitle track for this media
+             */
+            if ( item.fileId() == 0 )
+            {
+                auto file = media->addFile( item.mrl(), item.fileType() );
+                if ( file == nullptr )
+                    return Status::Fatal;
+                fileId = file->id();
+                item.setFile( std::move( file ) );
+            }
+            /* We have no way of knowing the attached subtitle track info for now */
+            media->addSubtitleTrack( "", "", "", "", fileId );
+            t->commit();
         }
         catch ( const sqlite::errors::ConstraintUnique& )
         {

@@ -9,6 +9,7 @@
             "title": "sample",
             "nbVideoTracks": 1,
             "nbAudioTracks": 1,
+            "nbSubtitleTracks": 1,
             "files": [
                 {
                     "filename": "sample.mp4",
