@@ -847,6 +847,11 @@ FilePtr Task::file()
     return m_file;
 }
 
+int64_t Task::fileId() const
+{
+    return m_fileId;
+}
+
 bool Task::setFile( FilePtr file )
 {
     auto fileId = file->id();

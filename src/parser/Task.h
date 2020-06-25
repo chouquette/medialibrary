@@ -291,6 +291,7 @@ public:
     virtual void setMedia( MediaPtr media ) override;
 
     virtual FilePtr file() override;
+    virtual int64_t fileId() const override;
     virtual bool setFile( FilePtr file ) override;
 
     virtual FolderPtr parentFolder() override;

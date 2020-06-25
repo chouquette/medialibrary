@@ -190,6 +190,14 @@ public:
      *             this item, if any. It returns nullptr otherwise
      */
     virtual FilePtr file() = 0;
+
+    /**
+     * @brief fileId Returns the ID of the file associated with this item, if any.
+     *
+     * If no file was created for this item yet, 0 is returned.
+     */
+    virtual int64_t fileId() const = 0;
+
     /**
      * @brief setFile Assigns a File to the item
      */
