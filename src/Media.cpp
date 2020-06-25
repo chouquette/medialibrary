@@ -453,9 +453,7 @@ bool Media::addSubtitleTrack( std::string codec, std::string language,
 
 Query<IAudioTrack> Media::audioTracks() const
 {
-    static const std::string req = "FROM " + AudioTrack::Table::Name +
-            " WHERE media_id = ?";
-    return make_query<AudioTrack, IAudioTrack>( m_ml, "*", req, "", m_id );
+    return AudioTrack::fromMedia( m_ml, m_id );
 }
 
 Query<ISubtitleTrack> Media::subtitleTracks() const

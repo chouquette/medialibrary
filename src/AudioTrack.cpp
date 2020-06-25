@@ -27,7 +27,7 @@
 #include "AudioTrack.h"
 
 #include "Media.h"
-
+#include "database/SqliteQuery.h"
 
 namespace medialibrary
 {
@@ -168,6 +168,13 @@ bool AudioTrack::removeFromMedia(MediaLibraryPtr ml, int64_t mediaId)
     static const std::string req = "DELETE FROM " + Table::Name + " "
             "WHERE media_id = ?";
     return sqlite::Tools::executeDelete( ml->getConn(), req, mediaId );
+}
+
+Query<IAudioTrack> AudioTrack::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
+{
+    static const std::string req = "FROM " + AudioTrack::Table::Name +
+            " WHERE media_id = ?";
+    return make_query<AudioTrack, IAudioTrack>( ml, "*", req, "", mediaId );
 }
 
 }
