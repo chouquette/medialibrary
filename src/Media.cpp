@@ -459,9 +459,7 @@ Query<IAudioTrack> Media::audioTracks() const
 
 Query<ISubtitleTrack> Media::subtitleTracks() const
 {
-    static const std::string req = "FROM " + SubtitleTrack::Table::Name +
-            " WHERE media_id = ?";
-    return make_query<SubtitleTrack, ISubtitleTrack>( m_ml, "*", req, "", m_id );
+    return SubtitleTrack::fromMedia( m_ml, m_id );
 }
 
 Query<IChapter> Media::chapters( const QueryParameters* params ) const

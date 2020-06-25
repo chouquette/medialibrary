@@ -61,6 +61,7 @@ public:
                 std::string codec, std::string language, std::string description,
                 std::string encoding, int64_t mediaId );
     static bool removeFromMedia( MediaLibraryPtr ml, int64_t mediaId );
+    static Query<ISubtitleTrack> fromMedia( MediaLibraryPtr ml, int64_t mediaId );
 
 private:
     int64_t m_id;

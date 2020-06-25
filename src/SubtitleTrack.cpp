@@ -27,6 +27,7 @@
 #include "SubtitleTrack.h"
 
 #include "Media.h"
+#include "database/SqliteQuery.h"
 
 namespace medialibrary
 {
@@ -154,6 +155,12 @@ bool SubtitleTrack::removeFromMedia( MediaLibraryPtr ml, int64_t mediaId )
     static const std::string req = "DELETE FROM " + Table::Name + " "
             "WHERE media_id = ?";
     return sqlite::Tools::executeDelete( ml->getConn(), req, mediaId );
+}
+
+Query<ISubtitleTrack> SubtitleTrack::fromMedia(MediaLibraryPtr ml, int64_t mediaId)
+{
+    static const std::string req = "FROM " + Table::Name + " WHERE media_id = ?";
+    return make_query<SubtitleTrack, ISubtitleTrack>( ml, "*", req, "", mediaId );
 }
 
 }
