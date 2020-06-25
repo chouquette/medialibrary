@@ -171,9 +171,31 @@ bool Task::isStepCompleted( Step step ) const
 {
     if ( m_type == Type::Link )
     {
-        // We always want to return true for any step which isn't the linking step
-        // since we don't want to run any service other than the linking one
-        return step != Step::Linking;
+        switch ( step )
+        {
+            case Step::MetadataExtraction:
+            {
+                if ( m_linkToType == LinkType::Media &&
+                       m_fileType == IFile::Type::Soundtrack )
+                {
+                    /* If the attached file is an audio track, we want to process
+                     * it if we haven't already, so we fallback to the default case
+                     * to run it only when the step hasn't been executed yet.
+                     * In other cases, we hardcode the results
+                     */
+                    break;
+                }
+                return true;
+            }
+            case Step::MetadataAnalysis:
+                /* We don't have anything to extract, just link tracks together */
+                return true;
+            case Step::Linking:
+                /* We definitely want to run the link step for link tasks */
+                return false;
+            default:
+                assert( !"Invalid state for linking task" );
+        }
     }
     return ( static_cast<uint8_t>( m_step ) & static_cast<uint8_t>( step ) ) != 0;
 }
