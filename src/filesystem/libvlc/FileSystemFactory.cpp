@@ -104,7 +104,8 @@ const std::string& FileSystemFactory::scheme() const
 
 bool FileSystemFactory::start( fs::IFileSystemFactoryCb* cb )
 {
-    assert( m_cb == nullptr );
+    if ( m_cb != nullptr )
+        return true;
     m_cb = cb;
     return m_deviceLister->start( this );
 }
