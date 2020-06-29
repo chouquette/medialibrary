@@ -111,6 +111,7 @@ bool FileSystemFactory::start( fs::IFileSystemFactoryCb* cb )
 
 void FileSystemFactory::stop()
 {
+    assert( m_cb != nullptr );
     m_deviceLister->stop();
     m_cb = nullptr;
 }
