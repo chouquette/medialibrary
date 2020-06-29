@@ -25,7 +25,6 @@
 #include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "medialibrary/IDeviceLister.h"
 #include "compat/Mutex.h"
-#include "compat/ConditionVariable.h"
 #include "Types.h"
 
 namespace medialibrary
@@ -66,7 +65,6 @@ private:
 private:
     const std::string m_scheme;
     compat::Mutex m_devicesLock;
-    compat::ConditionVariable m_devicesCond;
     std::vector<std::shared_ptr<fs::IDevice>> m_devices;
     std::shared_ptr<IDeviceLister> m_deviceLister;
     fs::IFileSystemFactoryCb* m_cb;

@@ -70,28 +70,15 @@ std::shared_ptr<fs::IFile> FileSystemFactory::createFile( const std::string& mrl
 std::shared_ptr<fs::IDevice>
 FileSystemFactory::createDevice( const std::string& uuid )
 {
-    std::shared_ptr<fs::IDevice> res;
     std::unique_lock<compat::Mutex> lock( m_devicesLock );
-
-    m_devicesCond.wait_for( lock, std::chrono::seconds{ 5 },
-                            [this, &res, &uuid]() {
-        res = deviceByUuidLocked( uuid );
-        return res != nullptr;
-    });
-    return res;
+    return deviceByUuidLocked( uuid );
 }
 
 std::shared_ptr<fs::IDevice>
 FileSystemFactory::createDeviceFromMrl( const std::string& mrl )
 {
-    std::shared_ptr<fs::IDevice> res;
     std::unique_lock<compat::Mutex> lock( m_devicesLock );
-    m_devicesCond.wait_for( lock, std::chrono::seconds{ 5 },
-                            [this, &res, &mrl]() {
-        res = deviceByMrlLocked( mrl );
-        return res != nullptr;
-    });
-    return res;
+    return deviceByMrlLocked( mrl );
 }
 
 void FileSystemFactory::refreshDevices()
@@ -149,7 +136,6 @@ void FileSystemFactory::onDeviceMounted( const std::string& uuid,
     if ( addMountpoint == true )
         device->addMountpoint( mountpoint );
 
-    m_devicesCond.notify_all();
     m_cb->onDeviceMounted( *device );
 }
 
