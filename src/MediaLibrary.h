@@ -232,6 +232,8 @@ public:
      */
     void startFsFactoriesAndRefresh();
 
+    void startFsFactory( fs::IFileSystemFactory& fsFactory );
+
     virtual bool forceRescan() override;
 
     virtual void enableFailedThumbnailRegeneration() override;

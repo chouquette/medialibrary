@@ -2489,6 +2489,12 @@ void MediaLibrary::startFsFactoriesAndRefresh()
     }
 }
 
+void MediaLibrary::startFsFactory( fs::IFileSystemFactory &fsFactory )
+{
+    fsFactory.start( &m_fsFactoryCb );
+    fsFactory.refreshDevices();
+}
+
 bool MediaLibrary::forceRescan()
 {
     std::lock_guard<compat::Mutex> lock{ m_mutex };
