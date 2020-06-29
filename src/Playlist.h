@@ -123,7 +123,7 @@ public:
 
     static Backups loadBackups( MediaLibraryPtr ml );
     static std::tuple<bool, time_t, std::vector<std::string>>
-        backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel);
+        backupPlaylists( MediaLibrary *ml, uint32_t dbModel );
 
     static std::shared_ptr<Playlist> fromFile( MediaLibraryPtr ml, int64_t fileId );
 

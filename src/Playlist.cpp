@@ -728,7 +728,7 @@ std::string Playlist::sortRequest( const QueryParameters* params )
 }
 
 std::tuple<bool, time_t, std::vector<std::string>>
-Playlist::backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel )
+Playlist::backupPlaylists( MediaLibrary* ml, uint32_t dbModel )
 {
     /* We can't use the Playlist class directly for this, as it's tied with the
      * current database model, and we're trying to run this before a
@@ -809,6 +809,12 @@ Playlist::backupPlaylists( MediaLibraryPtr ml, uint32_t dbModel )
                 auto fsFactory = ml->fsFactoryForMrl( scheme );
                 if ( fsFactory == nullptr )
                     continue;
+                /*
+                 * Since this happens before a migration, we haven't started any
+                 * device lister nor fs factories yet. We need to do so before
+                 * trying to access a removable device
+                 */
+                ml->startFsFactory( *fsFactory );
                 auto device = fsFactory->createDevice( uuid );
                 if ( device == nullptr )
                     continue;
