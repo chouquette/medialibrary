@@ -269,19 +269,23 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
 {
     try
     {
+        LOG_DEBUG( "Checking for modifications in ", currentFolderFs->mrl() );
         // We already know of this folder, though it may now contain a .nomedia file.
         // In this case, simply delete the folder.
         if ( m_probe->isHidden( *currentFolderFs ) == true )
         {
             if ( newFolder == false )
+            {
+                LOG_INFO( "A .nomedia file was added into a known folder, "
+                          "removing it." );
                 m_ml->deleteFolder( *currentFolder );
+            }
             return;
         }
 
         if ( m_cb != nullptr )
             m_cb->onDiscoveryProgress( currentFolderFs->mrl() );
         // Load the folders we already know of:
-        LOG_DEBUG( "Checking for modifications in ", currentFolderFs->mrl() );
         // Don't try to fetch any potential sub folders if the folder was freshly added
         std::vector<std::shared_ptr<Folder>> subFoldersInDB;
         if ( newFolder == false )
