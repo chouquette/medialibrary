@@ -141,3 +141,13 @@ AudioTrack::schema( AudioTrack::Table::Name, 27 ),
 "DROP TABLE " + AudioTrack::Table::Name + "_backup",
 
 AudioTrack::index( AudioTrack::Indexes::MediaId, 27 ),
+
+/*
+ * Recreate the entire settings table. We don't properly handle schema changes
+ * for that table, and only altering the table would cause prior changes to be
+ * applied too soon.
+ * For instance, when migrating from model 23 to 24, we already recreate the table
+ * with the new settings that should be added in model 27, causing the alter
+ * table to fail because the colums already exist
+ */
+"DROP TABLE Settings",
