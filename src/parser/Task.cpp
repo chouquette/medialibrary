@@ -454,14 +454,81 @@ std::string Task::schema( const std::string& tableName, uint32_t dbModel )
             "is_refresh BOOLEAN NOT NULL DEFAULT 0,"
             "UNIQUE(mrl, parent_playlist_id, is_refresh) ON CONFLICT FAIL,"
             "FOREIGN KEY(parent_folder_id) REFERENCES " + Folder::Table::Name
-            + "(id_folder) ON DELETE CASCADE,"
+                + "(id_folder) ON DELETE CASCADE,"
             "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
-            + "(id_file) ON DELETE CASCADE,"
+                + "(id_file) ON DELETE CASCADE,"
             "FOREIGN KEY(parent_playlist_id) REFERENCES " + Playlist::Table::Name
-            + "(id_playlist) ON DELETE CASCADE"
+                + "(id_playlist) ON DELETE CASCADE"
         ")";
     }
-    auto req = "CREATE TABLE " + Table::Name +
+    if ( dbModel < 20 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "step INTEGER NOT NULL DEFAULT 0,"
+            "retry_count INTEGER NOT NULL DEFAULT 0,"
+            "type INTEGER NOT NULL,"
+            "mrl TEXT,"
+            "file_type INTEGER NOT NULL,"
+            "file_id UNSIGNED INTEGER,"
+            "parent_folder_id UNSIGNED INTEGER,"
+            "link_to_id UNSIGNED INTEGER,"
+            "link_to_type UNSIGNED INTEGER,"
+            "link_extra UNSIGNED INTEGER,"
+            "UNIQUE(mrl,type) ON CONFLICT FAIL,"
+            "FOREIGN KEY(parent_folder_id) REFERENCES " + Folder::Table::Name
+                + "(id_folder) ON DELETE CASCADE,"
+            "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
+                + "(id_file) ON DELETE CASCADE"
+        ")";
+    }
+    if ( dbModel < 22 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "step INTEGER NOT NULL DEFAULT 0,"
+            "retry_count INTEGER NOT NULL DEFAULT 0,"
+            "type INTEGER NOT NULL,"
+            "mrl TEXT,"
+            "file_type INTEGER NOT NULL,"
+            "file_id UNSIGNED INTEGER,"
+            "parent_folder_id UNSIGNED INTEGER,"
+            "link_to_id UNSIGNED INTEGER NOT NULL,"
+            "link_to_type UNSIGNED INTEGER,"
+            "link_extra UNSIGNED INTEGER,"
+            "UNIQUE(mrl,type, link_to_id) ON CONFLICT FAIL,"
+            "FOREIGN KEY(parent_folder_id) REFERENCES " + Folder::Table::Name
+                + "(id_folder) ON DELETE CASCADE,"
+            "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
+                + "(id_file) ON DELETE CASCADE"
+        ")";
+    }
+    if ( dbModel < 25 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "step INTEGER NOT NULL DEFAULT 0,"
+            "retry_count INTEGER NOT NULL DEFAULT 0,"
+            "type INTEGER NOT NULL,"
+            "mrl TEXT,"
+            "file_type INTEGER NOT NULL,"
+            "file_id UNSIGNED INTEGER,"
+            "parent_folder_id UNSIGNED INTEGER,"
+            "link_to_id UNSIGNED INTEGER NOT NULL,"
+            "link_to_type UNSIGNED INTEGER NOT NULL,"
+            "link_extra UNSIGNED INTEGER NOT NULL,"
+            "UNIQUE(mrl,type, link_to_id, link_to_type, link_extra) "
+                "ON CONFLICT FAIL,"
+            "FOREIGN KEY(parent_folder_id) REFERENCES " + Folder::Table::Name
+                + "(id_folder) ON DELETE CASCADE,"
+            "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
+                + "(id_file) ON DELETE CASCADE"
+        ")";
+    }
+    return "CREATE TABLE " + Table::Name +
     "("
         "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
         "step INTEGER NOT NULL DEFAULT 0,"
@@ -470,49 +537,18 @@ std::string Task::schema( const std::string& tableName, uint32_t dbModel )
         "mrl TEXT,"
         "file_type INTEGER NOT NULL,"
         "file_id UNSIGNED INTEGER,"
-        "parent_folder_id UNSIGNED INTEGER,";
-
-        // For linking purposes
-        // link_to_id needs to be not null, so the unique constraint always take
-        // its value into account
-        // Starting from model 22, this is true for all link_ fields.
-
-    if ( dbModel >= 25 )
-    {
-        req += "link_to_id UNSIGNED INTEGER NOT NULL,"
-               "link_to_type UNSIGNED INTEGER NOT NULL,"
-               "link_extra UNSIGNED INTEGER NOT NULL,"
-               "link_to_mrl TEXT NOT NULL,"
-               "UNIQUE(mrl,type, link_to_id, link_to_type, link_extra, link_to_mrl) "
-               "ON CONFLICT FAIL,";
-    }
-    else if ( dbModel >= 22 )
-    {
-        req += "link_to_id UNSIGNED INTEGER NOT NULL,"
-               "link_to_type UNSIGNED INTEGER NOT NULL,"
-               "link_extra UNSIGNED INTEGER NOT NULL,"
-               "UNIQUE(mrl,type, link_to_id, link_to_type, link_extra) ON CONFLICT FAIL,";
-    }
-    else if ( dbModel >= 20 )
-    {
-        req += "link_to_id UNSIGNED INTEGER NOT NULL,"
-               "link_to_type UNSIGNED INTEGER,"
-               "link_extra UNSIGNED INTEGER,"
-               "UNIQUE(mrl,type, link_to_id) ON CONFLICT FAIL,";
-    }
-    else
-    {
-        req += "link_to_id UNSIGNED INTEGER, "
-               "link_to_type UNSIGNED INTEGER,"
-               "link_extra UNSIGNED INTEGER,"
-               "UNIQUE(mrl,type) ON CONFLICT FAIL,";
-    }
-    req += "FOREIGN KEY(parent_folder_id) REFERENCES " + Folder::Table::Name
+        "parent_folder_id UNSIGNED INTEGER,"
+        "link_to_id UNSIGNED INTEGER NOT NULL,"
+        "link_to_type UNSIGNED INTEGER NOT NULL,"
+        "link_extra UNSIGNED INTEGER NOT NULL,"
+        "link_to_mrl TEXT NOT NULL,"
+        "UNIQUE(mrl,type, link_to_id, link_to_type, link_extra, link_to_mrl) "
+            "ON CONFLICT FAIL,"
+        "FOREIGN KEY(parent_folder_id) REFERENCES " + Folder::Table::Name
             + "(id_folder) ON DELETE CASCADE,"
-            "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
+        "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
             + "(id_file) ON DELETE CASCADE"
     ")";
-    return req;
 }
 
 std::string Task::trigger(Task::Triggers trigger, uint32_t dbModel )
