@@ -38,11 +38,6 @@ public:
 
     CrawlerProbe() = default;
 
-    void setDiscoverNoMedia( bool discoverNoMedia )
-    {
-        m_discoverNoMedia = discoverNoMedia;
-    }
-
     virtual bool proceedOnDirectory( const fs::IDirectory& ) override
     {
         return true;
@@ -50,7 +45,7 @@ public:
 
     virtual bool isHidden( const fs::IDirectory& directory ) override
     {
-        bool hidden = m_discoverNoMedia == false && hasDotNoMediaFile( directory ) == true;
+        bool hidden = hasDotNoMediaFile( directory ) == true;
         if ( hidden == true )
             LOG_INFO( "Ignoring folder ", directory.mrl(), " with a .nomedia file" );
         return hidden;
@@ -99,10 +94,6 @@ private:
             return strcasecmp( file->name().c_str(), ".nomedia" ) == 0;
         }) != end( files );
     }
-
-private:
-    bool m_discoverNoMedia; // Initialized to false
-
 };
 
 }
