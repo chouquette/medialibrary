@@ -593,7 +593,7 @@ Status MetadataAnalyzer::createFileAndMedia( IItem& item ) const
         if ( deviceFs->isRemovable() == false )
             throw;
         LOG_INFO( "Failed to insert File in db: ", ex.what(), ". Assuming the"
-                  "mrl duplicate" );
+                  " mrl is duplicated" );
         return Status::Discarded;
     }
 
