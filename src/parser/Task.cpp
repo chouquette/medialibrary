@@ -608,9 +608,8 @@ bool Task::checkDbModel( MediaLibraryPtr ml )
 bool Task::resetRetryCount( MediaLibraryPtr ml )
 {
     static const std::string req = "UPDATE " + Task::Table::Name + " SET "
-            "retry_count = 0 WHERE step & ?1 != ?1 AND step != ?2";
-    return sqlite::Tools::executeUpdate( ml->getConn(), req, Step::Completed,
-                                         Step::Linking );
+            "retry_count = 0 WHERE step & ?1 != ?1";
+    return sqlite::Tools::executeUpdate( ml->getConn(), req, Step::Completed );
 }
 
 bool Task::resetParsing( MediaLibraryPtr ml )
