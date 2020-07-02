@@ -57,7 +57,7 @@ Task::Task( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
     , m_id( row.extract<decltype(m_id)>() )
     , m_step( row.extract<decltype(m_step)>() )
-    , m_retryCount( row.extract<decltype(m_retryCount)>() )
+    , m_attemptsRemaining( row.extract<decltype(m_attemptsRemaining)>() )
     , m_type( row.extract<decltype(m_type)>() )
     , m_mrl( row.extract<decltype(m_mrl)>() )
     , m_fileType( row.extract<decltype(m_fileType)>() )
@@ -76,6 +76,7 @@ Task::Task( MediaLibraryPtr ml, std::string mrl, std::shared_ptr<fs::IFile> file
             std::shared_ptr<fs::IDirectory> parentFolderFs,
             IFile::Type fileType )
     : m_ml( ml )
+    , m_attemptsRemaining( Settings::MaxTaskAttempts )
     , m_type( Type::Creation )
     , m_mrl( std::move( mrl ) )
     , m_fileType( fileType )
@@ -90,6 +91,7 @@ Task::Task( MediaLibraryPtr ml, std::shared_ptr<File> file,
             std::shared_ptr<fs::IFile> fileFs, std::shared_ptr<Folder> parentFolder,
             std::shared_ptr<fs::IDirectory> parentFolderFs )
     : m_ml( ml )
+    , m_attemptsRemaining( Settings::MaxTaskAttempts )
     , m_type( Type::Refresh )
     , m_mrl( file->mrl() )
     , m_fileType( file->type() )
@@ -105,6 +107,7 @@ Task::Task( MediaLibraryPtr ml, std::shared_ptr<File> file,
 Task::Task( MediaLibraryPtr ml, std::string mrl, int64_t linkToId,
             Task::LinkType linkToType, int64_t linkExtra )
     : m_ml( ml )
+    , m_attemptsRemaining( Settings::MaxLinkTaskAttempts )
     , m_type( Type::Link )
     , m_mrl( std::move( mrl ) )
     , m_linkToId( linkToId )
@@ -116,6 +119,7 @@ Task::Task( MediaLibraryPtr ml, std::string mrl, int64_t linkToId,
 Task::Task( MediaLibraryPtr ml, std::string mrl, IFile::Type fileType,
             std::string linkToMrl, IItem::LinkType linkToType, int64_t linkExtra )
     : m_ml( ml )
+    , m_attemptsRemaining( Settings::MaxLinkTaskAttempts )
     , m_type( Type::Link )
     , m_mrl( std::move( mrl ) )
     , m_fileType( fileType )
@@ -127,6 +131,7 @@ Task::Task( MediaLibraryPtr ml, std::string mrl, IFile::Type fileType,
 
 Task::Task( MediaLibraryPtr ml, std::string mrl , IFile::Type fileType )
     : m_ml( ml )
+    , m_attemptsRemaining( Settings::MaxTaskAttempts )
     , m_type( Type::Restore )
     , m_mrl( std::move( mrl ) )
     , m_fileType( fileType )
@@ -142,20 +147,28 @@ void Task::markStepCompleted( Step stepCompleted )
 bool Task::saveParserStep()
 {
     static const std::string req = "UPDATE " + Task::Table::Name + " SET step = ?, "
-            "retry_count = 0 WHERE id_task = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_step, m_id ) == false )
+            "attempts_left = "
+            "(CASE type "
+                "WHEN " +
+                    std::to_string( static_cast<std::underlying_type_t<Type>>( Type::Link ) ) + " "
+                "THEN (SELECT max_link_task_attempts FROM Settings) "
+                "ELSE (SELECT max_task_attempts FROM Settings) END) "
+            "WHERE id_task = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_step,
+                                       m_id ) == false )
         return false;
-    m_retryCount = 0;
+    m_attemptsRemaining = m_type != Type::Link ?
+                Settings::MaxTaskAttempts : Settings::MaxLinkTaskAttempts;
     return true;
 }
 
 bool Task::decrementRetryCount()
 {
     static const std::string req = "UPDATE " + Task::Table::Name + " SET "
-            "retry_count = retry_count - 1 WHERE id_task = ?";
+            "attempts_left = attempts_left + 1 WHERE id_task = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id ) == false )
         return false;
-    --m_retryCount;
+    ++m_attemptsRemaining;
     return true;
 }
 
@@ -203,10 +216,10 @@ bool Task::isStepCompleted( Step step ) const
 void Task::startParserStep()
 {
     static const std::string req = "UPDATE " + Task::Table::Name + " SET "
-            "retry_count = retry_count + 1 WHERE id_task = ?";
+            "attempts_left = attempts_left - 1 WHERE id_task = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id ) == false )
         return;
-    ++m_retryCount;
+    --m_attemptsRemaining;
 }
 
 uint32_t Task::goToNextService()
@@ -219,9 +232,9 @@ void Task::resetCurrentService()
     m_currentService = 0;
 }
 
-unsigned int Task::retryCount() const
+unsigned int Task::attemptsRemaining() const
 {
-    return m_retryCount;
+    return m_attemptsRemaining;
 }
 
 int64_t Task::id() const
@@ -528,11 +541,35 @@ std::string Task::schema( const std::string& tableName, uint32_t dbModel )
                 + "(id_file) ON DELETE CASCADE"
         ")";
     }
+    if ( dbModel < 27 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "step INTEGER NOT NULL DEFAULT 0,"
+            "retry_count INTEGER NOT NULL DEFAULT 0,"
+            "type INTEGER NOT NULL,"
+            "mrl TEXT,"
+            "file_type INTEGER NOT NULL,"
+            "file_id UNSIGNED INTEGER,"
+            "parent_folder_id UNSIGNED INTEGER,"
+            "link_to_id UNSIGNED INTEGER NOT NULL,"
+            "link_to_type UNSIGNED INTEGER NOT NULL,"
+            "link_extra UNSIGNED INTEGER NOT NULL,"
+            "link_to_mrl TEXT NOT NULL,"
+            "UNIQUE(mrl,type, link_to_id, link_to_type, link_extra, link_to_mrl) "
+                "ON CONFLICT FAIL,"
+            "FOREIGN KEY(parent_folder_id) REFERENCES " + Folder::Table::Name
+                + "(id_folder) ON DELETE CASCADE,"
+            "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
+                + "(id_file) ON DELETE CASCADE"
+        ")";
+    }
     return "CREATE TABLE " + Table::Name +
     "("
         "id_task INTEGER PRIMARY KEY AUTOINCREMENT,"
         "step INTEGER NOT NULL DEFAULT 0,"
-        "retry_count INTEGER NOT NULL DEFAULT 0,"
+        "attempts_left INTEGER NOT NULL,"
         "type INTEGER NOT NULL,"
         "mrl TEXT,"
         "file_type INTEGER NOT NULL,"
@@ -607,23 +644,42 @@ bool Task::checkDbModel( MediaLibraryPtr ml )
 
 bool Task::resetRetryCount( MediaLibraryPtr ml )
 {
+    auto t = ml->getConn()->newTransaction();
     static const std::string req = "UPDATE " + Task::Table::Name + " SET "
-            "retry_count = 0 WHERE step & ?1 != ?1";
-    return sqlite::Tools::executeUpdate( ml->getConn(), req, Step::Completed );
+            "attempts_left = (SELECT max_task_attempts FROM SETTINGS) "
+            "WHERE step & ?1 != ?1 AND type = ?";
+    static const std::string linkReq = "UPDATE " + Task::Table::Name + " SET "
+            "attempts_left = (SELECT max_link_task_attempts FROM SETTINGS) "
+            "WHERE step & ?1 != ?1 AND type = ?";
+    auto res = sqlite::Tools::executeUpdate( ml->getConn(), req, Step::Completed,
+                                             Type::Creation ) &&
+               sqlite::Tools::executeUpdate( ml->getConn(), req, Step::Completed,
+                                             Type::Link );
+    if ( res == false )
+        return false;
+    t->commit();
+    return true;
 }
 
 bool Task::resetParsing( MediaLibraryPtr ml )
 {
     assert( sqlite::Transaction::transactionInProgress() == true );
     static const std::string resetReq = "UPDATE " + Task::Table::Name + " SET "
-            "retry_count = 0, step = ?";
+            "attempts_left = (SELECT max_task_attempts FROM Settings), "
+            "step = ? WHERE type != ?";
+    static const std::string resetLinkReq = "UPDATE " + Task::Table::Name + " SET "
+            "attempts_left = (SELECT max_link_task_attempts FROM Settings), "
+            "step = ? WHERE type = ?";
     /* We also want to delete the refresh tasks, since we are going to rescan
      * all existing media anyway
      */
     static const std::string deleteRefreshReq = "DELETE FROM " + Task::Table::Name +
             " WHERE type = ?";
     return sqlite::Tools::executeDelete( ml->getConn(), deleteRefreshReq, Type::Refresh ) &&
-            sqlite::Tools::executeUpdate( ml->getConn(), resetReq, Step::None );
+            sqlite::Tools::executeUpdate( ml->getConn(), resetReq,
+                                          Step::None, Type::Link ) &&
+            sqlite::Tools::executeUpdate( ml->getConn(), resetLinkReq,
+                                          Step::None, Type::Link );
 }
 
 std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
@@ -631,12 +687,11 @@ std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
     static const std::string req = "SELECT t.* FROM " + Task::Table::Name + " t"
         " LEFT JOIN " + Folder::Table::Name + " fol ON t.parent_folder_id = fol.id_folder"
         " LEFT JOIN " + Device::Table::Name + " d ON d.id_device = fol.device_id"
-        " WHERE step & ? != ? AND retry_count <= ? AND "
+        " WHERE step & ? != ? AND attempts_left > 0 AND "
             "(d.is_present != 0 OR (t.parent_folder_id IS NULL AND t.type = ?))"
         " ORDER BY parent_folder_id";
     return Task::fetchAll<Task>( ml, req, Step::Completed,
-                                 Step::Completed, parser::MaxNbRetries,
-                                 Type::Link );
+                                 Step::Completed, Type::Link );
 }
 
 std::shared_ptr<Task>
@@ -658,11 +713,11 @@ Task::create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
         std::move( fileFs ), std::move( parentFolder ), std::move( parentFolderFs ),
         fileType );
     const std::string req = "INSERT INTO " + Task::Table::Name +
-        "(type, mrl, file_type, parent_folder_id, link_to_id, link_to_type, "
+        "(attempts_left, type, mrl, file_type, parent_folder_id, link_to_id, link_to_type, "
             "link_extra, link_to_mrl)"
-            "VALUES(?, ?, ?, ?, 0, 0, 0, '')";
-    if ( insert( ml, self, req, Type::Creation, self->mrl(), fileType,
-                 parentFolderId ) == false )
+            "VALUES(?, ?, ?, ?, ?, 0, 0, 0, '')";
+    if ( insert( ml, self, req, Settings::MaxTaskAttempts, Type::Creation,
+                 self->mrl(), fileType, parentFolderId ) == false )
         return nullptr;
     if ( parser != nullptr )
         parser->parse( self );
@@ -681,11 +736,12 @@ Task::createRefreshTask( MediaLibraryPtr ml, std::shared_ptr<File> file,
                                         std::move( parentFolder ),
                                         std::move( parentFolderFs ) );
     const std::string req = "INSERT INTO " + Task::Table::Name +
-            "(type, mrl, file_type, file_id, parent_folder_id, link_to_id, "
+            "(attempts_left, type, mrl, file_type, file_id, parent_folder_id, link_to_id, "
             "link_to_type, link_extra, link_to_mrl)"
-            "VALUES(?, ?, ?, ?, ?, 0, 0, 0, '')";
-    if ( insert( ml, self, req, Type::Refresh, self->mrl(), self->file()->type(),
-                 self->file()->id(), parentFolderId ) == false )
+            "VALUES(?, ?, ?, ?, ?, ?, 0, 0, 0, '')";
+    if ( insert( ml, self, req, Settings::MaxTaskAttempts, Type::Refresh,
+                 self->mrl(), self->file()->type(), self->file()->id(),
+                 parentFolderId ) == false )
         return nullptr;
     if ( parser != nullptr )
         parser->parse( self );
@@ -736,10 +792,11 @@ std::shared_ptr<Task> Task::createLinkTask( MediaLibraryPtr ml, std::string mrl,
     auto self = std::make_shared<Task>( ml, std::move( mrl ), linkToId, linkToType,
                                         linkToExtra );
     const std::string req = "INSERT INTO " + Task::Table::Name +
-            "(type, mrl, file_type, file_id, parent_folder_id, link_to_id,"
-            "link_to_type, link_extra, link_to_mrl) VALUES(?, ?, ?, ?, ?, ?, ?, ?, '')";
-    if ( insert( ml, self, req, Type::Link, self->mrl(), IFile::Type::Unknown,
-                 nullptr, nullptr, linkToId, linkToType, linkToExtra ) == false )
+            "(attempts_left, type, mrl, file_type, file_id, parent_folder_id, link_to_id,"
+            "link_to_type, link_extra, link_to_mrl) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, '')";
+    if ( insert( ml, self, req, Settings::MaxLinkTaskAttempts, Type::Link, self->mrl(),
+                 IFile::Type::Unknown, nullptr, nullptr, linkToId, linkToType,
+                 linkToExtra ) == false )
         return nullptr;
     if ( parser != nullptr )
         parser->parse( self );
@@ -756,10 +813,11 @@ std::shared_ptr<Task> Task::createLinkTask( MediaLibraryPtr ml, std::string mrl,
                                         std::move( linkToMrl ), linkToType,
                                         linkToExtra );
     const std::string req = "INSERT INTO " + Task::Table::Name +
-            "(type, mrl, file_type, link_to_id, link_to_type, link_extra, link_to_mrl) "
-            "VALUES(?, ?, ?, 0, ?, ?, ?)";
-    if ( insert( ml, self, req, Type::Link, self->mrl(), fileType, linkToType,
-                 linkToExtra, self->linkToMrl() ) == false )
+            "(attempts_left, type, mrl, file_type, link_to_id, link_to_type, link_extra, link_to_mrl) "
+            "VALUES(?, ?, ?, ?, 0, ?, ?, ?)";
+    if ( insert( ml, self, req, Settings::MaxLinkTaskAttempts, Type::Link,
+                 self->mrl(), fileType, linkToType, linkToExtra,
+                 self->linkToMrl() ) == false )
         return nullptr;
     auto parser = ml->getParser();
     if ( parser != nullptr )
@@ -773,9 +831,10 @@ std::shared_ptr<Task> Task::createRestoreTask( MediaLibraryPtr ml, std::string m
     auto parser = ml->getParser();
     auto self = std::make_shared<Task>( ml, std::move( mrl ), fileType );
     const std::string req = "INSERT INTO " + Table::Name +
-            "(type, mrl, file_type, link_to_id, link_to_type, link_extra, link_to_mrl) "
-            "VALUES(?, ?, ?, 0, 0, 0, '')";
-    if ( insert( ml, self, req, Type::Restore, self->mrl(), fileType ) == false )
+            "(attempts_left, type, mrl, file_type, link_to_id, link_to_type, link_extra, link_to_mrl) "
+            "VALUES(?, ?, ?, ?, 0, 0, 0, '')";
+    if ( insert( ml, self, req, Settings::MaxTaskAttempts, Type::Restore,
+                 self->mrl(), fileType ) == false )
         return nullptr;
     if ( parser != nullptr )
         parser->parse( self );

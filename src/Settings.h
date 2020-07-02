@@ -51,8 +51,8 @@ public:
     static void createTable( sqlite::Connection* dbConn );
 
     static const uint32_t DbModelVersion;
-    static const uint32_t MaxTaskRetries;
-    static const uint32_t MaxLinkTaskRetries;
+    static const uint32_t MaxTaskAttempts;
+    static const uint32_t MaxLinkTaskAttempts;
 
 private:
     MediaLibrary* m_ml;

@@ -33,8 +33,8 @@ namespace medialibrary
 {
 
 const uint32_t Settings::DbModelVersion = 27u;
-const uint32_t Settings::MaxTaskRetries = 1u;
-const uint32_t Settings::MaxLinkTaskRetries = 5u;
+const uint32_t Settings::MaxTaskAttempts = 2u;
+const uint32_t Settings::MaxLinkTaskAttempts = 6u;
 
 Settings::Settings( MediaLibrary* ml )
     : m_ml( ml )
@@ -51,7 +51,7 @@ bool Settings::load()
     {
         if ( sqlite::Tools::executeInsert( m_ml->getConn(),
                 "INSERT INTO Settings VALUES(?, ?, ?)",
-                DbModelVersion, MaxTaskRetries, MaxLinkTaskRetries ) == false )
+                DbModelVersion, MaxTaskAttempts, MaxLinkTaskAttempts ) == false )
         {
             return false;
         }
@@ -85,8 +85,8 @@ void Settings::createTable( sqlite::Connection* dbConn )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS Settings("
                 "db_model_version UNSIGNED INTEGER NOT NULL,"
-                "max_task_retries UNSIGNED INTEGER NOT NULL,"
-                "max_link_task_retries UNSIGNED INTEGER NOT NULL"
+                "max_task_attempts UNSIGNED INTEGER NOT NULL,"
+                "max_link_task_attempts UNSIGNED INTEGER NOT NULL"
             ")";
     sqlite::Tools::executeRequest( dbConn, req );
 }

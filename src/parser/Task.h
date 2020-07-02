@@ -176,7 +176,7 @@ public:
      */
     uint32_t goToNextService();
     void resetCurrentService();
-    unsigned int retryCount() const;
+    unsigned int attemptsRemaining() const;
 
     int64_t id() const;
 
@@ -315,7 +315,7 @@ private:
     MediaLibraryPtr m_ml = nullptr;
     int64_t     m_id = 0;
     Step        m_step = Step::None;
-    unsigned int m_retryCount = 0;
+    unsigned int m_attemptsRemaining;
     Type        m_type;
     std::string m_mrl;
     IFile::Type m_fileType = IFile::Type::Unknown;

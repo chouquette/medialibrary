@@ -151,3 +151,37 @@ AudioTrack::index( AudioTrack::Indexes::MediaId, 27 ),
  * table to fail because the colums already exist
  */
 "DROP TABLE Settings",
+
+"CREATE TEMPORARY TABLE " + parser::Task::Table::Name + "_backup"
+"("
+    "id_task INTEGER PRIMARY KEY,"
+    "step INTEGER,"
+    "retry_count INTEGER,"
+    "type INTEGER,"
+    "mrl TEXT,"
+    "file_type INTEGER,"
+    "file_id UNSIGNED INTEGER,"
+    "parent_folder_id UNSIGNED INTEGER,"
+    "link_to_id UNSIGNED INTEGER,"
+    "link_to_type UNSIGNED INTEGER,"
+    "link_extra UNSIGNED INTEGER,"
+    "link_to_mrl TEXT"
+")",
+
+"INSERT INTO " + parser::Task::Table::Name + "_backup"
+    " SELECT * FROM " + parser::Task::Table::Name,
+
+"DROP TABLE " + parser::Task::Table::Name,
+
+parser::Task::schema( parser::Task::Table::Name, 27 ),
+
+/*
+ * Don't bother migrate the retry_count since we force a rescan which will
+ * reset it anyway
+ */
+"INSERT INTO " + parser::Task::Table::Name +
+    " SELECT * FROM " + parser::Task::Table::Name + "_backup",
+
+"DROP TABLE " + parser::Task::Table::Name + "_backup",
+
+parser::Task::index( parser::Task::Indexes::ParentFolderId, 27 ),
