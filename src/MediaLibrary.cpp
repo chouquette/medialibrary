@@ -789,7 +789,7 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
         parser::Task::create( this, std::move( fileFs ), std::move( parentFolder ),
                               std::move( parentFolderFs ), fileType );
     }
-    catch ( const sqlite::errors::ConstraintViolation& ex )
+    catch ( const sqlite::errors::ConstraintUnique& ex )
     {
         // Most likely the file is already scheduled and we restarted the
         // discovery after a crash.

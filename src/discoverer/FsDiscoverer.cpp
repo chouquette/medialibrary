@@ -97,7 +97,7 @@ bool FsDiscoverer::discover( const std::string& entryPoint,
         m_ml->getCb()->onEntryPointAdded( entryPoint, res );
         return res;
     }
-    catch ( sqlite::errors::ConstraintViolation& ex )
+    catch ( sqlite::errors::ConstraintUnique& ex )
     {
         LOG_DEBUG( fsDirMrl, " discovery aborted (assuming banned folder): ", ex.what() );
     }
