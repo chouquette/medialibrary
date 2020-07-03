@@ -311,8 +311,8 @@ Connection::ThreadSpecificConnection::~ThreadSpecificConnection()
     auto it = conn->m_conns.find( compat::this_thread::get_id() );
     if ( it != end( conn->m_conns ) )
     {
-        // Ensure those cached statements will not be used if another connection
-        // with the same pointer gets created
+        // Ensure those cached statements will not be used if another thread
+        // with the same ID gets created
         sqlite::Statement::FlushConnectionStatementCache( it->second.get() );
         // And ensure we won't use the same connection if a thread with the same
         // ID gets used in the future.
