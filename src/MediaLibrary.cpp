@@ -1097,6 +1097,8 @@ Query<IArtist> MediaLibrary::searchArtists( const std::string& name,
 Query<IShow> MediaLibrary::searchShows( const std::string& pattern,
                                         const QueryParameters* params ) const
 {
+    if ( validateSearchPattern( pattern ) == false )
+        return {};
     return Show::search( this, pattern, params );
 }
 
