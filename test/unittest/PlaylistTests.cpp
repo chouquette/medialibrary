@@ -333,6 +333,9 @@ TEST_F( Playlists, Search )
     ml->createPlaylist( "playlist 2" );
     ml->createPlaylist( "laylist 3" );
 
+    auto query = ml->searchPlaylists( "", nullptr );
+    ASSERT_EQ( nullptr, query );
+
     auto playlists = ml->searchPlaylists( "play", nullptr )->all();
     ASSERT_EQ( 2u, playlists.size() );
 }
