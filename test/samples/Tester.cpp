@@ -184,6 +184,7 @@ void Tests::SetUp()
 
     auto res = m_ml->initialize( "test.db", mlDir, m_cb.get() );
     ASSERT_EQ( InitializeResult::Success, res );
+    ASSERT_TRUE( m_ml->isInitialized() );
 }
 
 void Tests::InitializeCallback()
