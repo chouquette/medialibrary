@@ -453,6 +453,10 @@ TEST_F( MediaGroups, Delete )
     ASSERT_EQ( 2u, groups.size() );
     ASSERT_EQ( m2->groupId(), groups[0]->id() );
     ASSERT_EQ( m1->groupId(), groups[1]->id() );
+
+    /* Ensure we properly handle a non existing group */
+    auto res = ml->deleteMediaGroup( 123 );
+    ASSERT_FALSE( res );
 }
 
 TEST_F( MediaGroups, DeleteMedia )
