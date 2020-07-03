@@ -630,3 +630,33 @@ TEST_F( Playlists, IsReadOnly )
     ASSERT_FALSE( pl->isReadOnly() );
     ASSERT_EQ( "", pl->mrl() );
 }
+
+TEST_F( Playlists, SortByCreationDate )
+{
+    auto pl2 = ml->createPlaylist( "zzzzzz" );
+    auto pl3 = ml->createPlaylist( "aaaaaa" );
+    auto forceCreationDate = [this]( int64_t plId, time_t t ) {
+        const std::string req = "UPDATE " + Playlist::Table::Name +
+                " SET creation_date = ? WHERE id_playlist = ?";
+        return sqlite::Tools::executeUpdate( ml->getConn(), req, t, plId );
+    };
+    forceCreationDate( pl->id(),  99999 );
+    forceCreationDate( pl2->id(), 11111 );
+    forceCreationDate( pl3->id(), 12345 );
+
+    QueryParameters params{};
+    params.sort = SortingCriteria::InsertionDate;
+    params.desc = false;
+    auto playlists = ml->playlists( &params )->all();
+    ASSERT_EQ( 3u, playlists.size() );
+    ASSERT_EQ( pl2->id(), playlists[0]->id() );
+    ASSERT_EQ( pl3->id(), playlists[1]->id() );
+    ASSERT_EQ( pl->id(), playlists[2]->id() );
+
+    params.desc = true;
+    playlists = ml->playlists( &params )->all();
+    ASSERT_EQ( 3u, playlists.size() );
+    ASSERT_EQ( pl->id(), playlists[0]->id() );
+    ASSERT_EQ( pl3->id(), playlists[1]->id() );
+    ASSERT_EQ( pl2->id(), playlists[2]->id() );
+}
