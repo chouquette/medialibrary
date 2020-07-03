@@ -163,7 +163,7 @@ TEST_F( Playlists, Insert )
     {
         auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv", IMedia::Type::Video );
         ASSERT_NE( nullptr, m );
-        auto res = pl->append( *m );
+        auto res = pl->append( m->id() );
         ASSERT_TRUE( res );
     }
     // [<1,0>,<2,1>,<3,2>]
