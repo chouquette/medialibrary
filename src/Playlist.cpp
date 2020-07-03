@@ -76,17 +76,9 @@ std::shared_ptr<Playlist> Playlist::create( MediaLibraryPtr ml, const std::strin
     auto self = std::make_shared<Playlist>( ml, name );
     static const std::string req = "INSERT INTO " + Playlist::Table::Name +
             "(name, file_id, creation_date, artwork_mrl) VALUES(?, ?, ?, ?)";
-    try
-    {
-        if ( insert( ml, self, req, name, nullptr, self->m_creationDate, self->m_artworkMrl ) == false )
-            return nullptr;
-        return self;
-    }
-    catch( sqlite::errors::ConstraintViolation& ex )
-    {
-        LOG_WARN( "Failed to create playlist: ", ex.what() );
-    }
-    return nullptr;
+    if ( insert( ml, self, req, name, nullptr, self->m_creationDate, self->m_artworkMrl ) == false )
+        return nullptr;
+    return self;
 }
 
 int64_t Playlist::id() const
