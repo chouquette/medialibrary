@@ -394,6 +394,13 @@ TEST_F( Playlists, Sort )
     ASSERT_EQ( 2u, pls.size() );
     ASSERT_EQ( pl2->id(), pls[1]->id() );
     ASSERT_EQ( pl->id(), pls[0]->id() );
+
+    params.sort = SortingCriteria::NbAudio;
+    params.desc = true;
+    pls = ml->playlists( &params )->all();
+    ASSERT_EQ( 2u, pls.size() );
+    ASSERT_EQ( pl->id(), pls[0]->id() );
+    ASSERT_EQ( pl2->id(), pls[1]->id() );
 }
 
 TEST_F( Playlists, AddDuplicate )
