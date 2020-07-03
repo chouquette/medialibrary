@@ -343,6 +343,9 @@ TEST_F( Albums, SearchByTitle )
     a2->addTrack( m2, 1, 0, 0, nullptr );
     m2->save();
 
+    auto query = ml->searchAlbums( "", nullptr );
+    ASSERT_EQ( nullptr, query );
+
     auto albums = ml->searchAlbums( "otte", nullptr )->all();
     ASSERT_EQ( 1u, albums.size() );
 }

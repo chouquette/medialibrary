@@ -225,6 +225,10 @@ TEST_F( Medias, Search )
                     ml->addMedia( "track " + std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
         m->save();
     }
+
+    auto query = ml->searchMedia( "", nullptr );
+    ASSERT_EQ( nullptr, query );
+
     auto media = ml->searchMedia( "tra", nullptr )->all();
     ASSERT_EQ( 10u, media.size() );
 

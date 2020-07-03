@@ -152,6 +152,9 @@ TEST_F( Genres, Search )
     ml->createGenre( "something" );
     ml->createGenre( "blork" );
 
+    auto query = ml->searchGenre( "", nullptr );
+    ASSERT_EQ( nullptr, query );
+
     auto genres = ml->searchGenre( "genr", nullptr )->all();
     ASSERT_EQ( 1u, genres.size() );
 }
