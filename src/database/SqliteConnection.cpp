@@ -85,7 +85,9 @@ Connection::Handle Connection::handle()
         ConnPtr dbConn( dbConnection, &sqlite3_close );
         if ( res != SQLITE_OK )
             errors::mapToException( "<connecting to db>", "", res );
-        sqlite3_extended_result_codes( dbConnection, 1 );
+        res = sqlite3_extended_result_codes( dbConnection, 1 );
+        if ( res != SQLITE_OK )
+            errors::mapToException( "<enabling extended errors>", "", res );
         sqlite3_busy_timeout( dbConnection, 500 );
         // Don't use public wrapper, they need to be able to call getConn, which
         // would result from a recursive call and a deadlock from here.
