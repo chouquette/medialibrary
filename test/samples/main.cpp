@@ -34,6 +34,7 @@ static std::string TestDirectory = SRC_DIR "/test/samples/";
 static std::string ForcedTestDirectory;
 bool Verbose = false;
 bool ExtraVerbose = false;
+bool DebugVerbose = false;
 
 #define TEST_CASE_LIST \
     X("featuring") \
@@ -304,6 +305,7 @@ int main(int ac, char** av)
     ::testing::InitGoogleTest(&ac, av);
     const std::string verboseArg = "-v";
     const std::string extraVerboseArg = "-vv";
+    const std::string debugVerboseArg = "-vvv";
     const std::string forcedTestDir = "--testdir";
     for ( auto i = 1; i < ac; ++i )
     {
@@ -311,6 +313,8 @@ int main(int ac, char** av)
             Verbose = true;
         else if ( av[i] == extraVerboseArg )
             ExtraVerbose = true;
+        else if ( av[i] == debugVerboseArg )
+            DebugVerbose = true;
         else if ( av[i] == forcedTestDir )
         {
             assert(i + 1 < ac);

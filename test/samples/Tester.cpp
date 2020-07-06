@@ -41,6 +41,7 @@
 
 extern bool Verbose;
 extern bool ExtraVerbose;
+extern bool DebugVerbose;
 
 MockCallback::MockCallback()
     : m_thumbnailDone( false )
@@ -166,6 +167,8 @@ void Tests::SetUp()
         m_ml->setVerbosity( LogLevel::Debug );
     else if ( Verbose == true )
         m_ml->setVerbosity( LogLevel::Info );
+    else if ( DebugVerbose == true )
+        m_ml->setVerbosity( LogLevel::Verbose );
 
 #ifndef _WIN32
     auto mlDir = "/tmp/ml_folder/";
