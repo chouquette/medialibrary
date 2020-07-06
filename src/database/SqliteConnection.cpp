@@ -81,7 +81,10 @@ Connection::Handle Connection::handle()
     if ( it == end( m_conns ) )
     {
         sqlite3* dbConnection;
-        auto res = sqlite3_open( m_dbPath.c_str(), &dbConnection );
+        auto flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX;
+        if ( m_conns.empty() == true )
+            flags |= SQLITE_OPEN_CREATE;
+        auto res = sqlite3_open_v2( m_dbPath.c_str(), &dbConnection, flags, nullptr );
         ConnPtr dbConn( dbConnection, &sqlite3_close );
         if ( res != SQLITE_OK )
             errors::mapToException( "<connecting to db>", "", res );
