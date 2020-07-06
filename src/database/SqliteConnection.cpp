@@ -99,9 +99,17 @@ Connection::Handle Connection::handle()
         setPragma( dbConnection, "temp_store", "2" );
 #endif
 #if DEBUG_SQLITE_TRIGGERS
-        sqlite3_trace_v2( dbConnection, SQLITE_TRACE_STMT, [](unsigned int, void* , void* , void* x) {
-            const char* str = static_cast<const char*>( x );
-            LOG_ERROR( "Executed: ", str );
+        sqlite3_trace_v2( dbConnection, SQLITE_TRACE_STMT | SQLITE_TRACE_CLOSE,
+                          [](unsigned int t, void* , void* p, void* x) {
+            if ( t == SQLITE_TRACE_STMT )
+            {
+                const char* str = static_cast<const char*>( x );
+                LOG_VERBOSE( "Executed: ", str );
+            }
+            else if ( t == SQLITE_TRACE_CLOSE )
+            {
+                LOG_VERBOSE( "Connection ", p, " was closed" );
+            }
             return 0;
         }, nullptr );
 #endif
