@@ -77,10 +77,10 @@ Connection::Handle Connection::handle()
      * \sa sqlite::Statement::StatementsCache
      */
     std::unique_lock<compat::Mutex> lock( m_connMutex );
-    sqlite3* dbConnection;
     auto it = m_conns.find( compat::this_thread::get_id() );
     if ( it == end( m_conns ) )
     {
+        sqlite3* dbConnection;
         auto res = sqlite3_open( m_dbPath.c_str(), &dbConnection );
         ConnPtr dbConn( dbConnection, &sqlite3_close );
         if ( res != SQLITE_OK )
