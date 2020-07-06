@@ -27,6 +27,7 @@
 #include <sstream>
 
 #include "medialibrary/ILogger.h"
+#include "compat/Thread.h"
 
 namespace medialibrary
 {
@@ -51,6 +52,7 @@ private:
     static std::string createMsg( Args&&... args )
     {
         std::stringstream stream;
+        stream << "[T#" << compat::this_thread::get_id() << "] ";
         createMsg( stream, std::forward<Args>( args )... );
         return stream.str();
     }
