@@ -62,6 +62,7 @@ std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::s
 
 std::shared_ptr<fs::IFile> FileSystemFactory::createFile( const std::string& mrl )
 {
+    assert( isStarted() == true );
     auto fsDir = createDirectory( utils::file::directory( mrl ) );
     assert( fsDir != nullptr );
     return fsDir->file( mrl );
@@ -70,6 +71,7 @@ std::shared_ptr<fs::IFile> FileSystemFactory::createFile( const std::string& mrl
 std::shared_ptr<fs::IDevice>
 FileSystemFactory::createDevice( const std::string& uuid )
 {
+    // Let deviceByUuidLocked handle the isStarted assertion
     std::unique_lock<compat::Mutex> lock( m_devicesLock );
     return deviceByUuidLocked( uuid );
 }
@@ -77,12 +79,14 @@ FileSystemFactory::createDevice( const std::string& uuid )
 std::shared_ptr<fs::IDevice>
 FileSystemFactory::createDeviceFromMrl( const std::string& mrl )
 {
+    // Let deviceByMrlLocked handle the isStarted assertion
     std::unique_lock<compat::Mutex> lock( m_devicesLock );
     return deviceByMrlLocked( mrl );
 }
 
 void FileSystemFactory::refreshDevices()
 {
+    assert( isStarted() == true );
     m_deviceLister->refresh();
 }
 
@@ -121,6 +125,7 @@ void FileSystemFactory::onDeviceMounted( const std::string& uuid,
                                          const std::string& mountpoint,
                                          bool removable )
 {
+    assert( isStarted() == true );
     auto addMountpoint = true;
     std::shared_ptr<fs::IDevice> device;
     {
@@ -144,6 +149,7 @@ void FileSystemFactory::onDeviceMounted( const std::string& uuid,
 void FileSystemFactory::onDeviceUnmounted( const std::string& uuid,
                                                   const std::string& mountpoint )
 {
+    assert( isStarted() == true );
     std::shared_ptr<fs::IDevice> device;
     {
         std::unique_lock<compat::Mutex> lock( m_devicesLock );
@@ -160,6 +166,7 @@ void FileSystemFactory::onDeviceUnmounted( const std::string& uuid,
 
 std::shared_ptr<fs::IDevice> FileSystemFactory::deviceByUuidLocked( const std::string& uuid )
 {
+    assert( isStarted() == true );
     auto it = std::find_if( begin( m_devices ), end( m_devices ),
                             [&uuid]( const std::shared_ptr<fs::IDevice>& d ) {
         return strcasecmp( d->uuid().c_str(), uuid.c_str() ) == 0;
@@ -171,6 +178,7 @@ std::shared_ptr<fs::IDevice> FileSystemFactory::deviceByUuidLocked( const std::s
 
 std::shared_ptr<fs::IDevice> FileSystemFactory::deviceByMrlLocked( const std::string& mrl )
 {
+    assert( isStarted() == true );
     std::shared_ptr<fs::IDevice> res;
     std::string mountpoint;
     for ( const auto& d : m_devices )
