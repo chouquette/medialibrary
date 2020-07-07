@@ -68,10 +68,7 @@ struct FileSystemFactory : public fs::IFileSystemFactory
     {
         auto dev = std::make_shared<Device>( mountpointMrl, uuid, removable );
         dev->setupRoot();
-        auto d = device( mountpointMrl );
-        if ( d != nullptr )
-            d->setMountpointRoot( mountpointMrl, dev->root() );
-        devices.push_back( dev );
+        addDevice( dev );
         return dev;
     }
 
