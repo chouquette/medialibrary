@@ -149,8 +149,7 @@ TEST_F( Folders, ListFolders )
 TEST_F( Folders, NewFolderWithFile )
 {
     ASSERT_EQ( 3u, ml->files().size() );
-    // Do not watch for live changes
-    ml.reset();
+
     auto newFolder = mock::FileSystemFactory::Root + "newfolder/";
     fsMock->addFolder( newFolder );
     fsMock->addFile( newFolder + "newfile.avi" );
@@ -170,8 +169,7 @@ TEST_F( Folders, NewFileInSubFolder )
     ASSERT_EQ( 3u, ml->files().size() );
 
     f = std::static_pointer_cast<Folder>( ml->folder( mock::FileSystemFactory::SubFolder ) );
-    // Do not watch for live changes
-    ml.reset();
+
     fsMock->addFile( mock::FileSystemFactory::SubFolder + "newfile.avi" );
 
     Reload();
@@ -186,8 +184,7 @@ TEST_F( Folders, NewFileInSubFolder )
 TEST_F( Folders, RemoveFileFromDirectory )
 {
     ASSERT_EQ( 3u, ml->files().size() );
-    // Do not watch for live changes
-    ml.reset();
+
     fsMock->removeFile( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
 
     Reload();
@@ -202,8 +199,7 @@ TEST_F( Folders, RemoveFileFromDirectory )
 TEST_F( Folders, RemoveDirectory )
 {
     ASSERT_EQ( 3u, ml->files().size() );
-    // Do not watch for live changes
-    ml.reset();
+
     fsMock->removeFolder( mock::FileSystemFactory::SubFolder );
 
     Reload();
@@ -222,7 +218,6 @@ TEST_F( Folders, UpdateFile )
     ASSERT_NE( f, nullptr );
     auto id = f->id();
 
-    ml.reset();
     auto fsFile = std::static_pointer_cast<mock::File>( fsMock->file( filePath ) );
     fsFile->markAsModified();
 
@@ -450,8 +445,7 @@ TEST_F( Folders, RemoveNonExistantEntryPoint )
 TEST_F( Folders, RemoveRootFolder )
 {
     ASSERT_EQ( 3u, ml->files().size() );
-    // Do not watch for live changes
-    ml.reset();
+
     fsMock->removeFolder( mock::FileSystemFactory::Root );
 
     Reload();
@@ -488,8 +482,6 @@ TEST_F( Folders, NbMedia )
     ASSERT_EQ( 2u, root->media( IMedia::Type::Unknown, nullptr )->count() );
     ASSERT_EQ( 1u, subFolder->media( IMedia::Type::Unknown, nullptr )->count() );
 
-    // Do not watch for live changes
-    ml.reset();
     fsMock->removeFile( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
 
     Reload();
