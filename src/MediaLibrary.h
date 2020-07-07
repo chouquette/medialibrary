@@ -325,6 +325,7 @@ private:
 protected:
     virtual void addLocalFsFactory();
     void addDefaultDeviceListers();
+    void deleteAllTables( medialibrary::sqlite::Connection *dbConn );
 
     class FsFactoryCb : public fs::IFileSystemFactoryCb
     {

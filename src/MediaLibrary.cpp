@@ -345,6 +345,20 @@ bool MediaLibrary::createAllTables()
     return true;
 }
 
+void MediaLibrary::deleteAllTables( sqlite::Connection* dbConn )
+{
+    auto tables = sqlite::Tools::listTables( dbConn );
+    auto views = sqlite::Tools::listViews( dbConn );
+    assert( sqlite::Transaction::transactionInProgress() == false );
+    sqlite::Connection::WeakDbContext ctx{ dbConn };
+    auto t = dbConn->newTransaction();
+    for ( const auto& t : tables )
+        sqlite::Tools::executeRequest( dbConn, "DROP TABLE " + t );
+    for ( const auto& t : views )
+        sqlite::Tools::executeRequest( dbConn, "DROP VIEW " + t );
+    t->commit();
+}
+
 void MediaLibrary::createAllTriggers()
 {
     auto dbConn = m_dbConnection.get();
@@ -1427,12 +1441,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
 
 bool MediaLibrary::recreateDatabase()
 {
-    // Close all active connections, flushes all previously run statements.
-    auto dbPath = m_dbConnection->dbPath();
-    m_dbConnection.reset();
-    if ( unlink( dbPath.c_str() ) != 0 )
-        return false;
-    m_dbConnection = sqlite::Connection::connect( dbPath );
+    deleteAllTables( m_dbConnection.get() );
     auto t = m_dbConnection->newTransaction();
     Settings::createTable( m_dbConnection.get() );
     if ( createAllTables() == false )
