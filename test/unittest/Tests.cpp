@@ -38,8 +38,9 @@ void Tests::TearDown()
     ml.reset();
 }
 
-void Tests::Reload()
+void Tests::SetUp()
 {
+    unlink("test.db");
     InstantiateMediaLibrary();
     if ( fsFactory == nullptr )
     {
@@ -62,12 +63,6 @@ void Tests::Reload()
     ASSERT_EQ( InitializeResult::Success, res );
     auto setupRes = ml->setupDummyFolder();
     ASSERT_TRUE( setupRes );
-}
-
-void Tests::SetUp()
-{
-    unlink("test.db");
-    Reload();
 }
 
 void Tests::InstantiateMediaLibrary()

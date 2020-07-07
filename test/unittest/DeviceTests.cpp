@@ -87,9 +87,8 @@ protected:
         ml.reset( new MediaLibraryWithDiscoverer );
     }
 
-    virtual void Reload() override
+    void Reload()
     {
-        Tests::Reload();
         ml->reload();
         auto res = cbMock->waitReload();
         ASSERT_TRUE( res );

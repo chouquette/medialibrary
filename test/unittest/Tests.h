@@ -40,6 +40,5 @@ protected:
 
     virtual void SetUp() override;
     virtual void InstantiateMediaLibrary();
-    virtual void Reload();
     virtual void TearDown() override;
 };
