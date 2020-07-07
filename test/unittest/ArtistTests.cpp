@@ -46,16 +46,6 @@ TEST_F( Artists, Create )
     ASSERT_EQ( a2->name(), "Flying Otters" );
 }
 
-TEST_F( Artists, CreateDefaults )
-{
-    // Ensure this won't fail due to duplicate insertions
-    // We just reload, which will call the initialization routine again.
-    // This is implicitely tested by all other tests, though it seems better
-    // to have an explicit one. We might also just run the request twice from here
-    // sometime in the future.
-    Reload();
-}
-
 TEST_F( Artists, ShortBio )
 {
     auto a = ml->createArtist( "Raging Otters" );
