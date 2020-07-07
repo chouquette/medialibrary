@@ -52,6 +52,7 @@ struct FileSystemFactory : public fs::IFileSystemFactory
     static const std::string NoopDeviceUuid;
 
     FileSystemFactory()
+        : m_cb( nullptr )
     {
         // Add a root device unremovable
         auto rootDevice = addDevice( Root, RootDeviceUuid, false );
@@ -93,10 +94,12 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         auto ret = *it;
         devices.erase( it );
         assert( ret->isRemovable() == true );
+        ret->setPresent( false );
         // Now flag the mountpoint as belonging to its containing device, since it's now
         // just a regular folder
         auto d = device( ret->mountpoint() );
         d->invalidateMountpoint( ret->mountpoint() );
+        m_cb->onDeviceUnmounted( *ret );
         return ret;
     }
 
@@ -112,6 +115,7 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         // we just removed.
         auto mountpointDevice = device( d->mountpoint() );
         mountpointDevice->invalidateMountpoint( d->mountpoint() );
+        m_cb->onDeviceUnmounted( *d );
     }
 
     void remountDevice( const std::string& uuid )
@@ -128,6 +132,7 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         auto mountpointDevice = device( d->mountpoint() );
         d->setPresent( true );
         mountpointDevice->setMountpointRoot( d->mountpoint(), d->root() );
+        m_cb->onDeviceMounted( *d );
     }
 
     void addDevice( std::shared_ptr<Device> dev )
@@ -136,6 +141,9 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         if ( d != nullptr )
             d->setMountpointRoot( dev->mountpoint(), dev->root() );
         devices.push_back( dev );
+        dev->setPresent( true );
+        if ( m_cb != nullptr )
+            m_cb->onDeviceMounted( *dev );
     }
 
     void addFile( const std::string& mrl )
@@ -250,10 +258,19 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         return s;
     }
 
-    virtual bool start( fs::IFileSystemFactoryCb* ) override { return true; }
-    virtual void stop() override {}
+    virtual bool start( fs::IFileSystemFactoryCb* cb ) override
+    {
+        m_cb = cb;
+        return true;
+    }
+    virtual void stop() override
+    {
+        assert( m_cb != nullptr );
+        m_cb = nullptr;
+    }
 
     std::vector<std::shared_ptr<Device>> devices;
+    fs::IFileSystemFactoryCb* m_cb;
 };
 
 // Noop FS (basically just returns file names, and don't try to access those.)
