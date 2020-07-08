@@ -87,7 +87,11 @@ Connection::Handle Connection::handle()
         auto res = sqlite3_open_v2( m_dbPath.c_str(), &dbConnection, flags, nullptr );
         ConnPtr dbConn( dbConnection, &sqlite3_close );
         if ( res != SQLITE_OK )
+        {
+            int err = sqlite3_system_errno(dbConnection);
+            LOG_ERROR( "Failed to connect to database. OS error: ", err );
             errors::mapToException( "<connecting to db>", "", res );
+        }
         res = sqlite3_extended_result_codes( dbConnection, 1 );
         if ( res != SQLITE_OK )
             errors::mapToException( "<enabling extended errors>", "", res );
