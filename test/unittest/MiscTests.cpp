@@ -309,23 +309,23 @@ public:
     {
         std::ifstream file{ dbPath };
         {
-            // Don't use our Sqlite wrapper to open a connection. We don't want
-            // to mess with per-thread connections.
-            medialibrary::sqlite::Connection::Handle conn;
-            sqlite3_open( "test.db", &conn );
-            std::unique_ptr<sqlite3, int(*)(sqlite3*)> dbPtr{ conn, &sqlite3_close };
+            auto dbConn = sqlite::Connection::connect( "test.db" );
+            ml->deleteAllTables( dbConn.get() );
             // The backup file already contains a transaction
             char buff[2048];
-            while( file.getline( buff, sizeof( buff ) ) )
             {
-                medialibrary::sqlite::Statement stmt( conn, buff );
-                stmt.execute();
-                while ( stmt.row() != nullptr )
-                    ;
+                sqlite::Connection::WeakDbContext ctx{ dbConn.get() };
+                while( file.getline( buff, sizeof( buff ) ) )
+                {
+                    medialibrary::sqlite::Statement stmt( dbConn->handle(), buff );
+                    stmt.execute();
+                    while ( stmt.row() != nullptr )
+                        ;
+                }
             }
             // Ensure we are doing a migration
             {
-                medialibrary::sqlite::Statement stmt{ conn,
+                medialibrary::sqlite::Statement stmt{ dbConn->handle(),
                         "SELECT * FROM Settings" };
                 stmt.execute();
                 auto row = stmt.row();
@@ -333,8 +333,6 @@ public:
                 row >> dbVersion;
                 ASSERT_NE( dbVersion, Settings::DbModelVersion );
             }
-            // Keep address sanitizer/memleak detection happy
-            medialibrary::sqlite::Statement::FlushStatementCache();
         }
     }
 
@@ -400,19 +398,14 @@ public:
 
     virtual void TearDown() override
     {
-        medialibrary::sqlite::Connection::Handle conn;
-        sqlite3_open( "test.db", &conn );
-        std::unique_ptr<sqlite3, int(*)(sqlite3*)> dbPtr{ conn, &sqlite3_close };
-        {
-            medialibrary::sqlite::Statement stmt{ conn,
-                    "SELECT * FROM Settings" };
-            stmt.execute();
-            auto row = stmt.row();
-            uint32_t dbVersion;
-            row >> dbVersion;
-            ASSERT_EQ( Settings::DbModelVersion, dbVersion );
-        }
-        medialibrary::sqlite::Statement::FlushStatementCache();
+        auto dbConn = sqlite::Connection::connect( "test.db" );
+        medialibrary::sqlite::Statement stmt{ dbConn->handle(),
+                "SELECT * FROM Settings" };
+        stmt.execute();
+        auto row = stmt.row();
+        uint32_t dbVersion;
+        row >> dbVersion;
+        ASSERT_EQ( Settings::DbModelVersion, dbVersion );
     }
 
     void CommonMigrationTest( const char* mockDb )
