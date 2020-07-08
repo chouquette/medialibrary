@@ -42,7 +42,7 @@ Transaction::Transaction( sqlite::Connection* dbConn)
 {
     assert( CurrentTransaction == nullptr );
     LOG_VERBOSE( "Starting SQLite transaction" );
-    Statement s( dbConn->handle(), "BEGIN" );
+    Statement s( dbConn->handle(), "BEGIN EXCLUSIVE" );
     s.execute();
     while ( s.row() != nullptr )
         ;
