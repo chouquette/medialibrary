@@ -289,6 +289,15 @@ public:
      * This allows more testing
      */
     virtual bool forceRescanLocked() override { return true; }
+
+    virtual void onDbConnectionReady( sqlite::Connection* ) override
+    {
+    }
+
+    void deleteAllTables( sqlite::Connection* dbConn )
+    {
+        MediaLibrary::deleteAllTables( dbConn );
+    }
 };
 
 class DbModel : public Tests
@@ -300,7 +309,6 @@ protected:
 public:
     virtual void SetUp() override
     {
-        unlink("test.db");
         ml.reset( new MediaLibraryTesterNoForceRescan );
         cbMock.reset( new mock::NoopCallback );
     }

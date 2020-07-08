@@ -543,6 +543,8 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     m_callback = mlCallback;
     m_dbConnection = sqlite::Connection::connect( dbPath );
 
+    onDbConnectionReady( m_dbConnection.get() );
+
     // Give a chance to test overloads to reject the creation of a notifier
     startDeletionNotifier();
     // Which allows us to register hooks, or not, depending on the presence of a notifier
@@ -1170,6 +1172,10 @@ void MediaLibrary::populateNetworkFsFactories()
 #ifdef HAVE_LIBVLC
     addFileSystemFactoryLocked( std::make_shared<fs::libvlc::FileSystemFactory>( this, "smb://" ) );
 #endif
+}
+
+void MediaLibrary::onDbConnectionReady( sqlite::Connection* )
+{
 }
 
 void MediaLibrary::addLocalFsFactory()

@@ -281,6 +281,11 @@ protected:
     virtual void startDiscoverer();
     virtual void startDeletionNotifier();
     virtual void populateNetworkFsFactories();
+    /*
+     * This allows tests to execute code once the database connection is ready
+     * and before all tables are created
+     */
+    virtual void onDbConnectionReady( sqlite::Connection* dbConn );
 
 private:
     bool recreateDatabase();

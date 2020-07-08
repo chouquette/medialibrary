@@ -148,6 +148,7 @@ public:
     {
     public:
         void forceParserStart();
+        virtual void onDbConnectionReady( sqlite::Connection* dbConn ) override;
     protected:
         virtual void startParser() override;
     };

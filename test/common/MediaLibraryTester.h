@@ -41,6 +41,7 @@ public:
     virtual void startParser() override { return; }
     virtual void startDiscoverer() override {}
     virtual void startDeletionNotifier() override {}
+    virtual void onDbConnectionReady( sqlite::Connection* dbConn ) override;
     std::vector<MediaPtr> files();
     // Use the filename getter
     using MediaLibrary::media;

@@ -40,7 +40,6 @@ void Tests::TearDown()
 
 void Tests::SetUp()
 {
-    unlink("test.db");
     InstantiateMediaLibrary();
     if ( fsFactory == nullptr )
     {

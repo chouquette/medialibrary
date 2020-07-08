@@ -160,7 +160,6 @@ bool MockResumeCallback::waitForParsingComplete( std::unique_lock<compat::Mutex>
 
 void Tests::SetUp()
 {
-    unlink("test.db");
     InitializeCallback();
     InitializeMediaLibrary();
     if ( ExtraVerbose == true )
@@ -192,9 +191,20 @@ void Tests::InitializeCallback()
     m_cb.reset( new MockCallback );
 }
 
+namespace
+{
+class MediaLibraryTester : public MediaLibrary
+{
+    virtual void onDbConnectionReady( sqlite::Connection* dbConn ) override
+    {
+        deleteAllTables( dbConn );
+    }
+};
+}
+
 void Tests::InitializeMediaLibrary()
 {
-    m_ml.reset( NewMediaLibrary() );
+    m_ml.reset( new MediaLibraryTester{} );
 }
 
 void Tests::runChecks(const rapidjson::Document& doc)
@@ -769,6 +779,11 @@ void ResumeTests::MediaLibraryResumeTest::forceParserStart()
 {
     std::unique_lock<compat::Mutex> lock{ m_mutex };
     MediaLibrary::startParser();
+}
+
+void ResumeTests::MediaLibraryResumeTest::onDbConnectionReady( sqlite::Connection *dbConn )
+{
+    deleteAllTables( dbConn );
 }
 
 void ResumeTests::MediaLibraryResumeTest::startParser()

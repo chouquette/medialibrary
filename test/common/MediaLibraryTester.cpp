@@ -45,6 +45,11 @@ MediaLibraryTester::MediaLibraryTester()
 {
 }
 
+void MediaLibraryTester::onDbConnectionReady( sqlite::Connection* dbConn )
+{
+    deleteAllTables( dbConn );
+}
+
 std::shared_ptr<Media> MediaLibraryTester::media( int64_t id )
 {
     return std::static_pointer_cast<Media>( MediaLibrary::media( id ) );
