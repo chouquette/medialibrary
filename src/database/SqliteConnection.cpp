@@ -96,7 +96,6 @@ Connection::Handle Connection::handle()
         res = sqlite3_extended_result_codes( dbConnection, 1 );
         if ( res != SQLITE_OK )
             errors::mapToException( "<enabling extended errors>", "", res );
-        sqlite3_busy_timeout( dbConnection, 500 );
         // Don't use public wrapper, they need to be able to call getConn, which
         // would result from a recursive call and a deadlock from here.
         setPragma( dbConnection, "foreign_keys", "1" );
