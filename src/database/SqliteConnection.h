@@ -120,7 +120,7 @@ private:
     };
 
     using ConnPtr = std::unique_ptr<sqlite3, int(*)(sqlite3*)>;
-    const std::string m_dbPath;
+    std::string m_dbPath;
     compat::Mutex m_connMutex;
     std::unordered_map<compat::Thread::id, ConnPtr> m_conns;
     utils::SWMRLock m_contextLock;

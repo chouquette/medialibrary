@@ -93,6 +93,18 @@ Connection::Handle Connection::handle()
             LOG_ERROR( "Failed to connect to database. OS error: ", err );
             errors::mapToException( "<connecting to db>", "", res );
         }
+        /*
+         * Fetch the absolute path to the database. If for whatever reason we were
+         * to change directories during the runtime, we'd end up having a connection
+         * to a different database in case the provided path is relative.
+         * See #262
+         */
+        if ( m_conns.empty() == true )
+        {
+            m_dbPath = sqlite3_db_filename( dbConnection, nullptr );
+            LOG_DEBUG( "Fetched absolute database path from sqlite: ", m_dbPath );
+        }
+
         res = sqlite3_extended_result_codes( dbConnection, 1 );
         if ( res != SQLITE_OK )
             errors::mapToException( "<enabling extended errors>", "", res );
