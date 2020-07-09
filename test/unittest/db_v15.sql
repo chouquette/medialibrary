@@ -95,11 +95,11 @@ INSERT INTO Media(id_media,type,subtype,duration,play_count,last_played_date,ins
 INSERT INTO File(id_file,media_id,playlist_id,mrl,type,last_modification_date,size,folder_id,is_removable,is_external,is_network) VALUES(1,1,NULL,'media.avi',1,NULL,NULL,1,0,0,0);
 INSERT INTO File(id_file,media_id,playlist_id,mrl,type,last_modification_date,size,folder_id,is_removable,is_external,is_network) VALUES(2,2,NULL,'media2.avi',1,NULL,NULL,1,0,0,0);
 INSERT INTO File(id_file,media_id,playlist_id,mrl,type,last_modification_date,size,folder_id,is_removable,is_external,is_network) VALUES(3,3,NULL,'external.avi',1,NULL,NULL,NULL,0,1,0);
-INSERT INTO Playlist(id_playlist,name,creation_date) VALUES(1,"contiguous",123);
+INSERT INTO Playlist(id_playlist,name,creation_date) VALUES(1,'contiguous',123);
 INSERT INTO PlaylistMediaRelation(media_id,playlist_id,position) VALUES(1,1,1);
 INSERT INTO PlaylistMediaRelation(media_id,playlist_id,position) VALUES(1,1,3);
 INSERT INTO PlaylistMediaRelation(media_id,playlist_id,position) VALUES(1,1,5);
-INSERT INTO Playlist(id_playlist,name,creation_date) VALUES(2,"contiguous2",123);
+INSERT INTO Playlist(id_playlist,name,creation_date) VALUES(2,'contiguous2',123);
 INSERT INTO PlaylistMediaRelation(media_id,playlist_id,position) VALUES(1,2,1);
 INSERT INTO PlaylistMediaRelation(media_id,playlist_id,position) VALUES(2,2,3);
 INSERT INTO PlaylistMediaRelation(media_id,playlist_id,position) VALUES(3,2,5);

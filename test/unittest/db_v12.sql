@@ -75,6 +75,6 @@ INSERT INTO `Artist` (id_artist,name,shortbio,artwork_mrl,nb_albums,nb_tracks,mb
 INSERT INTO `Artist` (id_artist,name,shortbio,artwork_mrl,nb_albums,nb_tracks,mb_id,is_present) VALUES (2,NULL,NULL,NULL,0,0,NULL,1);
 INSERT INTO `Media` (id_media,type,subtype,duration,play_count,last_played_date,insertion_date,release_date,thumbnail,title,filename,is_favorite,is_present) VALUES (1,3,NULL,-1,NULL,NULL,1522231538,NULL,'/path/to/thumbnail','media.avi','media.avi',0,1);
 INSERT INTO `File` (id_file,media_id,playlist_id,mrl,type,last_modification_date,size,folder_id,is_present,is_removable,is_external) VALUES (1,1,NULL,'media.avi',1,NULL,NULL,NULL,1,0,1);
-INSERT INTO `Album` (id_album,title,is_present) VALUES(1,"dummy",0);
+INSERT INTO `Album` (id_album,title,is_present) VALUES(1,'dummy',0);
 INSERT INTO `AlbumTrack` (media_id,duration,artist_id,genre_id,track_number,album_id,disc_number,is_present) VALUES(1,123,1,NULL,1,1,1,0);
 COMMIT;
