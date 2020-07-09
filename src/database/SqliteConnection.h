@@ -108,7 +108,7 @@ private:
                     const std::string& value );
     static void updateHook( void* data, int reason, const char* database,
                             const char* table, sqlite_int64 rowId );
-
+    static void logCallback( void*, int c, const char* str );
 private:
     struct ThreadSpecificConnection
     {

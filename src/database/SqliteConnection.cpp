@@ -46,6 +46,7 @@ Connection::Connection( const std::string& dbPath )
         throw std::runtime_error( "SQLite isn't built with threadsafe mode" );
     if ( sqlite3_config( SQLITE_CONFIG_MULTITHREAD ) == SQLITE_ERROR )
         throw std::runtime_error( "Failed to enable sqlite multithreaded mode" );
+    sqlite3_config( SQLITE_CONFIG_LOG, &logCallback, nullptr );
 }
 
 Connection::~Connection()
@@ -267,6 +268,11 @@ void Connection::updateHook( void* data, int reason, const char*,
         it->second( HookReason::Delete, rowId );
         break;
     }
+}
+
+void Connection::logCallback( void*, int c, const char *str )
+{
+    LOG_DEBUG( "Sqlite error; code: ", c, " msg: ", str);
 }
 
 Connection::WeakDbContext::WeakDbContext( Connection* conn )
