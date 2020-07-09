@@ -42,11 +42,8 @@ Connection::Connection( const std::string& dbPath )
     , m_readLock( m_contextLock )
     , m_writeLock( m_contextLock )
 {
-    if ( sqlite3_threadsafe() == 0 )
-        throw std::runtime_error( "SQLite isn't built with threadsafe mode" );
-    if ( sqlite3_config( SQLITE_CONFIG_MULTITHREAD ) == SQLITE_ERROR )
-        throw std::runtime_error( "Failed to enable sqlite multithreaded mode" );
-    sqlite3_config( SQLITE_CONFIG_LOG, &logCallback, nullptr );
+    /* Indirect call to sqlite3_config */
+    static SqliteConfigurator config;
 }
 
 Connection::~Connection()
@@ -321,6 +318,15 @@ Connection::ThreadSpecificConnection::~ThreadSpecificConnection()
         // ID gets used in the future.
         conn->m_conns.erase( it );
     }
+}
+
+Connection::SqliteConfigurator::SqliteConfigurator()
+{
+    if ( sqlite3_threadsafe() == 0 )
+        throw std::runtime_error( "SQLite isn't built with threadsafe mode" );
+    if ( sqlite3_config( SQLITE_CONFIG_MULTITHREAD ) == SQLITE_ERROR )
+        throw std::runtime_error( "Failed to enable sqlite multithreaded mode" );
+    sqlite3_config( SQLITE_CONFIG_LOG, &logCallback, nullptr );
 }
 
 }

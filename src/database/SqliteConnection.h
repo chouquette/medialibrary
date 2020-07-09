@@ -119,6 +119,21 @@ private:
         std::weak_ptr<Connection> m_weakConnection;
     };
 
+    /*
+     * Wrapper object to sqlite_config calls, to ensure we call those only once
+     * per process
+     * Not doing so will result in sqlite_misuse and invocation of the log callback
+     * for every subsequent calls to sqlite3_config
+     */
+    struct SqliteConfigurator
+    {
+        SqliteConfigurator();
+        SqliteConfigurator( const SqliteConfigurator& ) = delete;
+        SqliteConfigurator& operator=( const SqliteConfigurator& ) = delete;
+        SqliteConfigurator( SqliteConfigurator&& ) = delete;
+        SqliteConfigurator& operator=( SqliteConfigurator&& ) = delete;
+    };
+
     using ConnPtr = std::unique_ptr<sqlite3, int(*)(sqlite3*)>;
     std::string m_dbPath;
     compat::Mutex m_connMutex;
