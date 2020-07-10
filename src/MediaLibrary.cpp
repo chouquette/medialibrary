@@ -2701,7 +2701,8 @@ MediaLibrary::FsFactoryCb::FsFactoryCb(MediaLibrary* ml)
 {
 }
 
-void MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs )
+void MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs,
+                                                 const std::string& )
 {
     auto device = Device::fromUuid( m_ml, deviceFs.uuid(), deviceFs.scheme() );
     if ( device == nullptr )
@@ -2732,7 +2733,8 @@ void MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs )
     }
 }
 
-void MediaLibrary::FsFactoryCb::onDeviceUnmounted( const fs::IDevice& deviceFs )
+void MediaLibrary::FsFactoryCb::onDeviceUnmounted( const fs::IDevice& deviceFs,
+                                                   const std::string& )
 {
     auto device = Device::fromUuid( m_ml, deviceFs.uuid(), deviceFs.scheme() );
     if ( device == nullptr )

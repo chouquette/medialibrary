@@ -99,7 +99,7 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         // just a regular folder
         auto d = device( ret->mountpoints()[0] );
         d->invalidateMountpoint( ret->mountpoints()[0] );
-        m_cb->onDeviceUnmounted( *ret );
+        m_cb->onDeviceUnmounted( *ret, ret->mountpoints()[0] );
         return ret;
     }
 
@@ -115,7 +115,7 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         // we just removed.
         auto mountpointDevice = device( d->mountpoints()[0] );
         mountpointDevice->invalidateMountpoint( d->mountpoints()[0] );
-        m_cb->onDeviceUnmounted( *d );
+        m_cb->onDeviceUnmounted( *d, d->mountpoints()[0] );
     }
 
     void remountDevice( const std::string& uuid )
@@ -132,7 +132,7 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         auto mountpointDevice = device( d->mountpoints()[0] );
         d->setPresent( true );
         mountpointDevice->setMountpointRoot( d->mountpoints()[0], d->root() );
-        m_cb->onDeviceMounted( *d );
+        m_cb->onDeviceMounted( *d, d->mountpoints()[0] );
     }
 
     void addDevice( std::shared_ptr<Device> dev )
@@ -143,7 +143,7 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         devices.push_back( dev );
         dev->setPresent( true );
         if ( m_cb != nullptr )
-            m_cb->onDeviceMounted( *dev );
+            m_cb->onDeviceMounted( *dev, dev->mountpoints()[0] );
     }
 
     void addFile( const std::string& mrl )

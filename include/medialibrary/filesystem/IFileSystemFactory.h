@@ -44,20 +44,24 @@ namespace fs
         /**
          * @brief onDevicePlugged Shall be invoked when a device gets plugged
          * @param device The mounted device
+         * @param newMountpoint the mountpoint that was just added to this device
          *
          * When this callback is invoked, the FS device presence must already be
          * updated.
          */
-        virtual void onDeviceMounted( const fs::IDevice& device ) = 0;
+        virtual void onDeviceMounted( const fs::IDevice& device,
+                                      const std::string& newMountpoint ) = 0;
         /**
          * @brief onDeviceUnplugged Shall be invoked when a device gets unplugged
          * @param device The unmounted device
+         * @param removedMountpoint the mountpoint that was just unmounted
          *
          * When this callback is invoked, the FS device presence must already be
          * updated. If no more mountpoints are available, device->isPresent must
          * return false by the time this is called
          */
-        virtual void onDeviceUnmounted( const fs::IDevice& device ) = 0;
+        virtual void onDeviceUnmounted( const fs::IDevice& device,
+                                        const std::string& removedMountpoint ) = 0;
     };
 
     class IFileSystemFactory

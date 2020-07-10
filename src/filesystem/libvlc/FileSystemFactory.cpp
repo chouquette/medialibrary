@@ -143,11 +143,11 @@ void FileSystemFactory::onDeviceMounted( const std::string& uuid,
     if ( addMountpoint == true )
         device->addMountpoint( mountpoint );
 
-    m_cb->onDeviceMounted( *device );
+    m_cb->onDeviceMounted( *device, mountpoint );
 }
 
 void FileSystemFactory::onDeviceUnmounted( const std::string& uuid,
-                                                  const std::string& mountpoint )
+                                           const std::string& mountpoint )
 {
     assert( isStarted() == true );
     std::shared_ptr<fs::IDevice> device;
@@ -161,7 +161,7 @@ void FileSystemFactory::onDeviceUnmounted( const std::string& uuid,
         return;
     }
     device->removeMountpoint( mountpoint );
-    m_cb->onDeviceUnmounted( *device );
+    m_cb->onDeviceUnmounted( *device, mountpoint );
 }
 
 std::shared_ptr<fs::IDevice> FileSystemFactory::deviceByUuidLocked( const std::string& uuid )
