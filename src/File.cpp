@@ -413,29 +413,6 @@ std::shared_ptr<File> File::fromMrl( MediaLibraryPtr ml, const std::string& mrl 
      * Otherwise, fallback to constructing the mrl based on the device that
      * stores it
      */
-    auto fsFactory = ml->fsFactoryForMrl( mrl );
-    if ( fsFactory == nullptr )
-    {
-        LOG_WARN( "Failed to create FS factory for path ", mrl );
-        return nullptr;
-    }
-    auto device = fsFactory->createDeviceFromMrl( mrl );
-    if ( device == nullptr )
-    {
-        LOG_WARN( "Failed to create a device associated with mrl ", mrl );
-        return nullptr;
-    }
-    if ( device->isRemovable() == false )
-    {
-        /*
-         * We only expect removable devices at this point, but could find
-         * a matching mountpoint that used to contain a removed device mountpoint.
-         * (For instance '/mnt/removable/file.mkv' can match with '/'
-         * We can't assert that the device is removable, but if it's not, this
-         * is not the device we're looking for
-         */
-        return nullptr;
-    }
     auto folder = Folder::fromMrl( ml, utils::file::directory( mrl ) );
     if ( folder == nullptr )
     {
@@ -450,8 +427,7 @@ std::shared_ptr<File> File::fromMrl( MediaLibraryPtr ml, const std::string& mrl 
     file = fromFileName( ml, utils::file::fileName( mrl ), folder->id() );
     if ( file == nullptr )
     {
-        LOG_WARN( "Failed to fetch file for ", mrl, " (device ", device->uuid(), " was ",
-                  device->isRemovable() ? "" : "NOT ", "removable)");
+        LOG_WARN( "Failed to fetch file for ", mrl );
     }
     return file;
 }
