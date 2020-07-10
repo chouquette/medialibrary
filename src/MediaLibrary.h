@@ -264,12 +264,6 @@ public:
     virtual bool deleteRemovableDevices() override;
 
 
-    /**
-     * Helper to allow FS classes to ensure the required FS factories & device
-     * listers have been started
-     */
-    void ensureDeviceListersAreStarted() const;
-
 protected:
     // Allow access to unit test MediaLibrary implementations
     static const std::vector<const char*> SupportedMediaExtensions;

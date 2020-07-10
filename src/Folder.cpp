@@ -597,12 +597,6 @@ const std::string& Folder::mrl() const
     if ( m_isRemovable == false )
         return m_path;
 
-    /*
-     * We're accessing a removable device, we need to ensure the FS factories &
-     * device lister are available
-     */
-    m_ml->ensureDeviceListersAreStarted();
-
     if ( m_fullPath.empty() == false )
         return m_fullPath;
 

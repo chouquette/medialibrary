@@ -776,12 +776,6 @@ bool MediaLibrary::isSubtitleExtensionSupported(const char* ext) const
         });
 }
 
-void MediaLibrary::ensureDeviceListersAreStarted() const
-{
-    auto self = const_cast<MediaLibrary*>( this );
-    self->startDiscoverer();
-}
-
 void MediaLibrary::removeOldEntities( MediaLibraryPtr ml )
 {
     // Approximate 6 months for old device precision.

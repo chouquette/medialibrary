@@ -409,8 +409,6 @@ std::shared_ptr<File> File::fromMrl( MediaLibraryPtr ml, const std::string& mrl 
         return file;
     }
 
-    ml->ensureDeviceListersAreStarted();
-
     /*
      * Otherwise, fallback to constructing the mrl based on the device that
      * stores it
