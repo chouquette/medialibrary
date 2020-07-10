@@ -38,6 +38,11 @@ public:
         static const std::string PrimaryKeyColumn;
         static int64_t Device::*const PrimaryKey;
     };
+    struct MountpointTable
+    {
+        static const std::string Name;
+    };
+
     Device( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme,
             bool isRemovable, bool isNetwork, time_t insertionDate );
     Device( MediaLibraryPtr ml, sqlite::Row& row );
@@ -61,6 +66,15 @@ public:
     const std::string& scheme() const;
     void updateLastSeen();
 
+    /**
+     * @brief addMountpoint Stores a device mountpoint in database
+     * @param mrl The mrl to that mountpoint
+     * @return true if the insertion succeeded, false otherwise
+     *
+     * If the mountpoint was already known, the request is ignored
+     */
+    bool addMountpoint( const std::string& mrl, int64_t seenDate );
+
     static std::shared_ptr<Device> create(MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme, bool isRemovable , bool isNetwork);
     static void createTable( sqlite::Connection* connection );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
@@ -80,6 +94,16 @@ public:
      * wait for the device lister to signal their presence
      */
     static bool markNetworkAsDeviceMissing( MediaLibraryPtr ml );
+    /**
+     * @brief fromMountpoint Returns a device matching the given mountpoint
+     * @param ml A media library instance
+     * @param mrl An mrl
+     * @return A device instance if a match was found, nullptr otherwise.
+     *
+     * This will look at the mountpoints that were stored in database
+     */
+    static std::tuple<int64_t, std::string> fromMountpoint( MediaLibraryPtr ml,
+                                                   const std::string& mrl );
 private:
     MediaLibraryPtr m_ml;
     // This is a database ID

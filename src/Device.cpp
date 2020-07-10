@@ -26,6 +26,9 @@
 
 #include "Device.h"
 #include "Folder.h"
+#include "utils/Filename.h"
+
+#include <strings.h>
 
 namespace medialibrary
 {
@@ -33,6 +36,7 @@ namespace medialibrary
 const std::string Device::Table::Name = "Device";
 const std::string Device::Table::PrimaryKeyColumn = "id_device";
 int64_t Device::* const Device::Table::PrimaryKey = &Device::m_id;
+const std::string Device::MountpointTable::Name = "DeviceMountpoint";
 
 Device::Device( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
@@ -150,6 +154,24 @@ void Device::updateLastSeen()
         LOG_WARN( "Failed to update last seen date for device ", m_uuid );
 }
 
+bool Device::addMountpoint( const std::string& mrl, int64_t seenDate )
+{
+    /*
+     * We don't need to bother handling mountpoints in database for non
+     * removable, non network devices.
+     * Local devices can be quickly refreshed and can avoid using a potentially
+     * stalled cache from database
+     */
+    assert( m_isRemovable == true );
+    assert( m_isNetwork == true );
+    assert( utils::file::schemeIs( m_scheme, mrl ) == true );
+    static const std::string req = "INSERT INTO " + MountpointTable::Name +
+            " VALUES(?, ?, ?)";
+    return sqlite::Tools::executeInsert( m_ml->getConn(), req, m_id,
+                                         utils::file::toFolderPath( mrl ),
+                                         seenDate ) != 0;
+}
+
 std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& uuid,
                                         const std::string& scheme, bool isRemovable,
                                         bool isNetwork )
@@ -172,10 +194,25 @@ void Device::createTable( sqlite::Connection* connection )
 {
     sqlite::Tools::executeRequest( connection,
                                    schema( Table::Name, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   schema( MountpointTable::Name, Settings::DbModelVersion ) );
 }
 
 std::string Device::schema( const std::string& tableName, uint32_t dbModel )
 {
+    if ( tableName == MountpointTable::Name )
+    {
+        assert( dbModel >= 27 );
+        return "CREATE TABLE " + MountpointTable::Name +
+               "("
+                   "device_id INTEGER,"
+                   "mrl TEXT COLLATE NOCASE,"
+                   "last_seen INTEGER,"
+                   "PRIMARY KEY(device_id, mrl) ON CONFLICT REPLACE,"
+                   "FOREIGN KEY(device_id) REFERENCES " + Table::Name +
+                       "(id_device) ON DELETE CASCADE"
+               ")";
+    }
     assert( tableName == Table::Name );
     if ( dbModel <= 13 )
     {
@@ -271,6 +308,40 @@ bool Device::markNetworkAsDeviceMissing( MediaLibraryPtr ml )
     const std::string req = "UPDATE " + Table::Name + " SET is_present = 0 "
             "WHERE is_present != 0 AND is_network != 0 AND is_removable != 0";
     return sqlite::Tools::executeUpdate( ml->getConn(), req );
+}
+
+std::tuple<int64_t, std::string>
+Device::fromMountpoint( MediaLibraryPtr ml, const std::string& mrl )
+{
+    LOG_DEBUG( "Trying to match ", mrl, " with a cached mountpoint" );
+    static const std::string req =
+    "SELECT device_id, mrl FROM " + MountpointTable::Name + " mt "
+        "INNER JOIN " + Device::Table::Name + " d ON mt.device_id = d.id_device "
+        "WHERE d.scheme = ? ORDER BY mt.last_seen DESC";
+    auto dbConn = ml->getConn();
+    auto ctx = dbConn->acquireReadContext();
+    sqlite::Statement stmt{ dbConn->handle(), req };
+    stmt.execute( utils::file::scheme( mrl ) );
+    for ( auto row = stmt.row(); row != nullptr; row = stmt.row() )
+    {
+        assert( row.nbColumns() == 2 );
+        int64_t deviceId;
+        std::string mountpoint;
+        row >> deviceId >> mountpoint;
+        if ( strncasecmp( mrl.c_str(), mountpoint.c_str(), mountpoint.length() ) == 0 )
+        {
+            LOG_DEBUG( "Matched device #", deviceId );
+            /*
+             * Since we match the stored mountpoint in a case insensitive way,
+             * be sure to return the match as it was provided, not stored, otherwise
+             * the caller may not manage to remove the path since it won't be
+             * found in the processed mrl
+             */
+            return std::make_tuple( deviceId, mrl.substr( 0, mountpoint.length() ) );
+        }
+    }
+    LOG_DEBUG( "No match" );
+    return std::make_tuple( 0, "" );
 }
 
 }

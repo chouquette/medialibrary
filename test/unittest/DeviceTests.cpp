@@ -242,6 +242,47 @@ TEST_F( DeviceEntity, DeleteRemovable )
     ASSERT_EQ( 1u, devices.size() );
 }
 
+TEST_F( DeviceEntity, Mountpoints )
+{
+    std::string mrl{ "smb://1.2.3.4/folder/file.mkv" };
+    auto match = Device::fromMountpoint( ml.get(), mrl );
+    ASSERT_EQ( 0u, std::get<0>( match ) );
+    ASSERT_EQ( "", std::get<1>( match ) );
+
+    auto d = Device::create( ml.get(), "{fake-uuid}", "smb://", true, true );
+    ASSERT_NE( nullptr, d );
+    auto res = d->addMountpoint( "smb://1.2.3.4", 0 );
+    ASSERT_TRUE( res );
+
+    match = Device::fromMountpoint( ml.get(), mrl );
+    ASSERT_EQ( d->id(), std::get<0>( match ) );
+    ASSERT_EQ( "smb://1.2.3.4/", std::get<1>( match ) );
+
+    /*
+     * Now insert another device with a more recent seen date and the
+     * same mountpoint
+     */
+    auto d2 = Device::create( ml.get(), "{fake-uuid2}", "smb://", true, true );
+    ASSERT_NE( nullptr, d );
+    res = d2->addMountpoint( "smb://1.2.3.4", 100 );
+    ASSERT_TRUE( res );
+
+    match = Device::fromMountpoint( ml.get(), mrl );
+    ASSERT_EQ( d2->id(), std::get<0>( match ) );
+    ASSERT_EQ( "smb://1.2.3.4/", std::get<1>( match ) );
+
+    /*
+     * Now bump the seen date for the first device and check that it's returned
+     * instead of the 2nd device
+     */
+    res = d->addMountpoint( "smb://1.2.3.4", 1000 );
+    ASSERT_TRUE( res );
+
+    match = Device::fromMountpoint( ml.get(), mrl );
+    ASSERT_EQ( d->id(), std::get<0>( match ) );
+    ASSERT_EQ( "smb://1.2.3.4/", std::get<1>( match ) );
+}
+
 // Filesystem tests:
 
 TEST_F( DeviceFs, RemoveDisk )

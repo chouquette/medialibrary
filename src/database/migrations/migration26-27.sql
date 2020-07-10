@@ -185,3 +185,5 @@ parser::Task::schema( parser::Task::Table::Name, 27 ),
 "DROP TABLE " + parser::Task::Table::Name + "_backup",
 
 parser::Task::index( parser::Task::Indexes::ParentFolderId, 27 ),
+
+Device::schema( Device::MountpointTable::Name, 27 ),

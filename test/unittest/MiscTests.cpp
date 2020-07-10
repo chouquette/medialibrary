@@ -131,6 +131,7 @@ namespace
         "Bookmark",
         "Chapter",
         "Device",
+        "DeviceMountpoint",
         "ExcludedEntryFolder",
         "File",
         "Folder",
