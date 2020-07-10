@@ -53,6 +53,7 @@ public:
     virtual const std::string& scheme() const override;
     virtual bool start( fs::IFileSystemFactoryCb* cb ) override;
     virtual void stop() override;
+    virtual bool isStarted() const override;
 
 private:
     virtual void onDeviceMounted( const std::string& uuid,

@@ -104,7 +104,7 @@ const std::string& FileSystemFactory::scheme() const
 
 bool FileSystemFactory::start( fs::IFileSystemFactoryCb* cb )
 {
-    if ( m_cb != nullptr )
+    if ( isStarted() == true )
         return true;
     m_cb = cb;
     return m_deviceLister->start( this );
@@ -112,7 +112,7 @@ bool FileSystemFactory::start( fs::IFileSystemFactoryCb* cb )
 
 void FileSystemFactory::stop()
 {
-    assert( m_cb != nullptr );
+    assert( isStarted() == true );
     m_deviceLister->stop();
     m_cb = nullptr;
 }
@@ -186,6 +186,11 @@ std::shared_ptr<fs::IDevice> FileSystemFactory::deviceByMrlLocked( const std::st
         }
     }
     return res;
+}
+
+bool FileSystemFactory::isStarted() const
+{
+    return m_cb != nullptr;
 }
 
 }

@@ -269,6 +269,11 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         m_cb = nullptr;
     }
 
+    virtual bool isStarted() const override
+    {
+        return m_cb != nullptr;
+    }
+
     std::vector<std::shared_ptr<Device>> devices;
     fs::IFileSystemFactoryCb* m_cb;
 };
@@ -504,6 +509,7 @@ public:
     }
     virtual bool start( fs::IFileSystemFactoryCb* ) override { return true; }
     virtual void stop() override {}
+    virtual bool isStarted() const override { return true; }
 };
 
 }

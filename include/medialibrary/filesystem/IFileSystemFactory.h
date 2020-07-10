@@ -132,6 +132,10 @@ namespace fs
         /// required by this factory.
         ///
         virtual void stop() = 0;
+        ///
+        /// \brief isStarted Returns true if the factory is started
+        ///
+        virtual bool isStarted() const = 0;
     };
 }
 
