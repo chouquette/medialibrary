@@ -2702,13 +2702,17 @@ MediaLibrary::FsFactoryCb::FsFactoryCb(MediaLibrary* ml)
 }
 
 void MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs,
-                                                 const std::string& )
+                                                 const std::string& newMountpoint )
 {
     auto device = Device::fromUuid( m_ml, deviceFs.uuid(), deviceFs.scheme() );
     if ( device == nullptr )
         return;
     if ( device->isPresent() == deviceFs.isPresent() )
+    {
+        if ( deviceFs.isNetwork() == true )
+            device->addMountpoint( newMountpoint, time( nullptr ) );
         return;
+    }
 
     assert( device->isRemovable() == true );
 
@@ -2716,7 +2720,11 @@ void MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs,
               device->isPresent() ? "1" : "0", " -> ",
               deviceFs.isPresent() ? "1" : "0" );
     auto previousPresence = device->isPresent();
+    auto t = m_ml->getConn()->newTransaction();
     device->setPresent( deviceFs.isPresent() );
+    if ( deviceFs.isNetwork() == true )
+        device->addMountpoint( newMountpoint, time( nullptr ) );
+    t->commit();
     if ( previousPresence == false )
     {
         // We need to reload the entrypoint in case a previous discovery was

@@ -511,6 +511,13 @@ bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
                                  deviceFs->isRemovable(), deviceFs->isNetwork() );
         if ( device == nullptr )
             return false;
+        if ( deviceFs->isNetwork() == true )
+        {
+            auto mountpoints = deviceFs->mountpoints();
+            auto seenDate = time( nullptr );
+            for ( const auto& m : mountpoints )
+                device->addMountpoint( m, seenDate );
+        }
     }
 
     auto f = Folder::create( m_ml, folder->mrl(),
