@@ -100,7 +100,7 @@ Status VLCMetadataService::run( IItem& item )
         LOG_DEBUG( "Discarding playlist file with no subitem: ", mrl );
         return Status::Fatal;
     }
-    if ( utils::file::schemeIs( "attachment://", artworkMrl ) == true )
+    if ( utils::url::schemeIs( "attachment://", artworkMrl ) == true )
     {
         LOG_WARN( "Artwork for ", mrl, " is an attachment. Falling back to playback" );
         VLC::MediaPlayer mp( vlcMedia );

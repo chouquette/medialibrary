@@ -25,6 +25,7 @@
 #endif
 
 #include "Url.h"
+#include "medialibrary/filesystem/Errors.h"
 
 #include <stdexcept>
 #include <cstdlib>
@@ -137,6 +138,58 @@ std::string encode( const std::string& str )
 #endif
     encodeSegment( res, i, str.end(), nullptr );
     return res;
+}
+
+
+std::string stripScheme( const std::string& mrl )
+{
+    auto pos = mrl.find( "://" );
+    if ( pos == std::string::npos )
+        throw fs::errors::UnhandledScheme( "<empty scheme>" );
+    return mrl.substr( pos + 3 );
+}
+
+std::string scheme( const std::string& mrl )
+{
+    auto pos = mrl.find( "://" );
+    if ( pos == std::string::npos )
+        throw fs::errors::UnhandledScheme( "<empty scheme>" );
+    return mrl.substr( 0, pos + 3 );
+}
+
+#ifndef _WIN32
+
+std::string toLocalPath( const std::string& mrl )
+{
+    if ( mrl.compare( 0, 7, "file://" ) != 0 )
+        throw fs::errors::UnhandledScheme( scheme( mrl ) );
+    return utils::url::decode( mrl.substr( 7 ) );
+}
+
+#else
+
+std::string toLocalPath( const std::string& mrl )
+{
+    if ( mrl.compare( 0, 7, "file://" ) != 0 )
+        throw fs::errors::UnhandledScheme( utils::url::scheme( mrl ) );
+    auto path = mrl.substr( 7 );
+    // If the path is a local path (ie. X:\path\to and not \\path\to) skip the
+    // initial backslash, as it is only part of our representation, and not
+    // understood by the win32 API functions
+    // Note that the initial '/' (after the 2 forward slashes from the scheme)
+    // is not a backslash, as it is not a path separator, so do not use
+    // DIR_SEPARATOR_CHAR here.
+    if ( path[0] == '/' && isalpha( path[1] ) )
+        path.erase( 0, 1 );
+    std::replace( begin( path ), end( path ), '/', '\\' );
+    return utils::url::decode( path );
+}
+
+#endif
+
+bool schemeIs( const std::string& scheme, const std::string& mrl )
+{
+    return mrl.compare( 0, scheme.size(), scheme ) == 0;
 }
 
 }

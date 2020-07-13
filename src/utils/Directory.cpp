@@ -29,6 +29,7 @@
 
 #include "utils/Filename.h"
 #include "utils/File.h"
+#include "utils/Url.h"
 #include "logging/Logger.h"
 #include "medialibrary/filesystem/IDirectory.h"
 #include "medialibrary/filesystem/IFile.h"
@@ -144,13 +145,13 @@ bool rmdir( medialibrary::fs::IDirectory& dir )
 {
     for ( const auto& f : dir.files() )
     {
-        utils::fs::remove( utils::file::toLocalPath( f->mrl() ) );
+        utils::fs::remove( utils::url::toLocalPath( f->mrl() ) );
     }
 #ifdef _WIN32
     auto wPath = charset::ToWide( dir.mrl().c_str() );
     return _wrmdir( wPath.get() ) != 0;
 #else
-    return ::rmdir( utils::file::toLocalPath( dir.mrl() ).c_str() ) == 0;
+    return ::rmdir( utils::url::toLocalPath( dir.mrl() ).c_str() ) == 0;
 #endif
 }
 

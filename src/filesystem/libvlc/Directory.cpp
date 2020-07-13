@@ -135,7 +135,7 @@ void Directory::addFile( std::string mrl, fs::IFile::LinkedFileType linkedType,
 
     if ( m_fsFactory.isNetworkFileSystem() == false )
     {
-        auto path = utils::file::toLocalPath( mrl );
+        auto path = utils::url::toLocalPath( mrl );
 
 #ifdef _WIN32
         struct _stat64 s;

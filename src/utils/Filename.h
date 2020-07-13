@@ -61,34 +61,13 @@ namespace file
      */
     std::string& toFolderPath( std::string& path );
     std::string  toFolderPath( const std::string& path );
-    /**
-     * @brief toLocalPath Converts an MRL to a local path.
-     * This will strip the file:// scheme and URL decode the MRL
-     */
-    std::string  toLocalPath( const std::string& mrl );
 
-    /**
-     * @brief stripScheme Remove the scheme from a MRL
-     * @param mrl
-     */
-    std::string stripScheme( const std::string& mrl );
-
-    /**
-     * @brief scheme Returns the scheme used in an MRL
-     * ie. for seaOtter://foo.bar it will return seaOtter://
-     */
-    std::string  scheme( const std::string& mrl );
     /**
      * @brief toMrl Convert a filepath to an MRL
      */
     std::string toMrl( const std::string& path );
 
     std::stack<std::string> splitPath( const std::string& path, bool isDirectory );
-
-    /**
-     * @brief schemeIs Check if a mrl start with a specific scheme
-     */
-    bool schemeIs( const std::string& scheme, const std::string& mrl );
 }
 
 }

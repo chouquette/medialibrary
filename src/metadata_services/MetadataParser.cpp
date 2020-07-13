@@ -366,7 +366,7 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
     bool isDirectory;
     try
     {
-        isDirectory = utils::fs::isDirectory( utils::file::toLocalPath( mrl ) );
+        isDirectory = utils::fs::isDirectory( utils::url::toLocalPath( mrl ) );
     }
     catch ( const fs::errors::UnhandledScheme& ex )
     {
@@ -394,16 +394,16 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
     if ( parentKnown == false && Folder::fromMrl( m_ml, entryPoint ) != nullptr )
     {
         auto probePtr = std::make_unique<prober::PathProbe>(
-                    utils::file::toLocalPath( mrl ), isDirectory, parentFolder,
-                    utils::file::toLocalPath( directoryMrl ), playlistPtr->id(),
+                    utils::url::toLocalPath( mrl ), isDirectory, parentFolder,
+                    utils::url::toLocalPath( directoryMrl ), playlistPtr->id(),
                     subitem.linkExtra(), true );
         FsDiscoverer discoverer( m_ml, nullptr, std::move( probePtr ) );
         discoverer.reload( entryPoint, *this );
         return;
     }
     auto probePtr = std::make_unique<prober::PathProbe>(
-                utils::file::toLocalPath( mrl ), isDirectory, parentFolder,
-                utils::file::toLocalPath( directoryMrl ), playlistPtr->id(),
+                utils::url::toLocalPath( mrl ), isDirectory, parentFolder,
+                utils::url::toLocalPath( directoryMrl ), playlistPtr->id(),
                 subitem.linkExtra(), false );
     FsDiscoverer discoverer( m_ml, nullptr, std::move( probePtr ) );
     if ( parentKnown == false )

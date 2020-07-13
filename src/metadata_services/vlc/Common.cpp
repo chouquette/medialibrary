@@ -30,6 +30,8 @@
 
 #include "Common.hpp"
 #include "utils/Filename.h"
+#include "utils/Url.h"
+
 namespace medialibrary
 {
 
@@ -66,13 +68,13 @@ bool medialibrary::MetadataCommon::startPlayback( VLC::Media& media,
     bool metaArtworkChanged = false;
     bool watchForArtworkChange = false;
     auto mem = media.eventManager();
-    if ( utils::file::schemeIs( "attachment", media.meta( libvlc_meta_ArtworkURL ) ) == true )
+    if ( utils::url::schemeIs( "attachment", media.meta( libvlc_meta_ArtworkURL ) ) == true )
     {
         watchForArtworkChange = true;
         mem.onMetaChanged([&mutex, &cond, &metaArtworkChanged, &media]( libvlc_meta_t meta ) {
             if ( meta != libvlc_meta_ArtworkURL
                  || metaArtworkChanged == true
-                 || utils::file::schemeIs( "attachment", media.meta( libvlc_meta_ArtworkURL ) ) == true )
+                 || utils::url::schemeIs( "attachment", media.meta( libvlc_meta_ArtworkURL ) ) == true )
                 return;
             std::lock_guard<compat::Mutex> lock( mutex );
             metaArtworkChanged = true;

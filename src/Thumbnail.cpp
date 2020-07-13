@@ -27,6 +27,7 @@
 #include "Thumbnail.h"
 #include "utils/File.h"
 #include "utils/Filename.h"
+#include "utils/Url.h"
 #include "Album.h"
 #include "Artist.h"
 #include "Media.h"
@@ -82,7 +83,7 @@ Thumbnail::Thumbnail( MediaLibraryPtr ml, std::string mrl,
     // about storing a relative path in db, but we want to return the mrl as it
     // was given, ie. as an absolute mrl.
     assert( m_mrl.empty() == false &&
-            utils::file::scheme( m_mrl ).empty() == false );
+            utils::url::scheme( m_mrl ).empty() == false );
 }
 
 Thumbnail::Thumbnail( MediaLibraryPtr ml, ThumbnailStatus status,
@@ -248,7 +249,7 @@ void Thumbnail::relocate()
     std::string localPath;
     try
     {
-        localPath = utils::file::toLocalPath( originalMrl );
+        localPath = utils::url::toLocalPath( originalMrl );
     }
     catch ( const fs::errors::Exception& ex )
     {
@@ -743,7 +744,7 @@ std::string Thumbnail::toRelativeMrl( const std::string& absoluteMrl )
     }
     // Ensure the thumbnail mrl is an absolute mrl and contained in the
     // thumbnail directory.
-    assert( utils::file::schemeIs( "file://", absoluteMrl ) == true );
+    assert( utils::url::schemeIs( "file://", absoluteMrl ) == true );
     auto thumbnailDirMrl = utils::file::toMrl( m_ml->thumbnailPath() );
     assert( absoluteMrl.find( thumbnailDirMrl ) == 0 );
     return utils::file::removePath( absoluteMrl, thumbnailDirMrl );

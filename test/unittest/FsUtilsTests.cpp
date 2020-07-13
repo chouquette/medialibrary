@@ -117,25 +117,6 @@ TEST( FsUtils, parentFolder )
 #endif
 }
 
-TEST( FsUtils, toLocalPath )
-{
-#ifndef _WIN32
-    ASSERT_EQ( "/a/b/c/movie.avi", utils::file::toLocalPath( "file:///a/b/c/movie.avi" ) );
-    ASSERT_EQ( "/yea /sp ace", utils::file::toLocalPath( "file:///yea%20/sp%20ace" ) );
-    ASSERT_EQ( "/tést/ßóíú/file", utils::file::toLocalPath( "file:///t%C3%A9st/%C3%9F%C3%B3%C3%AD%C3%BA/file" ) );
-    ASSERT_EQ( "/&/#/~", utils::file::toLocalPath( "file:///%26/%23/%7E" ) );
-    ASSERT_EQ( "/yea /sp ace", utils::file::toLocalPath( "file:///yea%20/sp%20ace" ) );
-    ASSERT_EQ( "/c/foo/bar.mkv", utils::file::toLocalPath( "file:///c/foo/bar.mkv" ) );
-#else
-    ASSERT_EQ( "a\\b\\c\\movie.avi", utils::file::toLocalPath( "file:///a/b/c/movie.avi" ) );
-    ASSERT_EQ( "x\\yea \\sp ace", utils::file::toLocalPath( "file:///x/yea%20/sp%20ace" ) );
-    ASSERT_EQ( "d\\tést\\ßóíú\\file", utils::file::toLocalPath( "file:///d/t%C3%A9st/%C3%9F%C3%B3%C3%AD%C3%BA/file" ) );
-    ASSERT_EQ( "c\\&\\#\\~", utils::file::toLocalPath( "file:///c/%26/%23/%7E" ) );
-    ASSERT_EQ( "c\\foo\\bar.mkv", utils::file::toLocalPath( "file:///c/foo/bar.mkv" ) );
-    ASSERT_EQ( "x\\yea \\sp ace", utils::file::toLocalPath( "file:///x/yea%20/sp%20ace" ) );
-#endif
-}
-
 TEST( FsUtils, toMrl )
 {
 #ifndef _WIN32
@@ -147,30 +128,6 @@ TEST( FsUtils, toMrl )
     ASSERT_EQ( "file:///C:/path/to/file.mkv", utils::file::toMrl( "C:\\path\\to/file.mkv" ) );
     ASSERT_EQ( "file:///C:/path/to%3Aa/file%20with%20spaces.mkv", utils::file::toMrl( "C:\\path\\to:a\\file with spaces.mkv" ) );
 #endif
-}
-
-TEST( FsUtils, stripScheme )
-{
-  ASSERT_EQ( "space%20marine", utils::file::stripScheme( "sc2://space%20marine" ) );
-  ASSERT_THROW( utils::file::stripScheme( "bl%40bla" ), fs::errors::UnhandledScheme );
-  ASSERT_EQ( "", utils::file::stripScheme( "vlc://" ) );
-  ASSERT_EQ( "leaf/ern/%C3%A7a/pak.one", utils::file::stripScheme( "bteam://leaf/ern/%C3%A7a/pak.one" ) );
-  ASSERT_EQ( "/I", utils::file::stripScheme( "file:///I" ) );
-}
-
-TEST( FsUtils, scheme )
-{
-  ASSERT_EQ( "scheme://", utils::file::scheme( "scheme://on/them/33.spy" ) );
-  ASSERT_EQ( "file://", utils::file::scheme( "file:///l/z/4/" ) );
-  ASSERT_EQ( "miel://", utils::file::scheme( "miel://nuage.mkv" ) );
-  ASSERT_EQ( "://", utils::file::scheme( ":////\\//" ) );
-}
-
-TEST( FsUtils, schemeIs )
-{
-  ASSERT_TRUE( utils::file::schemeIs( "attachment://", "attachment://" ) );
-  ASSERT_TRUE( utils::file::schemeIs( "attachment://", "attachment://picture0.jpg" ) );
-  ASSERT_FALSE( utils::file::schemeIs( "boboop://", "/path/to/spaces%20here" ) );
 }
 
 TEST( FsUtils, splitPath )

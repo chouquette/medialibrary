@@ -27,6 +27,7 @@
 #include "Device.h"
 #include "Folder.h"
 #include "utils/Filename.h"
+#include "utils/Url.h"
 
 #include <strings.h>
 
@@ -164,7 +165,7 @@ bool Device::addMountpoint( const std::string& mrl, int64_t seenDate )
      */
     assert( m_isRemovable == true );
     assert( m_isNetwork == true );
-    assert( utils::file::schemeIs( m_scheme, mrl ) == true );
+    assert( utils::url::schemeIs( m_scheme, mrl ) == true );
     static const std::string req = "INSERT INTO " + MountpointTable::Name +
             " VALUES(?, ?, ?)";
     return sqlite::Tools::executeInsert( m_ml->getConn(), req, m_id,
@@ -321,7 +322,7 @@ Device::fromMountpoint( MediaLibraryPtr ml, const std::string& mrl )
     auto dbConn = ml->getConn();
     auto ctx = dbConn->acquireReadContext();
     sqlite::Statement stmt{ dbConn->handle(), req };
-    stmt.execute( utils::file::scheme( mrl ) );
+    stmt.execute( utils::url::scheme( mrl ) );
     for ( auto row = stmt.row(); row != nullptr; row = stmt.row() )
     {
         assert( row.nbColumns() == 2 );

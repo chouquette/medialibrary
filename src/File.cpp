@@ -30,6 +30,7 @@
 #include "Folder.h"
 #include "Playlist.h"
 #include "utils/Filename.h"
+#include "utils/Url.h"
 #include "medialibrary/filesystem/IFile.h"
 #include "medialibrary/filesystem/IDevice.h"
 
@@ -88,7 +89,7 @@ File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, IFile::Type
     , m_folderId( 0 )
     , m_isRemovable( false )
     , m_isExternal( true )
-    , m_isNetwork( utils::file::schemeIs( "file://", mrl ) == false )
+    , m_isNetwork( utils::url::schemeIs( "file://", mrl ) == false )
     , m_fullPath( mrl )
 {
     assert( ( mediaId == 0 && playlistId != 0 ) || ( mediaId != 0 && playlistId == 0 ) );

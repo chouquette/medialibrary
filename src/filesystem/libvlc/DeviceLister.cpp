@@ -27,6 +27,7 @@
 #include "filesystem/libvlc/DeviceLister.h"
 #include "utils/VLCInstance.h"
 #include "utils/Filename.h"
+#include "utils/Url.h"
 #include "filesystem/libvlc/Device.h"
 
 #include "logging/Logger.h"
@@ -72,9 +73,9 @@ void DeviceLister::stop()
 void DeviceLister::onDeviceAdded( VLC::MediaPtr media )
 {
     const auto& mrl = media->mrl();
-    assert( utils::file::scheme( mrl ) == m_protocol );
+    assert( utils::url::scheme( mrl ) == m_protocol );
 
-    auto uuid = utils::file::stripScheme( mrl );
+    auto uuid = utils::url::stripScheme( mrl );
     LOG_ERROR( "Mountpoint added: ", mrl, " from device ", uuid );
     m_cb->onDeviceMounted( uuid, utils::file::toFolderPath( mrl ), true );
 }
@@ -82,9 +83,9 @@ void DeviceLister::onDeviceAdded( VLC::MediaPtr media )
 void DeviceLister::onDeviceRemoved( VLC::MediaPtr media )
 {
     const auto& mrl = media->mrl();
-    assert( utils::file::scheme( mrl ) == m_protocol );
+    assert( utils::url::scheme( mrl ) == m_protocol );
 
-    auto uuid = utils::file::stripScheme( mrl );
+    auto uuid = utils::url::stripScheme( mrl );
     LOG_ERROR( "Mountpoint removed: ", mrl, " from device ", uuid );
 
     m_cb->onDeviceUnmounted( uuid, utils::file::toFolderPath( mrl ) );

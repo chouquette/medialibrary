@@ -34,6 +34,29 @@ namespace url
 std::string decode( const std::string& str );
 std::string encode( const std::string& str );
 
+/**
+ * @brief stripScheme Remove the scheme from a MRL
+ * @param mrl
+ */
+std::string stripScheme( const std::string& mrl );
+
+/**
+ * @brief scheme Returns the scheme used in an MRL
+ * ie. for seaOtter://foo.bar it will return seaOtter://
+ */
+std::string  scheme( const std::string& mrl );
+
+/**
+ * @brief toLocalPath Converts an MRL to a local path.
+ * This will strip the file:// scheme and URL decode the MRL
+ */
+std::string  toLocalPath( const std::string& mrl );
+
+/**
+ * @brief schemeIs Check if a mrl start with a specific scheme
+ */
+bool schemeIs( const std::string& scheme, const std::string& mrl );
+
 }
 }
 }

@@ -413,7 +413,7 @@ bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl )
     auto device = Device::fromUuid( ml, deviceFs->uuid(), fsFactory->scheme() );
     if ( device == nullptr )
         device = Device::create( ml, deviceFs->uuid(),
-                                 utils::file::scheme( mrl ),
+                                 utils::url::scheme( mrl ),
                                  deviceFs->isRemovable(),
                                  deviceFs->isNetwork() );
     std::string path;

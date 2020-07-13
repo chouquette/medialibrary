@@ -504,7 +504,7 @@ void MediaLibrary::removeThumbnails()
         auto files = dir->files();
         for ( const auto& f : files )
         {
-            auto path = utils::file::toLocalPath( f->mrl() );
+            auto path = utils::url::toLocalPath( f->mrl() );
             utils::fs::remove( path );
         }
     }
@@ -745,7 +745,7 @@ bool MediaLibrary::isPlaylistExtensionSupported( const char* ext ) const
 bool MediaLibrary::isDeviceKnown( const std::string &uuid,
                                   const std::string &mountpoint, bool isRemovable )
 {
-    auto scheme = utils::file::scheme( mountpoint );
+    auto scheme = utils::url::scheme( mountpoint );
     auto isNetwork = scheme != "file://";
     try
     {
