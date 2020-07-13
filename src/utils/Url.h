@@ -35,6 +35,15 @@ std::string decode( const std::string& str );
 std::string encode( const std::string& str );
 
 /**
+ * @brief path Returns the MRL path, ie. the mrl without the host and scheme parts
+ * @param mrl The MRL to remove the host from
+ *
+ * For instance, removeHost( foo://1.2.3.4/path/to/file.bar will return
+ * "/path/to/file.bar"
+ */
+std::string path( const std::string& mrl );
+
+/**
  * @brief stripScheme Remove the scheme from a MRL
  * @param mrl
  */

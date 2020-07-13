@@ -25,6 +25,7 @@
 #endif
 
 #include "Url.h"
+#include "Filename.h"
 #include "medialibrary/filesystem/Errors.h"
 
 #include <stdexcept>
@@ -140,7 +141,6 @@ std::string encode( const std::string& str )
     return res;
 }
 
-
 std::string stripScheme( const std::string& mrl )
 {
     auto pos = mrl.find( "://" );
@@ -190,6 +190,13 @@ std::string toLocalPath( const std::string& mrl )
 bool schemeIs( const std::string& scheme, const std::string& mrl )
 {
     return mrl.compare( 0, scheme.size(), scheme ) == 0;
+}
+
+std::string path( const std::string &mrl )
+{
+    auto schemelessMrl = stripScheme( mrl );
+    auto host = utils::file::firstFolder( schemelessMrl );
+    return utils::file::removePath( schemelessMrl, host );
 }
 
 }

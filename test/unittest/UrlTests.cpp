@@ -93,3 +93,11 @@ TEST( FsUtils, toLocalPath )
     ASSERT_EQ( "x\\yea \\sp ace", utils::url::toLocalPath( "file:///x/yea%20/sp%20ace" ) );
 #endif
 }
+
+TEST( FsUtils, Path )
+{
+    ASSERT_EQ( "path/to/file.mkv", utils::url::path( "http://host/path/to/file.mkv" ) );
+    ASSERT_EQ( "path/to/file.mkv", utils::url::path( "http://///host/path/to/file.mkv" ) );
+    ASSERT_THROW( utils::url::path( "/no/scheme/url" ), fs::errors::UnhandledScheme );
+    ASSERT_THROW( utils::url::path( "" ), fs::errors::UnhandledScheme );
+}
